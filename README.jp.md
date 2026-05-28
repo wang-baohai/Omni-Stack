@@ -1,0 +1,354 @@
+# Omni-Stack
+
+> Spring Boot 4 + Vue 3 で構築されたマイクロサービススキャフォールディングプラットフォーム。Harness 産業デザインパターンを採用し、AI 支援開発の業界ベストプラクティス基盤を提供します。
+
+**[中文](README.md)** | **[English](README.en.md)**
+
+---
+
+## 特徴
+
+- **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 — 最新のフルスタック技術
+- **Spring Cloud Gateway 5.x** (WebFlux) リアクティブゲートウェイ、Nacos サービスディスカバリと構成管理
+- **Sentinel** フロー制御とサーキットブレーカー、**OpenFeign** 宣言的サービス呼び出し
+- **Vue 3.5** + TypeScript 5.9 + Vite 8 + Element Plus 2.14 モダンフロントエンド
+- **Pinia 3** 状態管理 + **Vue Router 5** ナビゲーションガード
+- **Harness 産業デザインパターン**: 三層ハイトモデル（Architecture → Patterns → Code）、`docs/` ディレクトリにシステム真実を格納
+- **AI ネイティブエンジニアリング**: AGENTS.md 実行マニュアル + Skills 行動拡張、AI 支援開発ワークフローに対応
+- **Maven Wrapper** 内蔵 — クローン後すぐにビルド可能、システムへの Maven インストール不要
+
+## 技術スタック
+
+| 層 | 技術 | バージョン |
+|----|------|-----------|
+| JDK | OpenJDK | 25 |
+| バックエンド | Spring Boot | 4.0.6 |
+| クラウド | Spring Cloud | 2025.1.1 |
+| Cloud Alibaba | Spring Cloud Alibaba | 2025.1.0.0 |
+| ゲートウェイ | Spring Cloud Gateway Server (WebFlux) | 5.0.1 |
+| ディスカバリ / 構成 | Nacos Server | v3.1.1 |
+| フロー制御 | Sentinel Dashboard | 1.8.8 |
+| フロントエンド | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
+| ビルドツール | Vite 8 (Rolldown) | 8.0.14 |
+| UI フレームワーク | Element Plus | 2.14.0 |
+| 状態管理 | Pinia | 3.0.4 |
+| ルーター | Vue Router | 5.0.7 |
+| Node.js | Node.js LTS | >= 22.12.0 |
+
+## プロジェクト構造
+
+```
+Omni-Stack/
+├── AGENTS.md                        # AI 実行マニュアル（制約 + ビルドコマンド + チェックリスト）
+├── docs/                            # システム真実ドキュメント（Architecture + Patterns + Contract）
+│   ├── architecture.md                # システム境界、モジュールマップ、データフロー、制約
+│   ├── api-contract.md                # レスポンス形式、エラーコード、ページネーション、命名規則
+│   ├── backend-patterns.md            # バックエンド階層化、バリデーション、例外、ログ、OOP 規約
+│   ├── frontend-patterns.md           # フロントエンド構成、API 層、状態管理、コンポーネント規約
+│   └── core-flows.md                  # ログイン/検索/送信フローのエンドツーエンド追跡
+├── omni-backend/                    # Maven マルチモジュールバックエンド
+│   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
+│   ├── pom.xml                        # 親 POM（依存関係管理）
+│   ├── omni-common/                   # 共有ライブラリ：統一レスポンス、グローバル例外、Jackson 構成
+│   ├── omni-gateway/                  # API ゲートウェイ (WebFlux, ポート 8090)
+│   └── omni-business/                 # ビジネスサービス (ポート 8081)
+├── omni-frontend/                   # Vue 3 SPA (開発サーバー ポート 3000)
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── eslint.config.mjs
+│   └── src/
+│       ├── api/                       # API 層（ドメイン別ファイル分割）
+│       ├── stores/                    # Pinia ストア（Composition API スタイル）
+│       ├── router/                    # ルート定義 + ナビゲーションガード
+│       ├── views/                     # ページコンポーネント
+│       ├── layout/                    # アプリシェル（サイドバー + ヘッダー + コンテンツ）
+│       ├── types/                     # 共有型定義（ApiResponse, PageResult）
+│       └── styles/                    # グローバルスタイル
+└── .qoder/
+    └── skills/
+        └── grill-me/SKILL.md          # AI Skill: デザインストレステスト
+```
+
+## アーキテクチャ概要
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   omni-frontend  │────>│   omni-gateway    │────>│  omni-business  │
+│   Vue 3 SPA     │/api │  WebFlux :8090    │ lb  │   :8081         │
+│   :3000         │────>│  StripPrefix=2    │────>│  Controller     │
+└─────────────────┘     └──────────────────┘     │  Service (IF)   │
+                            │                     │  ServiceImpl    │
+                            │                     └─────────────────┘
+                    ┌───────┴────────┐
+                    │  Nacos :8848   │  ディスカバリ + 構成
+                    │  Sentinel :8858│  フロー制御
+                    └────────────────┘
+```
+
+**リクエストフロー**:
+
+```
+ブラウザ :3000  --/api/**-->  Vite プロキシ  -->  Gateway :8090  --lb://-->  Business :8081
+```
+
+- フロントエンドは Vite 開発サーバー経由で `/api/**` を Gateway にプロキシ
+- Gateway は `/api/business/**` を `omni-business` にルーティング（StripPrefix=2）
+- Gateway ディスカバリロケーターが Nacos 登録サービスのルートを自動作成
+
+## 環境準備
+
+### 必須ソフトウェア
+
+| ソフトウェア | バージョン要件 | 備考 |
+|-------------|--------------|------|
+| JDK | 25 | `JAVA_HOME` 環境変数の設定が必須 |
+| Node.js | >= 22.12.0 | npm 含む |
+| Docker Desktop | 安定版 | Nacos と Sentinel の実行に使用 |
+
+> **注意**: Maven Wrapper (3.9.16) が内蔵されています。すべての Maven コマンドは `./mvnw` で実行してください。
+
+### 環境変数
+
+| 変数 | デフォルト値 | 説明 |
+|------|------------|------|
+| `JAVA_HOME` | - | **必須** — JDK 25 のインストールパス |
+| `NACOS_SERVER_ADDR` | `127.0.0.1:8848` | Nacos サーバーアドレス |
+| `NACOS_NAMESPACE` | (空) | Nacos 名前空間 |
+| `SENTINEL_DASHBOARD` | `127.0.0.1:8858` | Sentinel ダッシュボードアドレス |
+| `VITE_API_BASE_URL` | `/api` | フロントエンド API ベース URL |
+
+## クイックスタート
+
+### ステップ 1: ミドルウェアの起動
+
+```bash
+# Nacos — サービスディスカバリと構成センター (ポート 8080, 8848, 9848)
+# Nacos v3.x は起動に認証設定が必要です
+docker run -d --name nacos \
+  -p 8080:8080 -p 8848:8848 -p 9848:9848 \
+  -e MODE=standalone \
+  -e NACOS_AUTH_TOKEN=U2VjcmV0S2V5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5 \
+  -e NACOS_AUTH_IDENTITY_KEY=nacos \
+  -e NACOS_AUTH_IDENTITY_VALUE=nacos \
+  nacos/nacos-server:v3.1.1
+
+# Sentinel — フロー制御ダッシュボード (ポート 8858)
+docker run -d --name sentinel -p 8858:8858 bladex/sentinel-dashboard:1.8.8
+```
+
+> バックエンドサービスを起動する前に、Nacos が完全に起動するまで約 30 秒お待ちください。`http://127.0.0.1:8080/` にアクセスして Nacos の起動を確認してください（デフォルト認証情報: nacos/nacos）。
+
+### ステップ 2: バックエンドのビルドと起動
+
+```bash
+# JAVA_HOME を設定（Spring Boot 4 プラグインには JDK 17+ が必要）
+export JAVA_HOME="/path/to/jdk-25"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# 全モジュールをビルド
+cd omni-backend
+./mvnw clean install
+
+# Gateway を起動（ポート 8090）
+cd omni-gateway
+./mvnw spring-boot:run
+
+# 新しいターミナルで Business サービスを起動（ポート 8081）
+cd omni-backend/omni-business
+./mvnw spring-boot:run
+```
+
+**ビルド順序**: `omni-common` を先にインストールする必要があります。特定のモジュールを依存関係と一緒にビルドする場合:
+```bash
+./mvnw clean install -pl omni-business -am
+```
+
+### ステップ 3: フロントエンドの起動
+
+```bash
+cd omni-frontend
+
+# 依存関係をインストール
+npm install
+
+# 開発サーバーを起動（ポート 3000、/api を Gateway :8090 に自動プロキシ）
+npm run dev
+```
+
+### ステップ 4: サービスの確認
+
+| 確認項目 | コマンド / URL | 期待される結果 |
+|---------|---------------|---------------|
+| フロントエンド | `http://localhost:3000` | ログインページ |
+| Gateway ルート | `curl http://localhost:8090/actuator/gateway/routes` | JSON ルート一覧 |
+| Nacos コンソール | `http://127.0.0.1:8080/` | Nacos 管理画面 |
+| Sentinel コンソール | `http://localhost:8858` | Sentinel ダッシュボード |
+
+**起動順序**: Nacos → Sentinel → バックエンド（Gateway, Business）→ フロントエンド
+
+## サービスポート
+
+| サービス | ポート | 説明 |
+|---------|-------|------|
+| フロントエンド開発サーバー | 3000 | Vite 開発サーバー、/api リクエストをプロキシ |
+| API ゲートウェイ | 8090 | Spring Cloud Gateway (WebFlux) |
+| ビジネスサービス | 8081 | omni-business マイクロサービス |
+| Nacos | 8080, 8848 | 管理画面 (8080) + サービスディスカバリと構成管理 (8848) |
+| Sentinel | 8858 | フロー制御ダッシュボード |
+
+## モジュール詳細
+
+### omni-common（共有ライブラリ）
+
+全バックエンドモジュールで共有される基盤インフラ。**単独では実行できません**:
+
+| コンポーネント | ファイル | 責任 |
+|--------------|---------|------|
+| 統一レスポンス | `R<T>` | 全 API が `{ code, message, data }` を返却 |
+| ページネーション | `PageResult<T>` | ページネーションレスポンス `{ records, total, size, current, pages }` |
+| ビジネス例外 | `BusinessException` | エラーコード付きビジネス例外 |
+| 例外ハンドラー | `GlobalExceptionHandler` | 全例外をキャッチし `R<Void>` に変換 |
+| Jackson 構成 | `JacksonConfig` | Java 8 日時シリアライゼーション (`yyyy-MM-dd HH:mm:ss`) |
+| Web 構成 | `WebMvcConfig` | CORS 設定 |
+| ベースエンティティ | `BaseEntity` | 監査フィールド (id, createTime, updateTime, createBy, updateBy) |
+
+> `omni-common` は Spring Boot 自動構成 (`AutoConfiguration.imports`) を使用して Bean を登録します。下流モジュールは手動で `@ComponentScan` を追加する必要がありません。
+
+### omni-gateway（API ゲートウェイ）
+
+Spring Cloud Gateway Server (WebFlux) ベースのリアクティブゲートウェイ:
+
+- ルート転送: `/api/business/**` → `lb://omni-business` (StripPrefix=2)
+- サービスディスカバリ: Nacos 登録サービスを自動ルーティング
+- 認証フィルター: `AuthFilter`（スタブ — トークン検証の拡張ポイント）
+- CORS 処理: `CorsConfig` によるクロスオリジンリクエスト対応
+
+### omni-business（ビジネスサービス）
+
+標準的な階層アーキテクチャを示すビジネスマイクロサービス:
+
+```
+Controller  →  Service (インターフェース)  →  ServiceImpl  →  Repository (将来)
+  パラメータ検証   ビジネス定義                ビジネスロジック   データアクセス
+  レスポンスラップ  @Transactional            トランザクション管理  SQL / ORM
+```
+
+- `UserController`: `R<T>` を返す RESTful API エンドポイント
+- `UserService`（インターフェース）+ `UserServiceImpl`（実装）: インターフェースベースの Service 層
+- `RemoteServiceFeignClient`: OpenFeign リモート呼び出しサンプル
+
+### omni-frontend（Vue 3 SPA）
+
+| 層 | ディレクトリ | 責任 |
+|----|------------|------|
+| API | `src/api/` | ドメイン別ファイル、共有 Axios インスタンス、型安全 |
+| ストア | `src/stores/` | Pinia Composition API スタイル、ドメイン別ストア |
+| ルーター | `src/router/` | 遅延ロードルート + ナビゲーションガード（デフォルト認証必須） |
+| ビュー | `src/views/` | ページコンポーネント、SFC 順序: script → template → style |
+| レイアウト | `src/layout/` | アプリシェル（サイドバー + ヘッダー + コンテンツエリア） |
+| 型 | `src/types/` | 共有型定義（ApiResponse, PageResult の単一ソース） |
+| スタイル | `src/styles/` | グローバルリセット + レイアウトスタイル |
+
+## 統一レスポンス形式
+
+全 API は `R<T>` ラッパーを使用します。フロントエンドとバックエンドは厳密な契約一貫性を維持します。詳細は [`docs/api-contract.md`](docs/api-contract.md) を参照してください。
+
+**成功レスポンス**:
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": { "id": 1, "username": "demo", "email": "demo@example.com" }
+}
+```
+
+**エラーレスポンス**:
+```json
+{
+  "code": 400,
+  "message": "username: Username is required; email: Email is required"
+}
+```
+
+**ページネーションレスポンス**:
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "records": [{ "id": 1, "username": "demo" }],
+    "total": 100,
+    "size": 10,
+    "current": 1,
+    "pages": 10
+  }
+}
+```
+
+## 開発者ガイド（新メンバー必読）
+
+### 1. コードを書く前にドキュメントを読む
+
+本プロジェクトは **Harness 産業デザインパターン** に従い、システム知識を三層に整理しています:
+
+| 層 | 内容 | 場所 |
+|----|------|------|
+| Layer 1: Architecture | システム境界、モジュール責任、データフロー、制約 | `docs/architecture.md` |
+| Layer 2: Patterns | バックエンド/フロントエンドコーディングパターン、API 契約、コアフロー | `docs/backend-patterns.md`、`docs/frontend-patterns.md`、`docs/api-contract.md`、`docs/core-flows.md` |
+| Layer 3: Code | 具体的な関数、クラス、コンポーネント実装 | ソースファイル |
+
+**ルール**: コードを変更する前に、対応する `docs/` ドキュメントを確認してください。アーキテクチャや契約が変更される場合は、まず `docs/` を更新してからコードを修正します。
+
+### 2. バックエンド開発規約
+
+- **階層化**: Controller → Service (インターフェース) → ServiceImpl → Repository
+- **DI**: `@RequiredArgsConstructor` + `final` フィールド。`@Autowired` フィールド注入は禁止
+- **戻り値**: すべての Controller メソッドは `R<T>` を返す
+- **例外**: ビジネスエラーは `BusinessException` をスロー。`GlobalExceptionHandler` が統一処理
+- **ログ**: `@Slf4j` + パラメータ化プレースホルダー。`System.out.println` は禁止
+- **詳細規約**: `docs/backend-patterns.md` を参照
+
+### 3. フロントエンド開発規約
+
+- **API 層**: ドメイン別ファイル（`src/api/user.ts`）、`request.ts` の共有 Axios インスタンスを使用
+- **型**: 共有型は `src/types/api.ts` のみ — 重複定義は禁止
+- **ストア**: Pinia Composition API スタイル、`use` プレフィックス命名
+- **コンポーネント**: SFC 順序 `<script setup>` → `<template>` → `<style scoped>`
+- **ルーター**: 遅延ロード + `meta` 宣言 (title, icon, requiresAuth)
+- **詳細規約**: `docs/frontend-patterns.md` を参照
+
+### 4. コミット前チェックリスト
+
+```bash
+# バックエンドコンパイル確認
+cd omni-backend && ./mvnw clean install
+
+# フロントエンドビルド + Lint 確認
+cd omni-frontend && npm run build && npm run lint
+```
+
+完全なチェックリストは `AGENTS.md` の Completion Checklist セクションを参照してください。
+
+### 5. よくある落とし穴
+
+| 落とし穴 | 原因 | 解決策 |
+|---------|------|--------|
+| Gateway ルートが読み込まれない | 5.x で構成プレフィックスが変更 | `spring.cloud.gateway.server.webflux` を使用 — AGENTS.md Important Notes を参照 |
+| Maven クラスバージョンエラー | JAVA_HOME が JDK 25 を指していない | `JAVA_HOME` を JDK 25 ディレクトリに設定 |
+| `omni-business` コンパイル失敗 | `omni-common` が先にインストールされていない | まず `./mvnw install -pl omni-common` を実行 |
+| フロントエンド型不整合 | `ApiResponse` が複数箇所で定義されている | `@/types/api` からのみインポート — 重複定義禁止 |
+| Actuator gateway エンドポイント 404 | 明示的な有効化が必要 | `management.endpoint.gateway.enabled: true` を構成 |
+
+## AI ネイティブエンジニアリング実践
+
+本プロジェクトは AI 支援開発ワークフローに対応しています:
+
+- **`AGENTS.md`**: AI 実行マニュアル — ハード制約、実行ルール、完了チェックリストを定義
+- **`docs/` ディレクトリ**: システム真実ドキュメント — AI がコードを変更する前にこれらを読んでシステム文脈を理解
+- **`.qoder/skills/`**: AI 行動拡張ユニット（例: `/grill-me` デザインストレステスト Skill）
+
+コア原則: **Layer 1 と Layer 2（Architecture + Patterns）を先に定義することで、Layer 3（Code）を AI に全力で高速生産させることができます。**
+
+## ライセンス
+
+[Apache License 2.0](LICENSE)

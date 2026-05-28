@@ -1,0 +1,73 @@
+// Global styles
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  width: 100%;
+  height: 100%;
+}
+
+// Layout styles
+.layout {
+  height: 100%;
+
+  .el-container {
+    height: 100%;
+  }
+}
+
+.sidebar {
+  background-color: #304156;
+  transition: width 0.3s;
+  overflow: hidden;
+
+  .logo {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #263445;
+
+    h1 {
+      color: #fff;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+  }
+
+  .el-menu {
+    border-right: none;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--el-border-color-light);
+  padding: 0 20px;
+  height: 60px;
+
+  .collapse-btn {
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--el-text-color-primary);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: var(--el-text-color-primary);
+  }
+}
+
+.main-content {
+  background-color: var(--el-bg-color-page);
+  overflow-y: auto;
+}
