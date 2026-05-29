@@ -12,9 +12,13 @@ spring:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
         namespace: ${NACOS_NAMESPACE:}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
       config:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
         namespace: ${NACOS_NAMESPACE:}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
         file-extension: yml
     gateway:
       server:
@@ -24,13 +28,17 @@ spring:
               enabled: true
               lower-case-service-id: true
           routes:
+            # Auth service routes
+            - id: omni-auth
+              uri: lb://omni-auth
+              predicates:
+                - Path=/api/auth/**
+
             # Business service routes
             - id: omni-business
               uri: lb://omni-business
               predicates:
                 - Path=/api/business/**
-              filters:
-                - StripPrefix=2
 
 management:
   endpoint:
@@ -40,6 +48,11 @@ management:
     web:
       exposure:
         include: health,info,gateway
+
+auth:
+  jwks:
+    uri: http://localhost:9000/oauth2/jwks
+    cache-ttl: 5m
 
 logging:
   level:

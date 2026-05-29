@@ -1,106 +1,111 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
+import LoginForm from '@/components/LoginForm.vue'
+import { useAppStore } from '@/stores/app'
+import { storeLang } from '@/i18n'
 
+const { t, locale } = useI18n()
 const router = useRouter()
-const route = useRoute()
-const userStore = useUserStore()
+const appStore = useAppStore()
 
-const formRef = ref<FormInstance>()
-const loading = ref(false)
-
-const form = reactive({
-  username: '',
-  password: '',
-})
-
-const rules: FormRules = {
-  username: [{ required: true, message: 'Please enter username', trigger: 'blur' }],
-  password: [{ required: true, message: 'Please enter password', trigger: 'blur' }],
+function handleSuccess() {
+  ElMessage.success(t('login.loginSuccess'))
+  router.push({ name: 'Dashboard' })
 }
 
-async function handleLogin() {
-  const valid = await formRef.value?.validate().catch(() => false)
-  if (!valid) return
+function toggleTheme() {
+  appStore.setTheme(appStore.theme === 'dark' ? 'light' : 'dark')
+}
 
-  loading.value = true
-  try {
-    // TODO: [frontend] Replace with actual login API call
-    userStore.setToken('mock-token-' + Date.now())
-    userStore.setUsername(form.username)
-    ElMessage.success('Login successful')
-    const redirect = (route.query.redirect as string) || '/'
-    router.push(redirect)
-  } catch {
-    ElMessage.error('Login failed')
-  } finally {
-    loading.value = false
-  }
+function toggleLang() {
+  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
+  locale.value = newLang
+  storeLang(newLang)
 }
 </script>
 
 <template>
-  <div class="login-container">
-    <el-card class="login-card">
-      <template #header>
-        <h2 class="login-title">Omni-Stack</h2>
-        <p class="login-subtitle">Microservices Management Platform</p>
-      </template>
+  <div class="login-page">
+    <div class="login-top-bar">
+      <div class="login-top-left">
+        <el-button text @click="router.push('/')">
+          <el-icon><ArrowLeft /></el-icon>
+          {{ t('common.home') }}
+        </el-button>
+      </div>
+      <div class="login-top-right">
+        <el-button text :title="t('lang.switch')" @click="toggleLang">
+          <el-icon><Globe /></el-icon>
+          {{ locale === 'zh-CN' ? 'EN' : '中' }}
+        </el-button>
+        <el-button text :title="t('theme.toggle')" @click="toggleTheme">
+          <el-icon>
+            <Moon v-if="appStore.theme === 'dark'" />
+            <Sunny v-else />
+          </el-icon>
+        </el-button>
+      </div>
+    </div>
 
-      <el-form ref="formRef" :model="form" :rules="rules" @submit.prevent="handleLogin">
-        <el-form-item prop="username">
-          <el-input
-            v-model="form.username"
-            placeholder="Username"
-            prefix-icon="User"
-            size="large"
-          />
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input
-            v-model="form.password"
-            type="password"
-            placeholder="Password"
-            prefix-icon="Lock"
-            size="large"
-            show-password
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" size="large" :loading="loading" native-type="submit" style="width: 100%">
-            Login
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <div class="login-main">
+      <div class="login-card glass-surface">
+        <LoginForm @login-success="handleSuccess" />
+      </div>
+    </div>
+
+    <footer class="login-footer">
+      <span>&copy; 2026 {{ t('common.appName') }}</span>
+    </footer>
   </div>
 </template>
 
 <style scoped lang="scss">
-.login-container {
+.login-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--omni-bg-base);
+}
+
+.login-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--omni-space-md) var(--omni-space-lg);
+}
+
+.login-top-left {
+  display: flex;
+  align-items: center;
+}
+
+.login-top-right {
+  display: flex;
+  align-items: center;
+  gap: var(--omni-space-xs);
+}
+
+.login-main {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: var(--el-bg-color-page);
+  padding: var(--omni-space-xl);
 }
 
 .login-card {
-  width: 400px;
+  width: 100%;
+  max-width: 420px;
+  padding: var(--omni-space-xl);
+  animation: omni-fade-in-up 0.6s var(--omni-ease-smooth) both;
 }
 
-.login-title {
+.login-footer {
   text-align: center;
-  margin: 0;
-  font-size: 24px;
-}
-
-.login-subtitle {
-  text-align: center;
-  margin: 8px 0 0;
-  color: var(--el-text-color-secondary);
+  padding: var(--omni-space-lg);
+  color: var(--omni-text-tertiary);
+  font-size: 13px;
 }
 </style>

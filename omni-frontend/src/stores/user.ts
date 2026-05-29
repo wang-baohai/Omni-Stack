@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref<string>(localStorage.getItem('token') || '')
-  const username = ref<string>('')
+  const username = ref<string>(localStorage.getItem('username') || '')
+  const isLoggedIn = computed(() => !!token.value)
 
   function setToken(newToken: string) {
     token.value = newToken
@@ -12,13 +13,15 @@ export const useUserStore = defineStore('user', () => {
 
   function setUsername(name: string) {
     username.value = name
+    localStorage.setItem('username', name)
   }
 
   function logout() {
     token.value = ''
     username.value = ''
     localStorage.removeItem('token')
+    localStorage.removeItem('username')
   }
 
-  return { token, username, setToken, setUsername, logout }
+  return { token, username, isLoggedIn, setToken, setUsername, logout }
 })

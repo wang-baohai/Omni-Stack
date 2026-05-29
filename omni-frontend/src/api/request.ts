@@ -31,7 +31,7 @@ service.interceptors.response.use(
       if (res.code === 401) {
         const userStore = useUserStore()
         userStore.logout()
-        router.push('/login')
+        router.push('/')
       }
       return Promise.reject(new Error(res.message))
     }

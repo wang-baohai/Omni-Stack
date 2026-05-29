@@ -19,7 +19,9 @@
     <description>Omni-Stack Microservices Platform</description>
 
     <modules>
+        <module>omni-common-core</module>
         <module>omni-common</module>
+        <module>omni-auth</module>
         <module>omni-gateway</module>
         <module>omni-business</module>
     </modules>
@@ -47,6 +49,12 @@
                 <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!-- Common Core Module -->
+            <dependency>
+                <groupId>com.omni</groupId>
+                <artifactId>omni-common-core</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <!-- Common Module -->
             <dependency>

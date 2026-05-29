@@ -1,4 +1,202 @@
-// Global styles
+// ============================================================
+// Omni-Stack Design System — "Cyber Glass"
+// Dark Mode First · Glassmorphism · Apple Minimalism · Neon Accents
+// ============================================================
+
+// §1  Design Tokens
+// ---------------------------------------------------------------------------
+
+// Light mode (default when .dark class is absent)
+:root {
+  // Backgrounds
+  --omni-bg-base:          #f5f7fa;
+  --omni-bg-surface:       #ffffff;
+  --omni-bg-elevated:      #ffffff;
+  --omni-bg-glass:         rgba(255, 255, 255, 0.80);
+  --omni-bg-glass-hover:   rgba(255, 255, 255, 0.92);
+  --omni-bg-input:         rgba(245, 247, 250, 0.8);
+
+  // Accents
+  --omni-accent-blue:      #0099cc;
+  --omni-accent-purple:    #6c47d6;
+  --omni-accent-cyan:      #00c4a7;
+  --omni-gradient-primary: linear-gradient(135deg, #0099cc 0%, #6c47d6 100%);
+  --omni-gradient-text:    linear-gradient(135deg, #0099cc 0%, #6c47d6 50%, #00c4a7 100%);
+
+  // Text
+  --omni-text-primary:     rgba(0, 0, 0, 0.88);
+  --omni-text-secondary:   rgba(0, 0, 0, 0.56);
+  --omni-text-tertiary:    rgba(0, 0, 0, 0.36);
+  --omni-text-accent:      #0099cc;
+
+  // Borders
+  --omni-border-color:     rgba(0, 0, 0, 0.09);
+  --omni-border-light:     rgba(0, 0, 0, 0.04);
+  --omni-border-glass:     rgba(0, 0, 0, 0.12);
+  --omni-border-glow:      rgba(0, 153, 204, 0.40);
+
+  // Radius
+  --omni-radius-sm:  6px;
+  --omni-radius-md:  10px;
+  --omni-radius-lg:  16px;
+  --omni-radius-xl:  24px;
+  --omni-radius-full: 9999px;
+
+  // Shadows
+  --omni-shadow-sm:  0 2px 8px rgba(0, 0, 0, 0.06);
+  --omni-shadow-md:  0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --omni-shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --omni-shadow-xl:  0 16px 48px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+  --omni-shadow-glow: 0 0 24px rgba(0, 153, 204, 0.10), 0 0 48px rgba(108, 71, 214, 0.06);
+  --omni-shadow-glow-strong: 0 0 32px rgba(0, 153, 204, 0.20), 0 0 64px rgba(108, 71, 214, 0.10);
+
+  // Spacing
+  --omni-space-xs:  4px;
+  --omni-space-sm:  8px;
+  --omni-space-md:  16px;
+  --omni-space-lg:  24px;
+  --omni-space-xl:  32px;
+  --omni-space-2xl: 48px;
+  --omni-space-3xl: 64px;
+
+  // Animation
+  --omni-ease-smooth:  cubic-bezier(0.4, 0, 0.2, 1);
+  --omni-ease-bounce:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --omni-ease-spring:  cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --omni-duration-fast:    150ms;
+  --omni-duration-normal:  250ms;
+  --omni-duration-slow:    400ms;
+
+  // Element Plus Overrides
+  --el-color-primary:         #0099cc;
+  --el-color-primary-light-3: #33add6;
+  --el-color-primary-light-5: #66c2e0;
+  --el-color-primary-light-7: #99d6ea;
+  --el-color-primary-light-9: #ccebf5;
+  --el-color-primary-dark-2:  #007aa3;
+
+  --el-bg-color-page:         var(--omni-bg-base);
+  --el-bg-color:              var(--omni-bg-surface);
+  --el-bg-color-overlay:      var(--omni-bg-elevated);
+  --el-fill-color-blank:      var(--omni-bg-surface);
+
+  --el-text-color-primary:    var(--omni-text-primary);
+  --el-text-color-regular:    var(--omni-text-secondary);
+  --el-text-color-secondary:  var(--omni-text-tertiary);
+  --el-text-color-placeholder: rgba(0, 0, 0, 0.30);
+
+  --el-border-color:          var(--omni-border-color);
+  --el-border-color-light:    var(--omni-border-light);
+  --el-border-color-lighter:  var(--omni-border-light);
+
+  --el-border-radius-base:    var(--omni-radius-md);
+  --el-border-radius-small:   var(--omni-radius-sm);
+  --el-border-radius-round:   var(--omni-radius-full);
+
+  --el-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+
+  --el-box-shadow:        var(--omni-shadow-lg);
+  --el-box-shadow-light:  var(--omni-shadow-md);
+  --el-box-shadow-lighter: var(--omni-shadow-sm);
+}
+
+html.dark {
+  // Backgrounds
+  --omni-bg-base:          #06060e;
+  --omni-bg-surface:       #0c0c18;
+  --omni-bg-elevated:      #121224;
+  --omni-bg-glass:         rgba(16, 16, 32, 0.72);
+  --omni-bg-glass-hover:   rgba(22, 22, 44, 0.80);
+  --omni-bg-input:         rgba(20, 20, 40, 0.6);
+
+  // Accents
+  --omni-accent-blue:      #00d4ff;
+  --omni-accent-purple:    #7b61ff;
+  --omni-accent-cyan:      #00f5d4;
+  --omni-gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7b61ff 100%);
+  --omni-gradient-text:    linear-gradient(135deg, #00d4ff 0%, #7b61ff 50%, #00f5d4 100%);
+
+  // Text
+  --omni-text-primary:     rgba(255, 255, 255, 0.92);
+  --omni-text-secondary:   rgba(255, 255, 255, 0.60);
+  --omni-text-tertiary:    rgba(255, 255, 255, 0.38);
+  --omni-text-accent:      #00d4ff;
+
+  // Borders
+  --omni-border-color:     rgba(255, 255, 255, 0.08);
+  --omni-border-light:     rgba(255, 255, 255, 0.04);
+  --omni-border-glass:     rgba(255, 255, 255, 0.12);
+  --omni-border-glow:      rgba(0, 212, 255, 0.30);
+
+  // Radius
+  --omni-radius-sm:  6px;
+  --omni-radius-md:  10px;
+  --omni-radius-lg:  16px;
+  --omni-radius-xl:  24px;
+  --omni-radius-full: 9999px;
+
+  // Shadows
+  --omni-shadow-sm:  0 2px 8px rgba(0, 0, 0, 0.25);
+  --omni-shadow-md:  0 4px 16px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --omni-shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --omni-shadow-xl:  0 16px 48px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.35);
+  --omni-shadow-glow: 0 0 24px rgba(0, 212, 255, 0.15), 0 0 48px rgba(123, 97, 255, 0.08);
+  --omni-shadow-glow-strong: 0 0 32px rgba(0, 212, 255, 0.3), 0 0 64px rgba(123, 97, 255, 0.15);
+
+  // Spacing
+  --omni-space-xs:  4px;
+  --omni-space-sm:  8px;
+  --omni-space-md:  16px;
+  --omni-space-lg:  24px;
+  --omni-space-xl:  32px;
+  --omni-space-2xl: 48px;
+  --omni-space-3xl: 64px;
+
+  // Animation
+  --omni-ease-smooth:  cubic-bezier(0.4, 0, 0.2, 1);
+  --omni-ease-bounce:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --omni-ease-spring:  cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --omni-duration-fast:    150ms;
+  --omni-duration-normal:  250ms;
+  --omni-duration-slow:    400ms;
+
+  // Element Plus Overrides
+  --el-color-primary:         #00d4ff;
+  --el-color-primary-light-3: #00a8cc;
+  --el-color-primary-light-5: #007a99;
+  --el-color-primary-light-7: #004d66;
+  --el-color-primary-light-9: #002133;
+  --el-color-primary-dark-2:  #33ddff;
+
+  --el-bg-color-page:         var(--omni-bg-base);
+  --el-bg-color:              var(--omni-bg-surface);
+  --el-bg-color-overlay:      var(--omni-bg-elevated);
+  --el-fill-color-blank:      var(--omni-bg-surface);
+
+  --el-text-color-primary:    var(--omni-text-primary);
+  --el-text-color-regular:    var(--omni-text-secondary);
+  --el-text-color-secondary:  var(--omni-text-tertiary);
+  --el-text-color-placeholder: rgba(255, 255, 255, 0.28);
+
+  --el-border-color:          var(--omni-border-color);
+  --el-border-color-light:    var(--omni-border-light);
+  --el-border-color-lighter:  var(--omni-border-light);
+
+  --el-border-radius-base:    var(--omni-radius-md);
+  --el-border-radius-small:   var(--omni-radius-sm);
+  --el-border-radius-round:   var(--omni-radius-full);
+
+  --el-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+
+  --el-box-shadow:        var(--omni-shadow-lg);
+  --el-box-shadow-light:  var(--omni-shadow-md);
+  --el-box-shadow-lighter: var(--omni-shadow-sm);
+}
+
+// §2  Global Reset
+// ---------------------------------------------------------------------------
 
 * {
   margin: 0;
@@ -11,7 +209,79 @@ html, body, #app {
   height: 100%;
 }
 
-// Layout styles
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--omni-bg-base);
+  color: var(--omni-text-primary);
+  transition: background-color var(--omni-duration-normal), color var(--omni-duration-normal);
+}
+
+// Scrollbar
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.25);
+  }
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.20);
+  }
+}
+
+// §3  Background Canvas — ambient gradient orbs
+// ---------------------------------------------------------------------------
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 10%, rgba(0, 153, 204, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 85%, rgba(108, 71, 214, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(0, 196, 167, 0.03) 0%, transparent 60%);
+  animation: omni-bg-drift 20s ease-in-out infinite alternate;
+}
+
+html.dark body::before {
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 10%, rgba(0, 212, 255, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 85%, rgba(123, 97, 255, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(0, 245, 212, 0.04) 0%, transparent 60%);
+  animation: omni-bg-drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes omni-bg-drift {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+// §4  Layout Styles
+// ---------------------------------------------------------------------------
+
 .layout {
   height: 100%;
 
@@ -20,42 +290,102 @@ html, body, #app {
   }
 }
 
+// Sidebar
 .sidebar {
-  background-color: #304156;
-  transition: width 0.3s;
+  background: var(--omni-bg-glass);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-right: 1px solid var(--omni-border-color);
+  transition: width var(--omni-duration-slow) var(--omni-ease-spring);
   overflow: hidden;
 
   .logo {
-    height: 60px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #263445;
+    background: transparent;
+    border-bottom: 1px solid var(--omni-border-color);
 
     h1 {
-      color: #fff;
+      background: var(--omni-gradient-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
       white-space: nowrap;
     }
   }
 
+  .logo-accent {
+    height: 2px;
+    background: var(--omni-gradient-primary);
+    opacity: 0.6;
+  }
+
   .el-menu {
     border-right: none;
+    background: transparent;
+    padding: var(--omni-space-sm);
+
+    .el-menu-item {
+      border-radius: var(--omni-radius-md);
+      margin-bottom: var(--omni-space-xs);
+      color: var(--omni-text-secondary);
+      transition: all var(--omni-duration-fast) var(--omni-ease-smooth);
+
+      &:hover {
+        background: var(--omni-bg-glass-hover);
+        color: var(--omni-text-primary);
+      }
+
+      &.is-active {
+        background: rgba(0, 212, 255, 0.10);
+        color: var(--omni-accent-blue);
+        font-weight: 600;
+      }
+
+      .el-icon {
+        color: inherit;
+      }
+    }
   }
 }
 
+// Header
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--el-border-color-light);
-  padding: 0 20px;
-  height: 60px;
+  height: 64px;
+  padding: 0 var(--omni-space-lg);
+  background: var(--omni-bg-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--omni-border-color);
+
+  .header-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--omni-space-md);
+  }
 
   .collapse-btn {
     font-size: 20px;
     cursor: pointer;
-    color: var(--el-text-color-primary);
+    color: var(--omni-text-secondary);
+    transition: color var(--omni-duration-fast) var(--omni-ease-smooth);
+
+    &:hover {
+      color: var(--omni-text-accent);
+    }
   }
 
   .user-info {
@@ -63,11 +393,273 @@ html, body, #app {
     align-items: center;
     gap: 6px;
     cursor: pointer;
-    color: var(--el-text-color-primary);
+    color: var(--omni-text-primary);
+    transition: color var(--omni-duration-fast);
+
+    &:hover {
+      color: var(--omni-text-accent);
+    }
   }
 }
 
+// Main content
 .main-content {
-  background-color: var(--el-bg-color-page);
+  background: transparent;
   overflow-y: auto;
+  padding: var(--omni-space-lg);
+}
+
+// §5  Element Plus Component Overrides
+// ---------------------------------------------------------------------------
+
+// --- el-button ---
+html.dark .el-button--primary {
+  --el-button-bg-color: transparent;
+  --el-button-border-color: transparent;
+  background: var(--omni-gradient-primary);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--omni-shadow-sm), var(--omni-shadow-glow);
+  transition: all var(--omni-duration-normal) var(--omni-ease-smooth);
+
+  &:hover, &:focus {
+    background: var(--omni-gradient-primary);
+    box-shadow: var(--omni-shadow-md), var(--omni-shadow-glow-strong);
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+  }
+
+  &:active {
+    transform: translateY(0);
+    filter: brightness(0.95);
+  }
+}
+
+html.dark .el-button--default {
+  --el-button-bg-color: var(--omni-bg-glass);
+  --el-button-border-color: var(--omni-border-glass);
+  --el-button-text-color: var(--omni-text-primary);
+  --el-button-hover-bg-color: var(--omni-bg-glass-hover);
+  --el-button-hover-border-color: var(--omni-border-glow);
+  --el-button-hover-text-color: var(--omni-text-accent);
+  backdrop-filter: blur(8px);
+  transition: all var(--omni-duration-fast) var(--omni-ease-smooth);
+}
+
+html.dark .el-button.is-text,
+html.dark .el-button--text {
+  --el-button-text-color: var(--omni-text-secondary);
+  --el-button-hover-text-color: var(--omni-text-accent);
+  transition: color var(--omni-duration-fast);
+}
+
+// --- el-card ---
+html.dark .el-card {
+  --el-card-bg-color: var(--omni-bg-glass);
+  background: var(--omni-bg-glass);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--omni-border-glass);
+  border-radius: var(--omni-radius-lg);
+  box-shadow: var(--omni-shadow-md);
+  transition: transform var(--omni-duration-normal) var(--omni-ease-smooth),
+              box-shadow var(--omni-duration-normal) var(--omni-ease-smooth);
+  color: var(--omni-text-primary);
+
+  .el-card__header {
+    border-bottom: 1px solid var(--omni-border-color);
+    color: var(--omni-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: var(--omni-space-md) var(--omni-space-lg);
+  }
+
+  .el-card__body {
+    padding: var(--omni-space-lg);
+  }
+}
+
+// --- el-input ---
+html.dark .el-input__wrapper {
+  background: var(--omni-bg-input) !important;
+  box-shadow: 0 0 0 1px var(--omni-border-color) inset !important;
+  border-radius: var(--omni-radius-md);
+  transition: box-shadow var(--omni-duration-fast) var(--omni-ease-smooth);
+
+  &:hover {
+    box-shadow: 0 0 0 1px var(--omni-border-glass) inset !important;
+  }
+
+  &.is-focus {
+    box-shadow: 0 0 0 1px var(--omni-border-glow) inset, var(--omni-shadow-glow) !important;
+  }
+
+  .el-input__inner {
+    color: var(--omni-text-primary);
+
+    &::placeholder {
+      color: var(--omni-text-tertiary);
+    }
+  }
+
+  .el-input__prefix .el-icon,
+  .el-input__suffix .el-icon {
+    color: var(--omni-text-tertiary);
+  }
+}
+
+// --- el-dialog ---
+html.dark .el-dialog {
+  --el-dialog-bg-color: var(--omni-bg-elevated);
+  background: var(--omni-bg-elevated);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid var(--omni-border-glass);
+  border-radius: var(--omni-radius-xl);
+  box-shadow: var(--omni-shadow-xl);
+
+  .el-dialog__header {
+    border-bottom: 1px solid var(--omni-border-color);
+    padding: var(--omni-space-lg) var(--omni-space-xl);
+
+    .el-dialog__title {
+      color: var(--omni-text-primary);
+      font-weight: 600;
+    }
+
+    .el-dialog__headerbtn .el-dialog__close {
+      color: var(--omni-text-tertiary);
+
+      &:hover {
+        color: var(--omni-text-accent);
+      }
+    }
+  }
+
+  .el-dialog__body {
+    padding: var(--omni-space-xl);
+    color: var(--omni-text-primary);
+  }
+}
+
+// --- el-overlay (dialog backdrop) ---
+html.dark .el-overlay {
+  background: rgba(0, 0, 0, 0.60);
+  backdrop-filter: blur(4px);
+}
+
+// --- el-dropdown ---
+html.dark .el-dropdown-menu {
+  background: rgba(18, 18, 36, 0.90);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--omni-border-glass);
+  border-radius: var(--omni-radius-md);
+  box-shadow: var(--omni-shadow-lg);
+  padding: var(--omni-space-xs);
+
+  .el-dropdown-menu__item {
+    border-radius: var(--omni-radius-sm);
+    color: var(--omni-text-secondary);
+    transition: all var(--omni-duration-fast);
+
+    &:hover {
+      background: var(--omni-bg-glass-hover);
+      color: var(--omni-text-primary);
+    }
+  }
+}
+
+// --- el-descriptions ---
+html.dark .el-descriptions {
+  .el-descriptions__label {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--omni-text-secondary);
+    font-weight: 500;
+  }
+
+  .el-descriptions__content {
+    background: transparent;
+    color: var(--omni-text-primary);
+  }
+
+  .el-descriptions__cell {
+    border-color: var(--omni-border-color);
+  }
+}
+
+// --- el-table (if used) ---
+html.dark .el-table {
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: rgba(255, 255, 255, 0.03);
+  --el-table-row-hover-bg-color: var(--omni-bg-glass-hover);
+  --el-table-border-color: var(--omni-border-color);
+  --el-table-text-color: var(--omni-text-primary);
+  --el-table-header-text-color: var(--omni-text-secondary);
+}
+
+// --- el-message (toast) ---
+html.dark .el-message {
+  background: rgba(18, 18, 36, 0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--omni-border-glass);
+  border-radius: var(--omni-radius-md);
+  box-shadow: var(--omni-shadow-lg);
+}
+
+// --- el-popper (tooltips / popover) ---
+html.dark .el-popper {
+  background: rgba(18, 18, 36, 0.92);
+  border: 1px solid var(--omni-border-glass);
+  border-radius: var(--omni-radius-md);
+  box-shadow: var(--omni-shadow-lg);
+  color: var(--omni-text-primary);
+}
+
+// §6  Shared Utility Classes
+// ---------------------------------------------------------------------------
+
+.gradient-text {
+  background: var(--omni-gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: omni-shimmer 3s ease-in-out infinite;
+  background-size: 200% auto;
+}
+
+.glass-surface {
+  background: var(--omni-bg-glass);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--omni-border-glass);
+  border-radius: var(--omni-radius-lg);
+}
+
+// §7  Keyframe Animations
+// ---------------------------------------------------------------------------
+
+@keyframes omni-shimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes omni-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes omni-glow-pulse {
+  0%, 100% { box-shadow: var(--omni-shadow-glow); }
+  50%      { box-shadow: var(--omni-shadow-glow-strong); }
 }

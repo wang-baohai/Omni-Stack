@@ -1,0 +1,77 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: omni-auth
+  profiles:
+    active: dev
+  config:
+    import:
+      - optional:nacos:omni-auth.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        username: nacos
+        password: nacos
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        username: nacos
+        password: nacos
+        file-extension: yml
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: root
+      database: 0
+      timeout: 5s
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
+
+# Spring Authorization Server OAuth2 Config
+auth:
+  issuer: http://localhost:9000
+  token:
+    access-token-ttl: 900
+    refresh-token-ttl: 604800
+  captcha:
+    ttl-seconds: 300
+  jwk:
+    key-id: omni-auth-key
+    private-key: |
+      -----BEGIN EC PRIVATE KEY-----
+      MHcCAQEEIBHbO1jWq0oMQCf5hJ1Fz9oOuP5b3n5hJ1Fz9oOuP5boAoGCCqGSM49
+      AwEHoUQDQgAEXAMPLE_KEY_FOR_DEVELOPMENT_ONLY_REPLACE_IN_PRODUCTION
+      -----END EC PRIVATE KEY-----
+    public-key: |
+      -----BEGIN PUBLIC KEY-----
+      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEXAMPLE_KEY_FOR_DEVELOPMENT_ONLY
+      -----END PUBLIC KEY-----
+
+logging:
+  level:
+    com.omni.auth.mapper: debug
+    org.springframework.security: debug

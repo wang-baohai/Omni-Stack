@@ -1,56 +1,242 @@
 package com.omni.gateway.filter;
 
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.omni.gateway.config.JwkKeyProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.security.interfaces.RSAPublicKey;
+import java.util.Date;
+import java.util.List;
+
 /**
- * Global authentication filter.
- * Add token validation logic here.
+ * Gateway 全局认证过滤器，负责 JWT 签名验证和用户身份传播。
+ * <p>
+ * 作为 Spring Cloud Gateway 的 {@link GlobalFilter}，该过滤器拦截所有经过网关的请求，
+ * 对非公开路径执行 JWT 验证，并将解析出的用户身份信息通过 HTTP Header 注入到下游服务请求中。
+ * </p>
+ *
+ * <h3>请求处理流程</h3>
+ * <ol>
+ *   <li><b>路径判断</b> — 公开路径（{@code /api/auth/}, {@code /actuator/}, {@code /oauth2/} 等）
+ *       直接放行，不需要认证</li>
+ *   <li><b>Token 提取</b> — 从 {@code Authorization: Bearer <token>} 头中提取 JWT 字符串</li>
+ *   <li><b>公钥获取</b> — 通过 {@link JwkKeyProvider} 获取 RSA 公钥（带缓存）</li>
+ *   <li><b>签名验证</b> — 使用 {@link RSASSAVerifier} 验证 JWT 的 RS256 签名</li>
+ *   <li><b>过期检查</b> — 验证 JWT 的 {@code exp} claim 是否已过期</li>
+ *   <li><b>身份注入</b> — 从 JWT claims 中提取用户信息，注入到请求头中供下游服务使用：
+ *       <ul>
+ *         <li>{@code X-User-Id} — 用户 ID（sub claim）</li>
+ *         <li>{@code X-Tenant-Id} — 租户 ID（tenant_id claim）</li>
+ *         <li>{@code X-User-Name} — 用户名（username claim）</li>
+ *         <li>{@code X-User-Roles} — 角色列表，逗号分隔（roles claim）</li>
+ *         <li>{@code X-User-Scopes} — 权限范围（scope claim）</li>
+ *       </ul>
+ *   </li>
+ * </ol>
+ *
+ * <h3>错误处理设计</h3>
+ * <ul>
+ *   <li>{@code onErrorResume} 仅捕获 {@link SecurityException}，避免下游路由错误
+ *       （如服务不可用、连接超时等）被误报为 JWT 验证失败</li>
+ *   <li>其他异常（如参数解析错误）不在此处处理，由 Gateway 默认错误处理机制负责</li>
+ * </ul>
+ *
+ * <h3>执行优先级</h3>
+ * <p>{@code order = -100}，确保在路由转发之前执行认证检查。</p>
+ *
+ * @see JwkKeyProvider RSA 公钥获取与缓存
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthFilter implements GlobalFilter, Ordered {
 
+    /** HTTP 授权头名称 */
     private static final String AUTH_HEADER = "Authorization";
+    /** Bearer Token 前缀 */
+    private static final String BEARER_PREFIX = "Bearer ";
 
+    /** RSA 公钥提供者，用于获取 JWT 签名验证所需的公钥 */
+    private final JwkKeyProvider jwkKeyProvider;
+
+    /**
+     * 过滤器主方法，拦截所有经过网关的请求。
+     * <p>
+     * 响应式 Mono 链路：
+     * <pre>
+     * getPublicKey()                          // Mono<RSAPublicKey>
+     *   .flatMap(validateJwt)                 // Mono<JWTClaimsSet> — 签名 + 过期验证
+     *   .flatMap(claims -> injectHeaders)     // 注入 X-User-* 头并转发请求
+     *   .onErrorResume(SecurityException)     // 仅捕获安全异常返回 401
+     * </pre>
+     * </p>
+     *
+     * @param exchange 当前请求上下文
+     * @param chain    过滤器链
+     * @return 请求处理完成的信号
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // Stub: currently passes all requests through.
-        // In production, missing/invalid tokens should return HTTP 401.
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-        // Skip authentication for public paths
+        // Step 1: 公开路径直接放行（登录、验证码、租户列表、健康检查等）
         if (isPublicPath(path)) {
             return chain.filter(exchange);
         }
 
-        // Check for authorization token
-        String token = request.getHeaders().getFirst(AUTH_HEADER);
-        if (token == null || token.isBlank()) {
-            log.warn("Missing authorization token for path: {}", path);
-            // TODO: [gateway] Return 401 response or implement token validation
+        // Step 2: 提取 Bearer Token，缺失或格式不正确直接返回 401
+        String authHeader = request.getHeaders().getFirst(AUTH_HEADER);
+        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            log.warn("Missing or invalid authorization token for path: {}", path);
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            return exchange.getResponse().setComplete();
         }
 
-        // TODO: [gateway] Validate token and extract user info
-        // Add user info to request headers for downstream services
-        return chain.filter(exchange);
+        // 截取 "Bearer " 之后的 JWT 字符串
+        String token = authHeader.substring(BEARER_PREFIX.length());
+
+        // Step 3-5: 响应式 JWT 验证链
+        return jwkKeyProvider.getPublicKey()
+                .flatMap(publicKey -> validateJwt(token, publicKey))  // 签名验证 + 过期检查
+                .flatMap(claims -> {
+                    // Step 6: 将 JWT claims 注入请求头，传递给下游微服务
+                    // 下游服务通过 @RequestHeader("X-User-Id") 等方式获取用户身份
+                    ServerHttpRequest mutatedRequest = request.mutate()
+                            .header("X-User-Id", claims.getSubject())                    // sub -> 用户ID
+                            .header("X-Tenant-Id", getClaimAsString(claims, "tenant_id")) // 租户ID
+                            .header("X-User-Name", getClaimAsString(claims, "username"))  // 用户名
+                            .header("X-User-Roles", getClaimAsString(claims, "roles"))    // 角色列表
+                            .header("X-User-Scopes", getClaimAsString(claims, "scope"))   // 权限范围
+                            .build();
+                    return chain.filter(exchange.mutate().request(mutatedRequest).build());
+                })
+                // 仅捕获 SecurityException（签名无效、token 过期等），
+                // 不捕获其他异常（如下游服务不可用），避免路由错误误报为 JWT 错误
+                .onErrorResume(SecurityException.class, e -> {
+                    log.warn("JWT validation failed for path: {}: {}", path, e.getMessage());
+                    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                    return exchange.getResponse().setComplete();
+                });
     }
 
+    /**
+     * 过滤器执行优先级。
+     * <p>返回 -100 确保在大部分自定义过滤器之前执行，认证检查应在路由转发前完成。</p>
+     *
+     * @return 优先级值，越小越先执行
+     */
     @Override
     public int getOrder() {
         return -100;
     }
 
+    /**
+     * 判断请求路径是否为公开路径（无需认证）。
+     * <p>
+     * 公开路径包括：
+     * <ul>
+     *   <li>{@code /api/auth/*} — 认证相关接口（登录、验证码、租户列表）</li>
+     *   <li>{@code /actuator/*} — Spring Boot Actuator 健康检查等</li>
+     *   <li>{@code /favicon.ico} — 浏览器图标请求</li>
+     *   <li>{@code /oauth2/*} — OAuth2 标准端点（JWKS 等）</li>
+     *   <li>{@code /login} — 登录页面</li>
+     *   <li>{@code /error} — 错误页面</li>
+     * </ul>
+     * </p>
+     *
+     * @param path 请求 URI 路径
+     * @return true 表示是公开路径，跳过认证
+     */
     private boolean isPublicPath(String path) {
         return path.startsWith("/api/auth/") ||
                path.startsWith("/actuator/") ||
-               path.equals("/favicon.ico");
+               path.equals("/favicon.ico") ||
+               path.startsWith("/oauth2/") ||
+               path.startsWith("/login") ||
+               path.startsWith("/error");
+    }
+
+    /**
+     * 验证 JWT 签名和过期时间，返回解析后的 Claims。
+     * <p>
+     * 验证步骤：
+     * <ol>
+     *   <li>解析 JWT 字符串为 {@link SignedJWT} 对象</li>
+     *   <li>使用 RSA 公钥创建 {@link RSASSAVerifier}，验证 RS256 签名</li>
+     *   <li>检查 {@code exp} claim 是否早于当前时间</li>
+     * </ol>
+     * 验证通过返回包含所有 claims 的 {@link JWTClaimsSet}；
+     * 验证失败返回 {@code Mono.error(SecurityException)} 以触发 401 响应。
+     * </p>
+     *
+     * @param token     JWT 字符串（不含 "Bearer " 前缀）
+     * @param publicKey RSA 公钥，从 Auth 服务的 JWKS 端点获取
+     * @return 包含 JWT claims 的 Mono，签名无效或过期时返回错误
+     */
+    private Mono<JWTClaimsSet> validateJwt(String token, RSAPublicKey publicKey) {
+        try {
+            // 解析 JWT 字符串（header.payload.signature 三段式结构）
+            SignedJWT signedJWT = SignedJWT.parse(token);
+
+            // 使用 RSA 公钥验证签名（RS256 = SHA-256 + RSA PKCS#1 v1.5）
+            RSASSAVerifier verifier = new RSASSAVerifier(publicKey);
+            if (!signedJWT.verify(verifier)) {
+                log.warn("JWT signature verification failed");
+                return Mono.error(new SecurityException("Invalid JWT signature"));
+            }
+
+            // 提取 claims 并检查过期时间
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            Date expiration = claims.getExpirationTime();
+            if (expiration != null && expiration.before(new Date())) {
+                log.warn("JWT token expired");
+                return Mono.error(new SecurityException("JWT token expired"));
+            }
+
+            return Mono.just(claims);
+        } catch (Exception e) {
+            // JWT 解析异常（格式错误、Base64 解码失败等）
+            log.error("Failed to validate JWT", e);
+            return Mono.error(e);
+        }
+    }
+
+    /**
+     * 从 JWT Claims 中提取指定 claim 的字符串值。
+     * <p>
+     * 处理两种数据类型：
+     * <ul>
+     *   <li>{@link List} — 用逗号连接为单个字符串（如 roles: ["admin","user"] -> "admin,user"）</li>
+     *   <li>其他类型 — 直接调用 {@code toString()}</li>
+     *   <li>null — 返回空字符串</li>
+     * </ul>
+     * </p>
+     *
+     * @param claims    JWT Claims 对象
+     * @param claimName claim 名称（如 "tenant_id", "roles", "scope"）
+     * @return claim 的字符串表示，null 时返回空字符串
+     */
+    private String getClaimAsString(JWTClaimsSet claims, String claimName) {
+        Object value = claims.getClaim(claimName);
+        if (value == null) {
+            return "";
+        }
+        // List 类型的 claim（如 roles）用逗号分隔拼接
+        if (value instanceof List) {
+            return String.join(",", ((List<?>) value).stream().map(Object::toString).toList());
+        }
+        return value.toString();
     }
 }

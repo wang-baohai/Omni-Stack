@@ -4,21 +4,27 @@ import { useUserStore } from '@/stores/user'
 
 const routes: RouteRecordRaw[] = [
   {
+    path: '/',
+    name: 'Home',
+    component: () => import('@/views/home/index.vue'),
+    meta: { title: 'Omni-Stack', requiresAuth: false },
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('@/views/login/index.vue'),
     meta: { title: 'Login', requiresAuth: false },
   },
   {
-    path: '/',
+    path: '/admin',
     component: () => import('@/layout/index.vue'),
-    redirect: '/dashboard',
+    redirect: '/admin/dashboard',
     children: [
       {
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/dashboard/index.vue'),
-        meta: { title: 'Dashboard', icon: 'Odometer' },
+        meta: { title: 'Dashboard', icon: 'Odometer', requiresAuth: true },
       },
     ],
   },
@@ -32,12 +38,15 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to, _from, next) => {
   const userStore = useUserStore()
-  const requiresAuth = to.meta.requiresAuth !== false
 
-  if (requiresAuth && !userStore.token) {
-    next({ name: 'Login', query: { redirect: to.fullPath } })
-  } else if (to.name === 'Login' && userStore.token) {
-    next({ name: 'Dashboard' })
+  if (to.meta.requiresAuth === false) {
+    if (to.name === 'Login' && userStore.token) {
+      next({ name: 'Dashboard' })
+    } else {
+      next()
+    }
+  } else if (!userStore.token) {
+    next({ name: 'Home' })
   } else {
     next()
   }
