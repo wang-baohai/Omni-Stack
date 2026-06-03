@@ -1,4 +1,4 @@
-# Core Business Flows
+# Core Flows
 
 This document traces the essential user-facing flows end-to-end, from browser interaction to backend processing and back. Use this as a reference when implementing or modifying features.
 
@@ -11,8 +11,51 @@ This document traces the essential user-facing flows end-to-end, from browser in
 
 ### Sequence
 
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant F as Frontend :3000
+    participant G as Gateway :8102
+    participant A as Auth :8100
+    participant R as Redis
+    participant M as MySQL
+
+    B->>F: 1. Open login page
+    F->>G: 2. GET /api/auth/captcha
+    G->>A: 3. Proxy to Auth
+    A->>A: 4. SpecCaptcha.generate()
+    A->>R: 5. SET captcha:{key} = text (TTL=300s)
+    A-->>F: 6. {captchaKey, captchaImage(base64)}
+    F-->>B: 7. Show captcha
+
+    F->>G: 8. GET /api/auth/tenants
+    G->>A: 9. Proxy to Auth
+    A->>M: 10. SELECT * FROM sys_tenant WHERE status=1
+    M-->>A: tenant list
+    A-->>F: 11. [{id, name, code}]
+    F-->>B: 12. Tenant dropdown
+
+    B->>F: 13. Fill form & Click Login
+    F->>G: 14. POST /api/auth/login {username, password, tenantId, captchaKey, captchaCode}
+    G->>A: 15. Proxy to Auth
+    A->>R: 16. GET + DEL captcha (one-time use)
+    A->>A: 17. Build "tenantId:username"
+    A->>M: 18. LoadUserByUsername (WHERE tenant_id=? AND username=? AND status=1)
+    M-->>A: user record
+    A->>A: 19. BCrypt password check
+    A->>M: 20. Load roles & permissions
+    M-->>A: roles/permissions
+    A->>A: 21. Generate JWT (RS256 sign)
+    A-->>F: 22. {accessToken, tokenType, expiresIn}
+    F->>F: 23. Store token + username to localStorage
+    F-->>B: 24. Redirect to dashboard
 ```
-Browser            Frontend :3000          Gateway :8090          Auth :9000           Redis              MySQL
+
+<details>
+<summary>ASCII 版本（点击展开）</summary>
+
+```
+Browser            Frontend :3000          Gateway :8102          Auth :8100           Redis              MySQL
   |                    |                       |                     |                   |                  |
   | 1. Open login page |                       |                     |                   |                  |
   |                    |                       |                     |                   |                  |
@@ -100,12 +143,14 @@ Browser            Frontend :3000          Gateway :8090          Auth :9000    
   |                    |                       |                     |                   |                  |
 ```
 
+</details>
+
 ### Post-Login: Authenticated Request Flow
 
 登录成功后，前端所有 API 请求自动携带 JWT Token，Gateway 负责验证：
 
 ```
-Browser            Frontend               Gateway :8090           Downstream Service
+Browser            Frontend               Gateway :8102           Downstream Service
   |                    |                       |                        |
   | 1. Navigate to     |                       |                        |
   |    protected page  |                       |                        |
@@ -147,7 +192,7 @@ Browser            Frontend               Gateway :8090           Downstream Ser
 | Login submit | `src/views/login/LoginForm.vue` | `handleLogin()`: validate form -> POST `/api/auth/login` |
 | Token storage | `src/stores/user.ts` | `setToken()` + `setUsername()` persist to `localStorage` |
 | Request auth | `src/api/request.ts` | Axios request interceptor: `Authorization: Bearer <token>` |
-| Vite proxy | `vite.config.ts` | `/api` -> `http://localhost:8090` (Gateway) |
+| Vite proxy | `vite.config.ts` | `/api` -> `http://localhost:8102` (Gateway) |
 | Gateway filter | `AuthFilter.java` | JWT RS256 签名验证 + claims 提取 + 身份头注入 |
 | JWK provider | `JwkKeyProvider.java` | 从 Auth `/oauth2/jwks` 获取 RSA 公钥，缓存 5 分钟 |
 | Captcha service | `CaptchaServiceImpl.java` | SpecCaptcha 生成 + Redis 存储（TTL 300s，一次性使用） |
@@ -218,149 +263,70 @@ Auth 服务签发的 JWT 包含以下 claims：
 - **前端**: 所有 mock 代码已移除，对接真实 API
 - **Token 有效期**: 15 分钟（900 秒），暂无 refresh token 机制
 
----
+## Flow 2: OAuth2 Authorization Code + PKCE Login
 
-## Flow 2: List Query (Pagination)
+### Overview
+
+前端作为 OAuth2 公共客户端（SPA），通过 Spring Authorization Server 的 OAuth2 授权端点完成 PKCE 授权码流程。
+用户在 Auth 服务的授权确认页面同意后，前端用授权码 + code_verifier 换取 access_token 和 id_token。
+适用于第三方集成或需要 OAuth2 标准化认证的场景。
 
 ### Sequence
 
-```
-Browser                    Frontend                     Gateway :8090            Business :8081
-  |                           |                              |                        |
-  |  1. View list page        |                              |                        |
-  |                           |  2. Call listUsers(1, 10)    |                        |
-  |                           |     from api/user.ts         |                        |
-  |                           |                              |                        |
-  |                           |  3. Axios GET                |                        |
-  |                           |  /api/business/user/list     |                        |
-  |                           |  ?page=1&size=10 ----------->|                        |
-  |                           |                              |                        |
-  |                           |                              |  4. Route match:       |
-  |                           |                              |     Path=/api/business/**
-  |                           |                              |     StripPrefix=2      |
-  |                           |                              |                        |
-  |                           |                              |  5. lb://omni-business |
-  |                           |                              |  GET /user/list ------->|
-  |                           |                              |                        |
-  |                           |                              |                        |  6. UserController
-  |                           |                              |                        |     .listUsers()
-  |                           |                              |                        |        |
-  |                           |                              |                        |  7. UserService
-  |                           |                              |                        |     .listUsers()
-  |                           |                              |                        |     returns PageResult
-  |                           |                              |                        |        |
-  |                           |                              |  8. R.ok(pageResult) <-|
-  |                           |                              |<-----------------------|
-  |                           |                              |                        |
-  |                           |  9. Response interceptor     |                        |
-  |                           |     checks code === 200      |                        |
-  |                           |                              |                        |
-  |  10. Render table <-------|                              |                        |
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant F as Frontend :3000
+    participant G as Gateway :8102
+    participant A as Auth :8100 (Authorization Server)
+    participant M as MySQL
+
+    B->>F: 1. Click "OAuth2 Login"
+    F->>F: 2. Generate PKCE: code_verifier + code_challenge (SHA256)
+    F->>F: 3. Store {pkce_verifier, pkce_state} in sessionStorage
+    F->>G: 4. Redirect to /api/oauth2/authorize?response_type=code&client_id=...&code_challenge=...&code_challenge_method=S256
+    G->>A: 5. Proxy to Auth authorization endpoint
+    A-->>B: 6. Login form page (or session-based redirect if already logged in)
+    B->>A: 7. Submit credentials (username + password)
+    A->>M: 8. Authenticate user (multi-tenant)
+    M-->>A: user record
+    A->>A: 9. Create authenticated session
+    A-->>B: 10. Consent page (if required) or auto-approve
+    B->>A: 11. User approves scopes
+    A-->>F: 12. Redirect to callback: ?code=XXX&state=YYY
+    F->>F: 13. Validate state matches sessionStorage
+    F->>G: 14. POST /api/oauth2/token {grant_type=authorization_code, code, code_verifier}
+    G->>A: 15. Proxy to token endpoint
+    A->>A: 16. Validate code + verify PKCE (SHA256(code_verifier) == code_challenge)
+    A->>M: 17. Store authorization record
+    A-->>F: 18. {access_token, id_token, token_type, expires_in, refresh_token}
+    F->>F: 19. Store tokens in localStorage
+    F-->>B: 20. Redirect to dashboard
 ```
 
 ### Key Components
 
 | Step | File | Logic |
 |------|------|-------|
-| API function | `src/api/user.ts` | `listUsers(page, size)` -> `GET /business/user/list` |
-| Axios instance | `src/api/request.ts` | Base URL `/api`, timeout 15s, auth header |
-| Vite proxy | `vite.config.ts` | `/api` -> `http://localhost:8090` |
-| Gateway route | `application.yml` (gateway) | `Path=/api/business/**` -> `lb://omni-business`, `StripPrefix=2` |
-| Load balancer | Spring Cloud LoadBalancer | Resolves `omni-business` via Nacos service registry |
-| Controller | `UserController.java` | `@GetMapping("/list")` -> calls `UserService.listUsers()` |
-| Service | `UserService.java` / `UserServiceImpl.java` | Returns `PageResult<Map<String, Object>>` (stub data) |
-| Response wrapper | `R.java` | `R.ok(pageResult)` -> `{ code: 200, message: "success", data: {...} }` |
-| Response interceptor | `src/api/request.ts` | Checks `code === 200`, rejects on error |
+| PKCE generator | `src/utils/oauth2.ts` | 生成 code_verifier（43-128 字符随机串）+ SHA256 code_challenge |
+| PKCE storage | `src/utils/oauth2.ts` | sessionStorage 存储 `pkce_verifier` 和 `pkce_state` |
+| Authorization redirect | `src/utils/oauth2.ts` | 构造 `/oauth2/authorize` URL，携带 PKCE 参数 |
+| Token exchange | `src/api/auth.ts` | POST `/oauth2/token`，code_verifier 发送给 Auth 服务验证 |
+| Token storage | `src/stores/user.ts` | 存储 access_token + id_token 到 localStorage |
+| Authorization endpoint | Spring Authorization Server | `/oauth2/authorize` — 登录表单 + 授权确认 |
+| Token endpoint | Spring Authorization Server | `/oauth2/token` — 授权码换 Token |
+| PKCE validator | Spring Authorization Server | SHA256(code_verifier) 与存储的 code_challenge 比对 |
 
-### Response Shape
+### PKCE Storage Keys
 
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "records": [
-      { "id": 1, "username": "demo", "email": "demo@example.com" }
-    ],
-    "total": 1,
-    "size": 10,
-    "current": 1,
-    "pages": 1
-  }
-}
-```
+| sessionStorage Key | Description | Lifecycle |
+|--------------------|-------------|-----------|
+| `pkce_verifier` | 随机 code_verifier 字符串 | 授权发起时写入，token 换取后删除 |
+| `pkce_state` | CSRF 防护 state 参数 | 授权发起时写入，callback 验证后删除 |
 
 ### Current Status
 
-- **Stub data**: `UserService` returns hardcoded `HashMap` data, no database integration
-- **TODO**: `[business] Replace with actual database query` in `UserServiceImpl.java`
-
----
-
-## Flow 3: Form Submission (Create)
-
-### Sequence
-
-```
-Browser                    Frontend                     Gateway :8090            Business :8081
-  |                           |                              |                        |
-  |  1. Fill form             |                              |                        |
-  |  2. Click "Submit" ------>|                              |                        |
-  |                           |  3. Client-side validation   |                        |
-  |                           |     (Element Plus rules)     |                        |
-  |                           |                              |                        |
-  |                           |  4. Axios POST               |                        |
-  |                           |  /api/business/user          |                        |
-  |                           |  { username, email } ------->|                        |
-  |                           |                              |                        |
-  |                           |                              |  5. StripPrefix=2      |
-  |                           |                              |  POST /user ----------->|
-  |                           |                              |                        |
-  |                           |                              |                        |  6. UserController
-  |                           |                              |                        |     @Valid CreateUserRequest
-  |                           |                              |                        |        |
-  |                           |                              |                        |  [A] Validation OK:
-  |                           |                              |                        |     UserService.createUser()
-  |                           |                              |                        |     R.ok()
-  |                           |                              |                        |        |
-  |                           |                              |                        |  [B] Validation FAIL:
-  |                           |                              |                        |     MethodArgumentNotValidException
-  |                           |                              |                        |     -> GlobalExceptionHandler
-  |                           |                              |                        |     -> R.fail(400, fieldErrors)
-  |                           |                              |                        |        |
-  |                           |                              |  7. R<Void> <----------|
-  |                           |                              |<-----------------------|
-  |                           |                              |                        |
-  |                           |  8. Response interceptor     |                        |
-  |                           |     [A] code=200: success    |                        |
-  |                           |     [B] code=400: show error |                        |
-  |                           |                              |                        |
-  |  9. Show result <---------|                              |                        |
-```
-
-### Key Components
-
-| Step | File | Logic |
-|------|------|-------|
-| Form validation | Frontend view | Element Plus `FormRules`: required fields, format checks |
-| API call | `src/api/user.ts` | `createUser(data)` -> `POST /business/user` |
-| Gateway routing | `application.yml` (gateway) | Same as Flow 2 |
-| Controller validation | `UserController.java` | `@Valid @RequestBody CreateUserRequest` triggers Jakarta Validation |
-| Validation failure | `GlobalExceptionHandler.java` | Catches `MethodArgumentNotValidException`, aggregates field errors into message |
-| Service call | `UserServiceImpl.java` | `createUser(username, email)` (stub: no-op) |
-| Success response | `R.java` | `R.ok()` -> `{ code: 200, message: "success", data: null }` |
-| Error display | `src/api/request.ts` | Interceptor shows `ElMessage.error(res.message)` |
-
-### Validation Error Response
-
-```json
-{
-  "code": 400,
-  "message": "username: Username is required; email: Email is required"
-}
-```
-
-### Current Status
-
-- **Create is a no-op**: `UserServiceImpl.createUser()` does nothing (no database)
-- **TODO**: `[business] Replace with actual database insert` in `UserServiceImpl.java`
+- **Authorization Server**: Spring Authorization Server 7.x 已配置，RS256 JWK 签名
+- **OAuth2 客户端**: `omni-spa` 客户端已注册（authorization_code + PKCE grant type）
+- **前端 PKCE 工具**: `src/utils/oauth2.ts` 已实现 verifier/challenge 生成和 token 交换
+- **Token 类型**: access_token (opaque) + id_token (JWT, 包含用户信息)

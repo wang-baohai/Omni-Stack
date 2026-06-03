@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * System user entity.
+ * 系统用户实体。
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -17,17 +17,28 @@ public class SysUser extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    /** 主键 ID */
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 所属租户 ID */
     private Long tenantId;
+    /** 用户名 */
     private String username;
+    /** 密码（BCrypt 加密） */
     private String password;
+    /** 昵称 */
     private String nickname;
+    /** 邮箱地址 */
     private String email;
+    /** 手机号 */
     private String phone;
+    /** 头像 URL */
     private String avatar;
+    /** 性别（0-未知，1-男，2-女） */
     private Integer gender;
+    /** 主组织单元 ID */
     private Long primaryUnitId;
+    /** 状态（1-启用，0-禁用） */
     private Integer status;
 }

@@ -8,12 +8,15 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
- * SysOrgUnit Mapper.
+ * 组织单元 Mapper 接口。
  */
 public interface SysOrgUnitMapper extends BaseMapper<SysOrgUnit> {
 
     /**
-     * Find all descendants by path prefix.
+     * 根据物化路径前缀查询所有后代节点。
+     *
+     * @param pathPrefix 路径前缀
+     * @return 满足条件的组织单元列表
      */
     @Select("SELECT * FROM sys_org_unit WHERE path LIKE CONCAT(#{pathPrefix}, '%') AND status = 1")
     List<SysOrgUnit> selectDescendantsByPath(@Param("pathPrefix") String pathPrefix);

@@ -14,7 +14,15 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8090',
+        target: 'http://localhost:8102',
+        changeOrigin: true,
+      },
+      '/oauth2': {
+        target: 'http://localhost:8102',
+        changeOrigin: true,
+      },
+      '/.well-known': {
+        target: 'http://localhost:8102',
         changeOrigin: true,
       },
     },

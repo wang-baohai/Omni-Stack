@@ -17,8 +17,8 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 | Module | Role | Port | Technology | Boundary Constraint |
 |--------|------|------|------------|---------------------|
 | `omni-common` | Shared models, utils, exception handling, Jackson config | N/A (library) | Spring Boot Web (optional), Validation (optional), Lombok | No business logic; only cross-cutting concerns |
-| `omni-gateway` | API Gateway, request routing, authentication filter | 8090 | Spring Cloud Gateway Server (WebFlux) | No business logic; routing and cross-cutting filters only |
-| `omni-business` | Business microservice | 8081 | Spring Boot Web, OpenFeign, Sentinel | Business logic lives here; no direct HTTP/response manipulation in Service layer |
+| `omni-gateway` | API Gateway, request routing, authentication filter | 8102 | Spring Cloud Gateway Server (WebFlux) | No business logic; routing and cross-cutting filters only |
+| `omni-auth` | Authentication microservice (login, captcha, JWT, multi-tenant) | 8100 | Spring Boot Web, Spring Security, OAuth2 Authorization Server | Authentication logic lives here; no direct HTTP/response manipulation in Service layer |
 | `omni-frontend` | Vue 3 SPA | 3000 (dev) | Vue 3, Pinia, Vue Router, Element Plus, Axios | Presentation layer only; no data-authoritative business rules |
 
 ## Dependency Graph
@@ -27,50 +27,108 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 omni-common  (shared library, no Spring Boot main class)
     ^                ^
     |                |
-omni-business    (omni-gateway does NOT depend on omni-common;
+omni-auth        (omni-gateway does NOT depend on omni-common;
     |             it uses the reactive WebFlux stack independently)
     |
     +-- registers with Nacos --+
                                |
-omni-gateway --- routes via lb:// ---> omni-business
+omni-gateway --- routes via lb:// ---> omni-auth
     |
-omni-frontend --- /api proxy :3000 ---> omni-gateway :8090
+omni-frontend --- /api proxy :3000 ---> omni-gateway :8102
 ```
 
-**Build dependency**: `omni-common` must be `mvn install`-ed before `omni-business` or `omni-gateway` can compile.
+**Build dependency**: `omni-common` must be `mvn install`-ed before `omni-auth` or `omni-gateway` can compile.
 
 ## Data Flow
 
 ```
 Browser (Vue SPA)
-    |  HTTP request (e.g., GET /api/business/user/list?page=1&size=10)
+    |  HTTP request (e.g., POST /api/auth/login)
     v
 Vite Dev Server (:3000)  -- proxy /api/** -->
     |
-Gateway (:8090)
-    |  1. AuthFilter checks Authorization header (stub: pass-through)
-    |  2. Route matching: Path=/api/business/** -> lb://omni-business
-    |  3. StripPrefix=2: /api/business/user/list -> /user/list
+Gateway (:8102)
+    |  1. Route matching: Path=/api/auth/** -> lb://omni-auth
+    |  2. StripPrefix=2: /api/auth/login -> /login
     v
-Business Service (:8081)
-    |  1. UserController receives /user/list
-    |  2. UserService processes business logic
-    |  3. (Future) Repository queries database
-    |  4. Response wrapped in R<T>
+Auth Service (:8100)
+    |  1. AuthController receives /login
+    |  2. CaptchaService validates captcha (Redis)
+    |  3. OmniUserDetailsService authenticates user (multi-tenant)
+    |  4. JwtTokenService generates RS256-signed JWT
+    |  5. Response wrapped in R<T>
     v
-JSON Response: { code: 200, message: "success", data: { ... } }
+JSON Response: { code: 200, message: "success", data: { accessToken, tokenType, expiresIn } }
     |
-Browser renders result
+Browser stores JWT and uses it for subsequent authenticated requests
 ```
 
 ## External Dependencies
 
-| Service | Purpose | Version | Docker Command |
-|---------|---------|---------|----------------|
-| Nacos Server | Service discovery + configuration center | v3.1.1 | `docker run -d --name nacos -p 8848:8848 -p 9848:9848 -e MODE=standalone nacos/nacos-server:v3.1.1` |
-| Sentinel Dashboard | Flow control + circuit breaking dashboard | 1.8.8 | `docker run -d --name sentinel -p 8858:8858 bladex/sentinel-dashboard:1.8.8` |
+| Service | Purpose | Version | Port |
+|---------|---------|---------|------|
+| MySQL | Primary relational database (Auth + RBAC schemas) | 8.4 | 3306 |
+| Redis | Captcha storage, session cache | 7.4 | 6379 |
+| Nacos Server | Service discovery + configuration center | v3.1.1 | 8080, 8848 |
+| Sentinel Dashboard | Flow control + circuit breaking dashboard | 1.8.8 | 8858 |
 
-**Start order**: Nacos -> Sentinel -> Backend services (Gateway, Business) -> Frontend
+All services can be started with a single command: `docker compose up -d`. See `docker-compose.yml` in the project root.
+
+**Start order**: MySQL -> Redis -> Nacos -> Sentinel -> Backend services (Auth, Gateway) -> Frontend
+
+## Infrastructure
+
+### Docker Compose Orchestration
+
+The project root `docker-compose.yml` defines all four middleware services with:
+
+- **Named volumes** (`mysql-data`, `redis-data`) for data persistence across restarts
+- **Health checks** on MySQL and Redis to ensure readiness before dependent services start
+- **Bridge network** (`omni-network`) for inter-service communication
+- **SQL init mount**: `scripts/sql/init-all.sql` is mounted into MySQL's `docker-entrypoint-initdb.d/` for automatic first-run database initialization
+
+### Database Schema
+
+The `omni_auth` database contains 13 tables organized into two domains:
+
+**OAuth2 Authorization (3 tables)**:
+
+| Table | Purpose |
+|-------|---------|
+| `oauth2_registered_client` | OAuth2 client registrations (client_id, secrets, grant types, scopes) |
+| `oauth2_authorization` | Active OAuth2 authorization records (access tokens, refresh tokens, authorization codes) |
+| `oauth2_authorization_consent` | User-consented scopes per client |
+
+**Multi-Tenant RBAC (10 tables)**:
+
+| Table | Purpose |
+|-------|---------|
+| `sys_tenant` | Tenant registry (multi-tenancy root) |
+| `sys_org_unit` | Organizational units with materialized path hierarchy |
+| `sys_user` | User accounts (linked to tenant + org unit) |
+| `sys_role` | Role definitions (scoped to tenant) |
+| `sys_permission` | Permission tree (menu, button, API; materialized path) |
+| `sys_user_role` | User-to-role assignments |
+| `sys_role_permission` | Role-to-permission assignments |
+| `sys_dict_type` | Dictionary type definitions |
+| `sys_dict_data` | Dictionary data entries |
+| `sys_operation_log` | Audit log for write operations |
+
+```mermaid
+erDiagram
+    sys_tenant ||--o{ sys_user : "has users"
+    sys_tenant ||--o{ sys_role : "has roles"
+    sys_tenant ||--o{ sys_org_unit : "has org units"
+    sys_org_unit ||--o{ sys_user : "contains users"
+    sys_user ||--o{ sys_user_role : "assigned"
+    sys_role ||--o{ sys_user_role : "assigned"
+    sys_role ||--o{ sys_role_permission : "grants"
+    sys_permission ||--o{ sys_role_permission : "granted by"
+    sys_permission ||--o{ sys_permission : "parent-child"
+    sys_dict_type ||--o{ sys_dict_data : "contains"
+```
+
+Authoritative DDL and seed data: `scripts/sql/init-all.sql`.
 
 ## Key Constraints
 

@@ -40,18 +40,22 @@
 ```
 Omni-Stack/
 ├── AGENTS.md                        # AI 実行マニュアル（制約 + ビルドコマンド + チェックリスト）
+├── docker-compose.yml               # ミドルウェアオーケストレーション（MySQL, Redis, Nacos, Sentinel）
 ├── docs/                            # システム真実ドキュメント（Architecture + Patterns + Contract）
 │   ├── architecture.md                # システム境界、モジュールマップ、データフロー、制約
 │   ├── api-contract.md                # レスポンス形式、エラーコード、ページネーション、命名規則
 │   ├── backend-patterns.md            # バックエンド階層化、バリデーション、例外、ログ、OOP 規約
 │   ├── frontend-patterns.md           # フロントエンド構成、API 層、状態管理、コンポーネント規約
 │   └── core-flows.md                  # ログイン/検索/送信フローのエンドツーエンド追跡
+├── scripts/
+│   └── sql/
+│       └── init-all.sql               # 権威データベース初期化スクリプト（DDL + シードデータ）
 ├── omni-backend/                    # Maven マルチモジュールバックエンド
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # 親 POM（依存関係管理）
 │   ├── omni-common/                   # 共有ライブラリ：統一レスポンス、グローバル例外、Jackson 構成
-│   ├── omni-gateway/                  # API ゲートウェイ (WebFlux, ポート 8090)
-│   └── omni-business/                 # ビジネスサービス (ポート 8081)
+│   ├── omni-auth/                     # 認証サービス：ログイン、キャプチャ、JWT、OAuth2 (ポート 8100)
+│   └── omni-gateway/                  # API ゲートウェイ (WebFlux, ポート 8102)
 ├── omni-frontend/                   # Vue 3 SPA (開発サーバー ポート 3000)
 │   ├── package.json
 │   ├── vite.config.ts
@@ -73,13 +77,14 @@ Omni-Stack/
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   omni-frontend  │────>│   omni-gateway    │────>│  omni-business  │
-│   Vue 3 SPA     │/api │  WebFlux :8090    │ lb  │   :8081         │
-│   :3000         │────>│  StripPrefix=2    │────>│  Controller     │
-└─────────────────┘     └──────────────────┘     │  Service (IF)   │
-                            │                     │  ServiceImpl    │
-                            │                     └─────────────────┘
+│   omni-frontend  │────>│   omni-gateway    │────>│    omni-auth     │
+│   Vue 3 SPA     │/api │  WebFlux :8102    │lb://│   Spring :8100  │
+│   :3000         │────>│  StripPrefix=2    │────>│  Security+OAuth2│
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+                            │
                     ┌───────┴────────┐
+                    │  MySQL :3306   │  永続化ストレージ
+                    │  Redis :6379   │  キャッシュ + キャプチャ
                     │  Nacos :8848   │  ディスカバリ + 構成
                     │  Sentinel :8858│  フロー制御
                     └────────────────┘
@@ -88,11 +93,10 @@ Omni-Stack/
 **リクエストフロー**:
 
 ```
-ブラウザ :3000  --/api/**-->  Vite プロキシ  -->  Gateway :8090  --lb://-->  Business :8081
+ブラウザ :3000  --/api/**-->  Vite プロキシ  -->  Gateway :8102  --lb://-->  バックエンドサービス
 ```
 
 - フロントエンドは Vite 開発サーバー経由で `/api/**` を Gateway にプロキシ
-- Gateway は `/api/business/**` を `omni-business` にルーティング（StripPrefix=2）
 - Gateway ディスカバリロケーターが Nacos 登録サービスのルートを自動作成
 
 ## 環境準備
@@ -103,7 +107,7 @@ Omni-Stack/
 |-------------|--------------|------|
 | JDK | 25 | `JAVA_HOME` 環境変数の設定が必須 |
 | Node.js | >= 22.12.0 | npm 含む |
-| Docker Desktop | 安定版 | Nacos と Sentinel の実行に使用 |
+| Docker Desktop | 安定版 | ミドルウェア（MySQL, Redis, Nacos, Sentinel）の実行に使用 |
 
 > **注意**: Maven Wrapper (3.9.16) が内蔵されています。すべての Maven コマンドは `./mvnw` で実行してください。
 
@@ -122,21 +126,15 @@ Omni-Stack/
 ### ステップ 1: ミドルウェアの起動
 
 ```bash
-# Nacos — サービスディスカバリと構成センター (ポート 8080, 8848, 9848)
-# Nacos v3.x は起動に認証設定が必要です
-docker run -d --name nacos \
-  -p 8080:8080 -p 8848:8848 -p 9848:9848 \
-  -e MODE=standalone \
-  -e NACOS_AUTH_TOKEN=U2VjcmV0S2V5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5 \
-  -e NACOS_AUTH_IDENTITY_KEY=nacos \
-  -e NACOS_AUTH_IDENTITY_VALUE=nacos \
-  nacos/nacos-server:v3.1.1
+# 全ミドルウェアを一括起動（MySQL, Redis, Nacos, Sentinel）
+docker compose up -d
 
-# Sentinel — フロー制御ダッシュボード (ポート 8858)
-docker run -d --name sentinel -p 8858:8858 bladex/sentinel-dashboard:1.8.8
+# サービス状態を確認
+docker compose ps
 ```
 
 > バックエンドサービスを起動する前に、Nacos が完全に起動するまで約 30 秒お待ちください。`http://127.0.0.1:8080/` にアクセスして Nacos の起動を確認してください（デフォルト認証情報: nacos/nacos）。
+> MySQL コンテナは初回起動時に `scripts/sql/init-all.sql` を自動実行してデータベースを初期化します。
 
 ### ステップ 2: バックエンドのビルドと起動
 
@@ -149,19 +147,16 @@ export PATH="$JAVA_HOME/bin:$PATH"
 cd omni-backend
 ./mvnw clean install
 
-# Gateway を起動（ポート 8090）
+# Auth サービスを起動（ポート 8100）
+cd omni-auth
+./mvnw spring-boot:run
+
+# Gateway を起動（ポート 8102、新規ターミナルで）
 cd omni-gateway
 ./mvnw spring-boot:run
-
-# 新しいターミナルで Business サービスを起動（ポート 8081）
-cd omni-backend/omni-business
-./mvnw spring-boot:run
 ```
 
-**ビルド順序**: `omni-common` を先にインストールする必要があります。特定のモジュールを依存関係と一緒にビルドする場合:
-```bash
-./mvnw clean install -pl omni-business -am
-```
+**ビルド順序**: `omni-common` を先にインストールする必要があります。
 
 ### ステップ 3: フロントエンドの起動
 
@@ -171,7 +166,7 @@ cd omni-frontend
 # 依存関係をインストール
 npm install
 
-# 開発サーバーを起動（ポート 3000、/api を Gateway :8090 に自動プロキシ）
+# 開発サーバーを起動（ポート 3000、/api を Gateway :8102 に自動プロキシ）
 npm run dev
 ```
 
@@ -180,19 +175,21 @@ npm run dev
 | 確認項目 | コマンド / URL | 期待される結果 |
 |---------|---------------|---------------|
 | フロントエンド | `http://localhost:3000` | ログインページ |
-| Gateway ルート | `curl http://localhost:8090/actuator/gateway/routes` | JSON ルート一覧 |
+| Gateway ルート | `curl http://localhost:8102/actuator/gateway/routes` | JSON ルート一覧 |
 | Nacos コンソール | `http://127.0.0.1:8080/` | Nacos 管理画面 |
 | Sentinel コンソール | `http://localhost:8858` | Sentinel ダッシュボード |
 
-**起動順序**: Nacos → Sentinel → バックエンド（Gateway, Business）→ フロントエンド
+**起動順序**: MySQL → Redis → Nacos → Sentinel → バックエンド（Auth, Gateway）→ フロントエンド
 
 ## サービスポート
 
 | サービス | ポート | 説明 |
 |---------|-------|------|
 | フロントエンド開発サーバー | 3000 | Vite 開発サーバー、/api リクエストをプロキシ |
-| API ゲートウェイ | 8090 | Spring Cloud Gateway (WebFlux) |
-| ビジネスサービス | 8081 | omni-business マイクロサービス |
+| 認証サービス | 8100 | Spring Security + OAuth2 Authorization Server |
+| API ゲートウェイ | 8102 | Spring Cloud Gateway (WebFlux) |
+| MySQL | 3306 | メインデータベース（omni_auth） |
+| Redis | 6379 | キャプチャキャッシュ |
 | Nacos | 8080, 8848 | 管理画面 (8080) + サービスディスカバリと構成管理 (8848) |
 | Sentinel | 8858 | フロー制御ダッシュボード |
 
@@ -214,28 +211,24 @@ npm run dev
 
 > `omni-common` は Spring Boot 自動構成 (`AutoConfiguration.imports`) を使用して Bean を登録します。下流モジュールは手動で `@ComponentScan` を追加する必要がありません。
 
+### omni-auth（認証サービス）
+
+Spring Security 7 + OAuth2 Authorization Server ベースの認証マイクロサービス:
+
+- ユーザーログイン: ユーザー名 + パスワード + キャプチャ + マルチテナント、RS256 JWT を発行
+- OAuth2 認可: Authorization Code + PKCE フロー、サードパーティ連携に対応
+- クライアント管理: `oauth2_registered_client` の CRUD、動的登録をサポート
+- マルチテナント RBAC: `tenantId:username` 形式のユーザー解決 + ロール権限ツリー
+- JWT 署名: RSA キーペア、JWK エンドポイントで Gateway に公開鍵を提供
+
 ### omni-gateway（API ゲートウェイ）
 
 Spring Cloud Gateway Server (WebFlux) ベースのリアクティブゲートウェイ:
 
-- ルート転送: `/api/business/**` → `lb://omni-business` (StripPrefix=2)
+- ルート転送: Nacos 登録サービスのバックエンドに自動ルーティング（StripPrefix=2）
 - サービスディスカバリ: Nacos 登録サービスを自動ルーティング
 - 認証フィルター: `AuthFilter`（スタブ — トークン検証の拡張ポイント）
 - CORS 処理: `CorsConfig` によるクロスオリジンリクエスト対応
-
-### omni-business（ビジネスサービス）
-
-標準的な階層アーキテクチャを示すビジネスマイクロサービス:
-
-```
-Controller  →  Service (インターフェース)  →  ServiceImpl  →  Repository (将来)
-  パラメータ検証   ビジネス定義                ビジネスロジック   データアクセス
-  レスポンスラップ  @Transactional            トランザクション管理  SQL / ORM
-```
-
-- `UserController`: `R<T>` を返す RESTful API エンドポイント
-- `UserService`（インターフェース）+ `UserServiceImpl`（実装）: インターフェースベースの Service 層
-- `RemoteServiceFeignClient`: OpenFeign リモート呼び出しサンプル
 
 ### omni-frontend（Vue 3 SPA）
 
@@ -335,7 +328,6 @@ cd omni-frontend && npm run build && npm run lint
 |---------|------|--------|
 | Gateway ルートが読み込まれない | 5.x で構成プレフィックスが変更 | `spring.cloud.gateway.server.webflux` を使用 — AGENTS.md Important Notes を参照 |
 | Maven クラスバージョンエラー | JAVA_HOME が JDK 25 を指していない | `JAVA_HOME` を JDK 25 ディレクトリに設定 |
-| `omni-business` コンパイル失敗 | `omni-common` が先にインストールされていない | まず `./mvnw install -pl omni-common` を実行 |
 | フロントエンド型不整合 | `ApiResponse` が複数箇所で定義されている | `@/types/api` からのみインポート — 重複定義禁止 |
 | Actuator gateway エンドポイント 404 | 明示的な有効化が必要 | `management.endpoint.gateway.enabled: true` を構成 |
 

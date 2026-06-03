@@ -7,25 +7,30 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * Login request payload.
+ * 登录请求参数。
  */
 @Data
 public class LoginRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotBlank(message = "Username is required")
+    /** 用户名，不能为空 */
+    @NotBlank(message = "用户名不能为空")
     private String username;
 
-    @NotBlank(message = "Password is required")
+    /** 密码，不能为空 */
+    @NotBlank(message = "密码不能为空")
     private String password;
 
-    @NotNull(message = "Tenant ID is required")
+    /** 租户 ID，不能为 null */
+    @NotNull(message = "租户 ID 不能为空")
     private Long tenantId;
 
-    @NotBlank(message = "Captcha key is required")
+    /** 验证码 Key（UUID），不能为空 */
+    @NotBlank(message = "验证码 Key 不能为空")
     private String captchaKey;
 
-    @NotBlank(message = "Captcha code is required")
+    /** 验证码内容，不能为空 */
+    @NotBlank(message = "验证码不能为空")
     private String captchaCode;
 }

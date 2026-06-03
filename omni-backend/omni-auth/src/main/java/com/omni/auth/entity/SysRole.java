@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * System role entity.
+ * 系统角色实体。
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -17,13 +17,20 @@ public class SysRole extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    /** 主键 ID */
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 所属租户 ID */
     private Long tenantId;
+    /** 角色编码（如 ADMIN、USER） */
     private String roleCode;
+    /** 角色名称 */
     private String roleName;
+    /** 数据权限范围 */
     private String dataScope;
+    /** 排序号 */
     private Integer sort;
+    /** 状态（1-启用，0-禁用） */
     private Integer status;
 }

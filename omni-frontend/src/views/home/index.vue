@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/**
+ * 首页组件。
+ * 展示产品介绍、导航入口，支持登录/未登录两种状态显示。
+ * 包含顶部导航栏、Hero 区域和页脚。
+ */
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
@@ -10,22 +15,27 @@ const router = useRouter()
 const userStore = useUserStore()
 const appStore = useAppStore()
 
+/** 跳转到登录页 */
 function goToLogin() {
   router.push({ name: 'Login' })
 }
 
+/** 跳转到控制台（仪表盘） */
 function goToConsole() {
   router.push({ name: 'Dashboard' })
 }
 
+/** 处理用户登出 */
 function handleLogout() {
   userStore.logout()
 }
 
+/** 切换主题模式 */
 function toggleTheme() {
   appStore.setTheme(appStore.theme === 'dark' ? 'light' : 'dark')
 }
 
+/** 切换语言 */
 function toggleLang() {
   const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
   locale.value = newLang
@@ -35,27 +45,32 @@ function toggleLang() {
 
 <template>
   <div class="home-page">
+    <!-- 顶部导航栏：Logo + 功能按钮 + 用户菜单 -->
     <header class="home-header">
       <div class="home-header-left">
         <span class="home-logo gradient-text">{{ t('common.appName') }}</span>
       </div>
       <div class="home-header-right">
+        <!-- 语言切换 -->
         <el-button text :title="t('lang.switch')" @click="toggleLang">
           <el-icon><Globe /></el-icon>
           {{ locale === 'zh-CN' ? 'EN' : '中' }}
         </el-button>
+        <!-- 主题切换 -->
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>
             <Moon v-if="appStore.theme === 'dark'" />
             <Sunny v-else />
           </el-icon>
         </el-button>
+        <!-- 未登录状态：显示登录按钮 -->
         <template v-if="!userStore.isLoggedIn">
           <el-button type="primary" @click="goToLogin">
             <el-icon><User /></el-icon>
             {{ t('common.login') }}
           </el-button>
         </template>
+        <!-- 已登录状态：显示用户信息和控制台入口 -->
         <template v-else>
           <el-dropdown>
             <span class="home-user-info">
@@ -78,6 +93,7 @@ function toggleLang() {
       </div>
     </header>
 
+    <!-- Hero 主视觉区域：标题、描述和操作按钮 -->
     <main class="home-hero">
       <div class="hero-orb"></div>
       <div class="hero-content">
@@ -87,6 +103,7 @@ function toggleLang() {
         <p class="home-hero-subtitle">{{ t('common.subtitle') }}</p>
         <p class="home-hero-desc">{{ t('home.desc') }}</p>
         <div class="home-hero-actions">
+          <!-- 已登录：进入控制台；未登录：开始使用 -->
           <el-button v-if="userStore.isLoggedIn" type="primary" size="large" @click="goToConsole">
             {{ t('home.goToConsole') }}
           </el-button>
@@ -97,6 +114,7 @@ function toggleLang() {
       </div>
     </main>
 
+    <!-- 页脚 -->
     <footer class="home-footer">
       <span>&copy; 2026 {{ t('common.appName') }}</span>
     </footer>

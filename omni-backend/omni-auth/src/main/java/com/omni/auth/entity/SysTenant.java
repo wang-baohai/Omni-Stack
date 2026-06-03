@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * System tenant entity.
+ * 系统租户实体。
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -17,13 +17,20 @@ public class SysTenant extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    /** 主键 ID */
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 租户编码 */
     private String tenantCode;
+    /** 租户名称 */
     private String tenantName;
+    /** 租户域名 */
     private String domain;
+    /** 联系人姓名 */
     private String contactName;
+    /** 联系人电话 */
     private String contactPhone;
+    /** 状态（1-启用，0-禁用） */
     private Integer status;
 }

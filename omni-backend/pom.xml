@@ -23,7 +23,6 @@
         <module>omni-common</module>
         <module>omni-auth</module>
         <module>omni-gateway</module>
-        <module>omni-business</module>
     </modules>
 
     <properties>

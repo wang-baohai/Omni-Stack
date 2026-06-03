@@ -5,17 +5,17 @@ import com.omni.auth.entity.SysUser;
 import java.util.List;
 
 /**
- * JWT token generation service.
+ * JWT 令牌生成服务接口。
  */
 public interface JwtTokenService {
 
     /**
-     * Generate a signed JWT access token for the authenticated user.
+     * 为已认证用户生成签名的 JWT 访问令牌。
      *
-     * @param user        the authenticated user
-     * @param roles       user's role codes
-     * @param permissions user's permission codes
-     * @return serialized JWT string
+     * @param user        已认证的用户实体
+     * @param roles       用户角色编码列表
+     * @param permissions 用户权限编码列表
+     * @return 序列化后的 JWT 字符串
      */
     String generateToken(SysUser user, List<String> roles, List<String> permissions);
 }

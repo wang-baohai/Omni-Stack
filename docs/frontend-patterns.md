@@ -65,7 +65,7 @@ import type { ApiResponse, PageResult } from '@/types/api'
 
 export function listUsers(page: number, size: number) {
   return request.get<ApiResponse<PageResult<UserInfo>>>(
-    `/business/user/list?page=${page}&size=${size}`,
+    `/auth/user/list?page=${page}&size=${size}`,
   )
 }
 ```
@@ -222,14 +222,14 @@ const routes: RouteRecordRaw[] = [
 
 ### Vite Proxy
 
-Dev server proxies `/api` to `http://localhost:8090` (Gateway):
+Dev server proxies `/api` to `http://localhost:8102` (Gateway):
 
 ```typescript
 server: {
   port: 3000,
   proxy: {
     '/api': {
-      target: 'http://localhost:8090',
+      target: 'http://localhost:8102',
       changeOrigin: true,
     },
   },

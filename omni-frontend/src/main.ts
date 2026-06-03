@@ -11,19 +11,22 @@ import i18n from './i18n'
 import './styles/index.scss'
 import { initTheme } from './stores/app'
 
+// 创建 Vue 应用实例
 const app = createApp(App)
 
-// Register all Element Plus icons
+// 全局注册所有 Element Plus 图标组件
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
+// 注册插件：状态管理、路由、UI 框架、国际化
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus)
 app.use(i18n)
 
+// 挂载应用到 DOM
 app.mount('#app')
 
-// Initialize theme after mount (reads localStorage, applies dark class)
+// 挂载后初始化主题（从 localStorage 读取主题偏好，应用暗色样式类）
 initTheme()

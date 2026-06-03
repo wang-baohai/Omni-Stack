@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS oauth2_registered_client (
     scopes                        VARCHAR(1000) NOT NULL,
     client_settings               VARCHAR(2000) NOT NULL,
     token_settings                VARCHAR(2000) NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_client_id (client_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS oauth2_authorization (
@@ -48,12 +49,21 @@ CREATE TABLE IF NOT EXISTS oauth2_authorization (
     refresh_token_issued_at       TIMESTAMP DEFAULT NULL,
     refresh_token_expires_at      TIMESTAMP DEFAULT NULL,
     refresh_token_metadata        VARCHAR(2000) DEFAULT NULL,
+    user_code_value               TEXT DEFAULT NULL,
+    user_code_issued_at           TIMESTAMP DEFAULT NULL,
+    user_code_expires_at          TIMESTAMP DEFAULT NULL,
+    user_code_metadata            VARCHAR(2000) DEFAULT NULL,
+    device_code_value             TEXT DEFAULT NULL,
+    device_code_issued_at         TIMESTAMP DEFAULT NULL,
+    device_code_expires_at        TIMESTAMP DEFAULT NULL,
+    device_code_metadata          VARCHAR(2000) DEFAULT NULL,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS oauth2_authorization_consent (
     registered_client_id VARCHAR(100) NOT NULL,
     principal_name       VARCHAR(200) NOT NULL,
+    authorities          VARCHAR(1000) DEFAULT NULL,
     scopes               VARCHAR(1000) DEFAULT NULL,
     PRIMARY KEY (registered_client_id, principal_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

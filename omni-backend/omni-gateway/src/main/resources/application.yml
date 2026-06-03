@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: 8102
 
 spring:
   application:
@@ -28,17 +28,21 @@ spring:
               enabled: true
               lower-case-service-id: true
           routes:
-            # Auth service routes
+            # OAuth2 authorization server endpoints (必须在 omni-auth 路由之前)
+            - id: omni-auth-oauth2
+              uri: lb://omni-auth
+              predicates:
+                - Path=/oauth2/**
+            # OpenID Connect discovery endpoint
+            - id: omni-auth-wellknown
+              uri: lb://omni-auth
+              predicates:
+                - Path=/.well-known/**
+            # Auth service REST API routes
             - id: omni-auth
               uri: lb://omni-auth
               predicates:
                 - Path=/api/auth/**
-
-            # Business service routes
-            - id: omni-business
-              uri: lb://omni-business
-              predicates:
-                - Path=/api/business/**
 
 management:
   endpoint:
@@ -51,7 +55,7 @@ management:
 
 auth:
   jwks:
-    uri: http://localhost:9000/oauth2/jwks
+    uri: http://localhost:8100/oauth2/jwks
     cache-ttl: 5m
 
 logging:

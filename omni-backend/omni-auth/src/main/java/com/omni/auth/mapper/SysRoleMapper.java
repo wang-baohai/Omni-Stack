@@ -8,12 +8,16 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
- * SysRole Mapper.
+ * 系统角色 Mapper 接口。
  */
 public interface SysRoleMapper extends BaseMapper<SysRole> {
 
     /**
-     * Find roles by user id.
+     * 根据用户 ID 查询该用户拥有的所有角色。
+     * <p>通过 {@code sys_user_role} 关联表进行 JOIN 查询，仅返回启用状态的角色。</p>
+     *
+     * @param userId 用户 ID
+     * @return 用户角色列表
      */
     @Select("SELECT r.* FROM sys_role r "
             + "INNER JOIN sys_user_role ur ON r.id = ur.role_id "

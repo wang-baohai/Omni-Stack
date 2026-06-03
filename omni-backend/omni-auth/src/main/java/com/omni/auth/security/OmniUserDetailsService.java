@@ -5,47 +5,41 @@ import com.omni.auth.entity.SysUser;
 import com.omni.auth.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Custom {@link UserDetailsService} that loads users from the database for Spring Security.
+ * 自定义 {@link UserDetailsService} 实现，从数据库加载用户信息供 Spring Security 认证使用。
  *
- * <h3>Multi-Tenant Login Mechanism</h3>
- * <p>This service supports multi-tenant authentication by encoding the tenant ID into the
- * username string. The format is {@code "tenantId:username"} (e.g., {@code "1:admin"}).
- * The parsing logic works as follows:</p>
+ * <h3>多租户登录机制</h3>
+ * <p>该服务支持多租户认证，通过在用户名字符串中编码租户 ID 来实现。
+ * 格式为 {@code "tenantId:username"}（如 {@code "1:admin"}）。解析逻辑如下：</p>
  * <ol>
- *   <li>If the username contains a colon ({@code :}), split on the first colon:
- *       the left part is parsed as {@code tenantId} (Long), and the right part is the
- *       actual username.</li>
- *   <li>If no colon is present, default to {@code tenantId = 1} (single-tenant fallback).
- *       This ensures backward compatibility when the tenant prefix is omitted.</li>
+ *   <li>如果用户名包含冒号（{@code :}），按第一个冒号分割：
+ *       左侧解析为 {@code tenantId}（Long），右侧为实际用户名。</li>
+ *   <li>如果不包含冒号，默认 {@code tenantId = 1}（单租户兼容模式）。</li>
  * </ol>
  *
- * <h3>User Lookup</h3>
- * <p>The user is queried from the {@code sys_user} table with three conditions:</p>
+ * <h3>用户查询</h3>
+ * <p>从 {@code sys_user} 表中查询满足以下三个条件的用户：</p>
  * <ul>
- *   <li>{@code tenant_id} matches the parsed tenant ID</li>
- *   <li>{@code username} matches the parsed username</li>
- *   <li>{@code status = 1} (only active users can authenticate)</li>
+ *   <li>{@code tenant_id} 匹配解析出的租户 ID</li>
+ *   <li>{@code username} 匹配解析出的用户名</li>
+ *   <li>{@code status = 1}（仅活跃用户可以认证）</li>
  * </ul>
  *
- * <h3>Authority Construction</h3>
- * <p>After the user is found, their roles and permissions are loaded from the database
- * via join queries on {@code sys_user_role}, {@code sys_role}, {@code sys_role_permission},
- * and {@code sys_permission}. These are converted into Spring Security authorities:</p>
+ * <h3>权限构建</h3>
+ * <p>用户查询成功后，通过关联查询加载角色和权限，转换为 Spring Security 权限对象：</p>
  * <ul>
- *   <li>Roles are prefixed with {@code ROLE_} (e.g., role code {@code "ADMIN"} becomes
- *       authority {@code "ROLE_ADMIN"}), enabling {@code hasRole("ADMIN")} checks.</li>
- *   <li>Permissions are added as-is (e.g., {@code "user:read"}), enabling
- *       {@code hasAuthority("user:read")} checks.</li>
+ *   <li>角色添加 {@code ROLE_} 前缀（如角色编码 {@code "ADMIN"} 变为权限 {@code "ROLE_ADMIN"}），
+ *       支持 {@code hasRole("ADMIN")} 检查。</li>
+ *   <li>权限编码原样添加（如 {@code "user:read"}），支持 {@code hasAuthority("user:read")} 检查。</li>
  * </ul>
  *
  * @see org.springframework.security.core.userdetails.UserDetailsService
@@ -54,26 +48,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OmniUserDetailsService implements UserDetailsService {
 
+    /** 用户 Mapper */
     private final SysUserMapper sysUserMapper;
 
     /**
-     * Load a user by the (optionally tenant-prefixed) username.
+     * 根据（可选带租户前缀的）用户名加载用户。
      *
-     * <p>This method is called by Spring Security's authentication providers (e.g.,
-     * {@code DaoAuthenticationProvider}) during the authentication process. It is
-     * also used by the OAuth2 authorization server's token endpoint when processing
-     * {@code password} grant type requests.</p>
+     * <p>此方法在认证过程中由 Spring Security 的认证提供者（如
+     * {@code DaoAuthenticationProvider}）调用。</p>
      *
-     * @param username the username, optionally prefixed with tenant ID as {@code "tenantId:username"}.
-     *                 If no prefix is present, defaults to tenant ID 1.
-     * @return a fully populated {@link UserDetails} object with username, password, and authorities
-     * @throws UsernameNotFoundException if no active user is found for the given username and tenant
+     * @param username 用户名，可选带租户 ID 前缀，格式为 {@code "tenantId:username"}。
+     *                 无前缀时默认租户 ID 为 1。
+     * @return 包含用户名、密码和权限列表的完整 {@link UserDetails} 对象
+     * @throws UsernameNotFoundException 如果未找到匹配的活跃用户
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // --- Multi-tenant parsing: "tenantId:username" or plain "username" ---
-        // Example: "1:admin" -> tenantId=1, actualUsername="admin"
-        //          "admin"   -> tenantId=1 (default), actualUsername="admin"
+        // --- 多租户解析："tenantId:username" 或纯 "username" ---
+        // 示例："1:admin" -> tenantId=1, actualUsername="admin"
+        //       "admin"   -> tenantId=1（默认值）, actualUsername="admin"
         Long tenantId = 1L;
         String actualUsername = username;
         if (username.contains(":")) {
@@ -82,35 +75,36 @@ public class OmniUserDetailsService implements UserDetailsService {
             actualUsername = parts[1];
         }
 
-        // Query the user by tenant + username, requiring active status
+        // 根据租户 + 用户名 + 活跃状态查询用户
         SysUser user = sysUserMapper.selectOne(Wrappers.<SysUser>lambdaQuery()
                 .eq(SysUser::getTenantId, tenantId)
                 .eq(SysUser::getUsername, actualUsername)
                 .eq(SysUser::getStatus, 1));
 
         if (user == null) {
-            throw new UsernameNotFoundException("User not found: " + actualUsername);
+            throw new UsernameNotFoundException("用户不存在: " + actualUsername);
         }
 
-        // --- Load roles and permissions from database via join queries ---
+        // --- 从数据库加载角色和权限 ---
         List<String> roleCodes = sysUserMapper.selectRoleCodesByUserId(user.getId());
         List<String> permissions = sysUserMapper.selectPermissionsByUserId(user.getId());
 
-        // Convert role codes to ROLE_-prefixed authorities (e.g., "ADMIN" -> "ROLE_ADMIN")
-        List<SimpleGrantedAuthority> authorities = roleCodes.stream()
+        // 将角色编码转换为 ROLE_ 前缀的权限（如 "ADMIN" -> "ROLE_ADMIN"）
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>(roleCodes.stream()
                 .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
 
-        // Add permission codes as plain authorities (e.g., "user:read")
+        // 添加权限编码作为普通权限（如 "user:read"）
         authorities.addAll(permissions.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList()));
 
-        // Build the Spring Security UserDetails with BCrypt-encoded password
-        return User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .authorities(authorities)
-                .build();
+        // 构建 OmniUserDetails，携带 userId 和 tenantId 供 OAuth2 Token 签发使用
+        return new OmniUserDetails(
+                user.getId(),
+                tenantId,
+                user.getUsername(),
+                user.getPassword(),
+                authorities);
     }
 }

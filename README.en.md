@@ -40,18 +40,22 @@
 ```
 Omni-Stack/
 ├── AGENTS.md                        # AI execution manual (constraints + build commands + checklist)
+├── docker-compose.yml               # Middleware orchestration (MySQL, Redis, Nacos, Sentinel)
 ├── docs/                            # System truth documents (Architecture + Patterns + Contract)
 │   ├── architecture.md                # System boundaries, module map, data flow, constraints
 │   ├── api-contract.md                # Response format, error codes, pagination, naming
 │   ├── backend-patterns.md            # Backend layering, validation, exceptions, logging, OOP
 │   ├── frontend-patterns.md           # Frontend directory, API layer, state, components
 │   └── core-flows.md                  # Login / query / submission end-to-end traces
+├── scripts/
+│   └── sql/
+│       └── init-all.sql               # Authoritative database initialization script (DDL + seed data)
 ├── omni-backend/                    # Maven multi-module backend
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # Parent POM (dependency management)
 │   ├── omni-common/                   # Shared: unified response, global exception, Jackson config
-│   ├── omni-gateway/                  # API Gateway (WebFlux, port 8090)
-│   └── omni-business/                 # Business service (port 8081)
+│   ├── omni-auth/                     # Auth service: login, captcha, JWT, OAuth2 (port 8100)
+│   └── omni-gateway/                  # API Gateway (WebFlux, port 8102)
 ├── omni-frontend/                   # Vue 3 SPA (dev server port 3000)
 │   ├── package.json
 │   ├── vite.config.ts
@@ -73,13 +77,14 @@ Omni-Stack/
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   omni-frontend  │────>│   omni-gateway    │────>│  omni-business  │
-│   Vue 3 SPA     │/api │  WebFlux :8090    │ lb  │   :8081         │
-│   :3000         │────>│  StripPrefix=2    │────>│  Controller     │
-└─────────────────┘     └──────────────────┘     │  Service (intf)  │
-                            │                     │  ServiceImpl    │
-                            │                     └─────────────────┘
+│   omni-frontend  │────>│   omni-gateway    │────>│    omni-auth     │
+│   Vue 3 SPA     │/api │  WebFlux :8102    │lb://│   Spring :8100  │
+│   :3000         │────>│  StripPrefix=2    │────>│  Security+OAuth2│
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+                            │
                     ┌───────┴────────┐
+                    │  MySQL :3306   │  Persistence storage
+                    │  Redis :6379   │  Cache + captcha
                     │  Nacos :8848   │  Discovery + Config
                     │  Sentinel :8858│  Flow Control
                     └────────────────┘
@@ -88,11 +93,10 @@ Omni-Stack/
 **Request Flow**:
 
 ```
-Browser :3000  --/api/**-->  Vite Proxy  -->  Gateway :8090  --lb://-->  Business :8081
+Browser :3000  --/api/**-->  Vite Proxy  -->  Gateway :8102  --lb://-->  Backend Services
 ```
 
 - Frontend proxies `/api/**` to Gateway via Vite dev server
-- Gateway routes `/api/business/**` to `omni-business` via Nacos load balancer (StripPrefix=2)
 - Gateway discovery locator auto-creates routes for all Nacos-registered services
 
 ## Prerequisites
@@ -103,7 +107,7 @@ Browser :3000  --/api/**-->  Vite Proxy  -->  Gateway :8090  --lb://-->  Busines
 |----------|---------|-------|
 | JDK | 25 | Must set `JAVA_HOME` environment variable |
 | Node.js | >= 22.12.0 | Includes npm |
-| Docker Desktop | Any stable | For running Nacos and Sentinel |
+| Docker Desktop | Any stable | For running middleware (MySQL, Redis, Nacos, Sentinel) |
 
 > **Note**: Maven Wrapper (3.9.16) is bundled. Use `./mvnw` instead of `mvn` for all Maven commands.
 
@@ -122,21 +126,15 @@ Browser :3000  --/api/**-->  Vite Proxy  -->  Gateway :8090  --lb://-->  Busines
 ### Step 1: Start Middleware
 
 ```bash
-# Nacos — service discovery and configuration center (ports 8080, 8848, 9848)
-# Nacos v3.x requires auth configuration to start
-docker run -d --name nacos \
-  -p 8080:8080 -p 8848:8848 -p 9848:9848 \
-  -e MODE=standalone \
-  -e NACOS_AUTH_TOKEN=U2VjcmV0S2V5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5 \
-  -e NACOS_AUTH_IDENTITY_KEY=nacos \
-  -e NACOS_AUTH_IDENTITY_VALUE=nacos \
-  nacos/nacos-server:v3.1.1
+# Start all middleware (MySQL, Redis, Nacos, Sentinel) with one command
+docker compose up -d
 
-# Sentinel — flow control dashboard (port 8858)
-docker run -d --name sentinel -p 8858:8858 bladex/sentinel-dashboard:1.8.8
+# Check service status
+docker compose ps
 ```
 
 > Wait ~30 seconds for Nacos to fully start before launching backend services. Visit `http://127.0.0.1:8080/` to confirm (default credentials: nacos/nacos).
+> MySQL container automatically runs `scripts/sql/init-all.sql` on first start to initialize the database.
 
 ### Step 2: Build and Start Backend
 
@@ -149,19 +147,16 @@ export PATH="$JAVA_HOME/bin:$PATH"
 cd omni-backend
 ./mvnw clean install
 
-# Start Gateway (port 8090)
+# Start Auth service (port 8100)
+cd omni-auth
+./mvnw spring-boot:run
+
+# Start Gateway (port 8102, in a new terminal)
 cd omni-gateway
 ./mvnw spring-boot:run
-
-# In a new terminal, start Business service (port 8081)
-cd omni-backend/omni-business
-./mvnw spring-boot:run
 ```
 
-**Build order**: `omni-common` must be installed first. To build a specific module with its dependencies:
-```bash
-./mvnw clean install -pl omni-business -am
-```
+**Build order**: `omni-common` must be installed first.
 
 ### Step 3: Start Frontend
 
@@ -171,7 +166,7 @@ cd omni-frontend
 # Install dependencies
 npm install
 
-# Start dev server (port 3000, auto-proxies /api to Gateway :8090)
+# Start dev server (port 3000, auto-proxies /api to Gateway :8102)
 npm run dev
 ```
 
@@ -180,19 +175,21 @@ npm run dev
 | Check | Command / URL | Expected Result |
 |-------|--------------|-----------------|
 | Frontend | `http://localhost:3000` | Login page |
-| Gateway routes | `curl http://localhost:8090/actuator/gateway/routes` | JSON route list |
+| Gateway routes | `curl http://localhost:8102/actuator/gateway/routes` | JSON route list |
 | Nacos console | `http://127.0.0.1:8080/` | Nacos admin UI |
 | Sentinel console | `http://localhost:8858` | Sentinel Dashboard |
 
-**Start order**: Nacos → Sentinel → Backend (Gateway, Business) → Frontend
+**Start order**: MySQL → Redis → Nacos → Sentinel → Backend (Auth, Gateway) → Frontend
 
 ## Service Ports
 
 | Service | Port | Description |
 |---------|------|-------------|
 | Frontend dev server | 3000 | Vite dev server, proxies /api requests |
-| API Gateway | 8090 | Spring Cloud Gateway (WebFlux) |
-| Business service | 8081 | omni-business microservice |
+| Auth service | 8100 | Spring Security + OAuth2 Authorization Server |
+| API Gateway | 8102 | Spring Cloud Gateway (WebFlux) |
+| MySQL | 3306 | Primary database (omni_auth) |
+| Redis | 6379 | Captcha cache |
 | Nacos | 8080, 8848 | Management UI (8080) + Discovery & Config (8848) |
 | Sentinel | 8858 | Flow control dashboard |
 
@@ -214,28 +211,24 @@ Shared infrastructure for all backend modules. **Cannot run independently**:
 
 > `omni-common` uses Spring Boot auto-configuration (`AutoConfiguration.imports`) to register beans. Downstream modules don't need manual `@ComponentScan`.
 
+### omni-auth (Auth Service)
+
+Authentication microservice built on Spring Security 7 + OAuth2 Authorization Server:
+
+- User login: username + password + captcha + multi-tenant, issues RS256 JWT
+- OAuth2 authorization: Authorization Code + PKCE flow for third-party integration
+- Client management: CRUD on `oauth2_registered_client`, supports dynamic registration
+- Multi-tenant RBAC: `tenantId:username` user resolution + role-permission tree
+- JWT signing: RSA key pair, JWK endpoint for Gateway public key verification
+
 ### omni-gateway (API Gateway)
 
 Reactive gateway based on Spring Cloud Gateway Server (WebFlux):
 
-- Route forwarding: `/api/business/**` → `lb://omni-business` (StripPrefix=2)
+- Route forwarding: auto-routes to Nacos-registered backend services (StripPrefix=2)
 - Service discovery: auto-routes Nacos-registered services
 - Auth filter: `AuthFilter` (stub — extension point for token validation)
 - CORS handling: `CorsConfig` for cross-origin requests
-
-### omni-business (Business Service)
-
-Business microservice demonstrating standard layered architecture:
-
-```
-Controller  →  Service (interface)  →  ServiceImpl  →  Repository (future)
-  Param check    Business definition    Business logic    Data access
-  Result wrap    @Transactional         Transaction mgmt  SQL / ORM
-```
-
-- `UserController`: RESTful API endpoints returning `R<T>`
-- `UserService` (interface) + `UserServiceImpl` (implementation): interface-based Service layer
-- `RemoteServiceFeignClient`: OpenFeign remote call example
 
 ### omni-frontend (Vue 3 SPA)
 
@@ -335,7 +328,6 @@ See the Completion Checklist section in `AGENTS.md` for the full checklist.
 |---------|-------|----------|
 | Gateway routes not loading | 5.x changed the config prefix | Use `spring.cloud.gateway.server.webflux` — see AGENTS.md Important Notes |
 | Maven class version error | JAVA_HOME not pointing to JDK 25 | Set `JAVA_HOME` to your JDK 25 directory |
-| `omni-business` compile fails | `omni-common` not installed first | Run `./mvnw install -pl omni-common` first |
 | Frontend type mismatch | `ApiResponse` defined in multiple places | Import only from `@/types/api` — never duplicate |
 | Actuator gateway endpoint 404 | Requires explicit enablement | Configure `management.endpoint.gateway.enabled: true` |
 

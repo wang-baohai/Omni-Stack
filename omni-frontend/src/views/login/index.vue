@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/**
+ * 登录页面组件。
+ * 包含顶部工具栏（返回首页、语言切换、主题切换）、
+ * 登录表单卡片和页脚。通过 LoginForm 子组件处理实际登录逻辑。
+ */
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -10,15 +15,18 @@ const { t, locale } = useI18n()
 const router = useRouter()
 const appStore = useAppStore()
 
+/** 登录成功回调：显示成功提示并跳转到仪表盘 */
 function handleSuccess() {
   ElMessage.success(t('login.loginSuccess'))
   router.push({ name: 'Dashboard' })
 }
 
+/** 切换主题模式 */
 function toggleTheme() {
   appStore.setTheme(appStore.theme === 'dark' ? 'light' : 'dark')
 }
 
+/** 切换语言 */
 function toggleLang() {
   const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
   locale.value = newLang
@@ -28,6 +36,7 @@ function toggleLang() {
 
 <template>
   <div class="login-page">
+    <!-- 顶部工具栏：返回首页 + 功能按钮 -->
     <div class="login-top-bar">
       <div class="login-top-left">
         <el-button text @click="router.push('/')">
@@ -36,10 +45,12 @@ function toggleLang() {
         </el-button>
       </div>
       <div class="login-top-right">
+        <!-- 语言切换 -->
         <el-button text :title="t('lang.switch')" @click="toggleLang">
           <el-icon><Globe /></el-icon>
           {{ locale === 'zh-CN' ? 'EN' : '中' }}
         </el-button>
+        <!-- 主题切换 -->
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>
             <Moon v-if="appStore.theme === 'dark'" />
@@ -49,12 +60,14 @@ function toggleLang() {
       </div>
     </div>
 
+    <!-- 登录表单区域 -->
     <div class="login-main">
       <div class="login-card glass-surface">
         <LoginForm @login-success="handleSuccess" />
       </div>
     </div>
 
+    <!-- 页脚 -->
     <footer class="login-footer">
       <span>&copy; 2026 {{ t('common.appName') }}</span>
     </footer>

@@ -119,7 +119,7 @@ public R<PageResult<UserVO>> listUsers(@RequestParam(defaultValue = "1") int pag
 // Frontend API call
 export function listUsers(page: number, size: number) {
   return request.get<ApiResponse<PageResult<UserInfo>>>(
-    `/business/user/list?page=${page}&size=${size}`,
+    `/auth/user/list?page=${page}&size=${size}`,
   )
 }
 ```
@@ -134,7 +134,7 @@ export function listUsers(page: number, size: number) {
 | Update | PUT | `/{resource}/{id}` | `PUT /user/1` |
 | Delete | DELETE | `/{resource}/{id}` | `DELETE /user/1` |
 
-**Gateway path prefix**: All frontend requests use `/api/business/<resource>`. The Gateway strips `/api/business` (StripPrefix=2), so the Business service receives `/<resource>`.
+**Gateway path prefix**: All frontend requests use `/api/<service>/<resource>` (e.g., `/api/auth/user/list`). The Gateway strips `/api/<service>` (StripPrefix=2), so the downstream service receives `/<resource>`.
 
 ## Naming Conventions
 
@@ -178,7 +178,7 @@ Authorization: Bearer <token>
 
 ## Versioning Strategy
 
-**Current decision**: No URL-based versioning during the scaffolding phase. When the API stabilizes and multiple consumers exist, introduce prefix versioning: `/api/v1/business/user/list`.
+**Current decision**: No URL-based versioning during the scaffolding phase. When the API stabilizes and multiple consumers exist, introduce prefix versioning: `/api/v1/auth/user/list`.
 
 ## Null Semantics
 

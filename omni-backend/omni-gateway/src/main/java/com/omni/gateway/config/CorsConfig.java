@@ -7,20 +7,39 @@ import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 /**
- * Gateway CORS configuration (reactive stack)
+ * 网关 CORS 跨域配置（响应式 WebFlux 技术栈）。
+ * <p>
+ * 使用 {@link CorsWebFilter} 替代传统的 MVC 跨域配置，
+ * 适配 Spring Cloud Gateway 的响应式编程模型。
+ * </p>
  */
 @Configuration
 public class CorsConfig {
 
+    /**
+     * 创建并配置 CORS 跨域过滤器。
+     * <p>
+     * 允许所有来源、所有方法和所有请求头，支持携带凭证，
+     * 预检请求缓存时间为 3600 秒。
+     * </p>
+     *
+     * @return 配置完成的 CORS 过滤器
+     */
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
+        // 允许所有来源（支持通配符模式）
         config.addAllowedOriginPattern("*");
+        // 允许所有 HTTP 方法
         config.addAllowedMethod("*");
+        // 允许所有请求头
         config.addAllowedHeader("*");
+        // 允许携带凭证（Cookie 等）
         config.setAllowCredentials(true);
+        // 预检请求缓存时间（秒）
         config.setMaxAge(3600L);
 
+        // 注册跨域配置，对所有路径生效
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsWebFilter(source);

@@ -1,5 +1,5 @@
 server:
-  port: 9000
+  port: 8100
 
 spring:
   application:
@@ -23,7 +23,7 @@ spring:
         password: nacos
         file-extension: yml
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://127.0.0.1:3306/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -31,7 +31,6 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
-      password: root
       database: 0
       timeout: 5s
       lettuce:
@@ -53,7 +52,11 @@ mybatis-plus:
 
 # Spring Authorization Server OAuth2 Config
 auth:
-  issuer: http://localhost:9000
+  issuer: http://localhost:8100
+  frontend:
+    base-url: http://localhost:3000
+    login-url: ${auth.frontend.base-url}/login?oauth2=true
+    callback-url: ${auth.frontend.base-url}/callback
   token:
     access-token-ttl: 900
     refresh-token-ttl: 604800

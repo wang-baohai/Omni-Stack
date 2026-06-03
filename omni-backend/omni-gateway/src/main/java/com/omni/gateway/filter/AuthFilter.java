@@ -164,6 +164,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
                path.startsWith("/actuator/") ||
                path.equals("/favicon.ico") ||
                path.startsWith("/oauth2/") ||
+               path.startsWith("/.well-known/") ||
                path.startsWith("/login") ||
                path.startsWith("/error");
     }

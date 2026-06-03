@@ -1,0 +1,114 @@
+# ============================================================
+# Omni-Stack 中间件 Docker Compose 配置
+# ============================================================
+# 启动顺序：MySQL → Redis → Nacos → Sentinel → 后端服务 → 前端
+#
+# 用法：
+#   docker compose up -d          # 启动所有服务
+#   docker compose up mysql redis # 仅启动 MySQL 和 Redis
+#   docker compose ps             # 查看服务状态
+#   docker compose down -v        # 停止并删除数据卷
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # MySQL 8.4 — 主数据库
+  # 端口: 3306 | 用户: root/root | 数据库: omni_auth
+  # ----------------------------------------------------------
+  mysql:
+    image: mysql:8.4
+    container_name: omni-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: omni_auth
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - omni-network
+
+  # ----------------------------------------------------------
+  # Redis 7.4 — 缓存与会话存储
+  # 端口: 6379 | 无密码
+  # ----------------------------------------------------------
+  redis:
+    image: redis:7.4-alpine
+    container_name: omni-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - omni-network
+
+  # ----------------------------------------------------------
+  # Nacos v3.1.1 — 服务注册与配置中心
+  # 端口: 8080 (Console) / 8848 (API) / 9848 (gRPC)
+  # ----------------------------------------------------------
+  nacos:
+    image: nacos/nacos-server:v3.1.1
+    container_name: omni-nacos
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8848:8848"
+      - "9848:9848"
+    environment:
+      MODE: standalone
+      NACOS_AUTH_TOKEN: U2VjcmV0S2V5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5
+      NACOS_AUTH_IDENTITY_KEY: nacos
+      NACOS_AUTH_IDENTITY_VALUE: nacos
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - omni-network
+
+  # ----------------------------------------------------------
+  # Sentinel Dashboard 1.8.8 — 流量控制与熔断
+  # 端口: 8858
+  # ----------------------------------------------------------
+  sentinel:
+    image: bladex/sentinel-dashboard:1.8.8
+    container_name: omni-sentinel
+    restart: unless-stopped
+    ports:
+      - "8858:8858"
+    networks:
+      - omni-network
+
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  omni-network:
+    driver: bridge

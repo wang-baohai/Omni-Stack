@@ -40,18 +40,22 @@
 ```
 Omni-Stack/
 ├── AGENTS.md                        # AI 执行手册（硬约束 + 构建命令 + 检查清单）
+├── docker-compose.yml               # 中间件编排（MySQL, Redis, Nacos, Sentinel）
 ├── docs/                            # 系统真相文档（Architecture + Patterns + Contract）
 │   ├── architecture.md                # 系统边界、模块地图、数据流、约束
 │   ├── api-contract.md                # 响应格式、错误码、分页、命名规范
 │   ├── backend-patterns.md            # 后端分层、校验、异常、日志、OOP 规约
 │   ├── frontend-patterns.md           # 前端目录、API 层、状态管理、组件约定
 │   └── core-flows.md                  # 登录/查询/提交流程端到端追踪
+├── scripts/
+│   └── sql/
+│       └── init-all.sql               # 权威数据库初始化脚本（DDL + 种子数据）
 ├── omni-backend/                    # Maven 多模块后端
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # 父 POM（依赖管理）
 │   ├── omni-common/                   # 公共库：统一响应、全局异常、Jackson 配置
-│   ├── omni-gateway/                  # API 网关 (WebFlux, 端口 8090)
-│   └── omni-business/                 # 业务服务 (端口 8081)
+│   ├── omni-auth/                     # 认证服务：登录、验证码、JWT、OAuth2 (端口 8100)
+│   └── omni-gateway/                  # API 网关 (WebFlux, 端口 8102)
 ├── omni-frontend/                   # Vue 3 SPA (开发服务器端口 3000)
 │   ├── package.json
 │   ├── vite.config.ts
@@ -73,13 +77,14 @@ Omni-Stack/
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   omni-frontend  │────>│   omni-gateway    │────>│  omni-business  │
-│   Vue 3 SPA     │/api │  WebFlux :8090    │ lb  │   :8081         │
-│   :3000         │────>│  StripPrefix=2    │────>│  Controller     │
-└─────────────────┘     └──────────────────┘     │  Service (接口)  │
-                            │                     │  ServiceImpl    │
-                            │                     └─────────────────┘
+│   omni-frontend  │────>│   omni-gateway    │────>│    omni-auth     │
+│   Vue 3 SPA     │/api │  WebFlux :8102    │lb://│   Spring :8100  │
+│   :3000         │────>│  StripPrefix=2    │────>│  Security+OAuth2│
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+                            │
                     ┌───────┴────────┐
+                    │  MySQL :3306   │  持久化存储
+                    │  Redis :6379   │  缓存 + 验证码
                     │  Nacos :8848   │  服务发现 + 配置中心
                     │  Sentinel :8858│  流控 + 熔断
                     └────────────────┘
@@ -88,12 +93,11 @@ Omni-Stack/
 **请求流转**：
 
 ```
-浏览器 :3000  --/api/**-->  Vite 代理  -->  Gateway :8090  --lb://-->  Business :8081
+浏览器 :3000  --/api/**-->  Vite 代理  -->  Gateway :8102  --lb://-->  后端服务
 ```
 
 - 前端通过 Vite 开发服务器将 `/api/**` 请求代理到 Gateway
-- Gateway 将 `/api/business/**` 路由到 `omni-business`（StripPrefix=2 去除前缀）
-- Gateway 通过 Nacos 服务发现自动创建注册服务的路由
+- Gateway 通过 Nacos 服务发现自动为注册的服务创建路由
 
 ## 环境准备
 
@@ -122,21 +126,15 @@ Omni-Stack/
 ### 第一步：启动中间件
 
 ```bash
-# Nacos 服务发现与配置中心 (端口 8080, 8848, 9848)
-# Nacos v3.x 需要配置认证参数才能启动
-docker run -d --name nacos \
-  -p 8080:8080 -p 8848:8848 -p 9848:9848 \
-  -e MODE=standalone \
-  -e NACOS_AUTH_TOKEN=U2VjcmV0S2V5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5 \
-  -e NACOS_AUTH_IDENTITY_KEY=nacos \
-  -e NACOS_AUTH_IDENTITY_VALUE=nacos \
-  nacos/nacos-server:v3.1.1
+# 一键启动所有中间件（MySQL, Redis, Nacos, Sentinel）
+docker compose up -d
 
-# Sentinel 流控仪表盘 (端口 8858)
-docker run -d --name sentinel -p 8858:8858 bladex/sentinel-dashboard:1.8.8
+# 查看服务状态
+docker compose ps
 ```
 
 > 等待 Nacos 完全启动（约 30 秒）后再启动后端服务。访问 `http://127.0.0.1:8080/` 确认 Nacos 就绪（默认账号 nacos/nacos）。
+> MySQL 容器首次启动时会自动执行 `scripts/sql/init-all.sql` 初始化数据库。
 
 ### 第二步：构建并启动后端
 
@@ -150,19 +148,16 @@ export PATH="$JAVA_HOME/bin:$PATH"
 cd omni-backend
 ./mvnw clean install
 
-# 启动 Gateway（端口 8090）
+# 启动 Auth 服务（端口 8100）
+cd omni-auth
+./mvnw spring-boot:run
+
+# 启动 Gateway（端口 8102，新开终端窗口）
 cd omni-gateway
 ./mvnw spring-boot:run
-
-# 新开终端，启动 Business 服务（端口 8081）
-cd omni-backend/omni-business
-./mvnw spring-boot:run
 ```
 
-**构建顺序说明**：`omni-common` 必须先安装，其他模块才能编译。如需单独构建某个模块，使用：
-```bash
-./mvnw clean install -pl omni-business -am
-```
+**构建顺序说明**：`omni-common` 必须先安装，其他模块才能编译。
 
 ### 第三步：启动前端
 
@@ -172,7 +167,7 @@ cd omni-frontend
 # 安装依赖
 npm install
 
-# 启动开发服务器（端口 3000，自动代理 /api 到 Gateway :8090）
+# 启动开发服务器（端口 3000，自动代理 /api 到 Gateway :8102）
 npm run dev
 ```
 
@@ -181,19 +176,21 @@ npm run dev
 | 验证项 | 命令 / URL | 预期结果 |
 |--------|----------|---------|
 | 前端页面 | `http://localhost:3000` | 登录页面 |
-| Gateway 路由 | `curl http://localhost:8090/actuator/gateway/routes` | 返回路由列表 JSON |
+| Gateway 路由 | `curl http://localhost:8102/actuator/gateway/routes` | 返回路由列表 JSON |
 | Nacos 控制台 | `http://127.0.0.1:8080/` | Nacos 管理界面 |
 | Sentinel 控制台 | `http://localhost:8858` | Sentinel Dashboard |
 
-**启动顺序**：Nacos → Sentinel → 后端服务（Gateway, Business）→ 前端
+**启动顺序**：MySQL → Redis → Nacos → Sentinel → 后端服务（Auth, Gateway）→ 前端
 
 ## 服务端口
 
 | 服务 | 端口 | 说明 |
 |------|------|------|
 | 前端开发服务器 | 3000 | Vite dev server，代理 /api 请求 |
-| API 网关 | 8090 | Spring Cloud Gateway (WebFlux) |
-| 业务服务 | 8081 | omni-business 微服务 |
+| 认证服务 | 8100 | Spring Security + OAuth2 Authorization Server |
+| API 网关 | 8102 | Spring Cloud Gateway (WebFlux) |
+| MySQL | 3306 | 主数据库（omni_auth 库） |
+| Redis | 6379 | 验证码缓存 |
 | Nacos | 8080, 8848 | 管理界面 (8080) + 服务发现与配置中心 (8848) |
 | Sentinel | 8858 | 流控仪表盘 |
 
@@ -215,28 +212,24 @@ npm run dev
 
 > `omni-common` 通过 Spring Boot 自动配置机制（`AutoConfiguration.imports`）注册 Bean，下游模块无需手动 `@ComponentScan`。
 
+### omni-auth（认证服务）
+
+基于 Spring Security 7 + OAuth2 Authorization Server 的认证微服务：
+
+- 用户登录：用户名 + 密码 + 图形验证码 + 多租户，签发 RS256 JWT
+- OAuth2 授权：Authorization Code + PKCE 流程，支持第三方集成
+- 客户端管理：CRUD 操作 `oauth2_registered_client`，支持动态注册
+- 多租户 RBAC：基于 `tenantId:username` 格式的用户解析 + 角色权限树
+- JWT 签名：RSA 密钥对，JWK 端点供 Gateway 获取公钥验证
+
 ### omni-gateway（API 网关）
 
 基于 Spring Cloud Gateway Server (WebFlux) 的响应式网关：
 
-- 路由转发：`/api/business/**` → `lb://omni-business`（StripPrefix=2）
+- 路由转发：通过 Nacos 服务发现自动路由到注册的后端服务（StripPrefix=2）
 - 服务发现：Nacos 自动路由注册的服务
 - 认证过滤器：`AuthFilter`（当前为存根，预留 token 校验扩展点）
 - CORS 配置：`CorsConfig` 处理跨域请求
-
-### omni-business（业务服务）
-
-业务微服务示例，展示标准的分层架构：
-
-```
-Controller  →  Service (接口)  →  ServiceImpl (实现)  →  Repository (未来)
-  参数校验       业务定义           业务逻辑              数据访问
-  结果封装       @Transactional    事务管理              SQL / ORM
-```
-
-- `UserController`：RESTful API 端点，返回 `R<T>`
-- `UserService`（接口）+ `UserServiceImpl`（实现）：Service 层接口化
-- `RemoteServiceFeignClient`：OpenFeign 远程调用示例
 
 ### omni-frontend（Vue 3 SPA）
 
@@ -336,7 +329,6 @@ cd omni-frontend && npm run build && npm run lint
 |------|------|---------|
 | Gateway 路由不生效 | 5.x 版本配置前缀已变更 | 使用 `spring.cloud.gateway.server.webflux`，详见 `AGENTS.md` Important Notes |
 | Maven 编译报 class version 错误 | JAVA_HOME 未指向 JDK 25 | 设置 `JAVA_HOME` 到 JDK 25 目录 |
-| `omni-business` 编译失败 | `omni-common` 未先安装 | 先运行 `./mvnw install -pl omni-common` |
 | 前端类型不匹配 | `ApiResponse` 在多处定义 | 只从 `@/types/api` 导入，禁止重复定义 |
 | Actuator gateway 端点 404 | 需显式启用 | 配置 `management.endpoint.gateway.enabled: true` |
 

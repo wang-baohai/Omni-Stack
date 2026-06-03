@@ -35,6 +35,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 ## Entry Points
 
 **Backend:**
+- Auth service: `omni-backend/omni-auth/src/main/java/com/omni/auth/AuthApplication.java`
 - Business service: `omni-backend/omni-business/src/main/java/com/omni/business/BusinessApplication.java`
 - Gateway: `omni-backend/omni-gateway/src/main/java/com/omni/gateway/GatewayApplication.java`
 - Common library: `omni-backend/omni-common/src/main/java/com/omni/common/`
@@ -45,6 +46,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Shared types: `omni-frontend/src/types/api.ts`
 
 **Configuration:**
+- Auth config: `omni-backend/omni-auth/src/main/resources/application.yml`
 - Gateway config: `omni-backend/omni-gateway/src/main/resources/application.yml`
 - Business config: `omni-backend/omni-business/src/main/resources/application.yml`
 - Vite config: `omni-frontend/vite.config.ts`
@@ -71,11 +73,15 @@ cd omni-backend
 # Build a specific module with its dependencies
 ./mvnw clean install -pl omni-business -am
 
-# Run Gateway (port 8090)
+# Run Auth service (port 8100)
+cd omni-backend/omni-auth
+./mvnw spring-boot:run
+
+# Run Gateway (port 8102)
 cd omni-backend/omni-gateway
 ./mvnw spring-boot:run
 
-# Run Business service (port 8081)
+# Run Business service (port 8101)
 cd omni-backend/omni-business
 ./mvnw spring-boot:run
 ```
@@ -90,7 +96,7 @@ cd omni-frontend
 # Install dependencies
 npm install
 
-# Dev server (port 3000, proxies /api to gateway:8090)
+# Dev server (port 3000, proxies /api to gateway:8102)
 npm run dev
 
 # Type-check and build for production
@@ -101,6 +107,18 @@ npm run lint
 ```
 
 ### External Services (Docker)
+
+**Primary method** — Docker Compose (recommended):
+
+```bash
+# Start all middleware (MySQL, Redis, Nacos, Sentinel)
+docker compose up -d
+
+# Check service health
+docker compose ps
+```
+
+**Fallback** — individual `docker run` commands:
 
 ```bash
 # Nacos Server (port 8080, 8848, 9848)
@@ -124,8 +142,10 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 | Service          | Port  |
 |------------------|-------|
 | Frontend (dev)   | 3000  |
-| Gateway          | 8090  |
-| Business         | 8081  |
+| Auth             | 8100  |
+| Gateway          | 8102  |
+| MySQL            | 3306  |
+| Redis            | 6379  |
 | Nacos            | 8080, 8848  |
 | Sentinel         | 8858  |
 
@@ -143,6 +163,7 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Frontend shared types (`ApiResponse`, `PageResult`) defined only in `src/types/api.ts` — never duplicate.
 - Vue SFC order: `<script setup>` -> `<template>` -> `<style scoped>`.
 - TODO format: `// TODO: [module] description`.
+- All code comments in Chinese (backend Javadoc, frontend JSDoc).
 
 ## Execution Rules
 

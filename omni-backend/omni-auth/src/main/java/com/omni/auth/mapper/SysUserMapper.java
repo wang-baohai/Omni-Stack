@@ -8,18 +8,27 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
- * SysUser Mapper.
+ * 系统用户 Mapper 接口。
  */
 public interface SysUserMapper extends BaseMapper<SysUser> {
 
     /**
-     * Find user by username within a tenant.
+     * 在指定租户内根据用户名查询用户。
+     * <p>仅查询启用状态（status = 1）的用户。</p>
+     *
+     * @param username 用户名
+     * @param tenantId 租户 ID
+     * @return 匹配的用户实体，不存在时返回 null
      */
     @Select("SELECT * FROM sys_user WHERE tenant_id = #{tenantId} AND username = #{username} AND status = 1")
     SysUser selectByUsernameAndTenantId(@Param("username") String username, @Param("tenantId") Long tenantId);
 
     /**
-     * Find roles by user id.
+     * 根据用户 ID 查询该用户拥有的所有角色编码。
+     * <p>通过 {@code sys_user_role} 关联表 JOIN 查询，仅返回启用状态的角色。</p>
+     *
+     * @param userId 用户 ID
+     * @return 角色编码列表
      */
     @Select("SELECT r.role_code FROM sys_role r "
             + "INNER JOIN sys_user_role ur ON r.id = ur.role_id "
@@ -27,7 +36,14 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     List<String> selectRoleCodesByUserId(@Param("userId") Long userId);
 
     /**
-     * Find permissions by user id.
+     * 根据用户 ID 查询该用户拥有的所有权限编码（去重）。
+     * <p>
+     * 通过 {@code sys_user_role} -> {@code sys_role_permission} -> {@code sys_permission}
+     * 三表关联查询，仅返回启用状态的权限。
+     * </p>
+     *
+     * @param userId 用户 ID
+     * @return 权限编码列表（已去重）
      */
     @Select("SELECT DISTINCT p.permission_code FROM sys_permission p "
             + "INNER JOIN sys_role_permission rp ON p.id = rp.permission_id "
