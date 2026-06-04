@@ -26,6 +26,24 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'OAuth2 Callback', requiresAuth: false },
   },
   {
+    path: '/device',
+    name: 'DeviceAuth',
+    component: () => import('@/views/device/index.vue'),
+    meta: { title: 'Device Authorization', requiresAuth: false },
+  },
+  {
+    path: '/device/verify',
+    name: 'DeviceVerify',
+    component: () => import('@/views/device/verify.vue'),
+    meta: { title: 'Device Verification', requiresAuth: false },
+  },
+  {
+    path: '/consent',
+    name: 'Consent',
+    component: () => import('@/views/consent/index.vue'),
+    meta: { title: 'Authorization Consent', requiresAuth: false },
+  },
+  {
     path: '/admin',
     component: () => import('@/layout/index.vue'),
     redirect: '/admin/dashboard',

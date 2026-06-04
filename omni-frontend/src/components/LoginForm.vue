@@ -312,6 +312,14 @@ onMounted(() => {
       </el-button>
     </div>
 
+    <!-- 设备授权登录（仅在非 OAuth2 模式下显示） -->
+    <div v-if="!isOAuth2Mode" class="login-device-section">
+      <el-button class="device-btn" @click="router.push({ name: 'DeviceAuth' })">
+        <el-icon><Monitor /></el-icon>
+        {{ t('login.deviceAuth') }}
+      </el-button>
+    </div>
+
     <!-- 分隔线 + 第三方登录（仅在非 OAuth2 模式下显示） -->
     <template v-if="!isOAuth2Mode">
       <!-- 分隔线 -->
@@ -473,6 +481,15 @@ onMounted(() => {
 }
 
 .sso-btn {
+  width: 100%;
+  height: 40px;
+}
+
+.login-device-section {
+  margin-top: var(--omni-space-sm);
+}
+
+.device-btn {
   width: 100%;
   height: 40px;
 }

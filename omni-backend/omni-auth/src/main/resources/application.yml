@@ -57,6 +57,7 @@ auth:
     base-url: http://localhost:3000
     login-url: ${auth.frontend.base-url}/login?oauth2=true
     callback-url: ${auth.frontend.base-url}/callback
+    device-verify-url: ${auth.frontend.base-url}/device/verify
   token:
     access-token-ttl: 900
     refresh-token-ttl: 604800

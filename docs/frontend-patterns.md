@@ -24,7 +24,10 @@ omni-frontend/
     │   └── index.ts        # Route definitions + navigation guard
     ├── views/              # Page components (kebab-case dirs)
     │   ├── login/index.vue
-    │   └── dashboard/index.vue
+    │   ├── dashboard/index.vue
+    │   ── device/         # Device authorization pages (OAuth2 Device Code Flow)
+    │       ├── index.vue   # Device simulator: shows QR code and polls for token
+    │       └── verify.vue  # Verification page: user approves device authorization
     ├── layout/
     │   └── index.vue       # App shell layout (sidebar, header, content)
     ├── components/         # Shared/reusable UI components

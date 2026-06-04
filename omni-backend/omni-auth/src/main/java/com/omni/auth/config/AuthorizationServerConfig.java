@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.omni.auth.mapper.SysUserMapper;
+import com.omni.auth.security.DeviceClientAuthenticationFilter;
 import com.omni.auth.security.OmniUserDetails;
 import com.omni.auth.security.OmniUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.oauth2.server.authorization.web.OAuth2DeviceAuthorizationEndpointFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -83,6 +85,14 @@ public class AuthorizationServerConfig {
     @Value("${auth.issuer:http://localhost:8100}")
     private String issuer;
 
+    /** 设备验证页 URL，未认证用户访问 /oauth2/device_verification 时重定向到此地址 */
+    @Value("${auth.frontend.device-verify-url:http://localhost:3000/device/verify}")
+    private String deviceVerifyUrl;
+
+    /** 授权确认页 URL，当客户端要求 requireAuthorizationConsent 时 SAS 重定向到此地址 */
+    @Value("${auth.frontend.consent-url:http://localhost:3000/consent}")
+    private String frontendConsentUrl;
+
     /**
      * OAuth2 授权服务器端点的请求匹配器。
      * <p>
@@ -112,19 +122,28 @@ public class AuthorizationServerConfig {
      * OAuth2 授权服务器安全过滤器链。
      * <p>仅匹配 OAuth2 授权服务器端点（authorize、token、jwks 等）。</p>
      *
-     * @param http HttpSecurity 配置对象
+     * @param http                       HttpSecurity 配置对象
+     * @param registeredClientRepository OAuth2 客户端仓库，用于公有客户端认证
      * @return 构建完成的安全过滤器链
      * @throws Exception 配置过程中的异常
      */
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain authorizationServerSecurityFilterChain(
+            HttpSecurity http,
+            RegisteredClientRepository registeredClientRepository) throws Exception {
         RequestMatcher endpointsMatcher = oauth2EndpointsMatcher();
         // 仅匹配 OAuth2 端点的请求
         http.securityMatcher(endpointsMatcher);
         OAuth2AuthorizationServerConfigurer authServerConfigurer = new OAuth2AuthorizationServerConfigurer();
         // 显式启用 OpenID Connect 1.0（SAS 7.x 要求显式开启 oidc）
         authServerConfigurer.oidc(Customizer.withDefaults());
+        // 显式启用设备授权端点和设备验证端点（RFC 8628）
+        authServerConfigurer.deviceAuthorizationEndpoint(Customizer.withDefaults());
+        authServerConfigurer.deviceVerificationEndpoint(Customizer.withDefaults());
+        // 自定义授权确认页面：当客户端 requireAuthorizationConsent=true 时，
+        // SAS 将重定向到前端 Consent 页面，而非展示默认的英文 HTML
+        authServerConfigurer.authorizationEndpoint(e -> e.consentPage(frontendConsentUrl));
         http.with(authServerConfigurer, Customizer.withDefaults());
 
         // 启用基于 HttpSession 的安全上下文持久化，确保 sessionLogin 创建的认证信息
@@ -133,27 +152,37 @@ public class AuthorizationServerConfig {
                 .requireExplicitSave(false)
                 .securityContextRepository(new HttpSessionSecurityContextRepository()));
 
-        // 添加预认证过滤器：未认证用户访问 /oauth2/authorize 时重定向到前端登录页
+        // 添加预认证过滤器：未认证用户访问 /oauth2/authorize 或 /oauth2/device_verification 时重定向到前端
         // 必须在 SecurityContextPersistenceFilter 之后执行，以确保 HttpSession 中的认证信息已被加载
         http.addFilterAfter(new OncePerRequestFilter() {
             private static final RequestMatcher AUTHORIZE_MATCHER =
                     PathPatternRequestMatcher.pathPattern("/oauth2/authorize");
+            private static final RequestMatcher DEVICE_VERIFY_MATCHER =
+                    PathPatternRequestMatcher.pathPattern("/oauth2/device_verification");
+            private static final RequestMatcher COMBINED_MATCHER =
+                    new OrRequestMatcher(AUTHORIZE_MATCHER, DEVICE_VERIFY_MATCHER);
 
             @Override
             protected void doFilterInternal(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain filterChain)
                     throws ServletException, IOException {
-                if (AUTHORIZE_MATCHER.matches(request)) {
+                if (COMBINED_MATCHER.matches(request)) {
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                     if (auth == null || !auth.isAuthenticated()
                             || "anonymousUser".equals(auth.getPrincipal())) {
-                        log.info("Unauthenticated authorize request (session={}), redirecting to login",
-                                request.getRequestedSessionId());
-                        response.sendRedirect(frontendLoginUrl);
+                        if (DEVICE_VERIFY_MATCHER.matches(request)) {
+                            log.info("Unauthenticated device verification request (session={}), redirecting to frontend",
+                                    request.getRequestedSessionId());
+                            response.sendRedirect(deviceVerifyUrl);
+                        } else {
+                            log.info("Unauthenticated authorize request (session={}), redirecting to login",
+                                    request.getRequestedSessionId());
+                            response.sendRedirect(frontendLoginUrl);
+                        }
                         return;
                     }
-                    log.info("Authenticated authorize request, principal='{}'", auth.getName());
+                    log.info("Authenticated request to '{}', principal='{}'", request.getRequestURI(), auth.getName());
                 }
                 filterChain.doFilter(request, response);
             }
@@ -166,6 +195,15 @@ public class AuthorizationServerConfig {
                         endpointsMatcher
                 )
         );
+
+        // 公有客户端设备授权认证过滤器：
+        // SAS 7 的 PublicClientAuthenticationConverter 仅处理 PKCE token 请求，
+        // 不处理设备授权端点的公有客户端认证。此过滤器在
+        // SecurityContextPersistenceFilter 之后、OAuth2 端点过滤器之前执行，
+        // 将已认证的客户端主体写入 SecurityContext。
+        http.addFilterAfter(
+                new DeviceClientAuthenticationFilter(registeredClientRepository),
+                SecurityContextPersistenceFilter.class);
 
         return http.build();
     }
@@ -278,7 +316,8 @@ public class AuthorizationServerConfig {
                 return;
             }
             Object principal = context.getPrincipal().getPrincipal();
-            if (principal instanceof OmniUserDetails user) {
+            if (principal instanceof OmniUserDetails) {
+                OmniUserDetails user = (OmniUserDetails) principal;
                 context.getClaims().claim("sub", String.valueOf(user.getUserId()));
                 context.getClaims().claim("tenant_id", user.getTenantId());
                 context.getClaims().claim("username", user.getUsername());

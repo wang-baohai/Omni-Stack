@@ -197,4 +197,22 @@ public class AuthController {
     public R<List<TenantOption>> getTenants() {
         return R.ok(tenantService.listActiveTenants());
     }
+
+    /**
+     * 检查当前 HttpSession 是否存在有效的 Spring Security 认证信息。
+     *
+     * <p>用于 OAuth2 授权确认页面：当用户通过 SAS 重定向到此页面时，
+     * 前端通过此接口判断是否已有 SAS 会话，有则跳过登录表单直接展示授权确认。</p>
+     *
+     * @return 已认证返回 {@code R.ok(username)}；未认证返回 {@code R.fail(401, ...)}
+     */
+    @GetMapping("/session-check")
+    public R<String> sessionCheck() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()
+                && !"anonymousUser".equals(auth.getPrincipal())) {
+            return R.ok(auth.getName());
+        }
+        return R.fail(401, "未认证");
+    }
 }

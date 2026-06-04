@@ -142,3 +142,74 @@ export async function exchangeCodeForToken(params: {
 export function getThirdPartyLoginUrl(provider: string, tenantId: number) {
   return `/api/auth/oauth2/${provider}?tenant_id=${tenantId}`
 }
+
+/** 设备授权客户端 ID（与后端 DeviceClientInitializer 保持一致） */
+export const DEVICE_CLIENT_ID = 'omni-device'
+
+/**
+ * 设备授权响应类型（RFC 8628）。
+ */
+export interface DeviceAuthorizationResponse {
+  /** 设备码（设备端使用，用于轮询 token） */
+  device_code: string
+  /** 用户码（用户在验证页面输入） */
+  user_code: string
+  /** 验证端点 URI */
+  verification_uri: string
+  /** 包含预填 user_code 的完整验证 URI（可选） */
+  verification_uri_complete?: string
+  /** 设备码有效期（秒） */
+  expires_in: number
+  /** 轮询间隔（秒） */
+  interval: number
+}
+
+/**
+ * 请求设备授权码（RFC 8628 第一步）。
+ * 注意：使用 native fetch()，响应为 OAuth2 标准格式。
+ */
+export async function requestDeviceAuthorization(): Promise<DeviceAuthorizationResponse> {
+  const body = new URLSearchParams({
+    client_id: DEVICE_CLIENT_ID,
+    scope: 'profile',
+  })
+  const response = await fetch('/oauth2/device_authorization', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`Device authorization request failed: ${response.status} ${errorText}`)
+  }
+  return response.json() as Promise<DeviceAuthorizationResponse>
+}
+
+/**
+ * 轮询设备授权 token（RFC 8628 第三步）。
+ * @returns token 响应，或 null 表示授权尚待处理（authorization_pending / slow_down）
+ */
+export async function pollDeviceToken(
+  deviceCode: string,
+  clientId: string,
+): Promise<OAuth2TokenResponse | null> {
+  const body = new URLSearchParams({
+    grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+    device_code: deviceCode,
+    client_id: clientId,
+  })
+  const response = await fetch('/oauth2/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  if (!response.ok) {
+    const errorJson = await response.json().catch(() => ({})) as { error?: string }
+    // authorization_pending: 用户尚未授权，slow_down: 轮询过快
+    if (errorJson.error === 'authorization_pending' || errorJson.error === 'slow_down') {
+      return null
+    }
+    throw new Error(`Device token polling failed: ${errorJson.error || response.status}`)
+  }
+  return response.json() as Promise<OAuth2TokenResponse>
+}

@@ -330,3 +330,94 @@ sequenceDiagram
 - **OAuth2 客户端**: `omni-spa` 客户端已注册（authorization_code + PKCE grant type）
 - **前端 PKCE 工具**: `src/utils/oauth2.ts` 已实现 verifier/challenge 生成和 token 交换
 - **Token 类型**: access_token (opaque) + id_token (JWT, 包含用户信息)
+
+---
+
+## Flow 3: OAuth2 Device Authorization Grant
+
+### 概述
+
+设备授权模式（RFC 8628）适用于没有浏览器或输入受限的设备（IoT、CLI 工具等）。设备端通过 `/oauth2/device_authorization` 获取 `device_code` 和 `user_code`，用户在另一台设备上输入 `user_code` 完成授权，设备端轮询 `/oauth2/token` 获取访问令牌。
+
+前端提供模拟入口（`/device` 页面），方便在浏览器中测试完整的设备授权流程。
+
+### 时序图
+
+```mermaid
+sequenceDiagram
+    participant D as /device 页面<br/>(模拟设备)
+    participant V as /device/verify 页面<br/>(用户浏览器)
+    participant G as Gateway :8102
+    participant A as Auth :8100 (SAS)
+    participant M as MySQL
+
+    D->>G: 1. POST /oauth2/device_authorization<br/>{client_id=omni-device, scope=openid profile}
+    G->>A: Proxy
+    A->>M: 查找 omni-device 客户端
+    A-->>D: 2. {device_code, user_code, verification_uri, expires_in, interval}
+
+    Note over D: 3. 展示 user_code 和验证链接<br/>开始轮询 /oauth2/token
+
+    V->>V: 4. 打开验证链接，检查登录状态
+    alt 未登录
+        V->>G: POST /api/auth/session-login
+        G->>A: 创建 HttpSession 认证
+    end
+
+    V->>G: 5. POST /oauth2/device_verification<br/>{user_code=XXXX}<br/>(credentials:include → session cookie)
+    G->>A: Proxy
+    A->>A: SAS 验证 user_code + 检查 session 认证
+    A->>M: 更新 OAuth2Authorization 记录
+    A-->>V: 6. 验证完成
+
+    loop 每 interval 秒轮询
+        D->>G: 7. POST /oauth2/token<br/>{grant_type=urn:ietf:params:oauth:grant-type:device_code,<br/>device_code=..., client_id=omni-device}
+        G->>A: Proxy
+        A-->>D: 8. {access_token, token_type, expires_in}
+    end
+
+    D->>D: 9. 存储 token 到 localStorage
+    D-->>B: 10. 跳转到 Dashboard
+```
+
+### 关键组件
+
+| 步骤 | 文件 | 职责 |
+|------|------|------|
+| 设备授权请求 | `src/api/auth.ts` → `requestDeviceAuthorization()` | POST `/oauth2/device_authorization`，获取设备码 |
+| Token 轮询 | `src/api/auth.ts` → `pollDeviceToken()` | POST `/oauth2/token`，处理 `authorization_pending` |
+| 设备模拟器页面 | `src/views/device/index.vue` | 展示 user_code + 倒计时 + 轮询 |
+| 设备验证页面 | `src/views/device/verify.vue` | 内嵌登录 + user_code 输入 + 授权确认 |
+| 登录页入口 | `src/components/LoginForm.vue` | 「设备授权登录」按钮 |
+| 设备授权端点 | Spring Authorization Server | `/oauth2/device_authorization` — SAS 内置 |
+| 设备验证端点 | Spring Authorization Server | `/oauth2/device_verification` — SAS 内置 |
+| 设备客户端 | `DeviceClientInitializer.java` | 启动时注册 `omni-device` 客户端 |
+| 重定向过滤器 | `AuthorizationServerConfig.java` | 未认证用户重定向到前端验证页 |
+
+### 设备客户端配置
+
+| 配置项 | 值 |
+|--------|-----|
+| Client ID | `omni-device` |
+| 认证方式 | `NONE`（公有客户端，无 clientSecret） |
+| 授权类型 | `urn:ietf:params:oauth:grant-type:device_code` + `refresh_token` |
+| 作用域 | `openid`, `profile` |
+| 要求 PKCE | `false` |
+| 要求授权同意 | `false`（用户点击"授权"即视为同意，无需 SAS 额外同意表单） |
+
+### 轮询行为
+
+| 错误码 | 含义 | 处理方式 |
+|--------|------|----------|
+| `authorization_pending` | 用户尚未完成授权 | 继续轮询 |
+| `slow_down` | 轮询频率过快 | 继续轮询（SAS 自动增加 interval） |
+| `expired_token` | device_code 已过期 | 停止轮询，提示用户重新发起 |
+| `access_denied` | 用户拒绝授权 | 停止轮询，提示用户 |
+
+### Current Status
+
+- **设备授权端点**: SAS 7 已通过 `deviceAuthorizationEndpoint(Customizer.withDefaults())` 启用
+- **设备验证端点**: SAS 7 已通过 `deviceVerificationEndpoint(Customizer.withDefaults())` 启用
+- **设备客户端**: `omni-device` 客户端由 `DeviceClientInitializer` 在启动时自动注册
+- **前端页面**: `/device`（设备模拟器）和 `/device/verify`（验证页）已实现
+- **登录入口**: 登录页新增「设备授权登录」按钮

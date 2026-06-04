@@ -216,11 +216,12 @@ npm run dev
 
 基于 Spring Security 7 + OAuth2 Authorization Server 的认证微服务：
 
-- 用户登录：用户名 + 密码 + 图形验证码 + 多租户，签发 RS256 JWT
-- OAuth2 授权：Authorization Code + PKCE 流程，支持第三方集成
-- 客户端管理：CRUD 操作 `oauth2_registered_client`，支持动态注册
-- 多租户 RBAC：基于 `tenantId:username` 格式的用户解析 + 角色权限树
-- JWT 签名：RSA 密钥对，JWK 端点供 Gateway 获取公钥验证
+- **用户登录**：用户名 + 密码 + 图形验证码 + 多租户，签发 RS256 JWT
+- **OAuth2 授权**：Authorization Code + PKCE 流程，支持第三方集成
+- **设备授权码模式**（RFC 8628）：为 IoT 设备、CLI 工具等无浏览器场景提供授权能力，通过 `omni-device` 客户端实现，前端 `/device` 页面模拟设备端发起授权请求并轮询 token，`/device/verify` 页面供用户在另一台设备上扫码或输入验证码完成授权
+- **客户端管理**：CRUD 操作 `oauth2_registered_client`，支持动态注册
+- **多租户 RBAC**：基于 `tenantId:username` 格式的用户解析 + 角色权限树
+- **JWT 签名**：RSA 密钥对，JWK 端点供 Gateway 获取公钥验证
 
 ### omni-gateway（API 网关）
 
@@ -238,7 +239,7 @@ npm run dev
 | API 层 | `src/api/` | 按领域拆分文件，统一使用 Axios 实例，类型安全 |
 | Store 层 | `src/stores/` | Pinia Composition API 风格，一 Store 一领域 |
 | 路由层 | `src/router/` | 懒加载路由 + 导航守卫（默认要求认证） |
-| 视图层 | `src/views/` | 页面组件，SFC 顺序：script → template → style |
+| 视图层 | `src/views/` | 页面组件，SFC 顺序：script → template → style；包含 `device/` 子目录实现 OAuth2 设备授权码模式的前端交互 |
 | 布局层 | `src/layout/` | 侧边栏 + 顶栏 + 内容区应用外壳 |
 | 类型层 | `src/types/` | 共享类型定义（ApiResponse, PageResult 的唯一来源） |
 | 样式层 | `src/styles/` | 全局重置 + 布局样式 |
