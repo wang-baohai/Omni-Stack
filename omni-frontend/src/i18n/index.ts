@@ -1,3 +1,9 @@
+/**
+ * @module i18n
+ * 国际化配置模块。
+ * 基于 vue-i18n 创建多语言实例，支持中文（zh-CN）和英文（en-US），
+ * 语言偏好持久化到 localStorage。
+ */
 import { createI18n } from 'vue-i18n'
 import zhCN from '@/locales/zh-CN'
 import enUS from '@/locales/en-US'
@@ -24,7 +30,7 @@ export function storeLang(lang: string) {
   localStorage.setItem(LANG_KEY, lang)
 }
 
-/** 创建 Vue I18n 国际化实例 */
+/** 创建 Vue I18n 国际化实例，默认使用 localStorage 中存储的语言 */
 const i18n = createI18n({
   legacy: false,
   locale: getStoredLang(),

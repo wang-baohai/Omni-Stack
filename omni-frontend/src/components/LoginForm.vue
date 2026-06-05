@@ -207,8 +207,15 @@ function handleThirdPartyLogin(provider: string) {
   window.location.href = getThirdPartyLoginUrl(provider, form.tenantId)
 }
 
-/** 组件挂载后加载验证码和租户列表 */
+/** 组件挂载后加载验证码和租户列表，并检查第三方登录错误 */
 onMounted(() => {
+  // 检查第三方登录重定向带回的错误信息
+  const error = route.query.error as string
+  if (error) {
+    const msg = (route.query.message as string) || '第三方登录失败'
+    ElMessage.error(decodeURIComponent(msg))
+  }
+
   loadCaptcha()
   loadTenants()
 })

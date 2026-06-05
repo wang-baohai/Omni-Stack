@@ -63,6 +63,13 @@ auth:
     refresh-token-ttl: 604800
   captcha:
     ttl-seconds: 300
+  oauth2:
+    github:
+      client-id: ${GITHUB_CLIENT_ID:Ov23ligRMGWbk0mpTAME}
+      client-secret: ${GITHUB_CLIENT_SECRET:4ca12f8a8fcc6f49568253b518c7057cbf23de8d}
+      redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/github/callback}
+    state-secret: ${OAUTH2_STATE_SECRET:omni-stack-oauth2-state-secret-change-in-production}
+    frontend-callback-url: ${auth.frontend.base-url}/callback
   jwk:
     key-id: omni-auth-key
     private-key: |

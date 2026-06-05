@@ -59,6 +59,7 @@ public class DeviceClientAuthenticationFilter extends OncePerRequestFilter {
                     .matcher(HttpMethod.POST, "/oauth2/token")
     );
 
+    /** OAuth2 客户端注册仓储，用于按 clientId 查找已注册的客户端配置 */
     private final RegisteredClientRepository registeredClientRepository;
 
     @Override

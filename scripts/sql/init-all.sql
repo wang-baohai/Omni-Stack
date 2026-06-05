@@ -6,15 +6,16 @@
 --   1. Docker MySQL 容器首次启动时自动执行（挂载到 /docker-entrypoint-initdb.d/）
 --   2. 手动执行：mysql -uroot -proot < scripts/sql/init-all.sql
 --
--- 表结构概览（共 13 表）：
+-- 表结构概览（共 14 表）：
 --   OAuth2 标准表（3 表）：
 --     oauth2_registered_client — 客户端注册
 --     oauth2_authorization     — 授权记录
 --     oauth2_authorization_consent — 授权同意
---   多租户 RBAC 表（10 表）：
+--   多租户 RBAC 表（11 表）：
 --     sys_tenant, sys_user, sys_role, sys_permission,
 --     sys_user_role, sys_role_permission, sys_org_unit,
---     sys_user_unit, sys_role_dept, sys_token_blacklist
+--     sys_user_unit, sys_role_dept, sys_token_blacklist,
+--     sys_user_oauth_provider
 --
 -- 种子数据：
 --   1 个默认租户、1 个根组织单元、1 个管理员用户（admin/admin123）、
@@ -251,6 +252,22 @@ CREATE TABLE IF NOT EXISTS sys_token_blacklist (
     UNIQUE KEY uk_token_jti (token_jti),
     INDEX idx_expire_time (expire_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Token黑名单表';
+
+-- 3.11 用户第三方身份关联表
+CREATE TABLE IF NOT EXISTS sys_user_oauth_provider (
+    id                BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    user_id           BIGINT       NOT NULL COMMENT '本地用户ID',
+    provider          VARCHAR(32)  NOT NULL COMMENT '提供商标识（github/google/wechat/gitee）',
+    provider_user_id  VARCHAR(100) NOT NULL COMMENT '第三方用户ID',
+    provider_username VARCHAR(100) DEFAULT NULL COMMENT '第三方用户名',
+    provider_email    VARCHAR(200) DEFAULT NULL COMMENT '第三方邮箱',
+    provider_avatar   VARCHAR(500) DEFAULT NULL COMMENT '第三方头像URL',
+    access_token      VARCHAR(500) DEFAULT NULL COMMENT '第三方访问令牌',
+    create_time       DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time       DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_provider_user (provider, provider_user_id),
+    INDEX idx_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户第三方身份关联表';
 
 -- ============================================================
 -- Section 4: 种子数据

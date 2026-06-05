@@ -11,6 +11,7 @@ import com.omni.auth.security.OmniUserDetails;
 import com.omni.auth.security.OmniUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -75,6 +76,7 @@ import java.util.UUID;
 @Slf4j
 @Configuration
 @EnableWebSecurity
+@EnableConfigurationProperties(OAuth2Properties.class)
 public class AuthorizationServerConfig {
 
     /** 前端登录页 URL，SAS 未认证时重定向到此地址 */

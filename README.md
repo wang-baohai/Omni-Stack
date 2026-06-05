@@ -11,6 +11,7 @@
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 全栈最新技术
 - **Spring Cloud Gateway 5.x** (WebFlux) 响应式网关，Nacos 服务发现与配置中心
 - **Sentinel** 流控与熔断，**OpenFeign** 声明式服务调用
+- **GitHub OAuth2 社交登录**：一键 GitHub 账号登录，HMAC-SHA256 state 签名，首次登录自动注册
 - **Vue 3.5** + TypeScript 5.9 + Vite 8 + Element Plus 2.14 现代前端
 - **Pinia 3** 状态管理 + **Vue Router 5** 路由守卫
 - **Harness 工业设计模式**：三层高度模型（Architecture → Patterns → Code），docs/ 目录承载系统真相
@@ -49,7 +50,8 @@ Omni-Stack/
 │   └── core-flows.md                  # 登录/查询/提交流程端到端追踪
 ├── scripts/
 │   └── sql/
-│       └── init-all.sql               # 权威数据库初始化脚本（DDL + 种子数据）
+│       ├── init-all.sql               # 权威数据库初始化脚本（DDL + 种子数据）
+│       └── init-nacos.sql           # Nacos v3.1.1 MySQL 持久化初始化脚本
 ├── omni-backend/                    # Maven 多模块后端
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # 父 POM（依赖管理）
@@ -120,6 +122,39 @@ Omni-Stack/
 | `NACOS_NAMESPACE` | (空) | Nacos 命名空间 |
 | `SENTINEL_DASHBOARD` | `127.0.0.1:8858` | Sentinel Dashboard 地址 |
 | `VITE_API_BASE_URL` | `/api` | 前端 API 基础路径 |
+| `GITHUB_CLIENT_ID` | (内置) | GitHub OAuth App 的 Client ID |
+| `GITHUB_CLIENT_SECRET` | (内置) | GitHub OAuth App 的 Client Secret |
+| `GITHUB_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/github/callback` | GitHub 授权回调地址 |
+
+### GitHub OAuth2 社交登录配置
+
+#### 1. 创建 GitHub OAuth App
+
+1. 登录 GitHub → Settings → Developer settings → [OAuth Apps](https://github.com/settings/developers) → New OAuth App
+2. 填写以下信息：
+   - **Application name**: Omni-Stack（任意名称）
+   - **Homepage URL**: `http://localhost:3000`
+   - **Authorization callback URL**: `http://localhost:8100/api/auth/oauth2/github/callback`
+3. 创建后复制 **Client ID** 和 **Client Secret**
+
+#### 2. 配置凭证
+
+通过环境变量或修改 `omni-auth/src/main/resources/application.yml`：
+
+```yaml
+auth:
+  oauth2:
+    github:
+      client-id: ${GITHUB_CLIENT_ID:你的ClientID}
+      client-secret: ${GITHUB_CLIENT_SECRET:你的ClientSecret}
+      redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/github/callback}
+```
+
+> **注意**：`redirect_uri` 必须与 GitHub OAuth App 中设置的 Authorization Callback URL 完全一致。
+
+#### 3. 使用
+
+前端登录页面点击 "GitHub" 按钮即可发起社交登录。首次登录会自动创建本地用户（用户名格式 `gh_{github_login}`）。
 
 ## 快速开始
 
@@ -217,6 +252,7 @@ npm run dev
 基于 Spring Security 7 + OAuth2 Authorization Server 的认证微服务：
 
 - **用户登录**：用户名 + 密码 + 图形验证码 + 多租户，签发 RS256 JWT
+- **GitHub OAuth2 社交登录**：一键 GitHub 账号登录，HMAC-SHA256 state 签名防篡改，首次登录自动创建本地用户并关联第三方身份（`sys_user_oauth_provider` 表）
 - **OAuth2 授权**：Authorization Code + PKCE 流程，支持第三方集成
 - **设备授权码模式**（RFC 8628）：为 IoT 设备、CLI 工具等无浏览器场景提供授权能力，通过 `omni-device` 客户端实现，前端 `/device` 页面模拟设备端发起授权请求并轮询 token，`/device/verify` 页面供用户在另一台设备上扫码或输入验证码完成授权
 - **客户端管理**：CRUD 操作 `oauth2_registered_client`，支持动态注册
@@ -229,7 +265,7 @@ npm run dev
 
 - 路由转发：通过 Nacos 服务发现自动路由到注册的后端服务（StripPrefix=2）
 - 服务发现：Nacos 自动路由注册的服务
-- 认证过滤器：`AuthFilter`（当前为存根，预留 token 校验扩展点）
+- 认证过滤器：`AuthFilter`（JWT RS256 签名验证 + claims 提取 + 身份头注入）
 - CORS 配置：`CorsConfig` 处理跨域请求
 
 ### omni-frontend（Vue 3 SPA）
@@ -332,6 +368,9 @@ cd omni-frontend && npm run build && npm run lint
 | Maven 编译报 class version 错误 | JAVA_HOME 未指向 JDK 25 | 设置 `JAVA_HOME` 到 JDK 25 目录 |
 | 前端类型不匹配 | `ApiResponse` 在多处定义 | 只从 `@/types/api` 导入，禁止重复定义 |
 | Actuator gateway 端点 404 | 需显式启用 | 配置 `management.endpoint.gateway.enabled: true` |
+| GitHub 社交登录回调 404 | OAuth App 未创建或 Client ID 是占位符 | 按上方"GitHub OAuth2 社交登录配置"创建 OAuth App 并填入真实凭证 |
+| GitHub 登录后卡在回调页面 | 数据库缺少 `sys_user_oauth_provider` 表 | 确保 `init-all.sql` 已执行（包含该表），或手动创建 |
+| Nacos 重启后配置丢失 | 使用内嵌 Derby 数据库，无持久化 | 使用本项目的 `init-nacos.sql` 切换到 MySQL 外部存储 |
 
 ## AI 原生工程实践
 

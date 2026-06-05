@@ -1,3 +1,9 @@
+/**
+ * @module main
+ * 应用启动入口。
+ * 初始化 Vue 应用实例，注册全局插件（Pinia、Vue Router、Element Plus、I18n），
+ * 挂载到 DOM 后执行主题初始化。
+ */
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'

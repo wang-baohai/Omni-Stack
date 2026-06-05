@@ -1,3 +1,8 @@
+/**
+ * @module router
+ * 应用路由配置模块。
+ * 定义路由表、创建 Vue Router 实例，并通过全局前置守卫实现认证拦截。
+ */
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'

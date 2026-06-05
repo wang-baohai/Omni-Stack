@@ -1,3 +1,8 @@
+/**
+ * @module stores/app
+ * 应用全局状态管理 Store。
+ * 管理侧边栏折叠状态和主题模式（浅色/暗色），支持 localStorage 持久化。
+ */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 

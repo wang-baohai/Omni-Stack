@@ -89,7 +89,7 @@ The project root `docker-compose.yml` defines all four middleware services with:
 
 ### Database Schema
 
-The `omni_auth` database contains 13 tables organized into two domains:
+The `omni_auth` database contains 14 tables organized into two domains:
 
 **OAuth2 Authorization (3 tables)**:
 
@@ -99,7 +99,7 @@ The `omni_auth` database contains 13 tables organized into two domains:
 | `oauth2_authorization` | Active OAuth2 authorization records (access tokens, refresh tokens, authorization codes) |
 | `oauth2_authorization_consent` | User-consented scopes per client |
 
-**Multi-Tenant RBAC (10 tables)**:
+**Multi-Tenant RBAC (11 tables)**:
 
 | Table | Purpose |
 |-------|---------|
@@ -110,23 +110,28 @@ The `omni_auth` database contains 13 tables organized into two domains:
 | `sys_permission` | Permission tree (menu, button, API; materialized path) |
 | `sys_user_role` | User-to-role assignments |
 | `sys_role_permission` | Role-to-permission assignments |
-| `sys_dict_type` | Dictionary type definitions |
-| `sys_dict_data` | Dictionary data entries |
-| `sys_operation_log` | Audit log for write operations |
+| `sys_user_unit` | User-to-org-unit assignments (primary/secondary) |
+| `sys_role_dept` | Role-to-department data scope bindings |
+| `sys_token_blacklist` | Revoked JWT token blacklist |
+| `sys_user_oauth_provider` | Third-party social login identity linking (GitHub/Google/WeChat/Gitee) |
 
 ```mermaid
 erDiagram
     sys_tenant ||--o{ sys_user : "has users"
     sys_tenant ||--o{ sys_role : "has roles"
     sys_tenant ||--o{ sys_org_unit : "has org units"
-    sys_org_unit ||--o{ sys_user : "contains users"
+    sys_org_unit ||--o{ sys_user_unit : "linked to users"
+    sys_user ||--o{ sys_user_unit : "belongs to units"
     sys_user ||--o{ sys_user_role : "assigned"
+    sys_user ||--o{ sys_user_oauth_provider : "social identities"
     sys_role ||--o{ sys_user_role : "assigned"
     sys_role ||--o{ sys_role_permission : "grants"
+    sys_role ||--o{ sys_role_dept : "data scope"
     sys_permission ||--o{ sys_role_permission : "granted by"
     sys_permission ||--o{ sys_permission : "parent-child"
-    sys_dict_type ||--o{ sys_dict_data : "contains"
 ```
+
+Additionally, the `nacos_config` database (separate MySQL instance, same container) contains 10 tables for Nacos v3.1.1 configuration and permission management. See `scripts/sql/init-nacos.sql`.
 
 Authoritative DDL and seed data: `scripts/sql/init-all.sql`.
 

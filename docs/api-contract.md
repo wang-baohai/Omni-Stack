@@ -166,6 +166,49 @@ Configured in `JacksonConfig.java`:
 
 Timestamps are serialized as strings, not numeric timestamps (`WRITE_DATES_AS_TIMESTAMPS` is disabled).
 
+## Social Login Endpoints
+
+社交登录端点返回 HTTP 302 重定向（非标准 `R<T>` 响应），因为前端通过 `window.location.href` 触发浏览器导航。
+
+| HTTP Method | URL | Description |
+|-------------|-----|-------------|
+| GET | `/api/auth/oauth2/{provider}?tenant_id=1` | 发起第三方登录，302 重定向到第三方授权页面 |
+| GET | `/api/auth/oauth2/{provider}/callback?code=XXX&state=YYY` | 处理第三方回调，成功时 302 重定向到前端回调页面 |
+
+### 发起登录
+
+```
+GET /api/auth/oauth2/github?tenant_id=1
+→ 302 Location: https://github.com/login/oauth/authorize?client_id=...&redirect_uri=...&scope=...&state=...
+```
+
+- `{provider}` 目前仅支持 `github`
+- `tenant_id` 必填，指定登录的目标租户
+- State 参数包含 HMAC-SHA256 签名（`tenantId|timestamp|hmac`），防止 CSRF 攻击
+
+### 回调处理
+
+```
+GET /api/auth/oauth2/github/callback?code=XXX&state=YYY
+→ 成功: 302 Location: /callback#token=<JWT>&username=<username>
+→ 失败: 302 Location: /login?error=<error_code>&message=<message>
+```
+
+### 错误码
+
+| error 参数 | 含义 | 触发条件 |
+|------------|------|---------|
+| `user_denied` | 用户拒绝授权 | GitHub 回调携带 `error=access_denied` |
+| `invalid_callback` | 回调参数缺失 | code 或 state 为空 |
+| `social_login_failed` | 登录流程异常 | state 验证失败、GitHub API 错误、用户已禁用等 |
+
+### 前端回调页面
+
+`/callback` 页面（`src/views/callback/index.vue`）负责：
+1. 解析 URL fragment 中的 `token` 和 `username`
+2. 存储到 `localStorage`（通过 `useUserStore`）
+3. 重定向到 Dashboard
+
 ## Authentication Header
 
 ```
@@ -173,7 +216,7 @@ Authorization: Bearer <token>
 ```
 
 - Set by the Axios request interceptor in `src/api/request.ts` using the token from `useUserStore()`
-- Checked by `AuthFilter` in `omni-gateway` (currently a stub — passes all requests through)
+- Checked by `AuthFilter` in `omni-gateway` (JWT RS256 签名验证 + claims 提取 + 身份头注入)
 - Public paths exempt from auth: `/api/auth/**`, `/actuator/**`, `/favicon.ico`
 
 ## Versioning Strategy

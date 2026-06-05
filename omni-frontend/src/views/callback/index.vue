@@ -1,7 +1,9 @@
 <script setup lang="ts">
 /**
  * OAuth2 授权码回调页面。
- * 处理授权服务器重定向，提取 authorization code 并换取访问令牌。
+ * 同时处理两种回调流程：
+ * 1. 社交登录回调（GitHub 等）：JWT 通过 URL fragment（#token=xxx）传入
+ * 2. OAuth2 授权码回调（企业 SSO）：通过 authorization code + PKCE 换取令牌
  */
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -29,6 +31,63 @@ const CLIENT_ID = import.meta.env.VITE_OAUTH2_CLIENT_ID || 'omni-frontend'
 const REDIRECT_URI = import.meta.env.VITE_OAUTH2_REDIRECT_URI || `${window.location.origin}/callback`
 
 onMounted(async () => {
+  // 优先检查社交登录回调（URL fragment 中的 token）
+  if (handleSocialLoginCallback()) {
+    return
+  }
+
+  // 否则走 OAuth2 授权码 + PKCE 流程
+  await handleOAuth2CodeCallback()
+})
+
+/**
+ * 处理社交登录回调。
+ * 后端重定向到 /callback#token=xxx&username=yyy，从 URL hash 中提取 JWT。
+ * @returns true 表示已处理（无论成功或失败），false 表示不是社交登录回调
+ */
+function handleSocialLoginCallback(): boolean {
+  const hash = window.location.hash
+  if (!hash || !hash.includes('token=') && !hash.includes('error=')) {
+    return false
+  }
+
+  const params = parseHashParams(hash)
+
+  // 处理错误
+  if (params.error) {
+    ElMessage.error(decodeURIComponent(params.error))
+    loading.value = false
+    router.replace({ name: 'Login' })
+    return true
+  }
+
+  const token = params.token
+  if (!token) {
+    return false
+  }
+
+  // 清理 URL 中的 hash（避免 JWT 留在地址栏）
+  history.replaceState(null, '', window.location.pathname)
+
+  // 存储令牌
+  userStore.setToken(token)
+  const username = params.username
+    ? decodeURIComponent(params.username)
+    : extractUsernameFromJwt(token)
+  if (username) {
+    userStore.setUsername(username)
+  }
+
+  ElMessage.success('登录成功')
+  loading.value = false
+  router.replace({ name: 'Dashboard' })
+  return true
+}
+
+/**
+ * 处理 OAuth2 授权码 + PKCE 回调（企业 SSO 流程）。
+ */
+async function handleOAuth2CodeCallback() {
   const code = route.query.code as string
   const state = route.query.state as string
   const error = route.query.error as string
@@ -103,7 +162,23 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+/**
+ * 解析 URL hash 中的键值对。
+ * 例如 "#token=xxx&username=yyy" → { token: "xxx", username: "yyy" }
+ */
+function parseHashParams(hash: string): Record<string, string> {
+  const result: Record<string, string> = {}
+  const raw = hash.startsWith('#') ? hash.slice(1) : hash
+  for (const pair of raw.split('&')) {
+    const [key, ...rest] = pair.split('=')
+    if (key) {
+      result[key] = rest.join('=')
+    }
+  }
+  return result
+}
 
 /**
  * 从 JWT payload 中提取用户名（不做签名验证，Gateway 会验证）。

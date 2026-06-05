@@ -1,3 +1,8 @@
+/**
+ * @module api/auth
+ * 认证与授权 API 模块。
+ * 封装密码登录、验证码、租户列表、OAuth2 PKCE 流程、设备授权和第三方社交登录等接口。
+ */
 import request from './request'
 import type { ApiResponse } from '@/types/api'
 
@@ -53,7 +58,12 @@ export interface TenantOption {
   code: string
 }
 
-/** 使用密码授权方式登录 */
+/**
+ * 使用密码授权方式登录。
+ *
+ * @param data - 登录请求参数（用户名、密码、租户 ID、验证码）
+ * @returns 包含 JWT 访问令牌的登录结果
+ */
 export function loginByPassword(data: LoginParams) {
   return request.post<ApiResponse<LoginResult>>('/auth/login', data)
 }
@@ -66,12 +76,20 @@ export function sessionLogin(data: LoginParams) {
   return request.post<ApiResponse<string>>('/auth/session-login', data)
 }
 
-/** 获取验证码图片（Base64 编码） */
+/**
+ * 获取验证码图片（Base64 编码）。
+ *
+ * @returns 包含验证码 Key 和 Base64 图片的结果
+ */
 export function fetchCaptcha() {
   return request.get<ApiResponse<CaptchaResult>>('/auth/captcha')
 }
 
-/** 获取可用租户列表（公开接口） */
+/**
+ * 获取可用租户列表（公开接口）。
+ *
+ * @returns 可用租户选项数组
+ */
 export function listTenants() {
   return request.get<ApiResponse<TenantOption[]>>('/auth/tenants')
 }

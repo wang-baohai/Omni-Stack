@@ -1,3 +1,8 @@
+/**
+ * @module api/oauth2-client
+ * OAuth2 客户端管理 API 模块。
+ * 提供客户端的增删改查接口，与后端 OAuth2ClientController 对应。
+ */
 import request from './request'
 import type { ApiResponse } from '@/types/api'
 

@@ -1,4 +1,10 @@
+/**
+ * 中文（简体）翻译文件。
+ * 按功能模块分组：common（通用）、login（登录）、theme（主题）、lang（语言）、
+ * home（首页）、device（设备授权）、consent（授权确认）。
+ */
 export default {
+  // ===== common — 通用文本 =====
   common: {
     appName: 'Omni-Stack',
     subtitle: '微服务管理平台',
@@ -22,6 +28,7 @@ export default {
     save: '保存',
     back: '返回',
   },
+  // ===== login — 登录模块 =====
   login: {
     title: '统一授权中心',
     username: '用户名',
@@ -52,22 +59,26 @@ export default {
     wechat: '微信',
     gitee: 'Gitee',
   },
+  // ===== theme — 主题模块 =====
   theme: {
     light: '浅色模式',
     dark: '深色模式',
     toggle: '切换主题',
   },
+  // ===== lang — 语言切换 =====
   lang: {
     zhCN: '中文',
     enUS: 'English',
     switch: '切换语言',
   },
+  // ===== home — 首页模块 =====
   home: {
     welcome: '欢迎使用 Omni-Stack',
     desc: 'AI 驱动，Harness 赋能的微服务管理平台。',
     getStarted: '立即开始',
     goToConsole: '进入控制台',
   },
+  // ===== device — 设备授权模块 =====
   device: {
     title: '设备授权',
     requesting: '正在请求设备授权...',
@@ -92,6 +103,7 @@ export default {
     scanQrCode: '扫描二维码快速授权',
     orManual: '或手动打开以下链接',
   },
+  // ===== consent — 授权确认模块 =====
   consent: {
     title: '授权确认',
     checking: '正在验证身份...',

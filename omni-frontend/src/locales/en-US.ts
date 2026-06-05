@@ -1,4 +1,10 @@
+/**
+ * English (US) translation file.
+ * 按功能模块分组：common（通用）、login（登录）、theme（主题）、lang（语言）、
+ * home（首页）、device（设备授权）、consent（授权确认）。
+ */
 export default {
+  // ===== common — shared text =====
   common: {
     appName: 'Omni-Stack',
     subtitle: 'Microservices Management Platform',
@@ -22,6 +28,7 @@ export default {
     save: 'Save',
     back: 'Back',
   },
+  // ===== login — authentication module =====
   login: {
     title: 'Authorization Center',
     username: 'Username',
@@ -52,22 +59,26 @@ export default {
     wechat: 'WeChat',
     gitee: 'Gitee',
   },
+  // ===== theme — theme switching =====
   theme: {
     light: 'Light Mode',
     dark: 'Dark Mode',
     toggle: 'Toggle Theme',
   },
+  // ===== lang — language switching =====
   lang: {
     zhCN: '中文',
     enUS: 'English',
     switch: 'Switch Language',
   },
+  // ===== home — home page module =====
   home: {
     welcome: 'Welcome to Omni-Stack',
     desc: 'AI-driven, Harness-powered microservices management platform.',
     getStarted: 'Get Started',
     goToConsole: 'Go to Console',
   },
+  // ===== device — device authorization module =====
   device: {
     title: 'Device Authorization',
     requesting: 'Requesting device authorization...',
@@ -92,6 +103,7 @@ export default {
     scanQrCode: 'Scan QR code to authorize',
     orManual: 'Or open the following link manually',
   },
+  // ===== consent — authorization consent module =====
   consent: {
     title: 'Authorization Consent',
     checking: 'Verifying identity...',
