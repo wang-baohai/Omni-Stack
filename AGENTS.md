@@ -30,7 +30,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/api-contract.md` | Response format, error codes, pagination, naming |
 | `docs/backend-patterns.md` | Java layering, validation, exceptions, logging, OOP rules |
 | `docs/frontend-patterns.md` | Vue/TS patterns, state management, routing, component conventions |
-| `docs/core-flows.md` | End-to-end traces of login, list query, and form submission |
+| `docs/core-flows.md` | End-to-end traces of login (password + captcha, GitHub social, Gitee social, device code), list query, and form submission |
 
 ## Entry Points
 
@@ -221,6 +221,20 @@ management:
 ### Maven JAVA_HOME
 
 Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25 before running Maven commands. Without this, the build will fail with class version errors.
+
+### Social Login Environment Variables
+
+社交登录功能需要配置以下环境变量（支持 GitHub 和 Gitee 两个提供商，基于 `OAuth2ProviderHandler` 策略模式可扩展）：
+
+| 变量 | 说明 |
+|------|------|
+| `GITHUB_CLIENT_ID` | GitHub OAuth App 的 Client ID |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth App 的 Client Secret |
+| `GITHUB_REDIRECT_URI` | GitHub 授权回调地址，默认 `http://localhost:8100/api/auth/oauth2/github/callback` |
+| `GITEE_CLIENT_ID` | Gitee 第三方应用的 Client ID |
+| `GITEE_CLIENT_SECRET` | Gitee 第三方应用的 Client Secret |
+| `GITEE_REDIRECT_URI` | Gitee 授权回调地址，默认 `http://localhost:8100/api/auth/oauth2/gitee/callback` |
+| `OAUTH2_STATE_SECRET` | OAuth2 state 参数的 HMAC-SHA256 签名密钥，所有提供商共用 |
 
 ## Testing
 

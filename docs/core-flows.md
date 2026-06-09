@@ -424,11 +424,13 @@ sequenceDiagram
 
 ---
 
-## Flow 4: GitHub OAuth2 社交登录
+## Flow 4: OAuth2 社交登录（GitHub / Gitee）
 
 ### 概述
 
-用户通过 GitHub 账号一键登录系统。前端发起 `window.location.href` 导航到 Auth 服务的 `/api/auth/oauth2/github` 端点，Auth 服务生成 HMAC 签名的 state 参数后 302 重定向到 GitHub 授权页面。用户在 GitHub 授权后，GitHub 回调 Auth 服务，Auth 完成 state 验证 → token 交换 → 用户信息获取 → 本地用户查找或自动创建 → JWT 签发，最终 302 重定向到前端回调页面（URL fragment 携带 JWT）。
+用户通过 GitHub 或 Gitee 账号一键登录系统。后端采用策略模式（Strategy Pattern），通过 `OAuth2ProviderHandler` 接口定义统一的 `buildAuthorizationUrl` / `exchangeCodeForAccessToken` / `fetchUserProfile` 方法，各提供商实现为独立的 `@Component`，由 Spring 的 `Map<String, OAuth2ProviderHandler>` 自动注入实现多提供商分发。当前已实现 GitHub 和 Gitee 两个提供商，前端 Google / WeChat 登录按钮为占位（暂未实现后端 Handler）。
+
+前端发起 `window.location.href` 导航到 Auth 服务的 `/api/auth/oauth2/{provider}` 端点，Auth 服务根据 provider 参数选择对应的 Handler 实现，生成 HMAC 签名的 state 参数后 302 重定向到第三方授权页面。用户在第三方平台授权后，回调 Auth 服务，Auth 通过 Handler 完成 state 验证 → token 交换 → 用户信息获取 → 本地用户查找或自动创建 → JWT 签发，最终 302 重定向到前端回调页面（URL fragment 携带 JWT）。
 
 ### 时序图
 
@@ -438,65 +440,68 @@ sequenceDiagram
     participant F as Frontend :3000
     participant G as Gateway :8102
     participant A as Auth :8100
-    participant GH as GitHub API
+    participant H as OAuth2ProviderHandler
+    participant P as Provider API (GitHub/Gitee)
     participant M as MySQL
 
-    B->>F: 1. Click "GitHub 登录"
-    F->>F: 2. Build URL: /api/auth/oauth2/github?tenant_id=1
+    B->>F: 1. Click "GitHub / Gitee 登录"
+    F->>F: 2. Build URL: /api/auth/oauth2/{provider}?tenant_id=1
     F->>B: 3. window.location.href 导航
     B->>G: 4. GET /api/auth/oauth2/github?tenant_id=1
     G->>A: 5. Proxy to Auth
     A->>A: 6. 校验提供商 + 租户合法性
     A->>A: 7. OAuth2StateUtils.createState(tenantId)
-    A-->>B: 8. 302 Redirect → github.com/login/oauth/authorize
+    A-->>B: 8. 302 Redirect → Provider 授权页面（github.com 或 gitee.com）
 
-    B->>GH: 9. GitHub 授权页面（用户输入账号密码）
-    GH-->>B: 10. 302 Redirect → callback?code=XXX&state=YYY
-    B->>G: 11. GET /api/auth/oauth2/github/callback?code=XXX&state=YYY
+    B->>P: 9. Provider 授权页面（用户输入账号密码）
+    P-->>B: 10. 302 Redirect → callback?code=XXX&state=YYY
+    B->>G: 11. GET /api/auth/oauth2/{provider}/callback?code=XXX&state=YYY
     G->>A: 12. Proxy to Auth
 
     A->>A: 13. OAuth2StateUtils.extractTenantId(state) 验证 HMAC
-    A->>GH: 14. POST /login/oauth/access_token {client_id, client_secret, code, redirect_uri}
-    GH-->>A: 15. {access_token}
-    A->>GH: 16. GET /user (Authorization: Bearer access_token)
-    GH-->>A: 17. {id, login, email, avatar_url, name}
+    A->>H: 14. Handler.exchangeCodeForAccessToken(code)
+    H->>P: 15. POST /login/oauth/access_token (或 /oauth/token)
+    P-->>H: 16. {access_token}
+    H->>P: 17. GET /user (或 /api/v5/user)
+    P-->>H: 18. ProviderUser {id, login, email, avatar_url, name}
+    H-->>A: 19. ProviderUser
 
-    A->>M: 18. SELECT * FROM sys_user_oauth_provider WHERE provider='github' AND provider_user_id=?
+    A->>M: 20. SELECT * FROM sys_user_oauth_provider WHERE provider=? AND provider_user_id=?
     M-->>A: oauth_provider (null = 首次登录)
 
     alt 首次登录（无关联记录）
-        A->>M: 19a. INSERT INTO sys_user (自动创建本地用户, username=gh_{login})
-        A->>M: 19b. INSERT INTO sys_user_oauth_provider (创建身份关联)
+        A->>M: 21a. INSERT INTO sys_user (自动创建本地用户, username=gh_{login} 或 ge_{login})
+        A->>M: 21b. INSERT INTO sys_user_oauth_provider (创建身份关联)
     else 已有绑定
-        A->>M: 19c. UPDATE sys_user_oauth_provider (更新 access_token, 用户信息)
-        A->>M: 19d. SELECT * FROM sys_user (加载本地用户)
+        A->>M: 21c. UPDATE sys_user_oauth_provider (更新 access_token, 用户信息)
+        A->>M: 21d. SELECT * FROM sys_user (加载本地用户)
     end
 
-    A->>M: 20. Load roles & permissions
+    A->>M: 22. Load roles & permissions
     M-->>A: roles/permissions
-    A->>A: 21. JwtTokenService.generateToken() RS256 签名
-    A-->>B: 22. 302 Redirect → /callback#token=JWT&username=gh_xxx
+    A->>A: 23. JwtTokenService.generateToken() RS256 签名
+    A-->>B: 24. 302 Redirect → /callback#token=JWT&username=gh_xxx
 
-    B->>F: 23. /callback 页面解析 URL fragment
-    F->>F: 24. 存储 token + username 到 localStorage
-    F-->>B: 25. Redirect to dashboard
+    B->>F: 25. /callback 页面解析 URL fragment
+    F->>F: 26. 存储 token + username 到 localStorage
+    F-->>B: 27. Redirect to dashboard
 ```
 
 <details>
 <summary>ASCII 版本（点击展开）</summary>
 
 ```
-Browser            Frontend :3000          Gateway :8102          Auth :8100           GitHub API           MySQL
+Browser            Frontend :3000          Gateway :8102          Auth :8100           Provider API         MySQL
   |                    |                       |                     |                     |                   |
-  | 1. Click GitHub    |                       |                     |                     |                   |
+  | 1. Click social    |                       |                     |                     |                   |
   |    login button    |                       |                     |                     |                   |
   |                    | 2. Build URL          |                     |                     |                   |
   |                    |    /api/auth/oauth2/  |                     |                     |                   |
-  |                    |    github?tenant_id=1 |                     |                     |                   |
+  |                    |    {provider}?tenant_id=1                   |                     |                   |
   | 3. window.location |                       |                     |                     |                   |
   |    .href --------->|                       |                     |                     |                   |
   |                    |                       |                     |                     |                   |
-  | 4. GET /api/auth/oauth2/github?tenant_id=1 |                     |                     |                   |
+  | 4. GET /api/auth/oauth2/{provider}?tenant_id=1                   |                   |
   |                    |                       |                     |                     |                   |
   |                    |                       | 5. Proxy            |                     |                   |
   |                    |                       |-------------------->|                     |                   |
@@ -505,16 +510,16 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
   |                    |                       |                     | 7. createState()     |                   |
   |                    |                       |                     |    HMAC-SHA256 sign  |                   |
   |                    |                       |                     |                     |                   |
-  | 8. 302 Redirect -> github.com/login/oauth/authorize?client_id=...&state=...            |                   |
+  | 8. 302 Redirect -> Provider 授权页面 (github.com 或 gitee.com)   |                   |
   |                    |                       |                     |                     |                   |
-  | 9. GitHub login    |                       |                     |                     |                   |
+  | 9. Provider login  |                       |                     |                     |                   |
   |    (user/password) |                       |                     |                     |                   |
   |--------------------|-------------------------------------------->|------------------------------------------>|
   |                    |                       |                     |                     |                   |
   | 10. 302 callback?code=XXX&state=YYY        |                     |                     |                   |
   |<---------------------------------------------------------------------------------------|                   |
   |                    |                       |                     |                     |                   |
-  | 11. GET /api/auth/oauth2/github/callback   |                     |                     |                   |
+  | 11. GET /api/auth/oauth2/{provider}/callback                     |                     |                   |
   |--------------------|---------------------->|                     |                     |                   |
   |                    |                       | 12. Proxy           |                     |                   |
   |                    |                       |-------------------->|                     |                   |
@@ -522,39 +527,35 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
   |                    |                       |                     | 13. Verify state     |                   |
   |                    |                       |                     |     HMAC signature   |                   |
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 14. POST /login/oauth/access_token      |
+  |                    |                       |                     | 14-19. Handler: exchange code,          |
+  |                    |                       |                     |   get access_token, fetch user profile  |
   |                    |                       |                     |-------------------->|                   |
-  |                    |                       |                     | 15. {access_token}  |                   |
+  |                    |                       |                     |    ProviderUser     |                   |
   |                    |                       |                     |<--------------------|                   |
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 16. GET /user       |                   |
-  |                    |                       |                     |-------------------->|                   |
-  |                    |                       |                     | 17. {id,login,email}|                   |
-  |                    |                       |                     |<--------------------|                   |
-  |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 18. Lookup oauth provider               |
+  |                    |                       |                     | 20. Lookup oauth provider               |
   |                    |                       |                     |------------------------------------------>|
   |                    |                       |                     |                     |    oauth_provider   |
   |                    |                       |                     |<------------------------------------------|
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 19. Create/Update user + oauth link      |
+  |                    |                       |                     | 21. Create/Update user + oauth link      |
   |                    |                       |                     |------------------------------------------>|
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 20. Load roles/perms |                   |
+  |                    |                       |                     | 22. Load roles/perms |                   |
   |                    |                       |                     |------------------------------------------>|
   |                    |                       |                     |                     |   roles/permissions |
   |                    |                       |                     |<------------------------------------------|
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 21. Generate JWT (RS256)                |
+  |                    |                       |                     | 23. Generate JWT (RS256)                |
   |                    |                       |                     |                     |                   |
-  | 22. 302 /callback#token=JWT&username=gh_xxx                       |                     |                   |
+  | 24. 302 /callback#token=JWT&username=xxx                         |                     |                   |
   |<---------------------------------------------------------------------------------------|                   |
   |                    |                       |                     |                     |                   |
-  | 23. /callback page |                       |                     |                     |                   |
+  | 25. /callback page |                       |                     |                     |                   |
   |    parse fragment  |                       |                     |                     |                   |
-  |                    | 24. Store token        |                     |                     |                   |
+  |                    | 26. Store token        |                     |                     |                   |
   |                    |     to localStorage    |                     |                     |                   |
-  | 25. Redirect to    |                       |                     |                     |                   |
+  | 27. Redirect to    |                       |                     |                     |                   |
   |     dashboard      |                       |                     |                     |                   |
   |<-------------------|                       |                     |                     |                   |
 ```
@@ -565,13 +566,16 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
 
 | 步骤 | 文件 | 职责 |
 |------|------|------|
-| 登录按钮 | `src/components/LoginForm.vue` | "GitHub" 第三方登录按钮，调用 `getThirdPartyLoginUrl()` |
+| 登录按钮 | `src/components/LoginForm.vue` | "GitHub / Gitee" 第三方登录按钮，调用 `getThirdPartyLoginUrl()` |
 | 前端发起 | `src/api/auth.ts` | `getThirdPartyLoginUrl(provider, tenantId)` 构建重定向 URL |
 | 回调页面 | `src/views/callback/index.vue` | 解析 URL fragment 中的 JWT，存储到 localStorage |
 | 登录发起端点 | `SocialLoginController.java` | `GET /api/auth/oauth2/{provider}` — state 生成 + 302 重定向 |
 | 回调处理端点 | `SocialLoginController.java` | `GET /api/auth/oauth2/{provider}/callback` — token 交换 + 用户创建 + JWT 签发 |
-| 业务编排 | `SocialLoginServiceImpl.java` | 完整回调流程：state 验证 → GitHub API → 用户查找/创建 → JWT |
-| GitHub 交互 | `GitHubOAuth2Handler.java` | 构建授权 URL、换取 access_token、获取用户资料 |
+| 业务编排 | `SocialLoginServiceImpl.java` | 完整回调流程：state 验证 → Handler 分发 → 用户查找/创建 → JWT |
+| 策略接口 | `OAuth2ProviderHandler.java` | 策略接口，定义 `buildAuthorizationUrl` / `exchangeCodeForAccessToken` / `fetchUserProfile` |
+| GitHub 实现 | `GitHubOAuth2Handler.java` | GitHub OAuth2 实现（`@Component("github")`），构建授权 URL、换取 access_token、获取用户资料 |
+| Gitee 实现 | `GiteeOAuth2Handler.java` | Gitee OAuth2 实现（`@Component("gitee")`），对接 Gitee OAuth2 API |
+| 统一用户 DTO | `ProviderUser.java` | 统一的第三方用户信息 DTO，屏蔽各提供商字段差异 |
 | State 签名 | `OAuth2StateUtils.java` | HMAC-SHA256 签名生成与验证（`tenantId|timestamp|hmac`） |
 | 身份关联 | `SysUserOauthProviderMapper.java` | 查询和持久化用户与第三方身份的绑定关系 |
 | JWT 签发 | `JwtTokenServiceImpl.java` | 为社交登录用户签发包含角色和权限的 RS256 JWT |
@@ -593,14 +597,16 @@ OAuth2 state 参数采用 HMAC-SHA256 签名，格式为 `tenantId|timestamp|hma
 
 ### 自动用户创建机制
 
-首次 GitHub 登录时，系统自动创建本地用户：
+首次第三方登录时，系统自动创建本地用户：
 
 ```
-1. 用户名: gh_{github_login}（如 gh_wang-baohai）
-   - 冲突时 fallback: gh_{github_login}_{github_user_id}
-2. 昵称: GitHub display name（无则取 login）
-3. 邮箱: GitHub email
-4. 头像: GitHub avatar_url
+1. 用户名: 按提供商前缀生成
+   - GitHub: gh_{login}（如 gh_wang-baohai）
+   - Gitee:  ge_{login}（如 ge_zhang-san）
+   - 冲突时 fallback: {prefix}_{login}_{provider_user_id}
+2. 昵称: 第三方平台 display name（无则取 login）
+3. 邮箱: 第三方平台 email
+4. 头像: 第三方平台 avatar_url
 5. 密码: null（无法通过密码登录，仅第三方登录）
 6. 状态: 启用 (status=1)
 7. 租户: 登录时指定的 tenantId
@@ -628,14 +634,16 @@ OAuth2 state 参数采用 HMAC-SHA256 签名，格式为 `tenantId|timestamp|hma
 | 用户拒绝授权 | 302 → `/login?error=user_denied` | 登录页提示"授权被拒绝" |
 | 回调参数缺失 | 302 → `/login?error=invalid_callback` | 登录页提示"无效回调" |
 | State 验证失败 | 抛出 BusinessException → 302 → `/login?error=social_login_failed` | 登录页提示错误信息 |
-| GitHub API 错误 | 抛出 BusinessException（502） | 登录页提示"GitHub 授权码换取失败" |
+| 第三方 API 错误 | 抛出 BusinessException（502） | 登录页提示"授权码换取失败"（GitHub: access_token 接口 / Gitee: token 接口） |
+| 用户信息获取失败 | 抛出 BusinessException（502） | 登录页提示"获取用户信息失败"（GitHub: /user 接口 / Gitee: /api/v5/user 接口） |
 | 用户已禁用 | 抛出 BusinessException（403） | 登录页提示"用户已被禁用" |
 
 ### Current Status
 
-- **GitHub OAuth2 登录**: 端到端完整实现并验证通过
+- **OAuth2 社交登录**: 已实现 GitHub 和 Gitee，端到端完整实现并验证通过
 - **State 签名**: HMAC-SHA256 防篡改 + 防重放
-- **自动用户创建**: 首次 GitHub 登录自动注册本地用户 + 身份关联
+- **自动用户创建**: 首次第三方登录自动注册本地用户 + 身份关联（GitHub: `gh_` 前缀，Gitee: `ge_` 前缀）
 - **redirect_uri**: 支持配置化（`application.yml` + 环境变量覆盖）
 - **前端回调**: `/callback` 页面解析 URL fragment 中的 JWT 并自动登录
-- **多提供商预留**: `sys_user_oauth_provider` 表支持 github/google/wechat/gitee，当前仅实现 GitHub
+- **策略模式**: `OAuth2ProviderHandler` 接口 + `Map<String, OAuth2ProviderHandler>` 注入，新增提供商仅需实现 Handler 接口
+- **多提供商扩展**: `sys_user_oauth_provider` 表支持 github/google/wechat/gitee，当前已实现 GitHub 和 Gitee，Google / WeChat 前端按钮为占位

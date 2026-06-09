@@ -62,6 +62,21 @@ public class DeviceClientAuthenticationFilter extends OncePerRequestFilter {
     /** OAuth2 客户端注册仓储，用于按 clientId 查找已注册的客户端配置 */
     private final RegisteredClientRepository registeredClientRepository;
 
+    /**
+     * 执行设备授权流程的公有客户端认证逻辑。
+     * <p>
+     * 仅处理 {@link #DEVICE_ENDPOINTS_MATCHER} 匹配的请求。
+     * 对于 {@code /oauth2/token} 端点，进一步校验 {@code grant_type} 是否为设备码类型，
+     * 非设备码请求（如 authorization_code、refresh_token）直接放行。
+     * 认证成功后将 {@link OAuth2ClientAuthenticationToken} 写入 {@link SecurityContextHolder}。
+     * </p>
+     *
+     * @param request     HTTP 请求
+     * @param response    HTTP 响应
+     * @param filterChain 过滤器链
+     * @throws ServletException Servlet 异常
+     * @throws IOException      IO 异常
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

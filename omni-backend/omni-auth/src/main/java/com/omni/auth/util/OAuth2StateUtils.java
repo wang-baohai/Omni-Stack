@@ -32,6 +32,7 @@ public class OAuth2StateUtils {
     /** state 有效期：10 分钟（毫秒） */
     private static final long STATE_TTL_MS = 10 * 60 * 1000L;
 
+    /** OAuth2 配置属性，提供 state 签名所需的 HMAC 密钥 */
     private final OAuth2Properties oauth2Properties;
 
     /**

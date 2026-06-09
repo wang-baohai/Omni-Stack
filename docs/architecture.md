@@ -160,3 +160,19 @@ Authoritative DDL and seed data: `scripts/sql/init-all.sql`.
 2. Add a route in `src/router/index.ts` with `meta: { title, icon, requiresAuth }`
 3. Create API functions in `src/api/<domain>.ts` using the shared Axios instance
 4. If needed, create a Pinia store in `src/stores/<domain>.ts` using Composition API style
+
+### Adding a New OAuth2 Social Login Provider
+
+The social login framework uses the Strategy Pattern via `OAuth2ProviderHandler` interface. Adding a new provider (e.g., Google, WeChat) requires:
+
+1. **Create handler implementation**: Create `XxxOAuth2Handler.java` implementing `OAuth2ProviderHandler`, annotated with `@Component("xxx")`. Implement `getProviderId()`, `buildAuthorizationUrl()`, `exchangeCodeForAccessToken()`, and `fetchUserProfile()` (returning the unified `ProviderUser` DTO).
+
+2. **Add configuration**: Add a new `XxxProperties` inner static class in `OAuth2Properties.java` with `clientId`, `clientSecret`, `redirectUri` fields. Add a corresponding field `private XxxProperties xxx = new XxxProperties()` in the outer class.
+
+3. **Configure credentials**: Add `auth.oauth2.xxx.*` section in `application.yml` with environment variable bindings (`${XXX_CLIENT_ID:placeholder}`).
+
+4. **Add username prefix**: Add a case in `SocialLoginServiceImpl.getUsernamePrefix()` switch expression (e.g., `"google" -> "go_"`).
+
+`SocialLoginServiceImpl` automatically discovers new handlers via Spring's `Map<String, OAuth2ProviderHandler>` injection — no changes to the orchestration layer needed.
+
+**Currently implemented providers**: GitHub (`@Component("github")`), Gitee (`@Component("gitee")`).

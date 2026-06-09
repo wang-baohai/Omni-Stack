@@ -178,18 +178,28 @@ Timestamps are serialized as strings, not numeric timestamps (`WRITE_DATES_AS_TI
 ### 发起登录
 
 ```
+# GitHub
 GET /api/auth/oauth2/github?tenant_id=1
 → 302 Location: https://github.com/login/oauth/authorize?client_id=...&redirect_uri=...&scope=...&state=...
+
+# Gitee
+GET /api/auth/oauth2/gitee?tenant_id=1
+→ 302 Location: https://gitee.com/oauth/authorize?client_id=...&redirect_uri=...&response_type=code&scope=user_info&state=...
 ```
 
-- `{provider}` 目前仅支持 `github`
+- `{provider}` 支持 `github` 和 `gitee`
 - `tenant_id` 必填，指定登录的目标租户
 - State 参数包含 HMAC-SHA256 签名（`tenantId|timestamp|hmac`），防止 CSRF 攻击
 
 ### 回调处理
 
 ```
+# GitHub 回调
 GET /api/auth/oauth2/github/callback?code=XXX&state=YYY
+
+# Gitee 回调
+GET /api/auth/oauth2/gitee/callback?code=XXX&state=YYY
+
 → 成功: 302 Location: /callback#token=<JWT>&username=<username>
 → 失败: 302 Location: /login?error=<error_code>&message=<message>
 ```
@@ -198,9 +208,9 @@ GET /api/auth/oauth2/github/callback?code=XXX&state=YYY
 
 | error 参数 | 含义 | 触发条件 |
 |------------|------|---------|
-| `user_denied` | 用户拒绝授权 | GitHub 回调携带 `error=access_denied` |
+| `user_denied` | 用户拒绝授权 | 第三方平台回调携带 `error=access_denied`（GitHub / Gitee 均适用） |
 | `invalid_callback` | 回调参数缺失 | code 或 state 为空 |
-| `social_login_failed` | 登录流程异常 | state 验证失败、GitHub API 错误、用户已禁用等 |
+| `social_login_failed` | 登录流程异常 | state 验证失败、第三方 API 错误（GitHub access_token / Gitee token 接口）、用户信息获取失败、用户已禁用等 |
 
 ### 前端回调页面
 

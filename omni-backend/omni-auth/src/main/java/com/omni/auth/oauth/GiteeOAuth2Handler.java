@@ -3,7 +3,6 @@ package com.omni.auth.oauth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omni.auth.config.OAuth2Properties;
-import com.omni.auth.dto.GitHubUser;
 import com.omni.auth.dto.ProviderUser;
 import com.omni.common.core.result.BusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -18,41 +17,41 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /**
- * GitHub OAuth2 处理器。
+ * Gitee OAuth2 处理器。
  * <p>
- * 封装与 GitHub OAuth2 交互的全部细节：构建授权 URL、换取 Access Token、
- * 获取用户资料。使用 JDK 内置的 {@link HttpClient} 发起 HTTP 请求，
- * 无需引入额外依赖。
+ * 封装与 Gitee OAuth2 交互的全部细节：构建授权 URL、换取 Access Token、
+ * 获取用户资料并映射为统一的 {@link ProviderUser}。
+ * 使用 JDK 内置的 {@link HttpClient} 发起 HTTP 请求，无需引入额外依赖。
  * </p>
  */
 @Slf4j
-@Component("github")
-public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
+@Component("gitee")
+public class GiteeOAuth2Handler implements OAuth2ProviderHandler {
 
-    /** GitHub OAuth2 授权页面 URL */
-    private static final String GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
-    /** GitHub OAuth2 Token 端点 URL */
-    private static final String GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
-    /** GitHub 用户信息 API URL */
-    private static final String GITHUB_USER_API = "https://api.github.com/user";
-    /** 请求的 OAuth2 授权范围：读取用户资料和邮箱 */
-    private static final String SCOPE = "read:user user:email";
+    /** Gitee OAuth2 授权页面 URL */
+    private static final String GITEE_AUTHORIZE_URL = "https://gitee.com/oauth/authorize";
+    /** Gitee OAuth2 Token 端点 URL */
+    private static final String GITEE_TOKEN_URL = "https://gitee.com/oauth/token";
+    /** Gitee 用户信息 API URL */
+    private static final String GITEE_USER_API = "https://gitee.com/api/v5/user";
+    /** 请求的 OAuth2 授权范围：仅获取基本用户信息 */
+    private static final String SCOPE = "user_info";
     /** HTTP 请求 User-Agent 标识 */
     private static final String USER_AGENT = "Omni-Stack/1.0";
 
-    /** OAuth2 第三方登录配置属性（包含 GitHub clientId、clientSecret、redirectUri） */
+    /** OAuth2 第三方登录配置属性（包含 Gitee clientId、clientSecret、redirectUri） */
     private final OAuth2Properties oauth2Properties;
-    /** JSON 序列化/反序列化工具，用于解析 GitHub API 响应 */
+    /** JSON 序列化/反序列化工具，用于解析 Gitee API 响应 */
     private final ObjectMapper objectMapper;
-    /** JDK 内置 HTTP 客户端，用于向 GitHub API 发起请求 */
+    /** JDK 内置 HTTP 客户端，用于向 Gitee API 发起请求 */
     private final HttpClient httpClient;
 
     /**
-     * 构造 GitHub OAuth2 处理器。
+     * 构造 Gitee OAuth2 处理器。
      *
      * @param oauth2Properties OAuth2 第三方登录配置属性
      */
-    public GitHubOAuth2Handler(OAuth2Properties oauth2Properties) {
+    public GiteeOAuth2Handler(OAuth2Properties oauth2Properties) {
         this.oauth2Properties = oauth2Properties;
         this.objectMapper = new ObjectMapper();
         this.httpClient = HttpClient.newBuilder()
@@ -64,47 +63,49 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
     /**
      * {@inheritDoc}
      *
-     * @return 提供商标识 {@code "github"}
+     * @return 提供商标识 {@code "gitee"}
      */
     @Override
     public String getProviderId() {
-        return "github";
+        return "gitee";
     }
 
     /**
-     * 构建 GitHub 授权页面 URL。
+     * 构建 Gitee 授权页面 URL。
      *
      * @param state HMAC 签名的 state 参数
      * @return 完整的授权 URL，浏览器应 302 重定向到此地址
      */
     @Override
     public String buildAuthorizationUrl(String state) {
-        String clientId = oauth2Properties.getGithub().getClientId();
-        String redirectUri = oauth2Properties.getGithub().getRedirectUri();
-        return GITHUB_AUTHORIZE_URL
+        String clientId = oauth2Properties.getGitee().getClientId();
+        String redirectUri = oauth2Properties.getGitee().getRedirectUri();
+        return GITEE_AUTHORIZE_URL
                 + "?client_id=" + encode(clientId)
                 + "&redirect_uri=" + encode(redirectUri)
+                + "&response_type=code"
                 + "&scope=" + encode(SCOPE)
                 + "&state=" + encode(state);
     }
 
     /**
-     * 使用授权码换取 GitHub Access Token。
+     * 使用授权码换取 Gitee Access Token。
      *
-     * @param code GitHub 回调传入的授权码
-     * @return GitHub Access Token 字符串
+     * @param code Gitee 回调传入的授权码
+     * @return Gitee Access Token 字符串
      * @throws BusinessException 网络错误、API 返回错误或解析失败时抛出
      */
     @Override
     public String exchangeCodeForAccessToken(String code) {
         try {
-            String requestBody = "client_id=" + encode(oauth2Properties.getGithub().getClientId())
-                    + "&client_secret=" + encode(oauth2Properties.getGithub().getClientSecret())
+            String requestBody = "client_id=" + encode(oauth2Properties.getGitee().getClientId())
+                    + "&client_secret=" + encode(oauth2Properties.getGitee().getClientSecret())
                     + "&code=" + encode(code)
-                    + "&redirect_uri=" + encode(oauth2Properties.getGithub().getRedirectUri());
+                    + "&redirect_uri=" + encode(oauth2Properties.getGitee().getRedirectUri())
+                    + "&grant_type=authorization_code";
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GITHUB_TOKEN_URL))
+                    .uri(URI.create(GITEE_TOKEN_URL))
                     .timeout(Duration.ofSeconds(30))
                     .header("Accept", "application/json")
                     .header("User-Agent", USER_AGENT)
@@ -114,32 +115,32 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                log.error("GitHub token 交换失败: status={}, body={}", response.statusCode(), response.body());
-                throw new BusinessException(502, "GitHub 授权码换取失败");
+                log.error("Gitee token 交换失败: status={}, body={}", response.statusCode(), response.body());
+                throw new BusinessException(502, "Gitee 授权码换取失败");
             }
 
-            var jsonNode = objectMapper.readTree(response.body());
+            JsonNode jsonNode = objectMapper.readTree(response.body());
             String accessToken = jsonNode.path("access_token").asText(null);
             if (accessToken == null || accessToken.isBlank()) {
                 String error = jsonNode.path("error").asText("unknown");
-                log.error("GitHub token 响应中缺少 access_token: error={}", error);
-                throw new BusinessException(502, "GitHub 授权码换取失败: " + error);
+                log.error("Gitee token 响应中缺少 access_token: error={}", error);
+                throw new BusinessException(502, "Gitee 授权码换取失败: " + error);
             }
 
-            log.info("GitHub access_token 获取成功");
+            log.info("Gitee access_token 获取成功");
             return accessToken;
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("GitHub API 调用失败（换取 token）", e);
-            throw new BusinessException(502, "GitHub API 调用失败");
+            log.error("Gitee API 调用失败（换取 token）", e);
+            throw new BusinessException(502, "Gitee API 调用失败");
         }
     }
 
     /**
-     * 获取 GitHub 用户资料并映射为统一的 {@link ProviderUser}。
+     * 获取 Gitee 用户资料并映射为统一的 {@link ProviderUser}。
      *
-     * @param accessToken GitHub Access Token
+     * @param accessToken Gitee Access Token
      * @return 归一化的用户信息 DTO
      * @throws BusinessException 网络错误、API 限流或解析失败时抛出
      */
@@ -147,7 +148,7 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
     public ProviderUser fetchUserProfile(String accessToken) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GITHUB_USER_API))
+                    .uri(URI.create(GITEE_USER_API))
                     .timeout(Duration.ofSeconds(30))
                     .header("Authorization", "Bearer " + accessToken)
                     .header("Accept", "application/json")
@@ -160,29 +161,35 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
             // 检查 API 限流
             if (response.statusCode() == 403) {
                 String remaining = response.headers().firstValue("X-RateLimit-Remaining").orElse("unknown");
-                log.warn("GitHub API 限流: X-RateLimit-Remaining={}", remaining);
-                throw new BusinessException(502, "GitHub API 请求频率超限");
+                log.warn("Gitee API 限流: X-RateLimit-Remaining={}", remaining);
+                throw new BusinessException(502, "Gitee API 请求频率超限");
             }
 
             if (response.statusCode() != 200) {
-                log.error("GitHub 用户信息获取失败: status={}, body={}", response.statusCode(), response.body());
-                throw new BusinessException(502, "GitHub 用户信息获取失败");
+                log.error("Gitee 用户信息获取失败: status={}, body={}", response.statusCode(), response.body());
+                throw new BusinessException(502, "Gitee 用户信息获取失败");
             }
 
-            GitHubUser user = objectMapper.readValue(response.body(), GitHubUser.class);
-            log.info("GitHub 用户信息获取成功: id={}, login={}", user.getId(), user.getLogin());
+            JsonNode json = objectMapper.readTree(response.body());
+            String id = json.path("id").asText(null);
+            String login = json.path("login").asText(null);
+            String name = json.path("name").asText(null);
+            String email = json.path("email").asText(null);
+            String avatarUrl = json.path("avatar_url").asText(null);
+
+            log.info("Gitee 用户信息获取成功: id={}, login={}", id, login);
             return ProviderUser.builder()
-                    .providerUserId(String.valueOf(user.getId()))
-                    .username(user.getLogin())
-                    .displayName(user.getName())
-                    .email(user.getEmail())
-                    .avatarUrl(user.getAvatarUrl())
+                    .providerUserId(id)
+                    .username(login)
+                    .displayName(name)
+                    .email(email)
+                    .avatarUrl(avatarUrl)
                     .build();
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("GitHub API 调用失败（获取用户信息）", e);
-            throw new BusinessException(502, "GitHub API 调用失败");
+            log.error("Gitee API 调用失败（获取用户信息）", e);
+            throw new BusinessException(502, "Gitee API 调用失败");
         }
     }
 

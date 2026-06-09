@@ -17,6 +17,9 @@ public class OAuth2Properties {
     /** GitHub OAuth2 配置 */
     private GitHubProperties github = new GitHubProperties();
 
+    /** Gitee OAuth2 配置 */
+    private GiteeProperties gitee = new GiteeProperties();
+
     /** HMAC 签名密钥，用于 state 参数防篡改 */
     private String stateSecret = "omni-stack-oauth2-state-secret-change-in-production";
 
@@ -34,5 +37,18 @@ public class OAuth2Properties {
         private String clientSecret;
         /** GitHub 回调地址（需与 GitHub OAuth App 的 Authorization Callback URL 一致） */
         private String redirectUri = "http://localhost:8100/api/auth/oauth2/github/callback";
+    }
+
+    /**
+     * Gitee OAuth2 应用凭证。
+     */
+    @Data
+    public static class GiteeProperties {
+        /** Gitee OAuth2 应用的 Client ID */
+        private String clientId;
+        /** Gitee OAuth2 应用的 Client Secret */
+        private String clientSecret;
+        /** Gitee 回调地址（需与 Gitee OAuth2 应用的回调 URL 一致） */
+        private String redirectUri = "http://localhost:8100/api/auth/oauth2/gitee/callback";
     }
 }
