@@ -424,11 +424,11 @@ sequenceDiagram
 
 ---
 
-## Flow 4: OAuth2 社交登录（GitHub / Gitee）
+## Flow 4: OAuth2 社交登录（GitHub / Google / Gitee）
 
 ### 概述
 
-用户通过 GitHub 或 Gitee 账号一键登录系统。后端采用策略模式（Strategy Pattern），通过 `OAuth2ProviderHandler` 接口定义统一的 `buildAuthorizationUrl` / `exchangeCodeForAccessToken` / `fetchUserProfile` 方法，各提供商实现为独立的 `@Component`，由 Spring 的 `Map<String, OAuth2ProviderHandler>` 自动注入实现多提供商分发。当前已实现 GitHub 和 Gitee 两个提供商，前端 Google / WeChat 登录按钮为占位（暂未实现后端 Handler）。
+用户通过 GitHub、Google 或 Gitee 账号一键登录系统。后端采用策略模式（Strategy Pattern），通过 `OAuth2ProviderHandler` 接口定义统一的 `buildAuthorizationUrl` / `exchangeCodeForAccessToken` / `fetchUserProfile` 方法，各提供商实现为独立的 `@Component`，由 Spring 的 `Map<String, OAuth2ProviderHandler>` 自动注入实现多提供商分发。当前已实现 GitHub、Google 和 Gitee 三个提供商，前端 WeChat 登录按钮为占位（暂未实现后端 Handler）。
 
 前端发起 `window.location.href` 导航到 Auth 服务的 `/api/auth/oauth2/{provider}` 端点，Auth 服务根据 provider 参数选择对应的 Handler 实现，生成 HMAC 签名的 state 参数后 302 重定向到第三方授权页面。用户在第三方平台授权后，回调 Auth 服务，Auth 通过 Handler 完成 state 验证 → token 交换 → 用户信息获取 → 本地用户查找或自动创建 → JWT 签发，最终 302 重定向到前端回调页面（URL fragment 携带 JWT）。
 
@@ -441,17 +441,17 @@ sequenceDiagram
     participant G as Gateway :8102
     participant A as Auth :8100
     participant H as OAuth2ProviderHandler
-    participant P as Provider API (GitHub/Gitee)
+    participant P as Provider API (GitHub/Google/Gitee)
     participant M as MySQL
 
-    B->>F: 1. Click "GitHub / Gitee 登录"
+    B->>F: 1. Click "GitHub / Google / Gitee 登录"
     F->>F: 2. Build URL: /api/auth/oauth2/{provider}?tenant_id=1
     F->>B: 3. window.location.href 导航
     B->>G: 4. GET /api/auth/oauth2/github?tenant_id=1
     G->>A: 5. Proxy to Auth
     A->>A: 6. 校验提供商 + 租户合法性
     A->>A: 7. OAuth2StateUtils.createState(tenantId)
-    A-->>B: 8. 302 Redirect → Provider 授权页面（github.com 或 gitee.com）
+    A-->>B: 8. 302 Redirect → Provider 授权页面（github.com、accounts.google.com 或 gitee.com）
 
     B->>P: 9. Provider 授权页面（用户输入账号密码）
     P-->>B: 10. 302 Redirect → callback?code=XXX&state=YYY
@@ -460,9 +460,9 @@ sequenceDiagram
 
     A->>A: 13. OAuth2StateUtils.extractTenantId(state) 验证 HMAC
     A->>H: 14. Handler.exchangeCodeForAccessToken(code)
-    H->>P: 15. POST /login/oauth/access_token (或 /oauth/token)
+    H->>P: 15. POST /login/oauth/access_token (或 /oauth/token 或 oauth2.googleapis.com/token)
     P-->>H: 16. {access_token}
-    H->>P: 17. GET /user (或 /api/v5/user)
+    H->>P: 17. GET /user (或 /api/v5/user 或 /oauth2/v3/userinfo)
     P-->>H: 18. ProviderUser {id, login, email, avatar_url, name}
     H-->>A: 19. ProviderUser
 
@@ -510,7 +510,7 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
   |                    |                       |                     | 7. createState()     |                   |
   |                    |                       |                     |    HMAC-SHA256 sign  |                   |
   |                    |                       |                     |                     |                   |
-  | 8. 302 Redirect -> Provider 授权页面 (github.com 或 gitee.com)   |                   |
+  | 8. 302 Redirect -> Provider 授权页面 (github.com, accounts.google.com 或 gitee.com) |                   |
   |                    |                       |                     |                     |                   |
   | 9. Provider login  |                       |                     |                     |                   |
   |    (user/password) |                       |                     |                     |                   |
@@ -566,7 +566,7 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
 
 | 步骤 | 文件 | 职责 |
 |------|------|------|
-| 登录按钮 | `src/components/LoginForm.vue` | "GitHub / Gitee" 第三方登录按钮，调用 `getThirdPartyLoginUrl()` |
+| 登录按钮 | `src/components/LoginForm.vue` | "GitHub / Google / Gitee" 第三方登录按钮，调用 `getThirdPartyLoginUrl()` |
 | 前端发起 | `src/api/auth.ts` | `getThirdPartyLoginUrl(provider, tenantId)` 构建重定向 URL |
 | 回调页面 | `src/views/callback/index.vue` | 解析 URL fragment 中的 JWT，存储到 localStorage |
 | 登录发起端点 | `SocialLoginController.java` | `GET /api/auth/oauth2/{provider}` — state 生成 + 302 重定向 |
@@ -574,6 +574,7 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
 | 业务编排 | `SocialLoginServiceImpl.java` | 完整回调流程：state 验证 → Handler 分发 → 用户查找/创建 → JWT |
 | 策略接口 | `OAuth2ProviderHandler.java` | 策略接口，定义 `buildAuthorizationUrl` / `exchangeCodeForAccessToken` / `fetchUserProfile` |
 | GitHub 实现 | `GitHubOAuth2Handler.java` | GitHub OAuth2 实现（`@Component("github")`），构建授权 URL、换取 access_token、获取用户资料 |
+| Google 实现 | `GoogleOAuth2Handler.java` | Google OAuth2 实现（`@Component("google")`），通过本地代理访问 Google API，从邮箱派生用户名 |
 | Gitee 实现 | `GiteeOAuth2Handler.java` | Gitee OAuth2 实现（`@Component("gitee")`），对接 Gitee OAuth2 API |
 | 统一用户 DTO | `ProviderUser.java` | 统一的第三方用户信息 DTO，屏蔽各提供商字段差异 |
 | State 签名 | `OAuth2StateUtils.java` | HMAC-SHA256 签名生成与验证（`tenantId|timestamp|hmac`） |
@@ -602,6 +603,7 @@ OAuth2 state 参数采用 HMAC-SHA256 签名，格式为 `tenantId|timestamp|hma
 ```
 1. 用户名: 按提供商前缀生成
    - GitHub: gh_{login}（如 gh_wang-baohai）
+   - Google: go_{email_prefix}（如 go_john，取自 john@gmail.com）
    - Gitee:  ge_{login}（如 ge_zhang-san）
    - 冲突时 fallback: {prefix}_{login}_{provider_user_id}
 2. 昵称: 第三方平台 display name（无则取 login）
@@ -634,16 +636,16 @@ OAuth2 state 参数采用 HMAC-SHA256 签名，格式为 `tenantId|timestamp|hma
 | 用户拒绝授权 | 302 → `/login?error=user_denied` | 登录页提示"授权被拒绝" |
 | 回调参数缺失 | 302 → `/login?error=invalid_callback` | 登录页提示"无效回调" |
 | State 验证失败 | 抛出 BusinessException → 302 → `/login?error=social_login_failed` | 登录页提示错误信息 |
-| 第三方 API 错误 | 抛出 BusinessException（502） | 登录页提示"授权码换取失败"（GitHub: access_token 接口 / Gitee: token 接口） |
-| 用户信息获取失败 | 抛出 BusinessException（502） | 登录页提示"获取用户信息失败"（GitHub: /user 接口 / Gitee: /api/v5/user 接口） |
+| 第三方 API 错误 | 抛出 BusinessException（502） | 登录页提示"授权码换取失败"（GitHub: access_token 接口 / Google: token 接口 / Gitee: token 接口） |
+| 用户信息获取失败 | 抛出 BusinessException（502） | 登录页提示"获取用户信息失败"（GitHub: /user 接口 / Google: /oauth2/v3/userinfo 接口 / Gitee: /api/v5/user 接口） |
 | 用户已禁用 | 抛出 BusinessException（403） | 登录页提示"用户已被禁用" |
 
 ### Current Status
 
-- **OAuth2 社交登录**: 已实现 GitHub 和 Gitee，端到端完整实现并验证通过
+- **OAuth2 社交登录**: 已实现 GitHub、Google 和 Gitee，端到端完整实现并验证通过
 - **State 签名**: HMAC-SHA256 防篡改 + 防重放
-- **自动用户创建**: 首次第三方登录自动注册本地用户 + 身份关联（GitHub: `gh_` 前缀，Gitee: `ge_` 前缀）
+- **自动用户创建**: 首次第三方登录自动注册本地用户 + 身份关联（GitHub: `gh_` 前缀，Google: `go_` 前缀，Gitee: `ge_` 前缀）
 - **redirect_uri**: 支持配置化（`application.yml` + 环境变量覆盖）
 - **前端回调**: `/callback` 页面解析 URL fragment 中的 JWT 并自动登录
 - **策略模式**: `OAuth2ProviderHandler` 接口 + `Map<String, OAuth2ProviderHandler>` 注入，新增提供商仅需实现 Handler 接口
-- **多提供商扩展**: `sys_user_oauth_provider` 表支持 github/google/wechat/gitee，当前已实现 GitHub 和 Gitee，Google / WeChat 前端按钮为占位
+- **多提供商扩展**: `sys_user_oauth_provider` 表支持 github/google/wechat/gitee，当前已实现 GitHub、Google 和 Gitee，WeChat 前端按钮为占位

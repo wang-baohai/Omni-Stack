@@ -175,4 +175,4 @@ The social login framework uses the Strategy Pattern via `OAuth2ProviderHandler`
 
 `SocialLoginServiceImpl` automatically discovers new handlers via Spring's `Map<String, OAuth2ProviderHandler>` injection — no changes to the orchestration layer needed.
 
-**Currently implemented providers**: GitHub (`@Component("github")`), Gitee (`@Component("gitee")`).
+**Currently implemented providers**: GitHub (`@Component("github")`), Google (`@Component("google")`), Gitee (`@Component("gitee")`).

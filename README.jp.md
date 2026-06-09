@@ -11,6 +11,7 @@
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 — 最新のフルスタック技術
 - **Spring Cloud Gateway 5.x** (WebFlux) リアクティブゲートウェイ、Nacos サービスディスカバリと構成管理
 - **Sentinel** フロー制御とサーキットブレーカー、**OpenFeign** 宣言的サービス呼び出し
+- **マルチプロバイダーソーシャルログイン**: GitHub + Google + Gitee OAuth2 ワンクリックログイン（ストラテジーパターン `OAuth2ProviderHandler` 拡張可能）、フロントエンドに WeChat ログインエントリ予約済み、HMAC-SHA256 state 署名で改ざん防止、初回ログイン時自動ユーザー登録
 - **Vue 3.5** + TypeScript 5.9 + Vite 8 + Element Plus 2.14 モダンフロントエンド
 - **Pinia 3** 状態管理 + **Vue Router 5** ナビゲーションガード
 - **Harness 産業デザインパターン**: 三層ハイトモデル（Architecture → Patterns → Code）、`docs/` ディレクトリにシステム真実を格納
@@ -49,7 +50,8 @@ Omni-Stack/
 │   └── core-flows.md                  # ログイン/検索/送信フローのエンドツーエンド追跡
 ├── scripts/
 │   └── sql/
-│       └── init-all.sql               # 権威データベース初期化スクリプト（DDL + シードデータ）
+│       ├── init-all.sql               # 権威データベース初期化スクリプト（DDL + シードデータ）
+│       └── init-nacos.sql           # Nacos v3.1.1 MySQL 永続化初期化スクリプト
 ├── omni-backend/                    # Maven マルチモジュールバックエンド
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # 親 POM（依存関係管理）
@@ -120,6 +122,75 @@ Omni-Stack/
 | `NACOS_NAMESPACE` | (空) | Nacos 名前空間 |
 | `SENTINEL_DASHBOARD` | `127.0.0.1:8858` | Sentinel ダッシュボードアドレス |
 | `VITE_API_BASE_URL` | `/api` | フロントエンド API ベース URL |
+| `GITHUB_CLIENT_ID` | (内蔵) | GitHub OAuth App の Client ID |
+| `GITHUB_CLIENT_SECRET` | (内蔵) | GitHub OAuth App の Client Secret |
+| `GITHUB_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/github/callback` | GitHub 認可コールバック URL |
+| `GITEE_CLIENT_ID` | (内蔵) | Gitee OAuth App の Client ID |
+| `GITEE_CLIENT_SECRET` | (内蔵) | Gitee OAuth App の Client Secret |
+| `GITEE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/gitee/callback` | Gitee 認可コールバック URL |
+| `GOOGLE_CLIENT_ID` | (内蔵) | Google Cloud Console OAuth 2.0 クライアントの Client ID |
+| `GOOGLE_CLIENT_SECRET` | (内蔵) | Google Cloud Console OAuth 2.0 クライアントの Client Secret |
+| `GOOGLE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/google/callback` | Google 認可コールバック URL |
+| `OAUTH2_STATE_SECRET` | (内蔵) | OAuth2 state パラメータの HMAC-SHA256 署名キー、全ソーシャルログインプロバイダーで共有 |
+
+### ソーシャルログイン構成（GitHub / Google / Gitee）
+
+システムは `OAuth2ProviderHandler` ストラテジーパターンを採用しており、各プロバイダーがインターフェースを実装するだけで組み込めます。新しいプロバイダーの追加にコアロジックの変更は不要です。
+
+#### 1. OAuth クライアントの作成
+
+**GitHub**：
+
+1. GitHub にログイン → Settings → Developer settings → [OAuth Apps](https://github.com/settings/developers) → New OAuth App
+2. 以下を入力：
+   - **Application name**: Omni-Stack（任意の名前）
+   - **Homepage URL**: `http://localhost:3000`
+   - **Authorization callback URL**: `http://localhost:8100/api/auth/oauth2/github/callback`
+3. 作成後に **Client ID** と **Client Secret** をコピー
+
+**Google**：
+
+1. [Google Cloud Console](https://console.cloud.google.com/) にログイン → APIs & Services → Credentials
+2. OAuth 2.0 Client ID を作成（アプリケーションタイプは Web application を選択）
+3. Authorized redirect URIs に以下を追加：`http://localhost:8100/api/auth/oauth2/google/callback`
+4. 作成後に **Client ID** と **Client Secret** をコピー
+
+**Gitee**：
+
+1. Gitee にログイン → 設定 → [サードパーティアプリケーション](https://gitee.com/oauth/applications) → アプリケーション作成
+2. 以下を入力：
+   - **アプリケーション名**: Omni-Stack（任意の名前）
+   - **アプリケーションホームページ**: `http://localhost:3000`
+   - **アプリケーションコールバック URL**: `http://localhost:8100/api/auth/oauth2/gitee/callback`
+3. 作成後に **Client ID** と **Client Secret** をコピー
+
+#### 2. 認証情報の構成
+
+環境変数を設定するか、`omni-auth/src/main/resources/application.yml` を編集：
+
+```yaml
+auth:
+  oauth2:
+    github:
+      client-id: ${GITHUB_CLIENT_ID:あなたのClientID}
+      client-secret: ${GITHUB_CLIENT_SECRET:あなたのClientSecret}
+      redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/github/callback}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:あなたのClientID}
+      client-secret: ${GOOGLE_CLIENT_SECRET:あなたのClientSecret}
+      redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/google/callback}
+    gitee:
+      client-id: ${GITEE_CLIENT_ID:あなたのClientID}
+      client-secret: ${GITEE_CLIENT_SECRET:あなたのClientSecret}
+      redirect-uri: ${GITEE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/gitee/callback}
+    state-secret: ${OAUTH2_STATE_SECRET:あなたのStateSecret}
+```
+
+> **注意**：`redirect_uri` は対応する OAuth クライアントで設定したコールバック URL と完全に一致する必要があります。`state-secret` は state パラメータの HMAC-SHA256 署名に使用されるため、ランダムな文字列を設定してください。
+
+#### 3. 使用方法
+
+フロントエンドのログインページで「GitHub」、「Google」、または「Gitee」ボタンをクリックするとソーシャルログインが開始されます。初回ログイン時にローカルユーザーが自動作成されます（ユーザー名形式：GitHub は `gh_{login}`、Google は `go_{email_prefix}`、Gitee は `ge_{login}`）。
 
 ## クイックスタート
 
@@ -215,11 +286,13 @@ npm run dev
 
 Spring Security 7 + OAuth2 Authorization Server ベースの認証マイクロサービス:
 
-- ユーザーログイン: ユーザー名 + パスワード + キャプチャ + マルチテナント、RS256 JWT を発行
-- OAuth2 認可: Authorization Code + PKCE フロー、サードパーティ連携に対応
-- クライアント管理: `oauth2_registered_client` の CRUD、動的登録をサポート
-- マルチテナント RBAC: `tenantId:username` 形式のユーザー解決 + ロール権限ツリー
-- JWT 署名: RSA キーペア、JWK エンドポイントで Gateway に公開鍵を提供
+- **ユーザーログイン**: ユーザー名 + パスワード + キャプチャ + マルチテナント、RS256 JWT を発行
+- **マルチプロバイダーソーシャルログイン**: `OAuth2ProviderHandler` ストラテジーパターンに基づく拡張可能なソーシャルログインアーキテクチャ、GitHub・Google・Gitee の三つのプロバイダーを接入済み、フロントエンドに WeChat ログインエントリ予約済み。HMAC-SHA256 state 署名で改ざん防止、初回ログイン時にローカルユーザーを自動作成しサードパーティ ID を関連付け（`sys_user_oauth_provider` テーブル）
+- **OAuth2 認可**: Authorization Code + PKCE フロー、サードパーティ連携に対応
+- **デバイス認可グラント**（RFC 8628）：IoT デバイス、CLI ツールなどブラウザレス環境向けに `omni-device` クライアント経由で認可機能を提供。フロントエンドの `/device` ページでデバイス側の認可リクエストとトークンポーリングをシミュレートし、`/device/verify` ページでユーザーが別のデバイスでスキャンまたはコード入力により認可を完了
+- **クライアント管理**: `oauth2_registered_client` の CRUD、動的登録をサポート
+- **マルチテナント RBAC**: `tenantId:username` 形式のユーザー解決 + ロール権限ツリー
+- **JWT 署名**: RSA キーペア、JWK エンドポイントで Gateway に公開鍵を提供
 
 ### omni-gateway（API ゲートウェイ）
 
@@ -227,7 +300,7 @@ Spring Cloud Gateway Server (WebFlux) ベースのリアクティブゲートウ
 
 - ルート転送: Nacos 登録サービスのバックエンドに自動ルーティング（StripPrefix=2）
 - サービスディスカバリ: Nacos 登録サービスを自動ルーティング
-- 認証フィルター: `AuthFilter`（スタブ — トークン検証の拡張ポイント）
+- 認証フィルター: `AuthFilter`（JWT RS256 署名検証 + claims 抽出 + ID ヘッダー注入）
 - CORS 処理: `CorsConfig` によるクロスオリジンリクエスト対応
 
 ### omni-frontend（Vue 3 SPA）
@@ -237,7 +310,7 @@ Spring Cloud Gateway Server (WebFlux) ベースのリアクティブゲートウ
 | API | `src/api/` | ドメイン別ファイル、共有 Axios インスタンス、型安全 |
 | ストア | `src/stores/` | Pinia Composition API スタイル、ドメイン別ストア |
 | ルーター | `src/router/` | 遅延ロードルート + ナビゲーションガード（デフォルト認証必須） |
-| ビュー | `src/views/` | ページコンポーネント、SFC 順序: script → template → style |
+| ビュー | `src/views/` | ページコンポーネント、SFC 順序: script → template → style。OAuth2 デバイス認可グラントのフロントエンドインタラクション用 `device/` サブディレクトリを含む |
 | レイアウト | `src/layout/` | アプリシェル（サイドバー + ヘッダー + コンテンツエリア） |
 | 型 | `src/types/` | 共有型定義（ApiResponse, PageResult の単一ソース） |
 | スタイル | `src/styles/` | グローバルリセット + レイアウトスタイル |
@@ -330,6 +403,14 @@ cd omni-frontend && npm run build && npm run lint
 | Maven クラスバージョンエラー | JAVA_HOME が JDK 25 を指していない | `JAVA_HOME` を JDK 25 ディレクトリに設定 |
 | フロントエンド型不整合 | `ApiResponse` が複数箇所で定義されている | `@/types/api` からのみインポート — 重複定義禁止 |
 | Actuator gateway エンドポイント 404 | 明示的な有効化が必要 | `management.endpoint.gateway.enabled: true` を構成 |
+| GitHub ソーシャルログインコールバック 404 | OAuth App が未作成または Client ID がプレースホルダー | 上記「ソーシャルログイン構成」に従い GitHub OAuth App を作成し、実認証情報を記入 |
+| Google ソーシャルログインコールバック 404 | Google Cloud Console OAuth クライアントが未作成または Client ID がプレースホルダー | 上記「ソーシャルログイン構成」に従い Google Cloud Console で OAuth 2.0 クライアントを作成し、実認証情報を記入 |
+| Gitee ソーシャルログインコールバック 404 | Gitee サードパーティアプリケーションが未作成または Client ID がプレースホルダー | 上記「ソーシャルログイン構成」に従い Gitee でサードパーティアプリケーションを作成し、実認証情報を記入 |
+| Google ログイン後コールバックページで停止 | データベースに `sys_user_oauth_provider` テーブルが存在しない | `init-all.sql` が実行済みであることを確認。このテーブルは全プロバイダーのバインディングを保存 |
+| GitHub ログイン後コールバックページで停止 | データベースに `sys_user_oauth_provider` テーブルが存在しない | `init-all.sql` が実行済みであることを確認（同テーブルを含む）、または手動で作成 |
+| Gitee ログイン後コールバックページで停止 | GitHub と同じ — `sys_user_oauth_provider` テーブルが存在しない | `init-all.sql` が実行済みであることを確認。このテーブルは全プロバイダーのバインディングを保存 |
+| ソーシャルログイン state 署名検証失敗 | `OAUTH2_STATE_SECRET` が未構成または再起動後に変更 | 固定の `OAUTH2_STATE_SECRET` 環境変数を設定し、署名キーの一貫性を確保 |
+| Nacos 再起動後に構成が消える | 組み込み Derby データベース使用、永続化なし | 本プロジェクトの `init-nacos.sql` を使用して MySQL 外部ストレージに切り替え |
 
 ## AI ネイティブエンジニアリング実践
 

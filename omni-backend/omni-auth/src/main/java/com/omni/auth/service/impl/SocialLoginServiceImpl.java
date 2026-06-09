@@ -158,11 +158,12 @@ public class SocialLoginServiceImpl implements SocialLoginService {
      * 根据 provider 名称返回自动注册时的用户名前缀。
      *
      * @param provider 提供商标识
-     * @return 用户名前缀（如 github -> "gh_"，gitee -> "ge_"）
+     * @return 用户名前缀（如 github -> "gh_"，google -> "go_"，gitee -> "ge_"）
      */
     private static String getUsernamePrefix(String provider) {
         return switch (provider) {
             case "github" -> "gh_";
+            case "google" -> "go_";
             case "gitee" -> "ge_";
             default -> provider + "_";
         };

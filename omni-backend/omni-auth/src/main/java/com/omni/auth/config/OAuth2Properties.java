@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * OAuth2 第三方登录配置属性。
  * <p>
- * 绑定 {@code auth.oauth2.*} 配置节点，提供 GitHub 等第三方提供商的
+ * 绑定 {@code auth.oauth2.*} 配置节点，提供 GitHub、Google、Gitee 等第三方提供商的
  * 凭证信息及全局安全参数。
  * </p>
  */
@@ -20,8 +20,11 @@ public class OAuth2Properties {
     /** Gitee OAuth2 配置 */
     private GiteeProperties gitee = new GiteeProperties();
 
+    /** Google OAuth2 配置 */
+    private GoogleProperties google = new GoogleProperties();
+
     /** HMAC 签名密钥，用于 state 参数防篡改 */
-    private String stateSecret = "omni-stack-oauth2-state-secret-change-in-production";
+    private String stateSecret = "change-me-in-application-local-yml";
 
     /** 前端回调地址（社交登录成功后重定向目标） */
     private String frontendCallbackUrl = "http://localhost:3000/callback";
@@ -50,5 +53,18 @@ public class OAuth2Properties {
         private String clientSecret;
         /** Gitee 回调地址（需与 Gitee OAuth2 应用的回调 URL 一致） */
         private String redirectUri = "http://localhost:8100/api/auth/oauth2/gitee/callback";
+    }
+
+    /**
+     * Google OAuth2 应用凭证。
+     */
+    @Data
+    public static class GoogleProperties {
+        /** Google Cloud Console OAuth 2.0 客户端的 Client ID */
+        private String clientId;
+        /** Google Cloud Console OAuth 2.0 客户端的 Client Secret */
+        private String clientSecret;
+        /** Google 回调地址（需与 Google Cloud Console 的授权重定向 URI 一致） */
+        private String redirectUri = "http://localhost:8100/api/auth/oauth2/google/callback";
     }
 }

@@ -11,7 +11,7 @@
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 全栈最新技术
 - **Spring Cloud Gateway 5.x** (WebFlux) 响应式网关，Nacos 服务发现与配置中心
 - **Sentinel** 流控与熔断，**OpenFeign** 声明式服务调用
-- **多提供商社交登录**：已实现 GitHub + Gitee OAuth2 一键登录（策略模式 `OAuth2ProviderHandler` 可扩展），前端预留 Google / 微信登录入口，HMAC-SHA256 state 签名防篡改，首次登录自动注册
+- **多提供商社交登录**：已实现 GitHub + Google + Gitee OAuth2 一键登录（策略模式 `OAuth2ProviderHandler` 可扩展），前端预留微信登录入口，HMAC-SHA256 state 签名防篡改，首次登录自动注册
 - **Vue 3.5** + TypeScript 5.9 + Vite 8 + Element Plus 2.14 现代前端
 - **Pinia 3** 状态管理 + **Vue Router 5** 路由守卫
 - **Harness 工业设计模式**：三层高度模型（Architecture → Patterns → Code），docs/ 目录承载系统真相
@@ -128,9 +128,12 @@ Omni-Stack/
 | `GITEE_CLIENT_ID` | (内置) | Gitee OAuth App 的 Client ID |
 | `GITEE_CLIENT_SECRET` | (内置) | Gitee OAuth App 的 Client Secret |
 | `GITEE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/gitee/callback` | Gitee 授权回调地址 |
+| `GOOGLE_CLIENT_ID` | (内置) | Google Cloud Console OAuth 2.0 客户端的 Client ID |
+| `GOOGLE_CLIENT_SECRET` | (内置) | Google Cloud Console OAuth 2.0 客户端的 Client Secret |
+| `GOOGLE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/google/callback` | Google 授权回调地址 |
 | `OAUTH2_STATE_SECRET` | (内置) | OAuth2 state 参数的 HMAC-SHA256 签名密钥，所有社交登录提供商共用 |
 
-### 社交登录配置（GitHub / Gitee）
+### 社交登录配置（GitHub / Google / Gitee）
 
 系统采用 `OAuth2ProviderHandler` 策略模式，每个提供商实现该接口即可接入，新增提供商无需修改核心逻辑。
 
@@ -144,6 +147,13 @@ Omni-Stack/
    - **Homepage URL**: `http://localhost:3000`
    - **Authorization callback URL**: `http://localhost:8100/api/auth/oauth2/github/callback`
 3. 创建后复制 **Client ID** 和 **Client Secret**
+
+**Google**：
+
+1. 登录 [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials
+2. 创建 OAuth 2.0 Client ID（应用类型选择 Web application）
+3. 在 Authorized redirect URIs 中添加：`http://localhost:8100/api/auth/oauth2/google/callback`
+4. 创建后复制 **Client ID** 和 **Client Secret**
 
 **Gitee**：
 
@@ -165,6 +175,10 @@ auth:
       client-id: ${GITHUB_CLIENT_ID:你的ClientID}
       client-secret: ${GITHUB_CLIENT_SECRET:你的ClientSecret}
       redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/github/callback}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:你的ClientID}
+      client-secret: ${GOOGLE_CLIENT_SECRET:你的ClientSecret}
+      redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/google/callback}
     gitee:
       client-id: ${GITEE_CLIENT_ID:你的ClientID}
       client-secret: ${GITEE_CLIENT_SECRET:你的ClientSecret}
@@ -176,7 +190,7 @@ auth:
 
 #### 3. 使用
 
-前端登录页面点击 "GitHub" 或 "Gitee" 按钮即可发起社交登录。首次登录会自动创建本地用户（用户名格式：GitHub 为 `gh_{login}`，Gitee 为 `gitee_{login}`）。
+前端登录页面点击 "GitHub"、"Google" 或 "Gitee" 按钮即可发起社交登录。首次登录会自动创建本地用户（用户名格式：GitHub 为 `gh_{login}`，Google 为 `go_{email_prefix}`，Gitee 为 `ge_{login}`）。
 
 ## 快速开始
 
@@ -274,7 +288,7 @@ npm run dev
 基于 Spring Security 7 + OAuth2 Authorization Server 的认证微服务：
 
 - **用户登录**：用户名 + 密码 + 图形验证码 + 多租户，签发 RS256 JWT
-- **多提供商社交登录**：基于 `OAuth2ProviderHandler` 策略模式实现可扩展社交登录架构，已接入 GitHub 和 Gitee 两个提供商，前端预留 Google / 微信登录入口。HMAC-SHA256 state 签名防篡改，首次登录自动创建本地用户并关联第三方身份（`sys_user_oauth_provider` 表）
+- **多提供商社交登录**：基于 `OAuth2ProviderHandler` 策略模式实现可扩展社交登录架构，已接入 GitHub、Google 和 Gitee 三个提供商，前端预留微信登录入口。HMAC-SHA256 state 签名防篡改，首次登录自动创建本地用户并关联第三方身份（`sys_user_oauth_provider` 表）
 - **OAuth2 授权**：Authorization Code + PKCE 流程，支持第三方集成
 - **设备授权码模式**（RFC 8628）：为 IoT 设备、CLI 工具等无浏览器场景提供授权能力，通过 `omni-device` 客户端实现，前端 `/device` 页面模拟设备端发起授权请求并轮询 token，`/device/verify` 页面供用户在另一台设备上扫码或输入验证码完成授权
 - **客户端管理**：CRUD 操作 `oauth2_registered_client`，支持动态注册
@@ -391,7 +405,9 @@ cd omni-frontend && npm run build && npm run lint
 | 前端类型不匹配 | `ApiResponse` 在多处定义 | 只从 `@/types/api` 导入，禁止重复定义 |
 | Actuator gateway 端点 404 | 需显式启用 | 配置 `management.endpoint.gateway.enabled: true` |
 | GitHub 社交登录回调 404 | OAuth App 未创建或 Client ID 是占位符 | 按上方"社交登录配置"创建 GitHub OAuth App 并填入真实凭证 |
+| Google 社交登录回调 404 | Google Cloud Console OAuth 客户端未创建或 Client ID 是占位符 | 按上方"社交登录配置"在 Google Cloud Console 创建 OAuth 2.0 客户端并填入真实凭证 |
 | Gitee 社交登录回调 404 | Gitee 第三方应用未创建或 Client ID 是占位符 | 按上方"社交登录配置"在 Gitee 创建第三方应用并填入真实凭证 |
+| Google 登录后卡在回调页面 | 数据库缺少 `sys_user_oauth_provider` 表 | 确保 `init-all.sql` 已执行，该表同时存储所有提供商的绑定关系 |
 | GitHub 登录后卡在回调页面 | 数据库缺少 `sys_user_oauth_provider` 表 | 确保 `init-all.sql` 已执行（包含该表），或手动创建 |
 | Gitee 登录后卡在回调页面 | 同 GitHub，`sys_user_oauth_provider` 表缺失 | 确保 `init-all.sql` 已执行，该表同时存储所有提供商的绑定关系 |
 | 社交登录 state 签名验证失败 | `OAUTH2_STATE_SECRET` 未配置或重启后变更 | 设置固定的 `OAUTH2_STATE_SECRET` 环境变量，确保签名密钥一致 |

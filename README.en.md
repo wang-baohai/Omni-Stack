@@ -11,6 +11,7 @@
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 — full latest-gen stack
 - **Spring Cloud Gateway 5.x** (WebFlux) reactive gateway with Nacos service discovery and configuration
 - **Sentinel** flow control and circuit breaking, **OpenFeign** declarative service calls
+- **Multi-provider Social Login**: GitHub + Google + Gitee OAuth2 one-click login (Strategy Pattern `OAuth2ProviderHandler`, extensible), WeChat login entry reserved on frontend, HMAC-SHA256 state signing against tampering, auto-registration on first login
 - **Vue 3.5** + TypeScript 5.9 + Vite 8 + Element Plus 2.14 modern frontend
 - **Pinia 3** state management + **Vue Router 5** navigation guards
 - **Harness Industrial Design Pattern**: Three-Layer Height Model (Architecture → Patterns → Code), with `docs/` holding system truth
@@ -49,7 +50,8 @@ Omni-Stack/
 │   └── core-flows.md                  # Login / query / submission end-to-end traces
 ├── scripts/
 │   └── sql/
-│       └── init-all.sql               # Authoritative database initialization script (DDL + seed data)
+│       ├── init-all.sql               # Authoritative database initialization script (DDL + seed data)
+│       └── init-nacos.sql           # Nacos v3.1.1 MySQL persistence initialization script
 ├── omni-backend/                    # Maven multi-module backend
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # Parent POM (dependency management)
@@ -120,6 +122,75 @@ Browser :3000  --/api/**-->  Vite Proxy  -->  Gateway :8102  --lb://-->  Backend
 | `NACOS_NAMESPACE` | (empty) | Nacos namespace |
 | `SENTINEL_DASHBOARD` | `127.0.0.1:8858` | Sentinel dashboard address |
 | `VITE_API_BASE_URL` | `/api` | Frontend API base URL |
+| `GITHUB_CLIENT_ID` | (built-in) | GitHub OAuth App Client ID |
+| `GITHUB_CLIENT_SECRET` | (built-in) | GitHub OAuth App Client Secret |
+| `GITHUB_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/github/callback` | GitHub authorization callback URL |
+| `GITEE_CLIENT_ID` | (built-in) | Gitee OAuth App Client ID |
+| `GITEE_CLIENT_SECRET` | (built-in) | Gitee OAuth App Client Secret |
+| `GITEE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/gitee/callback` | Gitee authorization callback URL |
+| `GOOGLE_CLIENT_ID` | (built-in) | Google Cloud Console OAuth 2.0 Client ID |
+| `GOOGLE_CLIENT_SECRET` | (built-in) | Google Cloud Console OAuth 2.0 Client Secret |
+| `GOOGLE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/google/callback` | Google authorization callback URL |
+| `OAUTH2_STATE_SECRET` | (built-in) | HMAC-SHA256 signing key for OAuth2 state parameter, shared across all social login providers |
+
+### Social Login Configuration (GitHub / Google / Gitee)
+
+The system uses the `OAuth2ProviderHandler` Strategy Pattern — each provider implements the interface to plug in, and adding a new provider requires no changes to core logic.
+
+#### 1. Create OAuth Apps
+
+**GitHub**:
+
+1. Log in to GitHub → Settings → Developer settings → [OAuth Apps](https://github.com/settings/developers) → New OAuth App
+2. Fill in the following:
+   - **Application name**: Omni-Stack (any name)
+   - **Homepage URL**: `http://localhost:3000`
+   - **Authorization callback URL**: `http://localhost:8100/api/auth/oauth2/github/callback`
+3. Copy the **Client ID** and **Client Secret** after creation
+
+**Google**:
+
+1. Log in to [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials
+2. Create an OAuth 2.0 Client ID (select Web application as the application type)
+3. Add the following to Authorized redirect URIs: `http://localhost:8100/api/auth/oauth2/google/callback`
+4. Copy the **Client ID** and **Client Secret** after creation
+
+**Gitee**:
+
+1. Log in to Gitee → Settings → [Third-party Applications](https://gitee.com/oauth/applications) → Create Application
+2. Fill in the following:
+   - **Application name**: Omni-Stack (any name)
+   - **Application homepage**: `http://localhost:3000`
+   - **Application callback URL**: `http://localhost:8100/api/auth/oauth2/gitee/callback`
+3. Copy the **Client ID** and **Client Secret** after creation
+
+#### 2. Configure Credentials
+
+Set environment variables or edit `omni-auth/src/main/resources/application.yml`:
+
+```yaml
+auth:
+  oauth2:
+    github:
+      client-id: ${GITHUB_CLIENT_ID:your-client-id}
+      client-secret: ${GITHUB_CLIENT_SECRET:your-client-secret}
+      redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/github/callback}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:your-client-id}
+      client-secret: ${GOOGLE_CLIENT_SECRET:your-client-secret}
+      redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/google/callback}
+    gitee:
+      client-id: ${GITEE_CLIENT_ID:your-client-id}
+      client-secret: ${GITEE_CLIENT_SECRET:your-client-secret}
+      redirect-uri: ${GITEE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/gitee/callback}
+    state-secret: ${OAUTH2_STATE_SECRET:your-state-secret}
+```
+
+> **Note**: `redirect_uri` must exactly match the callback URL configured in the corresponding OAuth App. `state-secret` is used for HMAC-SHA256 signing of the state parameter — use a random string.
+
+#### 3. Usage
+
+Click the "GitHub", "Google", or "Gitee" button on the frontend login page to initiate social login. On first login, a local user is automatically created (username format: `gh_{login}` for GitHub, `go_{email_prefix}` for Google, `ge_{login}` for Gitee).
 
 ## Quick Start
 
@@ -215,11 +286,13 @@ Shared infrastructure for all backend modules. **Cannot run independently**:
 
 Authentication microservice built on Spring Security 7 + OAuth2 Authorization Server:
 
-- User login: username + password + captcha + multi-tenant, issues RS256 JWT
-- OAuth2 authorization: Authorization Code + PKCE flow for third-party integration
-- Client management: CRUD on `oauth2_registered_client`, supports dynamic registration
-- Multi-tenant RBAC: `tenantId:username` user resolution + role-permission tree
-- JWT signing: RSA key pair, JWK endpoint for Gateway public key verification
+- **User login**: username + password + captcha + multi-tenant, issues RS256 JWT
+- **Multi-provider Social Login**: extensible social login architecture based on `OAuth2ProviderHandler` Strategy Pattern, with GitHub, Google, and Gitee providers integrated; WeChat login entry reserved on frontend. HMAC-SHA256 state signing against tampering, auto-creates local user and links third-party identity on first login (`sys_user_oauth_provider` table)
+- **OAuth2 authorization**: Authorization Code + PKCE flow for third-party integration
+- **Device Authorization Grant** (RFC 8628): provides authorization for IoT devices, CLI tools, and other browserless scenarios via the `omni-device` client; frontend `/device` page simulates device-initiated authorization with token polling, and `/device/verify` page allows users to complete authorization by scanning or entering a code on another device
+- **Client management**: CRUD on `oauth2_registered_client`, supports dynamic registration
+- **Multi-tenant RBAC**: `tenantId:username` user resolution + role-permission tree
+- **JWT signing**: RSA key pair, JWK endpoint for Gateway public key verification
 
 ### omni-gateway (API Gateway)
 
@@ -227,7 +300,7 @@ Reactive gateway based on Spring Cloud Gateway Server (WebFlux):
 
 - Route forwarding: auto-routes to Nacos-registered backend services (StripPrefix=2)
 - Service discovery: auto-routes Nacos-registered services
-- Auth filter: `AuthFilter` (stub — extension point for token validation)
+- Auth filter: `AuthFilter` (JWT RS256 signature verification + claims extraction + identity header injection)
 - CORS handling: `CorsConfig` for cross-origin requests
 
 ### omni-frontend (Vue 3 SPA)
@@ -237,7 +310,7 @@ Reactive gateway based on Spring Cloud Gateway Server (WebFlux):
 | API | `src/api/` | One file per domain, shared Axios instance, type-safe |
 | Store | `src/stores/` | Pinia Composition API style, one store per domain |
 | Router | `src/router/` | Lazy-loaded routes + navigation guard (auth by default) |
-| Views | `src/views/` | Page components, SFC order: script → template → style |
+| Views | `src/views/` | Page components, SFC order: script → template → style; includes `device/` subdirectory for OAuth2 Device Authorization Grant frontend interaction |
 | Layout | `src/layout/` | App shell (sidebar + header + content area) |
 | Types | `src/types/` | Shared type definitions (single source for ApiResponse, PageResult) |
 | Styles | `src/styles/` | Global reset + layout styles |
@@ -330,6 +403,14 @@ See the Completion Checklist section in `AGENTS.md` for the full checklist.
 | Maven class version error | JAVA_HOME not pointing to JDK 25 | Set `JAVA_HOME` to your JDK 25 directory |
 | Frontend type mismatch | `ApiResponse` defined in multiple places | Import only from `@/types/api` — never duplicate |
 | Actuator gateway endpoint 404 | Requires explicit enablement | Configure `management.endpoint.gateway.enabled: true` |
+| GitHub social login callback 404 | OAuth App not created or Client ID is a placeholder | Create a GitHub OAuth App per "Social Login Configuration" above and fill in real credentials |
+| Google social login callback 404 | Google Cloud Console OAuth client not created or Client ID is a placeholder | Create an OAuth 2.0 client in Google Cloud Console per "Social Login Configuration" above and fill in real credentials |
+| Gitee social login callback 404 | Gitee third-party application not created or Client ID is a placeholder | Create a third-party application on Gitee per "Social Login Configuration" above and fill in real credentials |
+| Google login stuck on callback page | `sys_user_oauth_provider` table missing from database | Ensure `init-all.sql` has been executed; this table stores bindings for all providers |
+| GitHub login stuck on callback page | `sys_user_oauth_provider` table missing from database | Ensure `init-all.sql` has been executed (includes this table), or create it manually |
+| Gitee login stuck on callback page | Same as GitHub — `sys_user_oauth_provider` table missing | Ensure `init-all.sql` has been executed; this table stores bindings for all providers |
+| Social login state signature verification failure | `OAUTH2_STATE_SECRET` not configured or changed after restart | Set a fixed `OAUTH2_STATE_SECRET` environment variable to keep the signing key consistent |
+| Nacos loses configuration after restart | Uses embedded Derby database, no persistence | Use `init-nacos.sql` from this project to switch to external MySQL storage |
 
 ## AI-Native Engineering Practice
 

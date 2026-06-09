@@ -224,7 +224,8 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 
 ### Social Login Environment Variables
 
-社交登录功能需要配置以下环境变量（支持 GitHub 和 Gitee 两个提供商，基于 `OAuth2ProviderHandler` 策略模式可扩展）：
+社交登录功能需要配置以下环境变量（支持 GitHub、Google 和 Gitee 三个提供商，基于 `OAuth2ProviderHandler` 策略模式可扩展）。
+真实凭证存放在 `application-local.yml`（已被 `.gitignore` 排除），通过 `spring.profiles.group.dev.include: local` 在 dev 环境下自动加载。
 
 | 变量 | 说明 |
 |------|------|
@@ -234,6 +235,9 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 | `GITEE_CLIENT_ID` | Gitee 第三方应用的 Client ID |
 | `GITEE_CLIENT_SECRET` | Gitee 第三方应用的 Client Secret |
 | `GITEE_REDIRECT_URI` | Gitee 授权回调地址，默认 `http://localhost:8100/api/auth/oauth2/gitee/callback` |
+| `GOOGLE_CLIENT_ID` | Google Cloud Console OAuth 2.0 客户端的 Client ID |
+| `GOOGLE_CLIENT_SECRET` | Google Cloud Console OAuth 2.0 客户端的 Client Secret |
+| `GOOGLE_REDIRECT_URI` | Google 授权回调地址，默认 `http://localhost:8100/api/auth/oauth2/google/callback` |
 | `OAUTH2_STATE_SECRET` | OAuth2 state 参数的 HMAC-SHA256 签名密钥，所有提供商共用 |
 
 ## Testing

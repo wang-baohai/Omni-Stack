@@ -5,7 +5,7 @@ import com.omni.auth.dto.ProviderUser;
 /**
  * OAuth2 第三方登录处理器策略接口。
  * <p>
- * 每个第三方平台（GitHub、Gitee 等）提供各自的实现类，通过 Spring 的
+ * 每个第三方平台（GitHub、Google、Gitee 等）提供各自的实现类，通过 Spring 的
  * {@code Map<String, OAuth2ProviderHandler>} 自动注入机制，
  * 按 bean 名称（即 {@link #getProviderId()} 返回值）进行分发。
  * </p>
@@ -17,7 +17,7 @@ import com.omni.auth.dto.ProviderUser;
 public interface OAuth2ProviderHandler {
 
     /**
-     * 返回提供商标识（如 {@code "github"}、{@code "gitee"}）。
+     * 返回提供商标识（如 {@code "github"}、{@code "google"}、{@code "gitee"}）。
      * <p>
      * 该值同时作为 Spring bean 名称，用于 {@code Map<String, T>} 注入时的 key 匹配。
      * </p>
