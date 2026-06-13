@@ -649,3 +649,166 @@ OAuth2 state 参数采用 HMAC-SHA256 签名，格式为 `tenantId|timestamp|hma
 - **前端回调**: `/callback` 页面解析 URL fragment 中的 JWT 并自动登录
 - **策略模式**: `OAuth2ProviderHandler` 接口 + `Map<String, OAuth2ProviderHandler>` 注入，新增提供商仅需实现 Handler 接口
 - **多提供商扩展**: `sys_user_oauth_provider` 表支持 github/google/wechat/gitee，当前已实现 GitHub、Google 和 Gitee，WeChat 前端按钮为占位
+
+## Flow 5: RBAC 功能权限 — 动态菜单加载与按钮鉴权
+
+### Overview
+
+用户登录成功后，前端从后端获取动态菜单树（已按用户权限过滤），据此注册路由和渲染侧边栏。
+页面内的按钮通过 `v-permission` 指令控制显隐，API 层通过 `@PreAuthorize` 鉴权。
+
+### Sequence
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant F as Frontend :3000
+    participant G as Gateway :8102
+    participant A as Auth :8100
+    participant M as MySQL
+
+    B->>F: 1. 登录成功，路由守卫触发
+    F->>F: 2. permissionStore.initFromToken() 解析 JWT 中的权限编码
+    F->>G: 3. GET /api/auth/menus（携带 Authorization Bearer Token）
+    G->>A: 4. AuthFilter 验证 JWT → 注入 X-User-Id, X-Tenant-Id
+    A->>M: 5. PermissionService.getPermissionTree(tenantId) 查询租户权限树
+    M-->>A: 完整权限树
+    A->>A: 6. filterMenuNodes() 仅保留 DIRECTORY + MENU 类型
+    A->>A: 7. getCurrentUserPermissions() 从 SecurityContext 提取权限集合
+    A->>A: 8. filterByUserPermissions() 递归过滤：
+    A->>A:    - MENU 节点：保留权限编码匹配项
+    A->>A:    - DIRECTORY 节点：仅当有可见子节点时保留
+    A-->>F: 9. R<List<PermissionTreeNode>>（过滤后的菜单树）
+    F->>F: 10. permissionStore.menuTree = 菜单数据
+    F->>F: 11. 遍历菜单树 → addRoute() 动态注册 Vue Router 路由
+    F->>B: 12. 侧边栏渲染 permissionStore.menuTree
+    B->>F: 13. 用户点击某页面
+    F->>F: 14. 页面内 v-permission 指令检查权限编码
+    F->>F: 15. 无权限 → el.style.display = 'none'
+    F->>G: 16. 用户点击有权限的操作按钮 → API 请求
+    G->>A: 17. @PreAuthorize("hasAuthority('system:user:create')") 校验
+    A->>A: 18. Spring Security 比对 JWT 中的权限集合
+    A-->>F: 19. R<T> 操作结果
+```
+
+### Key Implementation Details
+
+**后端菜单过滤逻辑**（`MenuController`）：
+
+1. 查询租户完整权限树 → `permissionService.getPermissionTree(tenantId)`
+2. 第一步过滤：仅保留 `type = DIRECTORY | MENU` 的节点（丢弃 BUTTON 和 API）
+3. 第二步过滤：从 `SecurityContext` 提取当前用户权限集合（排除 `ROLE_` 前缀）
+4. 递归过滤：MENU 节点检查 `permissionCode` 是否在权限集合中；DIRECTORY 节点先递归处理子节点，仅当有可见子节点时保留
+5. 无法获取权限信息时降级返回全部菜单
+
+**前端按钮权限控制**（`v-permission` 指令）：
+
+```vue
+<el-button v-permission="'system:user:create'" type="primary">新增</el-button>
+<el-button v-permission="'system:user:update'" size="small">编辑</el-button>
+<el-button v-permission="'system:user:delete'" size="small" type="danger">删除</el-button>
+```
+
+- 使用 `display: none` 而非 `removeChild`，兼容 Vue 响应式更新
+- 在 `mounted` 和 `updated` 钩子中执行检查
+- 已应用页面：用户管理、角色管理、组织管理、租户管理、在线用户、OAuth2 客户端管理
+
+### Current Status
+
+- **动态菜单**：后端 `MenuController` 完整实现，前端 `usePermissionStore` 动态路由注册
+- **按钮权限**：`v-permission` 自定义指令已应用于 6 个管理页面（共 20+ 按钮）
+- **API 鉴权**：所有 Controller 的写操作方法均声明 `@PreAuthorize`
+- **权限编码格式**：`resource:action`（如 `system:user:create`）
+
+## Flow 6: RBAC 数据权限 — 请求级行数据过滤
+
+### Overview
+
+每次 HTTP 请求到达时，`DataScopeResolveFilter` 解析当前用户的数据范围，
+MyBatis-Plus `DataPermissionInterceptor` 自动为 `sys_user` 表查询追加 WHERE 条件，
+实现行级数据过滤，业务代码零侵入。
+
+### Sequence
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant G as Gateway :8102
+    participant F as Filter (DataScopeResolveFilter)
+    participant C as Context (DataScopeContext)
+    participant I as Interceptor (DataPermissionInterceptor)
+    participant H as Handler (DataPermissionHandlerImpl)
+    participant M as MySQL
+
+    B->>G: 1. GET /api/auth/user/list（携带 JWT）
+    G->>F: 2. AuthFilter 验证 JWT → 注入 X-User-Id=1, X-Tenant-Id=1
+    F->>M: 3. sysRoleMapper.selectRolesByUserId(1) 查询用户角色
+    M-->>F: [{role: "管理员", dataScope: "ALL"}, {role: "审计", dataScope: "DEPT"}]
+    F->>F: 4. 合并 dataScope：取最宽松 → "ALL"（优先级 1 < 4）
+    F->>M: 5. （DEPT*/CUSTOM 时）查询可访问组织单元 ID
+    F->>C: 6. DataScopeContext.set({userId:1, effectiveScope:"ALL", ...})
+    F->>I: 7. 继续过滤器链 → Controller → Service → Mapper
+    I->>H: 8. 拦截 sys_user SELECT → getSqlSegment(table, where, msId)
+    H->>C: 9. DataScopeContext.get() 读取 effectiveScope
+    H->>H: 10. ALL/TENANT → return null（不追加条件）
+    I->>M: 11. 执行原始 SQL（无额外 WHERE）
+    M-->>B: 12. 返回全部用户数据
+    F->>C: 13. finally { DataScopeContext.clear() }
+```
+
+### DataScope 过滤条件对照表
+
+| effectiveScope | SQL 追加条件 | 说明 |
+|---------------|-------------|------|
+| `ALL` | 无 | 跨租户可见全部数据 |
+| `TENANT` | 无 | 现有 `tenant_id` 过滤已满足 |
+| `DEPT` | `WHERE sys_user.primary_unit_id IN ({本部门ID})` | 仅本部门用户 |
+| `DEPT_AND_BELOW` | `WHERE sys_user.primary_unit_id IN ({本部门及后代ID})` | 本部门+下级 |
+| `CUSTOM` | `WHERE sys_user.primary_unit_id IN ({自定义部门+后代ID})` | 自定义范围 |
+| `SELF` | `WHERE sys_user.id = {当前用户ID}` | 仅自己 |
+
+### 组织单元后代查询
+
+`DEPT_AND_BELOW` 和 `CUSTOM` 范围需要查询组织单元的所有后代节点：
+
+```java
+// SysOrgUnitMapper
+List<Long> selectDescendantIdsByPath(String path);
+// SQL: SELECT id FROM sys_org_unit WHERE path LIKE '{path}%' AND id != {selfId}
+```
+
+利用 `sys_org_unit` 表的物化路径（`path` 字段，如 `1/2/5/`）实现高效的祖先-后代查询。
+
+### 内存过滤模式（在线用户场景）
+
+在线用户数据存储在 Redis 中，无法通过 SQL 拦截器过滤。Controller 从 `DataScopeContext` 读取数据范围，手动过滤：
+
+```java
+// OnlineUserController.list()
+List<OnlineUserVO> list = onlineUserService.listOnlineUsers();
+DataScopeContext.DataScopeInfo scope = DataScopeContext.get();
+if (scope != null) {
+    list = filterByDataScope(list, scope);
+}
+// ALL/TENANT → 全部，DEPT*/CUSTOM → 按 primaryUnitId 过滤，SELF → 仅自己
+```
+
+### 配置注册顺序
+
+```java
+// MyBatisPlusConfig
+MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+// 数据权限必须在分页拦截器之前注册
+interceptor.addInnerInterceptor(new DataPermissionInterceptor(new DataPermissionHandlerImpl()));
+interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+```
+
+**原因**：分页拦截器执行 `SELECT COUNT(*)` 查询时，数据权限条件必须已追加，否则 COUNT 结果与实际数据不一致。
+
+### Current Status
+
+- **SQL 拦截**：`DataPermissionInterceptor` + `DataPermissionHandlerImpl` 完整实现，当前仅过滤 `sys_user` 表
+- **请求级上下文**：`DataScopeResolveFilter` + `DataScopeContext` ThreadLocal 管理
+- **多角色合并**：最宽松优先策略已实现
+- **内存过滤**：`OnlineUserController` 已实现基于 `primaryUnitId` 的内存过滤
+- **物化路径查询**：`SysOrgUnitMapper.selectDescendantIdsByPath()` 高效获取后代节点

@@ -43,11 +43,11 @@ Omni-Stack/
 ├── AGENTS.md                        # AI 実行マニュアル（制約 + ビルドコマンド + チェックリスト）
 ├── docker-compose.yml               # ミドルウェアオーケストレーション（MySQL, Redis, Nacos, Sentinel）
 ├── docs/                            # システム真実ドキュメント（Architecture + Patterns + Contract）
-│   ├── architecture.md                # システム境界、モジュールマップ、データフロー、制約
+│   ├── architecture.md                # システム境界、モジュールマップ、データフロー、RBAC 権限システム
 │   ├── api-contract.md                # レスポンス形式、エラーコード、ページネーション、命名規則
-│   ├── backend-patterns.md            # バックエンド階層化、バリデーション、例外、ログ、OOP 規約
-│   ├── frontend-patterns.md           # フロントエンド構成、API 層、状態管理、コンポーネント規約
-│   └── core-flows.md                  # ログイン/検索/送信フローのエンドツーエンド追跡
+│   ├── backend-patterns.md            # バックエンド階層化、バリデーション、例外、ログ、セキュリティ、OOP 規約
+│   ├── frontend-patterns.md           # フロントエンド構成、API 層、状態管理、権限制御、コンポーネント規約
+│   └── core-flows.md                  # ログイン/OAuth2/RBAC 権限フローのエンドツーエンド追跡
 ├── scripts/
 │   └── sql/
 │       ├── init-all.sql               # 権威データベース初期化スクリプト（DDL + シードデータ）
@@ -292,6 +292,7 @@ Spring Security 7 + OAuth2 Authorization Server ベースの認証マイクロ�
 - **デバイス認可グラント**（RFC 8628）：IoT デバイス、CLI ツールなどブラウザレス環境向けに `omni-device` クライアント経由で認可機能を提供。フロントエンドの `/device` ページでデバイス側の認可リクエストとトークンポーリングをシミュレートし、`/device/verify` ページでユーザーが別のデバイスでスキャンまたはコード入力により認可を完了
 - **クライアント管理**: `oauth2_registered_client` の CRUD、動的登録をサポート
 - **マルチテナント RBAC**: `tenantId:username` 形式のユーザー解決 + ロール権限ツリー
+- **RBAC 権限システム**: 機能権限（動的メニューフィルタリング + `v-permission` ボタンレベル制御 + `@PreAuthorize` API 認可）+ データ権限（MyBatis-Plus `DataPermissionInterceptor` SQL 自動インターセプト、6 レベル dataScope ゼロ侵入フィルタリング）
 - **JWT 署名**: RSA キーペア、JWK エンドポイントで Gateway に公開鍵を提供
 
 ### omni-gateway（API ゲートウェイ）
@@ -314,6 +315,35 @@ Spring Cloud Gateway Server (WebFlux) ベースのリアクティブゲートウ
 | レイアウト | `src/layout/` | アプリシェル（サイドバー + ヘッダー + コンテンツエリア） |
 | 型 | `src/types/` | 共有型定義（ApiResponse, PageResult の単一ソース） |
 | スタイル | `src/styles/` | グローバルリセット + レイアウトスタイル |
+
+## RBAC 権限システム
+
+プロジェクトは完全な RBAC 権限モデルを実装しており、機能権限とデータ権限の二つの独立サブシステムに分かれています。詳細な設計は [`docs/architecture.md`](docs/architecture.md) の RBAC Permission System セクションを、エンドツーエンドフローは [`docs/core-flows.md`](docs/core-flows.md) の Flow 5 と Flow 6 を参照してください。
+
+### 機能権限
+
+ユーザーが「何ができるか」を制御する三層防護：
+
+| 層 | メカニズム | 実装 |
+|----|-----------|------|
+| 動的メニュー | バックエンドがユーザー権限に基づきメニューツリーを再帰フィルタリング | `MenuController` -> `usePermissionStore` -> 動的ルート登録 |
+| ボタン制御 | Vue カスタムディレクティブによる DOM 表示/非表示制御 | `v-permission="'system:user:create'"` -> `display:none` |
+| API 認可 | Spring Security メソッドレベル権限チェック | `@PreAuthorize("hasAuthority('system:user:create')")` |
+
+### データ権限
+
+MyBatis-Plus `DataPermissionInterceptor` による SQL 自動インターセプト — ビジネスコードへのゼロ侵入で、ユーザーが「どのデータを見られるか」を制御：
+
+| dataScope | 説明 |
+|-----------|------|
+| `ALL` | 全データ（テナント間） |
+| `TENANT` | 自テナントの全データ |
+| `DEPT_AND_BELOW` | 自部門および下位部門 |
+| `DEPT` | 自部門のみ |
+| `CUSTOM` | カスタム部門セット |
+| `SELF` | 自分のデータのみ |
+
+**コアフロー**：リクエスト到着 -> `DataScopeResolveFilter` がロールの dataScope を解決（最も寛大なものが優先）-> `DataScopeContext`（ThreadLocal）に書き込み -> `DataPermissionInterceptor` が WHERE 条件を自動追加 -> リクエスト完了時にコンテキストをクリア。
 
 ## 統一レスポンス形式
 
@@ -359,8 +389,8 @@ Spring Cloud Gateway Server (WebFlux) ベースのリアクティブゲートウ
 
 | 層 | 内容 | 場所 |
 |----|------|------|
-| Layer 1: Architecture | システム境界、モジュール責任、データフロー、制約 | `docs/architecture.md` |
-| Layer 2: Patterns | バックエンド/フロントエンドコーディングパターン、API 契約、コアフロー | `docs/backend-patterns.md`、`docs/frontend-patterns.md`、`docs/api-contract.md`、`docs/core-flows.md` |
+| Layer 1: Architecture | システム境界、モジュール責任、データフロー、RBAC 権限システム、制約 | `docs/architecture.md` |
+| Layer 2: Patterns | バックエンド/フロントエンドコーディングパターン、API 契約、セキュリティ、コアフロー | `docs/backend-patterns.md`、`docs/frontend-patterns.md`、`docs/api-contract.md`、`docs/core-flows.md` |
 | Layer 3: Code | 具体的な関数、クラス、コンポーネント実装 | ソースファイル |
 
 **ルール**: コードを変更する前に、対応する `docs/` ドキュメントを確認してください。アーキテクチャや契約が変更される場合は、まず `docs/` を更新してからコードを修正します。

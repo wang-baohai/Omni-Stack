@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.omni.auth.entity.SysUser;
 import com.omni.auth.mapper.SysUserMapper;
+import com.omni.auth.mapper.SysUserRoleMapper;
 import com.omni.auth.service.UserService;
 import com.omni.common.core.result.PageResult;
+import com.omni.common.core.result.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +30,8 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
 
     /** 用户 Mapper */
     private final SysUserMapper sysUserMapper;
+    /** 用户角色关联 Mapper */
+    private final SysUserRoleMapper sysUserRoleMapper;
     /** 密码编码器 */
     private final PasswordEncoder passwordEncoder;
 
@@ -89,5 +94,56 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
                 new LambdaQueryWrapper<SysUser>()
                         .eq(SysUser::getTenantId, tenantId));
         return new PageResult<>(mpPage.getRecords(), mpPage.getTotal(), mpPage.getSize(), mpPage.getCurrent());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SysUser getById(Long id) {
+        SysUser user = sysUserMapper.selectById(id);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        return user;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>先删除用户的全部角色关联，再逐条插入（全量替换策略）。</p>
+     */
+    @Override
+    @Transactional
+    public void assignRoles(Long userId, List<Long> roleIds) {
+        sysUserRoleMapper.deleteByUserId(userId);
+        if (roleIds != null) {
+            for (Long roleId : roleIds) {
+                sysUserRoleMapper.insert(userId, roleId);
+            }
+        }
+        log.info("已为用户 {} 分配 {} 个角色", userId, roleIds == null ? 0 : roleIds.size());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Long> getUserRoleIds(Long userId) {
+        return sysUserRoleMapper.selectRoleIdsByUserId(userId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void toggleStatus(Long userId, Integer status) {
+        SysUser user = sysUserMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        user.setStatus(status);
+        sysUserMapper.updateById(user);
+        log.info("已切换用户 {} 状态为 {}", user.getUsername(), status == 1 ? "启用" : "禁用");
     }
 }

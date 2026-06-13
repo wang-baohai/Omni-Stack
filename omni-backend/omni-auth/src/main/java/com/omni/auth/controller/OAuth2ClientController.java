@@ -9,6 +9,7 @@ import com.omni.common.core.result.R;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,6 +44,7 @@ public class OAuth2ClientController {
      * @return 分页客户端列表
      */
     @GetMapping("/list")
+    @PreAuthorize("hasAuthority('system:oauth2:list')")
     public R<PageResult<OAuth2ClientVO>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -56,6 +58,7 @@ public class OAuth2ClientController {
      * @return 客户端详情
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('system:oauth2:list')")
     public R<OAuth2ClientVO> get(@PathVariable String id) {
         OAuth2ClientVO client = oAuth2ClientService.getClient(id);
         if (client == null) {
@@ -71,6 +74,7 @@ public class OAuth2ClientController {
      * @return 创建后的客户端详情
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('system:oauth2:create')")
     public R<OAuth2ClientVO> create(@Valid @RequestBody CreateOAuth2ClientRequest request) {
         return R.ok(oAuth2ClientService.createClient(request));
     }
@@ -83,6 +87,7 @@ public class OAuth2ClientController {
      * @return 更新后的客户端详情
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('system:oauth2:update')")
     public R<OAuth2ClientVO> update(@PathVariable String id,
                                     @Valid @RequestBody UpdateOAuth2ClientRequest request) {
         return R.ok(oAuth2ClientService.updateClient(id, request));
@@ -95,6 +100,7 @@ public class OAuth2ClientController {
      * @return 操作结果
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('system:oauth2:delete')")
     public R<Void> delete(@PathVariable String id) {
         oAuth2ClientService.deleteClient(id);
         return R.ok(null);

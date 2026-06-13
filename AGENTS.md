@@ -26,11 +26,11 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 
 | Document | Purpose |
 |----------|---------|
-| `docs/architecture.md` | System boundaries, module map, data flow, constraints |
+| `docs/architecture.md` | System boundaries, module map, data flow, RBAC permission system, constraints |
 | `docs/api-contract.md` | Response format, error codes, pagination, naming |
-| `docs/backend-patterns.md` | Java layering, validation, exceptions, logging, OOP rules |
-| `docs/frontend-patterns.md` | Vue/TS patterns, state management, routing, component conventions |
-| `docs/core-flows.md` | End-to-end traces of login (password + captcha, GitHub social, Gitee social, device code), list query, and form submission |
+| `docs/backend-patterns.md` | Java layering, validation, exceptions, logging, security & data permission, OOP rules |
+| `docs/frontend-patterns.md` | Vue/TS patterns, state management, routing, permission control, component conventions |
+| `docs/core-flows.md` | End-to-end traces of login (password + captcha, GitHub social, Gitee social, device code), RBAC functional permission (Flow 5), data permission (Flow 6) |
 
 ## Entry Points
 
@@ -50,6 +50,15 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Gateway config: `omni-backend/omni-gateway/src/main/resources/application.yml`
 - Business config: `omni-backend/omni-business/src/main/resources/application.yml`
 - Vite config: `omni-frontend/vite.config.ts`
+
+**RBAC & Permission:**
+- Data scope filter: `omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeResolveFilter.java`
+- Data permission handler: `omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataPermissionHandlerImpl.java`
+- Data scope context: `omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeContext.java`
+- MyBatis-Plus config: `omni-backend/omni-auth/src/main/java/com/omni/auth/config/MyBatisPlusConfig.java`
+- Dynamic menu controller: `omni-backend/omni-auth/src/main/java/com/omni/auth/controller/MenuController.java`
+- Permission store: `omni-frontend/src/stores/permission.ts`
+- v-permission directive: `omni-frontend/src/directives/permission.ts`
 
 ## Build & Run Commands
 
@@ -164,6 +173,10 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Vue SFC order: `<script setup>` -> `<template>` -> `<style scoped>`.
 - TODO format: `// TODO: [module] description`.
 - All code comments in Chinese (backend Javadoc, frontend JSDoc).
+- `DataPermissionInterceptor` must be registered before `PaginationInnerInterceptor` in `MyBatisPlusConfig`.
+- `DataScopeContext` ThreadLocal must be cleared in `finally` block to prevent memory leaks.
+- Write operations on Controller must declare `@PreAuthorize` with `resource:action` format permission codes.
+- `v-permission` directive uses `display:none` (not `removeChild`) for Vue reactivity compatibility.
 
 ## Execution Rules
 
@@ -174,6 +187,9 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - After backend changes: run `cd omni-backend && ./mvnw clean install` to verify compilation.
 - After frontend changes: run `npm run build` and `npm run lint` in `omni-frontend/`.
 - Use `./mvnw` (not `mvn`) for all Maven commands.
+- Before adding new write-operation endpoints: declare `@PreAuthorize` with `resource:action` permission codes and update `sys_permission` seed data in `scripts/sql/init-all.sql`.
+- Before adding data permission to a new table: update `DataPermissionHandlerImpl` with the target table name and column mapping; ensure `DataPermissionInterceptor` is registered before `PaginationInnerInterceptor`.
+- Before adding frontend buttons: add `v-permission` directive with the corresponding permission code.
 
 ## Completion Checklist
 

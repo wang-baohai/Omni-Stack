@@ -40,7 +40,7 @@ async function loadClients() {
     clients.value = res.data.records
     pagination.total = res.data.total
   } catch {
-    ElMessage.error('加载客户端列表失败')
+    ElMessage.error(t('oauth2Client.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -105,7 +105,7 @@ onMounted(() => {
   <div class="oauth2-client-page">
     <div class="page-header">
       <h2>{{ t('common.oauth2Clients') }}</h2>
-      <el-button type="primary" @click="handleCreate">
+      <el-button v-permission="'system:oauth2:create'" type="primary" @click="handleCreate">
         {{ t('common.create') }}
       </el-button>
     </div>
@@ -139,10 +139,10 @@ onMounted(() => {
       </el-table-column>
       <el-table-column label="操作" width="160" fixed="right">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="handleEdit(row)">
+          <el-button v-permission="'system:oauth2:update'" type="primary" link size="small" @click="handleEdit(row)">
             {{ t('common.edit') }}
           </el-button>
-          <el-button type="danger" link size="small" @click="handleDelete(row)">
+          <el-button v-permission="'system:oauth2:delete'" type="danger" link size="small" @click="handleDelete(row)">
             {{ t('common.delete') }}
           </el-button>
         </template>

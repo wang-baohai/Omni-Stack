@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * JWT 令牌服务实现，使用授权服务器的 {@link JWKSource} 中的 RSA 密钥对进行令牌签名。
@@ -105,6 +106,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         // 构建 JWT Claims：身份 + 授权 + 时间
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .subject(user.getId().toString())       // sub: 用户 ID（字符串格式）
+                .jwtID(UUID.randomUUID().toString())    // jti: 唯一标识，用于 Token 黑名单
                 .claim("tenant_id", user.getTenantId()) // tenant_id: 多租户隔离
                 .claim("username", user.getUsername())   // username: 显示和审计用途
                 .claim("roles", roles)                   // roles: 角色编码列表

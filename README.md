@@ -43,11 +43,11 @@ Omni-Stack/
 ├── AGENTS.md                        # AI 执行手册（硬约束 + 构建命令 + 检查清单）
 ├── docker-compose.yml               # 中间件编排（MySQL, Redis, Nacos, Sentinel）
 ├── docs/                            # 系统真相文档（Architecture + Patterns + Contract）
-│   ├── architecture.md                # 系统边界、模块地图、数据流、约束
+│   ├── architecture.md                # 系统边界、模块地图、数据流、RBAC 权限体系
 │   ├── api-contract.md                # 响应格式、错误码、分页、命名规范
-│   ├── backend-patterns.md            # 后端分层、校验、异常、日志、OOP 规约
-│   ├── frontend-patterns.md           # 前端目录、API 层、状态管理、组件约定
-│   └── core-flows.md                  # 登录/查询/提交流程端到端追踪
+│   ├── backend-patterns.md            # 后端分层、校验、异常、日志、安全权限、OOP 规约
+│   ├── frontend-patterns.md           # 前端目录、API 层、状态管理、权限控制、组件约定
+│   └── core-flows.md                  # 登录/OAuth2/RBAC 权限流程端到端追踪
 ├── scripts/
 │   └── sql/
 │       ├── init-all.sql               # 权威数据库初始化脚本（DDL + 种子数据）
@@ -293,6 +293,7 @@ npm run dev
 - **设备授权码模式**（RFC 8628）：为 IoT 设备、CLI 工具等无浏览器场景提供授权能力，通过 `omni-device` 客户端实现，前端 `/device` 页面模拟设备端发起授权请求并轮询 token，`/device/verify` 页面供用户在另一台设备上扫码或输入验证码完成授权
 - **客户端管理**：CRUD 操作 `oauth2_registered_client`，支持动态注册
 - **多租户 RBAC**：基于 `tenantId:username` 格式的用户解析 + 角色权限树
+- **RBAC 权限体系**：功能权限（动态菜单过滤 + `v-permission` 按钮级控制 + `@PreAuthorize` API 鉴权）+ 数据权限（MyBatis-Plus `DataPermissionInterceptor` SQL 自动拦截，六级 dataScope 零侵入过滤）
 - **JWT 签名**：RSA 密钥对，JWK 端点供 Gateway 获取公钥验证
 
 ### omni-gateway（API 网关）
@@ -315,6 +316,35 @@ npm run dev
 | 布局层 | `src/layout/` | 侧边栏 + 顶栏 + 内容区应用外壳 |
 | 类型层 | `src/types/` | 共享类型定义（ApiResponse, PageResult 的唯一来源） |
 | 样式层 | `src/styles/` | 全局重置 + 布局样式 |
+
+## RBAC 权限体系
+
+项目实现了完整的 RBAC 权限模型，分为功能权限和数据权限两个独立子系统。详细设计见 [`docs/architecture.md`](docs/architecture.md) 的 RBAC Permission System 章节，端到端流程见 [`docs/core-flows.md`](docs/core-flows.md) 的 Flow 5 和 Flow 6。
+
+### 功能权限
+
+三层防护控制用户"能做什么"：
+
+| 层级 | 机制 | 实现 |
+|------|------|------|
+| 动态菜单 | 后端按用户权限递归过滤菜单树 | `MenuController` → `usePermissionStore` → 动态路由注册 |
+| 按钮控制 | Vue 自定义指令控制 DOM 显隐 | `v-permission="'system:user:create'"` → `display:none` |
+| API 鉴权 | Spring Security 方法级权限校验 | `@PreAuthorize("hasAuthority('system:user:create')")` |
+
+### 数据权限
+
+基于 MyBatis-Plus `DataPermissionInterceptor` 的 SQL 自动拦截，业务代码零侵入，控制用户"能看哪些数据"：
+
+| dataScope | 含义 |
+|-----------|------|
+| `ALL` | 所有数据（跨租户） |
+| `TENANT` | 本租户所有数据 |
+| `DEPT_AND_BELOW` | 本部门及下级部门 |
+| `DEPT` | 仅本部门 |
+| `CUSTOM` | 自定义部门集合 |
+| `SELF` | 仅自己 |
+
+**核心流程**：请求到达 → `DataScopeResolveFilter` 解析角色 dataScope（最宽松优先） → 写入 `DataScopeContext`（ThreadLocal）→ `DataPermissionInterceptor` 自动追加 WHERE 条件 → 请求结束清除上下文。
 
 ## 统一响应格式
 
@@ -360,8 +390,8 @@ npm run dev
 
 | 层级 | 内容 | 位置 |
 |------|------|------|
-| Layer 1: Architecture | 系统边界、模块职责、数据流、约束 | `docs/architecture.md` |
-| Layer 2: Patterns | 后端/前端编码模式、API 契约、核心流程 | `docs/backend-patterns.md`、`docs/frontend-patterns.md`、`docs/api-contract.md`、`docs/core-flows.md` |
+| Layer 1: Architecture | 系统边界、模块职责、数据流、RBAC 权限体系、约束 | `docs/architecture.md` |
+| Layer 2: Patterns | 后端/前端编码模式、API 契约、安全权限、核心流程 | `docs/backend-patterns.md`、`docs/frontend-patterns.md`、`docs/api-contract.md`、`docs/core-flows.md` |
 | Layer 3: Code | 具体的函数、类、组件实现 | 源代码文件 |
 
 **规则**：修改代码前，先确认对应的 docs/ 文档。如果架构或契约发生变化，必须先更新 docs/ 再改代码。

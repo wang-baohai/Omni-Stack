@@ -43,11 +43,11 @@ Omni-Stack/
 ├── AGENTS.md                        # AI execution manual (constraints + build commands + checklist)
 ├── docker-compose.yml               # Middleware orchestration (MySQL, Redis, Nacos, Sentinel)
 ├── docs/                            # System truth documents (Architecture + Patterns + Contract)
-│   ├── architecture.md                # System boundaries, module map, data flow, constraints
+│   ├── architecture.md                # System boundaries, module map, data flow, RBAC permission system
 │   ├── api-contract.md                # Response format, error codes, pagination, naming
-│   ├── backend-patterns.md            # Backend layering, validation, exceptions, logging, OOP
-│   ├── frontend-patterns.md           # Frontend directory, API layer, state, components
-│   └── core-flows.md                  # Login / query / submission end-to-end traces
+│   ├── backend-patterns.md            # Backend layering, validation, exceptions, logging, security, OOP
+│   ├── frontend-patterns.md           # Frontend directory, API layer, state, permission control, components
+│   └── core-flows.md                  # Login / OAuth2 / RBAC permission end-to-end traces
 ├── scripts/
 │   └── sql/
 │       ├── init-all.sql               # Authoritative database initialization script (DDL + seed data)
@@ -292,6 +292,7 @@ Authentication microservice built on Spring Security 7 + OAuth2 Authorization Se
 - **Device Authorization Grant** (RFC 8628): provides authorization for IoT devices, CLI tools, and other browserless scenarios via the `omni-device` client; frontend `/device` page simulates device-initiated authorization with token polling, and `/device/verify` page allows users to complete authorization by scanning or entering a code on another device
 - **Client management**: CRUD on `oauth2_registered_client`, supports dynamic registration
 - **Multi-tenant RBAC**: `tenantId:username` user resolution + role-permission tree
+- **RBAC Permission System**: Functional permissions (dynamic menu filtering + `v-permission` button-level control + `@PreAuthorize` API authorization) + Data permissions (MyBatis-Plus `DataPermissionInterceptor` SQL auto-interception, six-level dataScope zero-intrusion filtering)
 - **JWT signing**: RSA key pair, JWK endpoint for Gateway public key verification
 
 ### omni-gateway (API Gateway)
@@ -314,6 +315,35 @@ Reactive gateway based on Spring Cloud Gateway Server (WebFlux):
 | Layout | `src/layout/` | App shell (sidebar + header + content area) |
 | Types | `src/types/` | Shared type definitions (single source for ApiResponse, PageResult) |
 | Styles | `src/styles/` | Global reset + layout styles |
+
+## RBAC Permission System
+
+The project implements a complete RBAC permission model, split into two independent subsystems: functional permissions and data permissions. See [`docs/architecture.md`](docs/architecture.md) (RBAC Permission System section) for detailed design, and [`docs/core-flows.md`](docs/core-flows.md) (Flow 5 & 6) for end-to-end flows.
+
+### Functional Permissions
+
+Three-layer defense controlling what users "can do":
+
+| Layer | Mechanism | Implementation |
+|-------|-----------|---------------|
+| Dynamic menus | Backend recursively filters menu tree by user permissions | `MenuController` -> `usePermissionStore` -> dynamic route registration |
+| Button control | Vue custom directive controls DOM visibility | `v-permission="'system:user:create'"` -> `display:none` |
+| API authorization | Spring Security method-level permission check | `@PreAuthorize("hasAuthority('system:user:create')")` |
+
+### Data Permissions
+
+SQL auto-interception based on MyBatis-Plus `DataPermissionInterceptor` — zero intrusion on business code, controlling what data users "can see":
+
+| dataScope | Description |
+|-----------|-------------|
+| `ALL` | All data (cross-tenant) |
+| `TENANT` | All data within own tenant |
+| `DEPT_AND_BELOW` | Own department and sub-departments |
+| `DEPT` | Own department only |
+| `CUSTOM` | Custom department set |
+| `SELF` | Own data only |
+
+**Core flow**: Request arrives -> `DataScopeResolveFilter` resolves role dataScope (most permissive wins) -> writes to `DataScopeContext` (ThreadLocal) -> `DataPermissionInterceptor` auto-appends WHERE conditions -> context cleared on request completion.
 
 ## Unified Response Format
 
@@ -359,8 +389,8 @@ This project follows the **Harness Industrial Design Pattern**, organizing syste
 
 | Layer | Content | Location |
 |-------|---------|----------|
-| Layer 1: Architecture | System boundaries, module responsibilities, data flow, constraints | `docs/architecture.md` |
-| Layer 2: Patterns | Backend/frontend coding patterns, API contracts, core flows | `docs/backend-patterns.md`, `docs/frontend-patterns.md`, `docs/api-contract.md`, `docs/core-flows.md` |
+| Layer 1: Architecture | System boundaries, module responsibilities, data flow, RBAC permission system, constraints | `docs/architecture.md` |
+| Layer 2: Patterns | Backend/frontend coding patterns, API contracts, security, core flows | `docs/backend-patterns.md`, `docs/frontend-patterns.md`, `docs/api-contract.md`, `docs/core-flows.md` |
 | Layer 3: Code | Concrete functions, classes, component implementations | Source files |
 
 **Rule**: Before modifying code, check the corresponding `docs/` document. If architecture or contracts change, update `docs/` first, then modify code.

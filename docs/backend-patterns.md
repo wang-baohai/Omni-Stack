@@ -178,6 +178,76 @@ System.out.println("debug info");
 - TODO format: `// TODO: [module] description`, clean up regularly
 - FIXME format: `// FIXME: description` for known issues
 
+## Security & Permission
+
+### 功能权限（API 鉴权）
+
+Controller 方法使用 `@PreAuthorize` 声明所需权限编码：
+
+```java
+@PreAuthorize("hasAuthority('system:user:create')")
+@PostMapping
+public R<Void> create(@Valid @RequestBody CreateUserRequest request) {
+    userService.createUser(request);
+    return R.ok();
+}
+```
+
+- 权限编码格式：`resource:action`（如 `system:user:update`、`system:role:delete`）
+- 权限集合在 JWT Claims 中携带，Spring Security 在方法调用前自动校验
+- 无权限时返回 403 Forbidden
+
+### 数据权限（DataPermission）
+
+基于 MyBatis-Plus `DataPermissionInterceptor` 实现行级数据过滤，业务代码零侵入。
+
+**核心组件协作**：
+
+```
+Gateway → X-User-Id/X-Tenant-Id Header
+    ↓
+DataScopeResolveFilter（@Order(0), OncePerRequestFilter）
+    ↓ 查询角色 → 合并 dataScope（最宽松优先）→ 解析可访问组织单元 ID
+    ↓
+DataScopeContext（ThreadLocal 存储 userId, tenantId, primaryUnitId, effectiveScope, accessibleUnitIds）
+    ↓
+DataPermissionInterceptor（MyBatis-Plus InnerInterceptor）
+    ↓ 调用 DataPermissionHandlerImpl.getSqlSegment(Table, Expression, String)
+    ↓ 仅对 sys_user 表追加 WHERE 条件
+    ↓
+业务 SQL 执行（自动过滤后的结果集）
+    ↓
+DataScopeContext.clear()（finally 块，防 ThreadLocal 泄漏）
+```
+
+**六级数据范围**：
+
+| dataScope | SQL 行为 |
+|-----------|---------|
+| `ALL` | 不追加条件（跨租户可见） |
+| `TENANT` | 不追加条件（现有 tenant_id 过滤已满足） |
+| `DEPT_AND_BELOW` | `WHERE sys_user.primary_unit_id IN (本部门及后代 ID)` |
+| `DEPT` | `WHERE sys_user.primary_unit_id IN (本部门 ID)` |
+| `CUSTOM` | `WHERE sys_user.primary_unit_id IN (自定义部门+后代 ID)` |
+| `SELF` | `WHERE sys_user.id = {当前用户ID}` |
+
+**多角色合并**：用户拥有多个角色时，取优先级最高的 dataScope（ALL > TENANT > DEPT_AND_BELOW > DEPT > CUSTOM > SELF）。
+
+**新增表的数据权限扩展**：
+
+1. 在 `DataPermissionHandlerImpl` 中添加目标表名和对应的列映射
+2. 目标表必须包含关联到 `sys_user` 的外键列（如 `primary_unit_id`、`create_by`）
+3. `DataPermissionInterceptor` 注册顺序必须在 `PaginationInnerInterceptor` 之前
+
+**内存过滤模式**：对于非数据库查询的数据（如 Redis 中的在线用户列表），Controller 从 `DataScopeContext.get()` 读取数据范围，手动按 `primaryUnitId` 过滤。
+
+### ThreadLocal 使用规范
+
+- `DataScopeContext` 使用 `ThreadLocal<DataScopeInfo>` 存储请求级上下文
+- **必须**在 `try/finally` 块中清除，避免线程池场景下的泄漏
+- 写入时机：`DataScopeResolveFilter.doFilterInternal()` 中 `try` 块之前
+- 清除时机：`DataScopeResolveFilter.doFilterInternal()` 中 `finally` 块
+
 ## Testing (Future Scaffold)
 
 No tests exist yet. When added:

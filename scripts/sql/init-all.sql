@@ -295,41 +295,54 @@ INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
 -- 4.6 用户组织映射：admin → 根组织（主组织）
 INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (1, 1, 1);
 
--- 4.7 权限树（1 个目录 + 5 个菜单 + 20 个 API 权限 = 26 条）
+-- 4.7 权限树（1 个目录 + 8 个菜单 + 27 个 API 权限 = 36 条）
 INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
-    (1,  1, 0, 'system',                'System Management',   'DIRECTORY', '/1/',       1, 0, 1, 'system'),
-    (2,  1, 1, 'system:user',           'User Management',     'MENU',      '/1/2/',     2, 1, 1, 'system'),
-    (3,  1, 1, 'system:role',           'Role Management',     'MENU',      '/1/3/',     2, 2, 1, 'system'),
-    (4,  1, 1, 'system:permission',     'Permission Mgmt',     'MENU',      '/1/4/',     2, 3, 1, 'system'),
-    (5,  1, 1, 'system:org',            'Organization Mgmt',   'MENU',      '/1/5/',     2, 4, 1, 'system'),
-    (6,  1, 1, 'system:tenant',         'Tenant Management',   'MENU',      '/1/6/',     2, 5, 1, 'system'),
-    (7,  1, 2, 'system:user:list',      'View Users',          'API',       '/1/2/7/',   3, 1, 1, 'system'),
-    (8,  1, 2, 'system:user:create',    'Create User',         'API',       '/1/2/8/',   3, 2, 1, 'system'),
-    (9,  1, 2, 'system:user:update',    'Update User',         'API',       '/1/2/9/',   3, 3, 1, 'system'),
-    (10, 1, 2, 'system:user:delete',    'Delete User',         'API',       '/1/2/10/',  3, 4, 1, 'system'),
-    (11, 1, 3, 'system:role:list',      'View Roles',          'API',       '/1/3/11/',  3, 1, 1, 'system'),
-    (12, 1, 3, 'system:role:create',    'Create Role',         'API',       '/1/3/12/',  3, 2, 1, 'system'),
-    (13, 1, 3, 'system:role:update',    'Update Role',         'API',       '/1/3/13/',  3, 3, 1, 'system'),
-    (14, 1, 3, 'system:role:delete',    'Delete Role',         'API',       '/1/3/14/',  3, 4, 1, 'system'),
-    (15, 1, 4, 'system:permission:list','View Permissions',    'API',       '/1/4/15/',  3, 1, 1, 'system'),
-    (16, 1, 4, 'system:permission:create','Create Permission', 'API',       '/1/4/16/',  3, 2, 1, 'system'),
-    (17, 1, 4, 'system:permission:update','Update Permission', 'API',       '/1/4/17/',  3, 3, 1, 'system'),
-    (18, 1, 4, 'system:permission:delete','Delete Permission', 'API',       '/1/4/18/',  3, 4, 1, 'system'),
-    (19, 1, 5, 'system:org:list',       'View Organizations',  'API',       '/1/5/19/',  3, 1, 1, 'system'),
-    (20, 1, 5, 'system:org:create',     'Create Organization', 'API',       '/1/5/20/',  3, 2, 1, 'system'),
-    (21, 1, 5, 'system:org:update',     'Update Organization', 'API',       '/1/5/21/',  3, 3, 1, 'system'),
-    (22, 1, 5, 'system:org:delete',     'Delete Organization', 'API',       '/1/5/22/',  3, 4, 1, 'system'),
-    (23, 1, 6, 'system:tenant:list',    'View Tenants',        'API',       '/1/6/23/',  3, 1, 1, 'system'),
-    (24, 1, 6, 'system:tenant:create',  'Create Tenant',       'API',       '/1/6/24/',  3, 2, 1, 'system'),
-    (25, 1, 6, 'system:tenant:update',  'Update Tenant',       'API',       '/1/6/25/',  3, 3, 1, 'system'),
-    (26, 1, 6, 'system:tenant:delete',  'Delete Tenant',       'API',       '/1/6/26/',  3, 4, 1, 'system');
+    (1,  1, 0, 'system',                '系统管理',   'DIRECTORY', '/1/',       1, 0, 1, 'system'),
+    (2,  1, 1, 'system:user',           '用户管理',     'MENU',      '/1/2/',     2, 1, 1, 'system'),
+    (3,  1, 1, 'system:role',           '角色管理',     'MENU',      '/1/3/',     2, 2, 1, 'system'),
+    (4,  1, 1, 'system:permission',     '权限管理',     'MENU',      '/1/4/',     2, 3, 1, 'system'),
+    (5,  1, 1, 'system:org',            '组织管理',   'MENU',      '/1/5/',     2, 4, 1, 'system'),
+    (6,  1, 1, 'system:tenant',         '租户管理',   'MENU',      '/1/6/',     2, 5, 1, 'system'),
+    (7,  1, 2, 'system:user:list',      '查看用户',          'API',       '/1/2/7/',   3, 1, 1, 'system'),
+    (8,  1, 2, 'system:user:create',    '创建用户',         'API',       '/1/2/8/',   3, 2, 1, 'system'),
+    (9,  1, 2, 'system:user:update',    '更新用户',         'API',       '/1/2/9/',   3, 3, 1, 'system'),
+    (10, 1, 2, 'system:user:delete',    '删除用户',         'API',       '/1/2/10/',  3, 4, 1, 'system'),
+    (11, 1, 3, 'system:role:list',      '查看角色',          'API',       '/1/3/11/',  3, 1, 1, 'system'),
+    (12, 1, 3, 'system:role:create',    '创建角色',         'API',       '/1/3/12/',  3, 2, 1, 'system'),
+    (13, 1, 3, 'system:role:update',    '更新角色',         'API',       '/1/3/13/',  3, 3, 1, 'system'),
+    (14, 1, 3, 'system:role:delete',    '删除角色',         'API',       '/1/3/14/',  3, 4, 1, 'system'),
+    (15, 1, 4, 'system:permission:list','查看权限',    'API',       '/1/4/15/',  3, 1, 1, 'system'),
+    (16, 1, 4, 'system:permission:create','创建权限', 'API',       '/1/4/16/',  3, 2, 1, 'system'),
+    (17, 1, 4, 'system:permission:update','更新权限', 'API',       '/1/4/17/',  3, 3, 1, 'system'),
+    (18, 1, 4, 'system:permission:delete','删除权限', 'API',       '/1/4/18/',  3, 4, 1, 'system'),
+    (19, 1, 5, 'system:org:list',       '查看组织',  'API',       '/1/5/19/',  3, 1, 1, 'system'),
+    (20, 1, 5, 'system:org:create',     '创建组织', 'API',       '/1/5/20/',  3, 2, 1, 'system'),
+    (21, 1, 5, 'system:org:update',     '更新组织', 'API',       '/1/5/21/',  3, 3, 1, 'system'),
+    (22, 1, 5, 'system:org:delete',     '删除组织', 'API',       '/1/5/22/',  3, 4, 1, 'system'),
+    (23, 1, 6, 'system:tenant:list',    '查看租户',        'API',       '/1/6/23/',  3, 1, 1, 'system'),
+    (24, 1, 6, 'system:tenant:create',  '创建租户',       'API',       '/1/6/24/',  3, 2, 1, 'system'),
+    (25, 1, 6, 'system:tenant:update',  '更新租户',       'API',       '/1/6/25/',  3, 3, 1, 'system'),
+    (26, 1, 6, 'system:tenant:delete',  '删除租户',       'API',       '/1/6/26/',  3, 4, 1, 'system'),
+    (27, 1, 1, 'system:oauth2',         'OAuth2 客户端',      'MENU',      '/1/27/',    2, 6, 1, 'system'),
+    (28, 1, 27,'system:oauth2:list',    '查看客户端',        'API',       '/1/27/28/', 3, 1, 1, 'system'),
+    (29, 1, 27,'system:oauth2:create',  '创建客户端',       'API',       '/1/27/29/', 3, 2, 1, 'system'),
+    (30, 1, 27,'system:oauth2:update',  '更新客户端',       'API',       '/1/27/30/', 3, 3, 1, 'system'),
+    (31, 1, 27,'system:oauth2:delete',  '删除客户端',       'API',       '/1/27/31/', 3, 4, 1, 'system'),
+    (32, 1, 1, 'system:online',         '在线用户',        'MENU',      '/1/32/',    2, 7, 1, 'system'),
+    (33, 1, 32,'system:online:list',    '查看在线用户',   'API',       '/1/32/33/', 3, 1, 1, 'system'),
+    (34, 1, 32,'system:online:kick',    '强制下线',    'API',       '/1/32/34/', 3, 2, 1, 'system'),
+    (35, 1, 1, 'system:authrecord',     '授权记录',        'MENU',      '/1/35/',    2, 8, 1, 'system'),
+    (36, 1, 35,'system:authrecord:list','查看授权记录',   'API',       '/1/35/36/', 3, 1, 1, 'system');
 
--- 4.8 角色权限映射：SUPER_ADMIN 拥有全部 26 个权限
+-- 4.8 角色权限映射：SUPER_ADMIN 拥有全部 36 个权限
 INSERT INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6),
     (1, 7), (1, 8), (1, 9), (1, 10),
     (1, 11), (1, 12), (1, 13), (1, 14),
     (1, 15), (1, 16), (1, 17), (1, 18),
     (1, 19), (1, 20), (1, 21), (1, 22),
-    (1, 23), (1, 24), (1, 25), (1, 26);
+    (1, 23), (1, 24), (1, 25), (1, 26),
+    (1, 27), (1, 28), (1, 29), (1, 30),
+    (1, 31), (1, 32), (1, 33), (1, 34),
+    (1, 35), (1, 36);

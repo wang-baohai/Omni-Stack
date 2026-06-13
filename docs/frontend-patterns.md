@@ -214,6 +214,75 @@ const routes: RouteRecordRaw[] = [
 - Use Element Plus CSS variables for theming (`--el-color-primary`, `--el-bg-color-page`, etc.)
 - Form validation: Element Plus `FormRules` with `ref<FormInstance>()` pattern
 
+## Permission & Access Control
+
+### Permission Store (`src/stores/permission.ts`)
+
+`usePermissionStore` 管理权限编码列表和动态菜单树：
+
+```typescript
+// 从 JWT Token 初始化权限编码
+permissionStore.initFromToken()
+
+// 从后端加载动态菜单
+await permissionStore.loadMenus()
+
+// 查询用户是否拥有指定权限
+permissionStore.hasPermission('system:user:create')
+```
+
+**数据来源**：
+- 权限编码列表：JWT Token 的 `authorities` 字段（登录时写入）
+- 动态菜单树：调用 `GET /api/auth/menus`（后端已按用户权限过滤）
+
+### Dynamic Menu Routing
+
+登录成功后，路由守卫触发以下流程：
+
+```
+JWT 解码 → permissionStore.initFromToken() 提取权限编码
+    → permissionStore.loadMenus() 获取后端过滤后的菜单树
+    → 遍历菜单树动态添加 Vue Router 路由
+    → 侧边栏渲染 permissionStore.menuTree
+```
+
+菜单数据结构（`MenuNode`）包含 `path`（前端路由路径）、`permissionCode`（权限编码）、`type`（DIRECTORY/MENU）等字段。
+
+### Button-Level Permission (`v-permission`)
+
+通过 Vue 自定义指令 `v-permission` 控制按钮的显隐：
+
+```vue
+<!-- 仅拥有 system:user:create 权限的用户可见 -->
+<el-button v-permission="'system:user:create'" type="primary">
+  新增
+</el-button>
+
+<!-- 编辑和删除按钮 -->
+<el-button v-permission="'system:user:update'" size="small">编辑</el-button>
+<el-button v-permission="'system:user:delete'" size="small" type="danger">删除</el-button>
+```
+
+**实现原理**：
+- 指令挂载时从 `usePermissionStore` 查询权限编码
+- 无权限时设置 `el.style.display = 'none'`（非 `removeChild`，兼容 Vue 响应式更新）
+- 在 `mounted` 和 `updated` 两个钩子中执行检查
+
+**注册方式**（`src/directives/permission.ts`）：
+
+```typescript
+// 在 main.ts 中注册
+import { setupPermissionDirective } from '@/directives/permission'
+setupPermissionDirective(app)
+```
+
+### Rules
+
+- 权限编码必须与后端 `sys_permission` 表中定义的一致，格式为 `resource:action`
+- `v-permission` 指令仅用于 UI 层显隐控制，后端 `@PreAuthorize` 才是安全边界
+- 动态路由必须在导航守卫中等待 `permissionStore.loadMenus()` 完成后注册
+- 登出时必须调用 `permissionStore.reset()` 清除权限状态
+
 ## Build & Tooling
 
 | Tool | Purpose | Config |

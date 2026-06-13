@@ -1,5 +1,6 @@
 package com.omni.auth.controller;
 
+import com.nimbusds.jwt.SignedJWT;
 import com.omni.auth.dto.CaptchaResult;
 import com.omni.auth.dto.LoginRequest;
 import com.omni.auth.dto.LoginResult;
@@ -7,6 +8,7 @@ import com.omni.auth.dto.TenantOption;
 import com.omni.auth.entity.SysUser;
 import com.omni.auth.service.CaptchaService;
 import com.omni.auth.service.JwtTokenService;
+import com.omni.auth.service.OnlineUserService;
 import com.omni.auth.service.TenantService;
 import com.omni.auth.service.UserService;
 import com.omni.common.core.result.R;
@@ -64,6 +66,8 @@ public class AuthController {
     private final TenantService tenantService;
     /** JWT 令牌服务 */
     private final JwtTokenService jwtTokenService;
+    /** 在线用户服务 */
+    private final OnlineUserService onlineUserService;
     /** 认证管理器，用于 session-login 端点进行 Spring Security 认证 */
     private final AuthenticationManager authenticationManager;
 
@@ -111,6 +115,14 @@ public class AuthController {
 
         // 第四步：生成签名的 JWT 访问令牌
         String token = jwtTokenService.generateToken(user, roles, permissions);
+
+        // 第五步：记录在线用户（从 JWT 中解析 jti）
+        try {
+            String jti = SignedJWT.parse(token).getJWTClaimsSet().getJWTID();
+            onlineUserService.recordOnline(user.getId(), user.getUsername(), jti, accessTokenTtl);
+        } catch (Exception e) {
+            log.warn("记录在线用户失败: {}", e.getMessage());
+        }
 
         log.info("用户 '{}' 登录成功，租户={}", request.getUsername(), request.getTenantId());
         return R.ok(LoginResult.builder()

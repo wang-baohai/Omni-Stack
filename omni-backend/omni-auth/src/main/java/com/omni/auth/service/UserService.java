@@ -55,4 +55,36 @@ public interface UserService extends IService<SysUser> {
      * @return 分页用户列表
      */
     PageResult<SysUser> listUsers(Long tenantId, int page, int size);
+
+    /**
+     * 获取用户详情。
+     *
+     * @param id 用户 ID
+     * @return 用户实体
+     */
+    SysUser getById(Long id);
+
+    /**
+     * 分配用户角色（全量替换）。
+     *
+     * @param userId  用户 ID
+     * @param roleIds 角色 ID 列表
+     */
+    void assignRoles(Long userId, List<Long> roleIds);
+
+    /**
+     * 获取用户已分配的角色 ID 列表。
+     *
+     * @param userId 用户 ID
+     * @return 角色 ID 列表
+     */
+    List<Long> getUserRoleIds(Long userId);
+
+    /**
+     * 切换用户启用/禁用状态。
+     *
+     * @param userId 用户 ID
+     * @param status 目标状态：1-启用, 0-禁用
+     */
+    void toggleStatus(Long userId, Integer status);
 }

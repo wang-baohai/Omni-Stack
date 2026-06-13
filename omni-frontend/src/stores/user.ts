@@ -39,6 +39,11 @@ export const useUserStore = defineStore('user', () => {
     username.value = ''
     localStorage.removeItem('token')
     localStorage.removeItem('username')
+    // 清除动态路由和权限状态
+    import('@/router').then(({ clearDynamicRoutes }) => clearDynamicRoutes())
+    import('@/stores/permission').then(({ usePermissionStore }) => {
+      usePermissionStore().reset()
+    })
   }
 
   return { token, username, isLoggedIn, setToken, setUsername, logout }

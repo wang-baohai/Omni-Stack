@@ -1,24 +1,28 @@
 package com.omni.auth.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.omni.auth.dto.CreateTenantRequest;
 import com.omni.auth.dto.TenantOption;
+import com.omni.auth.dto.UpdateTenantRequest;
 import com.omni.auth.entity.SysTenant;
 import com.omni.auth.mapper.SysTenantMapper;
 import com.omni.auth.service.TenantService;
+import com.omni.common.core.result.BusinessException;
+import com.omni.common.core.result.PageResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 租户服务实现，基于 MyBatis-Plus 查询。
+ * 租户服务实现，基于 MyBatis-Plus 提供完整的 CRUD 操作。
  *
- * <p>查询 {@code sys_tenant} 表，为登录流程提供租户数据。
- * 仅返回活跃租户（{@code status = 1}）。查询结果映射为轻量级的
- * {@link TenantOption} DTO，避免在公开的租户接口中暴露
- * 内部实体字段（域名、联系信息等）。</p>
+ * <p>查询 {@code sys_tenant} 表，为登录流程提供租户数据，
+ * 同时支持管理端的租户增删改查操作。</p>
  *
  * @see TenantService
  */
@@ -41,13 +45,11 @@ public class TenantServiceImpl implements TenantService {
      */
     @Override
     public List<TenantOption> listActiveTenants() {
-        // 仅查询必要的列，减少数据传输量
         List<SysTenant> tenants = sysTenantMapper.selectList(
                 new LambdaQueryWrapper<SysTenant>()
                         .eq(SysTenant::getStatus, 1)
                         .select(SysTenant::getId, SysTenant::getTenantName, SysTenant::getTenantCode));
 
-        // 将实体字段映射为 DTO 字段（tenantName -> name, tenantCode -> code）
         return tenants.stream()
                 .map(t -> TenantOption.builder()
                         .id(t.getId())
@@ -55,5 +57,90 @@ public class TenantServiceImpl implements TenantService {
                         .code(t.getTenantCode())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>使用 MyBatis-Plus 分页插件，按 ID 升序排列。</p>
+     */
+    @Override
+    public PageResult<SysTenant> listTenants(int page, int size) {
+        Page<SysTenant> mpPage = sysTenantMapper.selectPage(new Page<>(page, size),
+                new LambdaQueryWrapper<SysTenant>()
+                        .orderByAsc(SysTenant::getId));
+        return new PageResult<>(mpPage.getRecords(), mpPage.getTotal(), mpPage.getSize(), mpPage.getCurrent());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SysTenant getById(Long id) {
+        SysTenant tenant = sysTenantMapper.selectById(id);
+        if (tenant == null) {
+            throw new BusinessException(404, "租户不存在");
+        }
+        return tenant;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public SysTenant createTenant(CreateTenantRequest request) {
+        SysTenant tenant = new SysTenant();
+        tenant.setTenantCode(request.getTenantCode());
+        tenant.setTenantName(request.getTenantName());
+        tenant.setDomain(request.getDomain());
+        tenant.setContactName(request.getContactName());
+        tenant.setContactPhone(request.getContactPhone());
+        tenant.setStatus(request.getStatus() != null ? request.getStatus() : 1);
+        sysTenantMapper.insert(tenant);
+        log.info("已创建租户: {} ({})", tenant.getTenantName(), tenant.getTenantCode());
+        return tenant;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>仅更新非 null 字段。</p>
+     */
+    @Override
+    @Transactional
+    public SysTenant updateTenant(Long id, UpdateTenantRequest request) {
+        SysTenant tenant = sysTenantMapper.selectById(id);
+        if (tenant == null) {
+            throw new BusinessException(404, "租户不存在");
+        }
+        if (request.getTenantName() != null) {
+            tenant.setTenantName(request.getTenantName());
+        }
+        if (request.getDomain() != null) {
+            tenant.setDomain(request.getDomain());
+        }
+        if (request.getContactName() != null) {
+            tenant.setContactName(request.getContactName());
+        }
+        if (request.getContactPhone() != null) {
+            tenant.setContactPhone(request.getContactPhone());
+        }
+        if (request.getStatus() != null) {
+            tenant.setStatus(request.getStatus());
+        }
+        sysTenantMapper.updateById(tenant);
+        log.info("已更新租户: {}", tenant.getTenantName());
+        return tenant;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteTenant(Long id) {
+        sysTenantMapper.deleteById(id);
+        log.info("已删除租户 ID: {}", id);
     }
 }

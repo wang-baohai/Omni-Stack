@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.omni.auth.mapper.SysUserMapper;
 import com.omni.auth.security.DeviceClientAuthenticationFilter;
+import com.omni.auth.security.GatewayPreAuthFilter;
 import com.omni.auth.security.OmniUserDetails;
 import com.omni.auth.security.OmniUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -40,6 +42,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.web.OAuth2DeviceAuthorizationEndpointFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
@@ -76,6 +79,7 @@ import java.util.UUID;
 @Slf4j
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @EnableConfigurationProperties(OAuth2Properties.class)
 public class AuthorizationServerConfig {
 
@@ -239,6 +243,12 @@ public class AuthorizationServerConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 // 禁用 CSRF（JWT 无状态认证不需要 CSRF 防护）
                 .csrf(AbstractHttpConfigurer::disable);
+
+        // 网关预认证过滤器：从 Gateway 转发的请求头中构建 Authentication 对象，
+        // 使 @PreAuthorize 方法级权限注解能够正确执行授权检查。
+        // 必须在 AuthorizationFilter 之前执行。
+        http.addFilterBefore(new GatewayPreAuthFilter(), AuthorizationFilter.class);
+
         return http.build();
     }
 

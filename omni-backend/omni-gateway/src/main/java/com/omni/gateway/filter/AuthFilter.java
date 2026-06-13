@@ -142,31 +142,52 @@ public class AuthFilter implements GlobalFilter, Ordered {
         return -100;
     }
 
+    /** 无需认证的公开路径（精确匹配） */
+    private static final List<String> PUBLIC_EXACT_PATHS = List.of(
+            "/api/auth/login",
+            "/api/auth/session-login",
+            "/api/auth/captcha",
+            "/api/auth/tenants",
+            "/favicon.ico"
+    );
+
+    /** 无需认证的公开路径前缀 */
+    private static final List<String> PUBLIC_PREFIX_PATHS = List.of(
+            "/api/auth/oauth2/",
+            "/actuator/",
+            "/oauth2/",
+            "/.well-known/",
+            "/login",
+            "/error"
+    );
+
     /**
      * 判断请求路径是否为公开路径（无需认证）。
      * <p>
      * 公开路径包括：
      * <ul>
-     *   <li>{@code /api/auth/*} — 认证相关接口（登录、验证码、租户列表）</li>
-     *   <li>{@code /actuator/*} — Spring Boot Actuator 健康检查等</li>
-     *   <li>{@code /favicon.ico} — 浏览器图标请求</li>
-     *   <li>{@code /oauth2/*} — OAuth2 标准端点（JWKS 等）</li>
-     *   <li>{@code /login} — 登录页面</li>
-     *   <li>{@code /error} — 错误页面</li>
+     *   <li>精确匹配：登录、验证码、租户列表等认证接口</li>
+     *   <li>前缀匹配：社交登录入口（{@code /api/auth/oauth2/}）、OAuth2 标准端点、Actuator</li>
      * </ul>
+     * 注意：管理接口（{@code /api/auth/user/**}、{@code /api/auth/role/**} 等）
+     * 不在公开路径中，必须携带有效的 JWT 令牌。
      * </p>
      *
      * @param path 请求 URI 路径
      * @return true 表示是公开路径，跳过认证
      */
     private boolean isPublicPath(String path) {
-        return path.startsWith("/api/auth/") ||
-               path.startsWith("/actuator/") ||
-               path.equals("/favicon.ico") ||
-               path.startsWith("/oauth2/") ||
-               path.startsWith("/.well-known/") ||
-               path.startsWith("/login") ||
-               path.startsWith("/error");
+        for (String exact : PUBLIC_EXACT_PATHS) {
+            if (path.equals(exact)) {
+                return true;
+            }
+        }
+        for (String prefix : PUBLIC_PREFIX_PATHS) {
+            if (path.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -3,9 +3,11 @@ package com.omni.auth.config;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
@@ -73,6 +75,20 @@ public class AuthExceptionHandler {
                 .collect(Collectors.joining("; "));
         log.warn("参数绑定异常: {}", message);
         return R.fail(400, message);
+    }
+
+    /**
+     * 处理权限不足异常（{@code @PreAuthorize} 校验失败时抛出）。
+     * <p>返回 HTTP 403 状态码，而非被兜底的 {@link Exception} 处理器捕获返回 500。</p>
+     *
+     * @param e 权限不足异常
+     * @return HTTP 403 响应
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(org.springframework.http.HttpStatus.FORBIDDEN)
+    public R<Void> handleAccessDeniedException(AccessDeniedException e) {
+        log.warn("权限不足: {}", e.getMessage());
+        return R.fail(403, "权限不足，拒绝访问");
     }
 
     /**

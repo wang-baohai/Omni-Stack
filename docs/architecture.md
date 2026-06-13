@@ -135,6 +135,127 @@ Additionally, the `nacos_config` database (separate MySQL instance, same contain
 
 Authoritative DDL and seed data: `scripts/sql/init-all.sql`.
 
+## RBAC Permission System
+
+### Design Philosophy
+
+Omni-Stack 采用 **RBAC-0 基础权限模型**（用户-角色-权限），分为两个独立但互补的子系统：
+
+1. **功能权限**（Functional Permission）：控制用户"能做什么" — 菜单可见性 + 按钮/API 级操作权限
+2. **数据权限**（Data Permission）：控制用户"能看哪些数据" — 基于组织归属的行级过滤
+
+多租户场景下，用户名在租户内唯一（`sys_user` 表使用 `(username, tenant_id)` 联合唯一键），权限编码格式为 `resource:action`（细粒度 API 级）。
+
+### Functional Permission Architecture
+
+功能权限实现为 **菜单过滤 + 按钮级控制 + API 鉴权** 三层防护：
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 1: 动态菜单过滤（MenuController）                      │
+│ 后端基于用户权限集合递归过滤权限树，                           │
+│ 仅返回 DIRECTORY（有可见子节点）和 MENU（有权限编码）节点       │
+│ → 前端据动态注册路由 + 渲染侧边栏                             │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 2: 按钮级权限控制（v-permission 指令）                  │
+│ Vue 自定义指令 v-permission="'system:user:create'"            │
+│ 从 PermissionStore 查询权限编码，display:none 隐藏无权限按钮    │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 3: API 鉴权（Spring Security @PreAuthorize）           │
+│ Controller 方法声明 @PreAuthorize("hasAuthority('xxx')")      │
+│ Spring Security 在方法调用前校验 JWT 中的权限集合              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**关键组件**：
+
+| 组件 | 位置 | 职责 |
+|------|------|------|
+| `MenuController` | omni-auth | 动态菜单树过滤与输出 |
+| `PermissionService` | omni-auth | 权限树查询、角色-权限关联管理 |
+| `usePermissionStore` | omni-frontend | Pinia Store，存储权限编码列表和菜单树 |
+| `v-permission` 指令 | omni-frontend | 按钮级 DOM 显隐控制 |
+
+**权限树结构**（`sys_permission` 表，物化路径）：
+
+| 节点类型 | 用途 | 示例 |
+|---------|------|------|
+| `DIRECTORY` | 菜单分组目录 | "系统管理" |
+| `MENU` | 可路由菜单页面 | "用户管理" (path: /system/user) |
+| `BUTTON` | 按钮/API 操作 | "创建用户" (code: system:user:create) |
+| `API` | 细粒度 API 端点 | "GET /api/auth/user/list" |
+
+### Data Permission Architecture
+
+数据权限基于 **MyBatis-Plus `DataPermissionInterceptor`** 实现 SQL 自动拦截，业务代码零侵入。
+
+**六级数据范围（dataScope）**：
+
+| 级别 | dataScope 值 | 含义 | 优先级 |
+|------|-------------|------|--------|
+| 最宽松 | `ALL` | 所有数据（跨租户） | 1 |
+| | `TENANT` | 本租户所有数据 | 2 |
+| | `DEPT_AND_BELOW` | 本部门及所有下级部门 | 3 |
+| | `DEPT` | 仅本部门 | 4 |
+| | `CUSTOM` | 自定义部门集合（`sys_role_dept` 关联表） | 5 |
+| 最严格 | `SELF` | 仅自己的数据 | 6 |
+
+**多角色合并规则**：最宽松优先 — 当用户拥有多个角色时，取优先级数值最小的 dataScope。
+
+**请求级数据流**：
+
+```
+HTTP Request (含 X-User-Id, X-Tenant-Id Header)
+    │
+    v
+DataScopeResolveFilter (OncePerRequestFilter, @Order(0))
+    │ 1. 从 Header 提取 userId, tenantId
+    │ 2. 查询用户所有角色 → sys_role_mapper.selectRolesByUserId()
+    │ 3. 合并所有角色的 dataScope → 取最宽松
+    │ 4. 解析可访问的组织单元 ID 集合（DEPT*/CUSTOM 查询物化路径后代）
+    │ 5. 写入 DataScopeContext (ThreadLocal)
+    v
+MyBatis-Plus DataPermissionInterceptor
+    │ 拦截 sys_user 表的 SELECT 查询
+    │ 调用 DataPermissionHandlerImpl.getSqlSegment()
+    │ 根据 effectiveScope 自动追加 WHERE 条件：
+    │   ALL/TENANT → 不追加
+    │   SELF       → WHERE sys_user.id = {userId}
+    │   DEPT*/CUSTOM → WHERE sys_user.primary_unit_id IN (...)
+    v
+业务代码（Controller → Service → Mapper）
+    │ 零侵入，无需感知数据权限存在
+    │ 特殊情况（在线用户等内存数据）：Controller 读取 DataScopeContext 手动过滤
+    v
+DataScopeContext.clear() (finally 块，防止 ThreadLocal 泄漏)
+```
+
+**关键实现类**：
+
+| 类 | 包路径 | 职责 |
+|----|--------|------|
+| `DataScopeContext` | `com.omni.auth.security` | ThreadLocal 存储请求级数据范围（userId, tenantId, primaryUnitId, effectiveScope, accessibleUnitIds） |
+| `DataScopeResolveFilter` | `com.omni.auth.security` | Spring Security 过滤器，解析用户角色并写入 DataScopeContext |
+| `DataPermissionHandlerImpl` | `com.omni.auth.security` | 实现 `MultiDataPermissionHandler`，为 sys_user 表生成 WHERE 条件 |
+| `MyBatisPlusConfig` | `com.omni.auth.config` | 注册 DataPermissionInterceptor（必须在 PaginationInnerInterceptor 之前） |
+
+**两种过滤模式**：
+
+| 模式 | 适用场景 | 实现方式 |
+|------|---------|---------|
+| SQL 拦截 | 数据库查询（如用户列表） | `DataPermissionInterceptor` + `DataPermissionHandlerImpl` 自动追加 WHERE |
+| 内存过滤 | 非数据库数据（如 Redis 中的在线用户） | Controller 读取 `DataScopeContext` 按 `primaryUnitId` 过滤 |
+
+### RBAC Management Flows
+
+**角色管理**：创建角色 → 分配权限（`sys_role_permission`）→ 设置数据范围（`sys_role.data_scope`）→ 自定义部门（`sys_role_dept`，仅 CUSTOM 范围）
+
+**用户授权**：创建用户 → 分配角色（`sys_user_role`）→ 分配组织单元（`sys_user_unit`，标记 primary）
+
+**菜单渲染**：登录 → JWT 含权限编码 → 前端调用 `/api/auth/menus` → 后端递归过滤 → 前端动态注册路由
+
+**数据查询**：请求 → Gateway 注入身份头 → Filter 解析数据范围 → MyBatis-Plus 自动追加 SQL → 返回过滤后数据
+
 ## Key Constraints
 
 1. **JDK 25 required**: Spring Boot 4.x Maven plugin requires Java 17+; this project targets JDK 25. `JAVA_HOME` must be set before running any Maven commands.

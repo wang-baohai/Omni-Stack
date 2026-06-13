@@ -16,6 +16,7 @@ import router from './router'
 import i18n from './i18n'
 import './styles/index.scss'
 import { initTheme } from './stores/app'
+import { setupPermissionDirective } from './directives/permission'
 
 // 创建 Vue 应用实例
 const app = createApp(App)
@@ -30,6 +31,9 @@ app.use(createPinia())
 app.use(router)
 app.use(ElementPlus)
 app.use(i18n)
+
+// 注册自定义指令
+setupPermissionDirective(app)
 
 // 挂载应用到 DOM
 app.mount('#app')

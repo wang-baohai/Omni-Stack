@@ -48,18 +48,18 @@ const isEdit = computed(() => !!props.client)
 
 /** 表单校验规则 */
 const rules: FormRules = {
-  clientName: [{ required: true, message: '请输入客户端名称', trigger: 'blur' }],
-  authenticationMethods: [{ required: true, message: '请选择认证方式', trigger: 'change' }],
-  grantTypes: [{ required: true, message: '请选择授权类型', trigger: 'change' }],
-  scopes: [{ required: true, message: '请选择作用域', trigger: 'change' }],
+  clientName: [{ required: true, message: () => t('oauth2Client.clientNameRequired'), trigger: 'blur' }],
+  authenticationMethods: [{ required: true, message: () => t('oauth2Client.authMethodsRequired'), trigger: 'change' }],
+  grantTypes: [{ required: true, message: () => t('oauth2Client.grantTypesRequired'), trigger: 'change' }],
+  scopes: [{ required: true, message: () => t('oauth2Client.scopesRequired'), trigger: 'change' }],
 }
 
 /** 认证方式选项 */
-const authMethodOptions = [
-  { label: 'none (PKCE 公有客户端)', value: 'none' },
+const authMethodOptions = computed(() => [
+  { label: t('oauth2Client.authMethodNone'), value: 'none' },
   { label: 'client_secret_basic', value: 'client_secret_basic' },
   { label: 'client_secret_post', value: 'client_secret_post' },
-]
+])
 
 /** 授权类型选项 */
 const grantTypeOptions = [
@@ -137,7 +137,7 @@ async function handleSubmit() {
         requireConsent: form.requireConsent,
         requireProofKey: form.requireProofKey,
       })
-      ElMessage.success('更新成功')
+      ElMessage.success(t('oauth2Client.updateSuccess'))
     } else {
       await createOAuth2Client({
         clientName: form.clientName,
@@ -151,7 +151,7 @@ async function handleSubmit() {
         requireConsent: form.requireConsent,
         requireProofKey: form.requireProofKey,
       })
-      ElMessage.success('创建成功')
+      ElMessage.success(t('oauth2Client.createSuccess'))
     }
     emit('success')
   } catch {
@@ -172,7 +172,7 @@ function handleClose() {
 <template>
   <el-dialog
     :model-value="visible"
-    :title="isEdit ? '编辑 OAuth2 客户端' : '创建 OAuth2 客户端'"
+    :title="isEdit ? t('oauth2Client.editTitle') : t('oauth2Client.createTitle')"
     width="600px"
     @close="handleClose"
   >
@@ -183,27 +183,27 @@ function handleClose() {
       label-width="120px"
       label-position="top"
     >
-      <el-form-item label="客户端名称" prop="clientName">
-        <el-input v-model="form.clientName" placeholder="输入客户端名称" />
+      <el-form-item :label="t('oauth2Client.clientName')" prop="clientName">
+        <el-input v-model="form.clientName" :placeholder="t('oauth2Client.clientName')" />
       </el-form-item>
 
-      <el-form-item v-if="!isEdit" label="Client ID">
+      <el-form-item v-if="!isEdit" :label="t('oauth2Client.clientId')">
         <el-input
           v-model="form.clientId"
-          placeholder="留空则自动生成"
+          :placeholder="t('oauth2Client.clientIdPlaceholder')"
         />
       </el-form-item>
 
-      <el-form-item v-if="!isEdit" label="Client Secret">
+      <el-form-item v-if="!isEdit" :label="t('oauth2Client.clientSecret')">
         <el-input
           v-model="form.clientSecret"
           type="password"
           show-password
-          placeholder="留空则不设置（PKCE 客户端可跳过）"
+          :placeholder="t('oauth2Client.clientSecretPlaceholder')"
         />
       </el-form-item>
 
-      <el-form-item label="认证方式" prop="authenticationMethods">
+      <el-form-item :label="t('oauth2Client.authMethods')" prop="authenticationMethods">
         <el-checkbox-group v-model="form.authenticationMethods">
           <el-checkbox
             v-for="opt in authMethodOptions"
@@ -215,7 +215,7 @@ function handleClose() {
         </el-checkbox-group>
       </el-form-item>
 
-      <el-form-item label="授权类型" prop="grantTypes">
+      <el-form-item :label="t('oauth2Client.grantTypes')" prop="grantTypes">
         <el-checkbox-group v-model="form.grantTypes">
           <el-checkbox
             v-for="opt in grantTypeOptions"
@@ -227,25 +227,25 @@ function handleClose() {
         </el-checkbox-group>
       </el-form-item>
 
-      <el-form-item label="回调地址（每行一个）">
+      <el-form-item :label="`${t('oauth2Client.redirectUris')}（${t('oauth2Client.redirectUrisHint')}）`">
         <el-input
           v-model="form.redirectUris"
           type="textarea"
           :rows="3"
-          placeholder="http://localhost:3000/callback"
+          :placeholder="t('oauth2Client.redirectUrisPlaceholder')"
         />
       </el-form-item>
 
-      <el-form-item label="登出回调地址（每行一个）">
+      <el-form-item :label="`${t('oauth2Client.postLogoutRedirectUris')}（${t('oauth2Client.redirectUrisHint')}）`">
         <el-input
           v-model="form.postLogoutRedirectUris"
           type="textarea"
           :rows="2"
-          placeholder="可选"
+          :placeholder="t('oauth2Client.postLogoutPlaceholder')"
         />
       </el-form-item>
 
-      <el-form-item label="作用域" prop="scopes">
+      <el-form-item :label="t('oauth2Client.scopes')" prop="scopes">
         <el-checkbox-group v-model="form.scopes">
           <el-checkbox
             v-for="opt in scopeOptions"
@@ -257,16 +257,16 @@ function handleClose() {
         </el-checkbox-group>
       </el-form-item>
 
-      <el-form-item label="客户端设置">
+      <el-form-item :label="t('oauth2Client.settings')">
         <el-switch
           v-model="form.requireProofKey"
-          active-text="要求 PKCE"
+          :active-text="t('oauth2Client.requirePkce')"
           inactive-text=""
           style="margin-right: 20px"
         />
         <el-switch
           v-model="form.requireConsent"
-          active-text="要求授权确认"
+          :active-text="t('oauth2Client.requireConsent')"
           inactive-text=""
         />
       </el-form-item>
