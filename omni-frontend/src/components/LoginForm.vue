@@ -60,11 +60,12 @@ const captchaKey = ref('')
 /** 可用租户列表 */
 const tenants = ref<TenantOption[]>([])
 
-/** 表单数据模型 */
+/** 表单数据模型（优先读取注册时记住的租户） */
+const savedTenantId = Number(localStorage.getItem('last_tenant_id')) || undefined
 const form = reactive({
-  tenantId: 1,
-  username: 'admin',
-  password: 'admin123',
+  tenantId: savedTenantId as number | undefined,
+  username: '',
+  password: '',
   captchaCode: '',
 })
 
@@ -103,6 +104,10 @@ async function loadTenants() {
   try {
     const { data: res } = await listTenants()
     tenants.value = res.data
+    // 若无 localStorage 记录且列表非空，默认选中第一个租户
+    if (form.tenantId === undefined && tenants.value.length > 0) {
+      form.tenantId = tenants.value[0].id
+    }
   } catch {
     ElMessage.error('租户列表加载失败')
     tenants.value = []
@@ -125,7 +130,7 @@ async function handleLogin() {
       await sessionLogin({
         username: form.username,
         password: form.password,
-        tenantId: form.tenantId,
+        tenantId: form.tenantId!,
         captchaKey: captchaKey.value,
         captchaCode: form.captchaCode,
       })
@@ -143,7 +148,7 @@ async function handleLogin() {
       const { data: res } = await loginByPassword({
         username: form.username,
         password: form.password,
-        tenantId: form.tenantId,
+        tenantId: form.tenantId!,
         captchaKey: captchaKey.value,
         captchaCode: form.captchaCode,
       })
@@ -204,7 +209,7 @@ async function handleSsoLogin() {
  * @param provider 第三方登录提供商标识
  */
 function handleThirdPartyLogin(provider: string) {
-  window.location.href = getThirdPartyLoginUrl(provider, form.tenantId)
+  window.location.href = getThirdPartyLoginUrl(provider, form.tenantId ?? 0)
 }
 
 /** 组件挂载后加载验证码和租户列表，并检查第三方登录错误 */
@@ -310,6 +315,12 @@ onMounted(() => {
         </el-button>
       </el-form-item>
     </el-form>
+
+    <!-- 注册入口（仅在非 OAuth2 模式下显示） -->
+    <div v-if="!isOAuth2Mode" class="login-register-section">
+      <span>{{ t('login.noAccount') }}</span>
+      <router-link to="/register" class="register-link">{{ t('login.registerNow') }}</router-link>
+    </div>
 
     <!-- 企业 SSO 登录（仅在非 OAuth2 模式下显示） -->
     <div v-if="!isOAuth2Mode" class="login-sso-section">
@@ -472,6 +483,28 @@ onMounted(() => {
   width: 100%;
   height: 44px;
   font-size: 15px;
+}
+
+.login-register-section {
+  text-align: center;
+  margin-top: var(--omni-space-md);
+  margin-bottom: var(--omni-space-sm);
+  font-size: 14px;
+  color: var(--omni-text-secondary);
+  display: flex;
+  justify-content: center;
+  gap: var(--omni-space-xs);
+  align-items: center;
+}
+
+.register-link {
+  color: var(--omni-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .login-sso-section {

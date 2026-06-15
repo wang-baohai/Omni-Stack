@@ -71,6 +71,12 @@ const staticRoutes: RouteRecordRaw[] = [
     meta: { title: 'Login', requiresAuth: false },
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/register/index.vue'),
+    meta: { title: 'Register', requiresAuth: false },
+  },
+  {
     path: '/callback',
     name: 'OAuth2Callback',
     component: () => import('@/views/callback/index.vue'),

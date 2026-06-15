@@ -17,7 +17,7 @@ public class UpdateOrgUnitRequest implements Serializable {
     /** 组织单元名称 */
     private String name;
 
-    /** 类型：ORG / DEPT */
+    /** 类型：ORG / SUBSIDIARY / DEPT / TEAM */
     private String type;
 
     /** 排序值 */

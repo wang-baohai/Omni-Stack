@@ -2,20 +2,26 @@ package com.omni.auth.service.impl;
 
 import com.omni.auth.dto.LoginResult;
 import com.omni.auth.dto.ProviderUser;
+import com.omni.auth.entity.SysRole;
 import com.omni.auth.entity.SysTenant;
 import com.omni.auth.entity.SysUser;
 import com.omni.auth.entity.SysUserOauthProvider;
+import com.omni.auth.mapper.SysRoleMapper;
 import com.omni.auth.mapper.SysTenantMapper;
 import com.omni.auth.mapper.SysUserMapper;
 import com.omni.auth.mapper.SysUserOauthProviderMapper;
+import com.omni.auth.mapper.SysUserRoleMapper;
 import com.omni.auth.oauth.OAuth2ProviderHandler;
+import com.omni.auth.service.OnlineUserService;
 import com.omni.auth.service.JwtTokenService;
 import com.omni.auth.service.SocialLoginService;
 import com.omni.auth.service.UserService;
 import com.omni.auth.util.OAuth2StateUtils;
 import com.omni.common.core.result.BusinessException;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,10 +53,20 @@ public class SocialLoginServiceImpl implements SocialLoginService {
     private final SysUserMapper sysUserMapper;
     /** 租户 Mapper，校验租户合法性 */
     private final SysTenantMapper sysTenantMapper;
+    /** 角色 Mapper，查询默认角色用于新用户角色分配 */
+    private final SysRoleMapper sysRoleMapper;
+    /** 用户角色关联 Mapper，为新用户分配默认角色 */
+    private final SysUserRoleMapper sysUserRoleMapper;
     /** 用户服务，获取用户角色和权限列表 */
     private final UserService userService;
     /** JWT 令牌服务，签发包含用户身份和权限的 RS256 JWT */
     private final JwtTokenService jwtTokenService;
+    /** 在线用户服务，记录用户在线状态到 Redis */
+    private final OnlineUserService onlineUserService;
+
+    /** 访问令牌有效期（秒），与 JWT 过期时间保持一致 */
+    @Value("${auth.token.access-token-ttl:900}")
+    private long accessTokenTtl;
 
     /**
      * {@inheritDoc}
@@ -147,10 +163,18 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         // 8. 生成 JWT
         String jwt = jwtTokenService.generateToken(user, roles, permissions);
 
+        // 9. 记录在线用户（从 JWT 中解析 jti）
+        try {
+            String jti = SignedJWT.parse(jwt).getJWTClaimsSet().getJWTID();
+            onlineUserService.recordOnline(user.getId(), user.getUsername(), jti, accessTokenTtl);
+        } catch (Exception e) {
+            log.warn("记录在线用户失败: {}", e.getMessage());
+        }
+
         return LoginResult.builder()
                 .accessToken(jwt)
                 .tokenType("Bearer")
-                .expiresIn(900L)
+                .expiresIn(accessTokenTtl)
                 .build();
     }
 
@@ -224,6 +248,18 @@ public class SocialLoginServiceImpl implements SocialLoginService {
             if (oauthProvider != null) {
                 user = sysUserMapper.selectById(oauthProvider.getUserId());
             }
+        }
+
+        // 分配默认 USER 角色（失败不阻塞用户创建）
+        try {
+            SysRole defaultRole = sysRoleMapper.selectByTenantIdAndRoleCode(tenantId, "USER");
+            if (defaultRole != null) {
+                sysUserRoleMapper.insert(user.getId(), defaultRole.getId());
+            } else {
+                log.warn("未找到租户 {} 的默认 USER 角色，跳过角色分配", tenantId);
+            }
+        } catch (Exception e) {
+            log.warn("为用户 {} 分配默认角色失败: {}", user.getUsername(), e.getMessage());
         }
 
         return user;

@@ -1,6 +1,8 @@
 package com.omni.auth.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.omni.auth.dto.CreateUserRequest;
+import com.omni.auth.dto.RegisterRequest;
 import com.omni.auth.entity.SysUser;
 import com.omni.common.core.result.PageResult;
 
@@ -29,6 +31,15 @@ public interface UserService extends IService<SysUser> {
      * @return 用户实体，不存在返回 null
      */
     SysUser findByUsername(String username, Long tenantId);
+
+    /**
+     * 验证明文密码是否与用户的 BCrypt 哈希匹配。
+     *
+     * @param rawPassword    明文密码
+     * @param encodedPassword BCrypt 哈希值
+     * @return 匹配返回 true，否则返回 false
+     */
+    boolean verifyPassword(String rawPassword, String encodedPassword);
 
     /**
      * 获取用户的角色编码列表。
@@ -87,4 +98,21 @@ public interface UserService extends IService<SysUser> {
      * @param status 目标状态：1-启用, 0-禁用
      */
     void toggleStatus(Long userId, Integer status);
+
+    /**
+     * 创建新用户（管理员操作）。
+     * <p>对密码进行 BCrypt 编码，并自动分配默认 USER 角色。</p>
+     *
+     * @param request 创建用户请求
+     * @return 创建的用户实体（含回填 ID）
+     */
+    SysUser createUser(CreateUserRequest request);
+
+    /**
+     * 用户自助注册。
+     * <p>校验验证码，对密码进行 BCrypt 编码，自动分配默认 USER 角色。</p>
+     *
+     * @param request 注册请求
+     */
+    void registerUser(RegisterRequest request);
 }

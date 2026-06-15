@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -62,14 +61,9 @@ public class GatewayPreAuthFilter extends OncePerRequestFilter {
 
         log.info("网关预认证开始：userId={}, URI={}", userId, request.getRequestURI());
 
-        // 如果 SecurityContext 中已有非匿名认证信息，不覆盖
-        // 注意：AnonymousAuthenticationFilter 在过滤器链中先于本过滤器执行，
-        // 会将 SecurityContext 设置为匿名认证，因此需要排除匿名认证的情况
-        Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
-        if (existingAuth != null && !(existingAuth instanceof AnonymousAuthenticationToken)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        // 始终以 Gateway 注入的认证信息为准（Gateway 已完成 JWT 验证）。
+        // 不跳过已有的 SecurityContext 认证，因为 HttpSession 可能缓存了旧认证，
+        // 导致 @PreAuthorize 因权限信息过期而校验失败。
 
         String userName = request.getHeader(HEADER_USER_NAME);
         String principal = userName != null ? userName : userId;

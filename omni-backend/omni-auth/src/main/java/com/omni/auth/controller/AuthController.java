@@ -4,6 +4,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.omni.auth.dto.CaptchaResult;
 import com.omni.auth.dto.LoginRequest;
 import com.omni.auth.dto.LoginResult;
+import com.omni.auth.dto.RegisterRequest;
 import com.omni.auth.dto.TenantOption;
 import com.omni.auth.entity.SysUser;
 import com.omni.auth.service.CaptchaService;
@@ -102,11 +103,15 @@ public class AuthController {
         // 第一步：校验验证码（一次性使用，存储在 Redis 中，带 TTL 自动过期）
         captchaService.validate(request.getCaptchaKey(), request.getCaptchaCode());
 
-        // 第二步：根据租户范围内的用户名 + BCrypt 密码进行认证
-        SysUser user = userService.authenticate(
-                request.getUsername(), request.getPassword(), request.getTenantId());
+        // 第二步：查询该租户下是否存在此用户
+        SysUser user = userService.findByUsername(request.getUsername(), request.getTenantId());
         if (user == null) {
-            return R.fail(401, "用户名或密码错误");
+            return R.fail(401, "该租户下不存在此用户名，请检查租户选择和用户名");
+        }
+
+        // 第三步：验证 BCrypt 密码
+        if (!userService.verifyPassword(request.getPassword(), user.getPassword())) {
+            return R.fail(401, "密码错误");
         }
 
         // 第三步：加载用户的角色和权限列表，用于填充 JWT claims
@@ -226,5 +231,20 @@ public class AuthController {
             return R.ok(auth.getName());
         }
         return R.fail(401, "未认证");
+    }
+
+    /**
+     * 用户自助注册。
+     *
+     * <p>校验验证码，对密码进行 BCrypt 编码，创建用户并自动分配默认 USER 角色。
+     * 注册成功后用户需返回登录页进行登录。</p>
+     *
+     * @param request 注册请求（含用户名、密码、验证码等）
+     * @return 操作结果
+     */
+    @PostMapping("/register")
+    public R<Void> register(@Valid @RequestBody RegisterRequest request) {
+        userService.registerUser(request);
+        return R.ok();
     }
 }

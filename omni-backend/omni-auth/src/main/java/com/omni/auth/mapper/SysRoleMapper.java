@@ -23,4 +23,14 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
             + "INNER JOIN sys_user_role ur ON r.id = ur.role_id "
             + "WHERE ur.user_id = #{userId} AND r.status = 1")
     List<SysRole> selectRolesByUserId(@Param("userId") Long userId);
+
+    /**
+     * 根据租户 ID 和角色编码查询启用状态的角色。
+     *
+     * @param tenantId 租户 ID
+     * @param roleCode 角色编码
+     * @return 匹配的角色实体，不存在时返回 null
+     */
+    @Select("SELECT * FROM sys_role WHERE tenant_id = #{tenantId} AND role_code = #{roleCode} AND status = 1")
+    SysRole selectByTenantIdAndRoleCode(@Param("tenantId") Long tenantId, @Param("roleCode") String roleCode);
 }

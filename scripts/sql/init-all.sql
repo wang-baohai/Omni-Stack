@@ -289,6 +289,10 @@ VALUES (1, 1, 'admin', '$2b$10$QjkPz8OnRoNOXTrsj./ov.nDZxK.KvsAZdjzgb1YgWSKKprOV
 INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
 VALUES (1, 1, 'SUPER_ADMIN', 'Super Administrator', 'ALL', 0, 1, 'system');
 
+-- 4.4.1 默认用户角色（新用户自动关联，无管理权限）
+INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+VALUES (2, 1, 'USER', 'Default User', 'SELF', 99, 1, 'system');
+
 -- 4.5 用户角色映射：admin → SUPER_ADMIN
 INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
 

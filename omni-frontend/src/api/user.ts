@@ -31,7 +31,15 @@ export function getUser(id: number) {
   return request.get<ApiResponse<SysUser>>(`/auth/user/${id}`)
 }
 
-export function createUser(data: Partial<SysUser>) {
+export function createUser(data: {
+  username: string
+  password: string
+  nickname?: string
+  email?: string
+  phone?: string
+  gender?: number
+  tenantId: number
+}) {
   return request.post<ApiResponse<void>>('/auth/user', data)
 }
 

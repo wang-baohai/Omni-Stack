@@ -16,6 +16,7 @@
 - **Pinia 3** state management + **Vue Router 5** navigation guards
 - **Harness Industrial Design Pattern**: Three-Layer Height Model (Architecture → Patterns → Code), with `docs/` holding system truth
 - **AI-Native Engineering**: AGENTS.md execution manual + Skills behavioral extensions for AI-assisted workflows
+- **Three User Creation Paths**: Self-registration (captcha + default role), admin backend creation, social login auto-registration on first login
 - **Maven Wrapper** bundled — clone and build, no system Maven installation needed
 
 ## Tech Stack
@@ -344,6 +345,43 @@ SQL auto-interception based on MyBatis-Plus `DataPermissionInterceptor` — zero
 | `SELF` | Own data only |
 
 **Core flow**: Request arrives -> `DataScopeResolveFilter` resolves role dataScope (most permissive wins) -> writes to `DataScopeContext` (ThreadLocal) -> `DataPermissionInterceptor` auto-appends WHERE conditions -> context cleared on request completion.
+
+## User Creation
+
+Three user creation paths are supported. All paths automatically assign the `USER` default role (`data_scope=SELF`, can only view own data):
+
+| Path | Entry Point | Auth Required | Tenant | Password |
+|------|-------------|---------------|--------|----------|
+| Self-Registration | Register page `/register` | None (public) | User selects from dropdown | User sets (BCrypt) |
+| Admin Creation | User management page | `system:user:create` | Admin specifies | Admin sets (BCrypt) |
+| Social Login | OAuth2 callback | None (3rd-party auth) | HMAC state param | None (social-only) |
+
+See [`docs/core-flows.md`](docs/core-flows.md) Flow 7 for detailed flows.
+
+## Permission Collaboration Model
+
+How the five elements — Tenant, Organization, Role, Functional Permission, and Data Permission — collaborate to enforce complete access control:
+
+```
+Tenant ─── Isolation boundary: usernames unique per tenant, data isolated by default
+  │
+  ├── User ─── Belongs to one tenant, can have multiple roles
+  │     │
+  │     ├── Role ─── Bridge between users and permissions
+  │     │     ├── Functional Permission ─── Controls "what you can do" (menu/button/API)
+  │     │     └── Data Scope ─── Controls "what data you can see"
+  │     │
+  │     └── Org Unit ─── User's department affiliation, anchor for data permissions
+  │
+  └── Permission Tree ─── DIRECTORY → MENU → BUTTON → API four-level structure
+```
+
+**Collaboration flow**:
+
+1. **At login**: Look up user by `(tenantId, username)` → load roles → load permissions → issue JWT
+2. **Functional control**: JWT `scope` claim carries permission codes → frontend dynamic menus + `v-permission` button hiding → backend `@PreAuthorize` API authorization
+3. **Data control**: Role `data_scope` determines visibility → `DataScopeResolveFilter` resolves the widest scope → MyBatis-Plus auto-appends WHERE conditions
+4. **Organization link**: User's `primaryUnitId` serves as data permission anchor → `DEPT`/`DEPT_AND_BELOW` scopes use materialized path queries for hierarchy
 
 ## Unified Response Format
 

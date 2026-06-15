@@ -812,3 +812,98 @@ interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
 - **多角色合并**：最宽松优先策略已实现
 - **内存过滤**：`OnlineUserController` 已实现基于 `primaryUnitId` 的内存过滤
 - **物化路径查询**：`SysOrgUnitMapper.selectDescendantIdsByPath()` 高效获取后代节点
+
+## Flow 7: 用户创建 — 三种途径
+
+### 概述
+
+系统支持三种用户创建途径，覆盖不同场景：用户自助注册（面向新用户）、管理员后台创建（面向运维人员）、社交登录自动创建（面向第三方 OAuth2 首次登录用户）。所有途径创建的用户均自动分配当前租户下的 `USER` 默认角色（`data_scope=SELF`），初始无组织单元归属（`primaryUnitId` 为 `null`），需由管理员后续分配。
+
+### 时序图
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant F as Frontend :3000
+    participant G as Gateway :8102
+    participant A as Auth :8100
+    participant R as Redis
+    participant M as MySQL
+
+    Note over B,M: 途径 1: 用户自助注册
+    B->>F: 1. 访问 /register 页面
+    F->>G: 2. GET /api/auth/captcha
+    G->>A: 3. Proxy to Auth → CaptchaService.generate()
+    A->>R: 4. SET captcha:{uuid} = text (TTL 5min)
+    A-->>F: 5. R<CaptchaResult> {key, image}
+    F->>F: 6. 填写表单（用户名/密码/租户/验证码）
+    F->>G: 7. POST /api/auth/register
+    G->>A: 8. Proxy to Auth (public path)
+    A->>R: 9. CaptchaService.validate(key, code)
+    A->>M: 10. SELECT * FROM sys_user WHERE tenant_id=? AND username=?
+    A->>M: 11. INSERT INTO sys_user (BCrypt password)
+    A->>M: 12. SELECT * FROM sys_role WHERE tenant_id=? AND role_code='USER'
+    A->>M: 13. INSERT INTO sys_user_role (userId, roleId)
+    A-->>F: 14. R<Void> ok()
+    F->>F: 15. ElMessage.success → router.push('/login')
+
+    Note over B,M: 途径 2: 管理员后台创建
+    B->>F: 1. 用户管理页 → 点击"新增用户"
+    F->>G: 2. POST /api/auth/user (Bearer JWT)
+    G->>A: 3. AuthFilter → GatewayPreAuthFilter
+    A->>A: 4. @PreAuthorize("hasAuthority('system:user:create')")
+    A->>M: 5. SELECT * FROM sys_user WHERE tenant_id=? AND username=?
+    A->>M: 6. INSERT INTO sys_user (BCrypt password)
+    A->>M: 7. INSERT INTO sys_user_role (default USER role)
+    A-->>F: 8. R<Void> ok()
+
+    Note over B,M: 途径 3: 社交登录自动创建 (首次登录)
+    B->>G: 1. GET /api/auth/oauth2/{provider}/callback?code=XXX&state=YYY
+    G->>A: 2. Proxy to Auth
+    A->>A: 3. OAuth2StateUtils.extractTenantId(state) 验证 HMAC
+    A->>M: 4. SELECT * FROM sys_user_oauth_provider WHERE provider=? AND provider_user_id=?
+    A->>A: 5. 未找到关联 → 触发自动创建
+    A->>M: 6. INSERT INTO sys_user (password=null, avatar=provider avatar)
+    A->>M: 7. INSERT INTO sys_user_oauth_provider (关联记录)
+    A->>M: 8. INSERT INTO sys_user_role (default USER role)
+    A->>A: 9. JwtTokenService.generateToken() → JWT
+    A-->>B: 10. 302 Redirect → /callback#token=JWT
+```
+
+### 三种途径对比
+
+| 维度 | 自助注册 | 管理员创建 | 社交登录自动创建 |
+|------|---------|-----------|----------------|
+| **入口** | `POST /api/auth/register` | `POST /api/auth/user` | OAuth2 回调内部 |
+| **认证要求** | 无（公开端点） | `system:user:create` 权限 | 无（OAuth2 回调） |
+| **验证码** | 是（Redis 一次性） | 否 | 否 |
+| **租户确定** | 用户从下拉框选择 | 管理员指定 | HMAC 签名的 state 参数 |
+| **密码** | BCrypt 编码 | BCrypt 编码 | `null`（仅社交登录） |
+| **用户名** | 用户自选（3-32 字符） | 管理员指定（无长度上限） | 自动生成：`gh_`/`go_`/`ge_` + 第三方用户名 |
+| **默认角色** | `USER`（`data_scope=SELF`） | `USER` | `USER` |
+| **组织单元** | 不分配（`primaryUnitId=null`） | 不分配 | 不分配 |
+| **用户名冲突** | 抛 `BusinessException(400)` | 抛 `BusinessException(400)` | Fallback：`{prefix}{login}_{providerUserId}` |
+| **创建后行为** | 提示成功 → 跳转登录页 | 返回用户列表 | 自动签发 JWT → 重定向前端 |
+
+### 关键组件
+
+| 组件 | 文件 | 职责 |
+|------|------|------|
+| `AuthController.register()` | `omni-auth/.../controller/AuthController.java` | 自助注册入口，委托 `UserService` |
+| `UserController.create()` | `omni-auth/.../controller/UserController.java` | 管理员创建入口，需 `@PreAuthorize` |
+| `SocialLoginServiceImpl.handleCallback()` | `omni-auth/.../service/impl/SocialLoginServiceImpl.java` | 社交登录回调处理，含自动创建逻辑 |
+| `UserServiceImpl.registerUser()` | `omni-auth/.../service/impl/UserServiceImpl.java` | 自助注册业务：验证码校验 → 唯一性检查 → 插入 → 分配角色 |
+| `UserServiceImpl.createUser()` | `omni-auth/.../service/impl/UserServiceImpl.java` | 管理员创建业务：唯一性检查 → 插入 → 分配角色 |
+| `SocialLoginServiceImpl.createNewUser()` | `omni-auth/.../service/impl/SocialLoginServiceImpl.java` | 社交登录自动创建：用户名生成 → 插入 → OAuth 关联记录 → 分配角色 |
+| `UserServiceImpl.assignDefaultRole()` | `omni-auth/.../service/impl/UserServiceImpl.java` | 公共方法：查询租户 `USER` 角色 → 写入 `sys_user_role` |
+| `RegisterRequest` | `omni-auth/.../dto/RegisterRequest.java` | 自助注册 DTO（含验证码字段） |
+| `CreateUserRequest` | `omni-auth/.../dto/CreateUserRequest.java` | 管理员创建 DTO（含 phone/gender） |
+| 注册页面 | `omni-frontend/src/views/register/index.vue` | 前端注册表单（含确认密码、租户选择） |
+
+### Current Status
+
+- **自助注册**：`POST /api/auth/register` 完整实现，前端注册页 `/register` 已就绪，Gateway 白名单已配置
+- **管理员创建**：`POST /api/auth/user` 完整实现，前端用户管理页已就绪，`@PreAuthorize` 权限控制已生效
+- **社交登录自动创建**：`SocialLoginServiceImpl.createNewUser()` 完整实现，支持 GitHub/Google/Gitee，用户名冲突有 fallback 机制
+- **默认角色分配**：三种途径共用 `assignDefaultRole()` 方法，角色分配失败仅记录警告不阻塞创建
+- **组织单元**：三种途径均不分配组织单元，`primaryUnitId` 保持 `null`，需管理员后续手动分配

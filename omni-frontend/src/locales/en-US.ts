@@ -73,8 +73,8 @@ export default {
     dataScopeDept: 'Dept Data',
     dataScopeSelf: 'Self Only',
     dataScopeCustom: 'Custom Data',
-    assignPermissions: 'Assign Permissions',
-    assignDepts: 'Assign Departments',
+    assignPermissions: 'Assign Functional Permissions',
+    assignDepts: 'Assign Data Permissions',
     confirmDelete: 'Are you sure to delete this role?',
   },
   // ===== org — organization management module =====
@@ -82,7 +82,9 @@ export default {
     name: 'Name',
     type: 'Type',
     typeOrg: 'Organization',
+    typeSubsidiary: 'Subsidiary',
     typeDept: 'Department',
+    typeTeam: 'Working Group',
     parent: 'Parent',
     rootOrg: 'Root Organization',
     confirmDelete: 'Are you sure to delete this org and all children?',
@@ -222,6 +224,22 @@ export default {
     github: 'GitHub',
     google: 'Google',
     gitee: 'Gitee',
+    registerNow: 'Register now',
+  },
+  // ===== register — registration module =====
+  register: {
+    title: 'Create Account',
+    username: 'Username',
+    password: 'Password',
+    confirmPassword: 'Confirm Password',
+    nickname: 'Nickname (optional)',
+    email: 'Email (optional)',
+    captchaPlaceholder: 'Enter captcha',
+    registerButton: 'Register',
+    hasAccount: 'Already have an account?',
+    goLogin: 'Sign in',
+    registerSuccess: 'Registration successful, please sign in',
+    passwordMismatch: 'Passwords do not match',
   },
   // ===== theme — theme switching =====
   theme: {

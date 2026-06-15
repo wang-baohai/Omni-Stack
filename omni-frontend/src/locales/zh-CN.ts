@@ -73,8 +73,8 @@ export default {
     dataScopeDept: '本部门数据',
     dataScopeSelf: '仅本人数据',
     dataScopeCustom: '自定义数据',
-    assignPermissions: '分配权限',
-    assignDepts: '分配部门',
+    assignPermissions: '分配功能权限',
+    assignDepts: '分配数据权限',
     confirmDelete: '确认删除该角色？',
   },
   // ===== org — 组织管理模块 =====
@@ -82,7 +82,9 @@ export default {
     name: '名称',
     type: '类型',
     typeOrg: '组织',
+    typeSubsidiary: '子公司',
     typeDept: '部门',
+    typeTeam: '工作组',
     parent: '上级',
     rootOrg: '根组织',
     confirmDelete: '确认删除该组织及其所有子级？',
@@ -222,6 +224,22 @@ export default {
     github: 'GitHub',
     google: 'Google',
     gitee: 'Gitee',
+    registerNow: '立即注册',
+  },
+  // ===== register — 注册模块 =====
+  register: {
+    title: '注册新账号',
+    username: '用户名',
+    password: '密码',
+    confirmPassword: '确认密码',
+    nickname: '昵称（选填）',
+    email: '邮箱（选填）',
+    captchaPlaceholder: '请输入验证码',
+    registerButton: '注 册',
+    hasAccount: '已有账号？',
+    goLogin: '去登录',
+    registerSuccess: '注册成功，请登录',
+    passwordMismatch: '两次输入的密码不一致',
   },
   // ===== theme — 主题模块 =====
   theme: {

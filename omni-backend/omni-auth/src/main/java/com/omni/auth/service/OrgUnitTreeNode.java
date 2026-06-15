@@ -23,7 +23,7 @@ public class OrgUnitTreeNode implements Serializable {
     private Long parentId;
     /** 名称 */
     private String name;
-    /** 类型：ORG / DEPT */
+    /** 类型：ORG / SUBSIDIARY / DEPT / TEAM */
     private String type;
     /** 物化路径 */
     private String path;

@@ -1,9 +1,11 @@
 package com.omni.auth.controller;
 
+import com.omni.auth.dto.CreateUserRequest;
 import com.omni.auth.entity.SysUser;
 import com.omni.auth.service.UserService;
 import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -66,13 +68,13 @@ public class UserController {
     /**
      * 创建新用户。
      *
-     * @param user 用户实体（请求体）
+     * @param request 创建用户请求（含用户名、密码、租户 ID 等）
      * @return 操作结果
      */
     @PostMapping
     @PreAuthorize("hasAuthority('system:user:create')")
-    public R<Void> create(@RequestBody SysUser user) {
-        userService.save(user);
+    public R<Void> create(@Valid @RequestBody CreateUserRequest request) {
+        userService.createUser(request);
         return R.ok();
     }
 

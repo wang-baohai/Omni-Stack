@@ -16,6 +16,7 @@
 - **Pinia 3** 状态管理 + **Vue Router 5** 路由守卫
 - **Harness 工业设计模式**：三层高度模型（Architecture → Patterns → Code），docs/ 目录承载系统真相
 - **AI 原生工程**：AGENTS.md 执行手册 + Skills 行为扩展，支持 AI 辅助开发工作流
+- **三种用户创建途径**：用户自助注册（验证码 + 默认角色）、管理员后台创建、社交登录首次自动注册
 - **Maven Wrapper** 内置，克隆即可构建，无需全局安装 Maven
 
 ## 技术栈
@@ -345,6 +346,43 @@ npm run dev
 | `SELF` | 仅自己 |
 
 **核心流程**：请求到达 → `DataScopeResolveFilter` 解析角色 dataScope（最宽松优先） → 写入 `DataScopeContext`（ThreadLocal）→ `DataPermissionInterceptor` 自动追加 WHERE 条件 → 请求结束清除上下文。
+
+## 用户创建
+
+支持三种用户创建途径，所有途径均自动分配 `USER` 默认角色（`data_scope=SELF`，仅能查看自己的数据）：
+
+| 途径 | 入口 | 认证要求 | 租户确定 | 密码 |
+|------|------|---------|---------|------|
+| 自助注册 | 注册页 `/register` | 无（公开端点） | 用户下拉选择 | 用户设置（BCrypt） |
+| 管理员创建 | 用户管理页 | `system:user:create` | 管理员指定 | 管理员设置（BCrypt） |
+| 社交登录 | OAuth2 回调 | 无（第三方认证） | HMAC state 参数 | 无（仅社交登录） |
+
+详细流程见 [`docs/core-flows.md`](docs/core-flows.md) Flow 7。
+
+## 权限协作模型
+
+租户、组织、角色、功能权限、数据权限五要素如何协作完成完整的访问控制：
+
+```
+租户(Tenant) ─── 隔离边界：用户名租户内唯一，数据默认按租户隔离
+  │
+  ├── 用户(User) ─── 属于一个租户，可拥有多个角色
+  │     │
+  │     ├── 角色(Role) ─── 连接用户与权限的桥梁
+  │     │     ├── 功能权限(Permission) ─── 控制"能做什么"（菜单/按钮/API）
+  │     │     └── 数据范围(DataScope) ─── 控制"能看哪些数据"
+  │     │
+  │     └── 组织单元(OrgUnit) ─── 用户的部门归属，数据权限的锚点
+  │
+  └── 权限树(Permission Tree) ─── DIRECTORY → MENU → BUTTON → API 四层结构
+```
+
+**协作流程**：
+
+1. **登录时**：根据 `(tenantId, username)` 查找用户 → 加载角色 → 加载权限 → 签发 JWT
+2. **功能控制**：JWT `scope` claim 携带权限码 → 前端动态菜单 + `v-permission` 按钮隐藏 → 后端 `@PreAuthorize` API 鉴权
+3. **数据控制**：角色 `data_scope` 决定可见范围 → `DataScopeResolveFilter` 解析最宽松范围 → MyBatis-Plus 自动追加 WHERE 条件
+4. **组织关联**：用户的 `primaryUnitId` 作为数据权限锚点 → `DEPT`/`DEPT_AND_BELOW` 范围基于物化路径查询上下级
 
 ## 统一响应格式
 

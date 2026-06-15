@@ -161,6 +161,34 @@ export function getThirdPartyLoginUrl(provider: string, tenantId: number) {
   return `/api/auth/oauth2/${provider}?tenant_id=${tenantId}`
 }
 
+/** 注册请求参数类型 */
+export interface RegisterParams {
+  /** 用户名 */
+  username: string
+  /** 密码 */
+  password: string
+  /** 昵称（可选） */
+  nickname?: string
+  /** 邮箱（可选） */
+  email?: string
+  /** 租户 ID */
+  tenantId: number
+  /** 验证码 Key（UUID） */
+  captchaKey: string
+  /** 验证码内容 */
+  captchaCode: string
+}
+
+/**
+ * 用户自助注册。
+ *
+ * @param data - 注册请求参数（用户名、密码、验证码等）
+ * @returns 操作结果
+ */
+export function registerUser(data: RegisterParams) {
+  return request.post<ApiResponse<void>>('/auth/register', data)
+}
+
 /** 设备授权客户端 ID（与后端 DeviceClientInitializer 保持一致） */
 export const DEVICE_CLIENT_ID = 'omni-device'
 

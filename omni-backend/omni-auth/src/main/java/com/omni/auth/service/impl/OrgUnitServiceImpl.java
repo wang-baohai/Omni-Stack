@@ -86,10 +86,11 @@ public class OrgUnitServiceImpl implements OrgUnitService {
         unit.setType(request.getType());
         unit.setSort(request.getSort() != null ? request.getSort() : 0);
         unit.setStatus(request.getStatus() != null ? request.getStatus() : 1);
-        // 先插入获取自增 ID，再更新 path
+        // 先插入获取自增 ID，再更新 path；设置临时占位值以通过 NOT NULL 约束
+        unit.setPath("/");
+        unit.setDepth(depth);
         sysOrgUnitMapper.insert(unit);
         unit.setPath(parentPath + unit.getId() + "/");
-        unit.setDepth(depth);
         sysOrgUnitMapper.updateById(unit);
 
         log.info("已创建组织单元: {} (path={})", unit.getName(), unit.getPath());

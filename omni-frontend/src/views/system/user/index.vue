@@ -6,8 +6,9 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { listUsers, deleteUser, toggleUserStatus, assignUserRoles, getUserRoleIds, type SysUser } from '@/api/user'
+import { listUsers, createUser, deleteUser, toggleUserStatus, assignUserRoles, getUserRoleIds, type SysUser } from '@/api/user'
 import { listAllRoles, type SysRole } from '@/api/role'
+import { listTenants, type TenantOption } from '@/api/auth'
 import type { PageResult } from '@/types/api'
 
 const { t } = useI18n()
@@ -22,6 +23,40 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 /** 加载状态 */
 const loading = ref(false)
+
+/** 租户列表 */
+const tenants = ref<TenantOption[]>([])
+
+/**
+ * 加载租户列表。
+ */
+async function loadTenants() {
+  try {
+    const { data: res } = await listTenants()
+    tenants.value = res.data
+  } catch {
+    ElMessage.error('租户列表加载失败')
+    tenants.value = []
+  }
+}
+
+/** 新增用户对话框 */
+const createDialogVisible = ref(false)
+const createForm = ref({
+  username: '',
+  password: '',
+  nickname: '',
+  email: '',
+  phone: '',
+  gender: 0,
+  tenantId: undefined as number | undefined,
+})
+const createFormRef = ref()
+const createRules = {
+  username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
+  password: [{ required: true, message: '密码不能为空', trigger: 'blur' }, { min: 6, message: '密码至少 6 个字符', trigger: 'blur' }],
+  tenantId: [{ required: true, message: '请选择租户', trigger: 'change' }],
+}
 
 /** 角色分配对话框 */
 const roleDialogVisible = ref(false)
@@ -108,6 +143,38 @@ async function saveRoles() {
 }
 
 /**
+ * 打开新增用户对话框。
+ */
+function openCreateDialog() {
+  createForm.value = {
+    username: '',
+    password: '',
+    nickname: '',
+    email: '',
+    phone: '',
+    gender: 0,
+    tenantId: undefined as number | undefined,
+  }
+  createDialogVisible.value = true
+}
+
+/**
+ * 提交新增用户。
+ */
+async function handleCreate() {
+  const valid = await createFormRef.value?.validate().catch(() => false)
+  if (!valid) return
+  try {
+    await createUser({ ...createForm.value, tenantId: createForm.value.tenantId! })
+    ElMessage.success('创建成功')
+    createDialogVisible.value = false
+    loadData()
+  } catch {
+    // 错误消息已由 Axios 响应拦截器展示
+  }
+}
+
+/**
  * 获取性别显示文本。
  */
 function getGenderText(gender: number): string {
@@ -116,7 +183,10 @@ function getGenderText(gender: number): string {
   return t('user.genderUnknown')
 }
 
-onMounted(loadData)
+onMounted(() => {
+  loadData()
+  loadTenants()
+})
 </script>
 
 <template>
@@ -125,6 +195,9 @@ onMounted(loadData)
       <template #header>
         <div class="card-header">
           <span>{{ t('common.users') }}</span>
+          <el-button v-permission="'system:user:create'" type="primary" @click="openCreateDialog">
+            新增用户
+          </el-button>
         </div>
       </template>
 
@@ -183,12 +256,48 @@ onMounted(loadData)
           v-for="role in availableRoles"
           :key="role.id"
           :value="role.id"
-          :label="role.roleName"
-        />
+        >
+          {{ role.roleName }}
+        </el-checkbox>
       </el-checkbox-group>
       <template #footer>
         <el-button @click="roleDialogVisible = false">{{ t('common.cancel') }}</el-button>
         <el-button type="primary" @click="saveRoles">{{ t('common.confirm') }}</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 新增用户对话框 -->
+    <el-dialog v-model="createDialogVisible" title="新增用户" width="500px">
+      <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="80px">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="createForm.username" placeholder="请输入用户名" />
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="createForm.password" type="password" placeholder="请输入密码（至少6位）" show-password />
+        </el-form-item>
+        <el-form-item label="昵称" prop="nickname">
+          <el-input v-model="createForm.nickname" placeholder="请输入昵称" />
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="createForm.email" placeholder="请输入邮箱" />
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="createForm.phone" placeholder="请输入手机号" />
+        </el-form-item>
+        <el-form-item label="租户" prop="tenantId">
+          <el-select v-model="createForm.tenantId" placeholder="请选择租户" style="width: 100%">
+            <el-option
+              v-for="tenant in tenants"
+              :key="tenant.id"
+              :label="tenant.name"
+              :value="tenant.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="createDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleCreate">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
   </div>

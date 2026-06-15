@@ -24,7 +24,7 @@ public class CreateOrgUnitRequest implements Serializable {
     @NotBlank(message = "名称不能为空")
     private String name;
 
-    /** 类型：ORG / DEPT */
+    /** 类型：ORG / SUBSIDIARY / DEPT / TEAM */
     @NotBlank(message = "类型不能为空")
     private String type;
 

@@ -13,6 +13,29 @@ import {
 
 const { t } = useI18n()
 
+/** 组织类型标签颜色映射 */
+const typeTagMap: Record<string, string> = {
+  ORG: 'primary',
+  SUBSIDIARY: 'warning',
+  DEPT: 'success',
+  TEAM: 'info',
+}
+
+/**
+ * 获取组织类型显示标签。
+ */
+function getTypeLabel(type: string): string {
+  const key = `org.type${type.charAt(0) + type.slice(1).toLowerCase()}` as 'org.typeOrg' | 'org.typeSubsidiary' | 'org.typeDept' | 'org.typeTeam'
+  return t(key)
+}
+
+/**
+ * 获取组织类型标签颜色。
+ */
+function getTypeTagType(type: string): string {
+  return typeTagMap[type] ?? 'info'
+}
+
 /** 组织树数据 */
 const treeData = ref<OrgUnitTreeNode[]>([])
 const loading = ref(false)
@@ -115,8 +138,8 @@ onMounted(loadData)
         <template #default="{ node, data }">
           <div class="tree-node">
             <span class="node-label">
-              <el-tag :type="data.type === 'ORG' ? 'primary' : 'success'" size="small">
-                {{ data.type === 'ORG' ? t('org.typeOrg') : t('org.typeDept') }}
+              <el-tag :type="getTypeTagType(data.type)" size="small">
+                {{ getTypeLabel(data.type) }}
               </el-tag>
               {{ node.label }}
             </span>
@@ -145,7 +168,9 @@ onMounted(loadData)
         <el-form-item :label="t('org.type')">
           <el-select v-model="form.type">
             <el-option value="ORG" :label="t('org.typeOrg')" />
+            <el-option value="SUBSIDIARY" :label="t('org.typeSubsidiary')" />
             <el-option value="DEPT" :label="t('org.typeDept')" />
+            <el-option value="TEAM" :label="t('org.typeTeam')" />
           </el-select>
         </el-form-item>
       </el-form>

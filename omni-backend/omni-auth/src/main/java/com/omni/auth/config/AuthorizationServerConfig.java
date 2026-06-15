@@ -27,6 +27,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.jackson.SecurityJacksonModules;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -235,10 +236,11 @@ public class AuthorizationServerConfig {
                         // 其他所有请求需要认证
                         .anyRequest().authenticated()
                 )
-                // 启用基于 HttpSession 的安全上下文持久化
-                .securityContext(context -> context
-                        .requireExplicitSave(false)
-                        .securityContextRepository(new HttpSessionSecurityContextRepository()))
+                // 无状态会话：API 请求不创建 HttpSession，避免 SecurityContext 被持久化到 session
+                // 后导致后续请求加载旧认证信息、GatewayPreAuthFilter 跳过设置 JWT 认证。
+                // OAuth2 授权码流程（/oauth2/*）使用独立的过滤器链（Order 1），不受影响。
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 禁用表单登录（使用自定义登录接口）
                 .formLogin(AbstractHttpConfigurer::disable)
                 // 禁用 CSRF（JWT 无状态认证不需要 CSRF 防护）

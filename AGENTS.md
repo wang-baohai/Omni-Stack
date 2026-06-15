@@ -177,6 +177,9 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - `DataScopeContext` ThreadLocal must be cleared in `finally` block to prevent memory leaks.
 - Write operations on Controller must declare `@PreAuthorize` with `resource:action` format permission codes.
 - `v-permission` directive uses `display:none` (not `removeChild`) for Vue reactivity compatibility.
+- Self-registration endpoint (`POST /api/auth/register`) is public — no `@PreAuthorize`. Must validate captcha and username uniqueness within tenant.
+- All user creation paths must assign the default `USER` role via `assignDefaultRole()`. Role assignment failure must not block user creation (log warning only).
+- Social login auto-creation must use provider-prefixed usernames (`gh_`, `go_`, `ge_`) with fallback on collision.
 
 ## Execution Rules
 
