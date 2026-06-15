@@ -78,10 +78,12 @@ public interface UserService extends IService<SysUser> {
     /**
      * 分配用户角色（全量替换）。
      *
-     * @param userId  用户 ID
-     * @param roleIds 角色 ID 列表
+     * @param userId    用户 ID
+     * @param roleIds   角色 ID 列表
+     * @param operator  操作人用户名
+     * @param ipAddress 操作人 IP 地址
      */
-    void assignRoles(Long userId, List<Long> roleIds);
+    void assignRoles(Long userId, List<Long> roleIds, String operator, String ipAddress);
 
     /**
      * 获取用户已分配的角色 ID 列表。
@@ -94,19 +96,23 @@ public interface UserService extends IService<SysUser> {
     /**
      * 切换用户启用/禁用状态。
      *
-     * @param userId 用户 ID
-     * @param status 目标状态：1-启用, 0-禁用
+     * @param userId    用户 ID
+     * @param status    目标状态：1-启用, 0-禁用
+     * @param operator  操作人用户名
+     * @param ipAddress 操作人 IP 地址
      */
-    void toggleStatus(Long userId, Integer status);
+    void toggleStatus(Long userId, Integer status, String operator, String ipAddress);
 
     /**
      * 创建新用户（管理员操作）。
      * <p>对密码进行 BCrypt 编码，并自动分配默认 USER 角色。</p>
      *
-     * @param request 创建用户请求
+     * @param request   创建用户请求
+     * @param operator  操作人用户名
+     * @param ipAddress 操作人 IP 地址
      * @return 创建的用户实体（含回填 ID）
      */
-    SysUser createUser(CreateUserRequest request);
+    SysUser createUser(CreateUserRequest request, String operator, String ipAddress);
 
     /**
      * 用户自助注册。
@@ -115,4 +121,13 @@ public interface UserService extends IService<SysUser> {
      * @param request 注册请求
      */
     void registerUser(RegisterRequest request);
+
+    /**
+     * 删除用户。
+     *
+     * @param id        用户 ID
+     * @param operator  操作人用户名
+     * @param ipAddress 操作人 IP 地址
+     */
+    void deleteUser(Long id, String operator, String ipAddress);
 }

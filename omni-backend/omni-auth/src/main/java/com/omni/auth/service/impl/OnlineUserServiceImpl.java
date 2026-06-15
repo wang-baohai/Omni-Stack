@@ -1,11 +1,13 @@
 package com.omni.auth.service.impl;
 
 import com.omni.auth.entity.SysUser;
+import com.omni.auth.event.AuditEvent;
 import com.omni.auth.mapper.SysUserMapper;
 import com.omni.auth.service.OnlineUserService;
 import com.omni.auth.service.OnlineUserVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class OnlineUserServiceImpl implements OnlineUserService {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final SysUserMapper sysUserMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * {@inheritDoc}
@@ -94,16 +97,20 @@ public class OnlineUserServiceImpl implements OnlineUserService {
     /**
      * {@inheritDoc}
      *
-     * <p>删除在线标记并将 Token 的 jti 加入黑名单（TTL 与 Token 剩余有效期一致）。</p>
+     * <p>删除在线标记并将 Token 的 jti 加入黑名单（TTL 与 Token 剩余有效期一致）。
+     * 踢出成功后发布 LOGOUT 审计事件。</p>
      */
     @Override
-    public void kickUser(Long userId) {
+    public void kickUser(Long userId, String operatorUsername, String ipAddress) {
         String key = ONLINE_PREFIX + userId;
         String value = stringRedisTemplate.opsForValue().get(key);
         stringRedisTemplate.delete(key);
 
+        String username = null;
+
         if (value != null) {
             String[] parts = value.split("\\|", 2);
+            username = parts[0];
             if (parts.length > 1 && !parts[1].isEmpty()) {
                 // 将 jti 加入黑名单，默认 24 小时过期（与 JWT 最大有效期对齐）
                 stringRedisTemplate.opsForValue().set(
@@ -111,7 +118,29 @@ public class OnlineUserServiceImpl implements OnlineUserService {
                 log.info("已将 Token jti={} 加入黑名单", parts[1]);
             }
         }
-        log.info("已强制踢出用户: userId={}", userId);
+
+        // 查询用户租户 ID
+        Long tenantId = null;
+        SysUser user = sysUserMapper.selectById(userId);
+        if (user != null) {
+            tenantId = user.getTenantId();
+            if (username == null) {
+                username = user.getUsername();
+            }
+        }
+
+        // 发布 LOGOUT 审计事件（管理员强制踢出）
+        eventPublisher.publishEvent(AuditEvent.of(AuditEvent.LOGOUT)
+                .tenantId(tenantId)
+                .userId(userId)
+                .username(username != null ? username : String.valueOf(userId))
+                .ipAddress(ipAddress)
+                .description("管理员强制踢出用户下线")
+                .createBy(operatorUsername)
+                .extra("method", "admin_kick")
+                .build());
+
+        log.info("已强制踢出用户: userId={}, operator={}", userId, operatorUsername);
     }
 
     /**

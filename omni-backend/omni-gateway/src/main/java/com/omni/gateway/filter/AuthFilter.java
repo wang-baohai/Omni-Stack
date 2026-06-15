@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,8 @@ import java.util.List;
  *   <li><b>公钥获取</b> — 通过 {@link JwkKeyProvider} 获取 RSA 公钥（带缓存）</li>
  *   <li><b>签名验证</b> — 使用 {@link RSASSAVerifier} 验证 JWT 的 RS256 签名</li>
  *   <li><b>过期检查</b> — 验证 JWT 的 {@code exp} claim 是否已过期</li>
+ *   <li><b>黑名单检查</b> — 查询 Redis {@code token:blacklist:{jti}} 键，
+ *       拒绝已被管理员强制踢出的 Token</li>
  *   <li><b>身份注入</b> — 从 JWT claims 中提取用户信息，注入到请求头中供下游服务使用：
  *       <ul>
  *         <li>{@code X-User-Id} — 用户 ID（sub claim）</li>
@@ -66,9 +69,13 @@ public class AuthFilter implements GlobalFilter, Ordered {
     private static final String AUTH_HEADER = "Authorization";
     /** Bearer Token 前缀 */
     private static final String BEARER_PREFIX = "Bearer ";
+    /** Token 黑名单 Redis Key 前缀，与 omni-auth 的 OnlineUserServiceImpl 保持一致 */
+    private static final String BLACKLIST_PREFIX = "token:blacklist:";
 
     /** RSA 公钥提供者，用于获取 JWT 签名验证所需的公钥 */
     private final JwkKeyProvider jwkKeyProvider;
+    /** Redis 响应式模板，用于查询 Token 黑名单 */
+    private final ReactiveStringRedisTemplate redisTemplate;
 
     /**
      * 过滤器主方法，拦截所有经过网关的请求。
@@ -77,6 +84,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
      * <pre>
      * getPublicKey()                          // Mono<RSAPublicKey>
      *   .flatMap(validateJwt)                 // Mono<JWTClaimsSet> — 签名 + 过期验证
+     *   .flatMap(checkBlacklist)              // Mono<JWTClaimsSet> — Redis 黑名单检查
      *   .flatMap(claims -> injectHeaders)     // 注入 X-User-* 头并转发请求
      *   .onErrorResume(SecurityException)     // 仅捕获安全异常返回 401
      * </pre>
@@ -107,9 +115,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
         // 截取 "Bearer " 之后的 JWT 字符串
         String token = authHeader.substring(BEARER_PREFIX.length());
 
-        // Step 3-5: 响应式 JWT 验证链
+        // Step 3-6: 响应式 JWT 验证链（签名 + 过期 + 黑名单 + 身份注入）
         return jwkKeyProvider.getPublicKey()
                 .flatMap(publicKey -> validateJwt(token, publicKey))  // 签名验证 + 过期检查
+                .flatMap(claims -> checkBlacklist(token, claims))     // Token 黑名单检查
                 .flatMap(claims -> {
                     // Step 6: 将 JWT claims 注入请求头，传递给下游微服务
                     // 下游服务通过 @RequestHeader("X-User-Id") 等方式获取用户身份
@@ -234,6 +243,34 @@ public class AuthFilter implements GlobalFilter, Ordered {
             log.error("Failed to validate JWT", e);
             return Mono.error(e);
         }
+    }
+
+    /**
+     * 检查 Token 是否已被加入黑名单（管理员强制踢出）。
+     * <p>
+     * 从 JWT claims 中提取 {@code jti}（JWT ID），查询 Redis 中是否存在
+     * {@code token:blacklist:{jti}} 键。若存在则说明该 Token 已被管理员强制注销，
+     * 返回 {@code SecurityException} 触发 401 响应。
+     * </p>
+     *
+     * @param token  JWT 字符串（用于异常日志）
+     * @param claims JWT Claims 对象
+     * @return 验证通过的 claims，或黑名单命中时返回错误
+     */
+    private Mono<JWTClaimsSet> checkBlacklist(String token, JWTClaimsSet claims) {
+        String jti = claims.getJWTID();
+        if (jti == null || jti.isEmpty()) {
+            // 无 jti 的 token 不参与黑名单检查（兼容旧 token）
+            return Mono.just(claims);
+        }
+        return redisTemplate.hasKey(BLACKLIST_PREFIX + jti)
+                .flatMap(exists -> {
+                    if (Boolean.TRUE.equals(exists)) {
+                        log.warn("Token has been blacklisted (jti={}), rejecting request", jti);
+                        return Mono.<JWTClaimsSet>error(new SecurityException("Token has been revoked"));
+                    }
+                    return Mono.just(claims);
+                });
     }
 
     /**

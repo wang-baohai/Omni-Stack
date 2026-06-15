@@ -6,20 +6,20 @@
 --   1. Docker MySQL 容器首次启动时自动执行（挂载到 /docker-entrypoint-initdb.d/）
 --   2. 手动执行：mysql -uroot -proot < scripts/sql/init-all.sql
 --
--- 表结构概览（共 14 表）：
+-- 表结构概览（共 15 表）：
 --   OAuth2 标准表（3 表）：
 --     oauth2_registered_client — 客户端注册
 --     oauth2_authorization     — 授权记录
 --     oauth2_authorization_consent — 授权同意
---   多租户 RBAC 表（11 表）：
+--   多租户 RBAC 表（12 表）：
 --     sys_tenant, sys_user, sys_role, sys_permission,
 --     sys_user_role, sys_role_permission, sys_org_unit,
 --     sys_user_unit, sys_role_dept, sys_token_blacklist,
---     sys_user_oauth_provider
+--     sys_user_oauth_provider, sys_audit_log
 --
 -- 种子数据：
 --   1 个默认租户、1 个根组织单元、1 个管理员用户（admin/admin123）、
---   1 个超级管理员角色、26 个权限节点、26 条角色权限映射
+--   1 个超级管理员角色、28 个权限节点、28 条角色权限映射
 --
 -- 注意：此脚本使用 CREATE TABLE IF NOT EXISTS，可重复执行。
 -- ============================================================
@@ -269,6 +269,25 @@ CREATE TABLE IF NOT EXISTS sys_user_oauth_provider (
     INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户第三方身份关联表';
 
+-- 3.12 安全审计日志表（追加写入，不可变记录）
+CREATE TABLE IF NOT EXISTS sys_audit_log (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '审计日志ID',
+    tenant_id   BIGINT       NOT NULL COMMENT '租户ID',
+    event_type  VARCHAR(32)  NOT NULL COMMENT '事件类型: LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED',
+    username    VARCHAR(64)  DEFAULT NULL COMMENT '操作目标用户名',
+    user_id     BIGINT       DEFAULT NULL COMMENT '操作目标用户ID',
+    ip_address  VARCHAR(64)  DEFAULT NULL COMMENT '客户端IP地址',
+    user_agent  VARCHAR(500) DEFAULT NULL COMMENT '客户端User-Agent',
+    description VARCHAR(500) DEFAULT NULL COMMENT '事件描述',
+    extra       JSON         DEFAULT NULL COMMENT '事件扩展字段（JSON）',
+    create_by   VARCHAR(64)  DEFAULT NULL COMMENT '操作人（用户名或system）',
+    create_time DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '事件发生时间',
+    INDEX idx_audit_tenant (tenant_id),
+    INDEX idx_audit_event_type (event_type),
+    INDEX idx_audit_username (username),
+    INDEX idx_audit_create_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='安全审计日志表';
+
 -- ============================================================
 -- Section 4: 种子数据
 -- ============================================================
@@ -299,7 +318,7 @@ INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
 -- 4.6 用户组织映射：admin → 根组织（主组织）
 INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (1, 1, 1);
 
--- 4.7 权限树（1 个目录 + 8 个菜单 + 27 个 API 权限 = 36 条）
+-- 4.7 权限树（1 个目录 + 9 个菜单 + 28 个 API 权限 = 38 条）
 INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (1,  1, 0, 'system',                '系统管理',   'DIRECTORY', '/1/',       1, 0, 1, 'system'),
@@ -337,9 +356,11 @@ VALUES
     (33, 1, 32,'system:online:list',    '查看在线用户',   'API',       '/1/32/33/', 3, 1, 1, 'system'),
     (34, 1, 32,'system:online:kick',    '强制下线',    'API',       '/1/32/34/', 3, 2, 1, 'system'),
     (35, 1, 1, 'system:authrecord',     '授权记录',        'MENU',      '/1/35/',    2, 8, 1, 'system'),
-    (36, 1, 35,'system:authrecord:list','查看授权记录',   'API',       '/1/35/36/', 3, 1, 1, 'system');
+    (36, 1, 35,'system:authrecord:list','查看授权记录',   'API',       '/1/35/36/', 3, 1, 1, 'system'),
+    (37, 1, 1, 'system:auditlog',       '审计日志',        'MENU',      '/1/37/',    2, 9, 1, 'system'),
+    (38, 1, 37,'system:auditlog:list',  '查看审计日志',   'API',       '/1/37/38/', 3, 1, 1, 'system');
 
--- 4.8 角色权限映射：SUPER_ADMIN 拥有全部 36 个权限
+-- 4.8 角色权限映射：SUPER_ADMIN 拥有全部 38 个权限
 INSERT INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6),
     (1, 7), (1, 8), (1, 9), (1, 10),
@@ -349,4 +370,4 @@ INSERT INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 23), (1, 24), (1, 25), (1, 26),
     (1, 27), (1, 28), (1, 29), (1, 30),
     (1, 31), (1, 32), (1, 33), (1, 34),
-    (1, 35), (1, 36);
+    (1, 35), (1, 36), (1, 37), (1, 38);

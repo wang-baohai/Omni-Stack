@@ -27,9 +27,11 @@ public interface OnlineUserService {
     /**
      * 强制踢出用户（删除 Redis 在线标记 + 加入 Token 黑名单）。
      *
-     * @param userId 用户 ID
+     * @param userId          用户 ID
+     * @param operatorUsername 操作人用户名
+     * @param ipAddress       操作人 IP 地址
      */
-    void kickUser(Long userId);
+    void kickUser(Long userId, String operatorUsername, String ipAddress);
 
     /**
      * 检查用户是否在线。

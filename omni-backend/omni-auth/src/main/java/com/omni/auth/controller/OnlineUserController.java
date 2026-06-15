@@ -4,9 +4,12 @@ import com.omni.auth.security.DataScopeContext;
 import com.omni.auth.service.OnlineUserService;
 import com.omni.auth.service.OnlineUserVO;
 import com.omni.common.core.result.R;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,14 +58,31 @@ public class OnlineUserController {
     /**
      * 强制踢出在线用户。
      *
-     * @param userId 用户 ID
+     * @param userId      用户 ID
+     * @param httpRequest HTTP 请求，用于提取操作人 IP
      * @return 操作结果
      */
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAuthority('system:online:kick')")
-    public R<Void> kick(@PathVariable Long userId) {
-        onlineUserService.kickUser(userId);
+    public R<Void> kick(@PathVariable Long userId,
+                        HttpServletRequest httpRequest) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String operator = auth != null ? auth.getName() : "anonymous";
+        String ip = extractClientIp(httpRequest);
+        onlineUserService.kickUser(userId, operator, ip);
         return R.ok();
+    }
+
+    /**
+     * 提取客户端 IP 地址。
+     * <p>优先读取 X-Forwarded-For 头（取第一个值），回退到 remoteAddr。</p>
+     */
+    private String extractClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 
     /**

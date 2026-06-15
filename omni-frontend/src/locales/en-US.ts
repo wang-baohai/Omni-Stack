@@ -45,6 +45,7 @@ export default {
     onlineUsers: 'Online Users',
     authRecords: 'Auth Records',
     oauth2Clients: 'OAuth2 Clients',
+    auditLogs: 'Audit Logs',
   },
   // ===== user — user management module =====
   user: {
@@ -115,6 +116,35 @@ export default {
     scopes: 'Scopes',
     createdAt: 'Created At',
   },
+  // ===== auditLog — audit log module =====
+  auditLog: {
+    eventType: 'Event Type',
+    eventTypePlaceholder: 'All Event Types',
+    username: 'Username',
+    usernamePlaceholder: 'Search username',
+    timeRange: 'Time Range',
+    startTime: 'Start Time',
+    endTime: 'End Time',
+    to: 'to',
+    ipAddress: 'IP Address',
+    description: 'Description',
+    operator: 'Operator',
+    createTime: 'Time',
+    extraInfo: 'Extra Info',
+    all: 'All',
+    // Event types
+    eventLoginSuccess: 'Login Success',
+    eventLoginFailed: 'Login Failed',
+    eventLogout: 'Logout',
+    eventAccountLocked: 'Account Locked',
+    eventAccountUnlocked: 'Account Unlocked',
+    eventPasswordChanged: 'Password Changed',
+    eventUserCreated: 'User Created',
+    eventUserDeleted: 'User Deleted',
+    eventUserStatusChanged: 'Status Changed',
+    eventRoleAssigned: 'Role Assigned',
+    eventRoleRevoked: 'Role Revoked',
+  },
   // ===== permission — permission management module =====
   permission: {
     name: 'Permission Name',
@@ -162,6 +192,8 @@ export default {
     perm_system_online_list: 'View Online Users',
     perm_system_online_kick: 'Kick Online User',
     perm_system_authrecord_list: 'View Auth Records',
+    perm_system_auditlog: 'Audit Logs',
+    perm_system_auditlog_list: 'View Audit Logs',
   },
   // ===== oauth2Client — OAuth2 client module =====
   oauth2Client: {

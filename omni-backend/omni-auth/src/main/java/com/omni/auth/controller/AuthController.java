@@ -12,6 +12,8 @@ import com.omni.auth.service.JwtTokenService;
 import com.omni.auth.service.OnlineUserService;
 import com.omni.auth.service.TenantService;
 import com.omni.auth.service.UserService;
+import com.omni.auth.service.AccountLockoutService;
+import com.omni.auth.event.AuditEvent;
 import com.omni.common.core.result.R;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -19,6 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -71,6 +74,10 @@ public class AuthController {
     private final OnlineUserService onlineUserService;
     /** 认证管理器，用于 session-login 端点进行 Spring Security 认证 */
     private final AuthenticationManager authenticationManager;
+    /** 账号锁定服务 */
+    private final AccountLockoutService accountLockoutService;
+    /** Spring 事件发布器，用于发布审计事件 */
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 访问令牌有效期（秒），从配置项 {@code auth.token.access-token-ttl} 读取，默认 900 秒 */
     @Value("${auth.token.access-token-ttl:900}")
@@ -99,35 +106,73 @@ public class AuthController {
      *         和过期时间（秒）；认证失败时返回 {@code R.fail(401, ...)}
      */
     @PostMapping("/login")
-    public R<LoginResult> login(@Valid @RequestBody LoginRequest request) {
-        // 第一步：校验验证码（一次性使用，存储在 Redis 中，带 TTL 自动过期）
-        captchaService.validate(request.getCaptchaKey(), request.getCaptchaCode());
+    public R<LoginResult> login(@Valid @RequestBody LoginRequest request,
+                                HttpServletRequest httpRequest) {
+        String ip = extractClientIp(httpRequest);
+        String ua = httpRequest.getHeader("User-Agent");
 
-        // 第二步：查询该租户下是否存在此用户
+        // 第一步：检查账号是否被锁定
+        if (accountLockoutService.isLocked(request.getTenantId(), request.getUsername())) {
+            publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "account_locked",
+                    "账号已被锁定，请稍后重试");
+            return R.fail(423, "账号已被锁定，请 1 小时后重试");
+        }
+
+        // 第二步：校验验证码（一次性使用，存储在 Redis 中，带 TTL 自动过期）
+        try {
+            captchaService.validate(request.getCaptchaKey(), request.getCaptchaCode());
+        } catch (Exception e) {
+            publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "invalid_captcha",
+                    "验证码校验失败");
+            throw e;
+        }
+
+        // 第三步：查询该租户下是否存在此用户
         SysUser user = userService.findByUsername(request.getUsername(), request.getTenantId());
         if (user == null) {
+            accountLockoutService.recordFailure(request.getTenantId(), request.getUsername());
+            publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "user_not_found",
+                    "该租户下不存在此用户名");
             return R.fail(401, "该租户下不存在此用户名，请检查租户选择和用户名");
         }
 
-        // 第三步：验证 BCrypt 密码
+        // 第四步：验证 BCrypt 密码
         if (!userService.verifyPassword(request.getPassword(), user.getPassword())) {
+            int failCount = accountLockoutService.recordFailure(request.getTenantId(), request.getUsername());
+            publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "wrong_password",
+                    "密码错误，已连续失败 " + failCount + " 次");
             return R.fail(401, "密码错误");
         }
 
-        // 第三步：加载用户的角色和权限列表，用于填充 JWT claims
+        // 第五步：登录成功，重置失败计数
+        accountLockoutService.resetCount(request.getTenantId(), request.getUsername());
+
+        // 第六步：加载用户的角色和权限列表，用于填充 JWT claims
         List<String> roles = userService.getUserRoles(user.getId());
         List<String> permissions = userService.getUserPermissions(user.getId());
 
-        // 第四步：生成签名的 JWT 访问令牌
+        // 第七步：生成签名的 JWT 访问令牌
         String token = jwtTokenService.generateToken(user, roles, permissions);
 
-        // 第五步：记录在线用户（从 JWT 中解析 jti）
+        // 第八步：记录在线用户（从 JWT 中解析 jti）
         try {
             String jti = SignedJWT.parse(token).getJWTClaimsSet().getJWTID();
             onlineUserService.recordOnline(user.getId(), user.getUsername(), jti, accessTokenTtl);
         } catch (Exception e) {
             log.warn("记录在线用户失败: {}", e.getMessage());
         }
+
+        // 第九步：发布登录成功审计事件
+        eventPublisher.publishEvent(AuditEvent.of(AuditEvent.LOGIN_SUCCESS)
+                .tenantId(request.getTenantId())
+                .userId(user.getId())
+                .username(request.getUsername())
+                .ipAddress(ip)
+                .userAgent(ua)
+                .description("用户密码登录成功")
+                .createBy(request.getUsername())
+                .extra("method", "password")
+                .build());
 
         log.info("用户 '{}' 登录成功，租户={}", request.getUsername(), request.getTenantId());
         return R.ok(LoginResult.builder()
@@ -159,8 +204,24 @@ public class AuthController {
     @PostMapping("/session-login")
     public R<String> sessionLogin(@Valid @RequestBody LoginRequest request,
                                   HttpServletRequest httpRequest) {
+        String ip = extractClientIp(httpRequest);
+        String ua = httpRequest.getHeader("User-Agent");
+
+        // 检查账号是否被锁定
+        if (accountLockoutService.isLocked(request.getTenantId(), request.getUsername())) {
+            publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "account_locked",
+                    "账号已被锁定");
+            return R.fail(423, "账号已被锁定，请 1 小时后重试");
+        }
+
         // 验证码校验
-        captchaService.validate(request.getCaptchaKey(), request.getCaptchaCode());
+        try {
+            captchaService.validate(request.getCaptchaKey(), request.getCaptchaCode());
+        } catch (Exception e) {
+            publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "invalid_captcha",
+                    "验证码校验失败");
+            throw e;
+        }
 
         // 构造多租户用户名格式 "tenantId:username"
         String tenantUsername = request.getTenantId() + ":" + request.getUsername();
@@ -168,6 +229,9 @@ public class AuthController {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(tenantUsername, request.getPassword()));
+
+            // 登录成功，重置失败计数
+            accountLockoutService.resetCount(request.getTenantId(), request.getUsername());
 
             // 将认证信息存入 SecurityContext 并持久化到 HttpSession
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
@@ -179,10 +243,24 @@ public class AuthController {
                     HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                     securityContext);
 
+            // 发布会话登录成功审计事件
+            eventPublisher.publishEvent(AuditEvent.of(AuditEvent.LOGIN_SUCCESS)
+                    .tenantId(request.getTenantId())
+                    .username(request.getUsername())
+                    .ipAddress(ip)
+                    .userAgent(ua)
+                    .description("用户会话登录成功")
+                    .createBy(request.getUsername())
+                    .extra("method", "session")
+                    .build());
+
             log.info("用户 '{}' 会话登录成功，租户={}，sessionId={}",
                     request.getUsername(), request.getTenantId(), session.getId());
             return R.ok(request.getUsername());
         } catch (AuthenticationException e) {
+            accountLockoutService.recordFailure(request.getTenantId(), request.getUsername());
+            publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "wrong_password",
+                    "会话登录认证失败");
             log.warn("用户 '{}' 会话登录失败: {}", request.getUsername(), e.getMessage());
             return R.fail(401, "用户名或密码错误");
         }
@@ -246,5 +324,34 @@ public class AuthController {
     public R<Void> register(@Valid @RequestBody RegisterRequest request) {
         userService.registerUser(request);
         return R.ok();
+    }
+
+    /**
+     * 从请求中提取客户端 IP 地址。
+     * 优先读取 X-Forwarded-For 头（取第一个值），回退到 remoteAddr。
+     */
+    private String extractClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
+
+    /**
+     * 发布登录失败审计事件的便捷方法。
+     */
+    private void publishLoginFailed(Long tenantId, String username, String ip, String ua,
+                                    String reason, String description) {
+        eventPublisher.publishEvent(AuditEvent.of(AuditEvent.LOGIN_FAILED)
+                .tenantId(tenantId)
+                .username(username)
+                .ipAddress(ip)
+                .userAgent(ua)
+                .description(description)
+                .createBy(username)
+                .extra("reason", reason)
+                .extra("method", "password")
+                .build());
     }
 }

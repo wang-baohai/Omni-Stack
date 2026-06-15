@@ -6,6 +6,7 @@ import com.omni.auth.entity.SysRole;
 import com.omni.auth.entity.SysTenant;
 import com.omni.auth.entity.SysUser;
 import com.omni.auth.entity.SysUserOauthProvider;
+import com.omni.auth.event.AuditEvent;
 import com.omni.auth.mapper.SysRoleMapper;
 import com.omni.auth.mapper.SysTenantMapper;
 import com.omni.auth.mapper.SysUserMapper;
@@ -22,6 +23,7 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +65,8 @@ public class SocialLoginServiceImpl implements SocialLoginService {
     private final JwtTokenService jwtTokenService;
     /** 在线用户服务，记录用户在线状态到 Redis */
     private final OnlineUserService onlineUserService;
+    /** Spring 事件发布器，用于发布审计事件 */
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 访问令牌有效期（秒），与 JWT 过期时间保持一致 */
     @Value("${auth.token.access-token-ttl:900}")
@@ -153,6 +157,16 @@ public class SocialLoginServiceImpl implements SocialLoginService {
 
         // 6. 校验用户状态
         if (user.getStatus() != 1) {
+            eventPublisher.publishEvent(AuditEvent.of(AuditEvent.LOGIN_FAILED)
+                    .tenantId(tenantId)
+                    .userId(user.getId())
+                    .username(user.getUsername())
+                    .description("社交登录失败: 用户已被禁用")
+                    .createBy(user.getUsername())
+                    .extra("reason", "account_disabled")
+                    .extra("method", "social")
+                    .extra("provider", provider)
+                    .build());
             throw new BusinessException(403, "用户已被禁用，请联系管理员");
         }
 
@@ -170,6 +184,17 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         } catch (Exception e) {
             log.warn("记录在线用户失败: {}", e.getMessage());
         }
+
+        // 10. 发布社交登录成功审计事件
+        eventPublisher.publishEvent(AuditEvent.of(AuditEvent.LOGIN_SUCCESS)
+                .tenantId(tenantId)
+                .userId(user.getId())
+                .username(user.getUsername())
+                .description(provider + " 社交登录成功")
+                .createBy(user.getUsername())
+                .extra("method", "social")
+                .extra("provider", provider)
+                .build());
 
         return LoginResult.builder()
                 .accessToken(jwt)
@@ -261,6 +286,17 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         } catch (Exception e) {
             log.warn("为用户 {} 分配默认角色失败: {}", user.getUsername(), e.getMessage());
         }
+
+        // 发布用户创建审计事件
+        eventPublisher.publishEvent(AuditEvent.of(AuditEvent.USER_CREATED)
+                .tenantId(tenantId)
+                .userId(user.getId())
+                .username(user.getUsername())
+                .description("社交登录首次登录，自动创建用户")
+                .createBy("system")
+                .extra("method", "social_first_login")
+                .extra("provider", provider)
+                .build());
 
         return user;
     }

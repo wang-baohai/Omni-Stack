@@ -45,6 +45,7 @@ export default {
     onlineUsers: '在线用户',
     authRecords: '授权记录',
     oauth2Clients: 'OAuth2 客户端',
+    auditLogs: '审计日志',
   },
   // ===== user — 用户管理模块 =====
   user: {
@@ -115,6 +116,35 @@ export default {
     scopes: '授权范围',
     createdAt: '创建时间',
   },
+  // ===== auditLog — 审计日志模块 =====
+  auditLog: {
+    eventType: '事件类型',
+    eventTypePlaceholder: '全部事件类型',
+    username: '用户名',
+    usernamePlaceholder: '搜索用户名',
+    timeRange: '时间范围',
+    startTime: '开始时间',
+    endTime: '结束时间',
+    to: '至',
+    ipAddress: 'IP 地址',
+    description: '描述',
+    operator: '操作人',
+    createTime: '时间',
+    extraInfo: '扩展信息',
+    all: '全部',
+    // 事件类型
+    eventLoginSuccess: '登录成功',
+    eventLoginFailed: '登录失败',
+    eventLogout: '退出登录',
+    eventAccountLocked: '账号锁定',
+    eventAccountUnlocked: '账号解锁',
+    eventPasswordChanged: '密码修改',
+    eventUserCreated: '用户创建',
+    eventUserDeleted: '用户删除',
+    eventUserStatusChanged: '状态变更',
+    eventRoleAssigned: '角色分配',
+    eventRoleRevoked: '角色撤销',
+  },
   // ===== permission — 权限管理模块 =====
   permission: {
     name: '权限名称',
@@ -162,6 +192,8 @@ export default {
     perm_system_online_list: '查看在线用户',
     perm_system_online_kick: '强制下线',
     perm_system_authrecord_list: '查看授权记录',
+    perm_system_auditlog: '审计日志',
+    perm_system_auditlog_list: '查看审计日志',
   },
   // ===== oauth2Client — OAuth2 客户端模块 =====
   oauth2Client: {

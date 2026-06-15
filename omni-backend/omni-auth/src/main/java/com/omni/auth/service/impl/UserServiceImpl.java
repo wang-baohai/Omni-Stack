@@ -7,6 +7,7 @@ import com.omni.auth.dto.CreateUserRequest;
 import com.omni.auth.dto.RegisterRequest;
 import com.omni.auth.entity.SysRole;
 import com.omni.auth.entity.SysUser;
+import com.omni.auth.event.AuditEvent;
 import com.omni.auth.mapper.SysRoleMapper;
 import com.omni.auth.mapper.SysUserMapper;
 import com.omni.auth.mapper.SysUserRoleMapper;
@@ -16,6 +17,7 @@ import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,8 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     private final PasswordEncoder passwordEncoder;
     /** 验证码服务，用于注册时校验验证码 */
     private final CaptchaService captchaService;
+    /** Spring 事件发布器，用于发布审计事件 */
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * {@inheritDoc}
@@ -130,18 +134,65 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
     /**
      * {@inheritDoc}
      *
-     * <p>先删除用户的全部角色关联，再逐条插入（全量替换策略）。</p>
+     * <p>先删除用户的全部角色关联，再逐条插入（全量替换策略）。
+     * 对比新旧角色列表，发布 ROLE_ASSIGNED 和 ROLE_REVOKED 审计事件。</p>
      */
     @Override
     @Transactional
-    public void assignRoles(Long userId, List<Long> roleIds) {
+    public void assignRoles(Long userId, List<Long> roleIds, String operator, String ipAddress) {
+        SysUser user = sysUserMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+
+        // 获取旧角色 ID 列表
+        List<Long> oldRoleIds = sysUserRoleMapper.selectRoleIdsByUserId(userId);
+
         sysUserRoleMapper.deleteByUserId(userId);
         if (roleIds != null) {
             for (Long roleId : roleIds) {
                 sysUserRoleMapper.insert(userId, roleId);
             }
         }
-        log.info("已为用户 {} 分配 {} 个角色", userId, roleIds == null ? 0 : roleIds.size());
+
+        // 计算新增和撤销的角色
+        List<Long> finalRoleIds = roleIds != null ? roleIds : List.of();
+        List<Long> addedIds = finalRoleIds.stream().filter(id -> !oldRoleIds.contains(id)).toList();
+        List<Long> removedIds = oldRoleIds.stream().filter(id -> !finalRoleIds.contains(id)).toList();
+
+        // 发布 ROLE_ASSIGNED 事件
+        for (Long roleId : addedIds) {
+            SysRole role = sysRoleMapper.selectById(roleId);
+            String roleCode = role != null ? role.getRoleCode() : String.valueOf(roleId);
+            eventPublisher.publishEvent(AuditEvent.of(AuditEvent.ROLE_ASSIGNED)
+                    .tenantId(user.getTenantId())
+                    .userId(userId)
+                    .username(user.getUsername())
+                    .ipAddress(ipAddress)
+                    .description("分配角色: " + roleCode)
+                    .createBy(operator)
+                    .extra("role_code", roleCode)
+                    .extra("role_id", roleId)
+                    .build());
+        }
+
+        // 发布 ROLE_REVOKED 事件
+        for (Long roleId : removedIds) {
+            SysRole role = sysRoleMapper.selectById(roleId);
+            String roleCode = role != null ? role.getRoleCode() : String.valueOf(roleId);
+            eventPublisher.publishEvent(AuditEvent.of(AuditEvent.ROLE_REVOKED)
+                    .tenantId(user.getTenantId())
+                    .userId(userId)
+                    .username(user.getUsername())
+                    .ipAddress(ipAddress)
+                    .description("撤销角色: " + roleCode)
+                    .createBy(operator)
+                    .extra("role_code", roleCode)
+                    .extra("role_id", roleId)
+                    .build());
+        }
+
+        log.info("已为用户 {} 分配 {} 个角色", userId, finalRoleIds.size());
     }
 
     /**
@@ -154,26 +205,41 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
 
     /**
      * {@inheritDoc}
+     *
+     * <p>切换用户状态并发布 USER_STATUS_CHANGED 审计事件。</p>
      */
     @Override
-    public void toggleStatus(Long userId, Integer status) {
+    public void toggleStatus(Long userId, Integer status, String operator, String ipAddress) {
         SysUser user = sysUserMapper.selectById(userId);
         if (user == null) {
             throw new BusinessException(404, "用户不存在");
         }
+        Integer oldStatus = user.getStatus();
         user.setStatus(status);
         sysUserMapper.updateById(user);
+
+        eventPublisher.publishEvent(AuditEvent.of(AuditEvent.USER_STATUS_CHANGED)
+                .tenantId(user.getTenantId())
+                .userId(userId)
+                .username(user.getUsername())
+                .ipAddress(ipAddress)
+                .description("用户状态变更为: " + (status == 1 ? "启用" : "禁用"))
+                .createBy(operator)
+                .extra("new_status", status)
+                .extra("old_status", oldStatus)
+                .build());
+
         log.info("已切换用户 {} 状态为 {}", user.getUsername(), status == 1 ? "启用" : "禁用");
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>创建流程：校验用户名唯一性 -> BCrypt 编码密码 -> 插入用户 -> 分配默认 USER 角色。</p>
+     * <p>创建流程：校验用户名唯一性 -> BCrypt 编码密码 -> 插入用户 -> 分配默认 USER 角色 -> 发布审计事件。</p>
      */
     @Override
     @Transactional
-    public SysUser createUser(CreateUserRequest request) {
+    public SysUser createUser(CreateUserRequest request, String operator, String ipAddress) {
         // 校验用户名唯一性
         SysUser existing = findByUsername(request.getUsername(), request.getTenantId());
         if (existing != null) {
@@ -195,6 +261,18 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
 
         // 分配默认 USER 角色
         assignDefaultRole(user.getId(), request.getTenantId(), user.getUsername());
+
+        // 发布 USER_CREATED 审计事件
+        eventPublisher.publishEvent(AuditEvent.of(AuditEvent.USER_CREATED)
+                .tenantId(request.getTenantId())
+                .userId(user.getId())
+                .username(request.getUsername())
+                .ipAddress(ipAddress)
+                .description("管理员创建用户: " + request.getUsername())
+                .createBy(operator)
+                .extra("method", "admin_create")
+                .extra("nickname", request.getNickname())
+                .build());
 
         log.info("管理员创建用户成功: username={}, tenantId={}", request.getUsername(), request.getTenantId());
         return user;
@@ -233,7 +311,49 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
         // 分配默认 USER 角色
         assignDefaultRole(user.getId(), tenantId, user.getUsername());
 
+        // 发布 USER_CREATED 审计事件（自助注册）
+        eventPublisher.publishEvent(AuditEvent.of(AuditEvent.USER_CREATED)
+                .tenantId(tenantId)
+                .userId(user.getId())
+                .username(request.getUsername())
+                .description("用户自助注册: " + request.getUsername())
+                .createBy(request.getUsername())
+                .extra("method", "self_register")
+                .extra("nickname", request.getNickname())
+                .build());
+
         log.info("用户自助注册成功: username={}", request.getUsername());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>先删除角色关联，再删除用户，最后发布 USER_DELETED 审计事件。</p>
+     */
+    @Override
+    @Transactional
+    public void deleteUser(Long id, String operator, String ipAddress) {
+        SysUser user = sysUserMapper.selectById(id);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+
+        // 删除角色关联
+        sysUserRoleMapper.deleteByUserId(id);
+        // 删除用户
+        sysUserMapper.deleteById(id);
+
+        // 发布 USER_DELETED 审计事件
+        eventPublisher.publishEvent(AuditEvent.of(AuditEvent.USER_DELETED)
+                .tenantId(user.getTenantId())
+                .userId(id)
+                .username(user.getUsername())
+                .ipAddress(ipAddress)
+                .description("删除用户: " + user.getUsername())
+                .createBy(operator)
+                .build());
+
+        log.info("删除用户成功: username={}, operator={}", user.getUsername(), operator);
     }
 
     /**

@@ -35,6 +35,7 @@ const menuI18nMap: Record<string, string> = {
   'system:oauth2': 'common.oauth2Clients',
   'system:online': 'common.onlineUsers',
   'system:authrecord': 'common.authRecords',
+  'system:auditlog': 'common.auditLogs',
 }
 
 /** 获取菜单显示名称（优先 i18n 翻译，fallback 后端原始名称） */
@@ -64,6 +65,7 @@ const iconMap: Record<string, string> = {
   'system:oauth2': 'Key',
   'system:online': 'Monitor',
   'system:authrecord': 'Document',
+  'system:auditlog': 'Notebook',
 }
 
 /**
