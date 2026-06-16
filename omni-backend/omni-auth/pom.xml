@@ -26,6 +26,12 @@
             <artifactId>omni-common-core</artifactId>
         </dependency>
 
+        <!-- Common Module (XSS filter auto-configuration, shared web config) -->
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common</artifactId>
+        </dependency>
+
         <!-- Spring Boot Web (Servlet) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

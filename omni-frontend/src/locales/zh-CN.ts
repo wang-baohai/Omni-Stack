@@ -46,6 +46,7 @@ export default {
     authRecords: '授权记录',
     oauth2Clients: 'OAuth2 客户端',
     auditLogs: '审计日志',
+    xssConfig: 'XSS 防护',
   },
   // ===== user — 用户管理模块 =====
   user: {
@@ -194,6 +195,11 @@ export default {
     perm_system_authrecord_list: '查看授权记录',
     perm_system_auditlog: '审计日志',
     perm_system_auditlog_list: '查看审计日志',
+    perm_system_xssconfig: 'XSS 防护',
+    perm_system_xssconfig_list: '查看 XSS 配置',
+    perm_system_xssconfig_create: '创建 XSS 规则',
+    perm_system_xssconfig_update: '更新 XSS 配置',
+    perm_system_xssconfig_delete: '删除 XSS 规则',
   },
   // ===== oauth2Client — OAuth2 客户端模块 =====
   oauth2Client: {
@@ -226,6 +232,30 @@ export default {
     authMethodNone: 'none (PKCE 公有客户端)',
     redirectUrisPlaceholder: 'http://localhost:3000/callback',
     postLogoutPlaceholder: '可选',
+  },
+  // ===== xssConfig — XSS 防护配置模块 =====
+  xssConfig: {
+    globalSwitch: '全局开关',
+    globalSwitchDesc: '开启后将对所有请求启用 XSS 防护，关闭则跳过全部检测',
+    ruleList: '黑名单规则',
+    ruleName: '规则名称',
+    ruleType: '规则类型',
+    ruleTypeHtmlTag: 'HTML 标签',
+    ruleTypeEventHandler: '事件处理器',
+    ruleTypeDangerousProtocol: '危险协议',
+    ruleTypeCustomPattern: '自定义正则',
+    pattern: '匹配正则',
+    patternPlaceholder: '输入正则表达式，如 <script>',
+    description: '规则描述',
+    descriptionPlaceholder: '可选：描述该规则的作用',
+    sortOrder: '排序',
+    confirmDelete: '确认删除该规则？',
+    createRule: '新建规则',
+    editRule: '编辑规则',
+    ruleNameRequired: '请输入规则名称',
+    ruleTypeRequired: '请选择规则类型',
+    patternRequired: '请输入匹配正则',
+    patternInvalid: '正则表达式格式错误',
   },
   // ===== login — 登录模块 =====
   login: {

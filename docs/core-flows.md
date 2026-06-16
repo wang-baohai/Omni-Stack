@@ -907,3 +907,123 @@ sequenceDiagram
 - **社交登录自动创建**：`SocialLoginServiceImpl.createNewUser()` 完整实现，支持 GitHub/Google/Gitee，用户名冲突有 fallback 机制
 - **默认角色分配**：三种途径共用 `assignDefaultRole()` 方法，角色分配失败仅记录警告不阻塞创建
 - **组织单元**：三种途径均不分配组织单元，`primaryUnitId` 保持 `null`，需管理员后续手动分配
+
+---
+
+## Flow 8: XSS 防护 — 请求净化与配置管理
+
+### 8A. XSS 请求净化（每次请求自动执行）
+
+```
+Client Request
+    │
+    ▼
+┌─────────────────────────────────────────┐
+│ Gateway: SecurityHeadersFilter          │
+│  → 添加 X-Content-Type-Options: nosniff │
+│  → 添加 X-Frame-Options: DENY          │
+│  → 添加 Referrer-Policy: strict-origin  │
+│  → AuthFilter: JWT 验证 + 身份头注入    │
+└────────────────┬────────────────────────┘
+                 │ 转发至 omni-auth
+                 ▼
+┌─────────────────────────────────────────┐
+│ Layer 2: XssFilter (OncePerRequestFilter)│
+│  1. XssConfigProvider.getXssSettings()   │
+│     → Redis 缓存命中? 返回缓存          │
+│     → 未命中? 查询 DB + 写入缓存       │
+│  2. 如果 enabled=false → 跳过净化       │
+│  3. 如果 enabled=true → 包装 Request    │
+│     → XssHttpServletRequestWrapper       │
+│     → 重写 getParameter/getParameterValues│
+│     → XssRuleHolder.set(rules) ThreadLocal│
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│ Layer 1: XssStringDeserializer          │
+│  (Jackson SimpleModule 自动注册)        │
+│  → @RequestBody JSON 中的 String 字段   │
+│  → 自动经过 XssSanitizer.sanitize()    │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+            Controller
+```
+
+**XssSanitizer 净化规则**（按 ruleType 分派）：
+
+| ruleType | 净化方式 | 示例 |
+|----------|---------|------|
+| `HTML_TAG` | 正则剥离成对标签 `<tag>...</tag>` 和自闭合标签 `<tag/>` | `<script>alert(1)</script>` → `alert(1)` |
+| `EVENT_HANDLER` | 正则剥离 `on*` 属性 | `onclick="..."` → 移除 |
+| `DANGEROUS_PROTOCOL` | 替换 `javascript:` / `vbscript:` / `data:` 协议字符串 | `javascript:alert(1)` → 空串 |
+| `CUSTOM_PATTERN` | 自定义正则匹配并替换 | `expression(...)` → 移除 |
+
+**ThreadLocal 清理**：`XssFilter` 在 `finally` 块中调用 `XssRuleHolder.clear()` 防止内存泄漏。
+
+### 8B. XSS 配置管理（管理员操作）
+
+```
+Admin (前端 XSS防护配置页面)
+    │
+    ├─ 全局开关切换
+    │  PUT /api/auth/xss-config/toggle
+    │  → XssConfigController.toggleGlobal()
+    │  → @PreAuthorize("hasAuthority('system:xssconfig:update')")
+    │  → XssConfigServiceImpl.toggleGlobal()
+    │     → UPDATE sys_xss_config SET enabled = ? WHERE tenant_id = ?
+    │     → 删除 Redis 缓存: xss:enabled:{tenantId}, xss:rules:{tenantId}
+    │
+    ├─ 创建规则
+    │  POST /api/auth/xss-config/rules
+    │  → @PreAuthorize("hasAuthority('system:xssconfig:create')")
+    │  → 验证 ruleType 枚举 + pattern 正则合法性
+    │  → INSERT sys_xss_blacklist_rule
+    │  → 删除 Redis 缓存
+    │
+    ├─ 更新规则
+    │  PUT /api/auth/xss-config/rules/{id}
+    │  → @PreAuthorize("hasAuthority('system:xssconfig:update')")
+    │  → UPDATE sys_xss_blacklist_rule
+    │  → 删除 Redis 缓存
+    │
+    ├─ 删除规则
+    │  DELETE /api/auth/xss-config/rules/{id}
+    │  → @PreAuthorize("hasAuthority('system:xssconfig:delete')")
+    │  → DELETE sys_xss_blacklist_rule
+    │  → 删除 Redis 缓存
+    │
+    └─ 单条规则启用/禁用
+       PUT /api/auth/xss-config/rules/{id}/toggle
+       → @PreAuthorize("hasAuthority('system:xssconfig:update')")
+       → UPDATE sys_xss_blacklist_rule SET enabled = NOT enabled
+       → 删除 Redis 缓存
+```
+
+**缓存策略**：
+- Redis 键：`xss:enabled:{tenantId}`（字符串 "true"/"false"）+ `xss:rules:{tenantId}`（JSON 数组）
+- TTL：30 分钟
+- 失效：所有写操作（toggle、CRUD）后主动 `DEL` 两个缓存键
+- 回源：`XssConfigProviderImpl.loadFromDbAndCache()` 在缓存未命中时查询 DB 并回填缓存
+
+### Key Components
+
+| 组件 | 文件路径 | 职责 |
+|------|---------|------|
+| `XssConfigController` | `omni-auth/.../controller/XssConfigController.java` | XSS 配置管理 REST API（7 个端点） |
+| `XssConfigServiceImpl` | `omni-auth/.../service/impl/XssConfigServiceImpl.java` | 配置 CRUD + Redis 缓存失效 |
+| `XssConfigProviderImpl` | `omni-auth/.../security/XssConfigProviderImpl.java` | 配置加载（Redis 优先 → DB 回源） |
+| `XssFilter` | `omni-common/.../security/xss/XssFilter.java` | Servlet Filter，加载配置 + ThreadLocal 设置 |
+| `XssSanitizer` | `omni-common/.../security/xss/XssSanitizer.java` | 核心净化逻辑（4 种规则类型） |
+| `XssStringDeserializer` | `omni-common/.../security/xss/XssStringDeserializer.java` | Jackson 反序列化器包装，自动清洗 JSON 字符串 |
+| `SecurityHeadersFilter` | `omni-gateway/.../config/SecurityHeadersFilter.java` | Gateway 安全响应头 |
+| XSS 管理页面 | `omni-frontend/src/views/system/xssconfig/index.vue` | 全局开关 + 规则 CRUD 表格 |
+
+### Current Status
+
+- **三层净化**：Jackson 反序列化器 + Servlet Filter + Gateway 安全头均已实现并自动装配
+- **配置管理**：全局开关 + 规则 CRUD + 单条规则 toggle 共 7 个 API 端点完整实现
+- **前端页面**：`系统管理 → XSS防护配置` 已就绪，支持分页规则列表、创建/编辑对话框、v-permission 按钮权限控制
+- **缓存策略**：Redis 缓存 + 写操作主动失效已实现
+- **租户隔离**：配置和规则按 `tenant_id` 隔离

@@ -17,6 +17,7 @@
 - **Harness Industrial Design Pattern**: Three-Layer Height Model (Architecture → Patterns → Code), with `docs/` holding system truth
 - **AI-Native Engineering**: AGENTS.md execution manual + Skills behavioral extensions for AI-assisted workflows
 - **Three User Creation Paths**: Self-registration (captcha + default role), admin backend creation, social login auto-registration on first login
+- **Three-Layer XSS Defense**: Jackson deserializer auto-sanitizes `@RequestBody` + Servlet Filter sanitizes query parameters + Gateway security response headers, with per-tenant configurable global toggle and custom blacklist rules (HTML tags, event handlers, dangerous protocols, regex patterns), Redis-cached configuration, and a full frontend management UI
 - **Maven Wrapper** bundled — clone and build, no system Maven installation needed
 
 ## Tech Stack
@@ -280,6 +281,9 @@ Shared infrastructure for all backend modules. **Cannot run independently**:
 | Jackson Config | `JacksonConfig` | Java 8 time serialization (`yyyy-MM-dd HH:mm:ss`) |
 | Web Config | `WebMvcConfig` | CORS configuration |
 | Base Entity | `BaseEntity` | Audit fields (id, createTime, updateTime, createBy, updateBy) |
+| XSS Defense | `XssFilter` / `XssSanitizer` / `XssStringDeserializer` | Three-layer defense: Jackson auto-sanitizes JSON + Servlet Filter sanitizes query params + ThreadLocal rule holder |
+| XSS SPI | `XssConfigProvider` | SPI interface for loading per-tenant XSS toggle and rule list from Redis/DB |
+| XSS Auto-Config | `XssAutoConfiguration` | Auto-registers Filter + Jackson Module, downstream modules inherit protection with zero config |
 
 > `omni-common` uses Spring Boot auto-configuration (`AutoConfiguration.imports`) to register beans. Downstream modules don't need manual `@ComponentScan`.
 
@@ -295,6 +299,7 @@ Authentication microservice built on Spring Security 7 + OAuth2 Authorization Se
 - **Multi-tenant RBAC**: `tenantId:username` user resolution + role-permission tree
 - **RBAC Permission System**: Functional permissions (dynamic menu filtering + `v-permission` button-level control + `@PreAuthorize` API authorization) + Data permissions (MyBatis-Plus `DataPermissionInterceptor` SQL auto-interception, six-level dataScope zero-intrusion filtering)
 - **JWT signing**: RSA key pair, JWK endpoint for Gateway public key verification
+- **XSS Protection Config Management**: Frontend `System Management → XSS Protection Config` page with global toggle and blacklist rule CRUD (HTML tags, event handlers, dangerous protocols, custom regex), per-tenant isolation, Redis cache 30-min TTL with active invalidation on writes
 
 ### omni-gateway (API Gateway)
 

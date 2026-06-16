@@ -46,6 +46,7 @@ export default {
     authRecords: 'Auth Records',
     oauth2Clients: 'OAuth2 Clients',
     auditLogs: 'Audit Logs',
+    xssConfig: 'XSS Protection',
   },
   // ===== user — user management module =====
   user: {
@@ -194,6 +195,11 @@ export default {
     perm_system_authrecord_list: 'View Auth Records',
     perm_system_auditlog: 'Audit Logs',
     perm_system_auditlog_list: 'View Audit Logs',
+    perm_system_xssconfig: 'XSS Protection',
+    perm_system_xssconfig_list: 'View XSS Config',
+    perm_system_xssconfig_create: 'Create XSS Rule',
+    perm_system_xssconfig_update: 'Update XSS Config',
+    perm_system_xssconfig_delete: 'Delete XSS Rule',
   },
   // ===== oauth2Client — OAuth2 client module =====
   oauth2Client: {
@@ -226,6 +232,30 @@ export default {
     authMethodNone: 'none (PKCE public client)',
     redirectUrisPlaceholder: 'http://localhost:3000/callback',
     postLogoutPlaceholder: 'Optional',
+  },
+  // ===== xssConfig — XSS protection configuration module =====
+  xssConfig: {
+    globalSwitch: 'Global Switch',
+    globalSwitchDesc: 'When enabled, XSS protection applies to all requests. When disabled, all detection is skipped.',
+    ruleList: 'Blacklist Rules',
+    ruleName: 'Rule Name',
+    ruleType: 'Rule Type',
+    ruleTypeHtmlTag: 'HTML Tag',
+    ruleTypeEventHandler: 'Event Handler',
+    ruleTypeDangerousProtocol: 'Dangerous Protocol',
+    ruleTypeCustomPattern: 'Custom Pattern',
+    pattern: 'Pattern',
+    patternPlaceholder: 'Enter regex pattern, e.g. <script>',
+    description: 'Description',
+    descriptionPlaceholder: 'Optional: describe what this rule does',
+    sortOrder: 'Sort Order',
+    confirmDelete: 'Are you sure to delete this rule?',
+    createRule: 'Create Rule',
+    editRule: 'Edit Rule',
+    ruleNameRequired: 'Please enter rule name',
+    ruleTypeRequired: 'Please select rule type',
+    patternRequired: 'Please enter pattern',
+    patternInvalid: 'Invalid regex pattern',
   },
   // ===== login — authentication module =====
   login: {

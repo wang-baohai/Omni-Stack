@@ -114,6 +114,8 @@ The `omni_auth` database contains 14 tables organized into two domains:
 | `sys_role_dept` | Role-to-department data scope bindings |
 | `sys_token_blacklist` | Revoked JWT token blacklist |
 | `sys_user_oauth_provider` | Third-party social login identity linking (GitHub/Google/WeChat/Gitee) |
+| `sys_xss_config` | Per-tenant XSS global toggle (enabled/disabled) |
+| `sys_xss_blacklist_rule` | XSS blacklist rules (HTML_TAG, EVENT_HANDLER, DANGEROUS_PROTOCOL, CUSTOM_PATTERN) |
 
 ```mermaid
 erDiagram
@@ -297,3 +299,13 @@ The social login framework uses the Strategy Pattern via `OAuth2ProviderHandler`
 `SocialLoginServiceImpl` automatically discovers new handlers via Spring's `Map<String, OAuth2ProviderHandler>` injection — no changes to the orchestration layer needed.
 
 **Currently implemented providers**: GitHub (`@Component("github")`), Google (`@Component("google")`), Gitee (`@Component("gitee")`).
+
+### Adding XSS Protection to a New Service
+
+The XSS defense system is modular — new services inherit protection by depending on `omni-common`:
+
+1. **Add dependency**: Include `omni-common` in the new service's `pom.xml`
+2. **Implement SPI**: Create `XssConfigProviderImpl` in the new service module, implementing `XssConfigProvider` from `omni-common-core`. This method returns `XssSettings` (enabled flag + rule list) for a given tenant ID
+3. **Cache strategy**: Use Redis keys `xss:enabled:{tenantId}` + `xss:rules:{tenantId}` with 30-minute TTL. Invalidate on write operations
+4. **Auto-configuration**: `XssAutoConfiguration` is registered via `AutoConfiguration.imports` in `omni-common` — no manual `@ComponentScan` needed
+5. **Gateway headers**: `SecurityHeadersFilter` in `omni-gateway` adds `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy` on all responses automatically

@@ -283,6 +283,17 @@ setupPermissionDirective(app)
 - 动态路由必须在导航守卫中等待 `permissionStore.loadMenus()` 完成后注册
 - 登出时必须调用 `permissionStore.reset()` 清除权限状态
 
+### XSS 防护配置管理
+
+XSS 防护管理页面（`views/system/xssconfig/index.vue`）提供全局开关和黑名单规则 CRUD：
+
+- **全局开关**：`el-switch` 组件，调用 `PUT /api/auth/xss-config/toggle`
+- **规则列表**：`el-table` 分页表格，支持新建、编辑、删除、单条启用/禁用
+- **租户隔离**：API 层从 JWT Token 提取 `tenant_id`，通过 `X-Tenant-Id` 请求头传递
+- **规则类型**：HTML 标签 / 事件处理器 / 危险协议 / 自定义正则
+- **路由注册**：`iconMap` 和 `menuI18nMap` 中添加 `system:xssconfig` 映射
+- **i18n**：翻译文件添加 `common.xssConfig`（模块名）和 `xssConfig.*`（字段文本）
+
 ## Build & Tooling
 
 | Tool | Purpose | Config |

@@ -30,7 +30,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/api-contract.md` | Response format, error codes, pagination, naming |
 | `docs/backend-patterns.md` | Java layering, validation, exceptions, logging, security & data permission, OOP rules |
 | `docs/frontend-patterns.md` | Vue/TS patterns, state management, routing, permission control, component conventions |
-| `docs/core-flows.md` | End-to-end traces of login (password + captcha, GitHub social, Gitee social, device code), RBAC functional permission (Flow 5), data permission (Flow 6) |
+| `docs/core-flows.md` | End-to-end traces of login (password + captcha, GitHub social, Gitee social, device code), RBAC functional permission (Flow 5), data permission (Flow 6), XSS defense (Flow 8) |
 
 ## Entry Points
 
@@ -59,6 +59,15 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Dynamic menu controller: `omni-backend/omni-auth/src/main/java/com/omni/auth/controller/MenuController.java`
 - Permission store: `omni-frontend/src/stores/permission.ts`
 - v-permission directive: `omni-frontend/src/directives/permission.ts`
+
+**XSS Defense:**
+- XSS config provider SPI: `omni-backend/omni-common-core/src/main/java/com/omni/common/core/security/XssConfigProvider.java`
+- XSS sanitizer: `omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssSanitizer.java`
+- XSS filter + auto-config: `omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssFilter.java`
+- XSS config implementation: `omni-backend/omni-auth/src/main/java/com/omni/auth/security/XssConfigProviderImpl.java`
+- XSS config controller: `omni-backend/omni-auth/src/main/java/com/omni/auth/controller/XssConfigController.java`
+- XSS management page: `omni-frontend/src/views/system/xssconfig/index.vue`
+- Gateway security headers: `omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/SecurityHeadersFilter.java`
 
 ## Build & Run Commands
 
@@ -180,6 +189,9 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Self-registration endpoint (`POST /api/auth/register`) is public — no `@PreAuthorize`. Must validate captcha and username uniqueness within tenant.
 - All user creation paths must assign the default `USER` role via `assignDefaultRole()`. Role assignment failure must not block user creation (log warning only).
 - Social login auto-creation must use provider-prefixed usernames (`gh_`, `go_`, `ge_`) with fallback on collision.
+- New backend services with `@RequestBody` endpoints must implement `XssConfigProvider` SPI to inherit three-layer XSS defense. `omni-common` auto-configures filter + Jackson deserializer via `AutoConfiguration.imports`.
+- XSS config write operations (toggle, rule CRUD) must invalidate Redis cache keys `xss:enabled:{tenantId}` and `xss:rules:{tenantId}` to maintain consistency.
+- Gateway `SecurityHeadersFilter` must add `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy` on all responses.
 
 ## Execution Rules
 
@@ -193,6 +205,8 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Before adding new write-operation endpoints: declare `@PreAuthorize` with `resource:action` permission codes and update `sys_permission` seed data in `scripts/sql/init-all.sql`.
 - Before adding data permission to a new table: update `DataPermissionHandlerImpl` with the target table name and column mapping; ensure `DataPermissionInterceptor` is registered before `PaginationInnerInterceptor`.
 - Before adding frontend buttons: add `v-permission` directive with the corresponding permission code.
+- Before adding a new microservice: implement `XssConfigProvider` SPI in the new service module; `omni-common` dependency auto-registers XSS filter chain.
+- Before modifying XSS rules or toggle: invalidate Redis cache in `XssConfigServiceImpl` write methods — never rely on TTL expiry for consistency.
 
 ## Completion Checklist
 
@@ -258,6 +272,24 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 | `GOOGLE_CLIENT_SECRET` | Google Cloud Console OAuth 2.0 客户端的 Client Secret |
 | `GOOGLE_REDIRECT_URI` | Google 授权回调地址，默认 `http://localhost:8100/api/auth/oauth2/google/callback` |
 | `OAUTH2_STATE_SECRET` | OAuth2 state 参数的 HMAC-SHA256 签名密钥，所有提供商共用 |
+
+### XSS 三层防御架构
+
+项目采用三层纵深 XSS 防御，配置通过数据库 + Redis 缓存管理，按租户隔离：
+
+| 层 | 组件 | 职责 |
+|----|------|------|
+| Layer 1 | `XssStringDeserializer` | Jackson String 反序列化器，自动清洗 `@RequestBody` JSON 中的 String 字段 |
+| Layer 2 | `XssFilter` + `XssHttpServletRequestWrapper` | Servlet Filter，清洗查询参数 + 设置 ThreadLocal 规则 |
+| Layer 3 | `SecurityHeadersFilter` | Gateway WebFilter，添加 `X-Content-Type-Options` / `X-Frame-Options` / `Referrer-Policy` |
+
+**规则类型**：`HTML_TAG`（剥离标签）、`EVENT_HANDLER`（剥离 on* 属性）、`DANGEROUS_PROTOCOL`（替换危险协议）、`CUSTOM_PATTERN`（自定义正则）。
+
+**缓存策略**：Redis 键 `xss:enabled:{tenantId}` + `xss:rules:{tenantId}`，TTL 30 分钟。写操作主动失效缓存。
+
+**扩展新服务**：实现 `XssConfigProvider` SPI 接口即可自动获得 XSS 防护。`omni-common` 依赖引入后通过 `AutoConfiguration.imports` 自动装配。
+
+**前端管理**：`系统管理 → XSS防护配置` 页面支持全局开关切换和黑名单规则 CRUD（`system:xssconfig` 权限码）。
 
 ## Testing
 

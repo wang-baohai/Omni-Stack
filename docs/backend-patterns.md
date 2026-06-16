@@ -248,6 +248,43 @@ DataScopeContext.clear()（finally 块，防 ThreadLocal 泄漏）
 - 写入时机：`DataScopeResolveFilter.doFilterInternal()` 中 `try` 块之前
 - 清除时机：`DataScopeResolveFilter.doFilterInternal()` 中 `finally` 块
 
+### XSS 防护（三层防御架构）
+
+XSS 防护采用三层纵深防御，配置通过数据库 + Redis 缓存管理，支持按租户隔离。
+
+```
+Layer 1: Jackson StringDeserializer — 自动清洗 @RequestBody JSON 中的 String 字段
+Layer 2: Servlet Filter + HttpServletRequestWrapper — 清洗查询参数
+Layer 3: Gateway WebFilter — 添加安全响应头
+```
+
+**核心组件**：
+
+| 组件 | 模块 | 职责 |
+|------|------|------|
+| `XssConfigProvider` | omni-common-core | SPI 接口，由具体服务模块实现 |
+| `XssSettings` / `XssRule` | omni-common-core | 配置值对象（enabled + 规则列表） |
+| `XssSanitizer` | omni-common | 核心净化逻辑（HTML_TAG / EVENT_HANDLER / DANGEROUS_PROTOCOL / CUSTOM_PATTERN） |
+| `XssStringDeserializer` | omni-common | Jackson String 反序列化器包装，自动清洗 |
+| `XssFilter` | omni-common | OncePerRequestFilter，加载配置 + 设置 ThreadLocal |
+| `XssHttpServletRequestWrapper` | omni-common | 重写 getParameter/getParameterValues |
+| `XssAutoConfiguration` | omni-common | 自动注册 Filter + Jackson SimpleModule |
+| `XssConfigProviderImpl` | omni-auth | 实现配置加载（Redis 缓存 + 数据库回源） |
+| `SecurityHeadersFilter` | omni-gateway | 添加 X-Content-Type-Options / X-Frame-Options / Referrer-Policy |
+
+**规则类型**：
+
+| ruleType | 匹配与清洗方式 |
+|----------|---------------|
+| `HTML_TAG` | 剥离成对标签和自闭合标签 |
+| `EVENT_HANDLER` | 剥离 `on*` 属性 |
+| `DANGEROUS_PROTOCOL` | 替换 `javascript:` / `vbscript:` / `data:` 等协议字符串 |
+| `CUSTOM_PATTERN` | 自定义正则替换 |
+
+**扩展新服务**：实现 `XssConfigProvider` 接口即可自动获得 XSS 防护能力。`omni-common` 依赖引入后通过 `AutoConfiguration.imports` 自动装配。
+
+**缓存策略**：Redis 键 `xss:enabled:{tenantId}` + `xss:rules:{tenantId}`，TTL 30 分钟。所有写操作（开关切换、规则 CRUD）后主动失效缓存。
+
 ## Testing (Future Scaffold)
 
 No tests exist yet. When added:

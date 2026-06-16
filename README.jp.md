@@ -17,6 +17,7 @@
 - **Harness 産業デザインパターン**: 三層ハイトモデル（Architecture → Patterns → Code）、`docs/` ディレクトリにシステム真実を格納
 - **AI ネイティブエンジニアリング**: AGENTS.md 実行マニュアル + Skills 行動拡張、AI 支援開発ワークフローに対応
 - **3つのユーザー作成パス**: セルフ登録（CAPTCHA + デフォルトロール）、管理者バックエンド作成、ソーシャルログイン初回自動登録
+- **3層XSS防御**: Jackson デシリアライザーが `@RequestBody` を自動サニタイズ + Servlet Filter がクエリパラメータをサニタイズ + Gateway セキュリティレスポンスヘッダー、テナント別グローバルトグルとカスタムブラックリストルール（HTMLタグ、イベントハンドラ、危険プロトコル、正規表現パターン）をサポート、Redisキャッシュ構成、完全なフロントエンド管理UI付き
 - **Maven Wrapper** 内蔵 — クローン後すぐにビルド可能、システムへの Maven インストール不要
 
 ## 技術スタック
@@ -280,6 +281,9 @@ npm run dev
 | Jackson 構成 | `JacksonConfig` | Java 8 日時シリアライゼーション (`yyyy-MM-dd HH:mm:ss`) |
 | Web 構成 | `WebMvcConfig` | CORS 設定 |
 | ベースエンティティ | `BaseEntity` | 監査フィールド (id, createTime, updateTime, createBy, updateBy) |
+| XSS 防御 | `XssFilter` / `XssSanitizer` / `XssStringDeserializer` | 3層防御: Jackson が JSON を自動サニタイズ + Servlet Filter がクエリパラメータをサニタイズ + ThreadLocal ルールホルダー |
+| XSS SPI | `XssConfigProvider` | テナント別の XSS トグルとルールリストを Redis/DB からロードする SPI インターフェース |
+| XSS 自動構成 | `XssAutoConfiguration` | Filter + Jackson Module を自動登録、下流モジュールはゼロ構成で防御機能を継承 |
 
 > `omni-common` は Spring Boot 自動構成 (`AutoConfiguration.imports`) を使用して Bean を登録します。下流モジュールは手動で `@ComponentScan` を追加する必要がありません。
 
@@ -295,6 +299,7 @@ Spring Security 7 + OAuth2 Authorization Server ベースの認証マイクロ�
 - **マルチテナント RBAC**: `tenantId:username` 形式のユーザー解決 + ロール権限ツリー
 - **RBAC 権限システム**: 機能権限（動的メニューフィルタリング + `v-permission` ボタンレベル制御 + `@PreAuthorize` API 認可）+ データ権限（MyBatis-Plus `DataPermissionInterceptor` SQL 自動インターセプト、6 レベル dataScope ゼロ侵入フィルタリング）
 - **JWT 署名**: RSA キーペア、JWK エンドポイントで Gateway に公開鍵を提供
+- **XSS 防御構成管理**: フロントエンド `システム管理 → XSS防護構成` ページでグローバルトグルとブラックリストルール CRUD をサポート（HTMLタグ、イベントハンドラ、危険プロトコル、カスタム正規表現の4つのルールタイプ）、テナント別分離構成、Redis キャッシュ 30分 TTL + 書き込み時のアクティブ無効化
 
 ### omni-gateway（API ゲートウェイ）
 

@@ -240,6 +240,112 @@ Authorization: Bearer <token>
 
 **Current decision**: No URL-based versioning during the scaffolding phase. When the API stabilizes and multiple consumers exist, introduce prefix versioning: `/api/v1/auth/user/list`.
 
+## XSS Config Management Endpoints
+
+Base path: `/api/auth/xss-config`（Gateway StripPrefix=2 → 下游 `/xss-config/...`）
+
+### 获取当前 XSS 配置
+
+```
+GET /api/auth/xss-config/settings
+Authorization: Bearer <token>
+X-Tenant-Id: 1
+
+Response 200:
+{
+  "code": 200,
+  "data": {
+    "enabled": false,
+    "rules": [
+      { "id": 1, "ruleType": "HTML_TAG", "pattern": "script" }
+    ]
+  }
+}
+```
+
+### 切换全局开关
+
+```
+PUT /api/auth/xss-config/toggle
+Authorization: Bearer <token>
+X-Tenant-Id: 1
+
+@PreAuthorize("hasAuthority('system:xssconfig:update')")
+Response 200: { "code": 200, "message": "success" }
+```
+
+### 规则列表（分页）
+
+```
+GET /api/auth/xss-config/rules/list?page=1&size=10
+Authorization: Bearer <token>
+X-Tenant-Id: 1
+
+Response 200:
+{
+  "code": 200,
+  "data": {
+    "records": [...],
+    "total": 10,
+    "size": 10,
+    "current": 1,
+    "pages": 1
+  }
+}
+```
+
+### 创建规则
+
+```
+POST /api/auth/xss-config/rules
+Authorization: Bearer <token>
+X-Tenant-Id: 1
+Content-Type: application/json
+
+{
+  "ruleName": "Script标签",
+  "ruleType": "HTML_TAG",
+  "pattern": "script",
+  "description": "拦截<script>标签",
+  "sortOrder": 1
+}
+
+@PreAuthorize("hasAuthority('system:xssconfig:create')")
+Response 200: { "code": 200, "data": { "id": 1, ... } }
+```
+
+**ruleType 枚举值**：`HTML_TAG` | `EVENT_HANDLER` | `DANGEROUS_PROTOCOL` | `CUSTOM_PATTERN`
+
+### 更新规则
+
+```
+PUT /api/auth/xss-config/rules/{id}
+@PreAuthorize("hasAuthority('system:xssconfig:update')")
+```
+
+### 删除规则
+
+```
+DELETE /api/auth/xss-config/rules/{id}
+@PreAuthorize("hasAuthority('system:xssconfig:delete')")
+```
+
+### 切换单条规则启用状态
+
+```
+PUT /api/auth/xss-config/rules/{id}/toggle
+@PreAuthorize("hasAuthority('system:xssconfig:update')")
+```
+
+### 权限码
+
+| 权限码 | 说明 |
+|--------|------|
+| `system:xssconfig:list` | 查看 XSS 配置和规则 |
+| `system:xssconfig:update` | 切换全局开关、更新规则、切换规则状态 |
+| `system:xssconfig:create` | 创建规则 |
+| `system:xssconfig:delete` | 删除规则 |
+
 ## Null Semantics
 
 - `null` fields are included in JSON output (not suppressed)

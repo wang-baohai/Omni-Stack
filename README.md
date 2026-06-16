@@ -17,6 +17,7 @@
 - **Harness 工业设计模式**：三层高度模型（Architecture → Patterns → Code），docs/ 目录承载系统真相
 - **AI 原生工程**：AGENTS.md 执行手册 + Skills 行为扩展，支持 AI 辅助开发工作流
 - **三种用户创建途径**：用户自助注册（验证码 + 默认角色）、管理员后台创建、社交登录首次自动注册
+- **三层 XSS 纵深防御**：Jackson 反序列化器自动清洗 `@RequestBody` + Servlet Filter 清洗查询参数 + Gateway 安全响应头，支持按租户配置全局开关和自定义黑名单规则（HTML 标签、事件处理器、危险协议、正则模式），Redis 缓存 + 数据库配置，前端管理界面完整可用
 - **Maven Wrapper** 内置，克隆即可构建，无需全局安装 Maven
 
 ## 技术栈
@@ -281,6 +282,9 @@ npm run dev
 | Jackson 配置 | `JacksonConfig` | Java 8 时间类型序列化（`yyyy-MM-dd HH:mm:ss`） |
 | Web 配置 | `WebMvcConfig` | CORS 跨域配置 |
 | 基础实体 | `BaseEntity` | 包含审计字段（id, createTime, updateTime, createBy, updateBy） |
+| XSS 防护 | `XssFilter` / `XssSanitizer` / `XssStringDeserializer` | 三层纵深防御：Jackson 自动清洗 JSON + Servlet Filter 清洗查询参数 + ThreadLocal 规则持有 |
+| XSS SPI | `XssConfigProvider` | 配置加载 SPI 接口，按租户从 Redis/DB 获取 XSS 开关和规则列表 |
+| XSS 自动配置 | `XssAutoConfiguration` | 自动注册 Filter + Jackson Module，下游模块零配置继承防护能力 |
 
 > `omni-common` 通过 Spring Boot 自动配置机制（`AutoConfiguration.imports`）注册 Bean，下游模块无需手动 `@ComponentScan`。
 
@@ -296,6 +300,7 @@ npm run dev
 - **多租户 RBAC**：基于 `tenantId:username` 格式的用户解析 + 角色权限树
 - **RBAC 权限体系**：功能权限（动态菜单过滤 + `v-permission` 按钮级控制 + `@PreAuthorize` API 鉴权）+ 数据权限（MyBatis-Plus `DataPermissionInterceptor` SQL 自动拦截，六级 dataScope 零侵入过滤）
 - **JWT 签名**：RSA 密钥对，JWK 端点供 Gateway 获取公钥验证
+- **XSS 防护配置管理**：前端 `系统管理 → XSS防护配置` 页面支持全局开关切换和黑名单规则 CRUD，支持四种规则类型（HTML 标签、事件处理器、危险协议、自定义正则），配置按租户隔离，Redis 缓存 30 分钟 TTL + 写操作主动失效
 
 ### omni-gateway（API 网关）
 
