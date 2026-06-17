@@ -18,6 +18,8 @@
 - **AI 原生工程**：AGENTS.md 执行手册 + Skills 行为扩展，支持 AI 辅助开发工作流
 - **三种用户创建途径**：用户自助注册（验证码 + 默认角色）、管理员后台创建、社交登录首次自动注册
 - **三层 XSS 纵深防御**：Jackson 反序列化器自动清洗 `@RequestBody` + Servlet Filter 清洗查询参数 + Gateway 安全响应头，支持按租户配置全局开关和自定义黑名单规则（HTML 标签、事件处理器、危险协议、正则模式），Redis 缓存 + 数据库配置，前端管理界面完整可用
+- **Common Starter 生态**：`omni-common` 拆分为 5 个模块（core / common / mybatis / redis / redis-reactive），新服务通过 Maven 依赖即可获得 MyBatis-Plus 分页、Redis 缓存、XSS 防护等能力，`AutoConfiguration.imports` 零配置自动装配
+- **基础数据管理**：`omni-base` 服务（端口 8101）提供数据字典管理，类型+数据两级结构，Redis cache-aside 缓存，前端 master-detail 管理页面，11 个 API 端点完整实现
 - **Maven Wrapper** 内置，克隆即可构建，无需全局安装 Maven
 
 ## 技术栈
@@ -57,8 +59,13 @@ Omni-Stack/
 ├── omni-backend/                    # Maven 多模块后端
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # 父 POM（依赖管理）
-│   ├── omni-common/                   # 公共库：统一响应、全局异常、Jackson 配置
+│   ├── omni-common-core/              # 纯 POJO：R<T>, PageResult, BaseEntity, XSS SPI
+│   ├── omni-common/                   # Web 自动配置：Jackson, CORS, 全局异常, XSS Filter
+│   ├── omni-common-mybatis/           # MyBatis-Plus Starter：分页插件, MySQL 驱动
+│   ├── omni-common-redis/             # 阻塞式 Redis Starter：RedisTemplate, RedisUtils
+│   ├── omni-common-redis-reactive/    # 响应式 Redis Starter：WebFlux 服务专用
 │   ├── omni-auth/                     # 认证服务：登录、验证码、JWT、OAuth2 (端口 8100)
+│   ├── omni-base/                     # 基础数据服务：数据字典管理 (端口 8101)
 │   └── omni-gateway/                  # API 网关 (WebFlux, 端口 8102)
 ├── omni-frontend/                   # Vue 3 SPA (开发服务器端口 3000)
 │   ├── package.json
@@ -80,15 +87,21 @@ Omni-Stack/
 ## 架构概览
 
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   omni-frontend  │────>│   omni-gateway    │────>│    omni-auth     │
-│   Vue 3 SPA     │/api │  WebFlux :8102    │lb://│   Spring :8100  │
-│   :3000         │────>│  StripPrefix=2    │────>│  Security+OAuth2│
-└─────────────────┘     └──────────────────┘     └─────────────────┘
-                            │
-                    ┌───────┴────────┐
+                                 ┌─────────────────┐
+                                 │    omni-auth     │
+                                 │   Spring :8100  │
+                                 │  Security+OAuth2│
+                                 └─────────────────┘
+                                        ▲
+┌─────────────────┐     ┌──────────────────┐
+│   omni-frontend  │────>│   omni-gateway    │lb://
+│   Vue 3 SPA     │/api │  WebFlux :8102    │────>┌─────────────────┐
+│   :3000         │────>│  StripPrefix=2    │     │    omni-base     │
+└─────────────────┘     └──────────────────┘     │   Spring :8101  │
+                            │                    │  数据字典管理    │
+                    ┌───────┴────────┐            └─────────────────┘
                     │  MySQL :3306   │  持久化存储
-                    │  Redis :6379   │  缓存 + 验证码
+                    │  Redis :6379   │  缓存 + 验证码 + 字典缓存
                     │  Nacos :8848   │  服务发现 + 配置中心
                     │  Sentinel :8858│  流控 + 熔断
                     └────────────────┘
@@ -225,12 +238,16 @@ cd omni-backend
 cd omni-auth
 ./mvnw spring-boot:run
 
+# 启动 Base 服务（端口 8101，新开终端窗口）
+cd omni-base
+./mvnw spring-boot:run
+
 # 启动 Gateway（端口 8102，新开终端窗口）
 cd omni-gateway
 ./mvnw spring-boot:run
 ```
 
-**构建顺序说明**：`omni-common` 必须先安装，其他模块才能编译。
+**构建顺序说明**：`omni-common-core` 必须先安装，然后 `omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-redis-reactive`，最后才能编译 `omni-auth`、`omni-base`、`omni-gateway`。Maven reactor 会根据 `<modules>` 声明顺序自动解析。
 
 ### 第三步：启动前端
 
@@ -253,7 +270,7 @@ npm run dev
 | Nacos 控制台 | `http://127.0.0.1:8080/` | Nacos 管理界面 |
 | Sentinel 控制台 | `http://localhost:8858` | Sentinel Dashboard |
 
-**启动顺序**：MySQL → Redis → Nacos → Sentinel → 后端服务（Auth, Gateway）→ 前端
+**启动顺序**：MySQL → Redis → Nacos → Sentinel → 后端服务（Auth, Base, Gateway）→ 前端
 
 ## 服务端口
 
@@ -261,32 +278,29 @@ npm run dev
 |------|------|------|
 | 前端开发服务器 | 3000 | Vite dev server，代理 /api 请求 |
 | 认证服务 | 8100 | Spring Security + OAuth2 Authorization Server |
+| 基础数据服务 | 8101 | 数据字典管理，Redis cache-aside 缓存 |
 | API 网关 | 8102 | Spring Cloud Gateway (WebFlux) |
-| MySQL | 3306 | 主数据库（omni_auth 库） |
-| Redis | 6379 | 验证码缓存 |
+| MySQL | 3306 | 主数据库（omni_auth + omni_base 库） |
+| Redis | 6379 | 验证码缓存 + 字典缓存 + XSS 配置缓存 |
 | Nacos | 8080, 8848 | 管理界面 (8080) + 服务发现与配置中心 (8848) |
 | Sentinel | 8858 | 流控仪表盘 |
 
 ## 模块说明
 
-### omni-common（公共库）
+### Common Starter 生态（5 模块）
 
-所有后端模块共享的基础设施，**不可独立运行**：
+`omni-common` 已拆分为 5 个职责单一的模块，形成 Common Starter 生态。新微服务引入即用，**均不可独立运行**：
 
-| 组件 | 文件 | 职责 |
-|------|------|------|
-| 统一响应 | `R<T>` | 所有 API 返回 `{ code, message, data }` 格式 |
-| 分页结构 | `PageResult<T>` | 分页响应 `{ records, total, size, current, pages }` |
-| 业务异常 | `BusinessException` | 携带错误码的业务异常 |
-| 全局异常处理 | `GlobalExceptionHandler` | 统一捕获异常并转换为 `R<Void>` 响应 |
-| Jackson 配置 | `JacksonConfig` | Java 8 时间类型序列化（`yyyy-MM-dd HH:mm:ss`） |
-| Web 配置 | `WebMvcConfig` | CORS 跨域配置 |
-| 基础实体 | `BaseEntity` | 包含审计字段（id, createTime, updateTime, createBy, updateBy） |
-| XSS 防护 | `XssFilter` / `XssSanitizer` / `XssStringDeserializer` | 三层纵深防御：Jackson 自动清洗 JSON + Servlet Filter 清洗查询参数 + ThreadLocal 规则持有 |
-| XSS SPI | `XssConfigProvider` | 配置加载 SPI 接口，按租户从 Redis/DB 获取 XSS 开关和规则列表 |
-| XSS 自动配置 | `XssAutoConfiguration` | 自动注册 Filter + Jackson Module，下游模块零配置继承防护能力 |
+| 模块 | 职责 | 适用服务类型 |
+|------|------|-------------|
+| `omni-common-core` | 纯 POJO：`R<T>`、`PageResult<T>`、`BaseEntity`、`BusinessException`、`XssConfigProvider` SPI | 所有服务 |
+| `omni-common` | Web 自动配置：Jackson 时间序列化、CORS、全局异常处理、XSS Filter + Jackson Module 自动注册 | Servlet 服务 |
+| `omni-common-mybatis` | MyBatis-Plus + MySQL 驱动 + 分页插件 + YAML 默认配置，`@ConditionalOnMissingBean` 支持覆盖 | Servlet 服务 |
+| `omni-common-redis` | 阻塞式 Redis + RedisTemplate 序列化 + RedisUtils | Servlet 服务 |
+| `omni-common-redis-reactive` | 响应式 Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux 服务（Gateway） |
 
-> `omni-common` 通过 Spring Boot 自动配置机制（`AutoConfiguration.imports`）注册 Bean，下游模块无需手动 `@ComponentScan`。
+> 所有 Starter 通过 Spring Boot 自动配置机制（`AutoConfiguration.imports`）注册 Bean，下游模块无需手动 `@ComponentScan`。
+> `omni-common-redis` 和 `omni-common-redis-reactive` 不可混用，WebFlux 服务只能依赖 reactive 版本。
 
 ### omni-auth（认证服务）
 
@@ -301,6 +315,16 @@ npm run dev
 - **RBAC 权限体系**：功能权限（动态菜单过滤 + `v-permission` 按钮级控制 + `@PreAuthorize` API 鉴权）+ 数据权限（MyBatis-Plus `DataPermissionInterceptor` SQL 自动拦截，六级 dataScope 零侵入过滤）
 - **JWT 签名**：RSA 密钥对，JWK 端点供 Gateway 获取公钥验证
 - **XSS 防护配置管理**：前端 `系统管理 → XSS防护配置` 页面支持全局开关切换和黑名单规则 CRUD，支持四种规则类型（HTML 标签、事件处理器、危险协议、自定义正则），配置按租户隔离，Redis 缓存 30 分钟 TTL + 写操作主动失效
+
+### omni-base（基础数据服务）
+
+数据字典管理微服务，提供类型+数据两级结构的 CRUD 能力：
+
+- **字典类型管理**：`sys_dict_type` 表，支持列表查询、详情获取、创建、更新、删除、状态切换，11 个 API 端点完整实现
+- **字典数据管理**：`sys_dict_data` 表，按类型编码关联，支持列表查询、创建、更新、删除、缓存刷新
+- **Redis cache-aside 缓存**：TTL 30 分钟，写操作主动失效（write-through invalidation），`dict:{typeCode}` 键格式
+- **前端管理页面**：master-detail 布局，左侧字典类型列表，右侧字典数据列表，`base:dict` 权限码
+- **XSS 防护继承**：实现 `XssConfigProvider` SPI，自动获得三层 XSS 防御能力
 
 ### omni-gateway（API 网关）
 
@@ -485,6 +509,8 @@ cd omni-frontend && npm run build && npm run lint
 | Gitee 登录后卡在回调页面 | 同 GitHub，`sys_user_oauth_provider` 表缺失 | 确保 `init-all.sql` 已执行，该表同时存储所有提供商的绑定关系 |
 | 社交登录 state 签名验证失败 | `OAUTH2_STATE_SECRET` 未配置或重启后变更 | 设置固定的 `OAUTH2_STATE_SECRET` 环境变量，确保签名密钥一致 |
 | Nacos 重启后配置丢失 | 使用内嵌 Derby 数据库，无持久化 | 使用本项目的 `init-nacos.sql` 切换到 MySQL 外部存储 |
+| Maven 构建顺序错误 | `omni-common-core` 未先安装导致下游模块编译失败 | 使用 `./mvnw clean install` 从父 POM 构建，Maven reactor 自动按 `<modules>` 声明顺序解析 |
+| Redis Starter 混用导致线程饥饿 | 阻塞式 `omni-common-redis` 引入 WebFlux 服务 | WebFlux 服务（如 Gateway）只能依赖 `omni-common-redis-reactive`，不可混用 |
 
 ## AI 原生工程实践
 

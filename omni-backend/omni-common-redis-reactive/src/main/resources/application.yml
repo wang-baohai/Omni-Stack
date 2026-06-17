@@ -1,0 +1,4 @@
+spring:
+  data:
+    redis:
+      timeout: 5s

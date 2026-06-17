@@ -1,0 +1,46 @@
+server:
+  port: 8101
+
+spring:
+  application:
+    name: omni-base
+  profiles:
+    active: dev
+    group:
+      dev:
+        include: local
+  config:
+    import:
+      - optional:nacos:omni-base.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        username: nacos
+        password: nacos
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        username: nacos
+        password: nacos
+        file-extension: yml
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/omni_base?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+
+# MyBatis-Plus 开发环境配置（通用配置由 omni-common-mybatis 提供）
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com.omni.base.mapper: debug

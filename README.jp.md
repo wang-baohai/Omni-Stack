@@ -18,6 +18,8 @@
 - **AI ネイティブエンジニアリング**: AGENTS.md 実行マニュアル + Skills 行動拡張、AI 支援開発ワークフローに対応
 - **3つのユーザー作成パス**: セルフ登録（CAPTCHA + デフォルトロール）、管理者バックエンド作成、ソーシャルログイン初回自動登録
 - **3層XSS防御**: Jackson デシリアライザーが `@RequestBody` を自動サニタイズ + Servlet Filter がクエリパラメータをサニタイズ + Gateway セキュリティレスポンスヘッダー、テナント別グローバルトグルとカスタムブラックリストルール（HTMLタグ、イベントハンドラ、危険プロトコル、正規表現パターン）をサポート、Redisキャッシュ構成、完全なフロントエンド管理UI付き
+- **Common Starter エコシステム**: `omni-common` を5モジュール（core / common / mybatis / redis / redis-reactive）に分割、新サービスは Maven 依存関係を追加するだけで MyBatis-Plus ページネーション、Redis キャッシュ、XSS 防御等の能力を獲得、`AutoConfiguration.imports` ゼロ構成自動アセンブリ
+- **基礎データ管理**: `omni-base` サービス（ポート 8101）がデータ辞書管理を提供、タイプ+データの二層構造、Redis cache-aside キャッシュ、フロントエンド master-detail 管理ページ、11個の API エンドポイント完全実装
 - **Maven Wrapper** 内蔵 — クローン後すぐにビルド可能、システムへの Maven インストール不要
 
 ## 技術スタック
@@ -57,8 +59,13 @@ Omni-Stack/
 ├── omni-backend/                    # Maven マルチモジュールバックエンド
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # 親 POM（依存関係管理）
-│   ├── omni-common/                   # 共有ライブラリ：統一レスポンス、グローバル例外、Jackson 構成
+│   ├── omni-common-core/              # 純 POJO：R<T>, PageResult, BaseEntity, XSS SPI
+│   ├── omni-common/                   # Web 自動構成：Jackson, CORS, グローバル例外, XSS Filter
+│   ├── omni-common-mybatis/           # MyBatis-Plus Starter：ページネーションプラグイン, MySQL ドライバー
+│   ├── omni-common-redis/             # ブロッキング Redis Starter：RedisTemplate, RedisUtils
+│   ├── omni-common-redis-reactive/    # リアクティブ Redis Starter：WebFlux サービス専用
 │   ├── omni-auth/                     # 認証サービス：ログイン、キャプチャ、JWT、OAuth2 (ポート 8100)
+│   ├── omni-base/                     # 基礎データサービス：データ辞書管理 (ポート 8101)
 │   └── omni-gateway/                  # API ゲートウェイ (WebFlux, ポート 8102)
 ├── omni-frontend/                   # Vue 3 SPA (開発サーバー ポート 3000)
 │   ├── package.json
@@ -80,15 +87,21 @@ Omni-Stack/
 ## アーキテクチャ概要
 
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   omni-frontend  │────>│   omni-gateway    │────>│    omni-auth     │
-│   Vue 3 SPA     │/api │  WebFlux :8102    │lb://│   Spring :8100  │
-│   :3000         │────>│  StripPrefix=2    │────>│  Security+OAuth2│
-└─────────────────┘     └──────────────────┘     └─────────────────┘
-                            │
-                    ┌───────┴────────┐
+                                 ┌─────────────────┐
+                                 │    omni-auth     │
+                                 │   Spring :8100  │
+                                 │  Security+OAuth2│
+                                 └─────────────────┘
+                                        ▲
+┌─────────────────┐     ┌──────────────────┐
+│   omni-frontend  │────>│   omni-gateway    │lb://
+│   Vue 3 SPA     │/api │  WebFlux :8102    │────>┌─────────────────┐
+│   :3000         │────>│  StripPrefix=2    │     │    omni-base     │
+└─────────────────┘     └──────────────────┘     │   Spring :8101  │
+                            │                    │  データ辞書管理  │
+                    ┌───────┴────────┐            └─────────────────┘
                     │  MySQL :3306   │  永続化ストレージ
-                    │  Redis :6379   │  キャッシュ + キャプチャ
+                    │  Redis :6379   │  キャッシュ + キャプチャ + 辞書キャッシュ
                     │  Nacos :8848   │  ディスカバリ + 構成
                     │  Sentinel :8858│  フロー制御
                     └────────────────┘
@@ -224,12 +237,16 @@ cd omni-backend
 cd omni-auth
 ./mvnw spring-boot:run
 
+# Base サービスを起動（ポート 8101、新規ターミナルで）
+cd omni-base
+./mvnw spring-boot:run
+
 # Gateway を起動（ポート 8102、新規ターミナルで）
 cd omni-gateway
 ./mvnw spring-boot:run
 ```
 
-**ビルド順序**: `omni-common` を先にインストールする必要があります。
+**ビルド順序**: `omni-common-core` を先にインストールし、次に `omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-redis-reactive`、最後に `omni-auth`、`omni-base`、`omni-gateway` をコンパイルします。Maven reactor は `<modules>` 宣言順に基づき自動的に解決します。
 
 ### ステップ 3: フロントエンドの起動
 
@@ -252,7 +269,7 @@ npm run dev
 | Nacos コンソール | `http://127.0.0.1:8080/` | Nacos 管理画面 |
 | Sentinel コンソール | `http://localhost:8858` | Sentinel ダッシュボード |
 
-**起動順序**: MySQL → Redis → Nacos → Sentinel → バックエンド（Auth, Gateway）→ フロントエンド
+**起動順序**: MySQL → Redis → Nacos → Sentinel → バックエンド（Auth, Base, Gateway）→ フロントエンド
 
 ## サービスポート
 
@@ -260,32 +277,29 @@ npm run dev
 |---------|-------|------|
 | フロントエンド開発サーバー | 3000 | Vite 開発サーバー、/api リクエストをプロキシ |
 | 認証サービス | 8100 | Spring Security + OAuth2 Authorization Server |
+| 基礎データサービス | 8101 | データ辞書管理、Redis cache-aside キャッシュ |
 | API ゲートウェイ | 8102 | Spring Cloud Gateway (WebFlux) |
-| MySQL | 3306 | メインデータベース（omni_auth） |
-| Redis | 6379 | キャプチャキャッシュ |
+| MySQL | 3306 | メインデータベース（omni_auth + omni_base） |
+| Redis | 6379 | キャプチャキャッシュ + 辞書キャッシュ + XSS 構成キャッシュ |
 | Nacos | 8080, 8848 | 管理画面 (8080) + サービスディスカバリと構成管理 (8848) |
 | Sentinel | 8858 | フロー制御ダッシュボード |
 
 ## モジュール詳細
 
-### omni-common（共有ライブラリ）
+### Common Starter エコシステム（5モジュール）
 
-全バックエンドモジュールで共有される基盤インフラ。**単独では実行できません**:
+`omni-common` は5つの単一責任モジュールに分割され、Common Starter エコシステムを形成しています。新サービスは Maven 依存関係を追加するだけで能力を獲得でき、**いずれも単独では実行できません**：
 
-| コンポーネント | ファイル | 責任 |
-|--------------|---------|------|
-| 統一レスポンス | `R<T>` | 全 API が `{ code, message, data }` を返却 |
-| ページネーション | `PageResult<T>` | ページネーションレスポンス `{ records, total, size, current, pages }` |
-| ビジネス例外 | `BusinessException` | エラーコード付きビジネス例外 |
-| 例外ハンドラー | `GlobalExceptionHandler` | 全例外をキャッチし `R<Void>` に変換 |
-| Jackson 構成 | `JacksonConfig` | Java 8 日時シリアライゼーション (`yyyy-MM-dd HH:mm:ss`) |
-| Web 構成 | `WebMvcConfig` | CORS 設定 |
-| ベースエンティティ | `BaseEntity` | 監査フィールド (id, createTime, updateTime, createBy, updateBy) |
-| XSS 防御 | `XssFilter` / `XssSanitizer` / `XssStringDeserializer` | 3層防御: Jackson が JSON を自動サニタイズ + Servlet Filter がクエリパラメータをサニタイズ + ThreadLocal ルールホルダー |
-| XSS SPI | `XssConfigProvider` | テナント別の XSS トグルとルールリストを Redis/DB からロードする SPI インターフェース |
-| XSS 自動構成 | `XssAutoConfiguration` | Filter + Jackson Module を自動登録、下流モジュールはゼロ構成で防御機能を継承 |
+| モジュール | 責任 | 対象サービスタイプ |
+|-----------|------|-----------------|
+| `omni-common-core` | 純 POJO：`R<T>`、`PageResult<T>`、`BaseEntity`、`BusinessException`、`XssConfigProvider` SPI | 全サービス |
+| `omni-common` | Web 自動構成：Jackson 日時シリアライゼーション、CORS、グローバル例外処理、XSS Filter + Jackson Module 自動登録 | Servlet サービス |
+| `omni-common-mybatis` | MyBatis-Plus + MySQL ドライバー + ページネーションプラグイン + YAML デフォルト構成、`@ConditionalOnMissingBean` オーバーライドサポート | Servlet サービス |
+| `omni-common-redis` | ブロッキング Redis + RedisTemplate シリアライゼーション + RedisUtils | Servlet サービス |
+| `omni-common-redis-reactive` | リアクティブ Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux サービス（Gateway） |
 
-> `omni-common` は Spring Boot 自動構成 (`AutoConfiguration.imports`) を使用して Bean を登録します。下流モジュールは手動で `@ComponentScan` を追加する必要がありません。
+> 全 Starter は Spring Boot 自動構成（`AutoConfiguration.imports`）を使用して Bean を登録します。下流モジュールは手動で `@ComponentScan` を追加する必要がありません。
+> `omni-common-redis` と `omni-common-redis-reactive` は混用不可です。WebFlux サービスはリアクティブバージョンのみ依存できます。
 
 ### omni-auth（認証サービス）
 
@@ -300,6 +314,16 @@ Spring Security 7 + OAuth2 Authorization Server ベースの認証マイクロ�
 - **RBAC 権限システム**: 機能権限（動的メニューフィルタリング + `v-permission` ボタンレベル制御 + `@PreAuthorize` API 認可）+ データ権限（MyBatis-Plus `DataPermissionInterceptor` SQL 自動インターセプト、6 レベル dataScope ゼロ侵入フィルタリング）
 - **JWT 署名**: RSA キーペア、JWK エンドポイントで Gateway に公開鍵を提供
 - **XSS 防御構成管理**: フロントエンド `システム管理 → XSS防護構成` ページでグローバルトグルとブラックリストルール CRUD をサポート（HTMLタグ、イベントハンドラ、危険プロトコル、カスタム正規表現の4つのルールタイプ）、テナント別分離構成、Redis キャッシュ 30分 TTL + 書き込み時のアクティブ無効化
+
+### omni-base（基礎データサービス）
+
+データ辞書管理マイクロサービス、タイプ+データの二層構造 CRUD を提供：
+
+- **辞書タイプ管理**: `sys_dict_type` テーブル — リスト取得、詳細取得、作成、更新、削除、ステータス切替、11個の API エンドポイント完全実装
+- **辞書データ管理**: `sys_dict_data` テーブル — タイプコードで関連付け、リスト取得、作成、更新、削除、キャッシュリフレッシュをサポート
+- **Redis cache-aside キャッシュ**: TTL 30分、write-through 無効化、`dict:{typeCode}` キー形式
+- **フロントエンド管理ページ**: master-detail レイアウト — 左側に辞書タイプリスト、右側に辞書データリスト、`base:dict` 権限コード
+- **XSS 防御継承**: `XssConfigProvider` SPI を実装し、3層 XSS 防御を自動的に獲得
 
 ### omni-gateway（API ゲートウェイ）
 
@@ -484,6 +508,8 @@ cd omni-frontend && npm run build && npm run lint
 | Gitee ログイン後コールバックページで停止 | GitHub と同じ — `sys_user_oauth_provider` テーブルが存在しない | `init-all.sql` が実行済みであることを確認。このテーブルは全プロバイダーのバインディングを保存 |
 | ソーシャルログイン state 署名検証失敗 | `OAUTH2_STATE_SECRET` が未構成または再起動後に変更 | 固定の `OAUTH2_STATE_SECRET` 環境変数を設定し、署名キーの一貫性を確保 |
 | Nacos 再起動後に構成が消える | 組み込み Derby データベース使用、永続化なし | 本プロジェクトの `init-nacos.sql` を使用して MySQL 外部ストレージに切り替え |
+| Maven ビルド順序エラー | `omni-common-core` が先にインストールされておらず、下流モジュールのコンパイルに失敗 | 親 POM から `./mvnw clean install` を実行 — Maven reactor が `<modules>` 宣言順に基づき自動的に解決 |
+| Redis Starter 混用によるスレッド饥饿 | ブロッキング版 `omni-common-redis` を WebFlux サービスに導入 | WebFlux サービス（Gateway 等）は `omni-common-redis-reactive` のみ依存可能、混用不可 |
 
 ## AI ネイティブエンジニアリング実践
 

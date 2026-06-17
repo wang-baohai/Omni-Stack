@@ -52,6 +52,7 @@ const iconMap: Record<string, string> = {
   'system:online': 'Monitor',
   'system:authrecord': 'Document',
   'system:xssconfig': 'Filter',
+  'base:dict': 'Collection',
 }
 
 /**

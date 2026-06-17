@@ -47,6 +47,8 @@ export default {
     oauth2Clients: 'OAuth2 客户端',
     auditLogs: '审计日志',
     xssConfig: 'XSS 防护',
+    baseManagement: '基础数据',
+    dictManagement: '字典管理',
   },
   // ===== user — 用户管理模块 =====
   user: {
@@ -200,6 +202,17 @@ export default {
     perm_system_xssconfig_create: '创建 XSS 规则',
     perm_system_xssconfig_update: '更新 XSS 配置',
     perm_system_xssconfig_delete: '删除 XSS 规则',
+    perm_base: '基础数据',
+    perm_base_dict: '字典管理',
+    perm_dict_type_list: '查看字典类型',
+    perm_dict_type_create: '创建字典类型',
+    perm_dict_type_update: '更新字典类型',
+    perm_dict_type_delete: '删除字典类型',
+    perm_dict_data_list: '查看字典数据',
+    perm_dict_data_create: '创建字典数据',
+    perm_dict_data_update: '更新字典数据',
+    perm_dict_data_delete: '删除字典数据',
+    perm_dict_data_refresh: '刷新字典缓存',
   },
   // ===== oauth2Client — OAuth2 客户端模块 =====
   oauth2Client: {
@@ -256,6 +269,26 @@ export default {
     ruleTypeRequired: '请选择规则类型',
     patternRequired: '请输入匹配正则',
     patternInvalid: '正则表达式格式错误',
+  },
+  // ===== dict — 数据字典模块 =====
+  dict: {
+    typeCode: '类型编码',
+    typeName: '类型名称',
+    dictValue: '字典值',
+    dictLabel: '字典标签',
+    tagType: '标签样式',
+    remark: '备注',
+    typeList: '字典类型',
+    dataList: '字典数据',
+    selectTypeHint: '请从左侧选择一个字典类型',
+    createType: '新建类型',
+    editType: '编辑类型',
+    createData: '新建数据',
+    editData: '编辑数据',
+    refreshCache: '刷新缓存',
+    confirmDeleteType: '确认删除该字典类型？关联的字典数据将一并删除。',
+    confirmDeleteData: '确认删除该字典数据？',
+    cacheRefreshed: '缓存已刷新',
   },
   // ===== login — 登录模块 =====
   login: {

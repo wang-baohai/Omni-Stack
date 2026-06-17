@@ -16,28 +16,42 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 
 | Module | Role | Port | Technology | Boundary Constraint |
 |--------|------|------|------------|---------------------|
-| `omni-common` | Shared models, utils, exception handling, Jackson config | N/A (library) | Spring Boot Web (optional), Validation (optional), Lombok | No business logic; only cross-cutting concerns |
+| `omni-common-core` | Pure POJO: `R<T>`, `PageResult`, `BaseEntity`, `BusinessException`, XSS SPI (`XssConfigProvider`) | N/A (library) | Lombok, Jackson JSR310 | Zero Spring dependencies; no framework annotations |
+| `omni-common` | Web auto-config: Jackson time config, CORS, `GlobalExceptionHandler`, XSS Filter/Sanitizer/Deserializer | N/A (library) | Spring Boot Web (optional), Validation (optional) | No business logic; cross-cutting web concerns only |
+| `omni-common-mybatis` | MyBatis-Plus starter: pagination interceptor, MySQL driver, YAML defaults | N/A (library) | MyBatis-Plus 3.5.16, MySQL Connector | `@ConditionalOnMissingBean` allows service-level override |
+| `omni-common-redis` | Blocking Redis starter: `RedisTemplate` (Jackson serialization) + `RedisUtils` | N/A (library) | Spring Data Redis (Lettuce), commons-pool2 | Servlet services only; never in WebFlux |
+| `omni-common-redis-reactive` | Reactive Redis starter: `spring-boot-starter-data-redis-reactive` + YAML defaults | N/A (library) | Spring Data Redis Reactive | WebFlux services only; never in Servlet |
+| `omni-auth` | Authentication microservice (login, captcha, JWT, multi-tenant, XSS config management) | 8100 | Spring Boot Web, Spring Security, OAuth2 Authorization Server | Authentication logic lives here; no direct HTTP/response manipulation in Service layer |
+| `omni-base` | Base data management: dictionary type + dictionary data CRUD with Redis cache | 8101 | Spring Boot Web, Spring Security, omni-common-mybatis, omni-common-redis | Data dictionary only; no auth/user logic |
 | `omni-gateway` | API Gateway, request routing, authentication filter | 8102 | Spring Cloud Gateway Server (WebFlux) | No business logic; routing and cross-cutting filters only |
-| `omni-auth` | Authentication microservice (login, captcha, JWT, multi-tenant) | 8100 | Spring Boot Web, Spring Security, OAuth2 Authorization Server | Authentication logic lives here; no direct HTTP/response manipulation in Service layer |
 | `omni-frontend` | Vue 3 SPA | 3000 (dev) | Vue 3, Pinia, Vue Router, Element Plus, Axios | Presentation layer only; no data-authoritative business rules |
 
 ## Dependency Graph
 
 ```
-omni-common  (shared library, no Spring Boot main class)
-    ^                ^
-    |                |
-omni-auth        (omni-gateway does NOT depend on omni-common;
-    |             it uses the reactive WebFlux stack independently)
-    |
-    +-- registers with Nacos --+
-                               |
-omni-gateway --- routes via lb:// ---> omni-auth
+omni-common-core  (pure POJO: R<T>, PageResult, BaseEntity, XSS SPI — zero Spring deps)
+    ^          ^          ^          ^
+    |          |          |          |
+omni-common  omni-common-mybatis  omni-common-redis   omni-common-redis-reactive
+(Web auto-   (MyBatis-Plus +      (blocking Redis +    (reactive Redis,
+ config)      MySQL driver)        RedisUtils)           standalone)
+    ^   ^          ^    ^              ^    ^                   ^
+    |   |          |    |              |    |                   |
+    |   +----------+----+--------------+----+                  |
+    |                     |                                     |
+omni-auth :8100     omni-base :8101                     omni-gateway :8102
+(Servlet, Security,  (Servlet, Security,                 (WebFlux, depends on
+ OAuth2 Auth Server)  Dictionary CRUD)                    core + redis-reactive,
+    |                    |                                 NOT omni-common)
+    |                    |                                     |
+    +-- registers with Nacos --+                               |
+                               |                               |
+omni-gateway --- routes via lb:// ---> omni-auth, omni-base
     |
 omni-frontend --- /api proxy :3000 ---> omni-gateway :8102
 ```
 
-**Build dependency**: `omni-common` must be `mvn install`-ed before `omni-auth` or `omni-gateway` can compile.
+**Build dependency**: `omni-common-core` must be `mvn install`-ed first, then `omni-common`, then `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive`, before `omni-auth`, `omni-base`, or `omni-gateway` can compile. Maven reactor resolves ordering automatically from `<modules>` declaration.
 
 ## Data Flow
 
@@ -74,7 +88,7 @@ Browser stores JWT and uses it for subsequent authenticated requests
 
 All services can be started with a single command: `docker compose up -d`. See `docker-compose.yml` in the project root.
 
-**Start order**: MySQL -> Redis -> Nacos -> Sentinel -> Backend services (Auth, Gateway) -> Frontend
+**Start order**: MySQL -> Redis -> Nacos -> Sentinel -> Backend services (Auth, Base, Gateway) -> Frontend
 
 ## Infrastructure
 
@@ -136,6 +150,24 @@ erDiagram
 Additionally, the `nacos_config` database (separate MySQL instance, same container) contains 10 tables for Nacos v3.1.1 configuration and permission management. See `scripts/sql/init-nacos.sql`.
 
 Authoritative DDL and seed data: `scripts/sql/init-all.sql`.
+
+### omni_base Database
+
+The `omni_base` database contains 2 tables for data dictionary management, served by the `omni-base` microservice:
+
+**Data Dictionary (2 tables)**:
+
+| Table | Purpose |
+|-------|---------|
+| `sys_dict_type` | Dictionary type registry — defines encoding categories (e.g., `sys_user_gender`). Unique key `(tenant_id, type_code)`. Columns: `id`, `tenant_id`, `type_code`, `type_name`, `remark`, `sort`, `status`, `create_time`, `update_time`, `create_by`, `update_by` |
+| `sys_dict_data` | Dictionary data entries — concrete key-value pairs within a type (e.g., `1=Male, 2=Female`). Indexed on `(tenant_id, type_code)`. Columns: `id`, `tenant_id`, `type_code`, `dict_value`, `dict_label`, `tag_type`, `remark`, `sort`, `status`, `create_time`, `update_time`, `create_by`, `update_by` |
+
+```mermaid
+erDiagram
+    sys_dict_type ||--o{ sys_dict_data : "has data entries (by tenant_id + type_code)"
+```
+
+**Seed data** (tenant 1): 3 preset dictionary types (`sys_user_gender`, `sys_common_status`, `sys_notice_type`) with 7 data entries. See `scripts/sql/init-all.sql` Section 5.
 
 ## RBAC Permission System
 
@@ -262,20 +294,27 @@ DataScopeContext.clear() (finally 块，防止 ThreadLocal 泄漏)
 
 1. **JDK 25 required**: Spring Boot 4.x Maven plugin requires Java 17+; this project targets JDK 25. `JAVA_HOME` must be set before running any Maven commands.
 2. **Gateway 5.x config prefix**: Routes and settings must be under `spring.cloud.gateway.server.webflux`, NOT `spring.cloud.gateway` (the old prefix is silently ignored).
-3. **Build order**: `omni-common` must be installed first. Use `./mvnw install -N && ./mvnw install -pl omni-common` from the parent POM if needed.
+3. **Build order**: `omni-common-core` must be installed first, followed by `omni-common`, then the common starters (`omni-common-mybatis`, `omni-common-redis`, `omni-common-redis-reactive`). Use `./mvnw clean install` from the parent POM — Maven reactor resolves ordering automatically from `<modules>` declaration.
 4. **No direct service-to-service calls**: Inter-service communication must go through OpenFeign clients, never raw HTTP calls.
-5. **Gateway is reactive**: `omni-gateway` runs on WebFlux, not Servlet. It cannot depend on `omni-common` (which includes `spring-boot-starter-web`).
+5. **Gateway is reactive**: `omni-gateway` runs on WebFlux. It depends on `omni-common-core` (POJO only) and `omni-common-redis-reactive`, but NOT on `omni-common` or `omni-common-redis` (blocking Redis would starve Netty event loop threads).
+6. **Redis starter exclusivity**: `omni-common-redis` (blocking) and `omni-common-redis-reactive` (reactive) must not be mixed in the same service. Servlet services use blocking; WebFlux services use reactive.
 
 ## Extension Points
 
 ### Adding a New Microservice
 
+The Common Starter ecosystem auto-configures most infrastructure. Follow this checklist:
+
 1. Create a new Maven module under `omni-backend/` (e.g., `omni-order`)
-2. Add dependency on `omni-common` in the new module's `pom.xml`
+2. Add POM dependencies: `omni-common-core` + `omni-common` (web auto-config) + `omni-common-mybatis` (database) + `omni-common-redis` (cache)
 3. Register the module in the parent `pom.xml` `<modules>` section
-4. Add `@ComponentScan(basePackages = {"com.omni.order", "com.omni.common"})` to the application class (until auto-config is set up)
-5. Configure `application.yml` with Nacos discovery and a unique port
-6. Add a Gateway route in `omni-gateway/application.yml` for the new service
+4. Configure `application.yml`: `spring.datasource.*`, `spring.data.redis.host/port/database`, Nacos discovery, unique port
+5. Add `@MapperScan("com.omni.order.mapper")` to the application class
+6. Implement `XssConfigProvider` SPI for XSS protection (auto-configured via `omni-common`)
+7. Add a Gateway route in `omni-gateway/application.yml` for the new service (e.g., `Path=/api/order/**`)
+8. Add `sys_permission` seed data in `scripts/sql/init-all.sql` for new API permission codes
+
+> MyBatis-Plus pagination, Jackson time config, CORS, `GlobalExceptionHandler`, and XSS filter all auto-configure via `AutoConfiguration.imports` — no manual `@ComponentScan` of `com.omni.common` needed.
 
 ### Adding a New Frontend View
 
@@ -302,9 +341,9 @@ The social login framework uses the Strategy Pattern via `OAuth2ProviderHandler`
 
 ### Adding XSS Protection to a New Service
 
-The XSS defense system is modular — new services inherit protection by depending on `omni-common`:
+The XSS defense system is modular — new services inherit protection by depending on the Common Starter ecosystem:
 
-1. **Add dependency**: Include `omni-common` in the new service's `pom.xml`
+1. **Add dependency**: Include `omni-common-core` (contains `XssConfigProvider` SPI interface) + `omni-common` (contains `XssAutoConfiguration`, `XssFilter`, `XssSanitizer`) in the new service's `pom.xml`
 2. **Implement SPI**: Create `XssConfigProviderImpl` in the new service module, implementing `XssConfigProvider` from `omni-common-core`. This method returns `XssSettings` (enabled flag + rule list) for a given tenant ID
 3. **Cache strategy**: Use Redis keys `xss:enabled:{tenantId}` + `xss:rules:{tenantId}` with 30-minute TTL. Invalidate on write operations
 4. **Auto-configuration**: `XssAutoConfiguration` is registered via `AutoConfiguration.imports` in `omni-common` — no manual `@ComponentScan` needed

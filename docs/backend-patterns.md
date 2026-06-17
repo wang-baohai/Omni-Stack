@@ -285,6 +285,63 @@ Layer 3: Gateway WebFilter — 添加安全响应头
 
 **缓存策略**：Redis 键 `xss:enabled:{tenantId}` + `xss:rules:{tenantId}`，TTL 30 分钟。所有写操作（开关切换、规则 CRUD）后主动失效缓存。
 
+## Common Starter 接入规范
+
+项目将公共能力拆分为 5 个模块，新微服务通过 Maven 依赖引入即用，无需手动配置。
+
+### Starter 模块概览
+
+| 模块 | 职责 | 自动配置内容 | 适用服务类型 |
+|------|------|-------------|-------------|
+| `omni-common-core` | 纯 POJO 层 | 无（无 Spring 依赖） | 所有模块 |
+| `omni-common` | Web 自动配置 | `JacksonConfig`（时间序列化）、`WebMvcConfig`（CORS）、`GlobalExceptionHandler`、`XssAutoConfiguration`（Filter + Jackson Module） | Servlet 服务 |
+| `omni-common-mybatis` | 数据库能力 | `MybatisPlusAutoConfiguration`：`MybatisPlusInterceptor`（MySQL `PaginationInnerInterceptor`）+ YAML 默认配置（驼峰映射、逻辑删除、自增 ID） | Servlet 服务 |
+| `omni-common-redis` | 阻塞式 Redis | `RedisAutoConfiguration`：`RedisTemplate<String, Object>`（Jackson 序列化）+ `RedisUtils` 工具类 + Lettuce 连接池配置 | Servlet 服务 |
+| `omni-common-redis-reactive` | 响应式 Redis | `spring-boot-starter-data-redis-reactive` + YAML 默认超时配置 | WebFlux 服务（如 Gateway） |
+
+**自动配置注册机制**：所有 starter 通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 文件注册，这是 Spring Boot 3+/4+ 的标准机制（替代了旧版 `spring.factories`）。
+
+### 新服务接入步骤
+
+1. **POM 依赖**：在 `pom.xml` 中声明所需 starter：
+   ```xml
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common-core</artifactId></dependency>
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common</artifactId></dependency>
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common-mybatis</artifactId></dependency>
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common-redis</artifactId></dependency>
+   ```
+2. **application.yml**：仅需配置数据源和 Redis 连接信息：
+   ```yaml
+   spring:
+     datasource:
+       url: jdbc:mysql://127.0.0.1:3306/omni_xxx?useSSL=false&serverTimezone=Asia/Shanghai
+       username: root
+       password: root
+     data:
+       redis:
+         host: 127.0.0.1
+         port: 6379
+         database: 0
+   ```
+3. **启动类**：添加 `@MapperScan("com.omni.xxx.mapper")`
+4. **XSS 防护**：实现 `XssConfigProvider` SPI 接口（`omni-common` 自动注册 Filter + Jackson Module）
+5. **自动生效**：分页插件、Jackson 时间序列化、CORS 配置、`GlobalExceptionHandler`、`RedisUtils` 工具类均自动装配，无需额外配置
+
+### 覆盖机制
+
+所有 starter 的自动配置 Bean 均使用 `@ConditionalOnMissingBean` 注解，服务可按需覆盖：
+
+- **MybatisPlusInterceptor**：服务定义同名 `mybatisPlusInterceptor` Bean 即可覆盖默认分页配置。典型场景：添加 `DataPermissionInterceptor`（**必须在 `PaginationInnerInterceptor` 之前注册**）
+- **RedisTemplate**：服务定义 `@Bean(name = "redisTemplate")` 即可替换默认序列化策略
+- **XSS 配置**：`XssAutoConfiguration` 条件依赖 `XssConfigProvider` Bean，不实现 SPI 则 XSS 过滤链不激活
+
+### Redis Starter 互斥约束
+
+`omni-common-redis`（阻塞式）和 `omni-common-redis-reactive`（响应式）**不可在同一服务中混用**：
+
+- **WebFlux 服务**（如 Gateway）：只能依赖 `omni-common-redis-reactive`，阻塞式 Redis 调用会导致 Netty 事件循环线程饥饿
+- **Servlet 服务**：使用 `omni-common-redis`（阻塞式），`RedisUtils` 提供同步 API
+
 ## Testing (Future Scaffold)
 
 No tests exist yet. When added:

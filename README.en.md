@@ -18,6 +18,8 @@
 - **AI-Native Engineering**: AGENTS.md execution manual + Skills behavioral extensions for AI-assisted workflows
 - **Three User Creation Paths**: Self-registration (captcha + default role), admin backend creation, social login auto-registration on first login
 - **Three-Layer XSS Defense**: Jackson deserializer auto-sanitizes `@RequestBody` + Servlet Filter sanitizes query parameters + Gateway security response headers, with per-tenant configurable global toggle and custom blacklist rules (HTML tags, event handlers, dangerous protocols, regex patterns), Redis-cached configuration, and a full frontend management UI
+- **Common Starter Ecosystem**: `omni-common` split into 5 modules (core / common / mybatis / redis / redis-reactive) — new services gain MyBatis-Plus pagination, Redis caching, XSS protection via Maven dependency alone, `AutoConfiguration.imports` zero-config auto-assembly
+- **Base Data Management**: `omni-base` service (port 8101) provides data dictionary management with type+data two-level structure, Redis cache-aside caching, frontend master-detail management page, 11 API endpoints fully implemented
 - **Maven Wrapper** bundled — clone and build, no system Maven installation needed
 
 ## Tech Stack
@@ -57,8 +59,13 @@ Omni-Stack/
 ├── omni-backend/                    # Maven multi-module backend
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # Parent POM (dependency management)
-│   ├── omni-common/                   # Shared: unified response, global exception, Jackson config
+│   ├── omni-common-core/              # Pure POJO: R<T>, PageResult, BaseEntity, XSS SPI
+│   ├── omni-common/                   # Web auto-config: Jackson, CORS, global exception, XSS Filter
+│   ├── omni-common-mybatis/           # MyBatis-Plus Starter: pagination plugin, MySQL driver
+│   ├── omni-common-redis/             # Blocking Redis Starter: RedisTemplate, RedisUtils
+│   ├── omni-common-redis-reactive/    # Reactive Redis Starter: for WebFlux services
 │   ├── omni-auth/                     # Auth service: login, captcha, JWT, OAuth2 (port 8100)
+│   ├── omni-base/                     # Base data service: dictionary management (port 8101)
 │   └── omni-gateway/                  # API Gateway (WebFlux, port 8102)
 ├── omni-frontend/                   # Vue 3 SPA (dev server port 3000)
 │   ├── package.json
@@ -80,15 +87,21 @@ Omni-Stack/
 ## Architecture Overview
 
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   omni-frontend  │────>│   omni-gateway    │────>│    omni-auth     │
-│   Vue 3 SPA     │/api │  WebFlux :8102    │lb://│   Spring :8100  │
-│   :3000         │────>│  StripPrefix=2    │────>│  Security+OAuth2│
-└─────────────────┘     └──────────────────┘     └─────────────────┘
-                            │
-                    ┌───────┴────────┐
+                                 ┌─────────────────┐
+                                 │    omni-auth     │
+                                 │   Spring :8100  │
+                                 │  Security+OAuth2│
+                                 └─────────────────┘
+                                        ▲
+┌─────────────────┐     ┌──────────────────┐
+│   omni-frontend  │────>│   omni-gateway    │lb://
+│   Vue 3 SPA     │/api │  WebFlux :8102    │────>┌─────────────────┐
+│   :3000         │────>│  StripPrefix=2    │     │    omni-base     │
+└─────────────────┘     └──────────────────┘     │   Spring :8101  │
+                            │                    │  Dictionary Mgmt│
+                    ┌───────┴────────┐            └─────────────────┘
                     │  MySQL :3306   │  Persistence storage
-                    │  Redis :6379   │  Cache + captcha
+                    │  Redis :6379   │  Cache + captcha + dict cache
                     │  Nacos :8848   │  Discovery + Config
                     │  Sentinel :8858│  Flow Control
                     └────────────────┘
@@ -224,12 +237,16 @@ cd omni-backend
 cd omni-auth
 ./mvnw spring-boot:run
 
+# Start Base service (port 8101, in a new terminal)
+cd omni-base
+./mvnw spring-boot:run
+
 # Start Gateway (port 8102, in a new terminal)
 cd omni-gateway
 ./mvnw spring-boot:run
 ```
 
-**Build order**: `omni-common` must be installed first.
+**Build order**: `omni-common-core` must be installed first, then `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-redis-reactive` before `omni-auth`, `omni-base`, or `omni-gateway` can compile. Maven reactor resolves this automatically from `<modules>` declaration order.
 
 ### Step 3: Start Frontend
 
@@ -252,7 +269,7 @@ npm run dev
 | Nacos console | `http://127.0.0.1:8080/` | Nacos admin UI |
 | Sentinel console | `http://localhost:8858` | Sentinel Dashboard |
 
-**Start order**: MySQL → Redis → Nacos → Sentinel → Backend (Auth, Gateway) → Frontend
+**Start order**: MySQL → Redis → Nacos → Sentinel → Backend (Auth, Base, Gateway) → Frontend
 
 ## Service Ports
 
@@ -260,32 +277,29 @@ npm run dev
 |---------|------|-------------|
 | Frontend dev server | 3000 | Vite dev server, proxies /api requests |
 | Auth service | 8100 | Spring Security + OAuth2 Authorization Server |
+| Base data service | 8101 | Dictionary management, Redis cache-aside caching |
 | API Gateway | 8102 | Spring Cloud Gateway (WebFlux) |
-| MySQL | 3306 | Primary database (omni_auth) |
-| Redis | 6379 | Captcha cache |
+| MySQL | 3306 | Primary database (omni_auth + omni_base) |
+| Redis | 6379 | Captcha cache + dict cache + XSS config cache |
 | Nacos | 8080, 8848 | Management UI (8080) + Discovery & Config (8848) |
 | Sentinel | 8858 | Flow control dashboard |
 
 ## Module Details
 
-### omni-common (Shared Library)
+### Common Starter Ecosystem (5 Modules)
 
-Shared infrastructure for all backend modules. **Cannot run independently**:
+`omni-common` has been split into 5 single-responsibility modules forming the Common Starter ecosystem. New services gain capabilities by adding Maven dependencies alone — **none can run independently**:
 
-| Component | File | Responsibility |
-|-----------|------|----------------|
-| Unified Response | `R<T>` | All APIs return `{ code, message, data }` |
-| Pagination | `PageResult<T>` | Paginated response `{ records, total, size, current, pages }` |
-| Business Exception | `BusinessException` | Business exception with error code |
-| Exception Handler | `GlobalExceptionHandler` | Catches all exceptions, converts to `R<Void>` |
-| Jackson Config | `JacksonConfig` | Java 8 time serialization (`yyyy-MM-dd HH:mm:ss`) |
-| Web Config | `WebMvcConfig` | CORS configuration |
-| Base Entity | `BaseEntity` | Audit fields (id, createTime, updateTime, createBy, updateBy) |
-| XSS Defense | `XssFilter` / `XssSanitizer` / `XssStringDeserializer` | Three-layer defense: Jackson auto-sanitizes JSON + Servlet Filter sanitizes query params + ThreadLocal rule holder |
-| XSS SPI | `XssConfigProvider` | SPI interface for loading per-tenant XSS toggle and rule list from Redis/DB |
-| XSS Auto-Config | `XssAutoConfiguration` | Auto-registers Filter + Jackson Module, downstream modules inherit protection with zero config |
+| Module | Responsibility | Target Service Type |
+|--------|---------------|-------------------|
+| `omni-common-core` | Pure POJO: `R<T>`, `PageResult<T>`, `BaseEntity`, `BusinessException`, `XssConfigProvider` SPI | All services |
+| `omni-common` | Web auto-config: Jackson time serialization, CORS, global exception handler, XSS Filter + Jackson Module auto-registration | Servlet services |
+| `omni-common-mybatis` | MyBatis-Plus + MySQL driver + pagination plugin + YAML defaults, `@ConditionalOnMissingBean` override support | Servlet services |
+| `omni-common-redis` | Blocking Redis + RedisTemplate serialization + RedisUtils | Servlet services |
+| `omni-common-redis-reactive` | Reactive Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux services (Gateway) |
 
-> `omni-common` uses Spring Boot auto-configuration (`AutoConfiguration.imports`) to register beans. Downstream modules don't need manual `@ComponentScan`.
+> All starters use Spring Boot auto-configuration (`AutoConfiguration.imports`) to register beans. Downstream modules don't need manual `@ComponentScan`.
+> `omni-common-redis` and `omni-common-redis-reactive` must not be mixed — WebFlux services can only depend on the reactive version.
 
 ### omni-auth (Auth Service)
 
@@ -300,6 +314,16 @@ Authentication microservice built on Spring Security 7 + OAuth2 Authorization Se
 - **RBAC Permission System**: Functional permissions (dynamic menu filtering + `v-permission` button-level control + `@PreAuthorize` API authorization) + Data permissions (MyBatis-Plus `DataPermissionInterceptor` SQL auto-interception, six-level dataScope zero-intrusion filtering)
 - **JWT signing**: RSA key pair, JWK endpoint for Gateway public key verification
 - **XSS Protection Config Management**: Frontend `System Management → XSS Protection Config` page with global toggle and blacklist rule CRUD (HTML tags, event handlers, dangerous protocols, custom regex), per-tenant isolation, Redis cache 30-min TTL with active invalidation on writes
+
+### omni-base (Base Data Service)
+
+Data dictionary management microservice providing type+data two-level structure CRUD:
+
+- **Dictionary Type Management**: `sys_dict_type` table — list, get, create, update, delete, status toggle; 11 API endpoints fully implemented
+- **Dictionary Data Management**: `sys_dict_data` table — linked by type code, supports list, create, update, delete, cache refresh
+- **Redis cache-aside caching**: 30-minute TTL, write-through invalidation, `dict:{typeCode}` key format
+- **Frontend management page**: master-detail layout — dictionary type list on the left, dictionary data list on the right, `base:dict` permission code
+- **XSS protection inherited**: implements `XssConfigProvider` SPI to automatically gain three-layer XSS defense
 
 ### omni-gateway (API Gateway)
 
@@ -484,6 +508,8 @@ See the Completion Checklist section in `AGENTS.md` for the full checklist.
 | Gitee login stuck on callback page | Same as GitHub — `sys_user_oauth_provider` table missing | Ensure `init-all.sql` has been executed; this table stores bindings for all providers |
 | Social login state signature verification failure | `OAUTH2_STATE_SECRET` not configured or changed after restart | Set a fixed `OAUTH2_STATE_SECRET` environment variable to keep the signing key consistent |
 | Nacos loses configuration after restart | Uses embedded Derby database, no persistence | Use `init-nacos.sql` from this project to switch to external MySQL storage |
+| Maven build order error | `omni-common-core` not installed first, causing downstream module compilation failure | Run `./mvnw clean install` from parent POM — Maven reactor auto-resolves `<modules>` declaration order |
+| Redis Starter mix causes thread starvation | Blocking `omni-common-redis` imported into WebFlux service | WebFlux services (e.g., Gateway) must only depend on `omni-common-redis-reactive` — never mix the two |
 
 ## AI-Native Engineering Practice
 

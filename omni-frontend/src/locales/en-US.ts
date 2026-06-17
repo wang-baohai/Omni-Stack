@@ -47,6 +47,8 @@ export default {
     oauth2Clients: 'OAuth2 Clients',
     auditLogs: 'Audit Logs',
     xssConfig: 'XSS Protection',
+    baseManagement: 'Base Data',
+    dictManagement: 'Dictionary',
   },
   // ===== user — user management module =====
   user: {
@@ -200,6 +202,17 @@ export default {
     perm_system_xssconfig_create: 'Create XSS Rule',
     perm_system_xssconfig_update: 'Update XSS Config',
     perm_system_xssconfig_delete: 'Delete XSS Rule',
+    perm_base: 'Base Data',
+    perm_base_dict: 'Dictionary',
+    perm_dict_type_list: 'View Dict Types',
+    perm_dict_type_create: 'Create Dict Type',
+    perm_dict_type_update: 'Update Dict Type',
+    perm_dict_type_delete: 'Delete Dict Type',
+    perm_dict_data_list: 'View Dict Data',
+    perm_dict_data_create: 'Create Dict Data',
+    perm_dict_data_update: 'Update Dict Data',
+    perm_dict_data_delete: 'Delete Dict Data',
+    perm_dict_data_refresh: 'Refresh Dict Cache',
   },
   // ===== oauth2Client — OAuth2 client module =====
   oauth2Client: {
@@ -256,6 +269,26 @@ export default {
     ruleTypeRequired: 'Please select rule type',
     patternRequired: 'Please enter pattern',
     patternInvalid: 'Invalid regex pattern',
+  },
+  // ===== dict — data dictionary module =====
+  dict: {
+    typeCode: 'Type Code',
+    typeName: 'Type Name',
+    dictValue: 'Dict Value',
+    dictLabel: 'Dict Label',
+    tagType: 'Tag Type',
+    remark: 'Remark',
+    typeList: 'Dict Types',
+    dataList: 'Dict Data',
+    selectTypeHint: 'Please select a dict type from the left panel',
+    createType: 'Create Type',
+    editType: 'Edit Type',
+    createData: 'Create Data',
+    editData: 'Edit Data',
+    refreshCache: 'Refresh Cache',
+    confirmDeleteType: 'Delete this dict type? All associated dict data will also be deleted.',
+    confirmDeleteData: 'Delete this dict data?',
+    cacheRefreshed: 'Cache refreshed',
   },
   // ===== login — authentication module =====
   login: {

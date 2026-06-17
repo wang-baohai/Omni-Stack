@@ -36,9 +36,13 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 
 **Backend:**
 - Auth service: `omni-backend/omni-auth/src/main/java/com/omni/auth/AuthApplication.java`
-- Business service: `omni-backend/omni-business/src/main/java/com/omni/business/BusinessApplication.java`
+- Base service: `omni-backend/omni-base/src/main/java/com/omni/base/BaseApplication.java`
 - Gateway: `omni-backend/omni-gateway/src/main/java/com/omni/gateway/GatewayApplication.java`
 - Common library: `omni-backend/omni-common/src/main/java/com/omni/common/`
+- Common core (POJO): `omni-backend/omni-common-core/src/main/java/com/omni/common/core/`
+- Common MyBatis-Plus starter: `omni-backend/omni-common-mybatis/src/main/java/com/omni/common/mybatis/`
+- Common Redis starter (blocking): `omni-backend/omni-common-redis/src/main/java/com/omni/common/redis/`
+- Common Redis starter (reactive): `omni-backend/omni-common-redis-reactive/src/main/java/com/omni/common/redis/reactive/`
 
 **Frontend:**
 - App bootstrap: `omni-frontend/src/main.ts`
@@ -48,7 +52,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 **Configuration:**
 - Auth config: `omni-backend/omni-auth/src/main/resources/application.yml`
 - Gateway config: `omni-backend/omni-gateway/src/main/resources/application.yml`
-- Business config: `omni-backend/omni-business/src/main/resources/application.yml`
+- Base config: `omni-backend/omni-base/src/main/resources/application.yml`
 - Vite config: `omni-frontend/vite.config.ts`
 
 **RBAC & Permission:**
@@ -89,22 +93,22 @@ cd omni-backend
 ./mvnw clean install
 
 # Build a specific module with its dependencies
-./mvnw clean install -pl omni-business -am
+./mvnw clean install -pl omni-base -am
 
 # Run Auth service (port 8100)
 cd omni-backend/omni-auth
 ./mvnw spring-boot:run
 
+# Run Base service (port 8101)
+cd omni-backend/omni-base
+./mvnw spring-boot:run
+
 # Run Gateway (port 8102)
 cd omni-backend/omni-gateway
 ./mvnw spring-boot:run
-
-# Run Business service (port 8101)
-cd omni-backend/omni-business
-./mvnw spring-boot:run
 ```
 
-**Build order**: `omni-common` must be installed before `omni-business` or `omni-gateway` can compile. Use `./mvnw install -N && ./mvnw install -pl omni-common` from the parent if needed.
+**Build order**: `omni-common-core` must be installed first, then `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-redis-reactive` before `omni-auth`, `omni-base`, or `omni-gateway` can compile. Maven reactor resolves this automatically from `<modules>` declaration order.
 
 ### Frontend
 
@@ -161,6 +165,7 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 |------------------|-------|
 | Frontend (dev)   | 3000  |
 | Auth             | 8100  |
+| Base             | 8101  |
 | Gateway          | 8102  |
 | MySQL            | 3306  |
 | Redis            | 6379  |
@@ -171,7 +176,10 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 
 - JDK 25 required. `JAVA_HOME` must be set before any Maven commands.
 - Gateway 5.x uses `spring.cloud.gateway.server.webflux` prefix — NOT `spring.cloud.gateway`.
-- `omni-common` must be `mvn install`-ed before other modules can compile.
+- `omni-common-core` must be `mvn install`-ed before other modules can compile. Maven reactor handles ordering automatically.
+- `omni-common-redis`（阻塞式）和 `omni-common-redis-reactive`（响应式）不可混用。WebFlux 服务（如 Gateway）只能依赖 `omni-common-redis-reactive`，否则阻塞调用会导致 Netty 事件循环线程饥饿。
+- Servlet 服务引入 `omni-common-mybatis` + `omni-common-redis` 即可获得数据库和 Redis 能力，无需手动声明 MyBatis-Plus / MySQL / Redis 依赖。
+- 服务如需自定义 `MybatisPlusInterceptor`（如添加数据权限），定义同名 Bean 即可覆盖 common-mybatis 的默认分页配置（`@ConditionalOnMissingBean`）。
 - All controllers return `R<T>`. Paginated responses use `R<PageResult<T>>`.
 - No `@Autowired` field injection. Use `@RequiredArgsConstructor` + `final` fields.
 - No `System.out.println` or `e.printStackTrace()`. Use `@Slf4j` with parameterized placeholders.
@@ -290,6 +298,24 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 **扩展新服务**：实现 `XssConfigProvider` SPI 接口即可自动获得 XSS 防护。`omni-common` 依赖引入后通过 `AutoConfiguration.imports` 自动装配。
 
 **前端管理**：`系统管理 → XSS防护配置` 页面支持全局开关切换和黑名单规则 CRUD（`system:xssconfig` 权限码）。
+
+### Common Starter 模块
+
+项目提供 3 个自动装配的 Common Starter，新微服务引入即用：
+
+| 模块 | 职责 | 适用服务类型 |
+|------|------|-------------|
+| `omni-common-mybatis` | MyBatis-Plus + MySQL 驱动 + 分页插件 + YAML 默认配置 | Servlet 服务 |
+| `omni-common-redis` | 阻塞式 Redis + RedisTemplate 序列化 + RedisUtils | Servlet 服务 |
+| `omni-common-redis-reactive` | 响应式 Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux 服务（Gateway） |
+
+**新服务接入步骤**：
+1. POM 中依赖 `omni-common-mybatis` + `omni-common-redis`（或 `omni-common-redis-reactive`）
+2. `application.yml` 中配置 `spring.datasource.*` 和 `spring.data.redis.host/port/database`
+3. 启动类添加 `@MapperScan("com.omni.xxx.mapper")`
+4. 分页、序列化、RedisUtils 自动生效
+
+**覆盖机制**：服务定义同名 `mybatisPlusInterceptor` Bean 即可覆盖 common-mybatis 的默认分页配置（`@ConditionalOnMissingBean`）。
 
 ## Testing
 

@@ -35,23 +35,11 @@ spring:
       host: 127.0.0.1
       port: 6379
       database: 0
-      timeout: 5s
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
 
+# MyBatis-Plus 开发环境配置（通用配置由 omni-common-mybatis 提供）
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    map-underscore-to-camel-case: true
-  global-config:
-    db-config:
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      id-type: auto
 
 # Spring Authorization Server OAuth2 Config
 auth:

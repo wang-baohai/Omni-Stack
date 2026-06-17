@@ -1027,3 +1027,174 @@ Admin (前端 XSS防护配置页面)
 - **前端页面**：`系统管理 → XSS防护配置` 已就绪，支持分页规则列表、创建/编辑对话框、v-permission 按钮权限控制
 - **缓存策略**：Redis 缓存 + 写操作主动失效已实现
 - **租户隔离**：配置和规则按 `tenant_id` 隔离
+
+---
+
+## Flow 9: 数据字典管理 — 类型+数据两级结构 CRUD
+
+### 概述
+
+Base 服务（`omni-base :8101`）提供数据字典管理功能，采用「类型 + 数据」两级结构。字典类型（`sys_dict_type`）定义编码分类（如 `sys_user_gender`），字典数据（`sys_dict_data`）定义具体的键值对（如 `1=男, 2=女, 0=未知`）。前端采用 master-detail 布局，左侧类型列表，右侧数据列表，支持完整的 CRUD 操作和 Redis 缓存管理。
+
+### Sequence
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant F as Frontend :3000
+    participant G as Gateway :8102
+    participant Base as Base :8101
+    participant R as Redis
+    participant M as MySQL
+
+    B->>F: 1. 导航到 /admin/dict（动态路由）
+    F->>G: 2. GET /api/base/dict/type/list?page=1&size=10（X-Tenant-Id: 1）
+    G->>Base: 3. AuthFilter 验证 JWT → 注入身份头 → 转发 /api/base/dict/type/list
+    Base->>M: 4. SELECT sys_dict_type WHERE tenant_id=1（分页）
+    M-->>Base: type records
+    Base-->>F: 5. R<PageResult<SysDictType>>
+    F-->>B: 6. 渲染类型列表（左侧面板）
+
+    B->>F: 7. 点击类型行 → handleSelectType(typeCode)
+    F->>G: 8. GET /api/base/dict/data/list?typeCode=sys_user_gender&page=1&size=10
+    G->>Base: 9. 转发
+    Base->>R: 10. GET dict:type:1:sys_user_gender（检查缓存）
+    alt 缓存命中
+        R-->>Base: cached JSON
+    else 缓存未命中
+        Base->>M: 11. SELECT sys_dict_data WHERE tenant_id=1 AND type_code='sys_user_gender' AND status=1
+        M-->>Base: data records
+        Base->>R: 12. SET dict:type:1:sys_user_gender = JSON（TTL=30min）
+    end
+    Base-->>F: 13. R<PageResult<SysDictData>>
+    F-->>B: 14. 渲染数据列表（右侧面板）
+
+    Note over B,M: 管理员创建/更新/删除操作 → 写操作缓存失效
+    B->>F: 15. 创建字典数据 → POST /api/base/dict/data
+    F->>G: 16. 转发（Bearer JWT）
+    G->>Base: 17. @PreAuthorize('dict:data:create') → GatewayPreAuthFilter 解析身份
+    Base->>M: 18. INSERT sys_dict_data
+    Base->>R: 19. DEL dict:type:{tenantId}:{typeCode}（写操作失效缓存）
+    Base-->>F: 20. R<SysDictData>
+```
+
+<details>
+<summary>ASCII 版本（点击展开）</summary>
+
+```
+Browser            Frontend :3000          Gateway :8102          Base :8101           Redis              MySQL
+  |                    |                       |                     |                   |                  |
+  | 1. Navigate to     |                       |                     |                   |                  |
+  |    /admin/dict     |                       |                     |                   |                  |
+  |                    | 2. GET /api/base/dict/type/list              |                   |                  |
+  |                    |---------------------->|                     |                   |                  |
+  |                    |                       | 3. AuthFilter →     |                   |                  |
+  |                    |                       |    forward path     |                   |                  |
+  |                    |                       |-------------------->|                   |                  |
+  |                    |                       |                     | 4. SELECT         |                  |
+  |                    |                       |                     |    sys_dict_type  |                  |
+  |                    |                       |                     |    WHERE tenant_id=1                 |
+  |                    |                       |                     |-------------------------------------->|
+  |                    |                       |                     |                   |    type records   |
+  |                    |                       |                     |<--------------------------------------|
+  |                    | 5. R<PageResult>      |                     |                   |                  |
+  |                    |<----------------------|<--------------------|                   |                  |
+  | 6. Render type     |                       |                     |                   |                  |
+  |    list (left)     |                       |                     |                   |                  |
+  |<-------------------|                       |                     |                   |                  |
+  |                    |                       |                     |                   |                  |
+  | 7. Click type row  |                       |                     |                   |                  |
+  |                    | 8. GET /api/base/dict/data/list?typeCode=... |                   |                  |
+  |                    |---------------------->|                     |                   |                  |
+  |                    |                       | 9. Forward -------->|                   |                  |
+  |                    |                       |                     | 10. GET cache     |                  |
+  |                    |                       |                     |------------------>|                  |
+  |                    |                       |                     |                   |  hit? cached JSON |
+  |                    |                       |                     |<------------------|                  |
+  |                    |                       |                     |                   |                  |
+  |                    |                       |                     | [if miss: SELECT sys_dict_data ----->|
+  |                    |                       |                     |  SET cache <---------------------------|
+  |                    |                       |                     |                   |                  |
+  |                    | 13. R<PageResult>     |                     |                   |                  |
+  |                    |<----------------------|<--------------------|                   |                  |
+  | 14. Render data    |                       |                     |                   |                  |
+  |     list (right)   |                       |                     |                   |                  |
+  |<-------------------|                       |                     |                   |                  |
+  |                    |                       |                     |                   |                  |
+  | 15. Create data -->|                       |                     |                   |                  |
+  |                    | 16. POST /api/base/dict/data                 |                   |                  |
+  |                    |---------------------->|                     |                   |                  |
+  |                    |                       | 17. @PreAuthorize   |                   |                  |
+  |                    |                       |-------------------->|                   |                  |
+  |                    |                       |                     | 18. INSERT ------>|                  |
+  |                    |                       |                     | 19. DEL cache --->|                  |
+  |                    | 20. R<SysDictData>    |                     |                   |                  |
+  |                    |<----------------------|<--------------------|                   |                  |
+```
+
+</details>
+
+### Key Components
+
+| 组件 | 文件路径 | 职责 |
+|------|---------|------|
+| `DictTypeController` | `omni-base/.../controller/DictTypeController.java` | 字典类型 REST API（6 个端点），`@PreAuthorize` 权限控制 |
+| `DictDataController` | `omni-base/.../controller/DictDataController.java` | 字典数据 REST API（5 个端点），`@PreAuthorize` 权限控制 |
+| `DictTypeServiceImpl` | `omni-base/.../service/impl/DictTypeServiceImpl.java` | 类型 CRUD + 级联删除数据 + 缓存失效 |
+| `DictDataServiceImpl` | `omni-base/.../service/impl/DictDataServiceImpl.java` | 数据 CRUD + cache-aside 缓存 + 手动刷新 |
+| `GatewayPreAuthFilter` | `omni-base/.../security/GatewayPreAuthFilter.java` | 从 Gateway 注入的 X-User-* 头构建 SecurityContext |
+| `XssConfigProviderImpl` | `omni-base/.../security/XssConfigProviderImpl.java` | Redis-only 策略实现 XSS SPI（依赖 auth 服务写入的缓存） |
+| 字典管理页面 | `omni-frontend/src/views/base/dict/index.vue` | Master-detail 布局：左类型列表 + 右数据列表 |
+| 字典 API 模块 | `omni-frontend/src/api/dict.ts` | 11 个 typed API 函数 + TypeScript 接口定义 |
+
+### Cache Strategy
+
+**Cache-aside 模式**：
+
+| 项目 | 值 |
+|------|-----|
+| Redis Key | `dict:type:{tenantId}:{typeCode}` |
+| TTL | 30 分钟 |
+| 序列化 | JSON（`GenericJacksonJsonRedisSerializer`） |
+
+**读路径**（`DictDataServiceImpl.listEnabledData()`）：
+1. 检查 Redis 缓存 → 命中则反序列化返回
+2. 未命中 → 查询 DB（`status=1`，按 `sort` 后 `id` 排序）→ 序列化写入 Redis（TTL 30min）
+
+**写路径**（所有 CRUD 操作）：
+1. 先写 DB（INSERT / UPDATE / DELETE）
+2. 再 DEL Redis key（写操作失效缓存，下次读取时懒加载）
+
+**手动刷新**（`DictDataServiceImpl.refreshCache()`）：
+1. DEL Redis key
+2. 查询 DB
+3. 写入 Redis（立即回填，适用于数据不一致场景）
+
+**级联删除**：删除字典类型时，在单个 `@Transactional` 操作中同时删除所有关联的字典数据，并失效对应缓存。
+
+### Permission Tree
+
+```
+base (DIRECTORY, id=50)             ← "基础数据" 一级菜单
+  └── base:dict (MENU, id=51)       ← "字典管理" 二级菜单
+        ├── dict:type:list     (API, id=52)
+        ├── dict:type:create   (API, id=53)
+        ├── dict:type:update   (API, id=54)
+        ├── dict:type:delete   (API, id=55)
+        ├── dict:data:list     (API, id=56)
+        ├── dict:data:create   (API, id=57)
+        ├── dict:data:update   (API, id=58)
+        ├── dict:data:delete   (API, id=59)
+        └── dict:data:refresh  (API, id=60)
+```
+
+所有 11 个权限节点分配给 `SUPER_ADMIN` 角色（role_id=1）。
+
+### Current Status
+
+- **后端**：11 个 API 端点完整实现（6 类型 + 5 数据），`@PreAuthorize` 权限控制已生效
+- **前端**：Master-detail 布局页面已就绪，`v-permission` 按钮权限控制已应用于所有操作按钮
+- **缓存**：Cache-aside + 写操作失效 + 手动刷新已实现
+- **种子数据**：3 个预置字典类型（`sys_user_gender`, `sys_common_status`, `sys_notice_type`）+ 7 条数据（租户 1）
+- **Gateway 路由**：`Path=/api/base/**` → `lb://omni-base` 已配置（无 StripPrefix，控制器使用完整路径）
+- **安全架构**：`GatewayPreAuthFilter` 从 Gateway 注入的身份头构建 Spring Security 上下文，`XssConfigProviderImpl` 采用 Redis-only 策略继承 XSS 防护

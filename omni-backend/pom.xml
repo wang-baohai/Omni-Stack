@@ -21,7 +21,11 @@
     <modules>
         <module>omni-common-core</module>
         <module>omni-common</module>
+        <module>omni-common-mybatis</module>
+        <module>omni-common-redis</module>
+        <module>omni-common-redis-reactive</module>
         <module>omni-auth</module>
+        <module>omni-base</module>
         <module>omni-gateway</module>
     </modules>
 
@@ -29,6 +33,7 @@
         <java.version>25</java.version>
         <spring-cloud.version>2025.1.1</spring-cloud.version>
         <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
+        <mybatis-plus.version>3.5.16</mybatis-plus.version>
     </properties>
 
     <dependencyManagement>
@@ -59,6 +64,24 @@
             <dependency>
                 <groupId>com.omni</groupId>
                 <artifactId>omni-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- Common MyBatis-Plus Starter Module -->
+            <dependency>
+                <groupId>com.omni</groupId>
+                <artifactId>omni-common-mybatis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- Common Redis Starter Module -->
+            <dependency>
+                <groupId>com.omni</groupId>
+                <artifactId>omni-common-redis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- Common Reactive Redis Starter Module -->
+            <dependency>
+                <groupId>com.omni</groupId>
+                <artifactId>omni-common-redis-reactive</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

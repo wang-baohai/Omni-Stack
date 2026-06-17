@@ -43,12 +43,16 @@ spring:
               uri: lb://omni-auth
               predicates:
                 - Path=/api/auth/**
+            # Base service route
+            - id: omni-base
+              uri: lb://omni-base
+              predicates:
+                - Path=/api/base/**
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       database: 0
-      timeout: 5s
 
 management:
   endpoint:

@@ -346,6 +346,98 @@ PUT /api/auth/xss-config/rules/{id}/toggle
 | `system:xssconfig:create` | 创建规则 |
 | `system:xssconfig:delete` | 删除规则 |
 
+## Base Service Dictionary Management Endpoints
+
+Base 服务（`omni-base :8101`）提供数据字典管理功能，采用「类型 + 数据」两级结构。
+
+**路由说明**：Gateway 路由 `Path=/api/base/**` 无 StripPrefix 过滤器，Base 服务控制器使用完整路径（如 `@RequestMapping("/api/base/dict/type")`），与 Auth 服务的 `StripPrefix=2` 模式不同。
+
+### Dictionary Type Endpoints
+
+Base path: `/api/base/dict/type`
+
+| HTTP Method | URL | Permission Code | Description |
+|-------------|-----|-----------------|-------------|
+| GET | `/api/base/dict/type/list?page=1&size=10&typeCode=&typeName=&status=` | `dict:type:list` | 分页列表，支持 typeCode / typeName / status 过滤 |
+| GET | `/api/base/dict/type/{id}` | `dict:type:list` | 按 ID 查询 |
+| POST | `/api/base/dict/type` | `dict:type:create` | 创建字典类型（验证 tenant 内 typeCode 唯一性） |
+| PUT | `/api/base/dict/type/{id}` | `dict:type:update` | 更新字典类型（部分更新：typeName, remark, sort, status） |
+| DELETE | `/api/base/dict/type/{id}` | `dict:type:delete` | 删除字典类型（级联删除关联的字典数据） |
+| PUT | `/api/base/dict/type/{id}/status` | `dict:type:update` | 切换启用/禁用状态 |
+
+**示例请求**：
+
+```
+GET /api/base/dict/type/list?page=1&size=10
+Authorization: Bearer <token>
+X-Tenant-Id: 1
+
+Response 200:
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "records": [
+      { "id": 1, "typeCode": "sys_user_gender", "typeName": "用户性别", "status": 1, "sort": 0 }
+    ],
+    "total": 3,
+    "size": 10,
+    "current": 1,
+    "pages": 1
+  }
+}
+```
+
+### Dictionary Data Endpoints
+
+Base path: `/api/base/dict/data`
+
+| HTTP Method | URL | Permission Code | Description |
+|-------------|-----|-----------------|-------------|
+| GET | `/api/base/dict/data/list?typeCode=sys_user_gender&page=1&size=10` | `dict:data:list` | 按 typeCode 分页查询字典数据 |
+| POST | `/api/base/dict/data` | `dict:data:create` | 创建字典数据（验证父类型存在） |
+| PUT | `/api/base/dict/data/{id}` | `dict:data:update` | 更新字典数据（部分更新：dictValue, dictLabel, tagType, remark, sort, status） |
+| DELETE | `/api/base/dict/data/{id}` | `dict:data:delete` | 删除单条字典数据 |
+| POST | `/api/base/dict/data/refresh-cache` | `dict:data:refresh` | 手动刷新指定 typeCode 的 Redis 缓存 |
+
+**示例请求**：
+
+```
+POST /api/base/dict/data
+Authorization: Bearer <token>
+X-Tenant-Id: 1
+Content-Type: application/json
+
+{
+  "typeCode": "sys_user_gender",
+  "dictValue": "3",
+  "dictLabel": "保密",
+  "tagType": "warning",
+  "sort": 3
+}
+
+@PreAuthorize("hasAuthority('dict:data:create')")
+Response 200: { "code": 200, "data": { "id": 8, ... } }
+```
+
+### Permission Codes
+
+| 权限码 | 说明 |
+|--------|------|
+| `dict:type:list` | 查看字典类型列表 |
+| `dict:type:create` | 创建字典类型 |
+| `dict:type:update` | 更新/切换字典类型状态 |
+| `dict:type:delete` | 删除字典类型（级联） |
+| `dict:data:list` | 查看字典数据列表 |
+| `dict:data:create` | 创建字典数据 |
+| `dict:data:update` | 更新字典数据 |
+| `dict:data:delete` | 删除字典数据 |
+| `dict:data:refresh` | 手动刷新字典缓存 |
+
+### Tenant Isolation
+
+所有列表查询和创建操作要求 `X-Tenant-Id` 请求头（前端从 JWT Token 提取，Gateway 注入）。数据在 SQL 查询层按 `tenant_id` 隔离。字典类型唯一性约束范围为 `(tenant_id, type_code)`。
+
 ## Null Semantics
 
 - `null` fields are included in JSON output (not suppressed)

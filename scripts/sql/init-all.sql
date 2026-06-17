@@ -426,3 +426,84 @@ INSERT INTO sys_xss_blacklist_rule (tenant_id, rule_name, rule_type, pattern, en
     (1, 'VBScript协议',   'DANGEROUS_PROTOCOL', 'vbscript:',         1, '拦截vbscript:伪协议',        8,  'system'),
     (1, 'Data协议',       'DANGEROUS_PROTOCOL', 'data:',             1, '拦截data:URI',              9,  'system'),
     (1, 'Expression',     'CUSTOM_PATTERN',     'expression\\s*\\(', 1, '拦截CSS expression表达式',   10, 'system');
+
+-- 4.12 Base 服务权限节点（1 个目录 + 1 个菜单 + 9 个 API 权限 = 11 条）
+INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+VALUES
+    (50, 1, 0,  'base',                 '基础数据',       'DIRECTORY', '/50/',       1, 1, 1, 'system'),
+    (51, 1, 50, 'base:dict',            '字典管理',       'MENU',      '/50/51/',    2, 1, 1, 'system'),
+    (52, 1, 51, 'dict:type:list',       '查看字典类型',   'API',       '/50/51/52/', 3, 1, 1, 'system'),
+    (53, 1, 51, 'dict:type:create',     '创建字典类型',   'API',       '/50/51/53/', 3, 2, 1, 'system'),
+    (54, 1, 51, 'dict:type:update',     '更新字典类型',   'API',       '/50/51/54/', 3, 3, 1, 'system'),
+    (55, 1, 51, 'dict:type:delete',     '删除字典类型',   'API',       '/50/51/55/', 3, 4, 1, 'system'),
+    (56, 1, 51, 'dict:data:list',       '查看字典数据',   'API',       '/50/51/56/', 3, 5, 1, 'system'),
+    (57, 1, 51, 'dict:data:create',     '创建字典数据',   'API',       '/50/51/57/', 3, 6, 1, 'system'),
+    (58, 1, 51, 'dict:data:update',     '更新字典数据',   'API',       '/50/51/58/', 3, 7, 1, 'system'),
+    (59, 1, 51, 'dict:data:delete',     '删除字典数据',   'API',       '/50/51/59/', 3, 8, 1, 'system'),
+    (60, 1, 51, 'dict:data:refresh',    '刷新字典缓存',   'API',       '/50/51/60/', 3, 9, 1, 'system');
+
+-- 4.13 SUPER_ADMIN 角色追加 Base 服务权限
+INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+    (1, 50), (1, 51), (1, 52), (1, 53), (1, 54), (1, 55),
+    (1, 56), (1, 57), (1, 58), (1, 59), (1, 60);
+
+-- ============================================================
+-- Section 5: Base 服务 - 数据字典
+-- ============================================================
+CREATE DATABASE IF NOT EXISTS omni_base
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE omni_base;
+
+-- 5.1 字典类型表
+CREATE TABLE IF NOT EXISTS sys_dict_type (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id   BIGINT       NOT NULL COMMENT '租户ID',
+    type_code   VARCHAR(100) NOT NULL COMMENT '字典类型编码',
+    type_name   VARCHAR(200) NOT NULL COMMENT '字典类型名称',
+    remark      VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    sort        INT          DEFAULT 0 COMMENT '排序',
+    status      TINYINT      DEFAULT 1 COMMENT '状态：1=启用 0=禁用',
+    create_time DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by   VARCHAR(64)  DEFAULT NULL,
+    update_by   VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_dict_type_tenant_code (tenant_id, type_code),
+    INDEX idx_dict_type_tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='字典类型表';
+
+-- 5.2 字典数据表
+CREATE TABLE IF NOT EXISTS sys_dict_data (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id   BIGINT       NOT NULL COMMENT '租户ID',
+    type_code   VARCHAR(100) NOT NULL COMMENT '字典类型编码',
+    dict_value  VARCHAR(200) NOT NULL COMMENT '字典值',
+    dict_label  VARCHAR(200) NOT NULL COMMENT '字典标签',
+    tag_type    VARCHAR(50)  DEFAULT NULL COMMENT '标签样式：success/warning/danger/info/primary',
+    remark      VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    sort        INT          DEFAULT 0 COMMENT '排序',
+    status      TINYINT      DEFAULT 1 COMMENT '状态：1=启用 0=禁用',
+    create_time DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by   VARCHAR(64)  DEFAULT NULL,
+    update_by   VARCHAR(64)  DEFAULT NULL,
+    INDEX idx_dict_data_tenant (tenant_id),
+    INDEX idx_dict_data_tenant_type (tenant_id, type_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='字典数据表';
+
+-- 5.3 预置字典类型（默认租户 1）
+INSERT INTO sys_dict_type (tenant_id, type_code, type_name, sort, status, create_by) VALUES
+    (1, 'sys_user_gender',   '用户性别',   1, 1, 'system'),
+    (1, 'sys_common_status', '通用状态',   2, 1, 'system'),
+    (1, 'sys_notice_type',   '通知类型',   3, 1, 'system');
+
+-- 5.4 预置字典数据
+INSERT INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, tag_type, sort, status, create_by) VALUES
+    (1, 'sys_user_gender', '1', '男',     'primary', 1, 1, 'system'),
+    (1, 'sys_user_gender', '2', '女',     'danger',  2, 1, 'system'),
+    (1, 'sys_user_gender', '0', '未知',   'info',    3, 1, 'system'),
+    (1, 'sys_common_status', '1', '启用', 'success', 1, 1, 'system'),
+    (1, 'sys_common_status', '0', '禁用', 'danger',  2, 1, 'system'),
+    (1, 'sys_notice_type', '1', '系统通知', 'primary', 1, 1, 'system'),
+    (1, 'sys_notice_type', '2', '业务通知', 'warning', 2, 1, 'system');

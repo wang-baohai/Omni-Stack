@@ -16,7 +16,8 @@ omni-frontend/
     ├── App.vue             # Root component (<router-view />)
     ├── api/                # API layer (one file per domain)
     │   ├── request.ts      # Shared Axios instance + interceptors
-    │   └── user.ts         # User API functions
+    │   ├── user.ts         # User API functions
+    │   └── dict.ts         # Dictionary API (type + data CRUD)
     ├── stores/             # Pinia stores (one per domain)
     │   ├── user.ts         # User auth store
     │   └── app.ts          # App settings store
@@ -25,9 +26,11 @@ omni-frontend/
     ├── views/              # Page components (kebab-case dirs)
     │   ├── login/index.vue
     │   ├── dashboard/index.vue
-    │   ── device/         # Device authorization pages (OAuth2 Device Code Flow)
-    │       ├── index.vue   # Device simulator: shows QR code and polls for token
-    │       └── verify.vue  # Verification page: user approves device authorization
+    │   ├── base/           # Base data module
+    │   │   └── dict/index.vue  # Dictionary management (master-detail layout)
+    │   ├── device/         # Device authorization pages (OAuth2 Device Code Flow)
+    │   │   ├── index.vue   # Device simulator: shows QR code and polls for token
+    │   │   └── verify.vue  # Verification page: user approves device authorization
     ├── layout/
     │   └── index.vue       # App shell layout (sidebar, header, content)
     ├── components/         # Shared/reusable UI components
@@ -293,6 +296,66 @@ XSS 防护管理页面（`views/system/xssconfig/index.vue`）提供全局开关
 - **规则类型**：HTML 标签 / 事件处理器 / 危险协议 / 自定义正则
 - **路由注册**：`iconMap` 和 `menuI18nMap` 中添加 `system:xssconfig` 映射
 - **i18n**：翻译文件添加 `common.xssConfig`（模块名）和 `xssConfig.*`（字段文本）
+
+## 业务模块结构范式 (Business Module Structure Pattern)
+
+新增业务模块时，按以下约定组织目录、注册路由和配置国际化。
+
+### 标准目录布局
+
+以「基础数据模块 → 字典管理功能」为例：
+
+```
+src/
+├── views/
+│   └── base/                  # 模块分组目录
+│       └── dict/
+│           └── index.vue      # 功能页面（SFC 顺序: script → template → style）
+├── api/
+│   └── dict.ts               # API 函数 + TypeScript 接口（一文件一功能域）
+├── stores/
+│   └── dict.ts               # （可选）仅当需要复杂客户端状态时创建
+└── locales/
+    ├── zh-CN.ts              # 中文翻译
+    └── en-US.ts              # 英文翻译
+```
+
+### 约定式路由映射
+
+动态路由系统通过 `permissionCode` 自动映射到视图组件：
+
+```
+permissionCode → resolveViewComponent() → 视图路径
+
+base:dict       → replace ":" with "/"  → views/base/dict/index.vue
+system:user     → replace ":" with "/"  → views/system/user/index.vue
+```
+
+**规则**：
+- `resolveViewComponent()` 在 `src/router/index.ts` 中将 `:` 替换为 `/`，拼接为 `../views/<path>/index.vue`
+- 路由 `path` 取 `permissionCode` 最后一段（如 `base:dict` → path `dict`，注册为 `/admin/dict`）
+- 特殊路径可通过 `viewOverrides` Map 覆盖默认映射
+
+### 注册清单
+
+每个新业务模块需要完成以下注册：
+
+| 步骤 | 文件 | 操作 |
+|------|------|------|
+| 1 | `src/router/index.ts` → `iconMap` | 添加 `'<module>:<feature>': '<IconName>'`（如 `'base:dict': 'Collection'`） |
+| 2 | `src/layout/index.vue` → `menuI18nMap` | 添加模块目录和菜单项的 i18n key 映射 |
+| 3 | `src/locales/zh-CN.ts` + `en-US.ts` | 添加 `common.<module>Management`（目录名）、`common.<feature>Management`（菜单名）和功能级翻译 key |
+| 4 | `scripts/sql/init-all.sql` → `sys_permission` | 添加 DIRECTORY（模块分组）+ MENU（功能页面）+ BUTTON/API（操作权限）种子数据 |
+| 5 | `scripts/sql/init-all.sql` → `sys_role_permission` | 为 SUPER_ADMIN 角色分配新权限节点 |
+
+### 参考实现：字典管理模块
+
+以 `base:dict`（字典管理）作为新模块的参考范本：
+
+- **View**: `views/base/dict/index.vue` — master-detail 布局（左侧类型列表 10/24 cols，右侧数据列表 14/24 cols）
+- **API**: `api/dict.ts` — 11 个 typed 函数（`listDictTypes`, `getDictType`, `createDictType`, `updateDictType`, `deleteDictType`, `toggleDictTypeStatus`, `listDictData`, `createDictData`, `updateDictData`, `deleteDictData`, `refreshDictCache`）
+- **Permission codes**: `dict:type:*`（4 个）+ `dict:data:*`（5 个）
+- **UI patterns**: `v-permission` 按钮权限控制、`el-switch` 状态切换、`el-pagination` 分页、`ElMessageBox.confirm` 删除确认、`X-Tenant-Id` 多租户隔离
 
 ## Build & Tooling
 

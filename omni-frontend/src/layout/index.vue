@@ -37,6 +37,8 @@ const menuI18nMap: Record<string, string> = {
   'system:authrecord': 'common.authRecords',
   'system:auditlog': 'common.auditLogs',
   'system:xssconfig': 'common.xssConfig',
+  'base': 'common.baseManagement',
+  'base:dict': 'common.dictManagement',
 }
 
 /** 获取菜单显示名称（优先 i18n 翻译，fallback 后端原始名称） */
@@ -68,6 +70,7 @@ const iconMap: Record<string, string> = {
   'system:authrecord': 'Document',
   'system:auditlog': 'Notebook',
   'system:xssconfig': 'Filter',
+  'base:dict': 'Collection',
 }
 
 /**
