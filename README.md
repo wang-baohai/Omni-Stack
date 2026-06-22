@@ -20,6 +20,7 @@
 - **三层 XSS 纵深防御**：Jackson 反序列化器自动清洗 `@RequestBody` + Servlet Filter 清洗查询参数 + Gateway 安全响应头，支持按租户配置全局开关和自定义黑名单规则（HTML 标签、事件处理器、危险协议、正则模式），Redis 缓存 + 数据库配置，前端管理界面完整可用
 - **Common Starter 生态**：`omni-common` 拆分为 5 个模块（core / common / mybatis / redis / redis-reactive），新服务通过 Maven 依赖即可获得 MyBatis-Plus 分页、Redis 缓存、XSS 防护等能力，`AutoConfiguration.imports` 零配置自动装配
 - **基础数据管理**：`omni-base` 服务（端口 8101）提供数据字典管理，类型+数据两级结构，Redis cache-aside 缓存，前端 master-detail 管理页面，11 个 API 端点完整实现
+- **操作日志审计追踪**：基于 `@OperLog` 注解 + AOP 切面无侵入采集，自动记录 who/when/what/changed 完整审计信息，实体变更快照自动 diff（oldValue vs newValue）支持数据回溯，RocketMQ 异步发送不阻塞业务请求，热冷表分离归档策略（180 天保留 + 冷表长期留存）兼顾查询性能与合规要求，与审计日志（`sys_audit_log`）和登录日志（`sys_login_log`）形成互补，共同构成完整的审计追踪体系
 - **Maven Wrapper** 内置，克隆即可构建，无需全局安装 Maven
 
 ## 技术栈
@@ -45,7 +46,9 @@
 ```
 Omni-Stack/
 ├── AGENTS.md                        # AI 执行手册（硬约束 + 构建命令 + 检查清单）
-├── docker-compose.yml               # 中间件编排（MySQL, Redis, Nacos, Sentinel）
+├── start.bat / start.sh              # 一键启动脚本（自动启动 Docker + 端口保护 + 容器）
+├── stop.bat / stop.sh                # 一键停止脚本
+├── docker-compose.yml               # 中间件编排（MySQL, Redis, Nacos, RocketMQ）
 ├── docs/                            # 系统真相文档（Architecture + Patterns + Contract）
 │   ├── architecture.md                # 系统边界、模块地图、数据流、RBAC 权限体系
 │   ├── api-contract.md                # 响应格式、错误码、分页、命名规范
@@ -64,6 +67,7 @@ Omni-Stack/
 │   ├── omni-common-mybatis/           # MyBatis-Plus Starter：分页插件, MySQL 驱动
 │   ├── omni-common-redis/             # 阻塞式 Redis Starter：RedisTemplate, RedisUtils
 │   ├── omni-common-redis-reactive/    # 响应式 Redis Starter：WebFlux 服务专用
+│   ├── omni-common-operlog/             # 操作日志 Starter：AOP 切面 + MQ 生产者 + 实体 diff
 │   ├── omni-auth/                     # 认证服务：登录、验证码、JWT、OAuth2 (端口 8100)
 │   ├── omni-base/                     # 基础数据服务：数据字典管理 (端口 8101)
 │   └── omni-gateway/                  # API 网关 (WebFlux, 端口 8102)
@@ -211,9 +215,27 @@ auth:
 
 ### 第一步：启动中间件
 
+项目提供一键启动脚本，自动完成 Docker Desktop 启动、端口保护和容器部署：
+
+| 平台 | 启动 | 停止 |
+|------|------|------|
+| Windows | 右键 `start.bat` → 以管理员身份运行 | 右键 `stop.bat` → 以管理员身份运行 |
+| Linux / macOS | `./start.sh` | `./stop.sh` |
+
+**启动脚本自动完成**：
+
+1. **检测 Docker Desktop** — 未安装时提示下载并自动打开下载页面
+2. **启动 Docker 引擎** — 如未运行则自动拉起，等待就绪后继续
+3. **端口保护** (Windows) — 防止 Hyper-V/WSL2 动态占用项目端口（3306、6379、8080、8848、9848、9876、10909、10911、10912）
+4. **启动容器** — 执行 `docker compose up -d`
+
 ```bash
-# 一键启动所有中间件（MySQL, Redis, Nacos, Sentinel）
-docker compose up -d
+# 启动所有中间件
+./start.sh                          # Linux / macOS
+# 或 Windows: 右键 start.bat → 以管理员身份运行
+
+# 仅启动指定服务
+./start.sh mysql redis
 
 # 查看服务状态
 docker compose ps
@@ -315,6 +337,17 @@ npm run dev
 - **RBAC 权限体系**：功能权限（动态菜单过滤 + `v-permission` 按钮级控制 + `@PreAuthorize` API 鉴权）+ 数据权限（MyBatis-Plus `DataPermissionInterceptor` SQL 自动拦截，六级 dataScope 零侵入过滤）
 - **JWT 签名**：RSA 密钥对，JWK 端点供 Gateway 获取公钥验证
 - **XSS 防护配置管理**：前端 `系统管理 → XSS防护配置` 页面支持全局开关切换和黑名单规则 CRUD，支持四种规则类型（HTML 标签、事件处理器、危险协议、自定义正则），配置按租户隔离，Redis 缓存 30 分钟 TTL + 写操作主动失效
+
+### omni-common-operlog（操作日志 Starter）
+
+基于 AOP + RocketMQ 的操作日志采集框架，为业务服务提供无侵入式审计追踪能力：
+
+- **无侵入采集**：`@OperLog` 注解 + `OperLogAspect` AOP 切面，自动采集请求上下文（username、tenantId、IP、请求参数）和实体变更快照
+- **实体变更 diff**：`EntityDiffer` 字段级差异比对，UPDATE 操作仅记录变更字段，支持数据回溯
+- **RocketMQ 异步**：`OperLogProducer` 异步发送日志消息，不阻塞业务请求响应
+- **热冷表分离**：热表 `sys_oper_log` 保留近 180 天数据供快速查询，冷表 `sys_oper_log_archive` 长期留存满足合规要求，`OperLogArchiver` 每日 02:00 自动归档
+- **与审计日志互补**：操作日志记录业务数据变更（who/when/what/changed），审计日志（`sys_audit_log`）记录安全事件，登录日志（`sys_login_log`）记录登录行为，三者共同构成完整审计追踪体系
+- **omni-auth 禁用**：认证模块不引入该依赖，认证行为由 `sys_login_log` + `sys_audit_log` 覆盖
 
 ### omni-base（基础数据服务）
 

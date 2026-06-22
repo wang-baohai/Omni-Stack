@@ -5,6 +5,8 @@ import com.omni.base.dto.DictTypeQuery;
 import com.omni.base.dto.UpdateDictTypeRequest;
 import com.omni.base.entity.SysDictType;
 import com.omni.base.service.DictTypeService;
+import com.omni.common.core.operlog.OperLog;
+import com.omni.common.core.operlog.OperType;
 import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
 import jakarta.validation.Valid;
@@ -49,6 +51,7 @@ public class DictTypeController {
      * @param size     每页大小
      * @return 分页结果
      */
+    @OperLog(module = "字典类型管理", operType = OperType.QUERY)
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('dict:type:list')")
     public R<PageResult<SysDictType>> list(
@@ -84,6 +87,7 @@ public class DictTypeController {
      * @param request  创建请求
      * @return 创建的实体
      */
+    @OperLog(module = "字典类型管理", operType = OperType.CREATE)
     @PostMapping
     @PreAuthorize("hasAuthority('dict:type:create')")
     public R<SysDictType> create(
@@ -100,6 +104,7 @@ public class DictTypeController {
      * @param request 更新请求
      * @return 更新后的实体
      */
+    @OperLog(module = "字典类型管理", operType = OperType.UPDATE, entityClass = SysDictType.class, idExpr = "#id")
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('dict:type:update')")
     public R<SysDictType> update(@PathVariable Long id,
@@ -114,6 +119,7 @@ public class DictTypeController {
      * @param id 字典类型 ID
      * @return 操作结果
      */
+    @OperLog(module = "字典类型管理", operType = OperType.DELETE)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('dict:type:delete')")
     public R<Void> delete(@PathVariable Long id) {
@@ -128,6 +134,7 @@ public class DictTypeController {
      * @param status 目标状态
      * @return 操作结果
      */
+    @OperLog(module = "字典类型管理", operType = OperType.UPDATE, entityClass = SysDictType.class, idExpr = "#id")
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAuthority('dict:type:update')")
     public R<Void> toggleStatus(@PathVariable Long id,

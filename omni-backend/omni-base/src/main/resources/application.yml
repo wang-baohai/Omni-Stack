@@ -25,6 +25,18 @@ spring:
         username: nacos
         password: nacos
         file-extension: yml
+    stream:
+      rocketmq:
+        binder:
+          name-server: 127.0.0.1:9876
+      bindings:
+        operlog-out-0:
+          destination: operlog-topic
+          content-type: application/json
+        operlogConsumer-in-0:
+          destination: operlog-topic
+          content-type: application/json
+          group: operlog-consumer-group
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/omni_base?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root

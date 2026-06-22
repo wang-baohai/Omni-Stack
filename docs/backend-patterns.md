@@ -285,6 +285,80 @@ Layer 3: Gateway WebFilter — 添加安全响应头
 
 **缓存策略**：Redis 键 `xss:enabled:{tenantId}` + `xss:rules:{tenantId}`，TTL 30 分钟。所有写操作（开关切换、规则 CRUD）后主动失效缓存。
 
+## 操作日志（OperLog）
+
+操作日志系统基于 AOP + RocketMQ 异步架构，自动采集 Controller 方法的请求上下文和实体变更快照，实现对业务操作的完整审计追踪。
+
+### 核心记录流程
+
+```
+Controller 方法（@OperLog 注解）
+    ↓
+OperLogAspect（AOP @Around 切面）
+    ↓ 采集请求上下文：username、tenantId、IP、URL、请求参数
+    ↓ 实体变更快照：UPDATE/DELETE 操作前查询 oldValue，操作后查询 newValue
+    ↓ EntityDiffer.diff()：字段级差异比对（仅 UPDATE）
+    ↓
+OperLogProducer.send(OperLogMessage)
+    ↓ RocketMQ 异步发送
+    ↓
+omni-base 消费者
+    ↓ INSERT INTO sys_oper_log（热表）
+    ↓
+OperLogArchiver（@Scheduled 每日 02:00）
+    ↓ 将超过 180 天的热表记录迁移到 sys_oper_log_archive（冷表）
+    ↓ 批次处理（每批 1000 条），迁移后从热表删除
+```
+
+### @OperLog 注解使用
+
+```java
+@OperLog(module = "用户管理", operType = OperType.CREATE, entityClass = SysUser.class, idExpr = "#result.data.id")
+@PreAuthorize("hasAuthority('system:user:create')")
+@PostMapping
+public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
+    return R.ok(userService.createUser(request));
+}
+```
+
+**注解参数说明**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `module` | String | 是 | 业务模块名称，如"用户管理"、"字典类型管理" |
+| `operType` | OperType | 是 | 操作类型枚举（见下表） |
+| `entityClass` | Class<?> | 条件 | 目标实体类，用于 AOP 自动 diff 变更快照。QUERY/EXPORT/IMPORT 类型无需指定 |
+| `idExpr` | String | 条件 | SpEL 表达式，从方法参数或返回值中提取实体 ID。如 `"#id"`、`"#result.data.id"` |
+
+### OperType 枚举
+
+| 枚举值 | 含义 | 是否需要 entityClass | 说明 |
+|--------|------|---------------------|------|
+| `CREATE` | 新增 | 建议指定 | AOP 从返回值中提取新实体 ID 并查询 newValue |
+| `UPDATE` | 修改 | 是 | AOP 在操作前查询 oldValue，操作后查询 newValue，执行字段级 diff |
+| `DELETE` | 删除 | 是 | AOP 在操作前查询 oldValue，newValue 为 null |
+| `QUERY` | 查询 | 否 | 仅记录查询行为，无实体快照 |
+| `EXPORT` | 导出 | 否 | 仅记录导出行为，无实体快照 |
+| `IMPORT` | 导入 | 否 | 仅记录导入行为，无实体快照 |
+
+### 开发约束
+
+1. **新增写操作 Controller 方法必须标注 `@OperLog`**，指定 `module`、`operType`，涉及实体变更时还需指定 `entityClass` 和 `idExpr`
+2. **omni-auth 模块禁用 `@OperLog`**：认证行为由登录日志（`sys_login_log`）和审计日志（`sys_audit_log`）完整留存，omni-auth 不引入 `omni-common-operlog` 依赖，不在控制器方法上使用 `@OperLog` 注解
+3. **新微服务接入**：需在 `pom.xml` 中依赖 `omni-common-operlog` 并配置 RocketMQ，该模块通过 `AutoConfiguration.imports` 自动注册 AOP 切面和 MQ 生产者
+4. **`entityClass` 用途**：AOP 通过 `ApplicationContext` 查找对应实体类型的 `BaseMapper`，自动执行 `selectById` 获取变更前后快照
+5. **`idExpr` SpEL 语法**：支持引用方法参数（`#id`、`#request.id`）和返回值（`#result.data.id`），解析失败时记录警告日志但不影响业务
+6. **JSON 快照限制**：单条 oldValue/newValue 最大 4000 字符，超出自动截断
+7. **热冷表分离**：热表 `sys_oper_log` 保留近 180 天数据供快速查询，冷表 `sys_oper_log_archive` 长期留存满足合规要求。归档任务每日 02:00 执行，单批次 1000 条，失败时停止当次归档
+
+### 模块职责
+
+| 模块 | 组件 | 职责 |
+|------|------|------|
+| `omni-common-core` | `OperLog` 注解、`OperType` 枚举、`OperLogMessage` POJO | 纯 POJO 层，无 Spring 依赖 |
+| `omni-common-operlog` | `OperLogAspect`、`OperLogProducer`、`EntityDiffer`、`OperLogAutoConfiguration` | AOP 切面 + MQ 生产者 + 实体 diff + 自动装配 |
+| `omni-base` | `OperLogConsumer`、`OperLogArchiver` | MQ 消费写入热表 + 定时归档到冷表 |
+
 ## Common Starter 接入规范
 
 项目将公共能力拆分为 5 个模块，新微服务通过 Maven 依赖引入即用，无需手动配置。

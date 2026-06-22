@@ -49,6 +49,7 @@ export default {
     xssConfig: 'XSS Protection',
     baseManagement: 'Base Data',
     dictManagement: 'Dictionary',
+    operLogs: 'Operation Logs',
   },
   // ===== user — user management module =====
   user: {

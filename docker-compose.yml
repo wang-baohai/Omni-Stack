@@ -1,20 +1,21 @@
 # ============================================================
 # Omni-Stack 中间件 Docker Compose 配置
 # ============================================================
-# 启动顺序：MySQL → Redis → Nacos → Sentinel → 后端服务 → 前端
+# 启动顺序：MySQL/Redis/RocketMQ → Nacos → 后端服务 → 前端
 #
 # 用法：
-#   docker compose up -d          # 启动所有服务
-#   docker compose up mysql redis # 仅启动 MySQL 和 Redis
-#   docker compose ps             # 查看服务状态
-#   docker compose down -v        # 停止并删除数据卷
+#   Windows: 右键 start.bat → 以管理员身份运行（自动处理端口保护）
+#   Linux/Mac: ./start.sh
+#   仅启动指定服务: start.bat mysql redis  或  ./start.sh mysql redis
+#   查看状态: docker compose ps
+#   停止: stop.bat / ./stop.sh（数据随之清除）
 # ============================================================
 
 services:
 
   # ----------------------------------------------------------
   # MySQL 8.4 — 主数据库
-  # 端口: 3306 | 用户: root/root | 数据库: omni_auth
+  # 端口: 3306 | 用户: root/root | 数据库: omni_auth, omni_base, nacos_config
   # ----------------------------------------------------------
   mysql:
     image: mysql:8.4
@@ -29,15 +30,13 @@ services:
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
       TZ: Asia/Shanghai
     volumes:
-      - mysql-data:/var/lib/mysql
       - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
       - ./scripts/sql/init-nacos.sql:/docker-entrypoint-initdb.d/02-init-nacos.sql:ro
     command: >
-      --default-authentication-plugin=mysql_native_password
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot && mysql -uroot -proot -e 'SELECT 1 FROM config_info LIMIT 1' nacos_config"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -50,18 +49,17 @@ services:
   # 端口: 6379 | 无密码
   # ----------------------------------------------------------
   redis:
-    image: redis:7.4-alpine
+    image: redis:7.4
     container_name: omni-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
-    volumes:
-      - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     networks:
       - omni-network
 
@@ -94,7 +92,7 @@ services:
       mysql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -103,23 +101,54 @@ services:
       - omni-network
 
   # ----------------------------------------------------------
-  # Sentinel Dashboard 1.8.8 — 流量控制与熔断
-  # 端口: 8858
+  # RocketMQ 5.3.2 — 操作日志消息队列
+  # NameServer 端口: 9876 | Broker 端口: 10909/10911/10912
   # ----------------------------------------------------------
-  sentinel:
-    image: bladex/sentinel-dashboard:1.8.8
-    container_name: omni-sentinel
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.2
+    container_name: omni-rocketmq-namesrv
     restart: unless-stopped
     ports:
-      - "8858:8858"
+      - "9876:9876"
+    command: sh mqnamesrv
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/127.0.0.1/9876' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - omni-network
 
-volumes:
-  mysql-data:
-    driver: local
-  redis-data:
-    driver: local
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.2
+    container_name: omni-rocketmq-broker
+    restart: unless-stopped
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    environment:
+      NAMESRV_ADDR: rocketmq-namesrv:9876
+      JAVA_OPT_EXT: "-Drocketmq.broker.diskSpaceWarningLevelRatio=0.98"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./docker/rocketmq/broker.conf:/home/rocketmq/rocketmq-5.3.2/conf/broker.conf
+    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.2/conf/broker.conf --enable-proxy
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/127.0.0.1/10911' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - omni-network
 
 networks:
   omni-network:

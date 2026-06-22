@@ -4,6 +4,8 @@ import com.omni.base.dto.CreateDictDataRequest;
 import com.omni.base.dto.UpdateDictDataRequest;
 import com.omni.base.entity.SysDictData;
 import com.omni.base.service.DictDataService;
+import com.omni.common.core.operlog.OperLog;
+import com.omni.common.core.operlog.OperType;
 import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
 import jakarta.validation.Valid;
@@ -63,6 +65,7 @@ public class DictDataController {
      * @param request  创建请求
      * @return 创建的实体
      */
+    @OperLog(module = "字典数据管理", operType = OperType.CREATE)
     @PostMapping
     @PreAuthorize("hasAuthority('dict:data:create')")
     public R<SysDictData> create(
@@ -79,6 +82,7 @@ public class DictDataController {
      * @param request 更新请求
      * @return 更新后的实体
      */
+    @OperLog(module = "字典数据管理", operType = OperType.UPDATE, entityClass = SysDictData.class, idExpr = "#id")
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('dict:data:update')")
     public R<SysDictData> update(@PathVariable Long id,
@@ -93,6 +97,7 @@ public class DictDataController {
      * @param id 字典数据 ID
      * @return 操作结果
      */
+    @OperLog(module = "字典数据管理", operType = OperType.DELETE)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('dict:data:delete')")
     public R<Void> delete(@PathVariable Long id) {
@@ -107,6 +112,7 @@ public class DictDataController {
      * @param typeCode 字典类型编码
      * @return 操作结果
      */
+    @OperLog(module = "字典数据管理", operType = OperType.UPDATE)
     @PostMapping("/refresh-cache")
     @PreAuthorize("hasAuthority('dict:data:refresh')")
     public R<Void> refreshCache(

@@ -1198,3 +1198,105 @@ base (DIRECTORY, id=50)             ← "基础数据" 一级菜单
 - **种子数据**：3 个预置字典类型（`sys_user_gender`, `sys_common_status`, `sys_notice_type`）+ 7 条数据（租户 1）
 - **Gateway 路由**：`Path=/api/base/**` → `lb://omni-base` 已配置（无 StripPrefix，控制器使用完整路径）
 - **安全架构**：`GatewayPreAuthFilter` 从 Gateway 注入的身份头构建 Spring Security 上下文，`XssConfigProviderImpl` 采用 Redis-only 策略继承 XSS 防护
+
+---
+
+## Flow 10: 操作日志 — AOP 采集 + RocketMQ 异步写入 + 热冷归档
+
+### 概述
+
+操作日志系统基于 `@OperLog` 注解 + AOP 切面实现无侵入式采集，通过 RocketMQ 异步发送日志消息，由 omni-base 服务消费写入热表（`sys_oper_log`），定时归档到冷表（`sys_oper_log_archive`）实现长期合规留存。整个流程对业务代码零侵入，仅在 Controller 方法上添加注解即可。
+
+### 10A. 操作日志记录流程（每次写操作触发）
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant G as Gateway :8102
+    participant C as Controller (@OperLog)
+    participant A as OperLogAspect (AOP)
+    participant M as MySQL
+    participant P as OperLogProducer (MQ)
+    participant Q as RocketMQ
+    participant Base as Base :8101 (Consumer)
+
+    B->>G: 1. POST /api/base/dict/type (Bearer JWT)
+    G->>C: 2. AuthFilter → 转发请求
+    C->>A: 3. @Around 切面拦截
+    A->>A: 4. 采集请求上下文：username、tenantId、IP、URL、请求参数
+    A->>M: 5. (UPDATE/DELETE) selectById → oldValue 快照
+    A->>C: 6. joinPoint.proceed() 执行目标方法
+    C->>M: 7. 业务 SQL 执行
+    A->>M: 8. (UPDATE) selectById → newValue 快照
+    A->>A: 9. EntityDiffer.diff(oldValue, newValue) 字段级差异
+    A->>P: 10. OperLogProducer.send(OperLogMessage)
+    P->>Q: 11. RocketMQ 异步发送
+    A-->>B: 12. 返回业务响应 R<T>
+
+    Note over Q,Base: 异步消费
+    Q->>Base: 13. OperLogConsumer 消费消息
+    Base->>M: 14. INSERT INTO sys_oper_log (热表)
+```
+
+### 10B. 操作日志归档流程（每日 02:00 定时执行）
+
+```mermaid
+sequenceDiagram
+    participant S as Scheduler (@Scheduled)
+    participant Arc as OperLogArchiver
+    participant M as MySQL
+
+    S->>Arc: 1. cron="0 0 2 * * ?" 触发
+    Arc->>Arc: 2. AtomicBoolean 防重入检查
+    loop 批次循环（每批 1000 条）
+        Arc->>M: 3. SELECT id FROM sys_oper_log WHERE oper_time < (NOW-180天) LIMIT 1000
+        M-->>Arc: batchIds
+        Arc->>M: 4. selectBatchIds(batchIds)
+        Arc->>M: 5. @Transactional: INSERT INTO sys_oper_log_archive + DELETE FROM sys_oper_log
+    end
+    Arc->>Arc: 6. 记录归档完成日志
+```
+
+### 关键组件
+
+| 组件 | 文件路径 | 职责 |
+|------|---------|------|
+| `@OperLog` | `omni-common-core/.../operlog/OperLog.java` | 注解定义，声明 module/operType/entityClass/idExpr |
+| `OperType` | `omni-common-core/.../operlog/OperType.java` | 操作类型枚举：CREATE/UPDATE/DELETE/QUERY/EXPORT/IMPORT |
+| `OperLogMessage` | `omni-common-core/.../operlog/OperLogMessage.java` | 日志消息 POJO，实现 Serializable |
+| `OperLogAspect` | `omni-common-operlog/.../aspect/OperLogAspect.java` | AOP @Around 切面，采集上下文 + 实体快照 + diff |
+| `EntityDiffer` | `omni-common-operlog/.../diff/EntityDiffer.java` | 字段级差异比对，仅返回变更字段 |
+| `OperLogProducer` | `omni-common-operlog/.../producer/OperLogProducer.java` | RocketMQ 生产者，异步发送日志消息 |
+| `OperLogConsumer` | `omni-base/.../consumer/OperLogConsumer.java` | RocketMQ 消费者，写入 sys_oper_log 热表 |
+| `OperLogArchiver` | `omni-base/.../service/OperLogArchiver.java` | 定时归档任务，180 天热表→冷表迁移 |
+
+### 审计追踪维度
+
+| 维度 | 字段 | 说明 |
+|------|------|------|
+| Who | `oper_username` | 操作人用户名 |
+| When | `oper_time` | 操作时间戳 |
+| What | `module` + `oper_type` + `request_url` | 业务模块 + 操作类型 + 请求 URL |
+| Changed | `old_value` / `new_value` | 实体变更前后 JSON 快照（UPDATE 仅包含差异字段） |
+| Where | `ip_address` + `user_agent` | 操作来源 IP 和客户端信息 |
+| How Long | `execution_time` | 方法执行耗时（ms） |
+| Result | `response_status` + `error_msg` | 操作结果状态和错误信息 |
+
+### 与审计日志的互补关系
+
+| 日志类型 | 表 | 记录范围 | 采集方式 | 服务模块 |
+|---------|------|---------|---------|--------|
+| 操作日志 | `sys_oper_log` / `sys_oper_log_archive` | 业务数据变更（CRUD） | `@OperLog` + AOP + MQ 异步 | omni-base / omni-common-operlog |
+| 审计日志 | `sys_audit_log` | 安全事件（登录、Token、权限变更） | 事件驱动（`AuditEventPublisher`） | omni-auth |
+| 登录日志 | `sys_login_log` | 登录行为（成功/失败） | 认证流程内部记录 | omni-auth |
+
+三类日志各司其职，共同构成完整的审计追踪体系：操作日志记录「业务数据怎么变」，审计日志记录「安全事件发生了什么」，登录日志记录「谁在什么时候登录」。
+
+### Current Status
+
+- **AOP 切面**：`OperLogAspect` 完整实现，支持 CREATE/UPDATE/DELETE/QUERY/EXPORT/IMPORT 六种操作类型
+- **实体 diff**：`EntityDiffer` 实现字段级差异比对，UPDATE 操作仅记录变更字段
+- **SpEL 提取**：支持 `#id`、`#result.data.id` 等表达式，从方法参数和返回值中提取实体 ID
+- **MQ 异步**：`OperLogProducer` 通过 RocketMQ 异步发送，不阻塞业务请求
+- **热冷归档**：`OperLogArchiver` 每日 02:00 执行，180 天保留策略，批次处理 1000 条/批
+- **omni-auth 禁用**：认证模块不引入 `omni-common-operlog`，认证行为由 `sys_login_log` + `sys_audit_log` 覆盖

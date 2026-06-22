@@ -27,6 +27,10 @@
 -- ============================================================
 -- Section 1: 创建数据库
 -- ============================================================
+
+-- 强制客户端使用 UTF-8 字符集，防止 Docker 初始化时中文乱码
+SET NAMES utf8mb4;
+
 CREATE DATABASE IF NOT EXISTS omni_auth
     DEFAULT CHARACTER SET utf8mb4
     DEFAULT COLLATE utf8mb4_unicode_ci;
@@ -442,10 +446,16 @@ VALUES
     (59, 1, 51, 'dict:data:delete',     '删除字典数据',   'API',       '/50/51/59/', 3, 8, 1, 'system'),
     (60, 1, 51, 'dict:data:refresh',    '刷新字典缓存',   'API',       '/50/51/60/', 3, 9, 1, 'system');
 
--- 4.13 SUPER_ADMIN 角色追加 Base 服务权限
+-- 4.13 Base 服务操作日志权限节点（1 个菜单 + 1 个 API 权限 = 2 条）
+INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+VALUES
+    (61, 1, 50, 'base:operlog',       '操作日志',     'MENU', '/50/61/',    2, 2, 1, 'system'),
+    (62, 1, 61, 'base:operlog:list',  '查看操作日志', 'API',  '/50/61/62/', 3, 1, 1, 'system');
+
+-- 4.14 SUPER_ADMIN 角色追加 Base 服务权限
 INSERT INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 50), (1, 51), (1, 52), (1, 53), (1, 54), (1, 55),
-    (1, 56), (1, 57), (1, 58), (1, 59), (1, 60);
+    (1, 56), (1, 57), (1, 58), (1, 59), (1, 60), (1, 61), (1, 62);
 
 -- ============================================================
 -- Section 5: Base 服务 - 数据字典
@@ -492,13 +502,64 @@ CREATE TABLE IF NOT EXISTS sys_dict_data (
     INDEX idx_dict_data_tenant_type (tenant_id, type_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='字典数据表';
 
--- 5.3 预置字典类型（默认租户 1）
+-- 5.3 操作日志表（热表，保留最近 180 天）
+CREATE TABLE IF NOT EXISTS sys_oper_log (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '日志ID',
+    tenant_id       BIGINT       NOT NULL COMMENT '租户ID',
+    oper_username    VARCHAR(64)  DEFAULT NULL COMMENT '操作人用户名',
+    oper_time       DATETIME     NOT NULL COMMENT '操作时间',
+    module          VARCHAR(100) DEFAULT NULL COMMENT '业务模块名称',
+    oper_type       VARCHAR(20)  NOT NULL COMMENT '操作类型: CREATE/UPDATE/DELETE/QUERY/EXPORT/IMPORT',
+    request_method  VARCHAR(10)  DEFAULT NULL COMMENT 'HTTP方法',
+    request_url     VARCHAR(500) DEFAULT NULL COMMENT '请求URL',
+    request_params  TEXT         DEFAULT NULL COMMENT '请求参数JSON',
+    response_status INT          DEFAULT 200 COMMENT '响应状态码',
+    ip_address      VARCHAR(64)  DEFAULT NULL COMMENT '客户端IP',
+    user_agent      VARCHAR(500) DEFAULT NULL COMMENT 'User-Agent',
+    execution_time  BIGINT       DEFAULT NULL COMMENT '执行耗时（毫秒）',
+    old_value       JSON         DEFAULT NULL COMMENT '变更前值快照',
+    new_value       JSON         DEFAULT NULL COMMENT '变更后值快照',
+    error_msg       VARCHAR(1000) DEFAULT NULL COMMENT '错误信息',
+    create_time     DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    INDEX idx_operlog_tenant (tenant_id),
+    INDEX idx_operlog_time (oper_time),
+    INDEX idx_operlog_module (module),
+    INDEX idx_operlog_type (oper_type),
+    INDEX idx_operlog_username (oper_username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志热表';
+
+-- 5.4 操作日志归档表（冷表）
+CREATE TABLE IF NOT EXISTS sys_oper_log_archive (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '日志ID',
+    tenant_id       BIGINT       NOT NULL COMMENT '租户ID',
+    oper_username    VARCHAR(64)  DEFAULT NULL COMMENT '操作人用户名',
+    oper_time       DATETIME     NOT NULL COMMENT '操作时间',
+    module          VARCHAR(100) DEFAULT NULL COMMENT '业务模块名称',
+    oper_type       VARCHAR(20)  NOT NULL COMMENT '操作类型',
+    request_method  VARCHAR(10)  DEFAULT NULL COMMENT 'HTTP方法',
+    request_url     VARCHAR(500) DEFAULT NULL COMMENT '请求URL',
+    request_params  TEXT         DEFAULT NULL COMMENT '请求参数JSON',
+    response_status INT          DEFAULT 200 COMMENT '响应状态码',
+    ip_address      VARCHAR(64)  DEFAULT NULL COMMENT '客户端IP',
+    user_agent      VARCHAR(500) DEFAULT NULL COMMENT 'User-Agent',
+    execution_time  BIGINT       DEFAULT NULL COMMENT '执行耗时（毫秒）',
+    old_value       JSON         DEFAULT NULL COMMENT '变更前值快照',
+    new_value       JSON         DEFAULT NULL COMMENT '变更后值快照',
+    error_msg       VARCHAR(1000) DEFAULT NULL COMMENT '错误信息',
+    create_time     DATETIME     DEFAULT NULL COMMENT '原始记录创建时间',
+    archived_time   DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '归档时间',
+    INDEX idx_archive_tenant (tenant_id),
+    INDEX idx_archive_time (oper_time),
+    INDEX idx_archive_module (module)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志归档冷表';
+
+-- 5.5 预置字典类型（默认租户 1）
 INSERT INTO sys_dict_type (tenant_id, type_code, type_name, sort, status, create_by) VALUES
     (1, 'sys_user_gender',   '用户性别',   1, 1, 'system'),
     (1, 'sys_common_status', '通用状态',   2, 1, 'system'),
     (1, 'sys_notice_type',   '通知类型',   3, 1, 'system');
 
--- 5.4 预置字典数据
+-- 5.6 预置字典数据
 INSERT INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, tag_type, sort, status, create_by) VALUES
     (1, 'sys_user_gender', '1', '男',     'primary', 1, 1, 'system'),
     (1, 'sys_user_gender', '2', '女',     'danger',  2, 1, 'system'),

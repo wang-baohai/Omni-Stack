@@ -24,6 +24,7 @@
         <module>omni-common-mybatis</module>
         <module>omni-common-redis</module>
         <module>omni-common-redis-reactive</module>
+        <module>omni-common-operlog</module>
         <module>omni-auth</module>
         <module>omni-base</module>
         <module>omni-gateway</module>
@@ -82,6 +83,12 @@
             <dependency>
                 <groupId>com.omni</groupId>
                 <artifactId>omni-common-redis-reactive</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- Common OperLog Module -->
+            <dependency>
+                <groupId>com.omni</groupId>
+                <artifactId>omni-common-operlog</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

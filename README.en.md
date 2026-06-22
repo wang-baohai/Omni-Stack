@@ -20,6 +20,7 @@
 - **Three-Layer XSS Defense**: Jackson deserializer auto-sanitizes `@RequestBody` + Servlet Filter sanitizes query parameters + Gateway security response headers, with per-tenant configurable global toggle and custom blacklist rules (HTML tags, event handlers, dangerous protocols, regex patterns), Redis-cached configuration, and a full frontend management UI
 - **Common Starter Ecosystem**: `omni-common` split into 5 modules (core / common / mybatis / redis / redis-reactive) — new services gain MyBatis-Plus pagination, Redis caching, XSS protection via Maven dependency alone, `AutoConfiguration.imports` zero-config auto-assembly
 - **Base Data Management**: `omni-base` service (port 8101) provides data dictionary management with type+data two-level structure, Redis cache-aside caching, frontend master-detail management page, 11 API endpoints fully implemented
+- **Operation Log Audit Trail**: `@OperLog` annotation + AOP aspect for non-intrusive collection, automatically records who/when/what/changed with full audit information, entity change snapshot auto-diff (oldValue vs newValue) for data traceability, RocketMQ async delivery without blocking business requests, hot/cold table separation archival strategy (180-day retention + cold table long-term preservation) balancing query performance and compliance requirements, complementing audit logs (`sys_audit_log`) and login logs (`sys_login_log`) to form a complete audit trail system
 - **Maven Wrapper** bundled — clone and build, no system Maven installation needed
 
 ## Tech Stack
@@ -45,7 +46,9 @@
 ```
 Omni-Stack/
 ├── AGENTS.md                        # AI execution manual (constraints + build commands + checklist)
-├── docker-compose.yml               # Middleware orchestration (MySQL, Redis, Nacos, Sentinel)
+├── start.bat / start.sh              # One-click startup (auto-start Docker + port protection + containers)
+├── stop.bat / stop.sh                # One-click stop
+├── docker-compose.yml               # Middleware orchestration (MySQL, Redis, Nacos, RocketMQ)
 ├── docs/                            # System truth documents (Architecture + Patterns + Contract)
 │   ├── architecture.md                # System boundaries, module map, data flow, RBAC permission system
 │   ├── api-contract.md                # Response format, error codes, pagination, naming
@@ -64,6 +67,7 @@ Omni-Stack/
 │   ├── omni-common-mybatis/           # MyBatis-Plus Starter: pagination plugin, MySQL driver
 │   ├── omni-common-redis/             # Blocking Redis Starter: RedisTemplate, RedisUtils
 │   ├── omni-common-redis-reactive/    # Reactive Redis Starter: for WebFlux services
+│   ├── omni-common-operlog/             # Operation Log Starter: AOP aspect + MQ producer + entity diff
 │   ├── omni-auth/                     # Auth service: login, captcha, JWT, OAuth2 (port 8100)
 │   ├── omni-base/                     # Base data service: dictionary management (port 8101)
 │   └── omni-gateway/                  # API Gateway (WebFlux, port 8102)
@@ -211,9 +215,27 @@ Click the "GitHub", "Google", or "Gitee" button on the frontend login page to in
 
 ### Step 1: Start Middleware
 
+The project provides one-click startup scripts that automatically handle Docker Desktop, port protection, and container deployment:
+
+| Platform | Start | Stop |
+|----------|-------|------|
+| Windows | Right-click `start.bat` → Run as Administrator | Right-click `stop.bat` → Run as Administrator |
+| Linux / macOS | `./start.sh` | `./stop.sh` |
+
+**Startup script automatically**:
+
+1. **Detects Docker Desktop** — prompts download and opens the download page if not installed
+2. **Starts Docker engine** — auto-launches if not running, waits until ready
+3. **Port protection** (Windows) — prevents Hyper-V/WSL2 from dynamically occupying project ports (3306, 6379, 8080, 8848, 9848, 9876, 10909, 10911, 10912)
+4. **Starts containers** — runs `docker compose up -d`
+
 ```bash
-# Start all middleware (MySQL, Redis, Nacos, Sentinel) with one command
-docker compose up -d
+# Start all middleware
+./start.sh                          # Linux / macOS
+# or Windows: right-click start.bat → Run as Administrator
+
+# Start specific services only
+./start.sh mysql redis
 
 # Check service status
 docker compose ps
@@ -314,6 +336,17 @@ Authentication microservice built on Spring Security 7 + OAuth2 Authorization Se
 - **RBAC Permission System**: Functional permissions (dynamic menu filtering + `v-permission` button-level control + `@PreAuthorize` API authorization) + Data permissions (MyBatis-Plus `DataPermissionInterceptor` SQL auto-interception, six-level dataScope zero-intrusion filtering)
 - **JWT signing**: RSA key pair, JWK endpoint for Gateway public key verification
 - **XSS Protection Config Management**: Frontend `System Management → XSS Protection Config` page with global toggle and blacklist rule CRUD (HTML tags, event handlers, dangerous protocols, custom regex), per-tenant isolation, Redis cache 30-min TTL with active invalidation on writes
+
+### omni-common-operlog (Operation Log Starter)
+
+AOP + RocketMQ based operation log collection framework providing non-intrusive audit trail for business services:
+
+- **Non-intrusive collection**: `@OperLog` annotation + `OperLogAspect` AOP aspect automatically captures request context (username, tenantId, IP, request parameters) and entity change snapshots
+- **Entity change diff**: `EntityDiffer` field-level diff comparison — UPDATE operations record only changed fields, enabling data traceability
+- **RocketMQ async**: `OperLogProducer` asynchronously delivers log messages without blocking business request responses
+- **Hot/cold table separation**: Hot table `sys_oper_log` retains recent 180-day data for fast queries; cold table `sys_oper_log_archive` preserves long-term records for compliance. `OperLogArchiver` runs daily at 02:00 for automated archival
+- **Complementary to audit logs**: Operation logs record business data changes (who/when/what/changed), audit logs (`sys_audit_log`) record security events, and login logs (`sys_login_log`) record login behavior — together forming a complete audit trail system
+- **Disabled in omni-auth**: Auth module does not depend on this module; authentication behavior is covered by `sys_login_log` + `sys_audit_log`
 
 ### omni-base (Base Data Service)
 

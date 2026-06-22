@@ -20,6 +20,7 @@
 - **3層XSS防御**: Jackson デシリアライザーが `@RequestBody` を自動サニタイズ + Servlet Filter がクエリパラメータをサニタイズ + Gateway セキュリティレスポンスヘッダー、テナント別グローバルトグルとカスタムブラックリストルール（HTMLタグ、イベントハンドラ、危険プロトコル、正規表現パターン）をサポート、Redisキャッシュ構成、完全なフロントエンド管理UI付き
 - **Common Starter エコシステム**: `omni-common` を5モジュール（core / common / mybatis / redis / redis-reactive）に分割、新サービスは Maven 依存関係を追加するだけで MyBatis-Plus ページネーション、Redis キャッシュ、XSS 防御等の能力を獲得、`AutoConfiguration.imports` ゼロ構成自動アセンブリ
 - **基礎データ管理**: `omni-base` サービス（ポート 8101）がデータ辞書管理を提供、タイプ+データの二層構造、Redis cache-aside キャッシュ、フロントエンド master-detail 管理ページ、11個の API エンドポイント完全実装
+- **操作ログ監査証跡**: `@OperLog` アノテーション + AOP アスペクトによる非侵襲的収集、who/when/what/changed の完全な監査情報を自動記録、エンティティ変更スナップショットの自動 diff（oldValue vs newValue）でデータ追跡をサポート、RocketMQ 非同期配信でビジネスリクエストをブロックせず、ホット/コールドテーブル分離アーカイブ戦略（180日保持 + コールドテーブル長期保存）でクエリパフォーマンスとコンプライアンス要件を両立、監査ログ（`sys_audit_log`）およびログインログ（`sys_login_log`）と補完し合い完全な監査証跡システムを構築
 - **Maven Wrapper** 内蔵 — クローン後すぐにビルド可能、システムへの Maven インストール不要
 
 ## 技術スタック
@@ -45,7 +46,9 @@
 ```
 Omni-Stack/
 ├── AGENTS.md                        # AI 実行マニュアル（制約 + ビルドコマンド + チェックリスト）
-├── docker-compose.yml               # ミドルウェアオーケストレーション（MySQL, Redis, Nacos, Sentinel）
+├── start.bat / start.sh              # ワンクリック起動（Docker 自動起動 + ポート保護 + コンテナ）
+├── stop.bat / stop.sh                # ワンクリック停止
+├── docker-compose.yml               # ミドルウェアオーケストレーション（MySQL, Redis, Nacos, RocketMQ）
 ├── docs/                            # システム真実ドキュメント（Architecture + Patterns + Contract）
 │   ├── architecture.md                # システム境界、モジュールマップ、データフロー、RBAC 権限システム
 │   ├── api-contract.md                # レスポンス形式、エラーコード、ページネーション、命名規則
@@ -64,6 +67,7 @@ Omni-Stack/
 │   ├── omni-common-mybatis/           # MyBatis-Plus Starter：ページネーションプラグイン, MySQL ドライバー
 │   ├── omni-common-redis/             # ブロッキング Redis Starter：RedisTemplate, RedisUtils
 │   ├── omni-common-redis-reactive/    # リアクティブ Redis Starter：WebFlux サービス専用
+│   ├── omni-common-operlog/             # 操作ログ Starter：AOP アスペクト + MQ プロデューサー + エンティティ diff
 │   ├── omni-auth/                     # 認証サービス：ログイン、キャプチャ、JWT、OAuth2 (ポート 8100)
 │   ├── omni-base/                     # 基礎データサービス：データ辞書管理 (ポート 8101)
 │   └── omni-gateway/                  # API ゲートウェイ (WebFlux, ポート 8102)
@@ -211,9 +215,27 @@ auth:
 
 ### ステップ 1: ミドルウェアの起動
 
+プロジェクトはワンクリック起動スクリプトを提供しており、Docker Desktop の起動、ポート保護、コンテナデプロイを自動で完了します：
+
+| プラットフォーム | 起動 | 停止 |
+|----------------|------|------|
+| Windows | `start.bat` を右クリック → 管理者として実行 | `stop.bat` を右クリック → 管理者として実行 |
+| Linux / macOS | `./start.sh` | `./stop.sh` |
+
+**起動スクリプトの自動処理**：
+
+1. **Docker Desktop の検出** — 未インストール時にダウンロードを促し、ダウンロードページを自動で開く
+2. **Docker エンジンの起動** — 未実行時に自動起動し、準備完了まで待機
+3. **ポート保護** (Windows) — Hyper-V/WSL2 によるプロジェクトポートの動的占有を防止（3306、6379、8080、8848、9848、9876、10909、10911、10912）
+4. **コンテナ起動** — `docker compose up -d` を実行
+
 ```bash
-# 全ミドルウェアを一括起動（MySQL, Redis, Nacos, Sentinel）
-docker compose up -d
+# 全ミドルウェアを起動
+./start.sh                          # Linux / macOS
+# または Windows: start.bat を右クリック → 管理者として実行
+
+# 指定サービスのみ起動
+./start.sh mysql redis
 
 # サービス状態を確認
 docker compose ps
@@ -314,6 +336,17 @@ Spring Security 7 + OAuth2 Authorization Server ベースの認証マイクロ�
 - **RBAC 権限システム**: 機能権限（動的メニューフィルタリング + `v-permission` ボタンレベル制御 + `@PreAuthorize` API 認可）+ データ権限（MyBatis-Plus `DataPermissionInterceptor` SQL 自動インターセプト、6 レベル dataScope ゼロ侵入フィルタリング）
 - **JWT 署名**: RSA キーペア、JWK エンドポイントで Gateway に公開鍵を提供
 - **XSS 防御構成管理**: フロントエンド `システム管理 → XSS防護構成` ページでグローバルトグルとブラックリストルール CRUD をサポート（HTMLタグ、イベントハンドラ、危険プロトコル、カスタム正規表現の4つのルールタイプ）、テナント別分離構成、Redis キャッシュ 30分 TTL + 書き込み時のアクティブ無効化
+
+### omni-common-operlog（操作ログ Starter）
+
+AOP + RocketMQ ベースの操作ログ収集フレームワーク、ビジネスサービスに非侵襲的な監査証跡を提供：
+
+- **非侵襲的収集**: `@OperLog` アノテーション + `OperLogAspect` AOP アスペクトがリクエストコンテキスト（ユーザー名、テナントID、IP、リクエストパラメータ）とエンティティ変更スナップショットを自動収集
+- **エンティティ変更 diff**: `EntityDiffer` フィールドレベル差分比較 — UPDATE 操作は変更フィールドのみ記録し、データ追跡を可能にする
+- **RocketMQ 非同期**: `OperLogProducer` がログメッセージを非同期配信し、ビジネスリクエストのレスポンスをブロックしない
+- **ホット/コールドテーブル分離**: ホットテーブル `sys_oper_log` は直近 180日分のデータを高速クエリ用に保持、コールドテーブル `sys_oper_log_archive` はコンプライアンス向けに長期保存。`OperLogArchiver` が毎日 02:00 に自動アーカイブを実行
+- **監査ログとの補完関係**: 操作ログはビジネスデータ変更（who/when/what/changed）を記録、監査ログ（`sys_audit_log`）はセキュリティイベントを記録、ログインログ（`sys_login_log`）はログイン行動を記録 — 三者が完全な監査証跡システムを構築
+- **omni-auth では無効化**: 認証モジュールはこのモジュールに依存せず、認証行動は `sys_login_log` + `sys_audit_log` でカバー
 
 ### omni-base（基礎データサービス）
 

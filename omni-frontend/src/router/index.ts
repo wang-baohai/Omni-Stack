@@ -9,6 +9,18 @@ import type { RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { usePermissionStore } from '@/stores/permission'
 import type { MenuNode } from '@/api/menu'
+import { menuI18nMap } from '@/constants/menu'
+import i18n from '@/i18n'
+
+/** 扩展 Vue Router 路由元信息类型 */
+declare module 'vue-router' {
+  interface RouteMeta {
+    title?: string
+    icon?: string
+    requiresAuth?: boolean
+    permissionCode?: string
+  }
+}
 
 /**
  * 约定式组件映射：通过 import.meta.glob 扫描 views 目录下所有 index.vue。
@@ -53,6 +65,7 @@ const iconMap: Record<string, string> = {
   'system:authrecord': 'Document',
   'system:xssconfig': 'Filter',
   'base:dict': 'Collection',
+  'base:operlog': 'Tickets',
 }
 
 /**
@@ -166,6 +179,7 @@ function registerMenuRoute(menu: MenuNode, parentName?: string) {
           title: menu.permissionName,
           icon: iconMap[menu.permissionCode] || 'Document',
           requiresAuth: true,
+          permissionCode: menu.permissionCode,
         },
       })
       dynamicRouteNames.add(menu.permissionCode)
@@ -196,6 +210,15 @@ export function clearDynamicRoutes() {
  * - 需要认证的页面：未登录用户重定向到首页；已登录但菜单未加载时先加载动态路由
  */
 router.beforeEach(async (to, _from, next) => {
+  // 使用 i18n 解析页面标题（动态路由优先使用 i18n 翻译，避免数据库乱码）
+  const { t } = i18n.global
+  const permCode = to.meta.permissionCode as string | undefined
+  if (permCode && menuI18nMap[permCode]) {
+    document.title = t(menuI18nMap[permCode])
+  } else if (to.meta.title) {
+    document.title = to.meta.title as string
+  }
+
   const userStore = useUserStore()
   const permissionStore = usePermissionStore()
 

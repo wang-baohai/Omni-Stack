@@ -64,8 +64,8 @@ const tenants = ref<TenantOption[]>([])
 const savedTenantId = Number(localStorage.getItem('last_tenant_id')) || undefined
 const form = reactive({
   tenantId: savedTenantId as number | undefined,
-  username: '',
-  password: '',
+  username: 'admin',
+  password: 'admin123',
   captchaCode: '',
 })
 

@@ -200,6 +200,7 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - New backend services with `@RequestBody` endpoints must implement `XssConfigProvider` SPI to inherit three-layer XSS defense. `omni-common` auto-configures filter + Jackson deserializer via `AutoConfiguration.imports`.
 - XSS config write operations (toggle, rule CRUD) must invalidate Redis cache keys `xss:enabled:{tenantId}` and `xss:rules:{tenantId}` to maintain consistency.
 - Gateway `SecurityHeadersFilter` must add `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy` on all responses.
+- omni-auth 模块不记录操作日志（@OperLog）。认证行为由登录日志（sys_login_log）完整留存，omni-auth 不引入 `omni-common-operlog` 依赖，不在控制器方法上使用 `@OperLog` 注解。
 
 ## Execution Rules
 

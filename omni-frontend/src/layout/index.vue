@@ -11,6 +11,7 @@ import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
 import { storeLang } from '@/i18n'
 import type { MenuNode } from '@/api/menu'
+import { menuI18nMap } from '@/constants/menu'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -23,23 +24,6 @@ const permissionStore = usePermissionStore()
 const staticMenuItems = [
   { path: '/admin/dashboard', icon: 'Odometer', titleKey: 'common.dashboard' },
 ]
-
-/** 权限编码到 i18n 翻译键的映射 */
-const menuI18nMap: Record<string, string> = {
-  'system': 'common.systemManagement',
-  'system:user': 'common.users',
-  'system:role': 'common.roles',
-  'system:permission': 'common.permissions',
-  'system:org': 'common.organizations',
-  'system:tenant': 'common.tenants',
-  'system:oauth2': 'common.oauth2Clients',
-  'system:online': 'common.onlineUsers',
-  'system:authrecord': 'common.authRecords',
-  'system:auditlog': 'common.auditLogs',
-  'system:xssconfig': 'common.xssConfig',
-  'base': 'common.baseManagement',
-  'base:dict': 'common.dictManagement',
-}
 
 /** 获取菜单显示名称（优先 i18n 翻译，fallback 后端原始名称） */
 function getMenuLabel(code: string, fallback: string): string {
@@ -71,6 +55,7 @@ const iconMap: Record<string, string> = {
   'system:auditlog': 'Notebook',
   'system:xssconfig': 'Filter',
   'base:dict': 'Collection',
+  'base:operlog': 'Tickets',
 }
 
 /**

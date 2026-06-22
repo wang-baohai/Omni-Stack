@@ -63,6 +63,24 @@
             <artifactId>omni-common-redis</artifactId>
         </dependency>
 
+        <!-- Spring AOP + AspectJ (operlog 模块 optional，需显式声明) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
+        </dependency>
+
+        <!-- Common OperLog Module (操作日志 AOP + RocketMQ 生产者/消费者) -->
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common-operlog</artifactId>
+        </dependency>
+
+        <!-- Spring Cloud Stream RocketMQ (operlog 模块 optional，需显式声明) -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-stream-rocketmq</artifactId>
+        </dependency>
+
         <!-- Nacos Discovery -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
