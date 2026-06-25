@@ -13,6 +13,12 @@ import com.omni.auth.dto.ProviderUser;
  * 实现类须使用 {@code @Component("providerName")} 注解，
  * 其中 {@code providerName} 与 {@link #getProviderId()} 返回值一致。
  * </p>
+ *
+ * @author Omni-Stack Team
+ * @see GitHubOAuth2Handler
+ * @see GiteeOAuth2Handler
+ * @see GoogleOAuth2Handler
+ * @see com.omni.auth.dto.ProviderUser
  */
 public interface OAuth2ProviderHandler {
 

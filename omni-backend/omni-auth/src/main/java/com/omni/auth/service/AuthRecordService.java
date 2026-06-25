@@ -4,6 +4,10 @@ import com.omni.common.core.result.PageResult;
 
 /**
  * 授权记录服务接口，提供 OAuth2 授权记录的查询操作。
+ * <p>底层查询 SAS 的 {@code oauth2_authorization} 表，支持分页查询。</p>
+ *
+ * @author Omni-Stack Team
+ * @see AuthRecordVO
  */
 public interface AuthRecordService {
 

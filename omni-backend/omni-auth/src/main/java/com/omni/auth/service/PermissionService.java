@@ -6,6 +6,11 @@ import java.util.List;
 
 /**
  * 权限服务接口，提供权限树构建和角色权限分配操作。
+ * <p>支持完整权限树查询和角色关联权限树查询（带 checked 标记）。</p>
+ *
+ * @author Omni-Stack Team
+ * @see PermissionTreeNode
+ * @see com.omni.auth.entity.SysPermission
  */
 public interface PermissionService {
 

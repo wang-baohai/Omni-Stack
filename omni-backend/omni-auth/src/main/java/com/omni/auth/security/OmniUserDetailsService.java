@@ -42,7 +42,9 @@ import java.util.stream.Collectors;
  *   <li>权限编码原样添加（如 {@code "user:read"}），支持 {@code hasAuthority("user:read")} 检查。</li>
  * </ul>
  *
+ * @author Omni-Stack Team
  * @see org.springframework.security.core.userdetails.UserDetailsService
+ * @see OmniUserDetails
  */
 @Service
 @RequiredArgsConstructor

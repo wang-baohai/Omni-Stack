@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  *   <li>如果提交的验证码不匹配（不区分大小写），抛出 {@code BusinessException(400, "验证码错误")}</li>
  * </ol>
  *
+ * @author Omni-Stack Team
  * @see CaptchaService
  */
 @Slf4j

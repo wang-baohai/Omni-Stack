@@ -13,7 +13,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * 账号锁定服务实现，基于 Redis INCR + TTL 实现失败计数和自动锁定。
  *
- * <p>Redis key 格式：{@code login:fail:{tenantId}:{username}}，TTL 1 小时。</p>
+ * <p>Redis key 格式：{@code login:fail:{tenantId}:{username}}，TTL 1 小时。
+ * 达到 {@link #MAX_FAILURES} 阈值时发布 {@link AuditEvent#ACCOUNT_LOCKED} 审计事件。</p>
+ *
+ * @author Omni-Stack Team
+ * @see AccountLockoutService
  */
 @Slf4j
 @Service
@@ -25,6 +29,7 @@ public class AccountLockoutServiceImpl implements AccountLockoutService {
     private final StringRedisTemplate stringRedisTemplate;
     private final ApplicationEventPublisher eventPublisher;
 
+    /** {@inheritDoc} */
     @Override
     public int recordFailure(Long tenantId, String username) {
         String key = buildKey(tenantId, username);
@@ -52,11 +57,13 @@ public class AccountLockoutServiceImpl implements AccountLockoutService {
         return count != null ? count.intValue() : 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void resetCount(Long tenantId, String username) {
         stringRedisTemplate.delete(buildKey(tenantId, username));
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isLocked(Long tenantId, String username) {
         String key = buildKey(tenantId, username);

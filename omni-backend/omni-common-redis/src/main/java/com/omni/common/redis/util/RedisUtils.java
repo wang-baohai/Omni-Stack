@@ -13,8 +13,16 @@ import java.util.concurrent.TimeUnit;
  * Redis 工具类。
  * <p>封装 {@link RedisTemplate} 常用操作，提供类型安全的缓存读写方法。
  * 通过构造器注入 {@code RedisTemplate<String, Object>}，支持单元测试 Mock。</p>
+ * <p>支持的操作类型：</p>
+ * <ul>
+ *   <li>String 操作：{@link #set}/{@link #get}/{@link #increment}/{@link #decrement}</li>
+ *   <li>键操作：{@link #delete}/{@link #hasKey}/{@link #expire}/{@link #keys}</li>
+ *   <li>分布式锁：{@link #setIfAbsent} (SETNX + TTL)</li>
+ *   <li>Hash 操作：{@link #opsForHash} 获取 HashOperations 对象</li>
+ * </ul>
  *
  * @author Omni-Stack
+ * @see RedisTemplate
  */
 @Slf4j
 @RequiredArgsConstructor

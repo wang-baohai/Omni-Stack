@@ -76,6 +76,20 @@ import java.util.UUID;
  * 在 SAS 7（Spring Security 7）中，配置类位于
  * {@code org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization} 包下。
  * </p>
+ *
+ * <h3>核心 Bean</h3>
+ * <ul>
+ *   <li>{@code authorizationServerSecurityFilterChain}（Order 1）— OAuth2 端点安全过滤器链</li>
+ *   <li>{@code defaultSecurityFilterChain}（Order 2）— 非 OAuth2 端点的安全过滤器链</li>
+ *   <li>{@code jwkSource} — RSA 密钥源，用于 JWT 签名</li>
+ *   <li>{@code accessTokenCustomizer} — 为 JWT 添加业务 claims</li>
+ *   <li>{@code registeredClientRepository} — OAuth2 客户端注册仓库</li>
+ * </ul>
+ *
+ * @author Omni-Stack Team
+ * @see OAuth2Properties
+ * @see OAuth2ClientInitializer
+ * @see DeviceClientInitializer
  */
 @Slf4j
 @Configuration

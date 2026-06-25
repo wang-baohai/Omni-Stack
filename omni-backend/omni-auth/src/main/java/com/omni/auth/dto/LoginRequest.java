@@ -8,6 +8,12 @@ import java.io.Serializable;
 
 /**
  * 登录请求参数。
+ * <p>用于用户名/密码登录，包含用户名、密码、租户 ID 和验证码信息。
+ * 验证码通过 {@code captchaKey} 关联 Redis 中存储的正确答案。</p>
+ *
+ * @author Omni-Stack Team
+ * @see LoginResult
+ * @see CaptchaResult
  */
 @Data
 public class LoginRequest implements Serializable {

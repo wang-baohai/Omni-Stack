@@ -22,6 +22,12 @@ import java.util.Map;
 
 /**
  * 审计日志服务实现。
+ * <p>将 {@link AuditEvent} 持久化到 {@code sys_audit_log} 表，
+ * {@code extra} 字段以 JSON 字符串形式存储。</p>
+ *
+ * @author Omni-Stack Team
+ * @see AuditLogService
+ * @see AuditEvent
  */
 @Slf4j
 @Service
@@ -31,6 +37,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     private final SysAuditLogMapper sysAuditLogMapper;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    /** {@inheritDoc} */
     @Override
     public void save(AuditEvent event) {
         SysAuditLog entity = new SysAuditLog();
@@ -57,6 +64,7 @@ public class AuditLogServiceImpl implements AuditLogService {
         sysAuditLogMapper.insert(entity);
     }
 
+    /** {@inheritDoc} */
     @Override
     public PageResult<AuditLogVO> listAuditLogs(Long tenantId, AuditLogQuery query) {
         LambdaQueryWrapper<SysAuditLog> wrapper = new LambdaQueryWrapper<>();

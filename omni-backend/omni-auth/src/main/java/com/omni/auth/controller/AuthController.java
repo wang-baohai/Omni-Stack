@@ -50,11 +50,16 @@ import java.util.List;
  *       用于 OAuth2 授权码流程中创建服务端会话</li>
  *   <li>{@code GET  /api/auth/captcha} — 生成验证码图片用于登录验证</li>
  *   <li>{@code GET  /api/auth/tenants} — 获取活跃租户列表，供登录页租户选择器使用</li>
+ *   <li>{@code GET  /api/auth/session-check} — 检查当前 HttpSession 是否存在有效认证（用于 OAuth2 授权确认页）</li>
+ *   <li>{@code POST /api/auth/register} — 用户自助注册（含验证码校验）</li>
  * </ul>
  *
+ * @author Omni-Stack Team
  * @see CaptchaService
  * @see JwtTokenService
  * @see UserService
+ * @see AccountLockoutService
+ * @see OnlineUserService
  */
 @Slf4j
 @RestController

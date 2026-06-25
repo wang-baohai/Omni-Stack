@@ -1300,3 +1300,206 @@ sequenceDiagram
 - **MQ 异步**：`OperLogProducer` 通过 RocketMQ 异步发送，不阻塞业务请求
 - **热冷归档**：`OperLogArchiver` 每日 02:00 执行，180 天保留策略，批次处理 1000 条/批
 - **omni-auth 禁用**：认证模块不引入 `omni-common-operlog`，认证行为由 `sys_login_log` + `sys_audit_log` 覆盖
+
+---
+
+## Flow 11: 用户任务创建 — 工作台自助创建到 XXL-JOB 直注册
+
+### 概述
+
+用户通过工作台「我的任务」区域自助创建定时任务。前端提供任务类型选择、动态参数表单和 Cron 表达式编辑器，后端验证类型有效性后保存到数据库并直接注册到 XXL-JOB 调度中心，实现创建即生效。
+
+### 时序图
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant F as Frontend :3000
+    participant G as Gateway :8102
+    participant Base as Base :8101
+    participant M as MySQL
+    participant X as XxlJobAdminClient
+    participant XA as XXL-JOB Admin :18080
+
+    B->>F: 1. 工作台 → 点击「创建任务」
+    F->>G: 2. GET /api/base/my-job/types（获取可用任务类型列表）
+    G->>Base: 3. MyJobController.types() → listEnabledTypes()
+    Base->>M: 4. SELECT * FROM sys_user_job_type WHERE status=1
+    M-->>F: 5. [{typeCode, typeName, paramTemplate}]
+    F-->>B: 6. 渲染类型下拉 + DynamicFormRenderer 动态表单
+
+    B->>F: 7. 选择类型、填写参数、设置 Cron 表达式
+    F->>G: 8. POST /api/base/my-job {jobName, jobType, cronExpression, jobParams}
+    G->>Base: 9. AuthFilter → MyJobController.create()
+    Base->>Base: 10. currentUsername() 获取当前用户
+    Base->>M: 11. SELECT * FROM sys_user_job_type WHERE type_code=? AND status=1
+    M-->>Base: type record (null → throw BusinessException 400)
+    Base->>M: 12. INSERT INTO sys_user_job (tenantId, jobName, jobType, cron, params, createBy)
+    Base->>X: 13. buildExecutorParam(entity) → UserJobMessage JSON
+    Base->>X: 14. XxlJobAdminClient.addJob(jobGroup, jobName, cron, "FIRST", "userJobExecuteHandler", param)
+    X->>XA: 15. POST /jobinfo/insert (form-encoded)
+    XA-->>X: 16. {code:200, data: xxlJobId}
+    Base->>M: 17. UPDATE sys_user_job SET xxl_job_id = ? WHERE id = ?
+    Base-->>F: 18. R<SysUserJob> (含 xxlJobId)
+    F-->>B: 19. ElMessage.success → 刷新任务列表
+```
+
+### 错误处理
+
+| 场景 | 处理方式 | 前端表现 |
+|------|---------|----------|
+| 任务类型不存在或已禁用 | 抛 `BusinessException(400)` | ElMessage.error |
+| XXL-JOB 注册失败 | 回滚 DB 记录 (`sysUserJobMapper.deleteById`) → 抛 `BusinessException(500)` | ElMessage.error「任务注册到调度中心失败」 |
+| 任务名称为空 | Jakarta Validation `@NotBlank` | 表单验证提示 |
+| Cron 表达式为空 | Jakarta Validation `@NotBlank` | 表单验证提示 |
+
+### 关键组件
+
+| 组件 | 文件路径 | 职责 |
+|------|---------|------|
+| 工作台页面 | `omni-frontend/src/views/home/index.vue` | 任务创建弹窗（类型选择 + CronGenerator + DynamicFormRenderer） |
+| Cron 编辑器 | `omni-frontend/src/components/CronGenerator.vue` | 频率类型选择器 + 动态条件表单 + 人类可读预览 |
+| 动态表单 | `omni-frontend/src/components/DynamicFormRenderer.vue` | 根据 `param_template` JSON Schema 渲染表单 |
+| API 模块 | `omni-frontend/src/api/myJob.ts` | `createMyJob()`、`getEnabledJobTypes()` |
+| 控制器 | `omni-base/.../controller/MyJobController.java` | `POST /api/base/my-job`，提取 currentUsername |
+| 服务层 | `omni-base/.../service/impl/UserJobServiceImpl.java` | `createJob()` — 验证类型 + DB 插入 + XXL-JOB 注册 + 失败回滚 |
+| XXL-JOB 客户端 | `omni-common-job/.../XxlJobAdminClient.java` | `addJob()` — 构建 form 参数调用 `/jobinfo/insert` |
+| 任务类型注册表 | `sys_user_job_type` | `type_code`（唯一）+ `param_template`（JSON Schema） |
+| 用户任务表 | `sys_user_job` | `xxl_job_id` 关联 XXL-JOB 调度中心 |
+
+### 所有权模型
+
+`MyJobController` 不使用 `@PreAuthorize`，而是通过 `verifyOwnership(id, username)` 校验任务归属：
+
+```java
+private void verifyOwnership(Long id, String username) {
+    SysUserJob job = userJobService.getJobById(id);
+    if (!username.equals(job.getCreateBy())) {
+        throw new BusinessException(403, "无权操作此任务");
+    }
+}
+```
+
+每个用户只能操作自己创建的任务，实现行级数据隔离。
+
+### Current Status
+
+- **任务创建**：端到端实现，工作台创建 → DB 保存 → XXL-JOB 注册，失败自动回滚
+- **类型管理**：`UserJobTypeController` 支持任务类型的 CRUD 和参数模板管理
+- **动态表单**：`DynamicFormRenderer` 根据 `param_template` 自动渲染 input/select/number/textarea
+- **Cron 编辑器**：`CronGenerator` 支持 7 种频率类型（每分钟/每X分钟/每小时/每X小时/每天/每周/每月）
+- **所有权校验**：`verifyOwnership()` 确保用户只能操作自己创建的任务
+
+---
+
+## Flow 12: 用户任务执行 — XXL-JOB 触发到前端通知
+
+### 概述
+
+XXL-JOB 调度中心按 cron 表达式触发执行，`XxlJobSpringExecutor` 将请求分发给 `userJobExecuteHandler`。该 handler 从 JSON 执行参数中解析任务上下文，通过 `UserJobHandlerRegistry` 路由到具体 `UserJobHandler` 执行，写入执行日志并更新 `lastFireTime`。前端工作台每 10 秒轮询活跃任务的执行日志，发现新日志时弹出通知。
+
+### 时序图
+
+```mermaid
+sequenceDiagram
+    participant XA as XXL-JOB Scheduler
+    participant XE as XxlJobSpringExecutor
+    participant H as UserJobExecuteHandler
+    participant R as UserJobHandlerRegistry
+    participant DH as DrinkWaterRemindHandler
+    participant M as MySQL
+    participant F as Frontend :3000 (polling)
+
+    XA->>XE: 1. cron 触发 → dispatch to "userJobExecuteHandler"
+    XE->>H: 2. execute()
+    H->>H: 3. XxlJobHelper.getJobParam() → JSON string
+    H->>H: 4. objectMapper.readValue(param, UserJobMessage.class)
+    H->>R: 5. getHandler(jobType) → UserJobHandler
+    R-->>H: 6. DrinkWaterRemindHandler instance
+    H->>DH: 7. handler.execute(message)
+    DH->>DH: 8. parseCupShape(jobParams) → "大杯"
+    DH->>DH: 9. log.info("【喝水提醒】任务 [xxx] 已触发")
+    DH-->>H: 10. execute() 完成
+    H->>DH: 11. handler.getResultMessage(message) → "请喝一杯大杯水..."
+    DH-->>H: 12. resultMessage
+    H->>M: 13. INSERT INTO sys_user_job_log (jobId, fireTime, status=1, resultMessage)
+    H->>M: 14. UPDATE sys_user_job SET last_fire_time = fireTime WHERE id = jobId
+    H->>H: 15. XxlJobHelper.handleSuccess(resultMessage)
+
+    Note over F: 每 10 秒轮询
+    F->>F: 16. startGlobalPolling() → setInterval 10s
+    F->>M: 17. GET /api/base/my-job/{jobId}/logs?page=1&size=1
+    M-->>F: 18. {records: [{id, resultMessage, fireTime, status}]}
+    F->>F: 19. latestLog.id > lastLogIdMap.get(jobId) → 新日志
+    F->>F: 20. showLogNotification(latestLog) → ElNotification
+    F->>F: 21. lastLogIdMap.set(jobId, latestLog.id)
+```
+
+### 前端轮询机制
+
+工作台使用 `startGlobalPolling()` 实现全局日志监控：
+
+```
+setInterval 每 10 秒：
+1. 过滤 tableData 中 status=1 的活跃任务
+2. 对每个活跃任务：
+   a. GET /api/base/my-job/{id}/logs?page=1&size=1
+   b. 获取最新日志 ID
+   c. 与 lastLogIdMap 中的已知 ID 比较
+   d. 如果 latestLog.id > prevId：
+      - 如果 lastLogIdMap 已有该任务记录（非首次）→ 弹出 ElNotification
+      - 更新 lastLogIdMap
+3. 刷新 loadData() + loadStats()
+```
+
+**防重复通知**：`lastLogIdMap` 首次初始化时只记录当前最新日志 ID，不弹出通知。只有后续轮询发现的新日志（ID > 已知 ID）才触发通知。
+
+**生命周期管理**：
+- `onMounted` 中启动轮询
+- `onUnmounted` 中清除 `setInterval`，防止内存泄漏
+
+### 执行参数 JSON 格式
+
+`XxlJobAdminClient.addJob()` 注册任务时，`executorParam` 字段包含 `UserJobMessage` JSON：
+
+```json
+{
+    "jobId": 1,
+    "tenantId": 1,
+    "jobType": "Task-00001",
+    "jobName": "喝水提醒",
+    "jobParams": "{\"cupShape\":\"大杯\"}"
+}
+```
+
+`UserJobExecuteHandler` 通过 `objectMapper.readValue(param, UserJobMessage.class)` 解析后路由。
+
+### 错误处理
+
+| 场景 | 处理方式 | XXL-JOB 控制台表现 |
+|------|---------|-------------------|
+| JSON 参数解析失败 | `XxlJobHelper.handleFail("参数解析失败: ...")` | 执行失败 |
+| Handler 未找到 | `log.warn` + `status=0` + `errorMsg` 写入日志 | 执行失败 |
+| Handler 执行异常 | catch → `status=0` + `errorMsg`（截断 2000 字符） | 执行失败 |
+| 正常完成 | `XxlJobHelper.handleSuccess(resultMessage)` | 执行成功 |
+
+### 关键组件
+
+| 组件 | 文件路径 | 职责 |
+|------|---------|------|
+| 通用执行 Handler | `omni-base/.../job/UserJobExecuteHandler.java` | `@XxlJob("userJobExecuteHandler")` 入口，JSON 解析 + Handler 路由 + 日志写入 + lastFireTime 更新 |
+| Handler 注册中心 | `omni-base/.../job/UserJobHandlerRegistry.java` | `Map<String, UserJobHandler>` 自动注入，`getHandler(jobType)` 路由 |
+| SPI 接口 | `omni-common-core/.../job/UserJobHandler.java` | `execute()` + `getResultMessage()` |
+| 消息 POJO | `omni-common-core/.../job/UserJobMessage.java` | `jobId`, `tenantId`, `jobType`, `jobName`, `jobParams` |
+| 喝水处理器 | `omni-base/.../job/handler/DrinkWaterRemindHandler.java` | `@Component("Task-00001")`，解析 `cupShape` 参数生成提醒消息 |
+| 执行日志表 | `sys_user_job_log` | `fire_time`, `execute_time_ms`, `status`, `result_message`, `error_message` |
+| 前端轮询 | `omni-frontend/src/views/home/index.vue` | `startGlobalPolling()` 每 10 秒 + `lastLogIdMap` 防重复 |
+| 通知组件 | Element Plus `ElNotification` | 3 秒自动关闭，显示 `resultMessage` |
+
+### Current Status
+
+- **执行链路**：XXL-JOB 触发 → `userJobExecuteHandler` → Handler 路由 → 日志写入 → lastFireTime 更新，完整实现
+- **前端通知**：10 秒轮询 + `lastLogIdMap` 防重复 + `ElNotification` 3 秒自动关闭
+- **错误处理**：参数解析失败、Handler 未找到、执行异常均有处理，结果写入 `sys_user_job_log`
+- **lastFireTime**：每次执行后通过 `SysUserJobMapper.updateById()` 更新，工作台表格实时显示
+- **下次执行时间**：前端通过 `cron-parser` 库客户端计算，仅启用状态任务显示

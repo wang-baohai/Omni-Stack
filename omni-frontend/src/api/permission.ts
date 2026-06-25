@@ -13,10 +13,21 @@ export interface PermissionNode extends MenuNode {
   checked: boolean
 }
 
+/**
+ * 获取全量权限树（用于角色权限分配页面）。
+ *
+ * @returns 权限树节点数组
+ */
 export function fetchPermissionTree() {
   return request.get<ApiResponse<PermissionNode[]>>('/auth/permission/tree')
 }
 
+/**
+ * 获取指定角色的权限树（已分配节点 checked=true）。
+ *
+ * @param roleId - 角色 ID
+ * @returns 权限树节点数组（含 checked 状态）
+ */
 export function fetchRolePermissionTree(roleId: number) {
   return request.get<ApiResponse<PermissionNode[]>>(`/auth/permission/role/${roleId}`)
 }

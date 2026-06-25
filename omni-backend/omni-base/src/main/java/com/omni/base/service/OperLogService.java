@@ -8,6 +8,7 @@ import com.omni.common.core.result.PageResult;
  * 操作日志服务接口。
  *
  * @author Omni-Stack Team
+ * @see com.omni.base.service.impl.OperLogServiceImpl
  */
 public interface OperLogService {
 

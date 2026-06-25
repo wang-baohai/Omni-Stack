@@ -11,7 +11,12 @@ import java.util.List;
  * <p>
  * 重写 {@link #getParameter(String)} 和 {@link #getParameterValues(String)}，
  * 对查询参数和表单参数执行 {@link XssSanitizer} 净化。
+ * 仅处理 URL 查询参数和 {@code application/x-www-form-urlencoded} 表单参数，
+ * JSON Body 的净化由 {@link XssStringDeserializer} 在反序列化阶段完成。
  * </p>
+ *
+ * @see XssFilter
+ * @see XssSanitizer
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
@@ -28,12 +33,26 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         this.rules = rules;
     }
 
+    /**
+     * 获取单个查询参数并执行 XSS 净化。
+     * <p>委托父类获取原始值后，通过 {@link XssSanitizer#sanitize} 按黑名单规则清洗。</p>
+     *
+     * @param name 参数名
+     * @return 净化后的参数值，参数不存在时返回 null
+     */
     @Override
     public String getParameter(String name) {
         String value = super.getParameter(name);
         return XssSanitizer.sanitize(value, rules);
     }
 
+    /**
+     * 获取参数值数组并逐一执行 XSS 净化。
+     * <p>委托父类获取原始值数组后，对每个元素通过 {@link XssSanitizer#sanitize} 清洗。</p>
+     *
+     * @param name 参数名
+     * @return 净化后的参数值数组，参数不存在时返回 null
+     */
     @Override
     public String[] getParameterValues(String name) {
         String[] values = super.getParameterValues(name);

@@ -13,6 +13,10 @@ import java.util.Set;
  * {@code DataPermissionInnerInterceptor} 和在线用户内存过滤使用。</p>
  * <p>由 {@link DataScopeResolveFilter} 在每次请求开始时写入，
  * 在 {@code finally} 块中清除，避免 ThreadLocal 泄漏。</p>
+ *
+ * @author Omni-Stack Team
+ * @see DataScopeResolveFilter
+ * @see DataPermissionHandlerImpl
  */
 public final class DataScopeContext {
 

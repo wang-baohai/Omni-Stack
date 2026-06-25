@@ -39,6 +39,9 @@ import java.util.Map;
  * 通过 {@link OAuth2ProviderHandler} 策略接口实现多 provider 支持，
  * 本类不包含任何 provider 特定逻辑。
  * </p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.service.SocialLoginService
  */
 @Slf4j
 @Service

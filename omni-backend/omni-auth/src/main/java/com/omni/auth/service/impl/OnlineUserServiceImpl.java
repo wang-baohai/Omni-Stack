@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
  * 在线用户服务实现类。
  * <p>基于 Redis 追踪在线用户状态。每个在线用户在 Redis 中有一个 key：
  * {@code online:{userId}}，value 为 {@code username|jti}，TTL 与 JWT 有效期一致。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.service.OnlineUserService
  */
 @Slf4j
 @Service

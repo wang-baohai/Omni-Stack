@@ -9,6 +9,9 @@ import com.omni.common.core.result.PageResult;
  * OAuth2 客户端管理服务接口。
  * <p>提供 OAuth2 客户端的 CRUD 操作，底层使用 Spring Authorization Server 的
  * {@code RegisteredClientRepository} 和 MyBatis-Plus 进行分页查询。</p>
+ * @author Omni-Stack Team
+ * @see com.omni.auth.dto.OAuth2ClientVO
+ * @see com.omni.auth.entity.OAuth2RegisteredClient
  */
 public interface OAuth2ClientService {
 

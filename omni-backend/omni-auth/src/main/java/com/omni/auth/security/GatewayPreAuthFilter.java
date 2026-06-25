@@ -17,24 +17,37 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 网关预认证过滤器。
- * <p>
- * 从 Gateway 转发的请求头中提取用户身份和权限信息，构建 Spring Security
- * {@link org.springframework.security.core.Authentication} 对象，
- * 使 {@code @PreAuthorize} 方法级权限注解能够正确执行授权检查。
- * </p>
- * <p>
- * Gateway 在验证 JWT 后会注入以下请求头：
- * </p>
+ * 网关预认证过滤器，负责将 Gateway 转发的用户身份请求头转换为 Spring Security {@link Authentication} 对象。
+ *
+ * <h3>在安全过滤器链中的位置</h3>
+ * <p>本过滤器位于 Spring Security 过滤器链的前端，在 {@code SecurityContextPersistenceFilter} 之后、
+ * {@link DataScopeResolveFilter} 之前执行。Gateway 在完成 JWT 验证后，
+ * 将用户身份信息注入到转发请求的 HTTP 头中，本过滤器将其解析并写入
+ * {@link SecurityContextHolder}，使后续所有安全组件（包括 {@code @PreAuthorize} 注解）
+ * 能够正确执行授权检查。</p>
+ *
+ * <h3>请求头约定</h3>
+ * <p>Gateway 在验证 JWT 后会注入以下请求头：</p>
  * <ul>
- *   <li>{@code X-User-Id} — 用户 ID</li>
- *   <li>{@code X-User-Name} — 用户名</li>
- *   <li>{@code X-Tenant-Id} — 租户 ID</li>
- *   <li>{@code X-User-Roles} — 逗号分隔的角色编码（如 {@code SUPER_ADMIN}）</li>
- *   <li>{@code X-User-Scopes} — 空格分隔的权限编码（如 {@code system:user:list system:role:create}）</li>
+ *   <li>{@code X-User-Id} — 用户 ID（必需，缺失时跳过认证）</li>
+ *   <li>{@code X-User-Name} — 用户名（用作 principal，缺失时回退为 userId）</li>
+ *   <li>{@code X-Tenant-Id} — 租户 ID（多租户场景下标识当前租户）</li>
+ *   <li>{@code X-User-Roles} — 逗号分隔的角色编码（如 {@code SUPER_ADMIN}），
+ *       自动添加 {@code ROLE_} 前缀以支持 {@code hasRole()} 检查</li>
+ *   <li>{@code X-User-Scopes} — 逗号或空格分隔的权限编码
+ *       （如 {@code system:user:list system:role:create}），直接作为 authority 支持
+ *       {@code hasAuthority()} 检查</li>
  * </ul>
  *
+ * <h3>认证重建策略</h3>
+ * <p>始终以 Gateway 注入的请求头为准重建 {@link Authentication}，
+ * 即使 {@link SecurityContextHolder} 中已存在认证信息（如 HttpSession 缓存的旧认证）。
+ * 这确保 {@code @PreAuthorize} 始终基于最新的权限信息进行授权检查。</p>
+ *
  * @author Omni-Stack Team
+ * @see DataScopeResolveFilter
+ * @see org.springframework.security.core.context.SecurityContextHolder
+ * @see org.springframework.security.web.context.SecurityContextPersistenceFilter
  */
 @Slf4j
 public class GatewayPreAuthFilter extends OncePerRequestFilter {
@@ -45,6 +58,19 @@ public class GatewayPreAuthFilter extends OncePerRequestFilter {
     private static final String HEADER_USER_ROLES = "X-User-Roles";
     private static final String HEADER_USER_SCOPES = "X-User-Scopes";
 
+    /**
+     * 执行网关预认证逻辑。
+     *
+     * <p>从请求头中提取用户 ID、用户名、角色和权限信息，构建
+     * {@link UsernamePasswordAuthenticationToken} 并写入 {@link SecurityContextHolder}。
+     * 无 {@code X-User-Id} 头时直接放行，不设置认证信息。</p>
+     *
+     * @param request     HTTP 请求，需包含 Gateway 注入的身份请求头
+     * @param response    HTTP 响应
+     * @param filterChain 过滤器链
+     * @throws ServletException Servlet 异常
+     * @throws IOException      IO 异常
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -103,7 +129,12 @@ public class GatewayPreAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    /** 获取请求头名称列表（诊断用） */
+    /**
+     * 获取请求头名称列表，用于诊断日志输出。
+     *
+     * @param request HTTP 请求
+     * @return 逗号分隔的请求头名称字符串
+     */
     private static String getHeaderNames(HttpServletRequest request) {
         return String.join(", ", Collections.list(request.getHeaderNames()));
     }

@@ -10,9 +10,17 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 安全审计日志实体。
+ * 安全审计日志实体，映射 {@code sys_audit_log} 表。
+ * <p>
+ * 追加写入、不可变记录，不继承 {@code BaseEntity}（无 update_time/update_by）。
+ * 用于记录用户登录、权限变更、账号锁定等安全相关事件，
+ * 为安全审计和异常行为分析提供数据支撑。</p>
  *
- * <p>追加写入、不可变记录，不继承 {@code BaseEntity}（无 update_time/update_by）。</p>
+ * <p>常见事件类型：{@code LOGIN_SUCCESS}、{@code LOGIN_FAILED}、{@code ACCOUNT_LOCKED}、
+ * {@code PASSWORD_CHANGED}、{@code ROLE_ASSIGNED} 等。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.common.core.model.BaseEntity
  */
 @Data
 @TableName("sys_audit_log")

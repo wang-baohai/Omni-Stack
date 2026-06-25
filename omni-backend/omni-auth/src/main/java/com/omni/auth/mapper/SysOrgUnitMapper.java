@@ -9,6 +9,10 @@ import java.util.List;
 
 /**
  * 组织单元 Mapper 接口。
+ * <p>提供 {@code sys_org_unit} 表的 CRUD 操作，以及基于物化路径的子树查询。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.entity.SysOrgUnit
  */
 public interface SysOrgUnitMapper extends BaseMapper<SysOrgUnit> {
 

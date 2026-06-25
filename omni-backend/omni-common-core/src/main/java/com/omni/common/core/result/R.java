@@ -7,11 +7,16 @@ import java.io.Serializable;
 /**
  * 统一 API 响应封装类。
  * <p>
- * 所有接口返回数据均使用此包装结构：
+ * 所有接口返回数据均使用此包装结构，确保前后端响应格式统一：
  * <pre>{"code": 200, "message": "success", "data": {...}}</pre>
  * </p>
+ * <p>使用方式：通过静态工厂方法 {@link #ok()} / {@link #ok(Object)} 构建成功响应，
+ * 通过 {@link #fail(String)} / {@link #fail(int, String)} 构建失败响应。
+ * 禁止直接实例化（私有构造函数）。</p>
  *
  * @param <T> 响应数据的泛型类型
+ * @see PageResult
+ * @see BusinessException
  */
 @Data
 public class R<T> implements Serializable {

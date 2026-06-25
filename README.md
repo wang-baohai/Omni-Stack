@@ -2,7 +2,11 @@
 
 > 基于 Spring Boot 4 + Vue 3 的微服务脚手架平台，采用 Harness 工业设计模式构建，为 AI 辅助开发提供行业最佳实践基础。
 
-**[English](README.en.md)** | **[日本語](README.jp.md)**
+**[English](README.en.md)** | **[日本語](README.jp.md)** | **[한국어](README.kr.md)**
+
+**GitHub**: https://github.com/wang-baohai/Omni-Stack | **Gitee**: https://gitee.com/wang-baohai/Omni-Stack
+
+**联系邮箱**: wangbaohai1993@gmail.com
 
 ---
 
@@ -18,9 +22,10 @@
 - **AI 原生工程**：AGENTS.md 执行手册 + Skills 行为扩展，支持 AI 辅助开发工作流
 - **三种用户创建途径**：用户自助注册（验证码 + 默认角色）、管理员后台创建、社交登录首次自动注册
 - **三层 XSS 纵深防御**：Jackson 反序列化器自动清洗 `@RequestBody` + Servlet Filter 清洗查询参数 + Gateway 安全响应头，支持按租户配置全局开关和自定义黑名单规则（HTML 标签、事件处理器、危险协议、正则模式），Redis 缓存 + 数据库配置，前端管理界面完整可用
-- **Common Starter 生态**：`omni-common` 拆分为 5 个模块（core / common / mybatis / redis / redis-reactive），新服务通过 Maven 依赖即可获得 MyBatis-Plus 分页、Redis 缓存、XSS 防护等能力，`AutoConfiguration.imports` 零配置自动装配
-- **基础数据管理**：`omni-base` 服务（端口 8101）提供数据字典管理，类型+数据两级结构，Redis cache-aside 缓存，前端 master-detail 管理页面，11 个 API 端点完整实现
+- **Common Starter 生态**：`omni-common` 拆分为 7 个模块（core / common / mybatis / redis / redis-reactive / operlog / job），新服务通过 Maven 依赖即可获得 MyBatis-Plus 分页、Redis 缓存、XSS 防护、操作日志采集、定时任务调度等能力，`AutoConfiguration.imports` 零配置自动装配
+- **基础数据与任务管理**：`omni-base` 服务（端口 8101）提供数据字典管理、系统任务管理、用户任务管理、操作日志查看，Redis cache-aside 缓存，前端完整管理页面
 - **操作日志审计追踪**：基于 `@OperLog` 注解 + AOP 切面无侵入采集，自动记录 who/when/what/changed 完整审计信息，实体变更快照自动 diff（oldValue vs newValue）支持数据回溯，RocketMQ 异步发送不阻塞业务请求，热冷表分离归档策略（180 天保留 + 冷表长期留存）兼顾查询性能与合规要求，与审计日志（`sys_audit_log`）和登录日志（`sys_login_log`）形成互补，共同构成完整的审计追踪体系
+- **双轨制定时任务调度**：基于 XXL-JOB 3.3.1 实现系统任务（`@XxlJob` + `@SystemJobMeta` 双注解驱动，自动注册调度中心）和用户任务（SPI 模式，`UserJobHandler` 接口 + JSON 参数路由）两种模式，前端支持 Cron 编辑器、动态参数表单、执行日志实时推送
 - **Maven Wrapper** 内置，克隆即可构建，无需全局安装 Maven
 
 ## 技术栈
@@ -34,6 +39,8 @@
 | API 网关   | Spring Cloud Gateway Server (WebFlux)    | 5.0.1         |
 | 注册/配置  | Nacos Server                             | v3.1.1        |
 | 流控/熔断  | Sentinel Dashboard                       | 1.8.8         |
+| 消息队列   | Apache RocketMQ                        | 5.3.2         |
+| 任务调度   | XXL-JOB Admin                          | 3.3.1         |
 | 前端框架   | Vue 3 + TypeScript                       | 3.5.35 / 5.9.3|
 | 构建工具   | Vite 8 (Rolldown)                        | 8.0.14        |
 | UI 框架   | Element Plus                             | 2.14.0        |
@@ -48,7 +55,9 @@ Omni-Stack/
 ├── AGENTS.md                        # AI 执行手册（硬约束 + 构建命令 + 检查清单）
 ├── start.bat / start.sh              # 一键启动脚本（自动启动 Docker + 端口保护 + 容器）
 ├── stop.bat / stop.sh                # 一键停止脚本
-├── docker-compose.yml               # 中间件编排（MySQL, Redis, Nacos, RocketMQ）
+├── docker-compose.yml               # 中间件编排（MySQL, Redis, Nacos, RocketMQ, XXL-JOB）
+├── docker/
+│   └── rocketmq/broker.conf          # RocketMQ Broker 配置文件
 ├── docs/                            # 系统真相文档（Architecture + Patterns + Contract）
 │   ├── architecture.md                # 系统边界、模块地图、数据流、RBAC 权限体系
 │   ├── api-contract.md                # 响应格式、错误码、分页、命名规范
@@ -58,7 +67,8 @@ Omni-Stack/
 ├── scripts/
 │   └── sql/
 │       ├── init-all.sql               # 权威数据库初始化脚本（DDL + 种子数据）
-│       └── init-nacos.sql           # Nacos v3.1.1 MySQL 持久化初始化脚本
+│       ├── init-nacos.sql           # Nacos v3.1.1 MySQL 持久化初始化脚本
+│       └── init-xxl-job.sql          # XXL-JOB v3.3.1 数据库初始化脚本
 ├── omni-backend/                    # Maven 多模块后端
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # 父 POM（依赖管理）
@@ -68,6 +78,7 @@ Omni-Stack/
 │   ├── omni-common-redis/             # 阻塞式 Redis Starter：RedisTemplate, RedisUtils
 │   ├── omni-common-redis-reactive/    # 响应式 Redis Starter：WebFlux 服务专用
 │   ├── omni-common-operlog/             # 操作日志 Starter：AOP 切面 + MQ 生产者 + 实体 diff
+│   ├── omni-common-job/                 # 定时任务 Starter：XXL-JOB 自动装配 + Admin Client + 系统任务注册
 │   ├── omni-auth/                     # 认证服务：登录、验证码、JWT、OAuth2 (端口 8100)
 │   ├── omni-base/                     # 基础数据服务：数据字典管理 (端口 8101)
 │   └── omni-gateway/                  # API 网关 (WebFlux, 端口 8102)
@@ -108,6 +119,8 @@ Omni-Stack/
                     │  Redis :6379   │  缓存 + 验证码 + 字典缓存
                     │  Nacos :8848   │  服务发现 + 配置中心
                     │  Sentinel :8858│  流控 + 熔断
+                    │  RocketMQ :9876│  消息队列（操作日志异步投递）
+                    │  XXL-JOB :18080│  分布式任务调度中心
                     └────────────────┘
 ```
 
@@ -128,7 +141,7 @@ Omni-Stack/
 |------|---------|------|
 | JDK | 25 | 需设置 `JAVA_HOME` 环境变量 |
 | Node.js | >= 22.12.0 | 含 npm |
-| Docker Desktop | 任意稳定版 | 用于运行 Nacos 和 Sentinel |
+| Docker Desktop | 任意稳定版 | 用于运行 MySQL、Redis、Nacos、Sentinel、RocketMQ、XXL-JOB |
 
 > **注意**：项目内置 Maven Wrapper (3.9.16)，无需全局安装 Maven。所有 Maven 命令使用 `./mvnw` 执行。
 
@@ -140,6 +153,8 @@ Omni-Stack/
 | `NACOS_SERVER_ADDR` | `127.0.0.1:8848` | Nacos 服务器地址 |
 | `NACOS_NAMESPACE` | (空) | Nacos 命名空间 |
 | `SENTINEL_DASHBOARD` | `127.0.0.1:8858` | Sentinel Dashboard 地址 |
+| `ROCKETMQ_NAME_SERVER` | `127.0.0.1:9876` | RocketMQ NameServer 地址 |
+| `XXL_JOB_ADMIN_ADDRESSES` | `http://127.0.0.1:18080/xxl-job-admin` | XXL-JOB Admin 地址 |
 | `VITE_API_BASE_URL` | `/api` | 前端 API 基础路径 |
 | `GITHUB_CLIENT_ID` | (内置) | GitHub OAuth App 的 Client ID |
 | `GITHUB_CLIENT_SECRET` | (内置) | GitHub OAuth App 的 Client Secret |
@@ -226,7 +241,7 @@ auth:
 
 1. **检测 Docker Desktop** — 未安装时提示下载并自动打开下载页面
 2. **启动 Docker 引擎** — 如未运行则自动拉起，等待就绪后继续
-3. **端口保护** (Windows) — 防止 Hyper-V/WSL2 动态占用项目端口（3306、6379、8080、8848、9848、9876、10909、10911、10912）
+3. **端口保护** (Windows) — 防止 Hyper-V/WSL2 动态占用项目端口（3306、6379、8080、8848、9848、9876、10909、10911、10912、18080）
 4. **启动容器** — 执行 `docker compose up -d`
 
 ```bash
@@ -291,8 +306,10 @@ npm run dev
 | Gateway 路由 | `curl http://localhost:8102/actuator/gateway/routes` | 返回路由列表 JSON |
 | Nacos 控制台 | `http://127.0.0.1:8080/` | Nacos 管理界面 |
 | Sentinel 控制台 | `http://localhost:8858` | Sentinel Dashboard |
+| XXL-JOB 调度中心 | `http://localhost:18080/xxl-job-admin` | XXL-JOB Admin Web UI（admin/123456） |
+| RocketMQ | `telnet localhost 9876` | NameServer 连通性验证 |
 
-**启动顺序**：MySQL → Redis → Nacos → Sentinel → 后端服务（Auth, Base, Gateway）→ 前端
+**启动顺序**：MySQL → Redis → Nacos → Sentinel → RocketMQ → XXL-JOB → 后端服务（Auth, Base, Gateway）→ 前端
 
 ## 服务端口
 
@@ -302,24 +319,29 @@ npm run dev
 | 认证服务 | 8100 | Spring Security + OAuth2 Authorization Server |
 | 基础数据服务 | 8101 | 数据字典管理，Redis cache-aside 缓存 |
 | API 网关 | 8102 | Spring Cloud Gateway (WebFlux) |
-| MySQL | 3306 | 主数据库（omni_auth + omni_base 库） |
+| MySQL | 3306 | 主数据库（omni_auth + omni_base + xxl_job 库） |
 | Redis | 6379 | 验证码缓存 + 字典缓存 + XSS 配置缓存 |
 | Nacos | 8080, 8848 | 管理界面 (8080) + 服务发现与配置中心 (8848) |
 | Sentinel | 8858 | 流控仪表盘 |
+| XXL-JOB Admin | 18080 | 分布式任务调度中心（Web UI），默认账号 admin/123456 |
+| RocketMQ NameServer | 9876 | 消息队列命名服务器 |
+| RocketMQ Broker | 10909, 10911, 10912 | 消息队列代理节点 |
 
 ## 模块说明
 
-### Common Starter 生态（5 模块）
+### Common Starter 生态（7 模块）
 
-`omni-common` 已拆分为 5 个职责单一的模块，形成 Common Starter 生态。新微服务引入即用，**均不可独立运行**：
+`omni-common` 已拆分为 7 个职责单一的模块，形成 Common Starter 生态。新微服务引入即用，**均不可独立运行**：
 
 | 模块 | 职责 | 适用服务类型 |
 |------|------|-------------|
-| `omni-common-core` | 纯 POJO：`R<T>`、`PageResult<T>`、`BaseEntity`、`BusinessException`、`XssConfigProvider` SPI | 所有服务 |
+| `omni-common-core` | 纯 POJO：`R<T>`、`PageResult<T>`、`BaseEntity`、`BusinessException`、`XssConfigProvider` SPI、`UserJobHandler` SPI | 所有服务 |
 | `omni-common` | Web 自动配置：Jackson 时间序列化、CORS、全局异常处理、XSS Filter + Jackson Module 自动注册 | Servlet 服务 |
 | `omni-common-mybatis` | MyBatis-Plus + MySQL 驱动 + 分页插件 + YAML 默认配置，`@ConditionalOnMissingBean` 支持覆盖 | Servlet 服务 |
 | `omni-common-redis` | 阻塞式 Redis + RedisTemplate 序列化 + RedisUtils | Servlet 服务 |
 | `omni-common-redis-reactive` | 响应式 Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux 服务（Gateway） |
+| `omni-common-operlog` | 操作日志 Starter：`@OperLog` AOP 切面 + RocketMQ 生产者 + 实体变更 diff | 业务服务 |
+| `omni-common-job` | 定时任务 Starter：XXL-JOB 自动装配 + Admin Client + 系统任务注册表 + `@SystemJobMeta` 双注解驱动 | 业务服务 |
 
 > 所有 Starter 通过 Spring Boot 自动配置机制（`AutoConfiguration.imports`）注册 Bean，下游模块无需手动 `@ComponentScan`。
 > `omni-common-redis` 和 `omni-common-redis-reactive` 不可混用，WebFlux 服务只能依赖 reactive 版本。
@@ -351,12 +373,15 @@ npm run dev
 
 ### omni-base（基础数据服务）
 
-数据字典管理微服务，提供类型+数据两级结构的 CRUD 能力：
+基础数据与任务管理微服务，涵盖数据字典、定时任务、操作日志等能力：
 
 - **字典类型管理**：`sys_dict_type` 表，支持列表查询、详情获取、创建、更新、删除、状态切换，11 个 API 端点完整实现
 - **字典数据管理**：`sys_dict_data` 表，按类型编码关联，支持列表查询、创建、更新、删除、缓存刷新
 - **Redis cache-aside 缓存**：TTL 30 分钟，写操作主动失效（write-through invalidation），`dict:{typeCode}` 键格式
-- **前端管理页面**：master-detail 布局，左侧字典类型列表，右侧字典数据列表，`base:dict` 权限码
+- **系统任务管理**：合并 `SystemJobRegistry` 元数据与 XXL-JOB 运行状态，提供注册/启动/停止/触发/注销全生命周期操作，`job:system-job:*` 权限码
+- **用户任务管理**：SPI 模式任务类型 + 任务实例 + 执行日志，支持用户自助创建、Cron 调度、所有权校验
+- **操作日志查看**：热表查询 + 分页筛选，支持按模块、操作类型、操作人和时间范围过滤
+- **前端管理页面**：字典管理（master-detail 布局）、系统任务、任务类型、工作台我的任务，`base:dict` / `job:*` 权限码
 - **XSS 防护继承**：实现 `XssConfigProvider` SPI，自动获得三层 XSS 防御能力
 
 ### omni-gateway（API 网关）
@@ -375,10 +400,44 @@ npm run dev
 | API 层 | `src/api/` | 按领域拆分文件，统一使用 Axios 实例，类型安全 |
 | Store 层 | `src/stores/` | Pinia Composition API 风格，一 Store 一领域 |
 | 路由层 | `src/router/` | 懒加载路由 + 导航守卫（默认要求认证） |
-| 视图层 | `src/views/` | 页面组件，SFC 顺序：script → template → style；包含 `device/` 子目录实现 OAuth2 设备授权码模式的前端交互 |
+| 视图层 | `src/views/` | 页面组件，SFC 顺序：script → template → style；包含 `device/`（设备授权）、`job/`（定时任务管理）、`system/`（系统管理）等子目录 |
 | 布局层 | `src/layout/` | 侧边栏 + 顶栏 + 内容区应用外壳 |
 | 类型层 | `src/types/` | 共享类型定义（ApiResponse, PageResult 的唯一来源） |
 | 样式层 | `src/styles/` | 全局重置 + 布局样式 |
+
+## 定时任务系统
+
+项目基于 **XXL-JOB 3.3.1** 实现了双轨制定时任务调度架构，支持系统任务和用户任务两种模式。深度技术细节见 [`docs/scheduling.md`](docs/scheduling.md)。
+
+### 架构概览
+
+- **omni-common-job**：封装 `XxlJobAutoConfiguration`、`XxlJobAdminClient`、`SystemJobRegistry`，提供统一的任务注册与管理能力
+- **omni-common-core**：定义 `UserJobHandler` SPI 接口和 `UserJobMessage` POJO
+- **omni-base**：业务层，实现具体的系统任务和用户任务 Handler
+
+### 系统任务
+
+通过 `@XxlJob` + `@SystemJobMeta` 双注解驱动，`SystemJobRegistry` 在启动时自动扫描并注册到 XXL-JOB Admin。以 `OperLogArchiver`（操作日志归档）为例：Bean 注册 → 自动发现 → REST API 管理 → XXL-JOB 调度执行。管理接口需要 `job:system-job:*` 权限。
+
+### 用户任务
+
+采用 SPI 模式：业务方实现 `UserJobHandler` 接口并注册为 Spring Bean，`UserJobHandlerRegistry` 自动发现。所有用户任务共享一个 `@XxlJob("userJobExecuteHandler")` 入口，通过 JSON `executorParam` 路由到具体 Handler。`MyJobController` 使用所有权校验（非 `@PreAuthorize`），确保用户只能管理自己创建的任务。
+
+### 依赖组件
+
+| 组件 | 说明 |
+|------|------|
+| XXL-JOB Admin (`:18080`) | 分布式调度中心，Docker 容器部署 |
+| `omni-common-job` 模块 | 自动装配、Admin Client、系统任务注册 |
+| `sys_user_job_type` / `sys_user_job` / `sys_user_job_log` | 用户任务类型、任务实例、执行日志 |
+
+### 新增任务类型指南
+
+以 `DrinkWaterRemindHandler`（喝水提醒）为例：① 注册类型到 `sys_user_job_type` 表 → ② 实现 `UserJobHandler` 接口并添加 `@Component` → ③ 用户通过工作台创建任务 → ④ 验证 XXL-JOB 调度执行。详细步骤见 [`docs/scheduling.md` 第 4 章](docs/scheduling.md)。
+
+### 前端集成
+
+三个入口：系统任务管理（`SystemJob`）、任务类型管理（`UserJobType`）、工作台我的任务（`MyJob`）。支持 Cron 表达式编辑器、`DynamicFormRenderer` 动态参数表单、以及每 10 秒轮询活跃任务日志并通过 `ElNotification` 推送执行结果。
 
 ## RBAC 权限体系
 
@@ -544,6 +603,7 @@ cd omni-frontend && npm run build && npm run lint
 | Nacos 重启后配置丢失 | 使用内嵌 Derby 数据库，无持久化 | 使用本项目的 `init-nacos.sql` 切换到 MySQL 外部存储 |
 | Maven 构建顺序错误 | `omni-common-core` 未先安装导致下游模块编译失败 | 使用 `./mvnw clean install` 从父 POM 构建，Maven reactor 自动按 `<modules>` 声明顺序解析 |
 | Redis Starter 混用导致线程饥饿 | 阻塞式 `omni-common-redis` 引入 WebFlux 服务 | WebFlux 服务（如 Gateway）只能依赖 `omni-common-redis-reactive`，不可混用 |
+| Spring Cloud Stream 消费者不接收消息（RocketMQ 消费者组 OFFLINE） | 多个 `Consumer<T>` Bean 存在时，`spring.cloud.function.definition` 缺失或放在了错误的命名空间（`spring.cloud.stream.function.definition`） | 将 `spring.cloud.function.definition: beanName1;beanName2` 放在 `spring.cloud.function` 下，**不是** `spring.cloud.stream.function` 下。示例：`spring.cloud.function.definition: operlogConsumer;userJobConsumer` |
 
 ## AI 原生工程实践
 
@@ -558,3 +618,18 @@ cd omni-frontend && npm run build && npm run lint
 ## 许可证
 
 [Apache License 2.0](LICENSE)
+
+---
+
+## 支持项目
+
+如果这个项目对你有帮助，欢迎 Star 支持！
+
+**GitHub**: [https://github.com/wang-baohai/Omni-Stack](https://github.com/wang-baohai/Omni-Stack)
+**Gitee**: [https://gitee.com/wang-baohai/Omni-Stack](https://gitee.com/wang-baohai/Omni-Stack)
+
+期待你的 [PR](https://github.com/wang-baohai/Omni-Stack/pulls)！
+
+---
+
+**© Wang Baohai**

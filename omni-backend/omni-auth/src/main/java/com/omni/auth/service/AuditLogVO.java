@@ -10,6 +10,10 @@ import java.util.Map;
 
 /**
  * 审计日志视图对象，用于 API 响应。
+ * <p>封装 {@code sys_audit_log} 表的可读视图，{@code extra} 字段以 {@link Map} 形式返回 JSON 内容。</p>
+ *
+ * @author Omni-Stack Team
+ * @see AuditLogService
  */
 @Data
 @Builder

@@ -8,10 +8,14 @@ import java.util.List;
 /**
  * 分页查询结果封装类。
  * <p>
- * 用于统一分页接口的返回格式，包含记录列表和分页元数据。
+ * 用于统一所有分页接口的返回格式，包含记录列表和分页元数据。
+ * 与 MyBatis-Plus 的 {@code IPage} 配合使用，Controller 层将 {@code IPage} 转换为此对象返回给前端。
  * </p>
+ * <p>JSON 结构：</p>
+ * <pre>{"records": [...], "total": 100, "size": 10, "current": 1, "pages": 10}</pre>
  *
  * @param <T> 记录列表中元素的泛型类型
+ * @see R
  */
 @Data
 public class PageResult<T> implements Serializable {

@@ -9,6 +9,10 @@ import java.time.LocalDateTime;
 
 /**
  * 授权记录视图对象，展示 OAuth2 授权的基本信息。
+ * <p>包含客户端 ID、授权主体、授权类型、作用域和创建时间。</p>
+ *
+ * @author Omni-Stack Team
+ * @see AuthRecordService
  */
 @Data
 @Builder

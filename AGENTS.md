@@ -31,6 +31,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/backend-patterns.md` | Java layering, validation, exceptions, logging, security & data permission, OOP rules |
 | `docs/frontend-patterns.md` | Vue/TS patterns, state management, routing, permission control, component conventions |
 | `docs/core-flows.md` | End-to-end traces of login (password + captcha, GitHub social, Gitee social, device code), RBAC functional permission (Flow 5), data permission (Flow 6), XSS defense (Flow 8) |
+| `docs/scheduling.md` | Scheduled task system: dual-track architecture (system tasks + user tasks), XXL-JOB integration, creating new task types |
 
 ## Entry Points
 
@@ -72,6 +73,27 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - XSS config controller: `omni-backend/omni-auth/src/main/java/com/omni/auth/controller/XssConfigController.java`
 - XSS management page: `omni-frontend/src/views/system/xssconfig/index.vue`
 - Gateway security headers: `omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/SecurityHeadersFilter.java`
+
+**Scheduling & Tasks:**
+- XXL-JOB auto-config: `omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java`
+- XXL-JOB admin client: `omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobAdminClient.java`
+- XXL-JOB properties: `omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobProperties.java`
+- System job registry: `omni-backend/omni-common-job/src/main/java/com/omni/common/job/SystemJobRegistry.java`
+- System job metadata: `omni-backend/omni-common-job/src/main/java/com/omni/common/job/SystemJobMeta.java`
+- User job handler SPI: `omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobHandler.java`
+- User job message: `omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobMessage.java`
+- User job execute handler: `omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobExecuteHandler.java`
+- User job handler registry: `omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobHandlerRegistry.java`
+- Drink water handler: `omni-backend/omni-base/src/main/java/com/omni/base/job/handler/DrinkWaterRemindHandler.java`
+- Oper log archiver: `omni-backend/omni-base/src/main/java/com/omni/base/service/OperLogArchiver.java`
+- System job controller: `omni-backend/omni-base/src/main/java/com/omni/base/controller/SystemJobController.java`
+- My job (workspace) controller: `omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java`
+- User job service: `omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java`
+- Job type management: `omni-backend/omni-base/src/main/java/com/omni/base/controller/UserJobTypeController.java`
+- Frontend system job page: `omni-frontend/src/views/job/system-job/index.vue`
+- Frontend job type page: `omni-frontend/src/views/job/user-job-type/index.vue`
+- Frontend workspace (my jobs): `omni-frontend/src/views/home/index.vue`
+- Frontend API modules: `omni-frontend/src/api/myJob.ts`, `omni-frontend/src/api/systemJob.ts`, `omni-frontend/src/api/userJobType.ts`
 
 ## Build & Run Commands
 
@@ -201,6 +223,14 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - XSS config write operations (toggle, rule CRUD) must invalidate Redis cache keys `xss:enabled:{tenantId}` and `xss:rules:{tenantId}` to maintain consistency.
 - Gateway `SecurityHeadersFilter` must add `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy` on all responses.
 - omni-auth 模块不记录操作日志（@OperLog）。认证行为由登录日志（sys_login_log）完整留存，omni-auth 不引入 `omni-common-operlog` 依赖，不在控制器方法上使用 `@OperLog` 注解。
+- All date-time values must use `yyyy-MM-dd HH:mm:ss` format consistently. Frontend `el-date-picker` must use `value-format="YYYY-MM-DD HH:mm:ss"`. Backend `LocalDateTime` query params must declare `@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")`.
+- `omni-common-job` dependency is required for any service that needs scheduling. `XxlJobAutoConfiguration` activates via `@ConditionalOnClass(XxlJobSpringExecutor.class)` and auto-registers the executor and system job registry.
+- System tasks MUST use dual annotation: `@XxlJob("handlerName")` + `@SystemJobMeta(...)`. Missing either annotation makes the handler invisible to `SystemJobRegistry`.
+- User task handler `@Component` Bean name MUST exactly match `sys_user_job_type.type_code`. A mismatch causes silent routing failure in `UserJobHandlerRegistry`.
+- `MyJobController` uses `verifyOwnership()` instead of `@PreAuthorize`. Never add `@PreAuthorize` to `MyJobController` endpoints — ownership check is per-row (createBy == currentUser), not per-endpoint.
+- All user tasks share a single `@XxlJob("userJobExecuteHandler")`. Individual task routing is via JSON `executorParam` containing `UserJobMessage`, not separate XXL-JOB handlers.
+- XXL-JOB registration failure in `UserJobServiceImpl.createJob()` MUST rollback the DB record (`sysUserJobMapper.deleteById`). Never leave orphaned `sys_user_job` rows without a corresponding XXL-JOB entry.
+- `XxlJobAdminClient` session cookie is `volatile` and must not be persisted across restarts. The client auto-re-logins when the cookie is null or expired.
 
 ## Execution Rules
 
@@ -216,6 +246,8 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Before adding frontend buttons: add `v-permission` directive with the corresponding permission code.
 - Before adding a new microservice: implement `XssConfigProvider` SPI in the new service module; `omni-common` dependency auto-registers XSS filter chain.
 - Before modifying XSS rules or toggle: invalidate Redis cache in `XssConfigServiceImpl` write methods — never rely on TTL expiry for consistency.
+- Before creating a new user task type: read `docs/scheduling.md` Chapter 4 (tutorial with DrinkWater example).
+- Before modifying system task annotations or adding new system tasks: read `docs/scheduling.md` Chapter 2.
 
 ## Completion Checklist
 

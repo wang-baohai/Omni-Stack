@@ -8,7 +8,17 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 系统角色实体。
+ * 系统角色实体，映射 {@code sys_role} 表。
+ * <p>
+ * 支持多租户隔离，每个租户拥有独立的角色体系。
+ * {@code roleCode} 字段存储角色编码（如 {@code ADMIN}、{@code USER}），
+ * 与 JWT 中的 {@code roles} claim 对应。
+ * {@code dataScope} 字段控制数据权限范围（如全部、本部门、本人等）。</p>
+ *
+ * @author Omni-Stack Team
+ * @see SysPermission
+ * @see SysUser
+ * @see com.omni.common.core.model.BaseEntity
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

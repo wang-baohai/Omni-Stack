@@ -4,6 +4,10 @@ import com.omni.auth.dto.CaptchaResult;
 
 /**
  * 验证码服务接口，定义验证码的生成和校验操作。
+ * <p>验证码存储于 Redis，Key 为 UUID，有效期 5 分钟。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.dto.CaptchaResult
  */
 public interface CaptchaService {
 

@@ -42,6 +42,7 @@ import java.io.IOException;
  * @author Omni-Stack Team
  * @see org.springframework.security.oauth2.server.authorization.web.OAuth2DeviceAuthorizationEndpointFilter
  * @see org.springframework.security.oauth2.server.authorization.web.OAuth2TokenEndpointFilter
+ * @see org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
  */
 @Slf4j
 @RequiredArgsConstructor

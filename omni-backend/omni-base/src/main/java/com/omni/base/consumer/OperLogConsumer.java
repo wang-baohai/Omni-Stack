@@ -37,7 +37,7 @@ public class OperLogConsumer {
             try {
                 operLogService.save(message);
             } catch (Exception e) {
-                log.warn("操作日志消费失败: {}", e.getMessage());
+                log.warn("操作日志消费失败: {}", e.getMessage(), e);
             }
         };
     }

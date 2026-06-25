@@ -10,11 +10,14 @@ import org.springframework.context.annotation.Bean;
 
 /**
  * MyBatis-Plus 自动配置类。
- * <p>提供默认的分页插件配置。服务模块可通过自定义 {@link MybatisPlusInterceptor} Bean
- * 覆盖此默认配置（例如添加数据权限拦截器）。{@code @ConditionalOnMissingBean} 保证
- * 应用级 {@code @Configuration} 中定义的 Bean 优先于此自动配置。</p>
+ * <p>提供默认的分页插件配置，仅注册 MySQL 分页拦截器。
+ * 服务模块可通过自定义 {@link MybatisPlusInterceptor} Bean
+ * 覆盖此默认配置（例如添加数据权限拦截器、租户拦截器等）。</p>
+ * <p>{@code @ConditionalOnMissingBean} 保证应用级 {@code @Configuration} 中定义的 Bean
+ * 优先于此自动配置，实现可插拔式扩展。</p>
  *
  * @author Omni-Stack
+ * @see PaginationInnerInterceptor
  */
 @AutoConfiguration
 @ConditionalOnClass(MybatisPlusInterceptor.class)

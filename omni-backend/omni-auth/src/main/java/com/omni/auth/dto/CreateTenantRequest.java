@@ -8,6 +8,11 @@ import java.io.Serializable;
 
 /**
  * 创建租户请求 DTO。
+ * <p>用于超级管理员创建新的租户，租户编码全局唯一。创建后自动初始化租户默认配置。</p>
+ *
+ * @author Omni-Stack Team
+ * @see UpdateTenantRequest
+ * @see com.omni.auth.entity.SysTenant
  */
 @Data
 public class CreateTenantRequest implements Serializable {

@@ -10,6 +10,11 @@ import java.util.Set;
 
 /**
  * 更新 OAuth2 客户端请求参数。
+ * <p>用于修改已有 OAuth2 客户端配置，不包含 clientId/clientSecret（不可修改）。</p>
+ *
+ * @author Omni-Stack Team
+ * @see CreateOAuth2ClientRequest
+ * @see OAuth2ClientVO
  */
 @Data
 public class UpdateOAuth2ClientRequest implements Serializable {

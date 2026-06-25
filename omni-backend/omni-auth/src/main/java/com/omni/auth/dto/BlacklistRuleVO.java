@@ -10,6 +10,11 @@ import java.io.Serializable;
 
 /**
  * XSS 黑名单规则视图对象，用于规则详情展示。
+ * <p>作为 {@link XssSettingsVO} 的内嵌对象，包含单条 XSS 过滤规则的完整信息。</p>
+ *
+ * @author Omni-Stack Team
+ * @see XssSettingsVO
+ * @see com.omni.auth.entity.SysXssBlacklistRule
  */
 @Data
 @Builder

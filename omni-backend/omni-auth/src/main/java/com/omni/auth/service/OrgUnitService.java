@@ -8,6 +8,11 @@ import java.util.List;
 
 /**
  * 组织单元服务接口，提供组织树 CRUD 操作。
+ * <p>基于物化路径实现多级组织架构管理，支持树形查询、创建、更新和删除。</p>
+ *
+ * @author Omni-Stack Team
+ * @see OrgUnitTreeNode
+ * @see com.omni.auth.entity.SysOrgUnit
  */
 public interface OrgUnitService {
 

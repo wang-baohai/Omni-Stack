@@ -9,7 +9,12 @@ import java.util.List;
 
 /**
  * 角色权限关联表 Mapper 接口。
- * <p>操作 {@code sys_role_permission} 关联表，管理角色与权限的多对多关系。</p>
+ * <p>操作 {@code sys_role_permission} 关联表，管理角色与权限的多对多关系。
+ * 支持批量插入、批量删除和查询角色权限列表。</p>
+ *
+ * @author Omni-Stack Team
+ * @see SysRoleMapper
+ * @see SysPermissionMapper
  */
 public interface SysRolePermissionMapper {
 

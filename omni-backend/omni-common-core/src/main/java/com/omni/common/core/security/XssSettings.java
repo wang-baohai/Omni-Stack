@@ -13,8 +13,11 @@ import java.util.List;
  * XSS 防护运行时配置值对象。
  * <p>
  * 封装租户级 XSS 防护的全局开关状态和已启用的黑名单规则列表，
- * 供 {@link XssConfigProvider} 返回给 XSS 过滤器使用。
+ * 供 {@link XssConfigProvider#getXssSettings(Long)} 返回给 {@code XssFilter} 使用。
+ * 每次 HTTP 请求时从 Redis 缓存读取，缓存未命中则回源数据库。
  * </p>
+ *
+ * @see XssConfigProvider
  */
 @Data
 @Builder

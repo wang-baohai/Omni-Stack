@@ -10,6 +10,12 @@ import java.util.Set;
 
 /**
  * 创建 OAuth2 客户端请求参数。
+ * <p>用于管理界面新增 OAuth2 客户端，支持 PKCE 和机密客户端两种模式。
+ * 当 {@code clientId}/{@code clientSecret} 为空时自动生成。</p>
+ *
+ * @author Omni-Stack Team
+ * @see UpdateOAuth2ClientRequest
+ * @see OAuth2ClientVO
  */
 @Data
 public class CreateOAuth2ClientRequest implements Serializable {

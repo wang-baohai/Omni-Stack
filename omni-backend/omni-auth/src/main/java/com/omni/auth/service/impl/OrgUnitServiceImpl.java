@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
 /**
  * 组织单元服务实现类。
  * <p>基于物化路径管理树形结构，支持 CRUD 和级联删除操作。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.service.OrgUnitService
  */
 @Slf4j
 @Service

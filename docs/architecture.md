@@ -21,34 +21,37 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 | `omni-common-mybatis` | MyBatis-Plus starter: pagination interceptor, MySQL driver, YAML defaults | N/A (library) | MyBatis-Plus 3.5.16, MySQL Connector | `@ConditionalOnMissingBean` allows service-level override |
 | `omni-common-redis` | Blocking Redis starter: `RedisTemplate` (Jackson serialization) + `RedisUtils` | N/A (library) | Spring Data Redis (Lettuce), commons-pool2 | Servlet services only; never in WebFlux |
 | `omni-common-redis-reactive` | Reactive Redis starter: `spring-boot-starter-data-redis-reactive` + YAML defaults | N/A (library) | Spring Data Redis Reactive | WebFlux services only; never in Servlet |
+| `omni-common-job` | XXL-JOB integration: auto-configuration, admin HTTP client, system job registry, job metadata annotations | N/A (library) | XXL-JOB Core 3.3.1, Spring Boot Web (optional) | Scheduling infrastructure only; no business task logic |
 | `omni-auth` | Authentication microservice (login, captcha, JWT, multi-tenant, XSS config management) | 8100 | Spring Boot Web, Spring Security, OAuth2 Authorization Server | Authentication logic lives here; no direct HTTP/response manipulation in Service layer |
-| `omni-base` | Base data management: dictionary type + dictionary data CRUD with Redis cache | 8101 | Spring Boot Web, Spring Security, omni-common-mybatis, omni-common-redis | Data dictionary only; no auth/user logic |
+| `omni-base` | Base data management: dictionary CRUD, scheduled tasks (system + user), operation log archival | 8101 | Spring Boot Web, Spring Security, omni-common-mybatis, omni-common-redis, omni-common-job | Data dictionary + scheduling; no auth/user logic |
 | `omni-gateway` | API Gateway, request routing, authentication filter | 8102 | Spring Cloud Gateway Server (WebFlux) | No business logic; routing and cross-cutting filters only |
 | `omni-frontend` | Vue 3 SPA | 3000 (dev) | Vue 3, Pinia, Vue Router, Element Plus, Axios | Presentation layer only; no data-authoritative business rules |
 
 ## Dependency Graph
 
 ```
-omni-common-core  (pure POJO: R<T>, PageResult, BaseEntity, XSS SPI — zero Spring deps)
-    ^          ^          ^          ^
-    |          |          |          |
-omni-common  omni-common-mybatis  omni-common-redis   omni-common-redis-reactive
-(Web auto-   (MyBatis-Plus +      (blocking Redis +    (reactive Redis,
- config)      MySQL driver)        RedisUtils)           standalone)
-    ^   ^          ^    ^              ^    ^                   ^
-    |   |          |    |              |    |                   |
-    |   +----------+----+--------------+----+                  |
-    |                     |                                     |
+omni-common-core  (pure POJO: R<T>, PageResult, BaseEntity, XSS SPI, UserJobHandler SPI — zero Spring deps)
+    ^          ^          ^          ^          ^
+    |          |          |          |          |
+omni-common  omni-common-mybatis  omni-common-redis   omni-common-redis-reactive   omni-common-job
+(Web auto-   (MyBatis-Plus +      (blocking Redis +    (reactive Redis,            (XXL-JOB integration:
+ config)      MySQL driver)        RedisUtils)           standalone)                auto-config, admin client,
+    ^   ^          ^    ^              ^    ^                   ^                    system job registry)
+    |   |          |    |              |    |                   |                          ^
+    |   +----------+----+--------------+----+                  |                          |
+    |                     |                                     |                          |
 omni-auth :8100     omni-base :8101                     omni-gateway :8102
 (Servlet, Security,  (Servlet, Security,                 (WebFlux, depends on
- OAuth2 Auth Server)  Dictionary CRUD)                    core + redis-reactive,
-    |                    |                                 NOT omni-common)
+ OAuth2 Auth Server)  Dictionary CRUD,                   core + redis-reactive,
+    |                 Scheduling tasks)                    NOT omni-common)
     |                    |                                     |
     +-- registers with Nacos --+                               |
                                |                               |
 omni-gateway --- routes via lb:// ---> omni-auth, omni-base
     |
 omni-frontend --- /api proxy :3000 ---> omni-gateway :8102
+
+omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 ```
 
 **Build dependency**: `omni-common-core` must be `mvn install`-ed first, then `omni-common`, then `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive`, before `omni-auth`, `omni-base`, or `omni-gateway` can compile. Maven reactor resolves ordering automatically from `<modules>` declaration.
@@ -85,10 +88,11 @@ Browser stores JWT and uses it for subsequent authenticated requests
 | Redis | Captcha storage, session cache | 7.4 | 6379 |
 | Nacos Server | Service discovery + configuration center | v3.1.1 | 8080, 8848 |
 | Sentinel Dashboard | Flow control + circuit breaking dashboard | 1.8.8 | 8858 |
+| XXL-JOB Admin | Distributed task scheduling console | 3.3.1 | 18080 |
 
 All services can be started with a single command: `docker compose up -d`. See `docker-compose.yml` in the project root.
 
-**Start order**: MySQL -> Redis -> Nacos -> Sentinel -> Backend services (Auth, Base, Gateway) -> Frontend
+**Start order**: MySQL -> Redis -> Nacos -> Sentinel -> XXL-JOB Admin -> Backend services (Auth, Base, Gateway) -> Frontend
 
 ## Infrastructure
 
@@ -168,6 +172,28 @@ erDiagram
 ```
 
 **Seed data** (tenant 1): 3 preset dictionary types (`sys_user_gender`, `sys_common_status`, `sys_notice_type`) with 7 data entries. See `scripts/sql/init-all.sql` Section 5.
+
+### Scheduling Tables
+
+The `omni_base` database also contains 3 tables for scheduled task management, served by the `omni-base` microservice:
+
+**Scheduled Tasks (3 tables)**:
+
+| Table | Purpose |
+|-------|---------|
+| `sys_user_job_type` | Task type catalog — defines available task types with `type_code` (unique, maps to `UserJobHandler` Bean name), `type_name`, `description`, and `param_template` (JSON Schema for dynamic form rendering) |
+| `sys_user_job` | User task instances — `job_name`, `job_type` (FK to `type_code`), `cron_expression`, `job_params` (JSON), `xxl_job_id` (link to XXL-JOB), `last_fire_time`, `status`, `create_by` (ownership) |
+| `sys_user_job_log` | Execution history — `job_id`, `fire_time`, `execute_time_ms`, `status` (0=fail, 1=success), `result_message` (for frontend notification), `error_message` |
+
+```mermaid
+erDiagram
+    sys_user_job_type ||--o{ sys_user_job : "type_code -> job_type"
+    sys_user_job ||--o{ sys_user_job_log : "id -> job_id"
+```
+
+**Seed data** (tenant 1): 1 preset task type (`Task-00001` — Drink Water Reminder with `cupShape` parameter). See `scripts/sql/init-all.sql` Section 6.
+
+Detailed scheduling architecture: see `docs/scheduling.md`.
 
 ## RBAC Permission System
 
@@ -298,6 +324,8 @@ DataScopeContext.clear() (finally 块，防止 ThreadLocal 泄漏)
 4. **No direct service-to-service calls**: Inter-service communication must go through OpenFeign clients, never raw HTTP calls.
 5. **Gateway is reactive**: `omni-gateway` runs on WebFlux. It depends on `omni-common-core` (POJO only) and `omni-common-redis-reactive`, but NOT on `omni-common` or `omni-common-redis` (blocking Redis would starve Netty event loop threads).
 6. **Redis starter exclusivity**: `omni-common-redis` (blocking) and `omni-common-redis-reactive` (reactive) must not be mixed in the same service. Servlet services use blocking; WebFlux services use reactive.
+7. **XXL-JOB Admin must be running** before `omni-base` starts. The `XxlJobSpringExecutor` registers with XXL-JOB Admin on startup; user task creation/updates require `XxlJobAdminClient` HTTP calls.
+8. **omni-common-job is a library module** — it cannot run independently. Only Servlet services should depend on it. WebFlux services must not depend on it (XXL-JOB executor uses blocking I/O).
 
 ## Extension Points
 
@@ -348,3 +376,16 @@ The XSS defense system is modular — new services inherit protection by dependi
 3. **Cache strategy**: Use Redis keys `xss:enabled:{tenantId}` + `xss:rules:{tenantId}` with 30-minute TTL. Invalidate on write operations
 4. **Auto-configuration**: `XssAutoConfiguration` is registered via `AutoConfiguration.imports` in `omni-common` — no manual `@ComponentScan` needed
 5. **Gateway headers**: `SecurityHeadersFilter` in `omni-gateway` adds `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy` on all responses automatically
+
+### Adding a New User Task Type
+
+The user task system uses an SPI pattern via `UserJobHandler` to add new schedulable task types:
+
+1. **Register the type**: INSERT into `sys_user_job_type` with a unique `type_code`, display name, and `param_template` JSON Schema (drives the dynamic form in the workspace UI)
+2. **Implement the handler**: Create a class implementing `UserJobHandler`, annotated with `@Component("{type_code}")` — the Bean name **must exactly match** `type_code`
+3. **Implement `execute()`**: Business logic using `UserJobMessage.getJobParams()` for task parameters
+4. **Implement `getResultMessage()`** (optional): Return user-readable text stored in `sys_user_job_log.result_message`, displayed as a frontend notification
+
+The `UserJobHandlerRegistry` auto-discovers all implementations via Spring's `Map<String, UserJobHandler>` injection. No registration code or configuration changes needed.
+
+Full tutorial with DrinkWater example: see `docs/scheduling.md` Chapter 4.

@@ -29,6 +29,9 @@ import java.util.List;
  * <p>
  * 基于 MyBatis-Plus 的 ServiceImpl，提供用户的认证、查询和分页等操作。
  * </p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.service.UserService
  */
 @Slf4j
 @Service

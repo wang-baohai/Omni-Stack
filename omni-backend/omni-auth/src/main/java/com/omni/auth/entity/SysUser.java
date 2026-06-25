@@ -8,7 +8,17 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 系统用户实体。
+ * 系统用户实体，映射 {@code sys_user} 表。
+ * <p>
+ * 支持多租户隔离，同一租户下用户名唯一。
+ * 密码使用 BCrypt 加密存储，支持通过 {@code primaryUnitId} 关联主组织单元。
+ * {@code status} 字段控制账号启用/禁用状态，禁用后无法登录。</p>
+ *
+ * @author Omni-Stack Team
+ * @see SysTenant
+ * @see SysOrgUnit
+ * @see SysUserOauthProvider
+ * @see com.omni.common.core.model.BaseEntity
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

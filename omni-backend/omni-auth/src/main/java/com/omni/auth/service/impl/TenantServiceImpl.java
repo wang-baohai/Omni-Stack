@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  * <p>查询 {@code sys_tenant} 表，为登录流程提供租户数据，
  * 同时支持管理端的租户增删改查操作。</p>
  *
+ * @author Omni-Stack Team
  * @see TenantService
  */
 @Slf4j

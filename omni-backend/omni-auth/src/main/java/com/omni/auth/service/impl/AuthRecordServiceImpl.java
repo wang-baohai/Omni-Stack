@@ -16,6 +16,9 @@ import java.util.List;
  * 授权记录服务实现类。
  * <p>查询 Spring Authorization Server 的 {@code oauth2_authorization} 表，
  * 提供授权记录的分页查询功能。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.service.AuthRecordService
  */
 @Slf4j
 @Service

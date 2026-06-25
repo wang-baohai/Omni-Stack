@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 /**
  * 权限服务实现类。
  * <p>基于物化路径构建权限树，支持角色权限的查询和分配操作。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.service.PermissionService
  */
 @Slf4j
 @Service

@@ -25,6 +25,7 @@
         <module>omni-common-redis</module>
         <module>omni-common-redis-reactive</module>
         <module>omni-common-operlog</module>
+        <module>omni-common-job</module>
         <module>omni-auth</module>
         <module>omni-base</module>
         <module>omni-gateway</module>
@@ -35,6 +36,7 @@
         <spring-cloud.version>2025.1.1</spring-cloud.version>
         <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
         <mybatis-plus.version>3.5.16</mybatis-plus.version>
+        <xxl-job.version>3.3.1</xxl-job.version>
     </properties>
 
     <dependencyManagement>
@@ -89,6 +91,12 @@
             <dependency>
                 <groupId>com.omni</groupId>
                 <artifactId>omni-common-operlog</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- Common Job Module -->
+            <dependency>
+                <groupId>com.omni</groupId>
+                <artifactId>omni-common-job</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

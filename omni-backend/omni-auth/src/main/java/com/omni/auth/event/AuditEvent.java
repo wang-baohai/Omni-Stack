@@ -11,6 +11,15 @@ import java.util.Map;
  * 安全审计事件，通过 Spring {@link ApplicationEvent} 机制发布。
  *
  * <p>各登录/管理入口发布此事件，由 {@link AuditEventListener} 异步写入数据库。</p>
+ *
+ * <p>采用 Builder 模式构建实例，支持记录租户 ID、用户信息、客户端 IP、
+ * User-Agent 等上下文，同时提供 {@code extra} 字段用于扩展属性。
+ * 事件类型通过静态常量定义，涵盖登录成功/失败、账号锁定、密码变更、
+ * 角色分配等关键安全事件。</p>
+ *
+ * @author Omni-Stack Team
+ * @see AuditEventListener
+ * @see ApplicationEvent
  */
 @Getter
 public class AuditEvent extends ApplicationEvent {
@@ -86,7 +95,7 @@ public class AuditEvent extends ApplicationEvent {
     }
 
     /**
-     * 审计事件构建器。
+     * 审计事件构建器，支持链式调用设置事件各属性。
      */
     public static class Builder {
         private final String eventType;
@@ -103,51 +112,111 @@ public class AuditEvent extends ApplicationEvent {
             this.eventType = eventType;
         }
 
+        /**
+         * 设置租户 ID。
+         *
+         * @param tenantId 租户 ID
+         * @return 当前构建器实例
+         */
         public Builder tenantId(Long tenantId) {
             this.tenantId = tenantId;
             return this;
         }
 
+        /**
+         * 设置操作目标用户 ID。
+         *
+         * @param userId 操作目标用户 ID
+         * @return 当前构建器实例
+         */
         public Builder userId(Long userId) {
             this.userId = userId;
             return this;
         }
 
+        /**
+         * 设置操作目标用户名。
+         *
+         * @param username 操作目标用户名
+         * @return 当前构建器实例
+         */
         public Builder username(String username) {
             this.username = username;
             return this;
         }
 
+        /**
+         * 设置客户端 IP 地址。
+         *
+         * @param ipAddress 客户端 IP 地址
+         * @return 当前构建器实例
+         */
         public Builder ipAddress(String ipAddress) {
             this.ipAddress = ipAddress;
             return this;
         }
 
+        /**
+         * 设置客户端 User-Agent 信息。
+         *
+         * @param userAgent 客户端 User-Agent 字符串
+         * @return 当前构建器实例
+         */
         public Builder userAgent(String userAgent) {
             this.userAgent = userAgent;
             return this;
         }
 
+        /**
+         * 设置事件描述信息。
+         *
+         * @param description 事件描述
+         * @return 当前构建器实例
+         */
         public Builder description(String description) {
             this.description = description;
             return this;
         }
 
+        /**
+         * 设置操作人（用户名或 {@code "system"}）。
+         *
+         * @param createBy 操作人标识
+         * @return 当前构建器实例
+         */
         public Builder createBy(String createBy) {
             this.createBy = createBy;
             return this;
         }
 
+        /**
+         * 添加单个扩展字段。
+         *
+         * @param key   扩展字段键名
+         * @param value 扩展字段值
+         * @return 当前构建器实例
+         */
         public Builder extra(String key, Object value) {
             this.extra.put(key, value);
             return this;
         }
 
+        /**
+         * 批量添加扩展字段。
+         *
+         * @param extra 扩展字段 Map，会被合并到现有扩展字段中
+         * @return 当前构建器实例
+         */
         public Builder extra(Map<String, Object> extra) {
             this.extra.putAll(extra);
             return this;
         }
 
+        /**
+         * 构建并返回 {@link AuditEvent} 实例。
+         *
+         * @return 构建完成的审计事件实例
+         */
         public AuditEvent build() {
             return new AuditEvent(this);
         }

@@ -7,6 +7,11 @@ import org.apache.ibatis.annotations.Select;
 
 /**
  * 用户第三方身份关联 Mapper 接口。
+ * <p>提供 {@code sys_user_oauth_provider} 表的 CRUD 操作，
+ * 主要用于社交登录时查找已绑定的本地用户。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.entity.SysUserOauthProvider
  */
 public interface SysUserOauthProviderMapper extends BaseMapper<SysUserOauthProvider> {
 

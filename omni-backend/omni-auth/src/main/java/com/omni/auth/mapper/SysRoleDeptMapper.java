@@ -9,7 +9,11 @@ import java.util.List;
 
 /**
  * 角色数据范围关联表 Mapper 接口。
- * <p>操作 {@code sys_role_dept} 关联表，管理角色在 CUSTOM 数据范围下的部门权限。</p>
+ * <p>操作 {@code sys_role_dept} 关联表，管理角色在 {@code CUSTOM} 数据范围下的部门权限。
+ * 仅当角色的 {@code dataScope = CUSTOM} 时，本表数据才会生效。</p>
+ *
+ * @author Omni-Stack Team
+ * @see SysRoleMapper
  */
 public interface SysRoleDeptMapper {
 

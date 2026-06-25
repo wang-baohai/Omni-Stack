@@ -8,7 +8,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 组织单元实体，使用物化路径（Materialized Path）实现层级结构。
+ * 组织单元实体，映射 {@code sys_org_unit} 表。
+ * <p>
+ * 使用物化路径（Materialized Path）实现层级结构，
+ * 支持公司/部门/小组等多级组织架构。
+ * {@code path} 字段存储形如 {@code /1/2/3/} 的路径，
+ * 用于高效查询子树和判断祖先关系。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.common.core.model.BaseEntity
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

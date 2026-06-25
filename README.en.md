@@ -2,7 +2,11 @@
 
 > A microservices scaffolding platform built with Spring Boot 4 + Vue 3, structured with the Harness Industrial Design Pattern to provide an industry best-practice foundation for AI-assisted development.
 
-**[中文](README.md)** | **[日本語](README.jp.md)**
+**[中文](README.md)** | **[日本語](README.jp.md)** | **[한국어](README.kr.md)**
+
+**GitHub**: https://github.com/wang-baohai/Omni-Stack | **Gitee**: https://gitee.com/wang-baohai/Omni-Stack
+
+**Contact**: wangbaohai1993@gmail.com
 
 ---
 
@@ -18,9 +22,10 @@
 - **AI-Native Engineering**: AGENTS.md execution manual + Skills behavioral extensions for AI-assisted workflows
 - **Three User Creation Paths**: Self-registration (captcha + default role), admin backend creation, social login auto-registration on first login
 - **Three-Layer XSS Defense**: Jackson deserializer auto-sanitizes `@RequestBody` + Servlet Filter sanitizes query parameters + Gateway security response headers, with per-tenant configurable global toggle and custom blacklist rules (HTML tags, event handlers, dangerous protocols, regex patterns), Redis-cached configuration, and a full frontend management UI
-- **Common Starter Ecosystem**: `omni-common` split into 5 modules (core / common / mybatis / redis / redis-reactive) — new services gain MyBatis-Plus pagination, Redis caching, XSS protection via Maven dependency alone, `AutoConfiguration.imports` zero-config auto-assembly
-- **Base Data Management**: `omni-base` service (port 8101) provides data dictionary management with type+data two-level structure, Redis cache-aside caching, frontend master-detail management page, 11 API endpoints fully implemented
+- **Common Starter Ecosystem**: `omni-common` split into 7 modules (core / common / mybatis / redis / redis-reactive / operlog / job) — new services gain MyBatis-Plus pagination, Redis caching, XSS protection, operation log collection, scheduled task management via Maven dependency alone, `AutoConfiguration.imports` zero-config auto-assembly
+- **Base Data & Task Management**: `omni-base` service (port 8101) provides data dictionary management, system task management, user task management, and operation log viewing, with Redis cache-aside caching and complete frontend management pages
 - **Operation Log Audit Trail**: `@OperLog` annotation + AOP aspect for non-intrusive collection, automatically records who/when/what/changed with full audit information, entity change snapshot auto-diff (oldValue vs newValue) for data traceability, RocketMQ async delivery without blocking business requests, hot/cold table separation archival strategy (180-day retention + cold table long-term preservation) balancing query performance and compliance requirements, complementing audit logs (`sys_audit_log`) and login logs (`sys_login_log`) to form a complete audit trail system
+- **Dual-Track Scheduled Task Scheduling**: system tasks (`@XxlJob` + `@SystemJobMeta` dual annotations, auto-registered to scheduling center) and user tasks (SPI pattern, `UserJobHandler` interface + JSON parameter routing) based on XXL-JOB 3.3.1, with frontend Cron editor, dynamic parameter forms, and real-time execution log push
 - **Maven Wrapper** bundled — clone and build, no system Maven installation needed
 
 ## Tech Stack
@@ -34,6 +39,8 @@
 | Gateway | Spring Cloud Gateway Server (WebFlux) | 5.0.1 |
 | Discovery / Config | Nacos Server | v3.1.1 |
 | Flow Control | Sentinel Dashboard | 1.8.8 |
+| Message Queue | Apache RocketMQ | 5.3.2 |
+| Task Scheduling | XXL-JOB Admin | 3.3.1 |
 | Frontend | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
 | Bundler | Vite 8 (Rolldown) | 8.0.14 |
 | UI Framework | Element Plus | 2.14.0 |
@@ -48,7 +55,9 @@ Omni-Stack/
 ├── AGENTS.md                        # AI execution manual (constraints + build commands + checklist)
 ├── start.bat / start.sh              # One-click startup (auto-start Docker + port protection + containers)
 ├── stop.bat / stop.sh                # One-click stop
-├── docker-compose.yml               # Middleware orchestration (MySQL, Redis, Nacos, RocketMQ)
+├── docker-compose.yml               # Middleware orchestration (MySQL, Redis, Nacos, RocketMQ, XXL-JOB)
+├── docker/
+│   └── rocketmq/broker.conf          # RocketMQ Broker configuration
 ├── docs/                            # System truth documents (Architecture + Patterns + Contract)
 │   ├── architecture.md                # System boundaries, module map, data flow, RBAC permission system
 │   ├── api-contract.md                # Response format, error codes, pagination, naming
@@ -58,7 +67,8 @@ Omni-Stack/
 ├── scripts/
 │   └── sql/
 │       ├── init-all.sql               # Authoritative database initialization script (DDL + seed data)
-│       └── init-nacos.sql           # Nacos v3.1.1 MySQL persistence initialization script
+│       ├── init-nacos.sql           # Nacos v3.1.1 MySQL persistence initialization script
+│       └── init-xxl-job.sql          # XXL-JOB v3.3.1 database initialization script
 ├── omni-backend/                    # Maven multi-module backend
 │   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
 │   ├── pom.xml                        # Parent POM (dependency management)
@@ -68,6 +78,7 @@ Omni-Stack/
 │   ├── omni-common-redis/             # Blocking Redis Starter: RedisTemplate, RedisUtils
 │   ├── omni-common-redis-reactive/    # Reactive Redis Starter: for WebFlux services
 │   ├── omni-common-operlog/             # Operation Log Starter: AOP aspect + MQ producer + entity diff
+│   ├── omni-common-job/                 # Scheduled Task Starter: XXL-JOB auto-config + Admin Client + system task registry
 │   ├── omni-auth/                     # Auth service: login, captcha, JWT, OAuth2 (port 8100)
 │   ├── omni-base/                     # Base data service: dictionary management (port 8101)
 │   └── omni-gateway/                  # API Gateway (WebFlux, port 8102)
@@ -108,6 +119,8 @@ Omni-Stack/
                     │  Redis :6379   │  Cache + captcha + dict cache
                     │  Nacos :8848   │  Discovery + Config
                     │  Sentinel :8858│  Flow Control
+                    │  RocketMQ :9876│  Message queue (async log delivery)
+                    │  XXL-JOB :18080│  Distributed task scheduling
                     └────────────────┘
 ```
 
@@ -128,7 +141,7 @@ Browser :3000  --/api/**-->  Vite Proxy  -->  Gateway :8102  --lb://-->  Backend
 |----------|---------|-------|
 | JDK | 25 | Must set `JAVA_HOME` environment variable |
 | Node.js | >= 22.12.0 | Includes npm |
-| Docker Desktop | Any stable | For running middleware (MySQL, Redis, Nacos, Sentinel) |
+| Docker Desktop | Any stable | For running middleware (MySQL, Redis, Nacos, Sentinel, RocketMQ, XXL-JOB) |
 
 > **Note**: Maven Wrapper (3.9.16) is bundled. Use `./mvnw` instead of `mvn` for all Maven commands.
 
@@ -140,6 +153,8 @@ Browser :3000  --/api/**-->  Vite Proxy  -->  Gateway :8102  --lb://-->  Backend
 | `NACOS_SERVER_ADDR` | `127.0.0.1:8848` | Nacos server address |
 | `NACOS_NAMESPACE` | (empty) | Nacos namespace |
 | `SENTINEL_DASHBOARD` | `127.0.0.1:8858` | Sentinel dashboard address |
+| `ROCKETMQ_NAME_SERVER` | `127.0.0.1:9876` | RocketMQ NameServer address |
+| `XXL_JOB_ADMIN_ADDRESSES` | `http://127.0.0.1:18080/xxl-job-admin` | XXL-JOB Admin address |
 | `VITE_API_BASE_URL` | `/api` | Frontend API base URL |
 | `GITHUB_CLIENT_ID` | (built-in) | GitHub OAuth App Client ID |
 | `GITHUB_CLIENT_SECRET` | (built-in) | GitHub OAuth App Client Secret |
@@ -226,7 +241,7 @@ The project provides one-click startup scripts that automatically handle Docker 
 
 1. **Detects Docker Desktop** — prompts download and opens the download page if not installed
 2. **Starts Docker engine** — auto-launches if not running, waits until ready
-3. **Port protection** (Windows) — prevents Hyper-V/WSL2 from dynamically occupying project ports (3306, 6379, 8080, 8848, 9848, 9876, 10909, 10911, 10912)
+3. **Port protection** (Windows) — prevents Hyper-V/WSL2 from dynamically occupying project ports (3306, 6379, 8080, 8848, 9848, 9876, 10909, 10911, 10912, 18080)
 4. **Starts containers** — runs `docker compose up -d`
 
 ```bash
@@ -290,8 +305,10 @@ npm run dev
 | Gateway routes | `curl http://localhost:8102/actuator/gateway/routes` | JSON route list |
 | Nacos console | `http://127.0.0.1:8080/` | Nacos admin UI |
 | Sentinel console | `http://localhost:8858` | Sentinel Dashboard |
+| XXL-JOB Admin | `http://localhost:18080/xxl-job-admin` | XXL-JOB Admin Web UI (admin/123456) |
+| RocketMQ | `telnet localhost 9876` | NameServer connectivity check |
 
-**Start order**: MySQL → Redis → Nacos → Sentinel → Backend (Auth, Base, Gateway) → Frontend
+**Start order**: MySQL → Redis → Nacos → Sentinel → RocketMQ → XXL-JOB → Backend (Auth, Base, Gateway) → Frontend
 
 ## Service Ports
 
@@ -301,24 +318,29 @@ npm run dev
 | Auth service | 8100 | Spring Security + OAuth2 Authorization Server |
 | Base data service | 8101 | Dictionary management, Redis cache-aside caching |
 | API Gateway | 8102 | Spring Cloud Gateway (WebFlux) |
-| MySQL | 3306 | Primary database (omni_auth + omni_base) |
+| MySQL | 3306 | Primary database (omni_auth + omni_base + xxl_job) |
 | Redis | 6379 | Captcha cache + dict cache + XSS config cache |
 | Nacos | 8080, 8848 | Management UI (8080) + Discovery & Config (8848) |
 | Sentinel | 8858 | Flow control dashboard |
+| XXL-JOB Admin | 18080 | Distributed task scheduling center (Web UI), default credentials admin/123456 |
+| RocketMQ NameServer | 9876 | Message queue naming server |
+| RocketMQ Broker | 10909, 10911, 10912 | Message queue broker node |
 
 ## Module Details
 
-### Common Starter Ecosystem (5 Modules)
+### Common Starter Ecosystem (7 Modules)
 
-`omni-common` has been split into 5 single-responsibility modules forming the Common Starter ecosystem. New services gain capabilities by adding Maven dependencies alone — **none can run independently**:
+`omni-common` has been split into 7 single-responsibility modules forming the Common Starter ecosystem. New services gain capabilities by adding Maven dependencies alone — **none can run independently**:
 
 | Module | Responsibility | Target Service Type |
 |--------|---------------|-------------------|
-| `omni-common-core` | Pure POJO: `R<T>`, `PageResult<T>`, `BaseEntity`, `BusinessException`, `XssConfigProvider` SPI | All services |
+| `omni-common-core` | Pure POJO: `R<T>`, `PageResult<T>`, `BaseEntity`, `BusinessException`, `XssConfigProvider` SPI, `UserJobHandler` SPI | All services |
 | `omni-common` | Web auto-config: Jackson time serialization, CORS, global exception handler, XSS Filter + Jackson Module auto-registration | Servlet services |
 | `omni-common-mybatis` | MyBatis-Plus + MySQL driver + pagination plugin + YAML defaults, `@ConditionalOnMissingBean` override support | Servlet services |
 | `omni-common-redis` | Blocking Redis + RedisTemplate serialization + RedisUtils | Servlet services |
 | `omni-common-redis-reactive` | Reactive Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux services (Gateway) |
+| `omni-common-operlog` | Operation Log Starter: `@OperLog` AOP aspect + RocketMQ producer + entity change diff | Business services |
+| `omni-common-job` | Scheduled Task Starter: XXL-JOB auto-config + Admin Client + system task registry + `@SystemJobMeta` dual annotation | Business services |
 
 > All starters use Spring Boot auto-configuration (`AutoConfiguration.imports`) to register beans. Downstream modules don't need manual `@ComponentScan`.
 > `omni-common-redis` and `omni-common-redis-reactive` must not be mixed — WebFlux services can only depend on the reactive version.
@@ -348,14 +370,17 @@ AOP + RocketMQ based operation log collection framework providing non-intrusive 
 - **Complementary to audit logs**: Operation logs record business data changes (who/when/what/changed), audit logs (`sys_audit_log`) record security events, and login logs (`sys_login_log`) record login behavior — together forming a complete audit trail system
 - **Disabled in omni-auth**: Auth module does not depend on this module; authentication behavior is covered by `sys_login_log` + `sys_audit_log`
 
-### omni-base (Base Data Service)
+### omni-base (Base Data & Task Service)
 
-Data dictionary management microservice providing type+data two-level structure CRUD:
+Base data and task management microservice covering data dictionary, scheduled tasks, and operation log capabilities:
 
 - **Dictionary Type Management**: `sys_dict_type` table — list, get, create, update, delete, status toggle; 11 API endpoints fully implemented
 - **Dictionary Data Management**: `sys_dict_data` table — linked by type code, supports list, create, update, delete, cache refresh
 - **Redis cache-aside caching**: 30-minute TTL, write-through invalidation, `dict:{typeCode}` key format
-- **Frontend management page**: master-detail layout — dictionary type list on the left, dictionary data list on the right, `base:dict` permission code
+- **System Task Management**: merges `SystemJobRegistry` metadata with XXL-JOB runtime status, providing register/start/stop/trigger/unregister lifecycle operations, `job:system-job:*` permission codes
+- **User Task Management**: SPI-based task types + task instances + execution logs, supporting user self-service creation, Cron scheduling, and ownership verification
+- **Operation Log Viewing**: hot table query + paginated filtering by module, operation type, operator, and time range
+- **Frontend management pages**: dictionary management (master-detail layout), system tasks, task types, workspace my-tasks, `base:dict` / `job:*` permission codes
 - **XSS protection inherited**: implements `XssConfigProvider` SPI to automatically gain three-layer XSS defense
 
 ### omni-gateway (API Gateway)
@@ -374,10 +399,44 @@ Reactive gateway based on Spring Cloud Gateway Server (WebFlux):
 | API | `src/api/` | One file per domain, shared Axios instance, type-safe |
 | Store | `src/stores/` | Pinia Composition API style, one store per domain |
 | Router | `src/router/` | Lazy-loaded routes + navigation guard (auth by default) |
-| Views | `src/views/` | Page components, SFC order: script → template → style; includes `device/` subdirectory for OAuth2 Device Authorization Grant frontend interaction |
+| Views | `src/views/` | Page components, SFC order: script → template → style; includes `device/` (device authorization), `job/` (task management), `system/` (system management) subdirectories |
 | Layout | `src/layout/` | App shell (sidebar + header + content area) |
 | Types | `src/types/` | Shared type definitions (single source for ApiResponse, PageResult) |
 | Styles | `src/styles/` | Global reset + layout styles |
+
+## Scheduled Task System
+
+The project implements a dual-track scheduled task architecture based on **XXL-JOB 3.3.1**, supporting both system tasks and user tasks. See [`docs/scheduling.md`](docs/scheduling.md) for in-depth technical details.
+
+### Architecture Overview
+
+- **omni-common-job**: Encapsulates `XxlJobAutoConfiguration`, `XxlJobAdminClient`, and `SystemJobRegistry` for unified task registration and management
+- **omni-common-core**: Defines the `UserJobHandler` SPI interface and `UserJobMessage` POJO
+- **omni-base**: Business layer implementing concrete system and user task handlers
+
+### System Tasks
+
+Driven by `@XxlJob` + `@SystemJobMeta` dual annotations. `SystemJobRegistry` auto-discovers and registers them with XXL-JOB Admin at startup. Example: `OperLogArchiver` (operation log archival) — Bean registration → auto-discovery → REST API management → XXL-JOB scheduling. Management endpoints require `job:system-job:*` permissions.
+
+### User Tasks
+
+SPI-based: implement the `UserJobHandler` interface and register as a Spring Bean; `UserJobHandlerRegistry` auto-discovers handlers. All user tasks share a single `@XxlJob("userJobExecuteHandler")` entry point, routing to specific handlers via JSON `executorParam`. `MyJobController` uses ownership verification (not `@PreAuthorize`) to ensure users can only manage their own tasks.
+
+### Dependencies
+
+| Component | Description |
+|-----------|-------------|
+| XXL-JOB Admin (`:18080`) | Distributed scheduling center, Docker-deployed |
+| `omni-common-job` module | Auto-configuration, Admin Client, system task registration |
+| `sys_user_job_type` / `sys_user_job` / `sys_user_job_log` | User task types, task instances, execution logs |
+
+### Adding a New Task Type
+
+Using `DrinkWaterRemindHandler` (water drinking reminder) as an example: ① Register type in `sys_user_job_type` table → ② Implement `UserJobHandler` interface with `@Component` → ③ Users create tasks via workspace → ④ Verify XXL-JOB scheduling. See [`docs/scheduling.md` Chapter 4](docs/scheduling.md) for detailed steps.
+
+### Frontend Integration
+
+Three entry points: System Job Management (`SystemJob`), Task Type Management (`UserJobType`), and My Jobs on the workspace (`MyJob`). Features include a Cron expression editor, `DynamicFormRenderer` for dynamic parameter forms, and 10-second polling of active task logs with `ElNotification` push for execution results.
 
 ## RBAC Permission System
 
@@ -543,6 +602,7 @@ See the Completion Checklist section in `AGENTS.md` for the full checklist.
 | Nacos loses configuration after restart | Uses embedded Derby database, no persistence | Use `init-nacos.sql` from this project to switch to external MySQL storage |
 | Maven build order error | `omni-common-core` not installed first, causing downstream module compilation failure | Run `./mvnw clean install` from parent POM — Maven reactor auto-resolves `<modules>` declaration order |
 | Redis Starter mix causes thread starvation | Blocking `omni-common-redis` imported into WebFlux service | WebFlux services (e.g., Gateway) must only depend on `omni-common-redis-reactive` — never mix the two |
+| Spring Cloud Stream consumer not receiving messages (RocketMQ consumer group OFFLINE) | When multiple `Consumer<T>` beans exist, `spring.cloud.function.definition` is missing or placed under wrong namespace (`spring.cloud.stream.function.definition`) | Add `spring.cloud.function.definition: beanName1;beanName2` under `spring.cloud.function` — **NOT** under `spring.cloud.stream.function`. Example: `spring.cloud.function.definition: operlogConsumer;userJobConsumer` |
 
 ## AI-Native Engineering Practice
 
@@ -557,3 +617,18 @@ Core principle: **Layers 1 & 2 (Architecture + Patterns) must be defined first, 
 ## License
 
 [Apache License 2.0](LICENSE)
+
+---
+
+## Support
+
+If this project helps you, please Star it!
+
+**GitHub**: [https://github.com/wang-baohai/Omni-Stack](https://github.com/wang-baohai/Omni-Stack)
+**Gitee**: [https://gitee.com/wang-baohai/Omni-Stack](https://gitee.com/wang-baohai/Omni-Stack)
+
+[PRs](https://github.com/wang-baohai/Omni-Stack/pulls) welcome!
+
+---
+
+**© Wang Baohai**

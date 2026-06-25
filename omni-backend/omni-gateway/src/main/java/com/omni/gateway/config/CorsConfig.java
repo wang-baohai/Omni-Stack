@@ -11,7 +11,10 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
  * <p>
  * 使用 {@link CorsWebFilter} 替代传统的 MVC 跨域配置，
  * 适配 Spring Cloud Gateway 的响应式编程模型。
- * </p>
+ * 该过滤器必须在 {@link com.omni.gateway.filter.AuthFilter} 之前执行，
+ * 以确保预检请求（OPTIONS）不被认证过滤器拦截。</p>
+ *
+ * @see com.omni.gateway.filter.AuthFilter
  */
 @Configuration
 public class CorsConfig {

@@ -4,7 +4,7 @@
  * 左侧展示字典类型列表（可搜索/分页），右侧展示选中类型下的字典数据列表。
  * 支持字典类型和字典数据的增删改查，以及缓存刷新功能。
  */
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -62,14 +62,14 @@ const dataForm = reactive({
 })
 
 /** 标签样式选项 */
-const tagTypeOptions = [
+const tagTypeOptions = computed(() => [
   { value: '', label: '-' },
-  { value: 'success', label: 'Success' },
-  { value: 'warning', label: 'Warning' },
-  { value: 'danger', label: 'Danger' },
-  { value: 'info', label: 'Info' },
-  { value: 'primary', label: 'Primary' },
-]
+  { value: 'success', label: t('dict.tagSuccess') },
+  { value: 'warning', label: t('dict.tagWarning') },
+  { value: 'danger', label: t('dict.tagDanger') },
+  { value: 'info', label: t('dict.tagInfo') },
+  { value: 'primary', label: t('dict.tagPrimary') },
+])
 
 /** 加载字典类型列表 */
 async function loadTypes() {

@@ -6,7 +6,12 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 验证码生成结果，包含验证码 Key 和 Base64 编码的图片。
+ * 验证码生成结果 DTO。
+ * <p>包含验证码 Key（UUID）和 Base64 编码的 PNG 图片，
+ * 由 {@code /api/auth/captcha} 接口返回，前端登录时提交 captchaKey + captchaCode 进行校验。</p>
+ *
+ * @author Omni-Stack Team
+ * @see LoginRequest
  */
 @Data
 @Builder

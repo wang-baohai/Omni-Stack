@@ -10,6 +10,12 @@ import java.util.List;
 
 /**
  * 用户服务接口，定义用户相关的业务操作。
+ * <p>继承 MyBatis-Plus 的 {@link IService}，提供最丰富的用户管理功能，
+ * 包括认证、注册、角色分配、权限查询、启用/禁用等。</p>
+ *
+ * @author Omni-Stack Team
+ * @see RoleService
+ * @see com.omni.auth.entity.SysUser
  */
 public interface UserService extends IService<SysUser> {
 

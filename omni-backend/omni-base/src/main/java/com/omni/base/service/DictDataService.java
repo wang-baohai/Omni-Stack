@@ -11,6 +11,7 @@ import java.util.List;
  * 字典数据服务接口。
  *
  * @author Omni-Stack Team
+ * @see com.omni.base.service.impl.DictDataServiceImpl
  */
 public interface DictDataService {
 

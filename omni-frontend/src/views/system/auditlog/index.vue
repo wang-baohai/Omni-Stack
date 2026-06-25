@@ -196,7 +196,7 @@ onMounted(loadData)
             :range-separator="t('auditLog.to')"
             :start-placeholder="t('auditLog.startTime')"
             :end-placeholder="t('auditLog.endTime')"
-            value-format="YYYY-MM-DDTHH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
             style="width: 380px"
           />
         </el-form-item>

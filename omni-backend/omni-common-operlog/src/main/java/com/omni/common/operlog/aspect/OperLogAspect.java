@@ -32,9 +32,25 @@ import java.time.LocalDateTime;
 /**
  * 操作日志 AOP 切面。
  * <p>拦截 {@link OperLog} 注解标注的 Controller 方法，自动采集请求上下文、
- * 实体变更快照，并通过 MQ 异步发送操作日志。</p>
+ * 实体变更快照，并通过 RocketMQ 异步发送操作日志。</p>
+ *
+ * <p>执行流程：</p>
+ * <ol>
+ *   <li>采集请求上下文（URL、IP、User-Agent、请求参数、用户名、租户 ID）</li>
+ *   <li>UPDATE/DELETE 操作前通过 Mapper 查询旧值快照</li>
+ *   <li>执行目标 Controller 方法</li>
+ *   <li>UPDATE 操作后查询新值并通过 {@link EntityDiffer} 计算字段级 diff</li>
+ *   <li>CREATE 操作后从返回值提取新实体 ID 并查询新值快照</li>
+ *   <li>构建 {@link OperLogMessage} 并通过 {@link OperLogProducer} 发送至 RocketMQ</li>
+ * </ol>
+ *
+ * <p>异常处理：日志采集过程中的任何异常均不影响业务逻辑，
+ * 仅记录 WARN 级别日志。目标方法抛出的异常会原样向上抛出。</p>
  *
  * @author Omni-Stack Team
+ * @see OperLog
+ * @see OperLogMessage
+ * @see EntityDiffer
  */
 @Slf4j
 @Aspect
@@ -51,6 +67,15 @@ public class OperLogAspect {
 
     private final ExpressionParser spelParser = new SpelExpressionParser();
 
+    /**
+     * 环绕通知，拦截 {@link OperLog} 注解标注的方法执行。
+     * <p>采集请求上下文 → 操作前快照 → 执行目标方法 → 操作后快照 → 构建日志消息并发送。</p>
+     *
+     * @param joinPoint AOP 切入点，提供方法参数和返回值访问
+     * @param operLog   Controller 方法上的 {@link OperLog} 注解实例
+     * @return 目标方法的原始返回值
+     * @throws Throwable 目标方法抛出的异常，原样向上抛出
+     */
     @Around("@annotation(operLog)")
     public Object around(ProceedingJoinPoint joinPoint, OperLog operLog) throws Throwable {
         long startTime = System.currentTimeMillis();
@@ -161,6 +186,11 @@ public class OperLogAspect {
 
     /**
      * 从 ApplicationContext 中查找指定实体类的 BaseMapper。
+     * <p>通过 {@link GenericTypeResolver} 解析 Bean 的泛型参数，
+     * 匹配与目标实体类类型一致的 Mapper。</p>
+     *
+     * @param entityClass 目标实体类
+     * @return 匹配的 BaseMapper 实例，未找到时返回 null
      */
     @SuppressWarnings("unchecked")
     private BaseMapper<Object> findMapper(Class<?> entityClass) {
@@ -213,11 +243,23 @@ public class OperLogAspect {
         }
     }
 
+    /**
+     * 获取当前 HTTP 请求。
+     * <p>通过 Spring 的 {@link RequestContextHolder} 获取绑定到当前线程的请求。</p>
+     *
+     * @return 当前 HttpServletRequest，非 Web 上下文时返回 null
+     */
     private HttpServletRequest getRequest() {
         ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         return attrs != null ? attrs.getRequest() : null;
     }
 
+    /**
+     * 获取当前登录用户名。
+     * <p>从 Spring Security 的 {@link SecurityContextHolder} 中提取认证信息。</p>
+     *
+     * @return 用户名，未认证时返回 null
+     */
     private String getOperUsername() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -227,6 +269,13 @@ public class OperLogAspect {
         }
     }
 
+    /**
+     * 从请求头提取租户 ID。
+     * <p>读取网关注入的 {@code X-Tenant-Id} 请求头并解析为 Long。</p>
+     *
+     * @param request HTTP 请求
+     * @return 租户 ID，解析失败或请求为 null 时返回 null
+     */
     private Long getTenantId(HttpServletRequest request) {
         if (request == null) {
             return null;
@@ -242,6 +291,15 @@ public class OperLogAspect {
         return null;
     }
 
+    /**
+     * 获取客户端真实 IP 地址。
+     * <p>依次检查 {@code X-Forwarded-For}、{@code X-Real-IP} 请求头，
+     * 均未命中时回退到 {@code request.getRemoteAddr()}。
+     * 对 {@code X-Forwarded-For} 多 IP 场景取第一个（即原始客户端 IP）。</p>
+     *
+     * @param request HTTP 请求
+     * @return 客户端 IP 地址
+     */
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
@@ -257,6 +315,14 @@ public class OperLogAspect {
         return ip;
     }
 
+    /**
+     * 序列化方法参数为 JSON 字符串。
+     * <p>过滤掉 {@link HttpServletRequest}、{@code HttpServletResponse} 等框架对象，
+     * 替换为 {@code [FILTERED]} 标记，避免序列化异常或敏感信息泄露。</p>
+     *
+     * @param args 方法参数数组
+     * @return JSON 字符串，参数为空或序列化失败时返回 null
+     */
     private String serializeArgs(Object[] args) {
         if (args == null || args.length == 0) {
             return null;
@@ -278,6 +344,12 @@ public class OperLogAspect {
         }
     }
 
+    /**
+     * 将实体对象序列化为 JSON 字符串。
+     *
+     * @param obj 实体对象
+     * @return JSON 字符串，序列化失败时返回 null
+     */
     private String toJson(Object obj) {
         try {
             return objectMapper.writeValueAsString(obj);
@@ -287,6 +359,12 @@ public class OperLogAspect {
         }
     }
 
+    /**
+     * 将 JSON 字符串反序列化为 Object。
+     *
+     * @param json JSON 字符串
+     * @return 反序列化后的对象，json 为 null 或解析失败时返回 null
+     */
     private Object parseJson(String json) {
         if (json == null) {
             return null;
@@ -298,6 +376,14 @@ public class OperLogAspect {
         }
     }
 
+    /**
+     * 截断超长字符串。
+     * <p>超过 {@link #MAX_JSON_LENGTH}（4000）字符的 JSON 快照会被截断并追加
+     * {@code ...[TRUNCATED]} 标记，避免 MQ 消息体过大。</p>
+     *
+     * @param value 原始字符串
+     * @return 截断后的字符串，value 为 null 时返回 null
+     */
     private String truncate(String value) {
         if (value == null) {
             return null;

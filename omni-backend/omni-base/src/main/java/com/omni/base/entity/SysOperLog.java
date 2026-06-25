@@ -9,10 +9,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 操作日志实体（热表）。
- * <p>追加写入，不可变记录，不继承 BaseEntity。</p>
+ * 操作日志实体（热表），对应 {@code sys_oper_log} 表。
+ * <p>记录系统中所有用户操作的实时日志，采用追加写入方式，不可变记录。
+ * 不继承 {@link com.omni.common.core.model.BaseEntity}，字段独立维护。
+ * 当日志量达到阈值时，由定时任务迁移至归档表 {@link SysOperLogArchive}。</p>
  *
  * @author Omni-Stack Team
+ * @see SysOperLogArchive
  */
 @TableName("sys_oper_log")
 public class SysOperLog implements Serializable {
@@ -20,23 +23,56 @@ public class SysOperLog implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /** 主键 ID，自增 */
     @TableId(type = IdType.AUTO)
     private Long id;
+
+    /** 租户 ID，用于多租户数据隔离 */
     private Long tenantId;
+
+    /** 操作用户名，记录执行操作的用户登录名 */
     private String operUsername;
+
+    /** 操作时间，记录操作发生的精确时间 */
     private LocalDateTime operTime;
+
+    /** 所属模块，如 "用户管理"、"角色管理"、"字典管理" 等 */
     private String module;
+
+    /** 操作类型，如 "新增"、"修改"、"删除"、"查询"、"导入"、"导出" 等 */
     private String operType;
+
+    /** HTTP 请求方法，如 GET、POST、PUT、DELETE */
     private String requestMethod;
+
+    /** 请求 URL，完整的接口访问地址 */
     private String requestUrl;
+
+    /** 请求参数，JSON 格式的入参内容，可能包含敏感信息需脱敏处理 */
     private String requestParams;
+
+    /** 响应状态码，HTTP 响应状态（如 200-成功、500-服务器错误） */
     private Integer responseStatus;
+
+    /** 客户端 IP 地址，记录操作来源的网络地址 */
     private String ipAddress;
+
+    /** 浏览器 User-Agent，记录客户端浏览器及操作系统信息 */
     private String userAgent;
+
+    /** 执行耗时（毫秒），记录接口从接收到响应的耗时 */
     private Long executionTime;
+
+    /** 变更前值，JSON 格式，记录数据修改前的原始值，用于审计追溯 */
     private String oldValue;
+
+    /** 变更后值，JSON 格式，记录数据修改后的新值，用于审计追溯 */
     private String newValue;
+
+    /** 错误信息，操作失败时记录的异常堆栈或错误描述 */
     private String errorMsg;
+
+    /** 创建时间，记录入库时间 */
     private LocalDateTime createTime;
 
     public Long getId() {

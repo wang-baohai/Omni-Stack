@@ -75,6 +75,12 @@
             <artifactId>omni-common-operlog</artifactId>
         </dependency>
 
+        <!-- Common Job Module (XXL-JOB 执行器自动配置) -->
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common-job</artifactId>
+        </dependency>
+
         <!-- Spring Cloud Stream RocketMQ (operlog 模块 optional，需显式声明) -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

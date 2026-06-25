@@ -6,6 +6,10 @@ import java.util.List;
 
 /**
  * JWT 令牌生成服务接口。
+ * <p>根据用户信息、角色列表和权限列表生成签名的 JWT 访问令牌。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.dto.LoginResult
  */
 public interface JwtTokenService {
 

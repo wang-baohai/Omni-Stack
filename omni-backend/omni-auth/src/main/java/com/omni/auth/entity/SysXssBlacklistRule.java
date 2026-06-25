@@ -8,7 +8,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * XSS 黑名单规则实体。
+ * XSS 黑名单规则实体，映射 {@code sys_xss_blacklist_rule} 表。
+ * <p>
+ * 定义 XSS 防护的正则匹配规则，支持多租户独立配置。
+ * 规则类型包括：标签过滤（tag）、属性过滤（attribute）、事件过滤（event）等。
+ * 启用状态由 {@code enabled} 字段控制，规则按 {@code sortOrder} 排序执行。</p>
+ *
+ * @author Omni-Stack Team
+ * @see SysXssConfig
+ * @see com.omni.common.core.model.BaseEntity
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

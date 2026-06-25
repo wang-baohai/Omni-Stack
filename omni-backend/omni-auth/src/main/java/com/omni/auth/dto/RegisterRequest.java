@@ -11,6 +11,12 @@ import java.io.Serializable;
 
 /**
  * 用户自助注册请求参数。
+ * <p>用于未登录用户自主注册账号，需通过验证码校验。
+ * 与管理员创建用户（{@link CreateUserRequest}）相比，额外要求验证码字段。</p>
+ *
+ * @author Omni-Stack Team
+ * @see CreateUserRequest
+ * @see LoginRequest
  */
 @Data
 public class RegisterRequest implements Serializable {

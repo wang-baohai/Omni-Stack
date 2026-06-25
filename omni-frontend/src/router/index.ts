@@ -66,6 +66,8 @@ const iconMap: Record<string, string> = {
   'system:xssconfig': 'Filter',
   'base:dict': 'Collection',
   'base:operlog': 'Tickets',
+  'job:user-job-type': 'Files',
+  'job:system-job': 'Timer',
 }
 
 /**
@@ -224,7 +226,7 @@ router.beforeEach(async (to, _from, next) => {
 
   if (to.meta.requiresAuth === false) {
     if (to.name === 'Login' && userStore.token) {
-      next({ name: 'Dashboard' })
+      next({ name: 'Home' })
     } else {
       next()
     }
@@ -244,6 +246,10 @@ router.beforeEach(async (to, _from, next) => {
         next({ name: 'Home' })
       }
     } else {
+      // 菜单已加载（可能由 Home 页预加载），确保动态路由已注册
+      // Home 页面会预加载菜单数据（menusLoaded=true），但不会注册动态路由，
+      // 因此从 Home 导航到管理后台时，需要在此处补注册。
+      registerDynamicRoutes(permissionStore.menuTree)
       next()
     }
   }

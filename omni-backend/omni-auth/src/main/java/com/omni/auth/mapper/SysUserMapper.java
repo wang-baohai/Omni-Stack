@@ -9,6 +9,12 @@ import java.util.List;
 
 /**
  * 系统用户 Mapper 接口。
+ * <p>提供 {@code sys_user} 表的 CRUD 操作，以及用户角色编码、权限编码的关联查询。
+ * 角色和权限查询结果用于 JWT Token 的 claims 填充。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.entity.SysUser
+ * @see SysUserRoleMapper
  */
 public interface SysUserMapper extends BaseMapper<SysUser> {
 

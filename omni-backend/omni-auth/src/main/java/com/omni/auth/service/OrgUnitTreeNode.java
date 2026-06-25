@@ -9,6 +9,10 @@ import java.util.List;
 
 /**
  * 组织单元树节点视图对象，包含子节点嵌套列表。
+ * <p>用于前端组织树渲染，支持递归展示公司/部门/小组层级结构。</p>
+ *
+ * @author Omni-Stack Team
+ * @see OrgUnitService
  */
 @Data
 @Builder

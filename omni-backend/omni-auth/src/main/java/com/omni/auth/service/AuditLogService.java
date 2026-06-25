@@ -6,6 +6,11 @@ import com.omni.common.core.result.PageResult;
 
 /**
  * 审计日志服务接口。
+ * <p>提供安全审计事件的保存和分页查询操作，支持租户隔离。</p>
+ *
+ * @author Omni-Stack Team
+ * @see AuditLogVO
+ * @see com.omni.auth.entity.SysAuditLog
  */
 public interface AuditLogService {
 

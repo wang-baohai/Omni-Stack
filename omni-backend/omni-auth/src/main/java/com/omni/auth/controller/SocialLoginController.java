@@ -22,11 +22,21 @@ import java.util.Base64;
 
 /**
  * 社交登录控制器。
- * <p>
- * 提供第三方 OAuth2 登录的发起和回调处理端点。
+ *
+ * <p>提供第三方 OAuth2 登录的发起和回调处理端点。
  * 两个端点均返回 HTTP 302 重定向（非标准 {@code R<T>} 响应），
  * 因为前端通过 {@code window.location.href} 触发浏览器导航。
- * </p>
+ * 路径映射在 {@code /api/auth/oauth2}。</p>
+ *
+ * <h3>接口列表：</h3>
+ * <ul>
+ *   <li>{@code GET /api/auth/oauth2/{provider}} — 发起第三方登录（302 重定向到第三方授权页）</li>
+ *   <li>{@code GET /api/auth/oauth2/{provider}/callback} — 处理第三方登录回调（302 重定向到前端）</li>
+ * </ul>
+ *
+ * @author Omni-Stack Team
+ * @see SocialLoginService
+ * @see OAuth2Properties
  */
 @Slf4j
 @RestController

@@ -11,6 +11,14 @@ import org.springframework.stereotype.Component;
  * 审计事件监听器，异步将审计事件写入数据库。
  *
  * <p>所有异常均被捕获并记录警告日志，不会影响主业务流程。</p>
+ *
+ * <p>通过 Spring {@code @Async("auditExecutor")} 注解实现异步执行，
+ * 确保审计日志写入不会阻塞主业务请求线程。当账号锁定事件触发时，
+ * 额外输出 SMS 通知占位日志，用于后续接入短信通知服务。</p>
+ *
+ * @author Omni-Stack Team
+ * @see AuditEvent
+ * @see com.omni.auth.service.AuditLogService
  */
 @Slf4j
 @Component

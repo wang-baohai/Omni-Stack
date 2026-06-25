@@ -10,9 +10,14 @@ import java.util.Map;
 
 /**
  * 实体 JSON diff 工具。
- * <p>将新旧实体序列化为 JSON，仅输出变更字段。</p>
+ * <p>将新旧实体序列化为 JSON，逐字段比较差异，仅输出变更字段。
+ * 用于 {@code OperLogAspect} 在 UPDATE 操作中生成精确的变更快照。</p>
+ *
+ * <p>算法：将两端 JSON 反序列化为 {@link LinkedHashMap}，逐 key 比较 value，
+ * 仅保留值不同的字段。支持检测新增字段、删除字段和值变更。</p>
  *
  * @author Omni-Stack Team
+ * @see com.omni.common.operlog.aspect.OperLogAspect
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -47,6 +52,8 @@ public class EntityDiffer {
 
     /**
      * 对比新旧 JSON，仅保留变更字段。
+     * <p>将两端 JSON 反序列化为 {@link LinkedHashMap}，逐 key 比较 value。
+     * 支持检测：值变更、新增字段（旧值中无）、删除字段（新值中无）。</p>
      */
     @SuppressWarnings("unchecked")
     private DiffResult computeFieldDiff(String oldJson, String newJson) {

@@ -19,6 +19,10 @@ import java.util.Set;
  * <p>实现 {@link MultiDataPermissionHandler} 以获得表级感知能力，
  * 仅作用于 {@code sys_user} 表，不影响其他表的查询。
  * 当 DataScopeContext 为空时（如登录请求），不添加任何过滤条件。</p>
+ *
+ * @author Omni-Stack Team
+ * @see DataScopeContext
+ * @see DataScopeResolveFilter
  */
 @Slf4j
 public class DataPermissionHandlerImpl implements MultiDataPermissionHandler {

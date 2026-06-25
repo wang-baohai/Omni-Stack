@@ -2,6 +2,9 @@ package com.omni.auth.service;
 
 /**
  * 账号锁定服务接口，基于 Redis 实现登录失败计数和账号锁定。
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.service.impl.AccountLockoutServiceImpl
  */
 public interface AccountLockoutService {
 

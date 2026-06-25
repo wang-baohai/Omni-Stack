@@ -22,8 +22,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 租户管理控制器。
- * <p>提供租户 CRUD 接口，路径映射在 {@code /api/auth/tenant}。</p>
  *
+ * <p>提供租户 CRUD 接口，路径映射在 {@code /api/auth/tenant}。
+ * 支持租户的增删改查操作，用于多租户体系下的租户生命周期管理。</p>
+ *
+ * <h3>接口列表：</h3>
+ * <ul>
+ *   <li>{@code GET    /api/auth/tenant/list} — 分页查询租户（权限码：{@code system:tenant:list}）</li>
+ *   <li>{@code GET    /api/auth/tenant/{id}} — 获取租户详情（权限码：{@code system:tenant:list}）</li>
+ *   <li>{@code POST   /api/auth/tenant} — 创建租户（权限码：{@code system:tenant:create}）</li>
+ *   <li>{@code PUT    /api/auth/tenant/{id}} — 更新租户（权限码：{@code system:tenant:update}）</li>
+ *   <li>{@code DELETE /api/auth/tenant/{id}} — 删除租户（权限码：{@code system:tenant:delete}）</li>
+ * </ul>
+ *
+ * @author Omni-Stack Team
  * @see TenantService
  */
 @Slf4j
@@ -37,9 +49,11 @@ public class TenantController {
     /**
      * 分页查询租户列表。
      *
+     * <!-- 权限码: system:tenant:list -->
+     *
      * @param page 页码（默认 1）
      * @param size 每页大小（默认 10）
-     * @return 租户分页结果
+     * @return 租户分页结果 {@code R<PageResult<SysTenant>>}
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('system:tenant:list')")
@@ -52,8 +66,10 @@ public class TenantController {
     /**
      * 获取租户详情。
      *
-     * @param id 租户 ID
-     * @return 租户实体
+     * <!-- 权限码: system:tenant:list -->
+     *
+     * @param id 租户 ID（路径变量）
+     * @return 租户实体 {@code R<SysTenant>}
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('system:tenant:list')")
@@ -64,8 +80,10 @@ public class TenantController {
     /**
      * 创建租户。
      *
-     * @param request 创建请求
-     * @return 创建的租户
+     * <!-- 权限码: system:tenant:create -->
+     *
+     * @param request 创建请求（含租户名称、编码、联系人等）
+     * @return 创建的租户 {@code R<SysTenant>}
      */
     @PostMapping
     @PreAuthorize("hasAuthority('system:tenant:create')")
@@ -76,9 +94,11 @@ public class TenantController {
     /**
      * 更新租户。
      *
-     * @param id      租户 ID
+     * <!-- 权限码: system:tenant:update -->
+     *
+     * @param id      租户 ID（路径变量）
      * @param request 更新请求
-     * @return 更新后的租户
+     * @return 更新后的租户 {@code R<SysTenant>}
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('system:tenant:update')")
@@ -90,7 +110,9 @@ public class TenantController {
     /**
      * 删除租户。
      *
-     * @param id 租户 ID
+     * <!-- 权限码: system:tenant:delete -->
+     *
+     * @param id 租户 ID（路径变量）
      * @return 操作结果
      */
     @DeleteMapping("/{id}")

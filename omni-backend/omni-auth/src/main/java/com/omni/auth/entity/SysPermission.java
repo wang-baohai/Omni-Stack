@@ -8,8 +8,17 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 系统权限实体。
- * <p>使用物化路径实现权限的层级结构（如菜单 -> 按钮 -> 操作）。</p>
+ * 系统权限实体，映射 {@code sys_permission} 表。
+ * <p>
+ * 使用物化路径实现权限的层级结构（如菜单 -> 按钮 -> 操作）。
+ * {@code permission_code} 字段存储权限编码（如 {@code user:read}），
+ * 与 Spring Security 的 {@code @PreAuthorize("hasAuthority('user:read')")} 对应。</p>
+ *
+ * <p>权限类型包括：菜单（menu）、按钮（button）、操作（action）等。</p>
+ *
+ * @author Omni-Stack Team
+ * @see SysRole
+ * @see com.omni.common.core.model.BaseEntity
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

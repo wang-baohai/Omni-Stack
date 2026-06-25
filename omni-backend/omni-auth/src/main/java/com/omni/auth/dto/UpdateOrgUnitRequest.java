@@ -6,7 +6,12 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 更新组织单元请求 DTO，所有字段可选（null 表示不修改）。
+ * 更新组织单元请求 DTO。
+ * <p>所有字段可选，{@code null} 表示不修改该字段。不支持修改 {@code parentId}（防止树结构混乱）。</p>
+ *
+ * @author Omni-Stack Team
+ * @see CreateOrgUnitRequest
+ * @see com.omni.auth.entity.SysOrgUnit
  */
 @Data
 public class UpdateOrgUnitRequest implements Serializable {

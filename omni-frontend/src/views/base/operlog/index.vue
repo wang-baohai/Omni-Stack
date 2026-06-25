@@ -200,7 +200,7 @@ onMounted(loadData)
             :range-separator="t('operLog.to')"
             :start-placeholder="t('operLog.startTime')"
             :end-placeholder="t('operLog.endTime')"
-            value-format="YYYY-MM-DDTHH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
             style="width: 380px"
           />
         </el-form-item>

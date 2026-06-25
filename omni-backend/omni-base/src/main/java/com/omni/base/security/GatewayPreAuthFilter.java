@@ -44,6 +44,20 @@ public class GatewayPreAuthFilter extends OncePerRequestFilter {
     private static final String HEADER_USER_ROLES = "X-User-Roles";
     private static final String HEADER_USER_SCOPES = "X-User-Scopes";
 
+    /**
+     * 执行网关预认证过滤逻辑。
+     * <p>
+     * 从请求头中提取用户身份和权限信息，构建 {@code Authentication} 对象
+     * 并设置到 {@link SecurityContextHolder} 中。若缺少 {@code X-User-Id} 请求头，
+     * 则跳过认证直接放行。
+     * </p>
+     *
+     * @param request     当前 HTTP 请求
+     * @param response    当前 HTTP 响应
+     * @param filterChain 过滤器链，用于继续执行后续过滤器
+     * @throws ServletException Servlet 处理异常
+     * @throws IOException      I/O 处理异常
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

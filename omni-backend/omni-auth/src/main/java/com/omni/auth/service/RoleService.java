@@ -9,6 +9,12 @@ import java.util.List;
 
 /**
  * 角色服务接口，提供角色 CRUD、权限分配和部门分配操作。
+ * <p>支持角色的完整生命周期管理，包括创建、查询、更新、删除，
+ * 以及角色与权限、部门的关联操作。</p>
+ *
+ * @author Omni-Stack Team
+ * @see PermissionService
+ * @see com.omni.auth.entity.SysRole
  */
 public interface RoleService {
 

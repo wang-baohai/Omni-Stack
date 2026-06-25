@@ -9,7 +9,11 @@ import java.util.List;
 
 /**
  * 用户组织关联表 Mapper 接口。
- * <p>操作 {@code sys_user_unit} 关联表，管理用户与组织单元的多对多关系。</p>
+ * <p>操作 {@code sys_user_unit} 关联表，管理用户与组织单元的多对多关系。
+ * 一个用户可关联多个组织单元，其中 {@code is_primary = 1} 的为主组织。</p>
+ *
+ * @author Omni-Stack Team
+ * @see SysOrgUnitMapper
  */
 public interface SysUserUnitMapper {
 

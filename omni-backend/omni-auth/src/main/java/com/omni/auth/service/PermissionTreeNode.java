@@ -9,6 +9,10 @@ import java.util.List;
 
 /**
  * 权限树节点视图对象，包含子节点嵌套列表和选中状态。
+ * <p>{@code checked} 字段用于前端权限分配树形控件，标记角色已分配的权限。</p>
+ *
+ * @author Omni-Stack Team
+ * @see PermissionService
  */
 @Data
 @Builder

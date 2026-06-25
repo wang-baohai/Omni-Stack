@@ -25,6 +25,17 @@ import java.time.Duration;
  * 获取用户资料。使用 JDK 内置的 {@link HttpClient} 发起 HTTP 请求，
  * 无需引入额外依赖。
  * </p>
+ *
+ * <p>该处理器通过 Spring Bean 名称 {@code "google"} 注册，由 {@code OAuth2LoginService}
+ * 通过 {@code Map<String, OAuth2ProviderHandler>} 自动注入并按需调用。
+ * 由于 Google API 在国内网络环境下无法直接访问，本处理器配置了本地代理
+ * {@code localhost:7897} 进行转发，使用时请确保代理服务已启动。
+ * 用户名从邮箱 {@code @} 前缀派生，邮箱为空时 fallback 到 Google 用户唯一标识 {@code sub}。</p>
+ *
+ * @author Omni-Stack Team
+ * @see OAuth2ProviderHandler
+ * @see com.omni.auth.config.OAuth2Properties
+ * @see com.omni.auth.dto.GoogleUser
  */
 @Slf4j
 @Component("google")

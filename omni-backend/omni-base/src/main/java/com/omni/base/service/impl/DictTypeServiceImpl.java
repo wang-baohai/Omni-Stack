@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 字典类型服务实现。
  *
  * @author Omni-Stack Team
+ * @see DictTypeService
  */
 @Slf4j
 @Service
@@ -34,6 +35,7 @@ public class DictTypeServiceImpl implements DictTypeService {
 
     private static final String CACHE_KEY_PREFIX = "dict:type:";
 
+    /** {@inheritDoc} */
     @Override
     public PageResult<SysDictType> listTypes(Long tenantId, DictTypeQuery query, int page, int size) {
         LambdaQueryWrapper<SysDictType> wrapper = new LambdaQueryWrapper<SysDictType>()
@@ -51,6 +53,7 @@ public class DictTypeServiceImpl implements DictTypeService {
                 pageResult.getSize(), pageResult.getCurrent());
     }
 
+    /** {@inheritDoc} */
     @Override
     public SysDictType getTypeById(Long id) {
         SysDictType entity = sysDictTypeMapper.selectById(id);
@@ -60,6 +63,7 @@ public class DictTypeServiceImpl implements DictTypeService {
         return entity;
     }
 
+    /** {@inheritDoc} */
     @Override
     public SysDictType createType(Long tenantId, CreateDictTypeRequest request, String operator) {
         // 校验唯一性
@@ -86,6 +90,7 @@ public class DictTypeServiceImpl implements DictTypeService {
         return entity;
     }
 
+    /** {@inheritDoc} */
     @Override
     public SysDictType updateType(Long id, UpdateDictTypeRequest request, String operator) {
         SysDictType entity = getTypeById(id);
@@ -112,6 +117,7 @@ public class DictTypeServiceImpl implements DictTypeService {
         return entity;
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public void deleteType(Long id) {
@@ -131,6 +137,7 @@ public class DictTypeServiceImpl implements DictTypeService {
         log.info("删除字典类型：id={}, typeCode={}", id, entity.getTypeCode());
     }
 
+    /** {@inheritDoc} */
     @Override
     public void toggleStatus(Long id, Integer status) {
         SysDictType entity = getTypeById(id);

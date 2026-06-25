@@ -568,3 +568,94 @@ INSERT INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, tag_typ
     (1, 'sys_common_status', '0', '禁用', 'danger',  2, 1, 'system'),
     (1, 'sys_notice_type', '1', '系统通知', 'primary', 1, 1, 'system'),
     (1, 'sys_notice_type', '2', '业务通知', 'warning', 2, 1, 'system');
+
+-- ============================================================
+-- Section 6: Base 服务 - 用户自定义任务
+-- ============================================================
+
+-- 6.1 任务类型注册表
+CREATE TABLE IF NOT EXISTS sys_user_job_type (
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    type_code      VARCHAR(50)  NOT NULL COMMENT '任务类型编码（唯一，对应 UserJobHandler Bean 名称）',
+    type_name      VARCHAR(100) NOT NULL COMMENT '任务类型名称（中文显示名）',
+    description    VARCHAR(500) DEFAULT NULL COMMENT '任务类型描述',
+    param_template JSON         DEFAULT NULL COMMENT '参数模板（JSON Schema，前端据此渲染表单）',
+    status         TINYINT      DEFAULT 1 COMMENT '状态：0-禁用, 1-启用',
+    create_time    DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_job_type_code (type_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务类型注册表';
+
+-- 6.2 用户自定义任务表
+CREATE TABLE IF NOT EXISTS sys_user_job (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '任务ID',
+    tenant_id       BIGINT       NOT NULL COMMENT '租户ID',
+    job_name        VARCHAR(100) NOT NULL COMMENT '任务名称',
+    job_type        VARCHAR(50)  NOT NULL COMMENT '任务类型编码（关联 sys_user_job_type.type_code）',
+    cron_expression VARCHAR(100) NOT NULL COMMENT 'Cron 表达式',
+    job_params      JSON         DEFAULT NULL COMMENT '任务参数（JSON 格式，由任务类型定义）',
+    status          TINYINT      DEFAULT 1 COMMENT '状态：0-禁用, 1-启用',
+    xxl_job_id      BIGINT       DEFAULT NULL COMMENT 'XXL-JOB 调度中心任务 ID',
+    last_fire_time  DATETIME     DEFAULT NULL COMMENT '上次触发时间',
+    create_time     DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time     DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    create_by       VARCHAR(64)  DEFAULT NULL COMMENT '创建人',
+    update_by       VARCHAR(64)  DEFAULT NULL COMMENT '更新人',
+    INDEX idx_user_job_tenant (tenant_id),
+    INDEX idx_user_job_xxl (xxl_job_id),
+    INDEX idx_user_job_type (job_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户自定义任务表';
+
+-- 6.3 用户任务执行日志表
+CREATE TABLE IF NOT EXISTS sys_user_job_log (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    job_id          BIGINT       NOT NULL COMMENT '关联任务ID',
+    tenant_id       BIGINT       DEFAULT NULL COMMENT '租户ID',
+    job_name        VARCHAR(100) DEFAULT NULL COMMENT '任务名称',
+    job_type        VARCHAR(50)  DEFAULT NULL COMMENT '任务类型编码',
+    fire_time       DATETIME     DEFAULT NULL COMMENT '触发时间',
+    execute_time_ms BIGINT       DEFAULT NULL COMMENT '执行耗时（毫秒）',
+    status          TINYINT      DEFAULT NULL COMMENT '0=失败, 1=成功',
+    error_message   TEXT         DEFAULT NULL COMMENT '错误信息',
+    result_message  VARCHAR(500) DEFAULT NULL COMMENT '执行结果消息（前端通知弹窗用）',
+    create_time     DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_job_log_job (job_id),
+    INDEX idx_job_log_type (job_type),
+    INDEX idx_job_log_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户任务执行日志表';
+
+-- ============================================================
+-- Section 7: Phase 2 权限节点 - 任务调度（独立一级菜单）
+-- 注意：权限表在 omni_auth 库，需切换上下文
+-- ============================================================
+USE omni_auth;
+
+-- 7.0 任务调度一级目录
+INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+VALUES
+    (110, 1, 0, 'job', '任务调度', 'DIRECTORY', '/110/', 1, 2, 1, 'system');
+
+-- 7.1 任务类型管理权限（1 MENU + 4 API = 5 条）
+INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+VALUES
+    (70, 1, 110, 'job:user-job-type',        '任务类型管理',     'MENU', '/110/70/',      2, 1, 1, 'system'),
+    (71, 1, 70,  'job:user-job-type:list',    '查看任务类型',     'API',  '/110/70/71/',   3, 1, 1, 'system'),
+    (72, 1, 70,  'job:user-job-type:create',  '创建任务类型',     'API',  '/110/70/72/',   3, 2, 1, 'system'),
+    (73, 1, 70,  'job:user-job-type:update',  '更新任务类型',     'API',  '/110/70/73/',   3, 3, 1, 'system'),
+    (74, 1, 70,  'job:user-job-type:delete',  '删除任务类型',     'API',  '/110/70/74/',   3, 4, 1, 'system');
+
+-- 7.4 SUPER_ADMIN 角色追加 Phase 2 权限
+INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+    (1, 110),
+    (1, 70), (1, 71), (1, 72), (1, 73), (1, 74);
+
+-- 7.5 系统任务管理权限（1 MENU + 2 API = 3 条）
+INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+VALUES
+    (100, 1, 110, 'job:system-job',           '系统任务',         'MENU', '/110/100/',      2, 4, 1, 'system'),
+    (101, 1, 100, 'job:system-job:list',     '查看系统任务',     'API',  '/110/100/101/',   3, 1, 1, 'system'),
+    (102, 1, 100, 'job:system-job:manage',   '管理系统任务',     'API',  '/110/100/102/',   3, 2, 1, 'system');
+
+-- 7.6 SUPER_ADMIN 角色追加系统任务权限
+INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+    (1, 100), (1, 101), (1, 102);

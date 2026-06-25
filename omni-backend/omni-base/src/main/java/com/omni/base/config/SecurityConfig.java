@@ -18,6 +18,10 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
  * 依赖 Gateway 完成 JWT 验证，通过 {@link GatewayPreAuthFilter} 从请求头中
  * 提取身份信息构建 {@code Authentication}，使 {@code @PreAuthorize} 生效。
  * </p>
+ * <p>
+ * 采用无状态会话策略（{@code STATELESS}），禁用表单登录和 CSRF，
+ * 符合微服务架构下的 API 网关转发模式。
+ * </p>
  *
  * @author Omni-Stack Team
  */

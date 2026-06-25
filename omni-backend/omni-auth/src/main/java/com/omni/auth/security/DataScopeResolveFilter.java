@@ -23,12 +23,33 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 数据范围解析过滤器。
- * <p>在 Spring Security 过滤器链之后执行，解析当前用户所有角色的
- * {@code dataScope}，取最宽松的范围，计算可访问的组织单元 ID 集合，
- * 将结果存入 {@link DataScopeContext} 供下游使用。</p>
- * <p>多角色合并规则：最宽松优先
- * （ALL &gt; TENANT &gt; DEPT_AND_BELOW &gt; DEPT &gt; CUSTOM &gt; SELF）。</p>
+ * 数据范围解析过滤器，负责在每次请求时解析当前用户的数据权限范围并写入 {@link DataScopeContext}。
+ *
+ * <h3>在安全过滤器链中的位置</h3>
+ * <p>本过滤器通过 {@code @Order(0)} 排在 Spring Security 过滤器链之后执行，
+ * 假定 {@link GatewayPreAuthFilter} 已经将 Gateway 转发的用户身份请求头
+ * （{@code X-User-Id}、{@code X-Tenant-Id}）注入到请求中。</p>
+ *
+ * <h3>核心职责</h3>
+ * <ol>
+ *   <li>从请求头中提取 {@code X-User-Id} 和 {@code X-Tenant-Id}</li>
+ *   <li>查询用户所有角色，合并各角色的 {@code dataScope}，取最宽松的范围
+ *       （ALL &gt; TENANT &gt; DEPT_AND_BELOW &gt; DEPT &gt; CUSTOM &gt; SELF）</li>
+ *   <li>根据有效 scope 计算可访问的组织单元 ID 集合
+ *       （DEPT 取主单元、DEPT_AND_BELOW 取主单元及后代、CUSTOM 取角色自定义单元及后代）</li>
+ *   <li>将解析结果封装为 {@link DataScopeContext.DataScopeInfo} 写入 ThreadLocal，
+ *       供 {@link DataPermissionHandlerImpl} 和在线用户内存过滤使用</li>
+ *   <li>在 {@code finally} 块中清除 ThreadLocal，防止内存泄漏</li>
+ * </ol>
+ *
+ * <h3>跳过条件</h3>
+ * <p>当请求不包含 {@code X-User-Id} 头时（如未认证的公开接口），直接放行，不设置上下文。
+ * 此时 {@link DataPermissionHandlerImpl} 不会追加任何数据权限过滤条件。</p>
+ *
+ * @author Omni-Stack Team
+ * @see DataScopeContext
+ * @see DataPermissionHandlerImpl
+ * @see GatewayPreAuthFilter
  */
 @Slf4j
 @Component
@@ -41,6 +62,19 @@ public class DataScopeResolveFilter extends OncePerRequestFilter {
     private final SysRoleDeptMapper sysRoleDeptMapper;
     private final SysUserMapper sysUserMapper;
 
+    /**
+     * 执行数据范围解析过滤逻辑。
+     *
+     * <p>从请求头中提取用户 ID 和租户 ID，调用 {@link #resolveAndSet(Long, Long)}
+     * 解析数据范围并写入 {@link DataScopeContext}，在 {@code finally} 块中清除上下文。
+     * 无 {@code X-User-Id} 头或解析失败时直接放行。</p>
+     *
+     * @param request     HTTP 请求，需包含 Gateway 注入的 {@code X-User-Id} 请求头
+     * @param response    HTTP 响应
+     * @param filterChain 过滤器链
+     * @throws ServletException Servlet 异常
+     * @throws IOException      IO 异常
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

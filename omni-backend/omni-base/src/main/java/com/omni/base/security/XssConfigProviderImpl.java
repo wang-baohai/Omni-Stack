@@ -36,6 +36,16 @@ public class XssConfigProviderImpl implements XssConfigProvider {
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
 
+    /**
+     * 从 Redis 缓存中获取指定租户的 XSS 配置。
+     * <p>
+     * 优先从 Redis 读取缓存数据，若缓存未命中或反序列化失败，
+     * 则返回关闭状态的默认配置（安全降级策略）。
+     * </p>
+     *
+     * @param tenantId 租户 ID，不能为 {@code null}
+     * @return 对应租户的 {@link XssSettings} 配置，缓存未命中时返回关闭状态的默认配置
+     */
     @Override
     public XssSettings getXssSettings(Long tenantId) {
         String enabledKey = CACHE_KEY_ENABLED + tenantId;

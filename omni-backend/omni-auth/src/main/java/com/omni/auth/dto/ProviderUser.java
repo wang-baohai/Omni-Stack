@@ -13,6 +13,9 @@ import java.io.Serializable;
  * 由各 {@link com.omni.auth.oauth.OAuth2ProviderHandler} 实现内部映射，
  * 将不同第三方 API 的原始响应归一化为此通用结构，使上层编排逻辑与 provider 特定字段完全解耦。
  * </p>
+ * @author Omni-Stack Team
+ * @see GitHubUser
+ * @see GoogleUser
  */
 @Data
 @Builder

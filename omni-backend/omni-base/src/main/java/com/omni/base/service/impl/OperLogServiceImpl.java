@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
  * 操作日志服务实现。
  *
  * @author Omni-Stack Team
+ * @see OperLogService
  */
 @Slf4j
 @Service
@@ -25,6 +26,7 @@ public class OperLogServiceImpl implements OperLogService {
 
     private final SysOperLogMapper sysOperLogMapper;
 
+    /** {@inheritDoc} */
     @Override
     public void save(OperLogMessage message) {
         SysOperLog entity = new SysOperLog();
@@ -46,6 +48,7 @@ public class OperLogServiceImpl implements OperLogService {
         sysOperLogMapper.insert(entity);
     }
 
+    /** {@inheritDoc} */
     @Override
     public PageResult<OperLogVO> listOperLogs(Long tenantId, OperLogQuery query) {
         LambdaQueryWrapper<SysOperLog> wrapper = new LambdaQueryWrapper<>();
@@ -80,6 +83,12 @@ public class OperLogServiceImpl implements OperLogService {
         );
     }
 
+    /**
+     * 将实体转换为视图对象。
+     *
+     * @param entity 操作日志实体
+     * @return 操作日志视图对象
+     */
     private OperLogVO toVO(SysOperLog entity) {
         return OperLogVO.builder()
                 .id(entity.getId())

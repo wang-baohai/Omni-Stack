@@ -15,6 +15,7 @@ import java.util.Collection;
  * <p>通过 {@link OmniUserDetailsService} 在认证过程中构建，
  * 可从 {@code Authentication.getPrincipal()} 获取。</p>
  *
+ * @author Omni-Stack Team
  * @see OmniUserDetailsService
  */
 @Getter

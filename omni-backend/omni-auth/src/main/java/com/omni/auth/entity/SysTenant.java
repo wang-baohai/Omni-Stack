@@ -8,7 +8,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 系统租户实体。
+ * 系统租户实体，映射 {@code sys_tenant} 表。
+ * <p>
+ * 多租户架构的核心实体，每个租户拥有独立的用户、角色、权限和数据空间。
+ * {@code tenantCode} 为租户唯一标识，{@code domain} 可用于自定义域名绑定。</p>
+ *
+ * @author Omni-Stack Team
+ * @see SysUser
+ * @see com.omni.common.core.model.BaseEntity
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

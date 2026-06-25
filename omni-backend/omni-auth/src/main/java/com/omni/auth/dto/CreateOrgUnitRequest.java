@@ -9,6 +9,11 @@ import java.io.Serializable;
 
 /**
  * 创建组织单元请求 DTO。
+ * <p>用于新增公司/部门/小组等组织节点，必须指定父节点 ID 和类型。</p>
+ *
+ * @author Omni-Stack Team
+ * @see UpdateOrgUnitRequest
+ * @see com.omni.auth.entity.SysOrgUnit
  */
 @Data
 public class CreateOrgUnitRequest implements Serializable {

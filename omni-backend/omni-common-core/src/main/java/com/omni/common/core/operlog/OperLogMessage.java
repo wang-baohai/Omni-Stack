@@ -6,9 +6,16 @@ import java.time.LocalDateTime;
 
 /**
  * 操作日志 MQ 传输消息。
- * <p>由 AOP 切面构建，通过 RocketMQ 异步发送至日志消费端。</p>
+ * <p>由 {@code OperLogAspect} 切面构建，通过 RocketMQ 异步发送至日志消费端
+ * （{@code OperLogConsumer}），消费端将消息写入 {@code sys_oper_log} 表。</p>
+ *
+ * <p>消息传递链路：
+ * Controller 方法执行 → {@code OperLogAspect} 采集上下文 → 构建 {@code OperLogMessage} →
+ * {@code OperLogProducer.send()} → RocketMQ Topic → {@code OperLogConsumer.accept()} →
+ * INSERT INTO sys_oper_log</p>
  *
  * @author Omni-Stack Team
+ * @see OperLog
  */
 public class OperLogMessage implements Serializable {
 

@@ -8,6 +8,11 @@ import java.io.Serializable;
 
 /**
  * 创建 XSS 黑名单规则请求 DTO。
+ * <p>用于新增 XSS 过滤规则，规则名称和正则表达式为必填项。</p>
+ *
+ * @author Omni-Stack Team
+ * @see UpdateXssRuleRequest
+ * @see com.omni.auth.entity.SysXssBlacklistRule
  */
 @Data
 public class CreateXssRuleRequest implements Serializable {

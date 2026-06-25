@@ -48,6 +48,11 @@ spring:
               uri: lb://omni-base
               predicates:
                 - Path=/api/base/**
+            # Job scheduler route (定时任务管理)
+            - id: omni-base-job
+              uri: lb://omni-base
+              predicates:
+                - Path=/api/job/**
   data:
     redis:
       host: 127.0.0.1

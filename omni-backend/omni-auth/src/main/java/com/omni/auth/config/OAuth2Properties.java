@@ -7,8 +7,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * OAuth2 第三方登录配置属性。
  * <p>
  * 绑定 {@code auth.oauth2.*} 配置节点，提供 GitHub、Google、Gitee 等第三方提供商的
- * 凭证信息及全局安全参数。
- * </p>
+ * 凭证信息及全局安全参数。由 {@link AuthorizationServerConfig} 消费。</p>
+ *
+ * <p>配置示例：</p>
+ * <pre>{@code
+ * auth:
+ *   oauth2:
+ *     state-secret: your-secret-key
+ *     frontend-callback-url: http://localhost:3000/callback
+ *     github:
+ *       client-id: Iv1.xxxx
+ *       client-secret: xxxx
+ * }</pre>
+ *
+ * @author Omni-Stack Team
+ * @see AuthorizationServerConfig
  */
 @Data
 @ConfigurationProperties(prefix = "auth.oauth2")

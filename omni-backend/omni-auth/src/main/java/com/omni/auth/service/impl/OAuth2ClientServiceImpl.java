@@ -31,6 +31,9 @@ import java.util.stream.Collectors;
  * OAuth2 客户端管理服务实现。
  * <p>使用 {@link RegisteredClientRepository} 进行 CRUD 操作，
  * 使用 MyBatis-Plus 进行分页查询。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.service.OAuth2ClientService
  */
 @Slf4j
 @Service

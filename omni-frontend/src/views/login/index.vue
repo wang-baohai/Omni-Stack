@@ -15,10 +15,10 @@ const { t, locale } = useI18n()
 const router = useRouter()
 const appStore = useAppStore()
 
-/** 登录成功回调：显示成功提示并跳转到仪表盘 */
+/** 登录成功回调：显示成功提示并跳转到工作台 */
 function handleSuccess() {
   ElMessage.success(t('login.loginSuccess'))
-  router.push({ name: 'Dashboard' })
+  router.push({ name: 'Home' })
 }
 
 /** 切换主题模式 */

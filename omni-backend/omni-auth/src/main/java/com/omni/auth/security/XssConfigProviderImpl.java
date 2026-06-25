@@ -29,6 +29,10 @@ import java.util.stream.Collectors;
  *   <li>{@code xss:rules:{tenantId}} — 已启用规则的 JSON 数组</li>
  * </ul>
  * 缓存 TTL 为 30 分钟，由管理端写操作主动清除缓存以保证一致性。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.common.core.security.XssConfigProvider
+ * @see com.omni.common.core.security.XssSettings
  */
 @Slf4j
 @Component
@@ -57,6 +61,9 @@ public class XssConfigProviderImpl implements XssConfigProvider {
      * <p>优先从 Redis 读取全局开关和已启用规则列表，缓存命中时直接反序列化返回；
      * 缓存未命中时回源数据库查询并将结果写入 Redis（TTL 30 分钟）。
      * 若数据库中未找到租户配置，则返回关闭状态的默认配置。</p>
+     *
+     * @param tenantId 租户 ID
+     * @return XSS 防护配置，包含全局开关和已启用规则列表
      */
     @Override
     public XssSettings getXssSettings(Long tenantId) {

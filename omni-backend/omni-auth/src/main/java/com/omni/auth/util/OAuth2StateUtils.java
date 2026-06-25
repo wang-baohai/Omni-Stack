@@ -22,6 +22,14 @@ import java.util.HexFormat;
  * </ul>
  * 格式：{@code tenantId|timestamp|hex(HMAC-SHA256(tenantId|timestamp, secret))}
  * </p>
+ *
+ * <p>该工具类由 {@code OAuth2LoginService} 在构建授权 URL 时调用 {@link #createState(Long)}
+ * 生成 state，在 OAuth2 回调时调用 {@link #extractTenantId(String)} 验证并还原租户信息。
+ * HMAC 密钥从 {@link com.omni.auth.config.OAuth2Properties#getStateSecret()} 获取。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.config.OAuth2Properties
+ * @see com.omni.auth.oauth.OAuth2ProviderHandler
  */
 @Slf4j
 @Component

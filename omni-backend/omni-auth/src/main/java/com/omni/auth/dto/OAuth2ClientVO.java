@@ -10,6 +10,12 @@ import java.util.Set;
 
 /**
  * OAuth2 客户端视图对象，用于管理页面展示。
+ * <p>封装 {@code oauth2_registered_client} 表的可读视图，
+ * 客户端密钥已脱敏处理（仅显示前缀）。</p>
+ *
+ * @author Omni-Stack Team
+ * @see CreateOAuth2ClientRequest
+ * @see com.omni.auth.entity.OAuth2RegisteredClient
  */
 @Data
 @Builder

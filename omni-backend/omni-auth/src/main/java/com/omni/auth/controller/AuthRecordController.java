@@ -14,8 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 授权记录控制器。
- * <p>提供 OAuth2 授权记录的分页查询接口，路径映射在 {@code /api/auth/auth-record}。</p>
  *
+ * <p>提供 OAuth2 授权记录的分页查询接口，路径映射在 {@code /api/auth/auth-record}。
+ * 用于查看系统中所有 OAuth2 授权事件的历史记录。</p>
+ *
+ * <h3>接口列表：</h3>
+ * <ul>
+ *   <li>{@code GET /api/auth/auth-record/list} — 分页查询授权记录（权限码：{@code system:authrecord:list}）</li>
+ * </ul>
+ *
+ * @author Omni-Stack Team
  * @see AuthRecordService
  */
 @Slf4j
@@ -29,9 +37,11 @@ public class AuthRecordController {
     /**
      * 分页查询授权记录。
      *
+     * <!-- 权限码: system:authrecord:list -->
+     *
      * @param page 页码（默认 1）
      * @param size 每页大小（默认 10）
-     * @return 授权记录分页结果
+     * @return 授权记录分页结果 {@code R<PageResult<AuthRecordVO>>}
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('system:authrecord:list')")

@@ -13,6 +13,8 @@ spring:
     import:
       - optional:nacos:omni-base.yml
   cloud:
+    function:
+      definition: operlogConsumer
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
@@ -56,3 +58,18 @@ mybatis-plus:
 logging:
   level:
     com.omni.base.mapper: debug
+
+# XXL-JOB 执行器配置
+xxl:
+  job:
+    admin:
+      addresses: http://127.0.0.1:18080/xxl-job-admin
+      username: admin
+      password: 123456
+    executor:
+      appname: omni-base
+      address: http://host.docker.internal:9901/
+      ip: host.docker.internal
+      port: 9901
+      logpath: ./logs/xxl-job
+      logretentiondays: 30

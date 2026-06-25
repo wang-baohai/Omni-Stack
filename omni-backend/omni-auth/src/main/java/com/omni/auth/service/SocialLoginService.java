@@ -7,6 +7,9 @@ import com.omni.auth.dto.LoginResult;
  * <p>
  * 提供第三方 OAuth2 登录的发起和回调处理，支持 GitHub 等第三方提供商。
  * </p>
+ * @author Omni-Stack Team
+ * @see com.omni.auth.dto.LoginResult
+ * @see com.omni.auth.oauth.OAuth2ProviderHandler
  */
 public interface SocialLoginService {
 

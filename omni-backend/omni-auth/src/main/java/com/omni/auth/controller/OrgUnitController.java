@@ -24,8 +24,20 @@ import java.util.List;
 
 /**
  * 组织管理控制器。
- * <p>提供组织单元树 CRUD 接口，路径映射在 {@code /api/auth/org}。</p>
  *
+ * <p>提供组织单元树 CRUD 接口，路径映射在 {@code /api/auth/org}。
+ * 支持组织树的查询、创建、更新和删除（级联删除后代节点）操作。</p>
+ *
+ * <h3>接口列表：</h3>
+ * <ul>
+ *   <li>{@code GET    /api/auth/org/tree} — 获取组织树（权限码：{@code system:org:list}）</li>
+ *   <li>{@code GET    /api/auth/org/{id}} — 获取组织单元详情（权限码：{@code system:org:list}）</li>
+ *   <li>{@code POST   /api/auth/org} — 创建组织单元（权限码：{@code system:org:create}）</li>
+ *   <li>{@code PUT    /api/auth/org/{id}} — 更新组织单元（权限码：{@code system:org:update}）</li>
+ *   <li>{@code DELETE /api/auth/org/{id}} — 删除组织单元（权限码：{@code system:org:delete}）</li>
+ * </ul>
+ *
+ * @author Omni-Stack Team
  * @see OrgUnitService
  */
 @Slf4j
@@ -39,8 +51,10 @@ public class OrgUnitController {
     /**
      * 获取组织树。
      *
-     * @param tenantId 租户 ID
-     * @return 组织树形结构
+     * <!-- 权限码: system:org:list -->
+     *
+     * @param tenantId 租户 ID（由 Gateway 注入）
+     * @return 组织树形结构 {@code R<List<OrgUnitTreeNode>>}
      */
     @GetMapping("/tree")
     @PreAuthorize("hasAuthority('system:org:list')")
@@ -52,8 +66,10 @@ public class OrgUnitController {
     /**
      * 获取组织单元详情。
      *
-     * @param id 组织单元 ID
-     * @return 组织单元实体
+     * <!-- 权限码: system:org:list -->
+     *
+     * @param id 组织单元 ID（路径变量）
+     * @return 组织单元实体 {@code R<SysOrgUnit>}
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('system:org:list')")
@@ -64,9 +80,11 @@ public class OrgUnitController {
     /**
      * 创建组织单元。
      *
-     * @param request  创建请求
-     * @param tenantId 租户 ID
-     * @return 创建的组织单元
+     * <!-- 权限码: system:org:create -->
+     *
+     * @param request  创建请求（含名称、父级 ID、排序等）
+     * @param tenantId 租户 ID（由 Gateway 注入）
+     * @return 创建的组织单元 {@code R<SysOrgUnit>}
      */
     @PostMapping
     @PreAuthorize("hasAuthority('system:org:create')")
@@ -78,9 +96,11 @@ public class OrgUnitController {
     /**
      * 更新组织单元。
      *
-     * @param id      组织单元 ID
+     * <!-- 权限码: system:org:update -->
+     *
+     * @param id      组织单元 ID（路径变量）
      * @param request 更新请求
-     * @return 更新后的组织单元
+     * @return 更新后的组织单元 {@code R<SysOrgUnit>}
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('system:org:update')")
@@ -92,7 +112,9 @@ public class OrgUnitController {
     /**
      * 删除组织单元（级联删除后代节点）。
      *
-     * @param id 组织单元 ID
+     * <!-- 权限码: system:org:delete -->
+     *
+     * @param id 组织单元 ID（路径变量）
      * @return 操作结果
      */
     @DeleteMapping("/{id}")

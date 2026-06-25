@@ -27,8 +27,23 @@ import java.util.List;
 
 /**
  * 用户管理控制器。
- * <p>提供用户 CRUD、角色分配和状态切换接口，路径映射在 {@code /api/auth/user}。</p>
  *
+ * <p>提供用户 CRUD、角色分配和状态切换接口，路径映射在 {@code /api/auth/user}。
+ * 所有写操作均会记录操作人和客户端 IP 用于审计追踪。</p>
+ *
+ * <h3>接口列表：</h3>
+ * <ul>
+ *   <li>{@code GET    /api/auth/user/list} — 分页查询用户（权限码：{@code system:user:list}）</li>
+ *   <li>{@code GET    /api/auth/user/{id}} — 根据 ID 查询用户（权限码：{@code system:user:list}）</li>
+ *   <li>{@code POST   /api/auth/user} — 创建用户（权限码：{@code system:user:create}）</li>
+ *   <li>{@code PUT    /api/auth/user/{id}} — 更新用户信息（权限码：{@code system:user:update}）</li>
+ *   <li>{@code DELETE /api/auth/user/{id}} — 删除用户（权限码：{@code system:user:delete}）</li>
+ *   <li>{@code POST   /api/auth/user/{userId}/roles} — 分配用户角色（权限码：{@code system:user:update}）</li>
+ *   <li>{@code GET    /api/auth/user/{userId}/roles} — 获取用户角色 ID 列表（权限码：{@code system:user:list}）</li>
+ *   <li>{@code PUT    /api/auth/user/{userId}/status} — 切换用户启用/禁用（权限码：{@code system:user:update}）</li>
+ * </ul>
+ *
+ * @author Omni-Stack Team
  * @see UserService
  */
 @Slf4j
@@ -42,8 +57,10 @@ public class UserController {
     /**
      * 根据 ID 查询用户。
      *
-     * @param id 用户 ID
-     * @return 用户实体
+     * <!-- 权限码: system:user:list -->
+     *
+     * @param id 用户 ID（路径变量）
+     * @return 用户实体 {@code R<SysUser>}
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('system:user:list')")
@@ -54,10 +71,12 @@ public class UserController {
     /**
      * 分页查询用户列表。
      *
+     * <!-- 权限码: system:user:list -->
+     *
      * @param page     页码（默认 1）
      * @param size     每页大小（默认 10）
      * @param tenantId 租户 ID（由 Gateway 注入）
-     * @return 分页用户列表
+     * @return 分页用户列表 {@code R<PageResult<SysUser>>}
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('system:user:list')")
@@ -70,6 +89,8 @@ public class UserController {
 
     /**
      * 创建新用户。
+     *
+     * <!-- 权限码: system:user:create -->
      *
      * @param request     创建用户请求（含用户名、密码、租户 ID 等）
      * @param httpRequest HTTP 请求，用于提取操作人 IP
@@ -88,8 +109,10 @@ public class UserController {
     /**
      * 更新用户信息。
      *
-     * @param id   用户 ID
-     * @param user 更新后的用户实体
+     * <!-- 权限码: system:user:update -->
+     *
+     * @param id   用户 ID（路径变量）
+     * @param user 更新后的用户实体（请求体）
      * @return 操作结果
      */
     @PutMapping("/{id}")
@@ -103,7 +126,9 @@ public class UserController {
     /**
      * 删除用户。
      *
-     * @param id          用户 ID
+     * <!-- 权限码: system:user:delete -->
+     *
+     * @param id          用户 ID（路径变量）
      * @param httpRequest HTTP 请求，用于提取操作人 IP
      * @return 操作结果
      */
@@ -120,8 +145,10 @@ public class UserController {
     /**
      * 分配用户角色（全量替换）。
      *
-     * @param userId      用户 ID
-     * @param roleIds     角色 ID 列表
+     * <!-- 权限码: system:user:update -->
+     *
+     * @param userId      用户 ID（路径变量）
+     * @param roleIds     角色 ID 列表（请求体）
      * @param httpRequest HTTP 请求，用于提取操作人 IP
      * @return 操作结果
      */
@@ -139,8 +166,10 @@ public class UserController {
     /**
      * 获取用户已分配的角色 ID 列表。
      *
-     * @param userId 用户 ID
-     * @return 角色 ID 列表
+     * <!-- 权限码: system:user:list -->
+     *
+     * @param userId 用户 ID（路径变量）
+     * @return 角色 ID 列表 {@code R<List<Long>>}
      */
     @GetMapping("/{userId}/roles")
     @PreAuthorize("hasAuthority('system:user:list')")
@@ -151,7 +180,9 @@ public class UserController {
     /**
      * 切换用户启用/禁用状态。
      *
-     * @param userId      用户 ID
+     * <!-- 权限码: system:user:update -->
+     *
+     * @param userId      用户 ID（路径变量）
      * @param status      目标状态：1-启用, 0-禁用
      * @param httpRequest HTTP 请求，用于提取操作人 IP
      * @return 操作结果

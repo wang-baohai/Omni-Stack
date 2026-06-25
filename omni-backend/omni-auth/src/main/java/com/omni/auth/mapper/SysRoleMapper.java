@@ -9,6 +9,11 @@ import java.util.List;
 
 /**
  * 系统角色 Mapper 接口。
+ * <p>提供 {@code sys_role} 表的 CRUD 操作，以及通过关联表查询用户角色的方法。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.entity.SysRole
+ * @see SysUserRoleMapper
  */
 public interface SysRoleMapper extends BaseMapper<SysRole> {
 

@@ -4,6 +4,10 @@ import java.util.List;
 
 /**
  * 在线用户服务接口，提供基于 Redis 的在线用户追踪和强制下线操作。
+ * <p>通过 Redis 存储用户的 JWT Token ID（jti），实现分布式环境下的在线用户管理。</p>
+ *
+ * @author Omni-Stack Team
+ * @see OnlineUserVO
  */
 public interface OnlineUserService {
 

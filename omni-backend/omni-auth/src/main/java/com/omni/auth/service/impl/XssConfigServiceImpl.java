@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  *
  * <p>所有写操作均会同步清除 Redis 缓存，保证配置变更即时生效。</p>
  *
+ * @author Omni-Stack Team
  * @see XssConfigService
  */
 @Slf4j

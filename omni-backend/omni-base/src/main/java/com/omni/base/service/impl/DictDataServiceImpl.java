@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
  * 字典数据服务实现，包含 Redis 缓存策略。
  *
  * @author Omni-Stack Team
+ * @see DictDataService
  */
 @Slf4j
 @Service
@@ -42,6 +43,7 @@ public class DictDataServiceImpl implements DictDataService {
     private static final String CACHE_KEY_PREFIX = "dict:type:";
     private static final long CACHE_TTL_MINUTES = 30;
 
+    /** {@inheritDoc} */
     @Override
     public PageResult<SysDictData> listDataByTypeCode(Long tenantId, String typeCode, int page, int size) {
         LambdaQueryWrapper<SysDictData> wrapper = new LambdaQueryWrapper<SysDictData>()
@@ -55,6 +57,7 @@ public class DictDataServiceImpl implements DictDataService {
                 pageResult.getSize(), pageResult.getCurrent());
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<SysDictData> listEnabledData(Long tenantId, String typeCode) {
         String cacheKey = CACHE_KEY_PREFIX + tenantId + ":" + typeCode;
@@ -90,6 +93,7 @@ public class DictDataServiceImpl implements DictDataService {
         return dataList;
     }
 
+    /** {@inheritDoc} */
     @Override
     public SysDictData createData(Long tenantId, CreateDictDataRequest request, String operator) {
         // 校验父字典类型存在
@@ -122,6 +126,7 @@ public class DictDataServiceImpl implements DictDataService {
         return entity;
     }
 
+    /** {@inheritDoc} */
     @Override
     public SysDictData updateData(Long id, UpdateDictDataRequest request, String operator) {
         SysDictData entity = sysDictDataMapper.selectById(id);
@@ -156,6 +161,7 @@ public class DictDataServiceImpl implements DictDataService {
         return entity;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void deleteData(Long id) {
         SysDictData entity = sysDictDataMapper.selectById(id);
@@ -170,6 +176,7 @@ public class DictDataServiceImpl implements DictDataService {
         log.info("删除字典数据：id={}, typeCode={}", id, entity.getTypeCode());
     }
 
+    /** {@inheritDoc} */
     @Override
     public void refreshCache(Long tenantId, String typeCode) {
         String cacheKey = CACHE_KEY_PREFIX + tenantId + ":" + typeCode;

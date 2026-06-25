@@ -9,6 +9,11 @@ import java.util.List;
 
 /**
  * 创建角色请求 DTO。
+ * <p>用于新增系统角色，支持创建时直接分配初始权限列表。角色编码在同一租户下唯一。</p>
+ *
+ * @author Omni-Stack Team
+ * @see UpdateRoleRequest
+ * @see com.omni.auth.entity.SysRole
  */
 @Data
 public class CreateRoleRequest implements Serializable {

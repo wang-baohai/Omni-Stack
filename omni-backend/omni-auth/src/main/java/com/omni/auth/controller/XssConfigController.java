@@ -25,8 +25,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * XSS 防护配置控制器。
- * <p>提供 XSS 全局开关管理、黑名单规则 CRUD 接口，路径映射在 {@code /api/auth/xss-config}。</p>
  *
+ * <p>提供 XSS 全局开关管理、黑名单规则 CRUD 接口，路径映射在 {@code /api/auth/xss-config}。
+ * 支持 XSS 防护的全局启用/禁用、黑名单规则的增删改查及单条规则状态切换。</p>
+ *
+ * <h3>接口列表：</h3>
+ * <ul>
+ *   <li>{@code GET    /api/auth/xss-config/settings} — 获取 XSS 防护设置（权限码：{@code system:xssconfig:list}）</li>
+ *   <li>{@code PUT    /api/auth/xss-config/toggle} — 切换全局开关（权限码：{@code system:xssconfig:update}）</li>
+ *   <li>{@code GET    /api/auth/xss-config/rules/list} — 分页查询黑名单规则（权限码：{@code system:xssconfig:list}）</li>
+ *   <li>{@code POST   /api/auth/xss-config/rules} — 创建黑名单规则（权限码：{@code system:xssconfig:create}）</li>
+ *   <li>{@code PUT    /api/auth/xss-config/rules/{id}} — 更新黑名单规则（权限码：{@code system:xssconfig:update}）</li>
+ *   <li>{@code DELETE /api/auth/xss-config/rules/{id}} — 删除黑名单规则（权限码：{@code system:xssconfig:delete}）</li>
+ *   <li>{@code PUT    /api/auth/xss-config/rules/{id}/toggle} — 切换规则启用状态（权限码：{@code system:xssconfig:update}）</li>
+ * </ul>
+ *
+ * @author Omni-Stack Team
  * @see XssConfigService
  */
 @Slf4j
@@ -40,8 +54,10 @@ public class XssConfigController {
     /**
      * 获取 XSS 防护设置（全局开关 + 全部规则列表）。
      *
+     * <!-- 权限码: system:xssconfig:list -->
+     *
      * @param tenantId 租户 ID（从请求头 {@code X-Tenant-Id} 获取）
-     * @return XSS 防护设置视图对象
+     * @return XSS 防护设置视图对象 {@code R<XssSettingsVO>}
      */
     @GetMapping("/settings")
     @PreAuthorize("hasAuthority('system:xssconfig:list')")
@@ -52,8 +68,10 @@ public class XssConfigController {
     /**
      * 切换 XSS 防护全局开关。
      *
+     * <!-- 权限码: system:xssconfig:update -->
+     *
      * @param tenantId 租户 ID（从请求头 {@code X-Tenant-Id} 获取）
-     * @param enabled  是否启用
+     * @param enabled  是否启用（{@code true} 启用，{@code false} 禁用）
      * @return 操作结果
      */
     @PutMapping("/toggle")
@@ -68,10 +86,12 @@ public class XssConfigController {
     /**
      * 分页查询 XSS 黑名单规则列表。
      *
+     * <!-- 权限码: system:xssconfig:list -->
+     *
      * @param tenantId 租户 ID（从请求头 {@code X-Tenant-Id} 获取）
      * @param page     页码（默认 1）
      * @param size     每页大小（默认 10）
-     * @return 黑名单规则分页结果
+     * @return 黑名单规则分页结果 {@code R<PageResult<BlacklistRuleVO>>}
      */
     @GetMapping("/rules/list")
     @PreAuthorize("hasAuthority('system:xssconfig:list')")
@@ -84,9 +104,11 @@ public class XssConfigController {
     /**
      * 创建 XSS 黑名单规则。
      *
+     * <!-- 权限码: system:xssconfig:create -->
+     *
      * @param tenantId 租户 ID（从请求头 {@code X-Tenant-Id} 获取）
-     * @param request  创建请求
-     * @return 创建的规则视图对象
+     * @param request  创建请求（含规则名称、匹配模式等）
+     * @return 创建的规则视图对象 {@code R<BlacklistRuleVO>}
      */
     @PostMapping("/rules")
     @PreAuthorize("hasAuthority('system:xssconfig:create')")
@@ -99,9 +121,11 @@ public class XssConfigController {
     /**
      * 更新 XSS 黑名单规则。
      *
-     * @param id      规则 ID
+     * <!-- 权限码: system:xssconfig:update -->
+     *
+     * @param id      规则 ID（路径变量）
      * @param request 更新请求
-     * @return 更新后的规则视图对象
+     * @return 更新后的规则视图对象 {@code R<BlacklistRuleVO>}
      */
     @PutMapping("/rules/{id}")
     @PreAuthorize("hasAuthority('system:xssconfig:update')")
@@ -114,7 +138,9 @@ public class XssConfigController {
     /**
      * 删除 XSS 黑名单规则。
      *
-     * @param id 规则 ID
+     * <!-- 权限码: system:xssconfig:delete -->
+     *
+     * @param id 规则 ID（路径变量）
      * @return 操作结果
      */
     @DeleteMapping("/rules/{id}")
@@ -127,8 +153,10 @@ public class XssConfigController {
     /**
      * 切换单条 XSS 黑名单规则的启用状态。
      *
-     * @param id      规则 ID
-     * @param enabled 是否启用
+     * <!-- 权限码: system:xssconfig:update -->
+     *
+     * @param id      规则 ID（路径变量）
+     * @param enabled 是否启用（{@code true} 启用，{@code false} 禁用）
      * @return 操作结果
      */
     @PutMapping("/rules/{id}/toggle")

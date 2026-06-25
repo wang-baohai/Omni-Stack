@@ -23,7 +23,9 @@ import org.springframework.stereotype.Component;
  * 密码登录（{@code /api/auth/login}）和会话登录（{@code /api/auth/session-login}）
  * 产生的认证事件因类型不匹配会被自动忽略。</p>
  *
+ * @author Omni-Stack Team
  * @see OnlineUserService#recordOnline(Long, String, String, long)
+ * @see OmniUserDetails
  */
 @Slf4j
 @Component

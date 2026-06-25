@@ -22,6 +22,9 @@ import java.util.List;
 /**
  * 角色服务实现类。
  * <p>提供角色 CRUD、权限分配和 CUSTOM 数据范围部门分配操作。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.service.RoleService
  */
 @Slf4j
 @Service

@@ -24,6 +24,14 @@ import java.time.Duration;
  * 获取用户资料。使用 JDK 内置的 {@link HttpClient} 发起 HTTP 请求，
  * 无需引入额外依赖。
  * </p>
+ *
+ * <p>该处理器通过 Spring Bean 名称 {@code "github"} 注册，由 {@code OAuth2LoginService}
+ * 通过 {@code Map<String, OAuth2ProviderHandler>} 自动注入并按需调用。</p>
+ *
+ * @author Omni-Stack Team
+ * @see OAuth2ProviderHandler
+ * @see com.omni.auth.config.OAuth2Properties
+ * @see com.omni.auth.dto.GitHubUser
  */
 @Slf4j
 @Component("github")
@@ -187,7 +195,10 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
     }
 
     /**
-     * URL 编码。
+     * 对指定字符串进行 URL 编码（UTF-8）。
+     *
+     * @param value 待编码的字符串
+     * @return URL 编码后的字符串
      */
     private static String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);

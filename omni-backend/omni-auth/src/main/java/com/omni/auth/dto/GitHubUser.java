@@ -12,6 +12,8 @@ import java.io.Serializable;
  * 对应 GitHub API {@code GET /user} 返回的用户资料，
  * 仅映射社交登录流程所需的字段。
  * </p>
+ * @author Omni-Stack Team
+ * @see ProviderUser
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

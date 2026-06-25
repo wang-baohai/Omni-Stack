@@ -10,6 +10,7 @@ import com.omni.common.core.result.PageResult;
  * 字典类型服务接口。
  *
  * @author Omni-Stack Team
+ * @see com.omni.base.service.impl.DictTypeServiceImpl
  */
 public interface DictTypeService {
 

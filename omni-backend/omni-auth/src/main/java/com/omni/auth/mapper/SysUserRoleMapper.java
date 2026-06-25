@@ -9,7 +9,12 @@ import java.util.List;
 
 /**
  * 用户角色关联表 Mapper 接口。
- * <p>操作 {@code sys_user_role} 关联表，管理用户与角色的多对多关系。</p>
+ * <p>操作 {@code sys_user_role} 关联表，管理用户与角色的多对多关系。
+ * 支持单条插入、批量删除、指定删除和查询用户角色列表。</p>
+ *
+ * @author Omni-Stack Team
+ * @see SysUserMapper
+ * @see SysRoleMapper
  */
 public interface SysUserRoleMapper {
 

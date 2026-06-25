@@ -19,8 +19,17 @@ import java.util.stream.Collectors;
 
 /**
  * 动态菜单控制器。
+ *
  * <p>为前端提供动态菜单数据，基于当前用户的权限集合过滤出有权访问的
  * DIRECTORY 和 MENU 类型节点。路径映射在 {@code /api/auth/menus}。</p>
+ *
+ * <h3>接口列表：</h3>
+ * <ul>
+ *   <li>{@code GET /api/auth/menus} — 获取当前用户的动态菜单树（基于 JWT 中的权限自动过滤）</li>
+ * </ul>
+ *
+ * @author Omni-Stack Team
+ * @see PermissionService
  */
 @Slf4j
 @RestController

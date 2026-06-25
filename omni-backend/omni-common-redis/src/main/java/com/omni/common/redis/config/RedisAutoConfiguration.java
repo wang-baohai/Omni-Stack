@@ -15,8 +15,10 @@ import com.omni.common.redis.util.RedisUtils;
  * <p>提供已配置 Jackson 序列化的 {@link RedisTemplate} 和 {@link RedisUtils} 工具类。
  * Key 和 HashKey 使用 {@link StringRedisSerializer}，Value 和 HashValue 使用
  * {@link GenericJacksonJsonRedisSerializer}（自动嵌入类型信息以支持多态反序列化）。</p>
+ * <p>生效条件：classpath 中存在 {@code RedisTemplate} 类且应用未自定义同名 Bean。</p>
  *
  * @author Omni-Stack
+ * @see RedisUtils
  */
 @AutoConfiguration
 @ConditionalOnClass(RedisTemplate.class)

@@ -7,7 +7,13 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 更新角色请求 DTO，所有字段可选（null 表示不修改）。
+ * 更新角色请求 DTO。
+ * <p>所有字段可选，{@code null} 表示不修改该字段。
+ * {@code permissionIds} 非 {@code null} 时全量替换角色的权限关联。</p>
+ *
+ * @author Omni-Stack Team
+ * @see CreateRoleRequest
+ * @see com.omni.auth.entity.SysRole
  */
 @Data
 public class UpdateRoleRequest implements Serializable {

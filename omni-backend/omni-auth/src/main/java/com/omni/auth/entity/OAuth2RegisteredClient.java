@@ -11,8 +11,17 @@ import java.time.LocalDateTime;
 
 /**
  * OAuth2 注册客户端实体，映射 {@code oauth2_registered_client} 表。
- * <p>由 Spring Authorization Server 的 {@code JdbcRegisteredClientRepository} 管理，
- * 此实体仅用于 MyBatis-Plus 分页查询和展示。</p>
+ * <p>
+ * 由 Spring Authorization Server 的 {@code JdbcRegisteredClientRepository} 管理，
+ * 此实体仅用于 MyBatis-Plus 分页查询和管理界面展示。
+ * 客户端的创建和修改应通过 {@link com.omni.auth.config.OAuth2ClientInitializer} 或
+ * SAS 提供的 {@code RegisteredClientRepository} 接口进行。</p>
+ *
+ * <p>表结构特点：主键为 UUID 字符串，{@code client_settings} 和 {@code token_settings} 以 JSON 格式存储。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.config.OAuth2ClientInitializer
+ * @see com.omni.auth.config.DeviceClientInitializer
  */
 @Data
 @TableName("oauth2_registered_client")

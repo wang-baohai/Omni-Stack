@@ -10,6 +10,11 @@ import java.util.List;
 
 /**
  * 租户服务接口，提供租户相关的查询和管理操作。
+ * <p>支持活跃租户列表查询（登录页用）和完整的租户 CRUD 管理。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.dto.TenantOption
+ * @see com.omni.auth.entity.SysTenant
  */
 public interface TenantService {
 

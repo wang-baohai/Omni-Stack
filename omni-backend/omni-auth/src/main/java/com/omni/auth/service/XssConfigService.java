@@ -8,6 +8,11 @@ import com.omni.common.core.result.PageResult;
 
 /**
  * XSS 防护配置服务接口，提供租户级 XSS 全局开关和黑名单规则的管理操作。
+ * <p>支持获取 XSS 设置、切换全局开关、黑名单规则的 CRUD 和启用状态切换。</p>
+ *
+ * @author Omni-Stack Team
+ * @see com.omni.auth.dto.XssSettingsVO
+ * @see com.omni.auth.dto.BlacklistRuleVO
  */
 public interface XssConfigService {
 

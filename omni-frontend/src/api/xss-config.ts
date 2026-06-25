@@ -44,21 +44,34 @@ export interface UpdateXssRuleRequest {
   enabled?: number
 }
 
-/** 从 JWT 获取租户 ID，注入 X-Tenant-Id 请求头 */
+/**
+ * 从 JWT 获取租户 ID，注入 X-Tenant-Id 请求头。
+ *
+ * @returns 包含 X-Tenant-Id 的请求头对象
+ */
 function tenantHeaders(): Record<string, string> {
   const userStore = useUserStore()
   const tenantId = getTenantIdFromToken(userStore.token)
   return tenantId ? { 'X-Tenant-Id': String(tenantId) } : {}
 }
 
-/** 获取 XSS 防护设置（全局开关 + 规则列表） */
+/**
+ * 获取 XSS 防护设置（全局开关 + 规则列表）。
+ *
+ * @returns XSS 防护设置对象
+ */
 export function getXssSettings() {
   return request.get<ApiResponse<XssSettings>>('/auth/xss-config/settings', {
     headers: tenantHeaders(),
   })
 }
 
-/** 切换 XSS 防护全局开关 */
+/**
+ * 切换 XSS 防护全局开关。
+ *
+ * @param enabled - 是否启用全局 XSS 防护
+ * @returns 空结果
+ */
 export function toggleXssGlobal(enabled: boolean) {
   return request.put<ApiResponse<void>>('/auth/xss-config/toggle', null, {
     params: { enabled },
@@ -66,7 +79,13 @@ export function toggleXssGlobal(enabled: boolean) {
   })
 }
 
-/** 分页查询 XSS 黑名单规则列表 */
+/**
+ * 分页查询 XSS 黑名单规则列表。
+ *
+ * @param page - 页码
+ * @param size - 每页大小
+ * @returns 分页规则列表
+ */
 export function listXssRules(page: number, size: number) {
   return request.get<ApiResponse<PageResult<BlacklistRule>>>('/auth/xss-config/rules/list', {
     params: { page, size },
@@ -74,24 +93,46 @@ export function listXssRules(page: number, size: number) {
   })
 }
 
-/** 创建 XSS 黑名单规则 */
+/**
+ * 创建 XSS 黑名单规则。
+ *
+ * @param data - 创建请求
+ * @returns 创建成功的规则实体
+ */
 export function createXssRule(data: CreateXssRuleRequest) {
   return request.post<ApiResponse<BlacklistRule>>('/auth/xss-config/rules', data, {
     headers: tenantHeaders(),
   })
 }
 
-/** 更新 XSS 黑名单规则 */
+/**
+ * 更新 XSS 黑名单规则。
+ *
+ * @param id - 规则 ID
+ * @param data - 更新请求
+ * @returns 更新后的规则实体
+ */
 export function updateXssRule(id: number, data: UpdateXssRuleRequest) {
   return request.put<ApiResponse<BlacklistRule>>(`/auth/xss-config/rules/${id}`, data)
 }
 
-/** 删除 XSS 黑名单规则 */
+/**
+ * 删除 XSS 黑名单规则。
+ *
+ * @param id - 规则 ID
+ * @returns 空结果
+ */
 export function deleteXssRule(id: number) {
   return request.delete<ApiResponse<void>>(`/auth/xss-config/rules/${id}`)
 }
 
-/** 切换单条 XSS 黑名单规则的启用状态 */
+/**
+ * 切换单条 XSS 黑名单规则的启用状态。
+ *
+ * @param id - 规则 ID
+ * @param enabled - 是否启用
+ * @returns 空结果
+ */
 export function toggleXssRule(id: number, enabled: boolean) {
   return request.put<ApiResponse<void>>(`/auth/xss-config/rules/${id}/toggle`, null, {
     params: { enabled },

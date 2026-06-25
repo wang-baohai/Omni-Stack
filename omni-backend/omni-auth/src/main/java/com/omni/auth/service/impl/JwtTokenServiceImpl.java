@@ -47,6 +47,7 @@ import java.util.UUID;
  * 并缓存到应用生命周期结束。由于 JWK 密钥源在启动时生成一次密钥对（内存中，临时性的），
  * 密钥在应用运行期间不会变化。使用 {@code volatile} 字段的双重检查锁定模式确保线程安全的延迟初始化。</p>
  *
+ * @author Omni-Stack Team
  * @see JwtTokenService
  * @see com.omni.auth.config.AuthorizationServerConfig#jwkSource()
  */
