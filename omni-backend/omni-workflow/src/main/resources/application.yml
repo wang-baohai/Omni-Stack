@@ -1,0 +1,60 @@
+server:
+  port: 8103
+
+spring:
+  application:
+    name: omni-workflow
+  profiles:
+    active: dev
+    group:
+      dev:
+        include: local
+  config:
+    import:
+      - optional:nacos:omni-workflow.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        username: nacos
+        password: nacos
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        username: nacos
+        password: nacos
+        file-extension: yml
+    stream:
+      rocketmq:
+        binder:
+          name-server: 127.0.0.1:9876
+      bindings:
+        operlog-out-0:
+          destination: operlog-topic
+          content-type: application/json
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/omni_workflow?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+
+# MyBatis-Plus 开发环境配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# Flowable 流程引擎配置
+flowable:
+  database-schema-update: true
+  async-executor-activate: true
+  history-level: audit
+
+logging:
+  level:
+    com.omni.workflow: debug

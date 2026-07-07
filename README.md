@@ -26,6 +26,7 @@
 - **基础数据与任务管理**：`omni-base` 服务（端口 8101）提供数据字典管理、系统任务管理、用户任务管理、操作日志查看，Redis cache-aside 缓存，前端完整管理页面
 - **操作日志审计追踪**：基于 `@OperLog` 注解 + AOP 切面无侵入采集，自动记录 who/when/what/changed 完整审计信息，实体变更快照自动 diff（oldValue vs newValue）支持数据回溯，RocketMQ 异步发送不阻塞业务请求，热冷表分离归档策略（180 天保留 + 冷表长期留存）兼顾查询性能与合规要求，与审计日志（`sys_audit_log`）和登录日志（`sys_login_log`）形成互补，共同构成完整的审计追踪体系
 - **双轨制定时任务调度**：基于 XXL-JOB 3.3.1 实现系统任务（`@XxlJob` + `@SystemJobMeta` 双注解驱动，自动注册调度中心）和用户任务（SPI 模式，`UserJobHandler` 接口 + JSON 参数路由）两种模式，前端支持 Cron 编辑器、动态参数表单、执行日志实时推送
+- **可视化 BPMN 工作流引擎**：基于 Flowable 7.x 实现，`omni-workflow` 独立微服务（端口 8103），前端 BPMN 可视化设计器支持拖拽建模，双版本管理（业务版本 DRAFT → PUBLISHED → ARCHIVED + Flowable 引擎版本），多实例会签支持 ALL/ANY 审批模式，动态候选人解析（`omni:assignment` JSON 扩展 + `ScopedRoleAssignmentListener` 运行时解析），审批记录 + 流程进度图 + 抄送通知完整可用
 - **Maven Wrapper** 内置，克隆即可构建，无需全局安装 Maven
 
 ## 技术栈
@@ -41,6 +42,7 @@
 | 流控/熔断  | Sentinel Dashboard                       | 1.8.8         |
 | 消息队列   | Apache RocketMQ                        | 5.3.2         |
 | 任务调度   | XXL-JOB Admin                          | 3.3.1         |
+| 工作流引擎 | Flowable BPMN                          | 7.x           |
 | 前端框架   | Vue 3 + TypeScript                       | 3.5.35 / 5.9.3|
 | 构建工具   | Vite 8 (Rolldown)                        | 8.0.14        |
 | UI 框架   | Element Plus                             | 2.14.0        |
@@ -79,8 +81,10 @@ Omni-Stack/
 │   ├── omni-common-redis-reactive/    # 响应式 Redis Starter：WebFlux 服务专用
 │   ├── omni-common-operlog/             # 操作日志 Starter：AOP 切面 + MQ 生产者 + 实体 diff
 │   ├── omni-common-job/                 # 定时任务 Starter：XXL-JOB 自动装配 + Admin Client + 系统任务注册
+│   ├── omni-common-workflow/            # 工作流 Starter：Flowable 自动装配 + 审批 SPI + 租户过滤
 │   ├── omni-auth/                     # 认证服务：登录、验证码、JWT、OAuth2 (端口 8100)
 │   ├── omni-base/                     # 基础数据服务：数据字典管理 (端口 8101)
+│   ├── omni-workflow/                   # 工作流引擎服务：Flowable BPMN (端口 8103)
 │   └── omni-gateway/                  # API 网关 (WebFlux, 端口 8102)
 ├── omni-frontend/                   # Vue 3 SPA (开发服务器端口 3000)
 │   ├── package.json
@@ -114,7 +118,12 @@ Omni-Stack/
 │   :3000         │────>│  StripPrefix=2    │     │    omni-base     │
 └─────────────────┘     └──────────────────┘     │   Spring :8101  │
                             │                    │  数据字典管理    │
-                    ┌───────┴────────┐            └─────────────────┘
+                            │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │  omni-workflow   │
+                            │                    │  Flowable :8103  │
+                            │                    └─────────────────┘
+                    ┌───────┴────────┐
                     │  MySQL :3306   │  持久化存储
                     │  Redis :6379   │  缓存 + 验证码 + 字典缓存
                     │  Nacos :8848   │  服务发现 + 配置中心
@@ -319,6 +328,7 @@ npm run dev
 | 认证服务 | 8100 | Spring Security + OAuth2 Authorization Server |
 | 基础数据服务 | 8101 | 数据字典管理，Redis cache-aside 缓存 |
 | API 网关 | 8102 | Spring Cloud Gateway (WebFlux) |
+| 工作流引擎服务 | 8103 | Flowable BPMN 流程引擎 |
 | MySQL | 3306 | 主数据库（omni_auth + omni_base + xxl_job 库） |
 | Redis | 6379 | 验证码缓存 + 字典缓存 + XSS 配置缓存 |
 | Nacos | 8080, 8848 | 管理界面 (8080) + 服务发现与配置中心 (8848) |
@@ -342,6 +352,7 @@ npm run dev
 | `omni-common-redis-reactive` | 响应式 Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux 服务（Gateway） |
 | `omni-common-operlog` | 操作日志 Starter：`@OperLog` AOP 切面 + RocketMQ 生产者 + 实体变更 diff | 业务服务 |
 | `omni-common-job` | 定时任务 Starter：XXL-JOB 自动装配 + Admin Client + 系统任务注册表 + `@SystemJobMeta` 双注解驱动 | 业务服务 |
+| `omni-common-workflow` | 工作流 Starter：Flowable 自动配置、`ApprovalService` SPI、`UserGroupLookup`、`TenantInfoFilter` | 工作流服务 |
 
 > 所有 Starter 通过 Spring Boot 自动配置机制（`AutoConfiguration.imports`）注册 Bean，下游模块无需手动 `@ComponentScan`。
 > `omni-common-redis` 和 `omni-common-redis-reactive` 不可混用，WebFlux 服务只能依赖 reactive 版本。
@@ -438,6 +449,37 @@ npm run dev
 ### 前端集成
 
 三个入口：系统任务管理（`SystemJob`）、任务类型管理（`UserJobType`）、工作台我的任务（`MyJob`）。支持 Cron 表达式编辑器、`DynamicFormRenderer` 动态参数表单、以及每 10 秒轮询活跃任务日志并通过 `ElNotification` 推送执行结果。
+
+## 工作流引擎
+
+项目基于 **Flowable 7.x** 构建了可视化 BPMN 工作流引擎，支持模型设计、版本管理、多实例会签审批等能力。深度技术细节见 [`docs/workflow.md`](docs/workflow.md)。
+
+### 架构概览
+
+- **omni-workflow**：独立微服务（端口 8103），集成 Flowable BPMN 引擎，提供模型管理、流程定义、实例监控、审批处理、统计看板等 7 个控制器
+- **omni-common-workflow**：共享 Starter，提供 `FlowableAutoConfiguration`、`ApprovalService` SPI、`UserGroupLookup`、`TenantInfoFilter` 等基础设施
+
+### 核心能力
+
+- **可视化模型设计**：前端 BPMN 设计器支持拖拽建模、XML 编辑、校验预览，`BpmnXmlBuilder` 将设计器 JSON 转换为 BPMN 2.0 XML
+- **双版本管理**：业务版本（DRAFT → PUBLISHED → ARCHIVED）在 `wf_process_model_version` 表中管理，引擎版本由 Flowable deployment 机制管理
+- **多实例会签**：支持 ALL（全员通过）和 ANY（任一通过）两种审批模式，通过 MI `completionCondition` 控制，任一驳回立即终止
+- **动态候选人解析**：`omni:assignment` JSON 扩展元素 + `ScopedRoleAssignmentListener` 运行时解析，支持多种锚点类型（发起人主组织 / 上级组织 / 绝对组织等）
+- **审批记录 + 流程进度图 + 抄送通知**：完整的流程追踪能力，`HistoricTaskInstance` 级精度判定审批结果
+
+### 数据库表（omni_workflow 库）
+
+| 表 | 说明 |
+|----|------|
+| `wf_process_model` | 流程模型主表，`model_key` 租户内唯一 |
+| `wf_process_model_version` | 模型版本表，存储 BPMN XML + 部署信息 |
+| `wf_process_instance_ext` | 流程实例扩展表，关联模型版本与 Flowable 实例 |
+| `wf_todo_task` | 待办任务缓存表 |
+| `wf_cc_record` | 抄送记录表 |
+
+### 前端集成
+
+7 个页面/组件覆盖完整工作流场景：模型管理（`ModelDesigner`）、版本历史（`VersionHistoryDialog`）、校验结果（`ValidateResultDialog`）、流程定义、流程实例、审批记录（`ApprovalRecordsDialog`）、流程进度（`ProcessProgressDialog`）、统计看板。
 
 ## RBAC 权限体系
 

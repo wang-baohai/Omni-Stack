@@ -1,0 +1,11 @@
+SET NAMES utf8mb4;
+USE omni_auth;
+UPDATE sys_user SET nickname='张三' WHERE id=100;
+UPDATE sys_user SET nickname='李四' WHERE id=101;
+UPDATE sys_user SET nickname='李四2' WHERE id=102;
+UPDATE sys_user SET nickname='王五' WHERE id=103;
+UPDATE sys_user SET nickname='王五2' WHERE id=104;
+UPDATE sys_user SET nickname='赵六' WHERE id=105;
+UPDATE sys_user SET nickname='赵六2' WHERE id=106;
+UPDATE sys_user SET nickname='钱七' WHERE id=107;
+UPDATE sys_user SET nickname='钱七2' WHERE id=108;

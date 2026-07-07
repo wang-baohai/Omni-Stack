@@ -1,94 +1,3 @@
-<template>
-  <!-- Schema 字段编辑器：可视化编辑 JSON Schema 参数模板 -->
-  <div class="schema-field-editor">
-    <!-- 提示信息 -->
-    <el-alert type="info" :closable="false" show-icon style="margin-bottom: 12px">
-      {{ t('userJobType.paramTemplateHint') }}
-    </el-alert>
-    <!-- 表头行 -->
-    <el-row v-if="fields.length > 0" :gutter="8" class="header-row">
-      <el-col :span="4">
-        <span>{{ t('userJobType.headerFieldKey') }}</span>
-        <el-tooltip :content="t('userJobType.tipFieldKey')" placement="top">
-          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
-        </el-tooltip>
-      </el-col>
-      <el-col :span="4">
-        <span>{{ t('userJobType.headerFieldLabel') }}</span>
-        <el-tooltip :content="t('userJobType.tipFieldLabel')" placement="top">
-          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
-        </el-tooltip>
-      </el-col>
-      <el-col :span="4">
-        <span>{{ t('userJobType.headerFieldType') }}</span>
-        <el-tooltip :content="t('userJobType.tipFieldType')" placement="top">
-          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
-        </el-tooltip>
-      </el-col>
-      <el-col :span="3">
-        <span>{{ t('userJobType.headerFieldRequired') }}</span>
-        <el-tooltip :content="t('userJobType.tipFieldRequired')" placement="top">
-          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
-        </el-tooltip>
-      </el-col>
-      <el-col :span="6">
-        <span>{{ t('userJobType.headerFieldDefault') }}</span>
-        <el-tooltip :content="t('userJobType.tipFieldDefault')" placement="top">
-          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
-        </el-tooltip>
-      </el-col>
-      <el-col :span="3"></el-col>
-    </el-row>
-    <!-- 字段列表 -->
-    <div v-for="(field, index) in fields" :key="index" class="field-row">
-      <el-row :gutter="8" align="middle">
-        <el-col :span="4">
-          <el-input v-model="field.key" :placeholder="t('userJobType.fieldKeyPlaceholder')" size="small" />
-        </el-col>
-        <el-col :span="4">
-          <el-input v-model="field.label" :placeholder="t('userJobType.fieldLabelPlaceholder')" size="small" />
-        </el-col>
-        <el-col :span="4">
-          <el-select v-model="field.type" :placeholder="t('userJobType.fieldType')" size="small" @change="onTypeChange(index)">
-            <el-option :label="t('userJobType.typeText')" value="string" />
-            <el-option :label="t('userJobType.typeNumber')" value="number" />
-            <el-option :label="t('userJobType.typeBoolean')" value="boolean" />
-            <el-option :label="t('userJobType.typeSelect')" value="select" />
-            <el-option :label="t('userJobType.typeTextarea')" value="textarea" />
-          </el-select>
-        </el-col>
-        <el-col :span="3">
-          <el-checkbox v-model="field.required" :label="t('userJobType.fieldRequired')" size="small" />
-        </el-col>
-        <el-col :span="6">
-          <el-input v-if="field.type !== 'boolean' && field.type !== 'select'"
-                    v-model="field.defaultValue" :placeholder="t('userJobType.fieldDefault')" size="small" />
-          <el-switch v-else-if="field.type === 'boolean'" v-model="field.defaultBool" />
-          <div v-else class="options-editor">
-            <el-tag v-for="(opt, oi) in field.options" :key="oi" closable
-                    @close="removeOption(index, oi)" size="small" style="margin-right:4px">
-              {{ opt.label }}
-            </el-tag>
-            <el-input v-model="newOptionLabel" :placeholder="t('userJobType.optionName')" size="small"
-                      style="width:80px;display:inline-block"
-                      @keyup.enter="addOption(index)" />
-            <el-button link type="primary" size="small" @click="addOption(index)">+</el-button>
-          </div>
-        </el-col>
-        <el-col :span="3">
-          <el-button link type="danger" size="small" @click="removeField(index)">{{ t('userJobType.deleteField') }}</el-button>
-        </el-col>
-      </el-row>
-    </div>
-    <!-- 空状态提示 -->
-    <el-empty v-if="fields.length === 0" :description="t('userJobType.emptyParams')" :image-size="60" />
-    <!-- 添加字段按钮 -->
-    <el-button type="primary" link @click="addField" style="margin-top:8px">
-      + {{ t('userJobType.addField') }}
-    </el-button>
-  </div>
-</template>
-
 <script setup lang="ts">
 /**
  * Schema 字段编辑器组件。
@@ -270,6 +179,100 @@ watch(() => props.modelValue, (val) => {
   }
 })
 </script>
+
+<template>
+  <!-- Schema 字段编辑器：可视化编辑 JSON Schema 参数模板 -->
+  <div class="schema-field-editor">
+    <!-- 提示信息 -->
+    <el-alert type="info" :closable="false" show-icon style="margin-bottom: 12px">
+      {{ t('userJobType.paramTemplateHint') }}
+    </el-alert>
+    <!-- 表头行 -->
+    <el-row v-if="fields.length > 0" :gutter="8" class="header-row">
+      <el-col :span="4">
+        <span>{{ t('userJobType.headerFieldKey') }}</span>
+        <el-tooltip :content="t('userJobType.tipFieldKey')" placement="top">
+          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
+        </el-tooltip>
+      </el-col>
+      <el-col :span="4">
+        <span>{{ t('userJobType.headerFieldLabel') }}</span>
+        <el-tooltip :content="t('userJobType.tipFieldLabel')" placement="top">
+          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
+        </el-tooltip>
+      </el-col>
+      <el-col :span="4">
+        <span>{{ t('userJobType.headerFieldType') }}</span>
+        <el-tooltip :content="t('userJobType.tipFieldType')" placement="top">
+          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
+        </el-tooltip>
+      </el-col>
+      <el-col :span="3">
+        <span>{{ t('userJobType.headerFieldRequired') }}</span>
+        <el-tooltip :content="t('userJobType.tipFieldRequired')" placement="top">
+          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
+        </el-tooltip>
+      </el-col>
+      <el-col :span="6">
+        <span>{{ t('userJobType.headerFieldDefault') }}</span>
+        <el-tooltip :content="t('userJobType.tipFieldDefault')" placement="top">
+          <el-icon class="tip-icon"><QuestionFilled /></el-icon>
+        </el-tooltip>
+      </el-col>
+      <el-col :span="3"></el-col>
+    </el-row>
+    <!-- 字段列表 -->
+    <div v-for="(field, index) in fields" :key="index" class="field-row">
+      <el-row :gutter="8" align="middle">
+        <el-col :span="4">
+          <el-input v-model="field.key" :placeholder="t('userJobType.fieldKeyPlaceholder')" size="small" />
+        </el-col>
+        <el-col :span="4">
+          <el-input v-model="field.label" :placeholder="t('userJobType.fieldLabelPlaceholder')" size="small" />
+        </el-col>
+        <el-col :span="4">
+          <el-select v-model="field.type" :placeholder="t('userJobType.fieldType')" size="small" @change="onTypeChange(index)">
+            <el-option :label="t('userJobType.typeText')" value="string" />
+            <el-option :label="t('userJobType.typeNumber')" value="number" />
+            <el-option :label="t('userJobType.typeBoolean')" value="boolean" />
+            <el-option :label="t('userJobType.typeSelect')" value="select" />
+            <el-option :label="t('userJobType.typeTextarea')" value="textarea" />
+          </el-select>
+        </el-col>
+        <el-col :span="3">
+          <el-checkbox v-model="field.required" :label="t('userJobType.fieldRequired')" size="small" />
+        </el-col>
+        <el-col :span="6">
+          <el-input
+            v-if="field.type !== 'boolean' && field.type !== 'select'"
+            v-model="field.defaultValue" :placeholder="t('userJobType.fieldDefault')" size="small" />
+          <el-switch v-else-if="field.type === 'boolean'" v-model="field.defaultBool" />
+          <div v-else class="options-editor">
+            <el-tag
+              v-for="(opt, oi) in field.options" :key="oi" closable
+              size="small" style="margin-right:4px" @close="removeOption(index, oi)">
+              {{ opt.label }}
+            </el-tag>
+            <el-input
+              v-model="newOptionLabel" :placeholder="t('userJobType.optionName')" size="small"
+              style="width:80px;display:inline-block"
+              @keyup.enter="addOption(index)" />
+            <el-button link type="primary" size="small" @click="addOption(index)">+</el-button>
+          </div>
+        </el-col>
+        <el-col :span="3">
+          <el-button link type="danger" size="small" @click="removeField(index)">{{ t('userJobType.deleteField') }}</el-button>
+        </el-col>
+      </el-row>
+    </div>
+    <!-- 空状态提示 -->
+    <el-empty v-if="fields.length === 0" :description="t('userJobType.emptyParams')" :image-size="60" />
+    <!-- 添加字段按钮 -->
+    <el-button type="primary" link style="margin-top:8px" @click="addField">
+      + {{ t('userJobType.addField') }}
+    </el-button>
+  </div>
+</template>
 
 <style scoped>
 .header-row {

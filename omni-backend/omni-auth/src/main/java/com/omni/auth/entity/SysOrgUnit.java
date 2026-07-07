@@ -37,6 +37,8 @@ public class SysOrgUnit extends BaseEntity {
     private String name;
     /** 组织单元类型 */
     private String type;
+    /** 单元编码（同父节点下唯一） */
+    private String unitCode;
     /** 物化路径（如 /1/2/3/） */
     private String path;
     /** 树深度 */

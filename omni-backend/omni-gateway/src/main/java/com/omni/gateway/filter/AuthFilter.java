@@ -9,13 +9,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.List;
@@ -108,8 +111,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         String authHeader = request.getHeaders().getFirst(AUTH_HEADER);
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             log.warn("Missing or invalid authorization token for path: {}", path);
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            return writeUnauthorizedResponse(exchange, "请先登录");
         }
 
         // 截取 "Bearer " 之后的 JWT 字符串
@@ -135,8 +137,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 // 不捕获其他异常（如下游服务不可用），避免路由错误误报为 JWT 错误
                 .onErrorResume(SecurityException.class, e -> {
                     log.warn("JWT validation failed for path: {}: {}", path, e.getMessage());
-                    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                    return exchange.getResponse().setComplete();
+                    String msg = "JWT token expired".equals(e.getMessage())
+                            ? "登录已过期，请重新登录"
+                            : "认证失败，请重新登录";
+                    return writeUnauthorizedResponse(exchange, msg);
                 });
     }
 
@@ -271,6 +275,28 @@ public class AuthFilter implements GlobalFilter, Ordered {
                     }
                     return Mono.just(claims);
                 });
+    }
+
+    /**
+     * 向前端写入结构化 JSON 错误响应。
+     * <p>
+     * 响应格式与后端 {@code R.fail()} 保持一致：
+     * {@code {"code":401,"message":"...","data":null}}。
+     * 设置 {@code Content-Type: application/json} 响应头，
+     * 使用 {@link DataBuffer} 将 JSON 字符串写入响应体。
+     * </p>
+     *
+     * @param exchange 当前请求上下文
+     * @param message  错误消息
+     * @return 响应写入完成的 Mono 信号
+     */
+    private Mono<Void> writeUnauthorizedResponse(ServerWebExchange exchange, String message) {
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        String json = "{\"code\":401,\"message\":\"" + message + "\",\"data\":null}";
+        DataBuffer buffer = exchange.getResponse().bufferFactory()
+                .wrap(json.getBytes(StandardCharsets.UTF_8));
+        return exchange.getResponse().writeWith(Mono.just(buffer));
     }
 
     /**

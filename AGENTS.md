@@ -32,6 +32,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/frontend-patterns.md` | Vue/TS patterns, state management, routing, permission control, component conventions |
 | `docs/core-flows.md` | End-to-end traces of login (password + captcha, GitHub social, Gitee social, device code), RBAC functional permission (Flow 5), data permission (Flow 6), XSS defense (Flow 8) |
 | `docs/scheduling.md` | Scheduled task system: dual-track architecture (system tasks + user tasks), XXL-JOB integration, creating new task types |
+| `docs/workflow.md` | Workflow engine: Flowable integration, dual-version model management, multi-instance countersign, candidate resolution, approval flows |
 
 ## Entry Points
 
@@ -95,6 +96,17 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Frontend workspace (my jobs): `omni-frontend/src/views/home/index.vue`
 - Frontend API modules: `omni-frontend/src/api/myJob.ts`, `omni-frontend/src/api/systemJob.ts`, `omni-frontend/src/api/userJobType.ts`
 
+**Workflow:**
+- Workflow service: `omni-backend/omni-workflow/src/main/java/com/omni/workflow/WorkflowApplication.java`
+- Common workflow starter: `omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/`
+- Model controller: `omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowModelController.java`
+- Approval controller: `omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ApprovalController.java`
+- Process instance controller: `omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessInstanceController.java`
+- Candidate resolver: `omni-backend/omni-workflow/src/main/java/com/omni/workflow/listener/ScopedRoleAssignmentListener.java`
+- BPMN engine tools: `omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/`
+- Frontend model designer: `omni-frontend/src/views/workflow/model/index.vue`
+- Frontend API: `omni-frontend/src/api/workflow.ts`
+
 ## Build & Run Commands
 
 ### Prerequisites
@@ -127,6 +139,10 @@ cd omni-backend/omni-base
 
 # Run Gateway (port 8102)
 cd omni-backend/omni-gateway
+./mvnw spring-boot:run
+
+# Run Workflow service (port 8103)
+cd omni-backend/omni-workflow
 ./mvnw spring-boot:run
 ```
 
@@ -189,6 +205,7 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 | Auth             | 8100  |
 | Base             | 8101  |
 | Gateway          | 8102  |
+| Workflow         | 8103  |
 | MySQL            | 3306  |
 | Redis            | 6379  |
 | Nacos            | 8080, 8848  |
@@ -231,6 +248,11 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - All user tasks share a single `@XxlJob("userJobExecuteHandler")`. Individual task routing is via JSON `executorParam` containing `UserJobMessage`, not separate XXL-JOB handlers.
 - XXL-JOB registration failure in `UserJobServiceImpl.createJob()` MUST rollback the DB record (`sysUserJobMapper.deleteById`). Never leave orphaned `sys_user_job` rows without a corresponding XXL-JOB entry.
 - `XxlJobAdminClient` session cookie is `volatile` and must not be persisted across restarts. The client auto-re-logins when the cookie is null or expired.
+- `omni-workflow` is a standalone microservice (port 8103) — do NOT merge it into `omni-base` or `omni-auth`.
+- MI completionCondition triggers task skip with `deleteReason = "MI_END"` (not `"deleted"`). Always use `HistoricTaskInstance.getDeleteReason()` for approval result determination, never `HistoricActivityInstance` parent lookup (putIfAbsent pitfall).
+- `omni:assignment` JSON extension element is the sole configuration entry for candidate resolution. `ScopedRoleAssignmentListener` parses it on task `start` event.
+- `wf_process_model.model_key` MUST be unique per tenant and match BPMN `<process id>`. `BpmnXmlValidator` enforces this.
+- Model publish (`publishModel()`) uses `SELECT FOR UPDATE` pessimistic lock. Never deploy to Flowable without validation — always call `BpmnXmlValidator.validate()` first.
 
 ## Execution Rules
 
@@ -248,6 +270,8 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Before modifying XSS rules or toggle: invalidate Redis cache in `XssConfigServiceImpl` write methods — never rely on TTL expiry for consistency.
 - Before creating a new user task type: read `docs/scheduling.md` Chapter 4 (tutorial with DrinkWater example).
 - Before modifying system task annotations or adding new system tasks: read `docs/scheduling.md` Chapter 2.
+- Before writing workflow engine or approval logic: read `docs/workflow.md`.
+- Before adding a new candidate resolution strategy or anchor type: read `docs/workflow.md` Section 4 (Extension Guide).
 
 ## Completion Checklist
 

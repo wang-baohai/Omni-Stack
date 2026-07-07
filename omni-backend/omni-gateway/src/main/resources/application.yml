@@ -53,6 +53,11 @@ spring:
               uri: lb://omni-base
               predicates:
                 - Path=/api/job/**
+            # Workflow engine route (工作流引擎)
+            - id: omni-workflow
+              uri: lb://omni-workflow
+              predicates:
+                - Path=/api/workflow/**
   data:
     redis:
       host: 127.0.0.1

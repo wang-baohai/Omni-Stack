@@ -77,6 +77,17 @@ export function getRolesFromToken(token: string): string[] {
 }
 
 /**
+ * 从 JWT 中提取用户 ID。
+ *
+ * @param token JWT 字符串
+ * @returns 用户 ID
+ */
+export function getUserIdFromToken(token: string): number | null {
+  const payload = decodeJwt(token)
+  return payload?.sub ? Number(payload.sub) : null
+}
+
+/**
  * 从 JWT 中提取租户 ID。
  *
  * @param token JWT 字符串

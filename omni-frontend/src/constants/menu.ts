@@ -21,4 +21,9 @@ export const menuI18nMap: Record<string, string> = {
   'job': 'common.jobManagement',
   'job:user-job-type': 'common.userJobTypes',
   'job:system-job': 'common.systemJobs',
+  'workflow': 'common.workflowManagement',
+  'workflow:model': 'common.workflowModel',
+  'workflow:definition': 'common.workflowDefinition',
+  'workflow:instance': 'common.workflowInstance',
+  'workflow:stats': 'common.workflowStats',
 }

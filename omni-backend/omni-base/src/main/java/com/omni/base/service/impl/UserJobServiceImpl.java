@@ -90,11 +90,10 @@ public class UserJobServiceImpl implements UserJobService {
     /** {@inheritDoc} */
     @Override
     public SysUserJob createJob(Long tenantId, CreateUserJobRequest request, String operator) {
-        // 验证任务类型存在且启用
-        userJobTypeService.listEnabledTypes().stream()
-                .filter(t -> t.getTypeCode().equals(request.getJobType()))
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(400, "任务类型不存在或已禁用"));
+        // 验证任务类型存在且启用（精准查询，避免全量加载）
+        if (userJobTypeService.getEnabledTypeByCode(request.getJobType()) == null) {
+            throw new BusinessException(400, "任务类型不存在或已禁用");
+        }
 
         // 保存到数据库
         SysUserJob entity = new SysUserJob();

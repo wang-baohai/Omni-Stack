@@ -213,6 +213,7 @@ CREATE TABLE IF NOT EXISTS sys_org_unit (
     parent_id   BIGINT       DEFAULT 0 COMMENT '父节点ID',
     name        VARCHAR(100) NOT NULL COMMENT '单元名称',
     type        VARCHAR(20)  NOT NULL COMMENT '类型: ORG/DEPT/TEAM/GROUP',
+    unit_code   VARCHAR(50)  DEFAULT NULL COMMENT '单元编码（同父节点下唯一）',
     path        VARCHAR(500) NOT NULL COMMENT '物化路径',
     depth       INT          NOT NULL DEFAULT 1 COMMENT '深度',
     sort        INT          DEFAULT 0 COMMENT '排序',
@@ -223,7 +224,8 @@ CREATE TABLE IF NOT EXISTS sys_org_unit (
     update_by   VARCHAR(64)  DEFAULT NULL,
     INDEX idx_org_unit_tenant (tenant_id),
     INDEX idx_org_unit_path (path),
-    INDEX idx_org_unit_tenant_parent (tenant_id, parent_id)
+    INDEX idx_org_unit_tenant_parent (tenant_id, parent_id),
+    UNIQUE KEY uk_org_unit_parent_code (parent_id, unit_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='组织单元表';
 
 -- 3.8 用户组织关联表
@@ -659,3 +661,485 @@ VALUES
 -- 7.6 SUPER_ADMIN 角色追加系统任务权限
 INSERT INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 100), (1, 101), (1, 102);
+
+-- ============================================================
+-- Section 8: omni_workflow 工作流引擎
+-- ============================================================
+
+-- 8.1 创建工作流数据库
+CREATE DATABASE IF NOT EXISTS omni_workflow
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE omni_workflow;
+
+-- 8.2 流程实例扩展表
+CREATE TABLE IF NOT EXISTS wf_process_instance_ext (
+    id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id           BIGINT       NOT NULL COMMENT '租户 ID',
+    process_instance_id VARCHAR(64)  NOT NULL COMMENT 'Flowable 流程实例 ID',
+    process_key         VARCHAR(255) NOT NULL COMMENT '流程定义 Key',
+    model_id              BIGINT       DEFAULT NULL COMMENT '流程模型 ID',
+    model_version_id      BIGINT       DEFAULT NULL COMMENT '流程模型版本 ID',
+    process_definition_id VARCHAR(255) DEFAULT NULL COMMENT 'Flowable 流程定义 ID',
+    deployment_id         VARCHAR(64)  DEFAULT NULL COMMENT 'Flowable 部署 ID',
+    business_version      INT          DEFAULT NULL COMMENT '业务版本号',
+    engine_version        INT          DEFAULT NULL COMMENT 'Flowable 引擎版本号',
+    business_key        VARCHAR(255) DEFAULT NULL COMMENT '业务主键',
+    title               VARCHAR(500) DEFAULT NULL COMMENT '流程标题',
+    start_user_id       BIGINT       NOT NULL COMMENT '发起人用户 ID',
+    start_user_name     VARCHAR(100) DEFAULT NULL COMMENT '发起人用户名',
+    category            VARCHAR(100) DEFAULT NULL COMMENT '流程分类',
+    status              TINYINT      DEFAULT 1 COMMENT '状态: 0-已终止, 1-进行中, 2-已完成',
+    create_time         DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    update_time         DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_tenant_id (tenant_id),
+    INDEX idx_process_instance_id (process_instance_id),
+    INDEX idx_start_user (tenant_id, start_user_id),
+    INDEX idx_status (tenant_id, status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='流程实例扩展表';
+
+-- 8.3 待办任务缓存表
+CREATE TABLE IF NOT EXISTS wf_todo_task (
+    id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id           BIGINT       NOT NULL COMMENT '租户 ID',
+    task_id             VARCHAR(64)  NOT NULL COMMENT 'Flowable 任务 ID',
+    process_instance_id VARCHAR(64)  NOT NULL COMMENT '流程实例 ID',
+    process_key         VARCHAR(255) DEFAULT NULL COMMENT '流程定义 Key',
+    task_name           VARCHAR(255) DEFAULT NULL COMMENT '任务名称',
+    assignee_id         BIGINT       NOT NULL COMMENT '处理人用户 ID',
+    assignee_name       VARCHAR(100) DEFAULT NULL COMMENT '处理人用户名',
+    title               VARCHAR(500) DEFAULT NULL COMMENT '流程标题',
+    category            VARCHAR(100) DEFAULT NULL COMMENT '流程分类',
+    create_time         DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_tenant_id (tenant_id),
+    UNIQUE KEY uk_task_id (task_id),
+    INDEX idx_assignee (tenant_id, assignee_id),
+    INDEX idx_process_instance (process_instance_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='待办任务缓存表';
+
+-- 8.4 JSON Schema 表单定义表
+CREATE TABLE IF NOT EXISTS wf_form_schema (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id       BIGINT       NOT NULL COMMENT '租户 ID',
+    form_key        VARCHAR(100) NOT NULL COMMENT '表单标识',
+    form_name       VARCHAR(200) NOT NULL COMMENT '表单名称',
+    schema_json     TEXT         NOT NULL COMMENT 'JSON Schema 内容',
+    version         INT          DEFAULT 1 COMMENT '版本号',
+    status          TINYINT      DEFAULT 1 COMMENT '状态: 1=启用 0=禁用',
+    create_by       VARCHAR(100) DEFAULT NULL COMMENT '创建人',
+    create_time     DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_tenant_form (tenant_id, form_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='JSON Schema 表单定义表';
+
+-- 8.5 审批委托规则表
+CREATE TABLE IF NOT EXISTS wf_delegation_rule (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id       BIGINT       NOT NULL COMMENT '租户 ID',
+    from_user_id    BIGINT       NOT NULL COMMENT '委托人用户 ID',
+    to_user_id      BIGINT       NOT NULL COMMENT '被委托人用户 ID',
+    process_key     VARCHAR(255) DEFAULT NULL COMMENT '限定流程 Key（空表示全部）',
+    start_time      DATETIME     DEFAULT NULL COMMENT '生效开始时间',
+    end_time        DATETIME     DEFAULT NULL COMMENT '生效结束时间',
+    status          TINYINT      DEFAULT 1 COMMENT '状态: 1=启用 0=禁用',
+    create_time     DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_tenant_from (tenant_id, from_user_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='审批委托规则表';
+
+-- 8.6 工作流权限种子数据（写入 omni_auth.sys_permission）
+USE omni_auth;
+
+-- 工作流管理目录
+INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+VALUES
+    (200, 1, 0,   'workflow',                        '工作流管理',     'DIRECTORY', '/200/',          1, 6, 1, 'system'),
+    (201, 1, 200, 'workflow:definition',              '流程定义',       'MENU',      '/200/201/',      2, 2, 1, 'system'),
+    (202, 1, 201, 'workflow:definition:list',         '查看流程定义',   'API',       '/200/201/202/',  3, 1, 1, 'system'),
+    (203, 1, 201, 'workflow:definition:deploy',       '部署流程',       'API',       '/200/201/203/',  3, 2, 1, 'system'),
+    (204, 1, 201, 'workflow:definition:update',       '挂起/激活流程',  'API',       '/200/201/204/',  3, 3, 1, 'system'),
+    (205, 1, 201, 'workflow:definition:delete',       '删除流程',       'API',       '/200/201/205/',  3, 4, 1, 'system'),
+    (210, 1, 200, 'workflow:instance',                '流程实例',       'MENU',      '/200/210/',      2, 3, 1, 'system'),
+    (211, 1, 210, 'workflow:instance:list',           '查看流程实例',   'API',       '/200/210/211/',  3, 1, 1, 'system'),
+    (212, 1, 210, 'workflow:instance:start',          '发起流程实例',   'API',       '/200/210/212/',  3, 2, 1, 'system'),
+    (213, 1, 210, 'workflow:instance:terminate',      '终止流程实例',   'API',       '/200/210/213/',  3, 3, 1, 'system'),
+    (214, 1, 210, 'workflow:task:todo',               '查看待办任务',   'API',       '/200/210/214/',  3, 4, 1, 'system'),
+    (215, 1, 210, 'workflow:approval:complete',       '完成审批任务',   'API',       '/200/210/215/',  3, 5, 1, 'system'),
+    (216, 1, 210, 'workflow:approval:add-signer',     '审批加签',       'API',       '/200/210/216/',  3, 6, 1, 'system'),
+    (217, 1, 210, 'workflow:approval:remove-signer',  '审批减签',       'API',       '/200/210/217/',  3, 7, 1, 'system'),
+    (218, 1, 210, 'workflow:approval:delegate',       '审批委托',       'API',       '/200/210/218/',  3, 8, 1, 'system'),
+    (220, 1, 200, 'workflow:stats',                   '统计看板',       'MENU',      '/200/220/',      2, 4, 1, 'system'),
+    (221, 1, 220, 'workflow:stats:admin',             '管理端统计',     'API',       '/200/220/221/',  3, 1, 1, 'system'),
+    (222, 1, 200, 'workflow:identity',                '身份管理',       'API',       '/200/222/',      2, 5, 1, 'system'),
+    (223, 1, 222, 'workflow:identity:list',           '查询身份数据',   'API',       '/200/222/223/',  3, 1, 1, 'system'),
+    (224, 1, 200, 'workflow:model',                   '流程模型',       'MENU',      '/200/224/',      2, 1, 1, 'system'),
+    (225, 1, 224, 'workflow:model:list',              '查询模型列表',   'API',       '/200/224/225/',  3, 1, 1, 'system'),
+    (226, 1, 224, 'workflow:model:create',            '创建模型',       'API',       '/200/224/226/',  3, 2, 1, 'system'),
+    (227, 1, 224, 'workflow:model:update',            '更新模型',       'API',       '/200/224/227/',  3, 3, 1, 'system'),
+    (228, 1, 224, 'workflow:model:validate',          '校验模型',       'API',       '/200/224/228/',  3, 4, 1, 'system'),
+    (229, 1, 224, 'workflow:model:publish',           '发布模型',       'API',       '/200/224/229/',  3, 5, 1, 'system'),
+    (230, 1, 224, 'workflow:model:delete',            '删除模型',       'API',       '/200/224/230/',  3, 6, 1, 'system');
+
+-- SUPER_ADMIN 角色追加工作流权限
+INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+    (1, 200), (1, 201), (1, 202), (1, 203), (1, 204), (1, 205),
+    (1, 210), (1, 211), (1, 212), (1, 213), (1, 214), (1, 215),
+    (1, 216), (1, 217), (1, 218), (1, 220), (1, 221),
+    (1, 222), (1, 223), (1, 224), (1, 225), (1, 226), (1, 227),
+    (1, 228), (1, 229), (1, 230);
+
+-- USER 角色追加用户侧工作流权限（发起、查看自己的待办、处理自己的审批任务）
+INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+    (2, 211), (2, 212), (2, 213), (2, 214), (2, 215), (2, 216), (2, 217), (2, 218);
+
+-- EMPLOYEE / TEAM_LEADER / DEPT_LEADER 追加用户侧工作流权限
+INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+    (10, 211), (10, 212), (10, 213), (10, 214), (10, 215), (10, 216), (10, 217), (10, 218),
+    (11, 211), (11, 212), (11, 213), (11, 214), (11, 215), (11, 216), (11, 217), (11, 218),
+    (12, 211), (12, 212), (12, 213), (12, 214), (12, 215), (12, 216), (12, 217), (12, 218);
+
+-- 8.7 流程分类字典数据（写入 omni_base.sys_dict_type + sys_dict_data）
+USE omni_base;
+
+INSERT INTO sys_dict_type (id, tenant_id, type_code, type_name, remark, sort, status, create_by)
+VALUES
+    (10, 1, 'workflow_category', '流程分类', '工作流审批流程的分类标签', 10, 1, 'system');
+
+INSERT INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, sort, status, create_by)
+VALUES
+    (1, 'workflow_category', 'leave',    '请假审批', 1, 1, 'system'),
+    (1, 'workflow_category', 'expense',  '报销审批', 2, 1, 'system'),
+    (1, 'workflow_category', 'purchase', '采购审批', 3, 1, 'system'),
+    (1, 'workflow_category', 'contract', '合同审批', 4, 1, 'system'),
+    (1, 'workflow_category', 'general',  '通用审批', 5, 1, 'system');
+
+-- ============================================================
+-- Section 9: 工作流可视化设计器升级
+-- ============================================================
+
+-- 9.1 流程模型主表
+USE omni_workflow;
+
+CREATE TABLE IF NOT EXISTS wf_process_model (
+    id                           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id                    BIGINT       NOT NULL COMMENT '租户 ID',
+    model_key                    VARCHAR(100) NOT NULL COMMENT '模型标识（BPMN process id，同租户唯一）',
+    model_name                   VARCHAR(200) NOT NULL COMMENT '模型名称',
+    category                     VARCHAR(100) DEFAULT NULL COMMENT '流程分类',
+    status                       TINYINT      DEFAULT 1 COMMENT '状态: 0-已归档, 1-正常',
+    current_draft_version_id     BIGINT       DEFAULT NULL COMMENT '当前草稿版本 ID',
+    current_published_version_id BIGINT       DEFAULT NULL COMMENT '当前已发布版本 ID',
+    create_by                    VARCHAR(64)  DEFAULT NULL,
+    update_by                    VARCHAR(64)  DEFAULT NULL,
+    create_time                  DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    update_time                  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_model_tenant_key (tenant_id, model_key),
+    INDEX idx_model_tenant (tenant_id),
+    INDEX idx_model_category (tenant_id, category)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='流程模型主表';
+
+-- 9.2 流程模型版本表
+CREATE TABLE IF NOT EXISTS wf_process_model_version (
+    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id             BIGINT       NOT NULL COMMENT '租户 ID',
+    model_id              BIGINT       NOT NULL COMMENT '关联 wf_process_model.id',
+    version               INT          NOT NULL COMMENT '业务版本号（1, 2, 3...）',
+    status                VARCHAR(20)  NOT NULL DEFAULT 'DRAFT' COMMENT '版本状态: DRAFT/PUBLISHED/FAILED/ARCHIVED',
+    bpmn_xml              LONGTEXT     DEFAULT NULL COMMENT 'BPMN XML 内容',
+    designer_json         LONGTEXT     DEFAULT NULL COMMENT '可视化设计器 JSON',
+    xml_sha256            VARCHAR(64)  DEFAULT NULL COMMENT 'BPMN XML 的 SHA-256 摘要',
+    deployment_id         VARCHAR(64)  DEFAULT NULL COMMENT 'Flowable 部署 ID',
+    process_definition_id VARCHAR(255) DEFAULT NULL COMMENT 'Flowable 流程定义 ID',
+    engine_process_key    VARCHAR(255) DEFAULT NULL COMMENT 'Flowable 引擎 process key',
+    engine_version        INT          DEFAULT NULL COMMENT 'Flowable 引擎版本号',
+    publish_time          DATETIME     DEFAULT NULL COMMENT '发布时间',
+    publish_by            VARCHAR(64)  DEFAULT NULL COMMENT '发布人',
+    create_time           DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    update_time           DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_model_version (model_id, version),
+    INDEX idx_version_tenant (tenant_id),
+    INDEX idx_version_status (tenant_id, status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='流程模型版本表';
+
+-- 9.3 抄送记录表
+CREATE TABLE IF NOT EXISTS wf_cc_record (
+    id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id           BIGINT       NOT NULL COMMENT '租户 ID',
+    process_instance_id VARCHAR(64)  NOT NULL COMMENT '流程实例 ID',
+    source_activity_id  VARCHAR(255) DEFAULT NULL COMMENT '来源活动节点 ID',
+    user_id             BIGINT       NOT NULL COMMENT '被抄送人用户 ID',
+    title               VARCHAR(500) DEFAULT NULL COMMENT '流程标题',
+    read_status         TINYINT      DEFAULT 0 COMMENT '已读状态: 0-未读, 1-已读',
+    create_time         DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_cc_tenant (tenant_id),
+    INDEX idx_cc_user (tenant_id, user_id, read_status),
+    INDEX idx_cc_instance (process_instance_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='抄送记录表';
+
+-- 9.4 预置请假审批流程模型（DRAFT 状态，用户需手动发布）
+INSERT INTO wf_process_model (id, tenant_id, model_key, model_name, category, status, current_draft_version_id, create_by)
+VALUES (1, 1, 'leave', '请假审批（3级会签）', 'leave', 1, 1, 'system');
+
+INSERT INTO wf_process_model_version (id, tenant_id, model_id, version, status, bpmn_xml, designer_json)
+VALUES (1, 1, 1, 1, 'DRAFT',
+'<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:flowable="http://flowable.org/bpmn"
+  xmlns:omni="http://omni.com/workflow"
+  id="Definitions_leave"
+  targetNamespace="http://flowable.org/test"
+  xsi:schemaLocation="http://www.omg.org/spec/BPMN20 http://www.omg.org/spec/BPMN20/bpmn20.xsd">
+
+  <process id="leave" name="请假审批（3级会签）" isExecutable="true">
+    <documentation>3级会签审批请假流程：直属领导 → 部门领导 → 跨部门领导</documentation>
+    <startEvent id="start" name="提交请假申请" flowable:initiator="initiator" />
+    <userTask id="direct-leader-approve" name="直属领导审批" flowable:assignee="${userId}">
+      <documentation>发起人所在组织的组长（正副职）会签审批</documentation>
+      <extensionElements>
+        <flowable:executionListener event="start" delegateExpression="${scopedRoleAssignmentListener}" />
+        <omni:assignment>{"roleCode":"TEAM_LEADER","anchorType":"START_USER_PRIMARY_UNIT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ALL"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="candidateUserIds"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+    <exclusiveGateway id="gw-level1" name="第1级结果" default="flow-l1-reject" />
+    <userTask id="dept-leader-approve" name="部门领导审批" flowable:assignee="${userId}">
+      <documentation>发起人上级组织的部门领导（正副职）会签审批</documentation>
+      <extensionElements>
+        <flowable:executionListener event="start" delegateExpression="${scopedRoleAssignmentListener}" />
+        <omni:assignment>{"roleCode":"DEPT_LEADER","anchorType":"PARENT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="candidateUserIds"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+    <exclusiveGateway id="gw-level2" name="第2级结果" default="flow-l2-reject" />
+    <userTask id="cross-dept-approve" name="跨部门领导审批" flowable:assignee="${userId}">
+      <documentation>指定组织的领导（正副职）会签审批，设计者从全量组织树中选择</documentation>
+      <extensionElements>
+        <flowable:executionListener event="start" delegateExpression="${scopedRoleAssignmentListener}" />
+        <omni:assignment>{"roleCode":"DEPT_LEADER","anchorType":"ABSOLUTE_UNIT","anchorParams":{"unitIds":[200]},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="candidateUserIds"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+    <exclusiveGateway id="gw-level3" name="第3级结果" default="flow-l3-reject" />
+    <endEvent id="end-approved" name="审批通过" />
+    <endEvent id="end-rejected" name="审批驳回" />
+    <sequenceFlow id="flow-start" sourceRef="start" targetRef="direct-leader-approve" />
+    <sequenceFlow id="flow-l1-to-gw" sourceRef="direct-leader-approve" targetRef="gw-level1" />
+    <sequenceFlow id="flow-l1-pass" sourceRef="gw-level1" targetRef="dept-leader-approve">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-l1-reject" sourceRef="gw-level1" targetRef="end-rejected" />
+    <sequenceFlow id="flow-l2-to-gw" sourceRef="dept-leader-approve" targetRef="gw-level2" />
+    <sequenceFlow id="flow-l2-pass" sourceRef="gw-level2" targetRef="cross-dept-approve">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-l2-reject" sourceRef="gw-level2" targetRef="end-rejected" />
+    <sequenceFlow id="flow-l3-to-gw" sourceRef="cross-dept-approve" targetRef="gw-level3" />
+    <sequenceFlow id="flow-l3-pass" sourceRef="gw-level3" targetRef="end-approved">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-l3-reject" sourceRef="gw-level3" targetRef="end-rejected" />
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_leave">
+    <bpmndi:BPMNPlane id="BPMNPlane_leave" bpmnElement="leave">
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <dc:Bounds x="100" y="300" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="80" y="343" width="76" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="l1_di" bpmnElement="direct-leader-approve">
+        <dc:Bounds x="200" y="278" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw1_di" bpmnElement="gw-level1" isMarkerVisible="true">
+        <dc:Bounds x="420" y="293" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="405" y="350" width="80" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="l2_di" bpmnElement="dept-leader-approve">
+        <dc:Bounds x="540" y="278" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw2_di" bpmnElement="gw-level2" isMarkerVisible="true">
+        <dc:Bounds x="760" y="293" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="745" y="350" width="80" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="l3_di" bpmnElement="cross-dept-approve">
+        <dc:Bounds x="880" y="278" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw3_di" bpmnElement="gw-level3" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="293" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1085" y="350" width="80" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_approved_di" bpmnElement="end-approved">
+        <dc:Bounds x="1220" y="300" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1208" y="343" width="60" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_rejected_di" bpmnElement="end-rejected">
+        <dc:Bounds x="785" y="450" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="773" y="493" width="60" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow_start_di" bpmnElement="flow-start">
+        <di:waypoint x="136" y="318" /><di:waypoint x="200" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l1_gw_di" bpmnElement="flow-l1-to-gw">
+        <di:waypoint x="350" y="318" /><di:waypoint x="420" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l1_pass_di" bpmnElement="flow-l1-pass">
+        <di:waypoint x="470" y="318" /><di:waypoint x="540" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l1_reject_di" bpmnElement="flow-l1-reject">
+        <di:waypoint x="445" y="343" /><di:waypoint x="445" y="468" /><di:waypoint x="785" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l2_gw_di" bpmnElement="flow-l2-to-gw">
+        <di:waypoint x="690" y="318" /><di:waypoint x="760" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l2_pass_di" bpmnElement="flow-l2-pass">
+        <di:waypoint x="810" y="318" /><di:waypoint x="880" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l2_reject_di" bpmnElement="flow-l2-reject">
+        <di:waypoint x="785" y="343" /><di:waypoint x="785" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l3_gw_di" bpmnElement="flow-l3-to-gw">
+        <di:waypoint x="1030" y="318" /><di:waypoint x="1100" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l3_pass_di" bpmnElement="flow-l3-pass">
+        <di:waypoint x="1150" y="318" /><di:waypoint x="1220" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l3_reject_di" bpmnElement="flow-l3-reject">
+        <di:waypoint x="1125" y="343" /><di:waypoint x="1125" y="468" /><di:waypoint x="821" y="468" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>',
+NULL);
+
+-- 9.5 用户角色作用域表（omni_auth 库）
+USE omni_auth;
+
+CREATE TABLE IF NOT EXISTS sys_user_role_scope (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id   BIGINT       NOT NULL COMMENT '租户 ID',
+    user_id     BIGINT       NOT NULL COMMENT '用户 ID',
+    role_id     BIGINT       NOT NULL COMMENT '角色 ID',
+    unit_id     BIGINT       NOT NULL COMMENT '组织单元 ID',
+    scope_mode  VARCHAR(20)  NOT NULL DEFAULT 'SAME_UNIT' COMMENT '作用域模式: SAME_UNIT / UNIT_AND_BELOW',
+    status      TINYINT      DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    create_time DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_role_scope (tenant_id, user_id, role_id, unit_id),
+    INDEX idx_scope_tenant (tenant_id),
+    INDEX idx_scope_user (user_id),
+    INDEX idx_scope_role_unit (role_id, unit_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='用户角色作用域表';
+
+-- ============================================================
+-- Section 10: 4级会签审批请假流程 - 种子数据
+-- ============================================================
+USE omni_auth;
+
+-- 10.1 组织架构
+INSERT INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (100, 1, 1, '技术研发部', 'DEPT', 'tech-dept', '/1/100/', 2, 1, 1, 'system');
+
+INSERT INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (101, 1, 100, '后端1组', 'TEAM', 'backend-1', '/1/100/101/', 3, 1, 1, 'system');
+
+INSERT INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (102, 1, 100, '架构1组', 'TEAM', 'arch-1', '/1/100/102/', 3, 2, 1, 'system');
+
+INSERT INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (200, 1, 1, '人事部', 'DEPT', 'hr-dept', '/1/200/', 2, 2, 1, 'system');
+
+-- 10.2 角色
+INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+VALUES (10, 1, 'EMPLOYEE', '普通员工', 'SELF', 10, 1, 'system');
+
+INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+VALUES (11, 1, 'TEAM_LEADER', '工作组组长', 'DEPT', 11, 1, 'system');
+
+INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+VALUES (12, 1, 'DEPT_LEADER', '部门领导', 'DEPT_AND_BELOW', 12, 1, 'system');
+
+-- 10.3 用户（密码统一为 123456，BCrypt 编码）
+INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+VALUES (100, 1, 'zhangsan', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '张三', 1, 101, 1, 'system');
+
+INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+VALUES (101, 1, 'lisi', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '李四', 1, 101, 1, 'system');
+
+INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+VALUES (102, 1, 'lisi2', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '李四2', 1, 101, 1, 'system');
+
+INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+VALUES (103, 1, 'wangwu', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '王五', 1, 102, 1, 'system');
+
+INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+VALUES (104, 1, 'wangwu2', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '王五2', 1, 102, 1, 'system');
+
+INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+VALUES (105, 1, 'zhaoliu', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '赵六', 1, 100, 1, 'system');
+
+INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+VALUES (106, 1, 'zhaoliu2', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '赵六2', 1, 100, 1, 'system');
+
+INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+VALUES (107, 1, 'qianqi', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '钱七', 1, 200, 1, 'system');
+
+INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+VALUES (108, 1, 'qianqi2', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '钱七2', 1, 200, 1, 'system');
+
+-- 10.4 用户角色作用域（sys_user_role_scope）
+INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 100, 10, 101, 'SAME_UNIT', 1);
+INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 101, 11, 101, 'SAME_UNIT', 1);
+INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 102, 11, 101, 'SAME_UNIT', 1);
+INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 103, 11, 102, 'SAME_UNIT', 1);
+INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 104, 11, 102, 'SAME_UNIT', 1);
+INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 105, 12, 100, 'SAME_UNIT', 1);
+INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 106, 12, 100, 'SAME_UNIT', 1);
+INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 107, 12, 200, 'SAME_UNIT', 1);
+INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 108, 12, 200, 'SAME_UNIT', 1);
+
+-- 10.5 用户角色关联（sys_user_role）
+INSERT INTO sys_user_role (user_id, role_id) VALUES (100, 10);
+INSERT INTO sys_user_role (user_id, role_id) VALUES (101, 11);
+INSERT INTO sys_user_role (user_id, role_id) VALUES (102, 11);
+INSERT INTO sys_user_role (user_id, role_id) VALUES (103, 11);
+INSERT INTO sys_user_role (user_id, role_id) VALUES (104, 11);
+INSERT INTO sys_user_role (user_id, role_id) VALUES (105, 12);
+INSERT INTO sys_user_role (user_id, role_id) VALUES (106, 12);
+INSERT INTO sys_user_role (user_id, role_id) VALUES (107, 12);
+INSERT INTO sys_user_role (user_id, role_id) VALUES (108, 12);
+
+-- 10.6 用户组织关联（sys_user_unit）
+INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (100, 101, 1);
+INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (101, 101, 1);
+INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (102, 101, 1);
+INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (103, 102, 1);
+INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (104, 102, 1);
+INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (105, 100, 1);
+INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (106, 100, 1);
+INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (107, 200, 1);
+INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (108, 200, 1);
+

@@ -6,12 +6,12 @@
  *
  * - 请求拦截器：自动从 Pinia userStore 读取 JWT，附加 Bearer Token 认证头。
  * - 响应拦截器：统一处理业务错误码（code !== 200 时弹出 ElMessage.error），
- *   401 状态码自动执行登出并跳转；HTTP 层错误统一展示错误消息。
+ *   401 状态码弹出过期对话框并跳转登录页（携带 redirect 参数）；HTTP 层错误统一展示错误消息。
  */
 import axios from 'axios'
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 import type { ApiResponse } from '@/types/api'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 
@@ -38,6 +38,30 @@ service.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
+/** 防止并发 401 弹出多个对话框的标志 */
+let showingExpiredDialog = false
+
+/**
+ * 统一处理 401 认证过期。
+ * 弹出对话框提示用户，确认后执行登出并跳转到登录页（携带当前页面路径作为 redirect 参数）。
+ *
+ * @param message 过期提示消息
+ */
+function handle401(message: string) {
+  if (showingExpiredDialog) return
+  showingExpiredDialog = true
+  const userStore = useUserStore()
+  userStore.logout()
+  ElMessageBox.alert(message, '登录过期', {
+    confirmButtonText: '重新登录',
+    type: 'warning',
+  }).finally(() => {
+    showingExpiredDialog = false
+    const redirect = encodeURIComponent(router.currentRoute.value.fullPath)
+    router.push({ path: '/login', query: { redirect } })
+  })
+}
+
 /**
  * 响应拦截器。
  * 统一处理业务错误码和 HTTP 错误，展示错误消息并处理认证过期。
@@ -47,26 +71,25 @@ service.interceptors.response.use(
     const res = response.data
     // 业务状态码非 200，视为业务错误
     if (res.code !== 200) {
-      ElMessage.error(res.message || '请求失败')
-      // 401 表示认证过期，执行登出并跳转到首页
       if (res.code === 401) {
-        const userStore = useUserStore()
-        userStore.logout()
-        router.push('/')
+        // 401 表示认证过期，弹出过期对话框
+        handle401(res.message || '登录已过期，请重新登录')
+      } else {
+        ElMessage.error(res.message || '请求失败')
       }
       return Promise.reject(new Error(res.message))
     }
     return response
   },
   (error) => {
-    // HTTP 层错误处理（网络异常、超时等）
-    const message = error.response?.data?.message || error.message || '网络错误'
-    ElMessage.error(message)
-    // HTTP 401 表示认证过期
     if (error.response?.status === 401) {
-      const userStore = useUserStore()
-      userStore.logout()
-      router.push('/login')
+      // HTTP 401 表示认证过期，读取后端返回的结构化消息
+      const message = error.response?.data?.message || '登录已过期，请重新登录'
+      handle401(message)
+    } else {
+      // 其他 HTTP 层错误（网络异常、超时等）
+      const message = error.response?.data?.message || error.message || '网络错误'
+      ElMessage.error(message)
     }
     return Promise.reject(error)
   },

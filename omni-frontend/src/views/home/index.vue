@@ -11,6 +11,7 @@ import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
+import { useDictOptions } from '@/composables/useDictOptions'
 import { storeLang } from '@/i18n'
 import {
   listMyJobs, createMyJob, updateMyJob, deleteMyJob,
@@ -24,12 +25,24 @@ import type { PageResult } from '@/types/api'
 import CronGenerator from '@/components/CronGenerator.vue'
 import DynamicFormRenderer from '@/components/DynamicFormRenderer.vue'
 import { CronExpressionParser } from 'cron-parser'
+import {
+  listTodoTasks, listMyInitiated, listMyCompleted,
+  completeApproval, getWorkspaceStats,
+  type TodoTask, type ProcessInstanceExt, type WorkspaceStats,
+} from '@/api/workflow'
 
 const { t, locale } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
 const appStore = useAppStore()
 const permissionStore = usePermissionStore()
+
+// ─── 流程分类字典映射 ───
+const { options: categoryOptions } = useDictOptions('workflow_category')
+function categoryLabel(value: string | null) {
+  if (!value) return '-'
+  return categoryOptions.value.find(o => o.value === value)?.label || value
+}
 
 // ─── 通用状态 ───
 
@@ -316,6 +329,9 @@ onMounted(async () => {
   if (userStore.isLoggedIn) {
     await loadPermissions()
     await Promise.all([loadEnabledTypes(), loadStats(), loadData()])
+    // 加载工作流统计和待办
+    loadWfStats()
+    loadTodoList()
     // 检查最近 10 秒内的执行结果，弹出未读通知
     checkRecentLogs()
     // 启动周期性轮询检测 cron 自动触发的执行结果
@@ -332,6 +348,8 @@ onUnmounted(() => {
     clearInterval(globalPollTimer)
     globalPollTimer = null
   }
+  // 清除日志 ID 基线，确保下次进入时重新初始化
+  lastLogIdMap.clear()
 })
 
 // ===== 执行结果通知 =====
@@ -377,16 +395,21 @@ function pollForNewLog(jobId: number, lastKnownId: number) {
  */
 async function checkRecentLogs() {
   try {
-    // 获取所有任务的最近日志
-    for (const job of tableData.value) {
-      const res = await getMyJobLogs(job.id, { page: 1, size: 1 })
+    // 并行查询所有任务的最近日志
+    const results = await Promise.all(
+      tableData.value.map(job =>
+        getMyJobLogs(job.id, { page: 1, size: 1 }).catch(() => null),
+      ),
+    )
+    for (const res of results) {
+      if (!res) continue
       const data = res.data.data as PageResult<UserJobLog>
       if (data.records.length > 0) {
         const log = data.records[0]
-        // 检查是否在最近 10 秒内执行
+        // 检查是否在最近 2 分钟内执行（覆盖页面切换耗时）
         if (log.fireTime && log.resultMessage) {
           const fireTime = new Date(log.fireTime).getTime()
-          if (Date.now() - fireTime < 10000) {
+          if (Date.now() - fireTime < 120000) {
             showLogNotification(log)
           }
         }
@@ -424,26 +447,36 @@ function startGlobalPolling() {
   if (globalPollTimer) return
   globalPollTimer = setInterval(async () => {
     const activeJobs = tableData.value.filter(j => j.status === 1)
-    for (const job of activeJobs) {
-      try {
-        const res = await getMyJobLogs(job.id, { page: 1, size: 1 })
-        const data = res.data.data as PageResult<UserJobLog>
-        if (data.records.length > 0) {
-          const latestLog = data.records[0]
-          const prevId = lastLogIdMap.get(job.id) ?? 0
-          if (latestLog.id > prevId) {
-            // 仅在已初始化后才弹通知（避免页面加载时对旧日志弹通知）
-            if (lastLogIdMap.has(job.id)) {
-              showLogNotification(latestLog)
-            }
-            lastLogIdMap.set(job.id, latestLog.id)
+    // 并行查询所有活跃任务的最新日志
+    const results = await Promise.all(
+      activeJobs.map(job =>
+        getMyJobLogs(job.id, { page: 1, size: 1 })
+          .then(res => ({ job, data: res.data.data as PageResult<UserJobLog> }))
+          .catch(() => null),
+      ),
+    )
+    let hasNewLog = false
+    for (const result of results) {
+      if (!result) continue
+      const { job, data } = result
+      if (data.records.length > 0) {
+        const latestLog = data.records[0]
+        const prevId = lastLogIdMap.get(job.id) ?? 0
+        if (latestLog.id > prevId) {
+          // 仅在已初始化后才弹通知（避免页面加载时对旧日志弹通知）
+          if (lastLogIdMap.has(job.id)) {
+            showLogNotification(latestLog)
+            hasNewLog = true
           }
+          lastLogIdMap.set(job.id, latestLog.id)
         }
-      } catch { /* 网络异常，跳过此任务 */ }
+      }
     }
-    // 刷新列表以更新 lastFireTime 等字段
-    loadData()
-    loadStats()
+    // 仅在检测到新日志时刷新列表和统计，避免每 10 秒无谓刷新
+    if (hasNewLog) {
+      loadData()
+      loadStats()
+    }
   }, 10000)
 }
 
@@ -461,6 +494,107 @@ function getNextFireTime(cronExpression: string): string {
   } catch {
     return '-'
   }
+}
+
+// ─── 工作流标签页状态 ───
+
+const activeTab = ref('todo')
+const wfStats = ref<WorkspaceStats>({ todoCount: 0, myInitiatedRunning: 0, myInitiatedTotal: 0 })
+
+// 待我审批
+const todoList = ref<TodoTask[]>([])
+const todoTotal = ref(0)
+const todoPage = ref(1)
+const todoLoading = ref(false)
+
+// 我发起的
+const initiatedList = ref<ProcessInstanceExt[]>([])
+const initiatedTotal = ref(0)
+const initiatedPage = ref(1)
+const initiatedLoading = ref(false)
+const initiatedStatus = ref<number | undefined>(undefined)
+
+// 我已办的
+const completedList = ref<ProcessInstanceExt[]>([])
+const completedTotal = ref(0)
+const completedPage = ref(1)
+const completedLoading = ref(false)
+
+// 审批对话框
+const approvalVisible = ref(false)
+const approvalTask = ref<TodoTask | null>(null)
+const approvalForm = reactive({ approved: true, comment: '' })
+
+async function loadWfStats() {
+  try {
+    const res = await getWorkspaceStats()
+    wfStats.value = res.data.data
+  } catch { /* ignore */ }
+}
+
+async function loadTodoList() {
+  todoLoading.value = true
+  try {
+    const res = await listTodoTasks({ page: todoPage.value, size: 10 })
+    todoList.value = res.data.data.records
+    todoTotal.value = res.data.data.total
+  } finally { todoLoading.value = false }
+}
+
+async function loadInitiatedList() {
+  initiatedLoading.value = true
+  try {
+    const res = await listMyInitiated({ status: initiatedStatus.value, page: initiatedPage.value, size: 10 })
+    initiatedList.value = res.data.data.records
+    initiatedTotal.value = res.data.data.total
+  } finally { initiatedLoading.value = false }
+}
+
+async function loadCompletedList() {
+  completedLoading.value = true
+  try {
+    const res = await listMyCompleted({ page: completedPage.value, size: 10 })
+    completedList.value = res.data.data.records
+    completedTotal.value = res.data.data.total
+  } finally { completedLoading.value = false }
+}
+
+function openApproval(task: TodoTask) {
+  approvalTask.value = task
+  approvalForm.approved = true
+  approvalForm.comment = ''
+  approvalVisible.value = true
+}
+
+async function submitApproval() {
+  if (!approvalTask.value) return
+  await completeApproval(approvalTask.value.taskId, {
+    approved: approvalForm.approved,
+    comment: approvalForm.comment,
+  })
+  ElMessage.success(t('common.success'))
+  approvalVisible.value = false
+  loadTodoList()
+  loadWfStats()
+}
+
+function handleTabChange(tab: string) {
+  if (tab === 'todo') { loadTodoList(); loadWfStats() }
+  else if (tab === 'initiated') loadInitiatedList()
+  else if (tab === 'completed') loadCompletedList()
+}
+
+/** 状态标签映射 */
+function instanceStatusLabel(status: number): string {
+  if (status === 1) return t('workflow.pending')
+  if (status === 2) return t('workflow.completed')
+  return t('workflow.terminated')
+}
+
+function instanceStatusType(status: number): string {
+  if (status === 1) return 'warning'
+  if (status === 2) return 'success'
+  return 'danger'
 }
 </script>
 
@@ -534,33 +668,116 @@ function getNextFireTime(cronExpression: string): string {
 
     <!-- ═══ 已登录：用户工作台 ═══ -->
     <main v-else class="workspace">
-      <!-- 统计卡片 -->
-      <div class="ws-stats">
-        <el-card shadow="hover" class="ws-stat-card">
-          <div class="ws-stat-value">{{ stats.totalJobs }}</div>
-          <div class="ws-stat-label">{{ t('workspace.stats.totalJobs') }}</div>
-        </el-card>
-        <el-card shadow="hover" class="ws-stat-card">
-          <div class="ws-stat-value ws-stat-info">{{ stats.todayExecuted }}</div>
-          <div class="ws-stat-label">{{ t('workspace.stats.todayExecuted') }}</div>
-        </el-card>
-        <el-card shadow="hover" class="ws-stat-card">
-          <div class="ws-stat-value ws-stat-danger">{{ stats.todayFailed }}</div>
-          <div class="ws-stat-label">{{ t('workspace.stats.todayFailed') }}</div>
-        </el-card>
-      </div>
+      <!-- 工作台标签页 -->
+      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+        <!-- Tab 1: 待我审批 -->
+        <el-tab-pane :label="`${t('workflow.todo')} (${wfStats.todoCount})`" name="todo">
+          <el-table v-loading="todoLoading" :data="todoList" stripe border style="margin-top: 12px">
+            <el-table-column prop="title" :label="t('workflow.title')" min-width="180" />
+            <el-table-column prop="taskName" :label="t('workflow.processName')" width="150" />
+            <el-table-column :label="t('workflow.category')" width="100">
+              <template #default="{ row }">{{ categoryLabel(row.category) }}</template>
+            </el-table-column>
+            <el-table-column prop="createTime" :label="t('workflow.startTime')" width="170" />
+            <el-table-column :label="t('common.actions')" width="120" fixed="right">
+              <template #default="{ row }">
+                <el-button size="small" type="primary" @click="openApproval(row)">
+                  {{ t('workflow.approve') }}
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-empty v-if="!todoLoading && todoList.length === 0" :description="t('workspace.noJobs')" />
+          <el-pagination v-model:current-page="todoPage" class="pagination"
+                         :page-size="10" :total="todoTotal"
+                         layout="total, prev, pager, next"
+                         @current-change="loadTodoList" />
+        </el-tab-pane>
 
-      <!-- 任务列表 -->
-      <el-card class="ws-table-card">
-        <template #header>
-          <div class="ws-card-header">
-            <span class="ws-card-title">{{ t('workspace.myJobs') }}</span>
-            <el-button type="primary" @click="openCreateDialog">
-              <el-icon><Plus /></el-icon>
-              {{ t('workspace.createJob') }}
-            </el-button>
+        <!-- Tab 2: 我发起的 -->
+        <el-tab-pane :label="t('workflow.myInitiated')" name="initiated">
+          <div style="margin: 12px 0">
+            <el-select v-model="initiatedStatus" clearable :placeholder="t('common.status')" style="width: 140px" @change="loadInitiatedList">
+              <el-option :label="t('workflow.pending')" :value="1" />
+              <el-option :label="t('workflow.completed')" :value="2" />
+              <el-option :label="t('workflow.terminated')" :value="0" />
+            </el-select>
           </div>
-        </template>
+          <el-table v-loading="initiatedLoading" :data="initiatedList" stripe border>
+            <el-table-column prop="title" :label="t('workflow.title')" min-width="180" />
+            <el-table-column prop="processKey" :label="t('workflow.processKey')" width="150" />
+            <el-table-column :label="t('workflow.category')" width="100">
+              <template #default="{ row }">{{ categoryLabel(row.category) }}</template>
+            </el-table-column>
+            <el-table-column :label="t('common.status')" width="100" align="center">
+              <template #default="{ row }">
+                <el-tag :type="instanceStatusType(row.status)" size="small">
+                  {{ instanceStatusLabel(row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" :label="t('workflow.startTime')" width="170" />
+          </el-table>
+          <el-empty v-if="!initiatedLoading && initiatedList.length === 0" :description="t('workspace.noJobs')" />
+          <el-pagination v-model:current-page="initiatedPage" class="pagination"
+                         :page-size="10" :total="initiatedTotal"
+                         layout="total, prev, pager, next"
+                         @current-change="loadInitiatedList" />
+        </el-tab-pane>
+
+        <!-- Tab 3: 我已办的 -->
+        <el-tab-pane :label="t('workflow.myCompleted')" name="completed">
+          <el-table v-loading="completedLoading" :data="completedList" stripe border style="margin-top: 12px">
+            <el-table-column prop="title" :label="t('workflow.title')" min-width="180" />
+            <el-table-column prop="processKey" :label="t('workflow.processKey')" width="150" />
+            <el-table-column :label="t('workflow.category')" width="100">
+              <template #default="{ row }">{{ categoryLabel(row.category) }}</template>
+            </el-table-column>
+            <el-table-column :label="t('common.status')" width="100" align="center">
+              <template #default="{ row }">
+                <el-tag :type="instanceStatusType(row.status)" size="small">
+                  {{ instanceStatusLabel(row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" :label="t('workflow.startTime')" width="170" />
+          </el-table>
+          <el-empty v-if="!completedLoading && completedList.length === 0" :description="t('workspace.noJobs')" />
+          <el-pagination v-model:current-page="completedPage" class="pagination"
+                         :page-size="10" :total="completedTotal"
+                         layout="total, prev, pager, next"
+                         @current-change="loadCompletedList" />
+        </el-tab-pane>
+
+        <!-- Tab 4: 我的定时任务 -->
+        <el-tab-pane :label="t('workflow.myJobs')" name="jobs">
+          <!-- 统计卡片 -->
+          <div class="ws-stats">
+            <el-card shadow="hover" class="ws-stat-card">
+              <div class="ws-stat-value">{{ stats.totalJobs }}</div>
+              <div class="ws-stat-label">{{ t('workspace.stats.totalJobs') }}</div>
+            </el-card>
+            <el-card shadow="hover" class="ws-stat-card">
+              <div class="ws-stat-value ws-stat-info">{{ stats.todayExecuted }}</div>
+              <div class="ws-stat-label">{{ t('workspace.stats.todayExecuted') }}</div>
+            </el-card>
+            <el-card shadow="hover" class="ws-stat-card">
+              <div class="ws-stat-value ws-stat-danger">{{ stats.todayFailed }}</div>
+              <div class="ws-stat-label">{{ t('workspace.stats.todayFailed') }}</div>
+            </el-card>
+          </div>
+
+          <!-- 任务列表 -->
+          <el-card class="ws-table-card">
+            <template #header>
+              <div class="ws-card-header">
+                <span class="ws-card-title">{{ t('workspace.myJobs') }}</span>
+                <el-button type="primary" @click="openCreateDialog">
+                  <el-icon><Plus /></el-icon>
+                  {{ t('workspace.createJob') }}
+                </el-button>
+              </div>
+            </template>
 
         <!-- 搜索栏 -->
         <el-form inline style="margin-bottom: 16px">
@@ -616,7 +833,31 @@ function getNextFireTime(cronExpression: string): string {
                        :page-size="pageSize" :total="total"
                        layout="total, prev, pager, next"
                        @current-change="handlePageChange" />
-      </el-card>
+          </el-card>
+        </el-tab-pane>
+      </el-tabs>
+
+      <!-- 审批对话框 -->
+      <el-dialog v-model="approvalVisible" :title="approvalTask?.taskName || t('workflow.approve')" width="500">
+        <el-form :model="approvalForm" label-width="100">
+          <el-form-item :label="t('workflow.title')">
+            <span>{{ approvalTask?.title }}</span>
+          </el-form-item>
+          <el-form-item :label="t('common.status')">
+            <el-radio-group v-model="approvalForm.approved">
+              <el-radio :value="true">{{ t('workflow.approve') }}</el-radio>
+              <el-radio :value="false">{{ t('workflow.reject') }}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item :label="t('workflow.comment')">
+            <el-input v-model="approvalForm.comment" type="textarea" :rows="4" />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="approvalVisible = false">{{ t('common.cancel') }}</el-button>
+          <el-button type="primary" @click="submitApproval">{{ t('common.confirm') }}</el-button>
+        </template>
+      </el-dialog>
     </main>
 
     <!-- 页脚 -->

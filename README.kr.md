@@ -26,6 +26,7 @@
 - **기초 데이터 및 작업 관리**: `omni-base` 서비스 (포트 8101) 데이터 사전 관리, 시스템 작업 관리, 사용자 작업 관리, 작업 로그 열람 제공, Redis cache-aside 캐시, 완전한 프론트엔드 관리 페이지
 - **작업 로그 감사 추적**: `@OperLog` 어노테이션 + AOP 애스펙트 비침습적 수집, who/when/what/changed 완전한 감사 정보 자동 기록, 엔티티 변경 스냅샷 자동 diff (oldValue vs newValue) 데이터 추적 지원, RocketMQ 비동기 전송으로 비즈니스 요청 차단 없음, 핫/콜드 테이블 분리 아카이브 전략 (180일 보존 + 콜드 테이블 장기 보관)으로 쿼리 성능과 컴플라이언스 요구사항 동시 충족, 감사 로그 (`sys_audit_log`) 및 로그인 로그 (`sys_login_log`)와 보완하여 완전한 감사 추적 체계 구성
 - **이중 트랙 스케줄링 작업**: XXL-JOB 3.3.1 기반 시스템 작업 (`@XxlJob` + `@SystemJobMeta` 이중 어노테이션, 스케줄링 센터에 자동 등록)과 사용자 작업 (SPI 모드, `UserJobHandler` 인터페이스 + JSON 파라미터 라우팅) 두 가지 모드 구현, 프론트엔드 Cron 편집기, 동적 파라미터 폼, 실행 로그 실시간 푸시 지원
+- **시각적 BPMN 워크플로 엔진**: Flowable 7.x 기반, `omni-workflow` 독립 마이크로서비스 (포트 8103), 프론트엔드 BPMN 시각적 디자이너로 드래그 앤 드롭 모델링, 이중 버전 관리 (비즈니스 버전 DRAFT → PUBLISHED → ARCHIVED + Flowable 엔진 버전), 멀티 인스턴스 회서는 ALL/ANY 승인 모드 지원, 동적 후보자 해결 (`omni:assignment` JSON 확장 + `ScopedRoleAssignmentListener` 런타임 해결), 승인 기록 + 프로세스 진척도 + CC 알림 완전 사용 가능
 - **Maven Wrapper** 내장 — 클론 후 바로 빌드 가능, 시스템 Maven 설치 불필요
 
 ## 기술 스택
@@ -41,6 +42,7 @@
 | 트래픽 제어/서킷 브레이커 | Sentinel Dashboard | 1.8.8 |
 | 메시지 큐 | Apache RocketMQ | 5.3.2 |
 | 작업 스케줄링 | XXL-JOB Admin | 3.3.1 |
+| 워크플로 엔진 | Flowable BPMN | 7.x |
 | 프론트엔드 프레임워크 | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
 | 빌드 도구 | Vite 8 (Rolldown) | 8.0.14 |
 | UI 프레임워크 | Element Plus | 2.14.0 |
@@ -79,8 +81,10 @@ Omni-Stack/
 │   ├── omni-common-redis-reactive/    # 리액티브 Redis Starter: WebFlux 서비스 전용
 │   ├── omni-common-operlog/             # 작업 로그 Starter: AOP 애스펙트 + MQ 프로듀서 + 엔티티 diff
 │   ├── omni-common-job/                 # 스케줄링 작업 Starter: XXL-JOB 자동 구성 + Admin Client + 시스템 작업 등록
+│   ├── omni-common-workflow/            # 워크플로 Starter: Flowable 자동 구성 + 승인 SPI + 테넌트 필터
 │   ├── omni-auth/                     # 인증 서비스: 로그인, CAPTCHA, JWT, OAuth2 (포트 8100)
 │   ├── omni-base/                     # 기초 데이터 서비스: 데이터 사전 관리 (포트 8101)
+│   ├── omni-workflow/                   # 워크플로 엔진 서비스: Flowable BPMN (포트 8103)
 │   └── omni-gateway/                  # API 게이트웨이 (WebFlux, 포트 8102)
 ├── omni-frontend/                   # Vue 3 SPA (개발 서버 포트 3000)
 │   ├── package.json
@@ -114,7 +118,12 @@ Omni-Stack/
 │   :3000         │────>│  StripPrefix=2    │     │    omni-base     │
 └─────────────────┘     └──────────────────┘     │   Spring :8101  │
                             │                    │  데이터 사전 관리 │
-                    ┌───────┴────────┐            └─────────────────┘
+                            │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │  omni-workflow   │
+                            │                    │  Flowable :8103  │
+                            │                    └─────────────────┘
+                    ┌───────┴────────┐
                     │  MySQL :3306   │  영속화 스토리지
                     │  Redis :6379   │  캐시 + CAPTCHA + 사전 캐시
                     │  Nacos :8848   │  서비스 디스커버리 + 구성 센터
@@ -319,6 +328,7 @@ npm run dev
 | 인증 서비스 | 8100 | Spring Security + OAuth2 Authorization Server |
 | 기초 데이터 서비스 | 8101 | 데이터 사전 관리, Redis cache-aside 캐시 |
 | API 게이트웨이 | 8102 | Spring Cloud Gateway (WebFlux) |
+| 워크플로 엔진 서비스 | 8103 | Flowable BPMN 프로세스 엔진 |
 | MySQL | 3306 | 메인 DB (omni_auth + omni_base + xxl_job) |
 | Redis | 6379 | CAPTCHA 캐시 + 사전 캐시 + XSS 구성 캐시 |
 | Nacos | 8080, 8848 | 관리 화면 (8080) + 서비스 디스커버리 및 구성 센터 (8848) |
@@ -342,6 +352,7 @@ npm run dev
 | `omni-common-redis-reactive` | 리액티브 Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux 서비스 (Gateway) |
 | `omni-common-operlog` | 작업 로그 Starter: `@OperLog` AOP 애스펙트 + RocketMQ 프로듀서 + 엔티티 변경 diff | 비즈니스 서비스 |
 | `omni-common-job` | 스케줄링 작업 Starter: XXL-JOB 자동 구성 + Admin Client + 시스템 작업 등록 + `@SystemJobMeta` 이중 어노테이션 | 비즈니스 서비스 |
+| `omni-common-workflow` | 워크플로 Starter: Flowable 자동 구성, `ApprovalService` SPI, `UserGroupLookup`, `TenantInfoFilter` | 워크플로 서비스 |
 
 > 모든 Starter는 Spring Boot 자동 구성 (`AutoConfiguration.imports`)을 통해 Bean을 등록합니다. 하위 모듈은 수동 `@ComponentScan`이 필요 없습니다.
 > `omni-common-redis`와 `omni-common-redis-reactive`는 혼용 불가합니다. WebFlux 서비스는 리액티브 버전만 의존할 수 있습니다.
@@ -438,6 +449,37 @@ SPI 모드 채택: `UserJobHandler` 인터페이스를 구현하고 Spring Bean�
 ### 프론트엔드 통합
 
 세 가지 진입점: 시스템 작업 관리(`SystemJob`), 작업 유형 관리(`UserJobType`), 워크스페이스 내 작업(`MyJob`). Cron 표현식 편집기, `DynamicFormRenderer` 동적 매개변수 폼, 10초 간격 활성 작업 로그 폴링 및 `ElNotification`을 통한 실행 결과 푸시 알림을 지원합니다.
+
+## 워크플로 엔진
+
+프로젝트는 **Flowable 7.x** 기반의 시각적 BPMN 워크플로 엔진을 구축하여, 모델 설계, 버전 관리, 멀티 인스턴스 회서 승인 등의 기능을 지원합니다. 심층 기술 세부사항은 [`docs/workflow.md`](docs/workflow.md)를 참조하세요.
+
+### 아키텍처 개요
+
+- **omni-workflow**: 독립 마이크로서비스 (포트 8103), Flowable BPMN 엔진을 통합하여 모델 관리, 프로세스 정의, 인스턴스 모니터링, 승인 처리, 통계 대시보드 등 7개 컨트롤러 제공
+- **omni-common-workflow**: 공유 Starter, `FlowableAutoConfiguration`, `ApprovalService` SPI, `UserGroupLookup`, `TenantInfoFilter` 등 기반 기능 제공
+
+### 핵심 기능
+
+- **시각적 모델 설계**: 프론트엔드 BPMN 디자이너로 드래그 앤 드롭 모델링, XML 편집, 검증 미리보기, `BpmnXmlBuilder`가 디자이너 JSON을 BPMN 2.0 XML로 변환
+- **이중 버전 관리**: 비즈니스 버전 (DRAFT → PUBLISHED → ARCHIVED)은 `wf_process_model_version` 테이블에서 관리, 엔진 버전은 Flowable 배포 메커니즘으로 관리
+- **멀티 인스턴스 회서**: ALL (전원 승인)과 ANY (한 명 이상 승인) 두 가지 승인 모드 지원, MI `completionCondition`으로 제어, 거부 시 즉시 종료
+- **동적 후보자 해결**: `omni:assignment` JSON 확장 요소 + `ScopedRoleAssignmentListener` 런타임 해결, 다양한 앵커 유형 (기안자 주 조직 / 상위 조직 / 절대 조직 등) 지원
+- **승인 기록 + 프로세스 진척도 + CC 알림**: 완전한 프로세스 추적 기능, `HistoricTaskInstance` 수준 정밀도로 승인 결과 판정
+
+### 데이터베이스 테이블 (omni_workflow 데이터베이스)
+
+| 테이블 | 설명 |
+|--------|------|
+| `wf_process_model` | 프로세스 모델 메인 테이블, `model_key`는 테넌트 내 고유 |
+| `wf_process_model_version` | 모델 버전 테이블, BPMN XML + 배포 정보 저장 |
+| `wf_process_instance_ext` | 프로세스 인스턴스 확장 테이블, 모델 버전과 Flowable 인스턴스 연결 |
+| `wf_todo_task` | 미처리 작업 캐시 테이블 |
+| `wf_cc_record` | CC 기록 테이블 |
+
+### 프론트엔드 통합
+
+7개 페이지/컴포넌트로 완전한 워크플로 시나리오 커버: 모델 관리 (`ModelDesigner`), 버전 이력 (`VersionHistoryDialog`), 검증 결과 (`ValidateResultDialog`), 프로세스 정의, 프로세스 인스턴스, 승인 기록 (`ApprovalRecordsDialog`), 프로세스 진척도 (`ProcessProgressDialog`), 통계 대시보드.
 
 ## RBAC 권한 체계
 

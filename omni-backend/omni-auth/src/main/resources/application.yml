@@ -50,7 +50,7 @@ auth:
     callback-url: ${auth.frontend.base-url}/callback
     device-verify-url: ${auth.frontend.base-url}/device/verify
   token:
-    access-token-ttl: 900
+    access-token-ttl: 7200
     refresh-token-ttl: 604800
   captcha:
     ttl-seconds: 300

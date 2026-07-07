@@ -23,6 +23,12 @@ export interface DictType {
   updateBy: string | null
 }
 
+/** 字典选项（用于下拉组件） */
+export interface DictOption {
+  value: string
+  label: string
+}
+
 /** 字典数据 */
 export interface DictData {
   id: number
@@ -211,6 +217,19 @@ export function updateDictData(id: number, data: UpdateDictDataRequest) {
  */
 export function deleteDictData(id: number) {
   return request.delete<ApiResponse<void>>(`/base/dict/data/${id}`)
+}
+
+/**
+ * 按字典类型编码获取字典选项列表（轻量，用于前端下拉组件）。
+ *
+ * @param typeCode - 字典类型编码
+ * @returns 字典选项列表
+ */
+export function getDictOptions(typeCode: string) {
+  return request.get<ApiResponse<DictOption[]>>('/base/dict/data/options', {
+    params: { typeCode },
+    headers: tenantHeaders(),
+  })
 }
 
 /**

@@ -1,0 +1,2 @@
+SET NAMES utf8mb4;
+SELECT SUBSTRING(bpmn_xml, 1, 50) AS xml_start, LENGTH(bpmn_xml) AS xml_len, (LENGTH(bpmn_xml) - LENGTH(REPLACE(bpmn_xml, 'omni:assignment', ''))) / LENGTH('omni:assignment') AS assignment_count FROM omni_workflow.wf_process_model_version WHERE id = 3;

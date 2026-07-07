@@ -66,6 +66,16 @@ public class UserJobTypeServiceImpl implements UserJobTypeService {
 
     /** {@inheritDoc} */
     @Override
+    public SysUserJobType getEnabledTypeByCode(String typeCode) {
+        return sysUserJobTypeMapper.selectOne(
+                new LambdaQueryWrapper<SysUserJobType>()
+                        .eq(SysUserJobType::getTypeCode, typeCode)
+                        .eq(SysUserJobType::getStatus, 1)
+                        .last("LIMIT 1"));
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public SysUserJobType createType(CreateUserJobTypeRequest request) {
         // 校验 typeCode 唯一
         Long count = sysUserJobTypeMapper.selectCount(

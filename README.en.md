@@ -26,6 +26,7 @@
 - **Base Data & Task Management**: `omni-base` service (port 8101) provides data dictionary management, system task management, user task management, and operation log viewing, with Redis cache-aside caching and complete frontend management pages
 - **Operation Log Audit Trail**: `@OperLog` annotation + AOP aspect for non-intrusive collection, automatically records who/when/what/changed with full audit information, entity change snapshot auto-diff (oldValue vs newValue) for data traceability, RocketMQ async delivery without blocking business requests, hot/cold table separation archival strategy (180-day retention + cold table long-term preservation) balancing query performance and compliance requirements, complementing audit logs (`sys_audit_log`) and login logs (`sys_login_log`) to form a complete audit trail system
 - **Dual-Track Scheduled Task Scheduling**: system tasks (`@XxlJob` + `@SystemJobMeta` dual annotations, auto-registered to scheduling center) and user tasks (SPI pattern, `UserJobHandler` interface + JSON parameter routing) based on XXL-JOB 3.3.1, with frontend Cron editor, dynamic parameter forms, and real-time execution log push
+- **Visual BPMN Workflow Engine**: built on Flowable 7.x, `omni-workflow` standalone microervice (port 8103), frontend BPMN visual designer with drag-and-drop modeling, dual-version management (business version DRAFT → PUBLISHED → ARCHIVED + Flowable engine version), multi-instance countersign with ALL/ANY approval modes, dynamic candidate resolution (`omni:assignment` JSON extension + `ScopedRoleAssignmentListener` runtime parsing), approval records + process progress diagram + CC notifications
 - **Maven Wrapper** bundled — clone and build, no system Maven installation needed
 
 ## Tech Stack
@@ -41,6 +42,7 @@
 | Flow Control | Sentinel Dashboard | 1.8.8 |
 | Message Queue | Apache RocketMQ | 5.3.2 |
 | Task Scheduling | XXL-JOB Admin | 3.3.1 |
+| Workflow Engine | Flowable BPMN | 7.x |
 | Frontend | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
 | Bundler | Vite 8 (Rolldown) | 8.0.14 |
 | UI Framework | Element Plus | 2.14.0 |
@@ -79,8 +81,10 @@ Omni-Stack/
 │   ├── omni-common-redis-reactive/    # Reactive Redis Starter: for WebFlux services
 │   ├── omni-common-operlog/             # Operation Log Starter: AOP aspect + MQ producer + entity diff
 │   ├── omni-common-job/                 # Scheduled Task Starter: XXL-JOB auto-config + Admin Client + system task registry
+│   ├── omni-common-workflow/            # Workflow Starter: Flowable auto-config + Approval SPI + Tenant filter
 │   ├── omni-auth/                     # Auth service: login, captcha, JWT, OAuth2 (port 8100)
 │   ├── omni-base/                     # Base data service: dictionary management (port 8101)
+│   ├── omni-workflow/                   # Workflow engine service: Flowable BPMN (port 8103)
 │   └── omni-gateway/                  # API Gateway (WebFlux, port 8102)
 ├── omni-frontend/                   # Vue 3 SPA (dev server port 3000)
 │   ├── package.json
@@ -114,7 +118,12 @@ Omni-Stack/
 │   :3000         │────>│  StripPrefix=2    │     │    omni-base     │
 └─────────────────┘     └──────────────────┘     │   Spring :8101  │
                             │                    │  Dictionary Mgmt│
-                    ┌───────┴────────┐            └─────────────────┘
+                            │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │  omni-workflow   │
+                            │                    │  Flowable :8103  │
+                            │                    └─────────────────┘
+                    ┌───────┴────────┐
                     │  MySQL :3306   │  Persistence storage
                     │  Redis :6379   │  Cache + captcha + dict cache
                     │  Nacos :8848   │  Discovery + Config
@@ -318,6 +327,7 @@ npm run dev
 | Auth service | 8100 | Spring Security + OAuth2 Authorization Server |
 | Base data service | 8101 | Dictionary management, Redis cache-aside caching |
 | API Gateway | 8102 | Spring Cloud Gateway (WebFlux) |
+| Workflow engine | 8103 | Flowable BPMN process engine |
 | MySQL | 3306 | Primary database (omni_auth + omni_base + xxl_job) |
 | Redis | 6379 | Captcha cache + dict cache + XSS config cache |
 | Nacos | 8080, 8848 | Management UI (8080) + Discovery & Config (8848) |
@@ -341,6 +351,7 @@ npm run dev
 | `omni-common-redis-reactive` | Reactive Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux services (Gateway) |
 | `omni-common-operlog` | Operation Log Starter: `@OperLog` AOP aspect + RocketMQ producer + entity change diff | Business services |
 | `omni-common-job` | Scheduled Task Starter: XXL-JOB auto-config + Admin Client + system task registry + `@SystemJobMeta` dual annotation | Business services |
+| `omni-common-workflow` | Workflow Starter: Flowable auto-configuration, `ApprovalService` SPI, `UserGroupLookup`, `TenantInfoFilter` | Workflow service |
 
 > All starters use Spring Boot auto-configuration (`AutoConfiguration.imports`) to register beans. Downstream modules don't need manual `@ComponentScan`.
 > `omni-common-redis` and `omni-common-redis-reactive` must not be mixed — WebFlux services can only depend on the reactive version.
@@ -437,6 +448,37 @@ Using `DrinkWaterRemindHandler` (water drinking reminder) as an example: ① Reg
 ### Frontend Integration
 
 Three entry points: System Job Management (`SystemJob`), Task Type Management (`UserJobType`), and My Jobs on the workspace (`MyJob`). Features include a Cron expression editor, `DynamicFormRenderer` for dynamic parameter forms, and 10-second polling of active task logs with `ElNotification` push for execution results.
+
+## Workflow Engine
+
+The project provides a visual BPMN workflow engine built on **Flowable 7.x**, supporting model design, version management, multi-instance countersign approval, and more. Technical details are documented in [`docs/workflow.md`](docs/workflow.md).
+
+### Architecture Overview
+
+- **omni-workflow**: standalone microservice (port 8103), integrating Flowable BPMN engine with 7 controllers covering model management, process definitions, instance monitoring, approval processing, and statistics dashboards
+- **omni-common-workflow**: shared starter providing `FlowableAutoConfiguration`, `ApprovalService` SPI, `UserGroupLookup`, `TenantInfoFilter`, and other infrastructure
+
+### Core Capabilities
+
+- **Visual Model Designer**: frontend BPMN designer with drag-and-drop modeling, XML editing, and validation preview. `BpmnXmlBuilder` converts designer JSON to BPMN 2.0 XML
+- **Dual-Version Management**: business versions (DRAFT → PUBLISHED → ARCHIVED) tracked in `wf_process_model_version`, engine versions managed by Flowable deployment
+- **Multi-Instance Countersign**: ALL (everyone approves) and ANY (any one approves) modes controlled via MI `completionCondition`, with instant rejection shortcut
+- **Dynamic Candidate Resolution**: `omni:assignment` JSON extension element + `ScopedRoleAssignmentListener` runtime parsing, supporting multiple anchor types (initiator's primary unit / parent org / absolute org, etc.)
+- **Approval Records + Process Progress + CC Notifications**: complete process tracing with `HistoricTaskInstance`-level precision
+
+### Database Tables (omni_workflow)
+
+| Table | Description |
+|-------|-------------|
+| `wf_process_model` | Process model registry, `model_key` unique per tenant |
+| `wf_process_model_version` | Version history: BPMN XML + deployment info |
+| `wf_process_instance_ext` | Instance extension: links model version to Flowable instance |
+| `wf_todo_task` | Pending task cache |
+| `wf_cc_record` | CC notification records |
+
+### Frontend Integration
+
+7 pages/components covering the full workflow experience: Model Management (`ModelDesigner`), Version History (`VersionHistoryDialog`), Validation Results (`ValidateResultDialog`), Process Definitions, Process Instances, Approval Records (`ApprovalRecordsDialog`), Process Progress (`ProcessProgressDialog`), and Statistics Dashboard.
 
 ## RBAC Permission System
 

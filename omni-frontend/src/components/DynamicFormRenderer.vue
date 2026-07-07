@@ -1,49 +1,3 @@
-<template>
-  <!-- 动态表单渲染器：根据 JSON Schema 动态生成表单字段 -->
-  <div class="dynamic-form-renderer">
-    <!-- 表单字段区域 -->
-    <div v-if="fieldList.length > 0" class="dynamic-form-fields">
-      <div v-for="field in fieldList" :key="field.key" class="dynamic-form-field">
-        <div class="field-label">
-          {{ field.label }}
-          <span v-if="field.required" class="field-required">*</span>
-        </div>
-        <!-- string -->
-        <el-input v-if="field.type === 'string'"
-                  v-model="formValues[field.key]"
-                  :placeholder="'请输入' + field.label"
-                  @input="emitValues" />
-        <!-- number -->
-        <el-input-number v-else-if="field.type === 'number'"
-                         v-model="formValues[field.key]"
-                         style="width: 100%"
-                         @change="emitValues" />
-        <!-- boolean -->
-        <el-switch v-else-if="field.type === 'boolean'"
-                   v-model="formValues[field.key]"
-                   @change="emitValues" />
-        <!-- textarea -->
-        <el-input v-else-if="field.type === 'textarea'"
-                  v-model="formValues[field.key]"
-                  type="textarea" :rows="3"
-                  :placeholder="'请输入' + field.label"
-                  @input="emitValues" />
-        <!-- select -->
-        <el-select v-else-if="field.type === 'select'"
-                   v-model="formValues[field.key]"
-                   :placeholder="'请选择' + field.label"
-                   style="width: 100%"
-                   @change="emitValues">
-          <el-option v-for="opt in field.options" :key="opt.value"
-                     :label="opt.label" :value="opt.value" />
-        </el-select>
-      </div>
-    </div>
-    <!-- 空状态提示 -->
-    <el-empty v-else :description="t('userJob.noParams')" :image-size="60" />
-  </div>
-</template>
-
 <script setup lang="ts">
 /**
  * 动态表单渲染器组件。
@@ -139,6 +93,58 @@ watch(() => props.schema, () => {
   emitValues()
 }, { deep: true })
 </script>
+
+<template>
+  <!-- 动态表单渲染器：根据 JSON Schema 动态生成表单字段 -->
+  <div class="dynamic-form-renderer">
+    <!-- 表单字段区域 -->
+    <div v-if="fieldList.length > 0" class="dynamic-form-fields">
+      <div v-for="field in fieldList" :key="field.key" class="dynamic-form-field">
+        <div class="field-label">
+          {{ field.label }}
+          <span v-if="field.required" class="field-required">*</span>
+        </div>
+        <!-- string -->
+        <el-input
+          v-if="field.type === 'string'"
+          v-model="formValues[field.key]"
+          :placeholder="'请输入' + field.label"
+          @input="emitValues" />
+        <!-- number -->
+        <el-input-number
+          v-else-if="field.type === 'number'"
+          v-model="formValues[field.key]"
+          style="width: 100%"
+          @change="emitValues" />
+        <!-- boolean -->
+        <el-switch
+          v-else-if="field.type === 'boolean'"
+          v-model="formValues[field.key]"
+          @change="emitValues" />
+        <!-- textarea -->
+        <el-input
+          v-else-if="field.type === 'textarea'"
+          v-model="formValues[field.key]"
+          type="textarea" :rows="3"
+          :placeholder="'请输入' + field.label"
+          @input="emitValues" />
+        <!-- select -->
+        <el-select
+          v-else-if="field.type === 'select'"
+          v-model="formValues[field.key]"
+          :placeholder="'请选择' + field.label"
+          style="width: 100%"
+          @change="emitValues">
+          <el-option
+            v-for="opt in field.options" :key="opt.value"
+            :label="opt.label" :value="opt.value" />
+        </el-select>
+      </div>
+    </div>
+    <!-- 空状态提示 -->
+    <el-empty v-else :description="t('userJob.noParams')" :image-size="60" />
+  </div>
+</template>
 
 <style scoped>
 .dynamic-form-renderer {

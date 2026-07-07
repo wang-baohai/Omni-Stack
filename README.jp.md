@@ -26,6 +26,7 @@
 - **基礎データ・タスク管理**: `omni-base` サービス（ポート 8101）がデータ辞書管理、システムタスク管理、ユーザータスク管理、操作ログ閲覧を提供、Redis cache-aside キャッシュ、完全なフロントエンド管理ページ付き
 - **操作ログ監査証跡**: `@OperLog` アノテーション + AOP アスペクトによる非侵襲的収集、who/when/what/changed の完全な監査情報を自動記録、エンティティ変更スナップショットの自動 diff（oldValue vs newValue）でデータ追跡をサポート、RocketMQ 非同期配信でビジネスリクエストをブロックせず、ホット/コールドテーブル分離アーカイブ戦略（180日保持 + コールドテーブル長期保存）でクエリパフォーマンスとコンプライアンス要件を両立、監査ログ（`sys_audit_log`）およびログインログ（`sys_login_log`）と補完し合い完全な監査証跡システムを構築
 - **デュアルトラック スケジューリングタスク**: XXL-JOB 3.3.1 ベースのシステムタスク（`@XxlJob` + `@SystemJobMeta` デュアルアノテーション、スケジューリングセンターに自動登録）とユーザータスク（SPI モード、`UserJobHandler` インターフェース + JSON パラメータルーティング）の2つのモードを実装、フロントエンドは Cron エディター、動的パラメータフォーム、実行ログリアルタイムプッシュをサポート
+- **ビジュアル BPMN ワークフローエンジン**: Flowable 7.x ベース、`omni-workflow` 独立マイクロサービス（ポート 8103）、フロントエンド BPMN ビジュアルデザイナーによるドラッグ&ドロップモデリング、デュアルバージョン管理（ビジネスバージョン DRAFT → PUBLISHED → ARCHIVED + Flowable エンジンバージョン）、マルチインスタンス会書は ALL/ANY 承認モード対応、動的候補者解決（`omni:assignment` JSON 拡張 + `ScopedRoleAssignmentListener` ランタイム解決）、承認記録 + プロセス進捗図 + CC 通知が完全利用可能
 - **Maven Wrapper** 内蔵 — クローン後すぐにビルド可能、システムへの Maven インストール不要
 
 ## 技術スタック
@@ -41,6 +42,7 @@
 | フロー制御 | Sentinel Dashboard | 1.8.8 |
 | メッセージキュー | Apache RocketMQ | 5.3.2 |
 | タスクスケジューリング | XXL-JOB Admin | 3.3.1 |
+| ワークフローエンジン | Flowable BPMN | 7.x |
 | フロントエンド | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
 | ビルドツール | Vite 8 (Rolldown) | 8.0.14 |
 | UI フレームワーク | Element Plus | 2.14.0 |
@@ -79,8 +81,10 @@ Omni-Stack/
 │   ├── omni-common-redis-reactive/    # リアクティブ Redis Starter：WebFlux サービス専用
 │   ├── omni-common-operlog/             # 操作ログ Starter：AOP アスペクト + MQ プロデューサー + エンティティ diff
 │   ├── omni-common-job/                 # スケジューリングタスク Starter：XXL-JOB 自動設定 + Admin Client + システムタスク登録
+│   ├── omni-common-workflow/            # ワークフロー Starter：Flowable 自動設定 + 承認 SPI + テナントフィルタ
 │   ├── omni-auth/                     # 認証サービス：ログイン、キャプチャ、JWT、OAuth2 (ポート 8100)
 │   ├── omni-base/                     # 基礎データサービス：データ辞書管理 (ポート 8101)
+│   ├── omni-workflow/                   # ワークフローエンジンサービス：Flowable BPMN (ポート 8103)
 │   └── omni-gateway/                  # API ゲートウェイ (WebFlux, ポート 8102)
 ├── omni-frontend/                   # Vue 3 SPA (開発サーバー ポート 3000)
 │   ├── package.json
@@ -114,7 +118,12 @@ Omni-Stack/
 │   :3000         │────>│  StripPrefix=2    │     │    omni-base     │
 └─────────────────┘     └──────────────────┘     │   Spring :8101  │
                             │                    │  データ辞書管理  │
-                    ┌───────┴────────┐            └─────────────────┘
+                            │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │  omni-workflow   │
+                            │                    │  Flowable :8103  │
+                            │                    └─────────────────┘
+                    ┌───────┴────────┐
                     │  MySQL :3306   │  永続化ストレージ
                     │  Redis :6379   │  キャッシュ + キャプチャ + 辞書キャッシュ
                     │  Nacos :8848   │  ディスカバリ + 構成
@@ -318,6 +327,7 @@ npm run dev
 | 認証サービス | 8100 | Spring Security + OAuth2 Authorization Server |
 | 基礎データサービス | 8101 | データ辞書管理、Redis cache-aside キャッシュ |
 | API ゲートウェイ | 8102 | Spring Cloud Gateway (WebFlux) |
+| ワークフローエンジンサービス | 8103 | Flowable BPMN プロセスエンジン |
 | MySQL | 3306 | メインデータベース（omni_auth + omni_base + xxl_job） |
 | Redis | 6379 | キャプチャキャッシュ + 辞書キャッシュ + XSS 構成キャッシュ |
 | Nacos | 8080, 8848 | 管理画面 (8080) + サービスディスカバリと構成管理 (8848) |
@@ -341,6 +351,7 @@ npm run dev
 | `omni-common-redis-reactive` | リアクティブ Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux サービス（Gateway） |
 | `omni-common-operlog` | 操作ログ Starter：`@OperLog` AOP アスペクト + RocketMQ プロデューサー + エンティティ変更 diff | ビジネスサービス |
 | `omni-common-job` | スケジューリングタスク Starter：XXL-JOB 自動設定 + Admin Client + システムタスク登録 + `@SystemJobMeta` デュアルアノテーション | ビジネスサービス |
+| `omni-common-workflow` | ワークフロー Starter：Flowable 自動設定、`ApprovalService` SPI、`UserGroupLookup`、`TenantInfoFilter` | ワークフローサービス |
 
 > 全 Starter は Spring Boot 自動構成（`AutoConfiguration.imports`）を使用して Bean を登録します。下流モジュールは手動で `@ComponentScan` を追加する必要がありません。
 > `omni-common-redis` と `omni-common-redis-reactive` は混用不可です。WebFlux サービスはリアクティブバージョンのみ依存できます。
@@ -437,6 +448,37 @@ SPI モード採用：`UserJobHandler` インターフェースを実装し Spri
 ### フロントエンド統合
 
 三つのエントリポイント：システムタスク管理（`SystemJob`）、タスクタイプ管理（`UserJobType`）、ワークスペースのマイタスク（`MyJob`）。Cron 式エディター、`DynamicFormRenderer` 動的パラメータフォーム、および 10 秒間隔のアクティブタスクログポーリングと `ElNotification` による実行結果プッシュ通知をサポート。
+
+## ワークフローエンジン
+
+プロジェクトは **Flowable 7.x** ベースのビジュアル BPMN ワークフローエンジンを構築し、モデル設計、バージョン管理、マルチインスタンス会書承認などの機能をサポートしています。詳細な技術情報は [`docs/workflow.md`](docs/workflow.md) を参照してください。
+
+### アーキテクチャ概要
+
+- **omni-workflow**：独立マイクロサービス（ポート 8103）、Flowable BPMN エンジンを統合し、モデル管理、プロセス定義、インスタンス監視、承認処理、統計ダッシュボードなど 7 つのコントローラーを提供
+- **omni-common-workflow**：共有 Starter、`FlowableAutoConfiguration`、`ApprovalService` SPI、`UserGroupLookup`、`TenantInfoFilter` などの基盤機能を提供
+
+### コア機能
+
+- **ビジュアルモデル設計**：フロントエンド BPMN デザイナーによるドラッグ&ドロップモデリング、XML 編集、検証プレビュー、`BpmnXmlBuilder` がデザイナー JSON を BPMN 2.0 XML に変換
+- **デュアルバージョン管理**：ビジネスバージョン（DRAFT → PUBLISHED → ARCHIVED）は `wf_process_model_version` テーブルで管理、エンジンバージョンは Flowable デプロイメントメカニズムで管理
+- **マルチインスタンス会書**：ALL（全員承認）と ANY（いずれか一人承認）の2つの承認モードをサポート、MI `completionCondition` で制御、いずれかの拒否で即座に終了
+- **動的候補者解決**：`omni:assignment` JSON 拡張要素 + `ScopedRoleAssignmentListener` ランタイム解決、複数のアンカータイプ（發起人の主組織 / 上位組織 / 絶対組織など）をサポート
+- **承認記録 + プロセス進捗図 + CC 通知**：完全なプロセス追跡機能、`HistoricTaskInstance` レベルの精度で承認結果を判定
+
+### データベーステーブル（omni_workflow データベース）
+
+| テーブル | 説明 |
+|---------|------|
+| `wf_process_model` | プロセスモデルメインテーブル、`model_key` はテナント内ユニーク |
+| `wf_process_model_version` | モデルバージョンテーブル、BPMN XML + デプロイ情報を格納 |
+| `wf_process_instance_ext` | プロセスインスタンス拡張テーブル、モデルバージョンと Flowable インスタンスを関連付け |
+| `wf_todo_task` | 未処理タスクキャッシュテーブル |
+| `wf_cc_record` | CC 記録テーブル |
+
+### フロントエンド統合
+
+7 つのページ/コンポーネントで完全なワークフローシーンをカバー：モデル管理（`ModelDesigner`）、バージョン履歴（`VersionHistoryDialog`）、検証結果（`ValidateResultDialog`）、プロセス定義、プロセスインスタンス、承認記録（`ApprovalRecordsDialog`）、プロセス進捗（`ProcessProgressDialog`）、統計ダッシュボード。
 
 ## RBAC 権限システム
 

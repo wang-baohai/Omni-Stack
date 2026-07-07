@@ -2,6 +2,8 @@ package com.omni.common.result;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -55,6 +57,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 处理权限不足异常（{@code @PreAuthorize} 校验失败时抛出）。
+     * <p>
+     * Spring Security 6+ 使用 {@link AuthorizationDeniedException}，
+     * 旧版本使用 {@link AccessDeniedException}，两者统一处理返回 403。
+     * </p>
+     *
+     * @param e 权限不足异常
+     * @return HTTP 403 响应
+     */
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public R<Void> handleAccessDeniedException(Exception e) {
+        log.warn("权限不足: {}", e.getMessage());
+        return R.fail(403, "权限不足，拒绝访问");
+    }
+
+    /**
      * 处理表单/查询参数绑定异常。
      *
      * @param e 参数绑定异常
@@ -82,7 +101,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<Void> handleException(Exception e) {
-        log.error("未预期的系统异常", e);
-        return R.fail("服务器内部错误");
+        log.error("未预期的系统异常: {}", e.getClass().getSimpleName(), e);
+        return R.fail("服务器内部错误: " + e.getClass().getSimpleName());
     }
 }

@@ -292,6 +292,8 @@ html.dark body::before {
 
 // Sidebar
 .sidebar {
+  display: flex;
+  flex-direction: column;
   background: var(--omni-bg-glass);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -326,9 +328,29 @@ html.dark body::before {
   }
 
   .el-menu {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
     border-right: none;
     background: transparent;
     padding: var(--omni-space-sm);
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(160, 165, 180, 0.3);
+      border-radius: 2px;
+
+      &:hover {
+        background: rgba(160, 165, 180, 0.5);
+      }
+    }
 
     .el-menu-item {
       border-radius: var(--omni-radius-md);
@@ -618,6 +640,120 @@ html.dark .el-popper {
   border-radius: var(--omni-radius-md);
   box-shadow: var(--omni-shadow-lg);
   color: var(--omni-text-primary);
+}
+
+// --- bpmn-js 暗色模式适配 ---
+html.dark {
+  // 画布容器背景
+  .djs-container {
+    background: var(--omni-bg-surface);
+  }
+
+  // BPMN 元素形状（矩形、圆形、菱形、多边形）
+  .djs-element,
+  .djs-connection {
+    .djs-visual > rect,
+    .djs-visual > circle,
+    .djs-visual > ellipse,
+    .djs-visual > polygon,
+    .djs-visual > path {
+      fill: rgba(30, 30, 40, 0.65);
+      stroke: rgba(160, 165, 180, 0.45);
+    }
+  }
+
+  // 文字标签（!important 覆盖 bpmn-js 内联 style/fill 属性）
+  // bpmn-js 在 <text> 上设置 style="fill:#xxx"，必须 !important 才能覆盖
+  .djs-label,
+  .djs-label text,
+  .djs-label tspan,
+  .djs-element .djs-label,
+  .djs-element .djs-label text,
+  .djs-element .djs-label tspan,
+  .djs-connection .djs-label,
+  .djs-connection .djs-label text,
+  .djs-connection .djs-label tspan {
+    fill: #dce1eb !important;
+    color: #dce1eb !important;
+    font-family: var(--el-font-family) !important;
+  }
+
+  // 确保 SVG <text> 直接子元素也被覆盖（某些渲染路径不走 .djs-label）
+  .djs-visual text,
+  .djs-visual tspan {
+    fill: #dce1eb !important;
+  }
+
+  // 选中状态高亮
+  .djs-element.djs-element-selected .djs-visual > rect,
+  .djs-element.djs-element-selected .djs-visual > circle,
+  .djs-element.djs-element-selected .djs-visual > ellipse,
+  .djs-element.djs-element-selected .djs-visual > polygon,
+  .djs-element.djs-element-selected .djs-visual > path {
+    stroke: var(--omni-accent-blue);
+    stroke-width: 2;
+    fill: rgba(40, 50, 80, 0.5);
+  }
+
+  // 顺序流线条
+  .djs-connection .djs-visual > path {
+    stroke: rgba(140, 145, 160, 0.5);
+  }
+
+  // 拖拽预览
+  .djs-drag-group .djs-visual > rect,
+  .djs-drag-group .djs-visual > circle,
+  .djs-drag-group .djs-visual > polygon,
+  .djs-drag-group .djs-visual > path {
+    fill: rgba(255, 255, 255, 0.08);
+    stroke: var(--omni-accent-blue);
+  }
+
+  // 画布内文字输入框
+  .djs-direct-editing-parent,
+  .djs-direct-editing-content {
+    background: var(--omni-bg-elevated);
+    color: var(--omni-text-primary);
+    border-color: var(--omni-border-glass);
+  }
+
+  // 上下文菜单（右键）
+  .djs-context-pad .entry {
+    background: var(--omni-bg-glass);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--omni-border-glass);
+    color: var(--omni-text-primary);
+
+    &:hover {
+      background: var(--omni-bg-glass-hover);
+    }
+  }
+
+  // 搜索框（Ctrl+F）
+  .djs-search-container {
+    background: var(--omni-bg-glass);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--omni-border-glass);
+    color: var(--omni-text-primary);
+  }
+
+  // 内置 palette（如果显示）
+  .djs-palette {
+    background: var(--omni-bg-surface);
+    border-color: var(--omni-border-color);
+
+    .entry {
+      color: var(--omni-text-primary);
+
+      &:hover {
+        background: var(--omni-bg-glass-hover);
+      }
+    }
+
+    .separator {
+      border-color: var(--omni-border-color);
+    }
+  }
 }
 
 // §6  Shared Utility Classes

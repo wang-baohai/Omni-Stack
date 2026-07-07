@@ -1,6 +1,7 @@
 package com.omni.base.controller;
 
 import com.omni.base.dto.CreateDictDataRequest;
+import com.omni.base.dto.DictOptionVO;
 import com.omni.base.dto.UpdateDictDataRequest;
 import com.omni.base.entity.SysDictData;
 import com.omni.base.service.DictDataService;
@@ -24,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 字典数据控制器。
  * <p>提供字典数据的增删改查和缓存刷新接口，路径映射 {@code /api/base/dict/data}。</p>
@@ -38,6 +41,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class DictDataController {
 
     private final DictDataService dictDataService;
+
+    /**
+     * 按字典类型编码获取字典选项列表（轻量，用于前端下拉组件）。
+     * <p>无需特殊权限，仅需登录认证。返回已启用的字典数据，带 Redis 缓存。</p>
+     *
+     * @param tenantId 租户 ID
+     * @param typeCode 字典类型编码
+     * @return 字典选项列表
+     */
+    @GetMapping("/options")
+    public R<List<DictOptionVO>> options(
+            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestParam String typeCode) {
+        List<DictOptionVO> options = dictDataService.listEnabledData(tenantId, typeCode)
+                .stream()
+                .map(data -> new DictOptionVO(data.getDictValue(), data.getDictLabel()))
+                .toList();
+        return R.ok(options);
+    }
 
     /**
      * 按字典类型编码分页查询字典数据列表。

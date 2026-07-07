@@ -43,6 +43,14 @@ public interface UserJobTypeService {
     List<SysUserJobType> listEnabledTypes();
 
     /**
+     * 按类型编码查询启用状态的任务类型。
+     *
+     * @param typeCode 类型编码
+     * @return 启用状态的任务类型，不存在或已禁用时返回 null
+     */
+    SysUserJobType getEnabledTypeByCode(String typeCode);
+
+    /**
      * 创建任务类型。
      *
      * @param request 创建请求

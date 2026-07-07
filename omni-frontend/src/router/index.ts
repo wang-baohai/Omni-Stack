@@ -68,6 +68,10 @@ const iconMap: Record<string, string> = {
   'base:operlog': 'Tickets',
   'job:user-job-type': 'Files',
   'job:system-job': 'Timer',
+  'workflow:definition': 'SetUp',
+  'workflow:model': 'EditPen',
+  'workflow:instance': 'List',
+  'workflow:stats': 'DataAnalysis',
 }
 
 /**
@@ -231,7 +235,8 @@ router.beforeEach(async (to, _from, next) => {
       next()
     }
   } else if (!userStore.token) {
-    next({ name: 'Home' })
+    const redirect = encodeURIComponent(to.fullPath)
+    next({ path: '/login', query: { redirect } })
   } else {
     // 已登录但菜单未加载：加载菜单并注册动态路由
     if (!permissionStore.menusLoaded) {

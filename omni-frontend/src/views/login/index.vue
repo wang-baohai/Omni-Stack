@@ -5,20 +5,26 @@
  * 登录表单卡片和页脚。通过 LoginForm 子组件处理实际登录逻辑。
  */
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import LoginForm from '@/components/LoginForm.vue'
 import { useAppStore } from '@/stores/app'
 import { storeLang } from '@/i18n'
 
 const { t, locale } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
 
-/** 登录成功回调：显示成功提示并跳转到工作台 */
+/** 登录成功回调：显示成功提示并跳转到原页面（或工作台） */
 function handleSuccess() {
   ElMessage.success(t('login.loginSuccess'))
-  router.push({ name: 'Home' })
+  const redirect = route.query.redirect as string
+  if (redirect) {
+    router.push(decodeURIComponent(redirect))
+  } else {
+    router.push({ name: 'Home' })
+  }
 }
 
 /** 切换主题模式 */
