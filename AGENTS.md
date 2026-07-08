@@ -33,6 +33,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/core-flows.md` | End-to-end traces of login (password + captcha, GitHub social, Gitee social, device code), RBAC functional permission (Flow 5), data permission (Flow 6), XSS defense (Flow 8) |
 | `docs/scheduling.md` | Scheduled task system: dual-track architecture (system tasks + user tasks), XXL-JOB integration, creating new task types |
 | `docs/workflow.md` | Workflow engine: Flowable integration, dual-version model management, multi-instance countersign, candidate resolution, approval flows |
+| `docs/mq-reliability.md` | Reliable message sending: Transactional Outbox pattern, status machine, retry strategy, tenant isolation, new service onboarding |
 
 ## Entry Points
 
@@ -45,6 +46,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Common MyBatis-Plus starter: `omni-backend/omni-common-mybatis/src/main/java/com/omni/common/mybatis/`
 - Common Redis starter (blocking): `omni-backend/omni-common-redis/src/main/java/com/omni/common/redis/`
 - Common Redis starter (reactive): `omni-backend/omni-common-redis-reactive/src/main/java/com/omni/common/redis/reactive/`
+- Common MQ Log starter: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/`
 
 **Frontend:**
 - App bootstrap: `omni-frontend/src/main.ts`
@@ -95,6 +97,22 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Frontend job type page: `omni-frontend/src/views/job/user-job-type/index.vue`
 - Frontend workspace (my jobs): `omni-frontend/src/views/home/index.vue`
 - Frontend API modules: `omni-frontend/src/api/myJob.ts`, `omni-frontend/src/api/systemJob.ts`, `omni-frontend/src/api/userJobType.ts`
+
+**MQ Message Log:**
+- Reliable message relay interface: `omni-backend/omni-common-core/src/main/java/com/omni/common/core/mq/ReliableMessageRelay.java`
+- Reliable message template: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java`
+- Relay service: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java`
+- Relay job handler: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayJob.java`
+- Message entity: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/entity/SysMqMessage.java`
+- Message sender interface: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/sender/MessageSender.java`
+- RocketMQ sender: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/sender/RocketMqMessageSender.java`
+- Internal query API (Feign): `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/controller/MqMessageInternalController.java`
+- Auto-configuration: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/config/MqLogAutoConfiguration.java`
+- Schema DDL: `omni-backend/omni-common-mqlog/src/main/resources/schema.sql`
+- MQ message controller (external): `omni-backend/omni-base/src/main/java/com/omni/base/controller/MqMessageController.java`
+- Frontend MQ message page: `omni-frontend/src/views/base/mqmessage/index.vue`
+- Frontend operlog page: `omni-frontend/src/views/monitor/oper-log/index.vue`
+- Frontend API: `omni-frontend/src/api/mqMessage.ts`
 
 **Workflow:**
 - Workflow service: `omni-backend/omni-workflow/src/main/java/com/omni/workflow/WorkflowApplication.java`
@@ -242,6 +260,13 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - omni-auth 模块不记录操作日志（@OperLog）。认证行为由登录日志（sys_login_log）完整留存，omni-auth 不引入 `omni-common-operlog` 依赖，不在控制器方法上使用 `@OperLog` 注解。
 - All date-time values must use `yyyy-MM-dd HH:mm:ss` format consistently. Frontend `el-date-picker` must use `value-format="YYYY-MM-DD HH:mm:ss"`. Backend `LocalDateTime` query params must declare `@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")`.
 - `omni-common-job` dependency is required for any service that needs scheduling. `XxlJobAutoConfiguration` activates via `@ConditionalOnClass(XxlJobSpringExecutor.class)` and auto-registers the executor and system job registry.
+- `omni-common-mqlog` provides reliable MQ message sending via Transactional Outbox pattern. `ReliableMessageRelay.send(bindingName, payload, tenantId)` inserts a PENDING record into `sys_mq_message` in the same local transaction. `mqRelayHandler` (XXL-JOB, `@XxlJob` + `@SystemJobMeta` dual annotation) asynchronously delivers messages. Each service's executor AppName is different, so handler names are naturally isolated.
+- `ReliableMessageRelay.send()` requires explicit `Long tenantId` parameter. NEVER use ThreadLocal or implicit tenant resolution for MQ outbox writes. All callers must pass tenantId from their context (e.g., `OperLogMessage.getTenantId()`).
+- All MQ message query controllers (`MqMessageController`, `MqMessageInternalController`) MUST filter by `tenantId`. External controller uses `@RequestHeader("X-Tenant-Id")`, internal controller uses `@RequestParam Long tenantId`.
+- `MqMessageRelayService` (relay job) scans ALL PENDING/FAILED messages regardless of tenant — this is intentional, relay is a background process not subject to tenant isolation.
+- `MessageSender` uses strategy pattern routed by `broker_type`. Current implementation: `RocketMqMessageSender` (StreamBridge). New MQ brokers (e.g., Kafka) require implementing `MessageSender` interface — no changes to relay logic needed.
+- MQ message retry uses exponential backoff: `2^retryCount × 10s`. Messages exceeding `max_retry` enter DEAD_LETTER status. Dead letters can be manually resent or skipped via the admin UI.
+- `sys_mq_message` auto-creates via `schema.sql` (`CREATE TABLE IF NOT EXISTS`) on service startup. No manual DDL required.
 - System tasks MUST use dual annotation: `@XxlJob("handlerName")` + `@SystemJobMeta(...)`. Missing either annotation makes the handler invisible to `SystemJobRegistry`.
 - User task handler `@Component` Bean name MUST exactly match `sys_user_job_type.type_code`. A mismatch causes silent routing failure in `UserJobHandlerRegistry`.
 - `MyJobController` uses `verifyOwnership()` instead of `@PreAuthorize`. Never add `@PreAuthorize` to `MyJobController` endpoints — ownership check is per-row (createBy == currentUser), not per-endpoint.
@@ -272,6 +297,7 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Before modifying system task annotations or adding new system tasks: read `docs/scheduling.md` Chapter 2.
 - Before writing workflow engine or approval logic: read `docs/workflow.md`.
 - Before adding a new candidate resolution strategy or anchor type: read `docs/workflow.md` Section 4 (Extension Guide).
+- Before adding MQ message sending to a new service: depend on `omni-common-mqlog` (auto-registers `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, and `MqMessageInternalController`), ensure `sys_mq_message` table exists via `schema.sql`, and call `ReliableMessageRelay.send(bindingName, payload, tenantId)` with explicit tenantId. Read `docs/mq-reliability.md` for onboarding details.
 
 ## Completion Checklist
 

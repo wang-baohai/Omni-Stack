@@ -1,9 +1,11 @@
 package com.omni.common.operlog.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.omni.common.core.mq.ReliableMessageRelay;
 import com.omni.common.operlog.aspect.OperLogAspect;
 import com.omni.common.operlog.diff.EntityDiffer;
 import com.omni.common.operlog.producer.OperLogProducer;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -40,16 +42,19 @@ public class OperLogAutoConfiguration {
 
     /**
      * 操作日志 MQ 生产者。
-     * <p>仅当 classpath 中存在 {@link StreamBridge} 时注册，
-     * 通过 RocketMQ 将日志消息发送至消费端。</p>
+     * <p>仅当 classpath 中存在 {@link StreamBridge} 时注册。
+     * 当 {@link ReliableMessageRelay} Bean 可用时，自动切换到 Transactional Outbox 模式；
+     * 否则回退到直发模式。</p>
      *
-     * @param streamBridge Spring Cloud Stream 桥接器
+     * @param streamBridge     Spring Cloud Stream 桥接器
+     * @param reliableRelay    可靠消息中继（可选）
      * @return OperLogProducer 实例
      */
     @Bean
     @ConditionalOnClass(StreamBridge.class)
-    public OperLogProducer operLogProducer(StreamBridge streamBridge) {
-        return new OperLogProducer(streamBridge);
+    public OperLogProducer operLogProducer(StreamBridge streamBridge,
+                                            ObjectProvider<ReliableMessageRelay> reliableRelay) {
+        return new OperLogProducer(streamBridge, reliableRelay.getIfAvailable());
     }
 
     /**

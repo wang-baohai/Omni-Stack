@@ -22,10 +22,11 @@
 - **AI ネイティブエンジニアリング**: AGENTS.md 実行マニュアル + Skills 行動拡張、AI 支援開発ワークフローに対応
 - **3つのユーザー作成パス**: セルフ登録（CAPTCHA + デフォルトロール）、管理者バックエンド作成、ソーシャルログイン初回自動登録
 - **3層XSS防御**: Jackson デシリアライザーが `@RequestBody` を自動サニタイズ + Servlet Filter がクエリパラメータをサニタイズ + Gateway セキュリティレスポンスヘッダー、テナント別グローバルトグルとカスタムブラックリストルール（HTMLタグ、イベントハンドラ、危険プロトコル、正規表現パターン）をサポート、Redisキャッシュ構成、完全なフロントエンド管理UI付き
-- **Common Starter エコシステム**: `omni-common` を7モジュール（core / common / mybatis / redis / redis-reactive / operlog / job）に分割、新サービスは Maven 依存関係を追加するだけで MyBatis-Plus ページネーション、Redis キャッシュ、XSS 防御、操作ログ収集、スケジューリングタスク管理の能力を獲得、`AutoConfiguration.imports` ゼロ構成自動アセンブリ
+- **Common Starter エコシステム**: `omni-common` を8モジュール（core / common / mybatis / redis / redis-reactive / operlog / job / mqlog）に分割、新サービスは Maven 依存関係を追加するだけで MyBatis-Plus ページネーション、Redis キャッシュ、XSS 防御、操作ログ収集、スケジューリングタスク管理、信頼メッセーージ送信の能力を獲得、`AutoConfiguration.imports` ゼロ構成自動アセンブリ
 - **基礎データ・タスク管理**: `omni-base` サービス（ポート 8101）がデータ辞書管理、システムタスク管理、ユーザータスク管理、操作ログ閲覧を提供、Redis cache-aside キャッシュ、完全なフロントエンド管理ページ付き
 - **操作ログ監査証跡**: `@OperLog` アノテーション + AOP アスペクトによる非侵襲的収集、who/when/what/changed の完全な監査情報を自動記録、エンティティ変更スナップショットの自動 diff（oldValue vs newValue）でデータ追跡をサポート、RocketMQ 非同期配信でビジネスリクエストをブロックせず、ホット/コールドテーブル分離アーカイブ戦略（180日保持 + コールドテーブル長期保存）でクエリパフォーマンスとコンプライアンス要件を両立、監査ログ（`sys_audit_log`）およびログインログ（`sys_login_log`）と補完し合い完全な監査証跡システムを構築
 - **デュアルトラック スケジューリングタスク**: XXL-JOB 3.3.1 ベースのシステムタスク（`@XxlJob` + `@SystemJobMeta` デュアルアノテーション、スケジューリングセンターに自動登録）とユーザータスク（SPI モード、`UserJobHandler` インターフェース + JSON パラメータルーティング）の2つのモードを実装、フロントエンドは Cron エディター、動的パラメータフォーム、実行ログリアルタイムプッシュをサポート
+- **Transactional Outbox 信頼メッセーージ**: ローカル Outbox パターンによりビジネス操作とメッセージ記録を同一トランザクションで原子性を保証、XXL-JOB リレーによる非同期配信、指数バックオフ再試行 + 死信管理、フロントエンド運用監視ページでメッセージ閲覧・再送・スキップ操作をサポート
 - **ビジュアル BPMN ワークフローエンジン**: Flowable 7.x ベース、`omni-workflow` 独立マイクロサービス（ポート 8103）、フロントエンド BPMN ビジュアルデザイナーによるドラッグ&ドロップモデリング、デュアルバージョン管理（ビジネスバージョン DRAFT → PUBLISHED → ARCHIVED + Flowable エンジンバージョン）、マルチインスタンス会書は ALL/ANY 承認モード対応、動的候補者解決（`omni:assignment` JSON 拡張 + `ScopedRoleAssignmentListener` ランタイム解決）、承認記録 + プロセス進捗図 + CC 通知が完全利用可能
 - **Maven Wrapper** 内蔵 — クローン後すぐにビルド可能、システムへの Maven インストール不要
 
@@ -338,9 +339,9 @@ npm run dev
 
 ## モジュール詳細
 
-### Common Starter エコシステム（7モジュール）
+### Common Starter エコシステム（8モジュール）
 
-`omni-common` は7つの単一責任モジュールに分割され、Common Starter エコシステムを形成しています。新サービスは Maven 依存関係を追加するだけで能力を獲得でき、**いずれも単独では実行できません**：
+`omni-common` は8つの単一責任モジュールに分割され、Common Starter エコシステムを形成しています。新サービスは Maven 依存関係を追加するだけで能力を獲得でき、**いずれも単独では実行できません**：
 
 | モジュール | 責任 | 対象サービスタイプ |
 |-----------|------|-----------------|
@@ -351,6 +352,7 @@ npm run dev
 | `omni-common-redis-reactive` | リアクティブ Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux サービス（Gateway） |
 | `omni-common-operlog` | 操作ログ Starter：`@OperLog` AOP アスペクト + RocketMQ プロデューサー + エンティティ変更 diff | ビジネスサービス |
 | `omni-common-job` | スケジューリングタスク Starter：XXL-JOB 自動設定 + Admin Client + システムタスク登録 + `@SystemJobMeta` デュアルアノテーション | ビジネスサービス |
+| `omni-common-mqlog` | MQ メッセージ信頼性 Starter：Transactional Outbox + リレー配信 + 死信管理 + テナント分離 | Servlet サービス |
 | `omni-common-workflow` | ワークフロー Starter：Flowable 自動設定、`ApprovalService` SPI、`UserGroupLookup`、`TenantInfoFilter` | ワークフローサービス |
 
 > 全 Starter は Spring Boot 自動構成（`AutoConfiguration.imports`）を使用して Bean を登録します。下流モジュールは手動で `@ComponentScan` を追加する必要がありません。
@@ -380,6 +382,17 @@ AOP + RocketMQ ベースの操作ログ収集フレームワーク、ビジネ�
 - **ホット/コールドテーブル分離**: ホットテーブル `sys_oper_log` は直近 180日分のデータを高速クエリ用に保持、コールドテーブル `sys_oper_log_archive` はコンプライアンス向けに長期保存。`OperLogArchiver` が毎日 02:00 に自動アーカイブを実行
 - **監査ログとの補完関係**: 操作ログはビジネスデータ変更（who/when/what/changed）を記録、監査ログ（`sys_audit_log`）はセキュリティイベントを記録、ログインログ（`sys_login_log`）はログイン行動を記録 — 三者が完全な監査証跡システムを構築
 - **omni-auth では無効化**: 認証モジュールはこのモジュールに依存せず、認証行動は `sys_login_log` + `sys_audit_log` でカバー
+
+### omni-common-mqlog（MQ メッセージ信頼性 Starter）
+
+Transactional Outbox パターンベースの信頼メッセージ送信フレームワーク、ビジネス操作とメッセージ記録の原子性を保証：
+
+- **ローカル Outbox**: `ReliableMessageTemplate` がビジネストランザクション内で `sys_mq_message` テーブルに書き込み（PENDING 状態）、トランザクション整合性を維持
+- **スケジュールドリレー**: `MqMessageRelayJob`（XXL-JOB）が 10 秒ごとに配信待ちメッセージをポーリング、`MessageSender` ストラテジーパターンで MQ に配信
+- **指数バックオフ再試行**: 失敗メッセージは `2^retryCount × 10s` でバックオフ、最大再試行回数超過で死信状態に遷移
+- **テナント分離**: tenantId の明示的パラメータ渡し、クエリコントローラーはテナントでフィルタリング、リレージョブはフィルタリングなし（バックグラウンドプロセス）
+- **マルチ MQ 拡張**: `MessageSender` ストラテジーインターフェース、現在 `RocketMqMessageSender` を実装済み、Kafka 追加はインターフェース実装のみ
+- **フロントエンド管理**: 運用監視メニューのメッセージ記録ページ、ページネーションクエリ、詳細閲覧、手動再送、スキップ操作をサポート
 
 ### omni-base（基礎データ・タスクサービス）
 
@@ -479,6 +492,33 @@ SPI モード採用：`UserJobHandler` インターフェースを実装し Spri
 ### フロントエンド統合
 
 7 つのページ/コンポーネントで完全なワークフローシーンをカバー：モデル管理（`ModelDesigner`）、バージョン履歴（`VersionHistoryDialog`）、検証結果（`ValidateResultDialog`）、プロセス定義、プロセスインスタンス、承認記録（`ApprovalRecordsDialog`）、プロセス進捗（`ProcessProgressDialog`）、統計ダッシュボード。
+
+## メッセージ信頼性
+
+プロジェクトは **Transactional Outbox** パターンベースの信頼メッセージ送信システムを構築し、ビジネス操作とメッセージ記録の原子性を保証しています。詳細な技術情報は [`docs/mq-reliability.md`](docs/mq-reliability.md) を参照してください。
+
+### アーキテクチャ概要
+
+- **omni-common-core**：`ReliableMessageRelay` インターフェースを定義（純 POJO、Spring 依存ゼロ）
+- **omni-common-mqlog**：Transactional Outbox パターンを実装、`ReliableMessageTemplate`、`MqMessageRelayService`、`MqMessageRelayJob`、`MessageSender` ストラテジー、自動構成を提供
+- **omni-common-operlog**：オプション呼び出し元 — `OperLogProducer` は `ReliableMessageRelay` Bean が存在する場合に Outbox モードに自動切り替え
+- **omni-base**：外部管理コントローラー `MqMessageController`、フロントエンド運用管理 API を提供
+
+### メッセージライフサイクル
+
+`sys_mq_message` テーブルの状態遷移：PENDING(0) → SENT(1)（成功）/ FAILED(2)（失敗、再試行待ち）→ DEAD_LETTER(3)（最大再試行回数超過）/ SKIPPED(4)（手動スキップ）。失敗メッセージは `2^retryCount × 10s` の指数バックオフで待機、デフォルト最大 3 回再試行。
+
+### テナント分離
+
+書き込み時：`ReliableMessageRelay.send()` は `Long tenantId` の明示的渡しを要求、ThreadLocal ベースの暗黙的解決は使用しない。読み取り時：全コントローラーエンドポイントは tenantId でフィルタリング（外部は `@RequestHeader`、内部は `@RequestParam`）。リレー job はバックグラウンドインフラプロセスとして、テナントに関係なく全配信待ちメッセージをスキャン。
+
+### フロントエンド統合
+
+運用監視メニューのメッセージ記録ページがサポート：ページネーションクエリ（ステータス、Topic、サービス名、時間範囲でフィルタ）、メッセージ詳細閲覧、死信手動再送、死信スキップ。権限コード：`base:mqmessage:list` / `base:mqmessage:resend` / `base:mqmessage:skip`。
+
+### 新サービス接入ガイド
+
+`omni-common-mqlog` 依存関係を追加するだけで新サービスに信頼メッセージ送信能力が付与されます：`sys_mq_message` テーブルは `schema.sql` で自動作成、`ReliableMessageTemplate`、リレーjob、内部クエリ API はすべて `AutoConfiguration.imports` で自動登録。ビジネスコードは `ReliableMessageRelay` をインジェクトして `send(bindingName, payload, tenantId)` を呼び出すだけ。
 
 ## RBAC 権限システム
 

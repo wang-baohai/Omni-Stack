@@ -22,10 +22,11 @@
 - **AI 原生工程**：AGENTS.md 执行手册 + Skills 行为扩展，支持 AI 辅助开发工作流
 - **三种用户创建途径**：用户自助注册（验证码 + 默认角色）、管理员后台创建、社交登录首次自动注册
 - **三层 XSS 纵深防御**：Jackson 反序列化器自动清洗 `@RequestBody` + Servlet Filter 清洗查询参数 + Gateway 安全响应头，支持按租户配置全局开关和自定义黑名单规则（HTML 标签、事件处理器、危险协议、正则模式），Redis 缓存 + 数据库配置，前端管理界面完整可用
-- **Common Starter 生态**：`omni-common` 拆分为 7 个模块（core / common / mybatis / redis / redis-reactive / operlog / job），新服务通过 Maven 依赖即可获得 MyBatis-Plus 分页、Redis 缓存、XSS 防护、操作日志采集、定时任务调度等能力，`AutoConfiguration.imports` 零配置自动装配
+- **Common Starter 生态**：`omni-common` 拆分为 8 个模块（core / common / mybatis / redis / redis-reactive / operlog / job / mqlog），新服务通过 Maven 依赖即可获得 MyBatis-Plus 分页、Redis 缓存、XSS 防护、操作日志采集、定时任务调度、可靠消息发送等能力，`AutoConfiguration.imports` 零配置自动装配
 - **基础数据与任务管理**：`omni-base` 服务（端口 8101）提供数据字典管理、系统任务管理、用户任务管理、操作日志查看，Redis cache-aside 缓存，前端完整管理页面
 - **操作日志审计追踪**：基于 `@OperLog` 注解 + AOP 切面无侵入采集，自动记录 who/when/what/changed 完整审计信息，实体变更快照自动 diff（oldValue vs newValue）支持数据回溯，RocketMQ 异步发送不阻塞业务请求，热冷表分离归档策略（180 天保留 + 冷表长期留存）兼顾查询性能与合规要求，与审计日志（`sys_audit_log`）和登录日志（`sys_login_log`）形成互补，共同构成完整的审计追踪体系
 - **双轨制定时任务调度**：基于 XXL-JOB 3.3.1 实现系统任务（`@XxlJob` + `@SystemJobMeta` 双注解驱动，自动注册调度中心）和用户任务（SPI 模式，`UserJobHandler` 接口 + JSON 参数路由）两种模式，前端支持 Cron 编辑器、动态参数表单、执行日志实时推送
+- **Transactional Outbox 可靠消息**：基于本地发件箱模式，业务操作与消息记录写入同一事务保证原子性，XXL-JOB 定时中继异步投递，指数退避重试 + 死信管理，前端运维监控页面支持消息查看、重发、忽略操作
 - **可视化 BPMN 工作流引擎**：基于 Flowable 7.x 实现，`omni-workflow` 独立微服务（端口 8103），前端 BPMN 可视化设计器支持拖拽建模，双版本管理（业务版本 DRAFT → PUBLISHED → ARCHIVED + Flowable 引擎版本），多实例会签支持 ALL/ANY 审批模式，动态候选人解析（`omni:assignment` JSON 扩展 + `ScopedRoleAssignmentListener` 运行时解析），审批记录 + 流程进度图 + 抄送通知完整可用
 - **Maven Wrapper** 内置，克隆即可构建，无需全局安装 Maven
 
@@ -339,9 +340,9 @@ npm run dev
 
 ## 模块说明
 
-### Common Starter 生态（7 模块）
+### Common Starter 生态（8 模块）
 
-`omni-common` 已拆分为 7 个职责单一的模块，形成 Common Starter 生态。新微服务引入即用，**均不可独立运行**：
+`omni-common` 已拆分为 8 个职责单一的模块，形成 Common Starter 生态。新微服务引入即用，**均不可独立运行**：
 
 | 模块 | 职责 | 适用服务类型 |
 |------|------|-------------|
@@ -352,6 +353,7 @@ npm run dev
 | `omni-common-redis-reactive` | 响应式 Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux 服务（Gateway） |
 | `omni-common-operlog` | 操作日志 Starter：`@OperLog` AOP 切面 + RocketMQ 生产者 + 实体变更 diff | 业务服务 |
 | `omni-common-job` | 定时任务 Starter：XXL-JOB 自动装配 + Admin Client + 系统任务注册表 + `@SystemJobMeta` 双注解驱动 | 业务服务 |
+| `omni-common-mqlog` | MQ 消息可靠性 Starter：Transactional Outbox + 中继投递 + 死信管理 + 租户隔离 | Servlet 服务 |
 | `omni-common-workflow` | 工作流 Starter：Flowable 自动配置、`ApprovalService` SPI、`UserGroupLookup`、`TenantInfoFilter` | 工作流服务 |
 
 > 所有 Starter 通过 Spring Boot 自动配置机制（`AutoConfiguration.imports`）注册 Bean，下游模块无需手动 `@ComponentScan`。
@@ -381,6 +383,17 @@ npm run dev
 - **热冷表分离**：热表 `sys_oper_log` 保留近 180 天数据供快速查询，冷表 `sys_oper_log_archive` 长期留存满足合规要求，`OperLogArchiver` 每日 02:00 自动归档
 - **与审计日志互补**：操作日志记录业务数据变更（who/when/what/changed），审计日志（`sys_audit_log`）记录安全事件，登录日志（`sys_login_log`）记录登录行为，三者共同构成完整审计追踪体系
 - **omni-auth 禁用**：认证模块不引入该依赖，认证行为由 `sys_login_log` + `sys_audit_log` 覆盖
+
+### omni-common-mqlog（MQ 消息可靠性 Starter）
+
+基于 Transactional Outbox 模式的可靠消息发送框架，保证业务操作与消息记录的原子性：
+
+- **本地发件箱**：`ReliableMessageTemplate` 在业务事务中写入 `sys_mq_message` 表（PENDING 状态），与业务操作保持事务一致性
+- **定时中继**：`MqMessageRelayJob`（XXL-JOB）每 10 秒轮询待投递消息，通过 `MessageSender` 策略模式发送到 MQ
+- **指数退避重试**：失败消息按 `2^retryCount × 10s` 退避等待，超过最大重试次数进入死信状态
+- **租户隔离**：tenantId 显式传参，查询接口按租户过滤，中继任务不区分租户（后台进程）
+- **多 MQ 扩展**：`MessageSender` 策略接口，当前实现 `RocketMqMessageSender`，新增 Kafka 等只需实现接口
+- **前端管理**：运维监控菜单下的消息记录页面，支持分页查询、详情查看、手动重发、标记忽略
 
 ### omni-base（基础数据服务）
 
@@ -480,6 +493,33 @@ npm run dev
 ### 前端集成
 
 7 个页面/组件覆盖完整工作流场景：模型管理（`ModelDesigner`）、版本历史（`VersionHistoryDialog`）、校验结果（`ValidateResultDialog`）、流程定义、流程实例、审批记录（`ApprovalRecordsDialog`）、流程进度（`ProcessProgressDialog`）、统计看板。
+
+## MQ 消息可靠性
+
+项目基于 **Transactional Outbox** 模式构建了可靠消息发送体系，保证业务操作与消息记录的原子性。深度技术细节见 [`docs/mq-reliability.md`](docs/mq-reliability.md)。
+
+### 架构概览
+
+- **omni-common-core**：定义 `ReliableMessageRelay` 接口（纯 POJO，零 Spring 依赖）
+- **omni-common-mqlog**：实现 Transactional Outbox 模式，提供 `ReliableMessageTemplate`、`MqMessageRelayService`、`MqMessageRelayJob`、`MessageSender` 策略和自动配置
+- **omni-common-operlog**：可选调用方，`OperLogProducer` 在 `ReliableMessageRelay` 存在时自动切换到 Outbox 模式
+- **omni-base**：外部管理控制器 `MqMessageController`，提供前端运维管理 API
+
+### 消息生命周期
+
+`sys_mq_message` 表的状态机：PENDING(0) → SENT(1)（成功）/ FAILED(2)（失败待重试）→ DEAD_LETTER(3)（超过最大重试次数）/ SKIPPED(4)（人工忽略）。失败消息按 `2^retryCount × 10s` 指数退避等待，默认最多 3 次重试。
+
+### 租户隔离
+
+写入时 `ReliableMessageRelay.send()` 要求显式传入 `Long tenantId`，不使用 ThreadLocal 隐式解析。查询时所有控制器接口按 tenantId 过滤（外部用 `@RequestHeader`，内部用 `@RequestParam`）。中继任务作为后台基础设施进程，不区分租户扫描所有待投递消息。
+
+### 前端集成
+
+运维监控菜单下的消息记录页面支持：分页查询（按状态、Topic、服务名、时间范围筛选）、消息详情查看、死信手动重发、死信标记忽略。权限码 `base:mqmessage:list` / `base:mqmessage:resend` / `base:mqmessage:skip`。
+
+### 新服务接入指南
+
+新服务引入 `omni-common-mqlog` 依赖即可获得可靠消息发送能力：`sys_mq_message` 表通过 `schema.sql` 自动创建，`ReliableMessageTemplate`、中继任务、内部查询 API 均通过 `AutoConfiguration.imports` 自动注册。业务代码注入 `ReliableMessageRelay` 接口调用 `send(bindingName, payload, tenantId)` 即可。
 
 ## RBAC 权限体系
 

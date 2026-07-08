@@ -22,10 +22,11 @@
 - **AI-Native Engineering**: AGENTS.md execution manual + Skills behavioral extensions for AI-assisted workflows
 - **Three User Creation Paths**: Self-registration (captcha + default role), admin backend creation, social login auto-registration on first login
 - **Three-Layer XSS Defense**: Jackson deserializer auto-sanitizes `@RequestBody` + Servlet Filter sanitizes query parameters + Gateway security response headers, with per-tenant configurable global toggle and custom blacklist rules (HTML tags, event handlers, dangerous protocols, regex patterns), Redis-cached configuration, and a full frontend management UI
-- **Common Starter Ecosystem**: `omni-common` split into 7 modules (core / common / mybatis / redis / redis-reactive / operlog / job) — new services gain MyBatis-Plus pagination, Redis caching, XSS protection, operation log collection, scheduled task management via Maven dependency alone, `AutoConfiguration.imports` zero-config auto-assembly
+- **Common Starter Ecosystem**: `omni-common` split into 8 modules (core / common / mybatis / redis / redis-reactive / operlog / job / mqlog) — new services gain MyBatis-Plus pagination, Redis caching, XSS protection, operation log collection, scheduled task management, reliable message sending via Maven dependency alone, `AutoConfiguration.imports` zero-config auto-assembly
 - **Base Data & Task Management**: `omni-base` service (port 8101) provides data dictionary management, system task management, user task management, and operation log viewing, with Redis cache-aside caching and complete frontend management pages
 - **Operation Log Audit Trail**: `@OperLog` annotation + AOP aspect for non-intrusive collection, automatically records who/when/what/changed with full audit information, entity change snapshot auto-diff (oldValue vs newValue) for data traceability, RocketMQ async delivery without blocking business requests, hot/cold table separation archival strategy (180-day retention + cold table long-term preservation) balancing query performance and compliance requirements, complementing audit logs (`sys_audit_log`) and login logs (`sys_login_log`) to form a complete audit trail system
 - **Dual-Track Scheduled Task Scheduling**: system tasks (`@XxlJob` + `@SystemJobMeta` dual annotations, auto-registered to scheduling center) and user tasks (SPI pattern, `UserJobHandler` interface + JSON parameter routing) based on XXL-JOB 3.3.1, with frontend Cron editor, dynamic parameter forms, and real-time execution log push
+- **Transactional Outbox Reliable Messaging**: local outbox pattern ensuring business operations and message records are written atomically within the same transaction, XXL-JOB relay for async delivery, exponential backoff retry + dead letter management, frontend ops monitoring page with message viewing, resend, and skip operations
 - **Visual BPMN Workflow Engine**: built on Flowable 7.x, `omni-workflow` standalone microervice (port 8103), frontend BPMN visual designer with drag-and-drop modeling, dual-version management (business version DRAFT → PUBLISHED → ARCHIVED + Flowable engine version), multi-instance countersign with ALL/ANY approval modes, dynamic candidate resolution (`omni:assignment` JSON extension + `ScopedRoleAssignmentListener` runtime parsing), approval records + process progress diagram + CC notifications
 - **Maven Wrapper** bundled — clone and build, no system Maven installation needed
 
@@ -338,9 +339,9 @@ npm run dev
 
 ## Module Details
 
-### Common Starter Ecosystem (7 Modules)
+### Common Starter Ecosystem (8 Modules)
 
-`omni-common` has been split into 7 single-responsibility modules forming the Common Starter ecosystem. New services gain capabilities by adding Maven dependencies alone — **none can run independently**:
+`omni-common` has been split into 8 single-responsibility modules forming the Common Starter ecosystem. New services gain capabilities by adding Maven dependencies alone — **none can run independently**:
 
 | Module | Responsibility | Target Service Type |
 |--------|---------------|-------------------|
@@ -351,6 +352,7 @@ npm run dev
 | `omni-common-redis-reactive` | Reactive Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux services (Gateway) |
 | `omni-common-operlog` | Operation Log Starter: `@OperLog` AOP aspect + RocketMQ producer + entity change diff | Business services |
 | `omni-common-job` | Scheduled Task Starter: XXL-JOB auto-config + Admin Client + system task registry + `@SystemJobMeta` dual annotation | Business services |
+| `omni-common-mqlog` | MQ Reliability Starter: Transactional Outbox + relay delivery + dead letter management + tenant isolation | Servlet services |
 | `omni-common-workflow` | Workflow Starter: Flowable auto-configuration, `ApprovalService` SPI, `UserGroupLookup`, `TenantInfoFilter` | Workflow service |
 
 > All starters use Spring Boot auto-configuration (`AutoConfiguration.imports`) to register beans. Downstream modules don't need manual `@ComponentScan`.
@@ -380,6 +382,17 @@ AOP + RocketMQ based operation log collection framework providing non-intrusive 
 - **Hot/cold table separation**: Hot table `sys_oper_log` retains recent 180-day data for fast queries; cold table `sys_oper_log_archive` preserves long-term records for compliance. `OperLogArchiver` runs daily at 02:00 for automated archival
 - **Complementary to audit logs**: Operation logs record business data changes (who/when/what/changed), audit logs (`sys_audit_log`) record security events, and login logs (`sys_login_log`) record login behavior — together forming a complete audit trail system
 - **Disabled in omni-auth**: Auth module does not depend on this module; authentication behavior is covered by `sys_login_log` + `sys_audit_log`
+
+### omni-common-mqlog (Reliable Message Starter)
+
+Transactional Outbox-based reliable message sending framework ensuring atomicity between business operations and message records:
+
+- **Local Outbox**: `ReliableMessageTemplate` writes to `sys_mq_message` table (PENDING status) within the business transaction, maintaining transactional consistency
+- **Scheduled Relay**: `MqMessageRelayJob` (XXL-JOB) polls pending messages every 10 seconds, delivers to MQ via `MessageSender` strategy pattern
+- **Exponential Backoff Retry**: failed messages back off by `2^retryCount × 10s`, exceeding max retries transitions to dead letter status
+- **Tenant Isolation**: explicit tenantId parameter passing, query controllers filter by tenant, relay job does not filter (background process)
+- **Multi-MQ Extension**: `MessageSender` strategy interface, currently implemented by `RocketMqMessageSender`; adding Kafka requires only implementing the interface
+- **Frontend Management**: ops monitoring menu page with paginated query, detail viewing, manual resend, and skip operations
 
 ### omni-base (Base Data & Task Service)
 
@@ -479,6 +492,33 @@ The project provides a visual BPMN workflow engine built on **Flowable 7.x**, su
 ### Frontend Integration
 
 7 pages/components covering the full workflow experience: Model Management (`ModelDesigner`), Version History (`VersionHistoryDialog`), Validation Results (`ValidateResultDialog`), Process Definitions, Process Instances, Approval Records (`ApprovalRecordsDialog`), Process Progress (`ProcessProgressDialog`), and Statistics Dashboard.
+
+## Reliable Message Sending
+
+The project provides a reliable message sending system built on the **Transactional Outbox** pattern, ensuring atomicity between business operations and message records. Technical details are documented in [`docs/mq-reliability.md`](docs/mq-reliability.md).
+
+### Architecture Overview
+
+- **omni-common-core**: defines the `ReliableMessageRelay` interface (pure POJO, zero Spring dependencies)
+- **omni-common-mqlog**: implements the Transactional Outbox pattern, providing `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, `MessageSender` strategy, and auto-configuration
+- **omni-common-operlog**: optional caller — `OperLogProducer` automatically switches to Outbox mode when `ReliableMessageRelay` bean is available
+- **omni-base**: external management controller `MqMessageController`, providing frontend ops management API
+
+### Message Lifecycle
+
+`sys_mq_message` table status machine: PENDING(0) → SENT(1) (success) / FAILED(2) (failed, awaiting retry) → DEAD_LETTER(3) (exceeded max retries) / SKIPPED(4) (manually ignored). Failed messages back off exponentially by `2^retryCount × 10s`, with a default maximum of 3 retries.
+
+### Tenant Isolation
+
+Write path: `ReliableMessageRelay.send()` requires explicit `Long tenantId` — no ThreadLocal-based implicit resolution. Read path: all controller endpoints filter by tenantId (external uses `@RequestHeader`, internal uses `@RequestParam`). The relay job, as a background infrastructure process, scans all pending messages regardless of tenant.
+
+### Frontend Integration
+
+The ops monitoring message record page supports: paginated query (filter by status, topic, service name, time range), message detail viewing, dead letter manual resend, and dead letter skip. Permission codes: `base:mqmessage:list` / `base:mqmessage:resend` / `base:mqmessage:skip`.
+
+### New Service Onboarding
+
+Adding `omni-common-mqlog` dependency gives any new service reliable message sending capabilities: `sys_mq_message` table auto-created via `schema.sql`, `ReliableMessageTemplate`, relay job, and internal query API all auto-registered via `AutoConfiguration.imports`. Business code simply injects `ReliableMessageRelay` and calls `send(bindingName, payload, tenantId)`.
 
 ## RBAC Permission System
 

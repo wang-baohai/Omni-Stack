@@ -22,8 +22,9 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 | `omni-common-redis` | Blocking Redis starter: `RedisTemplate` (Jackson serialization) + `RedisUtils` | N/A (library) | Spring Data Redis (Lettuce), commons-pool2 | Servlet services only; never in WebFlux |
 | `omni-common-redis-reactive` | Reactive Redis starter: `spring-boot-starter-data-redis-reactive` + YAML defaults | N/A (library) | Spring Data Redis Reactive | WebFlux services only; never in Servlet |
 | `omni-common-job` | XXL-JOB integration: auto-configuration, admin HTTP client, system job registry, job metadata annotations | N/A (library) | XXL-JOB Core 3.3.1, Spring Boot Web (optional) | Scheduling infrastructure only; no business task logic |
+| `omni-common-mqlog` | Reliable MQ message sending: Transactional Outbox, relay job, strategy-based sender, internal query API | N/A (library) | Spring Cloud Stream RocketMQ (optional), omni-common-job (optional) | MQ infrastructure only; no business message logic |
 | `omni-auth` | Authentication microservice (login, captcha, JWT, multi-tenant, XSS config management) | 8100 | Spring Boot Web, Spring Security, OAuth2 Authorization Server | Authentication logic lives here; no direct HTTP/response manipulation in Service layer |
-| `omni-base` | Base data management: dictionary CRUD, scheduled tasks (system + user), operation log archival | 8101 | Spring Boot Web, Spring Security, omni-common-mybatis, omni-common-redis, omni-common-job | Data dictionary + scheduling; no auth/user logic |
+| `omni-base` | Base data management: dictionary CRUD, scheduled tasks (system + user), operation log archival, MQ message management | 8101 | Spring Boot Web, Spring Security, omni-common-mybatis, omni-common-redis, omni-common-job, omni-common-mqlog | Data dictionary + scheduling + MQ message management; no auth/user logic |
 | `omni-gateway` | API Gateway, request routing, authentication filter | 8102 | Spring Cloud Gateway Server (WebFlux) | No business logic; routing and cross-cutting filters only |
 | `omni-frontend` | Vue 3 SPA | 3000 (dev) | Vue 3, Pinia, Vue Router, Element Plus, Axios | Presentation layer only; no data-authoritative business rules |
 
@@ -78,6 +79,31 @@ Auth Service (:8100)
 JSON Response: { code: 200, message: "success", data: { accessToken, tokenType, expiresIn } }
     |
 Browser stores JWT and uses it for subsequent authenticated requests
+```
+
+### MQ Message Delivery Flow
+
+```
+Business Service (e.g., omni-base)
+    |  @Transactional
+    |  ReliableMessageTemplate.send(bindingName, payload)
+    v
+sys_mq_message table (status=PENDING, same local transaction)
+    |
+    |  XXL-JOB mqRelayHandler (every 10s)
+    v
+MqMessageRelayService.relayAll()
+    |  1. SELECT * FROM sys_mq_message WHERE status IN (PENDING, FAILED) AND next_retry_time <= NOW() LIMIT 100
+    |  2. MessageSender.send(message) -- strategy pattern by broker_type
+    |  3a. Success -> status=SENT
+    |  3b. Failure -> retry_count++, next_retry_time = NOW() + 2^retryCount * 10s
+    |      Exceeds max_retry -> status=DEAD_LETTER, error_msg recorded
+    v
+RocketMQ Broker (via StreamBridge)
+    |
+    |  Admin UI (omni-base MqMessageController)
+    v
+Monitoring Page: query/resend/skip dead-letter messages
 ```
 
 ## External Dependencies

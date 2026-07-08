@@ -33,6 +33,7 @@ const viewModules = import.meta.glob('../views/**/index.vue')
  */
 const viewOverrides: Record<string, string> = {
   'system:oauth2': '../views/oauth2-client/index.vue',
+  'base:operlog': '../views/monitor/oper-log/index.vue',
 }
 
 /**
@@ -66,6 +67,7 @@ const iconMap: Record<string, string> = {
   'system:xssconfig': 'Filter',
   'base:dict': 'Collection',
   'base:operlog': 'Tickets',
+  'base:mqmessage': 'MessageBox',
   'job:user-job-type': 'Files',
   'job:system-job': 'Timer',
   'workflow:definition': 'SetUp',

@@ -22,10 +22,11 @@
 - **AI 네이티브 엔지니어링**: AGENTS.md 실행 매뉴얼 + Skills 행동 확장, AI 지원 개발 워크플로 지원
 - **3가지 사용자 생성 경로**: 셀프 등록 (CAPTCHA + 기본 역할), 관리자 백엔드 생성, 소셜 로그인 첫 자동 등록
 - **3계층 XSS 종심 방어**: Jackson 역직렬화기가 `@RequestBody` 자동 세척 + Servlet Filter가 쿼리 파라미터 세척 + Gateway 보안 응답 헤더, 테넌트별 글로벌 토글 및 커스텀 블랙리스트 규칙 (HTML 태그, 이벤트 핸들러, 위험 프로토콜, 정규식 패턴) 지원, Redis 캐시 + DB 구성, 완전한 프론트엔드 관리 UI
-- **Common Starter 생태계**: `omni-common`을 7개 모듈 (core / common / mybatis / redis / redis-reactive / operlog / job)로 분할, 신규 서비스는 Maven 의존성 추가로 MyBatis-Plus 페이지네이션, Redis 캐시, XSS 방어, 작업 로그 수집, 스케줄링 작업 관리 등의 기능을 획득, `AutoConfiguration.imports` 제로 구성 자동 어셈블리
+- **Common Starter 생태계**: `omni-common`을 8개 모듈 (core / common / mybatis / redis / redis-reactive / operlog / job / mqlog)로 분할, 신규 서비스는 Maven 의존성 추가로 MyBatis-Plus 페이지네이션, Redis 캐시, XSS 방어, 작업 로그 수집, 스케줄링 작업 관리, 신뢰 메시지 전송 등의 기능을 획득, `AutoConfiguration.imports` 제로 구성 자동 어셈블리
 - **기초 데이터 및 작업 관리**: `omni-base` 서비스 (포트 8101) 데이터 사전 관리, 시스템 작업 관리, 사용자 작업 관리, 작업 로그 열람 제공, Redis cache-aside 캐시, 완전한 프론트엔드 관리 페이지
 - **작업 로그 감사 추적**: `@OperLog` 어노테이션 + AOP 애스펙트 비침습적 수집, who/when/what/changed 완전한 감사 정보 자동 기록, 엔티티 변경 스냅샷 자동 diff (oldValue vs newValue) 데이터 추적 지원, RocketMQ 비동기 전송으로 비즈니스 요청 차단 없음, 핫/콜드 테이블 분리 아카이브 전략 (180일 보존 + 콜드 테이블 장기 보관)으로 쿼리 성능과 컴플라이언스 요구사항 동시 충족, 감사 로그 (`sys_audit_log`) 및 로그인 로그 (`sys_login_log`)와 보완하여 완전한 감사 추적 체계 구성
 - **이중 트랙 스케줄링 작업**: XXL-JOB 3.3.1 기반 시스템 작업 (`@XxlJob` + `@SystemJobMeta` 이중 어노테이션, 스케줄링 센터에 자동 등록)과 사용자 작업 (SPI 모드, `UserJobHandler` 인터페이스 + JSON 파라미터 라우팅) 두 가지 모드 구현, 프론트엔드 Cron 편집기, 동적 파라미터 폼, 실행 로그 실시간 푸시 지원
+- **Transactional Outbox 신뢰 메시지**: 로컬 Outbox 패턴으로 비즈니스 작업과 메시지 기록을 동일 트랜잭션에서 원자성 보장, XXL-JOB 릴레이를 통한 비동기 전송, 지수 백오프 재시도 + 사신 관리, 프론트엔드 운영 모니터링 페이지에서 메시지 조회, 재전송, 건너뛰기 작업 지원
 - **시각적 BPMN 워크플로 엔진**: Flowable 7.x 기반, `omni-workflow` 독립 마이크로서비스 (포트 8103), 프론트엔드 BPMN 시각적 디자이너로 드래그 앤 드롭 모델링, 이중 버전 관리 (비즈니스 버전 DRAFT → PUBLISHED → ARCHIVED + Flowable 엔진 버전), 멀티 인스턴스 회서는 ALL/ANY 승인 모드 지원, 동적 후보자 해결 (`omni:assignment` JSON 확장 + `ScopedRoleAssignmentListener` 런타임 해결), 승인 기록 + 프로세스 진척도 + CC 알림 완전 사용 가능
 - **Maven Wrapper** 내장 — 클론 후 바로 빌드 가능, 시스템 Maven 설치 불필요
 
@@ -339,9 +340,9 @@ npm run dev
 
 ## 모듈 설명
 
-### Common Starter 생태계 (7개 모듈)
+### Common Starter 생태계 (8개 모듈)
 
-`omni-common`은 7개의 단일 책임 모듈로 분할되어 Common Starter 생태계를 형성합니다. 신규 마이크로서비스는 의존성 추가만으로 사용 가능하며, **모두 독립 실행 불가**합니다:
+`omni-common`은 8개의 단일 책임 모듈로 분할되어 Common Starter 생태계를 형성합니다. 신규 마이크로서비스는 의존성 추가만으로 사용 가능하며, **모두 독립 실행 불가**합니다:
 
 | 모듈 | 책임 | 대상 서비스 유형 |
 |------|------|----------------|
@@ -352,6 +353,7 @@ npm run dev
 | `omni-common-redis-reactive` | 리액티브 Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux 서비스 (Gateway) |
 | `omni-common-operlog` | 작업 로그 Starter: `@OperLog` AOP 애스펙트 + RocketMQ 프로듀서 + 엔티티 변경 diff | 비즈니스 서비스 |
 | `omni-common-job` | 스케줄링 작업 Starter: XXL-JOB 자동 구성 + Admin Client + 시스템 작업 등록 + `@SystemJobMeta` 이중 어노테이션 | 비즈니스 서비스 |
+| `omni-common-mqlog` | MQ 메시지 신뢰성 Starter: Transactional Outbox + 릴레이 전송 + 사신 관리 + 테넌트 분리 | Servlet 서비스 |
 | `omni-common-workflow` | 워크플로 Starter: Flowable 자동 구성, `ApprovalService` SPI, `UserGroupLookup`, `TenantInfoFilter` | 워크플로 서비스 |
 
 > 모든 Starter는 Spring Boot 자동 구성 (`AutoConfiguration.imports`)을 통해 Bean을 등록합니다. 하위 모듈은 수동 `@ComponentScan`이 필요 없습니다.
@@ -381,6 +383,17 @@ AOP + RocketMQ 기반 작업 로그 수집 프레임워크, 비즈니스 서비�
 - **핫/콜드 테이블 분리**: 핫 테이블 `sys_oper_log`은 최근 180일 데이터를 고속 쿼리용으로 보존, 콜드 테이블 `sys_oper_log_archive`는 컴플라이언스용으로 장기 보관. `OperLogArchiver`가 매일 02:00에 자동 아카이브 실행
 - **감사 로그와 보완 관계**: 작업 로그는 비즈니스 데이터 변경 (who/when/what/changed)을 기록, 감사 로그 (`sys_audit_log`)는 보안 이벤트를 기록, 로그인 로그 (`sys_login_log`)는 로그인 행동을 기록 — 세 가지가 완전한 감사 추적 체계 구축
 - **omni-auth에서 비활성화**: 인증 모듈은 이 모듈에 의존하지 않으며, 인증 행동은 `sys_login_log` + `sys_audit_log`으로 커버
+
+### omni-common-mqlog (MQ 메시지 신뢰성 Starter)
+
+Transactional Outbox 패턴 기반 신뢰 메시지 전송 프레임워크, 비즈니스 작업과 메시지 기록의 원자성 보장:
+
+- **로컬 Outbox**: `ReliableMessageTemplate`이 비즈니스 트랜잭션 내에서 `sys_mq_message` 테이블에 기록 (PENDING 상태), 트랜잭션 일관성 유지
+- **스케줄된 릴레이**: `MqMessageRelayJob`(XXL-JOB)이 10초마다 전송 대기 메시지를 폴링하여 `MessageSender` 전략 패턴으로 MQ에 전송
+- **지수 백오프 재시도**: 실패 메시지는 `2^retryCount × 10s`로 백오프, 최대 재시도 횟수 초과 시 사신 상태로 전환
+- **테넌트 분리**: tenantId 명시적 매개변수 전달, 쿼리 컨트롤러는 테넌트로 필터링, 릴레이 작업은 필터링 없음 (백그라운드 프로세스)
+- **멀티 MQ 확장**: `MessageSender` 전략 인터페이스, 현재 `RocketMqMessageSender` 구현 완료, Kafka 추가는 인터페이스 구현만으로 가능
+- **프론트엔드 관리**: 운영 모니터링 메뉴의 메시지 기록 페이지, 페이지네이션 쿼리, 상세 조회, 수동 재전송, 건너뛰기 작업 지원
 
 ### omni-base (기초 데이터 및 작업 서비스)
 
@@ -480,6 +493,33 @@ SPI 모드 채택: `UserJobHandler` 인터페이스를 구현하고 Spring Bean�
 ### 프론트엔드 통합
 
 7개 페이지/컴포넌트로 완전한 워크플로 시나리오 커버: 모델 관리 (`ModelDesigner`), 버전 이력 (`VersionHistoryDialog`), 검증 결과 (`ValidateResultDialog`), 프로세스 정의, 프로세스 인스턴스, 승인 기록 (`ApprovalRecordsDialog`), 프로세스 진척도 (`ProcessProgressDialog`), 통계 대시보드.
+
+## 메시지 신뢰성
+
+프로젝트는 **Transactional Outbox** 패턴 기반의 신뢰 메시지 전송 시스템을 구축하여, 비즈니스 작업과 메시지 기록의 원자성을 보장합니다. 심층 기술 세부사항은 [`docs/mq-reliability.md`](docs/mq-reliability.md)를 참조하세요.
+
+### 아키텍처 개요
+
+- **omni-common-core**: `ReliableMessageRelay` 인터페이스 정의 (순수 POJO, Spring 의존성 없음)
+- **omni-common-mqlog**: Transactional Outbox 패턴 구현, `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, `MessageSender` 전략, 자동 구성 제공
+- **omni-common-operlog**: 선택적 호출자 — `OperLogProducer`는 `ReliableMessageRelay` Bean이 존재할 때 Outbox 모드로 자동 전환
+- **omni-base**: 외부 관리 컨트롤러 `MqMessageController`, 프론트엔드 운영 관리 API 제공
+
+### 메시지 수명 주기
+
+`sys_mq_message` 테이블 상태 전이: PENDING(0) → SENT(1) (성공) / FAILED(2) (실패, 재시도 대기) → DEAD_LETTER(3) (최대 재시도 횟수 초과) / SKIPPED(4) (수동 건너뛰기). 실패 메시지는 `2^retryCount × 10s`의 지수 백오프로 대기, 기본 최대 3회 재시도.
+
+### 테넌트 분리
+
+쓰기 시: `ReliableMessageRelay.send()`는 `Long tenantId`의 명시적 전달을 요구, ThreadLocal 기반 암묵적 해결을 사용하지 않음. 읽기 시: 모든 컨트롤러 엔드포인트는 tenantId로 필터링 (외부는 `@RequestHeader`, 내부는 `@RequestParam`). 릴레이 작업은 백그라운드 인프라 프로세스로, 테넌트에 관계없이 모든 전송 대기 메시지를 스캔.
+
+### 프론트엔드 통합
+
+운영 모니터링 메뉴의 메시지 기록 페이지 지원: 페이지네이션 쿼리 (상태, Topic, 서비스명, 시간 범위 필터), 메시지 상세 조회, 사신 수동 재전송, 사신 건너뛰기. 권한 코드: `base:mqmessage:list` / `base:mqmessage:resend` / `base:mqmessage:skip`.
+
+### 신규 서비스 연동 가이드
+
+`omni-common-mqlog` 의존성을 추가하는 것만으로 신규 서비스에 신뢰 메시지 전송 능력이 부여됩니다: `sys_mq_message` 테이블은 `schema.sql`로 자동 생성, `ReliableMessageTemplate`, 릴레이 작업, 내부 쿼리 API는 모두 `AutoConfiguration.imports`로 자동 등록. 비즈니스 코드는 `ReliableMessageRelay`를 주입하여 `send(bindingName, payload, tenantId)`를 호출하면 됩니다.
 
 ## RBAC 권한 체계
 

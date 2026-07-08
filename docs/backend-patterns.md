@@ -285,6 +285,56 @@ Layer 3: Gateway WebFilter — 添加安全响应头
 
 **缓存策略**：Redis 键 `xss:enabled:{tenantId}` + `xss:rules:{tenantId}`，TTL 30 分钟。所有写操作（开关切换、规则 CRUD）后主动失效缓存。
 
+## MQ 消息发送记录与补偿管理（omni-common-mqlog）
+
+MQ 消息发送记录与补偿管理系统基于 Transactional Outbox + XXL-JOB 异步投递架构，为各微服务提供可靠消息发送能力，引入即用、零业务代码。
+
+### 核心架构
+
+```
+业务事务（@Transactional）
+    ↓
+ReliableMessageTemplate.send(bindingName, payload)
+    ↓ INSERT sys_mq_message (status=PENDING) -- 同一本地事务
+    ↓
+XXL-JOB mqRelayHandler (10s 轮询)
+    ↓
+MqMessageRelayService.relayAll()
+    ↓ 批量查询 PENDING/FAILED 且 next_retry_time <= NOW()
+    ↓
+MessageSender.send(message) -- 策略模式，按 broker_type 路由
+    ↓
+成功 → status=SENT | 失败 → retry_count++, 指数退避 | 超限 → DEAD_LETTER
+```
+
+### 核心组件
+
+| 组件 | 职责 |
+|------|------|
+| `ReliableMessageTemplate` | 提供 `send(bindingName, payload)` / `send(bindingName, payload, msgKey)` 两个重载，在调用方事务中 INSERT 消息记录 |
+| `MqMessageRelayService` | 轮询待投递消息，调用 `MessageSender` 策略实现发送，处理重试退避和死信标记 |
+| `MqMessageRelayJob` | XXL-JOB handler（`@XxlJob("mqRelayHandler")` + `@SystemJobMeta`），触发 relay 逻辑 |
+| `MessageSender` | 策略接口，按 `broker_type` 路由。当前实现 `RocketMqMessageSender`（基于 StreamBridge），后续可扩展 `KafkaMessageSender` |
+| `MqMessageInternalController` | Feign 内部查询 API（`/api/internal/mq-message`），供聚合查询服务调用 |
+
+### 新服务接入步骤
+
+1. POM 中依赖 `omni-common-mqlog`
+2. 确保已依赖 `omni-common-mybatis`（数据库）和 `omni-common-job`（XXL-JOB）
+3. 如需 RocketMQ 发送能力，依赖 `spring-cloud-starter-stream-rocketmq`
+4. `sys_mq_message` 表自动创建（`schema.sql` + `CREATE TABLE IF NOT EXISTS`）
+5. `mqRelayHandler` 自动注册到 XXL-JOB（各服务执行器 AppName 不同，handler name 天然隔离）
+6. 业务代码注入 `ReliableMessageTemplate`，调用 `send()` 方法即可
+
+### 指数退避策略
+
+重试间隔：`2^retryCount × 10s`。第1次 20s，第2次 40s，第3次 80s。超过 `max_retry`（默认 3）进入死信状态（DEAD_LETTER）。
+
+### 死信处理
+
+- **重发**：将 PENDING/FAILED/DEAD_LETTER 状态重置为 PENDING，`retry_count` 清零，relay 任务下次轮询重新投递
+- **忽略**：DEAD_LETTER → SKIPPED，确认无需再投递的终态
+
 ## 操作日志（OperLog）
 
 操作日志系统基于 AOP + RocketMQ 异步架构，自动采集 Controller 方法的请求上下文和实体变更快照，实现对业务操作的完整审计追踪。
@@ -361,7 +411,7 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 
 ## Common Starter 接入规范
 
-项目将公共能力拆分为 5 个模块，新微服务通过 Maven 依赖引入即用，无需手动配置。
+项目将公共能力拆分为 6 个模块，新微服务通过 Maven 依赖引入即用，无需手动配置。
 
 ### Starter 模块概览
 
@@ -372,6 +422,7 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 | `omni-common-mybatis` | 数据库能力 | `MybatisPlusAutoConfiguration`：`MybatisPlusInterceptor`（MySQL `PaginationInnerInterceptor`）+ YAML 默认配置（驼峰映射、逻辑删除、自增 ID） | Servlet 服务 |
 | `omni-common-redis` | 阻塞式 Redis | `RedisAutoConfiguration`：`RedisTemplate<String, Object>`（Jackson 序列化）+ `RedisUtils` 工具类 + Lettuce 连接池配置 | Servlet 服务 |
 | `omni-common-redis-reactive` | 响应式 Redis | `spring-boot-starter-data-redis-reactive` + YAML 默认超时配置 | WebFlux 服务（如 Gateway） |
+| `omni-common-mqlog` | 可靠 MQ 消息发送 | `ReliableMessageTemplate`（Transactional Outbox）、`MqMessageRelayService`（XXL-JOB 异步投递）、`MessageSender` 策略接口、`MqMessageInternalController`（Feign 内部查询）、`schema.sql`（自动建表） | Servlet 服务（需 MQ 能力） |
 
 **自动配置注册机制**：所有 starter 通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 文件注册，这是 Spring Boot 3+/4+ 的标准机制（替代了旧版 `spring.factories`）。
 

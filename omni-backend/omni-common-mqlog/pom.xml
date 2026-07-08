@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.omni</groupId>
+        <artifactId>omni-stack</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>omni-common-mqlog</artifactId>
+    <name>Omni Common MQ Log</name>
+    <description>可靠消息发送与补偿模块：Transactional Outbox + XXL-JOB 异步投递 + 多 MQ 策略扩展</description>
+
+    <dependencies>
+        <!-- Common Core Module (R, PageResult, BaseEntity) -->
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common-core</artifactId>
+        </dependency>
+
+        <!-- MyBatis-Plus (Mapper + 分页，可选依赖) -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Spring Cloud Stream RocketMQ (StreamBridge 发送能力) -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-stream-rocketmq</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Common Job Module (XXL-JOB 系统任务注册) -->
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common-job</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Spring Web (Controller) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Jackson (JSON 序列化) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>

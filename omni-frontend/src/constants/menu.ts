@@ -18,6 +18,8 @@ export const menuI18nMap: Record<string, string> = {
   'base': 'common.baseManagement',
   'base:dict': 'common.dictManagement',
   'base:operlog': 'common.operLogs',
+  'monitor': 'common.monitorManagement',
+  'base:mqmessage': 'common.mqMessages',
   'job': 'common.jobManagement',
   'job:user-job-type': 'common.userJobTypes',
   'job:system-job': 'common.systemJobs',

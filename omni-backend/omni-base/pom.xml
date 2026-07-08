@@ -81,6 +81,12 @@
             <artifactId>omni-common-job</artifactId>
         </dependency>
 
+        <!-- Common MQ Log Module (可靠消息发送 + 补偿管理) -->
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common-mqlog</artifactId>
+        </dependency>
+
         <!-- Spring Cloud Stream RocketMQ (operlog 模块 optional，需显式声明) -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
