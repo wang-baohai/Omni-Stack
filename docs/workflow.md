@@ -1,10 +1,13 @@
-# Workflow Engine
+# 工作流引擎
 
-Omni-Stack provides a visual BPMN workflow engine built on **Flowable 7.x**, supporting model design, dual-version management, multi-instance countersign approval, and end-to-end process tracking. This document covers the architecture, core flows, constraints, and extension guide.
+> 本文档覆盖 Omni-Stack 工作流引擎的架构、核心流程、约束和扩展指南。  
+> 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。
 
-## 1. Architecture Overview
+Omni-Stack 提供基于 **Flowable 7.x** 的可视化 BPMN 工作流引擎，支持模型设计、双版本管理、多实例会签审批和端到端流程跟踪。
 
-The workflow system is organized into a standalone microservice and a shared starter library:
+## 1. 架构概览
+
+工作流系统由一个独立微服务和一个共享 Starter 库组成：
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -34,169 +37,169 @@ The workflow system is organized into a standalone microservice and a shared sta
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Module dependencies**:
+**模块依赖**：
 
-- `omni-common-core` — POJOs (`R<T>`, `PageResult`), XSS SPI interface
-- `omni-common-mybatis` — MyBatis-Plus + MySQL driver + tenant interceptor
-- `omni-common-redis` — Redis cache for XSS config and session data
-- `omni-common-workflow` — Flowable auto-configuration, approval SPI, tenant filter, notification SPI
-- `omni-workflow` — business layer: controllers, services, delegates, BPMN engine tools
+- `omni-common-core` — POJO（`R<T>`、`PageResult`）、XSS SPI 接口
+- `omni-common-mybatis` — MyBatis-Plus + MySQL 驱动 + 租户拦截器
+- `omni-common-redis` — Redis 缓存，用于 XSS 配置和会话数据
+- `omni-common-workflow` — Flowable 自动配置、审批 SPI、租户过滤器、通知 SPI
+- `omni-workflow` — 业务层：控制器、服务、委托器、BPMN 引擎工具
 
-**Key design decisions**:
+**关键设计决策**：
 
-- **Flowable** as the BPMN engine: open-source, mature Spring Boot integration, native multi-instance (MI) support
-- **Dual-version management**: business versions tracked in `wf_process_model_version` (DRAFT → PUBLISHED → ARCHIVED), engine versions managed by Flowable deployment
-- **Visual designer**: front-end BPMN modeler generates designer JSON, `BpmnXmlBuilder` converts to BPMN 2.0 XML
-- **Dynamic candidate resolution**: `omni:assignment` JSON extension element parsed at task start by `ScopedRoleAssignmentListener`, no hardcoded assignees
+- 选择 **Flowable** 作为 BPMN 引擎：开源、成熟的 Spring Boot 集成、原生多实例（MI）支持
+- **双版本管理**：业务版本在 `wf_process_model_version` 中跟踪（DRAFT → PUBLISHED → ARCHIVED），引擎版本由 Flowable 部署管理
+- **可视化设计器**：前端 BPMN 建模器生成设计器 JSON，`BpmnXmlBuilder` 转换为 BPMN 2.0 XML
+- **动态候选人解析**：`omni:assignment` JSON 扩展元素在任务启动时由 `ScopedRoleAssignmentListener` 解析，无需硬编码审批人
 
-### Data Model
+### 数据模型
 
 ```mermaid
 erDiagram
-    wf_process_model ||--o{ wf_process_model_version : "1:N versions"
-    wf_process_model_version ||--o{ wf_process_instance_ext : "1:N instances"
-    wf_process_instance_ext ||--o{ wf_todo_task : "1:N todos"
-    wf_process_instance_ext ||--o{ wf_cc_record : "1:N cc"
+    wf_process_model ||--o{ wf_process_model_version : "1:N 版本"
+    wf_process_model_version ||--o{ wf_process_instance_ext : "1:N 实例"
+    wf_process_instance_ext ||--o{ wf_todo_task : "1:N 待办"
+    wf_process_instance_ext ||--o{ wf_cc_record : "1:N 抄送"
 ```
 
-### Database Tables (omni_workflow)
+### 数据库表（omni_workflow）
 
-| Table | Purpose |
-|-------|---------|
-| `wf_process_model` | Process model registry, `model_key` unique per tenant |
-| `wf_process_model_version` | Version history: BPMN XML, designer JSON, deployment info |
-| `wf_process_instance_ext` | Instance extension: links Flowable instance to model version |
-| `wf_todo_task` | Pending task cache for fast assignee-scoped queries |
-| `wf_cc_record` | CC notification records with read status |
-| `wf_form_schema` | JSON Schema form definitions |
-| `wf_delegation_rule` | Approval delegation rules (user-to-user, optional process scope) |
+| 表名 | 用途 |
+|------|------|
+| `wf_process_model` | 流程模型注册表，`model_key` 在租户内唯一 |
+| `wf_process_model_version` | 版本历史：BPMN XML、设计器 JSON、部署信息 |
+| `wf_process_instance_ext` | 实例扩展：将 Flowable 实例关联到模型版本 |
+| `wf_todo_task` | 待办任务缓存，支持按审批人快速查询 |
+| `wf_cc_record` | 抄送通知记录，含已读状态 |
+| `wf_form_schema` | JSON Schema 表单定义 |
+| `wf_delegation_rule` | 审批委托规则（用户到用户，可选流程范围） |
 
 ---
 
-## 2. Core Flow Walkthrough
+## 2. 核心流程详解
 
-### 2.1 Model Creation
+### 2.1 模型创建
 
 ```
 POST /api/workflow/model  (workflow:model:create)
 ```
 
 1. `WorkflowModelController.createModel(CreateModelRequest)` → `WorkflowModelService.createModel()`
-2. Creates `wf_process_model` row with `model_key` (unique per tenant)
-3. Creates initial `wf_process_model_version` row with `status = DRAFT`
-4. Links `wf_process_model.current_draft_version_id` to the new version
+2. 创建 `wf_process_model` 记录，包含 `model_key`（租户内唯一）
+3. 创建初始 `wf_process_model_version` 记录，`status = DRAFT`
+4. 将 `wf_process_model.current_draft_version_id` 指向新版本
 
-### 2.2 Draft Saving (Visual Designer)
+### 2.2 草稿保存（可视化设计器）
 
 ```
 PUT /api/workflow/model/{id}/draft  (workflow:model:update)
 ```
 
 1. `WorkflowModelController.saveDraft(id, SaveDraftRequest)` → `WorkflowModelService.saveDraft()`
-2. Updates the draft version's `designer_json`, regenerates `bpmn_xml` via `BpmnXmlBuilder.build()`
-3. Computes `xml_sha256` for change detection
-4. Syncs model name and category from request
+2. 更新草稿版本的 `designer_json`，通过 `BpmnXmlBuilder.build()` 重新生成 `bpmn_xml`
+3. 计算 `xml_sha256` 用于变更检测
+4. 从请求中同步模型名称和分类
 
-**BpmnXmlBuilder** converts designer JSON nodes to BPMN 2.0 XML elements:
+**BpmnXmlBuilder** 将设计器 JSON 节点转换为 BPMN 2.0 XML 元素：
 
-| Designer Node Type | BPMN Element | Extension |
+| 设计器节点类型 | BPMN 元素 | 扩展 |
 |---|---|---|
 | `StartEvent` | `<startEvent>` | — |
 | `EndEvent` | `<endEvent>` | — |
 | `UserTask` | `<userTask>` | `<omni:assignment>` + `flowable:executionListener` |
-| `ServiceTask` (CC) | `<serviceTask>` | `<omni:cc>` + `flowable:delegateExpression` |
-| `ExclusiveGateway` | `<exclusiveGateway>` | `default` attribute |
+| `ServiceTask`（抄送） | `<serviceTask>` | `<omni:cc>` + `flowable:delegateExpression` |
+| `ExclusiveGateway` | `<exclusiveGateway>` | `default` 属性 |
 | `ParallelGateway` | `<parallelGateway>` | — |
 
-### 2.3 Model Validation
+### 2.3 模型校验
 
 ```
 POST /api/workflow/model/{id}/validate  (workflow:model:validate)
 ```
 
-`BpmnXmlValidator.validate()` checks:
-1. XML well-formedness (with XXE protection)
-2. Exactly one executable `<process>` with id matching `model_key`
-3. At least one `StartEvent` and one `EndEvent`
-4. Every `UserTask` has `<omni:assignment>` extension
-5. CC `ServiceTask` has `<omni:cc>` extension
-6. `ExclusiveGateway` has a `default` flow (without `conditionExpression`)
-7. All `SequenceFlow` references valid source/target
+`BpmnXmlValidator.validate()` 检查项：
+1. XML 格式正确性（含 XXE 防护）
+2. 恰好一个可执行的 `<process>`，其 id 与 `model_key` 匹配
+3. 至少一个 `StartEvent` 和一个 `EndEvent`
+4. 每个 `UserTask` 都有 `<omni:assignment>` 扩展
+5. 抄送 `ServiceTask` 有 `<omni:cc>` 扩展
+6. `ExclusiveGateway` 有一个 `default` 流（不带 `conditionExpression`）
+7. 所有 `SequenceFlow` 引用有效的源/目标
 
-### 2.4 Model Publishing
+### 2.4 模型发布
 
 ```
 POST /api/workflow/model/{id}/publish  (workflow:model:publish)
 ```
 
-1. `SELECT FOR UPDATE` pessimistic lock on the model row
-2. Validates BPMN XML via `BpmnXmlValidator`
-3. Replaces `targetNamespace` with model category
-4. Deploys to Flowable: `repositoryService.createDeployment().addString(bpmnXml).deploy()`
-5. Computes business version number (`max(existing) + 1`)
-6. Updates version record: `status = PUBLISHED`, `deploymentId`, `processDefinitionId`, `engineVersion`
-7. Archives previous PUBLISHED versions (`status = ARCHIVED`)
-8. Updates model's `current_published_version_id`
+1. `SELECT FOR UPDATE` 对模型记录加悲观锁
+2. 通过 `BpmnXmlValidator` 校验 BPMN XML
+3. 将 `targetNamespace` 替换为模型分类
+4. 部署到 Flowable：`repositoryService.createDeployment().addString(bpmnXml).deploy()`
+5. 计算业务版本号（`max(现有版本) + 1`）
+6. 更新版本记录：`status = PUBLISHED`、`deploymentId`、`processDefinitionId`、`engineVersion`
+7. 归档之前的已发布版本（`status = ARCHIVED`）
+8. 更新模型的 `current_published_version_id`
 
-### 2.5 Process Instance Start
+### 2.5 流程实例启动
 
 ```
 POST /api/workflow/process-instance/start  (workflow:instance:start)
 ```
 
 1. `ProcessInstanceController.start(StartProcessRequest)` → `ProcessInstanceService.start()`
-2. Resolves the latest PUBLISHED version to get `processDefinitionId`
-3. Starts Flowable instance: `runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables)`
-4. Creates `wf_process_instance_ext` row linking model, version, and Flowable instance
-5. `ScopedRoleAssignmentListener` fires on each UserTask start event to resolve candidates
+2. 解析最新的已发布版本以获取 `processDefinitionId`
+3. 启动 Flowable 实例：`runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables)`
+4. 创建 `wf_process_instance_ext` 记录，关联模型、版本和 Flowable 实例
+5. `ScopedRoleAssignmentListener` 在每个 UserTask 启动事件触发时解析候选人
 
-### 2.6 Approval Completion
+### 2.6 审批完成
 
 ```
 POST /api/workflow/approval/{taskId}/complete  (workflow:approval:complete)
 ```
 
 1. `ApprovalController.complete(taskId, ApprovalRequest)` → `WorkflowApprovalService.complete()`
-2. Sets process variables: `approved = true/false`, `comment = "..."`
-3. Calls `taskService.complete(taskId, variables)`
-4. `ApprovalServiceImpl` updates MI counters (`approvedCount` / `rejectedCount`)
-5. MI `completionCondition` evaluates: `${rejectedCount > 0 || approvedCount >= requiredApprovals}`
-6. If condition met → remaining MI instances are skipped (deleteReason = `MI_END`)
+2. 设置流程变量：`approved = true/false`、`comment = "..."`
+3. 调用 `taskService.complete(taskId, variables)`
+4. `ApprovalServiceImpl` 更新多实例计数器（`approvedCount` / `rejectedCount`）
+5. 多实例 `completionCondition` 求值：`${rejectedCount > 0 || approvedCount >= requiredApprovals}`
+6. 若条件满足 → 剩余的多实例被跳过（deleteReason = `MI_END`）
 
-### 2.7 Progress & Records
+### 2.7 进度与记录
 
-**Progress** (`GET /{id}/progress`):
-- Queries `HistoricActivityInstance` for all activities
-- Aggregates by `activityId` (deduplicates MI sub-instances)
-- For pending UserTasks, pre-resolves candidates via `CandidateResolverBean`
-- Returns `ProcessProgressResponse` with `List<ActivityInfo>` including per-assignee status
+**进度**（`GET /{id}/progress`）：
+- 查询 `HistoricActivityInstance` 获取所有活动
+- 按 `activityId` 聚合（去重多实例子实例）
+- 对于待办的 UserTask，通过 `CandidateResolverBean` 预解析候选人
+- 返回 `ProcessProgressResponse`，包含 `List<ActivityInfo>` 及每个审批人的状态
 
-**Approval Records** (`GET /{id}/approval-records`):
-- Queries `HistoricTaskInstance` (ascending by creation time)
-- Determines result per task: `approved` / `rejected` / `auto-approved` (MI_END) / `cancelled` / `pending`
-- Fetches `Comment` for approval opinions and `approved` variable for approve/reject distinction
+**审批记录**（`GET /{id}/approval-records`）：
+- 查询 `HistoricTaskInstance`（按创建时间升序）
+- 判定每个任务的结果：`approved`（通过）/ `rejected`（驳回）/ `auto-approved`（自动通过，MI_END）/ `cancelled`（已取消）/ `pending`（待办）
+- 获取 `Comment` 作为审批意见，获取 `approved` 变量用于区分通过/驳回
 
 ---
 
-## 3. Constraints & Pitfalls
+## 3. 约束与注意事项
 
-### 3.1 MI DeleteReason
+### 3.1 多实例 DeleteReason
 
-When a multi-instance `completionCondition` is triggered, remaining tasks are deleted by Flowable with `deleteReason = "MI_END"` — **not** `"deleted"`. The `"deleted"` reason is used when the entire process instance is terminated or rejected.
+当多实例 `completionCondition` 触发时，剩余任务会被 Flowable 以 `deleteReason = "MI_END"` 删除——**而非** `"deleted"`。`"deleted"` 原因在整个流程实例被终止或驳回时使用。
 
-**Rule**: Always use `HistoricTaskInstance.getDeleteReason()` to determine skip vs cancel:
+**规则**：始终使用 `HistoricTaskInstance.getDeleteReason()` 来区分跳过与取消：
 
-| `deleteReason` | Meaning | Result |
+| `deleteReason` | 含义 | 结果 |
 |---|---|---|
-| `null` | Task completed normally | Check `approved` variable → approved / rejected |
-| `MI_END` | Skipped by MI completionCondition | auto-approved |
-| `deleted` | Process terminated / rejected | cancelled |
+| `null` | 任务正常完成 | 检查 `approved` 变量 → 通过 / 驳回 |
+| `MI_END` | 被多实例 completionCondition 跳过 | 自动通过 |
+| `deleted` | 流程终止 / 已驳回 | 已取消 |
 
-**Pitfall**: Do NOT rely on `HistoricActivityInstance` parent lookup. Multiple rows may share the same `ACT_ID_` (one with `NULL` deleteReason, another with `MI_END`). `putIfAbsent` may store the wrong row. Use task-level `deleteReason` directly.
+**注意**：不要依赖 `HistoricActivityInstance` 的父级查找。多行可能共享相同的 `ACT_ID_`（一行 deleteReason 为 `NULL`，另一行为 `MI_END`）。`putIfAbsent` 可能存入错误的行。应直接使用任务级别的 `deleteReason`。
 
-### 3.2 omni:assignment Extension Element
+### 3.2 omni:assignment 扩展元素
 
-The `omni:assignment` JSON is the **sole configuration entry** for candidate resolution:
+`omni:assignment` JSON 是候选人解析的**唯一配置入口**：
 
 ```xml
 <userTask id="dept-leader-approve" flowable:assignee="${userId}">
@@ -220,85 +223,85 @@ The `omni:assignment` JSON is the **sole configuration entry** for candidate res
 </userTask>
 ```
 
-**Fields**:
+**字段说明**：
 
-| Field | Values | Description |
+| 字段 | 取值 | 描述 |
 |---|---|---|
-| `roleCode` | Any role code (e.g. `TEAM_LEADER`, `DEPT_LEADER`) | Target role to resolve |
-| `anchorType` | `START_USER_PRIMARY_UNIT`, `PARENT`, `ABSOLUTE_UNIT`, `PARENT_BY_TYPE`, `CHILD_BY_CODE`, `SIBLING_BY_CODE`, `PARENT_CHILDREN`, `DEPT_BY_CODE`, `CHILD_UNIT`, `SIBLING_UNIT` | How to locate the anchor org unit |
-| `anchorParams` | JSON object (e.g. `{"unitIds": [200]}`) | Parameters for anchor resolution |
-| `scopeMode` | `SAME_UNIT`, `UNIT_AND_BELOW`, `CHILDREN_ONLY` | Candidate search scope |
-| `fallbackStrategy` | `ERROR`, `ASSIGN_ADMIN`, `ESCALATE_PARENT` | Behavior when no candidates found |
-| `approvalMode` | `ALL` (default), `ANY` | MI countersign mode |
+| `roleCode` | 任意角色编码（如 `TEAM_LEADER`、`DEPT_LEADER`） | 要解析的目标角色 |
+| `anchorType` | `START_USER_PRIMARY_UNIT`、`PARENT`、`ABSOLUTE_UNIT`、`PARENT_BY_TYPE`、`CHILD_BY_CODE`、`SIBLING_BY_CODE`、`PARENT_CHILDREN`、`DEPT_BY_CODE`、`CHILD_UNIT`、`SIBLING_UNIT` | 如何定位锚点组织单元 |
+| `anchorParams` | JSON 对象（如 `{"unitIds": [200]}`) | 锚点解析参数 |
+| `scopeMode` | `SAME_UNIT`、`UNIT_AND_BELOW`、`CHILDREN_ONLY` | 候选人搜索范围 |
+| `fallbackStrategy` | `ERROR`、`ASSIGN_ADMIN`、`ESCALATE_PARENT` | 未找到候选人时的行为 |
+| `approvalMode` | `ALL`（默认）、`ANY` | 多实例会签模式 |
 
-### 3.3 Approval Modes
+### 3.3 审批模式
 
-- **ALL**: All candidates must approve. `requiredApprovals = candidateUserIds.size()`. Flow advances when `approvedCount >= requiredApprovals`.
-- **ANY**: Any single approval is sufficient. `requiredApprovals = 1`. Flow advances on first approval; remaining tasks are auto-completed with `deleteReason = MI_END`.
+- **ALL**：所有候选人都必须审批。`requiredApprovals = candidateUserIds.size()`。当 `approvedCount >= requiredApprovals` 时流程推进。
+- **ANY**：任意一人审批即可。`requiredApprovals = 1`。首个审批通过后流程推进；剩余任务自动完成，`deleteReason = MI_END`。
 
-Both modes share the same `completionCondition` expression: `${rejectedCount > 0 || approvedCount >= requiredApprovals}`. The difference is in the `requiredApprovals` value set by `ScopedRoleAssignmentListener`.
+两种模式共享相同的 `completionCondition` 表达式：`${rejectedCount > 0 || approvedCount >= requiredApprovals}`。区别在于 `ScopedRoleAssignmentListener` 设置的 `requiredApprovals` 值不同。
 
-**Rejection shortcut**: In both modes, any single rejection (`rejectedCount > 0`) immediately triggers the reject branch, skipping remaining approvers.
+**驳回快捷方式**：在两种模式下，任意一个驳回（`rejectedCount > 0`）都会立即触发驳回分支，跳过剩余审批人。
 
-### 3.4 Tenant Isolation
+### 3.4 租户隔离
 
-`MybatisPlusConfig` in `omni-workflow` registers `TenantLineInnerInterceptor` that:
-- Reads tenant ID from `TenantInfoHolder` (set by `TenantInfoFilter` from `X-Tenant-Id` header)
-- **Excludes** Flowable internal tables (`ACT_*` / `act_*` prefix) from tenant filtering
+`omni-workflow` 中的 `MybatisPlusConfig` 注册了 `TenantLineInnerInterceptor`，其行为如下：
+- 从 `TenantInfoHolder` 读取租户 ID（由 `TenantInfoFilter` 从 `X-Tenant-Id` 请求头设置）
+- **排除** Flowable 内部表（`ACT_*` / `act_*` 前缀）不参与租户过滤
 
-Flowable tables are tenant-isolated via Flowable's built-in `tenantId` mechanism, not MyBatis-Plus interception.
+Flowable 表通过 Flowable 内置的 `tenantId` 机制实现租户隔离，而非 MyBatis-Plus 拦截。
 
-### 3.5 XSS Integration
+### 3.5 XSS 集成
 
-`omni-workflow` implements `XssConfigProvider` SPI via `XssConfigProviderImpl`:
-- Reads XSS config from Redis cache (`xss:enabled:{tenantId}`, `xss:rules:{tenantId}`)
-- Cache is written by `omni-auth` service; workflow service is a **read-only consumer**
-- On cache miss, returns `enabled = false` (fail-open)
+`omni-workflow` 通过 `XssConfigProviderImpl` 实现 `XssConfigProvider` SPI：
+- 从 Redis 缓存读取 XSS 配置（`xss:enabled:{tenantId}`、`xss:rules:{tenantId}`）
+- 缓存由 `omni-auth` 服务写入；工作流服务是**只读消费者**
+- 缓存未命中时，返回 `enabled = false`（失败开放策略）
 
-### 3.6 Candidate Resolution Components
+### 3.6 候选人解析组件
 
-| Component | Bean Name | Trigger |
+| 组件 | Bean 名称 | 触发时机 |
 |---|---|---|
-| `ScopedRoleAssignmentListener` | `scopedRoleAssignmentListener` | ExecutionListener on UserTask `start` event |
-| `CandidateResolverDelegate` | `candidateResolverDelegate` | JavaDelegate in ServiceTask before UserTask |
-| `CandidateResolverBean` | `candidateResolver` | UEL expression or offline pre-resolution |
+| `ScopedRoleAssignmentListener` | `scopedRoleAssignmentListener` | UserTask `start` 事件上的 ExecutionListener |
+| `CandidateResolverDelegate` | `candidateResolverDelegate` | UserTask 之前 ServiceTask 中的 JavaDelegate |
+| `CandidateResolverBean` | `candidateResolver` | UEL 表达式或离线预解析 |
 
-`CandidateResolverBean` exposes `resolveCandidates(processDefinitionId, activityId, startUserId, tenantId)` for offline use (e.g., `getProgress()` needs to show who *would* approve a pending task).
+`CandidateResolverBean` 暴露 `resolveCandidates(processDefinitionId, activityId, startUserId, tenantId)` 供离线使用（例如 `getProgress()` 需要显示谁*将会*审批一个待办任务）。
 
-### 3.7 Publish Locking
+### 3.7 发布锁定
 
-`publishModel()` uses `SELECT FOR UPDATE` pessimistic lock on `wf_process_model` to prevent concurrent deployments of the same model. This is critical because Flowable deployment is not atomic — it involves multiple engine API calls.
+`publishModel()` 使用 `SELECT FOR UPDATE` 对 `wf_process_model` 加悲观锁，以防止同一模型的并发部署。这很关键，因为 Flowable 部署不是原子操作——涉及多个引擎 API 调用。
 
 ---
 
-## 4. Extension Guide
+## 4. 扩展指南
 
-### 4.1 Adding a New Approval Process Type
+### 4.1 添加新的审批流程类型
 
-1. Design BPMN XML with `<omni:assignment>` on each UserTask
-2. Validate with `BpmnXmlValidator` (enforces required extensions)
-3. Create model via API: `POST /api/workflow/model`
-4. Save BPMN XML: `PUT /api/workflow/model/{id}/draft`
-5. Publish: `POST /api/workflow/model/{id}/publish`
+1. 设计 BPMN XML，在每个 UserTask 上配置 `<omni:assignment>`
+2. 使用 `BpmnXmlValidator` 校验（强制检查必需的扩展）
+3. 通过 API 创建模型：`POST /api/workflow/model`
+4. 保存 BPMN XML：`PUT /api/workflow/model/{id}/draft`
+5. 发布：`POST /api/workflow/model/{id}/publish`
 
-No code changes required — the framework is data-driven through BPMN XML + `omni:assignment` configuration.
+无需修改代码——框架通过 BPMN XML + `omni:assignment` 配置实现数据驱动。
 
-### 4.2 Adding a New Anchor Type
+### 4.2 添加新的锚点类型
 
-1. Add the new anchor type string to the resolution logic in `ScopedRoleAssignmentListener`
-2. Implement the org unit lookup query (e.g., query `sys_org_unit` by specific criteria)
-3. Add the anchor type to `BpmnXmlValidator`'s known values if validation is desired
-4. Update front-end `UserTaskPanel.vue` to expose the new anchor type in the property panel
+1. 在 `ScopedRoleAssignmentListener` 的解析逻辑中添加新的锚点类型字符串
+2. 实现组织单元查询（例如按特定条件查询 `sys_org_unit`）
+3. 如需校验，将锚点类型添加到 `BpmnXmlValidator` 的已知值中
+4. 更新前端 `UserTaskPanel.vue`，在属性面板中展示新的锚点类型
 
-### 4.3 Adding a New Fallback Strategy
+### 4.3 添加新的降级策略
 
-1. Add the strategy constant to `ScopedRoleAssignmentListener`
-2. Implement the fallback behavior (e.g., `ASSIGN_ADMIN` → query admin user, `ESCALATE_PARENT` → find parent unit candidates)
-3. Update `omni:assignment` JSON schema validation
+1. 在 `ScopedRoleAssignmentListener` 中添加策略常量
+2. 实现降级行为（例如 `ASSIGN_ADMIN` → 查询管理员用户，`ESCALATE_PARENT` → 查找上级单元候选人）
+3. 更新 `omni:assignment` JSON Schema 校验
 
-### 4.4 Custom Notification Service
+### 4.4 自定义通知服务
 
-Implement `WorkflowNotificationService` interface from `omni-common-workflow`:
+实现 `omni-common-workflow` 中的 `WorkflowNotificationService` 接口：
 
 ```java
 @Service
@@ -311,8 +314,70 @@ public class MyNotificationService implements WorkflowNotificationService {
 }
 ```
 
-The default `NoOpNotificationService` (registered by `FlowableAutoConfiguration`) is replaced by your implementation via `@ConditionalOnMissingBean`.
+默认的 `NoOpNotificationService`（由 `FlowableAutoConfiguration` 注册）会通过 `@ConditionalOnMissingBean` 被你的实现替换。
 
-### 4.5 CC (Carbon Copy) Notifications
+### 4.5 抄送（CC）通知
 
-Add a `ServiceTask` node in the BPMN designer with the `ccNotifyDelegate` delegate expression. Configure `<omni:cc>` extension element with target user IDs or role-based resolution. The `CcNotifyDelegate` creates `wf_cc_record` entries at runtime.
+在 BPMN 设计器中添加一个 `ServiceTask` 节点，使用 `ccNotifyDelegate` 委托表达式。配置 `<omni:cc>` 扩展元素指定目标用户 ID 或基于角色的解析。`CcNotifyDelegate` 在运行时创建 `wf_cc_record` 记录。
+
+---
+
+## 5. 技术选型思考：为什么选择 Flowable 7.x
+
+| 考量 | Flowable | Camunda | Activiti |
+|------|---------|---------|----------|
+| **开源许可** | Apache 2.0（商业友好） | 商业版需许可（社区版 MIT） | Apache 2.0 |
+| **Spring Boot 集成** | 原生 Spring Boot Starter，自动配置 | 需额外配置 Spring Boot Starter | 已停止维护（Flowable 是其分叉） |
+| **多实例支持** | 原生 MI（Multi-Instance）支持，completionCondition 灵活 | 类似功能 | 基础 MI 支持 |
+| **CMMN/DMN** | 支持 BPMN + CMMN + DMN | 支持 BPMN + DMN（CMMN 商业版） | 仅 BPMN |
+| **社区活跃度** | 活跃（GitHub 8k+ stars） | 活跃（商业支持） | 已停止维护 |
+| **版本 7.x** | Jakarta EE 兼容，Spring Boot 3/4 支持 | 版本 8 架构变动大 | 无新版 |
+
+**结论**：Flowable 7.x 在开源许可、Spring Boot 原生集成、多实例支持方面优势明显，是 Omni-Stack 工作流引擎的最佳选择。
+
+## 6. BPMN 建模最佳实践
+
+### 命名约定
+
+| 元素 | 命名规则 | 示例 |
+|------|---------|------|
+| Process ID | 与 `model_key` 一致 | `leave-request`, `expense-approval` |
+| UserTask ID | kebab-case，描述角色+动作 | `dept-leader-approve`, `hr-review` |
+| SequenceFlow ID | `flow-{source}-{target}` | `flow-start-submit` |
+| Gateway ID | `{type}-gw-{purpose}` | `exclusive-gw-amount`, `parallel-gw-notify` |
+
+### 建模原则
+
+1. **每个 UserTask 必须配置 `<omni:assignment>`**：动态候选人解析，禁止硬编码 `assignee`
+2. **ExclusiveGateway 必须设置 default flow**：无条件分支作为兑底，避免流程死锁
+3. **多实例会签使用统一的 completionCondition**：`${rejectedCount > 0 \|\| approvedCount >= requiredApprovals}`
+4. **CC 通知使用 ServiceTask + `ccNotifyDelegate`**：非阻塞，不影响主流程
+5. **模型发布前必须通过 `BpmnXmlValidator`**：确保 XML 合法性和扩展元素完整性
+
+### 流程设计器前端架构
+
+```
+bpmn-js Modeler (开源 BPMN 2.0 建模工具)
+    │
+    ├── useBpmnModeler.ts      — Modeler 创建/销毁生命周期
+    ├── useBpmnExtension.ts    — omni:assignment 等扩展元素读写
+    ├── bpmnContextPadI18n.ts  — 上下文菜单国际化
+    └── bpmnContextPadProvider.ts — 自定义上下文菜单项
+
+属性面板 (panels/)
+    ├── UserTaskPanel.vue      — 角色解析配置（roleCode, anchorType, scopeMode）
+    ├── ServiceTaskPanel.vue   — CC 通知配置
+    └── GatewayPanel.vue       — 网关条件配置
+```
+
+## 7. 故障排查指南
+
+| 问题 | 可能原因 | 排查方法 |
+|------|---------|----------|
+| **模型发布失败** | BPMN XML 校验未通过 | 调用 `POST /api/workflow/model/{id}/validate` 获取具体错误信息 |
+| **候选人解析失败** | `omni:assignment` 配置错误 | 检查 `roleCode`、`anchorType`、`scopeMode` 值是否合法；查看服务日志中的异常信息 |
+| **流程实例未启动** | 模型未发布或版本已归档 | 检查 `wf_process_model_version` 表中是否有 `status=PUBLISHED` 的版本 |
+| **多实例任务未跳过** | completionCondition 未触发 | 检查 `approvedCount`、`rejectedCount`、`requiredApprovals` 变量值 |
+| **deleteReason 显示错误** | MI_END vs deleted 混淆 | 参考 §3.1 MI DeleteReason 表格，`MI_END` = 自动完成，`deleted` = 流程终止 |
+| **租户隔离失效** | TenantInfoHolder 未设置 | 确认 Gateway 已注入 `X-Tenant-Id` 请求头；检查 `TenantInfoFilter` 是否正常执行 |
+| **BPMN 设计器无法加载** | bpmn-js 版本不兼容 | 确认 `bpmn-js` 版本为 18.x；检查浏览器控制台错误 |

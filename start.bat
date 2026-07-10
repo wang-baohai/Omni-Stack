@@ -1,14 +1,15 @@
 @echo off
 setlocal enabledelayedexpansion
 :: ============================================================
-:: Omni-Stack 中间件 — 一键启动
+:: Omni-Stack 全家桶 — 一键启动
 :: ============================================================
+:: 包含：中间件 + 后端微服务 + 前端
 :: 用法：右键 → 以管理员身份运行
 ::
 :: 自动完成：
 ::   1. 启动 Docker Desktop（如未运行）
 ::   2. 保留 Docker 所需端口（防止 Hyper-V/WSL2 占用）
-::   3. 启动所有中间件容器
+::   3. 构建并启动全部容器
 ::
 :: 启动指定服务：start.bat mysql redis
 :: ============================================================
@@ -26,7 +27,7 @@ if %errorlevel% neq 0 (
 )
 
 :: --- 检查 Docker ---
-echo [1/4] 检查 Docker...
+echo [1/5] 检查 Docker...
 
 :: 检查 docker 命令是否存在（Docker Desktop 是否已安装）
 where docker >nul 2>&1
@@ -86,15 +87,15 @@ echo.
 :start_port
 
 :: --- 端口保护（静默执行，仅 Windows + Hyper-V/WSL2 环境生效） ---
-echo [2/4] 端口保护...
+echo [2/5] 端口保护...
 powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ^
-  "sc.exe query winnat *>$null; if ($LASTEXITCODE -eq 0) { sc.exe stop winnat *>$null; @(3306,6379,8080,8848,9848,9876,10909,10911,10912,18080) | ForEach-Object { netsh int ipv4 add excludedportrange protocol=tcp startport=$_ numberofports=1 persistent=yes *>$null }; sc.exe start winnat *>$null }"
+  "sc.exe query winnat *>$null; if ($LASTEXITCODE -eq 0) { sc.exe stop winnat *>$null; @(3000,3306,6379,8080,8100,8101,8102,8103,8848,9848,19876,10909,10911,10912,18080) | ForEach-Object { netsh int ipv4 add excludedportrange protocol=tcp startport=$_ numberofports=1 persistent=yes *>$null }; sc.exe start winnat *>$null }"
 echo       完成
 echo.
 
-:: --- 拉取 Docker 镜像 ---
-echo [3/4] 拉取镜像（首次使用需下载，请耐心等待）...
-docker compose pull 2>&1
+:: --- 拉取中间件镜像 ---
+echo [3/5] 拉取中间件镜像（首次使用需下载，请耐心等待）...
+docker compose pull mysql redis nacos rocketmq-namesrv rocketmq-broker xxl-job-admin 2>&1
 if !errorlevel! neq 0 (
     echo.
     echo [ERROR] 镜像拉取失败！常见原因：
@@ -113,8 +114,21 @@ if !errorlevel! neq 0 (
 echo       镜像就绪
 echo.
 
-:: --- 启动 Docker Compose ---
-echo [4/4] 启动中间件...
+:: --- 构建应用镜像 ---
+echo [4/5] 构建应用镜像（首次构建约 5-10 分钟）...
+docker compose build omni-auth omni-base omni-workflow omni-gateway omni-frontend 2>&1
+if !errorlevel! neq 0 (
+    echo.
+    echo [ERROR] 构建失败！请检查以上错误信息。
+    echo         常见原因：JDK/Node 镜像下载失败、Maven 依赖下载超时。
+    echo.
+    goto done
+)
+echo       构建完成
+echo.
+
+:: --- 启动全部容器 ---
+echo [5/5] 启动全家桶...
 if "%~1"=="" (
     docker compose up -d 2>&1
 ) else (
@@ -127,15 +141,25 @@ if !errorlevel! neq 0 (
     echo.
 ) else (
     echo.
-    echo ==========================================
-    echo   中间件启动完成！
+    echo ==================================================
+    echo   Omni-Stack 全家桶启动完成！
     echo.
-    echo   MySQL:        localhost:3306  root/root
+    echo   -- 中间件 --
+    echo   MySQL:        localhost:3306       root/root
     echo   Redis:        localhost:6379
     echo   Nacos:        http://localhost:8080
-    echo   RocketMQ:     localhost:9876
+    echo   RocketMQ:     localhost:19876
     echo   XXL-JOB:      http://localhost:18080  admin/123456
-    echo ==========================================
+    echo.
+    echo   -- 应用 --
+    echo   前端:         http://localhost:3000
+    echo   Auth:         http://localhost:8100
+    echo   Base:         http://localhost:8101
+    echo   Gateway:      http://localhost:8102
+    echo   Workflow:     http://localhost:8103
+    echo.
+    echo   默认账号:     admin / admin123
+    echo ==================================================
 )
 echo.
 

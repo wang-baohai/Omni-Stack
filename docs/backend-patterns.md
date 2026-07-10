@@ -1,184 +1,195 @@
-# Backend Patterns & Conventions
+# 后端模式与规范
 
-This document defines how the Omni-Stack backend is organized internally. All backend code must follow these patterns.
+> 本文档定义了 Omni-Stack 后端的内部组织方式。所有后端代码必须遵循这些模式。  
+> 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。
 
-## Layering
+## 分层架构
 
 ```
 Controller --> Service --> Repository (DAO)
      |            |            |
-  Param check   Business     Data access
-  Result wrap   logic        SQL / ORM
-                Transaction
+  参数校验      业务逻辑      数据访问
+  结果包装      逻辑处理      SQL / ORM
+                事务管理
 ```
 
-### Controller Layer
+### Controller 层
 
-- **Responsibility**: Receive HTTP requests, validate parameters, call Service, wrap response
-- **No business logic** in Controller
-- All methods return `R<T>` (success) or `R<PageResult<T>>` (paginated)
-- Request DTOs validated with `@Valid` (Jakarta Bean Validation)
-- DTOs can be inner static classes of the Controller or standalone files
-- RESTful style: `GET /user/{id}`, `POST /user`, `GET /user/list`
+- **职责**：接收 HTTP 请求，校验参数，调用 Service，封装响应
+- Controller 中**禁止编写业务逻辑**
+- 所有方法返回 `R<T>`（成功）或 `R<PageResult<T>>`（分页）
+- 请求 DTO 使用 `@Valid`（Jakarta Bean Validation）校验
+- DTO 可以是 Controller 的内部静态类或独立文件
+- RESTful 风格：`GET /user/{id}`、`POST /user`、`GET /user/list`
 
-### Service Layer
+### Service 层
 
-- **Interface + Implementation**: `XxxService` (interface) + `XxxServiceImpl` (class)
-- `@Service` annotation on the implementation class
-- `@Transactional` on implementation methods:
-  - Read operations: `@Transactional(readOnly = true)`
-  - Write operations: `@Transactional`
-- No `HttpServletRequest` / `HttpServletResponse` in Service layer
-- Constructor injection via `@RequiredArgsConstructor` + `final` fields
+- **接口 + 实现**：`XxxService`（接口）+ `XxxServiceImpl`（实现类）
+- 实现类上添加 `@Service` 注解
+- 实现方法上添加 `@Transactional`：
+  - 读操作：`@Transactional(readOnly = true)`
+  - 写操作：`@Transactional`
+- Service 层禁止使用 `HttpServletRequest` / `HttpServletResponse`
+- 通过 `@RequiredArgsConstructor` + `final` 字段进行构造器注入
 
-### Repository / DAO Layer
+### Repository / DAO 层
 
-- Use MyBatis-Plus or JPA; Mapper interface naming: `XxxMapper`
-- No business logic in Mapper
-- SQL parameters: always `#{}`, never `${}` (prevent SQL injection)
+- 使用 MyBatis-Plus 或 JPA；Mapper 接口命名：`XxxMapper`
+- Mapper 中禁止编写业务逻辑
+- SQL 参数：始终使用 `#{}`，禁止使用 `${}`（防止 SQL 注入）
 
-## Dependency Injection
+## 依赖注入（DI）
 
 ```java
-// CORRECT: constructor injection via Lombok
+// 正确：通过 Lombok 构造器注入
 @RequiredArgsConstructor
 @RestController
 public class UserController {
     private final UserService userService;
 }
 
-// FORBIDDEN: field injection
+// 禁止：字段注入
 @Autowired
 private UserService userService;
 ```
 
-**Rule**: All dependency injection must use `@RequiredArgsConstructor` + `final` fields. `@Autowired` field injection is prohibited.
+**规则**：所有依赖注入必须使用 `@RequiredArgsConstructor` + `final` 字段。禁止 `@Autowired` 字段注入。
 
-## Validation
+### 技术选型思考：为什么用 @RequiredArgsConstructor 而非 @Autowired
 
-- Use Jakarta Bean Validation annotations on request DTOs
-- Trigger validation with `@Valid` on Controller method parameters
-- `MethodArgumentNotValidException` and `BindException` are caught globally by `GlobalExceptionHandler`
+| 考量 | 理由 |
+|------|------|
+| **不可变性** | `final` 字段保证依赖一旦构造就不可更改，避免运行时被意外替换 |
+| **编译时安全** | 遗漏依赖导致编译错误，而非运行时 `NullPointerException` |
+| **测试友好** | 构造器注入可直接在测试中传入 Mock 对象，无需 Spring 容器或反射工具 |
+| **明确性** | 所有依赖在类的构造器中一目了然，不需要扫描全部字段寻找 `@Autowired` |
+| **Spring 官方推荐** | Spring 团队从 4.x 开始推荐构造器注入，字段注入在 5.x 后被标记为不推荐 |
+
+## 参数校验
+
+- 在请求 DTO 上使用 Jakarta Bean Validation 注解
+- 在 Controller 方法参数上使用 `@Valid` 触发校验
+- `MethodArgumentNotValidException` 和 `BindException` 由 `GlobalExceptionHandler` 统一捕获
 
 ```java
 @Data
 public static class CreateUserRequest {
-    @NotBlank(message = "Username is required")
+    @NotBlank(message = "用户名不能为空")
     private String username;
-    @NotBlank(message = "Email is required")
+    @NotBlank(message = "邮箱不能为空")
     private String email;
 }
 ```
 
-## Exception Handling
+## 异常处理
 
 ### BusinessException
 
 ```java
-// Business rule violation
-throw new BusinessException("User not found");           // code: 500
-throw new BusinessException(404, "User not found");      // code: 404
+// 业务规则违反
+throw new BusinessException("用户不存在");           // code: 500
+throw new BusinessException(404, "用户不存在");      // code: 404
 ```
 
 ### GlobalExceptionHandler
 
-Located in `omni-common`, catches all exceptions and converts them to `R<Void>`:
+位于 `omni-common`，捕获所有异常并转换为 `R<Void>`：
 
-| Exception | Handling |
-|-----------|----------|
+| 异常 | 处理方式 |
+|------|----------|
 | `BusinessException` | `log.warn` + `R.fail(code, message)` |
-| `MethodArgumentNotValidException` | HTTP 400 + aggregate field errors + `R.fail(400, ...)` |
-| `BindException` | HTTP 400 + aggregate field errors + `R.fail(400, ...)` |
-| `Exception` (catch-all) | `log.error` with full stack + `R.fail("Internal server error")` |
+| `MethodArgumentNotValidException` | HTTP 400 + 聚合字段错误 + `R.fail(400, ...)` |
+| `BindException` | HTTP 400 + 聚合字段错误 + `R.fail(400, ...)` |
+| `Exception`（兜底捕获） | `log.error`（完整堆栈）+ `R.fail("服务器内部错误")` |
 
-### Rules
+### 规则
 
-- Never use empty `catch` blocks
-- Never use exceptions for flow control
-- NPE defense: use `Optional`, `Objects.requireNonNull()`, early null checks
-- Log exceptions with `log.error("msg", e)` preserving the full stack trace; never `e.printStackTrace()`
+- 禁止使用空的 `catch` 块
+- 禁止使用异常进行流程控制
+- NPE 防御：使用 `Optional`、`Objects.requireNonNull()`、提前进行空值检查
+- 使用 `log.error("msg", e)` 记录异常并保留完整堆栈；禁止使用 `e.printStackTrace()`
 
-## Logging
+## 日志规范
 
-Use Lombok `@Slf4j` and the `log` object:
+使用 Lombok `@Slf4j` 和 `log` 对象：
 
-| Level | Usage |
-|-------|-------|
-| `ERROR` | System-level errors requiring immediate attention |
-| `WARN` | Business exceptions, recoverable issues |
-| `INFO` | Key business flow checkpoints |
-| `DEBUG` | Development and debugging |
+| 级别 | 用途 |
+|------|------|
+| `ERROR` | 需要立即关注的系统级错误 |
+| `WARN` | 业务异常，可恢复的问题 |
+| `INFO` | 关键业务流程检查点 |
+| `DEBUG` | 开发和调试 |
 
 ```java
-// CORRECT: parameterized placeholder
-log.info("User {} logged in from {}", userId, ip);
+// 正确：参数化占位符
+log.info("用户 {} 从 {} 登录", userId, ip);
 
-// FORBIDDEN: string concatenation
+// 禁止：字符串拼接
 log.info("User " + userId + " logged in");
 
-// FORBIDDEN: console output
+// 禁止：控制台输出
 System.out.println("debug info");
 ```
 
-- Never log sensitive information (passwords, tokens, ID numbers)
+- 禁止记录敏感信息（密码、令牌、身份证号）
 
-## OOP Conventions
+## 面向对象规范
 
-- All POJO classes implement `Serializable` and declare `serialVersionUID`
-- Use Lombok: `@Data`, `@Getter`, `@Slf4j`, `@RequiredArgsConstructor`
-- Class member order: static constants -> static variables -> instance variables -> constructors -> public methods -> private methods
-- `equals`: put constants/deterministic values on the left: `"success".equals(status)`
-- Wrapper types: use `valueOf()`, never `new Integer()`
-- Float comparison: use `BigDecimal` or specify an epsilon
+- 所有 POJO 类实现 `Serializable` 并声明 `serialVersionUID`
+- 使用 Lombok：`@Data`、`@Getter`、`@Slf4j`、`@RequiredArgsConstructor`
+- 类成员顺序：静态常量 -> 静态变量 -> 实例变量 -> 构造方法 -> 公共方法 -> 私有方法
+- `equals`：将常量/确定值放在左侧：`"success".equals(status)`
+- 包装类型：使用 `valueOf()`，禁止使用 `new Integer()`
+- 浮点数比较：使用 `BigDecimal` 或指定精度（epsilon）
 
-## Collection & Concurrency
+## 集合与并发
 
-- Initialize collections with capacity: `new ArrayList<>(16)`, `new HashMap<>(16)`
-- Empty check: use `CollectionUtils.isEmpty()`, not `== null` or `size() == 0`
-- No `remove` during iteration; use `Iterator` or `removeIf()`
-- Map traversal: use `entrySet()`, not `keySet()` then `get()`
-- Thread pools: use `ThreadPoolExecutor`, never `Executors.newXxx()`
-- Concurrent modifications: `ConcurrentHashMap`, `AtomicXxx`; avoid manual locking unless necessary
+- 初始化集合时指定容量：`new ArrayList<>(16)`、`new HashMap<>(16)`
+- 空判断：使用 `CollectionUtils.isEmpty()`，而非 `== null` 或 `size() == 0`
+- 迭代过程中禁止 `remove`；使用 `Iterator` 或 `removeIf()`
+- Map 遍历：使用 `entrySet()`，而非先 `keySet()` 再 `get()`
+- 线程池：使用 `ThreadPoolExecutor`，禁止使用 `Executors.newXxx()`
+- 并发修改：使用 `ConcurrentHashMap`、`AtomicXxx`；除非必要，避免手动加锁
 
-## Naming Conventions (Java)
+## 命名规范（Java）
 
-| Type | Style | Example |
-|------|-------|---------|
-| Package | lowercase, dot-separated | `com.omni.business.controller` |
-| Class | UpperCamelCase | `UserController`, `BusinessException` |
-| Method / Variable | lowerCamelCase | `getUserById`, `createTime` |
-| Constant | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`, `DEFAULT_PAGE_SIZE` |
-| Boolean variable | No `is` prefix | `deleted`, `enabled` (not `isDeleted`) |
-| Abstract class | `Abstract` prefix | `AbstractEntity` |
-| Exception class | `Exception` suffix | `BusinessException` |
-| Enum class | `Enum` suffix | `OrderStatusEnum` |
-| DTO class | `Request` / `Response` / `VO` suffix | `CreateUserRequest`, `UserVO` |
-| Feign interface | `FeignClient` suffix | `RemoteServiceFeignClient` |
-| Service interface | `XxxService` | `UserService` |
-| Service implementation | `XxxServiceImpl` | `UserServiceImpl` |
-| Mapper interface | `XxxMapper` | `UserMapper` |
+| 类型 | 风格 | 示例 |
+|------|------|------|
+| 包名 | 小写，点分隔 | `com.omni.business.controller` |
+| 类名 | UpperCamelCase | `UserController`、`BusinessException` |
+| 方法名 / 变量名 | lowerCamelCase | `getUserById`、`createTime` |
+| 常量 | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`、`DEFAULT_PAGE_SIZE` |
+| Boolean 变量 | 不加 `is` 前缀 | `deleted`、`enabled`（而非 `isDeleted`） |
+| 抽象类 | `Abstract` 前缀 | `AbstractEntity` |
+| 异常类 | `Exception` 后缀 | `BusinessException` |
+| 枚举类 | `Enum` 后缀 | `OrderStatusEnum` |
+| DTO 类 | `Request` / `Response` / `VO` 后缀 | `CreateUserRequest`、`UserVO` |
+| Feign 接口 | `FeignClient` 后缀 | `RemoteServiceFeignClient` |
+| Service 接口 | `XxxService` | `UserService` |
+| Service 实现 | `XxxServiceImpl` | `UserServiceImpl` |
+| Mapper 接口 | `XxxMapper` | `UserMapper` |
 
-## Code Format (Java)
+## 代码格式（Java）
 
-- Indent: 4 spaces, no tabs
-- Max line length: 120 characters
-- Braces: K&R style (opening brace on same line)
-- One blank line between methods
-- Spaces around operators: `a + b`, `if (x == y)`
-- Space after commas: `method(a, b, c)`
-- Max 5 method parameters; encapsulate as Request object if exceeded
-- Import order: `java.*` -> `jakarta.*` -> third-party -> `com.omni.*`, blank line between groups
-- No wildcard imports (`import xxx.*`), except for Controller annotation packages
+- 缩进：4 个空格，禁止使用 Tab
+- 最大行宽：120 字符
+- 花括号：K&R 风格（左花括号不换行）
+- 方法之间保留一个空行
+- 运算符两侧加空格：`a + b`、`if (x == y)`
+- 逗号后加空格：`method(a, b, c)`
+- 方法参数最多 5 个；超出时封装为 Request 对象
+- import 顺序：`java.*` -> `jakarta.*` -> 第三方 -> `com.omni.*`，各组之间空行分隔
+- 禁止通配符导入（`import xxx.*`），Controller 注解包除外
 
-## Comments
+## 注释规范
 
-- Classes, class attributes, and class methods must have Javadoc (`/** ... */`)
-- Use `//` for inline comments explaining key logic
-- No meaningless comments (e.g., `// get name` for `getName()`)
-- TODO format: `// TODO: [module] description`, clean up regularly
-- FIXME format: `// FIXME: description` for known issues
+- 类、类属性和类方法必须添加 Javadoc（`/** ... */`）
+- 使用 `//` 作为行内注释，解释关键逻辑
+- 禁止无意义的注释（例如 `// get name` 对应 `getName()`）
+- TODO 格式：`// TODO: [模块] 描述`，定期清理
+- FIXME 格式：`// FIXME: 描述`，用于已知问题
 
-## Security & Permission
+## 安全与权限
 
 ### 功能权限（API 鉴权）
 
@@ -467,11 +478,132 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 - **WebFlux 服务**（如 Gateway）：只能依赖 `omni-common-redis-reactive`，阻塞式 Redis 调用会导致 Netty 事件循环线程饥饿
 - **Servlet 服务**：使用 `omni-common-redis`（阻塞式），`RedisUtils` 提供同步 API
 
-## Testing (Future Scaffold)
+## 配置参考表
 
-No tests exist yet. When added:
+### application.yml 关键配置项
 
-- **Unit tests**: JUnit 5 + Mockito, placed in `src/test/java/`
-- **Integration tests**: `@SpringBootTest` with embedded or test containers
-- Test class naming: `XxxTest` (unit) or `XxxIntegrationTest` (integration)
-- Test method naming: `should_<expected>_when_<condition>`
+以下为后端微服务 `application.yml` 中的核心配置项：
+
+| 配置键 | 说明 | 默认值 | Docker 环境变量覆盖 |
+|--------|------|--------|-------------------|
+| `server.port` | 服务端口 | 8100/8101/8102/8103 | `SERVER_PORT=8080` |
+| `spring.application.name` | Nacos 服务名 | omni-auth/base/gateway/workflow | — |
+| `spring.datasource.url` | 数据库连接 | `jdbc:mysql://127.0.0.1:3306/omni_xxx` | `SPRING_DATASOURCE_URL` |
+| `spring.datasource.username` | 数据库用户 | `root` | `SPRING_DATASOURCE_USERNAME` |
+| `spring.datasource.password` | 数据库密码 | `root` | `SPRING_DATASOURCE_PASSWORD` |
+| `spring.data.redis.host` | Redis 地址 | `127.0.0.1` | `SPRING_DATA_REDIS_HOST` |
+| `spring.data.redis.port` | Redis 端口 | `6379` | `SPRING_DATA_REDIS_PORT` |
+| `spring.data.redis.database` | Redis DB 索引 | 0 | `SPRING_DATA_REDIS_DATABASE` |
+| `spring.cloud.nacos.discovery.server-addr` | Nacos 地址 | `127.0.0.1:8848` | `SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR` |
+| `spring.cloud.nacos.discovery.ip` | 注册 IP | `127.0.0.1` | `SPRING_CLOUD_NACOS_DISCOVERY_IP` |
+| `auth.jwks.uri` | JWKS 端点 | `http://localhost:8100/oauth2/jwks` | `AUTH_JWKS_URI` |
+| `auth.jwks.cache-ttl` | 公钥缓存时间 | `5m` | — |
+| `spring.profiles.active` | 激活 Profile | `default` | `SPRING_PROFILES_ACTIVE` |
+
+### MyBatis-Plus 配置
+
+| 配置键 | 说明 | 默认值 |
+|--------|------|--------|
+| `mybatis-plus.configuration.map-underscore-to-camel-case` | 下划线转驼峰 | `true` |
+| `mybatis-plus.global-config.db-config.logic-delete-field` | 逻辑删除字段 | `deleted` |
+| `mybatis-plus.global-config.db-config.logic-delete-value` | 逻辑删除值 | `1` |
+| `mybatis-plus.global-config.db-config.logic-not-delete-value` | 逻辑未删除值 | `0` |
+| `mybatis-plus.global-config.db-config.id-type` | ID 策略 | `AUTO`（数据库自增） |
+
+### XXL-JOB 配置（omni-base）
+
+| 配置键 | 说明 | 默认值 |
+|--------|------|--------|
+| `xxl.job.admin.addresses` | Admin 地址 | `http://127.0.0.1:18080/xxl-job-admin` |
+| `xxl.job.executor.appname` | 执行器名称 | `omni-base` |
+| `xxl.job.executor.port` | 执行器端口 | `9999` |
+| `xxl.job.accessToken` | 通信令牌 | `default_token` |
+
+## Service 层设计模式
+
+### 接口 + 实现分离
+
+```
+UserService (interface)     — 定义业务方法签名
+    ↑ implements
+UserServiceImpl (@Service)  — 实现业务逻辑 + @Transactional
+```
+
+**设计理由**：
+- 接口层可被 OpenFeign 客户端复用
+- 单元测试可直接 Mock 接口，不依赖实现类
+- 实现类可替换而不影响调用方
+
+### 事务管理策略
+
+| 场景 | 注解 | 说明 |
+|------|------|------|
+| 只读查询 | `@Transactional(readOnly = true)` | 优化数据库查询性能，禁止写操作 |
+| 写操作 | `@Transactional` | 默认 REQUIRED 传播级别 |
+| 跨服务调用 | `@Transactional` + Outbox 模式 | 本地事务写 Outbox 表，不直接参与远程事务 |
+| 独立事务 | `@Transactional(propagation = REQUIRES_NEW)` | 如日志记录，确保主事务回滚时日志仍被记录 |
+
+### 异常处理链路
+
+```
+Controller 方法
+    │ 调用 Service 方法
+    ▼
+Service 层
+    │ 业务校验失败 → throw new BusinessException(400, "用户名已存在")
+    │ 资源不存在   → throw new BusinessException(404, "用户不存在")
+    ▼
+GlobalExceptionHandler (@RestControllerAdvice)
+    │ @ExceptionHandler(BusinessException.class)
+    │   → log.warn + R.fail(code, message)
+    │ @ExceptionHandler(MethodArgumentNotValidException.class)
+    │   → HTTP 400 + 聚合字段错误 + R.fail(400, "field: message")
+    │ @ExceptionHandler(AccessDeniedException.class)
+    │   → HTTP 403 + R.fail(403, "权限不足")
+    │ @ExceptionHandler(Exception.class)
+    │   → log.error（完整堆栈）+ R.fail("服务器内部错误")
+    ▼
+统一 R<Void> 响应
+```
+
+**omni-auth 的特殊处理**：Auth 模块依赖 `omni-common-core`（非 `omni-common`），因此 `GlobalExceptionHandler` 不在组件扫描范围。Auth 模块通过 `AuthExceptionHandler`（局部 `@RestControllerAdvice`）提供等价的异常处理。
+
+## 故障排查指南
+
+### 常见问题
+
+| 问题 | 可能原因 | 解决方案 |
+|------|---------|----------|
+| `@PreAuthorize` 不生效 | `GatewayPreAuthFilter` 未注册 | 检查 SecurityConfig 中是否 `addFilterBefore(new GatewayPreAuthFilter(), AuthorizationFilter.class)` |
+| 分页查询返回空 | `PaginationInnerInterceptor` 未注册 | 检查 `MybatisPlusConfig` 中的拦截器注册顺序 |
+| `@Transactional` 无效 | 方法不是 public / 自调用 | `@Transactional` 仅对 public 方法生效；同类内部方法调用不触发代理 |
+| Redis 连接超时 | 容器网络不通 | `docker compose exec omni-auth ping redis` 检查网络连通性 |
+| Nacos 注册失败 | 地址配置错误 | 确认 `server-addr` 使用容器名 `nacos:8848` 而非 `localhost` |
+| JWT 验证失败 | 公钥缓存过期 | 检查 `auth.jwks.cache-ttl` 配置，或重启 Gateway 清除缓存 |
+| XXL-JOB 注册失败 | Admin 未启动 | 确认 `xxl-job-admin` 容器健康运行 |
+| MQ 消息不投递 | Relay Job 未触发 | 在 XXL-JOB Admin 控制台检查 `mqRelayHandler` 是否正常调度 |
+
+### 调试技巧
+
+```bash
+# 查看后端服务日志
+docker compose logs -f omni-auth
+
+# 检查环境变量
+docker compose exec omni-auth env | grep SPRING
+
+# 测试数据库连接
+docker compose exec omni-auth sh -c 'nc -zv mysql 3306'
+
+# 检查 Nacos 注册的实例
+curl -s http://localhost:8848/nacos/v1/ns/instance/list?serviceName=omni-auth
+```
+
+## 测试（未来脚手架）
+
+尚无测试。添加时：
+
+- **单元测试**：JUnit 5 + Mockito，放在 `src/test/java/`
+- **集成测试**：`@SpringBootTest` + 嵌入式数据库或 Test Containers
+- 测试类命名：`XxxTest`（单元）或 `XxxIntegrationTest`（集成）
+- 测试方法命名：`should_<expected>_when_<condition>`

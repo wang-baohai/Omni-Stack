@@ -1,6 +1,8 @@
 # Omni-Stack
 
-> A microservices scaffolding platform built with Spring Boot 4 + Vue 3, structured with the Harness Industrial Design Pattern to provide an industry best-practice foundation for AI-assisted development.
+> A microservice scaffold platform built on Spring Boot 4 + Vue 3, designed with the Harness industrial design pattern to provide an industry best-practice foundation for AI-assisted development.
+>
+> **One command to launch the full stack: middleware + 4 microservices + frontend — 12 Docker containers in total.**
 
 **[中文](README.md)** | **[日本語](README.jp.md)** | **[한국어](README.kr.md)**
 
@@ -10,691 +12,322 @@
 
 ---
 
-## Features
+## Highlights
 
-- **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 — full latest-gen stack
-- **Spring Cloud Gateway 5.x** (WebFlux) reactive gateway with Nacos service discovery and configuration
-- **Sentinel** flow control and circuit breaking, **OpenFeign** declarative service calls
-- **Multi-provider Social Login**: GitHub + Google + Gitee OAuth2 one-click login (Strategy Pattern `OAuth2ProviderHandler`, extensible), WeChat login entry reserved on frontend, HMAC-SHA256 state signing against tampering, auto-registration on first login
-- **Vue 3.5** + TypeScript 5.9 + Vite 8 + Element Plus 2.14 modern frontend
-- **Pinia 3** state management + **Vue Router 5** navigation guards
-- **Harness Industrial Design Pattern**: Three-Layer Height Model (Architecture → Patterns → Code), with `docs/` holding system truth
-- **AI-Native Engineering**: AGENTS.md execution manual + Skills behavioral extensions for AI-assisted workflows
-- **Three User Creation Paths**: Self-registration (captcha + default role), admin backend creation, social login auto-registration on first login
-- **Three-Layer XSS Defense**: Jackson deserializer auto-sanitizes `@RequestBody` + Servlet Filter sanitizes query parameters + Gateway security response headers, with per-tenant configurable global toggle and custom blacklist rules (HTML tags, event handlers, dangerous protocols, regex patterns), Redis-cached configuration, and a full frontend management UI
-- **Common Starter Ecosystem**: `omni-common` split into 8 modules (core / common / mybatis / redis / redis-reactive / operlog / job / mqlog) — new services gain MyBatis-Plus pagination, Redis caching, XSS protection, operation log collection, scheduled task management, reliable message sending via Maven dependency alone, `AutoConfiguration.imports` zero-config auto-assembly
-- **Base Data & Task Management**: `omni-base` service (port 8101) provides data dictionary management, system task management, user task management, and operation log viewing, with Redis cache-aside caching and complete frontend management pages
-- **Operation Log Audit Trail**: `@OperLog` annotation + AOP aspect for non-intrusive collection, automatically records who/when/what/changed with full audit information, entity change snapshot auto-diff (oldValue vs newValue) for data traceability, RocketMQ async delivery without blocking business requests, hot/cold table separation archival strategy (180-day retention + cold table long-term preservation) balancing query performance and compliance requirements, complementing audit logs (`sys_audit_log`) and login logs (`sys_login_log`) to form a complete audit trail system
-- **Dual-Track Scheduled Task Scheduling**: system tasks (`@XxlJob` + `@SystemJobMeta` dual annotations, auto-registered to scheduling center) and user tasks (SPI pattern, `UserJobHandler` interface + JSON parameter routing) based on XXL-JOB 3.3.1, with frontend Cron editor, dynamic parameter forms, and real-time execution log push
-- **Transactional Outbox Reliable Messaging**: local outbox pattern ensuring business operations and message records are written atomically within the same transaction, XXL-JOB relay for async delivery, exponential backoff retry + dead letter management, frontend ops monitoring page with message viewing, resend, and skip operations
-- **Visual BPMN Workflow Engine**: built on Flowable 7.x, `omni-workflow` standalone microervice (port 8103), frontend BPMN visual designer with drag-and-drop modeling, dual-version management (business version DRAFT → PUBLISHED → ARCHIVED + Flowable engine version), multi-instance countersign with ALL/ANY approval modes, dynamic candidate resolution (`omni:assignment` JSON extension + `ScopedRoleAssignmentListener` runtime parsing), approval records + process progress diagram + CC notifications
-- **Maven Wrapper** bundled — clone and build, no system Maven installation needed
+- **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 — cutting-edge stack across the board
+- **One-click Docker deployment**: `start.bat` / `./start.sh` launches 12 containers (MySQL, Redis, Nacos, RocketMQ, XXL-JOB, 4 backend microservices, frontend) — see [Docker Deployment Guide](docs/docker-deployment.en.md)
+- **Multi-provider social login**: GitHub + Google + Gitee OAuth2 one-click login (strategy pattern for extensibility), auto-registration on first login
+- **Three-layer XSS defense in depth**: Jackson deserializer + Servlet Filter + Gateway security headers, per-tenant configuration, fully functional admin UI
+- **Common Starter ecosystem**: 8 auto-configuration modules (mybatis / redis / operlog / job / mqlog / workflow) — add a dependency and gain capabilities instantly, zero config
+- **Dual-track scheduling**: XXL-JOB 3.3.1 with system-task + user-task modes, frontend Cron editor + live execution log streaming — see [docs/scheduling.en.md](docs/scheduling.en.md)
+- **Transactional Outbox reliable messaging**: local outbox + XXL-JOB relay + exponential backoff retry + dead-letter management — see [docs/mq-reliability.en.md](docs/mq-reliability.en.md)
+- **Visual BPMN workflow**: Flowable 7.x engine, drag-and-drop modeling + dual-version management + multi-instance countersign + dynamic candidate resolution — see [docs/workflow.en.md](docs/workflow.en.md)
+- **Full RBAC permission system**: functional permissions (dynamic menus + v-permission + @PreAuthorize) + data permissions (DataPermissionInterceptor six-level filter) — see [docs/architecture.en.md](docs/architecture.en.md)
+- **AI-native engineering**: AGENTS.md execution manual + docs/ system truth + Skills behavior extensions — lock down the first two layers, then let AI produce code at full speed
 
 ## Tech Stack
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
 | JDK | OpenJDK | 25 |
-| Backend | Spring Boot | 4.0.6 |
-| Cloud | Spring Cloud | 2025.1.1 |
-| Cloud Alibaba | Spring Cloud Alibaba | 2025.1.0.0 |
-| Gateway | Spring Cloud Gateway Server (WebFlux) | 5.0.1 |
-| Discovery / Config | Nacos Server | v3.1.1 |
-| Flow Control | Sentinel Dashboard | 1.8.8 |
+| Backend Framework | Spring Boot | 4.0.6 |
+| Microservice Framework | Spring Cloud + Spring Cloud Alibaba | 2025.1.1 / 2025.1.0.0 |
+| API Gateway | Spring Cloud Gateway Server (WebFlux) | 5.0.1 |
+| Registry / Config | Nacos Server | v3.1.1 |
+| Rate Limiting / Circuit Breaking | Sentinel Dashboard | 1.8.8 |
 | Message Queue | Apache RocketMQ | 5.3.2 |
-| Task Scheduling | XXL-JOB Admin | 3.3.1 |
+| Job Scheduling | XXL-JOB Admin | 3.3.1 |
 | Workflow Engine | Flowable BPMN | 7.x |
-| Frontend | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
-| Bundler | Vite 8 (Rolldown) | 8.0.14 |
+| Frontend Framework | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
+| Build Tool | Vite 8 (Rolldown) | 8.0.14 |
 | UI Framework | Element Plus | 2.14.0 |
-| State | Pinia | 3.0.4 |
-| Router | Vue Router | 5.0.7 |
+| State Management | Pinia | 3.0.4 |
 | Node.js | Node.js LTS | >= 22.12.0 |
-
-## Project Structure
-
-```
-Omni-Stack/
-├── AGENTS.md                        # AI execution manual (constraints + build commands + checklist)
-├── start.bat / start.sh              # One-click startup (auto-start Docker + port protection + containers)
-├── stop.bat / stop.sh                # One-click stop
-├── docker-compose.yml               # Middleware orchestration (MySQL, Redis, Nacos, RocketMQ, XXL-JOB)
-├── docker/
-│   └── rocketmq/broker.conf          # RocketMQ Broker configuration
-├── docs/                            # System truth documents (Architecture + Patterns + Contract)
-│   ├── architecture.md                # System boundaries, module map, data flow, RBAC permission system
-│   ├── api-contract.md                # Response format, error codes, pagination, naming
-│   ├── backend-patterns.md            # Backend layering, validation, exceptions, logging, security, OOP
-│   ├── frontend-patterns.md           # Frontend directory, API layer, state, permission control, components
-│   └── core-flows.md                  # Login / OAuth2 / RBAC permission end-to-end traces
-├── scripts/
-│   └── sql/
-│       ├── init-all.sql               # Authoritative database initialization script (DDL + seed data)
-│       ├── init-nacos.sql           # Nacos v3.1.1 MySQL persistence initialization script
-│       └── init-xxl-job.sql          # XXL-JOB v3.3.1 database initialization script
-├── omni-backend/                    # Maven multi-module backend
-│   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
-│   ├── pom.xml                        # Parent POM (dependency management)
-│   ├── omni-common-core/              # Pure POJO: R<T>, PageResult, BaseEntity, XSS SPI
-│   ├── omni-common/                   # Web auto-config: Jackson, CORS, global exception, XSS Filter
-│   ├── omni-common-mybatis/           # MyBatis-Plus Starter: pagination plugin, MySQL driver
-│   ├── omni-common-redis/             # Blocking Redis Starter: RedisTemplate, RedisUtils
-│   ├── omni-common-redis-reactive/    # Reactive Redis Starter: for WebFlux services
-│   ├── omni-common-operlog/             # Operation Log Starter: AOP aspect + MQ producer + entity diff
-│   ├── omni-common-job/                 # Scheduled Task Starter: XXL-JOB auto-config + Admin Client + system task registry
-│   ├── omni-common-workflow/            # Workflow Starter: Flowable auto-config + Approval SPI + Tenant filter
-│   ├── omni-auth/                     # Auth service: login, captcha, JWT, OAuth2 (port 8100)
-│   ├── omni-base/                     # Base data service: dictionary management (port 8101)
-│   ├── omni-workflow/                   # Workflow engine service: Flowable BPMN (port 8103)
-│   └── omni-gateway/                  # API Gateway (WebFlux, port 8102)
-├── omni-frontend/                   # Vue 3 SPA (dev server port 3000)
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── eslint.config.mjs
-│   └── src/
-│       ├── api/                       # API layer (one file per domain)
-│       ├── stores/                    # Pinia stores (Composition API style)
-│       ├── router/                    # Route definitions + navigation guard
-│       ├── views/                     # Page components
-│       ├── layout/                    # App shell (sidebar + header + content)
-│       ├── types/                     # Shared type definitions (ApiResponse, PageResult)
-│       └── styles/                    # Global styles
-└── .qoder/
-    └── skills/
-        └── grill-me/SKILL.md          # AI Skill: design stress-testing
-```
 
 ## Architecture Overview
 
 ```
                                  ┌─────────────────┐
                                  │    omni-auth     │
-                                 │   Spring :8100  │
-                                 │  Security+OAuth2│
+                                 │   Spring :8100   │
+                                 │  Security+OAuth2 │
                                  └─────────────────┘
                                         ▲
 ┌─────────────────┐     ┌──────────────────┐
 │   omni-frontend  │────>│   omni-gateway    │lb://
 │   Vue 3 SPA     │/api │  WebFlux :8102    │────>┌─────────────────┐
-│   :3000         │────>│  StripPrefix=2    │     │    omni-base     │
-└─────────────────┘     └──────────────────┘     │   Spring :8101  │
-                            │                    │  Dictionary Mgmt│
+│   Nginx :3000   │────>│  StripPrefix=2    │     │    omni-base     │
+└─────────────────┘     └──────────────────┘     │   Spring :8101   │
                             │                    └─────────────────┘
                             │                    ┌─────────────────┐
                             │                    │  omni-workflow   │
                             │                    │  Flowable :8103  │
                             │                    └─────────────────┘
                     ┌───────┴────────┐
-                    │  MySQL :3306   │  Persistence storage
-                    │  Redis :6379   │  Cache + captcha + dict cache
-                    │  Nacos :8848   │  Discovery + Config
-                    │  Sentinel :8858│  Flow Control
-                    │  RocketMQ :9876│  Message queue (async log delivery)
-                    │  XXL-JOB :18080│  Distributed task scheduling
+                    │  MySQL :3306   │  Persistent Storage
+                    │  Redis :6379   │  Cache + Captcha
+                    │  Nacos :8848   │  Service Discovery + Config Center
+                    │  RocketMQ      │  Message Queue (Async Delivery)
+                    │  XXL-JOB       │  Distributed Job Scheduling
                     └────────────────┘
 ```
 
-**Request Flow**:
+**Request flow**: Browser `:3000` → Nginx reverse proxy → Gateway `:8102` → `lb://` → Backend services
+
+## Project Structure
 
 ```
-Browser :3000  --/api/**-->  Vite Proxy  -->  Gateway :8102  --lb://-->  Backend Services
+Omni-Stack/
+├── AGENTS.md                           # AI execution manual (hard constraints + build commands + checklists)
+├── start.bat / start.sh                # One-click Docker full-stack startup script
+├── stop.bat / stop.sh                  # One-click stop script
+├── docker-compose.yml                  # 12-container full-stack orchestration
+├── docker/
+│   ├── backend/Dockerfile              # Backend multi-stage build (Maven compile + JRE runtime)
+│   ├── frontend/Dockerfile             # Frontend multi-stage build (npm compile + Nginx)
+│   ├── frontend/nginx.conf             # Nginx reverse proxy config
+│   └── rocketmq/broker-docker.conf     # RocketMQ Broker config
+├── docs/                               # System truth documentation (in-depth technical docs, multi-language)
+│   ├── architecture.md                 #   System boundaries, module map, data flow, RBAC permission system
+│   ├── api-contract.md                 #   Response format, error codes, pagination, naming conventions
+│   ├── backend-patterns.md             #   Backend layering, validation, exceptions, logging, security & permissions
+│   ├── frontend-patterns.md            #   Frontend directory structure, API layer, state management, access control
+│   ├── core-flows.md                   #   End-to-end trace of login / OAuth2 / RBAC permission flows
+│   ├── scheduling.md                   #   Scheduled task system in-depth technical documentation
+│   ├── workflow.md                     #   Workflow engine in-depth technical documentation
+│   ├── mq-reliability.md              #   Reliable message delivery in-depth technical documentation
+│   └── docker-deployment.md            #   Docker full-stack deployment in-depth guide
+├── scripts/sql/                        # Database initialization scripts
+│   ├── init-all.sql                    #   Authoritative DDL + seed data
+│   ├── init-nacos.sql                  #   Nacos MySQL persistence
+│   └── init-xxl-job.sql               #   XXL-JOB database
+├── omni-backend/                       # Maven multi-module backend
+│   ├── omni-common-core/               #   Pure POJOs: R<T>, PageResult, XSS SPI
+│   ├── omni-common/                    #   Web auto-config: Jackson, CORS, XSS Filter
+│   ├── omni-common-mybatis/            #   MyBatis-Plus Starter
+│   ├── omni-common-redis/              #   Blocking Redis Starter
+│   ├── omni-common-redis-reactive/     #   Reactive Redis Starter (Gateway only)
+│   ├── omni-common-operlog/            #   Operation log Starter
+│   ├── omni-common-job/                #   Scheduled task Starter
+│   ├── omni-common-mqlog/              #   MQ message reliability Starter
+│   ├── omni-common-workflow/           #   Workflow Starter
+│   ├── omni-auth/                      #   Auth service (8100)
+│   ├── omni-base/                      #   Base data service (8101)
+│   ├── omni-workflow/                  #   Workflow engine service (8103)
+│   └── omni-gateway/                   #   API Gateway (8102)
+└── omni-frontend/                      # Vue 3 SPA (3000)
 ```
 
-- Frontend proxies `/api/**` to Gateway via Vite dev server
-- Gateway discovery locator auto-creates routes for all Nacos-registered services
+## Docker One-Click Deployment (Recommended)
 
-## Prerequisites
+One command launches all 12 containers: middleware (MySQL, Redis, Nacos, RocketMQ, XXL-JOB) + 4 backend microservices + frontend.
 
-### Required Software
+### Prerequisites
 
 | Software | Version | Notes |
 |----------|---------|-------|
-| JDK | 25 | Must set `JAVA_HOME` environment variable |
-| Node.js | >= 22.12.0 | Includes npm |
-| Docker Desktop | Any stable | For running middleware (MySQL, Redis, Nacos, Sentinel, RocketMQ, XXL-JOB) |
+| Docker Desktop | Any stable release | Windows requires WSL2 backend |
+| Git | Any | To clone the project |
 
-> **Note**: Maven Wrapper (3.9.16) is bundled. Use `./mvnw` instead of `mvn` for all Maven commands.
+> No need to install JDK, Node.js, or Maven — everything is built and runs inside Docker containers.
 
-### Environment Variables
+### Startup
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `JAVA_HOME` | - | **Required** — path to JDK 25 installation |
-| `NACOS_SERVER_ADDR` | `127.0.0.1:8848` | Nacos server address |
-| `NACOS_NAMESPACE` | (empty) | Nacos namespace |
-| `SENTINEL_DASHBOARD` | `127.0.0.1:8858` | Sentinel dashboard address |
-| `ROCKETMQ_NAME_SERVER` | `127.0.0.1:9876` | RocketMQ NameServer address |
-| `XXL_JOB_ADMIN_ADDRESSES` | `http://127.0.0.1:18080/xxl-job-admin` | XXL-JOB Admin address |
-| `VITE_API_BASE_URL` | `/api` | Frontend API base URL |
-| `GITHUB_CLIENT_ID` | (built-in) | GitHub OAuth App Client ID |
-| `GITHUB_CLIENT_SECRET` | (built-in) | GitHub OAuth App Client Secret |
-| `GITHUB_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/github/callback` | GitHub authorization callback URL |
-| `GITEE_CLIENT_ID` | (built-in) | Gitee OAuth App Client ID |
-| `GITEE_CLIENT_SECRET` | (built-in) | Gitee OAuth App Client Secret |
-| `GITEE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/gitee/callback` | Gitee authorization callback URL |
-| `GOOGLE_CLIENT_ID` | (built-in) | Google Cloud Console OAuth 2.0 Client ID |
-| `GOOGLE_CLIENT_SECRET` | (built-in) | Google Cloud Console OAuth 2.0 Client Secret |
-| `GOOGLE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/google/callback` | Google authorization callback URL |
-| `OAUTH2_STATE_SECRET` | (built-in) | HMAC-SHA256 signing key for OAuth2 state parameter, shared across all social login providers |
+| Platform | Command |
+|----------|---------|
+| Windows | Right-click `start.bat` → **Run as Administrator** |
+| Linux / macOS | `./start.sh` |
 
-### Social Login Configuration (GitHub / Google / Gitee)
-
-The system uses the `OAuth2ProviderHandler` Strategy Pattern — each provider implements the interface to plug in, and adding a new provider requires no changes to core logic.
-
-#### 1. Create OAuth Apps
-
-**GitHub**:
-
-1. Log in to GitHub → Settings → Developer settings → [OAuth Apps](https://github.com/settings/developers) → New OAuth App
-2. Fill in the following:
-   - **Application name**: Omni-Stack (any name)
-   - **Homepage URL**: `http://localhost:3000`
-   - **Authorization callback URL**: `http://localhost:8100/api/auth/oauth2/github/callback`
-3. Copy the **Client ID** and **Client Secret** after creation
-
-**Google**:
-
-1. Log in to [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials
-2. Create an OAuth 2.0 Client ID (select Web application as the application type)
-3. Add the following to Authorized redirect URIs: `http://localhost:8100/api/auth/oauth2/google/callback`
-4. Copy the **Client ID** and **Client Secret** after creation
-
-**Gitee**:
-
-1. Log in to Gitee → Settings → [Third-party Applications](https://gitee.com/oauth/applications) → Create Application
-2. Fill in the following:
-   - **Application name**: Omni-Stack (any name)
-   - **Application homepage**: `http://localhost:3000`
-   - **Application callback URL**: `http://localhost:8100/api/auth/oauth2/gitee/callback`
-3. Copy the **Client ID** and **Client Secret** after creation
-
-#### 2. Configure Credentials
-
-Set environment variables or edit `omni-auth/src/main/resources/application.yml`:
-
-```yaml
-auth:
-  oauth2:
-    github:
-      client-id: ${GITHUB_CLIENT_ID:your-client-id}
-      client-secret: ${GITHUB_CLIENT_SECRET:your-client-secret}
-      redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/github/callback}
-    google:
-      client-id: ${GOOGLE_CLIENT_ID:your-client-id}
-      client-secret: ${GOOGLE_CLIENT_SECRET:your-client-secret}
-      redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/google/callback}
-    gitee:
-      client-id: ${GITEE_CLIENT_ID:your-client-id}
-      client-secret: ${GITEE_CLIENT_SECRET:your-client-secret}
-      redirect-uri: ${GITEE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/gitee/callback}
-    state-secret: ${OAUTH2_STATE_SECRET:your-state-secret}
-```
-
-> **Note**: `redirect_uri` must exactly match the callback URL configured in the corresponding OAuth App. `state-secret` is used for HMAC-SHA256 signing of the state parameter — use a random string.
-
-#### 3. Usage
-
-Click the "GitHub", "Google", or "Gitee" button on the frontend login page to initiate social login. On first login, a local user is automatically created (username format: `gh_{login}` for GitHub, `go_{email_prefix}` for Google, `ge_{login}` for Gitee).
-
-## Quick Start
-
-### Step 1: Start Middleware
-
-The project provides one-click startup scripts that automatically handle Docker Desktop, port protection, and container deployment:
-
-| Platform | Start | Stop |
-|----------|-------|------|
-| Windows | Right-click `start.bat` → Run as Administrator | Right-click `stop.bat` → Run as Administrator |
-| Linux / macOS | `./start.sh` | `./stop.sh` |
-
-**Startup script automatically**:
-
-1. **Detects Docker Desktop** — prompts download and opens the download page if not installed
-2. **Starts Docker engine** — auto-launches if not running, waits until ready
-3. **Port protection** (Windows) — prevents Hyper-V/WSL2 from dynamically occupying project ports (3306, 6379, 8080, 8848, 9848, 9876, 10909, 10911, 10912, 18080)
-4. **Starts containers** — runs `docker compose up -d`
+The script handles everything automatically: detect Docker → start Docker engine (if not running) → port protection (Windows Hyper-V/WSL2) → pull middleware images → build application images → launch all containers.
 
 ```bash
-# Start all middleware
-./start.sh                          # Linux / macOS
-# or Windows: right-click start.bat → Run as Administrator
+# Start all services
+./start.sh
 
-# Start specific services only
+# Start specific services only (e.g., middleware only)
 ./start.sh mysql redis
 
 # Check service status
 docker compose ps
+
+# Stop all services
+./stop.sh
 ```
 
-> Wait ~30 seconds for Nacos to fully start before launching backend services. Visit `http://127.0.0.1:8080/` to confirm (default credentials: nacos/nacos).
-> MySQL container automatically runs `scripts/sql/init-all.sql` on first start to initialize the database.
-
-### Step 2: Build and Start Backend
-
-```bash
-# Set JAVA_HOME (Spring Boot 4 plugin requires JDK 17+)
-export JAVA_HOME="/path/to/jdk-25"
-export PATH="$JAVA_HOME/bin:$PATH"
-
-# Build all modules
-cd omni-backend
-./mvnw clean install
-
-# Start Auth service (port 8100)
-cd omni-auth
-./mvnw spring-boot:run
-
-# Start Base service (port 8101, in a new terminal)
-cd omni-base
-./mvnw spring-boot:run
-
-# Start Gateway (port 8102, in a new terminal)
-cd omni-gateway
-./mvnw spring-boot:run
-```
-
-**Build order**: `omni-common-core` must be installed first, then `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-redis-reactive` before `omni-auth`, `omni-base`, or `omni-gateway` can compile. Maven reactor resolves this automatically from `<modules>` declaration order.
-
-### Step 3: Start Frontend
-
-```bash
-cd omni-frontend
-
-# Install dependencies
-npm install
-
-# Start dev server (port 3000, auto-proxies /api to Gateway :8102)
-npm run dev
-```
-
-### Step 4: Verify Services
-
-| Check | Command / URL | Expected Result |
-|-------|--------------|-----------------|
-| Frontend | `http://localhost:3000` | Login page |
-| Gateway routes | `curl http://localhost:8102/actuator/gateway/routes` | JSON route list |
-| Nacos console | `http://127.0.0.1:8080/` | Nacos admin UI |
-| Sentinel console | `http://localhost:8858` | Sentinel Dashboard |
-| XXL-JOB Admin | `http://localhost:18080/xxl-job-admin` | XXL-JOB Admin Web UI (admin/123456) |
-| RocketMQ | `telnet localhost 9876` | NameServer connectivity check |
-
-**Start order**: MySQL → Redis → Nacos → Sentinel → RocketMQ → XXL-JOB → Backend (Auth, Base, Gateway) → Frontend
-
-## Service Ports
+### Service Ports
 
 | Service | Port | Description |
 |---------|------|-------------|
-| Frontend dev server | 3000 | Vite dev server, proxies /api requests |
-| Auth service | 8100 | Spring Security + OAuth2 Authorization Server |
-| Base data service | 8101 | Dictionary management, Redis cache-aside caching |
-| API Gateway | 8102 | Spring Cloud Gateway (WebFlux) |
-| Workflow engine | 8103 | Flowable BPMN process engine |
-| MySQL | 3306 | Primary database (omni_auth + omni_base + xxl_job) |
-| Redis | 6379 | Captcha cache + dict cache + XSS config cache |
-| Nacos | 8080, 8848 | Management UI (8080) + Discovery & Config (8848) |
-| Sentinel | 8858 | Flow control dashboard |
-| XXL-JOB Admin | 18080 | Distributed task scheduling center (Web UI), default credentials admin/123456 |
-| RocketMQ NameServer | 9876 | Message queue naming server |
-| RocketMQ Broker | 10909, 10911, 10912 | Message queue broker node |
+| **Frontend** | **http://localhost:3000** | **Entry point, Nginx reverse proxy to Gateway** |
+| Auth Service | http://localhost:8100 | Spring Security + OAuth2 |
+| Base Data Service | http://localhost:8101 | Dict / Org / User / Log / Job |
+| API Gateway | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
+| Workflow Engine | http://localhost:8103 | Flowable BPMN |
+| MySQL | localhost:3306 | root/root |
+| Redis | localhost:6379 | No password |
+| Nacos Console | http://localhost:8080 | nacos/nacos |
+| XXL-JOB Admin | http://localhost:18080 | admin/123456 |
+| RocketMQ NameServer | localhost:19876 | Host-mapped port (container internal: 9876) |
 
-## Module Details
+### Verification
+
+```bash
+# 1. Open the frontend
+open http://localhost:3000
+
+# 2. Verify the captcha endpoint
+curl http://localhost:3000/api/auth/captcha
+
+# 3. Check all container status
+docker compose ps
+```
+
+**Default login credentials**: `admin` / `admin123`
+
+### Troubleshooting
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Image pull failure | Network issues | Configure Docker mirror: `"registry-mirrors": ["https://docker.1ms.run"]` |
+| Port binding failure (Windows) | Hyper-V/WSL2 port reservation conflict | `start.bat` handles port protection automatically — run as Administrator |
+| RocketMQ port 9876 conflict | Windows Hyper-V reserved port range | Host-mapped to 19876, container internal remains 9876 |
+| 502 Bad Gateway | Nginx reverse proxy port misconfiguration | Ensure nginx.conf proxy_pass uses the container-internal port `8080` (not host port `8102`) |
+| Nacos startup failure | Health check endpoint changed | Nacos v3.1.1 uses `GET /nacos/` (not `/nacos/actuator/health`) |
+| Build timeout | Slow Maven dependency downloads | Backend Dockerfile includes Alibaba Cloud Maven mirror |
+
+> For in-depth troubleshooting, see [docs/docker-deployment.en.md](docs/docker-deployment.en.md)
+
+## Local Development
+
+Ideal for debugging and modifying code — middleware runs in Docker, backend and frontend run locally.
+
+### Prerequisites
+
+| Software | Version | Notes |
+|----------|---------|-------|
+| JDK | 25 | `JAVA_HOME` must be set |
+| Node.js | >= 22.12.0 | Includes npm |
+| Docker Desktop | Any | Middleware only |
+
+### Steps
+
+```bash
+# 1. Start middleware only (no application containers)
+./start.sh mysql redis nacos rocketmq-namesrv rocketmq-broker xxl-job-admin
+
+# Wait for Nacos to be ready (~30s), verify at http://localhost:8080
+
+# 2. Build and start the backend
+export JAVA_HOME="/path/to/jdk-25"
+cd omni-backend && ./mvnw clean install
+cd omni-auth && ./mvnw spring-boot:run       # Port 8100 (continue in new terminal windows)
+cd omni-base && ./mvnw spring-boot:run        # Port 8101
+cd omni-gateway && ./mvnw spring-boot:run     # Port 8102
+cd omni-workflow && ./mvnw spring-boot:run    # Port 8103
+
+# 3. Start the frontend
+cd omni-frontend && npm install && npm run dev  # Port 3000
+```
+
+> Maven Wrapper (3.9.16) is included — no global Maven installation required. Build order is automatically resolved by the Maven reactor.
+
+### Social Login Configuration
+
+Supports three OAuth2 providers: GitHub, Google, and Gitee. Credentials are configured in `application-local.yml` (excluded via `.gitignore`) — see [docs/core-flows.en.md](docs/core-flows.en.md) for details.
+
+## Feature Overview
+
+| Login Page | Dashboard |
+|------------|-----------|
+| ![Login Page](docs/images/login.png) | ![Dashboard](docs/images/dashboard.png) |
+
+| User Management | Dictionary Management |
+|-----------------|----------------------|
+| ![User Management](docs/images/system-user.png) | ![Dictionary Management](docs/images/system-dict.png) |
+
+## Module Overview
+
+### Backend Microservices
+
+| Module | Port | Responsibility | In-depth Docs |
+|--------|------|---------------|--------------|
+| omni-auth | 8100 | Authentication & authorization: login, JWT, OAuth2, RBAC, XSS config management | [core-flows.en.md](docs/core-flows.en.md) |
+| omni-base | 8101 | Base data: dictionaries, organizations, users, logs, scheduled tasks, MQ message management | [scheduling.en.md](docs/scheduling.en.md) |
+| omni-workflow | 8103 | Workflow engine: BPMN model management, approvals, process instances | [workflow.en.md](docs/workflow.en.md) |
+| omni-gateway | 8102 | API Gateway: route forwarding, JWT validation, CORS, security headers | [architecture.en.md](docs/architecture.en.md) |
 
 ### Common Starter Ecosystem (8 Modules)
 
-`omni-common` has been split into 8 single-responsibility modules forming the Common Starter ecosystem. New services gain capabilities by adding Maven dependencies alone — **none can run independently**:
+New microservices gain capabilities simply by adding a dependency — `AutoConfiguration.imports` provides zero-config auto-configuration:
 
-| Module | Responsibility | Target Service Type |
-|--------|---------------|-------------------|
-| `omni-common-core` | Pure POJO: `R<T>`, `PageResult<T>`, `BaseEntity`, `BusinessException`, `XssConfigProvider` SPI, `UserJobHandler` SPI | All services |
-| `omni-common` | Web auto-config: Jackson time serialization, CORS, global exception handler, XSS Filter + Jackson Module auto-registration | Servlet services |
-| `omni-common-mybatis` | MyBatis-Plus + MySQL driver + pagination plugin + YAML defaults, `@ConditionalOnMissingBean` override support | Servlet services |
+| Module | Capability | Target Services |
+|--------|-----------|----------------|
+| `omni-common-core` | Pure POJOs: `R<T>`, `PageResult`, `BaseEntity`, XSS SPI, UserJobHandler SPI | All services |
+| `omni-common` | Web auto-config: Jackson, CORS, global exception handling, XSS Filter | Servlet services |
+| `omni-common-mybatis` | MyBatis-Plus + MySQL driver + pagination plugin | Servlet services |
 | `omni-common-redis` | Blocking Redis + RedisTemplate serialization + RedisUtils | Servlet services |
-| `omni-common-redis-reactive` | Reactive Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux services (Gateway) |
-| `omni-common-operlog` | Operation Log Starter: `@OperLog` AOP aspect + RocketMQ producer + entity change diff | Business services |
-| `omni-common-job` | Scheduled Task Starter: XXL-JOB auto-config + Admin Client + system task registry + `@SystemJobMeta` dual annotation | Business services |
-| `omni-common-mqlog` | MQ Reliability Starter: Transactional Outbox + relay delivery + dead letter management + tenant isolation | Servlet services |
-| `omni-common-workflow` | Workflow Starter: Flowable auto-configuration, `ApprovalService` SPI, `UserGroupLookup`, `TenantInfoFilter` | Workflow service |
+| `omni-common-redis-reactive` | Reactive Redis (WebFlux services only, **do not mix with blocking variant**) | Gateway |
+| `omni-common-operlog` | Operation log: @OperLog AOP + RocketMQ async + entity diff + hot/cold table archiving | Business services |
+| `omni-common-job` | Scheduled tasks: XXL-JOB auto-config + @SystemJobMeta dual-annotation driven | Business services |
+| `omni-common-mqlog` | Reliable messaging: Transactional Outbox + relay delivery + dead-letter management | Servlet services |
+| `omni-common-workflow` | Workflow: Flowable auto-config + ApprovalService SPI | Workflow services |
 
-> All starters use Spring Boot auto-configuration (`AutoConfiguration.imports`) to register beans. Downstream modules don't need manual `@ComponentScan`.
-> `omni-common-redis` and `omni-common-redis-reactive` must not be mixed — WebFlux services can only depend on the reactive version.
+> See [docs/backend-patterns.en.md](docs/backend-patterns.en.md) and [docs/architecture.en.md](docs/architecture.en.md) for detailed design.
 
-### omni-auth (Auth Service)
+### Frontend
 
-Authentication microservice built on Spring Security 7 + OAuth2 Authorization Server:
-
-- **User login**: username + password + captcha + multi-tenant, issues RS256 JWT
-- **Multi-provider Social Login**: extensible social login architecture based on `OAuth2ProviderHandler` Strategy Pattern, with GitHub, Google, and Gitee providers integrated; WeChat login entry reserved on frontend. HMAC-SHA256 state signing against tampering, auto-creates local user and links third-party identity on first login (`sys_user_oauth_provider` table)
-- **OAuth2 authorization**: Authorization Code + PKCE flow for third-party integration
-- **Device Authorization Grant** (RFC 8628): provides authorization for IoT devices, CLI tools, and other browserless scenarios via the `omni-device` client; frontend `/device` page simulates device-initiated authorization with token polling, and `/device/verify` page allows users to complete authorization by scanning or entering a code on another device
-- **Client management**: CRUD on `oauth2_registered_client`, supports dynamic registration
-- **Multi-tenant RBAC**: `tenantId:username` user resolution + role-permission tree
-- **RBAC Permission System**: Functional permissions (dynamic menu filtering + `v-permission` button-level control + `@PreAuthorize` API authorization) + Data permissions (MyBatis-Plus `DataPermissionInterceptor` SQL auto-interception, six-level dataScope zero-intrusion filtering)
-- **JWT signing**: RSA key pair, JWK endpoint for Gateway public key verification
-- **XSS Protection Config Management**: Frontend `System Management → XSS Protection Config` page with global toggle and blacklist rule CRUD (HTML tags, event handlers, dangerous protocols, custom regex), per-tenant isolation, Redis cache 30-min TTL with active invalidation on writes
-
-### omni-common-operlog (Operation Log Starter)
-
-AOP + RocketMQ based operation log collection framework providing non-intrusive audit trail for business services:
-
-- **Non-intrusive collection**: `@OperLog` annotation + `OperLogAspect` AOP aspect automatically captures request context (username, tenantId, IP, request parameters) and entity change snapshots
-- **Entity change diff**: `EntityDiffer` field-level diff comparison — UPDATE operations record only changed fields, enabling data traceability
-- **RocketMQ async**: `OperLogProducer` asynchronously delivers log messages without blocking business request responses
-- **Hot/cold table separation**: Hot table `sys_oper_log` retains recent 180-day data for fast queries; cold table `sys_oper_log_archive` preserves long-term records for compliance. `OperLogArchiver` runs daily at 02:00 for automated archival
-- **Complementary to audit logs**: Operation logs record business data changes (who/when/what/changed), audit logs (`sys_audit_log`) record security events, and login logs (`sys_login_log`) record login behavior — together forming a complete audit trail system
-- **Disabled in omni-auth**: Auth module does not depend on this module; authentication behavior is covered by `sys_login_log` + `sys_audit_log`
-
-### omni-common-mqlog (Reliable Message Starter)
-
-Transactional Outbox-based reliable message sending framework ensuring atomicity between business operations and message records:
-
-- **Local Outbox**: `ReliableMessageTemplate` writes to `sys_mq_message` table (PENDING status) within the business transaction, maintaining transactional consistency
-- **Scheduled Relay**: `MqMessageRelayJob` (XXL-JOB) polls pending messages every 10 seconds, delivers to MQ via `MessageSender` strategy pattern
-- **Exponential Backoff Retry**: failed messages back off by `2^retryCount × 10s`, exceeding max retries transitions to dead letter status
-- **Tenant Isolation**: explicit tenantId parameter passing, query controllers filter by tenant, relay job does not filter (background process)
-- **Multi-MQ Extension**: `MessageSender` strategy interface, currently implemented by `RocketMqMessageSender`; adding Kafka requires only implementing the interface
-- **Frontend Management**: ops monitoring menu page with paginated query, detail viewing, manual resend, and skip operations
-
-### omni-base (Base Data & Task Service)
-
-Base data and task management microservice covering data dictionary, scheduled tasks, and operation log capabilities:
-
-- **Dictionary Type Management**: `sys_dict_type` table — list, get, create, update, delete, status toggle; 11 API endpoints fully implemented
-- **Dictionary Data Management**: `sys_dict_data` table — linked by type code, supports list, create, update, delete, cache refresh
-- **Redis cache-aside caching**: 30-minute TTL, write-through invalidation, `dict:{typeCode}` key format
-- **System Task Management**: merges `SystemJobRegistry` metadata with XXL-JOB runtime status, providing register/start/stop/trigger/unregister lifecycle operations, `job:system-job:*` permission codes
-- **User Task Management**: SPI-based task types + task instances + execution logs, supporting user self-service creation, Cron scheduling, and ownership verification
-- **Operation Log Viewing**: hot table query + paginated filtering by module, operation type, operator, and time range
-- **Frontend management pages**: dictionary management (master-detail layout), system tasks, task types, workspace my-tasks, `base:dict` / `job:*` permission codes
-- **XSS protection inherited**: implements `XssConfigProvider` SPI to automatically gain three-layer XSS defense
-
-### omni-gateway (API Gateway)
-
-Reactive gateway based on Spring Cloud Gateway Server (WebFlux):
-
-- Route forwarding: auto-routes to Nacos-registered backend services (StripPrefix=2)
-- Service discovery: auto-routes Nacos-registered services
-- Auth filter: `AuthFilter` (JWT RS256 signature verification + claims extraction + identity header injection)
-- CORS handling: `CorsConfig` for cross-origin requests
-
-### omni-frontend (Vue 3 SPA)
+Vue 3 + TypeScript + Vite 8 + Element Plus + Pinia 3 — see [docs/frontend-patterns.en.md](docs/frontend-patterns.en.md) for development conventions.
 
 | Layer | Directory | Responsibility |
-|-------|-----------|----------------|
-| API | `src/api/` | One file per domain, shared Axios instance, type-safe |
-| Store | `src/stores/` | Pinia Composition API style, one store per domain |
-| Router | `src/router/` | Lazy-loaded routes + navigation guard (auth by default) |
-| Views | `src/views/` | Page components, SFC order: script → template → style; includes `device/` (device authorization), `job/` (task management), `system/` (system management) subdirectories |
-| Layout | `src/layout/` | App shell (sidebar + header + content area) |
-| Types | `src/types/` | Shared type definitions (single source for ApiResponse, PageResult) |
-| Styles | `src/styles/` | Global reset + layout styles |
-
-## Scheduled Task System
-
-The project implements a dual-track scheduled task architecture based on **XXL-JOB 3.3.1**, supporting both system tasks and user tasks. See [`docs/scheduling.md`](docs/scheduling.md) for in-depth technical details.
-
-### Architecture Overview
-
-- **omni-common-job**: Encapsulates `XxlJobAutoConfiguration`, `XxlJobAdminClient`, and `SystemJobRegistry` for unified task registration and management
-- **omni-common-core**: Defines the `UserJobHandler` SPI interface and `UserJobMessage` POJO
-- **omni-base**: Business layer implementing concrete system and user task handlers
-
-### System Tasks
-
-Driven by `@XxlJob` + `@SystemJobMeta` dual annotations. `SystemJobRegistry` auto-discovers and registers them with XXL-JOB Admin at startup. Example: `OperLogArchiver` (operation log archival) — Bean registration → auto-discovery → REST API management → XXL-JOB scheduling. Management endpoints require `job:system-job:*` permissions.
-
-### User Tasks
-
-SPI-based: implement the `UserJobHandler` interface and register as a Spring Bean; `UserJobHandlerRegistry` auto-discovers handlers. All user tasks share a single `@XxlJob("userJobExecuteHandler")` entry point, routing to specific handlers via JSON `executorParam`. `MyJobController` uses ownership verification (not `@PreAuthorize`) to ensure users can only manage their own tasks.
-
-### Dependencies
-
-| Component | Description |
-|-----------|-------------|
-| XXL-JOB Admin (`:18080`) | Distributed scheduling center, Docker-deployed |
-| `omni-common-job` module | Auto-configuration, Admin Client, system task registration |
-| `sys_user_job_type` / `sys_user_job` / `sys_user_job_log` | User task types, task instances, execution logs |
-
-### Adding a New Task Type
-
-Using `DrinkWaterRemindHandler` (water drinking reminder) as an example: ① Register type in `sys_user_job_type` table → ② Implement `UserJobHandler` interface with `@Component` → ③ Users create tasks via workspace → ④ Verify XXL-JOB scheduling. See [`docs/scheduling.md` Chapter 4](docs/scheduling.md) for detailed steps.
-
-### Frontend Integration
-
-Three entry points: System Job Management (`SystemJob`), Task Type Management (`UserJobType`), and My Jobs on the workspace (`MyJob`). Features include a Cron expression editor, `DynamicFormRenderer` for dynamic parameter forms, and 10-second polling of active task logs with `ElNotification` push for execution results.
-
-## Workflow Engine
-
-The project provides a visual BPMN workflow engine built on **Flowable 7.x**, supporting model design, version management, multi-instance countersign approval, and more. Technical details are documented in [`docs/workflow.md`](docs/workflow.md).
-
-### Architecture Overview
-
-- **omni-workflow**: standalone microservice (port 8103), integrating Flowable BPMN engine with 7 controllers covering model management, process definitions, instance monitoring, approval processing, and statistics dashboards
-- **omni-common-workflow**: shared starter providing `FlowableAutoConfiguration`, `ApprovalService` SPI, `UserGroupLookup`, `TenantInfoFilter`, and other infrastructure
-
-### Core Capabilities
-
-- **Visual Model Designer**: frontend BPMN designer with drag-and-drop modeling, XML editing, and validation preview. `BpmnXmlBuilder` converts designer JSON to BPMN 2.0 XML
-- **Dual-Version Management**: business versions (DRAFT → PUBLISHED → ARCHIVED) tracked in `wf_process_model_version`, engine versions managed by Flowable deployment
-- **Multi-Instance Countersign**: ALL (everyone approves) and ANY (any one approves) modes controlled via MI `completionCondition`, with instant rejection shortcut
-- **Dynamic Candidate Resolution**: `omni:assignment` JSON extension element + `ScopedRoleAssignmentListener` runtime parsing, supporting multiple anchor types (initiator's primary unit / parent org / absolute org, etc.)
-- **Approval Records + Process Progress + CC Notifications**: complete process tracing with `HistoricTaskInstance`-level precision
-
-### Database Tables (omni_workflow)
-
-| Table | Description |
-|-------|-------------|
-| `wf_process_model` | Process model registry, `model_key` unique per tenant |
-| `wf_process_model_version` | Version history: BPMN XML + deployment info |
-| `wf_process_instance_ext` | Instance extension: links model version to Flowable instance |
-| `wf_todo_task` | Pending task cache |
-| `wf_cc_record` | CC notification records |
-
-### Frontend Integration
-
-7 pages/components covering the full workflow experience: Model Management (`ModelDesigner`), Version History (`VersionHistoryDialog`), Validation Results (`ValidateResultDialog`), Process Definitions, Process Instances, Approval Records (`ApprovalRecordsDialog`), Process Progress (`ProcessProgressDialog`), and Statistics Dashboard.
-
-## Reliable Message Sending
-
-The project provides a reliable message sending system built on the **Transactional Outbox** pattern, ensuring atomicity between business operations and message records. Technical details are documented in [`docs/mq-reliability.md`](docs/mq-reliability.md).
-
-### Architecture Overview
-
-- **omni-common-core**: defines the `ReliableMessageRelay` interface (pure POJO, zero Spring dependencies)
-- **omni-common-mqlog**: implements the Transactional Outbox pattern, providing `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, `MessageSender` strategy, and auto-configuration
-- **omni-common-operlog**: optional caller — `OperLogProducer` automatically switches to Outbox mode when `ReliableMessageRelay` bean is available
-- **omni-base**: external management controller `MqMessageController`, providing frontend ops management API
-
-### Message Lifecycle
-
-`sys_mq_message` table status machine: PENDING(0) → SENT(1) (success) / FAILED(2) (failed, awaiting retry) → DEAD_LETTER(3) (exceeded max retries) / SKIPPED(4) (manually ignored). Failed messages back off exponentially by `2^retryCount × 10s`, with a default maximum of 3 retries.
-
-### Tenant Isolation
-
-Write path: `ReliableMessageRelay.send()` requires explicit `Long tenantId` — no ThreadLocal-based implicit resolution. Read path: all controller endpoints filter by tenantId (external uses `@RequestHeader`, internal uses `@RequestParam`). The relay job, as a background infrastructure process, scans all pending messages regardless of tenant.
-
-### Frontend Integration
-
-The ops monitoring message record page supports: paginated query (filter by status, topic, service name, time range), message detail viewing, dead letter manual resend, and dead letter skip. Permission codes: `base:mqmessage:list` / `base:mqmessage:resend` / `base:mqmessage:skip`.
-
-### New Service Onboarding
-
-Adding `omni-common-mqlog` dependency gives any new service reliable message sending capabilities: `sys_mq_message` table auto-created via `schema.sql`, `ReliableMessageTemplate`, relay job, and internal query API all auto-registered via `AutoConfiguration.imports`. Business code simply injects `ReliableMessageRelay` and calls `send(bindingName, payload, tenantId)`.
-
-## RBAC Permission System
-
-The project implements a complete RBAC permission model, split into two independent subsystems: functional permissions and data permissions. See [`docs/architecture.md`](docs/architecture.md) (RBAC Permission System section) for detailed design, and [`docs/core-flows.md`](docs/core-flows.md) (Flow 5 & 6) for end-to-end flows.
-
-### Functional Permissions
-
-Three-layer defense controlling what users "can do":
-
-| Layer | Mechanism | Implementation |
 |-------|-----------|---------------|
-| Dynamic menus | Backend recursively filters menu tree by user permissions | `MenuController` -> `usePermissionStore` -> dynamic route registration |
-| Button control | Vue custom directive controls DOM visibility | `v-permission="'system:user:create'"` -> `display:none` |
-| API authorization | Spring Security method-level permission check | `@PreAuthorize("hasAuthority('system:user:create')")` |
+| API Layer | `src/api/` | Domain-based split, unified Axios instance, type-safe |
+| Store Layer | `src/stores/` | Pinia Composition API, one store per domain |
+| Router Layer | `src/router/` | Lazy loading + navigation guards |
+| View Layer | `src/views/` | SFC order: script → template → style |
+| Type Layer | `src/types/` | Single source of truth for shared types (no duplicate definitions) |
 
-### Data Permissions
+## Developer Guide (Must-read for New Members)
 
-SQL auto-interception based on MyBatis-Plus `DataPermissionInterceptor` — zero intrusion on business code, controlling what data users "can see":
+The project follows the **Harness industrial design pattern** — system knowledge is organized in three layers: **Architecture → Patterns → Code**. Before modifying code, read the corresponding `docs/` document first.
 
-| dataScope | Description |
-|-----------|-------------|
-| `ALL` | All data (cross-tenant) |
-| `TENANT` | All data within own tenant |
-| `DEPT_AND_BELOW` | Own department and sub-departments |
-| `DEPT` | Own department only |
-| `CUSTOM` | Custom department set |
-| `SELF` | Own data only |
-
-**Core flow**: Request arrives -> `DataScopeResolveFilter` resolves role dataScope (most permissive wins) -> writes to `DataScopeContext` (ThreadLocal) -> `DataPermissionInterceptor` auto-appends WHERE conditions -> context cleared on request completion.
-
-## User Creation
-
-Three user creation paths are supported. All paths automatically assign the `USER` default role (`data_scope=SELF`, can only view own data):
-
-| Path | Entry Point | Auth Required | Tenant | Password |
-|------|-------------|---------------|--------|----------|
-| Self-Registration | Register page `/register` | None (public) | User selects from dropdown | User sets (BCrypt) |
-| Admin Creation | User management page | `system:user:create` | Admin specifies | Admin sets (BCrypt) |
-| Social Login | OAuth2 callback | None (3rd-party auth) | HMAC state param | None (social-only) |
-
-See [`docs/core-flows.md`](docs/core-flows.md) Flow 7 for detailed flows.
-
-## Permission Collaboration Model
-
-How the five elements — Tenant, Organization, Role, Functional Permission, and Data Permission — collaborate to enforce complete access control:
-
-```
-Tenant ─── Isolation boundary: usernames unique per tenant, data isolated by default
-  │
-  ├── User ─── Belongs to one tenant, can have multiple roles
-  │     │
-  │     ├── Role ─── Bridge between users and permissions
-  │     │     ├── Functional Permission ─── Controls "what you can do" (menu/button/API)
-  │     │     └── Data Scope ─── Controls "what data you can see"
-  │     │
-  │     └── Org Unit ─── User's department affiliation, anchor for data permissions
-  │
-  └── Permission Tree ─── DIRECTORY → MENU → BUTTON → API four-level structure
-```
-
-**Collaboration flow**:
-
-1. **At login**: Look up user by `(tenantId, username)` → load roles → load permissions → issue JWT
-2. **Functional control**: JWT `scope` claim carries permission codes → frontend dynamic menus + `v-permission` button hiding → backend `@PreAuthorize` API authorization
-3. **Data control**: Role `data_scope` determines visibility → `DataScopeResolveFilter` resolves the widest scope → MyBatis-Plus auto-appends WHERE conditions
-4. **Organization link**: User's `primaryUnitId` serves as data permission anchor → `DEPT`/`DEPT_AND_BELOW` scopes use materialized path queries for hierarchy
-
-## Unified Response Format
-
-All APIs use the `R<T>` wrapper. Frontend and backend maintain strict contract consistency. See [`docs/api-contract.md`](docs/api-contract.md) for details.
-
-**Success**:
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": { "id": 1, "username": "demo", "email": "demo@example.com" }
-}
-```
-
-**Error**:
-```json
-{
-  "code": 400,
-  "message": "username: Username is required; email: Email is required"
-}
-```
-
-**Paginated**:
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "records": [{ "id": 1, "username": "demo" }],
-    "total": 100,
-    "size": 10,
-    "current": 1,
-    "pages": 10
-  }
-}
-```
-
-## Developer Guide (New Members — Start Here)
-
-### 1. Read Documentation Before Writing Code
-
-This project follows the **Harness Industrial Design Pattern**, organizing system knowledge into three layers:
-
-| Layer | Content | Location |
-|-------|---------|----------|
-| Layer 1: Architecture | System boundaries, module responsibilities, data flow, RBAC permission system, constraints | `docs/architecture.md` |
-| Layer 2: Patterns | Backend/frontend coding patterns, API contracts, security, core flows | `docs/backend-patterns.md`, `docs/frontend-patterns.md`, `docs/api-contract.md`, `docs/core-flows.md` |
-| Layer 3: Code | Concrete functions, classes, component implementations | Source files |
-
-**Rule**: Before modifying code, check the corresponding `docs/` document. If architecture or contracts change, update `docs/` first, then modify code.
-
-### 2. Backend Conventions
-
-- **Layering**: Controller → Service (interface) → ServiceImpl → Repository
-- **DI**: `@RequiredArgsConstructor` + `final` fields; no `@Autowired` field injection
-- **Returns**: All Controller methods return `R<T>`
-- **Exceptions**: Throw `BusinessException` for business errors, handled by `GlobalExceptionHandler`
-- **Logging**: `@Slf4j` + parameterized placeholders; no `System.out.println`
-- **Full conventions**: Read `docs/backend-patterns.md`
-
-### 3. Frontend Conventions
-
-- **API layer**: One file per domain (`src/api/user.ts`), shared Axios instance from `request.ts`
-- **Types**: Shared types in `src/types/api.ts` only — never duplicate
-- **Store**: Pinia Composition API style, `use` prefix naming
-- **Components**: SFC order `<script setup>` → `<template>` → `<style scoped>`
-- **Router**: Lazy loading + `meta` declaration (title, icon, requiresAuth)
-- **Full conventions**: Read `docs/frontend-patterns.md`
-
-### 4. Pre-commit Checklist
+| Rule | Description |
+|------|-------------|
+| Dependency Injection | `@RequiredArgsConstructor` + `final` fields — `@Autowired` is forbidden |
+| Return Values | All controllers return `R<T>`, use `R<PageResult<T>>` for pagination |
+| Exceptions | Throw `BusinessException` for business errors, handled uniformly by `GlobalExceptionHandler` |
+| Logging | `@Slf4j` + parameterized placeholders — `System.out.println` is forbidden |
+| Permissions | Write operations must declare `@PreAuthorize` in `resource:action` format |
+| Frontend Types | `ApiResponse`/`PageResult` must only be imported from `src/types/api.ts` |
+| Frontend Components | SFC order: `<script setup>` → `<template>` → `<style scoped>` |
 
 ```bash
-# Backend compilation check
-cd omni-backend && ./mvnw clean install
-
-# Frontend build + lint check
-cd omni-frontend && npm run build && npm run lint
+# Pre-commit verification
+cd omni-backend && ./mvnw clean install        # Backend compilation
+cd omni-frontend && npm run build && npm run lint  # Frontend build + lint
 ```
 
-See the Completion Checklist section in `AGENTS.md` for the full checklist.
+> Full conventions: [docs/backend-patterns.en.md](docs/backend-patterns.en.md) and [docs/frontend-patterns.en.md](docs/frontend-patterns.en.md). API contract: [docs/api-contract.en.md](docs/api-contract.en.md)
 
-### 5. Common Pitfalls
+## Common Pitfalls
 
-| Pitfall | Cause | Solution |
-|---------|-------|----------|
-| Gateway routes not loading | 5.x changed the config prefix | Use `spring.cloud.gateway.server.webflux` — see AGENTS.md Important Notes |
-| Maven class version error | JAVA_HOME not pointing to JDK 25 | Set `JAVA_HOME` to your JDK 25 directory |
-| Frontend type mismatch | `ApiResponse` defined in multiple places | Import only from `@/types/api` — never duplicate |
-| Actuator gateway endpoint 404 | Requires explicit enablement | Configure `management.endpoint.gateway.enabled: true` |
-| GitHub social login callback 404 | OAuth App not created or Client ID is a placeholder | Create a GitHub OAuth App per "Social Login Configuration" above and fill in real credentials |
-| Google social login callback 404 | Google Cloud Console OAuth client not created or Client ID is a placeholder | Create an OAuth 2.0 client in Google Cloud Console per "Social Login Configuration" above and fill in real credentials |
-| Gitee social login callback 404 | Gitee third-party application not created or Client ID is a placeholder | Create a third-party application on Gitee per "Social Login Configuration" above and fill in real credentials |
-| Google login stuck on callback page | `sys_user_oauth_provider` table missing from database | Ensure `init-all.sql` has been executed; this table stores bindings for all providers |
-| GitHub login stuck on callback page | `sys_user_oauth_provider` table missing from database | Ensure `init-all.sql` has been executed (includes this table), or create it manually |
-| Gitee login stuck on callback page | Same as GitHub — `sys_user_oauth_provider` table missing | Ensure `init-all.sql` has been executed; this table stores bindings for all providers |
-| Social login state signature verification failure | `OAUTH2_STATE_SECRET` not configured or changed after restart | Set a fixed `OAUTH2_STATE_SECRET` environment variable to keep the signing key consistent |
-| Nacos loses configuration after restart | Uses embedded Derby database, no persistence | Use `init-nacos.sql` from this project to switch to external MySQL storage |
-| Maven build order error | `omni-common-core` not installed first, causing downstream module compilation failure | Run `./mvnw clean install` from parent POM — Maven reactor auto-resolves `<modules>` declaration order |
-| Redis Starter mix causes thread starvation | Blocking `omni-common-redis` imported into WebFlux service | WebFlux services (e.g., Gateway) must only depend on `omni-common-redis-reactive` — never mix the two |
-| Spring Cloud Stream consumer not receiving messages (RocketMQ consumer group OFFLINE) | When multiple `Consumer<T>` beans exist, `spring.cloud.function.definition` is missing or placed under wrong namespace (`spring.cloud.stream.function.definition`) | Add `spring.cloud.function.definition: beanName1;beanName2` under `spring.cloud.function` — **NOT** under `spring.cloud.stream.function`. Example: `spring.cloud.function.definition: operlogConsumer;userJobConsumer` |
+| Pitfall | Description | Solution |
+|---------|-------------|----------|
+| Gateway routes not taking effect | 5.x config prefix changed | Use `spring.cloud.gateway.server.webflux` |
+| Maven class version error | JAVA_HOME not pointing to JDK 25 | Set `JAVA_HOME` to the JDK 25 directory |
+| Redis Starter mix-up | Blocking variant pulled into WebFlux service | Gateway must use `omni-common-redis-reactive` only |
+| Docker 502 error | Nginx proxy_pass port misconfigured | Use container-internal port `8080` for inter-container communication, not the host-mapped port |
+| Docker port conflicts | Hyper-V/WSL2 reserved ports | `start.bat` handles this automatically — requires Administrator privileges |
+| Nacos health check failure | v3.1.1 endpoint changed | Use `GET /nacos/`, not `/nacos/actuator/health` |
+| Frontend type mismatch | `ApiResponse` defined in multiple places | Import only from `@/types/api` |
+| Stream consumer OFFLINE | function.definition namespace error | Place under `spring.cloud.function`, not `spring.cloud.stream.function` |
 
-## AI-Native Engineering Practice
+## AI-Native Engineering
 
-This project supports AI-assisted development workflows:
+- **`AGENTS.md`**: AI execution manual — hard constraints + execution rules + completion checklists
+- **`docs/`**: System truth documents — AI reads these first to understand system context before modifying code
+- **`.qoder/skills/`**: AI behavior extension units (e.g., `/grill-me` for design stress-testing)
 
-- **`AGENTS.md`**: AI execution manual defining hard constraints, execution rules, and completion checklists
-- **`docs/` directory**: System truth documents — AI reads these first to understand system context before modifying code
-- **`.qoder/skills/`**: AI behavioral extension units (e.g., `/grill-me` for design stress-testing)
-
-Core principle: **Layers 1 & 2 (Architecture + Patterns) must be defined first, so Layer 3 (Code) can be safely delegated to AI at full speed.**
+> **Lock down the first two layers (Architecture + Patterns), then let AI produce code at full speed with confidence.**
 
 ## License
 
@@ -702,14 +335,14 @@ Core principle: **Layers 1 & 2 (Architecture + Patterns) must be defined first, 
 
 ---
 
-## Support
+## Support the Project
 
-If this project helps you, please Star it!
+If this project has been helpful to you, feel free to give it a Star!
 
 **GitHub**: [https://github.com/wang-baohai/Omni-Stack](https://github.com/wang-baohai/Omni-Stack)
 **Gitee**: [https://gitee.com/wang-baohai/Omni-Stack](https://gitee.com/wang-baohai/Omni-Stack)
 
-[PRs](https://github.com/wang-baohai/Omni-Stack/pulls) welcome!
+Pull requests are welcome — see [PRs](https://github.com/wang-baohai/Omni-Stack/pulls)!
 
 ---
 

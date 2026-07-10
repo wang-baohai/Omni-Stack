@@ -1,700 +1,333 @@
 # Omni-Stack
 
-> Spring Boot 4 + Vue 3 で構築されたマイクロサービススキャフォールディングプラットフォーム。Harness 産業デザインパターンを採用し、AI 支援開発の業界ベストプラクティス基盤を提供します。
+> Spring Boot 4 + Vue 3 ベースのマイクロサービススキャフォールドプラットフォーム。Harness 産業設計モデルを採用し、AI 支援開発のための業界ベストプラクティス基盤を提供します。
+>
+> **たった1コマンドでフルスタック起動：ミドルウェア + 4つのマイクロサービス + フロントエンド、合計12個の Docker コンテナ。**
 
 **[中文](README.md)** | **[English](README.en.md)** | **[한국어](README.kr.md)**
 
 **GitHub**: https://github.com/wang-baohai/Omni-Stack | **Gitee**: https://gitee.com/wang-baohai/Omni-Stack
 
-**連絡先**: wangbaohai1993@gmail.com
+**連絡先メール**: wangbaohai1993@gmail.com
 
 ---
 
-## 特徴
+## 主な特徴
 
-- **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 — 最新のフルスタック技術
-- **Spring Cloud Gateway 5.x** (WebFlux) リアクティブゲートウェイ、Nacos サービスディスカバリと構成管理
-- **Sentinel** フロー制御とサーキットブレーカー、**OpenFeign** 宣言的サービス呼び出し
-- **マルチプロバイダーソーシャルログイン**: GitHub + Google + Gitee OAuth2 ワンクリックログイン（ストラテジーパターン `OAuth2ProviderHandler` 拡張可能）、フロントエンドに WeChat ログインエントリ予約済み、HMAC-SHA256 state 署名で改ざん防止、初回ログイン時自動ユーザー登録
-- **Vue 3.5** + TypeScript 5.9 + Vite 8 + Element Plus 2.14 モダンフロントエンド
-- **Pinia 3** 状態管理 + **Vue Router 5** ナビゲーションガード
-- **Harness 産業デザインパターン**: 三層ハイトモデル（Architecture → Patterns → Code）、`docs/` ディレクトリにシステム真実を格納
-- **AI ネイティブエンジニアリング**: AGENTS.md 実行マニュアル + Skills 行動拡張、AI 支援開発ワークフローに対応
-- **3つのユーザー作成パス**: セルフ登録（CAPTCHA + デフォルトロール）、管理者バックエンド作成、ソーシャルログイン初回自動登録
-- **3層XSS防御**: Jackson デシリアライザーが `@RequestBody` を自動サニタイズ + Servlet Filter がクエリパラメータをサニタイズ + Gateway セキュリティレスポンスヘッダー、テナント別グローバルトグルとカスタムブラックリストルール（HTMLタグ、イベントハンドラ、危険プロトコル、正規表現パターン）をサポート、Redisキャッシュ構成、完全なフロントエンド管理UI付き
-- **Common Starter エコシステム**: `omni-common` を8モジュール（core / common / mybatis / redis / redis-reactive / operlog / job / mqlog）に分割、新サービスは Maven 依存関係を追加するだけで MyBatis-Plus ページネーション、Redis キャッシュ、XSS 防御、操作ログ収集、スケジューリングタスク管理、信頼メッセーージ送信の能力を獲得、`AutoConfiguration.imports` ゼロ構成自動アセンブリ
-- **基礎データ・タスク管理**: `omni-base` サービス（ポート 8101）がデータ辞書管理、システムタスク管理、ユーザータスク管理、操作ログ閲覧を提供、Redis cache-aside キャッシュ、完全なフロントエンド管理ページ付き
-- **操作ログ監査証跡**: `@OperLog` アノテーション + AOP アスペクトによる非侵襲的収集、who/when/what/changed の完全な監査情報を自動記録、エンティティ変更スナップショットの自動 diff（oldValue vs newValue）でデータ追跡をサポート、RocketMQ 非同期配信でビジネスリクエストをブロックせず、ホット/コールドテーブル分離アーカイブ戦略（180日保持 + コールドテーブル長期保存）でクエリパフォーマンスとコンプライアンス要件を両立、監査ログ（`sys_audit_log`）およびログインログ（`sys_login_log`）と補完し合い完全な監査証跡システムを構築
-- **デュアルトラック スケジューリングタスク**: XXL-JOB 3.3.1 ベースのシステムタスク（`@XxlJob` + `@SystemJobMeta` デュアルアノテーション、スケジューリングセンターに自動登録）とユーザータスク（SPI モード、`UserJobHandler` インターフェース + JSON パラメータルーティング）の2つのモードを実装、フロントエンドは Cron エディター、動的パラメータフォーム、実行ログリアルタイムプッシュをサポート
-- **Transactional Outbox 信頼メッセーージ**: ローカル Outbox パターンによりビジネス操作とメッセージ記録を同一トランザクションで原子性を保証、XXL-JOB リレーによる非同期配信、指数バックオフ再試行 + 死信管理、フロントエンド運用監視ページでメッセージ閲覧・再送・スキップ操作をサポート
-- **ビジュアル BPMN ワークフローエンジン**: Flowable 7.x ベース、`omni-workflow` 独立マイクロサービス（ポート 8103）、フロントエンド BPMN ビジュアルデザイナーによるドラッグ&ドロップモデリング、デュアルバージョン管理（ビジネスバージョン DRAFT → PUBLISHED → ARCHIVED + Flowable エンジンバージョン）、マルチインスタンス会書は ALL/ANY 承認モード対応、動的候補者解決（`omni:assignment` JSON 拡張 + `ScopedRoleAssignmentListener` ランタイム解決）、承認記録 + プロセス進捗図 + CC 通知が完全利用可能
-- **Maven Wrapper** 内蔵 — クローン後すぐにビルド可能、システムへの Maven インストール不要
+- **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 フルスタック最新技術
+- **Docker フルスタックワンクリックデプロイ**：`start.bat` / `./start.sh` 1コマンドで12コンテナ起動（MySQL、Redis、Nacos、RocketMQ、XXL-JOB、4つのバックエンドマイクロサービス、フロントエンド）、詳しくは [Docker デプロイガイド](docs/docker-deployment.jp.md)
+- **マルチプロバイダーソーシャルログイン**：GitHub + Google + Gitee OAuth2 ワンクリックログイン（戦略パターンで拡張可能）、初回ログイン時に自動登録
+- **3層 XSS 縦深防御**：Jackson デシリアライザー + Servlet Filter + Gateway セキュリティレスポンスヘッダー、テナント別設定、フロントエンド管理画面も完備
+- **Common Starter エコシステム**：8つの自動設定モジュール（mybatis / redis / operlog / job / mqlog / workflow）、新しいサービスは依存関係を追加するだけで機能が使える、設定ゼロ
+- **デュアルトラック定期タスク**：XXL-JOB 3.3.1 システムタスク + ユーザータスクのデュアルモード、フロントエンド Cron エディター + 実行ログのリアルタイムプッシュ、詳しくは [docs/scheduling.jp.md](docs/scheduling.jp.md)
+- **Transactional Outbox 信頼性メッセージ**：ローカルアウトボックス + XXL-JOB リレー + 指数バックオフリトライ + デッドレター管理、詳しくは [docs/mq-reliability.jp.md](docs/mq-reliability.jp.md)
+- **ビジュアル BPMN ワークフロー**：Flowable 7.x エンジン、フロントエンドのドラッグ&ドロップモデリング + デュアルバージョン管理 + マルチインスタンス会籤 + 動的候補者解決、詳しくは [docs/workflow.jp.md](docs/workflow.jp.md)
+- **完全な RBAC 権限体系**：機能権限（動的メニュー + v-permission + @PreAuthorize）+ データ権限（DataPermissionInterceptor 6段階フィルタリング）、詳しくは [docs/architecture.jp.md](docs/architecture.jp.md)
+- **AI ネイティブプロジェクト**：AGENTS.md 実行マニュアル + docs/ システムの真実 + Skills 行動拡張、最初の2層を固め、3層目は AI に高速生産を任せる
 
 ## 技術スタック
 
-| 層 | 技術 | バージョン |
-|----|------|-----------|
+| レイヤー | 技術 | バージョン |
+|------|------|------|
 | JDK | OpenJDK | 25 |
-| バックエンド | Spring Boot | 4.0.6 |
-| クラウド | Spring Cloud | 2025.1.1 |
-| Cloud Alibaba | Spring Cloud Alibaba | 2025.1.0.0 |
-| ゲートウェイ | Spring Cloud Gateway Server (WebFlux) | 5.0.1 |
-| ディスカバリ / 構成 | Nacos Server | v3.1.1 |
-| フロー制御 | Sentinel Dashboard | 1.8.8 |
+| バックエンドフレームワーク | Spring Boot | 4.0.6 |
+| マイクロサービスフレームワーク | Spring Cloud + Spring Cloud Alibaba | 2025.1.1 / 2025.1.0.0 |
+| API ゲートウェイ | Spring Cloud Gateway Server (WebFlux) | 5.0.1 |
+| 登録/設定 | Nacos Server | v3.1.1 |
+| フロー制御/サーキットブレーカー | Sentinel Dashboard | 1.8.8 |
 | メッセージキュー | Apache RocketMQ | 5.3.2 |
 | タスクスケジューリング | XXL-JOB Admin | 3.3.1 |
 | ワークフローエンジン | Flowable BPMN | 7.x |
-| フロントエンド | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
+| フロントエンドフレームワーク | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
 | ビルドツール | Vite 8 (Rolldown) | 8.0.14 |
 | UI フレームワーク | Element Plus | 2.14.0 |
 | 状態管理 | Pinia | 3.0.4 |
-| ルーター | Vue Router | 5.0.7 |
 | Node.js | Node.js LTS | >= 22.12.0 |
-
-## プロジェクト構造
-
-```
-Omni-Stack/
-├── AGENTS.md                        # AI 実行マニュアル（制約 + ビルドコマンド + チェックリスト）
-├── start.bat / start.sh              # ワンクリック起動（Docker 自動起動 + ポート保護 + コンテナ）
-├── stop.bat / stop.sh                # ワンクリック停止
-├── docker-compose.yml               # ミドルウェアオーケストレーション（MySQL, Redis, Nacos, RocketMQ, XXL-JOB）
-├── docker/
-│   └── rocketmq/broker.conf          # RocketMQ Broker 構成ファイル
-├── docs/                            # システム真実ドキュメント（Architecture + Patterns + Contract）
-│   ├── architecture.md                # システム境界、モジュールマップ、データフロー、RBAC 権限システム
-│   ├── api-contract.md                # レスポンス形式、エラーコード、ページネーション、命名規則
-│   ├── backend-patterns.md            # バックエンド階層化、バリデーション、例外、ログ、セキュリティ、OOP 規約
-│   ├── frontend-patterns.md           # フロントエンド構成、API 層、状態管理、権限制御、コンポーネント規約
-│   └── core-flows.md                  # ログイン/OAuth2/RBAC 権限フローのエンドツーエンド追跡
-├── scripts/
-│   └── sql/
-│       ├── init-all.sql               # 権威データベース初期化スクリプト（DDL + シードデータ）
-│       ├── init-nacos.sql           # Nacos v3.1.1 MySQL 永続化初期化スクリプト
-│       └── init-xxl-job.sql          # XXL-JOB v3.3.1 データベース初期化スクリプト
-├── omni-backend/                    # Maven マルチモジュールバックエンド
-│   ├── mvnw / mvnw.cmd                # Maven Wrapper (3.9.16)
-│   ├── pom.xml                        # 親 POM（依存関係管理）
-│   ├── omni-common-core/              # 純 POJO：R<T>, PageResult, BaseEntity, XSS SPI
-│   ├── omni-common/                   # Web 自動構成：Jackson, CORS, グローバル例外, XSS Filter
-│   ├── omni-common-mybatis/           # MyBatis-Plus Starter：ページネーションプラグイン, MySQL ドライバー
-│   ├── omni-common-redis/             # ブロッキング Redis Starter：RedisTemplate, RedisUtils
-│   ├── omni-common-redis-reactive/    # リアクティブ Redis Starter：WebFlux サービス専用
-│   ├── omni-common-operlog/             # 操作ログ Starter：AOP アスペクト + MQ プロデューサー + エンティティ diff
-│   ├── omni-common-job/                 # スケジューリングタスク Starter：XXL-JOB 自動設定 + Admin Client + システムタスク登録
-│   ├── omni-common-workflow/            # ワークフロー Starter：Flowable 自動設定 + 承認 SPI + テナントフィルタ
-│   ├── omni-auth/                     # 認証サービス：ログイン、キャプチャ、JWT、OAuth2 (ポート 8100)
-│   ├── omni-base/                     # 基礎データサービス：データ辞書管理 (ポート 8101)
-│   ├── omni-workflow/                   # ワークフローエンジンサービス：Flowable BPMN (ポート 8103)
-│   └── omni-gateway/                  # API ゲートウェイ (WebFlux, ポート 8102)
-├── omni-frontend/                   # Vue 3 SPA (開発サーバー ポート 3000)
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── eslint.config.mjs
-│   └── src/
-│       ├── api/                       # API 層（ドメイン別ファイル分割）
-│       ├── stores/                    # Pinia ストア（Composition API スタイル）
-│       ├── router/                    # ルート定義 + ナビゲーションガード
-│       ├── views/                     # ページコンポーネント
-│       ├── layout/                    # アプリシェル（サイドバー + ヘッダー + コンテンツ）
-│       ├── types/                     # 共有型定義（ApiResponse, PageResult）
-│       └── styles/                    # グローバルスタイル
-└── .qoder/
-    └── skills/
-        └── grill-me/SKILL.md          # AI Skill: デザインストレステスト
-```
 
 ## アーキテクチャ概要
 
 ```
                                  ┌─────────────────┐
                                  │    omni-auth     │
-                                 │   Spring :8100  │
-                                 │  Security+OAuth2│
+                                 │   Spring :8100   │
+                                 │  Security+OAuth2 │
                                  └─────────────────┘
                                         ▲
 ┌─────────────────┐     ┌──────────────────┐
 │   omni-frontend  │────>│   omni-gateway    │lb://
 │   Vue 3 SPA     │/api │  WebFlux :8102    │────>┌─────────────────┐
-│   :3000         │────>│  StripPrefix=2    │     │    omni-base     │
-└─────────────────┘     └──────────────────┘     │   Spring :8101  │
-                            │                    │  データ辞書管理  │
+│   Nginx :3000   │────>│  StripPrefix=2    │     │    omni-base     │
+└─────────────────┘     └──────────────────┘     │   Spring :8101   │
                             │                    └─────────────────┘
                             │                    ┌─────────────────┐
                             │                    │  omni-workflow   │
                             │                    │  Flowable :8103  │
                             │                    └─────────────────┘
                     ┌───────┴────────┐
-                    │  MySQL :3306   │  永続化ストレージ
-                    │  Redis :6379   │  キャッシュ + キャプチャ + 辞書キャッシュ
-                    │  Nacos :8848   │  ディスカバリ + 構成
-                    │  Sentinel :8858│  フロー制御
-                    │  RocketMQ :9876│  メッセージキュー（操作ログ非同期配信）
-                    │  XXL-JOB :18080│  分散タスクスケジューリングセンター
+                    │  MySQL :3306   │  永続ストレージ
+                    │  Redis :6379   │  キャッシュ + 認証コード
+                    │  Nacos :8848   │  サービスディスカバリ + 設定センター
+                    │  RocketMQ      │  メッセージキュー（非同期配信）
+                    │  XXL-JOB       │  分散タスクスケジューリング
                     └────────────────┘
 ```
 
-**リクエストフロー**:
+**リクエストフロー**：ブラウザ `:3000` → Nginx リバースプロキシ → Gateway `:8102` → `lb://` → バックエンドサービス
+
+## プロジェクト構成
 
 ```
-ブラウザ :3000  --/api/**-->  Vite プロキシ  -->  Gateway :8102  --lb://-->  バックエンドサービス
+Omni-Stack/
+├── AGENTS.md                           # AI 実行マニュアル（ハード制約 + ビルドコマンド + チェックリスト）
+├── start.bat / start.sh                # Docker フルスタックワンクリック起動スクリプト
+├── stop.bat / stop.sh                  # ワンクリック停止スクリプト
+├── docker-compose.yml                  # 12コンテナ フルスタックオーケストレーション
+├── docker/
+│   ├── backend/Dockerfile              # バックエンド マルチステージビルド（Maven コンパイル + JRE 実行）
+│   ├── frontend/Dockerfile             # フロントエンド マルチステージビルド（npm ビルド + Nginx）
+│   ├── frontend/nginx.conf             # Nginx リバースプロキシ設定
+│   └── rocketmq/broker-docker.conf     # RocketMQ Broker 設定
+├── docs/                               # システムの真実ドキュメント（多言語対応の深い技術文書）
+│   ├── architecture.md                 #   システム境界、モジュールマップ、データフロー、RBAC 権限体系
+│   ├── api-contract.md                 #   レスポンス形式、エラーコード、ページネーション、命名規則
+│   ├── backend-patterns.md             #   バックエンド階層化、バリデーション、例外、ログ、セキュリティ権限
+│   ├── frontend-patterns.md            #   フロントエンドディレクトリ、API 層、状態管理、権限制御
+│   ├── core-flows.md                   #   ログイン/OAuth2/RBAC 権限フローのエンドツーエンド追跡
+│   ├── scheduling.md                   #   定期タスクシステム 技術ドキュメント
+│   ├── workflow.md                     #   ワークフローエンジン 技術ドキュメント
+│   ├── mq-reliability.md              #   信頼性メッセージ送信 技術ドキュメント
+│   └── docker-deployment.md            #   Docker フルスタックデプロイ 詳細ガイド
+├── scripts/sql/                        # データベース初期化スクリプト
+│   ├── init-all.sql                    #   権威 DDL + シードデータ
+│   ├── init-nacos.sql                  #   Nacos MySQL 永続化
+│   └── init-xxl-job.sql               #   XXL-JOB データベース
+├── omni-backend/                       # Maven マルチモジュール バックエンド
+│   ├── omni-common-core/               #   純粋 POJO：R<T>, PageResult, XSS SPI
+│   ├── omni-common/                    #   Web 自動設定：Jackson, CORS, XSS Filter
+│   ├── omni-common-mybatis/            #   MyBatis-Plus Starter
+│   ├── omni-common-redis/              #   ブロッキング Redis Starter
+│   ├── omni-common-redis-reactive/     #   リアクティブ Redis Starter（Gateway 専用）
+│   ├── omni-common-operlog/            #   操作ログ Starter
+│   ├── omni-common-job/                #   定期タスク Starter
+│   ├── omni-common-mqlog/              #   MQ メッセージ信頼性 Starter
+│   ├── omni-common-workflow/           #   ワークフロー Starter
+│   ├── omni-auth/                      #   認証サービス (8100)
+│   ├── omni-base/                      #   基礎データサービス (8101)
+│   ├── omni-workflow/                  #   ワークフローエンジンサービス (8103)
+│   └── omni-gateway/                   #   API ゲートウェイ (8102)
+└── omni-frontend/                      # Vue 3 SPA (3000)
 ```
 
-- フロントエンドは Vite 開発サーバー経由で `/api/**` を Gateway にプロキシ
-- Gateway ディスカバリロケーターが Nacos 登録サービスのルートを自動作成
+## Docker ワンクリックデプロイ（推奨）
 
-## 環境準備
+1コマンドで全12コンテナを起動：ミドルウェア（MySQL、Redis、Nacos、RocketMQ、XXL-JOB）+ 4つのバックエンドマイクロサービス + フロントエンド。
 
-### 必須ソフトウェア
+### 前提条件
 
-| ソフトウェア | バージョン要件 | 備考 |
-|-------------|--------------|------|
-| JDK | 25 | `JAVA_HOME` 環境変数の設定が必須 |
-| Node.js | >= 22.12.0 | npm 含む |
-| Docker Desktop | 安定版 | ミドルウェア（MySQL, Redis, Nacos, Sentinel, RocketMQ, XXL-JOB）の実行に使用 |
+| ソフトウェア | バージョン要件 | 説明 |
+|------|---------|------|
+| Docker Desktop | 任意の安定版 | Windows は WSL2 バックエンドが必要 |
+| Git | 任意 | プロジェクトのクローン |
 
-> **注意**: Maven Wrapper (3.9.16) が内蔵されています。すべての Maven コマンドは `./mvnw` で実行してください。
+> JDK、Node.js、Maven のインストールは不要です。すべて Docker コンテナ内でビルド・実行されます。
 
-### 環境変数
+### 起動
 
-| 変数 | デフォルト値 | 説明 |
-|------|------------|------|
-| `JAVA_HOME` | - | **必須** — JDK 25 のインストールパス |
-| `NACOS_SERVER_ADDR` | `127.0.0.1:8848` | Nacos サーバーアドレス |
-| `NACOS_NAMESPACE` | (空) | Nacos 名前空間 |
-| `SENTINEL_DASHBOARD` | `127.0.0.1:8858` | Sentinel ダッシュボードアドレス |
-| `ROCKETMQ_NAME_SERVER` | `127.0.0.1:9876` | RocketMQ NameServer アドレス |
-| `XXL_JOB_ADMIN_ADDRESSES` | `http://127.0.0.1:18080/xxl-job-admin` | XXL-JOB Admin アドレス |
-| `VITE_API_BASE_URL` | `/api` | フロントエンド API ベース URL |
-| `GITHUB_CLIENT_ID` | (内蔵) | GitHub OAuth App の Client ID |
-| `GITHUB_CLIENT_SECRET` | (内蔵) | GitHub OAuth App の Client Secret |
-| `GITHUB_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/github/callback` | GitHub 認可コールバック URL |
-| `GITEE_CLIENT_ID` | (内蔵) | Gitee OAuth App の Client ID |
-| `GITEE_CLIENT_SECRET` | (内蔵) | Gitee OAuth App の Client Secret |
-| `GITEE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/gitee/callback` | Gitee 認可コールバック URL |
-| `GOOGLE_CLIENT_ID` | (内蔵) | Google Cloud Console OAuth 2.0 クライアントの Client ID |
-| `GOOGLE_CLIENT_SECRET` | (内蔵) | Google Cloud Console OAuth 2.0 クライアントの Client Secret |
-| `GOOGLE_REDIRECT_URI` | `http://localhost:8100/api/auth/oauth2/google/callback` | Google 認可コールバック URL |
-| `OAUTH2_STATE_SECRET` | (内蔵) | OAuth2 state パラメータの HMAC-SHA256 署名キー、全ソーシャルログインプロバイダーで共有 |
+| プラットフォーム | コマンド |
+|------|------|
+| Windows | `start.bat` を右クリック → **管理者として実行** |
+| Linux / macOS | `./start.sh` |
 
-### ソーシャルログイン構成（GitHub / Google / Gitee）
-
-システムは `OAuth2ProviderHandler` ストラテジーパターンを採用しており、各プロバイダーがインターフェースを実装するだけで組み込めます。新しいプロバイダーの追加にコアロジックの変更は不要です。
-
-#### 1. OAuth クライアントの作成
-
-**GitHub**：
-
-1. GitHub にログイン → Settings → Developer settings → [OAuth Apps](https://github.com/settings/developers) → New OAuth App
-2. 以下を入力：
-   - **Application name**: Omni-Stack（任意の名前）
-   - **Homepage URL**: `http://localhost:3000`
-   - **Authorization callback URL**: `http://localhost:8100/api/auth/oauth2/github/callback`
-3. 作成後に **Client ID** と **Client Secret** をコピー
-
-**Google**：
-
-1. [Google Cloud Console](https://console.cloud.google.com/) にログイン → APIs & Services → Credentials
-2. OAuth 2.0 Client ID を作成（アプリケーションタイプは Web application を選択）
-3. Authorized redirect URIs に以下を追加：`http://localhost:8100/api/auth/oauth2/google/callback`
-4. 作成後に **Client ID** と **Client Secret** をコピー
-
-**Gitee**：
-
-1. Gitee にログイン → 設定 → [サードパーティアプリケーション](https://gitee.com/oauth/applications) → アプリケーション作成
-2. 以下を入力：
-   - **アプリケーション名**: Omni-Stack（任意の名前）
-   - **アプリケーションホームページ**: `http://localhost:3000`
-   - **アプリケーションコールバック URL**: `http://localhost:8100/api/auth/oauth2/gitee/callback`
-3. 作成後に **Client ID** と **Client Secret** をコピー
-
-#### 2. 認証情報の構成
-
-環境変数を設定するか、`omni-auth/src/main/resources/application.yml` を編集：
-
-```yaml
-auth:
-  oauth2:
-    github:
-      client-id: ${GITHUB_CLIENT_ID:あなたのClientID}
-      client-secret: ${GITHUB_CLIENT_SECRET:あなたのClientSecret}
-      redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/github/callback}
-    google:
-      client-id: ${GOOGLE_CLIENT_ID:あなたのClientID}
-      client-secret: ${GOOGLE_CLIENT_SECRET:あなたのClientSecret}
-      redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/google/callback}
-    gitee:
-      client-id: ${GITEE_CLIENT_ID:あなたのClientID}
-      client-secret: ${GITEE_CLIENT_SECRET:あなたのClientSecret}
-      redirect-uri: ${GITEE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/gitee/callback}
-    state-secret: ${OAUTH2_STATE_SECRET:あなたのStateSecret}
-```
-
-> **注意**：`redirect_uri` は対応する OAuth クライアントで設定したコールバック URL と完全に一致する必要があります。`state-secret` は state パラメータの HMAC-SHA256 署名に使用されるため、ランダムな文字列を設定してください。
-
-#### 3. 使用方法
-
-フロントエンドのログインページで「GitHub」、「Google」、または「Gitee」ボタンをクリックするとソーシャルログインが開始されます。初回ログイン時にローカルユーザーが自動作成されます（ユーザー名形式：GitHub は `gh_{login}`、Google は `go_{email_prefix}`、Gitee は `ge_{login}`）。
-
-## クイックスタート
-
-### ステップ 1: ミドルウェアの起動
-
-プロジェクトはワンクリック起動スクリプトを提供しており、Docker Desktop の起動、ポート保護、コンテナデプロイを自動で完了します：
-
-| プラットフォーム | 起動 | 停止 |
-|----------------|------|------|
-| Windows | `start.bat` を右クリック → 管理者として実行 | `stop.bat` を右クリック → 管理者として実行 |
-| Linux / macOS | `./start.sh` | `./stop.sh` |
-
-**起動スクリプトの自動処理**：
-
-1. **Docker Desktop の検出** — 未インストール時にダウンロードを促し、ダウンロードページを自動で開く
-2. **Docker エンジンの起動** — 未実行時に自動起動し、準備完了まで待機
-3. **ポート保護** (Windows) — Hyper-V/WSL2 によるプロジェクトポートの動的占有を防止（3306、6379、8080、8848、9848、9876、10909、10911、10912、18080）
-4. **コンテナ起動** — `docker compose up -d` を実行
+スクリプトが自動で実行：Docker 検出 → Docker エンジン起動（未起動の場合）→ ポート保護（Windows Hyper-V/WSL2）→ ミドルウェアイメージのプル → アプリケーションイメージのビルド → 全コンテナ起動。
 
 ```bash
-# 全ミドルウェアを起動
-./start.sh                          # Linux / macOS
-# または Windows: start.bat を右クリック → 管理者として実行
+# 全サービスを起動
+./start.sh
 
-# 指定サービスのみ起動
+# 指定サービスのみ起動（例：ミドルウェアのみ）
 ./start.sh mysql redis
 
 # サービス状態を確認
 docker compose ps
+
+# 全サービスを停止
+./stop.sh
 ```
 
-> バックエンドサービスを起動する前に、Nacos が完全に起動するまで約 30 秒お待ちください。`http://127.0.0.1:8080/` にアクセスして Nacos の起動を確認してください（デフォルト認証情報: nacos/nacos）。
-> MySQL コンテナは初回起動時に `scripts/sql/init-all.sql` を自動実行してデータベースを初期化します。
-
-### ステップ 2: バックエンドのビルドと起動
-
-```bash
-# JAVA_HOME を設定（Spring Boot 4 プラグインには JDK 17+ が必要）
-export JAVA_HOME="/path/to/jdk-25"
-export PATH="$JAVA_HOME/bin:$PATH"
-
-# 全モジュールをビルド
-cd omni-backend
-./mvnw clean install
-
-# Auth サービスを起動（ポート 8100）
-cd omni-auth
-./mvnw spring-boot:run
-
-# Base サービスを起動（ポート 8101、新規ターミナルで）
-cd omni-base
-./mvnw spring-boot:run
-
-# Gateway を起動（ポート 8102、新規ターミナルで）
-cd omni-gateway
-./mvnw spring-boot:run
-```
-
-**ビルド順序**: `omni-common-core` を先にインストールし、次に `omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-redis-reactive`、最後に `omni-auth`、`omni-base`、`omni-gateway` をコンパイルします。Maven reactor は `<modules>` 宣言順に基づき自動的に解決します。
-
-### ステップ 3: フロントエンドの起動
-
-```bash
-cd omni-frontend
-
-# 依存関係をインストール
-npm install
-
-# 開発サーバーを起動（ポート 3000、/api を Gateway :8102 に自動プロキシ）
-npm run dev
-```
-
-### ステップ 4: サービスの確認
-
-| 確認項目 | コマンド / URL | 期待される結果 |
-|---------|---------------|---------------|
-| フロントエンド | `http://localhost:3000` | ログインページ |
-| Gateway ルート | `curl http://localhost:8102/actuator/gateway/routes` | JSON ルート一覧 |
-| Nacos コンソール | `http://127.0.0.1:8080/` | Nacos 管理画面 |
-| Sentinel コンソール | `http://localhost:8858` | Sentinel ダッシュボード |
-| XXL-JOB Admin | `http://localhost:18080/xxl-job-admin` | XXL-JOB Admin Web UI（admin/123456） |
-| RocketMQ | `telnet localhost 9876` | NameServer 接続確認 |
-
-**起動順序**: MySQL → Redis → Nacos → Sentinel → RocketMQ → XXL-JOB → バックエンド（Auth, Base, Gateway）→ フロントエンド
-
-## サービスポート
+### サービスポート
 
 | サービス | ポート | 説明 |
-|---------|-------|------|
-| フロントエンド開発サーバー | 3000 | Vite 開発サーバー、/api リクエストをプロキシ |
-| 認証サービス | 8100 | Spring Security + OAuth2 Authorization Server |
-| 基礎データサービス | 8101 | データ辞書管理、Redis cache-aside キャッシュ |
-| API ゲートウェイ | 8102 | Spring Cloud Gateway (WebFlux) |
-| ワークフローエンジンサービス | 8103 | Flowable BPMN プロセスエンジン |
-| MySQL | 3306 | メインデータベース（omni_auth + omni_base + xxl_job） |
-| Redis | 6379 | キャプチャキャッシュ + 辞書キャッシュ + XSS 構成キャッシュ |
-| Nacos | 8080, 8848 | 管理画面 (8080) + サービスディスカバリと構成管理 (8848) |
-| Sentinel | 8858 | フロー制御ダッシュボード |
-| XXL-JOB Admin | 18080 | 分散タスクスケジューリングセンター（Web UI）、デフォルト認証情報 admin/123456 |
-| RocketMQ NameServer | 9876 | メッセージキューネーミングサーバー |
-| RocketMQ Broker | 10909, 10911, 10912 | メッセージキューブローカーノード |
+|------|------|------|
+| **フロントエンド** | **http://localhost:3000** | **アクセス入口、Nginx から Gateway へリバースプロキシ** |
+| 認証サービス | http://localhost:8100 | Spring Security + OAuth2 |
+| 基礎データサービス | http://localhost:8101 | ディクショナリ/組織/ユーザー/ログ/タスク |
+| API ゲートウェイ | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
+| ワークフローエンジン | http://localhost:8103 | Flowable BPMN |
+| MySQL | localhost:3306 | root/root |
+| Redis | localhost:6379 | パスワードなし |
+| Nacos コンソール | http://localhost:8080 | nacos/nacos |
+| XXL-JOB スケジューリングセンター | http://localhost:18080 | admin/123456 |
+| RocketMQ NameServer | localhost:19876 | ホストマッピングポート（コンテナ内は 9876） |
 
-## モジュール詳細
+### 動作確認
+
+```bash
+# 1. フロントエンドにアクセス
+open http://localhost:3000
+
+# 2. 認証コード API を確認
+curl http://localhost:3000/api/auth/captcha
+
+# 3. 全コンテナの状態を確認
+docker compose ps
+```
+
+**デフォルトログインアカウント**：`admin` / `admin123`
+
+### よくある問題
+
+| 問題 | 原因 | 解決策 |
+|------|------|---------|
+| イメージのプルに失敗 | 国内ネットワークの問題 | Docker ミラーを設定：`"registry-mirrors": ["https://docker.1ms.run"]` |
+| ポートバインドに失敗 (Windows) | Hyper-V/WSL2 のポート予約と競合 | `start.bat` がポート保護を自動処理、管理者権限で実行が必要 |
+| RocketMQ ポート 9876 の競合 | Windows Hyper-V の予約ポート範囲 | ホストマッピングを 19876 に変更済み、コンテナ内は 9876 のまま |
+| 502 Bad Gateway | Nginx リバースプロキシのポート設定ミス | nginx.conf の proxy_pass にコンテナ内部ポート `8080` を使用しているか確認（ホストポート `8102` ではない） |
+| Nacos の起動に失敗 | ヘルスチェックエンドポイントの変更 | Nacos v3.1.1 は `GET /nacos/` を使用（`/nacos/actuator/health` ではない） |
+| ビルドタイムアウト | Maven 依存関係のダウンロードが遅い | バックエンド Dockerfile にアリババクラウド Maven ミラーを内蔵済み |
+
+> 詳細なトラブルシューティングガイドは [docs/docker-deployment.jp.md](docs/docker-deployment.jp.md) を参照
+
+## ローカル開発
+
+デバッグやコード修正が必要な場面向け。ミドルウェアは Docker、バックエンドとフロントエンドはローカルで実行します。
+
+### 前提条件
+
+| ソフトウェア | バージョン | 説明 |
+|------|------|------|
+| JDK | 25 | `JAVA_HOME` の設定が必須 |
+| Node.js | >= 22.12.0 | npm 含む |
+| Docker Desktop | 任意 | ミドルウェアのみ実行 |
+
+### 手順
+
+```bash
+# 1. ミドルウェアを起動（ミドルウェアのみ、アプリケーションコンテナは起動しない）
+./start.sh mysql redis nacos rocketmq-namesrv rocketmq-broker xxl-job-admin
+
+# Nacos の準備を待つ（約30秒）、http://localhost:8080 で確認
+
+# 2. バックエンドをビルドして起動
+export JAVA_HOME="/path/to/jdk-25"
+cd omni-backend && ./mvnw clean install
+cd omni-auth && ./mvnw spring-boot:run       # ポート 8100（新しいターミナルで続行）
+cd omni-base && ./mvnw spring-boot:run        # ポート 8101
+cd omni-gateway && ./mvnw spring-boot:run     # ポート 8102
+cd omni-workflow && ./mvnw spring-boot:run    # ポート 8103
+
+# 3. フロントエンドを起動
+cd omni-frontend && npm install && npm run dev  # ポート 3000
+```
+
+> Maven Wrapper が内蔵済み（3.9.16）、Maven のグローバルインストールは不要です。ビルド順序は Maven reactor が自動解決します。
+
+### ソーシャルログイン設定
+
+GitHub、Google、Gitee の3つの OAuth2 プロバイダーをサポートしています。認証情報は `application-local.yml`（`.gitignore` で除外済み）に設定します。詳しくは [docs/core-flows.jp.md](docs/core-flows.jp.md) を参照してください。
+
+## 機能概要
+
+| ログインページ | データダッシュボード |
+|--------|----------|
+| ![ログインページ](docs/images/login.png) | ![データダッシュボード](docs/images/dashboard.png) |
+
+| ユーザー管理 | ディクショナリ管理 |
+|----------|----------|
+| ![ユーザー管理](docs/images/system-user.png) | ![ディクショナリ管理](docs/images/system-dict.png) |
+
+## モジュール概要
+
+### バックエンドマイクロサービス
+
+| モジュール | ポート | 役割 | 詳細ドキュメント |
+|------|------|------|---------|
+| omni-auth | 8100 | 認証認可：ログイン、JWT、OAuth2、RBAC、XSS 設定管理 | [core-flows.jp.md](docs/core-flows.jp.md) |
+| omni-base | 8101 | 基礎データ：ディクショナリ、組織、ユーザー、ログ、定期タスク、MQ メッセージ管理 | [scheduling.jp.md](docs/scheduling.jp.md) |
+| omni-workflow | 8103 | ワークフローエンジン：BPMN モデル管理、承認、プロセスインスタンス | [workflow.jp.md](docs/workflow.jp.md) |
+| omni-gateway | 8102 | API ゲートウェイ：ルーティング転送、JWT 検証、CORS、セキュリティレスポンスヘッダー | [architecture.jp.md](docs/architecture.jp.md) |
 
 ### Common Starter エコシステム（8モジュール）
 
-`omni-common` は8つの単一責任モジュールに分割され、Common Starter エコシステムを形成しています。新サービスは Maven 依存関係を追加するだけで能力を獲得でき、**いずれも単独では実行できません**：
-
-| モジュール | 責任 | 対象サービスタイプ |
-|-----------|------|-----------------|
-| `omni-common-core` | 純 POJO：`R<T>`、`PageResult<T>`、`BaseEntity`、`BusinessException`、`XssConfigProvider` SPI、`UserJobHandler` SPI | 全サービス |
-| `omni-common` | Web 自動構成：Jackson 日時シリアライゼーション、CORS、グローバル例外処理、XSS Filter + Jackson Module 自動登録 | Servlet サービス |
-| `omni-common-mybatis` | MyBatis-Plus + MySQL ドライバー + ページネーションプラグイン + YAML デフォルト構成、`@ConditionalOnMissingBean` オーバーライドサポート | Servlet サービス |
-| `omni-common-redis` | ブロッキング Redis + RedisTemplate シリアライゼーション + RedisUtils | Servlet サービス |
-| `omni-common-redis-reactive` | リアクティブ Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux サービス（Gateway） |
-| `omni-common-operlog` | 操作ログ Starter：`@OperLog` AOP アスペクト + RocketMQ プロデューサー + エンティティ変更 diff | ビジネスサービス |
-| `omni-common-job` | スケジューリングタスク Starter：XXL-JOB 自動設定 + Admin Client + システムタスク登録 + `@SystemJobMeta` デュアルアノテーション | ビジネスサービス |
-| `omni-common-mqlog` | MQ メッセージ信頼性 Starter：Transactional Outbox + リレー配信 + 死信管理 + テナント分離 | Servlet サービス |
-| `omni-common-workflow` | ワークフロー Starter：Flowable 自動設定、`ApprovalService` SPI、`UserGroupLookup`、`TenantInfoFilter` | ワークフローサービス |
-
-> 全 Starter は Spring Boot 自動構成（`AutoConfiguration.imports`）を使用して Bean を登録します。下流モジュールは手動で `@ComponentScan` を追加する必要がありません。
-> `omni-common-redis` と `omni-common-redis-reactive` は混用不可です。WebFlux サービスはリアクティブバージョンのみ依存できます。
-
-### omni-auth（認証サービス）
-
-Spring Security 7 + OAuth2 Authorization Server ベースの認証マイクロサービス:
-
-- **ユーザーログイン**: ユーザー名 + パスワード + キャプチャ + マルチテナント、RS256 JWT を発行
-- **マルチプロバイダーソーシャルログイン**: `OAuth2ProviderHandler` ストラテジーパターンに基づく拡張可能なソーシャルログインアーキテクチャ、GitHub・Google・Gitee の三つのプロバイダーを接入済み、フロントエンドに WeChat ログインエントリ予約済み。HMAC-SHA256 state 署名で改ざん防止、初回ログイン時にローカルユーザーを自動作成しサードパーティ ID を関連付け（`sys_user_oauth_provider` テーブル）
-- **OAuth2 認可**: Authorization Code + PKCE フロー、サードパーティ連携に対応
-- **デバイス認可グラント**（RFC 8628）：IoT デバイス、CLI ツールなどブラウザレス環境向けに `omni-device` クライアント経由で認可機能を提供。フロントエンドの `/device` ページでデバイス側の認可リクエストとトークンポーリングをシミュレートし、`/device/verify` ページでユーザーが別のデバイスでスキャンまたはコード入力により認可を完了
-- **クライアント管理**: `oauth2_registered_client` の CRUD、動的登録をサポート
-- **マルチテナント RBAC**: `tenantId:username` 形式のユーザー解決 + ロール権限ツリー
-- **RBAC 権限システム**: 機能権限（動的メニューフィルタリング + `v-permission` ボタンレベル制御 + `@PreAuthorize` API 認可）+ データ権限（MyBatis-Plus `DataPermissionInterceptor` SQL 自動インターセプト、6 レベル dataScope ゼロ侵入フィルタリング）
-- **JWT 署名**: RSA キーペア、JWK エンドポイントで Gateway に公開鍵を提供
-- **XSS 防御構成管理**: フロントエンド `システム管理 → XSS防護構成` ページでグローバルトグルとブラックリストルール CRUD をサポート（HTMLタグ、イベントハンドラ、危険プロトコル、カスタム正規表現の4つのルールタイプ）、テナント別分離構成、Redis キャッシュ 30分 TTL + 書き込み時のアクティブ無効化
-
-### omni-common-operlog（操作ログ Starter）
-
-AOP + RocketMQ ベースの操作ログ収集フレームワーク、ビジネスサービスに非侵襲的な監査証跡を提供：
-
-- **非侵襲的収集**: `@OperLog` アノテーション + `OperLogAspect` AOP アスペクトがリクエストコンテキスト（ユーザー名、テナントID、IP、リクエストパラメータ）とエンティティ変更スナップショットを自動収集
-- **エンティティ変更 diff**: `EntityDiffer` フィールドレベル差分比較 — UPDATE 操作は変更フィールドのみ記録し、データ追跡を可能にする
-- **RocketMQ 非同期**: `OperLogProducer` がログメッセージを非同期配信し、ビジネスリクエストのレスポンスをブロックしない
-- **ホット/コールドテーブル分離**: ホットテーブル `sys_oper_log` は直近 180日分のデータを高速クエリ用に保持、コールドテーブル `sys_oper_log_archive` はコンプライアンス向けに長期保存。`OperLogArchiver` が毎日 02:00 に自動アーカイブを実行
-- **監査ログとの補完関係**: 操作ログはビジネスデータ変更（who/when/what/changed）を記録、監査ログ（`sys_audit_log`）はセキュリティイベントを記録、ログインログ（`sys_login_log`）はログイン行動を記録 — 三者が完全な監査証跡システムを構築
-- **omni-auth では無効化**: 認証モジュールはこのモジュールに依存せず、認証行動は `sys_login_log` + `sys_audit_log` でカバー
-
-### omni-common-mqlog（MQ メッセージ信頼性 Starter）
-
-Transactional Outbox パターンベースの信頼メッセージ送信フレームワーク、ビジネス操作とメッセージ記録の原子性を保証：
-
-- **ローカル Outbox**: `ReliableMessageTemplate` がビジネストランザクション内で `sys_mq_message` テーブルに書き込み（PENDING 状態）、トランザクション整合性を維持
-- **スケジュールドリレー**: `MqMessageRelayJob`（XXL-JOB）が 10 秒ごとに配信待ちメッセージをポーリング、`MessageSender` ストラテジーパターンで MQ に配信
-- **指数バックオフ再試行**: 失敗メッセージは `2^retryCount × 10s` でバックオフ、最大再試行回数超過で死信状態に遷移
-- **テナント分離**: tenantId の明示的パラメータ渡し、クエリコントローラーはテナントでフィルタリング、リレージョブはフィルタリングなし（バックグラウンドプロセス）
-- **マルチ MQ 拡張**: `MessageSender` ストラテジーインターフェース、現在 `RocketMqMessageSender` を実装済み、Kafka 追加はインターフェース実装のみ
-- **フロントエンド管理**: 運用監視メニューのメッセージ記録ページ、ページネーションクエリ、詳細閲覧、手動再送、スキップ操作をサポート
-
-### omni-base（基礎データ・タスクサービス）
-
-データ辞書、スケジューリングタスク、操作ログを含む基礎データ・タスク管理マイクロサービス：
-
-- **辞書タイプ管理**: `sys_dict_type` テーブル — リスト取得、詳細取得、作成、更新、削除、ステータス切替、11個の API エンドポイント完全実装
-- **辞書データ管理**: `sys_dict_data` テーブル — タイプコードで関連付け、リスト取得、作成、更新、削除、キャッシュリフレッシュをサポート
-- **Redis cache-aside キャッシュ**: TTL 30分、write-through 無効化、`dict:{typeCode}` キー形式
-- **システムタスク管理**: `SystemJobRegistry` メタデータと XXL-JOB ランタイム状態を統合し、登録/起動/停止/トリガー/注销のライフサイクル操作を提供、`job:system-job:*` 権限コード
-- **ユーザータスク管理**: SPI ベースのタスクタイプ + タスクインスタンス + 実行ログ、ユーザーセルフサービス作成、Cron スケジューリング、所有権チェックをサポート
-- **操作ログ閲覧**: ホットテーブルクエリ + モジュール、操作タイプ、操作者、時間範囲でのページネーションフィルタリング
-- **フロントエンド管理ページ**: 辞書管理（master-detail レイアウト）、システムタスク、タスクタイプ、ワークスペースのマイタスク、`base:dict` / `job:*` 権限コード
-- **XSS 防御継承**: `XssConfigProvider` SPI を実装し、3層 XSS 防御を自動的に獲得
-
-### omni-gateway（API ゲートウェイ）
-
-Spring Cloud Gateway Server (WebFlux) ベースのリアクティブゲートウェイ:
-
-- ルート転送: Nacos 登録サービスのバックエンドに自動ルーティング（StripPrefix=2）
-- サービスディスカバリ: Nacos 登録サービスを自動ルーティング
-- 認証フィルター: `AuthFilter`（JWT RS256 署名検証 + claims 抽出 + ID ヘッダー注入）
-- CORS 処理: `CorsConfig` によるクロスオリジンリクエスト対応
-
-### omni-frontend（Vue 3 SPA）
-
-| 層 | ディレクトリ | 責任 |
-|----|------------|------|
-| API | `src/api/` | ドメイン別ファイル、共有 Axios インスタンス、型安全 |
-| ストア | `src/stores/` | Pinia Composition API スタイル、ドメイン別ストア |
-| ルーター | `src/router/` | 遅延ロードルート + ナビゲーションガード（デフォルト認証必須） |
-| ビュー | `src/views/` | ページコンポーネント、SFC 順序: script → template → style。`device/`（デバイス認可）、`job/`（タスク管理）、`system/`（システム管理）サブディレクトリを含む |
-| レイアウト | `src/layout/` | アプリシェル（サイドバー + ヘッダー + コンテンツエリア） |
-| 型 | `src/types/` | 共有型定義（ApiResponse, PageResult の単一ソース） |
-| スタイル | `src/styles/` | グローバルリセット + レイアウトスタイル |
-
-## スケジューリングタスクシステム
-
-プロジェクトは **XXL-JOB 3.3.1** ベースのデュアルトラックスケジュールタスクアーキテクチャを実装しており、システムタスクとユーザータスクの二つのモードをサポートしています。詳細な技術情報は [`docs/scheduling.md`](docs/scheduling.md) を参照してください。
-
-### アーキテクチャ概要
-
-- **omni-common-job**：`XxlJobAutoConfiguration`、`XxlJobAdminClient`、`SystemJobRegistry` をカプセル化し、統一されたタスク登録・管理機能を提供
-- **omni-common-core**：`UserJobHandler` SPI インターフェースと `UserJobMessage` POJO を定義
-- **omni-base**：ビジネス層で、具体的なシステムタスクおよびユーザータスク Handler を実装
-
-### システムタスク
-
-`@XxlJob` + `@SystemJobMeta` デュアルアノテーションで駆動。`SystemJobRegistry` が起動時に自動スキャンし、XXL-JOB Admin に登録します。例：`OperLogArchiver`（操作ログアーカイブ）— Bean 登録 → 自動発見 → REST API 管理 → XXL-JOB スケジューリング実行。管理 API には `job:system-job:*` 権限が必要です。
-
-### ユーザータスク
-
-SPI モード採用：`UserJobHandler` インターフェースを実装し Spring Bean として登録すると、`UserJobHandlerRegistry` が自動発見します。全ユーザータスクは単一の `@XxlJob("userJobExecuteHandler")` エントリポイントを共有し、JSON `executorParam` で具体的な Handler にルーティングします。`MyJobController` は所有権チェック（`@PreAuthorize` ではなく）を使用し、ユーザーは自分が作成したタスクのみ管理できます。
-
-### 依存コンポーネント
-
-| コンポーネント | 説明 |
-|--------------|------|
-| XXL-JOB Admin (`:18080`) | 分散スケジューリングセンター、Docker コンテナデプロイ |
-| `omni-common-job` モジュール | 自動設定、Admin Client、システムタスク登録 |
-| `sys_user_job_type` / `sys_user_job` / `sys_user_job_log` | ユーザータスク種別、タスクインスタンス、実行ログ |
-
-### 新規タスクタイプの追加ガイド
-
-`DrinkWaterRemindHandler`（水分補給リマインダー）を例に：① `sys_user_job_type` テーブルにタイプを登録 → ② `UserJobHandler` インターフェースを実装し `@Component` を付与 → ③ ユーザーがワークスペースでタスクを作成 → ④ XXL-JOB スケジューリング実行を検証。詳細は [`docs/scheduling.md` 第 4 章](docs/scheduling.md) を参照してください。
-
-### フロントエンド統合
-
-三つのエントリポイント：システムタスク管理（`SystemJob`）、タスクタイプ管理（`UserJobType`）、ワークスペースのマイタスク（`MyJob`）。Cron 式エディター、`DynamicFormRenderer` 動的パラメータフォーム、および 10 秒間隔のアクティブタスクログポーリングと `ElNotification` による実行結果プッシュ通知をサポート。
-
-## ワークフローエンジン
-
-プロジェクトは **Flowable 7.x** ベースのビジュアル BPMN ワークフローエンジンを構築し、モデル設計、バージョン管理、マルチインスタンス会書承認などの機能をサポートしています。詳細な技術情報は [`docs/workflow.md`](docs/workflow.md) を参照してください。
-
-### アーキテクチャ概要
-
-- **omni-workflow**：独立マイクロサービス（ポート 8103）、Flowable BPMN エンジンを統合し、モデル管理、プロセス定義、インスタンス監視、承認処理、統計ダッシュボードなど 7 つのコントローラーを提供
-- **omni-common-workflow**：共有 Starter、`FlowableAutoConfiguration`、`ApprovalService` SPI、`UserGroupLookup`、`TenantInfoFilter` などの基盤機能を提供
-
-### コア機能
-
-- **ビジュアルモデル設計**：フロントエンド BPMN デザイナーによるドラッグ&ドロップモデリング、XML 編集、検証プレビュー、`BpmnXmlBuilder` がデザイナー JSON を BPMN 2.0 XML に変換
-- **デュアルバージョン管理**：ビジネスバージョン（DRAFT → PUBLISHED → ARCHIVED）は `wf_process_model_version` テーブルで管理、エンジンバージョンは Flowable デプロイメントメカニズムで管理
-- **マルチインスタンス会書**：ALL（全員承認）と ANY（いずれか一人承認）の2つの承認モードをサポート、MI `completionCondition` で制御、いずれかの拒否で即座に終了
-- **動的候補者解決**：`omni:assignment` JSON 拡張要素 + `ScopedRoleAssignmentListener` ランタイム解決、複数のアンカータイプ（發起人の主組織 / 上位組織 / 絶対組織など）をサポート
-- **承認記録 + プロセス進捗図 + CC 通知**：完全なプロセス追跡機能、`HistoricTaskInstance` レベルの精度で承認結果を判定
-
-### データベーステーブル（omni_workflow データベース）
-
-| テーブル | 説明 |
-|---------|------|
-| `wf_process_model` | プロセスモデルメインテーブル、`model_key` はテナント内ユニーク |
-| `wf_process_model_version` | モデルバージョンテーブル、BPMN XML + デプロイ情報を格納 |
-| `wf_process_instance_ext` | プロセスインスタンス拡張テーブル、モデルバージョンと Flowable インスタンスを関連付け |
-| `wf_todo_task` | 未処理タスクキャッシュテーブル |
-| `wf_cc_record` | CC 記録テーブル |
-
-### フロントエンド統合
-
-7 つのページ/コンポーネントで完全なワークフローシーンをカバー：モデル管理（`ModelDesigner`）、バージョン履歴（`VersionHistoryDialog`）、検証結果（`ValidateResultDialog`）、プロセス定義、プロセスインスタンス、承認記録（`ApprovalRecordsDialog`）、プロセス進捗（`ProcessProgressDialog`）、統計ダッシュボード。
-
-## メッセージ信頼性
-
-プロジェクトは **Transactional Outbox** パターンベースの信頼メッセージ送信システムを構築し、ビジネス操作とメッセージ記録の原子性を保証しています。詳細な技術情報は [`docs/mq-reliability.md`](docs/mq-reliability.md) を参照してください。
-
-### アーキテクチャ概要
-
-- **omni-common-core**：`ReliableMessageRelay` インターフェースを定義（純 POJO、Spring 依存ゼロ）
-- **omni-common-mqlog**：Transactional Outbox パターンを実装、`ReliableMessageTemplate`、`MqMessageRelayService`、`MqMessageRelayJob`、`MessageSender` ストラテジー、自動構成を提供
-- **omni-common-operlog**：オプション呼び出し元 — `OperLogProducer` は `ReliableMessageRelay` Bean が存在する場合に Outbox モードに自動切り替え
-- **omni-base**：外部管理コントローラー `MqMessageController`、フロントエンド運用管理 API を提供
-
-### メッセージライフサイクル
-
-`sys_mq_message` テーブルの状態遷移：PENDING(0) → SENT(1)（成功）/ FAILED(2)（失敗、再試行待ち）→ DEAD_LETTER(3)（最大再試行回数超過）/ SKIPPED(4)（手動スキップ）。失敗メッセージは `2^retryCount × 10s` の指数バックオフで待機、デフォルト最大 3 回再試行。
-
-### テナント分離
-
-書き込み時：`ReliableMessageRelay.send()` は `Long tenantId` の明示的渡しを要求、ThreadLocal ベースの暗黙的解決は使用しない。読み取り時：全コントローラーエンドポイントは tenantId でフィルタリング（外部は `@RequestHeader`、内部は `@RequestParam`）。リレー job はバックグラウンドインフラプロセスとして、テナントに関係なく全配信待ちメッセージをスキャン。
-
-### フロントエンド統合
-
-運用監視メニューのメッセージ記録ページがサポート：ページネーションクエリ（ステータス、Topic、サービス名、時間範囲でフィルタ）、メッセージ詳細閲覧、死信手動再送、死信スキップ。権限コード：`base:mqmessage:list` / `base:mqmessage:resend` / `base:mqmessage:skip`。
-
-### 新サービス接入ガイド
-
-`omni-common-mqlog` 依存関係を追加するだけで新サービスに信頼メッセージ送信能力が付与されます：`sys_mq_message` テーブルは `schema.sql` で自動作成、`ReliableMessageTemplate`、リレーjob、内部クエリ API はすべて `AutoConfiguration.imports` で自動登録。ビジネスコードは `ReliableMessageRelay` をインジェクトして `send(bindingName, payload, tenantId)` を呼び出すだけ。
-
-## RBAC 権限システム
-
-プロジェクトは完全な RBAC 権限モデルを実装しており、機能権限とデータ権限の二つの独立サブシステムに分かれています。詳細な設計は [`docs/architecture.md`](docs/architecture.md) の RBAC Permission System セクションを、エンドツーエンドフローは [`docs/core-flows.md`](docs/core-flows.md) の Flow 5 と Flow 6 を参照してください。
-
-### 機能権限
-
-ユーザーが「何ができるか」を制御する三層防護：
-
-| 層 | メカニズム | 実装 |
-|----|-----------|------|
-| 動的メニュー | バックエンドがユーザー権限に基づきメニューツリーを再帰フィルタリング | `MenuController` -> `usePermissionStore` -> 動的ルート登録 |
-| ボタン制御 | Vue カスタムディレクティブによる DOM 表示/非表示制御 | `v-permission="'system:user:create'"` -> `display:none` |
-| API 認可 | Spring Security メソッドレベル権限チェック | `@PreAuthorize("hasAuthority('system:user:create')")` |
-
-### データ権限
-
-MyBatis-Plus `DataPermissionInterceptor` による SQL 自動インターセプト — ビジネスコードへのゼロ侵入で、ユーザーが「どのデータを見られるか」を制御：
-
-| dataScope | 説明 |
-|-----------|------|
-| `ALL` | 全データ（テナント間） |
-| `TENANT` | 自テナントの全データ |
-| `DEPT_AND_BELOW` | 自部門および下位部門 |
-| `DEPT` | 自部門のみ |
-| `CUSTOM` | カスタム部門セット |
-| `SELF` | 自分のデータのみ |
-
-**コアフロー**：リクエスト到着 -> `DataScopeResolveFilter` がロールの dataScope を解決（最も寛大なものが優先）-> `DataScopeContext`（ThreadLocal）に書き込み -> `DataPermissionInterceptor` が WHERE 条件を自動追加 -> リクエスト完了時にコンテキストをクリア。
-
-## ユーザー作成
-
-3つのユーザー作成パスをサポートしています。すべてのパスで `USER` デフォルトロール（`data_scope=SELF`、自分のデータのみ閲覧可能）が自動割り当てされます：
-
-| パス | エントリポイント | 認証要件 | テナント | パスワード |
-|------|-----------------|---------|---------|-----------|
-| セルフ登録 | 登録ページ `/register` | なし（公開） | ユーザーがドロップダウンから選択 | ユーザー設定（BCrypt） |
-| 管理者作成 | ユーザー管理ページ | `system:user:create` | 管理者指定 | 管理者設定（BCrypt） |
-| ソーシャルログイン | OAuth2 コールバック | なし（サードパーティ認証） | HMAC state パラメータ | なし（ソーシャルのみ） |
-
-詳細フローは [`docs/core-flows.md`](docs/core-flows.md) Flow 7 を参照してください。
-
-## 権限連携モデル
-
-テナント、組織、ロール、機能権限、データ権限の5要素が連携して完全なアクセス制御を実現します：
-
-```
-テナント(Tenant) ─── 分離境界：ユーザー名はテナント内で一意、データはデフォルトでテナント別に分離
-  │
-  ├── ユーザー(User) ─── 1つのテナントに所属、複数のロールを保持可能
-  │     │
-  │     ├── ロール(Role) ─── ユーザーと権限を結ぶ架け橋
-  │     │     ├── 機能権限(Permission) ─── 「何ができるか」を制御（メニュー/ボタン/API）
-  │     │     └── データ範囲(DataScope) ─── 「どのデータが見えるか」を制御
-  │     │
-  │     └── 組織ユニット(OrgUnit) ─── ユーザーの所属部署、データ権限のアンカー
-  │
-  └── 権限ツリー(Permission Tree) ─── DIRECTORY → MENU → BUTTON → API 4層構造
-```
-
-**連携フロー**：
-
-1. **ログイン時**：`(tenantId, username)` でユーザー検索 → ロール読み込み → 権限読み込み → JWT 発行
-2. **機能制御**：JWT `scope` クレームに権限コードを格納 → フロントエンド動的メニュー + `v-permission` ボタン非表示 → バックエンド `@PreAuthorize` API 認可
-3. **データ制御**：ロールの `data_scope` で可視範囲を決定 → `DataScopeResolveFilter` が最も寛大な範囲を解決 → MyBatis-Plus が WHERE 条件を自動追加
-4. **組織連携**：ユーザーの `primaryUnitId` をデータ権限のアンカーとして使用 → `DEPT`/`DEPT_AND_BELOW` 範囲はマテリアライズドパスで階層を検索
-
-## 統一レスポンス形式
-
-全 API は `R<T>` ラッパーを使用します。フロントエンドとバックエンドは厳密な契約一貫性を維持します。詳細は [`docs/api-contract.md`](docs/api-contract.md) を参照してください。
-
-**成功レスポンス**:
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": { "id": 1, "username": "demo", "email": "demo@example.com" }
-}
-```
-
-**エラーレスポンス**:
-```json
-{
-  "code": 400,
-  "message": "username: Username is required; email: Email is required"
-}
-```
-
-**ページネーションレスポンス**:
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "records": [{ "id": 1, "username": "demo" }],
-    "total": 100,
-    "size": 10,
-    "current": 1,
-    "pages": 10
-  }
-}
-```
-
-## 開発者ガイド（新メンバー必読）
-
-### 1. コードを書く前にドキュメントを読む
-
-本プロジェクトは **Harness 産業デザインパターン** に従い、システム知識を三層に整理しています:
-
-| 層 | 内容 | 場所 |
-|----|------|------|
-| Layer 1: Architecture | システム境界、モジュール責任、データフロー、RBAC 権限システム、制約 | `docs/architecture.md` |
-| Layer 2: Patterns | バックエンド/フロントエンドコーディングパターン、API 契約、セキュリティ、コアフロー | `docs/backend-patterns.md`、`docs/frontend-patterns.md`、`docs/api-contract.md`、`docs/core-flows.md` |
-| Layer 3: Code | 具体的な関数、クラス、コンポーネント実装 | ソースファイル |
-
-**ルール**: コードを変更する前に、対応する `docs/` ドキュメントを確認してください。アーキテクチャや契約が変更される場合は、まず `docs/` を更新してからコードを修正します。
-
-### 2. バックエンド開発規約
-
-- **階層化**: Controller → Service (インターフェース) → ServiceImpl → Repository
-- **DI**: `@RequiredArgsConstructor` + `final` フィールド。`@Autowired` フィールド注入は禁止
-- **戻り値**: すべての Controller メソッドは `R<T>` を返す
-- **例外**: ビジネスエラーは `BusinessException` をスロー。`GlobalExceptionHandler` が統一処理
-- **ログ**: `@Slf4j` + パラメータ化プレースホルダー。`System.out.println` は禁止
-- **詳細規約**: `docs/backend-patterns.md` を参照
-
-### 3. フロントエンド開発規約
-
-- **API 層**: ドメイン別ファイル（`src/api/user.ts`）、`request.ts` の共有 Axios インスタンスを使用
-- **型**: 共有型は `src/types/api.ts` のみ — 重複定義は禁止
-- **ストア**: Pinia Composition API スタイル、`use` プレフィックス命名
-- **コンポーネント**: SFC 順序 `<script setup>` → `<template>` → `<style scoped>`
-- **ルーター**: 遅延ロード + `meta` 宣言 (title, icon, requiresAuth)
-- **詳細規約**: `docs/frontend-patterns.md` を参照
-
-### 4. コミット前チェックリスト
+新しいマイクロサービスは依存関係を追加するだけで機能が使えます。`AutoConfiguration.imports` によるゼロ設定自動構成：
+
+| モジュール | 機能 | 対象サービス |
+|------|------|---------|
+| `omni-common-core` | 純粋 POJO：`R<T>`、`PageResult`、`BaseEntity`、XSS SPI、UserJobHandler SPI | 全サービス |
+| `omni-common` | Web 自動設定：Jackson、CORS、グローバル例外処理、XSS Filter | Servlet サービス |
+| `omni-common-mybatis` | MyBatis-Plus + MySQL ドライバー + ページネーションプラグイン | Servlet サービス |
+| `omni-common-redis` | ブロッキング Redis + RedisTemplate シリアライズ + RedisUtils | Servlet サービス |
+| `omni-common-redis-reactive` | リアクティブ Redis（WebFlux サービス専用、**ブロッキング式との混用不可**） | Gateway |
+| `omni-common-operlog` | 操作ログ：@OperLog AOP + RocketMQ 非同期 + エンティティ diff + ホット/コールドテーブルアーカイブ | ビジネスサービス |
+| `omni-common-job` | 定期タスク：XXL-JOB 自動構成 + @SystemJobMeta デュアルアノテーションドリブン | ビジネスサービス |
+| `omni-common-mqlog` | 信頼性メッセージ：Transactional Outbox + リレー配信 + デッドレター管理 | Servlet サービス |
+| `omni-common-workflow` | ワークフロー：Flowable 自動構成 + ApprovalService SPI | ワークフローサービス |
+
+> 詳細な設計は [docs/backend-patterns.jp.md](docs/backend-patterns.jp.md) と [docs/architecture.jp.md](docs/architecture.jp.md) を参照
+
+### フロントエンド
+
+Vue 3 + TypeScript + Vite 8 + Element Plus + Pinia 3、開発規範の詳細は [docs/frontend-patterns.jp.md](docs/frontend-patterns.jp.md) を参照してください。
+
+| レイヤー | ディレクトリ | 役割 |
+|------|------|------|
+| API 層 | `src/api/` | ドメイン別に分割、統一 Axios インスタンス、型安全 |
+| Store 層 | `src/stores/` | Pinia Composition API、1 Store 1 ドメイン |
+| ルーティング層 | `src/router/` | 遅延読み込み + ナビゲーションガード |
+| ビュー層 | `src/views/` | SFC 順序：script → template → style |
+| 型層 | `src/types/` | 共有型の唯一の情報源（重複定義禁止） |
+
+## 開発ガイド（新メンバー必読）
+
+本プロジェクトは **Harness 産業設計モデル** を採用しています。システム知識は3層構造：**Architecture → Patterns → Code**。コードを修正する前に、対応する `docs/` ドキュメントを読んでください。
+
+| ルール | 説明 |
+|------|------|
+| 依存性注入 | `@RequiredArgsConstructor` + `final` フィールド、`@Autowired` は禁止 |
+| 戻り値 | 全 Controller は `R<T>` を返却、ページネーションは `R<PageResult<T>>` を使用 |
+| 例外処理 | ビジネス例外は `BusinessException` をスロー、`GlobalExceptionHandler` で統一処理 |
+| ログ | `@Slf4j` + パラメータ化プレースホルダー、`System.out.println` は禁止 |
+| 権限 | 書き込み操作は必ず `@PreAuthorize` を宣言、形式は `resource:action` |
+| フロントエンド型 | `ApiResponse`/`PageResult` は `src/types/api.ts` からのみインポート |
+| フロントエンドコンポーネント | SFC 順序：`<script setup>` → `<template>` → `<style scoped>` |
 
 ```bash
-# バックエンドコンパイル確認
-cd omni-backend && ./mvnw clean install
-
-# フロントエンドビルド + Lint 確認
-cd omni-frontend && npm run build && npm run lint
+# コミット前の検証
+cd omni-backend && ./mvnw clean install        # バックエンドコンパイル
+cd omni-frontend && npm run build && npm run lint  # フロントエンドビルド + Lint
 ```
 
-完全なチェックリストは `AGENTS.md` の Completion Checklist セクションを参照してください。
+> 完全な規約は [docs/backend-patterns.jp.md](docs/backend-patterns.jp.md) と [docs/frontend-patterns.jp.md](docs/frontend-patterns.jp.md) を参照、API 契約は [docs/api-contract.jp.md](docs/api-contract.jp.md) を参照
 
-### 5. よくある落とし穴
+## よくある落とし穴
 
-| 落とし穴 | 原因 | 解決策 |
-|---------|------|--------|
-| Gateway ルートが読み込まれない | 5.x で構成プレフィックスが変更 | `spring.cloud.gateway.server.webflux` を使用 — AGENTS.md Important Notes を参照 |
-| Maven クラスバージョンエラー | JAVA_HOME が JDK 25 を指していない | `JAVA_HOME` を JDK 25 ディレクトリに設定 |
-| フロントエンド型不整合 | `ApiResponse` が複数箇所で定義されている | `@/types/api` からのみインポート — 重複定義禁止 |
-| Actuator gateway エンドポイント 404 | 明示的な有効化が必要 | `management.endpoint.gateway.enabled: true` を構成 |
-| GitHub ソーシャルログインコールバック 404 | OAuth App が未作成または Client ID がプレースホルダー | 上記「ソーシャルログイン構成」に従い GitHub OAuth App を作成し、実認証情報を記入 |
-| Google ソーシャルログインコールバック 404 | Google Cloud Console OAuth クライアントが未作成または Client ID がプレースホルダー | 上記「ソーシャルログイン構成」に従い Google Cloud Console で OAuth 2.0 クライアントを作成し、実認証情報を記入 |
-| Gitee ソーシャルログインコールバック 404 | Gitee サードパーティアプリケーションが未作成または Client ID がプレースホルダー | 上記「ソーシャルログイン構成」に従い Gitee でサードパーティアプリケーションを作成し、実認証情報を記入 |
-| Google ログイン後コールバックページで停止 | データベースに `sys_user_oauth_provider` テーブルが存在しない | `init-all.sql` が実行済みであることを確認。このテーブルは全プロバイダーのバインディングを保存 |
-| GitHub ログイン後コールバックページで停止 | データベースに `sys_user_oauth_provider` テーブルが存在しない | `init-all.sql` が実行済みであることを確認（同テーブルを含む）、または手動で作成 |
-| Gitee ログイン後コールバックページで停止 | GitHub と同じ — `sys_user_oauth_provider` テーブルが存在しない | `init-all.sql` が実行済みであることを確認。このテーブルは全プロバイダーのバインディングを保存 |
-| ソーシャルログイン state 署名検証失敗 | `OAUTH2_STATE_SECRET` が未構成または再起動後に変更 | 固定の `OAUTH2_STATE_SECRET` 環境変数を設定し、署名キーの一貫性を確保 |
-| Nacos 再起動後に構成が消える | 組み込み Derby データベース使用、永続化なし | 本プロジェクトの `init-nacos.sql` を使用して MySQL 外部ストレージに切り替え |
-| Maven ビルド順序エラー | `omni-common-core` が先にインストールされておらず、下流モジュールのコンパイルに失敗 | 親 POM から `./mvnw clean install` を実行 — Maven reactor が `<modules>` 宣言順に基づき自動的に解決 |
-| Redis Starter 混用によるスレッド饥饿 | ブロッキング版 `omni-common-redis` を WebFlux サービスに導入 | WebFlux サービス（Gateway 等）は `omni-common-redis-reactive` のみ依存可能、混用不可 |
-| Spring Cloud Stream コンシューマーがメッセージを受信しない（RocketMQ コンシューマーグループ OFFLINE） | 複数の `Consumer<T>` Bean が存在する際に `spring.cloud.function.definition` が未設定または間違った名前空間（`spring.cloud.stream.function.definition`）に配置されている | `spring.cloud.function.definition: beanName1;beanName2` を `spring.cloud.function` の下に追加 — **`spring.cloud.stream.function` の下ではない**。例: `spring.cloud.function.definition: operlogConsumer;userJobConsumer` |
+| 落とし穴 | 説明 | 解決策 |
+|------|------|---------|
+| Gateway のルーティングが効かない | 5.x で設定プレフィックスが変更 | `spring.cloud.gateway.server.webflux` を使用 |
+| Maven クラスバージョンエラー | JAVA_HOME が JDK 25 を指していない | `JAVA_HOME` を JDK 25 のディレクトリに設定 |
+| Redis Starter の混用 | ブロッキング式が WebFlux サービスに導入される | Gateway は `omni-common-redis-reactive` のみ使用可能 |
+| Docker 502 エラー | Nginx proxy_pass のポート設定ミス | コンテナ間通信は内部ポート `8080` を使用、ホストマッピングポートではない |
+| Docker ポート競合 | Hyper-V/WSL2 の予約ポート | `start.bat` が自動処理、管理者権限での実行が必要 |
+| Nacos ヘルスチェック失敗 | v3.1.1 のエンドポイント変更 | `GET /nacos/` を使用、`/nacos/actuator/health` ではない |
+| フロントエンドの型不一致 | `ApiResponse` が複数箇所で定義 | `@/types/api` からのみインポート |
+| Stream コンシューマー OFFLINE | function.definition のネームスペースエラー | `spring.cloud.function` 配下に配置、`spring.cloud.stream.function` ではない |
 
-## AI ネイティブエンジニアリング実践
+## AI ネイティブプロジェクト
 
-本プロジェクトは AI 支援開発ワークフローに対応しています:
+- **`AGENTS.md`**：AI 実行マニュアル、ハード制約 + 実行ルール + 完了チェックリスト
+- **`docs/`**：システムの真実ドキュメント、AI がコードを修正する前に読んでシステムの文脈を理解
+- **`.qoder/skills/`**：AI 行動拡張ユニット（例：`/grill-me` 方案ストレステスト）
 
-- **`AGENTS.md`**: AI 実行マニュアル — ハード制約、実行ルール、完了チェックリストを定義
-- **`docs/` ディレクトリ**: システム真実ドキュメント — AI がコードを変更する前にこれらを読んでシステム文脈を理解
-- **`.qoder/skills/`**: AI 行動拡張ユニット（例: `/grill-me` デザインストレステスト Skill）
-
-コア原則: **Layer 1 と Layer 2（Architecture + Patterns）を先に定義することで、Layer 3（Code）を AI に全力で高速生産させることができます。**
+> **最初の2層（Architecture + Patterns）を固めれば、3層目（Code）は安心して AI に高速生産を任せられます。**
 
 ## ライセンス
 
@@ -702,14 +335,14 @@ cd omni-frontend && npm run build && npm run lint
 
 ---
 
-## サポート
+## プロジェクトを応援する
 
-このプロジェクトが役に立ったら、Star で応援してください！
+このプロジェクトがお役に立てれば、Star で応援していただけると嬉しいです！
 
 **GitHub**: [https://github.com/wang-baohai/Omni-Stack](https://github.com/wang-baohai/Omni-Stack)
 **Gitee**: [https://gitee.com/wang-baohai/Omni-Stack](https://gitee.com/wang-baohai/Omni-Stack)
 
-[PR](https://github.com/wang-baohai/Omni-Stack/pulls) 歓迎！
+皆様の [PR](https://github.com/wang-baohai/Omni-Stack/pulls) をお待ちしています！
 
 ---
 

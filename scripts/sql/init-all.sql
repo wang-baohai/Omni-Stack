@@ -328,33 +328,33 @@ CREATE TABLE IF NOT EXISTS sys_xss_blacklist_rule (
 -- ============================================================
 
 -- 4.1 默认租户
-INSERT INTO sys_tenant (id, tenant_code, tenant_name, domain, contact_name, contact_phone, status, create_by)
+INSERT IGNORE INTO sys_tenant (id, tenant_code, tenant_name, domain, contact_name, contact_phone, status, create_by)
 VALUES (1, 'default', 'Default Tenant', NULL, 'admin', NULL, 1, 'system');
 
 -- 4.2 根组织单元
-INSERT INTO sys_org_unit (id, tenant_id, parent_id, name, type, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, path, depth, sort, status, create_by)
 VALUES (1, 1, 0, 'Default Tenant', 'ORG', '/1/', 1, 0, 1, 'system');
 
 -- 4.3 管理员用户（密码: admin123，BCrypt 编码）
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, email, phone, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, email, phone, gender, primary_unit_id, status, create_by)
 VALUES (1, 1, 'admin', '$2b$10$QjkPz8OnRoNOXTrsj./ov.nDZxK.KvsAZdjzgb1YgWSKKprOVxfIW', 'Administrator', NULL, NULL, 0, 1, 1, 'system');
 
 -- 4.4 超级管理员角色
-INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+INSERT IGNORE INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
 VALUES (1, 1, 'SUPER_ADMIN', 'Super Administrator', 'ALL', 0, 1, 'system');
 
 -- 4.4.1 默认用户角色（新用户自动关联，无管理权限）
-INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+INSERT IGNORE INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
 VALUES (2, 1, 'USER', 'Default User', 'SELF', 99, 1, 'system');
 
 -- 4.5 用户角色映射：admin → SUPER_ADMIN
-INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (1, 1);
 
 -- 4.6 用户组织映射：admin → 根组织（主组织）
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (1, 1, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (1, 1, 1);
 
 -- 4.7 权限树（1 个目录 + 9 个菜单 + 28 个 API 权限 = 38 条）
-INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (1,  1, 0, 'system',                '系统管理',   'DIRECTORY', '/1/',       1, 0, 1, 'system'),
     (2,  1, 1, 'system:user',           '用户管理',     'MENU',      '/1/2/',     2, 1, 1, 'system'),
@@ -396,7 +396,7 @@ VALUES
     (38, 1, 37,'system:auditlog:list',  '查看审计日志',   'API',       '/1/37/38/', 3, 1, 1, 'system');
 
 -- 4.8 角色权限映射：SUPER_ADMIN 拥有全部权限
-INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6),
     (1, 7), (1, 8), (1, 9), (1, 10),
     (1, 11), (1, 12), (1, 13), (1, 14),
@@ -409,7 +409,7 @@ INSERT INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 39), (1, 40), (1, 41), (1, 42), (1, 43);
 
 -- 4.9 XSS 防护权限节点（1 个菜单 + 4 个 API 权限 = 5 条）
-INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (39, 1, 1,  'system:xssconfig',         'XSS防护配置',   'MENU', '/1/39/',    2, 10, 1, 'system'),
     (40, 1, 39, 'system:xssconfig:list',    '查看XSS配置',   'API',  '/1/39/40/', 3, 1,  1, 'system'),
@@ -418,10 +418,10 @@ VALUES
     (43, 1, 39, 'system:xssconfig:delete',  '删除XSS规则',   'API',  '/1/39/43/', 3, 4,  1, 'system');
 
 -- 4.10 XSS 防护默认配置（默认租户：关闭状态）
-INSERT INTO sys_xss_config (tenant_id, enabled, create_by) VALUES (1, 0, 'system');
+INSERT IGNORE INTO sys_xss_config (tenant_id, enabled, create_by) VALUES (1, 0, 'system');
 
 -- 4.11 XSS 黑名单预置规则
-INSERT INTO sys_xss_blacklist_rule (tenant_id, rule_name, rule_type, pattern, enabled, description, sort_order, create_by) VALUES
+INSERT IGNORE INTO sys_xss_blacklist_rule (tenant_id, rule_name, rule_type, pattern, enabled, description, sort_order, create_by) VALUES
     (1, 'Script标签',     'HTML_TAG',           'script',            1, '拦截<script>标签及其内容',   1,  'system'),
     (1, 'IFrame标签',     'HTML_TAG',           'iframe',            1, '拦截<iframe>标签及其内容',   2,  'system'),
     (1, 'Object标签',     'HTML_TAG',           'object',            1, '拦截<object>标签及其内容',   3,  'system'),
@@ -434,7 +434,7 @@ INSERT INTO sys_xss_blacklist_rule (tenant_id, rule_name, rule_type, pattern, en
     (1, 'Expression',     'CUSTOM_PATTERN',     'expression\\s*\\(', 1, '拦截CSS expression表达式',   10, 'system');
 
 -- 4.12 Base 服务权限节点（1 个目录 + 1 个菜单 + 9 个 API 权限 = 11 条）
-INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (50, 1, 0,  'base',                 '基础数据',       'DIRECTORY', '/50/',       1, 1, 1, 'system'),
     (51, 1, 50, 'base:dict',            '字典管理',       'MENU',      '/50/51/',    2, 1, 1, 'system'),
@@ -449,7 +449,7 @@ VALUES
     (60, 1, 51, 'dict:data:refresh',    '刷新字典缓存',   'API',       '/50/51/60/', 3, 9, 1, 'system');
 
 -- 4.13 运维监控权限节点（1 个目录 + 2 个菜单 + 4 个 API 权限 = 7 条）
-INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (63, 1, 0,  'monitor',                  '运维监控',     'DIRECTORY', '/63/',          1, 5, 1, 'system'),
     (61, 1, 63, 'base:operlog',             '操作日志',     'MENU',      '/63/61/',       2, 1, 1, 'system'),
@@ -460,7 +460,7 @@ VALUES
     (67, 1, 64, 'base:mqmessage:skip',      '忽略消息',     'API',       '/63/64/67/',    3, 3, 1, 'system');
 
 -- 4.14 SUPER_ADMIN 角色追加 Base 服务权限
-INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 50), (1, 51), (1, 52), (1, 53), (1, 54), (1, 55),
     (1, 56), (1, 57), (1, 58), (1, 59), (1, 60), (1, 61), (1, 62),
     (1, 63), (1, 64), (1, 65), (1, 66), (1, 67);
@@ -562,13 +562,13 @@ CREATE TABLE IF NOT EXISTS sys_oper_log_archive (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志归档冷表';
 
 -- 5.5 预置字典类型（默认租户 1）
-INSERT INTO sys_dict_type (tenant_id, type_code, type_name, sort, status, create_by) VALUES
+INSERT IGNORE INTO sys_dict_type (tenant_id, type_code, type_name, sort, status, create_by) VALUES
     (1, 'sys_user_gender',   '用户性别',   1, 1, 'system'),
     (1, 'sys_common_status', '通用状态',   2, 1, 'system'),
     (1, 'sys_notice_type',   '通知类型',   3, 1, 'system');
 
 -- 5.6 预置字典数据
-INSERT INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, tag_type, sort, status, create_by) VALUES
+INSERT IGNORE INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, tag_type, sort, status, create_by) VALUES
     (1, 'sys_user_gender', '1', '男',     'primary', 1, 1, 'system'),
     (1, 'sys_user_gender', '2', '女',     'danger',  2, 1, 'system'),
     (1, 'sys_user_gender', '0', '未知',   'info',    3, 1, 'system'),
@@ -663,12 +663,12 @@ CREATE TABLE IF NOT EXISTS sys_mq_message (
 USE omni_auth;
 
 -- 7.0 任务调度一级目录
-INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (110, 1, 0, 'job', '任务调度', 'DIRECTORY', '/110/', 1, 2, 1, 'system');
 
 -- 7.1 任务类型管理权限（1 MENU + 4 API = 5 条）
-INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (70, 1, 110, 'job:user-job-type',        '任务类型管理',     'MENU', '/110/70/',      2, 1, 1, 'system'),
     (71, 1, 70,  'job:user-job-type:list',    '查看任务类型',     'API',  '/110/70/71/',   3, 1, 1, 'system'),
@@ -677,19 +677,19 @@ VALUES
     (74, 1, 70,  'job:user-job-type:delete',  '删除任务类型',     'API',  '/110/70/74/',   3, 4, 1, 'system');
 
 -- 7.4 SUPER_ADMIN 角色追加 Phase 2 权限
-INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 110),
     (1, 70), (1, 71), (1, 72), (1, 73), (1, 74);
 
 -- 7.5 系统任务管理权限（1 MENU + 2 API = 3 条）
-INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (100, 1, 110, 'job:system-job',           '系统任务',         'MENU', '/110/100/',      2, 4, 1, 'system'),
     (101, 1, 100, 'job:system-job:list',     '查看系统任务',     'API',  '/110/100/101/',   3, 1, 1, 'system'),
     (102, 1, 100, 'job:system-job:manage',   '管理系统任务',     'API',  '/110/100/102/',   3, 2, 1, 'system');
 
 -- 7.6 SUPER_ADMIN 角色追加系统任务权限
-INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 100), (1, 101), (1, 102);
 
 -- ============================================================
@@ -810,7 +810,7 @@ CREATE TABLE IF NOT EXISTS sys_mq_message (
 USE omni_auth;
 
 -- 工作流管理目录
-INSERT INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (200, 1, 0,   'workflow',                        '工作流管理',     'DIRECTORY', '/200/',          1, 6, 1, 'system'),
     (201, 1, 200, 'workflow:definition',              '流程定义',       'MENU',      '/200/201/',      2, 2, 1, 'system'),
@@ -840,19 +840,25 @@ VALUES
     (230, 1, 224, 'workflow:model:delete',            '删除模型',       'API',       '/200/224/230/',  3, 6, 1, 'system');
 
 -- SUPER_ADMIN 角色追加工作流权限
-INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 200), (1, 201), (1, 202), (1, 203), (1, 204), (1, 205),
     (1, 210), (1, 211), (1, 212), (1, 213), (1, 214), (1, 215),
     (1, 216), (1, 217), (1, 218), (1, 220), (1, 221),
     (1, 222), (1, 223), (1, 224), (1, 225), (1, 226), (1, 227),
     (1, 228), (1, 229), (1, 230);
 
--- USER 角色追加用户侧工作流权限（发起、查看自己的待办、处理自己的审批任务）
-INSERT INTO sys_role_permission (role_id, permission_id) VALUES
-    (2, 211), (2, 212), (2, 213), (2, 214), (2, 215), (2, 216), (2, 217), (2, 218);
+-- USER 角色追加只读菜单权限（系统各模块浏览 + 工作流查看，无写操作权限）
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
+    (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
+    (2, 11), (2, 15), (2, 19), (2, 23),
+    (2, 27), (2, 28),
+    (2, 51), (2, 52), (2, 56),
+    (2, 61), (2, 62),
+    (2, 70), (2, 71),
+    (2, 201), (2, 202), (2, 210), (2, 211), (2, 214);
 
 -- EMPLOYEE / TEAM_LEADER / DEPT_LEADER 追加用户侧工作流权限
-INSERT INTO sys_role_permission (role_id, permission_id) VALUES
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
     (10, 211), (10, 212), (10, 213), (10, 214), (10, 215), (10, 216), (10, 217), (10, 218),
     (11, 211), (11, 212), (11, 213), (11, 214), (11, 215), (11, 216), (11, 217), (11, 218),
     (12, 211), (12, 212), (12, 213), (12, 214), (12, 215), (12, 216), (12, 217), (12, 218);
@@ -860,11 +866,11 @@ INSERT INTO sys_role_permission (role_id, permission_id) VALUES
 -- 8.7 流程分类字典数据（写入 omni_base.sys_dict_type + sys_dict_data）
 USE omni_base;
 
-INSERT INTO sys_dict_type (id, tenant_id, type_code, type_name, remark, sort, status, create_by)
+INSERT IGNORE INTO sys_dict_type (id, tenant_id, type_code, type_name, remark, sort, status, create_by)
 VALUES
     (10, 1, 'workflow_category', '流程分类', '工作流审批流程的分类标签', 10, 1, 'system');
 
-INSERT INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, sort, status, create_by)
+INSERT IGNORE INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, sort, status, create_by)
 VALUES
     (1, 'workflow_category', 'leave',    '请假审批', 1, 1, 'system'),
     (1, 'workflow_category', 'expense',  '报销审批', 2, 1, 'system'),
@@ -1138,86 +1144,210 @@ CREATE TABLE IF NOT EXISTS sys_mq_message (
 USE omni_auth;
 
 -- 10.1 组织架构
-INSERT INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
 VALUES (100, 1, 1, '技术研发部', 'DEPT', 'tech-dept', '/1/100/', 2, 1, 1, 'system');
 
-INSERT INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
 VALUES (101, 1, 100, '后端1组', 'TEAM', 'backend-1', '/1/100/101/', 3, 1, 1, 'system');
 
-INSERT INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
 VALUES (102, 1, 100, '架构1组', 'TEAM', 'arch-1', '/1/100/102/', 3, 2, 1, 'system');
 
-INSERT INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
 VALUES (200, 1, 1, '人事部', 'DEPT', 'hr-dept', '/1/200/', 2, 2, 1, 'system');
 
 -- 10.2 角色
-INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+INSERT IGNORE INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
 VALUES (10, 1, 'EMPLOYEE', '普通员工', 'SELF', 10, 1, 'system');
 
-INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+INSERT IGNORE INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
 VALUES (11, 1, 'TEAM_LEADER', '工作组组长', 'DEPT', 11, 1, 'system');
 
-INSERT INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+INSERT IGNORE INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
 VALUES (12, 1, 'DEPT_LEADER', '部门领导', 'DEPT_AND_BELOW', 12, 1, 'system');
 
 -- 10.3 用户（密码统一为 123456，BCrypt 编码）
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
 VALUES (100, 1, 'zhangsan', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '张三', 1, 101, 1, 'system');
 
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
 VALUES (101, 1, 'lisi', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '李四', 1, 101, 1, 'system');
 
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
 VALUES (102, 1, 'lisi2', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '李四2', 1, 101, 1, 'system');
 
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
 VALUES (103, 1, 'wangwu', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '王五', 1, 102, 1, 'system');
 
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
 VALUES (104, 1, 'wangwu2', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '王五2', 1, 102, 1, 'system');
 
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
 VALUES (105, 1, 'zhaoliu', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '赵六', 1, 100, 1, 'system');
 
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
 VALUES (106, 1, 'zhaoliu2', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '赵六2', 1, 100, 1, 'system');
 
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
 VALUES (107, 1, 'qianqi', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '钱七', 1, 200, 1, 'system');
 
-INSERT INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
 VALUES (108, 1, 'qianqi2', '$2b$10$b2rvxsi2LxHSZxzOuf4jOemAbYsmWGIWW/OhjzGBWWeg60lW/oLCa', '钱七2', 1, 200, 1, 'system');
 
 -- 10.4 用户角色作用域（sys_user_role_scope）
-INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 100, 10, 101, 'SAME_UNIT', 1);
-INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 101, 11, 101, 'SAME_UNIT', 1);
-INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 102, 11, 101, 'SAME_UNIT', 1);
-INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 103, 11, 102, 'SAME_UNIT', 1);
-INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 104, 11, 102, 'SAME_UNIT', 1);
-INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 105, 12, 100, 'SAME_UNIT', 1);
-INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 106, 12, 100, 'SAME_UNIT', 1);
-INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 107, 12, 200, 'SAME_UNIT', 1);
-INSERT INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 108, 12, 200, 'SAME_UNIT', 1);
+INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 100, 10, 101, 'SAME_UNIT', 1);
+INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 101, 11, 101, 'SAME_UNIT', 1);
+INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 102, 11, 101, 'SAME_UNIT', 1);
+INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 103, 11, 102, 'SAME_UNIT', 1);
+INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 104, 11, 102, 'SAME_UNIT', 1);
+INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 105, 12, 100, 'SAME_UNIT', 1);
+INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 106, 12, 100, 'SAME_UNIT', 1);
+INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 107, 12, 200, 'SAME_UNIT', 1);
+INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status) VALUES (1, 108, 12, 200, 'SAME_UNIT', 1);
 
 -- 10.5 用户角色关联（sys_user_role）
-INSERT INTO sys_user_role (user_id, role_id) VALUES (100, 10);
-INSERT INTO sys_user_role (user_id, role_id) VALUES (101, 11);
-INSERT INTO sys_user_role (user_id, role_id) VALUES (102, 11);
-INSERT INTO sys_user_role (user_id, role_id) VALUES (103, 11);
-INSERT INTO sys_user_role (user_id, role_id) VALUES (104, 11);
-INSERT INTO sys_user_role (user_id, role_id) VALUES (105, 12);
-INSERT INTO sys_user_role (user_id, role_id) VALUES (106, 12);
-INSERT INTO sys_user_role (user_id, role_id) VALUES (107, 12);
-INSERT INTO sys_user_role (user_id, role_id) VALUES (108, 12);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (100, 10);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (101, 11);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (102, 11);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (103, 11);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (104, 11);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (105, 12);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (106, 12);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (107, 12);
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (108, 12);
 
 -- 10.6 用户组织关联（sys_user_unit）
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (100, 101, 1);
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (101, 101, 1);
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (102, 101, 1);
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (103, 102, 1);
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (104, 102, 1);
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (105, 100, 1);
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (106, 100, 1);
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (107, 200, 1);
-INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (108, 200, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (100, 101, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (101, 101, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (102, 101, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (103, 102, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (104, 102, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (105, 100, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (106, 100, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (107, 200, 1);
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (108, 200, 1);
+
+-- ============================================================
+-- Section 11: 租户初始化存储过程
+-- 创建新租户后调用 CALL sp_init_tenant(newTenantId, 'tenantName', 'adminPassword')
+-- 自动克隆权限树、创建默认角色、根组织、管理员账号、XSS 配置
+-- ============================================================
+USE omni_auth;
+
+DROP PROCEDURE IF EXISTS sp_init_tenant;
+
+DELIMITER //
+
+CREATE PROCEDURE sp_init_tenant(
+    IN p_tenant_id   BIGINT,
+    IN p_tenant_name VARCHAR(200),
+    IN p_admin_pwd   VARCHAR(255)
+)
+BEGIN
+    DECLARE v_old_id     BIGINT;
+    DECLARE v_parent_id  BIGINT;
+    DECLARE v_new_id     BIGINT;
+    DECLARE v_done       INT DEFAULT 0;
+
+    -- 按 depth 排序保证父节点先插入
+    DECLARE cur CURSOR FOR
+        SELECT id, parent_id FROM sys_permission
+        WHERE tenant_id = 1 ORDER BY depth, id;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;
+
+    -- Step 1: 克隆权限树（tenant 1 作为模板）
+    CREATE TEMPORARY TABLE tmp_perm_map (old_id BIGINT PRIMARY KEY, new_id BIGINT);
+
+    OPEN cur;
+    perm_loop: LOOP
+        FETCH cur INTO v_old_id, v_parent_id;
+        IF v_done THEN LEAVE perm_loop; END IF;
+
+        INSERT INTO sys_permission (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+        SELECT p_tenant_id,
+               IF(parent_id = 0, 0, IFNULL((SELECT new_id FROM tmp_perm_map WHERE old_id = t.parent_id), 0)),
+               permission_code, permission_name, type, path, depth, sort, 1, 'system'
+        FROM sys_permission t WHERE t.id = v_old_id;
+
+        SET v_new_id = LAST_INSERT_ID();
+        INSERT INTO tmp_perm_map (old_id, new_id) VALUES (v_old_id, v_new_id);
+    END LOOP;
+    CLOSE cur;
+
+    -- Step 2: 创建默认角色
+    INSERT INTO sys_role (tenant_id, role_code, role_name, data_scope, sort, status, create_by) VALUES
+        (p_tenant_id, 'SUPER_ADMIN', 'Super Administrator', 'ALL',  0, 1, 'system'),
+        (p_tenant_id, 'USER',        'Default User',        'SELF', 99, 1, 'system'),
+        (p_tenant_id, 'EMPLOYEE',    '普通员工',             'SELF', 10, 1, 'system'),
+        (p_tenant_id, 'TEAM_LEADER', '工作组组长',         'DEPT', 11, 1, 'system'),
+        (p_tenant_id, 'DEPT_LEADER', '部门领导', 'DEPT_AND_BELOW', 12, 1, 'system');
+
+    -- Step 3: SUPER_ADMIN 获得全部权限
+    INSERT INTO sys_role_permission (role_id, permission_id)
+    SELECT (SELECT id FROM sys_role WHERE tenant_id = p_tenant_id AND role_code = 'SUPER_ADMIN' LIMIT 1),
+           new_id FROM tmp_perm_map;
+
+    -- Step 4: USER 角色只读菜单权限
+    INSERT INTO sys_role_permission (role_id, permission_id)
+    SELECT (SELECT id FROM sys_role WHERE tenant_id = p_tenant_id AND role_code = 'USER' LIMIT 1),
+           m.new_id
+    FROM tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE p.permission_code IN (
+        'system:user','system:role','system:permission','system:org','system:tenant',
+        'system:user:list','system:role:list','system:permission:list','system:org:list','system:tenant:list',
+        'system:oauth2','system:oauth2:list',
+        'base:dict','dict:type:list','dict:data:list',
+        'base:operlog','base:operlog:list',
+        'job:user-job-type','job:user-job-type:list',
+        'workflow:definition','workflow:definition:list',
+        'workflow:instance','workflow:instance:list','workflow:task:todo'
+    );
+
+    -- Step 5: EMPLOYEE / TEAM_LEADER / DEPT_LEADER 工作流操作权限
+    INSERT INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id
+      AND r.role_code IN ('EMPLOYEE', 'TEAM_LEADER', 'DEPT_LEADER')
+      AND p.permission_code IN (
+          'workflow:instance:list','workflow:instance:start','workflow:instance:terminate',
+          'workflow:task:todo','workflow:approval:complete',
+          'workflow:approval:add-signer','workflow:approval:remove-signer','workflow:approval:delegate'
+      );
+
+    -- Step 6: 创建根组织
+    INSERT INTO sys_org_unit (tenant_id, parent_id, name, type, path, depth, sort, status, create_by)
+    VALUES (p_tenant_id, 0, p_tenant_name, 'ORG', CONCAT('/', p_tenant_id, '/'), 1, 0, 1, 'system');
+
+    -- Step 7: 创建管理员账号（默认密码由调用方传入，BCrypt 编码）
+    INSERT INTO sys_user (tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
+    VALUES (p_tenant_id, 'admin', p_admin_pwd, CONCAT(p_tenant_name, ' Admin'), 0,
+            (SELECT id FROM sys_org_unit WHERE tenant_id = p_tenant_id AND parent_id = 0 LIMIT 1),
+            1, 'system');
+
+    -- Step 8: 关联管理员角色和组织
+    INSERT INTO sys_user_role (user_id, role_id) VALUES (
+        LAST_INSERT_ID(),
+        (SELECT id FROM sys_role WHERE tenant_id = p_tenant_id AND role_code = 'SUPER_ADMIN' LIMIT 1)
+    );
+    INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (
+        (SELECT id FROM sys_user WHERE tenant_id = p_tenant_id AND username = 'admin' LIMIT 1),
+        (SELECT id FROM sys_org_unit WHERE tenant_id = p_tenant_id AND parent_id = 0 LIMIT 1),
+        1
+    );
+
+    -- Step 9: XSS 防护默认配置 + 预置规则
+    INSERT INTO sys_xss_config (tenant_id, enabled, create_by) VALUES (p_tenant_id, 0, 'system');
+    INSERT INTO sys_xss_blacklist_rule (tenant_id, rule_name, rule_type, pattern, enabled, description, sort_order, create_by)
+    SELECT p_tenant_id, rule_name, rule_type, pattern, enabled, description, sort_order, 'system'
+    FROM sys_xss_blacklist_rule WHERE tenant_id = 1;
+
+    -- 清理临时表
+    DROP TEMPORARY TABLE IF EXISTS tmp_perm_map;
+END//
+
+DELIMITER ;
 

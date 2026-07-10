@@ -7,6 +7,7 @@ import com.omni.auth.dto.TenantOption;
 import com.omni.auth.dto.UpdateTenantRequest;
 import com.omni.auth.entity.SysTenant;
 import com.omni.auth.mapper.SysTenantMapper;
+import com.omni.auth.mapper.TenantProvisionMapper;
 import com.omni.auth.service.TenantService;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.PageResult;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +37,12 @@ public class TenantServiceImpl implements TenantService {
 
     /** 租户 Mapper */
     private final SysTenantMapper sysTenantMapper;
+
+    /** 租户初始化 Mapper（调用存储过程） */
+    private final TenantProvisionMapper tenantProvisionMapper;
+
+    /** 密码编码器 */
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * {@inheritDoc}
@@ -87,6 +96,9 @@ public class TenantServiceImpl implements TenantService {
 
     /**
      * {@inheritDoc}
+     *
+     * <p>创建租户后自动初始化：权限树（克隆 tenant 1）、默认角色（SUPER_ADMIN / USER / EMPLOYEE /
+     * TEAM_LEADER / DEPT_LEADER）、根组织单元、管理员账号（默认密码 admin123）和 XSS 防护配置。</p>
      */
     @Override
     @Transactional
@@ -99,7 +111,11 @@ public class TenantServiceImpl implements TenantService {
         tenant.setContactPhone(request.getContactPhone());
         tenant.setStatus(request.getStatus() != null ? request.getStatus() : 1);
         sysTenantMapper.insert(tenant);
-        log.info("已创建租户: {} ({})", tenant.getTenantName(), tenant.getTenantCode());
+
+        // 调用存储过程一键初始化租户数据
+        String adminPwd = passwordEncoder.encode("admin123");
+        tenantProvisionMapper.initTenant(tenant.getId(), tenant.getTenantName(), adminPwd);
+        log.info("已创建租户并初始化数据: {} (id={})", tenant.getTenantName(), tenant.getId());
         return tenant;
     }
 

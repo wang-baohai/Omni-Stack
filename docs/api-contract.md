@@ -1,33 +1,55 @@
-# API Contract
+# API 契约
 
-This document defines the definitive API contract between frontend and backend. Both sides must conform to these structures. Any deviation requires explicit team approval.
+> 本文档定义了前端与后端之间的权威 API 契约。双方必须遵守这些结构。任何偏离需要团队明确批准。  
+> 社交登录完整流程详见 [core-flows.md](core-flows.md)。数据字典和工作流端点详见各自文档。
 
-## Response Envelope
+---
 
-All API responses use the unified `R<T>` wrapper.
+## 目录
+
+- [1. 响应封装](#1-响应封装)
+- [2. 错误码速查表](#2-错误码速查表)
+- [3. 分页契约](#3-分页契约)
+- [4. RESTful URL 规范](#4-restful-url-规范)
+- [5. Gateway 路由配置](#5-gateway-路由配置)
+- [6. 命名约定](#6-命名约定)
+- [7. 时间格式](#7-时间格式)
+- [8. 请求头约定](#8-请求头约定)
+- [9. 认证头](#9-认证头)
+- [10. 社交登录端点](#10-社交登录端点)
+- [11. XSS 配置管理端点](#11-xss-配置管理端点)
+- [12. Base 服务字典管理端点](#12-base-服务字典管理端点)
+- [13. API 版本管理策略](#13-api-版本管理策略)
+- [14. Null 语义](#14-null-语义)
+
+---
+
+## 1. 响应封装
+
+所有 API 响应使用统一的 `R<T>` 封装。
 
 ```json
-// Success
+// 成功
 {
   "code": 200,
   "message": "success",
   "data": { ... }
 }
 
-// Failure (business error)
+// 失败（业务错误）
 {
   "code": 500,
-  "message": "Operation failed"
+  "message": "操作失败"
 }
 
-// Failure (validation error)
+// 失败（验证错误）
 {
   "code": 400,
-  "message": "username: Username is required; email: Email is required"
+  "message": "username: 用户名不能为空; email: 邮箱不能为空"
 }
 ```
 
-### Backend Type: `R<T>`
+### 后端类型：`R<T>`
 
 ```java
 @Data
@@ -42,7 +64,9 @@ public class R<T> implements Serializable {
 }
 ```
 
-### Frontend Type: `ApiResponse<T>`
+**位置**：`omni-common-core` 模块，`com.omni.common.core.result.R`。
+
+### 前端类型：`ApiResponse<T>`
 
 ```typescript
 interface ApiResponse<T = unknown> {
@@ -52,30 +76,71 @@ interface ApiResponse<T = unknown> {
 }
 ```
 
-**Canonical location**: `src/types/api.ts` (single source of truth; do not duplicate in other files).
+**权威位置**：`src/types/api.ts`（唯一真实来源；不要在其他文件中重复定义）。
 
-## Error Code Mapping
+---
 
-| HTTP Status | Business Code | Scenario | Trigger |
-|-------------|---------------|----------|---------|
-| 200 | 200 | Success | `R.ok(data)` |
-| 200 | 400 | Validation failure | `MethodArgumentNotValidException` / `BindException` caught by `GlobalExceptionHandler` |
-| 200 | 401 | Authentication required | Future: `AuthFilter` returns 401 |
-| 200 | 500 | Business exception | `BusinessException` caught by `GlobalExceptionHandler` |
-| 200 | 500 | Unexpected error | Catch-all `Exception` handler |
+## 2. 错误码速查表
 
-**Note**: The HTTP status is always 200 for business responses (the error code is in the `code` field). The exceptions are validation errors which return HTTP 400 via `@ResponseStatus`.
+### 2.1 系统级错误码
 
-### Frontend Error Handling
+| HTTP 状态码 | 业务码 | 场景 | 触发条件 | 处理方 |
+|------------|--------|------|---------|--------|
+| 200 | 200 | 成功 | `R.ok(data)` | — |
+| 400 | 400 | 参数校验失败 | `MethodArgumentNotValidException` / `BindException` 被 `GlobalExceptionHandler` 捕获 | 前端显示 `message` 中的字段错误 |
+| 401 | 401 | 未认证 | Gateway `AuthFilter` 返回 401 JSON | 前端自动跳转登录页 |
+| 403 | 403 | 权限不足 | `AccessDeniedException` / `AuthorizationDeniedException` 被 `GlobalExceptionHandler` 捕获 | 前端显示"权限不足"提示 |
+| 200 | 404 | 资源不存在 | `throw new BusinessException(404, "xxx不存在")` | 前端显示错误信息 |
+| 200 | 500 | 业务异常 | `BusinessException` 被 `GlobalExceptionHandler` 捕获 | 前端显示错误信息 |
+| 500 | 500 | 未知系统错误 | 兜底 `Exception` 处理器 | 前端显示"服务器内部错误" |
 
-The Axios response interceptor in `src/api/request.ts` checks `res.code !== 200`:
-- Shows `ElMessage.error(res.message)`
-- On code `401`: calls `userStore.logout()` and redirects to `/login`
-- Returns `Promise.reject(new Error(res.message))`
+### 2.2 业务级错误码
 
-## Pagination Contract
+| 业务码 | 场景 | 消息示例 |
+|--------|------|---------|
+| 500 | 验证码无效/过期 | "验证码已过期" |
+| 500 | 认证失败 | "用户名或密码错误" |
+| 500 | 账号被禁用 | "账号已被禁用" |
+| 500 | 账号被锁定 | "账号已锁定，请 N 分钟后重试" |
+| 500 | 租户不存在/禁用 | "租户不存在或已禁用" |
+| 400 | 唯一性冲突 | "用户名已存在" / "任务类型编码已存在" |
+| 404 | 资源不存在 | "组织单元不存在" / "字典数据不存在" |
+| 403 | 权限不足 | "权限不足，拒绝访问" |
 
-### Backend Type: `PageResult<T>`
+### 2.3 Gateway 级错误码
+
+| HTTP 状态码 | 场景 | 响应格式 |
+|------------|------|---------|
+| 401 | JWT 签名无效 | `{"code":401,"message":"Invalid JWT signature","data":null}` |
+| 401 | JWT 已过期 | `{"code":401,"message":"JWT token expired","data":null}` |
+| 401 | Token 已被撤销 | `{"code":401,"message":"Token has been revoked","data":null}` |
+| 401 | 缺少 Authorization 头 | `{"code":401,"message":"Missing Authorization header","data":null}` |
+
+### 2.4 社交登录错误码
+
+| error 参数 | 含义 | 触发条件 |
+|------------|------|---------|
+| `user_denied` | 用户拒绝授权 | 第三方平台回调携带 `error=access_denied` |
+| `invalid_callback` | 回调参数缺失 | code 或 state 为空 |
+| `social_login_failed` | 登录流程异常 | state 验证失败、第三方 API 错误、用户信息获取失败、用户已禁用 |
+
+### 2.5 前端错误处理流程
+
+Axios 响应拦截器（`src/api/request.ts`）检查 `res.code !== 200`：
+1. 显示 `ElMessage.error(res.message)` 错误提示
+2. 当 code 为 `401` 时：调用 `userStore.logout()` 并重定向到 `/login`
+3. 返回 `Promise.reject(new Error(res.message))`
+
+**HTTP 状态码处理**：
+- HTTP 401（Gateway JWT 验证失败）：Axios `onError` 拦截器捕获，清除 Token 并跳转登录页
+- HTTP 403（权限不足）：显示 `ElMessage.error("权限不足")` 并返回上一页
+- HTTP 400（参数校验失败）：显示 `GlobalExceptionHandler` 返回的字段级错误信息
+
+---
+
+## 3. 分页契约
+
+### 后端类型：`PageResult<T>`
 
 ```java
 @Data
@@ -84,13 +149,13 @@ public class PageResult<T> implements Serializable {
     private long total;
     private long size;
     private long current;
-    private long pages;   // auto-calculated: (total + size - 1) / size
+    private long pages;   // 自动计算: (total + size - 1) / size
 
     public PageResult(List<T> records, long total, long size, long current) { ... }
 }
 ```
 
-### Frontend Type: `PageResult<T>`
+### 前端类型：`PageResult<T>`
 
 ```typescript
 interface PageResult<T> {
@@ -102,12 +167,12 @@ interface PageResult<T> {
 }
 ```
 
-**Canonical location**: `src/types/api.ts`.
+**权威位置**：`src/types/api.ts`。
 
-### Usage Pattern
+### 使用模式
 
 ```java
-// Backend controller
+// 后端 Controller
 @GetMapping("/list")
 public R<PageResult<UserVO>> listUsers(@RequestParam(defaultValue = "1") int page,
                                         @RequestParam(defaultValue = "10") int size) {
@@ -116,7 +181,7 @@ public R<PageResult<UserVO>> listUsers(@RequestParam(defaultValue = "1") int pag
 ```
 
 ```typescript
-// Frontend API call
+// 前端 API 调用
 export function listUsers(page: number, size: number) {
   return request.get<ApiResponse<PageResult<UserInfo>>>(
     `/auth/user/list?page=${page}&size=${size}`,
@@ -124,54 +189,168 @@ export function listUsers(page: number, size: number) {
 }
 ```
 
-## RESTful URL Conventions
+### 分页参数约定
 
-| Operation | HTTP Method | URL Pattern | Example |
-|-----------|-------------|-------------|---------|
-| Get by ID | GET | `/{resource}/{id}` | `GET /user/1` |
-| List (paginated) | GET | `/{resource}/list` | `GET /user/list?page=1&size=10` |
-| Create | POST | `/{resource}` | `POST /user` |
-| Update | PUT | `/{resource}/{id}` | `PUT /user/1` |
-| Delete | DELETE | `/{resource}/{id}` | `DELETE /user/1` |
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `page` | int | 1 | 当前页码（从 1 开始） |
+| `size` | int | 10 | 每页条数 |
+| `records` | List | — | 当前页数据列表 |
+| `total` | long | — | 总记录数 |
+| `pages` | long | — | 总页数（自动计算） |
 
-**Gateway path prefix**: All frontend requests use `/api/<service>/<resource>` (e.g., `/api/auth/user/list`). The Gateway strips `/api/<service>` (StripPrefix=2), so the downstream service receives `/<resource>`.
+---
 
-## Naming Conventions
+## 4. RESTful URL 规范
 
-### Request/Response DTOs
+| 操作 | HTTP 方法 | URL 模式 | 示例 |
+|------|-----------|---------|------|
+| 按 ID 查询 | GET | `/{resource}/{id}` | `GET /user/1` |
+| 分页列表 | GET | `/{resource}/list` | `GET /user/list?page=1&size=10` |
+| 创建 | POST | `/{resource}` | `POST /user` |
+| 更新 | PUT | `/{resource}/{id}` | `PUT /user/1` |
+| 删除 | DELETE | `/{resource}/{id}` | `DELETE /user/1` |
+| 批量操作 | POST | `/{resource}/batch` | `POST /user/batch` |
 
-| Type | Suffix | Example |
-|------|--------|---------|
-| Create request | `CreateXxxRequest` | `CreateUserRequest` |
-| Update request | `UpdateXxxRequest` | `UpdateUserRequest` |
-| View object | `XxxVO` | `UserVO` |
-| Query parameters | `XxxQuery` | `UserQuery` |
+**Gateway 路径前缀**：所有前端请求使用 `/api/<service>/<resource>`（如 `/api/auth/user/list`）。Gateway 去除 `/api/<service>`（StripPrefix=2），下游服务接收 `/<resource>`。
 
-DTOs can be defined as static inner classes of the Controller (for simple cases) or as standalone files (for complex cases).
+**例外**：Base 服务的 `/api/base/**` 路由**没有** StripPrefix 过滤器，Base 服务控制器使用完整路径（如 `@RequestMapping("/api/base/dict/type")`）。
 
-### Field Naming
+---
 
-- Java fields: `lowerCamelCase` (e.g., `createTime`, `userName`)
-- JSON serialization: `lowerCamelCase` (matches Java field names directly)
-- URL path segments: `kebab-case` or single words (e.g., `/user/list`, not `/user/getAllUsers`)
+## 5. Gateway 路由配置
 
-## Time Format
+### 5.1 本地开发环境路由
 
-Configured in `JacksonConfig.java`:
+Gateway `application.yml` 中的路由配置（`spring.cloud.gateway.server.webflux.routes`）：
 
-| Java Type | JSON Format | Example |
-|-----------|-------------|---------|
+| 路由 ID | 路径匹配 | 目标服务 | StripPrefix | 说明 |
+|---------|---------|---------|-------------|------|
+| `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` | 无 | OAuth2 授权服务器端点 |
+| `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` | 无 | OpenID Connect 发现端点 |
+| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | 2 | Auth 服务 REST API |
+| `omni-base` | `/api/base/**` | `lb://omni-base` | **无** | Base 服务（使用完整路径） |
+| `omni-base-job` | `/api/job/**` | `lb://omni-base` | **无** | 定时任务管理 |
+| `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` | **无** | 工作流引擎 |
+
+### 5.2 Docker 部署路由
+
+Docker 部署时，路由配置相同，但目标服务的 URI 通过 Nacos 服务发现自动解析：
+
+| 前端请求 | Gateway 路由 | 下游接收路径 | 说明 |
+|---------|-------------|-------------|------|
+| `GET /api/auth/user/list` | `lb://omni-auth` + StripPrefix=2 | `GET /user/list` | Auth 服务去除前缀 |
+| `GET /api/base/dict/type/list` | `lb://omni-base` 无 StripPrefix | `GET /api/base/dict/type/list` | Base 服务保留完整路径 |
+| `POST /api/workflow/model` | `lb://omni-workflow` 无 StripPrefix | `POST /api/workflow/model` | Workflow 服务保留完整路径 |
+| `GET /api/job/type/list` | `lb://omni-base` 无 StripPrefix | `GET /api/job/type/list` | Job 路由到 Base 服务 |
+
+### 5.3 AuthFilter 白名单路径
+
+以下路径跳过 JWT 验证（`AuthFilter` 不拦截）：
+
+```
+/api/auth/login          — 登录
+/api/auth/register       — 注册
+/api/auth/captcha        — 验证码
+/api/auth/tenants        — 租户列表
+/api/auth/oauth2/        — 社交登录
+/actuator/               — 健康检查
+/oauth2/                 — OAuth2 端点
+/.well-known/            — OIDC 发现
+/login                   — Spring Security 登录
+/error                   — 错误页面
+```
+
+---
+
+## 6. 命名约定
+
+### 请求/响应 DTO
+
+| 类型 | 后缀 | 示例 |
+|------|------|------|
+| 创建请求 | `CreateXxxRequest` | `CreateUserRequest` |
+| 更新请求 | `UpdateXxxRequest` | `UpdateUserRequest` |
+| 视图对象 | `XxxVO` | `UserVO` |
+| 查询参数 | `XxxQuery` | `UserQuery` |
+
+DTO 可以定义为 Controller 的静态内部类（简单场景）或独立文件（复杂场景）。
+
+### 字段命名
+
+- Java 字段：`lowerCamelCase`（如 `createTime`、`userName`）
+- JSON 序列化：`lowerCamelCase`（直接匹配 Java 字段名）
+- URL 路径段：`kebab-case` 或单个词（如 `/user/list`，不是 `/user/getAllUsers`）
+
+---
+
+## 7. 时间格式
+
+在 `JacksonConfig.java` 中配置：
+
+| Java 类型 | JSON 格式 | 示例 |
+|-----------|----------|------|
 | `LocalDateTime` | `yyyy-MM-dd HH:mm:ss` | `2026-05-28 14:30:00` |
 | `LocalDate` | `yyyy-MM-dd` | `2026-05-28` |
 
-Timestamps are serialized as strings, not numeric timestamps (`WRITE_DATES_AS_TIMESTAMPS` is disabled).
+时间戳序列化为字符串，不是数字时间戳（`WRITE_DATES_AS_TIMESTAMPS` 已禁用）。
 
-## Social Login Endpoints
+**配置位置**：`omni-common` 模块的 `JacksonConfig`，通过 `AutoConfiguration.imports` 自动生效。所有依赖 `omni-common` 的服务自动获得一致的时间格式。
+
+---
+
+## 8. 请求头约定
+
+### 8.1 Gateway 注入的请求头
+
+Gateway 的 `AuthFilter` 在 JWT 验证成功后，向下游请求注入以下请求头：
+
+| 请求头 | 类型 | 说明 | 示例 |
+|--------|------|------|------|
+| `X-User-Id` | String | 用户 ID | `"1"` |
+| `X-User-Name` | String | 用户名 | `"admin"` |
+| `X-Tenant-Id` | String | 租户 ID | `"1"` |
+| `X-User-Roles` | String | 逗号分隔的角色编码 | `"SUPER_ADMIN,DEPT_LEADER"` |
+| `X-User-Scopes` | String | 空格/逗号分隔的权限编码 | `"dict:type:list dict:data:create"` |
+
+### 8.2 前端发送的请求头
+
+| 请求头 | 来源 | 说明 |
+|--------|------|------|
+| `Authorization: Bearer <JWT>` | Axios 拦截器自动注入 | 从 `useUserStore()` 获取 Token |
+| `X-Tenant-Id` | Axios 拦截器自动注入 | 从 `useUserStore()` 获取租户 ID |
+| `Content-Type: application/json` | Axios 默认 | JSON 请求体 |
+
+### 8.3 安全响应头（Gateway 注入）
+
+`SecurityHeadersFilter`（WebFlux WebFilter）为所有经过网关的响应添加：
+
+| 响应头 | 值 | 用途 |
+|--------|-----|------|
+| `X-Content-Type-Options` | `nosniff` | 防止浏览器 MIME 类型嗅探 |
+| `X-Frame-Options` | `SAMEORIGIN` | 防止点击劫持 |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | 控制 Referer 头泄露 |
+
+---
+
+## 9. 认证头
+
+```
+Authorization: Bearer <token>
+```
+
+- 由 Axios 请求拦截器（`src/api/request.ts`）使用 `useUserStore()` 中的 Token 设置
+- 由 `omni-gateway` 中的 `AuthFilter` 验证（JWT RS256 签名验证 + claims 提取 + 身份头注入）
+- 公开路径免认证：`/api/auth/**`、`/actuator/**`、`/favicon.ico`
+
+---
+
+## 10. 社交登录端点
 
 社交登录端点返回 HTTP 302 重定向（非标准 `R<T>` 响应），因为前端通过 `window.location.href` 触发浏览器导航。
 
-| HTTP Method | URL | Description |
-|-------------|-----|-------------|
+| HTTP 方法 | URL | 说明 |
+|-----------|-----|------|
 | GET | `/api/auth/oauth2/{provider}?tenant_id=1` | 发起第三方登录，302 重定向到第三方授权页面 |
 | GET | `/api/auth/oauth2/{provider}/callback?code=XXX&state=YYY` | 处理第三方回调，成功时 302 重定向到前端回调页面 |
 
@@ -198,26 +377,24 @@ GET /api/auth/oauth2/gitee?tenant_id=1
 ### 回调处理
 
 ```
-# GitHub 回调
-GET /api/auth/oauth2/github/callback?code=XXX&state=YYY
-
-# Google 回调
-GET /api/auth/oauth2/google/callback?code=XXX&state=YYY
-
-# Gitee 回调
-GET /api/auth/oauth2/gitee/callback?code=XXX&state=YYY
+# GitHub/Google/Gitee 回调
+GET /api/auth/oauth2/{provider}/callback?code=XXX&state=YYY
 
 → 成功: 302 Location: /callback#token=<JWT>&username=<username>
 → 失败: 302 Location: /login?error=<error_code>&message=<message>
 ```
 
-### 错误码
+### Docker 部署下的 OAuth2 回调 URL 配置
 
-| error 参数 | 含义 | 触发条件 |
-|------------|------|---------|
-| `user_denied` | 用户拒绝授权 | 第三方平台回调携带 `error=access_denied`（GitHub / Google / Gitee 均适用） |
-| `invalid_callback` | 回调参数缺失 | code 或 state 为空 |
-| `social_login_failed` | 登录流程异常 | state 验证失败、第三方 API 错误（GitHub access_token / Google token / Gitee token 接口）、用户信息获取失败、用户已禁用等 |
+Docker 部署时，社交登录的 `redirect_uri` 需要使用**宿主机可访问的 URL**：
+
+| 部署环境 | redirect_uri 示例 |
+|---------|------------------|
+| 本地开发 | `http://localhost:8100/api/auth/oauth2/github/callback` |
+| Docker 部署 | `http://<宿主机IP>:8100/api/auth/oauth2/github/callback` |
+| 生产环境 | `https://your-domain.com/api/auth/oauth2/github/callback` |
+
+> **注意**：Docker 部署中，Auth 服务容器内部端口是 8080，但 OAuth2 回调 URL 必须使用宿主机映射端口 8100（因为第三方平台需要回调到宿主机的公网/局域网可达地址）。
 
 ### 前端回调页面
 
@@ -226,21 +403,11 @@ GET /api/auth/oauth2/gitee/callback?code=XXX&state=YYY
 2. 存储到 `localStorage`（通过 `useUserStore`）
 3. 重定向到 Dashboard
 
-## Authentication Header
+> 完整流程时序图详见 [core-flows.md](core-flows.md) Flow 4。
 
-```
-Authorization: Bearer <token>
-```
+---
 
-- Set by the Axios request interceptor in `src/api/request.ts` using the token from `useUserStore()`
-- Checked by `AuthFilter` in `omni-gateway` (JWT RS256 签名验证 + claims 提取 + 身份头注入)
-- Public paths exempt from auth: `/api/auth/**`, `/actuator/**`, `/favicon.ico`
-
-## Versioning Strategy
-
-**Current decision**: No URL-based versioning during the scaffolding phase. When the API stabilizes and multiple consumers exist, introduce prefix versioning: `/api/v1/auth/user/list`.
-
-## XSS Config Management Endpoints
+## 11. XSS 配置管理端点
 
 Base path: `/api/auth/xss-config`（Gateway StripPrefix=2 → 下游 `/xss-config/...`）
 
@@ -274,68 +441,17 @@ X-Tenant-Id: 1
 Response 200: { "code": 200, "message": "success" }
 ```
 
-### 规则列表（分页）
+### 规则 CRUD
 
-```
-GET /api/auth/xss-config/rules/list?page=1&size=10
-Authorization: Bearer <token>
-X-Tenant-Id: 1
-
-Response 200:
-{
-  "code": 200,
-  "data": {
-    "records": [...],
-    "total": 10,
-    "size": 10,
-    "current": 1,
-    "pages": 1
-  }
-}
-```
-
-### 创建规则
-
-```
-POST /api/auth/xss-config/rules
-Authorization: Bearer <token>
-X-Tenant-Id: 1
-Content-Type: application/json
-
-{
-  "ruleName": "Script标签",
-  "ruleType": "HTML_TAG",
-  "pattern": "script",
-  "description": "拦截<script>标签",
-  "sortOrder": 1
-}
-
-@PreAuthorize("hasAuthority('system:xssconfig:create')")
-Response 200: { "code": 200, "data": { "id": 1, ... } }
-```
+| HTTP 方法 | URL | 权限码 | 说明 |
+|-----------|-----|--------|------|
+| GET | `/api/auth/xss-config/rules/list?page=1&size=10` | `system:xssconfig:list` | 分页列表 |
+| POST | `/api/auth/xss-config/rules` | `system:xssconfig:create` | 创建规则 |
+| PUT | `/api/auth/xss-config/rules/{id}` | `system:xssconfig:update` | 更新规则 |
+| DELETE | `/api/auth/xss-config/rules/{id}` | `system:xssconfig:delete` | 删除规则 |
+| PUT | `/api/auth/xss-config/rules/{id}/toggle` | `system:xssconfig:update` | 切换规则启用状态 |
 
 **ruleType 枚举值**：`HTML_TAG` | `EVENT_HANDLER` | `DANGEROUS_PROTOCOL` | `CUSTOM_PATTERN`
-
-### 更新规则
-
-```
-PUT /api/auth/xss-config/rules/{id}
-@PreAuthorize("hasAuthority('system:xssconfig:update')")
-```
-
-### 删除规则
-
-```
-DELETE /api/auth/xss-config/rules/{id}
-@PreAuthorize("hasAuthority('system:xssconfig:delete')")
-```
-
-### 切换单条规则启用状态
-
-```
-PUT /api/auth/xss-config/rules/{id}/toggle
-@PreAuthorize("hasAuthority('system:xssconfig:update')")
-```
 
 ### 权限码
 
@@ -346,24 +462,26 @@ PUT /api/auth/xss-config/rules/{id}/toggle
 | `system:xssconfig:create` | 创建规则 |
 | `system:xssconfig:delete` | 删除规则 |
 
-## Base Service Dictionary Management Endpoints
+---
 
-Base 服务（`omni-base :8101`）提供数据字典管理功能，采用「类型 + 数据」两级结构。
+## 12. Base 服务字典管理端点
 
-**路由说明**：Gateway 路由 `Path=/api/base/**` 无 StripPrefix 过滤器，Base 服务控制器使用完整路径（如 `@RequestMapping("/api/base/dict/type")`），与 Auth 服务的 `StripPrefix=2` 模式不同。
+Base 服务（`omni-base :8101`）提供数据字典管理，采用「类型 + 数据」两级结构。
 
-### Dictionary Type Endpoints
+**路由说明**：Gateway 路由 `Path=/api/base/**` **无** StripPrefix 过滤器，Base 服务控制器使用完整路径（如 `@RequestMapping("/api/base/dict/type")`）。
+
+### Dictionary Type 端点
 
 Base path: `/api/base/dict/type`
 
-| HTTP Method | URL | Permission Code | Description |
-|-------------|-----|-----------------|-------------|
-| GET | `/api/base/dict/type/list?page=1&size=10&typeCode=&typeName=&status=` | `dict:type:list` | 分页列表，支持 typeCode / typeName / status 过滤 |
+| HTTP 方法 | URL | 权限码 | 说明 |
+|-----------|-----|--------|------|
+| GET | `/api/base/dict/type/list?page=1&size=10&typeCode=&typeName=&status=` | `dict:type:list` | 分页列表，支持过滤 |
 | GET | `/api/base/dict/type/{id}` | `dict:type:list` | 按 ID 查询 |
-| POST | `/api/base/dict/type` | `dict:type:create` | 创建字典类型（验证 tenant 内 typeCode 唯一性） |
-| PUT | `/api/base/dict/type/{id}` | `dict:type:update` | 更新字典类型（部分更新：typeName, remark, sort, status） |
-| DELETE | `/api/base/dict/type/{id}` | `dict:type:delete` | 删除字典类型（级联删除关联的字典数据） |
-| PUT | `/api/base/dict/type/{id}/status` | `dict:type:update` | 切换启用/禁用状态 |
+| POST | `/api/base/dict/type` | `dict:type:create` | 创建（验证 tenant 内 typeCode 唯一） |
+| PUT | `/api/base/dict/type/{id}` | `dict:type:update` | 更新（部分更新） |
+| DELETE | `/api/base/dict/type/{id}` | `dict:type:delete` | 删除（级联删除关联数据） |
+| PUT | `/api/base/dict/type/{id}/status` | `dict:type:update` | 切换启用/禁用 |
 
 **示例请求**：
 
@@ -375,7 +493,6 @@ X-Tenant-Id: 1
 Response 200:
 {
   "code": 200,
-  "message": "success",
   "data": {
     "records": [
       { "id": 1, "typeCode": "sys_user_gender", "typeName": "用户性别", "status": 1, "sort": 0 }
@@ -388,17 +505,17 @@ Response 200:
 }
 ```
 
-### Dictionary Data Endpoints
+### Dictionary Data 端点
 
 Base path: `/api/base/dict/data`
 
-| HTTP Method | URL | Permission Code | Description |
-|-------------|-----|-----------------|-------------|
-| GET | `/api/base/dict/data/list?typeCode=sys_user_gender&page=1&size=10` | `dict:data:list` | 按 typeCode 分页查询字典数据 |
-| POST | `/api/base/dict/data` | `dict:data:create` | 创建字典数据（验证父类型存在） |
-| PUT | `/api/base/dict/data/{id}` | `dict:data:update` | 更新字典数据（部分更新：dictValue, dictLabel, tagType, remark, sort, status） |
-| DELETE | `/api/base/dict/data/{id}` | `dict:data:delete` | 删除单条字典数据 |
-| POST | `/api/base/dict/data/refresh-cache` | `dict:data:refresh` | 手动刷新指定 typeCode 的 Redis 缓存 |
+| HTTP 方法 | URL | 权限码 | 说明 |
+|-----------|-----|--------|------|
+| GET | `/api/base/dict/data/list?typeCode=sys_user_gender&page=1&size=10` | `dict:data:list` | 按 typeCode 分页查询 |
+| POST | `/api/base/dict/data` | `dict:data:create` | 创建（验证父类型存在） |
+| PUT | `/api/base/dict/data/{id}` | `dict:data:update` | 更新（部分更新） |
+| DELETE | `/api/base/dict/data/{id}` | `dict:data:delete` | 删除单条 |
+| POST | `/api/base/dict/data/refresh-cache` | `dict:data:refresh` | 手动刷新 Redis 缓存 |
 
 **示例请求**：
 
@@ -420,7 +537,7 @@ Content-Type: application/json
 Response 200: { "code": 200, "data": { "id": 8, ... } }
 ```
 
-### Permission Codes
+### 字典权限码
 
 | 权限码 | 说明 |
 |--------|------|
@@ -434,12 +551,36 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 | `dict:data:delete` | 删除字典数据 |
 | `dict:data:refresh` | 手动刷新字典缓存 |
 
-### Tenant Isolation
+### 租户隔离
 
 所有列表查询和创建操作要求 `X-Tenant-Id` 请求头（前端从 JWT Token 提取，Gateway 注入）。数据在 SQL 查询层按 `tenant_id` 隔离。字典类型唯一性约束范围为 `(tenant_id, type_code)`。
 
-## Null Semantics
+---
 
-- `null` fields are included in JSON output (not suppressed)
-- Empty collections should be returned as `[]`, not `null`
-- Optional single values should use `null` to indicate absence, not empty strings
+## 13. API 版本管理策略
+
+### 当前决策
+
+脚手架阶段不使用 URL 版本号。API 稳定后且有多个消费者时，引入前缀版本控制。
+
+### 未来演进路径
+
+| 阶段 | 版本策略 | URL 示例 |
+|------|---------|---------|
+| **当前（脚手架）** | 无版本号 | `/api/auth/user/list` |
+| **V1（API 稳定后）** | URL 前缀版本 | `/api/v1/auth/user/list` |
+| **V2（Breaking Change）** | URL 前缀版本 | `/api/v2/auth/user/list` |
+
+**版本规则**：
+- 新增字段（向后兼容）：不需要版本号变更
+- 删除/重命名字段：需要新版本
+- 变更请求/响应结构：需要新版本
+- 旧版本至少维护 6 个月
+
+---
+
+## 14. Null 语义
+
+- `null` 字段包含在 JSON 输出中（不省略）
+- 空集合返回为 `[]`，不是 `null`
+- 可选的单个值使用 `null` 表示不存在，不使用空字符串

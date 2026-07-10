@@ -36,3 +36,7 @@ dist-ssr/
 
 # 本地敏感配置文件（含 OAuth2 真实凭证）
 application-local.yml
+
+# Playwright
+test-results/
+playwright-report/

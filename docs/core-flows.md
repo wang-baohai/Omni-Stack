@@ -1,67 +1,68 @@
-# Core Flows
+# 核心业务流程
 
-This document traces the essential user-facing flows end-to-end, from browser interaction to backend processing and back. Use this as a reference when implementing or modifying features.
+> 本文档端到端追踪关键用户流程，从浏览器交互到后端处理再返回。实现或修改功能时以此为参考。  
+> 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。API 契约详见 [api-contract.md](api-contract.md)。
 
-## Flow 1: User Login (Username + Password + Captcha + JWT)
+## Flow 1: 用户登录（用户名 + 密码 + 验证码 + JWT）
 
-### Overview
+### 概述
 
 用户通过前端登录页面提交用户名、密码和验证码，经 Gateway 转发到 Auth 服务完成认证，
 返回 JWT Token 用于后续请求的身份认证。支持多租户登录（`tenantId:username` 格式）。
 
-### Sequence
+### 时序图
 
 ```mermaid
 sequenceDiagram
-    participant B as Browser
-    participant F as Frontend :3000
-    participant G as Gateway :8102
-    participant A as Auth :8100
+    participant B as 浏览器
+    participant F as 前端 :3000
+    participant G as 网关 :8102
+    participant A as 认证服务 :8100
     participant R as Redis
     participant M as MySQL
 
-    B->>F: 1. Open login page
+    B->>F: 1. 打开登录页面
     F->>G: 2. GET /api/auth/captcha
-    G->>A: 3. Proxy to Auth
+    G->>A: 3. 代理到认证服务
     A->>A: 4. SpecCaptcha.generate()
     A->>R: 5. SET captcha:{key} = text (TTL=300s)
     A-->>F: 6. {captchaKey, captchaImage(base64)}
-    F-->>B: 7. Show captcha
+    F-->>B: 7. 展示验证码
 
     F->>G: 8. GET /api/auth/tenants
-    G->>A: 9. Proxy to Auth
+    G->>A: 9. 代理到认证服务
     A->>M: 10. SELECT * FROM sys_tenant WHERE status=1
-    M-->>A: tenant list
+    M-->>A: 租户列表
     A-->>F: 11. [{id, name, code}]
-    F-->>B: 12. Tenant dropdown
+    F-->>B: 12. 租户下拉选择
 
-    B->>F: 13. Fill form & Click Login
+    B->>F: 13. 填写表单 & 点击登录
     F->>G: 14. POST /api/auth/login {username, password, tenantId, captchaKey, captchaCode}
-    G->>A: 15. Proxy to Auth
-    A->>R: 16. GET + DEL captcha (one-time use)
-    A->>A: 17. Build "tenantId:username"
+    G->>A: 15. 代理到认证服务
+    A->>R: 16. GET + DEL captcha（一次性使用）
+    A->>A: 17. 构建 "tenantId:username"
     A->>M: 18. LoadUserByUsername (WHERE tenant_id=? AND username=? AND status=1)
-    M-->>A: user record
-    A->>A: 19. BCrypt password check
-    A->>M: 20. Load roles & permissions
-    M-->>A: roles/permissions
-    A->>A: 21. Generate JWT (RS256 sign)
+    M-->>A: 用户记录
+    A->>A: 19. BCrypt 密码校验
+    A->>M: 20. 加载角色与权限
+    M-->>A: 角色/权限
+    A->>A: 21. 生成 JWT (RS256 签名)
     A-->>F: 22. {accessToken, tokenType, expiresIn}
-    F->>F: 23. Store token + username to localStorage
-    F-->>B: 24. Redirect to dashboard
+    F->>F: 23. 存储 token + username 到 localStorage
+    F-->>B: 24. 跳转到工作台
 ```
 
 <details>
 <summary>ASCII 版本（点击展开）</summary>
 
 ```
-Browser            Frontend :3000          Gateway :8102          Auth :8100           Redis              MySQL
+浏览器               前端 :3000             网关 :8102            认证服务 :8100        Redis              MySQL
   |                    |                       |                     |                   |                  |
-  | 1. Open login page |                       |                     |                   |                  |
+  | 1. 打开登录页面    |                       |                     |                   |                  |
   |                    |                       |                     |                   |                  |
   |                    | 2. GET /api/auth/captcha                   |                   |                  |
   |                    |---------------------->|                     |                   |                  |
-  |                    |                       | 3. Proxy to Auth    |                   |                  |
+  |                    |                       | 3. 代理到认证服务   |                   |                  |
   |                    |                       |-------------------->|                   |                  |
   |                    |                       |                     | 4. SpecCaptcha    |                  |
   |                    |                       |                     |    generate()     |                  |
@@ -71,136 +72,136 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
   |                    |                       |                     |                   |                  |
   |                    | 6. {captchaKey, captchaImage(base64)}      |                   |                  |
   |                    |<----------------------|<--------------------|                   |                  |
-  | 7. Show captcha    |                       |                     |                   |                  |
+  | 7. 展示验证码      |                       |                     |                   |                  |
   |<-------------------|                       |                     |                   |                  |
   |                    |                       |                     |                   |                  |
   |                    | 8. GET /api/auth/tenants                    |                   |                  |
   |                    |---------------------->|                     |                   |                  |
-  |                    |                       | 9. Proxy to Auth    |                   |                  |
+  |                    |                       | 9. 代理到认证服务   |                   |                  |
   |                    |                       |-------------------->|                   |                  |
   |                    |                       |                     | 10. SELECT * FROM |                  |
   |                    |                       |                     |     sys_tenant    |                  |
   |                    |                       |                     |     WHERE status=1|                  |
   |                    |                       |                     |-------------------------------------->|
-  |                    |                       |                     |                   |    tenant list    |
+  |                    |                       |                     |                   |    租户列表       |
   |                    |                       |                     |<--------------------------------------|
   |                    | 11. [{id,name,code}]  |                     |                   |                  |
   |                    |<----------------------|<--------------------|                   |                  |
-  | 12. Tenant dropdown|                       |                     |                   |                  |
+  | 12. 租户下拉选择   |                       |                     |                   |                  |
   |<-------------------|                       |                     |                   |                  |
   |                    |                       |                     |                   |                  |
-  | 13. Fill form      |                       |                     |                   |                  |
-  |     (username,     |                       |                     |                   |                  |
-  |      password,     |                       |                     |                   |                  |
-  |      captcha,      |                       |                     |                   |                  |
-  |      tenant)       |                       |                     |                   |                  |
-  | 14. Click Login -->|                       |                     |                   |                  |
+  | 13. 填写表单       |                       |                     |                   |                  |
+  |     (用户名,       |                       |                     |                   |                  |
+  |      密码,         |                       |                     |                   |                  |
+  |      验证码,       |                       |                     |                   |                  |
+  |      租户)         |                       |                     |                   |                  |
+  | 14. 点击登录 ----->|                       |                     |                   |                  |
   |                    |                       |                     |                   |                  |
   |                    | 15. POST /api/auth/login                   |                   |                  |
   |                    |   {username, password, |                   |                   |                  |
   |                    |    tenantId, captchaKey,                   |                   |                  |
   |                    |    captchaCode} ------>|                   |                   |                  |
-  |                    |                       | 16. Proxy to Auth   |                   |                  |
+  |                    |                       | 16. 代理到认证服务  |                   |                  |
   |                    |                       |-------------------->|                   |                  |
   |                    |                       |                     |                   |                  |
-  |                    |                       |                     | 17. Validate captcha                  |
+  |                    |                       |                     | 17. 验证码校验    |                  |
   |                    |                       |                     |    GET + DEL ---->|                  |
-  |                    |                       |                     |    (one-time use) |                  |
+  |                    |                       |                     |    (一次性使用)   |                  |
   |                    |                       |                     |                   |                  |
-  |                    |                       |                     | 18. Build username as                 |
+  |                    |                       |                     | 18. 构建用户名为  |                  |
   |                    |                       |                     |     "tenantId:username"               |
-  |                    |                       |                     |     (e.g. "1:admin")                  |
+  |                    |                       |                     |     (如 "1:admin")                    |
   |                    |                       |                     |                   |                  |
   |                    |                       |                     | 19. LoadUserByUsername                |
-  |                    |                       |                     |     Parse tenant + username           |
+  |                    |                       |                     |     解析租户 + 用户名                  |
   |                    |                       |                     |     WHERE tenant_id=? AND             |
   |                    |                       |                     |           username=? AND status=1     |
   |                    |                       |                     |-------------------------------------->|
-  |                    |                       |                     |                   |    user record    |
+  |                    |                       |                     |                   |    用户记录       |
   |                    |                       |                     |<--------------------------------------|
   |                    |                       |                     |                   |                  |
-  |                    |                       |                     | 20. BCrypt password check             |
+  |                    |                       |                     | 20. BCrypt 密码校验                   |
   |                    |                       |                     |                   |                  |
-  |                    |                       |                     | 21. Load roles & permissions          |
+  |                    |                       |                     | 21. 加载角色与权限                     |
   |                    |                       |                     |-------------------------------------->|
-  |                    |                       |                     |                   |   roles/permissions
+  |                    |                       |                     |                   |   角色/权限       |
   |                    |                       |                     |<--------------------------------------|
   |                    |                       |                     |                   |                  |
-  |                    |                       |                     | 22. Generate JWT   |                  |
-  |                    |                       |                     |     RS256 sign     |                  |
-  |                    |                       |                     |     (RSA private   |                  |
-  |                    |                       |                     |      key from JWK) |                  |
+  |                    |                       |                     | 22. 生成 JWT      |                  |
+  |                    |                       |                     |     RS256 签名    |                  |
+  |                    |                       |                     |     (RSA 私钥     |                  |
+  |                    |                       |                     |      来自 JWK)    |                  |
   |                    |                       |                     |                   |                  |
   |                    | 23. {accessToken, tokenType:"Bearer",       |                   |                  |
   |                    |      expiresIn:900}   |                     |                   |                  |
   |                    |<----------------------|<--------------------|                   |                  |
   |                    |                       |                     |                   |                  |
-  |                    | 24. Store token + username to localStorage |                   |                  |
+  |                    | 24. 存储 token + username 到 localStorage   |                   |                  |
   |                    |                       |                     |                   |                  |
-  | 25. Redirect to    |                       |                     |                   |                  |
-  |     dashboard      |                       |                     |                   |                  |
+  | 25. 跳转到         |                       |                     |                   |                  |
+  |     工作台         |                       |                     |                   |                  |
   |<-------------------|                       |                     |                   |                  |
   |                    |                       |                     |                   |                  |
 ```
 
 </details>
 
-### Post-Login: Authenticated Request Flow
+### 登录后：认证请求流程
 
 登录成功后，前端所有 API 请求自动携带 JWT Token，Gateway 负责验证：
 
 ```
-Browser            Frontend               Gateway :8102           Downstream Service
+浏览器               前端                   网关 :8102             下游服务
   |                    |                       |                        |
-  | 1. Navigate to     |                       |                        |
-  |    protected page  |                       |                        |
+  | 1. 导航到          |                       |                        |
+  |    受保护页面      |                       |                        |
   |                    | 2. Axios GET          |                        |
   |                    |    Authorization:      |                        |
   |                    |    Bearer <JWT> ------>|                        |
   |                    |                       |                        |
   |                    |                       | 3. AuthFilter:         |
-  |                    |                       |    - Extract Bearer token
-  |                    |                       |    - Get RSA public key |
-  |                    |                       |      (from JwkKeyProvider,
-  |                    |                       |       cached 5min TTL)  |
+  |                    |                       |    - 提取 Bearer token  |
+  |                    |                       |    - 获取 RSA 公钥     |
+  |                    |                       |      (来自 JwkKeyProvider，
+  |                    |                       |       缓存 5 分钟 TTL)  |
   |                    |                       |    - RSASSAVerifier:   |
-  |                    |                       |      verify RS256 sig  |
-  |                    |                       |    - Check exp claim   |
+  |                    |                       |      验证 RS256 签名    |
+  |                    |                       |    - 检查 exp 声明     |
   |                    |                       |                        |
-  |                    |                       | 4. Inject headers:     |
+  |                    |                       | 4. 注入请求头:          |
   |                    |                       |    X-User-Id: 1        |
   |                    |                       |    X-Tenant-Id: 1      |
   |                    |                       |    X-User-Name: admin  |
   |                    |                       |    X-User-Roles: admin |
   |                    |                       |    X-User-Scopes: read |
   |                    |                       |                        |
-  |                    |                       | 5. Forward request --->|
+  |                    |                       | 5. 转发请求 ---------->|
   |                    |                       |                        |
-  |                    |                       |    6. Response <-------|
-  |                    | 7. JSON data <--------|                        |
-  | 8. Render page     |                       |                        |
+  |                    |                       |    6. 响应 <-----------|
+  |                    | 7. JSON 数据 <--------|                        |
+  | 8. 渲染页面        |                       |                        |
   |<-------------------|                       |                        |
 ```
 
-### Key Components
+### 关键组件
 
-| Step | File | Logic |
-|------|------|-------|
-| Form UI | `src/views/login/LoginForm.vue` | Element Plus form: username, password, captcha, tenant dropdown |
-| Captcha load | `src/views/login/LoginForm.vue` | `GET /api/auth/captcha` -> display base64 PNG, store captchaKey |
-| Tenant load | `src/views/login/LoginForm.vue` | `GET /api/auth/tenants` -> populate `<el-select>` dropdown |
-| Login submit | `src/views/login/LoginForm.vue` | `handleLogin()`: validate form -> POST `/api/auth/login` |
-| Token storage | `src/stores/user.ts` | `setToken()` + `setUsername()` persist to `localStorage` |
-| Request auth | `src/api/request.ts` | Axios request interceptor: `Authorization: Bearer <token>` |
-| Vite proxy | `vite.config.ts` | `/api` -> `http://localhost:8102` (Gateway) |
-| Gateway filter | `AuthFilter.java` | JWT RS256 签名验证 + claims 提取 + 身份头注入 |
-| JWK provider | `JwkKeyProvider.java` | 从 Auth `/oauth2/jwks` 获取 RSA 公钥，缓存 5 分钟 |
-| Captcha service | `CaptchaServiceImpl.java` | SpecCaptcha 生成 + Redis 存储（TTL 300s，一次性使用） |
-| Auth controller | `AuthController.java` | `POST /login`: captcha -> authenticate -> roles -> JWT |
-| User details | `OmniUserDetailsService.java` | 多租户解析 `tenantId:username` + BCrypt 密码校验 |
-| JWT service | `JwtTokenServiceImpl.java` | RSA 私钥签名，生成包含用户身份和权限的 JWT |
+| 步骤 | 文件 | 逻辑 |
+|------|------|------|
+| 表单 UI | `src/views/login/LoginForm.vue` | Element Plus 表单：用户名、密码、验证码、租户下拉 |
+| 验证码加载 | `src/views/login/LoginForm.vue` | `GET /api/auth/captcha` -> 展示 base64 PNG，存储 captchaKey |
+| 租户加载 | `src/views/login/LoginForm.vue` | `GET /api/auth/tenants` -> 填充 `<el-select>` 下拉框 |
+| 登录提交 | `src/views/login/LoginForm.vue` | `handleLogin()`：校验表单 -> POST `/api/auth/login` |
+| Token 存储 | `src/stores/user.ts` | `setToken()` + `setUsername()` 持久化到 `localStorage` |
+| 请求鉴权 | `src/api/request.ts` | Axios 请求拦截器：`Authorization: Bearer <token>` |
+| Vite 代理 | `vite.config.ts` | `/api` -> `http://localhost:8102`（Gateway） |
+| 网关过滤器 | `AuthFilter.java` | JWT RS256 签名验证 + claims 提取 + 身份头注入 |
+| JWK 提供者 | `JwkKeyProvider.java` | 从 Auth `/oauth2/jwks` 获取 RSA 公钥，缓存 5 分钟 |
+| 验证码服务 | `CaptchaServiceImpl.java` | SpecCaptcha 生成 + Redis 存储（TTL 300s，一次性使用） |
+| 认证控制器 | `AuthController.java` | `POST /login`：验证码 -> 认证 -> 角色 -> JWT |
+| 用户详情 | `OmniUserDetailsService.java` | 多租户解析 `tenantId:username` + BCrypt 密码校验 |
+| JWT 服务 | `JwtTokenServiceImpl.java` | RSA 私钥签名，生成包含用户身份和权限的 JWT |
 
-### JWT Token Structure
+### JWT Token 结构
 
 Auth 服务签发的 JWT 包含以下 claims：
 
@@ -222,8 +223,8 @@ Auth 服务签发的 JWT 包含以下 claims：
 }
 ```
 
-| Claim | Description |
-|-------|-------------|
+| 声明 | 说明 |
+|------|------|
 | `sub` | 用户 ID（`sys_user.id`） |
 | `tenant_id` | 租户 ID（`sys_tenant.id`） |
 | `username` | 登录用户名 |
@@ -232,7 +233,7 @@ Auth 服务签发的 JWT 包含以下 claims：
 | `iat` | 签发时间（Unix timestamp） |
 | `exp` | 过期时间（`iat` + 900 秒 = 15 分钟） |
 
-### Multi-Tenant Login Mechanism
+### 多租户登录机制
 
 登录时通过 `tenantId` 参数指定租户，Auth 服务内部将用户名格式化为 `tenantId:username`（如 `1:admin`），
 由 `OmniUserDetailsService.loadUserByUsername()` 解析：
@@ -246,7 +247,7 @@ Auth 服务签发的 JWT 包含以下 claims：
 
 如果不包含 `:`（直接用户名登录），默认 `tenantId=1`，保证向后兼容。
 
-### Captcha Lifecycle
+### 验证码生命周期
 
 ```
 1. 生成: SpecCaptcha -> base64 PNG
@@ -256,84 +257,84 @@ Auth 服务签发的 JWT 包含以下 claims：
    - 值不匹配   -> "Invalid captcha"
 ```
 
-### Current Status
+### 当前状态
 
-- **Login**: 完整实现，验证码 + 多租户 + JWT Token 签发
-- **Gateway JWT 验证**: 完整实现，RS256 签名检查 + claims 提取 + 身份头注入
-- **前端**: 所有 mock 代码已移除，对接真实 API
-- **Token 有效期**: 15 分钟（900 秒），暂无 refresh token 机制
+- **登录**：完整实现，验证码 + 多租户 + JWT Token 签发
+- **Gateway JWT 验证**：完整实现，RS256 签名检查 + claims 提取 + 身份头注入
+- **前端**：所有 mock 代码已移除，对接真实 API
+- **Token 有效期**：15 分钟（900 秒），暂无 refresh token 机制
 
-## Flow 2: OAuth2 Authorization Code + PKCE Login
+## Flow 2: OAuth2 授权码 + PKCE 登录
 
-### Overview
+### 概述
 
 前端作为 OAuth2 公共客户端（SPA），通过 Spring Authorization Server 的 OAuth2 授权端点完成 PKCE 授权码流程。
 用户在 Auth 服务的授权确认页面同意后，前端用授权码 + code_verifier 换取 access_token 和 id_token。
 适用于第三方集成或需要 OAuth2 标准化认证的场景。
 
-### Sequence
+### 时序图
 
 ```mermaid
 sequenceDiagram
-    participant B as Browser
-    participant F as Frontend :3000
-    participant G as Gateway :8102
-    participant A as Auth :8100 (Authorization Server)
+    participant B as 浏览器
+    participant F as 前端 :3000
+    participant G as 网关 :8102
+    participant A as 认证服务 :8100 (Authorization Server)
     participant M as MySQL
 
-    B->>F: 1. Click "OAuth2 Login"
-    F->>F: 2. Generate PKCE: code_verifier + code_challenge (SHA256)
-    F->>F: 3. Store {pkce_verifier, pkce_state} in sessionStorage
-    F->>G: 4. Redirect to /api/oauth2/authorize?response_type=code&client_id=...&code_challenge=...&code_challenge_method=S256
-    G->>A: 5. Proxy to Auth authorization endpoint
-    A-->>B: 6. Login form page (or session-based redirect if already logged in)
-    B->>A: 7. Submit credentials (username + password)
-    A->>M: 8. Authenticate user (multi-tenant)
-    M-->>A: user record
-    A->>A: 9. Create authenticated session
-    A-->>B: 10. Consent page (if required) or auto-approve
-    B->>A: 11. User approves scopes
-    A-->>F: 12. Redirect to callback: ?code=XXX&state=YYY
-    F->>F: 13. Validate state matches sessionStorage
+    B->>F: 1. 点击"OAuth2 登录"
+    F->>F: 2. 生成 PKCE：code_verifier + code_challenge (SHA256)
+    F->>F: 3. 存储 {pkce_verifier, pkce_state} 到 sessionStorage
+    F->>G: 4. 重定向到 /api/oauth2/authorize?response_type=code&client_id=...&code_challenge=...&code_challenge_method=S256
+    G->>A: 5. 代理到认证服务授权端点
+    A-->>B: 6. 登录表单页面（已登录则基于 session 直接重定向）
+    B->>A: 7. 提交凭证（用户名 + 密码）
+    A->>M: 8. 认证用户（多租户）
+    M-->>A: 用户记录
+    A->>A: 9. 创建认证 session
+    A-->>B: 10. 授权确认页面（如需要）或自动批准
+    B->>A: 11. 用户同意授权范围
+    A-->>F: 12. 重定向到回调：?code=XXX&state=YYY
+    F->>F: 13. 验证 state 与 sessionStorage 匹配
     F->>G: 14. POST /api/oauth2/token {grant_type=authorization_code, code, code_verifier}
-    G->>A: 15. Proxy to token endpoint
-    A->>A: 16. Validate code + verify PKCE (SHA256(code_verifier) == code_challenge)
-    A->>M: 17. Store authorization record
+    G->>A: 15. 代理到 token 端点
+    A->>A: 16. 校验授权码 + 验证 PKCE (SHA256(code_verifier) == code_challenge)
+    A->>M: 17. 存储授权记录
     A-->>F: 18. {access_token, id_token, token_type, expires_in, refresh_token}
-    F->>F: 19. Store tokens in localStorage
-    F-->>B: 20. Redirect to dashboard
+    F->>F: 19. 存储 token 到 localStorage
+    F-->>B: 20. 跳转到工作台
 ```
 
-### Key Components
+### 关键组件
 
-| Step | File | Logic |
-|------|------|-------|
-| PKCE generator | `src/utils/oauth2.ts` | 生成 code_verifier（43-128 字符随机串）+ SHA256 code_challenge |
-| PKCE storage | `src/utils/oauth2.ts` | sessionStorage 存储 `pkce_verifier` 和 `pkce_state` |
-| Authorization redirect | `src/utils/oauth2.ts` | 构造 `/oauth2/authorize` URL，携带 PKCE 参数 |
-| Token exchange | `src/api/auth.ts` | POST `/oauth2/token`，code_verifier 发送给 Auth 服务验证 |
-| Token storage | `src/stores/user.ts` | 存储 access_token + id_token 到 localStorage |
-| Authorization endpoint | Spring Authorization Server | `/oauth2/authorize` — 登录表单 + 授权确认 |
-| Token endpoint | Spring Authorization Server | `/oauth2/token` — 授权码换 Token |
-| PKCE validator | Spring Authorization Server | SHA256(code_verifier) 与存储的 code_challenge 比对 |
+| 步骤 | 文件 | 逻辑 |
+|------|------|------|
+| PKCE 生成器 | `src/utils/oauth2.ts` | 生成 code_verifier（43-128 字符随机串）+ SHA256 code_challenge |
+| PKCE 存储 | `src/utils/oauth2.ts` | sessionStorage 存储 `pkce_verifier` 和 `pkce_state` |
+| 授权重定向 | `src/utils/oauth2.ts` | 构造 `/oauth2/authorize` URL，携带 PKCE 参数 |
+| Token 交换 | `src/api/auth.ts` | POST `/oauth2/token`，code_verifier 发送给 Auth 服务验证 |
+| Token 存储 | `src/stores/user.ts` | 存储 access_token + id_token 到 localStorage |
+| 授权端点 | Spring Authorization Server | `/oauth2/authorize` — 登录表单 + 授权确认 |
+| Token 端点 | Spring Authorization Server | `/oauth2/token` — 授权码换 Token |
+| PKCE 校验器 | Spring Authorization Server | SHA256(code_verifier) 与存储的 code_challenge 比对 |
 
-### PKCE Storage Keys
+### PKCE 存储键
 
-| sessionStorage Key | Description | Lifecycle |
-|--------------------|-------------|-----------|
+| sessionStorage 键 | 说明 | 生命周期 |
+|-------------------|------|----------|
 | `pkce_verifier` | 随机 code_verifier 字符串 | 授权发起时写入，token 换取后删除 |
 | `pkce_state` | CSRF 防护 state 参数 | 授权发起时写入，callback 验证后删除 |
 
-### Current Status
+### 当前状态
 
-- **Authorization Server**: Spring Authorization Server 7.x 已配置，RS256 JWK 签名
-- **OAuth2 客户端**: `omni-spa` 客户端已注册（authorization_code + PKCE grant type）
-- **前端 PKCE 工具**: `src/utils/oauth2.ts` 已实现 verifier/challenge 生成和 token 交换
-- **Token 类型**: access_token (opaque) + id_token (JWT, 包含用户信息)
+- **Authorization Server**：Spring Authorization Server 7.x 已配置，RS256 JWK 签名
+- **OAuth2 客户端**：`omni-spa` 客户端已注册（authorization_code + PKCE grant type）
+- **前端 PKCE 工具**：`src/utils/oauth2.ts` 已实现 verifier/challenge 生成和 token 交换
+- **Token 类型**：access_token (opaque) + id_token (JWT, 包含用户信息)
 
 ---
 
-## Flow 3: OAuth2 Device Authorization Grant
+## Flow 3: OAuth2 设备授权许可
 
 ### 概述
 
@@ -414,13 +415,13 @@ sequenceDiagram
 | `expired_token` | device_code 已过期 | 停止轮询，提示用户重新发起 |
 | `access_denied` | 用户拒绝授权 | 停止轮询，提示用户 |
 
-### Current Status
+### 当前状态
 
-- **设备授权端点**: SAS 7 已通过 `deviceAuthorizationEndpoint(Customizer.withDefaults())` 启用
-- **设备验证端点**: SAS 7 已通过 `deviceVerificationEndpoint(Customizer.withDefaults())` 启用
-- **设备客户端**: `omni-device` 客户端由 `DeviceClientInitializer` 在启动时自动注册
-- **前端页面**: `/device`（设备模拟器）和 `/device/verify`（验证页）已实现
-- **登录入口**: 登录页新增「设备授权登录」按钮
+- **设备授权端点**：SAS 7 已通过 `deviceAuthorizationEndpoint(Customizer.withDefaults())` 启用
+- **设备验证端点**：SAS 7 已通过 `deviceVerificationEndpoint(Customizer.withDefaults())` 启用
+- **设备客户端**：`omni-device` 客户端由 `DeviceClientInitializer` 在启动时自动注册
+- **前端页面**：`/device`（设备模拟器）和 `/device/verify`（验证页）已实现
+- **登录入口**：登录页新增「设备授权登录」按钮
 
 ---
 
@@ -436,33 +437,33 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant B as Browser
-    participant F as Frontend :3000
-    participant G as Gateway :8102
-    participant A as Auth :8100
+    participant B as 浏览器
+    participant F as 前端 :3000
+    participant G as 网关 :8102
+    participant A as 认证服务 :8100
     participant H as OAuth2ProviderHandler
-    participant P as Provider API (GitHub/Google/Gitee)
+    participant P as 提供商 API (GitHub/Google/Gitee)
     participant M as MySQL
 
-    B->>F: 1. Click "GitHub / Google / Gitee 登录"
-    F->>F: 2. Build URL: /api/auth/oauth2/{provider}?tenant_id=1
+    B->>F: 1. 点击"GitHub / Google / Gitee 登录"
+    F->>F: 2. 构建 URL：/api/auth/oauth2/{provider}?tenant_id=1
     F->>B: 3. window.location.href 导航
     B->>G: 4. GET /api/auth/oauth2/github?tenant_id=1
-    G->>A: 5. Proxy to Auth
+    G->>A: 5. 代理到认证服务
     A->>A: 6. 校验提供商 + 租户合法性
     A->>A: 7. OAuth2StateUtils.createState(tenantId)
-    A-->>B: 8. 302 Redirect → Provider 授权页面（github.com、accounts.google.com 或 gitee.com）
+    A-->>B: 8. 302 重定向 → 提供商授权页面（github.com、accounts.google.com 或 gitee.com）
 
-    B->>P: 9. Provider 授权页面（用户输入账号密码）
-    P-->>B: 10. 302 Redirect → callback?code=XXX&state=YYY
+    B->>P: 9. 提供商授权页面（用户输入账号密码）
+    P-->>B: 10. 302 重定向 → callback?code=XXX&state=YYY
     B->>G: 11. GET /api/auth/oauth2/{provider}/callback?code=XXX&state=YYY
-    G->>A: 12. Proxy to Auth
+    G->>A: 12. 代理到认证服务
 
     A->>A: 13. OAuth2StateUtils.extractTenantId(state) 验证 HMAC
     A->>H: 14. Handler.exchangeCodeForAccessToken(code)
-    H->>P: 15. POST /login/oauth/access_token (或 /oauth/token 或 oauth2.googleapis.com/token)
+    H->>P: 15. POST /login/oauth/access_token（或 /oauth/token 或 oauth2.googleapis.com/token）
     P-->>H: 16. {access_token}
-    H->>P: 17. GET /user (或 /api/v5/user 或 /oauth2/v3/userinfo)
+    H->>P: 17. GET /user（或 /api/v5/user 或 /oauth2/v3/userinfo）
     P-->>H: 18. ProviderUser {id, login, email, avatar_url, name}
     H-->>A: 19. ProviderUser
 
@@ -477,25 +478,25 @@ sequenceDiagram
         A->>M: 21d. SELECT * FROM sys_user (加载本地用户)
     end
 
-    A->>M: 22. Load roles & permissions
-    M-->>A: roles/permissions
+    A->>M: 22. 加载角色与权限
+    M-->>A: 角色/权限
     A->>A: 23. JwtTokenService.generateToken() RS256 签名
-    A-->>B: 24. 302 Redirect → /callback#token=JWT&username=gh_xxx
+    A-->>B: 24. 302 重定向 → /callback#token=JWT&username=gh_xxx
 
     B->>F: 25. /callback 页面解析 URL fragment
     F->>F: 26. 存储 token + username 到 localStorage
-    F-->>B: 27. Redirect to dashboard
+    F-->>B: 27. 跳转到工作台
 ```
 
 <details>
 <summary>ASCII 版本（点击展开）</summary>
 
 ```
-Browser            Frontend :3000          Gateway :8102          Auth :8100           Provider API         MySQL
+浏览器               前端 :3000             网关 :8102            认证服务 :8100        提供商 API          MySQL
   |                    |                       |                     |                     |                   |
-  | 1. Click social    |                       |                     |                     |                   |
-  |    login button    |                       |                     |                     |                   |
-  |                    | 2. Build URL          |                     |                     |                   |
+  | 1. 点击社交        |                       |                     |                     |                   |
+  |    登录按钮        |                       |                     |                     |                   |
+  |                    | 2. 构建 URL           |                     |                     |                   |
   |                    |    /api/auth/oauth2/  |                     |                     |                   |
   |                    |    {provider}?tenant_id=1                   |                     |                   |
   | 3. window.location |                       |                     |                     |                   |
@@ -503,17 +504,17 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
   |                    |                       |                     |                     |                   |
   | 4. GET /api/auth/oauth2/{provider}?tenant_id=1                   |                   |
   |                    |                       |                     |                     |                   |
-  |                    |                       | 5. Proxy            |                     |                   |
+  |                    |                       | 5. 代理             |                     |                   |
   |                    |                       |-------------------->|                     |                   |
-  |                    |                       |                     | 6. Validate provider |                   |
-  |                    |                       |                     |    + tenant          |                   |
-  |                    |                       |                     | 7. createState()     |                   |
-  |                    |                       |                     |    HMAC-SHA256 sign  |                   |
+  |                    |                       |                     | 6. 校验提供商       |                   |
+  |                    |                       |                     |    + 租户           |                   |
+  |                    |                       |                     | 7. createState()    |                   |
+  |                    |                       |                     |    HMAC-SHA256 签名 |                   |
   |                    |                       |                     |                     |                   |
-  | 8. 302 Redirect -> Provider 授权页面 (github.com, accounts.google.com 或 gitee.com) |                   |
+  | 8. 302 重定向 -> 提供商授权页面 (github.com, accounts.google.com 或 gitee.com)        |                   |
   |                    |                       |                     |                     |                   |
-  | 9. Provider login  |                       |                     |                     |                   |
-  |    (user/password) |                       |                     |                     |                   |
+  | 9. 提供商登录      |                       |                     |                     |                   |
+  |    (用户名/密码)   |                       |                     |                     |                   |
   |--------------------|-------------------------------------------->|------------------------------------------>|
   |                    |                       |                     |                     |                   |
   | 10. 302 callback?code=XXX&state=YYY        |                     |                     |                   |
@@ -521,42 +522,42 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
   |                    |                       |                     |                     |                   |
   | 11. GET /api/auth/oauth2/{provider}/callback                     |                     |                   |
   |--------------------|---------------------->|                     |                     |                   |
-  |                    |                       | 12. Proxy           |                     |                   |
+  |                    |                       | 12. 代理            |                     |                   |
   |                    |                       |-------------------->|                     |                   |
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 13. Verify state     |                   |
-  |                    |                       |                     |     HMAC signature   |                   |
+  |                    |                       |                     | 13. 验证 state      |                   |
+  |                    |                       |                     |     HMAC 签名       |                   |
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 14-19. Handler: exchange code,          |
-  |                    |                       |                     |   get access_token, fetch user profile  |
+  |                    |                       |                     | 14-19. Handler：交换授权码，             |
+  |                    |                       |                     |   获取 access_token，获取用户资料        |
   |                    |                       |                     |-------------------->|                   |
   |                    |                       |                     |    ProviderUser     |                   |
   |                    |                       |                     |<--------------------|                   |
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 20. Lookup oauth provider               |
+  |                    |                       |                     | 20. 查找 OAuth 提供商                  |
   |                    |                       |                     |------------------------------------------>|
   |                    |                       |                     |                     |    oauth_provider   |
   |                    |                       |                     |<------------------------------------------|
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 21. Create/Update user + oauth link      |
+  |                    |                       |                     | 21. 创建/更新用户 + OAuth 关联           |
   |                    |                       |                     |------------------------------------------>|
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 22. Load roles/perms |                   |
+  |                    |                       |                     | 22. 加载角色/权限    |                   |
   |                    |                       |                     |------------------------------------------>|
-  |                    |                       |                     |                     |   roles/permissions |
+  |                    |                       |                     |                     |   角色/权限        |
   |                    |                       |                     |<------------------------------------------|
   |                    |                       |                     |                     |                   |
-  |                    |                       |                     | 23. Generate JWT (RS256)                |
+  |                    |                       |                     | 23. 生成 JWT (RS256)                    |
   |                    |                       |                     |                     |                   |
   | 24. 302 /callback#token=JWT&username=xxx                         |                     |                   |
   |<---------------------------------------------------------------------------------------|                   |
   |                    |                       |                     |                     |                   |
-  | 25. /callback page |                       |                     |                     |                   |
-  |    parse fragment  |                       |                     |                     |                   |
-  |                    | 26. Store token        |                     |                     |                   |
-  |                    |     to localStorage    |                     |                     |                   |
-  | 27. Redirect to    |                       |                     |                     |                   |
-  |     dashboard      |                       |                     |                     |                   |
+  | 25. /callback 页面 |                       |                     |                     |                   |
+  |    解析 fragment   |                       |                     |                     |                   |
+  |                    | 26. 存储 token         |                     |                     |                   |
+  |                    |     到 localStorage    |                     |                     |                   |
+  | 27. 跳转到         |                       |                     |                     |                   |
+  |     工作台         |                       |                     |                     |                   |
   |<-------------------|                       |                     |                     |                   |
 ```
 
@@ -640,24 +641,24 @@ OAuth2 state 参数采用 HMAC-SHA256 签名，格式为 `tenantId|timestamp|hma
 | 用户信息获取失败 | 抛出 BusinessException（502） | 登录页提示"获取用户信息失败"（GitHub: /user 接口 / Google: /oauth2/v3/userinfo 接口 / Gitee: /api/v5/user 接口） |
 | 用户已禁用 | 抛出 BusinessException（403） | 登录页提示"用户已被禁用" |
 
-### Current Status
+### 当前状态
 
-- **OAuth2 社交登录**: 已实现 GitHub、Google 和 Gitee，端到端完整实现并验证通过
-- **State 签名**: HMAC-SHA256 防篡改 + 防重放
-- **自动用户创建**: 首次第三方登录自动注册本地用户 + 身份关联（GitHub: `gh_` 前缀，Google: `go_` 前缀，Gitee: `ge_` 前缀）
-- **redirect_uri**: 支持配置化（`application.yml` + 环境变量覆盖）
-- **前端回调**: `/callback` 页面解析 URL fragment 中的 JWT 并自动登录
-- **策略模式**: `OAuth2ProviderHandler` 接口 + `Map<String, OAuth2ProviderHandler>` 注入，新增提供商仅需实现 Handler 接口
-- **多提供商扩展**: `sys_user_oauth_provider` 表支持 github/google/wechat/gitee，当前已实现 GitHub、Google 和 Gitee，WeChat 前端按钮为占位
+- **OAuth2 社交登录**：已实现 GitHub、Google 和 Gitee，端到端完整实现并验证通过
+- **State 签名**：HMAC-SHA256 防篡改 + 防重放
+- **自动用户创建**：首次第三方登录自动注册本地用户 + 身份关联（GitHub: `gh_` 前缀，Google: `go_` 前缀，Gitee: `ge_` 前缀）
+- **redirect_uri**：支持配置化（`application.yml` + 环境变量覆盖）
+- **前端回调**：`/callback` 页面解析 URL fragment 中的 JWT 并自动登录
+- **策略模式**：`OAuth2ProviderHandler` 接口 + `Map<String, OAuth2ProviderHandler>` 注入，新增提供商仅需实现 Handler 接口
+- **多提供商扩展**：`sys_user_oauth_provider` 表支持 github/google/wechat/gitee，当前已实现 GitHub、Google 和 Gitee，WeChat 前端按钮为占位
 
 ## Flow 5: RBAC 功能权限 — 动态菜单加载与按钮鉴权
 
-### Overview
+### 概述
 
 用户登录成功后，前端从后端获取动态菜单树（已按用户权限过滤），据此注册路由和渲染侧边栏。
 页面内的按钮通过 `v-permission` 指令控制显隐，API 层通过 `@PreAuthorize` 鉴权。
 
-### Sequence
+### 时序图
 
 ```mermaid
 sequenceDiagram
@@ -691,7 +692,7 @@ sequenceDiagram
     A-->>F: 19. R<T> 操作结果
 ```
 
-### Key Implementation Details
+### 关键实现细节
 
 **后端菜单过滤逻辑**（`MenuController`）：
 
@@ -713,7 +714,7 @@ sequenceDiagram
 - 在 `mounted` 和 `updated` 钩子中执行检查
 - 已应用页面：用户管理、角色管理、组织管理、租户管理、在线用户、OAuth2 客户端管理
 
-### Current Status
+### 当前状态
 
 - **动态菜单**：后端 `MenuController` 完整实现，前端 `usePermissionStore` 动态路由注册
 - **按钮权限**：`v-permission` 自定义指令已应用于 6 个管理页面（共 20+ 按钮）
@@ -722,13 +723,13 @@ sequenceDiagram
 
 ## Flow 6: RBAC 数据权限 — 请求级行数据过滤
 
-### Overview
+### 概述
 
 每次 HTTP 请求到达时，`DataScopeResolveFilter` 解析当前用户的数据范围，
 MyBatis-Plus `DataPermissionInterceptor` 自动为 `sys_user` 表查询追加 WHERE 条件，
 实现行级数据过滤，业务代码零侵入。
 
-### Sequence
+### 时序图
 
 ```mermaid
 sequenceDiagram
@@ -805,7 +806,7 @@ interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
 
 **原因**：分页拦截器执行 `SELECT COUNT(*)` 查询时，数据权限条件必须已追加，否则 COUNT 结果与实际数据不一致。
 
-### Current Status
+### 当前状态
 
 - **SQL 拦截**：`DataPermissionInterceptor` + `DataPermissionHandlerImpl` 完整实现，当前仅过滤 `sys_user` 表
 - **请求级上下文**：`DataScopeResolveFilter` + `DataScopeContext` ThreadLocal 管理
@@ -900,7 +901,7 @@ sequenceDiagram
 | `CreateUserRequest` | `omni-auth/.../dto/CreateUserRequest.java` | 管理员创建 DTO（含 phone/gender） |
 | 注册页面 | `omni-frontend/src/views/register/index.vue` | 前端注册表单（含确认密码、租户选择） |
 
-### Current Status
+### 当前状态
 
 - **自助注册**：`POST /api/auth/register` 完整实现，前端注册页 `/register` 已就绪，Gateway 白名单已配置
 - **管理员创建**：`POST /api/auth/user` 完整实现，前端用户管理页已就绪，`@PreAuthorize` 权限控制已生效
@@ -1007,7 +1008,7 @@ Admin (前端 XSS防护配置页面)
 - 失效：所有写操作（toggle、CRUD）后主动 `DEL` 两个缓存键
 - 回源：`XssConfigProviderImpl.loadFromDbAndCache()` 在缓存未命中时查询 DB 并回填缓存
 
-### Key Components
+### 关键组件
 
 | 组件 | 文件路径 | 职责 |
 |------|---------|------|
@@ -1020,7 +1021,7 @@ Admin (前端 XSS防护配置页面)
 | `SecurityHeadersFilter` | `omni-gateway/.../config/SecurityHeadersFilter.java` | Gateway 安全响应头 |
 | XSS 管理页面 | `omni-frontend/src/views/system/xssconfig/index.vue` | 全局开关 + 规则 CRUD 表格 |
 
-### Current Status
+### 当前状态
 
 - **三层净化**：Jackson 反序列化器 + Servlet Filter + Gateway 安全头均已实现并自动装配
 - **配置管理**：全局开关 + 规则 CRUD + 单条规则 toggle 共 7 个 API 端点完整实现
@@ -1036,7 +1037,7 @@ Admin (前端 XSS防护配置页面)
 
 Base 服务（`omni-base :8101`）提供数据字典管理功能，采用「类型 + 数据」两级结构。字典类型（`sys_dict_type`）定义编码分类（如 `sys_user_gender`），字典数据（`sys_dict_data`）定义具体的键值对（如 `1=男, 2=女, 0=未知`）。前端采用 master-detail 布局，左侧类型列表，右侧数据列表，支持完整的 CRUD 操作和 Redis 缓存管理。
 
-### Sequence
+### 时序图
 
 ```mermaid
 sequenceDiagram
@@ -1082,14 +1083,14 @@ sequenceDiagram
 <summary>ASCII 版本（点击展开）</summary>
 
 ```
-Browser            Frontend :3000          Gateway :8102          Base :8101           Redis              MySQL
+浏览器               前端 :3000             网关 :8102            Base :8101           Redis              MySQL
   |                    |                       |                     |                   |                  |
-  | 1. Navigate to     |                       |                     |                   |                  |
+  | 1. 导航到          |                       |                     |                   |                  |
   |    /admin/dict     |                       |                     |                   |                  |
   |                    | 2. GET /api/base/dict/type/list              |                   |                  |
   |                    |---------------------->|                     |                   |                  |
   |                    |                       | 3. AuthFilter →     |                   |                  |
-  |                    |                       |    forward path     |                   |                  |
+  |                    |                       |    转发路径         |                   |                  |
   |                    |                       |-------------------->|                   |                  |
   |                    |                       |                     | 4. SELECT         |                  |
   |                    |                       |                     |    sys_dict_type  |                  |
@@ -1099,29 +1100,29 @@ Browser            Frontend :3000          Gateway :8102          Base :8101    
   |                    |                       |                     |<--------------------------------------|
   |                    | 5. R<PageResult>      |                     |                   |                  |
   |                    |<----------------------|<--------------------|                   |                  |
-  | 6. Render type     |                       |                     |                   |                  |
-  |    list (left)     |                       |                     |                   |                  |
+  | 6. 渲染类型        |                       |                     |                   |                  |
+  |    列表（左侧）    |                       |                     |                   |                  |
   |<-------------------|                       |                     |                   |                  |
   |                    |                       |                     |                   |                  |
-  | 7. Click type row  |                       |                     |                   |                  |
+  | 7. 点击类型行      |                       |                     |                   |                  |
   |                    | 8. GET /api/base/dict/data/list?typeCode=... |                   |                  |
   |                    |---------------------->|                     |                   |                  |
-  |                    |                       | 9. Forward -------->|                   |                  |
-  |                    |                       |                     | 10. GET cache     |                  |
+  |                    |                       | 9. 转发 ----------->|                   |                  |
+  |                    |                       |                     | 10. GET 缓存      |                  |
   |                    |                       |                     |------------------>|                  |
-  |                    |                       |                     |                   |  hit? cached JSON |
+  |                    |                       |                     |                   |  命中? 缓存 JSON  |
   |                    |                       |                     |<------------------|                  |
   |                    |                       |                     |                   |                  |
-  |                    |                       |                     | [if miss: SELECT sys_dict_data ----->|
+  |                    |                       |                     | [未命中: SELECT sys_dict_data ------>|
   |                    |                       |                     |  SET cache <---------------------------|
   |                    |                       |                     |                   |                  |
   |                    | 13. R<PageResult>     |                     |                   |                  |
   |                    |<----------------------|<--------------------|                   |                  |
-  | 14. Render data    |                       |                     |                   |                  |
-  |     list (right)   |                       |                     |                   |                  |
+  | 14. 渲染数据       |                       |                     |                   |                  |
+  |     列表（右侧）   |                       |                     |                   |                  |
   |<-------------------|                       |                     |                   |                  |
   |                    |                       |                     |                   |                  |
-  | 15. Create data -->|                       |                     |                   |                  |
+  | 15. 创建数据 ----->|                       |                     |                   |                  |
   |                    | 16. POST /api/base/dict/data                 |                   |                  |
   |                    |---------------------->|                     |                   |                  |
   |                    |                       | 17. @PreAuthorize   |                   |                  |
@@ -1134,7 +1135,7 @@ Browser            Frontend :3000          Gateway :8102          Base :8101    
 
 </details>
 
-### Key Components
+### 关键组件
 
 | 组件 | 文件路径 | 职责 |
 |------|---------|------|
@@ -1147,7 +1148,7 @@ Browser            Frontend :3000          Gateway :8102          Base :8101    
 | 字典管理页面 | `omni-frontend/src/views/base/dict/index.vue` | Master-detail 布局：左类型列表 + 右数据列表 |
 | 字典 API 模块 | `omni-frontend/src/api/dict.ts` | 11 个 typed API 函数 + TypeScript 接口定义 |
 
-### Cache Strategy
+### 缓存策略
 
 **Cache-aside 模式**：
 
@@ -1172,7 +1173,7 @@ Browser            Frontend :3000          Gateway :8102          Base :8101    
 
 **级联删除**：删除字典类型时，在单个 `@Transactional` 操作中同时删除所有关联的字典数据，并失效对应缓存。
 
-### Permission Tree
+### 权限树
 
 ```
 base (DIRECTORY, id=50)             ← "基础数据" 一级菜单
@@ -1190,7 +1191,7 @@ base (DIRECTORY, id=50)             ← "基础数据" 一级菜单
 
 所有 11 个权限节点分配给 `SUPER_ADMIN` 角色（role_id=1）。
 
-### Current Status
+### 当前状态
 
 - **后端**：11 个 API 端点完整实现（6 类型 + 5 数据），`@PreAuthorize` 权限控制已生效
 - **前端**：Master-detail 布局页面已就绪，`v-permission` 按钮权限控制已应用于所有操作按钮
@@ -1292,7 +1293,7 @@ sequenceDiagram
 
 三类日志各司其职，共同构成完整的审计追踪体系：操作日志记录「业务数据怎么变」，审计日志记录「安全事件发生了什么」，登录日志记录「谁在什么时候登录」。
 
-### Current Status
+### 当前状态
 
 - **AOP 切面**：`OperLogAspect` 完整实现，支持 CREATE/UPDATE/DELETE/QUERY/EXPORT/IMPORT 六种操作类型
 - **实体 diff**：`EntityDiffer` 实现字段级差异比对，UPDATE 操作仅记录变更字段
@@ -1382,7 +1383,7 @@ private void verifyOwnership(Long id, String username) {
 
 每个用户只能操作自己创建的任务，实现行级数据隔离。
 
-### Current Status
+### 当前状态
 
 - **任务创建**：端到端实现，工作台创建 → DB 保存 → XXL-JOB 注册，失败自动回滚
 - **类型管理**：`UserJobTypeController` 支持任务类型的 CRUD 和参数模板管理
@@ -1496,10 +1497,123 @@ setInterval 每 10 秒：
 | 前端轮询 | `omni-frontend/src/views/home/index.vue` | `startGlobalPolling()` 每 10 秒 + `lastLogIdMap` 防重复 |
 | 通知组件 | Element Plus `ElNotification` | 3 秒自动关闭，显示 `resultMessage` |
 
-### Current Status
+### 当前状态
 
 - **执行链路**：XXL-JOB 触发 → `userJobExecuteHandler` → Handler 路由 → 日志写入 → lastFireTime 更新，完整实现
 - **前端通知**：10 秒轮询 + `lastLogIdMap` 防重复 + `ElNotification` 3 秒自动关闭
 - **错误处理**：参数解析失败、Handler 未找到、执行异常均有处理，结果写入 `sys_user_job_log`
 - **lastFireTime**：每次执行后通过 `SysUserJobMapper.updateById()` 更新，工作台表格实时显示
 - **下次执行时间**：前端通过 `cron-parser` 库客户端计算，仅启用状态任务显示
+
+---
+
+## Docker 部署下的流程配置注意事项
+
+### OAuth2 回调 URL 配置
+
+Docker 部署时，社交登录的 `redirect_uri` 需要使用**宿主机可访问的 URL**（而非容器内部地址）：
+
+| 部署环境 | redirect_uri 示例 |
+|---------|------------------|
+| 本地开发 | `http://localhost:8100/api/auth/oauth2/github/callback` |
+| Docker 部署 | `http://<宿主机IP>:8100/api/auth/oauth2/github/callback` |
+| 生产环境 | `https://your-domain.com/api/auth/oauth2/github/callback` |
+
+**配置方式**（`application.yml`）：
+
+```yaml
+omni:
+  oauth2:
+    github:
+      redirect-uri: ${OAUTH2_GITHUB_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/github/callback}
+    google:
+      redirect-uri: ${OAUTH2_GOOGLE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/google/callback}
+    gitee:
+      redirect-uri: ${OAUTH2_GITEE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/gitee/callback}
+```
+
+**Docker Compose 环境变量覆盖**：
+
+```yaml
+# docker-compose.yml
+omni-auth:
+  environment:
+    OAUTH2_GITHUB_REDIRECT_URI: http://192.168.1.100:8100/api/auth/oauth2/github/callback
+    OAUTH2_GOOGLE_REDIRECT_URI: http://192.168.1.100:8100/api/auth/oauth2/google/callback
+    OAUTH2_GITEE_REDIRECT_URI: http://192.168.1.100:8100/api/auth/oauth2/gitee/callback
+```
+
+> **注意**：Docker 部署中，Auth 服务容器内部端口是 8080，但 OAuth2 回调 URL 必须使用宿主机映射端口 8100（因为第三方平台需要回调到宿主机的公网/局域网可达地址）。
+
+### Docker 部署下的前端回调页面
+
+社交登录成功后，Auth 服务 302 重定向到前端回调页面：
+
+```
+成功: 302 Location: /callback#token=<JWT>&username=<username>
+失败: 302 Location: /login?error=<error_code>&message=<message>
+```
+
+Docker 部署中，Nginx 容器负责服务前端静态文件，`/callback` 路由由 Vue Router 客户端处理（Nginx `try_files $uri $uri/ /index.html`）。
+
+### Gateway 容器间网络
+
+Docker 部署时所有容器在同一个 `omni-network` Bridge 网络中：
+
+```
+前端浏览器 → 宿主机:8100 → Nginx 容器(:80)
+    ├── 静态文件 → Nginx 直接返回
+    ├── /api/*   → proxy_pass http://omni-gateway:8080
+    └── /oauth2/* → proxy_pass http://omni-gateway:8080
+
+Gateway 容器(:8080)
+    ├── lb://omni-auth → Auth 容器(:8080) [Nacos 服务发现]
+    ├── lb://omni-base → Base 容器(:8080) [Nacos 服务发现]
+    └── lb://omni-workflow → Workflow 容器(:8080) [Nacos 服务发现]
+```
+
+---
+
+## 故障排查指南
+
+### 登录流程问题
+
+| 问题 | 可能原因 | 排查方法 |
+|------|---------|----------|
+| **验证码不显示** | Redis 未启动或连接失败 | 检查 Redis 容器状态；查看 Auth 服务日志中 Redis 连接错误 |
+| **登录返回「用户名或密码错误」** | 租户 ID 不匹配 | 确认前端 `tenantId` 参数正确；检查 `sys_user` 表中 `tenant_id` 字段 |
+| **登录后 401** | JWT 签名验证失败 | 检查 Gateway 是否能访问 Auth 的 `/oauth2/jwks` 端点；检查 `JwkKeyProvider` 缓存是否过期 |
+| **Token 过期频繁** | JWT 有效期仅 15 分钟 | 当前无 refresh token 机制，需重新登录；后续可增加 refresh token 流程 |
+
+### 社交登录问题
+
+| 问题 | 可能原因 | 排查方法 |
+|------|---------|----------|
+| **GitHub 回调 404** | redirect_uri 配置错误 | 检查 GitHub OAuth App 中的 `Authorization callback URL` 是否与 `application.yml` 中的配置一致 |
+| **State 验证失败** | HMAC 签名不匹配 | 检查 Auth 服务的 `omni.oauth2.state-secret` 配置是否一致（单实例部署不存在此问题） |
+| **Google API 超时** | 网络代理问题 | Google API 需要通过代理访问；检查 `application.yml` 中的 `proxy` 配置 |
+| **自动创建用户失败** | 用户名冲突且 fallback 也冲突 | 检查 `sys_user` 表是否存在 `gh_`/`go_`/`ge_` 前缀的用户名冲突 |
+| **Docker 部署回调到容器内部地址** | redirect_uri 使用了容器内部端口 | 确保 redirect_uri 使用宿主机映射端口（8100），而非容器内部端口（8080） |
+
+### 权限与菜单问题
+
+| 问题 | 可能原因 | 排查方法 |
+|------|---------|----------|
+| **动态菜单不显示** | 后端 `/api/auth/menus` 返回空 | 检查 JWT 中是否包含 `authorities` 字段；检查 `sys_role_permission` 表中角色-权限关联 |
+| **按钮始终隐藏** | v-permission 编码不匹配 | 对比前端 `v-permission` 值与 `sys_permission` 表中的 `permission_code` |
+| **API 返回 403** | @PreAuthorize 权限编码不匹配 | 对比 Controller 上的 `@PreAuthorize` 值与用户 JWT 中的权限集合 |
+
+### 数据字典问题
+
+| 问题 | 可能原因 | 排查方法 |
+|------|---------|----------|
+| **字典数据不更新** | Redis 缓存未失效 | 手动调用 `PUT /api/base/dict/data/refresh` 刷新缓存；或等待 TTL（30 分钟）过期 |
+| **字典类型删除后数据残留** | 级联删除未触发 | 检查 `DictTypeServiceImpl.deleteType()` 中的事务是否正常提交 |
+
+### 操作日志问题
+
+| 问题 | 可能原因 | 排查方法 |
+|------|---------|----------|
+| **日志未记录** | RocketMQ 未启动 | 检查 RocketMQ 容器状态；查看 `OperLogProducer` 日志中发送结果 |
+| **日志延迟** | MQ 消费积压 | 检查 omni-base 服务消费者日志；查看 RocketMQ 控制台消费进度 |
+| **归档任务未执行** | @Scheduled 未触发 | 确认 omni-base 服务只有一个实例（避免多实例重复归档）；检查日志中归档记录 |

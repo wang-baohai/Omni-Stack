@@ -1,27 +1,30 @@
-# Scheduled Task System
+# 定时任务系统
 
-Omni-Stack provides a dual-track scheduled task architecture built on **XXL-JOB 3.3.1**, covering both system-level operational tasks and user-level self-service tasks. This document describes the architecture, implementation details, and extension guide.
+> 本文档描述 Omni-Stack 定时任务系统的架构、实现细节和扩展指南。  
+> 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。
 
-## 1. Architecture Overview
+Omni-Stack 提供基于 **XXL-JOB 3.3.1** 的双轨定时任务架构，覆盖系统级运维任务和用户级自助任务。
 
-The scheduling system is organized into two independent tracks sharing the same `omni-common-job` infrastructure:
+## 1. 架构概览
+
+定时任务系统分为两个独立的轨道，共享同一套 `omni-common-job` 基础设施：
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                     Scheduled Task System                              │
+│                         定时任务系统                                    │
 ├────────────────────────────┬───────────────────────────────────────────┤
-│      System Tasks          │           User Tasks                      │
+│        系统任务             │           用户任务                         │
 │  ─────────────────         │   ─────────────────                       │
 │  @XxlJob + @SystemJobMeta  │   UserJobHandler SPI + Registry           │
-│  Admin manages via console │   User self-service via workspace         │
-│  Example: OperLogArchiver  │   Example: DrinkWaterRemindHandler        │
-│  Handler = XXL-JOB Bean    │   All share userJobExecuteHandler         │
+│  管理员通过控制台管理        │   用户通过工作台自助管理                    │
+│  示例: OperLogArchiver      │   示例: DrinkWaterRemindHandler           │
+│  Handler = XXL-JOB Bean    │   共享 userJobExecuteHandler               │
 ├────────────────────────────┴───────────────────────────────────────────┤
-│                    omni-common-job (shared library)                    │
+│                    omni-common-job（共享类库）                           │
 │  XxlJobAutoConfiguration · XxlJobAdminClient · SystemJobRegistry      │
 │  XxlJobProperties · SystemJobMeta · ParamDef                          │
 ├───────────────────────────────────────────────────────────────────────┤
-│                    omni-common-core (SPI interfaces)                   │
+│                    omni-common-core（SPI 接口）                         │
 │  UserJobHandler · UserJobMessage                                      │
 ├───────────────────────────────────────────────────────────────────────┤
 │                       XXL-JOB Admin :18080                             │
@@ -29,25 +32,25 @@ The scheduling system is organized into two independent tracks sharing the same 
 └───────────────────────────────────────────────────────────────────────┘
 ```
 
-**Module dependencies**:
+**模块依赖**：
 
-- `omni-common-core` — defines `UserJobHandler` SPI interface and `UserJobMessage` POJO (zero Spring dependencies)
-- `omni-common-job` — XXL-JOB integration: auto-configuration, admin HTTP client, system job registry, metadata annotations
-- `omni-base` — business layer: system job controller, user job service, handler implementations, workspace API
+- `omni-common-core` — 定义 `UserJobHandler` SPI 接口和 `UserJobMessage` POJO（零 Spring 依赖）
+- `omni-common-job` — XXL-JOB 集成：自动配置、Admin HTTP 客户端、系统任务注册、元数据注解
+- `omni-base` — 业务层：系统任务控制器、用户任务服务、Handler 实现、工作台 API
 
-**Key design decisions**:
+**关键设计决策**：
 
-- **XXL-JOB** as the scheduling engine: mature distributed scheduling with a visual console, cron management, and execution logging
-- **Dual-track separation**: system tasks (admin-managed, code-defined) vs user tasks (self-service, data-defined)
-- **Single shared handler** for user tasks: all user tasks register as `userJobExecuteHandler` in XXL-JOB, differentiated by JSON `executorParam`
+- 选用 **XXL-JOB** 作为调度引擎：成熟的分布式调度方案，具备可视化控制台、Cron 管理和执行日志
+- **双轨分离**：系统任务（管理员管理、代码定义）与用户任务（自助服务、数据定义）
+- 用户任务**共享单一 Handler**：所有用户任务在 XXL-JOB 中注册为 `userJobExecuteHandler`，通过 JSON `executorParam` 区分
 
-## 2. System Tasks
+## 2. 系统任务
 
-System tasks are defined in code via dual annotations and managed by administrators through the management console.
+系统任务通过双重注解在代码中定义，由管理员在管理控制台中管理。
 
-### Annotation Pattern
+### 注解模式
 
-Each system task handler method is annotated with both `@XxlJob` and `@SystemJobMeta`:
+每个系统任务 Handler 方法同时使用 `@XxlJob` 和 `@SystemJobMeta` 注解：
 
 ```java
 @XxlJob("operLogArchiveHandler")
@@ -64,53 +67,53 @@ Each system task handler method is annotated with both `@XxlJob` and `@SystemJob
 public void archive() { ... }
 ```
 
-| Annotation | Source | Purpose |
-|-----------|--------|---------|
-| `@XxlJob` | XXL-JOB Core | Declares the handler name for XXL-JOB executor routing |
-| `@SystemJobMeta` | `omni-common-job` | Declares display metadata (name, description, default cron, route strategy, parameter definitions) for the management UI |
-| `@ParamDef` | `omni-common-job` | Defines a configurable parameter (name, label, type, default, min/max) |
+| 注解 | 来源 | 用途 |
+|------|------|------|
+| `@XxlJob` | XXL-JOB Core | 声明 Handler 名称，用于 XXL-JOB 执行器路由 |
+| `@SystemJobMeta` | `omni-common-job` | 声明展示元数据（名称、描述、默认 Cron、路由策略、参数定义），供管理界面使用 |
+| `@ParamDef` | `omni-common-job` | 定义可配置参数（名称、标签、类型、默认值、最小/最大值） |
 
-### Registry Mechanism
+### 注册机制
 
-`SystemJobRegistry` scans all Spring Beans at startup (`@PostConstruct`), collecting methods annotated with both `@XxlJob` and `@SystemJobMeta`. The collected metadata is stored in an in-memory `LinkedHashMap<String, SystemJobInfo>` for the controller to query.
+`SystemJobRegistry` 在启动时（`@PostConstruct`）扫描所有 Spring Bean，收集同时标注了 `@XxlJob` 和 `@SystemJobMeta` 的方法。收集到的元数据存储在内存中的 `LinkedHashMap<String, SystemJobInfo>`，供控制器查询。
 
-Auto-configuration: `XxlJobAutoConfiguration` registers `SystemJobRegistry` as a `@Bean` with `@ConditionalOnMissingBean`.
+自动配置：`XxlJobAutoConfiguration` 通过 `@ConditionalOnMissingBean` 将 `SystemJobRegistry` 注册为 `@Bean`。
 
-### Management Workflow
+### 管理流程
 
-1. Admin views unregistered handlers in the system job management page
-2. Admin registers a handler to XXL-JOB with custom cron and parameters
-3. Admin can start/stop/trigger/unregister tasks from the same page
-4. Execution logs are viewed in the XXL-JOB native console (`http://localhost:18080`)
+1. 管理员在系统任务管理页面查看未注册的 Handler
+2. 管理员将 Handler 注册到 XXL-JOB，自定义 Cron 和参数
+3. 管理员可在同一页面启动/停止/触发/注销任务
+4. 执行日志在 XXL-JOB 原生控制台（`http://localhost:18080`）中查看
 
 ### REST API
 
-| Method | Path | Permission | Description |
-|--------|------|-----------|-------------|
-| `GET` | `/api/job/system-job/list` | `job:system-job:list` | List all handlers with XXL-JOB status (UNREGISTERED/RUNNING/STOPPED) |
-| `POST` | `/api/job/system-job/register` | `job:system-job:manage` | Register handler to XXL-JOB with custom cron/params |
-| `POST` | `/api/job/system-job/{xxlJobId}/start` | `job:system-job:manage` | Start scheduling |
-| `POST` | `/api/job/system-job/{xxlJobId}/stop` | `job:system-job:manage` | Stop scheduling |
-| `POST` | `/api/job/system-job/{xxlJobId}/trigger` | `job:system-job:manage` | Trigger immediate execution |
-| `DELETE` | `/api/job/system-job/{xxlJobId}` | `job:system-job:manage` | Unregister from XXL-JOB |
+| 方法 | 路径 | 权限 | 描述 |
+|------|------|------|------|
+| `GET` | `/api/job/system-job/list` | `job:system-job:list` | 列出所有 Handler 及其 XXL-JOB 状态（UNREGISTERED/RUNNING/STOPPED） |
+| `POST` | `/api/job/system-job/register` | `job:system-job:manage` | 将 Handler 注册到 XXL-JOB，自定义 Cron/参数 |
+| `POST` | `/api/job/system-job/{xxlJobId}/start` | `job:system-job:manage` | 启动调度 |
+| `POST` | `/api/job/system-job/{xxlJobId}/stop` | `job:system-job:manage` | 停止调度 |
+| `POST` | `/api/job/system-job/{xxlJobId}/trigger` | `job:system-job:manage` | 触发立即执行 |
+| `DELETE` | `/api/job/system-job/{xxlJobId}` | `job:system-job:manage` | 从 XXL-JOB 注销 |
 
-### Example: OperLogArchiver
+### 示例：操作日志归档
 
-The operation log archival task migrates records older than `retentionDays` from the hot table (`sys_oper_log`) to the cold table (`sys_oper_log_archive`):
+操作日志归档任务将超过 `retentionDays` 的记录从热表（`sys_oper_log`）迁移到冷表（`sys_oper_log_archive`）：
 
-- **Handler**: `OperLogArchiver.archive()` in `omni-base`
-- **Default cron**: `0 0 2 * * ?` (daily at 02:00)
-- **Parameters**: `retentionDays` (number, 1-3650, default 180)
-- **Batch processing**: 1000 records per batch with `@Transactional` per batch
-- **Execution logs**: viewed in XXL-JOB console, not in application UI
+- **Handler**：`omni-base` 中的 `OperLogArchiver.archive()`
+- **默认 Cron**：`0 0 2 * * ?`（每天凌晨 02:00）
+- **参数**：`retentionDays`（数字，1-3650，默认 180）
+- **批处理**：每批 1000 条记录，每批使用 `@Transactional`
+- **执行日志**：在 XXL-JOB 控制台查看，不在应用界面展示
 
-## 3. User Tasks
+## 3. 用户任务
 
-User tasks are self-service scheduled tasks created by end-users through the workspace UI. Each task is directly registered to XXL-JOB, leveraging native cron scheduling precision.
+用户任务是由终端用户通过工作台界面创建的自助式定时任务。每个任务直接注册到 XXL-JOB，充分利用原生 Cron 调度精度。
 
-### SPI Interface
+### SPI 接口
 
-`UserJobHandler` (in `omni-common-core`) is the extension point for defining new task types:
+`UserJobHandler`（位于 `omni-common-core`）是定义新任务类型的扩展点：
 
 ```java
 public interface UserJobHandler {
@@ -119,73 +122,73 @@ public interface UserJobHandler {
 }
 ```
 
-`UserJobMessage` carries task context:
+`UserJobMessage` 承载任务上下文：
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `jobId` | `Long` | Task ID (`sys_user_job.id`) |
-| `tenantId` | `Long` | Tenant ID |
-| `jobType` | `String` | Task type code (matches `sys_user_job_type.type_code`) |
-| `jobName` | `String` | User-defined task name |
-| `jobParams` | `String` | Task parameters JSON |
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| `jobId` | `Long` | 任务 ID（`sys_user_job.id`） |
+| `tenantId` | `Long` | 租户 ID |
+| `jobType` | `String` | 任务类型编码（对应 `sys_user_job_type.type_code`） |
+| `jobName` | `String` | 用户自定义的任务名称 |
+| `jobParams` | `String` | 任务参数 JSON |
 
-### Handler Registry & Routing
+### Handler 注册与路由
 
-`UserJobHandlerRegistry` auto-discovers all `UserJobHandler` implementations via Spring's `Map<String, UserJobHandler>` injection. The Map key is the Bean name, which **must exactly match** `sys_user_job_type.type_code`.
+`UserJobHandlerRegistry` 通过 Spring 的 `Map<String, UserJobHandler>` 注入自动发现所有 `UserJobHandler` 实现。Map 的 key 为 Bean 名称，**必须与** `sys_user_job_type.type_code` **完全一致**。
 
-All user tasks share a single XXL-JOB handler: `@XxlJob("userJobExecuteHandler")`. When XXL-JOB triggers execution, `UserJobExecuteHandler` reads the JSON `executorParam`, deserializes it to `UserJobMessage`, and routes to the correct handler via `UserJobHandlerRegistry.getHandler(jobType)`.
+所有用户任务共享同一个 XXL-JOB Handler：`@XxlJob("userJobExecuteHandler")`。当 XXL-JOB 触发执行时，`UserJobExecuteHandler` 读取 JSON 格式的 `executorParam`，反序列化为 `UserJobMessage`，然后通过 `UserJobHandlerRegistry.getHandler(jobType)` 路由到正确的 Handler。
 
-### Execution Flow
+### 执行流程
 
 ```
-XXL-JOB Scheduler triggers
-    → XxlJobSpringExecutor dispatches to userJobExecuteHandler
-    → UserJobExecuteHandler.execute():
-        1. XxlJobHelper.getJobParam() → JSON string
+XXL-JOB 调度器触发
+    → XxlJobSpringExecutor 分发到 userJobExecuteHandler
+    → UserJobExecuteHandler.execute()：
+        1. XxlJobHelper.getJobParam() → JSON 字符串
         2. objectMapper.readValue(param, UserJobMessage.class)
         3. handlerRegistry.getHandler(jobType) → UserJobHandler
         4. handler.execute(message)
-        5. handler.getResultMessage(message) → result text
+        5. handler.getResultMessage(message) → 结果文本
         6. INSERT INTO sys_user_job_log (status, executeTimeMs, resultMessage, errorMessage)
         7. UPDATE sys_user_job SET last_fire_time = fireTime
-        8. XxlJobHelper.handleSuccess() or handleFail()
+        8. XxlJobHelper.handleSuccess() 或 handleFail()
 ```
 
-### Service Layer
+### 服务层
 
-`UserJobServiceImpl` manages the full lifecycle:
+`UserJobServiceImpl` 管理完整的生命周期：
 
-| Operation | Flow |
-|-----------|------|
-| **Create** | Validate type → INSERT `sys_user_job` → `XxlJobAdminClient.addJob()` → update `xxlJobId` → rollback DB on XXL-JOB failure |
-| **Update** | Check ownership → UPDATE `sys_user_job` → `XxlJobAdminClient.updateJob()` if cron/params changed |
-| **Delete** | Check ownership → `XxlJobAdminClient.removeJob()` → DELETE `sys_user_job` |
-| **Toggle** | Check ownership → UPDATE status → `startJob()` or `stopJob()` |
-| **Trigger** | Check ownership → `triggerJob(xxlJobId, executorParam)` |
+| 操作 | 流程 |
+|------|------|
+| **创建** | 验证类型 → INSERT `sys_user_job` → `XxlJobAdminClient.addJob()` → 更新 `xxlJobId` → XXL-JOB 失败时回滚数据库 |
+| **更新** | 检查归属 → UPDATE `sys_user_job` → 若 Cron/参数变更则调用 `XxlJobAdminClient.updateJob()` |
+| **删除** | 检查归属 → `XxlJobAdminClient.removeJob()` → DELETE `sys_user_job` |
+| **切换状态** | 检查归属 → UPDATE 状态 → `startJob()` 或 `stopJob()` |
+| **触发执行** | 检查归属 → `triggerJob(xxlJobId, executorParam)` |
 
-### Workspace API (MyJobController)
+### 工作台 API（MyJobController）
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/base/my-job/list` | JWT | List current user's tasks (paginated) |
-| `GET` | `/api/base/my-job/types` | JWT | List enabled task types for dropdown |
-| `GET` | `/api/base/my-job/stats` | JWT | Dashboard statistics (total, today executed, today failed) |
-| `POST` | `/api/base/my-job` | JWT | Create task |
-| `PUT` | `/api/base/my-job/{id}` | JWT + ownership | Update task |
-| `DELETE` | `/api/base/my-job/{id}` | JWT + ownership | Delete task |
-| `PUT` | `/api/base/my-job/{id}/status` | JWT + ownership | Toggle status |
-| `POST` | `/api/base/my-job/{id}/trigger` | JWT + ownership | Trigger immediate execution |
-| `GET` | `/api/base/my-job/{id}/logs` | JWT + ownership | List execution logs |
+| 方法 | 路径 | 认证 | 描述 |
+|------|------|------|------|
+| `GET` | `/api/base/my-job/list` | JWT | 列出当前用户的任务（分页） |
+| `GET` | `/api/base/my-job/types` | JWT | 列出已启用的任务类型（下拉选项） |
+| `GET` | `/api/base/my-job/stats` | JWT | 仪表盘统计（总数、今日执行数、今日失败数） |
+| `POST` | `/api/base/my-job` | JWT | 创建任务 |
+| `PUT` | `/api/base/my-job/{id}` | JWT + 归属验证 | 更新任务 |
+| `DELETE` | `/api/base/my-job/{id}` | JWT + 归属验证 | 删除任务 |
+| `PUT` | `/api/base/my-job/{id}/status` | JWT + 归属验证 | 切换状态 |
+| `POST` | `/api/base/my-job/{id}/trigger` | JWT + 归属验证 | 触发立即执行 |
+| `GET` | `/api/base/my-job/{id}/logs` | JWT + 归属验证 | 列出执行日志 |
 
-**Ownership model**: `MyJobController` uses `verifyOwnership(id, username)` instead of `@PreAuthorize`. Each operation checks that the task's `createBy` matches the current user. This provides per-row data isolation without role-based permission codes.
+**归属模型**：`MyJobController` 使用 `verifyOwnership(id, username)` 而非 `@PreAuthorize`。每个操作都检查任务的 `createBy` 是否与当前用户匹配。这提供了逐行的数据隔离，无需基于角色的权限编码。
 
-## 4. Creating a New User Task Type (Tutorial)
+## 4. 创建新的用户任务类型（教程）
 
-This chapter walks through creating a new user task type using the **Drink Water Reminder** (`Task-00001`) as an example.
+本章以**喝水提醒**（`Task-00001`）为例，演示如何创建新的用户任务类型。
 
-### Step 1: Register the Task Type
+### 第一步：注册任务类型
 
-Insert a record into `sys_user_job_type`:
+在 `sys_user_job_type` 中插入一条记录：
 
 ```sql
 INSERT INTO sys_user_job_type (type_code, type_name, description, param_template)
@@ -197,29 +200,29 @@ VALUES (
 );
 ```
 
-| Column | Value | Purpose |
-|--------|-------|---------|
-| `type_code` | `Task-00001` | Unique identifier; **must match the Spring Bean name** |
-| `type_name` | `喝水提醒` | Display name in the workspace UI |
-| `param_template` | JSON array | Defines form fields for the task creation dialog |
+| 列名 | 值 | 用途 |
+|------|-----|------|
+| `type_code` | `Task-00001` | 唯一标识符；**必须与 Spring Bean 名称一致** |
+| `type_name` | `喝水提醒` | 工作台界面中的显示名称 |
+| `param_template` | JSON 数组 | 定义任务创建对话框的动态表单字段 |
 
-The `param_template` JSON Schema drives the dynamic form in the workspace UI. Each field definition supports:
+`param_template` JSON Schema 驱动工作台界面中的动态表单。每个字段定义支持以下属性：
 
-| Property | Description |
-|----------|-------------|
-| `fieldKey` | Parameter key (used in `jobParams` JSON) |
-| `fieldLabel` | Display label |
-| `fieldType` | `input`, `select`, `number`, `textarea` |
-| `required` | Whether the field is mandatory |
-| `options` | Available options for `select` type |
+| 属性 | 描述 |
+|------|------|
+| `fieldKey` | 参数键名（用于 `jobParams` JSON 中） |
+| `fieldLabel` | 显示标签 |
+| `fieldType` | `input`、`select`、`number`、`textarea` |
+| `required` | 该字段是否为必填项 |
+| `options` | `select` 类型的可选项 |
 
-### Step 2: Implement UserJobHandler
+### 第二步：实现 UserJobHandler
 
-Create a handler class with `@Component` where the Bean name matches `type_code`:
+创建一个带有 `@Component` 注解的 Handler 类，Bean 名称需与 `type_code` 一致：
 
 ```java
 @Slf4j
-@Component("Task-00001")  // Bean name MUST match sys_user_job_type.type_code
+@Component("Task-00001")  // Bean 名称必须与 sys_user_job_type.type_code 一致
 @RequiredArgsConstructor
 public class DrinkWaterRemindHandler implements UserJobHandler {
 
@@ -255,57 +258,57 @@ public class DrinkWaterRemindHandler implements UserJobHandler {
 }
 ```
 
-**Critical rule**: The `@Component` Bean name (`"Task-00001"`) must exactly match the `type_code` in `sys_user_job_type`. A mismatch causes silent routing failure — the task will be created successfully but execution will fail with "未找到任务类型对应的处理器".
+**关键规则**：`@Component` 的 Bean 名称（`"Task-00001"`）必须与 `sys_user_job_type` 中的 `type_code` 完全一致。不匹配会导致静默路由失败——任务会创建成功，但执行时会报错"未找到任务类型对应的处理器"。
 
-### Step 3: User Creates a Task
+### 第三步：用户创建任务
 
-1. User opens the workspace → clicks "创建任务"
-2. Selects "喝水提醒" from the type dropdown
-3. Fills the dynamic form (e.g., `cupShape = 大杯`)
-4. Sets a cron expression (e.g., `0 */30 9-18 * * ?` for every 30 minutes during work hours)
-5. Clicks "确认创建"
+1. 用户打开工作台 → 点击"创建任务"
+2. 从类型下拉框中选择"喝水提醒"
+3. 填写动态表单（如 `cupShape = 大杯`）
+4. 设置 Cron 表达式（如 `0 */30 9-18 * * ?`，表示工作时间每 30 分钟执行一次）
+5. 点击"确认创建"
 
-Behind the scenes:
-- `MyJobController.create()` → `UserJobServiceImpl.createJob()`:
-  - Validates `type_code` exists and is enabled in `sys_user_job_type`
-  - INSERT into `sys_user_job`
-  - Builds `UserJobMessage` JSON as `executorParam`
-  - Calls `XxlJobAdminClient.addJob()` to register in XXL-JOB
-  - Updates `sys_user_job.xxl_job_id` with the returned ID
+后台处理流程：
+- `MyJobController.create()` → `UserJobServiceImpl.createJob()`：
+  - 验证 `type_code` 在 `sys_user_job_type` 中存在且已启用
+  - INSERT 到 `sys_user_job`
+  - 构建 `UserJobMessage` JSON 作为 `executorParam`
+  - 调用 `XxlJobAdminClient.addJob()` 注册到 XXL-JOB
+  - 用返回的 ID 更新 `sys_user_job.xxl_job_id`
 
-### Step 4: Verify Execution
+### 第四步：验证执行
 
-1. **XXL-JOB Console** (`http://localhost:18080`): the task appears in the job list with the configured cron
-2. **Automatic trigger**: XXL-JOB fires at the scheduled time → `userJobExecuteHandler` → `DrinkWaterRemindHandler.execute()`
-3. **Execution log**: `sys_user_job_log` receives a new record with `result_message`
-4. **Frontend notification**: workspace polls every 10 seconds, detects the new log, shows an `ElNotification` popup with the result message
+1. **XXL-JOB 控制台**（`http://localhost:18080`）：任务出现在任务列表中，显示已配置的 Cron
+2. **自动触发**：XXL-JOB 在指定时间触发 → `userJobExecuteHandler` → `DrinkWaterRemindHandler.execute()`
+3. **执行日志**：`sys_user_job_log` 中新增一条包含 `result_message` 的记录
+4. **前端通知**：工作台每 10 秒轮询，检测到新日志后弹出 `ElNotification` 通知，显示结果消息
 
-## 5. XXL-JOB Admin Client
+## 5. XXL-JOB Admin 客户端
 
-`XxlJobAdminClient` is an HTTP client that wraps XXL-JOB Admin's REST API. It is instantiated by `SystemJobService` and `UserJobServiceImpl` using configuration from `XxlJobProperties`.
+`XxlJobAdminClient` 是一个 HTTP 客户端，封装了 XXL-JOB Admin 的 REST API。它由 `SystemJobService` 和 `UserJobServiceImpl` 使用 `XxlJobProperties` 中的配置实例化。
 
-### Authentication
+### 认证方式
 
-XXL-JOB Admin uses session-based authentication. `XxlJobAdminClient`:
-1. Calls `POST /login` with `userName` and `password`
-2. Caches the session cookie in a `volatile` field
-3. On subsequent API calls, includes the cookie in the `Cookie` header
-4. If a 302 redirect (login page) is detected, automatically re-authenticates and retries
+XXL-JOB Admin 使用基于 Session 的认证。`XxlJobAdminClient` 的处理方式：
+1. 使用 `userName` 和 `password` 调用 `POST /login`
+2. 将 Session Cookie 缓存在 `volatile` 字段中
+3. 后续 API 调用时，在 `Cookie` 请求头中包含该 Cookie
+4. 若检测到 302 重定向（登录页面），自动重新认证并重试
 
-### Key API Methods
+### 主要 API 方法
 
-| Method | XXL-JOB Endpoint | Purpose |
-|--------|-----------------|---------|
-| `addJob(jobGroup, jobDesc, cron, routeStrategy, handler, param)` | `POST /jobinfo/insert` | Create a new scheduled task |
-| `updateJob(xxlJobId, cron, param)` | `POST /jobinfo/update` | Update cron/params of an existing task |
-| `removeJob(xxlJobId)` | `POST /jobinfo/remove` | Delete a task |
-| `startJob(xxlJobId)` | `POST /jobinfo/start` | Start scheduling |
-| `stopJob(xxlJobId)` | `POST /jobinfo/stop` | Stop scheduling |
-| `triggerJob(xxlJobId, param)` | `POST /jobinfo/trigger` | Trigger immediate execution |
-| `getJobGroupId(appname)` | `POST /jobgroup/pageList` | Look up executor group ID by appname |
-| `pageList(jobGroup, handler)` | `POST /jobinfo/pageList` | Query task list (used to merge metadata with live status) |
+| 方法 | XXL-JOB 端点 | 用途 |
+|------|-------------|------|
+| `addJob(jobGroup, jobDesc, cron, routeStrategy, handler, param)` | `POST /jobinfo/insert` | 创建新的定时任务 |
+| `updateJob(xxlJobId, cron, param)` | `POST /jobinfo/update` | 更新已有任务的 Cron/参数 |
+| `removeJob(xxlJobId)` | `POST /jobinfo/remove` | 删除任务 |
+| `startJob(xxlJobId)` | `POST /jobinfo/start` | 启动调度 |
+| `stopJob(xxlJobId)` | `POST /jobinfo/stop` | 停止调度 |
+| `triggerJob(xxlJobId, param)` | `POST /jobinfo/trigger` | 触发立即执行 |
+| `getJobGroupId(appname)` | `POST /jobgroup/pageList` | 根据 appname 查找执行器组 ID |
+| `pageList(jobGroup, handler)` | `POST /jobinfo/pageList` | 查询任务列表（用于合并元数据与实时状态） |
 
-### Configuration
+### 配置项
 
 ```yaml
 xxl:
@@ -315,43 +318,43 @@ xxl:
       username: admin
       password: 123456
     executor:
-      appname: omni-base        # Falls back to spring.application.name if empty
-      port: 9999               # Executor callback port
+      appname: omni-base        # 为空时回退到 spring.application.name
+      port: 9999               # 执行器回调端口
       logPath: /data/applogs/xxl-job/jobhandler
       logRetentionDays: 30
 ```
 
-All properties are bound via `@ConfigurationProperties(prefix = "xxl.job")` in `XxlJobProperties`.
+所有属性通过 `XxlJobProperties` 中的 `@ConfigurationProperties(prefix = "xxl.job")` 绑定。
 
-## 6. Frontend Integration
+## 6. 前端集成
 
-### Three Frontend Entry Points
+### 三个前端入口
 
-| Area | Path | Audience | Permission |
-|------|------|----------|-----------|
-| System Job Management | `src/views/job/system-job/index.vue` | Admins | `job:system-job:list`, `job:system-job:manage` |
-| Task Type Management | `src/views/job/user-job-type/index.vue` | Admins | `job:user-job-type:*` |
-| Workspace (My Jobs) | `src/views/home/index.vue` | All users | JWT only (ownership-based) |
+| 区域 | 路径 | 受众 | 权限 |
+|------|------|------|------|
+| 系统任务管理 | `src/views/job/system-job/index.vue` | 管理员 | `job:system-job:list`、`job:system-job:manage` |
+| 任务类型管理 | `src/views/job/user-job-type/index.vue` | 管理员 | `job:user-job-type:*` |
+| 工作台（我的任务） | `src/views/home/index.vue` | 所有用户 | 仅需 JWT（基于归属验证） |
 
-### API Modules
+### API 模块
 
-| Module | File | Functions |
-|--------|------|-----------|
-| System Jobs | `src/api/systemJob.ts` | `listSystemJobs`, `registerSystemJob`, `startSystemJob`, `stopSystemJob`, `triggerSystemJob`, `unregisterSystemJob` |
-| Task Types | `src/api/userJobType.ts` | `listJobTypes`, `createJobType`, `updateJobType`, `deleteJobType` |
-| My Jobs | `src/api/myJob.ts` | `getMyJobs`, `getMyJobStats`, `createMyJob`, `updateMyJob`, `deleteMyJob`, `toggleMyJobStatus`, `triggerMyJob`, `getMyJobLogs`, `getEnabledJobTypes` |
+| 模块 | 文件 | 函数 |
+|------|------|------|
+| 系统任务 | `src/api/systemJob.ts` | `listSystemJobs`、`registerSystemJob`、`startSystemJob`、`stopSystemJob`、`triggerSystemJob`、`unregisterSystemJob` |
+| 任务类型 | `src/api/userJobType.ts` | `listJobTypes`、`createJobType`、`updateJobType`、`deleteJobType` |
+| 我的任务 | `src/api/myJob.ts` | `getMyJobs`、`getMyJobStats`、`createMyJob`、`updateMyJob`、`deleteMyJob`、`toggleMyJobStatus`、`triggerMyJob`、`getMyJobLogs`、`getEnabledJobTypes` |
 
-### Key UX Patterns
+### 关键交互模式
 
-- **Cron Generator**: A dedicated component (`CronGenerator.vue`) provides a frequency type selector (every minute / every X minutes / every hour / every X hours / daily / weekly / monthly) with a human-readable preview (e.g., "每周一 09:00 执行")
-- **Dynamic Form Renderer**: `DynamicFormRenderer.vue` renders forms based on `param_template` JSON Schema from `sys_user_job_type`. Supports `input`, `select`, `number`, and `textarea` field types.
-- **Global Polling**: The workspace polls every 10 seconds (`setInterval`) for new execution logs across all active tasks. Uses `lastLogIdMap` (Map<jobId, lastSeenLogId>) to detect new logs and show `ElNotification` popups. First poll initializes the baseline without showing notifications (prevents old log popups).
+- **Cron 生成器**：专用组件（`CronGenerator.vue`）提供频率类型选择器（每分钟 / 每 X 分钟 / 每小时 / 每 X 小时 / 每天 / 每周 / 每月），并附带可读的预览（如"每周一 09:00 执行"）
+- **动态表单渲染器**：`DynamicFormRenderer.vue` 根据 `sys_user_job_type` 的 `param_template` JSON Schema 渲染表单。支持 `input`、`select`、`number` 和 `textarea` 字段类型。
+- **全局轮询**：工作台每 10 秒（`setInterval`）轮询所有活跃任务的新执行日志。使用 `lastLogIdMap`（Map<jobId, lastSeenLogId>）检测新日志并弹出 `ElNotification` 通知。首次轮询初始化基线，不显示通知（防止弹出旧日志通知）。
 
-## 7. Configuration
+## 7. 配置
 
-### Docker Deployment
+### Docker 部署
 
-XXL-JOB Admin is deployed as a Docker container via `docker-compose.yml`:
+XXL-JOB Admin 通过 `docker-compose.yml` 以 Docker 容器方式部署：
 
 ```yaml
 xxl-job-admin:
@@ -366,15 +369,15 @@ xxl-job-admin:
       --spring.datasource.password=root123
 ```
 
-The `xxl_job` database is initialized via `scripts/sql/init-xxl-job.sql` mounted into MySQL's `docker-entrypoint-initdb.d/`.
+`xxl_job` 数据库通过 `scripts/sql/init-xxl-job.sql` 挂载到 MySQL 的 `docker-entrypoint-initdb.d/` 进行初始化。
 
-### Database Tables (omni_base schema)
+### 数据库表（omni_base 库）
 
-| Table | Purpose |
-|-------|---------|
-| `sys_user_job_type` | Task type catalog. `type_code` (unique) maps to `UserJobHandler` Bean name. `param_template` (JSON) drives the dynamic form. |
-| `sys_user_job` | User task instances. `xxl_job_id` links to XXL-JOB. `cron_expression`, `job_params`, `status`, `last_fire_time`. |
-| `sys_user_job_log` | Execution history. `job_id`, `fire_time`, `execute_time_ms`, `status` (0=fail, 1=success), `result_message`, `error_message`. |
+| 表名 | 用途 |
+|------|------|
+| `sys_user_job_type` | 任务类型目录。`type_code`（唯一）对应 `UserJobHandler` Bean 名称。`param_template`（JSON）驱动动态表单。 |
+| `sys_user_job` | 用户任务实例。`xxl_job_id` 关联 XXL-JOB。包含 `cron_expression`、`job_params`、`status`、`last_fire_time`。 |
+| `sys_user_job_log` | 执行历史记录。包含 `job_id`、`fire_time`、`execute_time_ms`、`status`（0=失败，1=成功）、`result_message`、`error_message`。 |
 
 ```mermaid
 erDiagram
@@ -382,23 +385,94 @@ erDiagram
     sys_user_job ||--o{ sys_user_job_log : "id -> job_id"
 ```
 
-### Auto-Configuration
+### 自动配置
 
-`XxlJobAutoConfiguration` (in `omni-common-job`) is registered via `META-INF/spring/AutoConfiguration.imports` and activates when:
-- `XxlJobSpringExecutor` class is on the classpath (`@ConditionalOnClass`)
-- `xxl.job.executor.enabled` is not explicitly set to `false` (`@ConditionalOnProperty`, defaults to `true`)
+`XxlJobAutoConfiguration`（位于 `omni-common-job`）通过 `META-INF/spring/AutoConfiguration.imports` 注册，在以下条件满足时激活：
+- classpath 中存在 `XxlJobSpringExecutor` 类（`@ConditionalOnClass`）
+- `xxl.job.executor.enabled` 未显式设置为 `false`（`@ConditionalOnProperty`，默认为 `true`）
 
-It provides:
-1. `XxlJobSpringExecutor` Bean — registers with XXL-JOB Admin on startup
-2. `SystemJobRegistry` Bean — scans `@XxlJob` + `@SystemJobMeta` annotated methods (`@ConditionalOnMissingBean`)
+提供以下 Bean：
+1. `XxlJobSpringExecutor` Bean — 启动时向 XXL-JOB Admin 注册
+2. `SystemJobRegistry` Bean — 扫描标注了 `@XxlJob` + `@SystemJobMeta` 的方法（`@ConditionalOnMissingBean`）
 
-### Service Integration Checklist
+### 服务集成清单
 
-To add scheduling capabilities to a new microservice:
+要为新的微服务添加调度能力：
 
-1. Add POM dependency: `omni-common-job`
-2. Configure `xxl.job.admin.*` and `xxl.job.executor.*` in `application.yml`
-3. Ensure XXL-JOB Admin is running and accessible
-4. For system tasks: annotate handler methods with `@XxlJob` + `@SystemJobMeta`
-5. For user tasks: implement `UserJobHandler` with Bean name matching `type_code`
-6. The executor auto-registers with XXL-JOB Admin on service startup
+1. 添加 POM 依赖：`omni-common-job`
+2. 在 `application.yml` 中配置 `xxl.job.admin.*` 和 `xxl.job.executor.*`
+3. 确保 XXL-JOB Admin 已启动且可访问
+4. 系统任务：在 Handler 方法上添加 `@XxlJob` + `@SystemJobMeta` 注解
+5. 用户任务：实现 `UserJobHandler`，Bean 名称与 `type_code` 一致
+6. 执行器会在服务启动时自动向 XXL-JOB Admin 注册
+
+---
+
+## 8. 技术选型思考：为什么选择 XXL-JOB 而非 Quartz
+
+| 考量 | XXL-JOB | Quartz |
+|------|---------|--------|
+| **可视化管理** | 内置 Web 控制台，支持任务 CRUD、执行日志、调度报表 | 无内置 UI，需第三方工具（如 Quartz Web UI） |
+| **分布式支持** | 原生支持多执行器、分片广播、故障转移 | 需额外配置 JDBC JobStore + 集群模式 |
+| **动态调度** | 运行时修改 cron/参数立即生效，无需重启 | 运行时修改需通过 API 重新调度 |
+| **运维友好** | 执行日志可视化、失败重试、邮件报警 | 日志需自定义集成 |
+| **Spring Boot 集成** | 提供 `xxl-job-core` SDK，集成简单 | Spring 内置 `@Scheduled`，但分布式功能有限 |
+| **社区活跃度** | GitHub 25k+ stars，中文社区活跃 | 历史悠久，但社区活跃度下降 |
+
+**结论**：XXL-JOB 在可视化管理、分布式调度、运维友好性方面明显优于 Quartz，特别适合需要管理员动态配置任务的场景。
+
+## 9. XXL-JOB Docker 部署配置详解
+
+### 容器配置
+
+```yaml
+# docker-compose.yml
+xxl-job-admin:
+  image: xuxueli/xxl-job-admin:3.3.1
+  container_name: omni-xxl-job-admin
+  ports:
+    - "18080:8080"              # 宿主机 18080 → 容器内部 8080
+  environment:
+    PARAMS: >
+      --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+      --spring.datasource.username=root
+      --spring.datasource.password=root123
+  depends_on:
+    mysql:
+      condition: service_healthy
+  networks:
+    - omni-network
+```
+
+### 关键配置说明
+
+| 配置项 | 值 | 说明 |
+|---------|-----|------|
+| 容器内部端口 | 8080 | XXL-JOB Admin 默认端口 |
+| 宿主机映射端口 | 18080 | 避免与 Gateway (8102) 冲突 |
+| 数据库连接 | `mysql:3306` | 使用 Docker 内部网络解析 `mysql` 主机名 |
+| 数据库初始化 | `scripts/sql/init-xxl-job.sql` | 挂载到 MySQL 的 `docker-entrypoint-initdb.d/` |
+| 默认账号 | admin / 123456 | 生产环境必须修改 |
+
+### 执行器注册
+
+各微服务的执行器通过 `xxl.job.executor.appname` 注册到 XXL-JOB Admin：
+
+| 服务 | appname | 端口 | 说明 |
+|------|---------|------|------|
+| omni-base | `omni-base` | 9999 | 系统任务 + 用户任务 + MQ 中继 |
+| omni-auth | `omni-auth` | 9998 | 认证相关任务（如配置了执行器） |
+| omni-workflow | `omni-workflow` | 9997 | 工作流相关任务（如配置了执行器） |
+
+---
+
+## 10. 故障排查指南
+
+| 问题 | 可能原因 | 排查方法 |
+|------|---------|----------|
+| **执行器未注册** | XXL-JOB Admin 未启动或网络不通 | 检查 XXL-JOB Admin 容器状态；确认 `xxl.job.admin.addresses` 配置正确 |
+| **任务未触发** | 任务未启动或 Cron 表达式错误 | XXL-JOB 控制台检查任务状态；使用在线 Cron 工具验证表达式 |
+| **执行失败** | Handler 抛出异常 | XXL-JOB 控制台查看执行日志；检查服务日志中的异常堆栈 |
+| **用户任务「未找到处理器」** | Bean name 与 type_code 不匹配 | 确认 `@Component("Task-XXXXX")` 中的名称与 `sys_user_job_type.type_code` 完全一致 |
+| **XXL-JOB 注册失败回滚** | `XxlJobAdminClient.addJob()` 返回失败 | 检查 XXL-JOB Admin 日志；确认执行器 appname 已注册 |
+| **任务重复注册** | 多次点击创建 | `dynamicRouteNames` Set 防重复，但若服务重启需重新注册 |

@@ -1,12 +1,13 @@
 # ============================================================
-# Omni-Stack 中间件 Docker Compose 配置
+# Omni-Stack 全家桶 Docker Compose 配置
 # ============================================================
-# 启动顺序：MySQL/Redis/RocketMQ → Nacos → 后端服务 → 前端
+# 包含：中间件（MySQL/Redis/RocketMQ/Nacos/XXL-JOB）+ 后端微服务 + 前端
+#
+# 启动顺序：MySQL/Redis/RocketMQ → Nacos/XXL-JOB → 后端服务 → 前端
 #
 # 用法：
 #   Windows: 右键 start.bat → 以管理员身份运行（自动处理端口保护）
 #   Linux/Mac: ./start.sh
-#   仅启动指定服务: start.bat mysql redis  或  ./start.sh mysql redis
 #   查看状态: docker compose ps
 #   停止: stop.bat / ./stop.sh（数据随之清除）
 # ============================================================
@@ -93,11 +94,11 @@ services:
       mysql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8848/nacos/"]
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 60s
     networks:
       - omni-network
 
@@ -110,10 +111,8 @@ services:
     container_name: omni-rocketmq-namesrv
     restart: unless-stopped
     ports:
-      - "9876:9876"
+      - "19876:9876"
     command: sh mqnamesrv
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/127.0.0.1/9876' || exit 1"]
       interval: 10s
@@ -134,10 +133,8 @@ services:
     environment:
       NAMESRV_ADDR: rocketmq-namesrv:9876
       JAVA_OPT_EXT: "-Drocketmq.broker.diskSpaceWarningLevelRatio=0.98"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
-      - ./docker/rocketmq/broker.conf:/home/rocketmq/rocketmq-5.3.2/conf/broker.conf
+      - ./docker/rocketmq/broker-docker.conf:/home/rocketmq/rocketmq-5.3.2/conf/broker.conf
     command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.2/conf/broker.conf --enable-proxy
     depends_on:
       rocketmq-namesrv:
@@ -170,8 +167,6 @@ services:
         --xxl.job.login.username=admin
         --xxl.job.login.password=123456
         --xxl.job.accessToken=
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     depends_on:
       mysql:
         condition: service_healthy
@@ -181,6 +176,177 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+    networks:
+      - omni-network
+
+  # ===========================================================
+  # 后端微服务（多阶段构建：Maven 编译 + JRE 运行）
+  # ===========================================================
+
+  # ----------------------------------------------------------
+  # omni-auth — 认证授权服务 (Spring Authorization Server)
+  # 宿主机端口: 8100 | 容器内部端口: 8080
+  # ----------------------------------------------------------
+  omni-auth:
+    build:
+      context: ./omni-backend
+      dockerfile: ../docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-auth
+    image: omni-auth:latest
+    container_name: omni-auth
+    restart: unless-stopped
+    ports:
+      - "8100:8080"
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      SPRING_DATA_REDIS_HOST: redis
+      AUTH_ISSUER: http://omni-auth:8080
+      AUTH_FRONTEND_BASE_URL: http://localhost:3000
+      AUTH_OAUTH2_GITHUB_REDIRECT_URI: http://localhost:8100/api/auth/oauth2/github/callback
+      AUTH_OAUTH2_GITEE_REDIRECT_URI: http://localhost:8100/api/auth/oauth2/gitee/callback
+      AUTH_OAUTH2_GOOGLE_REDIRECT_URI: http://localhost:8100/api/auth/oauth2/google/callback
+    depends_on:
+      nacos:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - omni-network
+
+  # ----------------------------------------------------------
+  # omni-base — 基础数据服务 (字典/组织/用户/日志/任务)
+  # 宿主机端口: 8101 | 容器内部端口: 8080
+  # ----------------------------------------------------------
+  omni-base:
+    build:
+      context: ./omni-backend
+      dockerfile: ../docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-base
+    image: omni-base:latest
+    container_name: omni-base
+    restart: unless-stopped
+    ports:
+      - "8101:8080"
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_base?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+    depends_on:
+      nacos:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+      xxl-job-admin:
+        condition: service_healthy
+    networks:
+      - omni-network
+
+  # ----------------------------------------------------------
+  # omni-workflow — 工作流引擎服务 (Flowable)
+  # 宿主机端口: 8103 | 容器内部端口: 8080
+  # ----------------------------------------------------------
+  omni-workflow:
+    build:
+      context: ./omni-backend
+      dockerfile: ../docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-workflow
+    image: omni-workflow:latest
+    container_name: omni-workflow
+    restart: unless-stopped
+    ports:
+      - "8103:8080"
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_workflow?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
+    depends_on:
+      nacos:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+    networks:
+      - omni-network
+
+  # ----------------------------------------------------------
+  # omni-gateway — API 网关 (Spring Cloud Gateway WebFlux)
+  # 宿主机端口: 8102 | 容器内部端口: 8080
+  # ----------------------------------------------------------
+  omni-gateway:
+    build:
+      context: ./omni-backend
+      dockerfile: ../docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-gateway
+    image: omni-gateway:latest
+    container_name: omni-gateway
+    restart: unless-stopped
+    ports:
+      - "8102:8080"
+    environment:
+      SERVER_PORT: "8080"
+      NACOS_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
+      SPRING_DATA_REDIS_HOST: redis
+      AUTH_JWKS_URI: http://omni-auth:8080/oauth2/jwks
+    depends_on:
+      nacos:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      omni-auth:
+        condition: service_healthy
+    networks:
+      - omni-network
+
+  # ===========================================================
+  # 前端应用（多阶段构建：npm build + Nginx）
+  # ===========================================================
+
+  # ----------------------------------------------------------
+  # omni-frontend — Vue 3 前端 (Nginx)
+  # 端口: 3000 | 静态文件 + 反代 Gateway
+  # ----------------------------------------------------------
+  omni-frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    image: omni-frontend:latest
+    container_name: omni-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      omni-gateway:
+        condition: service_healthy
     networks:
       - omni-network
 
