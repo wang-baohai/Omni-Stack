@@ -41,7 +41,7 @@ public class WorkflowModelController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('workflow:model:list')")
     public R<PageResult<WfProcessModel>> list(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String category,
             @RequestParam(defaultValue = "1") int page,
@@ -72,7 +72,7 @@ public class WorkflowModelController {
     @PostMapping
     @PreAuthorize("hasAuthority('workflow:model:create')")
     public R<WfProcessModel> create(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader(value = "X-User-Name", required = false) String userName,
             @Valid @RequestBody CreateModelRequest request) {
         return R.ok(workflowModelService.createModel(request, tenantId, userName));

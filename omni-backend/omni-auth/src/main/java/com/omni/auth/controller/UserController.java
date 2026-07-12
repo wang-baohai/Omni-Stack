@@ -83,7 +83,7 @@ public class UserController {
     public R<PageResult<SysUser>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(userService.listUsers(tenantId, page, size));
     }
 

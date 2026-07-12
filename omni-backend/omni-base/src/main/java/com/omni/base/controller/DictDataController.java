@@ -52,7 +52,7 @@ public class DictDataController {
      */
     @GetMapping("/options")
     public R<List<DictOptionVO>> options(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam String typeCode) {
         List<DictOptionVO> options = dictDataService.listEnabledData(tenantId, typeCode)
                 .stream()
@@ -73,7 +73,7 @@ public class DictDataController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('dict:data:list')")
     public R<PageResult<SysDictData>> list(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam String typeCode,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -91,7 +91,7 @@ public class DictDataController {
     @PostMapping
     @PreAuthorize("hasAuthority('dict:data:create')")
     public R<SysDictData> create(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @Valid @RequestBody CreateDictDataRequest request) {
         String operator = SecurityContextHolder.getContext().getAuthentication().getName();
         return R.ok(dictDataService.createData(tenantId, request, operator));
@@ -138,7 +138,7 @@ public class DictDataController {
     @PostMapping("/refresh-cache")
     @PreAuthorize("hasAuthority('dict:data:refresh')")
     public R<Void> refreshCache(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam String typeCode) {
         dictDataService.refreshCache(tenantId, typeCode);
         return R.ok();

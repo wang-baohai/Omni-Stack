@@ -52,7 +52,7 @@ public class MqMessageController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('base:mqmessage:list')")
     public R<PageResult<SysMqMessage>> list(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) String topic,
             @RequestParam(required = false) String msgKey,
@@ -89,7 +89,7 @@ public class MqMessageController {
     @GetMapping("/{msgId}")
     @PreAuthorize("hasAuthority('base:mqmessage:list')")
     public R<SysMqMessage> getByMsgId(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @PathVariable String msgId) {
         SysMqMessage message = sysMqMessageMapper.selectOne(
                 new LambdaQueryWrapper<SysMqMessage>()
@@ -113,7 +113,7 @@ public class MqMessageController {
     @PostMapping("/{msgId}/resend")
     @PreAuthorize("hasAuthority('base:mqmessage:resend')")
     public R<Void> resend(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @PathVariable String msgId) {
         SysMqMessage message = sysMqMessageMapper.selectOne(
                 new LambdaQueryWrapper<SysMqMessage>()
@@ -149,7 +149,7 @@ public class MqMessageController {
     @PostMapping("/{msgId}/skip")
     @PreAuthorize("hasAuthority('base:mqmessage:skip')")
     public R<Void> skip(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @PathVariable String msgId) {
         SysMqMessage message = sysMqMessageMapper.selectOne(
                 new LambdaQueryWrapper<SysMqMessage>()

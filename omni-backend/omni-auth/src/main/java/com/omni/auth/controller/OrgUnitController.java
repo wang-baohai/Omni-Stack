@@ -59,7 +59,7 @@ public class OrgUnitController {
     @GetMapping("/tree")
     @PreAuthorize("hasAuthority('system:org:list')")
     public R<List<OrgUnitTreeNode>> tree(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(orgUnitService.getOrgTree(tenantId));
     }
 
@@ -89,7 +89,7 @@ public class OrgUnitController {
     @PostMapping
     @PreAuthorize("hasAuthority('system:org:create')")
     public R<SysOrgUnit> create(@Valid @RequestBody CreateOrgUnitRequest request,
-                                @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+                                @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(orgUnitService.createOrgUnit(tenantId, request));
     }
 

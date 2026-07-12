@@ -4,7 +4,7 @@
  * 通过频率类型选择器 + 动态条件表单配置调度规则，
  * 自动转换为标准 6 段式 Cron 表达式，并提供自然语言预览。
  */
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -222,10 +222,17 @@ function onFreqTypeChange() {
   }
 }
 
-// ─── 发射 Cron ───
+// ─── 发射 Cron（带防循环锁） ───
+
+let isEmitting = false
 
 function emitCron() {
-  emit('update:modelValue', cronExpression.value)
+  if (isEmitting) return
+  isEmitting = true
+  nextTick(() => {
+    emit('update:modelValue', cronExpression.value)
+    isEmitting = false
+  })
 }
 
 // ─── 生命周期 & 监听 ───
@@ -236,6 +243,7 @@ onMounted(() => {
 })
 
 watch(() => props.modelValue, (val) => {
+  if (isEmitting) return
   if (val && val !== cronExpression.value) {
     parseCron(val)
   }

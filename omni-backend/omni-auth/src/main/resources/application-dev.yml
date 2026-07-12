@@ -1,0 +1,6 @@
+# 开发环境 profile 配置（仅本地开发使用，Docker/生产不加载此文件）
+
+# 开发环境开启 MyBatis SQL 日志输出
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

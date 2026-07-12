@@ -1,6 +1,14 @@
 server:
   port: 8101
 
+management:
+  server:
+    port: 19901
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 spring:
   application:
     name: omni-base
@@ -17,16 +25,16 @@ spring:
       definition: operlogConsumer
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
-        namespace: public
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:public}
         ip: 127.0.0.1
-        username: nacos
-        password: nacos
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
       config:
-        server-addr: 127.0.0.1:8848
-        namespace: public
-        username: nacos
-        password: nacos
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:public}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
         file-extension: yml
     stream:
       rocketmq:
@@ -41,20 +49,15 @@ spring:
           content-type: application/json
           group: operlog-consumer-group
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/omni_base?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_base?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       database: 0
-
-# MyBatis-Plus 开发环境配置（通用配置由 omni-common-mybatis 提供）
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 logging:
   level:
@@ -66,11 +69,17 @@ xxl:
     admin:
       addresses: http://127.0.0.1:18080/xxl-job-admin
       username: admin
-      password: 123456
+      password: ${XXL_JOB_PASSWORD:123456}
     executor:
       appname: omni-base
-      address: http://host.docker.internal:9901/
-      ip: host.docker.internal
+      address: ${XXL_JOB_EXECUTOR_ADDRESS:}
+      ip: ${XXL_JOB_EXECUTOR_IP:}
       port: 9901
       logpath: ./logs/xxl-job
       logretentiondays: 30
+
+# 内部 API 认证配置（Feign 调用其他服务时携带 X-Internal-Token）
+omni:
+  internal:
+    api:
+      token: ${OMNI_INTERNAL_API_TOKEN:}

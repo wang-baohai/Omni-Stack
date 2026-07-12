@@ -50,7 +50,7 @@ public class MenuController {
      */
     @GetMapping
     public R<List<PermissionTreeNode>> getMenus(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         List<PermissionTreeNode> tree = permissionService.getPermissionTree(tenantId);
         // 第一步：过滤为 DIRECTORY 和 MENU 类型节点
         List<PermissionTreeNode> menus = filterMenuNodes(tree);

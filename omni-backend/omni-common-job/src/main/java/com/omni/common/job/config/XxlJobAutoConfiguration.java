@@ -1,6 +1,7 @@
 package com.omni.common.job.config;
 
 import com.omni.common.job.SystemJobRegistry;
+import com.omni.common.job.XxlJobAdminClient;
 import com.omni.common.job.XxlJobProperties;
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,8 @@ public class XxlJobAutoConfiguration {
      * 读取 {@link XxlJobProperties} 配置并初始化执行器。
      * 当 {@code xxl.job.executor.appname} 为空时，回退使用
      * {@code spring.application.name} 作为 AppName。</p>
+     * <p>在创建执行器前，自动通过 Admin API 确保执行器组已注册到调度中心，
+     * 避免执行器启动时因组不存在而注册失败。</p>
      *
      * @param properties XXL-JOB 配置属性（{@code xxl.job.*}）
      * @param appName    Spring 应用名称（兑底值）
@@ -64,6 +67,9 @@ public class XxlJobAutoConfiguration {
                 properties.getExecutor().getAddress(),
                 properties.getExecutor().getPort());
 
+        // 确保执行器组在调度中心已注册（带重试），在执行器 Bean 创建前完成
+        ensureExecutorGroupRegistered(properties, resolvedAppName);
+
         XxlJobSpringExecutor executor = new XxlJobSpringExecutor();
         executor.setAdminAddresses(properties.getAdmin().getAddresses());
         executor.setAppname(resolvedAppName);
@@ -75,6 +81,46 @@ public class XxlJobAutoConfiguration {
         executor.setLogRetentionDays(properties.getExecutor().getLogRetentionDays());
 
         return executor;
+    }
+
+    /**
+     * 确保执行器组已注册到 XXL-JOB 调度中心。
+     * <p>带重试逻辑，防止 XXL-JOB Admin 尚未就绪时失败。
+     * 最多重试 5 次，每次间隔 10 秒。</p>
+     *
+     * @param properties     XXL-JOB 配置属性
+     * @param resolvedAppName 解析后的 AppName
+     */
+    private void ensureExecutorGroupRegistered(XxlJobProperties properties, String resolvedAppName) {
+        String adminAddr = properties.getAdmin().getAddresses();
+        String adminUser = properties.getAdmin().getUsername();
+        String adminPass = properties.getAdmin().getPassword();
+
+        XxlJobAdminClient client = new XxlJobAdminClient(adminAddr, adminUser, adminPass);
+        int maxRetries = 5;
+        for (int i = 1; i <= maxRetries; i++) {
+            try {
+                int groupId = client.ensureExecutorGroup(resolvedAppName, resolvedAppName);
+                if (groupId >= 0) {
+                    log.info("XXL-JOB 执行器组就绪: appname={}, groupId={}", resolvedAppName, groupId);
+                    return;
+                }
+                log.warn("执行器组创建后仍无法查询到: appname={}, 重试 {}/{}", resolvedAppName, i, maxRetries);
+            } catch (Exception e) {
+                log.warn("XXL-JOB 执行器组注册失败 ({}): {}, 重试 {}/{}",
+                        e.getClass().getSimpleName(), e.getMessage(), i, maxRetries);
+            }
+            if (i < maxRetries) {
+                try {
+                    Thread.sleep(10_000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    log.warn("XXL-JOB 执行器组注册等待被中断");
+                    return;
+                }
+            }
+        }
+        log.error("XXL-JOB 执行器组注册失败，已耗尽重试次数: appname={}", resolvedAppName);
     }
 
     /**

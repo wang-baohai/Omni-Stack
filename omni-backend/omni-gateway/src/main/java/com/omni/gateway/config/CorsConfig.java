@@ -1,5 +1,6 @@
 package com.omni.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -20,6 +21,13 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 public class CorsConfig {
 
     /**
+     * 允许的跨域来源列表，通过配置属性 {@code omni.cors.allowed-origins} 控制。
+     * <p>开发环境默认允许所有来源（{@code *}），生产环境应限制为前端域名。</p>
+     */
+    @Value("${omni.cors.allowed-origins:*}")
+    private String allowedOrigins;
+
+    /**
      * 创建并配置 CORS 跨域过滤器。
      * <p>
      * 允许所有来源、所有方法和所有请求头，支持携带凭证，
@@ -31,8 +39,14 @@ public class CorsConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        // 允许所有来源（支持通配符模式）
-        config.addAllowedOriginPattern("*");
+        // 根据配置属性设置允许的来源（支持逗号分隔多个域名）
+        if ("*".equals(allowedOrigins)) {
+            config.addAllowedOriginPattern("*");
+        } else {
+            for (String origin : allowedOrigins.split(",")) {
+                config.addAllowedOriginPattern(origin.trim());
+            }
+        }
         // 允许所有 HTTP 方法
         config.addAllowedMethod("*");
         // 允许所有请求头

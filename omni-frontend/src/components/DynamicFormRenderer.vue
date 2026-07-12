@@ -5,7 +5,7 @@
  *
  * @see SchemaFieldEditor
  */
-import { computed, watch, onMounted, reactive } from 'vue'
+import { computed, watch, onMounted, reactive, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -42,19 +42,46 @@ const formValues = reactive<Record<string, any>>({})
 
 /**
  * 解析 Schema 为字段列表。
+ * <p>同时兼容两种格式：
+ * <ul>
+ *   <li>扁平格式（SchemaFieldEditor 输出）：{ cupShape: { type, label, required, default, options } }</li>
+ *   <li>标准 JSON Schema：{ type: 'object', properties: { cupShape: { type, title, enum, default } }, required: [...] }</li>
+ * </ul>
+ * </p>
  *
  * @returns SchemaField 数组
  */
 const fieldList = computed<SchemaField[]>(() => {
   if (!props.schema) return []
-  return Object.entries(props.schema).map(([key, config]: [string, any]) => ({
-    key,
-    label: config.label || key,
-    type: config.type || 'string',
-    required: config.required || false,
-    default: config.default,
-    options: config.options || [],
-  }))
+
+  // 检测是否为标准 JSON Schema 格式（含 properties 字段）
+  const isStandardJsonSchema = props.schema.type === 'object' && props.schema.properties
+  const requiredSet = new Set<string>(
+    isStandardJsonSchema && Array.isArray(props.schema.required) ? props.schema.required : [],
+  )
+
+  const entries: Array<[string, any]> = isStandardJsonSchema
+    ? Object.entries(props.schema.properties)
+    : Object.entries(props.schema)
+
+  return entries.map(([key, config]: [string, any]) => {
+    // 标准 JSON Schema 用 enum，扁平格式用 options
+    let options: Array<{ value: string; label: string }> = config.options || []
+    if (options.length === 0 && Array.isArray(config.enum)) {
+      options = config.enum.map((v: string) => ({ value: v, label: v }))
+    }
+    // enum 字段自动映射为 select 类型
+    const type = config.enum && options.length > 0 && !config.type ? 'select' : (config.type || 'string')
+
+    return {
+      key,
+      label: config.label || config.title || key,
+      type,
+      required: config.required || requiredSet.has(key) || false,
+      default: config.default,
+      options,
+    }
+  })
 })
 
 /**
@@ -77,10 +104,17 @@ function initDefaults() {
 }
 
 /**
- * 向父组件发射更新后的表单值。
+ * 向父组件发射更新后的表单值（带防循环锁）。
  */
+let isEmitting = false
+
 function emitValues() {
-  emit('update:modelValue', { ...formValues })
+  if (isEmitting) return
+  isEmitting = true
+  nextTick(() => {
+    emit('update:modelValue', { ...formValues })
+    isEmitting = false
+  })
 }
 
 onMounted(() => {
@@ -89,6 +123,7 @@ onMounted(() => {
 })
 
 watch(() => props.schema, () => {
+  if (isEmitting) return
   initDefaults()
   emitValues()
 }, { deep: true })

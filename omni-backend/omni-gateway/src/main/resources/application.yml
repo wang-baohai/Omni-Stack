@@ -29,6 +29,19 @@ spring:
               enabled: true
               lower-case-service-id: true
           routes:
+            # 屏蔽内部 API 路由（防止通过服务发现路由访问 /internal/**）
+            - id: block-internal-api
+              uri: no://op
+              predicates:
+                - Path=/internal/**
+              filters:
+                - SetStatus=404
+            - id: block-internal-api-services
+              uri: no://op
+              predicates:
+                - Path=/omni-auth/internal/**,/omni-base/internal/**,/omni-workflow/internal/**,/omni-gateway/internal/**
+              filters:
+                - SetStatus=404
             # OAuth2 authorization server endpoints (必须在 omni-auth 路由之前)
             - id: omni-auth-oauth2
               uri: lb://omni-auth
@@ -66,6 +79,8 @@ spring:
       database: 0
 
 management:
+  server:
+    port: 19902
   endpoint:
     gateway:
       enabled: true

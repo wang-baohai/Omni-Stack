@@ -48,7 +48,7 @@ public class AuditLogController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('system:auditlog:list')")
     public R<PageResult<AuditLogVO>> list(AuditLogQuery query,
-                                           @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+                                           @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(auditLogService.listAuditLogs(tenantId, query));
     }
 }

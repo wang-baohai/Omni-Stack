@@ -3,7 +3,7 @@
  * 系统任务管理页面。
  * 展示所有 @SystemJobMeta 注册的 Handler，支持注册/启动/停止/触发/注销等全生命周期操作。
  */
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -24,9 +24,12 @@ const registerDialogVisible = ref(false)
 const registeringJob = ref<SystemJob | null>(null)
 const registerCron = ref('')
 const registerParams = ref<Record<string, any>>({})
+const registering = ref(false)
 
-/** 将 paramDefs 转换为 DynamicFormRenderer schema 格式 */
-function toSchema(job: SystemJob) {
+/** 将 paramDefs 转换为 DynamicFormRenderer schema 格式（缓存避免重复创建） */
+const registerSchema = computed(() => {
+  const job = registeringJob.value
+  if (!job) return null
   const schema: Record<string, any> = {}
   if (job.paramDefs) {
     for (const p of job.paramDefs) {
@@ -39,7 +42,7 @@ function toSchema(job: SystemJob) {
     }
   }
   return Object.keys(schema).length > 0 ? schema : null
-}
+})
 
 /** 获取状态标签类型 */
 function statusTagType(status: string) {
@@ -86,7 +89,8 @@ function openRegister(job: SystemJob) {
 
 /** 确认注册 */
 async function handleRegister() {
-  if (!registeringJob.value) return
+  if (!registeringJob.value || registering.value) return
+  registering.value = true
   const paramsJson = Object.keys(registerParams.value).length > 0
     ? JSON.stringify(registerParams.value)
     : undefined
@@ -105,6 +109,8 @@ async function handleRegister() {
     }
   } catch {
     ElMessage.error(t('common.error'))
+  } finally {
+    registering.value = false
   }
 }
 
@@ -272,18 +278,18 @@ onMounted(() => {
         <el-divider content-position="left">{{ t('systemJob.cronConfig') }}</el-divider>
         <CronGenerator v-model="registerCron" />
 
-        <template v-if="toSchema(registeringJob)">
+        <template v-if="registerSchema">
           <el-divider content-position="left">{{ t('systemJob.paramConfig') }}</el-divider>
           <DynamicFormRenderer
             v-model="registerParams"
-            :schema="toSchema(registeringJob)"
+            :schema="registerSchema"
           />
         </template>
       </div>
 
       <template #footer>
         <el-button @click="registerDialogVisible = false">{{ t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="handleRegister">{{ t('systemJob.register') }}</el-button>
+        <el-button type="primary" :loading="registering" @click="handleRegister">{{ t('systemJob.register') }}</el-button>
       </template>
     </el-dialog>
   </div>

@@ -50,9 +50,11 @@ COPY --from=build /build/${SERVICE_NAME}/target/*.jar /app/app.jar
 
 # 统一容器内部端口为 8080（覆盖各服务 application.yml 中的 server.port）
 ENV SERVER_PORT=8080
+# Actuator 管理端口（各服务通过 docker-compose 环境变量覆盖）
+ENV MANAGEMENT_PORT=8080
 EXPOSE 8080
 
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 --start-period=90s \
-  CMD curl -sf http://localhost:8080/actuator/health || exit 1
+  CMD curl -sf http://localhost:${MANAGEMENT_PORT}/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

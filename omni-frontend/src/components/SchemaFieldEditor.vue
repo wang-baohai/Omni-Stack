@@ -138,6 +138,7 @@ function buildSchema(): string | null {
 
 /**
  * 解析 JSON Schema 字符串为内部字段列表。
+ * <p>同时兼容扁平格式和标准 JSON Schema 格式（type: 'object' + properties）。</p>
  *
  * @param val - JSON Schema 字符串
  */
@@ -149,15 +150,34 @@ function parseSchema(val: string | null) {
   }
   try {
     const schema = JSON.parse(val)
-    fields.value = Object.entries(schema).map(([key, config]: [string, any]) => ({
-      key,
-      label: config.label || key,
-      type: config.type || 'string',
-      required: config.required || false,
-      defaultValue: config.type === 'boolean' ? '' : (config.default != null ? String(config.default) : ''),
-      defaultBool: config.type === 'boolean' ? !!config.default : false,
-      options: config.options || [],
-    }))
+
+    // 检测标准 JSON Schema 格式
+    const isStandard = schema.type === 'object' && schema.properties
+    const requiredSet = new Set<string>(
+      isStandard && Array.isArray(schema.required) ? schema.required : [],
+    )
+    const entries: Array<[string, any]> = isStandard
+      ? Object.entries(schema.properties)
+      : Object.entries(schema)
+
+    fields.value = entries.map(([key, config]: [string, any]) => {
+      // 标准 JSON Schema 用 enum，扁平格式用 options
+      let options: Array<{ value: string; label: string }> = config.options || []
+      if (options.length === 0 && Array.isArray(config.enum)) {
+        options = config.enum.map((v: string) => ({ value: v, label: v }))
+      }
+      const type = config.enum && options.length > 0 && !config.type ? 'select' : (config.type || 'string')
+
+      return {
+        key,
+        label: config.label || config.title || key,
+        type,
+        required: config.required || requiredSet.has(key) || false,
+        defaultValue: type === 'boolean' ? '' : (config.default != null ? String(config.default) : ''),
+        defaultBool: type === 'boolean' ? !!config.default : false,
+        options,
+      }
+    })
   } catch {
     fields.value = []
   }

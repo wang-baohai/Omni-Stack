@@ -1,6 +1,14 @@
 server:
   port: 8100
 
+management:
+  server:
+    port: 19900
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 spring:
   application:
     name: omni-auth
@@ -15,32 +23,27 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
-        namespace: public
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:public}
         ip: 127.0.0.1
-        username: nacos
-        password: nacos
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
       config:
-        server-addr: 127.0.0.1:8848
-        namespace: public
-        username: nacos
-        password: nacos
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+        namespace: ${NACOS_NAMESPACE:public}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
         file-extension: yml
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       database: 0
-
-# MyBatis-Plus 开发环境配置（通用配置由 omni-common-mybatis 提供）
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # Spring Authorization Server OAuth2 Config
 auth:
@@ -70,17 +73,16 @@ auth:
       redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8100/api/auth/oauth2/google/callback}
     state-secret: ${OAUTH2_STATE_SECRET:your-state-secret-change-me}
     frontend-callback-url: ${auth.frontend.base-url}/callback
-  jwk:
-    key-id: omni-auth-key
-    private-key: |
-      -----BEGIN EC PRIVATE KEY-----
-      MHcCAQEEIBHbO1jWq0oMQCf5hJ1Fz9oOuP5b3n5hJ1Fz9oOuP5boAoGCCqGSM49
-      AwEHoUQDQgAEXAMPLE_KEY_FOR_DEVELOPMENT_ONLY_REPLACE_IN_PRODUCTION
-      -----END EC PRIVATE KEY-----
-    public-key: |
-      -----BEGIN PUBLIC KEY-----
-      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEXAMPLE_KEY_FOR_DEVELOPMENT_ONLY
-      -----END PUBLIC KEY-----
+
+# JWK 密钥持久化配置（AES-256-GCM 加密后存入 Redis）
+jwk:
+  encrypt-key: ${JWK_ENCRYPT_KEY:}
+
+# 内部 API 认证配置（服务间 Feign 调用使用 X-Internal-Token 校验）
+omni:
+  internal:
+    api:
+      token: ${OMNI_INTERNAL_API_TOKEN:}
 
 logging:
   level:

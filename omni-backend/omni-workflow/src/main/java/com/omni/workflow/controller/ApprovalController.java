@@ -37,7 +37,7 @@ public class ApprovalController {
     @PostMapping("/{taskId}/complete")
     @PreAuthorize("hasAuthority('workflow:approval:complete')")
     public R<Void> complete(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable @NotBlank String taskId,
             @Valid @RequestBody ApprovalRequest request) {
@@ -55,7 +55,7 @@ public class ApprovalController {
     @PostMapping("/{taskId}/add-signer")
     @PreAuthorize("hasAuthority('workflow:approval:add-signer')")
     public R<Void> addSigner(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable @NotBlank String taskId,
             @RequestParam @NotBlank String newUserId) {
@@ -73,7 +73,7 @@ public class ApprovalController {
     @PostMapping("/{taskId}/remove-signer")
     @PreAuthorize("hasAuthority('workflow:approval:remove-signer')")
     public R<Void> removeSigner(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable @NotBlank String taskId,
             @RequestParam @NotBlank String targetUserId) {
@@ -91,7 +91,7 @@ public class ApprovalController {
     @PostMapping("/{taskId}/delegate")
     @PreAuthorize("hasAuthority('workflow:approval:delegate')")
     public R<Void> delegate(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable @NotBlank String taskId,
             @RequestParam @NotBlank String targetUserId) {

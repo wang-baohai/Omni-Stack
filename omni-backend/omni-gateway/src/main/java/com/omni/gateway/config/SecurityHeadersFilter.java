@@ -42,7 +42,7 @@ public class SecurityHeadersFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         HttpHeaders headers = exchange.getResponse().getHeaders();
         headers.add("X-Content-Type-Options", "nosniff");
-        headers.add("X-Frame-Options", "SAMEORIGIN");
+        headers.add("X-Frame-Options", "DENY");
         headers.add("Referrer-Policy", "strict-origin-when-cross-origin");
         return chain.filter(exchange);
     }

@@ -34,7 +34,7 @@ public class TaskController {
      */
     @GetMapping("/todo")
     public R<PageResult<WfTodoTask>> todoList(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "1") int page,
@@ -51,7 +51,7 @@ public class TaskController {
      */
     @GetMapping("/count")
     public R<Long> todoCount(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId) {
         return R.ok(workflowTaskService.todoCount(userId, tenantId));
     }
@@ -64,7 +64,7 @@ public class TaskController {
      */
     @GetMapping("/{taskId}/form")
     public R<Map<String, Object>> getTaskFormData(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String taskId) {
         return R.ok(workflowTaskService.getTaskFormData(taskId, userId, tenantId));

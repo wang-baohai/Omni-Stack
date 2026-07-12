@@ -656,6 +656,19 @@ CREATE TABLE IF NOT EXISTS sys_mq_message (
     INDEX idx_tenant_time (tenant_id, create_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='MQ消息发送记录表';
 
+-- 6.5 喝水提醒任务类型 + 示例任务（种子数据）
+SET NAMES utf8mb4;
+INSERT IGNORE INTO sys_user_job_type (type_code, type_name, description, param_template, status) VALUES
+('Task-00001', '喝水提醒', '定时提醒喝水，根据杯型参数生成个性化提醒消息',
+ '{"type":"object","properties":{"cupShape":{"type":"string","title":"杯型","enum":["大杯","中杯","小杯","玻璃杯"],"default":"中杯"}},"required":["cupShape"]}',
+ 1);
+
+INSERT IGNORE INTO sys_user_job (tenant_id, job_name, job_type, cron_expression, job_params, status, create_by) VALUES
+(1, '喝水提醒-大杯', 'Task-00001', '0 0/10 * * * ?', '{"cupShape":"大杯"}', 1, 'system'),
+(1, '喝水提醒-中杯', 'Task-00001', '0 0/10 * * * ?', '{"cupShape":"中杯"}', 1, 'system'),
+(1, '喝水提醒-小杯', 'Task-00001', '0 0/10 * * * ?', '{"cupShape":"小杯"}', 1, 'system'),
+(1, '我要喝水', 'Task-00001', '0 * * * * ?', '{"cupShape":"玻璃杯"}', 1, 'admin');
+
 -- ============================================================
 -- Section 7: Phase 2 权限节点 - 任务调度（独立一级菜单）
 -- 注意：权限表在 omni_auth 库，需切换上下文

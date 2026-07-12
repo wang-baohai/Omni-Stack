@@ -2,6 +2,7 @@ package com.omni.common.mqlog.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omni.common.mqlog.controller.MqMessageInternalController;
+import com.omni.common.mqlog.filter.InternalApiAuthFilter;
 import com.omni.common.mqlog.mapper.SysMqMessageMapper;
 import com.omni.common.mqlog.relay.MqMessageRelayJob;
 import com.omni.common.mqlog.relay.MqMessageRelayService;
@@ -9,10 +10,12 @@ import com.omni.common.mqlog.sender.MessageSender;
 import com.omni.common.mqlog.sender.RocketMqMessageSender;
 import com.omni.common.mqlog.template.ReliableMessageTemplate;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 
@@ -37,6 +40,22 @@ import java.util.List;
 @ConditionalOnClass(name = "com.baomidou.mybatisplus.core.mapper.BaseMapper")
 @MapperScan("com.omni.common.mqlog.mapper")
 public class MqLogAutoConfiguration {
+
+    /**
+     * 内部 API 认证过滤器。
+     * <p>校验 {@code X-Internal-Token} 请求头，保护 {@code /api/internal/} 路径。</p>
+     */
+    @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public FilterRegistrationBean<InternalApiAuthFilter> internalApiAuthFilter(
+            @Value("${omni.internal.api-token:omni-internal-default-token}") String internalToken) {
+        FilterRegistrationBean<InternalApiAuthFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new InternalApiAuthFilter(internalToken));
+        registration.addUrlPatterns("/api/internal/*");
+        registration.setOrder(-200);
+        registration.setName("internalApiAuthFilter");
+        return registration;
+    }
 
     /**
      * 可靠消息发送模板。

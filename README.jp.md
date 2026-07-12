@@ -237,13 +237,51 @@ GitHub、Google、Gitee の3つの OAuth2 プロバイダーをサポートし�
 
 ## 機能概要
 
-| ログインページ | データダッシュボード |
-|--------|----------|
-| ![ログインページ](docs/images/login.png) | ![データダッシュボード](docs/images/dashboard.png) |
+### 認証とログイン
+
+| ログインページ | 登録ページ |
+|--------|--------|
+| ![ログインページ](docs/images/login.png) | ![登録ページ](docs/images/register.png) |
+
+| データダッシュボード | ソーシャルログイン |
+|----------|----------|
+| ![データダッシュボード](docs/images/dashboard.png) | ![ソーシャルログイン](docs/images/social-login-buttons.png) |
+
+| 認可同意 | デバイスコードログイン |
+|----------|------------|
+| ![認可同意](docs/images/social-consent.png) | ![デバイスコードログイン](docs/images/social-device-init.png) |
+
+| デバイスコード検証 | |
+|------------|--|
+| ![デバイスコード検証](docs/images/social-device-verify.png) | |
+
+### システム管理
 
 | ユーザー管理 | ディクショナリ管理 |
 |----------|----------|
 | ![ユーザー管理](docs/images/system-user.png) | ![ディクショナリ管理](docs/images/system-dict.png) |
+
+| XSS防御設定 | |
+|--------------|--|
+| ![XSS防御設定](docs/images/system-xss.png) | |
+
+### 定時タスク
+
+| システムタスク | マイタスク |
+|----------|----------|
+| ![システムタスク](docs/images/job-system.png) | ![マイタスク](docs/images/job-workspace.png) |
+
+### 運用監視
+
+| 操作ログ | MQメッセージログ |
+|----------|-------------|
+| ![操作ログ](docs/images/monitor-operlog.png) | ![MQメッセージログ](docs/images/monitor-mqmessage.png) |
+
+### ワークフロー
+
+| BPMNデザイナー | 承認フロー |
+|-------------|----------|
+| ![BPMNデザイナー](docs/images/workflow-designer.png) | ![承認フロー](docs/images/workflow-approval.png) |
 
 ## モジュール概要
 

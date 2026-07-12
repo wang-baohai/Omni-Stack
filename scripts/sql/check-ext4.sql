@@ -1,2 +1,0 @@
-SET NAMES utf8mb4;
-SELECT SUBSTRING(bpmn_xml, LOCATE('direct-leader-approve', bpmn_xml) - 100, 800) AS snippet FROM omni_workflow.wf_process_model_version WHERE model_id = 3 ORDER BY update_time DESC LIMIT 1;

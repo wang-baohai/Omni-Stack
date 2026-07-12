@@ -55,7 +55,7 @@ public class DictTypeController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('dict:type:list')")
     public R<PageResult<SysDictType>> list(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(required = false) String typeCode,
             @RequestParam(required = false) String typeName,
             @RequestParam(required = false) Integer status,
@@ -91,7 +91,7 @@ public class DictTypeController {
     @PostMapping
     @PreAuthorize("hasAuthority('dict:type:create')")
     public R<SysDictType> create(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @Valid @RequestBody CreateDictTypeRequest request) {
         String operator = SecurityContextHolder.getContext().getAuthentication().getName();
         return R.ok(dictTypeService.createType(tenantId, request, operator));

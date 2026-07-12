@@ -35,7 +35,7 @@ public class OperLogController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('base:operlog:list')")
     public R<PageResult<OperLogVO>> list(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             OperLogQuery query) {
         return R.ok(operLogService.listOperLogs(tenantId, query));
     }

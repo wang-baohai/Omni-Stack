@@ -102,6 +102,6 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<Void> handleException(Exception e) {
         log.error("未预期的系统异常: {}", e.getClass().getSimpleName(), e);
-        return R.fail("服务器内部错误: " + e.getClass().getSimpleName());
+        return R.fail("服务器内部错误，请稍后重试");
     }
 }

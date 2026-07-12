@@ -64,7 +64,7 @@ public class MyJobController {
      */
     @GetMapping("/list")
     public R<PageResult<SysUserJob>> list(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(required = false) String jobName,
             @RequestParam(required = false) String jobType,
             @RequestParam(required = false) Integer status,
@@ -97,7 +97,7 @@ public class MyJobController {
      */
     @GetMapping("/stats")
     public R<MyJobStats> stats(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         String username = currentUsername();
         return R.ok(userJobService.getStats(tenantId, username));
     }
@@ -111,7 +111,7 @@ public class MyJobController {
      */
     @PostMapping
     public R<SysUserJob> create(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @Valid @RequestBody CreateUserJobRequest request) {
         String username = currentUsername();
         return R.ok(userJobService.createJob(tenantId, request, username));
@@ -188,7 +188,7 @@ public class MyJobController {
     @GetMapping("/{id}/logs")
     public R<PageResult<SysUserJobLog>> logs(
             @PathVariable Long id,
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         String username = currentUsername();

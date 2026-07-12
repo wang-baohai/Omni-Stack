@@ -51,7 +51,7 @@ public class PermissionController {
     @GetMapping("/tree")
     @PreAuthorize("hasAuthority('system:permission:list')")
     public R<List<PermissionTreeNode>> tree(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(permissionService.getPermissionTree(tenantId));
     }
 
@@ -68,7 +68,7 @@ public class PermissionController {
     @PreAuthorize("hasAuthority('system:role:list')")
     public R<List<PermissionTreeNode>> rolePermissionTree(
             @PathVariable Long roleId,
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(permissionService.getRolePermissionTree(roleId, tenantId));
     }
 

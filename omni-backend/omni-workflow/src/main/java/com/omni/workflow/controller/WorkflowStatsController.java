@@ -30,7 +30,7 @@ public class WorkflowStatsController {
      */
     @GetMapping("/workspace")
     public R<Map<String, Object>> workspaceStats(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId) {
         return R.ok(workflowStatsService.workspaceStats(userId, tenantId));
     }
@@ -44,7 +44,7 @@ public class WorkflowStatsController {
     @GetMapping("/admin")
     @PreAuthorize("hasAuthority('workflow:stats:admin')")
     public R<Map<String, Object>> adminStats(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(workflowStatsService.adminStats(tenantId));
     }
 }

@@ -35,7 +35,7 @@ public class WorkflowIdentityController {
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('workflow:identity:list')")
     public R<List<IdentityUserVO>> listUsers(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(required = false) String keyword) {
         return R.ok(workflowIdentityService.listUsers(tenantId, keyword));
     }
@@ -49,7 +49,7 @@ public class WorkflowIdentityController {
     @GetMapping("/roles")
     @PreAuthorize("hasAuthority('workflow:identity:list')")
     public R<List<IdentityRoleVO>> listRoles(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(workflowIdentityService.listRoles(tenantId));
     }
 
@@ -62,7 +62,7 @@ public class WorkflowIdentityController {
     @GetMapping("/org-tree")
     @PreAuthorize("hasAuthority('workflow:identity:list')")
     public R<List<OrgTreeNodeVO>> getOrgTree(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(workflowIdentityService.getOrgTree(tenantId));
     }
 
@@ -75,7 +75,7 @@ public class WorkflowIdentityController {
     @GetMapping("/unit-options")
     @PreAuthorize("hasAuthority('workflow:identity:list')")
     public R<List<OrgTreeNodeVO>> getUnitOptions(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(workflowIdentityService.getUnitOptions(tenantId));
     }
 
@@ -89,7 +89,7 @@ public class WorkflowIdentityController {
     @PostMapping("/resolve-preview")
     @PreAuthorize("hasAuthority('workflow:identity:list')")
     public R<ResolvePreviewResult> resolvePreview(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @Valid @RequestBody ResolvePreviewRequest request) {
         return R.ok(workflowIdentityService.resolvePreview(request, tenantId));
     }

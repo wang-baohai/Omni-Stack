@@ -33,7 +33,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BpmnXmlBuilder {
 
-    private static final String BPMN_NS = "http://www.omg.org/specifications/BPMN20";
+    private static final String BPMN_NS = "http://www.omg.org/spec/BPMN/20100524/MODEL";
     private static final String BPMN_DI_NS = "http://www.omg.org/specifications/BPMN_DI";
     private static final String OMNI_NS = "http://omni.com/workflow";
     private static final String FLOWABLE_NS = "http://flowable.org/bpmn";
@@ -54,9 +54,8 @@ public class BpmnXmlBuilder {
         JsonNode nodes = root.get("nodes");
         JsonNode edges = root.get("edges");
 
-        // 创建 DOM 文档
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
+        // 创建 DOM 文档（使用安全的工厂防止 XXE 攻击）
+        DocumentBuilderFactory factory = XmlSecurityUtils.createSafeDocumentBuilderFactory();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.newDocument();
 
@@ -296,7 +295,7 @@ public class BpmnXmlBuilder {
     }
 
     private String documentToString(Document doc) throws Exception {
-        TransformerFactory tf = TransformerFactory.newInstance();
+        TransformerFactory tf = XmlSecurityUtils.createSafeTransformerFactory();
         Transformer transformer = tf.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");

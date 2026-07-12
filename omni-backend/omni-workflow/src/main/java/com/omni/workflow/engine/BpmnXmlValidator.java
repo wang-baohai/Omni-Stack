@@ -65,12 +65,7 @@ public class BpmnXmlValidator {
         // 1. XML 格式合法性
         Document doc;
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            // 防止 XXE 攻击
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            DocumentBuilderFactory factory = XmlSecurityUtils.createSafeDocumentBuilderFactory();
             DocumentBuilder builder = factory.newDocumentBuilder();
             doc = builder.parse(new ByteArrayInputStream(bpmnXml.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {

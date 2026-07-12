@@ -237,13 +237,51 @@ cd omni-frontend && npm install && npm run dev  # 端口 3000
 
 ## 功能概览
 
-| 登录页 | 数据看板 |
-|--------|----------|
-| ![登录页](docs/images/login.png) | ![数据看板](docs/images/dashboard.png) |
+### 认证与登录
+
+| 登录页 | 注册页 |
+|--------|--------|
+| ![登录页](docs/images/login.png) | ![注册页](docs/images/register.png) |
+
+| 数据看板 | 社交登录 |
+|----------|----------|
+| ![数据看板](docs/images/dashboard.png) | ![社交登录](docs/images/social-login-buttons.png) |
+
+| 授权同意 | 设备码登录 |
+|----------|------------|
+| ![授权同意](docs/images/social-consent.png) | ![设备码登录](docs/images/social-device-init.png) |
+
+| 设备码验证 | |
+|------------|--|
+| ![设备码验证](docs/images/social-device-verify.png) | |
+
+### 系统管理
 
 | 用户管理 | 字典管理 |
 |----------|----------|
 | ![用户管理](docs/images/system-user.png) | ![字典管理](docs/images/system-dict.png) |
+
+| XSS 防护配置 | |
+|--------------|--|
+| ![XSS防护配置](docs/images/system-xss.png) | |
+
+### 定时任务
+
+| 系统任务 | 我的任务 |
+|----------|----------|
+| ![系统任务](docs/images/job-system.png) | ![我的任务](docs/images/job-workspace.png) |
+
+### 运维监控
+
+| 操作日志 | MQ 消息记录 |
+|----------|-------------|
+| ![操作日志](docs/images/monitor-operlog.png) | ![MQ消息记录](docs/images/monitor-mqmessage.png) |
+
+### 工作流
+
+| BPMN 设计器 | 审批流程 |
+|-------------|----------|
+| ![BPMN设计器](docs/images/workflow-designer.png) | ![审批流程](docs/images/workflow-approval.png) |
 
 ## 模块概览
 

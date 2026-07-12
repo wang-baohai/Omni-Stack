@@ -237,13 +237,51 @@ GitHub, Google, Gitee 세 가지 OAuth2 제공자를 지원합니다. 자격 증
 
 ## 기능 개요
 
-| 로그인 페이지 | 데이터 대시보드 |
-|--------|----------|
-| ![로그인 페이지](docs/images/login.png) | ![데이터 대시보드](docs/images/dashboard.png) |
+### 인증 및 로그인
+
+| 로그인 페이지 | 회원가입 |
+|--------|--------|
+| ![로그인 페이지](docs/images/login.png) | ![회원가입](docs/images/register.png) |
+
+| 데이터 대시보드 | 소셜 로그인 |
+|----------|----------|
+| ![데이터 대시보드](docs/images/dashboard.png) | ![소셜 로그인](docs/images/social-login-buttons.png) |
+
+| 인증 동의 | 디바이스 코드 로그인 |
+|----------|------------|
+| ![인증 동의](docs/images/social-consent.png) | ![디바이스 코드 로그인](docs/images/social-device-init.png) |
+
+| 디바이스 코드 검증 | |
+|------------|--|
+| ![디바이스 코드 검증](docs/images/social-device-verify.png) | |
+
+### 시스템 관리
 
 | 사용자 관리 | 사전 관리 |
 |----------|----------|
 | ![사용자 관리](docs/images/system-user.png) | ![사전 관리](docs/images/system-dict.png) |
+
+| XSS 방어 설정 | |
+|--------------|--|
+| ![XSS 방어 설정](docs/images/system-xss.png) | |
+
+### 정시 작업
+
+| 시스템 작업 | 내 작업 |
+|----------|----------|
+| ![시스템 작업](docs/images/job-system.png) | ![내 작업](docs/images/job-workspace.png) |
+
+### 운영 모니터링
+
+| 운영 로그 | MQ 메시지 로그 |
+|----------|-------------|
+| ![운영 로그](docs/images/monitor-operlog.png) | ![MQ 메시지 로그](docs/images/monitor-mqmessage.png) |
+
+### 워크플로우
+
+| BPMN 디자이너 | 승인 흐름 |
+|-------------|----------|
+| ![BPMN 디자이너](docs/images/workflow-designer.png) | ![승인 흐름](docs/images/workflow-approval.png) |
 
 ## 모듈 개요
 

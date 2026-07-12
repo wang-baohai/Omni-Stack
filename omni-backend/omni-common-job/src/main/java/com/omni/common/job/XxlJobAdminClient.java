@@ -6,11 +6,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,13 +44,22 @@ public class XxlJobAdminClient {
 
     private static final String LOGIN_TOKEN_COOKIE = "xxl_job_login_token";
 
+    /** 默认连接超时 */
+    private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(5);
+    /** 默认读取超时 */
+    private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofSeconds(10);
+
     public XxlJobAdminClient(String adminAddress, String username, String password) {
         // 去除末尾斜杠
         this.adminAddress = adminAddress.endsWith("/")
                 ? adminAddress.substring(0, adminAddress.length() - 1) : adminAddress;
         this.username = username;
         this.password = password;
-        this.restTemplate = new RestTemplate();
+
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
+        factory.setReadTimeout(DEFAULT_READ_TIMEOUT);
+        this.restTemplate = new RestTemplate(factory);
     }
 
     // ─── 登录 ───
@@ -168,6 +179,40 @@ public class XxlJobAdminClient {
     }
 
     // ─── 执行器管理 ───
+
+    /**
+     * 确保执行器组存在于 XXL-JOB 调度中心。
+     * <p>先查询 appname 是否已注册，未注册则通过 API 自动创建。
+     * 采用自动注册模式（addressType=0），执行器上线后自动上报地址。</p>
+     *
+     * @param appname 执行器 AppName
+     * @param title   执行器显示名称
+     * @return 执行器组 ID
+     */
+    public int ensureExecutorGroup(String appname, String title) {
+        int groupId = getJobGroupId(appname);
+        if (groupId >= 0) {
+            log.debug("执行器组已存在: appname={}, groupId={}", appname, groupId);
+            return groupId;
+        }
+
+        log.info("执行器组不存在，自动创建: appname={}, title={}", appname, title);
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("appname", appname);
+        form.add("title", title);
+        form.add("addressType", "0");  // 0=自动注册
+        form.add("addressList", "");
+
+        Map<String, Object> body = postForm("/jobgroup/insert", form);
+        Object code = body.get("code");
+        if (code instanceof Number && ((Number) code).intValue() == 200) {
+            log.info("执行器组创建成功: appname={}", appname);
+            return getJobGroupId(appname);
+        }
+        Object msg = body.get("msg");
+        log.warn("执行器组创建响应: code={}, msg={}", code, msg);
+        return getJobGroupId(appname);
+    }
 
     /**
      * 根据 appname 查询执行器 ID。

@@ -74,6 +74,9 @@ public class AuthFilter implements GlobalFilter, Ordered {
     private static final String BEARER_PREFIX = "Bearer ";
     /** Token 黑名单 Redis Key 前缀，与 omni-auth 的 OnlineUserServiceImpl 保持一致 */
     private static final String BLACKLIST_PREFIX = "token:blacklist:";
+    /** Gateway 转发标记头，下游服务据此判断请求是否经过 Gateway */
+    private static final String GATEWAY_FORWARDED_HEADER = "X-Gateway-Forwarded";
+    private static final String GATEWAY_FORWARDED_VALUE = "true";
 
     /** RSA 公钥提供者，用于获取 JWT 签名验证所需的公钥 */
     private final JwkKeyProvider jwkKeyProvider;
@@ -104,7 +107,11 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         // Step 1: 公开路径直接放行（登录、验证码、租户列表、健康检查等）
         if (isPublicPath(path)) {
-            return chain.filter(exchange);
+            // 添加 Gateway 转发标记，下游服务据此确认请求来源
+            ServerHttpRequest mutatedRequest = request.mutate()
+                    .header(GATEWAY_FORWARDED_HEADER, GATEWAY_FORWARDED_VALUE)
+                    .build();
+            return chain.filter(exchange.mutate().request(mutatedRequest).build());
         }
 
         // Step 2: 提取 Bearer Token，缺失或格式不正确直接返回 401
@@ -125,6 +132,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
                     // Step 6: 将 JWT claims 注入请求头，传递给下游微服务
                     // 下游服务通过 @RequestHeader("X-User-Id") 等方式获取用户身份
                     ServerHttpRequest mutatedRequest = request.mutate()
+                            .header(GATEWAY_FORWARDED_HEADER, GATEWAY_FORWARDED_VALUE)
                             .header("X-User-Id", claims.getSubject())                    // sub -> 用户ID
                             .header("X-Tenant-Id", getClaimAsString(claims, "tenant_id")) // 租户ID
                             .header("X-User-Name", getClaimAsString(claims, "username"))  // 用户名

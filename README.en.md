@@ -237,13 +237,51 @@ Supports three OAuth2 providers: GitHub, Google, and Gitee. Credentials are conf
 
 ## Feature Overview
 
-| Login Page | Dashboard |
-|------------|-----------|
-| ![Login Page](docs/images/login.png) | ![Dashboard](docs/images/dashboard.png) |
+### Authentication & Login
+
+| Login Page | Register Page |
+|------------|---------------|
+| ![Login Page](docs/images/login.png) | ![Register Page](docs/images/register.png) |
+
+| Dashboard | Social Login |
+|-----------|--------------|
+| ![Dashboard](docs/images/dashboard.png) | ![Social Login](docs/images/social-login-buttons.png) |
+
+| Consent Page | Device Code Login |
+|--------------|-------------------|
+| ![Consent Page](docs/images/social-consent.png) | ![Device Code Login](docs/images/social-device-init.png) |
+
+| Device Code Verify | |
+|--------------------|--|
+| ![Device Code Verify](docs/images/social-device-verify.png) | |
+
+### System Management
 
 | User Management | Dictionary Management |
 |-----------------|----------------------|
 | ![User Management](docs/images/system-user.png) | ![Dictionary Management](docs/images/system-dict.png) |
+
+| XSS Protection Config | |
+|----------------------|--|
+| ![XSS Protection Config](docs/images/system-xss.png) | |
+
+### Scheduled Tasks
+
+| System Jobs | My Jobs |
+|-------------|--------|
+| ![System Jobs](docs/images/job-system.png) | ![My Jobs](docs/images/job-workspace.png) |
+
+### Monitoring
+
+| Operation Log | MQ Message Log |
+|---------------|----------------|
+| ![Operation Log](docs/images/monitor-operlog.png) | ![MQ Message Log](docs/images/monitor-mqmessage.png) |
+
+### Workflow
+
+| BPMN Designer | Approval Flow |
+|---------------|---------------|
+| ![BPMN Designer](docs/images/workflow-designer.png) | ![Approval Flow](docs/images/workflow-approval.png) |
 
 ## Module Overview
 

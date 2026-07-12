@@ -9,6 +9,8 @@ import com.omni.auth.mapper.SysUserMapper;
 import com.omni.auth.security.DeviceClientAuthenticationFilter;
 import com.omni.auth.security.GatewayPreAuthFilter;
 import com.omni.auth.security.OmniUserDetails;
+import com.omni.auth.security.InternalApiFilter;
+import com.omni.auth.security.RedisKeyStoreLoader;
 import com.omni.auth.security.OmniUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -239,14 +241,29 @@ public class AuthorizationServerConfig {
      */
     @Bean
     @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http,
+                                                           InternalApiFilter internalApiFilter) throws Exception {
         // 匹配非 OAuth2 端点的所有请求
         http.securityMatcher(new NegatedRequestMatcher(oauth2EndpointsMatcher()));
 
         http
                 .authorizeHttpRequests(auth -> auth
-                        // 认证相关接口、健康检查和错误页面允许匿名访问
-                        .requestMatchers("/api/auth/**", "/actuator/**", "/error").permitAll()
+                        // 仅放行已知的公开接口，其余 /api/auth/** 需通过 GatewayPreAuthFilter 认证
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/session-login",
+                                "/api/auth/register",
+                                "/api/auth/captcha",
+                                "/api/auth/tenants",
+                                "/api/auth/oauth2/**",
+                                "/error"
+                        ).permitAll()
+                        // 内部服务间 API：由 InternalApiFilter 校验 X-Internal-Token，此处放行
+                        .requestMatchers("/internal/**").permitAll()
+                        // Actuator health/info 放行（容器健康检查 + 端口隔离为第一层防护）
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        // 其他 Actuator 端点仅允许 ADMIN 角色
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
                         // 其他所有请求需要认证
                         .anyRequest().authenticated()
                 )
@@ -260,6 +277,8 @@ public class AuthorizationServerConfig {
                 // 禁用 CSRF（JWT 无状态认证不需要 CSRF 防护）
                 .csrf(AbstractHttpConfigurer::disable);
 
+        // 内部 API 认证过滤器：校验 X-Internal-Token，在 AuthorizationFilter 之前执行
+        http.addFilterBefore(internalApiFilter, AuthorizationFilter.class);
         // 网关预认证过滤器：从 Gateway 转发的请求头中构建 Authentication 对象，
         // 使 @PreAuthorize 方法级权限注解能够正确执行授权检查。
         // 必须在 AuthorizationFilter 之前执行。
@@ -271,15 +290,24 @@ public class AuthorizationServerConfig {
     /**
      * JWK 密钥源配置，用于 JWT 签名。
      * <p>
-     * 启动时生成 RSA 密钥对。生产环境应使用持久化的密钥库。
+     * 优先从 Redis 加载持久化的 RSA 密钥对（AES-256-GCM 加密存储），
+     * 实现多实例共享同一签名密钥、重启后 JWT 不失效。
+     * 未配置加密密钥时退化为临时密钥（仅本地开发环境）。
      * </p>
      *
+     * @param keyStoreLoader Redis KeyStore 加载器
      * @return JWK 密钥源
-     * @throws Exception 密钥生成过程中的异常
+     * @throws Exception 密钥加载过程中的异常
      */
     @Bean
-    public JWKSource<SecurityContext> jwkSource() throws Exception {
-        // 生成 2048 位 RSA 密钥对
+    public JWKSource<SecurityContext> jwkSource(RedisKeyStoreLoader keyStoreLoader) throws Exception {
+        // 优先从 Redis 加载持久化的 JWK 密钥对（AES-256-GCM 加密存储）
+        JWKSource<SecurityContext> redisSource = keyStoreLoader.loadJwkSource();
+        if (redisSource != null) {
+            return redisSource;
+        }
+
+        // Fallback: 生成临时密钥对（开发环境）
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
         KeyPair keyPair = keyGen.generateKeyPair();
@@ -287,13 +315,11 @@ public class AuthorizationServerConfig {
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
 
-        // 构建 RSA JWK（包含公钥和私钥），生成随机 Key ID
         RSAKey rsaKey = new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
                 .keyID(UUID.randomUUID().toString())
                 .build();
 
-        // 封装为不可变的 JWK Set
         JWKSet jwkSet = new JWKSet(rsaKey);
         return new ImmutableJWKSet<>(jwkSet);
     }

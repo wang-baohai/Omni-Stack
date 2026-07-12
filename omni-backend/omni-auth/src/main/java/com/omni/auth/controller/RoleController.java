@@ -67,7 +67,7 @@ public class RoleController {
     public R<PageResult<SysRole>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(roleService.listRoles(tenantId, page, size));
     }
 
@@ -97,7 +97,7 @@ public class RoleController {
     @PostMapping
     @PreAuthorize("hasAuthority('system:role:create')")
     public R<SysRole> create(@Valid @RequestBody CreateRoleRequest request,
-                             @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+                             @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(roleService.createRole(tenantId, request));
     }
 
@@ -173,7 +173,7 @@ public class RoleController {
      */
     @GetMapping("/all")
     public R<List<SysRole>> all(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId) {
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         return R.ok(roleService.listAllRoles(tenantId));
     }
 }

@@ -36,7 +36,8 @@ public class SecurityConfig {
     /**
      * 安全过滤器链。
      * <p>
-     * 允许 actuator 和 error 端点匿名访问，其余请求需要认证（由 Gateway 保证）。
+     * Actuator 端点仅允许 ADMIN 角色访问（端口隔离为第一层防护，此处为第二层）。
+     * 其余请求需要认证（由 Gateway 保证）。
      * 注册 {@link GatewayPreAuthFilter} 在 {@link AuthorizationFilter} 之前执行。
      * </p>
      *
@@ -48,7 +49,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/**", "/error").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

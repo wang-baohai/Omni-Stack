@@ -39,7 +39,7 @@ public class ProcessInstanceController {
     @PostMapping("/start")
     @PreAuthorize("hasAuthority('workflow:instance:start')")
     public R<String> start(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @RequestHeader(value = "X-User-Name", required = false) String userName,
             @Valid @RequestBody StartProcessRequest request) {
@@ -59,7 +59,7 @@ public class ProcessInstanceController {
      */
     @GetMapping("/my-initiated")
     public R<PageResult<WfProcessInstanceExt>> myInitiated(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Integer status,
@@ -80,7 +80,7 @@ public class ProcessInstanceController {
      */
     @GetMapping("/my-completed")
     public R<PageResult<WfProcessInstanceExt>> myCompleted(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "1") int page,
@@ -98,7 +98,7 @@ public class ProcessInstanceController {
     @PutMapping("/{processInstanceId}/terminate")
     @PreAuthorize("hasAuthority('workflow:instance:terminate')")
     public R<Void> terminate(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable String processInstanceId,
             @RequestParam(required = false) String reason) {
@@ -119,7 +119,7 @@ public class ProcessInstanceController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('workflow:instance:list')")
     public R<PageResult<WfProcessInstanceExt>> list(
-            @RequestHeader(value = "X-Tenant-Id", defaultValue = "1") Long tenantId,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Integer status,
             @RequestParam(defaultValue = "1") int page,

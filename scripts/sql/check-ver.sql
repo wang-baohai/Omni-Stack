@@ -1,2 +1,0 @@
-SET NAMES utf8mb4;
-SELECT id, model_id, status, update_time, LENGTH(bpmn_xml) AS xml_len, CASE WHEN bpmn_xml LIKE '%omni:assignment%' THEN 'YES' ELSE 'NO' END AS has_omni FROM omni_workflow.wf_process_model_version WHERE model_id = 3;

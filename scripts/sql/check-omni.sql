@@ -1,2 +1,0 @@
-SET NAMES utf8mb4;
-SELECT CASE WHEN bpmn_xml LIKE '%omni:assignment%' THEN 'HAS omni:assignment' ELSE 'NO omni:assignment' END AS has_assignment, CASE WHEN bpmn_xml LIKE '%approvalMode%' THEN SUBSTRING(bpmn_xml, LOCATE('approvalMode', bpmn_xml), 30) ELSE 'no approvalMode' END AS approval_snippet FROM omni_workflow.wf_process_model_version WHERE id = 3;

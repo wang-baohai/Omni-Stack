@@ -170,6 +170,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD-SHELL", "timeout 3 bash -c '</dev/tcp/localhost/8080' || exit 1"]
       interval: 15s
@@ -199,7 +201,10 @@ services:
     ports:
       - "8100:8080"
     environment:
+      TZ: Asia/Shanghai
       SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
       SPRING_PROFILES_ACTIVE: default
       SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
       SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
@@ -211,6 +216,18 @@ services:
       AUTH_OAUTH2_GITHUB_REDIRECT_URI: http://localhost:8100/api/auth/oauth2/github/callback
       AUTH_OAUTH2_GITEE_REDIRECT_URI: http://localhost:8100/api/auth/oauth2/gitee/callback
       AUTH_OAUTH2_GOOGLE_REDIRECT_URI: http://localhost:8100/api/auth/oauth2/google/callback
+      # OAuth2 第三方凭证（通过 .env 文件注入，真实值不要提交到仓库）
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-your-github-client-id}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-your-github-client-secret}
+      GITEE_CLIENT_ID: ${GITEE_CLIENT_ID:-your-gitee-client-id}
+      GITEE_CLIENT_SECRET: ${GITEE_CLIENT_SECRET:-your-gitee-client-secret}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your-google-client-id}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your-google-client-secret}
+      OAUTH2_STATE_SECRET: ${OAUTH2_STATE_SECRET:-change-this-to-random-secret}
+      # JWK 密钥 AES 加密密钥（用于将 RSA 密钥库加密后存入 Redis）
+      JWK_ENCRYPT_KEY: ${JWK_ENCRYPT_KEY:-change-this-32chars-aes-key!!}
+      # 内部 API 认证 Token
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:-change-this-internal-token}
     depends_on:
       nacos:
         condition: service_healthy
@@ -237,7 +254,10 @@ services:
     ports:
       - "8101:8080"
     environment:
+      TZ: Asia/Shanghai
       SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
       SPRING_PROFILES_ACTIVE: default
       SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
       SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
@@ -246,6 +266,9 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
       XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-base:9901/
+      XXL_JOB_EXECUTOR_IP: omni-base
+      OMNI_INTERNAL_API_TOKEN: omni-internal-default-token
     depends_on:
       nacos:
         condition: service_healthy
@@ -276,7 +299,10 @@ services:
     ports:
       - "8103:8080"
     environment:
+      TZ: Asia/Shanghai
       SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
       SPRING_PROFILES_ACTIVE: default
       SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
       SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
@@ -284,6 +310,8 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_workflow?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
       SPRING_DATA_REDIS_HOST: redis
       SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
+      # 内部 API 认证 Token（Feign 调用 omni-auth 时使用）
+      OMNI_INTERNAL_API_TOKEN: omni-internal-default-token
     depends_on:
       nacos:
         condition: service_healthy
@@ -312,7 +340,10 @@ services:
     ports:
       - "8102:8080"
     environment:
+      TZ: Asia/Shanghai
       SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
       NACOS_SERVER_ADDR: nacos:8848
       SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
       SPRING_DATA_REDIS_HOST: redis

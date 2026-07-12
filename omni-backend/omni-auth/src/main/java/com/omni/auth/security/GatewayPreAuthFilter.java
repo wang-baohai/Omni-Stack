@@ -58,6 +58,9 @@ public class GatewayPreAuthFilter extends OncePerRequestFilter {
     private static final String HEADER_USER_ROLES = "X-User-Roles";
     private static final String HEADER_USER_SCOPES = "X-User-Scopes";
 
+    /** Gateway 转发标记头，缺失则说明请求未经 Gateway，可能是直接访问 */
+    private static final String HEADER_GATEWAY_FORWARDED = "X-Gateway-Forwarded";
+
     /**
      * 执行网关预认证逻辑。
      *
@@ -76,6 +79,21 @@ public class GatewayPreAuthFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+        // 校验 Gateway 转发标记，拒绝直接访问后端服务的请求
+        String gatewayForwarded = request.getHeader(HEADER_GATEWAY_FORWARDED);
+        if (!"true".equals(gatewayForwarded)) {
+            String uri = request.getRequestURI();
+            // actuator 和 error 路径允许直接访问（健康检查等运维场景）
+            if (!uri.startsWith("/actuator") && !uri.startsWith("/error")) {
+                log.warn("拒绝未经 Gateway 的直接访问: URI={}", uri);
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write(
+                        "{\"code\":403,\"message\":\"禁止直接访问后端服务，请通过 Gateway 访问\",\"data\":null}");
+                return;
+            }
+        }
+
         // 仅处理由 Gateway 转发的请求（包含 X-User-Id 头）
         String userId = request.getHeader(HEADER_USER_ID);
         if (userId == null || userId.isBlank()) {
