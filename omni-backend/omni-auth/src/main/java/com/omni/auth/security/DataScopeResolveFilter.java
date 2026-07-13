@@ -1,12 +1,8 @@
 package com.omni.auth.security;
 
-import com.omni.auth.entity.SysOrgUnit;
-import com.omni.auth.entity.SysRole;
-import com.omni.auth.entity.SysUser;
-import com.omni.auth.mapper.SysOrgUnitMapper;
-import com.omni.auth.mapper.SysRoleDeptMapper;
-import com.omni.auth.mapper.SysRoleMapper;
-import com.omni.auth.mapper.SysUserMapper;
+import com.omni.auth.service.DataScopeService;
+import com.omni.common.core.internal.InternalDataScopeDTO;
+import com.omni.common.core.result.BusinessException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,9 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * 数据范围解析过滤器，负责在每次请求时解析当前用户的数据权限范围并写入 {@link DataScopeContext}。
@@ -57,10 +50,22 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class DataScopeResolveFilter extends OncePerRequestFilter {
 
-    private final SysRoleMapper sysRoleMapper;
-    private final SysOrgUnitMapper sysOrgUnitMapper;
-    private final SysRoleDeptMapper sysRoleDeptMapper;
-    private final SysUserMapper sysUserMapper;
+    /** 内部服务接口路径前缀，内部接口按自身显式参数解析数据范围 */
+    private static final String INTERNAL_PATH_PREFIX = "/internal/";
+
+    /** 数据范围解析服务 */
+    private final DataScopeService dataScopeService;
+
+    /**
+     * 内部服务接口不建立普通请求级数据范围上下文。
+     *
+     * @param request HTTP 请求
+     * @return 内部接口返回 true，其余请求返回 false
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getRequestURI().startsWith(INTERNAL_PATH_PREFIX);
+    }
 
     /**
      * 执行数据范围解析过滤逻辑。
@@ -92,23 +97,34 @@ public class DataScopeResolveFilter extends OncePerRequestFilter {
             userId = Long.parseLong(userIdHeader);
         } catch (NumberFormatException e) {
             log.warn("无法解析 X-User-Id: {}", userIdHeader);
-            filterChain.doFilter(request, response);
+            writeError(response, HttpServletResponse.SC_BAD_REQUEST, "无效的 X-User-Id");
             return;
         }
 
         String tenantIdHeader = request.getHeader("X-Tenant-Id");
-        Long tenantId = null;
-        if (tenantIdHeader != null && !tenantIdHeader.isBlank()) {
-            try {
-                tenantId = Long.parseLong(tenantIdHeader);
-            } catch (NumberFormatException e) {
-                log.warn("无法解析 X-Tenant-Id: {}", tenantIdHeader);
-            }
+        if (tenantIdHeader == null || tenantIdHeader.isBlank()) {
+            writeError(response, HttpServletResponse.SC_BAD_REQUEST, "缺少 X-Tenant-Id");
+            return;
+        }
+
+        Long tenantId;
+        try {
+            tenantId = Long.parseLong(tenantIdHeader);
+        } catch (NumberFormatException e) {
+            log.warn("无法解析 X-Tenant-Id: {}", tenantIdHeader);
+            writeError(response, HttpServletResponse.SC_BAD_REQUEST, "无效的 X-Tenant-Id");
+            return;
         }
 
         try {
             resolveAndSet(userId, tenantId);
             filterChain.doFilter(request, response);
+        } catch (BusinessException e) {
+            log.warn("数据范围解析失败：userId={}, tenantId={}, code={}, message={}",
+                    userId, tenantId, e.getCode(), e.getMessage());
+            int status = e.getCode() == 403
+                    ? HttpServletResponse.SC_FORBIDDEN : HttpServletResponse.SC_BAD_REQUEST;
+            writeError(response, status, e.getMessage());
         } finally {
             DataScopeContext.clear();
         }
@@ -121,103 +137,41 @@ public class DataScopeResolveFilter extends OncePerRequestFilter {
      * @param tenantId 租户 ID
      */
     private void resolveAndSet(Long userId, Long tenantId) {
-        List<SysRole> roles = sysRoleMapper.selectRolesByUserId(userId);
-
-        // 无角色时默认 SELF（最严格）
-        if (roles == null || roles.isEmpty()) {
-            DataScopeContext.DataScopeInfo info = new DataScopeContext.DataScopeInfo();
-            info.setUserId(userId);
-            info.setTenantId(tenantId);
-            info.setEffectiveScope("SELF");
-            info.setAccessibleUnitIds(Set.of());
-            DataScopeContext.set(info);
-            return;
-        }
-
-        // 合并所有角色的 dataScope，取优先级数值最小的（最宽松）
-        String widestScope = "SELF";
-        int bestPriority = DataScopeContext.PRIORITY_SELF;
-        for (SysRole role : roles) {
-            String scope = role.getDataScope();
-            if (scope != null) {
-                int priority = DataScopeContext.priorityOf(scope);
-                if (priority < bestPriority) {
-                    bestPriority = priority;
-                    widestScope = scope;
-                }
-            }
-        }
-
-        // 查询用户主组织单元 ID
-        Long primaryUnitId = null;
-        SysUser user = sysUserMapper.selectById(userId);
-        if (user != null) {
-            primaryUnitId = user.getPrimaryUnitId();
-        }
-
-        // 根据有效 scope 解析可访问的组织单元 ID 集合
-        Set<Long> accessibleUnitIds = resolveAccessibleUnitIds(roles, widestScope, primaryUnitId);
-
+        InternalDataScopeDTO resolved = dataScopeService.resolveDataScope(userId, tenantId);
         DataScopeContext.DataScopeInfo info = new DataScopeContext.DataScopeInfo();
-        info.setUserId(userId);
-        info.setTenantId(tenantId);
-        info.setPrimaryUnitId(primaryUnitId);
-        info.setEffectiveScope(widestScope);
-        info.setAccessibleUnitIds(accessibleUnitIds);
+        info.setUserId(resolved.getUserId());
+        info.setTenantId(resolved.getTenantId());
+        info.setPrimaryUnitId(resolved.getPrimaryUnitId());
+        info.setEffectiveScope(resolved.getEffectiveScope());
+        info.setAccessibleUnitIds(resolved.getAccessibleUnitIds());
         DataScopeContext.set(info);
 
         log.debug("数据范围解析完成：userId={}, effectiveScope={}, accessibleUnitIds={}",
-                userId, widestScope, accessibleUnitIds.size());
+                userId, resolved.getEffectiveScope(), resolved.getAccessibleUnitIds().size());
     }
 
     /**
-     * 根据有效数据范围解析可访问的组织单元 ID 集合。
+     * 输出标准错误响应。
      *
-     * @param roles         用户角色列表
-     * @param effectiveScope 合并后的有效数据范围
-     * @param primaryUnitId 用户主组织单元 ID
-     * @return 可访问的组织单元 ID 集合
+     * @param response HTTP 响应
+     * @param status   HTTP 状态码
+     * @param message  错误消息
+     * @throws IOException 写响应失败时抛出
      */
-    private Set<Long> resolveAccessibleUnitIds(List<SysRole> roles,
-                                               String effectiveScope,
-                                               Long primaryUnitId) {
-        return switch (effectiveScope) {
-            case "ALL", "TENANT", "SELF" -> Set.of();
-            case "DEPT" -> {
-                if (primaryUnitId != null) {
-                    yield Set.of(primaryUnitId);
-                }
-                yield Set.of();
-            }
-            case "DEPT_AND_BELOW" -> {
-                if (primaryUnitId != null) {
-                    SysOrgUnit unit = sysOrgUnitMapper.selectById(primaryUnitId);
-                    if (unit != null && unit.getPath() != null) {
-                        List<Long> descendantIds = sysOrgUnitMapper.selectDescendantIdsByPath(unit.getPath());
-                        yield new HashSet<>(descendantIds);
-                    }
-                }
-                yield Set.of();
-            }
-            case "CUSTOM" -> {
-                Set<Long> result = new HashSet<>();
-                for (SysRole role : roles) {
-                    if ("CUSTOM".equals(role.getDataScope())) {
-                        List<Long> deptIds = sysRoleDeptMapper.selectDeptIdsByRoleId(role.getId());
-                        for (Long deptId : deptIds) {
-                            result.add(deptId);
-                            // 扩展为包含后代节点
-                            SysOrgUnit unit = sysOrgUnitMapper.selectById(deptId);
-                            if (unit != null && unit.getPath() != null) {
-                                List<Long> descendants = sysOrgUnitMapper.selectDescendantIdsByPath(unit.getPath());
-                                result.addAll(descendants);
-                            }
-                        }
-                    }
-                }
-                yield result;
-            }
-            default -> Set.of();
-        };
+    private void writeError(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"code\":" + status + ",\"message\":\""
+                + escapeJson(message) + "\",\"data\":null}");
+    }
+
+    /**
+     * 转义 JSON 字符串中的特殊字符。
+     *
+     * @param value 原始字符串
+     * @return 可安全写入 JSON 字符串字面量的内容
+     */
+    private String escapeJson(String value) {
+        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

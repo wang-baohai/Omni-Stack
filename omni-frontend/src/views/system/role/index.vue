@@ -201,7 +201,7 @@ onMounted(loadData)
         <el-table-column prop="roleName" :label="t('role.roleName')" width="180" />
         <el-table-column :label="t('role.dataScope')" width="150">
           <template #default="{ row }">
-            {{ t(`role.dataScope${row.dataScope.charAt(0) + row.dataScope.slice(1).toLowerCase()}`) }}
+            {{ t(`role.dataScope${row.dataScope.split('_').map((s: string) => s.charAt(0) + s.slice(1).toLowerCase()).join('')}`) }}
           </template>
         </el-table-column>
         <el-table-column prop="sort" :label="t('common.sort')" width="80" />

@@ -28,38 +28,46 @@ public interface AuthInternalClient {
     /**
      * 根据用户 ID 获取用户基本信息。
      *
-     * @param id 用户 ID
+     * @param id       用户 ID
+     * @param tenantId 租户 ID
      * @return 用户 DTO
      */
     @GetMapping("/internal/users/{id}")
-    R<InternalUserDTO> getUserById(@PathVariable("id") Long id);
+    R<InternalUserDTO> getUserById(@PathVariable("id") Long id,
+                                   @RequestParam("tenantId") Long tenantId);
 
     /**
      * 批量获取用户基本信息。
      *
-     * @param ids 用户 ID 列表（逗号分隔）
+     * @param ids      用户 ID 列表（逗号分隔）
+     * @param tenantId 租户 ID
      * @return 用户 DTO 列表
      */
     @GetMapping("/internal/users/batch")
-    R<List<InternalUserDTO>> getUsersByIds(@RequestParam("ids") String ids);
+    R<List<InternalUserDTO>> getUsersByIds(@RequestParam("ids") String ids,
+                                           @RequestParam("tenantId") Long tenantId);
 
     /**
      * 根据组织单元 ID 获取组织信息。
      *
-     * @param id 组织单元 ID
+     * @param id       组织单元 ID
+     * @param tenantId 租户 ID
      * @return 组织 DTO
      */
     @GetMapping("/internal/orgs/{id}")
-    R<InternalOrgDTO> getOrgById(@PathVariable("id") Long id);
+    R<InternalOrgDTO> getOrgById(@PathVariable("id") Long id,
+                                 @RequestParam("tenantId") Long tenantId);
 
     /**
      * 批量获取组织单元信息。
      *
-     * @param ids 组织单元 ID 列表（逗号分隔）
+     * @param ids      组织单元 ID 列表（逗号分隔）
+     * @param tenantId 租户 ID
      * @return 组织 DTO 列表
      */
     @GetMapping("/internal/orgs/batch")
-    R<List<InternalOrgDTO>> getOrgsByIds(@RequestParam("ids") String ids);
+    R<List<InternalOrgDTO>> getOrgsByIds(@RequestParam("ids") String ids,
+                                         @RequestParam("tenantId") Long tenantId);
 
     /**
      * Feign 拦截器配置，自动添加 {@code X-Internal-Token} 请求头。

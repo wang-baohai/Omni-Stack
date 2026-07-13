@@ -26,20 +26,20 @@ spring:
         webflux:
           discovery:
             locator:
-              enabled: true
+              enabled: false
               lower-case-service-id: true
           routes:
             # 屏蔽内部 API 路由（防止通过服务发现路由访问 /internal/**）
             - id: block-internal-api
               uri: no://op
               predicates:
-                - Path=/internal/**
+                - Path=/internal/**,/api/internal/**
               filters:
                 - SetStatus=404
             - id: block-internal-api-services
               uri: no://op
               predicates:
-                - Path=/omni-auth/internal/**,/omni-base/internal/**,/omni-workflow/internal/**,/omni-gateway/internal/**
+                - Path=/omni-auth/internal/**,/omni-auth/api/internal/**,/omni-base/internal/**,/omni-base/api/internal/**,/omni-workflow/internal/**,/omni-workflow/api/internal/**,/omni-crm/internal/**,/omni-crm/api/internal/**,/omni-gateway/internal/**
               filters:
                 - SetStatus=404
             # OAuth2 authorization server endpoints (必须在 omni-auth 路由之前)
@@ -72,6 +72,11 @@ spring:
               uri: lb://omni-workflow
               predicates:
                 - Path=/api/workflow/**
+            # CRM 服务路由
+            - id: omni-crm
+              uri: lb://omni-crm
+              predicates:
+                - Path=/api/crm/**
   data:
     redis:
       host: 127.0.0.1

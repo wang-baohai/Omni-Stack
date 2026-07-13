@@ -24,8 +24,8 @@ import java.util.UUID;
  * <p>使用示例：</p>
  * <pre>{@code
  * // 在业务 Service 的 @Transactional 方法中调用
- * reliableMessageTemplate.send("order-out-0", orderPayload);
- * reliableMessageTemplate.send("order-out-0", orderPayload, "order:12345");
+ * reliableMessageTemplate.send("order-out-0", orderPayload, tenantId);
+ * reliableMessageTemplate.send("order-out-0", orderPayload, tenantId, "order:12345");
  * }</pre>
  *
  * @author Omni-Stack Team
@@ -63,6 +63,15 @@ public class ReliableMessageTemplate implements ReliableMessageRelay {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void send(String bindingName, Object payload, Long tenantId, String msgKey) {
+        if (tenantId == null || tenantId <= 0) {
+            throw new IllegalArgumentException("可靠消息 tenantId 必须为正整数");
+        }
+        if (bindingName == null || bindingName.isBlank()) {
+            throw new IllegalArgumentException("可靠消息 bindingName 不能为空");
+        }
+        if (payload == null) {
+            throw new IllegalArgumentException("可靠消息 payload 不能为空");
+        }
         String msgId = UUID.randomUUID().toString();
         String jsonPayload;
         try {

@@ -8,6 +8,7 @@ import com.omni.common.core.operlog.OperLogMessage;
 import com.omni.common.core.operlog.OperType;
 import com.omni.common.operlog.diff.EntityDiffer;
 import com.omni.common.operlog.producer.OperLogProducer;
+import com.omni.common.operlog.sanitize.OperLogSanitizer;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * 操作日志 AOP 切面。
@@ -64,6 +66,7 @@ public class OperLogAspect {
     private final EntityDiffer entityDiffer;
     private final ObjectMapper objectMapper;
     private final ApplicationContext applicationContext;
+    private final OperLogSanitizer operLogSanitizer;
 
     private final ExpressionParser spelParser = new SpelExpressionParser();
 
@@ -88,14 +91,16 @@ public class OperLogAspect {
         String requestUrl = request != null ? request.getRequestURI() : null;
         String ipAddress = request != null ? getClientIp(request) : null;
         String userAgent = request != null ? request.getHeader("User-Agent") : null;
-        String requestParams = serializeArgs(joinPoint.getArgs());
+        String requestParams = operLog.recordParams()
+                ? operLogSanitizer.sanitizeJson(serializeArgs(joinPoint.getArgs()), operLog.excludeFields())
+                : null;
 
         // 操作前快照（UPDATE / DELETE）
         String oldValue = null;
         Object entityId = null;
         BaseMapper<Object> mapper = null;
         Class<?> entityClass = operLog.entityClass();
-        boolean needDiff = entityClass != Object.class
+        boolean needDiff = operLog.recordSnapshot() && entityClass != Object.class
                 && (operLog.operType() == OperType.UPDATE || operLog.operType() == OperType.DELETE);
 
         if (needDiff) {
@@ -146,7 +151,8 @@ public class OperLogAspect {
                 }
 
                 // CREATE: 从返回值提取新实体 ID
-                if (operLog.operType() == OperType.CREATE && entityClass != Object.class) {
+                if (operLog.recordSnapshot()
+                        && operLog.operType() == OperType.CREATE && entityClass != Object.class) {
                     BaseMapper<Object> createMapper = findMapper(entityClass);
                     if (createMapper != null && !operLog.idExpr().isEmpty()) {
                         Object newId = evaluateSpEL(operLog.idExpr(), joinPoint, result);
@@ -161,6 +167,7 @@ public class OperLogAspect {
 
                 // 构建并发送日志消息
                 OperLogMessage message = new OperLogMessage();
+                message.setEventId(UUID.randomUUID().toString());
                 message.setOperUsername(operUsername);
                 message.setTenantId(tenantId);
                 message.setOperTime(LocalDateTime.now());
@@ -173,9 +180,9 @@ public class OperLogAspect {
                 message.setIpAddress(ipAddress);
                 message.setUserAgent(truncate(userAgent));
                 message.setExecutionTime(executionTime);
-                message.setOldValue(truncate(oldValue));
-                message.setNewValue(truncate(newValue));
-                message.setErrorMsg(truncate(errorMsg));
+                message.setOldValue(truncate(operLogSanitizer.sanitizeJson(oldValue, operLog.excludeFields())));
+                message.setNewValue(truncate(operLogSanitizer.sanitizeJson(newValue, operLog.excludeFields())));
+                message.setErrorMsg(truncate(operLogSanitizer.sanitizeText(errorMsg)));
 
                 operLogProducer.send(message);
             } catch (Exception e) {

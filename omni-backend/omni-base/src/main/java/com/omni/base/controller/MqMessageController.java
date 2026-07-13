@@ -1,11 +1,9 @@
 package com.omni.base.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.omni.base.service.MqMessageAggregationService;
 import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
 import com.omni.common.mqlog.entity.SysMqMessage;
-import com.omni.common.mqlog.mapper.SysMqMessageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +21,7 @@ import java.time.LocalDateTime;
  * MQ 消息记录管理控制器。
  * <p>
  * 提供消息记录的查询、重发和忽略操作，面向运维人员。
- * 当前查询 omni-base 本地库中的消息记录，后续可通过 Feign 聚合各服务数据。
+ * 当前统一聚合 omni-base 与 omni-crm 各自数据库中的本地 Outbox 记录。
  * </p>
  *
  * @author Omni-Stack Team
@@ -33,7 +31,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class MqMessageController {
 
-    private final SysMqMessageMapper sysMqMessageMapper;
+    private final MqMessageAggregationService mqMessageAggregationService;
 
     /**
      * 分页查询消息记录。
@@ -64,19 +62,8 @@ public class MqMessageController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        LambdaQueryWrapper<SysMqMessage> wrapper = new LambdaQueryWrapper<SysMqMessage>()
-                .eq(SysMqMessage::getTenantId, tenantId)
-                .eq(status != null, SysMqMessage::getStatus, status)
-                .like(topic != null && !topic.isBlank(), SysMqMessage::getTopic, topic)
-                .like(msgKey != null && !msgKey.isBlank(), SysMqMessage::getMsgKey, msgKey)
-                .eq(serviceName != null && !serviceName.isBlank(), SysMqMessage::getServiceName, serviceName)
-                .ge(beginTime != null, SysMqMessage::getCreateTime, beginTime)
-                .le(endTime != null, SysMqMessage::getCreateTime, endTime)
-                .orderByDesc(SysMqMessage::getId);
-
-        Page<SysMqMessage> pageResult = sysMqMessageMapper.selectPage(new Page<>(page, size), wrapper);
-        return R.ok(new PageResult<>(pageResult.getRecords(), pageResult.getTotal(),
-                pageResult.getSize(), pageResult.getCurrent()));
+        return R.ok(mqMessageAggregationService.list(tenantId, status, topic, msgKey,
+                serviceName, beginTime, endTime, page, size));
     }
 
     /**
@@ -91,15 +78,7 @@ public class MqMessageController {
     public R<SysMqMessage> getByMsgId(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @PathVariable String msgId) {
-        SysMqMessage message = sysMqMessageMapper.selectOne(
-                new LambdaQueryWrapper<SysMqMessage>()
-                        .eq(SysMqMessage::getTenantId, tenantId)
-                        .eq(SysMqMessage::getMsgId, msgId)
-                        .last("LIMIT 1"));
-        if (message == null) {
-            return R.fail("消息不存在");
-        }
-        return R.ok(message);
+        return R.ok(mqMessageAggregationService.getByMsgId(tenantId, msgId));
     }
 
     /**
@@ -115,27 +94,8 @@ public class MqMessageController {
     public R<Void> resend(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @PathVariable String msgId) {
-        SysMqMessage message = sysMqMessageMapper.selectOne(
-                new LambdaQueryWrapper<SysMqMessage>()
-                        .eq(SysMqMessage::getTenantId, tenantId)
-                        .eq(SysMqMessage::getMsgId, msgId)
-                        .last("LIMIT 1"));
-        if (message == null) {
-            return R.fail("消息不存在");
-        }
-        int st = message.getStatus();
-        if (st != SysMqMessage.STATUS_PENDING
-                && st != SysMqMessage.STATUS_FAILED
-                && st != SysMqMessage.STATUS_DEAD_LETTER) {
-            return R.fail("仅 PENDING/FAILED/DEAD_LETTER 状态的消息可重发");
-        }
-        message.setStatus(SysMqMessage.STATUS_PENDING);
-        message.setRetryCount(0);
-        message.setNextRetryTime(null);
-        message.setErrorMsg(null);
-        message.setUpdateTime(LocalDateTime.now());
-        sysMqMessageMapper.updateById(message);
-        return R.ok(null);
+        mqMessageAggregationService.resend(tenantId, msgId);
+        return R.ok();
     }
 
     /**
@@ -151,20 +111,7 @@ public class MqMessageController {
     public R<Void> skip(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @PathVariable String msgId) {
-        SysMqMessage message = sysMqMessageMapper.selectOne(
-                new LambdaQueryWrapper<SysMqMessage>()
-                        .eq(SysMqMessage::getTenantId, tenantId)
-                        .eq(SysMqMessage::getMsgId, msgId)
-                        .last("LIMIT 1"));
-        if (message == null) {
-            return R.fail("消息不存在");
-        }
-        if (message.getStatus() != SysMqMessage.STATUS_DEAD_LETTER) {
-            return R.fail("仅死信状态的消息可标记忽略");
-        }
-        message.setStatus(SysMqMessage.STATUS_SKIPPED);
-        message.setUpdateTime(LocalDateTime.now());
-        sysMqMessageMapper.updateById(message);
-        return R.ok(null);
+        mqMessageAggregationService.skip(tenantId, msgId);
+        return R.ok();
     }
 }

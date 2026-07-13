@@ -1507,6 +1507,100 @@ setInterval 每 10 秒：
 
 ---
 
+## Flow 13: CRM 线索幂等转换 — Customer + Contact + Opportunity + Outbox
+
+### 概述
+
+销售人员将 `QUALIFIED` 线索转换为客户，可选择新建或关联客户/联系人，并可同时创建商机。转换在 `omni_crm` 单库事务中完成；同一线索只允许产生一条 `crm_lead_conversion`，重复请求直接返回已生成的对象 ID。跨服务调用只用于事务前的数据范围和 owner 权威校验，事务内不发送真实 MQ，只写本地 Outbox。
+
+### 时序图
+
+```mermaid
+sequenceDiagram
+    participant F as 前端 CRM
+    participant G as Gateway :8102
+    participant C as CRM :8104
+    participant A as Auth :8100
+    participant DB as omni_crm
+    participant MQ as Outbox Relay
+
+    F->>G: POST /api/crm/lead/{id}/convert + JWT + version
+    G->>G: 验证 JWT/黑名单，覆盖 X-User-* 与 X-Tenant-Id
+    G->>C: 转发请求 + X-Gateway-Forwarded
+    C->>C: GatewayPreAuthFilter + CrmTenantContextFilter
+    C->>C: @PreAuthorize(crm:lead:convert)
+    C->>A: GET /internal/data-scopes/{userId}?tenantId&permissionCode=crm:lead:convert
+    A-->>C: permission-aware scope
+    C->>C: CrmDataScopeContext 绑定（finally 清理）
+    C->>DB: SELECT lead FOR UPDATE（TenantLine + DataPermission）
+    C->>DB: SELECT conversion WHERE lead_id=?
+    alt 已转换
+        DB-->>C: customer/contact/opportunity IDs
+        C-->>F: 原结果（幂等重放）
+    else 首次转换
+        C->>DB: INSERT/校验 customer
+        C->>DB: 清除原主要联系人并 INSERT/校验 contact
+        opt 创建商机
+            C->>DB: INSERT opportunity
+            C->>DB: INSERT opportunity_stage_history(reason=CREATE)
+        end
+        C->>DB: INSERT crm_lead_conversion（tenant_id + lead_id 唯一）
+        C->>DB: UPDATE lead status=CONVERTED + version
+        C->>DB: UPDATE lead activities root/owner snapshot
+        C->>DB: INSERT sys_mq_message(crm.lead.converted.v1)
+        C->>DB: COMMIT
+        MQ->>DB: 异步扫描 PENDING
+        MQ-->>MQ: 至少一次投递，失败指数退避
+        C-->>F: ConversionResultVO
+    end
+```
+
+### 一致性边界
+
+- `crm_lead_conversion(tenant_id, lead_id)` 是转换幂等事实；Service 的行锁和乐观版本共同处理并发。
+- Customer、Contact、Opportunity、初始 Stage History、Lead 状态与 Outbox 必须同提交或同回滚。
+- 所有新建对象继承当前线索 owner 快照；目标用户/组织来自 Auth 权威接口，不能信任前端 ownerUnitId。
+- Outbox payload 只包含 tenantId、聚合 ID、状态、版本和事件 ID，不包含手机、邮箱、地址或备注。
+- `@OperLog` 在请求离开进程前递归脱敏参数和快照；转换命令显式排除客户、联系人和商机名称。
+
+---
+
+## Flow 14: CRM 商机推进与权限隔离 — Stage History + Customer 激活
+
+### 概述
+
+商机阶段变更不是通用更新，而是独立命令。每次请求按完整权限码 `crm:opportunity:stage` 从 Auth 解析数据范围，再由 CRM 的 TenantLine、DataPermission 和乐观锁共同约束；合法迁移写不可变阶段历史和领域 Outbox。赢单时，CRM 使用保留 TenantLine、仅忽略 DataPermission 的专用 SQL 将关联潜客激活，避免因 Customer 与 Opportunity owner 不同而静默漏更新。
+
+### 状态推进
+
+```mermaid
+flowchart LR
+    O["OPEN 阶段"] -->|"crm:opportunity:stage"| N["下一 OPEN 阶段"]
+    O -->|"目标 stageType=WON"| W["WON"]
+    O -->|"目标 stageType=LOST + lossReason"| L["LOST"]
+    W -->|"crm:opportunity:reopen"| R["最后一个 OPEN 阶段"]
+    L -->|"crm:opportunity:reopen"| R
+    W --> C["POTENTIAL Customer → ACTIVE"]
+```
+
+### 命令执行规则
+
+1. Gateway 验证 JWT 并覆盖身份头；CRM 拒绝没有转发标记、userId 或 tenantId 的业务请求。
+2. `@PreAuthorize` 先验证功能权限，`@CrmDataScope` 再以当前命令完整 permissionCode 向 Auth 取 scope。
+3. MyBatis 固定执行 `TenantLine → DataPermission → Pagination`；普通 CRM API 中 `ALL` 也只表示当前租户全部数据。
+4. Service 锁定商机，校验请求 version、当前状态、目标阶段所属 pipeline 以及状态机合法性；相同阶段的空操作直接拒绝。
+5. 更新商机阶段/状态/概率/输单原因和 version，追加 `crm_opportunity_stage_history`，再写 `stage-changed/won/lost` Outbox。
+6. 赢单激活客户的专用 Mapper 只绕过 owner 数据权限，不绕过 TenantLine，并显式校验 customer id、状态和 `deleted=0`。
+7. 重开使用 `crm:opportunity:reopen`，恢复最后一个开放阶段并写 `REOPEN` 历史，不能通过普通 update 绕过状态机。
+
+### PII 返回规则
+
+- Lead、Customer、Contact 列表始终返回掩码联系方式；详情仅在具备 `crm:pii:view` 时返回完整值。
+- Activity 列表/时间线的 content 始终为 `[REDACTED]`；详情仍受 `crm:pii:view` 控制。
+- 前端编辑前重新读取详情；没有 PII 权限时禁用敏感字段且不把字段放入 update payload，避免将掩码文本覆盖真实数据。
+
+---
+
 ## Docker 部署下的流程配置注意事项
 
 ### OAuth2 回调 URL 配置
@@ -1569,7 +1663,8 @@ Docker 部署时所有容器在同一个 `omni-network` Bridge 网络中：
 Gateway 容器(:8080)
     ├── lb://omni-auth → Auth 容器(:8080) [Nacos 服务发现]
     ├── lb://omni-base → Base 容器(:8080) [Nacos 服务发现]
-    └── lb://omni-workflow → Workflow 容器(:8080) [Nacos 服务发现]
+    ├── lb://omni-workflow → Workflow 容器(:8080) [Nacos 服务发现]
+    └── lb://omni-crm → CRM 容器(:8080) [Nacos 服务发现]
 ```
 
 ---

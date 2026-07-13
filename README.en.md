@@ -283,6 +283,35 @@ Supports three OAuth2 providers: GitHub, Google, and Gitee. Credentials are conf
 |---------------|---------------|
 | ![BPMN Designer](docs/images/workflow-designer.png) | ![Approval Flow](docs/images/workflow-approval.png) |
 
+### CRM Sales Management
+
+The CRM module covers the full pre-sales pipeline: lead acquisition → follow-up → customer creation → opportunity progression → win/loss. A six-layer security defense (Gateway JWT → tenant validation → functional permissions → data scope → SQL interception → row-level authorization) ensures multi-tenant data isolation. See [CRM System Truth](docs/crm.en.md) for details.
+
+| Sales Overview | Lead Management |
+|----------------|-----------------|
+| ![Sales Overview](docs/images/crm-overview.png) | ![Lead Management](docs/images/crm-lead-list.png) |
+| Stats cards + sales funnel + follow-up list — all key sales metrics on one screen | Lead list with search, filter, assignment and batch operations — the starting point of the sales process |
+
+| Lead Conversion | Customer Management |
+|-----------------|---------------------|
+| ![Lead Conversion](docs/images/crm-lead-convert.png) | ![Customer Management](docs/images/crm-customer-list.png) |
+| Convert qualified leads into customer + contact + opportunity in one click, with row-lock idempotency | Customer list supports transfer, status changes and blacklist management |
+
+| Customer 360 View | Contact Management |
+|-------------------|---------------------|
+| ![Customer 360](docs/images/crm-customer-360.png) | ![Contact Management](docs/images/crm-contact-list.png) |
+| Full-dimension customer view: contacts, opportunities and activities in one drawer | Contacts linked to customers with primary contact marking |
+
+| Opportunity Management | Opportunity Board |
+|------------------------|-------------------|
+| ![Opportunity Management](docs/images/crm-opportunity-list.png) | ![Opportunity Board](docs/images/crm-opportunity-board.png) |
+| Opportunity table showing stages, amounts, probabilities and expected close dates | Kanban board organizes opportunities by stage columns for visual pipeline tracking |
+
+| Activity Tracking | |
+|-------------------|--|
+| ![Activity Tracking](docs/images/crm-activity-timeline.png) | |
+| Activity list records every follow-up with plan/complete/cancel status flow | |
+
 ## Module Overview
 
 ### Backend Microservices
@@ -292,6 +321,7 @@ Supports three OAuth2 providers: GitHub, Google, and Gitee. Credentials are conf
 | omni-auth | 8100 | Authentication & authorization: login, JWT, OAuth2, RBAC, XSS config management | [core-flows.en.md](docs/core-flows.en.md) |
 | omni-base | 8101 | Base data: dictionaries, organizations, users, logs, scheduled tasks, MQ message management | [scheduling.en.md](docs/scheduling.en.md) |
 | omni-workflow | 8103 | Workflow engine: BPMN model management, approvals, process instances | [workflow.en.md](docs/workflow.en.md) |
+| omni-crm | 8104 | CRM: leads, customers, contacts, opportunities, follow-ups and sales overview | [crm.en.md](docs/crm.en.md) |
 | omni-gateway | 8102 | API Gateway: route forwarding, JWT validation, CORS, security headers | [architecture.en.md](docs/architecture.en.md) |
 
 ### Common Starter Ecosystem (8 Modules)

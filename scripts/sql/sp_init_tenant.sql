@@ -12,6 +12,7 @@ CREATE PROCEDURE sp_init_tenant(
 BEGIN
     DECLARE v_old_id     BIGINT;
     DECLARE v_parent_id  BIGINT;
+    DECLARE v_new_parent_id BIGINT;
     DECLARE v_new_id     BIGINT;
     DECLARE v_done       INT DEFAULT 0;
 
@@ -29,13 +30,24 @@ BEGIN
         FETCH cur INTO v_old_id, v_parent_id;
         IF v_done THEN LEAVE perm_loop; END IF;
 
+        SET v_new_parent_id = IF(v_parent_id = 0, 0,
+            IFNULL((SELECT new_id FROM tmp_perm_map WHERE old_id = v_parent_id), 0));
+
         INSERT INTO sys_permission (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
         SELECT p_tenant_id,
-               IF(parent_id = 0, 0, IFNULL((SELECT new_id FROM tmp_perm_map WHERE old_id = t.parent_id), 0)),
-               permission_code, permission_name, type, path, depth, sort, 1, 'system'
+               v_new_parent_id,
+               permission_code, permission_name, type, '', depth, sort, 1, 'system'
         FROM sys_permission t WHERE t.id = v_old_id;
 
         SET v_new_id = LAST_INSERT_ID();
+        IF v_new_parent_id = 0 THEN
+            UPDATE sys_permission SET path = CONCAT('/', v_new_id, '/') WHERE id = v_new_id;
+        ELSE
+            UPDATE sys_permission child
+            JOIN sys_permission parent ON parent.id = v_new_parent_id
+            SET child.path = CONCAT(parent.path, v_new_id, '/')
+            WHERE child.id = v_new_id;
+        END IF;
         INSERT INTO tmp_perm_map (old_id, new_id) VALUES (v_old_id, v_new_id);
     END LOOP;
     CLOSE cur;
@@ -46,7 +58,11 @@ BEGIN
         (p_tenant_id, 'USER',        'Default User',        'SELF', 99, 1, 'system'),
         (p_tenant_id, 'EMPLOYEE',    '普通员工',             'SELF', 10, 1, 'system'),
         (p_tenant_id, 'TEAM_LEADER', '工作组组长',         'DEPT', 11, 1, 'system'),
-        (p_tenant_id, 'DEPT_LEADER', '部门领导', 'DEPT_AND_BELOW', 12, 1, 'system');
+        (p_tenant_id, 'DEPT_LEADER', '部门领导', 'DEPT_AND_BELOW', 12, 1, 'system'),
+        (p_tenant_id, 'CRM_ADMIN',     'CRM管理员', 'TENANT',         20, 1, 'system'),
+        (p_tenant_id, 'SALES_MANAGER', '销售经理',  'DEPT_AND_BELOW', 21, 1, 'system'),
+        (p_tenant_id, 'SALES_REP',     '销售代表',  'SELF',           22, 1, 'system'),
+        (p_tenant_id, 'CRM_VIEWER',    'CRM只读员', 'TENANT',         23, 1, 'system');
 
     -- Step 3: SUPER_ADMIN 获得全部权限
     INSERT INTO sys_role_permission (role_id, permission_id)
@@ -82,6 +98,48 @@ BEGIN
           'workflow:instance:list','workflow:instance:start','workflow:instance:terminate',
           'workflow:task:todo','workflow:approval:complete',
           'workflow:approval:add-signer','workflow:approval:remove-signer','workflow:approval:delegate'
+      );
+
+    -- Step 5.1: CRM 管理员和销售经理获得完整 CRM 权限
+    INSERT INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id
+      AND r.role_code IN ('CRM_ADMIN', 'SALES_MANAGER')
+      AND (p.permission_code = 'crm' OR p.permission_code LIKE 'crm:%');
+
+    -- Step 5.2: 销售代表日常销售闭环权限
+    INSERT INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id AND r.role_code = 'SALES_REP'
+      AND p.permission_code IN (
+          'crm','crm:overview','crm:lead','crm:customer','crm:contact','crm:opportunity','crm:activity',
+          'crm:overview:list','crm:lead:list','crm:lead:create','crm:lead:update',
+          'crm:lead:disqualify','crm:lead:convert',
+          'crm:customer:list','crm:customer:create','crm:customer:update','crm:customer:status',
+          'crm:contact:list','crm:contact:create','crm:contact:update',
+          'crm:opportunity:list','crm:opportunity:create','crm:opportunity:update',
+          'crm:opportunity:stage','crm:opportunity:reopen',
+          'crm:activity:list','crm:activity:create','crm:activity:update',
+          'crm:activity:complete','crm:activity:cancel','crm:owner:list','crm:pii:view'
+      );
+
+    -- Step 5.3: CRM 只读角色默认返回脱敏数据
+    INSERT INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id AND r.role_code = 'CRM_VIEWER'
+      AND p.permission_code IN (
+          'crm','crm:overview','crm:lead','crm:customer','crm:contact','crm:opportunity','crm:activity',
+          'crm:overview:list','crm:lead:list','crm:customer:list','crm:contact:list',
+          'crm:opportunity:list','crm:activity:list'
       );
 
     -- Step 6: 创建根组织

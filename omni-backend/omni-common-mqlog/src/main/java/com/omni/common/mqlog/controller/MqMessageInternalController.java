@@ -109,7 +109,13 @@ public class MqMessageInternalController {
                         .eq(SysMqMessage::getMsgId, msgId)
                         .last("LIMIT 1"));
         if (message == null) {
-            return R.fail("消息不存在");
+            return R.fail(404, "消息不存在");
+        }
+        int status = message.getStatus();
+        if (status != SysMqMessage.STATUS_PENDING
+                && status != SysMqMessage.STATUS_FAILED
+                && status != SysMqMessage.STATUS_DEAD_LETTER) {
+            return R.fail(400, "仅 PENDING/FAILED/DEAD_LETTER 状态的消息可重发");
         }
         message.setStatus(SysMqMessage.STATUS_PENDING);
         message.setRetryCount(0);
@@ -137,10 +143,10 @@ public class MqMessageInternalController {
                         .eq(SysMqMessage::getMsgId, msgId)
                         .last("LIMIT 1"));
         if (message == null) {
-            return R.fail("消息不存在");
+            return R.fail(404, "消息不存在");
         }
         if (message.getStatus() != SysMqMessage.STATUS_DEAD_LETTER) {
-            return R.fail("仅死信状态的消息可标记忽略");
+            return R.fail(400, "仅死信状态的消息可标记忽略");
         }
         message.setStatus(SysMqMessage.STATUS_SKIPPED);
         message.setUpdateTime(LocalDateTime.now());

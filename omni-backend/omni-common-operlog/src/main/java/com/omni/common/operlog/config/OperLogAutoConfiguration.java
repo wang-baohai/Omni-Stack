@@ -5,6 +5,7 @@ import com.omni.common.core.mq.ReliableMessageRelay;
 import com.omni.common.operlog.aspect.OperLogAspect;
 import com.omni.common.operlog.diff.EntityDiffer;
 import com.omni.common.operlog.producer.OperLogProducer;
+import com.omni.common.operlog.sanitize.OperLogSanitizer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -27,6 +28,17 @@ import org.springframework.context.annotation.Bean;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass(name = "org.aspectj.lang.ProceedingJoinPoint")
 public class OperLogAutoConfiguration {
+
+    /**
+     * 操作日志敏感信息清洗器。
+     *
+     * @param objectMapper Jackson 对象映射器
+     * @return 操作日志清洗器
+     */
+    @Bean
+    public OperLogSanitizer operLogSanitizer(ObjectMapper objectMapper) {
+        return new OperLogSanitizer(objectMapper);
+    }
 
     /**
      * 实体 JSON diff 工具。
@@ -73,7 +85,9 @@ public class OperLogAutoConfiguration {
     public OperLogAspect operLogAspect(OperLogProducer operLogProducer,
                                         EntityDiffer entityDiffer,
                                         ObjectMapper objectMapper,
-                                        ApplicationContext applicationContext) {
-        return new OperLogAspect(operLogProducer, entityDiffer, objectMapper, applicationContext);
+                                        ApplicationContext applicationContext,
+                                        OperLogSanitizer operLogSanitizer) {
+        return new OperLogAspect(operLogProducer, entityDiffer, objectMapper, applicationContext,
+                operLogSanitizer);
     }
 }

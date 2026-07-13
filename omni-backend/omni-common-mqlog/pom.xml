@@ -50,6 +50,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Spring Security（内部 API 服务身份） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Jackson (JSON 序列化) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

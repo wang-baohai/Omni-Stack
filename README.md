@@ -2,7 +2,7 @@
 
 > 基于 Spring Boot 4 + Vue 3 的微服务脚手架平台，采用 Harness 工业设计模式构建，为 AI 辅助开发提供行业最佳实践基础。
 >
-> **一条命令启动全家桶：中间件 + 4 个微服务 + 前端，共 12 个 Docker 容器。**
+> **一条命令启动全家桶：中间件 + 5 个微服务 + 前端，共 12 个 Docker 容器。**
 
 **[English](README.en.md)** | **[日本語](README.jp.md)** | **[한국어](README.kr.md)**
 
@@ -15,7 +15,8 @@
 ## 特性亮点
 
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 全栈最新技术
-- **Docker 全家桶一键部署**：`start.bat` / `./start.sh` 一条命令启动 12 个容器（MySQL、Redis、Nacos、RocketMQ、XXL-JOB、4 个后端微服务、前端），详见 [Docker 部署指南](docs/docker-deployment.md)
+- **Docker 全家桶一键部署**：`start.bat` / `./start.sh` 一条命令启动 12 个容器（MySQL、Redis、Nacos、RocketMQ、XXL-JOB、5 个后端微服务、前端），详见 [Docker 部署指南](docs/docker-deployment.md)
+- **CRM 销售前闭环**：独立 `omni-crm` 服务，覆盖线索、客户、联系人、商机、跟进、转换与概览，复用租户、RBAC、数据范围、XSS、审计和 Outbox 能力
 - **多提供商社交登录**：GitHub + Google + Gitee OAuth2 一键登录（策略模式可扩展），首次登录自动注册
 - **三层 XSS 纵深防御**：Jackson 反序列化器 + Servlet Filter + Gateway 安全响应头，按租户配置，前端管理界面完整可用
 - **Common Starter 生态**：8 个自动装配模块（mybatis / redis / operlog / job / mqlog / workflow），新服务引入依赖即获能力，零配置
@@ -56,12 +57,16 @@
 ┌─────────────────┐     ┌──────────────────┐
 │   omni-frontend  │────>│   omni-gateway    │lb://
 │   Vue 3 SPA     │/api │  WebFlux :8102    │────>┌─────────────────┐
-│   Nginx :3000   │────>│  StripPrefix=2    │     │    omni-base     │
+│   Nginx :3000   │────>│ 显式 /api 路由    │     │    omni-base     │
 └─────────────────┘     └──────────────────┘     │   Spring :8101   │
                             │                    └─────────────────┘
                             │                    ┌─────────────────┐
                             │                    │  omni-workflow   │
                             │                    │  Flowable :8103  │
+                            │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │    omni-crm      │
+                            │                    │   Sales :8104   │
                             │                    └─────────────────┘
                     ┌───────┴────────┐
                     │  MySQL :3306   │  持久化存储
@@ -96,9 +101,12 @@ Omni-Stack/
 │   ├── scheduling.md                   #   定时任务系统深度技术文档
 │   ├── workflow.md                     #   工作流引擎深度技术文档
 │   ├── mq-reliability.md              #   可靠消息发送深度技术文档
+│   ├── crm.md                        #   CRM 销售管道系统真相（Harness 文档）
 │   └── docker-deployment.md            #   Docker 全家桶部署深度指南
 ├── scripts/sql/                        # 数据库初始化脚本
 │   ├── init-all.sql                    #   权威 DDL + 种子数据
+│   ├── migrate-crm-mvp.sql             #   既有环境 CRM MVP 幂等迁移
+│   ├── sp_init_tenant.sql              #   新租户初始化存储过程
 │   ├── init-nacos.sql                  #   Nacos MySQL 持久化
 │   └── init-xxl-job.sql               #   XXL-JOB 数据库
 ├── omni-backend/                       # Maven 多模块后端
@@ -114,13 +122,14 @@ Omni-Stack/
 │   ├── omni-auth/                      #   认证服务 (8100)
 │   ├── omni-base/                      #   基础数据服务 (8101)
 │   ├── omni-workflow/                  #   工作流引擎服务 (8103)
+│   ├── omni-crm/                       #   CRM 销售前闭环服务 (8104)
 │   └── omni-gateway/                   #   API 网关 (8102)
 └── omni-frontend/                      # Vue 3 SPA (3000)
 ```
 
 ## Docker 一键部署（推荐）
 
-一条命令启动全部 12 个容器：中间件（MySQL、Redis、Nacos、RocketMQ、XXL-JOB）+ 4 个后端微服务 + 前端。
+一条命令启动全部 12 个容器：中间件（MySQL、Redis、Nacos、RocketMQ、XXL-JOB）+ 5 个后端微服务 + 前端。
 
 ### 前置条件
 
@@ -129,7 +138,11 @@ Omni-Stack/
 | Docker Desktop | 任意稳定版 | Windows 需 WSL2 后端 |
 | Git | 任意 | 克隆项目 |
 
+首次启动前复制 `.env.example` 为 `.env`，并将 `OMNI_INTERNAL_API_TOKEN` 替换为至少 32 字节的随机值。所有后端服务必须使用同一值，仓库不提供不安全的默认密钥。
+
 > 无需安装 JDK、Node.js、Maven —— 全部在 Docker 容器内完成构建和运行。
+
+已有 MySQL 数据卷不会重新执行 Docker entrypoint 初始化脚本。升级时先备份数据库，再执行 `scripts/sql/migrate-crm-mvp.sql` 和更新后的 `scripts/sql/sp_init_tenant.sql`；新环境直接使用 `init-all.sql`。
 
 ### 启动
 
@@ -163,6 +176,9 @@ docker compose ps
 | 基础数据服务 | http://localhost:8101 | 字典/组织/用户/日志/任务 |
 | API 网关 | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
 | 工作流引擎 | http://localhost:8103 | Flowable BPMN |
+| CRM 服务 | http://localhost:8104 | 线索、客户、商机与跟进 |
+
+以上后端直连地址仅用于本地开发和诊断。生产环境只发布 Frontend 与 Gateway，Auth、Base、Workflow、CRM 端口必须保留在私有网络内。
 | MySQL | localhost:3306 | root/root |
 | Redis | localhost:6379 | 无密码 |
 | Nacos 控制台 | http://localhost:8080 | nacos/nacos |
@@ -224,6 +240,7 @@ cd omni-auth && ./mvnw spring-boot:run       # 端口 8100（新终端窗口继�
 cd omni-base && ./mvnw spring-boot:run        # 端口 8101
 cd omni-gateway && ./mvnw spring-boot:run     # 端口 8102
 cd omni-workflow && ./mvnw spring-boot:run    # 端口 8103
+cd omni-crm && ./mvnw spring-boot:run         # 端口 8104
 
 # 3. 启动前端
 cd omni-frontend && npm install && npm run dev  # 端口 3000
@@ -283,6 +300,35 @@ cd omni-frontend && npm install && npm run dev  # 端口 3000
 |-------------|----------|
 | ![BPMN设计器](docs/images/workflow-designer.png) | ![审批流程](docs/images/workflow-approval.png) |
 
+### CRM 销售管理
+
+CRM 模块覆盖完整的售前闭环：线索获取 → 跟进培育 → 客户建档 → 商机推进 → 赢单/输单。六层安全纵深（Gateway JWT → 租户校验 → 功能权限 → 数据范围 → SQL 拦截 → 行级授权）保障多租户数据安全，详见 [CRM 系统真相](docs/crm.md)。
+
+| 销售概览 | 线索管理 |
+|----------|----------|
+| ![销售概览](docs/images/crm-overview.png) | ![线索管理](docs/images/crm-lead-list.png) |
+| 统计卡片 + 销售漏斗 + 待跟进列表，一屏掌握全局销售数据 | 线索列表支持搜索、筛选、分配和批量操作，是销售流程的起点 |
+
+| 线索转换 | 客户管理 |
+|----------|----------|
+| ![线索转换](docs/images/crm-lead-convert.png) | ![客户管理](docs/images/crm-customer-list.png) |
+| 合格线索一键转换为客户 + 联系人 + 商机，行锁幂等保障并发安全 | 客户列表支持转移、状态变更和黑名单管理 |
+
+| 客户 360 视图 | 联系人管理 |
+|---------------|------------|
+| ![客户360](docs/images/crm-customer-360.png) | ![联系人管理](docs/images/crm-contact-list.png) |
+| 单客户全维度视图：联系人、商机、跟进活动一站式展示 | 联系人与客户关联，支持主要联系人标记 |
+
+| 商机管理 | 商机看板 |
+|----------|----------|
+| ![商机管理](docs/images/crm-opportunity-list.png) | ![商机看板](docs/images/crm-opportunity-board.png) |
+| 商机表格展示阶段、金额、概率和预计成交日 | Kanban 看板按阶段分列，直观展示销售管道进展 |
+
+| 跟进活动 | |
+|----------|--|
+| ![跟进活动](docs/images/crm-activity-timeline.png) | |
+| 活动列表记录每次跟进，支持计划/完成/取消状态流转 | |
+
 ## 模块概览
 
 ### 后端微服务
@@ -292,6 +338,7 @@ cd omni-frontend && npm install && npm run dev  # 端口 3000
 | omni-auth | 8100 | 认证授权：登录、JWT、OAuth2、RBAC、XSS 配置管理 | [core-flows.md](docs/core-flows.md) |
 | omni-base | 8101 | 基础数据：字典、组织、用户、日志、定时任务、MQ 消息管理 | [scheduling.md](docs/scheduling.md) |
 | omni-workflow | 8103 | 工作流引擎：BPMN 模型管理、审批、流程实例 | [workflow.md](docs/workflow.md) |
+| omni-crm | 8104 | CRM：线索、客户、联系人、商机、跟进与销售概览 | [crm.md](docs/crm.md) |
 | omni-gateway | 8102 | API 网关：路由转发、JWT 验证、CORS、安全响应头 | [architecture.md](docs/architecture.md) |
 
 ### Common Starter 生态（8 模块）

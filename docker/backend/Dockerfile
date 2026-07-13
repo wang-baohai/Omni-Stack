@@ -2,7 +2,7 @@
 # Omni-Stack 后端微服务 — 共享多阶段 Dockerfile
 # ============================================================
 # 通过 docker-compose build arg SERVICE_NAME 指定构建哪个微服务：
-#   omni-auth / omni-base / omni-gateway / omni-workflow
+#   omni-auth / omni-base / omni-gateway / omni-workflow / omni-crm
 #
 # 用法（由 docker-compose 自动调用，无需手动执行）：
 #   docker build --build-arg SERVICE_NAME=omni-auth \
@@ -32,6 +32,7 @@ COPY omni-auth/pom.xml omni-auth/
 COPY omni-base/pom.xml omni-base/
 COPY omni-gateway/pom.xml omni-gateway/
 COPY omni-workflow/pom.xml omni-workflow/
+COPY omni-crm/pom.xml omni-crm/
 
 RUN mvn dependency:go-offline -B -q || true
 

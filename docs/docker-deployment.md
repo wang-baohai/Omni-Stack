@@ -37,14 +37,15 @@ Omni-Stack Docker 全家桶包含 **12 个容器**，分为三层：
 └──────────────────────────┬──────────────────────────────────┘
                            │ proxy_pass
 ┌──────────────────────────┴──────────────────────────────────┐
-│                    后端微服务层 (4 容器)                      │
+│                    后端微服务层 (5 容器)                      │
 │  omni-gateway (:8102) ──→ omni-auth (:8100)                │
 │        │                 omni-base (:8101)                  │
 │        │                 omni-workflow (:8103)              │
+│        │                 omni-crm (:8104)                   │
 └────────┼────────────────────┬───────────────────────────────┘
          │                    │
 ┌────────┴────────────────────┴───────────────────────────────┐
-│                    中间件层 (7 容器)                          │
+│                    中间件层 (6 容器)                          │
 │  MySQL (:3306) · Redis (:6379) · Nacos (:8080/:8848/:9848) │
 │  RocketMQ NameServer (:19876) · Broker (:10909-10912)      │
 │  XXL-JOB Admin (:18080)                                    │
@@ -79,10 +80,15 @@ networks:
 | omni-auth | nacos | `nacos:8848` | 服务注册/配置 |
 | omni-base | rocketmq-namesrv | `rocketmq-namesrv:9876` | MQ 消息发送 |
 | omni-base | xxl-job-admin | `xxl-job-admin:8080` | 任务执行器注册 |
+| omni-crm | omni-auth | `omni-auth:8080` | 用户、组织、数据范围与 XSS 内部查询 |
+| omni-crm | rocketmq-namesrv | `rocketmq-namesrv:9876` | CRM Outbox 消息投递 |
+| omni-crm | xxl-job-admin | `xxl-job-admin:8080` | CRM 中继执行器注册 |
 | 宿主机浏览器 | omni-frontend | `localhost:3000` | 用户访问入口 |
 | 宿主机浏览器 | Nacos Console | `localhost:8080` | 运维管理 |
 
-> **关键区分**：容器间通信使用容器内部端口（如 8080），宿主机访问使用映射端口（如 8100/8101/8102/8103）。
+> **关键区分**：容器间通信使用容器内部端口（如 8080），宿主机访问使用映射端口（如 8100-8104）。
+
+> **生产网络边界**：仓库根目录的 `docker-compose.yml` 是本地开发/联调编排，因此映射了 8100-8104。生产部署必须只对外发布 Frontend 与 Gateway；Auth、Base、Workflow、CRM 的业务端口应仅在私有容器网络或安全组内可达。下游的 `X-Gateway-Forwarded` 是转发标记而不是密码学凭证，不能用它替代网络隔离。
 
 ---
 
@@ -90,7 +96,7 @@ networks:
 
 ### 3.1 分层启动顺序
 
-容器按依赖关系分为 5 层，通过 `depends_on` + `condition: service_healthy` 确保有序启动：
+容器按依赖关系分为 6 层，通过 `depends_on` + `condition: service_healthy` 确保有序启动：
 
 ```
 Layer 0:  mysql · redis · rocketmq-namesrv          （无依赖，首先启动）
@@ -99,9 +105,11 @@ Layer 1:  nacos     xxl-job   rocketmq-broker        （依赖 Layer 0）
             │         │          │
 Layer 2:  omni-auth                                  （依赖 nacos + redis + mysql）
             │
-Layer 3:  omni-base · omni-workflow · omni-gateway   （依赖 Layer 1 + Layer 2）
+Layer 3:  omni-base · omni-workflow · omni-crm       （依赖 Layer 1 + Layer 2）
                                                 │
-Layer 4:  omni-frontend                           （依赖 omni-gateway）
+Layer 4:  omni-gateway                              （依赖 omni-auth + omni-crm）
+                                                │
+Layer 5:  omni-frontend                             （依赖 omni-gateway）
 ```
 
 ### 3.2 健康检查配置一览
@@ -118,6 +126,7 @@ Layer 4:  omni-frontend                           （依赖 omni-gateway）
 | omni-base | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 | omni-gateway | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 | omni-workflow | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-crm | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 
 > **为什么 start_period 设为 90s？**  
 > Spring Boot 微服务首次启动需加载大量 Bean + 数据库初始化 + Nacos 注册，冷启动可能需要 60-80 秒。设置 90s 避免误判为不健康。
@@ -282,9 +291,9 @@ xxl-job-admin:
       --xxl.job.accessToken=           # 空 Token（开发环境不鉴权）
 ```
 
-### 5.6 后端微服务（4 个）
+### 5.6 后端微服务（5 个）
 
-四个后端微服务使用相同的 Dockerfile，通过 `build.args.SERVICE_NAME` 区分。每个服务的 `environment` 覆盖关键配置：
+五个后端微服务使用相同的 Dockerfile，通过 `build.args.SERVICE_NAME` 区分。每个服务的 `environment` 覆盖关键配置：
 
 | 环境变量 | 说明 | 示例值 |
 |----------|------|--------|
@@ -295,6 +304,10 @@ xxl-job-admin:
 | `SPRING_CLOUD_NACOS_DISCOVERY_IP` | 注册 IP（空=自动检测容器 IP） | `""` |
 | `AUTH_ISSUER` | JWT Issuer（仅 auth） | `http://omni-auth:8080` |
 | `AUTH_JWKS_URI` | JWKS 端点（仅 gateway） | `http://omni-auth:8080/oauth2/jwks` |
+| `OMNI_INTERNAL_API_TOKEN` | 服务间共享密钥（所有 Servlet 服务一致） | 从 `.env` 注入 |
+| `MYSQL_URL` | CRM 数据库连接（仅 crm） | `jdbc:mysql://mysql:3306/omni_crm?...` |
+
+首次启动必须执行 `cp .env.example .env`，并把 `OMNI_INTERNAL_API_TOKEN` 换成至少 32 字节的随机值。Compose 使用必填变量语法，缺少密钥时直接拒绝启动，不提供仓库内默认值。
 
 ### 5.7 前端
 
@@ -795,6 +808,7 @@ docker compose logs --timestamps omni-auth | head -5
 | omni-base | 8080 | 8101 | HTTP | 基础数据服务 |
 | omni-gateway | 8080 | 8102 | HTTP | API 网关 |
 | omni-workflow | 8080 | 8103 | HTTP | 工作流服务 |
+| omni-crm | 8080 | 8104 | HTTP | CRM 销售前闭环服务 |
 | MySQL | 3306 | 3306 | TCP | 数据库 |
 | Redis | 6379 | 6379 | TCP | 缓存 |
 | Nacos Console | 8080 | 8080 | HTTP | 控制台 |
@@ -824,6 +838,8 @@ docker compose logs --timestamps omni-auth | head -5
 | Broker 配置 | `docker/rocketmq/broker-docker.conf` | RocketMQ Docker 网络配置 |
 | Maven 镜像 | `omni-backend/docker-settings.xml` | 阿里云 Maven 加速 |
 | 数据库初始化 | `scripts/sql/init-all.sql` | 业务库表结构与数据 |
+| CRM 既有环境迁移 | `scripts/sql/migrate-crm-mvp.sql` | 创建 CRM 库、补权限角色与日志幂等列 |
+| 新租户初始化 | `scripts/sql/sp_init_tenant.sql` | 重建存储过程并正确映射权限物化路径 |
 | Nacos 初始化 | `scripts/sql/init-nacos.sql` | Nacos 配置数据 |
 | XXL-JOB 初始化 | `scripts/sql/init-xxl-job.sql` | 调度任务数据 |
 | 启动脚本 (Linux) | `start.sh` | 一键启动 |
@@ -841,6 +857,7 @@ docker compose logs --timestamps omni-auth | head -5
 | omni-base:latest | ~200MB | JRE + Fat JAR |
 | omni-gateway:latest | ~200MB | JRE + Fat JAR |
 | omni-workflow:latest | ~250MB | JRE + Fat JAR + Flowable 引擎 |
+| omni-crm:latest | ~210MB | JRE + Fat JAR + CRM/Outbox |
 | omni-frontend:latest | ~50MB | Nginx + Vue 静态文件 |
 | mysql:8.4 | ~600MB | 官方镜像 |
 | nacos/nacos-server:v3.1.1 | ~800MB | 官方镜像 |

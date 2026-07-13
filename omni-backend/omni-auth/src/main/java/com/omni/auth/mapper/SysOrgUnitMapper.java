@@ -17,6 +17,31 @@ import java.util.List;
 public interface SysOrgUnitMapper extends BaseMapper<SysOrgUnit> {
 
     /**
+     * 根据组织单元 ID 和租户 ID 查询组织单元。
+     *
+     * @param id       组织单元 ID
+     * @param tenantId 租户 ID
+     * @return 匹配的组织单元，不存在时返回 null
+     */
+    @Select("SELECT * FROM sys_org_unit WHERE id = #{id} AND tenant_id = #{tenantId}")
+    SysOrgUnit selectByIdAndTenantId(@Param("id") Long id, @Param("tenantId") Long tenantId);
+
+    /**
+     * 在指定租户内批量查询组织单元。
+     *
+     * @param ids      组织单元 ID 列表
+     * @param tenantId 租户 ID
+     * @return 匹配的组织单元列表
+     */
+    @Select("<script>"
+            + "SELECT * FROM sys_org_unit WHERE tenant_id = #{tenantId} AND id IN "
+            + "<foreach collection='ids' item='id' open='(' separator=',' close=')'>"
+            + "#{id}"
+            + "</foreach>"
+            + "</script>")
+    List<SysOrgUnit> selectByIdsAndTenantId(@Param("ids") List<Long> ids, @Param("tenantId") Long tenantId);
+
+    /**
      * 根据物化路径前缀查询所有后代节点。
      *
      * @param pathPrefix 路径前缀
@@ -34,4 +59,17 @@ public interface SysOrgUnitMapper extends BaseMapper<SysOrgUnit> {
      */
     @Select("SELECT id FROM sys_org_unit WHERE path LIKE CONCAT(#{pathPrefix}, '%') AND status = 1")
     List<Long> selectDescendantIdsByPath(@Param("pathPrefix") String pathPrefix);
+
+    /**
+     * 在指定租户内根据物化路径查询启用组织单元 ID。
+     *
+     * @param tenantId  租户 ID
+     * @param pathPrefix 路径前缀
+     * @return 当前节点及其启用后代节点 ID
+     */
+    @Select("SELECT id FROM sys_org_unit "
+            + "WHERE tenant_id = #{tenantId} "
+            + "AND path LIKE CONCAT(#{pathPrefix}, '%') AND status = 1")
+    List<Long> selectDescendantIdsByTenantIdAndPath(@Param("tenantId") Long tenantId,
+                                                    @Param("pathPrefix") String pathPrefix);
 }

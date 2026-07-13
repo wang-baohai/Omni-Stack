@@ -15,6 +15,7 @@ import com.omni.auth.security.OmniUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -258,8 +259,8 @@ public class AuthorizationServerConfig {
                                 "/api/auth/oauth2/**",
                                 "/error"
                         ).permitAll()
-                        // 内部服务间 API：由 InternalApiFilter 校验 X-Internal-Token，此处放行
-                        .requestMatchers("/internal/**").permitAll()
+                        // 内部服务间 API：InternalApiFilter 校验令牌并授予 INTERNAL_SERVICE 角色
+                        .requestMatchers("/internal/**").hasRole("INTERNAL_SERVICE")
                         // Actuator health/info 放行（容器健康检查 + 端口隔离为第一层防护）
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         // 其他 Actuator 端点仅允许 ADMIN 角色
@@ -285,6 +286,22 @@ public class AuthorizationServerConfig {
         http.addFilterBefore(new GatewayPreAuthFilter(), AuthorizationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * 禁止内部认证过滤器作为普通 Servlet Filter 重复注册。
+     * <p>该过滤器必须只在 Spring Security 链中执行，确保认证身份不会被安全上下文加载阶段覆盖。</p>
+     *
+     * @param internalApiFilter 内部 API 认证过滤器
+     * @return 已禁用容器级注册的过滤器注册 Bean
+     */
+    @Bean
+    public FilterRegistrationBean<InternalApiFilter> internalApiFilterRegistration(
+            InternalApiFilter internalApiFilter) {
+        FilterRegistrationBean<InternalApiFilter> registration =
+                new FilterRegistrationBean<>(internalApiFilter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     /**

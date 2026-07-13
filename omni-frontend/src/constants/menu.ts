@@ -4,6 +4,13 @@
  * 避免因数据库字符集问题导致中文乱码。
  */
 export const menuI18nMap: Record<string, string> = {
+  'crm': 'common.crmManagement',
+  'crm:overview': 'common.crmOverview',
+  'crm:lead': 'common.crmLeads',
+  'crm:customer': 'common.crmCustomers',
+  'crm:contact': 'common.crmContacts',
+  'crm:opportunity': 'common.crmOpportunities',
+  'crm:activity': 'common.crmActivities',
   'system': 'common.systemManagement',
   'system:user': 'common.users',
   'system:role': 'common.roles',

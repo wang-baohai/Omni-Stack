@@ -599,9 +599,9 @@ docker compose exec omni-auth sh -c 'nc -zv mysql 3306'
 curl -s http://localhost:8848/nacos/v1/ns/instance/list?serviceName=omni-auth
 ```
 
-## Testing (Future Scaffold)
+## Testing
 
-テストはまだ存在しません。追加時のガイドライン:
+Auth、CRM、および一部の Common モジュールにはテストが追加されています。バックエンド変更時のガイドライン:
 
 - **単体テスト**: JUnit 5 + Mockito、`src/test/java/` に配置
 - **結合テスト**: `@SpringBootTest` + 組み込みデータベースまたは Test Containers

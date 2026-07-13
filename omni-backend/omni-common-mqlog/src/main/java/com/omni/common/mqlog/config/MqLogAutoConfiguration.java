@@ -6,6 +6,8 @@ import com.omni.common.mqlog.filter.InternalApiAuthFilter;
 import com.omni.common.mqlog.mapper.SysMqMessageMapper;
 import com.omni.common.mqlog.relay.MqMessageRelayJob;
 import com.omni.common.mqlog.relay.MqMessageRelayService;
+import com.omni.common.mqlog.relay.MqRelayJobRegistrar;
+import com.omni.common.job.XxlJobProperties;
 import com.omni.common.mqlog.sender.MessageSender;
 import com.omni.common.mqlog.sender.RocketMqMessageSender;
 import com.omni.common.mqlog.template.ReliableMessageTemplate;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -48,7 +51,7 @@ public class MqLogAutoConfiguration {
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public FilterRegistrationBean<InternalApiAuthFilter> internalApiAuthFilter(
-            @Value("${omni.internal.api-token:omni-internal-default-token}") String internalToken) {
+            @Value("${omni.internal.api.token:}") String internalToken) {
         FilterRegistrationBean<InternalApiAuthFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new InternalApiAuthFilter(internalToken));
         registration.addUrlPatterns("/api/internal/*");
@@ -95,6 +98,22 @@ public class MqLogAutoConfiguration {
     @ConditionalOnClass(name = "com.xxl.job.core.handler.annotation.XxlJob")
     public MqMessageRelayJob mqMessageRelayJob(MqMessageRelayService relayService) {
         return new MqMessageRelayJob(relayService);
+    }
+
+    /**
+     * 自动确保 MQ 中继任务已注册并启动。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnClass(name = "com.xxl.job.core.handler.annotation.XxlJob")
+    @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "auto-register",
+            havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "xxl.job.executor", name = "enabled",
+            havingValue = "true", matchIfMissing = true)
+    public MqRelayJobRegistrar mqRelayJobRegistrar(
+            XxlJobProperties properties,
+            @Value("${spring.application.name}") String applicationName) {
+        return new MqRelayJobRegistrar(properties, applicationName);
     }
 
     /**

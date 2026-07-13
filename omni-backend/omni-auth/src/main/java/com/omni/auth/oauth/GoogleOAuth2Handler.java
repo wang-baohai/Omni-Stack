@@ -62,8 +62,8 @@ public class GoogleOAuth2Handler implements OAuth2ProviderHandler {
     /**
      * 构造 Google OAuth2 处理器。
      * <p>
-     * 初始化 HTTP 客户端，配置连接超时、禁止自动跟随重定向，
-     * 并通过本地代理（{@code localhost:7897}）访问 Google API。
+     * 初始化 HTTP 客户端，配置连接超时、禁止自动跟随重定向。
+     * 如果环境变量 HTTPS_PROXY 存在，则使用代理；否则直接连接。
      * </p>
      *
      * @param oauth2Properties OAuth2 第三方登录配置属性
@@ -71,11 +71,28 @@ public class GoogleOAuth2Handler implements OAuth2ProviderHandler {
     public GoogleOAuth2Handler(OAuth2Properties oauth2Properties) {
         this.oauth2Properties = oauth2Properties;
         this.objectMapper = new ObjectMapper();
-        this.httpClient = HttpClient.newBuilder()
+        
+        HttpClient.Builder builder = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
-                .followRedirects(HttpClient.Redirect.NEVER)
-                .proxy(ProxySelector.of(new InetSocketAddress("localhost", 7897)))
-                .build();
+                .followRedirects(HttpClient.Redirect.NEVER);
+        
+        // 从环境变量读取代理配置（Docker 容器中通过 host.docker.internal 访问宿主机代理）
+        String httpsProxy = System.getenv("HTTPS_PROXY");
+        if (httpsProxy != null && !httpsProxy.isBlank()) {
+            try {
+                // 解析代理地址（格式：http://host:port 或 https://host:port）
+                String proxyHost = httpsProxy.replaceFirst("^https?://", "").split(":")[0];
+                int proxyPort = Integer.parseInt(httpsProxy.replaceFirst("^https?://", "").split(":")[1]);
+                builder.proxy(ProxySelector.of(new InetSocketAddress(proxyHost, proxyPort)));
+                log.info("Google OAuth2 客户端已配置代理: {}:{}", proxyHost, proxyPort);
+            } catch (Exception e) {
+                log.warn("HTTPS_PROXY 环境变量解析失败: {}，将使用直连模式", httpsProxy);
+            }
+        } else {
+            log.info("Google OAuth2 客户端未配置代理，使用直连模式");
+        }
+        
+        this.httpClient = builder.build();
     }
 
     /**

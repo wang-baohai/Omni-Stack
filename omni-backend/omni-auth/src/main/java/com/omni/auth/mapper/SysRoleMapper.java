@@ -18,6 +18,40 @@ import java.util.List;
 public interface SysRoleMapper extends BaseMapper<SysRole> {
 
     /**
+     * 根据用户 ID 和租户 ID 查询启用角色。
+     *
+     * @param userId   用户 ID
+     * @param tenantId 租户 ID
+     * @return 用户在指定租户内拥有的启用角色
+     */
+    @Select("SELECT r.* FROM sys_role r "
+            + "INNER JOIN sys_user_role ur ON r.id = ur.role_id "
+            + "WHERE ur.user_id = #{userId} AND r.tenant_id = #{tenantId} AND r.status = 1")
+    List<SysRole> selectRolesByUserIdAndTenantId(@Param("userId") Long userId,
+                                                 @Param("tenantId") Long tenantId);
+
+    /**
+     * 查询真正授予指定权限的用户角色。
+     * <p>权限码使用精确匹配，并同时约束角色和权限所属租户，防止跨角色权限拼接。</p>
+     *
+     * @param userId         用户 ID
+     * @param tenantId       租户 ID
+     * @param permissionCode 完整权限码
+     * @return 授予该权限的启用角色列表
+     */
+    @Select("SELECT DISTINCT r.* FROM sys_role r "
+            + "INNER JOIN sys_user_role ur ON r.id = ur.role_id "
+            + "INNER JOIN sys_role_permission rp ON r.id = rp.role_id "
+            + "INNER JOIN sys_permission p ON rp.permission_id = p.id "
+            + "WHERE ur.user_id = #{userId} "
+            + "AND r.tenant_id = #{tenantId} AND p.tenant_id = #{tenantId} "
+            + "AND r.status = 1 AND p.status = 1 "
+            + "AND p.permission_code = #{permissionCode}")
+    List<SysRole> selectRolesGrantingPermission(@Param("userId") Long userId,
+                                                @Param("tenantId") Long tenantId,
+                                                @Param("permissionCode") String permissionCode);
+
+    /**
      * 根据用户 ID 查询该用户拥有的所有角色。
      * <p>通过 {@code sys_user_role} 关联表进行 JOIN 查询，仅返回启用状态的角色。</p>
      *

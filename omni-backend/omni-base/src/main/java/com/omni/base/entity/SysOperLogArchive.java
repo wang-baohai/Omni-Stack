@@ -26,6 +26,9 @@ public class SysOperLogArchive implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 原始事件唯一标识 */
+    private String eventId;
+
     /** 租户 ID，用于多租户数据隔离 */
     private Long tenantId;
 
@@ -83,6 +86,14 @@ public class SysOperLogArchive implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
     public Long getTenantId() {

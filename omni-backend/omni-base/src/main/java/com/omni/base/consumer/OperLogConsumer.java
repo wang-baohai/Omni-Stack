@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.util.function.Consumer;
 
@@ -36,8 +37,11 @@ public class OperLogConsumer {
         return message -> {
             try {
                 operLogService.save(message);
+            } catch (DuplicateKeyException e) {
+                log.debug("操作日志事件已消费，忽略重复消息: {}", message.getEventId());
             } catch (Exception e) {
-                log.warn("操作日志消费失败: {}", e.getMessage(), e);
+                log.error("操作日志消费失败，交由消息中间件重试: {}", e.getMessage(), e);
+                throw e;
             }
         };
     }

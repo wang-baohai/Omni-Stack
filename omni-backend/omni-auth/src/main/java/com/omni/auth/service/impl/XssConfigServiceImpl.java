@@ -13,6 +13,7 @@ import com.omni.auth.mapper.SysXssConfigMapper;
 import com.omni.auth.service.XssConfigService;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.PageResult;
+import com.omni.common.core.security.XssSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -68,6 +69,46 @@ public class XssConfigServiceImpl implements XssConfigService {
         return XssSettingsVO.builder()
                 .enabled(config.getEnabled() != null && config.getEnabled() == 1)
                 .rules(ruleVOs)
+                .build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public XssSettings getAuthoritativeSettings(Long tenantId) {
+        if (tenantId == null || tenantId <= 0) {
+            throw new BusinessException(400, "租户 ID 必须为正整数");
+        }
+
+        SysXssConfig config = sysXssConfigMapper.selectOne(
+                new LambdaQueryWrapper<SysXssConfig>()
+                        .eq(SysXssConfig::getTenantId, tenantId));
+        boolean enabled = config != null && Integer.valueOf(1).equals(config.getEnabled());
+        if (!enabled) {
+            return XssSettings.builder()
+                    .enabled(false)
+                    .rules(List.of())
+                    .build();
+        }
+
+        List<XssSettings.XssRule> rules = sysXssBlacklistRuleMapper.selectList(
+                        new LambdaQueryWrapper<SysXssBlacklistRule>()
+                                .eq(SysXssBlacklistRule::getTenantId, tenantId)
+                                .eq(SysXssBlacklistRule::getEnabled, 1)
+                                .orderByAsc(SysXssBlacklistRule::getSortOrder))
+                .stream()
+                .map(entity -> XssSettings.XssRule.builder()
+                        .id(entity.getId())
+                        .ruleType(entity.getRuleType())
+                        .pattern(entity.getPattern())
+                        .build())
+                .toList();
+
+        return XssSettings.builder()
+                .enabled(true)
+                .rules(rules)
                 .build();
     }
 
@@ -264,12 +305,12 @@ public class XssConfigServiceImpl implements XssConfigService {
     /**
      * 清除租户的 XSS 相关 Redis 缓存。
      *
-     * <p>同时删除 {@code xss:config:{tenantId}} 和 {@code xss:rules:{tenantId}} 两个 key。</p>
+     * <p>同时删除 {@code xss:enabled:{tenantId}} 和 {@code xss:rules:{tenantId}} 两个 key。</p>
      *
      * @param tenantId 租户 ID
      */
     private void invalidateXssCache(Long tenantId) {
-        stringRedisTemplate.delete("xss:config:" + tenantId);
+        stringRedisTemplate.delete("xss:enabled:" + tenantId);
         stringRedisTemplate.delete("xss:rules:" + tenantId);
     }
 

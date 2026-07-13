@@ -44,6 +44,13 @@ function menuCodeToPath(permissionCode: string): string {
  * 权限码到 Element Plus 图标名称的映射。
  */
 const iconMap: Record<string, string> = {
+  'crm': 'TrendCharts',
+  'crm:overview': 'DataAnalysis',
+  'crm:lead': 'User',
+  'crm:customer': 'OfficeBuilding',
+  'crm:contact': 'Postcard',
+  'crm:opportunity': 'TrendCharts',
+  'crm:activity': 'Calendar',
   'system:user': 'User',
   'system:role': 'UserFilled',
   'system:permission': 'Lock',
@@ -56,6 +63,13 @@ const iconMap: Record<string, string> = {
   'system:xssconfig': 'Filter',
   'base:dict': 'Collection',
   'base:operlog': 'Tickets',
+  'base:mqmessage': 'MessageBox',
+  'job:user-job-type': 'Files',
+  'job:system-job': 'Timer',
+  'workflow:definition': 'SetUp',
+  'workflow:model': 'EditPen',
+  'workflow:instance': 'List',
+  'workflow:stats': 'DataAnalysis',
 }
 
 /**

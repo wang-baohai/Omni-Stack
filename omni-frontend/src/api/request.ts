@@ -13,6 +13,7 @@ import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'a
 import type { ApiResponse } from '@/types/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { getTenantIdFromToken } from '@/utils/jwt'
 import router from '@/router'
 
 // 创建 Axios 实例，配置基础 URL 和超时时间
@@ -32,6 +33,10 @@ service.interceptors.request.use(
     // 如果用户已登录，在请求头中附加 JWT 令牌
     if (userStore.token) {
       config.headers.Authorization = `Bearer ${userStore.token}`
+      const tenantId = getTenantIdFromToken(userStore.token)
+      if (tenantId) {
+        config.headers['X-Tenant-Id'] = String(tenantId)
+      }
     }
     return config
   },

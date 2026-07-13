@@ -283,6 +283,35 @@ GitHub、Google、Gitee の3つの OAuth2 プロバイダーをサポートし�
 |-------------|----------|
 | ![BPMNデザイナー](docs/images/workflow-designer.png) | ![承認フロー](docs/images/workflow-approval.png) |
 
+### CRM 営業管理
+
+CRM モジュールは、プリセールスの全プロセスをカバーします：リード獲得 → フォローアップ → 顧客作成 → 商談推進 → 受注/失注。6 層のセキュリティ防御（Gateway JWT → テナント検証 → 機能権限 → データスコープ → SQL 傍受 → 行レベル認可）によりマルチテナントのデータ分離を保証します。詳しくは [CRM システムトゥルース](docs/crm.jp.md) を参照してください。
+
+| 営業ダッシュボード | リード管理 |
+|-------------------|-----------|
+| ![営業ダッシュボード](docs/images/crm-overview.png) | ![リード管理](docs/images/crm-lead-list.png) |
+| 統計カード + 売上ファネル + フォローアップ一覧で全体像を一望 | リード一覧は検索・フィルタ・分配・一括操作に対応 |
+
+| リード変換 | 顧客管理 |
+|-----------|----------|
+| ![リード変換](docs/images/crm-lead-convert.png) | ![顧客管理](docs/images/crm-customer-list.png) |
+| 適格リードをワンクリックで顧客 + 連絡先 + 商談に変換、行ロックで冪等性を保証 | 顧客一覧は移管・ステータス変更・ブラックリスト管理に対応 |
+
+| 顧客 360 ビュー | 連絡先管理 |
+|----------------|-----------|
+| ![顧客360](docs/images/crm-customer-360.png) | ![連絡先管理](docs/images/crm-contact-list.png) |
+| 顧客の全次元ビュー：連絡先・商談・フォローアップ活動を一つのドロワーに | 連絡先は顧客に紐付け、主要連絡先のマーキングに対応 |
+
+| 商談管理 | 商談カンバン |
+|---------|------------|
+| ![商談管理](docs/images/crm-opportunity-list.png) | ![商談カンバン](docs/images/crm-opportunity-board.png) |
+| 商談テーブルでステージ・金額・確率・予想クロージング日を表示 | カンバンボードで商談をステージ列ごとに視覚的に管理 |
+
+| フォローアップ活動 | |
+|-------------------|--|
+| ![フォローアップ活動](docs/images/crm-activity-timeline.png) | |
+| 活動一覧で全てのフォローアップを記録、計画/完了/取消のステータスフローに対応 | |
+
 ## モジュール概要
 
 ### バックエンドマイクロサービス
@@ -292,6 +321,7 @@ GitHub、Google、Gitee の3つの OAuth2 プロバイダーをサポートし�
 | omni-auth | 8100 | 認証認可：ログイン、JWT、OAuth2、RBAC、XSS 設定管理 | [core-flows.jp.md](docs/core-flows.jp.md) |
 | omni-base | 8101 | 基礎データ：ディクショナリ、組織、ユーザー、ログ、定期タスク、MQ メッセージ管理 | [scheduling.jp.md](docs/scheduling.jp.md) |
 | omni-workflow | 8103 | ワークフローエンジン：BPMN モデル管理、承認、プロセスインスタンス | [workflow.jp.md](docs/workflow.jp.md) |
+| omni-crm | 8104 | CRM：リード、顧客、連絡先、商談、フォローアップ、営業ダッシュボード | [crm.jp.md](docs/crm.jp.md) |
 | omni-gateway | 8102 | API ゲートウェイ：ルーティング転送、JWT 検証、CORS、セキュリティレスポンスヘッダー | [architecture.jp.md](docs/architecture.jp.md) |
 
 ### Common Starter エコシステム（8モジュール）

@@ -142,6 +142,7 @@ public class OperLogArchiver {
         LocalDateTime archivedTime = LocalDateTime.now();
         for (SysOperLog record : records) {
             SysOperLogArchive archive = new SysOperLogArchive();
+            archive.setEventId(record.getEventId());
             archive.setTenantId(record.getTenantId());
             archive.setOperUsername(record.getOperUsername());
             archive.setOperTime(record.getOperTime());

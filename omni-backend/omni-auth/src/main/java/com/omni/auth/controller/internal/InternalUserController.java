@@ -1,18 +1,14 @@
 package com.omni.auth.controller.internal;
 
-import com.omni.auth.entity.SysOrgUnit;
-import com.omni.auth.entity.SysUser;
-import com.omni.auth.mapper.SysOrgUnitMapper;
-import com.omni.auth.mapper.SysUserMapper;
+import com.omni.auth.service.InternalDirectoryService;
 import com.omni.common.core.internal.InternalOrgDTO;
 import com.omni.common.core.internal.InternalUserDTO;
+import com.omni.common.core.internal.InternalUserOptionDTO;
 import com.omni.common.core.result.R;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * 内部 API 控制器，供其他微服务通过 Feign 调用。
@@ -20,115 +16,80 @@ import java.util.stream.Collectors;
  *
  * @author Omni-Stack Team
  */
-@Slf4j
 @RestController
 @RequestMapping("/internal")
 @RequiredArgsConstructor
 public class InternalUserController {
 
-    private final SysUserMapper sysUserMapper;
-    private final SysOrgUnitMapper sysOrgUnitMapper;
+    /** 内部目录查询服务 */
+    private final InternalDirectoryService internalDirectoryService;
 
     /**
      * 根据用户 ID 获取用户基本信息。
      *
-     * @param id 用户 ID
+     * @param id       用户 ID
+     * @param tenantId 租户 ID
      * @return 用户 DTO
      */
     @GetMapping("/users/{id}")
-    public R<InternalUserDTO> getUserById(@PathVariable Long id) {
-        SysUser user = sysUserMapper.selectById(id);
-        if (user == null) {
-            return R.ok(null);
-        }
-        return R.ok(toUserDTO(user));
+    public R<InternalUserDTO> getUserById(@PathVariable Long id,
+                                          @RequestParam Long tenantId) {
+        return R.ok(internalDirectoryService.getUserById(id, tenantId));
     }
 
     /**
      * 批量获取用户基本信息。
      *
-     * @param ids 用户 ID 列表（逗号分隔）
+     * @param ids      用户 ID 列表（逗号分隔）
+     * @param tenantId 租户 ID
      * @return 用户 DTO 列表
      */
     @GetMapping("/users/batch")
-    public R<List<InternalUserDTO>> getUsersByIds(@RequestParam String ids) {
-        List<Long> idList = Arrays.stream(ids.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(Long::valueOf)
-                .toList();
+    public R<List<InternalUserDTO>> getUsersByIds(@RequestParam List<Long> ids,
+                                                   @RequestParam Long tenantId) {
+        return R.ok(internalDirectoryService.getUsersByIds(ids, tenantId));
+    }
 
-        if (idList.isEmpty()) {
-            return R.ok(List.of());
-        }
-
-        List<SysUser> users = sysUserMapper.selectBatchIds(idList);
-        List<InternalUserDTO> dtos = users.stream().map(this::toUserDTO).toList();
-        return R.ok(dtos);
+    /**
+     * 搜索租户内启用的负责人候选用户。
+     * <p>仅返回负责人选择所需的最小字段，且最多返回 100 条。</p>
+     *
+     * @param tenantId 租户 ID
+     * @param keyword  用户名或昵称关键字，可为空
+     * @param limit    最大返回数量
+     * @return 用户候选项列表
+     */
+    @GetMapping("/users/options")
+    public R<List<InternalUserOptionDTO>> searchUserOptions(
+            @RequestParam Long tenantId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "20") int limit) {
+        return R.ok(internalDirectoryService.searchEnabledUserOptions(tenantId, keyword, limit));
     }
 
     /**
      * 根据组织单元 ID 获取组织信息。
      *
-     * @param id 组织单元 ID
+     * @param id       组织单元 ID
+     * @param tenantId 租户 ID
      * @return 组织 DTO
      */
     @GetMapping("/orgs/{id}")
-    public R<InternalOrgDTO> getOrgById(@PathVariable Long id) {
-        SysOrgUnit unit = sysOrgUnitMapper.selectById(id);
-        if (unit == null) {
-            return R.ok(null);
-        }
-        return R.ok(toOrgDTO(unit));
+    public R<InternalOrgDTO> getOrgById(@PathVariable Long id,
+                                        @RequestParam Long tenantId) {
+        return R.ok(internalDirectoryService.getOrgById(id, tenantId));
     }
 
     /**
      * 批量获取组织单元信息。
      *
-     * @param ids 组织单元 ID 列表（逗号分隔）
+     * @param ids      组织单元 ID 列表（逗号分隔）
+     * @param tenantId 租户 ID
      * @return 组织 DTO 列表
      */
     @GetMapping("/orgs/batch")
-    public R<List<InternalOrgDTO>> getOrgsByIds(@RequestParam String ids) {
-        List<Long> idList = Arrays.stream(ids.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(Long::valueOf)
-                .toList();
-
-        if (idList.isEmpty()) {
-            return R.ok(List.of());
-        }
-
-        List<SysOrgUnit> units = sysOrgUnitMapper.selectBatchIds(idList);
-        List<InternalOrgDTO> dtos = units.stream().map(this::toOrgDTO).toList();
-        return R.ok(dtos);
-    }
-
-    private InternalUserDTO toUserDTO(SysUser user) {
-        InternalUserDTO dto = new InternalUserDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setNickname(user.getNickname());
-        dto.setTenantId(user.getTenantId());
-        dto.setPrimaryUnitId(user.getPrimaryUnitId());
-        dto.setEmail(user.getEmail());
-        dto.setPhone(user.getPhone());
-        dto.setAvatar(user.getAvatar());
-        dto.setStatus(user.getStatus());
-        return dto;
-    }
-
-    private InternalOrgDTO toOrgDTO(SysOrgUnit unit) {
-        InternalOrgDTO dto = new InternalOrgDTO();
-        dto.setId(unit.getId());
-        dto.setTenantId(unit.getTenantId());
-        dto.setParentId(unit.getParentId());
-        dto.setName(unit.getName());
-        dto.setType(unit.getType());
-        dto.setUnitCode(unit.getUnitCode());
-        dto.setPath(unit.getPath());
-        dto.setStatus(unit.getStatus());
-        return dto;
+    public R<List<InternalOrgDTO>> getOrgsByIds(@RequestParam List<Long> ids,
+                                                 @RequestParam Long tenantId) {
+        return R.ok(internalDirectoryService.getOrgsByIds(ids, tenantId));
     }
 }

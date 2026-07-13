@@ -599,9 +599,9 @@ docker compose exec omni-auth sh -c 'nc -zv mysql 3306'
 curl -s http://localhost:8848/nacos/v1/ns/instance/list?serviceName=omni-auth
 ```
 
-## 测试（未来脚手架）
+## 测试
 
-尚无测试。添加时：
+Auth、CRM 和部分 Common 模块已经建立测试目录。新增或修改后端能力时：
 
 - **单元测试**：JUnit 5 + Mockito，放在 `src/test/java/`
 - **集成测试**：`@SpringBootTest` + 嵌入式数据库或 Test Containers

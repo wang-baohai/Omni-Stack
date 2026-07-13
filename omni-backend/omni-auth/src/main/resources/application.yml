@@ -14,9 +14,6 @@ spring:
     name: omni-auth
   profiles:
     active: dev
-    group:
-      dev:
-        include: local
   config:
     import:
       - optional:nacos:omni-auth.yml

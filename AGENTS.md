@@ -33,6 +33,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/core-flows.md` | End-to-end traces of login (password + captcha, GitHub social, Gitee social, device code), RBAC functional permission (Flow 5), data permission (Flow 6), XSS defense (Flow 8) |
 | `docs/scheduling.md` | Scheduled task system: dual-track architecture (system tasks + user tasks), XXL-JOB integration, creating new task types |
 | `docs/workflow.md` | Workflow engine: Flowable integration, dual-version model management, multi-instance countersign, candidate resolution, approval flows |
+| `docs/crm.md` | CRM sales pipeline: domain model, 6-layer security, state machine, lead conversion, extension guide |
 | `docs/mq-reliability.md` | Reliable message sending: Transactional Outbox pattern, status machine, retry strategy, tenant isolation, new service onboarding |
 
 ## Entry Points
@@ -41,6 +42,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Auth service: `omni-backend/omni-auth/src/main/java/com/omni/auth/AuthApplication.java`
 - Base service: `omni-backend/omni-base/src/main/java/com/omni/base/BaseApplication.java`
 - Gateway: `omni-backend/omni-gateway/src/main/java/com/omni/gateway/GatewayApplication.java`
+- CRM service: `omni-backend/omni-crm/src/main/java/com/omni/crm/CrmApplication.java`
 - Common library: `omni-backend/omni-common/src/main/java/com/omni/common/`
 - Common core (POJO): `omni-backend/omni-common-core/src/main/java/com/omni/common/core/`
 - Common MyBatis-Plus starter: `omni-backend/omni-common-mybatis/src/main/java/com/omni/common/mybatis/`
@@ -58,6 +60,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Gateway config: `omni-backend/omni-gateway/src/main/resources/application.yml`
 - Base config: `omni-backend/omni-base/src/main/resources/application.yml`
 - Vite config: `omni-frontend/vite.config.ts`
+- CRM config: `omni-backend/omni-crm/src/main/resources/application.yml`
 
 **RBAC & Permission:**
 - Data scope filter: `omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeResolveFilter.java`
@@ -125,6 +128,14 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Frontend model designer: `omni-frontend/src/views/workflow/model/index.vue`
 - Frontend API: `omni-frontend/src/api/workflow.ts`
 
+**CRM:**
+- CRM service: `omni-backend/omni-crm/src/main/java/com/omni/crm/CrmApplication.java`
+- Domain model: `omni-backend/omni-crm/src/main/java/com/omni/crm/model/` (Lead, Customer, Contact, Opportunity, Activity, Overview)
+- Security: `omni-backend/omni-crm/src/main/java/com/omni/crm/security/` (CrmDataScope, CrmRecordAccessGuard, CrmTenantFilter)
+- Controllers: `omni-backend/omni-crm/src/main/java/com/omni/crm/controller/` (Lead/Customer/Contact/Opportunity/Activity/Overview)
+- Frontend pages: `omni-frontend/src/views/crm/` (overview, lead, customer, contact, opportunity, activity)
+- Frontend API: `omni-frontend/src/api/crm.ts` (lead, customer, contact, opportunity, activity, overview)
+
 ## Build & Run Commands
 
 ### Prerequisites
@@ -161,6 +172,10 @@ cd omni-backend/omni-gateway
 
 # Run Workflow service (port 8103)
 cd omni-backend/omni-workflow
+./mvnw spring-boot:run
+
+# Run CRM service (port 8104)
+cd omni-backend/omni-crm
 ./mvnw spring-boot:run
 ```
 
@@ -224,6 +239,7 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 | Base             | 8101  |
 | Gateway          | 8102  |
 | Workflow         | 8103  |
+| CRM              | 8104  |
 | MySQL            | 3306  |
 | Redis            | 6379  |
 | Nacos            | 8080, 8848  |
@@ -297,6 +313,7 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Before modifying system task annotations or adding new system tasks: read `docs/scheduling.md` Chapter 2.
 - Before writing workflow engine or approval logic: read `docs/workflow.md`.
 - Before adding a new candidate resolution strategy or anchor type: read `docs/workflow.md` Section 4 (Extension Guide).
+- Before adding CRM aggregate roots, stages, or permission codes: read `docs/crm.md` (domain model, state machines, hard constraints, extension guide).
 - Before adding MQ message sending to a new service: depend on `omni-common-mqlog` (auto-registers `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, and `MqMessageInternalController`), ensure `sys_mq_message` table exists via `schema.sql`, and call `ReliableMessageRelay.send(bindingName, payload, tenantId)` with explicit tenantId. Read `docs/mq-reliability.md` for onboarding details.
 
 ## Completion Checklist
@@ -349,7 +366,15 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 ### Social Login Environment Variables
 
 社交登录功能需要配置以下环境变量（支持 GitHub、Google 和 Gitee 三个提供商，基于 `OAuth2ProviderHandler` 策略模式可扩展）。
-真实凭证存放在 `application-local.yml`（已被 `.gitignore` 排除），通过 `spring.profiles.group.dev.include: local` 在 dev 环境下自动加载。
+所有敏感凭证统一存放在项目根目录的 `.env` 文件中（已被 `.gitignore` 排除），本地开发和 Docker 部署共用同一份配置。
+
+**配置步骤**：
+1. 从 `.env.example` 复制一份为 `.env`
+2. 填入真实的 OAuth2 凭证（从各平台 OAuth 应用管理页获取）
+3. Docker 部署时 `docker-compose.yml` 会自动读取 `.env` 并注入到容器
+4. 本地开发时，在 IDE 的 Run Configuration 中配置 Environment variables，或手动加载 `.env` 文件
+
+**配置项说明**：
 
 | 变量 | 说明 |
 |------|------|
@@ -362,7 +387,8 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 | `GOOGLE_CLIENT_ID` | Google Cloud Console OAuth 2.0 客户端的 Client ID |
 | `GOOGLE_CLIENT_SECRET` | Google Cloud Console OAuth 2.0 客户端的 Client Secret |
 | `GOOGLE_REDIRECT_URI` | Google 授权回调地址，默认 `http://localhost:8100/api/auth/oauth2/google/callback` |
-| `OAUTH2_STATE_SECRET` | OAuth2 state 参数的 HMAC-SHA256 签名密钥，所有提供商共用 |
+| `OAUTH2_STATE_SECRET` | OAuth2 state 参数的 HMAC-SHA256 签名密钥，所有提供商共用（至少 32 字节） |
+| `JWK_ENCRYPT_KEY` | JWK 密钥 AES-256-GCM 加密密钥（必须 32 字符，用于加密存入 Redis 的 RSA 密钥） |
 
 ### XSS 三层防御架构
 
@@ -402,4 +428,4 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 
 ## Testing
 
-No tests exist yet. Test directories (`src/test/`) have not been created in any module.
+Backend tests now exist in `omni-auth`, `omni-crm`, and `omni-common-operlog`. Use JUnit 5 + Mockito for unit tests, keep security and tenant-boundary regressions alongside the affected module, and run the Maven reactor test phase after backend changes.

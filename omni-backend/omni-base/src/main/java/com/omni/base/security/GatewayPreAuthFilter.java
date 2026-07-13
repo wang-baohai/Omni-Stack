@@ -47,6 +47,17 @@ public class GatewayPreAuthFilter extends OncePerRequestFilter {
     private static final String HEADER_GATEWAY_FORWARDED = "X-Gateway-Forwarded";
 
     /**
+     * 内部 API 由共享密钥过滤器认证，不要求网关转发标记。
+     *
+     * @param request 当前请求
+     * @return 内部 API 返回 {@code true}
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/api/internal/");
+    }
+
+    /**
      * 执行网关预认证过滤逻辑。
      * <p>
      * 首先校验 {@code X-Gateway-Forwarded} 请求头，拒绝未经 Gateway 转发的直接访问。

@@ -91,6 +91,8 @@ interface ApiResponse<T = unknown> {
 | 401 | 401 | 未认证 | Gateway `AuthFilter` 返回 401 JSON | 前端自动跳转登录页 |
 | 403 | 403 | 权限不足 | `AccessDeniedException` / `AuthorizationDeniedException` 被 `GlobalExceptionHandler` 捕获 | 前端显示"权限不足"提示 |
 | 200 | 404 | 资源不存在 | `throw new BusinessException(404, "xxx不存在")` | 前端显示错误信息 |
+| 200 | 409 | 状态/并发冲突 | 乐观锁版本不一致或状态机拒绝迁移 | 前端刷新数据后提示用户重试 |
+| 200 | 503 | 下游依赖不可用 | CRM 调用 Auth 数据范围接口失败关闭 | 前端提示服务暂不可用，不降级为越权数据 |
 | 200 | 500 | 业务异常 | `BusinessException` 被 `GlobalExceptionHandler` 捕获 | 前端显示错误信息 |
 | 500 | 500 | 未知系统错误 | 兜底 `Exception` 处理器 | 前端显示"服务器内部错误" |
 
@@ -106,6 +108,8 @@ interface ApiResponse<T = unknown> {
 | 400 | 唯一性冲突 | "用户名已存在" / "任务类型编码已存在" |
 | 404 | 资源不存在 | "组织单元不存在" / "字典数据不存在" |
 | 403 | 权限不足 | "权限不足，拒绝访问" |
+| 409 | 乐观锁或状态冲突 | "数据已被其他用户修改，请刷新后重试" |
+| 503 | 必需依赖不可用 | "认证授权服务暂不可用" |
 
 ### 2.3 Gateway 级错误码
 

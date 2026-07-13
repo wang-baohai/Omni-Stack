@@ -513,6 +513,7 @@ CREATE TABLE IF NOT EXISTS sys_dict_data (
 -- 5.3 操作日志表（热表，保留最近 180 天）
 CREATE TABLE IF NOT EXISTS sys_oper_log (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '日志ID',
+    event_id        VARCHAR(64)  NOT NULL COMMENT 'MQ事件唯一标识',
     tenant_id       BIGINT       NOT NULL COMMENT '租户ID',
     oper_username    VARCHAR(64)  DEFAULT NULL COMMENT '操作人用户名',
     oper_time       DATETIME     NOT NULL COMMENT '操作时间',
@@ -529,6 +530,7 @@ CREATE TABLE IF NOT EXISTS sys_oper_log (
     new_value       JSON         DEFAULT NULL COMMENT '变更后值快照',
     error_msg       VARCHAR(1000) DEFAULT NULL COMMENT '错误信息',
     create_time     DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    UNIQUE KEY uk_operlog_event (event_id),
     INDEX idx_operlog_tenant (tenant_id),
     INDEX idx_operlog_time (oper_time),
     INDEX idx_operlog_module (module),
@@ -539,6 +541,7 @@ CREATE TABLE IF NOT EXISTS sys_oper_log (
 -- 5.4 操作日志归档表（冷表）
 CREATE TABLE IF NOT EXISTS sys_oper_log_archive (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '日志ID',
+    event_id        VARCHAR(64)  NOT NULL COMMENT '原始MQ事件唯一标识',
     tenant_id       BIGINT       NOT NULL COMMENT '租户ID',
     oper_username    VARCHAR(64)  DEFAULT NULL COMMENT '操作人用户名',
     oper_time       DATETIME     NOT NULL COMMENT '操作时间',
@@ -556,6 +559,7 @@ CREATE TABLE IF NOT EXISTS sys_oper_log_archive (
     error_msg       VARCHAR(1000) DEFAULT NULL COMMENT '错误信息',
     create_time     DATETIME     DEFAULT NULL COMMENT '原始记录创建时间',
     archived_time   DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '归档时间',
+    UNIQUE KEY uk_archive_event (event_id),
     INDEX idx_archive_tenant (tenant_id),
     INDEX idx_archive_time (oper_time),
     INDEX idx_archive_module (module)
@@ -1151,23 +1155,782 @@ CREATE TABLE IF NOT EXISTS sys_mq_message (
     INDEX idx_tenant_time (tenant_id, create_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='MQ消息发送记录表';
 
+-- 9.7 CRM 功能权限与默认角色（omni_auth）
+INSERT IGNORE INTO sys_permission
+    (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+VALUES
+    (300, 1, 0,   'crm',                      '客户关系管理', 'DIRECTORY', '/300/',         1, 7, 1, 'system'),
+    (301, 1, 300, 'crm:overview',             'CRM概览',      'MENU',      '/300/301/',     2, 1, 1, 'system'),
+    (302, 1, 301, 'crm:overview:list',        '查看CRM概览',  'API',       '/300/301/302/', 3, 1, 1, 'system'),
+    (310, 1, 300, 'crm:lead',                 '线索管理',     'MENU',      '/300/310/',     2, 2, 1, 'system'),
+    (311, 1, 310, 'crm:lead:list',            '查看线索',     'API',       '/300/310/311/', 3, 1, 1, 'system'),
+    (312, 1, 310, 'crm:lead:create',          '创建线索',     'API',       '/300/310/312/', 3, 2, 1, 'system'),
+    (313, 1, 310, 'crm:lead:update',          '更新线索',     'API',       '/300/310/313/', 3, 3, 1, 'system'),
+    (314, 1, 310, 'crm:lead:delete',          '删除线索',     'API',       '/300/310/314/', 3, 4, 1, 'system'),
+    (315, 1, 310, 'crm:lead:assign',          '分配线索',     'API',       '/300/310/315/', 3, 5, 1, 'system'),
+    (316, 1, 310, 'crm:lead:disqualify',      '判定无效线索', 'API',       '/300/310/316/', 3, 6, 1, 'system'),
+    (317, 1, 310, 'crm:lead:convert',         '转换线索',     'API',       '/300/310/317/', 3, 7, 1, 'system'),
+    (320, 1, 300, 'crm:customer',             '客户管理',     'MENU',      '/300/320/',     2, 3, 1, 'system'),
+    (321, 1, 320, 'crm:customer:list',        '查看客户',     'API',       '/300/320/321/', 3, 1, 1, 'system'),
+    (322, 1, 320, 'crm:customer:create',      '创建客户',     'API',       '/300/320/322/', 3, 2, 1, 'system'),
+    (323, 1, 320, 'crm:customer:update',      '更新客户',     'API',       '/300/320/323/', 3, 3, 1, 'system'),
+    (324, 1, 320, 'crm:customer:delete',      '删除客户',     'API',       '/300/320/324/', 3, 4, 1, 'system'),
+    (325, 1, 320, 'crm:customer:status',      '变更客户状态', 'API',       '/300/320/325/', 3, 5, 1, 'system'),
+    (326, 1, 320, 'crm:customer:transfer',    '转移客户',     'API',       '/300/320/326/', 3, 6, 1, 'system'),
+    (327, 1, 320, 'crm:customer:blacklist',   '客户黑名单',   'API',       '/300/320/327/', 3, 7, 1, 'system'),
+    (332, 1, 300, 'crm:contact',              '联系人管理',   'MENU',      '/300/332/',     2, 4, 1, 'system'),
+    (328, 1, 332, 'crm:contact:list',         '查看联系人',   'API',       '/300/332/328/', 3, 1, 1, 'system'),
+    (329, 1, 332, 'crm:contact:create',       '创建联系人',   'API',       '/300/332/329/', 3, 2, 1, 'system'),
+    (330, 1, 332, 'crm:contact:update',       '更新联系人',   'API',       '/300/332/330/', 3, 3, 1, 'system'),
+    (331, 1, 332, 'crm:contact:delete',       '删除联系人',   'API',       '/300/332/331/', 3, 4, 1, 'system'),
+    (340, 1, 300, 'crm:opportunity',          '商机管理',     'MENU',      '/300/340/',     2, 5, 1, 'system'),
+    (341, 1, 340, 'crm:opportunity:list',     '查看商机',     'API',       '/300/340/341/', 3, 1, 1, 'system'),
+    (342, 1, 340, 'crm:opportunity:create',   '创建商机',     'API',       '/300/340/342/', 3, 2, 1, 'system'),
+    (343, 1, 340, 'crm:opportunity:update',   '更新商机',     'API',       '/300/340/343/', 3, 3, 1, 'system'),
+    (344, 1, 340, 'crm:opportunity:delete',   '删除商机',     'API',       '/300/340/344/', 3, 4, 1, 'system'),
+    (345, 1, 340, 'crm:opportunity:assign',   '分配商机',     'API',       '/300/340/345/', 3, 5, 1, 'system'),
+    (346, 1, 340, 'crm:opportunity:stage',    '推进商机阶段', 'API',       '/300/340/346/', 3, 6, 1, 'system'),
+    (347, 1, 340, 'crm:opportunity:reopen',   '重开商机',     'API',       '/300/340/347/', 3, 7, 1, 'system'),
+    (360, 1, 300, 'crm:activity',             '跟进管理',     'MENU',      '/300/360/',     2, 6, 1, 'system'),
+    (361, 1, 360, 'crm:activity:list',        '查看跟进',     'API',       '/300/360/361/', 3, 1, 1, 'system'),
+    (362, 1, 360, 'crm:activity:create',      '创建跟进',     'API',       '/300/360/362/', 3, 2, 1, 'system'),
+    (363, 1, 360, 'crm:activity:update',      '更新跟进',     'API',       '/300/360/363/', 3, 3, 1, 'system'),
+    (364, 1, 360, 'crm:activity:delete',      '删除跟进',     'API',       '/300/360/364/', 3, 4, 1, 'system'),
+    (365, 1, 360, 'crm:activity:complete',    '完成跟进',     'API',       '/300/360/365/', 3, 5, 1, 'system'),
+    (366, 1, 360, 'crm:activity:cancel',      '取消跟进',     'API',       '/300/360/366/', 3, 6, 1, 'system'),
+    (380, 1, 300, 'crm:owner:list',           '查看负责人选项','API',       '/300/380/',     2, 7, 1, 'system'),
+    (381, 1, 300, 'crm:pii:view',             '查看完整联系信息','API',     '/300/381/',     2, 8, 1, 'system');
+
+INSERT IGNORE INTO sys_role
+    (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+VALUES
+    (20, 1, 'CRM_ADMIN',     'CRM管理员', 'TENANT',         20, 1, 'system'),
+    (21, 1, 'SALES_MANAGER', '销售经理',  'DEPT_AND_BELOW', 21, 1, 'system'),
+    (22, 1, 'SALES_REP',     '销售代表',  'SELF',           22, 1, 'system'),
+    (23, 1, 'CRM_VIEWER',    'CRM只读员', 'TENANT',         23, 1, 'system');
+
+-- SUPER_ADMIN、CRM_ADMIN、SALES_MANAGER 获得完整 CRM 权限
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+SELECT r.id, p.id
+FROM sys_role r
+JOIN sys_permission p ON p.tenant_id = r.tenant_id
+WHERE r.tenant_id = 1
+  AND r.role_code IN ('SUPER_ADMIN', 'CRM_ADMIN', 'SALES_MANAGER')
+  AND (p.permission_code = 'crm' OR p.permission_code LIKE 'crm:%');
+
+-- 销售代表可在 SELF 数据范围内完成日常销售闭环，不授予删除、分配、转移和黑名单权限
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+SELECT r.id, p.id
+FROM sys_role r
+JOIN sys_permission p ON p.tenant_id = r.tenant_id
+WHERE r.tenant_id = 1 AND r.role_code = 'SALES_REP'
+  AND p.permission_code IN (
+      'crm','crm:overview','crm:lead','crm:customer','crm:contact','crm:opportunity','crm:activity',
+      'crm:overview:list','crm:lead:list','crm:lead:create','crm:lead:update',
+      'crm:lead:disqualify','crm:lead:convert',
+      'crm:customer:list','crm:customer:create','crm:customer:update','crm:customer:status',
+      'crm:contact:list','crm:contact:create','crm:contact:update',
+      'crm:opportunity:list','crm:opportunity:create','crm:opportunity:update',
+      'crm:opportunity:stage','crm:opportunity:reopen',
+      'crm:activity:list','crm:activity:create','crm:activity:update',
+      'crm:activity:complete','crm:activity:cancel','crm:owner:list','crm:pii:view'
+  );
+
+-- 只读角色可查看租户级统计和业务数据，但默认只能看到脱敏联系信息
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+SELECT r.id, p.id
+FROM sys_role r
+JOIN sys_permission p ON p.tenant_id = r.tenant_id
+WHERE r.tenant_id = 1 AND r.role_code = 'CRM_VIEWER'
+  AND p.permission_code IN (
+      'crm','crm:overview','crm:lead','crm:customer','crm:contact','crm:opportunity','crm:activity',
+      'crm:overview:list','crm:lead:list','crm:customer:list','crm:contact:list',
+      'crm:opportunity:list','crm:activity:list'
+  );
+
 -- ============================================================
--- Section 10: 4级会签审批请假流程 - 种子数据
+-- Section 10: CRM 服务 - 销售前闭环
+-- ============================================================
+CREATE DATABASE IF NOT EXISTS omni_crm
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE omni_crm;
+
+-- 10.1 CRM 租户配置
+CREATE TABLE IF NOT EXISTS crm_tenant_config (
+    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id             BIGINT       NOT NULL COMMENT '租户ID',
+    default_pipeline_id   BIGINT       DEFAULT NULL COMMENT '默认销售管道ID',
+    currency_code         VARCHAR(10)  NOT NULL DEFAULT 'CNY' COMMENT '默认币种',
+    lead_duplicate_policy VARCHAR(20)  NOT NULL DEFAULT 'WARN' COMMENT '线索重复策略',
+    initialized_time      DATETIME     NOT NULL COMMENT '初始化时间',
+    create_time           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time           DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by             VARCHAR(64)  DEFAULT NULL,
+    update_by             VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_crm_config_tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM租户配置';
+
+-- 10.2 销售管道及阶段
+CREATE TABLE IF NOT EXISTS crm_pipeline (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id    BIGINT       NOT NULL COMMENT '租户ID',
+    code         VARCHAR(50)  NOT NULL COMMENT '稳定编码',
+    name         VARCHAR(100) NOT NULL COMMENT '管道名称',
+    status       TINYINT      NOT NULL DEFAULT 1,
+    default_flag TINYINT      NOT NULL DEFAULT 0,
+    sort         INT          NOT NULL DEFAULT 0,
+    version      INT          NOT NULL DEFAULT 0,
+    deleted      TINYINT      NOT NULL DEFAULT 0,
+    create_time  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by    VARCHAR(64)  DEFAULT NULL,
+    update_by    VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_crm_pipeline_code (tenant_id, code),
+    INDEX idx_crm_pipeline_status (tenant_id, status, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM销售管道';
+
+CREATE TABLE IF NOT EXISTS crm_pipeline_stage (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id    BIGINT        NOT NULL COMMENT '租户ID',
+    pipeline_id  BIGINT        NOT NULL COMMENT '销售管道ID',
+    stage_code   VARCHAR(50)   NOT NULL COMMENT '阶段编码',
+    stage_name   VARCHAR(100)  NOT NULL COMMENT '阶段名称',
+    stage_type   VARCHAR(20)   NOT NULL COMMENT 'OPEN/WON/LOST',
+    probability  DECIMAL(5,2) NOT NULL DEFAULT 0 COMMENT '成交概率百分比',
+    sort         INT           NOT NULL DEFAULT 0,
+    status       TINYINT       NOT NULL DEFAULT 1,
+    deleted      TINYINT       NOT NULL DEFAULT 0,
+    create_time  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time  DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by    VARCHAR(64)   DEFAULT NULL,
+    update_by    VARCHAR(64)   DEFAULT NULL,
+    UNIQUE KEY uk_crm_stage_code (tenant_id, pipeline_id, stage_code),
+    INDEX idx_crm_stage_sort (tenant_id, pipeline_id, status, deleted, sort)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM销售管道阶段';
+
+-- 10.3 线索与转换事实
+CREATE TABLE IF NOT EXISTS crm_lead (
+    id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id           BIGINT       NOT NULL COMMENT '租户ID',
+    lead_no             VARCHAR(50)  NOT NULL COMMENT '线索编号',
+    full_name           VARCHAR(100) NOT NULL COMMENT '姓名',
+    company_name        VARCHAR(200) DEFAULT NULL COMMENT '公司名称',
+    job_title           VARCHAR(100) DEFAULT NULL COMMENT '职位',
+    mobile              VARCHAR(32)  DEFAULT NULL COMMENT '手机',
+    phone               VARCHAR(32)  DEFAULT NULL COMMENT '电话',
+    email               VARCHAR(200) DEFAULT NULL COMMENT '邮箱',
+    region              VARCHAR(100) DEFAULT NULL COMMENT '地区',
+    address             VARCHAR(500) DEFAULT NULL COMMENT '地址',
+    source_code         VARCHAR(50)  DEFAULT NULL COMMENT '来源编码',
+    industry_code       VARCHAR(50)  DEFAULT NULL COMMENT '行业编码',
+    rating              VARCHAR(20)  DEFAULT NULL COMMENT '评级',
+    status              VARCHAR(20)  NOT NULL COMMENT '生命周期状态',
+    disqualify_reason   VARCHAR(500) DEFAULT NULL COMMENT '无效原因',
+    owner_user_id       BIGINT       NOT NULL COMMENT '负责人用户ID',
+    owner_unit_id       BIGINT       NOT NULL COMMENT '负责人组织ID',
+    assigned_time       DATETIME     DEFAULT NULL,
+    last_activity_time  DATETIME     DEFAULT NULL,
+    next_followup_time  DATETIME     DEFAULT NULL,
+    converted_time      DATETIME     DEFAULT NULL,
+    version             INT          NOT NULL DEFAULT 0,
+    deleted             TINYINT      NOT NULL DEFAULT 0,
+    create_time         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time         DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by           VARCHAR(64)  DEFAULT NULL,
+    update_by           VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_crm_lead_no (tenant_id, lead_no),
+    INDEX idx_crm_lead_owner_status (tenant_id, owner_user_id, status, deleted),
+    INDEX idx_crm_lead_unit_status (tenant_id, owner_unit_id, status, deleted),
+    INDEX idx_crm_lead_followup (tenant_id, next_followup_time, status, deleted),
+    INDEX idx_crm_lead_company (tenant_id, company_name),
+    INDEX idx_crm_lead_mobile (tenant_id, mobile),
+    INDEX idx_crm_lead_email (tenant_id, email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM线索';
+
+CREATE TABLE IF NOT EXISTS crm_lead_conversion (
+    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id             BIGINT      NOT NULL COMMENT '租户ID',
+    lead_id               BIGINT      NOT NULL COMMENT '来源线索ID',
+    customer_id           BIGINT      NOT NULL COMMENT '客户ID',
+    contact_id            BIGINT      DEFAULT NULL COMMENT '联系人ID',
+    opportunity_id        BIGINT      DEFAULT NULL COMMENT '商机ID',
+    converted_by_user_id  BIGINT      NOT NULL COMMENT '转换用户ID',
+    converted_time        DATETIME    NOT NULL COMMENT '转换时间',
+    create_time           DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time           DATETIME    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by             VARCHAR(64) DEFAULT NULL,
+    update_by             VARCHAR(64) DEFAULT NULL,
+    UNIQUE KEY uk_crm_conversion_lead (tenant_id, lead_id),
+    INDEX idx_crm_conversion_customer (tenant_id, customer_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM线索转换事实';
+
+-- 10.4 客户与联系人
+CREATE TABLE IF NOT EXISTS crm_customer (
+    id                   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id            BIGINT       NOT NULL COMMENT '租户ID',
+    customer_no          VARCHAR(50)  NOT NULL COMMENT '客户编号',
+    name                 VARCHAR(200) NOT NULL COMMENT '客户名称',
+    normalized_name      VARCHAR(200) NOT NULL COMMENT '归一化名称',
+    customer_type        VARCHAR(50)  DEFAULT NULL,
+    industry_code        VARCHAR(50)  DEFAULT NULL,
+    level_code           VARCHAR(50)  DEFAULT NULL,
+    source_code          VARCHAR(50)  DEFAULT NULL,
+    credit_code          VARCHAR(50)  DEFAULT NULL COMMENT '统一信用代码',
+    website              VARCHAR(300) DEFAULT NULL,
+    phone                VARCHAR(32)  DEFAULT NULL,
+    email                VARCHAR(200) DEFAULT NULL,
+    region               VARCHAR(100) DEFAULT NULL,
+    address              VARCHAR(500) DEFAULT NULL,
+    status               VARCHAR(20)  NOT NULL COMMENT '生命周期状态',
+    owner_user_id        BIGINT       NOT NULL COMMENT '负责人用户ID',
+    owner_unit_id        BIGINT       NOT NULL COMMENT '负责人组织ID',
+    last_activity_time   DATETIME     DEFAULT NULL,
+    next_followup_time   DATETIME     DEFAULT NULL,
+    version              INT          NOT NULL DEFAULT 0,
+    deleted              TINYINT      NOT NULL DEFAULT 0,
+    create_time          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time          DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by            VARCHAR(64)  DEFAULT NULL,
+    update_by            VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_crm_customer_no (tenant_id, customer_no),
+    INDEX idx_crm_customer_owner_status (tenant_id, owner_user_id, status, deleted),
+    INDEX idx_crm_customer_unit_status (tenant_id, owner_unit_id, status, deleted),
+    INDEX idx_crm_customer_name (tenant_id, normalized_name, deleted),
+    INDEX idx_crm_customer_credit (tenant_id, credit_code),
+    INDEX idx_crm_customer_phone (tenant_id, phone)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM客户';
+
+CREATE TABLE IF NOT EXISTS crm_contact (
+    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id             BIGINT       NOT NULL COMMENT '租户ID',
+    customer_id           BIGINT       NOT NULL COMMENT '客户ID',
+    name                  VARCHAR(100) NOT NULL COMMENT '姓名',
+    department            VARCHAR(100) DEFAULT NULL,
+    job_title             VARCHAR(100) DEFAULT NULL,
+    mobile                VARCHAR(32)  DEFAULT NULL,
+    phone                 VARCHAR(32)  DEFAULT NULL,
+    email                 VARCHAR(200) DEFAULT NULL,
+    decision_role         VARCHAR(50)  DEFAULT NULL,
+    primary_flag          TINYINT      NOT NULL DEFAULT 0,
+    status                TINYINT      NOT NULL DEFAULT 1,
+    owner_user_id         BIGINT       NOT NULL COMMENT '负责人权限快照',
+    owner_unit_id         BIGINT       NOT NULL COMMENT '组织权限快照',
+    version               INT          NOT NULL DEFAULT 0,
+    deleted               TINYINT      NOT NULL DEFAULT 0,
+    primary_customer_guard BIGINT GENERATED ALWAYS AS (
+        CASE WHEN primary_flag = 1 AND status = 1 AND deleted = 0 THEN customer_id ELSE NULL END
+    ) STORED,
+    create_time           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time           DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by             VARCHAR(64)  DEFAULT NULL,
+    update_by             VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_crm_contact_primary (tenant_id, primary_customer_guard),
+    INDEX idx_crm_contact_customer (tenant_id, customer_id, status, deleted),
+    INDEX idx_crm_contact_owner (tenant_id, owner_user_id, deleted),
+    INDEX idx_crm_contact_mobile (tenant_id, mobile),
+    INDEX idx_crm_contact_email (tenant_id, email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM客户联系人';
+
+-- 10.5 商机及阶段历史
+CREATE TABLE IF NOT EXISTS crm_opportunity (
+    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id             BIGINT        NOT NULL COMMENT '租户ID',
+    opportunity_no        VARCHAR(50)   NOT NULL COMMENT '商机编号',
+    name                  VARCHAR(200)  NOT NULL COMMENT '商机名称',
+    customer_id           BIGINT        NOT NULL COMMENT '客户ID',
+    primary_contact_id    BIGINT        DEFAULT NULL,
+    source_lead_id        BIGINT        DEFAULT NULL,
+    pipeline_id           BIGINT        NOT NULL,
+    stage_id              BIGINT        NOT NULL,
+    status                VARCHAR(20)   NOT NULL COMMENT 'OPEN/WON/LOST',
+    amount                DECIMAL(18,2) NOT NULL DEFAULT 0,
+    currency_code         VARCHAR(10)   NOT NULL COMMENT '租户默认币种',
+    probability           DECIMAL(5,2)  NOT NULL DEFAULT 0,
+    expected_close_date   DATE          DEFAULT NULL,
+    actual_close_time     DATETIME      DEFAULT NULL,
+    loss_reason           VARCHAR(500)  DEFAULT NULL,
+    stage_change_time     DATETIME      NOT NULL,
+    next_followup_time    DATETIME      DEFAULT NULL,
+    owner_user_id         BIGINT        NOT NULL,
+    owner_unit_id         BIGINT        NOT NULL,
+    version               INT           NOT NULL DEFAULT 0,
+    deleted               TINYINT       NOT NULL DEFAULT 0,
+    create_time           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time           DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by             VARCHAR(64)   DEFAULT NULL,
+    update_by             VARCHAR(64)   DEFAULT NULL,
+    UNIQUE KEY uk_crm_opportunity_no (tenant_id, opportunity_no),
+    INDEX idx_crm_opp_owner_status (tenant_id, owner_user_id, status, deleted),
+    INDEX idx_crm_opp_unit_status (tenant_id, owner_unit_id, status, deleted),
+    INDEX idx_crm_opp_stage (tenant_id, pipeline_id, stage_id, status, deleted),
+    INDEX idx_crm_opp_customer (tenant_id, customer_id, status, deleted),
+    INDEX idx_crm_opp_close_date (tenant_id, expected_close_date, status, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM商机';
+
+CREATE TABLE IF NOT EXISTS crm_opportunity_stage_history (
+    id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id           BIGINT       NOT NULL,
+    opportunity_id      BIGINT       NOT NULL,
+    from_stage_id       BIGINT       DEFAULT NULL,
+    to_stage_id         BIGINT       NOT NULL,
+    from_status         VARCHAR(20)  DEFAULT NULL,
+    to_status           VARCHAR(20)  NOT NULL,
+    change_reason       VARCHAR(500) DEFAULT NULL,
+    changed_by_user_id  BIGINT       NOT NULL,
+    changed_time        DATETIME     NOT NULL,
+    create_time         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time         DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by           VARCHAR(64)  DEFAULT NULL,
+    update_by           VARCHAR(64)  DEFAULT NULL,
+    INDEX idx_crm_opp_history (tenant_id, opportunity_id, changed_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM商机阶段历史';
+
+-- 10.6 跟进活动与负责人变更历史
+CREATE TABLE IF NOT EXISTS crm_activity (
+    id                   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id            BIGINT       NOT NULL,
+    root_type            VARCHAR(20)  NOT NULL COMMENT 'LEAD/CUSTOMER/OPPORTUNITY',
+    root_id              BIGINT       NOT NULL,
+    contact_id           BIGINT       DEFAULT NULL,
+    activity_type        VARCHAR(50)  NOT NULL,
+    subject              VARCHAR(200) NOT NULL,
+    content              TEXT         DEFAULT NULL COMMENT '纯文本跟进内容',
+    status               VARCHAR(20)  NOT NULL,
+    planned_start_time   DATETIME     DEFAULT NULL,
+    planned_end_time     DATETIME     DEFAULT NULL,
+    completed_time       DATETIME     DEFAULT NULL,
+    next_action_time     DATETIME     DEFAULT NULL,
+    performed_by_user_id BIGINT       DEFAULT NULL,
+    owner_user_id        BIGINT       NOT NULL,
+    owner_unit_id        BIGINT       NOT NULL,
+    version              INT          NOT NULL DEFAULT 0,
+    deleted              TINYINT      NOT NULL DEFAULT 0,
+    create_time          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time          DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by            VARCHAR(64)  DEFAULT NULL,
+    update_by            VARCHAR(64)  DEFAULT NULL,
+    INDEX idx_crm_activity_root (tenant_id, root_type, root_id, status, deleted),
+    INDEX idx_crm_activity_owner (tenant_id, owner_user_id, status, deleted),
+    INDEX idx_crm_activity_plan (tenant_id, planned_start_time, status, deleted),
+    INDEX idx_crm_activity_next (tenant_id, next_action_time, status, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM跟进活动';
+
+CREATE TABLE IF NOT EXISTS crm_owner_change_log (
+    id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id          BIGINT       NOT NULL,
+    entity_type        VARCHAR(30)  NOT NULL,
+    entity_id          BIGINT       NOT NULL,
+    old_owner_user_id  BIGINT       DEFAULT NULL,
+    old_owner_unit_id  BIGINT       DEFAULT NULL,
+    new_owner_user_id  BIGINT       NOT NULL,
+    new_owner_unit_id  BIGINT       NOT NULL,
+    operation_type     VARCHAR(30)  NOT NULL,
+    reason             VARCHAR(500) DEFAULT NULL,
+    operator_user_id   BIGINT       NOT NULL,
+    operated_time      DATETIME     NOT NULL,
+    create_time        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time        DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by          VARCHAR(64)  DEFAULT NULL,
+    update_by          VARCHAR(64)  DEFAULT NULL,
+    INDEX idx_crm_owner_change_entity (tenant_id, entity_type, entity_id, operated_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM负责人变更历史';
+
+-- 10.7 CRM 本地 Transactional Outbox
+CREATE TABLE IF NOT EXISTS sys_mq_message (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    msg_id          VARCHAR(36)  NOT NULL COMMENT '业务消息ID',
+    topic           VARCHAR(128) NOT NULL COMMENT 'MQ Topic',
+    binding_name    VARCHAR(128) NOT NULL COMMENT 'Stream binding',
+    tag             VARCHAR(64)  DEFAULT NULL,
+    msg_key         VARCHAR(128) DEFAULT NULL COMMENT '事件ID或业务键',
+    payload         TEXT         NOT NULL COMMENT '不含PII的消息体',
+    broker_type     VARCHAR(32)  NOT NULL DEFAULT 'rocketmq',
+    status          TINYINT      NOT NULL DEFAULT 0,
+    retry_count     INT          NOT NULL DEFAULT 0,
+    max_retry       INT          NOT NULL DEFAULT 3,
+    next_retry_time DATETIME     DEFAULT NULL,
+    error_msg       VARCHAR(512) DEFAULT NULL,
+    service_name    VARCHAR(64)  NOT NULL,
+    tenant_id       BIGINT       NOT NULL,
+    create_time     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_crm_mq_msg_id (msg_id),
+    INDEX idx_crm_mq_relay (status, next_retry_time),
+    INDEX idx_crm_mq_tenant_time (tenant_id, create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CRM可靠消息发件箱';
+
+-- 默认租户配置；其他租户由 CrmTenantInitializer 首次使用时幂等创建
+INSERT IGNORE INTO crm_pipeline
+    (id, tenant_id, code, name, status, default_flag, sort, version, deleted, create_by)
+VALUES (1, 1, 'DEFAULT', '默认销售管道', 1, 1, 0, 0, 0, 'system');
+
+INSERT IGNORE INTO crm_pipeline_stage
+    (id, tenant_id, pipeline_id, stage_code, stage_name, stage_type, probability, sort, status, deleted, create_by)
+VALUES
+    (1, 1, 1, 'DISCOVERY',     '需求发现', 'OPEN', 10, 10, 1, 0, 'system'),
+    (2, 1, 1, 'QUALIFICATION', '资格确认', 'OPEN', 30, 20, 1, 0, 'system'),
+    (3, 1, 1, 'PROPOSAL',      '方案报价', 'OPEN', 50, 30, 1, 0, 'system'),
+    (4, 1, 1, 'NEGOTIATION',   '商务谈判', 'OPEN', 80, 40, 1, 0, 'system'),
+    (5, 1, 1, 'WON',           '赢单',     'WON', 100, 50, 1, 0, 'system'),
+    (6, 1, 1, 'LOST',          '输单',     'LOST', 0, 60, 1, 0, 'system');
+
+INSERT IGNORE INTO crm_tenant_config
+    (id, tenant_id, default_pipeline_id, currency_code, lead_duplicate_policy, initialized_time, create_by)
+VALUES (1, 1, 1, 'CNY', 'WARN', NOW(), 'system');
+
+-- 10.8 CRM 样例数据（线索、客户、联系人、商机、阶段历史、跟进活动、Lead 转换）
+-- 一键启动后用户可在前端看到完整的销售管道演示数据
+
+-- 线索（crm_lead）- 8 条
+INSERT IGNORE INTO crm_lead
+    (id, tenant_id, lead_no, full_name, company_name, job_title, mobile, phone, email, region, address,
+     source_code, industry_code, rating, status, disqualify_reason,
+     owner_user_id, owner_unit_id, assigned_time, last_activity_time, next_followup_time, converted_time,
+     version, deleted, create_by)
+VALUES
+(1, 1, 'L20260001', '张三', '北京星辰科技', 'CTO', '13800138001', NULL, 'zhangsan@xingchen.com', '北京', '北京市朝阳区建国路88号',
+ 'WEB', 'TECH', 'A', 'QUALIFIED', NULL,
+ 100, 101, NOW(), '2026-07-12 15:30:00', '2026-07-15 10:00:00', NULL,
+ 0, 0, 'admin'),
+
+(2, 1, 'L20260002', '李四', '上海云帆网络', 'COO', '13800138002', NULL, 'lisi@yunfan.com', '上海', '上海市浦东新区陆家嘴环路100号',
+ 'REFERRAL', 'TECH', 'A', 'FOLLOWING', NULL,
+ 101, 101, NOW(), '2026-07-09 12:00:00', '2026-07-15 09:00:00', NULL,
+ 0, 0, 'admin'),
+
+(3, 1, 'L20260003', '王五', '深圳蓝海智能', 'CPO', '13800138003', NULL, 'wangwu@lanhai.com', '深圳', '深圳市南山区科技园南区',
+ 'WEINAR', 'AI', 'B', 'NEW', NULL,
+ 102, 101, NOW(), '2026-07-11 16:20:00', '2026-07-14 14:00:00', NULL,
+ 0, 0, 'admin'),
+
+(4, 1, 'L20260004', '赵六', '杭州绿竹教育', '校长', '13800138004', NULL, 'zhaoliu@lvzhu.edu', '杭州', '杭州市西湖区文三路200号',
+ 'CONFERENCE', 'EDU', 'C', 'DISQUALIFIED', '预算不足，暂缓项目',
+ 103, 102, NOW(), '2026-07-08 10:00:00', NULL, NULL,
+ 0, 0, 'admin'),
+
+(5, 1, 'L20260005', '钱七', '广州红日电商', '运营总监', '13800138005', NULL, 'qianqi@hongri.com', '广州', '广州市天河区体育西路58号',
+ 'WEB', 'ECOMMERCE', 'A', 'QUALIFIED', NULL,
+ 105, 100, NOW(), '2026-07-10 11:00:00', '2026-07-16 10:00:00', NULL,
+ 0, 0, 'admin'),
+
+(6, 1, 'L20260006', '孙八', '成都紫气文化', '市场部总监', '13800138006', NULL, 'sunba@ziqi.com', '成都', '成都市锦江区春熙路55号',
+ 'REFERRAL', 'CULTURE', 'B', 'NEW', NULL,
+ 107, 200, NOW(), NULL, '2026-07-14 16:00:00', NULL,
+ 0, 0, 'admin'),
+
+(7, 1, 'L20260007', '周九', '武汉青松医药', '采购经理', '13800138007', NULL, 'zhoujiu@qingsong.com', '武汉', '武汉市江夏区光谷大道88号',
+ 'WEB', 'PHARMA', 'A', 'FOLLOWING', NULL,
+ 100, 101, NOW(), '2026-07-08 15:05:00', '2026-07-17 09:00:00', NULL,
+ 0, 0, 'admin'),
+
+(8, 1, 'L20260008', '吴十', '南京黄花物流', '总经理', '13800138008', NULL, 'wushi@huanghua.com', '南京', '南京市棂霞区仙林大学城99号',
+ 'CONFERENCE', 'LOGISTICS', 'B', 'CONVERTED', NULL,
+ 103, 102, NOW(), '2026-07-05 11:00:00', NULL, '2026-07-06 09:00:00',
+ 0, 0, 'admin');
+
+-- 客户（crm_customer）- 5 条
+INSERT IGNORE INTO crm_customer
+    (id, tenant_id, customer_no, name, normalized_name, customer_type, industry_code, level_code, source_code,
+     credit_code, website, phone, email, region, address, status,
+     owner_user_id, owner_unit_id, last_activity_time, next_followup_time,
+     version, deleted, create_by)
+VALUES
+(1, 1, 'C20260001', '北京星辰科技有限公司', '北京星辰科技', 'ENTERPRISE', 'TECH', 'A', 'LEAD_CONVERT',
+ '91110000MA01ABCX', 'https://www.xingchen.com', '010-88888888', 'contact@xingchen.com', '北京', '北京市朝阳区建国路88号', 'ACTIVE',
+ 100, 101, '2026-07-13 11:30:00', '2026-07-20 14:00:00',
+ 0, 0, 'admin'),
+
+(2, 1, 'C20260002', '上海云帆网络有限公司', '上海云帆网络', 'ENTERPRISE', 'TECH', 'A', 'LEAD_CONVERT',
+ '91310000MA02DEFY', 'https://www.yunfan.com', '021-66666666', 'contact@yunfan.com', '上海', '上海市浦东新区陆家嘴环路100号', 'POTENTIAL',
+ 101, 101, '2026-07-09 12:00:00', '2026-07-15 09:00:00',
+ 0, 0, 'admin'),
+
+(3, 1, 'C20260003', '深圳蓝海智能科技有限公司', '深圳蓝海智能', 'STARTUP', 'AI', 'B', 'LEAD_CONVERT',
+ '91440300MA03IGHZ', 'https://www.lanhai.ai', '0755-88889999', 'contact@lanhai.ai', '深圳', '深圳市南山区科技园南区', 'DORMANT',
+ 102, 101, '2026-06-15 10:00:00', '2026-08-01 14:00:00',
+ 0, 0, 'admin'),
+
+(4, 1, 'C20260004', '广州红日电子商务有限公司', '广州红日电商', 'SME', 'ECOMMERCE', 'A', 'LEAD_CONVERT',
+ '91440100MA04JKLW', 'https://www.hongri.com', '020-33334444', 'contact@hongri.com', '广州', '广州市天河区体育西路58号', 'LOST',
+ 105, 100, '2026-07-10 11:00:00', NULL,
+ 0, 0, 'admin'),
+
+(5, 1, 'C20260005', '成都紫气文化传媒有限公司', '成都紫气文化', 'SME', 'CULTURE', 'B', 'LEAD_CONVERT',
+ '91510100MA05MNVT', 'https://www.ziqi.com', '028-86667777', 'contact@ziqi.com', '成都', '成都市锦江区春熙路55号', 'ACTIVE',
+ 107, 200, '2026-07-05 11:30:00', '2026-07-18 10:00:00',
+ 0, 0, 'admin');
+
+-- 联系人（crm_contact）- 7 条
+INSERT IGNORE INTO crm_contact
+    (id, tenant_id, customer_id, name, department, job_title, mobile, phone, email, decision_role,
+     primary_flag, status, owner_user_id, owner_unit_id,
+     version, deleted, create_by)
+VALUES
+(1, 1, 1, '张三', '技术部', 'CTO', '13800138001', NULL, 'zhangsan@xingchen.com', 'DECISION_MAKER',
+ 1, 1, 100, 101,
+ 0, 0, 'admin'),
+
+(2, 1, 1, '张三丰', '研发部', '架构师', '13800138011', NULL, 'zhangsf@xingchen.com', 'INFLUENCER',
+ 0, 1, 100, 101,
+ 0, 0, 'admin'),
+
+(3, 1, 2, '李四', '运营部', 'COO', '13800138002', NULL, 'lisi@yunfan.com', 'DECISION_MAKER',
+ 1, 1, 101, 101,
+ 0, 0, 'admin'),
+
+(4, 1, 3, '王五', '产品部', 'CPO', '13800138003', NULL, 'wangwu@lanhai.ai', 'DECISION_MAKER',
+ 1, 1, 102, 101,
+ 0, 0, 'admin'),
+
+(5, 1, 4, '钱七', '商务部', '总监', '13800138005', NULL, 'qianqi@hongri.com', 'DECISION_MAKER',
+ 1, 1, 105, 100,
+ 0, 0, 'admin'),
+
+(6, 1, 5, '孙八', '市场部', '总监', '13800138006', NULL, 'sunba@ziqi.com', 'DECISION_MAKER',
+ 1, 1, 107, 200,
+ 0, 0, 'admin'),
+
+(7, 1, 5, '孙小明', '市场部', '经理', '13800138016', NULL, 'sunxm@ziqi.com', 'INFLUENCER',
+ 0, 1, 107, 200,
+ 0, 0, 'admin');
+
+-- 商机（crm_opportunity）- 6 条
+INSERT IGNORE INTO crm_opportunity
+    (id, tenant_id, opportunity_no, name, customer_id, primary_contact_id, source_lead_id,
+     pipeline_id, stage_id, status, amount, currency_code, probability,
+     expected_close_date, actual_close_time, loss_reason,
+     stage_change_time, next_followup_time,
+     owner_user_id, owner_unit_id,
+     version, deleted, create_by)
+VALUES
+(1, 1, 'O20260001', '星辰-ERP 系统项目', 1, 1, 1,
+ 1, 2, 'QUALIFICATION', 150000.00, 'CNY', 30,
+ '2026-09-30', NULL, NULL,
+ '2026-07-10 10:00:00', '2026-07-15 10:00:00',
+ 100, 101,
+ 0, 0, 'admin'),
+
+(2, 1, 'O20260002', '云帆-SaaS 平台定制', 2, 3, 2,
+ 1, 4, 'NEGOTIATION', 280000.00, 'CNY', 80,
+ '2026-08-15', NULL, NULL,
+ '2026-07-10 10:00:00', '2026-07-15 14:00:00',
+ 101, 101,
+ 0, 0, 'admin'),
+
+(3, 1, 'O20260003', '蓝海-AI 客服系统', 3, 4, 3,
+ 1, 1, 'DISCOVERY', 95000.00, 'CNY', 10,
+ '2026-10-20', NULL, NULL,
+ '2026-07-11 16:00:00', '2026-07-14 14:00:00',
+ 102, 101,
+ 0, 0, 'admin'),
+
+(4, 1, 'O20260004', '红日-订单中台', 4, 5, 5,
+ 1, 6, 'LOST', 200000.00, 'CNY', 0,
+ '2026-07-10', '2026-07-10 16:00:00', '客户选择竞品，价格因素',
+ '2026-07-10 16:00:00', NULL,
+ 105, 100,
+ 0, 0, 'admin'),
+
+(5, 1, 'O20260005', '紫气-会员营销平台', 5, 6, 8,
+ 1, 5, 'WON', 120000.00, 'CNY', 100,
+ '2026-07-01', '2026-07-01 10:00:00', NULL,
+ '2026-07-01 10:00:00', '2026-07-18 10:00:00',
+ 107, 200,
+ 0, 0, 'admin'),
+
+(6, 1, 'O20260006', '星辰-数据分析平台', 1, 1, 1,
+ 1, 3, 'PROPOSAL', 180000.00, 'CNY', 50,
+ '2026-11-30', NULL, NULL,
+ '2026-07-12 14:00:00', '2026-07-20 09:00:00',
+ 100, 101,
+ 0, 0, 'admin');
+
+-- 商机阶段历史（crm_opportunity_stage_history）- 11 条
+INSERT IGNORE INTO crm_opportunity_stage_history
+    (id, tenant_id, opportunity_id, from_stage_id, to_stage_id, from_status, to_status,
+     change_reason, changed_by_user_id, changed_time, create_by)
+VALUES
+(1, 1, 1, NULL, 2, NULL, 'QUALIFICATION', '新线索合格判定', 100, '2026-07-10 10:00:00', 'admin'),
+
+(2, 1, 2, NULL, 2, NULL, 'QUALIFICATION', '初步接触后判定合格', 101, '2026-07-05 11:00:00', 'admin'),
+(3, 1, 2, 2, 3, 'QUALIFICATION', 'PROPOSAL', '通过资格确认，进入方案阶段', 101, '2026-07-08 15:00:00', 'admin'),
+(4, 1, 2, 3, 4, 'PROPOSAL', 'NEGOTIATION', '方案通过，进入商务谈判', 101, '2026-07-10 10:00:00', 'admin'),
+
+(5, 1, 5, NULL, 1, NULL, 'DISCOVERY', 'Lead 转换自动创建', 103, '2026-07-06 09:00:00', 'admin'),
+(6, 1, 5, 1, 2, 'DISCOVERY', 'QUALIFICATION', '需求明确', 107, '2026-07-06 14:00:00', 'admin'),
+(7, 1, 5, 2, 3, 'QUALIFICATION', 'PROPOSAL', '提交方案', 107, '2026-07-07 10:00:00', 'admin'),
+(8, 1, 5, 3, 4, 'PROPOSAL', 'NEGOTIATION', '方案通过', 107, '2026-07-08 11:00:00', 'admin'),
+(9, 1, 5, 4, 5, 'NEGOTIATION', 'WON', '签约成功', 107, '2026-07-01 10:00:00', 'admin'),
+
+(10, 1, 6, NULL, 3, NULL, 'PROPOSAL', '直接创建商机', 100, '2026-07-12 14:00:00', 'admin');
+
+-- 跟进活动（crm_activity）- 12 条
+INSERT IGNORE INTO crm_activity
+    (id, tenant_id, root_type, root_id, contact_id, activity_type, subject, content,
+     status, planned_start_time, planned_end_time, completed_time, next_action_time,
+     performed_by_user_id,
+     owner_user_id, owner_unit_id,
+     version, deleted, create_by)
+VALUES
+(1, 1, 'LEAD', 1, 1, 'CALL', '首次电话沟通', '与客户CTO张三进行首次电话沟通，了解其ERP系统升级需求，预算约15万。',
+ 'COMPLETED', '2026-07-10 10:00:00', '2026-07-10 10:30:00', '2026-07-10 10:15:00', NULL,
+ 100,
+ 100, 101,
+ 0, 0, 'admin'),
+
+(2, 1, 'LEAD', 1, 1, 'MEETING', '需求讨论会', '与星辰科技研发团队进行需求讨论，确认需要ERP系统升级和数据分析两个模块。',
+ 'COMPLETED', '2026-07-12 14:00:00', '2026-07-12 16:00:00', '2026-07-12 15:30:00', NULL,
+ 100,
+ 100, 101,
+ 0, 0, 'admin'),
+
+(3, 1, 'LEAD', 2, 3, 'VISIT', '拜访客户', '拜访上海云帆网络，了解其SaaS平台定制需求，客户希望8月中旬上线。',
+ 'COMPLETED', '2026-07-09 11:00:00', '2026-07-09 12:30:00', '2026-07-09 12:00:00', NULL,
+ 101,
+ 101, 101,
+ 0, 0, 'admin'),
+
+(4, 1, 'LEAD', 2, 3, 'CALL', '报价沟通', '电话沟通SaaS平台定制报价，客户反馍8月中旬需要上线。',
+ 'PLANNED', '2026-07-15 09:00:00', '2026-07-15 09:30:00', NULL, NULL,
+ NULL,
+ 101, 101,
+ 0, 0, 'admin'),
+
+(5, 1, 'LEAD', 3, 4, 'CALL', '初步接触', '与蓝海智能CPO王五初步接触，了解其AI客服系统需求。',
+ 'COMPLETED', '2026-07-11 16:00:00', '2026-07-11 16:30:00', '2026-07-11 16:20:00', NULL,
+ 102,
+ 102, 101,
+ 0, 0, 'admin'),
+
+(6, 1, 'LEAD', 7, NULL, 'EMAIL', '发送产品手册', '向武汉青松医药发送产品手册和案例集。',
+ 'COMPLETED', '2026-07-08 15:00:00', '2026-07-08 15:10:00', '2026-07-08 15:05:00', NULL,
+ 100,
+ 100, 101,
+ 0, 0, 'admin'),
+
+(7, 1, 'CUSTOMER', 1, 1, 'MEETING', '项目启动会', '星辰科技ERP系统项目启动会，确认项目范围和里程碑。',
+ 'COMPLETED', '2026-07-13 10:00:00', '2026-07-13 12:00:00', '2026-07-13 11:30:00', NULL,
+ 100,
+ 100, 101,
+ 0, 0, 'admin'),
+
+(8, 1, 'CUSTOMER', 2, 3, 'VISIT', '现场调研', '到云帆网络现场调研SaaS平台技术架构。',
+ 'PLANNED', '2026-07-18 14:00:00', '2026-07-18 16:00:00', NULL, NULL,
+ NULL,
+ 101, 101,
+ 0, 0, 'admin'),
+
+(9, 1, 'CUSTOMER', 5, 6, 'CALL', '需求确认', '与紫气文化确认会员营销平台需求细节。',
+ 'COMPLETED', '2026-07-05 11:00:00', '2026-07-05 11:30:00', '2026-07-05 11:30:00', NULL,
+ 107,
+ 107, 200,
+ 0, 0, 'admin'),
+
+(10, 1, 'OPPORTUNITY', 2, 3, 'MEETING', '方案评审', '云帆SaaS平台定制方案评审，客户认可技术方案。',
+ 'COMPLETED', '2026-07-10 10:00:00', '2026-07-10 12:00:00', '2026-07-10 12:00:00', NULL,
+ 101,
+ 101, 101,
+ 0, 0, 'admin'),
+
+(11, 1, 'OPPORTUNITY', 6, 1, 'PROPOSAL', '提交方案', '向星辰科技提交数据分析平台方案。',
+ 'PLANNED', '2026-07-20 09:00:00', '2026-07-20 10:00:00', NULL, NULL,
+ NULL,
+ 100, 101,
+ 0, 0, 'admin'),
+
+(12, 1, 'LEAD', 4, NULL, 'CALL', '无效跟进', '与杭州绿竹教育沟通，客户表示预算不足，暂缓项目。',
+ 'CANCELLED', '2026-07-08 10:00:00', '2026-07-08 10:30:00', NULL, NULL,
+ 103,
+ 103, 102,
+ 0, 0, 'admin');
+
+-- Lead 转换记录（crm_lead_conversion）- 1 条
+INSERT IGNORE INTO crm_lead_conversion
+    (id, tenant_id, lead_id, customer_id, contact_id, opportunity_id,
+     converted_by_user_id, converted_time, create_by)
+VALUES
+(1, 1, 8, 5, 6, 5,
+ 103, '2026-07-06 09:00:00', 'admin');
+
+-- Owner 变更记录（crm_owner_change_log）- 2 条
+INSERT IGNORE INTO crm_owner_change_log
+    (id, tenant_id, entity_type, entity_id, old_owner_user_id, old_owner_unit_id,
+     new_owner_user_id, new_owner_unit_id, operation_type, reason,
+     operator_user_id, operated_time, create_by)
+VALUES
+(1, 1, 'CUSTOMER', 3, 100, 101, 102, 101, 'TRANSFER', '客户归属调整到销售1组',
+ 100, '2026-06-15 10:00:00', 'admin'),
+
+(2, 1, 'CUSTOMER', 4, 105, 100, 105, 100, 'TRANSFER', '客户重新分配',
+ 1, '2026-07-10 16:00:00', 'admin');
+
+-- ============================================================
+-- Section 11: 4级会签审批请假流程 - 种子数据
 -- ============================================================
 USE omni_auth;
 
 -- 10.1 组织架构
 INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
-VALUES (100, 1, 1, '技术研发部', 'DEPT', 'tech-dept', '/1/100/', 2, 1, 1, 'system');
+VALUES (100, 1, 1, '销售部', 'DEPT', 'sales-dept', '/1/100/', 2, 1, 1, 'system');
 
 INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
-VALUES (101, 1, 100, '后端1组', 'TEAM', 'backend-1', '/1/100/101/', 3, 1, 1, 'system');
+VALUES (101, 1, 100, '销售1组', 'TEAM', 'sales-team-1', '/1/100/101/', 3, 1, 1, 'system');
 
 INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
-VALUES (102, 1, 100, '架构1组', 'TEAM', 'arch-1', '/1/100/102/', 3, 2, 1, 'system');
+VALUES (102, 1, 100, '销售2组', 'TEAM', 'sales-team-2', '/1/100/102/', 3, 2, 1, 'system');
 
 INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
-VALUES (200, 1, 1, '人事部', 'DEPT', 'hr-dept', '/1/200/', 2, 2, 1, 'system');
+VALUES (200, 1, 1, '市场部', 'DEPT', 'marketing-dept', '/1/200/', 2, 2, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (300, 1, 1, '财务部', 'DEPT', 'finance-dept', '/1/300/', 2, 3, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (301, 1, 300, '会计组', 'TEAM', 'finance-accounting', '/1/300/301/', 3, 1, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (302, 1, 300, '审计组', 'TEAM', 'finance-audit', '/1/300/302/', 3, 2, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (303, 1, 300, '税务组', 'TEAM', 'finance-tax', '/1/300/303/', 3, 3, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (400, 1, 1, '技术部', 'DEPT', 'tech-dept', '/1/400/', 2, 4, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (401, 1, 400, '前端组', 'TEAM', 'tech-frontend', '/1/400/401/', 3, 1, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (402, 1, 400, '后端组', 'TEAM', 'tech-backend', '/1/400/402/', 3, 2, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (403, 1, 400, '测试组', 'TEAM', 'tech-qa', '/1/400/403/', 3, 3, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (404, 1, 400, '运维组', 'TEAM', 'tech-ops', '/1/400/404/', 3, 4, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (500, 1, 1, '法律部', 'DEPT', 'legal-dept', '/1/500/', 2, 5, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (501, 1, 500, '合规组', 'TEAM', 'legal-compliance', '/1/500/501/', 3, 1, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (502, 1, 500, '法务组', 'TEAM', 'legal-affairs', '/1/500/502/', 3, 2, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (600, 1, 1, '人事部', 'DEPT', 'hr-dept', '/1/600/', 2, 6, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (601, 1, 600, '招聘组', 'TEAM', 'hr-recruit', '/1/600/601/', 3, 1, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (602, 1, 600, '培训组', 'TEAM', 'hr-training', '/1/600/602/', 3, 2, 1, 'system');
+
+INSERT IGNORE INTO sys_org_unit (id, tenant_id, parent_id, name, type, unit_code, path, depth, sort, status, create_by)
+VALUES (603, 1, 600, '薪酬组', 'TEAM', 'hr-compensation', '/1/600/603/', 3, 3, 1, 'system');
 
 -- 10.2 角色
 INSERT IGNORE INTO sys_role (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
@@ -1259,6 +2022,7 @@ CREATE PROCEDURE sp_init_tenant(
 BEGIN
     DECLARE v_old_id     BIGINT;
     DECLARE v_parent_id  BIGINT;
+    DECLARE v_new_parent_id BIGINT;
     DECLARE v_new_id     BIGINT;
     DECLARE v_done       INT DEFAULT 0;
 
@@ -1276,13 +2040,24 @@ BEGIN
         FETCH cur INTO v_old_id, v_parent_id;
         IF v_done THEN LEAVE perm_loop; END IF;
 
+        SET v_new_parent_id = IF(v_parent_id = 0, 0,
+            IFNULL((SELECT new_id FROM tmp_perm_map WHERE old_id = v_parent_id), 0));
+
         INSERT INTO sys_permission (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
         SELECT p_tenant_id,
-               IF(parent_id = 0, 0, IFNULL((SELECT new_id FROM tmp_perm_map WHERE old_id = t.parent_id), 0)),
-               permission_code, permission_name, type, path, depth, sort, 1, 'system'
+               v_new_parent_id,
+               permission_code, permission_name, type, '', depth, sort, 1, 'system'
         FROM sys_permission t WHERE t.id = v_old_id;
 
         SET v_new_id = LAST_INSERT_ID();
+        IF v_new_parent_id = 0 THEN
+            UPDATE sys_permission SET path = CONCAT('/', v_new_id, '/') WHERE id = v_new_id;
+        ELSE
+            UPDATE sys_permission child
+            JOIN sys_permission parent ON parent.id = v_new_parent_id
+            SET child.path = CONCAT(parent.path, v_new_id, '/')
+            WHERE child.id = v_new_id;
+        END IF;
         INSERT INTO tmp_perm_map (old_id, new_id) VALUES (v_old_id, v_new_id);
     END LOOP;
     CLOSE cur;
@@ -1293,7 +2068,11 @@ BEGIN
         (p_tenant_id, 'USER',        'Default User',        'SELF', 99, 1, 'system'),
         (p_tenant_id, 'EMPLOYEE',    '普通员工',             'SELF', 10, 1, 'system'),
         (p_tenant_id, 'TEAM_LEADER', '工作组组长',         'DEPT', 11, 1, 'system'),
-        (p_tenant_id, 'DEPT_LEADER', '部门领导', 'DEPT_AND_BELOW', 12, 1, 'system');
+        (p_tenant_id, 'DEPT_LEADER', '部门领导', 'DEPT_AND_BELOW', 12, 1, 'system'),
+        (p_tenant_id, 'CRM_ADMIN',     'CRM管理员', 'TENANT',         20, 1, 'system'),
+        (p_tenant_id, 'SALES_MANAGER', '销售经理',  'DEPT_AND_BELOW', 21, 1, 'system'),
+        (p_tenant_id, 'SALES_REP',     '销售代表',  'SELF',           22, 1, 'system'),
+        (p_tenant_id, 'CRM_VIEWER',    'CRM只读员', 'TENANT',         23, 1, 'system');
 
     -- Step 3: SUPER_ADMIN 获得全部权限
     INSERT INTO sys_role_permission (role_id, permission_id)
@@ -1329,6 +2108,48 @@ BEGIN
           'workflow:instance:list','workflow:instance:start','workflow:instance:terminate',
           'workflow:task:todo','workflow:approval:complete',
           'workflow:approval:add-signer','workflow:approval:remove-signer','workflow:approval:delegate'
+      );
+
+    -- Step 5.1: CRM 管理员和销售经理获得完整 CRM 权限
+    INSERT INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id
+      AND r.role_code IN ('CRM_ADMIN', 'SALES_MANAGER')
+      AND (p.permission_code = 'crm' OR p.permission_code LIKE 'crm:%');
+
+    -- Step 5.2: 销售代表日常销售闭环权限
+    INSERT INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id AND r.role_code = 'SALES_REP'
+      AND p.permission_code IN (
+          'crm','crm:overview','crm:lead','crm:customer','crm:contact','crm:opportunity','crm:activity',
+          'crm:overview:list','crm:lead:list','crm:lead:create','crm:lead:update',
+          'crm:lead:disqualify','crm:lead:convert',
+          'crm:customer:list','crm:customer:create','crm:customer:update','crm:customer:status',
+          'crm:contact:list','crm:contact:create','crm:contact:update',
+          'crm:opportunity:list','crm:opportunity:create','crm:opportunity:update',
+          'crm:opportunity:stage','crm:opportunity:reopen',
+          'crm:activity:list','crm:activity:create','crm:activity:update',
+          'crm:activity:complete','crm:activity:cancel','crm:owner:list','crm:pii:view'
+      );
+
+    -- Step 5.3: CRM 只读角色默认返回脱敏数据
+    INSERT INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id AND r.role_code = 'CRM_VIEWER'
+      AND p.permission_code IN (
+          'crm','crm:overview','crm:lead','crm:customer','crm:contact','crm:opportunity','crm:activity',
+          'crm:overview:list','crm:lead:list','crm:customer:list','crm:contact:list',
+          'crm:opportunity:list','crm:activity:list'
       );
 
     -- Step 6: 创建根组织

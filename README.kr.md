@@ -283,6 +283,35 @@ GitHub, Google, Gitee 세 가지 OAuth2 제공자를 지원합니다. 자격 증
 |-------------|----------|
 | ![BPMN 디자이너](docs/images/workflow-designer.png) | ![승인 흐름](docs/images/workflow-approval.png) |
 
+### CRM 영업 관리
+
+CRM 모듈은 프리세일즈 전 과정을 커버합니다: 리드 획득 → 팔로업 → 고객 생성 → 기회 추진 → 수주/실주. 6계층 보안 방어(Gateway JWT → 테넌트 검증 → 기능 권한 → 데이터 범위 → SQL 가로채기 → 행 수준 인가)로 멀티테넌트 데이터 격리를 보장합니다. 자세한 내용은 [CRM 시스템 트루스](docs/crm.kr.md)를 참조하세요.
+
+| 영업 대시보드 | 리드 관리 |
+|--------------|----------|
+| ![영업 대시보드](docs/images/crm-overview.png) | ![리드 관리](docs/images/crm-lead-list.png) |
+| 통계 카드 + 영업 퍼널 + 팔로업 목록으로 전체 영업 현황을 한눈에 | 리드 목록은 검색, 필터, 배정, 일괄 작업 지원 |
+
+| 리드 전환 | 고객 관리 |
+|----------|----------|
+| ![리드 전환](docs/images/crm-lead-convert.png) | ![고객 관리](docs/images/crm-customer-list.png) |
+| 적격 리드를 원클릭으로 고객 + 연락처 + 기회로 전환, 행 잠금으로 멱등성 보장 | 고객 목록은 이관, 상태 변경, 블랙리스트 관리 지원 |
+
+| 고객 360 뷰 | 연락처 관리 |
+|-------------|------------|
+| ![고객 360](docs/images/crm-customer-360.png) | ![연락처 관리](docs/images/crm-contact-list.png) |
+| 고객의 모든 차원을 한 드로어에: 연락처, 기회, 팔로업 활동 | 연락처는 고객에 연결되며 주요 연락처 표시 지원 |
+
+| 기회 관리 | 기회 칸반 |
+|----------|----------|
+| ![기회 관리](docs/images/crm-opportunity-list.png) | ![기회 칸반](docs/images/crm-opportunity-board.png) |
+| 기회 테이블에서 단계, 금액, 확률, 예상 마감일 표시 | 칸반 보드로 기회를 단계별 열로 시각적으로 관리 |
+
+| 팔로업 활동 | |
+|------------|--|
+| ![팔로업 활동](docs/images/crm-activity-timeline.png) | |
+| 활동 목록으로 모든 팔로업을 기록, 계획/완료/취소 상태 흐름 지원 | |
+
 ## 모듈 개요
 
 ### 백엔드 마이크로서비스
@@ -292,6 +321,7 @@ GitHub, Google, Gitee 세 가지 OAuth2 제공자를 지원합니다. 자격 증
 | omni-auth | 8100 | 인증/인가: 로그인, JWT, OAuth2, RBAC, XSS 설정 관리 | [core-flows.kr.md](docs/core-flows.kr.md) |
 | omni-base | 8101 | 기초 데이터: 사전, 조직, 사용자, 로그, 스케줄링 작업, MQ 메시지 관리 | [scheduling.kr.md](docs/scheduling.kr.md) |
 | omni-workflow | 8103 | 워크플로우 엔진: BPMN 모델 관리, 승인, 프로세스 인스턴스 | [workflow.kr.md](docs/workflow.kr.md) |
+| omni-crm | 8104 | CRM: 리드, 고객, 연락처, 기회, 팔로업, 영업 대시보드 | [crm.kr.md](docs/crm.kr.md) |
 | omni-gateway | 8102 | API 게이트웨이: 라우팅 전달, JWT 검증, CORS, 보안 응답 헤더 | [architecture.kr.md](docs/architecture.kr.md) |
 
 ### Common Starter 생태계 (8개 모듈)

@@ -48,4 +48,28 @@ public @interface OperLog {
      * 提取的 ID 存储在 {@code sys_oper_log.biz_id} 字段中。</p>
      */
     String idExpr() default "";
+
+    /**
+     * 是否记录请求参数。
+     * <p>包含大段文本或不适合进入审计日志的接口可显式关闭。</p>
+     *
+     * @return {@code true} 表示记录脱敏后的请求参数
+     */
+    boolean recordParams() default true;
+
+    /**
+     * 是否记录实体变更快照。
+     * <p>CRM 等包含个人信息的业务默认应关闭，仅保留操作元数据。</p>
+     *
+     * @return {@code true} 表示采集并记录脱敏后的实体快照
+     */
+    boolean recordSnapshot() default true;
+
+    /**
+     * 额外排除的字段名。
+     * <p>字段名不区分大小写，命中后统一替换为脱敏占位符。</p>
+     *
+     * @return 需要额外排除的字段名
+     */
+    String[] excludeFields() default {};
 }

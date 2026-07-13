@@ -22,6 +22,9 @@ public class OperLogMessage implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /** 事件唯一标识，用于消费端幂等 */
+    private String eventId;
+
     /** 操作人用户名 */
     private String operUsername;
 
@@ -68,6 +71,14 @@ public class OperLogMessage implements Serializable {
     private String errorMsg;
 
     public OperLogMessage() {
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
     public String getOperUsername() {

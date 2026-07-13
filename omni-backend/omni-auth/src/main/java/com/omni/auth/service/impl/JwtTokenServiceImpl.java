@@ -158,7 +158,14 @@ public class JwtTokenServiceImpl implements JwtTokenService {
                         null);
                 // 提取第一个 RSA 密钥（授权服务器启动时只生成一个密钥对）
                 RSAKey rsaKey = (RSAKey) keys.get(0);
-                cachedPrivateKey = rsaKey.toRSAPrivateKey();
+                RSAPrivateKey privateKey = rsaKey.toRSAPrivateKey();
+                // 防御性检查：确保密钥包含私钥（旧版本可能只存储了公钥）
+                if (privateKey == null) {
+                    log.error("JWK 密钥库中的 RSA 密钥不包含私钥参数 (kid={})，" +
+                            "可能是旧版本存储的。请删除 Redis 中的 sys:jwk:keystore 并重启服务", rsaKey.getKeyID());
+                    throw new IllegalStateException("JWK 密钥库缺少私钥，需要重新生成");
+                }
+                cachedPrivateKey = privateKey;
                 cachedKeyId = rsaKey.getKeyID();
                 log.info("RSA 私钥已从 JWKSource 加载, kid={}", cachedKeyId);
             } catch (Exception e) {

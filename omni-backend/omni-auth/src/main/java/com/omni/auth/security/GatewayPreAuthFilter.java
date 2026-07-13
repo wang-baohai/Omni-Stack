@@ -61,6 +61,20 @@ public class GatewayPreAuthFilter extends OncePerRequestFilter {
     /** Gateway 转发标记头，缺失则说明请求未经 Gateway，可能是直接访问 */
     private static final String HEADER_GATEWAY_FORWARDED = "X-Gateway-Forwarded";
 
+    /** 内部服务接口路径前缀，由独立的内部令牌过滤器负责认证 */
+    private static final String INTERNAL_PATH_PREFIX = "/internal/";
+
+    /**
+     * 内部服务接口不执行网关预认证，避免覆盖内部服务身份或误判为非法直连。
+     *
+     * @param request HTTP 请求
+     * @return 内部接口返回 true，其余请求返回 false
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getRequestURI().startsWith(INTERNAL_PATH_PREFIX);
+    }
+
     /**
      * 执行网关预认证逻辑。
      *

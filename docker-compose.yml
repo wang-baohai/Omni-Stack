@@ -213,9 +213,9 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       AUTH_ISSUER: http://omni-auth:8080
       AUTH_FRONTEND_BASE_URL: http://localhost:3000
-      AUTH_OAUTH2_GITHUB_REDIRECT_URI: http://localhost:8100/api/auth/oauth2/github/callback
-      AUTH_OAUTH2_GITEE_REDIRECT_URI: http://localhost:8100/api/auth/oauth2/gitee/callback
-      AUTH_OAUTH2_GOOGLE_REDIRECT_URI: http://localhost:8100/api/auth/oauth2/google/callback
+      AUTH_OAUTH2_GITHUB_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/github/callback
+      AUTH_OAUTH2_GITEE_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/gitee/callback
+      AUTH_OAUTH2_GOOGLE_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/google/callback
       # OAuth2 第三方凭证（通过 .env 文件注入，真实值不要提交到仓库）
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-your-github-client-id}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-your-github-client-secret}
@@ -227,7 +227,13 @@ services:
       # JWK 密钥 AES 加密密钥（用于将 RSA 密钥库加密后存入 Redis）
       JWK_ENCRYPT_KEY: ${JWK_ENCRYPT_KEY:-change-this-32chars-aes-key!!}
       # 内部 API 认证 Token
-      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:-change-this-internal-token}
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+      # HTTP 代理配置（用于访问 Google API，需要宿主机运行代理服务）
+      HTTP_PROXY: http://host.docker.internal:7897
+      HTTPS_PROXY: http://host.docker.internal:7897
+      NO_PROXY: localhost,127.0.0.1,mysql,redis,nacos
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       nacos:
         condition: service_healthy
@@ -268,7 +274,7 @@ services:
       XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
       XXL_JOB_EXECUTOR_ADDRESS: http://omni-base:9901/
       XXL_JOB_EXECUTOR_IP: omni-base
-      OMNI_INTERNAL_API_TOKEN: omni-internal-default-token
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
     depends_on:
       nacos:
         condition: service_healthy
@@ -311,7 +317,7 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
       # 内部 API 认证 Token（Feign 调用 omni-auth 时使用）
-      OMNI_INTERNAL_API_TOKEN: omni-internal-default-token
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
     depends_on:
       nacos:
         condition: service_healthy
@@ -320,6 +326,52 @@ services:
       mysql:
         condition: service_healthy
       rocketmq-broker:
+        condition: service_healthy
+    networks:
+      - omni-network
+
+  # ----------------------------------------------------------
+  # omni-crm — 客户关系管理服务
+  # 宿主机端口: 8104 | 容器内部端口: 8080 | XXL执行器: 9904
+  # ----------------------------------------------------------
+  omni-crm:
+    build:
+      context: ./omni-backend
+      dockerfile: ../docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-crm
+    image: omni-crm:latest
+    container_name: omni-crm
+    restart: unless-stopped
+    ports:
+      - "8104:8080"
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: default
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_URL: "jdbc:mysql://mysql:3306/omni_crm?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      REDIS_HOST: redis
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-crm:9904/
+      XXL_JOB_EXECUTOR_IP: omni-crm
+      XXL_JOB_EXECUTOR_PORT: "9904"
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+    depends_on:
+      nacos:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+      xxl-job-admin:
+        condition: service_healthy
+      omni-auth:
         condition: service_healthy
     networks:
       - omni-network
@@ -354,6 +406,8 @@ services:
       redis:
         condition: service_healthy
       omni-auth:
+        condition: service_healthy
+      omni-crm:
         condition: service_healthy
     networks:
       - omni-network

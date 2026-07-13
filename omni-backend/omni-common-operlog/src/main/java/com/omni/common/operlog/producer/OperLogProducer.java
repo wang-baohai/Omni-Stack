@@ -56,7 +56,7 @@ public class OperLogProducer {
         try {
             Long tenantId = message.getTenantId();
             if (reliableRelay != null) {
-                reliableRelay.send(BINDING_NAME, message, tenantId);
+                reliableRelay.send(BINDING_NAME, message, tenantId, message.getEventId());
             } else {
                 streamBridge.send(BINDING_NAME, message);
             }

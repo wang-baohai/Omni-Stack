@@ -5,6 +5,7 @@ import com.omni.auth.dto.CreateXssRuleRequest;
 import com.omni.auth.dto.UpdateXssRuleRequest;
 import com.omni.auth.dto.XssSettingsVO;
 import com.omni.common.core.result.PageResult;
+import com.omni.common.core.security.XssSettings;
 
 /**
  * XSS 防护配置服务接口，提供租户级 XSS 全局开关和黑名单规则的管理操作。
@@ -23,6 +24,15 @@ public interface XssConfigService {
      * @return XSS 防护设置视图对象
      */
     XssSettingsVO getSettings(Long tenantId);
+
+    /**
+     * 直接从数据库获取指定租户的权威运行时 XSS 设置。
+     * <p>该方法不读取 Redis，确保显式关闭状态不会与缓存未命中混淆。</p>
+     *
+     * @param tenantId 租户 ID
+     * @return 仅包含启用规则的运行时设置
+     */
+    XssSettings getAuthoritativeSettings(Long tenantId);
 
     /**
      * 切换 XSS 防护全局开关。

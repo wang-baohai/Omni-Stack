@@ -1,13 +1,9 @@
 package com.omni.auth.security;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omni.auth.entity.SysXssBlacklistRule;
-import com.omni.auth.entity.SysXssConfig;
-import com.omni.auth.mapper.SysXssBlacklistRuleMapper;
-import com.omni.auth.mapper.SysXssConfigMapper;
+import com.omni.auth.service.XssConfigService;
 import com.omni.common.core.security.XssConfigProvider;
 import com.omni.common.core.security.XssSettings;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * XSS 配置提供者实现，优先从 Redis 缓存读取配置，缓存未命中时回源数据库查询。
@@ -43,11 +37,8 @@ public class XssConfigProviderImpl implements XssConfigProvider {
     private static final String CACHE_KEY_RULES = "xss:rules:";
     private static final long CACHE_TTL_MINUTES = 30;
 
-    /** XSS 防护配置 Mapper */
-    private final SysXssConfigMapper sysXssConfigMapper;
-
-    /** XSS 黑名单规则 Mapper */
-    private final SysXssBlacklistRuleMapper sysXssBlacklistRuleMapper;
+    /** XSS 配置服务 */
+    private final XssConfigService xssConfigService;
 
     /** Redis 操作模板 */
     private final StringRedisTemplate stringRedisTemplate;
@@ -99,44 +90,14 @@ public class XssConfigProviderImpl implements XssConfigProvider {
      * @return XSS 防护配置
      */
     private XssSettings loadFromDbAndCache(Long tenantId, String enabledKey, String rulesKey) {
-        SysXssConfig config = sysXssConfigMapper.selectOne(
-                new LambdaQueryWrapper<SysXssConfig>()
-                        .eq(SysXssConfig::getTenantId, tenantId));
-
-        if (config == null) {
-            return XssSettings.builder()
-                    .enabled(false)
-                    .rules(Collections.emptyList())
-                    .build();
-        }
-
-        boolean enabled = config.getEnabled() != null && config.getEnabled() == 1;
-
-        List<XssSettings.XssRule> rules = Collections.emptyList();
-        if (enabled) {
-            List<SysXssBlacklistRule> ruleEntities = sysXssBlacklistRuleMapper.selectList(
-                    new LambdaQueryWrapper<SysXssBlacklistRule>()
-                            .eq(SysXssBlacklistRule::getTenantId, tenantId)
-                            .eq(SysXssBlacklistRule::getEnabled, 1)
-                            .orderByAsc(SysXssBlacklistRule::getSortOrder));
-
-            rules = ruleEntities.stream()
-                    .map(entity -> XssSettings.XssRule.builder()
-                            .id(entity.getId())
-                            .ruleType(entity.getRuleType())
-                            .pattern(entity.getPattern())
-                            .build())
-                    .collect(Collectors.toList());
-        }
-
-        XssSettings settings = XssSettings.builder()
-                .enabled(enabled)
-                .rules(rules)
-                .build();
+        XssSettings settings = xssConfigService.getAuthoritativeSettings(tenantId);
+        List<XssSettings.XssRule> rules = settings.getRules();
 
         try {
-            stringRedisTemplate.opsForValue().set(enabledKey, String.valueOf(enabled), CACHE_TTL_MINUTES, TimeUnit.MINUTES);
-            stringRedisTemplate.opsForValue().set(rulesKey, objectMapper.writeValueAsString(rules), CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            stringRedisTemplate.opsForValue().set(enabledKey, String.valueOf(settings.isEnabled()),
+                    CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            stringRedisTemplate.opsForValue().set(
+                    rulesKey, objectMapper.writeValueAsString(rules), CACHE_TTL_MINUTES, TimeUnit.MINUTES);
         } catch (JsonProcessingException e) {
             log.warn("序列化 XSS 规则写入 Redis 缓存失败，租户 {}: {}", tenantId, e.getMessage());
         }

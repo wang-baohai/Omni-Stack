@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
 /**
  * 操作日志服务实现。
  *
@@ -30,6 +33,7 @@ public class OperLogServiceImpl implements OperLogService {
     @Override
     public void save(OperLogMessage message) {
         SysOperLog entity = new SysOperLog();
+        entity.setEventId(resolveEventId(message));
         entity.setTenantId(message.getTenantId());
         entity.setOperUsername(message.getOperUsername());
         entity.setOperTime(message.getOperTime());
@@ -46,6 +50,23 @@ public class OperLogServiceImpl implements OperLogService {
         entity.setNewValue(message.getNewValue());
         entity.setErrorMsg(message.getErrorMsg());
         sysOperLogMapper.insert(entity);
+    }
+
+    private String resolveEventId(OperLogMessage message) {
+        if (message.getEventId() != null && !message.getEventId().isBlank()) {
+            return message.getEventId();
+        }
+        String legacyIdentity = String.join("|",
+                String.valueOf(message.getTenantId()),
+                String.valueOf(message.getOperUsername()),
+                String.valueOf(message.getOperTime()),
+                String.valueOf(message.getModule()),
+                String.valueOf(message.getOperType()),
+                String.valueOf(message.getRequestMethod()),
+                String.valueOf(message.getRequestUrl()),
+                String.valueOf(message.getRequestParams()));
+        return "legacy-message-" + UUID.nameUUIDFromBytes(
+                legacyIdentity.getBytes(StandardCharsets.UTF_8));
     }
 
     /** {@inheritDoc} */

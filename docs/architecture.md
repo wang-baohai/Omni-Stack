@@ -111,13 +111,14 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 | `omni-common-mqlog` | 可靠 MQ 消息发送：Transactional Outbox、中继任务、策略模式发送器、内部查询 API | Spring Cloud Stream RocketMQ（optional）、omni-common-job（optional） | 仅 MQ 基础设施，无业务消息逻辑 |
 | `omni-common-operlog` | 操作日志切面与生产者：`@OperLog` 注解驱动，支持可靠消息和直接发送两种模式 | Spring AOP、omni-common-mqlog（optional） | 仅操作日志关注点 |
 
-### 4.2 微服务模块（4 个）
+### 4.2 微服务模块（5 个）
 
 | 模块 | 端口 | 职责 | 核心依赖 |
 |------|------|------|----------|
 | `omni-auth` :8100 | 8100 | 认证授权：登录、验证码、JWT、多租户、OAuth2 授权服务器、XSS 配置管理、RBAC 权限、在线用户管理 | Spring Boot Web、Spring Security、OAuth2 Authorization Server |
 | `omni-base` :8101 | 8101 | 基础数据：字典 CRUD、定时任务管理（系统 + 用户）、操作日志归档、MQ 消息管理 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
 | `omni-workflow` :8103 | 8103 | 工作流引擎：BPMN 模型管理、流程实例、审批、任务分派、统计 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 7.x |
+| `omni-crm` :8104 | 8104 | CRM 销售前闭环：线索、客户、联系人、商机、跟进、转换与概览 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
 | `omni-gateway` :8102 | 8102 | API 网关：请求路由、JWT 认证过滤、CORS 处理、安全响应头 | Spring Cloud Gateway Server（WebFlux）、omni-common-redis-reactive |
 
 ### 4.3 前端模块
@@ -148,14 +149,14 @@ omni-auth :8100     omni-base :8101                     omni-gateway :8102
     |                    |                                     |
     +-- 注册到 Nacos --+                                      |
                                |                               |
-omni-gateway --- 通过 lb:// 路由 ---> omni-auth, omni-base, omni-workflow
+omni-gateway --- 通过显式 lb:// 路由 ---> omni-auth, omni-base, omni-workflow, omni-crm
     |
 omni-frontend --- /api 代理 :3000 ---> omni-gateway :8102
 
 omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 ```
 
-**构建依赖顺序**：`omni-common-core` → `omni-common` → `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive` → `omni-auth` / `omni-base` / `omni-workflow` / `omni-gateway`。Maven reactor 从 `<modules>` 声明自动解析顺序。
+**构建依赖顺序**：`omni-common-core` → `omni-common` → `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive` → `omni-auth` / `omni-base` / `omni-workflow` / `omni-crm` / `omni-gateway`。Maven reactor 从 `<modules>` 声明自动解析顺序。
 
 ### 局部与整体关系
 
@@ -169,6 +170,7 @@ omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 | `omni-gateway` | **流量入口**：所有 HTTP 请求的唯一入口，JWT 验证 + 身份传播 + 路由分发 |
 | `omni-base` | **数据基座**：字典、日志、定时任务等公共业务数据的管理中心 |
 | `omni-workflow` | **流程引擎**：独立部署的 BPMN 工作流服务，通过 `omni-common-workflow` starter 隔离 Flowable 依赖 |
+| `omni-crm` | **销售业务域**：独立拥有 CRM 数据，通过 Auth 内部接口复用租户用户、组织和 permission-aware 数据范围 |
 
 ---
 
@@ -241,10 +243,10 @@ SecurityHeadersFilter (WebFilter)
     ▼
 Spring Cloud Gateway 路由引擎
     │ 1. Route 匹配：Path=/api/auth/** → lb://omni-auth
-    │ 2. StripPrefix=2：/api/auth/login → /login
+    │ 2. 保留完整路径：/api/auth/login → /api/auth/login
     │ 3. 负载均衡：通过 Nacos 服务发现获取实例列表
     ▼
-转发至下游微服务（omni-auth / omni-base / omni-workflow）
+转发至下游微服务（omni-auth / omni-base / omni-workflow / omni-crm）
 ```
 
 **关键设计决策**：
@@ -253,9 +255,9 @@ Spring Cloud Gateway 路由引擎
 - **公钥缓存 5 分钟**：避免每次请求都调用 JWKS 端点，`volatile` 保证多线程可见性
 - **`onErrorResume` 仅捕获 `SecurityException`**：避免下游路由错误（服务不可用、超时）被误报为 JWT 验证失败
 
-### 6.3 omni-base / omni-workflow 安全模型
+### 6.3 omni-base / omni-workflow / omni-crm 安全模型
 
-下游微服务（base、workflow）采用统一的**网关预认证模型**：
+下游微服务（base、workflow、crm）采用统一的**网关预认证模型**。CRM 进一步以完整 permissionCode 从 Auth 解析数据范围，TenantLine 与 DataPermission 拦截器共同约束每条业务 SQL：
 
 ```
 请求进入（已经 Gateway JWT 验证）
@@ -288,10 +290,10 @@ Vite Dev Server (:3000)  -- proxy /api/** -->
     │
 Gateway (:8102)
     │  1. 路由匹配: Path=/api/auth/** -> lb://omni-auth
-    │  2. StripPrefix=2: /api/auth/login -> /login
+    │  2. 保留完整路径: /api/auth/login -> /api/auth/login
     ▼
 Auth Service (:8100)
-    │  1. AuthController 接收 /login
+    │  1. AuthController 接收 /api/auth/login
     │  2. CaptchaService 验证验证码 (Redis)
     │  3. OmniUserDetailsService 认证用户 (多租户 tenantId:username)
     │  4. JwtTokenService 生成 RS256 签名 JWT
@@ -305,7 +307,7 @@ Browser 存储 JWT，后续请求自动携带
 ### 7.2 MQ 消息可靠投递流
 
 ```
-业务服务 (e.g., omni-base)
+业务服务 (e.g., omni-base / omni-crm)
     │  @Transactional
     │  ReliableMessageTemplate.send(bindingName, payload)
     ▼
@@ -322,7 +324,7 @@ MqMessageRelayService.relayAll()
     ▼
 RocketMQ Broker (通过 StreamBridge)
     │
-    │  管理 UI (omni-base MqMessageController)
+    │  管理 UI (omni-base 聚合本地与 CRM 内部 Outbox API)
     ▼
 监控页面: 查询/重发/跳过死信消息
 ```
@@ -344,7 +346,7 @@ RocketMQ Broker (通过 StreamBridge)
 
 所有服务可通过一条命令启动：`docker compose up -d`。详见项目根目录 `docker-compose.yml`。
 
-**启动顺序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 后端服务（Auth, Base, Workflow, Gateway）→ 前端
+**启动顺序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 后端服务（Auth, Base, Workflow, CRM, Gateway）→ 前端
 
 ---
 
@@ -419,6 +421,12 @@ erDiagram
 
 > 详见 [workflow.md](workflow.md)
 
+#### omni_crm 数据库
+
+**CRM 核心表（11 表）**：`crm_tenant_config`、`crm_pipeline`、`crm_pipeline_stage`、`crm_lead`、`crm_lead_conversion`、`crm_customer`、`crm_contact`、`crm_opportunity`、`crm_opportunity_stage_history`、`crm_activity`、`crm_owner_change_log`，另含每服务独立的 `sys_mq_message` Outbox。所有 `crm_*` 表均含 `tenant_id`，授权根表保存 owner 快照并使用乐观锁。
+
+> 详见 [crm-design.md](crm-design.md)
+
 **权威 DDL 和种子数据**：`scripts/sql/init-all.sql`
 
 ---
@@ -453,7 +461,7 @@ erDiagram
 │  └────────┘  └────────┘  └────────┘  └──────────────┘  └────────┘ │
 └───────────────────────────────────────────────────────────────────────┘
         ↕ 宿主机端口映射
-   :3000    :8100-8103   :3306  :6379  :8080  :8848  :19876  :18080
+   :3000    :8100-8104   :3306  :6379  :8080  :8848  :19876  :18080
 ```
 
 ### 10.2 服务发现机制
@@ -467,9 +475,9 @@ Nacos 注册: service=omni-auth, ip=<容器内IP>, port=8080
     │
 omni-gateway 启动
     │ @EnableDiscoveryClient
-    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=true
+    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=false
     ▼
-Gateway 路由: lb://omni-auth → Nacos 查询实例列表 → 负载均衡转发
+Gateway 显式路由: /api/crm/** → lb://omni-crm → Nacos 查询实例列表 → 负载均衡转发
 ```
 
 **关键配置**：
@@ -739,19 +747,20 @@ spring:
   uri: lb://omni-order
   predicates:
     - Path=/api/order/**
-  filters:
-    - StripPrefix=2
 ```
+
+下游 Controller 保留并声明完整 `/api/order/**` 路径；当前网关不做 `StripPrefix`。
 
 ### 14.6 添加权限种子数据
 
 在 `scripts/sql/init-all.sql` 中添加 `sys_permission` 记录：
 
 ```sql
-INSERT INTO sys_permission (tenant_id, parent_id, name, code, type, path, ...) VALUES
-(1, 0, '订单管理', NULL, 'DIRECTORY', '/order', ...),
-(1, @order_dir, '订单列表', 'order:list:page', 'MENU', 'list', ...),
-(1, @order_list, '查看订单', 'order:detail:query', 'BUTTON', NULL, ...);
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_name, permission_code, type, path, depth, sort, status) VALUES
+(1, 0, '订单管理', 'order', 'DIRECTORY', '/<目录ID>/', 1, 1, 1),
+(1, @order_dir, '订单列表', 'order:list', 'MENU', '/<目录ID>/<菜单ID>/', 2, 1, 1),
+(1, @order_list, '查看订单', 'order:detail:query', 'API', '/<目录ID>/<菜单ID>/<权限ID>/', 3, 1, 1);
 ```
 
 ### 14.7 Docker 部署配置

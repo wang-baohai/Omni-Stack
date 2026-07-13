@@ -250,7 +250,7 @@ public class OrderServiceImpl implements OrderService {
 启动服务并检查 XXL-JOB 管理控制台（`http://localhost:18080`）：
 - 执行器：你的服务的 AppName 应出现在执行器列表中
 - 任务：`mqRelayHandler` 应已注册，cron 表达式为 `0/10 * * * * ?`
-- 如果任务未运行，请手动启动
+- `MqRelayJobRegistrar` 会在应用就绪后异步注册并启动任务，调度中心暂不可用时每 10 秒重试，最多 12 次
 
 ### 步骤 5：检查前端管理界面
 
@@ -258,6 +258,8 @@ public class OrderServiceImpl implements OrderService {
 - 新消息应以 `status = PENDING`（0）出现，中继后转为 `SENT`（1）
 - 可按 `tenantId`、`status`、`topic`、`serviceName` 或时间范围过滤
 - 可重发失败消息或跳过死信
+
+Base 管理接口通过带 `X-Internal-Token` 的 Feign 调用聚合已接入服务的本地 Outbox。当前聚合 `omni-base` 与 `omni-crm`；新增服务时必须把其内部 `/api/internal/mq-message/**` 客户端纳入聚合，否则消息虽能可靠投递但不会出现在统一运维页面。
 
 ## 6. 扩展指南
 
@@ -382,7 +384,7 @@ spring:
         binder:
           name-server: ${ROCKETMQ_NAMESRV:rocketmq-namesrv:9876}
       bindings:
-        oper-log-out-0:
+        operlog-out-0:
           destination: omni-oper-log-topic
           content-type: application/json
 ```
@@ -393,7 +395,7 @@ spring:
 
 | 问题 | 可能原因 | 排查方法 |
 |------|---------|----------|
-| **消息始终 PENDING** | 中继任务未启动 | XXL-JOB 控制台检查 `mqRelayHandler` 是否已注册并启动；检查 cron 配置 |
+| **消息始终 PENDING** | 中继任务自动注册失败或未启动 | 检查 `MqRelayJobRegistrar` 重试日志、XXL-JOB 凭证与 `mqRelayHandler` 状态 |
 | **消息发送失败进入 FAILED** | RocketMQ Broker 未启动 | 检查 RocketMQ 容器状态；确认 `spring.cloud.stream.rocketmq.binder.name-server` 配置正确 |
 | **消息进入 DEAD_LETTER** | 超过最大重试次数（3 次） | 前端管理页面查看消息详情和错误信息；修复问题后手动重发 |
 | **消费者未收到消息** | Topic 未创建或消费者未订阅 | RocketMQ 控制台检查 Topic 和 Consumer Group；确认消费者服务已启动 |
