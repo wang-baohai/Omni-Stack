@@ -1,5 +1,6 @@
 server:
   port: 8103
+  max-http-header-size: 32KB
 
 management:
   server:

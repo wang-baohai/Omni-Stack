@@ -56,7 +56,8 @@ export const usePermissionStore = defineStore('permission', () => {
       const res = await fetchMenuTree()
       menuTree.value = res.data.data
       menusLoaded.value = true
-    } catch {
+    } catch (error) {
+      console.error('菜单加载失败，请检查 /api/auth/menus 接口响应', error)
       menuTree.value = []
     }
   }

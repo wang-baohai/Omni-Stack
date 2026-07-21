@@ -62,8 +62,7 @@ function handle401(message: string) {
     type: 'warning',
   }).finally(() => {
     showingExpiredDialog = false
-    const redirect = encodeURIComponent(router.currentRoute.value.fullPath)
-    router.push({ path: '/login', query: { redirect } })
+    router.push('/')
   })
 }
 

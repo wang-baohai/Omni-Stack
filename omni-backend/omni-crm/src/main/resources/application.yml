@@ -1,5 +1,6 @@
 server:
   port: 8104
+  max-http-header-size: 32KB
 
 spring:
   application:

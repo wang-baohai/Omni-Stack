@@ -1,5 +1,6 @@
 server:
   port: 8102
+  max-http-header-size: 32KB
 
 spring:
   application:
@@ -39,7 +40,7 @@ spring:
             - id: block-internal-api-services
               uri: no://op
               predicates:
-                - Path=/omni-auth/internal/**,/omni-auth/api/internal/**,/omni-base/internal/**,/omni-base/api/internal/**,/omni-workflow/internal/**,/omni-workflow/api/internal/**,/omni-crm/internal/**,/omni-crm/api/internal/**,/omni-gateway/internal/**
+                - Path=/omni-auth/internal/**,/omni-auth/api/internal/**,/omni-base/internal/**,/omni-base/api/internal/**,/omni-workflow/internal/**,/omni-workflow/api/internal/**,/omni-crm/internal/**,/omni-crm/api/internal/**,/omni-srm/internal/**,/omni-srm/api/internal/**,/omni-gateway/internal/**
               filters:
                 - SetStatus=404
             # OAuth2 authorization server endpoints (必须在 omni-auth 路由之前)
@@ -77,6 +78,11 @@ spring:
               uri: lb://omni-crm
               predicates:
                 - Path=/api/crm/**
+            # SRM 服务路由
+            - id: omni-srm
+              uri: lb://omni-srm
+              predicates:
+                - Path=/api/srm/**
   data:
     redis:
       host: 127.0.0.1

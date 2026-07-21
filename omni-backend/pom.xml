@@ -32,6 +32,7 @@
         <module>omni-base</module>
         <module>omni-workflow</module>
         <module>omni-crm</module>
+        <module>omni-srm</module>
         <module>omni-gateway</module>
     </modules>
 

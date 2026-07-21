@@ -52,7 +52,7 @@ echo ""
 
 # --- 构建应用镜像 ---
 echo "[3/4] 构建应用镜像（首次构建约 5-10 分钟）..."
-if ! docker compose build omni-auth omni-base omni-workflow omni-crm omni-gateway omni-frontend; then
+if ! docker compose build omni-auth omni-base omni-workflow omni-crm omni-srm omni-gateway omni-frontend; then
     echo ""
     echo "[ERROR] 构建失败！请检查以上错误信息。"
     echo "        常见原因：JDK/Node 镜像下载失败、Maven 依赖下载超时。"
@@ -95,6 +95,7 @@ echo "  Base:         http://localhost:8101"
 echo "  Gateway:      http://localhost:8102"
 echo "  Workflow:     http://localhost:8103"
 echo "  CRM:          http://localhost:8104"
+echo "  SRM:          http://localhost:8105"
 echo ""
 echo "  默认账号:     admin / admin123"
 echo "=================================================="

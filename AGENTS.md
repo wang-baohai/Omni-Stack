@@ -34,6 +34,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/scheduling.md` | Scheduled task system: dual-track architecture (system tasks + user tasks), XXL-JOB integration, creating new task types |
 | `docs/workflow.md` | Workflow engine: Flowable integration, dual-version model management, multi-instance countersign, candidate resolution, approval flows |
 | `docs/crm.md` | CRM sales pipeline: domain model, 6-layer security, state machine, lead conversion, extension guide |
+| `docs/design/srm-design.md` | SRM MVP: supplier lifecycle, portal Saga, evaluation/risk, data scope, API and deployment constraints |
 | `docs/mq-reliability.md` | Reliable message sending: Transactional Outbox pattern, status machine, retry strategy, tenant isolation, new service onboarding |
 
 ## Entry Points
@@ -43,6 +44,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Base service: `omni-backend/omni-base/src/main/java/com/omni/base/BaseApplication.java`
 - Gateway: `omni-backend/omni-gateway/src/main/java/com/omni/gateway/GatewayApplication.java`
 - CRM service: `omni-backend/omni-crm/src/main/java/com/omni/crm/CrmApplication.java`
+- SRM service: `omni-backend/omni-srm/src/main/java/com/omni/srm/SrmApplication.java`
 - Common library: `omni-backend/omni-common/src/main/java/com/omni/common/`
 - Common core (POJO): `omni-backend/omni-common-core/src/main/java/com/omni/common/core/`
 - Common MyBatis-Plus starter: `omni-backend/omni-common-mybatis/src/main/java/com/omni/common/mybatis/`
@@ -61,6 +63,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Base config: `omni-backend/omni-base/src/main/resources/application.yml`
 - Vite config: `omni-frontend/vite.config.ts`
 - CRM config: `omni-backend/omni-crm/src/main/resources/application.yml`
+- SRM config: `omni-backend/omni-srm/src/main/resources/application.yml`
 
 **RBAC & Permission:**
 - Data scope filter: `omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeResolveFilter.java`
@@ -136,6 +139,17 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Frontend pages: `omni-frontend/src/views/crm/` (overview, lead, customer, contact, opportunity, activity)
 - Frontend API: `omni-frontend/src/api/crm.ts` (lead, customer, contact, opportunity, activity, overview)
 
+**SRM:**
+- SRM service: `omni-backend/omni-srm/src/main/java/com/omni/srm/SrmApplication.java`
+- Supplier lifecycle: `omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmStateMachine.java`
+- Tenant/DataScope: `omni-backend/omni-srm/src/main/java/com/omni/srm/security/`
+- Portal Saga: `omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java`, `omni-backend/omni-srm/src/main/java/com/omni/srm/consumer/PortalRoleResultConsumer.java`
+- Auth role consumer: `omni-backend/omni-auth/src/main/java/com/omni/auth/consumer/PortalRoleAssignConsumer.java`
+- Evaluation/Risk: `omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/EvaluationServiceImpl.java`, `omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskServiceImpl.java`
+- Frontend management pages: `omni-frontend/src/views/srm/`
+- Supplier portal: `omni-frontend/src/views/supplier-portal/`
+- SRM migration: `scripts/sql/migrate-srm-mvp.sql`
+
 ## Build & Run Commands
 
 ### Prerequisites
@@ -176,6 +190,10 @@ cd omni-backend/omni-workflow
 
 # Run CRM service (port 8104)
 cd omni-backend/omni-crm
+./mvnw spring-boot:run
+
+# Run SRM service (port 8105)
+cd omni-backend/omni-srm
 ./mvnw spring-boot:run
 ```
 
@@ -240,6 +258,7 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 | Gateway          | 8102  |
 | Workflow         | 8103  |
 | CRM              | 8104  |
+| SRM              | 8105  |
 | MySQL            | 3306  |
 | Redis            | 6379  |
 | Nacos            | 8080, 8848  |
@@ -275,6 +294,10 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Gateway `SecurityHeadersFilter` must add `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy` on all responses.
 - omni-auth 模块不记录操作日志（@OperLog）。认证行为由登录日志（sys_login_log）完整留存，omni-auth 不引入 `omni-common-operlog` 依赖，不在控制器方法上使用 `@OperLog` 注解。
 - All date-time values must use `yyyy-MM-dd HH:mm:ss` format consistently. Frontend `el-date-picker` must use `value-format="YYYY-MM-DD HH:mm:ss"`. Backend `LocalDateTime` query params must declare `@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")`.
+- SRM default `USER` role may only enroll; `srm:portal:profile/evaluation` require the `SUPPLIER` role and an active `srm_supplier_portal_user` association.
+- SRM Portal enrollment requires inviteToken and client requestId. Supplier Portal user IDs must never be written into internal `owner_user_id/owner_unit_id` fields.
+- SRM child-resource DataScope must inherit visibility through Supplier/Evaluation relations; never append owner columns to tables that do not contain them.
+- SRM lifecycle, evaluation, risk and Portal Saga rules are defined in `docs/design/srm-design.md`; changes require matching SQL seed/migration, backend permission and frontend `v-permission` updates.
 - `omni-common-job` dependency is required for any service that needs scheduling. `XxlJobAutoConfiguration` activates via `@ConditionalOnClass(XxlJobSpringExecutor.class)` and auto-registers the executor and system job registry.
 - `omni-common-mqlog` provides reliable MQ message sending via Transactional Outbox pattern. `ReliableMessageRelay.send(bindingName, payload, tenantId)` inserts a PENDING record into `sys_mq_message` in the same local transaction. `mqRelayHandler` (XXL-JOB, `@XxlJob` + `@SystemJobMeta` dual annotation) asynchronously delivers messages. Each service's executor AppName is different, so handler names are naturally isolated.
 - `ReliableMessageRelay.send()` requires explicit `Long tenantId` parameter. NEVER use ThreadLocal or implicit tenant resolution for MQ outbox writes. All callers must pass tenantId from their context (e.g., `OperLogMessage.getTenantId()`).
@@ -314,6 +337,7 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Before writing workflow engine or approval logic: read `docs/workflow.md`.
 - Before adding a new candidate resolution strategy or anchor type: read `docs/workflow.md` Section 4 (Extension Guide).
 - Before adding CRM aggregate roots, stages, or permission codes: read `docs/crm.md` (domain model, state machines, hard constraints, extension guide).
+- Before modifying SRM lifecycle, portal, evaluation, risk, permission codes or schema: read `docs/design/srm-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-srm-mvp.sql`.
 - Before adding MQ message sending to a new service: depend on `omni-common-mqlog` (auto-registers `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, and `MqMessageInternalController`), ensure `sys_mq_message` table exists via `schema.sql`, and call `ReliableMessageRelay.send(bindingName, payload, tenantId)` with explicit tenantId. Read `docs/mq-reliability.md` for onboarding details.
 
 ## Completion Checklist

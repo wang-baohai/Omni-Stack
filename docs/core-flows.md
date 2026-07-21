@@ -1712,3 +1712,48 @@ Gateway 容器(:8080)
 | **日志未记录** | RocketMQ 未启动 | 检查 RocketMQ 容器状态；查看 `OperLogProducer` 日志中发送结果 |
 | **日志延迟** | MQ 消费积压 | 检查 omni-base 服务消费者日志；查看 RocketMQ 控制台消费进度 |
 | **归档任务未执行** | @Scheduled 未触发 | 确认 omni-base 服务只有一个实例（避免多实例重复归档）；检查日志中归档记录 |
+
+---
+
+## Flow 13：SRM 门户邀请入驻与角色分配 Saga
+
+```mermaid
+sequenceDiagram
+    participant U as 门户用户
+    participant G as Gateway
+    participant A as Auth
+    participant S as SRM
+    participant O as SRM Outbox
+    participant M as RocketMQ
+    participant I as Auth Inbox/Outbox
+
+    U->>G: Auth 注册（tenant + captcha）
+    G->>A: POST /api/auth/register
+    A-->>U: USER 账号创建完成
+    U->>G: 登录后提交 requestId + inviteToken + 企业信息
+    G->>S: POST /api/srm/portal/enroll
+    S->>S: 校验 tenant/user、邀请余量、creditCode 唯一
+    S->>S: 创建 REGISTERING Supplier 与 PENDING_ROLE_ASSIGN Enrollment
+    S->>O: 同事务写 srm.portal-role.assign-requested.v1
+    O->>M: 可靠中继
+    M->>A: requestId/tenantId/supplierId/userId/SUPPLIER
+    A->>I: requestId Inbox 幂等 + 校验用户和租户 + 分配角色
+    A->>I: 同事务写成功/失败结果 Outbox
+    I->>M: 可靠中继
+    M->>S: Auth 角色分配结果
+    S->>S: 建立租户上下文并按 requestId 幂等消费
+    alt 分配成功
+        S->>S: 创建 PortalUser，Supplier → PENDING_REVIEW，Enrollment → COMPLETED
+    else 分配失败
+        S->>S: Supplier → REGISTERING_FAILED，Enrollment → ROLE_ASSIGN_FAILED
+    end
+    U->>S: GET /api/srm/portal/enrollment
+    S-->>U: 当前 Saga 状态或可重试信息
+```
+
+关键约束：
+
+- USER 只有 `srm:portal:enroll`；企业资料与评估必须同时具备 SUPPLIER 权限和有效 PortalUser 关联。
+- inviteToken 原文不落库、不进日志、不进入 MQ；邀请次数使用版本条件原子递增。
+- Portal userId 不得写入内部 owner 字段；Portal Supplier 在内部负责人分配前允许 owner 为空。
+- 请求与结果均使用 Transactional Outbox；消费者以 requestId 幂等，所有 MQ ThreadLocal 都在 finally 清理。

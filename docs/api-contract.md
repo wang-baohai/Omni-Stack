@@ -588,3 +588,49 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 - `null` 字段包含在 JSON 输出中（不省略）
 - 空集合返回为 `[]`，不是 `null`
 - 可选的单个值使用 `null` 表示不存在，不使用空字符串
+
+---
+
+## 15. SRM MVP 契约
+
+### 15.1 供应商与子资源
+
+- 管理端供应商生命周期命令均携带 `version`；黑名单恢复使用
+  `POST /api/srm/supplier/{id}/restore-from-blacklist`。
+- 联系人、资质、银行账户路径中的 `supplierId` 必须与子资源实际归属一致；不一致统一返回 404。
+- `creditCode` 在租户内唯一；分页 `size` 最大为 100。
+- 供应商 360 使用 `GET /api/srm/supplier/{id}/overview`，返回内容仍按调用人的子资源权限和 PII 权限裁剪。
+
+### 15.2 门户入驻
+
+`POST /api/srm/portal/enroll` 仅接受 Gateway 注入的 tenant/user 身份，请求不得携带 tenantId 或 userId：
+
+```json
+{
+  "requestId": "client-generated-uuid",
+  "inviteToken": "raw-token-returned-once",
+  "name": "示例供应商有限公司",
+  "creditCode": "91320000EXAMPLE"
+}
+```
+
+响应中的状态只使用：`PENDING_ROLE_ASSIGN`、`ROLE_ASSIGN_FAILED`、`COMPLETED`、`CANCELLED`。
+当前用户可通过 `GET /api/srm/portal/enrollment` 查询状态，并在失败后调用
+`POST /api/srm/portal/enrollment/retry` 幂等重试。角色分配完成前不创建 PortalUser，也不开放企业资料接口。
+
+### 15.3 评估与风险
+
+- `GET /api/srm/evaluation/template/default/dimensions` 返回当前租户默认模板及有效维度，前端不得硬编码数据库 ID。
+- 评分范围为 1–5，必须覆盖默认模板的全部维度且不得重复。
+- `GET /api/srm/risk/list` 返回按供应商最新评估聚合的风险摘要分页，可按 `riskLevel` 筛选。
+- `GET /api/srm/supplier/{id}/risk` 返回 `indicators/latestAssessment/history` 聚合视图。
+- 风险指标更新携带 `version`；仅综合等级从非 RED 变为 RED 时产生 `srm.risk.level-changed.v1`。
+
+### 15.4 内部供应商摘要
+
+后续 Procurement/Asset 只能携带 `X-Internal-Token` 调用：
+
+- `GET /api/internal/supplier/{id}?tenantId={tenantId}`
+- `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}&limit=50`
+
+响应仅包含供应商 ID、编号、名称、状态、等级和品类，不返回联系人或银行账户 PII。

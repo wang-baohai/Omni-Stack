@@ -6,12 +6,16 @@ import com.omni.common.job.XxlJobProperties;
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * XXL-JOB 执行器自动配置。
@@ -137,5 +141,120 @@ public class XxlJobAutoConfiguration {
     @ConditionalOnMissingBean
     public SystemJobRegistry systemJobRegistry() {
         return new SystemJobRegistry();
+    }
+
+    /**
+     * 应用启动完成后，自动将未注册的系统任务注册到 XXL-JOB 调度中心。
+     * <p>
+     * 遍历 {@link SystemJobRegistry} 中收集的所有 Handler 元数据，
+     * 查询 XXL-JOB 中已存在的任务，对未注册的 Handler 使用默认 Cron 自动创建。
+     * 已有任务不会被覆盖（保留运维人员手动修改的 Cron 和参数）。
+     * </p>
+     *
+     * @param systemJobRegistry 系统任务元数据注册中心
+     * @param properties        XXL-JOB 配置属性
+     * @return 启动后执行的自动注册逻辑
+     */
+    @Bean
+    public ApplicationRunner systemJobAutoRegistrar(
+            SystemJobRegistry systemJobRegistry,
+            XxlJobProperties properties) {
+        return args -> {
+            String appname = properties.getExecutor().getAppname();
+            if (appname == null || appname.isBlank()) {
+                log.debug("XXL-JOB appname 未配置，跳过系统任务自动注册");
+                return;
+            }
+
+            Map<String, SystemJobRegistry.SystemJobInfo> allJobs = systemJobRegistry.getAll();
+            if (allJobs.isEmpty()) {
+                log.debug("无系统任务元数据，跳过自动注册");
+                return;
+            }
+
+            XxlJobAdminClient client = new XxlJobAdminClient(
+                    properties.getAdmin().getAddresses(),
+                    properties.getAdmin().getUsername(),
+                    properties.getAdmin().getPassword());
+
+            try {
+                int groupId = client.getJobGroupId(appname);
+                if (groupId < 0) {
+                    log.warn("未找到执行器组: appname={}, 跳过自动注册", appname);
+                    return;
+                }
+
+                // 查询 XXL-JOB 中已注册的任务
+                List<Map<String, Object>> existingJobs = client.pageList(groupId, null);
+                java.util.Set<String> existingHandlers = new java.util.HashSet<>();
+                for (Map<String, Object> job : existingJobs) {
+                    Object handler = job.get("executorHandler");
+                    if (handler != null) {
+                        existingHandlers.add(handler.toString());
+                    }
+                }
+
+                // 自动注册未注册的任务
+                int registered = 0;
+                for (SystemJobRegistry.SystemJobInfo info : allJobs.values()) {
+                    if (existingHandlers.contains(info.getHandlerName())) {
+                        log.debug("系统任务已注册，跳过: {}", info.getHandlerName());
+                        continue;
+                    }
+                    if (info.getDefaultCron() == null || info.getDefaultCron().isBlank()) {
+                        log.warn("系统任务缺少默认 Cron，跳过自动注册: {}", info.getHandlerName());
+                        continue;
+                    }
+
+                    String defaultParams = buildDefaultParams(info);
+                    String xxlJobId = client.addJob(
+                            groupId,
+                            info.getName(),
+                            info.getDefaultCron(),
+                            info.getRouteStrategy(),
+                            info.getHandlerName(),
+                            defaultParams);
+                    log.info("系统任务自动注册成功: {} -> XXL-JOB ID={}, cron={}",
+                            info.getHandlerName(), xxlJobId, info.getDefaultCron());
+                    registered++;
+                }
+
+                if (registered > 0) {
+                    log.info("系统任务自动注册完成，本次注册 {} 个", registered);
+                } else {
+                    log.info("系统任务已全部注册，无需操作");
+                }
+            } catch (Exception e) {
+                log.warn("系统任务自动注册失败: {}", e.getMessage());
+            }
+        };
+    }
+
+    /**
+     * 根据元数据中的参数定义构建默认执行参数 JSON。
+     *
+     * @param info 系统任务元数据
+     * @return JSON 格式的默认参数，无参数时返回空字符串
+     */
+    private String buildDefaultParams(SystemJobRegistry.SystemJobInfo info) {
+        List<SystemJobRegistry.ParamDefInfo> paramDefs = info.getParamDefs();
+        if (paramDefs == null || paramDefs.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder("{");
+        for (int i = 0; i < paramDefs.size(); i++) {
+            SystemJobRegistry.ParamDefInfo p = paramDefs.get(i);
+            if (i > 0) sb.append(",");
+            sb.append("\"").append(p.getName()).append("\":");
+            if ("number".equals(p.getType())) {
+                sb.append(p.getDefaultValue());
+            } else if ("boolean".equals(p.getType())) {
+                sb.append(p.getDefaultValue());
+            } else {
+                sb.append("\"").append(p.getDefaultValue() != null ? p.getDefaultValue() : "").append("\"");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
     }
 }

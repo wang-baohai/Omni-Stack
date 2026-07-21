@@ -1,5 +1,7 @@
 package com.omni.common.result;
 
+import com.omni.common.core.result.BusinessException;
+import com.omni.common.core.result.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;

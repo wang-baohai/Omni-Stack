@@ -15,7 +15,7 @@
 ## 特性亮点
 
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 全栈最新技术
-- **Docker 全家桶一键部署**：`start.bat` / `./start.sh` 一条命令启动 12 个容器（MySQL、Redis、Nacos、RocketMQ、XXL-JOB、5 个后端微服务、前端），详见 [Docker 部署指南](docs/docker-deployment.md)
+- **Docker 全家桶一键部署**：`start.bat` / `./start.sh` 一条命令启动 13 个容器（6 个中间件容器、6 个后端微服务、前端），详见 [Docker 部署指南](docs/docker-deployment.md)
 - **CRM 销售前闭环**：独立 `omni-crm` 服务，覆盖线索、客户、联系人、商机、跟进、转换与概览，复用租户、RBAC、数据范围、XSS、审计和 Outbox 能力
 - **多提供商社交登录**：GitHub + Google + Gitee OAuth2 一键登录（策略模式可扩展），首次登录自动注册
 - **三层 XSS 纵深防御**：Jackson 反序列化器 + Servlet Filter + Gateway 安全响应头，按租户配置，前端管理界面完整可用
@@ -68,8 +68,12 @@
                             │                    │    omni-crm      │
                             │                    │   Sales :8104   │
                             │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │    omni-srm      │
+                            │                    │   SRM :8105     │
+                            │                    └─────────────────┘
                     ┌───────┴────────┐
-                    │  MySQL :3306   │  持久化存储
+                    │ MySQL :13306*  │  持久化存储（*宿主机；容器内 3306）
                     │  Redis :6379   │  缓存 + 验证码
                     │  Nacos :8848   │  服务发现 + 配置中心
                     │  RocketMQ      │  消息队列（异步投递）
@@ -101,11 +105,14 @@ Omni-Stack/
 │   ├── scheduling.md                   #   定时任务系统深度技术文档
 │   ├── workflow.md                     #   工作流引擎深度技术文档
 │   ├── mq-reliability.md              #   可靠消息发送深度技术文档
-│   ├── crm.md                        #   CRM 销售管道系统真相（Harness 文档）
+│   ├── crm.md                          #   CRM 销售管道系统真相（Harness 文档）
+│   ├── srm.md                          #   SRM 供应商关系管理系统真相（Harness 文档）
+│   ├── design/srm-design.md            #   SRM MVP 设计与实现基线
 │   └── docker-deployment.md            #   Docker 全家桶部署深度指南
 ├── scripts/sql/                        # 数据库初始化脚本
 │   ├── init-all.sql                    #   权威 DDL + 种子数据
 │   ├── migrate-crm-mvp.sql             #   既有环境 CRM MVP 幂等迁移
+│   ├── migrate-srm-mvp.sql             #   既有环境 SRM MVP 幂等迁移
 │   ├── sp_init_tenant.sql              #   新租户初始化存储过程
 │   ├── init-nacos.sql                  #   Nacos MySQL 持久化
 │   └── init-xxl-job.sql               #   XXL-JOB 数据库
@@ -123,13 +130,14 @@ Omni-Stack/
 │   ├── omni-base/                      #   基础数据服务 (8101)
 │   ├── omni-workflow/                  #   工作流引擎服务 (8103)
 │   ├── omni-crm/                       #   CRM 销售前闭环服务 (8104)
+│   ├── omni-srm/                       #   SRM 供应商关系管理服务 (8105)
 │   └── omni-gateway/                   #   API 网关 (8102)
 └── omni-frontend/                      # Vue 3 SPA (3000)
 ```
 
 ## Docker 一键部署（推荐）
 
-一条命令启动全部 12 个容器：中间件（MySQL、Redis、Nacos、RocketMQ、XXL-JOB）+ 5 个后端微服务 + 前端。
+一条命令启动全部容器：中间件（MySQL、Redis、Nacos、RocketMQ、XXL-JOB）+ 6 个后端微服务 + 前端。
 
 ### 前置条件
 
@@ -142,7 +150,7 @@ Omni-Stack/
 
 > 无需安装 JDK、Node.js、Maven —— 全部在 Docker 容器内完成构建和运行。
 
-已有 MySQL 数据卷不会重新执行 Docker entrypoint 初始化脚本。升级时先备份数据库，再执行 `scripts/sql/migrate-crm-mvp.sql` 和更新后的 `scripts/sql/sp_init_tenant.sql`；新环境直接使用 `init-all.sql`。
+已有 MySQL 数据卷不会重新执行 Docker entrypoint 初始化脚本。升级时先备份数据库，再依次执行 `scripts/sql/migrate-crm-mvp.sql`、`scripts/sql/migrate-srm-mvp.sql` 和更新后的 `scripts/sql/sp_init_tenant.sql`；SRM 迁移会幂等创建 Auth/SRM Outbox、权限角色、业务表、索引/约束、默认模板与品类字典。新环境直接使用 `init-all.sql`。
 
 ### 启动
 
@@ -177,13 +185,14 @@ docker compose ps
 | API 网关 | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
 | 工作流引擎 | http://localhost:8103 | Flowable BPMN |
 | CRM 服务 | http://localhost:8104 | 线索、客户、商机与跟进 |
-
-以上后端直连地址仅用于本地开发和诊断。生产环境只发布 Frontend 与 Gateway，Auth、Base、Workflow、CRM 端口必须保留在私有网络内。
-| MySQL | localhost:3306 | root/root |
+| SRM 服务 | http://127.0.0.1:8105 | 供应商、门户、评估与风险（仅回环调试） |
+| MySQL | localhost:13306 | root/root（容器内端口 3306） |
 | Redis | localhost:6379 | 无密码 |
 | Nacos 控制台 | http://localhost:8080 | nacos/nacos |
 | XXL-JOB 调度中心 | http://localhost:18080 | admin/123456 |
 | RocketMQ NameServer | localhost:19876 | 宿主机映射端口（容器内 9876） |
+
+以上后端直连地址仅用于本地开发和诊断。生产环境只发布 Frontend 与 Gateway，Auth、Base、Workflow、CRM、SRM 端口必须保留在私有网络内。
 
 ### 验证
 
@@ -329,6 +338,30 @@ CRM 模块覆盖完整的售前闭环：线索获取 → 跟进培育 → 客户
 | ![跟进活动](docs/images/crm-activity-timeline.png) | |
 | 活动列表记录每次跟进，支持计划/完成/取消状态流转 | |
 
+### SRM 供应商管理
+
+SRM 模块覆盖供应商全生命周期管理闭环：供应商注册/准入 → 审核 → 分级分类 → 绩效评估 → 风险管控 → 淘汰退出。五层安全信任链（Gateway JWT → 租户校验 → 功能权限 → 数据范围 → 行级授权）保障多租户数据安全，详见 [SRM 系统真相](docs/srm.md)。
+
+- **供应商主数据**：供应商信息库、联系人、资质、银行账户，支持准入审核、冻结恢复、黑名单和淘汰退出
+- **供应商门户**：供应商自助注册入驻、企业信息维护、绩效查看，基于 Outbox/Saga 的跨服务角色分配
+- **绩效评估**：加权评分卡（质量/交期/价格/服务），系统自动计算百分制总分并映射供应商等级
+- **风险看板**：六维风险指标（财务/合规/供应/合作/质量/资质），红黄绿灯可视化，资质到期预警
+
+| 供应商概览 | 供应商列表 |
+|-----------|------------|
+| ![供应商概览](docs/images/srm-overview.png) | ![供应商列表](docs/images/srm-supplier-list.png) |
+| 统计卡片 + 供应商分布 + 等级概况，关键指标一屏纵览 | 供应商列表支持搜索、筛选、分配和批量操作，准入审核的起点 |
+
+| 绩效评估 | 风险看板 |
+|----------|----------|
+| ![绩效评估](docs/images/srm-evaluation.png) | ![风险看板](docs/images/srm-risk.png) |
+| 加权评分卡（质量/交期/价格/服务），自动计算百分制总分并映射等级 | 六维风险指标红黄绿灯可视化，资质到期预警，综合风险等级一目了然 |
+
+| 邀请管理 | 供应商门户 |
+|----------|------------|
+| ![邀请管理](docs/images/srm-invite.png) | ![供应商门户](docs/images/srm-portal.png) |
+| 邀请码发放与撤回，控制供应商准入入口 | 供应商自助入驻、企业信息维护、绩效查看 |
+
 ## 模块概览
 
 ### 后端微服务
@@ -339,6 +372,7 @@ CRM 模块覆盖完整的售前闭环：线索获取 → 跟进培育 → 客户
 | omni-base | 8101 | 基础数据：字典、组织、用户、日志、定时任务、MQ 消息管理 | [scheduling.md](docs/scheduling.md) |
 | omni-workflow | 8103 | 工作流引擎：BPMN 模型管理、审批、流程实例 | [workflow.md](docs/workflow.md) |
 | omni-crm | 8104 | CRM：线索、客户、联系人、商机、跟进与销售概览 | [crm.md](docs/crm.md) |
+| omni-srm | 8105 | SRM：供应商主档、准入、绩效、风险、邀请与供应商门户 | [srm.md](docs/srm.md) |
 | omni-gateway | 8102 | API 网关：路由转发、JWT 验证、CORS、安全响应头 | [architecture.md](docs/architecture.md) |
 
 ### Common Starter 生态（8 模块）

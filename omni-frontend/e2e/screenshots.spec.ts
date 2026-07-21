@@ -1,13 +1,13 @@
 /**
  * @module screenshots.spec
  * 系统功能截图自动化脚本。
- * 通过 Playwright 自动截取 15 张系统核心功能截图，输出到 docs/images/ 目录。
+ * 通过 Playwright 自动截取 21 张系统核心功能截图，输出到 docs/images/ 目录。
  *
  * 前置条件：
  * 1. Docker 中间件已启动（MySQL, Redis, Nacos 等）
- * 2. 后端 Auth(8100) + Base(8101) + Gateway(8102) + Workflow(8103) 服务已启动
+ * 2. 后端 Auth(8100) + Base(8101) + Gateway(8102) + Workflow(8103) + CRM(8104) + SRM(8105) 服务已启动
  * 3. 前端 dev server 已启动（localhost:3000）
- * 4. 数据库已初始化（init-all.sql 已执行）
+ * 4. 数据库已初始化（init-all.sql 已执行，SRM 数据已导入）
  *
  * 运行命令：cd omni-frontend && npx playwright test
  */
@@ -247,4 +247,80 @@ test('15 - 设备授权验证页', async ({ page }) => {
   await page.waitForSelector('.user-code-input', { timeout: 5000 }).catch(() => {})
   await page.waitForTimeout(500)
   await page.screenshot({ path: path.join(OUT, 'social-device-verify.png'), fullPage: true })
+})
+
+// ===== SRM 供应商管理截图 =====
+
+test('16 - SRM 供应商概览', async ({ page }) => {
+  await login(page)
+  await navigateTo(page, '/admin/srm/overview')
+  await page.screenshot({ path: path.join(OUT, 'srm-overview.png'), fullPage: true })
+})
+
+test('17 - SRM 供应商列表', async ({ page }) => {
+  await login(page)
+  await navigateTo(page, '/admin/srm/supplier')
+  await page.screenshot({ path: path.join(OUT, 'srm-supplier-list.png'), fullPage: true })
+})
+
+test('18 - SRM 绩效评估', async ({ page }) => {
+  await login(page)
+  await navigateTo(page, '/admin/srm/evaluation')
+  await page.screenshot({ path: path.join(OUT, 'srm-evaluation.png'), fullPage: true })
+})
+
+test('19 - SRM 风险看板', async ({ page }) => {
+  await login(page)
+  await navigateTo(page, '/admin/srm/risk')
+  await page.screenshot({ path: path.join(OUT, 'srm-risk.png'), fullPage: true })
+})
+
+test('20 - SRM 邀请管理', async ({ page }) => {
+  await login(page)
+  await navigateTo(page, '/admin/srm/invite')
+  await page.screenshot({ path: path.join(OUT, 'srm-invite.png'), fullPage: true })
+})
+
+test('21 - SRM 供应商门户', async ({ page }) => {
+  // 拦截验证码 API 响应，提取 captchaKey
+  let captchaKey = ''
+  await page.route('**/api/auth/captcha', async (route) => {
+    const response = await route.fetch()
+    const json = await response.json()
+    captchaKey = json.data.captchaKey
+    await route.fulfill({ response })
+  })
+
+  await page.goto('/portal-login')
+  await page.waitForSelector('.login-card', { timeout: 10000 })
+  await page.waitForSelector('.captcha-image img', { timeout: 10000 })
+  await page.waitForTimeout(500)
+
+  // 从 Redis 读取验证码
+  if (!captchaKey) throw new Error('未能拦截到验证码 captchaKey')
+  const captchaCode = await getCaptchaFromRedis(captchaKey)
+
+  // 选择租户
+  await page.click('.el-select .el-select__wrapper')
+  await page.waitForSelector('.el-select-dropdown__item', { timeout: 5000 })
+  await page.click('.el-select-dropdown__item')
+
+  // 填写用户名和密码
+  const formItems = page.locator('.el-form-item')
+  await formItems.nth(1).locator('input').fill('supplier1')
+  await formItems.nth(2).locator('input').fill('supplier123')
+
+  // 填写验证码
+  const captchaInput = page.locator('.captcha-input input')
+  await captchaInput.fill(captchaCode)
+
+  // 点击登录
+  await page.click('.login-btn')
+
+  // 等待跳转到供应商门户
+  await page.waitForURL(url => url.pathname.includes('/supplier-portal'), { timeout: 15000 })
+  await page.waitForTimeout(3000)
+
+  await page.unroute('**/api/auth/captcha')
+  await page.screenshot({ path: path.join(OUT, 'srm-portal.png'), fullPage: true })
 })

@@ -10,6 +10,8 @@ import { useUserStore } from '@/stores/user'
 import { usePermissionStore } from '@/stores/permission'
 import type { MenuNode } from '@/api/menu'
 import { menuI18nMap } from '@/constants/menu'
+import { hasManagementAccess } from '@/utils/access'
+import { getRolesFromToken } from '@/utils/jwt'
 import i18n from '@/i18n'
 
 /** 扩展 Vue Router 路由元信息类型 */
@@ -19,6 +21,7 @@ declare module 'vue-router' {
     icon?: string
     requiresAuth?: boolean
     permissionCode?: string
+    portalAccess?: boolean
   }
 }
 
@@ -63,6 +66,15 @@ const iconMap: Record<string, string> = {
   'crm:contact': 'Postcard',
   'crm:opportunity': 'TrendCharts',
   'crm:activity': 'Calendar',
+  'srm': 'GoodsFilled',
+  'srm:overview': 'DataAnalysis',
+  'srm:supplier': 'OfficeBuilding',
+  'srm:evaluation': 'Document',
+  'srm:risk': 'Warning',
+  'srm:portal': 'Promotion',
+  'srm:portal:profile': 'Document',
+  'srm:portal:evaluation': 'TrendCharts',
+  'srm:invite': 'Message',
   'system:user': 'User',
   'system:role': 'UserFilled',
   'system:permission': 'Lock',
@@ -107,6 +119,18 @@ const staticRoutes: RouteRecordRaw[] = [
     meta: { title: 'Register', requiresAuth: false },
   },
   {
+    path: '/portal-login',
+    name: 'PortalLogin',
+    component: () => import('@/views/portal-login/index.vue'),
+    meta: { title: 'Supplier Portal Login', requiresAuth: false },
+  },
+  {
+    path: '/portal-register',
+    name: 'PortalRegister',
+    component: () => import('@/views/portal-register/index.vue'),
+    meta: { title: 'Supplier Registration', requiresAuth: false },
+  },
+  {
     path: '/callback',
     name: 'OAuth2Callback',
     component: () => import('@/views/callback/index.vue'),
@@ -129,6 +153,12 @@ const staticRoutes: RouteRecordRaw[] = [
     name: 'Consent',
     component: () => import('@/views/consent/index.vue'),
     meta: { title: 'Authorization Consent', requiresAuth: false },
+  },
+  {
+    path: '/supplier-portal',
+    name: 'SupplierPortal',
+    component: () => import('@/views/supplier-portal/index.vue'),
+    meta: { title: 'Supplier Portal', requiresAuth: true, portalAccess: true },
   },
   {
     path: '/admin',
@@ -178,12 +208,11 @@ export function registerDynamicRoutes(menus: MenuNode[]) {
  */
 function registerMenuRoute(menu: MenuNode, parentName?: string) {
   // 仅处理 MENU 类型节点（DIRECTORY 类型仅作为分组，不需要路由）
-  if (menu.type === 'MENU') {
+  if (menu.type === 'MENU' && !menu.permissionCode.startsWith('srm:portal:')) {
     const component = resolveViewComponent(menu.permissionCode)
     if (component && !dynamicRouteNames.has(menu.permissionCode)) {
-      // 从 permissionCode 提取最后一段作为路由路径
-      const segments = menu.permissionCode.split(':')
-      const routePath = segments[segments.length - 1]
+      // 从 permissionCode 提取所有段作为路由路径（避免不同模块同名冲突）
+      const routePath = menu.permissionCode.replace(/:/g, '/')
       const routeName = menu.permissionCode.replace(/:/g, '-')
 
       router.addRoute('admin', {
@@ -238,25 +267,32 @@ router.beforeEach(async (to, _from, next) => {
   const permissionStore = usePermissionStore()
 
   if (to.meta.requiresAuth === false) {
+    // 已登录用户访问登录页时重定向
     if (to.name === 'Login' && userStore.token) {
       next({ name: 'Home' })
+    } else if (to.name === 'PortalLogin' && userStore.token) {
+      next('/supplier-portal')
     } else {
       next()
     }
   } else if (!userStore.token) {
-    const redirect = encodeURIComponent(to.fullPath)
-    next({ path: '/login', query: { redirect } })
+    // 门户入口保留独立登录体验，其他受保护页面回到首页。
+    if (to.meta.portalAccess) {
+      next({ name: 'PortalLogin', query: { redirect: to.fullPath } })
+    } else {
+      next({ name: 'Home' })
+    }
   } else {
+    // 静态门户路由同样依赖 JWT 权限，不能只依赖动态菜单加载时的初始化。
+    permissionStore.initFromToken()
     // 已登录但菜单未加载：加载菜单并注册动态路由
     if (!permissionStore.menusLoaded) {
       try {
-        permissionStore.initFromToken()
         await permissionStore.loadMenus()
         registerDynamicRoutes(permissionStore.menuTree)
         // 重新导航到目标路由（使用 fullPath 避免传递内部路由对象状态）
         next({ path: to.fullPath, replace: true })
-      } catch (error) {
-        console.error('路由守卫：菜单加载失败', error)
+      } catch {
         next({ name: 'Home' })
       }
     } else {
@@ -264,6 +300,26 @@ router.beforeEach(async (to, _from, next) => {
       // Home 页面会预加载菜单数据（menusLoaded=true），但不会注册动态路由，
       // 因此从 Home 导航到管理后台时，需要在此处补注册。
       registerDynamicRoutes(permissionStore.menuTree)
+      const roles = getRolesFromToken(userStore.token)
+      const isSupplier = roles.includes('SUPPLIER')
+      const hasManagementPermission = hasManagementAccess(permissionStore.permissions, roles)
+      const canEnroll = permissionStore.hasPermission('srm:portal:enroll')
+      const canAccessPortal = isSupplier || (canEnroll && !hasManagementPermission)
+
+      if (to.meta.portalAccess && !canAccessPortal) {
+        next({ name: 'Home' })
+        return
+      }
+
+      // 只有门户权限的 USER/SUPPLIER 账号不得进入管理后台。
+      if (to.path.startsWith('/admin') && isSupplier && !hasManagementPermission) {
+        next('/supplier-portal')
+        return
+      }
+      if (to.path.startsWith('/admin') && !hasManagementPermission) {
+        next(canAccessPortal ? '/supplier-portal' : '/')
+        return
+      }
       next()
     }
   }

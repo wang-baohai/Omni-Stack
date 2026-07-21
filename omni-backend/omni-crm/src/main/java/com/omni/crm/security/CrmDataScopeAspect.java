@@ -6,6 +6,7 @@ import com.omni.common.core.result.R;
 import com.omni.crm.client.AuthInternalClient;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Order(300)
+@Slf4j
 @RequiredArgsConstructor
 public class CrmDataScopeAspect {
 
@@ -47,8 +49,13 @@ public class CrmDataScopeAspect {
             CrmDataScopeContext.set(scope);
             return joinPoint.proceed();
         } catch (FeignException.Forbidden exception) {
+            log.warn("权限服务拒绝数据范围解析: userId={}, tenantId={}, permissionCode={}, status={}",
+                    identity.userId(), identity.tenantId(), annotation.permissionCode(), exception.status());
             throw new BusinessException(403, "当前用户不具备该操作的数据权限");
         } catch (FeignException exception) {
+            log.warn("权限服务数据范围解析调用失败: userId={}, tenantId={}, permissionCode={}, status={}, 原因={}",
+                    identity.userId(), identity.tenantId(), annotation.permissionCode(),
+                    exception.status(), exception.getMessage());
             throw new BusinessException(503, "权限服务暂时不可用");
         } finally {
             CrmDataScopeContext.clear();

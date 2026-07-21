@@ -98,7 +98,7 @@ echo.
 :: --- 端口保护（静默执行，仅 Windows + Hyper-V/WSL2 环境生效） ---
 echo [2/5] 端口保护...
 powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ^
-  "sc.exe query winnat *>$null; if ($LASTEXITCODE -eq 0) { sc.exe stop winnat *>$null; @(3000,3306,6379,8080,8100,8101,8102,8103,8104,8848,9848,19876,10909,10911,10912,18080) | ForEach-Object { netsh int ipv4 add excludedportrange protocol=tcp startport=$_ numberofports=1 persistent=yes *>$null }; sc.exe start winnat *>$null }"
+  "sc.exe query winnat *>$null; if ($LASTEXITCODE -eq 0) { sc.exe stop winnat *>$null; @(3000,3306,6379,8080,8100,8101,8102,8103,8104,8105,8848,9848,19876,10909,10911,10912,18080) | ForEach-Object { netsh int ipv4 add excludedportrange protocol=tcp startport=$_ numberofports=1 persistent=yes *>$null }; sc.exe start winnat *>$null }"
 echo       完成
 echo.
 
@@ -125,7 +125,7 @@ echo.
 
 :: --- 构建应用镜像 ---
 echo [4/5] 构建应用镜像（首次构建约 5-10 分钟）...
-docker compose build omni-auth omni-base omni-workflow omni-crm omni-gateway omni-frontend 2>&1
+docker compose build omni-auth omni-base omni-workflow omni-crm omni-srm omni-gateway omni-frontend 2>&1
 if !errorlevel! neq 0 (
     echo.
     echo [ERROR] 构建失败！请检查以上错误信息。
@@ -167,6 +167,7 @@ if !errorlevel! neq 0 (
     echo   Gateway:      http://localhost:8102
     echo   Workflow:     http://localhost:8103
     echo   CRM:          http://localhost:8104
+    echo   SRM:          http://localhost:8105
     echo.
     echo   默认账号:     admin / admin123
     echo ==================================================

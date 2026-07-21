@@ -28,6 +28,16 @@ public interface SysUserRoleMapper {
     void insert(@Param("userId") Long userId, @Param("roleId") Long roleId);
 
     /**
+     * 幂等插入用户角色关联。
+     *
+     * @param userId 用户 ID
+     * @param roleId 角色 ID
+     * @return 新增行数，关联已存在时为 0
+     */
+    @Insert("INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (#{userId}, #{roleId})")
+    int insertIgnore(@Param("userId") Long userId, @Param("roleId") Long roleId);
+
+    /**
      * 删除用户的所有角色关联。
      *
      * @param userId 用户 ID

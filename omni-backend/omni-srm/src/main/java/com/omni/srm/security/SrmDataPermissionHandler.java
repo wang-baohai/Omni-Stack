@@ -1,0 +1,119 @@
+package com.omni.srm.security;
+
+import com.baomidou.mybatisplus.extension.plugins.handler.MultiDataPermissionHandler;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * SRM 授权聚合根 owner 数据权限 SQL 处理器。
+ *
+ * @author Omni-Stack Team
+ */
+public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
+
+    private static final Set<String> OWNED_TABLES = Set.of("srm_supplier", "srm_evaluation");
+    private static final Map<String, ParentRelation> CHILD_TABLES = Map.of(
+            "srm_supplier_contact", new ParentRelation("srm_supplier", "supplier_id", "id"),
+            "srm_supplier_qualification", new ParentRelation("srm_supplier", "supplier_id", "id"),
+            "srm_supplier_bank_account", new ParentRelation("srm_supplier", "supplier_id", "id"),
+            "srm_risk_indicator", new ParentRelation("srm_supplier", "supplier_id", "id"),
+            "srm_risk_assessment", new ParentRelation("srm_supplier", "supplier_id", "id"),
+            "srm_evaluation_item", new ParentRelation("srm_evaluation", "evaluation_id", "id"));
+
+    /** {@inheritDoc} */
+    @Override
+    public Expression getSqlSegment(Table table, Expression where, String mappedStatementId) {
+        if (table == null || table.getName() == null) {
+            return null;
+        }
+        String tableName = table.getName().toLowerCase();
+        if (!OWNED_TABLES.contains(tableName) && !CHILD_TABLES.containsKey(tableName)) {
+            return null;
+        }
+        String alias = table.getAlias() == null ? table.getName() : table.getAlias().getName();
+        SrmDataScopeContext.ScopeInfo info = SrmDataScopeContext.get();
+        if (info == null || info.effectiveScope() == null) {
+            return deny(alias);
+        }
+        if ("ALL".equals(info.effectiveScope()) || "TENANT".equals(info.effectiveScope())) {
+            return null;
+        }
+        ParentRelation relation = CHILD_TABLES.get(tableName);
+        if (relation != null) {
+            return inherited(alias, relation, info);
+        }
+        return owned(alias, info);
+    }
+
+    private Expression owned(String alias, SrmDataScopeContext.ScopeInfo info) {
+        return switch (info.effectiveScope()) {
+            case "SELF" -> equals(alias, "owner_user_id", info.userId());
+            case "DEPT" -> equals(alias, "owner_unit_id", info.primaryUnitId());
+            case "DEPT_AND_BELOW", "CUSTOM" -> in(alias, "owner_unit_id", info.accessibleUnitIds());
+            default -> deny(alias);
+        };
+    }
+
+    private Expression inherited(String alias, ParentRelation relation, SrmDataScopeContext.ScopeInfo info) {
+        if (info.tenantId() == null) {
+            return deny(alias);
+        }
+        String parentAlias = "srm_scope_parent";
+        Expression owner = owned(parentAlias, info);
+        if (owner == null) {
+            return null;
+        }
+        String condition = "EXISTS (SELECT 1 FROM " + relation.parentTable() + " " + parentAlias
+                + " WHERE " + parentAlias + "." + relation.parentColumn() + " = "
+                + alias + "." + relation.childColumn()
+                + " AND " + parentAlias + ".tenant_id = " + info.tenantId()
+                + " AND " + parentAlias + ".deleted = 0 AND " + owner + ")";
+        try {
+            return CCJSqlParserUtil.parseCondExpression(condition);
+        } catch (Exception exception) {
+            throw new IllegalStateException("无法构建 SRM 子资源数据权限条件", exception);
+        }
+    }
+
+    private Expression equals(String alias, String column, Long value) {
+        if (value == null) {
+            return deny(alias);
+        }
+        return new EqualsTo(new Column(alias + "." + column), new LongValue(value));
+    }
+
+    private Expression in(String alias, String column, Set<Long> values) {
+        if (values == null || values.isEmpty()) {
+            return deny(alias);
+        }
+        ParenthesedExpressionList<Expression> list = new ParenthesedExpressionList<>();
+        values.stream().sorted().forEach(value -> list.add(new LongValue(value)));
+        InExpression expression = new InExpression();
+        expression.setLeftExpression(new Column(alias + "." + column));
+        expression.setRightExpression(list);
+        return expression;
+    }
+
+    private Expression deny(String alias) {
+        return new EqualsTo(new Column(alias + ".id"), new LongValue(-1));
+    }
+
+    /**
+     * 子资源到授权父表的关联关系。
+     *
+     * @param parentTable 父表
+     * @param childColumn 子表外键列
+     * @param parentColumn 父表主键列
+     */
+    private record ParentRelation(String parentTable, String childColumn, String parentColumn) {
+    }
+}

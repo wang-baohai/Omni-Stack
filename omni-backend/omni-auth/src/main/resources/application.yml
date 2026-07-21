@@ -1,5 +1,6 @@
 server:
   port: 8100
+  max-http-header-size: 32KB
 
 management:
   server:
@@ -18,6 +19,8 @@ spring:
     import:
       - optional:nacos:omni-auth.yml
   cloud:
+    function:
+      definition: portalRoleAssignFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
@@ -31,6 +34,18 @@ spring:
         username: ${NACOS_USERNAME:nacos}
         password: ${NACOS_PASSWORD:nacos}
         file-extension: yml
+    stream:
+      rocketmq:
+        binder:
+          name-server: ${ROCKETMQ_NAME_SERVER:localhost:9876}
+      bindings:
+        portalRoleAssignFunction-in-0:
+          destination: srm-domain-event
+          content-type: application/json
+          group: auth-portal-role-assign-group
+        authPortalRoleResult-out-0:
+          destination: auth-portal-role-result
+          content-type: application/json
   datasource:
     url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:root}
@@ -74,6 +89,23 @@ auth:
 # JWK 密钥持久化配置（AES-256-GCM 加密后存入 Redis）
 jwk:
   encrypt-key: ${JWK_ENCRYPT_KEY:}
+
+# 门户角色结果 Outbox 中继执行器
+xxl:
+  job:
+    access-token: ${XXL_JOB_ACCESS_TOKEN:}
+    admin:
+      addresses: ${XXL_JOB_ADMIN_ADDRESSES:http://localhost:8088/xxl-job-admin}
+      username: ${XXL_JOB_ADMIN_USERNAME:admin}
+      password: ${XXL_JOB_ADMIN_PASSWORD:123456}
+    executor:
+      enabled: ${XXL_JOB_ENABLED:true}
+      appname: omni-auth
+      address: ${XXL_JOB_EXECUTOR_ADDRESS:}
+      ip: ${XXL_JOB_EXECUTOR_IP:}
+      port: ${XXL_JOB_EXECUTOR_PORT:9900}
+      log-path: ${XXL_JOB_LOG_PATH:./logs/xxl-job}
+      log-retention-days: ${XXL_JOB_LOG_RETENTION_DAYS:30}
 
 # 内部 API 认证配置（服务间 Feign 调用使用 X-Internal-Token 校验）
 omni:

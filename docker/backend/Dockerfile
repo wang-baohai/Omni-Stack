@@ -2,7 +2,7 @@
 # Omni-Stack 后端微服务 — 共享多阶段 Dockerfile
 # ============================================================
 # 通过 docker-compose build arg SERVICE_NAME 指定构建哪个微服务：
-#   omni-auth / omni-base / omni-gateway / omni-workflow / omni-crm
+#   omni-auth / omni-base / omni-gateway / omni-workflow / omni-crm / omni-srm
 #
 # 用法（由 docker-compose 自动调用，无需手动执行）：
 #   docker build --build-arg SERVICE_NAME=omni-auth \
@@ -33,6 +33,7 @@ COPY omni-base/pom.xml omni-base/
 COPY omni-gateway/pom.xml omni-gateway/
 COPY omni-workflow/pom.xml omni-workflow/
 COPY omni-crm/pom.xml omni-crm/
+COPY omni-srm/pom.xml omni-srm/
 
 RUN mvn dependency:go-offline -B -q || true
 
@@ -53,6 +54,8 @@ COPY --from=build /build/${SERVICE_NAME}/target/*.jar /app/app.jar
 ENV SERVER_PORT=8080
 # Actuator 管理端口（各服务通过 docker-compose 环境变量覆盖）
 ENV MANAGEMENT_PORT=8080
+# 增大 HTTP 请求头限制，JWT + X-User-Scopes 等头部可能超过 Tomcat 默认 8KB
+ENV SERVER_MAX_HTTP_HEADER_SIZE=32768
 EXPOSE 8080
 
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 --start-period=90s \

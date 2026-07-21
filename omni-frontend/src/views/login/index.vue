@@ -9,12 +9,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import LoginForm from '@/components/LoginForm.vue'
 import { useAppStore } from '@/stores/app'
+import { usePermissionStore } from '@/stores/permission'
+import { hasManagementAccess } from '@/utils/access'
+import { getRolesFromToken } from '@/utils/jwt'
 import { storeLang } from '@/i18n'
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
+const permissionStore = usePermissionStore()
 
 /** 登录成功回调：显示成功提示并跳转到原页面（或工作台） */
 function handleSuccess() {
@@ -23,7 +27,17 @@ function handleSuccess() {
   if (redirect) {
     router.push(decodeURIComponent(redirect))
   } else {
-    router.push({ name: 'Home' })
+    // 从 JWT 解析权限，判断用户角色
+    permissionStore.initFromToken()
+    const roles = getRolesFromToken(localStorage.getItem('token') || '')
+    const isSupplier = roles.includes('SUPPLIER')
+    const hasManagementPermission = hasManagementAccess(permissionStore.permissions, roles)
+    const hasPortalEntry = isSupplier || permissionStore.hasPermission('srm:portal:enroll')
+    if (hasPortalEntry && !hasManagementPermission) {
+      router.push('/supplier-portal')
+    } else {
+      router.push({ name: 'Home' })
+    }
   }
 }
 

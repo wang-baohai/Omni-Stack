@@ -2,7 +2,7 @@
 
 > Spring Boot 4 + Vue 3 기반의 마이크로서비스 스캐폴딩 플랫폼으로, Harness 산업 설계 패턴을 채택하여 AI 보조 개발을 위한 업계 모범 사례 기반을 제공합니다.
 >
-> **단 한 번의 명령으로 전체 스택 시작: 미들웨어 + 4개 마이크로서비스 + 프론트엔드, 총 12개의 Docker 컨테이너.**
+> **단 한 번의 명령으로 전체 스택 시작: 미들웨어 + 5개 마이크로서비스 + 프론트엔드, 총 12개의 Docker 컨테이너.**
 
 **[中文](README.md)** | **[English](README.en.md)** | **[日本語](README.jp.md)**
 
@@ -16,6 +16,8 @@
 
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 최신 기술 스택
 - **Docker 원클릭 배포**: `start.bat` / `./start.sh` 한 명령으로 12개 컨테이너 시작 (MySQL, Redis, Nacos, RocketMQ, XXL-JOB, 4개 백엔드 마이크로서비스, 프론트엔드), 자세한 내용은 [Docker 배포 가이드](docs/docker-deployment.kr.md) 참조
+- **CRM 프리세일즈 폐쇄 루프**: 독립 `omni-crm` 서비스가 리드, 고객, 연락처, 기회, 팔로업, 전환, 대시보드를 커버 — 테넌트, RBAC, 데이터 범위, XSS, 감사, Outbox 기능 재사용
+- **SRM 공급업체 수명주기**: 독립 `omni-srm` 서비스가 공급업체 입점, 심사, 등급 분류, 성과 평가, 리스크 관리, 포털 셀프서비스, 공급업체 360을 커버 — 자세한 내용은 [docs/srm.kr.md](docs/srm.kr.md) 참조
 - **멀티 제공자 소셜 로그인**: GitHub + Google + Gitee OAuth2 원클릭 로그인 (전략 패턴으로 확장 가능), 최초 로그인 시 자동 회원가입
 - **3계층 XSS 종심 방어**: Jackson 역직렬화기 + Servlet Filter + Gateway 보안 응답 헤더, 테넌트별 설정 가능, 프론트엔드 관리 UI 완전 지원
 - **Common Starter 생태계**: 8개 자동 설정 모듈 (mybatis / redis / operlog / job / mqlog / workflow), 새 서비스에서 의존성 추가만으로 기능 획득, 제로 설정
@@ -63,6 +65,14 @@
                             │                    │  omni-workflow   │
                             │                    │  Flowable :8103  │
                             │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │    omni-crm      │
+                            │                    │   Sales :8104   │
+                            │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │    omni-srm      │
+                            │                    │   SRM :8105     │
+                            │                    └─────────────────┘
                     ┌───────┴────────┐
                     │  MySQL :3306   │  영구 저장소
                     │  Redis :6379   │  캐시 + 인증코드
@@ -96,6 +106,9 @@ Omni-Stack/
 │   ├── scheduling.md                   #   스케줄링 시스템 심층 기술 문서
 │   ├── workflow.md                     #   워크플로우 엔진 심층 기술 문서
 │   ├── mq-reliability.md              #   신뢰성 메시지 전송 심층 기술 문서
+│   ├── crm.md                          #   CRM 프리세일즈 시스템 진실 (Harness 문서)
+│   ├── srm.md                          #   SRM 공급업체 관계 관리 시스템 진실 (Harness 문서)
+│   ├── design/srm-design.md            #   SRM MVP 설계 및 구현 베이스라인
 │   └── docker-deployment.md            #   Docker 전체 스택 배포 심층 가이드
 ├── scripts/sql/                        # 데이터베이스 초기화 스크립트
 │   ├── init-all.sql                    #   공식 DDL + 시드 데이터
@@ -114,13 +127,15 @@ Omni-Stack/
 │   ├── omni-auth/                      #   인증 서비스 (8100)
 │   ├── omni-base/                      #   기초 데이터 서비스 (8101)
 │   ├── omni-workflow/                  #   워크플로우 엔진 서비스 (8103)
+│   ├── omni-crm/                       #   CRM 프리세일즈 폐쇄 루프 서비스 (8104)
+│   ├── omni-srm/                       #   SRM 공급업체 관계 관리 서비스 (8105)
 │   └── omni-gateway/                   #   API 게이트웨이 (8102)
 └── omni-frontend/                      # Vue 3 SPA (3000)
 ```
 
 ## Docker 원클릭 배포 (권장)
 
-한 명령으로 전체 12개 컨테이너를 시작합니다: 미들웨어 (MySQL, Redis, Nacos, RocketMQ, XXL-JOB) + 4개 백엔드 마이크로서비스 + 프론트엔드.
+한 명령으로 전체 컨테이너를 시작합니다: 미들웨어 (MySQL, Redis, Nacos, RocketMQ, XXL-JOB) + 6개 백엔드 마이크로서비스 + 프론트엔드.
 
 ### 사전 요구사항
 
@@ -163,6 +178,8 @@ docker compose ps
 | 기초 데이터 서비스 | http://localhost:8101 | 사전/조직/사용자/로그/작업 |
 | API 게이트웨이 | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
 | 워크플로우 엔진 | http://localhost:8103 | Flowable BPMN |
+| CRM 서비스 | http://localhost:8104 | 리드, 고객, 기회, 팔로업 |
+| SRM 서비스 | http://localhost:8105 | 공급업체, 포털, 평가, 리스크 |
 | MySQL | localhost:3306 | root/root |
 | Redis | localhost:6379 | 비밀번호 없음 |
 | Nacos 콘솔 | http://localhost:8080 | nacos/nacos |
@@ -312,6 +329,31 @@ CRM 모듈은 프리세일즈 전 과정을 커버합니다: 리드 획득 → �
 | ![팔로업 활동](docs/images/crm-activity-timeline.png) | |
 | 활동 목록으로 모든 팔로업을 기록, 계획/완료/취소 상태 흐름 지원 | |
 
+### SRM 공급업체 관리
+
+SRM 모듈은 공급업체의 전체 수명주기를 커버합니다: 등록/입점 → 심사 → 등급 분류 → 성과 평가 → 리스크 관리 → 도태/퇴출. 5계층 신뢰 체인(Gateway JWT → 테넌트 검증 → 기능 권한 → 데이터 범위 → SQL 가로채기 → 행 수준 인가)으로 멀티테넌트 데이터 격리를 보장합니다. 자세한 내용은 [SRM 시스템 트루스](docs/srm.kr.md)를 참조하세요.
+
+- **공급업체 마스터 데이터**: 공급업체 번호 자동 생성, 연락처, 자격, 은행 계좌 (PII 마스킹), 카테고리/등급 자동 매핑
+- **입점 & 포털**: 초대 토큰 (SHA-256 해시), Outbox/Saga 크로스 서비스 역할 할당을 통한 셀프서비스 입점
+- **성과 평가**: 가중 점수 (1-5 → 백분위 20-100), 자동 등급 매핑 (전략/우선/합격/도태)
+- **리스크 관리**: 6차원 지표 (재무/컴플라이언스/공급/협력/품질/자격), 종합 리스크 레벨 (GREEN/YELLOW/RED)
+- **공급업체 360**: 블록 단위 권한 제어 — 권한에 따라 다른 사용자가 다른 공급업체 360 섹션을 열람
+
+| 공급업체 개요 | 공급업체 목록 |
+|-------------|-------------|
+| ![공급업체 개요](docs/images/srm-overview.png) | ![공급업체 목록](docs/images/srm-supplier-list.png) |
+| 통계 카드 + 공급업체 분포 + 등급 현황, 핵심 지표를 한눈에 | 공급업체 목록은 검색, 필터, 배정, 일괄 작업 지원, 입점 심사의 시작점 |
+
+| 성과 평가 | 리스크 대시보드 |
+|----------|----------------|
+| ![성과 평가](docs/images/srm-evaluation.png) | ![리스크 대시보드](docs/images/srm-risk.png) |
+| 가중 스코어카드 (품질/납기/가격/서비스), 백분율 점수와 등급 자동 매핑 | 6차원 리스크 지표 신호등 시각화, 자격 만료 알림, 종합 리스크 레벨 |
+
+| 초대 관리 | 공급업체 포털 |
+|----------|--------------|
+| ![초대 관리](docs/images/srm-invite.png) | ![공급업체 포털](docs/images/srm-portal.png) |
+| 초대 토큰 발급 및 취소, 공급업체 입점 입구 제어 | 공급업체 셀프서비스 입점, 기업 정보 유지보수, 성과 조회 |
+
 ## 모듈 개요
 
 ### 백엔드 마이크로서비스
@@ -322,6 +364,7 @@ CRM 모듈은 프리세일즈 전 과정을 커버합니다: 리드 획득 → �
 | omni-base | 8101 | 기초 데이터: 사전, 조직, 사용자, 로그, 스케줄링 작업, MQ 메시지 관리 | [scheduling.kr.md](docs/scheduling.kr.md) |
 | omni-workflow | 8103 | 워크플로우 엔진: BPMN 모델 관리, 승인, 프로세스 인스턴스 | [workflow.kr.md](docs/workflow.kr.md) |
 | omni-crm | 8104 | CRM: 리드, 고객, 연락처, 기회, 팔로업, 영업 대시보드 | [crm.kr.md](docs/crm.kr.md) |
+| omni-srm | 8105 | SRM: 공급업체 마스터 데이터, 입점, 평가, 리스크, 포털, 공급업체 360 | [srm.kr.md](docs/srm.kr.md) |
 | omni-gateway | 8102 | API 게이트웨이: 라우팅 전달, JWT 검증, CORS, 보안 응답 헤더 | [architecture.kr.md](docs/architecture.kr.md) |
 
 ### Common Starter 생태계 (8개 모듈)

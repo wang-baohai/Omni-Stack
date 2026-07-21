@@ -131,13 +131,17 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 .flatMap(claims -> {
                     // Step 6: 将 JWT claims 注入请求头，传递给下游微服务
                     // 下游服务通过 @RequestHeader("X-User-Id") 等方式获取用户身份
+                    // 移除原始 Authorization 头，避免转发超大 JWT 导致下游 Tomcat 拒绝请求
                     ServerHttpRequest mutatedRequest = request.mutate()
-                            .header(GATEWAY_FORWARDED_HEADER, GATEWAY_FORWARDED_VALUE)
-                            .header("X-User-Id", claims.getSubject())                    // sub -> 用户ID
-                            .header("X-Tenant-Id", getClaimAsString(claims, "tenant_id")) // 租户ID
-                            .header("X-User-Name", getClaimAsString(claims, "username"))  // 用户名
-                            .header("X-User-Roles", getClaimAsString(claims, "roles"))    // 角色列表
-                            .header("X-User-Scopes", getClaimAsString(claims, "scope"))   // 权限范围
+                            .headers(h -> {
+                                h.remove(AUTH_HEADER);
+                                h.set(GATEWAY_FORWARDED_HEADER, GATEWAY_FORWARDED_VALUE);
+                                h.set("X-User-Id", claims.getSubject());
+                                h.set("X-Tenant-Id", getClaimAsString(claims, "tenant_id"));
+                                h.set("X-User-Name", getClaimAsString(claims, "username"));
+                                h.set("X-User-Roles", getClaimAsString(claims, "roles"));
+                                h.set("X-User-Scopes", getClaimAsString(claims, "scope"));
+                            })
                             .build();
                     return chain.filter(exchange.mutate().request(mutatedRequest).build());
                 })
@@ -244,16 +248,44 @@ public class AuthFilter implements GlobalFilter, Ordered {
             // 提取 claims 并检查过期时间
             JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
             Date expiration = claims.getExpirationTime();
-            if (expiration != null && expiration.before(new Date())) {
+            if (expiration == null) {
+                log.warn("JWT token missing expiration claim");
+                return Mono.error(new SecurityException("Invalid JWT claims"));
+            }
+            if (expiration.before(new Date())) {
                 log.warn("JWT token expired");
                 return Mono.error(new SecurityException("JWT token expired"));
             }
+            if (!isPositiveLong(claims.getSubject())
+                    || !isPositiveLong(getClaimAsString(claims, "tenant_id"))) {
+                log.warn("JWT token missing valid user or tenant identity");
+                return Mono.error(new SecurityException("Invalid JWT claims"));
+            }
 
             return Mono.just(claims);
+        } catch (SecurityException e) {
+            return Mono.error(e);
         } catch (Exception e) {
             // JWT 解析异常（格式错误、Base64 解码失败等）
-            log.error("Failed to validate JWT", e);
-            return Mono.error(e);
+            log.warn("Failed to parse or verify JWT: {}", e.getMessage());
+            return Mono.error(new SecurityException("Invalid JWT token", e));
+        }
+    }
+
+    /**
+     * 判断身份 claim 是否为正整数，避免把空值或非法身份传播给下游服务。
+     *
+     * @param value claim 字符串
+     * @return 是正整数时返回 true
+     */
+    private boolean isPositiveLong(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            return Long.parseLong(value) > 0;
+        } catch (NumberFormatException exception) {
+            return false;
         }
     }
 

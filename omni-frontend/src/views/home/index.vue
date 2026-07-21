@@ -11,6 +11,8 @@ import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
+import { hasManagementAccess } from '@/utils/access'
+import { getRolesFromToken } from '@/utils/jwt'
 import { useDictOptions } from '@/composables/useDictOptions'
 import { storeLang } from '@/i18n'
 import {
@@ -46,8 +48,13 @@ function categoryLabel(value: string | null) {
 
 // ─── 通用状态 ───
 
-/** 管理员权限：是否显示"控制台"按钮 */
-const isAdmin = computed(() => permissionStore.hasPermission('job:user-job-type:list'))
+/** 是否显示管理控制台入口；供应商角色固定使用独立门户。 */
+const canAccessConsole = computed(() => {
+  return hasManagementAccess(
+    permissionStore.permissions,
+    getRolesFromToken(userStore.token),
+  )
+})
 
 // ─── 工作台状态 ───
 
@@ -109,6 +116,11 @@ const currentLogJobId = ref<number | null>(null)
 /** 跳转到登录页 */
 function goToLogin() {
   router.push({ name: 'Login' })
+}
+
+/** 跳转到供应商门户登录页 */
+function goToPortalLogin() {
+  router.push({ name: 'PortalLogin' })
 }
 
 /** 跳转到控制台 */
@@ -641,7 +653,7 @@ function instanceStatusType(status: number): string {
             </template>
           </el-dropdown>
           <!-- 管理员才显示控制台入口 -->
-          <el-button v-if="isAdmin" type="primary" @click="goToConsole">
+          <el-button v-if="canAccessConsole" type="primary" @click="goToConsole">
             <el-icon><Monitor /></el-icon>
             {{ t('common.console') }}
           </el-button>
@@ -661,6 +673,9 @@ function instanceStatusType(status: number): string {
         <div class="home-hero-actions">
           <el-button type="primary" size="large" @click="goToLogin">
             {{ t('home.getStarted') }}
+          </el-button>
+          <el-button size="large" @click="goToPortalLogin">
+            {{ t('common.supplierPortal') }}
           </el-button>
         </div>
       </div>

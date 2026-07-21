@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,8 @@ import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -99,9 +102,11 @@ public class RedisKeyStoreLoader {
         // Redis 中不存在，生成新密钥对并存入 Redis
         log.info("Redis 中未找到 JWK 密钥库，生成新的 RSA 密钥对并存入 Redis");
         JWKSet jwkSet = generateJwkSet();
-        // JWKSet.toString() 默认不包含私钥参数（d/p/q/dp/dq/qi），
-        // 必须使用 toString(true) 序列化包含私钥的完整密钥
-        String jwkJson = jwkSet.toString(true);
+        // nimbus-jose-jwt 10.x 破坏性变更：JWKSet.toString(true) 不再包含私钥参数。
+        // 必须通过 RSAKey.toJSONObject()（单个密钥）手动构建 JWK Set JSON，
+        // 否则存入 Redis 的密钥将丢失私钥，导致 JWT 签发失败。
+        RSAKey rsaKey = (RSAKey) jwkSet.getKeys().get(0);
+        String jwkJson = new JSONObject(Map.of("keys", List.of(rsaKey.toJSONObject()))).toString();
         byte[] encryptedBytes = encrypt(jwkJson.getBytes(StandardCharsets.UTF_8), aesKey);
         String encoded = Base64.getEncoder().encodeToString(encryptedBytes);
         redisTemplate.opsForValue().set(REDIS_KEY, encoded);

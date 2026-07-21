@@ -32,6 +32,20 @@ const emit = defineEmits<{
   loginSuccess: []
 }>()
 
+/** 注册页路径，供应商门户登录时使用不同路径 */
+const props = withDefaults(defineProps<{
+  registerPath?: string
+  defaultUsername?: string
+  defaultPassword?: string
+  /** 精简模式：仅保留账号密码和注册入口，隐藏 SSO / 设备码 / 社交登录 */
+  simple?: boolean
+}>(), {
+  registerPath: '/register',
+  defaultUsername: '',
+  defaultPassword: '',
+  simple: false,
+})
+
 /** OAuth2 客户端配置（redirectUri 使用动态 origin，避免 localhost/127.0.0.1 不匹配） */
 const OAUTH2_CLIENT_ID = import.meta.env.VITE_OAUTH2_CLIENT_ID || 'omni-frontend'
 
@@ -64,8 +78,8 @@ const tenants = ref<TenantOption[]>([])
 const savedTenantId = Number(localStorage.getItem('last_tenant_id')) || undefined
 const form = reactive({
   tenantId: savedTenantId as number | undefined,
-  username: 'admin',
-  password: 'admin123',
+  username: props.defaultUsername,
+  password: props.defaultPassword,
   captchaCode: '',
 })
 
@@ -319,27 +333,27 @@ onMounted(() => {
     <!-- 注册入口（仅在非 OAuth2 模式下显示） -->
     <div v-if="!isOAuth2Mode" class="login-register-section">
       <span>{{ t('login.noAccount') }}</span>
-      <router-link to="/register" class="register-link">{{ t('login.registerNow') }}</router-link>
+      <router-link :to="props.registerPath" class="register-link">{{ t('login.registerNow') }}</router-link>
     </div>
 
-    <!-- 企业 SSO 登录（仅在非 OAuth2 模式下显示） -->
-    <div v-if="!isOAuth2Mode" class="login-sso-section">
+    <!-- 企业 SSO 登录（仅在非 OAuth2 且非精简模式下显示） -->
+    <div v-if="!isOAuth2Mode && !props.simple" class="login-sso-section">
       <el-button class="sso-btn" @click="handleSsoLogin">
         <el-icon><OfficeBuilding /></el-icon>
         {{ t('login.ssoLogin') }}
       </el-button>
     </div>
 
-    <!-- 设备授权登录（仅在非 OAuth2 模式下显示） -->
-    <div v-if="!isOAuth2Mode" class="login-device-section">
+    <!-- 设备授权登录（仅在非 OAuth2 且非精简模式下显示） -->
+    <div v-if="!isOAuth2Mode && !props.simple" class="login-device-section">
       <el-button class="device-btn" @click="router.push({ name: 'DeviceAuth' })">
         <el-icon><Monitor /></el-icon>
         {{ t('login.deviceAuth') }}
       </el-button>
     </div>
 
-    <!-- 分隔线 + 第三方登录（仅在非 OAuth2 模式下显示） -->
-    <template v-if="!isOAuth2Mode">
+    <!-- 分隔线 + 第三方登录（仅在非 OAuth2 且非精简模式下显示） -->
+    <template v-if="!isOAuth2Mode && !props.simple">
       <!-- 分隔线 -->
       <div class="login-divider">
         <span>{{ t('login.thirdParty') }}</span>

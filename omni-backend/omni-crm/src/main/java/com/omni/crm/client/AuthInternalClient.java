@@ -7,10 +7,15 @@ import com.omni.common.core.internal.InternalUserOptionDTO;
 import com.omni.common.core.result.R;
 import com.omni.common.core.security.XssSettings;
 import feign.RequestInterceptor;
+import feign.codec.Decoder;
+import feign.optionals.OptionalDecoder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.support.FeignHttpMessageConverters;
+import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
+import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -106,7 +111,6 @@ public interface AuthInternalClient {
     /**
      * Feign 内部认证配置。
      */
-    @Configuration
     class FeignConfig {
 
         @Value("${omni.internal.api.token:}")
@@ -120,6 +124,18 @@ public interface AuthInternalClient {
         @Bean
         public RequestInterceptor internalTokenInterceptor() {
             return template -> template.header("X-Internal-Token", internalToken);
+        }
+
+        /**
+         * 在单线程 Bean 初始化阶段预先装载 Feign 消息转换器，规避首次并发响应解码竞态。
+         *
+         * @param messageConverters Feign 消息转换器提供器
+         * @return Feign 响应解码器
+         */
+        @Bean
+        public Decoder feignDecoder(ObjectProvider<FeignHttpMessageConverters> messageConverters) {
+            messageConverters.getObject().getConverters();
+            return new OptionalDecoder(new ResponseEntityDecoder(new SpringDecoder(messageConverters)));
         }
     }
 }

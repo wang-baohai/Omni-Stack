@@ -2,7 +2,7 @@
 
 > A microservice scaffold platform built on Spring Boot 4 + Vue 3, designed with the Harness industrial design pattern to provide an industry best-practice foundation for AI-assisted development.
 >
-> **One command to launch the full stack: middleware + 4 microservices + frontend — 12 Docker containers in total.**
+> **One command to launch the full stack: middleware + 5 microservices + frontend — 12 Docker containers in total.**
 
 **[中文](README.md)** | **[日本語](README.jp.md)** | **[한국어](README.kr.md)**
 
@@ -16,6 +16,8 @@
 
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 — cutting-edge stack across the board
 - **One-click Docker deployment**: `start.bat` / `./start.sh` launches 12 containers (MySQL, Redis, Nacos, RocketMQ, XXL-JOB, 4 backend microservices, frontend) — see [Docker Deployment Guide](docs/docker-deployment.en.md)
+- **CRM pre-sales closed loop**: Standalone `omni-crm` service covering leads, customers, contacts, opportunities, follow-ups, conversion and overview — reusing tenant, RBAC, data scope, XSS, audit and Outbox capabilities
+- **SRM supplier lifecycle**: Standalone `omni-srm` service covering supplier admission, review, grading, performance evaluation, risk management, portal self-service and supplier 360 — see [docs/srm.en.md](docs/srm.en.md)
 - **Multi-provider social login**: GitHub + Google + Gitee OAuth2 one-click login (strategy pattern for extensibility), auto-registration on first login
 - **Three-layer XSS defense in depth**: Jackson deserializer + Servlet Filter + Gateway security headers, per-tenant configuration, fully functional admin UI
 - **Common Starter ecosystem**: 8 auto-configuration modules (mybatis / redis / operlog / job / mqlog / workflow) — add a dependency and gain capabilities instantly, zero config
@@ -63,6 +65,14 @@
                             │                    │  omni-workflow   │
                             │                    │  Flowable :8103  │
                             │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │    omni-crm      │
+                            │                    │   Sales :8104   │
+                            │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │    omni-srm      │
+                            │                    │   SRM :8105     │
+                            │                    └─────────────────┘
                     ┌───────┴────────┐
                     │  MySQL :3306   │  Persistent Storage
                     │  Redis :6379   │  Cache + Captcha
@@ -96,6 +106,9 @@ Omni-Stack/
 │   ├── scheduling.md                   #   Scheduled task system in-depth technical documentation
 │   ├── workflow.md                     #   Workflow engine in-depth technical documentation
 │   ├── mq-reliability.md              #   Reliable message delivery in-depth technical documentation
+│   ├── crm.md                          #   CRM sales pipeline system truth (Harness doc)
+│   ├── srm.md                          #   SRM supplier relationship management system truth (Harness doc)
+│   ├── design/srm-design.md            #   SRM MVP design and implementation baseline
 │   └── docker-deployment.md            #   Docker full-stack deployment in-depth guide
 ├── scripts/sql/                        # Database initialization scripts
 │   ├── init-all.sql                    #   Authoritative DDL + seed data
@@ -114,13 +127,15 @@ Omni-Stack/
 │   ├── omni-auth/                      #   Auth service (8100)
 │   ├── omni-base/                      #   Base data service (8101)
 │   ├── omni-workflow/                  #   Workflow engine service (8103)
+│   ├── omni-crm/                       #   CRM pre-sales closed-loop service (8104)
+│   ├── omni-srm/                       #   SRM supplier relationship management service (8105)
 │   └── omni-gateway/                   #   API Gateway (8102)
 └── omni-frontend/                      # Vue 3 SPA (3000)
 ```
 
 ## Docker One-Click Deployment (Recommended)
 
-One command launches all 12 containers: middleware (MySQL, Redis, Nacos, RocketMQ, XXL-JOB) + 4 backend microservices + frontend.
+One command launches all containers: middleware (MySQL, Redis, Nacos, RocketMQ, XXL-JOB) + 6 backend microservices + frontend.
 
 ### Prerequisites
 
@@ -163,6 +178,8 @@ docker compose ps
 | Base Data Service | http://localhost:8101 | Dict / Org / User / Log / Job |
 | API Gateway | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
 | Workflow Engine | http://localhost:8103 | Flowable BPMN |
+| CRM Service | http://localhost:8104 | Leads, Customers, Opportunities and Follow-ups |
+| SRM Service | http://localhost:8105 | Suppliers, Portal, Evaluation and Risk |
 | MySQL | localhost:3306 | root/root |
 | Redis | localhost:6379 | No password |
 | Nacos Console | http://localhost:8080 | nacos/nacos |
@@ -312,6 +329,31 @@ The CRM module covers the full pre-sales pipeline: lead acquisition → follow-u
 | ![Activity Tracking](docs/images/crm-activity-timeline.png) | |
 | Activity list records every follow-up with plan/complete/cancel status flow | |
 
+### SRM Supplier Management
+
+The SRM module covers the full supplier lifecycle: registration/admission → review → grading → performance evaluation → risk management → elimination/exit. A five-layer trust chain (Gateway JWT → tenant validation → functional permissions → data scope → SQL interception → row-level authorization) ensures multi-tenant data isolation. See [SRM System Truth](docs/srm.en.md) for details.
+
+- **Supplier Master Data**: supplier number auto-generation, contacts, qualifications, bank accounts (PII masking), category/level auto-mapping
+- **Admission & Portal**: invite token (SHA-256 hashed), self-service enrollment with Outbox/Saga cross-service role assignment
+- **Performance Evaluation**: weighted scoring (1-5 → percentile 20-100), automatic grade mapping (Strategic/Preferred/Qualified/Eliminated)
+- **Risk Management**: six-dimension indicators (Financial/Compliance/Supply/Cooperation/Quality/Certificate), aggregate risk level (GREEN/YELLOW/RED)
+- **Supplier 360**: block-level permission control — different users see different Supplier 360 sections based on permissions
+
+| Supplier Overview | Supplier List |
+|-------------------|---------------|
+| ![Supplier Overview](docs/images/srm-overview.png) | ![Supplier List](docs/images/srm-supplier-list.png) |
+| Stats cards + supplier distribution + level summary — all key metrics on one screen | Supplier list with search, filter, assignment and batch operations — the starting point of admission |
+
+| Performance Evaluation | Risk Dashboard |
+|------------------------|----------------|
+| ![Performance Evaluation](docs/images/srm-evaluation.png) | ![Risk Dashboard](docs/images/srm-risk.png) |
+| Weighted scorecard (Quality/Delivery/Price/Service), auto-calculated percentile score and grade mapping | Six-dimension risk indicators with traffic-light visualization, certificate expiry alerts and aggregate risk level |
+
+| Invite Management | Supplier Portal |
+|-------------------|-----------------|
+| ![Invite Management](docs/images/srm-invite.png) | ![Supplier Portal](docs/images/srm-portal.png) |
+| Issue and revoke invite tokens, control the supplier admission entry point | Supplier self-service enrollment, company profile maintenance and performance review |
+
 ## Module Overview
 
 ### Backend Microservices
@@ -322,6 +364,7 @@ The CRM module covers the full pre-sales pipeline: lead acquisition → follow-u
 | omni-base | 8101 | Base data: dictionaries, organizations, users, logs, scheduled tasks, MQ message management | [scheduling.en.md](docs/scheduling.en.md) |
 | omni-workflow | 8103 | Workflow engine: BPMN model management, approvals, process instances | [workflow.en.md](docs/workflow.en.md) |
 | omni-crm | 8104 | CRM: leads, customers, contacts, opportunities, follow-ups and sales overview | [crm.en.md](docs/crm.en.md) |
+| omni-srm | 8105 | SRM: supplier master data, admission, evaluation, risk, portal and supplier 360 | [srm.en.md](docs/srm.en.md) |
 | omni-gateway | 8102 | API Gateway: route forwarding, JWT validation, CORS, security headers | [architecture.en.md](docs/architecture.en.md) |
 
 ### Common Starter Ecosystem (8 Modules)

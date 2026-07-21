@@ -31,6 +31,9 @@
 -- 强制客户端使用 UTF-8 字符集，防止 Docker 初始化时中文乱码
 SET NAMES utf8mb4;
 
+-- 创建应用专用用户（非 root，以确保 --init-connect=SET NAMES utf8mb4 生效）
+CREATE USER IF NOT EXISTS 'omni_app'@'%' IDENTIFIED BY 'omni_app_pass';
+
 CREATE DATABASE IF NOT EXISTS omni_auth
     DEFAULT CHARACTER SET utf8mb4
     DEFAULT COLLATE utf8mb4_unicode_ci;
@@ -569,7 +572,8 @@ CREATE TABLE IF NOT EXISTS sys_oper_log_archive (
 INSERT IGNORE INTO sys_dict_type (tenant_id, type_code, type_name, sort, status, create_by) VALUES
     (1, 'sys_user_gender',   '用户性别',   1, 1, 'system'),
     (1, 'sys_common_status', '通用状态',   2, 1, 'system'),
-    (1, 'sys_notice_type',   '通知类型',   3, 1, 'system');
+    (1, 'sys_notice_type',   '通知类型',   3, 1, 'system'),
+    (1, 'srm_supplier_category', '供应商品类', 20, 1, 'system');
 
 -- 5.6 预置字典数据
 INSERT IGNORE INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, tag_type, sort, status, create_by) VALUES
@@ -580,6 +584,24 @@ INSERT IGNORE INTO sys_dict_data (tenant_id, type_code, dict_value, dict_label, 
     (1, 'sys_common_status', '0', '禁用', 'danger',  2, 1, 'system'),
     (1, 'sys_notice_type', '1', '系统通知', 'primary', 1, 1, 'system'),
     (1, 'sys_notice_type', '2', '业务通知', 'warning', 2, 1, 'system');
+
+INSERT INTO sys_dict_data
+    (tenant_id, type_code, dict_value, dict_label, tag_type, sort, status, create_by)
+SELECT 1, 'srm_supplier_category', category.dict_value, category.dict_label,
+       category.tag_type, category.sort, 1, 'system'
+FROM (
+    SELECT 'ELECTRONICS' dict_value, '电子元器件' dict_label, 'primary' tag_type, 1 sort
+    UNION ALL SELECT 'IT', '信息技术', 'success', 2
+    UNION ALL SELECT 'RAW_MATERIAL', '原材料', 'warning', 3
+    UNION ALL SELECT 'ADMIN', '行政物资', 'info', 4
+    UNION ALL SELECT 'SERVICE', '服务', 'primary', 5
+) category
+WHERE NOT EXISTS (
+    SELECT 1 FROM sys_dict_data dict_data
+    WHERE dict_data.tenant_id = 1
+      AND dict_data.type_code = 'srm_supplier_category'
+      AND dict_data.dict_value = category.dict_value
+);
 
 -- ============================================================
 -- Section 6: Base 服务 - 用户自定义任务
@@ -668,9 +690,6 @@ INSERT IGNORE INTO sys_user_job_type (type_code, type_name, description, param_t
  1);
 
 INSERT IGNORE INTO sys_user_job (tenant_id, job_name, job_type, cron_expression, job_params, status, create_by) VALUES
-(1, '喝水提醒-大杯', 'Task-00001', '0 0/10 * * * ?', '{"cupShape":"大杯"}', 1, 'system'),
-(1, '喝水提醒-中杯', 'Task-00001', '0 0/10 * * * ?', '{"cupShape":"中杯"}', 1, 'system'),
-(1, '喝水提醒-小杯', 'Task-00001', '0 0/10 * * * ?', '{"cupShape":"小杯"}', 1, 'system'),
 (1, '我要喝水', 'Task-00001', '0 * * * * ?', '{"cupShape":"玻璃杯"}', 1, 'admin');
 
 -- ============================================================
@@ -1247,6 +1266,133 @@ WHERE r.tenant_id = 1 AND r.role_code = 'CRM_VIEWER'
       'crm:overview:list','crm:lead:list','crm:customer:list','crm:contact:list',
       'crm:opportunity:list','crm:activity:list'
   );
+
+-- Portal 角色分配请求 Inbox：按 request_id 幂等消费 SRM Saga 请求
+CREATE TABLE IF NOT EXISTS sys_portal_role_request (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id   BIGINT       NOT NULL,
+    request_id  VARCHAR(64)  NOT NULL,
+    supplier_id BIGINT       NOT NULL,
+    user_id     BIGINT       NOT NULL,
+    role_code   VARCHAR(50)  NOT NULL,
+    status      VARCHAR(20)  NOT NULL DEFAULT 'PROCESSING',
+    error_code  VARCHAR(100) DEFAULT NULL,
+    version     INT          NOT NULL DEFAULT 0,
+    create_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_portal_role_request (tenant_id, request_id),
+    INDEX idx_portal_role_user (tenant_id, user_id, status),
+    CONSTRAINT chk_portal_role_request_status CHECK (status IN ('PROCESSING','COMPLETED','FAILED'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='门户角色分配请求幂等 Inbox';
+
+-- ============================================================
+-- Section 9.8: SRM 功能权限与默认角色（omni_auth）
+-- ============================================================
+INSERT IGNORE INTO sys_permission
+    (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+VALUES
+    (400, 1, 0,   'srm',                          '供应商关系管理',  'DIRECTORY', '/400/',             1, 8, 1, 'system'),
+    (401, 1, 400, 'srm:overview',                   'SRM概览',        'MENU',      '/400/401/',         2, 1, 1, 'system'),
+    (402, 1, 401, 'srm:overview:list',              '查看SRM概览',    'API',       '/400/401/402/',     3, 1, 1, 'system'),
+    (410, 1, 400, 'srm:supplier',                   '供应商管理',      'MENU',      '/400/410/',         2, 2, 1, 'system'),
+    (411, 1, 410, 'srm:supplier:list',              '查看供应商',      'API',       '/400/410/411/',     3, 1, 1, 'system'),
+    (412, 1, 410, 'srm:supplier:create',            '创建供应商',      'API',       '/400/410/412/',     3, 2, 1, 'system'),
+    (413, 1, 410, 'srm:supplier:update',            '更新供应商',      'API',       '/400/410/413/',     3, 3, 1, 'system'),
+    (414, 1, 410, 'srm:supplier:delete',            '删除供应商',      'API',       '/400/410/414/',     3, 4, 1, 'system'),
+    (415, 1, 410, 'srm:supplier:approve',           '审核通过供应商',  'API',       '/400/410/415/',     3, 5, 1, 'system'),
+    (416, 1, 410, 'srm:supplier:reject',            '驳回供应商',      'API',       '/400/410/416/',     3, 6, 1, 'system'),
+    (417, 1, 410, 'srm:supplier:suspend',           '冻结供应商',      'API',       '/400/410/417/',     3, 7, 1, 'system'),
+    (418, 1, 410, 'srm:supplier:resume',            '解冻供应商',      'API',       '/400/410/418/',     3, 8, 1, 'system'),
+    (419, 1, 410, 'srm:supplier:blacklist',         '供应商黑名单',    'API',       '/400/410/419/',     3, 9, 1, 'system'),
+    (462, 1, 410, 'srm:supplier:restore',           '恢复供应商',      'API',       '/400/410/462/',     3, 10, 1, 'system'),
+    (463, 1, 410, 'srm:supplier:eliminate',         '淘汰供应商',      'API',       '/400/410/463/',     3, 11, 1, 'system'),
+    (464, 1, 410, 'srm:supplier:transfer',          '转移供应商负责人', 'API',       '/400/410/464/',     3, 12, 1, 'system'),
+    (420, 1, 400, 'srm:evaluation',                 '绩效评估',        'MENU',      '/400/420/',         2, 3, 1, 'system'),
+    (421, 1, 420, 'srm:evaluation:list',            '查看评估',        'API',       '/400/420/421/',     3, 1, 1, 'system'),
+    (422, 1, 420, 'srm:evaluation:create',          '创建评估',        'API',       '/400/420/422/',     3, 2, 1, 'system'),
+    (423, 1, 420, 'srm:evaluation:view',            '查看评估详情',    'API',       '/400/420/423/',     3, 3, 1, 'system'),
+    (430, 1, 400, 'srm:risk',                       '风险管理',        'MENU',      '/400/430/',         2, 4, 1, 'system'),
+    (431, 1, 430, 'srm:risk:list',                  '查看风险',        'API',       '/400/430/431/',     3, 1, 1, 'system'),
+    (432, 1, 430, 'srm:risk:update',                '更新风险指标',    'API',       '/400/430/432/',     3, 2, 1, 'system'),
+    (433, 1, 430, 'srm:risk:assess',                '创建风险评估',    'API',       '/400/430/433/',     3, 3, 1, 'system'),
+    (440, 1, 400, 'srm:portal',                     '供应商门户',      'DIRECTORY', '/400/440/',         2, 5, 1, 'system'),
+    (441, 1, 440, 'srm:portal:enroll',              '门户入驻',        'API',       '/400/440/441/',     3, 1, 1, 'system'),
+    (442, 1, 440, 'srm:portal:profile',             '企业信息',        'MENU',      '/400/440/442/',     3, 2, 1, 'system'),
+    (443, 1, 440, 'srm:portal:evaluation',          '绩效评估',        'MENU',      '/400/440/443/',     3, 3, 1, 'system'),
+    (450, 1, 400, 'srm:invite',                     '邀请管理',        'MENU',      '/400/450/',         2, 6, 1, 'system'),
+    (451, 1, 450, 'srm:invite:create',              '创建邀请',        'API',       '/400/450/451/',     3, 1, 1, 'system'),
+    (452, 1, 450, 'srm:invite:list',                '查看邀请',        'API',       '/400/450/452/',     3, 2, 1, 'system'),
+    (453, 1, 450, 'srm:invite:revoke',              '撤销邀请',        'API',       '/400/450/453/',     3, 3, 1, 'system'),
+    (482, 1, 450, 'srm:portal:invite',              '管理门户邀请',    'API',       '/400/450/482/',     3, 4, 1, 'system'),
+    (460, 1, 400, 'srm:owner:list',                 '查看负责人选项',  'API',       '/400/460/',         2, 7, 1, 'system'),
+    (461, 1, 400, 'srm:pii:view',                   '查看完整银行信息','API',       '/400/461/',         2, 8, 1, 'system'),
+    -- 联系人权限
+    (470, 1, 410, 'srm:contact:list',               '查看联系人',      'API',       '/400/410/470/',     3, 12, 1, 'system'),
+    (471, 1, 410, 'srm:contact:create',             '创建联系人',      'API',       '/400/410/471/',     3, 13, 1, 'system'),
+    (480, 1, 410, 'srm:contact:update',             '更新联系人',      'API',       '/400/410/480/',     3, 14, 1, 'system'),
+    (481, 1, 410, 'srm:contact:delete',             '删除联系人',      'API',       '/400/410/481/',     3, 15, 1, 'system'),
+    -- 资质权限
+    (472, 1, 410, 'srm:qualification:list',          '查看资质',        'API',       '/400/410/472/',     3, 14, 1, 'system'),
+    (473, 1, 410, 'srm:qualification:create',        '创建资质',        'API',       '/400/410/473/',     3, 15, 1, 'system'),
+    (474, 1, 410, 'srm:qualification:update',        '更新资质',        'API',       '/400/410/474/',     3, 16, 1, 'system'),
+    (475, 1, 410, 'srm:qualification:delete',        '删除资质',        'API',       '/400/410/475/',     3, 17, 1, 'system'),
+    -- 银行账户权限
+    (476, 1, 410, 'srm:bank-account:list',            '查看银行账户',    'API',       '/400/410/476/',     3, 18, 1, 'system'),
+    (477, 1, 410, 'srm:bank-account:create',          '创建银行账户',    'API',       '/400/410/477/',     3, 19, 1, 'system'),
+    (478, 1, 410, 'srm:bank-account:update',          '更新银行账户',    'API',       '/400/410/478/',     3, 20, 1, 'system'),
+    (479, 1, 410, 'srm:bank-account:delete',          '删除银行账户',    'API',       '/400/410/479/',     3, 21, 1, 'system');
+
+INSERT IGNORE INTO sys_role
+    (id, tenant_id, role_code, role_name, data_scope, sort, status, create_by)
+VALUES
+    (30, 1, 'SRM_ADMIN',           'SRM管理员',       'TENANT',         30, 1, 'system'),
+    (31, 1, 'PROCUREMENT_MANAGER', '采购经理',        'DEPT_AND_BELOW', 31, 1, 'system'),
+    (32, 1, 'PROCUREMENT_STAFF',   '采购员',          'SELF',           32, 1, 'system'),
+    (33, 1, 'SUPPLIER',            '供应商',          'SELF',           33, 1, 'system');
+
+-- SUPER_ADMIN、SRM_ADMIN、PROCUREMENT_MANAGER 获得全部 SRM 权限
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+SELECT r.id, p.id
+FROM sys_role r
+JOIN sys_permission p ON p.tenant_id = r.tenant_id
+WHERE r.tenant_id = 1
+  AND r.role_code IN ('SUPER_ADMIN', 'SRM_ADMIN', 'PROCUREMENT_MANAGER')
+  AND (p.permission_code = 'srm' OR p.permission_code LIKE 'srm:%')
+  AND (r.role_code = 'SUPER_ADMIN'
+       OR p.permission_code NOT IN ('srm:portal:enroll', 'srm:portal:profile', 'srm:portal:evaluation'));
+
+-- 采购员日常供应商管理权限
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+SELECT r.id, p.id
+FROM sys_role r
+JOIN sys_permission p ON p.tenant_id = r.tenant_id
+WHERE r.tenant_id = 1 AND r.role_code = 'PROCUREMENT_STAFF'
+  AND p.permission_code IN (
+      'srm','srm:overview','srm:supplier','srm:evaluation','srm:risk',
+      'srm:overview:list','srm:supplier:list','srm:supplier:create','srm:supplier:update',
+      'srm:evaluation:list','srm:evaluation:create','srm:evaluation:view',
+      'srm:risk:list','srm:risk:update','srm:risk:assess',
+      'srm:contact:list','srm:contact:create','srm:contact:update','srm:contact:delete',
+      'srm:qualification:list','srm:qualification:create','srm:qualification:update','srm:qualification:delete',
+      'srm:bank-account:list','srm:bank-account:create','srm:bank-account:update','srm:bank-account:delete',
+      'srm:owner:list'
+  );
+
+-- USER 角色仅授予门户入驻权限；企业信息必须等待 SUPPLIER 角色与 PortalUser 关联建立后访问
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+SELECT r.id, p.id
+FROM sys_role r
+JOIN sys_permission p ON p.tenant_id = r.tenant_id
+WHERE r.tenant_id = 1 AND r.role_code = 'USER'
+  AND p.permission_code IN ('srm', 'srm:portal', 'srm:portal:enroll');
+
+-- 供应商角色授予门户权限（企业信息 + 绩效）
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+SELECT r.id, p.id
+FROM sys_role r
+JOIN sys_permission p ON p.tenant_id = r.tenant_id
+WHERE r.tenant_id = 1 AND r.role_code = 'SUPPLIER'
+  AND p.permission_code IN ('srm', 'srm:portal', 'srm:portal:profile', 'srm:portal:evaluation');
 
 -- ============================================================
 -- Section 10: CRM 服务 - 销售前闭环
@@ -2024,15 +2170,26 @@ BEGIN
     DECLARE v_parent_id  BIGINT;
     DECLARE v_new_parent_id BIGINT;
     DECLARE v_new_id     BIGINT;
+    DECLARE v_srm_template_id BIGINT;
+    DECLARE v_root_unit_id BIGINT;
+    DECLARE v_admin_user_id BIGINT;
     DECLARE v_done       INT DEFAULT 0;
 
     -- 按 depth 排序保证父节点先插入
     DECLARE cur CURSOR FOR
         SELECT id, parent_id FROM sys_permission
         WHERE tenant_id = 1 ORDER BY depth, id;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        DROP TEMPORARY TABLE IF EXISTS tmp_perm_map;
+        RESIGNAL;
+    END;
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;
 
     -- Step 1: 克隆权限树（tenant 1 作为模板）
+    START TRANSACTION;
+    DROP TEMPORARY TABLE IF EXISTS tmp_perm_map;
     CREATE TEMPORARY TABLE tmp_perm_map (old_id BIGINT PRIMARY KEY, new_id BIGINT);
 
     OPEN cur;
@@ -2043,13 +2200,38 @@ BEGIN
         SET v_new_parent_id = IF(v_parent_id = 0, 0,
             IFNULL((SELECT new_id FROM tmp_perm_map WHERE old_id = v_parent_id), 0));
 
-        INSERT INTO sys_permission (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
-        SELECT p_tenant_id,
-               v_new_parent_id,
-               permission_code, permission_name, type, '', depth, sort, 1, 'system'
-        FROM sys_permission t WHERE t.id = v_old_id;
+        SET v_new_id = (
+            SELECT existing_permission.id
+            FROM sys_permission existing_permission
+            JOIN sys_permission template_permission ON template_permission.id = v_old_id
+            WHERE existing_permission.tenant_id = p_tenant_id
+              AND existing_permission.permission_code = template_permission.permission_code
+            ORDER BY existing_permission.id
+            LIMIT 1
+        );
 
-        SET v_new_id = LAST_INSERT_ID();
+        IF v_new_id IS NULL THEN
+            INSERT INTO sys_permission
+                (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+            SELECT p_tenant_id,
+                   v_new_parent_id,
+                   permission_code, permission_name, type, '', depth, sort, 1, 'system'
+            FROM sys_permission template_permission
+            WHERE template_permission.id = v_old_id;
+            SET v_new_id = LAST_INSERT_ID();
+        END IF;
+
+        UPDATE sys_permission target_permission
+        JOIN sys_permission template_permission ON template_permission.id = v_old_id
+        SET target_permission.parent_id = v_new_parent_id,
+            target_permission.permission_name = template_permission.permission_name,
+            target_permission.type = template_permission.type,
+            target_permission.depth = template_permission.depth,
+            target_permission.sort = template_permission.sort,
+            target_permission.status = 1,
+            target_permission.update_by = 'system'
+        WHERE target_permission.id = v_new_id;
+
         IF v_new_parent_id = 0 THEN
             UPDATE sys_permission SET path = CONCAT('/', v_new_id, '/') WHERE id = v_new_id;
         ELSE
@@ -2058,7 +2240,8 @@ BEGIN
             SET child.path = CONCAT(parent.path, v_new_id, '/')
             WHERE child.id = v_new_id;
         END IF;
-        INSERT INTO tmp_perm_map (old_id, new_id) VALUES (v_old_id, v_new_id);
+        INSERT INTO tmp_perm_map (old_id, new_id) VALUES (v_old_id, v_new_id)
+        ON DUPLICATE KEY UPDATE new_id = VALUES(new_id);
     END LOOP;
     CLOSE cur;
 
@@ -2072,15 +2255,25 @@ BEGIN
         (p_tenant_id, 'CRM_ADMIN',     'CRM管理员', 'TENANT',         20, 1, 'system'),
         (p_tenant_id, 'SALES_MANAGER', '销售经理',  'DEPT_AND_BELOW', 21, 1, 'system'),
         (p_tenant_id, 'SALES_REP',     '销售代表',  'SELF',           22, 1, 'system'),
-        (p_tenant_id, 'CRM_VIEWER',    'CRM只读员', 'TENANT',         23, 1, 'system');
+        (p_tenant_id, 'CRM_VIEWER',    'CRM只读员', 'TENANT',         23, 1, 'system'),
+        (p_tenant_id, 'SRM_ADMIN',           'SRM管理员',       'TENANT',         30, 1, 'system'),
+        (p_tenant_id, 'PROCUREMENT_MANAGER', '采购经理',        'DEPT_AND_BELOW', 31, 1, 'system'),
+        (p_tenant_id, 'PROCUREMENT_STAFF',   '采购员',          'SELF',           32, 1, 'system'),
+        (p_tenant_id, 'SUPPLIER',            '供应商',          'SELF',           33, 1, 'system')
+    ON DUPLICATE KEY UPDATE
+        role_name = VALUES(role_name),
+        data_scope = VALUES(data_scope),
+        sort = VALUES(sort),
+        status = 1,
+        update_by = 'system';
 
     -- Step 3: SUPER_ADMIN 获得全部权限
-    INSERT INTO sys_role_permission (role_id, permission_id)
+    INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
     SELECT (SELECT id FROM sys_role WHERE tenant_id = p_tenant_id AND role_code = 'SUPER_ADMIN' LIMIT 1),
            new_id FROM tmp_perm_map;
 
     -- Step 4: USER 角色只读菜单权限
-    INSERT INTO sys_role_permission (role_id, permission_id)
+    INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
     SELECT (SELECT id FROM sys_role WHERE tenant_id = p_tenant_id AND role_code = 'USER' LIMIT 1),
            m.new_id
     FROM tmp_perm_map m
@@ -2093,11 +2286,12 @@ BEGIN
         'base:operlog','base:operlog:list',
         'job:user-job-type','job:user-job-type:list',
         'workflow:definition','workflow:definition:list',
-        'workflow:instance','workflow:instance:list','workflow:task:todo'
+        'workflow:instance','workflow:instance:list','workflow:task:todo',
+        'srm','srm:portal','srm:portal:enroll'
     );
 
     -- Step 5: EMPLOYEE / TEAM_LEADER / DEPT_LEADER 工作流操作权限
-    INSERT INTO sys_role_permission (role_id, permission_id)
+    INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
     SELECT r.id, m.new_id
     FROM sys_role r
     CROSS JOIN tmp_perm_map m
@@ -2111,7 +2305,7 @@ BEGIN
       );
 
     -- Step 5.1: CRM 管理员和销售经理获得完整 CRM 权限
-    INSERT INTO sys_role_permission (role_id, permission_id)
+    INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
     SELECT r.id, m.new_id
     FROM sys_role r
     CROSS JOIN tmp_perm_map m
@@ -2121,7 +2315,7 @@ BEGIN
       AND (p.permission_code = 'crm' OR p.permission_code LIKE 'crm:%');
 
     -- Step 5.2: 销售代表日常销售闭环权限
-    INSERT INTO sys_role_permission (role_id, permission_id)
+    INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
     SELECT r.id, m.new_id
     FROM sys_role r
     CROSS JOIN tmp_perm_map m
@@ -2140,7 +2334,7 @@ BEGIN
       );
 
     -- Step 5.3: CRM 只读角色默认返回脱敏数据
-    INSERT INTO sys_role_permission (role_id, permission_id)
+    INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
     SELECT r.id, m.new_id
     FROM sys_role r
     CROSS JOIN tmp_perm_map m
@@ -2152,36 +2346,627 @@ BEGIN
           'crm:opportunity:list','crm:activity:list'
       );
 
+    -- Step 5.4: SRM 管理员和采购经理获得全部 SRM 权限
+    INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id
+      AND r.role_code IN ('SRM_ADMIN', 'PROCUREMENT_MANAGER')
+      AND (p.permission_code = 'srm' OR p.permission_code LIKE 'srm:%')
+      AND p.permission_code NOT IN ('srm:portal:enroll', 'srm:portal:profile', 'srm:portal:evaluation');
+
+    -- Step 5.5: 采购员日常供应商管理权限
+    INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id AND r.role_code = 'PROCUREMENT_STAFF'
+      AND p.permission_code IN (
+          'srm','srm:overview','srm:supplier','srm:evaluation','srm:risk',
+          'srm:overview:list','srm:supplier:list','srm:supplier:create','srm:supplier:update',
+          'srm:evaluation:list','srm:evaluation:create','srm:evaluation:view',
+          'srm:risk:list','srm:risk:update','srm:risk:assess',
+          'srm:contact:list','srm:contact:create','srm:contact:update','srm:contact:delete',
+          'srm:qualification:list','srm:qualification:create','srm:qualification:update','srm:qualification:delete',
+          'srm:bank-account:list','srm:bank-account:create','srm:bank-account:update','srm:bank-account:delete',
+          'srm:owner:list'
+      );
+
+    -- Step 5.6: SUPPLIER 角色门户权限（企业信息 + 绩效）
+    INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+    SELECT r.id, m.new_id
+    FROM sys_role r
+    CROSS JOIN tmp_perm_map m
+    JOIN sys_permission p ON m.old_id = p.id AND p.tenant_id = 1
+    WHERE r.tenant_id = p_tenant_id AND r.role_code = 'SUPPLIER'
+      AND p.permission_code IN ('srm', 'srm:portal', 'srm:portal:profile', 'srm:portal:evaluation');
+
     -- Step 6: 创建根组织
     INSERT INTO sys_org_unit (tenant_id, parent_id, name, type, path, depth, sort, status, create_by)
-    VALUES (p_tenant_id, 0, p_tenant_name, 'ORG', CONCAT('/', p_tenant_id, '/'), 1, 0, 1, 'system');
+    SELECT p_tenant_id, 0, p_tenant_name, 'ORG', CONCAT('/', p_tenant_id, '/'), 1, 0, 1, 'system'
+    WHERE NOT EXISTS (
+        SELECT 1 FROM sys_org_unit
+        WHERE tenant_id = p_tenant_id AND parent_id = 0
+    );
+
+    SET v_root_unit_id = (
+        SELECT id FROM sys_org_unit
+        WHERE tenant_id = p_tenant_id AND parent_id = 0
+        ORDER BY id LIMIT 1
+    );
 
     -- Step 7: 创建管理员账号（默认密码由调用方传入，BCrypt 编码）
     INSERT INTO sys_user (tenant_id, username, password, nickname, gender, primary_unit_id, status, create_by)
-    VALUES (p_tenant_id, 'admin', p_admin_pwd, CONCAT(p_tenant_name, ' Admin'), 0,
-            (SELECT id FROM sys_org_unit WHERE tenant_id = p_tenant_id AND parent_id = 0 LIMIT 1),
-            1, 'system');
+    SELECT p_tenant_id, 'admin', p_admin_pwd, CONCAT(p_tenant_name, ' Admin'), 0,
+           v_root_unit_id, 1, 'system'
+    WHERE NOT EXISTS (
+        SELECT 1 FROM sys_user
+        WHERE tenant_id = p_tenant_id AND username = 'admin'
+    );
+
+    SET v_admin_user_id = (
+        SELECT id FROM sys_user
+        WHERE tenant_id = p_tenant_id AND username = 'admin'
+        ORDER BY id LIMIT 1
+    );
+    UPDATE sys_user
+    SET primary_unit_id = COALESCE(primary_unit_id, v_root_unit_id),
+        update_by = 'system'
+    WHERE id = v_admin_user_id;
 
     -- Step 8: 关联管理员角色和组织
-    INSERT INTO sys_user_role (user_id, role_id) VALUES (
-        LAST_INSERT_ID(),
+    INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (
+        v_admin_user_id,
         (SELECT id FROM sys_role WHERE tenant_id = p_tenant_id AND role_code = 'SUPER_ADMIN' LIMIT 1)
     );
-    INSERT INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (
-        (SELECT id FROM sys_user WHERE tenant_id = p_tenant_id AND username = 'admin' LIMIT 1),
-        (SELECT id FROM sys_org_unit WHERE tenant_id = p_tenant_id AND parent_id = 0 LIMIT 1),
+    INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (
+        v_admin_user_id,
+        v_root_unit_id,
         1
     );
 
     -- Step 9: XSS 防护默认配置 + 预置规则
-    INSERT INTO sys_xss_config (tenant_id, enabled, create_by) VALUES (p_tenant_id, 0, 'system');
+    INSERT INTO sys_xss_config (tenant_id, enabled, create_by)
+    SELECT p_tenant_id, 0, 'system'
+    WHERE NOT EXISTS (
+        SELECT 1 FROM sys_xss_config WHERE tenant_id = p_tenant_id
+    );
     INSERT INTO sys_xss_blacklist_rule (tenant_id, rule_name, rule_type, pattern, enabled, description, sort_order, create_by)
     SELECT p_tenant_id, rule_name, rule_type, pattern, enabled, description, sort_order, 'system'
-    FROM sys_xss_blacklist_rule WHERE tenant_id = 1;
+    FROM sys_xss_blacklist_rule source_rule
+    WHERE source_rule.tenant_id = 1
+      AND NOT EXISTS (
+          SELECT 1 FROM sys_xss_blacklist_rule target_rule
+          WHERE target_rule.tenant_id = p_tenant_id
+            AND target_rule.rule_type = source_rule.rule_type
+            AND target_rule.pattern = source_rule.pattern
+      );
+
+    -- Step 10: 幂等初始化 SRM 供应商品类字典
+    INSERT INTO omni_base.sys_dict_type
+        (tenant_id, type_code, type_name, remark, sort, status, create_by)
+    VALUES
+        (p_tenant_id, 'srm_supplier_category', '供应商品类', 'SRM供应商品类编码', 20, 1, 'system')
+    ON DUPLICATE KEY UPDATE
+        type_name = VALUES(type_name),
+        remark = VALUES(remark),
+        sort = VALUES(sort),
+        status = 1,
+        update_by = 'system';
+
+    INSERT INTO omni_base.sys_dict_data
+        (tenant_id, type_code, dict_value, dict_label, tag_type, sort, status, create_by)
+    SELECT p_tenant_id, 'srm_supplier_category', category.dict_value, category.dict_label,
+           category.tag_type, category.sort, 1, 'system'
+    FROM (
+        SELECT 'ELECTRONICS' dict_value, '电子元器件' dict_label, 'primary' tag_type, 1 sort
+        UNION ALL SELECT 'IT', '信息技术', 'success', 2
+        UNION ALL SELECT 'RAW_MATERIAL', '原材料', 'warning', 3
+        UNION ALL SELECT 'ADMIN', '行政物资', 'info', 4
+        UNION ALL SELECT 'SERVICE', '服务', 'primary', 5
+    ) category
+    WHERE NOT EXISTS (
+        SELECT 1 FROM omni_base.sys_dict_data dict_data
+        WHERE dict_data.tenant_id = p_tenant_id
+          AND dict_data.type_code = 'srm_supplier_category'
+          AND dict_data.dict_value = category.dict_value
+    );
+
+    UPDATE omni_base.sys_dict_data dict_data
+    JOIN (
+        SELECT 'ELECTRONICS' dict_value, '电子元器件' dict_label, 'primary' tag_type, 1 sort
+        UNION ALL SELECT 'IT', '信息技术', 'success', 2
+        UNION ALL SELECT 'RAW_MATERIAL', '原材料', 'warning', 3
+        UNION ALL SELECT 'ADMIN', '行政物资', 'info', 4
+        UNION ALL SELECT 'SERVICE', '服务', 'primary', 5
+    ) category ON category.dict_value = dict_data.dict_value
+    SET dict_data.dict_label = category.dict_label,
+        dict_data.tag_type = category.tag_type,
+        dict_data.sort = category.sort,
+        dict_data.status = 1,
+        dict_data.update_by = 'system'
+    WHERE dict_data.tenant_id = p_tenant_id
+      AND dict_data.type_code = 'srm_supplier_category';
+
+    -- Step 11: 幂等归一 SRM 默认评估模板与四个启用维度
+    SET v_srm_template_id = (
+        SELECT id FROM omni_srm.srm_evaluation_template
+        WHERE tenant_id = p_tenant_id AND deleted = 0
+        ORDER BY status DESC, default_flag DESC, id
+        LIMIT 1
+    );
+
+    IF v_srm_template_id IS NULL THEN
+        INSERT INTO omni_srm.srm_evaluation_template
+            (tenant_id, name, status, default_flag, version, deleted, create_by)
+        VALUES
+            (p_tenant_id, '默认供应商评估模板', 1, 1, 0, 0, 'system');
+        SET v_srm_template_id = LAST_INSERT_ID();
+    END IF;
+
+    UPDATE omni_srm.srm_evaluation_template
+    SET default_flag = IF(id = v_srm_template_id, 1, 0),
+        status = IF(id = v_srm_template_id, 1, status),
+        update_by = 'system'
+    WHERE tenant_id = p_tenant_id AND deleted = 0;
+
+    INSERT INTO omni_srm.srm_evaluation_dimension
+        (tenant_id, template_id, indicator_name, weight, sort, status, deleted, create_by)
+    VALUES
+        (p_tenant_id, v_srm_template_id, '质量', 30.00, 1, 1, 0, 'system'),
+        (p_tenant_id, v_srm_template_id, '交期', 30.00, 2, 1, 0, 'system'),
+        (p_tenant_id, v_srm_template_id, '价格', 20.00, 3, 1, 0, 'system'),
+        (p_tenant_id, v_srm_template_id, '服务', 20.00, 4, 1, 0, 'system')
+    ON DUPLICATE KEY UPDATE
+        weight = VALUES(weight),
+        sort = VALUES(sort),
+        status = 1,
+        update_by = 'system';
+
+    UPDATE omni_srm.srm_evaluation_dimension
+    SET status = 0, update_by = 'system'
+    WHERE tenant_id = p_tenant_id
+      AND template_id = v_srm_template_id
+      AND deleted = 0
+      AND indicator_name NOT IN ('质量','交期','价格','服务');
 
     -- 清理临时表
     DROP TEMPORARY TABLE IF EXISTS tmp_perm_map;
+    COMMIT;
 END//
 
 DELIMITER ;
+
+-- ============================================================
+-- Section 12: SRM 服务 — 供应商关系管理
+-- ============================================================
+CREATE DATABASE IF NOT EXISTS omni_srm
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE omni_srm;
+
+-- 12.1 供应商主表
+CREATE TABLE IF NOT EXISTS srm_supplier (
+    id                   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id            BIGINT       NOT NULL COMMENT '租户ID',
+    supplier_no          VARCHAR(50)  NOT NULL COMMENT '供应商编号',
+    name                 VARCHAR(200) NOT NULL COMMENT '供应商名称',
+    normalized_name      VARCHAR(200) NOT NULL COMMENT '规范化供应商名称',
+    supplier_type        VARCHAR(50)  NOT NULL COMMENT '供应商类型',
+    industry_code        VARCHAR(50)  DEFAULT NULL COMMENT '行业编码',
+    credit_code          VARCHAR(50)  DEFAULT NULL COMMENT '统一社会信用代码',
+    website              VARCHAR(300) DEFAULT NULL,
+    phone                VARCHAR(32)  DEFAULT NULL,
+    email                VARCHAR(200) DEFAULT NULL,
+    region               VARCHAR(100) DEFAULT NULL,
+    address              VARCHAR(500) DEFAULT NULL,
+    category_code        VARCHAR(50)  DEFAULT NULL COMMENT '品类编码',
+    level_code           VARCHAR(50)  DEFAULT NULL COMMENT '等级编码 STRATEGIC/PREFERRED/QUALIFIED/ELIMINATED',
+    status               VARCHAR(30)  NOT NULL DEFAULT 'REGISTERING' COMMENT '状态',
+    assigned_time        DATETIME     DEFAULT NULL COMMENT '分配时间',
+    last_evaluation_time DATETIME     DEFAULT NULL COMMENT '最近评估时间',
+    owner_user_id        BIGINT       DEFAULT NULL COMMENT '内部负责人用户ID；门户注册阶段允许为空',
+    owner_unit_id        BIGINT       DEFAULT NULL COMMENT '内部负责人组织ID；门户注册阶段允许为空',
+    version              INT          NOT NULL DEFAULT 0,
+    deleted              TINYINT      NOT NULL DEFAULT 0,
+    create_time          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time          DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by            VARCHAR(64)  DEFAULT NULL,
+    update_by            VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_srm_supplier_no (tenant_id, supplier_no),
+    UNIQUE KEY uk_srm_supplier_credit (tenant_id, credit_code),
+    INDEX idx_srm_supplier_owner_status (tenant_id, owner_user_id, status, deleted),
+    INDEX idx_srm_supplier_unit_status (tenant_id, owner_unit_id, status, deleted),
+    INDEX idx_srm_supplier_name (tenant_id, normalized_name, deleted),
+    INDEX idx_srm_supplier_category_status (tenant_id, category_code, status, deleted),
+    INDEX idx_srm_supplier_level (tenant_id, level_code, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM供应商主表';
+
+-- 12.2 供应商联系人
+CREATE TABLE IF NOT EXISTS srm_supplier_contact (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id       BIGINT       NOT NULL,
+    supplier_id     BIGINT       NOT NULL COMMENT '供应商ID',
+    name            VARCHAR(100) NOT NULL,
+    department      VARCHAR(100) DEFAULT NULL,
+    job_title       VARCHAR(100) DEFAULT NULL,
+    mobile          VARCHAR(32)  DEFAULT NULL,
+    phone           VARCHAR(32)  DEFAULT NULL,
+    email           VARCHAR(200) DEFAULT NULL,
+    decision_role   VARCHAR(50)  DEFAULT NULL,
+    primary_flag    TINYINT      NOT NULL DEFAULT 0,
+    status          TINYINT      NOT NULL DEFAULT 1,
+    version         INT          NOT NULL DEFAULT 0,
+    deleted         TINYINT      NOT NULL DEFAULT 0,
+    primary_supplier_guard BIGINT GENERATED ALWAYS AS (
+        CASE WHEN primary_flag = 1 AND status = 1 AND deleted = 0 THEN supplier_id ELSE NULL END
+    ) STORED,
+    create_time     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by       VARCHAR(64)  DEFAULT NULL,
+    update_by       VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_srm_contact_primary (tenant_id, primary_supplier_guard),
+    INDEX idx_srm_contact_supplier (tenant_id, supplier_id, status, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM供应商联系人';
+
+-- 12.3 供应商资质
+CREATE TABLE IF NOT EXISTS srm_supplier_qualification (
+    id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id           BIGINT       NOT NULL,
+    supplier_id         BIGINT       NOT NULL,
+    qualification_name  VARCHAR(200) NOT NULL,
+    certificate_no      VARCHAR(100) DEFAULT NULL,
+    issuing_authority   VARCHAR(200) DEFAULT NULL,
+    issue_date          DATE         DEFAULT NULL,
+    expiry_date         DATE         DEFAULT NULL,
+    status              VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE',
+    version             INT          NOT NULL DEFAULT 0,
+    deleted             TINYINT      NOT NULL DEFAULT 0,
+    create_time         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time         DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by           VARCHAR(64)  DEFAULT NULL,
+    update_by           VARCHAR(64)  DEFAULT NULL,
+    INDEX idx_srm_qual_supplier (tenant_id, supplier_id, deleted),
+    INDEX idx_srm_qual_expiry (tenant_id, expiry_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM供应商资质';
+
+-- 12.4 供应商银行账户
+CREATE TABLE IF NOT EXISTS srm_supplier_bank_account (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id     BIGINT       NOT NULL,
+    supplier_id   BIGINT       NOT NULL,
+    account_name  VARCHAR(200) NOT NULL,
+    account_no    VARCHAR(100) NOT NULL,
+    bank_name     VARCHAR(200) NOT NULL,
+    bank_branch   VARCHAR(200) DEFAULT NULL,
+    bank_code     VARCHAR(50)  DEFAULT NULL,
+    primary_flag  TINYINT      NOT NULL DEFAULT 0,
+    status        TINYINT      NOT NULL DEFAULT 1,
+    version       INT          NOT NULL DEFAULT 0,
+    deleted       TINYINT      NOT NULL DEFAULT 0,
+    primary_supplier_guard BIGINT GENERATED ALWAYS AS (
+        CASE WHEN primary_flag = 1 AND status = 1 AND deleted = 0 THEN supplier_id ELSE NULL END
+    ) STORED,
+    create_time   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time   DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by     VARCHAR(64)  DEFAULT NULL,
+    update_by     VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_srm_bank_primary (tenant_id, primary_supplier_guard),
+    INDEX idx_srm_bank_supplier (tenant_id, supplier_id, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM供应商银行账户';
+
+-- 12.5 门户用户
+CREATE TABLE IF NOT EXISTS srm_supplier_portal_user (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id    BIGINT   NOT NULL,
+    supplier_id  BIGINT   NOT NULL,
+    user_id      BIGINT   NOT NULL,
+    status       VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    last_login_time DATETIME DEFAULT NULL,
+    version      INT NOT NULL DEFAULT 0,
+    deleted      TINYINT NOT NULL DEFAULT 0,
+    create_time  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by    VARCHAR(64) DEFAULT NULL,
+    update_by    VARCHAR(64) DEFAULT NULL,
+    UNIQUE KEY uk_srm_portal_user (tenant_id, user_id),
+    INDEX idx_srm_portal_supplier (tenant_id, supplier_id, status, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM门户用户';
+
+-- 12.6 门户入驻记录
+CREATE TABLE IF NOT EXISTS srm_supplier_enrollment (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id    BIGINT       NOT NULL,
+    supplier_id  BIGINT       NOT NULL,
+    user_id      BIGINT       NOT NULL,
+    request_id   VARCHAR(64)  NOT NULL COMMENT '幂等请求ID',
+    invite_id    BIGINT       DEFAULT NULL,
+    status       VARCHAR(30)  NOT NULL DEFAULT 'PENDING_ROLE_ASSIGN',
+    retry_count  INT          NOT NULL DEFAULT 0,
+    last_error_code VARCHAR(100) DEFAULT NULL,
+    next_retry_time DATETIME  DEFAULT NULL,
+    version      INT          NOT NULL DEFAULT 0,
+    deleted      TINYINT      NOT NULL DEFAULT 0,
+    active_user_guard BIGINT GENERATED ALWAYS AS (
+        CASE WHEN deleted = 0 AND status IN ('PENDING_ROLE_ASSIGN','ROLE_ASSIGN_FAILED')
+             THEN user_id ELSE NULL END
+    ) STORED,
+    create_time  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by    VARCHAR(64)  DEFAULT NULL,
+    update_by    VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_srm_enrollment_req (tenant_id, request_id),
+    UNIQUE KEY uk_srm_enrollment_active_user (tenant_id, active_user_guard),
+    INDEX idx_srm_enrollment_user_status (tenant_id, user_id, status, deleted),
+    INDEX idx_srm_enrollment_supplier (tenant_id, supplier_id, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM门户入驻记录';
+
+-- 12.7 邀请
+CREATE TABLE IF NOT EXISTS srm_supplier_invite (
+    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id         BIGINT       NOT NULL,
+    invite_code_hash  VARCHAR(128) NOT NULL COMMENT '邀请码 SHA-256 哈希',
+    status            VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE',
+    expires_time      DATETIME     NOT NULL,
+    max_uses          INT          NOT NULL DEFAULT 1,
+    used_count        INT          NOT NULL DEFAULT 0,
+    version           INT          NOT NULL DEFAULT 0,
+    deleted           TINYINT      NOT NULL DEFAULT 0,
+    create_time       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time       DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by         VARCHAR(64)  DEFAULT NULL,
+    update_by         VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_srm_invite_hash (tenant_id, invite_code_hash),
+    INDEX idx_srm_invite_status (tenant_id, status, expires_time, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM供应商邀请';
+
+-- 12.8 评估模板
+CREATE TABLE IF NOT EXISTS srm_evaluation_template (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id    BIGINT       NOT NULL,
+    name         VARCHAR(200) NOT NULL,
+    status       TINYINT      NOT NULL DEFAULT 1,
+    default_flag TINYINT      NOT NULL DEFAULT 0,
+    version      INT          NOT NULL DEFAULT 0,
+    deleted      TINYINT      NOT NULL DEFAULT 0,
+    create_time  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by    VARCHAR(64)  DEFAULT NULL,
+    update_by    VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_srm_eval_tpl_name (tenant_id, name, deleted),
+    INDEX idx_srm_eval_tpl_status (tenant_id, default_flag, status, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM评估模板';
+
+-- 12.9 评估维度
+CREATE TABLE IF NOT EXISTS srm_evaluation_dimension (
+    id              BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    tenant_id       BIGINT        NOT NULL,
+    template_id     BIGINT        NOT NULL,
+    indicator_name  VARCHAR(200)  NOT NULL COMMENT '指标名称',
+    weight          DECIMAL(5,2)  NOT NULL COMMENT '权重百分比',
+    sort            INT           NOT NULL DEFAULT 0,
+    status          TINYINT       NOT NULL DEFAULT 1,
+    deleted         TINYINT       NOT NULL DEFAULT 0,
+    create_time     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by       VARCHAR(64)   DEFAULT NULL,
+    update_by       VARCHAR(64)   DEFAULT NULL,
+    UNIQUE KEY uk_srm_eval_dim_name (tenant_id, template_id, indicator_name, deleted),
+    INDEX idx_srm_eval_dim_tpl (tenant_id, template_id, status, deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM评估维度';
+
+-- 12.10 绩效评估
+CREATE TABLE IF NOT EXISTS srm_evaluation (
+    id                 BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    tenant_id          BIGINT        NOT NULL,
+    supplier_id        BIGINT        NOT NULL,
+    template_id        BIGINT        NOT NULL,
+    evaluation_period  VARCHAR(50)   NOT NULL COMMENT '评估周期',
+    total_score        DECIMAL(5,2)  NOT NULL DEFAULT 0 COMMENT '百分制总分',
+    evaluator_user_id  BIGINT        NOT NULL,
+    evaluation_time    DATETIME      NOT NULL,
+    status             VARCHAR(20)   NOT NULL DEFAULT 'COMPLETED',
+    owner_user_id      BIGINT        NOT NULL COMMENT '负责人快照',
+    owner_unit_id      BIGINT        NOT NULL COMMENT '组织快照',
+    version            INT           NOT NULL DEFAULT 0,
+    deleted            TINYINT       NOT NULL DEFAULT 0,
+    create_time        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time        DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by          VARCHAR(64)   DEFAULT NULL,
+    update_by          VARCHAR(64)   DEFAULT NULL,
+    INDEX idx_srm_eval_supplier (tenant_id, supplier_id, deleted),
+    INDEX idx_srm_eval_owner (tenant_id, owner_user_id, deleted),
+    INDEX idx_srm_eval_period (tenant_id, evaluation_period)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM绩效评估';
+
+-- 12.11 评估评分明细
+CREATE TABLE IF NOT EXISTS srm_evaluation_item (
+    id              BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    tenant_id       BIGINT        NOT NULL,
+    evaluation_id   BIGINT        NOT NULL,
+    dimension_id    BIGINT        NOT NULL,
+    indicator_name  VARCHAR(200)  NOT NULL,
+    score           DECIMAL(3,1)  NOT NULL COMMENT '评分 1-5',
+    weight          DECIMAL(5,2)  NOT NULL COMMENT '权重快照',
+    remark          VARCHAR(500)  DEFAULT NULL,
+    version         INT           NOT NULL DEFAULT 0,
+    deleted         TINYINT       NOT NULL DEFAULT 0,
+    create_time     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by       VARCHAR(64)   DEFAULT NULL,
+    update_by       VARCHAR(64)   DEFAULT NULL,
+    UNIQUE KEY uk_srm_eval_item_dim (tenant_id, evaluation_id, dimension_id),
+    INDEX idx_srm_eval_item_eval (tenant_id, evaluation_id, deleted),
+    CONSTRAINT chk_srm_eval_item_score CHECK (score >= 1 AND score <= 5)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM评估评分明细';
+
+-- 12.12 风险指标
+CREATE TABLE IF NOT EXISTS srm_risk_indicator (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id       BIGINT       NOT NULL,
+    supplier_id     BIGINT       NOT NULL,
+    indicator_type  VARCHAR(50)  NOT NULL COMMENT '指标类型',
+    indicator_value VARCHAR(200) DEFAULT NULL,
+    risk_level      VARCHAR(20)  NOT NULL DEFAULT 'GREEN' COMMENT 'RED/YELLOW/GREEN',
+    assessment_time DATETIME     NOT NULL,
+    remark          VARCHAR(500) DEFAULT NULL,
+    version         INT          NOT NULL DEFAULT 0,
+    deleted         TINYINT      NOT NULL DEFAULT 0,
+    create_time     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by       VARCHAR(64)  DEFAULT NULL,
+    update_by       VARCHAR(64)  DEFAULT NULL,
+    UNIQUE KEY uk_srm_risk_ind_type (tenant_id, supplier_id, indicator_type),
+    INDEX idx_srm_risk_ind_supplier (tenant_id, supplier_id, indicator_type, deleted),
+    INDEX idx_srm_risk_ind_level (tenant_id, risk_level, deleted),
+    CONSTRAINT chk_srm_risk_ind_type CHECK (indicator_type IN ('FINANCIAL','COMPLIANCE','SUPPLY','COOPERATION','QUALITY','CERTIFICATE')),
+    CONSTRAINT chk_srm_risk_ind_level CHECK (risk_level IN ('GREEN','YELLOW','RED'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM风险指标';
+
+-- 12.13 综合风险评估
+CREATE TABLE IF NOT EXISTS srm_risk_assessment (
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id        BIGINT       NOT NULL,
+    supplier_id      BIGINT       NOT NULL,
+    overall_level    VARCHAR(20)  NOT NULL COMMENT 'RED/YELLOW/GREEN',
+    assessment_time  DATETIME     NOT NULL,
+    assessor_user_id BIGINT       NOT NULL,
+    remark           VARCHAR(500) DEFAULT NULL,
+    version          INT          NOT NULL DEFAULT 0,
+    deleted          TINYINT      NOT NULL DEFAULT 0,
+    create_time      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time      DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by        VARCHAR(64)  DEFAULT NULL,
+    update_by        VARCHAR(64)  DEFAULT NULL,
+    INDEX idx_srm_risk_assess_supplier (tenant_id, supplier_id, assessment_time, deleted),
+    CONSTRAINT chk_srm_risk_assess_level CHECK (overall_level IN ('GREEN','YELLOW','RED'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM综合风险评估';
+
+-- 12.14 SRM 本地 Transactional Outbox
+CREATE TABLE IF NOT EXISTS sys_mq_message (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    msg_id          VARCHAR(36)  NOT NULL COMMENT '业务消息ID',
+    topic           VARCHAR(128) NOT NULL COMMENT 'MQ Topic',
+    binding_name    VARCHAR(128) NOT NULL COMMENT 'Stream binding',
+    tag             VARCHAR(64)  DEFAULT NULL,
+    msg_key         VARCHAR(128) DEFAULT NULL COMMENT '事件ID或业务键',
+    payload         TEXT         NOT NULL COMMENT '不含PII的消息体',
+    broker_type     VARCHAR(32)  NOT NULL DEFAULT 'rocketmq',
+    status          TINYINT      NOT NULL DEFAULT 0,
+    retry_count     INT          NOT NULL DEFAULT 0,
+    max_retry       INT          NOT NULL DEFAULT 3,
+    next_retry_time DATETIME     DEFAULT NULL,
+    error_msg       VARCHAR(512) DEFAULT NULL,
+    service_name    VARCHAR(64)  NOT NULL,
+    tenant_id       BIGINT       NOT NULL,
+    create_time     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_srm_mq_msg_id (msg_id),
+    INDEX idx_srm_mq_relay (status, next_retry_time),
+    INDEX idx_srm_mq_tenant_time (tenant_id, create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM可靠消息发件箱';
+
+-- 默认评估模板（质量30%/交期30%/价格20%/服务20%）
+INSERT IGNORE INTO srm_evaluation_template (id, tenant_id, name, status, default_flag, version, deleted, create_by)
+VALUES (1, 1, '默认供应商评估模板', 1, 1, 0, 0, 'system');
+
+INSERT IGNORE INTO srm_evaluation_dimension (id, tenant_id, template_id, indicator_name, weight, sort, status, deleted, create_by)
+VALUES
+    (1, 1, 1, '质量', 30.00, 1, 1, 0, 'system'),
+    (2, 1, 1, '交期', 30.00, 2, 1, 0, 'system'),
+    (3, 1, 1, '价格', 20.00, 3, 1, 0, 'system'),
+    (4, 1, 1, '服务', 20.00, 4, 1, 0, 'system');
+
+-- ============================================================
+-- 13. 供应商门户样例数据
+-- ============================================================
+
+-- 13.1 供应商门户用户（切回 omni_auth）
+USE omni_auth;
+
+INSERT IGNORE INTO sys_user (id, tenant_id, username, password, nickname, email, phone, gender, primary_unit_id, status, create_by)
+VALUES (200, 1, 'supplier1', '$2b$10$TWIuwQVfxgsioXe/2O9cgOXtuZwOREr1IBkgTj2.nhA1NSlnad1oa', '王建国', 'wangjianguo@huaxin-precision.com', '13912345678', 1, 1, 1, 'system');
+
+-- 13.2 供应商角色绑定（仅 SUPPLIER，不绑定 USER 避免暴露内部管理菜单）
+INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES (200, 33);
+
+-- 13.3 用户组织映射
+INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) VALUES (200, 1, 1);
+
+-- 13.4 供应商业务数据（切回 omni_srm）
+USE omni_srm;
+
+-- 供应商企业
+INSERT IGNORE INTO srm_supplier (id, tenant_id, supplier_no, name, normalized_name, supplier_type, industry_code, credit_code, website, phone, email, region, address, category_code, level_code, status, assigned_time, last_evaluation_time, owner_user_id, owner_unit_id, version, deleted, create_by)
+VALUES (1, 1, 'SUP-2026-001', '华信精密制造有限公司', '华信精密制造有限公司', 'MANUFACTURER', 'C39', '91320500MA1EXAMPLE', 'https://www.huaxin-precision.com', '0512-66881234', 'contact@huaxin-precision.com', '江苏省苏州市', '苏州工业园区星湖街328号创新产业园A栋', 'ELECTRONICS', 'STRATEGIC', 'APPROVED', '2026-01-01 09:00:00', '2026-01-15 10:00:00', 1, 1, 0, 0, 'system');
+
+-- 供应商联系人
+INSERT IGNORE INTO srm_supplier_contact (id, tenant_id, supplier_id, name, department, job_title, mobile, phone, email, decision_role, primary_flag, status, version, deleted, create_by)
+VALUES
+    (1, 1, 1, '王建国', '销售部', '销售总监', '13912345678', '0512-66881234', 'wangjianguo@huaxin-precision.com', 'DECISION_MAKER', 1, 1, 0, 0, 'system'),
+    (2, 1, 1, '李芳', '质量部', '质量经理', '13856781234', '0512-66885678', 'lifang@huaxin-precision.com', 'INFLUENCER', 0, 1, 0, 0, 'system'),
+    (3, 1, 1, '赵明', '物流部', '物流主管', '13765432100', '0512-66889012', 'zhaoming@huaxin-precision.com', 'USER', 0, 1, 0, 0, 'system');
+
+-- 供应商资质
+INSERT IGNORE INTO srm_supplier_qualification (id, tenant_id, supplier_id, qualification_name, certificate_no, issuing_authority, issue_date, expiry_date, status, version, deleted, create_by)
+VALUES
+    (1, 1, 1, 'ISO 9001:2015 质量管理体系', 'CN24/30001', '中国质量认证中心(CQC)', '2024-03-15', '2027-03-14', 'ACTIVE', 0, 0, 'system'),
+    (2, 1, 1, 'ISO 14001:2015 环境管理体系', 'CN24/E0128', '中国质量认证中心(CQC)', '2024-06-01', '2027-05-31', 'ACTIVE', 0, 0, 'system'),
+    (3, 1, 1, 'IATF 16949:2016 汽车行业质量管理体系', 'IATF-2025-0456', 'SGS', '2025-01-10', '2028-01-09', 'ACTIVE', 0, 0, 'system');
+
+-- 供应商银行账户
+INSERT IGNORE INTO srm_supplier_bank_account (id, tenant_id, supplier_id, account_name, account_no, bank_name, bank_branch, bank_code, primary_flag, status, version, deleted, create_by)
+VALUES
+    (1, 1, 1, '华信精密制造有限公司', '6228480322123456789', '中国工商银行', '苏州工业园区支行', 'ICBC', 1, 1, 0, 0, 'system'),
+    (2, 1, 1, '华信精密制造有限公司', '5129021234567890', '招商银行', '苏州分行', 'CMB', 0, 1, 0, 0, 'system');
+
+-- 门户用户关联
+INSERT IGNORE INTO srm_supplier_portal_user (tenant_id, supplier_id, user_id, create_by)
+VALUES (1, 1, 200, 'system');
+
+-- 门户入驻记录（已审批通过）
+INSERT IGNORE INTO srm_supplier_enrollment (id, tenant_id, supplier_id, user_id, request_id, status, create_by)
+VALUES (1, 1, 1, 200, 'enroll-huaxin-20260101', 'COMPLETED', 'system');
+
+-- 绩效评估（2025 Q4）
+INSERT IGNORE INTO srm_evaluation (id, tenant_id, supplier_id, template_id, evaluation_period, total_score, evaluator_user_id, evaluation_time, status, owner_user_id, owner_unit_id, version, deleted, create_by)
+VALUES (1, 1, 1, 1, '2025-Q4', 85.00, 1, '2026-01-15 10:00:00', 'COMPLETED', 1, 1, 0, 0, 'system');
+
+INSERT IGNORE INTO srm_evaluation_item (tenant_id, evaluation_id, dimension_id, indicator_name, score, weight, create_by)
+VALUES
+    (1, 1, 1, '质量', 4.5, 30.00, 'system'),
+    (1, 1, 2, '交期', 4.0, 30.00, 'system'),
+    (1, 1, 3, '价格', 4.0, 20.00, 'system'),
+    (1, 1, 4, '服务', 4.5, 20.00, 'system');
+
+-- 供应商邀请（示例邀请码 hash，有效期 7 天，最大使用 1 次）
+INSERT IGNORE INTO srm_supplier_invite (id, tenant_id, invite_code_hash, status, expires_time, max_uses, used_count, version, deleted, create_by)
+VALUES (1, 1, 'a697e214bda1f51dae035be089555d92ddd9780862096747de5f21890a896abb', 'ACTIVE', DATE_ADD(NOW(), INTERVAL 7 DAY), 1, 0, 0, 0, 'system');
+
+-- 风险评估
+INSERT IGNORE INTO srm_risk_assessment (tenant_id, supplier_id, overall_level, assessment_time, assessor_user_id, remark, create_by)
+VALUES (1, 1, 'YELLOW', '2026-01-20 14:00:00', 1, '整体风险可控，需关注财务指标变化趋势', 'system');
+
+INSERT IGNORE INTO srm_risk_indicator (tenant_id, supplier_id, indicator_type, indicator_value, risk_level, assessment_time, remark, create_by)
+VALUES
+    (1, 1, 'FINANCIAL', '流动比率 1.2（行业均值 1.8）', 'YELLOW', '2026-01-20 14:00:00', '流动比率偏低，需持续关注', 'system'),
+    (1, 1, 'QUALITY', '来料合格率 98.5%', 'GREEN', '2026-01-20 14:00:00', '质量表现优秀', 'system'),
+    (1, 1, 'SUPPLY', '准时交付率 95.2%', 'GREEN', '2026-01-20 14:00:00', '交付表现良好', 'system'),
+    (1, 1, 'COMPLIANCE', '应付账款同比增长 35%', 'YELLOW', '2026-01-20 14:00:00', '应付账款增幅较大，需关注资金链', 'system'),
+    (1, 1, 'COOPERATION', '合作响应正常', 'GREEN', '2026-01-20 14:00:00', '合作过程稳定', 'system'),
+    (1, 1, 'CERTIFICATE', '全部资质在有效期内', 'GREEN', '2026-01-20 14:00:00', '暂无资质到期风险', 'system');
+
+-- ============================================================
+-- 授权应用用户访问所有 omni 数据库
+-- ============================================================
+GRANT ALL PRIVILEGES ON omni_auth.* TO 'omni_app'@'%';
+GRANT ALL PRIVILEGES ON omni_base.* TO 'omni_app'@'%';
+GRANT ALL PRIVILEGES ON omni_workflow.* TO 'omni_app'@'%';
+GRANT ALL PRIVILEGES ON omni_crm.* TO 'omni_app'@'%';
+GRANT ALL PRIVILEGES ON omni_srm.* TO 'omni_app'@'%';
+FLUSH PRIVILEGES;
 

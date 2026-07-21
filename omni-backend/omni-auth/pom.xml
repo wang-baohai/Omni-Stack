@@ -74,6 +74,16 @@
             <artifactId>omni-common-redis</artifactId>
         </dependency>
 
+        <!-- XXL-JOB + 可靠 MQ Outbox（门户角色分配结果） -->
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common-job</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common-mqlog</artifactId>
+        </dependency>
+
         <!-- Nacos Discovery -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -110,6 +120,12 @@
             <groupId>com.github.whvcse</groupId>
             <artifactId>easy-captcha</artifactId>
             <version>1.6.2</version>
+        </dependency>
+
+        <!-- Spring Cloud Stream RocketMQ (门户角色分配 MQ) -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-stream-rocketmq</artifactId>
         </dependency>
 
         <!-- Test -->

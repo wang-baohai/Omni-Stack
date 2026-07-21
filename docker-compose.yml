@@ -23,7 +23,7 @@ services:
     container_name: omni-mysql
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "13306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: omni_auth
@@ -34,9 +34,10 @@ services:
       - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
       - ./scripts/sql/init-nacos.sql:/docker-entrypoint-initdb.d/02-init-nacos.sql:ro
       - ./scripts/sql/init-xxl-job.sql:/docker-entrypoint-initdb.d/03-init-xxl-job.sql:ro
-    command: >
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_unicode_ci
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --init-connect=SET NAMES utf8mb4
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s
@@ -210,7 +211,14 @@ services:
       SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
       SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: omni_app
+      SPRING_DATASOURCE_PASSWORD: omni_app_pass
       SPRING_DATA_REDIS_HOST: redis
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-auth:9900/
+      XXL_JOB_EXECUTOR_IP: omni-auth
+      XXL_JOB_EXECUTOR_PORT: "9900"
       AUTH_ISSUER: http://omni-auth:8080
       AUTH_FRONTEND_BASE_URL: http://localhost:3000
       AUTH_OAUTH2_GITHUB_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/github/callback
@@ -241,6 +249,10 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+      xxl-job-admin:
+        condition: service_healthy
     networks:
       - omni-network
 
@@ -269,6 +281,8 @@ services:
       SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
       SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_base?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: omni_app
+      SPRING_DATASOURCE_PASSWORD: omni_app_pass
       SPRING_DATA_REDIS_HOST: redis
       SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
       XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
@@ -314,6 +328,8 @@ services:
       SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
       SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_workflow?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: omni_app
+      SPRING_DATASOURCE_PASSWORD: omni_app_pass
       SPRING_DATA_REDIS_HOST: redis
       SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
       # 内部 API 认证 Token（Feign 调用 omni-auth 时使用）
@@ -353,6 +369,8 @@ services:
       SPRING_PROFILES_ACTIVE: default
       NACOS_SERVER_ADDR: nacos:8848
       MYSQL_URL: "jdbc:mysql://mysql:3306/omni_crm?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      MYSQL_USERNAME: omni_app
+      MYSQL_PASSWORD: omni_app_pass
       REDIS_HOST: redis
       ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
       XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
@@ -408,6 +426,57 @@ services:
       omni-auth:
         condition: service_healthy
       omni-crm:
+        condition: service_healthy
+      omni-srm:
+        condition: service_healthy
+    networks:
+      - omni-network
+
+  # ----------------------------------------------------------
+  # omni-srm — 供应商关系管理服务
+  # 宿主机端口: 8105 | 容器内部端口: 8080 | XXL执行器: 9905
+  # ----------------------------------------------------------
+  omni-srm:
+    build:
+      context: ./omni-backend
+      dockerfile: ../docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-srm
+    image: omni-srm:latest
+    container_name: omni-srm
+    restart: unless-stopped
+    ports:
+      # 业务端口仅绑定回环地址；生产流量必须经 Gateway。
+      - "127.0.0.1:8105:8080"
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: default
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_URL: "jdbc:mysql://mysql:3306/omni_srm?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      MYSQL_USERNAME: omni_app
+      MYSQL_PASSWORD: omni_app_pass
+      REDIS_HOST: redis
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-srm:9905/
+      XXL_JOB_EXECUTOR_IP: omni-srm
+      XXL_JOB_EXECUTOR_PORT: "9905"
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+    depends_on:
+      nacos:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_healthy
+      xxl-job-admin:
+        condition: service_healthy
+      omni-auth:
         condition: service_healthy
     networks:
       - omni-network

@@ -28,7 +28,7 @@
 
 ## 1. 架构概览
 
-Omni-Stack Docker 全家桶包含 **12 个容器**，分为三层：
+Omni-Stack Docker 全家桶包含 **13 个容器**，分为三层：
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -37,16 +37,18 @@ Omni-Stack Docker 全家桶包含 **12 个容器**，分为三层：
 └──────────────────────────┬──────────────────────────────────┘
                            │ proxy_pass
 ┌──────────────────────────┴──────────────────────────────────┐
-│                    后端微服务层 (5 容器)                      │
+│                    后端微服务层 (6 容器)                      │
 │  omni-gateway (:8102) ──→ omni-auth (:8100)                │
 │        │                 omni-base (:8101)                  │
 │        │                 omni-workflow (:8103)              │
 │        │                 omni-crm (:8104)                   │
+│        │                 omni-srm (:8105，仅回环调试)        │
 └────────┼────────────────────┬───────────────────────────────┘
          │                    │
 ┌────────┴────────────────────┴───────────────────────────────┐
 │                    中间件层 (6 容器)                          │
-│  MySQL (:3306) · Redis (:6379) · Nacos (:8080/:8848/:9848) │
+│  MySQL (宿主机:13306/容器:3306) · Redis (:6379)             │
+│  Nacos (:8080/:8848/:9848)                                 │
 │  RocketMQ NameServer (:19876) · Broker (:10909-10912)      │
 │  XXL-JOB Admin (:18080)                                    │
 └─────────────────────────────────────────────────────────────┘
@@ -83,12 +85,14 @@ networks:
 | omni-crm | omni-auth | `omni-auth:8080` | 用户、组织、数据范围与 XSS 内部查询 |
 | omni-crm | rocketmq-namesrv | `rocketmq-namesrv:9876` | CRM Outbox 消息投递 |
 | omni-crm | xxl-job-admin | `xxl-job-admin:8080` | CRM 中继执行器注册 |
+| omni-srm | mysql | `mysql:3306` | SRM 业务库与本地 Outbox |
+| omni-srm | omni-auth | `omni-auth:8080` | 用户/组织内部查询与 Portal Saga |
 | 宿主机浏览器 | omni-frontend | `localhost:3000` | 用户访问入口 |
 | 宿主机浏览器 | Nacos Console | `localhost:8080` | 运维管理 |
 
-> **关键区分**：容器间通信使用容器内部端口（如 8080），宿主机访问使用映射端口（如 8100-8104）。
+> **关键区分**：容器间通信使用容器内部端口（如 8080），宿主机访问使用映射端口（如 8100-8105）；MySQL 容器内始终使用 3306，宿主机映射为 13306。
 
-> **生产网络边界**：仓库根目录的 `docker-compose.yml` 是本地开发/联调编排，因此映射了 8100-8104。生产部署必须只对外发布 Frontend 与 Gateway；Auth、Base、Workflow、CRM 的业务端口应仅在私有容器网络或安全组内可达。下游的 `X-Gateway-Forwarded` 是转发标记而不是密码学凭证，不能用它替代网络隔离。
+> **生产网络边界**：仓库根目录的 `docker-compose.yml` 是本地开发/联调编排，因此映射了 8100-8104，并仅在 `127.0.0.1:8105` 暴露 SRM 调试口。生产部署必须只对外发布 Frontend 与 Gateway；Auth、Base、Workflow、CRM、SRM 的业务端口应仅在私有容器网络或安全组内可达。下游的 `X-Gateway-Forwarded` 是转发标记而不是密码学凭证，不能用它替代网络隔离。
 
 ---
 
@@ -210,6 +214,8 @@ EXPOSE 3000
 ```yaml
 mysql:
   image: mysql:8.4
+  ports:
+    - "13306:3306"
   environment:
     MYSQL_ROOT_PASSWORD: root          # root 密码
     MYSQL_DATABASE: omni_auth          # 自动创建的首个数据库
@@ -226,6 +232,7 @@ mysql:
 - 三个 SQL 脚本按编号顺序自动执行：`01-init.sql`（业务库 + 初始数据）→ `02-init-nacos.sql`（Nacos 配置库）→ `03-init-xxl-job.sql`（XXL-JOB 库）
 - 挂载为 `:ro`（只读），防止容器意外修改源文件
 - 数据不持久化到宿主机 Volume —— 容器销毁即重置，适合开发环境
+- Docker entrypoint 初始化脚本只在空数据目录执行。保留旧数据目录升级时须先备份，再依次执行 `migrate-crm-mvp.sql`、`migrate-srm-mvp.sql`、`sp_init_tenant.sql`；SRM 脚本同时补齐 Auth/SRM Outbox、权限、表结构、默认模板和品类字典。
 
 ### 5.2 Redis 7.4
 
@@ -352,7 +359,7 @@ Spring Boot 支持通过环境变量覆盖 `application.yml` 中的配置，Dock
 
 | 配置项 | application.yml 值（本地开发） | Docker 环境变量值 |
 |--------|-------------------------------|------------------|
-| 数据库地址 | `localhost:3306` | `mysql:3306` |
+| 数据库地址 | `localhost:13306`（连接本 Compose MySQL） | `mysql:3306` |
 | Redis 地址 | `localhost` | `redis` |
 | Nacos 地址 | `localhost:8848` | `nacos:8848` |
 | RocketMQ | `localhost:9876` | `rocketmq-namesrv:9876` |
@@ -809,7 +816,8 @@ docker compose logs --timestamps omni-auth | head -5
 | omni-gateway | 8080 | 8102 | HTTP | API 网关 |
 | omni-workflow | 8080 | 8103 | HTTP | 工作流服务 |
 | omni-crm | 8080 | 8104 | HTTP | CRM 销售前闭环服务 |
-| MySQL | 3306 | 3306 | TCP | 数据库 |
+| omni-srm | 8080 | 127.0.0.1:8105 | HTTP | SRM 服务；生产流量只经 Gateway，宿主机仅回环调试 |
+| MySQL | 3306 | 13306 | TCP | 数据库；避免与宿主机已有 MySQL 3306 冲突 |
 | Redis | 6379 | 6379 | TCP | 缓存 |
 | Nacos Console | 8080 | 8080 | HTTP | 控制台 |
 | Nacos API | 8848 | 8848 | HTTP | 服务注册/配置 |
@@ -823,7 +831,7 @@ docker compose logs --timestamps omni-auth | head -5
 | 服务 | 账号 | 密码 | 访问地址 |
 |------|------|------|----------|
 | 前端应用 | admin | admin123 | http://localhost:3000 |
-| MySQL | root | root | localhost:3306 |
+| MySQL | root | root | localhost:13306 |
 | Nacos Console | nacos | nacos | http://localhost:8080 |
 | XXL-JOB Admin | admin | 123456 | http://localhost:18080 |
 
@@ -839,7 +847,8 @@ docker compose logs --timestamps omni-auth | head -5
 | Maven 镜像 | `omni-backend/docker-settings.xml` | 阿里云 Maven 加速 |
 | 数据库初始化 | `scripts/sql/init-all.sql` | 业务库表结构与数据 |
 | CRM 既有环境迁移 | `scripts/sql/migrate-crm-mvp.sql` | 创建 CRM 库、补权限角色与日志幂等列 |
-| 新租户初始化 | `scripts/sql/sp_init_tenant.sql` | 重建存储过程并正确映射权限物化路径 |
+| SRM 既有环境迁移 | `scripts/sql/migrate-srm-mvp.sql` | 幂等创建 SRM/Auth Outbox、权限角色、SRM 表与升级约束 |
+| 新租户初始化 | `scripts/sql/sp_init_tenant.sql` | 重建可重入存储过程，映射权限路径并归一 SRM 模板/字典 |
 | Nacos 初始化 | `scripts/sql/init-nacos.sql` | Nacos 配置数据 |
 | XXL-JOB 初始化 | `scripts/sql/init-xxl-job.sql` | 调度任务数据 |
 | 启动脚本 (Linux) | `start.sh` | 一键启动 |
