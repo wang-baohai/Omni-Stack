@@ -57,7 +57,7 @@ public final class XssSanitizer {
     private static String applyRule(String input, XssSettings.XssRule rule) {
         String type = rule.getRuleType();
         String pattern = rule.getPattern();
-        if (type == null || pattern == null) {
+        if (type == null || pattern == null || pattern.isBlank()) {
             return input;
         }
         return switch (type.toUpperCase()) {
@@ -74,12 +74,14 @@ public final class XssSanitizer {
      * <p>匹配 {@code <tag...>content</tag>} 和自闭合 {@code <tag.../>} 两种形式。</p>
      */
     private static String stripHtmlTag(String input, String tagName) {
+        String tagAlternation = toLiteralAlternation(tagName);
         // 匹配成对标签: <tag ...>...</tag>
-        String pairRegex = "<" + Pattern.quote(tagName) + "[^>]*>.*?</" + Pattern.quote(tagName) + "\\s*>";
+        String pairRegex = "<(?:" + tagAlternation + ")[^>]*>.*?</(?:"
+                + tagAlternation + ")\\s*>";
         String result = Pattern.compile(pairRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
                 .matcher(input).replaceAll("");
         // 匹配自闭合标签: <tag ... />
-        String selfCloseRegex = "<" + Pattern.quote(tagName) + "[^>]*/?>";
+        String selfCloseRegex = "<(?:" + tagAlternation + ")[^>]*/?>";
         result = Pattern.compile(selfCloseRegex, Pattern.CASE_INSENSITIVE).matcher(result).replaceAll("");
         return result;
     }
@@ -98,8 +100,21 @@ public final class XssSanitizer {
      * 剥离危险协议字符串（不区分大小写直接替换）。
      */
     private static String stripProtocol(String input, String protocol) {
-        return Pattern.compile(Pattern.quote(protocol), Pattern.CASE_INSENSITIVE)
+        return Pattern.compile("(?:" + toLiteralAlternation(protocol) + ")", Pattern.CASE_INSENSITIVE)
                 .matcher(input).replaceAll("");
+    }
+
+    /**
+     * 将竖线分隔的配置值转换为安全的正则 alternation。
+     * <p>每个配置项按字面量匹配，竖线仅作为多值分隔符，避免整串被 quote 后失效。</p>
+     */
+    private static String toLiteralAlternation(String configuredValue) {
+        return Pattern.compile("\\|")
+                .splitAsStream(configuredValue)
+                .map(String::trim)
+                .filter(value -> !value.isEmpty())
+                .map(Pattern::quote)
+                .collect(java.util.stream.Collectors.joining("|"));
     }
 
     /**

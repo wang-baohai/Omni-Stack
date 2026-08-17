@@ -1,8 +1,8 @@
 # 资产管理模块架构与实现基线
 
-> 状态：设计完成，待实施  
-> 项目：Omni-Stack  
-> 日期：2026-07-13  
+> 状态：MVP 已实现并完成验证
+> 项目：Omni-Stack
+> 日期：2026-07-27
 > 目标：说明 omni-asset MVP 的架构、跨服务契约和实施边界；实现入口为 `omni-backend/omni-asset` 与 `omni-frontend/src/views/asset`。
 
 设计依据：`README.md`，以及 `docs/` 中 architecture、api-contract、backend-patterns、frontend-patterns、core-flows、scheduling、workflow、mq-reliability、docker-deployment 全部主题文档；同时参照 `docs/design/srm-design.md` 和 `docs/design/procurement-design.md`。
@@ -34,7 +34,7 @@ Asset MVP 覆盖资产全生命周期管理闭环：
 | 用户 | 核心诉求 |
 |---|---|
 | 行政/IT 管理员 | 管理公司全部资产，分配给员工，处理处置申请 |
-| 资产使用人 | 查看自己名下的资产，发起调拨或退还 |
+| 资产使用人 | 查看自己名下的资产，确认领用或发起退还 |
 | 部门经理 | 查看本部门资产，审批调拨和处置 |
 | 财务人员 | 查看资产原值、当前状态，确认报废 |
 | 资产管理员 | 全租户资产管理、配置、统计 |
@@ -99,13 +99,13 @@ erDiagram
 
 ### 4.2 通用字段与规则
 
-每一张 `ast_*` 表都必须包含 `tenant_id`。可授权业务表还必须包含：
+每一张 `ast_*` 表都必须包含 `tenant_id`。资产聚合根 `ast_asset` 还必须包含：
 
 - `tenant_id`：租户隔离。
 - `owner_user_id`：资产管理员（SELF 范围）。
 - `owner_unit_id`：资产管理部门（DEPT 范围）。
-- `version`：乐观锁。
-- `deleted`：逻辑删除。
+- `version`：乐观锁。调拨和处置申请也分别维护自己的 `version`。
+- `deleted`：逻辑删除。不可变历史与 Inbox 不使用逻辑删除。
 - `id/create_time/update_time/create_by/update_by`：审计字段。
 
 约束：
@@ -150,6 +150,7 @@ erDiagram
 
 - `transfer_no/asset_id/from_user_id/from_unit_id/to_user_id/to_unit_id/from_location/to_location`。
 - `reason/status/process_instance_id/previous_asset_status/active_flag`。
+- `workflow_request_id/workflow_business_key/model_version_id/workflow_start_status/workflow_start_user_id/workflow_start_user_name`：Workflow 幂等快照及原始发起人身份；`businessType=ASSET_TRANSFER` 由调拨聚合类型固定推导。
 - `status`：PENDING_APPROVAL/START_FAILED/APPROVED/REJECTED/COMPLETED/CANCELLED。
 - `approved_time/completed_time`。
 - `version/deleted` 和审计字段。
@@ -160,8 +161,8 @@ erDiagram
 - `residual_value（残值）/disposal_method（处置方式描述）`。
 - `status`：PENDING_APPROVAL/START_FAILED/APPROVED/REJECTED/COMPLETED/CANCELLED。
 - `process_instance_id`：关联 omni-workflow 审批流程实例。
+- `workflow_request_id/workflow_business_key/model_version_id/workflow_start_status/workflow_start_user_id/workflow_start_user_name`：Workflow 幂等快照及原始发起人身份；`businessType=ASSET_DISPOSAL` 由处置聚合类型固定推导。
 - `approved_time/completed_time`。
-- `final_approver_user_id/final_approver_remark`：审批结果快照，完整任务和意见仍以 Workflow 为权威。
 - `version/deleted` 和审计字段。
 
 ## 5. 状态机与核心流程
@@ -282,7 +283,7 @@ sequenceDiagram
     S->>DB: INSERT asset_history (TRANSFER → IN_USE)
 ```
 
-调拨审批使用简单单级审批（管理员或部门经理审批）。MVP 不做多级审批。Workflow 返回 REJECTED 或用户取消时，Asset 必须在同一事务中把 Transfer 置为终态、`active=false`，并将 Asset 恢复为 `previous_asset_status`；流程启动超时使用相同 `tenantId + businessType + businessKey` 重试，明确失败则进入 START_FAILED，可重试或取消恢复。
+调拨审批使用简单单级审批（管理员或部门经理审批）。MVP 不做多级审批。Workflow 返回 REJECTED 或用户取消时，Asset 必须在同一事务中把 Transfer 置为终态、`active=false`，并将 Asset 恢复为 `previous_asset_status`；流程启动结果不确定时保持 `PENDING_APPROVAL + PENDING` 并使用相同 `tenantId + businessType + businessKey` 重试，不允许本地取消。Workflow 业务响应 404 表示模型版本已不可启动且远端未创建实例，此时进入 `START_FAILED + FAILED`，可重试或取消恢复。
 
 ### 5.5 资产处置（丢弃/报废）
 
@@ -389,7 +390,7 @@ API 权限：
 | Disposal | `GET /disposal/list`、`GET /disposal/{id}`、`POST /disposal` |
 | Disposal 审批视图 | `GET /disposal/{id}/approval-view?taskId={taskId}` |
 | Disposal 命令 | `POST /disposal/{id}/complete`、`/cancel`、`/retry-start`；审批动作在 Workflow 完成 |
-| 内部 API | `GET /internal/asset/search?tenantId={tenantId}&status={status}` |
+| 内部 API | `POST /api/internal/asset/procurement/backfill?tenantId={tenantId}&afterId={id}&size={size}`，受内部令牌保护 |
 
 ### 7.3 端点与 DataScope permission 映射
 
@@ -422,10 +423,12 @@ API 权限：
 
 ### 8.2 SRM Feign
 
-Asset 通过 SRM 内部 API 获取供应商信息（保修联系、供应商状态）：
+Asset 通过 SRM 内部 API 获取供应商信息（资产录入候选、保修联系、供应商状态）：
 
-- `GET /internal/supplier/{id}?tenantId={tenantId}`：获取供应商摘要。
-- 仅在资产详情页展示供应商信息，非核心流程依赖。SRM 不可用时降级为 ID/未知供应商。
+- `GET /api/internal/supplier/{id}?tenantId={tenantId}`：获取供应商摘要。
+- `GET /api/internal/supplier/search?...&status=APPROVED&keyword={keyword}`：搜索当前租户已批准供应商。
+- 资产录入页面调用 `/api/asset/options/suppliers`，展示编号和名称，不再要求用户手工输入数字 ID；
+  历史详情在 SRM 暂不可用时仍使用本地名称快照展示。
 
 ### 8.3 Procurement 联动
 
@@ -435,14 +438,14 @@ Asset 通过 SRM 内部 API 获取供应商信息（保修联系、供应商状�
 
 消费流程：
 1. RocketMQ Consumer 接收消息。
-2. 校验事件 `tenantId`，设置系统 TenantContext。
+2. 校验事件 `tenantId`，同时设置系统 TenantContext 与当前租户 `TENANT` 级 DataScopeContext；消费结束必须在 `finally` 中清理两者。
 3. 幂等检查：`ast_inbox_event` 表（`consumer_name + event_id` 唯一键）。
 4. 对满足资产化条件的收货行按 unitSequence 创建资产记录，并依赖来源唯一键兜底。
 5. 在同一事务中更新 inbox 消费状态。
 
 **Feign 查询**（可选）：Asset 可通过 Procurement 内部 API 查询采购来源详情（PO 号、金额、供应商）。
 
-**补偿回扫**：Asset 启动后的受控任务调用 Procurement 资产候选分页 API，直到游标耗尽；实时事件与回扫共用同一幂等创建逻辑。
+**补偿回扫**：Asset 启动后的受控任务调用 Procurement 资产候选分页 API，直到游标耗尽；实时事件与回扫共用同一幂等创建逻辑。回扫同样必须显式设置当前租户 `TENANT` 级 DataScopeContext，避免来源幂等写入后的校验查询被失败关闭规则过滤；请求结束后清理上下文。
 
 ### 8.4 Workflow 集成
 
@@ -452,9 +455,15 @@ Asset 不嵌入 Flowable，通过 Workflow 内部 API 与审批结果事件集�
 - 资产丢弃处置审批。
 - 资产报废处置审批（可能需要财务确认）。
 
-审批流遵循 `docs/workflow.md` 规范。每个审批类型一个 BPMN 流程模型。
+审批流遵循 `docs/workflow.md` 规范。每个审批类型一个 BPMN 流程模型；模型键可由租户自定义，
+但模型 `category` 必须与用途精确绑定：调拨为 `ASSET_TRANSFER`，丢弃/报废处置为
+`ASSET_DISPOSAL`。
 
-启动契约与 Procurement 一致：请求包含 requestId、tenantId、modelVersionId、businessType（ASSET_TRANSFER/ASSET_DISPOSAL）、businessKey（申请 ID）、startUserId 和 variables。Workflow 对 `tenantId + businessType + businessKey` 唯一幂等，重复调用返回已有实例。
+用户创建调拨或处置申请时不传 `modelVersionId`。Asset 先按当前租户与固定业务分类调用 Workflow
+`current-published` 内部查询，自动选择已发布、存在流程定义且 `category` 与业务类型一致的版本，再把
+`requestId/tenantId/modelVersionId/businessType/businessKey/startUser/variables` 保存为本地幂等快照。
+实际启动时 Workflow 再次校验模型，关闭解析与启动之间的变更窗口。Workflow 对
+`tenantId + businessType + businessKey` 唯一幂等，重复调用返回已有实例。
 
 审批人通过 Workflow `/api/workflow/approval/{taskId}/complete` 执行审批。承担资产审批的角色必须同时获得对应的 `asset:transfer:approve` 或 `asset:disposal:approve`（读取专用 approval-view）以及 `workflow:approval:complete`（完成本人任务）。approval-view 必须校验 tenant、businessType、businessKey 和当前任务分配，不能作为普通 dataScope 的通用绕过。
 
@@ -464,7 +473,10 @@ Asset 不嵌入 Flowable，通过 Workflow 内部 API 与审批结果事件集�
 - REJECTED/CANCELLED：申请进入对应终态，恢复 Asset.previousStatus，清除 `active_operation_*`。
 - 重复、乱序或实例不匹配事件只记录告警，不改变资产。
 
-Workflow 不可用或响应丢失时，申请保持 PENDING_APPROVAL/START_FAILED 和资产占位状态；使用同一业务键重试，或由有权限用户取消并恢复。Asset 不依赖 `omni-common-workflow`，Flowable 表只存在于 `omni-workflow` 数据库。
+MVP 完成事件不携带审批人或审批意见等可能含敏感信息的内容，Asset 不冗余此类快照；完整任务、
+处理人和意见始终以 Workflow 查询结果为权威。
+
+Workflow 不可用、返回 409/其他结果不确定响应或响应丢失时，远端结果可能已受理，申请保持 `PENDING_APPROVAL + PENDING` 和资产占位状态，只能使用原始 requestId、业务键、模型版本和发起人身份重试。Workflow 业务响应 404 是远端事务未创建实例的显式失败，进入 `START_FAILED + FAILED` 后才允许有权限用户本地取消并恢复。Asset 不依赖 `omni-common-workflow`，Flowable 表只存在于 `omni-workflow` 数据库。
 
 ### 8.5 Outbox 事件
 
@@ -572,7 +584,7 @@ omni-backend/omni-asset/
 
 - SRM 不可用：供应商信息降级为 ID。
 - Procurement 不可用：采购来源信息降级为 PO 号文本。
-- Workflow 不可用：返回 503，申请进入可重试 START_FAILED 或保持 PENDING_APPROVAL；不得跳过审批，取消时恢复原资产状态。
+- Workflow 不可用或结果不确定：返回 503，申请保持可同键重试的 `PENDING_APPROVAL + PENDING`；明确返回模型版本不可启动时进入 `START_FAILED + FAILED`。不得跳过审批或在启动结果不确定时本地取消。
 - Auth 不可用：503 失败关闭。
 
 ## 13. 测试与验收
@@ -586,7 +598,7 @@ omni-backend/omni-asset/
 - 批量收货正确创建多条资产（数量 > 1）。
 - 调拨完成后资产使用人和部门正确更新。
 - 处置完成后资产进入终态。
-- 调拨/处置拒绝、取消、启动失败后取消均恢复 previousStatus 并清除活动占位。
+- 调拨/处置拒绝以及 `START_FAILED + FAILED` 后本地取消均恢复 previousStatus 并清除活动占位；启动结果不确定时不得取消。
 - 同一资产并发创建调拨和处置时只有一个成功，另一个返回 409。
 - Workflow 审批结果重复、乱序、tenant/businessKey/processInstanceId 不匹配时不更新资产。
 - 审批人只能通过分配给自己的 taskId 读取 Transfer/Disposal approval-view，伪造 taskId 或业务 ID 时拒绝。
@@ -628,8 +640,8 @@ omni-backend/omni-asset/
 
 ### Milestone 4：调拨 + 处置
 
-- 调拨申请 + Flowable 审批。
-- 丢弃/报废处置 + Flowable 审批。
+- 调拨申请 + 独立 Workflow 服务审批。
+- 丢弃/报废处置 + 独立 Workflow 服务审批。
 - 审批结果事件 → 申请状态更新、拒绝恢复、业务 complete。
 
 ### Milestone 5：概览 + 生产加固
@@ -656,7 +668,7 @@ omni-backend/omni-asset/
 | 优先级 | 风险 | 处理 |
 |---|---|---|
 | P0 | 收货事件重复消费导致资产重复创建 | `ast_inbox_event` 唯一键幂等 |
-| P0 | Workflow 不可用或响应丢失导致半启动/重复流程 | 503 + START_FAILED 可重试态 + 跨服务 businessKey 幂等 |
+| P0 | Workflow 不可用或响应丢失导致半启动/重复流程 | 结果不确定保持 PENDING 同键重试；仅远端明确未创建实例时进入 START_FAILED |
 | P0 | 写操作绕过查询数据权限 | AccessGuard + 条件更新 |
 | P1 | 并发分配同一资产 | 行锁 + version 乐观锁 |
 | P1 | 收货数量 > 1 时资产创建不完整 | 事务内逐行创建，全部成功或全部回滚 |

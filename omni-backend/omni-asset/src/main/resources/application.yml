@@ -1,0 +1,111 @@
+server:
+  port: 8107
+  max-http-header-size: 32KB
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force-response: true
+
+spring:
+  application:
+    name: omni-asset
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml?group=DEFAULT_GROUP&refreshEnabled=true
+  cloud:
+    function:
+      definition: procurementGoodsReceiptFunction;workflowCompletionFunction
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 3000
+            read-timeout: 5000
+    stream:
+      rocketmq:
+        binder:
+          name-server: ${ROCKETMQ_NAME_SERVER:localhost:9876}
+      bindings:
+        operlog-out-0:
+          destination: operlog-topic
+          content-type: application/json
+        asset-domain-out-0:
+          destination: asset-domain-event
+          content-type: application/json
+        procurementGoodsReceiptFunction-in-0:
+          destination: procurement-domain-event
+          content-type: application/json
+          group: omni-asset-procurement-goods-receipt
+        workflowCompletionFunction-in-0:
+          destination: workflow-domain-event
+          content-type: application/json
+          group: omni-asset-workflow-completion
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/omni_asset?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:root}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+      password: ${REDIS_PASSWORD:}
+
+management:
+  server:
+    port: ${MANAGEMENT_PORT:19907}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+omni:
+  internal:
+    api:
+      token: ${OMNI_INTERNAL_API_TOKEN:}
+
+xxl:
+  job:
+    access-token: ${XXL_JOB_ACCESS_TOKEN:}
+    admin:
+      addresses: ${XXL_JOB_ADMIN_ADDRESSES:http://localhost:8088/xxl-job-admin}
+      username: ${XXL_JOB_ADMIN_USERNAME:admin}
+      password: ${XXL_JOB_ADMIN_PASSWORD:123456}
+    executor:
+      enabled: ${XXL_JOB_ENABLED:true}
+      appname: omni-asset
+      address: ${XXL_JOB_EXECUTOR_ADDRESS:}
+      ip: ${XXL_JOB_EXECUTOR_IP:}
+      port: ${XXL_JOB_EXECUTOR_PORT:9907}
+      log-path: ${XXL_JOB_LOG_PATH:./logs/xxl-job}
+      log-retention-days: ${XXL_JOB_LOG_RETENTION_DAYS:30}
+
+logging:
+  level:
+    com.omni.asset: info
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0

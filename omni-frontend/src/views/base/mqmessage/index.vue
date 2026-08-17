@@ -47,6 +47,8 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 /** 加载状态 */
 const loading = ref(false)
+/** 持久加载错误；与“查询成功但无数据”明确区分。 */
+const loadError = ref('')
 
 /** 详情弹窗 */
 const dialogVisible = ref(false)
@@ -57,6 +59,7 @@ const selectedMessage = ref<MqMessage | null>(null)
  */
 async function loadData() {
   loading.value = true
+  loadError.value = ''
   try {
     const params: MqMessageQuery = {
       page: currentPage.value,
@@ -82,6 +85,12 @@ async function loadData() {
     const data = res.data.data as PageResult<MqMessage>
     tableData.value = data.records
     total.value = data.total
+  } catch (error: unknown) {
+    const response = (error as { response?: { headers?: Record<string, string> } }).response
+    const traceId = response?.headers?.['x-trace-id']
+    loadError.value = traceId
+      ? `消息聚合服务加载失败，请重试。追踪号：${traceId}`
+      : '消息聚合服务加载失败，请检查相关业务服务后重试。'
   } finally {
     loading.value = false
   }
@@ -247,8 +256,24 @@ onMounted(loadData)
         </el-form-item>
       </el-form>
 
+      <el-alert
+        v-if="loadError"
+        :title="loadError"
+        type="error"
+        :closable="false"
+        show-icon
+        class="load-error"
+      >
+        <template #default>
+          <el-button type="danger" plain size="small" :loading="loading" @click="loadData">
+            {{ t('common.retry') }}
+          </el-button>
+        </template>
+      </el-alert>
+
       <!-- 数据表格 -->
       <el-table
+        v-if="!loadError"
         v-permission="'base:mqmessage:list'"
         v-loading="loading"
         :data="tableData"
@@ -258,7 +283,7 @@ onMounted(loadData)
         style="width: 100%"
       >
         <el-table-column prop="msgId" :label="t('mqMessage.msgId')" width="120" show-overflow-tooltip />
-        <el-table-column prop="topic" :label="t('mqMessage.topic')" width="160" show-overflow-tooltip />
+        <el-table-column prop="topic" :label="t('mqMessage.topic')" min-width="160" show-overflow-tooltip />
         <el-table-column prop="msgKey" :label="t('mqMessage.msgKey')" width="140" show-overflow-tooltip>
           <template #default="{ row }">
             {{ row.msgKey || '-' }}
@@ -307,12 +332,15 @@ onMounted(loadData)
 
       <!-- 分页 -->
       <el-pagination
+        v-if="!loadError"
         v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
         class="pagination"
-        :page-size="pageSize"
+        :page-sizes="[5, 10, 20, 50, 100]"
         :total="total"
-        layout="total, prev, pager, next"
+        layout="total, sizes, prev, pager, next"
         @current-change="handlePageChange"
+        @size-change="currentPage = 1; handlePageChange(1)"
       />
     </el-card>
 
@@ -372,6 +400,9 @@ onMounted(loadData)
   font-weight: 600;
 }
 .filter-form {
+  margin-bottom: 16px;
+}
+.load-error {
   margin-bottom: 16px;
 }
 .pagination {

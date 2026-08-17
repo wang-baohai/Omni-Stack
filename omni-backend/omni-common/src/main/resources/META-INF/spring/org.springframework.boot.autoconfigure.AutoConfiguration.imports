@@ -1,4 +1,6 @@
+com.omni.common.config.FeignRetryConfiguration
 com.omni.common.config.JacksonConfig
 com.omni.common.config.WebMvcConfig
 com.omni.common.result.GlobalExceptionHandler
 com.omni.common.security.xss.XssAutoConfiguration
+com.omni.common.web.TraceIdAutoConfiguration

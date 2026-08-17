@@ -50,7 +50,7 @@ public class AsyncConfig {
                 new LinkedBlockingQueue<>(1000),
                 r -> {
                     Thread t = new Thread(r);
-                    t.setName("audit-" + t.getId());
+                    t.setName("audit-" + t.threadId());
                     t.setDaemon(true);
                     return t;
                 },

@@ -37,6 +37,8 @@ import java.util.List;
 @Slf4j
 public class GatewayPreAuthFilter extends OncePerRequestFilter {
 
+    private static final String INTERNAL_PATH_PREFIX = "/api/internal/";
+
     private static final String HEADER_USER_ID = "X-User-Id";
     private static final String HEADER_USER_NAME = "X-User-Name";
     private static final String HEADER_TENANT_ID = "X-Tenant-Id";
@@ -45,6 +47,17 @@ public class GatewayPreAuthFilter extends OncePerRequestFilter {
 
     /** Gateway 转发标记头，缺失则说明请求未经 Gateway，可能是直接访问 */
     private static final String HEADER_GATEWAY_FORWARDED = "X-Gateway-Forwarded";
+
+    /**
+     * 内部服务调用由共享令牌过滤器认证，不经过 Gateway 预认证。
+     *
+     * @param request 当前 HTTP 请求
+     * @return 内部服务请求返回 {@code true}
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getRequestURI().startsWith(INTERNAL_PATH_PREFIX);
+    }
 
     /**
      * 执行网关预认证过滤逻辑。

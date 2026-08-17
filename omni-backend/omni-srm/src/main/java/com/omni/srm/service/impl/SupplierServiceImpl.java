@@ -40,7 +40,9 @@ import com.omni.srm.service.support.SrmPermissionScopeExecutor;
 import com.omni.srm.service.support.SrmRecordAccessGuard;
 import com.omni.srm.service.support.SupplierNameNormalizer;
 import com.omni.srm.service.support.SupplierRiskInitializer;
+import com.omni.srm.workflow.SupplierWorkflowCoordinator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +57,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /** SRM 供应商应用服务实现。 */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SupplierServiceImpl implements SupplierService {
@@ -75,6 +78,7 @@ public class SupplierServiceImpl implements SupplierService {
     private final SupplierRiskInitializer riskInitializer;
     private final ReliableMessageRelay reliableMessageRelay;
     private final RiskService riskService;
+    private final SupplierWorkflowCoordinator workflowCoordinator;
 
     /** {@inheritDoc} */
     @Override
@@ -219,6 +223,7 @@ public class SupplierServiceImpl implements SupplierService {
         supplier.setSupplierNo(number);
         riskInitializer.initialize(supplier.getTenantId(), supplier.getId());
         sendSupplierEvent(supplier, "srm.supplier.registered.v1", null);
+        prepareAndStartWorkflow(supplier);
         return ownerEnricher.enrichOne(SrmViewAssembler.supplier(supplier, SrmViewAssembler.canViewPii()));
     }
 
@@ -355,7 +360,7 @@ public class SupplierServiceImpl implements SupplierService {
         }
     }
 
-    /** 管理端仅允许将审核驳回的供应商重新提交；门户首次推进由角色分配 Saga 消费者完成。 */
+    /** 被驳回后重新提交：REJECTED → APPROVING（启动新一轮工作流）。 */
     @Override
     @Transactional
     public SrmViews.SupplierVO submit(Long id, SrmRequests.StatusRequest request) {
@@ -363,30 +368,29 @@ public class SupplierServiceImpl implements SupplierService {
         if (SrmStateMachine.parse(current.getStatus()) != SupplierStatus.REJECTED) {
             throw new BusinessException(409, "仅审核驳回的供应商可由管理端重新提交");
         }
-        return changeStatus(current, id, request.getVersion(), SupplierStatus.PENDING_REVIEW, request.getReason());
+        SrmStateMachine.requireTransition(SupplierStatus.REJECTED, SupplierStatus.PENDING_REVIEW);
+        LambdaUpdateWrapper<SrmSupplier> update = versioned(id, request.getVersion())
+                .set(SrmSupplier::getStatus, SupplierStatus.PENDING_REVIEW.name());
+        audit(update);
+        requireUpdated(supplierMapper.update(null, update));
+        current.setStatus(SupplierStatus.PENDING_REVIEW.name());
+        current.setVersion(request.getVersion() + 1);
+        prepareAndStartWorkflow(current);
+        return getSimple(id);
     }
 
-    /** 审核通过：PENDING_REVIEW → APPROVED。 */
+    /** 撤回审批流程：APPROVING → PENDING_REVIEW。 */
     @Override
     @Transactional
-    public SrmViews.SupplierVO approve(Long id, SrmRequests.StatusRequest request) {
-        SrmSupplier current = accessGuard.requireSupplier(id);
-        if (current.getOwnerUserId() == null || current.getOwnerUnitId() == null) {
-            throw new BusinessException(409, "审批通过前必须先分配供应商负责人和所属组织");
-        }
-        SrmViews.SupplierVO approved = changeStatus(
-                current, id, request.getVersion(), SupplierStatus.APPROVED, request.getReason());
-        SrmRequests.CreateRiskAssessmentRequest riskRequest = new SrmRequests.CreateRiskAssessmentRequest();
-        riskRequest.setRemark("供应商准入通过后初始化综合风险评估");
-        riskService.createAssessment(id, riskRequest);
-        return approved;
+    public SrmViews.SupplierVO withdraw(Long id, SrmRequests.StatusRequest request) {
+        return terminateWorkflow(id, request, "withdraw");
     }
 
-    /** 审核驳回：PENDING_REVIEW → REJECTED。 */
+    /** 取消审批流程：APPROVING → PENDING_REVIEW。 */
     @Override
     @Transactional
-    public SrmViews.SupplierVO reject(Long id, SrmRequests.StatusRequest request) {
-        return changeStatus(id, request.getVersion(), SupplierStatus.REJECTED, request.getReason());
+    public SrmViews.SupplierVO cancel(Long id, SrmRequests.StatusRequest request) {
+        return terminateWorkflow(id, request, "cancel");
     }
 
     /** 冻结：APPROVED → SUSPENDED。 */
@@ -529,6 +533,32 @@ public class SupplierServiceImpl implements SupplierService {
         if (request.getAddress() != null) current.setAddress(request.getAddress());
         if (request.getCategoryCode() != null) current.setCategoryCode(request.getCategoryCode());
         current.setVersion(request.getVersion() + 1);
+    }
+
+    private SrmViews.SupplierVO terminateWorkflow(
+            Long id, SrmRequests.StatusRequest request, String action) {
+        SrmSupplier current = accessGuard.requireSupplier(id);
+        if (!SupplierStatus.APPROVING.name().equals(current.getStatus())) {
+            throw new BusinessException(409, "仅审批中的供应商可以" + ("withdraw".equals(action) ? "撤回" : "取消"));
+        }
+        if (current.getProcessInstanceId() == null || current.getProcessInstanceId().isBlank()) {
+            throw new BusinessException(409, "该供应商没有正在运行的审批流程");
+        }
+        workflowCoordinator.terminate(
+                current.getTenantId(), current.getProcessInstanceId(),
+                "withdraw".equals(action) ? "管理员撤回审批" : "管理员取消审批");
+        SrmStateMachine.requireTransition(SupplierStatus.APPROVING, SupplierStatus.PENDING_REVIEW);
+        LambdaUpdateWrapper<SrmSupplier> update = versioned(id, request.getVersion())
+                .set(SrmSupplier::getStatus, SupplierStatus.PENDING_REVIEW.name())
+                .set(SrmSupplier::getProcessInstanceId, null)
+                .set(SrmSupplier::getWorkflowStartStatus, SrmStateMachine.START_NOT_STARTED);
+        audit(update);
+        requireUpdated(supplierMapper.update(null, update));
+        return getSimple(id);
+    }
+
+    private void prepareAndStartWorkflow(SrmSupplier supplier) {
+        workflowCoordinator.prepareAndStart(supplier);
     }
 
     private void sendSupplierStatusEvent(

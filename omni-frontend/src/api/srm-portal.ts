@@ -145,3 +145,104 @@ export function listPortalEvaluationHistory() {
   return request.get<ApiResponse<PortalEvaluation[]>>('/srm/portal/evaluations/history')
 }
 
+/** 询价邀请摘要。 */
+export interface QuotationInvitationSummary {
+  rfqId: number
+  rfqNo: string
+  title: string
+  status: string
+  invitationStatus: string
+  quotationDeadline: string
+  currencyCode: string
+  invitedTime: string
+  quotationId: number | null
+  quotationVersion: number | null
+  quotationStatus: string | null
+  totalAmount: string | null
+  validUntil: string | null
+}
+
+/** 询价邀请行快照。 */
+export interface QuotationInvitationLine {
+  rfqLineId: number
+  materialCode: string
+  materialName: string
+  unit: string
+  quantity: string
+  remark: string | null
+}
+
+/** 报价行快照。 */
+export interface PortalQuotationLine {
+  id: number
+  rfqLineId: number
+  materialCode: string
+  materialName: string
+  unit: string
+  unitPrice: string
+  quantity: string
+  lineAmount: string
+  deliveryDays: number
+  remark: string | null
+}
+
+/** 门户报价。 */
+export interface PortalQuotation {
+  id: number
+  rfqId: number
+  rfqNo: string
+  supplierId: number
+  supplierNameSnapshot: string
+  quotationTime: string
+  validUntil: string
+  totalAmount: string
+  currencyCode: string
+  status: string
+  version: number
+  lines: PortalQuotationLine[]
+}
+
+/** 询价邀请详情。 */
+export interface QuotationInvitationDetail {
+  rfqId: number
+  rfqNo: string
+  title: string
+  status: string
+  invitationStatus: string
+  quotationDeadline: string
+  currencyCode: string
+  invitedTime: string
+  lines: QuotationInvitationLine[]
+  currentQuotation: PortalQuotation | null
+}
+
+export interface SubmitQuotationLineRequest {
+  rfqLineId: number
+  unitPrice: string
+  deliveryDays: number
+  remark?: string
+}
+
+export interface SubmitQuotationRequest {
+  requestId: string
+  rfqId: number
+  version: number
+  validUntil: string
+  lines: SubmitQuotationLineRequest[]
+}
+
+/** 查询当前供应商收到的询价邀请。 */
+export function listQuotationInvitations() {
+  return request.get<ApiResponse<QuotationInvitationSummary[]>>('/srm/portal/quotation/invitations')
+}
+
+/** 查询询价邀请及其不可变行快照。 */
+export function getQuotationInvitation(rfqId: number) {
+  return request.get<ApiResponse<QuotationInvitationDetail>>(`/srm/portal/quotation/invitations/${rfqId}`)
+}
+
+/** 首次提交或按版本修改报价。 */
+export function submitQuotation(data: SubmitQuotationRequest) {
+  return request.post<ApiResponse<PortalQuotation>>('/srm/portal/quotation', data)
+}
+

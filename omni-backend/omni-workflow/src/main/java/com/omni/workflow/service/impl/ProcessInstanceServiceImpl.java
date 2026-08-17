@@ -10,12 +10,14 @@ import com.omni.workflow.dto.ApprovalRecord;
 import com.omni.workflow.dto.AssigneeStatus;
 import com.omni.workflow.dto.ProcessProgressResponse;
 import com.omni.workflow.dto.StartProcessRequest;
+import com.omni.workflow.dto.WorkflowCompletionResult;
 import com.omni.workflow.entity.WfProcessInstanceExt;
 import com.omni.workflow.entity.WfProcessModelVersion;
 import com.omni.workflow.mapper.WfProcessInstanceExtMapper;
 import com.omni.workflow.mapper.WfProcessModelVersionMapper;
-import com.omni.workflow.service.ProcessInstanceService;
 import com.omni.workflow.delegate.CandidateResolverBean;
+import com.omni.workflow.service.ProcessInstanceService;
+import com.omni.workflow.service.WorkflowCompletionEventService;
 import com.omni.workflow.service.WorkflowTodoSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +66,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     private final WfProcessInstanceExtMapper extMapper;
     private final WfProcessModelVersionMapper versionMapper;
     private final WorkflowTodoSyncService workflowTodoSyncService;
+    private final WorkflowCompletionEventService workflowCompletionEventService;
     private final JdbcTemplate jdbcTemplate;
     private final CandidateResolverBean candidateResolverBean;
 
@@ -89,8 +92,14 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
             if (request.getModelVersionId() != null) {
                 // 新路径：通过模型版本 ID 查找 processDefinitionId，使用 startProcessInstanceById
                 modelVersion = versionMapper.selectById(request.getModelVersionId());
-                if (modelVersion == null || modelVersion.getProcessDefinitionId() == null) {
+                if (modelVersion == null
+                        || !"PUBLISHED".equals(modelVersion.getStatus())
+                        || modelVersion.getProcessDefinitionId() == null
+                        || modelVersion.getProcessDefinitionId().isBlank()) {
                     throw new BusinessException("模型版本不存在或尚未发布");
+                }
+                if (!tenantId.equals(modelVersion.getTenantId())) {
+                    throw new BusinessException(403, "无权使用其他租户的流程模型版本");
                 }
                 instance = runtimeService.startProcessInstanceById(
                         modelVersion.getProcessDefinitionId(),
@@ -120,6 +129,8 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 businessKey = "SIM-" + instance.getProcessInstanceId();
             }
             ext.setBusinessKey(businessKey);
+            ext.setRequestId(request.getRequestId());
+            ext.setBusinessType(request.getBusinessType());
 
             ext.setTitle(request.getTitle());
             ext.setStartUserId(effectiveUserId);
@@ -258,10 +269,15 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
         // 删除 Flowable 流程实例
         runtimeService.deleteProcessInstance(processInstanceId, "用户终止: " + reason);
 
-        // 更新扩展表状态
-        ext.setStatus(0); // 已终止
-        ext.setUpdateTime(LocalDateTime.now());
-        extMapper.updateById(ext);
+        // 跨服务流程需要在同一事务内原子更新状态并写入完成事件；站内流程保持原有状态更新。
+        if (ext.getBusinessType() != null && !ext.getBusinessType().isBlank()) {
+            workflowCompletionEventService.publishCompletionEvent(
+                    tenantId, processInstanceId, WorkflowCompletionResult.CANCELLED, LocalDateTime.now());
+        } else {
+            ext.setStatus(0); // 已终止
+            ext.setUpdateTime(LocalDateTime.now());
+            extMapper.updateById(ext);
+        }
         workflowTodoSyncService.deleteProcessTodos(processInstanceId);
 
         log.info("流程实例已终止: processInstanceId={}, reason={}", processInstanceId, reason);

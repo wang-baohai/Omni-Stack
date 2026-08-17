@@ -51,6 +51,10 @@ public final class SrmViews {
         private String status;
         private LocalDateTime assignedTime;
         private LocalDateTime lastEvaluationTime;
+        /** Workflow 流程实例 ID（前端用于查询审批进度）。 */
+        private String processInstanceId;
+        /** Workflow 启动状态。 */
+        private String workflowStartStatus;
         private Integer version;
         private LocalDateTime createTime;
         private String createBy;
@@ -196,11 +200,17 @@ public final class SrmViews {
         private Long id;
         private Long supplierId;
         private String indicatorType;
+        private String indicatorTypeName;
         private String indicatorValue;
         private String riskLevel;
+        private Long criterionId;
+        private Integer score;
+        private Integer autoCalc;
         private LocalDateTime assessmentTime;
         private String remark;
         private Integer version;
+        /** 该指标类型下的可选评分标准列表。 */
+        private List<RiskCriterionVO> criteria;
     }
 
     /**
@@ -225,6 +235,7 @@ public final class SrmViews {
         private Long totalSuppliers;
         private Long approvedCount;
         private Long pendingReviewCount;
+        private Long approvingCount;
         private Long suspendedCount;
         private Long blacklistedCount;
         private Long eliminatedCount;
@@ -323,5 +334,45 @@ public final class SrmViews {
         private String username;
         private String nickname;
         private String unitName;
+    }
+
+    /**
+     * 风险指标类型配置视图。
+     */
+    @Data
+    public static class RiskIndicatorTypeVO {
+        private Long id;
+        private String typeCode;
+        private String typeName;
+        private String description;
+        private Integer sort;
+        private Integer autoCalc;
+        private Integer status;
+        private List<RiskCriterionVO> criteria;
+    }
+
+    /**
+     * 风险评分标准视图。
+     */
+    @Data
+    public static class RiskCriterionVO {
+        private Long id;
+        private Long indicatorTypeId;
+        private String criterionLabel;
+        private Integer score;
+        private String riskLevel;
+        private Integer sort;
+        private Integer status;
+    }
+
+    /**
+     * 风险得分阈值视图。
+     */
+    @Data
+    public static class RiskScoreThresholdVO {
+        private Long id;
+        private String riskLevel;
+        private Integer minScore;
+        private Integer maxScore;
     }
 }

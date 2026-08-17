@@ -23,6 +23,8 @@ public class SrmRiskIndicator extends SrmTenantEntity {
     /** 指标类型 */ private String indicatorType;
     /** 指标值 */ private String indicatorValue;
     /** 风险等级 RED/YELLOW/GREEN */ private String riskLevel;
+    /** 关联评分标准 ID */ private Long criterionId;
+    /** 该指标的得分 */ private Integer score;
     /** 评估时间 */ private LocalDateTime assessmentTime;
     /** 备注 */ private String remark;
     /** 乐观锁版本 */ @Version private Integer version;

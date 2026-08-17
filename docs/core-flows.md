@@ -1610,7 +1610,7 @@ Docker 部署时，社交登录的 `redirect_uri` 需要使用**宿主机可访�
 | 部署环境 | redirect_uri 示例 |
 |---------|------------------|
 | 本地开发 | `http://localhost:8100/api/auth/oauth2/github/callback` |
-| Docker 部署 | `http://<宿主机IP>:8100/api/auth/oauth2/github/callback` |
+| Docker 部署 | `http://<宿主机IP>:8102/api/auth/oauth2/github/callback` |
 | 生产环境 | `https://your-domain.com/api/auth/oauth2/github/callback` |
 
 **配置方式**（`application.yml`）：
@@ -1632,12 +1632,12 @@ omni:
 # docker-compose.yml
 omni-auth:
   environment:
-    OAUTH2_GITHUB_REDIRECT_URI: http://192.168.1.100:8100/api/auth/oauth2/github/callback
-    OAUTH2_GOOGLE_REDIRECT_URI: http://192.168.1.100:8100/api/auth/oauth2/google/callback
-    OAUTH2_GITEE_REDIRECT_URI: http://192.168.1.100:8100/api/auth/oauth2/gitee/callback
+    AUTH_OAUTH2_GITHUB_REDIRECT_URI: http://192.168.1.100:8102/api/auth/oauth2/github/callback
+    AUTH_OAUTH2_GOOGLE_REDIRECT_URI: http://192.168.1.100:8102/api/auth/oauth2/google/callback
+    AUTH_OAUTH2_GITEE_REDIRECT_URI: http://192.168.1.100:8102/api/auth/oauth2/gitee/callback
 ```
 
-> **注意**：Docker 部署中，Auth 服务容器内部端口是 8080，但 OAuth2 回调 URL 必须使用宿主机映射端口 8100（因为第三方平台需要回调到宿主机的公网/局域网可达地址）。
+> **注意**：Docker 部署的第三方回调统一进入 Gateway 8102；Auth 8080/8100 只作为容器内部或本地诊断入口。生产使用 Frontend/Gateway 的 HTTPS 域名。
 
 ### Docker 部署下的前端回调页面
 
@@ -1715,7 +1715,93 @@ Gateway 容器(:8080)
 
 ---
 
-## Flow 13：SRM 门户邀请入驻与角色分配 Saga
+## Flow 15：SRM 供应商准入审批
+
+```mermaid
+sequenceDiagram
+    participant U as 管理端
+    participant S as SRM
+    participant W as Workflow
+    participant M as RocketMQ
+    participant D as SRM Inbox
+
+    U->>S: POST /api/srm/supplier
+    S->>W: 查询当前租户 category=SRM_SUPPLIER_ONBOARDING 的发布版本
+    S->>S: 保存 Supplier=PENDING_REVIEW 与 Workflow 幂等快照
+    S->>W: POST /api/internal/workflow/process/start
+    W-->>S: processInstanceId / idempotentReplay
+    S->>S: Supplier=APPROVING, startStatus=STARTED
+    W->>M: workflow.process.completed.v1（Outbox）
+    M->>D: eventId Inbox 幂等消费
+    D->>S: 核对 tenant/businessType/businessKey/processInstanceId
+    S->>S: Supplier=APPROVED 或 REJECTED
+```
+
+关键约束：
+
+- 用户不选择模型版本；SRM 固定按 `SRM_SUPPLIER_ONBOARDING` 自动解析当前已发布模型。
+- 默认租户所需模型由 Workflow 启动初始化器校验并发布，缺失或无法发布时 Workflow 失败启动。
+- 启动结果不确定时保留原 `requestId/businessKey/modelVersionId/startUser`，只允许幂等重试。
+- 审批完成由可靠事件回写；重复、乱序、跨租户或实例不匹配事件不得改变供应商状态。
+
+## Flow 16：Procurement 请购审批与异步回写
+
+```mermaid
+sequenceDiagram
+    participant U as 采购用户
+    participant P as Procurement
+    participant W as Workflow
+    participant O as Workflow Outbox
+    participant M as RocketMQ
+    participant I as Procurement Inbox
+
+    U->>P: 创建草稿并提交
+    P->>P: 回查物料/品类、重算十进制金额、选择审批路线
+    P->>P: 保存 approvalAttempt + 幂等启动快照
+    P->>W: tenant + businessKey={id}:{attempt} 启动流程
+    W-->>P: processInstanceId
+    W->>O: 审批完成事件
+    O->>M: 可靠中继
+    M->>I: eventId Inbox 幂等消费
+    I->>P: APPROVING → APPROVED/REJECTED
+    P-->>U: 页面每 5 秒静默轮询；超时可手动刷新
+```
+
+启动明确失败记录为 `FAILED` 并允许复用原快照重试；网络结果不确定时不得创建第二业务键。页面必须区分
+“Workflow 已完成、业务状态同步中”和最终业务状态，不能把短暂延迟展示成失败。
+
+RFQ 报价链以 Procurement 的邀请为权威、SRM 的报价为权威：Portal 按需读取邀请并提交报价，SRM
+同事务写报价与 Outbox，Procurement Inbox 更新邀请状态；定点前 Procurement 再回查当前报价版本并保存
+不可变快照，随后创建采购订单。
+
+## Flow 17：Procurement 收货到 Asset 建卡、调拨与处置
+
+```mermaid
+sequenceDiagram
+    participant P as Procurement
+    participant O as Procurement Outbox
+    participant M as RocketMQ
+    participant A as Asset
+    participant W as Workflow
+
+    P->>P: 确认收货/质检通过
+    P->>O: goods-receipt confirmed 或 quality-passed 事件
+    O->>M: 可靠中继
+    M->>A: 至少一次投递
+    A->>A: eventId Inbox + 来源行/单位序号双重幂等
+    A->>A: 仅 PASS + assetManaged + 正整数数量创建资产卡
+    A->>P: 历史候选游标回扫（补偿路径）
+    A->>W: 调拨/处置按分类自动解析模型并幂等启动
+    W->>M: workflow.process.completed.v1
+    M->>A: 审批结果 Inbox 回写
+    A->>A: 通过后完成操作；拒绝/取消恢复 previousStatus 并清 occupancy
+```
+
+资产页面的使用人、组织、供应商、调拨/处置资产均使用当前租户和数据范围内的搜索候选；模型版本由服务端
+自动选择。调拨与处置共享 `active_operation_type/id` 原子占位，任何终止路径都必须在同一事务中恢复状态并
+清理占位。金额在 JSON 中始终使用十进制字符串。
+
+## Flow 18：SRM 门户邀请入驻与角色分配 Saga
 
 ```mermaid
 sequenceDiagram

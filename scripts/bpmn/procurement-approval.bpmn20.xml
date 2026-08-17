@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:flowable="http://flowable.org/bpmn"
+  xmlns:omni="http://omni.com/workflow"
+  id="Definitions_procurement"
+  targetNamespace="http://flowable.org/test"
+  xsi:schemaLocation="http://www.omg.org/spec/BPMN20 http://www.omg.org/spec/BPMN20/bpmn20.xsd">
+
+  <process id="procurement-approval" name="采购请购审批（品类+金额路由）" isExecutable="true">
+    <documentation>通用采购请购审批流程：按物料品类一级分支，再按金额二级路由到不同审批人。</documentation>
+
+    <!-- 开始事件 -->
+    <startEvent id="start" name="提交请购" flowable:initiator="initiator" />
+
+    <!-- ========== 一级网关：按品类分支 ========== -->
+    <exclusiveGateway id="gw-category" name="按品类分支" default="flow-to-general" />
+
+    <!-- ================================================================ -->
+    <!-- IT 设备品类                                                      -->
+    <!-- ================================================================ -->
+    <exclusiveGateway id="gw-it-amount" name="IT金额分支" default="flow-it-low" />
+
+    <!-- IT 低金额：直属领导会签 -->
+    <userTask id="it-low-approve" name="IT 直属领导审批" flowable:assignee="${userId}">
+      <documentation>IT设备&lt;5万，发起人所在组织组长会签</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"TEAM_LEADER","anchorType":"START_USER_PRIMARY_UNIT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ALL"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <!-- IT 高金额：部门领导 -->
+    <userTask id="it-high-dept" name="IT 部门领导审批" flowable:assignee="${userId}">
+      <documentation>IT设备≥5万，上级组织部门领导会签</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"DEPT_LEADER","anchorType":"PARENT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <!-- IT 高金额第二级：CTO -->
+    <userTask id="it-high-cto" name="CTO 审批" flowable:assignee="${userId}">
+      <documentation>IT设备≥5万第二级，CTO审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"DEPT_LEADER","anchorType":"ABSOLUTE_UNIT","anchorParams":{"unitIds":[200]},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <exclusiveGateway id="gw-it-high" name="IT高金额结果" default="flow-it-high-reject" />
+
+    <!-- ================================================================ -->
+    <!-- 办公用品品类                                                      -->
+    <!-- ================================================================ -->
+    <exclusiveGateway id="gw-office-amount" name="办公用品金额分支" default="flow-office-low" />
+
+    <userTask id="office-low-approve" name="行政主管审批" flowable:assignee="${userId}">
+      <documentation>办公用品&lt;1万，行政主管审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"TEAM_LEADER","anchorType":"START_USER_PRIMARY_UNIT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <userTask id="office-high-admin" name="行政主管审批" flowable:assignee="${userId}">
+      <documentation>办公用品≥1万第一级，行政主管审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"TEAM_LEADER","anchorType":"START_USER_PRIMARY_UNIT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <userTask id="office-high-director" name="行政总监审批" flowable:assignee="${userId}">
+      <documentation>办公用品≥1万第二级，行政总监审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"DEPT_LEADER","anchorType":"PARENT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <exclusiveGateway id="gw-office-high" name="办公用品高金额结果" default="flow-office-high-reject" />
+
+    <!-- ================================================================ -->
+    <!-- 原材料品类                                                        -->
+    <!-- ================================================================ -->
+    <exclusiveGateway id="gw-raw-amount" name="原材料金额分支" default="flow-raw-low" />
+
+    <userTask id="raw-low-approve" name="采购经理审批" flowable:assignee="${userId}">
+      <documentation>原材料&lt;10万，采购经理审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"PROCUREMENT_MANAGER","anchorType":"START_USER_PRIMARY_UNIT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <userTask id="raw-high-proc" name="采购经理审批" flowable:assignee="${userId}">
+      <documentation>原材料≥10万第一级，采购经理审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"PROCUREMENT_MANAGER","anchorType":"START_USER_PRIMARY_UNIT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <userTask id="raw-high-vp" name="供应链VP审批" flowable:assignee="${userId}">
+      <documentation>原材料≥10万第二级，供应链VP审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"DEPT_LEADER","anchorType":"PARENT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <exclusiveGateway id="gw-raw-high" name="原材料高金额结果" default="flow-raw-high-reject" />
+
+    <!-- ================================================================ -->
+    <!-- 其他品类（默认分支）                                                -->
+    <!-- ================================================================ -->
+    <exclusiveGateway id="gw-general-amount" name="通用金额分支" default="flow-general-low" />
+
+    <userTask id="general-low-approve" name="部门负责人审批" flowable:assignee="${userId}">
+      <documentation>其他品类&lt;3万，需求部门负责人审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"DEPT_LEADER","anchorType":"START_USER_PRIMARY_UNIT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <userTask id="general-high-dept" name="部门负责人审批" flowable:assignee="${userId}">
+      <documentation>其他品类≥3万第一级，需求部门负责人审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"DEPT_LEADER","anchorType":"START_USER_PRIMARY_UNIT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <userTask id="general-high-cfo" name="CFO 审批" flowable:assignee="${userId}">
+      <documentation>其他品类≥3万第二级，CFO审批</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"DEPT_LEADER","anchorType":"PARENT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <exclusiveGateway id="gw-general-high" name="通用高金额结果" default="flow-general-high-reject" />
+
+    <!-- ========== 汇聚网关 ========== -->
+    <exclusiveGateway id="gw-approved-merge" name="审批通过汇聚" default="flow-to-end-approved" />
+
+    <!-- 结束事件 -->
+    <endEvent id="end-approved" name="审批通过" />
+    <endEvent id="end-rejected" name="审批驳回" />
+
+    <!-- ===== 流程连线 ===== -->
+
+    <!-- 开始 → 品类网关 -->
+    <sequenceFlow id="flow-start" sourceRef="start" targetRef="gw-category" />
+
+    <!-- 品类 → IT设备 -->
+    <sequenceFlow id="flow-to-it" sourceRef="gw-category" targetRef="gw-it-amount">
+      <conditionExpression xsi:type="tFormalExpression">${materialCategory == 'IT_DEVICE'}</conditionExpression>
+    </sequenceFlow>
+    <!-- 品类 → 办公用品 -->
+    <sequenceFlow id="flow-to-office" sourceRef="gw-category" targetRef="gw-office-amount">
+      <conditionExpression xsi:type="tFormalExpression">${materialCategory == 'OFFICE_SUPPLY'}</conditionExpression>
+    </sequenceFlow>
+    <!-- 品类 → 原材料 -->
+    <sequenceFlow id="flow-to-raw" sourceRef="gw-category" targetRef="gw-raw-amount">
+      <conditionExpression xsi:type="tFormalExpression">${materialCategory == 'RAW_MATERIAL'}</conditionExpression>
+    </sequenceFlow>
+    <!-- 品类 → 其他（default） -->
+    <sequenceFlow id="flow-to-general" sourceRef="gw-category" targetRef="gw-general-amount" />
+
+    <!-- IT金额分支 -->
+    <sequenceFlow id="flow-it-low" sourceRef="gw-it-amount" targetRef="it-low-approve" />
+    <sequenceFlow id="flow-it-high" sourceRef="gw-it-amount" targetRef="it-high-dept">
+      <conditionExpression xsi:type="tFormalExpression">${totalAmount >= 50000}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- IT低金额 → 通过汇聚 -->
+    <sequenceFlow id="flow-it-low-pass" sourceRef="it-low-approve" targetRef="gw-approved-merge" />
+
+    <!-- IT高金额：部门领导 → CTO网关 -->
+    <sequenceFlow id="flow-it-dept-to-gw" sourceRef="it-high-dept" targetRef="gw-it-high" />
+    <sequenceFlow id="flow-it-high-pass" sourceRef="gw-it-high" targetRef="it-high-cto">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-it-high-reject" sourceRef="gw-it-high" targetRef="end-rejected" />
+
+    <!-- IT高金额：CTO → 通过汇聚 -->
+    <sequenceFlow id="flow-it-cto-pass" sourceRef="it-high-cto" targetRef="gw-approved-merge" />
+
+    <!-- 办公用品金额分支 -->
+    <sequenceFlow id="flow-office-low" sourceRef="gw-office-amount" targetRef="office-low-approve" />
+    <sequenceFlow id="flow-office-high" sourceRef="gw-office-amount" targetRef="office-high-admin">
+      <conditionExpression xsi:type="tFormalExpression">${totalAmount >= 10000}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- 办公用品低金额 → 通过汇聚 -->
+    <sequenceFlow id="flow-office-low-pass" sourceRef="office-low-approve" targetRef="gw-approved-merge" />
+
+    <!-- 办公用品高金额：行政主管 → 行政总监网关 -->
+    <sequenceFlow id="flow-office-admin-to-gw" sourceRef="office-high-admin" targetRef="gw-office-high" />
+    <sequenceFlow id="flow-office-high-pass" sourceRef="gw-office-high" targetRef="office-high-director">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-office-high-reject" sourceRef="gw-office-high" targetRef="end-rejected" />
+
+    <!-- 办公用品高金额：行政总监 → 通过汇聚 -->
+    <sequenceFlow id="flow-office-dir-pass" sourceRef="office-high-director" targetRef="gw-approved-merge" />
+
+    <!-- 原材料金额分支 -->
+    <sequenceFlow id="flow-raw-low" sourceRef="gw-raw-amount" targetRef="raw-low-approve" />
+    <sequenceFlow id="flow-raw-high" sourceRef="gw-raw-amount" targetRef="raw-high-proc">
+      <conditionExpression xsi:type="tFormalExpression">${totalAmount >= 100000}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- 原材料低金额 → 通过汇聚 -->
+    <sequenceFlow id="flow-raw-low-pass" sourceRef="raw-low-approve" targetRef="gw-approved-merge" />
+
+    <!-- 原材料高金额：采购经理 → 供应链VP网关 -->
+    <sequenceFlow id="flow-raw-proc-to-gw" sourceRef="raw-high-proc" targetRef="gw-raw-high" />
+    <sequenceFlow id="flow-raw-high-pass" sourceRef="gw-raw-high" targetRef="raw-high-vp">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-raw-high-reject" sourceRef="gw-raw-high" targetRef="end-rejected" />
+
+    <!-- 原材料高金额：供应链VP → 通过汇聚 -->
+    <sequenceFlow id="flow-raw-vp-pass" sourceRef="raw-high-vp" targetRef="gw-approved-merge" />
+
+    <!-- 通用金额分支 -->
+    <sequenceFlow id="flow-general-low" sourceRef="gw-general-amount" targetRef="general-low-approve" />
+    <sequenceFlow id="flow-general-high" sourceRef="gw-general-amount" targetRef="general-high-dept">
+      <conditionExpression xsi:type="tFormalExpression">${totalAmount >= 30000}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- 通用低金额 → 通过汇聚 -->
+    <sequenceFlow id="flow-general-low-pass" sourceRef="general-low-approve" targetRef="gw-approved-merge" />
+
+    <!-- 通用高金额：部门负责人 → CFO网关 -->
+    <sequenceFlow id="flow-general-dept-to-gw" sourceRef="general-high-dept" targetRef="gw-general-high" />
+    <sequenceFlow id="flow-general-high-pass" sourceRef="gw-general-high" targetRef="general-high-cfo">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-general-high-reject" sourceRef="gw-general-high" targetRef="end-rejected" />
+
+    <!-- 通用高金额：CFO → 通过汇聚 -->
+    <sequenceFlow id="flow-general-cfo-pass" sourceRef="general-high-cfo" targetRef="gw-approved-merge" />
+
+    <!-- 通过汇聚 → 审批通过结束 -->
+    <sequenceFlow id="flow-to-end-approved" sourceRef="gw-approved-merge" targetRef="end-approved" />
+
+  </process>
+
+  <!-- BPMN 图形布局 -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_procurement">
+    <bpmndi:BPMNPlane id="BPMNPlane_procurement" bpmnElement="procurement-approval">
+
+      <!-- 开始事件 -->
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <dc:Bounds x="80" y="520" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="66" y="563" width="64" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 品类网关 -->
+      <bpmndi:BPMNShape id="gw_category_di" bpmnElement="gw-category" isMarkerVisible="true">
+        <dc:Bounds x="180" y="513" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="165" y="570" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- IT金额网关 -->
+      <bpmndi:BPMNShape id="gw_it_amount_di" bpmnElement="gw-it-amount" isMarkerVisible="true">
+        <dc:Bounds x="300" y="133" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="285" y="190" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- IT低金额审批 -->
+      <bpmndi:BPMNShape id="it_low_di" bpmnElement="it-low-approve">
+        <dc:Bounds x="420" y="58" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- IT高金额部门领导 -->
+      <bpmndi:BPMNShape id="it_high_dept_di" bpmnElement="it-high-dept">
+        <dc:Bounds x="420" y="198" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- IT高金额网关 -->
+      <bpmndi:BPMNShape id="gw_it_high_di" bpmnElement="gw-it-high" isMarkerVisible="true">
+        <dc:Bounds x="640" y="213" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="625" y="270" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- IT CTO -->
+      <bpmndi:BPMNShape id="it_high_cto_di" bpmnElement="it-high-cto">
+        <dc:Bounds x="760" y="198" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 办公用品金额网关 -->
+      <bpmndi:BPMNShape id="gw_office_amount_di" bpmnElement="gw-office-amount" isMarkerVisible="true">
+        <dc:Bounds x="300" y="353" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="278" y="410" width="94" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 办公用品低金额审批 -->
+      <bpmndi:BPMNShape id="office_low_di" bpmnElement="office-low-approve">
+        <dc:Bounds x="420" y="278" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 办公用品高金额行政主管 -->
+      <bpmndi:BPMNShape id="office_high_admin_di" bpmnElement="office-high-admin">
+        <dc:Bounds x="420" y="418" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 办公用品高金额网关 -->
+      <bpmndi:BPMNShape id="gw_office_high_di" bpmnElement="gw-office-high" isMarkerVisible="true">
+        <dc:Bounds x="640" y="433" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="618" y="490" width="94" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 办公用品行政总监 -->
+      <bpmndi:BPMNShape id="office_high_dir_di" bpmnElement="office-high-director">
+        <dc:Bounds x="760" y="418" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 原材料金额网关 -->
+      <bpmndi:BPMNShape id="gw_raw_amount_di" bpmnElement="gw-raw-amount" isMarkerVisible="true">
+        <dc:Bounds x="300" y="573" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="285" y="630" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 原材料低金额审批 -->
+      <bpmndi:BPMNShape id="raw_low_di" bpmnElement="raw-low-approve">
+        <dc:Bounds x="420" y="558" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 原材料高金额采购经理 -->
+      <bpmndi:BPMNShape id="raw_high_proc_di" bpmnElement="raw-high-proc">
+        <dc:Bounds x="420" y="698" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 原材料高金额网关 -->
+      <bpmndi:BPMNShape id="gw_raw_high_di" bpmnElement="gw-raw-high" isMarkerVisible="true">
+        <dc:Bounds x="640" y="713" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="618" y="770" width="94" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 原材料供应链VP -->
+      <bpmndi:BPMNShape id="raw_high_vp_di" bpmnElement="raw-high-vp">
+        <dc:Bounds x="760" y="698" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 通用金额网关 -->
+      <bpmndi:BPMNShape id="gw_general_amount_di" bpmnElement="gw-general-amount" isMarkerVisible="true">
+        <dc:Bounds x="300" y="813" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="285" y="870" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 通用低金额审批 -->
+      <bpmndi:BPMNShape id="general_low_di" bpmnElement="general-low-approve">
+        <dc:Bounds x="420" y="838" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 通用高金额部门负责人 -->
+      <bpmndi:BPMNShape id="general_high_dept_di" bpmnElement="general-high-dept">
+        <dc:Bounds x="420" y="978" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 通用高金额网关 -->
+      <bpmndi:BPMNShape id="gw_general_high_di" bpmnElement="gw-general-high" isMarkerVisible="true">
+        <dc:Bounds x="640" y="993" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="625" y="1050" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 通用CFO -->
+      <bpmndi:BPMNShape id="general_high_cfo_di" bpmnElement="general-high-cfo">
+        <dc:Bounds x="760" y="978" width="150" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 审批通过汇聚网关 -->
+      <bpmndi:BPMNShape id="gw_approved_di" bpmnElement="gw-approved-merge" isMarkerVisible="true">
+        <dc:Bounds x="1020" y="513" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1005" y="570" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 审批通过结束 -->
+      <bpmndi:BPMNShape id="end_approved_di" bpmnElement="end-approved">
+        <dc:Bounds x="1140" y="520" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1128" y="563" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- 审批驳回结束 -->
+      <bpmndi:BPMNShape id="end_rejected_di" bpmnElement="end-rejected">
+        <dc:Bounds x="1140" y="1100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1128" y="1143" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- ===== 连线 ===== -->
+
+      <!-- 开始 → 品类网关 -->
+      <bpmndi:BPMNEdge id="flow_start_di" bpmnElement="flow-start">
+        <di:waypoint x="116" y="538" />
+        <di:waypoint x="180" y="538" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 品类 → IT金额 -->
+      <bpmndi:BPMNEdge id="flow_to_it_di" bpmnElement="flow-to-it">
+        <di:waypoint x="205" y="513" />
+        <di:waypoint x="205" y="158" />
+        <di:waypoint x="300" y="158" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 品类 → 办公用品金额 -->
+      <bpmndi:BPMNEdge id="flow_to_office_di" bpmnElement="flow-to-office">
+        <di:waypoint x="205" y="513" />
+        <di:waypoint x="205" y="378" />
+        <di:waypoint x="300" y="378" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 品类 → 原材料金额 -->
+      <bpmndi:BPMNEdge id="flow_to_raw_di" bpmnElement="flow-to-raw">
+        <di:waypoint x="230" y="538" />
+        <di:waypoint x="300" y="598" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 品类 → 通用金额（default，向下） -->
+      <bpmndi:BPMNEdge id="flow_to_general_di" bpmnElement="flow-to-general">
+        <di:waypoint x="205" y="563" />
+        <di:waypoint x="205" y="838" />
+        <di:waypoint x="300" y="838" />
+      </bpmndi:BPMNEdge>
+
+      <!-- IT金额 → 低金额审批（default） -->
+      <bpmndi:BPMNEdge id="flow_it_low_di" bpmnElement="flow-it-low">
+        <di:waypoint x="325" y="133" />
+        <di:waypoint x="325" y="98" />
+        <di:waypoint x="420" y="98" />
+      </bpmndi:BPMNEdge>
+
+      <!-- IT金额 → 高金额部门领导 -->
+      <bpmndi:BPMNEdge id="flow_it_high_di" bpmnElement="flow-it-high">
+        <di:waypoint x="325" y="183" />
+        <di:waypoint x="325" y="238" />
+        <di:waypoint x="420" y="238" />
+      </bpmndi:BPMNEdge>
+
+      <!-- IT低金额 → 通过汇聚 -->
+      <bpmndi:BPMNEdge id="flow_it_low_pass_di" bpmnElement="flow-it-low-pass">
+        <di:waypoint x="570" y="98" />
+        <di:waypoint x="1045" y="98" />
+        <di:waypoint x="1045" y="513" />
+      </bpmndi:BPMNEdge>
+
+      <!-- IT高金额部门领导 → IT高金额网关 -->
+      <bpmndi:BPMNEdge id="flow_it_dept_gw_di" bpmnElement="flow-it-dept-to-gw">
+        <di:waypoint x="570" y="238" />
+        <di:waypoint x="640" y="238" />
+      </bpmndi:BPMNEdge>
+
+      <!-- IT高金额网关 → CTO（通过） -->
+      <bpmndi:BPMNEdge id="flow_it_high_pass_di" bpmnElement="flow-it-high-pass">
+        <di:waypoint x="690" y="238" />
+        <di:waypoint x="760" y="238" />
+      </bpmndi:BPMNEdge>
+
+      <!-- IT高金额网关 → 驳回 -->
+      <bpmndi:BPMNEdge id="flow_it_high_reject_di" bpmnElement="flow-it-high-reject">
+        <di:waypoint x="665" y="263" />
+        <di:waypoint x="665" y="1118" />
+        <di:waypoint x="1140" y="1118" />
+      </bpmndi:BPMNEdge>
+
+      <!-- IT CTO → 通过汇聚 -->
+      <bpmndi:BPMNEdge id="flow_it_cto_pass_di" bpmnElement="flow-it-cto-pass">
+        <di:waypoint x="910" y="238" />
+        <di:waypoint x="980" y="238" />
+        <di:waypoint x="980" y="538" />
+        <di:waypoint x="1020" y="538" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 办公用品金额 → 低金额审批（default） -->
+      <bpmndi:BPMNEdge id="flow_office_low_di" bpmnElement="flow-office-low">
+        <di:waypoint x="325" y="353" />
+        <di:waypoint x="325" y="318" />
+        <di:waypoint x="420" y="318" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 办公用品金额 → 高金额行政主管 -->
+      <bpmndi:BPMNEdge id="flow_office_high_di" bpmnElement="flow-office-high">
+        <di:waypoint x="325" y="403" />
+        <di:waypoint x="325" y="458" />
+        <di:waypoint x="420" y="458" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 办公用品低金额 → 通过汇聚 -->
+      <bpmndi:BPMNEdge id="flow_office_low_pass_di" bpmnElement="flow-office-low-pass">
+        <di:waypoint x="570" y="318" />
+        <di:waypoint x="1000" y="318" />
+        <di:waypoint x="1000" y="538" />
+        <di:waypoint x="1020" y="538" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 办公用品高金额行政主管 → 网关 -->
+      <bpmndi:BPMNEdge id="flow_office_admin_gw_di" bpmnElement="flow-office-admin-to-gw">
+        <di:waypoint x="570" y="458" />
+        <di:waypoint x="640" y="458" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 办公用品高金额网关 → 行政总监（通过） -->
+      <bpmndi:BPMNEdge id="flow_office_high_pass_di" bpmnElement="flow-office-high-pass">
+        <di:waypoint x="690" y="458" />
+        <di:waypoint x="760" y="458" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 办公用品高金额网关 → 驳回 -->
+      <bpmndi:BPMNEdge id="flow_office_high_reject_di" bpmnElement="flow-office-high-reject">
+        <di:waypoint x="665" y="483" />
+        <di:waypoint x="665" y="1118" />
+        <di:waypoint x="1140" y="1118" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 办公用品行政总监 → 通过汇聚 -->
+      <bpmndi:BPMNEdge id="flow_office_dir_pass_di" bpmnElement="flow-office-dir-pass">
+        <di:waypoint x="910" y="458" />
+        <di:waypoint x="980" y="458" />
+        <di:waypoint x="980" y="538" />
+        <di:waypoint x="1020" y="538" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 原材料金额 → 低金额审批（default） -->
+      <bpmndi:BPMNEdge id="flow_raw_low_di" bpmnElement="flow-raw-low">
+        <di:waypoint x="350" y="598" />
+        <di:waypoint x="420" y="598" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 原材料金额 → 高金额采购经理 -->
+      <bpmndi:BPMNEdge id="flow_raw_high_di" bpmnElement="flow-raw-high">
+        <di:waypoint x="325" y="623" />
+        <di:waypoint x="325" y="738" />
+        <di:waypoint x="420" y="738" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 原材料低金额 → 通过汇聚 -->
+      <bpmndi:BPMNEdge id="flow_raw_low_pass_di" bpmnElement="flow-raw-low-pass">
+        <di:waypoint x="570" y="598" />
+        <di:waypoint x="1045" y="598" />
+        <di:waypoint x="1045" y="563" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 原材料高金额采购经理 → 网关 -->
+      <bpmndi:BPMNEdge id="flow_raw_proc_gw_di" bpmnElement="flow-raw-proc-to-gw">
+        <di:waypoint x="570" y="738" />
+        <di:waypoint x="640" y="738" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 原材料高金额网关 → 供应链VP（通过） -->
+      <bpmndi:BPMNEdge id="flow_raw_high_pass_di" bpmnElement="flow-raw-high-pass">
+        <di:waypoint x="690" y="738" />
+        <di:waypoint x="760" y="738" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 原材料高金额网关 → 驳回 -->
+      <bpmndi:BPMNEdge id="flow_raw_high_reject_di" bpmnElement="flow-raw-high-reject">
+        <di:waypoint x="665" y="763" />
+        <di:waypoint x="665" y="1118" />
+        <di:waypoint x="1140" y="1118" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 原材料供应链VP → 通过汇聚 -->
+      <bpmndi:BPMNEdge id="flow_raw_vp_pass_di" bpmnElement="flow-raw-vp-pass">
+        <di:waypoint x="910" y="738" />
+        <di:waypoint x="980" y="738" />
+        <di:waypoint x="980" y="538" />
+        <di:waypoint x="1020" y="538" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 通用金额 → 低金额审批（default） -->
+      <bpmndi:BPMNEdge id="flow_general_low_di" bpmnElement="flow-general-low">
+        <di:waypoint x="350" y="838" />
+        <di:waypoint x="420" y="878" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 通用金额 → 高金额部门负责人 -->
+      <bpmndi:BPMNEdge id="flow_general_high_di" bpmnElement="flow-general-high">
+        <di:waypoint x="325" y="863" />
+        <di:waypoint x="325" y="1018" />
+        <di:waypoint x="420" y="1018" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 通用低金额 → 通过汇聚 -->
+      <bpmndi:BPMNEdge id="flow_general_low_pass_di" bpmnElement="flow-general-low-pass">
+        <di:waypoint x="570" y="878" />
+        <di:waypoint x="1000" y="878" />
+        <di:waypoint x="1000" y="538" />
+        <di:waypoint x="1020" y="538" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 通用高金额部门负责人 → 网关 -->
+      <bpmndi:BPMNEdge id="flow_general_dept_gw_di" bpmnElement="flow-general-dept-to-gw">
+        <di:waypoint x="570" y="1018" />
+        <di:waypoint x="640" y="1018" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 通用高金额网关 → CFO（通过） -->
+      <bpmndi:BPMNEdge id="flow_general_high_pass_di" bpmnElement="flow-general-high-pass">
+        <di:waypoint x="690" y="1018" />
+        <di:waypoint x="760" y="1018" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 通用高金额网关 → 驳回 -->
+      <bpmndi:BPMNEdge id="flow_general_high_reject_di" bpmnElement="flow-general-high-reject">
+        <di:waypoint x="665" y="1043" />
+        <di:waypoint x="665" y="1118" />
+        <di:waypoint x="1140" y="1118" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 通用CFO → 通过汇聚 -->
+      <bpmndi:BPMNEdge id="flow_general_cfo_pass_di" bpmnElement="flow-general-cfo-pass">
+        <di:waypoint x="910" y="1018" />
+        <di:waypoint x="980" y="1018" />
+        <di:waypoint x="980" y="538" />
+        <di:waypoint x="1020" y="538" />
+      </bpmndi:BPMNEdge>
+
+      <!-- 通过汇聚 → 审批通过 -->
+      <bpmndi:BPMNEdge id="flow_to_end_approved_di" bpmnElement="flow-to-end-approved">
+        <di:waypoint x="1070" y="538" />
+        <di:waypoint x="1140" y="538" />
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

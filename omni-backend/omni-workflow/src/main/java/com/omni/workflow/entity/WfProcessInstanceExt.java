@@ -53,6 +53,12 @@ public class WfProcessInstanceExt implements Serializable {
     /** Flowable 引擎版本号 */
     private Integer engineVersion;
 
+    /** 跨服务调用请求 ID */
+    private String requestId;
+
+    /** 跨服务业务类型 */
+    private String businessType;
+
     /** 业务主键（外部表单关联） */
     private String businessKey;
 
@@ -70,6 +76,15 @@ public class WfProcessInstanceExt implements Serializable {
 
     /** 状态: 0-已终止, 1-进行中, 2-已完成 */
     private Integer status;
+
+    /** 业务完成结果：APPROVED/REJECTED/CANCELLED */
+    private String completionResult;
+
+    /** 业务完成时间 */
+    private LocalDateTime completedTime;
+
+    /** 完成事件 ID，同时作为单实例仅发布一次的门闩 */
+    private String completionEventId;
 
     /** 创建时间 */
     private LocalDateTime createTime;

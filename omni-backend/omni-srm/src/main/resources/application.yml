@@ -17,7 +17,7 @@ spring:
       - optional:nacos:${spring.application.name}.yml?group=DEFAULT_GROUP&refreshEnabled=true
   cloud:
     function:
-      definition: portalRoleResultFunction
+      definition: portalRoleResultFunction;workflowCompletionFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
@@ -27,6 +27,12 @@ spring:
         server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
         username: ${NACOS_USERNAME:nacos}
         password: ${NACOS_PASSWORD:nacos}
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 3000
+            read-timeout: 5000
     stream:
       rocketmq:
         binder:
@@ -42,6 +48,10 @@ spring:
           destination: auth-portal-role-result
           content-type: application/json
           group: srm-portal-role-result-group
+        workflowCompletionFunction-in-0:
+          destination: workflow-domain
+          content-type: application/json
+          group: omni-srm-workflow-completed
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/omni_srm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
@@ -69,10 +79,6 @@ omni:
   internal:
     api:
       token: ${OMNI_INTERNAL_API_TOKEN:}
-  srm:
-    feign:
-      connect-timeout: ${SRM_FEIGN_CONNECT_TIMEOUT:2000}
-      read-timeout: ${SRM_FEIGN_READ_TIMEOUT:3000}
 
 xxl:
   job:

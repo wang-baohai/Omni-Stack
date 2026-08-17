@@ -1,0 +1,58 @@
+name: Quality Gate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: omni_crm_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      CRM_TEST_MYSQL_URL: jdbc:mysql://127.0.0.1:3306/omni_crm_test?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      CRM_TEST_MYSQL_USERNAME: root
+      CRM_TEST_MYSQL_PASSWORD: root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Backend tests and package
+        working-directory: omni-backend
+        run: ./mvnw clean install
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: omni-frontend/package-lock.json
+      - name: Install dependencies
+        working-directory: omni-frontend
+        run: npm ci
+      - name: Lint
+        working-directory: omni-frontend
+        run: npm run lint
+      - name: Production build
+        working-directory: omni-frontend
+        run: npm run build
+      - name: Validate Playwright suite discovery
+        working-directory: omni-frontend
+        run: npx playwright test --list

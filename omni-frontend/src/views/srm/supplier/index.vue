@@ -1,25 +1,25 @@
 <script setup lang="ts">
 /** SRM 供应商管理页面，包含供应商 CRUD、状态机操作和 360 视图。 */
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
-  approveSupplier,
   blacklistSupplier,
+  cancelSupplier,
   createSupplier,
   deleteSupplier,
   eliminateSupplier,
   getSupplier,
   listOwnerOptions,
   listSuppliers,
-  rejectSupplier,
   restoreSupplier,
   resumeSupplier,
   submitSupplier,
   suspendSupplier,
   transferSupplierOwner,
   updateSupplier,
+  withdrawSupplier,
   type SaveSupplierRequest,
   type OwnerOption,
   type SrmSupplier,
@@ -27,6 +27,7 @@ import {
 } from '@/api/srm-supplier'
 import SupplierOverview from '@/components/srm/SupplierOverview.vue'
 import SupplierResourcesDrawer from '@/components/srm/SupplierResourcesDrawer.vue'
+import ProcessProgressDialog from '@/components/workflow/ProcessProgressDialog.vue'
 import { useDictOptions } from '@/composables/useDictOptions'
 import { usePermissionStore } from '@/stores/permission'
 
@@ -50,6 +51,7 @@ const statuses: Array<{ label: string; value: SupplierStatus; type: string }> = 
   { label: '登记中', value: 'REGISTERING', type: 'info' },
   { label: '入驻失败', value: 'REGISTERING_FAILED', type: 'danger' },
   { label: '待审核', value: 'PENDING_REVIEW', type: 'warning' },
+  { label: '审批中', value: 'APPROVING', type: 'warning' },
   { label: '已驳回', value: 'REJECTED', type: 'danger' },
   { label: '已通过', value: 'APPROVED', type: 'success' },
   { label: '已冻结', value: 'SUSPENDED', type: '' },
@@ -100,6 +102,9 @@ const supplierTypeLabel: Record<string, string> = {
 const levelLabel: Record<string, string> = {
   STRATEGIC: '战略级', PREFERRED: '优选级', QUALIFIED: '合格级', ELIMINATED: '淘汰级',
 }
+const categoryLabel = computed(() =>
+  Object.fromEntries(categoryOptions.value.map((o) => [o.value, o.label])),
+)
 
 async function loadData() {
   loading.value = true
@@ -229,21 +234,24 @@ async function handleDelete(row: SrmSupplier) {
   } catch { /* 用户取消 */ }
 }
 
+const progressDialogRef = ref<InstanceType<typeof ProcessProgressDialog>>()
+
 async function handleSubmit(row: SrmSupplier) {
-  await ElMessageBox.confirm(`确认提交供应商"${row.name}"审核？`, '提交审核')
-  await submitSupplier(row.id, row.version); ElMessage.success('已提交审核'); loadData()
+  await ElMessageBox.confirm(`确认提交供应商“${row.name}”重新审批？将启动新一轮审批流程。`, '重新提交')
+  await submitSupplier(row.id, row.version); ElMessage.success('已提交审批'); loadData()
 }
-async function handleApprove(row: SrmSupplier) {
-  if (!row.ownerUserId || !row.ownerUnitId) {
-    ElMessage.warning('请先为供应商分配有效的内部负责人后再审核通过')
-    return
+async function handleWithdraw(row: SrmSupplier) {
+  await ElMessageBox.confirm(`确认撤回供应商“${row.name}”的审批流程？`, '撤回审批')
+  await withdrawSupplier(row.id, row.version); ElMessage.success('已撤回'); loadData()
+}
+async function handleCancel(row: SrmSupplier) {
+  await ElMessageBox.confirm(`确认取消供应商“${row.name}”的审批流程？`, '取消审批', { type: 'warning' })
+  await cancelSupplier(row.id, row.version); ElMessage.success('已取消'); loadData()
+}
+function openProcessProgress(row: SrmSupplier) {
+  if (row.processInstanceId) {
+    progressDialogRef.value?.open(row.processInstanceId, '')
   }
-  await ElMessageBox.confirm(`确认通过供应商"${row.name}"？`, '审核通过')
-  await approveSupplier(row.id, row.version); ElMessage.success('已通过'); loadData()
-}
-async function handleReject(row: SrmSupplier) {
-  await ElMessageBox.confirm(`确认驳回供应商"${row.name}"？`, '审核驳回')
-  await rejectSupplier(row.id, row.version); ElMessage.success('已驳回'); loadData()
 }
 async function handleSuspend(row: SrmSupplier) {
   await ElMessageBox.confirm(`确认冻结供应商"${row.name}"？`, '冻结确认', { type: 'warning' })
@@ -330,7 +338,9 @@ onMounted(() => {
         <el-table-column label="类型" width="110">
           <template #default="{ row }">{{ supplierTypeLabel[row.supplierType] || row.supplierType }}</template>
         </el-table-column>
-        <el-table-column prop="categoryCode" label="品类" width="100" />
+        <el-table-column label="品类" width="120">
+          <template #default="{ row }">{{ categoryLabel[row.categoryCode] || row.categoryCode }}</template>
+        </el-table-column>
         <el-table-column label="等级" width="110">
           <template #default="{ row }">{{ levelLabel[row.levelCode] || row.levelCode }}</template>
         </el-table-column>
@@ -358,15 +368,9 @@ onMounted(() => {
                     维护关联资料
                   </el-dropdown-item>
                   <el-dropdown-item v-if="row.status === 'REJECTED'" v-permission="'srm:supplier:create'" @click="handleSubmit(row)">重新提交审核</el-dropdown-item>
-                  <el-dropdown-item
-                    v-if="row.status === 'PENDING_REVIEW'"
-                    v-permission="'srm:supplier:approve'"
-                    :disabled="!row.ownerUserId || !row.ownerUnitId"
-                    @click="handleApprove(row)"
-                  >
-                    审核通过{{ !row.ownerUserId || !row.ownerUnitId ? '（请先分配负责人）' : '' }}
-                  </el-dropdown-item>
-                  <el-dropdown-item v-if="row.status === 'PENDING_REVIEW'" v-permission="'srm:supplier:reject'" @click="handleReject(row)">审核驳回</el-dropdown-item>
+                  <el-dropdown-item v-if="row.status === 'APPROVING'" v-permission="'srm:supplier:withdraw'" @click="handleWithdraw(row)">撤回审批</el-dropdown-item>
+                  <el-dropdown-item v-if="row.status === 'APPROVING'" v-permission="'srm:supplier:cancel'" @click="handleCancel(row)">取消审批</el-dropdown-item>
+                  <el-dropdown-item v-if="row.processInstanceId" @click="openProcessProgress(row)">审批进度</el-dropdown-item>
                   <el-dropdown-item v-if="row.status === 'APPROVED'" v-permission="'srm:supplier:suspend'" @click="handleSuspend(row)">冻结</el-dropdown-item>
                   <el-dropdown-item v-if="row.status === 'SUSPENDED'" v-permission="'srm:supplier:resume'" @click="handleResume(row)">恢复</el-dropdown-item>
                   <el-dropdown-item v-if="row.status === 'BLACKLISTED'" v-permission="'srm:supplier:restore'" @click="handleRestore(row)">移出黑名单</el-dropdown-item>
@@ -384,7 +388,7 @@ onMounted(() => {
         v-model:page-size="pageSize"
         class="pagination"
         :total="total"
-        :page-sizes="[10, 20, 50, 100]"
+        :page-sizes="[5, 10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next"
         @current-change="loadData"
         @size-change="currentPage = 1; loadData()"
@@ -454,6 +458,8 @@ onMounted(() => {
       :supplier-id="selectedSupplier?.id"
       :supplier-name="selectedSupplier?.name"
     />
+
+    <ProcessProgressDialog ref="progressDialogRef" />
   </div>
 </template>
 

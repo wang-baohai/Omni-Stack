@@ -43,9 +43,9 @@ const tenants = ref<TenantOption[]>([])
 
 /** 内嵌登录表单数据 */
 const loginForm = reactive({
-  tenantId: 1,
-  username: 'admin',
-  password: 'admin123',
+  tenantId: undefined as number | undefined,
+  username: '',
+  password: '',
   captchaCode: '',
 })
 
@@ -82,6 +82,9 @@ async function loadTenants() {
   try {
     const { data: res } = await listTenants()
     tenants.value = res.data
+    if (loginForm.tenantId === undefined && tenants.value.length > 0) {
+      loginForm.tenantId = tenants.value[0].id
+    }
   } catch {
     tenants.value = []
   }
@@ -97,7 +100,7 @@ async function handleLogin() {
     await sessionLogin({
       username: loginForm.username,
       password: loginForm.password,
-      tenantId: loginForm.tenantId,
+      tenantId: loginForm.tenantId!,
       captchaKey: captchaKey.value,
       captchaCode: loginForm.captchaCode,
     })

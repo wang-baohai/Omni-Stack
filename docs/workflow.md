@@ -15,11 +15,14 @@ Omni-Stack 提供基于 **Flowable 7.x** 的可视化 BPMN 工作流引擎，支
 ├──────────────────────────────────────────────────────────────────────────┤
 │                      omni-workflow (port 8103)                            │
 │  ─────────────────────────────────────────────────────────────────────   │
-│  Controllers (7): WorkflowModel · ProcessDefinition · ProcessInstance    │
+│  Controllers (8): WorkflowModel · ProcessDefinition · ProcessInstance    │
 │                   Approval · Task · WorkflowStats · WorkflowIdentity     │
-│  Services (8): WorkflowModel · ProcessDefinition · ProcessInstance       │
-│                WorkflowApproval · WorkflowTask · WorkflowStats            │
-│                WorkflowIdentity · WorkflowTodoSync                       │
+│                   InternalWorkflow                                      │
+│  Services (12): WorkflowModel · ProcessDefinition · ProcessInstance      │
+│                 WorkflowApproval · WorkflowTask · WorkflowStats           │
+│                 WorkflowIdentity · WorkflowTodoSync · InternalWorkflow   │
+│                 ProcessStartRequest · CompletionEvent                    │
+│                 CandidateResolution                                     │
 │  Delegates:  ScopedRoleAssignmentListener · CandidateResolverDelegate    │
 │              CandidateResolverBean · CcNotifyDelegate                    │
 │  Engine:     BpmnXmlBuilder · BpmnXmlValidator                           │
@@ -33,7 +36,8 @@ Omni-Stack 提供基于 **Flowable 7.x** 的可视化 BPMN 工作流引擎，支
 ├──────────────────────────────────────────────────────────────────────────┤
 │                       omni_workflow (MySQL)                               │
 │  wf_process_model · wf_process_model_version · wf_process_instance_ext   │
-│  wf_todo_task · wf_cc_record · wf_form_schema · wf_delegation_rule      │
+│  wf_process_start_request · wf_todo_task · wf_cc_record · sys_mq_message │
+│  wf_form_schema · wf_delegation_rule                                    │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -43,6 +47,7 @@ Omni-Stack 提供基于 **Flowable 7.x** 的可视化 BPMN 工作流引擎，支
 - `omni-common-mybatis` — MyBatis-Plus + MySQL 驱动 + 租户拦截器
 - `omni-common-redis` — Redis 缓存，用于 XSS 配置和会话数据
 - `omni-common-workflow` — Flowable 自动配置、审批 SPI、租户过滤器、通知 SPI
+- `omni-common-mqlog` — Transactional Outbox、内部 API 共享令牌过滤器和可靠消息中继
 - `omni-workflow` — 业务层：控制器、服务、委托器、BPMN 引擎工具
 
 **关键设计决策**：
@@ -51,6 +56,8 @@ Omni-Stack 提供基于 **Flowable 7.x** 的可视化 BPMN 工作流引擎，支
 - **双版本管理**：业务版本在 `wf_process_model_version` 中跟踪（DRAFT → PUBLISHED → ARCHIVED），引擎版本由 Flowable 部署管理
 - **可视化设计器**：前端 BPMN 建模器生成设计器 JSON，`BpmnXmlBuilder` 转换为 BPMN 2.0 XML
 - **动态候选人解析**：`omni:assignment` JSON 扩展元素在任务启动时由 `ScopedRoleAssignmentListener` 解析，无需硬编码审批人
+- **跨服务启动双幂等**：分别以租户内 `requestId` 和 `(businessType, businessKey)` 约束流程启动
+- **可靠完成通知**：完成元数据和 Outbox 记录在同一本地事务内提交，由中继任务异步投递
 
 ### 数据模型
 
@@ -68,11 +75,13 @@ erDiagram
 |------|------|
 | `wf_process_model` | 流程模型注册表，`model_key` 在租户内唯一 |
 | `wf_process_model_version` | 版本历史：BPMN XML、设计器 JSON、部署信息 |
-| `wf_process_instance_ext` | 实例扩展：将 Flowable 实例关联到模型版本 |
+| `wf_process_instance_ext` | 实例扩展：关联模型版本，并记录 `requestId`、业务键和完成事件门闩 |
+| `wf_process_start_request` | 跨服务启动预留记录；请求 ID 与业务键在租户内分别唯一 |
 | `wf_todo_task` | 待办任务缓存，支持按审批人快速查询 |
 | `wf_cc_record` | 抄送通知记录，含已读状态 |
 | `wf_form_schema` | JSON Schema 表单定义 |
 | `wf_delegation_rule` | 审批委托规则（用户到用户，可选流程范围） |
+| `sys_mq_message` | Transactional Outbox 消息记录，由可靠消息中继异步投递 |
 
 ---
 
@@ -178,6 +187,177 @@ POST /api/workflow/approval/{taskId}/complete  (workflow:approval:complete)
 - 查询 `HistoricTaskInstance`（按创建时间升序）
 - 判定每个任务的结果：`approved`（通过）/ `rejected`（驳回）/ `auto-approved`（自动通过，MI_END）/ `cancelled`（已取消）/ `pending`（待办）
 - 获取 `Comment` 作为审批意见，获取 `approved` 变量用于区分通过/驳回
+
+### 2.8 跨服务内部契约
+
+所有服务间接口统一使用 `/api/internal/**` 路径，不经过 Gateway 用户预认证。调用方必须同时携带：
+
+```http
+X-Internal-Token: <共享内部令牌>
+X-Tenant-Id: 1
+Content-Type: application/json
+```
+
+容器级 `InternalApiAuthFilter` 在 Spring Security 链之前校验共享令牌并对全部 `/api/internal/**`
+失败关闭；这些路径不会再使用 Gateway 用户预认证。令牌缺失或不匹配返回 HTTP 401；服务端未配置共享令牌时返回 HTTP 503。
+内部请求中的 `X-Tenant-Id` 必须与请求体或查询参数中的 `tenantId` 完全一致，不一致返回业务码 403。
+
+#### 2.8.1 幂等启动流程
+
+```http
+POST /api/internal/workflow/process-instance/start
+```
+
+请求体：
+
+```json
+{
+  "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
+  "tenantId": 1,
+  "modelVersionId": 42,
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001",
+  "startUserId": 7,
+  "startUserName": "buyer",
+  "title": "采购申请 PR-202607-0001",
+  "variables": {
+    "amount": 120000
+  }
+}
+```
+
+| 字段 | 必填 | 约束 | 说明 |
+|---|---|---|---|
+| `requestId` | 是 | 非空，最长 64 | 调用方生成的幂等请求 ID |
+| `tenantId` | 是 | 正整数 | 必须等于 `X-Tenant-Id` |
+| `modelVersionId` | 是 | 正整数 | 必须属于当前租户且已关联 Flowable `processDefinitionId` |
+| `businessType` | 是 | 非空，最长 100 | 稳定的跨服务业务类型 |
+| `businessKey` | 是 | 非空，最长 255 | 调用方业务主键 |
+| `startUserId` | 是 | 正整数 | 流程发起人 |
+| `startUserName` | 否 | 最长 100 | 发起人显示名 |
+| `title` | 否 | 最长 500 | 为空时生成 `{businessType}:{businessKey}` |
+| `variables` | 否 | JSON 对象 | 业务流程变量；服务会覆盖写入三个关联变量 |
+
+服务始终按 `modelVersionId` 解析 `processDefinitionId`，再调用
+`startProcessInstanceById`。`requestId`、`businessType`、`businessKey` 同时写入流程变量和实例扩展记录。
+
+成功响应：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
+    "businessType": "PROCUREMENT_REQUISITION",
+    "businessKey": "10001",
+    "processInstanceId": "22501",
+    "replayed": false
+  }
+}
+```
+
+幂等规则：
+
+- `wf_process_start_request` 分别建立 `(tenant_id, request_id)` 和
+  `(tenant_id, business_type, business_key)` 唯一约束，任一维度都不能重复创建流程。
+- 同一请求意图（相同业务键、`modelVersionId`、`startUserId`）已经成功时，重试返回原
+  `processInstanceId`，并设置 `replayed = true`。
+- 已有预留仍在处理中返回业务码 409；调用方应使用同一 `requestId` 退避重试。
+- 同一 `requestId` 被不同业务使用，或同一业务键改换流程模型/发起人，返回业务码 409，禁止静默复用。
+
+#### 2.8.2 校验任务处理资格
+
+```http
+POST /api/internal/workflow/task/assignment/validate
+```
+
+请求体：
+
+```json
+{
+  "tenantId": 1,
+  "taskId": "25017",
+  "userId": 7,
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001"
+}
+```
+
+校验同时覆盖四层边界：Flowable 任务租户、实例扩展记录租户、`businessType + businessKey`
+业务归属，以及用户是否为当前 `ASSIGNEE` 或未签收任务的 `CANDIDATE`。任何一层不匹配都不会授予处理资格。
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "valid": true,
+    "processInstanceId": "22501",
+    "assignmentType": "ASSIGNEE",
+    "message": "校验通过"
+  }
+}
+```
+
+`assignmentType` 仅取 `ASSIGNEE`、`CANDIDATE`、`NONE`。任务不存在或边界不匹配时正常返回
+`valid = false`；请求头与请求体租户不一致属于调用方安全错误，返回业务码 403。
+
+#### 2.8.3 流程完成事件
+
+跨服务流程在最终审批结束或被终止时产生 `workflow.process.completed.v1`。事件通过
+`workflow-domain-out-0` binding 写入 `workflow-domain-event`，载荷如下：
+
+```json
+{
+  "eventId": "3f206832-9dc1-4422-870a-a286a979404d",
+  "eventType": "workflow.process.completed.v1",
+  "occurredAt": "2026-07-21 10:30:00",
+  "tenantId": 1,
+  "producer": "omni-workflow",
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001",
+  "processInstanceId": "22501",
+  "result": "APPROVED",
+  "completedTime": "2026-07-21 10:30:00"
+}
+```
+
+| 字段 | 说明 |
+|---|---|
+| `eventId` | UUID；同时作为 Outbox `msgKey` 和消费端幂等键 |
+| `eventType` | 固定为 `workflow.process.completed.v1` |
+| `occurredAt` | 事件记录产生时间 |
+| `tenantId` | 业务租户 ID |
+| `producer` | 固定为 `omni-workflow` |
+| `businessType` / `businessKey` | 回查调用方聚合的稳定业务标识 |
+| `processInstanceId` | Flowable 流程实例 ID |
+| `result` | `APPROVED`、`REJECTED`、`CANCELLED` |
+| `completedTime` | 流程实际完成或终止时间 |
+
+实例状态/完成元数据更新与 `sys_mq_message` 的 PENDING Outbox 记录在同一本地事务中提交。
+`completion_event_id IS NULL` 条件更新是数据库发布门闩，保证同一流程实例只生成一条逻辑完成事件；事务失败时两者一起回滚。
+中继任务在提交后异步投递并重试，因此消息传输语义是**至少一次**，消费方仍必须按 `eventId` 幂等消费。
+
+#### 2.8.4 查询已发布模型版本
+
+```http
+GET /api/internal/workflow/model-version/{modelVersionId}
+X-Internal-Token: <共享内部令牌>
+X-Tenant-Id: 1
+```
+
+响应包含 `id/modelId/modelKey/category/version/processDefinitionId/status`。其中：
+
+- `modelKey` 是租户内唯一且必须与 BPMN process id 一致的模型标识。
+- `category` 是供业务服务绑定审批用途的稳定分类，不等同于可自由显示的模型名称。
+- 模型主记录已归档、版本不是 `PUBLISHED`、版本不属于请求租户或缺少
+  `processDefinitionId` 时统一返回 404。
+
+业务服务可以在启动前把自身稳定 `businessType` 与 `category` 做精确匹配，防止误用其他业务的
+已发布模型。Workflow 内部启动端点会在实际创建实例前再次校验
+`ASSET_TRANSFER/ASSET_DISPOSAL` 与模型分类，错配以 404 明确拒绝且不创建实例；既有
+Procurement 审批路由不受该 Asset 专用绑定影响。该查询只提供模型元数据，不授予流程启动或审批权限。
 
 ---
 

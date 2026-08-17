@@ -10,6 +10,8 @@ export const useUserStore = defineStore('user', () => {
   const token = ref<string>(localStorage.getItem('token') || '')
   /** 当前用户名，从 localStorage 恢复 */
   const username = ref<string>(localStorage.getItem('username') || '')
+  /** 显式登出进行中；用于忽略已发出请求随后到达的 401。 */
+  const isLoggingOut = ref(false)
   /** 是否已登录（计算属性，基于 token 是否存在） */
   const isLoggedIn = computed(() => !!token.value)
 
@@ -19,6 +21,7 @@ export const useUserStore = defineStore('user', () => {
    * @param newToken 新的 JWT 令牌
    */
   function setToken(newToken: string) {
+    isLoggingOut.value = false
     token.value = newToken
     localStorage.setItem('token', newToken)
   }
@@ -33,18 +36,14 @@ export const useUserStore = defineStore('user', () => {
     localStorage.setItem('username', name)
   }
 
-  /** 登出：清除令牌和用户名，同时清除 localStorage 中的对应数据 */
-  function logout() {
+  /** 登出：清除令牌和用户名；动态路由及权限由路由层统一回收。 */
+  function logout(explicit = true) {
+    isLoggingOut.value = explicit
     token.value = ''
     username.value = ''
     localStorage.removeItem('token')
     localStorage.removeItem('username')
-    // 清除动态路由和权限状态
-    import('@/router').then(({ clearDynamicRoutes }) => clearDynamicRoutes())
-    import('@/stores/permission').then(({ usePermissionStore }) => {
-      usePermissionStore().reset()
-    })
   }
 
-  return { token, username, isLoggedIn, setToken, setUsername, logout }
+  return { token, username, isLoggedIn, isLoggingOut, setToken, setUsername, logout }
 })

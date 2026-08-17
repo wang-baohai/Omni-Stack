@@ -77,6 +77,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
     /** Gateway 转发标记头，下游服务据此判断请求是否经过 Gateway */
     private static final String GATEWAY_FORWARDED_HEADER = "X-Gateway-Forwarded";
     private static final String GATEWAY_FORWARDED_VALUE = "true";
+    /** 所有只能由网关注入、不能信任客户端输入的身份头。 */
+    private static final List<String> TRUSTED_IDENTITY_HEADERS = List.of(
+            "X-User-Id", "X-Tenant-Id", "X-User-Name", "X-User-Roles", "X-User-Scopes",
+            "X-Internal-Token", GATEWAY_FORWARDED_HEADER);
 
     /** RSA 公钥提供者，用于获取 JWT 签名验证所需的公钥 */
     private final JwkKeyProvider jwkKeyProvider;
@@ -107,9 +111,13 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         // Step 1: 公开路径直接放行（登录、验证码、租户列表、健康检查等）
         if (isPublicPath(path)) {
-            // 添加 Gateway 转发标记，下游服务据此确认请求来源
+            // 公开路径剥离 Authorization 头，避免超大 JWT 转发到下游 Tomcat 触发 400
             ServerHttpRequest mutatedRequest = request.mutate()
-                    .header(GATEWAY_FORWARDED_HEADER, GATEWAY_FORWARDED_VALUE)
+                    .headers(h -> {
+                        h.remove(AUTH_HEADER);
+                        TRUSTED_IDENTITY_HEADERS.forEach(h::remove);
+                        h.set(GATEWAY_FORWARDED_HEADER, GATEWAY_FORWARDED_VALUE);
+                    })
                     .build();
             return chain.filter(exchange.mutate().request(mutatedRequest).build());
         }
@@ -135,6 +143,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
                     ServerHttpRequest mutatedRequest = request.mutate()
                             .headers(h -> {
                                 h.remove(AUTH_HEADER);
+                                TRUSTED_IDENTITY_HEADERS.forEach(h::remove);
                                 h.set(GATEWAY_FORWARDED_HEADER, GATEWAY_FORWARDED_VALUE);
                                 h.set("X-User-Id", claims.getSubject());
                                 h.set("X-Tenant-Id", getClaimAsString(claims, "tenant_id"));

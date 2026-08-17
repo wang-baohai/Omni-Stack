@@ -1,18 +1,26 @@
 package com.omni.workflow.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.workflow.approval.ApprovalService;
 import com.omni.workflow.dto.ApprovalRequest;
+import com.omni.workflow.dto.WorkflowCompletionResult;
+import com.omni.workflow.entity.WfProcessInstanceExt;
+import com.omni.workflow.mapper.WfProcessInstanceExtMapper;
 import com.omni.workflow.service.WorkflowApprovalService;
+import com.omni.workflow.service.WorkflowCompletionEventService;
 import com.omni.workflow.service.WorkflowTodoSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.task.api.Task;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.time.LocalDateTime;
 
 /**
  * 工作流审批操作服务实现。
@@ -30,6 +38,9 @@ public class WorkflowApprovalServiceImpl implements WorkflowApprovalService {
 
     private final ApprovalService approvalService;
     private final TaskService taskService;
+    private final RuntimeService runtimeService;
+    private final WfProcessInstanceExtMapper processInstanceExtMapper;
+    private final WorkflowCompletionEventService workflowCompletionEventService;
     private final WorkflowTodoSyncService workflowTodoSyncService;
 
     /** {@inheritDoc} */
@@ -37,7 +48,38 @@ public class WorkflowApprovalServiceImpl implements WorkflowApprovalService {
     public void complete(String taskId, ApprovalRequest request, Long userId, Long tenantId) {
         Task task = requireCurrentAssigneeTask(taskId, userId, tenantId);
         approvalService.complete(taskId, request.isApproved(), request.getComment(), request.getVariables());
+        publishIfCrossServiceProcessCompleted(task.getProcessInstanceId(), tenantId, request.isApproved());
         syncAfterCommit(task.getProcessInstanceId());
+    }
+
+    /**
+     * 当跨服务流程在本次审批后自然结束时，事务内写入唯一完成事件。
+     *
+     * @param processInstanceId 流程实例 ID
+     * @param tenantId 租户 ID
+     * @param approved 最终审批动作
+     */
+    private void publishIfCrossServiceProcessCompleted(String processInstanceId,
+                                                       Long tenantId,
+                                                       boolean approved) {
+        boolean running = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .processInstanceTenantId(String.valueOf(tenantId))
+                .singleResult() != null;
+        if (running) {
+            return;
+        }
+        WfProcessInstanceExt ext = processInstanceExtMapper.selectOne(
+                new LambdaQueryWrapper<WfProcessInstanceExt>()
+                        .eq(WfProcessInstanceExt::getTenantId, tenantId)
+                        .eq(WfProcessInstanceExt::getProcessInstanceId, processInstanceId));
+        if (ext == null || ext.getBusinessType() == null || ext.getBusinessType().isBlank()) {
+            return;
+        }
+        WorkflowCompletionResult result = approved
+                ? WorkflowCompletionResult.APPROVED : WorkflowCompletionResult.REJECTED;
+        workflowCompletionEventService.publishCompletionEvent(
+                tenantId, processInstanceId, result, LocalDateTime.now());
     }
 
     /** {@inheritDoc} */
@@ -102,7 +144,7 @@ public class WorkflowApprovalServiceImpl implements WorkflowApprovalService {
                 .taskTenantId(String.valueOf(tenantId))
                 .singleResult();
         if (task == null) {
-            throw new BusinessException("审批任务不存在");
+            throw new BusinessException(409, "审批任务已被处理或不存在，请刷新待办列表");
         }
         if (!String.valueOf(userId).equals(task.getAssignee())) {
             throw new BusinessException(403, "无权操作该审批任务");

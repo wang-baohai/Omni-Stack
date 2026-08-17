@@ -22,6 +22,7 @@ import com.omni.srm.service.SupplierPortalService;
 import com.omni.srm.service.support.SrmAuditSupport;
 import com.omni.srm.service.support.SupplierNameNormalizer;
 import com.omni.srm.service.support.SupplierRiskInitializer;
+import com.omni.srm.workflow.SupplierWorkflowCoordinator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,7 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     private final PortalInviteService portalInviteService;
     private final SupplierRiskInitializer supplierRiskInitializer;
     private final ReliableMessageRelay reliableMessageRelay;
+    private final SupplierWorkflowCoordinator workflowCoordinator;
 
     /** {@inheritDoc} */
     @Override
@@ -329,6 +331,8 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
         }
         supplier.setStatus(SupplierStatus.PENDING_REVIEW.name());
         supplier.setVersion(request.getVersion() + 1);
+        // 门户端重新提交后自动启动新一轮工作流审批
+        workflowCoordinator.prepareAndStart(supplier);
         return profileView(supplier);
     }
 

@@ -10,6 +10,7 @@ import com.omni.srm.mapper.SrmSupplierEnrollmentMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
 import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
 import com.omni.srm.security.SrmTenantContext;
+import com.omni.srm.workflow.SupplierWorkflowCoordinator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ class PortalRoleResultServiceImplTest {
     @Mock private SrmSupplierEnrollmentMapper enrollmentMapper;
     @Mock private SrmSupplierPortalUserMapper portalUserMapper;
     @Mock private SrmSupplierMapper supplierMapper;
+    @Mock private SupplierWorkflowCoordinator workflowCoordinator;
 
     private PortalRoleResultServiceImpl service;
 
@@ -44,7 +46,7 @@ class PortalRoleResultServiceImplTest {
         initTableInfo(SrmSupplier.class);
         initTableInfo(SrmSupplierEnrollment.class);
         initTableInfo(SrmSupplierPortalUser.class);
-        service = new PortalRoleResultServiceImpl(enrollmentMapper, portalUserMapper, supplierMapper);
+        service = new PortalRoleResultServiceImpl(enrollmentMapper, portalUserMapper, supplierMapper, workflowCoordinator);
         SrmTenantContext.set(new SrmTenantContext.RequestIdentity(20L, 1L, "portal-role-saga"));
     }
 

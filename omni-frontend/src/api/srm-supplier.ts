@@ -9,6 +9,7 @@ export type SupplierStatus =
   | 'REGISTERING'
   | 'REGISTERING_FAILED'
   | 'PENDING_REVIEW'
+  | 'APPROVING'
   | 'REJECTED'
   | 'APPROVED'
   | 'SUSPENDED'
@@ -37,6 +38,8 @@ export interface SrmSupplier {
   ownerUnitId: number | null
   ownerName: string | null
   ownerUnitName: string | null
+  processInstanceId: string | null
+  workflowStartStatus: string | null
   version: number
   createTime: string
   createBy: string | null
@@ -236,12 +239,12 @@ export function submitSupplier(id: number, version: number, reason?: string) {
   return request.post<ApiResponse<SrmSupplier>>(`/srm/supplier/${id}/submit`, { version, reason })
 }
 
-export function approveSupplier(id: number, version: number, reason?: string) {
-  return request.post<ApiResponse<SrmSupplier>>(`/srm/supplier/${id}/approve`, { version, reason })
+export function withdrawSupplier(id: number, version: number, reason?: string) {
+  return request.post<ApiResponse<SrmSupplier>>(`/srm/supplier/${id}/withdraw`, { version, reason })
 }
 
-export function rejectSupplier(id: number, version: number, reason?: string) {
-  return request.post<ApiResponse<SrmSupplier>>(`/srm/supplier/${id}/reject`, { version, reason })
+export function cancelSupplier(id: number, version: number, reason?: string) {
+  return request.post<ApiResponse<SrmSupplier>>(`/srm/supplier/${id}/cancel`, { version, reason })
 }
 
 export function suspendSupplier(id: number, version: number, reason?: string) {

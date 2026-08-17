@@ -35,6 +35,12 @@ public class StartProcessRequest implements Serializable {
     /** 业务主键（外挂表单关联，可选） */
     private String businessKey;
 
+    /** 跨服务调用请求 ID（站内发起时为空） */
+    private String requestId;
+
+    /** 跨服务业务类型（站内发起时为空） */
+    private String businessType;
+
     /** 流程分类 */
     private String category;
 

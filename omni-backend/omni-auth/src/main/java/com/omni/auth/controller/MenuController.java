@@ -114,8 +114,8 @@ public class MenuController {
     private List<PermissionTreeNode> filterByUserPermissions(List<PermissionTreeNode> nodes,
                                                               Set<String> permissions) {
         if (permissions.isEmpty()) {
-            // 无法获取权限信息时返回全部菜单（降级处理）
-            return nodes;
+            log.warn("当前认证上下文没有功能权限，菜单按失败关闭策略返回空列表");
+            return List.of();
         }
         return nodes.stream()
                 .map(node -> {

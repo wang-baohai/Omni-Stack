@@ -28,6 +28,7 @@ export interface CrmOpportunity {
   opportunityNo: string
   name: string
   customerId: number
+  customerName: string | null
   primaryContactId: number | null
   sourceLeadId: number | null
   pipelineId: number

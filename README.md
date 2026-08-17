@@ -2,7 +2,7 @@
 
 > 基于 Spring Boot 4 + Vue 3 的微服务脚手架平台，采用 Harness 工业设计模式构建，为 AI 辅助开发提供行业最佳实践基础。
 >
-> **一条命令启动全家桶：中间件 + 5 个微服务 + 前端，共 12 个 Docker 容器。**
+> **一条命令启动全家桶：中间件 + 8 个微服务 + 前端，共 15 个 Docker 容器。**
 
 **[English](README.en.md)** | **[日本語](README.jp.md)** | **[한국어](README.kr.md)**
 
@@ -15,8 +15,9 @@
 ## 特性亮点
 
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 全栈最新技术
-- **Docker 全家桶一键部署**：`start.bat` / `./start.sh` 一条命令启动 13 个容器（6 个中间件容器、6 个后端微服务、前端），详见 [Docker 部署指南](docs/docker-deployment.md)
+- **Docker 全家桶一键部署**：`start.bat` / `./start.sh` 一条命令启动 15 个容器（6 个中间件容器、8 个后端微服务、前端），详见 [Docker 部署指南](docs/docker-deployment.md)
 - **CRM 销售前闭环**：独立 `omni-crm` 服务，覆盖线索、客户、联系人、商机、跟进、转换与概览，复用租户、RBAC、数据范围、XSS、审计和 Outbox 能力
+- **SRM → Procurement → Asset 业务链**：供应商准入与报价、请购/RFQ/订单/收货、资产建卡/分配/调拨/处置按独立微服务闭环协作
 - **多提供商社交登录**：GitHub + Google + Gitee OAuth2 一键登录（策略模式可扩展），首次登录自动注册
 - **三层 XSS 纵深防御**：Jackson 反序列化器 + Servlet Filter + Gateway 安全响应头，按租户配置，前端管理界面完整可用
 - **Common Starter 生态**：8 个自动装配模块（mybatis / redis / operlog / job / mqlog / workflow），新服务引入依赖即获能力，零配置
@@ -35,12 +36,12 @@
 | 微服务框架 | Spring Cloud + Spring Cloud Alibaba | 2025.1.1 / 2025.1.0.0 |
 | API 网关 | Spring Cloud Gateway Server (WebFlux) | 5.0.1 |
 | 注册/配置 | Nacos Server | v3.1.1 |
-| 流控/熔断 | Sentinel Dashboard | 1.8.8 |
+| 流控/熔断 | Spring Cloud Alibaba Sentinel 客户端 | 2025.1.0.0（Dashboard 可选，Compose 未内置） |
 | 消息队列 | Apache RocketMQ | 5.3.2 |
 | 任务调度 | XXL-JOB Admin | 3.3.1 |
 | 工作流引擎 | Flowable BPMN | 7.x |
 | 前端框架 | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
-| 构建工具 | Vite 8 (Rolldown) | 8.0.14 |
+| 构建工具 | Vite 8 (Rolldown) | 8.2.1 |
 | UI 框架 | Element Plus | 2.14.0 |
 | 状态管理 | Pinia | 3.0.4 |
 | Node.js | Node.js LTS | >= 22.12.0 |
@@ -72,6 +73,14 @@
                             │                    │    omni-srm      │
                             │                    │   SRM :8105     │
                             │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │omni-procurement │
+                            │                    │ Procurement:8106│
+                            │                    └─────────────────┘
+                            │                    ┌─────────────────┐
+                            │                    │   omni-asset    │
+                            │                    │   Asset :8107   │
+                            │                    └─────────────────┘
                     ┌───────┴────────┐
                     │ MySQL :13306*  │  持久化存储（*宿主机；容器内 3306）
                     │  Redis :6379   │  缓存 + 验证码
@@ -90,7 +99,7 @@ Omni-Stack/
 ├── AGENTS.md                           # AI 执行手册（硬约束 + 构建命令 + 检查清单）
 ├── start.bat / start.sh                # Docker 全家桶一键启动脚本
 ├── stop.bat / stop.sh                  # 一键停止脚本
-├── docker-compose.yml                  # 12 容器全家桶编排
+├── docker-compose.yml                  # 15 容器全家桶编排
 ├── docker/
 │   ├── backend/Dockerfile              # 后端多阶段构建（Maven 编译 + JRE 运行）
 │   ├── frontend/Dockerfile             # 前端多阶段构建（npm 编译 + Nginx）
@@ -108,6 +117,8 @@ Omni-Stack/
 │   ├── crm.md                          #   CRM 销售管道系统真相（Harness 文档）
 │   ├── srm.md                          #   SRM 供应商关系管理系统真相（Harness 文档）
 │   ├── design/srm-design.md            #   SRM MVP 设计与实现基线
+│   ├── design/procurement-design.md    #   Procurement MVP 设计与实现基线
+│   ├── design/asset-design.md          #   Asset MVP 设计与实现基线
 │   └── docker-deployment.md            #   Docker 全家桶部署深度指南
 ├── scripts/sql/                        # 数据库初始化脚本
 │   ├── init-all.sql                    #   权威 DDL + 种子数据
@@ -131,13 +142,15 @@ Omni-Stack/
 │   ├── omni-workflow/                  #   工作流引擎服务 (8103)
 │   ├── omni-crm/                       #   CRM 销售前闭环服务 (8104)
 │   ├── omni-srm/                       #   SRM 供应商关系管理服务 (8105)
+│   ├── omni-procurement/               #   采购执行服务 (8106)
+│   ├── omni-asset/                     #   资产生命周期服务 (8107)
 │   └── omni-gateway/                   #   API 网关 (8102)
 └── omni-frontend/                      # Vue 3 SPA (3000)
 ```
 
 ## Docker 一键部署（推荐）
 
-一条命令启动全部容器：中间件（MySQL、Redis、Nacos、RocketMQ、XXL-JOB）+ 6 个后端微服务 + 前端。
+一条命令启动全部容器：中间件（MySQL、Redis、Nacos、RocketMQ、XXL-JOB）+ 8 个后端微服务 + 前端。
 
 ### 前置条件
 
@@ -146,11 +159,17 @@ Omni-Stack/
 | Docker Desktop | 任意稳定版 | Windows 需 WSL2 后端 |
 | Git | 任意 | 克隆项目 |
 
-首次启动前复制 `.env.example` 为 `.env`，并将 `OMNI_INTERNAL_API_TOKEN` 替换为至少 32 字节的随机值。所有后端服务必须使用同一值，仓库不提供不安全的默认密钥。
+首次启动前复制 `.env.example` 为 `.env`，把其中每个 `replace-with-*` 占位值替换为独立随机密钥。
+`OMNI_INTERNAL_API_TOKEN` 必须在所有 Servlet 服务中保持一致；Compose 对 MySQL、Redis、Nacos、
+XXL-JOB、OAuth state、服务间令牌等变量均采用必填校验，缺少配置时直接拒绝启动。
 
 > 无需安装 JDK、Node.js、Maven —— 全部在 Docker 容器内完成构建和运行。
 
-已有 MySQL 数据卷不会重新执行 Docker entrypoint 初始化脚本。升级时先备份数据库，再依次执行 `scripts/sql/migrate-crm-mvp.sql`、`scripts/sql/migrate-srm-mvp.sql` 和更新后的 `scripts/sql/sp_init_tenant.sql`；SRM 迁移会幂等创建 Auth/SRM Outbox、权限角色、业务表、索引/约束、默认模板与品类字典。新环境直接使用 `init-all.sql`。
+已有 MySQL 数据卷不会重新执行 Docker entrypoint 初始化脚本。升级时先备份数据库，再按依赖顺序执行
+`scripts/sql/migrate-crm-mvp.sql`、`scripts/sql/migrate-srm-mvp.sql`、
+`scripts/sql/migrate-workflow-process-start-idempotency.sql`、
+`scripts/sql/migrate-procurement-mvp.sql`、`scripts/sql/migrate-asset-mvp.sql`，最后更新
+`scripts/sql/sp_init_tenant.sql`。新环境直接使用 `init-all.sql`。
 
 ### 启动
 
@@ -180,19 +199,21 @@ docker compose ps
 | 服务 | 端口 | 说明 |
 |------|------|------|
 | **前端** | **http://localhost:3000** | **访问入口，Nginx 反代到 Gateway** |
-| 认证服务 | http://localhost:8100 | Spring Security + OAuth2 |
-| 基础数据服务 | http://localhost:8101 | 字典/组织/用户/日志/任务 |
+| 认证服务 | http://127.0.0.1:8100 | Spring Security + OAuth2（仅回环调试） |
+| 基础数据服务 | http://127.0.0.1:8101 | 字典/组织/用户/日志/任务（仅回环调试） |
 | API 网关 | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
-| 工作流引擎 | http://localhost:8103 | Flowable BPMN |
-| CRM 服务 | http://localhost:8104 | 线索、客户、商机与跟进 |
+| 工作流引擎 | http://127.0.0.1:8103 | Flowable BPMN（仅回环调试） |
+| CRM 服务 | http://127.0.0.1:8104 | 线索、客户、商机与跟进（仅回环调试） |
 | SRM 服务 | http://127.0.0.1:8105 | 供应商、门户、评估与风险（仅回环调试） |
-| MySQL | localhost:13306 | root/root（容器内端口 3306） |
-| Redis | localhost:6379 | 无密码 |
-| Nacos 控制台 | http://localhost:8080 | nacos/nacos |
-| XXL-JOB 调度中心 | http://localhost:18080 | admin/123456 |
+| Procurement 服务 | http://127.0.0.1:8106 | 请购、询价、订单与收货（仅回环调试） |
+| Asset 服务 | http://127.0.0.1:8107 | 资产台账、调拨与处置（仅回环调试） |
+| MySQL | 127.0.0.1:13306 | root + `.env` 中的 `MYSQL_ROOT_PASSWORD`（仅回环） |
+| Redis | 127.0.0.1:6379 | `.env` 中的 `REDIS_PASSWORD`（仅回环） |
+| Nacos 控制台 | http://127.0.0.1:8080 | 凭据由 `.env` 注入（仅回环） |
+| XXL-JOB 调度中心 | http://127.0.0.1:18080 | 本地初始化账号；执行器令牌由 `.env` 注入（仅回环） |
 | RocketMQ NameServer | localhost:19876 | 宿主机映射端口（容器内 9876） |
 
-以上后端直连地址仅用于本地开发和诊断。生产环境只发布 Frontend 与 Gateway，Auth、Base、Workflow、CRM、SRM 端口必须保留在私有网络内。
+以上后端直连地址仅用于本地开发和诊断。生产环境只发布 Frontend 与 Gateway，所有下游微服务端口必须保留在私有网络内。
 
 ### 验证
 
@@ -207,7 +228,8 @@ curl http://localhost:3000/api/auth/captcha
 docker compose ps
 ```
 
-**默认登录账号**：`admin` / `admin123`
+本地演示种子包含 `admin` / `admin123`，只用于首次本地联调。首次登录后必须立即修改；生产环境不得
+直接使用仓库种子数据。通过管理端新建租户时必须显式设置初始管理员密码，后端不再生成公共默认口令。
 
 ### 常见问题
 
@@ -250,6 +272,9 @@ cd omni-base && ./mvnw spring-boot:run        # 端口 8101
 cd omni-gateway && ./mvnw spring-boot:run     # 端口 8102
 cd omni-workflow && ./mvnw spring-boot:run    # 端口 8103
 cd omni-crm && ./mvnw spring-boot:run         # 端口 8104
+cd omni-srm && ./mvnw spring-boot:run         # 端口 8105
+cd omni-procurement && ./mvnw spring-boot:run # 端口 8106
+cd omni-asset && ./mvnw spring-boot:run       # 端口 8107
 
 # 3. 启动前端
 cd omni-frontend && npm install && npm run dev  # 端口 3000
@@ -373,6 +398,8 @@ SRM 模块覆盖供应商全生命周期管理闭环：供应商注册/准入 �
 | omni-workflow | 8103 | 工作流引擎：BPMN 模型管理、审批、流程实例 | [workflow.md](docs/workflow.md) |
 | omni-crm | 8104 | CRM：线索、客户、联系人、商机、跟进与销售概览 | [crm.md](docs/crm.md) |
 | omni-srm | 8105 | SRM：供应商主档、准入、绩效、风险、邀请与供应商门户 | [srm.md](docs/srm.md) |
+| omni-procurement | 8106 | Procurement：物料、请购审批、RFQ/报价、订单与收货 | [procurement-design.md](docs/design/procurement-design.md) |
+| omni-asset | 8107 | Asset：采购建卡、台账、分配/退还、调拨、处置与概览 | [asset-design.md](docs/design/asset-design.md) |
 | omni-gateway | 8102 | API 网关：路由转发、JWT 验证、CORS、安全响应头 | [architecture.md](docs/architecture.md) |
 
 ### Common Starter 生态（8 模块）

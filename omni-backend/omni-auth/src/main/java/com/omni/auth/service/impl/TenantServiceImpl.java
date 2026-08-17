@@ -98,7 +98,8 @@ public class TenantServiceImpl implements TenantService {
      * {@inheritDoc}
      *
      * <p>创建租户后自动初始化：权限树（克隆 tenant 1）、默认角色（SUPER_ADMIN / USER / EMPLOYEE /
-     * TEAM_LEADER / DEPT_LEADER）、根组织单元、管理员账号（默认密码 admin123）和 XSS 防护配置。</p>
+     * TEAM_LEADER / DEPT_LEADER）、根组织单元、管理员账号和 XSS 防护配置。管理员密码由创建请求显式提供，
+     * 服务端只把 BCrypt 哈希传给初始化过程。</p>
      */
     @Override
     @Transactional
@@ -113,7 +114,7 @@ public class TenantServiceImpl implements TenantService {
         sysTenantMapper.insert(tenant);
 
         // 调用存储过程一键初始化租户数据
-        String adminPwd = passwordEncoder.encode("admin123");
+        String adminPwd = passwordEncoder.encode(request.getAdminPassword());
         tenantProvisionMapper.initTenant(tenant.getId(), tenant.getTenantName(), adminPwd);
         log.info("已创建租户并初始化数据: {} (id={})", tenant.getTenantName(), tenant.getId());
         return tenant;

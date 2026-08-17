@@ -9,6 +9,8 @@ import net.sf.jsqlparser.expression.LongValue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Locale;
+
 /**
  * MyBatis-Plus 配置类。
  * <p>
@@ -51,8 +53,8 @@ public class MybatisPlusConfig {
 
             @Override
             public boolean ignoreTable(String tableName) {
-                // Flowable ACT_* 表由引擎自身处理租户隔离，不参与 TenantLine 拦截
-                return tableName.startsWith("ACT_") || tableName.startsWith("act_");
+                // 仅拦截 wf_* 业务表；Flowable 表与 sys_mq_message 等基础设施表自行处理租户边界。
+                return !tableName.toLowerCase(Locale.ROOT).startsWith("wf_");
             }
         });
 

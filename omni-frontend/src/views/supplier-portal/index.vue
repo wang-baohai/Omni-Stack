@@ -8,20 +8,27 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
-import { getTenantIdFromToken } from '@/utils/jwt'
+import { getRolesFromToken, getTenantIdFromToken } from '@/utils/jwt'
 import { storeLang } from '@/i18n'
+import { clearAuthenticatedSession } from '@/router'
 import {
   enrollSupplier,
   getPortalEnrollment,
   getPortalProfile,
+  getQuotationInvitation,
   listPortalEvaluations,
+  listQuotationInvitations,
   retryPortalEnrollment,
+  submitQuotation,
   submitPortalProfile,
   updatePortalProfile,
   type EnrollRequest,
   type EnrollmentState,
   type PortalEvaluation,
   type PortalProfile,
+  type QuotationInvitationDetail,
+  type QuotationInvitationSummary,
+  type SubmitQuotationRequest,
   type UpdatePortalProfileRequest,
 } from '@/api/srm-portal'
 
@@ -34,7 +41,14 @@ const permissionStore = usePermissionStore()
 const canEnroll = computed(() => permissionStore.hasPermission('srm:portal:enroll'))
 const canViewProfile = computed(() => permissionStore.hasPermission('srm:portal:profile'))
 const canViewEvaluation = computed(() => permissionStore.hasPermission('srm:portal:evaluation'))
-const accessDenied = computed(() => !canEnroll.value && !canViewProfile.value)
+const hasSupplierRole = computed(() => {
+  const roles = getRolesFromToken(userStore.token)
+  return roles.includes('SUPPLIER') || roles.includes('ROLE_SUPPLIER')
+})
+const canViewQuotation = computed(() => hasSupplierRole.value
+  && permissionStore.hasPermission('srm:portal:quotation'))
+const accessDenied = computed(() => !canEnroll.value && !canViewProfile.value
+  && !canViewEvaluation.value && !canViewQuotation.value)
 
 const portalLoading = ref(false)
 const enrollment = ref<EnrollmentState | null>(null)
@@ -203,6 +217,7 @@ const supplierStatusLabel: Record<string, string> = {
   REGISTERING: '登记中',
   REGISTERING_FAILED: '入驻失败',
   PENDING_REVIEW: '待审核',
+  APPROVING: '审批中',
   REJECTED: '已驳回',
   APPROVED: '已通过',
   SUSPENDED: '已冻结',
@@ -297,18 +312,182 @@ function handleEvalPageChange(page: number) {
   loadEvaluations()
 }
 
+const quotationLoading = ref(false)
+const quotationSubmitting = ref(false)
+const quotationRequestLocked = ref(false)
+const quotationDialogVisible = ref(false)
+const quotationInvitations = ref<QuotationInvitationSummary[]>([])
+const quotationLoaded = ref(false)
+const quotationError = ref('')
+const activeTab = ref('')
+const quotationDetail = ref<QuotationInvitationDetail | null>(null)
+const quotationForm = reactive<SubmitQuotationRequest>({
+  requestId: '',
+  rfqId: 0,
+  version: 0,
+  validUntil: '',
+  lines: [],
+})
+
+const POSITIVE_PRICE_PATTERN = /^(?:0|[1-9]\d{0,12})(?:\.\d{1,6})?$/
+
+function parseDateTime(value: string): number {
+  return Date.parse(value.replace(' ', 'T'))
+}
+
+function isQuotationOpen(status: string, invitationStatus: string, deadline: string): boolean {
+  return status === 'SENT'
+    && ['INVITED', 'QUOTED'].includes(invitationStatus)
+    && parseDateTime(deadline) > Date.now()
+}
+
+function canEditInvitation(invitation: QuotationInvitationSummary): boolean {
+  return isQuotationOpen(invitation.status, invitation.invitationStatus, invitation.quotationDeadline)
+}
+
+const quotationEditable = computed(() => {
+  const detail = quotationDetail.value
+  return detail !== null
+    && isQuotationOpen(detail.status, detail.invitationStatus, detail.quotationDeadline)
+})
+
+function formatDecimal(value: string | null | undefined): string {
+  if (!value) return '0'
+  const [integer, fraction] = String(value).split('.')
+  if (!fraction) return integer
+  const trimmedFraction = fraction.replace(/0+$/, '')
+  return trimmedFraction ? `${integer}.${trimmedFraction}` : integer
+}
+
+async function loadQuotationInvitations() {
+  if (!canViewQuotation.value) return
+  quotationLoading.value = true
+  quotationError.value = ''
+  try {
+    const response = await listQuotationInvitations()
+    quotationInvitations.value = response.data.data
+    quotationLoaded.value = true
+  } catch (error: unknown) {
+    const response = (error as { response?: { headers?: Record<string, string> } }).response
+    const traceId = response?.headers?.['x-trace-id']
+    quotationError.value = traceId
+      ? `${t('portal.quotation.refreshFailed')}（${traceId}）`
+      : t('portal.quotation.refreshFailed')
+  } finally {
+    quotationLoading.value = false
+  }
+}
+
+async function openQuotation(rfqId: number) {
+  quotationLoading.value = true
+  try {
+    const response = await getQuotationInvitation(rfqId)
+    const detail = response.data.data
+    quotationDetail.value = detail
+    quotationRequestLocked.value = false
+    const quotedLines = new Map(
+      (detail.currentQuotation?.lines || []).map((line) => [line.rfqLineId, line]),
+    )
+    Object.assign(quotationForm, {
+      requestId: newRequestId(),
+      rfqId: detail.rfqId,
+      version: detail.currentQuotation?.version || 0,
+      validUntil: detail.currentQuotation?.validUntil || detail.quotationDeadline,
+      lines: detail.lines.map((line) => ({
+        rfqLineId: line.rfqLineId,
+        unitPrice: String(quotedLines.get(line.rfqLineId)?.unitPrice || ''),
+        deliveryDays: quotedLines.get(line.rfqLineId)?.deliveryDays || 0,
+        remark: quotedLines.get(line.rfqLineId)?.remark || '',
+      })),
+    })
+    quotationDialogVisible.value = true
+  } finally {
+    quotationLoading.value = false
+  }
+}
+
+async function resolveQuotationRequest() {
+  if (!quotationForm.rfqId) return
+  await openQuotation(quotationForm.rfqId)
+  ElMessage.info(t('portal.quotation.requestResolved'))
+}
+
+async function saveQuotation() {
+  if (!quotationDetail.value || !quotationForm.validUntil) {
+    ElMessage.warning(t('portal.quotation.validUntilRequired'))
+    return
+  }
+  if (!quotationEditable.value) {
+    ElMessage.warning(t('portal.quotation.closedWarning'))
+    return
+  }
+  if (quotationForm.lines.some((line) => {
+    const price = String(line.unitPrice).trim()
+    return !POSITIVE_PRICE_PATTERN.test(price) || /^0(?:\.0+)?$/.test(price)
+  })) {
+    ElMessage.warning(t('portal.quotation.priceInvalid'))
+    return
+  }
+  if (quotationForm.lines.some((line) => !Number.isInteger(line.deliveryDays)
+    || line.deliveryDays < 0 || line.deliveryDays > 3650)) {
+    ElMessage.warning(t('portal.quotation.deliveryDaysInvalid'))
+    return
+  }
+  const validUntil = parseDateTime(quotationForm.validUntil)
+  const deadline = parseDateTime(quotationDetail.value.quotationDeadline)
+  if (!Number.isFinite(validUntil) || validUntil <= Date.now() || validUntil < deadline) {
+    ElMessage.warning(t('portal.quotation.validUntilInvalid'))
+    return
+  }
+  quotationRequestLocked.value = true
+  quotationSubmitting.value = true
+  try {
+    await submitQuotation({
+      ...quotationForm,
+      lines: quotationForm.lines.map((line) => ({ ...line })),
+    })
+  } catch {
+    ElMessage.warning(t('portal.quotation.uncertainResult'))
+    return
+  } finally {
+    quotationSubmitting.value = false
+  }
+  quotationRequestLocked.value = false
+  ElMessage.success(t('portal.quotation.submitSuccess'))
+  quotationDialogVisible.value = false
+  try {
+    await loadQuotationInvitations()
+  } catch {
+    ElMessage.warning(t('portal.quotation.refreshFailed'))
+  }
+}
+
 async function initializePortal() {
   permissionStore.initFromToken()
   if (canViewProfile.value) {
-    await Promise.all([loadProfile(), loadEvaluations()])
+    activeTab.value = 'profile'
+    await loadProfile().catch(() => undefined)
+  } else if (canViewQuotation.value) {
+    activeTab.value = 'quotation'
+    await loadQuotationInvitations()
+  } else if (canViewEvaluation.value) {
+    activeTab.value = 'evaluation'
+    await loadEvaluations().catch(() => undefined)
   } else if (canEnroll.value) {
     await refreshEnrollment()
   }
 }
 
-function handleLogout(target: 'home' | 'login' = 'home') {
-  userStore.logout()
-  router.push(target === 'login' ? '/portal-login' : '/')
+/** 首次进入 Tab 时按需加载，避免无关模块故障干扰当前页面。 */
+async function handleTabChange(name: string | number) {
+  if (name === 'quotation' && !quotationLoaded.value) await loadQuotationInvitations()
+  if (name === 'evaluation' && evalList.value.length === 0) await loadEvaluations().catch(() => undefined)
+  if (name === 'profile' && !profile.value) await loadProfile().catch(() => undefined)
+}
+
+function handleLogout() {
+  clearAuthenticatedSession()
+  router.push('/portal-login')
 }
 
 function toggleTheme() {
@@ -349,7 +528,7 @@ onUnmounted(() => {
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="router.push('/')">{{ t('common.home') }}</el-dropdown-item>
-              <el-dropdown-item @click="handleLogout('home')">{{ t('common.logout') }}</el-dropdown-item>
+              <el-dropdown-item @click="handleLogout">{{ t('common.logout') }}</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -366,7 +545,12 @@ onUnmounted(() => {
         <template #extra><el-button @click="router.push('/')">返回首页</el-button></template>
       </el-result>
 
-      <el-card v-else-if="!canViewProfile" v-loading="portalLoading" shadow="never" class="enrollment-card">
+      <el-card
+        v-else-if="canEnroll && !canViewProfile && !canViewEvaluation && !canViewQuotation"
+        v-loading="portalLoading"
+        shadow="never"
+        class="enrollment-card"
+      >
         <template v-if="enrollment">
           <el-result
             :icon="enrollmentStatusMeta[enrollment.status]?.icon || 'info'"
@@ -376,7 +560,7 @@ onUnmounted(() => {
             <template #extra>
               <el-space wrap>
                 <el-button v-if="enrollment.status === 'ROLE_ASSIGN_FAILED'" v-permission="'srm:portal:enroll'" type="primary" @click="retryEnrollment">重试角色分配</el-button>
-                <el-button v-if="enrollment.status === 'COMPLETED'" type="primary" @click="handleLogout('login')">重新登录</el-button>
+                <el-button v-if="enrollment.status === 'COMPLETED'" type="primary" @click="handleLogout">重新登录</el-button>
                 <el-button @click="refreshEnrollment">刷新进度</el-button>
               </el-space>
             </template>
@@ -422,8 +606,8 @@ onUnmounted(() => {
         </template>
       </el-card>
 
-      <el-tabs v-else type="border-card">
-        <el-tab-pane :label="t('common.srmPortalProfile')">
+      <el-tabs v-else v-model="activeTab" type="border-card" @tab-change="handleTabChange">
+        <el-tab-pane v-if="canViewProfile" name="profile" :label="t('common.srmPortalProfile')">
           <div v-loading="profileLoading" class="tab-content">
             <template v-if="profile">
               <el-descriptions :column="2" border>
@@ -474,7 +658,64 @@ onUnmounted(() => {
           </div>
         </el-tab-pane>
 
-        <el-tab-pane v-if="canViewEvaluation" :label="t('common.srmPortalEvaluation')">
+        <el-tab-pane v-if="canViewQuotation" name="quotation" :label="t('common.srmPortalQuotation')">
+          <div class="tab-content">
+            <div class="quotation-toolbar">
+              <el-button :loading="quotationLoading" @click="loadQuotationInvitations">
+                {{ t('portal.quotation.refresh') }}
+              </el-button>
+            </div>
+            <el-alert
+              v-if="quotationError"
+              :title="quotationError"
+              type="error"
+              :closable="false"
+              show-icon
+              class="quotation-error"
+            >
+              <template #default>
+                <el-button type="danger" plain size="small" @click="loadQuotationInvitations">
+                  {{ t('common.retry') }}
+                </el-button>
+              </template>
+            </el-alert>
+            <el-table v-if="!quotationError" v-loading="quotationLoading" :data="quotationInvitations" stripe border>
+              <el-table-column prop="rfqNo" :label="t('portal.quotation.rfqNo')" min-width="160" />
+              <el-table-column prop="title" :label="t('portal.quotation.title')" min-width="220" show-overflow-tooltip />
+              <el-table-column prop="quotationDeadline" :label="t('portal.quotation.deadline')" width="170" />
+              <el-table-column prop="currencyCode" :label="t('portal.quotation.currency')" width="90" align="center" />
+              <el-table-column prop="invitationStatus" :label="t('portal.quotation.invitationStatus')" width="110" align="center">
+                <template #default="{ row }"><el-tag size="small">{{ row.invitationStatus }}</el-tag></template>
+              </el-table-column>
+              <el-table-column :label="t('portal.quotation.currentQuotation')" min-width="150" align="right">
+                <template #default="{ row }">
+                  <span v-if="row.quotationId">{{ row.currencyCode }} {{ formatDecimal(row.totalAmount) }}</span>
+                  <el-tag v-else type="warning" size="small">{{ t('portal.quotation.notQuoted') }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column :label="t('common.actions')" width="110" fixed="right" align="center">
+                <template #default="{ row }">
+                  <el-button
+                    v-permission="'srm:portal:quotation'"
+                    type="primary"
+                    link
+                    @click="openQuotation(row.rfqId)"
+                  >
+                    {{ canEditInvitation(row)
+                      ? (row.quotationId ? t('portal.quotation.edit') : t('portal.quotation.submit'))
+                      : t('common.view') }}
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-empty
+              v-if="!quotationError && !quotationLoading && quotationLoaded && quotationInvitations.length === 0"
+              :description="t('portal.quotation.empty')"
+            />
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane v-if="canViewEvaluation" name="evaluation" :label="t('common.srmPortalEvaluation')">
           <div class="tab-content">
             <el-table v-loading="evalLoading" :data="evalList" stripe border>
               <el-table-column prop="evaluationPeriod" :label="t('portal.evaluationPeriod')" min-width="150" />
@@ -491,6 +732,122 @@ onUnmounted(() => {
           </div>
         </el-tab-pane>
       </el-tabs>
+
+      <el-dialog
+        v-model="quotationDialogVisible"
+        :title="quotationDetail
+          ? `${t('portal.quotation.dialogTitle')} - ${quotationDetail.rfqNo}`
+          : t('portal.quotation.dialogTitle')"
+        width="980px"
+        append-to-body
+        destroy-on-close
+        :show-close="!quotationRequestLocked"
+        :close-on-click-modal="!quotationRequestLocked"
+        :close-on-press-escape="!quotationRequestLocked"
+      >
+        <template v-if="quotationDetail">
+          <el-alert
+            v-if="!quotationEditable"
+            :title="t('portal.quotation.readOnly')"
+            type="warning"
+            :closable="false"
+            show-icon
+            class="quotation-summary"
+          />
+          <el-alert
+            v-else-if="quotationRequestLocked"
+            :title="t('portal.quotation.requestLocked')"
+            type="warning"
+            :closable="false"
+            show-icon
+            class="quotation-summary"
+          />
+          <el-descriptions :column="3" border class="quotation-summary">
+            <el-descriptions-item :label="t('portal.quotation.title')" :span="2">{{ quotationDetail.title }}</el-descriptions-item>
+            <el-descriptions-item :label="t('portal.quotation.currency')">{{ quotationDetail.currencyCode }}</el-descriptions-item>
+            <el-descriptions-item :label="t('portal.quotation.deadline')">{{ quotationDetail.quotationDeadline }}</el-descriptions-item>
+            <el-descriptions-item :label="t('portal.quotation.rfqStatus')">{{ quotationDetail.status }}</el-descriptions-item>
+            <el-descriptions-item :label="t('portal.quotation.version')">{{ quotationForm.version }}</el-descriptions-item>
+          </el-descriptions>
+          <el-form label-width="100px" class="quotation-form">
+            <el-form-item :label="t('portal.quotation.validUntil')" required>
+              <el-date-picker
+                v-model="quotationForm.validUntil"
+                type="datetime"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                :placeholder="t('portal.quotation.validUntilPlaceholder')"
+                :disabled="!quotationEditable || quotationSubmitting || quotationRequestLocked"
+              />
+            </el-form-item>
+          </el-form>
+          <el-table :data="quotationDetail.lines" border>
+            <el-table-column prop="materialCode" :label="t('portal.quotation.materialCode')" width="130" />
+            <el-table-column prop="materialName" :label="t('portal.quotation.materialName')" min-width="170" />
+            <el-table-column :label="t('portal.quotation.quantity')" width="100" align="right">
+              <template #default="{ row }">{{ formatDecimal(row.quantity) }}</template>
+            </el-table-column>
+            <el-table-column prop="unit" :label="t('portal.quotation.unit')" width="80" align="center" />
+            <el-table-column :label="t('portal.quotation.unitPrice')" width="180">
+              <template #default="{ $index }">
+                <el-input
+                  v-model="quotationForm.lines[$index].unitPrice"
+                  inputmode="decimal"
+                  maxlength="20"
+                  :disabled="!quotationEditable || quotationSubmitting || quotationRequestLocked"
+                  style="width: 150px"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column :label="t('portal.quotation.deliveryDays')" width="150">
+              <template #default="{ $index }">
+                <el-input-number
+                  v-model="quotationForm.lines[$index].deliveryDays"
+                  :min="0"
+                  :max="3650"
+                  :precision="0"
+                  :disabled="!quotationEditable || quotationSubmitting || quotationRequestLocked"
+                  controls-position="right"
+                  style="width: 120px"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column :label="t('portal.quotation.remark')" min-width="180">
+              <template #default="{ $index }">
+                <el-input
+                  v-model="quotationForm.lines[$index].remark"
+                  maxlength="500"
+                  :disabled="!quotationEditable || quotationSubmitting || quotationRequestLocked"
+                />
+              </template>
+            </el-table-column>
+          </el-table>
+        </template>
+        <template #footer>
+          <el-button
+            v-if="quotationRequestLocked && !quotationSubmitting"
+            :loading="quotationLoading"
+            :disabled="quotationSubmitting"
+            @click="resolveQuotationRequest"
+          >
+            {{ t('portal.quotation.refreshResult') }}
+          </el-button>
+          <el-button
+            :disabled="quotationSubmitting || quotationRequestLocked"
+            @click="quotationDialogVisible = false"
+          >
+            {{ t('common.cancel') }}
+          </el-button>
+          <el-button
+            v-if="quotationEditable"
+            v-permission="'srm:portal:quotation'"
+            type="primary"
+            :loading="quotationSubmitting"
+            @click="saveQuotation"
+          >
+            {{ quotationRequestLocked ? t('portal.quotation.retrySameRequest') : t('portal.quotation.submit') }}
+          </el-button>
+        </template>
+      </el-dialog>
     </main>
 
     <footer class="portal-footer"><span>&copy; 2026 {{ t('common.appName') }}</span></footer>
@@ -515,11 +872,28 @@ onUnmounted(() => {
 .enrollment-detail { max-width: 720px; margin: 0 auto 24px; }
 .profile-status-alert { margin-top: 16px; }
 .tab-content { padding: var(--omni-space-md) 0; }
+.quotation-toolbar { display: flex; justify-content: flex-end; margin-bottom: var(--omni-space-md); }
+.quotation-summary { margin-bottom: var(--omni-space-md); }
+.quotation-form { margin-top: var(--omni-space-md); }
 .pagination { margin-top: 20px; display: flex; justify-content: flex-end; }
 .portal-footer { text-align: center; padding: var(--omni-space-lg); color: var(--omni-text-tertiary); font-size: 14px; border-top: 1px solid var(--omni-border-color); }
 @media (max-width: 768px) {
-  .portal-header { padding: 0 var(--omni-space-md); }
+  .portal-header { height: auto; min-height: 64px; padding: 8px var(--omni-space-md); gap: 8px; }
+  .portal-header-left, .portal-header-right { min-width: 0; }
+  .portal-logo { font-size: 18px; white-space: nowrap; }
+  .portal-badge { display: none; }
   .portal-username { display: none; }
-  .portal-main { padding: var(--omni-space-md); }
+  .portal-main { padding: var(--omni-space-sm); overflow-x: hidden; }
+  .portal-main :deep(.el-col-12) { flex: 0 0 100%; max-width: 100%; }
+  .portal-main :deep(.el-form-item) { display: block; }
+  .portal-main :deep(.el-form-item__label) { width: auto !important; justify-content: flex-start; line-height: 28px; }
+  .portal-main :deep(.el-form-item__content) { margin-left: 0 !important; }
+  .portal-main :deep(.el-descriptions__label.el-descriptions__cell) { min-width: 104px; white-space: nowrap; }
+  .portal-main :deep(.el-tabs__nav-wrap) { overflow-x: auto; }
+  .portal-main :deep(.el-tabs__nav-scroll) { overflow: visible; }
+  .portal-main :deep(.el-tabs__nav) { white-space: nowrap; }
+  .quotation-toolbar { justify-content: stretch; }
+  .quotation-toolbar .el-button { width: 100%; }
+  .portal-footer { padding: var(--omni-space-md); }
 }
 </style>

@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.omni.auth.dto.CreateUserRequest;
 import com.omni.auth.dto.RegisterRequest;
+import com.omni.auth.dto.UpdateUserRequest;
+import com.omni.auth.dto.UserVO;
 import com.omni.auth.entity.SysRole;
 import com.omni.auth.entity.SysUser;
 import com.omni.auth.event.AuditEvent;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.LinkedHashSet;
 
 /**
  * 用户服务实现类。
@@ -115,19 +118,44 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
      * <p>使用 MyBatis-Plus 分页插件，按租户 ID 过滤。</p>
      */
     @Override
-    public PageResult<SysUser> listUsers(Long tenantId, int page, int size) {
+    public PageResult<UserVO> listUsers(Long tenantId, int page, int size) {
         Page<SysUser> mpPage = sysUserMapper.selectPage(new Page<>(page, size),
                 new LambdaQueryWrapper<SysUser>()
                         .eq(SysUser::getTenantId, tenantId));
-        return new PageResult<>(mpPage.getRecords(), mpPage.getTotal(), mpPage.getSize(), mpPage.getCurrent());
+        return new PageResult<>(mpPage.getRecords().stream().map(this::toUserVO).toList(),
+                mpPage.getTotal(), mpPage.getSize(), mpPage.getCurrent());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SysUser getById(Long id) {
-        SysUser user = sysUserMapper.selectById(id);
+    public UserVO getUserDetail(Long id, Long tenantId) {
+        SysUser user = requireUser(id, tenantId);
+        return toUserVO(user);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateUser(Long id, Long tenantId, UpdateUserRequest request) {
+        requireUser(id, tenantId);
+        SysUser update = new SysUser();
+        update.setId(id);
+        update.setNickname(request.getNickname());
+        update.setEmail(request.getEmail());
+        update.setPhone(request.getPhone());
+        update.setAvatar(request.getAvatar());
+        update.setGender(request.getGender());
+        update.setPrimaryUnitId(request.getPrimaryUnitId());
+        if (sysUserMapper.updateById(update) != 1) {
+            throw new BusinessException(409, "用户资料更新冲突，请刷新后重试");
+        }
+    }
+
+    private SysUser requireUser(Long id, Long tenantId) {
+        SysUser user = sysUserMapper.selectByIdAndTenantId(id, tenantId);
         if (user == null) {
             throw new BusinessException(404, "用户不存在");
         }
@@ -142,24 +170,28 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
      */
     @Override
     @Transactional
-    public void assignRoles(Long userId, List<Long> roleIds, String operator, String ipAddress) {
-        SysUser user = sysUserMapper.selectById(userId);
-        if (user == null) {
-            throw new BusinessException(404, "用户不存在");
+    public void assignRoles(Long userId, Long tenantId, List<Long> roleIds,
+                            String operator, String ipAddress) {
+        SysUser user = requireUser(userId, tenantId);
+        List<Long> finalRoleIds = roleIds == null
+                ? List.of()
+                : new LinkedHashSet<>(roleIds).stream().toList();
+        for (Long roleId : finalRoleIds) {
+            SysRole role = sysRoleMapper.selectById(roleId);
+            if (role == null || !tenantId.equals(role.getTenantId())) {
+                throw new BusinessException(400, "角色不存在或不属于当前租户");
+            }
         }
 
         // 获取旧角色 ID 列表
         List<Long> oldRoleIds = sysUserRoleMapper.selectRoleIdsByUserId(userId);
 
         sysUserRoleMapper.deleteByUserId(userId);
-        if (roleIds != null) {
-            for (Long roleId : roleIds) {
-                sysUserRoleMapper.insert(userId, roleId);
-            }
+        for (Long roleId : finalRoleIds) {
+            sysUserRoleMapper.insert(userId, roleId);
         }
 
         // 计算新增和撤销的角色
-        List<Long> finalRoleIds = roleIds != null ? roleIds : List.of();
         List<Long> addedIds = finalRoleIds.stream().filter(id -> !oldRoleIds.contains(id)).toList();
         List<Long> removedIds = oldRoleIds.stream().filter(id -> !finalRoleIds.contains(id)).toList();
 
@@ -202,7 +234,8 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
      * {@inheritDoc}
      */
     @Override
-    public List<Long> getUserRoleIds(Long userId) {
+    public List<Long> getUserRoleIds(Long userId, Long tenantId) {
+        requireUser(userId, tenantId);
         return sysUserRoleMapper.selectRoleIdsByUserId(userId);
     }
 
@@ -212,11 +245,12 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
      * <p>切换用户状态并发布 USER_STATUS_CHANGED 审计事件。</p>
      */
     @Override
-    public void toggleStatus(Long userId, Integer status, String operator, String ipAddress) {
-        SysUser user = sysUserMapper.selectById(userId);
-        if (user == null) {
-            throw new BusinessException(404, "用户不存在");
+    public void toggleStatus(Long userId, Long tenantId, Integer status,
+                             String operator, String ipAddress) {
+        if (status == null || (status != 0 && status != 1)) {
+            throw new BusinessException(400, "用户状态只能为 0 或 1");
         }
+        SysUser user = requireUser(userId, tenantId);
         Integer oldStatus = user.getStatus();
         user.setStatus(status);
         sysUserMapper.updateById(user);
@@ -335,11 +369,8 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
      */
     @Override
     @Transactional
-    public void deleteUser(Long id, String operator, String ipAddress) {
-        SysUser user = sysUserMapper.selectById(id);
-        if (user == null) {
-            throw new BusinessException(404, "用户不存在");
-        }
+    public void deleteUser(Long id, Long tenantId, String operator, String ipAddress) {
+        SysUser user = requireUser(id, tenantId);
 
         // 删除角色关联
         sysUserRoleMapper.deleteByUserId(id);
@@ -357,6 +388,23 @@ public class UserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
                 .build());
 
         log.info("删除用户成功: username={}, operator={}", user.getUsername(), operator);
+    }
+
+    private UserVO toUserVO(SysUser user) {
+        return UserVO.builder()
+                .id(user.getId())
+                .tenantId(user.getTenantId())
+                .username(user.getUsername())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .avatar(user.getAvatar())
+                .gender(user.getGender())
+                .primaryUnitId(user.getPrimaryUnitId())
+                .status(user.getStatus())
+                .createTime(user.getCreateTime())
+                .updateTime(user.getUpdateTime())
+                .build();
     }
 
     /**

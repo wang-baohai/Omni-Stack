@@ -34,6 +34,16 @@ export interface SysUser {
   updateTime: string
 }
 
+/** 用户资料白名单更新请求。 */
+export interface UpdateUserRequest {
+  nickname?: string
+  email?: string | null
+  phone?: string | null
+  avatar?: string | null
+  gender?: number
+  primaryUnitId?: number
+}
+
 /**
  * 分页查询用户列表。
  *
@@ -82,7 +92,7 @@ export function createUser(data: {
  * @param data - 更新参数（部分字段）
  * @returns 空结果
  */
-export function updateUser(id: number, data: Partial<SysUser>) {
+export function updateUser(id: number, data: UpdateUserRequest) {
   return request.put<ApiResponse<void>>(`/auth/user/${id}`, data)
 }
 

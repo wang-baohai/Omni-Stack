@@ -11,6 +11,7 @@ import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
 import { storeLang } from '@/i18n'
 import SidebarMenu from '@/components/SidebarMenu.vue'
+import { clearAuthenticatedSession } from '@/router'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -25,8 +26,8 @@ const staticMenuItems = [
 ]
 
 function handleLogout() {
-  userStore.logout()
-  router.push('/')
+  clearAuthenticatedSession()
+  router.push('/login')
 }
 
 function toggleTheme() {

@@ -33,6 +33,8 @@
         <module>omni-workflow</module>
         <module>omni-crm</module>
         <module>omni-srm</module>
+        <module>omni-procurement</module>
+        <module>omni-asset</module>
         <module>omni-gateway</module>
     </modules>
 
@@ -133,6 +135,14 @@
                             <artifactId>lombok</artifactId>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- JDK 25 禁止 Mockito 继续依赖运行时自附加，测试进程显式加载其代理。 -->
+                    <argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
                 </configuration>
             </plugin>
         </plugins>

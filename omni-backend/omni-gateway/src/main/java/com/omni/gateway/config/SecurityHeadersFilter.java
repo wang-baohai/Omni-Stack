@@ -7,6 +7,8 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 /**
  * 安全响应头过滤器（WebFlux 响应式技术栈）。
  * <p>
@@ -14,7 +16,7 @@ import reactor.core.publisher.Mono;
  * 提供基础的浏览器端安全防护：
  * <ul>
  *   <li>{@code X-Content-Type-Options: nosniff} — 防止浏览器 MIME 类型嗅探</li>
- *   <li>{@code X-Frame-Options: SAMEORIGIN} — 防止点击劫持（仅允许同源 iframe）</li>
+ *   <li>{@code X-Frame-Options: DENY} — 禁止页面被 iframe 嵌套</li>
  *   <li>{@code Referrer-Policy: strict-origin-when-cross-origin} — 控制 Referer 头泄露</li>
  * </ul>
  * </p>
@@ -30,7 +32,7 @@ public class SecurityHeadersFilter implements WebFilter {
      * 添加以下安全头：</p>
      * <ul>
      *   <li>{@code X-Content-Type-Options: nosniff} — 禁止浏览器 MIME 类型喗探，防止 XSS 等攻击</li>
-     *   <li>{@code X-Frame-Options: SAMEORIGIN} — 仅允许同源 iframe 嵌套，防止点击劫持</li>
+     *   <li>{@code X-Frame-Options: DENY} — 禁止 iframe 嵌套，防止点击劫持</li>
      *   <li>{@code Referrer-Policy: strict-origin-when-cross-origin} — 跨域请求仅发送 origin，防止 Referer 泄露敏感信息</li>
      * </ul>
      *
@@ -40,10 +42,20 @@ public class SecurityHeadersFilter implements WebFilter {
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        HttpHeaders headers = exchange.getResponse().getHeaders();
-        headers.add("X-Content-Type-Options", "nosniff");
-        headers.add("X-Frame-Options", "DENY");
-        headers.add("Referrer-Policy", "strict-origin-when-cross-origin");
-        return chain.filter(exchange);
+        String traceId = UUID.randomUUID().toString().replace("-", "");
+        ServerWebExchange tracedExchange = exchange.mutate()
+                .request(exchange.getRequest().mutate()
+                        .headers(headers -> headers.set("X-Trace-Id", traceId))
+                        .build())
+                .build();
+        exchange.getResponse().beforeCommit(() -> {
+            HttpHeaders headers = exchange.getResponse().getHeaders();
+            headers.set("X-Trace-Id", traceId);
+            headers.set("X-Content-Type-Options", "nosniff");
+            headers.set("X-Frame-Options", "DENY");
+            headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+            return Mono.empty();
+        });
+        return chain.filter(tracedExchange);
     }
 }

@@ -70,6 +70,28 @@ public class CrmOwnerEnricher {
         return record;
     }
 
+    /**
+     * 批量补全活动执行人名称。
+     *
+     * @param records 活动视图列表
+     * @return 原列表
+     */
+    public List<CrmViews.ActivityVO> enrichPerformedBy(List<CrmViews.ActivityVO> records) {
+        if (records == null || records.isEmpty()) return records;
+        Long tenantId = CrmTenantContext.requireTenantId();
+        String userIds = join(records.stream().map(CrmViews.ActivityVO::getPerformedByUserId).toList());
+        try {
+            Map<Long, InternalUserDTO> users = users(userIds, tenantId);
+            records.forEach(record -> {
+                InternalUserDTO user = users.get(record.getPerformedByUserId());
+                if (user != null) record.setPerformedByName(hasText(user.getNickname()) ? user.getNickname() : user.getUsername());
+            });
+        } catch (RuntimeException exception) {
+            log.warn("CRM 执行人展示增强降级为 ID：tenantId={}, message={}", tenantId, exception.getMessage());
+        }
+        return records;
+    }
+
     private Map<Long, InternalUserDTO> users(String ids, Long tenantId) {
         if (ids.isBlank()) return Map.of();
         R<List<InternalUserDTO>> response = authInternalClient.getUsers(ids, tenantId);

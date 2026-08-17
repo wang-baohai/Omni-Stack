@@ -28,7 +28,7 @@
 
 ## 1. 아키텍처 개요
 
-Omni-Stack Docker 풀스택은 **12개 컨테이너**로 구성되며, 3개의 계층으로 나뉩니다:
+Omni-Stack Docker 풀스택은 **15개 컨테이너**로 구성되며, 3개의 계층으로 나뉩니다:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -37,14 +37,13 @@ Omni-Stack Docker 풀스택은 **12개 컨테이너**로 구성되며, 3개의 �
 └──────────────────────────┬──────────────────────────────────┘
                            │ proxy_pass
 ┌──────────────────────────┴──────────────────────────────────┐
-│              백엔드 마이크로서비스 계층 (4개 컨테이너)         │
-│  omni-gateway (:8102) ──→ omni-auth (:8100)                │
-│        │                 omni-base (:8101)                  │
-│        │                 omni-workflow (:8103)              │
+│              백엔드 마이크로서비스 계층 (8개 컨테이너)         │
+│  Gateway · Auth · Base · Workflow · CRM · SRM              │
+│  Procurement · Asset (공개 진입점은 Gateway만)              │
 └────────┼────────────────────┬───────────────────────────────┘
          │                    │
 ┌────────┴────────────────────┴───────────────────────────────┐
-│                   미들웨어 계층 (7개 컨테이너)                │
+│                   미들웨어 계층 (6개 컨테이너)                │
 │  MySQL (:3306) · Redis (:6379) · Nacos (:8080/:8848/:9848) │
 │  RocketMQ NameServer (:19876) · Broker (:10909-10912)      │
 │  XXL-JOB Admin (:18080)                                    │
@@ -202,11 +201,13 @@ EXPOSE 3000
 mysql:
   image: mysql:8.4
   environment:
-    MYSQL_ROOT_PASSWORD: root          # root 비밀번호
+    MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:? .env에 설정하세요}
     MYSQL_DATABASE: omni_auth          # 자동 생성되는 첫 번째 DB
     MYSQL_CHARACTER_SET_SERVER: utf8mb4
     MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     TZ: Asia/Shanghai                  # 타임존
+  volumes:
+    - omni-mysql-data:/var/lib/mysql
   volumes:
     - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     - ./scripts/sql/init-nacos.sql:/docker-entrypoint-initdb.d/02-init-nacos.sql:ro
@@ -216,14 +217,14 @@ mysql:
 **핵심 포인트**:
 - 3개의 SQL 스크립트가 순서대로 자동 실행: `01-init.sql`(비즈니스 DB + 초기 데이터) → `02-init-nacos.sql`(Nacos 설정 DB) → `03-init-xxl-job.sql`(XXL-JOB DB)
 - `:ro`(읽기 전용)로 마운트하여 우발적 변경 방지
-- 호스트 볼륨에 영속화하지 않음 — 컨테이너 파기 시 리셋 (개발 환경용)
+- MySQL은 이름 있는 볼륨 `omni-mysql-data`를 사용하며 일반적인 컨테이너 재생성 시 데이터를 유지
 
 ### 5.2 Redis 7.4
 
 ```yaml
 redis:
   image: redis:7.4
-  # 비밀번호 없음 — 개발 환경 간소화
+  command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:? .env에 설정하세요}"]
 ```
 
 ### 5.3 Nacos v3.1.1
@@ -276,9 +277,10 @@ xxl-job-admin:
     PARAMS: >
       --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?...
       --spring.datasource.username=root
-      --spring.datasource.password=root
-      --xxl.job.login.username=admin
-      --xxl.job.login.password=123456
+      --spring.datasource.password=${MYSQL_ROOT_PASSWORD}
+      --xxl.job.login.username=${XXL_JOB_ADMIN_USERNAME}
+      --xxl.job.login.password=${XXL_JOB_ADMIN_PASSWORD}
+      --xxl.job.accessToken=${XXL_JOB_ACCESS_TOKEN}
       --xxl.job.accessToken=           # 빈 토큰 (개발 환경에서 인증 없음)
 ```
 
@@ -344,9 +346,9 @@ Spring Boot는 환경 변수를 통한 `application.yml` 설정 오버라이드�
 | Nacos 주소 | `localhost:8848` | `nacos:8848` |
 | RocketMQ | `localhost:9876` | `rocketmq-namesrv:9876` |
 | JWT Issuer | `http://localhost:8100` | `http://omni-auth:8080` |
-| OAuth2 콜백 | `http://localhost:8100/api/auth/...` | `http://localhost:8100/api/auth/...` |
+| OAuth2 콜백 | `http://localhost:8102/api/auth/...` | `http://localhost:8102/api/auth/...` |
 
-> **주의**: OAuth2 콜백 URI는 `localhost:8100`(호스트 포트)을 사용합니다. 사용자 브라우저가 실제로 접근하는 주소이기 때문입니다.
+> **주의**: OAuth2 콜백 URI는 Gateway 주소 `localhost:8102`를 사용합니다. Auth 등 내부 서비스 포트는 진단용으로 루프백에 바인딩하며 외부에 공개하지 않습니다.
 
 ---
 
@@ -412,21 +414,15 @@ MySQL 컨테이너 최초 기동 시 `/docker-entrypoint-initdb.d/`의 SQL 스�
 
 ### 8.2 데이터 영속화 전략
 
-현재 설정은 **무상태 개발 환경**입니다: 컨테이너 파기 시 데이터가 리셋됩니다. 영속화가 필요한 경우:
+현재 설정은 MySQL을 이름 있는 볼륨 `omni-mysql-data`에 영속화합니다. `docker compose down`은 데이터를 유지하고, `docker compose down -v`는 복구할 수 없게 삭제합니다.
 
 ```yaml
-# docker-compose.yml에 볼륨 추가
 mysql:
   volumes:
-    - mysql-data:/var/lib/mysql
-
-redis:
-  volumes:
-    - redis-data:/data
+    - omni-mysql-data:/var/lib/mysql
 
 volumes:
-  mysql-data:
-  redis-data:
+  omni-mysql-data:
 ```
 
 ---
@@ -795,7 +791,11 @@ docker compose logs --timestamps omni-auth | head -5
 | omni-base | 8080 | 8101 | HTTP | 기초 데이터 서비스 |
 | omni-gateway | 8080 | 8102 | HTTP | API 게이트웨이 |
 | omni-workflow | 8080 | 8103 | HTTP | 워크플로우 서비스 |
-| MySQL | 3306 | 3306 | TCP | 데이터베이스 |
+| omni-crm | 8080 | 8104 | HTTP | CRM 서비스 |
+| omni-srm | 8080 | 8105 | HTTP | SRM 서비스 |
+| omni-procurement | 8080 | 8106 | HTTP | 조달 서비스 |
+| omni-asset | 8080 | 8107 | HTTP | 자산 서비스 |
+| MySQL | 3306 | 13306 | TCP | 데이터베이스 |
 | Redis | 6379 | 6379 | TCP | 캐시 |
 | Nacos Console | 8080 | 8080 | HTTP | 콘솔 |
 | Nacos API | 8848 | 8848 | HTTP | 서비스 등록/설정 |
@@ -804,14 +804,9 @@ docker compose logs --timestamps omni-auth | head -5
 | RocketMQ Broker | 10909-10912 | 10909-10912 | TCP | 메시지 브로커 |
 | XXL-JOB Admin | 8080 | 18080 | HTTP | 잡 스케줄러 |
 
-### 16.2 기본 계정 정보
+### 16.2 인증 정보와 공개 범위
 
-| 서비스 | 사용자명 | 비밀번호 | 접근 URL |
-|--------|---------|---------|---------|
-| 프론트엔드 앱 | admin | admin123 | http://localhost:3000 |
-| MySQL | root | root | localhost:3306 |
-| Nacos Console | nacos | nacos | http://localhost:8080 |
-| XXL-JOB Admin | admin | 123456 | http://localhost:18080 |
+운영 자격 증명은 하드코딩하지 않습니다. 시작 전에 `.env`에서 MySQL, Redis, Nacos, XXL-JOB, OAuth state, JWK 암호화, 내부 API 및 애플리케이션 DB 비밀값을 설정해야 합니다. 초기 애플리케이션 계정은 로컬 데모 전용이며 공유 배포 전에 변경하거나 제거해야 합니다. 공개 진입점은 프런트엔드(`3000`)와 Gateway(`8102`)뿐이며 다른 포트는 `127.0.0.1`에 바인딩됩니다.
 
 ### 16.3 주요 파일 경로
 

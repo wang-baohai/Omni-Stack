@@ -34,6 +34,8 @@ export interface CreateTenantRequest {
   tenantCode: string
   /** 租户名称 */
   tenantName: string
+  /** 初始超级管理员密码，仅创建时提交 */
+  adminPassword: string
   /** 域名 */
   domain?: string
   /** 联系人 */

@@ -8,6 +8,7 @@ import {
   listRiskSuppliers,
   updateRiskIndicator,
   type RiskAssessmentVO,
+  type RiskCriterionOption,
   type RiskIndicatorVO,
   type RiskLevel,
   type SupplierRiskSummary,
@@ -37,25 +38,42 @@ const filteredIndicators = computed(() => (
     : indicators.value
 ))
 
-const editDialogVisible = ref(false)
-const editingIndicator = ref<RiskIndicatorVO | null>(null)
-const editForm = reactive<{ version: number; indicatorValue: string; riskLevel: RiskLevel; remark: string }>({
-  version: 0,
-  indicatorValue: '',
-  riskLevel: 'GREEN',
-  remark: '',
-})
-const assessmentDialogVisible = ref(false)
-const assessmentRemark = ref('')
-
-const indicatorTypeLabel: Record<string, string> = {
-  FINANCIAL: '财务风险',
-  COMPLIANCE: '合规风险',
-  SUPPLY: '供应风险',
-  COOPERATION: '合作风险',
-  QUALITY: '质量风险',
-  CERTIFICATE: '资质证书风险',
+/** 综合评估弹窗表单数据。 */
+interface AssessmentFormItem {
+  id: number
+  indicatorType: string
+  indicatorTypeName: string
+  indicatorValue: string
+  riskLevel: RiskLevel
+  criterionId: number | null
+  score: number | null
+  autoCalc: boolean
+  remark: string
+  version: number
+  criteria: RiskCriterionOption[]
 }
+
+const assessmentDialogVisible = ref(false)
+const assessmentSubmitting = ref(false)
+const assessmentRemark = ref('')
+const assessmentItems = ref<AssessmentFormItem[]>([])
+
+/** 总分实时计算。 */
+const computedTotalScore = computed(() =>
+  assessmentItems.value.reduce((sum, item) => sum + (item.score || 0), 0),
+)
+
+/** 综合等级实时预览：取所有指标中最高等级。 */
+const LEVEL_ORDER: Record<RiskLevel, number> = { GREEN: 0, YELLOW: 1, RED: 2 }
+const computedOverallLevel = computed<RiskLevel>(() => {
+  let highest: RiskLevel = 'GREEN'
+  for (const item of assessmentItems.value) {
+    if (LEVEL_ORDER[item.riskLevel] > LEVEL_ORDER[highest]) {
+      highest = item.riskLevel
+    }
+  }
+  return highest
+})
 
 async function loadRiskSuppliers() {
   listLoading.value = true
@@ -112,40 +130,81 @@ async function toggleAssessmentHistory() {
   if (showAssessmentHistory.value) await loadSupplierDetail(true)
 }
 
-function openEditDialog(row: RiskIndicatorVO) {
-  if (row.indicatorType === 'CERTIFICATE') {
-    ElMessage.warning('资质风险由资质有效期自动计算，不能手工修改')
-    return
-  }
-  editingIndicator.value = row
-  Object.assign(editForm, {
-    version: row.version,
-    indicatorValue: row.indicatorValue || '',
-    riskLevel: row.riskLevel,
-    remark: row.remark || '',
-  })
-  editDialogVisible.value = true
-}
-
-async function submitEdit() {
-  if (!editingIndicator.value) return
-  await updateRiskIndicator(editingIndicator.value.id, { ...editForm })
-  ElMessage.success('风险指标更新成功')
-  editDialogVisible.value = false
-  await Promise.all([loadSupplierDetail(), loadRiskSuppliers()])
-}
-
+/**
+ * 打开综合评估弹窗，从当前指标数据初始化表单。
+ */
 function openAssessmentDialog() {
+  assessmentItems.value = indicators.value.map((ind) => ({
+    id: ind.id,
+    indicatorType: ind.indicatorType,
+    indicatorTypeName: ind.indicatorTypeName || ind.indicatorType,
+    indicatorValue: ind.indicatorValue || '',
+    riskLevel: ind.riskLevel,
+    criterionId: ind.criterionId,
+    score: ind.score,
+    autoCalc: ind.autoCalc === 1,
+    remark: ind.remark || '',
+    version: ind.version,
+    criteria: ind.criteria || [],
+  }))
   assessmentRemark.value = ''
   assessmentDialogVisible.value = true
 }
 
+/** 选中评分标准后自动填充分数和风险等级。 */
+function onCriterionChange(item: AssessmentFormItem) {
+  const criterion = item.criteria.find(c => c.id === item.criterionId)
+  if (criterion) {
+    item.score = criterion.score
+    item.riskLevel = criterion.riskLevel
+    item.indicatorValue = criterion.criterionLabel
+  }
+}
+
+/** 从列表直接打开评估弹窗：先加载该供应商的指标数据，再打开弹窗。 */
+async function openAssessmentFromList(row: SupplierRiskSummary) {
+  selectedSupplier.value = row
+  indicatorLevel.value = ''
+  showAssessmentHistory.value = false
+  detailLoading.value = true
+  try {
+    const response = await getSupplierRisk(row.supplierId)
+    indicators.value = response.data.data.indicators
+    latestAssessment.value = response.data.data.latestAssessment
+  } finally {
+    detailLoading.value = false
+  }
+  openAssessmentDialog()
+}
+
+/** 提交综合评估：先逐个更新变化的指标（通过 criterionId），再创建综合评估记录。 */
 async function submitAssessment() {
   if (!selectedSupplier.value) return
-  await createRiskAssessment(selectedSupplier.value.supplierId, { remark: assessmentRemark.value || undefined })
-  ElMessage.success('综合风险评估已完成')
-  assessmentDialogVisible.value = false
-  await Promise.all([loadSupplierDetail(), loadRiskSuppliers()])
+  assessmentSubmitting.value = true
+  try {
+    const originals = indicators.value
+    for (const item of assessmentItems.value) {
+      if (item.autoCalc) continue
+      const original = originals.find((o) => o.id === item.id)
+      const criterionChanged = item.criterionId !== original?.criterionId
+      const remarkChanged = item.remark !== (original?.remark || '')
+      if (criterionChanged || remarkChanged) {
+        await updateRiskIndicator(item.id, {
+          version: item.version,
+          criterionId: item.criterionId || undefined,
+          remark: item.remark || undefined,
+        })
+      }
+    }
+    await createRiskAssessment(selectedSupplier.value.supplierId, {
+      remark: assessmentRemark.value || undefined,
+    })
+    ElMessage.success('综合风险评估已完成')
+    assessmentDialogVisible.value = false
+    await Promise.all([loadSupplierDetail(), loadRiskSuppliers()])
+  } finally {
+    assessmentSubmitting.value = false
+  }
 }
 
 onMounted(loadRiskSuppliers)
@@ -177,8 +236,11 @@ onMounted(loadRiskSuppliers)
         </el-table-column>
         <el-table-column prop="redIndicatorCount" label="红色指标数" width="120" align="center" />
         <el-table-column prop="assessmentTime" label="最近评估时间" width="180" />
-        <el-table-column label="操作" width="100" fixed="right">
-          <template #default="{ row }"><el-button link type="primary" @click="openDetail(row)">风险详情</el-button></template>
+        <el-table-column label="操作" width="160" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" @click="openDetail(row)">详情</el-button>
+            <el-button v-permission="'srm:risk:assess'" link type="success" @click="openAssessmentFromList(row)">评估</el-button>
+          </template>
         </el-table-column>
       </el-table>
       <el-pagination
@@ -186,7 +248,7 @@ onMounted(loadRiskSuppliers)
         v-model:page-size="pageSize"
         class="pagination"
         :total="total"
-        :page-sizes="[10, 20, 50, 100]"
+        :page-sizes="[5, 10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next"
         @current-change="loadRiskSuppliers"
         @size-change="currentPage = 1; loadRiskSuppliers()"
@@ -218,18 +280,15 @@ onMounted(loadRiskSuppliers)
         </div>
         <el-table :data="filteredIndicators" border stripe>
           <el-table-column label="指标类型" min-width="140">
-            <template #default="{ row }">{{ indicatorTypeLabel[row.indicatorType] || row.indicatorType }}</template>
+            <template #default="{ row }">{{ row.indicatorTypeName || row.indicatorType }}</template>
           </el-table-column>
           <el-table-column prop="indicatorValue" label="指标值" min-width="120" />
+          <el-table-column label="得分" width="80" align="center">
+            <template #default="{ row }">{{ row.score ?? '-' }}</template>
+          </el-table-column>
           <el-table-column label="风险等级" width="110"><template #default="{ row }"><RiskIndicator :level="row.riskLevel" /></template></el-table-column>
           <el-table-column prop="assessmentTime" label="评估时间" width="170" />
           <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
-          <el-table-column label="操作" width="80" fixed="right">
-            <template #default="{ row }">
-              <el-tag v-if="row.indicatorType === 'CERTIFICATE'" type="info" size="small">自动</el-tag>
-              <el-button v-else v-permission="'srm:risk:update'" link type="primary" @click="openEditDialog(row)">编辑</el-button>
-            </template>
-          </el-table-column>
         </el-table>
 
         <div class="history-toggle">
@@ -245,23 +304,59 @@ onMounted(loadRiskSuppliers)
       </div>
     </el-drawer>
 
-    <el-dialog v-model="editDialogVisible" title="编辑风险指标" width="480px">
-      <el-form label-width="90px">
-        <el-form-item label="指标类型">{{ indicatorTypeLabel[editingIndicator?.indicatorType || ''] || editingIndicator?.indicatorType }}</el-form-item>
-        <el-form-item label="指标值"><el-input v-model="editForm.indicatorValue" maxlength="200" show-word-limit /></el-form-item>
-        <el-form-item label="风险等级">
-          <el-select v-model="editForm.riskLevel"><el-option v-for="level in riskLevels" :key="level" :label="riskLevelLabel[level]" :value="level" /></el-select>
-        </el-form-item>
-        <el-form-item label="备注"><el-input v-model="editForm.remark" type="textarea" :rows="3" maxlength="500" show-word-limit /></el-form-item>
-      </el-form>
-      <template #footer><el-button @click="editDialogVisible = false">取消</el-button><el-button v-permission="'srm:risk:update'" type="primary" @click="submitEdit">保存</el-button></template>
-    </el-dialog>
-
-    <el-dialog v-model="assessmentDialogVisible" title="创建综合风险评估" width="480px">
+    <el-dialog v-model="assessmentDialogVisible" title="创建综合风险评估" width="800px" destroy-on-close>
+      <div style="margin-bottom: 16px; color: #909399; font-size: 13px">从预定义评分标准中选择评估维度，系统将基于总分自动计算综合风险等级。自动计算类指标不可编辑。</div>
+      <el-table :data="assessmentItems" border size="small" style="margin-bottom: 16px">
+        <el-table-column label="指标类型" min-width="110">
+          <template #default="{ row }">{{ row.indicatorTypeName }}</template>
+        </el-table-column>
+        <el-table-column label="评分标准" min-width="200">
+          <template #default="{ row }">
+            <el-select
+              v-if="!row.autoCalc && row.criteria.length > 0"
+              v-model="row.criterionId"
+              size="small"
+              placeholder="请选择"
+              style="width: 100%"
+              @change="onCriterionChange(row)"
+            >
+              <el-option
+                v-for="c in row.criteria"
+                :key="c.id"
+                :label="`${c.criterionLabel}（${c.score}分）`"
+                :value="c.id"
+              />
+            </el-select>
+            <span v-else style="color: #909399; font-size: 12px">{{ row.indicatorValue || '自动计算' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="得分" width="70" align="center">
+          <template #default="{ row }">{{ row.score ?? '-' }}</template>
+        </el-table-column>
+        <el-table-column label="风险等级" width="110" align="center">
+          <template #default="{ row }"><RiskIndicator :level="row.riskLevel" /></template>
+        </el-table-column>
+        <el-table-column label="备注" min-width="150">
+          <template #default="{ row }">
+            <el-input v-if="!row.autoCalc" v-model="row.remark" size="small" maxlength="500" />
+            <span v-else style="color: #909399; font-size: 12px">{{ row.remark || '自动计算' }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px">
+        <span style="font-weight: bold">总分：{{ computedTotalScore }}</span>
+        <span style="font-weight: bold">综合风险等级预览：</span>
+        <RiskIndicator :level="computedOverallLevel" />
+      </div>
       <el-form label-width="80px">
-        <el-form-item label="备注"><el-input v-model="assessmentRemark" type="textarea" :rows="3" maxlength="500" show-word-limit placeholder="评估备注（可选）" /></el-form-item>
+        <el-form-item label="评估备注">
+          <el-input v-model="assessmentRemark" type="textarea" :rows="2" maxlength="500" show-word-limit placeholder="本次评估说明（可选）" />
+        </el-form-item>
       </el-form>
-      <template #footer><el-button @click="assessmentDialogVisible = false">取消</el-button><el-button v-permission="'srm:risk:assess'" type="primary" @click="submitAssessment">开始评估</el-button></template>
+      <template #footer>
+        <el-button @click="assessmentDialogVisible = false">取消</el-button>
+        <el-button v-permission="'srm:risk:assess'" type="primary" :loading="assessmentSubmitting" @click="submitAssessment">提交评估</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>

@@ -10,9 +10,10 @@ import { useUserStore } from '@/stores/user'
 import { usePermissionStore } from '@/stores/permission'
 import type { MenuNode } from '@/api/menu'
 import { menuI18nMap } from '@/constants/menu'
-import { hasManagementAccess } from '@/utils/access'
+import { hasManagementAccess, isAssetSelfServiceUser } from '@/utils/access'
 import { getRolesFromToken } from '@/utils/jwt'
 import i18n from '@/i18n'
+import { safeAppRedirect } from '@/utils/navigation'
 
 /** 扩展 Vue Router 路由元信息类型 */
 declare module 'vue-router' {
@@ -71,10 +72,24 @@ const iconMap: Record<string, string> = {
   'srm:supplier': 'OfficeBuilding',
   'srm:evaluation': 'Document',
   'srm:risk': 'Warning',
+  'srm:risk:config': 'Setting',
   'srm:portal': 'Promotion',
   'srm:portal:profile': 'Document',
   'srm:portal:evaluation': 'TrendCharts',
   'srm:invite': 'Message',
+  'procurement': 'ShoppingCart',
+  'procurement:overview': 'DataAnalysis',
+  'procurement:material': 'Box',
+  'procurement:approval-route': 'Guide',
+  'procurement:requisition': 'DocumentAdd',
+  'procurement:rfq': 'Tickets',
+  'procurement:purchase-order': 'ShoppingBag',
+  'procurement:goods-receipt': 'TakeawayBox',
+  'asset': 'Coin',
+  'asset:overview': 'DataAnalysis',
+  'asset:asset': 'Box',
+  'asset:transfer': 'Switch',
+  'asset:disposal': 'Delete',
   'system:user': 'User',
   'system:role': 'UserFilled',
   'system:permission': 'Lock',
@@ -161,6 +176,12 @@ const staticRoutes: RouteRecordRaw[] = [
     meta: { title: 'Supplier Portal', requiresAuth: true, portalAccess: true },
   },
   {
+    path: '/menu-load-error',
+    name: 'MenuLoadError',
+    component: () => import('@/views/error/menu-load/index.vue'),
+    meta: { title: 'Menu Load Error', requiresAuth: true },
+  },
+  {
     path: '/admin',
     name: 'admin',
     component: () => import('@/layout/index.vue'),
@@ -172,7 +193,21 @@ const staticRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/dashboard/index.vue'),
         meta: { title: 'Dashboard', icon: 'Odometer', requiresAuth: true },
       },
+      {
+        path: ':pathMatch(.*)*',
+        name: 'AdminAccessDenied',
+        component: () => import('@/views/error/status/index.vue'),
+        props: { statusCode: 403 },
+        meta: { title: 'Access Denied', requiresAuth: true },
+      },
     ],
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/error/status/index.vue'),
+    props: { statusCode: 404 },
+    meta: { title: 'Not Found', requiresAuth: false },
   },
 ]
 
@@ -249,6 +284,17 @@ export function clearDynamicRoutes() {
 }
 
 /**
+ * 统一清理认证会话、权限快照和动态路由。
+ *
+ * @param explicit 是否由用户主动退出
+ */
+export function clearAuthenticatedSession(explicit = true) {
+  useUserStore().logout(explicit)
+  usePermissionStore().reset()
+  clearDynamicRoutes()
+}
+
+/**
  * 全局路由前置守卫。
  * - 无需认证的页面：已登录用户访问登录页时重定向到仪表盘，否则放行
  * - 需要认证的页面：未登录用户重定向到首页；已登录但菜单未加载时先加载动态路由
@@ -276,15 +322,21 @@ router.beforeEach(async (to, _from, next) => {
       next()
     }
   } else if (!userStore.token) {
-    // 门户入口保留独立登录体验，其他受保护页面回到首页。
+    const redirect = safeAppRedirect(to.fullPath)
+    // 门户入口保留独立登录体验，其他受保护页面进入管理端登录。
     if (to.meta.portalAccess) {
-      next({ name: 'PortalLogin', query: { redirect: to.fullPath } })
+      next({ name: 'PortalLogin', query: redirect ? { redirect } : undefined })
     } else {
-      next({ name: 'Home' })
+      next({ name: 'Login', query: redirect ? { redirect } : undefined })
     }
   } else {
     // 静态门户路由同样依赖 JWT 权限，不能只依赖动态菜单加载时的初始化。
     permissionStore.initFromToken()
+    const roles = getRolesFromToken(userStore.token)
+    const assetSelfServiceOnly = isAssetSelfServiceUser(permissionStore.permissions, roles)
+    if (permCode === 'asset:asset' && assetSelfServiceOnly) {
+      document.title = t('common.assetMyAssets')
+    }
     // 已登录但菜单未加载：加载菜单并注册动态路由
     if (!permissionStore.menusLoaded) {
       try {
@@ -293,14 +345,13 @@ router.beforeEach(async (to, _from, next) => {
         // 重新导航到目标路由（使用 fullPath 避免传递内部路由对象状态）
         next({ path: to.fullPath, replace: true })
       } catch {
-        next({ name: 'Home' })
+        next({ name: 'MenuLoadError', query: { redirect: to.fullPath } })
       }
     } else {
       // 菜单已加载（可能由 Home 页预加载），确保动态路由已注册
       // Home 页面会预加载菜单数据（menusLoaded=true），但不会注册动态路由，
       // 因此从 Home 导航到管理后台时，需要在此处补注册。
       registerDynamicRoutes(permissionStore.menuTree)
-      const roles = getRolesFromToken(userStore.token)
       const isSupplier = roles.includes('SUPPLIER')
       const hasManagementPermission = hasManagementAccess(permissionStore.permissions, roles)
       const canEnroll = permissionStore.hasPermission('srm:portal:enroll')
@@ -318,6 +369,10 @@ router.beforeEach(async (to, _from, next) => {
       }
       if (to.path.startsWith('/admin') && !hasManagementPermission) {
         next(canAccessPortal ? '/supplier-portal' : '/')
+        return
+      }
+      if (to.path === '/admin/dashboard' && assetSelfServiceOnly) {
+        next('/admin/asset/asset')
         return
       }
       next()

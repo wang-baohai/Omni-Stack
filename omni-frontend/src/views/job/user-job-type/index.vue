@@ -227,10 +227,11 @@ onMounted(loadData)
       </el-table>
 
       <!-- 分页控件 -->
-      <el-pagination v-model:current-page="currentPage" class="pagination"
-                     :page-size="pageSize" :total="total"
-                     layout="total, prev, pager, next"
-                     @current-change="handlePageChange" />
+      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination"
+                     :page-sizes="[5, 10, 20, 50, 100]" :total="total"
+                     layout="total, sizes, prev, pager, next"
+                     @current-change="handlePageChange"
+                     @size-change="currentPage = 1; handlePageChange(1)" />
     </el-card>
 
     <!-- 表单对话框 -->

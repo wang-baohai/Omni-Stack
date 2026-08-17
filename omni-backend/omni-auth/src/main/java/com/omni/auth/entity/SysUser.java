@@ -1,5 +1,6 @@
 package com.omni.auth.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -36,6 +37,7 @@ public class SysUser extends BaseEntity {
     /** 用户名 */
     private String username;
     /** 密码（BCrypt 加密） */
+    @JsonIgnore
     private String password;
     /** 昵称 */
     private String nickname;

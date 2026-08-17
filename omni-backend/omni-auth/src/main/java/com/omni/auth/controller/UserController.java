@@ -1,7 +1,8 @@
 package com.omni.auth.controller;
 
 import com.omni.auth.dto.CreateUserRequest;
-import com.omni.auth.entity.SysUser;
+import com.omni.auth.dto.UpdateUserRequest;
+import com.omni.auth.dto.UserVO;
 import com.omni.auth.service.UserService;
 import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
@@ -64,8 +65,9 @@ public class UserController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('system:user:list')")
-    public R<SysUser> getById(@PathVariable Long id) {
-        return R.ok(userService.getById(id));
+    public R<UserVO> getById(@PathVariable Long id,
+                             @RequestHeader("X-Tenant-Id") Long tenantId) {
+        return R.ok(userService.getUserDetail(id, tenantId));
     }
 
     /**
@@ -80,7 +82,7 @@ public class UserController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('system:user:list')")
-    public R<PageResult<SysUser>> list(
+    public R<PageResult<UserVO>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestHeader("X-Tenant-Id") Long tenantId) {
@@ -117,9 +119,10 @@ public class UserController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('system:user:update')")
-    public R<Void> update(@PathVariable Long id, @RequestBody SysUser user) {
-        user.setId(id);
-        userService.updateById(user);
+    public R<Void> update(@PathVariable Long id,
+                          @RequestHeader("X-Tenant-Id") Long tenantId,
+                          @Valid @RequestBody UpdateUserRequest request) {
+        userService.updateUser(id, tenantId, request);
         return R.ok();
     }
 
@@ -135,10 +138,11 @@ public class UserController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('system:user:delete')")
     public R<Void> delete(@PathVariable Long id,
+                          @RequestHeader("X-Tenant-Id") Long tenantId,
                           HttpServletRequest httpRequest) {
         String operator = getCurrentUsername();
         String ip = extractClientIp(httpRequest);
-        userService.deleteUser(id, operator, ip);
+        userService.deleteUser(id, tenantId, operator, ip);
         return R.ok();
     }
 
@@ -155,11 +159,12 @@ public class UserController {
     @PostMapping("/{userId}/roles")
     @PreAuthorize("hasAuthority('system:user:update')")
     public R<Void> assignRoles(@PathVariable Long userId,
+                               @RequestHeader("X-Tenant-Id") Long tenantId,
                                @RequestBody List<Long> roleIds,
                                HttpServletRequest httpRequest) {
         String operator = getCurrentUsername();
         String ip = extractClientIp(httpRequest);
-        userService.assignRoles(userId, roleIds, operator, ip);
+        userService.assignRoles(userId, tenantId, roleIds, operator, ip);
         return R.ok();
     }
 
@@ -173,8 +178,9 @@ public class UserController {
      */
     @GetMapping("/{userId}/roles")
     @PreAuthorize("hasAuthority('system:user:list')")
-    public R<List<Long>> getUserRoleIds(@PathVariable Long userId) {
-        return R.ok(userService.getUserRoleIds(userId));
+    public R<List<Long>> getUserRoleIds(@PathVariable Long userId,
+                                        @RequestHeader("X-Tenant-Id") Long tenantId) {
+        return R.ok(userService.getUserRoleIds(userId, tenantId));
     }
 
     /**
@@ -190,11 +196,12 @@ public class UserController {
     @PutMapping("/{userId}/status")
     @PreAuthorize("hasAuthority('system:user:update')")
     public R<Void> toggleStatus(@PathVariable Long userId,
+                                @RequestHeader("X-Tenant-Id") Long tenantId,
                                 @RequestParam Integer status,
                                 HttpServletRequest httpRequest) {
         String operator = getCurrentUsername();
         String ip = extractClientIp(httpRequest);
-        userService.toggleStatus(userId, status, operator, ip);
+        userService.toggleStatus(userId, tenantId, status, operator, ip);
         return R.ok();
     }
 

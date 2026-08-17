@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:flowable="http://flowable.org/bpmn"
+  xmlns:omni="http://omni.com/workflow"
+  id="Definitions_supplier_onboarding"
+  targetNamespace="supplier">
+
+  <process id="supplier-onboarding" name="供应商准入审批（3级会签）" isExecutable="true">
+    <documentation>3级会签审批供应商准入流程：采购经理 → 合规负责人 → 高管</documentation>
+
+    <startEvent id="start" name="提交供应商准入" flowable:initiator="initiator" />
+
+    <userTask id="manager-approve" name="采购经理审批" flowable:assignee="${userId}">
+      <documentation>采购经理（SRM_MANAGER）会签审批，任一通过即过</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"SRM_MANAGER","anchorType":"PARENT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <exclusiveGateway id="gw-level1" name="第1级结果" default="flow-l1-reject" />
+
+    <userTask id="compliance-approve" name="合规负责人审批" flowable:assignee="${userId}">
+      <documentation>合规负责人（SRM_COMPLIANCE）会签审批，任一通过即过</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"SRM_COMPLIANCE","anchorType":"PARENT","anchorParams":{},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ANY"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <exclusiveGateway id="gw-level2" name="第2级结果" default="flow-l2-reject" />
+
+    <userTask id="director-approve" name="高管审批" flowable:assignee="${userId}">
+      <documentation>高管（SRM_DIRECTOR）全员会签审批，全部通过才算通过</documentation>
+      <extensionElements>
+        <omni:assignment>{"roleCode":"SRM_DIRECTOR","anchorType":"ABSOLUTE_UNIT","anchorParams":{"unitIds":[1]},"scopeMode":"SAME_UNIT","fallbackStrategy":"ERROR","approvalMode":"ALL"}</omni:assignment>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false"
+        flowable:collection="${candidateResolver.resolve(execution)}"
+        flowable:elementVariable="userId">
+        <completionCondition xsi:type="tFormalExpression">${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
+      </multiInstanceLoopCharacteristics>
+    </userTask>
+
+    <exclusiveGateway id="gw-level3" name="第3级结果" default="flow-l3-reject" />
+
+    <endEvent id="end-approved" name="审批通过" />
+    <endEvent id="end-rejected" name="审批驳回" />
+
+    <sequenceFlow id="flow-start" sourceRef="start" targetRef="manager-approve" />
+    <sequenceFlow id="flow-l1-to-gw" sourceRef="manager-approve" targetRef="gw-level1" />
+    <sequenceFlow id="flow-l1-pass" sourceRef="gw-level1" targetRef="compliance-approve">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-l1-reject" sourceRef="gw-level1" targetRef="end-rejected" />
+    <sequenceFlow id="flow-l2-to-gw" sourceRef="compliance-approve" targetRef="gw-level2" />
+    <sequenceFlow id="flow-l2-pass" sourceRef="gw-level2" targetRef="director-approve">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-l2-reject" sourceRef="gw-level2" targetRef="end-rejected" />
+    <sequenceFlow id="flow-l3-to-gw" sourceRef="director-approve" targetRef="gw-level3" />
+    <sequenceFlow id="flow-l3-pass" sourceRef="gw-level3" targetRef="end-approved">
+      <conditionExpression xsi:type="tFormalExpression">${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow-l3-reject" sourceRef="gw-level3" targetRef="end-rejected" />
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_supplier_onboarding">
+    <bpmndi:BPMNPlane id="BPMNPlane_supplier_onboarding" bpmnElement="supplier-onboarding">
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <dc:Bounds x="100" y="300" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="l1_di" bpmnElement="manager-approve">
+        <dc:Bounds x="200" y="278" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw1_di" bpmnElement="gw-level1" isMarkerVisible="true">
+        <dc:Bounds x="420" y="293" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="l2_di" bpmnElement="compliance-approve">
+        <dc:Bounds x="540" y="278" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw2_di" bpmnElement="gw-level2" isMarkerVisible="true">
+        <dc:Bounds x="760" y="293" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="l3_di" bpmnElement="director-approve">
+        <dc:Bounds x="880" y="278" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw3_di" bpmnElement="gw-level3" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="293" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_approved_di" bpmnElement="end-approved">
+        <dc:Bounds x="1220" y="300" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_rejected_di" bpmnElement="end-rejected">
+        <dc:Bounds x="785" y="450" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow_start_di" bpmnElement="flow-start">
+        <di:waypoint x="136" y="318" /><di:waypoint x="200" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l1_gw_di" bpmnElement="flow-l1-to-gw">
+        <di:waypoint x="350" y="318" /><di:waypoint x="420" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l1_pass_di" bpmnElement="flow-l1-pass">
+        <di:waypoint x="470" y="318" /><di:waypoint x="540" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l1_reject_di" bpmnElement="flow-l1-reject">
+        <di:waypoint x="445" y="343" /><di:waypoint x="445" y="468" /><di:waypoint x="785" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l2_gw_di" bpmnElement="flow-l2-to-gw">
+        <di:waypoint x="690" y="318" /><di:waypoint x="760" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l2_pass_di" bpmnElement="flow-l2-pass">
+        <di:waypoint x="810" y="318" /><di:waypoint x="880" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l2_reject_di" bpmnElement="flow-l2-reject">
+        <di:waypoint x="785" y="343" /><di:waypoint x="785" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l3_gw_di" bpmnElement="flow-l3-to-gw">
+        <di:waypoint x="1030" y="318" /><di:waypoint x="1100" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l3_pass_di" bpmnElement="flow-l3-pass">
+        <di:waypoint x="1150" y="318" /><di:waypoint x="1220" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_l3_reject_di" bpmnElement="flow-l3-reject">
+        <di:waypoint x="1125" y="343" /><di:waypoint x="1125" y="468" /><di:waypoint x="821" y="468" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

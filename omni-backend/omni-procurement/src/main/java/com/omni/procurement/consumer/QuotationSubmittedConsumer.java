@@ -1,0 +1,55 @@
+package com.omni.procurement.consumer;
+
+import com.omni.procurement.dto.RfqContracts;
+import com.omni.procurement.security.ProcDataScopeContext;
+import com.omni.procurement.security.ProcTenantContext;
+import com.omni.procurement.service.QuotationSubmittedService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.Set;
+import java.util.function.Consumer;
+
+/**
+ * SRM 报价提交事件消费者。
+ *
+ * @author Omni-Stack Team
+ */
+@Configuration
+@RequiredArgsConstructor
+public class QuotationSubmittedConsumer {
+
+    private static final String EVENT_TYPE = "srm.quotation.submitted.v1";
+    private static final String AGGREGATE_TYPE = "QUOTATION";
+
+    private final QuotationSubmittedService quotationSubmittedService;
+
+    /**
+     * 消费报价提交事件并在 finally 中清理消息线程上下文。
+     *
+     * @return 消息消费函数
+     */
+    @Bean(name = "quotationSubmittedFunction")
+    public Consumer<RfqContracts.QuotationSubmittedEvent> quotationSubmittedFunction() {
+        return event -> {
+            if (event == null || !EVENT_TYPE.equals(event.getEventType())
+                    || !AGGREGATE_TYPE.equals(event.getAggregateType())) {
+                return;
+            }
+            if (event.getTenantId() == null || event.getTenantId() <= 0) {
+                throw new IllegalArgumentException("SRM 报价提交事件 tenantId 必须为正整数");
+            }
+            ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+                    0L, event.getTenantId(), "srm-quotation-event"));
+            ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
+                    0L, event.getTenantId(), "srm-quotation-event", null, "TENANT", Set.of()));
+            try {
+                quotationSubmittedService.handle(event);
+            } finally {
+                ProcDataScopeContext.clear();
+                ProcTenantContext.clear();
+            }
+        };
+    }
+}

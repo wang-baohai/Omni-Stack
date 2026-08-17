@@ -1,8 +1,13 @@
-node_modules/
-dist/
+**/node_modules/
+**/dist/
 **/target/
 **/logs/
 **/.qoder/
 **/.agents/
+.git/
+.codex/
+**/test-results/
+**/playwright-report/
+**/screenshots/
 docs/
 *.log

@@ -39,7 +39,7 @@ function formatAmount(amount: number, currencyCode = 'CNY') {
             @click="emit('open', opportunity)"
           >
             <strong>{{ opportunity.name }}</strong>
-            <span>客户 #{{ opportunity.customerId }}</span>
+            <span>{{ opportunity.customerName || `客户 #${opportunity.customerId}` }}</span>
             <span>{{ formatAmount(opportunity.amount, opportunity.currencyCode) }}</span>
             <el-dropdown
               v-if="canMove && opportunity.status === 'OPEN'"

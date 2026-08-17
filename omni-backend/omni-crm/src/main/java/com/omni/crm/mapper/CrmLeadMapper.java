@@ -1,6 +1,7 @@
 package com.omni.crm.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
 import com.omni.crm.dto.CrmViews;
 import com.omni.crm.entity.CrmLead;
 import org.apache.ibatis.annotations.Param;
@@ -11,6 +12,18 @@ import java.util.List;
 
 /** CRM 线索 Mapper。 */
 public interface CrmLeadMapper extends BaseMapper<CrmLead> {
+
+    /**
+     * 批量查询线索名称（不受数据权限限制，仅用于列表展示填充）。
+     *
+     * @param ids 线索 ID 列表
+     * @return 线索列表（仅含 id 和 full_name）
+     */
+    @InterceptorIgnore(dataPermission = "true")
+    @Select("<script>SELECT id, full_name FROM crm_lead WHERE deleted = 0 AND id IN "
+            + "<foreach collection='ids' item='id' open='(' separator=',' close=')'>#{id}</foreach>"
+            + "</script>")
+    List<CrmLead> selectNamesByIds(@Param("ids") List<Long> ids);
 
     /**
      * 在租户和数据权限拦截下锁定线索。

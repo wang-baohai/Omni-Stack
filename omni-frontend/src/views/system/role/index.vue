@@ -199,7 +199,7 @@ onMounted(loadData)
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="roleCode" :label="t('role.roleCode')" width="150" />
         <el-table-column prop="roleName" :label="t('role.roleName')" width="180" />
-        <el-table-column :label="t('role.dataScope')" width="150">
+        <el-table-column :label="t('role.dataScope')" min-width="150">
           <template #default="{ row }">
             {{ t(`role.dataScope${row.dataScope.split('_').map((s: string) => s.charAt(0) + s.slice(1).toLowerCase()).join('')}`) }}
           </template>
@@ -236,11 +236,13 @@ onMounted(loadData)
 
       <el-pagination
         v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
         class="pagination"
-        :page-size="pageSize"
+        :page-sizes="[5, 10, 20, 50, 100]"
         :total="total"
-        layout="total, prev, pager, next"
+        layout="total, sizes, prev, pager, next"
         @current-change="handlePageChange"
+        @size-change="currentPage = 1; handlePageChange(1)"
       />
     </el-card>
 

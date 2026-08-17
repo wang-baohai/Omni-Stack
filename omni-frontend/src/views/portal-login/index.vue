@@ -4,20 +4,22 @@
  * 复用 LoginForm 组件，登录成功后跳转到供应商门户工作台。
  */
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import LoginForm from '@/components/LoginForm.vue'
 import { useAppStore } from '@/stores/app'
 import { storeLang } from '@/i18n'
+import { safeAppRedirect } from '@/utils/navigation'
 
 const { t, locale } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const appStore = useAppStore()
 
 /** 登录成功回调：跳转到供应商门户工作台 */
 function handleSuccess() {
   ElMessage.success(t('login.loginSuccess'))
-  router.push('/supplier-portal')
+  router.push(safeAppRedirect(route.query.redirect) || '/supplier-portal')
 }
 
 /** 切换主题模式 */
@@ -70,8 +72,6 @@ function toggleLang() {
         <LoginForm
           simple
           register-path="/portal-register"
-          default-username="supplier1"
-          default-password="supplier123"
           @login-success="handleSuccess"
         />
       </div>

@@ -264,11 +264,13 @@ onMounted(() => {
     <!-- 分页 -->
     <el-pagination
       v-model:current-page="page"
-      :page-size="size"
+      v-model:page-size="size"
+      :page-sizes="[5, 10, 20, 50, 100]"
       :total="total"
-      layout="total, prev, pager, next"
+      layout="total, sizes, prev, pager, next"
       class="pagination"
       @current-change="handlePageChange"
+      @size-change="page = 1; handlePageChange(1)"
     />
 
     <!-- 对话框 -->

@@ -11,10 +11,11 @@ import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
-import { hasManagementAccess } from '@/utils/access'
+import { hasManagementAccess, isAssetSelfServiceUser } from '@/utils/access'
 import { getRolesFromToken } from '@/utils/jwt'
 import { useDictOptions } from '@/composables/useDictOptions'
 import { storeLang } from '@/i18n'
+import { clearAuthenticatedSession } from '@/router'
 import {
   listMyJobs, createMyJob, updateMyJob, deleteMyJob,
   toggleMyJobStatus, triggerMyJob, getMyJobTypes,
@@ -29,9 +30,21 @@ import DynamicFormRenderer from '@/components/DynamicFormRenderer.vue'
 import { CronExpressionParser } from 'cron-parser'
 import {
   listTodoTasks, listMyInitiated, listMyCompleted,
-  completeApproval, getWorkspaceStats,
+  completeApproval, getTaskFormData, getWorkspaceStats,
   type TodoTask, type ProcessInstanceExt, type WorkspaceStats,
 } from '@/api/workflow'
+import {
+  getProcurementRequisitionApprovalView,
+  type ProcurementRequisitionApprovalView,
+} from '@/api/procurement-requisition'
+import {
+  getAssetTransferApprovalView,
+  type AssetTransfer,
+} from '@/api/asset-transfer'
+import {
+  getAssetDisposalApprovalView,
+  type AssetDisposal,
+} from '@/api/asset-disposal'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -51,6 +64,14 @@ function categoryLabel(value: string | null) {
 /** 是否显示管理控制台入口；供应商角色固定使用独立门户。 */
 const canAccessConsole = computed(() => {
   return hasManagementAccess(
+    permissionStore.permissions,
+    getRolesFromToken(userStore.token),
+  )
+})
+
+/** 纯资产使用人进入控制台时直接落到“我的资产”。 */
+const assetSelfServiceOnly = computed(() => {
+  return isAssetSelfServiceUser(
     permissionStore.permissions,
     getRolesFromToken(userStore.token),
   )
@@ -125,12 +146,12 @@ function goToPortalLogin() {
 
 /** 跳转到控制台 */
 function goToConsole() {
-  router.push({ name: 'Dashboard' })
+  router.push(assetSelfServiceOnly.value ? '/admin/asset/asset' : { name: 'Dashboard' })
 }
 
 /** 处理用户登出 */
 function handleLogout() {
-  userStore.logout()
+  clearAuthenticatedSession()
 }
 
 /** 切换主题模式 */
@@ -517,12 +538,14 @@ const wfStats = ref<WorkspaceStats>({ todoCount: 0, myInitiatedRunning: 0, myIni
 const todoList = ref<TodoTask[]>([])
 const todoTotal = ref(0)
 const todoPage = ref(1)
+const todoPageSize = ref(10)
 const todoLoading = ref(false)
 
 // 我发起的
 const initiatedList = ref<ProcessInstanceExt[]>([])
 const initiatedTotal = ref(0)
 const initiatedPage = ref(1)
+const initiatedPageSize = ref(10)
 const initiatedLoading = ref(false)
 const initiatedStatus = ref<number | undefined>(undefined)
 
@@ -530,12 +553,26 @@ const initiatedStatus = ref<number | undefined>(undefined)
 const completedList = ref<ProcessInstanceExt[]>([])
 const completedTotal = ref(0)
 const completedPage = ref(1)
+const completedPageSize = ref(10)
 const completedLoading = ref(false)
 
 // 审批对话框
 const approvalVisible = ref(false)
 const approvalTask = ref<TodoTask | null>(null)
 const approvalForm = reactive({ approved: true, comment: '' })
+const businessFormLoading = ref(false)
+const businessFormError = ref('')
+const requisitionApprovalView = ref<ProcurementRequisitionApprovalView | null>(null)
+const assetTransferApprovalView = ref<AssetTransfer | null>(null)
+const assetDisposalApprovalView = ref<AssetDisposal | null>(null)
+const hasBusinessApprovalView = computed(() => Boolean(
+  requisitionApprovalView.value
+  || assetTransferApprovalView.value
+  || assetDisposalApprovalView.value,
+))
+const approvalCanSubmit = computed(() => Boolean(
+  approvalTask.value && !businessFormLoading.value && !businessFormError.value,
+))
 
 async function loadWfStats() {
   try {
@@ -571,20 +608,65 @@ async function loadCompletedList() {
   } finally { completedLoading.value = false }
 }
 
-function openApproval(task: TodoTask) {
+function positiveInteger(value: unknown): number | null {
+  const text = typeof value === 'number' || typeof value === 'string' ? String(value) : ''
+  return /^\d+$/.test(text) && text !== '0' ? Number(text) : null
+}
+
+async function openApproval(task: TodoTask) {
   approvalTask.value = task
   approvalForm.approved = true
   approvalForm.comment = ''
+  businessFormError.value = ''
+  requisitionApprovalView.value = null
+  assetTransferApprovalView.value = null
+  assetDisposalApprovalView.value = null
   approvalVisible.value = true
+  businessFormLoading.value = true
+  try {
+    const formResponse = await getTaskFormData(task.taskId)
+    const variables = formResponse.data.data.variables || {}
+    if (variables.businessType === 'PROCUREMENT_REQUISITION') {
+      const requisitionId = positiveInteger(variables.requisitionId)
+      if (!requisitionId) throw new Error('采购请购流程缺少合法的 requisitionId')
+      const businessResponse = await getProcurementRequisitionApprovalView(requisitionId, task.taskId)
+      requisitionApprovalView.value = businessResponse.data.data
+    } else if (variables.businessType === 'ASSET_TRANSFER') {
+      const transferId = positiveInteger(variables.transferId)
+      if (!transferId) throw new Error('资产调拨流程缺少合法的 transferId')
+      const businessResponse = await getAssetTransferApprovalView(transferId, task.taskId)
+      assetTransferApprovalView.value = businessResponse.data.data
+    } else if (variables.businessType === 'ASSET_DISPOSAL') {
+      const disposalId = positiveInteger(variables.disposalId)
+      if (!disposalId) throw new Error('资产处置流程缺少合法的 disposalId')
+      const businessResponse = await getAssetDisposalApprovalView(disposalId, task.taskId)
+      assetDisposalApprovalView.value = businessResponse.data.data
+    }
+  } catch (error) {
+    businessFormError.value = error instanceof Error ? error.message : '业务表单加载失败'
+  } finally {
+    businessFormLoading.value = false
+  }
 }
 
 async function submitApproval() {
-  if (!approvalTask.value) return
+  if (!approvalTask.value || !approvalCanSubmit.value) {
+    ElMessage.warning('业务表单尚未通过校验，不能审批')
+    return
+  }
   await completeApproval(approvalTask.value.taskId, {
     approved: approvalForm.approved,
     comment: approvalForm.comment,
   })
-  ElMessage.success(t('common.success'))
+  if (hasBusinessApprovalView.value) {
+    ElNotification.success({
+      title: '审批已处理',
+      message: '业务状态正在通过可靠消息同步，可在对应业务列表中查看最终结果。',
+      duration: 5000,
+    })
+  } else {
+    ElMessage.success(t('common.success'))
+  }
   approvalVisible.value = false
   loadTodoList()
   loadWfStats()
@@ -702,11 +784,12 @@ function instanceStatusType(status: number): string {
               </template>
             </el-table-column>
           </el-table>
-          <el-empty v-if="!todoLoading && todoList.length === 0" :description="t('workspace.noJobs')" />
-          <el-pagination v-model:current-page="todoPage" class="pagination"
-                         :page-size="10" :total="todoTotal"
-                         layout="total, prev, pager, next"
-                         @current-change="loadTodoList" />
+          <el-empty v-if="!todoLoading && todoList.length === 0" :description="t('workflow.noTodo')" />
+          <el-pagination v-model:current-page="todoPage" v-model:page-size="todoPageSize" class="pagination"
+                         :page-sizes="[5, 10, 20, 50, 100]" :total="todoTotal"
+                         layout="total, sizes, prev, pager, next"
+                         @current-change="loadTodoList"
+                         @size-change="todoPage = 1; loadTodoList()" />
         </el-tab-pane>
 
         <!-- Tab 2: 我发起的 -->
@@ -733,11 +816,12 @@ function instanceStatusType(status: number): string {
             </el-table-column>
             <el-table-column prop="createTime" :label="t('workflow.startTime')" width="170" />
           </el-table>
-          <el-empty v-if="!initiatedLoading && initiatedList.length === 0" :description="t('workspace.noJobs')" />
-          <el-pagination v-model:current-page="initiatedPage" class="pagination"
-                         :page-size="10" :total="initiatedTotal"
-                         layout="total, prev, pager, next"
-                         @current-change="loadInitiatedList" />
+          <el-empty v-if="!initiatedLoading && initiatedList.length === 0" :description="t('workflow.noInitiated')" />
+          <el-pagination v-model:current-page="initiatedPage" v-model:page-size="initiatedPageSize" class="pagination"
+                         :page-sizes="[5, 10, 20, 50, 100]" :total="initiatedTotal"
+                         layout="total, sizes, prev, pager, next"
+                         @current-change="loadInitiatedList"
+                         @size-change="initiatedPage = 1; loadInitiatedList()" />
         </el-tab-pane>
 
         <!-- Tab 3: 我已办的 -->
@@ -757,11 +841,12 @@ function instanceStatusType(status: number): string {
             </el-table-column>
             <el-table-column prop="createTime" :label="t('workflow.startTime')" width="170" />
           </el-table>
-          <el-empty v-if="!completedLoading && completedList.length === 0" :description="t('workspace.noJobs')" />
-          <el-pagination v-model:current-page="completedPage" class="pagination"
-                         :page-size="10" :total="completedTotal"
-                         layout="total, prev, pager, next"
-                         @current-change="loadCompletedList" />
+          <el-empty v-if="!completedLoading && completedList.length === 0" :description="t('workflow.noCompleted')" />
+          <el-pagination v-model:current-page="completedPage" v-model:page-size="completedPageSize" class="pagination"
+                         :page-sizes="[5, 10, 20, 50, 100]" :total="completedTotal"
+                         layout="total, sizes, prev, pager, next"
+                         @current-change="loadCompletedList"
+                         @size-change="completedPage = 1; loadCompletedList()" />
         </el-tab-pane>
 
         <!-- Tab 4: 我的定时任务 -->
@@ -844,16 +929,135 @@ function instanceStatusType(status: number): string {
         <!-- 空状态提示 -->
         <el-empty v-if="!loading && tableData.length === 0" :description="t('workspace.noJobs')" />
 
-        <el-pagination v-model:current-page="currentPage" class="pagination"
-                       :page-size="pageSize" :total="total"
-                       layout="total, prev, pager, next"
-                       @current-change="handlePageChange" />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination"
+                       :page-sizes="[5, 10, 20, 50, 100]" :total="total"
+                       layout="total, sizes, prev, pager, next"
+                       @current-change="handlePageChange"
+                       @size-change="currentPage = 1; handlePageChange(1)" />
           </el-card>
         </el-tab-pane>
       </el-tabs>
 
       <!-- 审批对话框 -->
-      <el-dialog v-model="approvalVisible" :title="approvalTask?.taskName || t('workflow.approve')" width="500">
+      <el-dialog
+        v-model="approvalVisible"
+        :title="approvalTask?.taskName || t('workflow.approve')"
+        :width="hasBusinessApprovalView ? '860px' : '500px'"
+      >
+        <div v-loading="businessFormLoading">
+          <el-alert
+            v-if="businessFormError"
+            type="error"
+            :closable="false"
+            show-icon
+            :title="`业务表单校验失败：${businessFormError}`"
+          />
+          <template v-if="requisitionApprovalView">
+            <el-descriptions :column="2" border class="approval-business-form">
+              <el-descriptions-item label="请购单号">
+                {{ requisitionApprovalView.requisition.requisitionNo }}
+              </el-descriptions-item>
+              <el-descriptions-item label="品类">
+                {{ requisitionApprovalView.requisition.primaryCategoryCode }}
+              </el-descriptions-item>
+              <el-descriptions-item label="标题" :span="2">
+                {{ requisitionApprovalView.requisition.title }}
+              </el-descriptions-item>
+              <el-descriptions-item label="申请人">
+                #{{ requisitionApprovalView.requisition.requesterUserId }}
+              </el-descriptions-item>
+              <el-descriptions-item label="申请组织">
+                #{{ requisitionApprovalView.requisition.requesterUnitId }}
+              </el-descriptions-item>
+              <el-descriptions-item label="预估金额">
+                {{ requisitionApprovalView.requisition.totalAmount }}
+                {{ requisitionApprovalView.requisition.currencyCode }}
+              </el-descriptions-item>
+              <el-descriptions-item label="审批轮次">
+                {{ requisitionApprovalView.requisition.approvalAttempt }}
+              </el-descriptions-item>
+              <el-descriptions-item label="请购原因" :span="2">
+                {{ requisitionApprovalView.requisition.reason || '—' }}
+              </el-descriptions-item>
+            </el-descriptions>
+            <el-table
+              :data="requisitionApprovalView.requisition.lines"
+              border
+              size="small"
+              class="approval-business-lines"
+            >
+              <el-table-column prop="lineNo" label="#" width="50" />
+              <el-table-column prop="materialCode" label="物料编码" min-width="120" />
+              <el-table-column prop="materialName" label="物料名称" min-width="150" />
+              <el-table-column prop="quantity" label="数量" min-width="105" align="right" />
+              <el-table-column prop="unit" label="单位" width="70" />
+              <el-table-column prop="estimatedUnitPrice" label="预估单价" min-width="110" align="right" />
+              <el-table-column prop="estimatedTotalPrice" label="行金额" min-width="120" align="right" />
+            </el-table>
+          </template>
+          <el-descriptions
+            v-else-if="assetTransferApprovalView"
+            :column="2"
+            border
+            class="approval-business-form"
+          >
+            <el-descriptions-item label="调拨单号">
+              {{ assetTransferApprovalView.transferNo }}
+            </el-descriptions-item>
+            <el-descriptions-item label="当前状态">
+              {{ assetTransferApprovalView.status }}
+            </el-descriptions-item>
+            <el-descriptions-item label="资产" :span="2">
+              {{ assetTransferApprovalView.assetNo }} /
+              {{ assetTransferApprovalView.assetName }}
+            </el-descriptions-item>
+            <el-descriptions-item label="原用户/部门">
+              {{ assetTransferApprovalView.fromUserId || '—' }} /
+              {{ assetTransferApprovalView.fromUnitId || '—' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="目标用户/部门">
+              {{ assetTransferApprovalView.toUserId }} /
+              {{ assetTransferApprovalView.toUnitId }}
+            </el-descriptions-item>
+            <el-descriptions-item label="位置" :span="2">
+              {{ assetTransferApprovalView.fromLocation || '—' }}
+              →
+              {{ assetTransferApprovalView.toLocation || '—' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="调拨原因" :span="2">
+              {{ assetTransferApprovalView.reason }}
+            </el-descriptions-item>
+          </el-descriptions>
+          <el-descriptions
+            v-else-if="assetDisposalApprovalView"
+            :column="2"
+            border
+            class="approval-business-form"
+          >
+            <el-descriptions-item label="处置单号">
+              {{ assetDisposalApprovalView.disposalNo }}
+            </el-descriptions-item>
+            <el-descriptions-item label="处置类型">
+              {{ assetDisposalApprovalView.disposalType === 'SCRAP' ? '报废' : '丢弃' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="资产" :span="2">
+              {{ assetDisposalApprovalView.assetNo }} /
+              {{ assetDisposalApprovalView.assetName }}
+            </el-descriptions-item>
+            <el-descriptions-item label="原资产状态">
+              {{ assetDisposalApprovalView.previousAssetStatus }}
+            </el-descriptions-item>
+            <el-descriptions-item label="残值">
+              {{ assetDisposalApprovalView.residualValue || '—' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="处置方式" :span="2">
+              {{ assetDisposalApprovalView.disposalMethod || '—' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="处置原因" :span="2">
+              {{ assetDisposalApprovalView.reason }}
+            </el-descriptions-item>
+          </el-descriptions>
+        </div>
         <el-form :model="approvalForm" label-width="100">
           <el-form-item :label="t('workflow.title')">
             <span>{{ approvalTask?.title }}</span>
@@ -870,7 +1074,9 @@ function instanceStatusType(status: number): string {
         </el-form>
         <template #footer>
           <el-button @click="approvalVisible = false">{{ t('common.cancel') }}</el-button>
-          <el-button type="primary" @click="submitApproval">{{ t('common.confirm') }}</el-button>
+          <el-button type="primary" :disabled="!approvalCanSubmit" @click="submitApproval">
+            {{ t('common.confirm') }}
+          </el-button>
         </template>
       </el-dialog>
     </main>
@@ -926,10 +1132,11 @@ function instanceStatusType(status: number): string {
         <el-table-column prop="resultMessage" :label="t('userJobLog.resultMessage')" show-overflow-tooltip min-width="180" />
         <el-table-column prop="errorMessage" :label="t('userJobLog.errorMessage')" show-overflow-tooltip />
       </el-table>
-      <el-pagination v-model:current-page="logPage" class="pagination"
-                     :page-size="logPageSize" :total="logTotal"
-                     layout="total, prev, pager, next"
-                     @current-change="handleLogPageChange" />
+      <el-pagination v-model:current-page="logPage" v-model:page-size="logPageSize" class="pagination"
+                     :page-sizes="[5, 10, 20, 50, 100]" :total="logTotal"
+                     layout="total, sizes, prev, pager, next"
+                     @current-change="handleLogPageChange"
+                     @size-change="logPage = 1; handleLogPageChange(1)" />
     </el-dialog>
   </div>
 </template>
@@ -1137,6 +1344,14 @@ html.dark .hero-orb {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.approval-business-form {
+  margin: 16px 0;
+}
+
+.approval-business-lines {
+  margin-bottom: 18px;
 }
 
 /* ─── 页脚 ─── */

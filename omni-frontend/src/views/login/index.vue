@@ -13,6 +13,7 @@ import { usePermissionStore } from '@/stores/permission'
 import { hasManagementAccess } from '@/utils/access'
 import { getRolesFromToken } from '@/utils/jwt'
 import { storeLang } from '@/i18n'
+import { safeAppRedirect } from '@/utils/navigation'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -23,9 +24,9 @@ const permissionStore = usePermissionStore()
 /** 登录成功回调：显示成功提示并跳转到原页面（或工作台） */
 function handleSuccess() {
   ElMessage.success(t('login.loginSuccess'))
-  const redirect = route.query.redirect as string
+  const redirect = safeAppRedirect(route.query.redirect)
   if (redirect) {
-    router.push(decodeURIComponent(redirect))
+    router.push(redirect)
   } else {
     // 从 JWT 解析权限，判断用户角色
     permissionStore.initFromToken()

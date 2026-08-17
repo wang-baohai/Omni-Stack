@@ -1,8 +1,8 @@
 # 采购执行模块架构与实现基线
 
-> 状态：设计完成，待实施  
-> 项目：Omni-Stack  
-> 日期：2026-07-13  
+> 状态：MVP 已实现并完成验证
+> 项目：Omni-Stack
+> 日期：2026-07-27
 > 目标：说明 omni-procurement MVP 的架构、跨服务契约和实施边界；实现入口为 `omni-backend/omni-procurement` 与 `omni-frontend/src/views/procurement`。
 
 设计依据：`README.md`，以及 `docs/` 中 architecture、api-contract、backend-patterns、frontend-patterns、core-flows、scheduling、workflow、mq-reliability、docker-deployment 全部主题文档；同时参照 `docs/design/srm-design.md` 的 SRM 供应商模型。
@@ -58,7 +58,7 @@ MVP 应能回答：有多少待审批请购单；某个请购单审批到哪一�
 | `omni-base` | 字典、操作日志 | 操作日志汇聚 |
 | `omni-workflow` | BPMN、流程实例、审批、Flowable 引擎唯一运行时 | 内部 OpenFeign 启动/查询/取消流程，消费审批结果事件 |
 | `omni-procurement` | 物料、请购、询价、采购订单、收货 | 唯一业务写入方 |
-| `omni-asset` | 资产管理（后续服务） | 收货验收通过后，通过 Outbox 事件或 Feign 通知 Asset 创建资产卡片 |
+| `omni-asset` | 资产管理 | 收货验收通过后，通过 Outbox 事件和受控历史补偿创建资产卡片 |
 | XXL-JOB | 触发批量扫描 | 订单超期提醒（Phase 2） |
 | RocketMQ | 异步运输 | 至少一次；消费者必须幂等 |
 
@@ -74,7 +74,8 @@ flowchart LR
     PROC --> R[("Redis DB 0")]
     PROC --> O["sys_mq_message"]
     O -->|"mqRelayHandler"| MQ["RocketMQ"]
-    ASSET["omni-asset :8107"] -. "Phase 2" .-> PROC
+    PROC -->|"合格收货事件"| ASSET["omni-asset :8107"]
+    ASSET -->|"历史候选补偿"| PROC
 ```
 
 推荐依赖：`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`，以及 Web、Validation、Security、AspectJ、OpenFeign、LoadBalancer、Nacos、RocketMQ Stream、Actuator、Lombok。
@@ -87,6 +88,7 @@ flowchart LR
 
 | 聚合 | 表 | 职责 |
 |---|---|---|
+| ProcurementConfig | `proc_tenant_config`、`proc_approval_route` | 租户币种与品类/金额审批模型路由 |
 | Material | `proc_material_category`、`proc_material` | 物料品类树、物料目录 |
 | Requisition | `proc_requisition`、`proc_requisition_line` | 请购申请、明细行；审批任务和记录由 omni-workflow 权威管理 |
 | RFQ | `proc_rfq`、`proc_rfq_line`、`proc_rfq_supplier` | 询价单、明细行、受邀供应商 |
@@ -123,56 +125,68 @@ erDiagram
 - 供应商 ID 由 SRM 管理，Procurement 只存 `supplier_id`，不建跨库外键。
 - 物料编号 `material_code` 在 tenant 内唯一。
 - 请购单号 `requisition_no`、询价单号 `rfq_no`、订单号 `po_no`、收货单号 `gr_no` 由数据库 ID 生成，tenant 内唯一。
-- 金额使用 `DECIMAL(18,2)` / `BigDecimal`，币种使用 ISO 4217 三位码（MVP 强制租户默认币种，与 CRM 一致）。
+- 数量和单价使用 `DECIMAL(19,6)` / `BigDecimal`，行金额和总金额使用 `DECIMAL(19,4)` / `BigDecimal`；HTTP JSON 一律使用十进制字符串承接，禁止经 JavaScript `number` 计算。币种使用 ISO 4217 三位码（MVP 强制租户默认币种）。
 - 时间统一 `yyyy-MM-dd HH:mm:ss`。
 - 普通 PUT 不允许直接修改审批状态、订单状态。
 - 外部请求不得使用裸 `selectById/updateById/deleteById`。
 
 ### 4.3 主要表
 
+`proc_tenant_config`
+
+- `tenant_id/currency_code/initialized_time/version` 与审计字段，tenant 内唯一。
+
+`proc_approval_route`
+
+- `route_code/category_code/min_amount/max_amount/model_version_id/priority/status/version/deleted` 与审计字段。
+- 精确品类优先于 `category_code='*'` 默认路由；区间语义为 `min_amount <= total_amount < max_amount`，max 为空表示无上限。
+- 同品类活动金额区间不得重叠；提交请购时匹配零条或多条都返回 409，客户端不得传 modelVersionId。
+
 `proc_material_category`
 
-- `tenant_id/parent_id/category_code/category_name/sort/status/deleted`。
-- 支持两级品类树（parent_id 为 0 表示顶级品类）。
-- MVP 不开放管理 UI，品类由租户初始化预置或管理员通过 API 维护。
+- `tenant_id/parent_id/category_code/category_name/sort/status/version/deleted` 与审计字段。
+- 支持任意层级品类树（parent_id 为 0 表示顶级品类），物料只能关联叶子品类。
+- MVP 在物料目录页提供品类树管理；`category_code` 创建后不可修改，更新和删除必须携带 `version` 并执行条件更新。
 
 `proc_material`
 
 - `tenant_id/category_id/material_code/material_name/specification/unit/asset_managed/status/version/deleted`。
 - `specification` 为文本描述（MVP 不做结构化规格参数）。
-- `unit` 为计量单位（个、箱、台、kg 等）。
-- `asset_managed` 表示合格收货后是否按“每个单位一张资产卡片”进入 Asset；仅允许可离散计数的计量单位启用，耗材、服务和 kg 等连续计量物料必须为 false。
+- `unit` 为规范化的大写计量单位（如 EA、PCS、UNIT、SET、KG）。
+- `asset_managed` 表示合格收货后是否按“每个单位一张资产卡片”进入 Asset；仅 `EA/PCS/UNIT/SET` 可启用，耗材、服务和 KG 等连续计量物料必须为 false。
 - 索引：tenant + category_id/status、tenant + material_code（唯一）。
 
 `proc_requisition`
 
-- `requisition_no/title/requester_user_id/requester_unit_id/reason/total_amount/currency_code`。
+- `requisition_no/title/requester_user_id/requester_unit_id/reason/primary_category_code/total_amount/currency_code`。
 - `status`：DRAFT/SUBMITTED/APPROVING/APPROVED/REJECTED/CANCELLED。
-- `process_instance_id`：关联 Workflow 流程实例 ID（启动成功后写入）。
+- `approval_attempt/workflow_request_id/workflow_business_key/workflow_model_version_id/process_instance_id`：当前审批轮次及 Workflow 幂等快照；businessKey 固定为 `{requisitionId}:{approvalAttempt}`。
 - `workflow_start_status`：NOT_STARTED/PENDING/FAILED/STARTED；与业务 status 分离，失败时业务状态仍为 SUBMITTED。
-- `approved_time/final_approval_remark`：审批完成快照，完整任务和意见仍以 Workflow 为权威。
+- `approved_time/workflow_completed_time`：审批完成时间快照；审批意见仍以 Workflow 为权威，Procurement 不复制或伪造最终意见。
 - `owner_user_id/owner_unit_id/version/deleted` 和审计字段。
 
 `proc_requisition_line`
 
-- `requisition_id/material_id/material_name/unit/quantity/estimated_unit_price/estimated_total_price/remark`。
+- `line_no/requisition_id/material_id/material_code/material_name/category_code/unit/quantity/estimated_unit_price/estimated_total_price/remark`；物料编码、名称、品类和单位均为提交时快照。
 - 请购单总金额 = SUM(line.estimated_total_price)。
+- MVP 强制一张请购的所有行属于同一品类；跨品类需求拆成多张请购，避免单值审批路由语义不确定。
 
 `proc_rfq`
 
-- `rfq_no/requisition_id/title/deadline/status/owner_user_id/owner_unit_id/version/deleted`。
+- `rfq_no/requisition_id/title/quotation_deadline/currency_code/status/sent_time/owner_user_id/owner_unit_id/version/deleted`。
 - `status`：DRAFT/SENT/CLOSED/AWARDED/CANCELLED。
-- `awarded_supplier_id/awarded_time`：定点结果。
+- `awarded_supplier_id/awarded_quotation_id/awarded_quotation_version/awarded_time`：定点与报价版本快照。
 - 关联请购单（一个请购可生成多个询价单，按品类拆分）。
 
 `proc_rfq_line`
 
-- `rfq_id/material_id/material_name/unit/quantity/remark`。
+- `rfq_id/line_no/material_id/material_code/material_name/category_code/unit/quantity/remark/version/deleted`，全部为请购行快照。
 
 `proc_rfq_supplier`
 
-- `rfq_id/supplier_id/supplier_name_snapshot/invited_time/quotation_id/status`。
-- `status`：INVITED/QUOTED/EXPIRED。
+- `rfq_id/supplier_id/supplier_name_snapshot/invited_time/quotation_id/quotation_version/quotation_request_id/quotation_time/status/version/deleted`。
+- `status`：INVITED/QUOTED/EXPIRED/AWARDED/REJECTED。`AWARDED/REJECTED` 为定点后的只读历史终态，不能继续报价。
+- 仅当 RFQ `status=SENT`、邀请 `status IN (INVITED, QUOTED)` 且当前时间不晚于 deadline 时可提交或更新报价。
 - `quotation_id` 逻辑关联 SRM 的 `srm_quotation`（不建跨库外键）；`supplier_name_snapshot` 仅用于历史展示，不作为当前供应商状态或权限依据。
 
 `proc_purchase_order`
@@ -241,12 +255,12 @@ flowchart TD
 实现方式：
 - 在 `omni-workflow` 中为每个品类创建一个 BPMN 流程模型（如 `procurement_approval_it`、`procurement_approval_office` 等）。
 - 或者使用一个通用 BPMN，通过 Exclusive Gateway 的两级嵌套（品类 → 金额）实现路由。
-- Procurement 服务在请购提交时，根据请购行的品类和总金额选择已发布的 modelVersionId，通过 Workflow 内部 API 启动流程。
+- Procurement 服务在请购提交时，根据请购的唯一品类和服务端重算总金额，从 `proc_approval_route` 选择已发布的 modelVersionId，通过 Workflow 内部 API 启动流程；客户端不能指定模型版本。
 - 审批人通过 Flowable 的 `ScopedRoleAssignmentListener` 动态解析（利用已有的组织架构+角色体系）。
 
-跨服务启动必须可重试：Procurement 以 `tenantId + businessType(PROCUREMENT_REQUISITION) + businessKey(requisitionId)` 作为幂等键。先以本地事务将请购从 DRAFT/REJECTED 条件更新为 `status=SUBMITTED, workflow_start_status=PENDING`，事务提交后调用 Workflow；成功后写入 processInstanceId，设置 workflow_start_status=STARTED 并推进到 APPROVING。响应丢失或调用失败时保留 `status=SUBMITTED, workflow_start_status=FAILED`，可使用同一幂等键安全重试，禁止重复启动流程。
+跨服务启动必须可重试：每次从 DRAFT 提交时先将 `approvalAttempt + 1`，生成并持久化 requestId 与 `businessKey={requisitionId}:{approvalAttempt}`；Procurement 以 `tenantId + businessType(PROCUREMENT_REQUISITION) + businessKey` 作为当前轮次幂等键。先以本地事务更新为 `status=SUBMITTED, workflow_start_status=PENDING`，事务提交后调用 Workflow；成功后写入 processInstanceId，设置 workflow_start_status=STARTED 并推进到 APPROVING。响应丢失或调用失败时保留 `status=SUBMITTED, workflow_start_status=FAILED`，retry 必须复用已保存的 requestId/businessKey/modelVersionId 且不得增加 attempt。REJECTED 修改成功后回到 DRAFT，再提交才开启新 attempt，避免 Workflow 永久业务键唯一约束重放旧流程。
 
-**MVP 简化**：如果品类较多导致 BPMN 过于复杂，可以先按"金额"单维度分支（忽略品类），后续迭代加入品类维度。
+**MVP 约束**：单张请购仅允许一个品类；审批路由支持精确品类与 `*` 默认路由，BPMN 可按金额分支。后续需要跨品类请购时再定义明确的主品类或多流程策略，禁止当前版本隐式取第一行。
 
 ### 5.3 询价/比价（RFQ）
 
@@ -258,15 +272,21 @@ sequenceDiagram
     participant DB as omni_procurement
     participant SUP as 供应商门户
 
-    BUYER->>S: POST /rfq (requisitionId, supplierIds[])
+    BUYER->>S: POST /rfq (requisitionId, supplierIds[]) 创建草稿
     S->>SRM: Feign 验证供应商状态=APPROVED
     S->>DB: INSERT Rfq + Lines + RfqSuppliers
+    BUYER->>S: POST /rfq/{id}/send
+    S->>SRM: 再次校验供应商状态=APPROVED
     S->>DB: INSERT Outbox event (rfq.sent.v1)
 
     Note over SUP: 供应商通过 SRM 门户查看询价
 
-    SUP->>SRM: POST /portal/quotation (报价)
-    SRM->>S: 内部 API 校验 RFQ 邀请/tenant/deadline
+    SUP->>SRM: GET /api/srm/portal/quotation/invitations
+    SRM->>S: GET /api/internal/procurement/rfq/invitations
+    SUP->>SRM: GET /api/srm/portal/quotation/invitations/{rfqId}
+    SRM->>S: GET /api/internal/procurement/rfq/{rfqId}/invitation
+    SUP->>SRM: POST /api/srm/portal/quotation (requestId, lines)
+    SRM->>S: 再次校验 RFQ 邀请/tenant/deadline/行快照
     SRM->>SRM: 本地事务保存报价 + Outbox
     SRM-->>S: MQ srm.quotation.submitted.v1
     S->>DB: 幂等更新 RfqSupplier.status=QUOTED
@@ -278,7 +298,7 @@ sequenceDiagram
     S-->>BUYER: PurchaseOrderVO
 ```
 
-比价方式：MVP 提供简单的比价视图——通过 SRM batch 内部 API 列出受邀供应商的有效报价（单价、总价、交期），采购员手动选择定点供应商。不做自动评标算法。定点事务必须保存 quotationId、报价版本以及金额/交期不可变快照，后续 SRM 报价变更不得改变既有定点和采购订单。
+比价方式：MVP 提供简单的比价视图——通过 `GET /api/internal/quotation/batch` 列出受邀供应商的有效报价（单价、总价、交期），采购员手动选择定点供应商。不做自动评标算法。定点事务必须保存 quotationId、报价版本以及金额/交期不可变快照，后续 SRM 报价变更不得改变既有定点和采购订单。
 
 ### 5.4 采购订单（Purchase Order）
 
@@ -328,24 +348,25 @@ sequenceDiagram
 
 ### 6.2 权限树与角色
 
-菜单：`procurement`（DIRECTORY）以及 `procurement:overview`、`procurement:material`、`procurement:requisition`、`procurement:rfq`、`procurement:purchase-order`、`procurement:goods-receipt`（MENU）。
+菜单：`procurement`（DIRECTORY）以及 `procurement:overview`、`procurement:material`、`procurement:approval-route`、`procurement:requisition`、`procurement:rfq`、`procurement:purchase-order`、`procurement:goods-receipt`（MENU）。只为已经交付的页面种 MENU，避免动态侧栏出现死链接。
 
 API 权限：
 
 - `procurement:overview:list`
 - `procurement:material:list/create/update/delete`
+- `procurement:approval-route:list/create/update/delete`
 - `procurement:requisition:list/create/update/delete/submit/approve/cancel`
-- `procurement:rfq:list/create/update/delete/award/cancel`
-- `procurement:purchase-order:list/create/update/delete/send/confirm/cancel`
+- `procurement:rfq:list/create/update/delete/send/award/cancel`
+- `procurement:purchase-order:list/update/delete/send/confirm/cancel`（采购订单仅由 RFQ 定点生成）
 - `procurement:goods-receipt:list/create/confirm`
 
 | 角色 | dataScope | 能力 |
 |---|---|---|
-| `PROCUREMENT_ADMIN` | TENANT | 当前租户全部采购功能/数据 |
 | `PROCUREMENT_MANAGER` | DEPT_AND_BELOW | 部门及下级、审批、统计 |
-| `PROCUREMENT_STAFF` | SELF | 自己负责的请购、询价、订单 |
-| `REQUESTER` | SELF | 仅能提交和查看自己的请购 |
-| `APPROVER` | 按流程 | 审批流中的审批人（由 Flowable 动态分配） |
+| `PROCUREMENT_STAFF` | SELF | 自己负责的请购、询价、订单及 SELF 范围概览 |
+| `EMPLOYEE` | SELF | 提交和查看自己的请购 |
+| `TEAM_LEADER` | DEPT | Workflow 分配给本人的审批及部门审批业务视图 |
+| `DEPT_LEADER` | DEPT_AND_BELOW | Workflow 分配给本人的审批及部门树审批业务视图 |
 | `SUPER_ADMIN` | ALL | 所有功能，采购数据仍限当前租户 |
 
 默认 USER 不授予采购权限。
@@ -378,7 +399,7 @@ API 权限：
 
 请购审批由独立的 `omni-workflow` 驱动，审批人由 `ScopedRoleAssignmentListener` 动态解析。用户在 Workflow 的 `/api/workflow/approval/{taskId}/complete` 完成任务；Workflow 必须同时校验功能权限和当前任务候选人/受理人身份。
 
-承担请购审批的角色必须同时获得 `procurement:requisition:approve`（读取专用业务审批 VO）和 `workflow:approval:complete`（完成本人 Workflow 任务）。两者缺一不可，租户初始化和角色 seed 必须同步维护。
+承担请购审批的 `TEAM_LEADER/DEPT_LEADER/PROCUREMENT_MANAGER` 必须同时获得 `procurement:requisition:approve`（读取专用业务审批 VO）和 `workflow:approval:complete`（完成本人 Workflow 任务）。两者缺一不可，租户初始化和角色 seed 必须同步维护。
 
 审批人在查看业务表单时使用 `procurement:requisition:approve` 权限，但审批可见范围不受普通 requester/owner dataScope 限制。为避免形成通用绕过，Procurement 提供专用 `GET /api/procurement/requisition/{id}/approval-view?taskId={taskId}`：先通过 Workflow 内部 API 校验 taskId 属于当前 tenant、businessKey 等于该 requisitionId，且任务已分配给当前用户，再按 `tenant_id + id` 读取只读审批 VO。普通详情接口仍执行 DataPermission，禁止复用此例外。
 
@@ -393,16 +414,25 @@ API 权限：
 | 领域 | 端点 |
 |---|---|
 | Overview | `GET /api/procurement/overview/summary`、`/spend-analysis` |
-| Material | `GET /material/category/list`、`GET /material/list`、`GET /material/{id}`、`POST /material`、`PUT/DELETE /material/{id}` |
+| Material Category | `GET /material/category/list`、`POST /material/category`、`PUT/DELETE /material/category/{id}`；更新 body 和删除 query 均携带 `version` |
+| Material | `GET /material/list`、`GET /material/{id}`、`POST /material`、`PUT/DELETE /material/{id}`；更新 body 和删除 query 均携带 `version` |
+| Approval Route | `GET /approval-route/list`、`POST /approval-route`、`PUT/DELETE /approval-route/{id}` |
 | Requisition | `GET /requisition/list`、`GET /requisition/{id}`、`POST /requisition`、`PUT/DELETE /requisition/{id}` |
 | Requisition 审批视图 | `GET /requisition/{id}/approval-view?taskId={taskId}`（先校验 Workflow 任务分配） |
 | Requisition 命令 | `POST /requisition/{id}/submit`、`/retry-start`、`/cancel` |
 | RFQ | `GET /rfq/list`、`GET /rfq/{id}`、`POST /rfq`、`PUT/DELETE /rfq/{id}` |
-| RFQ 命令 | `POST /rfq/{id}/award`、`/cancel` |
+| RFQ 命令 | `POST /rfq/{id}/send`、`/award`、`/cancel` |
 | Purchase Order | `GET /purchase-order/list`、`GET /purchase-order/{id}`、`POST /purchase-order`、`PUT/DELETE /purchase-order/{id}` |
 | PO 命令 | `POST /purchase-order/{id}/send`、`/confirm`、`/cancel` |
 | Goods Receipt | `GET /goods-receipt/list`、`GET /goods-receipt/{id}`、`POST /goods-receipt` |
 | GR 命令 | `POST /goods-receipt/{id}/confirm`、`/quality-result` |
+
+Overview 摘要固定返回审批中的请购数量、截止时间内仍有 `INVITED` 供应商的 `SENT` RFQ 数量、
+采购订单各状态数量、收货草稿数量，以及按 `currencyCode` 分组的已确认采购承诺金额。
+采购承诺与支出仅统计 `CONFIRMED/PARTIAL_RECEIVED/RECEIVED/CLOSED` 订单，不包含
+`DRAFT/SENT/CANCELLED`。`spend-analysis` 的 `dimension` 支持
+`CATEGORY/SUPPLIER/DEPARTMENT`，其中 DEPARTMENT 表示采购订单 `owner_unit_id`；
+结果先按币种、再按金额降序排列，`limit` 范围为 1–100。任何接口都不得跨币种直接求和。
 
 ### 7.3 端点与 DataScope permission 映射
 
@@ -411,6 +441,7 @@ API 权限：
 | Overview | `procurement:overview:list` |
 | Material list/detail | `procurement:material:list` |
 | Material create/update/delete | `procurement:material:create/update/delete` |
+| Approval route list/create/update/delete | `procurement:approval-route:list/create/update/delete` |
 | Requisition list/detail | `procurement:requisition:list` |
 | Requisition create/update/delete | `procurement:requisition:create/update/delete` |
 | Requisition submit | `procurement:requisition:submit` |
@@ -418,9 +449,9 @@ API 权限：
 | Requisition approve | `procurement:requisition:approve` |
 | Requisition cancel | `procurement:requisition:cancel` |
 | RFQ list/detail | `procurement:rfq:list` |
-| RFQ create/award/cancel | `procurement:rfq:create/award/cancel` |
+| RFQ create/update/delete/send/award/cancel | `procurement:rfq:create/update/delete/send/award/cancel` |
 | PO list/detail | `procurement:purchase-order:list` |
-| PO create/send/confirm/cancel | `procurement:purchase-order:create/send/confirm/cancel` |
+| PO update/delete/send/confirm/cancel | `procurement:purchase-order:update/delete/send/confirm/cancel`（无外部 create，订单仅由 RFQ 定点生成） |
 | GR list/detail | `procurement:goods-receipt:list` |
 | GR create/confirm/quality-result | `procurement:goods-receipt:create/confirm`（quality-result 复用 confirm 权限） |
 
@@ -434,13 +465,20 @@ API 权限：
 
 Procurement 通过 SRM 内部 API 获取供应商数据：
 
-- `GET /internal/supplier/{id}?tenantId={tenantId}`：获取供应商摘要。
-- `GET /internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}`：搜索合格供应商。
-- `GET /internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}`：返回受邀供应商的报价及版本，用于比价和定点快照。
+- `GET /api/internal/supplier/{id}?tenantId={tenantId}`：获取供应商摘要。
+- `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}`：搜索合格供应商。
+- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}`：返回受邀供应商的有效报价、版本和完整行快照，用于比价和定点快照。
 - 询价时验证供应商状态为 APPROVED，且不在黑名单。
 - 列表展示供应商名称时，收集 supplier_id 后一次 batch Feign。
 
-Procurement 同时提供 `GET /internal/procurement/rfq/{id}/invitation?tenantId={tenantId}&supplierId={supplierId}` 给 SRM 门户校验邀请、RFQ 状态和截止时间。SRM 保存报价后发布 `srm.quotation.submitted.v1`；Procurement 以 eventId Inbox 幂等消费并更新自己的 `proc_rfq_supplier`，SRM 不得跨库写 Procurement 表。
+Procurement 同时向 SRM 提供两类内部只读接口：
+
+- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`：返回当前供应商的邀请列表，至少包含 `rfqId/rfqNo/title/status/invitationStatus/quotationDeadline/currencyCode/invitedTime`。
+- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`：返回邀请详情和 RFQ 行快照，行至少包含 `rfqLineId/materialCode/materialName/unit/quantity/remark`。
+
+SRM 必须以 PortalUser 关联得到的 supplierId 调用这些接口，不能使用门户请求传入的 supplierId。提交前再次校验 RFQ `status=SENT`、邀请 `status IN (INVITED, QUOTED)` 且未超过 quotationDeadline，报价 `validUntil` 不得早于 quotationDeadline，并校验提交 rfqLineId 集合与详情完全一致。SRM 保存报价后发布 `srm.quotation.submitted.v1`；Procurement 以 eventId Inbox 幂等消费并更新自己的 `proc_rfq_supplier`，SRM 不得跨库写 Procurement 表。
+
+所有上述内部接口统一使用 `/api/internal/**` 前缀，要求 `X-Internal-Token` 和 `X-Tenant-Id`；若接口同时携带 query/body tenant，则必须与 header tenant 一致。Gateway 不转发该前缀。
 
 SRM 不可用时：
 - 供应商展示：可返回 ID/未知供应商。
@@ -450,13 +488,13 @@ SRM 不可用时：
 
 Procurement 不嵌入 Flowable，通过 `X-Internal-Token` 保护的 Workflow 内部 API 集成。请购审批流程：
 
-1. Procurement 将请购条件更新为 SUBMITTED，事务提交后调用 Workflow `POST /internal/workflow/process-instance/start`。
-2. 请求包含 `requestId`、`tenantId`、`modelVersionId`、`businessType=PROCUREMENT_REQUISITION`、`businessKey=requisitionId`、`startUserId` 和 variables。
-3. `variables` 包含 `materialCategory`（品类 code）、`totalAmount`（总金额）、`requesterUnitId`（申请部门）；Workflow 按 modelVersionId 对应的已发布 BPMN 启动实例。
+1. Procurement 将请购条件更新为 SUBMITTED，事务提交后调用 Workflow `POST /api/internal/workflow/process-instance/start`。
+2. 请求包含已持久化的 `requestId`、`tenantId`、`modelVersionId`、`businessType=PROCUREMENT_REQUISITION`、`businessKey={requisitionId}:{approvalAttempt}`、`startUserId` 和 variables。
+3. `variables` 包含 `requisitionId`、`approvalAttempt`、`materialCategory`（唯一品类 code）、`totalAmount`（总金额十进制字符串）、`requesterUnitId`（申请部门）；Workflow 按 modelVersionId 对应的已发布 BPMN 启动实例。
 4. Workflow 对 `tenantId + businessType + businessKey` 建唯一幂等约束；重复请求返回已有 processInstanceId。
 5. Procurement 保存 processInstanceId，将状态推进到 APPROVING。超时或响应丢失时以同一 requestId/businessKey 重试。
 6. 审批结束后，Workflow 在本地事务中发布 `workflow.process.completed.v1`，携带 eventId、tenantId、businessType、businessKey、processInstanceId、result 和 completedTime。
-7. Procurement 使用 Inbox 唯一键幂等消费，仅当 tenant/businessKey/processInstanceId 均匹配且当前状态为 APPROVING 时更新为 APPROVED 或 REJECTED，并发送采购领域事件。
+7. Procurement 使用 Inbox 唯一键幂等消费，仅当 tenant/businessKey（含当前 attempt）/processInstanceId 均匹配且当前状态为 APPROVING 时更新为 APPROVED、REJECTED 或 CANCELLED，并发送采购领域事件。若完成事件早于本地 `markStarted` 到达，必须抛出可重试异常且不能把 Inbox 标成已处理；旧 attempt 事件只做幂等忽略。
 
 工作流集成遵循 `docs/workflow.md` 的规范：
 - `model_key` 在租户内唯一。
@@ -484,6 +522,8 @@ Procurement 不嵌入 Flowable，通过 `X-Internal-Token` 保护的 Workflow �
     "supplierNameSnapshot": "某某科技",
     "purchaseDate": "2026-07-13 10:30:00",
     "currencyCode": "CNY",
+    "ownerUserId": 1001,
+    "ownerUnitId": 2001,
     "lines": [
       {
         "goodsReceiptLineId": 401,
@@ -493,21 +533,25 @@ Procurement 不嵌入 Flowable，通过 `X-Internal-Token` 保护的 Workflow �
         "materialNameSnapshot": "ThinkPad X1 Carbon",
         "categoryCode": "IT_DEVICE",
         "unit": "台",
-        "receivedQuantity": 5,
+        "receivedQuantity": "5.000000",
         "qualityStatus": "PASS",
         "assetManaged": true,
         "assetQuantity": 5,
-        "unitPrice": 12000.00,
-        "totalPrice": 60000.00
+        "unitPrice": "12000.000000",
+        "totalPrice": "60000.0000"
       }
     ]
   }
 }
 ```
 
-`omni-asset` 只对满足资产化条件的行按 `assetQuantity` 创建资产卡片，并以 `eventId + goodsReceiptLineId + unitSequence` 幂等。
+`ownerUserId/ownerUnitId` 是收货单管理归属的不可缺失快照，Asset 直接继承为新资产的管理人和管理部门；不得用供应商门户用户或消息消费线程身份猜测。数量、单价和金额沿用 Procurement 十进制字符串契约，只有整型计数 `assetQuantity` 使用 JSON number。
 
-Outbox 只保证事件可靠投递到 Broker；消息一旦发送成功会进入 SENT，不保证为未来尚未部署的消费者无限期保留。Asset 上线时必须执行补偿回扫：通过 `GET /internal/procurement/goods-receipt/asset-candidates?tenantId={tenantId}&afterId={id}&size={size}` 分页读取全部已确认且可资产化的历史收货行，按同一幂等键补建。实时消费与历史回扫可以并行，Inbox 唯一约束保证不会重复。
+`omni-asset` 只对满足资产化条件的行按 `assetQuantity` 创建资产卡片。实时事件使用
+`consumerName + eventId` 的 Inbox 唯一键幂等，实时消费和历史回扫共同使用
+`tenantId + goodsReceiptLineId + unitSequence` 的资产来源唯一键兜底；同一幂等键绑定不同完整业务意图时返回冲突，不得静默覆盖。
+
+Outbox 只保证事件可靠投递到 Broker；消息一旦发送成功会进入 SENT，不保证为未来尚未部署的消费者无限期保留。Asset 上线时必须执行补偿回扫：通过 `GET /api/internal/procurement/goods-receipt/asset-candidates?tenantId={tenantId}&afterId={id}&size={size}` 分页读取全部已确认且可资产化的历史收货行，按同一幂等键补建。实时消费与历史回扫可以并行，Inbox 唯一约束保证不会重复。
 
 ### 8.5 Outbox 事件
 
@@ -568,6 +612,7 @@ omni-frontend/src/
 - `ApiResponse/PageResult` 只从 `src/types/api.ts` 导入。
 - 请购表单支持明细行动态增删（添加/移除物料行）。
 - 比价视图使用 Element Plus 表格横向对比各供应商报价。
+- Workflow 待办列表本身不携带 Procurement businessKey；打开任务时先调用 `/api/workflow/task/{taskId}/form`，从 variables 读取 `businessType/requisitionId`，再加载 Procurement `approval-view`。业务表单加载或任务分配校验失败时必须禁止提交审批。
 - `router/index.ts` 与 `layout/index.vue` iconMap 补 Procurement。
 - `constants/menu.ts`、`zh-CN.ts`、`en-US.ts` 同步。
 
@@ -615,14 +660,16 @@ omni-backend/omni-procurement/
 
 - 所有列表分页，最大 100。
 - 供应商名称一次 batch enrich，禁止 N+1。
-- 概览统计使用 Mapper 层聚合 SQL（按品类/供应商/部门的采购支出 `GROUP BY`）。
+- 概览统计使用 Mapper 层聚合 SQL（按品类/供应商/负责部门及币种的采购支出 `GROUP BY`），
+  每个聚合根继续应用与其列表相同的 requester/owner DataScope，禁止跨币种求和和逐记录查询。
 
 ### 并发与幂等
 
 - 请购提交 → 审批流启动：本地状态条件更新 + Workflow 的 `tenantId + businessType + businessKey` 唯一幂等；超时使用相同 requestId 重试。
 - 收货数量校验：`received_quantity <= ordered_quantity - already_received`，使用乐观锁。
 - 询价定点：version 乐观锁 + RFQ 状态校验。
-- 报价事件和审批结果事件：各自使用 Inbox eventId 唯一键幂等消费。
+- 门户报价提交：SRM 用永久请求历史表以 `(tenantId, requestId)` 幂等、requestHash 防止同键异意图，并以 `(tenantId, rfqId, supplierId)` 约束唯一有效报价；相同意图重放返回当前快照，不重复发布事件。
+- 报价事件和审批结果事件：各自使用 Inbox eventId 唯一键幂等消费；同一 quotationId 的旧 quotationVersion 不得覆盖新版本。
 
 ### 降级
 
@@ -673,7 +720,7 @@ omni-backend/omni-procurement/
 
 ### Milestone 2：物料目录
 
-- 品类树（两级）和物料 CRUD。
+- 品类树（任意层级）和物料 CRUD。
 - 物料编号 tenant 内唯一。
 
 ### Milestone 3：请购 + 审批流
@@ -710,7 +757,7 @@ omni-backend/omni-procurement/
 | 收货 → Asset | Outbox 实时事件 + 历史补偿回扫 | 解耦且不依赖 Broker 为未来消费者永久保存消息 |
 | 供应商数据 | Feign 调用 SRM | 不跨库读取 SRM 数据 |
 | 三单匹配 | 不做 | 留给 ERP/财务系统 |
-| MVP 品类管理 | 不开放管理 UI | 预置或 API 维护 |
+| MVP 品类管理 | 已开放前端管理 UI | 支持任意层级品类树自主维护 |
 
 ## 16. 主要风险
 

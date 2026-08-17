@@ -1,6 +1,7 @@
 package com.omni.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.io.Serial;
@@ -27,6 +28,11 @@ public class CreateTenantRequest implements Serializable {
     /** 租户名称 */
     @NotBlank(message = "租户名称不能为空")
     private String tenantName;
+
+    /** 初始超级管理员密码，仅用于创建租户时生成 BCrypt 哈希。 */
+    @NotBlank(message = "初始管理员密码不能为空")
+    @Size(min = 8, max = 64, message = "初始管理员密码长度必须为 8-64 个字符")
+    private String adminPassword;
 
     /** 域名 */
     private String domain;

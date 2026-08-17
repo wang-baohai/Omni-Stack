@@ -24,20 +24,18 @@ class SrmRiskCalculatorTest {
     /** 未定义的类型和等级必须拒绝。 */
     @Test
     void shouldRejectUnknownEnums() {
-        assertThatThrownBy(() -> SrmRiskCalculator.parseType("QUALIFICATION_LICENSE"))
-                .isInstanceOf(BusinessException.class);
         assertThatThrownBy(() -> SrmRiskCalculator.parseLevel("ORANGE"))
                 .isInstanceOf(BusinessException.class);
     }
 
-    /** 资质风险必须由系统计算，不能手工维护。 */
+    /** 自动计算的指标不允许手工修改。 */
     @Test
-    void shouldRejectManualCertificateUpdate() {
-        assertThatThrownBy(() -> SrmRiskCalculator.requireManuallyEditable(
-                SrmRiskCalculator.IndicatorType.CERTIFICATE))
+    void shouldRejectAutoCalcIndicator() {
+        assertThatThrownBy(() -> SrmRiskCalculator.requireManuallyEditable(1))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo(400);
-        SrmRiskCalculator.requireManuallyEditable(SrmRiskCalculator.IndicatorType.FINANCIAL);
+        SrmRiskCalculator.requireManuallyEditable(0);
+        SrmRiskCalculator.requireManuallyEditable(null);
     }
 
     /** 资质过期、三十天内和三十天外边界必须正确。 */

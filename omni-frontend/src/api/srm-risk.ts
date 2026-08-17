@@ -11,11 +11,26 @@ export interface RiskIndicatorVO {
   id: number
   supplierId: number
   indicatorType: string
+  indicatorTypeName: string | null
   indicatorValue: string
   riskLevel: RiskLevel
+  criterionId: number | null
+  score: number | null
+  autoCalc: number | null
   assessmentTime: string
   remark: string | null
   version: number
+  criteria: RiskCriterionOption[]
+}
+
+export interface RiskCriterionOption {
+  id: number
+  indicatorTypeId: number
+  criterionLabel: string
+  score: number
+  riskLevel: RiskLevel
+  sort: number
+  status: number
 }
 
 export interface RiskAssessmentVO {
@@ -51,6 +66,7 @@ export interface RiskDashboardVO {
 
 export interface UpdateRiskIndicatorRequest {
   version: number
+  criterionId?: number
   indicatorValue?: string
   riskLevel?: RiskLevel
   remark?: string

@@ -12,9 +12,9 @@ Omni-Stack is a microservices scaffolding platform built with Spring Boot 4 + Vu
 | Cloud Alibaba | Spring Cloud Alibaba                     | 2025.1.0.0     |
 | Gateway     | Spring Cloud Gateway Server (WebFlux)       | 5.0.1          |
 | Service Discovery / Config | Nacos Server              | v3.1.1         |
-| Circuit Breaker / Flow Control | Sentinel Dashboard            | 1.8.8          |
+| Circuit Breaker / Flow Control | Spring Cloud Alibaba Sentinel client | 2025.1.0.0 (Dashboard optional) |
 | Frontend    | Vue 3 + TypeScript                          | 3.5.35 / 5.9.3 |
-| Bundler     | Vite 8 (Rolldown)                           | 8.0.14         |
+| Bundler     | Vite 8 (Rolldown)                           | 8.2.1          |
 | UI Framework| Element Plus                                | 2.14.0         |
 | State       | Pinia                                       | 3.0.4          |
 | Router      | Vue Router                                  | 5.0.7          |
@@ -35,6 +35,8 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/workflow.md` | Workflow engine: Flowable integration, dual-version model management, multi-instance countersign, candidate resolution, approval flows |
 | `docs/crm.md` | CRM sales pipeline: domain model, 6-layer security, state machine, lead conversion, extension guide |
 | `docs/design/srm-design.md` | SRM MVP: supplier lifecycle, portal Saga, evaluation/risk, data scope, API and deployment constraints |
+| `docs/design/procurement-design.md` | Procurement: material catalog, requisition approval, RFQ/quotation, purchase order and goods receipt boundaries |
+| `docs/design/asset-design.md` | Asset MVP: asset ledger, procurement receipt ingestion, allocation/return, transfer/disposal approval and data scope |
 | `docs/mq-reliability.md` | Reliable message sending: Transactional Outbox pattern, status machine, retry strategy, tenant isolation, new service onboarding |
 
 ## Entry Points
@@ -45,6 +47,8 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Gateway: `omni-backend/omni-gateway/src/main/java/com/omni/gateway/GatewayApplication.java`
 - CRM service: `omni-backend/omni-crm/src/main/java/com/omni/crm/CrmApplication.java`
 - SRM service: `omni-backend/omni-srm/src/main/java/com/omni/srm/SrmApplication.java`
+- Procurement service: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java`
+- Asset service: `omni-backend/omni-asset/src/main/java/com/omni/asset/AssetApplication.java`
 - Common library: `omni-backend/omni-common/src/main/java/com/omni/common/`
 - Common core (POJO): `omni-backend/omni-common-core/src/main/java/com/omni/common/core/`
 - Common MyBatis-Plus starter: `omni-backend/omni-common-mybatis/src/main/java/com/omni/common/mybatis/`
@@ -64,6 +68,8 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Vite config: `omni-frontend/vite.config.ts`
 - CRM config: `omni-backend/omni-crm/src/main/resources/application.yml`
 - SRM config: `omni-backend/omni-srm/src/main/resources/application.yml`
+- Procurement config: `omni-backend/omni-procurement/src/main/resources/application.yml`
+- Asset config: `omni-backend/omni-asset/src/main/resources/application.yml`
 
 **RBAC & Permission:**
 - Data scope filter: `omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeResolveFilter.java`
@@ -150,6 +156,28 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Supplier portal: `omni-frontend/src/views/supplier-portal/`
 - SRM migration: `scripts/sql/migrate-srm-mvp.sql`
 
+**Procurement:**
+- Procurement service: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java`
+- Tenant/DataScope: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/`
+- MyBatis interceptor chain: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/config/MybatisPlusConfig.java`
+- Material, approval route, requisition and RFQ aggregates: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/entity/`
+- Requisition workflow: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RequisitionController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinator.java`
+- RFQ lifecycle and quotation integration: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RfqController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/consumer/QuotationSubmittedConsumer.java`
+- Purchase order and goods receipt: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/PurchaseOrderController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/GoodsReceiptController.java`
+- Procurement overview: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/OverviewController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcOverviewMapper.java`
+- Procurement schema and RBAC: `scripts/sql/migrate-procurement-mvp.sql`, `scripts/sql/init-all.sql`
+
+**Asset:**
+- Asset service: `omni-backend/omni-asset/src/main/java/com/omni/asset/AssetApplication.java`
+- Tenant/DataScope: `omni-backend/omni-asset/src/main/java/com/omni/asset/security/`
+- MyBatis interceptor chain: `omni-backend/omni-asset/src/main/java/com/omni/asset/config/MybatisPlusConfig.java`
+- Asset ledger and lifecycle commands: `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetController.java`
+- Procurement receipt ingestion/backfill: `omni-backend/omni-asset/src/main/java/com/omni/asset/consumer/ProcurementGoodsReceiptConsumer.java`, `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/InternalProcurementBackfillController.java`
+- Transfer/disposal approval: `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetTransferController.java`, `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetDisposalController.java`
+- Asset overview: `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetOverviewController.java`
+- Frontend pages: `omni-frontend/src/views/asset/`
+- Asset schema and RBAC: `scripts/sql/migrate-asset-mvp.sql`, `scripts/sql/init-all.sql`
+
 ## Build & Run Commands
 
 ### Prerequisites
@@ -195,6 +223,14 @@ cd omni-backend/omni-crm
 # Run SRM service (port 8105)
 cd omni-backend/omni-srm
 ./mvnw spring-boot:run
+
+# Run Procurement service (port 8106)
+cd omni-backend/omni-procurement
+./mvnw spring-boot:run
+
+# Run Asset service (port 8107)
+cd omni-backend/omni-asset
+./mvnw spring-boot:run
 ```
 
 **Build order**: `omni-common-core` must be installed first, then `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-redis-reactive` before `omni-auth`, `omni-base`, or `omni-gateway` can compile. Maven reactor resolves this automatically from `<modules>` declaration order.
@@ -222,7 +258,7 @@ npm run lint
 **Primary method** — Docker Compose (recommended):
 
 ```bash
-# Start all middleware (MySQL, Redis, Nacos, Sentinel)
+# Start the repository stack (MySQL, Redis, Nacos, RocketMQ, XXL-JOB, services, frontend)
 docker compose up -d
 
 # Check service health
@@ -242,11 +278,12 @@ docker run -d --name nacos \
   -e NACOS_AUTH_IDENTITY_VALUE=nacos \
   nacos/nacos-server:v3.1.1
 
-# Sentinel Dashboard (port 8858)
+# Optional Sentinel Dashboard (not included in docker-compose.yml, port 8858)
 docker run -d --name sentinel -p 8858:8858 bladex/sentinel-dashboard:1.8.8
 ```
 
-Start order: Nacos -> Sentinel -> Backend services -> Frontend
+Start order: MySQL/Redis/RocketMQ -> Nacos/XXL-JOB -> Backend services -> Frontend.
+Start the optional Sentinel Dashboard separately only when interactive rule monitoring is required.
 
 ### Service Ports
 
@@ -259,10 +296,12 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 | Workflow         | 8103  |
 | CRM              | 8104  |
 | SRM              | 8105  |
+| Procurement      | 8106  |
+| Asset            | 8107  |
 | MySQL            | 3306  |
 | Redis            | 6379  |
 | Nacos            | 8080, 8848  |
-| Sentinel         | 8858  |
+| Sentinel Dashboard (optional) | 8858  |
 
 ## Hard Constraints
 
@@ -298,6 +337,15 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - SRM Portal enrollment requires inviteToken and client requestId. Supplier Portal user IDs must never be written into internal `owner_user_id/owner_unit_id` fields.
 - SRM child-resource DataScope must inherit visibility through Supplier/Evaluation relations; never append owner columns to tables that do not contain them.
 - SRM lifecycle, evaluation, risk and Portal Saga rules are defined in `docs/design/srm-design.md`; changes require matching SQL seed/migration, backend permission and frontend `v-permission` updates.
+- Procurement TenantLine only applies to `proc_*` tables; `sys_mq_message` must remain outside tenant interception so the relay can scan all tenants.
+- Procurement data permission mappings are aggregate-specific: requisition uses requester columns, RFQ/PO/GR use owner columns, and child rows inherit through their aggregate root. Material/category/approval route/config are tenant-shared.
+- Procurement approval runtime remains in `omni-workflow`; never add Flowable or `omni-common-workflow` to `omni-procurement`.
+- Asset TenantLine only applies to `ast_*` tables; `sys_mq_message` must remain outside tenant interception so the relay can scan all tenants.
+- Asset management views use `owner_user_id/owner_unit_id`; “my asset”, accept and return use fixed `current_user_id`; transfer/disposal child rows inherit scope through `ast_asset`.
+- Asset receipt ingestion only creates cards for `qualityStatus=PASS && assetManaged=true` with an exact positive integer `assetQuantity`. Inbox event ID plus source receipt-line/unit sequence provide dual idempotency.
+- Asset transfer and disposal share the atomic `active_operation_type/active_operation_id` occupancy on `ast_asset`; cancellation or rejection must restore `previous_asset_status` and clear occupancy in the same transaction.
+- Asset approval runtime remains in `omni-workflow`; never add Flowable or `omni-common-workflow` to `omni-asset`.
+- Asset monetary JSON fields (`purchaseAmount`, `residualValue`, event prices) use decimal strings and must never be transported as JSON numbers.
 - `omni-common-job` dependency is required for any service that needs scheduling. `XxlJobAutoConfiguration` activates via `@ConditionalOnClass(XxlJobSpringExecutor.class)` and auto-registers the executor and system job registry.
 - `omni-common-mqlog` provides reliable MQ message sending via Transactional Outbox pattern. `ReliableMessageRelay.send(bindingName, payload, tenantId)` inserts a PENDING record into `sys_mq_message` in the same local transaction. `mqRelayHandler` (XXL-JOB, `@XxlJob` + `@SystemJobMeta` dual annotation) asynchronously delivers messages. Each service's executor AppName is different, so handler names are naturally isolated.
 - `ReliableMessageRelay.send()` requires explicit `Long tenantId` parameter. NEVER use ThreadLocal or implicit tenant resolution for MQ outbox writes. All callers must pass tenantId from their context (e.g., `OperLogMessage.getTenantId()`).
@@ -338,6 +386,8 @@ Start order: Nacos -> Sentinel -> Backend services -> Frontend
 - Before adding a new candidate resolution strategy or anchor type: read `docs/workflow.md` Section 4 (Extension Guide).
 - Before adding CRM aggregate roots, stages, or permission codes: read `docs/crm.md` (domain model, state machines, hard constraints, extension guide).
 - Before modifying SRM lifecycle, portal, evaluation, risk, permission codes or schema: read `docs/design/srm-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-srm-mvp.sql`.
+- Before modifying Procurement material, requisition, RFQ, purchase order, goods receipt, permission codes or schema: read `docs/design/procurement-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-procurement-mvp.sql`.
+- Before modifying Asset lifecycle, receipt ingestion, transfer, disposal, permission codes or schema: read `docs/design/asset-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-asset-mvp.sql`.
 - Before adding MQ message sending to a new service: depend on `omni-common-mqlog` (auto-registers `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, and `MqMessageInternalController`), ensure `sys_mq_message` table exists via `schema.sql`, and call `ReliableMessageRelay.send(bindingName, payload, tenantId)` with explicit tenantId. Read `docs/mq-reliability.md` for onboarding details.
 
 ## Completion Checklist

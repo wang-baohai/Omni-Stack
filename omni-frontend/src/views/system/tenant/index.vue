@@ -37,6 +37,7 @@ const formRef = ref()
 const form = reactive<CreateTenantRequest>({
   tenantCode: '',
   tenantName: '',
+  adminPassword: '',
   domain: '',
   contactName: '',
   contactPhone: '',
@@ -47,6 +48,19 @@ const form = reactive<CreateTenantRequest>({
 const rules = {
   tenantCode: [{ required: true, message: t('tenant.tenantCode'), trigger: 'blur' }],
   tenantName: [{ required: true, message: t('tenant.tenantName'), trigger: 'blur' }],
+  adminPassword: [
+    {
+      validator: (_rule: unknown, value: string, callback: (error?: Error) => void) => {
+        if (editingId.value !== null) return callback()
+        if (!value) return callback(new Error(t('tenant.adminPasswordRequired')))
+        if (value.length < 8 || value.length > 64) {
+          return callback(new Error(t('tenant.adminPasswordLength')))
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
+  ],
 }
 
 /**
@@ -81,6 +95,7 @@ function openCreateDialog() {
   Object.assign(form, {
     tenantCode: '',
     tenantName: '',
+    adminPassword: '',
     domain: '',
     contactName: '',
     contactPhone: '',
@@ -98,6 +113,7 @@ function openEditDialog(row: SysTenant) {
   Object.assign(form, {
     tenantCode: row.tenantCode,
     tenantName: row.tenantName,
+    adminPassword: '',
     domain: row.domain ?? '',
     contactName: row.contactName ?? '',
     contactPhone: row.contactPhone ?? '',
@@ -112,12 +128,14 @@ function openEditDialog(row: SysTenant) {
 async function handleSave() {
   await formRef.value?.validate()
   if (editingId.value !== null) {
-    const { tenantCode: _tenantCode, ...updateData } = form
+    const { tenantCode: _tenantCode, adminPassword: _adminPassword, ...updateData } = form
     void _tenantCode
+    void _adminPassword
     await updateTenant(editingId.value, updateData)
   } else {
     await createTenant(form)
   }
+  form.adminPassword = ''
   ElMessage.success(t('common.success'))
   dialogVisible.value = false
   loadData()
@@ -180,11 +198,13 @@ onMounted(loadData)
 
       <el-pagination
         v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
         class="pagination"
-        :page-size="pageSize"
+        :page-sizes="[5, 10, 20, 50, 100]"
         :total="total"
-        layout="total, prev, pager, next"
+        layout="total, sizes, prev, pager, next"
         @current-change="handlePageChange"
+        @size-change="currentPage = 1; handlePageChange(1)"
       />
     </el-card>
 
@@ -196,6 +216,19 @@ onMounted(loadData)
         </el-form-item>
         <el-form-item :label="t('tenant.tenantName')" prop="tenantName">
           <el-input v-model="form.tenantName" />
+        </el-form-item>
+        <el-form-item
+          v-if="editingId === null"
+          :label="t('tenant.adminPassword')"
+          prop="adminPassword"
+        >
+          <el-input
+            v-model="form.adminPassword"
+            type="password"
+            show-password
+            autocomplete="new-password"
+            :placeholder="t('tenant.adminPasswordPlaceholder')"
+          />
         </el-form-item>
         <el-form-item :label="t('tenant.domain')" prop="domain">
           <el-input v-model="form.domain" />

@@ -7,14 +7,14 @@
  */
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
+import { resolve } from 'node:path'
 
 export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
       /** @ 指向 src 目录，简化模块导入路径 */
-      '@': resolve(__dirname, 'src'),
+      '@': resolve(import.meta.dirname, 'src'),
     },
   },
   server: {
@@ -45,7 +45,18 @@ export default defineConfig({
     target: 'es2020',
     /** 输出目录 */
     outDir: 'dist',
-    /** chunk 体积警告阈值（KB），Element Plus 体积较大需适当调高 */
-    chunkSizeWarningLimit: 2000,
+    /** 单个异步包体预算；超出时构建直接给出可行动警告。 */
+    chunkSizeWarningLimit: 750,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('bpmn-js') || id.includes('diagram-js')) return 'bpmn-vendor'
+          if (id.includes('element-plus')) return 'element-plus'
+          if (id.includes('/vue/') || id.includes('pinia')
+            || id.includes('vue-router') || id.includes('vue-i18n')) return 'vue-vendor'
+          return undefined
+        },
+      },
+    },
   },
 })

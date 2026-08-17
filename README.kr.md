@@ -41,7 +41,7 @@
 | 작업 스케줄링 | XXL-JOB Admin | 3.3.1 |
 | 워크플로우 엔진 | Flowable BPMN | 7.x |
 | 프론트엔드 프레임워크 | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
-| 빌드 도구 | Vite 8 (Rolldown) | 8.0.14 |
+| 빌드 도구 | Vite 8 (Rolldown) | 8.2.1 |
 | UI 프레임워크 | Element Plus | 2.14.0 |
 | 상태 관리 | Pinia | 3.0.4 |
 | Node.js | Node.js LTS | >= 22.12.0 |
@@ -174,17 +174,21 @@ docker compose ps
 | 서비스 | 포트 | 설명 |
 |------|------|------|
 | **프론트엔드** | **http://localhost:3000** | **접속 진입점, Nginx 리버스 프록시로 Gateway 연결** |
-| 인증 서비스 | http://localhost:8100 | Spring Security + OAuth2 |
-| 기초 데이터 서비스 | http://localhost:8101 | 사전/조직/사용자/로그/작업 |
+| 인증 서비스 | http://127.0.0.1:8100 | Spring Security + OAuth2 (루프백 진단 전용) |
+| 기초 데이터 서비스 | http://127.0.0.1:8101 | 사전/조직/사용자/로그/작업 (루프백 진단 전용) |
 | API 게이트웨이 | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
-| 워크플로우 엔진 | http://localhost:8103 | Flowable BPMN |
-| CRM 서비스 | http://localhost:8104 | 리드, 고객, 기회, 팔로업 |
-| SRM 서비스 | http://localhost:8105 | 공급업체, 포털, 평가, 리스크 |
-| MySQL | localhost:3306 | root/root |
-| Redis | localhost:6379 | 비밀번호 없음 |
-| Nacos 콘솔 | http://localhost:8080 | nacos/nacos |
-| XXL-JOB 스케줄링 센터 | http://localhost:18080 | admin/123456 |
+| 워크플로우 엔진 | http://127.0.0.1:8103 | Flowable BPMN (루프백 진단 전용) |
+| CRM 서비스 | http://127.0.0.1:8104 | 리드, 고객, 기회, 팔로업 |
+| SRM 서비스 | http://127.0.0.1:8105 | 공급업체, 포털, 평가, 리스크 |
+| Procurement 서비스 | http://127.0.0.1:8106 | 구매 요청, 견적, 발주, 입고 |
+| Asset 서비스 | http://127.0.0.1:8107 | 자산 원장, 이관, 폐기 |
+| MySQL | 127.0.0.1:13306 | `root` + `.env`의 `MYSQL_ROOT_PASSWORD` |
+| Redis | 127.0.0.1:6379 | `.env`의 `REDIS_PASSWORD` |
+| Nacos 콘솔 | http://127.0.0.1:8080 | 자격 증명은 `.env`에서 주입 |
+| XXL-JOB 스케줄링 센터 | http://127.0.0.1:18080 | 로컬 초기 계정, 실행 토큰은 `.env`에서 주입 |
 | RocketMQ NameServer | localhost:19876 | 호스트 매핑 포트 (컨테이너 내부 9876) |
+
+백엔드 직접 주소는 로컬 개발 및 진단 전용입니다. 운영 환경에서는 Frontend와 Gateway만 공개하고 하위 서비스는 사설 네트워크에 유지해야 합니다.
 
 ### 검증
 
@@ -199,7 +203,7 @@ curl http://localhost:3000/api/auth/captcha
 docker compose ps
 ```
 
-**기본 로그인 계정**: `admin` / `admin123`
+로컬 데모 시드에는 최초 연동 전용 `admin` / `admin123`이 포함됩니다. 첫 로그인 직후 변경하고 운영 환경에서는 저장소 시드 자격 증명을 사용하지 마십시오. 테넌트 생성 시 초기 관리자 비밀번호를 명시해야 하며, 백엔드는 공용 기본 비밀번호를 생성하지 않습니다.
 
 ### 자주 발생하는 문제
 

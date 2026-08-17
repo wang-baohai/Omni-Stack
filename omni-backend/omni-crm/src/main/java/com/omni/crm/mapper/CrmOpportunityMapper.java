@@ -15,6 +15,18 @@ import java.util.List;
 public interface CrmOpportunityMapper extends BaseMapper<CrmOpportunity> {
 
     /**
+     * 批量查询商机名称（不受数据权限限制，仅用于列表展示填充）。
+     *
+     * @param ids 商机 ID 列表
+     * @return 商机列表（仅含 id 和 name）
+     */
+    @InterceptorIgnore(dataPermission = "true")
+    @Select("<script>SELECT id, name FROM crm_opportunity WHERE deleted = 0 AND id IN "
+            + "<foreach collection='ids' item='id' open='(' separator=',' close=')'>#{id}</foreach>"
+            + "</script>")
+    List<CrmOpportunity> selectNamesByIds(@Param("ids") List<Long> ids);
+
+    /**
      * 在数据权限范围内锁定商机。
      *
      * @param id 商机 ID

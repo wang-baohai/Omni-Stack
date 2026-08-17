@@ -56,7 +56,11 @@ public class ActivityServiceImpl implements ActivityService {
     public PageResult<CrmViews.ActivityVO> list(CrmRequests.ActivityQuery query) {
         Page<CrmActivity> result = activityMapper.selectPage(new Page<>(query.getPage(), query.getSize()),
                 queryWrapper(query).orderByDesc(CrmActivity::getPlannedStartTime).orderByDesc(CrmActivity::getId));
-        return new PageResult<>(ownerEnricher.enrich(result.getRecords().stream().map(CrmViewAssembler::activity).toList()),
+        List<CrmViews.ActivityVO> records = result.getRecords().stream().map(CrmViewAssembler::activity).toList();
+        enrichRootNames(records);
+        ownerEnricher.enrich(records);
+        ownerEnricher.enrichPerformedBy(records);
+        return new PageResult<>(records,
                 result.getTotal(), result.getSize(), result.getCurrent());
     }
 
@@ -65,17 +69,24 @@ public class ActivityServiceImpl implements ActivityService {
     public List<CrmViews.ActivityVO> timeline(String rootType, Long rootId, int limit) {
         accessGuard.requireRootOwner(rootType, rootId);
         int safeLimit = Math.max(1, Math.min(limit, 100));
-        return ownerEnricher.enrich(activityMapper.selectList(new LambdaQueryWrapper<CrmActivity>()
+        List<CrmViews.ActivityVO> records = activityMapper.selectList(new LambdaQueryWrapper<CrmActivity>()
                         .eq(CrmActivity::getRootType, rootType.toUpperCase()).eq(CrmActivity::getRootId, rootId)
                         .orderByDesc(CrmActivity::getCreateTime).last("LIMIT " + safeLimit))
-                .stream().map(CrmViewAssembler::activity).toList());
+                .stream().map(CrmViewAssembler::activity).toList();
+        enrichRootNames(records);
+        ownerEnricher.enrich(records);
+        ownerEnricher.enrichPerformedBy(records);
+        return records;
     }
 
     /** {@inheritDoc} */
     @Override
     public CrmViews.ActivityVO get(Long id) {
-        return ownerEnricher.enrichOne(CrmViewAssembler.activity(
+        CrmViews.ActivityVO vo = ownerEnricher.enrichOne(CrmViewAssembler.activity(
                 accessGuard.requireActivity(id), CrmViewAssembler.canViewPii()));
+        enrichRootNames(List.of(vo));
+        ownerEnricher.enrichPerformedBy(List.of(vo));
+        return vo;
     }
 
     /** {@inheritDoc} */
@@ -106,7 +117,7 @@ public class ActivityServiceImpl implements ActivityService {
         if (status == ActivityStatus.COMPLETED) {
             publishCompletedEvent(entity, request.getCompletedTime(), entity.getVersion());
         }
-        return ownerEnricher.enrichOne(CrmViewAssembler.activity(entity, CrmViewAssembler.canViewPii()));
+        return get(entity.getId());
     }
 
     /** {@inheritDoc} */
@@ -292,4 +303,38 @@ public class ActivityServiceImpl implements ActivityService {
 
     private void requireUpdated(int rows) { if (rows != 1) throw new BusinessException(409, "记录已被其他用户修改，请刷新后重试"); }
     private boolean hasText(String value) { return value != null && !value.isBlank(); }
+
+    /**
+     * 批量填充关联对象名称，避免列表页显示裸 ID。
+     * <p>按 rootType 分组查询对应的业务实体名称，避免 N+1。</p>
+     */
+    private void enrichRootNames(List<CrmViews.ActivityVO> records) {
+        if (records == null || records.isEmpty()) return;
+
+        // 按 rootType 分组收集 rootId
+        Map<String, List<Long>> groupedIds = new java.util.HashMap<>();
+        for (CrmViews.ActivityVO vo : records) {
+            if (vo.getRootType() != null && vo.getRootId() != null) {
+                groupedIds.computeIfAbsent(vo.getRootType(), k -> new java.util.ArrayList<>()).add(vo.getRootId());
+            }
+        }
+
+        // 批量查询名称
+        Map<Long, String> nameMap = new java.util.HashMap<>();
+        if (groupedIds.containsKey("LEAD")) {
+            leadMapper.selectNamesByIds(groupedIds.get("LEAD").stream().distinct().toList())
+                    .forEach(e -> nameMap.put(e.getId(), e.getFullName()));
+        }
+        if (groupedIds.containsKey("CUSTOMER")) {
+            customerMapper.selectNamesByIds(groupedIds.get("CUSTOMER").stream().distinct().toList())
+                    .forEach(e -> nameMap.put(e.getId(), e.getName()));
+        }
+        if (groupedIds.containsKey("OPPORTUNITY")) {
+            opportunityMapper.selectNamesByIds(groupedIds.get("OPPORTUNITY").stream().distinct().toList())
+                    .forEach(e -> nameMap.put(e.getId(), e.getName()));
+        }
+
+        // 填充 rootName
+        records.forEach(vo -> vo.setRootName(nameMap.get(vo.getRootId())));
+    }
 }

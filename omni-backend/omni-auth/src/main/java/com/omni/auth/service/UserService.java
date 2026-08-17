@@ -3,6 +3,8 @@ package com.omni.auth.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.omni.auth.dto.CreateUserRequest;
 import com.omni.auth.dto.RegisterRequest;
+import com.omni.auth.dto.UpdateUserRequest;
+import com.omni.auth.dto.UserVO;
 import com.omni.auth.entity.SysUser;
 import com.omni.common.core.result.PageResult;
 
@@ -71,7 +73,7 @@ public interface UserService extends IService<SysUser> {
      * @param size     每页大小
      * @return 分页用户列表
      */
-    PageResult<SysUser> listUsers(Long tenantId, int page, int size);
+    PageResult<UserVO> listUsers(Long tenantId, int page, int size);
 
     /**
      * 获取用户详情。
@@ -79,7 +81,16 @@ public interface UserService extends IService<SysUser> {
      * @param id 用户 ID
      * @return 用户实体
      */
-    SysUser getById(Long id);
+    UserVO getUserDetail(Long id, Long tenantId);
+
+    /**
+     * 更新用户可编辑的基础资料。
+     *
+     * @param id       用户 ID
+     * @param tenantId 当前租户 ID
+     * @param request  更新请求
+     */
+    void updateUser(Long id, Long tenantId, UpdateUserRequest request);
 
     /**
      * 分配用户角色（全量替换）。
@@ -89,7 +100,7 @@ public interface UserService extends IService<SysUser> {
      * @param operator  操作人用户名
      * @param ipAddress 操作人 IP 地址
      */
-    void assignRoles(Long userId, List<Long> roleIds, String operator, String ipAddress);
+    void assignRoles(Long userId, Long tenantId, List<Long> roleIds, String operator, String ipAddress);
 
     /**
      * 获取用户已分配的角色 ID 列表。
@@ -97,7 +108,7 @@ public interface UserService extends IService<SysUser> {
      * @param userId 用户 ID
      * @return 角色 ID 列表
      */
-    List<Long> getUserRoleIds(Long userId);
+    List<Long> getUserRoleIds(Long userId, Long tenantId);
 
     /**
      * 切换用户启用/禁用状态。
@@ -107,7 +118,7 @@ public interface UserService extends IService<SysUser> {
      * @param operator  操作人用户名
      * @param ipAddress 操作人 IP 地址
      */
-    void toggleStatus(Long userId, Integer status, String operator, String ipAddress);
+    void toggleStatus(Long userId, Long tenantId, Integer status, String operator, String ipAddress);
 
     /**
      * 创建新用户（管理员操作）。
@@ -135,5 +146,5 @@ public interface UserService extends IService<SysUser> {
      * @param operator  操作人用户名
      * @param ipAddress 操作人 IP 地址
      */
-    void deleteUser(Long id, String operator, String ipAddress);
+    void deleteUser(Long id, Long tenantId, String operator, String ipAddress);
 }

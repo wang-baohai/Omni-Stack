@@ -65,8 +65,9 @@ public class OpportunityServiceImpl implements OpportunityService {
     public PageResult<CrmViews.OpportunityVO> list(CrmRequests.OpportunityQuery query) {
         tenantInitializer.ensureInitialized();
         Page<CrmOpportunity> result = opportunityMapper.selectPage(new Page<>(query.getPage(), query.getSize()), wrapper(query));
-        return new PageResult<>(ownerEnricher.enrich(result.getRecords().stream().map(CrmViewAssembler::opportunity).toList()),
-                result.getTotal(), result.getSize(), result.getCurrent());
+        List<CrmViews.OpportunityVO> records = ownerEnricher.enrich(result.getRecords().stream().map(CrmViewAssembler::opportunity).toList());
+        enrichCustomerNames(records);
+        return new PageResult<>(records, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
     /** {@inheritDoc} */
@@ -82,6 +83,7 @@ public class OpportunityServiceImpl implements OpportunityService {
                 .selectPage(new Page<>(1, 100, false), wrapper).getRecords();
         List<CrmViews.OpportunityVO> opportunityViews = ownerEnricher.enrich(
                 opportunities.stream().map(CrmViewAssembler::opportunity).toList());
+        enrichCustomerNames(opportunityViews);
         CrmViews.OpportunityBoardVO board = new CrmViews.OpportunityBoardVO();
         board.setStages(stages.stream().map(CrmViewAssembler::stage).toList());
         Map<Long, List<CrmViews.OpportunityVO>> grouped = new LinkedHashMap<>();
@@ -93,7 +95,9 @@ public class OpportunityServiceImpl implements OpportunityService {
     /** {@inheritDoc} */
     @Override
     public CrmViews.OpportunityVO get(Long id) {
-        return ownerEnricher.enrichOne(CrmViewAssembler.opportunity(accessGuard.requireOpportunity(id)));
+        CrmViews.OpportunityVO vo = ownerEnricher.enrichOne(CrmViewAssembler.opportunity(accessGuard.requireOpportunity(id)));
+        enrichCustomerNames(List.of(vo));
+        return vo;
     }
 
     /** {@inheritDoc} */
@@ -131,7 +135,9 @@ public class OpportunityServiceImpl implements OpportunityService {
         opportunityMapper.update(null, new LambdaUpdateWrapper<CrmOpportunity>().eq(CrmOpportunity::getId, entity.getId())
                 .set(CrmOpportunity::getOpportunityNo, number)); entity.setOpportunityNo(number);
         appendHistory(entity.getId(), null, stage.getId(), null, stage.getStageType(), "CREATE");
-        return ownerEnricher.enrichOne(CrmViewAssembler.opportunity(entity));
+        CrmViews.OpportunityVO created = ownerEnricher.enrichOne(CrmViewAssembler.opportunity(entity));
+        enrichCustomerNames(List.of(created));
+        return created;
     }
 
     /** {@inheritDoc} */
@@ -299,4 +305,15 @@ public class OpportunityServiceImpl implements OpportunityService {
 
     private void requireUpdated(int rows) { if (rows != 1) throw new BusinessException(409, "记录已被其他用户修改，请刷新后重试"); }
     private boolean hasText(String value) { return value != null && !value.isBlank(); }
+
+    /** 批量填充客户名称，避免列表页显示裸 ID。 */
+    private void enrichCustomerNames(List<CrmViews.OpportunityVO> records) {
+        if (records == null || records.isEmpty()) return;
+        List<Long> customerIds = records.stream().map(CrmViews.OpportunityVO::getCustomerId)
+                .filter(java.util.Objects::nonNull).distinct().toList();
+        if (customerIds.isEmpty()) return;
+        Map<Long, String> nameMap = customerMapper.selectNamesByIds(customerIds).stream()
+                .collect(java.util.stream.Collectors.toMap(CrmCustomer::getId, CrmCustomer::getName, (a, b) -> a));
+        records.forEach(vo -> vo.setCustomerName(nameMap.get(vo.getCustomerId())));
+    }
 }

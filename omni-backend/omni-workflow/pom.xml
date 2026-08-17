@@ -75,6 +75,18 @@
             <artifactId>omni-common-operlog</artifactId>
         </dependency>
 
+        <!-- Common Job Module (XXL-JOB executor and system job registry) -->
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common-job</artifactId>
+        </dependency>
+
+        <!-- Common MQ Log Module (Transactional Outbox and relay job) -->
+        <dependency>
+            <groupId>com.omni</groupId>
+            <artifactId>omni-common-mqlog</artifactId>
+        </dependency>
+
         <!-- Common Workflow Module (Flowable 引擎 + 审批 SPI + 租户桥接) -->
         <dependency>
             <groupId>com.omni</groupId>
@@ -122,6 +134,13 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Tests -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

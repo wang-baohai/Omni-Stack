@@ -9,6 +9,9 @@ import { getPermissionsFromToken, getTenantIdFromToken } from '@/utils/jwt'
 import { useUserStore } from './user'
 import { fetchMenuTree, type MenuNode } from '@/api/menu'
 
+/** 菜单加载状态。 */
+export type MenuLoadState = 'idle' | 'loading' | 'loaded' | 'failed'
+
 /**
  * 权限 Store。
  * 存储当前用户的权限编码列表和动态菜单树。
@@ -22,6 +25,12 @@ export const usePermissionStore = defineStore('permission', () => {
 
   /** 是否已加载菜单 */
   const menusLoaded = ref(false)
+
+  /** 菜单加载状态，用于区分尚未加载和加载失败。 */
+  const menuLoadState = ref<MenuLoadState>('idle')
+
+  /** 合并并发菜单请求。 */
+  let menuLoadPromise: Promise<void> | null = null
 
   /** 计算属性：用户是否有指定权限 */
   const hasPermission = computed(() => {
@@ -43,12 +52,23 @@ export const usePermissionStore = defineStore('permission', () => {
   /**
    * 从后端加载动态菜单树。
    */
-  async function loadMenus() {
+  function loadMenus(): Promise<void> {
+    if (menuLoadState.value === 'loaded') return Promise.resolve()
+    if (menuLoadPromise) return menuLoadPromise
+    menuLoadState.value = 'loading'
+    menuLoadPromise = performMenuLoad().finally(() => {
+      menuLoadPromise = null
+    })
+    return menuLoadPromise
+  }
+
+  async function performMenuLoad() {
     const userStore = useUserStore()
     const tenantId = getTenantIdFromToken(userStore.token)
     if (!tenantId) {
       menuTree.value = []
       menusLoaded.value = true
+      menuLoadState.value = 'loaded'
       return
     }
 
@@ -56,10 +76,21 @@ export const usePermissionStore = defineStore('permission', () => {
       const res = await fetchMenuTree()
       menuTree.value = res.data.data
       menusLoaded.value = true
+      menuLoadState.value = 'loaded'
     } catch (error) {
       console.error('菜单加载失败，请检查 /api/auth/menus 接口响应', error)
       menuTree.value = []
+      menusLoaded.value = true
+      menuLoadState.value = 'failed'
+      throw error
     }
+  }
+
+  /** 清除失败状态并重新加载菜单。 */
+  async function retryLoadMenus() {
+    menusLoaded.value = false
+    menuLoadState.value = 'idle'
+    await loadMenus()
   }
 
   /**
@@ -69,15 +100,19 @@ export const usePermissionStore = defineStore('permission', () => {
     permissions.value = []
     menuTree.value = []
     menusLoaded.value = false
+    menuLoadState.value = 'idle'
+    menuLoadPromise = null
   }
 
   return {
     permissions,
     menuTree,
     menusLoaded,
+    menuLoadState,
     hasPermission,
     initFromToken,
     loadMenus,
+    retryLoadMenus,
     reset,
   }
 })

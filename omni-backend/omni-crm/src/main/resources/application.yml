@@ -20,6 +20,12 @@ spring:
         server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
         username: ${NACOS_USERNAME:nacos}
         password: ${NACOS_PASSWORD:nacos}
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 3000
+            read-timeout: 5000
     stream:
       rocketmq:
         binder:
@@ -58,10 +64,6 @@ omni:
   internal:
     api:
       token: ${OMNI_INTERNAL_API_TOKEN:}
-  crm:
-    feign:
-      connect-timeout: ${CRM_FEIGN_CONNECT_TIMEOUT:2000}
-      read-timeout: ${CRM_FEIGN_READ_TIMEOUT:3000}
 
 xxl:
   job:

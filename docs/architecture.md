@@ -111,7 +111,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 | `omni-common-mqlog` | 可靠 MQ 消息发送：Transactional Outbox、中继任务、策略模式发送器、内部查询 API | Spring Cloud Stream RocketMQ（optional）、omni-common-job（optional） | 仅 MQ 基础设施，无业务消息逻辑 |
 | `omni-common-operlog` | 操作日志切面与生产者：`@OperLog` 注解驱动，支持可靠消息和直接发送两种模式 | Spring AOP、omni-common-mqlog（optional） | 仅操作日志关注点 |
 
-### 4.2 微服务模块（6 个）
+### 4.2 微服务模块（8 个）
 
 | 模块 | 端口 | 职责 | 核心依赖 |
 |------|------|------|----------|
@@ -120,6 +120,8 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 | `omni-workflow` :8103 | 8103 | 工作流引擎：BPMN 模型管理、流程实例、审批、任务分派、统计 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 7.x |
 | `omni-crm` :8104 | 8104 | CRM 销售前闭环：线索、客户、联系人、商机、跟进、转换与概览 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
 | `omni-srm` :8105 | 8105 | SRM 供应商闭环：主档、准入状态机、联系人/资质/银行、绩效、风险、邀请与供应商门户 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
+| `omni-procurement` :8106 | 8106 | 采购执行闭环：物料目录、请购审批、询价比价、采购订单与收货 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog、OpenFeign |
+| `omni-asset` :8107 | 8107 | 资产全生命周期：采购验收入账、台账、分配/退还、调拨、处置与概览 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog、OpenFeign |
 | `omni-gateway` :8102 | 8102 | API 网关：请求路由、JWT 认证过滤、CORS 处理、安全响应头 | Spring Cloud Gateway Server（WebFlux）、omni-common-redis-reactive |
 
 ### 4.3 前端模块
@@ -150,14 +152,14 @@ omni-auth :8100     omni-base :8101                     omni-gateway :8102
     |                    |                                     |
     +-- 注册到 Nacos --+                                      |
                                |                               |
-omni-gateway --- 通过显式 lb:// 路由 ---> omni-auth, omni-base, omni-workflow, omni-crm, omni-srm
+omni-gateway --- 通过显式 lb:// 路由 ---> omni-auth, omni-base, omni-workflow, omni-crm, omni-srm, omni-procurement, omni-asset
     |
 omni-frontend --- /api 代理 :3000 ---> omni-gateway :8102
 
 omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 ```
 
-**构建依赖顺序**：`omni-common-core` → `omni-common` → `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive` → `omni-auth` / `omni-base` / `omni-workflow` / `omni-crm` / `omni-srm` / `omni-gateway`。Maven reactor 从 `<modules>` 声明自动解析顺序。
+**构建依赖顺序**：`omni-common-core` → `omni-common` → `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive` → `omni-auth` / `omni-base` / `omni-workflow` / `omni-crm` / `omni-srm` / `omni-procurement` / `omni-asset` / `omni-gateway`。Maven reactor 从 `<modules>` 声明自动解析顺序。
 
 ### 局部与整体关系
 
@@ -173,6 +175,8 @@ omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 | `omni-workflow` | **流程引擎**：独立部署的 BPMN 工作流服务，通过 `omni-common-workflow` starter 隔离 Flowable 依赖 |
 | `omni-crm` | **销售业务域**：独立拥有 CRM 数据，通过 Auth 内部接口复用租户用户、组织和 permission-aware 数据范围 |
 | `omni-srm` | **供应商业务域**：独立拥有 SRM 数据，通过 Portal Saga 与 Auth 分配 SUPPLIER 角色，并向采购/资产提供受内部令牌保护的供应商摘要接口 |
+| `omni-procurement` | **采购执行域**：独立拥有采购数据，通过 Workflow 驱动请购审批、通过 SRM 完成供应商邀请与报价协作，并向资产域发布合格收货事件和历史补偿接口 |
+| `omni-asset` | **资产生命周期域**：独立拥有资产数据，消费采购合格收货事件建卡，通过 Workflow 驱动调拨/处置审批，并以资产聚合根统一管理归属与使用范围 |
 
 ---
 
@@ -248,7 +252,7 @@ Spring Cloud Gateway 路由引擎
     │ 2. 保留完整路径：/api/auth/login → /api/auth/login
     │ 3. 负载均衡：通过 Nacos 服务发现获取实例列表
     ▼
-转发至下游微服务（omni-auth / omni-base / omni-workflow / omni-crm）
+转发至下游微服务（omni-auth / omni-base / omni-workflow / omni-crm / omni-srm / omni-procurement / omni-asset）
 ```
 
 **关键设计决策**：
@@ -257,9 +261,9 @@ Spring Cloud Gateway 路由引擎
 - **公钥缓存 5 分钟**：避免每次请求都调用 JWKS 端点，`volatile` 保证多线程可见性
 - **`onErrorResume` 仅捕获 `SecurityException`**：避免下游路由错误（服务不可用、超时）被误报为 JWT 验证失败
 
-### 6.3 omni-base / omni-workflow / omni-crm 安全模型
+### 6.3 Servlet 业务服务安全模型
 
-下游微服务（base、workflow、crm）采用统一的**网关预认证模型**。CRM 进一步以完整 permissionCode 从 Auth 解析数据范围，TenantLine 与 DataPermission 拦截器共同约束每条业务 SQL：
+下游 Servlet 微服务（base、workflow、crm、srm、procurement、asset）采用统一的**网关预认证模型**。CRM、SRM、Procurement 与 Asset 进一步以完整 permissionCode 从 Auth 解析数据范围，TenantLine 与 DataPermission 拦截器共同约束每条业务 SQL：
 
 ```
 请求进入（已经 Gateway JWT 验证）
@@ -348,7 +352,7 @@ RocketMQ Broker (通过 StreamBridge)
 
 所有服务可通过一条命令启动：`docker compose up -d`。详见项目根目录 `docker-compose.yml`。
 
-**启动顺序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 后端服务（Auth, Base, Workflow, CRM, Gateway）→ 前端
+**启动顺序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 后端服务（Auth、Base、Workflow、CRM、SRM、Procurement、Asset、Gateway）→ 前端
 
 ---
 
@@ -356,7 +360,7 @@ RocketMQ Broker (通过 StreamBridge)
 
 ### 9.1 Docker Compose 编排
 
-项目根目录 `docker-compose.yml` 定义了所有 12 个容器：
+项目根目录 `docker-compose.yml` 定义了 15 个容器：
 
 - **命名卷**（`mysql-data`、`redis-data`）用于数据持久化
 - **健康检查**（depends_on + service_healthy）确保分层启动链
@@ -427,7 +431,25 @@ erDiagram
 
 **CRM 核心表（11 表）**：`crm_tenant_config`、`crm_pipeline`、`crm_pipeline_stage`、`crm_lead`、`crm_lead_conversion`、`crm_customer`、`crm_contact`、`crm_opportunity`、`crm_opportunity_stage_history`、`crm_activity`、`crm_owner_change_log`，另含每服务独立的 `sys_mq_message` Outbox。所有 `crm_*` 表均含 `tenant_id`，授权根表保存 owner 快照并使用乐观锁。
 
-> 详见 [crm-design.md](crm-design.md)
+> 领域运行约束详见 [crm.md](crm.md)，设计基线详见 [design/crm-design.md](design/crm-design.md)。
+
+#### omni_srm 数据库
+
+**SRM 核心表**：供应商主档、联系人、资质、银行账户、评估、风险、门户用户关联、邀请 Saga 及报价协作表，另含服务独立的 `sys_mq_message` Outbox。所有授权子资源通过供应商或评估聚合根继承租户与数据范围。
+
+> 详见 [design/srm-design.md](design/srm-design.md)
+
+#### omni_procurement 数据库
+
+**Procurement 核心表**：租户配置、物料/品类、审批路线、请购及明细、RFQ 及供应商/明细、采购订单及明细、收货及明细、通用 Inbox 与服务独立 Outbox。请购按申请人范围过滤，RFQ/PO/GR 按 owner 范围过滤，子表通过聚合根继承。
+
+> 详见 [design/procurement-design.md](design/procurement-design.md)
+
+#### omni_asset 数据库
+
+**Asset 核心表**：`ast_asset`（资产聚合根）、`ast_asset_history`（不可变历史）、`ast_transfer`（调拨）、`ast_disposal`（处置）、`ast_inbox_event`（跨服务消费幂等），另含服务独立的 `sys_mq_message` Outbox。采购来源使用收货行与单位序号保证建卡幂等，调拨和处置通过聚合根活动操作字段统一并发占位。
+
+> 详见 [design/asset-design.md](design/asset-design.md)
 
 **权威 DDL 和种子数据**：`scripts/sql/init-all.sql`
 
@@ -463,7 +485,7 @@ erDiagram
 │  └────────┘  └────────┘  └────────┘  └──────────────┘  └────────┘ │
 └───────────────────────────────────────────────────────────────────────┘
         ↕ 宿主机端口映射
-   :3000    :8100-8104   :3306  :6379  :8080  :8848  :19876  :18080
+   :3000    :8100-8107   :3306  :6379  :8080  :8848  :19876  :18080
 ```
 
 ### 10.2 服务发现机制

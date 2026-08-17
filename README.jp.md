@@ -41,7 +41,7 @@
 | タスクスケジューリング | XXL-JOB Admin | 3.3.1 |
 | ワークフローエンジン | Flowable BPMN | 7.x |
 | フロントエンドフレームワーク | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
-| ビルドツール | Vite 8 (Rolldown) | 8.0.14 |
+| ビルドツール | Vite 8 (Rolldown) | 8.2.1 |
 | UI フレームワーク | Element Plus | 2.14.0 |
 | 状態管理 | Pinia | 3.0.4 |
 | Node.js | Node.js LTS | >= 22.12.0 |
@@ -174,17 +174,21 @@ docker compose ps
 | サービス | ポート | 説明 |
 |------|------|------|
 | **フロントエンド** | **http://localhost:3000** | **アクセス入口、Nginx から Gateway へリバースプロキシ** |
-| 認証サービス | http://localhost:8100 | Spring Security + OAuth2 |
-| 基礎データサービス | http://localhost:8101 | ディクショナリ/組織/ユーザー/ログ/タスク |
+| 認証サービス | http://127.0.0.1:8100 | Spring Security + OAuth2（ループバック診断専用） |
+| 基礎データサービス | http://127.0.0.1:8101 | ディクショナリ/組織/ユーザー/ログ/タスク（ループバック診断専用） |
 | API ゲートウェイ | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
-| ワークフローエンジン | http://localhost:8103 | Flowable BPMN |
-| CRM サービス | http://localhost:8104 | リード、顧客、商談、フォローアップ |
-| SRM サービス | http://localhost:8105 | サプライヤー、ポータル、評価、リスク |
-| MySQL | localhost:3306 | root/root |
-| Redis | localhost:6379 | パスワードなし |
-| Nacos コンソール | http://localhost:8080 | nacos/nacos |
-| XXL-JOB スケジューリングセンター | http://localhost:18080 | admin/123456 |
+| ワークフローエンジン | http://127.0.0.1:8103 | Flowable BPMN（ループバック診断専用） |
+| CRM サービス | http://127.0.0.1:8104 | リード、顧客、商談、フォローアップ |
+| SRM サービス | http://127.0.0.1:8105 | サプライヤー、ポータル、評価、リスク |
+| Procurement サービス | http://127.0.0.1:8106 | 購買申請、見積、発注、入荷 |
+| Asset サービス | http://127.0.0.1:8107 | 資産台帳、移管、廃棄 |
+| MySQL | 127.0.0.1:13306 | `root` + `.env` の `MYSQL_ROOT_PASSWORD` |
+| Redis | 127.0.0.1:6379 | `.env` の `REDIS_PASSWORD` |
+| Nacos コンソール | http://127.0.0.1:8080 | 認証情報は `.env` から注入 |
+| XXL-JOB スケジューリングセンター | http://127.0.0.1:18080 | ローカル初期アカウント、実行トークンは `.env` から注入 |
 | RocketMQ NameServer | localhost:19876 | ホストマッピングポート（コンテナ内は 9876） |
+
+バックエンドの直接アドレスはローカル開発・診断専用です。本番環境では Frontend と Gateway だけを公開し、下流サービスはプライベートネットワーク内に保持してください。
 
 ### 動作確認
 
@@ -199,7 +203,7 @@ curl http://localhost:3000/api/auth/captcha
 docker compose ps
 ```
 
-**デフォルトログインアカウント**：`admin` / `admin123`
+ローカルデモ用シードには初回連携専用の `admin` / `admin123` が含まれます。初回ログイン直後に変更し、本番環境ではリポジトリのシード認証情報を使用しないでください。テナント作成時は初期管理者パスワードを明示指定する必要があり、バックエンドは共通の既定パスワードを生成しません。
 
 ### よくある問題
 

@@ -53,6 +53,8 @@ public final class SrmViewAssembler {
         vo.setStatus(entity.getStatus());
         vo.setAssignedTime(entity.getAssignedTime());
         vo.setLastEvaluationTime(entity.getLastEvaluationTime());
+        vo.setProcessInstanceId(entity.getProcessInstanceId());
+        vo.setWorkflowStartStatus(entity.getWorkflowStartStatus());
         vo.setVersion(entity.getVersion());
         vo.setCreateTime(entity.getCreateTime());
         vo.setCreateBy(entity.getCreateBy());
@@ -148,6 +150,8 @@ public final class SrmViewAssembler {
         vo.setIndicatorType(entity.getIndicatorType());
         vo.setIndicatorValue(entity.getIndicatorValue());
         vo.setRiskLevel(entity.getRiskLevel());
+        vo.setCriterionId(entity.getCriterionId());
+        vo.setScore(entity.getScore());
         vo.setAssessmentTime(entity.getAssessmentTime());
         vo.setRemark(entity.getRemark());
         vo.setVersion(entity.getVersion());

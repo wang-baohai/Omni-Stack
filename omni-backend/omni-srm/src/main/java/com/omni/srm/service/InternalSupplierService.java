@@ -30,4 +30,26 @@ public interface InternalSupplierService {
      * @return 供应商摘要列表
      */
     List<InternalSupplierSummary> search(Long tenantId, String status, String categoryCode, int limit);
+
+    /**
+     * 按名称或编号关键词搜索供应商摘要。
+     *
+     * @param tenantId 租户 ID
+     * @param status 生命周期状态
+     * @param categoryCode 品类编码
+     * @param keyword 供应商名称或编号关键词
+     * @param limit 返回上限
+     * @return 供应商摘要列表
+     */
+    List<InternalSupplierSummary> searchOptions(Long tenantId, String status,
+                                                String categoryCode, String keyword, int limit);
+
+    /**
+     * 按租户和供应商 ID 批量查询摘要。
+     *
+     * @param tenantId 租户 ID
+     * @param supplierIds 供应商 ID 列表
+     * @return 去重且保持输入顺序的供应商摘要列表
+     */
+    List<InternalSupplierSummary> batch(Long tenantId, List<Long> supplierIds);
 }

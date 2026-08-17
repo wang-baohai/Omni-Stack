@@ -9,6 +9,7 @@ export interface CrmActivity {
   id: number
   rootType: ActivityRootType
   rootId: number
+  rootName: string | null
   contactId: number | null
   activityType: string
   subject: string
@@ -19,6 +20,7 @@ export interface CrmActivity {
   completedTime: string | null
   nextActionTime: string | null
   performedByUserId: number | null
+  performedByName: string | null
   ownerUserId: number
   ownerUnitId: number | null
   ownerName: string | null

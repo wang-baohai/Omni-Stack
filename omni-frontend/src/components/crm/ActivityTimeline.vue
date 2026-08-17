@@ -3,6 +3,14 @@
 import { ref, watch } from 'vue'
 import { listActivityTimeline, type ActivityRootType, type CrmActivity } from '@/api/crm-activity'
 import { usePermissionStore } from '@/stores/permission'
+import { useDictOptions } from '@/composables/useDictOptions'
+
+const { options: activityTypeOptions } = useDictOptions('crm_activity_type')
+const { options: activityStatusOptions } = useDictOptions('crm_activity_status')
+
+function labelOf(options: { value: string; label: string }[], value?: string) {
+  return options.find(o => o.value === value)?.label ?? value ?? '-'
+}
 
 const props = withDefaults(defineProps<{
   rootType: ActivityRootType
@@ -64,11 +72,11 @@ watch(() => [props.rootType, props.rootId], loadData, { immediate: true })
         <el-card shadow="never">
           <div class="timeline-heading">
             <strong>{{ activity.subject }}</strong>
-            <el-tag :type="statusType(activity.status)" size="small">{{ activity.status }}</el-tag>
+            <el-tag :type="statusType(activity.status)" size="small">{{ labelOf(activityStatusOptions, activity.status) }}</el-tag>
           </div>
           <p v-if="activity.content" class="plain-content">{{ activity.content }}</p>
           <div class="timeline-meta">
-            {{ activity.activityType }} · {{ activity.ownerName || `用户 #${activity.performedByUserId || activity.ownerUserId}` }}
+            {{ labelOf(activityTypeOptions, activity.activityType) }} · {{ activity.performedByName || activity.ownerName || `用户 #${activity.performedByUserId || activity.ownerUserId}` }}
           </div>
         </el-card>
       </el-timeline-item>

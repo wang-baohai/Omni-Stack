@@ -15,16 +15,23 @@ public final class SrmStateMachine {
     /**
      * 供应商状态枚举。
      */
+    /** Workflow 启动状态常量。 */
+    public static final String START_NOT_STARTED = "NOT_STARTED";
+    public static final String START_PENDING = "PENDING";
+    public static final String START_FAILED = "FAILED";
+    public static final String START_STARTED = "STARTED";
+
     public enum SupplierStatus {
-        REGISTERING, REGISTERING_FAILED, PENDING_REVIEW, REJECTED,
+        REGISTERING, REGISTERING_FAILED, PENDING_REVIEW, APPROVING, REJECTED,
         APPROVED, SUSPENDED, BLACKLISTED, ELIMINATED
     }
 
     private static final Map<SupplierStatus, Set<SupplierStatus>> TRANSITIONS = Map.of(
             SupplierStatus.REGISTERING, Set.of(SupplierStatus.PENDING_REVIEW, SupplierStatus.REGISTERING_FAILED),
             SupplierStatus.REGISTERING_FAILED, Set.of(SupplierStatus.REGISTERING),
-            SupplierStatus.PENDING_REVIEW, Set.of(SupplierStatus.APPROVED, SupplierStatus.REJECTED),
-            SupplierStatus.REJECTED, Set.of(SupplierStatus.PENDING_REVIEW),
+            SupplierStatus.PENDING_REVIEW, Set.of(SupplierStatus.APPROVING, SupplierStatus.APPROVED, SupplierStatus.REJECTED),
+            SupplierStatus.APPROVING, Set.of(SupplierStatus.APPROVED, SupplierStatus.REJECTED, SupplierStatus.PENDING_REVIEW),
+            SupplierStatus.REJECTED, Set.of(SupplierStatus.PENDING_REVIEW, SupplierStatus.APPROVING),
             SupplierStatus.APPROVED, Set.of(SupplierStatus.SUSPENDED, SupplierStatus.BLACKLISTED, SupplierStatus.ELIMINATED),
             SupplierStatus.SUSPENDED, Set.of(SupplierStatus.APPROVED, SupplierStatus.ELIMINATED),
             SupplierStatus.BLACKLISTED, Set.of(SupplierStatus.APPROVED),

@@ -13,9 +13,9 @@ public interface SupplierService {
     /** 更新供应商。 */ SrmViews.SupplierVO update(Long id, SrmRequests.UpdateSupplierRequest request);
     /** 转移负责人。 */ SrmViews.SupplierVO transferOwner(Long id, SrmRequests.TransferOwnerRequest request);
     /** 删除供应商。 */ void delete(Long id, Integer version);
-    /** 提交审核。 */ SrmViews.SupplierVO submit(Long id, SrmRequests.StatusRequest request);
-    /** 审核通过。 */ SrmViews.SupplierVO approve(Long id, SrmRequests.StatusRequest request);
-    /** 审核驳回。 */ SrmViews.SupplierVO reject(Long id, SrmRequests.StatusRequest request);
+    /** 提交审核（被驳回后重新提交，启动新一轮工作流）。 */ SrmViews.SupplierVO submit(Long id, SrmRequests.StatusRequest request);
+    /** 撤回审批流程（APPROVING → PENDING_REVIEW）。 */ SrmViews.SupplierVO withdraw(Long id, SrmRequests.StatusRequest request);
+    /** 取消审批流程（APPROVING → PENDING_REVIEW）。 */ SrmViews.SupplierVO cancel(Long id, SrmRequests.StatusRequest request);
     /** 冻结。 */ SrmViews.SupplierVO suspend(Long id, SrmRequests.StatusRequest request);
     /** 解冻恢复。 */ SrmViews.SupplierVO resume(Long id, SrmRequests.StatusRequest request);
     /** 从黑名单恢复。 */ SrmViews.SupplierVO restoreFromBlacklist(Long id, SrmRequests.StatusRequest request);

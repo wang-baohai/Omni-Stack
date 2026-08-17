@@ -96,6 +96,7 @@ public final class CrmViews {
         @Serial private static final long serialVersionUID = 1L;
         private Long id;
         private Long customerId;
+        private String customerName;
         private String name;
         private String department;
         private String jobTitle;
@@ -122,6 +123,7 @@ public final class CrmViews {
         private String opportunityNo;
         private String name;
         private Long customerId;
+        private String customerName;
         private Long primaryContactId;
         private Long sourceLeadId;
         private Long pipelineId;
@@ -151,6 +153,7 @@ public final class CrmViews {
         private Long id;
         private String rootType;
         private Long rootId;
+        private String rootName;
         private Long contactId;
         private String activityType;
         private String subject;
@@ -161,6 +164,7 @@ public final class CrmViews {
         private LocalDateTime completedTime;
         private LocalDateTime nextActionTime;
         private Long performedByUserId;
+        private String performedByName;
         private Long ownerUserId;
         private Long ownerUnitId;
         private String ownerName;

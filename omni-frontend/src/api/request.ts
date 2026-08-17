@@ -14,7 +14,8 @@ import type { ApiResponse } from '@/types/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { getTenantIdFromToken } from '@/utils/jwt'
-import router from '@/router'
+import router, { clearAuthenticatedSession } from '@/router'
+import { safeAppRedirect } from '@/utils/navigation'
 
 // 创建 Axios 实例，配置基础 URL 和超时时间
 const service: AxiosInstance = axios.create({
@@ -53,16 +54,22 @@ let showingExpiredDialog = false
  * @param message 过期提示消息
  */
 function handle401(message: string) {
-  if (showingExpiredDialog) return
-  showingExpiredDialog = true
   const userStore = useUserStore()
-  userStore.logout()
+  if (showingExpiredDialog || userStore.isLoggingOut) return
+  showingExpiredDialog = true
+  const currentPath = router.currentRoute.value.fullPath
+  const redirect = safeAppRedirect(currentPath)
+  const isPortal = currentPath.startsWith('/supplier-portal')
+  clearAuthenticatedSession(false)
   ElMessageBox.alert(message, '登录过期', {
     confirmButtonText: '重新登录',
     type: 'warning',
   }).finally(() => {
     showingExpiredDialog = false
-    router.push('/')
+    router.replace({
+      name: isPortal ? 'PortalLogin' : 'Login',
+      query: redirect ? { redirect } : undefined,
+    })
   })
 }
 
@@ -86,6 +93,8 @@ service.interceptors.response.use(
     return response
   },
   (error) => {
+    const userStore = useUserStore()
+    if (userStore.isLoggingOut) return Promise.reject(error)
     if (error.response?.status === 401) {
       // HTTP 401 表示认证过期，读取后端返回的结构化消息
       const message = error.response?.data?.message || '登录已过期，请重新登录'

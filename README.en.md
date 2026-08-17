@@ -41,7 +41,7 @@
 | Job Scheduling | XXL-JOB Admin | 3.3.1 |
 | Workflow Engine | Flowable BPMN | 7.x |
 | Frontend Framework | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
-| Build Tool | Vite 8 (Rolldown) | 8.0.14 |
+| Build Tool | Vite 8 (Rolldown) | 8.2.1 |
 | UI Framework | Element Plus | 2.14.0 |
 | State Management | Pinia | 3.0.4 |
 | Node.js | Node.js LTS | >= 22.12.0 |
@@ -174,17 +174,21 @@ docker compose ps
 | Service | Port | Description |
 |---------|------|-------------|
 | **Frontend** | **http://localhost:3000** | **Entry point, Nginx reverse proxy to Gateway** |
-| Auth Service | http://localhost:8100 | Spring Security + OAuth2 |
-| Base Data Service | http://localhost:8101 | Dict / Org / User / Log / Job |
+| Auth Service | http://127.0.0.1:8100 | Spring Security + OAuth2 (loopback diagnostics only) |
+| Base Data Service | http://127.0.0.1:8101 | Dict / Org / User / Log / Job (loopback diagnostics only) |
 | API Gateway | http://localhost:8102 | Spring Cloud Gateway (WebFlux) |
-| Workflow Engine | http://localhost:8103 | Flowable BPMN |
-| CRM Service | http://localhost:8104 | Leads, Customers, Opportunities and Follow-ups |
-| SRM Service | http://localhost:8105 | Suppliers, Portal, Evaluation and Risk |
-| MySQL | localhost:3306 | root/root |
-| Redis | localhost:6379 | No password |
-| Nacos Console | http://localhost:8080 | nacos/nacos |
-| XXL-JOB Admin | http://localhost:18080 | admin/123456 |
+| Workflow Engine | http://127.0.0.1:8103 | Flowable BPMN (loopback diagnostics only) |
+| CRM Service | http://127.0.0.1:8104 | Leads, Customers, Opportunities and Follow-ups |
+| SRM Service | http://127.0.0.1:8105 | Suppliers, Portal, Evaluation and Risk |
+| Procurement Service | http://127.0.0.1:8106 | Requisitions, RFQ, purchase orders and receipts |
+| Asset Service | http://127.0.0.1:8107 | Asset ledger, transfers and disposal |
+| MySQL | 127.0.0.1:13306 | `root` + `MYSQL_ROOT_PASSWORD` from `.env` |
+| Redis | 127.0.0.1:6379 | `REDIS_PASSWORD` from `.env` |
+| Nacos Console | http://127.0.0.1:8080 | Credentials injected from `.env` |
+| XXL-JOB Admin | http://127.0.0.1:18080 | Local bootstrap account; executor token from `.env` |
 | RocketMQ NameServer | localhost:19876 | Host-mapped port (container internal: 9876) |
+
+Direct backend addresses are for local development and diagnostics only. Production deployments must expose only the Frontend and Gateway; downstream services remain on the private network.
 
 ### Verification
 
@@ -199,7 +203,7 @@ curl http://localhost:3000/api/auth/captcha
 docker compose ps
 ```
 
-**Default login credentials**: `admin` / `admin123`
+The local demo seed contains `admin` / `admin123` for first-time integration only. Change it immediately after the first login and never deploy repository seed credentials to production. Creating a tenant now requires an explicit initial administrator password; the backend no longer generates a shared default password.
 
 ### Troubleshooting
 

@@ -5,6 +5,7 @@ import type { ApiResponse, PageResult } from '@/types/api'
 export interface CrmContact {
   id: number
   customerId: number
+  customerName: string | null
   name: string
   department: string | null
   jobTitle: string | null

@@ -148,7 +148,7 @@ function handleApprovalRecords(row: ProcessInstanceExt) {
         v-model:current-page="page"
         v-model:page-size="size"
         :total="total"
-        :page-sizes="[10, 20, 50]"
+        :page-sizes="[5, 10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next"
         @size-change="loadList"
         @current-change="loadList"

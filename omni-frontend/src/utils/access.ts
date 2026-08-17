@@ -1,5 +1,6 @@
 /** 供应商账号中不构成内部管理身份的基础角色。 */
 const NON_MANAGEMENT_SUPPLIER_ROLES = new Set(['USER', 'SUPPLIER'])
+const ASSET_SELF_SERVICE_ROLES = new Set(['USER', 'ASSET_USER'])
 
 /**
  * 判断当前账号是否具备管理端身份。
@@ -30,5 +31,16 @@ export function hasManagementAccess(permissions: string[], roles: string[] = [])
     || code.startsWith('srm:invite:')
     || code === 'srm:portal:invite'
     || code.startsWith('srm:portal:invite:')
+    || code.startsWith('asset:')
   ))
+}
+
+/**
+ * 判断当前账号是否仅以资产使用人身份进入管理端。
+ */
+export function isAssetSelfServiceUser(permissions: string[], roles: string[]): boolean {
+  return roles.length > 0
+    && roles.every((role) => ASSET_SELF_SERVICE_ROLES.has(role))
+    && permissions.includes('asset:asset:self')
+    && !permissions.includes('asset:asset:list')
 }

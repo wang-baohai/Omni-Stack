@@ -55,6 +55,15 @@ export interface TodoTask {
   createTime: string
 }
 
+/** 当前任务及其流程变量形成的只读表单上下文。 */
+export interface TaskFormData {
+  taskId: string
+  taskName: string
+  processInstanceId: string
+  processDefinitionId: string
+  variables: Record<string, unknown>
+}
+
 /** 部署流程请求 */
 export interface DeployProcessRequest {
   name: string
@@ -301,7 +310,7 @@ export function getTodoCount() {
 
 /** 获取任务表单数据 */
 export function getTaskFormData(taskId: string) {
-  return request.get<ApiResponse<Record<string, unknown>>>(
+  return request.get<ApiResponse<TaskFormData>>(
     `/workflow/task/${taskId}/form`,
     { headers: tenantHeaders() },
   )

@@ -80,25 +80,25 @@ public class SupplierController {
         return R.ok();
     }
 
-    /** 提交审核。 */
+    /** 提交审核（被驳回后重新提交，启动新一轮工作流）。 */
     @PostMapping("/{id}/submit") @PreAuthorize("hasAuthority('srm:supplier:create')") @SrmDataScope(permissionCode = "srm:supplier:create")
     @OperLog(module = "SRM供应商", operType = OperType.UPDATE, idExpr = "#id")
     public R<SrmViews.SupplierVO> submit(@PathVariable Long id, @Valid @RequestBody SrmRequests.StatusRequest request) {
         return R.ok(supplierService.submit(id, request));
     }
 
-    /** 审核通过。 */
-    @PostMapping("/{id}/approve") @PreAuthorize("hasAuthority('srm:supplier:approve')") @SrmDataScope(permissionCode = "srm:supplier:approve")
-    @OperLog(module = "SRM供应商审核", operType = OperType.UPDATE, idExpr = "#id")
-    public R<SrmViews.SupplierVO> approve(@PathVariable Long id, @Valid @RequestBody SrmRequests.StatusRequest request) {
-        return R.ok(supplierService.approve(id, request));
+    /** 撤回审批流程。 */
+    @PostMapping("/{id}/withdraw") @PreAuthorize("hasAuthority('srm:supplier:withdraw')") @SrmDataScope(permissionCode = "srm:supplier:withdraw")
+    @OperLog(module = "SRM供应商审批", operType = OperType.UPDATE, idExpr = "#id")
+    public R<SrmViews.SupplierVO> withdraw(@PathVariable Long id, @Valid @RequestBody SrmRequests.StatusRequest request) {
+        return R.ok(supplierService.withdraw(id, request));
     }
 
-    /** 审核驳回。 */
-    @PostMapping("/{id}/reject") @PreAuthorize("hasAuthority('srm:supplier:reject')") @SrmDataScope(permissionCode = "srm:supplier:reject")
-    @OperLog(module = "SRM供应商审核", operType = OperType.UPDATE, idExpr = "#id")
-    public R<SrmViews.SupplierVO> reject(@PathVariable Long id, @Valid @RequestBody SrmRequests.StatusRequest request) {
-        return R.ok(supplierService.reject(id, request));
+    /** 取消审批流程。 */
+    @PostMapping("/{id}/cancel") @PreAuthorize("hasAuthority('srm:supplier:cancel')") @SrmDataScope(permissionCode = "srm:supplier:cancel")
+    @OperLog(module = "SRM供应商审批", operType = OperType.UPDATE, idExpr = "#id")
+    public R<SrmViews.SupplierVO> cancel(@PathVariable Long id, @Valid @RequestBody SrmRequests.StatusRequest request) {
+        return R.ok(supplierService.cancel(id, request));
     }
 
     /** 冻结供应商。 */

@@ -335,6 +335,8 @@ public final class SrmRequests {
         @NotNull(message = "版本号不能为空")
         @Min(0)
         private Integer version;
+        /** 选中的评分标准 ID。 */
+        private Long criterionId;
         @Size(max = 200)
         private String indicatorValue;
         @Size(max = 20)

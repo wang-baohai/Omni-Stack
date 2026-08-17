@@ -23,6 +23,16 @@ public interface SrmSupplierMapper extends BaseMapper<SrmSupplier> {
     SrmSupplier selectVisibleForUpdate(@Param("id") Long id);
 
     /**
+     * 按租户 + ID 锁定供应商（用于工作流回调等跨线程场景）。
+     *
+     * @param tenantId 租户 ID
+     * @param id 供应商 ID
+     * @return 供应商
+     */
+    @Select("SELECT * FROM srm_supplier WHERE tenant_id = #{tenantId} AND id = #{id} AND deleted = 0 FOR UPDATE")
+    SrmSupplier selectForUpdate(@Param("tenantId") Long tenantId, @Param("id") Long id);
+
+    /**
      * 统计各状态供应商数量。
      *
      * @return 概览统计
@@ -31,6 +41,7 @@ public interface SrmSupplierMapper extends BaseMapper<SrmSupplier> {
             "SELECT COUNT(*) AS total_suppliers,",
             "COALESCE(SUM(CASE WHEN status = 'APPROVED' THEN 1 ELSE 0 END), 0) AS approved_count,",
             "COALESCE(SUM(CASE WHEN status = 'PENDING_REVIEW' THEN 1 ELSE 0 END), 0) AS pending_review_count,",
+            "COALESCE(SUM(CASE WHEN status = 'APPROVING' THEN 1 ELSE 0 END), 0) AS approving_count,",
             "COALESCE(SUM(CASE WHEN status = 'SUSPENDED' THEN 1 ELSE 0 END), 0) AS suspended_count,",
             "COALESCE(SUM(CASE WHEN status = 'BLACKLISTED' THEN 1 ELSE 0 END), 0) AS blacklisted_count,",
             "COALESCE(SUM(CASE WHEN status = 'ELIMINATED' THEN 1 ELSE 0 END), 0) AS eliminated_count,",

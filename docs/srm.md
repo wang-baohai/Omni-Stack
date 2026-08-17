@@ -6,7 +6,7 @@
 
 [English](srm.en.md) | [日本語](srm.jp.md) | [한국어](srm.kr.md)
 
-SRM 是独立微服务 `omni-srm`，覆盖供应商全生命周期管理闭环：供应商注册/准入 → 审核 → 分级分类 → 绩效评估 → 风险管控 → 淘汰退出。采购执行（请购、询价、订单、收货）和资产处置不在 SRM 范围内，分别在后续建设的 `omni-procurement` 和 `omni-asset` 中实现。
+SRM 是独立微服务 `omni-srm`，覆盖供应商全生命周期管理闭环：供应商注册/准入 → 审核 → 分级分类 → 绩效评估 → 风险管控 → 淘汰退出。采购执行（请购、询价、订单、收货）和资产处置不在 SRM 范围内，分别由已经落地的独立服务 `omni-procurement` 和 `omni-asset` 实现。
 
 ## 1. 服务边界
 
@@ -163,7 +163,7 @@ DataPermissionInterceptor 不保护写入。每个更新/删除/审核/冻结/�
 | Invite | `srm:invite:list/create/revoke`、`srm:portal:invite` |
 | Owner 候选 | `srm:owner:list` |
 | PII 查看 | `srm:pii:view` |
-| Portal | `srm:portal:enroll/profile/evaluation` |
+| Portal | `srm:portal:enroll/profile/evaluation/quotation` |
 
 表中 `/` 是同一资源下多个完整权限码的简写，落库时逐条保存完整 code。`@PreAuthorize` 与 `@SrmDataScope` 使用同一个完整权限码。
 
@@ -182,13 +182,13 @@ SRM 实现 `XssConfigProvider` SPI，读取 Redis DB 0 的 `xss:enabled:{tenantI
 
 | 角色 | dataScope | 能力 |
 |---|---|---|
-| `SRM_ADMIN` | TENANT | 当前租户全部 SRM 功能/数据 |
-| `PROCUREMENT_MANAGER` | DEPT_AND_BELOW | 部门及下级、供应商评估、风险管理 |
+| `SRM_ADMIN` | TENANT | 当前租户 SRM 内部管理功能/数据，不含供应商自助门户 |
+| `PROCUREMENT_MANAGER` | DEPT_AND_BELOW | 部门及下级、供应商评估、风险管理，不含供应商自助门户 |
 | `PROCUREMENT_STAFF` | SELF | 自己负责的数据及日常操作 |
-| `SUPPLIER` | SELF | 门户自助：入驻后企业信息维护、查看自身绩效 |
+| `SUPPLIER` | SELF | 门户自助：入驻后企业信息维护、查看自身绩效、按邀请报价 |
 | `SUPER_ADMIN` | ALL | 所有功能，SRM 数据仍限当前租户 |
 
-默认 USER 仅授予 `srm:portal:enroll`，不授予 SRM 管理或门户资料/绩效权限；入驻完成并增加 SUPPLIER 角色后才能访问 profile/evaluation。
+默认 USER 仅授予 `srm:portal:enroll`，不授予 SRM 管理或门户资料/绩效/报价权限；入驻完成并增加 SUPPLIER 角色后才能访问 profile/evaluation/quotation。`srm:portal:quotation` 严格只授予 `SUPPLIER` 与按平台规则拥有全部权限树的 `SUPER_ADMIN`，`SRM_ADMIN`、`PROCUREMENT_MANAGER` 等内部角色不得代供应商报价。报价 Controller 同时要求 SUPPLIER 角色和有效 PortalUser 关联，仅有 SUPER_ADMIN 仍不能冒充供应商。
 
 ## 4. 状态机与核心流程
 
@@ -325,6 +325,7 @@ POST /api/auth/register（公开 Auth 自注册，分配默认 USER 角色）
 - `srm.portal-role.assign-requested.v1`
 - `auth.portal-role.assigned.v1`（Auth 发布，SRM 消费）
 - `auth.portal-role.assign-failed.v1`（Auth 发布，SRM 标记失败）
+- `srm.quotation.submitted.v1`
 - `srm.evaluation.completed.v1`
 - `srm.risk.level-changed.v1`
 
@@ -336,10 +337,21 @@ POST /api/auth/register（公开 Auth 自注册，分配默认 USER 角色）
 
 ### 6.4 内部 API
 
-SRM 预留以下能力供后续 Procurement/Asset 服务调用：
+SRM 提供以下能力供 Procurement/Asset 服务调用：
 - `GET /api/internal/supplier/{id}?tenantId={tenantId}` — 供应商摘要
 - `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}` — 搜索合格供应商
-- 所有内部 API 使用 `X-Internal-Token` 认证，不经 Gateway 暴露
+- `POST /api/internal/supplier/batch` — body 为 `{tenantId,supplierIds}`，按输入首次出现顺序返回最多 100 个摘要；缺失 ID 省略
+- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}` — 获取 RFQ 有效报价、版本和行快照
+- 所有内部 API 使用 `X-Internal-Token` 与 `X-Tenant-Id`，query/body tenant 必须与 header 一致，不经 Gateway 暴露；供应商摘要不包含联系人或银行账户 PII
+
+SRM 查询门户可见 RFQ 时调用 Procurement：
+
+- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`
+- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`
+
+supplierId 只能取当前 userId 对应的 `srm_supplier_portal_user`，不接受门户请求传入。所有内部请求同时携带 `X-Tenant-Id`；接口若另有 query/body tenant，必须与 header 一致。
+
+只有 RFQ `status=SENT`、邀请 `status IN (INVITED, QUOTED)` 且未超过 quotationDeadline 时允许提交或更新报价；`DRAFT/CLOSED/AWARDED/CANCELLED` 一律拒绝。
 
 ## 7. 硬约束
 
@@ -419,9 +431,19 @@ omni-frontend/src/
 3. 事件信封遵循统一格式，payload 不含完整 PII
 4. 消费者必须幂等，以 `payload.eventId` 做业务去重
 
-### Phase 2 报价预留
+### Procurement 报价集成
 
-报价依赖尚未建设的 `omni-procurement` RFQ 与邀请关系。MVP 不创建报价表、不注册报价端点、不下发 `srm:portal:quotation` 权限。Phase 2 接入时再落地 `srm_quotation`/`srm_quotation_line`，并同步补充 DDL、迁移脚本、权限与事件契约。
+门户端点：
+
+- `GET /api/srm/portal/quotation/invitations`：列出当前 PortalUser 的 RFQ 邀请，并合并本地报价状态。
+- `GET /api/srm/portal/quotation/invitations/{rfqId}`：返回邀请、RFQ 行快照与当前报价。
+- `POST /api/srm/portal/quotation`：提交或按 version 更新报价。
+
+提交请求仅接受 `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]`。tenantId、supplierId、供应商名称、RFQ 编号、物料、单位、数量、币种、行金额和总金额全部从可信身份、PortalUser 与 Procurement 邀请详情获取或服务端计算。
+
+`srm_quotation.request_id` 保存最后一次成功请求，`srm_quotation_request` 以 `(tenant_id, request_id)` 永久保留请求历史和 SHA-256 requestHash，并以 `(tenant_id, quotation_id, target_version)` 关联结果版本。`srm_quotation` 以 `(tenant_id, rfq_id, active_supplier_guard)` 保证同一供应商在同一 RFQ 只有一条未删除报价。`srm_quotation_line.rfq_line_id` 必填，提交行集合必须与 RFQ 快照完全一致。金额精度为：单价/数量 `DECIMAL(19,6)` 且大于 0，行金额/总金额 `DECIMAL(19,4)` 且大于 0。
+
+报价、明细、`srm_quotation_request` 与 `srm.quotation.submitted.v1` Outbox 必须在同一事务提交；同 requestId+requestHash 重试返回当前报价快照且不得重复发事件，同 requestId 的不同意图返回 409。首次请求使用创建哨兵 `version=0`，首版报价从 `version=1` 开始，避免并发创建意图把首版误当作可更新版本。事件 payload 至少包含 `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil`，Procurement 以 eventId Inbox 幂等消费。
 
 ## 10. 测试
 
@@ -438,6 +460,9 @@ SRM 模块覆盖以下测试集：
 - `tenant_id + id + version` 并发更新
 - 门户入驻幂等性（重复 credit_code 或同一 userId 重复入驻拒绝）
 - inviteToken 过期、作废、跨租户和并发超用均拒绝
+- 报价 requestId+requestHash 重放无副作用，同 requestId 异意图返回 409
+- 报价并发 version 冲突、RFQ 行缺失/重复/越权、截止时间与 Procurement 不可用均失败关闭
+- 报价、幂等历史和 Outbox 同事务，旧 requestId 在后续版本产生后重放仍不重复发事件
 - SUPPLIER 角色只能看到自己关联的供应商数据
 
 运行测试：

@@ -5,6 +5,13 @@
 
 SET NAMES utf8mb4;
 
+-- Workflow 启动初始化器会为该分类幂等部署当前草稿；迁移先修正既有模型元数据。
+UPDATE omni_workflow.wf_process_model
+SET category = 'SRM_SUPPLIER_ONBOARDING',
+    update_by = 'system'
+WHERE model_key = 'supplier-onboarding'
+  AND category <> 'SRM_SUPPLIER_ONBOARDING';
+
 CREATE DATABASE IF NOT EXISTS omni_srm
     DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -107,6 +114,7 @@ VALUES
     ('srm:portal:enroll', 'srm:portal', '门户入驻', 'API', 3, 1),
     ('srm:portal:profile', 'srm:portal', '企业信息', 'MENU', 3, 2),
     ('srm:portal:evaluation', 'srm:portal', '绩效评估', 'MENU', 3, 3),
+    ('srm:portal:quotation', 'srm:portal', '询价报价', 'MENU', 3, 4),
     ('srm:invite', 'srm', '邀请管理', 'MENU', 2, 6),
     ('srm:invite:create', 'srm:invite', '创建邀请', 'API', 3, 1),
     ('srm:invite:list', 'srm:invite', '查看邀请', 'API', 3, 2),
@@ -253,7 +261,10 @@ WHERE (role_current.role_code = 'USER'
             OR permission_current.permission_code LIKE 'srm:%')
        AND permission_current.permission_code NOT IN ('srm','srm:portal','srm:portal:enroll'))
    OR (role_current.role_code IN ('SRM_ADMIN','PROCUREMENT_MANAGER')
-       AND permission_current.permission_code IN ('srm:portal:enroll','srm:portal:profile','srm:portal:evaluation'))
+       AND permission_current.permission_code IN (
+           'srm:portal:enroll','srm:portal:profile',
+           'srm:portal:evaluation','srm:portal:quotation'
+       ))
    OR (role_current.role_code = 'PROCUREMENT_STAFF'
        AND (permission_current.permission_code = 'srm'
             OR permission_current.permission_code LIKE 'srm:%')
@@ -269,9 +280,12 @@ WHERE (role_current.role_code = 'USER'
        ))
    OR (role_current.role_code = 'SUPPLIER'
        AND (permission_current.permission_code = 'srm'
-            OR permission_current.permission_code LIKE 'srm:%')
+             OR permission_current.permission_code LIKE 'srm:%')
        AND permission_current.permission_code NOT IN
-           ('srm','srm:portal','srm:portal:profile','srm:portal:evaluation'));
+           ('srm','srm:portal','srm:portal:profile','srm:portal:evaluation',
+            'srm:portal:quotation'))
+   OR (permission_current.permission_code = 'srm:portal:quotation'
+       AND role_current.role_code NOT IN ('SUPER_ADMIN','SUPPLIER'));
 
 -- SUPER_ADMIN 获得全部 SRM 权限。
 INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
@@ -291,7 +305,8 @@ WHERE role_current.role_code IN ('SRM_ADMIN','PROCUREMENT_MANAGER')
   AND (permission_current.permission_code = 'srm'
        OR permission_current.permission_code LIKE 'srm:%')
   AND permission_current.permission_code NOT IN
-      ('srm:portal:enroll','srm:portal:profile','srm:portal:evaluation');
+      ('srm:portal:enroll','srm:portal:profile','srm:portal:evaluation',
+       'srm:portal:quotation');
 
 INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
 SELECT role_current.id, permission_current.id
@@ -317,7 +332,8 @@ WHERE (role_current.role_code = 'USER'
        AND permission_current.permission_code IN ('srm','srm:portal','srm:portal:enroll'))
     OR (role_current.role_code = 'SUPPLIER'
        AND permission_current.permission_code IN
-           ('srm','srm:portal','srm:portal:profile','srm:portal:evaluation'));
+           ('srm','srm:portal','srm:portal:profile','srm:portal:evaluation',
+            'srm:portal:quotation'));
 
 -- 供应商品类使用 Base 字典 code；为所有既有有效租户幂等补齐 MVP 基线。
 USE omni_base;
@@ -678,7 +694,94 @@ CREATE TABLE IF NOT EXISTS srm_risk_assessment (
     CONSTRAINT chk_srm_risk_assess_level CHECK (overall_level IN ('GREEN','YELLOW','RED'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM综合风险评估';
 
--- 12.14 SRM 本地 Transactional Outbox
+-- 12.14 供应商报价
+CREATE TABLE IF NOT EXISTS srm_quotation (
+    id                    BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    tenant_id             BIGINT        NOT NULL,
+    supplier_id           BIGINT        NOT NULL,
+    rfq_id                BIGINT        NOT NULL COMMENT 'Procurement RFQ ID；不建跨库外键',
+    rfq_no                VARCHAR(64)   NOT NULL COMMENT '询价单号快照',
+    supplier_name_snapshot VARCHAR(200) NOT NULL COMMENT '供应商名称快照',
+    request_id            VARCHAR(64)   NOT NULL COMMENT '客户端幂等请求ID',
+    quotation_time        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    valid_until           DATETIME      NOT NULL,
+    total_amount          DECIMAL(19,4) NOT NULL DEFAULT 0 COMMENT '服务端汇总金额',
+    currency_code         CHAR(3)       NOT NULL DEFAULT 'CNY',
+    status                VARCHAR(20)   NOT NULL DEFAULT 'SUBMITTED',
+    version               INT           NOT NULL DEFAULT 1,
+    deleted               TINYINT       NOT NULL DEFAULT 0,
+    active_supplier_guard BIGINT GENERATED ALWAYS AS (
+        CASE WHEN deleted = 0 THEN supplier_id ELSE NULL END
+    ) STORED,
+    create_time           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time           DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by             VARCHAR(64)   DEFAULT NULL,
+    update_by             VARCHAR(64)   DEFAULT NULL,
+    UNIQUE KEY uk_srm_quote_request (tenant_id, request_id),
+    UNIQUE KEY uk_srm_quote_active_supplier (tenant_id, rfq_id, active_supplier_guard),
+    INDEX idx_srm_quote_rfq_status (tenant_id, rfq_id, status, deleted),
+    INDEX idx_srm_quote_supplier_time (tenant_id, supplier_id, quotation_time, deleted),
+    INDEX idx_srm_quote_valid_until (tenant_id, status, valid_until, deleted),
+    CONSTRAINT chk_srm_quote_status
+        CHECK (status IN ('DRAFT','SUBMITTED','WITHDRAWN','EXPIRED')),
+    CONSTRAINT chk_srm_quote_total CHECK (total_amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM供应商报价';
+
+-- 12.15 供应商报价明细
+CREATE TABLE IF NOT EXISTS srm_quotation_line (
+    id                    BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    tenant_id             BIGINT        NOT NULL,
+    quotation_id          BIGINT        NOT NULL,
+    rfq_line_id           BIGINT        NOT NULL COMMENT 'Procurement RFQ行ID；不建跨库外键',
+    material_code         VARCHAR(64)   NOT NULL COMMENT '物料编码快照',
+    material_name         VARCHAR(200)  NOT NULL COMMENT '物料名称快照',
+    unit                  VARCHAR(32)   NOT NULL COMMENT '计量单位快照',
+    unit_price            DECIMAL(19,6) NOT NULL,
+    quantity              DECIMAL(19,6) NOT NULL COMMENT '询价数量快照',
+    line_amount           DECIMAL(19,4) NOT NULL COMMENT '服务端计算行金额',
+    delivery_days         INT           NOT NULL DEFAULT 0,
+    remark                VARCHAR(500)  DEFAULT NULL,
+    version               INT           NOT NULL DEFAULT 0,
+    deleted               TINYINT       NOT NULL DEFAULT 0,
+    active_rfq_line_guard BIGINT GENERATED ALWAYS AS (
+        CASE WHEN deleted = 0 THEN rfq_line_id ELSE NULL END
+    ) STORED,
+    create_time           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time           DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by             VARCHAR(64)   DEFAULT NULL,
+    update_by             VARCHAR(64)   DEFAULT NULL,
+    UNIQUE KEY uk_srm_quote_line_active (tenant_id, quotation_id, active_rfq_line_guard),
+    INDEX idx_srm_quote_line_quote (tenant_id, quotation_id, deleted),
+    INDEX idx_srm_quote_line_rfq_line (tenant_id, rfq_line_id, deleted),
+    CONSTRAINT chk_srm_quote_line_price CHECK (unit_price > 0),
+    CONSTRAINT chk_srm_quote_line_quantity CHECK (quantity > 0),
+    CONSTRAINT chk_srm_quote_line_amount CHECK (line_amount > 0),
+    CONSTRAINT chk_srm_quote_line_delivery CHECK (delivery_days BETWEEN 0 AND 3650)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM供应商报价明细';
+
+-- 12.16 报价请求幂等历史
+CREATE TABLE IF NOT EXISTS srm_quotation_request (
+    id             BIGINT      AUTO_INCREMENT PRIMARY KEY,
+    tenant_id      BIGINT      NOT NULL,
+    request_id     VARCHAR(64) NOT NULL COMMENT '客户端幂等请求ID',
+    quotation_id   BIGINT      DEFAULT NULL COMMENT 'RESERVED阶段允许为空',
+    rfq_id         BIGINT      NOT NULL,
+    supplier_id    BIGINT      NOT NULL,
+    request_hash   CHAR(64)    NOT NULL COMMENT '规范化请求体SHA-256',
+    target_version INT         DEFAULT NULL COMMENT '本请求成功产生的报价版本',
+    status         VARCHAR(20) NOT NULL DEFAULT 'RESERVED',
+    create_time    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time    DATETIME    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_by      VARCHAR(64) DEFAULT NULL,
+    update_by      VARCHAR(64) DEFAULT NULL,
+    UNIQUE KEY uk_srm_quote_req_id (tenant_id, request_id),
+    UNIQUE KEY uk_srm_quote_req_version (tenant_id, quotation_id, target_version),
+    INDEX idx_srm_quote_req_business (tenant_id, rfq_id, supplier_id, status),
+    INDEX idx_srm_quote_req_quote (tenant_id, quotation_id, create_time),
+    CONSTRAINT chk_srm_quote_req_status CHECK (status IN ('RESERVED','COMPLETED'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SRM报价请求幂等历史';
+
+-- 12.17 SRM 本地 Transactional Outbox
 CREATE TABLE IF NOT EXISTS sys_mq_message (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
     msg_id          VARCHAR(36)  NOT NULL COMMENT '业务消息ID',
@@ -1347,6 +1450,30 @@ CALL sp_srm_add_index('srm_risk_indicator', 'idx_srm_risk_ind_level',
     'INDEX `idx_srm_risk_ind_level` (`tenant_id`,`risk_level`,`deleted`)');
 CALL sp_srm_add_index('srm_risk_assessment', 'idx_srm_risk_assess_supplier',
     'INDEX `idx_srm_risk_assess_supplier` (`tenant_id`,`supplier_id`,`assessment_time`,`deleted`)');
+CALL sp_srm_add_index('srm_quotation', 'uk_srm_quote_request',
+    'UNIQUE KEY `uk_srm_quote_request` (`tenant_id`,`request_id`)');
+CALL sp_srm_add_index('srm_quotation', 'uk_srm_quote_active_supplier',
+    'UNIQUE KEY `uk_srm_quote_active_supplier` (`tenant_id`,`rfq_id`,`active_supplier_guard`)');
+CALL sp_srm_add_index('srm_quotation', 'idx_srm_quote_rfq_status',
+    'INDEX `idx_srm_quote_rfq_status` (`tenant_id`,`rfq_id`,`status`,`deleted`)');
+CALL sp_srm_add_index('srm_quotation', 'idx_srm_quote_supplier_time',
+    'INDEX `idx_srm_quote_supplier_time` (`tenant_id`,`supplier_id`,`quotation_time`,`deleted`)');
+CALL sp_srm_add_index('srm_quotation', 'idx_srm_quote_valid_until',
+    'INDEX `idx_srm_quote_valid_until` (`tenant_id`,`status`,`valid_until`,`deleted`)');
+CALL sp_srm_add_index('srm_quotation_line', 'uk_srm_quote_line_active',
+    'UNIQUE KEY `uk_srm_quote_line_active` (`tenant_id`,`quotation_id`,`active_rfq_line_guard`)');
+CALL sp_srm_add_index('srm_quotation_line', 'idx_srm_quote_line_quote',
+    'INDEX `idx_srm_quote_line_quote` (`tenant_id`,`quotation_id`,`deleted`)');
+CALL sp_srm_add_index('srm_quotation_line', 'idx_srm_quote_line_rfq_line',
+    'INDEX `idx_srm_quote_line_rfq_line` (`tenant_id`,`rfq_line_id`,`deleted`)');
+CALL sp_srm_add_index('srm_quotation_request', 'uk_srm_quote_req_id',
+    'UNIQUE KEY `uk_srm_quote_req_id` (`tenant_id`,`request_id`)');
+CALL sp_srm_add_index('srm_quotation_request', 'uk_srm_quote_req_version',
+    'UNIQUE KEY `uk_srm_quote_req_version` (`tenant_id`,`quotation_id`,`target_version`)');
+CALL sp_srm_add_index('srm_quotation_request', 'idx_srm_quote_req_business',
+    'INDEX `idx_srm_quote_req_business` (`tenant_id`,`rfq_id`,`supplier_id`,`status`)');
+CALL sp_srm_add_index('srm_quotation_request', 'idx_srm_quote_req_quote',
+    'INDEX `idx_srm_quote_req_quote` (`tenant_id`,`quotation_id`,`create_time`)');
 CALL sp_srm_add_index('sys_mq_message', 'uk_srm_mq_msg_id',
     'UNIQUE KEY `uk_srm_mq_msg_id` (`msg_id`)');
 CALL sp_srm_add_index('sys_mq_message', 'idx_srm_mq_relay',
@@ -1362,6 +1489,20 @@ CALL sp_srm_add_constraint('srm_risk_indicator', 'chk_srm_risk_ind_level',
     'CHECK (`risk_level` IN (''GREEN'',''YELLOW'',''RED''))');
 CALL sp_srm_add_constraint('srm_risk_assessment', 'chk_srm_risk_assess_level',
     'CHECK (`overall_level` IN (''GREEN'',''YELLOW'',''RED''))');
+CALL sp_srm_add_constraint('srm_quotation', 'chk_srm_quote_status',
+    'CHECK (`status` IN (''DRAFT'',''SUBMITTED'',''WITHDRAWN'',''EXPIRED''))');
+CALL sp_srm_add_constraint('srm_quotation', 'chk_srm_quote_total',
+    'CHECK (`total_amount` > 0)');
+CALL sp_srm_add_constraint('srm_quotation_line', 'chk_srm_quote_line_price',
+    'CHECK (`unit_price` > 0)');
+CALL sp_srm_add_constraint('srm_quotation_line', 'chk_srm_quote_line_quantity',
+    'CHECK (`quantity` > 0)');
+CALL sp_srm_add_constraint('srm_quotation_line', 'chk_srm_quote_line_amount',
+    'CHECK (`line_amount` > 0)');
+CALL sp_srm_add_constraint('srm_quotation_line', 'chk_srm_quote_line_delivery',
+    'CHECK (`delivery_days` BETWEEN 0 AND 3650)');
+CALL sp_srm_add_constraint('srm_quotation_request', 'chk_srm_quote_req_status',
+    'CHECK (`status` IN (''RESERVED'',''COMPLETED''))');
 
 -- 既有租户幂等补齐默认评估模板和四个维度。
 INSERT INTO srm_evaluation_template

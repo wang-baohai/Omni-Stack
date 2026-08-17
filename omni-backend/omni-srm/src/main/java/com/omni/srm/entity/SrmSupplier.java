@@ -33,4 +33,12 @@ public class SrmSupplier extends SrmOwnedEntity {
     /** 生命周期状态 */ private String status;
     /** 分配时间 */ private LocalDateTime assignedTime;
     /** 最近评估时间 */ private LocalDateTime lastEvaluationTime;
+    /** Workflow 启动请求幂等键 */ private String workflowRequestId;
+    /** Workflow 业务键，格式为 supplierId:attempt */ private String workflowBusinessKey;
+    /** 本轮选定的已发布流程模型版本 ID */ private Long workflowModelVersionId;
+    /** Workflow 流程实例 ID */ private String processInstanceId;
+    /** NOT_STARTED/PENDING/FAILED/STARTED */ private String workflowStartStatus;
+    /** Workflow 审批完成时间 */ private LocalDateTime workflowCompletedTime;
+    /** 当前审批轮次 */ private Integer approvalAttempt;
+    /** 审批通过时间 */ private LocalDateTime approvedTime;
 }

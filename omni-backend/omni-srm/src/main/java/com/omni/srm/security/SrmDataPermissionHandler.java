@@ -27,7 +27,13 @@ public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
             "srm_supplier_bank_account", new ParentRelation("srm_supplier", "supplier_id", "id"),
             "srm_risk_indicator", new ParentRelation("srm_supplier", "supplier_id", "id"),
             "srm_risk_assessment", new ParentRelation("srm_supplier", "supplier_id", "id"),
-            "srm_evaluation_item", new ParentRelation("srm_evaluation", "evaluation_id", "id"));
+            "srm_evaluation_item", new ParentRelation("srm_evaluation", "evaluation_id", "id"),
+            "srm_quotation", new ParentRelation("srm_supplier", "supplier_id", "id"));
+
+    private static final Map<String, NestedParentRelation> NESTED_CHILD_TABLES = Map.of(
+            "srm_quotation_line", new NestedParentRelation(
+                    "srm_quotation", "quotation_id", "id",
+                    "srm_supplier", "supplier_id", "id"));
 
     /** {@inheritDoc} */
     @Override
@@ -36,7 +42,8 @@ public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
             return null;
         }
         String tableName = table.getName().toLowerCase();
-        if (!OWNED_TABLES.contains(tableName) && !CHILD_TABLES.containsKey(tableName)) {
+        if (!OWNED_TABLES.contains(tableName) && !CHILD_TABLES.containsKey(tableName)
+                && !NESTED_CHILD_TABLES.containsKey(tableName)) {
             return null;
         }
         String alias = table.getAlias() == null ? table.getName() : table.getAlias().getName();
@@ -50,6 +57,10 @@ public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
         ParentRelation relation = CHILD_TABLES.get(tableName);
         if (relation != null) {
             return inherited(alias, relation, info);
+        }
+        NestedParentRelation nestedRelation = NESTED_CHILD_TABLES.get(tableName);
+        if (nestedRelation != null) {
+            return nestedInherited(alias, nestedRelation, info);
         }
         return owned(alias, info);
     }
@@ -84,6 +95,31 @@ public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
         }
     }
 
+    private Expression nestedInherited(String alias, NestedParentRelation relation,
+                                       SrmDataScopeContext.ScopeInfo info) {
+        if (info.tenantId() == null) {
+            return deny(alias);
+        }
+        String intermediateAlias = "srm_scope_intermediate";
+        String parentAlias = "srm_scope_parent";
+        Expression owner = owned(parentAlias, info);
+        String condition = "EXISTS (SELECT 1 FROM " + relation.intermediateTable() + " "
+                + intermediateAlias + " JOIN " + relation.parentTable() + " " + parentAlias
+                + " ON " + parentAlias + "." + relation.parentColumn() + " = "
+                + intermediateAlias + "." + relation.intermediateParentColumn()
+                + " AND " + parentAlias + ".tenant_id = " + info.tenantId()
+                + " AND " + parentAlias + ".deleted = 0"
+                + " WHERE " + intermediateAlias + "." + relation.intermediateColumn() + " = "
+                + alias + "." + relation.childColumn()
+                + " AND " + intermediateAlias + ".tenant_id = " + info.tenantId()
+                + " AND " + intermediateAlias + ".deleted = 0 AND " + owner + ")";
+        try {
+            return CCJSqlParserUtil.parseCondExpression(condition);
+        } catch (Exception exception) {
+            throw new IllegalStateException("无法构建 SRM 孙资源数据权限条件", exception);
+        }
+    }
+
     private Expression equals(String alias, String column, Long value) {
         if (value == null) {
             return deny(alias);
@@ -115,5 +151,20 @@ public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
      * @param parentColumn 父表主键列
      */
     private record ParentRelation(String parentTable, String childColumn, String parentColumn) {
+    }
+
+    /**
+     * 孙资源经中间聚合再继承授权父表的关联关系。
+     *
+     * @param intermediateTable 中间聚合表
+     * @param childColumn 孙表指向中间表的外键列
+     * @param intermediateColumn 中间表主键列
+     * @param parentTable 授权父表
+     * @param intermediateParentColumn 中间表指向授权父表的外键列
+     * @param parentColumn 授权父表主键列
+     */
+    private record NestedParentRelation(String intermediateTable, String childColumn,
+                                        String intermediateColumn, String parentTable,
+                                        String intermediateParentColumn, String parentColumn) {
     }
 }

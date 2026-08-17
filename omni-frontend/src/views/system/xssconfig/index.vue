@@ -253,11 +253,13 @@ onMounted(() => {
 
       <el-pagination
         v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
         class="pagination"
-        :page-size="pageSize"
+        :page-sizes="[5, 10, 20, 50, 100]"
         :total="total"
-        layout="total, prev, pager, next"
+        layout="total, sizes, prev, pager, next"
         @current-change="handlePageChange"
+        @size-change="currentPage = 1; handlePageChange(1)"
       />
     </el-card>
 

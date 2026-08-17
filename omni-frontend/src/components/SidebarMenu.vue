@@ -5,11 +5,22 @@
  * 支持任意深度的权限树嵌套（DIRECTORY → DIRECTORY → ... → MENU），
  * 通过递归调用自身渲染多级子菜单。
  */
+import { computed } from 'vue'
 import type { MenuNode } from '@/api/menu'
 import { menuI18nMap } from '@/constants/menu'
 import { useI18n } from 'vue-i18n'
+import { usePermissionStore } from '@/stores/permission'
+import { useUserStore } from '@/stores/user'
+import { isAssetSelfServiceUser } from '@/utils/access'
+import { getRolesFromToken } from '@/utils/jwt'
 
 const { t } = useI18n()
+const permissionStore = usePermissionStore()
+const userStore = useUserStore()
+const assetSelfServiceOnly = computed(() => isAssetSelfServiceUser(
+  permissionStore.permissions,
+  getRolesFromToken(userStore.token),
+))
 
 defineProps<{
   /** 当前层级的菜单节点列表 */
@@ -37,6 +48,19 @@ const iconMap: Record<string, string> = {
   'srm:portal:evaluation': 'TrendCharts',
   'srm:portal:risk': 'Warning',
   'srm:invite': 'Message',
+  'procurement': 'ShoppingCart',
+  'procurement:overview': 'DataAnalysis',
+  'procurement:material': 'Box',
+  'procurement:approval-route': 'Guide',
+  'procurement:requisition': 'DocumentAdd',
+  'procurement:rfq': 'Tickets',
+  'procurement:purchase-order': 'ShoppingBag',
+  'procurement:goods-receipt': 'TakeawayBox',
+  'asset': 'Coin',
+  'asset:overview': 'DataAnalysis',
+  'asset:asset': 'Box',
+  'asset:transfer': 'Switch',
+  'asset:disposal': 'Delete',
   'system:user': 'User',
   'system:role': 'UserFilled',
   'system:permission': 'Lock',
@@ -60,6 +84,9 @@ const iconMap: Record<string, string> = {
 
 /** 获取菜单显示名称（优先 i18n 翻译，fallback 后端原始名称） */
 function getMenuLabel(code: string, fallback: string): string {
+  if (code === 'asset:asset' && assetSelfServiceOnly.value) {
+    return t('common.assetMyAssets')
+  }
   const key = menuI18nMap[code]
   return key ? t(key) : fallback
 }

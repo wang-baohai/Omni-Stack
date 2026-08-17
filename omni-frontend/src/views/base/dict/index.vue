@@ -373,11 +373,13 @@ onMounted(() => {
             v-if="typeTotal > 0"
             class="type-pagination"
             :current-page="typePage"
-            :page-size="typeSize"
+            v-model:page-size="typeSize"
+            :page-sizes="[5, 10, 20, 50, 100]"
             :total="typeTotal"
-            layout="total, prev, pager, next"
+            layout="total, sizes, prev, pager, next"
             small
             @current-change="(p: number) => { typePage = p; loadTypes() }"
+            @size-change="typePage = 1; loadTypes()"
           />
         </el-card>
       </el-col>
@@ -452,11 +454,13 @@ onMounted(() => {
               v-if="dataTotal > 0"
               class="data-pagination"
               :current-page="dataPage"
-              :page-size="dataSize"
+              v-model:page-size="dataSize"
+              :page-sizes="[5, 10, 20, 50, 100]"
               :total="dataTotal"
-              layout="total, prev, pager, next"
+              layout="total, sizes, prev, pager, next"
               small
               @current-change="(p: number) => { dataPage = p; loadDataList() }"
+              @size-change="dataPage = 1; loadDataList()"
             />
           </template>
         </el-card>

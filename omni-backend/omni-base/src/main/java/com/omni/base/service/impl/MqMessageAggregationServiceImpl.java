@@ -11,6 +11,9 @@ import com.omni.common.mqlog.entity.SysMqMessage;
 import com.omni.common.mqlog.mapper.SysMqMessageMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import com.omni.common.web.TraceIdFilter;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,6 +27,7 @@ import java.util.List;
  *
  * @author Omni-Stack Team
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MqMessageAggregationServiceImpl implements MqMessageAggregationService {
@@ -184,6 +188,10 @@ public class MqMessageAggregationServiceImpl implements MqMessageAggregationServ
             }
             return response;
         } catch (FeignException ex) {
+            log.warn("聚合 CRM MQ 消息失败: traceId={}, status={}, url={}, cause={}",
+                    MDC.get(TraceIdFilter.MDC_KEY), ex.status(),
+                    ex.request() == null ? "-" : ex.request().url(),
+                    ex.getClass().getName(), ex);
             throw new BusinessException(503, "CRM 服务暂不可用");
         }
     }

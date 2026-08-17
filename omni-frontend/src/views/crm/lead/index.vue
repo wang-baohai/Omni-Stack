@@ -282,7 +282,7 @@ onMounted(loadData)
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination" :total="total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next" @current-change="loadData" @size-change="currentPage = 1; loadData()" />
+      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination" :total="total" :page-sizes="[5, 10, 20, 50, 100]" layout="total, sizes, prev, pager, next" @current-change="loadData" @size-change="currentPage = 1; loadData()" />
     </el-card>
 
     <el-dialog v-model="formDialogVisible" :title="editingLead ? '编辑线索' : '新建线索'" width="720px">

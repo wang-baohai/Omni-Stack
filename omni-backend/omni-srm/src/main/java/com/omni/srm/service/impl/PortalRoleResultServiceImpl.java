@@ -11,8 +11,10 @@ import com.omni.srm.entity.SrmSupplierPortalUser;
 import com.omni.srm.mapper.SrmSupplierEnrollmentMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
 import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
+import com.omni.srm.security.SrmTenantContext;
 import com.omni.srm.service.PortalRoleResultService;
 import com.omni.srm.service.support.SrmAuditSupport;
+import com.omni.srm.workflow.SupplierWorkflowCoordinator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -40,6 +42,7 @@ public class PortalRoleResultServiceImpl implements PortalRoleResultService {
     private final SrmSupplierEnrollmentMapper enrollmentMapper;
     private final SrmSupplierPortalUserMapper portalUserMapper;
     private final SrmSupplierMapper supplierMapper;
+    private final SupplierWorkflowCoordinator workflowCoordinator;
 
     /** {@inheritDoc} */
     @Override
@@ -155,6 +158,17 @@ public class PortalRoleResultServiceImpl implements PortalRoleResultService {
         }
         log.info("门户角色分配 Saga 完成: requestId={}, supplierId={}",
                 event.getRequestId(), event.getSupplierId());
+        // Saga 完成后自动启动工作流审批（PENDING_REVIEW → APPROVING）
+        SrmSupplier updatedSupplier = requireSupplier(event.getTenantId(), event.getSupplierId());
+        if (SupplierStatus.PENDING_REVIEW.name().equals(updatedSupplier.getStatus())) {
+            SrmTenantContext.set(new SrmTenantContext.RequestIdentity(
+                    event.getUserId(), event.getTenantId(), "portal-role-saga"));
+            try {
+                workflowCoordinator.prepareAndStart(updatedSupplier);
+            } finally {
+                SrmTenantContext.clear();
+            }
+        }
     }
 
     private void handleFailure(SrmSupplierEnrollment enrollment, PortalRoleResultEvent event) {

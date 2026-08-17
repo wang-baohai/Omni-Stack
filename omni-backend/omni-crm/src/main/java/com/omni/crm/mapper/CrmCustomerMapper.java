@@ -15,6 +15,18 @@ import java.util.List;
 public interface CrmCustomerMapper extends BaseMapper<CrmCustomer> {
 
     /**
+     * 批量查询客户名称（不受数据权限限制，仅用于列表展示填充）。
+     *
+     * @param ids 客户 ID 列表
+     * @return 客户列表（仅含 id 和 name）
+     */
+    @InterceptorIgnore(dataPermission = "true")
+    @Select("<script>SELECT id, name FROM crm_customer WHERE deleted = 0 AND id IN "
+            + "<foreach collection='ids' item='id' open='(' separator=',' close=')'>#{id}</foreach>"
+            + "</script>")
+    List<CrmCustomer> selectNamesByIds(@Param("ids") List<Long> ids);
+
+    /**
      * 在数据权限范围内锁定客户。
      *
      * @param id 客户 ID

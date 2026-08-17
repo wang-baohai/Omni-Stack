@@ -62,4 +62,19 @@ public class XssAutoConfiguration {
                 new com.fasterxml.jackson.databind.deser.std.StringDeserializer()));
         return module;
     }
+
+    /**
+     * 注册 Jackson 3 XSS 模块，供 Spring Boot 4 默认 HTTP JSON 转换器使用。
+     *
+     * @return Jackson 3 XSS 防护模块
+     */
+    @Bean
+    @ConditionalOnBean(XssConfigProvider.class)
+    @ConditionalOnClass(name = "tools.jackson.databind.json.JsonMapper")
+    public tools.jackson.databind.module.SimpleModule xssJackson3Module() {
+        tools.jackson.databind.module.SimpleModule module =
+                new tools.jackson.databind.module.SimpleModule("XssModule3");
+        module.addDeserializer(String.class, new XssStringDeserializer3());
+        return module;
+    }
 }

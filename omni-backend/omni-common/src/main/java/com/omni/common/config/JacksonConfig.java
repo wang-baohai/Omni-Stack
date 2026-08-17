@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -28,6 +29,7 @@ import java.util.List;
  * </p>
  */
 @Configuration
+@SuppressWarnings({"deprecation", "removal"})
 public class JacksonConfig implements WebMvcConfigurer {
 
     /** 日期时间格式：yyyy-MM-dd HH:mm:ss */
@@ -37,6 +39,21 @@ public class JacksonConfig implements WebMvcConfigurer {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
+
+    private final ObjectProvider<com.fasterxml.jackson.databind.Module> jackson2Modules;
+    private final ObjectProvider<tools.jackson.databind.JacksonModule> jackson3Modules;
+
+    /**
+     * 创建 Jackson 配置并保留业务模块扩展点。
+     *
+     * @param jackson2Modules 应用上下文中的 Jackson 2 模块
+     * @param jackson3Modules 应用上下文中的 Jackson 3 模块
+     */
+    public JacksonConfig(ObjectProvider<com.fasterxml.jackson.databind.Module> jackson2Modules,
+                         ObjectProvider<tools.jackson.databind.JacksonModule> jackson3Modules) {
+        this.jackson2Modules = jackson2Modules;
+        this.jackson3Modules = jackson3Modules;
+    }
 
     /**
      * 提供全局 ObjectMapper Bean（Jackson 2），供其他组件（如 XSS 防护）注入使用。
@@ -56,6 +73,7 @@ public class JacksonConfig implements WebMvcConfigurer {
                 new LocalDateDeserializer(DATE_FORMATTER));
 
         ObjectMapper mapper = new ObjectMapper();
+        jackson2Modules.orderedStream().forEach(mapper::registerModule);
         mapper.registerModule(javaTimeModule);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;
@@ -79,8 +97,9 @@ public class JacksonConfig implements WebMvcConfigurer {
         module.addDeserializer(LocalDate.class,
                 new tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer(DATE_FORMATTER));
 
-        return JsonMapper.builder()
-                .addModule(module);
+        JsonMapper.Builder builder = JsonMapper.builder();
+        jackson3Modules.orderedStream().forEach(builder::addModule);
+        return builder.addModule(module);
     }
 
     /**

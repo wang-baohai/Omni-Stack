@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /** CRM 联系人应用服务实现。 */
 @Service
@@ -55,7 +56,9 @@ public class ContactServiceImpl implements ContactService {
     /** {@inheritDoc} */
     @Override
     public CrmViews.ContactVO get(Long id) {
-        return ownerEnricher.enrichOne(CrmViewAssembler.contact(accessGuard.requireContact(id), CrmViewAssembler.canViewPii()));
+        CrmViews.ContactVO vo = ownerEnricher.enrichOne(CrmViewAssembler.contact(accessGuard.requireContact(id), CrmViewAssembler.canViewPii()));
+        enrichCustomerNames(List.of(vo));
+        return vo;
     }
 
     /** {@inheritDoc} */
@@ -123,7 +126,19 @@ public class ContactServiceImpl implements ContactService {
                         .orderByDesc(CrmContact::getPrimaryFlag).orderByDesc(CrmContact::getUpdateTime));
         List<CrmViews.ContactVO> records = result.getRecords().stream()
                 .map(entity -> CrmViewAssembler.contact(entity, false)).toList();
+        enrichCustomerNames(records);
         return new PageResult<>(ownerEnricher.enrich(records), result.getTotal(), result.getSize(), result.getCurrent());
+    }
+
+    /** 批量填充客户名称，避免列表页显示裸 ID。 */
+    private void enrichCustomerNames(List<CrmViews.ContactVO> records) {
+        if (records == null || records.isEmpty()) return;
+        List<Long> customerIds = records.stream().map(CrmViews.ContactVO::getCustomerId)
+                .filter(java.util.Objects::nonNull).distinct().toList();
+        if (customerIds.isEmpty()) return;
+        Map<Long, String> nameMap = customerMapper.selectNamesByIds(customerIds).stream()
+                .collect(java.util.stream.Collectors.toMap(CrmCustomer::getId, CrmCustomer::getName, (a, b) -> a));
+        records.forEach(vo -> vo.setCustomerName(nameMap.get(vo.getCustomerId())));
     }
 
     private void clearPrimary(Long customerId) {

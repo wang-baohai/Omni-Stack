@@ -16,6 +16,7 @@ import com.omni.srm.security.SrmDataScopeContext;
 import com.omni.srm.security.SrmTenantContext;
 import com.omni.srm.service.PortalInviteService;
 import com.omni.srm.service.support.SupplierRiskInitializer;
+import com.omni.srm.workflow.SupplierWorkflowCoordinator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,7 @@ class SupplierPortalServiceImplTest {
     @Mock private PortalInviteService portalInviteService;
     @Mock private SupplierRiskInitializer supplierRiskInitializer;
     @Mock private ReliableMessageRelay reliableMessageRelay;
+    @Mock private SupplierWorkflowCoordinator workflowCoordinator;
 
     private SupplierPortalServiceImpl service;
 
@@ -61,7 +63,7 @@ class SupplierPortalServiceImplTest {
         initTableInfo(SrmSupplierEnrollment.class);
         initTableInfo(SrmSupplierPortalUser.class);
         service = new SupplierPortalServiceImpl(supplierMapper, portalUserMapper, enrollmentMapper,
-                portalInviteService, supplierRiskInitializer, reliableMessageRelay);
+                portalInviteService, supplierRiskInitializer, reliableMessageRelay, workflowCoordinator);
         SrmTenantContext.set(new SrmTenantContext.RequestIdentity(20L, 1L, "supplier-user"));
     }
 

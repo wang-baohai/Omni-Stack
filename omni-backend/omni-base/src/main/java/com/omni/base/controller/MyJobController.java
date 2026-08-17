@@ -120,28 +120,32 @@ public class MyJobController {
     /**
      * 更新任务（校验归属）。
      *
+     * @param tenantId 租户 ID（从请求头获取）
      * @param id      任务 ID
      * @param request 更新请求
      * @return 更新后的任务实体
      */
     @PutMapping("/{id}")
-    public R<SysUserJob> update(@PathVariable Long id,
+    public R<SysUserJob> update(@RequestHeader("X-Tenant-Id") Long tenantId,
+                                 @PathVariable Long id,
                                  @Valid @RequestBody UpdateUserJobRequest request) {
         String username = currentUsername();
-        verifyOwnership(id, username);
+        verifyOwnership(id, tenantId, username);
         return R.ok(userJobService.updateJob(id, request, username));
     }
 
     /**
      * 删除任务（校验归属）。
      *
+     * @param tenantId 租户 ID（从请求头获取）
      * @param id 任务 ID
      * @return 空结果
      */
     @DeleteMapping("/{id}")
-    public R<Void> delete(@PathVariable Long id) {
+    public R<Void> delete(@RequestHeader("X-Tenant-Id") Long tenantId,
+                          @PathVariable Long id) {
         String username = currentUsername();
-        verifyOwnership(id, username);
+        verifyOwnership(id, tenantId, username);
         userJobService.deleteJob(id);
         return R.ok();
     }
@@ -149,15 +153,17 @@ public class MyJobController {
     /**
      * 切换任务状态（校验归属）。
      *
+     * @param tenantId 租户 ID（从请求头获取）
      * @param id     任务 ID
      * @param status 目标状态（1=启用，0=停止）
      * @return 空结果
      */
     @PutMapping("/{id}/status")
-    public R<Void> toggleStatus(@PathVariable Long id,
+    public R<Void> toggleStatus(@RequestHeader("X-Tenant-Id") Long tenantId,
+                                @PathVariable Long id,
                                 @RequestParam Integer status) {
         String username = currentUsername();
-        verifyOwnership(id, username);
+        verifyOwnership(id, tenantId, username);
         userJobService.toggleStatus(id, status);
         return R.ok();
     }
@@ -165,13 +171,15 @@ public class MyJobController {
     /**
      * 立即触发任务执行（校验归属）。
      *
+     * @param tenantId 租户 ID（从请求头获取）
      * @param id 任务 ID
      * @return 空结果
      */
     @PostMapping("/{id}/trigger")
-    public R<Void> trigger(@PathVariable Long id) {
+    public R<Void> trigger(@RequestHeader("X-Tenant-Id") Long tenantId,
+                           @PathVariable Long id) {
         String username = currentUsername();
-        verifyOwnership(id, username);
+        verifyOwnership(id, tenantId, username);
         userJobService.triggerNow(id);
         return R.ok();
     }
@@ -192,7 +200,7 @@ public class MyJobController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         String username = currentUsername();
-        verifyOwnership(id, username);
+        verifyOwnership(id, tenantId, username);
         UserJobLogQuery query = new UserJobLogQuery();
         query.setJobId(id);
         return R.ok(userJobLogService.listLogs(tenantId, query, page, size));
@@ -209,11 +217,12 @@ public class MyJobController {
      * 校验任务归属：确保当前用户是任务的创建者。
      *
      * @param jobId    任务 ID
+     * @param tenantId 当前租户 ID
      * @param username 当前用户名
      */
-    private void verifyOwnership(Long jobId, String username) {
+    private void verifyOwnership(Long jobId, Long tenantId, String username) {
         SysUserJob job = userJobService.getJobById(jobId);
-        if (!username.equals(job.getCreateBy())) {
+        if (!tenantId.equals(job.getTenantId()) || !username.equals(job.getCreateBy())) {
             throw new BusinessException(403, "无权操作他人的任务");
         }
     }

@@ -28,7 +28,7 @@
 
 ## 1. Architecture Overview
 
-The Omni-Stack Docker full-stack contains **12 containers** organized in three layers:
+The Omni-Stack Docker full-stack contains **15 containers** organized in three layers:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -37,14 +37,13 @@ The Omni-Stack Docker full-stack contains **12 containers** organized in three l
 └──────────────────────────┬──────────────────────────────────┘
                            │ proxy_pass
 ┌──────────────────────────┴──────────────────────────────────┐
-│               Backend Microservices Layer (4 containers)     │
-│  omni-gateway (:8102) ──→ omni-auth (:8100)                │
-│        │                 omni-base (:8101)                  │
-│        │                 omni-workflow (:8103)              │
+│               Backend Microservices Layer (8 containers)     │
+│  Gateway · Auth · Base · Workflow · CRM · SRM              │
+│  Procurement · Asset (only Gateway is publicly exposed)     │
 └────────┼────────────────────┬───────────────────────────────┘
          │                    │
 ┌────────┴────────────────────┴───────────────────────────────┐
-│                  Middleware Layer (7 containers)              │
+│                  Middleware Layer (6 containers)             │
 │  MySQL (:3306) · Redis (:6379) · Nacos (:8080/:8848/:9848) │
 │  RocketMQ NameServer (:19876) · Broker (:10909-10912)      │
 │  XXL-JOB Admin (:18080)                                    │
@@ -202,11 +201,13 @@ EXPOSE 3000
 mysql:
   image: mysql:8.4
   environment:
-    MYSQL_ROOT_PASSWORD: root          # Root password
+    MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?configure MYSQL_ROOT_PASSWORD in .env}
     MYSQL_DATABASE: omni_auth          # First auto-created database
     MYSQL_CHARACTER_SET_SERVER: utf8mb4
     MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     TZ: Asia/Shanghai                  # Timezone
+  volumes:
+    - omni-mysql-data:/var/lib/mysql
   volumes:
     - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     - ./scripts/sql/init-nacos.sql:/docker-entrypoint-initdb.d/02-init-nacos.sql:ro
@@ -216,14 +217,14 @@ mysql:
 **Key Points**:
 - Three SQL scripts auto-execute in order: `01-init.sql` (business DBs + seed data) → `02-init-nacos.sql` (Nacos config DB) → `03-init-xxl-job.sql` (XXL-JOB DB)
 - Mounted as `:ro` (read-only) to prevent accidental modification
-- No host volume persistence — data resets on container destruction (suitable for dev environments)
+- MySQL uses the named volume `omni-mysql-data`; normal container recreation preserves data
 
 ### 5.2 Redis 7.4
 
 ```yaml
 redis:
   image: redis:7.4
-  # No password — simplified for dev environment
+  command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?configure REDIS_PASSWORD in .env}"]
 ```
 
 ### 5.3 Nacos v3.1.1
@@ -276,9 +277,10 @@ xxl-job-admin:
     PARAMS: >
       --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?...
       --spring.datasource.username=root
-      --spring.datasource.password=root
-      --xxl.job.login.username=admin
-      --xxl.job.login.password=123456
+      --spring.datasource.password=${MYSQL_ROOT_PASSWORD}
+      --xxl.job.login.username=${XXL_JOB_ADMIN_USERNAME}
+      --xxl.job.login.password=${XXL_JOB_ADMIN_PASSWORD}
+      --xxl.job.accessToken=${XXL_JOB_ACCESS_TOKEN}
       --xxl.job.accessToken=           # Empty token (no auth in dev)
 ```
 
@@ -344,9 +346,9 @@ Spring Boot supports overriding `application.yml` configurations via environment
 | Nacos address | `localhost:8848` | `nacos:8848` |
 | RocketMQ | `localhost:9876` | `rocketmq-namesrv:9876` |
 | JWT Issuer | `http://localhost:8100` | `http://omni-auth:8080` |
-| OAuth2 Callback | `http://localhost:8100/api/auth/...` | `http://localhost:8100/api/auth/...` |
+| OAuth2 Callback | `http://localhost:8102/api/auth/...` | `http://localhost:8102/api/auth/...` |
 
-> **Note**: OAuth2 callback URIs use `localhost:8100` (host port) because that's the address the user's browser actually accesses.
+> **Note**: OAuth2 callback URIs use the Gateway address `localhost:8102`. Auth and other private service ports are bound to loopback for diagnostics only and must not be exposed publicly.
 
 ---
 
@@ -412,21 +414,15 @@ MySQL container auto-executes SQL scripts in `/docker-entrypoint-initdb.d/` on f
 
 ### 8.2 Data Persistence Strategy
 
-Current configuration is **stateless dev environment**: data resets when containers are destroyed. For persistence:
+The current configuration persists MySQL in the named volume `omni-mysql-data`. `docker compose down` retains it; `docker compose down -v` deletes it irreversibly.
 
 ```yaml
-# Add volumes in docker-compose.yml
 mysql:
   volumes:
-    - mysql-data:/var/lib/mysql
-
-redis:
-  volumes:
-    - redis-data:/data
+    - omni-mysql-data:/var/lib/mysql
 
 volumes:
-  mysql-data:
-  redis-data:
+  omni-mysql-data:
 ```
 
 ---
@@ -795,7 +791,11 @@ docker compose logs --timestamps omni-auth | head -5
 | omni-base | 8080 | 8101 | HTTP | Base data service |
 | omni-gateway | 8080 | 8102 | HTTP | API Gateway |
 | omni-workflow | 8080 | 8103 | HTTP | Workflow service |
-| MySQL | 3306 | 3306 | TCP | Database |
+| omni-crm | 8080 | 8104 | HTTP | CRM service |
+| omni-srm | 8080 | 8105 | HTTP | SRM service |
+| omni-procurement | 8080 | 8106 | HTTP | Procurement service |
+| omni-asset | 8080 | 8107 | HTTP | Asset service |
+| MySQL | 3306 | 13306 | TCP | Database |
 | Redis | 6379 | 6379 | TCP | Cache |
 | Nacos Console | 8080 | 8080 | HTTP | Console |
 | Nacos API | 8848 | 8848 | HTTP | Service registry/config |
@@ -804,14 +804,9 @@ docker compose logs --timestamps omni-auth | head -5
 | RocketMQ Broker | 10909-10912 | 10909-10912 | TCP | Message broker |
 | XXL-JOB Admin | 8080 | 18080 | HTTP | Job scheduler |
 
-### 16.2 Default Credentials
+### 16.2 Credentials and Exposure
 
-| Service | Username | Password | Access URL |
-|---------|----------|----------|------------|
-| Frontend App | admin | admin123 | http://localhost:3000 |
-| MySQL | root | root | localhost:3306 |
-| Nacos Console | nacos | nacos | http://localhost:8080 |
-| XXL-JOB Admin | admin | 123456 | http://localhost:18080 |
+No production credential is hard-coded. Configure MySQL, Redis, Nacos, XXL-JOB, OAuth state, JWK encryption, internal API, and application database secrets in `.env` before startup. Seed application accounts are local-demo data only and must be changed or removed before any shared deployment. Only the frontend (`3000`) and Gateway (`8102`) are intended as public entry points; all other published ports bind to `127.0.0.1`.
 
 ### 16.3 Key File Paths
 

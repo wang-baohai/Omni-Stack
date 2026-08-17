@@ -87,6 +87,28 @@ class SrmDataPermissionHandlerTest {
         assertThat(expression.toString()).contains("srm_scope_parent.id = -1");
     }
 
+    /** 报价头必须通过供应商聚合继承 SELF 范围。 */
+    @Test
+    void shouldInheritSupplierSelfScopeForQuotation() {
+        SrmDataScopeContext.set(scope("SELF", Set.of()));
+        Expression expression = handler.getSqlSegment(new Table("srm_quotation"), null, "mapper.select");
+        assertThat(expression.toString())
+                .contains("srm_supplier", "supplier_id", "owner_user_id = 12")
+                .doesNotContain("srm_quotation.owner_user_id");
+    }
+
+    /** 报价行必须经报价头再继承供应商组织范围。 */
+    @Test
+    void shouldInheritSupplierDepartmentScopeForQuotationLine() {
+        SrmDataScopeContext.set(scope("DEPT_AND_BELOW", Set.of(8L, 9L)));
+        Expression expression = handler.getSqlSegment(
+                new Table("srm_quotation_line"), null, "mapper.select");
+        assertThat(expression.toString())
+                .contains("srm_quotation", "quotation_id", "srm_supplier", "supplier_id",
+                        "owner_unit_id IN (8, 9)")
+                .doesNotContain("srm_quotation_line.owner_unit_id");
+    }
+
     private InternalDataScopeDTO scope(String effectiveScope, Set<Long> units) {
         InternalDataScopeDTO dto = new InternalDataScopeDTO();
         dto.setUserId(12L);

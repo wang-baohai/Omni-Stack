@@ -28,6 +28,7 @@ import com.omni.srm.service.support.SrmOwnerResolver;
 import com.omni.srm.service.support.SrmPermissionScopeExecutor;
 import com.omni.srm.service.support.SrmRecordAccessGuard;
 import com.omni.srm.service.support.SupplierRiskInitializer;
+import com.omni.srm.workflow.SupplierWorkflowCoordinator;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -68,6 +69,7 @@ class SupplierServiceImplTest {
     @Mock private SupplierRiskInitializer riskInitializer;
     @Mock private ReliableMessageRelay reliableMessageRelay;
     @Mock private RiskService riskService;
+    @Mock private SupplierWorkflowCoordinator workflowCoordinator;
     @InjectMocks private SupplierServiceImpl service;
 
     /** 初始化 MyBatis-Plus Lambda 元数据。 */
@@ -187,6 +189,7 @@ class SupplierServiceImplTest {
         verify(reliableMessageRelay).send(
                 ArgumentMatchers.eq("srm-domain-out-0"), ArgumentMatchers.any(),
                 ArgumentMatchers.eq(3L), ArgumentMatchers.anyString());
+        verify(workflowCoordinator).prepareAndStart(ArgumentMatchers.any(SrmSupplier.class));
     }
 
     /** 更新名称和信用代码时必须使用与创建、门户一致的规范化规则。 */
@@ -248,39 +251,7 @@ class SupplierServiceImplTest {
         verifyNoInteractions(supplierMapper);
     }
 
-    /** 门户供应商未分配负责人时不得审批通过。 */
-    @Test
-    void shouldRejectApprovalWithoutAssignedOwner() {
-        SrmSupplier current = supplier(10L, "PENDING_REVIEW", null, null);
-        when(accessGuard.requireSupplier(10L)).thenReturn(current);
-        SrmRequests.StatusRequest request = new SrmRequests.StatusRequest();
-        request.setVersion(0);
-
-        assertThatThrownBy(() -> service.approve(10L, request))
-                .isInstanceOf(BusinessException.class)
-                .extracting("code").isEqualTo(409);
-        verifyNoInteractions(supplierMapper);
-    }
-
-    /** 审批成功后必须生成首次综合风险评估，使供应商进入风险看板。 */
-    @Test
-    void shouldCreateInitialRiskAssessmentAfterApproval() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
-        SrmSupplier current = supplier(10L, "PENDING_REVIEW", 7L, 8L);
-        current.setName("ACME");
-        when(accessGuard.requireSupplier(10L)).thenReturn(current);
-        when(supplierMapper.update(ArgumentMatchers.isNull(), ArgumentMatchers.any())).thenReturn(1);
-        when(ownerEnricher.enrichOne(ArgumentMatchers.any())).thenAnswer(invocation -> invocation.getArgument(0));
-        SrmRequests.StatusRequest request = new SrmRequests.StatusRequest();
-        request.setVersion(0);
-
-        service.approve(10L, request);
-
-        ArgumentCaptor<SrmRequests.CreateRiskAssessmentRequest> captor =
-                ArgumentCaptor.forClass(SrmRequests.CreateRiskAssessmentRequest.class);
-        verify(riskService).createAssessment(ArgumentMatchers.eq(10L), captor.capture());
-        assertThat(captor.getValue().getRemark()).contains("准入通过后初始化");
-    }
+    /** 审批流程已迁移到工作流服务，approve/reject 不再由 SupplierService 提供。 */
 
     /** 并发创建撞上数据库信用代码唯一键时必须转换为业务 409。 */
     @Test
