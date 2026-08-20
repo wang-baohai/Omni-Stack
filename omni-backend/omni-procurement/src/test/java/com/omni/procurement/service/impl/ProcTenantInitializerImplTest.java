@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,16 +54,27 @@ class ProcTenantInitializerImplTest {
         ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 23L, "buyer"));
         when(categoryMapper.selectOne(any())).thenReturn(null);
         when(configMapper.selectOne(any())).thenReturn(null);
+        AtomicLong categoryId = new AtomicLong(100L);
+        when(categoryMapper.insert(any(ProcMaterialCategory.class))).thenAnswer(invocation -> {
+            ProcMaterialCategory category = invocation.getArgument(0);
+            category.setId(categoryId.incrementAndGet());
+            return 1;
+        });
         ProcTenantInitializerImpl service = new ProcTenantInitializerImpl(configMapper, categoryMapper);
 
         service.ensureInitialized();
 
         ArgumentCaptor<ProcMaterialCategory> categoryCaptor = ArgumentCaptor.forClass(ProcMaterialCategory.class);
-        verify(categoryMapper, org.mockito.Mockito.times(4)).insert(categoryCaptor.capture());
+        verify(categoryMapper, org.mockito.Mockito.times(13)).insert(categoryCaptor.capture());
         List<ProcMaterialCategory> categories = categoryCaptor.getAllValues();
         assertThat(categories).extracting(ProcMaterialCategory::getTenantId).containsOnly(23L);
         assertThat(categories).extracting(ProcMaterialCategory::getCategoryCode)
-                .containsExactly("IT_DEVICE", "OFFICE_SUPPLY", "RAW_MATERIAL", "OTHER");
+                .containsExactly(
+                        "IT_DEVICE", "OFFICE_SUPPLY", "RAW_MATERIAL", "OTHER",
+                        "LAPTOP", "MONITOR", "PERIPHERAL", "STATIONERY", "PAPER",
+                        "METAL", "ELECTRONIC", "PLASTIC", "SERVICE");
+        assertThat(categories.subList(4, categories.size()))
+                .allSatisfy(category -> assertThat(category.getParentId()).isPositive());
         ArgumentCaptor<ProcTenantConfig> configCaptor = ArgumentCaptor.forClass(ProcTenantConfig.class);
         verify(configMapper).insert(configCaptor.capture());
         assertThat(configCaptor.getValue().getTenantId()).isEqualTo(23L);

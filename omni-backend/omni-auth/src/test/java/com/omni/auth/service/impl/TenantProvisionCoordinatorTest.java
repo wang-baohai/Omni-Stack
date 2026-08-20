@@ -113,6 +113,43 @@ class TenantProvisionCoordinatorTest {
     }
 
     /**
+     * 重试只能重新请求失败的事件模块，已成功模块不得降级或重复执行。
+     */
+    @Test
+    void should_retry_only_failed_event_modules() {
+        ModuleCatalogLoader catalogLoader = catalogLoader();
+        TenantLocalProvisioner localProvisioner = mock(TenantLocalProvisioner.class);
+        SysTenantMapper tenantMapper = mock(SysTenantMapper.class);
+        SysTenantModuleProvisionMapper stateMapper = mock(SysTenantModuleProvisionMapper.class);
+        ReliableMessageRelay relay = mock(ReliableMessageRelay.class);
+        TenantProvisionServiceImpl service = new TenantProvisionServiceImpl(
+                catalogLoader, localProvisioner, tenantMapper, stateMapper, relay);
+        SysTenant tenant = tenant();
+        tenant.setProvisioningStatus(TenantProvisionStatusEnum.FAILED);
+        tenant.setProvisioningRequestId("request-old");
+        SysTenantModuleProvision local = state(
+                "request-old", "auth", TenantModuleProvisionStatusEnum.SUCCESS);
+        SysTenantModuleProvision failed = state(
+                "request-old", "base", TenantModuleProvisionStatusEnum.FAILED);
+        when(tenantMapper.selectByIdForUpdate(9L)).thenReturn(tenant);
+        when(stateMapper.selectList(any())).thenReturn(List.of(local, failed));
+
+        service.retryFailedModules(9L);
+
+        assertThat(local.getStatus()).isEqualTo(TenantModuleProvisionStatusEnum.SUCCESS);
+        assertThat(local.getAttemptCount()).isEqualTo(1);
+        assertThat(failed.getStatus()).isEqualTo(TenantModuleProvisionStatusEnum.PENDING);
+        assertThat(failed.getAttemptCount()).isEqualTo(2);
+        assertThat(tenant.getProvisioningStatus()).isEqualTo(TenantProvisionStatusEnum.PROVISIONING);
+        assertThat(tenant.getProvisioningRequestId()).isEqualTo(failed.getRequestId());
+        ArgumentCaptor<ProvisionRequestedEvent> eventCaptor =
+                ArgumentCaptor.forClass(ProvisionRequestedEvent.class);
+        verify(relay).send(
+                eq(TenantProvisionServiceImpl.REQUEST_BINDING), eventCaptor.capture(), eq(9L), anyString());
+        assertThat(eventCaptor.getValue().moduleIds()).containsExactly("base");
+    }
+
+    /**
      * 创建包含一个本地模块和一个事件模块的最小目录。
      */
     private static ModuleCatalogLoader catalogLoader() {

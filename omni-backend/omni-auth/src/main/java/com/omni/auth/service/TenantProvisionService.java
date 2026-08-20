@@ -1,6 +1,9 @@
 package com.omni.auth.service;
 
+import java.util.List;
+
 import com.omni.auth.entity.SysTenant;
+import com.omni.auth.entity.SysTenantModuleProvision;
 import com.omni.common.core.tenant.TenantProvisionContracts.ProvisionResultEvent;
 
 /**
@@ -29,4 +32,12 @@ public interface TenantProvisionService {
      * @param tenantId 租户 ID
      */
     void retryFailedModules(Long tenantId);
+
+    /**
+     * 查询租户各模块的初始化状态。
+     *
+     * @param tenantId 租户 ID
+     * @return 按记录 ID 排序的模块状态
+     */
+    List<SysTenantModuleProvision> listModuleStates(Long tenantId);
 }

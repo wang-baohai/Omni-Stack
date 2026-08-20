@@ -3,3 +3,5 @@ databaseChangeLog:
       file: database/changelog/common/0001-mq-schema.yaml
   - include:
       file: database/changelog/common/0002-mq-normalize.yaml
+  - include:
+      file: database/changelog/common/0003-tenant-provision-receipt.yaml

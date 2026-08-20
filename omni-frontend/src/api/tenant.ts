@@ -6,6 +6,12 @@
 import request from './request'
 import type { ApiResponse, PageResult } from '@/types/api'
 
+/** 租户整体初始化状态 */
+export type TenantProvisionStatus = 'PROVISIONING' | 'ACTIVE' | 'FAILED'
+
+/** 单模块初始化状态 */
+export type TenantModuleProvisionStatus = 'PENDING' | 'SUCCESS' | 'FAILED'
+
 /** 租户实体 */
 export interface SysTenant {
   /** 租户 ID */
@@ -22,10 +28,40 @@ export interface SysTenant {
   contactPhone: string | null
   /** 状态（1=启用，0=禁用） */
   status: number
+  /** 初始化状态 */
+  provisioningStatus: TenantProvisionStatus
+  /** 最近一次初始化请求 ID */
+  provisioningRequestId: string | null
+  /** 最近一次脱敏失败摘要 */
+  provisioningError: string | null
   /** 创建时间 */
   createTime: string
   /** 更新时间 */
   updateTime: string
+}
+
+/** 租户模块初始化明细 */
+export interface TenantModuleProvision {
+  /** 记录 ID */
+  id: number
+  /** 租户 ID */
+  tenantId: number
+  /** 初始化请求 ID */
+  requestId: string
+  /** 模块 ID */
+  moduleId: string
+  /** 模块状态 */
+  status: TenantModuleProvisionStatus
+  /** 已处理次数 */
+  attemptCount: number
+  /** 稳定错误码 */
+  errorCode: string | null
+  /** 脱敏错误摘要 */
+  errorMessage: string | null
+  /** 最近开始时间 */
+  startedTime: string
+  /** 最近完成时间 */
+  completedTime: string | null
 }
 
 /** 创建租户请求 */
@@ -91,6 +127,26 @@ export function getTenant(id: number) {
  */
 export function createTenant(data: CreateTenantRequest) {
   return request.post<ApiResponse<SysTenant>>('/auth/tenant', data)
+}
+
+/**
+ * 查询租户模块初始化明细。
+ *
+ * @param id - 租户 ID
+ * @returns 模块初始化明细
+ */
+export function getTenantProvisioning(id: number) {
+  return request.get<ApiResponse<TenantModuleProvision[]>>(`/auth/tenant/${id}/provisioning`)
+}
+
+/**
+ * 重试租户初始化失败模块。
+ *
+ * @param id - 租户 ID
+ * @returns 空结果
+ */
+export function retryTenantProvisioning(id: number) {
+  return request.post<ApiResponse<void>>(`/auth/tenant/${id}/provisioning/retry`)
 }
 
 /**

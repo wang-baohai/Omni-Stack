@@ -22,6 +22,8 @@ spring:
     import:
       - optional:nacos:omni-workflow.yml
   cloud:
+    function:
+      definition: tenantProvisionRequestedFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
@@ -45,6 +47,13 @@ spring:
           content-type: application/json
         workflow-domain-out-0:
           destination: workflow-domain-event
+          content-type: application/json
+        tenantProvisionRequestedFunction-in-0:
+          destination: tenant-provisioning
+          content-type: application/json
+          group: workflow-tenant-provision-group
+        tenantProvisionResult-out-0:
+          destination: tenant-provision-result
           content-type: application/json
   datasource:
     url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_workflow?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true

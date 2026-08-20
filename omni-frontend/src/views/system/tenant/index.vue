@@ -11,8 +11,12 @@ import {
   createTenant,
   updateTenant,
   deleteTenant,
+  getTenantProvisioning,
+  retryTenantProvisioning,
   type SysTenant,
   type CreateTenantRequest,
+  type TenantModuleProvision,
+  type TenantProvisionStatus,
 } from '@/api/tenant'
 import type { PageResult } from '@/types/api'
 
@@ -28,6 +32,11 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 /** 加载状态 */
 const loading = ref(false)
+/** 初始化明细对话框状态 */
+const provisioningVisible = ref(false)
+const provisioningLoading = ref(false)
+const provisioningTenant = ref<SysTenant | null>(null)
+const provisioningDetails = ref<TenantModuleProvision[]>([])
 
 /** 表单对话框 */
 const dialogVisible = ref(false)
@@ -61,6 +70,23 @@ const rules = {
       trigger: 'blur',
     },
   ],
+}
+
+/** 初始化状态对应的标签类型。 */
+const provisioningTagType: Record<TenantProvisionStatus, 'success' | 'warning' | 'danger'> = {
+  ACTIVE: 'success',
+  PROVISIONING: 'warning',
+  FAILED: 'danger',
+}
+
+/** 返回初始化状态的本地化文案。 */
+function provisioningStatusText(status: TenantProvisionStatus) {
+  const key: Record<TenantProvisionStatus, string> = {
+    ACTIVE: 'tenant.provisioningActive',
+    PROVISIONING: 'tenant.provisioning',
+    FAILED: 'tenant.provisioningFailed',
+  }
+  return t(key[status])
 }
 
 /**
@@ -141,6 +167,30 @@ async function handleSave() {
   loadData()
 }
 
+/** 打开模块初始化明细。 */
+async function openProvisioning(row: SysTenant) {
+  provisioningTenant.value = row
+  provisioningVisible.value = true
+  provisioningLoading.value = true
+  try {
+    const response = await getTenantProvisioning(row.id)
+    provisioningDetails.value = response.data.data
+  } finally {
+    provisioningLoading.value = false
+  }
+}
+
+/** 重试当前租户的失败模块。 */
+async function handleRetryProvisioning(row: SysTenant) {
+  await retryTenantProvisioning(row.id)
+  ElMessage.success(t('tenant.retryStarted'))
+  await loadData()
+  const latest = tableData.value.find((item) => item.id === row.id)
+  if (provisioningVisible.value && latest) {
+    await openProvisioning(latest)
+  }
+}
+
 /**
  * 处理删除租户。
  */
@@ -184,8 +234,32 @@ onMounted(loadData)
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('common.actions')" width="180" fixed="right">
+        <el-table-column :label="t('tenant.provisioningStatus')" min-width="180">
           <template #default="{ row }">
+            <div class="provisioning-cell">
+              <el-tag :type="provisioningTagType[row.provisioningStatus as TenantProvisionStatus]">
+                {{ provisioningStatusText(row.provisioningStatus as TenantProvisionStatus) }}
+              </el-tag>
+              <span v-if="row.provisioningError" class="provisioning-error">
+                {{ row.provisioningError }}
+              </span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('common.actions')" width="330" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" @click="openProvisioning(row)">
+              {{ t('tenant.viewProvisioning') }}
+            </el-button>
+            <el-button
+              v-if="row.provisioningStatus === 'FAILED'"
+              v-permission="'system:tenant:update'"
+              size="small"
+              type="warning"
+              @click="handleRetryProvisioning(row)"
+            >
+              {{ t('tenant.retryProvisioning') }}
+            </el-button>
             <el-button v-permission="'system:tenant:update'" size="small" @click="openEditDialog(row)">
               {{ t('common.edit') }}
             </el-button>
@@ -254,6 +328,43 @@ onMounted(loadData)
         <el-button type="primary" @click="handleSave">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+      v-model="provisioningVisible"
+      :title="`${provisioningTenant?.tenantName ?? ''} - ${t('tenant.provisioningDetail')}`"
+      width="760px"
+    >
+      <el-table
+        v-loading="provisioningLoading"
+        :data="provisioningDetails"
+        :empty-text="t('tenant.noProvisioningModules')"
+        border
+      >
+        <el-table-column prop="moduleId" :label="t('tenant.module')" min-width="130" />
+        <el-table-column :label="t('common.status')" width="120">
+          <template #default="{ row }">
+            <el-tag
+              :type="row.status === 'SUCCESS' ? 'success' : row.status === 'FAILED' ? 'danger' : 'warning'"
+            >
+              {{ row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="attemptCount" :label="t('tenant.attemptCount')" width="110" />
+        <el-table-column prop="errorMessage" :label="t('tenant.errorReason')" min-width="260" />
+      </el-table>
+      <template #footer>
+        <el-button
+          v-if="provisioningTenant?.provisioningStatus === 'FAILED'"
+          v-permission="'system:tenant:update'"
+          type="warning"
+          @click="handleRetryProvisioning(provisioningTenant)"
+        >
+          {{ t('tenant.retryProvisioning') }}
+        </el-button>
+        <el-button @click="provisioningVisible = false">{{ t('common.close') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -271,5 +382,19 @@ onMounted(loadData)
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+.provisioning-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.provisioning-error {
+  max-width: 100%;
+  color: var(--el-color-danger);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

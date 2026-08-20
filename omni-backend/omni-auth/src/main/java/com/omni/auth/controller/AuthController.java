@@ -132,6 +132,8 @@ public class AuthController {
             throw e;
         }
 
+        tenantService.requireLoginAvailable(request.getTenantId());
+
         // 第三步：查询该租户下是否存在此用户
         SysUser user = userService.findByUsername(request.getUsername(), request.getTenantId());
         if (user == null) {
@@ -227,6 +229,8 @@ public class AuthController {
                     "验证码校验失败");
             throw e;
         }
+
+        tenantService.requireLoginAvailable(request.getTenantId());
 
         // 构造多租户用户名格式 "tenantId:username"
         String tenantUsername = request.getTenantId() + ":" + request.getUsername();

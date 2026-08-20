@@ -23,7 +23,7 @@ spring:
       - optional:nacos:omni-base.yml
   cloud:
     function:
-      definition: operlogConsumer
+      definition: operlogConsumer;tenantProvisionRequestedFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
@@ -55,6 +55,13 @@ spring:
           destination: operlog-topic
           content-type: application/json
           group: operlog-consumer-group
+        tenantProvisionRequestedFunction-in-0:
+          destination: tenant-provisioning
+          content-type: application/json
+          group: base-tenant-provision-group
+        tenantProvisionResult-out-0:
+          destination: tenant-provision-result
+          content-type: application/json
   datasource:
     url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_base?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:root}

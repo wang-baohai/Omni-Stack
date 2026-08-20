@@ -11,18 +11,26 @@ import com.omni.common.job.XxlJobProperties;
 import com.omni.common.mqlog.sender.MessageSender;
 import com.omni.common.mqlog.sender.RocketMqMessageSender;
 import com.omni.common.mqlog.template.ReliableMessageTemplate;
+import com.omni.common.mqlog.tenant.TenantProvisionRequestHandler;
+import com.omni.common.core.mq.ReliableMessageRelay;
+import com.omni.common.core.tenant.TenantModuleProvisioner;
+import com.omni.common.core.tenant.TenantProvisionContracts.ProvisionRequestedEvent;
+import com.omni.common.mqlog.mapper.SysTenantProvisionReceiptMapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 
 import java.util.List;
+import java.util.function.Consumer;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * MQ 消息记录自动装配。
@@ -68,6 +76,32 @@ public class MqLogAutoConfiguration {
     public ReliableMessageTemplate reliableMessageTemplate(SysMqMessageMapper mapper,
                                                             ObjectMapper objectMapper) {
         return new ReliableMessageTemplate(mapper, objectMapper);
+    }
+
+    /**
+     * 租户模块初始化通用事务处理器。
+     */
+    @Bean
+    @ConditionalOnBean(TenantModuleProvisioner.class)
+    @ConditionalOnMissingBean
+    public TenantProvisionRequestHandler tenantProvisionRequestHandler(
+            TenantModuleProvisioner provisioner,
+            SysTenantProvisionReceiptMapper receiptMapper,
+            ReliableMessageRelay reliableMessageRelay,
+            PlatformTransactionManager transactionManager) {
+        return new TenantProvisionRequestHandler(
+                provisioner, receiptMapper, reliableMessageRelay, transactionManager);
+    }
+
+    /**
+     * 租户模块初始化请求函数。
+     */
+    @Bean
+    @ConditionalOnBean(TenantModuleProvisioner.class)
+    @ConditionalOnMissingBean(name = "tenantProvisionRequestedFunction")
+    public Consumer<ProvisionRequestedEvent> tenantProvisionRequestedFunction(
+            TenantProvisionRequestHandler handler) {
+        return handler::handle;
     }
 
     /**

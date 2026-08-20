@@ -1,8 +1,12 @@
 package com.omni.auth.controller;
 
+import java.util.List;
+
 import com.omni.auth.dto.CreateTenantRequest;
 import com.omni.auth.dto.UpdateTenantRequest;
 import com.omni.auth.entity.SysTenant;
+import com.omni.auth.entity.SysTenantModuleProvision;
+import com.omni.auth.service.TenantProvisionService;
 import com.omni.auth.service.TenantService;
 import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
@@ -32,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code GET    /api/auth/tenant/{id}} — 获取租户详情（权限码：{@code system:tenant:list}）</li>
  *   <li>{@code POST   /api/auth/tenant} — 创建租户（权限码：{@code system:tenant:create}）</li>
  *   <li>{@code PUT    /api/auth/tenant/{id}} — 更新租户（权限码：{@code system:tenant:update}）</li>
+ *   <li>{@code GET    /api/auth/tenant/{id}/provisioning} — 查询初始化明细</li>
+ *   <li>{@code POST   /api/auth/tenant/{id}/provisioning/retry} — 重试失败模块</li>
  *   <li>{@code DELETE /api/auth/tenant/{id}} — 删除租户（权限码：{@code system:tenant:delete}）</li>
  * </ul>
  *
@@ -45,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TenantController {
 
     private final TenantService tenantService;
+    private final TenantProvisionService tenantProvisionService;
 
     /**
      * 分页查询租户列表。
@@ -105,6 +112,31 @@ public class TenantController {
     public R<SysTenant> update(@PathVariable Long id,
                                @Valid @RequestBody UpdateTenantRequest request) {
         return R.ok(tenantService.updateTenant(id, request));
+    }
+
+    /**
+     * 查询租户各模块初始化状态。
+     *
+     * @param id 租户 ID
+     * @return 模块初始化明细
+     */
+    @GetMapping("/{id}/provisioning")
+    @PreAuthorize("hasAuthority('system:tenant:list')")
+    public R<List<SysTenantModuleProvision>> provisioning(@PathVariable Long id) {
+        return R.ok(tenantProvisionService.listModuleStates(id));
+    }
+
+    /**
+     * 重试租户初始化失败模块。
+     *
+     * @param id 租户 ID
+     * @return 操作结果
+     */
+    @PostMapping("/{id}/provisioning/retry")
+    @PreAuthorize("hasAuthority('system:tenant:update')")
+    public R<Void> retryProvisioning(@PathVariable Long id) {
+        tenantProvisionService.retryFailedModules(id);
+        return R.ok();
     }
 
     /**

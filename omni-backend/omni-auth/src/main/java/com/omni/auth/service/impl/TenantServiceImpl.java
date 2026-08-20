@@ -8,7 +8,7 @@ import com.omni.auth.dto.UpdateTenantRequest;
 import com.omni.auth.entity.SysTenant;
 import com.omni.auth.entity.TenantProvisionStatusEnum;
 import com.omni.auth.mapper.SysTenantMapper;
-import com.omni.auth.mapper.TenantProvisionMapper;
+import com.omni.auth.service.TenantProvisionService;
 import com.omni.auth.service.TenantService;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.PageResult;
@@ -39,8 +39,8 @@ public class TenantServiceImpl implements TenantService {
     /** 租户 Mapper */
     private final SysTenantMapper sysTenantMapper;
 
-    /** 租户初始化 Mapper（调用存储过程） */
-    private final TenantProvisionMapper tenantProvisionMapper;
+    /** 模块化租户初始化协调服务 */
+    private final TenantProvisionService tenantProvisionService;
 
     /** 密码编码器 */
     private final PasswordEncoder passwordEncoder;
@@ -73,6 +73,26 @@ public class TenantServiceImpl implements TenantService {
 
     /**
      * {@inheritDoc}
+     */
+    @Override
+    public void requireLoginAvailable(Long tenantId) {
+        if (tenantId == null || tenantId <= 0) {
+            throw new BusinessException(403, "租户不可用");
+        }
+        SysTenant tenant = sysTenantMapper.selectById(tenantId);
+        if (tenant == null || !Integer.valueOf(1).equals(tenant.getStatus())) {
+            throw new BusinessException(403, "租户不可用");
+        }
+        if (TenantProvisionStatusEnum.PROVISIONING == tenant.getProvisioningStatus()) {
+            throw new BusinessException(409, "租户正在初始化，请稍后再试");
+        }
+        if (TenantProvisionStatusEnum.ACTIVE != tenant.getProvisioningStatus()) {
+            throw new BusinessException(409, "租户初始化未完成，请联系管理员");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
      *
      * <p>使用 MyBatis-Plus 分页插件，按 ID 升序排列。</p>
      */
@@ -99,9 +119,8 @@ public class TenantServiceImpl implements TenantService {
     /**
      * {@inheritDoc}
      *
-     * <p>创建租户后自动初始化：权限树（克隆 tenant 1）、默认角色（SUPER_ADMIN / USER / EMPLOYEE /
-     * TEAM_LEADER / DEPT_LEADER）、根组织单元、管理员账号和 XSS 防护配置。管理员密码由创建请求显式提供，
-     * 服务端只把 BCrypt 哈希传给初始化过程。</p>
+     * <p>创建租户后由模块化协调器初始化 Auth 本地数据，并通过可靠消息请求各业务模块初始化。
+     * 管理员密码只在 Auth 内编码和使用，不进入跨服务事件。</p>
      */
     @Override
     @Transactional
@@ -113,12 +132,12 @@ public class TenantServiceImpl implements TenantService {
         tenant.setContactName(request.getContactName());
         tenant.setContactPhone(request.getContactPhone());
         tenant.setStatus(request.getStatus() != null ? request.getStatus() : 1);
+        tenant.setProvisioningStatus(TenantProvisionStatusEnum.PROVISIONING);
         sysTenantMapper.insert(tenant);
 
-        // 调用存储过程一键初始化租户数据
         String adminPwd = passwordEncoder.encode(request.getAdminPassword());
-        tenantProvisionMapper.initTenant(tenant.getId(), tenant.getTenantName(), adminPwd);
-        log.info("已创建租户并初始化数据: {} (id={})", tenant.getTenantName(), tenant.getId());
+        tenantProvisionService.startProvisioning(tenant, adminPwd);
+        log.info("已创建租户并启动模块化初始化: {} (id={})", tenant.getTenantName(), tenant.getId());
         return tenant;
     }
 

@@ -11,6 +11,8 @@ spring:
     import:
       - optional:nacos:${spring.application.name}.yml?group=DEFAULT_GROUP&refreshEnabled=true
   cloud:
+    function:
+      definition: tenantProvisionRequestedFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
@@ -36,6 +38,13 @@ spring:
           content-type: application/json
         crm-domain-out-0:
           destination: crm-domain-event
+          content-type: application/json
+        tenantProvisionRequestedFunction-in-0:
+          destination: tenant-provisioning
+          content-type: application/json
+          group: crm-tenant-provision-group
+        tenantProvisionResult-out-0:
+          destination: tenant-provision-result
           content-type: application/json
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

@@ -20,7 +20,7 @@ spring:
       - optional:nacos:omni-auth.yml
   cloud:
     function:
-      definition: portalRoleAssignFunction
+      definition: portalRoleAssignFunction;tenantProvisionResultFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
@@ -49,6 +49,10 @@ spring:
         tenantProvisionRequested-out-0:
           destination: tenant-provisioning
           content-type: application/json
+        tenantProvisionResultFunction-in-0:
+          destination: tenant-provision-result
+          content-type: application/json
+          group: auth-tenant-provision-result-group
   datasource:
     url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:root}

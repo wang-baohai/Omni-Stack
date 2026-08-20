@@ -12,7 +12,6 @@ import com.omni.procurement.service.support.ProcAuditSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -33,7 +32,7 @@ public class ProcTenantInitializerImpl implements ProcTenantInitializer {
 
     /** {@inheritDoc} */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void ensureInitialized() {
         Long tenantId = ProcTenantContext.requireTenantId();
         if (findConfig(tenantId) != null) {
@@ -42,10 +41,21 @@ public class ProcTenantInitializerImpl implements ProcTenantInitializer {
         if (!insertConfigOrObserveConcurrent(tenantId)) {
             return;
         }
-        ensureCategory(tenantId, "IT_DEVICE", "IT 设备", 10);
-        ensureCategory(tenantId, "OFFICE_SUPPLY", "办公用品", 20);
-        ensureCategory(tenantId, "RAW_MATERIAL", "原材料", 30);
-        ensureCategory(tenantId, "OTHER", "其他", 40);
+        ProcMaterialCategory itDevice = ensureCategory(tenantId, 0L, "IT_DEVICE", "IT 设备", 10);
+        ProcMaterialCategory officeSupply = ensureCategory(
+                tenantId, 0L, "OFFICE_SUPPLY", "办公用品", 20);
+        ProcMaterialCategory rawMaterial = ensureCategory(
+                tenantId, 0L, "RAW_MATERIAL", "原材料", 30);
+        ProcMaterialCategory other = ensureCategory(tenantId, 0L, "OTHER", "其他", 40);
+        ensureCategory(tenantId, requireId(itDevice), "LAPTOP", "笔记本电脑", 10);
+        ensureCategory(tenantId, requireId(itDevice), "MONITOR", "显示器", 20);
+        ensureCategory(tenantId, requireId(itDevice), "PERIPHERAL", "外设配件", 30);
+        ensureCategory(tenantId, requireId(officeSupply), "STATIONERY", "文具", 10);
+        ensureCategory(tenantId, requireId(officeSupply), "PAPER", "纸张耗材", 20);
+        ensureCategory(tenantId, requireId(rawMaterial), "METAL", "金属材料", 10);
+        ensureCategory(tenantId, requireId(rawMaterial), "ELECTRONIC", "电子元器件", 20);
+        ensureCategory(tenantId, requireId(rawMaterial), "PLASTIC", "塑料材料", 30);
+        ensureCategory(tenantId, requireId(other), "SERVICE", "服务", 10);
     }
 
     /** {@inheritDoc} */
@@ -60,13 +70,15 @@ public class ProcTenantInitializerImpl implements ProcTenantInitializer {
         return config.getCurrencyCode();
     }
 
-    private void ensureCategory(Long tenantId, String code, String name, int sort) {
-        if (findCategory(tenantId, code) != null) {
-            return;
+    private ProcMaterialCategory ensureCategory(
+            Long tenantId, Long parentId, String code, String name, int sort) {
+        ProcMaterialCategory existing = findCategory(tenantId, code);
+        if (existing != null) {
+            return existing;
         }
         ProcMaterialCategory category = new ProcMaterialCategory();
         category.setTenantId(tenantId);
-        category.setParentId(0L);
+        category.setParentId(parentId);
         category.setCategoryCode(code);
         category.setCategoryName(name);
         category.setSort(sort);
@@ -76,11 +88,21 @@ public class ProcTenantInitializerImpl implements ProcTenantInitializer {
         ProcAuditSupport.created(category);
         try {
             categoryMapper.insert(category);
+            return category;
         } catch (DuplicateKeyException exception) {
-            if (findCategoryForUpdate(tenantId, code) == null) {
+            ProcMaterialCategory concurrent = findCategoryForUpdate(tenantId, code);
+            if (concurrent == null) {
                 throw new BusinessException(500, "采购默认物料品类初始化冲突");
             }
+            return concurrent;
         }
+    }
+
+    private Long requireId(ProcMaterialCategory category) {
+        if (category == null || category.getId() == null) {
+            throw new BusinessException(500, "采购默认父品类初始化后缺少 ID");
+        }
+        return category.getId();
     }
 
     private boolean insertConfigOrObserveConcurrent(Long tenantId) {

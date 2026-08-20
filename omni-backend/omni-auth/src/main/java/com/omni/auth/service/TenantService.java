@@ -26,6 +26,13 @@ public interface TenantService {
     List<TenantOption> listActiveTenants();
 
     /**
+     * 校验租户是否允许登录。
+     *
+     * @param tenantId 租户 ID
+     */
+    void requireLoginAvailable(Long tenantId);
+
+    /**
      * 分页查询租户列表。
      *
      * @param page 页码

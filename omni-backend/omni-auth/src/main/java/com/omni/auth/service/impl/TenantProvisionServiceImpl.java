@@ -174,6 +174,18 @@ public class TenantProvisionServiceImpl implements TenantProvisionService {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<SysTenantModuleProvision> listModuleStates(Long tenantId) {
+        if (tenantId == null || tenantId <= 0 || tenantMapper.selectById(tenantId) == null) {
+            throw new BusinessException(404, "租户不存在");
+        }
+        return listStates(tenantId);
+    }
+
+    /**
      * 新建或重置单个模块状态。
      */
     private void upsertModuleState(

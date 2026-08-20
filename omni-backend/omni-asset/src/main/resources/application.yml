@@ -17,7 +17,7 @@ spring:
       - optional:nacos:${spring.application.name}.yml?group=DEFAULT_GROUP&refreshEnabled=true
   cloud:
     function:
-      definition: procurementGoodsReceiptFunction;workflowCompletionFunction
+      definition: procurementGoodsReceiptFunction;workflowCompletionFunction;tenantProvisionRequestedFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
@@ -52,6 +52,13 @@ spring:
           destination: workflow-domain-event
           content-type: application/json
           group: omni-asset-workflow-completion
+        tenantProvisionRequestedFunction-in-0:
+          destination: tenant-provisioning
+          content-type: application/json
+          group: asset-tenant-provision-group
+        tenantProvisionResult-out-0:
+          destination: tenant-provision-result
+          content-type: application/json
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/omni_asset?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
