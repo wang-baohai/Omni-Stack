@@ -28,6 +28,7 @@ COPY omni-common-operlog/pom.xml omni-common-operlog/
 COPY omni-common-job/pom.xml omni-common-job/
 COPY omni-common-mqlog/pom.xml omni-common-mqlog/
 COPY omni-common-workflow/pom.xml omni-common-workflow/
+COPY omni-db-migrator/pom.xml omni-db-migrator/
 COPY omni-auth/pom.xml omni-auth/
 COPY omni-base/pom.xml omni-base/
 COPY omni-gateway/pom.xml omni-gateway/

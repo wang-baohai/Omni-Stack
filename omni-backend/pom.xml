@@ -28,6 +28,7 @@
         <module>omni-common-job</module>
         <module>omni-common-mqlog</module>
         <module>omni-common-workflow</module>
+        <module>omni-db-migrator</module>
         <module>omni-auth</module>
         <module>omni-base</module>
         <module>omni-workflow</module>

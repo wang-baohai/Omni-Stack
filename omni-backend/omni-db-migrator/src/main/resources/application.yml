@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: omni-db-migrator
+  main:
+    web-application-type: none
+    banner-mode: "off"
+
+omni:
+  db-migrator:
+    command: ${DB_MIGRATOR_COMMAND:validate}
+    admin-url: ${DB_MIGRATOR_ADMIN_URL:}
+    admin-username: ${DB_MIGRATOR_ADMIN_USERNAME:}
+    admin-password: ${DB_MIGRATOR_ADMIN_PASSWORD:}
+    changelog-root: database/changelog/db.changelog-root.yaml
+    adopt-confirmation: ${DB_MIGRATOR_ADOPT_CONFIRMATION:}
+
+logging:
+  level:
+    liquibase: info
+    com.omni.dbmigrator: info

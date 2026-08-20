@@ -24,6 +24,9 @@ Thumbs.db
 *.log
 logs/
 
+# Liquibase offline validation artifacts
+databasechangelog.csv
+
 # Node
 node_modules/
 dist/
