@@ -40,4 +40,10 @@ public class SysTenant extends BaseEntity {
     private String contactPhone;
     /** 状态（1-启用，0-禁用） */
     private Integer status;
+    /** 初始化状态，与业务启停状态相互独立。 */
+    private TenantProvisionStatusEnum provisioningStatus;
+    /** 最近一次初始化请求 ID。 */
+    private String provisioningRequestId;
+    /** 最近一次脱敏失败摘要。 */
+    private String provisioningError;
 }

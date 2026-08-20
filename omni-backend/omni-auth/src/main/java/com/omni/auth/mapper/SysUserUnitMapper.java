@@ -28,6 +28,20 @@ public interface SysUserUnitMapper {
     void insert(@Param("userId") Long userId, @Param("unitId") Long unitId, @Param("isPrimary") Integer isPrimary);
 
     /**
+     * 幂等插入用户组织关联。
+     *
+     * @param userId    用户 ID
+     * @param unitId    组织单元 ID
+     * @param isPrimary 是否主组织（0-否，1-是）
+     * @return 新增行数，关联已存在时为 0
+     */
+    @Insert("INSERT IGNORE INTO sys_user_unit (user_id, unit_id, is_primary) "
+            + "VALUES (#{userId}, #{unitId}, #{isPrimary})")
+    int insertIgnore(@Param("userId") Long userId,
+                     @Param("unitId") Long unitId,
+                     @Param("isPrimary") Integer isPrimary);
+
+    /**
      * 删除用户的所有组织关联。
      *
      * @param userId 用户 ID

@@ -46,6 +46,9 @@ spring:
         authPortalRoleResult-out-0:
           destination: auth-portal-role-result
           content-type: application/json
+        tenantProvisionRequested-out-0:
+          destination: tenant-provisioning
+          content-type: application/json
   datasource:
     url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:root}

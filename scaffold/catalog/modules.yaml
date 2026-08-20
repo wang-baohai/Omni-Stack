@@ -29,6 +29,7 @@ modules:
     tenantProvisioning: event
     permissionRoots:
       - base
+      - dict
       - job
       - monitor
     provisioningSeedIds:

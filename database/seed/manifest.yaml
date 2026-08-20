@@ -49,6 +49,8 @@ assertions:
 
   - id: auth-role-catalog
     module: auth
+    provisioning:
+      roleCodes: [SUPER_ADMIN, USER]
     database: omni_auth
     query: >-
       SELECT role_code AS seed_key
@@ -130,6 +132,8 @@ assertions:
 
   - id: workflow-role-catalog
     module: workflow
+    provisioning:
+      roleCodes: [EMPLOYEE, TEAM_LEADER, DEPT_LEADER]
     database: omni_auth
     query: >-
       SELECT role_code AS seed_key
@@ -150,6 +154,8 @@ assertions:
 
   - id: crm-role-catalog
     module: crm
+    provisioning:
+      roleCodes: [CRM_ADMIN, CRM_VIEWER, SALES_MANAGER, SALES_REP]
     database: omni_auth
     query: >-
       SELECT role_code AS seed_key
@@ -189,6 +195,8 @@ assertions:
 
   - id: srm-role-catalog
     module: srm
+    provisioning:
+      roleCodes: [SRM_ADMIN, SRM_COMPLIANCE, SRM_DIRECTOR, SRM_MANAGER, SUPPLIER]
     database: omni_auth
     query: >-
       SELECT role_code AS seed_key
@@ -235,6 +243,8 @@ assertions:
 
   - id: procurement-role-catalog
     module: procurement
+    provisioning:
+      roleCodes: [PROCUREMENT_MANAGER, PROCUREMENT_STAFF]
     database: omni_auth
     query: >-
       SELECT role_code AS seed_key
@@ -273,6 +283,8 @@ assertions:
 
   - id: asset-role-catalog
     module: asset
+    provisioning:
+      roleCodes: [ASSET_ADMIN, ASSET_MANAGER, ASSET_USER]
     database: omni_auth
     query: >-
       SELECT role_code AS seed_key

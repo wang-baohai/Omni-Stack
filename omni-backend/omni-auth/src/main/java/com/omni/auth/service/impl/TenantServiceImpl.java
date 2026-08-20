@@ -6,6 +6,7 @@ import com.omni.auth.dto.CreateTenantRequest;
 import com.omni.auth.dto.TenantOption;
 import com.omni.auth.dto.UpdateTenantRequest;
 import com.omni.auth.entity.SysTenant;
+import com.omni.auth.entity.TenantProvisionStatusEnum;
 import com.omni.auth.mapper.SysTenantMapper;
 import com.omni.auth.mapper.TenantProvisionMapper;
 import com.omni.auth.service.TenantService;
@@ -58,6 +59,7 @@ public class TenantServiceImpl implements TenantService {
         List<SysTenant> tenants = sysTenantMapper.selectList(
                 new LambdaQueryWrapper<SysTenant>()
                         .eq(SysTenant::getStatus, 1)
+                        .eq(SysTenant::getProvisioningStatus, TenantProvisionStatusEnum.ACTIVE)
                         .select(SysTenant::getId, SysTenant::getTenantName, SysTenant::getTenantCode));
 
         return tenants.stream()

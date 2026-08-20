@@ -33,6 +33,20 @@ public interface SysRolePermissionMapper {
     void batchInsert(@Param("roleId") Long roleId, @Param("permissionIds") List<Long> permissionIds);
 
     /**
+     * 幂等批量插入角色权限关联。
+     *
+     * @param roleId        角色 ID
+     * @param permissionIds 权限 ID 列表
+     */
+    @Insert("<script>"
+            + "INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES "
+            + "<foreach collection='permissionIds' item='permId' separator=','>"
+            + "(#{roleId}, #{permId})"
+            + "</foreach>"
+            + "</script>")
+    void batchInsertIgnore(@Param("roleId") Long roleId, @Param("permissionIds") List<Long> permissionIds);
+
+    /**
      * 删除角色的所有权限关联。
      *
      * @param roleId 角色 ID
