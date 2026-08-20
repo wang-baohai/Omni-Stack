@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: common-mq-0002-normalize-tenant-and-indexes
       author: omni-scaffold
-      labels: database:common-mq
+      labels: database:common-mq,adoption-upgrade
       runInTransaction: false
       comment: 统一七个业务数据库 Outbox 的非空租户约束与索引命名
       preConditions:

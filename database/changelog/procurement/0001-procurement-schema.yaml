@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: procurement-0001-baseline-schema
       author: omni-scaffold
-      labels: database:procurement
+      labels: database:procurement,adoption-baseline
       runInTransaction: false
       comment: omni_procurement 业务结构基线，不包含公共 MQ 表和种子数据
       preConditions:

@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: crm-0001-baseline-schema
       author: omni-scaffold
-      labels: database:crm
+      labels: database:crm,adoption-baseline
       runInTransaction: false
       comment: omni_crm 业务结构基线，不包含公共 MQ 表和种子数据
       preConditions:

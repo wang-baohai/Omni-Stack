@@ -19,7 +19,7 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 public class SchemaFingerprintManifestLoader {
 
     /** 当前受支持的算法版本。 */
-    public static final String ALGORITHM = "mysql-show-create-v1";
+    public static final String ALGORITHM = "mysql-information-schema-v1";
     /** 小写 SHA-256 格式。 */
     private static final String SHA256_PATTERN = "[a-f0-9]{64}";
 

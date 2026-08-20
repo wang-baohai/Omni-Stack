@@ -90,7 +90,7 @@ public class SchemaFingerprintService {
                 properties.adminPassword())) {
             connection.setReadOnly(true);
             List<String> parts = new ArrayList<>();
-            int tables = appendTables(connection, target.database(), parts);
+            int tables = appendSchema(connection, target.database(), parts);
             int views = appendViews(connection, target.database(), parts);
             int triggers = appendTriggers(connection, target.database(), parts);
             int routines = appendRoutines(connection, target.database(), parts);
@@ -103,29 +103,55 @@ public class SchemaFingerprintService {
     }
 
     /**
-     * 追加按名称排序的 SHOW CREATE TABLE。
+     * 追加可跨备份恢复稳定比较的表、列、索引和约束语义。
      */
-    private static int appendTables(Connection connection, String database, List<String> parts) throws Exception {
-        List<String> names = names(connection,
-                "SELECT TABLE_NAME FROM information_schema.TABLES "
-                        + "WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = 'BASE TABLE' "
-                        + "AND TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK') "
+    private static int appendSchema(Connection connection, String database, List<String> parts) throws Exception {
+        String excluded = " AND TABLE_NAME NOT IN ('DATABASECHANGELOG', 'DATABASECHANGELOGLOCK') ";
+        int tables = appendRows(connection,
+                "SELECT TABLE_NAME, ENGINE, ROW_FORMAT, TABLE_COLLATION, CREATE_OPTIONS, TABLE_COMMENT "
+                        + "FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? "
+                        + "AND TABLE_TYPE = 'BASE TABLE'" + excluded
                         + "ORDER BY BINARY TABLE_NAME",
-                database);
-        try (Statement statement = connection.createStatement()) {
-            for (String name : names) {
-                try (ResultSet resultSet = statement.executeQuery(
-                        "SHOW CREATE TABLE `" + identifier(database) + "`.`" + identifier(name) + "`")) {
-                    if (!resultSet.next()) {
-                        throw new IllegalStateException("SHOW CREATE TABLE 未返回结果: " + name);
-                    }
-                    String ddl = normalize(resultSet.getString(2))
-                            .replaceAll("(?i) AUTO_INCREMENT=\\d+", "");
-                    parts.add("TABLE|" + name + "|" + ddl);
-                }
-            }
-        }
-        return names.size();
+                database, "TABLE", parts);
+        appendRows(connection,
+                "SELECT TABLE_NAME, ORDINAL_POSITION, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, "
+                        + "COLUMN_DEFAULT, EXTRA, CHARACTER_SET_NAME, COLLATION_NAME, GENERATION_EXPRESSION, SRS_ID "
+                        + "FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ?" + excluded
+                        + "ORDER BY BINARY TABLE_NAME, ORDINAL_POSITION",
+                database, "COLUMN", parts);
+        appendRows(connection,
+                "SELECT TABLE_NAME, INDEX_NAME, NON_UNIQUE, SEQ_IN_INDEX, COLUMN_NAME, COLLATION, "
+                        + "SUB_PART, PACKED, NULLABLE, INDEX_TYPE, COMMENT, INDEX_COMMENT, IS_VISIBLE, EXPRESSION "
+                        + "FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ?" + excluded
+                        + "ORDER BY BINARY TABLE_NAME, BINARY INDEX_NAME, SEQ_IN_INDEX",
+                database, "INDEX", parts);
+        appendRows(connection,
+                "SELECT TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE, ENFORCED "
+                        + "FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = ?" + excluded
+                        + "ORDER BY BINARY TABLE_NAME, BINARY CONSTRAINT_NAME",
+                database, "CONSTRAINT", parts);
+        appendRows(connection,
+                "SELECT TABLE_NAME, CONSTRAINT_NAME, COLUMN_NAME, ORDINAL_POSITION, POSITION_IN_UNIQUE_CONSTRAINT, "
+                        + "REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME "
+                        + "FROM information_schema.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = ?" + excluded
+                        + "ORDER BY BINARY TABLE_NAME, BINARY CONSTRAINT_NAME, ORDINAL_POSITION",
+                database, "KEY", parts);
+        appendRows(connection,
+                "SELECT TABLE_NAME, CONSTRAINT_NAME, UNIQUE_CONSTRAINT_SCHEMA, UNIQUE_CONSTRAINT_NAME, "
+                        + "MATCH_OPTION, UPDATE_RULE, DELETE_RULE FROM information_schema.REFERENTIAL_CONSTRAINTS "
+                        + "WHERE CONSTRAINT_SCHEMA = ?" + excluded
+                        + "ORDER BY BINARY TABLE_NAME, BINARY CONSTRAINT_NAME",
+                database, "REFERENCE", parts);
+        appendRows(connection,
+                "SELECT constraints_current.TABLE_NAME, checks.CONSTRAINT_NAME, checks.CHECK_CLAUSE, "
+                        + "constraints_current.ENFORCED FROM information_schema.CHECK_CONSTRAINTS checks "
+                        + "JOIN information_schema.TABLE_CONSTRAINTS constraints_current "
+                        + "ON constraints_current.CONSTRAINT_SCHEMA = checks.CONSTRAINT_SCHEMA "
+                        + "AND constraints_current.CONSTRAINT_NAME = checks.CONSTRAINT_NAME "
+                        + "WHERE checks.CONSTRAINT_SCHEMA = ?" + excluded
+                        + "ORDER BY BINARY constraints_current.TABLE_NAME, BINARY checks.CONSTRAINT_NAME",
+                database, "CHECK", parts);
+        return tables;
     }
 
     /**
@@ -206,32 +232,6 @@ public class SchemaFingerprintService {
             }
         }
         return count;
-    }
-
-    /**
-     * 查询单列名称列表。
-     */
-    private static List<String> names(Connection connection, String sql, String database) throws Exception {
-        List<String> result = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, database);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    result.add(resultSet.getString(1));
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * 校验并转义 MySQL 标识符。
-     */
-    private static String identifier(String value) {
-        if (!value.matches("[A-Za-z0-9_]+")) {
-            throw new IllegalArgumentException("数据库标识符不合法");
-        }
-        return value;
     }
 
     /**

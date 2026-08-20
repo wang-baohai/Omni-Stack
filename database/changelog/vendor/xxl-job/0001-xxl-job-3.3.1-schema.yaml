@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: vendor-xxl-job-0001-3.3.1-schema
       author: omni-scaffold
-      labels: database:vendor-xxl-job
+      labels: database:vendor-xxl-job,adoption-baseline
       runInTransaction: false
       comment: XXL-JOB 3.3.1 MySQL vendor schema 基线，upstreamVersion=3.3.1
       preConditions:

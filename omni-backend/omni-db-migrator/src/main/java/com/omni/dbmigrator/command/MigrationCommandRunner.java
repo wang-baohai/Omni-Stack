@@ -6,7 +6,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import com.omni.dbmigrator.adoption.SchemaFingerprintService;
+import com.omni.dbmigrator.adoption.AdoptionService;
 import com.omni.dbmigrator.config.DbMigratorProperties;
 import com.omni.dbmigrator.migration.LiquibaseMigrationService;
 import com.omni.dbmigrator.seed.SeedVerificationService;
@@ -25,8 +25,8 @@ public class MigrationCommandRunner implements ApplicationRunner {
     private final LiquibaseMigrationService migrationService;
     /** 种子数据校验服务。 */
     private final SeedVerificationService seedVerificationService;
-    /** 既有数据库强结构指纹服务。 */
-    private final SchemaFingerprintService schemaFingerprintService;
+    /** 既有数据库双阶段接管服务。 */
+    private final AdoptionService adoptionService;
 
     /**
      * 执行数据库命令。
@@ -41,12 +41,7 @@ public class MigrationCommandRunner implements ApplicationRunner {
             case VALIDATE -> migrationService.validateAll();
             case STATUS -> migrationService.status();
             case MIGRATE -> migrationService.migrate();
-            case ADOPT_CURRENT -> {
-                schemaFingerprintService.verifyAll();
-                seedVerificationService.verifyAll();
-                throw new IllegalStateException(
-                        "adopt-current 写入仍关闭：必须完成 S0-06 备份证据和双阶段人工确认");
-            }
+            case ADOPT_CURRENT -> adoptionService.adoptCurrent();
             case VERIFY_SEED -> seedVerificationService.verifyAll();
         }
         log.info("数据库迁移命令执行成功: command={}", command.value());

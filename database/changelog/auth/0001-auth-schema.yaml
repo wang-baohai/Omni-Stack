@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: auth-0001-baseline-schema
       author: omni-scaffold
-      labels: database:auth
+      labels: database:auth,adoption-baseline
       runInTransaction: false
       comment: omni_auth 业务结构基线，不包含公共 MQ 表和种子数据
       preConditions:

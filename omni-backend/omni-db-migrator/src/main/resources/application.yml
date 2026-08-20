@@ -14,6 +14,8 @@ omni:
     changelog-root: database/changelog/db.changelog-root.yaml
     seed-manifest: database/seed/manifest.yaml
     adoption-baseline: database/adoption/baseline-09a29fe.yaml
+    backup-evidence: ${DB_MIGRATOR_BACKUP_EVIDENCE:}
+    backup-max-age-hours: ${DB_MIGRATOR_BACKUP_MAX_AGE_HOURS:24}
     adopt-confirmation: ${DB_MIGRATOR_ADOPT_CONFIRMATION:}
 
 logging:

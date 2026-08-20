@@ -5,16 +5,22 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -94,6 +100,39 @@ public class LiquibaseMigrationService {
             withLiquibase(targetUrl(target.database()), target.changelog(),
                     liquibase -> liquibase.update(new Contexts(target.id()), new LabelExpression()));
             log.info("数据库迁移完成: target={}", target.id());
+        }
+    }
+
+    /**
+     * 只将已由强指纹证明存在的 baseline changeSet 写入历史表。
+     *
+     * <p>调用方必须先完成备份、结构、种子和人工确认门。本方法明确排除
+     * {@code adoption-upgrade}，公共 MQ 0002 必须由后续 migrate 真实执行。</p>
+     */
+    public void adoptBaseline() {
+        requireAdminConfig();
+        validateAdoptionHistory();
+        LabelExpression baseline = new LabelExpression("adoption-baseline");
+        withLiquibase(targetUrl("omni_auth"), properties.changelogRoot(),
+                liquibase -> liquibase.changeLogSync(new Contexts("platform"), baseline));
+        for (MigrationTarget target : MigrationTargetCatalog.targets()) {
+            withLiquibase(targetUrl(target.database()), target.changelog(),
+                    liquibase -> liquibase.changeLogSync(new Contexts(target.id()), baseline));
+        }
+        withLiquibase(targetUrl("omni_auth"), properties.changelogRoot(), liquibase -> {
+            List<ChangeSet> pending = liquibase.listUnrunChangeSets(new Contexts("platform"), baseline);
+            if (!pending.isEmpty()) {
+                throw new IllegalStateException("平台 baseline 接管后仍有未同步 changeSet");
+            }
+        });
+        for (MigrationTarget target : MigrationTargetCatalog.targets()) {
+            withLiquibase(targetUrl(target.database()), target.changelog(), liquibase -> {
+                List<ChangeSet> pending = liquibase.listUnrunChangeSets(new Contexts(target.id()), baseline);
+                if (!pending.isEmpty()) {
+                    throw new IllegalStateException("目标 baseline 接管后仍有未同步 changeSet: " + target.id());
+                }
+            });
+            log.info("数据库 baseline 接管完成: target={}", target.id());
         }
     }
 
@@ -226,6 +265,100 @@ public class LiquibaseMigrationService {
     }
 
     /**
+     * 接管前拒绝任何非 baseline Liquibase 历史，允许安全续跑部分完成的接管。
+     */
+    private void validateAdoptionHistory() {
+        for (MigrationTarget target : MigrationTargetCatalog.targets()) {
+            DatabaseState state = inspectState(target.database());
+            if (!state.exists() || state.userTableCount() == 0) {
+                throw new IllegalStateException("接管目标不存在或为空: target=" + target.id());
+            }
+            if (!state.historyTableExists()) {
+                continue;
+            }
+            Set<ChangeSetIdentity> allowed = expectedBaselineHistory(target);
+            String sql = "SELECT ID, AUTHOR, FILENAME, LABELS FROM DATABASECHANGELOG";
+            try (Connection connection = DriverManager.getConnection(
+                    targetUrl(target.database()), properties.adminUsername(), properties.adminPassword());
+                 Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(sql)) {
+                while (resultSet.next()) {
+                    ChangeSetIdentity actual = new ChangeSetIdentity(
+                            resultSet.getString("ID"),
+                            resultSet.getString("AUTHOR"),
+                            resultSet.getString("FILENAME"));
+                    String labels = resultSet.getString("LABELS");
+                    validateAdoptionHistoryRow(target.id(), actual, labels, allowed);
+                }
+            } catch (IllegalStateException exception) {
+                throw exception;
+            } catch (Exception exception) {
+                throw new IllegalStateException("校验接管历史失败: target=" + target.id(), exception);
+            }
+        }
+    }
+
+    /**
+     * 校验一条已有历史确实属于当前冻结基线。
+     *
+     * @param targetId 目标 ID
+     * @param actual   实际历史身份
+     * @param labels   实际标签
+     * @param allowed 允许的基线身份
+     */
+    static void validateAdoptionHistoryRow(
+            String targetId,
+            ChangeSetIdentity actual,
+            String labels,
+            Set<ChangeSetIdentity> allowed) {
+        boolean baselineLabel = labels != null && Arrays.stream(labels.split(","))
+                .map(String::trim)
+                .anyMatch("adoption-baseline"::equals);
+        if (!baselineLabel || !allowed.contains(actual)) {
+            throw new IllegalStateException("目标库存在未知或非 baseline Liquibase 历史: target="
+                    + targetId + ", changeSet=" + actual);
+        }
+    }
+
+    /**
+     * 从当前冻结 changelog 解析一个目标允许出现的 baseline 身份集合。
+     *
+     * <p>Auth 数据库同时承载平台根 changelog 的历史，因此需要合并平台和 Auth 两组身份。</p>
+     *
+     * @param target 迁移目标
+     * @return 允许的 baseline changeSet 身份
+     */
+    private Set<ChangeSetIdentity> expectedBaselineHistory(MigrationTarget target) {
+        Set<ChangeSetIdentity> expected = new HashSet<>();
+        collectBaselineIdentities(target.changelog(), expected);
+        if ("auth".equals(target.id())) {
+            collectBaselineIdentities(properties.changelogRoot(), expected);
+        }
+        return Set.copyOf(expected);
+    }
+
+    /**
+     * 解析指定 changelog 并收集带接管基线标签的 changeSet。
+     *
+     * @param changelog changelog 路径
+     * @param target    收集目标
+     */
+    private static void collectBaselineIdentities(String changelog, Set<ChangeSetIdentity> target) {
+        try (ClassLoaderResourceAccessor accessor = new ClassLoaderResourceAccessor(
+                LiquibaseMigrationService.class.getClassLoader())) {
+            DatabaseChangeLog databaseChangeLog = ChangeLogParserFactory.getInstance()
+                    .getParser(changelog, accessor)
+                    .parse(changelog, new ChangeLogParameters(), accessor);
+            databaseChangeLog.getChangeSets().stream()
+                    .filter(changeSet -> changeSet.getLabels().getLabels().contains("adoption-baseline"))
+                    .map(ChangeSetIdentity::from)
+                    .forEach(target::add);
+        } catch (Exception exception) {
+            throw new IllegalStateException("解析 baseline changelog 失败: " + changelog, exception);
+        }
+    }
+
+    /**
      * 数据库命令必须显式提供管理连接；离线 validate 不需要。
      */
     private void requireAdminConfig() {
@@ -273,5 +406,25 @@ public class LiquibaseMigrationService {
      * @param historyTableExists 是否存在 DATABASECHANGELOG
      */
     private record DatabaseState(boolean exists, int userTableCount, boolean historyTableExists) {
+    }
+
+    /**
+     * Liquibase 历史表中稳定标识一个 changeSet 的三元组。
+     *
+     * @param id       changeSet ID
+     * @param author   作者
+     * @param filename changelog 逻辑路径
+     */
+    record ChangeSetIdentity(String id, String author, String filename) {
+
+        /**
+         * 从已解析 changeSet 创建身份。
+         *
+         * @param changeSet changeSet
+         * @return 身份三元组
+         */
+        private static ChangeSetIdentity from(ChangeSet changeSet) {
+            return new ChangeSetIdentity(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+        }
     }
 }

@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: common-mq-0001-schema
       author: omni-scaffold
-      labels: database:common-mq
+      labels: database:common-mq,adoption-baseline
       runInTransaction: false
       comment: 七个业务数据库复用的 Transactional Outbox 表结构
       preConditions:

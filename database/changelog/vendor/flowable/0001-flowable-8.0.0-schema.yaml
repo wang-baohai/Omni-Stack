@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: vendor-flowable-0001-8.0.0-schema
       author: omni-scaffold
-      labels: database:vendor-flowable
+      labels: database:vendor-flowable,adoption-baseline
       runInTransaction: false
       comment: Flowable 8.0.0 MySQL vendor schema 基线，upstreamVersion=8.0.0
       preConditions:

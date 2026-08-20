@@ -1,5 +1,5 @@
 baselineCommit: "09a29fe10af9c7ddffe5001238d048947868dc98"
-algorithm: "mysql-show-create-v1"
+algorithm: "mysql-information-schema-v1"
 targets:
   - id: auth
     database: omni_auth
@@ -7,60 +7,60 @@ targets:
     expectedViews: 0
     expectedTriggers: 0
     expectedRoutines: 1
-    expectedSha256: "8424eff26b8b2973569af7361c861090672f2ed6bcd1ff19f53cbe35e83e0c99"
+    expectedSha256: "acb200c9499f643be8d9e045d94c5a520c34c953d03cc51ff2f511bfc8db1b55"
   - id: base
     database: omni_base
     expectedTables: 8
     expectedViews: 0
     expectedTriggers: 0
     expectedRoutines: 0
-    expectedSha256: "f1c0ff6f491e0f5eeed5da53145b0374387c986b46885df0d5f11a13e697f67c"
+    expectedSha256: "c3ffaf8e835520f420bf2f8dfcce803af60bdef1c5a4504c42cca679348b648a"
   - id: workflow
     database: omni_workflow
     expectedTables: 54
     expectedViews: 0
     expectedTriggers: 0
     expectedRoutines: 0
-    expectedSha256: "ac88fb4afc935a6a3ddf3fa351dabb5e24d336883b54e6338b15da428a1674cf"
+    expectedSha256: "198fe5312d31abb81d865c368d0a5a530ef0cbba60f5b4cf159c51b8a17a6678"
   - id: crm
     database: omni_crm
     expectedTables: 12
     expectedViews: 0
     expectedTriggers: 0
     expectedRoutines: 0
-    expectedSha256: "8c548ad2b46ec79c12d80c86c71e16407daa6f17f68f0ed18845a159be71bee5"
+    expectedSha256: "d590a0e19b9b42212df7420e9bf59a3d3aa651ef3fa016ecc9269e02284e4c0d"
   - id: srm
     database: omni_srm
     expectedTables: 21
     expectedViews: 0
     expectedTriggers: 0
     expectedRoutines: 0
-    expectedSha256: "6110eee2894cdef7f1593a3d62cc308ae85fefb8d9762032fb266adc8c8987e6"
+    expectedSha256: "d0af9e04d58225fa6300bf07e1c3d8450b04a2c71078dfefb3f2a10713c7f9e4"
   - id: procurement
     database: omni_procurement
     expectedTables: 15
     expectedViews: 0
     expectedTriggers: 0
     expectedRoutines: 0
-    expectedSha256: "9e952029e6ce90f1861c3b78853a2c30299d6850b046391f8d30269703fcb1d0"
+    expectedSha256: "2f4213dcbe7eeae8d5bded181c58c2f438dc83394fb737be46fd3bf8a44e9376"
   - id: asset
     database: omni_asset
     expectedTables: 6
     expectedViews: 0
     expectedTriggers: 0
     expectedRoutines: 0
-    expectedSha256: "4e032fbdf8179d686ec4bd4e82531a5229cf0bd6fa65539e14107e2509c2d29b"
+    expectedSha256: "b8911dc8f5657d5bf544a7dbd15672dfbecbe9ef5afff426cf197fb4d2636c8d"
   - id: nacos
     database: nacos_config
     expectedTables: 10
     expectedViews: 0
     expectedTriggers: 0
     expectedRoutines: 0
-    expectedSha256: "052066e374ba5986c0a3e61357da8fc193cf9c768b54bd97b972ed28ceb34281"
+    expectedSha256: "47372dd8400ee1d01e4bb8339af82b153582119937bda89139d8cafd780d88c2"
   - id: xxl-job
     database: xxl_job
     expectedTables: 8
     expectedViews: 0
     expectedTriggers: 0
     expectedRoutines: 0
-    expectedSha256: "1331d03b9618206abbe95c38f28aa33fd8749a8914fd5ec2fbe9eae41f50e3e4"
+    expectedSha256: "9dc5f8a30ff67dd5556b4b191e2b11fd56e56d9233dad15c981909dcf7cde981"

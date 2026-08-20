@@ -19,7 +19,7 @@ class SchemaFingerprintManifestLoaderTest {
 
         assertThat(manifest.baselineCommit())
                 .isEqualTo("09a29fe10af9c7ddffe5001238d048947868dc98");
-        assertThat(manifest.algorithm()).isEqualTo("mysql-show-create-v1");
+        assertThat(manifest.algorithm()).isEqualTo("mysql-information-schema-v1");
         assertThat(manifest.targets())
                 .extracting(SchemaFingerprintTarget::id)
                 .containsExactly(

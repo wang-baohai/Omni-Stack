@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: workflow-0001-business-schema
       author: omni-scaffold
-      labels: database:workflow
+      labels: database:workflow,adoption-baseline
       runInTransaction: false
       comment: omni_workflow 业务扩展结构基线，不包含 Flowable vendor 与公共 MQ 表
       preConditions:

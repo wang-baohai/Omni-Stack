@@ -2,7 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: vendor-nacos-0001-3.1.1-schema
       author: omni-scaffold
-      labels: database:vendor-nacos
+      labels: database:vendor-nacos,adoption-baseline
       runInTransaction: false
       comment: Nacos 3.1.1 MySQL vendor schema 基线，upstreamVersion=3.1.1
       preConditions:
