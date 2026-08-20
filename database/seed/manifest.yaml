@@ -1,0 +1,316 @@
+version: "1.0.0-bootstrap"
+digestAlgorithm: "SHA-256"
+
+# 当前为完整开发预设。后续 modules.yaml 落地后，enabledByDefault 将由所选预设解析结果覆盖。
+modules:
+  - id: platform
+    enabledByDefault: true
+  - id: auth
+    enabledByDefault: true
+  - id: base
+    enabledByDefault: true
+  - id: workflow
+    enabledByDefault: true
+  - id: crm
+    enabledByDefault: true
+  - id: srm
+    enabledByDefault: true
+  - id: procurement
+    enabledByDefault: true
+  - id: asset
+    enabledByDefault: true
+  - id: nacos
+    enabledByDefault: true
+  - id: xxl-job
+    enabledByDefault: true
+
+# 每个查询只返回不含密码、令牌和业务交易数据的稳定自然键投影。
+# expectedSha256 是对 JDBC 列标签、类型和值生成规范串，按行排序后计算的 SHA-256。
+assertions:
+  - id: platform-default-tenant
+    module: platform
+    database: omni_auth
+    query: >-
+      SELECT tenant_code AS seed_key
+      FROM sys_tenant WHERE tenant_code = 'default'
+    expectedRows: 1
+    expectedSha256: "b5b1bca0e3a6438bab2a8d8bbaabeffbc84e2be1a9bfb641dfda2fe9f078824c"
+
+  - id: auth-default-root
+    module: auth
+    database: omni_auth
+    query: >-
+      SELECT CONCAT_WS('|', tenant.tenant_code, unit.type) AS seed_key
+      FROM sys_org_unit unit JOIN sys_tenant tenant ON tenant.id = unit.tenant_id
+      WHERE tenant.tenant_code = 'default' AND unit.parent_id = 0
+    expectedRows: 1
+    expectedSha256: "78fbed3d59cd18aebd3648eb4acfe49c7a33f62349472adf9c11e66bbb75e5b2"
+
+  - id: auth-role-catalog
+    module: auth
+    database: omni_auth
+    query: >-
+      SELECT role_code AS seed_key
+      FROM sys_role WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND role_code IN ('SUPER_ADMIN', 'USER')
+    expectedRows: 2
+    expectedSha256: "5931cd76aa95dc41953f9ad8eb0e32dfc8fb7021ebf065d094c92458e9a5116f"
+
+  - id: auth-permission-catalog
+    module: auth
+    database: omni_auth
+    query: >-
+      SELECT CONCAT_WS('|', permission.permission_code, permission.type,
+      COALESCE(parent.permission_code, '')) AS seed_key
+      FROM sys_permission permission LEFT JOIN sys_permission parent ON parent.id = permission.parent_id
+      WHERE permission.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND (permission.permission_code = 'system' OR permission.permission_code LIKE 'system:%')
+    expectedRows: 43
+    expectedSha256: "1d960c285f8def5e12c16873c4a027ebf25eee65f6e64cc0684e21700b07b023"
+
+  - id: auth-xss-defaults
+    module: auth
+    database: omni_auth
+    query: >-
+      SELECT 'config' AS seed_key FROM sys_xss_config
+      WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      UNION ALL SELECT CONCAT_WS('|', 'rule', rule_name)
+      FROM sys_xss_blacklist_rule
+      WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+    expectedRows: 11
+    expectedSha256: "b19d0aaac44f0496f5fde25fe83513d233a3cfcffd45acf60164d005897c38de"
+
+  - id: base-permission-catalog
+    module: base
+    database: omni_auth
+    query: >-
+      SELECT CONCAT_WS('|', permission.permission_code, permission.type,
+      COALESCE(parent.permission_code, '')) AS seed_key
+      FROM sys_permission permission LEFT JOIN sys_permission parent ON parent.id = permission.parent_id
+      WHERE permission.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND (permission.permission_code IN ('base', 'dict:data:create', 'dict:data:delete', 'dict:data:list',
+      'dict:data:refresh', 'dict:data:update', 'dict:type:create', 'dict:type:delete', 'dict:type:list',
+      'dict:type:update', 'job', 'monitor') OR permission.permission_code LIKE 'base:%'
+      OR permission.permission_code LIKE 'job:%')
+    expectedRows: 27
+    expectedSha256: "d09da27a1c1c2c138987decd7a35d95d47f5afc6ca8336a674e9fba4b762d906"
+
+  - id: base-dictionary-catalog
+    module: base
+    database: omni_base
+    query: >-
+      SELECT CONCAT_WS('|', 'type', type_code) AS seed_key
+      FROM sys_dict_type WHERE tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default')
+      UNION ALL SELECT CONCAT_WS('|', 'data', type_code, dict_value) FROM sys_dict_data
+      WHERE tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default')
+    expectedRows: 101
+    expectedSha256: "0dea7e2c5b2dcccf82ce2bea92fc9b809d5221b8b2541d8d0099313142e944a9"
+
+  - id: base-job-type-catalog
+    module: base
+    database: omni_base
+    query: >-
+      SELECT type_code AS seed_key
+      FROM sys_user_job_type
+    expectedRows: 1
+    expectedSha256: "78718eda823047c3e8590e1b556b685d038237c770bd8a8e0ec23d6ed39e9897"
+
+  - id: workflow-permission-catalog
+    module: workflow
+    database: omni_auth
+    query: >-
+      SELECT CONCAT_WS('|', permission.permission_code, permission.type,
+      COALESCE(parent.permission_code, '')) AS seed_key
+      FROM sys_permission permission LEFT JOIN sys_permission parent ON parent.id = permission.parent_id
+      WHERE permission.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND (permission.permission_code = 'workflow' OR permission.permission_code LIKE 'workflow:%')
+    expectedRows: 26
+    expectedSha256: "b119e18ae0866a472d06370633a67bb93d4486bd0c08fd8a82723c6e3635164a"
+
+  - id: workflow-role-catalog
+    module: workflow
+    database: omni_auth
+    query: >-
+      SELECT role_code AS seed_key
+      FROM sys_role WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND role_code IN ('EMPLOYEE', 'TEAM_LEADER', 'DEPT_LEADER')
+    expectedRows: 3
+    expectedSha256: "a05779aaecab6a51d8550288efe967842fd73101cefbb9061032ec87deb4b495"
+
+  - id: workflow-model-catalog
+    module: workflow
+    database: omni_workflow
+    query: >-
+      SELECT model.model_key AS seed_key FROM wf_process_model model
+      WHERE model.tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default')
+      AND EXISTS (SELECT 1 FROM wf_process_model_version model_version WHERE model_version.model_id = model.id)
+    expectedRows: 5
+    expectedSha256: "399c97afa4fcb0b7621d6ab09dc80afc0bf6112bf6981d84a2b3a65058414503"
+
+  - id: crm-role-catalog
+    module: crm
+    database: omni_auth
+    query: >-
+      SELECT role_code AS seed_key
+      FROM sys_role WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND role_code IN ('CRM_ADMIN', 'CRM_VIEWER', 'SALES_MANAGER', 'SALES_REP')
+    expectedRows: 4
+    expectedSha256: "2a95856eec6bae9f657d3487c5cbbbb6497782c1803267905d598ac74c801e0a"
+
+  - id: crm-permission-catalog
+    module: crm
+    database: omni_auth
+    query: >-
+      SELECT CONCAT_WS('|', permission.permission_code, permission.type,
+      COALESCE(parent.permission_code, '')) AS seed_key
+      FROM sys_permission permission LEFT JOIN sys_permission parent ON parent.id = permission.parent_id
+      WHERE permission.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND (permission.permission_code = 'crm' OR permission.permission_code LIKE 'crm:%')
+    expectedRows: 41
+    expectedSha256: "d5e5f319dc9d05ef5cacc8825d44d525c64d467c8879dce0cd82479c9c3989b3"
+
+  - id: crm-default-config
+    module: crm
+    database: omni_crm
+    query: >-
+      SELECT 'config' AS seed_key
+      FROM crm_tenant_config
+      WHERE tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default')
+      UNION ALL SELECT CONCAT_WS('|', 'pipeline', code)
+      FROM crm_pipeline
+      WHERE tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default') AND deleted = 0
+      UNION ALL SELECT CONCAT_WS('|', 'stage', pipeline.code, stage.stage_code)
+      FROM crm_pipeline_stage stage JOIN crm_pipeline pipeline ON pipeline.id = stage.pipeline_id
+      WHERE stage.tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default')
+      AND stage.deleted = 0
+    expectedRows: 8
+    expectedSha256: "d09d264634dcd551bfacecbac3997e49faa59e8e76ea78ada4f77ce6ced047c8"
+
+  - id: srm-role-catalog
+    module: srm
+    database: omni_auth
+    query: >-
+      SELECT role_code AS seed_key
+      FROM sys_role WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND role_code IN ('SRM_ADMIN', 'SRM_COMPLIANCE', 'SRM_DIRECTOR', 'SRM_MANAGER', 'SUPPLIER')
+    expectedRows: 5
+    expectedSha256: "7f7590430844f970bf04a8edb137bece15dbcaa191e344963e02afacc96ca943"
+
+  - id: srm-permission-catalog
+    module: srm
+    database: omni_auth
+    query: >-
+      SELECT CONCAT_WS('|', permission.permission_code, permission.type,
+      COALESCE(parent.permission_code, '')) AS seed_key
+      FROM sys_permission permission LEFT JOIN sys_permission parent ON parent.id = permission.parent_id
+      WHERE permission.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND (permission.permission_code = 'srm' OR permission.permission_code LIKE 'srm:%')
+    expectedRows: 51
+    expectedSha256: "3f0b4cfc21b43c143a06ee69bb765d245ce67a2270461e9ca1a43a9ea4d078a5"
+
+  - id: srm-default-config
+    module: srm
+    database: omni_srm
+    query: >-
+      SELECT CONCAT_WS('|', 'template', name) AS seed_key
+      FROM srm_evaluation_template
+      WHERE tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default') AND deleted = 0
+      UNION ALL SELECT CONCAT_WS('|', 'dimension', template.name, dimension.indicator_name)
+      FROM srm_evaluation_dimension dimension
+      JOIN srm_evaluation_template template ON template.id = dimension.template_id
+      WHERE dimension.tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default')
+      AND dimension.deleted = 0
+      UNION ALL SELECT CONCAT_WS('|', 'risk-type', type_code)
+      FROM srm_risk_indicator_type
+      WHERE tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default') AND deleted = 0
+      UNION ALL SELECT CONCAT_WS('|', 'risk-criterion', type.type_code, criterion.criterion_label)
+      FROM srm_risk_criterion criterion JOIN srm_risk_indicator_type type ON type.id = criterion.indicator_type_id
+      WHERE criterion.tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default')
+      AND criterion.deleted = 0
+      UNION ALL SELECT CONCAT_WS('|', 'threshold', risk_level) FROM srm_risk_score_threshold
+      WHERE tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default') AND deleted = 0
+    expectedRows: 29
+    expectedSha256: "b050b5bfaff46f047f06c26969aab010ce2f85ca4a16c8d2754b2bf952122a9e"
+
+  - id: procurement-role-catalog
+    module: procurement
+    database: omni_auth
+    query: >-
+      SELECT role_code AS seed_key
+      FROM sys_role WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND role_code IN ('PROCUREMENT_MANAGER', 'PROCUREMENT_STAFF')
+    expectedRows: 2
+    expectedSha256: "d45fd9ef03d9f8718505e00f592425a9f3d95bbba58ce5c6ff6823849b677399"
+
+  - id: procurement-permission-catalog
+    module: procurement
+    database: omni_auth
+    query: >-
+      SELECT CONCAT_WS('|', permission.permission_code, permission.type,
+      COALESCE(parent.permission_code, '')) AS seed_key
+      FROM sys_permission permission LEFT JOIN sys_permission parent ON parent.id = permission.parent_id
+      WHERE permission.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND (permission.permission_code = 'procurement' OR permission.permission_code LIKE 'procurement:%')
+    expectedRows: 40
+    expectedSha256: "2143b390329e481c3a57e75a11d6c9eff46ae9289d0a56b0b3df6a62ac3f7f9d"
+
+  - id: procurement-default-config
+    module: procurement
+    database: omni_procurement
+    query: >-
+      SELECT 'config' AS seed_key
+      FROM proc_tenant_config
+      WHERE tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default') AND deleted = 0
+      UNION ALL SELECT CONCAT_WS('|', 'category', category.category_code,
+      COALESCE(parent.category_code, ''))
+      FROM proc_material_category category
+      LEFT JOIN proc_material_category parent ON parent.id = category.parent_id
+      WHERE category.tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default')
+      AND category.deleted = 0
+    expectedRows: 14
+    expectedSha256: "d1aebd181fed2e45958a31bdfeee88016492b0f16b20f122f02f7598050cac8f"
+
+  - id: asset-role-catalog
+    module: asset
+    database: omni_auth
+    query: >-
+      SELECT role_code AS seed_key
+      FROM sys_role WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND role_code IN ('ASSET_ADMIN', 'ASSET_MANAGER', 'ASSET_USER')
+    expectedRows: 3
+    expectedSha256: "f03b169eb255caadfcbb20fa67b66eaf796392c5454c088af5af7cbb1bdc164f"
+
+  - id: asset-permission-catalog
+    module: asset
+    database: omni_auth
+    query: >-
+      SELECT CONCAT_WS('|', permission.permission_code, permission.type,
+      COALESCE(parent.permission_code, '')) AS seed_key
+      FROM sys_permission permission LEFT JOIN sys_permission parent ON parent.id = permission.parent_id
+      WHERE permission.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND (permission.permission_code = 'asset' OR permission.permission_code LIKE 'asset:%')
+    expectedRows: 27
+    expectedSha256: "6c937abd1c207dbec482f26986333b40877e1be36f4867e46aa18fb404fcd2c8"
+
+  - id: nacos-security-catalog
+    module: nacos
+    database: nacos_config
+    query: >-
+      SELECT CONCAT_WS('|', 'user', username) AS seed_key FROM users
+      UNION ALL SELECT CONCAT_WS('|', 'role', username, role) FROM roles
+      UNION ALL SELECT CONCAT_WS('|', 'permission', role, resource, action) FROM permissions
+    expectedRows: 2
+    expectedSha256: "e5e232ef54efc5d2745cf52b0e61bdfc97b50d274a6d3176a8dd9a92b758bd1b"
+
+  - id: xxl-job-catalog
+    module: xxl-job
+    database: xxl_job
+    query: >-
+      SELECT CONCAT_WS('|', 'group', app_name) AS seed_key
+      FROM xxl_job_group
+      UNION ALL SELECT CONCAT_WS('|', 'job', job_group.app_name, job.executor_handler)
+      FROM xxl_job_info job JOIN xxl_job_group job_group ON job_group.id = job.job_group
+      UNION ALL SELECT CONCAT_WS('|', 'user', username) FROM xxl_job_user
+      UNION ALL SELECT CONCAT_WS('|', 'lock', lock_name) FROM xxl_job_lock
+    expectedRows: 20
+    expectedSha256: "7d4cfd11d7d1474d80b4674152122f8bc484616547981a887f3a3db33fdcf374"

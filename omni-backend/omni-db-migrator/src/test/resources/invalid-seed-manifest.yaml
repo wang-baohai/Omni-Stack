@@ -1,0 +1,12 @@
+version: "test"
+digestAlgorithm: "SHA-256"
+modules:
+  - id: auth
+    enabledByDefault: true
+assertions:
+  - id: invalid-write
+    module: auth
+    database: omni_auth
+    query: "DELETE FROM sys_tenant"
+    expectedRows: 0
+    expectedSha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.omni.dbmigrator.config.DbMigratorProperties;
 import com.omni.dbmigrator.migration.LiquibaseMigrationService;
+import com.omni.dbmigrator.seed.SeedVerificationService;
 
 /**
  * 执行配置中声明的一次性数据库命令。
@@ -21,6 +22,8 @@ public class MigrationCommandRunner implements ApplicationRunner {
     private final DbMigratorProperties properties;
     /** Liquibase 迁移服务。 */
     private final LiquibaseMigrationService migrationService;
+    /** 种子数据校验服务。 */
+    private final SeedVerificationService seedVerificationService;
 
     /**
      * 执行数据库命令。
@@ -37,8 +40,7 @@ public class MigrationCommandRunner implements ApplicationRunner {
             case MIGRATE -> migrationService.migrate();
             case ADOPT_CURRENT -> throw new IllegalStateException(
                     "adopt-current 尚未开放：必须先完成 S0-05 指纹基线和 S0-06 备份前置检查");
-            case VERIFY_SEED -> throw new IllegalStateException(
-                    "verify-seed 尚未开放：必须先完成 S0-05 seed manifest 转换");
+            case VERIFY_SEED -> seedVerificationService.verifyAll();
         }
         log.info("数据库迁移命令执行成功: command={}", command.value());
     }

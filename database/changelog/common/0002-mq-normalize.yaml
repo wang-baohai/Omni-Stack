@@ -1,0 +1,98 @@
+databaseChangeLog:
+  - changeSet:
+      id: common-mq-0002-normalize-tenant-and-indexes
+      author: omni-scaffold
+      labels: database:common-mq
+      runInTransaction: false
+      comment: 统一七个业务数据库 Outbox 的非空租户约束与索引命名
+      preConditions:
+        - dbms:
+            type: mysql
+        - tableExists:
+            tableName: sys_mq_message
+        - sqlCheck:
+            expectedResult: "0"
+            sql: SELECT COUNT(*) FROM sys_mq_message WHERE tenant_id IS NULL
+        - sqlCheck:
+            expectedResult: "1"
+            sql: SELECT COUNT(*) FROM (SELECT index_name, MIN(non_unique) AS non_unique, GROUP_CONCAT(column_name ORDER BY seq_in_index SEPARATOR ',') AS columns_csv FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message' GROUP BY index_name) indexes_current WHERE non_unique = 0 AND columns_csv = 'msg_id'
+        - sqlCheck:
+            expectedResult: "1"
+            sql: SELECT COUNT(*) FROM (SELECT index_name, GROUP_CONCAT(column_name ORDER BY seq_in_index SEPARATOR ',') AS columns_csv FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message' GROUP BY index_name) indexes_current WHERE columns_csv = 'status,next_retry_time'
+        - sqlCheck:
+            expectedResult: "1"
+            sql: SELECT COUNT(*) FROM (SELECT index_name, GROUP_CONCAT(column_name ORDER BY seq_in_index SEPARATOR ',') AS columns_csv FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message' GROUP BY index_name) indexes_current WHERE columns_csv = 'tenant_id,create_time'
+      changes:
+        - sql:
+            splitStatements: true
+            stripComments: true
+            sql: |
+              ALTER TABLE sys_mq_message
+                MODIFY COLUMN tenant_id BIGINT NOT NULL COMMENT '租户ID';
+
+              SET @mq_unique_index = (
+                SELECT index_name
+                FROM (
+                  SELECT index_name,
+                         MIN(non_unique) AS non_unique,
+                         GROUP_CONCAT(column_name ORDER BY seq_in_index SEPARATOR ',') AS columns_csv
+                  FROM information_schema.statistics
+                  WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message'
+                  GROUP BY index_name
+                ) indexes_current
+                WHERE non_unique = 0 AND columns_csv = 'msg_id'
+                LIMIT 1
+              );
+              SET @mq_rename_sql = IF(
+                @mq_unique_index = 'uk_msg_id',
+                'SELECT 1',
+                CONCAT('ALTER TABLE sys_mq_message RENAME INDEX `',
+                       REPLACE(@mq_unique_index, '`', '``'), '` TO `uk_msg_id`')
+              );
+              PREPARE mq_rename_statement FROM @mq_rename_sql;
+              EXECUTE mq_rename_statement;
+              DEALLOCATE PREPARE mq_rename_statement;
+
+              SET @mq_relay_index = (
+                SELECT index_name
+                FROM (
+                  SELECT index_name,
+                         GROUP_CONCAT(column_name ORDER BY seq_in_index SEPARATOR ',') AS columns_csv
+                  FROM information_schema.statistics
+                  WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message'
+                  GROUP BY index_name
+                ) indexes_current
+                WHERE columns_csv = 'status,next_retry_time'
+                LIMIT 1
+              );
+              SET @mq_rename_sql = IF(
+                @mq_relay_index = 'idx_relay',
+                'SELECT 1',
+                CONCAT('ALTER TABLE sys_mq_message RENAME INDEX `',
+                       REPLACE(@mq_relay_index, '`', '``'), '` TO `idx_relay`')
+              );
+              PREPARE mq_rename_statement FROM @mq_rename_sql;
+              EXECUTE mq_rename_statement;
+              DEALLOCATE PREPARE mq_rename_statement;
+
+              SET @mq_tenant_index = (
+                SELECT index_name
+                FROM (
+                  SELECT index_name,
+                         GROUP_CONCAT(column_name ORDER BY seq_in_index SEPARATOR ',') AS columns_csv
+                  FROM information_schema.statistics
+                  WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message'
+                  GROUP BY index_name
+                ) indexes_current
+                WHERE columns_csv = 'tenant_id,create_time'
+                LIMIT 1
+              );
+              SET @mq_rename_sql = IF(
+                @mq_tenant_index = 'idx_tenant_time',
+                'SELECT 1',
+                CONCAT('ALTER TABLE sys_mq_message RENAME INDEX `',
+                       REPLACE(@mq_tenant_index, '`', '``'), '` TO `idx_tenant_time`')
+              );
+              PREPARE mq_rename_statement FROM @mq_rename_sql;
+              EXECUTE mq_rename_statement;
+              DEALLOCATE PREPARE mq_rename_statement;

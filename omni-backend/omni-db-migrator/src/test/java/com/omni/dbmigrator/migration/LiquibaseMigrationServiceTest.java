@@ -48,6 +48,7 @@ class LiquibaseMigrationServiceTest {
                 "",
                 "",
                 "database/changelog/db.changelog-root.yaml",
+                "database/seed/manifest.yaml",
                 ""));
 
         service.validateAll();
@@ -66,6 +67,7 @@ class LiquibaseMigrationServiceTest {
                 "test-user",
                 "test-password",
                 "database/changelog/db.changelog-root.yaml",
+                "database/seed/manifest.yaml",
                 "");
     }
 }

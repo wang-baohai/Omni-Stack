@@ -5,6 +5,9 @@ databaseChangeLog:
       context: platform
       runInTransaction: false
       comment: 创建七个业务数据库与两个固定版本基础设施数据库
+      preConditions:
+        - dbms:
+            type: mysql
       changes:
         - sql:
             splitStatements: true

@@ -1,1 +1,7 @@
-databaseChangeLog: []
+databaseChangeLog:
+  - include:
+      file: database/changelog/vendor/flowable/0001-flowable-8.0.0-schema.yaml
+  - include:
+      file: database/changelog/workflow/0001-workflow-schema.yaml
+  - include:
+      file: database/changelog/common/db.changelog-common-mq.yaml

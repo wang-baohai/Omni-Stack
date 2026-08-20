@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
  * @param adminUsername     管理用户名
  * @param adminPassword     管理密码
  * @param changelogRoot     根 changelog classpath 路径
+ * @param seedManifest      种子清单 classpath 路径
  * @param adoptConfirmation 接管现有库时的人工确认串
  */
 @Validated
@@ -22,5 +23,6 @@ public record DbMigratorProperties(
         String adminUsername,
         String adminPassword,
         @NotBlank String changelogRoot,
+        @NotBlank String seedManifest,
         String adoptConfirmation) {
 }

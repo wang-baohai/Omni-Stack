@@ -12,6 +12,7 @@ omni:
     admin-username: ${DB_MIGRATOR_ADMIN_USERNAME:}
     admin-password: ${DB_MIGRATOR_ADMIN_PASSWORD:}
     changelog-root: database/changelog/db.changelog-root.yaml
+    seed-manifest: database/seed/manifest.yaml
     adopt-confirmation: ${DB_MIGRATOR_ADOPT_CONFIRMATION:}
 
 logging:

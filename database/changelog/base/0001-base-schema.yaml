@@ -1,0 +1,155 @@
+databaseChangeLog:
+  - changeSet:
+      id: base-0001-baseline-schema
+      author: omni-scaffold
+      labels: database:base
+      runInTransaction: false
+      comment: omni_base 业务结构基线，不包含公共 MQ 表和种子数据
+      preConditions:
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: "0"
+            sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_type = 'BASE TABLE' AND table_name NOT IN ('DATABASECHANGELOG','DATABASECHANGELOGLOCK','sys_mq_message')
+      changes:
+        - sql:
+            splitStatements: true
+            stripComments: false
+            sql: |
+              SET FOREIGN_KEY_CHECKS = 0;
+              CREATE TABLE `sys_dict_data` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户ID',
+                `type_code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字典类型编码',
+                `dict_value` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字典值',
+                `dict_label` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字典标签',
+                `tag_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '标签样式：success/warning/danger/info/primary',
+                `remark` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                `sort` int DEFAULT '0' COMMENT '排序',
+                `status` tinyint DEFAULT '1' COMMENT '状态：1=启用 0=禁用',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `create_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `update_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                KEY `idx_dict_data_tenant` (`tenant_id`),
+                KEY `idx_dict_data_tenant_type` (`tenant_id`,`type_code`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='字典数据表';
+              CREATE TABLE `sys_dict_type` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户ID',
+                `type_code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字典类型编码',
+                `type_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字典类型名称',
+                `remark` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                `sort` int DEFAULT '0' COMMENT '排序',
+                `status` tinyint DEFAULT '1' COMMENT '状态：1=启用 0=禁用',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `create_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `update_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_dict_type_tenant_code` (`tenant_id`,`type_code`),
+                KEY `idx_dict_type_tenant` (`tenant_id`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='字典类型表';
+              CREATE TABLE `sys_oper_log` (
+                `id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+                `event_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'MQ事件唯一标识',
+                `tenant_id` bigint NOT NULL COMMENT '租户ID',
+                `oper_username` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '操作人用户名',
+                `oper_time` datetime NOT NULL COMMENT '操作时间',
+                `module` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '业务模块名称',
+                `oper_type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '操作类型: CREATE/UPDATE/DELETE/QUERY/EXPORT/IMPORT',
+                `request_method` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'HTTP方法',
+                `request_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '请求URL',
+                `request_params` text COLLATE utf8mb4_unicode_ci COMMENT '请求参数JSON',
+                `response_status` int DEFAULT '200' COMMENT '响应状态码',
+                `ip_address` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '客户端IP',
+                `user_agent` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'User-Agent',
+                `execution_time` bigint DEFAULT NULL COMMENT '执行耗时（毫秒）',
+                `old_value` json DEFAULT NULL COMMENT '变更前值快照',
+                `new_value` json DEFAULT NULL COMMENT '变更后值快照',
+                `error_msg` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '错误信息',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_operlog_event` (`event_id`),
+                KEY `idx_operlog_tenant` (`tenant_id`),
+                KEY `idx_operlog_time` (`oper_time`),
+                KEY `idx_operlog_module` (`module`),
+                KEY `idx_operlog_type` (`oper_type`),
+                KEY `idx_operlog_username` (`oper_username`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志热表';
+              CREATE TABLE `sys_oper_log_archive` (
+                `id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+                `event_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '原始MQ事件唯一标识',
+                `tenant_id` bigint NOT NULL COMMENT '租户ID',
+                `oper_username` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '操作人用户名',
+                `oper_time` datetime NOT NULL COMMENT '操作时间',
+                `module` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '业务模块名称',
+                `oper_type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '操作类型',
+                `request_method` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'HTTP方法',
+                `request_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '请求URL',
+                `request_params` text COLLATE utf8mb4_unicode_ci COMMENT '请求参数JSON',
+                `response_status` int DEFAULT '200' COMMENT '响应状态码',
+                `ip_address` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '客户端IP',
+                `user_agent` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'User-Agent',
+                `execution_time` bigint DEFAULT NULL COMMENT '执行耗时（毫秒）',
+                `old_value` json DEFAULT NULL COMMENT '变更前值快照',
+                `new_value` json DEFAULT NULL COMMENT '变更后值快照',
+                `error_msg` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '错误信息',
+                `create_time` datetime DEFAULT NULL COMMENT '原始记录创建时间',
+                `archived_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '归档时间',
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_archive_event` (`event_id`),
+                KEY `idx_archive_tenant` (`tenant_id`),
+                KEY `idx_archive_time` (`oper_time`),
+                KEY `idx_archive_module` (`module`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志归档冷表';
+              CREATE TABLE `sys_user_job` (
+                `id` bigint NOT NULL AUTO_INCREMENT COMMENT '任务ID',
+                `tenant_id` bigint NOT NULL COMMENT '租户ID',
+                `job_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务名称',
+                `job_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务类型编码（关联 sys_user_job_type.type_code）',
+                `cron_expression` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Cron 表达式',
+                `job_params` json DEFAULT NULL COMMENT '任务参数（JSON 格式，由任务类型定义）',
+                `status` tinyint DEFAULT '1' COMMENT '状态：0-禁用, 1-启用',
+                `xxl_job_id` bigint DEFAULT NULL COMMENT 'XXL-JOB 调度中心任务 ID',
+                `last_fire_time` datetime DEFAULT NULL COMMENT '上次触发时间',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                `create_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '创建人',
+                `update_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新人',
+                PRIMARY KEY (`id`),
+                KEY `idx_user_job_tenant` (`tenant_id`),
+                KEY `idx_user_job_xxl` (`xxl_job_id`),
+                KEY `idx_user_job_type` (`job_type`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户自定义任务表';
+              CREATE TABLE `sys_user_job_log` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `job_id` bigint NOT NULL COMMENT '关联任务ID',
+                `tenant_id` bigint DEFAULT NULL COMMENT '租户ID',
+                `job_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务名称',
+                `job_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务类型编码',
+                `fire_time` datetime DEFAULT NULL COMMENT '触发时间',
+                `execute_time_ms` bigint DEFAULT NULL COMMENT '执行耗时（毫秒）',
+                `status` tinyint DEFAULT NULL COMMENT '0=失败, 1=成功',
+                `error_message` text COLLATE utf8mb4_unicode_ci COMMENT '错误信息',
+                `result_message` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '执行结果消息（前端通知弹窗用）',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `idx_job_log_job` (`job_id`),
+                KEY `idx_job_log_type` (`job_type`),
+                KEY `idx_job_log_time` (`create_time`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户任务执行日志表';
+              CREATE TABLE `sys_user_job_type` (
+                `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+                `type_code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务类型编码（唯一，对应 UserJobHandler Bean 名称）',
+                `type_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务类型名称（中文显示名）',
+                `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务类型描述',
+                `param_template` json DEFAULT NULL COMMENT '参数模板（JSON Schema，前端据此渲染表单）',
+                `status` tinyint DEFAULT '1' COMMENT '状态：0-禁用, 1-启用',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_job_type_code` (`type_code`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务类型注册表';
+              SET FOREIGN_KEY_CHECKS = 1;

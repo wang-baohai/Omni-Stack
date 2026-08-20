@@ -1,0 +1,176 @@
+databaseChangeLog:
+  - changeSet:
+      id: workflow-0001-business-schema
+      author: omni-scaffold
+      labels: database:workflow
+      runInTransaction: false
+      comment: omni_workflow 业务扩展结构基线，不包含 Flowable vendor 与公共 MQ 表
+      preConditions:
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: "0"
+            sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_type = 'BASE TABLE' AND LEFT(table_name, 3) = 'wf_'
+      changes:
+        - sql:
+            splitStatements: true
+            stripComments: false
+            sql: |
+              SET FOREIGN_KEY_CHECKS = 0;
+              CREATE TABLE `wf_cc_record` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户 ID',
+                `process_instance_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程实例 ID',
+                `source_activity_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '来源活动节点 ID',
+                `user_id` bigint NOT NULL COMMENT '被抄送人用户 ID',
+                `title` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程标题',
+                `read_status` tinyint DEFAULT '0' COMMENT '已读状态: 0-未读, 1-已读',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `idx_cc_tenant` (`tenant_id`),
+                KEY `idx_cc_user` (`tenant_id`,`user_id`,`read_status`),
+                KEY `idx_cc_instance` (`process_instance_id`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='抄送记录表';
+              CREATE TABLE `wf_delegation_rule` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户 ID',
+                `from_user_id` bigint NOT NULL COMMENT '委托人用户 ID',
+                `to_user_id` bigint NOT NULL COMMENT '被委托人用户 ID',
+                `process_key` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '限定流程 Key（空表示全部）',
+                `start_time` datetime DEFAULT NULL COMMENT '生效开始时间',
+                `end_time` datetime DEFAULT NULL COMMENT '生效结束时间',
+                `status` tinyint DEFAULT '1' COMMENT '状态: 1=启用 0=禁用',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `idx_tenant_from` (`tenant_id`,`from_user_id`),
+                KEY `idx_status` (`status`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='审批委托规则表';
+              CREATE TABLE `wf_form_schema` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户 ID',
+                `form_key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '表单标识',
+                `form_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '表单名称',
+                `schema_json` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'JSON Schema 内容',
+                `version` int DEFAULT '1' COMMENT '版本号',
+                `status` tinyint DEFAULT '1' COMMENT '状态: 1=启用 0=禁用',
+                `create_by` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '创建人',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `idx_tenant_form` (`tenant_id`,`form_key`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='JSON Schema 表单定义表';
+              CREATE TABLE `wf_process_instance_ext` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户 ID',
+                `process_instance_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Flowable 流程实例 ID',
+                `process_key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程定义 Key',
+                `model_id` bigint DEFAULT NULL COMMENT '流程模型 ID',
+                `model_version_id` bigint DEFAULT NULL COMMENT '流程模型版本 ID',
+                `process_definition_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Flowable 流程定义 ID',
+                `deployment_id` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Flowable 部署 ID',
+                `business_version` int DEFAULT NULL COMMENT '业务版本号',
+                `engine_version` int DEFAULT NULL COMMENT 'Flowable 引擎版本号',
+                `request_id` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '跨服务调用请求 ID',
+                `business_type` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '跨服务业务类型',
+                `business_key` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '业务主键',
+                `title` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程标题',
+                `start_user_id` bigint NOT NULL COMMENT '发起人用户 ID',
+                `start_user_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '发起人用户名',
+                `category` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程分类',
+                `status` tinyint DEFAULT '1' COMMENT '状态: 0-已终止, 1-进行中, 2-已完成',
+                `completion_result` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '完成结果: APPROVED/REJECTED/CANCELLED',
+                `completed_time` datetime DEFAULT NULL COMMENT '业务完成时间',
+                `completion_event_id` varchar(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '完成事件 ID；同实例仅发布一次',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_wf_completion_event` (`completion_event_id`),
+                KEY `idx_tenant_id` (`tenant_id`),
+                KEY `idx_process_instance_id` (`process_instance_id`),
+                KEY `idx_start_user` (`tenant_id`,`start_user_id`),
+                KEY `idx_status` (`tenant_id`,`status`),
+                KEY `idx_wf_ext_request` (`tenant_id`,`request_id`),
+                KEY `idx_wf_ext_business` (`tenant_id`,`business_type`,`business_key`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='流程实例扩展表';
+              CREATE TABLE `wf_process_model` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户 ID',
+                `model_key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '模型标识（BPMN process id，同租户唯一）',
+                `model_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '模型名称',
+                `category` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程分类',
+                `status` tinyint DEFAULT '1' COMMENT '状态: 0-已归档, 1-正常',
+                `current_draft_version_id` bigint DEFAULT NULL COMMENT '当前草稿版本 ID',
+                `current_published_version_id` bigint DEFAULT NULL COMMENT '当前已发布版本 ID',
+                `create_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `update_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_model_tenant_key` (`tenant_id`,`model_key`),
+                KEY `idx_model_tenant` (`tenant_id`),
+                KEY `idx_model_category` (`tenant_id`,`category`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='流程模型主表';
+              CREATE TABLE `wf_process_model_version` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户 ID',
+                `model_id` bigint NOT NULL COMMENT '关联 wf_process_model.id',
+                `version` int NOT NULL COMMENT '业务版本号（1, 2, 3...）',
+                `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DRAFT' COMMENT '版本状态: DRAFT/PUBLISHED/FAILED/ARCHIVED',
+                `bpmn_xml` longtext COLLATE utf8mb4_unicode_ci COMMENT 'BPMN XML 内容',
+                `designer_json` longtext COLLATE utf8mb4_unicode_ci COMMENT '可视化设计器 JSON',
+                `xml_sha256` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'BPMN XML 的 SHA-256 摘要',
+                `deployment_id` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Flowable 部署 ID',
+                `process_definition_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Flowable 流程定义 ID',
+                `engine_process_key` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Flowable 引擎 process key',
+                `engine_version` int DEFAULT NULL COMMENT 'Flowable 引擎版本号',
+                `publish_time` datetime DEFAULT NULL COMMENT '发布时间',
+                `publish_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '发布人',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_model_version` (`model_id`,`version`),
+                KEY `idx_version_tenant` (`tenant_id`),
+                KEY `idx_version_status` (`tenant_id`,`status`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='流程模型版本表';
+              CREATE TABLE `wf_process_start_request` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户 ID',
+                `request_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调用方请求 ID',
+                `business_type` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '业务类型',
+                `business_key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '业务主键',
+                `model_version_id` bigint NOT NULL COMMENT '流程模型版本 ID',
+                `start_user_id` bigint NOT NULL COMMENT '发起人用户 ID',
+                `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'RESERVED' COMMENT '状态: RESERVED/STARTED/FAILED',
+                `process_instance_id` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Flowable 流程实例 ID',
+                `retry_count` int NOT NULL DEFAULT '0' COMMENT '重试次数',
+                `last_error` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '最近一次失败原因',
+                `started_time` datetime DEFAULT NULL COMMENT '启动成功时间',
+                `failed_time` datetime DEFAULT NULL COMMENT '最近一次失败时间',
+                `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_wf_start_request` (`tenant_id`,`request_id`),
+                UNIQUE KEY `uk_wf_start_business` (`tenant_id`,`business_type`,`business_key`),
+                UNIQUE KEY `uk_wf_start_process_instance` (`tenant_id`,`process_instance_id`),
+                KEY `idx_wf_start_status` (`tenant_id`,`status`,`update_time`),
+                CONSTRAINT `chk_wf_start_status` CHECK ((`status` in (_utf8mb4'RESERVED',_utf8mb4'STARTED',_utf8mb4'FAILED')))
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='跨服务流程启动幂等请求表';
+              CREATE TABLE `wf_todo_task` (
+                `id` bigint NOT NULL AUTO_INCREMENT,
+                `tenant_id` bigint NOT NULL COMMENT '租户 ID',
+                `task_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Flowable 任务 ID',
+                `process_instance_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程实例 ID',
+                `process_key` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义 Key',
+                `task_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务名称',
+                `assignee_id` bigint NOT NULL COMMENT '处理人用户 ID',
+                `assignee_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '处理人用户名',
+                `title` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程标题',
+                `category` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程分类',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_task_id` (`task_id`),
+                KEY `idx_tenant_id` (`tenant_id`),
+                KEY `idx_assignee` (`tenant_id`,`assignee_id`),
+                KEY `idx_process_instance` (`process_instance_id`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='待办任务缓存表';
+              SET FOREIGN_KEY_CHECKS = 1;
