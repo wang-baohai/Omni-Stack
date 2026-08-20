@@ -1,0 +1,121 @@
+version: "1.0.0"
+
+# 模块组合的单一事实来源。preset 只能引用这里的 id，不得复制依赖或初始化声明。
+modules:
+  - id: platform
+    kind: foundation
+    dependencies: []
+    tenantProvisioning: local
+    provisioningSeedIds:
+      - platform-default-tenant
+
+  - id: auth
+    kind: foundation
+    dependencies:
+      - platform
+    tenantProvisioning: local
+    permissionRoots:
+      - system
+    provisioningSeedIds:
+      - auth-default-root
+      - auth-role-catalog
+      - auth-permission-catalog
+      - auth-xss-defaults
+
+  - id: base
+    kind: foundation
+    dependencies:
+      - auth
+    tenantProvisioning: event
+    permissionRoots:
+      - base
+      - job
+      - monitor
+    provisioningSeedIds:
+      - base-permission-catalog
+      - base-dictionary-catalog
+      - base-job-type-catalog
+
+  - id: workflow
+    kind: capability
+    dependencies:
+      - auth
+      - base
+    tenantProvisioning: event
+    permissionRoots:
+      - workflow
+    provisioningSeedIds:
+      - workflow-permission-catalog
+      - workflow-role-catalog
+      - workflow-model-catalog
+
+  - id: crm
+    kind: business
+    dependencies:
+      - auth
+      - base
+    tenantProvisioning: event
+    permissionRoots:
+      - crm
+    provisioningSeedIds:
+      - crm-role-catalog
+      - crm-permission-catalog
+      - crm-default-config
+
+  - id: srm
+    kind: business
+    dependencies:
+      - auth
+      - base
+      - workflow
+    tenantProvisioning: event
+    permissionRoots:
+      - srm
+    provisioningSeedIds:
+      - srm-role-catalog
+      - srm-permission-catalog
+      - srm-default-config
+
+  - id: procurement
+    kind: business
+    dependencies:
+      - auth
+      - base
+      - workflow
+      - srm
+    tenantProvisioning: event
+    permissionRoots:
+      - procurement
+    provisioningSeedIds:
+      - procurement-role-catalog
+      - procurement-permission-catalog
+      - procurement-default-config
+
+  - id: asset
+    kind: business
+    dependencies:
+      - auth
+      - base
+      - workflow
+      - procurement
+    tenantProvisioning: event
+    permissionRoots:
+      - asset
+    provisioningSeedIds:
+      - asset-role-catalog
+      - asset-permission-catalog
+
+  - id: nacos
+    kind: infrastructure
+    dependencies: []
+    tenantProvisioning: none
+    provisioningSeedIds:
+      - nacos-security-catalog
+
+  - id: xxl-job
+    kind: infrastructure
+    dependencies:
+      - nacos
+    tenantProvisioning: none
+    provisioningSeedIds:
+      - xxl-job-catalog

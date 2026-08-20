@@ -54,6 +54,11 @@
                 <targetPath>database</targetPath>
                 <filtering>false</filtering>
             </resource>
+            <resource>
+                <directory>${maven.multiModuleProjectDirectory}/../scaffold</directory>
+                <targetPath>scaffold</targetPath>
+                <filtering>false</filtering>
+            </resource>
         </resources>
         <plugins>
             <plugin>

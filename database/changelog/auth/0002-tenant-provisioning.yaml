@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: auth-0002-tenant-provisioning-state
+      author: omni-scaffold
+      labels: database:auth,adoption-upgrade
+      runInTransaction: false
+      comment: 增加可恢复的租户模块化初始化状态，不改变既有 status 启停语义
+      preConditions:
+        - dbms:
+            type: mysql
+        - tableExists:
+            tableName: sys_tenant
+        - not:
+            columnExists:
+              tableName: sys_tenant
+              columnName: provisioning_status
+        - not:
+            tableExists:
+              tableName: sys_tenant_module_provision
+      changes:
+        - sql:
+            splitStatements: true
+            stripComments: true
+            sql: |
+              ALTER TABLE sys_tenant
+                ADD COLUMN provisioning_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
+                  COMMENT '初始化状态: PROVISIONING/ACTIVE/FAILED' AFTER status,
+                ADD COLUMN provisioning_request_id VARCHAR(36) DEFAULT NULL
+                  COMMENT '最近一次初始化请求ID' AFTER provisioning_status,
+                ADD COLUMN provisioning_error VARCHAR(500) DEFAULT NULL
+                  COMMENT '最近一次脱敏失败摘要' AFTER provisioning_request_id,
+                ADD KEY idx_tenant_provisioning_status (provisioning_status);
+
+              CREATE TABLE sys_tenant_module_provision (
+                id BIGINT NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+                tenant_id BIGINT NOT NULL COMMENT '租户ID',
+                request_id VARCHAR(36) NOT NULL COMMENT '最近一次初始化请求ID',
+                module_id VARCHAR(64) NOT NULL COMMENT 'scaffold 模块ID',
+                status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/SUCCESS/FAILED',
+                attempt_count INT NOT NULL DEFAULT 0 COMMENT '处理次数',
+                error_code VARCHAR(64) DEFAULT NULL COMMENT '稳定错误码',
+                error_message VARCHAR(500) DEFAULT NULL COMMENT '脱敏错误摘要',
+                started_time DATETIME DEFAULT NULL COMMENT '最近开始时间',
+                completed_time DATETIME DEFAULT NULL COMMENT '最近完成时间',
+                create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本',
+                PRIMARY KEY (id),
+                UNIQUE KEY uk_tenant_provision_module (tenant_id, module_id),
+                KEY idx_provision_request (request_id),
+                KEY idx_provision_status (status, update_time)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                COMMENT='租户模块初始化状态';
+      rollback:
+        - sql:
+            splitStatements: true
+            sql: |
+              DROP TABLE IF EXISTS sys_tenant_module_provision;
+              ALTER TABLE sys_tenant
+                DROP INDEX idx_tenant_provisioning_status,
+                DROP COLUMN provisioning_error,
+                DROP COLUMN provisioning_request_id,
+                DROP COLUMN provisioning_status;

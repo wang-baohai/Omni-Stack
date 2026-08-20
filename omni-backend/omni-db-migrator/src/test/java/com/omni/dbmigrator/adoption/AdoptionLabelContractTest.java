@@ -34,6 +34,16 @@ class AdoptionLabelContractTest {
                 "asset", 2,
                 "nacos", 1,
                 "xxl-job", 1);
+        Map<String, Integer> expectedUpgrade = Map.of(
+                "auth", 2,
+                "base", 1,
+                "workflow", 1,
+                "crm", 1,
+                "srm", 1,
+                "procurement", 1,
+                "asset", 1,
+                "nacos", 0,
+                "xxl-job", 0);
 
         try (ClassLoaderResourceAccessor accessor = new ClassLoaderResourceAccessor(
                 AdoptionLabelContractTest.class.getClassLoader())) {
@@ -47,7 +57,7 @@ class AdoptionLabelContractTest {
                         .isEqualTo(expectedBaseline.get(target.id()).longValue());
                 assertThat(count(changelog, "adoption-upgrade"))
                         .as(target.id() + " upgrade")
-                        .isEqualTo(target.vendor() ? 0L : 1L);
+                        .isEqualTo(expectedUpgrade.get(target.id()).longValue());
             }
         }
     }

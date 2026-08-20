@@ -1,7 +1,8 @@
 version: "1.0.0-bootstrap"
 digestAlgorithm: "SHA-256"
 
-# 当前为完整开发预设。后续 modules.yaml 落地后，enabledByDefault 将由所选预设解析结果覆盖。
+# 兼容期模块 ID 镜像；scaffold/catalog/modules.yaml 是依赖和 provisioning 声明的单一事实来源，
+# ModuleCatalogContractTest 强制两份 ID 与全部 provisioningSeedIds 一致。
 modules:
   - id: platform
     enabledByDefault: true
