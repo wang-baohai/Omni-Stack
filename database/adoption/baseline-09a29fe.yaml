@@ -1,0 +1,66 @@
+baselineCommit: "09a29fe10af9c7ddffe5001238d048947868dc98"
+algorithm: "mysql-show-create-v1"
+targets:
+  - id: auth
+    database: omni_auth
+    expectedTables: 20
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 1
+    expectedSha256: "8424eff26b8b2973569af7361c861090672f2ed6bcd1ff19f53cbe35e83e0c99"
+  - id: base
+    database: omni_base
+    expectedTables: 8
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "f1c0ff6f491e0f5eeed5da53145b0374387c986b46885df0d5f11a13e697f67c"
+  - id: workflow
+    database: omni_workflow
+    expectedTables: 54
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "ac88fb4afc935a6a3ddf3fa351dabb5e24d336883b54e6338b15da428a1674cf"
+  - id: crm
+    database: omni_crm
+    expectedTables: 12
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "8c548ad2b46ec79c12d80c86c71e16407daa6f17f68f0ed18845a159be71bee5"
+  - id: srm
+    database: omni_srm
+    expectedTables: 21
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "6110eee2894cdef7f1593a3d62cc308ae85fefb8d9762032fb266adc8c8987e6"
+  - id: procurement
+    database: omni_procurement
+    expectedTables: 15
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "9e952029e6ce90f1861c3b78853a2c30299d6850b046391f8d30269703fcb1d0"
+  - id: asset
+    database: omni_asset
+    expectedTables: 6
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "4e032fbdf8179d686ec4bd4e82531a5229cf0bd6fa65539e14107e2509c2d29b"
+  - id: nacos
+    database: nacos_config
+    expectedTables: 10
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "052066e374ba5986c0a3e61357da8fc193cf9c768b54bd97b972ed28ceb34281"
+  - id: xxl-job
+    database: xxl_job
+    expectedTables: 8
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "1331d03b9618206abbe95c38f28aa33fd8749a8914fd5ec2fbe9eae41f50e3e4"
