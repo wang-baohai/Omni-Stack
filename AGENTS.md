@@ -55,6 +55,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Common Redis starter (blocking): `omni-backend/omni-common-redis/src/main/java/com/omni/common/redis/`
 - Common Redis starter (reactive): `omni-backend/omni-common-redis-reactive/src/main/java/com/omni/common/redis/reactive/`
 - Common MQ Log starter: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/`
+- Common Servlet business starter: `omni-backend/omni-common-service/src/main/java/com/omni/common/service/`
 
 **Frontend:**
 - App bootstrap: `omni-frontend/src/main.ts`
@@ -484,16 +485,17 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 
 ### Common Starter 模块
 
-项目提供 3 个自动装配的 Common Starter，新微服务引入即用：
+项目提供底层 Starter 与 Servlet 业务组合 Starter，新微服务按运行模型选择：
 
 | 模块 | 职责 | 适用服务类型 |
 |------|------|-------------|
 | `omni-common-mybatis` | MyBatis-Plus + MySQL 驱动 + 分页插件 + YAML 默认配置 | Servlet 服务 |
 | `omni-common-redis` | 阻塞式 Redis + RedisTemplate 序列化 + RedisUtils | Servlet 服务 |
 | `omni-common-redis-reactive` | 响应式 Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux 服务（Gateway） |
+| `omni-common-service` | Gateway 预认证、请求身份/租户、内部 API、DataScope、固定 MyBatis 顺序与 XSS 安全回退 | Servlet 业务服务 |
 
 **新服务接入步骤**：
-1. POM 中依赖 `omni-common-mybatis` + `omni-common-redis`（或 `omni-common-redis-reactive`）
+1. Servlet 业务服务优先依赖 `omni-common-service`；Gateway 只依赖 reactive 底层模块
 2. `application.yml` 中配置 `spring.datasource.*` 和 `spring.data.redis.host/port/database`
 3. 启动类添加 `@MapperScan("com.omni.xxx.mapper")`
 4. 分页、序列化、RedisUtils 自动生效

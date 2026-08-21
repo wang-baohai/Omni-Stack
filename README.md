@@ -21,7 +21,7 @@
 - **业务化请购审批规则**：按品类与金额配置规则，支持真实匹配试算、默认兜底、覆盖断档/冲突检测、停用影响分析和安全审批图预览
 - **多提供商社交登录**：GitHub + Google + Gitee OAuth2 一键登录（策略模式可扩展），首次登录自动注册
 - **三层 XSS 纵深防御**：Jackson 反序列化器 + Servlet Filter + Gateway 安全响应头，按租户配置，前端管理界面完整可用
-- **Common Starter 生态**：8 个自动装配模块（mybatis / redis / operlog / job / mqlog / workflow），新服务引入依赖即获能力，零配置
+- **Common 生态**：10 个公共模块，新增 Servlet 业务组合 Starter，安全能力按配置失败关闭
 - **双轨制定时任务**：XXL-JOB 3.3.1 系统任务 + 用户任务双模式，前端 Cron 编辑器 + 执行日志实时推送，详见 [docs/scheduling.md](docs/scheduling.md)
 - **Transactional Outbox 可靠消息**：本地发件箱 + XXL-JOB 中继 + 指数退避重试 + 死信管理，详见 [docs/mq-reliability.md](docs/mq-reliability.md)
 - **可视化 BPMN 工作流**：Flowable 7.x 引擎，前端拖拽建模 + 双版本管理 + 多实例会签 + 动态候选人解析，详见 [docs/workflow.md](docs/workflow.md)
@@ -138,6 +138,7 @@ Omni-Stack/
 │   ├── omni-common-job/                #   定时任务 Starter
 │   ├── omni-common-mqlog/              #   MQ 消息可靠性 Starter
 │   ├── omni-common-workflow/           #   工作流 Starter
+│   ├── omni-common-service/            #   Servlet 业务服务组合 Starter
 │   ├── omni-auth/                      #   认证服务 (8100)
 │   ├── omni-base/                      #   基础数据服务 (8101)
 │   ├── omni-workflow/                  #   工作流引擎服务 (8103)
@@ -403,7 +404,7 @@ SRM 模块覆盖供应商全生命周期管理闭环：供应商注册/准入 �
 | omni-asset | 8107 | Asset：采购建卡、台账、分配/退还、调拨、处置与概览 | [asset-design.md](docs/design/asset-design.md) |
 | omni-gateway | 8102 | API 网关：路由转发、JWT 验证、CORS、安全响应头 | [architecture.md](docs/architecture.md) |
 
-### Common Starter 生态（8 模块）
+### Common 生态（10 模块）
 
 新微服务引入依赖即获能力，`AutoConfiguration.imports` 零配置自动装配：
 
@@ -418,6 +419,7 @@ SRM 模块覆盖供应商全生命周期管理闭环：供应商注册/准入 �
 | `omni-common-job` | 定时任务：XXL-JOB 自动装配 + @SystemJobMeta 双注解驱动 | 业务服务 |
 | `omni-common-mqlog` | 可靠消息：Transactional Outbox + 中继投递 + 死信管理 | Servlet 服务 |
 | `omni-common-workflow` | 工作流：Flowable 自动配置 + ApprovalService SPI | 工作流服务 |
+| `omni-common-service` | Servlet 业务服务组合：预认证、租户、内部 API、DataScope、固定 SQL 拦截顺序、XSS 回退 | Servlet 业务服务 |
 
 > 详细设计见 [docs/backend-patterns.md](docs/backend-patterns.md) 和 [docs/architecture.md](docs/architecture.md)
 

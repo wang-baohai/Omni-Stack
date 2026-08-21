@@ -16,7 +16,7 @@ documents:
     module: platform
     owner: architecture
     source: docs/architecture.md
-    source_sha256: 0bf747a30f4ba4550de13c9717ead08b9a54837fd1eeace571614fb9eec4abe0
+    source_sha256: 6b7cd5223dc5dae2930e551f44f861db07790c1af6d9273da99e554b3f61494a
     dependencies: [module-structure, ports, data-flow, permissions]
     translations:
       en-US: { path: docs/architecture.en.md, status: present-unverified, reviewed_at: null }
@@ -38,7 +38,7 @@ documents:
     module: backend
     owner: backend
     source: docs/backend-patterns.md
-    source_sha256: a6a57b1f485b087e0861a8c55da58659ec439b8f72ccfb68b5f69e4aad7686f9
+    source_sha256: 064a80d61f5fc6f987a944dcb418bd7888c6d0c246b860006adea68ebcec40ed
     dependencies: [starter, security, persistence, testing]
     translations:
       en-US: { path: docs/backend-patterns.en.md, status: present-unverified, reviewed_at: null }

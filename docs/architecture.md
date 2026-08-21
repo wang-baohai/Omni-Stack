@@ -31,7 +31,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 **核心设计哲学**：
 
 - **Harness 模式**：Architecture → Patterns → Code 三层递进，架构决策驱动代码规范
-- **Common Starter 生态**：8 个自动装配模块，新服务零配置接入基础设施
+- **Common 生态**：10 个公共模块（9 个自动装配模块 + 纯 POJO core），新服务按需接入基础设施
 - **Gateway 中心化认证**：JWT 验证集中在网关，下游服务通过请求头信任链传递身份
 - **Transactional Outbox**：MQ 消息可靠性通过本地事务表 + 异步中继保障
 
@@ -98,7 +98,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 
 ## 4. 模块地图
 
-### 4.1 Common Starter 生态（8 个自动装配模块）
+### 4.1 Common 生态（10 个公共模块）
 
 | 模块 | 职责 | 技术栈 | 边界约束 |
 |------|------|--------|----------|
@@ -110,6 +110,8 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 | `omni-common-job` | XXL-JOB 集成：自动装配、Admin HTTP Client、系统任务注册、任务元数据注解 | XXL-JOB Core 3.3.1、Spring Boot Web（optional） | 仅调度基础设施，无业务任务逻辑 |
 | `omni-common-mqlog` | 可靠 MQ 消息发送：Transactional Outbox、中继任务、策略模式发送器、内部查询 API | Spring Cloud Stream RocketMQ（optional）、omni-common-job（optional） | 仅 MQ 基础设施，无业务消息逻辑 |
 | `omni-common-operlog` | 操作日志切面与生产者：`@OperLog` 注解驱动，支持可靠消息和直接发送两种模式 | Spring AOP、omni-common-mqlog（optional） | 仅操作日志关注点 |
+| `omni-common-workflow` | Flowable 自动配置与审批 SPI | Flowable 8.0.0 | 仅 Workflow 服务使用，业务服务不得依赖流程运行时 |
+| `omni-common-service` | Servlet 业务服务组合 Starter：Gateway 预认证、请求身份/租户、内部 API、DataScope、固定 MyBatis 顺序、XSS 回源与安全基线 | Spring Security、OpenFeign、MyBatis-Plus、Redis | 不适用于 Gateway/Auth；领域表映射和 AccessGuard 仍由服务实现 |
 
 ### 4.2 微服务模块（8 个）
 
@@ -117,7 +119,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 |------|------|------|----------|
 | `omni-auth` :8100 | 8100 | 认证授权：登录、验证码、JWT、多租户、OAuth2 授权服务器、XSS 配置管理、RBAC 权限、在线用户管理 | Spring Boot Web、Spring Security、OAuth2 Authorization Server |
 | `omni-base` :8101 | 8101 | 基础数据：字典 CRUD、定时任务管理（系统 + 用户）、操作日志归档、MQ 消息管理 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
-| `omni-workflow` :8103 | 8103 | 工作流引擎：BPMN 模型管理、流程实例、审批、任务分派、统计 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 7.x |
+| `omni-workflow` :8103 | 8103 | 工作流引擎：BPMN 模型管理、流程实例、审批、任务分派、统计 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 8.0.0 |
 | `omni-crm` :8104 | 8104 | CRM 销售前闭环：线索、客户、联系人、商机、跟进、转换与概览 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
 | `omni-srm` :8105 | 8105 | SRM 供应商闭环：主档、准入状态机、联系人/资质/银行、绩效、风险、邀请与供应商门户 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
 | `omni-procurement` :8106 | 8106 | 采购执行闭环：物料目录、请购审批、询价比价、采购订单与收货 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog、OpenFeign |
@@ -159,7 +161,7 @@ omni-frontend --- /api 代理 :3000 ---> omni-gateway :8102
 omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 ```
 
-**构建依赖顺序**：`omni-common-core` → `omni-common` → `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive` → `omni-auth` / `omni-base` / `omni-workflow` / `omni-crm` / `omni-srm` / `omni-procurement` / `omni-asset` / `omni-gateway`。Maven reactor 从 `<modules>` 声明自动解析顺序。
+**构建依赖顺序**：`omni-common-core` → `omni-common` → `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive` → `omni-common-service` → 各可运行服务。Maven reactor 从 `<modules>` 声明自动解析顺序。
 
 ### 局部与整体关系
 

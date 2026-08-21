@@ -1,0 +1,4 @@
+com.omni.common.service.config.ServiceCoreAutoConfiguration
+com.omni.common.service.config.ServiceAuthClientAutoConfiguration
+com.omni.common.service.config.ServicePersistenceAutoConfiguration
+com.omni.common.service.config.ServiceXssAutoConfiguration

@@ -28,6 +28,7 @@
         <module>omni-common-job</module>
         <module>omni-common-mqlog</module>
         <module>omni-common-workflow</module>
+        <module>omni-common-service</module>
         <module>omni-db-migrator</module>
         <module>omni-auth</module>
         <module>omni-base</module>
@@ -118,6 +119,12 @@
             <dependency>
                 <groupId>com.omni</groupId>
                 <artifactId>omni-common-workflow</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- Common Servlet Business Service Starter -->
+            <dependency>
+                <groupId>com.omni</groupId>
+                <artifactId>omni-common-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

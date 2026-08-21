@@ -422,7 +422,8 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 
 ## Common Starter 接入规范
 
-项目将公共能力拆分为 6 个模块，新微服务通过 Maven 依赖引入即用，无需手动配置。
+项目将公共能力拆分为组合 Starter 与可选能力模块。Servlet 业务服务优先使用
+`omni-common-service`；Gateway、Auth 和 Workflow 按各自特殊边界选择底层模块。
 
 ### Starter 模块概览
 
@@ -434,19 +435,18 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 | `omni-common-redis` | 阻塞式 Redis | `RedisAutoConfiguration`：`RedisTemplate<String, Object>`（Jackson 序列化）+ `RedisUtils` 工具类 + Lettuce 连接池配置 | Servlet 服务 |
 | `omni-common-redis-reactive` | 响应式 Redis | `spring-boot-starter-data-redis-reactive` + YAML 默认超时配置 | WebFlux 服务（如 Gateway） |
 | `omni-common-mqlog` | 可靠 MQ 消息发送 | `ReliableMessageTemplate`（Transactional Outbox）、`MqMessageRelayService`（XXL-JOB 异步投递）、`MessageSender` 策略接口、`MqMessageInternalController`（Feign 内部查询）、`schema.sql`（自动建表） | Servlet 服务（需 MQ 能力） |
+| `omni-common-service` | Servlet 业务服务安全与上下文组合 | Gateway 预认证 Filter、不可变请求身份、内部 API Token、DataScope SPI/切面、Tenant/DataPermission 固定顺序、Auth XSS 回源与安全基线 | CRM/SRM/Procurement/Asset 等 Servlet 业务服务 |
 
 **自动配置注册机制**：所有 starter 通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 文件注册，这是 Spring Boot 3+/4+ 的标准机制（替代了旧版 `spring.factories`）。
 
 ### 新服务接入步骤
 
-1. **POM 依赖**：在 `pom.xml` 中声明所需 starter：
+1. **POM 依赖**：Servlet 业务服务声明组合 Starter，再按需增加 OperLog/Job/MQ：
    ```xml
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-core</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-mybatis</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-redis</artifactId></dependency>
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common-service</artifactId></dependency>
    ```
-2. **application.yml**：仅需配置数据源和 Redis 连接信息：
+2. **application.yml**：除数据源和 Redis 外，显式配置服务身份和启用的安全能力；内部 Token
+   必须来自环境变量，不能使用弱默认值：
    ```yaml
    spring:
      datasource:
@@ -458,10 +458,30 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
          host: 127.0.0.1
          port: 6379
          database: 0
+   omni:
+     service:
+       name: omni-xxx
+       display-name: Xxx
+       gateway-preauth:
+         enabled: true
+       internal-api:
+         enabled: true
+         token: ${OMNI_INTERNAL_API_TOKEN}
+       tenant:
+         enabled: true
+       data-scope:
+         enabled: true
+       xss:
+         enabled: true
    ```
-3. **启动类**：添加 `@MapperScan("com.omni.xxx.mapper")`
-4. **XSS 防护**：实现 `XssConfigProvider` SPI 接口（`omni-common` 自动注册 Filter + Jackson Module）
-5. **自动生效**：分页插件、Jackson 时间序列化、CORS 配置、`GlobalExceptionHandler`、`RedisUtils` 工具类均自动装配，无需额外配置
+3. **领域 SPI**：启用 tenant/data-scope 时分别提供唯一的 `TenantTablePolicy` 和
+   `DataScopeTablePolicy`；不得把领域表名或 owner 列放入 Starter。
+4. **安全链**：将 Starter 提供的 Gateway Filter 放在 `AuthorizationFilter` 前，将身份上下文 Filter
+   放在 Gateway Filter 后；二者已禁止 Servlet 容器重复注册。
+5. **可选能力**：OperLog、Job、MQ 与 Workflow 继续作为独立依赖，按业务需要启用。
+
+当前 `omni-common-service` 已提供 v0 自动配置和测试，CRM/SRM/Procurement/Asset 仍按
+CRM → SRM → Procurement → Asset 的顺序逐个迁移；未切换的服务继续使用原 Bean，禁止一次性删除。
 
 ### 覆盖机制
 

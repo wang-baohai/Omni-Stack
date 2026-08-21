@@ -58,6 +58,8 @@ public class MqLogAutoConfiguration {
      */
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @ConditionalOnProperty(prefix = "omni.service.internal-api", name = "enabled",
+            havingValue = "false", matchIfMissing = true)
     public FilterRegistrationBean<InternalApiAuthFilter> internalApiAuthFilter(
             @Value("${omni.internal.api.token:}") String internalToken) {
         FilterRegistrationBean<InternalApiAuthFilter> registration = new FilterRegistrationBean<>();
