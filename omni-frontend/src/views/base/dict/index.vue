@@ -371,9 +371,9 @@ onMounted(() => {
 
           <el-pagination
             v-if="typeTotal > 0"
+            v-model:page-size="typeSize"
             class="type-pagination"
             :current-page="typePage"
-            v-model:page-size="typeSize"
             :page-sizes="[5, 10, 20, 50, 100]"
             :total="typeTotal"
             layout="total, sizes, prev, pager, next"
@@ -452,9 +452,9 @@ onMounted(() => {
 
             <el-pagination
               v-if="dataTotal > 0"
+              v-model:page-size="dataSize"
               class="data-pagination"
               :current-page="dataPage"
-              v-model:page-size="dataSize"
               :page-sizes="[5, 10, 20, 50, 100]"
               :total="dataTotal"
               layout="total, sizes, prev, pager, next"

@@ -785,11 +785,12 @@ function instanceStatusType(status: number): string {
             </el-table-column>
           </el-table>
           <el-empty v-if="!todoLoading && todoList.length === 0" :description="t('workflow.noTodo')" />
-          <el-pagination v-model:current-page="todoPage" v-model:page-size="todoPageSize" class="pagination"
-                         :page-sizes="[5, 10, 20, 50, 100]" :total="todoTotal"
-                         layout="total, sizes, prev, pager, next"
-                         @current-change="loadTodoList"
-                         @size-change="todoPage = 1; loadTodoList()" />
+          <el-pagination
+            v-model:current-page="todoPage" v-model:page-size="todoPageSize" class="pagination"
+            :page-sizes="[5, 10, 20, 50, 100]" :total="todoTotal"
+            layout="total, sizes, prev, pager, next"
+            @current-change="loadTodoList"
+            @size-change="todoPage = 1; loadTodoList()" />
         </el-tab-pane>
 
         <!-- Tab 2: 我发起的 -->
@@ -817,11 +818,12 @@ function instanceStatusType(status: number): string {
             <el-table-column prop="createTime" :label="t('workflow.startTime')" width="170" />
           </el-table>
           <el-empty v-if="!initiatedLoading && initiatedList.length === 0" :description="t('workflow.noInitiated')" />
-          <el-pagination v-model:current-page="initiatedPage" v-model:page-size="initiatedPageSize" class="pagination"
-                         :page-sizes="[5, 10, 20, 50, 100]" :total="initiatedTotal"
-                         layout="total, sizes, prev, pager, next"
-                         @current-change="loadInitiatedList"
-                         @size-change="initiatedPage = 1; loadInitiatedList()" />
+          <el-pagination
+            v-model:current-page="initiatedPage" v-model:page-size="initiatedPageSize" class="pagination"
+            :page-sizes="[5, 10, 20, 50, 100]" :total="initiatedTotal"
+            layout="total, sizes, prev, pager, next"
+            @current-change="loadInitiatedList"
+            @size-change="initiatedPage = 1; loadInitiatedList()" />
         </el-tab-pane>
 
         <!-- Tab 3: 我已办的 -->
@@ -842,11 +844,12 @@ function instanceStatusType(status: number): string {
             <el-table-column prop="createTime" :label="t('workflow.startTime')" width="170" />
           </el-table>
           <el-empty v-if="!completedLoading && completedList.length === 0" :description="t('workflow.noCompleted')" />
-          <el-pagination v-model:current-page="completedPage" v-model:page-size="completedPageSize" class="pagination"
-                         :page-sizes="[5, 10, 20, 50, 100]" :total="completedTotal"
-                         layout="total, sizes, prev, pager, next"
-                         @current-change="loadCompletedList"
-                         @size-change="completedPage = 1; loadCompletedList()" />
+          <el-pagination
+            v-model:current-page="completedPage" v-model:page-size="completedPageSize" class="pagination"
+            :page-sizes="[5, 10, 20, 50, 100]" :total="completedTotal"
+            layout="total, sizes, prev, pager, next"
+            @current-change="loadCompletedList"
+            @size-change="completedPage = 1; loadCompletedList()" />
         </el-tab-pane>
 
         <!-- Tab 4: 我的定时任务 -->
@@ -879,61 +882,62 @@ function instanceStatusType(status: number): string {
               </div>
             </template>
 
-        <!-- 搜索栏 -->
-        <el-form inline style="margin-bottom: 16px">
-          <el-form-item :label="t('userJob.jobName')">
-            <el-input v-model="searchJobName" clearable />
-          </el-form-item>
-          <el-form-item :label="t('userJob.jobType')">
-            <el-input v-model="searchJobType" clearable />
-          </el-form-item>
-          <el-form-item :label="t('common.status')">
-            <el-select v-model="searchStatus" clearable style="width: 120px">
-              <el-option :label="t('common.enabled')" :value="1" />
-              <el-option :label="t('common.disabled')" :value="0" />
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
-            <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-          </el-form-item>
-        </el-form>
+            <!-- 搜索栏 -->
+            <el-form inline style="margin-bottom: 16px">
+              <el-form-item :label="t('userJob.jobName')">
+                <el-input v-model="searchJobName" clearable />
+              </el-form-item>
+              <el-form-item :label="t('userJob.jobType')">
+                <el-input v-model="searchJobType" clearable />
+              </el-form-item>
+              <el-form-item :label="t('common.status')">
+                <el-select v-model="searchStatus" clearable style="width: 120px">
+                  <el-option :label="t('common.enabled')" :value="1" />
+                  <el-option :label="t('common.disabled')" :value="0" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+                <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+              </el-form-item>
+            </el-form>
 
-        <el-table v-loading="loading" :data="tableData" stripe border>
-          <el-table-column prop="jobName" :label="t('userJob.jobName')" min-width="150" />
-          <el-table-column prop="jobType" :label="t('userJob.jobType')" width="130" />
-          <el-table-column prop="cronExpression" :label="t('userJob.cronExpression')" width="150" />
-          <el-table-column :label="t('common.status')" width="90" align="center">
-            <template #default="{ row }">
-              <el-switch :model-value="row.status === 1" @change="handleToggleStatus(row)" />
-            </template>
-          </el-table-column>
-          <el-table-column prop="lastFireTime" :label="t('userJob.lastFireTime')" width="170" />
-          <el-table-column :label="t('userJob.nextFireTime')" width="170">
-            <template #default="{ row }">
-              {{ row.status === 1 ? getNextFireTime(row.cronExpression) : '-' }}
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('common.actions')" width="300" fixed="right">
-            <template #default="{ row }">
-              <el-button size="small" @click="openEditDialog(row)">{{ t('common.edit') }}</el-button>
-              <el-button size="small" type="primary" @click="handleTrigger(row)">
-                {{ t('userJob.triggerNow') }}
-              </el-button>
-              <el-button size="small" @click="openLogDialog(row)">{{ t('workspace.viewLogs') }}</el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+            <el-table v-loading="loading" :data="tableData" stripe border>
+              <el-table-column prop="jobName" :label="t('userJob.jobName')" min-width="150" />
+              <el-table-column prop="jobType" :label="t('userJob.jobType')" width="130" />
+              <el-table-column prop="cronExpression" :label="t('userJob.cronExpression')" width="150" />
+              <el-table-column :label="t('common.status')" width="90" align="center">
+                <template #default="{ row }">
+                  <el-switch :model-value="row.status === 1" @change="handleToggleStatus(row)" />
+                </template>
+              </el-table-column>
+              <el-table-column prop="lastFireTime" :label="t('userJob.lastFireTime')" width="170" />
+              <el-table-column :label="t('userJob.nextFireTime')" width="170">
+                <template #default="{ row }">
+                  {{ row.status === 1 ? getNextFireTime(row.cronExpression) : '-' }}
+                </template>
+              </el-table-column>
+              <el-table-column :label="t('common.actions')" width="300" fixed="right">
+                <template #default="{ row }">
+                  <el-button size="small" @click="openEditDialog(row)">{{ t('common.edit') }}</el-button>
+                  <el-button size="small" type="primary" @click="handleTrigger(row)">
+                    {{ t('userJob.triggerNow') }}
+                  </el-button>
+                  <el-button size="small" @click="openLogDialog(row)">{{ t('workspace.viewLogs') }}</el-button>
+                  <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
 
-        <!-- 空状态提示 -->
-        <el-empty v-if="!loading && tableData.length === 0" :description="t('workspace.noJobs')" />
+            <!-- 空状态提示 -->
+            <el-empty v-if="!loading && tableData.length === 0" :description="t('workspace.noJobs')" />
 
-        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination"
-                       :page-sizes="[5, 10, 20, 50, 100]" :total="total"
-                       layout="total, sizes, prev, pager, next"
-                       @current-change="handlePageChange"
-                       @size-change="currentPage = 1; handlePageChange(1)" />
+            <el-pagination
+              v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination"
+              :page-sizes="[5, 10, 20, 50, 100]" :total="total"
+              layout="total, sizes, prev, pager, next"
+              @current-change="handlePageChange"
+              @size-change="currentPage = 1; handlePageChange(1)" />
           </el-card>
         </el-tab-pane>
       </el-tabs>
@@ -1087,18 +1091,21 @@ function instanceStatusType(status: number): string {
     </footer>
 
     <!-- ═══ 创建/编辑任务对话框 ═══ -->
-    <el-dialog v-model="formDialogVisible"
-               :title="isEdit ? t('workspace.editJob') : t('workspace.createJob')"
-               width="700px">
+    <el-dialog
+      v-model="formDialogVisible"
+      :title="isEdit ? t('workspace.editJob') : t('workspace.createJob')"
+      width="700px">
       <el-form :model="form" label-width="120px">
         <el-form-item :label="t('userJob.jobName')">
           <el-input v-model="form.jobName" />
         </el-form-item>
         <el-form-item :label="t('userJob.jobType')">
-          <el-select v-model="form.jobType" :disabled="isEdit"
-                     style="width: 100%" @change="onJobTypeChange">
-            <el-option v-for="jt in enabledTypes" :key="jt.typeCode"
-                       :label="jt.typeName" :value="jt.typeCode" />
+          <el-select
+            v-model="form.jobType" :disabled="isEdit"
+            style="width: 100%" @change="onJobTypeChange">
+            <el-option
+              v-for="jt in enabledTypes" :key="jt.typeCode"
+              :label="jt.typeName" :value="jt.typeCode" />
           </el-select>
         </el-form-item>
         <el-form-item :label="t('userJob.cronExpression')">
@@ -1106,7 +1113,7 @@ function instanceStatusType(status: number): string {
         </el-form-item>
         <!-- 动态参数表单 -->
         <el-form-item v-if="currentSchema" :label="t('userJob.jobParams')">
-          <DynamicFormRenderer :schema="currentSchema" v-model="form.jobParams" />
+          <DynamicFormRenderer v-model="form.jobParams" :schema="currentSchema" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -1116,9 +1123,10 @@ function instanceStatusType(status: number): string {
     </el-dialog>
 
     <!-- ═══ 执行日志弹窗 ═══ -->
-    <el-dialog v-model="logDialogVisible"
-               :title="`${t('workspace.executionLogs')} — ${logJobName}`"
-               width="800px">
+    <el-dialog
+      v-model="logDialogVisible"
+      :title="`${t('workspace.executionLogs')} — ${logJobName}`"
+      width="800px">
       <el-table v-loading="logLoading" :data="logData" stripe border size="small">
         <el-table-column prop="fireTime" :label="t('userJobLog.fireTime')" width="170" />
         <el-table-column prop="executeTimeMs" :label="t('userJobLog.executeTimeMs')" width="130" align="right" />
@@ -1132,11 +1140,12 @@ function instanceStatusType(status: number): string {
         <el-table-column prop="resultMessage" :label="t('userJobLog.resultMessage')" show-overflow-tooltip min-width="180" />
         <el-table-column prop="errorMessage" :label="t('userJobLog.errorMessage')" show-overflow-tooltip />
       </el-table>
-      <el-pagination v-model:current-page="logPage" v-model:page-size="logPageSize" class="pagination"
-                     :page-sizes="[5, 10, 20, 50, 100]" :total="logTotal"
-                     layout="total, sizes, prev, pager, next"
-                     @current-change="handleLogPageChange"
-                     @size-change="logPage = 1; handleLogPageChange(1)" />
+      <el-pagination
+        v-model:current-page="logPage" v-model:page-size="logPageSize" class="pagination"
+        :page-sizes="[5, 10, 20, 50, 100]" :total="logTotal"
+        layout="total, sizes, prev, pager, next"
+        @current-change="handleLogPageChange"
+        @size-change="logPage = 1; handleLogPageChange(1)" />
     </el-dialog>
   </div>
 </template>

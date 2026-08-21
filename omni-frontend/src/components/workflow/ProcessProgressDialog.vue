@@ -325,8 +325,8 @@ defineExpose({ open })
           <div v-else-if="selectedActivity.assigneeName" class="detail-row">
             <span class="label">
               {{ selectedActivity.activityType === 'startEvent'
-                 ? '申请人'
-                 : selectedActivity.status === 'pending' ? '预计处理人' : '处理人' }}
+                ? '申请人'
+                : selectedActivity.status === 'pending' ? '预计处理人' : '处理人' }}
             </span>
             <span class="value">{{ selectedActivity.assigneeName }}</span>
           </div>

@@ -204,14 +204,14 @@ onMounted(() => {
 
     <!-- 操作栏 -->
     <div class="toolbar">
-      <el-button type="primary" v-permission="'workflow:model:create'" @click="handleCreate">
+      <el-button v-permission="'workflow:model:create'" type="primary" @click="handleCreate">
         <el-icon><Plus /></el-icon>
         {{ t('common.create') }}
       </el-button>
     </div>
 
     <!-- 列表 -->
-    <el-table :data="list" v-loading="loading" stripe border>
+    <el-table v-loading="loading" :data="list" stripe border>
       <el-table-column prop="modelName" label="模型名称" min-width="180" />
       <el-table-column prop="modelKey" label="模型标识" width="200" />
       <el-table-column label="分类" width="120">
@@ -234,15 +234,15 @@ onMounted(() => {
             设计
           </el-button>
           <el-button
-            link type="primary" size="small"
-            v-permission="'workflow:model:validate'"
+            v-permission="'workflow:model:validate'" link type="primary"
+            size="small"
             @click="handleValidate(row)"
           >
             校验
           </el-button>
           <el-button
-            link type="warning" size="small"
-            v-permission="'workflow:model:publish'"
+            v-permission="'workflow:model:publish'" link type="warning"
+            size="small"
             @click="handlePublish(row)"
           >
             发布
@@ -251,8 +251,8 @@ onMounted(() => {
             版本
           </el-button>
           <el-button
-            link type="danger" size="small"
-            v-permission="'workflow:model:delete'"
+            v-permission="'workflow:model:delete'" link type="danger"
+            size="small"
             @click="handleDelete(row)"
           >
             {{ t('common.delete') }}

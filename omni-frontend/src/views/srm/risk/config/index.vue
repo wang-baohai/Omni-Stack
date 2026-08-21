@@ -247,10 +247,10 @@ onMounted(() => {
             v-loading="typesLoading"
             :data="types"
             highlight-current-row
-            @current-change="(row: RiskIndicatorTypeVO) => selectedType = row"
             stripe
             border
             size="small"
+            @current-change="(row: RiskIndicatorTypeVO) => selectedType = row"
           >
             <el-table-column prop="typeName" label="名称" min-width="100" />
             <el-table-column prop="typeCode" label="编码" width="120" />
@@ -360,10 +360,10 @@ onMounted(() => {
     <!-- 指标类型对话框 -->
     <el-dialog v-model="typeDialogVisible" :title="typeDialogIsEdit ? '编辑指标类型' : '新增指标类型'" width="500px">
       <el-form :model="typeForm" label-width="100px">
-        <el-form-item label="指标编码" v-if="!typeDialogIsEdit">
+        <el-form-item v-if="!typeDialogIsEdit" label="指标编码">
           <el-input v-model="typeForm.typeCode" placeholder="如 FINANCIAL" :maxlength="50" />
         </el-form-item>
-        <el-form-item label="指标编码" v-else>
+        <el-form-item v-else label="指标编码">
           <el-input :model-value="typeForm.typeCode" disabled />
         </el-form-item>
         <el-form-item label="指标名称">

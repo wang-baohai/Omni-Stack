@@ -51,7 +51,7 @@ defineExpose({ open })
 </script>
 
 <template>
-  <el-dialog title="审批记录" v-model="visible" width="850px" destroy-on-close>
+  <el-dialog v-model="visible" title="审批记录" width="850px" destroy-on-close>
     <el-table v-loading="loading" :data="records" border stripe max-height="500">
       <el-table-column prop="nodeName" label="节点名称" width="140" />
       <el-table-column prop="assigneeName" label="审批人" width="100" />

@@ -209,9 +209,10 @@ onMounted(loadData)
         <el-table-column prop="description" :label="t('userJobType.description')" show-overflow-tooltip min-width="200" />
         <el-table-column :label="t('common.status')" width="100">
           <template #default="{ row }">
-            <el-switch v-permission="'job:user-job-type:update'"
-                       :model-value="row.status === 1"
-                       @change="handleToggleStatus(row)" />
+            <el-switch
+              v-permission="'job:user-job-type:update'"
+              :model-value="row.status === 1"
+              @change="handleToggleStatus(row)" />
           </template>
         </el-table-column>
         <el-table-column :label="t('common.actions')" width="200" fixed="right">
@@ -227,17 +228,19 @@ onMounted(loadData)
       </el-table>
 
       <!-- 分页控件 -->
-      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination"
-                     :page-sizes="[5, 10, 20, 50, 100]" :total="total"
-                     layout="total, sizes, prev, pager, next"
-                     @current-change="handlePageChange"
-                     @size-change="currentPage = 1; handlePageChange(1)" />
+      <el-pagination
+        v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination"
+        :page-sizes="[5, 10, 20, 50, 100]" :total="total"
+        layout="total, sizes, prev, pager, next"
+        @current-change="handlePageChange"
+        @size-change="currentPage = 1; handlePageChange(1)" />
     </el-card>
 
     <!-- 表单对话框 -->
-    <el-dialog v-model="formDialogVisible"
-               :title="isEdit ? t('userJobType.editType') : t('userJobType.createType')"
-               width="800px">
+    <el-dialog
+      v-model="formDialogVisible"
+      :title="isEdit ? t('userJobType.editType') : t('userJobType.createType')"
+      width="800px">
       <el-form :model="form" label-width="120px">
         <el-form-item :label="t('userJobType.typeCode')">
           <el-input v-model="form.typeCode" :disabled="isEdit" />

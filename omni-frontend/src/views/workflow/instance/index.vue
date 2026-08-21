@@ -132,13 +132,17 @@ function handleApprovalRecords(row: ProcessInstanceExt) {
             link
             size="small"
             @click="handleProgress(row)"
-          >流转进度</el-button>
+          >
+            流转进度
+          </el-button>
           <el-button
             type="primary"
             link
             size="small"
             @click="handleApprovalRecords(row)"
-          >审批记录</el-button>
+          >
+            审批记录
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
