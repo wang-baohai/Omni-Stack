@@ -2,9 +2,10 @@
 /**
  * 开始事件属性面板 — 仅展示基本信息。
  */
+import type { BpmnElement } from '@/types/bpmn'
 
 defineProps<{
-  element: any
+  element: BpmnElement
 }>()
 </script>
 

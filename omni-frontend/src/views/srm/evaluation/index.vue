@@ -47,7 +47,9 @@ const currentEvaluation = ref<EvaluationVO | null>(null)
 const evalStatusLabel: Record<string, string> = { COMPLETED: '已完成', PENDING: '待评估', IN_PROGRESS: '评估中' }
 
 // 等级映射
-const levelMap: Record<string, { label: string; type: string }> = {
+type EvaluationTagType = '' | 'success' | 'warning' | 'danger'
+
+const levelMap: Record<string, { label: string; type: EvaluationTagType }> = {
   STRATEGIC: { label: '战略级', type: 'success' },
   PREFERRED: { label: '优选级', type: '' },
   QUALIFIED: { label: '合格级', type: 'warning' },
@@ -207,7 +209,7 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="等级" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(levelMap[levelLabel(row.totalScore)]?.type as any) || ''">
+            <el-tag :type="levelMap[levelLabel(row.totalScore)]?.type || ''">
               {{ levelMap[levelLabel(row.totalScore)]?.label || levelLabel(row.totalScore) }}
             </el-tag>
           </template>
@@ -273,7 +275,7 @@ onMounted(() => {
           <el-descriptions-item label="评估周期">{{ currentEvaluation.evaluationPeriod }}</el-descriptions-item>
           <el-descriptions-item label="总分">
             <span class="score-text-lg">{{ currentEvaluation.totalScore }}</span>
-            <el-tag :type="(levelMap[levelLabel(currentEvaluation.totalScore)]?.type as any) || ''" class="ml-2">
+            <el-tag :type="levelMap[levelLabel(currentEvaluation.totalScore)]?.type || ''" class="ml-2">
               {{ levelMap[levelLabel(currentEvaluation.totalScore)]?.label || levelLabel(currentEvaluation.totalScore) }}
             </el-tag>
           </el-descriptions-item>

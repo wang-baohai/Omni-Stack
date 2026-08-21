@@ -3,9 +3,10 @@
  * 并行网关（ParallelGateway）属性面板。
  * 并行网关自动汇聚所有入流，无需额外配置。仅展示基本信息。
  */
+import type { BpmnElement } from '@/types/bpmn'
 
 defineProps<{
-  element: any
+  element: BpmnElement
 }>()
 </script>
 

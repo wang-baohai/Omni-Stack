@@ -6,6 +6,14 @@
  */
 import { ref, shallowRef, nextTick, computed } from 'vue'
 import NavigatedViewer from 'bpmn-js/lib/NavigatedViewer'
+import { ElMessage } from 'element-plus'
+import type {
+  BpmnCanvas,
+  BpmnElementClickEvent,
+  BpmnElementRegistry,
+  BpmnOverlays,
+} from '@/types/bpmn'
+import { getErrorMessage } from '@/utils/errors'
 import {
   getProcessDefinitionBpmn,
   getProcessProgress,
@@ -128,8 +136,8 @@ async function open(processInstanceId: string, processDefinitionId: string) {
 
     // 导入 BPMN XML
     await viewer.value.importXML(bpmnXml)
-    const canvas = viewer.value.get('canvas') as any
-    const elementRegistry = viewer.value.get('elementRegistry') as any
+    const canvas = viewer.value.get<BpmnCanvas>('canvas')
+    const elementRegistry = viewer.value.get<BpmnElementRegistry>('elementRegistry')
 
     // 补全所有 BPMN 节点（未到达的节点不在后端响应中，需要创建占位数据）
     const allElements = elementRegistry.getAll()
@@ -172,7 +180,7 @@ async function open(processInstanceId: string, processDefinitionId: string) {
     }
 
     // 为活跃的会签节点添加进度徽章
-    const overlays = viewer.value.get('overlays') as any
+    const overlays = viewer.value.get<BpmnOverlays>('overlays')
     for (const act of progress.allActivities) {
       if (act.status === 'active' && act.completedCount != null && act.totalCount != null) {
         try {
@@ -200,7 +208,7 @@ async function open(processInstanceId: string, processDefinitionId: string) {
     canvas.zoom('fit-viewport')
 
     // 节点点击事件
-    viewer.value.on('element.click', (event: any) => {
+    viewer.value.on('element.click', (event: BpmnElementClickEvent) => {
       const element = event.element
       if (element && element.type && !element.type.includes('SequenceFlow')) {
         const act = activityMap.value.get(element.id)
@@ -209,9 +217,8 @@ async function open(processInstanceId: string, processDefinitionId: string) {
         }
       }
     })
-  } catch (err) {
-    console.error('[ProcessProgressDialog] 加载失败:', err)
-    loading.value = false
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '流程进度加载失败'))
   } finally {
     loading.value = false
   }

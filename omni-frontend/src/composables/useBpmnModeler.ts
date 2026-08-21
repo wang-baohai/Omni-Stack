@@ -9,13 +9,19 @@ import BpmnModeler from 'bpmn-js/lib/Modeler'
 import { contextPadI18nModule } from '@/composables/workflow/bpmnContextPadI18n'
 import { contextPadProviderModule } from '@/composables/workflow/bpmnContextPadProvider'
 import { MODDLE_EXTENSIONS } from '@/composables/useBpmnExtension'
+import {
+  type BpmnCanvas,
+  type BpmnElement,
+  type BpmnModeling,
+  type BpmnModdle,
+  type BpmnModdleElement,
+  type BpmnSelection,
+  type BpmnSelectionChangedEvent,
+} from '@/types/bpmn'
+import { getErrorMessage } from '@/utils/errors'
 import 'bpmn-js/dist/assets/diagram-js.css'
 import 'bpmn-js/dist/assets/bpmn-js.css'
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
-
-interface BpmnCanvas {
-  zoom: (value: string) => void
-}
 
 interface UseBpmnModelerOptions {
   /** 容器 DOM 元素 ref */
@@ -27,7 +33,7 @@ interface UseBpmnModelerOptions {
   /** XML 内容变化回调 */
   onChanged?: (xml: string) => void
   /** 选中元素变化回调 */
-  onSelectionChanged?: (element: any) => void
+  onSelectionChanged?: (element: BpmnElement | null) => void
   /** Ctrl+S 保存回调（优先级高于 onChanged） */
   onSave?: () => void
   /** 每次导入 XML 前的回调（用于注册自定义命名空间到 moddle） */
@@ -88,14 +94,13 @@ export function useBpmnModeler(options: UseBpmnModelerOptions) {
       // 归一化 BPMN 命名空间 URI，避免旧版 URI 导致解析失败
       const normalizedXml = normalizeBpmnXml(xml)
       await modeler.value.importXML(normalizedXml)
-      const canvas = modeler.value.get('canvas') as BpmnCanvas
+      const canvas = modeler.value.get<BpmnCanvas>('canvas')
       canvas.zoom('fit-viewport')
       // 暗色模式下修正形状和文字颜色
       fixDarkModeColors()
       currentXml.value = xml
-    } catch (err: any) {
-      console.error('[useBpmnModeler] importXML failed:', err)
-      ElMessage.error('导入 BPMN XML 失败：' + (err?.message || '未知错误'))
+    } catch (error: unknown) {
+      ElMessage.error('导入 BPMN XML 失败：' + getErrorMessage(error, '未知错误'))
     } finally {
       loading.value = false
     }
@@ -110,30 +115,30 @@ export function useBpmnModeler(options: UseBpmnModelerOptions) {
   }
 
   /** 获取当前选中的 BPMN 元素 */
-  function getSelectedElement(): any {
+  function getSelectedElement(): BpmnElement | null {
     if (!modeler.value) return null
-    const selection = modeler.value.get('selection') as any
+    const selection = modeler.value.get<BpmnSelection>('selection')
     const selected = selection.get()
     return selected.length > 0 ? selected[0] : null
   }
 
   /** 更新选中元素的属性 */
-  function updateElementProperties(element: any, properties: Record<string, any>) {
+  function updateElementProperties(element: BpmnElement, properties: Record<string, unknown>) {
     if (!modeler.value || !element) return
-    const modeling = modeler.value.get('modeling') as any
+    const modeling = modeler.value.get<BpmnModeling>('modeling')
     modeling.updateProperties(toRaw(element), properties)
   }
 
   /** 获取元素的 moddle 扩展元素 */
-  function getExtensionElements(element: any): any[] {
+  function getExtensionElements(element: BpmnElement): BpmnModdleElement[] {
     if (!element?.businessObject?.extensionElements) return []
     return element.businessObject.extensionElements.values || []
   }
 
   /** 获取 moddle（BPMN 模型工厂） */
-  function getModdle(): any {
+  function getModdle(): BpmnModdle | null {
     if (!modeler.value) return null
-    return modeler.value.get('moddle')
+    return modeler.value.get<BpmnModdle>('moddle')
   }
 
   /** 判断当前是否暗色模式 */
@@ -174,7 +179,7 @@ export function useBpmnModeler(options: UseBpmnModelerOptions) {
   function initModeler() {
     if (!options.container.value) return
 
-    const additionalModules: any[] = [contextPadI18nModule, contextPadProviderModule]
+    const additionalModules = [contextPadI18nModule, contextPadProviderModule]
 
     // 暗色模式下设置浅色标签，确保文字可见
     const dark = isDarkMode()
@@ -200,7 +205,7 @@ export function useBpmnModeler(options: UseBpmnModelerOptions) {
 
     // 监听选中变化
     if (options.onSelectionChanged) {
-      modeler.value.on('selection.changed', (event: any) => {
+      modeler.value.on('selection.changed', (event: BpmnSelectionChangedEvent) => {
         const selected = event.newSelection
         options.onSelectionChanged?.(selected.length > 0 ? selected[0] : null)
       })

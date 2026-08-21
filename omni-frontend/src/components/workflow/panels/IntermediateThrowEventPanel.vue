@@ -3,9 +3,10 @@
  * 中间事件（IntermediateThrowEvent）属性面板。
  * V1 版本中仅作为流程节点标记，无需额外配置。
  */
+import type { BpmnElement } from '@/types/bpmn'
 
 defineProps<{
-  element: any
+  element: BpmnElement
 }>()
 </script>
 

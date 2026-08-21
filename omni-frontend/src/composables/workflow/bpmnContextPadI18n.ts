@@ -10,6 +10,11 @@ import i18n from '@/i18n'
 
 const { t } = i18n.global
 
+/** bpmn-js 事件总线的项目最小视图。 */
+interface BpmnEventBus {
+  on(eventName: string, callback: (event: { current: { html: HTMLElement } }) => void): void
+}
+
 /**
  * 遍历 context pad DOM 中所有 .entry 元素，
  * 根据 data-action 属性值查找 i18n key 并替换 title。
@@ -38,7 +43,7 @@ function translateContextPad(event: { current: { html: HTMLElement } }): void {
  * bpmn-js 模块定义。
  * 监听 contextPad.open 事件，在 entry DOM 渲染后翻译条目。
  */
-function I18nContextPadModule(eventBus: any): void {
+function I18nContextPadModule(eventBus: BpmnEventBus): void {
   eventBus.on('contextPad.open', translateContextPad)
 }
 

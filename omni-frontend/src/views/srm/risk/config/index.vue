@@ -22,6 +22,7 @@ import {
   type RiskScoreThresholdVO,
 } from '@/api/srm-risk-config'
 import type { RiskLevel } from '@/api/srm-risk'
+import { getErrorMessage, isUserCancelled } from '@/utils/errors'
 
 // ===== 指标类型列表 =====
 const types = ref<RiskIndicatorTypeVO[]>([])
@@ -93,8 +94,8 @@ async function submitType() {
     }
     typeDialogVisible.value = false
     await loadTypes()
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.message || '操作失败')
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '操作失败'))
   }
 }
 
@@ -105,8 +106,8 @@ async function handleDeleteType(row: RiskIndicatorTypeVO) {
     ElMessage.success('删除成功')
     if (selectedType.value?.id === row.id) selectedType.value = null
     await loadTypes()
-  } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e.response?.data?.message || '删除失败')
+  } catch (error: unknown) {
+    if (!isUserCancelled(error)) ElMessage.error(getErrorMessage(error, '删除失败'))
   }
 }
 
@@ -166,8 +167,8 @@ async function submitCriterion() {
     }
     criterionDialogVisible.value = false
     await loadTypes()
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.message || '操作失败')
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '操作失败'))
   }
 }
 
@@ -177,8 +178,8 @@ async function handleDeleteCriterion(row: RiskCriterionVO) {
     await deleteCriterion(row.id)
     ElMessage.success('删除成功')
     await loadTypes()
-  } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e.response?.data?.message || '删除失败')
+  } catch (error: unknown) {
+    if (!isUserCancelled(error)) ElMessage.error(getErrorMessage(error, '删除失败'))
   }
 }
 
@@ -203,8 +204,8 @@ async function saveThresholds() {
     await updateScoreThresholds(thresholds.value)
     ElMessage.success('阈值保存成功')
     await loadThresholds()
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.message || '保存失败')
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '保存失败'))
   }
 }
 

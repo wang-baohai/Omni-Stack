@@ -7,8 +7,9 @@
 ## 结论
 
 S1-01～S1-04 的数据库兼容、Workflow 安全只读契约、Procurement 业务外观 API 和业务化前端组件已经实现，
-并在隔离全栈完成真实验证码登录后的 API 功能流验证。G2 尚未关闭：三视口、键盘和浏览器冲突/权限/
-降级 E2E 仍需在浏览器控制运行时恢复后补齐；S1-06 的 197 条既有 lint warning 也仍需清零。
+并在隔离全栈完成真实验证码登录后的 API 功能流验证。S1-06 已将前端 lint 基线从 197 条 warning
+清零并启用 `--max-warnings 0`。G2 尚未关闭：三视口、键盘和浏览器冲突/权限/降级 E2E 仍需在
+浏览器控制运行时恢复后补齐。
 
 ## 已实现范围
 
@@ -29,8 +30,18 @@ S1-01～S1-04 的数据库兼容、Workflow 安全只读契约、Procurement 业
 | 后端完整 Reactor | 19 modules，`clean install` 成功，0 failure |
 | Workflow 模块测试 | 46 tests，0 failure，0 error |
 | Procurement 模块测试 | 168 tests，0 failure，0 error |
-| 前端生产构建 | 通过，2445 modules transformed |
-| 当前 lint 基线 | 0 error / 197 warning；G2 前必须清零 |
+| 前端生产构建 | 通过，2447 modules transformed |
+| 当前 lint 门禁 | `eslint . --max-warnings 0`，0 error / 0 warning |
+
+## S1-06 前端质量门禁
+
+- 将动态表单 JSON Schema 解析收敛到共享强类型和运行时守卫，兼容扁平格式与标准
+  `object/properties` 格式。
+- 为 bpmn-js 画布、Moddle、属性面板、Context Pad 和流程进度 Viewer 建立项目最小类型视图，
+  清除 BPMN 设计器中的显式 `any`。
+- 将菜单、流程、SRM 风险等异步失败从 `console` 或不透明对象访问改为统一的未知错误提取；
+  用户可感知的流程进度加载失败通过正式消息组件呈现。
+- 将 lint 脚本固化为零警告门禁，后续新增 warning 会直接导致命令失败。
 
 ## 隔离全栈功能流
 
@@ -57,4 +68,3 @@ S1-01～S1-04 的数据库兼容、Workflow 安全只读契约、Procurement 业
   已按浏览器技能重置连接并确认插件脚本存在，但运行时仍失败。
 - 待运行时恢复后补做 390×844、768×1024、1440×900 三视口、键盘焦点、权限不足、Workflow
   降级和历史冲突数据的浏览器 E2E，并生成正式截图。
-- S1-06 必须将前端 lint 从 197 warning 清到 0 warning，随后启用 `--max-warnings 0`。

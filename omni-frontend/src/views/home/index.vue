@@ -25,6 +25,7 @@ import {
 import type { UserJob, CreateUserJobRequest, UserJobLog } from '@/api/myJob'
 import type { UserJobType } from '@/api/userJobType'
 import type { PageResult } from '@/types/api'
+import { isRecord, type DynamicFormValues } from '@/types/schema'
 import CronGenerator from '@/components/CronGenerator.vue'
 import DynamicFormRenderer from '@/components/DynamicFormRenderer.vue'
 import { CronExpressionParser } from 'cron-parser'
@@ -103,7 +104,7 @@ const form = reactive<{
   jobName: string
   jobType: string
   cronExpression: string
-  jobParams: Record<string, any>
+  jobParams: DynamicFormValues
 }>({
   jobName: '',
   jobType: '',
@@ -112,11 +113,12 @@ const form = reactive<{
 })
 
 /** 当前选中类型的 paramTemplate schema */
-const currentSchema = computed<Record<string, any> | null>(() => {
+const currentSchema = computed<Record<string, unknown> | null>(() => {
   const selected = enabledTypes.value.find(tp => tp.typeCode === form.jobType)
   if (!selected?.paramTemplate) return null
   try {
-    return JSON.parse(selected.paramTemplate)
+    const parsed: unknown = JSON.parse(selected.paramTemplate)
+    return isRecord(parsed) ? parsed : null
   } catch {
     return null
   }
@@ -246,9 +248,10 @@ function openCreateDialog() {
 async function openEditDialog(row: UserJob) {
   isEdit.value = true
   editingId.value = row.id
-  let params: Record<string, any> = {}
+  let params: DynamicFormValues = {}
   try {
-    params = row.jobParams ? JSON.parse(row.jobParams) : {}
+    const parsed: unknown = row.jobParams ? JSON.parse(row.jobParams) : {}
+    params = isRecord(parsed) ? parsed as DynamicFormValues : {}
   } catch { /* ignore */ }
   Object.assign(form, {
     jobName: row.jobName,

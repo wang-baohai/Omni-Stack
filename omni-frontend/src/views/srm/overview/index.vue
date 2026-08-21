@@ -56,7 +56,7 @@ onMounted(loadData)
     <el-row :gutter="16" class="mb-4">
       <el-col v-for="card in statusCards" :key="card.key" :span="4">
         <el-card shadow="hover" class="stat-card">
-          <div class="stat-card__count">{{ (summary as any)?.[card.key] ?? 0 }}</div>
+          <div class="stat-card__count">{{ summary?.[card.key] ?? 0 }}</div>
           <div class="stat-card__label">{{ card.label }}</div>
         </el-card>
       </el-col>
@@ -66,7 +66,7 @@ onMounted(loadData)
     <el-row :gutter="16" class="mb-4">
       <el-col v-for="card in levelCards" :key="card.key" :span="8">
         <el-card shadow="hover" class="stat-card">
-          <div class="stat-card__count">{{ (summary as any)?.[card.key] ?? 0 }}</div>
+          <div class="stat-card__count">{{ summary?.[card.key] ?? 0 }}</div>
           <div class="stat-card__label">{{ card.label }}</div>
         </el-card>
       </el-col>

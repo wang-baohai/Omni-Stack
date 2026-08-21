@@ -13,7 +13,9 @@ import {
   validateModel,
   publishModel,
   type ProcessModel,
+  type ValidateResult,
 } from '@/api/workflow-model'
+import { getErrorMessage, isUserCancelled } from '@/utils/errors'
 import CreateModelDialog from './CreateModelDialog.vue'
 import VersionHistoryDialog from './VersionHistoryDialog.vue'
 import ValidateResultDialog from './ValidateResultDialog.vue'
@@ -101,7 +103,7 @@ async function handleValidate(model: ProcessModel) {
   }
 }
 
-const validateResult = ref<any>(null)
+const validateResult = ref<ValidateResult | null>(null)
 const validateDialogVisible = ref(false)
 
 // ===== 发布 =====
@@ -115,9 +117,9 @@ async function handlePublish(model: ProcessModel) {
     const res = await publishModel(model.id)
     ElMessage.success(`发布成功！业务版本: v${res.data.data.businessVersion}`)
     loadList()
-  } catch (e: any) {
-    if (e !== 'cancel') {
-      ElMessage.error(e?.message || '发布失败')
+  } catch (error: unknown) {
+    if (!isUserCancelled(error)) {
+      ElMessage.error(getErrorMessage(error, '发布失败'))
     }
   }
 }
@@ -142,9 +144,9 @@ async function handleDelete(model: ProcessModel) {
     await deleteModel(model.id)
     ElMessage.success('删除成功')
     loadList()
-  } catch (e: any) {
-    if (e !== 'cancel') {
-      ElMessage.error(e?.message || '删除失败')
+  } catch (error: unknown) {
+    if (!isUserCancelled(error)) {
+      ElMessage.error(getErrorMessage(error, '删除失败'))
     }
   }
 }

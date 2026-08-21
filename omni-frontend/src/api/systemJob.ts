@@ -5,12 +5,13 @@
  */
 import request from './request'
 import type { ApiResponse } from '@/types/api'
+import type { DynamicFieldType } from '@/types/schema'
 
 /** 参数定义（来自后端 @ParamDef 注解） */
 export interface ParamDefInfo {
   name: string
   label: string
-  type: string
+  type: DynamicFieldType
   defaultValue: string
   required: boolean
   min: number

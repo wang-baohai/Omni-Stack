@@ -7,6 +7,9 @@
 import { ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled } from '@element-plus/icons-vue'
+import type BpmnModeler from 'bpmn-js/lib/Modeler'
+import type { BpmnElement } from '@/types/bpmn'
+import { isRecord } from '@/types/schema'
 import {
   readAssignment,
   writeAssignment,
@@ -26,8 +29,8 @@ import { useUserStore } from '@/stores/user'
 import { getUserIdFromToken } from '@/utils/jwt'
 
 const props = defineProps<{
-  element: any
-  modeler: any
+  element: BpmnElement
+  modeler: BpmnModeler | null
 }>()
 
 // ===== 选项数据 =====
@@ -152,8 +155,11 @@ function loadFromElement() {
     // 回退：从 multiInstanceLoopCharacteristics 的 completionCondition 推断审批模式
     const bo = props.element?.businessObject
     const loopChar = bo?.loopCharacteristics
-    if (loopChar?.completionCondition) {
-      const condBody = loopChar.completionCondition.body || ''
+    const completionCondition = isRecord(loopChar) && isRecord(loopChar.completionCondition)
+      ? loopChar.completionCondition
+      : null
+    if (completionCondition) {
+      const condBody = typeof completionCondition.body === 'string' ? completionCondition.body : ''
       // approvedCount >= nrOfInstances 表示全员审批（会签）
       if (condBody.includes('approvedCount') && condBody.includes('nrOfInstances')) {
         form.approvalMode = 'ALL'

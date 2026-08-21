@@ -6,6 +6,8 @@
  */
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import type BpmnModeler from 'bpmn-js/lib/Modeler'
+import type { BpmnElement, BpmnElementRegistry, BpmnModdleElement } from '@/types/bpmn'
 import {
   readGatewayConditions,
   writeGatewayDefault,
@@ -13,8 +15,8 @@ import {
 } from '@/composables/useBpmnExtension'
 
 const props = defineProps<{
-  element: any
-  modeler: any
+  element: BpmnElement
+  modeler: BpmnModeler | null
 }>()
 
 // ===== 分支列表 =====
@@ -37,7 +39,9 @@ function loadFromElement() {
   const outgoing = bo.outgoing || []
   const { defaultFlow, conditions } = readGatewayConditions(props.element)
 
-  branches.value = outgoing.map((flow: any) => ({
+  branches.value = outgoing.filter(
+    (flow): flow is BpmnModdleElement & { id: string } => typeof flow.id === 'string',
+  ).map(flow => ({
     id: flow.id,
     name: flow.name || flow.id,
     condition: conditions[flow.id] || '',
@@ -68,12 +72,12 @@ function saveCondition(branch: FlowBranch) {
 
   const bo = props.element.businessObject
   const outgoing = bo.outgoing || []
-  const flowElement = outgoing.find((f: any) => f.id === branch.id)
+  const flowElement = outgoing.find(flow => flow.id === branch.id)
 
   if (!flowElement) return
 
   // 需要通过 modeler 获取实际的 SequenceFlow 包装元素
-  const elementRegistry = props.modeler.get('elementRegistry')
+  const elementRegistry = props.modeler.get<BpmnElementRegistry>('elementRegistry')
   const wrappedFlow = elementRegistry?.get(branch.id)
 
   if (wrappedFlow) {

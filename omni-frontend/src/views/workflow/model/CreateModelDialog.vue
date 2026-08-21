@@ -8,6 +8,7 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { createModel, type CreateModelRequest } from '@/api/workflow-model'
 import { useDictOptions } from '@/composables/useDictOptions'
+import { getErrorMessage } from '@/utils/errors'
 
 const { t } = useI18n()
 
@@ -62,8 +63,8 @@ async function handleSubmit() {
     await createModel(form)
     ElMessage.success('模型创建成功')
     emit('success')
-  } catch (e: any) {
-    ElMessage.error(e?.response?.data?.message || '创建失败')
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '创建失败'))
   } finally {
     submitting.value = false
   }

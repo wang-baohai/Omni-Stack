@@ -13,6 +13,7 @@ import {
 } from '@/api/systemJob'
 import CronGenerator from '@/components/CronGenerator.vue'
 import DynamicFormRenderer from '@/components/DynamicFormRenderer.vue'
+import type { DynamicFormValues, DynamicSchemaFieldConfig } from '@/types/schema'
 
 const { t } = useI18n()
 
@@ -23,14 +24,14 @@ const loading = ref(false)
 const registerDialogVisible = ref(false)
 const registeringJob = ref<SystemJob | null>(null)
 const registerCron = ref('')
-const registerParams = ref<Record<string, any>>({})
+const registerParams = ref<DynamicFormValues>({})
 const registering = ref(false)
 
 /** 将 paramDefs 转换为 DynamicFormRenderer schema 格式（缓存避免重复创建） */
 const registerSchema = computed(() => {
   const job = registeringJob.value
   if (!job) return null
-  const schema: Record<string, any> = {}
+  const schema: Record<string, DynamicSchemaFieldConfig> = {}
   if (job.paramDefs) {
     for (const p of job.paramDefs) {
       schema[p.name] = {

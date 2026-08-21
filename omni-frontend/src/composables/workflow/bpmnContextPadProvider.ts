@@ -10,6 +10,18 @@
  * 通过 DI key `contextPadProvider` 注入，作为 additionalModules 使用时
  * 自动覆盖默认 provider。
  */
+import type {
+  BpmnAutoPlace,
+  BpmnConnect,
+  BpmnContextPad,
+  BpmnContextPadEntries,
+  BpmnContextPadEntry,
+  BpmnContextPadProvider,
+  BpmnCreate,
+  BpmnElement,
+  BpmnElementFactory,
+  BpmnModeling,
+} from '@/types/bpmn'
 
 /** 项目支持的 BPMN 元素类型定义 */
 interface SupportedType {
@@ -52,19 +64,30 @@ const NO_CONNECT_TYPES = new Set([
   'label',
 ])
 
+/** 自定义 Provider 运行时实例。 */
+interface CustomContextPadProviderInstance extends BpmnContextPadProvider {
+  _contextPad: BpmnContextPad
+  _modeling: BpmnModeling
+  _elementFactory: BpmnElementFactory
+  _create: BpmnCreate
+  _connect: BpmnConnect
+  _autoPlace?: BpmnAutoPlace
+  _translate: (text: string) => string
+}
+
 /**
  * 自定义 Context Pad Provider 构造函数。
  * 通过 bpmn-js DI 系统注入所需服务。
  */
 function CustomContextPadProvider(
-  this: any,
-  contextPad: any,
-  modeling: any,
-  elementFactory: any,
-  create: any,
-  connect: any,
-  autoPlace: any,
-  translate: any,
+  this: CustomContextPadProviderInstance,
+  contextPad: BpmnContextPad,
+  modeling: BpmnModeling,
+  elementFactory: BpmnElementFactory,
+  create: BpmnCreate,
+  connect: BpmnConnect,
+  autoPlace: BpmnAutoPlace | undefined,
+  translate: (text: string) => string,
 ): void {
   // 注册为 context pad provider
   contextPad.registerProvider(this)
@@ -91,7 +114,10 @@ CustomContextPadProvider.$inject = [
 /**
  * 多元素选中时的 context pad 条目（仅 delete）。
  */
-CustomContextPadProvider.prototype.getMultiElementContextPadEntries = function (this: any, _elements: any[]): any {
+CustomContextPadProvider.prototype.getMultiElementContextPadEntries = function (
+  this: CustomContextPadProviderInstance,
+  _elements: BpmnElement[],
+): BpmnContextPadEntries {
   const modeling = this._modeling
 
   return {
@@ -100,7 +126,7 @@ CustomContextPadProvider.prototype.getMultiElementContextPadEntries = function (
       className: 'bpmn-icon-trash',
       title: this._translate('Delete'),
       action: {
-        click(_event: any, elements: any[]) {
+        click(_event: Event, elements: BpmnElement[]) {
           modeling.removeElements(elements.slice())
         },
       },
@@ -114,7 +140,10 @@ CustomContextPadProvider.prototype.getMultiElementContextPadEntries = function (
  * @param element 当前选中的 BPMN 元素
  * @returns context pad 条目映射
  */
-CustomContextPadProvider.prototype.getContextPadEntries = function (this: any, element: any): any {
+CustomContextPadProvider.prototype.getContextPadEntries = function (
+  this: CustomContextPadProviderInstance,
+  element: BpmnElement,
+): BpmnContextPadEntries {
   const modeling = this._modeling
   const elementFactory = this._elementFactory
   const create = this._create
@@ -123,8 +152,8 @@ CustomContextPadProvider.prototype.getContextPadEntries = function (this: any, e
   const translate = this._translate
   const contextPad = this._contextPad
 
-  const actions: Record<string, any> = {}
-  const type = element.type || element.businessObject?.$type
+  const actions: BpmnContextPadEntries = {}
+  const type = element.type || element.businessObject?.$type || ''
 
   // ===== label 类型只显示 delete =====
   if (type === 'label') {
@@ -153,7 +182,7 @@ CustomContextPadProvider.prototype.getContextPadEntries = function (this: any, e
       className: 'bpmn-icon-connection-multi',
       title: translate('Connect to other element'),
       action: {
-        click(event: any, element: any) {
+        click(event: Event, element: BpmnElement) {
           connect.start(event, element)
         },
       },
@@ -168,7 +197,7 @@ CustomContextPadProvider.prototype.getContextPadEntries = function (this: any, e
       className: 'bpmn-icon-screw-wrench',
       title: translate('Change element'),
       action: {
-        click(_event: any, element: any) {
+        click(_event: Event, element: BpmnElement) {
           // 打开替换菜单（使用 popupMenu）
           const popupMenu = contextPad._popupMenu || contextPad._injector?.get?.('popupMenu')
           if (popupMenu) {
@@ -185,13 +214,13 @@ CustomContextPadProvider.prototype.getContextPadEntries = function (this: any, e
   // ===== 内部辅助函数 =====
 
   /** 创建 delete action */
-  function createDeleteAction(): any {
+  function createDeleteAction(): BpmnContextPadEntry {
     return {
       group: 'edit',
       className: 'bpmn-icon-trash',
       title: translate('Delete'),
       action: {
-        click(_event: any, element: any) {
+        click(_event: Event, element: BpmnElement) {
           modeling.removeElements([element])
         },
       },
@@ -199,14 +228,14 @@ CustomContextPadProvider.prototype.getContextPadEntries = function (this: any, e
   }
 
   /** 创建 append action */
-  function createAppendAction(item: SupportedType): any {
-    function appendStart(event: any, element: any) {
+  function createAppendAction(item: SupportedType): BpmnContextPadEntry {
+    function appendStart(event: Event, element: BpmnElement) {
       const shape = elementFactory.createShape({ type: item.type })
       create.start(event, shape, { source: element })
     }
 
     const clickAction = autoPlace
-      ? function (_: any, element: any) {
+      ? function (_event: Event, element: BpmnElement) {
         const shape = elementFactory.createShape({ type: item.type })
         autoPlace.append(element, shape)
       }
@@ -224,7 +253,7 @@ CustomContextPadProvider.prototype.getContextPadEntries = function (this: any, e
   }
 
   /** 计算替换菜单位置 */
-  function getReplaceMenuPosition(element: any): { x: number; y: number } {
+  function getReplaceMenuPosition(element: BpmnElement): { x: number; y: number } {
     const pad = contextPad.getPad(element).html
     const padRect = pad.getBoundingClientRect()
     return {

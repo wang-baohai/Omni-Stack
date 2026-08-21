@@ -6,6 +6,8 @@
  */
 import { ref, reactive, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import type BpmnModeler from 'bpmn-js/lib/Modeler'
+import type { BpmnElement } from '@/types/bpmn'
 import {
   readCcConfig,
   writeCcConfig,
@@ -21,8 +23,8 @@ import {
 } from '@/api/workflow-model'
 
 const props = defineProps<{
-  element: any
-  modeler: any
+  element: BpmnElement
+  modeler: BpmnModeler | null
 }>()
 
 // ===== 选项数据 =====

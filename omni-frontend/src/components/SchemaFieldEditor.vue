@@ -9,6 +9,13 @@
 import { ref, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { QuestionFilled } from '@element-plus/icons-vue'
+import {
+  isRecord,
+  normalizeDynamicSchema,
+  type DynamicFieldType,
+  type DynamicSchemaFieldConfig,
+  type DynamicSelectOption,
+} from '@/types/schema'
 
 const { t } = useI18n()
 
@@ -19,7 +26,7 @@ interface FieldDef {
   /** 显示标签 */
   label: string
   /** 字段类型（string/number/boolean/select/textarea） */
-  type: string
+  type: DynamicFieldType
   /** 是否必填 */
   required: boolean
   /** 默认值（字符串类型） */
@@ -27,7 +34,7 @@ interface FieldDef {
   /** 默认值（布尔类型） */
   defaultBool: boolean
   /** 下拉选项 */
-  options: Array<{ value: string; label: string }>
+  options: DynamicSelectOption[]
 }
 
 const props = defineProps<{
@@ -115,9 +122,9 @@ function buildSchema(): string | null {
   const validFields = fields.value.filter(f => f.key.trim())
   if (validFields.length === 0) return null
 
-  const schema: Record<string, any> = {}
+  const schema: Record<string, DynamicSchemaFieldConfig> = {}
   for (const f of validFields) {
-    const entry: Record<string, any> = {
+    const entry: DynamicSchemaFieldConfig = {
       type: f.type,
       label: f.label || f.key,
       required: f.required,
@@ -149,30 +156,28 @@ function parseSchema(val: string | null) {
     return
   }
   try {
-    const schema = JSON.parse(val)
+    const parsed: unknown = JSON.parse(val)
+    if (!isRecord(parsed)) {
+      fields.value = []
+      return
+    }
+    const normalized = normalizeDynamicSchema(parsed)
 
-    // 检测标准 JSON Schema 格式
-    const isStandard = schema.type === 'object' && schema.properties
-    const requiredSet = new Set<string>(
-      isStandard && Array.isArray(schema.required) ? schema.required : [],
-    )
-    const entries: Array<[string, any]> = isStandard
-      ? Object.entries(schema.properties)
-      : Object.entries(schema)
-
-    fields.value = entries.map(([key, config]: [string, any]) => {
+    fields.value = normalized.entries.map(([key, config]) => {
       // 标准 JSON Schema 用 enum，扁平格式用 options
       let options: Array<{ value: string; label: string }> = config.options || []
       if (options.length === 0 && Array.isArray(config.enum)) {
         options = config.enum.map((v: string) => ({ value: v, label: v }))
       }
-      const type = config.enum && options.length > 0 && !config.type ? 'select' : (config.type || 'string')
+      const type: DynamicFieldType = config.enum && options.length > 0 && !config.type
+        ? 'select'
+        : (config.type || 'string')
 
       return {
         key,
         label: config.label || config.title || key,
         type,
-        required: config.required || requiredSet.has(key) || false,
+        required: config.required || normalized.required.has(key) || false,
         defaultValue: type === 'boolean' ? '' : (config.default != null ? String(config.default) : ''),
         defaultBool: type === 'boolean' ? !!config.default : false,
         options,

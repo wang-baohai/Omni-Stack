@@ -4,6 +4,8 @@
  * StartEvent / EndEvent / UserTask / ServiceTask / ExclusiveGateway / SequenceFlow。
  */
 import { computed } from 'vue'
+import type BpmnModeler from 'bpmn-js/lib/Modeler'
+import type { BpmnElement } from '@/types/bpmn'
 import UserTaskPanel from './UserTaskPanel.vue'
 import ServiceTaskPanel from './ServiceTaskPanel.vue'
 import GatewayPanel from './GatewayPanel.vue'
@@ -13,8 +15,8 @@ import ParallelGatewayPanel from './ParallelGatewayPanel.vue'
 import IntermediateThrowEventPanel from './IntermediateThrowEventPanel.vue'
 
 const props = defineProps<{
-  element: any
-  modeler: any
+  element: BpmnElement | null
+  modeler: BpmnModeler | null
 }>()
 
 const elementType = computed(() => {

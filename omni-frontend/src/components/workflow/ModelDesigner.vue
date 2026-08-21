@@ -18,6 +18,14 @@ import {
 } from '@/api/workflow-model'
 import { useBpmnModeler } from '@/composables/useBpmnModeler'
 import { registerOmniModdle } from '@/composables/useBpmnExtension'
+import {
+  type BpmnConnect,
+  type BpmnCreate,
+  type BpmnElement,
+  type BpmnElementFactory,
+  type BpmnModdle,
+} from '@/types/bpmn'
+import { getErrorMessage, isUserCancelled } from '@/utils/errors'
 import PropertyPanel from './panels/PropertyPanel.vue'
 
 const props = defineProps<{
@@ -37,7 +45,7 @@ const loadingModel = ref(false)
 
 // ===== bpmn-js Canvas =====
 const canvasRef = ref<HTMLDivElement>()
-const selectedElement = ref<any>(null)
+const selectedElement = ref<BpmnElement | null>(null)
 const dirty = ref(false)
 
 interface PaletteItem {
@@ -95,7 +103,7 @@ const {
   destroy,
 } = useBpmnModeler({
   container: canvasRef,
-  onSelectionChanged: (el: any) => {
+  onSelectionChanged: (el: BpmnElement | null) => {
     selectedElement.value = el
   },
   onChanged: () => {
@@ -103,7 +111,7 @@ const {
   },
   onSave: handleSave,
   onBeforeImport: () => {
-    const moddle = modeler.value?.get('moddle')
+    const moddle = modeler.value?.get<BpmnModdle>('moddle')
     if (moddle) registerOmniModdle(moddle)
   },
 })
@@ -222,9 +230,9 @@ async function handlePublish() {
     ElMessage.success(`发布成功！业务版本: v${res.data.data.businessVersion}`)
     dirty.value = false
     emit('saved')
-  } catch (e: any) {
-    if (e !== 'cancel') {
-      ElMessage.error(e?.message || '发布失败')
+  } catch (error: unknown) {
+    if (!isUserCancelled(error)) {
+      ElMessage.error(getErrorMessage(error, '发布失败'))
     }
   } finally {
     publishing.value = false
@@ -242,7 +250,7 @@ async function handleClose() {
         type: 'warning',
       })
       await handleSave()
-    } catch (action: any) {
+    } catch (action: unknown) {
       if (action === 'close') return // 点击 X 取消关闭
     }
   }
@@ -259,14 +267,14 @@ function handlePaletteMouseDown(event: MouseEvent, item: PaletteItem) {
       ElMessage.info('请先选中一个起点节点')
       return
     }
-    const connect = modeler.value.get('connect') as any
+    const connect = modeler.value.get<BpmnConnect>('connect')
     connect.start(event, selectedElement.value)
     return
   }
 
   if (!item.bpmnType) return
-  const elementFactory = modeler.value.get('elementFactory') as any
-  const create = modeler.value.get('create') as any
+  const elementFactory = modeler.value.get<BpmnElementFactory>('elementFactory')
+  const create = modeler.value.get<BpmnCreate>('create')
   const shape = elementFactory.createShape({ type: item.bpmnType })
   create.start(event, shape)
 }
