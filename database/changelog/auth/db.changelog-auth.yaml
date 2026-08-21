@@ -7,3 +7,5 @@ databaseChangeLog:
       file: database/changelog/common/db.changelog-common-mq.yaml
   - include:
       file: database/changelog/auth/0003-auth-seed.yaml
+  - include:
+      file: database/changelog/auth/0004-procurement-approval-rule-labels.yaml

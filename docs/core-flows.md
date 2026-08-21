@@ -1744,6 +1744,31 @@ sequenceDiagram
 - 启动结果不确定时保留原 `requestId/businessKey/modelVersionId/startUser`，只允许幂等重试。
 - 审批完成由可靠事件回写；重复、乱序、跨租户或实例不匹配事件不得改变供应商状态。
 
+### Flow 15.1：请购审批规则配置与匹配试算
+
+```mermaid
+sequenceDiagram
+    participant U as 采购经理
+    participant P as Procurement
+    participant W as Workflow
+
+    U->>P: 打开请购审批规则页
+    P->>W: 查询 category=purchase 的当前已发布版本
+    W-->>P: 流程名称、版本和安全审批图
+    P-->>U: 展示流程选项、覆盖风险和业务化规则列表
+    U->>P: 保存规则名称、品类、金额区间和流程选项
+    P->>W: 批量校验 modelVersionId 仍为当前 purchase 发布版本
+    P->>P: 行锁下校验冲突，生成 APR-{ULID} 和 priority
+    P-->>U: 返回可读规则，不暴露可编辑技术 ID
+    U->>P: 输入品类和金额进行匹配试算
+    P->>P: 调用请购提交共用的 ApprovalRouteResolver.evaluate
+    P-->>U: 唯一命中、无匹配、冲突或流程不可用，并返回安全审批图
+```
+
+规则列表通过 Workflow 批量解析当前页模型版本，禁止逐行调用。Workflow 暂时不可用时只读列表保留
+本地规则并标记 `UNAVAILABLE`，创建、更新和请购提交则失败关闭。停用或删除前的影响分析只在内存中
+排除目标规则，不修改数据库；覆盖算法按“精确品类优先、默认规则补空缺”计算从 0 到无穷的断档和冲突。
+
 ## Flow 16：Procurement 请购审批与异步回写
 
 ```mermaid

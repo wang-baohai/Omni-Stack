@@ -57,6 +57,26 @@ class ApprovalRouteResolverTest {
         assertThat(ProcTenantContext.requireTenantId()).isEqualTo(9L);
     }
 
+    /** 结构化评估必须保留无匹配、重复匹配和默认兜底语义。 */
+    @Test
+    void shouldEvaluateWithoutThrowingForBusinessOutcomes() {
+        ProcApprovalRoute wildcard = route(1L, "*");
+        ApprovalRouteResolver.Evaluation fallback = ApprovalRouteResolver.evaluateCandidates(
+                "IT_DEVICE", new BigDecimal("1.0000"), List.of(wildcard));
+        ApprovalRouteResolver.Evaluation missing = ApprovalRouteResolver.evaluateCandidates(
+                "IT_DEVICE", new BigDecimal("1.0000"), List.of());
+        ApprovalRouteResolver.Evaluation ambiguous = ApprovalRouteResolver.evaluateCandidates(
+                "IT_DEVICE", new BigDecimal("1.0000"),
+                List.of(route(2L, "IT_DEVICE"), route(3L, "IT_DEVICE")));
+
+        assertThat(fallback.outcome()).isEqualTo(ApprovalRouteResolver.Outcome.MATCHED);
+        assertThat(fallback.defaultRule()).isTrue();
+        assertThat(missing.outcome()).isEqualTo(ApprovalRouteResolver.Outcome.NO_MATCH);
+        assertThat(ambiguous.outcome()).isEqualTo(ApprovalRouteResolver.Outcome.AMBIGUOUS);
+        assertThat(ambiguous.matches()).extracting(ProcApprovalRoute::getId)
+                .containsExactly(2L, 3L);
+    }
+
     private ProcApprovalRoute route(Long id, String categoryCode) {
         ProcApprovalRoute route = new ProcApprovalRoute();
         route.setId(id);

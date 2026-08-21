@@ -112,12 +112,7 @@ public final class ApprovalRoutePolicy {
     public static ProcApprovalRoute select(String categoryCode, BigDecimal amount,
                                            List<ProcApprovalRoute> routes) {
         String normalizedCategory = normalizeCategoryCode(categoryCode);
-        if (WILDCARD_CATEGORY.equals(normalizedCategory)) {
-            throw new BusinessException(400, "请购物料品类不能使用通配符");
-        }
-        if (amount == null || amount.signum() < 0) {
-            throw new BusinessException(400, "请购总金额不能小于 0");
-        }
+        validateMatchAmount(normalizedCategory, amount);
         List<ProcApprovalRoute> exact = matching(routes, normalizedCategory, amount);
         if (!exact.isEmpty()) {
             return requireSingle(exact);
@@ -125,8 +120,32 @@ public final class ApprovalRoutePolicy {
         return requireSingle(matching(routes, WILDCARD_CATEGORY, amount));
     }
 
-    private static List<ProcApprovalRoute> matching(List<ProcApprovalRoute> routes,
-                                                    String categoryCode, BigDecimal amount) {
+    /**
+     * 校验用于规则匹配的具体品类与金额。
+     *
+     * @param categoryCode 具体品类编码
+     * @param amount 请购金额
+     */
+    public static void validateMatchAmount(String categoryCode, BigDecimal amount) {
+        String normalizedCategory = normalizeCategoryCode(categoryCode);
+        if (WILDCARD_CATEGORY.equals(normalizedCategory)) {
+            throw new BusinessException(400, "请购物料品类不能使用通配符");
+        }
+        if (amount == null || amount.signum() < 0) {
+            throw new BusinessException(400, "请购总金额不能小于 0");
+        }
+    }
+
+    /**
+     * 返回指定品类和金额的活动匹配项。
+     *
+     * @param routes 候选规则
+     * @param categoryCode 具体品类或通配符
+     * @param amount 金额
+     * @return 匹配规则
+     */
+    public static List<ProcApprovalRoute> matching(List<ProcApprovalRoute> routes,
+                                                   String categoryCode, BigDecimal amount) {
         if (routes == null) {
             return List.of();
         }

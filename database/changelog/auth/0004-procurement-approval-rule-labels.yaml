@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: auth-0004-procurement-approval-rule-labels
+      author: omni-stack
+      labels: database:auth,adoption-upgrade
+      comment: 将技术化审批路由文案升级为业务人员可理解的请购审批规则
+      preConditions:
+        - onFail: HALT
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: omni_auth
+            sql: SELECT DATABASE()
+        - tableExists:
+            tableName: sys_permission
+      changes:
+        - sql:
+            sql: |
+              UPDATE sys_permission
+              SET permission_name = CASE permission_code
+                  WHEN 'procurement:approval-route' THEN '请购审批规则'
+                  WHEN 'procurement:approval-route:list' THEN '查看请购审批规则'
+                  WHEN 'procurement:approval-route:create' THEN '创建请购审批规则'
+                  WHEN 'procurement:approval-route:update' THEN '更新请购审批规则'
+                  WHEN 'procurement:approval-route:delete' THEN '删除请购审批规则'
+                  ELSE permission_name
+              END
+              WHERE permission_code IN (
+                  'procurement:approval-route',
+                  'procurement:approval-route:list',
+                  'procurement:approval-route:create',
+                  'procurement:approval-route:update',
+                  'procurement:approval-route:delete'
+              );
+      rollback:
+        - sql:
+            sql: |
+              UPDATE sys_permission
+              SET permission_name = CASE permission_code
+                  WHEN 'procurement:approval-route' THEN '审批路由'
+                  WHEN 'procurement:approval-route:list' THEN '查看审批路由'
+                  WHEN 'procurement:approval-route:create' THEN '创建审批路由'
+                  WHEN 'procurement:approval-route:update' THEN '更新审批路由'
+                  WHEN 'procurement:approval-route:delete' THEN '删除审批路由'
+                  ELSE permission_name
+              END
+              WHERE permission_code IN (
+                  'procurement:approval-route',
+                  'procurement:approval-route:list',
+                  'procurement:approval-route:create',
+                  'procurement:approval-route:update',
+                  'procurement:approval-route:delete'
+              );

@@ -71,6 +71,7 @@ public final class ProcViewAssembler {
         ApprovalRouteViews.RouteVO result = new ApprovalRouteViews.RouteVO();
         result.setId(route.getId());
         result.setRouteCode(route.getRouteCode());
+        result.setRouteName(route.getRouteName());
         result.setCategoryCode(route.getCategoryCode());
         result.setMinAmount(route.getMinAmount());
         result.setMaxAmount(route.getMaxAmount());

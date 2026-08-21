@@ -984,6 +984,19 @@ X-Tenant-Id: 1
 `ASSET_TRANSFER`，处置模型分类为 `ASSET_DISPOSAL`，不得交叉复用或使用其他业务模型；
 Workflow 在实际创建资产审批实例前再次执行相同校验，关闭预校验后的模型变更窗口。
 
+### 16.5 审批规则只读模型聚合
+
+| 方法 | 路径 | 约束 |
+|---|---|---|
+| GET | `/api/internal/workflow/model-versions/published?category=purchase` | 只返回当前租户、分类精确匹配、主模型有效且 currentPublishedVersionId 指向可部署已发布版本的记录 |
+| POST | `/api/internal/workflow/model-versions/resolve` | body 为 `{ "modelVersionIds": [1, 2] }`，单次 1–200 个正整数，按请求顺序返回 |
+| GET | `/api/internal/workflow/model-version/{id}/preview` | 返回安全审批图，不返回 BPMN XML 或 designerJson |
+
+批量解析的 `availability` 仅取 `AVAILABLE/NOT_CURRENT/UNAVAILABLE/MODEL_ARCHIVED/NOT_FOUND`。
+安全预览只包含节点、脱敏边和模型元数据；UserTask 可包含 `roleCode/approvalMode`，条件表达式只返回
+“已配置条件（内容已隐藏）”。有分支或环时 `linearSummary=null`，前端必须提示实际路径由业务数据决定，
+不得把当前组织解析成未来实际审批人。
+
 ## 17. Procurement MVP 契约
 
 ### 17.1 通用边界
@@ -1015,11 +1028,29 @@ Workflow 在实际创建资产审批实例前再次执行相同校验，关闭�
 | 方法 | 路径 | 权限 |
 |---|---|---|
 | GET | `/api/procurement/approval-route/list` | `procurement:approval-route:list` |
+| GET | `/api/procurement/approval-route/workflow-options` | `procurement:approval-route:list` |
+| POST | `/api/procurement/approval-route/match-preview` | `procurement:approval-route:list` |
+| GET | `/api/procurement/approval-route/coverage` | `procurement:approval-route:list` |
+| GET | `/api/procurement/approval-route/impact?routeId={id}` | `procurement:approval-route:list` |
 | POST | `/api/procurement/approval-route` | `procurement:approval-route:create` |
 | PUT | `/api/procurement/approval-route/{id}` | `procurement:approval-route:update` |
 | DELETE | `/api/procurement/approval-route/{id}?version={version}` | `procurement:approval-route:delete` |
 
-路由请求包含 `routeCode/categoryCode/minAmount/maxAmount/modelVersionId/priority/status`；更新不接受 `routeCode`。`minAmount/maxAmount` 必须使用 JSON 十进制字符串（`maxAmount=null` 除外），JSON number 返回 400。活动区间使用 `minAmount <= amount < maxAmount`，`maxAmount=null` 表示无上限。同品类活动区间不得重叠，写事务以租户配置行锁串行化校验。`modelVersionId` 写入前必须属于当前租户、状态为 `PUBLISHED` 且已有非空 `processDefinitionId`，创建新流程实例前 Workflow 再次校验。提交请购时优先选择精确 `categoryCode`，无匹配才回退 `*`；匹配零条或多条均返回 409。
+新 UI 创建请求包含 `routeName/categoryCode/minAmount/maxAmount/modelVersionId/status`。`routeCode` 由服务端生成
+`APR-{ULID}` 且创建后不可修改；一个兼容发布周期内，旧创建请求可以传 `routeCode` 作为缺失
+`routeName` 的回退，服务端记录弃用日志。`priority` 只为兼容高级调用方保留；新建未传时在租户配置锁内取
+同品类最大值加 10，前端不显示该字段。
+
+`minAmount/maxAmount` 必须使用 JSON 十进制字符串（`maxAmount=null` 除外），JSON number 返回 400。
+活动区间使用 `minAmount <= amount < maxAmount`，`maxAmount=null` 表示无上限。同品类活动区间不得重叠，
+写事务以租户配置行锁串行化校验。新建或更换 `modelVersionId` 时只允许当前租户、`category=purchase`、
+`availability=AVAILABLE` 的当前已发布版本；遗留非 purchase 引用在列表标记 `LEGACY_CATEGORY`，不能静默迁移。
+
+`match-preview` 请求为 `{ "categoryCode": "IT_DEVICE", "totalAmount": "10000.0000" }`，响应
+`outcome` 仅取 `MATCHED/NO_MATCH/AMBIGUOUS/WORKFLOW_UNAVAILABLE`。它与请购提交共同调用
+`ApprovalRouteResolver.evaluate`；提交路径把非 MATCHED 结果转换为原有 409，因此浏览器不计算命中。
+`coverage` 按全部启用品类输出从 0 到无穷的 `COVERED/GAP/AMBIGUOUS` 半开片段，并标记默认兜底、
+失效模型和 Workflow 不可用。`impact` 在内存中排除指定规则后复用同一算法，不修改数据库。
 
 ### 17.4 请购申请
 

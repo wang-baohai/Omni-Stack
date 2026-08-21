@@ -5,3 +5,5 @@ databaseChangeLog:
       file: database/changelog/common/db.changelog-common-mq.yaml
   - include:
       file: database/changelog/procurement/0002-procurement-seed.yaml
+  - include:
+      file: database/changelog/procurement/0003-approval-route-business-name.yaml

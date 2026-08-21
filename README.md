@@ -18,6 +18,7 @@
 - **Docker 全家桶一键部署**：`start.bat` / `./start.sh` 一条命令启动 15 个容器（6 个中间件容器、8 个后端微服务、前端），详见 [Docker 部署指南](docs/docker-deployment.md)
 - **CRM 销售前闭环**：独立 `omni-crm` 服务，覆盖线索、客户、联系人、商机、跟进、转换与概览，复用租户、RBAC、数据范围、XSS、审计和 Outbox 能力
 - **SRM → Procurement → Asset 业务链**：供应商准入与报价、请购/RFQ/订单/收货、资产建卡/分配/调拨/处置按独立微服务闭环协作
+- **业务化请购审批规则**：按品类与金额配置规则，支持真实匹配试算、默认兜底、覆盖断档/冲突检测、停用影响分析和安全审批图预览
 - **多提供商社交登录**：GitHub + Google + Gitee OAuth2 一键登录（策略模式可扩展），首次登录自动注册
 - **三层 XSS 纵深防御**：Jackson 反序列化器 + Servlet Filter + Gateway 安全响应头，按租户配置，前端管理界面完整可用
 - **Common Starter 生态**：8 个自动装配模块（mybatis / redis / operlog / job / mqlog / workflow），新服务引入依赖即获能力，零配置

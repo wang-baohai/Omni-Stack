@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: procurement-0003-approval-route-business-name
+      author: omni-stack
+      labels: adoption-upgrade
+      comment: 为请购审批规则增加业务名称并兼容回填既有技术编码
+      preConditions:
+        - onFail: HALT
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: omni_procurement
+            sql: SELECT DATABASE()
+        - not:
+            columnExists:
+              tableName: proc_approval_route
+              columnName: route_name
+      changes:
+        - addColumn:
+            tableName: proc_approval_route
+            columns:
+              - column:
+                  name: route_name
+                  type: varchar(100)
+                  remarks: 业务可读的审批规则名称
+        - sql:
+            sql: |
+              UPDATE proc_approval_route
+              SET route_name = route_code
+              WHERE route_name IS NULL OR TRIM(route_name) = '';
+        - sql:
+            sql: |
+              ALTER TABLE proc_approval_route
+              MODIFY COLUMN route_name varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL
+              COMMENT '业务可读的审批规则名称';
+      rollback:
+        - dropColumn:
+            tableName: proc_approval_route
+            columnName: route_name

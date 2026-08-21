@@ -6,19 +6,19 @@ sources:
   - id: auth-bootstrap
     module: auth
     resource: scripts/sql/seed/auth.sql
-    sha256: "e849defecdb7730e2886dc2f0eb059ce788537b6d1468acc1d5c23d8d52649ba"
+    sha256: "025cb76a3c99026419c733a99995d7bc0fcecd60abdef6e50aec8d145241eef0"
   - id: base-bootstrap
     module: base
     resource: scripts/sql/seed/base.sql
-    sha256: "1f01ef32f72d86a9e0eeaa9d9854baae1f31323bb7ffd76540bc55f341c8fa4b"
+    sha256: "e9133957e7d242b42c80bd653d86b88ab5718344410cdeccac5c8de50fabfc80"
   - id: workflow-bootstrap
     module: workflow
     resource: scripts/sql/seed/workflow.sql
-    sha256: "94b232fc1e4b14dedc4f5ef68ad5113dbcf7c4a521f907e7f188af7ae1ca0344"
+    sha256: "acba4dd6b661b44b2a44d777d87b654e5245990358866f3fd5239b5e64f24b1c"
   - id: crm-bootstrap
     module: crm
     resource: scripts/sql/seed/crm.sql
-    sha256: "18582849a8febbb2b657f1ef7511aa782d1fe1d8e5bf394bc6be191ffea9f964"
+    sha256: "8da1727de798aed1d6d442301eb962cb2ce8cfa819e61802c1b70ce2bb301c25"
   - id: srm-bootstrap
     module: srm
     resource: scripts/sql/seed/srm.sql
@@ -26,15 +26,15 @@ sources:
   - id: procurement-bootstrap
     module: procurement
     resource: scripts/sql/seed/procurement.sql
-    sha256: "e8449d705269304674de81acf4f3b5efb1a2cc7807595b015ea0de151d37ef7f"
+    sha256: "f4564f297ae87dc839851949631368489493dd3fceefc3a7b53a85e06685b36c"
   - id: nacos-bootstrap
     module: nacos
     resource: scripts/sql/seed/nacos.sql
-    sha256: "31722ba44f1b169c4593ededd9a8cc197735046914a77fa7cc3d01ad743cc717"
+    sha256: "67a00d737bdd35cfcf0ff5820518a165297d479cf2cb211f4aaef6b86e3b9ae9"
   - id: xxl-job-bootstrap
     module: xxl-job
     resource: scripts/sql/seed/xxl-job.sql
-    sha256: "90428030e25eb4a5e61f5d34a4f645dc5c4345db8255861866f110b18d9d2cc1"
+    sha256: "f9edab4bce79c47a935d29f9b401ac0ede3f9543fada4547e60e9d9caf1c5ce8"
 
 # 兼容期模块 ID 镜像；scaffold/catalog/modules.yaml 是依赖和 provisioning 声明的单一事实来源，
 # ModuleCatalogContractTest 强制两份 ID 与全部 provisioningSeedIds 一致。
