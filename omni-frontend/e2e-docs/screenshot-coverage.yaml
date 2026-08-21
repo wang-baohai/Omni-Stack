@@ -1,0 +1,103 @@
+version: 1
+baseline_date: 2026-08-21
+status_values: [missing, partial, covered, exempt]
+required_states: [entry, list, detail, create-or-edit, key-action, success, failure-or-forbidden]
+locales: [zh-CN, en-US, ja-JP, ko-KR]
+default_viewport: { width: 1440, height: 900 }
+
+modules:
+  - id: authentication
+    status: partial
+    required_flows: [password-captcha, register, social-login, device-code, expired-session]
+    existing_assets:
+      - docs/images/login.png
+      - docs/images/register.png
+      - docs/images/social-login-buttons.png
+      - docs/images/social-consent.png
+      - docs/images/social-device-init.png
+      - docs/images/social-device-verify.png
+    gaps: [four-locale-assets, expired-session, forbidden-state, reproducible-fixture]
+  - id: system-management
+    status: partial
+    required_flows: [tenant, organization, user, role, permission, menu, data-scope, config, dictionary, oauth2, online-user, login-record, audit, xss]
+    existing_assets: [docs/images/dashboard.png, docs/images/system-user.png, docs/images/system-dict.png, docs/images/system-xss.png]
+    gaps: [most-management-flows, four-locale-assets, failure-states]
+  - id: scheduling-workspace
+    status: partial
+    required_flows: [system-job, job-type, personal-create, schedule, trigger, pause, resume, execution-log]
+    existing_assets: [docs/images/job-system.png, docs/images/job-workspace.png]
+    gaps: [job-type, lifecycle-results, four-locale-assets, failure-states]
+  - id: messaging-monitoring
+    status: partial
+    required_flows: [message-status, retry, dead-letter, operation-log, trace-diagnosis]
+    existing_assets: [docs/images/monitor-mqmessage.png, docs/images/monitor-operlog.png]
+    gaps: [retry, dead-letter, trace-diagnosis, four-locale-assets]
+  - id: workflow
+    status: partial
+    required_flows: [model-create, bpmn-design, candidate-config, validation, publish, start, approval, countersign, completion, instance-tracking]
+    existing_assets: [docs/images/workflow-designer.png, docs/images/workflow-approval.png]
+    gaps: [model-lifecycle, countersign, tracking, four-locale-assets, failure-states]
+  - id: crm
+    status: partial
+    required_flows: [lead, lead-conversion, customer, contact, opportunity-stage, activity, overview]
+    existing_assets:
+      - docs/images/crm-lead-list.png
+      - docs/images/crm-lead-convert.png
+      - docs/images/crm-customer-list.png
+      - docs/images/crm-customer-360.png
+      - docs/images/crm-contact-list.png
+      - docs/images/crm-opportunity-list.png
+      - docs/images/crm-opportunity-board.png
+      - docs/images/crm-activity-timeline.png
+      - docs/images/crm-overview.png
+    gaps: [four-locale-assets, permission-and-failure-states, reproducible-fixture]
+  - id: srm
+    status: partial
+    required_flows: [invite, portal-register, admission, activation, lifecycle, evaluation, risk, supplier-quotation]
+    existing_assets:
+      - docs/images/srm-invite.png
+      - docs/images/srm-supplier-list.png
+      - docs/images/srm-evaluation.png
+      - docs/images/srm-risk.png
+      - docs/images/srm-overview.png
+      - docs/images/srm-portal.png
+      - docs/images/social-portal-login.png
+      - docs/images/social-portal-profile.png
+      - docs/images/srm-portal-login-simple.png
+      - docs/images/srm-portal-profile-deployed.png
+      - docs/images/srm-portal-profile-fixed.png
+    gaps: [admission-lifecycle, supplier-quotation, four-locale-assets, stable-mobile-flow]
+  - id: procurement
+    status: missing
+    required_flows: [material, approval-rule-match, requisition-approval, rfq, quotation-receipt, comparison, purchase-order, goods-receipt, overview]
+    existing_assets: []
+    special_viewports:
+      - { width: 390, height: 844, flow: approval-rule-match }
+      - { width: 1024, height: 768, flow: approval-rule-match }
+    gaps: [all-scenes]
+  - id: asset
+    status: missing
+    required_flows: [receipt-card, ledger, allocation, acceptance, return, transfer-approval, disposal-approval, overview]
+    existing_assets: []
+    gaps: [all-scenes]
+  - id: permissions-exceptions
+    status: missing
+    required_flows: [employee-scope, procurement-admin-scope, supplier-scope, forbidden-403, not-found-404, menu-failure, api-failure]
+    existing_assets: []
+    gaps: [all-scenes]
+  - id: scaffold-development
+    status: missing
+    required_flows: [create-service, crud-generate, preset-select, lite-mode]
+    existing_assets: []
+    gaps: [implementation-not-yet-delivered, all-scenes]
+  - id: operations
+    status: missing
+    required_flows: [compose-start, health-check, trace, dashboard, alert]
+    existing_assets: []
+    gaps: [observability-not-yet-delivered, all-scenes]
+
+rules:
+  - 正式图片必须在 screenshot-manifest.yaml 中与稳定 Playwright 用例一一对应
+  - 同一流程的四语言必须使用相同 fixture、步骤编号和视口
+  - 正式图片不得包含验证码答案、令牌、内部密钥、真实密码或个人敏感数据
+  - 临时图片在任务收尾时删除，只保留 manifest 引用的最终图片
