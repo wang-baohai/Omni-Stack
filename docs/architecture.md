@@ -365,7 +365,7 @@ RocketMQ Broker (通过 StreamBridge)
 - **命名卷**（`mysql-data`、`redis-data`）用于数据持久化
 - **健康检查**（depends_on + service_healthy）确保分层启动链
 - **Bridge 网络**（`omni-network`）用于容器间通信
-- **SQL 初始化挂载**：`scripts/sql/init-all.sql`、`init-nacos.sql`、`init-xxl-job.sql` 挂载到 MySQL 的 `docker-entrypoint-initdb.d/`
+- **迁移启动门**：一次性 `omni-db-migrator` 使用 Liquibase 完成九库结构和幂等种子；Nacos、XXL-JOB 与应用只在迁移成功后启动
 
 ### 9.2 数据库 Schema
 
@@ -451,7 +451,7 @@ erDiagram
 
 > 详见 [design/asset-design.md](design/asset-design.md)
 
-**权威 DDL 和种子数据**：`scripts/sql/init-all.sql`
+**权威数据库事实源**：结构、索引、约束和升级由 `database/changelog/` 管理；正式幂等种子由 `scripts/sql/seed/` 管理，并受 `database/seed/manifest.yaml` 的 SHA-256 和自然键断言约束。`scripts/sql/init-all.sql` 仅为兼容期遗留文件，不参与 Compose 初始化。
 
 ---
 
@@ -777,7 +777,7 @@ spring:
 
 ### 14.6 添加权限种子数据
 
-在 `scripts/sql/init-all.sql` 中添加 `sys_permission` 记录：
+在 `scripts/sql/seed/auth.sql` 中添加幂等 `sys_permission` 记录，并刷新 `database/seed/manifest.yaml` 的校验和与自然键断言：
 
 ```sql
 INSERT INTO sys_permission

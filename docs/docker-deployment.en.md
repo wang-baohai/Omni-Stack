@@ -208,15 +208,12 @@ mysql:
     TZ: Asia/Shanghai                  # Timezone
   volumes:
     - omni-mysql-data:/var/lib/mysql
-  volumes:
-    - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-    - ./scripts/sql/init-nacos.sql:/docker-entrypoint-initdb.d/02-init-nacos.sql:ro
-    - ./scripts/sql/init-xxl-job.sql:/docker-entrypoint-initdb.d/03-init-xxl-job.sql:ro
 ```
 
 **Key Points**:
-- Three SQL scripts auto-execute in order: `01-init.sql` (business DBs + seed data) → `02-init-nacos.sql` (Nacos config DB) → `03-init-xxl-job.sql` (XXL-JOB DB)
-- Mounted as `:ro` (read-only) to prevent accidental modification
+- MySQL entrypoint no longer mounts aggregate SQL files; fresh and upgraded environments use the same Liquibase chain
+- The one-shot `omni-db-migrator` creates databases, migrates schema, applies formal seeds, and verifies assertions; Nacos, XXL-JOB, and applications start only after it exits successfully
+- Application services use the least-privileged `MYSQL_APP_USERNAME` / `MYSQL_APP_PASSWORD` account, not the migration administrator
 - MySQL uses the named volume `omni-mysql-data`; normal container recreation preserves data
 
 ### 5.2 Redis 7.4
@@ -404,13 +401,19 @@ server {
 
 ### 8.1 Database Initialization Chain
 
-MySQL container auto-executes SQL scripts in `/docker-entrypoint-initdb.d/` on first startup:
+Compose enforces one migration startup gate for both empty volumes and later upgrades:
 
 ```
-01-init.sql       → Create omni_auth / omni_base / omni_workflow databases + seed data
-02-init-nacos.sql → Create nacos_config database + Nacos config data
-03-init-xxl-job.sql → Create xxl_job database + XXL-JOB scheduling data
+MySQL healthy
+  → omni-db-migrator migrate (Liquibase changes for all nine databases)
+  → verify SHA-256 for 8 seed sources and 24 natural-key assertions
+  → migrator exits successfully
+  → Nacos / XXL-JOB / backend services start
 ```
+
+`database/changelog/` is the schema source of truth. Formal DML seeds live in `scripts/sql/seed/` and are
+declared by `database/seed/manifest.yaml`. `scripts/sql/init-all.sql` and legacy `migrate-*.sql` files remain
+only until compatibility cleanup and do not participate in Compose startup. Flowable runtime schema updates are disabled.
 
 ### 8.2 Data Persistence Strategy
 
@@ -818,9 +821,8 @@ No production credential is hard-coded. Configure MySQL, Redis, Nacos, XXL-JOB, 
 | Nginx Config | `docker/frontend/nginx.conf` | Frontend reverse proxy rules |
 | Broker Config | `docker/rocketmq/broker-docker.conf` | RocketMQ Docker network config |
 | Maven Mirror | `omni-backend/docker-settings.xml` | Aliyun Maven acceleration |
-| DB Init | `scripts/sql/init-all.sql` | Business schema & seed data |
-| Nacos Init | `scripts/sql/init-nacos.sql` | Nacos config data |
-| XXL-JOB Init | `scripts/sql/init-xxl-job.sql` | Scheduling task data |
+| DB Migrations | `database/changelog/` | Liquibase schema, constraints, and upgrades for all nine databases |
+| DB Seeds | `scripts/sql/seed/`, `database/seed/manifest.yaml` | Idempotent DML, source checksums, and natural-key assertions |
 | Start Script (Linux) | `start.sh` | One-click start |
 | Start Script (Windows) | `start.bat` | One-click start (with port protection) |
 | Stop Script (Linux) | `stop.sh` | One-click stop |

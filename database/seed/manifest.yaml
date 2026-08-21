@@ -1,6 +1,41 @@
 version: "1.0.0-bootstrap"
 digestAlgorithm: "SHA-256"
 
+# 正式种子文件摘要是迁移输入契约；任何变更必须新增 changeSet 并同步版本和摘要。
+sources:
+  - id: auth-bootstrap
+    module: auth
+    resource: scripts/sql/seed/auth.sql
+    sha256: "e849defecdb7730e2886dc2f0eb059ce788537b6d1468acc1d5c23d8d52649ba"
+  - id: base-bootstrap
+    module: base
+    resource: scripts/sql/seed/base.sql
+    sha256: "1f01ef32f72d86a9e0eeaa9d9854baae1f31323bb7ffd76540bc55f341c8fa4b"
+  - id: workflow-bootstrap
+    module: workflow
+    resource: scripts/sql/seed/workflow.sql
+    sha256: "94b232fc1e4b14dedc4f5ef68ad5113dbcf7c4a521f907e7f188af7ae1ca0344"
+  - id: crm-bootstrap
+    module: crm
+    resource: scripts/sql/seed/crm.sql
+    sha256: "18582849a8febbb2b657f1ef7511aa782d1fe1d8e5bf394bc6be191ffea9f964"
+  - id: srm-bootstrap
+    module: srm
+    resource: scripts/sql/seed/srm.sql
+    sha256: "e4e831920866be9502555fa5786348b2ca5841bfeb4ee7511d477517cbc80c59"
+  - id: procurement-bootstrap
+    module: procurement
+    resource: scripts/sql/seed/procurement.sql
+    sha256: "e8449d705269304674de81acf4f3b5efb1a2cc7807595b015ea0de151d37ef7f"
+  - id: nacos-bootstrap
+    module: nacos
+    resource: scripts/sql/seed/nacos.sql
+    sha256: "31722ba44f1b169c4593ededd9a8cc197735046914a77fa7cc3d01ad743cc717"
+  - id: xxl-job-bootstrap
+    module: xxl-job
+    resource: scripts/sql/seed/xxl-job.sql
+    sha256: "90428030e25eb4a5e61f5d34a4f645dc5c4345db8255861866f110b18d9d2cc1"
+
 # 兼容期模块 ID 镜像；scaffold/catalog/modules.yaml 是依赖和 provisioning 声明的单一事实来源，
 # ModuleCatalogContractTest 强制两份 ID 与全部 provisioningSeedIds 一致。
 modules:
@@ -320,10 +355,12 @@ assertions:
     database: xxl_job
     query: >-
       SELECT CONCAT_WS('|', 'group', app_name) AS seed_key
-      FROM xxl_job_group
+      FROM xxl_job_group WHERE app_name = 'xxl-job-executor-sample'
       UNION ALL SELECT CONCAT_WS('|', 'job', job_group.app_name, job.executor_handler)
       FROM xxl_job_info job JOIN xxl_job_group job_group ON job_group.id = job.job_group
-      UNION ALL SELECT CONCAT_WS('|', 'user', username) FROM xxl_job_user
-      UNION ALL SELECT CONCAT_WS('|', 'lock', lock_name) FROM xxl_job_lock
-    expectedRows: 20
-    expectedSha256: "7d4cfd11d7d1474d80b4674152122f8bc484616547981a887f3a3db33fdcf374"
+      WHERE job_group.app_name = 'xxl-job-executor-sample' AND job.executor_handler = 'demoJobHandler'
+      UNION ALL SELECT CONCAT_WS('|', 'user', username) FROM xxl_job_user WHERE username = 'admin'
+      UNION ALL SELECT CONCAT_WS('|', 'lock', lock_name) FROM xxl_job_lock WHERE lock_name = 'schedule_lock'
+    # 这里只断言静态引导种子；各服务执行器和系统任务由运行时幂等注册，不能阻断 one-shot 迁移。
+    expectedRows: 4
+    expectedSha256: "0ece7d9707cf9c8097108a1ff7390c63aca5ceceaa120c70c85e81c7e1c16daf"

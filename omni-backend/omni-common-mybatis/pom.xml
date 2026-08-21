@@ -12,7 +12,7 @@
 
     <artifactId>omni-common-mybatis</artifactId>
     <name>Omni Common MyBatis-Plus</name>
-    <description>MyBatis-Plus auto-configuration starter with pagination plugin and YAML defaults</description>
+    <description>MyBatis-Plus auto-configuration starter with optimistic locking, pagination, and YAML defaults</description>
 
     <dependencies>
         <!-- Common Core Module -->
@@ -47,6 +47,13 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

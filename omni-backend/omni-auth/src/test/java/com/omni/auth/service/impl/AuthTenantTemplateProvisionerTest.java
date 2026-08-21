@@ -72,7 +72,9 @@ class AuthTenantTemplateProvisionerTest {
         assignIdOnInsert(permissionMapper, 11L);
         assignIdOnInsert(roleMapper, 21L);
         doAnswer(invocation -> {
-            invocation.<SysOrgUnit>getArgument(0).setId(30L);
+            SysOrgUnit root = invocation.getArgument(0);
+            assertThat(root.getPath()).isEqualTo("/");
+            root.setId(30L);
             return 1;
         }).when(orgMapper).insert(any(SysOrgUnit.class));
         doAnswer(invocation -> {

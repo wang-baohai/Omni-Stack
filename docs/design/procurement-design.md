@@ -646,8 +646,10 @@ omni-backend/omni-procurement/
 | `docker/backend/Dockerfile` | POM 缓存层 |
 | `docker-compose.yml` | Procurement 服务、8106 |
 | `start.bat/start.sh` | build 列表加入 Procurement |
-| `scripts/sql/init-all.sql` | `omni_procurement` DDL、物料品类种子数据、权限和角色 |
-| `scripts/sql/sp_init_tenant.sql` | 新租户初始化同步 |
+| `database/changelog/procurement/` | 为采购结构变更增加 forward-only Liquibase changeSet |
+| `scripts/sql/seed/procurement.sql` | 物料品类等正式幂等种子；更新后刷新 seed manifest |
+| `scripts/sql/seed/auth.sql` | 采购权限和角色正式幂等种子；更新后刷新 seed manifest |
+| Procurement `TenantModuleProvisioner` | 新租户 13 项物料分类的幂等初始化 |
 | `omni-workflow` | 增加幂等内部启动/任务分配校验 API，以及 `workflow.process.completed.v1` Outbox 事件 |
 | `docs/workflow.md` | 补充跨服务幂等启动、结果事件和采购审批流程模型说明 |
 | Frontend router/layout/menu/locales | 图标、菜单、i18n |

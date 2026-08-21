@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: crm-0002-bootstrap-seed
+      author: omni-stack
+      labels: seed-v1
+      context: crm
+      comment: 按业务自然键幂等写入 CRM 默认配置与演示基线
+      changes:
+        - sqlFile:
+            path: scripts/sql/seed/crm.sql
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: SELECT 1;

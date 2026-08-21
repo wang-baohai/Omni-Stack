@@ -946,9 +946,9 @@ VALUES
     (1, 'workflow_category', 'purchase',       '采购审批', 3, 1, 'system'),
     (1, 'workflow_category', 'contract',       '合同审批', 4, 1, 'system'),
     (1, 'workflow_category', 'general',        '通用审批', 5, 1, 'system'),
-    (1, 'workflow_category', 'ASSET_TRANSFER',          '资产调拨', 6, 1, 'system'),
-    (1, 'workflow_category', 'ASSET_DISPOSAL',          '资产处置', 7, 1, 'system'),
-    (1, 'workflow_category', 'SRM_SUPPLIER_ONBOARDING', '供应商审批', 8, 1, 'system');
+    (1, 'workflow_category', 'asset_transfer', '资产调拨', 6, 1, 'system'),
+    (1, 'workflow_category', 'asset_disposal', '资产处置', 7, 1, 'system'),
+    (1, 'workflow_category', 'supplier',       '供应商审批', 8, 1, 'system');
 
 -- ============================================================
 -- Section 9: 工作流可视化设计器升级
@@ -3830,24 +3830,24 @@ VALUES
 
 -- 评分标准种子数据（每个手动指标 3 条：GREEN=1分, YELLOW=2分, RED=3分）
 INSERT IGNORE INTO srm_risk_criterion (tenant_id, indicator_type_id, criterion_label, score, risk_level, sort, status, deleted, create_by)
-SELECT 1, t.id, c.criterion_label, c.score, c.risk_level, c.sort, 1, 0, 'system'
+SELECT 1, t.id, c.cl, c.s, c.rl, c.so, 1, 0, 'system'
 FROM srm_risk_indicator_type t
 JOIN (
     SELECT 'FINANCIAL' tc, '流动比率>2，资金充裕' cl, 1 s, 'GREEN' rl, 1 so
     UNION ALL SELECT 'FINANCIAL', '流动比率1~2，资金偏紧', 2, 'YELLOW', 2
-    UNION ALL SELECT 'FINANCIAL', '流动比率<1，资金链紧张', 3, 'RED', 3
-    UNION ALL SELECT 'COMPLIANCE', '无违规记录，信用良好', 1, 'GREEN', 4
-    UNION ALL SELECT 'COMPLIANCE', '存在轻微违规或合同纠纷', 2, 'YELLOW', 5
+    UNION ALL SELECT 'FINANCIAL', '流动比率<1，资金紧张', 3, 'RED', 3
+    UNION ALL SELECT 'COMPLIANCE', '无重大合规问题', 1, 'GREEN', 4
+    UNION ALL SELECT 'COMPLIANCE', '存在轻微违规，已整改', 2, 'YELLOW', 5
     UNION ALL SELECT 'COMPLIANCE', '存在重大违规或诉讼', 3, 'RED', 6
-    UNION ALL SELECT 'SUPPLY', '准时交付率>95%，产能充足', 1, 'GREEN', 7
-    UNION ALL SELECT 'SUPPLY', '准时交付率80~95%，产能偏紧', 2, 'YELLOW', 8
-    UNION ALL SELECT 'SUPPLY', '准时交付率<80%，供应不稳定', 3, 'RED', 9
-    UNION ALL SELECT 'COOPERATION', '响应及时，沟通顺畅', 1, 'GREEN', 10
-    UNION ALL SELECT 'COOPERATION', '响应偶有延迟，需催促', 2, 'YELLOW', 11
-    UNION ALL SELECT 'COOPERATION', '响应严重滞后，配合度差', 3, 'RED', 12
-    UNION ALL SELECT 'QUALITY', '来料合格率>98%，质量体系完善', 1, 'GREEN', 13
-    UNION ALL SELECT 'QUALITY', '来料合格率90~98%，偶有质量问题', 2, 'YELLOW', 14
-    UNION ALL SELECT 'QUALITY', '来料合格率<90%，质量风险高', 3, 'RED', 15
+    UNION ALL SELECT 'SUPPLY', '交货准时率>95%，供应稳定', 1, 'GREEN', 7
+    UNION ALL SELECT 'SUPPLY', '交货准时率80~95%，偶尔延迟', 2, 'YELLOW', 8
+    UNION ALL SELECT 'SUPPLY', '交货准时率<80%，供应不稳定', 3, 'RED', 9
+    UNION ALL SELECT 'COOPERATION', '合作满意度高，沟通顺畅', 1, 'GREEN', 10
+    UNION ALL SELECT 'COOPERATION', '合作满意度一般，偶有摩擦', 2, 'YELLOW', 11
+    UNION ALL SELECT 'COOPERATION', '合作满意度差，沟通困难', 3, 'RED', 12
+    UNION ALL SELECT 'QUALITY', '产品合格率>98%，质量优秀', 1, 'GREEN', 13
+    UNION ALL SELECT 'QUALITY', '产品合格率90~98%，质量良好', 2, 'YELLOW', 14
+    UNION ALL SELECT 'QUALITY', '产品合格率<90%，质量堪忧', 3, 'RED', 15
 ) c ON t.type_code = c.tc
 WHERE t.tenant_id = 1 AND t.deleted = 0;
 

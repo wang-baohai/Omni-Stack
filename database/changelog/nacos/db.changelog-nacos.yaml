@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: database/changelog/vendor/nacos/0001-nacos-3.1.1-schema.yaml
+  - include:
+      file: database/changelog/nacos/0002-nacos-seed.yaml

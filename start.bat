@@ -125,7 +125,7 @@ echo.
 
 :: --- 构建应用镜像 ---
 echo [4/5] 构建应用镜像（首次构建约 5-10 分钟）...
-docker compose build omni-auth omni-base omni-workflow omni-crm omni-srm omni-procurement omni-asset omni-gateway omni-frontend 2>&1
+docker compose build omni-db-migrator omni-auth omni-base omni-workflow omni-crm omni-srm omni-procurement omni-asset omni-gateway omni-frontend 2>&1
 if !errorlevel! neq 0 (
     echo.
     echo [ERROR] 构建失败！请检查以上错误信息。
@@ -146,7 +146,8 @@ if "%~1"=="" (
 if !errorlevel! neq 0 (
     echo.
     echo [ERROR] 启动失败！请检查以上错误信息。
-    echo         运行 docker compose logs 查看详细日志。
+    echo         若 omni-db-migrator 失败，先查看 docker compose logs omni-db-migrator。
+    echo         既有旧数据卷必须按升级文档完成备份和 adopt-current，禁止跳过迁移器。
     echo.
 ) else (
     echo.

@@ -1,7 +1,7 @@
 # S0-04 db-migrator 骨架证据
 
 > 日期：2026-08-20
-> 状态：In Progress；骨架和安全门已完成，Compose one-shot 接入与 S0-05 正式 changeSet 尚未完成。
+> 状态：历史检查点已完成；Compose one-shot、正式 changeSet 与 G1 最终结果见 [s0-08-g1.md](s0-08-g1.md)。
 > Liquibase：5.0.2，由 Spring Boot 4.0.6 依赖管理锁定。
 
 ## 已交付
@@ -30,7 +30,7 @@
 
 MySQL 在不选择默认数据库时，Liquibase 5 的 `validate()` 会尝试初始化空 catalog 下的历史表。实现因此改用 `OfflineConnection`，避免看似只读的 validate 修改环境。Fresh migrate 将以一个固定、幂等的 `omni_auth` 建库语句完成最小引导，然后平台历史保存在 `omni_auth.DATABASECHANGELOG`；在 S0-05/S0-06 完成前不会对现有数据库运行该路径。
 
-## 下一步
+## 当时记录的下一步（现均已在 S0-05～S0-08 完成）
 
 1. 将 25 个旧 SQL 的结构拆入平台、七个业务、Flowable vendor、Nacos vendor、XXL-JOB vendor 和公共 MQ changeSet。
 2. 建立 seed manifest 及 `verify-seed`。

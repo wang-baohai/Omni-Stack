@@ -369,7 +369,7 @@ xxl-job-admin:
       --spring.datasource.password=root123
 ```
 
-`xxl_job` データベースは MySQL の `docker-entrypoint-initdb.d/` にマウントされた `scripts/sql/init-xxl-job.sql` により初期化されます。
+`xxl_job` データベースは one-shot の `omni-db-migrator` が `database/changelog/xxl-job/` から初期化します。正式なスケジューラシードは `scripts/sql/seed/xxl-job.sql` にあり、seed manifest で検証します。
 
 ### データベーステーブル（omni_base スキーマ）
 
@@ -451,7 +451,8 @@ xxl-job-admin:
 | コンテナ内部ポート | 8080 | XXL-JOB Admin のデフォルトポート |
 | ホストマッピングポート | 18080 | Gateway（8102）との競合を回避 |
 | データベース接続 | `mysql:3306` | Docker 内部ネットワークで `mysql` ホスト名を解決 |
-| データベース初期化 | `scripts/sql/init-xxl-job.sql` | MySQL の `docker-entrypoint-initdb.d/` にマウント |
+| データベース構造 | `database/changelog/xxl-job/` | XXL-JOB 起動前に one-shot migrator が適用 |
+| スケジューラシード | `scripts/sql/seed/xxl-job.sql` | `database/seed/manifest.yaml` で検証する冪等 DML |
 | デフォルトアカウント | admin / 123456 | 本番環境では必ず変更すること |
 
 ### エグゼキュータの登録

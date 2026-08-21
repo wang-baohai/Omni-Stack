@@ -208,15 +208,12 @@ mysql:
     TZ: Asia/Shanghai                  # タイムゾーン
   volumes:
     - omni-mysql-data:/var/lib/mysql
-  volumes:
-    - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-    - ./scripts/sql/init-nacos.sql:/docker-entrypoint-initdb.d/02-init-nacos.sql:ro
-    - ./scripts/sql/init-xxl-job.sql:/docker-entrypoint-initdb.d/03-init-xxl-job.sql:ro
 ```
 
 **ポイント**：
-- 3 つの SQL スクリプトが順序通り自動実行：`01-init.sql`（ビジネスDB + 初期データ）→ `02-init-nacos.sql`（Nacos 設定DB）→ `03-init-xxl-job.sql`（XXL-JOB DB）
-- `:ro`（読み取り専用）でマウントし、偶発的な変更を防止
+- MySQL entrypoint には集約 SQL をマウントせず、新規環境とアップグレード環境で同じ Liquibase チェーンを使用
+- one-shot の `omni-db-migrator` が DB 作成、構造移行、正式シード、検証を行い、正常終了後にのみ Nacos、XXL-JOB、各アプリを起動
+- アプリケーションは移行管理者ではなく、最小権限の `MYSQL_APP_USERNAME` / `MYSQL_APP_PASSWORD` を使用
 - MySQL は名前付きボリューム `omni-mysql-data` を使用し、通常のコンテナ再作成ではデータを保持
 
 ### 5.2 Redis 7.4
@@ -404,13 +401,19 @@ server {
 
 ### 8.1 データベース初期化チェーン
 
-MySQL コンテナ初回起動時に `/docker-entrypoint-initdb.d/` の SQL スクリプトが自動実行されます：
+Compose は空ボリュームと後続アップグレードに同一の移行起動ゲートを適用します：
 
 ```
-01-init.sql       → omni_auth / omni_base / omni_workflow データベース作成 + 初期データ
-02-init-nacos.sql → nacos_config データベース作成 + Nacos 設定データ
-03-init-xxl-job.sql → xxl_job データベース作成 + XXL-JOB スケジューリングデータ
+MySQL healthy
+  → omni-db-migrator migrate（9 DB の Liquibase changeSet）
+  → 8 seed source の SHA-256 と 24 件の自然キー検証
+  → migrator 正常終了
+  → Nacos / XXL-JOB / バックエンドサービス起動
 ```
+
+構造の正規情報源は `database/changelog/` です。正式な DML シードは `scripts/sql/seed/` にあり、
+`database/seed/manifest.yaml` で宣言します。`scripts/sql/init-all.sql` と旧 `migrate-*.sql` は互換性
+クリーンアップまで残しますが、Compose 起動には使用しません。Flowable の実行時スキーマ更新は無効です。
 
 ### 8.2 データ永続化戦略
 
@@ -818,9 +821,8 @@ docker compose logs --timestamps omni-auth | head -5
 | Nginx 設定 | `docker/frontend/nginx.conf` | フロントエンドリバースプロキシルール |
 | Broker 設定 | `docker/rocketmq/broker-docker.conf` | RocketMQ Docker ネットワーク設定 |
 | Maven ミラー | `omni-backend/docker-settings.xml` | Aliyun Maven 高速化 |
-| DB 初期化 | `scripts/sql/init-all.sql` | ビジネススキーマ＆初期データ |
-| Nacos 初期化 | `scripts/sql/init-nacos.sql` | Nacos 設定データ |
-| XXL-JOB 初期化 | `scripts/sql/init-xxl-job.sql` | スケジューリングタスクデータ |
+| DB マイグレーション | `database/changelog/` | 9 DB の Liquibase スキーマ、制約、アップグレード |
+| DB シード | `scripts/sql/seed/`、`database/seed/manifest.yaml` | 冪等 DML、ソースチェックサム、自然キー検証 |
 | 起動スクリプト (Linux) | `start.sh` | ワンクリック起動 |
 | 起動スクリプト (Windows) | `start.bat` | ワンクリック起動（ポート保護付き） |
 | 停止スクリプト (Linux) | `stop.sh` | ワンクリック停止 |

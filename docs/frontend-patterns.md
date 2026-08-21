@@ -623,8 +623,8 @@ src/
 | 1 | `src/router/index.ts` → `iconMap` | 添加 `'<module>:<feature>': '<IconName>'`（如 `'base:dict': 'Collection'`） |
 | 2 | `src/constants/menu.ts` → `menuI18nMap` | 添加模块目录和菜单项的 i18n key 映射 |
 | 3 | `src/locales/zh-CN.ts` + `en-US.ts` | 添加 `common.<module>Management`（目录名）、`common.<feature>Management`（菜单名）和功能级翻译 key |
-| 4 | `scripts/sql/init-all.sql` → `sys_permission` | 添加 DIRECTORY（模块分组）+ MENU（功能页面）+ BUTTON/API（操作权限）种子数据 |
-| 5 | `scripts/sql/init-all.sql` → `sys_role_permission` | 为 SUPER_ADMIN 角色分配新权限节点 |
+| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | 添加幂等 DIRECTORY（模块分组）+ MENU（功能页面）+ BUTTON/API（操作权限）种子数据，并刷新 seed manifest |
+| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | 幂等地为 SUPER_ADMIN 角色分配新权限节点，并增加自然键断言 |
 
 ### 参考实现：字典管理模块
 

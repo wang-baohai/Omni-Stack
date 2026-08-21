@@ -204,6 +204,8 @@ public class AuthTenantTemplateProvisioner implements TenantLocalProvisioner {
         root.setParentId(0L);
         root.setName(tenantName);
         root.setType("ORG");
+        // path 为非空列；先写入合法占位值，获得自增 ID 后再更新为最终物化路径。
+        root.setPath("/");
         root.setDepth(1);
         root.setSort(0);
         root.setStatus(1);

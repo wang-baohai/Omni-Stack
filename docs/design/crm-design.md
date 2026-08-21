@@ -642,15 +642,15 @@ omni-backend/omni-crm/
 | `docker/backend/Dockerfile` | POM 缓存层 `COPY omni-crm/pom.xml omni-crm/` |
 | `docker-compose.yml` | CRM 服务、8104、DB/Redis/Nacos/MQ/XXL/internal token |
 | `start.bat/start.sh` | build 列表加入 CRM；Windows 端口保护加入 8104 |
-| `scripts/sql/init-all.sql` | `omni_crm` DDL、默认配置、权限和角色 |
-| `scripts/sql/sp_init_tenant.sql` | 与内嵌过程同步 |
-| `scripts/sql/init-tenant-a.sql` | 演示租户同步（若继续维护） |
-| `scripts/sql/migrate-crm-mvp.sql` | 已有库/已有租户幂等迁移 |
+| `database/changelog/crm/` | 为 CRM 结构变更增加 forward-only Liquibase changeSet |
+| `scripts/sql/seed/crm.sql` | CRM 默认配置的正式幂等种子；更新后刷新 seed manifest |
+| `scripts/sql/seed/auth.sql` | CRM 权限和角色的正式幂等种子；更新后刷新 seed manifest |
+| CRM `TenantModuleProvisioner` | 新租户 CRM 配置和阶段的幂等初始化 |
 | Frontend router/layout/menu/locales | 图标、菜单、i18n |
 
-权威 DDL 目前是 `scripts/sql/init-all.sql`；仓库没有统一启用 Flyway。Docker entrypoint 也只在空卷首次执行，因此必须提供已有环境迁移，后续再引入版本化迁移工具。
+权威结构事实源是 `database/changelog/crm/`；正式种子由 `scripts/sql/seed/crm.sql` 与 `scripts/sql/seed/auth.sql` 管理，并由 `database/seed/manifest.yaml` 校验。Compose 对 fresh 和 upgrade 统一运行 `omni-db-migrator`，旧聚合 SQL 不再参与启动。
 
-权限迁移不能只用固定 ID + `INSERT IGNORE`：`sys_permission` 没有 `(tenant_id,permission_code)` 唯一键。应按 tenant + code 的 `NOT EXISTS` 幂等插入，并正确重建 parent/path；同时更新 SUPER_ADMIN、CRM 角色及新租户初始化。
+权限种子不能只用固定 ID + `INSERT IGNORE`：`sys_permission` 没有 `(tenant_id,permission_code)` 唯一键。应按 tenant + code 的 `NOT EXISTS` 幂等插入，并正确重建 parent/path；同时更新 SUPER_ADMIN、CRM 角色、seed manifest 断言及新租户初始化。
 
 Gateway 已有显式业务路由时，生产推荐关闭 discovery locator；若暂时保留，必须同时阻断 `/internal/**`、`/api/internal/**` 和 `/omni-crm/internal/**` 等服务发现直达路径。
 

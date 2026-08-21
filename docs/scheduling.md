@@ -369,7 +369,7 @@ xxl-job-admin:
       --spring.datasource.password=root123
 ```
 
-`xxl_job` 数据库通过 `scripts/sql/init-xxl-job.sql` 挂载到 MySQL 的 `docker-entrypoint-initdb.d/` 进行初始化。
+`xxl_job` 数据库由一次性 `omni-db-migrator` 通过 `database/changelog/xxl-job/` 初始化，正式调度种子位于 `scripts/sql/seed/xxl-job.sql`，并受 seed manifest 校验。
 
 ### 数据库表（omni_base 库）
 
@@ -451,7 +451,8 @@ xxl-job-admin:
 | 容器内部端口 | 8080 | XXL-JOB Admin 默认端口 |
 | 宿主机映射端口 | 18080 | 避免与 Gateway (8102) 冲突 |
 | 数据库连接 | `mysql:3306` | 使用 Docker 内部网络解析 `mysql` 主机名 |
-| 数据库初始化 | `scripts/sql/init-xxl-job.sql` | 挂载到 MySQL 的 `docker-entrypoint-initdb.d/` |
+| 数据库结构 | `database/changelog/xxl-job/` | 由一次性 migrator 在 XXL-JOB 启动前执行 |
+| 调度种子 | `scripts/sql/seed/xxl-job.sql` | 幂等写入并由 `database/seed/manifest.yaml` 校验 |
 | 默认账号 | admin / 123456 | 生产环境必须修改 |
 
 ### 执行器注册

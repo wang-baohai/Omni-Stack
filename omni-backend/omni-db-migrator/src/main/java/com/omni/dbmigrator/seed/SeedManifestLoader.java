@@ -1,7 +1,9 @@
 package com.omni.dbmigrator.seed;
 
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -71,8 +73,75 @@ public class SeedManifestLoader {
             }
         }
 
+        List<SeedSource> sources = parseSources(requiredList(root, "sources"), moduleIds);
         List<SeedAssertion> assertions = parseAssertions(requiredList(root, "assertions"), moduleIds);
-        return new SeedManifest(version, digestAlgorithm, List.copyOf(modules), List.copyOf(assertions));
+        return new SeedManifest(
+                version,
+                digestAlgorithm,
+                List.copyOf(sources),
+                List.copyOf(modules),
+                List.copyOf(assertions));
+    }
+
+    /**
+     * 解析种子资源并立即校验 classpath 内容摘要。
+     */
+    private static List<SeedSource> parseSources(List<?> values, Set<String> moduleIds) {
+        List<SeedSource> sources = new ArrayList<>();
+        Set<String> sourceIds = new HashSet<>();
+        Set<String> resources = new HashSet<>();
+        for (Object value : values) {
+            Map<?, ?> map = requiredMap(value, "sources");
+            String id = requiredString(map, "id");
+            String module = requiredString(map, "module");
+            String resource = requiredString(map, "resource");
+            String sha256 = requiredString(map, "sha256");
+            if (!id.matches(ID_PATTERN) || !sourceIds.add(id)) {
+                throw new IllegalArgumentException("种子源 ID 不合法或重复: " + id);
+            }
+            if (!moduleIds.contains(module)) {
+                throw new IllegalArgumentException("种子源引用未知模块: " + id);
+            }
+            if (!isSafeSeedResource(resource) || !resources.add(resource)) {
+                throw new IllegalArgumentException("种子源路径不安全或重复: " + id);
+            }
+            if (!sha256.matches(SHA256_PATTERN)) {
+                throw new IllegalArgumentException("种子源摘要不合法: " + id);
+            }
+            verifyResourceDigest(resource, sha256);
+            sources.add(new SeedSource(id, module, resource, sha256));
+        }
+        return sources;
+    }
+
+    /**
+     * 种子资源只能位于最终 SQL 目录，禁止绝对路径和目录穿越。
+     */
+    private static boolean isSafeSeedResource(String resource) {
+        return resource.matches("scripts/sql/seed/[a-z0-9-]+\\.sql")
+                && !resource.startsWith("/")
+                && !resource.contains("..");
+    }
+
+    /**
+     * 校验种子文件与清单摘要完全一致，防止迁移输入被静默修改。
+     */
+    private static void verifyResourceDigest(String resource, String expectedSha256) {
+        ClassLoader classLoader = SeedManifestLoader.class.getClassLoader();
+        try (InputStream inputStream = classLoader.getResourceAsStream(resource)) {
+            if (inputStream == null) {
+                throw new IllegalArgumentException("找不到种子资源: " + resource);
+            }
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String actual = HexFormat.of().formatHex(digest.digest(inputStream.readAllBytes()));
+            if (!expectedSha256.equals(actual)) {
+                throw new IllegalArgumentException("种子资源摘要不匹配: " + resource);
+            }
+        } catch (IllegalArgumentException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new IllegalStateException("校验种子资源失败: " + resource, exception);
+        }
     }
 
     /**

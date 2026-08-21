@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.omni.asset.security.AssetDataPermissionHandler;
@@ -17,7 +18,7 @@ import java.util.Locale;
 
 /**
  * 资产 MyBatis-Plus 拦截器链配置。
- * <p>顺序固定：TenantLine、DataPermission、Pagination。</p>
+ * <p>顺序固定：TenantLine、DataPermission、OptimisticLocker、Pagination。</p>
  *
  * @author Omni-Stack Team
  */
@@ -45,6 +46,7 @@ public class MybatisPlusConfig {
         });
         interceptor.addInnerInterceptor(tenant);
         interceptor.addInnerInterceptor(new DataPermissionInterceptor(new AssetDataPermissionHandler()));
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
     }

@@ -83,6 +83,8 @@ class AdoptionServiceTest {
                 "jdbc:mysql://invalid/",
                 "root",
                 "secret",
+                "omni_app",
+                "test-app-password",
                 "database/changelog/db.changelog-root.yaml",
                 "database/seed/manifest.yaml",
                 "database/adoption/baseline-09a29fe.yaml",

@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: xxl-job-0002-bootstrap-seed
+      author: omni-stack
+      labels: seed-v1
+      context: xxl-job
+      comment: 幂等写入 XXL-JOB 执行器、系统任务和本地管理员种子
+      changes:
+        - sqlFile:
+            path: scripts/sql/seed/xxl-job.sql
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: SELECT 1;

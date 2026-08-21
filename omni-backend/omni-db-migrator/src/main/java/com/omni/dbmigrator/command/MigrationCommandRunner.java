@@ -40,7 +40,10 @@ public class MigrationCommandRunner implements ApplicationRunner {
         switch (command) {
             case VALIDATE -> migrationService.validateAll();
             case STATUS -> migrationService.status();
-            case MIGRATE -> migrationService.migrate();
+            case MIGRATE -> {
+                migrationService.migrate();
+                seedVerificationService.verifyAll();
+            }
             case ADOPT_CURRENT -> adoptionService.adoptCurrent();
             case VERIFY_SEED -> seedVerificationService.verifyAll();
         }

@@ -1,7 +1,7 @@
 # S0-07 租户模块化初始化实施记录
 
 > 开始日期：2026-08-20
-> 当前状态：实现完成；等待 S0-08 全栈消息与失败恢复门禁证据
+> 当前状态：完成；S0-08 全栈消息、失败恢复和幂等门禁已通过
 
 ## 本检查点已完成
 
@@ -27,14 +27,15 @@
 - 新增/更新的契约和适配测试覆盖 Auth 编排、通用消费、Base、Workflow、CRM、SRM、Procurement、Asset；目标 reactor、前端 production build 均通过，本次 UI 没有新增 ESLint 告警。
 - 在一次性 MySQL 8.4 隔离实例重新执行九库 fresh 迁移，七个应用库均创建 `sys_tenant_provision_receipt`；紧接着第二次迁移全部报告无待执行 changeSet。
 
-## S0-08 尚需闭合的运行证据
+## S0-08 运行证据
 
-以下不是 S0-07 的代码缺口，而是进入 G1 前必须在隔离全栈完成的运行门禁：
+以下项目已在隔离 Compose 全栈闭合，完整记录见 [s0-08-g1.md](s0-08-g1.md)：
 
 1. 真实 RocketMQ 广播到六个服务，Auth 收齐结果后租户从 `PROVISIONING` 转为 `ACTIVE`。
-2. 人为停止一个模块后创建租户，确认失败或超时可观测；恢复模块并重试后转为 `ACTIVE`，且管理员和已成功模块数据不重复。
-3. 对 fresh、adopt 后 upgrade、重复执行、迁移中断恢复分别归档数据库计数、changeSet 和回滚/恢复证据。
-4. 在 Compose 启动契约中强制 migrator 成功后才启动应用，并关闭 Flowable 运行时自动建表。
+2. 运行故障可观测并完成恢复；全新租户随后在没有人工补偿的情况下自动转为 `ACTIVE`。
+3. 同一租户请求重放后，各模块回执、领域初始化和结果 Outbox 均未重复。
+4. fresh、adopt 后 upgrade、重复执行及失败关闭证据已归档。
+5. Compose 已强制 migrator 成功后才启动应用，并关闭 Flowable 运行时自动建表。
 
 ## 安全与兼容约束
 

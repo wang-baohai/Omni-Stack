@@ -154,7 +154,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Evaluation/Risk: `omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/EvaluationServiceImpl.java`, `omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskServiceImpl.java`
 - Frontend management pages: `omni-frontend/src/views/srm/`
 - Supplier portal: `omni-frontend/src/views/supplier-portal/`
-- SRM migration: `scripts/sql/migrate-srm-mvp.sql`
+- SRM database source: `database/changelog/srm/`, `scripts/sql/seed/srm.sql`
 
 **Procurement:**
 - Procurement service: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java`
@@ -165,7 +165,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - RFQ lifecycle and quotation integration: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RfqController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/consumer/QuotationSubmittedConsumer.java`
 - Purchase order and goods receipt: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/PurchaseOrderController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/GoodsReceiptController.java`
 - Procurement overview: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/OverviewController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcOverviewMapper.java`
-- Procurement schema and RBAC: `scripts/sql/migrate-procurement-mvp.sql`, `scripts/sql/init-all.sql`
+- Procurement database source: `database/changelog/procurement/`, `scripts/sql/seed/procurement.sql`; RBAC seed: `scripts/sql/seed/auth.sql`
 
 **Asset:**
 - Asset service: `omni-backend/omni-asset/src/main/java/com/omni/asset/AssetApplication.java`
@@ -176,7 +176,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Transfer/disposal approval: `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetTransferController.java`, `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetDisposalController.java`
 - Asset overview: `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetOverviewController.java`
 - Frontend pages: `omni-frontend/src/views/asset/`
-- Asset schema and RBAC: `scripts/sql/migrate-asset-mvp.sql`, `scripts/sql/init-all.sql`
+- Asset database source: `database/changelog/asset/`; RBAC seed: `scripts/sql/seed/auth.sql`
 
 ## Build & Run Commands
 
@@ -375,7 +375,7 @@ Start the optional Sentinel Dashboard separately only when interactive rule moni
 - After backend changes: run `cd omni-backend && ./mvnw clean install` to verify compilation.
 - After frontend changes: run `npm run build` and `npm run lint` in `omni-frontend/`.
 - Use `./mvnw` (not `mvn`) for all Maven commands.
-- Before adding new write-operation endpoints: declare `@PreAuthorize` with `resource:action` permission codes and update `sys_permission` seed data in `scripts/sql/init-all.sql`.
+- Before adding new write-operation endpoints: declare `@PreAuthorize` with `resource:action` permission codes, update `sys_permission` in `scripts/sql/seed/auth.sql`, refresh its SHA-256 in `database/seed/manifest.yaml`, and add/update seed assertions.
 - Before adding data permission to a new table: update `DataPermissionHandlerImpl` with the target table name and column mapping; ensure `DataPermissionInterceptor` is registered before `PaginationInnerInterceptor`.
 - Before adding frontend buttons: add `v-permission` directive with the corresponding permission code.
 - Before adding a new microservice: implement `XssConfigProvider` SPI in the new service module; `omni-common` dependency auto-registers XSS filter chain.
@@ -385,9 +385,9 @@ Start the optional Sentinel Dashboard separately only when interactive rule moni
 - Before writing workflow engine or approval logic: read `docs/workflow.md`.
 - Before adding a new candidate resolution strategy or anchor type: read `docs/workflow.md` Section 4 (Extension Guide).
 - Before adding CRM aggregate roots, stages, or permission codes: read `docs/crm.md` (domain model, state machines, hard constraints, extension guide).
-- Before modifying SRM lifecycle, portal, evaluation, risk, permission codes or schema: read `docs/design/srm-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-srm-mvp.sql`.
-- Before modifying Procurement material, requisition, RFQ, purchase order, goods receipt, permission codes or schema: read `docs/design/procurement-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-procurement-mvp.sql`.
-- Before modifying Asset lifecycle, receipt ingestion, transfer, disposal, permission codes or schema: read `docs/design/asset-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-asset-mvp.sql`.
+- Before modifying SRM lifecycle, portal, evaluation, risk, permission codes or schema: read `docs/design/srm-design.md`; add a forward-only changeSet under `database/changelog/srm/`, update `scripts/sql/seed/srm.sql` and/or `scripts/sql/seed/auth.sql`, then refresh `database/seed/manifest.yaml` checksums and assertions.
+- Before modifying Procurement material, requisition, RFQ, purchase order, goods receipt, permission codes or schema: read `docs/design/procurement-design.md`; add a forward-only changeSet under `database/changelog/procurement/`, update `scripts/sql/seed/procurement.sql` and/or `scripts/sql/seed/auth.sql`, then refresh `database/seed/manifest.yaml` checksums and assertions.
+- Before modifying Asset lifecycle, receipt ingestion, transfer, disposal, permission codes or schema: read `docs/design/asset-design.md`; add a forward-only changeSet under `database/changelog/asset/`, update `scripts/sql/seed/auth.sql` when RBAC changes, then refresh `database/seed/manifest.yaml` checksums and assertions.
 - Before adding MQ message sending to a new service: depend on `omni-common-mqlog` (auto-registers `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, and `MqMessageInternalController`), ensure `sys_mq_message` table exists via `schema.sql`, and call `ReliableMessageRelay.send(bindingName, payload, tenantId)` with explicit tenantId. Read `docs/mq-reliability.md` for onboarding details.
 
 ## Completion Checklist

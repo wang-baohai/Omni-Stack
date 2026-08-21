@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: nacos-0002-bootstrap-seed
+      author: omni-stack
+      labels: seed-v1
+      context: nacos
+      comment: 幂等写入 Nacos 本地开发安全主体种子
+      changes:
+        - sqlFile:
+            path: scripts/sql/seed/nacos.sql
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: SELECT 1;

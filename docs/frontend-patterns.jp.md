@@ -623,8 +623,8 @@ src/
 | 1 | `src/router/index.ts` → `iconMap` | `'<module>:<feature>': '<IconName>'` を追加（例：`'base:dict': 'Collection'`） |
 | 2 | `src/constants/menu.ts` → `menuI18nMap` | モジュールディレクトリとメニュー項目の i18n key マッピングを追加 |
 | 3 | `src/locales/zh-CN.ts` + `en-US.ts` | `common.<module>Management`（ディレクトリ名）、`common.<feature>Management`（メニュー名）および機能レベルの翻訳 key を追加 |
-| 4 | `scripts/sql/init-all.sql` → `sys_permission` | DIRECTORY（モジュールグループ）+ MENU（機能ページ）+ BUTTON/API（操作権限）のシードデータを追加 |
-| 5 | `scripts/sql/init-all.sql` → `sys_role_permission` | SUPER_ADMIN ロールに新規権限ノードを割り当て |
+| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | 冪等な DIRECTORY（モジュールグループ）+ MENU（機能ページ）+ BUTTON/API（操作権限）シードを追加し、seed manifest を更新 |
+| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | SUPER_ADMIN に新規権限ノードを冪等に割り当て、自然キー検証を追加 |
 
 ### 参考実装：ディクショナリ管理モジュール
 

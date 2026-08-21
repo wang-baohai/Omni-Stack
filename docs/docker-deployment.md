@@ -240,18 +240,15 @@ mysql:
     TZ: Asia/Shanghai                  # 时区设置
   volumes:
     - omni-mysql-data:/var/lib/mysql
-    - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-    - ./scripts/sql/init-nacos.sql:/docker-entrypoint-initdb.d/02-init-nacos.sql:ro
-    - ./scripts/sql/init-xxl-job.sql:/docker-entrypoint-initdb.d/03-init-xxl-job.sql:ro
 ```
 
 **要点**：
-- 三个 SQL 脚本按编号顺序自动执行：`01-init.sql`（业务库 + 初始数据）→ `02-init-nacos.sql`（Nacos 配置库）→ `03-init-xxl-job.sql`（XXL-JOB 库）
-- 挂载为 `:ro`（只读），防止容器意外修改源文件
+- MySQL entrypoint 不再挂载聚合 SQL；全新和升级环境使用同一套 Liquibase 迁移链
+- 一次性 `omni-db-migrator` 以管理员连接完成建库、结构迁移、正式种子和断言，成功退出后才放行 Nacos、XXL-JOB 和应用
+- 应用服务使用 `MYSQL_APP_USERNAME` / `MYSQL_APP_PASSWORD` 最小权限账号，不使用迁移管理员账号
 - MySQL 使用显式命名卷 `omni-stack-mysql-data`；普通 `docker compose down` 和重建容器不会删除数据，
   `docker compose down -v` 会删除卷且不可恢复。
-- Docker entrypoint 初始化脚本只在空数据卷执行。已有环境升级前必须备份，再按 README 所列顺序执行
-  CRM、Workflow 幂等、SRM、Procurement、Asset 迁移和 `sp_init_tenant.sql`。
+- 既有非空库首次接管必须先备份，通过 `omni-db-migrator adopt-current` 的结构指纹与确认门；不能直接运行 `migrate` 绕过接管。
 
 ### 5.2 Redis 7.4
 
@@ -443,13 +440,19 @@ server {
 
 ### 8.1 数据库初始化链
 
-MySQL 容器首次启动时自动执行 `/docker-entrypoint-initdb.d/` 下的 SQL 脚本：
+Compose 使用显式迁移启动门，空卷与后续升级采用同一条链：
 
 ```
-01-init.sql       → 创建 omni_auth / omni_base / omni_workflow 数据库 + 初始数据
-02-init-nacos.sql → 创建 nacos_config 数据库 + Nacos 配置数据
-03-init-xxl-job.sql → 创建 xxl_job 数据库 + XXL-JOB 调度数据
+MySQL healthy
+  → omni-db-migrator migrate（九库 Liquibase changeSet）
+  → 校验 8 个 seed source 的 SHA-256 和 24 项自然键断言
+  → migrator 成功退出
+  → Nacos / XXL-JOB / 后端服务启动
 ```
+
+结构事实源是 `database/changelog/`；正式 DML 种子位于 `scripts/sql/seed/`，清单为
+`database/seed/manifest.yaml`。`scripts/sql/init-all.sql` 和旧 `migrate-*.sql` 仅在兼容清理完成前保留，
+不参与当前 Compose 启动。Flowable 的运行时自动建表已关闭。
 
 ### 8.2 数据持久化策略
 
@@ -870,15 +873,9 @@ docker compose logs --timestamps omni-auth | head -5
 | Nginx 配置 | `docker/frontend/nginx.conf` | 前端反代规则 |
 | Broker 配置 | `docker/rocketmq/broker-docker.conf` | RocketMQ Docker 网络配置 |
 | Maven 镜像 | `omni-backend/docker-settings.xml` | 阿里云 Maven 加速 |
-| 数据库初始化 | `scripts/sql/init-all.sql` | 业务库表结构与数据 |
-| CRM 既有环境迁移 | `scripts/sql/migrate-crm-mvp.sql` | 创建 CRM 库、补权限角色与日志幂等列 |
-| SRM 既有环境迁移 | `scripts/sql/migrate-srm-mvp.sql` | 幂等创建 SRM/Auth Outbox、权限角色、SRM 表与升级约束 |
-| Workflow 启动幂等迁移 | `scripts/sql/migrate-workflow-process-start-idempotency.sql` | 补齐跨服务流程启动幂等表与约束 |
-| Procurement 既有环境迁移 | `scripts/sql/migrate-procurement-mvp.sql` | 创建采购库、权限角色、业务表与默认配置 |
-| Asset 既有环境迁移 | `scripts/sql/migrate-asset-mvp.sql` | 创建资产库、权限角色、业务表与默认字典 |
-| 新租户初始化 | `scripts/sql/sp_init_tenant.sql` | 重建可重入存储过程，映射权限路径并归一 SRM 模板/字典 |
-| Nacos 初始化 | `scripts/sql/init-nacos.sql` | Nacos 配置数据 |
-| XXL-JOB 初始化 | `scripts/sql/init-xxl-job.sql` | 调度任务数据 |
+| 数据库迁移 | `database/changelog/` | 九库 Liquibase 结构、约束与升级事实源 |
+| 数据库种子 | `scripts/sql/seed/`、`database/seed/manifest.yaml` | 幂等 DML、源文件校验和自然键断言 |
+| Migrator 镜像 | `docker/migrator/Dockerfile` | 构建一次性 Liquibase 迁移服务 |
 | 启动脚本 (Linux) | `start.sh` | 一键启动 |
 | 启动脚本 (Windows) | `start.bat` | 一键启动（含端口保护） |
 | 停止脚本 (Linux) | `stop.sh` | 一键停止 |

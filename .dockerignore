@@ -6,6 +6,9 @@
 **/.agents/
 .git/
 .codex/
+.env
+.env.*
+!.env.example
 **/test-results/
 **/playwright-report/
 **/screenshots/

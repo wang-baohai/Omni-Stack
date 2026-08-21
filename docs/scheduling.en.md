@@ -369,7 +369,7 @@ xxl-job-admin:
       --spring.datasource.password=root123
 ```
 
-The `xxl_job` database is initialized via `scripts/sql/init-xxl-job.sql` mounted into MySQL's `docker-entrypoint-initdb.d/`.
+The one-shot `omni-db-migrator` initializes `xxl_job` from `database/changelog/xxl-job/`. Formal scheduler seeds live in `scripts/sql/seed/xxl-job.sql` and are verified by the seed manifest.
 
 ### Database Tables (omni_base schema)
 
@@ -451,7 +451,8 @@ xxl-job-admin:
 | Container internal port | 8080 | XXL-JOB Admin default port |
 | Host mapped port | 18080 | Avoids conflict with Gateway (8102) |
 | Database connection | `mysql:3306` | Uses Docker internal network to resolve `mysql` hostname |
-| Database initialization | `scripts/sql/init-xxl-job.sql` | Mounted to MySQL's `docker-entrypoint-initdb.d/` |
+| Database schema | `database/changelog/xxl-job/` | Applied by the one-shot migrator before XXL-JOB starts |
+| Scheduler seeds | `scripts/sql/seed/xxl-job.sql` | Idempotent DML verified by `database/seed/manifest.yaml` |
 | Default credentials | admin / 123456 | Must be changed in production |
 
 ### Executor Registration

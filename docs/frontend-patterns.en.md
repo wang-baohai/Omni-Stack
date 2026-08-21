@@ -623,8 +623,8 @@ Each new business module requires the following registrations:
 | 1 | `src/router/index.ts` → `iconMap` | Add `'<module>:<feature>': '<IconName>'` (e.g., `'base:dict': 'Collection'`) |
 | 2 | `src/constants/menu.ts` → `menuI18nMap` | Add i18n key mappings for module directory and menu items |
 | 3 | `src/locales/zh-CN.ts` + `en-US.ts` | Add `common.<module>Management` (directory name), `common.<feature>Management` (menu name), and feature-level translation keys |
-| 4 | `scripts/sql/init-all.sql` → `sys_permission` | Add DIRECTORY (module group) + MENU (feature page) + BUTTON/API (operation permissions) seed data |
-| 5 | `scripts/sql/init-all.sql` → `sys_role_permission` | Assign new permission nodes to the SUPER_ADMIN role |
+| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | Add idempotent DIRECTORY (module group) + MENU (feature page) + BUTTON/API (operation permission) seeds and refresh the seed manifest |
+| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | Idempotently assign new permission nodes to SUPER_ADMIN and add natural-key assertions |
 
 ### Reference Implementation: Dictionary Management Module
 

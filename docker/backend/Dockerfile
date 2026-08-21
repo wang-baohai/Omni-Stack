@@ -13,35 +13,37 @@
 FROM maven:3.9-eclipse-temurin-25-alpine AS build
 
 # 配置阿里云 Maven 镜像（加速依赖下载）
-COPY docker-settings.xml /root/.m2/settings.xml
+COPY omni-backend/docker-settings.xml /root/.m2/settings.xml
 
 WORKDIR /build
 
 # 先拷入 Maven Wrapper + 所有 POM（利用 Docker 层缓存，POM 不变时跳过依赖下载）
-COPY mvnw pom.xml ./
-COPY omni-common-core/pom.xml omni-common-core/
-COPY omni-common/pom.xml omni-common/
-COPY omni-common-mybatis/pom.xml omni-common-mybatis/
-COPY omni-common-redis/pom.xml omni-common-redis/
-COPY omni-common-redis-reactive/pom.xml omni-common-redis-reactive/
-COPY omni-common-operlog/pom.xml omni-common-operlog/
-COPY omni-common-job/pom.xml omni-common-job/
-COPY omni-common-mqlog/pom.xml omni-common-mqlog/
-COPY omni-common-workflow/pom.xml omni-common-workflow/
-COPY omni-db-migrator/pom.xml omni-db-migrator/
-COPY omni-auth/pom.xml omni-auth/
-COPY omni-base/pom.xml omni-base/
-COPY omni-gateway/pom.xml omni-gateway/
-COPY omni-workflow/pom.xml omni-workflow/
-COPY omni-crm/pom.xml omni-crm/
-COPY omni-srm/pom.xml omni-srm/
-COPY omni-procurement/pom.xml omni-procurement/
-COPY omni-asset/pom.xml omni-asset/
+COPY omni-backend/mvnw omni-backend/pom.xml ./
+COPY omni-backend/omni-common-core/pom.xml omni-common-core/
+COPY omni-backend/omni-common/pom.xml omni-common/
+COPY omni-backend/omni-common-mybatis/pom.xml omni-common-mybatis/
+COPY omni-backend/omni-common-redis/pom.xml omni-common-redis/
+COPY omni-backend/omni-common-redis-reactive/pom.xml omni-common-redis-reactive/
+COPY omni-backend/omni-common-operlog/pom.xml omni-common-operlog/
+COPY omni-backend/omni-common-job/pom.xml omni-common-job/
+COPY omni-backend/omni-common-mqlog/pom.xml omni-common-mqlog/
+COPY omni-backend/omni-common-workflow/pom.xml omni-common-workflow/
+COPY omni-backend/omni-db-migrator/pom.xml omni-db-migrator/
+COPY omni-backend/omni-auth/pom.xml omni-auth/
+COPY omni-backend/omni-base/pom.xml omni-base/
+COPY omni-backend/omni-gateway/pom.xml omni-gateway/
+COPY omni-backend/omni-workflow/pom.xml omni-workflow/
+COPY omni-backend/omni-crm/pom.xml omni-crm/
+COPY omni-backend/omni-srm/pom.xml omni-srm/
+COPY omni-backend/omni-procurement/pom.xml omni-procurement/
+COPY omni-backend/omni-asset/pom.xml omni-asset/
 
 RUN mvn dependency:go-offline -B -q || true
 
-# 拷入全部源码并构建指定服务
-COPY . .
+# 拷入全部后端源码和运行时目录事实源。Auth 的 Maven resources 会将后两者打入应用包。
+COPY omni-backend/ .
+COPY scaffold/ /scaffold/
+COPY database/seed/ /database/seed/
 
 ARG SERVICE_NAME
 # 镜像构建也是发布门禁：目标服务及其依赖测试失败时不得产出镜像。

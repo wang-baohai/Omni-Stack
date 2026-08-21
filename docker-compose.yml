@@ -1,9 +1,9 @@
 # ============================================================
 # Omni-Stack 本地开发 Docker Compose 配置（不得直接作为公网生产模板）
 # ============================================================
-# 包含：中间件（MySQL/Redis/RocketMQ/Nacos/XXL-JOB）+ 后端微服务 + 前端
+# 包含：MySQL + one-shot 迁移器 + 中间件 + 后端微服务 + 前端
 #
-# 启动顺序：MySQL/Redis/RocketMQ → Nacos/XXL-JOB → 后端服务 → 前端
+# 启动顺序：MySQL → DB Migrator → Nacos/XXL-JOB → 后端服务 → 前端
 #
 # 用法：
 #   Windows: 右键 start.bat → 以管理员身份运行（自动处理端口保护）
@@ -21,10 +21,9 @@ services:
   # ----------------------------------------------------------
   mysql:
     image: mysql:8.4
-    container_name: omni-mysql
     restart: unless-stopped
     ports:
-      - "127.0.0.1:13306:3306"
+      - "127.0.0.1:${OMNI_MYSQL_HOST_PORT:-13306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中配置 MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: omni_auth
@@ -33,9 +32,6 @@ services:
       TZ: Asia/Shanghai
     volumes:
       - omni-mysql-data:/var/lib/mysql
-      - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-      - ./scripts/sql/init-nacos.sql:/docker-entrypoint-initdb.d/02-init-nacos.sql:ro
-      - ./scripts/sql/init-xxl-job.sql:/docker-entrypoint-initdb.d/03-init-xxl-job.sql:ro
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
@@ -50,15 +46,38 @@ services:
       - omni-network
 
   # ----------------------------------------------------------
+  # omni-db-migrator — Liquibase 一次性结构、账号与种子迁移
+  # 迁移失败时保持非零退出，所有基础设施和应用服务禁止启动。
+  # ----------------------------------------------------------
+  omni-db-migrator:
+    build:
+      context: .
+      dockerfile: docker/migrator/Dockerfile
+    image: omni-db-migrator:latest
+    restart: "no"
+    environment:
+      TZ: Asia/Shanghai
+      DB_MIGRATOR_COMMAND: migrate
+      DB_MIGRATOR_ADMIN_URL: "jdbc:mysql://mysql:3306/?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai"
+      DB_MIGRATOR_ADMIN_USERNAME: root
+      DB_MIGRATOR_ADMIN_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中配置 MYSQL_ROOT_PASSWORD}
+      DB_MIGRATOR_APP_USERNAME: omni_app
+      DB_MIGRATOR_APP_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - omni-network
+
+  # ----------------------------------------------------------
   # Redis 7.4 — 缓存与会话存储
   # 端口: 6379 | 密码由 .env 注入
   # ----------------------------------------------------------
   redis:
     image: redis:7.4
-    container_name: omni-redis
     restart: unless-stopped
     ports:
-      - "127.0.0.1:6379:6379"
+      - "127.0.0.1:${OMNI_REDIS_HOST_PORT:-6379}:6379"
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}"]
     healthcheck:
       test: ["CMD-SHELL", "REDISCLI_AUTH=\"$${REDIS_PASSWORD}\" redis-cli ping | grep PONG"]
@@ -78,12 +97,11 @@ services:
   # ----------------------------------------------------------
   nacos:
     image: nacos/nacos-server:v3.1.1
-    container_name: omni-nacos
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8080:8080"
-      - "127.0.0.1:8848:8848"
-      - "127.0.0.1:9848:9848"
+      - "127.0.0.1:${OMNI_NACOS_CONSOLE_HOST_PORT:-8080}:8080"
+      - "127.0.0.1:${OMNI_NACOS_API_HOST_PORT:-8848}:8848"
+      - "127.0.0.1:${OMNI_NACOS_GRPC_HOST_PORT:-9848}:9848"
     environment:
       MODE: standalone
       NACOS_AUTH_TOKEN: ${NACOS_AUTH_TOKEN:?请在 .env 中配置 NACOS_AUTH_TOKEN}
@@ -97,8 +115,8 @@ services:
       MYSQL_SERVICE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中配置 MYSQL_ROOT_PASSWORD}
       MYSQL_SERVICE_DB_PARAM: "characterEncoding=utf8&connectTimeout=10000&socketTimeout=30000&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true"
     depends_on:
-      mysql:
-        condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8848/nacos/"]
       interval: 15s
@@ -114,10 +132,9 @@ services:
   # ----------------------------------------------------------
   rocketmq-namesrv:
     image: apache/rocketmq:5.3.2
-    container_name: omni-rocketmq-namesrv
     restart: unless-stopped
     ports:
-      - "127.0.0.1:19876:9876"
+      - "127.0.0.1:${OMNI_ROCKETMQ_NAMESRV_HOST_PORT:-19876}:9876"
     command: sh mqnamesrv
     healthcheck:
       test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/127.0.0.1/9876' || exit 1"]
@@ -130,12 +147,11 @@ services:
 
   rocketmq-broker:
     image: apache/rocketmq:5.3.2
-    container_name: omni-rocketmq-broker
     restart: unless-stopped
     ports:
-      - "127.0.0.1:10909:10909"
-      - "127.0.0.1:10911:10911"
-      - "127.0.0.1:10912:10912"
+      - "127.0.0.1:${OMNI_ROCKETMQ_FAST_HOST_PORT:-10909}:10909"
+      - "127.0.0.1:${OMNI_ROCKETMQ_BROKER_HOST_PORT:-10911}:10911"
+      - "127.0.0.1:${OMNI_ROCKETMQ_HA_HOST_PORT:-10912}:10912"
     environment:
       NAMESRV_ADDR: rocketmq-namesrv:9876
       JAVA_OPT_EXT: "-Drocketmq.broker.diskSpaceWarningLevelRatio=0.98"
@@ -161,10 +177,9 @@ services:
   # ----------------------------------------------------------
   xxl-job-admin:
     image: xuxueli/xxl-job-admin:3.3.1
-    container_name: omni-xxl-job-admin
     restart: unless-stopped
     ports:
-      - "127.0.0.1:18080:8080"
+      - "127.0.0.1:${OMNI_XXL_JOB_HOST_PORT:-18080}:8080"
     environment:
       PARAMS: >
         --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
@@ -174,8 +189,8 @@ services:
         --xxl.job.login.password=${XXL_JOB_ADMIN_PASSWORD:?请在 .env 中配置 XXL_JOB_ADMIN_PASSWORD}
         --xxl.job.accessToken=${XXL_JOB_ACCESS_TOKEN:?请在 .env 中配置 XXL_JOB_ACCESS_TOKEN}
     depends_on:
-      mysql:
-        condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -197,15 +212,14 @@ services:
   # ----------------------------------------------------------
   omni-auth:
     build:
-      context: ./omni-backend
-      dockerfile: ../docker/backend/Dockerfile
+      context: .
+      dockerfile: docker/backend/Dockerfile
       args:
         SERVICE_NAME: omni-auth
     image: omni-auth:latest
-    container_name: omni-auth
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8100:8080"
+      - "127.0.0.1:${OMNI_AUTH_HOST_PORT:-8100}:8080"
     environment:
       TZ: Asia/Shanghai
       SERVER_PORT: "8080"
@@ -258,6 +272,8 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
       rocketmq-broker:
         condition: service_healthy
       xxl-job-admin:
@@ -271,15 +287,14 @@ services:
   # ----------------------------------------------------------
   omni-base:
     build:
-      context: ./omni-backend
-      dockerfile: ../docker/backend/Dockerfile
+      context: .
+      dockerfile: docker/backend/Dockerfile
       args:
         SERVICE_NAME: omni-base
     image: omni-base:latest
-    container_name: omni-base
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8101:8080"
+      - "127.0.0.1:${OMNI_BASE_HOST_PORT:-8101}:8080"
     environment:
       TZ: Asia/Shanghai
       SERVER_PORT: "8080"
@@ -307,6 +322,8 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
       rocketmq-broker:
         condition: service_healthy
       xxl-job-admin:
@@ -320,15 +337,14 @@ services:
   # ----------------------------------------------------------
   omni-workflow:
     build:
-      context: ./omni-backend
-      dockerfile: ../docker/backend/Dockerfile
+      context: .
+      dockerfile: docker/backend/Dockerfile
       args:
         SERVICE_NAME: omni-workflow
     image: omni-workflow:latest
-    container_name: omni-workflow
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8103:8080"
+      - "127.0.0.1:${OMNI_WORKFLOW_HOST_PORT:-8103}:8080"
     environment:
       TZ: Asia/Shanghai
       SERVER_PORT: "8080"
@@ -341,6 +357,7 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_workflow?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: omni_app
       SPRING_DATASOURCE_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+      FLOWABLE_DATABASE_SCHEMA_UPDATE: "false"
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
       SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
@@ -358,6 +375,8 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
       rocketmq-broker:
         condition: service_healthy
       xxl-job-admin:
@@ -371,15 +390,14 @@ services:
   # ----------------------------------------------------------
   omni-crm:
     build:
-      context: ./omni-backend
-      dockerfile: ../docker/backend/Dockerfile
+      context: .
+      dockerfile: docker/backend/Dockerfile
       args:
         SERVICE_NAME: omni-crm
     image: omni-crm:latest
-    container_name: omni-crm
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8104:8080"
+      - "127.0.0.1:${OMNI_CRM_HOST_PORT:-8104}:8080"
     environment:
       TZ: Asia/Shanghai
       SERVER_PORT: "8080"
@@ -406,6 +424,8 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
       rocketmq-broker:
         condition: service_healthy
       xxl-job-admin:
@@ -421,15 +441,14 @@ services:
   # ----------------------------------------------------------
   omni-gateway:
     build:
-      context: ./omni-backend
-      dockerfile: ../docker/backend/Dockerfile
+      context: .
+      dockerfile: docker/backend/Dockerfile
       args:
         SERVICE_NAME: omni-gateway
     image: omni-gateway:latest
-    container_name: omni-gateway
     restart: unless-stopped
     ports:
-      - "8102:8080"
+      - "${OMNI_GATEWAY_HOST_PORT:-8102}:8080"
     environment:
       TZ: Asia/Shanghai
       SERVER_PORT: "8080"
@@ -443,6 +462,8 @@ services:
       # Netty HTTP 解码器最大 Header 尺寸 64KB（JWT scope 较大）
       JAVA_OPTS: "-Dreactor.netty.http.server.maxHeaderSize=65536"
     depends_on:
+      omni-db-migrator:
+        condition: service_completed_successfully
       nacos:
         condition: service_healthy
       redis:
@@ -466,16 +487,15 @@ services:
   # ----------------------------------------------------------
   omni-srm:
     build:
-      context: ./omni-backend
-      dockerfile: ../docker/backend/Dockerfile
+      context: .
+      dockerfile: docker/backend/Dockerfile
       args:
         SERVICE_NAME: omni-srm
     image: omni-srm:latest
-    container_name: omni-srm
     restart: unless-stopped
     ports:
       # 业务端口仅绑定回环地址；生产流量必须经 Gateway。
-      - "127.0.0.1:8105:8080"
+      - "127.0.0.1:${OMNI_SRM_HOST_PORT:-8105}:8080"
     environment:
       TZ: Asia/Shanghai
       SERVER_PORT: "8080"
@@ -502,6 +522,8 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
       rocketmq-broker:
         condition: service_healthy
       xxl-job-admin:
@@ -517,16 +539,15 @@ services:
   # ----------------------------------------------------------
   omni-procurement:
     build:
-      context: ./omni-backend
-      dockerfile: ../docker/backend/Dockerfile
+      context: .
+      dockerfile: docker/backend/Dockerfile
       args:
         SERVICE_NAME: omni-procurement
     image: omni-procurement:latest
-    container_name: omni-procurement
     restart: unless-stopped
     ports:
       # 业务端口仅绑定回环地址；生产流量必须经 Gateway。
-      - "127.0.0.1:8106:8080"
+      - "127.0.0.1:${OMNI_PROCUREMENT_HOST_PORT:-8106}:8080"
     environment:
       TZ: Asia/Shanghai
       SERVER_PORT: "8080"
@@ -553,6 +574,8 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
       rocketmq-broker:
         condition: service_healthy
       xxl-job-admin:
@@ -572,16 +595,15 @@ services:
   # ----------------------------------------------------------
   omni-asset:
     build:
-      context: ./omni-backend
-      dockerfile: ../docker/backend/Dockerfile
+      context: .
+      dockerfile: docker/backend/Dockerfile
       args:
         SERVICE_NAME: omni-asset
     image: omni-asset:latest
-    container_name: omni-asset
     restart: unless-stopped
     ports:
       # 业务端口仅绑定回环地址；生产流量必须经 Gateway。
-      - "127.0.0.1:8107:8080"
+      - "127.0.0.1:${OMNI_ASSET_HOST_PORT:-8107}:8080"
     environment:
       TZ: Asia/Shanghai
       SERVER_PORT: "8080"
@@ -608,6 +630,8 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
       rocketmq-broker:
         condition: service_healthy
       xxl-job-admin:
@@ -636,10 +660,9 @@ services:
       context: .
       dockerfile: docker/frontend/Dockerfile
     image: omni-frontend:latest
-    container_name: omni-frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${OMNI_FRONTEND_HOST_PORT:-3000}:3000"
     depends_on:
       omni-gateway:
         condition: service_healthy
@@ -652,4 +675,4 @@ networks:
 
 volumes:
   omni-mysql-data:
-    name: omni-stack-mysql-data
+    name: ${OMNI_MYSQL_VOLUME_NAME:-omni-stack-mysql-data}

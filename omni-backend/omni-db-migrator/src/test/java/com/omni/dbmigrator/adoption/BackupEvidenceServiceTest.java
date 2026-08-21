@@ -114,6 +114,7 @@ class BackupEvidenceServiceTest {
         Files.writeString(evidencePath, yaml, StandardCharsets.UTF_8);
         DbMigratorProperties properties = new DbMigratorProperties(
                 "adopt-current", "jdbc:mysql://invalid/", "root", "secret",
+                "omni_app", "test-app-password",
                 "root.yaml", "seed.yaml", "baseline.yaml", evidencePath.toString(), 24, "");
 
         assertThatThrownBy(() -> new BackupEvidenceService(properties).verify(BASELINE))

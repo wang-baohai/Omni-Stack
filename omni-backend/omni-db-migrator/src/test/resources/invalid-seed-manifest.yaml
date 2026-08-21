@@ -1,5 +1,6 @@
 version: "test"
 digestAlgorithm: "SHA-256"
+sources: []
 modules:
   - id: auth
     enabledByDefault: true

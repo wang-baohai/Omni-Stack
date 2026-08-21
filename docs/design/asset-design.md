@@ -557,8 +557,9 @@ omni-backend/omni-asset/
 | `docker/backend/Dockerfile` | POM 缓存层 |
 | `docker-compose.yml` | Asset 服务、8107 |
 | `start.bat/start.sh` | build 列表加入 Asset |
-| `scripts/sql/init-all.sql` | `omni_asset` DDL、权限和角色 |
-| `scripts/sql/sp_init_tenant.sql` | 新租户初始化同步 |
+| `database/changelog/asset/` | 为资产结构变更增加 forward-only Liquibase changeSet |
+| `scripts/sql/seed/auth.sql` | 资产权限和角色正式幂等种子；更新后刷新 seed manifest |
+| Asset `TenantModuleProvisioner` | 显式声明当前无模块自有租户默认事实，保持协议幂等 |
 | `omni-workflow` | 复用/补齐幂等内部启动、任务分配校验 API 和 `workflow.process.completed.v1` Outbox 事件 |
 | `omni-procurement` | 确认收货事件 v1 字段与历史资产候选分页 API |
 | Frontend router/layout/menu/locales | 图标、菜单、i18n |

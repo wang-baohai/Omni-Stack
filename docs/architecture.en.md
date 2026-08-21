@@ -358,7 +358,7 @@ The project root `docker-compose.yml` defines all 12 containers:
 - **Named volumes** (`mysql-data`, `redis-data`) for data persistence across restarts
 - **Health checks** (depends_on + service_healthy) ensuring layered startup chain
 - **Bridge network** (`omni-network`) for inter-container communication
-- **SQL init mounts**: `scripts/sql/init-all.sql`, `init-nacos.sql`, `init-xxl-job.sql` mounted into MySQL's `docker-entrypoint-initdb.d/`
+- **Migration startup gate**: the one-shot `omni-db-migrator` applies Liquibase structure and idempotent seeds for all nine databases; Nacos, XXL-JOB, and applications start only after it succeeds
 
 ### 9.2 Database Schema
 
@@ -420,7 +420,7 @@ erDiagram
 
 > See [workflow.en.md](workflow.en.md) for details.
 
-**Authoritative DDL and seed data**: `scripts/sql/init-all.sql`
+**Authoritative database sources**: `database/changelog/` owns schema, indexes, constraints, and upgrades. `scripts/sql/seed/` owns formal idempotent seeds, guarded by source SHA-256 values and natural-key assertions in `database/seed/manifest.yaml`. `scripts/sql/init-all.sql` is a compatibility-era legacy file and is not used by Compose initialization.
 
 ---
 
@@ -748,7 +748,7 @@ Add to `omni-gateway/application.yml`:
 
 ### 14.6 Add Permission Seed Data
 
-Add `sys_permission` records in `scripts/sql/init-all.sql`:
+Add idempotent `sys_permission` records in `scripts/sql/seed/auth.sql`, then refresh its checksum and natural-key assertions in `database/seed/manifest.yaml`:
 
 ```sql
 INSERT INTO sys_permission (tenant_id, parent_id, name, code, type, path, ...) VALUES

@@ -623,8 +623,8 @@ src/
 | 1 | `src/router/index.ts` → `iconMap` | `'<module>:<feature>': '<IconName>'` 추가(예: `'base:dict': 'Collection'`) |
 | 2 | `src/constants/menu.ts` → `menuI18nMap` | 모듈 디렉터리 및 메뉴 항목의 i18n key 매핑 추가 |
 | 3 | `src/locales/zh-CN.ts` + `en-US.ts` | `common.<module>Management`(디렉터리명), `common.<feature>Management`(메뉴명) 및 기능별 번역 key 추가 |
-| 4 | `scripts/sql/init-all.sql` → `sys_permission` | DIRECTORY(모듈 그룹) + MENU(기능 페이지) + BUTTON/API(조작 권한) 시드 데이터 추가 |
-| 5 | `scripts/sql/init-all.sql` → `sys_role_permission` | SUPER_ADMIN 역할에 신규 권한 노드 할당 |
+| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | 멱등 DIRECTORY(모듈 그룹) + MENU(기능 페이지) + BUTTON/API(조작 권한) 시드를 추가하고 seed manifest 갱신 |
+| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | SUPER_ADMIN 역할에 신규 권한 노드를 멱등 할당하고 자연 키 검증 추가 |
 
 ### 참고 구현: 사전 관리 모듈
 

@@ -37,7 +37,7 @@ class AdoptionLabelContractTest {
         Map<String, Integer> expectedUpgrade = Map.of(
                 "auth", 2,
                 "base", 1,
-                "workflow", 1,
+                "workflow", 2,
                 "crm", 1,
                 "srm", 1,
                 "procurement", 1,

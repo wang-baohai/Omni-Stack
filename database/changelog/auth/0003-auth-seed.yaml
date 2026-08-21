@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: auth-0003-bootstrap-seed
+      author: omni-stack
+      labels: seed-v1
+      context: auth
+      comment: 按稳定业务键幂等写入默认租户、认证、权限和角色种子
+      changes:
+        - sqlFile:
+            path: scripts/sql/seed/auth.sql
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: SELECT 1;

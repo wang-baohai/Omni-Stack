@@ -358,7 +358,7 @@ RocketMQ Broker (StreamBridge 経由)
 - **名前付きボリューム**（`mysql-data`、`redis-data`）で再起動時のデータ永続化
 - **ヘルスチェック**（depends_on + service_healthy）で段階的起動チェーンを保証
 - **ブリッジネットワーク**（`omni-network`）でコンテナ間通信
-- **SQL 初期化マウント**：`scripts/sql/init-all.sql`、`init-nacos.sql`、`init-xxl-job.sql` を MySQL の `docker-entrypoint-initdb.d/` にマウント
+- **マイグレーション起動ゲート**：one-shot の `omni-db-migrator` が Liquibase により 9 DB の構造と冪等シードを適用し、成功後にのみ Nacos、XXL-JOB、各アプリを起動
 
 ### 9.2 データベーススキーマ
 
@@ -416,7 +416,7 @@ erDiagram
 
 **ワークフロー（7 テーブル）**：`wf_process_model` + `wf_process_model_version` + `wf_process_instance_ext` + `wf_todo_task` + `wf_cc_record` + `wf_form_schema` + `wf_delegation_rule`
 
-**権威 DDL とシードデータ**：`scripts/sql/init-all.sql`
+**データベースの正規情報源**：スキーマ、インデックス、制約、アップグレードは `database/changelog/`、正式な冪等シードは `scripts/sql/seed/` で管理し、`database/seed/manifest.yaml` の SHA-256 と自然キー検証で保護します。`scripts/sql/init-all.sql` は互換期間のレガシーファイルであり、Compose 初期化では使用しません。
 
 ---
 
@@ -672,7 +672,7 @@ spring:
 
 ### 14.6 権限シードデータの追加
 
-`scripts/sql/init-all.sql` に `sys_permission` レコードを追加。
+`scripts/sql/seed/auth.sql` に冪等な `sys_permission` レコードを追加し、`database/seed/manifest.yaml` のチェックサムと自然キー検証を更新します。
 
 ### 14.7 Docker デプロイ設定
 

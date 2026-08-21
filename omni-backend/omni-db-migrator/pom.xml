@@ -59,6 +59,11 @@
                 <targetPath>scaffold</targetPath>
                 <filtering>false</filtering>
             </resource>
+            <resource>
+                <directory>${maven.multiModuleProjectDirectory}/../scripts/sql/seed</directory>
+                <targetPath>scripts/sql/seed</targetPath>
+                <filtering>false</filtering>
+            </resource>
         </resources>
         <plugins>
             <plugin>

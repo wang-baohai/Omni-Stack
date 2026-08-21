@@ -11,6 +11,8 @@ omni:
     admin-url: ${DB_MIGRATOR_ADMIN_URL:}
     admin-username: ${DB_MIGRATOR_ADMIN_USERNAME:}
     admin-password: ${DB_MIGRATOR_ADMIN_PASSWORD:}
+    app-username: ${DB_MIGRATOR_APP_USERNAME:omni_app}
+    app-password: ${DB_MIGRATOR_APP_PASSWORD:}
     changelog-root: database/changelog/db.changelog-root.yaml
     seed-manifest: database/seed/manifest.yaml
     adoption-baseline: database/adoption/baseline-09a29fe.yaml

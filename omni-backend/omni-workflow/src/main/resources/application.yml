@@ -68,7 +68,8 @@ spring:
 
 # Flowable 流程引擎配置
 flowable:
-  database-schema-update: true
+  # 正式结构只允许由 omni-db-migrator 管理，运行时引擎不得隐式建表或升级。
+  database-schema-update: false
   async-executor-activate: true
   history-level: audit
 

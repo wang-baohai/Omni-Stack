@@ -52,7 +52,7 @@ echo ""
 
 # --- 构建应用镜像 ---
 echo "[3/4] 构建应用镜像（首次构建约 5-10 分钟）..."
-if ! docker compose build omni-auth omni-base omni-workflow omni-crm omni-srm omni-procurement omni-asset omni-gateway omni-frontend; then
+if ! docker compose build omni-db-migrator omni-auth omni-base omni-workflow omni-crm omni-srm omni-procurement omni-asset omni-gateway omni-frontend; then
     echo ""
     echo "[ERROR] 构建失败！请检查以上错误信息。"
     echo "        常见原因：JDK/Node 镜像下载失败、Maven 依赖下载超时。"
@@ -73,7 +73,8 @@ fi
 if [ $? -ne 0 ]; then
     echo ""
     echo "[ERROR] 启动失败！请检查以上错误信息。"
-    echo "        运行 docker compose logs 查看详细日志。"
+    echo "        若 omni-db-migrator 失败，先运行 docker compose logs omni-db-migrator。"
+    echo "        既有旧数据卷必须按升级文档完成备份和 adopt-current，禁止跳过迁移器。"
     exit 1
 fi
 

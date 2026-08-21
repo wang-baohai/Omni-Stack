@@ -666,12 +666,14 @@ omni-backend/omni-srm/
 | `docker/backend/Dockerfile` | POM 缓存层 `COPY omni-srm/pom.xml omni-srm/` |
 | `docker-compose.yml` | SRM 服务、8105、DB/Redis/Nacos/MQ/XXL/internal token |
 | `start.bat/start.sh` | build 列表加入 SRM；Windows 端口保护加入 8105 |
-| `scripts/sql/init-all.sql` | `omni_srm` DDL、默认评估模板、权限和角色 |
-| `scripts/sql/sp_init_tenant.sql` | 与内嵌过程同步 |
+| `database/changelog/srm/` | 为 SRM 结构变更增加 forward-only Liquibase changeSet |
+| `scripts/sql/seed/srm.sql` | 默认评估模板等正式幂等种子；更新后刷新 seed manifest |
+| `scripts/sql/seed/auth.sql` | SRM 权限和角色正式幂等种子；更新后刷新 seed manifest |
+| SRM `TenantModuleProvisioner` | 新租户模板与风险目录的幂等初始化 |
 | `omni-auth` | 消费 portal-role assign 请求并以 requestId 幂等分配 SUPPLIER 角色，发布成功/失败结果事件 |
 | Frontend router/layout/menu/locales | 图标、菜单、i18n |
 
-权限迁移按 tenant + code 的 `NOT EXISTS` 幂等插入，正确重建 parent/path；同时更新 SUPER_ADMIN、SRM 角色及新租户初始化。默认 USER 只增加 `srm:portal:enroll`，SUPPLIER 增加 profile/evaluation/quotation，SRM 管理角色增加 invite 管理但显式排除全部供应商自助门户能力；不得把管理权限整体授给 USER。`srm:portal:quotation` 只授予 SUPPLIER 与 SUPER_ADMIN。
+权限种子按 tenant + code 的 `NOT EXISTS` 幂等插入，正确重建 parent/path；同时更新 SUPER_ADMIN、SRM 角色、seed manifest 断言及新租户初始化。默认 USER 只增加 `srm:portal:enroll`，SUPPLIER 增加 profile/evaluation/quotation，SRM 管理角色增加 invite 管理但显式排除全部供应商自助门户能力；不得把管理权限整体授给 USER。`srm:portal:quotation` 只授予 SUPPLIER 与 SUPER_ADMIN。
 
 配置要点：server 8105、management 19905、Redis DB 0、XXL appname `omni-srm`/port 9905。
 

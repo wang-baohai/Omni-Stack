@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: database/changelog/vendor/xxl-job/0001-xxl-job-3.3.1-schema.yaml
+  - include:
+      file: database/changelog/xxl-job/0002-xxl-job-seed.yaml

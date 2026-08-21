@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.omni.crm.security.CrmDataPermissionHandler;
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * CRM MyBatis-Plus 拦截器配置，顺序固定为租户、数据权限、分页。
+ * CRM MyBatis-Plus 拦截器配置，顺序固定为租户、数据权限、乐观锁、分页。
  *
  * @author Omni-Stack Team
  */
@@ -42,6 +43,7 @@ public class MybatisPlusConfig {
         });
         interceptor.addInnerInterceptor(tenant);
         interceptor.addInnerInterceptor(new DataPermissionInterceptor(new CrmDataPermissionHandler()));
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
     }

@@ -34,6 +34,16 @@ import com.omni.dbmigrator.config.DbMigratorProperties;
 @Service
 public class LiquibaseMigrationService {
 
+    /** 需要授权给业务账号的应用数据库。 */
+    private static final List<String> APPLICATION_DATABASES = List.of(
+            "omni_auth",
+            "omni_base",
+            "omni_workflow",
+            "omni_crm",
+            "omni_srm",
+            "omni_procurement",
+            "omni_asset");
+
     /** 数据库迁移器配置。 */
     private final DbMigratorProperties properties;
 
@@ -86,6 +96,7 @@ public class LiquibaseMigrationService {
      */
     public void migrate() {
         requireAdminConfig();
+        requireApplicationAccountConfig();
         for (MigrationTarget target : MigrationTargetCatalog.targets()) {
             DatabaseState state = inspectState(target.database());
             if (state.exists() && state.userTableCount() > 0 && !state.historyTableExists()) {
@@ -96,6 +107,7 @@ public class LiquibaseMigrationService {
         ensureBootstrapDatabase();
         withLiquibase(targetUrl("omni_auth"), properties.changelogRoot(),
                 liquibase -> liquibase.update(new Contexts("platform"), new LabelExpression()));
+        ensureApplicationAccount();
         for (MigrationTarget target : MigrationTargetCatalog.targets()) {
             withLiquibase(targetUrl(target.database()), target.changelog(),
                     liquibase -> liquibase.update(new Contexts(target.id()), new LabelExpression()));
@@ -212,6 +224,30 @@ public class LiquibaseMigrationService {
                     + "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
         } catch (Exception exception) {
             throw new IllegalStateException("无法创建 Liquibase 引导数据库 omni_auth", exception);
+        }
+    }
+
+    /**
+     * 创建或更新最小权限业务账号，并只授予七个应用数据库权限。
+     */
+    private void ensureApplicationAccount() {
+        String username = properties.appUsername();
+        String account = "'" + username + "'@'%'";
+        String passwordLiteral = sqlStringLiteral(properties.appPassword());
+        try (Connection connection = DriverManager.getConnection(
+                properties.adminUrl(),
+                properties.adminUsername(),
+                properties.adminPassword());
+             Statement statement = connection.createStatement()) {
+            statement.execute("CREATE USER IF NOT EXISTS " + account
+                    + " IDENTIFIED BY '" + passwordLiteral + "'");
+            statement.execute("ALTER USER " + account
+                    + " IDENTIFIED BY '" + passwordLiteral + "'");
+            for (String database : APPLICATION_DATABASES) {
+                statement.execute("GRANT ALL PRIVILEGES ON `" + database + "`.* TO " + account);
+            }
+        } catch (Exception exception) {
+            throw new IllegalStateException("创建或授权业务数据库账号失败", exception);
         }
     }
 
@@ -368,6 +404,31 @@ public class LiquibaseMigrationService {
             throw new IllegalArgumentException("status/migrate/adopt-current/verify-seed 必须配置数据库管理连接");
         }
         validateAdminUrl(properties.adminUrl());
+    }
+
+    /**
+     * 迁移命令必须显式提供安全的业务数据库账号，禁止沿用管理账号。
+     */
+    private void requireApplicationAccountConfig() {
+        String username = properties.appUsername();
+        String password = properties.appPassword();
+        if (username == null || !username.matches("[A-Za-z0-9_]{1,32}")) {
+            throw new IllegalArgumentException("DB_MIGRATOR_APP_USERNAME 不合法");
+        }
+        if (password == null || password.length() < 12 || password.length() > 128
+                || password.chars().anyMatch(Character::isISOControl)) {
+            throw new IllegalArgumentException("DB_MIGRATOR_APP_PASSWORD 必须为 12～128 位且不含控制字符");
+        }
+        if (username.equals(properties.adminUsername())) {
+            throw new IllegalArgumentException("业务数据库账号不能与管理账号相同");
+        }
+    }
+
+    /**
+     * 将受控配置值转义为 MySQL 字符串字面量内容。
+     */
+    private static String sqlStringLiteral(String value) {
+        return value.replace("\\", "\\\\").replace("'", "''");
     }
 
     /**

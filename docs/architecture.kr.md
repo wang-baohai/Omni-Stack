@@ -356,7 +356,7 @@ RocketMQ Broker (StreamBridge 경유)
 - **이름 있는 볼륨**(`mysql-data`, `redis-data`)으로 재시작 시 데이터 영속화
 - **헬스 체크**(depends_on + service_healthy)로 계층적 시작 체인 보장
 - **브리지 네트워크**(`omni-network`)로 컨테이너 간 통신
-- **SQL 초기화 마운트**: `scripts/sql/init-all.sql`, `init-nacos.sql`, `init-xxl-job.sql`을 MySQL의 `docker-entrypoint-initdb.d/`에 마운트
+- **마이그레이션 시작 게이트**: one-shot `omni-db-migrator`가 Liquibase로 9개 DB의 구조와 멱등 시드를 적용하며, 성공한 뒤에만 Nacos, XXL-JOB 및 애플리케이션이 시작됨
 
 ### 9.2 데이터베이스 스키마
 
@@ -392,7 +392,7 @@ erDiagram
 
 **워크플로우 (7 테이블)**: `wf_process_model` + `wf_process_model_version` + `wf_process_instance_ext` + `wf_todo_task` + `wf_cc_record` + `wf_form_schema` + `wf_delegation_rule`
 
-**권위 DDL 및 시드 데이터**: `scripts/sql/init-all.sql`
+**데이터베이스 공식 소스**: 스키마, 인덱스, 제약 조건 및 업그레이드는 `database/changelog/`가 관리합니다. 공식 멱등 시드는 `scripts/sql/seed/`가 관리하며 `database/seed/manifest.yaml`의 SHA-256 및 자연 키 검증으로 보호됩니다. `scripts/sql/init-all.sql`은 호환 기간의 레거시 파일이며 Compose 초기화에는 사용되지 않습니다.
 
 ---
 
@@ -700,7 +700,7 @@ spring:
 
 ### 14.6 권한 시드 데이터 추가
 
-`scripts/sql/init-all.sql`에 `sys_permission` 레코드 추가.
+`scripts/sql/seed/auth.sql`에 멱등 `sys_permission` 레코드를 추가하고 `database/seed/manifest.yaml`의 체크섬과 자연 키 검증을 갱신합니다.
 
 ### 14.7 Docker 배포 설정
 
