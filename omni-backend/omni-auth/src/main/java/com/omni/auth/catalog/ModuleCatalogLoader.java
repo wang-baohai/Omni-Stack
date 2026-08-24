@@ -31,7 +31,10 @@ public class ModuleCatalogLoader {
     private static final Set<String> ROOT_FIELDS = Set.of("version", "modules");
     /** 模块节点允许字段。 */
     private static final Set<String> MODULE_FIELDS = Set.of(
-            "id", "kind", "dependencies", "tenantProvisioning", "permissionRoots", "provisioningSeedIds");
+            "id", "artifactId", "kind", "version", "dependencies", "optionalModules", "conflicts",
+            "backendModules", "frontend", "gatewayRoutes", "composeServices", "database",
+            "tenantProvisioning", "permissionRoots", "provisioningSeedIds", "nacosConfigs", "ports",
+            "mq", "xxl", "docs", "resourceHints", "deprecation", "compatibility");
 
     /** 已校验的不可变模块目录。 */
     private final ModuleCatalog catalog;

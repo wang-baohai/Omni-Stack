@@ -9,30 +9,124 @@
     "modules": {
       "type": "array",
       "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["id", "kind", "dependencies", "tenantProvisioning", "provisioningSeedIds"],
-        "properties": {
-          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-          "kind": { "enum": ["foundation", "capability", "business", "infrastructure"] },
-          "dependencies": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
-          },
-          "tenantProvisioning": { "enum": ["local", "event", "none"] },
-          "permissionRoots": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": { "type": "string", "minLength": 1 }
-          },
-          "provisioningSeedIds": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": { "type": "string", "minLength": 1 }
-          }
-        }
+      "items": { "$ref": "#/definitions/module" }
+    }
+  },
+  "definitions": {
+    "stringList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "moduleIdList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    },
+    "frontend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["viewGlobs", "apiGlobs", "i18nGlobs", "i18nPrefixes"],
+      "properties": {
+        "viewGlobs": { "$ref": "#/definitions/stringList" },
+        "apiGlobs": { "$ref": "#/definitions/stringList" },
+        "i18nGlobs": { "$ref": "#/definitions/stringList" },
+        "i18nPrefixes": { "$ref": "#/definitions/stringList" }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["changelogs", "seedSourceIds"],
+      "properties": {
+        "changelogs": { "$ref": "#/definitions/stringList" },
+        "seedSourceIds": { "$ref": "#/definitions/stringList" }
+      }
+    },
+    "mq": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["producers", "consumers"],
+      "properties": {
+        "producers": { "$ref": "#/definitions/stringList" },
+        "consumers": { "$ref": "#/definitions/stringList" }
+      }
+    },
+    "xxl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["handlers", "appNames"],
+      "properties": {
+        "handlers": { "$ref": "#/definitions/stringList" },
+        "appNames": { "$ref": "#/definitions/stringList" }
+      }
+    },
+    "resourceHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimumMemoryMb", "recommendedMemoryMb"],
+      "properties": {
+        "minimumMemoryMb": { "type": "integer", "minimum": 0 },
+        "recommendedMemoryMb": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "deprecation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["active", "deprecated"] },
+        "since": { "type": "string", "minLength": 1 },
+        "replacement": { "type": "string", "minLength": 1 }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["java", "node", "notes"],
+      "properties": {
+        "java": { "type": "string", "minLength": 1 },
+        "node": { "type": "string", "minLength": 1 },
+        "notes": { "$ref": "#/definitions/stringList" }
+      }
+    },
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "artifactId", "kind", "version", "dependencies", "optionalModules", "conflicts",
+        "backendModules", "frontend", "gatewayRoutes", "composeServices", "database",
+        "tenantProvisioning", "permissionRoots", "provisioningSeedIds", "nacosConfigs", "ports",
+        "mq", "xxl", "docs", "resourceHints", "deprecation", "compatibility"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "artifactId": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "kind": { "enum": ["foundation", "capability", "business", "infrastructure"] },
+        "version": { "type": "string", "minLength": 1 },
+        "dependencies": { "$ref": "#/definitions/moduleIdList" },
+        "optionalModules": { "$ref": "#/definitions/moduleIdList" },
+        "conflicts": { "$ref": "#/definitions/moduleIdList" },
+        "backendModules": { "$ref": "#/definitions/stringList" },
+        "frontend": { "$ref": "#/definitions/frontend" },
+        "gatewayRoutes": { "$ref": "#/definitions/stringList" },
+        "composeServices": { "$ref": "#/definitions/stringList" },
+        "database": { "$ref": "#/definitions/database" },
+        "tenantProvisioning": { "enum": ["local", "event", "none"] },
+        "permissionRoots": { "$ref": "#/definitions/stringList" },
+        "provisioningSeedIds": { "$ref": "#/definitions/stringList" },
+        "nacosConfigs": { "$ref": "#/definitions/stringList" },
+        "ports": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 1, "maximum": 65535 }
+        },
+        "mq": { "$ref": "#/definitions/mq" },
+        "xxl": { "$ref": "#/definitions/xxl" },
+        "docs": { "$ref": "#/definitions/stringList" },
+        "resourceHints": { "$ref": "#/definitions/resourceHints" },
+        "deprecation": { "$ref": "#/definitions/deprecation" },
+        "compatibility": { "$ref": "#/definitions/compatibility" }
       }
     }
   }

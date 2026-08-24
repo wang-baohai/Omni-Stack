@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { isAbsolute, resolve } from 'node:path';
-import { loadCatalog } from './catalog.js';
+import { loadCatalog, validateCatalogResources } from './catalog.js';
 import { runDoctor } from './doctor.js';
 import { CliError } from './errors.js';
 import { renderCrudGeneration, validateExistingCrud } from './crud-generator.js';
@@ -26,6 +26,7 @@ const catalog = program.command('catalog').description('模块清单命令');
 catalog.command('validate').description('校验模块清单').action(() => {
   const root = workspaceRoot();
   const value = loadCatalog(root);
+  validateCatalogResources(root, value);
   console.log(`catalog valid: version=${value.version}, modules=${value.modules.length}`);
 });
 

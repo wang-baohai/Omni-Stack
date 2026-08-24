@@ -3,146 +3,413 @@ version: "1.0.0"
 # 模块组合的单一事实来源。preset 只能引用这里的 id，不得复制依赖或初始化声明。
 modules:
   - id: platform
+    artifactId: omni-stack
     kind: foundation
+    version: "1.0.0-SNAPSHOT"
     dependencies: []
+    optionalModules: []
+    conflicts: []
+    backendModules:
+      - omni-common-core
+      - omni-common
+      - omni-common-mybatis
+      - omni-common-redis
+      - omni-common-redis-reactive
+      - omni-common-operlog
+      - omni-common-job
+      - omni-common-mqlog
+      - omni-common-service
+      - omni-db-migrator
+    frontend:
+      viewGlobs: []
+      apiGlobs: []
+      i18nGlobs: [omni-frontend/src/locales/*.ts]
+      i18nPrefixes: [common]
+    gatewayRoutes: [block-internal-api, block-internal-api-services]
+    composeServices: [omni-db-migrator, omni-frontend]
+    database:
+      changelogs: [database/changelog/platform/db.changelog-platform.yaml, database/changelog/common/db.changelog-common-mq.yaml]
+      seedSourceIds: []
     tenantProvisioning: local
-    provisioningSeedIds:
-      - platform-default-tenant
+    permissionRoots: []
+    provisioningSeedIds: [platform-default-tenant]
+    nacosConfigs: [omni-common.yml]
+    ports: [80, 3000]
+    mq: { producers: [], consumers: [] }
+    xxl: { handlers: [mqRelayHandler], appNames: [] }
+    docs: [docs/architecture.md, docs/api-contract.md, docs/backend-patterns.md, docs/frontend-patterns.md, docs/core-flows.md, docs/mq-reliability.md, docs/docker-deployment.md]
+    resourceHints: { minimumMemoryMb: 768, recommendedMemoryMb: 1536 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [Spring Boot 4.0.6] }
 
   - id: auth
+    artifactId: omni-auth
     kind: foundation
-    dependencies:
-      - platform
+    version: "1.0.0-SNAPSHOT"
+    dependencies: [platform]
+    optionalModules: [rocketmq, xxl-job]
+    conflicts: []
+    backendModules: [omni-auth]
+    frontend:
+      viewGlobs: [omni-frontend/src/views/system, omni-frontend/src/views/login, omni-frontend/src/views/register, omni-frontend/src/views/oauth2-client, omni-frontend/src/views/callback, omni-frontend/src/views/device, omni-frontend/src/views/consent]
+      apiGlobs: [omni-frontend/src/api/auth.ts, omni-frontend/src/api/user.ts, omni-frontend/src/api/role.ts, omni-frontend/src/api/permission.ts, omni-frontend/src/api/tenant.ts, omni-frontend/src/api/org.ts, omni-frontend/src/api/oauth2-client.ts, omni-frontend/src/api/auth-record.ts, omni-frontend/src/api/audit-log.ts, omni-frontend/src/api/online.ts, omni-frontend/src/api/xss-config.ts]
+      i18nGlobs: [omni-frontend/src/locales/*.ts]
+      i18nPrefixes: [system, auth, login, register]
+    gatewayRoutes: [omni-auth-oauth2, omni-auth-wellknown, omni-auth]
+    composeServices: [omni-auth]
+    database:
+      changelogs: [database/changelog/auth/db.changelog-auth.yaml]
+      seedSourceIds: [auth-bootstrap]
     tenantProvisioning: local
-    permissionRoots:
-      - system
-    provisioningSeedIds:
-      - auth-default-root
-      - auth-role-catalog
-      - auth-permission-catalog
-      - auth-xss-defaults
+    permissionRoots: [system]
+    provisioningSeedIds: [auth-default-root, auth-role-catalog, auth-permission-catalog, auth-xss-defaults]
+    nacosConfigs: [omni-auth.yml]
+    ports: [8100, 19900, 9900]
+    mq:
+      producers: [auth-portal-role-result, tenant-provisioning]
+      consumers: [srm-domain-event, tenant-provision-result]
+    xxl: { handlers: [mqRelayHandler], appNames: [omni-auth] }
+    docs: [docs/core-flows.md]
+    resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [OAuth2 Authorization Server] }
 
   - id: base
+    artifactId: omni-base
     kind: foundation
-    dependencies:
-      - auth
+    version: "1.0.0-SNAPSHOT"
+    dependencies: [auth]
+    optionalModules: [rocketmq, xxl-job]
+    conflicts: []
+    backendModules: [omni-base]
+    frontend:
+      viewGlobs: [omni-frontend/src/views/base, omni-frontend/src/views/job, omni-frontend/src/views/monitor, omni-frontend/src/views/home, omni-frontend/src/views/dashboard, omni-frontend/src/views/error]
+      apiGlobs: [omni-frontend/src/api/dict.ts, omni-frontend/src/api/menu.ts, omni-frontend/src/api/mqMessage.ts, omni-frontend/src/api/myJob.ts, omni-frontend/src/api/oper-log.ts, omni-frontend/src/api/systemJob.ts, omni-frontend/src/api/userJobType.ts]
+      i18nGlobs: [omni-frontend/src/locales/*.ts]
+      i18nPrefixes: [base, dict, job, monitor]
+    gatewayRoutes: [omni-base, omni-base-job]
+    composeServices: [omni-base]
+    database:
+      changelogs: [database/changelog/base/db.changelog-base.yaml]
+      seedSourceIds: [base-bootstrap]
     tenantProvisioning: event
-    permissionRoots:
-      - base
-      - dict
-      - job
-      - monitor
-    provisioningSeedIds:
-      - base-permission-catalog
-      - base-dictionary-catalog
-      - base-job-type-catalog
+    permissionRoots: [base, dict, job, monitor]
+    provisioningSeedIds: [base-permission-catalog, base-dictionary-catalog, base-job-type-catalog]
+    nacosConfigs: [omni-base.yml]
+    ports: [8101, 19901, 9901]
+    mq:
+      producers: [operlog-topic, tenant-provision-result]
+      consumers: [operlog-topic, tenant-provisioning]
+    xxl: { handlers: [operLogArchiveHandler, userJobExecuteHandler, mqRelayHandler], appNames: [omni-base] }
+    docs: [docs/scheduling.md]
+    resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [XXL-JOB 可由功能开关关闭] }
 
   - id: workflow
+    artifactId: omni-workflow
     kind: capability
-    dependencies:
-      - auth
-      - base
+    version: "1.0.0-SNAPSHOT"
+    dependencies: [base]
+    optionalModules: [rocketmq, xxl-job]
+    conflicts: []
+    backendModules: [omni-common-workflow, omni-workflow]
+    frontend:
+      viewGlobs: [omni-frontend/src/views/workflow]
+      apiGlobs: [omni-frontend/src/api/workflow.ts, omni-frontend/src/api/workflow-model.ts]
+      i18nGlobs: [omni-frontend/src/locales/*.ts]
+      i18nPrefixes: [workflow]
+    gatewayRoutes: [omni-workflow]
+    composeServices: [omni-workflow]
+    database:
+      changelogs: [database/changelog/workflow/db.changelog-workflow.yaml, database/changelog/vendor/flowable/0001-flowable-8.0.0-schema.yaml, database/changelog/vendor/flowable/0002-flowable-8.0.0-properties.yaml]
+      seedSourceIds: [workflow-bootstrap]
     tenantProvisioning: event
-    permissionRoots:
-      - workflow
-    provisioningSeedIds:
-      - workflow-permission-catalog
-      - workflow-role-catalog
-      - workflow-model-catalog
+    permissionRoots: [workflow]
+    provisioningSeedIds: [workflow-permission-catalog, workflow-role-catalog, workflow-model-catalog]
+    nacosConfigs: [omni-workflow.yml]
+    ports: [8103, 19903, 9903]
+    mq:
+      producers: [workflow-domain-event, tenant-provision-result]
+      consumers: [tenant-provisioning]
+    xxl: { handlers: [mqRelayHandler], appNames: [omni-workflow] }
+    docs: [docs/workflow.md]
+    resourceHints: { minimumMemoryMb: 768, recommendedMemoryMb: 1024 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [Flowable 8.0.0] }
 
   - id: crm
+    artifactId: omni-crm
     kind: business
-    dependencies:
-      - auth
-      - base
+    version: "1.0.0-SNAPSHOT"
+    dependencies: [base]
+    optionalModules: [rocketmq, xxl-job]
+    conflicts: []
+    backendModules: [omni-crm]
+    frontend:
+      viewGlobs: [omni-frontend/src/views/crm]
+      apiGlobs: [omni-frontend/src/api/crm-*.ts]
+      i18nGlobs: [omni-frontend/src/locales/*.ts]
+      i18nPrefixes: [crm]
+    gatewayRoutes: [omni-crm]
+    composeServices: [omni-crm]
+    database:
+      changelogs: [database/changelog/crm/db.changelog-crm.yaml]
+      seedSourceIds: [crm-bootstrap]
     tenantProvisioning: event
-    permissionRoots:
-      - crm
-    provisioningSeedIds:
-      - crm-role-catalog
-      - crm-permission-catalog
-      - crm-default-config
+    permissionRoots: [crm]
+    provisioningSeedIds: [crm-role-catalog, crm-permission-catalog, crm-default-config]
+    nacosConfigs: [omni-crm.yml]
+    ports: [8104, 19904, 9904]
+    mq:
+      producers: [crm-domain-event, tenant-provision-result]
+      consumers: [tenant-provisioning]
+    xxl: { handlers: [mqRelayHandler], appNames: [omni-crm] }
+    docs: [docs/crm.md, docs/design/crm-design.md]
+    resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [CRM 与 Workflow 无强依赖] }
 
   - id: srm
+    artifactId: omni-srm
     kind: business
-    dependencies:
-      - auth
-      - base
-      - workflow
+    version: "1.0.0-SNAPSHOT"
+    dependencies: [workflow]
+    optionalModules: [rocketmq, xxl-job]
+    conflicts: []
+    backendModules: [omni-srm]
+    frontend:
+      viewGlobs: [omni-frontend/src/views/srm, omni-frontend/src/views/supplier-portal, omni-frontend/src/views/portal-login, omni-frontend/src/views/portal-register]
+      apiGlobs: [omni-frontend/src/api/srm-*.ts]
+      i18nGlobs: [omni-frontend/src/locales/*.ts]
+      i18nPrefixes: [srm, supplierPortal]
+    gatewayRoutes: [omni-srm]
+    composeServices: [omni-srm]
+    database:
+      changelogs: [database/changelog/srm/db.changelog-srm.yaml]
+      seedSourceIds: [srm-bootstrap]
     tenantProvisioning: event
-    permissionRoots:
-      - srm
-    provisioningSeedIds:
-      - srm-role-catalog
-      - srm-permission-catalog
-      - srm-default-config
+    permissionRoots: [srm]
+    provisioningSeedIds: [srm-role-catalog, srm-permission-catalog, srm-default-config]
+    nacosConfigs: [omni-srm.yml]
+    ports: [8105, 19905, 9905]
+    mq:
+      producers: [srm-domain-event, tenant-provision-result]
+      consumers: [auth-portal-role-result, workflow-domain-event, tenant-provisioning]
+    xxl: { handlers: [mqRelayHandler], appNames: [omni-srm] }
+    docs: [docs/srm.md, docs/design/srm-design.md]
+    resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [供应商准入依赖 Workflow] }
 
   - id: procurement
+    artifactId: omni-procurement
     kind: business
-    dependencies:
-      - auth
-      - base
-      - workflow
-      - srm
+    version: "1.0.0-SNAPSHOT"
+    dependencies: [srm]
+    optionalModules: [rocketmq, xxl-job]
+    conflicts: []
+    backendModules: [omni-procurement]
+    frontend:
+      viewGlobs: [omni-frontend/src/views/procurement]
+      apiGlobs: [omni-frontend/src/api/procurement-*.ts]
+      i18nGlobs: [omni-frontend/src/locales/*.ts]
+      i18nPrefixes: [procurement]
+    gatewayRoutes: [omni-procurement]
+    composeServices: [omni-procurement]
+    database:
+      changelogs: [database/changelog/procurement/db.changelog-procurement.yaml]
+      seedSourceIds: [procurement-bootstrap]
     tenantProvisioning: event
-    permissionRoots:
-      - procurement
-    provisioningSeedIds:
-      - procurement-role-catalog
-      - procurement-permission-catalog
-      - procurement-default-config
+    permissionRoots: [procurement]
+    provisioningSeedIds: [procurement-role-catalog, procurement-permission-catalog, procurement-default-config]
+    nacosConfigs: [omni-procurement.yml]
+    ports: [8106, 19906, 9906]
+    mq:
+      producers: [procurement-domain-event, tenant-provision-result]
+      consumers: [workflow-domain-event, srm-domain-event, tenant-provisioning]
+    xxl: { handlers: [mqRelayHandler], appNames: [omni-procurement] }
+    docs: [docs/design/procurement-design.md]
+    resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [审批运行时保留在 Workflow] }
 
   - id: asset
+    artifactId: omni-asset
     kind: business
-    dependencies:
-      - auth
-      - base
-      - workflow
-      - procurement
+    version: "1.0.0-SNAPSHOT"
+    dependencies: [procurement, srm]
+    optionalModules: [rocketmq, xxl-job]
+    conflicts: []
+    backendModules: [omni-asset]
+    frontend:
+      viewGlobs: [omni-frontend/src/views/asset]
+      apiGlobs: [omni-frontend/src/api/asset-*.ts]
+      i18nGlobs: [omni-frontend/src/locales/*.ts]
+      i18nPrefixes: [asset]
+    gatewayRoutes: [omni-asset]
+    composeServices: [omni-asset]
+    database:
+      changelogs: [database/changelog/asset/db.changelog-asset.yaml]
+      seedSourceIds: []
     tenantProvisioning: event
-    permissionRoots:
-      - asset
-    provisioningSeedIds:
-      - asset-role-catalog
-      - asset-permission-catalog
+    permissionRoots: [asset]
+    provisioningSeedIds: [asset-role-catalog, asset-permission-catalog]
+    nacosConfigs: [omni-asset.yml]
+    ports: [8107, 19907, 9907]
+    mq:
+      producers: [asset-domain-event, tenant-provision-result]
+      consumers: [procurement-domain-event, workflow-domain-event, tenant-provisioning]
+    xxl: { handlers: [mqRelayHandler], appNames: [omni-asset] }
+    docs: [docs/design/asset-design.md]
+    resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [资产入账依赖采购与 SRM 契约] }
 
   - id: nacos
+    artifactId: nacos-server
     kind: infrastructure
+    version: "3.1.1"
     dependencies: []
+    optionalModules: [mysql]
+    conflicts: []
+    backendModules: []
+    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    gatewayRoutes: []
+    composeServices: [nacos]
+    database:
+      changelogs: [database/changelog/nacos/db.changelog-nacos.yaml, database/changelog/vendor/nacos/0001-nacos-3.1.1-schema.yaml]
+      seedSourceIds: [nacos-bootstrap]
     tenantProvisioning: none
-    provisioningSeedIds:
-      - nacos-security-catalog
+    permissionRoots: []
+    provisioningSeedIds: [nacos-security-catalog]
+    nacosConfigs: []
+    ports: [8080, 8848, 9848]
+    mq: { producers: [], consumers: [] }
+    xxl: { handlers: [], appNames: [] }
+    docs: [docs/docker-deployment.md]
+    resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [MySQL 外部存储] }
 
   - id: xxl-job
+    artifactId: xxl-job-admin
     kind: infrastructure
-    dependencies:
-      - nacos
+    version: "3.3.1"
+    dependencies: [nacos]
+    optionalModules: [mysql]
+    conflicts: []
+    backendModules: []
+    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    gatewayRoutes: []
+    composeServices: [xxl-job-admin]
+    database:
+      changelogs: [database/changelog/xxl-job/db.changelog-xxl-job.yaml, database/changelog/vendor/xxl-job/0001-xxl-job-3.3.1-schema.yaml]
+      seedSourceIds: [xxl-job-bootstrap]
     tenantProvisioning: none
-    provisioningSeedIds:
-      - xxl-job-catalog
+    permissionRoots: []
+    provisioningSeedIds: [xxl-job-catalog]
+    nacosConfigs: []
+    ports: [8080]
+    mq: { producers: [], consumers: [] }
+    xxl: { handlers: [], appNames: [xxl-job-admin] }
+    docs: [docs/scheduling.md, docs/docker-deployment.md]
+    resourceHints: { minimumMemoryMb: 384, recommendedMemoryMb: 512 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [执行器按服务隔离] }
 
   - id: gateway
+    artifactId: omni-gateway
     kind: foundation
-    dependencies:
-      - auth
-      - base
+    version: "1.0.0-SNAPSHOT"
+    dependencies: [base]
+    optionalModules: []
+    conflicts: []
+    backendModules: [omni-gateway]
+    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    gatewayRoutes: []
+    composeServices: [omni-gateway]
+    database: { changelogs: [], seedSourceIds: [] }
     tenantProvisioning: none
+    permissionRoots: []
     provisioningSeedIds: []
+    nacosConfigs: [omni-gateway.yml]
+    ports: [8102, 19902]
+    mq: { producers: [], consumers: [] }
+    xxl: { handlers: [], appNames: [] }
+    docs: [docs/architecture.md, docs/core-flows.md]
+    resourceHints: { minimumMemoryMb: 384, recommendedMemoryMb: 512 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [仅依赖响应式 Redis Starter] }
 
   - id: mysql
+    artifactId: mysql
     kind: infrastructure
+    version: "8.4"
     dependencies: []
+    optionalModules: []
+    conflicts: []
+    backendModules: []
+    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    gatewayRoutes: []
+    composeServices: [mysql]
+    database: { changelogs: [], seedSourceIds: [] }
     tenantProvisioning: none
+    permissionRoots: []
     provisioningSeedIds: []
+    nacosConfigs: []
+    ports: [3306]
+    mq: { producers: [], consumers: [] }
+    xxl: { handlers: [], appNames: [] }
+    docs: [docs/docker-deployment.md]
+    resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 1024 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [utf8mb4_unicode_ci] }
 
   - id: redis
+    artifactId: redis
     kind: infrastructure
+    version: "7.4"
     dependencies: []
+    optionalModules: []
+    conflicts: []
+    backendModules: []
+    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    gatewayRoutes: []
+    composeServices: [redis]
+    database: { changelogs: [], seedSourceIds: [] }
     tenantProvisioning: none
+    permissionRoots: []
     provisioningSeedIds: []
+    nacosConfigs: []
+    ports: [6379]
+    mq: { producers: [], consumers: [] }
+    xxl: { handlers: [], appNames: [] }
+    docs: [docs/docker-deployment.md]
+    resourceHints: { minimumMemoryMb: 128, recommendedMemoryMb: 256 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [Gateway 使用 reactive client] }
 
   - id: rocketmq
+    artifactId: rocketmq
     kind: infrastructure
+    version: "5.3.2"
     dependencies: []
+    optionalModules: []
+    conflicts: []
+    backendModules: []
+    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    gatewayRoutes: []
+    composeServices: [rocketmq-namesrv, rocketmq-broker]
+    database: { changelogs: [], seedSourceIds: [] }
     tenantProvisioning: none
+    permissionRoots: []
     provisioningSeedIds: []
+    nacosConfigs: []
+    ports: [9876, 10909, 10911, 10912]
+    mq: { producers: [], consumers: [] }
+    xxl: { handlers: [], appNames: [] }
+    docs: [docs/mq-reliability.md, docs/docker-deployment.md]
+    resourceHints: { minimumMemoryMb: 768, recommendedMemoryMb: 1536 }
+    deprecation: { status: active }
+    compatibility: { java: "25", node: ">=22.12.0", notes: [Transactional Outbox] }

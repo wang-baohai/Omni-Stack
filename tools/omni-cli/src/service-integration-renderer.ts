@@ -208,11 +208,36 @@ function renderCatalog(content: string, spec: ServiceSpec): string {
   document.addIn(['modules', authIndex, 'provisioningSeedIds'], permissionAssertionId(spec));
   document.addIn(['modules'], {
     id: spec.serviceId,
+    artifactId: spec.artifactId,
     kind: 'business',
+    version: '1.0.0-SNAPSHOT',
     dependencies: ['auth', 'base'],
+    optionalModules: spec.enableMq ? ['rocketmq', 'xxl-job'] : spec.enableJob ? ['xxl-job'] : [],
+    conflicts: [],
+    backendModules: [spec.artifactId],
+    frontend: {
+      viewGlobs: [],
+      apiGlobs: [],
+      i18nGlobs: ['omni-frontend/src/locales/*.ts'],
+      i18nPrefixes: [spec.serviceId],
+    },
+    gatewayRoutes: [spec.artifactId],
+    composeServices: [spec.artifactId],
+    database: {
+      changelogs: [`database/changelog/${spec.serviceId}/db.changelog-${spec.serviceId}.yaml`],
+      seedSourceIds: [],
+    },
     tenantProvisioning: 'none',
     permissionRoots: [spec.serviceId],
     provisioningSeedIds: [],
+    nacosConfigs: [`${spec.artifactId}.yml`],
+    ports: [spec.servicePort, spec.managementPort, ...(spec.enableJob ? [spec.xxlPort] : [])],
+    mq: { producers: spec.enableMq ? [`${spec.serviceId}-domain-event`] : [], consumers: [] },
+    xxl: { handlers: spec.enableJob ? ['mqRelayHandler'] : [], appNames: spec.enableJob ? [spec.artifactId] : [] },
+    docs: [`docs/${spec.serviceId}.md`, `docs/${spec.serviceId}-i18n-status.yaml`],
+    resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 },
+    deprecation: { status: 'active' },
+    compatibility: { java: '25', node: '>=22.12.0', notes: ['由 create-service 生成'] },
   });
   return document.toString({ lineWidth: 0 });
 }

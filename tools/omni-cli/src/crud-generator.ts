@@ -536,15 +536,15 @@ function registerSeedManifest(content: string, context: CrudContext, seedSha: st
 }
 
 function registerProvisioningAssertion(content: string, assertionId: string): string {
-  if (content.includes(`      - ${assertionId}`)) throw new CliError(`catalog 已登记：${assertionId}`);
-  const start = content.indexOf('  - id: auth\n');
-  const end = content.indexOf('\n  - id: ', start + 1);
-  if (start < 0 || end < 0) throw new CliError('catalog 缺少唯一 auth 模块区块');
-  const block = content.slice(start, end);
-  const anchor = '      - auth-xss-defaults';
-  if (block.split(anchor).length !== 2) throw new CliError('catalog auth provisioning 锚点不唯一');
-  const updated = block.replace(anchor, `${anchor}\n      - ${assertionId}`);
-  return `${content.slice(0, start)}${updated}${content.slice(end)}`;
+  const document = parseDocument(content);
+  const root = document.toJS() as { modules?: Array<{ id?: string; provisioningSeedIds?: string[] }> };
+  const authIndex = root.modules?.findIndex((module) => module.id === 'auth') ?? -1;
+  if (authIndex < 0) throw new CliError('catalog 缺少 auth 模块');
+  if (root.modules?.[authIndex]?.provisioningSeedIds?.includes(assertionId)) {
+    throw new CliError(`catalog 已登记：${assertionId}`);
+  }
+  document.addIn(['modules', authIndex, 'provisioningSeedIds'], assertionId);
+  return document.toString({ lineWidth: 0 });
 }
 
 function registerProcurementDataScope(content: string, context: CrudContext): string {

@@ -4,11 +4,36 @@ export type TenantProvisioningMode = 'local' | 'event' | 'none';
 /** 当前与 Auth 兼容的模块清单定义。 */
 export interface ModuleDefinition {
   id: string;
+  artifactId: string;
   kind: 'foundation' | 'capability' | 'business' | 'infrastructure';
+  version: string;
   dependencies: string[];
+  optionalModules: string[];
+  conflicts: string[];
+  backendModules: string[];
+  frontend: {
+    viewGlobs: string[];
+    apiGlobs: string[];
+    i18nGlobs: string[];
+    i18nPrefixes: string[];
+  };
+  gatewayRoutes: string[];
+  composeServices: string[];
+  database: {
+    changelogs: string[];
+    seedSourceIds: string[];
+  };
   tenantProvisioning: TenantProvisioningMode;
-  permissionRoots?: string[];
+  permissionRoots: string[];
   provisioningSeedIds: string[];
+  nacosConfigs: string[];
+  ports: number[];
+  mq: { producers: string[]; consumers: string[] };
+  xxl: { handlers: string[]; appNames: string[] };
+  docs: string[];
+  resourceHints: { minimumMemoryMb: number; recommendedMemoryMb: number };
+  deprecation: { status: 'active' | 'deprecated'; since?: string; replacement?: string };
+  compatibility: { java: string; node: string; notes: string[] };
 }
 
 /** 模块清单根对象。 */
