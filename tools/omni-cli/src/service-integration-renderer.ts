@@ -247,6 +247,7 @@ function renderPlatformChangelog(content: string, spec: ServiceSpec): string {
   - changeSet:
       id: ${changeSetId}
       author: omni-cli
+      labels: adoption-upgrade
       context: platform
       runInTransaction: false
       comment: 为 ${spec.displayName} 创建独立数据库

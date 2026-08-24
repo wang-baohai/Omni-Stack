@@ -1,5 +1,7 @@
 package com.omni.dbmigrator.seed;
 
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,5 +46,17 @@ class SeedManifestLoaderTest {
         assertThatThrownBy(() -> loader.load("../manifest.yaml"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("安全");
+    }
+
+    /**
+     * Windows 与 Unix 换行必须产生相同摘要。
+     */
+    @Test
+    void should_normalize_line_endings_when_digest_is_calculated() {
+        byte[] lf = "INSERT INTO sample VALUES (1);\n".getBytes(StandardCharsets.UTF_8);
+        byte[] crlf = "INSERT INTO sample VALUES (1);\r\n".getBytes(StandardCharsets.UTF_8);
+
+        assertThat(SeedManifestLoader.canonicalSha256(crlf))
+                .isEqualTo(SeedManifestLoader.canonicalSha256(lf));
     }
 }

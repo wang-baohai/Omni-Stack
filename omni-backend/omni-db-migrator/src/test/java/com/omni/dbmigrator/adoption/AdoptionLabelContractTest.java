@@ -49,15 +49,19 @@ class AdoptionLabelContractTest {
                 AdoptionLabelContractTest.class.getClassLoader())) {
             DatabaseChangeLog platform = parse("database/changelog/db.changelog-root.yaml", accessor);
             assertThat(count(platform, "adoption-baseline")).isEqualTo(1);
+            assertLabelsDisjoint("platform", platform);
 
             for (MigrationTarget target : MigrationTargetCatalog.targets()) {
                 DatabaseChangeLog changelog = parse(target.changelog(), accessor);
-                assertThat(count(changelog, "adoption-baseline"))
-                        .as(target.id() + " baseline")
-                        .isEqualTo(expectedBaseline.get(target.id()).longValue());
-                assertThat(count(changelog, "adoption-upgrade"))
-                        .as(target.id() + " upgrade")
-                        .isEqualTo(expectedUpgrade.get(target.id()).longValue());
+                if (expectedBaseline.containsKey(target.id())) {
+                    assertThat(count(changelog, "adoption-baseline"))
+                            .as(target.id() + " baseline")
+                            .isEqualTo(expectedBaseline.get(target.id()).longValue());
+                    assertThat(count(changelog, "adoption-upgrade"))
+                            .as(target.id() + " upgrade")
+                            .isEqualTo(expectedUpgrade.get(target.id()).longValue());
+                }
+                assertLabelsDisjoint(target.id(), changelog);
             }
         }
     }
@@ -81,5 +85,18 @@ class AdoptionLabelContractTest {
                     return labels.contains(label);
                 })
                 .count();
+    }
+
+    /**
+     * 同一个 changeSet 不得同时属于接管基线和后续升级。
+     */
+    private static void assertLabelsDisjoint(String targetId, DatabaseChangeLog changelog) {
+        assertThat(changelog.getChangeSets())
+                .allSatisfy(changeSet -> {
+                    Set<String> labels = changeSet.getLabels().getLabels();
+                    assertThat(labels.contains("adoption-baseline") && labels.contains("adoption-upgrade"))
+                            .as(targetId + " changeSet " + changeSet.getId())
+                            .isFalse();
+                });
     }
 }

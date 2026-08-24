@@ -75,6 +75,10 @@ describe('service integration renderer', () => {
       /id: platform-generated-inventory-sample-create-database/,
     );
     assert.match(
+      required(byTarget, 'database/changelog/platform/db.changelog-platform.yaml'),
+      /labels: adoption-upgrade/,
+    );
+    assert.match(
       required(byTarget, 'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java'),
       /target\("inventory-sample", "omni_inventory_sample", false\)/,
     );

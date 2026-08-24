@@ -1,6 +1,9 @@
 package com.omni.dbmigrator.seed;
 
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HexFormat;
@@ -132,8 +135,7 @@ public class SeedManifestLoader {
             if (inputStream == null) {
                 throw new IllegalArgumentException("找不到种子资源: " + resource);
             }
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String actual = HexFormat.of().formatHex(digest.digest(inputStream.readAllBytes()));
+            String actual = canonicalSha256(inputStream.readAllBytes());
             if (!expectedSha256.equals(actual)) {
                 throw new IllegalArgumentException("种子资源摘要不匹配: " + resource);
             }
@@ -141,6 +143,29 @@ public class SeedManifestLoader {
             throw exception;
         } catch (Exception exception) {
             throw new IllegalStateException("校验种子资源失败: " + resource, exception);
+        }
+    }
+
+    /**
+     * 以 UTF-8 文本和 LF 换行为事实源计算摘要，避免 Git autocrlf 造成跨平台漂移。
+     *
+     * @param value 种子 SQL 原始字节
+     * @return 规范化后的 SHA-256
+     */
+    static String canonicalSha256(byte[] value) {
+        try {
+            String text = StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+                    .decode(ByteBuffer.wrap(value))
+                    .toString();
+            byte[] canonical = text.replace("\r\n", "\n")
+                    .replace('\r', '\n')
+                    .getBytes(StandardCharsets.UTF_8);
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return HexFormat.of().formatHex(digest.digest(canonical));
+        } catch (Exception exception) {
+            throw new IllegalArgumentException("种子资源必须是合法 UTF-8 文本", exception);
         }
     }
 
