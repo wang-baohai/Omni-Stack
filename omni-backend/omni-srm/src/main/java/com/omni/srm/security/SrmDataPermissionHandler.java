@@ -1,6 +1,8 @@
 package com.omni.srm.security;
 
 import com.baomidou.mybatisplus.extension.plugins.handler.MultiDataPermissionHandler;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.persistence.DataScopeTablePolicy;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -9,6 +11,7 @@ import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionLi
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +21,8 @@ import java.util.Set;
  *
  * @author Omni-Stack Team
  */
-public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
+@Component
+public class SrmDataPermissionHandler implements MultiDataPermissionHandler, DataScopeTablePolicy {
 
     private static final Set<String> OWNED_TABLES = Set.of("srm_supplier", "srm_evaluation");
     private static final Map<String, ParentRelation> CHILD_TABLES = Map.of(
@@ -47,7 +51,7 @@ public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
             return null;
         }
         String alias = table.getAlias() == null ? table.getName() : table.getAlias().getName();
-        SrmDataScopeContext.ScopeInfo info = SrmDataScopeContext.get();
+        ServiceDataScopeContext.ScopeInfo info = ServiceDataScopeContext.get();
         if (info == null || info.effectiveScope() == null) {
             return deny(alias);
         }
@@ -65,7 +69,7 @@ public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
         return owned(alias, info);
     }
 
-    private Expression owned(String alias, SrmDataScopeContext.ScopeInfo info) {
+    private Expression owned(String alias, ServiceDataScopeContext.ScopeInfo info) {
         return switch (info.effectiveScope()) {
             case "SELF" -> equals(alias, "owner_user_id", info.userId());
             case "DEPT" -> equals(alias, "owner_unit_id", info.primaryUnitId());
@@ -74,7 +78,7 @@ public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
         };
     }
 
-    private Expression inherited(String alias, ParentRelation relation, SrmDataScopeContext.ScopeInfo info) {
+    private Expression inherited(String alias, ParentRelation relation, ServiceDataScopeContext.ScopeInfo info) {
         if (info.tenantId() == null) {
             return deny(alias);
         }
@@ -96,7 +100,7 @@ public class SrmDataPermissionHandler implements MultiDataPermissionHandler {
     }
 
     private Expression nestedInherited(String alias, NestedParentRelation relation,
-                                       SrmDataScopeContext.ScopeInfo info) {
+                                       ServiceDataScopeContext.ScopeInfo info) {
         if (info.tenantId() == null) {
             return deny(alias);
         }

@@ -2,7 +2,7 @@ package com.omni.srm.controller;
 
 import com.omni.common.core.result.R;
 import com.omni.srm.dto.SrmViews;
-import com.omni.srm.security.SrmDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.srm.service.OwnerOptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +21,7 @@ public class OptionsController {
     private final OwnerOptionService ownerOptionService;
 
     /** 查询负责人候选。 */
-    @GetMapping("/owners") @PreAuthorize("hasAuthority('srm:owner:list')") @SrmDataScope(permissionCode = "srm:owner:list")
+    @GetMapping("/owners") @PreAuthorize("hasAuthority('srm:owner:list')") @ServiceDataScope(permissionCode = "srm:owner:list")
     public R<List<SrmViews.OwnerOptionVO>> owners(@RequestParam(required = false) String keyword,
                                                    @RequestParam(defaultValue = "20") int limit) {
         return R.ok(ownerOptionService.list(keyword, limit));

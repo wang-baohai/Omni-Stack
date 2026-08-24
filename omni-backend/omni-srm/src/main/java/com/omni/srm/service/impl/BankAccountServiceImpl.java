@@ -9,7 +9,7 @@ import com.omni.srm.dto.SrmViews;
 import com.omni.srm.entity.SrmSupplierBankAccount;
 import com.omni.srm.mapper.SrmSupplierBankAccountMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.BankAccountService;
 import com.omni.srm.service.support.SrmAuditSupport;
 import com.omni.srm.service.support.SrmRecordAccessGuard;
@@ -57,7 +57,7 @@ public class BankAccountServiceImpl implements BankAccountService {
             clearPrimary(supplierId, null);
         }
         SrmSupplierBankAccount account = new SrmSupplierBankAccount();
-        account.setTenantId(SrmTenantContext.requireTenantId());
+        account.setTenantId(ServiceIdentityContext.requireTenantId());
         account.setSupplierId(supplierId);
         account.setAccountName(request.getAccountName());
         account.setAccountNo(request.getAccountNo());
@@ -94,7 +94,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         if (request.getBankCode() != null) update.set(SrmSupplierBankAccount::getBankCode, request.getBankCode());
         if (request.getPrimaryFlag() != null) update.set(SrmSupplierBankAccount::getPrimaryFlag, request.getPrimaryFlag());
         update.set(SrmSupplierBankAccount::getUpdateTime, LocalDateTime.now())
-                .set(SrmSupplierBankAccount::getUpdateBy, SrmTenantContext.require().username());
+                .set(SrmSupplierBankAccount::getUpdateBy, ServiceIdentityContext.require().username());
         if (bankAccountMapper.update(null, update) != 1) {
             throw new BusinessException(409, "记录已被其他用户修改，请刷新后重试");
         }
@@ -114,7 +114,7 @@ public class BankAccountServiceImpl implements BankAccountService {
                 .set(SrmSupplierBankAccount::getDeleted, 1)
                 .setSql("version = version + 1");
         update.set(SrmSupplierBankAccount::getUpdateTime, LocalDateTime.now())
-                .set(SrmSupplierBankAccount::getUpdateBy, SrmTenantContext.require().username());
+                .set(SrmSupplierBankAccount::getUpdateBy, ServiceIdentityContext.require().username());
         if (bankAccountMapper.update(null, update) != 1) {
             throw new BusinessException(409, "记录已被其他用户修改，请刷新后重试");
         }
@@ -148,7 +148,7 @@ public class BankAccountServiceImpl implements BankAccountService {
                 .ne(excludeId != null, SrmSupplierBankAccount::getId, excludeId)
                 .set(SrmSupplierBankAccount::getPrimaryFlag, false)
                 .set(SrmSupplierBankAccount::getUpdateTime, LocalDateTime.now())
-                .set(SrmSupplierBankAccount::getUpdateBy, SrmTenantContext.require().username())
+                .set(SrmSupplierBankAccount::getUpdateBy, ServiceIdentityContext.require().username())
                 .setSql("version = version + 1");
         bankAccountMapper.update(null, update);
     }

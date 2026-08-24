@@ -6,8 +6,8 @@ import com.omni.common.core.result.BusinessException;
 import com.omni.srm.dto.InternalSupplierSummary;
 import com.omni.srm.entity.SrmSupplier;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmDataScopeContext;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,8 +45,8 @@ class InternalSupplierServiceImplTest {
     /** 清理测试线程上下文。 */
     @AfterEach
     void clearContext() {
-        SrmDataScopeContext.clear();
-        SrmTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 批量查询必须去重、保持输入顺序并过滤其他租户数据。 */
@@ -56,8 +56,8 @@ class InternalSupplierServiceImplTest {
         SrmSupplier third = supplier(3L, 7L, "S-003");
         SrmSupplier foreign = supplier(3L, 8L, "FOREIGN");
         when(supplierMapper.selectList(ArgumentMatchers.any())).thenAnswer(invocation -> {
-            assertThat(SrmTenantContext.requireTenantId()).isEqualTo(7L);
-            assertThat(SrmDataScopeContext.require().tenantId()).isEqualTo(7L);
+            assertThat(ServiceIdentityContext.requireTenantId()).isEqualTo(7L);
+            assertThat(ServiceDataScopeContext.require().tenantId()).isEqualTo(7L);
             return List.of(first, foreign, third);
         });
 
@@ -114,7 +114,7 @@ class InternalSupplierServiceImplTest {
     }
 
     private void assertContextsCleared() {
-        assertThat(SrmDataScopeContext.get()).isNull();
-        assertThatThrownBy(SrmTenantContext::require).isInstanceOf(BusinessException.class);
+        assertThat(ServiceDataScopeContext.get()).isNull();
+        assertThatThrownBy(ServiceIdentityContext::require).isInstanceOf(BusinessException.class);
     }
 }

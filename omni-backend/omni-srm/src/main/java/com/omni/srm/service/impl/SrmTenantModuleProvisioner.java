@@ -17,7 +17,8 @@ import com.omni.srm.entity.SrmTenantEntity;
 import com.omni.srm.mapper.SrmRiskCriterionMapper;
 import com.omni.srm.mapper.SrmRiskIndicatorTypeMapper;
 import com.omni.srm.mapper.SrmRiskScoreThresholdMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.SrmTenantInitializer;
 import lombok.RequiredArgsConstructor;
 
@@ -46,18 +47,18 @@ public class SrmTenantModuleProvisioner implements TenantModuleProvisioner {
     @Override
     public void provision(ProvisionRequestedEvent event) {
         RiskCatalogSnapshot snapshot = loadTemplateSnapshot();
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 0L, event.tenantId(), "tenant-provisioning"));
         try {
             tenantInitializer.ensureInitialized();
             cloneRiskCatalog(event.tenantId(), snapshot);
         } finally {
-            SrmTenantContext.clear();
+            ServiceIdentityContext.clear();
         }
     }
 
     private RiskCatalogSnapshot loadTemplateSnapshot() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 0L, TEMPLATE_TENANT_ID, "tenant-provisioning-template"));
         try {
             List<RiskTypeSeed> types = riskTypeMapper.selectList(
@@ -83,7 +84,7 @@ public class SrmTenantModuleProvisioner implements TenantModuleProvisioner {
             }
             return new RiskCatalogSnapshot(types, criteria, thresholds);
         } finally {
-            SrmTenantContext.clear();
+            ServiceIdentityContext.clear();
         }
     }
 

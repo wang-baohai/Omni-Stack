@@ -7,7 +7,7 @@ import com.omni.srm.entity.SrmEvaluationDimension;
 import com.omni.srm.entity.SrmEvaluationTemplate;
 import com.omni.srm.mapper.SrmEvaluationDimensionMapper;
 import com.omni.srm.mapper.SrmEvaluationTemplateMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.SrmTenantInitializer;
 import com.omni.srm.service.support.SrmAuditSupport;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class SrmTenantInitializerImpl implements SrmTenantInitializer {
     @Override
     @Transactional
     public Long ensureInitialized() {
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         SrmEvaluationTemplate template = findDefaultTemplate();
         if (template == null) {
             template = resolveDefaultTemplate(tenantId);
@@ -181,9 +181,9 @@ public class SrmTenantInitializerImpl implements SrmTenantInitializer {
     }
 
     private String operator() {
-        String username = SrmTenantContext.require().username();
+        String username = ServiceIdentityContext.require().username();
         return username == null || username.isBlank()
-                ? String.valueOf(SrmTenantContext.require().userId()) : username;
+                ? String.valueOf(ServiceIdentityContext.require().userId()) : username;
     }
 
     /**

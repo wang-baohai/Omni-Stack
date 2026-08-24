@@ -8,7 +8,8 @@ import com.omni.srm.entity.SrmSupplier;
 import com.omni.srm.entity.SrmSupplierContact;
 import com.omni.srm.mapper.SrmSupplierContactMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.support.SrmRecordAccessGuard;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,7 +44,7 @@ class ContactServiceImplTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        SrmTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 子资源必须属于 URL 指定的供应商。 */
@@ -63,7 +64,7 @@ class ContactServiceImplTest {
     /** 新建主要联系人前必须清除同供应商旧的主要标记。 */
     @Test
     void shouldClearPreviousPrimaryBeforeCreate() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmSupplier supplier = new SrmSupplier();
         supplier.setId(10L);
         when(supplierMapper.selectVisibleForUpdate(10L)).thenReturn(supplier);
@@ -82,7 +83,7 @@ class ContactServiceImplTest {
     /** 乐观锁版本冲突必须返回 409 并回滚命令。 */
     @Test
     void shouldRejectStaleContactVersion() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmSupplierContact contact = new SrmSupplierContact();
         contact.setId(2L);
         contact.setSupplierId(10L);

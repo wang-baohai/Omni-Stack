@@ -1,10 +1,11 @@
 package com.omni.srm.client;
 
 import com.omni.common.core.result.R;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.internal.InternalFeignHeadersFactory;
 import com.omni.srm.dto.quotation.ProcurementRfqInvitationDetail;
 import com.omni.srm.dto.quotation.ProcurementRfqInvitationSummary;
 import feign.RequestInterceptor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,18 +55,15 @@ public interface ProcurementInternalClient {
     /** Feign 内部认证配置。 */
     @Configuration
     class FeignConfig {
-
-        @Value("${omni.internal.api.token:}")
-        private String internalToken;
-
         /**
          * 注入内部服务令牌。
          *
          * @return Feign 请求拦截器
          */
         @Bean
-        public RequestInterceptor procurementInternalHeadersInterceptor() {
-            return template -> template.header("X-Internal-Token", internalToken);
+        public RequestInterceptor procurementInternalHeadersInterceptor(
+                ServiceIdentityProperties properties, InternalFeignHeadersFactory factory) {
+            return factory.create(properties.getInternalApi().getToken());
         }
     }
 }

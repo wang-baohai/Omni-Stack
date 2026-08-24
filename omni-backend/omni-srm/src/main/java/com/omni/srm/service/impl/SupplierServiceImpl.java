@@ -30,7 +30,7 @@ import com.omni.srm.mapper.SrmSupplierEnrollmentMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
 import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
 import com.omni.srm.mapper.SrmSupplierQualificationMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.SupplierService;
 import com.omni.srm.service.RiskService;
 import com.omni.srm.service.support.SrmAuditSupport;
@@ -191,7 +191,7 @@ public class SupplierServiceImpl implements SupplierService {
         SrmOwnerResolver.Owner owner = ownerResolver.resolveForCreate(
                 request.getOwnerUserId(), "srm:supplier:transfer");
         SrmSupplier supplier = new SrmSupplier();
-        supplier.setTenantId(SrmTenantContext.requireTenantId());
+        supplier.setTenantId(ServiceIdentityContext.requireTenantId());
         supplier.setSupplierNo("TMP-" + java.util.UUID.randomUUID());
         supplier.setName(name);
         supplier.setNormalizedName(SupplierNameNormalizer.normalize(name));
@@ -315,7 +315,7 @@ public class SupplierServiceImpl implements SupplierService {
         requireDeletableSupplier(supplier);
         requireNoSupplierHistory(id);
         LocalDateTime now = LocalDateTime.now();
-        String operator = SrmTenantContext.require().username();
+        String operator = ServiceIdentityContext.require().username();
         // 子资源权限继承自仍有效的 Supplier，因此必须先清理子资源，再删除聚合根。
         contactMapper.softDeleteBySupplier(id, now, operator);
         qualificationMapper.softDeleteBySupplier(id, now, operator);
@@ -463,7 +463,7 @@ public class SupplierServiceImpl implements SupplierService {
 
     private void audit(LambdaUpdateWrapper<SrmSupplier> update) {
         update.set(SrmSupplier::getUpdateTime, LocalDateTime.now())
-                .set(SrmSupplier::getUpdateBy, SrmTenantContext.require().username());
+                .set(SrmSupplier::getUpdateBy, ServiceIdentityContext.require().username());
     }
 
     private <T> void setIf(LambdaUpdateWrapper<SrmSupplier> update, T value,
@@ -483,7 +483,7 @@ public class SupplierServiceImpl implements SupplierService {
                 .set(SrmEvaluation::getOwnerUserId, owner.userId())
                 .set(SrmEvaluation::getOwnerUnitId, owner.unitId())
                 .set(SrmEvaluation::getUpdateTime, LocalDateTime.now())
-                .set(SrmEvaluation::getUpdateBy, SrmTenantContext.require().username())
+                .set(SrmEvaluation::getUpdateBy, ServiceIdentityContext.require().username())
                 .setSql("version = version + 1"));
     }
 
@@ -596,7 +596,7 @@ public class SupplierServiceImpl implements SupplierService {
                 .aggregateType("SUPPLIER")
                 .aggregateId(supplier.getId())
                 .aggregateVersion(supplier.getVersion())
-                .actorUserId(SrmTenantContext.require().userId())
+                .actorUserId(ServiceIdentityContext.require().userId())
                 .payload(Map.copyOf(payload))
                 .build();
         reliableMessageRelay.send("srm-domain-out-0", envelope, supplier.getTenantId(), eventId);

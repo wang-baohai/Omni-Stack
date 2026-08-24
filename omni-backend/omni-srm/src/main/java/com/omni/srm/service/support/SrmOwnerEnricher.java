@@ -5,7 +5,7 @@ import com.omni.common.core.internal.InternalUserDTO;
 import com.omni.common.core.result.R;
 import com.omni.srm.client.AuthInternalClient;
 import com.omni.srm.dto.SrmViews;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -40,7 +40,7 @@ public class SrmOwnerEnricher {
         if (records == null || records.isEmpty()) {
             return records == null ? Collections.emptyList() : records;
         }
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String userIds = join(records.stream().map(SrmViews.OwnedVO::getOwnerUserId).toList());
         String unitIds = join(records.stream().map(SrmViews.OwnedVO::getOwnerUnitId).toList());
         try {

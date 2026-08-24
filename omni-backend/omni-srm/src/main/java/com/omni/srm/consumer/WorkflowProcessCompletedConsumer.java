@@ -1,8 +1,9 @@
 package com.omni.srm.consumer;
 
 import com.omni.srm.dto.WorkflowContracts;
-import com.omni.srm.security.SrmDataScopeContext;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.SupplierWorkflowCompletionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -39,15 +40,15 @@ public class WorkflowProcessCompletedConsumer {
             if (event.getTenantId() == null || event.getTenantId() <= 0) {
                 throw new IllegalArgumentException("Workflow 完成事件 tenantId 必须为正整数");
             }
-            SrmTenantContext.set(new SrmTenantContext.RequestIdentity(
+            ServiceIdentityContext.set(new ServiceRequestIdentity(
                     0L, event.getTenantId(), "workflow-event"));
-            SrmDataScopeContext.set(new SrmDataScopeContext.ScopeInfo(
-                    0L, event.getTenantId(), "workflow-event", null, "TENANT", Set.of()));
+            ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                    0L, event.getTenantId(), "workflow-event", null, "TENANT", Set.of(), null));
             try {
                 workflowCompletionService.handle(event);
             } finally {
-                SrmDataScopeContext.clear();
-                SrmTenantContext.clear();
+                ServiceDataScopeContext.clear();
+                ServiceIdentityContext.clear();
             }
         };
     }

@@ -1,8 +1,8 @@
 package com.omni.srm.consumer;
 
 import com.omni.srm.dto.PortalRoleResultEvent;
-import com.omni.srm.security.SrmDataScopeContext;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.PortalRoleResultService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -30,15 +30,15 @@ class PortalRoleResultConsumerTest {
 
     @AfterEach
     void tearDown() {
-        SrmDataScopeContext.clear();
-        SrmTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     @Test
     void shouldEstablishAndClearTenantContextForMqConsumer() {
         doAnswer(invocation -> {
-            assertEquals(1L, SrmTenantContext.requireTenantId());
-            assertEquals("TENANT", SrmDataScopeContext.require().effectiveScope());
+            assertEquals(1L, ServiceIdentityContext.requireTenantId());
+            assertEquals("TENANT", ServiceDataScopeContext.require().effectiveScope());
             return null;
         }).when(service).handle(any());
         PortalRoleResultConsumer consumerConfig = new PortalRoleResultConsumer(service);
@@ -49,7 +49,7 @@ class PortalRoleResultConsumerTest {
         ArgumentCaptor<PortalRoleResultEvent> captor = ArgumentCaptor.forClass(PortalRoleResultEvent.class);
         verify(service).handle(captor.capture());
         assertEquals("request-1", captor.getValue().getRequestId());
-        assertThrows(RuntimeException.class, SrmTenantContext::requireTenantId);
+        assertThrows(RuntimeException.class, ServiceIdentityContext::requireTenantId);
     }
 
     @Test

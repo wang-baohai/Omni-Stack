@@ -1,5 +1,6 @@
 package com.omni.srm.service.impl;
 
+import com.omni.srm.security.SrmPortalScope;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.omni.common.core.mq.ReliableMessageRelay;
@@ -15,8 +16,8 @@ import com.omni.srm.entity.SrmSupplierPortalUser;
 import com.omni.srm.mapper.SrmSupplierEnrollmentMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
 import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
-import com.omni.srm.security.SrmDataScopeContext;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.PortalInviteService;
 import com.omni.srm.service.SupplierPortalService;
 import com.omni.srm.service.support.SrmAuditSupport;
@@ -61,7 +62,7 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     @Transactional
     public SrmViews.EnrollmentVO enroll(SrmRequests.EnrollRequest request) {
         try {
-            return SrmDataScopeContext.runAsPortal(() -> doEnroll(request));
+            return SrmPortalScope.run(() -> doEnroll(request));
         } catch (DuplicateKeyException exception) {
             BusinessException conflict = new BusinessException(
                     409, "入驻申请已存在或正在并发处理，请查询当前入驻进度");
@@ -74,7 +75,7 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     @Override
     @Transactional(readOnly = true)
     public SrmViews.EnrollmentVO getEnrollment() {
-        return SrmDataScopeContext.runAsPortal(() -> {
+        return SrmPortalScope.run(() -> {
             SrmSupplierEnrollment enrollment = findLatestEnrollmentForCurrentUser(false);
             return enrollment == null ? null : enrollmentView(enrollment);
         });
@@ -84,40 +85,40 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     @Override
     @Transactional
     public SrmViews.EnrollmentVO retryEnrollment() {
-        return SrmDataScopeContext.runAsPortal(this::doRetryEnrollment);
+        return SrmPortalScope.run(this::doRetryEnrollment);
     }
 
     /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
     public SrmViews.PortalProfileVO getProfile() {
-        return SrmDataScopeContext.runAsPortal(() -> buildProfile(requirePortalSupplierId()));
+        return SrmPortalScope.run(() -> buildProfile(requirePortalSupplierId()));
     }
 
     /** {@inheritDoc} */
     @Override
     @Transactional
     public SrmViews.PortalProfileVO updateProfile(SrmRequests.UpdateProfileRequest request) {
-        return SrmDataScopeContext.runAsPortal(() -> doUpdateProfile(request));
+        return SrmPortalScope.run(() -> doUpdateProfile(request));
     }
 
     /** {@inheritDoc} */
     @Override
     @Transactional
     public SrmViews.PortalProfileVO resubmitProfile(SrmRequests.StatusRequest request) {
-        return SrmDataScopeContext.runAsPortal(() -> doResubmitProfile(request));
+        return SrmPortalScope.run(() -> doResubmitProfile(request));
     }
 
     /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
     public Long getCurrentSupplierId() {
-        return SrmDataScopeContext.runAsPortal(this::requirePortalSupplierId);
+        return SrmPortalScope.run(this::requirePortalSupplierId);
     }
 
     private SrmViews.EnrollmentVO doEnroll(SrmRequests.EnrollRequest request) {
-        Long tenantId = SrmTenantContext.requireTenantId();
-        Long userId = SrmTenantContext.require().userId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        Long userId = ServiceIdentityContext.require().userId();
         String requestId = request.getRequestId().trim();
         String creditCode = normalizeCreditCode(request.getCreditCode());
 
@@ -157,8 +158,8 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     }
 
     private SrmViews.EnrollmentVO doRetryEnrollment() {
-        Long tenantId = SrmTenantContext.requireTenantId();
-        Long userId = SrmTenantContext.require().userId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        Long userId = ServiceIdentityContext.require().userId();
         SrmSupplierEnrollment enrollment = findLatestEnrollmentForCurrentUser(false);
         if (enrollment == null) {
             throw new BusinessException(404, "当前用户没有入驻申请");
@@ -279,7 +280,7 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     }
 
     private SrmViews.PortalProfileVO doUpdateProfile(SrmRequests.UpdateProfileRequest request) {
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         Long supplierId = requirePortalSupplierId();
         SrmSupplier supplier = requireSupplier(tenantId, supplierId);
         LambdaUpdateWrapper<SrmSupplier> update = new LambdaUpdateWrapper<SrmSupplier>()
@@ -306,7 +307,7 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     }
 
     private SrmViews.PortalProfileVO doResubmitProfile(SrmRequests.StatusRequest request) {
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         Long supplierId = requirePortalSupplierId();
         SrmSupplier supplier = requireSupplier(tenantId, supplierId);
         SupplierStatus currentStatus = SrmStateMachine.parse(supplier.getStatus());
@@ -337,8 +338,8 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     }
 
     private Long requirePortalSupplierId() {
-        Long tenantId = SrmTenantContext.requireTenantId();
-        Long userId = SrmTenantContext.require().userId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        Long userId = ServiceIdentityContext.require().userId();
         SrmSupplierPortalUser portalUser = findPortalUser(tenantId, userId);
         if (portalUser == null || !"ACTIVE".equals(portalUser.getStatus())) {
             throw new BusinessException(403, "当前用户不是已授权的门户供应商");
@@ -361,8 +362,8 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     }
 
     private SrmSupplierEnrollment findLatestEnrollmentForCurrentUser(boolean activeOnly) {
-        Long tenantId = SrmTenantContext.requireTenantId();
-        Long userId = SrmTenantContext.require().userId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        Long userId = ServiceIdentityContext.require().userId();
         LambdaQueryWrapper<SrmSupplierEnrollment> query = new LambdaQueryWrapper<SrmSupplierEnrollment>()
                 .eq(SrmSupplierEnrollment::getTenantId, tenantId)
                 .eq(SrmSupplierEnrollment::getUserId, userId)
@@ -401,7 +402,7 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     }
 
     private SrmViews.PortalProfileVO buildProfile(Long supplierId) {
-        SrmSupplier supplier = requireSupplier(SrmTenantContext.requireTenantId(), supplierId);
+        SrmSupplier supplier = requireSupplier(ServiceIdentityContext.requireTenantId(), supplierId);
         return profileView(supplier);
     }
 
@@ -466,8 +467,8 @@ public class SupplierPortalServiceImpl implements SupplierPortalService {
     }
 
     private String operator() {
-        String username = SrmTenantContext.require().username();
+        String username = ServiceIdentityContext.require().username();
         return username == null || username.isBlank()
-                ? String.valueOf(SrmTenantContext.require().userId()) : username;
+                ? String.valueOf(ServiceIdentityContext.require().userId()) : username;
     }
 }

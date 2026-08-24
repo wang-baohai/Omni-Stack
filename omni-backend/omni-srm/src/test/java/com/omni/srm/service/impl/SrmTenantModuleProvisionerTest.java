@@ -25,7 +25,7 @@ import com.omni.srm.entity.SrmRiskScoreThreshold;
 import com.omni.srm.mapper.SrmRiskCriterionMapper;
 import com.omni.srm.mapper.SrmRiskIndicatorTypeMapper;
 import com.omni.srm.mapper.SrmRiskScoreThresholdMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.SrmTenantInitializer;
 
 /**
@@ -62,7 +62,7 @@ class SrmTenantModuleProvisionerTest {
             return 1;
         });
         doAnswer(invocation -> {
-            assertThat(SrmTenantContext.requireTenantId()).isEqualTo(9L);
+            assertThat(ServiceIdentityContext.requireTenantId()).isEqualTo(9L);
             return 99L;
         }).when(initializer).ensureInitialized();
 
@@ -81,8 +81,8 @@ class SrmTenantModuleProvisionerTest {
                 ArgumentCaptor.forClass(SrmRiskScoreThreshold.class);
         verify(thresholdMapper).insert(thresholdTarget.capture());
         assertThat(thresholdTarget.getValue().getTenantId()).isEqualTo(9L);
-        assertThatThrownBy(SrmTenantContext::requireTenantId)
-                .hasMessageContaining("缺少 SRM");
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
+                .hasMessageContaining("缺少服务请求身份上下文");
     }
 
     private static SrmRiskIndicatorType type(Long id, String code) {

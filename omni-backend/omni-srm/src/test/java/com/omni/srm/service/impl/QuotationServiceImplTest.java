@@ -20,8 +20,9 @@ import com.omni.srm.mapper.SrmQuotationLineMapper;
 import com.omni.srm.mapper.SrmQuotationMapper;
 import com.omni.srm.mapper.SrmQuotationRequestMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmDataScopeContext;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.SupplierPortalService;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
@@ -84,14 +85,14 @@ class QuotationServiceImplTest {
         service = new QuotationServiceImpl(quotationMapper, quotationLineMapper,
                 quotationRequestMapper, supplierMapper, supplierPortalService,
                 procurementInternalClient, reliableMessageRelay);
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(20L, 1L, "supplier-user"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(20L, 1L, "supplier-user"));
     }
 
     /** 清理线程上下文。 */
     @AfterEach
     void tearDown() {
-        SrmDataScopeContext.clear();
-        SrmTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 数量、币种、供应商和金额必须全部使用服务端权威数据。 */

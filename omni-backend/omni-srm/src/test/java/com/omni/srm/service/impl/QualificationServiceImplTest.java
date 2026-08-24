@@ -7,7 +7,8 @@ import com.omni.srm.dto.SrmRequests;
 import com.omni.srm.entity.SrmSupplier;
 import com.omni.srm.entity.SrmSupplierQualification;
 import com.omni.srm.mapper.SrmSupplierQualificationMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.RiskService;
 import com.omni.srm.service.support.SrmRecordAccessGuard;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -48,7 +49,7 @@ class QualificationServiceImplTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        SrmTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 到期日早于签发日时必须拒绝持久化。 */
@@ -75,7 +76,7 @@ class QualificationServiceImplTest {
     /** 资质创建成功后必须在同一事务链路中刷新证书风险和综合风险。 */
     @Test
     void shouldRecalculateCertificateRiskAfterCreate() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         when(accessGuard.requireSupplier(10L)).thenReturn(supplier(10L, "APPROVED"));
         SrmRequests.CreateQualificationRequest request = new SrmRequests.CreateQualificationRequest();
         request.setQualificationName("质量体系认证");
@@ -95,7 +96,7 @@ class QualificationServiceImplTest {
     /** 资质更新成功后必须刷新证书风险。 */
     @Test
     void shouldRecalculateCertificateRiskAfterUpdate() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         when(accessGuard.requireSupplier(10L)).thenReturn(supplier(10L, "APPROVED"));
         when(accessGuard.requireQualification(5L)).thenReturn(qualification(5L, 10L));
         when(qualificationMapper.update(
@@ -115,7 +116,7 @@ class QualificationServiceImplTest {
     /** 资质删除成功后必须刷新证书风险。 */
     @Test
     void shouldRecalculateCertificateRiskAfterDelete() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         when(accessGuard.requireSupplier(10L)).thenReturn(supplier(10L, "APPROVED"));
         when(accessGuard.requireQualification(5L)).thenReturn(qualification(5L, 10L));
         when(qualificationMapper.update(
@@ -132,7 +133,7 @@ class QualificationServiceImplTest {
     /** 未准入供应商维护资质时不得提前生成综合风险评估。 */
     @Test
     void shouldNotCreateAssessmentBeforeSupplierApproval() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         when(accessGuard.requireSupplier(10L)).thenReturn(supplier(10L, "PENDING_REVIEW"));
         SrmRequests.CreateQualificationRequest request = new SrmRequests.CreateQualificationRequest();
         request.setQualificationName("质量体系认证");

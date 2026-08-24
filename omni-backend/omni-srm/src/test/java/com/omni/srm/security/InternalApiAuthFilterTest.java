@@ -1,6 +1,9 @@
 package com.omni.srm.security;
 
-import com.omni.common.mqlog.filter.InternalApiAuthFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.identity.ServicePathPolicy;
+import com.omni.common.service.internal.InternalApiAuthenticationFilter;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,8 @@ import static org.mockito.Mockito.verify;
 /** 容器级内部 API 令牌过滤器安全回归测试。 */
 class InternalApiAuthFilterTest {
 
+    private static final String TOKEN = "srm-internal-test-token-0123456789abcdef";
+
     /** 清理 Spring Security 上下文。 */
     @AfterEach
     void clearSecurityContext() {
@@ -30,21 +35,21 @@ class InternalApiAuthFilterTest {
     /** 未配置共享令牌时必须失败关闭。 */
     @Test
     void shouldFailClosedWhenExpectedTokenIsMissing() throws Exception {
-        InternalApiAuthFilter filter = new InternalApiAuthFilter("");
+        InternalApiAuthenticationFilter filter = filter("");
         MockHttpServletRequest request = request(null);
         MockHttpServletResponse response = new MockHttpServletResponse();
         FilterChain chain = mock(FilterChain.class);
 
         filter.doFilter(request, response, chain);
 
-        assertThat(response.getStatus()).isEqualTo(503);
+        assertThat(response.getStatus()).isEqualTo(401);
         verify(chain, never()).doFilter(any(), any());
     }
 
     /** 缺少调用令牌时不得进入内部控制器。 */
     @Test
     void shouldRejectMissingRequestToken() throws Exception {
-        InternalApiAuthFilter filter = new InternalApiAuthFilter("shared-secret");
+        InternalApiAuthenticationFilter filter = filter(TOKEN);
         MockHttpServletRequest request = request(null);
         MockHttpServletResponse response = new MockHttpServletResponse();
         FilterChain chain = mock(FilterChain.class);
@@ -58,8 +63,8 @@ class InternalApiAuthFilterTest {
     /** 合法令牌仅在调用期间建立内部服务身份，并在结束后清理。 */
     @Test
     void shouldAuthenticateAndClearContextForValidToken() throws Exception {
-        InternalApiAuthFilter filter = new InternalApiAuthFilter("shared-secret");
-        MockHttpServletRequest request = request("shared-secret");
+        InternalApiAuthenticationFilter filter = filter(TOKEN);
+        MockHttpServletRequest request = request(TOKEN);
         MockHttpServletResponse response = new MockHttpServletResponse();
         FilterChain chain = mock(FilterChain.class);
         AtomicReference<Authentication> observed = new AtomicReference<>();
@@ -84,5 +89,14 @@ class InternalApiAuthFilterTest {
             request.addHeader("X-Internal-Token", token);
         }
         return request;
+    }
+
+    private InternalApiAuthenticationFilter filter(String token) {
+        ServiceIdentityProperties properties = new ServiceIdentityProperties();
+        properties.setName("omni-srm");
+        properties.setDisplayName("SRM");
+        properties.getInternalApi().setToken(token);
+        return new InternalApiAuthenticationFilter(
+                properties, new ServicePathPolicy(properties), new ObjectMapper());
     }
 }

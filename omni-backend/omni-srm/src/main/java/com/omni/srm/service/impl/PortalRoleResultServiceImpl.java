@@ -11,7 +11,8 @@ import com.omni.srm.entity.SrmSupplierPortalUser;
 import com.omni.srm.mapper.SrmSupplierEnrollmentMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
 import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.PortalRoleResultService;
 import com.omni.srm.service.support.SrmAuditSupport;
 import com.omni.srm.workflow.SupplierWorkflowCoordinator;
@@ -161,12 +162,12 @@ public class PortalRoleResultServiceImpl implements PortalRoleResultService {
         // Saga 完成后自动启动工作流审批（PENDING_REVIEW → APPROVING）
         SrmSupplier updatedSupplier = requireSupplier(event.getTenantId(), event.getSupplierId());
         if (SupplierStatus.PENDING_REVIEW.name().equals(updatedSupplier.getStatus())) {
-            SrmTenantContext.set(new SrmTenantContext.RequestIdentity(
+            ServiceIdentityContext.set(new ServiceRequestIdentity(
                     event.getUserId(), event.getTenantId(), "portal-role-saga"));
             try {
                 workflowCoordinator.prepareAndStart(updatedSupplier);
             } finally {
-                SrmTenantContext.clear();
+                ServiceIdentityContext.clear();
             }
         }
     }

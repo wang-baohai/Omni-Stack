@@ -9,7 +9,8 @@ import com.omni.srm.entity.SrmSupplierPortalUser;
 import com.omni.srm.mapper.SrmSupplierEnrollmentMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
 import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.workflow.SupplierWorkflowCoordinator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,12 +48,12 @@ class PortalRoleResultServiceImplTest {
         initTableInfo(SrmSupplierEnrollment.class);
         initTableInfo(SrmSupplierPortalUser.class);
         service = new PortalRoleResultServiceImpl(enrollmentMapper, portalUserMapper, supplierMapper, workflowCoordinator);
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(20L, 1L, "portal-role-saga"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(20L, 1L, "portal-role-saga"));
     }
 
     @AfterEach
     void tearDown() {
-        SrmTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     @Test

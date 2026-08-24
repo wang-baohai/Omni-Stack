@@ -15,7 +15,7 @@ import com.omni.srm.entity.SrmEventInbox;
 import com.omni.srm.entity.SrmSupplier;
 import com.omni.srm.mapper.SrmEventInboxMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.RiskService;
 import com.omni.srm.service.SupplierWorkflowCompletionService;
 import com.omni.srm.workflow.RetryableWorkflowEventException;
@@ -57,7 +57,7 @@ public class SupplierWorkflowCompletionServiceImpl implements SupplierWorkflowCo
     @Transactional
     public boolean handle(WorkflowContracts.ProcessCompletedEvent event) {
         validate(event);
-        if (!event.getTenantId().equals(SrmTenantContext.requireTenantId())) {
+        if (!event.getTenantId().equals(ServiceIdentityContext.requireTenantId())) {
             throw new BusinessException(403, "Workflow 完成事件与当前租户上下文不一致");
         }
         BusinessKey businessKey = parseBusinessKey(event.getBusinessKey());

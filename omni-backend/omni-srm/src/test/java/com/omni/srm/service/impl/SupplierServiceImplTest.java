@@ -21,7 +21,8 @@ import com.omni.srm.mapper.SrmSupplierEnrollmentMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
 import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
 import com.omni.srm.mapper.SrmSupplierQualificationMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.RiskService;
 import com.omni.srm.service.support.SrmOwnerEnricher;
 import com.omni.srm.service.support.SrmOwnerResolver;
@@ -92,13 +93,13 @@ class SupplierServiceImplTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        SrmTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 已进入正式生命周期的供应商必须保留审计历史，不能普通删除。 */
     @Test
     void shouldRejectDeleteForApprovedSupplier() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmSupplier supplier = supplier("APPROVED", 2);
         when(accessGuard.requireSupplier(10L)).thenReturn(supplier);
         when(supplierMapper.selectVisibleForUpdate(10L)).thenReturn(supplier);
@@ -113,7 +114,7 @@ class SupplierServiceImplTest {
     /** 门户、评估或风险历史存在时不得通过删除隐藏历史。 */
     @Test
     void shouldRejectDeleteWhenSupplierHasEvaluationHistory() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmSupplier supplier = supplier("REJECTED", 1);
         when(accessGuard.requireSupplier(10L)).thenReturn(supplier);
         when(supplierMapper.selectVisibleForUpdate(10L)).thenReturn(supplier);
@@ -129,7 +130,7 @@ class SupplierServiceImplTest {
     /** 尚未进入正式生命周期且没有业务历史时级联清理草稿聚合数据。 */
     @Test
     void shouldCascadeDeleteDraftSupplierAggregate() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmSupplier supplier = supplier("PENDING_REVIEW", 0);
         when(accessGuard.requireSupplier(10L)).thenReturn(supplier);
         when(supplierMapper.selectVisibleForUpdate(10L)).thenReturn(supplier);
@@ -159,7 +160,7 @@ class SupplierServiceImplTest {
     /** 管理员创建必须直接待审核并初始化 owner、风险和 Outbox。 */
     @Test
     void shouldCreateAdministratorSupplierPendingReview() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         when(ownerResolver.resolveForCreate(null, "srm:supplier:transfer"))
                 .thenReturn(new SrmOwnerResolver.Owner(7L, 8L));
         when(supplierMapper.insert(ArgumentMatchers.any(SrmSupplier.class))).thenAnswer(invocation -> {
@@ -195,7 +196,7 @@ class SupplierServiceImplTest {
     /** 更新名称和信用代码时必须使用与创建、门户一致的规范化规则。 */
     @Test
     void shouldNormalizeNameAndCreditCodeWhenUpdating() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmSupplier current = supplier(10L, "APPROVED", 7L, 8L);
         when(accessGuard.requireSupplier(10L)).thenReturn(current);
         when(supplierMapper.update(ArgumentMatchers.isNull(), ArgumentMatchers.any())).thenReturn(1);
@@ -218,7 +219,7 @@ class SupplierServiceImplTest {
     /** 显式空信用代码表示清空字段，不能存为空串占用租户唯一键。 */
     @Test
     void shouldClearCreditCodeToNullWhenUpdatingBlankValue() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmSupplier current = supplier(10L, "APPROVED", 7L, 8L);
         when(accessGuard.requireSupplier(10L)).thenReturn(current);
         when(supplierMapper.update(ArgumentMatchers.isNull(), ArgumentMatchers.any())).thenReturn(1);
@@ -256,7 +257,7 @@ class SupplierServiceImplTest {
     /** 并发创建撞上数据库信用代码唯一键时必须转换为业务 409。 */
     @Test
     void shouldTranslateDuplicateCreditCodeOnCreate() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         when(ownerResolver.resolveForCreate(null, "srm:supplier:transfer"))
                 .thenReturn(new SrmOwnerResolver.Owner(7L, 8L));
         when(supplierMapper.insert(ArgumentMatchers.any(SrmSupplier.class)))
@@ -275,7 +276,7 @@ class SupplierServiceImplTest {
     /** 并发更新撞上数据库信用代码唯一键时必须转换为业务 409。 */
     @Test
     void shouldTranslateDuplicateCreditCodeOnUpdate() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmSupplier current = supplier(10L, "APPROVED", 7L, 8L);
         when(accessGuard.requireSupplier(10L)).thenReturn(current);
         when(supplierMapper.update(ArgumentMatchers.isNull(), ArgumentMatchers.any()))
@@ -292,7 +293,7 @@ class SupplierServiceImplTest {
     /** 负责人转移必须走独立 transfer 权限范围，并直接返回更新快照。 */
     @Test
     void shouldTransferOwnerThroughDedicatedCommand() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmSupplier current = supplier(10L, "APPROVED", 7L, 8L);
         current.setName("ACME");
         when(accessGuard.requireSupplier(10L)).thenReturn(current);

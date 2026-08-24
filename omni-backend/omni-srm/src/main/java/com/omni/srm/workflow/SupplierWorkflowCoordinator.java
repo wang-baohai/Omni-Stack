@@ -8,7 +8,8 @@ import com.omni.srm.domain.SrmStateMachine;
 import com.omni.srm.dto.WorkflowContracts;
 import com.omni.srm.entity.SrmSupplier;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class SupplierWorkflowCoordinator {
      * @param command 已持久化启动快照
      */
     public void start(SupplierWorkflowCommand command) {
-        if (!command.tenantId().equals(SrmTenantContext.requireTenantId())) {
+        if (!command.tenantId().equals(ServiceIdentityContext.requireTenantId())) {
             throw new BusinessException(403, "Workflow 启动快照与当前租户不一致");
         }
         try {
@@ -81,7 +82,7 @@ public class SupplierWorkflowCoordinator {
                 .set(SrmSupplier::getWorkflowCompletedTime, null));
 
         supplier.setApprovalAttempt(nextAttempt);
-        SrmTenantContext.RequestIdentity identity = SrmTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         SupplierWorkflowCommand command = new SupplierWorkflowCommand(
                 supplier.getId(), tenantId, supplier.getSupplierNo(),
                 supplier.getName(), supplier.getCategoryCode(),

@@ -2,7 +2,7 @@ package com.omni.srm.controller;
 
 import com.omni.common.core.result.R;
 import com.omni.srm.dto.SrmViews;
-import com.omni.srm.security.SrmDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.srm.service.OverviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,14 +18,14 @@ public class OverviewController {
     private final OverviewService overviewService;
 
     /** 查询概览统计。 */
-    @GetMapping("/summary") @PreAuthorize("hasAuthority('srm:overview:list')") @SrmDataScope(permissionCode = "srm:overview:list")
+    @GetMapping("/summary") @PreAuthorize("hasAuthority('srm:overview:list')") @ServiceDataScope(permissionCode = "srm:overview:list")
     public R<SrmViews.OverviewSummaryVO> summary() {
         return R.ok(overviewService.summary());
     }
 
     /** 查询风险看板。 */
     @GetMapping("/risk-dashboard") @PreAuthorize("hasAuthority('srm:overview:list')")
-    @SrmDataScope(permissionCode = "srm:overview:list")
+    @ServiceDataScope(permissionCode = "srm:overview:list")
     public R<SrmViews.RiskDashboardVO> riskDashboard() {
         return R.ok(overviewService.riskDashboard());
     }

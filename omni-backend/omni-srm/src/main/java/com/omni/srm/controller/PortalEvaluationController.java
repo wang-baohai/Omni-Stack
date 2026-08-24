@@ -1,9 +1,10 @@
 package com.omni.srm.controller;
 
+import com.omni.srm.security.SrmPortalScope;
 import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
 import com.omni.srm.dto.SrmViews;
-import com.omni.srm.security.SrmDataScopeContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.srm.service.EvaluationService;
 import com.omni.srm.service.SupplierPortalService;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class PortalEvaluationController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         Long supplierId = supplierPortalService.getCurrentSupplierId();
-        return R.ok(SrmDataScopeContext.runAsPortal(() -> evaluationService.list(supplierId, page, size)));
+        return R.ok(SrmPortalScope.run(() -> evaluationService.list(supplierId, page, size)));
     }
 
     /** 查询当前供应商的评估历史（全量）。 */
@@ -42,6 +43,6 @@ public class PortalEvaluationController {
     @PreAuthorize("hasRole('SUPPLIER') and hasAuthority('srm:portal:evaluation')")
     public R<List<SrmViews.EvaluationVO>> history() {
         Long supplierId = supplierPortalService.getCurrentSupplierId();
-        return R.ok(SrmDataScopeContext.runAsPortal(() -> evaluationService.supplierHistory(supplierId)));
+        return R.ok(SrmPortalScope.run(() -> evaluationService.supplierHistory(supplierId)));
     }
 }
