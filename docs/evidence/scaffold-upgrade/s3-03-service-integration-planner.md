@@ -10,16 +10,19 @@
 - `ff4e264 feat(scaffold): render validated service integration changes`
 - `e862d84 refactor(database): derive application grants from migration catalog`
 - `89c30d2 feat(scaffold): apply atomic service integration`
+- `059caf0 fix(scaffold): generate forward-only permission seeds`
+- `6401e33 fix(scaffold): align generated seed assertion digest`
 
 ## 1. 当前结论
 
-CLI 0.5.0 已提供 `omni service integrate <service-id> --source <generated-package>`。默认模式只读
+CLI 0.6.1 已提供 `omni service integrate <service-id> --source <generated-package>`。默认模式只读
 渲染；追加 `--apply` 后，才会将已完成全部后置校验的变更作为跨文件事务写入。它校验服务包锁
 文件后，解析当前 monorepo 的 Maven XML、Gateway/Compose/catalog/seed manifest/Liquibase YAML、
 前端 TypeScript AST、迁移器 Java 目录、权限 SQL 和 Dockerfile。
 
-真实 `inventory-sample` 服务包输出 19 项操作和 30 个文件变更，除原有后端、前端、基础设施、
-权限与文档接入外，还创建服务 Liquibase 主文件、登记平台建库 SQL 和 DB Migrator 迁移目标。Git
+真实 `inventory-sample` 服务包输出 21 项操作和 32 个文件变更，除原有后端、前端、基础设施、
+权限与文档接入外，还创建服务 Liquibase 主文件、独立 forward-only Auth 权限 changeSet/seed、登记
+平台建库 SQL 和 DB Migrator 迁移目标。Git
 目标文件清洁检查通过，planner 报告 `ready`，默认 dry-run 确认未写入工作区。
 
 ## 2. 安全门
@@ -53,9 +56,9 @@ CLI 0.5.0 已提供 `omni service integrate <service-id> --source <generated-pac
 
 ```text
 命令：cd tools/omni-cli && npm test
-CLI：0.5.0
+CLI：0.6.1
 Tests：14 passed, 0 failed
-新增覆盖：19 项计划、30 文件内存渲染、完整写入、第五文件故障注入与全量回滚
+新增覆盖：21 项计划、32 文件内存渲染、完整写入、第五文件故障注入与全量回滚
 ```
 
 ```text
@@ -70,13 +73,13 @@ API；View 位于 `views/<id>/overview/index.vue`，符合动态路由约定。�
 
 ```text
 命令：cd tools/omni-cli && npm run test:golden
-结果：JDK 25 编译 8 个生成源文件，1 个契约测试通过，BUILD SUCCESS
-生成锁文件：26 个文件（含服务 Liquibase 主文件）
+结果：在隔离临时工作区完成生成、原子接入、JDK 25 Maven clean install 和 Compose config，BUILD SUCCESS
+生成锁文件：28 个；接入文件：32 个
 ```
 
 ```text
 命令：cd omni-backend && .\mvnw.cmd -pl omni-db-migrator -am test
-结果：21 passed, 0 failed，BUILD SUCCESS
+结果：22 passed, 0 failed，BUILD SUCCESS
 ```
 
 DB Migrator 的业务账号授权已改为从 `MigrationTargetCatalog` 动态筛选非 vendor 目标，不再维护
