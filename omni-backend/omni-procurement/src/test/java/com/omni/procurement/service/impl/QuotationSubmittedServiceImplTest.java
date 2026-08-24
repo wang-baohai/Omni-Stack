@@ -14,8 +14,9 @@ import com.omni.procurement.entity.ProcRfqSupplier;
 import com.omni.procurement.mapper.ProcEventInboxMapper;
 import com.omni.procurement.mapper.ProcRfqMapper;
 import com.omni.procurement.mapper.ProcRfqSupplierMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -62,17 +63,17 @@ class QuotationSubmittedServiceImplTest {
         objectMapper = new ObjectMapper().findAndRegisterModules();
         service = new QuotationSubmittedServiceImpl(
                 inboxMapper, rfqMapper, supplierMapper, objectMapper);
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 0L, 41L, "srm-quotation-event"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                0L, 41L, "srm-quotation-event", null, "TENANT", Set.of()));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                0L, 41L, "srm-quotation-event", null, "TENANT", Set.of(), null));
     }
 
     /** 清理消息线程上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 完全匹配的 typed payload 必须推进 QUOTED 并完成 Inbox。 */

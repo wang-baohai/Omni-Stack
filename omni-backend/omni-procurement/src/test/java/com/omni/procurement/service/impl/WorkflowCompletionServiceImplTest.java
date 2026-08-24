@@ -11,8 +11,9 @@ import com.omni.procurement.entity.ProcEventInbox;
 import com.omni.procurement.entity.ProcRequisition;
 import com.omni.procurement.mapper.ProcEventInboxMapper;
 import com.omni.procurement.mapper.ProcRequisitionMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.workflow.RetryableWorkflowEventException;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
@@ -58,16 +59,16 @@ class WorkflowCompletionServiceImplTest {
         objectMapper = new ObjectMapper().findAndRegisterModules();
         service = new WorkflowCompletionServiceImpl(
                 inboxMapper, requisitionMapper, reliableMessageRelay, objectMapper);
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(0L, 41L, "workflow-event"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                0L, 41L, "workflow-event", null, "TENANT", Set.of()));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(0L, 41L, "workflow-event"));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                0L, 41L, "workflow-event", null, "TENANT", Set.of(), null));
     }
 
     /** 清理消息线程上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 完成事件早于 markStarted 时必须抛可重试异常且不标记 Inbox。 */

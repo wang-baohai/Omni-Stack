@@ -1,8 +1,9 @@
 package com.omni.procurement.consumer;
 
 import com.omni.procurement.dto.WorkflowContracts;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.WorkflowCompletionService;
 import com.omni.procurement.workflow.RequisitionWorkflowCoordinator;
 import lombok.RequiredArgsConstructor;
@@ -40,15 +41,15 @@ public class WorkflowProcessCompletedConsumer {
             if (event.getTenantId() == null || event.getTenantId() <= 0) {
                 throw new IllegalArgumentException("Workflow 完成事件 tenantId 必须为正整数");
             }
-            ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+            ServiceIdentityContext.set(new ServiceRequestIdentity(
                     0L, event.getTenantId(), "workflow-event"));
-            ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                    0L, event.getTenantId(), "workflow-event", null, "TENANT", Set.of()));
+            ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                    0L, event.getTenantId(), "workflow-event", null, "TENANT", Set.of(), null));
             try {
                 workflowCompletionService.handle(event);
             } finally {
-                ProcDataScopeContext.clear();
-                ProcTenantContext.clear();
+                ServiceDataScopeContext.clear();
+                ServiceIdentityContext.clear();
             }
         };
     }

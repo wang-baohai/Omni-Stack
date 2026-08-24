@@ -12,7 +12,8 @@ import com.omni.procurement.dto.WorkflowContracts;
 import com.omni.procurement.entity.ProcApprovalRoute;
 import com.omni.procurement.mapper.ProcApprovalRouteMapper;
 import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.ProcTenantInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class ApprovalRouteInsightServiceImplTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        ProcTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 流程选项必须固定请求 purchase 且只暴露当前可用版本。 */
@@ -127,7 +128,7 @@ class ApprovalRouteInsightServiceImplTest {
     }
 
     private void useTenant() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
     }
 
     private WorkflowContracts.ModelVersionResponse model(String category, String availability) {

@@ -4,7 +4,7 @@ import com.omni.common.core.result.BusinessException;
 import com.omni.procurement.dto.OverviewRequests;
 import com.omni.procurement.dto.OverviewViews;
 import com.omni.procurement.mapper.ProcOverviewMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,14 +35,14 @@ class OverviewServiceImplTest {
     @BeforeEach
     void setUp() {
         overviewService = new OverviewServiceImpl(overviewMapper);
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                7L, 41L, "procurement:overview:list", 12L, "SELF", Set.of(12L)));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                7L, 41L, "procurement:overview:list", 12L, "SELF", Set.of(12L), null));
     }
 
     /** 清理线程数据范围。 */
     @AfterEach
     void clearScope() {
-        ProcDataScopeContext.clear();
+        ServiceDataScopeContext.clear();
     }
 
     /** 摘要应补齐所有订单状态零值，并保持币种金额分组。 */
@@ -113,7 +113,7 @@ class OverviewServiceImplTest {
     /** 缺少数据范围时必须失败关闭且不查询 Mapper。 */
     @Test
     void shouldFailClosedWithoutOverviewScope() {
-        ProcDataScopeContext.clear();
+        ServiceDataScopeContext.clear();
 
         assertThatThrownBy(() -> overviewService.summary())
                 .isInstanceOf(BusinessException.class)

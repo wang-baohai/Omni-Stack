@@ -2,8 +2,8 @@ package com.omni.procurement.consumer;
 
 import com.omni.common.core.result.BusinessException;
 import com.omni.procurement.dto.RfqContracts;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.QuotationSubmittedService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,8 +21,8 @@ class QuotationSubmittedConsumerTest {
     /** 清理测试线程上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 有效事件必须绑定租户上下文、调用服务并在结束后清理。 */
@@ -36,9 +36,9 @@ class QuotationSubmittedConsumerTest {
         consumer.accept(event);
 
         verify(service).handle(event);
-        assertThatThrownBy(ProcTenantContext::requireTenantId)
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
                 .isInstanceOf(BusinessException.class);
-        org.assertj.core.api.Assertions.assertThat(ProcDataScopeContext.get()).isNull();
+        org.assertj.core.api.Assertions.assertThat(ServiceDataScopeContext.get()).isNull();
     }
 
     /** 非法租户必须在创建线程上下文和调用业务服务前拒绝。 */
@@ -53,7 +53,7 @@ class QuotationSubmittedConsumerTest {
                 .isInstanceOf(IllegalArgumentException.class);
 
         verify(service, never()).handle(event);
-        assertThatThrownBy(ProcTenantContext::requireTenantId)
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
                 .isInstanceOf(BusinessException.class);
     }
 

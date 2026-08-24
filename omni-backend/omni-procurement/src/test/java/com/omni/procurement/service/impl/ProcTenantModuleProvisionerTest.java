@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.omni.common.core.tenant.TenantProvisionContracts.ProvisionRequestedEvent;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.ProcTenantInitializer;
 
 /**
@@ -24,14 +24,14 @@ class ProcTenantModuleProvisionerTest {
     void shouldUseTargetTenantAndClearContext() {
         ProcTenantInitializer initializer = mock(ProcTenantInitializer.class);
         doAnswer(invocation -> {
-            assertThat(ProcTenantContext.requireTenantId()).isEqualTo(9L);
+            assertThat(ServiceIdentityContext.requireTenantId()).isEqualTo(9L);
             return 99L;
         }).when(initializer).ensureInitialized();
 
         new ProcTenantModuleProvisioner(initializer).provision(request());
 
-        assertThatThrownBy(ProcTenantContext::requireTenantId)
-                .hasMessageContaining("缺少采购");
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
+                .hasMessageContaining("缺少服务");
     }
 
     private static ProvisionRequestedEvent request() {

@@ -3,7 +3,7 @@ package com.omni.procurement.domain;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.omni.procurement.entity.ProcApprovalRoute;
 import com.omni.procurement.mapper.ProcApprovalRouteMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +47,7 @@ public class ApprovalRouteResolver {
      * @return 结构化评估结果
      */
     public Evaluation evaluate(String categoryCode, BigDecimal totalAmount) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String normalizedCategory = ApprovalRoutePolicy.normalizeCategoryCode(categoryCode);
         ApprovalRoutePolicy.validateMatchAmount(normalizedCategory, totalAmount);
         List<ProcApprovalRoute> candidates = routeMapper.selectList(

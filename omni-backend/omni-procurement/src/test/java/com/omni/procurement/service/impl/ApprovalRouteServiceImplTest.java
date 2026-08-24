@@ -13,7 +13,8 @@ import com.omni.procurement.entity.ProcApprovalRoute;
 import com.omni.procurement.entity.ProcMaterialCategory;
 import com.omni.procurement.mapper.ProcApprovalRouteMapper;
 import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.ProcTenantInitializer;
 import com.omni.procurement.service.support.ApprovalRouteCodeGenerator;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -55,13 +56,13 @@ class ApprovalRouteServiceImplTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        ProcTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 同品类活动金额区间重叠时必须在写库前返回 409。 */
     @Test
     void shouldRejectOverlappingActiveRoute() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         when(routeMapper.lockTenantConfig(41L)).thenReturn(1L);
         when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
         stubPublishedVersion();
@@ -80,7 +81,7 @@ class ApprovalRouteServiceImplTest {
     /** 并发插入触发数据库唯一键时必须翻译为稳定的 409。 */
     @Test
     void shouldTranslateConcurrentRouteCodeConflict() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         when(routeMapper.lockTenantConfig(41L)).thenReturn(1L);
         when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
         stubPublishedVersion();
@@ -100,7 +101,7 @@ class ApprovalRouteServiceImplTest {
     /** 创建必须先锁定租户配置行，再检查活动区间并写入。 */
     @Test
     void shouldLockTenantBeforeCreateOverlapCheckAndInsert() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         when(routeMapper.lockTenantConfig(41L)).thenReturn(1L);
         when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
         stubPublishedVersion();
@@ -123,7 +124,7 @@ class ApprovalRouteServiceImplTest {
     /** 更新同样必须在读取和重叠校验前锁定租户配置行。 */
     @Test
     void shouldLockTenantBeforeUpdateOverlapCheck() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         ProcApprovalRoute current = existingRoute("0", "100");
         current.setId(5L);
         current.setTenantId(41L);
@@ -160,7 +161,7 @@ class ApprovalRouteServiceImplTest {
     /** 未发布或缺少流程定义的模型版本不得写入审批路由。 */
     @Test
     void shouldRejectWorkflowModelVersionWithoutPublishedDefinition() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
         WorkflowContracts.ModelVersionResponse invalid = new WorkflowContracts.ModelVersionResponse();
         invalid.setId(12L);
@@ -183,7 +184,7 @@ class ApprovalRouteServiceImplTest {
     /** 新建规则不得绑定非 purchase 分类的遗留流程。 */
     @Test
     void shouldRejectLegacyWorkflowCategory() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
         WorkflowContracts.ModelVersionResponse legacy = new WorkflowContracts.ModelVersionResponse();
         legacy.setId(12L);

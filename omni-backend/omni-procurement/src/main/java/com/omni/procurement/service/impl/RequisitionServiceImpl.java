@@ -21,8 +21,9 @@ import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcRequisitionLineMapper;
 import com.omni.procurement.mapper.ProcRequisitionMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.ProcTenantInitializer;
 import com.omni.procurement.service.RequisitionService;
 import com.omni.procurement.service.RequisitionWorkflowStateService;
@@ -74,7 +75,7 @@ public class RequisitionServiceImpl implements RequisitionService {
     @Transactional(readOnly = true)
     public PageResult<RequisitionViews.Summary> page(RequisitionRequests.Query query) {
         tenantInitializer.ensureInitialized();
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         LambdaQueryWrapper<ProcRequisition> wrapper = new LambdaQueryWrapper<ProcRequisition>()
                 .eq(ProcRequisition::getTenantId, tenantId);
         String keyword = MaterialDomainPolicy.trimToNull(query.getKeyword());
@@ -102,15 +103,15 @@ public class RequisitionServiceImpl implements RequisitionService {
     @Override
     @Transactional(readOnly = true)
     public RequisitionViews.Detail get(Long id) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         return loadVisibleDetail(tenantId, id);
     }
 
     /** {@inheritDoc} */
     @Override
     public RequisitionViews.ApprovalView approvalView(Long id, String taskId) {
-        Long tenantId = ProcTenantContext.requireTenantId();
-        Long userId = ProcTenantContext.require().userId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        Long userId = ServiceIdentityContext.require().userId();
         ProcRequisition identity = requisitionMapper.selectWorkflowIdentity(tenantId, id);
         if (identity == null) {
             throw new BusinessException(404, "请购申请不存在");
@@ -134,9 +135,9 @@ public class RequisitionServiceImpl implements RequisitionService {
             throw new BusinessException(403, "当前任务未分配给当前用户或不属于该请购");
         }
 
-        ProcDataScopeContext.ScopeInfo previous = ProcDataScopeContext.get();
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                userId, tenantId, "procurement:requisition:approve", null, "TENANT", Set.of()));
+        ServiceDataScopeContext.ScopeInfo previous = ServiceDataScopeContext.get();
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                userId, tenantId, "procurement:requisition:approve", null, "TENANT", Set.of(), null));
         try {
             RequisitionViews.ApprovalView result = new RequisitionViews.ApprovalView();
             result.setTaskId(taskId);
@@ -144,9 +145,9 @@ public class RequisitionServiceImpl implements RequisitionService {
             return result;
         } finally {
             if (previous == null) {
-                ProcDataScopeContext.clear();
+                ServiceDataScopeContext.clear();
             } else {
-                ProcDataScopeContext.set(previous);
+                ServiceDataScopeContext.set(previous);
             }
         }
     }
@@ -156,8 +157,8 @@ public class RequisitionServiceImpl implements RequisitionService {
     @Transactional
     public RequisitionViews.Detail create(RequisitionRequests.CreateRequest request) {
         tenantInitializer.ensureInitialized();
-        Long tenantId = ProcTenantContext.requireTenantId();
-        ProcDataScopeContext.ScopeInfo scope = ProcDataScopeContext.require();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        ServiceDataScopeContext.ScopeInfo scope = ServiceDataScopeContext.require();
         if (scope.primaryUnitId() == null || scope.primaryUnitId() <= 0) {
             throw new BusinessException(403, "当前用户缺少有效的主组织");
         }
@@ -197,7 +198,7 @@ public class RequisitionServiceImpl implements RequisitionService {
     @Override
     @Transactional
     public RequisitionViews.Detail update(Long id, RequisitionRequests.UpdateRequest request) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRequisition current = requireLocked(tenantId, id);
         RequisitionStateMachine.requireEditable(current.getStatus());
         requireVersion(current, request.getVersion());
@@ -229,7 +230,7 @@ public class RequisitionServiceImpl implements RequisitionService {
     @Override
     @Transactional
     public void delete(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRequisition current = requireLocked(tenantId, id);
         RequisitionStateMachine.requireDeletable(current.getStatus());
         requireVersion(current, version);
@@ -260,7 +261,7 @@ public class RequisitionServiceImpl implements RequisitionService {
     @Override
     @Transactional
     public RequisitionViews.Detail cancel(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRequisition current = requireLocked(tenantId, id);
         RequisitionStateMachine.requireCancellable(current.getStatus(), current.getWorkflowStartStatus());
         requireVersion(current, version);
@@ -412,7 +413,7 @@ public class RequisitionServiceImpl implements RequisitionService {
     }
 
     private String operator() {
-        ProcTenantContext.RequestIdentity identity = ProcTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         return identity.username() == null || identity.username().isBlank()
                 ? String.valueOf(identity.userId()) : identity.username();
     }

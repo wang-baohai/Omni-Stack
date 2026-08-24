@@ -1,6 +1,7 @@
 package com.omni.procurement.security;
 
 import com.omni.common.core.internal.InternalDataScopeDTO;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.AfterEach;
@@ -18,7 +19,7 @@ class ProcDataPermissionHandlerTest {
     /** 每次测试后清理数据范围。 */
     @AfterEach
     void clearScope() {
-        ProcDataScopeContext.clear();
+        ServiceDataScopeContext.clear();
     }
 
     /** 缺少上下文时授权聚合根必须失败关闭。 */
@@ -33,7 +34,7 @@ class ProcDataPermissionHandlerTest {
     /** 请购 SELF 范围必须使用申请人列。 */
     @Test
     void shouldUseRequesterForRequisitionSelfScope() {
-        ProcDataScopeContext.set(scope("SELF", Set.of()));
+        ServiceDataScopeContext.set(scope("SELF", Set.of()));
 
         Expression expression = handler.getSqlSegment(
                 new Table("proc_requisition"), null, "mapper.select");
@@ -46,7 +47,7 @@ class ProcDataPermissionHandlerTest {
     /** 请购行必须通过同租户请购根继承申请部门范围。 */
     @Test
     void shouldInheritRequisitionUnitsForLine() {
-        ProcDataScopeContext.set(scope("DEPT_AND_BELOW", Set.of(8L, 9L)));
+        ServiceDataScopeContext.set(scope("DEPT_AND_BELOW", Set.of(8L, 9L)));
 
         Expression expression = handler.getSqlSegment(
                 new Table("proc_requisition_line"), null, "mapper.select");
@@ -60,7 +61,7 @@ class ProcDataPermissionHandlerTest {
     /** RFQ 供应商邀请必须通过 RFQ owner 继承 SELF 范围。 */
     @Test
     void shouldInheritRfqOwnerForSupplierInvitation() {
-        ProcDataScopeContext.set(scope("SELF", Set.of()));
+        ServiceDataScopeContext.set(scope("SELF", Set.of()));
 
         Expression expression = handler.getSqlSegment(
                 new Table("proc_rfq_supplier"), null, "mapper.select");
@@ -73,7 +74,7 @@ class ProcDataPermissionHandlerTest {
     /** 采购订单行必须通过订单根继承 DEPT 范围。 */
     @Test
     void shouldInheritPurchaseOrderDepartmentForLine() {
-        ProcDataScopeContext.set(scope("DEPT", Set.of()));
+        ServiceDataScopeContext.set(scope("DEPT", Set.of()));
 
         Expression expression = handler.getSqlSegment(
                 new Table("proc_purchase_order_line"), null, "mapper.select");
@@ -85,7 +86,7 @@ class ProcDataPermissionHandlerTest {
     /** 收货行 CUSTOM 空组织集合必须在聚合根上失败关闭。 */
     @Test
     void shouldFailClosedForEmptyGoodsReceiptCustomScope() {
-        ProcDataScopeContext.set(scope("CUSTOM", Set.of()));
+        ServiceDataScopeContext.set(scope("CUSTOM", Set.of()));
 
         Expression expression = handler.getSqlSegment(
                 new Table("proc_goods_receipt_line"), null, "mapper.select");
@@ -108,10 +109,10 @@ class ProcDataPermissionHandlerTest {
     /** TENANT 和 ALL 范围仅由 TenantLine 负责租户隔离。 */
     @Test
     void shouldLeaveTenantAndAllScopeToTenantLine() {
-        ProcDataScopeContext.set(scope("TENANT", Set.of()));
+        ServiceDataScopeContext.set(scope("TENANT", Set.of()));
         assertThat(handler.getSqlSegment(new Table("proc_rfq"), null, "mapper.select")).isNull();
 
-        ProcDataScopeContext.set(scope("ALL", Set.of()));
+        ServiceDataScopeContext.set(scope("ALL", Set.of()));
         assertThat(handler.getSqlSegment(
                 new Table("proc_goods_receipt"), null, "mapper.select")).isNull();
     }

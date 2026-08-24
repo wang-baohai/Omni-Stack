@@ -1,5 +1,6 @@
 package com.omni.procurement.security;
 
+import com.omni.common.service.datascope.ServiceDataScopeContext;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.AfterEach;
@@ -17,14 +18,14 @@ class OverviewDataScopeTest {
     /** 每次测试后清理数据范围。 */
     @AfterEach
     void clearScope() {
-        ProcDataScopeContext.clear();
+        ServiceDataScopeContext.clear();
     }
 
     /** 概览 SELF 范围必须按各业务列表的 requester/owner 列分别约束。 */
     @Test
     void shouldUseListScopeColumnsForEveryOverviewAggregate() {
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                17L, 3L, "procurement:overview:list", 8L, "SELF", Set.of(8L)));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                17L, 3L, "procurement:overview:list", 8L, "SELF", Set.of(8L), null));
 
         assertScopeColumn("proc_requisition", "requester_user_id = 17");
         assertScopeColumn("proc_rfq", "owner_user_id = 17");
@@ -35,9 +36,9 @@ class OverviewDataScopeTest {
     /** 概览部门范围必须按各业务列表的 requester/owner 组织列分别约束。 */
     @Test
     void shouldUseListUnitColumnsForDepartmentOverview() {
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                 17L, 3L, "procurement:overview:list", 8L,
-                "DEPT_AND_BELOW", Set.of(8L, 9L)));
+                "DEPT_AND_BELOW", Set.of(8L, 9L), null));
 
         assertScopeColumn("proc_requisition", "requester_unit_id IN (8, 9)");
         assertScopeColumn("proc_rfq", "owner_unit_id IN (8, 9)");

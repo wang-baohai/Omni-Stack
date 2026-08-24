@@ -14,7 +14,7 @@ import com.omni.procurement.entity.ProcApprovalRoute;
 import com.omni.procurement.entity.ProcMaterialCategory;
 import com.omni.procurement.mapper.ProcApprovalRouteMapper;
 import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.ApprovalRouteInsightService;
 import com.omni.procurement.service.ProcTenantInitializer;
 import feign.FeignException;
@@ -53,7 +53,7 @@ public class ApprovalRouteInsightServiceImpl implements ApprovalRouteInsightServ
     @Transactional(readOnly = true)
     public List<ApprovalRouteInsightViews.WorkflowOption> workflowOptions() {
         tenantInitializer.ensureInitialized();
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         try {
             R<List<WorkflowContracts.ModelVersionResponse>> response =
                     workflowClient.listPublishedModelVersions(tenantId, WORKFLOW_CATEGORY);
@@ -94,7 +94,7 @@ public class ApprovalRouteInsightServiceImpl implements ApprovalRouteInsightServ
                             .map(ProcApprovalRoute::getId).sorted().toList())
                     .build();
         }
-        return matchedPreview(ProcTenantContext.requireTenantId(), categoryCode, evaluation);
+        return matchedPreview(ServiceIdentityContext.requireTenantId(), categoryCode, evaluation);
     }
 
     /** {@inheritDoc} */
@@ -180,7 +180,7 @@ public class ApprovalRouteInsightServiceImpl implements ApprovalRouteInsightServ
     }
 
     private ModelResolution resolveModels(List<ProcApprovalRoute> routes) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         Set<Long> ids = new LinkedHashSet<>();
         routes.forEach(route -> {
             if (route.getModelVersionId() != null) {
@@ -251,14 +251,14 @@ public class ApprovalRouteInsightServiceImpl implements ApprovalRouteInsightServ
 
     private List<ProcApprovalRoute> loadRoutes() {
         return routeMapper.selectList(new LambdaQueryWrapper<ProcApprovalRoute>()
-                .eq(ProcApprovalRoute::getTenantId, ProcTenantContext.requireTenantId())
+                .eq(ProcApprovalRoute::getTenantId, ServiceIdentityContext.requireTenantId())
                 .orderByAsc(ProcApprovalRoute::getPriority)
                 .orderByAsc(ProcApprovalRoute::getId));
     }
 
     private List<ProcMaterialCategory> loadActiveCategories() {
         return categoryMapper.selectList(new LambdaQueryWrapper<ProcMaterialCategory>()
-                .eq(ProcMaterialCategory::getTenantId, ProcTenantContext.requireTenantId())
+                .eq(ProcMaterialCategory::getTenantId, ServiceIdentityContext.requireTenantId())
                 .eq(ProcMaterialCategory::getStatus, 1)
                 .orderByAsc(ProcMaterialCategory::getSort)
                 .orderByAsc(ProcMaterialCategory::getId));

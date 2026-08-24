@@ -25,8 +25,9 @@ import com.omni.procurement.mapper.ProcRequisitionMapper;
 import com.omni.procurement.mapper.ProcRfqLineMapper;
 import com.omni.procurement.mapper.ProcRfqMapper;
 import com.omni.procurement.mapper.ProcRfqSupplierMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.PurchaseOrderService;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -84,16 +85,16 @@ class RfqServiceImplTest {
         service = new RfqServiceImpl(rfqMapper, lineMapper, supplierMapper,
                 requisitionMapper, requisitionLineMapper, srmInternalClient,
                 purchaseOrderService, reliableMessageRelay, new ProcRecordAccessGuard());
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                7L, 41L, "procurement:rfq:create", 12L, "SELF", Set.of(12L)));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                7L, 41L, "procurement:rfq:create", 12L, "SELF", Set.of(12L), null));
     }
 
     /** 清理请求线程上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 创建必须复制已审批请购行、服务端负责人和合格供应商名称快照。 */

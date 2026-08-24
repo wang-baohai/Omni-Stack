@@ -18,8 +18,9 @@ import com.omni.procurement.entity.ProcRfqLine;
 import com.omni.procurement.mapper.ProcGoodsReceiptLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
@@ -71,16 +72,16 @@ class PurchaseOrderServiceImplTest {
     void setUp() {
         service = new PurchaseOrderServiceImpl(orderMapper, lineMapper,
                 receiptLineMapper, reliableMessageRelay, new ProcRecordAccessGuard());
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                7L, 41L, "procurement:rfq:award", 12L, "SELF", Set.of(12L)));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                7L, 41L, "procurement:rfq:award", 12L, "SELF", Set.of(12L), null));
     }
 
     /** 清理线程上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 定点必须复制报价版本、供应商、价格和交期不可变快照并发送 created 事件。 */

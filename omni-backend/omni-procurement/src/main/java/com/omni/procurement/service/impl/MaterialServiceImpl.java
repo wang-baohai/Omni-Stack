@@ -13,7 +13,7 @@ import com.omni.procurement.entity.ProcMaterial;
 import com.omni.procurement.entity.ProcMaterialCategory;
 import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.MaterialService;
 import com.omni.procurement.service.ProcTenantInitializer;
 import com.omni.procurement.service.support.ProcAuditSupport;
@@ -51,7 +51,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Transactional(readOnly = true)
     public List<MaterialViews.CategoryVO> listCategories() {
         tenantInitializer.ensureInitialized();
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         List<ProcMaterialCategory> categories = categoryMapper.selectList(
                 new LambdaQueryWrapper<ProcMaterialCategory>()
                         .eq(ProcMaterialCategory::getTenantId, tenantId)
@@ -82,7 +82,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Transactional
     public MaterialViews.CategoryVO createCategory(MaterialRequests.CreateCategoryRequest request) {
         tenantInitializer.ensureInitialized();
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String code = MaterialDomainPolicy.normalizeCode(request.getCategoryCode(), "品类编码");
         ProcMaterialCategory parent = Long.valueOf(MaterialDomainPolicy.ROOT_PARENT_ID).equals(request.getParentId())
                 ? null : requireLockedCategory(lockCategories(tenantId, request.getParentId()), request.getParentId());
@@ -112,7 +112,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Override
     @Transactional
     public MaterialViews.CategoryVO updateCategory(Long id, MaterialRequests.UpdateCategoryRequest request) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         if (id.equals(request.getParentId())) {
             throw new BusinessException(400, "品类不能作为自身父节点");
         }
@@ -146,7 +146,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Override
     @Transactional
     public void deleteCategory(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcMaterialCategory snapshot = requireCategory(tenantId, id);
         ProcMaterialCategory current = requireLockedCategory(
                 lockCategories(tenantId, id, snapshot.getParentId()), id);
@@ -168,7 +168,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Transactional(readOnly = true)
     public PageResult<MaterialViews.MaterialVO> page(MaterialRequests.MaterialQuery query) {
         tenantInitializer.ensureInitialized();
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         LambdaQueryWrapper<ProcMaterial> wrapper = new LambdaQueryWrapper<ProcMaterial>()
                 .eq(ProcMaterial::getTenantId, tenantId);
         String keyword = MaterialDomainPolicy.trimToNull(query.getKeyword());
@@ -204,7 +204,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Override
     @Transactional(readOnly = true)
     public MaterialViews.MaterialVO get(Long id) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcMaterial material = requireMaterial(tenantId, id);
         return ProcViewAssembler.material(material, findCategory(tenantId, material.getCategoryId()));
     }
@@ -214,7 +214,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Transactional
     public MaterialViews.MaterialVO create(MaterialRequests.CreateMaterialRequest request) {
         tenantInitializer.ensureInitialized();
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcMaterialCategory category = requireLockedCategory(
                 lockCategories(tenantId, request.getCategoryId()), request.getCategoryId());
         MaterialDomainPolicy.requireActiveCategory(category);
@@ -249,7 +249,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Override
     @Transactional
     public MaterialViews.MaterialVO update(Long id, MaterialRequests.UpdateMaterialRequest request) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcMaterial snapshot = requireMaterial(tenantId, id);
         Map<Long, ProcMaterialCategory> lockedCategories = lockCategories(
                 tenantId, snapshot.getCategoryId(), request.getCategoryId());
@@ -281,7 +281,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Override
     @Transactional
     public void delete(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         requireMaterial(tenantId, id);
         LambdaUpdateWrapper<ProcMaterial> update = versionedMaterial(tenantId, id, version)
                 .set(ProcMaterial::getDeleted, 1);
@@ -293,7 +293,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Override
     @Transactional(readOnly = true)
     public ProcMaterial requireActiveForRequisition(Long id) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcMaterial material = requireMaterial(tenantId, id);
         MaterialDomainPolicy.requireActiveMaterial(material);
         MaterialDomainPolicy.requireActiveCategory(requireCategory(tenantId, material.getCategoryId()));
@@ -428,12 +428,12 @@ public class MaterialServiceImpl implements MaterialService {
 
     private void auditCategory(LambdaUpdateWrapper<ProcMaterialCategory> update) {
         update.set(ProcMaterialCategory::getUpdateTime, LocalDateTime.now())
-                .set(ProcMaterialCategory::getUpdateBy, ProcTenantContext.require().username());
+                .set(ProcMaterialCategory::getUpdateBy, ServiceIdentityContext.require().username());
     }
 
     private void auditMaterial(LambdaUpdateWrapper<ProcMaterial> update) {
         update.set(ProcMaterial::getUpdateTime, LocalDateTime.now())
-                .set(ProcMaterial::getUpdateBy, ProcTenantContext.require().username());
+                .set(ProcMaterial::getUpdateBy, ServiceIdentityContext.require().username());
     }
 
     private String requiredText(String value, String fieldName) {

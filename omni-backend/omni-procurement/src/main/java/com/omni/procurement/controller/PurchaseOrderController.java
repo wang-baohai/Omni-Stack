@@ -7,7 +7,7 @@ import com.omni.common.core.result.R;
 import com.omni.procurement.dto.PurchaseOrderRequests;
 import com.omni.procurement.dto.PurchaseOrderViews;
 import com.omni.procurement.entity.ProcPurchaseOrder;
-import com.omni.procurement.security.ProcDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.procurement.service.PurchaseOrderService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -46,7 +46,7 @@ public class PurchaseOrderController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('procurement:purchase-order:list')")
-    @ProcDataScope(permissionCode = "procurement:purchase-order:list")
+    @ServiceDataScope(permissionCode = "procurement:purchase-order:list")
     public R<PageResult<PurchaseOrderViews.Summary>> list(
             @Valid PurchaseOrderRequests.Query query) {
         return R.ok(purchaseOrderService.page(query));
@@ -60,7 +60,7 @@ public class PurchaseOrderController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:purchase-order:list')")
-    @ProcDataScope(permissionCode = "procurement:purchase-order:list")
+    @ServiceDataScope(permissionCode = "procurement:purchase-order:list")
     public R<PurchaseOrderViews.Detail> get(@PathVariable @Positive Long id) {
         return R.ok(purchaseOrderService.get(id));
     }
@@ -74,7 +74,7 @@ public class PurchaseOrderController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:purchase-order:update')")
-    @ProcDataScope(permissionCode = "procurement:purchase-order:update")
+    @ServiceDataScope(permissionCode = "procurement:purchase-order:update")
     @OperLog(module = "采购订单", operType = OperType.UPDATE,
             entityClass = ProcPurchaseOrder.class, idExpr = "#id")
     public R<PurchaseOrderViews.Detail> update(
@@ -92,7 +92,7 @@ public class PurchaseOrderController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:purchase-order:delete')")
-    @ProcDataScope(permissionCode = "procurement:purchase-order:delete")
+    @ServiceDataScope(permissionCode = "procurement:purchase-order:delete")
     @OperLog(module = "采购订单", operType = OperType.DELETE,
             entityClass = ProcPurchaseOrder.class, idExpr = "#id")
     public R<Void> delete(
@@ -111,7 +111,7 @@ public class PurchaseOrderController {
      */
     @PostMapping("/{id}/send")
     @PreAuthorize("hasAuthority('procurement:purchase-order:send')")
-    @ProcDataScope(permissionCode = "procurement:purchase-order:send")
+    @ServiceDataScope(permissionCode = "procurement:purchase-order:send")
     @OperLog(module = "采购订单", operType = OperType.UPDATE,
             entityClass = ProcPurchaseOrder.class, idExpr = "#id")
     public R<PurchaseOrderViews.Detail> send(
@@ -129,7 +129,7 @@ public class PurchaseOrderController {
      */
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasAuthority('procurement:purchase-order:confirm')")
-    @ProcDataScope(permissionCode = "procurement:purchase-order:confirm")
+    @ServiceDataScope(permissionCode = "procurement:purchase-order:confirm")
     @OperLog(module = "采购订单", operType = OperType.UPDATE,
             entityClass = ProcPurchaseOrder.class, idExpr = "#id")
     public R<PurchaseOrderViews.Detail> confirm(
@@ -147,7 +147,7 @@ public class PurchaseOrderController {
      */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('procurement:purchase-order:cancel')")
-    @ProcDataScope(permissionCode = "procurement:purchase-order:cancel")
+    @ServiceDataScope(permissionCode = "procurement:purchase-order:cancel")
     @OperLog(module = "采购订单", operType = OperType.UPDATE,
             entityClass = ProcPurchaseOrder.class, idExpr = "#id")
     public R<PurchaseOrderViews.Detail> cancel(

@@ -27,8 +27,9 @@ import com.omni.procurement.mapper.ProcRequisitionMapper;
 import com.omni.procurement.mapper.ProcRfqLineMapper;
 import com.omni.procurement.mapper.ProcRfqMapper;
 import com.omni.procurement.mapper.ProcRfqSupplierMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.PurchaseOrderService;
 import com.omni.procurement.service.RfqService;
 import com.omni.procurement.service.support.ProcAuditSupport;
@@ -78,7 +79,7 @@ public class RfqServiceImpl implements RfqService {
     @Transactional(readOnly = true)
     public List<RfqViews.SupplierOption> supplierOptions(
             RfqRequests.SupplierOptionQuery query) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String categoryCode = trimToNull(query.getCategoryCode());
         if (categoryCode != null) {
             categoryCode = categoryCode.toUpperCase(Locale.ROOT);
@@ -138,7 +139,7 @@ public class RfqServiceImpl implements RfqService {
     @Override
     @Transactional(readOnly = true)
     public PageResult<RfqViews.Summary> page(RfqRequests.Query query) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         LambdaQueryWrapper<ProcRfq> wrapper = new LambdaQueryWrapper<ProcRfq>()
                 .eq(ProcRfq::getTenantId, tenantId);
         String keyword = trimToNull(query.getKeyword());
@@ -174,14 +175,14 @@ public class RfqServiceImpl implements RfqService {
     @Override
     @Transactional(readOnly = true)
     public RfqViews.Detail get(Long id) {
-        return loadVisibleDetail(ProcTenantContext.requireTenantId(), id);
+        return loadVisibleDetail(ServiceIdentityContext.requireTenantId(), id);
     }
 
     /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
     public List<PurchaseOrderContracts.QuotationSnapshot> comparison(Long id) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRfq rfq = requireVisible(tenantId, id);
         RfqStateMachine.requireComparable(rfq.getStatus());
         List<ProcRfqLine> lines = requireRfqLines(tenantId, id);
@@ -199,8 +200,8 @@ public class RfqServiceImpl implements RfqService {
     @Override
     @Transactional
     public RfqViews.Detail create(RfqRequests.CreateRequest request) {
-        Long tenantId = ProcTenantContext.requireTenantId();
-        ProcDataScopeContext.ScopeInfo scope = requireOwnerScope();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        ServiceDataScopeContext.ScopeInfo scope = requireOwnerScope();
         requireFutureDeadline(request.getQuotationDeadline());
         ProcRequisition requisition = accessGuard.requireVisible(
                 requisitionMapper.selectOne(new LambdaQueryWrapper<ProcRequisition>()
@@ -252,7 +253,7 @@ public class RfqServiceImpl implements RfqService {
     @Override
     @Transactional
     public RfqViews.Detail update(Long id, RfqRequests.UpdateRequest request) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRfq visible = requireVisible(tenantId, id);
         RfqStateMachine.requireEditable(visible.getStatus());
         requireVersion(visible, request.getVersion());
@@ -276,7 +277,7 @@ public class RfqServiceImpl implements RfqService {
     @Override
     @Transactional
     public void delete(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRfq current = requireLocked(tenantId, id);
         RfqStateMachine.requireDeletable(current.getStatus());
         requireVersion(current, version);
@@ -292,7 +293,7 @@ public class RfqServiceImpl implements RfqService {
     @Override
     @Transactional
     public RfqViews.Detail send(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRfq visible = requireVisible(tenantId, id);
         RfqStateMachine.requireSendable(visible.getStatus());
         requireVersion(visible, version);
@@ -343,7 +344,7 @@ public class RfqServiceImpl implements RfqService {
     @Override
     @Transactional
     public RfqViews.AwardResult award(Long id, RfqRequests.AwardRequest request) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         requireAwardSelection(request);
         ProcRfq current = requireLocked(tenantId, id);
         RfqStateMachine.requireAwardable(current.getStatus());
@@ -406,7 +407,7 @@ public class RfqServiceImpl implements RfqService {
     @Override
     @Transactional
     public RfqViews.Detail cancel(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRfq current = requireLocked(tenantId, id);
         RfqStateMachine.requireCancellable(current.getStatus());
         requireVersion(current, version);
@@ -838,8 +839,8 @@ public class RfqServiceImpl implements RfqService {
                 .set(ProcRfq::getUpdateBy, operator());
     }
 
-    private ProcDataScopeContext.ScopeInfo requireOwnerScope() {
-        ProcDataScopeContext.ScopeInfo scope = ProcDataScopeContext.require();
+    private ServiceDataScopeContext.ScopeInfo requireOwnerScope() {
+        ServiceDataScopeContext.ScopeInfo scope = ServiceDataScopeContext.require();
         if (scope.userId() == null || scope.userId() <= 0
                 || scope.primaryUnitId() == null || scope.primaryUnitId() <= 0) {
             throw new BusinessException(403, "当前用户缺少有效的负责人或主组织上下文");
@@ -885,7 +886,7 @@ public class RfqServiceImpl implements RfqService {
     }
 
     private String operator() {
-        ProcTenantContext.RequestIdentity identity = ProcTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         return identity.username() == null || identity.username().isBlank()
                 ? String.valueOf(identity.userId()) : identity.username();
     }

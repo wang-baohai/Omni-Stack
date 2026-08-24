@@ -12,8 +12,9 @@ import com.omni.procurement.mapper.ProcGoodsReceiptLineMapper;
 import com.omni.procurement.mapper.ProcGoodsReceiptMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.InternalAssetCandidateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -171,14 +172,14 @@ public class InternalAssetCandidateServiceImpl implements InternalAssetCandidate
 
     private <T> T runAsInternalTenant(Long tenantId, Supplier<T> action) {
         try {
-            ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+            ServiceIdentityContext.set(new ServiceRequestIdentity(
                     0L, tenantId, "internal-asset"));
-            ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                    0L, tenantId, "INTERNAL", null, "TENANT", Collections.emptySet()));
+            ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                    0L, tenantId, "INTERNAL", null, "TENANT", Collections.emptySet(), null));
             return action.get();
         } finally {
-            ProcDataScopeContext.clear();
-            ProcTenantContext.clear();
+            ServiceDataScopeContext.clear();
+            ServiceIdentityContext.clear();
         }
     }
 

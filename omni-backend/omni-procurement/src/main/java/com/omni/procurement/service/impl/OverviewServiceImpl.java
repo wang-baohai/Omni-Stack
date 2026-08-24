@@ -5,7 +5,7 @@ import com.omni.procurement.domain.PurchaseOrderStateMachine;
 import com.omni.procurement.dto.OverviewRequests;
 import com.omni.procurement.dto.OverviewViews;
 import com.omni.procurement.mapper.ProcOverviewMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.procurement.service.OverviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class OverviewServiceImpl implements OverviewService {
     @Override
     @Transactional(readOnly = true)
     public OverviewViews.Summary summary() {
-        ProcDataScopeContext.require();
+        ServiceDataScopeContext.require();
         OverviewViews.Summary summary = new OverviewViews.Summary();
         summary.setPendingApprovalRequisitionCount(
                 safeCount(overviewMapper.countPendingApprovalRequisitions()));
@@ -58,7 +58,7 @@ public class OverviewServiceImpl implements OverviewService {
     @Transactional(readOnly = true)
     public List<OverviewViews.SpendItem> spendAnalysis(
             OverviewRequests.SpendAnalysisQuery query) {
-        ProcDataScopeContext.require();
+        ServiceDataScopeContext.require();
         if (query == null || query.getDimension() == null) {
             throw new BusinessException(400, "支出分析维度不能为空");
         }

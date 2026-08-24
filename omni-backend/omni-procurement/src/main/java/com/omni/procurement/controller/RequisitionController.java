@@ -7,7 +7,7 @@ import com.omni.common.core.result.R;
 import com.omni.procurement.dto.RequisitionRequests;
 import com.omni.procurement.dto.RequisitionViews;
 import com.omni.procurement.entity.ProcRequisition;
-import com.omni.procurement.security.ProcDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.procurement.service.RequisitionService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -47,7 +47,7 @@ public class RequisitionController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('procurement:requisition:list')")
-    @ProcDataScope(permissionCode = "procurement:requisition:list")
+    @ServiceDataScope(permissionCode = "procurement:requisition:list")
     public R<PageResult<RequisitionViews.Summary>> list(@Valid RequisitionRequests.Query query) {
         return R.ok(requisitionService.page(query));
     }
@@ -60,7 +60,7 @@ public class RequisitionController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:requisition:list')")
-    @ProcDataScope(permissionCode = "procurement:requisition:list")
+    @ServiceDataScope(permissionCode = "procurement:requisition:list")
     public R<RequisitionViews.Detail> get(@PathVariable Long id) {
         return R.ok(requisitionService.get(id));
     }
@@ -88,7 +88,7 @@ public class RequisitionController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('procurement:requisition:create')")
-    @ProcDataScope(permissionCode = "procurement:requisition:create")
+    @ServiceDataScope(permissionCode = "procurement:requisition:create")
     @OperLog(module = "采购请购", operType = OperType.CREATE,
             entityClass = ProcRequisition.class, idExpr = "#result.data.id")
     public R<RequisitionViews.Detail> create(
@@ -105,7 +105,7 @@ public class RequisitionController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:requisition:update')")
-    @ProcDataScope(permissionCode = "procurement:requisition:update")
+    @ServiceDataScope(permissionCode = "procurement:requisition:update")
     @OperLog(module = "采购请购", operType = OperType.UPDATE,
             entityClass = ProcRequisition.class, idExpr = "#id")
     public R<RequisitionViews.Detail> update(
@@ -122,7 +122,7 @@ public class RequisitionController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:requisition:delete')")
-    @ProcDataScope(permissionCode = "procurement:requisition:delete")
+    @ServiceDataScope(permissionCode = "procurement:requisition:delete")
     @OperLog(module = "采购请购", operType = OperType.DELETE,
             entityClass = ProcRequisition.class, idExpr = "#id")
     public R<Void> delete(
@@ -141,7 +141,7 @@ public class RequisitionController {
      */
     @PostMapping("/{id}/submit")
     @PreAuthorize("hasAuthority('procurement:requisition:submit')")
-    @ProcDataScope(permissionCode = "procurement:requisition:submit")
+    @ServiceDataScope(permissionCode = "procurement:requisition:submit")
     @OperLog(module = "采购请购", operType = OperType.UPDATE,
             entityClass = ProcRequisition.class, idExpr = "#id")
     public R<RequisitionViews.Detail> submit(
@@ -159,7 +159,7 @@ public class RequisitionController {
      */
     @PostMapping("/{id}/retry-start")
     @PreAuthorize("hasAuthority('procurement:requisition:submit')")
-    @ProcDataScope(permissionCode = "procurement:requisition:submit")
+    @ServiceDataScope(permissionCode = "procurement:requisition:submit")
     @OperLog(module = "采购请购", operType = OperType.UPDATE,
             entityClass = ProcRequisition.class, idExpr = "#id")
     public R<RequisitionViews.Detail> retryStart(
@@ -177,7 +177,7 @@ public class RequisitionController {
      */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('procurement:requisition:cancel')")
-    @ProcDataScope(permissionCode = "procurement:requisition:cancel")
+    @ServiceDataScope(permissionCode = "procurement:requisition:cancel")
     @OperLog(module = "采购请购", operType = OperType.UPDATE,
             entityClass = ProcRequisition.class, idExpr = "#id")
     public R<RequisitionViews.Detail> cancel(

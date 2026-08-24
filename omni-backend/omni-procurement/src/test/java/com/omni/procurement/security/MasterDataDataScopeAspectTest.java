@@ -1,8 +1,11 @@
 package com.omni.procurement.security;
 
 import com.omni.common.core.internal.InternalDataScopeDTO;
-import com.omni.common.core.result.R;
-import com.omni.procurement.client.AuthInternalClient;
+import com.omni.common.service.datascope.ServiceDataScope;
+import com.omni.common.service.datascope.ServiceDataScopeAspect;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -20,27 +23,24 @@ class MasterDataDataScopeAspectTest {
     /** 清理租户和数据范围上下文。 */
     @AfterEach
     void clearContexts() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 业务方法异常时也必须在 finally 清除数据范围。 */
     @Test
     void shouldClearDataScopeWhenBusinessMethodFails() throws Throwable {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 51L, "buyer"));
-        AuthInternalClient client = mock(AuthInternalClient.class);
-        ProcDataScope annotation = mock(ProcDataScope.class);
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 51L, "buyer"));
+        ServiceDataScope annotation = mock(ServiceDataScope.class);
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(annotation.permissionCode()).thenReturn("procurement:material:list");
-        when(client.resolveDataScope(7L, 51L, "procurement:material:list"))
-                .thenReturn(R.ok(scope()));
         when(joinPoint.proceed()).thenThrow(new IllegalStateException("business failed"));
 
-        ProcDataScopeAspect aspect = new ProcDataScopeAspect(client);
+        ServiceDataScopeAspect aspect = new ServiceDataScopeAspect((identity, permissionCode) -> scope());
         assertThatThrownBy(() -> aspect.bindScope(joinPoint, annotation))
                 .isInstanceOf(IllegalStateException.class);
 
-        assertThat(ProcDataScopeContext.get()).isNull();
+        assertThat(ServiceDataScopeContext.get()).isNull();
     }
 
     private InternalDataScopeDTO scope() {

@@ -1,7 +1,8 @@
 package com.omni.procurement.service.support;
 
 import com.omni.common.core.model.BaseEntity;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 
 import java.time.LocalDateTime;
 
@@ -40,7 +41,7 @@ public final class ProcAuditSupport {
     }
 
     private static String operator() {
-        ProcTenantContext.RequestIdentity identity = ProcTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         return identity.username() == null || identity.username().isBlank()
                 ? String.valueOf(identity.userId()) : identity.username();
     }

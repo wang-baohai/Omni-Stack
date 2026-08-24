@@ -11,7 +11,8 @@ import com.omni.procurement.entity.ProcMaterial;
 import com.omni.procurement.entity.ProcMaterialCategory;
 import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.ProcTenantInitializer;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
@@ -53,13 +54,13 @@ class MaterialServiceImplTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        ProcTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 数据库并发唯一冲突必须稳定翻译为 409，并保持当前租户和规范化编码。 */
     @Test
     void shouldTranslateConcurrentMaterialCodeConflict() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 31L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "buyer"));
         ProcMaterialCategory category = activeCategory(100L, 31L);
         when(categoryMapper.selectForUpdate(31L, 100L)).thenReturn(category);
         when(materialMapper.selectOne(any())).thenReturn(null);
@@ -88,7 +89,7 @@ class MaterialServiceImplTest {
     /** 请购选择必须同时要求活动物料和活动品类。 */
     @Test
     void shouldRejectInactiveMaterialForRequisition() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 31L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "buyer"));
         ProcMaterial material = new ProcMaterial();
         material.setId(1L);
         material.setTenantId(31L);
@@ -105,7 +106,7 @@ class MaterialServiceImplTest {
     /** 品类删除必须以 tenant、id、version、deleted 条件更新并原子递增版本。 */
     @Test
     void shouldDeleteCategoryWithOptimisticCondition() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 31L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "buyer"));
         ProcMaterialCategory category = activeCategory(100L, 31L);
         category.setVersion(4);
         when(categoryMapper.selectOne(any())).thenReturn(category);
@@ -133,7 +134,7 @@ class MaterialServiceImplTest {
     /** 品类移动必须按 ID 升序锁定新父、旧父和当前品类，阻断停用或删除穿透。 */
     @Test
     void shouldLockOldAndNewCategoryDependenciesInAscendingOrder() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 31L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "buyer"));
         ProcMaterialCategory current = activeCategory(50L, 31L);
         current.setParentId(30L);
         current.setVersion(2);
@@ -161,7 +162,7 @@ class MaterialServiceImplTest {
     /** 物料变更必须先按升序锁定旧、新品类，再锁定物料当前行。 */
     @Test
     void shouldLockOldAndNewMaterialCategoriesBeforeMaterialRow() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 31L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "buyer"));
         ProcMaterial material = activeMaterial(1L, 31L, 30L);
         ProcMaterialCategory oldCategory = activeCategory(30L, 31L);
         ProcMaterialCategory newCategory = activeCategory(20L, 31L);

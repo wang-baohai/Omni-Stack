@@ -6,7 +6,8 @@ import com.omni.procurement.entity.ProcMaterialCategory;
 import com.omni.procurement.entity.ProcTenantConfig;
 import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
 import com.omni.procurement.mapper.ProcTenantConfigMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,13 +46,13 @@ class ProcTenantInitializerImplTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        ProcTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 首次初始化必须给当前租户创建四个预置品类和 CNY 配置。 */
     @Test
     void shouldInitializeDefaultsForCurrentTenant() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 23L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 23L, "buyer"));
         when(categoryMapper.selectOne(any())).thenReturn(null);
         when(configMapper.selectOne(any())).thenReturn(null);
         AtomicLong categoryId = new AtomicLong(100L);
@@ -84,7 +85,7 @@ class ProcTenantInitializerImplTest {
     /** 已初始化租户再次调用不得重复写入。 */
     @Test
     void shouldBeIdempotentWhenDefaultsExist() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 23L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 23L, "buyer"));
         ProcTenantConfig existingConfig = new ProcTenantConfig();
         existingConfig.setTenantId(23L);
         when(configMapper.selectOne(any())).thenReturn(existingConfig);
@@ -98,7 +99,7 @@ class ProcTenantInitializerImplTest {
     /** 初始化门闩已存在时，即使预置品类已被删除也不得自动复活。 */
     @Test
     void shouldNotRestoreDeletedDefaultCategoryAfterInitialization() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 23L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 23L, "buyer"));
         ProcTenantConfig existingConfig = new ProcTenantConfig();
         existingConfig.setTenantId(23L);
         when(configMapper.selectOne(any())).thenReturn(existingConfig);
@@ -112,7 +113,7 @@ class ProcTenantInitializerImplTest {
     /** 并发初始化唯一键失败方必须当前读观察胜者并直接返回，不能重复播种。 */
     @Test
     void shouldObserveConcurrentInitializerWinnerWithoutSeedingAgain() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 23L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 23L, "buyer"));
         ProcTenantConfig existingConfig = new ProcTenantConfig();
         existingConfig.setTenantId(23L);
         when(configMapper.selectOne(any())).thenReturn(null);

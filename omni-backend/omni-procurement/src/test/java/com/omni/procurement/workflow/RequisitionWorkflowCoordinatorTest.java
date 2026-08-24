@@ -4,7 +4,8 @@ import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import com.omni.procurement.client.WorkflowInternalClient;
 import com.omni.procurement.dto.WorkflowContracts;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.RequisitionWorkflowStateService;
 import feign.FeignException;
 import org.junit.jupiter.api.AfterEach;
@@ -33,13 +34,13 @@ class RequisitionWorkflowCoordinatorTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        ProcTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 成功启动必须使用已持久化幂等键并标记 STARTED。 */
     @Test
     void shouldStartWithPersistedIdempotencySnapshot() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         RequisitionWorkflowCommand command = command();
         WorkflowContracts.StartResponse data = response(command, "pi-900");
         when(workflowInternalClient.start(any(), any())).thenReturn(R.ok(data));
@@ -65,7 +66,7 @@ class RequisitionWorkflowCoordinatorTest {
     /** 下游失败必须标记 FAILED 并返回 503，供同一快照重试。 */
     @Test
     void shouldMarkFailedWhenWorkflowCallFails() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         RequisitionWorkflowCommand command = command();
         when(workflowInternalClient.start(any(), any())).thenThrow(FeignException.class);
         RequisitionWorkflowCoordinator coordinator = new RequisitionWorkflowCoordinator(
@@ -81,7 +82,7 @@ class RequisitionWorkflowCoordinatorTest {
     /** 响应中的业务键不匹配时不能确认启动。 */
     @Test
     void shouldRejectMismatchedWorkflowResponse() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         RequisitionWorkflowCommand command = command();
         WorkflowContracts.StartResponse data = response(command, "pi-900");
         data.setBusinessKey("100:2");

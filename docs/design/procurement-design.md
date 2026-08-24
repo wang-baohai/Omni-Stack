@@ -357,7 +357,7 @@ sequenceDiagram
 
 ### 6.1 信任链
 
-与 SRM 一致：Gateway JWT → Procurement Tenant 校验 → @PreAuthorize → @ProcDataScope → MyBatis DataPermission → ProcRecordAccessGuard。
+与 SRM 一致：Gateway JWT → `GatewayPreAuthenticationFilter` → `ServiceIdentityFilter`（Tenant/用户身份校验）→ `@PreAuthorize` → `@ServiceDataScope` → MyBatis DataPermission → `ProcRecordAccessGuard`。
 
 ### 6.2 权限树与角色
 
@@ -386,9 +386,9 @@ API 权限：
 
 ### 6.3 Procurement 上下文与 SQL 拦截
 
-与 SRM/CRM 模式一致：`ProcTenantContext`、`ProcDataScopeContext`、`@ProcDataScope` 切面、`ProcDataPermissionHandler`、`ProcRecordAccessGuard`。
+通用请求身份、DataScope 上下文与切面由 `omni-common-service` 提供：`ServiceIdentityContext`、`ServiceDataScopeContext`、`@ServiceDataScope` 和 `ServicePersistenceAutoConfiguration`。采购模块只保留领域差异：`ProcTenantTablePolicy`、`ProcDataPermissionHandler` 与 `ProcRecordAccessGuard`。
 
-拦截器顺序固定：`TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInterceptor`。
+拦截器顺序固定：`TenantLineInnerInterceptor → DataPermissionInterceptor → OptimisticLockerInnerInterceptor → PaginationInnerInterceptor`。`ProcTenantTablePolicy` 只对 `proc_*` 表启用 TenantLine；`sys_mq_message` 必须排除，保证跨租户 Outbox Relay 可以扫描待发送消息。领域表的数据权限映射仍由 `ProcDataPermissionHandler` 按下表定义。
 
 | dataScope | 条件 |
 |---|---|
@@ -595,7 +595,7 @@ Outbox 只保证事件可靠投递到 Broker；消息一旦发送成功会进入
 
 ### 9.3 XSS
 
-Procurement 必须实现 `XssConfigProvider`，读取 Redis DB 0 配置。MVP 备注只允许纯文本。
+Procurement 通过 `omni-common-service` 的 `CachedServiceXssConfigProvider` 获得 XSS 配置，不再重复实现模块级 `XssConfigProvider`。配置优先读取 Redis DB 0，缓存未命中时回源 Auth；Auth 不可用且无缓存时采用安全基线继续过滤。MVP 备注只允许纯文本。
 
 ## 10. 前端设计
 

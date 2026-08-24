@@ -17,7 +17,7 @@ import com.omni.procurement.entity.ProcApprovalRoute;
 import com.omni.procurement.entity.ProcMaterialCategory;
 import com.omni.procurement.mapper.ProcApprovalRouteMapper;
 import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.ApprovalRouteService;
 import com.omni.procurement.service.ProcTenantInitializer;
 import com.omni.procurement.service.support.ApprovalRouteCodeGenerator;
@@ -64,7 +64,7 @@ public class ApprovalRouteServiceImpl implements ApprovalRouteService {
     @Transactional(readOnly = true)
     public PageResult<ApprovalRouteViews.RouteVO> page(ApprovalRouteRequests.RouteQuery query) {
         tenantInitializer.ensureInitialized();
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         LambdaQueryWrapper<ProcApprovalRoute> wrapper = new LambdaQueryWrapper<ProcApprovalRoute>()
                 .eq(ProcApprovalRoute::getTenantId, tenantId);
         String keyword = MaterialDomainPolicy.trimToNull(query.getKeyword());
@@ -97,7 +97,7 @@ public class ApprovalRouteServiceImpl implements ApprovalRouteService {
     @Transactional
     public ApprovalRouteViews.RouteVO create(ApprovalRouteRequests.CreateRouteRequest request) {
         tenantInitializer.ensureInitialized();
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String routeName = resolveCreateRouteName(request, tenantId);
         String categoryCode = ApprovalRoutePolicy.normalizeCategoryCode(request.getCategoryCode());
         String status = ApprovalRoutePolicy.normalizeStatus(request.getStatus());
@@ -137,7 +137,7 @@ public class ApprovalRouteServiceImpl implements ApprovalRouteService {
     @Override
     @Transactional
     public ApprovalRouteViews.RouteVO update(Long id, ApprovalRouteRequests.UpdateRouteRequest request) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String categoryCode = ApprovalRoutePolicy.normalizeCategoryCode(request.getCategoryCode());
         String status = ApprovalRoutePolicy.normalizeStatus(request.getStatus());
         ApprovalRoutePolicy.validateDefinition(request.getMinAmount(), request.getMaxAmount(),
@@ -174,7 +174,7 @@ public class ApprovalRouteServiceImpl implements ApprovalRouteService {
     @Override
     @Transactional
     public void delete(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         lockTenantRoutes(tenantId);
         requireRoute(tenantId, id);
         LambdaUpdateWrapper<ProcApprovalRoute> update = versioned(tenantId, id, version)
@@ -406,7 +406,7 @@ public class ApprovalRouteServiceImpl implements ApprovalRouteService {
 
     private void audit(LambdaUpdateWrapper<ProcApprovalRoute> update) {
         update.set(ProcApprovalRoute::getUpdateTime, LocalDateTime.now())
-                .set(ProcApprovalRoute::getUpdateBy, ProcTenantContext.require().username());
+                .set(ProcApprovalRoute::getUpdateBy, ServiceIdentityContext.require().username());
     }
 
     private void requireUpdated(int affected) {

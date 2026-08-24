@@ -6,7 +6,7 @@ import com.omni.procurement.entity.ProcMaterialCategory;
 import com.omni.procurement.entity.ProcTenantConfig;
 import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
 import com.omni.procurement.mapper.ProcTenantConfigMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.ProcTenantInitializer;
 import com.omni.procurement.service.support.ProcAuditSupport;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class ProcTenantInitializerImpl implements ProcTenantInitializer {
     @Override
     @Transactional
     public void ensureInitialized() {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         if (findConfig(tenantId) != null) {
             return;
         }
@@ -63,7 +63,7 @@ public class ProcTenantInitializerImpl implements ProcTenantInitializer {
     @Transactional
     public String currencyCode() {
         ensureInitialized();
-        ProcTenantConfig config = configMapper.selectForUpdateByTenant(ProcTenantContext.requireTenantId());
+        ProcTenantConfig config = configMapper.selectForUpdateByTenant(ServiceIdentityContext.requireTenantId());
         if (config == null || config.getCurrencyCode() == null || config.getCurrencyCode().length() != 3) {
             throw new BusinessException(500, "采购租户默认币种未正确初始化");
         }

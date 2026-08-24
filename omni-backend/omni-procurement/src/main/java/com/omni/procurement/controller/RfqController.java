@@ -8,7 +8,7 @@ import com.omni.procurement.dto.PurchaseOrderContracts;
 import com.omni.procurement.dto.RfqRequests;
 import com.omni.procurement.dto.RfqViews;
 import com.omni.procurement.entity.ProcRfq;
-import com.omni.procurement.security.ProcDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.procurement.service.RfqService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -62,7 +62,7 @@ public class RfqController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('procurement:rfq:list')")
-    @ProcDataScope(permissionCode = "procurement:rfq:list")
+    @ServiceDataScope(permissionCode = "procurement:rfq:list")
     public R<PageResult<RfqViews.Summary>> list(@Valid RfqRequests.Query query) {
         return R.ok(rfqService.page(query));
     }
@@ -75,7 +75,7 @@ public class RfqController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:rfq:list')")
-    @ProcDataScope(permissionCode = "procurement:rfq:list")
+    @ServiceDataScope(permissionCode = "procurement:rfq:list")
     public R<RfqViews.Detail> get(@PathVariable @Positive Long id) {
         return R.ok(rfqService.get(id));
     }
@@ -88,7 +88,7 @@ public class RfqController {
      */
     @GetMapping("/{id}/comparison")
     @PreAuthorize("hasAuthority('procurement:rfq:list')")
-    @ProcDataScope(permissionCode = "procurement:rfq:list")
+    @ServiceDataScope(permissionCode = "procurement:rfq:list")
     public R<List<PurchaseOrderContracts.QuotationSnapshot>> comparison(
             @PathVariable @Positive Long id) {
         return R.ok(rfqService.comparison(id));
@@ -102,7 +102,7 @@ public class RfqController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('procurement:rfq:create')")
-    @ProcDataScope(permissionCode = "procurement:rfq:create")
+    @ServiceDataScope(permissionCode = "procurement:rfq:create")
     @OperLog(module = "采购询价", operType = OperType.CREATE,
             entityClass = ProcRfq.class, idExpr = "#result.data.id")
     public R<RfqViews.Detail> create(@Valid @RequestBody RfqRequests.CreateRequest request) {
@@ -118,7 +118,7 @@ public class RfqController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:rfq:update')")
-    @ProcDataScope(permissionCode = "procurement:rfq:update")
+    @ServiceDataScope(permissionCode = "procurement:rfq:update")
     @OperLog(module = "采购询价", operType = OperType.UPDATE,
             entityClass = ProcRfq.class, idExpr = "#id")
     public R<RfqViews.Detail> update(
@@ -136,7 +136,7 @@ public class RfqController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:rfq:delete')")
-    @ProcDataScope(permissionCode = "procurement:rfq:delete")
+    @ServiceDataScope(permissionCode = "procurement:rfq:delete")
     @OperLog(module = "采购询价", operType = OperType.DELETE,
             entityClass = ProcRfq.class, idExpr = "#id")
     public R<Void> delete(
@@ -155,7 +155,7 @@ public class RfqController {
      */
     @PostMapping("/{id}/send")
     @PreAuthorize("hasAuthority('procurement:rfq:send')")
-    @ProcDataScope(permissionCode = "procurement:rfq:send")
+    @ServiceDataScope(permissionCode = "procurement:rfq:send")
     @OperLog(module = "采购询价", operType = OperType.UPDATE,
             entityClass = ProcRfq.class, idExpr = "#id")
     public R<RfqViews.Detail> send(
@@ -173,7 +173,7 @@ public class RfqController {
      */
     @PostMapping("/{id}/award")
     @PreAuthorize("hasAuthority('procurement:rfq:award')")
-    @ProcDataScope(permissionCode = "procurement:rfq:award")
+    @ServiceDataScope(permissionCode = "procurement:rfq:award")
     @OperLog(module = "采购询价", operType = OperType.UPDATE,
             entityClass = ProcRfq.class, idExpr = "#id")
     public R<RfqViews.AwardResult> award(
@@ -191,7 +191,7 @@ public class RfqController {
      */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('procurement:rfq:cancel')")
-    @ProcDataScope(permissionCode = "procurement:rfq:cancel")
+    @ServiceDataScope(permissionCode = "procurement:rfq:cancel")
     @OperLog(module = "采购询价", operType = OperType.UPDATE,
             entityClass = ProcRfq.class, idExpr = "#id")
     public R<RfqViews.Detail> cancel(

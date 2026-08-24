@@ -9,7 +9,7 @@ import com.omni.procurement.dto.ApprovalRouteInsightRequests;
 import com.omni.procurement.dto.ApprovalRouteInsightViews;
 import com.omni.procurement.dto.ApprovalRouteViews;
 import com.omni.procurement.entity.ProcApprovalRoute;
-import com.omni.procurement.security.ProcDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.procurement.service.ApprovalRouteService;
 import com.omni.procurement.service.ApprovalRouteInsightService;
 import jakarta.validation.Valid;
@@ -51,7 +51,7 @@ public class ApprovalRouteController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('procurement:approval-route:list')")
-    @ProcDataScope(permissionCode = "procurement:approval-route:list")
+    @ServiceDataScope(permissionCode = "procurement:approval-route:list")
     public R<PageResult<ApprovalRouteViews.RouteVO>> list(@Valid ApprovalRouteRequests.RouteQuery query) {
         return R.ok(routeService.page(query));
     }
@@ -63,7 +63,7 @@ public class ApprovalRouteController {
      */
     @GetMapping("/workflow-options")
     @PreAuthorize("hasAuthority('procurement:approval-route:list')")
-    @ProcDataScope(permissionCode = "procurement:approval-route:list")
+    @ServiceDataScope(permissionCode = "procurement:approval-route:list")
     public R<List<ApprovalRouteInsightViews.WorkflowOption>> workflowOptions() {
         return R.ok(insightService.workflowOptions());
     }
@@ -76,7 +76,7 @@ public class ApprovalRouteController {
      */
     @PostMapping("/match-preview")
     @PreAuthorize("hasAuthority('procurement:approval-route:list')")
-    @ProcDataScope(permissionCode = "procurement:approval-route:list")
+    @ServiceDataScope(permissionCode = "procurement:approval-route:list")
     public R<ApprovalRouteInsightViews.MatchPreview> matchPreview(
             @Valid @RequestBody ApprovalRouteInsightRequests.MatchPreviewRequest request) {
         return R.ok(insightService.matchPreview(request));
@@ -89,7 +89,7 @@ public class ApprovalRouteController {
      */
     @GetMapping("/coverage")
     @PreAuthorize("hasAuthority('procurement:approval-route:list')")
-    @ProcDataScope(permissionCode = "procurement:approval-route:list")
+    @ServiceDataScope(permissionCode = "procurement:approval-route:list")
     public R<ApprovalRouteInsightViews.CoverageReport> coverage() {
         return R.ok(insightService.coverage());
     }
@@ -102,7 +102,7 @@ public class ApprovalRouteController {
      */
     @GetMapping("/impact")
     @PreAuthorize("hasAuthority('procurement:approval-route:list')")
-    @ProcDataScope(permissionCode = "procurement:approval-route:list")
+    @ServiceDataScope(permissionCode = "procurement:approval-route:list")
     public R<ApprovalRouteInsightViews.ImpactReport> impact(
             @RequestParam @Min(value = 1, message = "审批规则 ID 必须为正整数") Long routeId) {
         return R.ok(insightService.impact(routeId));
@@ -116,7 +116,7 @@ public class ApprovalRouteController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('procurement:approval-route:create')")
-    @ProcDataScope(permissionCode = "procurement:approval-route:create")
+    @ServiceDataScope(permissionCode = "procurement:approval-route:create")
     @OperLog(module = "请购审批规则", operType = OperType.CREATE,
             entityClass = ProcApprovalRoute.class, idExpr = "#result.data.id")
     public R<ApprovalRouteViews.RouteVO> create(
@@ -133,7 +133,7 @@ public class ApprovalRouteController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:approval-route:update')")
-    @ProcDataScope(permissionCode = "procurement:approval-route:update")
+    @ServiceDataScope(permissionCode = "procurement:approval-route:update")
     @OperLog(module = "请购审批规则", operType = OperType.UPDATE,
             entityClass = ProcApprovalRoute.class, idExpr = "#id")
     public R<ApprovalRouteViews.RouteVO> update(
@@ -150,7 +150,7 @@ public class ApprovalRouteController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:approval-route:delete')")
-    @ProcDataScope(permissionCode = "procurement:approval-route:delete")
+    @ServiceDataScope(permissionCode = "procurement:approval-route:delete")
     @OperLog(module = "请购审批规则", operType = OperType.DELETE,
             entityClass = ProcApprovalRoute.class, idExpr = "#id")
     public R<Void> delete(@PathVariable Long id,

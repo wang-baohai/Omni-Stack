@@ -5,7 +5,14 @@ import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionIntercepto
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.config.ServicePersistenceAutoConfiguration;
+import com.omni.common.service.persistence.DataScopeTablePolicy;
+import com.omni.common.service.persistence.TenantTablePolicy;
+import com.omni.procurement.security.ProcDataPermissionHandler;
+import com.omni.procurement.security.ProcTenantTablePolicy;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,7 +22,17 @@ class MybatisPlusConfigTest {
     /** 租户、数据权限、乐观锁和分页拦截器必须按安全约束顺序注册。 */
     @Test
     void shouldRegisterTenantDataPermissionAndPaginationInOrder() {
-        MybatisPlusInterceptor interceptor = new MybatisPlusConfig().mybatisPlusInterceptor();
+        ServiceIdentityProperties properties = new ServiceIdentityProperties();
+        properties.getTenant().setEnabled(true);
+        properties.getDataScope().setEnabled(true);
+        StaticListableBeanFactory beans = new StaticListableBeanFactory();
+        beans.addBean("tenantTablePolicy", new ProcTenantTablePolicy());
+        beans.addBean("dataScopeTablePolicy", new ProcDataPermissionHandler());
+
+        MybatisPlusInterceptor interceptor = new ServicePersistenceAutoConfiguration().mybatisPlusInterceptor(
+                properties,
+                beans.getBeanProvider(TenantTablePolicy.class),
+                beans.getBeanProvider(DataScopeTablePolicy.class));
 
         assertThat(interceptor.getInterceptors())
                 .hasSize(4)
@@ -24,5 +41,16 @@ class MybatisPlusConfigTest {
                         item -> assertThat(item).isInstanceOf(DataPermissionInterceptor.class),
                         item -> assertThat(item).isInstanceOf(OptimisticLockerInnerInterceptor.class),
                         item -> assertThat(item).isInstanceOf(PaginationInnerInterceptor.class));
+    }
+
+    /** 租户策略必须只覆盖采购表，可靠消息表必须由后台 Relay 跨租户扫描。 */
+    @Test
+    void shouldOnlyApplyTenantLineToProcurementTables() {
+        ProcTenantTablePolicy policy = new ProcTenantTablePolicy();
+
+        assertThat(policy.appliesTo("proc_requisition")).isTrue();
+        assertThat(policy.appliesTo("PROC_RFQ")).isTrue();
+        assertThat(policy.appliesTo("sys_mq_message")).isFalse();
+        assertThat(policy.appliesTo(null)).isFalse();
     }
 }

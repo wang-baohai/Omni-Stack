@@ -1,8 +1,9 @@
 package com.omni.procurement.consumer;
 
 import com.omni.procurement.dto.RfqContracts;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.QuotationSubmittedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -40,15 +41,15 @@ public class QuotationSubmittedConsumer {
             if (event.getTenantId() == null || event.getTenantId() <= 0) {
                 throw new IllegalArgumentException("SRM 报价提交事件 tenantId 必须为正整数");
             }
-            ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+            ServiceIdentityContext.set(new ServiceRequestIdentity(
                     0L, event.getTenantId(), "srm-quotation-event"));
-            ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                    0L, event.getTenantId(), "srm-quotation-event", null, "TENANT", Set.of()));
+            ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                    0L, event.getTenantId(), "srm-quotation-event", null, "TENANT", Set.of(), null));
             try {
                 quotationSubmittedService.handle(event);
             } finally {
-                ProcDataScopeContext.clear();
-                ProcTenantContext.clear();
+                ServiceDataScopeContext.clear();
+                ServiceIdentityContext.clear();
             }
         };
     }

@@ -13,7 +13,7 @@ import com.omni.procurement.entity.ProcRfqSupplier;
 import com.omni.procurement.mapper.ProcEventInboxMapper;
 import com.omni.procurement.mapper.ProcRfqMapper;
 import com.omni.procurement.mapper.ProcRfqSupplierMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.QuotationSubmittedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,7 @@ public class QuotationSubmittedServiceImpl implements QuotationSubmittedService 
     @Transactional
     public boolean handle(RfqContracts.QuotationSubmittedEvent event) {
         validateEnvelope(event);
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         if (!event.getTenantId().equals(tenantId)) {
             throw new BusinessException(403, "报价事件与当前租户上下文不一致");
         }

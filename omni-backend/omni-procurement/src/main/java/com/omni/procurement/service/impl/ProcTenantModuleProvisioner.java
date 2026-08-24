@@ -4,7 +4,8 @@ import org.springframework.stereotype.Component;
 
 import com.omni.common.core.tenant.TenantModuleProvisioner;
 import com.omni.common.core.tenant.TenantProvisionContracts.ProvisionRequestedEvent;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.ProcTenantInitializer;
 import lombok.RequiredArgsConstructor;
 
@@ -26,12 +27,12 @@ public class ProcTenantModuleProvisioner implements TenantModuleProvisioner {
     /** {@inheritDoc} */
     @Override
     public void provision(ProvisionRequestedEvent event) {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 0L, event.tenantId(), "tenant-provisioning"));
         try {
             tenantInitializer.ensureInitialized();
         } finally {
-            ProcTenantContext.clear();
+            ServiceIdentityContext.clear();
         }
     }
 }
