@@ -2,7 +2,7 @@ package com.omni.crm.controller;
 
 import com.omni.common.core.result.R;
 import com.omni.crm.dto.CrmViews;
-import com.omni.crm.security.CrmDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.crm.service.OverviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,13 +23,13 @@ public class OverviewController {
     /** 查询看板摘要。 */
     @GetMapping("/summary")
     @PreAuthorize("hasAuthority('crm:overview:list')")
-    @CrmDataScope(permissionCode = "crm:overview:list")
+    @ServiceDataScope(permissionCode = "crm:overview:list")
     public R<CrmViews.OverviewSummaryVO> summary() { return R.ok(overviewService.summary()); }
 
     /** 查询销售漏斗。 */
     @GetMapping("/funnel")
     @PreAuthorize("hasAuthority('crm:overview:list')")
-    @CrmDataScope(permissionCode = "crm:overview:list")
+    @ServiceDataScope(permissionCode = "crm:overview:list")
     public R<List<CrmViews.FunnelItemVO>> funnel(@RequestParam(required = false) Long pipelineId) {
         return R.ok(overviewService.funnel(pipelineId));
     }
@@ -37,7 +37,7 @@ public class OverviewController {
     /** 查询今日和逾期待跟进。 */
     @GetMapping("/follow-ups")
     @PreAuthorize("hasAuthority('crm:overview:list')")
-    @CrmDataScope(permissionCode = "crm:overview:list")
+    @ServiceDataScope(permissionCode = "crm:overview:list")
     public R<List<CrmViews.FollowupVO>> followups(@RequestParam(defaultValue = "50") int limit) {
         return R.ok(overviewService.followups(limit));
     }

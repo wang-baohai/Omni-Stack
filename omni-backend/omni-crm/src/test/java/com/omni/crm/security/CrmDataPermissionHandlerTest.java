@@ -1,6 +1,7 @@
 package com.omni.crm.security;
 
 import com.omni.common.core.internal.InternalDataScopeDTO;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.AfterEach;
@@ -18,7 +19,7 @@ class CrmDataPermissionHandlerTest {
     /** 每次测试清理线程上下文。 */
     @AfterEach
     void clear() {
-        CrmDataScopeContext.clear();
+        ServiceDataScopeContext.clear();
     }
 
     /** 缺少 scope 时必须生成拒绝条件。 */
@@ -31,7 +32,7 @@ class CrmDataPermissionHandlerTest {
     /** SELF 范围必须按 owner_user_id 过滤。 */
     @Test
     void shouldFilterSelfByOwner() {
-        CrmDataScopeContext.set(scope("SELF", Set.of()));
+        ServiceDataScopeContext.set(scope("SELF", Set.of()));
         Expression expression = handler.getSqlSegment(new Table("crm_customer"), null, "mapper.select");
         assertThat(expression.toString()).contains("owner_user_id = 12");
     }
@@ -39,7 +40,7 @@ class CrmDataPermissionHandlerTest {
     /** DEPT 范围必须仅按当前主组织过滤。 */
     @Test
     void shouldFilterDepartmentByPrimaryUnit() {
-        CrmDataScopeContext.set(scope("DEPT", Set.of()));
+        ServiceDataScopeContext.set(scope("DEPT", Set.of()));
         Expression expression = handler.getSqlSegment(new Table("crm_lead"), null, "mapper.select");
         assertThat(expression.toString()).contains("owner_unit_id = 8");
     }
@@ -47,7 +48,7 @@ class CrmDataPermissionHandlerTest {
     /** DEPT_AND_BELOW 范围必须使用 Auth 返回的可访问组织集合。 */
     @Test
     void shouldFilterDepartmentTreeByAccessibleUnits() {
-        CrmDataScopeContext.set(scope("DEPT_AND_BELOW", Set.of(8L, 9L)));
+        ServiceDataScopeContext.set(scope("DEPT_AND_BELOW", Set.of(8L, 9L)));
         Expression expression = handler.getSqlSegment(new Table("crm_contact"), null, "mapper.select");
         assertThat(expression.toString()).contains("owner_unit_id IN (8, 9)");
     }
@@ -55,7 +56,7 @@ class CrmDataPermissionHandlerTest {
     /** CUSTOM 空组织集合必须拒绝全部记录。 */
     @Test
     void shouldDenyEmptyCustomScope() {
-        CrmDataScopeContext.set(scope("CUSTOM", Set.of()));
+        ServiceDataScopeContext.set(scope("CUSTOM", Set.of()));
         Expression expression = handler.getSqlSegment(new Table("crm_opportunity"), null, "mapper.select");
         assertThat(expression.toString()).contains("id = -1");
     }
@@ -63,14 +64,14 @@ class CrmDataPermissionHandlerTest {
     /** TENANT 范围不追加 owner 条件，TenantLine 仍独立生效。 */
     @Test
     void shouldLeaveTenantScopeToTenantLine() {
-        CrmDataScopeContext.set(scope("TENANT", Set.of()));
+        ServiceDataScopeContext.set(scope("TENANT", Set.of()));
         assertThat(handler.getSqlSegment(new Table("crm_activity"), null, "mapper.select")).isNull();
     }
 
     /** ALL 在普通 CRM API 中仍只表示当前租户全量，owner 层不追加条件。 */
     @Test
     void shouldLeaveAllScopeToTenantLine() {
-        CrmDataScopeContext.set(scope("ALL", Set.of()));
+        ServiceDataScopeContext.set(scope("ALL", Set.of()));
         assertThat(handler.getSqlSegment(new Table("crm_opportunity"), null, "mapper.select")).isNull();
     }
 

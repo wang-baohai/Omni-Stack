@@ -15,6 +15,7 @@
     <description>CRM 销售前闭环微服务</description>
 
     <dependencies>
+        <dependency><groupId>com.omni</groupId><artifactId>omni-common-service</artifactId></dependency>
         <dependency><groupId>com.omni</groupId><artifactId>omni-common-core</artifactId></dependency>
         <dependency><groupId>com.omni</groupId><artifactId>omni-common</artifactId></dependency>
         <dependency><groupId>com.omni</groupId><artifactId>omni-common-mybatis</artifactId></dependency>

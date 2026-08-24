@@ -8,7 +8,7 @@ import com.omni.crm.entity.CrmTenantConfig;
 import com.omni.crm.mapper.CrmPipelineMapper;
 import com.omni.crm.mapper.CrmPipelineStageMapper;
 import com.omni.crm.mapper.CrmTenantConfigMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.crm.service.CrmTenantInitializer;
 import com.omni.crm.service.support.CrmAuditSupport;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class CrmTenantInitializerImpl implements CrmTenantInitializer {
     @Override
     @Transactional
     public Long ensureInitialized() {
-        Long tenantId = CrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         CrmTenantConfig existing = findConfig(tenantId);
         if (existing != null) {
             return existing.getDefaultPipelineId();
@@ -51,7 +51,7 @@ public class CrmTenantInitializerImpl implements CrmTenantInitializer {
     @Override
     public String currencyCode() {
         ensureInitialized();
-        CrmTenantConfig config = findConfig(CrmTenantContext.requireTenantId());
+        CrmTenantConfig config = findConfig(ServiceIdentityContext.requireTenantId());
         if (config == null || config.getCurrencyCode() == null || config.getCurrencyCode().length() != 3) {
             throw new BusinessException(500, "CRM 租户默认币种未正确初始化");
         }

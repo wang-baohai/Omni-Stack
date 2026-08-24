@@ -26,7 +26,7 @@ import com.omni.crm.mapper.CrmLeadConversionMapper;
 import com.omni.crm.mapper.CrmLeadMapper;
 import com.omni.crm.mapper.CrmOpportunityMapper;
 import com.omni.crm.mapper.CrmOwnerChangeLogMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.crm.security.PiiMasker;
 import com.omni.crm.service.CustomerService;
 import com.omni.crm.service.support.CrmAuditSupport;
@@ -115,7 +115,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional
     public CrmViews.CustomerVO create(CrmRequests.CreateCustomerRequest request) {
         CrmOwnerResolver.Owner owner = ownerResolver.resolveForCreate(request.getOwnerUserId(), "crm:customer:transfer");
-        CrmCustomer customer = new CrmCustomer(); customer.setTenantId(CrmTenantContext.requireTenantId());
+        CrmCustomer customer = new CrmCustomer(); customer.setTenantId(ServiceIdentityContext.requireTenantId());
         customer.setCustomerNo("TMP-" + UUID.randomUUID()); customer.setName(request.getName());
         customer.setNormalizedName(normalize(request.getName())); customer.setCustomerType(request.getCustomerType());
         customer.setIndustryCode(request.getIndustryCode()); customer.setLevelCode(request.getLevelCode());
@@ -156,7 +156,7 @@ public class CustomerServiceImpl implements CustomerService {
         LambdaUpdateWrapper<CrmCustomer> update = versioned(id, version).set(CrmCustomer::getDeleted, 1);
         audit(update); requireUpdated(customerMapper.update(null, update));
         LocalDateTime now = LocalDateTime.now();
-        String operator = CrmTenantContext.require().username();
+        String operator = ServiceIdentityContext.require().username();
         activityMapper.clearContactReferencesByCustomer(id, now, operator);
         opportunityMapper.clearPrimaryContactReferencesByCustomer(id, now, operator);
         contactMapper.softDeleteByCustomer(id, now, operator);
@@ -225,7 +225,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .set(CrmCustomer::getOwnerUserId, owner.userId()).set(CrmCustomer::getOwnerUnitId, owner.unitId());
         audit(update); requireUpdated(customerMapper.update(null, update));
         LocalDateTime now = LocalDateTime.now();
-        String operator = CrmTenantContext.require().username();
+        String operator = ServiceIdentityContext.require().username();
         contactMapper.syncOwnerByCustomer(id, owner.userId(), owner.unitId(), now, operator);
         activityMapper.syncOwnerByRoot("CUSTOMER", id, owner.userId(), owner.unitId(), now, operator);
         if (request.isCascadeOpenOpportunities()) {
@@ -262,7 +262,7 @@ public class CustomerServiceImpl implements CustomerService {
                                 Long oldOwnerUnitId, CrmOwnerResolver.Owner owner,
                                 String operationType, String reason) {
         CrmOwnerChangeLog log = new CrmOwnerChangeLog();
-        log.setTenantId(CrmTenantContext.requireTenantId());
+        log.setTenantId(ServiceIdentityContext.requireTenantId());
         log.setEntityType(entityType);
         log.setEntityId(entityId);
         log.setOldOwnerUserId(oldOwnerUserId);
@@ -271,7 +271,7 @@ public class CustomerServiceImpl implements CustomerService {
         log.setNewOwnerUnitId(owner.unitId());
         log.setOperationType(operationType);
         log.setReason(reason);
-        log.setOperatorUserId(CrmTenantContext.require().userId());
+        log.setOperatorUserId(ServiceIdentityContext.require().userId());
         log.setOperatedTime(LocalDateTime.now());
         CrmAuditSupport.created(log);
         ownerLogMapper.insert(log);
@@ -284,12 +284,12 @@ public class CustomerServiceImpl implements CustomerService {
                 .eventId(eventId)
                 .eventType("crm.customer.owner-changed.v1")
                 .occurredAt(LocalDateTime.now())
-                .tenantId(CrmTenantContext.requireTenantId())
+                .tenantId(ServiceIdentityContext.requireTenantId())
                 .producer("omni-crm")
                 .aggregateType("CUSTOMER")
                 .aggregateId(customer.getId())
                 .aggregateVersion(request.getVersion() + 1)
-                .actorUserId(CrmTenantContext.require().userId())
+                .actorUserId(ServiceIdentityContext.require().userId())
                 .payload(Map.of("customerId", customer.getId(),
                         "oldOwnerUserId", customer.getOwnerUserId(),
                         "oldOwnerUnitId", customer.getOwnerUnitId(),
@@ -298,7 +298,7 @@ public class CustomerServiceImpl implements CustomerService {
                         "cascadeOpenOpportunities", request.isCascadeOpenOpportunities()))
                 .build();
         reliableMessageRelay.send("crm-domain-out-0", envelope,
-                CrmTenantContext.requireTenantId(), eventId);
+                ServiceIdentityContext.requireTenantId(), eventId);
     }
 
     private LambdaUpdateWrapper<CrmCustomer> versioned(Long id, Integer version) {
@@ -308,7 +308,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void audit(LambdaUpdateWrapper<CrmCustomer> update) {
         update.set(CrmCustomer::getUpdateTime, LocalDateTime.now())
-                .set(CrmCustomer::getUpdateBy, CrmTenantContext.require().username());
+                .set(CrmCustomer::getUpdateBy, ServiceIdentityContext.require().username());
     }
 
     private <T> void setIf(LambdaUpdateWrapper<CrmCustomer> update, T value,

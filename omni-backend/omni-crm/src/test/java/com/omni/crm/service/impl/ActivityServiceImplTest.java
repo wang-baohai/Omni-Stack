@@ -11,7 +11,8 @@ import com.omni.crm.mapper.CrmContactMapper;
 import com.omni.crm.mapper.CrmCustomerMapper;
 import com.omni.crm.mapper.CrmLeadMapper;
 import com.omni.crm.mapper.CrmOpportunityMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.crm.service.support.CrmOwnerEnricher;
 import com.omni.crm.service.support.CrmRecordAccessGuard;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -56,7 +57,7 @@ class ActivityServiceImplTest {
     /** 设置请求上下文和公共桩。 */
     @BeforeEach
     void setUp() {
-        CrmTenantContext.set(new CrmTenantContext.RequestIdentity(12L, 3L, "sales"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(12L, 3L, "sales"));
         when(activityMapper.update(any(), any())).thenReturn(1);
         lenient().when(ownerEnricher.enrichOne(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
@@ -64,7 +65,7 @@ class ActivityServiceImplTest {
     /** 清理请求上下文。 */
     @AfterEach
     void clear() {
-        CrmTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 修改计划时间后重新计算根对象下次跟进时间。 */

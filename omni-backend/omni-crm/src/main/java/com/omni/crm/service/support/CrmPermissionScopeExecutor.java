@@ -4,8 +4,9 @@ import com.omni.common.core.internal.InternalDataScopeDTO;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import com.omni.crm.client.AuthInternalClient;
-import com.omni.crm.security.CrmDataScopeContext;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,30 +41,30 @@ public class CrmPermissionScopeExecutor {
         if (!granted) {
             return deniedValue;
         }
-        CrmDataScopeContext.ScopeInfo previous = CrmDataScopeContext.get();
+        ServiceDataScopeContext.ScopeInfo previous = ServiceDataScopeContext.get();
         try {
             R<InternalDataScopeDTO> response = authInternalClient.resolveDataScope(
-                    CrmTenantContext.require().userId(), CrmTenantContext.requireTenantId(), permissionCode);
+                    ServiceIdentityContext.require().userId(), ServiceIdentityContext.requireTenantId(), permissionCode);
             if (response == null || response.getCode() != 200 || response.getData() == null) {
                 int code = response != null && response.getCode() == 403 ? 403 : 503;
                 throw new BusinessException(code, code == 403 ? "跨聚合查询权限不足" : "权限服务暂时不可用");
             }
             InternalDataScopeDTO scope = response.getData();
-            CrmTenantContext.RequestIdentity identity = CrmTenantContext.require();
+            ServiceRequestIdentity identity = ServiceIdentityContext.require();
             if (!identity.userId().equals(scope.getUserId()) || !identity.tenantId().equals(scope.getTenantId())
                     || !permissionCode.equals(scope.getPermissionCode()) || scope.getEffectiveScope() == null) {
                 throw new BusinessException(403, "权限服务返回了不一致的跨聚合数据范围");
             }
-            CrmDataScopeContext.set(scope);
+            ServiceDataScopeContext.set(scope);
             return supplier.get();
         } catch (FeignException exception) {
             throw new BusinessException(exception.status() == 403 ? 403 : 503,
                     exception.status() == 403 ? "跨聚合查询权限不足" : "权限服务暂时不可用");
         } finally {
             if (previous == null) {
-                CrmDataScopeContext.clear();
+                ServiceDataScopeContext.clear();
             } else {
-                CrmDataScopeContext.set(previous);
+                ServiceDataScopeContext.set(previous);
             }
         }
     }

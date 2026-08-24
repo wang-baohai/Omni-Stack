@@ -22,7 +22,7 @@ import com.omni.crm.mapper.CrmContactMapper;
 import com.omni.crm.mapper.CrmCustomerMapper;
 import com.omni.crm.mapper.CrmLeadMapper;
 import com.omni.crm.mapper.CrmOpportunityMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.crm.service.ActivityService;
 import com.omni.crm.service.support.CrmAuditSupport;
 import com.omni.crm.service.support.CrmOwnerResolver;
@@ -101,13 +101,13 @@ public class ActivityServiceImpl implements ActivityService {
             throw new BusinessException(400, "直接创建已完成活动必须填写完成时间");
         }
         if (status == ActivityStatus.CANCELLED) throw new BusinessException(400, "不能直接创建已取消活动");
-        CrmActivity entity = new CrmActivity(); entity.setTenantId(CrmTenantContext.requireTenantId());
+        CrmActivity entity = new CrmActivity(); entity.setTenantId(ServiceIdentityContext.requireTenantId());
         entity.setRootType(rootType); entity.setRootId(request.getRootId()); entity.setContactId(request.getContactId());
         entity.setActivityType(request.getActivityType()); entity.setSubject(request.getSubject()); entity.setContent(request.getContent());
         entity.setStatus(status.name()); entity.setPlannedStartTime(request.getPlannedStartTime());
         entity.setPlannedEndTime(request.getPlannedEndTime()); entity.setCompletedTime(request.getCompletedTime());
         entity.setNextActionTime(request.getNextActionTime()); entity.setPerformedByUserId(
-                status == ActivityStatus.COMPLETED ? CrmTenantContext.require().userId() : null);
+                status == ActivityStatus.COMPLETED ? ServiceIdentityContext.require().userId() : null);
         entity.setOwnerUserId(owner.userId()); entity.setOwnerUnitId(owner.unitId()); entity.setVersion(0); entity.setDeleted(0);
         CrmAuditSupport.created(entity); activityMapper.insert(entity);
         if (status == ActivityStatus.COMPLETED) {
@@ -160,7 +160,7 @@ public class ActivityServiceImpl implements ActivityService {
         LocalDateTime completed = request.getCompletedTime() == null ? LocalDateTime.now() : request.getCompletedTime();
         LambdaUpdateWrapper<CrmActivity> update = versioned(id, request.getVersion())
                 .set(CrmActivity::getStatus, ActivityStatus.COMPLETED.name()).set(CrmActivity::getCompletedTime, completed)
-                .set(CrmActivity::getPerformedByUserId, CrmTenantContext.require().userId())
+                .set(CrmActivity::getPerformedByUserId, ServiceIdentityContext.require().userId())
                 .set(CrmActivity::getNextActionTime, request.getNextActionTime());
         audit(update); requireUpdated(activityMapper.update(null, update));
         touchCompletedRoot(current, completed);
@@ -172,12 +172,12 @@ public class ActivityServiceImpl implements ActivityService {
     private void publishCompletedEvent(CrmActivity activity, LocalDateTime completed, int aggregateVersion) {
         String eventId = UUID.randomUUID().toString();
         DomainEventEnvelope event = DomainEventEnvelope.builder().eventId(eventId).eventType("crm.activity.completed.v1")
-                .occurredAt(completed).tenantId(CrmTenantContext.requireTenantId()).producer("omni-crm")
+                .occurredAt(completed).tenantId(ServiceIdentityContext.requireTenantId()).producer("omni-crm")
                 .aggregateType("ACTIVITY").aggregateId(activity.getId()).aggregateVersion(aggregateVersion)
-                .actorUserId(CrmTenantContext.require().userId())
+                .actorUserId(ServiceIdentityContext.require().userId())
                 .payload(Map.of("activityId", activity.getId(), "rootType", activity.getRootType(),
                         "rootId", activity.getRootId())).build();
-        reliableMessageRelay.send("crm-domain-out-0", event, CrmTenantContext.requireTenantId(), eventId);
+        reliableMessageRelay.send("crm-domain-out-0", event, ServiceIdentityContext.requireTenantId(), eventId);
     }
 
     /** {@inheritDoc} */
@@ -253,7 +253,7 @@ public class ActivityServiceImpl implements ActivityService {
         LocalDateTime nextActionTime = activityMapper.selectLatestCompletedNextActionTime(rootType, rootId);
         LocalDateTime nextFollowupTime = earlier(plannedTime, nextActionTime);
         LocalDateTime now = LocalDateTime.now();
-        String operator = CrmTenantContext.require().username();
+        String operator = ServiceIdentityContext.require().username();
         if ("LEAD".equals(rootType)) {
             leadMapper.update(null, new LambdaUpdateWrapper<CrmLead>().eq(CrmLead::getId, rootId)
                     .set(CrmLead::getNextFollowupTime, nextFollowupTime).set(CrmLead::getUpdateTime, now)
@@ -293,7 +293,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     private void audit(LambdaUpdateWrapper<CrmActivity> update) {
         update.set(CrmActivity::getUpdateTime, LocalDateTime.now())
-                .set(CrmActivity::getUpdateBy, CrmTenantContext.require().username());
+                .set(CrmActivity::getUpdateBy, ServiceIdentityContext.require().username());
     }
 
     private <T> void setIf(LambdaUpdateWrapper<CrmActivity> update, T value,

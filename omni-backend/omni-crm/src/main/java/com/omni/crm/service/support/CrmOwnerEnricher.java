@@ -5,7 +5,7 @@ import com.omni.common.core.internal.InternalUserDTO;
 import com.omni.common.core.result.R;
 import com.omni.crm.client.AuthInternalClient;
 import com.omni.crm.dto.CrmViews;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -40,7 +40,7 @@ public class CrmOwnerEnricher {
         if (records == null || records.isEmpty()) {
             return records == null ? Collections.emptyList() : records;
         }
-        Long tenantId = CrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String userIds = join(records.stream().map(CrmViews.OwnedVO::getOwnerUserId).toList());
         String unitIds = join(records.stream().map(CrmViews.OwnedVO::getOwnerUnitId).toList());
         try {
@@ -78,7 +78,7 @@ public class CrmOwnerEnricher {
      */
     public List<CrmViews.ActivityVO> enrichPerformedBy(List<CrmViews.ActivityVO> records) {
         if (records == null || records.isEmpty()) return records;
-        Long tenantId = CrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String userIds = join(records.stream().map(CrmViews.ActivityVO::getPerformedByUserId).toList());
         try {
             Map<Long, InternalUserDTO> users = users(userIds, tenantId);

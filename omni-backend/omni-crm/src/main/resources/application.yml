@@ -73,6 +73,20 @@ omni:
   internal:
     api:
       token: ${OMNI_INTERNAL_API_TOKEN:}
+  service:
+    name: omni-crm
+    display-name: CRM
+    gateway-preauth:
+      enabled: true
+    internal-api:
+      enabled: true
+      token: ${OMNI_INTERNAL_API_TOKEN:}
+    tenant:
+      enabled: true
+    data-scope:
+      enabled: true
+    xss:
+      enabled: true
 
 xxl:
   job:

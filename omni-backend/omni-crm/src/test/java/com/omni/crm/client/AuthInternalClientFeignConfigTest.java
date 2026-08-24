@@ -1,5 +1,8 @@
 package com.omni.crm.client;
 
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.internal.InternalFeignHeadersFactory;
+import feign.RequestTemplate;
 import feign.codec.Decoder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
@@ -17,6 +20,20 @@ import static org.mockito.Mockito.when;
 
 /** Auth 内部 Feign 客户端配置测试。 */
 class AuthInternalClientFeignConfigTest {
+
+    /** CRM 专用 Auth Client 必须使用 Starter 工厂注入内部认证头。 */
+    @Test
+    void shouldUseStarterFactoryForInternalAuthentication() {
+        ServiceIdentityProperties properties = new ServiceIdentityProperties();
+        properties.getInternalApi().setToken("0123456789abcdef0123456789abcdef");
+        RequestTemplate template = new RequestTemplate();
+
+        new AuthInternalClient.FeignConfig().internalTokenInterceptor(
+                properties, new InternalFeignHeadersFactory()).apply(template);
+
+        assertThat(template.headers().get("X-Internal-Token"))
+                .containsExactly("0123456789abcdef0123456789abcdef");
+    }
 
     /** 解码器创建时必须完成消息转换器预热，禁止延迟到首次并发请求。 */
     @Test

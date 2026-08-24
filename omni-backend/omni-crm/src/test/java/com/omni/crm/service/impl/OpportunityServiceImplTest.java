@@ -15,7 +15,8 @@ import com.omni.crm.mapper.CrmOpportunityMapper;
 import com.omni.crm.mapper.CrmOpportunityStageHistoryMapper;
 import com.omni.crm.mapper.CrmOwnerChangeLogMapper;
 import com.omni.crm.mapper.CrmPipelineStageMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.crm.service.CrmTenantInitializer;
 import com.omni.crm.service.support.CrmOwnerEnricher;
 import com.omni.crm.service.support.CrmOwnerResolver;
@@ -66,13 +67,13 @@ class OpportunityServiceImplTest {
     /** 清理租户请求上下文。 */
     @AfterEach
     void clear() {
-        CrmTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 赢单命令必须通过保留租户隔离的专用 Mapper 激活潜客。 */
     @Test
     void shouldActivatePotentialCustomerAfterWin() {
-        CrmTenantContext.set(new CrmTenantContext.RequestIdentity(12L, 3L, "sales"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(12L, 3L, "sales"));
         CrmOpportunity opportunity = opportunity();
         CrmPipelineStage from = stage(10L, "OPEN", 10);
         CrmPipelineStage won = stage(20L, "WON", 50);

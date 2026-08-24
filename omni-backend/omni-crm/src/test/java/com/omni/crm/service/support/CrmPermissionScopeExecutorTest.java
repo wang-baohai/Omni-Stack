@@ -4,8 +4,9 @@ import com.omni.common.core.internal.InternalDataScopeDTO;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import com.omni.crm.client.AuthInternalClient;
-import com.omni.crm.security.CrmDataScopeContext;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,7 +28,7 @@ class CrmPermissionScopeExecutorTest {
     /** 清理线程上下文。 */
     @AfterEach
     void clear() {
-        CrmDataScopeContext.clear(); CrmTenantContext.clear(); SecurityContextHolder.clearContext();
+        ServiceDataScopeContext.clear(); ServiceIdentityContext.clear(); SecurityContextHolder.clearContext();
     }
 
     /** Auth 返回错租户 scope 时必须拒绝，且不得执行查询。 */
@@ -35,7 +36,7 @@ class CrmPermissionScopeExecutorTest {
     void shouldRejectMismatchedAuthoritativeScope() {
         AuthInternalClient client = mock(AuthInternalClient.class);
         CrmPermissionScopeExecutor executor = new CrmPermissionScopeExecutor(client);
-        CrmTenantContext.set(new CrmTenantContext.RequestIdentity(12L, 3L, "sales"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(12L, 3L, "sales"));
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 "sales", null, List.of(new SimpleGrantedAuthority("crm:contact:list"))));
         InternalDataScopeDTO scope = new InternalDataScopeDTO(); scope.setUserId(12L); scope.setTenantId(99L);

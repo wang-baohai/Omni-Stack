@@ -10,8 +10,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.tenant.TenantProvisionContracts.ProvisionRequestedEvent;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.crm.service.CrmTenantInitializer;
 
 /**
@@ -24,14 +25,15 @@ class CrmTenantModuleProvisionerTest {
     void shouldUseTargetTenantAndClearContext() {
         CrmTenantInitializer initializer = mock(CrmTenantInitializer.class);
         doAnswer(invocation -> {
-            assertThat(CrmTenantContext.requireTenantId()).isEqualTo(9L);
+            assertThat(ServiceIdentityContext.requireTenantId()).isEqualTo(9L);
             return 99L;
         }).when(initializer).ensureInitialized();
 
         new CrmTenantModuleProvisioner(initializer).provision(request());
 
-        assertThatThrownBy(CrmTenantContext::requireTenantId)
-                .hasMessageContaining("缺少 CRM");
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
+                .isInstanceOf(BusinessException.class)
+                .satisfies(error -> assertThat(((BusinessException) error).getCode()).isEqualTo(403));
     }
 
     private static ProvisionRequestedEvent request() {

@@ -5,8 +5,8 @@ import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import com.omni.crm.client.AuthInternalClient;
 import com.omni.crm.dto.CrmViews;
-import com.omni.crm.security.CrmDataScopeContext;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.crm.service.OwnerOptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,21 +27,21 @@ public class OwnerOptionServiceImpl implements OwnerOptionService {
         int safeLimit = Math.max(1, Math.min(limit, 100));
         R<List<InternalUserOptionDTO>> response;
         try {
-            response = authInternalClient.listOwnerOptions(CrmTenantContext.requireTenantId(), keyword, 100);
+            response = authInternalClient.listOwnerOptions(ServiceIdentityContext.requireTenantId(), keyword, 100);
         } catch (FeignException exception) {
             throw new BusinessException(503, "负责人目录暂时不可用");
         }
         if (response == null || response.getCode() != 200 || response.getData() == null) {
             throw new BusinessException(503, "负责人目录暂时不可用");
         }
-        CrmDataScopeContext.ScopeInfo scope = CrmDataScopeContext.require();
+        ServiceDataScopeContext.ScopeInfo scope = ServiceDataScopeContext.require();
         return response.getData().stream().filter(user -> allowed(scope, user)).limit(safeLimit).map(user -> {
             CrmViews.OwnerOptionVO vo = new CrmViews.OwnerOptionVO(); vo.setId(user.getId()); vo.setUsername(user.getUsername());
             vo.setNickname(user.getNickname()); vo.setPrimaryUnitId(user.getPrimaryUnitId()); vo.setAvatar(user.getAvatar()); return vo;
         }).toList();
     }
 
-    private boolean allowed(CrmDataScopeContext.ScopeInfo scope, InternalUserOptionDTO user) {
+    private boolean allowed(ServiceDataScopeContext.ScopeInfo scope, InternalUserOptionDTO user) {
         return switch (scope.effectiveScope()) {
             case "ALL", "TENANT" -> true;
             case "SELF" -> scope.userId().equals(user.getId());

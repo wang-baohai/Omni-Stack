@@ -14,7 +14,7 @@ import com.omni.crm.mapper.CrmActivityMapper;
 import com.omni.crm.mapper.CrmContactMapper;
 import com.omni.crm.mapper.CrmCustomerMapper;
 import com.omni.crm.mapper.CrmOpportunityMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.crm.service.ContactService;
 import com.omni.crm.service.support.CrmAuditSupport;
 import com.omni.crm.service.support.CrmRecordAccessGuard;
@@ -68,7 +68,7 @@ public class ContactServiceImpl implements ContactService {
         CrmCustomer customer = customerMapper.selectVisibleForUpdate(customerId);
         if (customer == null) throw new BusinessException(404, "客户不存在");
         if (request.isPrimary()) clearPrimary(customerId);
-        CrmContact contact = new CrmContact(); contact.setTenantId(CrmTenantContext.requireTenantId());
+        CrmContact contact = new CrmContact(); contact.setTenantId(ServiceIdentityContext.requireTenantId());
         contact.setCustomerId(customerId); contact.setName(request.getName()); contact.setDepartment(request.getDepartment());
         contact.setJobTitle(request.getJobTitle()); contact.setMobile(request.getMobile()); contact.setPhone(request.getPhone());
         contact.setEmail(request.getEmail()); contact.setDecisionRole(request.getDecisionRole());
@@ -99,7 +99,7 @@ public class ContactServiceImpl implements ContactService {
         LambdaUpdateWrapper<CrmContact> update = versioned(id, version).set(CrmContact::getDeleted, 1);
         audit(update); requireUpdated(contactMapper.update(null, update));
         LocalDateTime now = LocalDateTime.now();
-        String operator = CrmTenantContext.require().username();
+        String operator = ServiceIdentityContext.require().username();
         activityMapper.clearContactReference(id, now, operator);
         opportunityMapper.clearPrimaryContactReference(id, now, operator);
     }
@@ -143,7 +143,7 @@ public class ContactServiceImpl implements ContactService {
 
     private void clearPrimary(Long customerId) {
         contactMapper.clearPrimaryByCustomer(customerId, LocalDateTime.now(),
-                CrmTenantContext.require().username());
+                ServiceIdentityContext.require().username());
     }
 
     private LambdaUpdateWrapper<CrmContact> versioned(Long id, Integer version) {
@@ -153,7 +153,7 @@ public class ContactServiceImpl implements ContactService {
 
     private void audit(LambdaUpdateWrapper<CrmContact> update) {
         update.set(CrmContact::getUpdateTime, LocalDateTime.now())
-                .set(CrmContact::getUpdateBy, CrmTenantContext.require().username());
+                .set(CrmContact::getUpdateBy, ServiceIdentityContext.require().username());
     }
 
     private <T> void setIf(LambdaUpdateWrapper<CrmContact> update, T value,
