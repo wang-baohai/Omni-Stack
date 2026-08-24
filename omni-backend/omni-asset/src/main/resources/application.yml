@@ -83,8 +83,23 @@ management:
       show-details: when_authorized
 
 omni:
+  service:
+    name: omni-asset
+    display-name: Asset
+    gateway-preauth:
+      enabled: true
+    internal-api:
+      enabled: true
+      token: ${OMNI_INTERNAL_API_TOKEN:}
+    tenant:
+      enabled: true
+    data-scope:
+      enabled: true
+    xss:
+      enabled: true
   internal:
     api:
+      # 兼容尚未迁移的内部调用读取路径，后续配置收敛阶段删除。
       token: ${OMNI_INTERNAL_API_TOKEN:}
 
 xxl:

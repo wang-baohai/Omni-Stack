@@ -12,7 +12,8 @@ import com.omni.asset.mapper.AstAssetHistoryMapper;
 import com.omni.asset.mapper.AstAssetMapper;
 import com.omni.asset.mapper.AstDisposalMapper;
 import com.omni.asset.mapper.AstTransferMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.service.AssetOperationWorkflowStateService;
 import com.omni.asset.service.support.AssetAuditSupport;
 import com.omni.asset.service.support.AssetRecordAccessGuard;
@@ -59,7 +60,7 @@ public class AssetOperationWorkflowStateServiceImpl
     @Override
     @Transactional
     public AssetWorkflowCommand prepareTransfer(AssetOperationRequests.CreateTransferRequest request) {
-        AssetTenantContext.RequestIdentity identity = AssetTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         Long tenantId = identity.tenantId();
         AstAsset asset = requireAsset(tenantId, request.getAssetId());
         requireAvailable(asset);
@@ -116,7 +117,7 @@ public class AssetOperationWorkflowStateServiceImpl
     @Override
     @Transactional
     public AssetWorkflowCommand prepareDisposal(AssetOperationRequests.CreateDisposalRequest request) {
-        AssetTenantContext.RequestIdentity identity = AssetTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         Long tenantId = identity.tenantId();
         AstAsset asset = requireAsset(tenantId, request.getAssetId());
         requireAvailable(asset);
@@ -232,7 +233,7 @@ public class AssetOperationWorkflowStateServiceImpl
     }
 
     private AssetWorkflowCommand prepareTransferRetry(Long id, Integer version) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstTransfer transfer = accessGuard.requireVisible(
                 transferMapper.selectForUpdate(tenantId, id), "调拨申请不存在");
         AssetOperationStateMachine.requireRetryable(
@@ -262,7 +263,7 @@ public class AssetOperationWorkflowStateServiceImpl
     }
 
     private AssetWorkflowCommand prepareDisposalRetry(Long id, Integer version) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstDisposal disposal = accessGuard.requireVisible(
                 disposalMapper.selectForUpdate(tenantId, id), "处置申请不存在");
         AssetOperationStateMachine.requireRetryable(
@@ -323,7 +324,7 @@ public class AssetOperationWorkflowStateServiceImpl
         history.setAssetId(asset.getId());
         history.setFromStatus(asset.getStatus());
         history.setToStatus(targetStatus);
-        history.setChangedByUserId(AssetTenantContext.require().userId());
+        history.setChangedByUserId(ServiceIdentityContext.require().userId());
         history.setChangedTime(LocalDateTime.now());
         history.setRemark(remark);
         AssetAuditSupport.created(history);
@@ -386,7 +387,7 @@ public class AssetOperationWorkflowStateServiceImpl
     }
 
     private void requireCommandTenant(AssetWorkflowCommand command) {
-        if (!command.tenantId().equals(AssetTenantContext.requireTenantId())) {
+        if (!command.tenantId().equals(ServiceIdentityContext.requireTenantId())) {
             throw new BusinessException(403, "Workflow 启动快照与当前租户不一致");
         }
     }

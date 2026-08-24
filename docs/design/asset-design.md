@@ -76,7 +76,7 @@ flowchart LR
     O -->|"mqRelayHandler"| MQ["RocketMQ"]
 ```
 
-推荐依赖：`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`，以及 Web、Validation、Security、AspectJ、OpenFeign、LoadBalancer、Nacos、RocketMQ Stream、Actuator、Lombok。
+推荐依赖：`omni-common-service`（Servlet 业务服务安全、身份、租户、DataScope、MyBatis 与 XSS 组合），以及按需启用的 `omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`。Asset 仍显式使用 Web、Validation、Security、OpenFeign、LoadBalancer、Nacos、RocketMQ Stream与 Actuator 等业务依赖。
 
 **Asset 不依赖 `omni-common-workflow`，也不嵌入 Flowable。** `omni-workflow` 是独立微服务和 Flowable 唯一运行时；Asset 通过内部 Feign 契约发起流程，通过可靠领域事件接收审批结果。
 
@@ -323,7 +323,7 @@ sequenceDiagram
 
 ### 6.1 信任链
 
-与其他服务一致：Gateway JWT → Asset Tenant 校验 → @PreAuthorize → @AssetDataScope → MyBatis DataPermission → AssetRecordAccessGuard。
+与其他 Servlet 业务服务一致：Gateway JWT → `GatewayPreAuthenticationFilter` 预认证 → `ServiceIdentityFilter` 租户/身份校验 → `@PreAuthorize` → `@ServiceDataScope` → MyBatis DataPermission → `AssetRecordAccessGuard`。
 
 ### 6.2 权限树与角色
 
@@ -347,7 +347,9 @@ API 权限：
 
 ### 6.3 Asset 上下文与 SQL 拦截
 
-与 SRM/CRM/Procurement 模式一致。拦截器顺序固定：`TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInterceptor`。
+跨模块上下文与持久层组装由 `omni-common-service` 提供：请求身份使用 `ServiceIdentityContext` / `ServiceRequestIdentity`，数据范围使用 `@ServiceDataScope` / `ServiceDataScopeContext`，`ServicePersistenceAutoConfiguration` 负责组装拦截器。Asset 仅保留领域策略 `AssetTenantTablePolicy`、`AssetDataPermissionHandler` 和写操作守卫 `AssetRecordAccessGuard`。
+
+拦截器顺序固定：`TenantLineInnerInterceptor → DataPermissionInterceptor → OptimisticLockerInnerInterceptor → PaginationInnerInterceptor`。`AssetTenantTablePolicy` 只对 `ast_*` 表生效，`sys_mq_message` 必须保持在租户拦截之外，以允许后台 Relay 跨租户扫描。
 
 | dataScope | 条件 |
 |---|---|
@@ -438,14 +440,14 @@ Asset 通过 SRM 内部 API 获取供应商信息（资产录入候选、保修�
 
 消费流程：
 1. RocketMQ Consumer 接收消息。
-2. 校验事件 `tenantId`，同时设置系统 TenantContext 与当前租户 `TENANT` 级 DataScopeContext；消费结束必须在 `finally` 中清理两者。
+2. 校验事件 `tenantId`，使用 `ServiceRequestIdentity` 设置 `ServiceIdentityContext`，并设置当前租户 `TENANT` 级 `ServiceDataScopeContext`；消费结束必须在 `finally` 中清理两者。
 3. 幂等检查：`ast_inbox_event` 表（`consumer_name + event_id` 唯一键）。
 4. 对满足资产化条件的收货行按 unitSequence 创建资产记录，并依赖来源唯一键兜底。
 5. 在同一事务中更新 inbox 消费状态。
 
 **Feign 查询**（可选）：Asset 可通过 Procurement 内部 API 查询采购来源详情（PO 号、金额、供应商）。
 
-**补偿回扫**：Asset 启动后的受控任务调用 Procurement 资产候选分页 API，直到游标耗尽；实时事件与回扫共用同一幂等创建逻辑。回扫同样必须显式设置当前租户 `TENANT` 级 DataScopeContext，避免来源幂等写入后的校验查询被失败关闭规则过滤；请求结束后清理上下文。
+**补偿回扫**：Asset 启动后的受控任务调用 Procurement 资产候选分页 API，直到游标耗尽；实时事件与回扫共用同一幂等创建逻辑。回扫同样必须显式设置当前租户 `TENANT` 级 `ServiceDataScopeContext`，避免来源幂等写入后的校验查询被失败关闭规则过滤；请求结束后清理共享身份与 DataScope 上下文。
 
 ### 8.4 Workflow 集成
 
@@ -499,7 +501,7 @@ Workflow 不可用、返回 409/其他结果不确定响应或响应丢失时，
 
 ### 9.3 XSS
 
-Asset 必须实现 `XssConfigProvider`。MVP 备注只允许纯文本。
+Asset 通过 `omni-common-service` 的 `CachedServiceXssConfigProvider` 获得统一 XSS 配置：优先读取 Redis DB 0 缓存，缓存未命中时使用带内部身份的 Auth 回源；Auth 或 Redis 不可用时必须落到安全基线，禁止因配置中心故障而绕过清洗。MVP 备注只允许纯文本。
 
 ## 10. 前端设计
 

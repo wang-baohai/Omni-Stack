@@ -1,6 +1,8 @@
 package com.omni.asset.security;
 
 import com.baomidou.mybatisplus.extension.plugins.handler.MultiDataPermissionHandler;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.persistence.DataScopeTablePolicy;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -9,6 +11,7 @@ import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionLi
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 import java.util.Map;
@@ -19,7 +22,8 @@ import java.util.Set;
  *
  * @author Omni-Stack Team
  */
-public class AssetDataPermissionHandler implements MultiDataPermissionHandler {
+@Component
+public class AssetDataPermissionHandler implements MultiDataPermissionHandler, DataScopeTablePolicy {
 
     private static final ScopeColumns MANAGEMENT_COLUMNS =
             new ScopeColumns("owner_user_id", "owner_unit_id");
@@ -48,7 +52,7 @@ public class AssetDataPermissionHandler implements MultiDataPermissionHandler {
             return null;
         }
         String alias = table.getAlias() == null ? table.getName() : table.getAlias().getName();
-        AssetDataScopeContext.ScopeInfo scope = AssetDataScopeContext.get();
+        ServiceDataScopeContext.ScopeInfo scope = ServiceDataScopeContext.get();
         if (scope == null || scope.effectiveScope() == null || scope.permissionCode() == null) {
             return deny(alias);
         }
@@ -59,7 +63,7 @@ public class AssetDataPermissionHandler implements MultiDataPermissionHandler {
     }
 
     private Expression rootScope(String alias, ScopeColumns columns,
-                                 AssetDataScopeContext.ScopeInfo scope) {
+                                 ServiceDataScopeContext.ScopeInfo scope) {
         if (usesCurrentUser(scope)) {
             return equals(alias, "current_user_id", scope.userId());
         }
@@ -70,7 +74,7 @@ public class AssetDataPermissionHandler implements MultiDataPermissionHandler {
     }
 
     private Expression managementScope(String alias, ScopeColumns columns,
-                                       AssetDataScopeContext.ScopeInfo scope) {
+                                       ServiceDataScopeContext.ScopeInfo scope) {
         return switch (scope.effectiveScope()) {
             case "SELF" -> equals(alias, columns.selfColumn(), scope.userId());
             case "DEPT" -> equals(alias, columns.unitColumn(), scope.primaryUnitId());
@@ -80,7 +84,7 @@ public class AssetDataPermissionHandler implements MultiDataPermissionHandler {
     }
 
     private Expression inherited(String alias, ParentRelation relation,
-                                 AssetDataScopeContext.ScopeInfo scope) {
+                                 ServiceDataScopeContext.ScopeInfo scope) {
         if (scope.tenantId() == null) {
             return deny(alias);
         }
@@ -110,7 +114,7 @@ public class AssetDataPermissionHandler implements MultiDataPermissionHandler {
         }
     }
 
-    private boolean usesCurrentUser(AssetDataScopeContext.ScopeInfo scope) {
+    private boolean usesCurrentUser(ServiceDataScopeContext.ScopeInfo scope) {
         return FIXED_CURRENT_USER_PERMISSIONS.contains(scope.permissionCode())
                 || ("asset:transfer:create".equals(scope.permissionCode())
                 && "SELF".equals(scope.effectiveScope()));

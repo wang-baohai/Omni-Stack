@@ -2,8 +2,9 @@ package com.omni.asset.client;
 
 import com.omni.asset.dto.ProcurementAssetContracts;
 import com.omni.common.core.result.R;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.internal.InternalFeignHeadersFactory;
 import feign.RequestInterceptor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,17 +43,15 @@ public interface ProcurementInternalClient {
     @Configuration
     class FeignConfig {
 
-        @Value("${omni.internal.api.token:}")
-        private String internalToken;
-
         /**
          * 注入服务间共享认证令牌。
          *
          * @return Feign 请求拦截器
          */
         @Bean
-        public RequestInterceptor assetProcurementInternalTokenInterceptor() {
-            return template -> template.header("X-Internal-Token", internalToken);
+        public RequestInterceptor assetProcurementInternalTokenInterceptor(
+                ServiceIdentityProperties properties, InternalFeignHeadersFactory factory) {
+            return factory.create(properties.getInternalApi().getToken());
         }
     }
 }

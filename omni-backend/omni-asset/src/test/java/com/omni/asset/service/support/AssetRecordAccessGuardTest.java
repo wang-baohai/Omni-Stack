@@ -1,8 +1,9 @@
 package com.omni.asset.service.support;
 
 import com.omni.asset.entity.AstAsset;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.common.core.result.BusinessException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -20,14 +21,14 @@ class AssetRecordAccessGuardTest {
     /** 清理线程上下文。 */
     @AfterEach
     void clearContext() {
-        AssetTenantContext.clear();
-        AssetDataScopeContext.clear();
+        ServiceIdentityContext.clear();
+        ServiceDataScopeContext.clear();
     }
 
     /** 领用和退还只能由资产当前使用人执行。 */
     @Test
     void shouldRequireCurrentAssignedUser() {
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 31L, "employee"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "employee"));
         AstAsset asset = new AstAsset();
         asset.setCurrentUserId(8L);
 
@@ -39,9 +40,9 @@ class AssetRecordAccessGuardTest {
     /** 部门范围写入不得把管理归属移出可访问组织。 */
     @Test
     void shouldRejectOwnerOutsideDepartmentScope() {
-        AssetDataScopeContext.set(new AssetDataScopeContext.ScopeInfo(
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                 7L, 31L, "asset:asset:update", 12L,
-                "DEPT_AND_BELOW", Set.of(12L, 13L)));
+                "DEPT_AND_BELOW", Set.of(12L, 13L), null));
 
         assertThatCode(() -> guard.requireOwnerWritable(9L, 13L)).doesNotThrowAnyException();
         assertThatThrownBy(() -> guard.requireOwnerWritable(9L, 99L))
@@ -52,9 +53,9 @@ class AssetRecordAccessGuardTest {
     /** 租户级管理角色可以设置当前租户内任意管理部门。 */
     @Test
     void shouldAllowOwnerForTenantScope() {
-        AssetDataScopeContext.set(new AssetDataScopeContext.ScopeInfo(
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                 7L, 31L, "asset:asset:create", 12L,
-                "TENANT", Set.of()));
+                "TENANT", Set.of(), null));
 
         assertThatCode(() -> guard.requireOwnerWritable(9L, 99L)).doesNotThrowAnyException();
     }

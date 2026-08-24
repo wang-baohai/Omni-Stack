@@ -1,8 +1,9 @@
 package com.omni.asset.consumer;
 
 import com.omni.asset.dto.WorkflowContracts;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.service.WorkflowCompletionService;
 import com.omni.asset.workflow.AssetWorkflowCoordinator;
 import lombok.RequiredArgsConstructor;
@@ -49,15 +50,15 @@ public class WorkflowProcessCompletedConsumer {
             if (event.getTenantId() == null || event.getTenantId() <= 0) {
                 throw new IllegalArgumentException("Workflow 完成事件 tenantId 必须为正整数");
             }
-            AssetTenantContext.set(new AssetTenantContext.RequestIdentity(
+            ServiceIdentityContext.set(new ServiceRequestIdentity(
                     0L, event.getTenantId(), "workflow-event"));
-            AssetDataScopeContext.set(new AssetDataScopeContext.ScopeInfo(
-                    0L, event.getTenantId(), "workflow-event", null, "TENANT", Set.of()));
+            ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                    0L, event.getTenantId(), "workflow-event", null, "TENANT", Set.of(), null));
             try {
                 workflowCompletionService.handle(event);
             } finally {
-                AssetDataScopeContext.clear();
-                AssetTenantContext.clear();
+                ServiceDataScopeContext.clear();
+                ServiceIdentityContext.clear();
             }
         };
     }

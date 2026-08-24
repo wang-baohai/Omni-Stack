@@ -2,8 +2,8 @@ package com.omni.asset.service.impl;
 
 import com.omni.asset.client.ProcurementInternalClient;
 import com.omni.asset.dto.ProcurementAssetContracts;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.asset.service.ProcurementAssetImportService;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
@@ -36,8 +36,8 @@ class ProcurementAssetBackfillServiceImplTest {
     /** 清理可能残留的租户上下文。 */
     @AfterEach
     void tearDown() {
-        AssetTenantContext.clear();
-        AssetDataScopeContext.clear();
+        ServiceIdentityContext.clear();
+        ServiceDataScopeContext.clear();
     }
 
     /** 验证按游标导入一页并返回下一游标。 */
@@ -49,9 +49,9 @@ class ProcurementAssetBackfillServiceImplTest {
         when(procurementClient.listAssetCandidates(41L, 41L, 900L, 2))
                 .thenReturn(R.ok(List.of(first, second)));
         when(importService.importCandidate(41L, first)).thenAnswer(invocation -> {
-            assertThat(AssetTenantContext.requireTenantId()).isEqualTo(41L);
-            assertThat(AssetDataScopeContext.require().tenantId()).isEqualTo(41L);
-            assertThat(AssetDataScopeContext.require().effectiveScope()).isEqualTo("TENANT");
+            assertThat(ServiceIdentityContext.requireTenantId()).isEqualTo(41L);
+            assertThat(ServiceDataScopeContext.require().tenantId()).isEqualTo(41L);
+            assertThat(ServiceDataScopeContext.require().effectiveScope()).isEqualTo("TENANT");
             return importResult(2, 0);
         });
         when(importService.importCandidate(41L, second))
@@ -65,9 +65,9 @@ class ProcurementAssetBackfillServiceImplTest {
         assertThat(result.getDuplicateCount()).isEqualTo(1);
         assertThat(result.getNextAfterId()).isEqualTo(902L);
         assertThat(result.isHasMore()).isTrue();
-        assertThatThrownBy(AssetTenantContext::requireTenantId)
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
                 .hasMessageContaining("上下文");
-        assertThatThrownBy(AssetDataScopeContext::require)
+        assertThatThrownBy(ServiceDataScopeContext::require)
                 .hasMessageContaining("上下文");
     }
 
@@ -85,9 +85,9 @@ class ProcurementAssetBackfillServiceImplTest {
                 .hasMessageContaining("游标顺序");
 
         verify(importService, never()).importCandidate(any(), any());
-        assertThatThrownBy(AssetTenantContext::requireTenantId)
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
                 .hasMessageContaining("上下文");
-        assertThatThrownBy(AssetDataScopeContext::require)
+        assertThatThrownBy(ServiceDataScopeContext::require)
                 .hasMessageContaining("上下文");
     }
 

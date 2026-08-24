@@ -4,7 +4,7 @@ import com.omni.asset.domain.AssetStateMachine;
 import com.omni.asset.dto.AssetOverviewRequests;
 import com.omni.asset.dto.AssetOverviewViews;
 import com.omni.asset.mapper.AssetOverviewMapper;
-import com.omni.asset.security.AssetDataScopeContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.asset.service.AssetOverviewService;
 import com.omni.common.core.result.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class AssetOverviewServiceImpl implements AssetOverviewService {
     @Override
     @Transactional(readOnly = true)
     public AssetOverviewViews.Summary summary() {
-        AssetDataScopeContext.require();
+        ServiceDataScopeContext.require();
         Map<String, Long> counts = completeCounts(overviewMapper.selectStatusCounts());
         AssetOverviewViews.Summary result = new AssetOverviewViews.Summary();
         result.setTotalCount(counts.values().stream().mapToLong(Long::longValue).sum());
@@ -58,7 +58,7 @@ public class AssetOverviewServiceImpl implements AssetOverviewService {
     @Transactional(readOnly = true)
     public List<AssetOverviewViews.DistributionItem> distribution(
             AssetOverviewRequests.DistributionQuery query) {
-        AssetDataScopeContext.require();
+        ServiceDataScopeContext.require();
         if (query == null || query.getDimension() == null) {
             throw new BusinessException(400, "资产分布维度不能为空");
         }

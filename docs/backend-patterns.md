@@ -480,8 +480,7 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
    放在 Gateway Filter 后；二者已禁止 Servlet 容器重复注册。
 5. **可选能力**：OperLog、Job、MQ 与 Workflow 继续作为独立依赖，按业务需要启用。
 
-当前 `omni-common-service` 已提供 v0 自动配置和测试，CRM、SRM、Procurement 已完成迁移及隔离运行态复验；
-Asset 仍按既定顺序迁移。未切换的服务继续使用原 Bean，禁止提前删除。
+当前 `omni-common-service` 已提供 v0 自动配置和测试，CRM、SRM、Procurement、Asset 均已完成迁移、模块测试与隔离运行态复验。
 Starter 的 XSS Provider 自动配置必须先于 `XssAutoConfiguration` 生效，并由上下文测试同时断言
 Provider、Servlet FilterRegistration 以及 Jackson 2/3 清洗模块，避免条件求值顺序导致静默失效。
 

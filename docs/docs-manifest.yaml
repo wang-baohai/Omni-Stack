@@ -38,7 +38,7 @@ documents:
     module: backend
     owner: backend
     source: docs/backend-patterns.md
-    source_sha256: 42d677c1856630b5528c3a75ec4b49c6d963849749b7fc7c588ba36bc446af98
+      source_sha256: 9d60b1049ac81f86b878b8f3c06a725e7b9adb37921dc08d3b8ccbc3ff4da5d5
     dependencies: [starter, security, persistence, testing]
     translations:
       en-US: { path: docs/backend-patterns.en.md, status: present-unverified, reviewed_at: null }
@@ -170,7 +170,7 @@ documents:
     module: asset
     owner: asset
     source: docs/design/asset-design.md
-    source_sha256: 3a05f7f587b007835045d818b34711fd197a03c4489499effe0aba4a7652ee7f
+      source_sha256: bba9461126d85d919c83fa80fe235987a9e911740bebb5faf0ad5aa144bb6261
     dependencies: [schema, api, permissions, workflow, procurement-events]
     translations:
       en-US: { path: docs/design/asset-design.en.md, status: missing, reviewed_at: null }

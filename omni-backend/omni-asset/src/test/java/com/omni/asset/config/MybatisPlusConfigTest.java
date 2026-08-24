@@ -2,15 +2,19 @@ package com.omni.asset.config;
 
 import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.omni.asset.mapper.AstInboxEventMapper;
+import com.omni.asset.security.AssetDataPermissionHandler;
+import com.omni.asset.security.AssetTenantTablePolicy;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.config.ServicePersistenceAutoConfiguration;
+import com.omni.common.service.persistence.DataScopeTablePolicy;
+import com.omni.common.service.persistence.TenantTablePolicy;
 import org.junit.jupiter.api.Test;
-
-import java.lang.reflect.Field;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +24,17 @@ class MybatisPlusConfigTest {
     /** 租户、数据权限、乐观锁和分页拦截器必须按安全约束顺序注册。 */
     @Test
     void shouldRegisterTenantDataPermissionAndPaginationInOrder() {
-        MybatisPlusInterceptor interceptor = new MybatisPlusConfig().mybatisPlusInterceptor();
+        ServiceIdentityProperties properties = new ServiceIdentityProperties();
+        properties.getTenant().setEnabled(true);
+        properties.getDataScope().setEnabled(true);
+        StaticListableBeanFactory beans = new StaticListableBeanFactory();
+        beans.addBean("tenantTablePolicy", new AssetTenantTablePolicy());
+        beans.addBean("dataScopeTablePolicy", new AssetDataPermissionHandler());
+
+        MybatisPlusInterceptor interceptor = new ServicePersistenceAutoConfiguration().mybatisPlusInterceptor(
+                properties,
+                beans.getBeanProvider(TenantTablePolicy.class),
+                beans.getBeanProvider(DataScopeTablePolicy.class));
 
         assertThat(interceptor.getInterceptors())
                 .hasSize(4)
@@ -33,18 +47,14 @@ class MybatisPlusConfigTest {
 
     /** TenantLine 只能拦截 ast 表，Outbox 必须供全租户后台中继扫描。 */
     @Test
-    void shouldApplyTenantLineOnlyToAssetTables() throws Exception {
-        MybatisPlusInterceptor interceptor = new MybatisPlusConfig().mybatisPlusInterceptor();
-        TenantLineInnerInterceptor tenant =
-                (TenantLineInnerInterceptor) interceptor.getInterceptors().getFirst();
-        Field field = TenantLineInnerInterceptor.class.getDeclaredField("tenantLineHandler");
-        field.setAccessible(true);
-        TenantLineHandler handler = (TenantLineHandler) field.get(tenant);
+    void shouldApplyTenantLineOnlyToAssetTables() {
+        AssetTenantTablePolicy policy = new AssetTenantTablePolicy();
 
-        assertThat(handler.ignoreTable("ast_asset")).isFalse();
-        assertThat(handler.ignoreTable("ast_inbox_event")).isFalse();
-        assertThat(handler.ignoreTable("sys_mq_message")).isTrue();
-        assertThat(handler.ignoreTable("wf_process_model")).isTrue();
+        assertThat(policy.appliesTo("ast_asset")).isTrue();
+        assertThat(policy.appliesTo("AST_INBOX_EVENT")).isTrue();
+        assertThat(policy.appliesTo("sys_mq_message")).isFalse();
+        assertThat(policy.appliesTo("wf_process_model")).isFalse();
+        assertThat(policy.appliesTo(null)).isFalse();
     }
 
     /** Inbox 全局唯一键锁查询需跨租户命中，后续再由意图校验严格核对租户。 */

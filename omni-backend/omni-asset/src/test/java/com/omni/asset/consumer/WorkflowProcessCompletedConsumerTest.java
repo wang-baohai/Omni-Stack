@@ -1,8 +1,8 @@
 package com.omni.asset.consumer;
 
 import com.omni.asset.dto.WorkflowContracts;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.asset.service.WorkflowCompletionService;
 import com.omni.asset.workflow.AssetWorkflowCoordinator;
 import com.omni.common.core.result.BusinessException;
@@ -27,8 +27,8 @@ class WorkflowProcessCompletedConsumerTest {
     /** 清理消息线程上下文。 */
     @AfterEach
     void clearContext() {
-        AssetDataScopeContext.clear();
-        AssetTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** Asset v1 事件必须建立租户上下文并在处理后清理。 */
@@ -42,7 +42,7 @@ class WorkflowProcessCompletedConsumerTest {
         consumer.accept(event);
 
         verify(workflowCompletionService).handle(event);
-        assertThatThrownBy(AssetTenantContext::requireTenantId)
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
                 .isInstanceOf(BusinessException.class);
     }
 

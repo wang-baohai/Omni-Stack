@@ -1,8 +1,8 @@
 package com.omni.asset.consumer;
 
 import com.omni.asset.dto.ProcurementAssetContracts;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.asset.service.ProcurementAssetImportService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +30,8 @@ class ProcurementGoodsReceiptConsumerTest {
     /** 清理可能残留的租户上下文。 */
     @AfterEach
     void tearDown() {
-        AssetTenantContext.clear();
-        AssetDataScopeContext.clear();
+        ServiceIdentityContext.clear();
+        ServiceDataScopeContext.clear();
     }
 
     /** 验证消费期间显式设置租户，结束后 finally 清理。 */
@@ -45,17 +45,17 @@ class ProcurementGoodsReceiptConsumerTest {
                 ProcurementGoodsReceiptConsumer.CONFIRMED_EVENT, 41L);
 
         org.mockito.Mockito.doAnswer(invocation -> {
-            assertThat(AssetDataScopeContext.require().effectiveScope()).isEqualTo("TENANT");
-            assertThat(AssetDataScopeContext.require().tenantId()).isEqualTo(41L);
+            assertThat(ServiceDataScopeContext.require().effectiveScope()).isEqualTo("TENANT");
+            assertThat(ServiceDataScopeContext.require().tenantId()).isEqualTo(41L);
             return null;
         }).when(importService).importEvent(event);
 
         consumer.accept(event);
 
         verify(importService).importEvent(event);
-        assertThatThrownBy(AssetTenantContext::requireTenantId)
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
                 .hasMessageContaining("上下文");
-        assertThatThrownBy(AssetDataScopeContext::require)
+        assertThatThrownBy(ServiceDataScopeContext::require)
                 .hasMessageContaining("上下文");
     }
 

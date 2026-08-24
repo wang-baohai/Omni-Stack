@@ -15,8 +15,8 @@ import com.omni.asset.entity.AstTransfer;
 import com.omni.asset.mapper.AstAssetHistoryMapper;
 import com.omni.asset.mapper.AstAssetMapper;
 import com.omni.asset.mapper.AstTransferMapper;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.asset.service.AssetOperationWorkflowStateService;
 import com.omni.asset.service.AssetTransferService;
 import com.omni.asset.service.support.AssetAuditSupport;
@@ -71,7 +71,7 @@ public class AssetTransferServiceImpl implements AssetTransferService {
     @Transactional(readOnly = true)
     public PageResult<AssetOperationViews.TransferVO> page(
             AssetOperationRequests.TransferQuery query) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         LambdaQueryWrapper<AstTransfer> wrapper = new LambdaQueryWrapper<AstTransfer>()
                 .eq(AstTransfer::getTenantId, tenantId);
         String keyword = trimToNull(query.getKeyword());
@@ -105,7 +105,7 @@ public class AssetTransferServiceImpl implements AssetTransferService {
     @Override
     @Transactional(readOnly = true)
     public AssetOperationViews.TransferVO get(Long id) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstTransfer transfer = accessGuard.requireVisible(transferMapper.selectOne(
                 new LambdaQueryWrapper<AstTransfer>()
                         .eq(AstTransfer::getTenantId, tenantId)
@@ -120,8 +120,8 @@ public class AssetTransferServiceImpl implements AssetTransferService {
     /** {@inheritDoc} */
     @Override
     public AssetOperationViews.TransferVO approvalView(Long id, String taskId) {
-        Long tenantId = AssetTenantContext.requireTenantId();
-        Long userId = AssetTenantContext.require().userId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        Long userId = ServiceIdentityContext.require().userId();
         AstTransfer identity = transferMapper.selectWorkflowIdentity(tenantId, id);
         requireApprovalIdentity(identity);
         workflowApprovalGuard.requireAssigned(new AssetWorkflowApprovalGuard.AssignmentIntent(
@@ -134,7 +134,7 @@ public class AssetTransferServiceImpl implements AssetTransferService {
     @Override
     public AssetOperationViews.TransferVO create(
             AssetOperationRequests.CreateTransferRequest request) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         accessGuard.requireUnitWritable(request.getToUnitId());
         identityGuard.requireActiveUserInUnit(tenantId, request.getToUserId(), request.getToUnitId());
         request.setModelVersionId(workflowModelGuard.resolveStartable(
@@ -158,7 +158,7 @@ public class AssetTransferServiceImpl implements AssetTransferService {
     @Override
     @Transactional
     public AssetOperationViews.TransferVO cancel(Long id, Integer version) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstTransfer transfer = requireLocked(tenantId, id);
         requireVersion(transfer.getVersion(), version);
         AssetOperationStateMachine.requireLocallyCancellable(
@@ -176,7 +176,7 @@ public class AssetTransferServiceImpl implements AssetTransferService {
     @Override
     @Transactional
     public AssetOperationViews.TransferVO complete(Long id, Integer version) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstTransfer transfer = requireLocked(tenantId, id);
         requireVersion(transfer.getVersion(), version);
         AssetOperationStateMachine.requireCompletable(transfer.getStatus());
@@ -297,16 +297,16 @@ public class AssetTransferServiceImpl implements AssetTransferService {
 
     private <T> T withTenantScope(Long userId, Long tenantId,
                                   java.util.function.Supplier<T> action) {
-        AssetDataScopeContext.ScopeInfo previous = AssetDataScopeContext.get();
-        AssetDataScopeContext.set(new AssetDataScopeContext.ScopeInfo(
-                userId, tenantId, "asset:transfer:approve", null, "TENANT", Set.of()));
+        ServiceDataScopeContext.ScopeInfo previous = ServiceDataScopeContext.get();
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                userId, tenantId, "asset:transfer:approve", null, "TENANT", Set.of(), null));
         try {
             return action.get();
         } finally {
             if (previous == null) {
-                AssetDataScopeContext.clear();
+                ServiceDataScopeContext.clear();
             } else {
-                AssetDataScopeContext.set(previous);
+                ServiceDataScopeContext.set(previous);
             }
         }
     }
@@ -327,7 +327,7 @@ public class AssetTransferServiceImpl implements AssetTransferService {
         history.setAssetId(asset.getId());
         history.setFromStatus(fromStatus);
         history.setToStatus(toStatus);
-        history.setChangedByUserId(AssetTenantContext.require().userId());
+        history.setChangedByUserId(ServiceIdentityContext.require().userId());
         history.setChangedTime(LocalDateTime.now());
         history.setRemark(remark);
         AssetAuditSupport.created(history);

@@ -1,8 +1,9 @@
 package com.omni.asset.consumer;
 
 import com.omni.asset.dto.ProcurementAssetContracts;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.service.ProcurementAssetImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -57,15 +58,15 @@ public class ProcurementGoodsReceiptConsumer {
                 throw new IllegalArgumentException("Procurement 收货事件 tenantId 必须为正整数");
             }
             try {
-                AssetTenantContext.set(new AssetTenantContext.RequestIdentity(
+                ServiceIdentityContext.set(new ServiceRequestIdentity(
                         0L, event.getTenantId(), "procurement-event"));
-                AssetDataScopeContext.set(new AssetDataScopeContext.ScopeInfo(
+                ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                         0L, event.getTenantId(), "asset:procurement:import",
-                        null, "TENANT", Set.of()));
+                        null, "TENANT", Set.of(), null));
                 importService.importEvent(event);
             } finally {
-                AssetDataScopeContext.clear();
-                AssetTenantContext.clear();
+                ServiceDataScopeContext.clear();
+                ServiceIdentityContext.clear();
             }
         };
     }

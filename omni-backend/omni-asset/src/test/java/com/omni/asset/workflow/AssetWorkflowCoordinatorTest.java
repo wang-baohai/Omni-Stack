@@ -2,7 +2,8 @@ package com.omni.asset.workflow;
 
 import com.omni.asset.client.WorkflowInternalClient;
 import com.omni.asset.dto.WorkflowContracts;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.service.AssetOperationWorkflowStateService;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
@@ -34,13 +35,13 @@ class AssetWorkflowCoordinatorTest {
     @BeforeEach
     void setUp() {
         coordinator = new AssetWorkflowCoordinator(workflowInternalClient, workflowStateService);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
     }
 
     /** 清理租户身份。 */
     @AfterEach
     void clearContext() {
-        AssetTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 409 可能表示同键请求仍在处理，必须保留 PENDING。 */

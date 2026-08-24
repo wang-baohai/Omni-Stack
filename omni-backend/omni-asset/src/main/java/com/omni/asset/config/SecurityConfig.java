@@ -1,7 +1,7 @@
 package com.omni.asset.config;
 
-import com.omni.asset.security.AssetTenantContextFilter;
-import com.omni.asset.security.GatewayPreAuthFilter;
+import com.omni.common.service.identity.GatewayPreAuthenticationFilter;
+import com.omni.common.service.identity.ServiceIdentityFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,8 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AssetTenantContextFilter tenantContextFilter;
+    private final GatewayPreAuthenticationFilter gatewayPreAuthenticationFilter;
+    private final ServiceIdentityFilter serviceIdentityFilter;
 
     /**
      * 构建安全过滤器链。
@@ -48,8 +49,8 @@ public class SecurityConfig {
                                 writeError(response, 401, "未认证"))
                         .accessDeniedHandler((request, response, exception) ->
                                 writeError(response, 403, "权限不足，拒绝访问")));
-        http.addFilterBefore(new GatewayPreAuthFilter(), AuthorizationFilter.class);
-        http.addFilterAfter(tenantContextFilter, GatewayPreAuthFilter.class);
+        http.addFilterBefore(gatewayPreAuthenticationFilter, AuthorizationFilter.class);
+        http.addFilterAfter(serviceIdentityFilter, GatewayPreAuthenticationFilter.class);
         return http.build();
     }
 

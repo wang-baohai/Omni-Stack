@@ -3,7 +3,7 @@ package com.omni.asset.controller;
 import com.omni.asset.dto.AssetOperationRequests;
 import com.omni.asset.dto.AssetOperationViews;
 import com.omni.asset.entity.AstDisposal;
-import com.omni.asset.security.AssetDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.asset.service.AssetDisposalService;
 import com.omni.common.core.operlog.OperLog;
 import com.omni.common.core.operlog.OperType;
@@ -45,7 +45,7 @@ public class AssetDisposalController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('asset:disposal:list')")
-    @AssetDataScope(permissionCode = "asset:disposal:list")
+    @ServiceDataScope(permissionCode = "asset:disposal:list")
     public R<PageResult<AssetOperationViews.DisposalVO>> list(
             @Valid AssetOperationRequests.DisposalQuery query) {
         return R.ok(disposalService.page(query));
@@ -59,7 +59,7 @@ public class AssetDisposalController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('asset:disposal:list')")
-    @AssetDataScope(permissionCode = "asset:disposal:list")
+    @ServiceDataScope(permissionCode = "asset:disposal:list")
     public R<AssetOperationViews.DisposalVO> get(@PathVariable @Positive Long id) {
         return R.ok(disposalService.get(id));
     }
@@ -73,7 +73,7 @@ public class AssetDisposalController {
      */
     @GetMapping("/{id}/approval-view")
     @PreAuthorize("hasAuthority('asset:disposal:approve')")
-    @AssetDataScope(permissionCode = "asset:disposal:approve")
+    @ServiceDataScope(permissionCode = "asset:disposal:approve")
     public R<AssetOperationViews.DisposalVO> approvalView(
             @PathVariable @Positive Long id,
             @RequestParam @NotBlank @Size(max = 64) String taskId) {
@@ -88,7 +88,7 @@ public class AssetDisposalController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('asset:disposal:create')")
-    @AssetDataScope(permissionCode = "asset:disposal:create")
+    @ServiceDataScope(permissionCode = "asset:disposal:create")
     @OperLog(module = "资产处置", operType = OperType.CREATE,
             entityClass = AstDisposal.class, idExpr = "#result.data.id")
     public R<AssetOperationViews.DisposalVO> create(
@@ -105,7 +105,7 @@ public class AssetDisposalController {
      */
     @PostMapping("/{id}/retry-start")
     @PreAuthorize("hasAuthority('asset:disposal:retry')")
-    @AssetDataScope(permissionCode = "asset:disposal:retry")
+    @ServiceDataScope(permissionCode = "asset:disposal:retry")
     @OperLog(module = "资产处置", operType = OperType.UPDATE,
             entityClass = AstDisposal.class, idExpr = "#id")
     public R<AssetOperationViews.DisposalVO> retryStart(
@@ -123,7 +123,7 @@ public class AssetDisposalController {
      */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('asset:disposal:cancel')")
-    @AssetDataScope(permissionCode = "asset:disposal:cancel")
+    @ServiceDataScope(permissionCode = "asset:disposal:cancel")
     @OperLog(module = "资产处置", operType = OperType.UPDATE,
             entityClass = AstDisposal.class, idExpr = "#id")
     public R<AssetOperationViews.DisposalVO> cancel(
@@ -141,7 +141,7 @@ public class AssetDisposalController {
      */
     @PostMapping("/{id}/complete")
     @PreAuthorize("hasAuthority('asset:disposal:complete')")
-    @AssetDataScope(permissionCode = "asset:disposal:complete")
+    @ServiceDataScope(permissionCode = "asset:disposal:complete")
     @OperLog(module = "资产处置", operType = OperType.UPDATE,
             entityClass = AstDisposal.class, idExpr = "#id")
     public R<AssetOperationViews.DisposalVO> complete(

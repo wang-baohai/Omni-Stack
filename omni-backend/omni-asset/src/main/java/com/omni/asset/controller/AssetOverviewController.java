@@ -2,7 +2,7 @@ package com.omni.asset.controller;
 
 import com.omni.asset.dto.AssetOverviewRequests;
 import com.omni.asset.dto.AssetOverviewViews;
-import com.omni.asset.security.AssetDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.asset.service.AssetOverviewService;
 import com.omni.common.core.result.R;
 import jakarta.validation.Valid;
@@ -35,7 +35,7 @@ public class AssetOverviewController {
      */
     @GetMapping("/summary")
     @PreAuthorize("hasAuthority('asset:overview:list')")
-    @AssetDataScope(permissionCode = "asset:overview:list")
+    @ServiceDataScope(permissionCode = "asset:overview:list")
     public R<AssetOverviewViews.Summary> summary() {
         return R.ok(overviewService.summary());
     }
@@ -48,7 +48,7 @@ public class AssetOverviewController {
      */
     @GetMapping("/distribution")
     @PreAuthorize("hasAuthority('asset:overview:list')")
-    @AssetDataScope(permissionCode = "asset:overview:list")
+    @ServiceDataScope(permissionCode = "asset:overview:list")
     public R<List<AssetOverviewViews.DistributionItem>> distribution(
             @Valid AssetOverviewRequests.DistributionQuery query) {
         return R.ok(overviewService.distribution(query));

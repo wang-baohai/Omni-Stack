@@ -14,7 +14,7 @@ import com.omni.asset.entity.AstInboxEvent;
 import com.omni.asset.mapper.AssetReceiptImportMapper;
 import com.omni.asset.mapper.AstAssetHistoryMapper;
 import com.omni.asset.mapper.AstInboxEventMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.asset.service.ProcurementAssetImportService;
 import com.omni.common.core.mq.ReliableMessageRelay;
 import com.omni.common.core.result.BusinessException;
@@ -405,7 +405,7 @@ public class ProcurementAssetImportServiceImpl implements ProcurementAssetImport
         if (tenantId == null || tenantId <= 0) {
             throw new IllegalArgumentException("租户 ID 必须为正整数");
         }
-        Long contextTenantId = AssetTenantContext.requireTenantId();
+        Long contextTenantId = ServiceIdentityContext.requireTenantId();
         if (!tenantId.equals(contextTenantId)) {
             throw new BusinessException(403, "采购资产导入与当前租户上下文不一致");
         }

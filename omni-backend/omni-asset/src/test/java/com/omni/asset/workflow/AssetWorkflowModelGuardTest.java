@@ -2,7 +2,8 @@ package com.omni.asset.workflow;
 
 import com.omni.asset.client.WorkflowInternalClient;
 import com.omni.asset.dto.WorkflowContracts;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import org.junit.jupiter.api.AfterEach;
@@ -19,7 +20,7 @@ class AssetWorkflowModelGuardTest {
     /** 清理身份上下文。 */
     @AfterEach
     void clearContext() {
-        AssetTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 只有已发布、有流程定义且分类匹配的模型版本可用于资产审批。 */
@@ -30,7 +31,7 @@ class AssetWorkflowModelGuardTest {
                 42L, "PUBLISHED", "process:1:42",
                 AssetWorkflowCoordinator.TRANSFER_BUSINESS_TYPE);
         when(client.getModelVersion(1L, 42L)).thenReturn(R.ok(model));
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         new AssetWorkflowModelGuard(client).requireStartable(
                 42L, AssetWorkflowCoordinator.TRANSFER_BUSINESS_TYPE);
@@ -40,7 +41,7 @@ class AssetWorkflowModelGuardTest {
     @Test
     void shouldFailClosedForInvalidOrCrossTenantModelResponse() {
         WorkflowInternalClient client = mock(WorkflowInternalClient.class);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
         AssetWorkflowModelGuard guard = new AssetWorkflowModelGuard(client);
         when(client.getModelVersion(1L, 42L))
                 .thenReturn(R.ok(model(42L, "DRAFT", "process:1:42",
@@ -71,7 +72,7 @@ class AssetWorkflowModelGuardTest {
         when(client.getModelVersion(1L, 42L)).thenReturn(R.ok(model(
                 42L, "PUBLISHED", "process:1:42",
                 AssetWorkflowCoordinator.DISPOSAL_BUSINESS_TYPE)));
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         assertThatThrownBy(() -> new AssetWorkflowModelGuard(client).requireStartable(
                 42L, AssetWorkflowCoordinator.TRANSFER_BUSINESS_TYPE))
@@ -88,7 +89,7 @@ class AssetWorkflowModelGuardTest {
                 AssetWorkflowCoordinator.TRANSFER_BUSINESS_TYPE);
         when(client.getCurrentPublishedModelVersion(
                 1L, AssetWorkflowCoordinator.TRANSFER_BUSINESS_TYPE)).thenReturn(R.ok(model));
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         Long modelVersionId = new AssetWorkflowModelGuard(client)
                 .resolveStartable(AssetWorkflowCoordinator.TRANSFER_BUSINESS_TYPE);
@@ -104,7 +105,7 @@ class AssetWorkflowModelGuardTest {
                 1L, AssetWorkflowCoordinator.TRANSFER_BUSINESS_TYPE)).thenReturn(R.ok(model(
                         42L, "PUBLISHED", "process:1:42",
                         AssetWorkflowCoordinator.DISPOSAL_BUSINESS_TYPE)));
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         assertThatThrownBy(() -> new AssetWorkflowModelGuard(client)
                 .resolveStartable(AssetWorkflowCoordinator.TRANSFER_BUSINESS_TYPE))

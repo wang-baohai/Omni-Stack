@@ -1,8 +1,8 @@
 package com.omni.asset.service.support;
 
 import com.omni.asset.entity.AstAsset;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.common.core.result.BusinessException;
 import org.springframework.stereotype.Component;
 
@@ -49,7 +49,7 @@ public class AssetRecordAccessGuard {
      * @param asset 资产
      */
     public void requireAssignedToCurrentUser(AstAsset asset) {
-        Long currentUserId = AssetTenantContext.require().userId();
+        Long currentUserId = ServiceIdentityContext.require().userId();
         if (!currentUserId.equals(asset.getCurrentUserId())) {
             throw new BusinessException(404, "资产不存在或未分配给当前用户");
         }
@@ -62,7 +62,7 @@ public class AssetRecordAccessGuard {
      * @param ownerUnitId 管理部门 ID
      */
     public void requireOwnerWritable(Long ownerUserId, Long ownerUnitId) {
-        AssetDataScopeContext.ScopeInfo scope = AssetDataScopeContext.require();
+        ServiceDataScopeContext.ScopeInfo scope = ServiceDataScopeContext.require();
         String effectiveScope = scope.effectiveScope();
         if ("ALL".equals(effectiveScope) || "TENANT".equals(effectiveScope)) {
             return;
@@ -80,7 +80,7 @@ public class AssetRecordAccessGuard {
      * @param unitId 目标部门 ID
      */
     public void requireUnitWritable(Long unitId) {
-        AssetDataScopeContext.ScopeInfo scope = AssetDataScopeContext.require();
+        ServiceDataScopeContext.ScopeInfo scope = ServiceDataScopeContext.require();
         String effectiveScope = scope.effectiveScope();
         boolean allowed = switch (effectiveScope) {
             case "ALL", "TENANT" -> true;

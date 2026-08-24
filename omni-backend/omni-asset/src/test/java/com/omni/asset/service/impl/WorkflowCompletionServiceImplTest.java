@@ -17,7 +17,8 @@ import com.omni.asset.mapper.AstAssetMapper;
 import com.omni.asset.mapper.AstDisposalMapper;
 import com.omni.asset.mapper.AstInboxEventMapper;
 import com.omni.asset.mapper.AstTransferMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.workflow.AssetWorkflowCoordinator;
 import com.omni.asset.workflow.RetryableWorkflowEventException;
 import com.omni.common.core.result.BusinessException;
@@ -63,7 +64,7 @@ class WorkflowCompletionServiceImplTest {
     /** 清理事件线程身份。 */
     @AfterEach
     void clearContext() {
-        AssetTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 审批通过必须只推进申请，保留资产活动占位等待业务完成。 */
@@ -77,7 +78,7 @@ class WorkflowCompletionServiceImplTest {
         when(transferMapper.selectForUpdate(1L, 10L)).thenReturn(transfer);
         when(assetMapper.selectForUpdate(1L, 50L)).thenReturn(occupiedTransferAsset());
         when(transferMapper.update(ArgumentMatchers.isNull(), any(Wrapper.class))).thenReturn(1);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(0L, 1L, "workflow-event"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(0L, 1L, "workflow-event"));
 
         boolean handled = service().handle(event);
 
@@ -95,7 +96,7 @@ class WorkflowCompletionServiceImplTest {
         AstTransfer transfer = transfer(null, AssetOperationStateMachine.START_PENDING);
         stubInbox(inbox);
         when(transferMapper.selectForUpdate(1L, 10L)).thenReturn(transfer);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(0L, 1L, "workflow-event"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(0L, 1L, "workflow-event"));
 
         assertThatThrownBy(() -> service().handle(event))
                 .isInstanceOf(RetryableWorkflowEventException.class);
@@ -112,7 +113,7 @@ class WorkflowCompletionServiceImplTest {
         stubInbox(inbox);
         when(inboxMapper.markProcessed(inbox)).thenReturn(1);
         when(transferMapper.selectForUpdate(1L, 10L)).thenReturn(transfer);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(0L, 1L, "workflow-event"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(0L, 1L, "workflow-event"));
 
         assertThat(service().handle(event)).isFalse();
         assertThat(inbox.getStatus()).isEqualTo("IGNORED");
@@ -140,7 +141,7 @@ class WorkflowCompletionServiceImplTest {
         when(assetMapper.selectForUpdate(1L, 50L)).thenReturn(asset);
         when(assetMapper.update(ArgumentMatchers.isNull(), any(Wrapper.class))).thenReturn(1);
         when(historyMapper.insert(any(AstAssetHistory.class))).thenReturn(1);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(0L, 1L, "workflow-event"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(0L, 1L, "workflow-event"));
 
         assertThat(service().handle(event)).isTrue();
         verify(assetMapper).update(ArgumentMatchers.isNull(), any(Wrapper.class));
@@ -153,7 +154,7 @@ class WorkflowCompletionServiceImplTest {
         WorkflowContracts.ProcessCompletedEvent event = transferEvent("event-5", "p-1", "APPROVED");
         AstInboxEvent inbox = inbox(event, "PROCESSED");
         stubInbox(inbox);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(0L, 1L, "workflow-event"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(0L, 1L, "workflow-event"));
 
         assertThat(service().handle(event)).isFalse();
         verify(transferMapper, never()).selectForUpdate(any(), any());
@@ -163,7 +164,7 @@ class WorkflowCompletionServiceImplTest {
     @Test
     void shouldFailClosedForWrongTenantContext() {
         WorkflowContracts.ProcessCompletedEvent event = transferEvent("event-6", "p-1", "APPROVED");
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(0L, 2L, "workflow-event"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(0L, 2L, "workflow-event"));
 
         assertThatThrownBy(() -> service().handle(event))
                 .isInstanceOf(BusinessException.class);
@@ -177,7 +178,7 @@ class WorkflowCompletionServiceImplTest {
         AstInboxEvent inbox = inbox(event, "RECEIVED");
         inbox.setTenantId(2L);
         stubInbox(inbox);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(0L, 1L, "workflow-event"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(0L, 1L, "workflow-event"));
 
         assertThatThrownBy(() -> service().handle(event))
                 .isInstanceOf(BusinessException.class)

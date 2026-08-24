@@ -1,7 +1,7 @@
 package com.omni.asset.controller;
 
 import com.omni.asset.dto.AssetOverviewRequests;
-import com.omni.asset.security.AssetDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -23,7 +23,7 @@ class AssetOverviewControllerSecurityTest {
     private void assertPermission(Method method) {
         assertThat(method.getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAuthority('asset:overview:list')");
-        assertThat(method.getAnnotation(AssetDataScope.class).permissionCode())
+        assertThat(method.getAnnotation(ServiceDataScope.class).permissionCode())
                 .isEqualTo("asset:overview:list");
     }
 }

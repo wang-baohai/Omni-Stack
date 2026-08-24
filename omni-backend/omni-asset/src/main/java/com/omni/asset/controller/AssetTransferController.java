@@ -3,7 +3,7 @@ package com.omni.asset.controller;
 import com.omni.asset.dto.AssetOperationRequests;
 import com.omni.asset.dto.AssetOperationViews;
 import com.omni.asset.entity.AstTransfer;
-import com.omni.asset.security.AssetDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.asset.service.AssetTransferService;
 import com.omni.common.core.operlog.OperLog;
 import com.omni.common.core.operlog.OperType;
@@ -45,7 +45,7 @@ public class AssetTransferController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('asset:transfer:list')")
-    @AssetDataScope(permissionCode = "asset:transfer:list")
+    @ServiceDataScope(permissionCode = "asset:transfer:list")
     public R<PageResult<AssetOperationViews.TransferVO>> list(
             @Valid AssetOperationRequests.TransferQuery query) {
         return R.ok(transferService.page(query));
@@ -59,7 +59,7 @@ public class AssetTransferController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('asset:transfer:list')")
-    @AssetDataScope(permissionCode = "asset:transfer:list")
+    @ServiceDataScope(permissionCode = "asset:transfer:list")
     public R<AssetOperationViews.TransferVO> get(@PathVariable @Positive Long id) {
         return R.ok(transferService.get(id));
     }
@@ -73,7 +73,7 @@ public class AssetTransferController {
      */
     @GetMapping("/{id}/approval-view")
     @PreAuthorize("hasAuthority('asset:transfer:approve')")
-    @AssetDataScope(permissionCode = "asset:transfer:approve")
+    @ServiceDataScope(permissionCode = "asset:transfer:approve")
     public R<AssetOperationViews.TransferVO> approvalView(
             @PathVariable @Positive Long id,
             @RequestParam @NotBlank @Size(max = 64) String taskId) {
@@ -88,7 +88,7 @@ public class AssetTransferController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('asset:transfer:create')")
-    @AssetDataScope(permissionCode = "asset:transfer:create")
+    @ServiceDataScope(permissionCode = "asset:transfer:create")
     @OperLog(module = "资产调拨", operType = OperType.CREATE,
             entityClass = AstTransfer.class, idExpr = "#result.data.id")
     public R<AssetOperationViews.TransferVO> create(
@@ -105,7 +105,7 @@ public class AssetTransferController {
      */
     @PostMapping("/{id}/retry-start")
     @PreAuthorize("hasAuthority('asset:transfer:retry')")
-    @AssetDataScope(permissionCode = "asset:transfer:retry")
+    @ServiceDataScope(permissionCode = "asset:transfer:retry")
     @OperLog(module = "资产调拨", operType = OperType.UPDATE,
             entityClass = AstTransfer.class, idExpr = "#id")
     public R<AssetOperationViews.TransferVO> retryStart(
@@ -123,7 +123,7 @@ public class AssetTransferController {
      */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('asset:transfer:cancel')")
-    @AssetDataScope(permissionCode = "asset:transfer:cancel")
+    @ServiceDataScope(permissionCode = "asset:transfer:cancel")
     @OperLog(module = "资产调拨", operType = OperType.UPDATE,
             entityClass = AstTransfer.class, idExpr = "#id")
     public R<AssetOperationViews.TransferVO> cancel(
@@ -141,7 +141,7 @@ public class AssetTransferController {
      */
     @PostMapping("/{id}/complete")
     @PreAuthorize("hasAuthority('asset:transfer:complete')")
-    @AssetDataScope(permissionCode = "asset:transfer:complete")
+    @ServiceDataScope(permissionCode = "asset:transfer:complete")
     @OperLog(module = "资产调拨", operType = OperType.UPDATE,
             entityClass = AstTransfer.class, idExpr = "#id")
     public R<AssetOperationViews.TransferVO> complete(

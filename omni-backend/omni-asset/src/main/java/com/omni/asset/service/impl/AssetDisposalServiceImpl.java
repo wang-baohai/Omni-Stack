@@ -15,8 +15,8 @@ import com.omni.asset.entity.AstDisposal;
 import com.omni.asset.mapper.AstAssetHistoryMapper;
 import com.omni.asset.mapper.AstAssetMapper;
 import com.omni.asset.mapper.AstDisposalMapper;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.asset.service.AssetDisposalService;
 import com.omni.asset.service.AssetOperationWorkflowStateService;
 import com.omni.asset.service.support.AssetAuditSupport;
@@ -69,7 +69,7 @@ public class AssetDisposalServiceImpl implements AssetDisposalService {
     @Transactional(readOnly = true)
     public PageResult<AssetOperationViews.DisposalVO> page(
             AssetOperationRequests.DisposalQuery query) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         LambdaQueryWrapper<AstDisposal> wrapper = new LambdaQueryWrapper<AstDisposal>()
                 .eq(AstDisposal::getTenantId, tenantId);
         String keyword = trimToNull(query.getKeyword());
@@ -106,7 +106,7 @@ public class AssetDisposalServiceImpl implements AssetDisposalService {
     @Override
     @Transactional(readOnly = true)
     public AssetOperationViews.DisposalVO get(Long id) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstDisposal disposal = accessGuard.requireVisible(disposalMapper.selectOne(
                 new LambdaQueryWrapper<AstDisposal>()
                         .eq(AstDisposal::getTenantId, tenantId)
@@ -121,8 +121,8 @@ public class AssetDisposalServiceImpl implements AssetDisposalService {
     /** {@inheritDoc} */
     @Override
     public AssetOperationViews.DisposalVO approvalView(Long id, String taskId) {
-        Long tenantId = AssetTenantContext.requireTenantId();
-        Long userId = AssetTenantContext.require().userId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        Long userId = ServiceIdentityContext.require().userId();
         AstDisposal identity = disposalMapper.selectWorkflowIdentity(tenantId, id);
         requireApprovalIdentity(identity);
         workflowApprovalGuard.requireAssigned(new AssetWorkflowApprovalGuard.AssignmentIntent(
@@ -156,7 +156,7 @@ public class AssetDisposalServiceImpl implements AssetDisposalService {
     @Override
     @Transactional
     public AssetOperationViews.DisposalVO cancel(Long id, Integer version) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstDisposal disposal = requireLocked(tenantId, id);
         requireVersion(disposal.getVersion(), version);
         AssetOperationStateMachine.requireLocallyCancellable(
@@ -175,7 +175,7 @@ public class AssetDisposalServiceImpl implements AssetDisposalService {
     @Override
     @Transactional
     public AssetOperationViews.DisposalVO complete(Long id, Integer version) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstDisposal disposal = requireLocked(tenantId, id);
         requireVersion(disposal.getVersion(), version);
         AssetOperationStateMachine.requireCompletable(disposal.getStatus());
@@ -286,16 +286,16 @@ public class AssetDisposalServiceImpl implements AssetDisposalService {
 
     private <T> T withTenantScope(Long userId, Long tenantId,
                                   java.util.function.Supplier<T> action) {
-        AssetDataScopeContext.ScopeInfo previous = AssetDataScopeContext.get();
-        AssetDataScopeContext.set(new AssetDataScopeContext.ScopeInfo(
-                userId, tenantId, "asset:disposal:approve", null, "TENANT", Set.of()));
+        ServiceDataScopeContext.ScopeInfo previous = ServiceDataScopeContext.get();
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                userId, tenantId, "asset:disposal:approve", null, "TENANT", Set.of(), null));
         try {
             return action.get();
         } finally {
             if (previous == null) {
-                AssetDataScopeContext.clear();
+                ServiceDataScopeContext.clear();
             } else {
-                AssetDataScopeContext.set(previous);
+                ServiceDataScopeContext.set(previous);
             }
         }
     }
@@ -316,7 +316,7 @@ public class AssetDisposalServiceImpl implements AssetDisposalService {
         history.setAssetId(asset.getId());
         history.setFromStatus(fromStatus);
         history.setToStatus(toStatus);
-        history.setChangedByUserId(AssetTenantContext.require().userId());
+        history.setChangedByUserId(ServiceIdentityContext.require().userId());
         history.setChangedTime(LocalDateTime.now());
         history.setRemark(remark);
         AssetAuditSupport.created(history);
