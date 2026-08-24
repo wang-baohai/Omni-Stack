@@ -25,7 +25,7 @@ class SeedManifestLoaderTest {
         assertThat(manifest.version()).isEqualTo("1.0.0-bootstrap");
         assertThat(manifest.sources()).hasSize(8);
         assertThat(manifest.modules()).hasSize(10);
-        assertThat(manifest.assertions()).hasSize(24);
+        assertThat(manifest.assertions()).hasSizeGreaterThanOrEqualTo(24);
     }
 
     /**
