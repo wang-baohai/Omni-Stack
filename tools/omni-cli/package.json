@@ -12,6 +12,7 @@
     "test:golden": "npm run build && node scripts/service-golden.mjs",
     "test:crud-golden": "npm run build && node scripts/crud-golden.mjs",
     "test:crud-db-golden": "npm run build && node scripts/crud-database-golden.mjs",
+    "test:crud-runtime-golden": "npm run build && node scripts/crud-runtime-golden.mjs",
     "dev": "tsx src/cli.ts"
   },
   "dependencies": {
