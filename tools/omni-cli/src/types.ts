@@ -98,7 +98,7 @@ export interface ServiceGenerationLock {
 
 /** 服务包接入操作类型。 */
 export type IntegrationOperationKind = 'create-directory' | 'create-file' | 'modify-xml' | 'modify-yaml'
-  | 'modify-typescript' | 'modify-sql' | 'modify-dockerfile';
+  | 'modify-typescript' | 'modify-java' | 'modify-sql' | 'modify-dockerfile';
 
 /** 单个 monorepo 接入操作。 */
 export interface IntegrationOperation {

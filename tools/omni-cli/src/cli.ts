@@ -12,6 +12,7 @@ import {
   validateGeneratedService,
 } from './service-generator.js';
 import { renderServiceIntegration } from './service-integration-renderer.js';
+import { applyRenderedIntegration } from './service-integration-transaction.js';
 import type { CreateServiceOptions } from './types.js';
 import { findWorkspaceRoot } from './workspace.js';
 
@@ -107,7 +108,8 @@ service.command('validate <service-id>')
 service.command('integrate <service-id>')
   .description('只读渲染服务包接入当前 monorepo 的全部变更')
   .requiredOption('--source <directory>', '已生成并通过校验的服务包目录')
-  .action((serviceId: string, commandOptions: { source: string }) => {
+  .option('--apply', '执行跨文件原子写入；默认只读 dry-run')
+  .action((serviceId: string, commandOptions: { source: string; apply?: boolean }) => {
     const rendered = renderServiceIntegration(workspaceRoot(), commandOptions.source, serviceId);
     const plan = rendered.plan;
     console.log(`INTEGRATION PLAN ${serviceId}`);
@@ -125,7 +127,14 @@ service.command('integrate <service-id>')
       const afterLines = change.after.split('\n').length;
       console.log(`  ${change.mode.toUpperCase()} ${change.target} (${afterLines - beforeLines >= 0 ? '+' : ''}${afterLines - beforeLines} lines)`);
     });
-    console.log(`ready: ${plan.operations.length} operations; renderer is read-only and wrote no files.`);
+    if (commandOptions.apply !== true) {
+      console.log(`ready: ${plan.operations.length} operations; renderer is read-only and wrote no files.`);
+      console.log('未写入工作区；确认后追加 --apply。');
+      return;
+    }
+    const result = applyRenderedIntegration(workspaceRoot(), rendered);
+    console.log(`integration applied: files=${result.files}`);
+    result.cleanupWarnings.forEach((warning) => console.log(`  WARN ${warning}`));
   });
 
 function workspaceRoot(): string {

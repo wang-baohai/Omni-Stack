@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { afterEach, describe, it } from 'node:test';
 import { parseDocument } from 'yaml';
 import { applyServiceGeneration, planServiceGeneration } from '../src/service-generator.js';
 import { renderServiceIntegration } from '../src/service-integration-renderer.js';
+import { applyRenderedIntegration } from '../src/service-integration-transaction.js';
 import { findWorkspaceRoot } from '../src/workspace.js';
 
 const workspaceRoot = findWorkspaceRoot(resolve(import.meta.dirname, '..'));
@@ -23,6 +24,8 @@ const fixtureTargets = [
   'omni-frontend/src/locales/en-US.ts',
   'scripts/sql/seed/auth.sql',
   'database/seed/manifest.yaml',
+  'database/changelog/platform/db.changelog-platform.yaml',
+  'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
 ];
 
 afterEach(() => {
@@ -45,7 +48,7 @@ describe('service integration renderer', () => {
       { checkGit: false },
     );
 
-    assert.equal(rendered.changes.length, 27);
+    assert.equal(rendered.changes.length, 30);
     assert.equal(readFileSync(resolve(fixtureRoot, 'omni-backend/pom.xml'), 'utf8'), originalPom);
     assert.equal(existsSync(resolve(fixtureRoot, 'omni-backend/omni-inventory-sample')), false);
 
@@ -54,6 +57,18 @@ describe('service integration renderer', () => {
     assert.match(required(byTarget, 'scripts/sql/seed/auth.sql'), /NOT EXISTS/);
     assert.doesNotMatch(required(byTarget, 'scripts/sql/seed/auth.sql'), /VALUES \(\d+, 1, \d+, 'inventory-sample'/);
     assert.match(required(byTarget, 'omni-frontend/src/constants/menu.ts'), /inventory-sample:overview/);
+    assert.match(
+      required(byTarget, 'database/changelog/platform/db.changelog-platform.yaml'),
+      /CREATE DATABASE IF NOT EXISTS omni_inventory_sample /,
+    );
+    assert.match(
+      required(byTarget, 'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java'),
+      /target\("inventory-sample", "omni_inventory_sample", false\)/,
+    );
+    assert.match(
+      required(byTarget, 'database/changelog/inventory-sample/db.changelog-inventory-sample.yaml'),
+      /db\.changelog-common-mq\.yaml/,
+    );
 
     const gateway = parseDocument(required(
       byTarget,
@@ -83,6 +98,48 @@ describe('service integration renderer', () => {
     assert.ok(assertion);
     assert.equal(assertion.module, 'auth');
     assert.equal(assertion.expectedRows, 3);
+  });
+
+  it('applies all rendered files and removes transaction backups', () => {
+    const fixtureRoot = createWorkspaceFixture();
+    const rendered = renderServiceIntegration(
+      fixtureRoot,
+      createGeneratedPackage(),
+      'inventory-sample',
+      { checkGit: false },
+    );
+
+    const result = applyRenderedIntegration(fixtureRoot, rendered);
+
+    assert.deepEqual(result, { files: 30, cleanupWarnings: [] });
+    for (const change of rendered.changes) {
+      assert.equal(readFileSync(resolve(fixtureRoot, ...change.target.split('/')), 'utf8'), change.after);
+    }
+    assert.deepEqual(listTransactionArtifacts(fixtureRoot), []);
+  });
+
+  it('rolls back every file when a mid-transaction failure is injected', () => {
+    const fixtureRoot = createWorkspaceFixture();
+    const rendered = renderServiceIntegration(
+      fixtureRoot,
+      createGeneratedPackage(),
+      'inventory-sample',
+      { checkGit: false },
+    );
+    const originals = new Map(rendered.changes
+      .filter((change) => change.mode === 'modify')
+      .map((change) => [change.target, readFileSync(resolve(fixtureRoot, ...change.target.split('/')), 'utf8')]));
+
+    assert.throws(
+      () => applyRenderedIntegration(fixtureRoot, rendered, { failAfter: 5 }),
+      /已完整回滚/,
+    );
+    for (const change of rendered.changes) {
+      const target = resolve(fixtureRoot, ...change.target.split('/'));
+      if (change.mode === 'create') assert.equal(existsSync(target), false, change.target);
+      else assert.equal(readFileSync(target, 'utf8'), originals.get(change.target), change.target);
+    }
+    assert.deepEqual(listTransactionArtifacts(fixtureRoot), []);
   });
 });
 
@@ -116,4 +173,16 @@ function required(values: Map<string, string>, target: string): string {
   const value = values.get(target);
   assert.ok(value, `缺少变更：${target}`);
   return value;
+}
+
+function listTransactionArtifacts(root: string, current = root): string[] {
+  const result: string[] = [];
+  for (const entry of readdirSync(current, { withFileTypes: true })) {
+    const path = resolve(current, entry.name);
+    if (entry.isDirectory()) result.push(...listTransactionArtifacts(root, path));
+    else if (entry.name.includes('.omni-') && (entry.name.endsWith('.tmp') || entry.name.endsWith('.bak'))) {
+      result.push(path);
+    }
+  }
+  return result;
 }

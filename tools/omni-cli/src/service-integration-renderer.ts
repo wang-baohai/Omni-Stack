@@ -29,6 +29,8 @@ const TARGETS = {
   enLocale: 'omni-frontend/src/locales/en-US.ts',
   authSeed: 'scripts/sql/seed/auth.sql',
   seedManifest: 'database/seed/manifest.yaml',
+  platformChangelog: 'database/changelog/platform/db.changelog-platform.yaml',
+  migrationCatalog: 'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
 } as const;
 
 /**
@@ -52,6 +54,8 @@ export function renderServiceIntegration(
   addModified(changes, workspaceRoot, TARGETS.compose, (content) => renderCompose(content, lock.spec));
   addModified(changes, workspaceRoot, TARGETS.catalog, (content) => renderCatalog(content, lock.spec));
   addModified(changes, workspaceRoot, TARGETS.dockerfile, (content) => renderDockerfile(content, lock.spec));
+  addModified(changes, workspaceRoot, TARGETS.platformChangelog, (content) => renderPlatformChangelog(content, lock.spec));
+  addModified(changes, workspaceRoot, TARGETS.migrationCatalog, (content) => renderMigrationCatalog(content, lock.spec));
   addModified(changes, workspaceRoot, TARGETS.menu, (content) => renderMenu(content, lock.spec));
   addModified(changes, workspaceRoot, TARGETS.router, (content) => renderRouter(content, lock.spec));
   addModified(changes, workspaceRoot, TARGETS.zhLocale, (content) => renderLocale(content, lock.spec, 'zh-CN'));
@@ -84,6 +88,7 @@ function addGeneratedFiles(
     `omni-backend/${lock.spec.artifactId}/`,
     `omni-frontend/src/api/${lock.spec.serviceId}.ts`,
     `omni-frontend/src/views/${lock.spec.serviceId}/`,
+    `database/changelog/${lock.spec.serviceId}/`,
     `docs/${lock.spec.serviceId}.md`,
     `docs/${lock.spec.serviceId}-i18n-status.yaml`,
   ];
@@ -219,6 +224,37 @@ function renderDockerfile(content: string, spec: ServiceSpec): string {
   const line = `COPY omni-backend/${spec.artifactId}/pom.xml ${spec.artifactId}/`;
   lines.splice(indexes[indexes.length - 1]! + 1, 0, line);
   return lines.join('\n');
+}
+
+function renderPlatformChangelog(content: string, spec: ServiceSpec): string {
+  const document = yamlDocument(content, TARGETS.platformChangelog);
+  const root = document.toJS() as {
+    databaseChangeLog?: Array<{ changeSet?: { id?: string; comment?: string; changes?: Array<{ sql?: { sql?: string } }> } }>;
+  };
+  const platform = root.databaseChangeLog?.find((entry) => entry.changeSet?.id === 'platform-0001-create-databases')?.changeSet;
+  const sql = platform?.changes?.find((change) => typeof change.sql?.sql === 'string')?.sql?.sql;
+  if (!sql) throw new CliError('平台 changelog 缺少建库 SQL');
+  if (new RegExp(`CREATE DATABASE IF NOT EXISTS ${escapeRegExp(spec.databaseName)}\\b`).test(sql)) {
+    throw new CliError(`平台 changelog 已包含数据库：${spec.databaseName}`);
+  }
+  const anchor = '              CREATE DATABASE IF NOT EXISTS nacos_config';
+  if (content.split(anchor).length !== 2) throw new CliError('平台 changelog 的 nacos_config 建库锚点不唯一');
+  return content
+    .replace('comment: 创建七个业务数据库与两个固定版本基础设施数据库', 'comment: 创建业务数据库与两个固定版本基础设施数据库')
+    .replace(anchor, `              CREATE DATABASE IF NOT EXISTS ${spec.databaseName} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n${anchor}`);
+}
+
+function renderMigrationCatalog(content: string, spec: ServiceSpec): string {
+  const existing = [...content.matchAll(/target\("([a-z0-9-]+)",\s*"([a-z0-9_]+)",\s*(?:true|false)\)/g)];
+  if (existing.some((match) => match[1] === spec.serviceId || match[2] === spec.databaseName)) {
+    throw new CliError(`迁移目标已包含服务或数据库：${spec.serviceId}`);
+  }
+  const anchor = '            target("nacos", "nacos_config", true),';
+  if (content.split(anchor).length !== 2) throw new CliError('迁移目标目录的 nacos 锚点不唯一');
+  return content
+    .replace('/** 按依赖顺序排列的九个目标数据库。 */', '/** 按依赖顺序排列的目标数据库。 */')
+    .replace('@return 九个目标数据库', '@return 全部目标数据库')
+    .replace(anchor, `            target("${spec.serviceId}", "${spec.databaseName}", false),\n${anchor}`);
 }
 
 function renderMenu(content: string, spec: ServiceSpec): string {
@@ -375,7 +411,7 @@ function validateRenderedChanges(
   if (!parseMavenModules(requiredChange(byTarget, TARGETS.parentPom)).includes(spec.artifactId)) {
     throw new CliError('渲染后父 POM 未登记新模块');
   }
-  for (const target of [TARGETS.gateway, TARGETS.compose, TARGETS.catalog, TARGETS.seedManifest]) {
+  for (const target of [TARGETS.gateway, TARGETS.compose, TARGETS.catalog, TARGETS.seedManifest, TARGETS.platformChangelog]) {
     yamlDocument(requiredChange(byTarget, target), target);
   }
   const catalogValue = yamlDocument(requiredChange(byTarget, TARGETS.catalog), TARGETS.catalog).toJS();
@@ -387,6 +423,16 @@ function validateRenderedChanges(
   validateCatalogGraph(catalog);
   for (const target of [TARGETS.menu, TARGETS.router, TARGETS.zhLocale, TARGETS.enLocale]) {
     parseTypeScript(requiredChange(byTarget, target), target);
+  }
+  const generatedChangelog = `database/changelog/${spec.serviceId}/db.changelog-${spec.serviceId}.yaml`;
+  yamlDocument(requiredChange(byTarget, generatedChangelog), generatedChangelog);
+  const platformSql = requiredChange(byTarget, TARGETS.platformChangelog);
+  if (!platformSql.includes(`CREATE DATABASE IF NOT EXISTS ${spec.databaseName} `)) {
+    throw new CliError('渲染后平台 changelog 未创建新数据库');
+  }
+  const migrationCatalog = requiredChange(byTarget, TARGETS.migrationCatalog);
+  if (!migrationCatalog.includes(`target("${spec.serviceId}", "${spec.databaseName}", false)`)) {
+    throw new CliError('渲染后迁移目标目录未登记新服务');
   }
   const manifest = yamlDocument(requiredChange(byTarget, TARGETS.seedManifest), TARGETS.seedManifest).toJS() as {
     sources?: Array<{ id?: string; sha256?: string }>;
@@ -416,6 +462,10 @@ function yamlDocument(content: string, target: string): Document.Parsed {
     throw new CliError(`${target} YAML 无效：${document.errors.map((error) => error.message).join('; ')}`);
   }
   return document;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function parseMavenModules(content: string): string[] {

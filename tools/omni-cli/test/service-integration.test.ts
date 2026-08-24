@@ -24,13 +24,17 @@ describe('service integration planner', () => {
     const plan = planServiceIntegration(workspaceRoot, packageRoot, 'inventory-sample', { checkGit: false });
 
     assert.equal(plan.ready, true, plan.conflicts.join('\n'));
-    assert.equal(plan.operations.length, 16);
+    assert.equal(plan.operations.length, 19);
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-xml'
       && operation.target === 'omni-backend/pom.xml'));
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-yaml'
       && operation.target === 'docker-compose.yml'));
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-typescript'
       && operation.target === 'omni-frontend/src/router/index.ts'));
+    assert.ok(plan.operations.some((operation) => operation.kind === 'modify-java'
+      && operation.target.endsWith('/MigrationTargetCatalog.java')));
+    assert.ok(plan.operations.some((operation) => operation.kind === 'create-file'
+      && operation.target === 'database/changelog/inventory-sample/db.changelog-inventory-sample.yaml'));
     assert.match(plan.warnings.join('\n'), /自然键/);
   });
 });

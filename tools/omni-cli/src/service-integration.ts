@@ -21,6 +21,8 @@ const STRUCTURAL_TARGETS = {
   enLocale: 'omni-frontend/src/locales/en-US.ts',
   authSeed: 'scripts/sql/seed/auth.sql',
   seedManifest: 'database/seed/manifest.yaml',
+  platformChangelog: 'database/changelog/platform/db.changelog-platform.yaml',
+  migrationCatalog: 'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
 } as const;
 
 /**
@@ -49,6 +51,14 @@ export function planServiceIntegration(
   inspectCompose(workspaceRoot, lock.spec.artifactId, operations, conflicts);
   inspectCatalog(workspaceRoot, serviceId, operations, conflicts);
   inspectDockerfile(workspaceRoot, lock.spec.artifactId, operations, conflicts);
+  inspectDatabaseIntegration(
+    workspaceRoot,
+    serviceId,
+    lock.spec.databaseName,
+    source,
+    operations,
+    conflicts,
+  );
   inspectFrontendRegistration(workspaceRoot, lock.spec.className, serviceId, operations, conflicts);
   planSeedIntegration(workspaceRoot, serviceId, operations, warnings);
   if (options.checkGit === false) warnings.push('Git 目标文件检查由测试调用方显式隔离');
@@ -102,6 +112,12 @@ function planGeneratedTrees(
       source: `docs/${serviceId}-i18n-status.yaml`,
       target: `docs/${serviceId}-i18n-status.yaml`,
       description: '创建多语言完成状态',
+    },
+    {
+      kind: 'create-file' as const,
+      source: `database/changelog/${serviceId}/db.changelog-${serviceId}.yaml`,
+      target: `database/changelog/${serviceId}/db.changelog-${serviceId}.yaml`,
+      description: '创建服务数据库 Liquibase 主文件',
     },
   ];
   for (const entry of entries) {
@@ -198,6 +214,42 @@ function inspectDockerfile(
   const expectedCopy = `COPY omni-backend/${artifactId}/pom.xml ${artifactId}/`;
   if (content.includes(expectedCopy)) conflicts.push(`Dockerfile 已包含 POM 缓存条目：${artifactId}`);
   operations.push({ kind: 'modify-dockerfile', target, description: `登记 ${artifactId} POM 缓存层` });
+}
+
+function inspectDatabaseIntegration(
+  workspaceRoot: string,
+  serviceId: string,
+  databaseName: string,
+  source: string,
+  operations: IntegrationOperation[],
+  conflicts: string[],
+): void {
+  const generatedChangelog = `database/changelog/${serviceId}/db.changelog-${serviceId}.yaml`;
+  if (!existsSync(resolve(source, ...generatedChangelog.split('/')))) {
+    conflicts.push(`服务包缺少生成文件：${generatedChangelog}`);
+  }
+
+  const platform = readRequiredFile(workspaceRoot, STRUCTURAL_TARGETS.platformChangelog);
+  readYamlFile(resolve(workspaceRoot, STRUCTURAL_TARGETS.platformChangelog));
+  if (new RegExp(`CREATE DATABASE IF NOT EXISTS ${escapeRegExp(databaseName)}\\b`).test(platform)) {
+    conflicts.push(`平台 changelog 已包含数据库：${databaseName}`);
+  }
+  operations.push({
+    kind: 'modify-yaml',
+    target: STRUCTURAL_TARGETS.platformChangelog,
+    description: `登记 ${databaseName} 平台建库语句`,
+  });
+
+  const catalog = readRequiredFile(workspaceRoot, STRUCTURAL_TARGETS.migrationCatalog);
+  if (catalog.includes(`target("${serviceId}",`) || catalog.includes(`"${databaseName}"`)) {
+    conflicts.push(`数据库迁移目标已包含服务或数据库：${serviceId}`);
+  }
+  operations.push({
+    kind: 'modify-java',
+    target: STRUCTURAL_TARGETS.migrationCatalog,
+    description: `登记 ${serviceId} Liquibase 迁移目标`,
+  });
+
 }
 
 function inspectFrontendRegistration(
@@ -371,4 +423,8 @@ function lowerFirst(value: string): string {
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

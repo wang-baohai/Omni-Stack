@@ -34,6 +34,10 @@ describe('create-service generator', () => {
     assert.equal(plan.spec.enableDataScope, false);
     assert.ok(plan.files.some((file) => file.path.endsWith('/pom.xml')));
     assert.ok(!plan.files.some((file) => file.path.endsWith('DataScopeTablePolicy.java')));
+    assert.equal(
+      plan.files.find((file) => file.path.endsWith('db.changelog-inventory-sample.yaml'))?.content,
+      'databaseChangeLog: []\n',
+    );
     assert.equal(existsSync(output), false);
   });
 
