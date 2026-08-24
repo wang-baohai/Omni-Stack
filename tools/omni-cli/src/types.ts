@@ -96,6 +96,68 @@ export interface ServiceGenerationLock {
   files: Array<{ path: string; sha256: string }>;
 }
 
+/** CRUD 声明支持的字段类型。 */
+export type CrudJavaType = 'String' | 'Integer' | 'Long' | 'Boolean' | 'LocalDate' | 'LocalDateTime' | 'BigDecimal';
+
+/** CRUD 声明中的字段定义。 */
+export interface CrudFieldSpec {
+  name: string;
+  columnName: string;
+  comment: string;
+  javaType: CrudJavaType;
+  typescriptType: 'string' | 'number' | 'boolean';
+  databaseType: 'VARCHAR' | 'TEXT' | 'INT' | 'BIGINT' | 'TINYINT' | 'DATE' | 'DATETIME' | 'DECIMAL';
+  length?: number;
+  decimalPrecision?: number;
+  decimalScale?: number;
+  required: boolean;
+  immutable: boolean;
+  list: boolean;
+  query: boolean;
+  form: boolean;
+  detail: boolean;
+  queryOperator: 'none' | 'eq' | 'like' | 'ge' | 'le' | 'between';
+  pii: 'none' | 'name' | 'phone' | 'email' | 'id-card' | 'address' | 'custom';
+  maskStrategy?: 'none' | 'name' | 'phone' | 'email' | 'id-card' | 'address' | 'custom';
+  decimalAsString?: boolean;
+  dateTimeFormat?: 'yyyy-MM-dd HH:mm:ss';
+  control: 'input' | 'textarea' | 'number' | 'switch' | 'select' | 'date' | 'datetime';
+  dictionaryTypeCode?: string;
+  i18nKey: string;
+}
+
+/** CRUD 声明中的索引或唯一约束。 */
+export interface CrudKeySpec {
+  name: string;
+  fields: string[];
+}
+
+/** 经 Schema 和语义校验的单表 CRUD 声明。 */
+export interface CrudSpec {
+  moduleId: string;
+  aggregateName: string;
+  displayName: string;
+  aggregateMode: 'single-table';
+  tableName: string;
+  tablePrefix: string;
+  apiPath: string;
+  permissionResource: string;
+  menuParent: string;
+  roleCodes: string[];
+  tenant: boolean;
+  dataScope: boolean;
+  owner: 'none' | 'user' | 'unit' | 'user-and-unit';
+  optimisticLock: boolean;
+  logicalDelete: boolean;
+  statusToggle: boolean;
+  forbiddenCapabilities: Array<'saga' | 'workflow' | 'inbox' | 'outbox' | 'multiAggregate'
+    | 'piiInference' | 'complexMoney' | 'inventory' | 'overReceipt' | 'assetIdempotency'>;
+  fields: CrudFieldSpec[];
+  uniqueConstraints: CrudKeySpec[];
+  indexes: CrudKeySpec[];
+  defaultSort: { field: string; direction: 'asc' | 'desc' };
+}
+
 /** 服务包接入操作类型。 */
 export type IntegrationOperationKind = 'create-directory' | 'create-file' | 'modify-xml' | 'modify-yaml'
   | 'modify-typescript' | 'modify-java' | 'modify-sql' | 'modify-dockerfile';

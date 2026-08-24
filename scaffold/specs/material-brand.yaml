@@ -1,0 +1,99 @@
+moduleId: procurement
+aggregateName: MaterialBrand
+displayName: 物料品牌
+aggregateMode: single-table
+tableName: proc_material_brand
+tablePrefix: proc_
+apiPath: /api/procurement/material-brands
+permissionResource: procurement:material-brand
+menuParent: procurement:material
+roleCodes: [SUPER_ADMIN]
+tenant: true
+dataScope: false
+owner: none
+optimisticLock: true
+logicalDelete: true
+statusToggle: true
+forbiddenCapabilities: []
+fields:
+  - name: brandCode
+    columnName: brand_code
+    comment: 品牌编码
+    javaType: String
+    typescriptType: string
+    databaseType: VARCHAR
+    length: 64
+    required: true
+    immutable: true
+    list: true
+    query: true
+    form: true
+    detail: true
+    queryOperator: like
+    pii: none
+    maskStrategy: none
+    control: input
+    i18nKey: procurement.materialBrand.fields.brandCode
+  - name: brandName
+    columnName: brand_name
+    comment: 品牌名称
+    javaType: String
+    typescriptType: string
+    databaseType: VARCHAR
+    length: 128
+    required: true
+    immutable: false
+    list: true
+    query: true
+    form: true
+    detail: true
+    queryOperator: like
+    pii: none
+    maskStrategy: none
+    control: input
+    i18nKey: procurement.materialBrand.fields.brandName
+  - name: status
+    columnName: status
+    comment: 启用状态
+    javaType: Integer
+    typescriptType: number
+    databaseType: INT
+    required: true
+    immutable: false
+    list: true
+    query: true
+    form: true
+    detail: true
+    queryOperator: eq
+    pii: none
+    maskStrategy: none
+    control: select
+    dictionaryTypeCode: sys_common_status
+    i18nKey: procurement.materialBrand.fields.status
+  - name: remark
+    columnName: remark
+    comment: 备注
+    javaType: String
+    typescriptType: string
+    databaseType: VARCHAR
+    length: 500
+    required: false
+    immutable: false
+    list: false
+    query: false
+    form: true
+    detail: true
+    queryOperator: none
+    pii: none
+    maskStrategy: none
+    control: textarea
+    i18nKey: procurement.materialBrand.fields.remark
+uniqueConstraints:
+  - name: uk_proc_material_brand_tenant_code
+    fields: [tenantId, brandCode]
+indexes:
+  - name: idx_proc_material_brand_tenant_status
+    fields: [tenantId, status]
+defaultSort:
+  field: updateTime
+  direction: desc
