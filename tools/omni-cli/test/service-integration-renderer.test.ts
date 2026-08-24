@@ -41,6 +41,10 @@ describe('service integration renderer', () => {
     const fixtureRoot = createWorkspaceFixture();
     const packageRoot = createGeneratedPackage();
     const originalPom = readFileSync(resolve(fixtureRoot, 'omni-backend/pom.xml'), 'utf8');
+    const originalPlatform = parseDocument(readFileSync(
+      resolve(fixtureRoot, 'database/changelog/platform/db.changelog-platform.yaml'),
+      'utf8',
+    )).toJS() as { databaseChangeLog: unknown[] };
     const rendered = renderServiceIntegration(
       fixtureRoot,
       packageRoot,
@@ -60,6 +64,15 @@ describe('service integration renderer', () => {
     assert.match(
       required(byTarget, 'database/changelog/platform/db.changelog-platform.yaml'),
       /CREATE DATABASE IF NOT EXISTS omni_inventory_sample /,
+    );
+    const renderedPlatform = parseDocument(required(
+      byTarget,
+      'database/changelog/platform/db.changelog-platform.yaml',
+    )).toJS() as { databaseChangeLog: unknown[] };
+    assert.deepEqual(renderedPlatform.databaseChangeLog[0], originalPlatform.databaseChangeLog[0]);
+    assert.match(
+      required(byTarget, 'database/changelog/platform/db.changelog-platform.yaml'),
+      /id: platform-generated-inventory-sample-create-database/,
     );
     assert.match(
       required(byTarget, 'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java'),

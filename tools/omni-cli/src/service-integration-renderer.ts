@@ -231,17 +231,38 @@ function renderPlatformChangelog(content: string, spec: ServiceSpec): string {
   const root = document.toJS() as {
     databaseChangeLog?: Array<{ changeSet?: { id?: string; comment?: string; changes?: Array<{ sql?: { sql?: string } }> } }>;
   };
-  const platform = root.databaseChangeLog?.find((entry) => entry.changeSet?.id === 'platform-0001-create-databases')?.changeSet;
-  const sql = platform?.changes?.find((change) => typeof change.sql?.sql === 'string')?.sql?.sql;
-  if (!sql) throw new CliError('平台 changelog 缺少建库 SQL');
-  if (new RegExp(`CREATE DATABASE IF NOT EXISTS ${escapeRegExp(spec.databaseName)}\\b`).test(sql)) {
+  const entries = root.databaseChangeLog ?? [];
+  const platform = entries.find((entry) => entry.changeSet?.id === 'platform-0001-create-databases')?.changeSet;
+  if (!platform?.changes?.some((change) => typeof change.sql?.sql === 'string')) {
+    throw new CliError('平台 changelog 缺少原始建库 changeSet');
+  }
+  const changeSetId = `platform-generated-${spec.serviceId}-create-database`;
+  if (entries.some((entry) => entry.changeSet?.id === changeSetId)) {
+    throw new CliError(`平台 changelog 已包含 changeSet：${changeSetId}`);
+  }
+  if (content.match(new RegExp(`CREATE DATABASE IF NOT EXISTS ${escapeRegExp(spec.databaseName)}\\b`))) {
     throw new CliError(`平台 changelog 已包含数据库：${spec.databaseName}`);
   }
-  const anchor = '              CREATE DATABASE IF NOT EXISTS nacos_config';
-  if (content.split(anchor).length !== 2) throw new CliError('平台 changelog 的 nacos_config 建库锚点不唯一');
-  return content
-    .replace('comment: 创建七个业务数据库与两个固定版本基础设施数据库', 'comment: 创建业务数据库与两个固定版本基础设施数据库')
-    .replace(anchor, `              CREATE DATABASE IF NOT EXISTS ${spec.databaseName} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n${anchor}`);
+  const block = `
+  - changeSet:
+      id: ${changeSetId}
+      author: omni-cli
+      context: platform
+      runInTransaction: false
+      comment: 为 ${spec.displayName} 创建独立数据库
+      preConditions:
+        - dbms:
+            type: mysql
+      changes:
+        - sql:
+            splitStatements: false
+            stripComments: true
+            sql: CREATE DATABASE IF NOT EXISTS ${spec.databaseName} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+      rollback:
+        - sql:
+            sql: SELECT 1;
+`;
+  return `${content.replace(/\s*$/, '')}\n${block}`;
 }
 
 function renderMigrationCatalog(content: string, spec: ServiceSpec): string {

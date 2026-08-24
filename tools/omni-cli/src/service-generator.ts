@@ -12,7 +12,7 @@ import type {
   ServiceSpec,
 } from './types.js';
 
-export const GENERATOR_VERSION = '0.5.0';
+export const GENERATOR_VERSION = '0.5.1';
 export const SERVICE_TEMPLATE_VERSION = '1.1.0';
 const LOCK_FILE = 'omni-service.lock.json';
 const TEMPLATE_ROOT = 'scaffold/templates/service';
