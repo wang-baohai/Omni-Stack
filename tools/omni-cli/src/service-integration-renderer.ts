@@ -534,8 +534,18 @@ function permissionAssertionSha(spec: ServiceSpec): string {
     `${spec.serviceId}|DIRECTORY|`,
     `${spec.serviceId}:overview|MENU|${spec.serviceId}`,
     `${spec.serviceId}:read|API|${spec.serviceId}:overview`,
-  ].map((value) => `seed_key:12=${value}`).sort();
+  ].map((value) => `seed_key:12=${canonicalSeedValue(value)}`).sort();
   return sha256(values.join('\n'));
+}
+
+function canonicalSeedValue(value: string): string {
+  return value
+    .replaceAll('\\', '\\\\')
+    .replaceAll('|', '\\|')
+    .replaceAll('=', '\\=')
+    .replaceAll('\r', '\\r')
+    .replaceAll('\n', '\\n')
+    .replaceAll('\t', '\\t');
 }
 
 function ensureUniqueTargets(changes: IntegrationFileChange[]): void {

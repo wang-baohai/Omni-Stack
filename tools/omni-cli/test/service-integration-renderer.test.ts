@@ -121,7 +121,7 @@ describe('service integration renderer', () => {
 
     const manifest = parseDocument(required(byTarget, 'database/seed/manifest.yaml')).toJS() as {
       sources: Array<{ id: string; resource: string }>;
-      assertions: Array<{ id: string; module: string; expectedRows: number }>;
+      assertions: Array<{ id: string; module: string; expectedRows: number; expectedSha256: string }>;
     };
     assert.equal(
       manifest.sources.find((item) => item.id === 'auth-inventory-sample-permissions')?.resource,
@@ -131,6 +131,10 @@ describe('service integration renderer', () => {
     assert.ok(assertion);
     assert.equal(assertion.module, 'auth');
     assert.equal(assertion.expectedRows, 3);
+    assert.equal(
+      assertion.expectedSha256,
+      'dee57b7e3bbb35f6e86c8bb2ed128457aaeae735e8e40d0b8913a95383d8634b',
+    );
   });
 
   it('applies all rendered files and removes transaction backups', () => {
