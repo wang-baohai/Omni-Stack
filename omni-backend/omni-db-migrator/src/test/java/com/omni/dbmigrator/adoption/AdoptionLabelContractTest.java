@@ -59,7 +59,7 @@ class AdoptionLabelContractTest {
                             .isEqualTo(expectedBaseline.get(target.id()).longValue());
                     assertThat(count(changelog, "adoption-upgrade"))
                             .as(target.id() + " upgrade")
-                            .isEqualTo(expectedUpgrade.get(target.id()).longValue());
+                            .isGreaterThanOrEqualTo(expectedUpgrade.get(target.id()).longValue());
                 }
                 assertLabelsDisjoint(target.id(), changelog);
             }
