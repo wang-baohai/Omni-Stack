@@ -34,16 +34,6 @@ import com.omni.dbmigrator.config.DbMigratorProperties;
 @Service
 public class LiquibaseMigrationService {
 
-    /** 需要授权给业务账号的应用数据库。 */
-    private static final List<String> APPLICATION_DATABASES = List.of(
-            "omni_auth",
-            "omni_base",
-            "omni_workflow",
-            "omni_crm",
-            "omni_srm",
-            "omni_procurement",
-            "omni_asset");
-
     /** 数据库迁移器配置。 */
     private final DbMigratorProperties properties;
 
@@ -92,7 +82,7 @@ public class LiquibaseMigrationService {
     }
 
     /**
-     * 先执行平台迁移，再按目录顺序迁移九个目标数据库。
+     * 先执行平台迁移，再按目录顺序迁移全部目标数据库。
      */
     public void migrate() {
         requireAdminConfig();
@@ -228,7 +218,7 @@ public class LiquibaseMigrationService {
     }
 
     /**
-     * 创建或更新最小权限业务账号，并只授予七个应用数据库权限。
+     * 创建或更新最小权限业务账号，并只授予目录中的应用数据库权限。
      */
     private void ensureApplicationAccount() {
         String username = properties.appUsername();
@@ -243,8 +233,10 @@ public class LiquibaseMigrationService {
                     + " IDENTIFIED BY '" + passwordLiteral + "'");
             statement.execute("ALTER USER " + account
                     + " IDENTIFIED BY '" + passwordLiteral + "'");
-            for (String database : APPLICATION_DATABASES) {
-                statement.execute("GRANT ALL PRIVILEGES ON `" + database + "`.* TO " + account);
+            for (MigrationTarget target : MigrationTargetCatalog.targets()) {
+                if (!target.vendor()) {
+                    statement.execute("GRANT ALL PRIVILEGES ON `" + target.database() + "`.* TO " + account);
+                }
             }
         } catch (Exception exception) {
             throw new IllegalStateException("创建或授权业务数据库账号失败", exception);

@@ -7,7 +7,7 @@ import java.util.List;
  *
  * @param baselineCommit 参考 Git 提交
  * @param algorithm 指纹算法版本
- * @param targets 九个目标数据库
+ * @param targets 冻结基线覆盖的目标数据库
  */
 public record SchemaFingerprintManifest(
         String baselineCommit,

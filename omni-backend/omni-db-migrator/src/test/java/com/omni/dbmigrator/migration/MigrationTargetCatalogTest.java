@@ -13,15 +13,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MigrationTargetCatalogTest {
 
     /**
-     * 应覆盖七个业务库和两个基础设施库且 ID 唯一。
+     * 应覆盖全部固定核心库、保持 ID 唯一，并允许脚手架追加业务库。
      */
     @Test
-    void should_contain_nine_unique_targets_when_catalog_is_loaded() {
-        assertThat(MigrationTargetCatalog.targets()).hasSize(9);
+    void should_contain_core_unique_targets_when_catalog_is_loaded() {
         Set<String> ids = MigrationTargetCatalog.targets().stream()
                 .map(MigrationTarget::id)
                 .collect(Collectors.toSet());
-        assertThat(ids).hasSize(9);
+        assertThat(ids)
+                .hasSize(MigrationTargetCatalog.targets().size())
+                .contains(
+                        "auth",
+                        "base",
+                        "workflow",
+                        "crm",
+                        "srm",
+                        "procurement",
+                        "asset",
+                        "nacos",
+                        "xxl-job");
         assertThat(MigrationTargetCatalog.targets().stream().filter(MigrationTarget::vendor)).hasSize(2);
     }
 }
