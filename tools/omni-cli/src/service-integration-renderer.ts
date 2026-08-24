@@ -217,6 +217,7 @@ function renderCatalog(content: string, spec: ServiceSpec): string {
     backendModules: [spec.artifactId],
     frontend: {
       viewGlobs: [],
+      componentGlobs: [],
       apiGlobs: [],
       i18nGlobs: ['omni-frontend/src/locales/*.ts'],
       i18nPrefixes: [spec.serviceId],

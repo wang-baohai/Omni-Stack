@@ -22,9 +22,10 @@ modules:
       - omni-db-migrator
     frontend:
       viewGlobs: []
+      componentGlobs: []
       apiGlobs: []
       i18nGlobs: [omni-frontend/src/locales/*.ts]
-      i18nPrefixes: [common]
+      i18nPrefixes: [common, theme, lang, home, errorPage]
     gatewayRoutes: [block-internal-api, block-internal-api-services]
     composeServices: [omni-db-migrator, omni-frontend]
     database:
@@ -52,9 +53,10 @@ modules:
     backendModules: [omni-auth]
     frontend:
       viewGlobs: [omni-frontend/src/views/system, omni-frontend/src/views/login, omni-frontend/src/views/register, omni-frontend/src/views/oauth2-client, omni-frontend/src/views/callback, omni-frontend/src/views/device, omni-frontend/src/views/consent]
+      componentGlobs: [omni-frontend/src/components/LoginForm.vue]
       apiGlobs: [omni-frontend/src/api/auth.ts, omni-frontend/src/api/user.ts, omni-frontend/src/api/role.ts, omni-frontend/src/api/permission.ts, omni-frontend/src/api/tenant.ts, omni-frontend/src/api/org.ts, omni-frontend/src/api/oauth2-client.ts, omni-frontend/src/api/auth-record.ts, omni-frontend/src/api/audit-log.ts, omni-frontend/src/api/online.ts, omni-frontend/src/api/xss-config.ts]
       i18nGlobs: [omni-frontend/src/locales/*.ts]
-      i18nPrefixes: [system, auth, login, register]
+      i18nPrefixes: [user, role, org, tenant, online, authRecord, auditLog, permission, oauth2Client, xssConfig, login, register, device, consent]
     gatewayRoutes: [omni-auth-oauth2, omni-auth-wellknown, omni-auth]
     composeServices: [omni-auth]
     database:
@@ -84,9 +86,10 @@ modules:
     backendModules: [omni-base]
     frontend:
       viewGlobs: [omni-frontend/src/views/base, omni-frontend/src/views/job, omni-frontend/src/views/monitor, omni-frontend/src/views/home, omni-frontend/src/views/dashboard, omni-frontend/src/views/error]
+      componentGlobs: [omni-frontend/src/components/CronGenerator.vue, omni-frontend/src/components/DynamicFormRenderer.vue, omni-frontend/src/components/SchemaFieldEditor.vue, omni-frontend/src/components/SidebarMenu.vue]
       apiGlobs: [omni-frontend/src/api/dict.ts, omni-frontend/src/api/menu.ts, omni-frontend/src/api/mqMessage.ts, omni-frontend/src/api/myJob.ts, omni-frontend/src/api/oper-log.ts, omni-frontend/src/api/systemJob.ts, omni-frontend/src/api/userJobType.ts]
       i18nGlobs: [omni-frontend/src/locales/*.ts]
-      i18nPrefixes: [base, dict, job, monitor]
+      i18nPrefixes: [dict, operLog, mqMessage, userJobType, userJob, userJobLog, workspace, cron, systemJob]
     gatewayRoutes: [omni-base, omni-base-job]
     composeServices: [omni-base]
     database:
@@ -116,6 +119,7 @@ modules:
     backendModules: [omni-common-workflow, omni-workflow]
     frontend:
       viewGlobs: [omni-frontend/src/views/workflow]
+      componentGlobs: [omni-frontend/src/components/workflow]
       apiGlobs: [omni-frontend/src/api/workflow.ts, omni-frontend/src/api/workflow-model.ts]
       i18nGlobs: [omni-frontend/src/locales/*.ts]
       i18nPrefixes: [workflow]
@@ -148,9 +152,10 @@ modules:
     backendModules: [omni-crm]
     frontend:
       viewGlobs: [omni-frontend/src/views/crm]
+      componentGlobs: [omni-frontend/src/components/crm]
       apiGlobs: [omni-frontend/src/api/crm-*.ts]
       i18nGlobs: [omni-frontend/src/locales/*.ts]
-      i18nPrefixes: [crm]
+      i18nPrefixes: []
     gatewayRoutes: [omni-crm]
     composeServices: [omni-crm]
     database:
@@ -180,9 +185,10 @@ modules:
     backendModules: [omni-srm]
     frontend:
       viewGlobs: [omni-frontend/src/views/srm, omni-frontend/src/views/supplier-portal, omni-frontend/src/views/portal-login, omni-frontend/src/views/portal-register]
+      componentGlobs: [omni-frontend/src/components/srm]
       apiGlobs: [omni-frontend/src/api/srm-*.ts]
       i18nGlobs: [omni-frontend/src/locales/*.ts]
-      i18nPrefixes: [srm, supplierPortal]
+      i18nPrefixes: [portalLogin, portalRegister, portal]
     gatewayRoutes: [omni-srm]
     composeServices: [omni-srm]
     database:
@@ -212,9 +218,10 @@ modules:
     backendModules: [omni-procurement]
     frontend:
       viewGlobs: [omni-frontend/src/views/procurement]
+      componentGlobs: [omni-frontend/src/components/procurement]
       apiGlobs: [omni-frontend/src/api/procurement-*.ts]
       i18nGlobs: [omni-frontend/src/locales/*.ts]
-      i18nPrefixes: [procurement]
+      i18nPrefixes: [procurementApprovalRules]
     gatewayRoutes: [omni-procurement]
     composeServices: [omni-procurement]
     database:
@@ -244,9 +251,10 @@ modules:
     backendModules: [omni-asset]
     frontend:
       viewGlobs: [omni-frontend/src/views/asset]
+      componentGlobs: []
       apiGlobs: [omni-frontend/src/api/asset-*.ts]
       i18nGlobs: [omni-frontend/src/locales/*.ts]
-      i18nPrefixes: [asset]
+      i18nPrefixes: []
     gatewayRoutes: [omni-asset]
     composeServices: [omni-asset]
     database:
@@ -274,7 +282,7 @@ modules:
     optionalModules: [mysql]
     conflicts: []
     backendModules: []
-    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    frontend: { viewGlobs: [], componentGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
     gatewayRoutes: []
     composeServices: [nacos]
     database:
@@ -300,7 +308,7 @@ modules:
     optionalModules: [mysql]
     conflicts: []
     backendModules: []
-    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    frontend: { viewGlobs: [], componentGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
     gatewayRoutes: []
     composeServices: [xxl-job-admin]
     database:
@@ -326,7 +334,7 @@ modules:
     optionalModules: []
     conflicts: []
     backendModules: [omni-gateway]
-    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    frontend: { viewGlobs: [], componentGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
     gatewayRoutes: []
     composeServices: [omni-gateway]
     database: { changelogs: [], seedSourceIds: [] }
@@ -350,7 +358,7 @@ modules:
     optionalModules: []
     conflicts: []
     backendModules: []
-    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    frontend: { viewGlobs: [], componentGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
     gatewayRoutes: []
     composeServices: [mysql]
     database: { changelogs: [], seedSourceIds: [] }
@@ -374,7 +382,7 @@ modules:
     optionalModules: []
     conflicts: []
     backendModules: []
-    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    frontend: { viewGlobs: [], componentGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
     gatewayRoutes: []
     composeServices: [redis]
     database: { changelogs: [], seedSourceIds: [] }
@@ -398,7 +406,7 @@ modules:
     optionalModules: []
     conflicts: []
     backendModules: []
-    frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
+    frontend: { viewGlobs: [], componentGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] }
     gatewayRoutes: []
     composeServices: [rocketmq-namesrv, rocketmq-broker]
     database: { changelogs: [], seedSourceIds: [] }

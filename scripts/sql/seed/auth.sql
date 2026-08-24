@@ -149,6 +149,14 @@ VALUES
 INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 100), (1, 101), (1, 102);
 
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
+    (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
+    (2, 11), (2, 15), (2, 19), (2, 23),
+    (2, 27), (2, 28),
+    (2, 51), (2, 52), (2, 56),
+    (2, 61), (2, 62),
+    (2, 70), (2, 71);
+
 INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
     (200, 1, 0,   'workflow',                        '工作流管理',     'DIRECTORY', '/200/',          1, 6, 1, 'system'),
@@ -186,12 +194,6 @@ INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
     (1, 228), (1, 229), (1, 230);
 
 INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES
-    (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
-    (2, 11), (2, 15), (2, 19), (2, 23),
-    (2, 27), (2, 28),
-    (2, 51), (2, 52), (2, 56),
-    (2, 61), (2, 62),
-    (2, 70), (2, 71),
     (2, 201), (2, 202), (2, 210), (2, 211), (2, 214);
 
 INSERT IGNORE INTO sys_role_permission (role_id, permission_id) VALUES

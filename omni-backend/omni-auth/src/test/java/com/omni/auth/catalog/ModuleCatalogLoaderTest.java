@@ -2,6 +2,7 @@ package com.omni.auth.catalog;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -14,15 +15,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ModuleCatalogLoaderTest {
 
     /**
-     * 仓库目录必须能解析出稳定的本地与事件模块顺序。
+     * 仓库目录必须能按当前预设解析出稳定的本地与事件模块顺序。
      */
     @Test
     void should_load_repository_catalog() {
         ModuleCatalog catalog = new ModuleCatalogLoader().catalog();
+        List<String> expectedLocal = catalog.modules().stream()
+                .filter(module -> module.tenantProvisioning() == ModuleCatalog.TenantProvisioningMode.LOCAL)
+                .map(ModuleCatalog.ModuleDefinition::id)
+                .toList();
+        List<String> expectedEvent = catalog.modules().stream()
+                .filter(module -> module.tenantProvisioning() == ModuleCatalog.TenantProvisioningMode.EVENT)
+                .map(ModuleCatalog.ModuleDefinition::id)
+                .toList();
 
-        assertThat(catalog.localProvisioningModuleIds()).containsExactly("platform", "auth");
-        assertThat(catalog.eventProvisioningModuleIds())
-                .containsExactly("base", "workflow", "crm", "srm", "procurement", "asset");
+        assertThat(catalog.localProvisioningModuleIds()).containsExactlyElementsOf(expectedLocal);
+        assertThat(catalog.eventProvisioningModuleIds()).containsExactlyElementsOf(expectedEvent).startsWith("base");
         assertThat(catalog.modules()).isUnmodifiable();
     }
 

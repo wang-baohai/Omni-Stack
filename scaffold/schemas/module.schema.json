@@ -26,9 +26,10 @@
     "frontend": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["viewGlobs", "apiGlobs", "i18nGlobs", "i18nPrefixes"],
+      "required": ["viewGlobs", "componentGlobs", "apiGlobs", "i18nGlobs", "i18nPrefixes"],
       "properties": {
         "viewGlobs": { "$ref": "#/definitions/stringList" },
+        "componentGlobs": { "$ref": "#/definitions/stringList" },
         "apiGlobs": { "$ref": "#/definitions/stringList" },
         "i18nGlobs": { "$ref": "#/definitions/stringList" },
         "i18nPrefixes": { "$ref": "#/definitions/stringList" }

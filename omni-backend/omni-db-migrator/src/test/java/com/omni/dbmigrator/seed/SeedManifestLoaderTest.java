@@ -1,6 +1,8 @@
 package com.omni.dbmigrator.seed;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,16 +18,19 @@ class SeedManifestLoaderTest {
     private final SeedManifestLoader loader = new SeedManifestLoader();
 
     /**
-     * 应加载正式清单并保留全部模块和断言。
+     * 应加载正式清单并保证种子源、模块和断言引用闭合。
      */
     @Test
     void should_load_manifest_when_contract_is_valid() {
         SeedManifest manifest = loader.load("database/seed/manifest.yaml");
+        Set<String> moduleIds = manifest.modules().stream()
+                .map(SeedModule::id)
+                .collect(Collectors.toSet());
 
         assertThat(manifest.version()).isEqualTo("1.0.0-bootstrap");
-        assertThat(manifest.sources()).hasSizeGreaterThanOrEqualTo(8);
-        assertThat(manifest.modules()).hasSize(10);
-        assertThat(manifest.assertions()).hasSizeGreaterThanOrEqualTo(24);
+        assertThat(moduleIds).hasSize(manifest.modules().size()).contains("platform", "auth", "base");
+        assertThat(manifest.sources()).isNotEmpty().allMatch(source -> moduleIds.contains(source.module()));
+        assertThat(manifest.assertions()).isNotEmpty().allMatch(assertion -> moduleIds.contains(assertion.module()));
     }
 
     /**

@@ -13,6 +13,9 @@
     "test:crud-golden": "npm run build && node scripts/crud-golden.mjs",
     "test:crud-db-golden": "npm run build && node scripts/crud-database-golden.mjs",
     "test:crud-runtime-golden": "npm run build && node scripts/crud-runtime-golden.mjs",
+    "test:preset-smoke": "npm run build && node scripts/preset-golden.mjs --presets=core,supply-chain --verify-only",
+    "test:preset-golden": "npm run build && node scripts/preset-golden.mjs",
+    "test:preset-structure": "npm run build && node scripts/preset-golden.mjs --structural-only",
     "dev": "tsx src/cli.ts"
   },
   "dependencies": {

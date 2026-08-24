@@ -6,7 +6,7 @@ sources:
   - id: auth-bootstrap
     module: auth
     resource: scripts/sql/seed/auth.sql
-    sha256: "025cb76a3c99026419c733a99995d7bc0fcecd60abdef6e50aec8d145241eef0"
+    sha256: "324c0cf0f9fa53cf7892b38952ebc033d83f39268dce1bcb3da17aa0a2168971"
   - id: base-bootstrap
     module: base
     resource: scripts/sql/seed/base.sql

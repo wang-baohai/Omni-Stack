@@ -37,7 +37,7 @@ describe('module catalog', () => {
             optionalModules: [],
             conflicts: [],
             backendModules: [],
-            frontend: { viewGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] },
+            frontend: { viewGlobs: [], componentGlobs: [], apiGlobs: [], i18nGlobs: [], i18nPrefixes: [] },
             gatewayRoutes: [],
             composeServices: [],
             database: { changelogs: [], seedSourceIds: [] },

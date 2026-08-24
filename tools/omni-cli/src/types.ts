@@ -13,6 +13,7 @@ export interface ModuleDefinition {
   backendModules: string[];
   frontend: {
     viewGlobs: string[];
+    componentGlobs: string[];
     apiGlobs: string[];
     i18nGlobs: string[];
     i18nPrefixes: string[];
@@ -56,6 +57,34 @@ export interface ResolvedPreset {
   preset: PresetDefinition;
   explicitModules: string[];
   resolvedModules: string[];
+}
+
+/** 预设工程生成计划。 */
+export interface PresetGenerationPlan {
+  targetDirectory: string;
+  resolved: ResolvedPreset;
+  omittedModules: string[];
+  summary: {
+    backendModules: string[];
+    composeServices: string[];
+    gatewayRoutes: string[];
+    ports: number[];
+    databases: string[];
+    permissionRoots: string[];
+    minimumMemoryMb: number;
+    recommendedMemoryMb: number;
+  };
+}
+
+/** 裁剪工程根目录锁文件。 */
+export interface PresetGenerationLock {
+  generatedBy: '@omni-stack/cli';
+  generatorVersion: string;
+  sourceVersion: string;
+  catalogVersion: string;
+  preset: { id: string; version: string };
+  modules: Array<{ id: string; version: string }>;
+  templates: { preset: string; service: string; crud: string };
 }
 
 /** 新服务生成参数。 */

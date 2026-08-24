@@ -7,6 +7,7 @@ import { CliError } from './errors.js';
 import { renderCrudGeneration, validateExistingCrud } from './crud-generator.js';
 import { loadCrudSpec } from './crud-spec.js';
 import { listPresetIds, resolvePreset } from './presets.js';
+import { applyPresetGeneration, planPresetGeneration, validateGeneratedPreset } from './preset-generator.js';
 import {
   applyServiceGeneration,
   GENERATOR_VERSION,
@@ -34,12 +35,20 @@ const preset = program.command('preset').description('项目裁剪预设命令')
 preset.command('list').description('列出预设').action(() => {
   listPresetIds(workspaceRoot()).forEach((id) => console.log(id));
 });
-preset.command('validate <preset-id>').description('校验预设及依赖闭包').action((presetId: string) => {
+preset.command('validate <preset-or-file>').description('校验正式预设或自定义 YAML 及依赖闭包')
+  .option('--output <directory>', '同时校验已生成的预设工程')
+  .action((presetId: string, commandOptions: { output?: string }) => {
   const root = workspaceRoot();
-  const resolved = resolvePreset(root, loadCatalog(root), presetId);
-  console.log(`preset valid: ${presetId}, modules=${resolved.resolvedModules.join(',')}`);
+  const moduleCatalog = loadCatalog(root);
+  validateCatalogResources(root, moduleCatalog);
+  const resolved = resolvePreset(root, moduleCatalog, presetId);
+  if (commandOptions.output) {
+    const lock = validateGeneratedPreset(resolveOutput(root, commandOptions.output), resolved.preset.id);
+    console.log(`generated preset valid: ${lock.preset.id}@${lock.preset.version}, modules=${lock.modules.length}`);
+  }
+  console.log(`preset valid: ${resolved.preset.id}, modules=${resolved.resolvedModules.join(',')}`);
 });
-preset.command('explain <preset-id>').description('解释预设').action((presetId: string) => {
+preset.command('explain <preset-or-file>').description('解释正式预设或自定义 YAML').action((presetId: string) => {
   const root = workspaceRoot();
   const resolved = resolvePreset(root, loadCatalog(root), presetId);
   console.log(`${resolved.preset.displayName} (${resolved.preset.id}@${resolved.preset.version})`);
@@ -47,6 +56,30 @@ preset.command('explain <preset-id>').description('解释预设').action((preset
   console.log(`explicit: ${resolved.explicitModules.join(', ')}`);
   console.log(`resolved: ${resolved.resolvedModules.join(', ')}`);
 });
+preset.command('create <preset-or-file>')
+  .description('在新目录原子生成裁剪后的工程')
+  .requiredOption('--output <directory>', '输出目录（必须不存在或为空）')
+  .option('--dry-run', '仅显示资源与裁剪计划，不写入文件')
+  .action((presetId: string, commandOptions: { output: string; dryRun?: boolean }) => {
+    const root = workspaceRoot();
+    const plan = planPresetGeneration(root, presetId, commandOptions.output);
+    console.log(`${commandOptions.dryRun ? 'DRY-RUN' : 'CREATE'} preset ${plan.resolved.preset.id}@${plan.resolved.preset.version}`);
+    console.log(`target: ${plan.targetDirectory}`);
+    console.log(`modules: ${plan.resolved.resolvedModules.join(', ')}`);
+    console.log(`backend: ${plan.summary.backendModules.join(', ')}`);
+    console.log(`compose: ${plan.summary.composeServices.join(', ')}`);
+    console.log(`ports: ${plan.summary.ports.join(', ')}`);
+    console.log(`databases: ${plan.summary.databases.join(', ')}`);
+    console.log(`permissions: ${plan.summary.permissionRoots.join(', ') || '-'}`);
+    console.log(`memory: minimum=${plan.summary.minimumMemoryMb}MB, recommended=${plan.summary.recommendedMemoryMb}MB`);
+    console.log(`omit: ${plan.omittedModules.join(', ') || '-'}`);
+    if (commandOptions.dryRun) {
+      console.log('未写入文件；移除 --dry-run 后创建。');
+      return;
+    }
+    const lock = applyPresetGeneration(root, plan);
+    console.log(`preset created: ${lock.preset.id}@${lock.preset.version}, modules=${lock.modules.length}`);
+  });
 preset.command('diff <left> <right>').description('比较两个预设').action((left: string, right: string) => {
   const root = workspaceRoot();
   const moduleCatalog = loadCatalog(root);

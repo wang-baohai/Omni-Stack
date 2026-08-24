@@ -1,5 +1,5 @@
 import { existsSync, readdirSync } from 'node:fs';
-import { basename, extname, resolve } from 'node:path';
+import { basename, extname, isAbsolute, resolve } from 'node:path';
 import { CliError } from './errors.js';
 import { resolveModuleClosure } from './catalog.js';
 import { formatSchemaErrors, loadSchema } from './schema.js';
@@ -34,13 +34,28 @@ export function loadPreset(workspaceRoot: string, presetId: string): PresetDefin
   return preset;
 }
 
+/** 加载正式预设 ID 或用户提供的自定义 YAML 文件。 */
+export function loadPresetInput(workspaceRoot: string, presetOrFile: string): PresetDefinition {
+  const candidate = isAbsolute(presetOrFile) ? resolve(presetOrFile) : resolve(workspaceRoot, presetOrFile);
+  if (!existsSync(candidate)) return loadPreset(workspaceRoot, presetOrFile);
+  if (!['.yaml', '.yml'].includes(extname(candidate).toLowerCase())) {
+    throw new CliError(`自定义预设必须是 YAML 文件: ${presetOrFile}`);
+  }
+  const value = readYamlFile(candidate);
+  const validate = loadSchema(workspaceRoot, 'preset.schema.json');
+  if (!validate(value)) {
+    throw new CliError(`自定义预设 Schema 校验失败: ${formatSchemaErrors(validate.errors)}`);
+  }
+  return value as PresetDefinition;
+}
+
 /** 解析预设的依赖闭包。 */
 export function resolvePreset(
   workspaceRoot: string,
   catalog: ModuleCatalog,
   presetId: string,
 ): ResolvedPreset {
-  const preset = loadPreset(workspaceRoot, presetId);
+  const preset = loadPresetInput(workspaceRoot, presetId);
   return {
     preset,
     explicitModules: [...preset.modules],

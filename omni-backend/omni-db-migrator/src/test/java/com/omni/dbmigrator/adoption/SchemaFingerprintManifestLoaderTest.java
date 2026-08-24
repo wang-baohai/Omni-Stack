@@ -1,5 +1,7 @@
 package com.omni.dbmigrator.adoption;
 
+import com.omni.dbmigrator.migration.MigrationTarget;
+import com.omni.dbmigrator.migration.MigrationTargetCatalog;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SchemaFingerprintManifestLoaderTest {
 
     /**
-     * 应加载冻结提交和全部九个目标。
+     * 应加载冻结提交和当前模块清单声明的全部目标。
      */
     @Test
     void should_load_all_targets_when_baseline_is_valid() {
@@ -22,8 +24,8 @@ class SchemaFingerprintManifestLoaderTest {
         assertThat(manifest.algorithm()).isEqualTo("mysql-information-schema-v1");
         assertThat(manifest.targets())
                 .extracting(SchemaFingerprintTarget::id)
-                .containsExactly(
-                        "auth", "base", "workflow", "crm", "srm",
-                        "procurement", "asset", "nacos", "xxl-job");
+                .containsExactlyElementsOf(MigrationTargetCatalog.targets().stream()
+                        .map(MigrationTarget::id)
+                        .toList());
     }
 }
