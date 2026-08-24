@@ -38,7 +38,7 @@ documents:
     module: backend
     owner: backend
     source: docs/backend-patterns.md
-    source_sha256: 064a80d61f5fc6f987a944dcb418bd7888c6d0c246b860006adea68ebcec40ed
+    source_sha256: d6dd03fc88502f4ced3ff4a894dd3b993606a4c2d92e16edd8c7eab7dcc08a7d
     dependencies: [starter, security, persistence, testing]
     translations:
       en-US: { path: docs/backend-patterns.en.md, status: present-unverified, reviewed_at: null }
@@ -93,7 +93,7 @@ documents:
     module: crm
     owner: crm
     source: docs/crm.md
-    source_sha256: b65c179113c4901f56a8b200bcb571db58855b060662a1c882f6054cf653c8bf
+    source_sha256: 29f71d97b6d37bbedd1f9b63c4746397545927015dc936c90e78d492dc20d058
     dependencies: [api, permissions, state-machine, screenshots]
     translations:
       en-US: { path: docs/crm.en.md, status: present-unverified, reviewed_at: null }
@@ -148,7 +148,7 @@ documents:
     module: srm
     owner: srm
     source: docs/design/srm-design.md
-    source_sha256: 6647595812af70b061b33ef04b6f84dbad7d81eef7213ac0cedd08a888729e0d
+    source_sha256: ceeb22198758d1561a4fdfa4984c6f415ebb7bf76d50a18778327435b5065c9b
     dependencies: [schema, api, permissions, portal-saga]
     translations:
       en-US: { path: docs/design/srm-design.en.md, status: missing, reviewed_at: null }

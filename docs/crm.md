@@ -18,11 +18,11 @@ CRM 是独立微服务 `omni-crm`，覆盖售前闭环：线索 → 跟进 → �
 | Gateway 路由 | `/api/crm/**` → `lb://omni-crm`（不使用 StripPrefix） |
 | Redis | DB 0，共享 Auth 的 XSS 配置，键前缀 `crm:` |
 
-**依赖模块**：`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`。
+**依赖模块**：`omni-common-service`、`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`。
 
 **不要依赖** `omni-common-workflow`，否则会把 Flowable 引擎嵌入 CRM。
 
-**跨服务调用**：通过 OpenFeign + `X-Internal-Token` 调用 Auth 内部 API，CRM 只存 userId/unitId，不跨库读取 `omni_auth`。
+**跨服务调用**：通过 OpenFeign + `InternalFeignHeadersFactory` 生成的 `X-Internal-Token` 调用 Auth 内部 API，CRM 只存 userId/unitId，不跨库读取 `omni_auth`。
 
 ## 2. 领域模型
 
@@ -77,13 +77,13 @@ erDiagram
 
 ```
 Gateway JWT 验证 → CRM Tenant 校验 → Spring Security @PreAuthorize
-→ @CrmDataScope 切面 → MyBatis DataPermission 拦截器 → CrmRecordAccessGuard 行级写授权
+→ @ServiceDataScope 切面 → MyBatis DataPermission 拦截器 → CrmRecordAccessGuard 行级写授权
 ```
 
 1. Gateway 验证 RS256 JWT，覆盖注入 `X-User-*`、`X-Tenant-Id`、`X-Gateway-Forwarded`
-2. `GatewayPreAuthFilter` 构建 `Authentication`，校验 userId/tenantId
+2. `omni-common-service` 的 `GatewayPreAuthenticationFilter` 构建 `Authentication`，`ServiceIdentityFilter` 校验并绑定 userId/tenantId
 3. Controller `@PreAuthorize` 验证功能权限
-4. `@CrmDataScope(permissionCode)` 切面调 Auth 内部 API 解析 dataScope
+4. `@ServiceDataScope(permissionCode)` 公共切面调 Auth 内部 API 解析 dataScope
 5. MyBatis-Plus 追加 tenant + owner 条件
 6. `CrmRecordAccessGuard` 校验写操作行级授权
 
@@ -91,7 +91,7 @@ Gateway JWT 验证 → CRM Tenant 校验 → Spring Security @PreAuthorize
 
 ### 3.2 MyBatis 拦截器顺序
 
-CRM 自定义 `mybatisPlusInterceptor`，顺序固定不可调换：
+CRM 通过 `CrmTenantTablePolicy` 和 `CrmDataPermissionHandler` 向 `omni-common-service` 提供领域策略，公共 Starter 装配 `mybatisPlusInterceptor`，顺序固定不可调换：
 
 ```
 TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInterceptor
@@ -133,7 +133,7 @@ DataPermissionInterceptor 不保护写入。每个更新/删除/转换/转移/�
 | Owner 候选 | `crm:owner:list` |
 | PII 查看 | `crm:pii:view` |
 
-表中 `/` 是同一资源下多个完整权限码的简写，落库时逐条保存完整 code。`@PreAuthorize` 与 `@CrmDataScope` 使用同一个完整权限码。
+表中 `/` 是同一资源下多个完整权限码的简写，落库时逐条保存完整 code。`@PreAuthorize` 与 `@ServiceDataScope` 使用同一个完整权限码。
 
 ### 3.6 PII 掩码
 
@@ -144,7 +144,7 @@ DataPermissionInterceptor 不保护写入。每个更新/删除/转换/转移/�
 
 ### 3.7 XSS 防护
 
-CRM 实现 `XssConfigProvider` SPI，读取 Redis DB 0 的 `xss:enabled:{tenantId}` 和 `xss:rules:{tenantId}`。缓存 miss 时回源 Auth 或使用内置基线规则，不关闭防护。MVP 备注只允许纯文本，前端禁止 `v-html`。
+CRM 启用 `omni-common-service` 的共享 `XssConfigProvider`，读取 Redis DB 0 的 `xss:enabled:{tenantId}` 和 `xss:rules:{tenantId}`。缓存 miss 时回源 Auth；回源失败使用公共安全基线，不关闭防护。MVP 备注只允许纯文本，前端禁止 `v-html`。
 
 ### 3.8 角色与 dataScope
 
@@ -242,7 +242,7 @@ POST /lead/{id}/convert → SELECT Lead FOR UPDATE
 
 ### 5.3 Customer 360 分块权限
 
-`/customer/{id}/overview` 返回联系人、商机、活动、线索摘要。但这不是"客户可见即所有子数据可见"——每块用各自的 list permission 独立解析数据范围，缺少某块权限时不查询该块。实现用 `CrmPermissionScopeExecutor` 逐块建立和清理 scope。
+`/customer/{id}/overview` 返回联系人、商机、活动、线索摘要。但这不是"客户可见即所有子数据可见"——每块用各自的 list permission 独立解析数据范围，缺少某块权限时不查询该块。实现用 `CrmPermissionScopeExecutor` 逐块建立和清理 `ServiceDataScopeContext`。
 
 ### 5.4 Overview 聚合查询
 
@@ -276,8 +276,8 @@ POST /lead/{id}/convert → SELECT Lead FOR UPDATE
 1. **租户隔离**：所有 `crm_*` 表必须有 `tenant_id`，TenantLine 始终追加，普通 API 永不跨租户
 2. **乐观锁**：所有写操作必须 `tenant_id + id + version` 条件更新
 3. **失败关闭**：缺 tenant → 401，缺 scope → `id=-1`，Auth 不可用 → 503，绝不降级
-4. **ThreadLocal 清理**：`CrmDataScopeContext` 必须在 `finally` 块清理，防内存泄漏
-5. **权限双声明**：写接口必须同时声明 `@PreAuthorize`（功能权限）和 `@CrmDataScope`（数据范围），使用同一个完整权限码
+4. **ThreadLocal 清理**：`ServiceIdentityContext` 和 `ServiceDataScopeContext` 必须在 `finally` 块清理，防内存泄漏
+5. **权限双声明**：写接口必须同时声明 `@PreAuthorize`（功能权限）和 `@ServiceDataScope`（数据范围），使用同一个完整权限码
 6. **PII 后端掩码**：无 `crm:pii:view` 时后端 VO 直接返回掩码，不依赖前端
 7. **Outbox tenantId 显式**：`ReliableMessageRelay.send()` 必须显式传 `Long tenantId`，禁止 ThreadLocal 隐式
 8. **拦截器顺序**：TenantLine → DataPermission → Pagination，不可调换
@@ -327,7 +327,7 @@ omni-frontend/src/
 2. 创建 Entity（extends BaseEntity）、Mapper、Service 接口 + Impl、Controller
 3. 在 `CrmDataPermissionHandlerImpl` 中注册新表的 owner 列映射
 4. 在 `init-all.sql` 中追加 DDL 和权限种子数据
-5. Controller 写接口声明 `@PreAuthorize` + `@CrmDataScope`，使用新的 `crm:<resource>:<action>` 权限码
+5. Controller 写接口声明 `@PreAuthorize` + `@ServiceDataScope`，使用新的 `crm:<resource>:<action>` 权限码
 
 ### 新增 Opportunity 阶段
 
@@ -340,7 +340,7 @@ MVP 管道不可配置。如果未来开放，需要：
 
 1. 在 `init-all.sql` 的 `sys_permission` 中插入新权限，type 为 `API`
 2. 按角色分配到 `sys_role_permission`
-3. Controller 方法声明 `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@CrmDataScope("crm:<resource>:<action>")`
+3. Controller 方法声明 `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@ServiceDataScope(permissionCode = "crm:<resource>:<action>")`
 4. 前端对应按钮添加 `v-permission="'crm:<resource>:<action'"`
 
 ### 接入 Outbox 事件
