@@ -12,7 +12,7 @@ import type {
   ServiceSpec,
 } from './types.js';
 
-export const GENERATOR_VERSION = '0.2.0';
+export const GENERATOR_VERSION = '0.3.0';
 export const SERVICE_TEMPLATE_VERSION = '1.0.0';
 const LOCK_FILE = 'omni-service.lock.json';
 const TEMPLATE_ROOT = 'scaffold/templates/service';
@@ -37,7 +37,7 @@ const TEMPLATE_ENTRIES: TemplateEntry[] = [
   { template: 'backend/application-dev.yml.hbs', output: 'omni-backend/{{artifactId}}/src/main/resources/application-dev.yml' },
   { template: 'backend/ServiceSkeletonContractTest.java.hbs', output: 'omni-backend/{{artifactId}}/src/test/java/{{packagePath}}/ServiceSkeletonContractTest.java' },
   { template: 'frontend/api.ts.hbs', output: 'omni-frontend/src/api/{{serviceId}}.ts' },
-  { template: 'frontend/index.vue.hbs', output: 'omni-frontend/src/views/{{serviceId}}/index.vue' },
+  { template: 'frontend/index.vue.hbs', output: 'omni-frontend/src/views/{{serviceId}}/overview/index.vue' },
   { template: 'frontend/zh-CN.fragment.ts.hbs', output: 'integration/frontend/{{serviceId}}.zh-CN.fragment.ts' },
   { template: 'frontend/en-US.fragment.ts.hbs', output: 'integration/frontend/{{serviceId}}.en-US.fragment.ts' },
   { template: 'integration/catalog-entry.yaml.hbs', output: 'integration/catalog/{{serviceId}}.yaml' },
@@ -227,6 +227,7 @@ function templateContext(spec: ServiceSpec): Record<string, unknown> {
     managementPortExpression: `\${MANAGEMENT_PORT:${spec.managementPort}}`,
     xxlPortExpression: `\${XXL_JOB_EXECUTOR_PORT:${spec.xxlPort}}`,
     frontendApiPrefix: spec.apiPrefix.slice('/api'.length),
+    lowerCamelClassName: `${spec.className.charAt(0).toLowerCase()}${spec.className.slice(1)}`,
   };
 }
 

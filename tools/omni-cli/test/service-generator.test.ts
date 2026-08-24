@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterEach, describe, it } from 'node:test';
+import ts from 'typescript';
 import { CliError } from '../src/errors.js';
 import {
   applyServiceGeneration,
@@ -54,13 +55,17 @@ describe('create-service generator', () => {
     assert.ok(lock.files.some((file) => file.path.endsWith('DataScopeTablePolicy.java')));
     assert.equal(applyServiceGeneration(plan), 'unchanged');
     assert.match(
-      readFileSync(resolve(output, 'omni-frontend/src/views/inventory-sample/index.vue'), 'utf8'),
+      readFileSync(resolve(output, 'omni-frontend/src/views/inventory-sample/overview/index.vue'), 'utf8'),
       /\{\{ moduleInfo\.serviceId \}\}/,
     );
     assert.match(
       readFileSync(resolve(output, 'omni-frontend/src/api/inventory-sample.ts'), 'utf8'),
       /request\.get<ApiResponse<InventorySampleModuleInfo>>\('\/inventory-sample\/status'\)/,
     );
+    assertTypeScriptParses(
+      `export default {\n${readFileSync(resolve(output, 'integration/frontend/inventory-sample.zh-CN.fragment.ts'), 'utf8')}\n}`,
+    );
+    assertTypeScriptParses(readFileSync(resolve(output, 'integration/frontend/inventory-sample.menu.fragment.ts'), 'utf8'));
   });
 
   it('rejects unsafe DataScope and existing workspace conflicts', () => {
@@ -101,4 +106,10 @@ function createTemporaryTarget(): string {
   const parent = mkdtempSync(resolve(tmpdir(), 'omni-cli-service-test-'));
   temporaryDirectories.push(parent);
   return resolve(parent, 'generated-service');
+}
+
+function assertTypeScriptParses(content: string): void {
+  const source = ts.createSourceFile('generated.ts', content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const diagnostics = (source as ts.SourceFile & { parseDiagnostics?: readonly ts.Diagnostic[] }).parseDiagnostics ?? [];
+  assert.deepEqual(diagnostics, []);
 }

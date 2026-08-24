@@ -95,3 +95,25 @@ export interface ServiceGenerationLock {
   spec: ServiceSpec;
   files: Array<{ path: string; sha256: string }>;
 }
+
+/** 服务包接入操作类型。 */
+export type IntegrationOperationKind = 'create-directory' | 'create-file' | 'modify-xml' | 'modify-yaml'
+  | 'modify-typescript' | 'modify-sql' | 'modify-dockerfile';
+
+/** 单个 monorepo 接入操作。 */
+export interface IntegrationOperation {
+  kind: IntegrationOperationKind;
+  target: string;
+  description: string;
+  source?: string;
+}
+
+/** 服务包只读接入计划。 */
+export interface ServiceIntegrationPlan {
+  serviceId: string;
+  sourceDirectory: string;
+  operations: IntegrationOperation[];
+  conflicts: string[];
+  warnings: string[];
+  ready: boolean;
+}

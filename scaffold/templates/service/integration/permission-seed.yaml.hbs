@@ -5,11 +5,15 @@ permissions:
     code: "{{serviceId}}"
     name: "{{displayName}}"
   - type: MENU
+    code: "{{serviceId}}:overview"
+    name: "{{displayName}}概览"
+    path: "/{{serviceId}}/overview"
+  - type: API
     code: "{{serviceId}}:read"
     name: "查看{{displayName}}"
-    path: "/{{serviceId}}"
 roles:
   - roleCode: SUPER_ADMIN
     permissionCodes:
       - "{{serviceId}}"
+      - "{{serviceId}}:overview"
       - "{{serviceId}}:read"
