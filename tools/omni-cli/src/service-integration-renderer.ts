@@ -27,7 +27,7 @@ const TARGETS = {
   router: 'omni-frontend/src/router/index.ts',
   zhLocale: 'omni-frontend/src/locales/zh-CN.ts',
   enLocale: 'omni-frontend/src/locales/en-US.ts',
-  authSeed: 'scripts/sql/seed/auth.sql',
+  authChangelog: 'database/changelog/auth/db.changelog-auth.yaml',
   seedManifest: 'database/seed/manifest.yaml',
   platformChangelog: 'database/changelog/platform/db.changelog-platform.yaml',
   migrationCatalog: 'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
@@ -60,17 +60,16 @@ export function renderServiceIntegration(
   addModified(changes, workspaceRoot, TARGETS.router, (content) => renderRouter(content, lock.spec));
   addModified(changes, workspaceRoot, TARGETS.zhLocale, (content) => renderLocale(content, lock.spec, 'zh-CN'));
   addModified(changes, workspaceRoot, TARGETS.enLocale, (content) => renderLocale(content, lock.spec, 'en-US'));
-  const authSeedChange = addModified(
+  addModified(changes, workspaceRoot, TARGETS.authChangelog, (content) => renderAuthChangelog(content, lock.spec));
+  const permissionSql = generatedContent(
     changes,
-    workspaceRoot,
-    TARGETS.authSeed,
-    (content) => renderAuthSeed(content, lock.spec),
+    `scripts/sql/seed/${lock.spec.serviceId}-permissions.sql`,
   );
   addModified(
     changes,
     workspaceRoot,
     TARGETS.seedManifest,
-    (content) => renderSeedManifest(content, lock.spec, sha256(authSeedChange.after)),
+    (content) => renderSeedManifest(content, lock.spec, sha256(permissionSql)),
   );
 
   ensureUniqueTargets(changes);
@@ -89,6 +88,8 @@ function addGeneratedFiles(
     `omni-frontend/src/api/${lock.spec.serviceId}.ts`,
     `omni-frontend/src/views/${lock.spec.serviceId}/`,
     `database/changelog/${lock.spec.serviceId}/`,
+    `database/changelog/auth/${lock.spec.serviceId}-permissions.yaml`,
+    `scripts/sql/seed/${lock.spec.serviceId}-permissions.sql`,
     `docs/${lock.spec.serviceId}.md`,
     `docs/${lock.spec.serviceId}-i18n-status.yaml`,
   ];
@@ -319,93 +320,43 @@ function renderLocale(content: string, spec: ServiceSpec, locale: 'zh-CN' | 'en-
   return result;
 }
 
-function renderAuthSeed(content: string, spec: ServiceSpec): string {
-  const serviceCode = sqlLiteral(spec.serviceId);
-  const overviewCode = sqlLiteral(`${spec.serviceId}:overview`);
-  const readCode = sqlLiteral(`${spec.serviceId}:read`);
-  const display = sqlLiteral(spec.displayName);
+function renderAuthChangelog(content: string, spec: ServiceSpec): string {
+  const document = yamlDocument(content, TARGETS.authChangelog);
+  const root = document.toJS() as { databaseChangeLog?: Array<{ include?: { file?: string } }> };
+  const generatedFile = `database/changelog/auth/${spec.serviceId}-permissions.yaml`;
+  if (root.databaseChangeLog?.some((entry) => entry.include?.file === generatedFile)) {
+    throw new CliError(`Auth changelog 已包含生成权限文件：${generatedFile}`);
+  }
   const block = `
--- generated-by: @omni-stack/cli；${spec.displayName}模块权限模板（自然键幂等）
-INSERT INTO sys_permission
-    (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
-SELECT tenant.id, 0, '${serviceCode}', '${display}', 'DIRECTORY', '', 1, 50, 1, 'system'
-FROM sys_tenant tenant
-WHERE tenant.tenant_code = 'default'
-  AND NOT EXISTS (
-      SELECT 1 FROM sys_permission existing
-      WHERE existing.tenant_id = tenant.id AND existing.permission_code = '${serviceCode}'
-  );
-
-UPDATE sys_permission permission
-JOIN sys_tenant tenant ON tenant.id = permission.tenant_id AND tenant.tenant_code = 'default'
-SET permission.path = CONCAT('/', permission.id, '/')
-WHERE permission.permission_code = '${serviceCode}';
-
-INSERT INTO sys_permission
-    (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
-SELECT tenant.id, parent.id, '${overviewCode}', '${display}概览', 'MENU', '', 2, 1, 1, 'system'
-FROM sys_tenant tenant
-JOIN sys_permission parent ON parent.tenant_id = tenant.id AND parent.permission_code = '${serviceCode}'
-WHERE tenant.tenant_code = 'default'
-  AND NOT EXISTS (
-      SELECT 1 FROM sys_permission existing
-      WHERE existing.tenant_id = tenant.id AND existing.permission_code = '${overviewCode}'
-  );
-
-UPDATE sys_permission permission
-JOIN sys_tenant tenant ON tenant.id = permission.tenant_id AND tenant.tenant_code = 'default'
-JOIN sys_permission parent ON parent.id = permission.parent_id AND parent.tenant_id = permission.tenant_id
-SET permission.path = CONCAT(parent.path, permission.id, '/')
-WHERE permission.permission_code = '${overviewCode}';
-
-INSERT INTO sys_permission
-    (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
-SELECT tenant.id, parent.id, '${readCode}', '查看${display}', 'API', '', 3, 1, 1, 'system'
-FROM sys_tenant tenant
-JOIN sys_permission parent ON parent.tenant_id = tenant.id AND parent.permission_code = '${overviewCode}'
-WHERE tenant.tenant_code = 'default'
-  AND NOT EXISTS (
-      SELECT 1 FROM sys_permission existing
-      WHERE existing.tenant_id = tenant.id AND existing.permission_code = '${readCode}'
-  );
-
-UPDATE sys_permission permission
-JOIN sys_tenant tenant ON tenant.id = permission.tenant_id AND tenant.tenant_code = 'default'
-JOIN sys_permission parent ON parent.id = permission.parent_id AND parent.tenant_id = permission.tenant_id
-SET permission.path = CONCAT(parent.path, permission.id, '/')
-WHERE permission.permission_code = '${readCode}';
-
-INSERT INTO sys_role_permission (role_id, permission_id)
-SELECT role.id, permission.id
-FROM sys_role role
-JOIN sys_permission permission ON permission.tenant_id = role.tenant_id
-WHERE role.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
-  AND role.role_code = 'SUPER_ADMIN'
-  AND permission.permission_code IN ('${serviceCode}', '${overviewCode}', '${readCode}')
-  AND NOT EXISTS (
-      SELECT 1 FROM sys_role_permission existing
-      WHERE existing.role_id = role.id AND existing.permission_id = permission.id
-  );
+  - include:
+      file: ${generatedFile}
 `;
   return `${content.replace(/\s*$/, '')}\n${block}`;
 }
 
-function renderSeedManifest(content: string, spec: ServiceSpec, authSeedSha: string): string {
+function renderSeedManifest(content: string, spec: ServiceSpec, permissionSeedSha: string): string {
   const document = yamlDocument(content, TARGETS.seedManifest);
   const root = document.toJS() as {
     sources?: Array<{ id?: string }>;
     assertions?: Array<{ id?: string }>;
   };
-  const sourceIndex = root.sources?.findIndex((source) => source.id === 'auth-bootstrap') ?? -1;
-  if (sourceIndex < 0) throw new CliError('seed manifest 缺少 auth-bootstrap source');
+  const sourceId = permissionSourceId(spec);
+  if (root.sources?.some((source) => source.id === sourceId)) {
+    throw new CliError(`seed source 已存在：${sourceId}`);
+  }
   const assertionId = permissionAssertionId(spec);
   if (root.assertions?.some((assertion) => assertion.id === assertionId)) {
     throw new CliError(`seed assertion 已存在：${assertionId}`);
   }
-  const shaNode = document.getIn(['sources', sourceIndex, 'sha256'], true) as { range?: [number, number, number] } | undefined;
-  const range = shaNode?.range;
-  if (!range) throw new CliError('seed manifest auth SHA 节点缺少源码范围');
-  const withDigest = `${content.slice(0, range[0])}"${authSeedSha}"${content.slice(range[1])}`;
+  const sourceAnchor = '# 兼容期模块 ID 镜像；';
+  if (content.split(sourceAnchor).length !== 2) throw new CliError('seed manifest sources 结束锚点不唯一');
+  const sourceBlock = `  - id: ${sourceId}
+    module: auth
+    resource: scripts/sql/seed/${spec.serviceId}-permissions.sql
+    sha256: "${permissionSeedSha}"
+
+`;
+  const withSource = content.replace(sourceAnchor, `${sourceBlock}${sourceAnchor}`);
   const assertionBlock = `
 
   - id: ${assertionId}
@@ -421,7 +372,7 @@ function renderSeedManifest(content: string, spec: ServiceSpec, authSeedSha: str
     expectedRows: 3
     expectedSha256: "${permissionAssertionSha(spec)}"
 `;
-  return `${withDigest.replace(/\s*$/, '')}${assertionBlock}`;
+  return `${withSource.replace(/\s*$/, '')}${assertionBlock}`;
 }
 
 function validateRenderedChanges(
@@ -433,7 +384,14 @@ function validateRenderedChanges(
   if (!parseMavenModules(requiredChange(byTarget, TARGETS.parentPom)).includes(spec.artifactId)) {
     throw new CliError('渲染后父 POM 未登记新模块');
   }
-  for (const target of [TARGETS.gateway, TARGETS.compose, TARGETS.catalog, TARGETS.seedManifest, TARGETS.platformChangelog]) {
+  for (const target of [
+    TARGETS.gateway,
+    TARGETS.compose,
+    TARGETS.catalog,
+    TARGETS.seedManifest,
+    TARGETS.platformChangelog,
+    TARGETS.authChangelog,
+  ]) {
     yamlDocument(requiredChange(byTarget, target), target);
   }
   const catalogValue = yamlDocument(requiredChange(byTarget, TARGETS.catalog), TARGETS.catalog).toJS();
@@ -448,6 +406,11 @@ function validateRenderedChanges(
   }
   const generatedChangelog = `database/changelog/${spec.serviceId}/db.changelog-${spec.serviceId}.yaml`;
   yamlDocument(requiredChange(byTarget, generatedChangelog), generatedChangelog);
+  const permissionChangelog = `database/changelog/auth/${spec.serviceId}-permissions.yaml`;
+  yamlDocument(requiredChange(byTarget, permissionChangelog), permissionChangelog);
+  if (!requiredChange(byTarget, TARGETS.authChangelog).includes(`file: ${permissionChangelog}`)) {
+    throw new CliError('渲染后 Auth 主 changelog 未引用生成权限 changeSet');
+  }
   const platformSql = requiredChange(byTarget, TARGETS.platformChangelog);
   if (!platformSql.includes(`CREATE DATABASE IF NOT EXISTS ${spec.databaseName} `)) {
     throw new CliError('渲染后平台 changelog 未创建新数据库');
@@ -457,12 +420,14 @@ function validateRenderedChanges(
     throw new CliError('渲染后迁移目标目录未登记新服务');
   }
   const manifest = yamlDocument(requiredChange(byTarget, TARGETS.seedManifest), TARGETS.seedManifest).toJS() as {
-    sources?: Array<{ id?: string; sha256?: string }>;
+    sources?: Array<{ id?: string; resource?: string; sha256?: string }>;
     assertions?: Array<{ id?: string; expectedSha256?: string }>;
   };
-  const authSource = manifest.sources?.find((source) => source.id === 'auth-bootstrap');
-  if (authSource?.sha256 !== sha256(requiredChange(byTarget, TARGETS.authSeed))) {
-    throw new CliError('渲染后 auth seed SHA-256 与 manifest 不一致');
+  const permissionSqlTarget = `scripts/sql/seed/${spec.serviceId}-permissions.sql`;
+  const permissionSource = manifest.sources?.find((source) => source.id === permissionSourceId(spec));
+  if (permissionSource?.resource !== permissionSqlTarget
+      || permissionSource.sha256 !== sha256(requiredChange(byTarget, permissionSqlTarget))) {
+    throw new CliError('渲染后生成权限 seed SHA-256 与 manifest 不一致');
   }
   const assertion = manifest.assertions?.find((item) => item.id === permissionAssertionId(spec));
   if (assertion?.expectedSha256 !== permissionAssertionSha(spec)) {
@@ -560,6 +525,10 @@ function permissionAssertionId(spec: ServiceSpec): string {
   return `auth-${spec.serviceId}-permission-catalog`;
 }
 
+function permissionSourceId(spec: ServiceSpec): string {
+  return `auth-${spec.serviceId}-permissions`;
+}
+
 function permissionAssertionSha(spec: ServiceSpec): string {
   const values = [
     `${spec.serviceId}|DIRECTORY|`,
@@ -583,12 +552,14 @@ function requiredChange(changes: Map<string, string>, target: string): string {
   return content;
 }
 
-function lowerCamel(spec: ServiceSpec): string {
-  return `${spec.className.charAt(0).toLowerCase()}${spec.className.slice(1)}`;
+function generatedContent(changes: IntegrationFileChange[], target: string): string {
+  const change = changes.find((item) => item.target === target && item.mode === 'create');
+  if (!change) throw new CliError(`生成包缺少接入文件：${target}`);
+  return change.after;
 }
 
-function sqlLiteral(value: string): string {
-  return value.replaceAll('\\', '\\\\').replaceAll("'", "''");
+function lowerCamel(spec: ServiceSpec): string {
+  return `${spec.className.charAt(0).toLowerCase()}${spec.className.slice(1)}`;
 }
 
 function sqlSafeText(value: string): string {

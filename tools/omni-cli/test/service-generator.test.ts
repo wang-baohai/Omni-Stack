@@ -38,6 +38,8 @@ describe('create-service generator', () => {
       plan.files.find((file) => file.path.endsWith('db.changelog-inventory-sample.yaml'))?.content,
       'databaseChangeLog: []\n',
     );
+    assert.ok(plan.files.some((file) => file.path === 'database/changelog/auth/inventory-sample-permissions.yaml'));
+    assert.ok(plan.files.some((file) => file.path === 'scripts/sql/seed/inventory-sample-permissions.sql'));
     assert.equal(existsSync(output), false);
   });
 

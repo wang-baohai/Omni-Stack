@@ -12,8 +12,8 @@ import type {
   ServiceSpec,
 } from './types.js';
 
-export const GENERATOR_VERSION = '0.5.1';
-export const SERVICE_TEMPLATE_VERSION = '1.1.0';
+export const GENERATOR_VERSION = '0.6.0';
+export const SERVICE_TEMPLATE_VERSION = '1.2.0';
 const LOCK_FILE = 'omni-service.lock.json';
 const TEMPLATE_ROOT = 'scaffold/templates/service';
 
@@ -39,6 +39,8 @@ const TEMPLATE_ENTRIES: TemplateEntry[] = [
   { template: 'frontend/api.ts.hbs', output: 'omni-frontend/src/api/{{serviceId}}.ts' },
   { template: 'frontend/index.vue.hbs', output: 'omni-frontend/src/views/{{serviceId}}/overview/index.vue' },
   { template: 'database/db.changelog-service.yaml.hbs', output: 'database/changelog/{{serviceId}}/db.changelog-{{serviceId}}.yaml' },
+  { template: 'database/auth-permissions.yaml.hbs', output: 'database/changelog/auth/{{serviceId}}-permissions.yaml' },
+  { template: 'database/auth-permissions.sql.hbs', output: 'scripts/sql/seed/{{serviceId}}-permissions.sql' },
   { template: 'frontend/zh-CN.fragment.ts.hbs', output: 'integration/frontend/{{serviceId}}.zh-CN.fragment.ts' },
   { template: 'frontend/en-US.fragment.ts.hbs', output: 'integration/frontend/{{serviceId}}.en-US.fragment.ts' },
   { template: 'integration/catalog-entry.yaml.hbs', output: 'integration/catalog/{{serviceId}}.yaml' },
@@ -229,6 +231,8 @@ function templateContext(spec: ServiceSpec): Record<string, unknown> {
     xxlPortExpression: `\${XXL_JOB_EXECUTOR_PORT:${spec.xxlPort}}`,
     frontendApiPrefix: spec.apiPrefix.slice('/api'.length),
     lowerCamelClassName: `${spec.className.charAt(0).toLowerCase()}${spec.className.slice(1)}`,
+    sqlDisplayName: spec.displayName.replaceAll('\\', '\\\\').replaceAll("'", "''"),
+    yamlDoubleQuotedDisplayName: spec.displayName.replaceAll('\\', '\\\\').replaceAll('"', '\\"'),
   };
 }
 

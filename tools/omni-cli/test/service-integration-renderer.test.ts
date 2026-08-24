@@ -22,7 +22,7 @@ const fixtureTargets = [
   'omni-frontend/src/router/index.ts',
   'omni-frontend/src/locales/zh-CN.ts',
   'omni-frontend/src/locales/en-US.ts',
-  'scripts/sql/seed/auth.sql',
+  'database/changelog/auth/db.changelog-auth.yaml',
   'database/seed/manifest.yaml',
   'database/changelog/platform/db.changelog-platform.yaml',
   'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
@@ -52,14 +52,25 @@ describe('service integration renderer', () => {
       { checkGit: false },
     );
 
-    assert.equal(rendered.changes.length, 30);
+    assert.equal(rendered.changes.length, 32);
     assert.equal(readFileSync(resolve(fixtureRoot, 'omni-backend/pom.xml'), 'utf8'), originalPom);
     assert.equal(existsSync(resolve(fixtureRoot, 'omni-backend/omni-inventory-sample')), false);
 
     const byTarget = new Map(rendered.changes.map((change) => [change.target, change.after]));
     assert.match(required(byTarget, 'omni-backend/pom.xml'), /<module>omni-inventory-sample<\/module>/);
-    assert.match(required(byTarget, 'scripts/sql/seed/auth.sql'), /NOT EXISTS/);
-    assert.doesNotMatch(required(byTarget, 'scripts/sql/seed/auth.sql'), /VALUES \(\d+, 1, \d+, 'inventory-sample'/);
+    assert.match(required(byTarget, 'scripts/sql/seed/inventory-sample-permissions.sql'), /NOT EXISTS/);
+    assert.doesNotMatch(
+      required(byTarget, 'scripts/sql/seed/inventory-sample-permissions.sql'),
+      /VALUES \(\d+, 1, \d+, 'inventory-sample'/,
+    );
+    assert.match(
+      required(byTarget, 'database/changelog/auth/db.changelog-auth.yaml'),
+      /database\/changelog\/auth\/inventory-sample-permissions\.yaml/,
+    );
+    assert.match(
+      required(byTarget, 'database/changelog/auth/inventory-sample-permissions.yaml'),
+      /labels: adoption-upgrade/,
+    );
     assert.match(required(byTarget, 'omni-frontend/src/constants/menu.ts'), /inventory-sample:overview/);
     assert.match(
       required(byTarget, 'database/changelog/platform/db.changelog-platform.yaml'),
@@ -109,8 +120,13 @@ describe('service integration renderer', () => {
       .includes('auth-inventory-sample-permission-catalog'));
 
     const manifest = parseDocument(required(byTarget, 'database/seed/manifest.yaml')).toJS() as {
+      sources: Array<{ id: string; resource: string }>;
       assertions: Array<{ id: string; module: string; expectedRows: number }>;
     };
+    assert.equal(
+      manifest.sources.find((item) => item.id === 'auth-inventory-sample-permissions')?.resource,
+      'scripts/sql/seed/inventory-sample-permissions.sql',
+    );
     const assertion = manifest.assertions.find((item) => item.id === 'auth-inventory-sample-permission-catalog');
     assert.ok(assertion);
     assert.equal(assertion.module, 'auth');
@@ -128,7 +144,7 @@ describe('service integration renderer', () => {
 
     const result = applyRenderedIntegration(fixtureRoot, rendered);
 
-    assert.deepEqual(result, { files: 30, cleanupWarnings: [] });
+    assert.deepEqual(result, { files: 32, cleanupWarnings: [] });
     for (const change of rendered.changes) {
       assert.equal(readFileSync(resolve(fixtureRoot, ...change.target.split('/')), 'utf8'), change.after);
     }

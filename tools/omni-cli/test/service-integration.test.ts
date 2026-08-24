@@ -24,7 +24,7 @@ describe('service integration planner', () => {
     const plan = planServiceIntegration(workspaceRoot, packageRoot, 'inventory-sample', { checkGit: false });
 
     assert.equal(plan.ready, true, plan.conflicts.join('\n'));
-    assert.equal(plan.operations.length, 19);
+    assert.equal(plan.operations.length, 21);
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-xml'
       && operation.target === 'omni-backend/pom.xml'));
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-yaml'

@@ -19,7 +19,7 @@ const STRUCTURAL_TARGETS = {
   router: 'omni-frontend/src/router/index.ts',
   zhLocale: 'omni-frontend/src/locales/zh-CN.ts',
   enLocale: 'omni-frontend/src/locales/en-US.ts',
-  authSeed: 'scripts/sql/seed/auth.sql',
+  authChangelog: 'database/changelog/auth/db.changelog-auth.yaml',
   seedManifest: 'database/seed/manifest.yaml',
   platformChangelog: 'database/changelog/platform/db.changelog-platform.yaml',
   migrationCatalog: 'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
@@ -60,7 +60,7 @@ export function planServiceIntegration(
     conflicts,
   );
   inspectFrontendRegistration(workspaceRoot, lock.spec.className, serviceId, operations, conflicts);
-  planSeedIntegration(workspaceRoot, serviceId, operations, warnings);
+  planSeedIntegration(workspaceRoot, serviceId, operations, conflicts, warnings);
   if (options.checkGit === false) warnings.push('Git 目标文件检查由测试调用方显式隔离');
   else inspectDirtyTargets(workspaceRoot, operations, conflicts);
 
@@ -118,6 +118,18 @@ function planGeneratedTrees(
       source: `database/changelog/${serviceId}/db.changelog-${serviceId}.yaml`,
       target: `database/changelog/${serviceId}/db.changelog-${serviceId}.yaml`,
       description: '创建服务数据库 Liquibase 主文件',
+    },
+    {
+      kind: 'create-file' as const,
+      source: `database/changelog/auth/${serviceId}-permissions.yaml`,
+      target: `database/changelog/auth/${serviceId}-permissions.yaml`,
+      description: '创建 forward-only 权限 changeSet',
+    },
+    {
+      kind: 'create-file' as const,
+      source: `scripts/sql/seed/${serviceId}-permissions.sql`,
+      target: `scripts/sql/seed/${serviceId}-permissions.sql`,
+      description: '创建独立权限种子资源',
     },
   ];
   for (const entry of entries) {
@@ -279,11 +291,20 @@ function planSeedIntegration(
   workspaceRoot: string,
   serviceId: string,
   operations: IntegrationOperation[],
+  conflicts: string[],
   warnings: string[],
 ): void {
-  readRequiredFile(workspaceRoot, STRUCTURAL_TARGETS.authSeed);
+  const authChangelog = readRequiredFile(workspaceRoot, STRUCTURAL_TARGETS.authChangelog);
+  readYamlFile(resolve(workspaceRoot, STRUCTURAL_TARGETS.authChangelog));
+  if (authChangelog.includes(`database/changelog/auth/${serviceId}-permissions.yaml`)) {
+    conflicts.push(`Auth changelog 已引用 ${serviceId} 权限文件`);
+  }
   readYamlFile(resolve(workspaceRoot, STRUCTURAL_TARGETS.seedManifest));
-  operations.push({ kind: 'modify-sql', target: STRUCTURAL_TARGETS.authSeed, description: `按自然键登记 ${serviceId} 菜单和 SUPER_ADMIN 权限` });
+  operations.push({
+    kind: 'modify-yaml',
+    target: STRUCTURAL_TARGETS.authChangelog,
+    description: `引用 ${serviceId} forward-only 权限 changeSet`,
+  });
   operations.push({ kind: 'modify-yaml', target: STRUCTURAL_TARGETS.seedManifest, description: '刷新 auth seed SHA-256、module 和自然键断言' });
   warnings.push('权限 SQL 必须在写入层生成自然键幂等语句；planner 不分配固定自增 ID');
 }

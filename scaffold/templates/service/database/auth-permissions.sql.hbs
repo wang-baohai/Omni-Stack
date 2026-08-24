@@ -1,0 +1,62 @@
+-- generated-by: @omni-stack/cli {{generatorVersion}}；模板 {{templateVersion}}
+-- {{displayName}}模块权限模板（自然键幂等）
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+SELECT tenant.id, 0, '{{serviceId}}', '{{sqlDisplayName}}', 'DIRECTORY', '', 1, 50, 1, 'system'
+FROM sys_tenant tenant
+WHERE tenant.tenant_code = 'default'
+  AND NOT EXISTS (
+      SELECT 1 FROM sys_permission existing
+      WHERE existing.tenant_id = tenant.id AND existing.permission_code = '{{serviceId}}'
+  );
+
+UPDATE sys_permission permission
+JOIN sys_tenant tenant ON tenant.id = permission.tenant_id AND tenant.tenant_code = 'default'
+SET permission.path = CONCAT('/', permission.id, '/')
+WHERE permission.permission_code = '{{serviceId}}';
+
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+SELECT tenant.id, parent.id, '{{serviceId}}:overview', '{{sqlDisplayName}}概览', 'MENU', '', 2, 1, 1, 'system'
+FROM sys_tenant tenant
+JOIN sys_permission parent ON parent.tenant_id = tenant.id AND parent.permission_code = '{{serviceId}}'
+WHERE tenant.tenant_code = 'default'
+  AND NOT EXISTS (
+      SELECT 1 FROM sys_permission existing
+      WHERE existing.tenant_id = tenant.id AND existing.permission_code = '{{serviceId}}:overview'
+  );
+
+UPDATE sys_permission permission
+JOIN sys_tenant tenant ON tenant.id = permission.tenant_id AND tenant.tenant_code = 'default'
+JOIN sys_permission parent ON parent.id = permission.parent_id AND parent.tenant_id = permission.tenant_id
+SET permission.path = CONCAT(parent.path, permission.id, '/')
+WHERE permission.permission_code = '{{serviceId}}:overview';
+
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+SELECT tenant.id, parent.id, '{{serviceId}}:read', '查看{{sqlDisplayName}}', 'API', '', 3, 1, 1, 'system'
+FROM sys_tenant tenant
+JOIN sys_permission parent ON parent.tenant_id = tenant.id AND parent.permission_code = '{{serviceId}}:overview'
+WHERE tenant.tenant_code = 'default'
+  AND NOT EXISTS (
+      SELECT 1 FROM sys_permission existing
+      WHERE existing.tenant_id = tenant.id AND existing.permission_code = '{{serviceId}}:read'
+  );
+
+UPDATE sys_permission permission
+JOIN sys_tenant tenant ON tenant.id = permission.tenant_id AND tenant.tenant_code = 'default'
+JOIN sys_permission parent ON parent.id = permission.parent_id AND parent.tenant_id = permission.tenant_id
+SET permission.path = CONCAT(parent.path, permission.id, '/')
+WHERE permission.permission_code = '{{serviceId}}:read';
+
+INSERT INTO sys_role_permission (role_id, permission_id)
+SELECT role.id, permission.id
+FROM sys_role role
+JOIN sys_permission permission ON permission.tenant_id = role.tenant_id
+WHERE role.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+  AND role.role_code = 'SUPER_ADMIN'
+  AND permission.permission_code IN ('{{serviceId}}', '{{serviceId}}:overview', '{{serviceId}}:read')
+  AND NOT EXISTS (
+      SELECT 1 FROM sys_role_permission existing
+      WHERE existing.role_id = role.id AND existing.permission_id = permission.id
+  );
