@@ -11,7 +11,7 @@ import {
   planServiceGeneration,
   validateGeneratedService,
 } from './service-generator.js';
-import { planServiceIntegration } from './service-integration.js';
+import { renderServiceIntegration } from './service-integration-renderer.js';
 import type { CreateServiceOptions } from './types.js';
 import { findWorkspaceRoot } from './workspace.js';
 
@@ -105,10 +105,11 @@ service.command('validate <service-id>')
     console.log(`service valid: ${serviceId}, files=${lock.files.length}, template=${lock.templateVersion}`);
   });
 service.command('integrate <service-id>')
-  .description('只读规划服务包接入当前 monorepo 的全部变更')
+  .description('只读渲染服务包接入当前 monorepo 的全部变更')
   .requiredOption('--source <directory>', '已生成并通过校验的服务包目录')
   .action((serviceId: string, commandOptions: { source: string }) => {
-    const plan = planServiceIntegration(workspaceRoot(), commandOptions.source, serviceId);
+    const rendered = renderServiceIntegration(workspaceRoot(), commandOptions.source, serviceId);
+    const plan = rendered.plan;
     console.log(`INTEGRATION PLAN ${serviceId}`);
     console.log(`source: ${plan.sourceDirectory}`);
     plan.operations.forEach((operation) => console.log(`  ${operation.kind.toUpperCase()} ${operation.target} - ${operation.description}`));
@@ -118,7 +119,13 @@ service.command('integrate <service-id>')
       process.exitCode = 2;
       return;
     }
-    console.log(`ready: ${plan.operations.length} operations; planner is read-only and wrote no files.`);
+    console.log(`rendered: ${rendered.changes.length} file changes`);
+    rendered.changes.forEach((change) => {
+      const beforeLines = change.before?.split(/\r?\n/).length ?? 0;
+      const afterLines = change.after.split('\n').length;
+      console.log(`  ${change.mode.toUpperCase()} ${change.target} (${afterLines - beforeLines >= 0 ? '+' : ''}${afterLines - beforeLines} lines)`);
+    });
+    console.log(`ready: ${plan.operations.length} operations; renderer is read-only and wrote no files.`);
   });
 
 function workspaceRoot(): string {

@@ -117,3 +117,17 @@ export interface ServiceIntegrationPlan {
   warnings: string[];
   ready: boolean;
 }
+
+/** 接入事务中的单文件变更。 */
+export interface IntegrationFileChange {
+  target: string;
+  mode: 'create' | 'modify';
+  after: string;
+  before?: string;
+}
+
+/** 只在内存中构建的服务接入变更集。 */
+export interface RenderedServiceIntegration {
+  plan: ServiceIntegrationPlan;
+  changes: IntegrationFileChange[];
+}

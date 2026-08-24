@@ -3,7 +3,6 @@ import { resolve } from 'node:path';
 import { Ajv, type ErrorObject, type ValidateFunction } from 'ajv';
 import { CliError } from './errors.js';
 
-const ajv = new Ajv({ allErrors: true, strict: true });
 const validators = new Map<string, ValidateFunction>();
 
 /** 加载并编译工作区 JSON Schema。 */
@@ -13,6 +12,7 @@ export function loadSchema(workspaceRoot: string, fileName: string): ValidateFun
   if (cached !== undefined) return cached;
   try {
     const schema = JSON.parse(readFileSync(schemaPath, 'utf8')) as object;
+    const ajv = new Ajv({ allErrors: true, strict: true });
     const validate = ajv.compile(schema);
     validators.set(schemaPath, validate);
     return validate;
