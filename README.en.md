@@ -462,3 +462,17 @@ Pull requests are welcome — see [PRs](https://github.com/wang-baohai/Omni-Stac
 ---
 
 **© Wang Baohai**
+
+<!-- omni:preset-table:start -->
+## Project Presets
+
+| Preset | Explicit modules | Dependency closure |
+|---|---|---|
+| core | base, gateway, mysql, redis, nacos | platform, auth, base, nacos, gateway, mysql, redis |
+| crm | crm, gateway, mysql, redis, nacos | platform, auth, base, crm, nacos, gateway, mysql, redis |
+| full | crm, asset, gateway, mysql, redis, nacos, rocketmq, xxl-job | platform, auth, base, workflow, crm, srm, procurement, asset, nacos, xxl-job, gateway, mysql, redis, rocketmq |
+| supply-chain | asset, gateway, mysql, redis, nacos, rocketmq, xxl-job | platform, auth, base, workflow, srm, procurement, asset, nacos, xxl-job, gateway, mysql, redis, rocketmq |
+| workflow | workflow, gateway, mysql, redis, nacos | platform, auth, base, workflow, nacos, gateway, mysql, redis |
+
+[Selection guide](docs/preset-quick-selection.en.md) · [Preset Dependency Matrix](docs/preset-dependency-matrix.en.md)
+<!-- omni:preset-table:end -->

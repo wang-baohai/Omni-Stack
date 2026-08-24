@@ -496,3 +496,17 @@ cd omni-frontend && npm run build && npm run lint  # 前端构建 + Lint
 ---
 
 **© Wang Baohai**
+
+<!-- omni:preset-table:start -->
+## 项目裁剪预设
+
+| 预设 | 显式模块 | 依赖闭包 |
+|---|---|---|
+| core | base, gateway, mysql, redis, nacos | platform, auth, base, nacos, gateway, mysql, redis |
+| crm | crm, gateway, mysql, redis, nacos | platform, auth, base, crm, nacos, gateway, mysql, redis |
+| full | crm, asset, gateway, mysql, redis, nacos, rocketmq, xxl-job | platform, auth, base, workflow, crm, srm, procurement, asset, nacos, xxl-job, gateway, mysql, redis, rocketmq |
+| supply-chain | asset, gateway, mysql, redis, nacos, rocketmq, xxl-job | platform, auth, base, workflow, srm, procurement, asset, nacos, xxl-job, gateway, mysql, redis, rocketmq |
+| workflow | workflow, gateway, mysql, redis, nacos | platform, auth, base, workflow, nacos, gateway, mysql, redis |
+
+[选择指南](docs/preset-quick-selection.md) · [预设依赖矩阵](docs/preset-dependency-matrix.md)
+<!-- omni:preset-table:end -->

@@ -462,3 +462,17 @@ cd omni-frontend && npm run build && npm run lint  # フロントエンドビル
 ---
 
 **© Wang Baohai**
+
+<!-- omni:preset-table:start -->
+## プロジェクトプリセット
+
+| プリセット | 明示モジュール | 依存クロージャ |
+|---|---|---|
+| core | base, gateway, mysql, redis, nacos | platform, auth, base, nacos, gateway, mysql, redis |
+| crm | crm, gateway, mysql, redis, nacos | platform, auth, base, crm, nacos, gateway, mysql, redis |
+| full | crm, asset, gateway, mysql, redis, nacos, rocketmq, xxl-job | platform, auth, base, workflow, crm, srm, procurement, asset, nacos, xxl-job, gateway, mysql, redis, rocketmq |
+| supply-chain | asset, gateway, mysql, redis, nacos, rocketmq, xxl-job | platform, auth, base, workflow, srm, procurement, asset, nacos, xxl-job, gateway, mysql, redis, rocketmq |
+| workflow | workflow, gateway, mysql, redis, nacos | platform, auth, base, workflow, nacos, gateway, mysql, redis |
+
+[選択ガイド](docs/preset-quick-selection.jp.md) · [プリセット依存関係マトリクス](docs/preset-dependency-matrix.jp.md)
+<!-- omni:preset-table:end -->

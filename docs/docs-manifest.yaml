@@ -38,7 +38,7 @@ documents:
     module: backend
     owner: backend
     source: docs/backend-patterns.md
-      source_sha256: 9d60b1049ac81f86b878b8f3c06a725e7b9adb37921dc08d3b8ccbc3ff4da5d5
+    source_sha256: 9d60b1049ac81f86b878b8f3c06a725e7b9adb37921dc08d3b8ccbc3ff4da5d5
     dependencies: [starter, security, persistence, testing]
     translations:
       en-US: { path: docs/backend-patterns.en.md, status: present-unverified, reviewed_at: null }
@@ -170,7 +170,7 @@ documents:
     module: asset
     owner: asset
     source: docs/design/asset-design.md
-      source_sha256: bba9461126d85d919c83fa80fe235987a9e911740bebb5faf0ad5aa144bb6261
+    source_sha256: bba9461126d85d919c83fa80fe235987a9e911740bebb5faf0ad5aa144bb6261
     dependencies: [schema, api, permissions, workflow, procurement-events]
     translations:
       en-US: { path: docs/design/asset-design.en.md, status: missing, reviewed_at: null }
@@ -220,6 +220,61 @@ documents:
       en-US: { path: docs/scaffold-upgrade-implementation-plan.en.md, status: missing, reviewed_at: null }
       ja-JP: { path: docs/scaffold-upgrade-implementation-plan.jp.md, status: missing, reviewed_at: null }
       ko-KR: { path: docs/scaffold-upgrade-implementation-plan.kr.md, status: missing, reviewed_at: null }
+  - id: preset-quick-selection
+    type: user-guide
+    module: scaffold
+    owner: architecture
+    source: docs/preset-quick-selection.md
+    source_sha256: 1a2e8b84b19bdddbd84cca2668320452306878940c7319ebc24b9ae489905230
+    dependencies: [module-catalog, presets, generator]
+    translations:
+      en-US: { path: docs/preset-quick-selection.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/preset-quick-selection.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/preset-quick-selection.kr.md, status: present-unverified, reviewed_at: null }
+  - id: preset-maintenance
+    type: maintenance-guide
+    module: scaffold
+    owner: architecture
+    source: docs/preset-maintenance.md
+    source_sha256: c168b62c7bb1f1f68634fceb24fdbd72cf29940a8abd1eb566adfdb551b94ba4
+    dependencies: [module-catalog, schemas, generator, golden-matrix]
+    translations:
+      en-US: { path: docs/preset-maintenance.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/preset-maintenance.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/preset-maintenance.kr.md, status: present-unverified, reviewed_at: null }
+  - id: preset-dependency-matrix
+    type: generated-reference
+    module: scaffold
+    owner: architecture
+    source: docs/preset-dependency-matrix.md
+    source_sha256: 2b235bedcb4d69068d347159684b7d71e06287be290a3fe842cf494251a1bd32
+    dependencies: [module-catalog, presets]
+    translations:
+      en-US: { path: docs/preset-dependency-matrix.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/preset-dependency-matrix.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/preset-dependency-matrix.kr.md, status: present-unverified, reviewed_at: null }
+  - id: custom-preset-tutorial
+    type: user-guide
+    module: scaffold
+    owner: architecture
+    source: docs/custom-preset-tutorial.md
+    source_sha256: e4d58bf268d1aa8530edc2161e0ccc38f36fc8ea75475c5a7f141504ca096593
+    dependencies: [preset-schema, dependency-closure, generator]
+    translations:
+      en-US: { path: docs/custom-preset-tutorial.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/custom-preset-tutorial.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/custom-preset-tutorial.kr.md, status: present-unverified, reviewed_at: null }
+  - id: preset-upgrade-guide
+    type: upgrade-guide
+    module: scaffold
+    owner: architecture
+    source: docs/preset-upgrade-guide.md
+    source_sha256: 3a91cf33fb233dc07525df120bc2a208bb251cfce7e985d193fe6fc82a291000
+    dependencies: [scaffold-lock, compatibility, database-upgrade]
+    translations:
+      en-US: { path: docs/preset-upgrade-guide.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/preset-upgrade-guide.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/preset-upgrade-guide.kr.md, status: present-unverified, reviewed_at: null }
 
 source_only:
   - path: docs/adr/0001-scaffold-upgrade-foundations.md
