@@ -83,6 +83,11 @@ export function renderCrudGeneration(workspaceRoot: string, specFile: string): R
     (content) => insertLocale(content, context, 'zh-CN'));
   addRegistration(changes, registrations, root, 'omni-frontend/src/locales/en-US.ts',
     (content) => insertLocale(content, context, 'en-US'));
+  if (spec.dataScope) {
+    addRegistration(changes, registrations, root,
+      `omni-backend/${convention.artifactId}/src/main/java/${context.packagePath}/security/ProcDataPermissionHandler.java`,
+      (content) => registerProcurementDataScope(content, context));
+  }
 
   const lock = createLock(spec, generated, registrations);
   const lockContent = normalize(`${JSON.stringify(lock, null, 2)}\n`);
@@ -434,6 +439,12 @@ function validateRegistrations(workspaceRoot: string, context: CrudContext, regi
     ['omni-frontend/src/constants/menu.ts', context.spec.permissionResource],
     ['omni-frontend/src/router/index.ts', context.spec.permissionResource],
   ];
+  if (context.spec.dataScope) {
+    required.push([
+      `omni-backend/${context.convention.artifactId}/src/main/java/${context.packagePath}/security/ProcDataPermissionHandler.java`,
+      `"${context.spec.tableName}"`,
+    ]);
+  }
   for (const [target, value] of required) {
     if (!registrations.includes(target) || !readFileSync(resolve(workspaceRoot, ...target.split('/')), 'utf8').includes(value)) {
       throw new CliError(`CRUD 登记项缺失：${target} -> ${value}`);
@@ -534,6 +545,14 @@ function registerProvisioningAssertion(content: string, assertionId: string): st
   if (block.split(anchor).length !== 2) throw new CliError('catalog auth provisioning 锚点不唯一');
   const updated = block.replace(anchor, `${anchor}\n      - ${assertionId}`);
   return `${content.slice(0, start)}${updated}${content.slice(end)}`;
+}
+
+function registerProcurementDataScope(content: string, context: CrudContext): string {
+  const entry = `            "${context.spec.tableName}", new ScopeColumns("owner_user_id", "owner_unit_id"),`;
+  if (content.includes(`"${context.spec.tableName}"`)) throw new CliError(`DataScope handler 已登记表：${context.spec.tableName}`);
+  const anchor = '    private static final Map<String, ScopeColumns> ROOT_TABLES = Map.of(\n';
+  if (content.split(anchor).length !== 2) throw new CliError('ProcDataPermissionHandler ROOT_TABLES 锚点不唯一');
+  return content.replace(anchor, `${anchor}${entry}\n`);
 }
 
 function insertRecordProperty(content: string, variable: string, line: string): string {

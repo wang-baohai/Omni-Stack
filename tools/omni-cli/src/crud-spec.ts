@@ -71,8 +71,8 @@ export function validateCrudSpec(workspaceRoot: string, value: unknown): CrudSpe
   if (!spec.roleCodes.includes('SUPER_ADMIN')) {
     throw new CliError('CRUD 权限至少必须绑定 SUPER_ADMIN，避免生成不可管理的菜单孤儿');
   }
-  if (spec.dataScope && (!spec.tenant || spec.owner === 'none')) {
-    throw new CliError('启用 DataScope 时必须启用 tenant 并声明 user/unit owner');
+  if (spec.dataScope && (!spec.tenant || spec.owner !== 'user-and-unit')) {
+    throw new CliError('启用 DataScope 时必须启用 tenant，并同时声明 user-and-unit owner 列');
   }
 
   validateFields(spec);

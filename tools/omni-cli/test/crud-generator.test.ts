@@ -22,6 +22,7 @@ const fixtureTargets = [
   'omni-frontend/src/router/index.ts',
   'omni-frontend/src/locales/zh-CN.ts',
   'omni-frontend/src/locales/en-US.ts',
+  'omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java',
 ];
 
 afterEach(() => {
@@ -82,6 +83,19 @@ describe('CRUD generator', () => {
     const generated = resolve(fixture, 'docs/generated/procurement-material-brand.md');
     writeFileSync(generated, `${readFileSync(generated, 'utf8')}人工修改\n`, 'utf8');
     assert.throws(() => renderCrudGeneration(fixture, specFile), /人工漂移/);
+  });
+
+  it('registers DataScope only when both owner columns are declared', () => {
+    const fixture = createWorkspaceFixture();
+    const scopedSpec = resolve(fixture, 'scaffold/specs/scoped-brand.yaml');
+    mkdirSync(dirname(scopedSpec), { recursive: true });
+    writeFileSync(scopedSpec, readFileSync(specFile, 'utf8')
+      .replace('dataScope: false', 'dataScope: true')
+      .replace('owner: none', 'owner: user-and-unit'), 'utf8');
+
+    const rendered = renderCrudGeneration(fixture, scopedSpec);
+    const handler = rendered.changes.find((change) => change.target.endsWith('ProcDataPermissionHandler.java'));
+    assert.match(handler?.after ?? '', /"proc_material_brand", new ScopeColumns\("owner_user_id", "owner_unit_id"\)/);
   });
 });
 
