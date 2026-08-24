@@ -158,6 +158,34 @@ export interface CrudSpec {
   defaultSort: { field: string; direction: 'asc' | 'desc' };
 }
 
+/** CRUD 生成器锁文件。 */
+export interface CrudGenerationLock {
+  generatedBy: '@omni-stack/cli';
+  generatorVersion: string;
+  templateVersion: string;
+  specSha256: string;
+  spec: CrudSpec;
+  files: Array<{ path: string; sha256: string }>;
+  registrations: string[];
+}
+
+/** CRUD 生成计划。 */
+export interface CrudGenerationPlan {
+  aggregateKey: string;
+  specFile: string;
+  operations: IntegrationOperation[];
+  conflicts: string[];
+  warnings: string[];
+  ready: boolean;
+  unchanged: boolean;
+}
+
+/** 在内存中渲染并校验完成的 CRUD 变更集。 */
+export interface RenderedCrudGeneration {
+  plan: CrudGenerationPlan;
+  changes: IntegrationFileChange[];
+}
+
 /** 服务包接入操作类型。 */
 export type IntegrationOperationKind = 'create-directory' | 'create-file' | 'modify-xml' | 'modify-yaml'
   | 'modify-typescript' | 'modify-java' | 'modify-sql' | 'modify-dockerfile';

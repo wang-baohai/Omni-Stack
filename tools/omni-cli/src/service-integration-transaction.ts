@@ -13,7 +13,12 @@ import {
 } from 'node:fs';
 import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { CliError } from './errors.js';
-import type { IntegrationFileChange, RenderedServiceIntegration } from './types.js';
+import type { IntegrationFileChange } from './types.js';
+
+interface RenderedAtomicChanges {
+  plan: { ready: boolean };
+  changes: IntegrationFileChange[];
+}
 
 interface PreparedChange {
   change: IntegrationFileChange;
@@ -34,7 +39,7 @@ export interface IntegrationTransactionResult {
  */
 export function applyRenderedIntegration(
   workspaceRoot: string,
-  rendered: RenderedServiceIntegration,
+  rendered: RenderedAtomicChanges,
   testOptions: { failAfter?: number } = {},
 ): IntegrationTransactionResult {
   if (!rendered.plan.ready) throw new CliError('接入计划未就绪，拒绝写入');

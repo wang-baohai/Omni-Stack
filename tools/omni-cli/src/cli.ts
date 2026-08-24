@@ -4,6 +4,8 @@ import { isAbsolute, resolve } from 'node:path';
 import { loadCatalog } from './catalog.js';
 import { runDoctor } from './doctor.js';
 import { CliError } from './errors.js';
+import { renderCrudGeneration, validateExistingCrud } from './crud-generator.js';
+import { loadCrudSpec } from './crud-spec.js';
 import { listPresetIds, resolvePreset } from './presets.js';
 import {
   applyServiceGeneration,
@@ -60,6 +62,43 @@ program.command('doctor').description('检查本地开发环境与工作区').ac
   checks.forEach((check) => console.log(`${check.passed ? 'PASS' : 'FAIL'} ${check.name}: ${check.detail}`));
   if (checks.some((check) => !check.passed)) process.exitCode = 1;
 });
+
+const generate = program.command('generate').description('代码生成命令');
+generate.command('crud')
+  .description('从安全声明生成标准单表全栈 CRUD（默认 dry-run）')
+  .requiredOption('--spec <file>', 'CRUD YAML 声明文件')
+  .option('--dry-run', '只读渲染并显示变更计划')
+  .option('--apply', '执行跨文件原子写入')
+  .option('--check', '仅校验声明，不渲染或写入')
+  .action((commandOptions: { spec: string; dryRun?: boolean; apply?: boolean; check?: boolean }) => {
+    const root = workspaceRoot();
+    if (commandOptions.check === true) {
+      const spec = loadCrudSpec(root, commandOptions.spec);
+      console.log(`crud spec valid: ${spec.moduleId}:${spec.aggregateName}, fields=${spec.fields.length}`);
+      return;
+    }
+    if (commandOptions.apply === true && commandOptions.dryRun === true) {
+      throw new CliError('--apply 与 --dry-run 不能同时使用');
+    }
+    const rendered = renderCrudGeneration(root, commandOptions.spec);
+    console.log(`${commandOptions.apply === true ? 'APPLY' : 'DRY-RUN'} CRUD ${rendered.plan.aggregateKey}`);
+    if (rendered.plan.unchanged) {
+      const lock = validateExistingCrud(root, commandOptions.spec);
+      console.log(`unchanged: files=${lock.files.length}, template=${lock.templateVersion}`);
+      return;
+    }
+    rendered.plan.operations.forEach((operation) => {
+      console.log(`  ${operation.kind.toUpperCase()} ${operation.target} - ${operation.description}`);
+    });
+    rendered.plan.warnings.forEach((warning) => console.log(`  WARN ${warning}`));
+    if (commandOptions.apply !== true) {
+      console.log(`ready: ${rendered.changes.length} file changes; 未写入工作区，确认后追加 --apply。`);
+      return;
+    }
+    const result = applyRenderedIntegration(root, rendered);
+    console.log(`crud applied: files=${result.files}`);
+    result.cleanupWarnings.forEach((warning) => console.log(`  WARN ${warning}`));
+  });
 
 program.command('create-service <service-id>')
   .description('生成新微服务接入包（默认仅预览）')
