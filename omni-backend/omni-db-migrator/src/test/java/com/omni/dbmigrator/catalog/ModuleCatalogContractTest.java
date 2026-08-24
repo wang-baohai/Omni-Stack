@@ -38,7 +38,7 @@ class ModuleCatalogContractTest {
         Set<String> assertionIds = seedManifest.assertions().stream().map(SeedAssertion::id)
                 .collect(java.util.stream.Collectors.toSet());
 
-        List<String> catalogIds = new ArrayList<>();
+        List<String> seededCatalogIds = new ArrayList<>();
         Set<String> knownIds = new HashSet<>();
         Set<String> catalogSeedIds = new HashSet<>();
         for (Object value : moduleValues) {
@@ -50,15 +50,20 @@ class ModuleCatalogContractTest {
             }
             String provisioning = requiredString(module, "tenantProvisioning");
             assertThat(provisioning).isIn("local", "event", "none");
-            for (Object seedId : requiredList(module, "provisioningSeedIds")) {
+            List<?> provisioningSeedIds = requiredList(module, "provisioningSeedIds");
+            if (provisioningSeedIds.isEmpty()) {
+                assertThat(provisioning).as(id + " 无种子模块不得触发租户初始化").isEqualTo("none");
+            } else {
+                seededCatalogIds.add(id);
+            }
+            for (Object seedId : provisioningSeedIds) {
                 assertThat(catalogSeedIds.add(seedId.toString()))
                         .as("provisioning seed ID 唯一: " + seedId)
                         .isTrue();
             }
-            catalogIds.add(id);
         }
 
-        assertThat(catalogIds).containsExactlyElementsOf(seedModuleIds);
+        assertThat(seededCatalogIds).containsExactlyElementsOf(seedModuleIds);
         assertThat(catalogSeedIds).containsExactlyInAnyOrderElementsOf(assertionIds);
     }
 

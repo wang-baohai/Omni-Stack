@@ -1,0 +1,5 @@
+id: core
+version: "1.0.0"
+displayName: 核心平台
+description: 认证、RBAC、组织、字典、日志与基础任务。
+modules: [base, gateway, mysql, redis, nacos]

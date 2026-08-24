@@ -120,3 +120,29 @@ modules:
     tenantProvisioning: none
     provisioningSeedIds:
       - xxl-job-catalog
+
+  - id: gateway
+    kind: foundation
+    dependencies:
+      - auth
+      - base
+    tenantProvisioning: none
+    provisioningSeedIds: []
+
+  - id: mysql
+    kind: infrastructure
+    dependencies: []
+    tenantProvisioning: none
+    provisioningSeedIds: []
+
+  - id: redis
+    kind: infrastructure
+    dependencies: []
+    tenantProvisioning: none
+    provisioningSeedIds: []
+
+  - id: rocketmq
+    kind: infrastructure
+    dependencies: []
+    tenantProvisioning: none
+    provisioningSeedIds: []

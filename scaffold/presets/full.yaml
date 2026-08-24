@@ -1,0 +1,5 @@
+id: full
+version: "1.0.0"
+displayName: Omni-Stack 完整平台
+description: 当前工程的全部核心、工作流、CRM、供应链和资产能力。
+modules: [crm, asset, gateway, mysql, redis, nacos, rocketmq, xxl-job]

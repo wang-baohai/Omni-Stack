@@ -1,0 +1,5 @@
+id: workflow
+version: "1.0.0"
+displayName: 工作流平台
+description: 核心平台加 BPMN、审批、待办与流程实例。
+modules: [workflow, gateway, mysql, redis, nacos]
