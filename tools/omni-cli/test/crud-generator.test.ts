@@ -49,6 +49,9 @@ describe('CRUD generator', () => {
     assert.match(required(byTarget, 'omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/MaterialBrandController.java'), /procurement:material-brand:create/);
     assert.match(required(byTarget, 'omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/MaterialBrandServiceImpl.java'), /com\.omni\.common\.core\.result\.BusinessException/);
     assert.doesNotMatch(required(byTarget, 'omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/MaterialBrandServiceImpl.java'), /tenantId.*request/i);
+    const responseView = required(byTarget, 'omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/MaterialBrandVO.java');
+    assert.match(responseView, /com\.fasterxml\.jackson\.databind\.annotation\.JsonSerialize/);
+    assert.match(responseView, /tools\.jackson\.databind\.annotation\.JsonSerialize/);
 
     for (const target of [
       'database/changelog/procurement/generated-material-brand-0001.yaml',

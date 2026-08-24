@@ -227,16 +227,16 @@ function renderRequest(context: CrudContext, update: boolean): string {
 function renderVo(context: CrudContext): string {
   const imports = new Set<string>(['lombok.Data', 'java.io.Serial', 'java.io.Serializable', 'java.time.LocalDateTime']);
   addJavaTypeImports(imports, context.spec.fields);
-  imports.add('com.fasterxml.jackson.databind.annotation.JsonSerialize');
-  imports.add('com.fasterxml.jackson.databind.ser.std.ToStringSerializer');
   imports.add('com.fasterxml.jackson.annotation.JsonFormat');
+  imports.add('tools.jackson.databind.annotation.JsonSerialize');
+  imports.add('tools.jackson.databind.ser.std.ToStringSerializer');
   const fields = context.spec.fields.filter((field) => field.detail || field.list).map((field) => {
     const annotations: string[] = [];
-    if (field.javaType === 'Long' || field.javaType === 'BigDecimal') annotations.push('    @JsonSerialize(using = ToStringSerializer.class)');
+    if (field.javaType === 'Long' || field.javaType === 'BigDecimal') annotations.push('    @com.fasterxml.jackson.databind.annotation.JsonSerialize(using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)\n    @JsonSerialize(using = ToStringSerializer.class)');
     if (field.javaType === 'LocalDateTime') annotations.push('    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")');
     return `    /** ${field.comment}。 */\n${annotations.length ? `${annotations.join('\n')}\n` : ''}    private ${field.javaType} ${field.name};`;
   });
-  return `package ${context.convention.javaPackage}.dto;\n\n${javaImports(imports)}\n\n/** ${context.spec.displayName}响应视图。 */\n@Data\npublic class ${context.spec.aggregateName}VO implements Serializable {\n\n    @Serial\n    private static final long serialVersionUID = 1L;\n\n    /** 主键 ID。 */\n    @JsonSerialize(using = ToStringSerializer.class)\n    private Long id;\n\n${fields.join('\n\n')}\n\n${context.spec.optimisticLock ? '    /** 乐观锁版本。 */\n    private Integer version;\n\n' : ''}    /** 创建时间。 */\n    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")\n    private LocalDateTime createTime;\n\n    /** 更新时间。 */\n    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")\n    private LocalDateTime updateTime;\n}\n`;
+  return `package ${context.convention.javaPackage}.dto;\n\n${javaImports(imports)}\n\n/** ${context.spec.displayName}响应视图。 */\n@Data\npublic class ${context.spec.aggregateName}VO implements Serializable {\n\n    @Serial\n    private static final long serialVersionUID = 1L;\n\n    /** 主键 ID。 */\n    @com.fasterxml.jackson.databind.annotation.JsonSerialize(using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)\n    @JsonSerialize(using = ToStringSerializer.class)\n    private Long id;\n\n${fields.join('\n\n')}\n\n${context.spec.optimisticLock ? '    /** 乐观锁版本。 */\n    private Integer version;\n\n' : ''}    /** 创建时间。 */\n    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")\n    private LocalDateTime createTime;\n\n    /** 更新时间。 */\n    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")\n    private LocalDateTime updateTime;\n}\n`;
 }
 
 function renderMapper(context: CrudContext): string {
