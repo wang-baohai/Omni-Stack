@@ -1,0 +1,16 @@
+/**
+ * @module api/{{serviceId}}
+ * {{displayName}}模块接入状态 API。
+ * 由 @omni-stack/cli {{generatorVersion}} 生成，模板版本 {{templateVersion}}。
+ */
+import request from './request'
+import type { ApiResponse } from '@/types/api'
+
+export interface {{className}}ModuleInfo {
+  serviceId: string
+  status: string
+}
+
+export function get{{className}}ModuleInfo() {
+  return request.get<ApiResponse<{{className}}ModuleInfo>>('{{frontendApiPrefix}}/status')
+}

@@ -1,0 +1,11 @@
+# 由 @omni-stack/cli {{generatorVersion}} 生成；合并前必须执行 omni catalog validate。
+- id: {{serviceId}}
+  kind: business
+  dependencies:
+    - platform
+    - auth
+    - base
+  tenantProvisioning: none
+  permissionRoots:
+    - "{{serviceId}}"
+  provisioningSeedIds: []

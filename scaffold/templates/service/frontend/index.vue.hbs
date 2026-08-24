@@ -1,0 +1,43 @@
+<script setup lang="ts">
+/** {{displayName}}模块接入页；由 @omni-stack/cli {{generatorVersion}} 生成。 */
+import { onMounted, ref } from 'vue'
+import { get{{className}}ModuleInfo, type {{className}}ModuleInfo } from '@/api/{{serviceId}}'
+
+const loading = ref(false)
+const moduleInfo = ref<{{className}}ModuleInfo>()
+
+async function loadModuleInfo() {
+  loading.value = true
+  try {
+    const response = await get{{className}}ModuleInfo()
+    moduleInfo.value = response.data.data
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadModuleInfo)
+</script>
+
+<template>
+  <div v-loading="loading" class="module-page">
+    <el-card shadow="never">
+      <template #header>{{displayName}}</template>
+      <el-descriptions v-if="moduleInfo" :column="1" border>
+        <el-descriptions-item :label="$t('{{serviceId}}.serviceId')">
+          {{vueOpen}} moduleInfo.serviceId {{vueClose}}
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('{{serviceId}}.status')">
+          {{vueOpen}} moduleInfo.status {{vueClose}}
+        </el-descriptions-item>
+      </el-descriptions>
+      <el-empty v-else :description="$t('{{serviceId}}.empty')" />
+    </el-card>
+  </div>
+</template>
+
+<style scoped>
+.module-page {
+  padding: 16px;
+}
+</style>

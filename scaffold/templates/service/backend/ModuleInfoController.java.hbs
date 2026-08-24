@@ -1,0 +1,36 @@
+package {{javaPackage}}.controller;
+
+import com.omni.common.core.result.R;
+import {{javaPackage}}.service.ModuleInfoService;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * {{displayName}}模块信息接口，仅作为接入验证入口。
+ *
+ * <p>由 @omni-stack/cli {{generatorVersion}} 生成，模板版本 {{templateVersion}}。</p>
+ *
+ * @author Omni-Stack Team
+ */
+@RestController
+@RequestMapping("{{apiPrefix}}")
+@RequiredArgsConstructor
+public class ModuleInfoController {
+
+    private final ModuleInfoService moduleInfoService;
+
+    /**
+     * 查询模块接入状态。
+     *
+     * @return 模块状态
+     */
+    @GetMapping("/status")
+    @PreAuthorize("hasAuthority('{{serviceId}}:read')")
+    public R<Map<String, String>> status() {
+        return R.ok(moduleInfoService.getModuleInfo());
+    }
+}

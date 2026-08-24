@@ -1,0 +1,29 @@
+# {{displayName}}模块维护说明
+
+<!-- 由 @omni-stack/cli {{generatorVersion}} 生成；模板 {{templateVersion}}。 -->
+
+## 模块边界
+
+- 服务标识：`{{artifactId}}`
+- Java 包：`{{javaPackage}}`
+- API 前缀：`{{apiPrefix}}`
+- 数据库：`{{databaseName}}`
+- 租户表前缀：`{{tablePrefix}}`
+- DataScope：`{{enableDataScope}}`{{#if enableDataScope}}（当前仅失败关闭，表：{{dataScopeTablesCsv}}）{{/if}}
+- OperLog / Job / MQ：`{{enableOperLog}} / {{enableJob}} / {{enableMq}}`
+
+## 生成边界
+
+当前生成物只提供安全的服务骨架和接入声明，不包含虚假 Entity、业务状态机、Saga、审批补偿或跨服务幂等逻辑。`ModuleInfoController` 仅用于首次接入验证，真实领域接口完成后可删除。
+
+## 接入顺序
+
+1. 审核 `integration/` 中的父 POM、catalog、Gateway、Compose、权限和前端片段。
+2. 使用后续结构化集成命令合并，不手工复制未知区块。
+3. 为数据库增加 forward-only Liquibase changeSet；SQL 目录只保留正式种子数据。
+4. 实现领域模型、权限和 DataScope 后，再开放业务写接口。
+5. 执行后端构建、前端 build/lint、Compose 配置校验和 401/403/503 冒烟测试。
+
+## 手写区域
+
+生成器不会接管领域 Entity、DTO、Mapper、Service 实现和业务 Controller。修改已登记生成文件后，`omni service validate` 会报告哈希漂移；不要使用生成器覆盖手写改动。

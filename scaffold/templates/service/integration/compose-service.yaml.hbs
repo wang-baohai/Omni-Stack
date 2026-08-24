@@ -1,0 +1,19 @@
+# 由 @omni-stack/cli {{generatorVersion}} 生成；结构化合并到 compose services。
+{{artifactId}}:
+  build:
+    context: .
+    dockerfile: docker/backend/Dockerfile
+    args:
+      MODULE: {{artifactId}}
+  environment:
+    SPRING_PROFILES_ACTIVE: docker
+    MYSQL_URL: jdbc:mysql://omni-mysql:3306/{{databaseName}}
+    MANAGEMENT_PORT: {{managementPort}}
+  ports:
+    - "{{servicePort}}:{{servicePort}}"
+    - "{{managementPort}}:{{managementPort}}"
+  healthcheck:
+    test: ["CMD", "wget", "--spider", "-q", "http://localhost:{{managementPort}}/actuator/health"]
+    interval: 10s
+    timeout: 5s
+    retries: 12

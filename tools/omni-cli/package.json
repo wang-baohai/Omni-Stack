@@ -1,6 +1,6 @@
 {
   "name": "@omni-stack/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "bin": {
@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test --experimental-test-isolation=none dist/test/*.test.js",
+    "test:golden": "npm run build && node scripts/service-golden.mjs",
     "dev": "tsx src/cli.ts"
   },
   "dependencies": {

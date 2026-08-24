@@ -1,13 +1,21 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { isAbsolute, resolve } from 'node:path';
 import { loadCatalog } from './catalog.js';
 import { runDoctor } from './doctor.js';
 import { CliError } from './errors.js';
 import { listPresetIds, resolvePreset } from './presets.js';
+import {
+  applyServiceGeneration,
+  GENERATOR_VERSION,
+  planServiceGeneration,
+  validateGeneratedService,
+} from './service-generator.js';
+import type { CreateServiceOptions } from './types.js';
 import { findWorkspaceRoot } from './workspace.js';
 
 const program = new Command();
-program.name('omni').description('Omni-Stack 项目脚手架 CLI').version('0.1.0');
+program.name('omni').description('Omni-Stack 项目脚手架 CLI').version(GENERATOR_VERSION);
 program.option('--root <directory>', '工作区根目录');
 
 const catalog = program.command('catalog').description('模块清单命令');
@@ -51,9 +59,83 @@ program.command('doctor').description('检查本地开发环境与工作区').ac
   if (checks.some((check) => !check.passed)) process.exitCode = 1;
 });
 
+program.command('create-service <service-id>')
+  .description('生成新微服务接入包（默认仅预览）')
+  .option('--package <java-package>', 'Java 包名')
+  .option('--display-name <name>', '模块显示名称')
+  .option('--api-prefix <path>', 'API 路径前缀')
+  .option('--service-port <port>', '服务端口', parsePort)
+  .option('--management-port <port>', '管理端口', parsePort)
+  .option('--xxl-port <port>', 'XXL-JOB 执行器端口', parsePort)
+  .option('--database <name>', '数据库名')
+  .option('--table-prefix <prefix>', '业务表前缀')
+  .option('--oper-log', '启用操作日志')
+  .option('--job', '启用 XXL-JOB')
+  .option('--mq', '启用可靠消息（自动启用 XXL-JOB）')
+  .option('--data-scope', '启用数据权限（必须同时声明表）')
+  .option('--data-scope-table <table...>', 'DataScope 业务表清单')
+  .option('--output <directory>', '生成包输出目录')
+  .option('--apply', '执行原子写入')
+  .action((serviceId: string, commandOptions: Record<string, unknown>) => {
+    const root = workspaceRoot();
+    const options = toCreateServiceOptions(commandOptions);
+    const plan = planServiceGeneration(root, serviceId, options);
+    console.log(`${options.apply ? 'APPLY' : 'DRY-RUN'} create ${plan.spec.artifactId}`);
+    console.log(`target: ${plan.targetDirectory}`);
+    console.log(`ports: service=${plan.spec.servicePort}, management=${plan.spec.managementPort}${plan.spec.enableJob ? `, xxl=${plan.spec.xxlPort}` : ''}`);
+    plan.files.forEach((file) => console.log(`  CREATE ${file.path}`));
+    console.log(`  CREATE omni-service.lock.json`);
+    if (!options.apply) {
+      console.log('未写入文件；确认后追加 --apply。');
+      return;
+    }
+    const result = applyServiceGeneration(plan);
+    console.log(result === 'created' ? '服务生成包已原子写入。' : '输入和生成文件均未变化。');
+  });
+
+const service = program.command('service').description('服务生成包命令');
+service.command('validate <service-id>')
+  .description('校验已生成服务包的锁文件和内容哈希')
+  .requiredOption('--output <directory>', '生成包目录')
+  .action((serviceId: string, commandOptions: { output: string }) => {
+    const target = resolveOutput(workspaceRoot(), commandOptions.output);
+    const lock = validateGeneratedService(target);
+    if (lock.spec.serviceId !== serviceId) throw new CliError(`锁文件 service-id 为 ${lock.spec.serviceId}，与 ${serviceId} 不一致`);
+    console.log(`service valid: ${serviceId}, files=${lock.files.length}, template=${lock.templateVersion}`);
+  });
+
 function workspaceRoot(): string {
   const options = program.opts<{ root?: string }>();
   return findWorkspaceRoot(options.root ?? process.cwd());
+}
+
+function parsePort(value: string): number {
+  if (!/^\d+$/.test(value)) throw new CliError(`端口必须是整数：${value}`);
+  return Number(value);
+}
+
+function toCreateServiceOptions(options: Record<string, unknown>): CreateServiceOptions {
+  return {
+    ...(typeof options.package === 'string' ? { javaPackage: options.package } : {}),
+    ...(typeof options.displayName === 'string' ? { displayName: options.displayName } : {}),
+    ...(typeof options.apiPrefix === 'string' ? { apiPrefix: options.apiPrefix } : {}),
+    ...(typeof options.servicePort === 'number' ? { servicePort: options.servicePort } : {}),
+    ...(typeof options.managementPort === 'number' ? { managementPort: options.managementPort } : {}),
+    ...(typeof options.xxlPort === 'number' ? { xxlPort: options.xxlPort } : {}),
+    ...(typeof options.database === 'string' ? { databaseName: options.database } : {}),
+    ...(typeof options.tablePrefix === 'string' ? { tablePrefix: options.tablePrefix } : {}),
+    ...(options.operLog === true ? { operLog: true } : {}),
+    ...(options.job === true ? { job: true } : {}),
+    ...(options.mq === true ? { mq: true } : {}),
+    ...(options.dataScope === true ? { dataScope: true } : {}),
+    ...(Array.isArray(options.dataScopeTable) ? { dataScopeTable: options.dataScopeTable as string[] } : {}),
+    ...(typeof options.output === 'string' ? { output: options.output } : {}),
+    ...(options.apply === true ? { apply: true } : {}),
+  };
+}
+
+function resolveOutput(root: string, output: string): string {
+  return isAbsolute(output) ? resolve(output) : resolve(root, output);
 }
 
 program.parseAsync(process.argv).catch((error: unknown) => {

@@ -1,0 +1,21 @@
+# {{artifactId}} 生成接入计划
+
+<!-- 由 @omni-stack/cli {{generatorVersion}} 生成；模板 {{templateVersion}}。 -->
+
+本目录是待接入生成包，不是已经合并的可部署工程。
+
+## 已生成
+
+- Servlet 服务骨架，依赖 `omni-common-service`。
+- 租户、Gateway 预认证、内部 API、XSS、Actuator 配置。
+- 失败关闭的可选 DataScope 骨架。
+- 前端 View/API/i18n、权限自然键和基础设施接入片段。
+- 模块维护说明和四语言完成状态。
+
+## 尚未执行
+
+- 父 Maven reactor、Gateway、Compose、catalog、权限种子及前端注册的结构化合并。
+- Liquibase schema、真实业务模型和生产 Nacos 配置。
+- 构建、容器启动、权限与故障注入验收。
+
+执行 `omni service validate {{serviceId}} --output <本目录>` 可检查所有生成文件是否发生漂移。

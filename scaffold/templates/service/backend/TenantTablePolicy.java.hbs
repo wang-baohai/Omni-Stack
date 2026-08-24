@@ -1,0 +1,21 @@
+package {{javaPackage}}.security;
+
+import com.omni.common.service.persistence.TenantTablePolicy;
+import org.springframework.stereotype.Component;
+
+/**
+ * {{displayName}}租户表边界，只允许公共 Starter 拦截本模块领域表。
+ *
+ * <p>由 @omni-stack/cli {{generatorVersion}} 生成，模板版本 {{templateVersion}}。</p>
+ *
+ * @author Omni-Stack Team
+ */
+@Component
+public class {{className}}TenantTablePolicy implements TenantTablePolicy {
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean appliesTo(String tableName) {
+        return tableName != null && tableName.toLowerCase().startsWith("{{tablePrefix}}");
+    }
+}

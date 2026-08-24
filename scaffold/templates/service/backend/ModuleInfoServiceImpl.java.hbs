@@ -1,0 +1,20 @@
+package {{javaPackage}}.service.impl;
+
+import {{javaPackage}}.service.ModuleInfoService;
+import java.util.Map;
+import org.springframework.stereotype.Service;
+
+/**
+ * {{displayName}}模块信息服务实现。
+ *
+ * @author Omni-Stack Team
+ */
+@Service
+public class ModuleInfoServiceImpl implements ModuleInfoService {
+
+    /** {@inheritDoc} */
+    @Override
+    public Map<String, String> getModuleInfo() {
+        return Map.of("serviceId", "{{serviceId}}", "status", "READY_FOR_DOMAIN_IMPLEMENTATION");
+    }
+}
