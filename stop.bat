@@ -1,23 +1,12 @@
 @echo off
-:: ============================================================
-:: Omni-Stack 全家桶 — 停止
-:: ============================================================
-:: 用法：右键 → 以管理员身份运行
-:: ============================================================
-
+setlocal
 cd /d "%~dp0"
 
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [ERROR] 请右键此脚本，选择"以管理员身份运行"！
-    echo.
-    pause
+if not exist ".env" (
+    echo [ERROR] 未找到 .env，无法解析当前 Compose 项目。
     exit /b 1
 )
 
-echo ========== 停止全家桶 ==========
-docker compose down
-echo.
-echo ========== 已停止 ==========
-echo.
-pause
+echo [INFO] 停止开发栈并保留数据库等命名卷。
+docker compose --profile "*" down
+exit /b %errorlevel%

@@ -19,6 +19,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omni.common.core.mq.ReliableMessageRelay;
 import com.omni.common.core.tenant.TenantModuleProvisioner;
+import com.omni.common.mqlog.relay.MqMessageRelayJob;
+import com.omni.common.mqlog.relay.MqMessageRelayService;
 import com.omni.common.mqlog.sender.MessageSender;
 import com.omni.common.mqlog.tenant.TenantProvisionRequestHandler;
 
@@ -38,6 +40,26 @@ class MqLogTenantProvisionAutoConfigurationTest {
                     assertThat(context).hasNotFailed();
                     assertThat(context).hasSingleBean(TenantProvisionRequestHandler.class);
                     assertThat(context).hasBean("tenantProvisionRequestedFunction");
+                });
+    }
+
+    /** 禁用中继时保留 Outbox 写入边界，但不创建投递服务和任务。 */
+    @Test
+    void shouldKeepOutboxBoundaryWithoutRelayBeansWhenRelayDisabled() {
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(MqLogAutoConfiguration.class))
+                .withUserConfiguration(TestConfiguration.class)
+                .withPropertyValues(
+                        "omni.mqlog.relay.enabled=false",
+                        "omni.mqlog.relay.auto-register=false")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).hasBean("reliableMessageTemplate");
+                    assertThat(context.getBean("reliableMessageTemplate"))
+                            .isInstanceOf(ReliableMessageRelay.class);
+                    assertThat(context).doesNotHaveBean(MqMessageRelayService.class);
+                    assertThat(context).doesNotHaveBean(MqMessageRelayJob.class);
+                    assertThat(context).doesNotHaveBean("mqRelayJobRegistrar");
                 });
     }
 

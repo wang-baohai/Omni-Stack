@@ -28,7 +28,7 @@ describe('service integration planner', () => {
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-xml'
       && operation.target === 'omni-backend/pom.xml'));
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-yaml'
-      && operation.target === 'docker-compose.yml'));
+      && operation.target === 'compose.apps.yaml'));
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-typescript'
       && operation.target === 'omni-frontend/src/router/index.ts'));
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-java'

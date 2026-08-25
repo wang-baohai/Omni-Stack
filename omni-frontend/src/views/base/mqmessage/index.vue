@@ -7,12 +7,14 @@ import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   listMqMessages,
+  getMqRelayRuntimeStatus,
   resendMessage,
   skipMessage,
   MqMessageStatus,
   statusMap,
   type MqMessage,
   type MqMessageQuery,
+  type MqRelayRuntimeStatus,
 } from '@/api/mqMessage'
 import type { PageResult } from '@/types/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -49,6 +51,8 @@ const pageSize = ref(10)
 const loading = ref(false)
 /** 持久加载错误；与“查询成功但无数据”明确区分。 */
 const loadError = ref('')
+/** 轻量模式下异步投递关闭，但事务 Outbox 仍可写入。 */
+const runtimeStatus = ref<MqRelayRuntimeStatus | null>(null)
 
 /** 详情弹窗 */
 const dialogVisible = ref(false)
@@ -61,6 +65,8 @@ async function loadData() {
   loading.value = true
   loadError.value = ''
   try {
+    const runtimeResponse = await getMqRelayRuntimeStatus()
+    runtimeStatus.value = runtimeResponse.data.data
     const params: MqMessageQuery = {
       page: currentPage.value,
       size: pageSize.value,
@@ -142,7 +148,8 @@ function formatJson(jsonStr: string | null): string {
 
 /** 判断是否可重发 */
 function canResend(status: number): boolean {
-  return [MqMessageStatus.PENDING, MqMessageStatus.FAILED, MqMessageStatus.DEAD_LETTER].includes(status)
+  return runtimeStatus.value?.deliveryEnabled === true
+    && [MqMessageStatus.PENDING, MqMessageStatus.FAILED, MqMessageStatus.DEAD_LETTER].includes(status)
 }
 
 /** 判断是否可忽略 */
@@ -255,6 +262,16 @@ onMounted(loadData)
           <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
+
+      <el-alert
+        v-if="runtimeStatus && !runtimeStatus.deliveryEnabled"
+        :title="t('mqMessage.deliveryDisabledTitle')"
+        :description="t('mqMessage.deliveryDisabledDescription')"
+        type="warning"
+        :closable="false"
+        show-icon
+        class="runtime-warning"
+      />
 
       <el-alert
         v-if="loadError"
@@ -403,6 +420,9 @@ onMounted(loadData)
   margin-bottom: 16px;
 }
 .load-error {
+  margin-bottom: 16px;
+}
+.runtime-warning {
   margin-bottom: 16px;
 }
 .pagination {

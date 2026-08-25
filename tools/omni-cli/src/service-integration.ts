@@ -12,7 +12,7 @@ import { readYamlFile } from './yaml.js';
 const STRUCTURAL_TARGETS = {
   parentPom: 'omni-backend/pom.xml',
   gateway: 'omni-backend/omni-gateway/src/main/resources/application.yml',
-  compose: 'docker-compose.yml',
+  compose: 'compose.apps.yaml',
   catalog: 'scaffold/catalog/modules.yaml',
   dockerfile: 'docker/backend/Dockerfile',
   menu: 'omni-frontend/src/constants/menu.ts',

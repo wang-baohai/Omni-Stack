@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { basename, relative, resolve, sep } from 'node:path';
 import { parseDocument } from 'yaml';
 import { loadCatalog } from '../dist/src/catalog.js';
+import { loadComposeApplication } from '../dist/src/compose-model.js';
 import {
   applyPresetGeneration,
   planPresetGeneration,
@@ -99,14 +100,14 @@ function validateNoOmittedResiduals(target, catalog, selected) {
     'Maven 模块矩阵漂移',
   );
 
-  const compose = parseDocument(readFileSync(resolve(target, 'docker-compose.yml'), 'utf8')).toJS();
-  const actualComposeServices = Object.keys(compose.services ?? {});
+  const compose = loadComposeApplication(target);
+  const actualComposeServices = Object.keys(compose.services);
   assert.deepEqual(
     [...actualComposeServices].sort(),
     unique(selectedDefinitions.flatMap((module) => module.composeServices)).sort(),
     'Compose 服务矩阵漂移',
   );
-  for (const [serviceName, service] of Object.entries(compose.services ?? {})) {
+  for (const [serviceName, service] of Object.entries(compose.services)) {
     const dependencies = Array.isArray(service.depends_on) ? service.depends_on : Object.keys(service.depends_on ?? {});
     for (const dependency of dependencies) {
       assert.ok(actualComposeServices.includes(dependency), `${serviceName} 依赖已裁掉的 Compose 服务 ${dependency}`);

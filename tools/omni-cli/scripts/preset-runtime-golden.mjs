@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { basename, relative, resolve, sep } from 'node:path';
-import { parseDocument } from 'yaml';
+import { loadComposeApplication } from '../dist/src/compose-model.js';
 import {
   applyPresetGeneration,
   planPresetGeneration,
@@ -41,9 +41,9 @@ async function verifyPresetRuntime(presetId) {
   const lock = applyPresetGeneration(workspaceRoot, planPresetGeneration(workspaceRoot, presetId, target));
   validateGeneratedPreset(target, presetId);
 
-  const composePath = resolve(target, 'docker-compose.yml');
-  const composeText = readFileSync(composePath, 'utf8');
-  const compose = parseDocument(composeText).toJS();
+  const composeText = ['compose.infra.yaml', 'compose.apps.yaml']
+    .map((path) => readFileSync(resolve(target, path), 'utf8')).join('\n');
+  const compose = loadComposeApplication(target);
   const reservations = await reserveComposePorts(composeText);
   const environment = runtimeEnvironment(project, reservations, composeText);
   let started = false;
@@ -54,7 +54,7 @@ async function verifyPresetRuntime(presetId) {
     await releaseReservations(reservations);
     runCompose(project, ['up', '-d', ...(argumentsMap.skipBuild ? [] : ['--build'])], target, environment);
     started = true;
-    const statuses = await waitForHealthyProject(project, target, environment, Object.keys(compose.services ?? {}));
+    const statuses = await waitForHealthyProject(project, target, environment, Object.keys(compose.services));
     await verifyHttpRuntime(project, environment, new Set(lock.modules.map((module) => module.id)));
     if (presetId === 'full') await verifyFullE2e(target, environment);
     console.log(

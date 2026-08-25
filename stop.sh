@@ -1,13 +1,12 @@
-#!/bin/bash
-# ============================================================
-# Omni-Stack 全家桶 — 停止 (Linux/Mac)
-# ============================================================
-
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 cd "$(dirname "$0")"
 
-echo "========== 停止全家桶 =========="
-docker compose down
-echo ""
-echo "========== 已停止 =========="
+if [[ ! -f .env ]]; then
+  echo "[ERROR] 未找到 .env，无法解析当前 Compose 项目。"
+  exit 1
+fi
+
+echo "[INFO] 停止开发栈并保留数据库等命名卷。"
+docker compose --profile '*' down

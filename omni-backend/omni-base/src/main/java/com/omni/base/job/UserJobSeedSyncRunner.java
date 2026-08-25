@@ -10,6 +10,7 @@ import com.omni.common.job.XxlJobProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -41,6 +42,7 @@ public class UserJobSeedSyncRunner {
      * @return 启动后执行的同步逻辑
      */
     @Bean
+    @ConditionalOnProperty(prefix = "xxl.job.executor", name = "enabled", havingValue = "true", matchIfMissing = true)
     public ApplicationRunner syncUserJobSeeds() {
         return args -> {
             String appname = xxlJobProperties.getExecutor().getAppname();

@@ -259,8 +259,11 @@ npm run lint
 **Primary method** — Docker Compose (recommended):
 
 ```bash
-# Start the repository stack (MySQL, Redis, Nacos, RocketMQ, XXL-JOB, services, frontend)
-docker compose up -d
+# Start the full repository stack (MySQL, Redis, Nacos, RocketMQ, XXL-JOB, services, frontend)
+docker compose --profile full up -d
+
+# Start a minimal preset through the repository CLI
+npm --prefix tools/omni-cli run dev -- dev up --preset crm
 
 # Check service health
 docker compose ps
@@ -279,7 +282,7 @@ docker run -d --name nacos \
   -e NACOS_AUTH_IDENTITY_VALUE=nacos \
   nacos/nacos-server:v3.1.1
 
-# Optional Sentinel Dashboard (not included in docker-compose.yml, port 8858)
+# Optional Sentinel Dashboard (not included in the base Compose model, port 8858)
 docker run -d --name sentinel -p 8858:8858 bladex/sentinel-dashboard:1.8.8
 ```
 
@@ -446,7 +449,7 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 **配置步骤**：
 1. 从 `.env.example` 复制一份为 `.env`
 2. 填入真实的 OAuth2 凭证（从各平台 OAuth 应用管理页获取）
-3. Docker 部署时 `docker-compose.yml` 会自动读取 `.env` 并注入到容器
+3. Docker 部署时 `compose.yaml` 及其 include 文件会自动读取 `.env` 并注入到容器
 4. 本地开发时，在 IDE 的 Run Configuration 中配置 Environment variables，或手动加载 `.env` 文件
 
 **配置项说明**：

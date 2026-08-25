@@ -1,0 +1,11 @@
+# Omni-Stack 可组合本地开发入口。
+include:
+  - path: ./compose.infra.yaml
+  - path: ./compose.apps.yaml
+
+x-omni-profile-modules:
+  core: [auth, base, gateway]
+  workflow: [auth, base, workflow, gateway]
+  crm: [auth, base, crm, gateway]
+  supply-chain: [auth, base, workflow, srm, procurement, asset, gateway]
+  full: [auth, base, workflow, crm, srm, procurement, asset, gateway]

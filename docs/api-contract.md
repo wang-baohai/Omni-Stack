@@ -580,6 +580,24 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 
 所有列表查询和创建操作要求 `X-Tenant-Id` 请求头（前端从 JWT Token 提取，Gateway 注入）。数据在 SQL 查询层按 `tenant_id` 隔离。字典类型唯一性约束范围为 `(tenant_id, type_code)`。
 
+### MQ 投递运行状态
+
+`GET /api/base/mq-message/runtime` 使用 `base:mqmessage:list` 权限，返回当前 Outbox 与后台投递能力：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "outboxWriteEnabled": true,
+    "deliveryEnabled": false,
+    "mode": "OUTBOX_ONLY"
+  }
+}
+```
+
+`OUTBOX_ONLY` 表示业务事务仍写入本地 Outbox，但 MQ relay/XXL-JOB 未运行；前端必须显示降级提示并禁用重发操作。`FULL` 表示写入和异步投递均启用。
+
 ---
 
 ## 13. API 版本管理策略

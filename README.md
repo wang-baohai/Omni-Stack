@@ -2,7 +2,7 @@
 
 > 基于 Spring Boot 4 + Vue 3 的微服务脚手架平台，采用 Harness 工业设计模式构建，为 AI 辅助开发提供行业最佳实践基础。
 >
-> **一条命令启动全家桶：中间件 + 8 个微服务 + 前端，共 15 个 Docker 容器。**
+> **一条命令启动全家桶：中间件 + 数据迁移器 + 8 个微服务 + 前端，共 16 个 Docker 容器。**
 
 **[English](README.en.md)** | **[日本語](README.jp.md)** | **[한국어](README.kr.md)**
 
@@ -15,7 +15,7 @@
 ## 特性亮点
 
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 全栈最新技术
-- **Docker 全家桶一键部署**：`start.bat` / `./start.sh` 一条命令启动 15 个容器（6 个中间件容器、8 个后端微服务、前端），详见 [Docker 部署指南](docs/docker-deployment.md)
+- **按需开发与一键部署**：Omni CLI 可启动 core/workflow/crm/supply-chain/full 最小组合，`start.bat` / `./start.sh` 默认启动完整 16 容器，详见 [Docker 部署指南](docs/docker-deployment.md)
 - **CRM 销售前闭环**：独立 `omni-crm` 服务，覆盖线索、客户、联系人、商机、跟进、转换与概览，复用租户、RBAC、数据范围、XSS、审计和 Outbox 能力
 - **SRM → Procurement → Asset 业务链**：供应商准入与报价、请购/RFQ/订单/收货、资产建卡/分配/调拨/处置按独立微服务闭环协作
 - **业务化请购审批规则**：按品类与金额配置规则，支持真实匹配试算、默认兜底、覆盖断档/冲突检测、停用影响分析和安全审批图预览
@@ -100,7 +100,9 @@ Omni-Stack/
 ├── AGENTS.md                           # AI 执行手册（硬约束 + 构建命令 + 检查清单）
 ├── start.bat / start.sh                # Docker 全家桶一键启动脚本
 ├── stop.bat / stop.sh                  # 一键停止脚本
-├── docker-compose.yml                  # 15 容器全家桶编排
+├── compose.yaml                        # Compose 统一入口（include 分层文件）
+├── compose.infra.yaml                  # 数据库、注册中心、MQ、任务调度
+├── compose.apps.yaml                   # 后端微服务与前端
 ├── docker/
 │   ├── backend/Dockerfile              # 后端多阶段构建（Maven 编译 + JRE 运行）
 │   ├── frontend/Dockerfile             # 前端多阶段构建（npm 编译 + Nginx）
@@ -152,48 +154,54 @@ Omni-Stack/
 
 ## Docker 一键部署（推荐）
 
-一条命令启动全部容器：中间件（MySQL、Redis、Nacos、RocketMQ、XXL-JOB）+ 8 个后端微服务 + 前端。
+可按预设或模块启动最小依赖闭包；完整模式包含中间件、迁移器、8 个后端微服务与前端。
 
 ### 前置条件
 
 | 软件 | 版本要求 | 说明 |
 |------|---------|------|
 | Docker Desktop | 任意稳定版 | Windows 需 WSL2 后端 |
+| Node.js | >= 22.12.0 | 运行 Omni CLI 与一键脚本 |
 | Git | 任意 | 克隆项目 |
 
 首次启动前复制 `.env.example` 为 `.env`，把其中每个 `replace-with-*` 占位值替换为独立随机密钥。
 `OMNI_INTERNAL_API_TOKEN` 必须在所有 Servlet 服务中保持一致；Compose 对 MySQL、Redis、Nacos、
 XXL-JOB、OAuth state、服务间令牌等变量均采用必填校验，缺少配置时直接拒绝启动。
 
-> 无需安装 JDK、Node.js、Maven —— 全部在 Docker 容器内完成构建和运行。
+> 容器启动无需本机 JDK 或 Maven；Omni CLI 需要 Node.js，应用编译仍在 Docker 容器内完成。
 
-已有 MySQL 数据卷不会重新执行 Docker entrypoint 初始化脚本。升级时先备份数据库，再按依赖顺序执行
-`scripts/sql/migrate-crm-mvp.sql`、`scripts/sql/migrate-srm-mvp.sql`、
-`scripts/sql/migrate-workflow-process-start-idempotency.sql`、
-`scripts/sql/migrate-procurement-mvp.sql`、`scripts/sql/migrate-asset-mvp.sql`，最后更新
-`scripts/sql/sp_init_tenant.sql`。新环境直接使用 `init-all.sql`。
+数据库结构与种子统一由一次性 `omni-db-migrator` 管理。新环境自动执行 fresh migration；已有数据卷必须先备份，
+再按迁移器的指纹预检与 `adopt-current` 流程接管，禁止手工跳过版本记录。详见
+[Docker 部署指南](docs/docker-deployment.md)。
 
 ### 启动
 
 | 平台 | 命令 |
 |------|------|
-| Windows | 右键 `start.bat` → **以管理员身份运行** |
+| Windows | `start.bat`（无需管理员权限） |
 | Linux / macOS | `./start.sh` |
 
-脚本自动完成：检测 Docker → 启动 Docker 引擎（如未运行）→ 端口保护（Windows Hyper-V/WSL2）→ 拉取中间件镜像 → 构建应用镜像 → 启动全部容器。
+脚本会检查 Docker 与 Node.js，通过 Omni CLI 构建并启动指定预设；不修改 Windows 端口保留策略。
 
 ```bash
-# 启动全部服务
+# 默认启动 full
 ./start.sh
 
-# 仅启动指定服务（如只启动中间件）
-./start.sh mysql redis
+# 启动 CRM 最小组合（不包含 SRM / Procurement / Asset）
+./start.sh crm
+
+# CLI 等价命令；也可按模块只启动公开前端
+npm --prefix tools/omni-cli run dev -- dev up --preset crm --build
+npm --prefix tools/omni-cli run dev -- dev up --module frontend
 
 # 查看服务状态
-docker compose ps
+npm --prefix tools/omni-cli run dev -- dev status
 
 # 停止全部服务
 ./stop.sh
+
+# 删除命名卷必须双重确认
+npm --prefix tools/omni-cli run dev -- dev down --volumes --confirm-delete-volumes
 ```
 
 ### 服务端口
@@ -238,7 +246,7 @@ docker compose ps
 | 问题 | 原因 | 解决方案 |
 |------|------|---------|
 | 镜像拉取失败 | 国内网络问题 | 配置 Docker 镜像加速：`"registry-mirrors": ["https://docker.1ms.run"]` |
-| 端口绑定失败 (Windows) | Hyper-V/WSL2 端口保留冲突 | `start.bat` 已自动处理端口保护，需以管理员身份运行 |
+| 端口绑定失败 (Windows) | 目标组合所需端口被占用 | 运行 `omni dev doctor`，只调整 `.env` 中对应的 `OMNI_*_HOST_PORT`，无需管理员权限 |
 | RocketMQ 端口 9876 冲突 | Windows Hyper-V 保留端口范围 | 宿主机映射已改为 19876，容器内仍为 9876 |
 | 502 Bad Gateway | Nginx 反代端口配置错误 | 确认 nginx.conf 中 proxy_pass 使用容器内部端口 `8080`（非宿主机端口 `8102`） |
 | Nacos 启动失败 | 健康检查端点变更 | Nacos v3.1.1 使用 `GET /nacos/`（非 `/nacos/actuator/health`） |

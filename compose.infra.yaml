@@ -1,0 +1,193 @@
+# Omni-Stack 基础设施服务：由 compose.yaml 统一装配。
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_MYSQL_HOST_PORT:-13306}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中配置 MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: omni_auth
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    volumes:
+      - omni-mysql-data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --init-connect=SET NAMES utf8mb4
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping --protocol=tcp -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD}
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - core
+      - workflow
+      - crm
+      - supply-chain
+      - full
+  omni-db-migrator:
+    build:
+      context: .
+      dockerfile: docker/migrator/Dockerfile
+    image: omni-db-migrator:latest
+    restart: no
+    environment:
+      TZ: Asia/Shanghai
+      DB_MIGRATOR_COMMAND: migrate
+      DB_MIGRATOR_ADMIN_URL: jdbc:mysql://mysql:3306/?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      DB_MIGRATOR_ADMIN_USERNAME: root
+      DB_MIGRATOR_ADMIN_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中配置 MYSQL_ROOT_PASSWORD}
+      DB_MIGRATOR_APP_USERNAME: omni_app
+      DB_MIGRATOR_APP_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    profiles:
+      - core
+      - workflow
+      - crm
+      - supply-chain
+      - full
+  redis:
+    image: redis:7.4
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_REDIS_HOST_PORT:-6379}:6379
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - REDISCLI_AUTH="$${REDIS_PASSWORD}" redis-cli ping | grep PONG
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+    profiles:
+      - core
+      - workflow
+      - crm
+      - supply-chain
+      - full
+  nacos:
+    image: nacos/nacos-server:v3.1.1
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_NACOS_CONSOLE_HOST_PORT:-8080}:8080
+      - 127.0.0.1:${OMNI_NACOS_API_HOST_PORT:-8848}:8848
+      - 127.0.0.1:${OMNI_NACOS_GRPC_HOST_PORT:-9848}:9848
+    environment:
+      MODE: standalone
+      NACOS_AUTH_TOKEN: ${NACOS_AUTH_TOKEN:?请在 .env 中配置 NACOS_AUTH_TOKEN}
+      NACOS_AUTH_IDENTITY_KEY: ${NACOS_AUTH_IDENTITY_KEY:?请在 .env 中配置 NACOS_AUTH_IDENTITY_KEY}
+      NACOS_AUTH_IDENTITY_VALUE: ${NACOS_AUTH_IDENTITY_VALUE:?请在 .env 中配置 NACOS_AUTH_IDENTITY_VALUE}
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中配置 MYSQL_ROOT_PASSWORD}
+      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=10000&socketTimeout=30000&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+    depends_on:
+      omni-db-migrator:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -sf
+        - http://localhost:8848/nacos/
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    profiles:
+      - core
+      - workflow
+      - crm
+      - supply-chain
+      - full
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.2
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_ROCKETMQ_NAMESRV_HOST_PORT:-19876}:9876
+    command: sh mqnamesrv
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - timeout 5 bash -c '</dev/tcp/127.0.0.1/9876' || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - supply-chain
+      - full
+      - mq
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.2
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_ROCKETMQ_FAST_HOST_PORT:-10909}:10909
+      - 127.0.0.1:${OMNI_ROCKETMQ_BROKER_HOST_PORT:-10911}:10911
+      - 127.0.0.1:${OMNI_ROCKETMQ_HA_HOST_PORT:-10912}:10912
+    environment:
+      NAMESRV_ADDR: rocketmq-namesrv:9876
+      JAVA_OPT_EXT: -Drocketmq.broker.diskSpaceWarningLevelRatio=0.98
+    volumes:
+      - ./docker/rocketmq/broker-docker.conf:/home/rocketmq/rocketmq-5.3.2/conf/broker.conf
+    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.2/conf/broker.conf --enable-proxy
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - timeout 5 bash -c '</dev/tcp/127.0.0.1/10911' || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    profiles:
+      - supply-chain
+      - full
+      - mq
+  xxl-job-admin:
+    image: xuxueli/xxl-job-admin:3.3.1
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_XXL_JOB_HOST_PORT:-18080}:8080
+    environment:
+      PARAMS: |
+        --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true --spring.datasource.username=root --spring.datasource.password=${MYSQL_ROOT_PASSWORD:?请在 .env 中配置 MYSQL_ROOT_PASSWORD} --xxl.job.login.username=${XXL_JOB_ADMIN_USERNAME:?请在 .env 中配置 XXL_JOB_ADMIN_USERNAME} --xxl.job.login.password=${XXL_JOB_ADMIN_PASSWORD:?请在 .env 中配置 XXL_JOB_ADMIN_PASSWORD} --xxl.job.accessToken=${XXL_JOB_ACCESS_TOKEN:?请在 .env 中配置 XXL_JOB_ACCESS_TOKEN}
+    depends_on:
+      omni-db-migrator:
+        condition: service_completed_successfully
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - timeout 3 bash -c '</dev/tcp/localhost/8080' || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    profiles:
+      - supply-chain
+      - full
+      - job
+volumes:
+  omni-mysql-data:
+    name: ${OMNI_MYSQL_VOLUME_NAME:-omni-stack-mysql-data}

@@ -452,6 +452,8 @@ export default {
     resend: 'Resend',
     skip: 'Skip',
     close: 'Close',
+    deliveryDisabledTitle: 'Outbox-only mode: asynchronous delivery is disabled',
+    deliveryDisabledDescription: 'Business transactions still write to the Outbox, but messages are not sent to MQ. Start full or supply-chain mode before resending.',
     confirmResend: 'Are you sure to resend this message?',
     confirmSkip: 'Are you sure to skip this message? This action cannot be undone.',
   },

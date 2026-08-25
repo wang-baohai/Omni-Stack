@@ -57,6 +57,18 @@ export interface MqMessageQuery {
   size: number
 }
 
+/** MQ Outbox 与异步投递能力运行状态。 */
+export interface MqRelayRuntimeStatus {
+  outboxWriteEnabled: boolean
+  deliveryEnabled: boolean
+  mode: 'FULL' | 'OUTBOX_ONLY'
+}
+
+/** 查询当前消息投递运行状态。 */
+export function getMqRelayRuntimeStatus() {
+  return request.get<ApiResponse<MqRelayRuntimeStatus>>('/base/mq-message/runtime')
+}
+
 /**
  * 分页查询消息记录。
  */

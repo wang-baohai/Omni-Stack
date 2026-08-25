@@ -20,7 +20,7 @@ import type {
 const TARGETS = {
   parentPom: 'omni-backend/pom.xml',
   gateway: 'omni-backend/omni-gateway/src/main/resources/application.yml',
-  compose: 'docker-compose.yml',
+  compose: 'compose.apps.yaml',
   catalog: 'scaffold/catalog/modules.yaml',
   dockerfile: 'docker/backend/Dockerfile',
   menu: 'omni-frontend/src/constants/menu.ts',
@@ -195,7 +195,7 @@ function renderCompose(content: string, spec: ServiceSpec): string {
     ports: [`127.0.0.1:\${OMNI_${envName}_HOST_PORT:-${spec.servicePort}}:8080`],
     environment,
     depends_on: dependsOn,
-    networks: ['omni-network'],
+    profiles: ['full', spec.serviceId],
   });
   return document.toString({ lineWidth: 0 });
 }

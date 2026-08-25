@@ -1,0 +1,427 @@
+# Omni-Stack 应用服务：同一服务只定义一次，通过 profiles 组合。
+services:
+  omni-auth:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-auth
+    image: omni-auth:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_AUTH_HOST_PORT:-8100}:8080
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SERVER_MAX_HTTP_HEADER_SIZE: "32768"
+      SPRING_PROFILES_ACTIVE: ${OMNI_RUNTIME_PROFILE:-default}
+      SPRING_CLOUD_NACOS_DISCOVERY_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_CONFIG_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: omni_app
+      SPRING_DATASOURCE_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-auth:9900/
+      XXL_JOB_EXECUTOR_IP: omni-auth
+      XXL_JOB_EXECUTOR_PORT: "9900"
+      XXL_JOB_ACCESS_TOKEN: ${XXL_JOB_ACCESS_TOKEN:?请在 .env 中配置 XXL_JOB_ACCESS_TOKEN}
+      AUTH_ISSUER: http://omni-auth:8080
+      AUTH_FRONTEND_BASE_URL: http://localhost:3000
+      AUTH_OAUTH2_GITHUB_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/github/callback
+      AUTH_OAUTH2_GITEE_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/gitee/callback
+      AUTH_OAUTH2_GOOGLE_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/google/callback
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GITEE_CLIENT_ID: ${GITEE_CLIENT_ID:-}
+      GITEE_CLIENT_SECRET: ${GITEE_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      OAUTH2_STATE_SECRET: ${OAUTH2_STATE_SECRET:?请在 .env 中配置 OAUTH2_STATE_SECRET}
+      JWK_ENCRYPT_KEY: ${JWK_ENCRYPT_KEY:?请在 .env 中配置 JWK_ENCRYPT_KEY}
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+      HTTP_PROXY: http://host.docker.internal:7897
+      HTTPS_PROXY: http://host.docker.internal:7897
+      NO_PROXY: localhost,127.0.0.1,mysql,redis,nacos
+      XXL_JOB_EXECUTOR_ENABLED: ${XXL_JOB_ENABLED:-true}
+      OMNI_MQLOG_RELAY_AUTO_REGISTER: ${OMNI_MQ_RELAY_ENABLED:-true}
+      OMNI_MQLOG_RELAY_ENABLED: ${OMNI_MQ_RELAY_ENABLED:-true}
+      SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT: ${OMNI_MQ_AUTODETECT:-true}
+      SPRING_CLOUD_FUNCTION_DEFINITION: ${OMNI_AUTH_FUNCTION_DEFINITION-portalRoleAssignFunction;tenantProvisionResultFunction}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
+    profiles:
+      - core
+      - workflow
+      - crm
+      - supply-chain
+      - full
+  omni-base:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-base
+    image: omni-base:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_BASE_HOST_PORT:-8101}:8080
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: ${OMNI_RUNTIME_PROFILE:-default}
+      SPRING_CLOUD_NACOS_DISCOVERY_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_CONFIG_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/omni_base?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: omni_app
+      SPRING_DATASOURCE_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+      SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-base:9901/
+      XXL_JOB_EXECUTOR_IP: omni-base
+      XXL_JOB_ACCESS_TOKEN: ${XXL_JOB_ACCESS_TOKEN:?请在 .env 中配置 XXL_JOB_ACCESS_TOKEN}
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+      XXL_JOB_EXECUTOR_ENABLED: ${XXL_JOB_ENABLED:-true}
+      OMNI_MQLOG_RELAY_AUTO_REGISTER: ${OMNI_MQ_RELAY_ENABLED:-true}
+      OMNI_MQLOG_RELAY_ENABLED: ${OMNI_MQ_RELAY_ENABLED:-true}
+      SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT: ${OMNI_MQ_AUTODETECT:-true}
+      SPRING_CLOUD_FUNCTION_DEFINITION: ${OMNI_BASE_FUNCTION_DEFINITION-operlogConsumer;tenantProvisionRequestedFunction}
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
+    profiles:
+      - core
+      - workflow
+      - crm
+      - supply-chain
+      - full
+  omni-workflow:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-workflow
+    image: omni-workflow:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_WORKFLOW_HOST_PORT:-8103}:8080
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: ${OMNI_RUNTIME_PROFILE:-default}
+      SPRING_CLOUD_NACOS_DISCOVERY_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_CONFIG_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/omni_workflow?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: omni_app
+      SPRING_DATASOURCE_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+      FLOWABLE_DATABASE_SCHEMA_UPDATE: "false"
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+      SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-workflow:9903/
+      XXL_JOB_EXECUTOR_IP: omni-workflow
+      XXL_JOB_EXECUTOR_PORT: "9903"
+      XXL_JOB_ACCESS_TOKEN: ${XXL_JOB_ACCESS_TOKEN:?请在 .env 中配置 XXL_JOB_ACCESS_TOKEN}
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+      XXL_JOB_EXECUTOR_ENABLED: ${XXL_JOB_ENABLED:-true}
+      OMNI_MQLOG_RELAY_AUTO_REGISTER: ${OMNI_MQ_RELAY_ENABLED:-true}
+      OMNI_MQLOG_RELAY_ENABLED: ${OMNI_MQ_RELAY_ENABLED:-true}
+      SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT: ${OMNI_MQ_AUTODETECT:-true}
+      SPRING_CLOUD_FUNCTION_DEFINITION: ${OMNI_WORKFLOW_FUNCTION_DEFINITION-tenantProvisionRequestedFunction}
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
+    profiles:
+      - workflow
+      - supply-chain
+      - full
+  omni-crm:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-crm
+    image: omni-crm:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_CRM_HOST_PORT:-8104}:8080
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: ${OMNI_RUNTIME_PROFILE:-default}
+      SPRING_CLOUD_NACOS_DISCOVERY_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_CONFIG_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_URL: jdbc:mysql://mysql:3306/omni_crm?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      MYSQL_USERNAME: omni_app
+      MYSQL_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-crm:9904/
+      XXL_JOB_EXECUTOR_IP: omni-crm
+      XXL_JOB_EXECUTOR_PORT: "9904"
+      XXL_JOB_ACCESS_TOKEN: ${XXL_JOB_ACCESS_TOKEN:?请在 .env 中配置 XXL_JOB_ACCESS_TOKEN}
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+      XXL_JOB_EXECUTOR_ENABLED: ${XXL_JOB_ENABLED:-true}
+      OMNI_MQLOG_RELAY_AUTO_REGISTER: ${OMNI_MQ_RELAY_ENABLED:-true}
+      OMNI_MQLOG_RELAY_ENABLED: ${OMNI_MQ_RELAY_ENABLED:-true}
+      SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT: ${OMNI_MQ_AUTODETECT:-true}
+      SPRING_CLOUD_FUNCTION_DEFINITION: ${OMNI_CRM_FUNCTION_DEFINITION-tenantProvisionRequestedFunction}
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
+      omni-auth:
+        condition: service_healthy
+    profiles:
+      - crm
+      - full
+  omni-gateway:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-gateway
+    image: omni-gateway:latest
+    restart: unless-stopped
+    ports:
+      - ${OMNI_GATEWAY_HOST_PORT:-8102}:8080
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: ${OMNI_RUNTIME_PROFILE:-default}
+      SPRING_CLOUD_NACOS_DISCOVERY_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_CONFIG_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      NACOS_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_DISCOVERY_IP: ""
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+      AUTH_JWKS_URI: http://omni-auth:8080/oauth2/jwks
+      JAVA_OPTS: -Dreactor.netty.http.server.maxHeaderSize=65536
+    depends_on:
+      omni-db-migrator:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      omni-auth:
+        condition: service_healthy
+    profiles:
+      - core
+      - workflow
+      - crm
+      - supply-chain
+      - full
+  omni-srm:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-srm
+    image: omni-srm:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_SRM_HOST_PORT:-8105}:8080
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: ${OMNI_RUNTIME_PROFILE:-default}
+      SPRING_CLOUD_NACOS_DISCOVERY_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_CONFIG_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_URL: jdbc:mysql://mysql:3306/omni_srm?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      MYSQL_USERNAME: omni_app
+      MYSQL_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-srm:9905/
+      XXL_JOB_EXECUTOR_IP: omni-srm
+      XXL_JOB_EXECUTOR_PORT: "9905"
+      XXL_JOB_ACCESS_TOKEN: ${XXL_JOB_ACCESS_TOKEN:?请在 .env 中配置 XXL_JOB_ACCESS_TOKEN}
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+      XXL_JOB_EXECUTOR_ENABLED: ${XXL_JOB_ENABLED:-true}
+      OMNI_MQLOG_RELAY_AUTO_REGISTER: ${OMNI_MQ_RELAY_ENABLED:-true}
+      OMNI_MQLOG_RELAY_ENABLED: ${OMNI_MQ_RELAY_ENABLED:-true}
+      SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT: ${OMNI_MQ_AUTODETECT:-true}
+      SPRING_CLOUD_FUNCTION_DEFINITION: ${OMNI_SRM_FUNCTION_DEFINITION-portalRoleResultFunction;workflowCompletionFunction;tenantProvisionRequestedFunction}
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
+      omni-auth:
+        condition: service_healthy
+      omni-workflow:
+        condition: service_healthy
+    profiles:
+      - supply-chain
+      - full
+  omni-procurement:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-procurement
+    image: omni-procurement:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_PROCUREMENT_HOST_PORT:-8106}:8080
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: ${OMNI_RUNTIME_PROFILE:-default}
+      SPRING_CLOUD_NACOS_DISCOVERY_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_CONFIG_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_URL: jdbc:mysql://mysql:3306/omni_procurement?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      MYSQL_USERNAME: omni_app
+      MYSQL_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-procurement:9906/
+      XXL_JOB_EXECUTOR_IP: omni-procurement
+      XXL_JOB_EXECUTOR_PORT: "9906"
+      XXL_JOB_ACCESS_TOKEN: ${XXL_JOB_ACCESS_TOKEN:?请在 .env 中配置 XXL_JOB_ACCESS_TOKEN}
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+      XXL_JOB_EXECUTOR_ENABLED: ${XXL_JOB_ENABLED:-true}
+      OMNI_MQLOG_RELAY_AUTO_REGISTER: ${OMNI_MQ_RELAY_ENABLED:-true}
+      OMNI_MQLOG_RELAY_ENABLED: ${OMNI_MQ_RELAY_ENABLED:-true}
+      SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT: ${OMNI_MQ_AUTODETECT:-true}
+      SPRING_CLOUD_FUNCTION_DEFINITION: ${OMNI_PROCUREMENT_FUNCTION_DEFINITION-workflowCompletionFunction;quotationSubmittedFunction;tenantProvisionRequestedFunction}
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
+      omni-auth:
+        condition: service_healthy
+      omni-workflow:
+        condition: service_healthy
+      omni-srm:
+        condition: service_healthy
+    profiles:
+      - supply-chain
+      - full
+  omni-asset:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      args:
+        SERVICE_NAME: omni-asset
+    image: omni-asset:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${OMNI_ASSET_HOST_PORT:-8107}:8080
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: "8080"
+      MANAGEMENT_SERVER_PORT: "8080"
+      MANAGEMENT_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: ${OMNI_RUNTIME_PROFILE:-default}
+      SPRING_CLOUD_NACOS_DISCOVERY_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      SPRING_CLOUD_NACOS_CONFIG_ENABLED: ${NACOS_CLIENT_ENABLED:-true}
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_URL: jdbc:mysql://mysql:3306/omni_asset?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      MYSQL_USERNAME: omni_app
+      MYSQL_PASSWORD: ${OMNI_DB_PASSWORD:?请在 .env 中配置 OMNI_DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?请在 .env 中配置 REDIS_PASSWORD}
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      XXL_JOB_EXECUTOR_ADDRESS: http://omni-asset:9907/
+      XXL_JOB_EXECUTOR_IP: omni-asset
+      XXL_JOB_EXECUTOR_PORT: "9907"
+      XXL_JOB_ACCESS_TOKEN: ${XXL_JOB_ACCESS_TOKEN:?请在 .env 中配置 XXL_JOB_ACCESS_TOKEN}
+      OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+      XXL_JOB_EXECUTOR_ENABLED: ${XXL_JOB_ENABLED:-true}
+      OMNI_MQLOG_RELAY_AUTO_REGISTER: ${OMNI_MQ_RELAY_ENABLED:-true}
+      OMNI_MQLOG_RELAY_ENABLED: ${OMNI_MQ_RELAY_ENABLED:-true}
+      SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT: ${OMNI_MQ_AUTODETECT:-true}
+      SPRING_CLOUD_FUNCTION_DEFINITION: ${OMNI_ASSET_FUNCTION_DEFINITION-procurementGoodsReceiptFunction;workflowCompletionFunction;tenantProvisionRequestedFunction}
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      omni-db-migrator:
+        condition: service_completed_successfully
+      omni-auth:
+        condition: service_healthy
+      omni-workflow:
+        condition: service_healthy
+      omni-srm:
+        condition: service_healthy
+      omni-procurement:
+        condition: service_healthy
+    profiles:
+      - supply-chain
+      - full
+  omni-frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    image: omni-frontend:latest
+    restart: unless-stopped
+    ports:
+      - ${OMNI_FRONTEND_HOST_PORT:-3000}:3000
+    profiles:
+      - core
+      - workflow
+      - crm
+      - supply-chain
+      - full

@@ -156,6 +156,7 @@ public class XxlJobAutoConfiguration {
      * @return 启动后执行的自动注册逻辑
      */
     @Bean
+    @ConditionalOnProperty(prefix = "xxl.job.executor", name = "enabled", havingValue = "true", matchIfMissing = true)
     public ApplicationRunner systemJobAutoRegistrar(
             SystemJobRegistry systemJobRegistry,
             XxlJobProperties properties) {

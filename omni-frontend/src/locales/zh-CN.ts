@@ -488,6 +488,8 @@ export default {
     resend: '重发',
     skip: '忽略',
     close: '关闭',
+    deliveryDisabledTitle: '当前为仅写入模式，异步投递未启用',
+    deliveryDisabledDescription: '业务事务仍会写入 Outbox，但消息不会发送到 MQ；请启动 full 或 supply-chain 模式后再执行重发。',
     confirmResend: '确认重发该消息？',
     confirmSkip: '确认忽略该消息？此操作不可撤销。',
   },

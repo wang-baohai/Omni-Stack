@@ -14,7 +14,7 @@ const temporaryDirectories: string[] = [];
 const fixtureTargets = [
   'omni-backend/pom.xml',
   'omni-backend/omni-gateway/src/main/resources/application.yml',
-  'docker-compose.yml',
+  'compose.apps.yaml',
   'scaffold/catalog/modules.yaml',
   'scaffold/schemas/module.schema.json',
   'docker/backend/Dockerfile',
@@ -105,7 +105,7 @@ describe('service integration renderer', () => {
     assert.ok(gateway.spring.cloud.gateway.server.webflux.routes.some((route) => route.id === 'omni-inventory-sample'));
     assert.ok(gateway.spring.cloud.gateway.server.webflux.routes.some((route) => route.id === 'block-internal-inventory-sample'));
 
-    const compose = parseDocument(required(byTarget, 'docker-compose.yml')).toJS() as {
+    const compose = parseDocument(required(byTarget, 'compose.apps.yaml')).toJS() as {
       services: Record<string, { ports: string[]; environment: Record<string, string> }>;
     };
     assert.deepEqual(compose.services['omni-inventory-sample']?.ports, [

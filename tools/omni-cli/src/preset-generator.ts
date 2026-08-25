@@ -15,6 +15,7 @@ import {
 import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { parseDocument, stringify } from 'yaml';
 import { loadCatalog, validateCatalogResources } from './catalog.js';
+import { COMPOSE_SERVICE_FILES } from './compose-model.js';
 import { CliError } from './errors.js';
 import { CRUD_TEMPLATE_VERSION } from './crud-generator.js';
 import { resolvePreset } from './presets.js';
@@ -177,32 +178,36 @@ function filterDockerfile(root: string, selectedModules: ModuleDefinition[]): vo
 function filterCompose(root: string, selectedModules: ModuleDefinition[]): void {
   const retained = new Set(selectedModules.flatMap((module) => module.composeServices));
   const backendServices = new Set(selectedModules.flatMap((module) => module.backendModules));
-  const path = resolve(root, 'docker-compose.yml');
-  const value = parseDocument(readFileSync(path, 'utf8')).toJS() as {
-    services?: Record<string, {
-      depends_on?: Record<string, unknown> | string[];
-      environment?: Record<string, unknown>;
-    }>;
-  };
-  for (const service of Object.keys(value.services ?? {})) if (!retained.has(service)) delete value.services?.[service];
-  for (const [serviceName, service] of Object.entries(value.services ?? {})) {
-    if (Array.isArray(service.depends_on)) {
-      service.depends_on = service.depends_on.filter((dependency) => retained.has(dependency));
-    } else if (service.depends_on) {
-      for (const dependency of Object.keys(service.depends_on)) {
-        if (!retained.has(dependency)) delete service.depends_on[dependency];
+  for (const relativePath of COMPOSE_SERVICE_FILES) {
+    const path = resolve(root, relativePath);
+    const value = parseDocument(readFileSync(path, 'utf8')).toJS() as {
+      services?: Record<string, {
+        depends_on?: Record<string, unknown> | string[];
+        environment?: Record<string, unknown>;
+        profiles?: string[];
+      }>;
+    };
+    for (const service of Object.keys(value.services ?? {})) if (!retained.has(service)) delete value.services?.[service];
+    for (const [serviceName, service] of Object.entries(value.services ?? {})) {
+      delete service.profiles;
+      if (Array.isArray(service.depends_on)) {
+        service.depends_on = service.depends_on.filter((dependency) => retained.has(dependency));
+      } else if (service.depends_on) {
+        for (const dependency of Object.keys(service.depends_on)) {
+          if (!retained.has(dependency)) delete service.depends_on[dependency];
+        }
+      }
+      if (!retained.has('xxl-job-admin') && backendServices.has(serviceName) && service.environment) {
+        const xxlKeys = Object.keys(service.environment).filter((key) => key.startsWith('XXL_JOB_'));
+        for (const key of xxlKeys) delete service.environment[key];
+        if (xxlKeys.length > 0) service.environment.XXL_JOB_EXECUTOR_ENABLED = 'false';
+      }
+      if (!retained.has('rocketmq-namesrv') && backendServices.has(serviceName) && service.environment) {
+        for (const key of Object.keys(service.environment)) if (key.includes('ROCKETMQ')) delete service.environment[key];
       }
     }
-    if (!retained.has('xxl-job-admin') && backendServices.has(serviceName) && service.environment) {
-      const xxlKeys = Object.keys(service.environment).filter((key) => key.startsWith('XXL_JOB_'));
-      for (const key of xxlKeys) delete service.environment[key];
-      if (xxlKeys.length > 0) service.environment.XXL_JOB_EXECUTOR_ENABLED = 'false';
-    }
-    if (!retained.has('rocketmq-namesrv') && backendServices.has(serviceName) && service.environment) {
-      for (const key of Object.keys(service.environment)) if (key.includes('ROCKETMQ')) delete service.environment[key];
-    }
+    writeFileSync(path, stringify(value, { lineWidth: 0 }), 'utf8');
   }
-  writeFileSync(path, stringify(value, { lineWidth: 0 }), 'utf8');
 }
 
 function filterOptionalInfrastructure(root: string, catalog: ModuleCatalog, selected: Set<string>): void {

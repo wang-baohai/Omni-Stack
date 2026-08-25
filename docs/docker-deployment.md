@@ -11,7 +11,7 @@
 - [2. 容器网络拓扑](#2-容器网络拓扑)
 - [3. 启动链与健康检查](#3-启动链与健康检查)
 - [4. 多阶段构建原理](#4-多阶段构建原理)
-- [5. docker-compose.yml 逐服务配置解读](#5-docker-composeyml-逐服务配置解读)
+- [5. Compose 分层配置解读](#5-compose-分层配置解读)
 - [6. 环境变量覆盖机制](#6-环境变量覆盖机制)
 - [7. Nginx 反代配置要点](#7-nginx-反代配置要点)
 - [8. 数据初始化与持久化](#8-数据初始化与持久化)
@@ -98,7 +98,7 @@ networks:
 
 > **关键区分**：容器间通信使用容器内部端口（如 8080），宿主机访问使用映射端口（如 8100-8107）；MySQL 容器内始终使用 3306，宿主机映射为 13306。
 
-> **生产网络边界**：仓库根目录的 `docker-compose.yml` 是本地开发/联调编排。Frontend 3000 与 Gateway 8102
+> **生产网络边界**：仓库根目录的 `compose.yaml` 及其 include 文件是本地开发/联调编排。Frontend 3000 与 Gateway 8102
 > 可由宿主机访问，其余服务、中间件和管理控制台都只绑定 `127.0.0.1` 作为诊断入口。生产部署必须只发布
 > Frontend/Gateway 的 HTTPS 入口，并移除全部诊断端口映射；下游 `X-Gateway-Forwarded` 只是转发标记，
 > 不能替代私有网络与服务间令牌。
@@ -223,7 +223,9 @@ EXPOSE 3000
 
 ---
 
-## 5. docker-compose.yml 逐服务配置解读
+## 5. Compose 分层配置解读
+
+`compose.yaml` 是统一入口，基础设施位于 `compose.infra.yaml`，应用与前端位于 `compose.apps.yaml`；同一服务不得在多个文件中重复定义。
 
 ### 5.1 MySQL 8.4
 
@@ -459,7 +461,7 @@ MySQL healthy
 当前 Compose 使用显式 MySQL 命名卷：
 
 ```yaml
-# 在 docker-compose.yml 中添加 Volume
+# 在 compose.infra.yaml 中添加 Volume
 mysql:
   volumes:
     - omni-mysql-data:/var/lib/mysql
@@ -581,7 +583,7 @@ Nacos 从 v3.x 开始，移除了 `/nacos/actuator/health` 端点。健康检查
 | v2.x | `/nacos/actuator/health` | GET |
 | v3.0+ | `/nacos/` | GET |
 
-### 11.2 docker-compose.yml 中的配置
+### 11.2 Compose 中的配置
 
 ```yaml
 healthcheck:
@@ -774,7 +776,7 @@ lsof -i :8080
 
 **解决**：
 - 停止占用端口的进程
-- 修改 docker-compose.yml 中的宿主机端口映射
+- 修改 `.env` 中对应的 `OMNI_*_HOST_PORT`，由 Compose 映射宿主机端口
 - Windows 用户检查 Hyper-V 端口保留（见[第 10 节](#10-windows-hyper-vws12-端口保留问题)）
 
 ### 15.5 Nacos 注册失败
@@ -867,7 +869,9 @@ docker compose logs --timestamps omni-auth | head -5
 
 | 文件 | 路径 | 说明 |
 |------|------|------|
-| docker-compose.yml | `docker-compose.yml` | 容器编排配置 |
+| Compose 入口 | `compose.yaml` | include 基础设施与应用编排 |
+| Compose 基础设施 | `compose.infra.yaml` | MySQL、Redis、Nacos、RocketMQ、XXL-JOB |
+| Compose 应用 | `compose.apps.yaml` | 后端服务与前端 |
 | 后端 Dockerfile | `docker/backend/Dockerfile` | 微服务多阶段构建 |
 | 前端 Dockerfile | `docker/frontend/Dockerfile` | Vue 前端多阶段构建 |
 | Nginx 配置 | `docker/frontend/nginx.conf` | 前端反代规则 |
@@ -877,7 +881,7 @@ docker compose logs --timestamps omni-auth | head -5
 | 数据库种子 | `scripts/sql/seed/`、`database/seed/manifest.yaml` | 幂等 DML、源文件校验和自然键断言 |
 | Migrator 镜像 | `docker/migrator/Dockerfile` | 构建一次性 Liquibase 迁移服务 |
 | 启动脚本 (Linux) | `start.sh` | 一键启动 |
-| 启动脚本 (Windows) | `start.bat` | 一键启动（含端口保护） |
+| 启动脚本 (Windows) | `start.bat` | 无管理员权限启动指定预设，不修改系统端口策略 |
 | 停止脚本 (Linux) | `stop.sh` | 一键停止 |
 | 停止脚本 (Windows) | `stop.bat` | 一键停止 |
 

@@ -42,7 +42,7 @@ describe('preset generator', () => {
     assert.match(migratorDockerfile, /^# syntax=docker\/dockerfile:1\.7/);
     const frontendDockerfile = readFileSync(resolve(target, 'docker/frontend/Dockerfile'), 'utf8');
     assert.match(frontendDockerfile, /^# syntax=docker\/dockerfile:1\.7/);
-    const composeConfiguration = readFileSync(resolve(target, 'docker-compose.yml'), 'utf8');
+    const composeConfiguration = readFileSync(resolve(target, 'compose.infra.yaml'), 'utf8');
     assert.match(composeConfiguration, /mysqladmin ping --protocol=tcp -h 127\.0\.0\.1/);
     assert.doesNotMatch(composeConfiguration, /mysqladmin ping -h localhost/);
     const homeWorkspace = readFileSync(resolve(target, 'omni-frontend/src/views/home/index.vue'), 'utf8');
@@ -89,7 +89,7 @@ describe('preset generator', () => {
     assert.doesNotMatch(authConfiguration, /srm-domain-event|portalRoleAssignFunction/);
     assert.doesNotMatch(authConfiguration, /rocketmq:/);
     assert.match(authConfiguration, /autodetect: false/);
-    const composeConfiguration = readFileSync(resolve(target, 'docker-compose.yml'), 'utf8');
+    const composeConfiguration = readFileSync(resolve(target, 'compose.apps.yaml'), 'utf8');
     assert.match(composeConfiguration, /XXL_JOB_EXECUTOR_ENABLED: "false"/);
     assert.doesNotMatch(composeConfiguration, /XXL_JOB_ACCESS_TOKEN|ROCKETMQ_NAME_SERVER/);
     const workflowSeed = readFileSync(resolve(target, 'scripts/sql/seed/workflow.sql'), 'utf8');

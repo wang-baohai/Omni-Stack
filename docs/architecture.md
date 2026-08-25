@@ -352,7 +352,7 @@ RocketMQ Broker (通过 StreamBridge)
 | XXL-JOB Admin | 分布式任务调度控制台 | 3.3.1 | 18080 |
 | RocketMQ | 消息队列（NameServer + Broker） | 5.3.2 | 9876, 10909-10912 |
 
-所有服务可通过一条命令启动：`docker compose up -d`。详见项目根目录 `docker-compose.yml`。
+完整服务可通过 `docker compose --profile full up -d` 启动；日常开发使用 `omni dev up --preset <id>` 启动最小依赖闭包。统一入口为根目录 `compose.yaml`。
 
 **启动顺序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 后端服务（Auth、Base、Workflow、CRM、SRM、Procurement、Asset、Gateway）→ 前端
 
@@ -362,11 +362,12 @@ RocketMQ Broker (通过 StreamBridge)
 
 ### 9.1 Docker Compose 编排
 
-项目根目录 `docker-compose.yml` 定义了 15 个容器：
+项目根目录 `compose.yaml` 通过 include 合并 `compose.infra.yaml` 与 `compose.apps.yaml`，完整 profile 定义 16 个容器：
 
 - **命名卷**（`mysql-data`、`redis-data`）用于数据持久化
 - **健康检查**（depends_on + service_healthy）确保分层启动链
-- **Bridge 网络**（`omni-network`）用于容器间通信
+- **共享默认 Bridge 网络**用于 include 后所有容器间通信，不重复声明服务或网络
+- **Profiles**（core、workflow、crm、supply-chain、full）组合唯一服务定义
 - **迁移启动门**：一次性 `omni-db-migrator` 使用 Liquibase 完成九库结构和幂等种子；Nacos、XXL-JOB 与应用只在迁移成功后启动
 
 ### 9.2 数据库 Schema
@@ -791,7 +792,7 @@ INSERT INTO sys_permission
 
 ### 14.7 Docker 部署配置
 
-在 `docker-compose.yml` 中添加服务定义：
+在 `compose.apps.yaml` 中添加唯一服务定义，并为其声明适用 profiles：
 
 ```yaml
 omni-order:

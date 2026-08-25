@@ -3,6 +3,14 @@ import { Command } from 'commander';
 import { isAbsolute, resolve } from 'node:path';
 import { loadCatalog, validateCatalogResources } from './catalog.js';
 import { runDoctor } from './doctor.js';
+import {
+  planDevelopmentSelection,
+  showDevelopmentStatus,
+  showModuleLogs,
+  startDevelopmentSelection,
+  stopDevelopmentEnvironment,
+  testModuleDependencies,
+} from './development.js';
 import { CliError } from './errors.js';
 import { renderCrudGeneration, validateExistingCrud } from './crud-generator.js';
 import { loadCrudSpec } from './crud-spec.js';
@@ -96,6 +104,57 @@ program.command('doctor').description('检查本地开发环境与工作区').ac
   checks.forEach((check) => console.log(`${check.passed ? 'PASS' : 'FAIL'} ${check.name}: ${check.detail}`));
   if (checks.some((check) => !check.passed)) process.exitCode = 1;
 });
+
+const dev = program.command('dev').description('轻量本地开发环境命令');
+dev.command('up')
+  .description('启动预设或模块的最小依赖组合')
+  .option('--preset <preset>', '正式预设 ID')
+  .option('--module <module>', '模块 ID')
+  .option('--build', '启动前强制重新构建镜像')
+  .action((commandOptions: { preset?: string; module?: string; build?: boolean }) => {
+    const root = workspaceRoot();
+    const selection = planDevelopmentSelection(root, commandOptions);
+    console.log(`development ${selection.kind}: ${selection.id}`);
+    console.log(`mode: ${selection.lite ? 'lite' : 'full'}`);
+    console.log(`modules: ${selection.moduleIds.join(', ')}`);
+    console.log(`services: ${selection.services.join(', ')}`);
+    if (selection.lite) console.log('degraded: XXL-JOB=off, MQ relay/consumers=off, Outbox writes=on');
+    startDevelopmentSelection(root, selection, commandOptions.build === true);
+  });
+dev.command('down')
+  .description('停止当前开发栈，默认保留命名卷')
+  .option('--volumes', '同时删除命名卷（不可恢复）')
+  .option('--confirm-delete-volumes', '确认删除命名卷')
+  .action((commandOptions: { volumes?: boolean; confirmDeleteVolumes?: boolean }) => {
+    stopDevelopmentEnvironment(
+      workspaceRoot(),
+      commandOptions.volumes === true,
+      commandOptions.confirmDeleteVolumes === true,
+    );
+  });
+dev.command('status').description('显示所有开发 profile 的容器状态').action(() => {
+  showDevelopmentStatus(workspaceRoot());
+});
+dev.command('doctor').description('检查本地开发环境与工作区').action(() => {
+  const checks = runDoctor(workspaceRoot());
+  checks.forEach((check) => console.log(`${check.passed ? 'PASS' : 'FAIL'} ${check.name}: ${check.detail}`));
+  if (checks.some((check) => !check.passed)) process.exitCode = 1;
+});
+dev.command('logs')
+  .description('查看指定模块服务日志')
+  .requiredOption('--module <module>', '模块 ID')
+  .option('--follow', '持续跟踪日志')
+  .action((commandOptions: { module: string; follow?: boolean }) => {
+    showModuleLogs(workspaceRoot(), commandOptions.module, commandOptions.follow === true);
+  });
+
+const test = program.command('test').description('模块验证命令');
+test.command('deps')
+  .description('运行指定模块及 Maven reactor 依赖测试')
+  .requiredOption('--module <module>', '模块 ID')
+  .action((commandOptions: { module: string }) => {
+    testModuleDependencies(workspaceRoot(), commandOptions.module);
+  });
 
 const generate = program.command('generate').description('代码生成命令');
 generate.command('crud')

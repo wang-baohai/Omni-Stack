@@ -112,6 +112,8 @@ public class MqLogAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(MessageSender.class)
     @ConditionalOnClass(StreamBridge.class)
+    @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "enabled",
+            havingValue = "true", matchIfMissing = true)
     public RocketMqMessageSender rocketMqMessageSender(StreamBridge streamBridge) {
         return new RocketMqMessageSender(streamBridge);
     }
@@ -121,6 +123,8 @@ public class MqLogAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "enabled",
+            havingValue = "true", matchIfMissing = true)
     public MqMessageRelayService mqMessageRelayService(SysMqMessageMapper mapper,
                                                         List<MessageSender> senders) {
         return new MqMessageRelayService(mapper, senders);
@@ -132,6 +136,8 @@ public class MqLogAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass(name = "com.xxl.job.core.handler.annotation.XxlJob")
+    @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "enabled",
+            havingValue = "true", matchIfMissing = true)
     public MqMessageRelayJob mqMessageRelayJob(MqMessageRelayService relayService) {
         return new MqMessageRelayJob(relayService);
     }
@@ -143,6 +149,8 @@ public class MqLogAutoConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnClass(name = "com.xxl.job.core.handler.annotation.XxlJob")
     @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "auto-register",
+            havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "enabled",
             havingValue = "true", matchIfMissing = true)
     @ConditionalOnProperty(prefix = "xxl.job.executor", name = "enabled",
             havingValue = "true", matchIfMissing = true)

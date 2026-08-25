@@ -5,6 +5,7 @@ import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
 import com.omni.common.mqlog.entity.SysMqMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,26 @@ import java.time.LocalDateTime;
 public class MqMessageController {
 
     private final MqMessageAggregationService mqMessageAggregationService;
+    private final Environment environment;
+
+    /**
+     * 查询当前消息投递运行状态。
+     *
+     * @return Outbox 写入与异步投递能力状态
+     */
+    @GetMapping("/runtime")
+    @PreAuthorize("hasAuthority('base:mqmessage:list')")
+    public R<MqRelayRuntimeStatus> runtime() {
+        boolean relayEnabled = environment.getProperty(
+                "omni.mqlog.relay.enabled", Boolean.class, true);
+        boolean executorEnabled = environment.getProperty(
+                "xxl.job.executor.enabled", Boolean.class, true);
+        boolean deliveryEnabled = relayEnabled && executorEnabled;
+        return R.ok(new MqRelayRuntimeStatus(
+                true,
+                deliveryEnabled,
+                deliveryEnabled ? "FULL" : "OUTBOX_ONLY"));
+    }
 
     /**
      * 分页查询消息记录。
@@ -113,5 +134,18 @@ public class MqMessageController {
             @PathVariable String msgId) {
         mqMessageAggregationService.skip(tenantId, msgId);
         return R.ok();
+    }
+
+    /**
+     * 消息投递运行状态。
+     *
+     * @param outboxWriteEnabled 本地事务 Outbox 是否可写
+     * @param deliveryEnabled    后台异步投递是否启用
+     * @param mode               运行模式
+     */
+    public record MqRelayRuntimeStatus(
+            boolean outboxWriteEnabled,
+            boolean deliveryEnabled,
+            String mode) {
     }
 }

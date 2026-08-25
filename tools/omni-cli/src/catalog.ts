@@ -1,5 +1,6 @@
 import { existsSync, globSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { composeDependencies, loadComposeApplication } from './compose-model.js';
 import { CliError } from './errors.js';
 import { formatSchemaErrors, loadSchema } from './schema.js';
 import type { ModuleCatalog, ModuleDefinition } from './types.js';
@@ -92,15 +93,11 @@ export function validateCatalogResources(workspaceRoot: string, catalog: ModuleC
   const reactorModules = [...parentPom.matchAll(/<module>([^<]+)<\/module>/g)].map((match) => match[1]!);
   assertExactOwnership('Maven reactor 模块', reactorModules, ownedBackendModules);
 
-  const compose = readYamlFile(resolve(workspaceRoot, 'docker-compose.yml')) as {
-    services?: Record<string, { depends_on?: Record<string, unknown> | string[] }>;
-  };
-  const composeServiceIds = Object.keys(compose.services ?? {});
+  const compose = loadComposeApplication(workspaceRoot);
+  const composeServiceIds = Object.keys(compose.services);
   assertExactOwnership('Compose 服务', composeServiceIds, ownedComposeServices);
-  for (const [serviceId, service] of Object.entries(compose.services ?? {})) {
-    const dependencies = Array.isArray(service.depends_on)
-      ? service.depends_on
-      : Object.keys(service.depends_on ?? {});
+  for (const [serviceId, service] of Object.entries(compose.services)) {
+    const dependencies = composeDependencies(service);
     const dangling = dependencies.filter((dependency) => !composeServiceIds.includes(dependency));
     if (dangling.length > 0) throw new CliError(`Compose 服务 ${serviceId} 存在悬空依赖: ${dangling.join(',')}`);
   }
