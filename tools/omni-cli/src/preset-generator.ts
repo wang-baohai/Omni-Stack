@@ -140,6 +140,7 @@ function pruneWorkspace(root: string, catalog: ModuleCatalog, selected: Set<stri
   filterCompose(root, selectedDefinitions);
   filterGateway(root, selectedDefinitions);
   filterMqBindings(root, catalog, selected);
+  filterOptionalInfrastructure(root, catalog, selected);
   filterWorkflowBusinessModels(root, selected);
   filterCatalog(root, selected);
   filterAuthSeed(root, selected);
@@ -167,7 +168,7 @@ function filterDockerfile(root: string, selectedModules: ModuleDefinition[]): vo
   const selected = new Set(selectedModules.flatMap((module) => module.backendModules));
   const path = resolve(root, 'docker/backend/Dockerfile');
   const content = readFileSync(path, 'utf8').split(/\r?\n/).filter((line) => {
-    const match = line.match(/^COPY omni-backend\/([^/]+)\/pom\.xml /);
+    const match = line.match(/^COPY omni-backend\/([^/\s]+)\/pom\.xml /);
     return !match || selected.has(match[1]!);
   }).join('\n');
   writeFileSync(path, `${content.replace(/\s*$/, '')}\n`, 'utf8');
@@ -175,12 +176,16 @@ function filterDockerfile(root: string, selectedModules: ModuleDefinition[]): vo
 
 function filterCompose(root: string, selectedModules: ModuleDefinition[]): void {
   const retained = new Set(selectedModules.flatMap((module) => module.composeServices));
+  const backendServices = new Set(selectedModules.flatMap((module) => module.backendModules));
   const path = resolve(root, 'docker-compose.yml');
   const value = parseDocument(readFileSync(path, 'utf8')).toJS() as {
-    services?: Record<string, { depends_on?: Record<string, unknown> | string[] }>;
+    services?: Record<string, {
+      depends_on?: Record<string, unknown> | string[];
+      environment?: Record<string, unknown>;
+    }>;
   };
   for (const service of Object.keys(value.services ?? {})) if (!retained.has(service)) delete value.services?.[service];
-  for (const service of Object.values(value.services ?? {})) {
+  for (const [serviceName, service] of Object.entries(value.services ?? {})) {
     if (Array.isArray(service.depends_on)) {
       service.depends_on = service.depends_on.filter((dependency) => retained.has(dependency));
     } else if (service.depends_on) {
@@ -188,8 +193,44 @@ function filterCompose(root: string, selectedModules: ModuleDefinition[]): void 
         if (!retained.has(dependency)) delete service.depends_on[dependency];
       }
     }
+    if (!retained.has('xxl-job-admin') && backendServices.has(serviceName) && service.environment) {
+      const xxlKeys = Object.keys(service.environment).filter((key) => key.startsWith('XXL_JOB_'));
+      for (const key of xxlKeys) delete service.environment[key];
+      if (xxlKeys.length > 0) service.environment.XXL_JOB_EXECUTOR_ENABLED = 'false';
+    }
+    if (!retained.has('rocketmq-namesrv') && backendServices.has(serviceName) && service.environment) {
+      for (const key of Object.keys(service.environment)) if (key.includes('ROCKETMQ')) delete service.environment[key];
+    }
   }
   writeFileSync(path, stringify(value, { lineWidth: 0 }), 'utf8');
+}
+
+function filterOptionalInfrastructure(root: string, catalog: ModuleCatalog, selected: Set<string>): void {
+  if (selected.has('rocketmq')) return;
+  const selectedBackendModules = catalog.modules
+    .filter((module) => selected.has(module.id))
+    .flatMap((module) => module.backendModules);
+  for (const backendModule of selectedBackendModules) {
+    const path = resolve(root, `omni-backend/${backendModule}/src/main/resources/application.yml`);
+    if (!existsSync(path)) continue;
+    const value = parseDocument(readFileSync(path, 'utf8')).toJS() as {
+      spring?: { cloud?: {
+        function?: { definition?: string };
+        stream?: {
+          rocketmq?: unknown;
+          bindings?: Record<string, unknown>;
+          function?: { autodetect?: boolean };
+        };
+      } };
+    };
+    const cloud = value.spring?.cloud;
+    if (!cloud?.stream) continue;
+    delete cloud.stream.rocketmq;
+    cloud.stream.bindings = {};
+    cloud.stream.function = { ...(cloud.stream.function ?? {}), autodetect: false };
+    if (cloud.function) cloud.function.definition = '';
+    writeFileSync(path, stringify(value, { lineWidth: 0 }), 'utf8');
+  }
 }
 
 function filterGateway(root: string, selectedModules: ModuleDefinition[]): void {

@@ -34,6 +34,8 @@ describe('preset generator', () => {
     assert.equal(existsSync(resolve(target, 'omni-backend/omni-crm')), false);
     assert.equal(existsSync(resolve(target, 'omni-frontend/src/views/crm')), false);
     assert.equal(existsSync(resolve(target, 'scaffold.lock')), true);
+    const backendDockerfile = readFileSync(resolve(target, 'docker/backend/Dockerfile'), 'utf8');
+    assert.match(backendDockerfile, /COPY omni-backend\/mvnw omni-backend\/pom\.xml \.\//);
     const homeWorkspace = readFileSync(resolve(target, 'omni-frontend/src/views/home/index.vue'), 'utf8');
     assert.doesNotMatch(homeWorkspace, /positiveInteger/);
     const coreLocale = readFileSync(resolve(target, 'omni-frontend/src/locales/zh-CN.ts'), 'utf8');
@@ -76,6 +78,11 @@ describe('preset generator', () => {
       'utf8',
     );
     assert.doesNotMatch(authConfiguration, /srm-domain-event|portalRoleAssignFunction/);
+    assert.doesNotMatch(authConfiguration, /rocketmq:/);
+    assert.match(authConfiguration, /autodetect: false/);
+    const composeConfiguration = readFileSync(resolve(target, 'docker-compose.yml'), 'utf8');
+    assert.match(composeConfiguration, /XXL_JOB_EXECUTOR_ENABLED: "false"/);
+    assert.doesNotMatch(composeConfiguration, /XXL_JOB_ACCESS_TOKEN|ROCKETMQ_NAME_SERVER/);
     const workflowSeed = readFileSync(resolve(target, 'scripts/sql/seed/workflow.sql'), 'utf8');
     assert.doesNotMatch(workflowSeed, /supplier-onboarding|procurement-approval|asset-transfer|asset-disposal/);
     assert.equal(existsSync(resolve(
