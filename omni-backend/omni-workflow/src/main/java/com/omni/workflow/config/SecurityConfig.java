@@ -50,7 +50,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         // 内部路径由容器级 InternalApiAuthFilter 在安全链之前失败关闭。
                         .requestMatchers("/api/internal/**").permitAll()

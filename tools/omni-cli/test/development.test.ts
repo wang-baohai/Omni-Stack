@@ -6,6 +6,7 @@ import YAML from 'yaml';
 import {
   developmentEnvironment,
   developmentCommandEnvironment,
+  observabilityEnvironment,
   planDevelopmentSelection,
   validateVolumeDeletion,
 } from '../src/development.js';
@@ -67,6 +68,19 @@ describe('development selection', () => {
     assert.equal(environment.NACOS_CLIENT_ENABLED, 'false');
     assert.equal(environment.OMNI_WORKFLOW_FUNCTION_DEFINITION, '');
     assert.equal(Object.keys(environment).some((key) => /PASSWORD|TOKEN|SECRET/.test(key)), false);
+  });
+
+  it('enables OTLP export and full local sampling only when observability is requested', () => {
+    const disabled = developmentCommandEnvironment(
+      workspaceRoot, planDevelopmentSelection(workspaceRoot, { preset: 'core' }),
+    );
+    const enabled = observabilityEnvironment();
+
+    assert.equal(enabled.OTLP_EXPORT_ENABLED, 'true');
+    assert.equal(enabled.TRACING_SAMPLING_PROBABILITY, '1.0');
+    assert.equal(enabled.MIGRATION_PUSHGATEWAY_ENABLED, 'true');
+    assert.equal(enabled.MIGRATION_PUSHGATEWAY_ADDRESS, 'pushgateway:9091');
+    assert.equal(Object.keys(enabled).some((key) => /PASSWORD|TOKEN|SECRET/.test(key)), false);
   });
 
   it('provides a Nacos-free static discovery profile to every runnable backend', () => {

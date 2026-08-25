@@ -32,6 +32,7 @@ databaseChangeLog:
                 `next_retry_time` datetime DEFAULT NULL COMMENT '下次重试时间（指数退避）',
                 `error_msg` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '最后一次失败错误信息',
                 `service_name` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '来源服务名（spring.application.name）',
+                `producer_trace_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Outbox 创建时的 W3C traceId',
                 `tenant_id` bigint NOT NULL COMMENT '租户ID',
                 `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                 `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

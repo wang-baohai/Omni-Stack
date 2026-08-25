@@ -68,6 +68,9 @@ public class SysMqMessage implements Serializable {
     /** 来源服务名（spring.application.name） */
     private String serviceName;
 
+    /** Outbox 创建时的 W3C traceId */
+    private String producerTraceId;
+
     /** 租户ID */
     private Long tenantId;
 

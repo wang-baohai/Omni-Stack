@@ -4,6 +4,7 @@ import com.omni.procurement.dto.RfqContracts;
 import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.common.service.identity.ServiceRequestIdentity;
+import com.omni.common.service.observability.InboxMetrics;
 import com.omni.procurement.service.QuotationSubmittedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -47,6 +48,10 @@ public class QuotationSubmittedConsumer {
                     0L, event.getTenantId(), "srm-quotation-event", null, "TENANT", Set.of(), null));
             try {
                 quotationSubmittedService.handle(event);
+                InboxMetrics.record("quotation-submitted", "success");
+            } catch (RuntimeException exception) {
+                InboxMetrics.record("quotation-submitted", "retry");
+                throw exception;
             } finally {
                 ServiceDataScopeContext.clear();
                 ServiceIdentityContext.clear();

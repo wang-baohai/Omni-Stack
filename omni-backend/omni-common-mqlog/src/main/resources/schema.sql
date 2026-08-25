@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS sys_mq_message (
     next_retry_time DATETIME     DEFAULT NULL COMMENT '下次重试时间（指数退避）',
     error_msg       VARCHAR(512) DEFAULT NULL COMMENT '最后一次失败错误信息',
     service_name    VARCHAR(64)  NOT NULL COMMENT '来源服务名（spring.application.name）',
+    producer_trace_id VARCHAR(32) DEFAULT NULL COMMENT 'Outbox 创建时的 W3C traceId',
     tenant_id       BIGINT       DEFAULT NULL COMMENT '租户ID',
     create_time     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time     DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

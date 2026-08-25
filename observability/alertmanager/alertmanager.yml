@@ -1,0 +1,11 @@
+route:
+  receiver: local-null
+  group_by: [alertname, service_name]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: local-null
+
+# 本地模板默认不向外发送通知。生产环境必须替换 receiver 并安全注入凭据。

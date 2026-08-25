@@ -5,6 +5,7 @@ import com.omni.srm.dto.PortalRoleResultEvent;
 import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.common.service.identity.ServiceRequestIdentity;
+import com.omni.common.service.observability.InboxMetrics;
 import com.omni.srm.service.PortalRoleResultService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,10 @@ public class PortalRoleResultConsumer {
                     portalRoleResultService.handle(event);
                     return null;
                 });
+                InboxMetrics.record("portal-role-result", "success");
+            } catch (RuntimeException exception) {
+                InboxMetrics.record("portal-role-result", "retry");
+                throw exception;
             } finally {
                 ServiceDataScopeContext.clear();
                 ServiceIdentityContext.clear();

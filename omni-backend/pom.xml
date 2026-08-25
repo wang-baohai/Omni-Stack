@@ -47,10 +47,17 @@
         <mybatis-plus.version>3.5.16</mybatis-plus.version>
         <xxl-job.version>3.3.1</xxl-job.version>
         <flowable.version>8.0.0</flowable.version>
+        <okio.version>3.16.1</okio.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- 对齐 OpenTelemetry OkHttp 5.2.1，覆盖 RocketMQ 5.3.1 传递的旧 Okio。 -->
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio-jvm</artifactId>
+                <version>${okio.version}</version>
+            </dependency>
             <!-- Spring Cloud BOM -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>

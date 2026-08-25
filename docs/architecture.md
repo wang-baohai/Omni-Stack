@@ -352,7 +352,7 @@ RocketMQ Broker (通过 StreamBridge)
 | XXL-JOB Admin | 分布式任务调度控制台 | 3.3.1 | 18080 |
 | RocketMQ | 消息队列（NameServer + Broker） | 5.3.2 | 9876, 10909-10912 |
 
-完整服务可通过 `docker compose --profile full up -d` 启动；日常开发使用 `omni dev up --preset <id>` 启动最小依赖闭包。统一入口为根目录 `compose.yaml`。
+完整服务可通过 `docker compose --profile full up -d` 启动；日常开发使用 `omni dev up --preset <id>` 启动最小依赖闭包。追加 `--observability` 会启动 Prometheus、Pushgateway、Node Exporter、cAdvisor、Grafana、Tempo、Loki、Alloy、OTel Collector 与 Alertmanager，并开启本地 Trace 导出。统一入口为根目录 `compose.yaml`，观测语义与安全边界见 [observability.md](observability.md)。
 
 **启动顺序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 后端服务（Auth、Base、Workflow、CRM、SRM、Procurement、Asset、Gateway）→ 前端
 

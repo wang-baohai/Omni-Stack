@@ -36,7 +36,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error", "/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/error", "/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                         // 内部路径由容器级 InternalApiAuthFilter 在安全链之前失败关闭。
                         .requestMatchers("/api/internal/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")

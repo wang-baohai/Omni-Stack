@@ -21,6 +21,7 @@ import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcRequisitionLineMapper;
 import com.omni.procurement.mapper.ProcRequisitionMapper;
+import com.omni.procurement.metrics.ProcurementMetrics;
 import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.common.service.identity.ServiceRequestIdentity;
@@ -252,9 +253,16 @@ public class RequisitionServiceImpl implements RequisitionService {
     /** {@inheritDoc} */
     @Override
     public RequisitionViews.Detail retryStart(Long id, Integer version) {
-        RequisitionWorkflowCommand command = workflowStateService.prepareRetry(id, version);
-        workflowCoordinator.start(command);
-        return loadVisibleDetail(command.tenantId(), id);
+        String result = "failure";
+        try {
+            RequisitionWorkflowCommand command = workflowStateService.prepareRetry(id, version);
+            workflowCoordinator.start(command);
+            RequisitionViews.Detail detail = loadVisibleDetail(command.tenantId(), id);
+            result = "success";
+            return detail;
+        } finally {
+            ProcurementMetrics.recordWorkflowStartRetry(result);
+        }
     }
 
     /** {@inheritDoc} */

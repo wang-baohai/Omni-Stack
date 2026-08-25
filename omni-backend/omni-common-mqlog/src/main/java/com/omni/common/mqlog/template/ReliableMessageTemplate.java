@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omni.common.core.mq.ReliableMessageRelay;
 import com.omni.common.mqlog.entity.SysMqMessage;
 import com.omni.common.mqlog.mapper.SysMqMessageMapper;
+import com.omni.common.mqlog.metrics.MqLogMetrics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,7 @@ public class ReliableMessageTemplate implements ReliableMessageRelay {
 
     private final SysMqMessageMapper sysMqMessageMapper;
     private final ObjectMapper objectMapper;
+    private final MqLogMetrics mqLogMetrics;
 
     @Value("${spring.application.name:unknown}")
     private String serviceName;
@@ -91,10 +94,13 @@ public class ReliableMessageTemplate implements ReliableMessageRelay {
         message.setRetryCount(0);
         message.setMaxRetry(3);
         message.setServiceName(serviceName);
+        message.setProducerTraceId(MDC.get("traceId"));
         message.setTenantId(tenantId);
         message.setCreateTime(LocalDateTime.now());
 
         sysMqMessageMapper.insert(message);
-        log.debug("可靠消息已落库：msgId={}, binding={}, key={}", msgId, bindingName, msgKey);
+        mqLogMetrics.recordOperation(bindingName, "enqueued");
+        log.debug("可靠消息已落库：msgId={}, binding={}, producerTraceId={}",
+                msgId, bindingName, message.getProducerTraceId());
     }
 }

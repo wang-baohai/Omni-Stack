@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 
 import java.util.function.Consumer;
 
@@ -39,7 +41,7 @@ class ProcurementGoodsReceiptConsumerTest {
     void should_set_and_clear_tenant_context_when_consuming_supported_event() {
         ProcurementGoodsReceiptConsumer configuration =
                 new ProcurementGoodsReceiptConsumer(importService);
-        Consumer<ProcurementAssetContracts.GoodsReceiptEvent> consumer =
+        Consumer<Message<ProcurementAssetContracts.GoodsReceiptEvent>> consumer =
                 configuration.procurementGoodsReceiptFunction();
         ProcurementAssetContracts.GoodsReceiptEvent event = event(
                 ProcurementGoodsReceiptConsumer.CONFIRMED_EVENT, 41L);
@@ -50,7 +52,7 @@ class ProcurementGoodsReceiptConsumerTest {
             return null;
         }).when(importService).importEvent(event);
 
-        consumer.accept(event);
+        consumer.accept(message(event));
 
         verify(importService).importEvent(event);
         assertThatThrownBy(ServiceIdentityContext::requireTenantId)
@@ -64,12 +66,12 @@ class ProcurementGoodsReceiptConsumerTest {
     void should_reject_unsupported_goods_receipt_event_version() {
         ProcurementGoodsReceiptConsumer configuration =
                 new ProcurementGoodsReceiptConsumer(importService);
-        Consumer<ProcurementAssetContracts.GoodsReceiptEvent> consumer =
+        Consumer<Message<ProcurementAssetContracts.GoodsReceiptEvent>> consumer =
                 configuration.procurementGoodsReceiptFunction();
         ProcurementAssetContracts.GoodsReceiptEvent event = event(
                 "procurement.goods-receipt.confirmed.v2", 41L);
 
-        assertThatThrownBy(() -> consumer.accept(event))
+        assertThatThrownBy(() -> consumer.accept(message(event)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("版本");
         verify(importService, never()).importEvent(event);
@@ -80,12 +82,12 @@ class ProcurementGoodsReceiptConsumerTest {
     void should_ignore_unrelated_procurement_domain_event() {
         ProcurementGoodsReceiptConsumer configuration =
                 new ProcurementGoodsReceiptConsumer(importService);
-        Consumer<ProcurementAssetContracts.GoodsReceiptEvent> consumer =
+        Consumer<Message<ProcurementAssetContracts.GoodsReceiptEvent>> consumer =
                 configuration.procurementGoodsReceiptFunction();
         ProcurementAssetContracts.GoodsReceiptEvent event = event(
                 "procurement.requisition.approved.v1", 41L);
 
-        consumer.accept(event);
+        consumer.accept(message(event));
 
         verify(importService, never()).importEvent(event);
     }
@@ -95,12 +97,12 @@ class ProcurementGoodsReceiptConsumerTest {
     void should_fail_closed_when_tenant_missing() {
         ProcurementGoodsReceiptConsumer configuration =
                 new ProcurementGoodsReceiptConsumer(importService);
-        Consumer<ProcurementAssetContracts.GoodsReceiptEvent> consumer =
+        Consumer<Message<ProcurementAssetContracts.GoodsReceiptEvent>> consumer =
                 configuration.procurementGoodsReceiptFunction();
         ProcurementAssetContracts.GoodsReceiptEvent event = event(
                 ProcurementGoodsReceiptConsumer.QUALITY_PASSED_EVENT, null);
 
-        assertThatThrownBy(() -> consumer.accept(event))
+        assertThatThrownBy(() -> consumer.accept(message(event)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("tenantId");
         verify(importService, never()).importEvent(event);
@@ -114,5 +116,13 @@ class ProcurementGoodsReceiptConsumerTest {
         event.setEventType(eventType);
         event.setTenantId(tenantId);
         return event;
+    }
+
+    private Message<ProcurementAssetContracts.GoodsReceiptEvent> message(
+            ProcurementAssetContracts.GoodsReceiptEvent event) {
+        return MessageBuilder.withPayload(event)
+                .setHeader("omniMessageId", "msg-consumer-1")
+                .setHeader("omniProducerTraceId", "0123456789abcdef0123456789abcdef")
+                .build();
     }
 }

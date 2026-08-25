@@ -1261,6 +1261,8 @@ doctor 检查：
 - HTTP method、route template、status。
 - exception class。
 - MQ destination 和 result。
+- 代码中封闭枚举的 operation 和 status；新增前必须证明取值集合固定。
+- 数据库迁移指标可额外使用受版本控制的 schema version；不得使用动态 SQL、表名或连接地址。
 
 禁止把 tenantId、userId、username、businessKey、URL 原始路径或消息 payload 作为 Metrics label。
 
@@ -1280,6 +1282,9 @@ observability profile 包含：
 | 组件 | 责任 |
 |---|---|
 | Prometheus | 抓取应用和基础设施指标 |
+| Pushgateway | 接收迁移器等短生命周期任务的结束指标 |
+| Node Exporter | 提供宿主文件系统与节点资源指标 |
+| cAdvisor | 提供本地容器资源和重启指标 |
 | Alertmanager | 告警路由模板 |
 | Grafana | Dashboard 和统一查询入口 |
 | Tempo | Trace 存储 |

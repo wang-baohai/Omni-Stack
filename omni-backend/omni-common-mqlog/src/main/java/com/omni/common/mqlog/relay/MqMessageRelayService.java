@@ -3,7 +3,10 @@ package com.omni.common.mqlog.relay;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.omni.common.mqlog.entity.SysMqMessage;
 import com.omni.common.mqlog.mapper.SysMqMessageMapper;
+import com.omni.common.mqlog.metrics.MqLogMetrics;
 import com.omni.common.mqlog.sender.MessageSender;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -11,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -33,10 +37,16 @@ public class MqMessageRelayService {
 
     private final SysMqMessageMapper sysMqMessageMapper;
     private final Map<String, MessageSender> senderMap;
+    private final MqLogMetrics mqLogMetrics;
+    private final Supplier<Tracer> tracerSupplier;
 
     public MqMessageRelayService(SysMqMessageMapper sysMqMessageMapper,
-                                  List<MessageSender> senders) {
+                                  List<MessageSender> senders,
+                                  MqLogMetrics mqLogMetrics,
+                                  Supplier<Tracer> tracerSupplier) {
         this.sysMqMessageMapper = sysMqMessageMapper;
+        this.mqLogMetrics = mqLogMetrics;
+        this.tracerSupplier = tracerSupplier;
         this.senderMap = senders.stream()
                 .collect(Collectors.toMap(MessageSender::brokerType, Function.identity()));
         log.info("MQ 消息中继服务初始化，已注册 sender: {}", senderMap.keySet());
@@ -78,6 +88,19 @@ public class MqMessageRelayService {
      * 投递单条消息。
      */
     private void relayOne(SysMqMessage msg) {
+        Tracer tracer = tracerSupplier.get();
+        Span relaySpan = tracer == null ? null : tracer.nextSpan().name("mq relay").start();
+        try (Tracer.SpanInScope ignored = relaySpan == null ? null : tracer.withSpan(relaySpan)) {
+            relayOneWithinSpan(msg);
+        } finally {
+            if (relaySpan != null) {
+                relaySpan.end();
+            }
+        }
+    }
+
+    /** 在独立消费 span 中投递一条消息，日志通过 msgId 关联生产与消费 trace。 */
+    private void relayOneWithinSpan(SysMqMessage msg) {
         MessageSender sender = senderMap.get(msg.getBrokerType());
         if (sender == null) {
             log.warn("MQ 中继：未找到 brokerType={} 对应的 sender，msgId={}", msg.getBrokerType(), msg.getMsgId());
@@ -92,7 +115,9 @@ public class MqMessageRelayService {
             msg.setErrorMsg(null);
             msg.setUpdateTime(LocalDateTime.now());
             sysMqMessageMapper.updateById(msg);
-            log.debug("MQ 中继：消息投递成功 msgId={}", msg.getMsgId());
+            mqLogMetrics.recordOperation(msg.getBindingName(), "sent");
+            log.info("MQ 中继：消息投递成功 msgId={}, producerTraceId={}, relayTraceId={}",
+                    msg.getMsgId(), msg.getProducerTraceId(), currentTraceId());
         } catch (Exception e) {
             // 投递失败，指数退避
             int newRetryCount = msg.getRetryCount() + 1;
@@ -104,17 +129,26 @@ public class MqMessageRelayService {
             if (newRetryCount >= msg.getMaxRetry()) {
                 // 超过最大重试次数，标记死信
                 msg.setStatus(SysMqMessage.STATUS_DEAD_LETTER);
-                log.warn("MQ 中继：消息进入死信 msgId={}, 已重试 {} 次: {}",
-                        msg.getMsgId(), newRetryCount, e.getMessage());
+                mqLogMetrics.recordOperation(msg.getBindingName(), "dead_letter");
+                log.warn("MQ 中继：消息进入死信 msgId={}, producerTraceId={}, relayTraceId={}, 已重试 {} 次: {}",
+                        msg.getMsgId(), msg.getProducerTraceId(), currentTraceId(), newRetryCount, e.getMessage());
             } else {
+                mqLogMetrics.recordOperation(msg.getBindingName(), "retry");
                 // 计算下次重试时间（指数退避：2^retryCount * 基数秒）
                 int backoffSeconds = (int) Math.pow(2, newRetryCount) * BACKOFF_BASE_SECONDS;
                 msg.setNextRetryTime(LocalDateTime.now().plusSeconds(backoffSeconds));
-                log.info("MQ 中继：消息投递失败 msgId={}, 第 {} 次重试将在 {} 秒后",
-                        msg.getMsgId(), newRetryCount, backoffSeconds);
+                log.info("MQ 中继：消息投递失败 msgId={}, producerTraceId={}, relayTraceId={}, 第 {} 次重试将在 {} 秒后",
+                        msg.getMsgId(), msg.getProducerTraceId(), currentTraceId(), newRetryCount, backoffSeconds);
             }
             sysMqMessageMapper.updateById(msg);
         }
+    }
+
+    /** 返回当前中继 span 的 traceId。 */
+    private String currentTraceId() {
+        Tracer tracer = tracerSupplier.get();
+        Span current = tracer == null ? null : tracer.currentSpan();
+        return current == null ? null : current.context().traceId();
     }
 
     /**

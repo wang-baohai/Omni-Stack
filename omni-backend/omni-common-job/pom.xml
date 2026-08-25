@@ -28,6 +28,13 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- 可选观测指标；未启用 Actuator 时写入全局空注册表，不影响调度逻辑 -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Spring Web (optional, XxlJobAdminClient needs RestTemplate) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

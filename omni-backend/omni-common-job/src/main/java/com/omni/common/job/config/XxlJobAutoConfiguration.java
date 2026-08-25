@@ -1,6 +1,7 @@
 package com.omni.common.job.config;
 
 import com.omni.common.job.SystemJobRegistry;
+import com.omni.common.job.JobMetrics;
 import com.omni.common.job.XxlJobAdminClient;
 import com.omni.common.job.XxlJobProperties;
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
@@ -106,6 +107,7 @@ public class XxlJobAutoConfiguration {
             try {
                 int groupId = client.ensureExecutorGroup(resolvedAppName, resolvedAppName);
                 if (groupId >= 0) {
+                    JobMetrics.recordRegistration("success");
                     log.info("XXL-JOB 执行器组就绪: appname={}, groupId={}", resolvedAppName, groupId);
                     return;
                 }
@@ -124,6 +126,7 @@ public class XxlJobAutoConfiguration {
                 }
             }
         }
+        JobMetrics.recordRegistration("failure");
         log.error("XXL-JOB 执行器组注册失败，已耗尽重试次数: appname={}", resolvedAppName);
     }
 
@@ -225,7 +228,9 @@ public class XxlJobAutoConfiguration {
                 } else {
                     log.info("系统任务已全部注册，无需操作");
                 }
+                JobMetrics.recordRegistration("success");
             } catch (Exception e) {
+                JobMetrics.recordRegistration("failure");
                 log.warn("系统任务自动注册失败: {}", e.getMessage());
             }
         };

@@ -7,6 +7,7 @@ import com.omni.workflow.dto.WorkflowCompletionResult;
 import com.omni.workflow.dto.WorkflowProcessCompletedEvent;
 import com.omni.workflow.entity.WfProcessInstanceExt;
 import com.omni.workflow.mapper.WfProcessInstanceExtMapper;
+import com.omni.workflow.metrics.WorkflowMetrics;
 import com.omni.workflow.service.WorkflowCompletionEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -83,6 +85,10 @@ public class WorkflowCompletionEventServiceImpl implements WorkflowCompletionEve
                 .completedTime(completedTime)
                 .build();
         reliableMessageRelay.send(BINDING_NAME, event, tenantId, eventId);
+        if (ext.getCreateTime() != null) {
+            WorkflowMetrics.recordProcessCompletion(
+                    result.name().toLowerCase(), Duration.between(ext.getCreateTime(), completedTime));
+        }
         log.info("工作流完成事件已写入 Outbox: tenantId={}, processInstanceId={}, result={}, eventId={}",
                 tenantId, processInstanceId, result, eventId);
         return true;

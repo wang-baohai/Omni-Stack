@@ -1,36 +1,40 @@
 package com.omni.common.mqlog.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.omni.common.core.mq.ReliableMessageRelay;
+import com.omni.common.core.tenant.TenantModuleProvisioner;
+import com.omni.common.core.tenant.TenantProvisionContracts.ProvisionRequestedEvent;
+import com.omni.common.job.XxlJobProperties;
 import com.omni.common.mqlog.controller.MqMessageInternalController;
 import com.omni.common.mqlog.filter.InternalApiAuthFilter;
 import com.omni.common.mqlog.mapper.SysMqMessageMapper;
+import com.omni.common.mqlog.mapper.SysTenantProvisionReceiptMapper;
+import com.omni.common.mqlog.metrics.MqLogMetrics;
 import com.omni.common.mqlog.relay.MqMessageRelayJob;
 import com.omni.common.mqlog.relay.MqMessageRelayService;
 import com.omni.common.mqlog.relay.MqRelayJobRegistrar;
-import com.omni.common.job.XxlJobProperties;
 import com.omni.common.mqlog.sender.MessageSender;
 import com.omni.common.mqlog.sender.RocketMqMessageSender;
 import com.omni.common.mqlog.template.ReliableMessageTemplate;
 import com.omni.common.mqlog.tenant.TenantProvisionRequestHandler;
-import com.omni.common.core.mq.ReliableMessageRelay;
-import com.omni.common.core.tenant.TenantModuleProvisioner;
-import com.omni.common.core.tenant.TenantProvisionContracts.ProvisionRequestedEvent;
-import com.omni.common.mqlog.mapper.SysTenantProvisionReceiptMapper;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.tracing.Tracer;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 import java.util.function.Consumer;
-import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * MQ 消息记录自动装配。
@@ -76,8 +80,19 @@ public class MqLogAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ReliableMessageTemplate reliableMessageTemplate(SysMqMessageMapper mapper,
-                                                            ObjectMapper objectMapper) {
-        return new ReliableMessageTemplate(mapper, objectMapper);
+                                                            ObjectMapper objectMapper,
+                                                            ObjectProvider<MqLogMetrics> metricsProvider) {
+        return new ReliableMessageTemplate(mapper, objectMapper,
+                metricsProvider.getIfAvailable(MqLogMetrics::new));
+    }
+
+    /** 注册可靠消息数量、年龄与投递结果指标。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public MqLogMetrics mqLogMetrics(ObjectProvider<MeterRegistry> registryProvider,
+                                     SysMqMessageMapper mapper) {
+        MeterRegistry registry = registryProvider.getIfAvailable();
+        return registry == null ? new MqLogMetrics() : new MqLogMetrics(registry, mapper);
     }
 
     /**
@@ -126,8 +141,11 @@ public class MqLogAutoConfiguration {
     @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "enabled",
             havingValue = "true", matchIfMissing = true)
     public MqMessageRelayService mqMessageRelayService(SysMqMessageMapper mapper,
-                                                        List<MessageSender> senders) {
-        return new MqMessageRelayService(mapper, senders);
+                                                        List<MessageSender> senders,
+                                                        ObjectProvider<MqLogMetrics> metricsProvider,
+                                                        ObjectProvider<Tracer> tracerProvider) {
+        return new MqMessageRelayService(mapper, senders,
+                metricsProvider.getIfAvailable(MqLogMetrics::new), tracerProvider::getIfAvailable);
     }
 
     /**

@@ -24,3 +24,19 @@ logging:
   level:
     liquibase: info
     com.omni.dbmigrator: info
+
+management:
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+        pushgateway:
+          enabled: ${MIGRATION_PUSHGATEWAY_ENABLED:false}
+          address: ${MIGRATION_PUSHGATEWAY_ADDRESS:localhost:9091}
+          job: omni-db-migrator
+          shutdown-operation: put
+  metrics:
+    tags:
+      service.name: ${spring.application.name}
+      environment: ${OMNI_ENVIRONMENT:local}
+      instance: ${HOSTNAME:local}

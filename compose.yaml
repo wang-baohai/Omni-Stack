@@ -2,6 +2,7 @@
 include:
   - path: ./compose.infra.yaml
   - path: ./compose.apps.yaml
+  - path: ./compose.observability.yaml
 
 x-omni-profile-modules:
   core: [auth, base, gateway]

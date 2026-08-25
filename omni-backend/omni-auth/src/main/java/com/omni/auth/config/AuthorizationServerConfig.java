@@ -261,8 +261,8 @@ public class AuthorizationServerConfig {
                         ).permitAll()
                         // 内部服务间 API：InternalApiFilter 校验令牌并授予 INTERNAL_SERVICE 角色
                         .requestMatchers("/internal/**").hasRole("INTERNAL_SERVICE")
-                        // Actuator health/info 放行（容器健康检查 + 端口隔离为第一层防护）
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        // Actuator 健康、信息与 Prometheus 抓取端点放行，管理端口隔离为第一层防护
+                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                         // 其他 Actuator 端点仅允许 ADMIN 角色
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         // 其他所有请求需要认证

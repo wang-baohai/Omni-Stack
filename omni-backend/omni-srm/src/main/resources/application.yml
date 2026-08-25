@@ -78,6 +78,30 @@ management:
     web:
       exposure:
         include: health,info,prometheus,metrics
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.0}
+    export:
+      otlp:
+        enabled: ${OTLP_EXPORT_ENABLED:false}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+    tags:
+      service.name: ${spring.application.name}
+      environment: ${OMNI_ENVIRONMENT:local}
+      instance: ${HOSTNAME:local}
   endpoint:
     health:
       show-details: when_authorized

@@ -3,6 +3,7 @@ package com.omni.workflow.service.impl;
 import com.omni.common.core.result.BusinessException;
 import com.omni.workflow.entity.WfProcessStartRequest;
 import com.omni.workflow.mapper.WfProcessStartRequestMapper;
+import com.omni.workflow.metrics.WorkflowMetrics;
 import com.omni.workflow.service.WorkflowProcessStartRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -117,6 +118,7 @@ public class WorkflowProcessStartRequestServiceImpl implements WorkflowProcessSt
         int rows = requestMapper.markStarted(
                 tenantId, id, normalizedProcessInstanceId, LocalDateTime.now());
         if (rows == 1) {
+            WorkflowMetrics.recordStart("success");
             return;
         }
 
@@ -139,6 +141,7 @@ public class WorkflowProcessStartRequestServiceImpl implements WorkflowProcessSt
         String normalizedError = normalizeError(error);
         int rows = requestMapper.markFailed(tenantId, id, normalizedError, LocalDateTime.now());
         if (rows == 1) {
+            WorkflowMetrics.recordStart("failure");
             return;
         }
 

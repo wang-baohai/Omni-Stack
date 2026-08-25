@@ -4,6 +4,7 @@ import com.omni.asset.dto.WorkflowContracts;
 import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.common.service.identity.ServiceRequestIdentity;
+import com.omni.common.service.observability.InboxMetrics;
 import com.omni.asset.service.WorkflowCompletionService;
 import com.omni.asset.workflow.AssetWorkflowCoordinator;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,10 @@ public class WorkflowProcessCompletedConsumer {
                     0L, event.getTenantId(), "workflow-event", null, "TENANT", Set.of(), null));
             try {
                 workflowCompletionService.handle(event);
+                InboxMetrics.record("workflow-completed", "success");
+            } catch (RuntimeException exception) {
+                InboxMetrics.record("workflow-completed", "retry");
+                throw exception;
             } finally {
                 ServiceDataScopeContext.clear();
                 ServiceIdentityContext.clear();

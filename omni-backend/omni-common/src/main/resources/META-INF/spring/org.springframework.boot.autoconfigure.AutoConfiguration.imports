@@ -4,3 +4,4 @@ com.omni.common.config.WebMvcConfig
 com.omni.common.result.GlobalExceptionHandler
 com.omni.common.security.xss.XssAutoConfiguration
 com.omni.common.web.TraceIdAutoConfiguration
+com.omni.common.observability.OtlpTracingExporterAutoConfiguration

@@ -38,6 +38,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/design/procurement-design.md` | Procurement: material catalog, requisition approval, RFQ/quotation, purchase order and goods receipt boundaries |
 | `docs/design/asset-design.md` | Asset MVP: asset ledger, procurement receipt ingestion, allocation/return, transfer/disposal approval and data scope |
 | `docs/mq-reliability.md` | Reliable message sending: Transactional Outbox pattern, status machine, retry strategy, tenant isolation, new service onboarding |
+| `docs/observability.md` | Metrics, W3C tracing, structured logs, local observability stack, dashboards, alerts and SLO template |
 
 ## Entry Points
 

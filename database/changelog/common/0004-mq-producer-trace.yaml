@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: common-mq-0004-producer-trace
+      author: omni-scaffold
+      labels: database:common-mq
+      comment: 保存 Outbox 创建时的 traceId，用 msgId 关联异步生产与消费日志
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: sys_mq_message
+        - not:
+            columnExists:
+              tableName: sys_mq_message
+              columnName: producer_trace_id
+      changes:
+        - addColumn:
+            tableName: sys_mq_message
+            columns:
+              - column:
+                  name: producer_trace_id
+                  type: varchar(32)
+                  remarks: Outbox 创建时的 W3C traceId

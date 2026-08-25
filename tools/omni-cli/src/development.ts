@@ -9,6 +9,10 @@ import { resolvePreset } from './presets.js';
 
 const RUNTIME_FOUNDATION_MODULES = ['gateway', 'mysql', 'redis', 'nacos'];
 const LITE_PRESETS = new Set(['core', 'workflow', 'crm']);
+const OBSERVABILITY_SERVICES = [
+  'otel-collector', 'prometheus', 'pushgateway', 'node-exporter', 'cadvisor',
+  'alertmanager', 'tempo', 'loki', 'alloy', 'grafana',
+];
 const FUNCTION_ENVIRONMENT_KEYS = [
   'OMNI_AUTH_FUNCTION_DEFINITION',
   'OMNI_BASE_FUNCTION_DEFINITION',
@@ -68,23 +72,42 @@ export function startDevelopmentSelection(
   workspaceRoot: string,
   selection: DevelopmentSelection,
   build: boolean,
+  observability = false,
 ): void {
   if (!isFrontendOnly(selection)) requireEnvironmentFile(workspaceRoot);
-  const args = ['compose', 'up', '-d', ...(build ? ['--build'] : []), ...selection.services];
-  runCommand('docker', args, workspaceRoot, developmentCommandEnvironment(workspaceRoot, selection));
+  const observationServices = observability ? OBSERVABILITY_SERVICES : [];
+  const args = ['compose', 'up', '-d', ...(build ? ['--build'] : []), ...selection.services, ...observationServices];
+  runCommand('docker', args, workspaceRoot,
+    developmentCommandEnvironment(workspaceRoot, selection, observability));
 }
 
 /** 构造 Compose 启动环境；frontend-only 仅为未启动服务补足插值占位。 */
 export function developmentCommandEnvironment(
   workspaceRoot: string,
   selection: DevelopmentSelection,
+  observability = false,
 ): NodeJS.ProcessEnv {
-  const environment = developmentEnvironment(selection);
+  const environment = {
+    ...developmentEnvironment(selection),
+    ...(observability ? observabilityEnvironment() : {}),
+  };
   if (!isFrontendOnly(selection)) return environment;
   for (const name of requiredComposeEnvironmentNames(workspaceRoot)) {
     environment[name] = process.env[name] ?? 'unused-in-frontend-only-mode';
   }
   return environment;
+}
+
+/** 启用本地观测栈所需的非 Secret 开关。 */
+export function observabilityEnvironment(): NodeJS.ProcessEnv {
+  return {
+    OTLP_EXPORT_ENABLED: 'true',
+    OTLP_TRACES_ENDPOINT: 'http://otel-collector:4318/v1/traces',
+    TRACING_SAMPLING_PROBABILITY: process.env.TRACING_SAMPLING_PROBABILITY ?? '1.0',
+    STRUCTURED_LOGGING_FORMAT: 'ecs',
+    MIGRATION_PUSHGATEWAY_ENABLED: 'true',
+    MIGRATION_PUSHGATEWAY_ADDRESS: 'pushgateway:9091',
+  };
 }
 
 /** 停止当前项目，默认保留命名卷。 */

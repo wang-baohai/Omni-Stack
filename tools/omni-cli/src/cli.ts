@@ -111,15 +111,19 @@ dev.command('up')
   .option('--preset <preset>', '正式预设 ID')
   .option('--module <module>', '模块 ID')
   .option('--build', '启动前强制重新构建镜像')
-  .action((commandOptions: { preset?: string; module?: string; build?: boolean }) => {
+  .option('--observability', '同时启动本地指标、Trace、日志和告警栈')
+  .action((commandOptions: { preset?: string; module?: string; build?: boolean; observability?: boolean }) => {
     const root = workspaceRoot();
     const selection = planDevelopmentSelection(root, commandOptions);
     console.log(`development ${selection.kind}: ${selection.id}`);
     console.log(`mode: ${selection.lite ? 'lite' : 'full'}`);
     console.log(`modules: ${selection.moduleIds.join(', ')}`);
     console.log(`services: ${selection.services.join(', ')}`);
+    console.log(`observability: ${commandOptions.observability === true ? 'on' : 'off'}`);
     if (selection.lite) console.log('degraded: XXL-JOB=off, MQ relay/consumers=off, Outbox writes=on');
-    startDevelopmentSelection(root, selection, commandOptions.build === true);
+    startDevelopmentSelection(
+      root, selection, commandOptions.build === true, commandOptions.observability === true,
+    );
   });
 dev.command('down')
   .description('停止当前开发栈，默认保留命名卷')
