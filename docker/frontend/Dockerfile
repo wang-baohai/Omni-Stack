@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # ============================================================
 # Omni-Stack 前端 — 多阶段 Dockerfile
 # ============================================================
@@ -11,7 +12,9 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 COPY omni-frontend/package*.json ./
-RUN npm ci
+RUN --mount=type=cache,id=omni-npm-cache,target=/root/.npm,sharing=locked \
+    npm ci --prefer-offline --no-audit --fetch-retries=5 \
+      --fetch-retry-mintimeout=10000 --fetch-retry-maxtimeout=60000
 
 COPY omni-frontend/ .
 RUN npm run build

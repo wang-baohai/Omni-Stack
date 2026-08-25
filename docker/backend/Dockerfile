@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # ============================================================
 # Omni-Stack 后端微服务 — 共享多阶段 Dockerfile
 # ============================================================
@@ -39,16 +40,19 @@ COPY omni-backend/omni-srm/pom.xml omni-srm/
 COPY omni-backend/omni-procurement/pom.xml omni-procurement/
 COPY omni-backend/omni-asset/pom.xml omni-asset/
 
-RUN mvn dependency:go-offline -B -q || true
+RUN --mount=type=cache,id=omni-maven-repository,target=/root/.m2,sharing=locked \
+    mvn dependency:go-offline -B -q -Dmaven.wagon.http.retryHandler.count=5 || true
 
 # 拷入全部后端源码和运行时目录事实源。Auth 的 Maven resources 会将后两者打入应用包。
 COPY omni-backend/ .
 COPY scaffold/ /scaffold/
 COPY database/seed/ /database/seed/
 
-ARG SERVICE_NAME
-# 镜像构建也是发布门禁：目标服务及其依赖测试失败时不得产出镜像。
-RUN mvn package -pl ${SERVICE_NAME} -am -B -q
+# 镜像构建也是发布门禁：当前预设服务 reactor 任一模块测试失败时不得产出镜像。
+# 数据库迁移器由独立镜像携带完整 database/scripts 上下文构建和测试，此处排除它。
+# 本步骤不依赖 SERVICE_NAME，因此多个服务镜像共享同一个完整构建层，避免重复编译。
+RUN --mount=type=cache,id=omni-maven-repository,target=/root/.m2,sharing=locked \
+    mvn package -pl '!omni-db-migrator' -B -q -Dmaven.wagon.http.retryHandler.count=5
 
 # ---------- Stage 2: 运行 ----------
 FROM eclipse-temurin:25-jre-alpine

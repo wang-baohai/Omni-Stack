@@ -37,7 +37,8 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --init-connect=SET NAMES utf8mb4
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD}"]
+      # 强制走 TCP，避免初始化临时实例仅开放 Unix Socket 时被提前判定为健康。
+      test: ["CMD-SHELL", "mysqladmin ping --protocol=tcp -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5

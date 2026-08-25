@@ -35,7 +35,16 @@ describe('preset generator', () => {
     assert.equal(existsSync(resolve(target, 'omni-frontend/src/views/crm')), false);
     assert.equal(existsSync(resolve(target, 'scaffold.lock')), true);
     const backendDockerfile = readFileSync(resolve(target, 'docker/backend/Dockerfile'), 'utf8');
+    assert.match(backendDockerfile, /^# syntax=docker\/dockerfile:1\.7/);
     assert.match(backendDockerfile, /COPY omni-backend\/mvnw omni-backend\/pom\.xml \.\//);
+    assert.match(backendDockerfile, /mvn package -pl '!omni-db-migrator'/);
+    const migratorDockerfile = readFileSync(resolve(target, 'docker/migrator/Dockerfile'), 'utf8');
+    assert.match(migratorDockerfile, /^# syntax=docker\/dockerfile:1\.7/);
+    const frontendDockerfile = readFileSync(resolve(target, 'docker/frontend/Dockerfile'), 'utf8');
+    assert.match(frontendDockerfile, /^# syntax=docker\/dockerfile:1\.7/);
+    const composeConfiguration = readFileSync(resolve(target, 'docker-compose.yml'), 'utf8');
+    assert.match(composeConfiguration, /mysqladmin ping --protocol=tcp -h 127\.0\.0\.1/);
+    assert.doesNotMatch(composeConfiguration, /mysqladmin ping -h localhost/);
     const homeWorkspace = readFileSync(resolve(target, 'omni-frontend/src/views/home/index.vue'), 'utf8');
     assert.doesNotMatch(homeWorkspace, /positiveInteger/);
     const coreLocale = readFileSync(resolve(target, 'omni-frontend/src/locales/zh-CN.ts'), 'utf8');

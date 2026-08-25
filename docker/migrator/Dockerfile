@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # ============================================================
 # Omni-Stack 一次性数据库迁移器
 # ============================================================
@@ -10,7 +11,8 @@ COPY . .
 WORKDIR /workspace/omni-backend
 
 # 迁移镜像同样执行模块测试；迁移器测试失败时不得产出镜像。
-RUN ./mvnw -pl omni-db-migrator -am package -B -q
+RUN --mount=type=cache,id=omni-maven-repository,target=/root/.m2,sharing=locked \
+    ./mvnw -pl omni-db-migrator -am package -B -q -Dmaven.wagon.http.retryHandler.count=5
 
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
