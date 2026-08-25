@@ -47,6 +47,7 @@ async function verifyPresetRuntime(presetId) {
   const reservations = await reserveComposePorts(composeText);
   const environment = runtimeEnvironment(project, reservations, composeText);
   let started = false;
+  let primaryError;
 
   try {
     runCompose(project, ['config', '--quiet'], target, environment);
@@ -55,16 +56,26 @@ async function verifyPresetRuntime(presetId) {
     started = true;
     const statuses = await waitForHealthyProject(project, target, environment, Object.keys(compose.services ?? {}));
     await verifyHttpRuntime(project, environment, new Set(lock.modules.map((module) => module.id)));
+    if (presetId === 'full') await verifyFullE2e(target, environment);
     console.log(
       `preset runtime valid: ${presetId}, services=${statuses.length}, modules=${lock.modules.length}, `
-      + 'fresh=pass, health=pass, login=pass, menus=pass, base-dict=pass',
+      + 'fresh=pass, health=pass, login=pass, menus=pass, base-dict=pass, '
+      + `auth-boundary=pass, tenant-identity=pass${presetId === 'full' ? ', e2e=18/18' : ''}`,
     );
   } catch (error) {
+    primaryError = error;
     if (started || projectExists(project, target, environment)) printProjectLogs(project, target, environment);
     throw error;
   } finally {
     await releaseReservations(reservations);
-    if (!argumentsMap.keep) downProject(project, target, environment);
+    if (!argumentsMap.keep) {
+      try {
+        downProject(project, target, environment);
+      } catch (cleanupError) {
+        if (!primaryError) throw cleanupError;
+        console.error(`隔离 Compose 清理同时失败，保留原始错误：${cleanupError.message}`);
+      }
+    }
   }
 }
 
@@ -76,6 +87,15 @@ async function verifyHttpRuntime(project, environment, selectedModules) {
   assert.equal(frontendResponse.status, 200, '前端首页不可访问');
 
   const tenantHeaders = { 'X-Tenant-Id': '1' };
+  const anonymousProtected = await fetchWithTimeout(`${gateway}/api/base/dict/type/list?page=1&size=10`, {
+    headers: {
+      ...tenantHeaders,
+      'X-User-Id': '1',
+      'X-User-Roles': 'ADMIN',
+    },
+  });
+  assert.equal(anonymousProtected.status, 401, '伪造身份头未被网关拒绝');
+
   const captcha = await requestJson(`${gateway}/api/auth/captcha`, { headers: tenantHeaders });
   assert.equal(captcha.code, 200, '验证码接口业务状态失败');
   assert.ok(captcha.data?.captchaKey, '验证码接口未返回 captchaKey');
@@ -112,6 +132,59 @@ async function verifyHttpRuntime(project, environment, selectedModules) {
   });
   assert.equal(dictTypes.code, 200, '基础字典列表业务状态失败');
   assert.ok(dictTypes.data, '基础字典列表缺少数据');
+
+  const spoofedTenant = await requestJson(`${gateway}/api/base/dict/type/list?page=1&size=10`, {
+    headers: { ...authenticatedHeaders, 'X-Tenant-Id': '999999' },
+  });
+  assert.deepEqual(spoofedTenant, dictTypes, '客户端租户头覆盖了 JWT 租户身份');
+}
+
+function verifyFullE2e(target, environment) {
+  const backend = resolve(target, 'omni-backend');
+  const frontend = resolve(target, 'omni-frontend');
+  const tokenFile = resolve(systemTempRoot, `e2e-tokens-${randomBytes(8).toString('hex')}.json`);
+  const javaHome = process.env.JAVA_HOME || 'C:\\APP\\JDK25\\jdk-25.0.2';
+  const javaPath = resolve(javaHome, 'bin');
+  const commandEnvironment = {
+    ...environment,
+    JAVA_HOME: javaHome,
+    PATH: `${javaPath}${sep}${process.env.PATH ?? ''}`,
+    E2E_FIXTURE_OUTPUT: tokenFile,
+    E2E_FIXTURE_DB_URL: `jdbc:mysql://127.0.0.1:${requiredEnvironment(environment, 'OMNI_MYSQL_HOST_PORT')}`
+      + '/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai'
+      + '&allowPublicKeyRetrieval=true',
+    E2E_FIXTURE_DB_USERNAME: 'omni_app',
+    E2E_FIXTURE_DB_PASSWORD: requiredEnvironment(environment, 'OMNI_DB_PASSWORD'),
+    E2E_FIXTURE_REDIS_HOST: '127.0.0.1',
+    E2E_FIXTURE_REDIS_PORT: requiredEnvironment(environment, 'OMNI_REDIS_HOST_PORT'),
+    E2E_FIXTURE_REDIS_PASSWORD: requiredEnvironment(environment, 'REDIS_PASSWORD'),
+    E2E_FIXTURE_JWK_ENCRYPT_KEY: requiredEnvironment(environment, 'JWK_ENCRYPT_KEY'),
+  };
+
+  try {
+    run(platformCommand('mvnw', true), ['-pl', 'omni-auth', '-am', 'install', '-DskipTests'], backend, commandEnvironment);
+    run(platformCommand('mvnw', true), [
+      '-pl', 'omni-auth',
+      'org.codehaus.mojo:exec-maven-plugin:3.5.0:java',
+      '-Dexec.mainClass=com.omni.auth.e2e.E2eTokenFixture',
+      '-Dexec.classpathScope=test',
+    ], backend, commandEnvironment);
+    assert.ok(existsSync(tokenFile), 'E2E 令牌夹具未生成输出文件');
+    const tokens = JSON.parse(readFileSync(tokenFile, 'utf8'));
+    assert.ok(tokens.adminToken && tokens.employeeToken && tokens.supplierToken, 'E2E 令牌夹具输出不完整');
+
+    run(platformCommand('npm'), ['ci'], frontend, environment);
+    run(platformCommand('npm'), ['run', 'test:e2e'], frontend, {
+      ...environment,
+      E2E_BASE_URL: `http://127.0.0.1:${requiredEnvironment(environment, 'OMNI_FRONTEND_HOST_PORT')}`,
+      E2E_ADMIN_TOKEN: tokens.adminToken,
+      E2E_EMPLOYEE_TOKEN: tokens.employeeToken,
+      E2E_SUPPLIER_TOKEN: tokens.supplierToken,
+      E2E_MUTATIONS: 'true',
+    });
+  } finally {
+    if (existsSync(tokenFile)) rmSync(tokenFile, { force: true });
+  }
 }
 
 async function waitForHealthyProject(project, cwd, environment, expectedServices) {
@@ -163,7 +236,10 @@ function downProject(project, cwd, environment) {
     encoding: 'utf8',
     maxBuffer: 20 * 1024 * 1024,
   });
-  if (result.status !== 0) throw new Error(`隔离 Compose 清理失败：${project}\n${result.stderr}`);
+  if (result.status !== 0) {
+    const detail = result.error?.message ?? result.stderr ?? result.stdout ?? `exit=${result.status}`;
+    throw new Error(`隔离 Compose 清理失败：${project}\n${detail}`);
+  }
 }
 
 function projectExists(project, cwd, environment) {
@@ -254,7 +330,8 @@ function fetchWithTimeout(url, options = {}) {
 
 function run(command, args, cwd, extraEnvironment = {}) {
   console.log(`preset runtime command: ${command} ${args.join(' ')}`);
-  const result = spawnSync(command, args, {
+  const invocation = commandInvocation(command, args);
+  const result = spawnSync(invocation.command, invocation.args, {
     cwd,
     env: { ...process.env, ...extraEnvironment },
     encoding: 'utf8',
@@ -263,6 +340,25 @@ function run(command, args, cwd, extraEnvironment = {}) {
   });
   if (result.error) throw result.error;
   assert.equal(result.status, 0, `预设运行命令失败：${command} ${args.join(' ')}`);
+}
+
+function commandInvocation(command, args) {
+  if (process.platform !== 'win32' || !command.toLowerCase().endsWith('.cmd')) {
+    return { command, args };
+  }
+  const commandLine = [command, ...args].map(quoteWindowsCommandArgument).join(' ');
+  return { command: process.env.ComSpec || 'cmd.exe', args: ['/d', '/c', commandLine] };
+}
+
+function quoteWindowsCommandArgument(value) {
+  assert.doesNotMatch(value, /[\r\n&|<>^%!]/, 'Windows 命令参数包含不安全字符');
+  if (!/[\t "]/u.test(value)) return value;
+  return `"${value.replaceAll('"', '""')}"`;
+}
+
+function platformCommand(command, workspaceLocal = false) {
+  if (process.platform === 'win32') return `${command}.cmd`;
+  return workspaceLocal ? `./${command}` : command;
 }
 
 function capture(command, args, cwd, extraEnvironment = {}) {
