@@ -368,14 +368,36 @@ function filterSeedManifest(root: string, selected: Set<string>): void {
   const value = parseDocument(readFileSync(path, 'utf8')).toJS() as {
     sources?: Array<{ module?: string; resource?: string }>;
     modules?: Array<{ id?: string }>;
-    assertions?: Array<{ module?: string }>;
+    assertions?: Array<{
+      id?: string;
+      module?: string;
+      expectedRows?: number;
+      expectedSha256?: string;
+    }>;
   };
   const removedSources = (value.sources ?? []).filter((source) => source.module && !selected.has(source.module));
   value.sources = (value.sources ?? []).filter((source) => !source.module || selected.has(source.module));
   value.modules = (value.modules ?? []).filter((module) => module.id && selected.has(module.id));
   value.assertions = (value.assertions ?? []).filter((assertion) => !assertion.module || selected.has(assertion.module));
+  const workflowModelAssertion = value.assertions.find((assertion) => assertion.id === 'workflow-model-catalog');
+  if (workflowModelAssertion) {
+    const retainedModelKeys = [
+      'leave',
+      ...(selected.has('procurement') ? ['procurement-approval'] : []),
+      ...(selected.has('asset') ? ['asset-transfer', 'asset-disposal'] : []),
+      ...(selected.has('srm') ? ['supplier-onboarding'] : []),
+    ];
+    workflowModelAssertion.expectedRows = retainedModelKeys.length;
+    workflowModelAssertion.expectedSha256 = workflowModelAssertionSha256(retainedModelKeys);
+  }
   for (const source of removedSources) if (source.resource) removeRelative(root, source.resource);
   writeFileSync(path, stringify(value, { lineWidth: 0 }), 'utf8');
+}
+
+function workflowModelAssertionSha256(modelKeys: string[]): string {
+  // SeedVerificationService 对 MySQL VARCHAR（JDBC type 12）结果生成同一规范串。
+  const canonicalRows = [...modelKeys].sort().map((modelKey) => `seed_key:12=${modelKey}`);
+  return createHash('sha256').update(canonicalRows.join('\n'), 'utf8').digest('hex');
 }
 
 function filterAuthSeed(root: string, selected: Set<string>): void {

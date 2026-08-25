@@ -94,6 +94,14 @@ describe('preset generator', () => {
     assert.doesNotMatch(composeConfiguration, /XXL_JOB_ACCESS_TOKEN|ROCKETMQ_NAME_SERVER/);
     const workflowSeed = readFileSync(resolve(target, 'scripts/sql/seed/workflow.sql'), 'utf8');
     assert.doesNotMatch(workflowSeed, /supplier-onboarding|procurement-approval|asset-transfer|asset-disposal/);
+    const seedManifest = parse(readFileSync(resolve(target, 'database/seed/manifest.yaml'), 'utf8')) as {
+      assertions: Array<{ id: string; expectedRows: number; expectedSha256: string }>;
+    };
+    const workflowModelAssertion = seedManifest.assertions.find((assertion) =>
+      assertion.id === 'workflow-model-catalog');
+    assert.equal(workflowModelAssertion?.expectedRows, 1);
+    assert.equal(workflowModelAssertion?.expectedSha256,
+      'e21926aecd8eb01a6300e8e54a9ab21beab7a85a3c10a01bc145ec3ce00e42fb');
     assert.equal(existsSync(resolve(
       target,
       'omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java',
@@ -132,5 +140,13 @@ describe('preset generator', () => {
     const workflowSeed = readFileSync(resolve(target, 'scripts/sql/seed/workflow.sql'), 'utf8');
     assert.match(workflowSeed, /supplier-onboarding/);
     assert.doesNotMatch(workflowSeed, /procurement-approval|asset-transfer|asset-disposal/);
+    const seedManifest = parse(readFileSync(resolve(target, 'database/seed/manifest.yaml'), 'utf8')) as {
+      assertions: Array<{ id: string; expectedRows: number; expectedSha256: string }>;
+    };
+    const workflowModelAssertion = seedManifest.assertions.find((assertion) =>
+      assertion.id === 'workflow-model-catalog');
+    assert.equal(workflowModelAssertion?.expectedRows, 2);
+    assert.equal(workflowModelAssertion?.expectedSha256,
+      '3b20530b150a385b5a9eb48d189ee3a8f03ff53ac3f0b4c30f261db290a22c0b');
   });
 });
