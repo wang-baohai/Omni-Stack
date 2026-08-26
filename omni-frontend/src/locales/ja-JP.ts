@@ -39,6 +39,15 @@ export default {
     phonePlaceholder: '電話番号を入力', tenantPlaceholder: 'テナントを選択', usernameRequired: 'ユーザー名は必須です', passwordRequired: 'パスワードは必須です',
     passwordMinLength: 'パスワードは6文字以上で入力してください', tenantRequired: 'テナントを選択してください', tenantLoadFailed: 'テナント一覧を読み込めませんでした', createSuccess: 'ユーザーを作成しました',
   },
+  workflow: {
+    ...enUS.workflow,
+    processName: 'プロセス名', category: 'プロセス分類', version: 'バージョン', design: '設計', updateTime: '更新日時',
+    modelName: 'モデル名', modelKey: 'モデルキー', modelSearchPlaceholder: 'モデル名 / キー', updatedBy: '更新者', validate: '検証', publish: '公開',
+    statusNormal: '正常', statusArchived: 'アーカイブ済み', validationRequestFailed: '検証リクエストに失敗しました',
+    publishConfirmTitle: '公開の確認', publishConfirmMessage: 'モデル「{name}」を公開しますか？新しいバージョンを作成し、ワークフローエンジンにデプロイします。',
+    publishSuccess: '公開しました。ビジネスバージョン：v{version}', publishFailed: 'モデルの公開に失敗しました',
+    deleteConfirmTitle: '削除の確認', deleteModelConfirmMessage: 'モデル「{name}」を削除しますか？この操作は元に戻せません。', deleteSuccess: '削除しました', deleteFailed: 'モデルの削除に失敗しました',
+  },
   lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '言語を切り替える' },
   theme: { ...enUS.theme, toggle: 'テーマを切り替える' },
   dashboardPage: {

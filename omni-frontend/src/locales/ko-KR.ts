@@ -34,6 +34,15 @@ export default {
     nicknamePlaceholder: '별명 입력', emailPlaceholder: '이메일 주소 입력', phonePlaceholder: '휴대전화 번호 입력', tenantPlaceholder: '테넌트 선택', usernameRequired: '사용자 이름은 필수입니다',
     passwordRequired: '비밀번호는 필수입니다', passwordMinLength: '비밀번호는 6자 이상이어야 합니다', tenantRequired: '테넌트를 선택하세요', tenantLoadFailed: '테넌트 목록을 불러오지 못했습니다', createSuccess: '사용자를 추가했습니다',
   },
+  workflow: {
+    ...enUS.workflow,
+    processName: '프로세스 이름', category: '프로세스 분류', version: '버전', design: '설계', updateTime: '수정 일시',
+    modelName: '모델 이름', modelKey: '모델 키', modelSearchPlaceholder: '모델 이름 / 키', updatedBy: '수정자', validate: '검증', publish: '게시',
+    statusNormal: '정상', statusArchived: '보관됨', validationRequestFailed: '검증 요청에 실패했습니다',
+    publishConfirmTitle: '게시 확인', publishConfirmMessage: '모델 "{name}"을(를) 게시할까요? 새 버전을 생성하여 워크플로 엔진에 배포합니다.',
+    publishSuccess: '게시했습니다. 비즈니스 버전: v{version}', publishFailed: '모델 게시에 실패했습니다',
+    deleteConfirmTitle: '삭제 확인', deleteModelConfirmMessage: '모델 "{name}"을(를) 삭제할까요? 이 작업은 되돌릴 수 없습니다.', deleteSuccess: '삭제했습니다', deleteFailed: '모델 삭제에 실패했습니다',
+  },
   lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '언어 전환' },
   theme: { ...enUS.theme, toggle: '테마 전환' },
   dashboardPage: {

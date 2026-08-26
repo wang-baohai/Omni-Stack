@@ -99,7 +99,7 @@ async function handleValidate(model: ProcessModel) {
     validateResult.value = res.data.data
     validateDialogVisible.value = true
   } catch {
-    ElMessage.error('校验请求失败')
+    ElMessage.error(t('workflow.validationRequestFailed'))
   }
 }
 
@@ -110,16 +110,16 @@ const validateDialogVisible = ref(false)
 async function handlePublish(model: ProcessModel) {
   try {
     await ElMessageBox.confirm(
-      `确认发布模型「${model.modelName}」？发布后将生成新版本并部署到流程引擎。`,
-      '发布确认',
+      t('workflow.publishConfirmMessage', { name: model.modelName }),
+      t('workflow.publishConfirmTitle'),
       { type: 'warning' },
     )
     const res = await publishModel(model.id)
-    ElMessage.success(`发布成功！业务版本: v${res.data.data.businessVersion}`)
+    ElMessage.success(t('workflow.publishSuccess', { version: res.data.data.businessVersion }))
     loadList()
   } catch (error: unknown) {
     if (!isUserCancelled(error)) {
-      ElMessage.error(getErrorMessage(error, '发布失败'))
+      ElMessage.error(getErrorMessage(error, t('workflow.publishFailed')))
     }
   }
 }
@@ -137,23 +137,23 @@ function handleVersions(model: ProcessModel) {
 async function handleDelete(model: ProcessModel) {
   try {
     await ElMessageBox.confirm(
-      `确认删除模型「${model.modelName}」？删除后不可恢复。`,
-      '删除确认',
+      t('workflow.deleteModelConfirmMessage', { name: model.modelName }),
+      t('workflow.deleteConfirmTitle'),
       { type: 'warning' },
     )
     await deleteModel(model.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('workflow.deleteSuccess'))
     loadList()
   } catch (error: unknown) {
     if (!isUserCancelled(error)) {
-      ElMessage.error(getErrorMessage(error, '删除失败'))
+      ElMessage.error(getErrorMessage(error, t('workflow.deleteFailed')))
     }
   }
 }
 
 // ===== 状态标签 =====
 function statusLabel(status: number) {
-  return status === 1 ? '正常' : '已归档'
+  return status === 1 ? t('workflow.statusNormal') : t('workflow.statusArchived')
 }
 
 function statusType(status: number): string {
@@ -172,7 +172,7 @@ onMounted(() => {
       <el-form-item>
         <el-input
           v-model="search.keyword"
-          placeholder="模型名称 / 标识"
+          :placeholder="t('workflow.modelSearchPlaceholder')"
           clearable
           @clear="handleSearch"
         />
@@ -180,7 +180,7 @@ onMounted(() => {
       <el-form-item>
         <el-select
           v-model="search.category"
-          placeholder="流程分类"
+          :placeholder="t('workflow.category')"
           clearable
           style="width: 160px"
           @clear="handleSearch"
@@ -214,43 +214,43 @@ onMounted(() => {
 
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" stripe border>
-      <el-table-column prop="modelName" label="模型名称" min-width="180" />
-      <el-table-column prop="modelKey" label="模型标识" width="200" />
-      <el-table-column label="分类" width="120">
+      <el-table-column prop="modelName" :label="t('workflow.modelName')" min-width="180" />
+      <el-table-column prop="modelKey" :label="t('workflow.modelKey')" width="200" />
+      <el-table-column :label="t('workflow.category')" width="120">
         <template #default="{ row }">
           {{ categoryLabel(row.category) }}
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="100" align="center">
+      <el-table-column :label="t('common.status')" width="100" align="center">
         <template #default="{ row }">
           <el-tag :type="statusType(row.status)" size="small">
             {{ statusLabel(row.status) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="updateBy" label="更新人" width="120" />
-      <el-table-column prop="updateTime" label="更新时间" width="180" />
-      <el-table-column label="操作" width="320" fixed="right">
+      <el-table-column prop="updateBy" :label="t('workflow.updatedBy')" width="120" />
+      <el-table-column prop="updateTime" :label="t('workflow.updateTime')" width="180" />
+      <el-table-column :label="t('common.actions')" width="320" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" size="small" @click="handleDesign(row)">
-            设计
+            {{ t('workflow.design') }}
           </el-button>
           <el-button
             v-permission="'workflow:model:validate'" link type="primary"
             size="small"
             @click="handleValidate(row)"
           >
-            校验
+            {{ t('workflow.validate') }}
           </el-button>
           <el-button
             v-permission="'workflow:model:publish'" link type="warning"
             size="small"
             @click="handlePublish(row)"
           >
-            发布
+            {{ t('workflow.publish') }}
           </el-button>
           <el-button link type="primary" size="small" @click="handleVersions(row)">
-            版本
+            {{ t('workflow.version') }}
           </el-button>
           <el-button
             v-permission="'workflow:model:delete'" link type="danger"
