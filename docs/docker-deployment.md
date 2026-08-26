@@ -16,7 +16,7 @@
 - [7. Nginx 反代配置要点](#7-nginx-反代配置要点)
 - [8. 数据初始化与持久化](#8-数据初始化与持久化)
 - [9. Docker 镜像加速配置](#9-docker-镜像加速配置)
-- [10. Windows Hyper-V/WSL2 端口保留问题](#10-windows-hyper-vws12-端口保留问题)
+- [10. Windows Hyper-V/WSL2 端口保留问题](#10-windows-hyper-vwsl2-端口保留问题)
 - [11. Nacos v3.1.1 健康检查端点变更](#11-nacos-v311-健康检查端点变更)
 - [12. RocketMQ Broker Docker 网络配置](#12-rocketmq-broker-docker-网络配置)
 - [13. 扩缩容指南](#13-扩缩容指南)
@@ -302,7 +302,7 @@ rocketmq-broker:
   command: sh mqbroker -n rocketmq-namesrv:9876 -c ... --enable-proxy
 ```
 
-> **端口映射 19876:9876 的原因**：Windows Hyper-V/WSL2 会保留端口范围 9859-9958，直接映射 9876 会导致冲突。详见[第 10 节](#10-windows-hyper-vws12-端口保留问题)。
+> **端口映射 19876:9876 的原因**：Windows Hyper-V/WSL2 会保留端口范围 9859-9958，直接映射 9876 会导致冲突。详见[第 10 节](#10-windows-hyper-vwsl2-端口保留问题)。
 
 ### 5.5 XXL-JOB Admin v3.3.1
 
@@ -777,7 +777,7 @@ lsof -i :8080
 **解决**：
 - 停止占用端口的进程
 - 修改 `.env` 中对应的 `OMNI_*_HOST_PORT`，由 Compose 映射宿主机端口
-- Windows 用户检查 Hyper-V 端口保留（见[第 10 节](#10-windows-hyper-vws12-端口保留问题)）
+- Windows 用户检查 Hyper-V 端口保留（见[第 10 节](#10-windows-hyper-vwsl2-端口保留问题)）
 
 ### 15.5 Nacos 注册失败
 

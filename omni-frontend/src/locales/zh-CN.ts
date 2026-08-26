@@ -651,6 +651,8 @@ export default {
   lang: {
     zhCN: '中文',
     enUS: 'English',
+    jaJP: '日本語',
+    koKR: '한국어',
     switch: '切换语言',
   },
   // ===== home — 首页模块 =====

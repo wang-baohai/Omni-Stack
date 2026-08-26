@@ -14,7 +14,7 @@ import { usePermissionStore } from '@/stores/permission'
 import { hasManagementAccess, isAssetSelfServiceUser } from '@/utils/access'
 import { getRolesFromToken } from '@/utils/jwt'
 import { useDictOptions } from '@/composables/useDictOptions'
-import { storeLang } from '@/i18n'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 import { clearAuthenticatedSession } from '@/router'
 import {
   listMyJobs, createMyJob, updateMyJob, deleteMyJob,
@@ -162,11 +162,6 @@ function toggleTheme() {
 }
 
 /** 切换语言 */
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 
 // ─── 工作台函数 ───
 
@@ -523,7 +518,7 @@ function getNextFireTime(cronExpression: string): string {
   try {
     const interval = CronExpressionParser.parse(cronExpression)
     const next = interval.next()
-    return next.toDate().toLocaleString(locale.value === 'zh-CN' ? 'zh-CN' : 'en-US', {
+    return next.toDate().toLocaleString(locale.value, {
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit',
     })
@@ -704,10 +699,7 @@ function instanceStatusType(status: number): string {
       </div>
       <div class="home-header-right">
         <!-- 语言切换 -->
-        <el-button text :title="t('lang.switch')" @click="toggleLang">
-          <el-icon><Globe /></el-icon>
-          {{ locale === 'zh-CN' ? 'EN' : '中' }}
-        </el-button>
+        <LanguageSelector />
         <!-- 主题切换 -->
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>

@@ -12,6 +12,7 @@ import {
   ElCheckbox,
   ElCheckboxGroup,
   ElCol,
+  ElConfigProvider,
   ElContainer,
   ElDatePicker,
   ElDescriptions,
@@ -124,7 +125,7 @@ import {
 
 const components: Record<string, Component> = {
   ElAlert, ElAside, ElAvatar, ElButton, ElCard, ElCheckbox, ElCheckboxGroup, ElCol,
-  ElContainer, ElDatePicker, ElDescriptions, ElDescriptionsItem, ElDialog, ElDivider,
+  ElConfigProvider, ElContainer, ElDatePicker, ElDescriptions, ElDescriptionsItem, ElDialog, ElDivider,
   ElDrawer, ElDropdown, ElDropdownItem, ElDropdownMenu, ElEmpty, ElForm, ElFormItem,
   ElHeader, ElIcon, ElInput, ElInputNumber, ElLink, ElMain, ElMenu, ElMenuItem, ElOption,
   ElPagination, ElRadio, ElRadioButton, ElRadioGroup, ElRate, ElResult, ElRow, ElSegmented,

@@ -9,7 +9,7 @@ import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
 import { getRolesFromToken, getTenantIdFromToken } from '@/utils/jwt'
-import { storeLang } from '@/i18n'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 import { clearAuthenticatedSession } from '@/router'
 import {
   enrollSupplier,
@@ -32,7 +32,7 @@ import {
   type UpdatePortalProfileRequest,
 } from '@/api/srm-portal'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
 const appStore = useAppStore()
@@ -494,11 +494,6 @@ function toggleTheme() {
   appStore.setTheme(appStore.theme === 'dark' ? 'light' : 'dark')
 }
 
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 
 onMounted(initializePortal)
 onUnmounted(() => {
@@ -514,9 +509,7 @@ onUnmounted(() => {
         <span class="portal-badge">{{ t('common.supplierPortal') }}</span>
       </div>
       <div class="portal-header-right">
-        <el-button text :title="t('lang.switch')" @click="toggleLang">
-          <el-icon><Globe /></el-icon>{{ locale === 'zh-CN' ? 'EN' : '中' }}
-        </el-button>
+        <LanguageSelector />
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon><Moon v-if="appStore.theme === 'dark'" /><Sunny v-else /></el-icon>
         </el-button>

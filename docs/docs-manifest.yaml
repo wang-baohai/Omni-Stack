@@ -276,6 +276,150 @@ documents:
       ja-JP: { path: docs/preset-upgrade-guide.jp.md, status: present-unverified, reviewed_at: null }
       ko-KR: { path: docs/preset-upgrade-guide.kr.md, status: present-unverified, reviewed_at: null }
 
+  - id: guide-quick-start
+    type: user-guide
+    module: platform
+    owner: documentation
+    source: docs/guides/quick-start.md
+    source_sha256: d2e9dbf61979cf80a17404d429dc3421cf51d90f80b2907b79dd1924a16d7ad7
+    dependencies: [compose, presets, authentication, screenshots]
+    translations:
+      en-US: { path: docs/guides/quick-start.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/quick-start.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/quick-start.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-authentication
+    type: user-guide
+    module: authentication
+    owner: auth
+    source: docs/guides/authentication.md
+    source_sha256: 814b54899799a6e43b1350a1b37e6419ca3eff833453dee49d1a02c53002b99f
+    dependencies: [captcha, social-login, device-code, tenant, screenshots]
+    translations:
+      en-US: { path: docs/guides/authentication.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/authentication.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/authentication.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-permissions
+    type: user-guide
+    module: security
+    owner: auth
+    source: docs/guides/permissions.md
+    source_sha256: 56e2b23b96b492de05ef585a6aaa745fd0dbfc1d2fd8e485a5940caf2bbabfcd
+    dependencies: [menus, roles, functional-permission, data-scope]
+    translations:
+      en-US: { path: docs/guides/permissions.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/permissions.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/permissions.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-system-security-audit
+    type: user-guide
+    module: security
+    owner: operations
+    source: docs/guides/system-security-audit.md
+    source_sha256: 727b84cdfa427476b388a61056edda483ca98d8835b85a6c7e2a1455fc99b5fb
+    dependencies: [oauth2, xss, audit, mq, observability]
+    translations:
+      en-US: { path: docs/guides/system-security-audit.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/system-security-audit.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/system-security-audit.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-workflow-approval
+    type: user-guide
+    module: workflow
+    owner: workflow
+    source: docs/guides/workflow-approval.md
+    source_sha256: 86f3f2c1a165de630d42fe580d57a77fce4c004db35290db7f8186186219522b
+    dependencies: [bpmn, candidates, publishing, approval, screenshots]
+    translations:
+      en-US: { path: docs/guides/workflow-approval.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/workflow-approval.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/workflow-approval.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-scheduling
+    type: user-guide
+    module: scheduling
+    owner: base
+    source: docs/guides/scheduling.md
+    source_sha256: 3896bf01c3539720e183f3be8ea497809e2a039670264e329e6d930cb18e68d1
+    dependencies: [xxl-job, job-type, dynamic-schema, screenshots]
+    translations:
+      en-US: { path: docs/guides/scheduling.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/scheduling.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/scheduling.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-crm-flow
+    type: user-guide
+    module: crm
+    owner: crm
+    source: docs/guides/crm-flow.md
+    source_sha256: 7c4a669c5705326e5805aba1ac212b1c1e2874c193df8ea163f68b8421bd4a35
+    dependencies: [crm, permissions, state-machine, screenshots]
+    translations:
+      en-US: { path: docs/guides/crm-flow.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/crm-flow.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/crm-flow.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-srm-flow
+    type: user-guide
+    module: srm
+    owner: srm
+    source: docs/guides/srm-flow.md
+    source_sha256: f4f0eb8870b88138699e0749c6b78daaa7eeb0a0ff4019509b137125b0907a4d
+    dependencies: [srm, portal, saga, quotation, screenshots]
+    translations:
+      en-US: { path: docs/guides/srm-flow.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/srm-flow.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/srm-flow.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-procurement-flow
+    type: user-guide
+    module: procurement
+    owner: procurement
+    source: docs/guides/procurement-flow.md
+    source_sha256: 72d82136c0f2c03aeb40ebf775a33448c418b5b23b8e5eb784d07bdc6860e316
+    dependencies: [procurement, workflow, srm-events, asset-events, screenshots]
+    translations:
+      en-US: { path: docs/guides/procurement-flow.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/procurement-flow.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/procurement-flow.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-asset-flow
+    type: user-guide
+    module: asset
+    owner: asset
+    source: docs/guides/asset-flow.md
+    source_sha256: 5bb97118317fa442029048ceb212a49ba7585fd9a9007c2756c55461d3ceff3f
+    dependencies: [asset, procurement-events, workflow, screenshots]
+    translations:
+      en-US: { path: docs/guides/asset-flow.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/asset-flow.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/asset-flow.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-scaffold-development
+    type: development-guide
+    module: scaffold
+    owner: architecture
+    source: docs/guides/scaffold-development.md
+    source_sha256: bb5c758f989a77c7f4844cc345d267f0fc86319f2b51b796708e2c7ef141ff8b
+    dependencies: [cli, presets, create-service, crud-generator]
+    translations:
+      en-US: { path: docs/guides/scaffold-development.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/scaffold-development.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/scaffold-development.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-operations-upgrade
+    type: operations-guide
+    module: operations
+    owner: operations
+    source: docs/guides/operations-upgrade.md
+    source_sha256: 7b9d5042add3d6bbb4732e4e9e42156c6a5a63bdf1bade24d06c210a30a4fc21
+    dependencies: [compose, observability, backup, recovery, upgrade]
+    translations:
+      en-US: { path: docs/guides/operations-upgrade.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/operations-upgrade.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/operations-upgrade.kr.md, status: present-unverified, reviewed_at: null }
+  - id: guide-troubleshooting
+    type: operations-guide
+    module: all
+    owner: operations
+    source: docs/guides/troubleshooting.md
+    source_sha256: 93fa881990184731680a98934186f753a2ded28ad66beb060a767f1f64841207
+    dependencies: [runtime, security, workflow, scheduling, mq, frontend]
+    translations:
+      en-US: { path: docs/guides/troubleshooting.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/guides/troubleshooting.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/guides/troubleshooting.kr.md, status: present-unverified, reviewed_at: null }
+
 source_only:
   - path: docs/adr/0001-scaffold-upgrade-foundations.md
     reason: 内部架构决策记录，正式发布前重新评估翻译范围

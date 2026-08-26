@@ -12,10 +12,10 @@ import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
 import { hasManagementAccess } from '@/utils/access'
 import { getRolesFromToken } from '@/utils/jwt'
-import { storeLang } from '@/i18n'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 import { safeAppRedirect } from '@/utils/navigation'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
@@ -47,12 +47,6 @@ function toggleTheme() {
   appStore.setTheme(appStore.theme === 'dark' ? 'light' : 'dark')
 }
 
-/** 切换语言 */
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 </script>
 
 <template>
@@ -67,10 +61,7 @@ function toggleLang() {
       </div>
       <div class="login-top-right">
         <!-- 语言切换 -->
-        <el-button text :title="t('lang.switch')" @click="toggleLang">
-          <el-icon><Globe /></el-icon>
-          {{ locale === 'zh-CN' ? 'EN' : '中' }}
-        </el-button>
+        <LanguageSelector />
         <!-- 主题切换 -->
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>

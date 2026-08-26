@@ -19,6 +19,10 @@
     "test:preset-runtime": "npm run build && node scripts/preset-runtime-golden.mjs",
     "docs:preset": "npm run build && node scripts/preset-docs.mjs",
     "docs:preset:check": "npm run build && node scripts/preset-docs.mjs --check",
+    "docs:links:check": "node scripts/docs-quality.mjs --scope=links",
+    "docs:i18n:check": "node scripts/docs-quality.mjs --scope=i18n",
+    "docs:screenshots:check": "node scripts/docs-quality.mjs --scope=screenshots",
+    "docs:quality": "node scripts/docs-quality.mjs",
     "dev": "tsx src/cli.ts"
   },
   "dependencies": {

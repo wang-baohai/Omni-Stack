@@ -16,7 +16,7 @@
 - [7. Nginx 리버스 프록시 설정](#7-nginx-리버스-프록시-설정)
 - [8. 데이터 초기화와 영속화](#8-데이터-초기화와-영속화)
 - [9. Docker 레지스트리 미러 설정](#9-docker-레지스트리-미러-설정)
-- [10. Windows Hyper-V/WSL2 포트 예약 문제](#10-windows-hyper-vws12-포트-예약-문제)
+- [10. Windows Hyper-V/WSL2 포트 예약 문제](#10-windows-hyper-vwsl2-포트-예약-문제)
 - [11. Nacos v3.1.1 헬스체크 엔드포인트 변경](#11-nacos-v311-헬스체크-엔드포인트-변경)
 - [12. RocketMQ Broker Docker 네트워크 설정](#12-rocketmq-broker-docker-네트워크-설정)
 - [13. 스케일링 가이드](#13-스케일링-가이드)
@@ -264,7 +264,7 @@ rocketmq-broker:
   command: sh mqbroker -n rocketmq-namesrv:9876 -c ... --enable-proxy
 ```
 
-> **포트 매핑 19876:9876 이유**: Windows Hyper-V/WSL2는 9859-9958 포트 범위를 예약합니다. 9876을 직접 매핑하면 충돌이 발생합니다. [섹션 10](#10-windows-hyper-vws12-포트-예약-문제) 참조.
+> **포트 매핑 19876:9876 이유**: Windows Hyper-V/WSL2는 9859-9958 포트 범위를 예약합니다. 9876을 직접 매핑하면 충돌이 발생합니다. [섹션 10](#10-windows-hyper-vwsl2-포트-예약-문제) 참조.
 
 ### 5.5 XXL-JOB Admin v3.3.1
 
@@ -730,7 +730,7 @@ lsof -i :8080
 **해결책**:
 - 포트를 점유 중인 프로세스 중지
 - docker-compose.yml의 호스트 포트 매핑 변경
-- Windows 사용자: Hyper-V 포트 예약 확인 ([섹션 10](#10-windows-hyper-vws12-포트-예약-문제) 참조)
+- Windows 사용자: Hyper-V 포트 예약 확인 ([섹션 10](#10-windows-hyper-vwsl2-포트-예약-문제) 참조)
 
 ### 15.5 Nacos 등록 실패
 

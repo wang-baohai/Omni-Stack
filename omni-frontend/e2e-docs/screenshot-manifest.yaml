@@ -1,0 +1,270 @@
+version: 1
+product_version: 0.6.1
+generated_at: 2026-08-26T09:52:03+08:00
+fixture: isolated-fresh-docs-v1
+rules:
+  token_storage: process-memory-only
+  captcha: display-only
+  sensitive_masking: required
+  animation: disabled
+
+screenshots:
+  - id: auth-login-zh-CN
+    module: authentication
+    flow: password-captcha
+    step: entry
+    locale: zh-CN
+    role: public
+    route: /login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开登录页
+    expected: 显示租户、用户名、密码、验证码和登录方式
+    masks: [captcha]
+    image: docs/images/zh-CN/auth-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-login-en-US
+    module: authentication
+    flow: password-captcha
+    step: entry
+    locale: en-US
+    role: public
+    route: /login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the login page
+    expected: Tenant, username, password, CAPTCHA, and login methods are visible
+    masks: [captcha]
+    image: docs/images/en-US/auth-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-login-ja-JP
+    module: authentication
+    flow: password-captcha
+    step: entry
+    locale: ja-JP
+    role: public
+    route: /login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: ログイン画面を開く
+    expected: テナント、ユーザー名、パスワード、認証コード、ログイン方法が表示される
+    masks: [captcha]
+    image: docs/images/ja-JP/auth-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-login-ko-KR
+    module: authentication
+    flow: password-captcha
+    step: entry
+    locale: ko-KR
+    role: public
+    route: /login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 로그인 화면 열기
+    expected: 테넌트, 사용자 이름, 비밀번호, 보안 문자와 로그인 방식이 표시됨
+    masks: [captcha]
+    image: docs/images/ko-KR/auth-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+
+  - id: auth-register-zh-CN
+    module: authentication
+    flow: register
+    step: create-account
+    locale: zh-CN
+    role: public
+    route: /register
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开注册页
+    expected: 显示账号、租户、验证码和注册入口
+    masks: [captcha, password]
+    image: docs/images/zh-CN/auth-register.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-register-en-US
+    module: authentication
+    flow: register
+    step: create-account
+    locale: en-US
+    role: public
+    route: /register
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open registration
+    expected: Account, tenant, CAPTCHA, and registration controls are visible
+    masks: [captcha, password]
+    image: docs/images/en-US/auth-register.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-register-ja-JP
+    module: authentication
+    flow: register
+    step: create-account
+    locale: ja-JP
+    role: public
+    route: /register
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 登録画面を開く
+    expected: アカウント、テナント、認証コード、登録操作が表示される
+    masks: [captcha, password]
+    image: docs/images/ja-JP/auth-register.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-register-ko-KR
+    module: authentication
+    flow: register
+    step: create-account
+    locale: ko-KR
+    role: public
+    route: /register
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 가입 화면 열기
+    expected: 계정, 테넌트, 보안 문자와 가입 작업이 표시됨
+    masks: [captcha, password]
+    image: docs/images/ko-KR/auth-register.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+
+  - id: auth-device-code-zh-CN
+    module: authentication
+    flow: device-code
+    step: request-code
+    locale: zh-CN
+    role: public
+    route: /device
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开设备授权页
+    expected: 显示设备验证码、验证地址和二维码
+    masks: []
+    image: docs/images/zh-CN/auth-device-code.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-device-code-en-US
+    module: authentication
+    flow: device-code
+    step: request-code
+    locale: en-US
+    role: public
+    route: /device
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open device authorization
+    expected: Device code, verification URL, and QR code are visible
+    masks: []
+    image: docs/images/en-US/auth-device-code.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-device-code-ja-JP
+    module: authentication
+    flow: device-code
+    step: request-code
+    locale: ja-JP
+    role: public
+    route: /device
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: デバイス認証画面を開く
+    expected: 確認コード、確認 URL、QR コードが表示される
+    masks: []
+    image: docs/images/ja-JP/auth-device-code.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-device-code-ko-KR
+    module: authentication
+    flow: device-code
+    step: request-code
+    locale: ko-KR
+    role: public
+    route: /device
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 기기 인증 화면 열기
+    expected: 확인 코드, 확인 URL과 QR 코드가 표시됨
+    masks: []
+    image: docs/images/ko-KR/auth-device-code.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+
+  - id: supplier-portal-login-zh-CN
+    module: srm
+    flow: portal-login
+    step: entry
+    locale: zh-CN
+    role: supplier-public
+    route: /portal-login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开供应商门户登录页
+    expected: 显示供应商登录和开户注册入口
+    masks: [captcha, password]
+    image: docs/images/zh-CN/supplier-portal-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: supplier-portal-login-en-US
+    module: srm
+    flow: portal-login
+    step: entry
+    locale: en-US
+    role: supplier-public
+    route: /portal-login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open supplier portal login
+    expected: Supplier login and registration entries are visible
+    masks: [captcha, password]
+    image: docs/images/en-US/supplier-portal-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: supplier-portal-login-ja-JP
+    module: srm
+    flow: portal-login
+    step: entry
+    locale: ja-JP
+    role: supplier-public
+    route: /portal-login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: サプライヤーポータルのログイン画面を開く
+    expected: サプライヤーのログインと登録入口が表示される
+    masks: [captcha, password]
+    image: docs/images/ja-JP/supplier-portal-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: supplier-portal-login-ko-KR
+    module: srm
+    flow: portal-login
+    step: entry
+    locale: ko-KR
+    role: supplier-public
+    route: /portal-login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 공급업체 포털 로그인 화면 열기
+    expected: 공급업체 로그인과 가입 진입점이 표시됨
+    masks: [captcha, password]
+    image: docs/images/ko-KR/supplier-portal-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00

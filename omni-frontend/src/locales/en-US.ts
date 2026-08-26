@@ -615,6 +615,8 @@ export default {
   lang: {
     zhCN: '中文',
     enUS: 'English',
+    jaJP: '日本語',
+    koKR: '한국어',
     switch: 'Switch Language',
   },
   // ===== home — home page module =====

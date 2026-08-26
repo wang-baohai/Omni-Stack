@@ -9,11 +9,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
-import { storeLang } from '@/i18n'
 import SidebarMenu from '@/components/SidebarMenu.vue'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 import { clearAuthenticatedSession } from '@/router'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
@@ -34,11 +34,6 @@ function toggleTheme() {
   appStore.setTheme(appStore.theme === 'dark' ? 'light' : 'dark')
 }
 
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 </script>
 
 <template>
@@ -81,10 +76,7 @@ function toggleLang() {
               <el-icon><HomeFilled /></el-icon>
               {{ t('common.home') }}
             </el-button>
-            <el-button text :title="t('lang.switch')" @click="toggleLang">
-              <el-icon><Globe /></el-icon>
-              {{ locale === 'zh-CN' ? 'EN' : '中' }}
-            </el-button>
+            <LanguageSelector />
             <el-button text :title="t('theme.toggle')" @click="toggleTheme">
               <el-icon>
                 <Moon v-if="appStore.theme === 'dark'" />

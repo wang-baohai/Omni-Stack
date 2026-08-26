@@ -16,7 +16,7 @@
 - [7. Nginx リバースプロキシ設定](#7-nginx-リバースプロキシ設定)
 - [8. データ初期化と永続化](#8-データ初期化と永続化)
 - [9. Docker レジストリミラー設定](#9-docker-レジストリミラー設定)
-- [10. Windows Hyper-V/WSL2 ポート予約問題](#10-windows-hyper-vws12-ポート予約問題)
+- [10. Windows Hyper-V/WSL2 ポート予約問題](#10-windows-hyper-vwsl2-ポート予約問題)
 - [11. Nacos v3.1.1 ヘルスチェックエンドポイント変更](#11-nacos-v311-ヘルスチェックエンドポイント変更)
 - [12. RocketMQ Broker Docker ネットワーク設定](#12-rocketmq-broker-docker-ネットワーク設定)
 - [13. スケーリングガイド](#13-スケーリングガイド)
@@ -264,7 +264,7 @@ rocketmq-broker:
   command: sh mqbroker -n rocketmq-namesrv:9876 -c ... --enable-proxy
 ```
 
-> **ポートマッピング 19876:9876 の理由**：Windows Hyper-V/WSL2 は 9859-9958 のポート範囲を予約します。9876 を直接マッピングすると競合が発生します。[セクション 10](#10-windows-hyper-vws12-ポート予約問題)を参照。
+> **ポートマッピング 19876:9876 の理由**：Windows Hyper-V/WSL2 は 9859-9958 のポート範囲を予約します。9876 を直接マッピングすると競合が発生します。[セクション 10](#10-windows-hyper-vwsl2-ポート予約問題)を参照。
 
 ### 5.5 XXL-JOB Admin v3.3.1
 
@@ -730,7 +730,7 @@ lsof -i :8080
 **解決策**：
 - ポートを占有しているプロセスを停止
 - docker-compose.yml のホストポートマッピングを変更
-- Windows ユーザー：Hyper-V ポート予約を確認（[セクション 10](#10-windows-hyper-vws12-ポート予約問題)を参照）
+- Windows ユーザー：Hyper-V ポート予約を確認（[セクション 10](#10-windows-hyper-vwsl2-ポート予約問題)を参照）
 
 ### 15.5 Nacos 登録失敗
 

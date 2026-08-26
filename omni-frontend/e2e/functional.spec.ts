@@ -126,6 +126,20 @@ test.describe('公开入口', () => {
     await expect(page.locator('input[type="password"]').first()).toHaveValue('')
   })
 
+  test('中英日韩四种界面语言可选择并持久化', async ({ page }) => {
+    await page.goto('/login')
+    await page.getByRole('button', { name: '切换语言' }).click()
+    await page.getByRole('menuitem', { name: '日本語' }).click()
+    await expect(page.getByText('アカウントにログイン')).toBeVisible()
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('omni-lang'))).toBe('ja-JP')
+
+    await page.reload()
+    await page.getByRole('button', { name: '言語を切り替える' }).click()
+    await page.getByRole('menuitem', { name: '한국어' }).click()
+    await expect(page.getByText('계정 로그인')).toBeVisible()
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('omni-lang'))).toBe('ko-KR')
+  })
+
   test('公开 API 返回可追踪且唯一的关联 ID', async ({ request }) => {
     const response = await request.get('/api/auth/tenants')
     expect(response.ok()).toBeTruthy()

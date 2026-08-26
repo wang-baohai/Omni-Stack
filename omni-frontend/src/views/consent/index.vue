@@ -11,7 +11,7 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
-import { storeLang } from '@/i18n'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 import {
   sessionLogin,
   fetchCaptcha,
@@ -19,7 +19,7 @@ import {
 } from '@/api/auth'
 import type { TenantOption } from '@/api/auth'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
@@ -212,11 +212,6 @@ function toggleTheme() {
 }
 
 /** 切换语言 */
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 
 onMounted(async () => {
   // 从 URL 查询参数中解析 SAS 传递的授权请求信息
@@ -263,10 +258,7 @@ onMounted(async () => {
         </el-button>
       </div>
       <div class="consent-top-right">
-        <el-button text :title="t('lang.switch')" @click="toggleLang">
-          <el-icon><Globe /></el-icon>
-          {{ locale === 'zh-CN' ? 'EN' : '中' }}
-        </el-button>
+        <LanguageSelector />
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>
             <Moon v-if="appStore.theme === 'dark'" />

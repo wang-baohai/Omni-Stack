@@ -12,9 +12,9 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { fetchCaptcha, registerUser, listTenants } from '@/api/auth'
 import type { RegisterParams, TenantOption } from '@/api/auth'
 import { useAppStore } from '@/stores/app'
-import { storeLang } from '@/i18n'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const router = useRouter()
 const appStore = useAppStore()
 
@@ -143,11 +143,6 @@ function toggleTheme() {
 }
 
 /** 切换语言 */
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 
 /** 组件挂载后加载验证码和租户列表 */
 onMounted(() => {
@@ -168,10 +163,7 @@ onMounted(() => {
       </div>
       <div class="register-top-right">
         <!-- 语言切换 -->
-        <el-button text :title="t('lang.switch')" @click="toggleLang">
-          <el-icon><Globe /></el-icon>
-          {{ locale === 'zh-CN' ? 'EN' : '中' }}
-        </el-button>
+        <LanguageSelector />
         <!-- 主题切换 -->
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>

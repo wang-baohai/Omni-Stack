@@ -16,7 +16,7 @@
 - [7. Nginx Reverse Proxy Configuration](#7-nginx-reverse-proxy-configuration)
 - [8. Data Initialization & Persistence](#8-data-initialization--persistence)
 - [9. Docker Registry Mirror Configuration](#9-docker-registry-mirror-configuration)
-- [10. Windows Hyper-V/WSL2 Port Reservation Issues](#10-windows-hyper-vws12-port-reservation-issues)
+- [10. Windows Hyper-V/WSL2 Port Reservation Issues](#10-windows-hyper-vwsl2-port-reservation-issues)
 - [11. Nacos v3.1.1 Health Check Endpoint Changes](#11-nacos-v311-health-check-endpoint-changes)
 - [12. RocketMQ Broker Docker Network Configuration](#12-rocketmq-broker-docker-network-configuration)
 - [13. Scaling Guide](#13-scaling-guide)
@@ -264,7 +264,7 @@ rocketmq-broker:
   command: sh mqbroker -n rocketmq-namesrv:9876 -c ... --enable-proxy
 ```
 
-> **Why port mapping 19876:9876**: Windows Hyper-V/WSL2 reserves port ranges including 9859-9958. Mapping 9876 directly causes conflicts. See [Section 10](#10-windows-hyper-vws12-port-reservation-issues).
+> **Why port mapping 19876:9876**: Windows Hyper-V/WSL2 reserves port ranges including 9859-9958. Mapping 9876 directly causes conflicts. See [Section 10](#10-windows-hyper-vwsl2-port-reservation-issues).
 
 ### 5.5 XXL-JOB Admin v3.3.1
 
@@ -730,7 +730,7 @@ lsof -i :8080
 **Solutions**:
 - Stop the process occupying the port
 - Modify host port mapping in docker-compose.yml
-- Windows users: check Hyper-V port reservation (see [Section 10](#10-windows-hyper-vws12-port-reservation-issues))
+- Windows users: check Hyper-V port reservation (see [Section 10](#10-windows-hyper-vwsl2-port-reservation-issues))
 
 ### 15.5 Nacos Registration Failure
 
