@@ -4,7 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getCrmFollowups, getCrmFunnel, getCrmOverviewSummary, type CrmOverviewSummary, type FollowupItem, type FunnelItem } from '@/api/crm-overview'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const loading = ref(false)
 const summary = ref<CrmOverviewSummary | null>(null)
 const funnel = ref<FunnelItem[]>([])
@@ -32,7 +32,10 @@ async function loadData() {
 }
 
 function money(value = 0) {
-  return new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY' }).format(value)
+  return new Intl.NumberFormat(locale.value, {
+    style: 'currency',
+    currency: summary.value?.currencyCode || 'CNY',
+  }).format(value)
 }
 
 function percent(value = 0) {
@@ -47,29 +50,29 @@ onMounted(loadData)
     <div class="page-heading">
       <div>
         <h2>{{ t('common.crmOverview') }}</h2>
-        <p>聚焦线索转化、销售漏斗与需要立即处理的跟进事项</p>
+        <p>{{ t('crmOverviewPage.description') }}</p>
       </div>
       <el-button @click="loadData"><el-icon><Refresh /></el-icon>{{ t('common.refresh') }}</el-button>
     </div>
 
     <el-row :gutter="16" class="metrics">
       <el-col :xs="12" :sm="8" :lg="4">
-        <el-card shadow="never"><el-statistic title="新线索" :value="summary?.newLeadCount || 0" /></el-card>
+        <el-card shadow="never"><el-statistic :title="t('crmOverviewPage.newLeads')" :value="summary?.newLeadCount || 0" /></el-card>
       </el-col>
       <el-col :xs="12" :sm="8" :lg="4">
-        <el-card shadow="never"><el-statistic title="已合格线索" :value="summary?.qualifiedLeadCount || 0" /></el-card>
+        <el-card shadow="never"><el-statistic :title="t('crmOverviewPage.qualifiedLeads')" :value="summary?.qualifiedLeadCount || 0" /></el-card>
       </el-col>
       <el-col :xs="12" :sm="8" :lg="4">
-        <el-card shadow="never"><el-statistic title="已转换线索" :value="summary?.convertedLeadCount || 0" /></el-card>
+        <el-card shadow="never"><el-statistic :title="t('crmOverviewPage.convertedLeads')" :value="summary?.convertedLeadCount || 0" /></el-card>
       </el-col>
       <el-col :xs="12" :sm="8" :lg="4">
-        <el-card shadow="never"><el-statistic title="开放商机" :value="summary?.openOpportunityCount || 0" /></el-card>
+        <el-card shadow="never"><el-statistic :title="t('crmOverviewPage.openOpportunities')" :value="summary?.openOpportunityCount || 0" /></el-card>
       </el-col>
       <el-col :xs="12" :sm="8" :lg="4">
-        <el-card shadow="never"><el-statistic title="今日待跟进" :value="summary?.todayFollowupCount || 0" /></el-card>
+        <el-card shadow="never"><el-statistic :title="t('crmOverviewPage.todayFollowups')" :value="summary?.todayFollowupCount || 0" /></el-card>
       </el-col>
       <el-col :xs="12" :sm="8" :lg="4">
-        <el-card shadow="never" class="danger-card"><el-statistic title="逾期待跟进" :value="summary?.overdueFollowupCount || 0" /></el-card>
+        <el-card shadow="never" class="danger-card"><el-statistic :title="t('crmOverviewPage.overdueFollowups')" :value="summary?.overdueFollowupCount || 0" /></el-card>
       </el-col>
     </el-row>
 
@@ -78,16 +81,16 @@ onMounted(loadData)
         <el-card shadow="never">
           <template #header>
             <div class="section-heading">
-              <strong>销售漏斗</strong>
-              <span>开放金额 {{ money(summary?.openOpportunityAmount) }}</span>
+              <strong>{{ t('crmOverviewPage.salesFunnel') }}</strong>
+              <span>{{ t('crmOverviewPage.openAmount', { amount: money(summary?.openOpportunityAmount) }) }}</span>
             </div>
           </template>
-          <el-empty v-if="funnel.length === 0" description="暂无漏斗数据" />
+          <el-empty v-if="funnel.length === 0" :description="t('crmOverviewPage.noFunnel')" />
           <div v-else class="funnel">
             <div v-for="item in funnel" :key="item.stageId" class="funnel-row">
               <div class="funnel-label">
                 <strong>{{ item.stageName }}</strong>
-                <span>{{ item.count }} 个 · {{ money(item.amount) }} · {{ item.stageType }}</span>
+                <span>{{ t('crmOverviewPage.funnelItem', { count: item.count, amount: money(item.amount), type: item.stageType }) }}</span>
               </div>
               <div class="funnel-track">
                 <div class="funnel-bar" :style="{ width: `${Math.max(8, item.amount / maxFunnelAmount * 100)}%` }"></div>
@@ -96,25 +99,25 @@ onMounted(loadData)
           </div>
           <el-divider />
           <div class="rate-grid">
-            <el-statistic title="线索转换率" :value="percent(summary?.leadConversionRate)" />
-            <el-statistic title="商机赢单率" :value="percent(summary?.opportunityWinRate)" />
-            <el-statistic title="赢单金额" :value="money(summary?.wonOpportunityAmount)" />
+            <el-statistic :title="t('crmOverviewPage.leadConversionRate')" :value="percent(summary?.leadConversionRate)" />
+            <el-statistic :title="t('crmOverviewPage.opportunityWinRate')" :value="percent(summary?.opportunityWinRate)" />
+            <el-statistic :title="t('crmOverviewPage.wonAmount')" :value="money(summary?.wonOpportunityAmount)" />
           </div>
         </el-card>
       </el-col>
       <el-col :xs="24" :lg="9">
         <el-card shadow="never">
-          <template #header><strong>跟进提醒</strong></template>
+          <template #header><strong>{{ t('crmOverviewPage.followupReminder') }}</strong></template>
           <el-tabs>
-            <el-tab-pane :label="`逾期 (${followups.overdue.length})`">
-              <el-empty v-if="followups.overdue.length === 0" description="没有逾期事项" :image-size="70" />
+            <el-tab-pane :label="t('crmOverviewPage.overdueTab', { count: followups.overdue.length })">
+              <el-empty v-if="followups.overdue.length === 0" :description="t('crmOverviewPage.noOverdue')" :image-size="70" />
               <div v-for="item in followups.overdue" :key="`${item.rootType}-${item.rootId}`" class="followup-item overdue">
                 <strong>{{ item.name }}</strong><span>{{ item.number || `${item.rootType} #${item.rootId}` }}</span>
                 <time>{{ item.nextFollowupTime }}</time>
               </div>
             </el-tab-pane>
-            <el-tab-pane :label="`今日 (${followups.today.length})`">
-              <el-empty v-if="followups.today.length === 0" description="今日没有待办" :image-size="70" />
+            <el-tab-pane :label="t('crmOverviewPage.todayTab', { count: followups.today.length })">
+              <el-empty v-if="followups.today.length === 0" :description="t('crmOverviewPage.noToday')" :image-size="70" />
               <div v-for="item in followups.today" :key="`${item.rootType}-${item.rootId}`" class="followup-item">
                 <strong>{{ item.name }}</strong><span>{{ item.number || `${item.rootType} #${item.rootId}` }}</span>
                 <time>{{ item.nextFollowupTime }}</time>

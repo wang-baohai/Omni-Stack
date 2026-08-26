@@ -890,6 +890,23 @@ export default {
       requestResolved: 'Server quotation status refreshed. You can continue from the latest version.',
     },
   },
+  crmOverviewPage: {
+    description: 'Focus on lead conversion, the sales funnel, and follow-ups requiring immediate action.',
+    newLeads: 'New Leads', qualifiedLeads: 'Qualified Leads', convertedLeads: 'Converted Leads', openOpportunities: 'Open Opportunities', todayFollowups: 'Due Today', overdueFollowups: 'Overdue Follow-ups',
+    salesFunnel: 'Sales Funnel', openAmount: 'Open amount {amount}', noFunnel: 'No funnel data', funnelItem: '{count} · {amount} · {type}',
+    leadConversionRate: 'Lead Conversion Rate', opportunityWinRate: 'Opportunity Win Rate', wonAmount: 'Won Amount', followupReminder: 'Follow-up Reminders',
+    overdueTab: 'Overdue ({count})', noOverdue: 'No overdue items', todayTab: 'Today ({count})', noToday: 'Nothing due today',
+  },
+  srmOverviewPage: {
+    totalSuppliers: 'Total Suppliers', approved: 'Approved', pendingReview: 'Pending Review', suspended: 'Suspended', blacklisted: 'Blacklisted', eliminated: 'Eliminated',
+    strategic: 'Strategic', preferred: 'Preferred', qualified: 'Qualified', riskDashboard: 'Risk Dashboard',
+  },
+  assetOverviewPage: {
+    status: 'Status', category: 'Category', department: 'Department', location: 'Location',
+    total: 'Total Assets', inStock: 'In Stock', inUse: 'In Use', allocated: 'Awaiting Acceptance', maintenance: 'In Maintenance', transfer: 'In Transfer', disposalPending: 'Pending Disposal', terminal: 'Terminal',
+    originalValue: 'Original Asset Value (Separated by Currency)', noAmount: 'No amount data', distribution: 'Asset Distribution',
+    dimensionItem: 'Dimension Item', assetCount: 'Asset Count', currency: 'Currency', assetValue: 'Original Asset Value',
+  },
   procurementOverviewPage: {
     title: 'Procurement Overview', description: 'Statistics follow the current user’s procurement data scope, with amounts kept separate by currency.',
     category: 'Material Category', supplier: 'Supplier', department: 'Responsible Department',

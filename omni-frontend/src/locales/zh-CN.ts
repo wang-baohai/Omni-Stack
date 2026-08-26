@@ -926,6 +926,23 @@ export default {
       requestResolved: '已刷新服务端报价状态，可以根据最新版本继续处理。',
     },
   },
+  crmOverviewPage: {
+    description: '聚焦线索转化、销售漏斗与需要立即处理的跟进事项',
+    newLeads: '新线索', qualifiedLeads: '已合格线索', convertedLeads: '已转换线索', openOpportunities: '开放商机', todayFollowups: '今日待跟进', overdueFollowups: '逾期待跟进',
+    salesFunnel: '销售漏斗', openAmount: '开放金额 {amount}', noFunnel: '暂无漏斗数据', funnelItem: '{count} 个 · {amount} · {type}',
+    leadConversionRate: '线索转换率', opportunityWinRate: '商机赢单率', wonAmount: '赢单金额', followupReminder: '跟进提醒',
+    overdueTab: '逾期 ({count})', noOverdue: '没有逾期事项', todayTab: '今日 ({count})', noToday: '今日没有待办',
+  },
+  srmOverviewPage: {
+    totalSuppliers: '供应商总数', approved: '已通过', pendingReview: '待审核', suspended: '已冻结', blacklisted: '黑名单', eliminated: '已淘汰',
+    strategic: '战略级', preferred: '优选级', qualified: '合格级', riskDashboard: '风险看板',
+  },
+  assetOverviewPage: {
+    status: '状态', category: '品类', department: '部门', location: '位置',
+    total: '资产总数', inStock: '在库', inUse: '使用中', allocated: '待领用', maintenance: '维修中', transfer: '调拨中', disposalPending: '待处置', terminal: '已终结',
+    originalValue: '资产原值（按币种独立统计）', noAmount: '暂无金额数据', distribution: '资产分布',
+    dimensionItem: '维度项', assetCount: '资产数量', currency: '币种', assetValue: '资产原值',
+  },
   procurementOverviewPage: {
     title: '采购概览', description: '统计严格沿用当前用户的采购数据范围，金额按币种分别汇总。',
     category: '物料品类', supplier: '供应商', department: '负责部门',

@@ -1,26 +1,28 @@
 <script setup lang="ts">
 /** SRM 供应商概览页面，包含统计卡片和风险看板。 */
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getSrmOverviewSummary, getRiskDashboard, type SrmOverviewSummary, type RiskDashboard } from '@/api/srm-overview'
 import RiskDashboardComponent from '@/components/srm/RiskDashboard.vue'
 
+const { t } = useI18n()
 const loading = ref(false)
 const summary = ref<SrmOverviewSummary | null>(null)
 const riskDashboard = ref<RiskDashboard>({ redCount: 0, yellowCount: 0, greenCount: 0, topRiskSuppliers: [] })
 
-const statusCards = [
-  { key: 'approvedCount', label: '已通过', color: 'success' },
-  { key: 'pendingReviewCount', label: '待审核', color: 'warning' },
-  { key: 'suspendedCount', label: '已冻结', color: 'info' },
-  { key: 'blacklistedCount', label: '黑名单', color: 'danger' },
-  { key: 'eliminatedCount', label: '已淘汰', color: 'danger' },
-] as const
+const statusCards = computed(() => [
+  { key: 'approvedCount', label: t('srmOverviewPage.approved'), color: 'success' },
+  { key: 'pendingReviewCount', label: t('srmOverviewPage.pendingReview'), color: 'warning' },
+  { key: 'suspendedCount', label: t('srmOverviewPage.suspended'), color: 'info' },
+  { key: 'blacklistedCount', label: t('srmOverviewPage.blacklisted'), color: 'danger' },
+  { key: 'eliminatedCount', label: t('srmOverviewPage.eliminated'), color: 'danger' },
+] as const)
 
-const levelCards = [
-  { key: 'strategicCount', label: '战略级', color: 'success' },
-  { key: 'preferredCount', label: '优选级', color: '' },
-  { key: 'qualifiedCount', label: '合格级', color: 'warning' },
-] as const
+const levelCards = computed(() => [
+  { key: 'strategicCount', label: t('srmOverviewPage.strategic'), color: 'success' },
+  { key: 'preferredCount', label: t('srmOverviewPage.preferred'), color: '' },
+  { key: 'qualifiedCount', label: t('srmOverviewPage.qualified'), color: 'warning' },
+] as const)
 
 async function loadData() {
   loading.value = true
@@ -46,7 +48,7 @@ onMounted(loadData)
       <el-col :span="24">
         <el-card shadow="never">
           <div class="overview-total">
-            供应商总数：<span class="overview-total__count">{{ summary?.totalSuppliers ?? '-' }}</span>
+            {{ t('srmOverviewPage.totalSuppliers') }}：<span class="overview-total__count">{{ summary?.totalSuppliers ?? '-' }}</span>
           </div>
         </el-card>
       </el-col>
@@ -74,7 +76,7 @@ onMounted(loadData)
 
     <!-- 风险看板 -->
     <el-card shadow="never">
-      <template #header>风险看板</template>
+      <template #header>{{ t('srmOverviewPage.riskDashboard') }}</template>
       <RiskDashboardComponent :dashboard="riskDashboard" />
     </el-card>
   </div>

@@ -77,4 +77,24 @@ export default {
     spendAnalysis: '支出分析', spendAggregation: '現在は{dimension}別です。異なる通貨は合算しません。',
     codeOrId: 'コード / ID', currency: '通貨', committedAmount: '確認済みコミットメント金額',
   },
+  assetOverviewPage: {
+    ...enUS.assetOverviewPage,
+    status: '状態', category: 'カテゴリ', department: '部門', location: '場所',
+    total: '資産総数', inStock: '在庫', inUse: '使用中', allocated: '受領待ち', maintenance: '修理中', transfer: '移管中', disposalPending: '廃棄待ち', terminal: '終了済み',
+    originalValue: '資産取得価額（通貨別）', noAmount: '金額データはありません', distribution: '資産分布',
+    dimensionItem: '分類項目', assetCount: '資産数', currency: '通貨', assetValue: '資産取得価額',
+  },
+  crmOverviewPage: {
+    ...enUS.crmOverviewPage,
+    description: 'リード転換、営業ファネル、直ちに対応すべきフォローアップを確認します。',
+    newLeads: '新規リード', qualifiedLeads: '有望リード', convertedLeads: '転換済みリード', openOpportunities: '進行中の商談', todayFollowups: '本日のフォロー', overdueFollowups: '期限超過フォロー',
+    salesFunnel: '営業ファネル', openAmount: '進行中金額 {amount}', noFunnel: 'ファネルデータはありません', funnelItem: '{count} 件 · {amount} · {type}',
+    leadConversionRate: 'リード転換率', opportunityWinRate: '商談受注率', wonAmount: '受注金額', followupReminder: 'フォローアップ通知',
+    overdueTab: '期限超過 ({count})', noOverdue: '期限超過項目はありません', todayTab: '本日 ({count})', noToday: '本日の予定はありません',
+  },
+  srmOverviewPage: {
+    ...enUS.srmOverviewPage,
+    totalSuppliers: 'サプライヤー総数', approved: '承認済み', pendingReview: '審査待ち', suspended: '停止中', blacklisted: 'ブラックリスト', eliminated: '除外済み',
+    strategic: '戦略', preferred: '優先', qualified: '適格', riskDashboard: 'リスクダッシュボード',
+  },
 }

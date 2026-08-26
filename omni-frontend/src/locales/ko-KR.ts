@@ -74,4 +74,24 @@ export default {
     spendAnalysis: '지출 분석', spendAggregation: '현재 {dimension} 기준이며 서로 다른 통화는 합산하지 않습니다.',
     codeOrId: '코드 / ID', currency: '통화', committedAmount: '확인된 약정 금액',
   },
+  assetOverviewPage: {
+    ...enUS.assetOverviewPage,
+    status: '상태', category: '분류', department: '부서', location: '위치',
+    total: '전체 자산', inStock: '재고', inUse: '사용 중', allocated: '인수 대기', maintenance: '수리 중', transfer: '이동 중', disposalPending: '처분 대기', terminal: '종료됨',
+    originalValue: '자산 취득가액(통화별)', noAmount: '금액 데이터가 없습니다', distribution: '자산 분포',
+    dimensionItem: '차원 항목', assetCount: '자산 수량', currency: '통화', assetValue: '자산 취득가액',
+  },
+  crmOverviewPage: {
+    ...enUS.crmOverviewPage,
+    description: '리드 전환, 영업 퍼널과 즉시 처리할 후속 활동을 확인합니다.',
+    newLeads: '신규 리드', qualifiedLeads: '검증된 리드', convertedLeads: '전환된 리드', openOpportunities: '진행 중 영업 기회', todayFollowups: '오늘 후속 활동', overdueFollowups: '기한 초과 후속 활동',
+    salesFunnel: '영업 퍼널', openAmount: '진행 금액 {amount}', noFunnel: '퍼널 데이터가 없습니다', funnelItem: '{count}건 · {amount} · {type}',
+    leadConversionRate: '리드 전환율', opportunityWinRate: '영업 기회 수주율', wonAmount: '수주 금액', followupReminder: '후속 활동 알림',
+    overdueTab: '기한 초과 ({count})', noOverdue: '기한 초과 항목이 없습니다', todayTab: '오늘 ({count})', noToday: '오늘 할 일이 없습니다',
+  },
+  srmOverviewPage: {
+    ...enUS.srmOverviewPage,
+    totalSuppliers: '전체 공급업체', approved: '승인됨', pendingReview: '심사 대기', suspended: '중지됨', blacklisted: '블랙리스트', eliminated: '탈락됨',
+    strategic: '전략 등급', preferred: '우선 등급', qualified: '적격 등급', riskDashboard: '위험 대시보드',
+  },
 }
