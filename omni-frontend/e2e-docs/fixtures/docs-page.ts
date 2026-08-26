@@ -1,5 +1,5 @@
 /** 文档截图共享夹具：固定语言、登录态、遮罩与稳定等待。 */
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { expect, type Page } from '@playwright/test'
 
@@ -20,6 +20,8 @@ interface PrepareOptions {
 
 /** 在应用启动前注入语言和隔离环境短期令牌。 */
 export async function prepareDocsPage(page: Page, options: PrepareOptions) {
+  // 固定文档时钟，避免设备码倒计时和时间列在重复生成时产生像素漂移。
+  await page.clock.install({ time: new Date('2026-08-26T09:00:00+08:00') })
   const captchaSvg = `data:image/svg+xml;base64,${Buffer.from(`
     <svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
       <rect width="120" height="40" rx="6" fill="#eef3fb"/>
@@ -87,12 +89,26 @@ export async function waitForDocsPage(page: Page, selector: string) {
     input[type="password"], [data-docs-mask="true"], .captcha-image, .captcha-img {
       filter: blur(8px) !important;
     }
+    .device-spinner, .device-spinner-sm {
+      animation: none !important;
+      transform: none !important;
+    }
+    .device-countdown span {
+      font-size: 0 !important;
+    }
+    .device-countdown span::after {
+      content: "10:00";
+      font-size: 14px;
+    }
   ` })
 }
 
 /** 将正式截图写入 docs/images 的语言目录。 */
 export async function captureDocsImage(page: Page, locale: DocsLocale, imageName: string) {
   const output = resolve(process.cwd(), '..', 'docs', 'images', locale, `${imageName}.png`)
+  const temporaryOutput = `${output}.next`
   mkdirSync(dirname(output), { recursive: true })
-  await page.screenshot({ path: output, fullPage: false })
+  const image = await page.screenshot({ fullPage: false })
+  writeFileSync(temporaryOutput, image)
+  renameSync(temporaryOutput, output)
 }

@@ -11,6 +11,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "docs:screenshots": "playwright test --config=playwright.docs.config.ts",
+    "docs:screenshots:public": "playwright test --config=playwright.docs.config.ts flows/public.flows.spec.ts",
     "docs:screenshots:check": "node ../tools/omni-cli/scripts/docs-quality.mjs --scope=screenshots",
     "docs:links:check": "node ../tools/omni-cli/scripts/docs-quality.mjs --scope=links",
     "docs:i18n:check": "node ../tools/omni-cli/scripts/docs-quality.mjs --scope=i18n",

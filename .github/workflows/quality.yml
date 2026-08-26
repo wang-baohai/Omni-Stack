@@ -53,6 +53,40 @@ jobs:
       - name: Production build
         working-directory: omni-frontend
         run: npm run build
-      - name: Validate Playwright suite discovery
+      - name: Install Chromium
         working-directory: omni-frontend
-        run: npx playwright test --list
+        run: npx playwright install --with-deps chromium
+      - name: Run public browser and localization smoke tests
+        working-directory: omni-frontend
+        run: npm run docs:screenshots:public
+
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tools/omni-cli/package-lock.json
+      - name: Install documentation tooling
+        working-directory: tools/omni-cli
+        run: npm ci
+      - name: Verify generated preset documentation
+        working-directory: tools/omni-cli
+        run: npm run docs:preset:check
+      - name: Verify documentation links
+        working-directory: tools/omni-cli
+        run: npm run docs:links:check
+      - name: Verify current README facts
+        working-directory: tools/omni-cli
+        run: npm run docs:readme:check
+      - name: Verify translation files and source digests
+        working-directory: tools/omni-cli
+        run: node scripts/docs-quality.mjs --scope=i18n --allow-draft
+      - name: Verify screenshot manifest and draft coverage
+        working-directory: tools/omni-cli
+        run: node scripts/docs-quality.mjs --scope=screenshots --allow-draft
+      - name: Scan documentation for sensitive content
+        working-directory: tools/omni-cli
+        run: node scripts/docs-quality.mjs --scope=sensitive
