@@ -26,6 +26,14 @@ export default {
     procurementRequisition: '구매 요청 관리', procurementRfq: '견적 요청 및 비교', procurementPurchaseOrder: '구매 주문', procurementGoodsReceipt: '입고 확인',
     assetManagement: '자산 관리', assetOverview: '자산 개요', assetLedger: '자산 원장', assetMyAssets: '내 자산', assetTransfer: '자산 이동', assetDisposal: '자산 처분',
   },
+  user: {
+    ...enUS.user,
+    username: '사용자 이름', nickname: '별명', email: '이메일', phone: '휴대전화', gender: '성별', genderMale: '남성', genderFemale: '여성', genderUnknown: '미지정',
+    assignRoles: '역할 할당', toggleStatus: '상태 전환', confirmDelete: '이 사용자를 삭제할까요?', confirmDisable: '이 사용자를 비활성화할까요?', confirmEnable: '이 사용자를 활성화할까요?',
+    createUser: '사용자 추가', password: '비밀번호', tenant: '테넌트', usernamePlaceholder: '사용자 이름 입력', passwordPlaceholder: '비밀번호 입력(6자 이상)',
+    nicknamePlaceholder: '별명 입력', emailPlaceholder: '이메일 주소 입력', phonePlaceholder: '휴대전화 번호 입력', tenantPlaceholder: '테넌트 선택', usernameRequired: '사용자 이름은 필수입니다',
+    passwordRequired: '비밀번호는 필수입니다', passwordMinLength: '비밀번호는 6자 이상이어야 합니다', tenantRequired: '테넌트를 선택하세요', tenantLoadFailed: '테넌트 목록을 불러오지 못했습니다', createSuccess: '사용자를 추가했습니다',
+  },
   lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '언어 전환' },
   theme: { ...enUS.theme, toggle: '테마 전환' },
   dashboardPage: {

@@ -29,6 +29,16 @@ export default {
     procurementRequisition: '購買申請管理', procurementRfq: '見積依頼・比較', procurementPurchaseOrder: '発注書', procurementGoodsReceipt: '入荷確認',
     assetManagement: '資産管理', assetOverview: '資産概要', assetLedger: '資産台帳', assetMyAssets: '自分の資産', assetTransfer: '資産移管', assetDisposal: '資産廃棄',
   },
+  user: {
+    ...enUS.user,
+    username: 'ユーザー名', nickname: '表示名', email: 'メールアドレス', phone: '電話番号', gender: '性別',
+    genderMale: '男性', genderFemale: '女性', genderUnknown: '未設定', assignRoles: 'ロールを割り当てる', toggleStatus: 'ステータスを切り替える',
+    confirmDelete: 'このユーザーを削除しますか？', confirmDisable: 'このユーザーを無効にしますか？', confirmEnable: 'このユーザーを有効にしますか？',
+    createUser: 'ユーザーを追加', password: 'パスワード', tenant: 'テナント', usernamePlaceholder: 'ユーザー名を入力',
+    passwordPlaceholder: 'パスワードを入力（6文字以上）', nicknamePlaceholder: '表示名を入力', emailPlaceholder: 'メールアドレスを入力',
+    phonePlaceholder: '電話番号を入力', tenantPlaceholder: 'テナントを選択', usernameRequired: 'ユーザー名は必須です', passwordRequired: 'パスワードは必須です',
+    passwordMinLength: 'パスワードは6文字以上で入力してください', tenantRequired: 'テナントを選択してください', tenantLoadFailed: 'テナント一覧を読み込めませんでした', createSuccess: 'ユーザーを作成しました',
+  },
   lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '言語を切り替える' },
   theme: { ...enUS.theme, toggle: 'テーマを切り替える' },
   dashboardPage: {

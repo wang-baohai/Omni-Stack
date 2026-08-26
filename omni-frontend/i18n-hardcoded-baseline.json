@@ -2,7 +2,7 @@
   "version": 1,
   "purpose": "记录尚未迁移到 vue-i18n 的可见中文基线；最终目标为零。",
   "generatedBy": "tools/omni-cli/scripts/ui-i18n-audit.mjs",
-  "total": 1776,
+  "total": 1756,
   "files": {
     "src/api/request.ts": {
       "template": 0,
@@ -235,10 +235,6 @@
     "src/views/supplier-portal/index.vue": {
       "template": 31,
       "script": 49
-    },
-    "src/views/system/user/index.vue": {
-      "template": 14,
-      "script": 6
     },
     "src/views/workflow/definition/index.vue": {
       "template": 10,
