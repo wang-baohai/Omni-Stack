@@ -16,7 +16,7 @@ documents:
     module: platform
     owner: architecture
     source: docs/architecture.md
-    source_sha256: 6b7cd5223dc5dae2930e551f44f861db07790c1af6d9273da99e554b3f61494a
+    source_sha256: bb27001588661f6cca71429951c52905cc15e18fae1de2ccf62ea54bfb9e1b66
     dependencies: [module-structure, ports, data-flow, permissions]
     translations:
       en-US: { path: docs/architecture.en.md, status: present-unverified, reviewed_at: null }
@@ -27,7 +27,7 @@ documents:
     module: platform
     owner: backend
     source: docs/api-contract.md
-    source_sha256: 2f8f9187035dda5db1fdc60c4b1b61ba729d4755fdd490257b24fd62b678549c
+    source_sha256: 96cebb47233a285434719b4e72c324d3fe34634ca2e6f7ea90c6b51336e536db
     dependencies: [api, error-codes, pagination, internal-contract]
     translations:
       en-US: { path: docs/api-contract.en.md, status: present-unverified, reviewed_at: null }
@@ -126,12 +126,23 @@ documents:
     module: deployment
     owner: operations
     source: docs/docker-deployment.md
-    source_sha256: 5948743326a42871450bf067b509ffd562fb1f259ff5c6901f7c32c8cc9f2169
+    source_sha256: 935f4f1109383d9a64fadf35783430c3dd3a2757ed29e990847853c16a7964ea
     dependencies: [compose, ports, health-checks, security]
     translations:
       en-US: { path: docs/docker-deployment.en.md, status: present-unverified, reviewed_at: null }
       ja-JP: { path: docs/docker-deployment.jp.md, status: present-unverified, reviewed_at: null }
       ko-KR: { path: docs/docker-deployment.kr.md, status: present-unverified, reviewed_at: null }
+  - id: observability
+    type: operations-guide
+    module: platform
+    owner: operations
+    source: docs/observability.md
+    source_sha256: 16e9664eb19ef480cf4b665b92d9fd58ee932f1003fe3d0d491e3178c6b0e540
+    dependencies: [metrics, tracing, logging, alerts, slo, compose]
+    translations:
+      en-US: { path: docs/observability.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/observability.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/observability.kr.md, status: present-unverified, reviewed_at: null }
   - id: crm-design
     type: design
     module: crm
@@ -140,9 +151,9 @@ documents:
     source_sha256: 4ec0c10fc3bebcd697aa828f603ac268993185e2e3bdfdd22b251abcba57d530
     dependencies: [schema, api, permissions]
     translations:
-      en-US: { path: docs/design/crm-design.en.md, status: missing, reviewed_at: null }
-      ja-JP: { path: docs/design/crm-design.jp.md, status: missing, reviewed_at: null }
-      ko-KR: { path: docs/design/crm-design.kr.md, status: missing, reviewed_at: null }
+      en-US: { path: docs/design/crm-design.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/design/crm-design.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/design/crm-design.kr.md, status: present-unverified, reviewed_at: null }
   - id: srm-design
     type: design
     module: srm
@@ -151,9 +162,9 @@ documents:
     source_sha256: ceeb22198758d1561a4fdfa4984c6f415ebb7bf76d50a18778327435b5065c9b
     dependencies: [schema, api, permissions, portal-saga]
     translations:
-      en-US: { path: docs/design/srm-design.en.md, status: missing, reviewed_at: null }
-      ja-JP: { path: docs/design/srm-design.jp.md, status: missing, reviewed_at: null }
-      ko-KR: { path: docs/design/srm-design.kr.md, status: missing, reviewed_at: null }
+      en-US: { path: docs/design/srm-design.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/design/srm-design.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/design/srm-design.kr.md, status: present-unverified, reviewed_at: null }
   - id: procurement-design
     type: design
     module: procurement
@@ -162,9 +173,9 @@ documents:
     source_sha256: 46b8f10e8e393b6a2789306fd6d645ed13af050e69d44f8bffa041e35f74c8f6
     dependencies: [schema, api, permissions, workflow]
     translations:
-      en-US: { path: docs/design/procurement-design.en.md, status: missing, reviewed_at: null }
-      ja-JP: { path: docs/design/procurement-design.jp.md, status: missing, reviewed_at: null }
-      ko-KR: { path: docs/design/procurement-design.kr.md, status: missing, reviewed_at: null }
+      en-US: { path: docs/design/procurement-design.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/design/procurement-design.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/design/procurement-design.kr.md, status: present-unverified, reviewed_at: null }
   - id: asset-design
     type: design
     module: asset
@@ -173,9 +184,9 @@ documents:
     source_sha256: bba9461126d85d919c83fa80fe235987a9e911740bebb5faf0ad5aa144bb6261
     dependencies: [schema, api, permissions, workflow, procurement-events]
     translations:
-      en-US: { path: docs/design/asset-design.en.md, status: missing, reviewed_at: null }
-      ja-JP: { path: docs/design/asset-design.jp.md, status: missing, reviewed_at: null }
-      ko-KR: { path: docs/design/asset-design.kr.md, status: missing, reviewed_at: null }
+      en-US: { path: docs/design/asset-design.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/design/asset-design.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/design/asset-design.kr.md, status: present-unverified, reviewed_at: null }
   - id: full-functional-audit
     type: audit
     module: all
@@ -184,9 +195,9 @@ documents:
     source_sha256: d2c3242f9cf881b7a5f5d7f8ea58d72d43ec9d9ac9c603ba41bbbf5cd4008708
     dependencies: [code, api, permissions, screenshots]
     translations:
-      en-US: { path: docs/full-functional-audit-2026-08-14.en.md, status: missing, reviewed_at: null }
-      ja-JP: { path: docs/full-functional-audit-2026-08-14.jp.md, status: missing, reviewed_at: null }
-      ko-KR: { path: docs/full-functional-audit-2026-08-14.kr.md, status: missing, reviewed_at: null }
+      en-US: { path: docs/full-functional-audit-2026-08-14.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/full-functional-audit-2026-08-14.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/full-functional-audit-2026-08-14.kr.md, status: present-unverified, reviewed_at: null }
   - id: full-functional-audit-remediation
     type: audit
     module: all
@@ -195,9 +206,9 @@ documents:
     source_sha256: cdc31c14329cfb21a2be93e57708209bd3a447a1b82cde06190c67f747c393d2
     dependencies: [code, test-evidence]
     translations:
-      en-US: { path: docs/full-functional-audit-remediation-2026-08-17.en.md, status: missing, reviewed_at: null }
-      ja-JP: { path: docs/full-functional-audit-remediation-2026-08-17.jp.md, status: missing, reviewed_at: null }
-      ko-KR: { path: docs/full-functional-audit-remediation-2026-08-17.kr.md, status: missing, reviewed_at: null }
+      en-US: { path: docs/full-functional-audit-remediation-2026-08-17.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/full-functional-audit-remediation-2026-08-17.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/full-functional-audit-remediation-2026-08-17.kr.md, status: present-unverified, reviewed_at: null }
   - id: scaffold-upgrade-plan
     type: roadmap
     module: scaffold
@@ -206,20 +217,20 @@ documents:
     source_sha256: 281cf5c5e6e90935d203ae0ca3c0189dbf8d2a58ec6f106866c99f31d337923b
     dependencies: [all-work-packages]
     translations:
-      en-US: { path: docs/scaffold-upgrade-plan.en.md, status: missing, reviewed_at: null }
-      ja-JP: { path: docs/scaffold-upgrade-plan.jp.md, status: missing, reviewed_at: null }
-      ko-KR: { path: docs/scaffold-upgrade-plan.kr.md, status: missing, reviewed_at: null }
+      en-US: { path: docs/scaffold-upgrade-plan.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/scaffold-upgrade-plan.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/scaffold-upgrade-plan.kr.md, status: present-unverified, reviewed_at: null }
   - id: scaffold-upgrade-implementation-plan
     type: implementation-plan
     module: scaffold
     owner: architecture
     source: docs/scaffold-upgrade-implementation-plan.md
-    source_sha256: d30dda0d924e648a94e6f00a9511e23dc04b7217bd2db076cc150f682a1b0123
+    source_sha256: 1bbdc39b6c2bc700fec2ec65ac12c41e271a9e7c781a2831096bc789f60198ba
     dependencies: [all-work-packages, gates, evidence]
     translations:
-      en-US: { path: docs/scaffold-upgrade-implementation-plan.en.md, status: missing, reviewed_at: null }
-      ja-JP: { path: docs/scaffold-upgrade-implementation-plan.jp.md, status: missing, reviewed_at: null }
-      ko-KR: { path: docs/scaffold-upgrade-implementation-plan.kr.md, status: missing, reviewed_at: null }
+      en-US: { path: docs/scaffold-upgrade-implementation-plan.en.md, status: present-unverified, reviewed_at: null }
+      ja-JP: { path: docs/scaffold-upgrade-implementation-plan.jp.md, status: present-unverified, reviewed_at: null }
+      ko-KR: { path: docs/scaffold-upgrade-implementation-plan.kr.md, status: present-unverified, reviewed_at: null }
   - id: preset-quick-selection
     type: user-guide
     module: scaffold

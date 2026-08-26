@@ -2,7 +2,7 @@
 
 > Spring Boot 4 + Vue 3 ベースのマイクロサービススキャフォールドプラットフォーム。Harness 産業設計モデルを採用し、AI 支援開発のための業界ベストプラクティス基盤を提供します。
 >
-> **たった1コマンドでフルスタック起動：ミドルウェア + 5つのマイクロサービス + フロントエンド、合計12個の Docker コンテナ。**
+> **1コマンドでミドルウェア、データベースマイグレーター、8つのマイクロサービス、フロントエンドを起動。full モードは16個の Docker コンテナです。**
 
 **[中文](README.md)** | **[English](README.en.md)** | **[한국어](README.kr.md)**
 
@@ -10,17 +10,29 @@
 
 **連絡先メール**: wangbaohai1993@gmail.com
 
+## はじめに
+
+- [5分クイックスタート](docs/guides/quick-start.jp.md)で起動、ログイン、確認までを最短で実行できます。
+- [認証ガイド](docs/guides/authentication.jp.md)から権限、Workflow、Scheduling、CRM、SRM、`omni-procurement`、`omni-asset` の利用ガイドへ進めます。
+- プリセット、`create-service`、CRUD 生成、軽量モードは[スキャフォールド開発ガイド](docs/guides/scaffold-development.jp.md)を参照してください。保守対象 CLI は `tools/omni-cli` にあります。
+- スキーマは `omni-db-migrator` と `database/changelog/` で管理し、`scripts/sql/seed` には冪等なシードデータだけを置きます。
+- ローカル可観測性と本番セキュリティ境界は [docs/observability.jp.md](docs/observability.jp.md) と[運用・アップグレードガイド](docs/guides/operations-upgrade.jp.md)を参照してください。
+- [日本語スクリーンショット索引](docs/images/ja-JP/auth-login.png)は文書専用 Playwright から生成され、各ガイドに操作者、前提、手順、期待結果を記載します。
+
+企業管理画面、テナント対応データアプリ、Workflow・CRM・サプライチェーンを必要とするマイクロサービスに適しています。ノーコード基盤ではなく、ドメイン設計、本番 Secret 管理、容量設計、リリース承認を代替しません。
+
 ---
 
 ## 主な特徴
 
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 フルスタック最新技術
-- **Docker フルスタックワンクリックデプロイ**：`start.bat` / `./start.sh` 1コマンドで12コンテナ起動（MySQL、Redis、Nacos、RocketMQ、XXL-JOB、4つのバックエンドマイクロサービス、フロントエンド）、詳しくは [Docker デプロイガイド](docs/docker-deployment.jp.md)
+- **オンデマンド開発とワンクリックデプロイ**：Omni CLI は core/workflow/crm/supply-chain/full の最小依存関係を起動し、`start.bat` / `./start.sh` は既定で16コンテナの full モードを起動します。
 - **CRM プリセールス閉ループ**：独立 `omni-crm` サービスがリード、顧客、連絡先、商談、フォローアップ、変換、ダッシュボードをカバー — テナント、RBAC、データスコープ、XSS、監査、Outbox の機能を再利用
 - **SRM サプライヤーライフサイクル**：独立 `omni-srm` サービスがサプライヤー准入、審査、等級付け、パフォーマンス評価、リスク管理、ポータルセルフサービス、サプライヤー 360 をカバー — 詳しくは [docs/srm.jp.md](docs/srm.jp.md)
 - **マルチプロバイダーソーシャルログイン**：GitHub + Google + Gitee OAuth2 ワンクリックログイン（戦略パターンで拡張可能）、初回ログイン時に自動登録
 - **3層 XSS 縦深防御**：Jackson デシリアライザー + Servlet Filter + Gateway セキュリティレスポンスヘッダー、テナント別設定、フロントエンド管理画面も完備
-- **Common Starter エコシステム**：8つの自動設定モジュール（mybatis / redis / operlog / job / mqlog / workflow）、新しいサービスは依存関係を追加するだけで機能が使える、設定ゼロ
+- **Common Starter エコシステム**：Servlet 組み合わせ Starter `omni-common-service` を含む10モジュール。必要なセキュリティコンテキストがない場合は安全側で拒否します。
+- **任意のフルスタック可観測性**：OpenTelemetry、Prometheus、Pushgateway、Grafana、Tempo、Loki、Alloy は既定で無効です。詳しくは [docs/observability.jp.md](docs/observability.jp.md) を参照してください。
 - **デュアルトラック定期タスク**：XXL-JOB 3.3.1 システムタスク + ユーザータスクのデュアルモード、フロントエンド Cron エディター + 実行ログのリアルタイムプッシュ、詳しくは [docs/scheduling.jp.md](docs/scheduling.jp.md)
 - **Transactional Outbox 信頼性メッセージ**：ローカルアウトボックス + XXL-JOB リレー + 指数バックオフリトライ + デッドレター管理、詳しくは [docs/mq-reliability.jp.md](docs/mq-reliability.jp.md)
 - **ビジュアル BPMN ワークフロー**：Flowable 7.x エンジン、フロントエンドのドラッグ&ドロップモデリング + デュアルバージョン管理 + マルチインスタンス会籤 + 動的候補者解決、詳しくは [docs/workflow.jp.md](docs/workflow.jp.md)
@@ -91,7 +103,9 @@ Omni-Stack/
 ├── AGENTS.md                           # AI 実行マニュアル（ハード制約 + ビルドコマンド + チェックリスト）
 ├── start.bat / start.sh                # Docker フルスタックワンクリック起動スクリプト
 ├── stop.bat / stop.sh                  # ワンクリック停止スクリプト
-├── docker-compose.yml                  # 12コンテナ フルスタックオーケストレーション
+├── compose.yaml                        # Compose 統一エントリ
+├── compose.infra.yaml / compose.apps.yaml
+├── compose.observability.yaml          # 任意のローカル可観測性スタック
 ├── docker/
 │   ├── backend/Dockerfile              # バックエンド マルチステージビルド（Maven コンパイル + JRE 実行）
 │   ├── frontend/Dockerfile             # フロントエンド マルチステージビルド（npm ビルド + Nginx）
@@ -110,7 +124,8 @@ Omni-Stack/
 │   ├── srm.md                          #   SRM サプライヤー関係管理 システムトゥルース（Harness ドキュメント）
 │   ├── design/srm-design.md            #   SRM MVP 設計および実装ベースライン
 │   └── docker-deployment.md            #   Docker フルスタックデプロイ 詳細ガイド
-├── scripts/sql/                        # データベース初期化スクリプト
+├── database/changelog/                 # Liquibase 構造履歴とベンダースキーマ
+├── scripts/sql/seed/                   # 冪等なシードデータのみ
 │   ├── init-all.sql                    #   権威 DDL + シードデータ
 │   ├── init-nacos.sql                  #   Nacos MySQL 永続化
 │   └── init-xxl-job.sql               #   XXL-JOB データベース
@@ -124,33 +139,37 @@ Omni-Stack/
 │   ├── omni-common-job/                #   定期タスク Starter
 │   ├── omni-common-mqlog/              #   MQ メッセージ信頼性 Starter
 │   ├── omni-common-workflow/           #   ワークフロー Starter
+│   ├── omni-common-service/            #   Servlet ビジネスサービス組み合わせ Starter
 │   ├── omni-auth/                      #   認証サービス (8100)
 │   ├── omni-base/                      #   基礎データサービス (8101)
 │   ├── omni-workflow/                  #   ワークフローエンジンサービス (8103)
 │   ├── omni-crm/                       #   CRM プリセールス閉ループサービス (8104)
 │   ├── omni-srm/                       #   SRM サプライヤー関係管理サービス (8105)
+│   ├── omni-procurement/               #   Procurement 実行サービス (8106)
+│   ├── omni-asset/                     #   Asset ライフサイクルサービス (8107)
 │   └── omni-gateway/                   #   API ゲートウェイ (8102)
 └── omni-frontend/                      # Vue 3 SPA (3000)
 ```
 
 ## Docker ワンクリックデプロイ（推奨）
 
-1コマンドで全コンテナを起動：ミドルウェア（MySQL、Redis、Nacos、RocketMQ、XXL-JOB）+ 6つのバックエンドマイクロサービス + フロントエンド。
+full モードはミドルウェア、`omni-db-migrator`、8つのバックエンドマイクロサービス、フロントエンドを起動します。プリセットは検証済みの小さい依存関係だけを起動できます。
 
 ### 前提条件
 
 | ソフトウェア | バージョン要件 | 説明 |
 |------|---------|------|
 | Docker Desktop | 任意の安定版 | Windows は WSL2 バックエンドが必要 |
+| Node.js | >= 22.12.0 | Omni CLI と起動スクリプトを実行 |
 | Git | 任意 | プロジェクトのクローン |
 
-> JDK、Node.js、Maven のインストールは不要です。すべて Docker コンテナ内でビルド・実行されます。
+> コンテナ起動にローカル JDK/Maven は不要ですが、Omni CLI には Node.js が必要です。
 
 ### 起動
 
 | プラットフォーム | コマンド |
 |------|------|
-| Windows | `start.bat` を右クリック → **管理者として実行** |
+| Windows | `start.bat`（管理者権限は不要） |
 | Linux / macOS | `./start.sh` |
 
 スクリプトが自動で実行：Docker 検出 → Docker エンジン起動（未起動の場合）→ ポート保護（Windows Hyper-V/WSL2）→ ミドルウェアイメージのプル → アプリケーションイメージのビルド → 全コンテナ起動。
@@ -159,8 +178,12 @@ Omni-Stack/
 # 全サービスを起動
 ./start.sh
 
-# 指定サービスのみ起動（例：ミドルウェアのみ）
-./start.sh mysql redis
+# 検証済みの CRM 最小構成を起動
+./start.sh crm
+
+# 同等の CLI と任意の可観測性
+npm --prefix tools/omni-cli run dev -- dev up --preset crm --build
+npm --prefix tools/omni-cli run dev -- dev up --preset full --observability
 
 # サービス状態を確認
 docker compose ps
@@ -210,7 +233,7 @@ docker compose ps
 | 問題 | 原因 | 解決策 |
 |------|------|---------|
 | イメージのプルに失敗 | 国内ネットワークの問題 | Docker ミラーを設定：`"registry-mirrors": ["https://docker.1ms.run"]` |
-| ポートバインドに失敗 (Windows) | Hyper-V/WSL2 のポート予約と競合 | `start.bat` がポート保護を自動処理、管理者権限で実行が必要 |
+| ポートバインドに失敗 | 他のプロセスまたは Compose プロジェクトが使用中 | `dev status` で競合を確認して停止。管理者権限は不要 |
 | RocketMQ ポート 9876 の競合 | Windows Hyper-V の予約ポート範囲 | ホストマッピングを 19876 に変更済み、コンテナ内は 9876 のまま |
 | 502 Bad Gateway | Nginx リバースプロキシのポート設定ミス | nginx.conf の proxy_pass にコンテナ内部ポート `8080` を使用しているか確認（ホストポート `8102` ではない） |
 | Nacos の起動に失敗 | ヘルスチェックエンドポイントの変更 | Nacos v3.1.1 は `GET /nacos/` を使用（`/nacos/actuator/health` ではない） |
@@ -233,8 +256,8 @@ docker compose ps
 ### 手順
 
 ```bash
-# 1. ミドルウェアを起動（ミドルウェアのみ、アプリケーションコンテナは起動しない）
-./start.sh mysql redis nacos rocketmq-namesrv rocketmq-broker xxl-job-admin
+# 1. 対象モジュールと最小依存関係を起動（CRM の例）
+npm --prefix tools/omni-cli run dev -- dev up --module crm
 
 # Nacos の準備を待つ（約30秒）、http://localhost:8080 で確認
 
@@ -371,7 +394,7 @@ SRM モジュールはサプライヤーの全ライフサイクルをカバー�
 | omni-srm | 8105 | SRM：サプライヤー基本データ、准入、評価、リスク、ポータル、サプライヤー 360 | [srm.jp.md](docs/srm.jp.md) |
 | omni-gateway | 8102 | API ゲートウェイ：ルーティング転送、JWT 検証、CORS、セキュリティレスポンスヘッダー | [architecture.jp.md](docs/architecture.jp.md) |
 
-### Common Starter エコシステム（8モジュール）
+### Common Starter エコシステム（10モジュール）
 
 新しいマイクロサービスは依存関係を追加するだけで機能が使えます。`AutoConfiguration.imports` によるゼロ設定自動構成：
 
@@ -386,6 +409,7 @@ SRM モジュールはサプライヤーの全ライフサイクルをカバー�
 | `omni-common-job` | 定期タスク：XXL-JOB 自動構成 + @SystemJobMeta デュアルアノテーションドリブン | ビジネスサービス |
 | `omni-common-mqlog` | 信頼性メッセージ：Transactional Outbox + リレー配信 + デッドレター管理 | Servlet サービス |
 | `omni-common-workflow` | ワークフロー：Flowable 自動構成 + ApprovalService SPI | ワークフローサービス |
+| `omni-common-service` | Servlet 共通 Web・DB・Redis・セキュリティ・可観測性の組み合わせ | ビジネスサービス |
 
 > 詳細な設計は [docs/backend-patterns.jp.md](docs/backend-patterns.jp.md) と [docs/architecture.jp.md](docs/architecture.jp.md) を参照
 
@@ -431,7 +455,7 @@ cd omni-frontend && npm run build && npm run lint  # フロントエンドビル
 | Maven クラスバージョンエラー | JAVA_HOME が JDK 25 を指していない | `JAVA_HOME` を JDK 25 のディレクトリに設定 |
 | Redis Starter の混用 | ブロッキング式が WebFlux サービスに導入される | Gateway は `omni-common-redis-reactive` のみ使用可能 |
 | Docker 502 エラー | Nginx proxy_pass のポート設定ミス | コンテナ間通信は内部ポート `8080` を使用、ホストマッピングポートではない |
-| Docker ポート競合 | Hyper-V/WSL2 の予約ポート | `start.bat` が自動処理、管理者権限での実行が必要 |
+| Docker ポート競合 | 他のプロセスまたは Compose プロジェクトが使用中 | `dev status` で競合を確認して停止。管理者権限は不要 |
 | Nacos ヘルスチェック失敗 | v3.1.1 のエンドポイント変更 | `GET /nacos/` を使用、`/nacos/actuator/health` ではない |
 | フロントエンドの型不一致 | `ApiResponse` が複数箇所で定義 | `@/types/api` からのみインポート |
 | Stream コンシューマー OFFLINE | function.definition のネームスペースエラー | `spring.cloud.function` 配下に配置、`spring.cloud.stream.function` ではない |

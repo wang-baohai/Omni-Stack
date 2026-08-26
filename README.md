@@ -10,6 +10,17 @@
 
 **联系邮箱**: wangbaohai1993@gmail.com
 
+## 第一次使用
+
+- [五分钟快速启动](docs/guides/quick-start.md)提供最短启动、登录和验证路径。
+- [功能指南目录](docs/guides/authentication.md)从认证开始，继续覆盖权限、Workflow、Scheduling、CRM、SRM、Procurement 与 Asset。
+- 项目裁剪、`create-service`、CRUD 生成和轻量模式见[脚手架开发指南](docs/guides/scaffold-development.md)，入口为 `tools/omni-cli`。
+- 数据结构由 `omni-db-migrator` 和 `database/changelog/` 管理；`scripts/sql/seed` 只保留幂等种子数据，升级前必须备份，失败时使用兼容窗口和前向修复。
+- 本地可观测性与生产安全边界见 [docs/observability.md](docs/observability.md) 和[运维升级指南](docs/guides/operations-upgrade.md)。
+- [中文流程截图索引](docs/images/zh-CN/auth-login.png)由文档专用 Playwright 用例生成；各模块指南按操作者、前置条件、步骤和预期结果引用正式图片。
+
+适用场景：企业后台、带租户和权限的数据管理系统、需要 Workflow/CRM/供应链能力的微服务项目。非目标：它不是无代码平台，也不会替代领域建模、生产 Secret 管理、容量规划和人工发布审批。
+
 ---
 
 ## 特性亮点
@@ -274,8 +285,8 @@ docker compose ps
 ### 步骤
 
 ```bash
-# 1. 启动中间件（仅中间件，不启动应用容器）
-./start.sh mysql redis nacos rocketmq-namesrv rocketmq-broker xxl-job-admin
+# 1. 启动当前模块及其最小依赖闭包（示例：CRM）
+npm --prefix tools/omni-cli run dev -- dev up --module crm
 
 # 等待 Nacos 就绪（约 30 秒），访问 http://localhost:8080 确认
 
@@ -478,7 +489,7 @@ cd omni-frontend && npm run build && npm run lint  # 前端构建 + Lint
 | Maven class version 错误 | JAVA_HOME 未指向 JDK 25 | 设置 `JAVA_HOME` 到 JDK 25 目录 |
 | Redis Starter 混用 | 阻塞式引入 WebFlux 服务 | Gateway 只能用 `omni-common-redis-reactive` |
 | Docker 502 错误 | Nginx proxy_pass 端口错误 | 容器间通信用内部端口 `8080`，非宿主机映射端口 |
-| Docker 端口冲突 | Hyper-V/WSL2 保留端口 | `start.bat` 自动处理，需管理员权限运行 |
+| Docker 端口冲突 | 端口已被其他程序或 Compose 项目占用 | 用 `dev status` 定位并停止冲突项目；启动脚本无需管理员权限 |
 | Nacos 健康检查失败 | v3.1.1 端点变更 | 使用 `GET /nacos/`，非 `/nacos/actuator/health` |
 | 前端类型不匹配 | `ApiResponse` 多处定义 | 只从 `@/types/api` 导入 |
 | Stream 消费者 OFFLINE | function.definition 命名空间错误 | 放在 `spring.cloud.function` 下，非 `spring.cloud.stream.function` |

@@ -22,6 +22,7 @@
     "docs:links:check": "node scripts/docs-quality.mjs --scope=links",
     "docs:i18n:check": "node scripts/docs-quality.mjs --scope=i18n",
     "docs:screenshots:check": "node scripts/docs-quality.mjs --scope=screenshots",
+    "docs:readme:check": "node scripts/docs-quality.mjs --scope=readme",
     "docs:quality": "node scripts/docs-quality.mjs",
     "dev": "tsx src/cli.ts"
   },

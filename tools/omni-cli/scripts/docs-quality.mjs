@@ -162,11 +162,42 @@ function checkSensitiveContent() {
   }
 }
 
+function checkReadmes() {
+  const readmes = ['README.md', 'README.en.md', 'README.jp.md', 'README.kr.md']
+  const requiredFacts = [
+    'Spring Boot 4.0.6',
+    'omni-common-service',
+    'omni-db-migrator',
+    'omni-procurement',
+    'omni-asset',
+    '8107',
+    'tools/omni-cli',
+    'docs/guides/quick-start',
+    'docs/observability',
+    'scripts/sql/seed',
+  ]
+  const retiredFacts = [
+    { label: '旧 Compose 单文件名', pattern: /docker-compose\.yml/ },
+    { label: '旧 Common 模块数量', pattern: /Common[^\n]{0,30}(?:8 Modules|8 modules|8モジュール|8개 모듈)/i },
+    { label: '旧 12 容器描述', pattern: /12 (?:Docker )?containers/i },
+  ]
+  for (const relativePath of readmes) {
+    const content = read(relativePath)
+    for (const fact of requiredFacts) {
+      if (!content.includes(fact)) fail(`${relativePath}: 缺少当前事实：${fact}`)
+    }
+    for (const retired of retiredFacts) {
+      if (retired.pattern.test(content)) fail(`${relativePath}: 仍包含${retired.label}`)
+    }
+  }
+}
+
 const scopes = {
   links: checkLinks,
   i18n: checkTranslations,
   screenshots: checkScreenshots,
   sensitive: checkSensitiveContent,
+  readme: checkReadmes,
 }
 
 if (selectedScope === 'all') {
