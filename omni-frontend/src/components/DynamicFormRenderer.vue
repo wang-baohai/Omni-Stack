@@ -69,7 +69,7 @@ const fieldList = computed<SchemaField[]>(() => {
       options = config.enum.map((v: string) => ({ value: v, label: v }))
     }
     // enum 字段自动映射为 select 类型
-    const type: DynamicFieldType = config.enum && options.length > 0 && !config.type
+    const type: DynamicFieldType = config.enum && options.length > 0
       ? 'select'
       : (config.type || 'string')
 

@@ -6,7 +6,13 @@ import globals from 'globals'
 
 export default [
   {
-    ignores: ['dist/**', 'dist-ssr/**', 'node_modules/**'],
+    ignores: [
+      'dist/**',
+      'dist-ssr/**',
+      'node_modules/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

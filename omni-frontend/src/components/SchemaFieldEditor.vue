@@ -169,7 +169,7 @@ function parseSchema(val: string | null) {
       if (options.length === 0 && Array.isArray(config.enum)) {
         options = config.enum.map((v: string) => ({ value: v, label: v }))
       }
-      const type: DynamicFieldType = config.enum && options.length > 0 && !config.type
+      const type: DynamicFieldType = config.enum && options.length > 0
         ? 'select'
         : (config.type || 'string')
 
