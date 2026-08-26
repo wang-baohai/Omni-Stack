@@ -95,8 +95,8 @@ async function loadData() {
     const response = (error as { response?: { headers?: Record<string, string> } }).response
     const traceId = response?.headers?.['x-trace-id']
     loadError.value = traceId
-      ? `消息聚合服务加载失败，请重试。追踪号：${traceId}`
-      : '消息聚合服务加载失败，请检查相关业务服务后重试。'
+      ? t('mqMessage.loadFailedWithTrace', { traceId })
+      : t('mqMessage.loadFailed')
   } finally {
     loading.value = false
   }

@@ -28,6 +28,17 @@ export default {
   },
   lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '언어 전환' },
   theme: { ...enUS.theme, toggle: '테마 전환' },
+  dashboardPage: {
+    ...enUS.dashboardPage,
+    metricsUnavailable: '운영 메트릭이 통합 Metrics 데이터 원본에 아직 연결되지 않았습니다',
+    metricsDescription: '사용자 수, 호출량과 오류율은 모의 값을 표시하지 않습니다. 권한이 있는 업무 개요에서 실제 통계를 확인하세요.',
+    welcome: '환영합니다', ready: 'Omni-Stack 마이크로서비스 관리 플랫폼이 준비되었습니다.', backend: '백엔드', frontend: '프런트엔드', coreServices: '핵심 서비스', infrastructure: '인프라', serviceCalls: '서비스 호출', reliableMessaging: '신뢰성 메시징',
+  },
+  mqMessage: {
+    ...enUS.mqMessage,
+    loadFailedWithTrace: '메시지 집계 서비스를 불러오지 못했습니다. 다시 시도하세요. 추적 ID: {traceId}',
+    loadFailed: '메시지 집계 서비스를 불러오지 못했습니다. 관련 업무 서비스를 확인한 뒤 다시 시도하세요.',
+  },
   login: {
     ...enUS.login,
     title: '인증 센터', username: '사용자 이름', password: '비밀번호', captcha: '보안 문자',

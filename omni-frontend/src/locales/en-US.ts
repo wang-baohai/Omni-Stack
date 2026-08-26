@@ -456,6 +456,8 @@ export default {
     deliveryDisabledDescription: 'Business transactions still write to the Outbox, but messages are not sent to MQ. Start full or supply-chain mode before resending.',
     confirmResend: 'Are you sure to resend this message?',
     confirmSkip: 'Are you sure to skip this message? This action cannot be undone.',
+    loadFailedWithTrace: 'The message aggregation service could not be loaded. Retry. Trace ID: {traceId}',
+    loadFailed: 'The message aggregation service could not be loaded. Check the related business services and retry.',
   },
   // ===== userJobType — job type management module =====
   userJobType: {
@@ -889,6 +891,11 @@ export default {
       uncertainResult: 'The result could not be confirmed. Retry unchanged or refresh the quotation status.',
       requestResolved: 'Server quotation status refreshed. You can continue from the latest version.',
     },
+  },
+  dashboardPage: {
+    metricsUnavailable: 'Operational metrics are not yet connected to a unified Metrics source',
+    metricsDescription: 'User counts, request volume, and error rates no longer show simulated values. Open an authorized business overview for real statistics.',
+    welcome: 'Welcome', ready: 'The Omni-Stack microservice management platform is ready.', backend: 'Backend', frontend: 'Frontend', coreServices: 'Core Services', infrastructure: 'Infrastructure', serviceCalls: 'Service Calls', reliableMessaging: 'Reliable Messaging',
   },
   crmOverviewPage: {
     description: 'Focus on lead conversion, the sales funnel, and follow-ups requiring immediate action.',

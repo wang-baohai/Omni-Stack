@@ -31,6 +31,17 @@ export default {
   },
   lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '言語を切り替える' },
   theme: { ...enUS.theme, toggle: 'テーマを切り替える' },
+  dashboardPage: {
+    ...enUS.dashboardPage,
+    metricsUnavailable: '運用メトリクスは統合 Metrics データソースに未接続です',
+    metricsDescription: '利用者数、呼出量、エラー率に模擬値は表示しません。権限のある各業務概要で実データを確認してください。',
+    welcome: 'ようこそ', ready: 'Omni-Stack マイクロサービス管理基盤の準備が完了しました。', backend: 'バックエンド', frontend: 'フロントエンド', coreServices: '主要サービス', infrastructure: 'インフラストラクチャ', serviceCalls: 'サービス呼出', reliableMessaging: '信頼性メッセージング',
+  },
+  mqMessage: {
+    ...enUS.mqMessage,
+    loadFailedWithTrace: 'メッセージ集約サービスを読み込めません。再試行してください。トレース ID：{traceId}',
+    loadFailed: 'メッセージ集約サービスを読み込めません。関連サービスを確認して再試行してください。',
+  },
   login: {
     ...enUS.login,
     title: '認証センター', username: 'ユーザー名', password: 'パスワード', captcha: '認証コード',

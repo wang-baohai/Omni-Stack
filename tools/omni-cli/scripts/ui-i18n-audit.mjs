@@ -18,7 +18,11 @@ function stripComments(content) {
 }
 
 function countTemplateFindings(source) {
-  const template = source.match(/<template(?:\s[^>]*)?>([\s\S]*?)<\/template>/)?.[1] || ''
+  const opening = /<template(?:\s[^>]*)?>/.exec(source)
+  const closingIndex = source.lastIndexOf('</template>')
+  const template = opening && closingIndex > opening.index
+    ? source.slice(opening.index + opening[0].length, closingIndex)
+    : ''
   return stripComments(template)
     .split(/\r?\n/)
     .filter((line) => hanPattern.test(line))

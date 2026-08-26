@@ -492,6 +492,8 @@ export default {
     deliveryDisabledDescription: '业务事务仍会写入 Outbox，但消息不会发送到 MQ；请启动 full 或 supply-chain 模式后再执行重发。',
     confirmResend: '确认重发该消息？',
     confirmSkip: '确认忽略该消息？此操作不可撤销。',
+    loadFailedWithTrace: '消息聚合服务加载失败，请重试。追踪号：{traceId}',
+    loadFailed: '消息聚合服务加载失败，请检查相关业务服务后重试。',
   },
   // ===== userJobType — 任务类型管理模块 =====
   userJobType: {
@@ -925,6 +927,11 @@ export default {
       uncertainResult: '未能确认提交结果。请保持当前内容并原样重试，或刷新报价状态。',
       requestResolved: '已刷新服务端报价状态，可以根据最新版本继续处理。',
     },
+  },
+  dashboardPage: {
+    metricsUnavailable: '运营指标尚未接入统一 Metrics 数据源',
+    metricsDescription: '用户数、调用量和错误率不再展示模拟值；请从各业务概览页查看有权访问的真实业务统计。',
+    welcome: '欢迎', ready: 'Omni-Stack 微服务管理平台已就绪。', backend: '后端', frontend: '前端', coreServices: '核心服务', infrastructure: '基础设施', serviceCalls: '服务调用', reliableMessaging: '可靠消息',
   },
   crmOverviewPage: {
     description: '聚焦线索转化、销售漏斗与需要立即处理的跟进事项',
