@@ -15,7 +15,9 @@
     "docs:screenshots:check": "node ../tools/omni-cli/scripts/docs-quality.mjs --scope=screenshots",
     "docs:links:check": "node ../tools/omni-cli/scripts/docs-quality.mjs --scope=links",
     "docs:i18n:check": "node ../tools/omni-cli/scripts/docs-quality.mjs --scope=i18n",
-    "docs:readme:check": "node ../tools/omni-cli/scripts/docs-quality.mjs --scope=readme"
+    "docs:readme:check": "node ../tools/omni-cli/scripts/docs-quality.mjs --scope=readme",
+    "ui:i18n:audit": "node ../tools/omni-cli/scripts/ui-i18n-audit.mjs",
+    "ui:i18n:check": "node ../tools/omni-cli/scripts/ui-i18n-audit.mjs --check"
   },
   "dependencies": {
     "axios": "^1.19.0",

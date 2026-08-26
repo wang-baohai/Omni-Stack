@@ -90,3 +90,6 @@ jobs:
       - name: Scan documentation for sensitive content
         working-directory: tools/omni-cli
         run: node scripts/docs-quality.mjs --scope=sensitive
+      - name: Prevent new hard-coded UI copy
+        working-directory: tools/omni-cli
+        run: npm run ui:i18n:check

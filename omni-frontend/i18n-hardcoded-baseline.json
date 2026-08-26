@@ -1,0 +1,284 @@
+{
+  "version": 1,
+  "purpose": "记录尚未迁移到 vue-i18n 的可见中文基线；最终目标为零。",
+  "generatedBy": "tools/omni-cli/scripts/ui-i18n-audit.mjs",
+  "total": 912,
+  "files": {
+    "src/api/request.ts": {
+      "template": 0,
+      "script": 6
+    },
+    "src/components/DynamicFormRenderer.vue": {
+      "template": 3,
+      "script": 0
+    },
+    "src/components/LanguageSelector.vue": {
+      "template": 0,
+      "script": 2
+    },
+    "src/components/LoginForm.vue": {
+      "template": 0,
+      "script": 4
+    },
+    "src/components/crm/ActivityTimeline.vue": {
+      "template": 3,
+      "script": 0
+    },
+    "src/components/crm/CustomerOverview.vue": {
+      "template": 17,
+      "script": 0
+    },
+    "src/components/crm/CustomerPicker.vue": {
+      "template": 1,
+      "script": 1
+    },
+    "src/components/crm/OpportunityStageBoard.vue": {
+      "template": 3,
+      "script": 0
+    },
+    "src/components/crm/OwnerSelector.vue": {
+      "template": 2,
+      "script": 1
+    },
+    "src/components/procurement/GoodsReceiptForm.vue": {
+      "template": 6,
+      "script": 11
+    },
+    "src/components/procurement/PurchaseOrderTracker.vue": {
+      "template": 20,
+      "script": 7
+    },
+    "src/components/procurement/RequisitionForm.vue": {
+      "template": 8,
+      "script": 19
+    },
+    "src/components/procurement/RfqCompareView.vue": {
+      "template": 4,
+      "script": 12
+    },
+    "src/components/srm/EvaluationScorecard.vue": {
+      "template": 4,
+      "script": 4
+    },
+    "src/components/srm/RiskDashboard.vue": {
+      "template": 5,
+      "script": 0
+    },
+    "src/components/srm/RiskIndicator.vue": {
+      "template": 0,
+      "script": 3
+    },
+    "src/components/srm/SupplierOverview.vue": {
+      "template": 18,
+      "script": 0
+    },
+    "src/components/srm/SupplierPicker.vue": {
+      "template": 6,
+      "script": 0
+    },
+    "src/components/srm/SupplierResourcesDrawer.vue": {
+      "template": 10,
+      "script": 34
+    },
+    "src/components/workflow/ApprovalRecordsDialog.vue": {
+      "template": 4,
+      "script": 5
+    },
+    "src/components/workflow/ModelDesigner.vue": {
+      "template": 1,
+      "script": 28
+    },
+    "src/components/workflow/ProcessProgressDialog.vue": {
+      "template": 7,
+      "script": 4
+    },
+    "src/components/workflow/panels/EndEventPanel.vue": {
+      "template": 2,
+      "script": 0
+    },
+    "src/components/workflow/panels/GatewayPanel.vue": {
+      "template": 6,
+      "script": 3
+    },
+    "src/components/workflow/panels/IntermediateThrowEventPanel.vue": {
+      "template": 2,
+      "script": 0
+    },
+    "src/components/workflow/panels/ParallelGatewayPanel.vue": {
+      "template": 2,
+      "script": 0
+    },
+    "src/components/workflow/panels/PropertyPanel.vue": {
+      "template": 3,
+      "script": 11
+    },
+    "src/components/workflow/panels/ServiceTaskPanel.vue": {
+      "template": 13,
+      "script": 8
+    },
+    "src/components/workflow/panels/StartEventPanel.vue": {
+      "template": 2,
+      "script": 0
+    },
+    "src/components/workflow/panels/UserTaskPanel.vue": {
+      "template": 4,
+      "script": 12
+    },
+    "src/composables/useBpmnModeler.ts": {
+      "template": 0,
+      "script": 2
+    },
+    "src/stores/permission.ts": {
+      "template": 0,
+      "script": 1
+    },
+    "src/views/asset/asset/index.vue": {
+      "template": 4,
+      "script": 31
+    },
+    "src/views/asset/disposal/index.vue": {
+      "template": 2,
+      "script": 16
+    },
+    "src/views/asset/overview/index.vue": {
+      "template": 9,
+      "script": 4
+    },
+    "src/views/asset/transfer/index.vue": {
+      "template": 2,
+      "script": 16
+    },
+    "src/views/base/mqmessage/index.vue": {
+      "template": 0,
+      "script": 2
+    },
+    "src/views/callback/index.vue": {
+      "template": 0,
+      "script": 8
+    },
+    "src/views/consent/index.vue": {
+      "template": 0,
+      "script": 1
+    },
+    "src/views/crm/activity/index.vue": {
+      "template": 1,
+      "script": 12
+    },
+    "src/views/crm/contact/index.vue": {
+      "template": 1,
+      "script": 6
+    },
+    "src/views/crm/customer/index.vue": {
+      "template": 1,
+      "script": 24
+    },
+    "src/views/crm/lead/index.vue": {
+      "template": 1,
+      "script": 37
+    },
+    "src/views/crm/opportunity/index.vue": {
+      "template": 1,
+      "script": 13
+    },
+    "src/views/crm/overview/index.vue": {
+      "template": 9,
+      "script": 0
+    },
+    "src/views/dashboard/index.vue": {
+      "template": 3,
+      "script": 0
+    },
+    "src/views/device/verify.vue": {
+      "template": 0,
+      "script": 1
+    },
+    "src/views/home/index.vue": {
+      "template": 0,
+      "script": 7
+    },
+    "src/views/oauth2-client/index.vue": {
+      "template": 2,
+      "script": 3
+    },
+    "src/views/portal-register/index.vue": {
+      "template": 0,
+      "script": 2
+    },
+    "src/views/procurement/goods-receipt/index.vue": {
+      "template": 3,
+      "script": 12
+    },
+    "src/views/procurement/material/index.vue": {
+      "template": 2,
+      "script": 17
+    },
+    "src/views/procurement/purchase-order/index.vue": {
+      "template": 3,
+      "script": 28
+    },
+    "src/views/procurement/requisition/index.vue": {
+      "template": 5,
+      "script": 17
+    },
+    "src/views/procurement/rfq/index.vue": {
+      "template": 3,
+      "script": 21
+    },
+    "src/views/register/index.vue": {
+      "template": 0,
+      "script": 5
+    },
+    "src/views/srm/evaluation/index.vue": {
+      "template": 7,
+      "script": 13
+    },
+    "src/views/srm/invite/index.vue": {
+      "template": 1,
+      "script": 9
+    },
+    "src/views/srm/overview/index.vue": {
+      "template": 2,
+      "script": 8
+    },
+    "src/views/srm/risk/config/index.vue": {
+      "template": 2,
+      "script": 23
+    },
+    "src/views/srm/risk/index.vue": {
+      "template": 6,
+      "script": 4
+    },
+    "src/views/srm/supplier/index.vue": {
+      "template": 1,
+      "script": 65
+    },
+    "src/views/supplier-portal/index.vue": {
+      "template": 0,
+      "script": 49
+    },
+    "src/views/system/user/index.vue": {
+      "template": 1,
+      "script": 6
+    },
+    "src/views/workflow/definition/index.vue": {
+      "template": 1,
+      "script": 7
+    },
+    "src/views/workflow/model/CreateModelDialog.vue": {
+      "template": 7,
+      "script": 6
+    },
+    "src/views/workflow/model/ValidateResultDialog.vue": {
+      "template": 4,
+      "script": 0
+    },
+    "src/views/workflow/model/VersionHistoryDialog.vue": {
+      "template": 3,
+      "script": 0
+    },
+    "src/views/workflow/model/index.vue": {
+      "template": 5,
+      "script": 13
+    }
+  }
+}

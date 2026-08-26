@@ -23,6 +23,8 @@
     "docs:i18n:check": "node scripts/docs-quality.mjs --scope=i18n",
     "docs:screenshots:check": "node scripts/docs-quality.mjs --scope=screenshots",
     "docs:readme:check": "node scripts/docs-quality.mjs --scope=readme",
+    "ui:i18n:audit": "node scripts/ui-i18n-audit.mjs",
+    "ui:i18n:check": "node scripts/ui-i18n-audit.mjs --check",
     "docs:quality": "node scripts/docs-quality.mjs",
     "dev": "tsx src/cli.ts"
   },

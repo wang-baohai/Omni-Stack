@@ -63,4 +63,18 @@ export default {
     title: 'サプライヤーポータル ログイン', subtitle: 'ログインして企業情報を管理します',
     noAccount: 'サプライヤーアカウントをお持ちでない場合', registerNow: '今すぐ登録',
   },
+  procurementOverviewPage: {
+    ...enUS.procurementOverviewPage,
+    title: '調達概要', description: '現在の利用者の調達データ範囲を厳守し、金額は通貨別に集計します。',
+    category: '品目カテゴリ', supplier: 'サプライヤー', department: '担当部門',
+    statusDraft: '下書き', statusSent: '送信済み', statusConfirmed: '確認済み', statusPartialReceived: '一部入荷', statusReceived: '入荷完了', statusClosed: '終了', statusCancelled: '取消済み',
+    pendingRequisitions: '承認中の購買申請', pendingRequisitionsHint: 'Workflow の承認完了待ち',
+    waitingQuotations: '見積回答待ち', waitingQuotationsHint: '見積期限内です',
+    activeOrders: '実行中の発注', activeOrdersHint: '送信済み、確認済み、または一部入荷',
+    draftReceipts: '確認待ちの入荷下書き', draftReceiptsHint: '確認後に発注数量へ反映されます',
+    orderStatus: '発注ステータス', currentDataScope: '現在のデータ範囲', noOrders: '発注はありません',
+    committedPurchases: '確認済み購買コミットメント', currencySeparated: '通貨別', noCommittedAmount: '確認済み購買金額はありません',
+    spendAnalysis: '支出分析', spendAggregation: '現在は{dimension}別です。異なる通貨は合算しません。',
+    codeOrId: 'コード / ID', currency: '通貨', committedAmount: '確認済みコミットメント金額',
+  },
 }

@@ -60,4 +60,18 @@ export default {
     title: '공급업체 포털 로그인', subtitle: '로그인하여 기업 정보를 관리하세요',
     noAccount: '공급업체 계정이 없으신가요?', registerNow: '지금 가입',
   },
+  procurementOverviewPage: {
+    ...enUS.procurementOverviewPage,
+    title: '조달 개요', description: '현재 사용자의 조달 데이터 범위를 준수하며 금액은 통화별로 집계합니다.',
+    category: '품목 분류', supplier: '공급업체', department: '담당 부서',
+    statusDraft: '초안', statusSent: '전송됨', statusConfirmed: '확인됨', statusPartialReceived: '일부 입고', statusReceived: '입고 완료', statusClosed: '종료됨', statusCancelled: '취소됨',
+    pendingRequisitions: '승인 중인 구매 요청', pendingRequisitionsHint: 'Workflow 승인 완료 대기',
+    waitingQuotations: '공급업체 견적 대기', waitingQuotationsHint: '견적 마감 전입니다',
+    activeOrders: '진행 중인 주문', activeOrdersHint: '전송, 확인 또는 일부 입고 상태',
+    draftReceipts: '확인 대기 입고 초안', draftReceiptsHint: '확인 후에 주문 수량에 반영됩니다',
+    orderStatus: '구매 주문 상태', currentDataScope: '현재 데이터 범위', noOrders: '구매 주문이 없습니다',
+    committedPurchases: '확인된 구매 약정', currencySeparated: '통화별 구분', noCommittedAmount: '확인된 구매 금액이 없습니다',
+    spendAnalysis: '지출 분석', spendAggregation: '현재 {dimension} 기준이며 서로 다른 통화는 합산하지 않습니다.',
+    codeOrId: '코드 / ID', currency: '통화', committedAmount: '확인된 약정 금액',
+  },
 }
