@@ -147,6 +147,10 @@ export default {
     title: '공급업체 포털 로그인', subtitle: '로그인하여 기업 정보를 관리하세요',
     noAccount: '공급업체 계정이 없으신가요?', registerNow: '지금 가입',
   },
+  assetTransfer: {
+    title: '자산 이동', workflowHint: '승인 작업은 Workflow 할 일에서 처리합니다. 승인 후 여기에서 실물 인계를 확인하세요.', initiate: '이동 시작', keywordPlaceholder: '이동 번호 또는 자산', transferNo: '이동 번호', fromUnit: '기존 부서', toUnit: '대상 부서', toUser: '대상 사용자', complete: '인계 완료', noPermission: '자산 이동 목록 조회 권한이 없습니다', createTitle: '자산 이동 시작', userSearch: '사용자 이름 또는 별명으로 검색', toLocation: '대상 위치', reason: '이동 사유', detailTitle: '이동 상세', previousStatus: '기존 상태', fromUserUnit: '기존 사용자 / 부서', toUserUnit: '대상 사용자 / 부서', location: '위치',
+    targetUserRequired: '대상 사용자를 선택하세요', targetUnitMissing: '대상 사용자에게 기본 부서가 없어 이동할 수 없습니다', reasonRequired: '이동 사유를 입력하세요', created: '이동 요청을 만들고 승인에 제출했습니다', completeHandover: '이동 인계 완료', cancelTransfer: '이동 취소',
+  },
   assetDisposal: {
     title: '자산 처분', warning: '처분 완료 후 자산은 되돌릴 수 없는 종료 상태가 됩니다. 승인 완료가 실물 처분 완료를 의미하지는 않습니다.', initiate: '처분 시작', keyword: '검색어', keywordPlaceholder: '처분 번호 또는 자산', type: '처분 유형', all: '전체', discard: '버림', scrap: '폐기', disposalNo: '처분 번호', assetNo: '자산 번호', assetName: '자산 이름', residualValue: '잔존 가치', details: '상세', complete: '처분 완료', retry: '재시도', noPermission: '처분 목록 조회 권한이 없습니다', createTitle: '자산 처분 시작', asset: '자산', assetSearch: '자산 번호 또는 이름으로 검색', residualPlaceholder: '선택 사항인 10진 문자열', method: '처분 방식', methodPlaceholder: '재활용, 기부, 폐기 등', reason: '처분 사유', submitApproval: '승인 제출', detailTitle: '처분 상세', processInstance: '프로세스 인스턴스', previousStatus: '기존 자산 상태',
     statusPending: '승인 대기', statusStartFailed: '시작 실패', statusApproved: '승인됨', statusRejected: '거부됨', statusCompleted: '완료됨', statusCancelled: '취소됨', assetRequired: '자산을 선택하세요', typeRequired: '처분 유형을 선택하세요', reasonRequired: '처분 사유를 입력하세요', residualInvalid: '잔존 가치는 정수 16자리와 소수 2자리 이내의 10진 문자열이어야 합니다', created: '처분 요청을 만들고 승인에 제출했습니다', confirmPhysical: '실물 처분 확인', cancelRequest: '처분 요청 취소', retryApproval: '승인 시작 재시도', actionConfirm: '{action} “{no}”을 실행할까요?', actionSuccess: '{action} 성공',

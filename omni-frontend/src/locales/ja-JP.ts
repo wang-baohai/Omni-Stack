@@ -153,6 +153,10 @@ export default {
     title: 'サプライヤーポータル ログイン', subtitle: 'ログインして企業情報を管理します',
     noAccount: 'サプライヤーアカウントをお持ちでない場合', registerNow: '今すぐ登録',
   },
+  assetTransfer: {
+    title: '資産移管', workflowHint: '承認操作は Workflow のタスクで行います。承認後、ここで実物の引き渡しを確認してください。', initiate: '移管を開始', keywordPlaceholder: '移管番号または資産', transferNo: '移管番号', fromUnit: '元の部門', toUnit: '移管先部門', toUser: '移管先利用者', complete: '引き渡し完了', noPermission: '資産移管一覧を表示する権限がありません', createTitle: '資産移管を開始', userSearch: 'ユーザー名または表示名で検索', toLocation: '移管先の場所', reason: '移管理由', detailTitle: '移管詳細', previousStatus: '元の状態', fromUserUnit: '元の利用者 / 部門', toUserUnit: '移管先利用者 / 部門', location: '場所',
+    targetUserRequired: '移管先利用者を選択してください', targetUnitMissing: '移管先利用者に主所属部門がないため移管できません', reasonRequired: '移管理由を入力してください', created: '移管申請を作成し承認に提出しました', completeHandover: '移管の引き渡しを完了', cancelTransfer: '移管を取り消す',
+  },
   assetDisposal: {
     title: '資産廃棄', warning: '廃棄完了後、資産は元に戻せない終了状態になります。承認完了は実物廃棄の完了を意味しません。', initiate: '廃棄を開始', keyword: 'キーワード', keywordPlaceholder: '廃棄番号または資産', type: '廃棄タイプ', all: 'すべて', discard: '廃棄', scrap: '除却', disposalNo: '廃棄番号', assetNo: '資産番号', assetName: '資産名', residualValue: '残存価額', details: '詳細', complete: '廃棄を完了', retry: '再試行', noPermission: '廃棄一覧を表示する権限がありません', createTitle: '資産廃棄を開始', asset: '資産', assetSearch: '資産番号または名称で検索', residualPlaceholder: '任意の10進数文字列', method: '廃棄方法', methodPlaceholder: 'リサイクル、寄付、破棄など', reason: '廃棄理由', submitApproval: '承認申請', detailTitle: '廃棄詳細', processInstance: 'プロセスインスタンス', previousStatus: '元の資産状態',
     statusPending: '承認待ち', statusStartFailed: '開始失敗', statusApproved: '承認済み', statusRejected: '否認済み', statusCompleted: '完了', statusCancelled: '取消済み', assetRequired: '資産を選択してください', typeRequired: '廃棄タイプを選択してください', reasonRequired: '廃棄理由を入力してください', residualInvalid: '残存価額は整数16桁、小数2桁までの10進数文字列で入力してください', created: '廃棄申請を作成し承認に提出しました', confirmPhysical: '実物廃棄を確認', cancelRequest: '廃棄申請を取り消す', retryApproval: '承認開始を再試行', actionConfirm: '{action}「{no}」を実行しますか？', actionSuccess: '{action}に成功しました',
