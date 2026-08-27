@@ -662,6 +662,13 @@ export default {
     departmentNumber: 'Department #{id}', noOpportunityStages: 'No opportunity stage data', customerNumber: 'Customer #{id}', moveStage: 'Move Stage',
     noActivityPermission: 'This account cannot view follow-up activities', noActivities: 'No follow-up activity records', userNumber: 'User #{id}',
   },
+  crmContact: {
+    create: 'Create Contact', edit: 'Edit Contact', keyword: 'Keyword', keywordPlaceholder: 'Name / mobile / email', customer: 'Customer', name: 'Name', department: 'Department', jobTitle: 'Job Title', mobile: 'Mobile', phone: 'Phone', email: 'Email', decisionRole: 'Decision Role', primaryContact: 'Primary Contact', primary: 'Primary', setPrimary: 'Set as Primary', owner: 'Owner',
+    nameRequired: 'Enter the contact name', deleteTitle: 'Confirm Delete', deleteConfirm: 'Delete contact “{name}”?', primaryUpdated: 'Primary contact updated',
+  },
+  crmCustomerOverview: {
+    noCustomer: 'No customer data', profile: 'Customer Profile', number: 'Customer Number', name: 'Customer Name', lastFollowup: 'Last Follow-up', nextFollowup: 'Next Follow-up', contacts: 'Contacts', noContactPermission: 'No permission to view contacts', openOpportunities: 'Open Opportunities', noOpportunityPermission: 'No permission to view opportunities', opportunityName: 'Opportunity Name', stage: 'Stage', amount: 'Amount', expectedClose: 'Expected Close', recentActivities: 'Recent Activities',
+  },
   validation: {
     usernameLength: 'Username must be 3-32 characters', passwordMin: 'Password must be at least 6 characters', emailFormat: 'Enter a valid email address',
   },
@@ -1130,6 +1137,16 @@ export default {
     high: 'High Risk',
     medium: 'Medium Risk',
     low: 'Low Risk',
+    topSuppliers: 'High-Risk Suppliers',
+    riskLevel: 'Risk Level',
+    redIndicatorCount: 'Red Indicators',
+  },
+  srmCommon: {
+    selectSupplier: 'Select Supplier', number: 'Number', name: 'Name', type: 'Type', level: 'Level', supplier: 'Supplier',
+  },
+  srmEvaluationCommon: {
+    strategic: 'Strategic', preferred: 'Preferred', qualified: 'Qualified', eliminated: 'Eliminated',
+    weight: 'Weight {value}%', bad: 'Bad', poor: 'Poor', average: 'Average', good: 'Good', excellent: 'Excellent', remarkOptional: 'Remark (optional)', weightedTotal: 'Weighted Total:',
   },
   assetOverviewPage: {
     status: 'Status', category: 'Category', department: 'Department', location: 'Location',

@@ -698,6 +698,13 @@ export default {
     departmentNumber: '部门 #{id}', noOpportunityStages: '暂无商机阶段数据', customerNumber: '客户 #{id}', moveStage: '迁移阶段',
     noActivityPermission: '当前账号没有跟进活动查看权限', noActivities: '暂无跟进记录', userNumber: '用户 #{id}',
   },
+  crmContact: {
+    create: '新建联系人', edit: '编辑联系人', keyword: '关键词', keywordPlaceholder: '姓名/手机/邮箱', customer: '所属客户', name: '姓名', department: '部门', jobTitle: '职位', mobile: '手机', phone: '电话', email: '邮箱', decisionRole: '决策角色', primaryContact: '主要联系人', primary: '主要', setPrimary: '设为主要', owner: '负责人',
+    nameRequired: '请输入联系人姓名', deleteTitle: '删除确认', deleteConfirm: '确认删除联系人“{name}”？', primaryUpdated: '主要联系人已更新',
+  },
+  crmCustomerOverview: {
+    noCustomer: '暂无客户数据', profile: '客户档案', number: '客户编号', name: '客户名称', lastFollowup: '最近跟进', nextFollowup: '下次跟进', contacts: '联系人', noContactPermission: '无联系人查看权限', openOpportunities: '开放商机', noOpportunityPermission: '无商机查看权限', opportunityName: '商机名称', stage: '阶段', amount: '金额', expectedClose: '预计成交', recentActivities: '最近活动',
+  },
   validation: {
     usernameLength: '用户名长度须为 3-32 个字符', passwordMin: '密码至少需要 6 个字符', emailFormat: '请输入正确的邮箱格式',
   },
@@ -1166,6 +1173,16 @@ export default {
     high: '高风险',
     medium: '中风险',
     low: '低风险',
+    topSuppliers: '高风险供应商',
+    riskLevel: '风险等级',
+    redIndicatorCount: '红色指标数',
+  },
+  srmCommon: {
+    selectSupplier: '选择供应商', number: '编号', name: '名称', type: '类型', level: '等级', supplier: '供应商',
+  },
+  srmEvaluationCommon: {
+    strategic: '战略级 STRATEGIC', preferred: '优选级 PREFERRED', qualified: '合格级 QUALIFIED', eliminated: '淘汰级 ELIMINATED',
+    weight: '权重 {value}%', bad: '差', poor: '较差', average: '一般', good: '良好', excellent: '优秀', remarkOptional: '备注（可选）', weightedTotal: '加权总分：',
   },
   assetOverviewPage: {
     status: '状态', category: '品类', department: '部门', location: '位置',

@@ -4,6 +4,7 @@
  * 客户、联系人、商机、活动分别按各自权限和接口加载，禁止复用客户权限读取跨聚合数据。
  */
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getCustomer, type CrmCustomer } from '@/api/crm-customer'
 import { listCustomerContacts, type CrmContact } from '@/api/crm-contact'
 import { listOpportunities, type CrmOpportunity } from '@/api/crm-opportunity'
@@ -15,6 +16,7 @@ const props = defineProps<{
 }>()
 
 const permissionStore = usePermissionStore()
+const { t, locale } = useI18n()
 const customer = ref<CrmCustomer | null>(null)
 const contacts = ref<CrmContact[]>([])
 const opportunities = ref<CrmOpportunity[]>([])
@@ -59,7 +61,7 @@ async function loadData() {
 }
 
 function money(value: number, currency = 'CNY') {
-  return new Intl.NumberFormat('zh-CN', { style: 'currency', currency }).format(value || 0)
+  return new Intl.NumberFormat(locale.value, { style: 'currency', currency }).format(value || 0)
 }
 
 watch(() => props.customerId, loadData, { immediate: true })
@@ -67,43 +69,43 @@ watch(() => props.customerId, loadData, { immediate: true })
 
 <template>
   <div v-loading="loading" class="customer-overview">
-    <el-empty v-if="!customer" description="暂无客户数据" />
+    <el-empty v-if="!customer" :description="t('crmCustomerOverview.noCustomer')" />
     <template v-else>
-      <el-descriptions title="客户档案" :column="2" border>
-        <el-descriptions-item label="客户编号">{{ customer.customerNo }}</el-descriptions-item>
-        <el-descriptions-item label="客户名称">{{ customer.name }}</el-descriptions-item>
-        <el-descriptions-item label="状态">{{ customer.status }}</el-descriptions-item>
-        <el-descriptions-item label="负责人">{{ customer.ownerName || `用户 #${customer.ownerUserId}` }}</el-descriptions-item>
-        <el-descriptions-item label="电话">{{ customer.phone || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="邮箱">{{ customer.email || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="最近跟进">{{ customer.lastActivityTime || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="下次跟进">{{ customer.nextFollowupTime || '-' }}</el-descriptions-item>
+      <el-descriptions :title="t('crmCustomerOverview.profile')" :column="2" border>
+        <el-descriptions-item :label="t('crmCustomerOverview.number')">{{ customer.customerNo }}</el-descriptions-item>
+        <el-descriptions-item :label="t('crmCustomerOverview.name')">{{ customer.name }}</el-descriptions-item>
+        <el-descriptions-item :label="t('common.status')">{{ customer.status }}</el-descriptions-item>
+        <el-descriptions-item :label="t('crmContact.owner')">{{ customer.ownerName || t('crmUi.userNumber', { id: customer.ownerUserId }) }}</el-descriptions-item>
+        <el-descriptions-item :label="t('crmContact.phone')">{{ customer.phone || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('crmContact.email')">{{ customer.email || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('crmCustomerOverview.lastFollowup')">{{ customer.lastActivityTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('crmCustomerOverview.nextFollowup')">{{ customer.nextFollowupTime || '-' }}</el-descriptions-item>
       </el-descriptions>
 
-      <el-divider content-position="left">联系人</el-divider>
-      <el-alert v-if="!canViewContacts" title="无联系人查看权限" type="info" :closable="false" />
+      <el-divider content-position="left">{{ t('crmCustomerOverview.contacts') }}</el-divider>
+      <el-alert v-if="!canViewContacts" :title="t('crmCustomerOverview.noContactPermission')" type="info" :closable="false" />
       <el-table v-else :data="contacts" size="small" border>
-        <el-table-column prop="name" label="姓名" />
-        <el-table-column prop="jobTitle" label="职务" />
-        <el-table-column prop="mobile" label="手机" />
-        <el-table-column label="主要联系人" width="100">
-          <template #default="{ row }"><el-tag v-if="row.primaryFlag === 1" type="success">是</el-tag></template>
+        <el-table-column prop="name" :label="t('crmContact.name')" />
+        <el-table-column prop="jobTitle" :label="t('crmContact.jobTitle')" />
+        <el-table-column prop="mobile" :label="t('crmContact.mobile')" />
+        <el-table-column :label="t('crmContact.primaryContact')" width="100">
+          <template #default="{ row }"><el-tag v-if="row.primaryFlag === 1" type="success">{{ t('common.yes') }}</el-tag></template>
         </el-table-column>
       </el-table>
 
-      <el-divider content-position="left">开放商机</el-divider>
-      <el-alert v-if="!canViewOpportunities" title="无商机查看权限" type="info" :closable="false" />
+      <el-divider content-position="left">{{ t('crmCustomerOverview.openOpportunities') }}</el-divider>
+      <el-alert v-if="!canViewOpportunities" :title="t('crmCustomerOverview.noOpportunityPermission')" type="info" :closable="false" />
       <el-table v-else :data="opportunities" size="small" border>
-        <el-table-column prop="name" label="商机名称" />
-        <el-table-column label="阶段"><template #default="{ row }">#{{ row.stageId }}</template></el-table-column>
-        <el-table-column label="金额" width="140">
+        <el-table-column prop="name" :label="t('crmCustomerOverview.opportunityName')" />
+        <el-table-column :label="t('crmCustomerOverview.stage')"><template #default="{ row }">#{{ row.stageId }}</template></el-table-column>
+        <el-table-column :label="t('crmCustomerOverview.amount')" width="140">
           <template #default="{ row }">{{ money(row.amount, row.currencyCode) }}</template>
         </el-table-column>
-        <el-table-column prop="expectedCloseDate" label="预计成交" width="120" />
+        <el-table-column prop="expectedCloseDate" :label="t('crmCustomerOverview.expectedClose')" width="120" />
       </el-table>
 
-      <el-divider content-position="left">最近活动</el-divider>
-      <el-alert v-if="!canViewActivities" title="无跟进活动查看权限" type="info" :closable="false" />
+      <el-divider content-position="left">{{ t('crmCustomerOverview.recentActivities') }}</el-divider>
+      <el-alert v-if="!canViewActivities" :title="t('crmUi.noActivityPermission')" type="info" :closable="false" />
       <el-timeline v-else-if="activities.length">
         <el-timeline-item
           v-for="activity in activities"
@@ -114,7 +116,7 @@ watch(() => props.customerId, loadData, { immediate: true })
           <p class="plain-content">{{ activity.content }}</p>
         </el-timeline-item>
       </el-timeline>
-      <el-empty v-else description="暂无活动" :image-size="70" />
+      <el-empty v-else :description="t('crmUi.noActivities')" :image-size="70" />
     </template>
   </div>
 </template>

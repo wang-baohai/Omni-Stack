@@ -2,12 +2,8 @@
   "version": 1,
   "purpose": "记录尚未迁移到 vue-i18n 的可见中文基线；最终目标为零。",
   "generatedBy": "tools/omni-cli/scripts/ui-i18n-audit.mjs",
-  "total": 1457,
+  "total": 1400,
   "files": {
-    "src/components/crm/CustomerOverview.vue": {
-      "template": 26,
-      "script": 0
-    },
     "src/components/procurement/GoodsReceiptForm.vue": {
       "template": 16,
       "script": 11
@@ -24,20 +20,8 @@
       "template": 28,
       "script": 12
     },
-    "src/components/srm/EvaluationScorecard.vue": {
-      "template": 4,
-      "script": 4
-    },
-    "src/components/srm/RiskDashboard.vue": {
-      "template": 7,
-      "script": 0
-    },
     "src/components/srm/SupplierOverview.vue": {
       "template": 42,
-      "script": 0
-    },
-    "src/components/srm/SupplierPicker.vue": {
-      "template": 6,
       "script": 0
     },
     "src/components/srm/SupplierResourcesDrawer.vue": {
@@ -59,10 +43,6 @@
     "src/views/crm/activity/index.vue": {
       "template": 7,
       "script": 12
-    },
-    "src/views/crm/contact/index.vue": {
-      "template": 4,
-      "script": 6
     },
     "src/views/crm/customer/index.vue": {
       "template": 6,

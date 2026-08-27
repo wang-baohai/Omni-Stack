@@ -74,6 +74,13 @@ export default {
     departmentNumber: '부서 #{id}', noOpportunityStages: '영업 기회 단계 데이터가 없습니다', customerNumber: '고객 #{id}', moveStage: '단계 이동',
     noActivityPermission: '이 계정은 후속 활동을 조회할 권한이 없습니다', noActivities: '후속 활동 기록이 없습니다', userNumber: '사용자 #{id}',
   },
+  crmContact: {
+    create: '연락처 추가', edit: '연락처 편집', keyword: '검색어', keywordPlaceholder: '이름 / 휴대전화 / 이메일', customer: '고객', name: '이름', department: '부서', jobTitle: '직책', mobile: '휴대전화', phone: '전화', email: '이메일', decisionRole: '의사결정 역할', primaryContact: '주 연락처', primary: '주 연락처', setPrimary: '주 연락처로 설정', owner: '담당자',
+    nameRequired: '연락처 이름을 입력하세요', deleteTitle: '삭제 확인', deleteConfirm: '연락처 “{name}”을 삭제할까요?', primaryUpdated: '주 연락처를 업데이트했습니다',
+  },
+  crmCustomerOverview: {
+    noCustomer: '고객 데이터가 없습니다', profile: '고객 프로필', number: '고객 번호', name: '고객 이름', lastFollowup: '최근 후속 활동', nextFollowup: '다음 후속 활동', contacts: '연락처', noContactPermission: '연락처 조회 권한이 없습니다', openOpportunities: '진행 중 영업 기회', noOpportunityPermission: '영업 기회 조회 권한이 없습니다', opportunityName: '영업 기회 이름', stage: '단계', amount: '금액', expectedClose: '예상 성사일', recentActivities: '최근 활동',
+  },
   validation: {
     usernameLength: '사용자 이름은 3~32자여야 합니다', passwordMin: '비밀번호는 6자 이상이어야 합니다', emailFormat: '올바른 이메일 주소를 입력하세요',
   },
@@ -159,6 +166,13 @@ export default {
     strategic: '전략 등급', preferred: '우선 등급', qualified: '적격 등급', riskDashboard: '위험 대시보드',
   },
   srmRiskCommon: {
-    high: '고위험', medium: '중위험', low: '저위험',
+    high: '고위험', medium: '중위험', low: '저위험', topSuppliers: '고위험 공급업체', riskLevel: '위험 등급', redIndicatorCount: '빨간색 지표 수',
+  },
+  srmCommon: {
+    selectSupplier: '공급업체 선택', number: '번호', name: '이름', type: '유형', level: '등급', supplier: '공급업체',
+  },
+  srmEvaluationCommon: {
+    strategic: '전략 등급', preferred: '우선 등급', qualified: '적격 등급', eliminated: '탈락 등급', weight: '가중치 {value}%',
+    bad: '나쁨', poor: '미흡', average: '보통', good: '좋음', excellent: '우수', remarkOptional: '비고(선택)', weightedTotal: '가중 총점:',
   },
 }

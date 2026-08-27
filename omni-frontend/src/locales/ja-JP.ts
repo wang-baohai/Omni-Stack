@@ -80,6 +80,13 @@ export default {
     departmentNumber: '部門 #{id}', noOpportunityStages: '商談ステージデータがありません', customerNumber: '顧客 #{id}', moveStage: 'ステージを変更',
     noActivityPermission: 'このアカウントに活動履歴の表示権限はありません', noActivities: 'フォローアップ履歴はありません', userNumber: 'ユーザー #{id}',
   },
+  crmContact: {
+    create: '連絡先を作成', edit: '連絡先を編集', keyword: 'キーワード', keywordPlaceholder: '氏名 / 携帯電話 / メール', customer: '顧客', name: '氏名', department: '部署', jobTitle: '役職', mobile: '携帯電話', phone: '電話', email: 'メール', decisionRole: '意思決定ロール', primaryContact: '主要連絡先', primary: '主要', setPrimary: '主要に設定', owner: '担当者',
+    nameRequired: '連絡先の氏名を入力してください', deleteTitle: '削除の確認', deleteConfirm: '連絡先「{name}」を削除しますか？', primaryUpdated: '主要連絡先を更新しました',
+  },
+  crmCustomerOverview: {
+    noCustomer: '顧客データがありません', profile: '顧客プロフィール', number: '顧客番号', name: '顧客名', lastFollowup: '最終フォロー', nextFollowup: '次回フォロー', contacts: '連絡先', noContactPermission: '連絡先を表示する権限がありません', openOpportunities: '進行中の商談', noOpportunityPermission: '商談を表示する権限がありません', opportunityName: '商談名', stage: 'ステージ', amount: '金額', expectedClose: '成約予定', recentActivities: '最近の活動',
+  },
   validation: {
     usernameLength: 'ユーザー名は3〜32文字で入力してください', passwordMin: 'パスワードは6文字以上で入力してください', emailFormat: '有効なメールアドレスを入力してください',
   },
@@ -165,6 +172,13 @@ export default {
     strategic: '戦略', preferred: '優先', qualified: '適格', riskDashboard: 'リスクダッシュボード',
   },
   srmRiskCommon: {
-    high: '高リスク', medium: '中リスク', low: '低リスク',
+    high: '高リスク', medium: '中リスク', low: '低リスク', topSuppliers: '高リスクサプライヤー', riskLevel: 'リスクレベル', redIndicatorCount: '赤色指標数',
+  },
+  srmCommon: {
+    selectSupplier: 'サプライヤーを選択', number: '番号', name: '名称', type: '種類', level: 'レベル', supplier: 'サプライヤー',
+  },
+  srmEvaluationCommon: {
+    strategic: '戦略', preferred: '優先', qualified: '適格', eliminated: '除外', weight: '重み {value}%',
+    bad: '悪い', poor: 'やや悪い', average: '普通', good: '良い', excellent: '優秀', remarkOptional: '備考（任意）', weightedTotal: '加重合計：',
   },
 }
