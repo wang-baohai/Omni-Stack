@@ -705,6 +705,10 @@ export default {
   crmCustomerOverview: {
     noCustomer: '暂无客户数据', profile: '客户档案', number: '客户编号', name: '客户名称', lastFollowup: '最近跟进', nextFollowup: '下次跟进', contacts: '联系人', noContactPermission: '无联系人查看权限', openOpportunities: '开放商机', noOpportunityPermission: '无商机查看权限', opportunityName: '商机名称', stage: '阶段', amount: '金额', expectedClose: '预计成交', recentActivities: '最近活动',
   },
+  crmActivity: {
+    create: '新建活动', edit: '编辑活动', rootType: '关联类型', recordId: '记录 ID', relatedRecord: '关联记录', relatedObject: '关联对象', activityType: '活动类型', type: '类型', subject: '主题', content: '内容', plannedTime: '计划时间', startTime: '开始时间', endTime: '结束时间', plannedStart: '计划开始', plannedEnd: '计划结束', completedTime: '完成时间', nextAction: '下次行动', details: '详情', complete: '完成', more: '更多', reschedule: '重新计划', completeActivity: '完成活动', confirmComplete: '确认完成', rescheduleActivity: '重新计划活动', confirmReschedule: '确认重新计划', activityDetails: '活动详情', performer: '执行人', to: '至', plainTextOnly: '仅支持纯文本',
+    rootTypeRequired: '请选择关联类型', rootIdRequired: '请输入关联记录 ID', subjectRequired: '请输入活动主题', activityTypeRequired: '请选择活动类型', deleteTitle: '删除确认', deleteConfirm: '确认删除活动“{subject}”？', completed: '活动已完成', cancelReasonPrompt: '请填写取消原因', cancelActivity: '取消活动', cancelReasonRequired: '取消原因不能为空', cancelled: '活动已取消', rescheduled: '活动已重新计划',
+  },
   validation: {
     usernameLength: '用户名长度须为 3-32 个字符', passwordMin: '密码至少需要 6 个字符', emailFormat: '请输入正确的邮箱格式',
   },
@@ -1183,6 +1187,10 @@ export default {
   srmEvaluationCommon: {
     strategic: '战略级 STRATEGIC', preferred: '优选级 PREFERRED', qualified: '合格级 QUALIFIED', eliminated: '淘汰级 ELIMINATED',
     weight: '权重 {value}%', bad: '差', poor: '较差', average: '一般', good: '良好', excellent: '优秀', remarkOptional: '备注（可选）', weightedTotal: '加权总分：',
+  },
+  srmInvitePage: {
+    create: '创建邀请', created: '邀请已创建', revoke: '撤销', revokeTitle: '撤销确认', revokeConfirm: '确认撤销此邀请？', revoked: '已撤销', copied: '邀请令牌已复制', maxUses: '最大次数', usedCount: '已使用', expiresTime: '过期时间', createTime: '创建时间', maxUseCount: '最大使用次数', validHours: '有效期（小时）', token: '邀请令牌', tokenWarning: '请保存此邀请令牌，关闭后将无法再次查看', copy: '复制',
+    status: { active: '有效', revoked: '已撤销', expired: '已过期', used: '已用完' },
   },
   assetOverviewPage: {
     status: '状态', category: '品类', department: '部门', location: '位置',

@@ -669,6 +669,10 @@ export default {
   crmCustomerOverview: {
     noCustomer: 'No customer data', profile: 'Customer Profile', number: 'Customer Number', name: 'Customer Name', lastFollowup: 'Last Follow-up', nextFollowup: 'Next Follow-up', contacts: 'Contacts', noContactPermission: 'No permission to view contacts', openOpportunities: 'Open Opportunities', noOpportunityPermission: 'No permission to view opportunities', opportunityName: 'Opportunity Name', stage: 'Stage', amount: 'Amount', expectedClose: 'Expected Close', recentActivities: 'Recent Activities',
   },
+  crmActivity: {
+    create: 'Create Activity', edit: 'Edit Activity', rootType: 'Related Type', recordId: 'Record ID', relatedRecord: 'Related Record', relatedObject: 'Related Object', activityType: 'Activity Type', type: 'Type', subject: 'Subject', content: 'Content', plannedTime: 'Planned Time', startTime: 'Start Time', endTime: 'End Time', plannedStart: 'Planned Start', plannedEnd: 'Planned End', completedTime: 'Completed Time', nextAction: 'Next Action', details: 'Details', complete: 'Complete', more: 'More', reschedule: 'Reschedule', completeActivity: 'Complete Activity', confirmComplete: 'Confirm Completion', rescheduleActivity: 'Reschedule Activity', confirmReschedule: 'Confirm Reschedule', activityDetails: 'Activity Details', performer: 'Performed By', to: 'to', plainTextOnly: 'Plain text only',
+    rootTypeRequired: 'Select a related type', rootIdRequired: 'Enter the related record ID', subjectRequired: 'Enter an activity subject', activityTypeRequired: 'Select an activity type', deleteTitle: 'Confirm Delete', deleteConfirm: 'Delete activity “{subject}”?', completed: 'Activity completed', cancelReasonPrompt: 'Enter a cancellation reason', cancelActivity: 'Cancel Activity', cancelReasonRequired: 'Cancellation reason is required', cancelled: 'Activity cancelled', rescheduled: 'Activity rescheduled',
+  },
   validation: {
     usernameLength: 'Username must be 3-32 characters', passwordMin: 'Password must be at least 6 characters', emailFormat: 'Enter a valid email address',
   },
@@ -1147,6 +1151,10 @@ export default {
   srmEvaluationCommon: {
     strategic: 'Strategic', preferred: 'Preferred', qualified: 'Qualified', eliminated: 'Eliminated',
     weight: 'Weight {value}%', bad: 'Bad', poor: 'Poor', average: 'Average', good: 'Good', excellent: 'Excellent', remarkOptional: 'Remark (optional)', weightedTotal: 'Weighted Total:',
+  },
+  srmInvitePage: {
+    create: 'Create Invite', created: 'Invite created', revoke: 'Revoke', revokeTitle: 'Confirm Revoke', revokeConfirm: 'Revoke this invite?', revoked: 'Invite revoked', copied: 'Invite token copied', maxUses: 'Maximum Uses', usedCount: 'Used', expiresTime: 'Expires At', createTime: 'Created At', maxUseCount: 'Maximum Use Count', validHours: 'Validity (hours)', token: 'Invite Token', tokenWarning: 'Save this invite token now. It cannot be viewed again after closing.', copy: 'Copy',
+    status: { active: 'Active', revoked: 'Revoked', expired: 'Expired', used: 'Fully Used' },
   },
   assetOverviewPage: {
     status: 'Status', category: 'Category', department: 'Department', location: 'Location',

@@ -81,6 +81,10 @@ export default {
   crmCustomerOverview: {
     noCustomer: '고객 데이터가 없습니다', profile: '고객 프로필', number: '고객 번호', name: '고객 이름', lastFollowup: '최근 후속 활동', nextFollowup: '다음 후속 활동', contacts: '연락처', noContactPermission: '연락처 조회 권한이 없습니다', openOpportunities: '진행 중 영업 기회', noOpportunityPermission: '영업 기회 조회 권한이 없습니다', opportunityName: '영업 기회 이름', stage: '단계', amount: '금액', expectedClose: '예상 성사일', recentActivities: '최근 활동',
   },
+  crmActivity: {
+    create: '활동 추가', edit: '활동 편집', rootType: '연결 유형', recordId: '레코드 ID', relatedRecord: '연결 레코드', relatedObject: '연결 대상', activityType: '활동 유형', type: '유형', subject: '제목', content: '내용', plannedTime: '예정 시간', startTime: '시작 시간', endTime: '종료 시간', plannedStart: '예정 시작', plannedEnd: '예정 종료', completedTime: '완료 시간', nextAction: '다음 활동', details: '상세', complete: '완료', more: '더 보기', reschedule: '다시 계획', completeActivity: '활동 완료', confirmComplete: '완료 확인', rescheduleActivity: '활동 다시 계획', confirmReschedule: '재계획 확인', activityDetails: '활동 상세', performer: '수행자', to: '~', plainTextOnly: '일반 텍스트만 지원',
+    rootTypeRequired: '연결 유형을 선택하세요', rootIdRequired: '연결 레코드 ID를 입력하세요', subjectRequired: '활동 제목을 입력하세요', activityTypeRequired: '활동 유형을 선택하세요', deleteTitle: '삭제 확인', deleteConfirm: '활동 “{subject}”을 삭제할까요?', completed: '활동을 완료했습니다', cancelReasonPrompt: '취소 사유를 입력하세요', cancelActivity: '활동 취소', cancelReasonRequired: '취소 사유는 필수입니다', cancelled: '활동을 취소했습니다', rescheduled: '활동을 다시 계획했습니다',
+  },
   validation: {
     usernameLength: '사용자 이름은 3~32자여야 합니다', passwordMin: '비밀번호는 6자 이상이어야 합니다', emailFormat: '올바른 이메일 주소를 입력하세요',
   },
@@ -174,5 +178,9 @@ export default {
   srmEvaluationCommon: {
     strategic: '전략 등급', preferred: '우선 등급', qualified: '적격 등급', eliminated: '탈락 등급', weight: '가중치 {value}%',
     bad: '나쁨', poor: '미흡', average: '보통', good: '좋음', excellent: '우수', remarkOptional: '비고(선택)', weightedTotal: '가중 총점:',
+  },
+  srmInvitePage: {
+    create: '초대 만들기', created: '초대를 만들었습니다', revoke: '취소', revokeTitle: '취소 확인', revokeConfirm: '이 초대를 취소할까요?', revoked: '초대를 취소했습니다', copied: '초대 토큰을 복사했습니다', maxUses: '최대 횟수', usedCount: '사용 횟수', expiresTime: '만료 시간', createTime: '생성 시간', maxUseCount: '최대 사용 횟수', validHours: '유효 기간(시간)', token: '초대 토큰', tokenWarning: '이 초대 토큰을 저장하세요. 닫은 후에는 다시 볼 수 없습니다.', copy: '복사',
+    status: { active: '유효', revoked: '취소됨', expired: '만료됨', used: '사용 완료' },
   },
 }

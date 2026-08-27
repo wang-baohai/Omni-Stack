@@ -87,6 +87,10 @@ export default {
   crmCustomerOverview: {
     noCustomer: '顧客データがありません', profile: '顧客プロフィール', number: '顧客番号', name: '顧客名', lastFollowup: '最終フォロー', nextFollowup: '次回フォロー', contacts: '連絡先', noContactPermission: '連絡先を表示する権限がありません', openOpportunities: '進行中の商談', noOpportunityPermission: '商談を表示する権限がありません', opportunityName: '商談名', stage: 'ステージ', amount: '金額', expectedClose: '成約予定', recentActivities: '最近の活動',
   },
+  crmActivity: {
+    create: '活動を作成', edit: '活動を編集', rootType: '関連タイプ', recordId: 'レコード ID', relatedRecord: '関連レコード', relatedObject: '関連対象', activityType: '活動タイプ', type: 'タイプ', subject: '件名', content: '内容', plannedTime: '予定時間', startTime: '開始時間', endTime: '終了時間', plannedStart: '予定開始', plannedEnd: '予定終了', completedTime: '完了時間', nextAction: '次のアクション', details: '詳細', complete: '完了', more: 'その他', reschedule: '再計画', completeActivity: '活動を完了', confirmComplete: '完了を確認', rescheduleActivity: '活動を再計画', confirmReschedule: '再計画を確認', activityDetails: '活動詳細', performer: '実行者', to: 'から', plainTextOnly: 'プレーンテキストのみ対応',
+    rootTypeRequired: '関連タイプを選択してください', rootIdRequired: '関連レコード ID を入力してください', subjectRequired: '活動の件名を入力してください', activityTypeRequired: '活動タイプを選択してください', deleteTitle: '削除の確認', deleteConfirm: '活動「{subject}」を削除しますか？', completed: '活動を完了しました', cancelReasonPrompt: '取消理由を入力してください', cancelActivity: '活動を取り消す', cancelReasonRequired: '取消理由は必須です', cancelled: '活動を取り消しました', rescheduled: '活動を再計画しました',
+  },
   validation: {
     usernameLength: 'ユーザー名は3〜32文字で入力してください', passwordMin: 'パスワードは6文字以上で入力してください', emailFormat: '有効なメールアドレスを入力してください',
   },
@@ -180,5 +184,9 @@ export default {
   srmEvaluationCommon: {
     strategic: '戦略', preferred: '優先', qualified: '適格', eliminated: '除外', weight: '重み {value}%',
     bad: '悪い', poor: 'やや悪い', average: '普通', good: '良い', excellent: '優秀', remarkOptional: '備考（任意）', weightedTotal: '加重合計：',
+  },
+  srmInvitePage: {
+    create: '招待を作成', created: '招待を作成しました', revoke: '取り消す', revokeTitle: '取り消しの確認', revokeConfirm: 'この招待を取り消しますか？', revoked: '取り消しました', copied: '招待トークンをコピーしました', maxUses: '最大回数', usedCount: '使用済み', expiresTime: '有効期限', createTime: '作成日時', maxUseCount: '最大使用回数', validHours: '有効期間（時間）', token: '招待トークン', tokenWarning: 'この招待トークンを保存してください。閉じると再表示できません。', copy: 'コピー',
+    status: { active: '有効', revoked: '取り消し済み', expired: '期限切れ', used: '使用上限到達' },
   },
 }
