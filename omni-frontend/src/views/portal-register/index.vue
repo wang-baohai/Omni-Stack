@@ -45,11 +45,11 @@ function validateConfirmPassword(_rule: unknown, value: string, callback: (error
 const rules: FormRules = {
   username: [
     { required: true, message: () => t('register.username'), trigger: 'blur' },
-    { min: 3, max: 32, message: '用户名长度 3-32 个字符', trigger: 'blur' },
+    { min: 3, max: 32, message: () => t('validation.usernameLength'), trigger: 'blur' },
   ],
   password: [
     { required: true, message: () => t('register.password'), trigger: 'blur' },
-    { min: 6, message: '密码至少 6 个字符', trigger: 'blur' },
+    { min: 6, message: () => t('validation.passwordMin'), trigger: 'blur' },
   ],
   confirmPassword: [
     { required: true, message: () => t('register.confirmPassword'), trigger: 'blur' },

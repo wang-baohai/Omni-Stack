@@ -640,6 +640,8 @@ export default {
     loginSuccess: '登录成功',
     loginFailed: '登录失败',
     captchaFailed: '验证码获取失败',
+    tenantLoadFailed: '租户列表加载失败',
+    thirdPartyFailed: '第三方登录失败',
     captchaExpired: '验证码已过期，请刷新',
     github: 'GitHub',
     google: 'Google',
@@ -683,6 +685,12 @@ export default {
     selectCustomer: '请选择客户', noCustomerPermission: '无客户查看权限', selectOwner: '请选择负责人', noOwnerPermission: '无负责人候选权限',
     departmentNumber: '部门 #{id}', noOpportunityStages: '暂无商机阶段数据', customerNumber: '客户 #{id}', moveStage: '迁移阶段',
     noActivityPermission: '当前账号没有跟进活动查看权限', noActivities: '暂无跟进记录', userNumber: '用户 #{id}',
+  },
+  validation: {
+    usernameLength: '用户名长度须为 3-32 个字符', passwordMin: '密码至少需要 6 个字符', emailFormat: '请输入正确的邮箱格式',
+  },
+  request: {
+    loginExpiredTitle: '登录过期', loginAgain: '重新登录', loginExpiredMessage: '登录已过期，请重新登录', requestFailed: '请求失败', networkError: '网络错误', menuLoadFailed: '菜单加载失败', unknownError: '未知错误',
   },
   // ===== home — 首页模块 =====
   home: {
@@ -1031,6 +1039,7 @@ export default {
     saveDraft: '保存草稿',
     errorsLabel: '错误：',
     warningsLabel: '警告：',
+    bpmnImportFailed: 'BPMN XML 导入失败：{error}',
     contextPad: {
       append: {
         'user-task': '添加审批节点',

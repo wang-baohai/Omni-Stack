@@ -58,6 +58,11 @@ const i18n = createI18n({
   },
 })
 
+/** 为 Store、HTTP 拦截器等非组件上下文提供类型安全的翻译入口。 */
+export function translate(key: string, named?: Record<string, string | number>): string {
+  return String(i18n.global.t(key, named ?? {}))
+}
+
 document.documentElement.lang = getStoredLang()
 
 export default i18n

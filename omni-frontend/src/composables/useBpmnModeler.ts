@@ -19,6 +19,7 @@ import {
   type BpmnSelectionChangedEvent,
 } from '@/types/bpmn'
 import { getErrorMessage } from '@/utils/errors'
+import { translate } from '@/i18n'
 import 'bpmn-js/dist/assets/diagram-js.css'
 import 'bpmn-js/dist/assets/bpmn-js.css'
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
@@ -100,7 +101,7 @@ export function useBpmnModeler(options: UseBpmnModelerOptions) {
       fixDarkModeColors()
       currentXml.value = xml
     } catch (error: unknown) {
-      ElMessage.error('导入 BPMN XML 失败：' + getErrorMessage(error, '未知错误'))
+      ElMessage.error(translate('workflow.bpmnImportFailed', { error: getErrorMessage(error, translate('request.unknownError')) }))
     } finally {
       loading.value = false
     }

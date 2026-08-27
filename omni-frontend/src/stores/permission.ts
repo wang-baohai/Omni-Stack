@@ -9,6 +9,7 @@ import { getPermissionsFromToken, getTenantIdFromToken } from '@/utils/jwt'
 import { useUserStore } from './user'
 import { fetchMenuTree, type MenuNode } from '@/api/menu'
 import { getErrorMessage } from '@/utils/errors'
+import { translate } from '@/i18n'
 
 /** 菜单加载状态。 */
 export type MenuLoadState = 'idle' | 'loading' | 'loaded' | 'failed'
@@ -86,7 +87,7 @@ export const usePermissionStore = defineStore('permission', () => {
       menuTree.value = []
       menusLoaded.value = true
       menuLoadState.value = 'failed'
-      menuLoadError.value = getErrorMessage(error, '菜单加载失败')
+      menuLoadError.value = getErrorMessage(error, translate('request.menuLoadFailed'))
       throw error
     }
   }

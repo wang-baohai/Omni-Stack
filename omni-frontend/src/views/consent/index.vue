@@ -60,7 +60,7 @@ const loginRules: FormRules = {
   username: [{ required: true, message: () => t('login.username'), trigger: 'blur' }],
   password: [
     { required: true, message: () => t('login.password'), trigger: 'blur' },
-    { min: 6, message: '密码至少 6 个字符', trigger: 'blur' },
+    { min: 6, message: () => t('validation.passwordMin'), trigger: 'blur' },
   ],
   captchaCode: [{ required: true, message: () => t('login.captchaPlaceholder'), trigger: 'blur' }],
 }

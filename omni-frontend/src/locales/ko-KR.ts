@@ -56,13 +56,19 @@ export default {
     approverConfiguration: '승인자 설정', approvalRole: '승인 역할', approvalRoleHelp: '승인자가 가져야 할 역할을 선택하면 대상 조직에서 해당 사용자를 찾습니다.', approvalRoleExample: '예: 팀장을 선택하면 TEAM_LEADER 역할을 찾습니다.', approvalOrganization: '승인 조직', approvalOrganizationHelp: '선택한 역할의 승인자를 찾을 조직을 정합니다.',
     initiatorOrganizationHelp: '신청자 소속 조직에서 찾으며 직속 상사 승인에 적합합니다.', initiatorParentOrganizationHelp: '한 단계 상위 조직에서 찾습니다.', initiatorChildOrganizationHelp: '하위 조직을 선택합니다.', specifiedOrganizationHelp: '인사나 재무 등 고정 조직을 하나 이상 선택합니다.', approvalMode: '승인 방식', approvalModeHelp: '승인 노드의 완료 조건을 선택합니다.', approvalModeAny: '한 명만 승인', approvalModeAnyHelp: '한 명이 승인하거나 반려하면 노드가 완료됩니다.', approvalModeAll: '전원 승인(회의 승인)', approvalModeAllHelp: '모든 승인자가 처리해야 하며 한 명이 반려하면 즉시 종료됩니다.',
     fallbackStrategy: '예외 처리 정책', fallbackHelp: '조건에 맞는 승인자가 없을 때의 처리를 선택합니다.', fallbackError: '오류 로그만 기록', fallbackErrorHelp: '오류를 기록하고 작업이 미할당 상태로 남을 수 있으며 개발과 테스트용입니다.', fallbackAdmin: '관리자에게 할당', fallbackAdminHelp: 'SUPER_ADMIN 사용자에게 할당하여 진행합니다.', fallbackParent: '상위 조직으로 에스컬레이션', fallbackParentHelp: '상위 조직에서 후보자를 찾습니다.', previewCandidates: '후보자 미리보기', candidatePreview: '후보자 미리보기', selectSimulatedUser: '모의 사용자 선택', unassignedOrganization: '조직 미할당', noCandidates: '일치하는 후보자가 없습니다', organization: '소속 조직', candidateCount: '후보자 {count}명', resolveAgain: '다시 해석', selectApprovalRoleFirst: '먼저 승인 역할을 선택하세요', selectSimulatedInitiatorFirst: '먼저 모의 신청자를 선택하세요', candidatePreviewFailed: '후보자 미리보기 해석에 실패했습니다',
-    paletteEvents: '이벤트', paletteActivities: '활동', paletteGateways: '게이트웨이', paletteConnections: '연결', paletteAnnotations: '주석', paletteElements: '요소', ccNode: '참조 노드', paletteHint: '요소를 캔버스로 끌어오고 시작 노드를 선택한 후 순차 흐름으로 연결하세요.', modelLoadFailed: '모델 데이터를 불러오지 못했습니다', draftSaved: '초안을 저장했습니다', draftSaveFailed: '초안 저장에 실패했습니다', publishCurrentConfirmMessage: '현재 모델을 게시할까요? 새 버전을 워크플로 엔진에 배포합니다.', unsavedCloseConfirm: '저장하지 않은 변경이 있습니다. 저장하고 닫을까요?', doNotSave: '저장하지 않음', selectStartNodeFirst: '먼저 시작 노드를 선택하세요', unsaved: '저장되지 않음', saveDraft: '초안 저장', errorsLabel: '오류:', warningsLabel: '경고:',
+    paletteEvents: '이벤트', paletteActivities: '활동', paletteGateways: '게이트웨이', paletteConnections: '연결', paletteAnnotations: '주석', paletteElements: '요소', ccNode: '참조 노드', paletteHint: '요소를 캔버스로 끌어오고 시작 노드를 선택한 후 순차 흐름으로 연결하세요.', modelLoadFailed: '모델 데이터를 불러오지 못했습니다', draftSaved: '초안을 저장했습니다', draftSaveFailed: '초안 저장에 실패했습니다', publishCurrentConfirmMessage: '현재 모델을 게시할까요? 새 버전을 워크플로 엔진에 배포합니다.', unsavedCloseConfirm: '저장하지 않은 변경이 있습니다. 저장하고 닫을까요?', doNotSave: '저장하지 않음', selectStartNodeFirst: '먼저 시작 노드를 선택하세요', unsaved: '저장되지 않음', saveDraft: '초안 저장', errorsLabel: '오류:', warningsLabel: '경고:', bpmnImportFailed: 'BPMN XML 가져오기에 실패했습니다: {error}',
   },
   lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '언어 전환', zhShort: '中', enShort: 'EN', jaShort: '日', koShort: '한' },
   crmUi: {
     selectCustomer: '고객 선택', noCustomerPermission: '고객 조회 권한이 없습니다', selectOwner: '담당자 선택', noOwnerPermission: '담당자 후보 조회 권한이 없습니다',
     departmentNumber: '부서 #{id}', noOpportunityStages: '영업 기회 단계 데이터가 없습니다', customerNumber: '고객 #{id}', moveStage: '단계 이동',
     noActivityPermission: '이 계정은 후속 활동을 조회할 권한이 없습니다', noActivities: '후속 활동 기록이 없습니다', userNumber: '사용자 #{id}',
+  },
+  validation: {
+    usernameLength: '사용자 이름은 3~32자여야 합니다', passwordMin: '비밀번호는 6자 이상이어야 합니다', emailFormat: '올바른 이메일 주소를 입력하세요',
+  },
+  request: {
+    loginExpiredTitle: '세션 만료', loginAgain: '다시 로그인', loginExpiredMessage: '세션이 만료되었습니다. 다시 로그인하세요.', requestFailed: '요청에 실패했습니다', networkError: '네트워크 오류', menuLoadFailed: '메뉴를 불러오지 못했습니다', unknownError: '알 수 없는 오류',
   },
   theme: { ...enUS.theme, toggle: '테마 전환' },
   dashboardPage: {
@@ -85,7 +91,7 @@ export default {
     oauth2ModeTitle: 'OAuth2 인증 로그인', oauth2ModeTip: '인증 후 요청한 애플리케이션으로 돌아갑니다.',
     thirdParty: '다른 로그인 방식', rememberMe: '로그인 상태 유지', forgotPassword: '비밀번호 찾기',
     noAccount: '계정이 없으신가요?', contactAdmin: '관리자에게 문의',
-    loginSuccess: '로그인되었습니다', loginFailed: '로그인에 실패했습니다', captchaFailed: '보안 문자를 불러오지 못했습니다',
+    loginSuccess: '로그인되었습니다', loginFailed: '로그인에 실패했습니다', captchaFailed: '보안 문자를 불러오지 못했습니다', tenantLoadFailed: '테넌트 목록을 불러오지 못했습니다', thirdPartyFailed: '외부 서비스 로그인에 실패했습니다',
     captchaExpired: '보안 문자가 만료되었습니다. 새로 고침하세요', registerNow: '지금 가입',
   },
   register: {

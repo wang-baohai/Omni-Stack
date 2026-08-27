@@ -2,19 +2,11 @@
   "version": 1,
   "purpose": "记录尚未迁移到 vue-i18n 的可见中文基线；最终目标为零。",
   "generatedBy": "tools/omni-cli/scripts/ui-i18n-audit.mjs",
-  "total": 1501,
+  "total": 1479,
   "files": {
-    "src/api/request.ts": {
-      "template": 0,
-      "script": 6
-    },
     "src/components/DynamicFormRenderer.vue": {
       "template": 3,
       "script": 0
-    },
-    "src/components/LoginForm.vue": {
-      "template": 0,
-      "script": 4
     },
     "src/components/crm/CustomerOverview.vue": {
       "template": 26,
@@ -60,14 +52,6 @@
       "template": 63,
       "script": 34
     },
-    "src/composables/useBpmnModeler.ts": {
-      "template": 0,
-      "script": 2
-    },
-    "src/stores/permission.ts": {
-      "template": 0,
-      "script": 1
-    },
     "src/views/asset/asset/index.vue": {
       "template": 78,
       "script": 31
@@ -83,10 +67,6 @@
     "src/views/callback/index.vue": {
       "template": 0,
       "script": 8
-    },
-    "src/views/consent/index.vue": {
-      "template": 0,
-      "script": 1
     },
     "src/views/crm/activity/index.vue": {
       "template": 7,
@@ -108,10 +88,6 @@
       "template": 7,
       "script": 13
     },
-    "src/views/device/verify.vue": {
-      "template": 0,
-      "script": 1
-    },
     "src/views/home/index.vue": {
       "template": 30,
       "script": 7
@@ -119,10 +95,6 @@
     "src/views/oauth2-client/index.vue": {
       "template": 5,
       "script": 3
-    },
-    "src/views/portal-register/index.vue": {
-      "template": 0,
-      "script": 2
     },
     "src/views/procurement/goods-receipt/index.vue": {
       "template": 51,
@@ -143,10 +115,6 @@
     "src/views/procurement/rfq/index.vue": {
       "template": 61,
       "script": 21
-    },
-    "src/views/register/index.vue": {
-      "template": 0,
-      "script": 5
     },
     "src/views/srm/evaluation/index.vue": {
       "template": 31,

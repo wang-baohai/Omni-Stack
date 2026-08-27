@@ -55,18 +55,18 @@ function validateConfirmPassword(_rule: unknown, value: string, callback: (error
 const rules: FormRules = {
   username: [
     { required: true, message: () => t('register.username'), trigger: 'blur' },
-    { min: 3, max: 32, message: '用户名长度 3-32 个字符', trigger: 'blur' },
+    { min: 3, max: 32, message: () => t('validation.usernameLength'), trigger: 'blur' },
   ],
   password: [
     { required: true, message: () => t('register.password'), trigger: 'blur' },
-    { min: 6, message: '密码至少 6 个字符', trigger: 'blur' },
+    { min: 6, message: () => t('validation.passwordMin'), trigger: 'blur' },
   ],
   confirmPassword: [
     { required: true, message: () => t('register.confirmPassword'), trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: 'blur' },
   ],
   email: [
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' },
+    { type: 'email', message: () => t('validation.emailFormat'), trigger: 'blur' },
   ],
   tenantId: [{ required: true, message: () => t('login.tenantPlaceholder'), trigger: 'change' }],
   captchaCode: [{ required: true, message: () => t('register.captchaPlaceholder'), trigger: 'blur' }],
@@ -82,7 +82,7 @@ async function loadCaptcha() {
     captchaKey.value = res.data.captchaKey
     captchaImage.value = res.data.captchaImage
   } catch {
-    ElMessage.error('验证码加载失败')
+    ElMessage.error(t('login.captchaFailed'))
     captchaImage.value = ''
   } finally {
     captchaLoading.value = false
@@ -97,7 +97,7 @@ async function loadTenants() {
     const { data: res } = await listTenants()
     tenants.value = res.data
   } catch {
-    ElMessage.error('租户列表加载失败')
+    ElMessage.error(t('login.tenantLoadFailed'))
     tenants.value = []
   }
 }

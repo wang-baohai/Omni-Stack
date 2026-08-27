@@ -604,6 +604,8 @@ export default {
     loginSuccess: 'Login successful',
     loginFailed: 'Login failed',
     captchaFailed: 'Failed to load captcha',
+    tenantLoadFailed: 'Failed to load tenant list',
+    thirdPartyFailed: 'Third-party login failed',
     captchaExpired: 'Captcha expired, please refresh',
     github: 'GitHub',
     google: 'Google',
@@ -647,6 +649,12 @@ export default {
     selectCustomer: 'Select a customer', noCustomerPermission: 'No permission to view customers', selectOwner: 'Select an owner', noOwnerPermission: 'No permission to view owner candidates',
     departmentNumber: 'Department #{id}', noOpportunityStages: 'No opportunity stage data', customerNumber: 'Customer #{id}', moveStage: 'Move Stage',
     noActivityPermission: 'This account cannot view follow-up activities', noActivities: 'No follow-up activity records', userNumber: 'User #{id}',
+  },
+  validation: {
+    usernameLength: 'Username must be 3-32 characters', passwordMin: 'Password must be at least 6 characters', emailFormat: 'Enter a valid email address',
+  },
+  request: {
+    loginExpiredTitle: 'Session Expired', loginAgain: 'Sign In Again', loginExpiredMessage: 'Your session has expired. Sign in again.', requestFailed: 'Request failed', networkError: 'Network error', menuLoadFailed: 'Failed to load the menu', unknownError: 'Unknown error',
   },
   // ===== home — home page module =====
   home: {
@@ -995,6 +1003,7 @@ export default {
     saveDraft: 'Save Draft',
     errorsLabel: 'Errors:',
     warningsLabel: 'Warnings:',
+    bpmnImportFailed: 'Failed to import BPMN XML: {error}',
     contextPad: {
       append: {
         'user-task': 'Append Approval Node',

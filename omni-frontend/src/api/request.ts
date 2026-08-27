@@ -16,6 +16,7 @@ import { useUserStore } from '@/stores/user'
 import { getTenantIdFromToken } from '@/utils/jwt'
 import router, { clearAuthenticatedSession } from '@/router'
 import { safeAppRedirect } from '@/utils/navigation'
+import { translate } from '@/i18n'
 
 // 创建 Axios 实例，配置基础 URL 和超时时间
 const service: AxiosInstance = axios.create({
@@ -61,8 +62,8 @@ function handle401(message: string) {
   const redirect = safeAppRedirect(currentPath)
   const isPortal = currentPath.startsWith('/supplier-portal')
   clearAuthenticatedSession(false)
-  ElMessageBox.alert(message, '登录过期', {
-    confirmButtonText: '重新登录',
+  ElMessageBox.alert(message, translate('request.loginExpiredTitle'), {
+    confirmButtonText: translate('request.loginAgain'),
     type: 'warning',
   }).finally(() => {
     showingExpiredDialog = false
@@ -84,9 +85,9 @@ service.interceptors.response.use(
     if (res.code !== 200) {
       if (res.code === 401) {
         // 401 表示认证过期，弹出过期对话框
-        handle401(res.message || '登录已过期，请重新登录')
+        handle401(res.message || translate('request.loginExpiredMessage'))
       } else {
-        ElMessage.error(res.message || '请求失败')
+        ElMessage.error(res.message || translate('request.requestFailed'))
       }
       return Promise.reject(new Error(res.message))
     }
@@ -97,11 +98,11 @@ service.interceptors.response.use(
     if (userStore.isLoggingOut) return Promise.reject(error)
     if (error.response?.status === 401) {
       // HTTP 401 表示认证过期，读取后端返回的结构化消息
-      const message = error.response?.data?.message || '登录已过期，请重新登录'
+      const message = error.response?.data?.message || translate('request.loginExpiredMessage')
       handle401(message)
     } else {
       // 其他 HTTP 层错误（网络异常、超时等）
-      const message = error.response?.data?.message || error.message || '网络错误'
+      const message = error.response?.data?.message || error.message || translate('request.networkError')
       ElMessage.error(message)
     }
     return Promise.reject(error)

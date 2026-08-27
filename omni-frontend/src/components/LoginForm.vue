@@ -89,7 +89,7 @@ const rules: FormRules = {
   username: [{ required: true, message: () => t('login.username'), trigger: 'blur' }],
   password: [
     { required: true, message: () => t('login.password'), trigger: 'blur' },
-    { min: 6, message: '密码至少 6 个字符', trigger: 'blur' },
+    { min: 6, message: () => t('validation.passwordMin'), trigger: 'blur' },
   ],
   captchaCode: [{ required: true, message: () => t('login.captchaPlaceholder'), trigger: 'blur' }],
 }
@@ -104,7 +104,7 @@ async function loadCaptcha() {
     captchaKey.value = res.data.captchaKey
     captchaImage.value = res.data.captchaImage
   } catch {
-    ElMessage.error('验证码加载失败')
+    ElMessage.error(t('login.captchaFailed'))
     captchaImage.value = ''
   } finally {
     captchaLoading.value = false
@@ -123,7 +123,7 @@ async function loadTenants() {
       form.tenantId = tenants.value[0].id
     }
   } catch {
-    ElMessage.error('租户列表加载失败')
+    ElMessage.error(t('login.tenantLoadFailed'))
     tenants.value = []
   }
 }
@@ -231,7 +231,7 @@ onMounted(() => {
   // 检查第三方登录重定向带回的错误信息
   const error = route.query.error as string
   if (error) {
-    const msg = (route.query.message as string) || '第三方登录失败'
+    const msg = (route.query.message as string) || t('login.thirdPartyFailed')
     ElMessage.error(decodeURIComponent(msg))
   }
 

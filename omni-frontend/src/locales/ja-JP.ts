@@ -62,13 +62,19 @@ export default {
     approverConfiguration: '承認者設定', approvalRole: '承認ロール', approvalRoleHelp: '承認者に必要なロールを選択すると、対象組織内の対応ユーザーを検索します。', approvalRoleExample: '例: チームリーダーを選択すると TEAM_LEADER ロールを検索します。', approvalOrganization: '承認組織', approvalOrganizationHelp: '選択したロールを持つ承認者を探す組織を指定します。',
     initiatorOrganizationHelp: '申請者の組織内を検索し、直属上司の承認に適します。', initiatorParentOrganizationHelp: '一階層上の組織を検索します。', initiatorChildOrganizationHelp: '下位組織を選択します。', specifiedOrganizationHelp: '人事や経理など固定の組織を複数選択できます。', approvalMode: '承認モード', approvalModeHelp: '承認ノードの完了条件を選択します。', approvalModeAny: 'いずれか一人が承認', approvalModeAnyHelp: '一人の承認または否認でノードが完了します。', approvalModeAll: '全員承認（合議）', approvalModeAllHelp: '全員の操作が必要で、一人の否認でプロセスが終了します。',
     fallbackStrategy: 'フォールバック方針', fallbackHelp: '条件に合う承認者がいない場合の処理を選択します。', fallbackError: 'エラーをログのみに記録', fallbackErrorHelp: 'エラーを記録し、タスクが未割当のままになる場合があります。', fallbackAdmin: '管理者に割り当て', fallbackAdminHelp: 'SUPER_ADMIN ユーザーに割り当てて継続します。', fallbackParent: '上位組織にエスカレート', fallbackParentHelp: '上位組織で候補者を検索します。', previewCandidates: '候補者をプレビュー', candidatePreview: '候補者プレビュー', selectSimulatedUser: 'シミュレーションユーザーを選択', unassignedOrganization: '組織未割当', noCandidates: '一致する候補者がいません', organization: '所属組織', candidateCount: '候補者 {count} 名', resolveAgain: '再解析', selectApprovalRoleFirst: '先に承認ロールを選択してください', selectSimulatedInitiatorFirst: '先にシミュレーション申請者を選択してください', candidatePreviewFailed: '候補者プレビューの解析に失敗しました',
-    paletteEvents: 'イベント', paletteActivities: 'アクティビティ', paletteGateways: 'ゲートウェイ', paletteConnections: '接続', paletteAnnotations: '注釈', paletteElements: '要素', ccNode: 'CC ノード', paletteHint: '要素をキャンバスにドラッグし、始点を選択してシーケンスフローを接続します。', modelLoadFailed: 'モデルデータを読み込めませんでした', draftSaved: '下書きを保存しました', draftSaveFailed: '下書きの保存に失敗しました', publishCurrentConfirmMessage: '現在のモデルを公開しますか？新しいバージョンをワークフローエンジンにデプロイします。', unsavedCloseConfirm: '未保存の変更があります。保存して閉じますか？', doNotSave: '保存しない', selectStartNodeFirst: '先に始点ノードを選択してください', unsaved: '未保存', saveDraft: '下書きを保存', errorsLabel: 'エラー:', warningsLabel: '警告:',
+    paletteEvents: 'イベント', paletteActivities: 'アクティビティ', paletteGateways: 'ゲートウェイ', paletteConnections: '接続', paletteAnnotations: '注釈', paletteElements: '要素', ccNode: 'CC ノード', paletteHint: '要素をキャンバスにドラッグし、始点を選択してシーケンスフローを接続します。', modelLoadFailed: 'モデルデータを読み込めませんでした', draftSaved: '下書きを保存しました', draftSaveFailed: '下書きの保存に失敗しました', publishCurrentConfirmMessage: '現在のモデルを公開しますか？新しいバージョンをワークフローエンジンにデプロイします。', unsavedCloseConfirm: '未保存の変更があります。保存して閉じますか？', doNotSave: '保存しない', selectStartNodeFirst: '先に始点ノードを選択してください', unsaved: '未保存', saveDraft: '下書きを保存', errorsLabel: 'エラー:', warningsLabel: '警告:', bpmnImportFailed: 'BPMN XML のインポートに失敗しました：{error}',
   },
   lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '言語を切り替える', zhShort: '中', enShort: 'EN', jaShort: '日', koShort: '한' },
   crmUi: {
     selectCustomer: '顧客を選択', noCustomerPermission: '顧客の表示権限がありません', selectOwner: '担当者を選択', noOwnerPermission: '担当者候補の表示権限がありません',
     departmentNumber: '部門 #{id}', noOpportunityStages: '商談ステージデータがありません', customerNumber: '顧客 #{id}', moveStage: 'ステージを変更',
     noActivityPermission: 'このアカウントに活動履歴の表示権限はありません', noActivities: 'フォローアップ履歴はありません', userNumber: 'ユーザー #{id}',
+  },
+  validation: {
+    usernameLength: 'ユーザー名は3〜32文字で入力してください', passwordMin: 'パスワードは6文字以上で入力してください', emailFormat: '有効なメールアドレスを入力してください',
+  },
+  request: {
+    loginExpiredTitle: 'セッション期限切れ', loginAgain: '再ログイン', loginExpiredMessage: 'セッションの有効期限が切れました。再度ログインしてください。', requestFailed: 'リクエストに失敗しました', networkError: 'ネットワークエラー', menuLoadFailed: 'メニューを読み込めませんでした', unknownError: '不明なエラー',
   },
   theme: { ...enUS.theme, toggle: 'テーマを切り替える' },
   dashboardPage: {
@@ -91,7 +97,7 @@ export default {
     oauth2ModeTitle: 'OAuth2 認証ログイン', oauth2ModeTip: '認証後、要求元のアプリケーションへ戻ります。',
     thirdParty: 'その他のログイン方法', rememberMe: 'ログイン状態を保持', forgotPassword: 'パスワードを忘れた場合',
     noAccount: 'アカウントをお持ちでない場合', contactAdmin: '管理者に連絡',
-    loginSuccess: 'ログインしました', loginFailed: 'ログインに失敗しました', captchaFailed: '認証コードの読み込みに失敗しました',
+    loginSuccess: 'ログインしました', loginFailed: 'ログインに失敗しました', captchaFailed: '認証コードの読み込みに失敗しました', tenantLoadFailed: 'テナント一覧の読み込みに失敗しました', thirdPartyFailed: '外部サービスでのログインに失敗しました',
     captchaExpired: '認証コードの有効期限が切れました。更新してください', registerNow: '今すぐ登録',
   },
   register: {
