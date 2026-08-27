@@ -2,7 +2,7 @@
   "version": 1,
   "purpose": "记录尚未迁移到 vue-i18n 的可见中文基线；最终目标为零。",
   "generatedBy": "tools/omni-cli/scripts/ui-i18n-audit.mjs",
-  "total": 1730,
+  "total": 1601,
   "files": {
     "src/api/request.ts": {
       "template": 0,
@@ -80,45 +80,9 @@
       "template": 63,
       "script": 34
     },
-    "src/components/workflow/ApprovalRecordsDialog.vue": {
-      "template": 6,
-      "script": 5
-    },
     "src/components/workflow/ModelDesigner.vue": {
       "template": 12,
       "script": 28
-    },
-    "src/components/workflow/ProcessProgressDialog.vue": {
-      "template": 12,
-      "script": 4
-    },
-    "src/components/workflow/panels/EndEventPanel.vue": {
-      "template": 3,
-      "script": 0
-    },
-    "src/components/workflow/panels/GatewayPanel.vue": {
-      "template": 7,
-      "script": 3
-    },
-    "src/components/workflow/panels/IntermediateThrowEventPanel.vue": {
-      "template": 3,
-      "script": 0
-    },
-    "src/components/workflow/panels/ParallelGatewayPanel.vue": {
-      "template": 3,
-      "script": 0
-    },
-    "src/components/workflow/panels/PropertyPanel.vue": {
-      "template": 3,
-      "script": 11
-    },
-    "src/components/workflow/panels/ServiceTaskPanel.vue": {
-      "template": 16,
-      "script": 8
-    },
-    "src/components/workflow/panels/StartEventPanel.vue": {
-      "template": 3,
-      "script": 0
     },
     "src/components/workflow/panels/UserTaskPanel.vue": {
       "template": 35,
@@ -235,26 +199,6 @@
     "src/views/supplier-portal/index.vue": {
       "template": 31,
       "script": 49
-    },
-    "src/views/workflow/definition/index.vue": {
-      "template": 10,
-      "script": 7
-    },
-    "src/views/workflow/instance/index.vue": {
-      "template": 2,
-      "script": 0
-    },
-    "src/views/workflow/model/CreateModelDialog.vue": {
-      "template": 7,
-      "script": 6
-    },
-    "src/views/workflow/model/ValidateResultDialog.vue": {
-      "template": 4,
-      "script": 0
-    },
-    "src/views/workflow/model/VersionHistoryDialog.vue": {
-      "template": 6,
-      "script": 0
     }
   }
 }

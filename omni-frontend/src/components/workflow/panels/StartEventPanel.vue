@@ -3,6 +3,9 @@
  * 开始事件属性面板 — 仅展示基本信息。
  */
 import type { BpmnElement } from '@/types/bpmn'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 defineProps<{
   element: BpmnElement
@@ -11,19 +14,19 @@ defineProps<{
 
 <template>
   <div class="event-panel">
-    <div class="section-title">开始事件</div>
+    <div class="section-title">{{ t('workflow.nodeTypeStartEvent') }}</div>
     <el-alert
       type="info"
       :closable="false"
       show-icon
     >
       <template #title>
-        开始事件是流程的入口，无需额外配置。流程实例从此节点启动。
+        {{ t('workflow.startEventHint') }}
       </template>
     </el-alert>
 
     <el-form label-width="80px" size="small" class="event-form">
-      <el-form-item label="名称">
+      <el-form-item :label="t('workflow.nodeName')">
         <el-input
           :model-value="element?.businessObject?.name || 'Start'"
           disabled

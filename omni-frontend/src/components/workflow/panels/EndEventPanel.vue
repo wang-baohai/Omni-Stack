@@ -3,6 +3,9 @@
  * 结束事件属性面板 — 仅展示基本信息。
  */
 import type { BpmnElement } from '@/types/bpmn'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 defineProps<{
   element: BpmnElement
@@ -11,19 +14,19 @@ defineProps<{
 
 <template>
   <div class="event-panel">
-    <div class="section-title">结束事件</div>
+    <div class="section-title">{{ t('workflow.nodeTypeEndEvent') }}</div>
     <el-alert
       type="info"
       :closable="false"
       show-icon
     >
       <template #title>
-        结束事件是流程的终点，无需额外配置。流程执行到此节点时自动结束。
+        {{ t('workflow.endEventHint') }}
       </template>
     </el-alert>
 
     <el-form label-width="80px" size="small" class="event-form">
-      <el-form-item label="名称">
+      <el-form-item :label="t('workflow.nodeName')">
         <el-input
           :model-value="element?.businessObject?.name || 'End'"
           disabled

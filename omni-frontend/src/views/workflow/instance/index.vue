@@ -133,7 +133,7 @@ function handleApprovalRecords(row: ProcessInstanceExt) {
             size="small"
             @click="handleProgress(row)"
           >
-            流转进度
+            {{ t('workflow.processProgress') }}
           </el-button>
           <el-button
             type="primary"
@@ -141,7 +141,7 @@ function handleApprovalRecords(row: ProcessInstanceExt) {
             size="small"
             @click="handleApprovalRecords(row)"
           >
-            审批记录
+            {{ t('workflow.approvalRecords') }}
           </el-button>
         </template>
       </el-table-column>

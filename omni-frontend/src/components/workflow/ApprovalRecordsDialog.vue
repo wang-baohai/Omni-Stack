@@ -5,7 +5,10 @@
  * 审批结果（通过/驳回/自动通过/已取消/待审批）、审批意见和审批时间。
  */
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getApprovalRecords, type ApprovalRecord } from '@/api/workflow'
+
+const { t } = useI18n()
 
 const visible = ref(false)
 const loading = ref(false)
@@ -23,14 +26,14 @@ async function open(processInstanceId: string) {
   }
 }
 
-/** 审批结果中文标签 */
+/** 获取审批结果的本地化标签 */
 function resultLabel(result: string) {
   const map: Record<string, string> = {
-    approved: '通过',
-    rejected: '驳回',
-    'auto-approved': '自动通过',
-    cancelled: '已取消',
-    pending: '待审批',
+    approved: t('workflow.approved'),
+    rejected: t('workflow.rejected'),
+    'auto-approved': t('workflow.autoApproved'),
+    cancelled: t('workflow.cancelled'),
+    pending: t('workflow.pendingApproval'),
   }
   return map[result] ?? result
 }
@@ -51,23 +54,23 @@ defineExpose({ open })
 </script>
 
 <template>
-  <el-dialog v-model="visible" title="审批记录" width="850px" destroy-on-close>
+  <el-dialog v-model="visible" :title="t('workflow.approvalRecords')" width="850px" destroy-on-close>
     <el-table v-loading="loading" :data="records" border stripe max-height="500">
-      <el-table-column prop="nodeName" label="节点名称" width="140" />
-      <el-table-column prop="assigneeName" label="审批人" width="100" />
-      <el-table-column label="审批结果" width="110" align="center">
+      <el-table-column prop="nodeName" :label="t('workflow.nodeName')" width="140" />
+      <el-table-column prop="assigneeName" :label="t('workflow.approver')" width="100" />
+      <el-table-column :label="t('workflow.approvalResult')" width="110" align="center">
         <template #default="{ row }">
           <el-tag :type="resultType(row.result)" size="small">
             {{ resultLabel(row.result) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="comment" label="审批意见" min-width="200">
+      <el-table-column prop="comment" :label="t('workflow.comment')" min-width="200">
         <template #default="{ row }">
           {{ row.comment || '-' }}
         </template>
       </el-table-column>
-      <el-table-column prop="approvalTime" label="审批时间" width="170">
+      <el-table-column prop="approvalTime" :label="t('workflow.approvalTime')" width="170">
         <template #default="{ row }">
           {{ row.approvalTime || '-' }}
         </template>

@@ -5,6 +5,7 @@
  * 使用 useBpmnExtension 的 readGatewayConditions / writeGatewayDefault / writeGatewayCondition。
  */
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type BpmnModeler from 'bpmn-js/lib/Modeler'
 import type { BpmnElement, BpmnElementRegistry, BpmnModdleElement } from '@/types/bpmn'
@@ -13,6 +14,8 @@ import {
   writeGatewayDefault,
   writeGatewayCondition,
 } from '@/composables/useBpmnExtension'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   element: BpmnElement
@@ -63,7 +66,7 @@ function setDefault(flowId: string) {
   if (target) target.isDefault = true
 
   writeGatewayDefault(props.modeler, props.element, flowId)
-  ElMessage.success('默认分支已更新')
+  ElMessage.success(t('workflow.defaultBranchUpdated'))
 }
 
 // ===== 保存条件 =====
@@ -82,18 +85,18 @@ function saveCondition(branch: FlowBranch) {
 
   if (wrappedFlow) {
     writeGatewayCondition(props.modeler, wrappedFlow, branch.condition)
-    ElMessage.success(`分支「${branch.name}」条件已更新`)
+    ElMessage.success(t('workflow.branchConditionUpdated', { name: branch.name }))
   }
 }
 </script>
 
 <template>
   <div class="gateway-panel">
-    <div class="section-title">分支配置</div>
+    <div class="section-title">{{ t('workflow.branchConfiguration') }}</div>
 
     <div v-if="branches.length === 0" class="no-branches">
       <el-text type="info" size="small">
-        请先连接网关到下游节点
+        {{ t('workflow.connectGatewayHint') }}
       </el-text>
     </div>
 
@@ -105,7 +108,7 @@ function saveCondition(branch: FlowBranch) {
           type="success"
           size="small"
         >
-          默认
+          {{ t('workflow.defaultBranch') }}
         </el-tag>
         <el-button
           v-else
@@ -114,19 +117,19 @@ function saveCondition(branch: FlowBranch) {
           size="small"
           @click="setDefault(branch.id)"
         >
-          设为默认
+          {{ t('workflow.setAsDefault') }}
         </el-button>
       </div>
 
       <div v-if="!branch.isDefault" class="branch-condition">
         <el-input
           v-model="branch.condition"
-          placeholder="条件表达式（如: ${amount > 1000}）"
+          :placeholder="t('workflow.conditionExpressionPlaceholder')"
           size="small"
         >
           <template #append>
             <el-button @click="saveCondition(branch)">
-              保存
+              {{ t('common.save') }}
             </el-button>
           </template>
         </el-input>
@@ -141,7 +144,7 @@ function saveCondition(branch: FlowBranch) {
       show-icon
     >
       <template #title>
-        默认分支无需条件表达式。当所有条件分支均不满足时，流程将走默认分支。
+        {{ t('workflow.defaultBranchHint') }}
       </template>
     </el-alert>
   </div>

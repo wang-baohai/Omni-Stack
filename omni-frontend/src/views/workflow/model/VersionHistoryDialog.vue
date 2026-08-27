@@ -50,20 +50,20 @@ function handleClose() {
 <template>
   <el-dialog
     :model-value="visible"
-    title="版本历史"
+    :title="t('workflow.versionHistory')"
     width="700px"
     @close="handleClose"
   >
     <el-table v-loading="loading" :data="versions" stripe border size="small">
-      <el-table-column prop="version" label="业务版本" width="100" align="center" />
-      <el-table-column label="状态" width="120" align="center">
+      <el-table-column prop="version" :label="t('workflow.businessVersion')" width="100" align="center" />
+      <el-table-column :label="t('common.status')" width="120" align="center">
         <template #default="{ row }">
           <el-tag :type="statusTagType(row.status)" size="small">{{ row.status }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="engineVersion" label="引擎版本" width="100" align="center" />
-      <el-table-column prop="publishBy" label="发布人" width="120" />
-      <el-table-column prop="publishTime" label="发布时间" width="180" />
+      <el-table-column prop="engineVersion" :label="t('workflow.engineVersion')" width="100" align="center" />
+      <el-table-column prop="publishBy" :label="t('workflow.publishedBy')" width="120" />
+      <el-table-column prop="publishTime" :label="t('workflow.publishTime')" width="180" />
       <el-table-column prop="xmlSha256" label="SHA-256" min-width="180">
         <template #default="{ row }">
           <span v-if="row.xmlSha256" class="sha-text">{{ row.xmlSha256.slice(0, 16) }}...</span>

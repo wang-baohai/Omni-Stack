@@ -4,7 +4,8 @@
  * 配置：抄送对象（直接指定用户 / 角色+组织）+ 通知渠道。
  * 使用 useBpmnExtension 的 readCcConfig / writeCcConfig。
  */
-import { ref, reactive, watch, onMounted } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type BpmnModeler from 'bpmn-js/lib/Modeler'
 import type { BpmnElement } from '@/types/bpmn'
@@ -21,6 +22,8 @@ import {
   type IdentityRoleVO,
   type OrgTreeNodeVO,
 } from '@/api/workflow-model'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   element: BpmnElement
@@ -68,18 +71,18 @@ const form = reactive<{
   channels: ['SYSTEM'],
 })
 
-const anchorTypes = [
-  { value: 'START_USER_PRIMARY_UNIT', label: '发起人所在组织' },
-  { value: 'PARENT', label: '发起人上级组织' },
-  { value: 'CHILD_UNIT', label: '发起人下级组织' },
-  { value: 'ABSOLUTE_UNIT', label: '指定组织' },
-]
+const anchorTypes = computed(() => [
+  { value: 'START_USER_PRIMARY_UNIT', label: t('workflow.initiatorOrganization') },
+  { value: 'PARENT', label: t('workflow.initiatorParentOrganization') },
+  { value: 'CHILD_UNIT', label: t('workflow.initiatorChildOrganization') },
+  { value: 'ABSOLUTE_UNIT', label: t('workflow.specifiedOrganization') },
+])
 
-const channelOptions = [
-  { value: 'SYSTEM', label: '站内通知' },
-  { value: 'EMAIL', label: '邮件' },
-  { value: 'SMS', label: '短信' },
-]
+const channelOptions = computed(() => [
+  { value: 'SYSTEM', label: t('workflow.systemNotification') },
+  { value: 'EMAIL', label: t('workflow.emailNotification') },
+  { value: 'SMS', label: t('workflow.smsNotification') },
+])
 
 /** 需要用户在树形下拉中选择组织的锚点类型（单选） */
 const NEEDS_UNIT_SELECTION_TYPES = new Set(['CHILD_UNIT'])
@@ -176,29 +179,29 @@ function applyConfig() {
   }
 
   writeCcConfig(props.modeler, props.element, config)
-  ElMessage.success('抄送配置已更新')
+  ElMessage.success(t('workflow.ccConfigurationUpdated'))
 }
 </script>
 
 <template>
   <div class="service-task-panel">
-    <div class="section-title">抄送配置</div>
+    <div class="section-title">{{ t('workflow.ccConfiguration') }}</div>
 
     <el-form label-width="90px" size="small" @submit.prevent>
-      <el-form-item label="抄送对象">
+      <el-form-item :label="t('workflow.ccRecipients')">
         <el-radio-group v-model="form.recipientType">
-          <el-radio value="USER_IDS">指定用户</el-radio>
-          <el-radio value="ROLE_ORG">角色+组织</el-radio>
+          <el-radio value="USER_IDS">{{ t('workflow.specifiedUsers') }}</el-radio>
+          <el-radio value="ROLE_ORG">{{ t('workflow.roleAndOrganization') }}</el-radio>
         </el-radio-group>
       </el-form-item>
 
       <!-- 直接指定用户 -->
-      <el-form-item v-if="form.recipientType === 'USER_IDS'" label="选择用户">
+      <el-form-item v-if="form.recipientType === 'USER_IDS'" :label="t('workflow.selectUsers')">
         <el-select
           v-model="form.selectedUserIds"
           multiple
           filterable
-          placeholder="选择用户"
+          :placeholder="t('workflow.selectUsers')"
           style="width: 100%"
         >
           <el-option
@@ -212,8 +215,8 @@ function applyConfig() {
 
       <!-- 角色+组织模式 -->
       <template v-if="form.recipientType === 'ROLE_ORG'">
-        <el-form-item label="角色">
-          <el-select v-model="form.roleCode" placeholder="选择角色" filterable style="width: 100%">
+        <el-form-item :label="t('workflow.role')">
+          <el-select v-model="form.roleCode" :placeholder="t('workflow.selectRole')" filterable style="width: 100%">
             <el-option
               v-for="role in roles"
               :key="role.roleCode"
@@ -223,7 +226,7 @@ function applyConfig() {
           </el-select>
         </el-form-item>
 
-        <el-form-item label="抄送组织">
+        <el-form-item :label="t('workflow.ccOrganization')">
           <el-select v-model="form.anchorType" style="width: 100%">
             <el-option
               v-for="at in anchorTypes"
@@ -234,12 +237,12 @@ function applyConfig() {
           </el-select>
         </el-form-item>
 
-        <el-form-item v-if="form.anchorType === 'CHILD_UNIT'" label="选择下级组织">
+        <el-form-item v-if="form.anchorType === 'CHILD_UNIT'" :label="t('workflow.selectChildOrganization')">
           <el-tree-select
             v-model="form.selectedUnitId"
             :data="unitOptions"
             :props="{ label: 'name', value: 'id', children: 'children' }"
-            placeholder="选择下级组织"
+            :placeholder="t('workflow.selectChildOrganization')"
             check-strictly
             filterable
             style="width: 100%"
@@ -247,12 +250,12 @@ function applyConfig() {
         </el-form-item>
 
         <!-- ABSOLUTE_UNIT：多选组织树 -->
-        <el-form-item v-if="form.anchorType === 'ABSOLUTE_UNIT'" label="选择组织">
+        <el-form-item v-if="form.anchorType === 'ABSOLUTE_UNIT'" :label="t('workflow.selectOrganization')">
           <el-tree-select
             v-model="form.selectedUnitIds"
             :data="unitOptions"
             :props="{ label: 'name', value: 'id', children: 'children' }"
-            placeholder="选择组织（可多选）"
+            :placeholder="t('workflow.selectOrganizationsPlaceholder')"
             multiple
             check-strictly
             filterable
@@ -261,7 +264,7 @@ function applyConfig() {
         </el-form-item>
       </template>
 
-      <el-form-item label="通知渠道">
+      <el-form-item :label="t('workflow.notificationChannels')">
         <el-checkbox-group v-model="form.channels">
           <el-checkbox
             v-for="ch in channelOptions"
@@ -274,7 +277,7 @@ function applyConfig() {
 
       <el-form-item>
         <el-button type="primary" size="small" @click="applyConfig">
-          应用配置
+          {{ t('workflow.applyConfiguration') }}
         </el-button>
       </el-form-item>
     </el-form>
@@ -286,7 +289,7 @@ function applyConfig() {
       class="cc-hint"
     >
       <template #title>
-        抄送节点不会进入待办列表，仅发送通知并记录到 wf_cc_record。
+        {{ t('workflow.ccHint') }}
       </template>
     </el-alert>
   </div>

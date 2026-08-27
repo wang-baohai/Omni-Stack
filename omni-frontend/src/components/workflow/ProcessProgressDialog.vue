@@ -5,6 +5,7 @@
  * 绿色=已完成、蓝色=进行中、灰色=未到达。点击节点显示活动详情。
  */
 import { ref, shallowRef, nextTick, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import NavigatedViewer from 'bpmn-js/lib/NavigatedViewer'
 import { ElMessage } from 'element-plus'
 import type {
@@ -22,6 +23,8 @@ import {
 import 'bpmn-js/dist/assets/diagram-js.css'
 import 'bpmn-js/dist/assets/bpmn-js.css'
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
+
+const { t } = useI18n()
 
 const visible = ref(false)
 const loading = ref(false)
@@ -218,7 +221,7 @@ async function open(processInstanceId: string, processDefinitionId: string) {
       }
     })
   } catch (error: unknown) {
-    ElMessage.error(getErrorMessage(error, '流程进度加载失败'))
+    ElMessage.error(getErrorMessage(error, t('workflow.progressLoadFailed')))
   } finally {
     loading.value = false
   }
@@ -241,11 +244,11 @@ function formatDt(val: string | null) {
   return val.length > 19 ? val.substring(0, 19) : val
 }
 
-/** 获取状态中文标签 */
+/** 获取状态本地化标签 */
 function statusLabel(status: string) {
-  if (status === 'completed') return '已完成'
-  if (status === 'active') return '进行中'
-  return '未到达'
+  if (status === 'completed') return t('workflow.completed')
+  if (status === 'active') return t('workflow.pending')
+  return t('workflow.notReached')
 }
 
 /** 获取状态 Tag 类型 */
@@ -261,7 +264,7 @@ const completedNames = computed(() => {
   return selectedActivity.value.assigneeStatuses
     .filter(a => a.status === 'completed')
     .map(a => a.userName)
-    .join('、')
+    .join(t('workflow.nameSeparator'))
 })
 
 /** 自动通过的人名（会签节点，ANY 模式下被 completionCondition 跳过） */
@@ -270,7 +273,7 @@ const autoCompletedNames = computed(() => {
   return selectedActivity.value.assigneeStatuses
     .filter(a => a.status === 'auto-completed')
     .map(a => a.userName)
-    .join('、')
+    .join(t('workflow.nameSeparator'))
 })
 
 /** 待审批的人名（会签节点） */
@@ -279,7 +282,7 @@ const pendingNames = computed(() => {
   return selectedActivity.value.assigneeStatuses
     .filter(a => a.status === 'active')
     .map(a => a.userName)
-    .join('、')
+    .join(t('workflow.nameSeparator'))
 })
 
 defineExpose({ open })
@@ -288,7 +291,7 @@ defineExpose({ open })
 <template>
   <el-dialog
     v-model="visible"
-    title="流转进度"
+    :title="t('workflow.processProgress')"
     width="85%"
     top="5vh"
     destroy-on-close
@@ -301,30 +304,30 @@ defineExpose({ open })
       </div>
       <!-- 活动详情面板 -->
       <div class="detail-panel">
-        <div class="detail-header">节点详情</div>
+        <div class="detail-header">{{ t('workflow.nodeDetails') }}</div>
         <div v-if="selectedActivity" class="detail-content">
           <div class="detail-row">
-            <span class="label">状态</span>
+            <span class="label">{{ t('common.status') }}</span>
             <el-tag :type="statusType(selectedActivity.status)" size="small">
               {{ statusLabel(selectedActivity.status) }}
             </el-tag>
           </div>
           <div class="detail-row">
-            <span class="label">名称</span>
+            <span class="label">{{ t('workflow.nodeName') }}</span>
             <span class="value">{{ selectedActivity.activityName || selectedActivity.activityId }}</span>
           </div>
           <!-- 会签节点：分组展示已通过/待审批 -->
           <template v-if="selectedActivity.assigneeStatuses && selectedActivity.assigneeStatuses.length > 1">
             <div v-if="completedNames" class="detail-row">
-              <span class="label label-passed">已通过</span>
+              <span class="label label-passed">{{ t('workflow.approved') }}</span>
               <span class="value">{{ completedNames }}</span>
             </div>
             <div v-if="autoCompletedNames" class="detail-row">
-              <span class="label label-auto">自动通过</span>
+              <span class="label label-auto">{{ t('workflow.autoApproved') }}</span>
               <span class="value">{{ autoCompletedNames }}</span>
             </div>
             <div v-if="pendingNames" class="detail-row">
-              <span class="label label-pending">待审批</span>
+              <span class="label label-pending">{{ t('workflow.pendingApproval') }}</span>
               <span class="value">{{ pendingNames }}</span>
             </div>
           </template>
@@ -332,22 +335,22 @@ defineExpose({ open })
           <div v-else-if="selectedActivity.assigneeName" class="detail-row">
             <span class="label">
               {{ selectedActivity.activityType === 'startEvent'
-                ? '申请人'
-                : selectedActivity.status === 'pending' ? '预计处理人' : '处理人' }}
+                ? t('workflow.applicant')
+                : selectedActivity.status === 'pending' ? t('workflow.expectedAssignee') : t('workflow.assignee') }}
             </span>
             <span class="value">{{ selectedActivity.assigneeName }}</span>
           </div>
           <div class="detail-row">
-            <span class="label">开始时间</span>
+            <span class="label">{{ t('workflow.startTime') }}</span>
             <span class="value">{{ formatDt(selectedActivity.startTime) }}</span>
           </div>
           <div class="detail-row">
-            <span class="label">结束时间</span>
+            <span class="label">{{ t('workflow.endTime') }}</span>
             <span class="value">{{ formatDt(selectedActivity.endTime) }}</span>
           </div>
         </div>
         <div v-else class="detail-empty">
-          点击流程图中的节点查看详情
+          {{ t('workflow.selectNodeHint') }}
         </div>
       </div>
     </div>

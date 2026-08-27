@@ -4,6 +4,7 @@
  * StartEvent / EndEvent / UserTask / ServiceTask / ExclusiveGateway / SequenceFlow。
  */
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type BpmnModeler from 'bpmn-js/lib/Modeler'
 import type { BpmnElement } from '@/types/bpmn'
 import UserTaskPanel from './UserTaskPanel.vue'
@@ -13,6 +14,8 @@ import StartEventPanel from './StartEventPanel.vue'
 import EndEventPanel from './EndEventPanel.vue'
 import ParallelGatewayPanel from './ParallelGatewayPanel.vue'
 import IntermediateThrowEventPanel from './IntermediateThrowEventPanel.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   element: BpmnElement | null
@@ -44,17 +47,17 @@ const isTextAnnotation = computed(() => elementType.value === 'bpmn:TextAnnotati
 function typeLabel(type: string | null) {
   if (!type) return ''
   const map: Record<string, string> = {
-    'bpmn:UserTask': '审批节点',
-    'bpmn:ServiceTask': '服务节点（抄送）',
-    'bpmn:ExclusiveGateway': '排他网关',
-    'bpmn:ParallelGateway': '并行网关',
-    'bpmn:InclusiveGateway': '包含网关',
-    'bpmn:StartEvent': '开始事件',
-    'bpmn:EndEvent': '结束事件',
-    'bpmn:IntermediateThrowEvent': '中间事件',
-    'bpmn:SequenceFlow': '顺序流',
-    'bpmn:Process': '流程',
-    'bpmn:TextAnnotation': '文本注释',
+    'bpmn:UserTask': t('workflow.nodeTypeUserTask'),
+    'bpmn:ServiceTask': t('workflow.nodeTypeServiceTask'),
+    'bpmn:ExclusiveGateway': t('workflow.nodeTypeExclusiveGateway'),
+    'bpmn:ParallelGateway': t('workflow.nodeTypeParallelGateway'),
+    'bpmn:InclusiveGateway': t('workflow.nodeTypeInclusiveGateway'),
+    'bpmn:StartEvent': t('workflow.nodeTypeStartEvent'),
+    'bpmn:EndEvent': t('workflow.nodeTypeEndEvent'),
+    'bpmn:IntermediateThrowEvent': t('workflow.nodeTypeIntermediateEvent'),
+    'bpmn:SequenceFlow': t('workflow.nodeTypeSequenceFlow'),
+    'bpmn:Process': t('workflow.nodeTypeProcess'),
+    'bpmn:TextAnnotation': t('workflow.nodeTypeTextAnnotation'),
   }
   return map[type] || type
 }
@@ -64,7 +67,7 @@ function typeLabel(type: string | null) {
   <div class="property-panel">
     <!-- 未选中 -->
     <div v-if="!element || !elementType" class="panel-empty">
-      <el-empty description="点击画布中的节点以配置属性" :image-size="80" />
+      <el-empty :description="t('workflow.selectCanvasNodeHint')" :image-size="80" />
     </div>
 
     <!-- 已选中 -->
@@ -78,7 +81,7 @@ function typeLabel(type: string | null) {
 
       <!-- 通用属性 -->
       <div class="panel-section">
-        <div class="section-title">基本信息</div>
+        <div class="section-title">{{ t('workflow.basicInfo') }}</div>
         <el-form label-width="80px" size="small">
           <el-form-item label="ID">
             <el-input :model-value="element.businessObject?.id" disabled />
@@ -148,7 +151,7 @@ function typeLabel(type: string | null) {
         show-icon
       >
         <template #title>
-          文本注释可直接在画布中编辑内容，无需属性面板配置。
+          {{ t('workflow.textAnnotationHint') }}
         </template>
       </el-alert>
     </template>

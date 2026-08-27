@@ -4,6 +4,9 @@
  * 并行网关自动汇聚所有入流，无需额外配置。仅展示基本信息。
  */
 import type { BpmnElement } from '@/types/bpmn'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 defineProps<{
   element: BpmnElement
@@ -12,19 +15,19 @@ defineProps<{
 
 <template>
   <div class="gateway-panel">
-    <div class="section-title">并行网关</div>
+    <div class="section-title">{{ t('workflow.nodeTypeParallelGateway') }}</div>
     <el-alert
       type="info"
       :closable="false"
       show-icon
     >
       <template #title>
-        并行网关自动汇聚所有入流，无需额外配置。所有入流完成后才会继续执行下游。
+        {{ t('workflow.parallelGatewayHint') }}
       </template>
     </el-alert>
 
     <el-form label-width="80px" size="small" class="gateway-form">
-      <el-form-item label="名称">
+      <el-form-item :label="t('workflow.nodeName')">
         <el-input
           :model-value="element?.businessObject?.name || 'Parallel Gateway'"
           disabled
