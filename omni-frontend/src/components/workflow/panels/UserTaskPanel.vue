@@ -4,7 +4,8 @@
  * 配置：角色 + 锚点组织 + 目标组织 + 审批模式 + 兜底策略。
  * 使用 useBpmnExtension 的 readAssignment / writeAssignment 读写 omni:assignment。
  */
-import { ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import type BpmnModeler from 'bpmn-js/lib/Modeler'
@@ -27,6 +28,8 @@ import {
 } from '@/api/workflow-model'
 import { useUserStore } from '@/stores/user'
 import { getUserIdFromToken } from '@/utils/jwt'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   element: BpmnElement
@@ -72,23 +75,23 @@ const form = reactive<{
   approvalMode: 'ANY',
 })
 
-const anchorTypes = [
-  { value: 'START_USER_PRIMARY_UNIT', label: '发起人所在组织' },
-  { value: 'PARENT', label: '发起人上级组织' },
-  { value: 'CHILD_UNIT', label: '发起人下级组织' },
-  { value: 'ABSOLUTE_UNIT', label: '指定组织' },
-]
+const anchorTypes = computed(() => [
+  { value: 'START_USER_PRIMARY_UNIT', label: t('workflow.initiatorOrganization') },
+  { value: 'PARENT', label: t('workflow.initiatorParentOrganization') },
+  { value: 'CHILD_UNIT', label: t('workflow.initiatorChildOrganization') },
+  { value: 'ABSOLUTE_UNIT', label: t('workflow.specifiedOrganization') },
+])
 
-const fallbackStrategies = [
-  { value: 'ERROR', label: '报错（仅日志）' },
-  { value: 'ASSIGN_ADMIN', label: '分配给管理员' },
-  { value: 'ESCALATE_PARENT', label: '上报上级' },
-]
+const fallbackStrategies = computed(() => [
+  { value: 'ERROR', label: t('workflow.fallbackError') },
+  { value: 'ASSIGN_ADMIN', label: t('workflow.fallbackAdmin') },
+  { value: 'ESCALATE_PARENT', label: t('workflow.fallbackParent') },
+])
 
-const approvalModes = [
-  { value: 'ANY', label: '任一人审批即可' },
-  { value: 'ALL', label: '全员审批（会签）' },
-]
+const approvalModes = computed(() => [
+  { value: 'ANY', label: t('workflow.approvalModeAny') },
+  { value: 'ALL', label: t('workflow.approvalModeAll') },
+])
 
 // ===== 读取已有配置 =====
 /** 加载期间禁止 syncToElement，避免将未完成的表单值写回元素 */
@@ -252,11 +255,11 @@ async function loadUsers() {
 
 async function handlePreview() {
   if (!form.roleCode) {
-    ElMessage.warning('请先选择审批角色')
+    ElMessage.warning(t('workflow.selectApprovalRoleFirst'))
     return
   }
   if (!simulateUserId.value) {
-    ElMessage.warning('请先选择模拟发起人')
+    ElMessage.warning(t('workflow.selectSimulatedInitiatorFirst'))
     return
   }
   previewLoading.value = true
@@ -272,7 +275,7 @@ async function handlePreview() {
     previewCandidates.value = res.data.data.candidates || []
     previewVisible.value = true
   } catch {
-    ElMessage.error('预览解析失败')
+    ElMessage.error(t('workflow.candidatePreviewFailed'))
   } finally {
     previewLoading.value = false
   }
@@ -281,25 +284,25 @@ async function handlePreview() {
 
 <template>
   <div class="user-task-panel">
-    <div class="section-title">审批人配置</div>
+    <div class="section-title">{{ t('workflow.approverConfiguration') }}</div>
 
     <el-form label-width="90px" size="small" @submit.prevent>
       <!-- 审批角色 -->
       <el-form-item required>
         <template #label>
-          <span>审批角色</span>
+          <span>{{ t('workflow.approvalRole') }}</span>
           <el-tooltip placement="top" :show-after="300">
             <template #content>
               <div class="help-content">
-                选择审批人在组织中担任的角色。系统会在目标组织范围内查找拥有该角色的用户作为审批候选人。<br />
+                {{ t('workflow.approvalRoleHelp') }}<br />
                 <br />
-                例如：选择「工作组组长」，则会在目标组织内查找所有 TEAM_LEADER 角色的用户。
+                {{ t('workflow.approvalRoleExample') }}
               </div>
             </template>
             <el-icon class="help-icon"><QuestionFilled /></el-icon>
           </el-tooltip>
         </template>
-        <el-select v-model="form.roleCode" placeholder="选择角色" filterable style="width: 100%">
+        <el-select v-model="form.roleCode" :placeholder="t('workflow.selectRole')" filterable style="width: 100%">
           <el-option
             v-for="role in roles"
             :key="role.roleCode"
@@ -312,16 +315,16 @@ async function handlePreview() {
       <!-- 锚点组织 -->
       <el-form-item>
         <template #label>
-          <span>审批组织</span>
+          <span>{{ t('workflow.approvalOrganization') }}</span>
           <el-tooltip placement="top" :show-after="300">
             <template #content>
               <div class="help-content">
-                决定去哪个组织里找审批人。系统先定位到目标组织，再在该组织内查找拥有指定角色的人。<br />
+                {{ t('workflow.approvalOrganizationHelp') }}<br />
                 <br />
-                <b>发起人所在组织</b>：发起人属于哪个组，就在那个组里找（最常用，适合“找直属领导”）<br />
-                <b>发起人上级组织</b>：从发起人所在组往上找一级父组织（适合“找部门领导审批”）<br />
-                <b>发起人下级组织</b>：从下拉选择一个子组织（适合“指派下属小组负责人”）<br />
-                <b>指定组织</b>：直接从组织树中选择一个或多个固定组织（适合“人事部/财务部固定审批”）
+                <b>{{ t('workflow.initiatorOrganization') }}</b>：{{ t('workflow.initiatorOrganizationHelp') }}<br />
+                <b>{{ t('workflow.initiatorParentOrganization') }}</b>：{{ t('workflow.initiatorParentOrganizationHelp') }}<br />
+                <b>{{ t('workflow.initiatorChildOrganization') }}</b>：{{ t('workflow.initiatorChildOrganizationHelp') }}<br />
+                <b>{{ t('workflow.specifiedOrganization') }}</b>：{{ t('workflow.specifiedOrganizationHelp') }}
               </div>
             </template>
             <el-icon class="help-icon"><QuestionFilled /></el-icon>
@@ -338,12 +341,12 @@ async function handlePreview() {
       </el-form-item>
       
       <!-- 组织树选择（CHILD_UNIT 单选） -->
-      <el-form-item v-if="form.anchorType === 'CHILD_UNIT'" label="选择下级组织">
+      <el-form-item v-if="form.anchorType === 'CHILD_UNIT'" :label="t('workflow.selectChildOrganization')">
         <el-tree-select
           v-model="form.selectedUnitId"
           :data="unitOptions"
           :props="{ label: 'name', value: 'id', children: 'children' }"
-          placeholder="选择下级组织"
+          :placeholder="t('workflow.selectChildOrganization')"
           check-strictly
           filterable
           style="width: 100%"
@@ -351,12 +354,12 @@ async function handlePreview() {
       </el-form-item>
 
       <!-- ABSOLUTE_UNIT：多选组织树 -->
-      <el-form-item v-if="form.anchorType === 'ABSOLUTE_UNIT'" label="选择组织">
+      <el-form-item v-if="form.anchorType === 'ABSOLUTE_UNIT'" :label="t('workflow.selectOrganization')">
         <el-tree-select
           v-model="form.selectedUnitIds"
           :data="unitOptions"
           :props="{ label: 'name', value: 'id', children: 'children' }"
-          placeholder="选择组织（可多选）"
+          :placeholder="t('workflow.selectOrganizationsPlaceholder')"
           multiple
           check-strictly
           filterable
@@ -367,15 +370,15 @@ async function handlePreview() {
       <!-- 审批模式 -->
       <el-form-item>
         <template #label>
-          <span>审批模式</span>
+          <span>{{ t('workflow.approvalMode') }}</span>
           <el-tooltip placement="top" :show-after="300">
             <template #content>
               <div class="help-content">
-                决定审批节点的通过规则。<br />
+                {{ t('workflow.approvalModeHelp') }}<br />
                 <br />
-                <b>任一人审批即可</b>：只要有一位审批人操作（通过或驳回），该节点即完成。适用于"一个领导签字就够"的场景。<br />
+                <b>{{ t('workflow.approvalModeAny') }}</b>：{{ t('workflow.approvalModeAnyHelp') }}<br />
                 <br />
-                <b>全员审批（会签）</b>：所有审批人都必须逐一操作。任一人驳回则整条流程立即终止（一票否决）。适用于"多个领导都要签字"的场景。
+                <b>{{ t('workflow.approvalModeAll') }}</b>：{{ t('workflow.approvalModeAllHelp') }}
               </div>
             </template>
             <el-icon class="help-icon"><QuestionFilled /></el-icon>
@@ -395,17 +398,17 @@ async function handlePreview() {
       <!-- 兜底策略 -->
       <el-form-item>
         <template #label>
-          <span>兜底策略</span>
+          <span>{{ t('workflow.fallbackStrategy') }}</span>
           <el-tooltip placement="top" :show-after="300">
             <template #content>
               <div class="help-content">
-                当系统找不到符合条件的审批候选人时，如何处理。<br />
+                {{ t('workflow.fallbackHelp') }}<br />
                 <br />
-                <b>报错（仅日志）</b>：仅记录错误日志，任务可能无人处理。适合开发测试阶段排查问题。<br />
+                <b>{{ t('workflow.fallbackError') }}</b>：{{ t('workflow.fallbackErrorHelp') }}<br />
                 <br />
-                <b>分配给管理员</b>：自动将任务转给拥有 SUPER_ADMIN 角色的用户，确保流程不会卡住。推荐生产环境使用。<br />
+                <b>{{ t('workflow.fallbackAdmin') }}</b>：{{ t('workflow.fallbackAdminHelp') }}<br />
                 <br />
-                <b>上报上级</b>：记录日志并尝试在上级组织中查找候选人。适用于有多级组织结构的场景。
+                <b>{{ t('workflow.fallbackParent') }}</b>：{{ t('workflow.fallbackParentHelp') }}
               </div>
             </template>
             <el-icon class="help-icon"><QuestionFilled /></el-icon>
@@ -423,39 +426,39 @@ async function handlePreview() {
 
       <el-form-item>
         <el-button size="small" :loading="previewLoading" @click="handlePreview">
-          预览候选人
+          {{ t('workflow.previewCandidates') }}
         </el-button>
       </el-form-item>
     </el-form>
 
     <!-- 预览结果 -->
-    <el-dialog v-model="previewVisible" title="候选人预览" width="480" append-to-body>
+    <el-dialog v-model="previewVisible" :title="t('workflow.candidatePreview')" width="480" append-to-body>
       <el-form label-width="100px" size="small" style="margin-bottom: 12px" @submit.prevent>
-        <el-form-item label="模拟发起人">
-          <el-select v-model="simulateUserId" filterable placeholder="选择模拟用户" style="width: 100%">
+        <el-form-item :label="t('workflow.simulatedInitiator')">
+          <el-select v-model="simulateUserId" filterable :placeholder="t('workflow.selectSimulatedUser')" style="width: 100%">
             <el-option
               v-for="u in allUsers"
               :key="u.userId"
-              :label="`${u.nickname || u.username}（${u.unitName || '未分配组织'}）`"
+              :label="`${u.nickname || u.username} (${u.unitName || t('workflow.unassignedOrganization')})`"
               :value="u.userId"
             />
           </el-select>
         </el-form-item>
       </el-form>
       <div v-if="previewCandidates.length === 0">
-        <el-empty description="未找到匹配的候选人" :image-size="60" />
+        <el-empty :description="t('workflow.noCandidates')" :image-size="60" />
       </div>
       <el-table v-else :data="previewCandidates" stripe size="small">
-        <el-table-column prop="username" label="用户名" width="120" />
-        <el-table-column prop="nickname" label="昵称" width="120" />
-        <el-table-column prop="unitName" label="所属组织" />
+        <el-table-column prop="username" :label="t('user.username')" width="120" />
+        <el-table-column prop="nickname" :label="t('user.nickname')" width="120" />
+        <el-table-column prop="unitName" :label="t('workflow.organization')" />
       </el-table>
       <div class="preview-count">
-        共 {{ previewCandidates.length }} 位候选人
+        {{ t('workflow.candidateCount', { count: previewCandidates.length }) }}
       </div>
       <template #footer>
         <el-button size="small" type="primary" :loading="previewLoading" @click="handlePreview">
-          重新解析
+          {{ t('workflow.resolveAgain') }}
         </el-button>
       </template>
     </el-dialog>

@@ -4,7 +4,8 @@
  * 左侧：受限 Palette 面板；中央：bpmn-js Canvas；右侧：属性面板 PropertyPanel。
  * 工具栏：保存草稿 / 校验 / 发布。
  */
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { computed, ref, onMounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getModel,
@@ -27,6 +28,8 @@ import {
 } from '@/types/bpmn'
 import { getErrorMessage, isUserCancelled } from '@/utils/errors'
 import PropertyPanel from './panels/PropertyPanel.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   visible: boolean
@@ -56,43 +59,43 @@ interface PaletteItem {
   bpmnType?: string
 }
 
-const paletteGroups: Array<{ label: string; items: PaletteItem[] }> = [
+const paletteGroups = computed<Array<{ label: string; items: PaletteItem[] }>>(() => [
   {
-    label: '事件',
+    label: t('workflow.paletteEvents'),
     items: [
-      { key: 'start-event', label: '开始事件', icon: 'bpmn-icon-start-event-none', tool: 'shape', bpmnType: 'bpmn:StartEvent' },
-      { key: 'end-event', label: '结束事件', icon: 'bpmn-icon-end-event-none', tool: 'shape', bpmnType: 'bpmn:EndEvent' },
-      { key: 'intermediate-throw-event', label: '中间事件', icon: 'bpmn-icon-intermediate-event-none', tool: 'shape', bpmnType: 'bpmn:IntermediateThrowEvent' },
+      { key: 'start-event', label: t('workflow.nodeTypeStartEvent'), icon: 'bpmn-icon-start-event-none', tool: 'shape', bpmnType: 'bpmn:StartEvent' },
+      { key: 'end-event', label: t('workflow.nodeTypeEndEvent'), icon: 'bpmn-icon-end-event-none', tool: 'shape', bpmnType: 'bpmn:EndEvent' },
+      { key: 'intermediate-throw-event', label: t('workflow.nodeTypeIntermediateEvent'), icon: 'bpmn-icon-intermediate-event-none', tool: 'shape', bpmnType: 'bpmn:IntermediateThrowEvent' },
     ],
   },
   {
-    label: '活动',
+    label: t('workflow.paletteActivities'),
     items: [
-      { key: 'user-task', label: '审批节点', icon: 'bpmn-icon-user-task', tool: 'shape', bpmnType: 'bpmn:UserTask' },
-      { key: 'service-task', label: '抄送节点', icon: 'bpmn-icon-service-task', tool: 'shape', bpmnType: 'bpmn:ServiceTask' },
+      { key: 'user-task', label: t('workflow.nodeTypeUserTask'), icon: 'bpmn-icon-user-task', tool: 'shape', bpmnType: 'bpmn:UserTask' },
+      { key: 'service-task', label: t('workflow.ccNode'), icon: 'bpmn-icon-service-task', tool: 'shape', bpmnType: 'bpmn:ServiceTask' },
     ],
   },
   {
-    label: '网关',
+    label: t('workflow.paletteGateways'),
     items: [
-      { key: 'exclusive-gateway', label: '排他网关', icon: 'bpmn-icon-gateway-xor', tool: 'shape', bpmnType: 'bpmn:ExclusiveGateway' },
-      { key: 'parallel-gateway', label: '并行网关', icon: 'bpmn-icon-gateway-parallel', tool: 'shape', bpmnType: 'bpmn:ParallelGateway' },
-      { key: 'inclusive-gateway', label: '包含网关', icon: 'bpmn-icon-gateway-or', tool: 'shape', bpmnType: 'bpmn:InclusiveGateway' },
+      { key: 'exclusive-gateway', label: t('workflow.nodeTypeExclusiveGateway'), icon: 'bpmn-icon-gateway-xor', tool: 'shape', bpmnType: 'bpmn:ExclusiveGateway' },
+      { key: 'parallel-gateway', label: t('workflow.nodeTypeParallelGateway'), icon: 'bpmn-icon-gateway-parallel', tool: 'shape', bpmnType: 'bpmn:ParallelGateway' },
+      { key: 'inclusive-gateway', label: t('workflow.nodeTypeInclusiveGateway'), icon: 'bpmn-icon-gateway-or', tool: 'shape', bpmnType: 'bpmn:InclusiveGateway' },
     ],
   },
   {
-    label: '连线',
+    label: t('workflow.paletteConnections'),
     items: [
-      { key: 'sequence-flow', label: '顺序流', icon: 'bpmn-icon-connection', tool: 'connect' },
+      { key: 'sequence-flow', label: t('workflow.nodeTypeSequenceFlow'), icon: 'bpmn-icon-connection', tool: 'connect' },
     ],
   },
   {
-    label: '注释',
+    label: t('workflow.paletteAnnotations'),
     items: [
-      { key: 'text-annotation', label: '文本注释', icon: 'bpmn-icon-text-annotation', tool: 'shape', bpmnType: 'bpmn:TextAnnotation' },
+      { key: 'text-annotation', label: t('workflow.nodeTypeTextAnnotation'), icon: 'bpmn-icon-text-annotation', tool: 'shape', bpmnType: 'bpmn:TextAnnotation' },
     ],
   },
-]
+])
 
 const {
   modeler,
@@ -135,7 +138,7 @@ async function loadModel() {
       }
     }
   } catch {
-    ElMessage.error('加载模型数据失败')
+    ElMessage.error(t('workflow.modelLoadFailed'))
   } finally {
     loadingModel.value = false
   }
@@ -178,10 +181,10 @@ async function handleSave() {
       bpmnXml: xml,
     })
     dirty.value = false
-    ElMessage.success('草稿已保存')
+    ElMessage.success(t('workflow.draftSaved'))
     emit('saved')
   } catch {
-    ElMessage.error('保存草稿失败')
+    ElMessage.error(t('workflow.draftSaveFailed'))
   } finally {
     saving.value = false
   }
@@ -204,7 +207,7 @@ async function handleValidate() {
     validateResult.value = res.data.data
     validateDialogVisible.value = true
   } catch {
-    ElMessage.error('校验请求失败')
+    ElMessage.error(t('workflow.validationRequestFailed'))
   } finally {
     validating.value = false
   }
@@ -217,8 +220,8 @@ async function handlePublish() {
   if (!modelInfo.value || publishing.value) return
   try {
     await ElMessageBox.confirm(
-      '确认发布当前模型？发布后将生成新版本并部署到流程引擎。',
-      '发布确认',
+      t('workflow.publishCurrentConfirmMessage'),
+      t('workflow.publishConfirmTitle'),
       { type: 'warning' },
     )
     // 先保存再发布
@@ -227,12 +230,12 @@ async function handlePublish() {
     }
     publishing.value = true
     const res = await publishModel(modelInfo.value.id)
-    ElMessage.success(`发布成功！业务版本: v${res.data.data.businessVersion}`)
+    ElMessage.success(t('workflow.publishSuccess', { version: res.data.data.businessVersion }))
     dirty.value = false
     emit('saved')
   } catch (error: unknown) {
     if (!isUserCancelled(error)) {
-      ElMessage.error(getErrorMessage(error, '发布失败'))
+      ElMessage.error(getErrorMessage(error, t('workflow.publishFailed')))
     }
   } finally {
     publishing.value = false
@@ -243,9 +246,9 @@ async function handlePublish() {
 async function handleClose() {
   if (dirty.value) {
     try {
-      await ElMessageBox.confirm('有未保存的修改，是否保存后关闭？', '提示', {
-        confirmButtonText: '保存',
-        cancelButtonText: '不保存',
+      await ElMessageBox.confirm(t('workflow.unsavedCloseConfirm'), t('common.notice'), {
+        confirmButtonText: t('common.save'),
+        cancelButtonText: t('workflow.doNotSave'),
         distinguishCancelAndClose: true,
         type: 'warning',
       })
@@ -264,7 +267,7 @@ function handlePaletteMouseDown(event: MouseEvent, item: PaletteItem) {
 
   if (item.tool === 'connect') {
     if (!selectedElement.value) {
-      ElMessage.info('请先选中一个起点节点')
+      ElMessage.info(t('workflow.selectStartNodeFirst'))
       return
     }
     const connect = modeler.value.get<BpmnConnect>('connect')
@@ -299,25 +302,25 @@ onMounted(() => {
       <div class="designer-header">
         <div class="header-left">
           <span class="header-title">
-            流程设计器
+            {{ t('workflow.designer') }}
             <template v-if="modelInfo">
               — {{ modelInfo.modelName }}
               <el-tag size="small" type="info" class="header-key">{{ modelInfo.modelKey }}</el-tag>
             </template>
           </span>
-          <el-tag v-if="dirty" size="small" type="warning" class="header-dirty">未保存</el-tag>
+          <el-tag v-if="dirty" size="small" type="warning" class="header-dirty">{{ t('workflow.unsaved') }}</el-tag>
         </div>
         <div class="header-actions">
           <el-button :loading="saving" type="primary" @click="handleSave">
-            保存草稿
+            {{ t('workflow.saveDraft') }}
           </el-button>
           <el-button :loading="validating" @click="handleValidate">
-            校验
+            {{ t('workflow.validate') }}
           </el-button>
           <el-button :loading="publishing" type="success" @click="handlePublish">
-            发布
+            {{ t('workflow.publish') }}
           </el-button>
-          <el-button @click="handleClose">关闭</el-button>
+          <el-button @click="handleClose">{{ t('common.close') }}</el-button>
         </div>
       </div>
     </template>
@@ -325,7 +328,7 @@ onMounted(() => {
     <div v-loading="loadingModel || modelerLoading" class="designer-body">
       <!-- 左侧 Palette -->
       <div class="designer-palette">
-        <div class="palette-title">元素</div>
+        <div class="palette-title">{{ t('workflow.paletteElements') }}</div>
         <div
           v-for="group in paletteGroups"
           :key="group.label"
@@ -345,7 +348,7 @@ onMounted(() => {
         </div>
         <div class="palette-hint">
           <el-text size="small" type="info">
-            拖拽元素到画布；选择起点后可使用顺序流连线。
+            {{ t('workflow.paletteHint') }}
           </el-text>
         </div>
       </div>
@@ -365,14 +368,14 @@ onMounted(() => {
     </div>
 
     <!-- 校验结果对话框 -->
-    <el-dialog v-model="validateDialogVisible" title="校验结果" width="500">
+    <el-dialog v-model="validateDialogVisible" :title="t('workflow.validationResult')" width="500">
       <template v-if="validateResult">
         <el-result
           :icon="validateResult.valid ? 'success' : 'error'"
-          :title="validateResult.valid ? '校验通过' : '校验失败'"
+          :title="validateResult.valid ? t('workflow.validationPassed') : t('workflow.validationFailed')"
         />
         <div v-if="validateResult.errors.length" class="validate-section">
-          <div class="validate-label">错误：</div>
+          <div class="validate-label">{{ t('workflow.errorsLabel') }}</div>
           <ul class="validate-list">
             <li v-for="(err, idx) in validateResult.errors" :key="idx" class="validate-error">
               {{ err }}
@@ -380,7 +383,7 @@ onMounted(() => {
           </ul>
         </div>
         <div v-if="validateResult.warnings.length" class="validate-section">
-          <div class="validate-label">警告：</div>
+          <div class="validate-label">{{ t('workflow.warningsLabel') }}</div>
           <ul class="validate-list">
             <li v-for="(warn, idx) in validateResult.warnings" :key="idx" class="validate-warning">
               {{ warn }}
