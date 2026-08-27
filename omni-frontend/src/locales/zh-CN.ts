@@ -749,6 +749,10 @@ export default {
       todayFailed: '今日失败',
     },
   },
+  workspaceApproval: {
+    invalidRequisitionId: '采购请购流程缺少合法的 requisitionId', invalidTransferId: '资产调拨流程缺少合法的 transferId', invalidDisposalId: '资产处置流程缺少合法的 disposalId', formLoadFailed: '业务表单加载失败', formNotValidated: '业务表单尚未通过校验，不能审批', processed: '审批已处理', syncing: '业务状态正在通过可靠消息同步，可在对应业务列表中查看最终结果。', validationFailed: '业务表单校验失败：{error}',
+    requisitionNo: '请购单号', category: '品类', title: '标题', requester: '申请人', requesterOrg: '申请组织', estimatedAmount: '预估金额', approvalRound: '审批轮次', requisitionReason: '请购原因', materialCode: '物料编码', materialName: '物料名称', quantity: '数量', unit: '单位', estimatedUnitPrice: '预估单价', lineAmount: '行金额', transferNo: '调拨单号', currentStatus: '当前状态', asset: '资产', fromUserOrg: '原用户/部门', toUserOrg: '目标用户/部门', location: '位置', transferReason: '调拨原因', disposalNo: '处置单号', disposalType: '处置类型', scrap: '报废', discard: '丢弃', previousAssetStatus: '原资产状态', residualValue: '残值', disposalMethod: '处置方式', disposalReason: '处置原因',
+  },
   // ===== cron — 调度频率生成器模块 =====
   cron: {
     frequencyType: '执行频率',

@@ -713,6 +713,10 @@ export default {
       todayFailed: 'Today Failed',
     },
   },
+  workspaceApproval: {
+    invalidRequisitionId: 'The procurement requisition process has no valid requisitionId', invalidTransferId: 'The asset transfer process has no valid transferId', invalidDisposalId: 'The asset disposal process has no valid disposalId', formLoadFailed: 'Failed to load the business form', formNotValidated: 'The business form has not passed validation and cannot be approved', processed: 'Approval Processed', syncing: 'The business status is synchronizing through reliable messaging. Check the related business list for the final result.', validationFailed: 'Business form validation failed: {error}',
+    requisitionNo: 'Requisition Number', category: 'Category', title: 'Title', requester: 'Requester', requesterOrg: 'Requester Organization', estimatedAmount: 'Estimated Amount', approvalRound: 'Approval Round', requisitionReason: 'Requisition Reason', materialCode: 'Material Code', materialName: 'Material Name', quantity: 'Quantity', unit: 'Unit', estimatedUnitPrice: 'Estimated Unit Price', lineAmount: 'Line Amount', transferNo: 'Transfer Number', currentStatus: 'Current Status', asset: 'Asset', fromUserOrg: 'Previous User / Department', toUserOrg: 'Target User / Department', location: 'Location', transferReason: 'Transfer Reason', disposalNo: 'Disposal Number', disposalType: 'Disposal Type', scrap: 'Scrap', discard: 'Discard', previousAssetStatus: 'Previous Asset Status', residualValue: 'Residual Value', disposalMethod: 'Disposal Method', disposalReason: 'Disposal Reason',
+  },
   // ===== cron — schedule frequency generator module =====
   cron: {
     frequencyType: 'Frequency',

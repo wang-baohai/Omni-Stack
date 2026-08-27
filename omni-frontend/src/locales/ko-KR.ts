@@ -143,6 +143,10 @@ export default {
     title: '공급업체 포털 로그인', subtitle: '로그인하여 기업 정보를 관리하세요',
     noAccount: '공급업체 계정이 없으신가요?', registerNow: '지금 가입',
   },
+  workspaceApproval: {
+    invalidRequisitionId: '구매 요청 프로세스에 유효한 requisitionId가 없습니다', invalidTransferId: '자산 이동 프로세스에 유효한 transferId가 없습니다', invalidDisposalId: '자산 처분 프로세스에 유효한 disposalId가 없습니다', formLoadFailed: '업무 양식을 불러오지 못했습니다', formNotValidated: '업무 양식이 검증을 통과하지 않아 승인할 수 없습니다', processed: '승인을 처리했습니다', syncing: '업무 상태를 신뢰성 메시지로 동기화하고 있습니다. 최종 결과는 관련 업무 목록에서 확인하세요.', validationFailed: '업무 양식 검증 실패: {error}',
+    requisitionNo: '구매 요청 번호', category: '분류', title: '제목', requester: '신청자', requesterOrg: '신청 조직', estimatedAmount: '예상 금액', approvalRound: '승인 회차', requisitionReason: '구매 요청 사유', materialCode: '품목 코드', materialName: '품목 이름', quantity: '수량', unit: '단위', estimatedUnitPrice: '예상 단가', lineAmount: '행 금액', transferNo: '이동 번호', currentStatus: '현재 상태', asset: '자산', fromUserOrg: '기존 사용자 / 부서', toUserOrg: '대상 사용자 / 부서', location: '위치', transferReason: '이동 사유', disposalNo: '처분 번호', disposalType: '처분 유형', scrap: '폐기', discard: '버림', previousAssetStatus: '기존 자산 상태', residualValue: '잔존 가치', disposalMethod: '처분 방식', disposalReason: '처분 사유',
+  },
   procurementOverviewPage: {
     ...enUS.procurementOverviewPage,
     title: '조달 개요', description: '현재 사용자의 조달 데이터 범위를 준수하며 금액은 통화별로 집계합니다.',

@@ -626,22 +626,22 @@ async function openApproval(task: TodoTask) {
     const variables = formResponse.data.data.variables || {}
     if (variables.businessType === 'PROCUREMENT_REQUISITION') {
       const requisitionId = positiveInteger(variables.requisitionId)
-      if (!requisitionId) throw new Error('采购请购流程缺少合法的 requisitionId')
+      if (!requisitionId) throw new Error(t('workspaceApproval.invalidRequisitionId'))
       const businessResponse = await getProcurementRequisitionApprovalView(requisitionId, task.taskId)
       requisitionApprovalView.value = businessResponse.data.data
     } else if (variables.businessType === 'ASSET_TRANSFER') {
       const transferId = positiveInteger(variables.transferId)
-      if (!transferId) throw new Error('资产调拨流程缺少合法的 transferId')
+      if (!transferId) throw new Error(t('workspaceApproval.invalidTransferId'))
       const businessResponse = await getAssetTransferApprovalView(transferId, task.taskId)
       assetTransferApprovalView.value = businessResponse.data.data
     } else if (variables.businessType === 'ASSET_DISPOSAL') {
       const disposalId = positiveInteger(variables.disposalId)
-      if (!disposalId) throw new Error('资产处置流程缺少合法的 disposalId')
+      if (!disposalId) throw new Error(t('workspaceApproval.invalidDisposalId'))
       const businessResponse = await getAssetDisposalApprovalView(disposalId, task.taskId)
       assetDisposalApprovalView.value = businessResponse.data.data
     }
   } catch (error) {
-    businessFormError.value = error instanceof Error ? error.message : '业务表单加载失败'
+    businessFormError.value = error instanceof Error ? error.message : t('workspaceApproval.formLoadFailed')
   } finally {
     businessFormLoading.value = false
   }
@@ -649,7 +649,7 @@ async function openApproval(task: TodoTask) {
 
 async function submitApproval() {
   if (!approvalTask.value || !approvalCanSubmit.value) {
-    ElMessage.warning('业务表单尚未通过校验，不能审批')
+    ElMessage.warning(t('workspaceApproval.formNotValidated'))
     return
   }
   await completeApproval(approvalTask.value.taskId, {
@@ -658,8 +658,8 @@ async function submitApproval() {
   })
   if (hasBusinessApprovalView.value) {
     ElNotification.success({
-      title: '审批已处理',
-      message: '业务状态正在通过可靠消息同步，可在对应业务列表中查看最终结果。',
+      title: t('workspaceApproval.processed'),
+      message: t('workspaceApproval.syncing'),
       duration: 5000,
     })
   } else {
@@ -949,33 +949,33 @@ function instanceStatusType(status: number): string {
             type="error"
             :closable="false"
             show-icon
-            :title="`业务表单校验失败：${businessFormError}`"
+            :title="t('workspaceApproval.validationFailed', { error: businessFormError })"
           />
           <template v-if="requisitionApprovalView">
             <el-descriptions :column="2" border class="approval-business-form">
-              <el-descriptions-item label="请购单号">
+              <el-descriptions-item :label="t('workspaceApproval.requisitionNo')">
                 {{ requisitionApprovalView.requisition.requisitionNo }}
               </el-descriptions-item>
-              <el-descriptions-item label="品类">
+              <el-descriptions-item :label="t('workspaceApproval.category')">
                 {{ requisitionApprovalView.requisition.primaryCategoryCode }}
               </el-descriptions-item>
-              <el-descriptions-item label="标题" :span="2">
+              <el-descriptions-item :label="t('workspaceApproval.title')" :span="2">
                 {{ requisitionApprovalView.requisition.title }}
               </el-descriptions-item>
-              <el-descriptions-item label="申请人">
+              <el-descriptions-item :label="t('workspaceApproval.requester')">
                 #{{ requisitionApprovalView.requisition.requesterUserId }}
               </el-descriptions-item>
-              <el-descriptions-item label="申请组织">
+              <el-descriptions-item :label="t('workspaceApproval.requesterOrg')">
                 #{{ requisitionApprovalView.requisition.requesterUnitId }}
               </el-descriptions-item>
-              <el-descriptions-item label="预估金额">
+              <el-descriptions-item :label="t('workspaceApproval.estimatedAmount')">
                 {{ requisitionApprovalView.requisition.totalAmount }}
                 {{ requisitionApprovalView.requisition.currencyCode }}
               </el-descriptions-item>
-              <el-descriptions-item label="审批轮次">
+              <el-descriptions-item :label="t('workspaceApproval.approvalRound')">
                 {{ requisitionApprovalView.requisition.approvalAttempt }}
               </el-descriptions-item>
-              <el-descriptions-item label="请购原因" :span="2">
+              <el-descriptions-item :label="t('workspaceApproval.requisitionReason')" :span="2">
                 {{ requisitionApprovalView.requisition.reason || '—' }}
               </el-descriptions-item>
             </el-descriptions>
@@ -986,12 +986,12 @@ function instanceStatusType(status: number): string {
               class="approval-business-lines"
             >
               <el-table-column prop="lineNo" label="#" width="50" />
-              <el-table-column prop="materialCode" label="物料编码" min-width="120" />
-              <el-table-column prop="materialName" label="物料名称" min-width="150" />
-              <el-table-column prop="quantity" label="数量" min-width="105" align="right" />
-              <el-table-column prop="unit" label="单位" width="70" />
-              <el-table-column prop="estimatedUnitPrice" label="预估单价" min-width="110" align="right" />
-              <el-table-column prop="estimatedTotalPrice" label="行金额" min-width="120" align="right" />
+              <el-table-column prop="materialCode" :label="t('workspaceApproval.materialCode')" min-width="120" />
+              <el-table-column prop="materialName" :label="t('workspaceApproval.materialName')" min-width="150" />
+              <el-table-column prop="quantity" :label="t('workspaceApproval.quantity')" min-width="105" align="right" />
+              <el-table-column prop="unit" :label="t('workspaceApproval.unit')" width="70" />
+              <el-table-column prop="estimatedUnitPrice" :label="t('workspaceApproval.estimatedUnitPrice')" min-width="110" align="right" />
+              <el-table-column prop="estimatedTotalPrice" :label="t('workspaceApproval.lineAmount')" min-width="120" align="right" />
             </el-table>
           </template>
           <el-descriptions
@@ -1000,30 +1000,30 @@ function instanceStatusType(status: number): string {
             border
             class="approval-business-form"
           >
-            <el-descriptions-item label="调拨单号">
+            <el-descriptions-item :label="t('workspaceApproval.transferNo')">
               {{ assetTransferApprovalView.transferNo }}
             </el-descriptions-item>
-            <el-descriptions-item label="当前状态">
+            <el-descriptions-item :label="t('workspaceApproval.currentStatus')">
               {{ assetTransferApprovalView.status }}
             </el-descriptions-item>
-            <el-descriptions-item label="资产" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.asset')" :span="2">
               {{ assetTransferApprovalView.assetNo }} /
               {{ assetTransferApprovalView.assetName }}
             </el-descriptions-item>
-            <el-descriptions-item label="原用户/部门">
+            <el-descriptions-item :label="t('workspaceApproval.fromUserOrg')">
               {{ assetTransferApprovalView.fromUserId || '—' }} /
               {{ assetTransferApprovalView.fromUnitId || '—' }}
             </el-descriptions-item>
-            <el-descriptions-item label="目标用户/部门">
+            <el-descriptions-item :label="t('workspaceApproval.toUserOrg')">
               {{ assetTransferApprovalView.toUserId }} /
               {{ assetTransferApprovalView.toUnitId }}
             </el-descriptions-item>
-            <el-descriptions-item label="位置" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.location')" :span="2">
               {{ assetTransferApprovalView.fromLocation || '—' }}
               →
               {{ assetTransferApprovalView.toLocation || '—' }}
             </el-descriptions-item>
-            <el-descriptions-item label="调拨原因" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.transferReason')" :span="2">
               {{ assetTransferApprovalView.reason }}
             </el-descriptions-item>
           </el-descriptions>
@@ -1033,26 +1033,26 @@ function instanceStatusType(status: number): string {
             border
             class="approval-business-form"
           >
-            <el-descriptions-item label="处置单号">
+            <el-descriptions-item :label="t('workspaceApproval.disposalNo')">
               {{ assetDisposalApprovalView.disposalNo }}
             </el-descriptions-item>
-            <el-descriptions-item label="处置类型">
-              {{ assetDisposalApprovalView.disposalType === 'SCRAP' ? '报废' : '丢弃' }}
+            <el-descriptions-item :label="t('workspaceApproval.disposalType')">
+              {{ assetDisposalApprovalView.disposalType === 'SCRAP' ? t('workspaceApproval.scrap') : t('workspaceApproval.discard') }}
             </el-descriptions-item>
-            <el-descriptions-item label="资产" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.asset')" :span="2">
               {{ assetDisposalApprovalView.assetNo }} /
               {{ assetDisposalApprovalView.assetName }}
             </el-descriptions-item>
-            <el-descriptions-item label="原资产状态">
+            <el-descriptions-item :label="t('workspaceApproval.previousAssetStatus')">
               {{ assetDisposalApprovalView.previousAssetStatus }}
             </el-descriptions-item>
-            <el-descriptions-item label="残值">
+            <el-descriptions-item :label="t('workspaceApproval.residualValue')">
               {{ assetDisposalApprovalView.residualValue || '—' }}
             </el-descriptions-item>
-            <el-descriptions-item label="处置方式" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.disposalMethod')" :span="2">
               {{ assetDisposalApprovalView.disposalMethod || '—' }}
             </el-descriptions-item>
-            <el-descriptions-item label="处置原因" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.disposalReason')" :span="2">
               {{ assetDisposalApprovalView.reason }}
             </el-descriptions-item>
           </el-descriptions>

@@ -149,6 +149,10 @@ export default {
     title: 'サプライヤーポータル ログイン', subtitle: 'ログインして企業情報を管理します',
     noAccount: 'サプライヤーアカウントをお持ちでない場合', registerNow: '今すぐ登録',
   },
+  workspaceApproval: {
+    invalidRequisitionId: '購買申請プロセスに有効な requisitionId がありません', invalidTransferId: '資産移管プロセスに有効な transferId がありません', invalidDisposalId: '資産廃棄プロセスに有効な disposalId がありません', formLoadFailed: '業務フォームを読み込めませんでした', formNotValidated: '業務フォームが検証を通過していないため承認できません', processed: '承認を処理しました', syncing: '業務状態を信頼性メッセージで同期しています。最終結果は該当する業務一覧で確認できます。', validationFailed: '業務フォームの検証に失敗しました：{error}',
+    requisitionNo: '購買申請番号', category: 'カテゴリ', title: 'タイトル', requester: '申請者', requesterOrg: '申請組織', estimatedAmount: '見積金額', approvalRound: '承認回数', requisitionReason: '申請理由', materialCode: '品目コード', materialName: '品目名', quantity: '数量', unit: '単位', estimatedUnitPrice: '見積単価', lineAmount: '行金額', transferNo: '移管番号', currentStatus: '現在の状態', asset: '資産', fromUserOrg: '元の利用者 / 部門', toUserOrg: '移管先利用者 / 部門', location: '場所', transferReason: '移管理由', disposalNo: '廃棄番号', disposalType: '廃棄タイプ', scrap: '除却', discard: '廃棄', previousAssetStatus: '元の資産状態', residualValue: '残存価額', disposalMethod: '廃棄方法', disposalReason: '廃棄理由',
+  },
   procurementOverviewPage: {
     ...enUS.procurementOverviewPage,
     title: '調達概要', description: '現在の利用者の調達データ範囲を厳守し、金額は通貨別に集計します。',
