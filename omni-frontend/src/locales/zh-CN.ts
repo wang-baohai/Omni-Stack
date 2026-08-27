@@ -749,6 +749,10 @@ export default {
       todayFailed: '今日失败',
     },
   },
+  assetDisposal: {
+    title: '资产处置', warning: '处置完成后资产进入不可恢复终态；审批通过不等于实物处置完成。', initiate: '发起处置', keyword: '关键词', keywordPlaceholder: '处置单号或资产', type: '处置类型', all: '全部', discard: '丢弃', scrap: '报废', disposalNo: '处置单号', assetNo: '资产编号', assetName: '资产名称', residualValue: '残值', details: '详情', complete: '完成处置', retry: '重试', noPermission: '当前账号无处置列表权限', createTitle: '发起资产处置', asset: '资产', assetSearch: '按资产编号或名称搜索', residualPlaceholder: '可留空，使用十进制字符串', method: '处置方式', methodPlaceholder: '回收、捐赠、销毁等', reason: '处置原因', submitApproval: '提交审批', detailTitle: '处置详情', processInstance: '流程实例', previousStatus: '原资产状态',
+    statusPending: '待审批', statusStartFailed: '启动失败', statusApproved: '已批准', statusRejected: '已拒绝', statusCompleted: '已完成', statusCancelled: '已取消', assetRequired: '请选择资产', typeRequired: '请选择处置类型', reasonRequired: '请输入处置原因', residualInvalid: '残值须为十进制字符串，最多 16 位整数和 2 位小数', created: '处置申请已创建并提交审批', confirmPhysical: '确认实物处置', cancelRequest: '取消处置申请', retryApproval: '重试启动审批', actionConfirm: '确认{action}“{no}”？', actionSuccess: '{action}成功',
+  },
   workspaceApproval: {
     invalidRequisitionId: '采购请购流程缺少合法的 requisitionId', invalidTransferId: '资产调拨流程缺少合法的 transferId', invalidDisposalId: '资产处置流程缺少合法的 disposalId', formLoadFailed: '业务表单加载失败', formNotValidated: '业务表单尚未通过校验，不能审批', processed: '审批已处理', syncing: '业务状态正在通过可靠消息同步，可在对应业务列表中查看最终结果。', validationFailed: '业务表单校验失败：{error}',
     requisitionNo: '请购单号', category: '品类', title: '标题', requester: '申请人', requesterOrg: '申请组织', estimatedAmount: '预估金额', approvalRound: '审批轮次', requisitionReason: '请购原因', materialCode: '物料编码', materialName: '物料名称', quantity: '数量', unit: '单位', estimatedUnitPrice: '预估单价', lineAmount: '行金额', transferNo: '调拨单号', currentStatus: '当前状态', asset: '资产', fromUserOrg: '原用户/部门', toUserOrg: '目标用户/部门', location: '位置', transferReason: '调拨原因', disposalNo: '处置单号', disposalType: '处置类型', scrap: '报废', discard: '丢弃', previousAssetStatus: '原资产状态', residualValue: '残值', disposalMethod: '处置方式', disposalReason: '处置原因',
