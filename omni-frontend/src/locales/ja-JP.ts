@@ -13,7 +13,7 @@ export default {
     loading: '読み込み中...', success: '操作が完了しました', error: '操作に失敗しました', home: 'ホーム',
     dashboard: 'ダッシュボード', console: 'コンソール', create: '新規作成', edit: '編集', view: '表示',
     delete: '削除', search: '検索', reset: 'リセット', refresh: '更新', save: '保存', back: '戻る', close: '閉じる',
-    status: '状態', enabled: '有効', disabled: '無効', actions: '操作', total: '合計', items: '件', yes: 'はい', no: 'いいえ', sort: '並び順', selectPlaceholder: '選択してください', notice: 'お知らせ', warning: '警告',
+    status: '状態', enabled: '有効', disabled: '無効', actions: '操作', total: '合計', items: '件', yes: 'はい', no: 'いいえ', sort: '並び順', selectPlaceholder: '選択してください', enterField: '{field}を入力してください', selectField: '{field}を選択してください', notice: 'お知らせ', warning: '警告',
     systemManagement: 'システム管理', users: 'ユーザー管理', roles: 'ロール管理', permissions: '権限管理',
     organizations: '組織管理', tenants: 'テナント管理', onlineUsers: 'オンラインユーザー', authRecords: '認証記録',
     oauth2Clients: 'OAuth2 クライアント', auditLogs: '監査ログ', xssConfig: 'XSS 防御', baseManagement: '基本データ',
@@ -28,6 +28,16 @@ export default {
     procurementOverview: '調達概要', procurementMaterial: '品目カタログ', procurementApprovalRoute: '購買申請承認ルール',
     procurementRequisition: '購買申請管理', procurementRfq: '見積依頼・比較', procurementPurchaseOrder: '発注書', procurementGoodsReceipt: '入荷確認',
     assetManagement: '資産管理', assetOverview: '資産概要', assetLedger: '資産台帳', assetMyAssets: '自分の資産', assetTransfer: '資産移管', assetDisposal: '資産廃棄',
+  },
+  oauth2Client: {
+    ...enUS.oauth2Client,
+    clientName: 'クライアント名', grantTypes: '認可タイプ', redirectUris: 'リダイレクト URI', pkce: 'PKCE',
+    deleteConfirmTitle: '削除の確認', deleteConfirm: 'クライアント「{name}」({id}) を削除しますか？', deleteSuccess: '削除しました',
+  },
+  oauthCallback: {
+    completingLogin: 'ログインを完了しています...', loginFailed: 'OAuth2 ログインに失敗しました：{error}', missingCode: '認可コードがありません',
+    stateValidationFailed: 'セキュリティ検証に失敗しました。もう一度ログインしてください。', missingPkce: 'PKCE パラメーターがありません。もう一度ログインしてください。',
+    exchangingToken: 'アクセストークンを取得しています...', exchangeFailed: 'トークンの取得に失敗しました。もう一度ログインしてください。',
   },
   user: {
     ...enUS.user,
@@ -153,5 +163,8 @@ export default {
     ...enUS.srmOverviewPage,
     totalSuppliers: 'サプライヤー総数', approved: '承認済み', pendingReview: '審査待ち', suspended: '停止中', blacklisted: 'ブラックリスト', eliminated: '除外済み',
     strategic: '戦略', preferred: '優先', qualified: '適格', riskDashboard: 'リスクダッシュボード',
+  },
+  srmRiskCommon: {
+    high: '高リスク', medium: '中リスク', low: '低リスク',
   },
 }

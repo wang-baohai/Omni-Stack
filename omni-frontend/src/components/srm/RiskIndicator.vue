@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import type { RiskLevel } from '@/api/srm-risk'
+import { useI18n } from 'vue-i18n'
 
 defineProps<{ level?: RiskLevel | string }>()
 
+const { t } = useI18n()
+
 const levelLabels: Record<string, string> = {
-  RED: '高风险',
-  YELLOW: '中风险',
-  GREEN: '低风险',
+  RED: 'srmRiskCommon.high',
+  YELLOW: 'srmRiskCommon.medium',
+  GREEN: 'srmRiskCommon.low',
 }
 </script>
 
 <template>
   <div class="risk-indicator">
     <span :class="['risk-indicator__dot', `risk-indicator__dot--${level?.toLowerCase()}`]" />
-    <span class="risk-indicator__label">{{ level ? (levelLabels[level] || level) : '' }}</span>
+    <span class="risk-indicator__label">{{ level ? (levelLabels[level] ? t(levelLabels[level]) : level) : '' }}</span>
   </div>
 </template>
 

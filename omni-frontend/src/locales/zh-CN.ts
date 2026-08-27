@@ -39,6 +39,8 @@ export default {
     no: '否',
     sort: '排序',
     selectPlaceholder: '请选择',
+    enterField: '请输入{field}',
+    selectField: '请选择{field}',
     notice: '提示',
     warning: '警告',
     // 管理模块名称
@@ -373,6 +375,7 @@ export default {
     scopes: '作用域',
     settings: '客户端设置',
     requirePkce: '要求 PKCE',
+    pkce: 'PKCE',
     requireConsent: '要求授权确认',
     createTitle: '创建 OAuth2 客户端',
     editTitle: '编辑 OAuth2 客户端',
@@ -512,6 +515,15 @@ export default {
     confirmSkip: '确认忽略该消息？此操作不可撤销。',
     loadFailedWithTrace: '消息聚合服务加载失败，请重试。追踪号：{traceId}',
     loadFailed: '消息聚合服务加载失败，请检查相关业务服务后重试。',
+  },
+  oauthCallback: {
+    completingLogin: '正在完成登录...',
+    loginFailed: 'OAuth2 登录失败：{error}',
+    missingCode: '缺少授权码',
+    stateValidationFailed: '安全验证失败，请重新登录',
+    missingPkce: 'PKCE 参数缺失，请重新登录',
+    exchangingToken: '正在换取访问令牌...',
+    exchangeFailed: '令牌换取失败，请重新登录',
   },
   // ===== userJobType — 任务类型管理模块 =====
   userJobType: {
@@ -1149,6 +1161,11 @@ export default {
   srmOverviewPage: {
     totalSuppliers: '供应商总数', approved: '已通过', pendingReview: '待审核', suspended: '已冻结', blacklisted: '黑名单', eliminated: '已淘汰',
     strategic: '战略级', preferred: '优选级', qualified: '合格级', riskDashboard: '风险看板',
+  },
+  srmRiskCommon: {
+    high: '高风险',
+    medium: '中风险',
+    low: '低风险',
   },
   assetOverviewPage: {
     status: '状态', category: '品类', department: '部门', location: '位置',

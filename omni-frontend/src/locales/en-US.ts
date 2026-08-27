@@ -39,6 +39,8 @@ export default {
     no: 'No',
     sort: 'Sort',
     selectPlaceholder: 'Select an option',
+    enterField: 'Enter {field}',
+    selectField: 'Select {field}',
     notice: 'Notice',
     warning: 'Warning',
     // Management module names
@@ -373,6 +375,7 @@ export default {
     scopes: 'Scopes',
     settings: 'Client Settings',
     requirePkce: 'Require PKCE',
+    pkce: 'PKCE',
     requireConsent: 'Require Consent',
     createTitle: 'Create OAuth2 Client',
     editTitle: 'Edit OAuth2 Client',
@@ -476,6 +479,15 @@ export default {
     confirmSkip: 'Are you sure to skip this message? This action cannot be undone.',
     loadFailedWithTrace: 'The message aggregation service could not be loaded. Retry. Trace ID: {traceId}',
     loadFailed: 'The message aggregation service could not be loaded. Check the related business services and retry.',
+  },
+  oauthCallback: {
+    completingLogin: 'Completing login...',
+    loginFailed: 'OAuth2 login failed: {error}',
+    missingCode: 'Authorization code is missing',
+    stateValidationFailed: 'Security validation failed. Please log in again.',
+    missingPkce: 'PKCE parameters are missing. Please log in again.',
+    exchangingToken: 'Exchanging authorization code for an access token...',
+    exchangeFailed: 'Token exchange failed. Please log in again.',
   },
   // ===== userJobType — job type management module =====
   userJobType: {
@@ -1113,6 +1125,11 @@ export default {
   srmOverviewPage: {
     totalSuppliers: 'Total Suppliers', approved: 'Approved', pendingReview: 'Pending Review', suspended: 'Suspended', blacklisted: 'Blacklisted', eliminated: 'Eliminated',
     strategic: 'Strategic', preferred: 'Preferred', qualified: 'Qualified', riskDashboard: 'Risk Dashboard',
+  },
+  srmRiskCommon: {
+    high: 'High Risk',
+    medium: 'Medium Risk',
+    low: 'Low Risk',
   },
   assetOverviewPage: {
     status: 'Status', category: 'Category', department: 'Department', location: 'Location',

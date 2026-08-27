@@ -12,7 +12,7 @@ export default {
     login: '로그인', logout: '로그아웃', cancel: '취소', confirm: '확인', submit: '제출', loading: '불러오는 중...',
     success: '작업이 완료되었습니다', error: '작업에 실패했습니다', home: '홈', dashboard: '대시보드', console: '콘솔',
     create: '새로 만들기', edit: '편집', view: '보기', delete: '삭제', search: '검색', reset: '초기화', refresh: '새로 고침',
-    save: '저장', back: '뒤로', close: '닫기', status: '상태', enabled: '사용', disabled: '사용 안 함', actions: '작업', total: '합계', items: '건', yes: '예', no: '아니요', sort: '정렬', selectPlaceholder: '선택하세요', notice: '알림', warning: '경고',
+    save: '저장', back: '뒤로', close: '닫기', status: '상태', enabled: '사용', disabled: '사용 안 함', actions: '작업', total: '합계', items: '건', yes: '예', no: '아니요', sort: '정렬', selectPlaceholder: '선택하세요', enterField: '{field} 입력', selectField: '{field} 선택', notice: '알림', warning: '경고',
     systemManagement: '시스템 관리', users: '사용자 관리', roles: '역할 관리', permissions: '권한 관리', organizations: '조직 관리',
     tenants: '테넌트 관리', onlineUsers: '온라인 사용자', authRecords: '인증 기록', oauth2Clients: 'OAuth2 클라이언트', auditLogs: '감사 로그',
     xssConfig: 'XSS 보호', baseManagement: '기초 데이터', jobManagement: '작업 스케줄링', dictManagement: '사전 관리', operLogs: '작업 로그',
@@ -25,6 +25,16 @@ export default {
     procurementManagement: '조달 실행 관리', procurementOverview: '조달 개요', procurementMaterial: '품목 카탈로그', procurementApprovalRoute: '구매 요청 승인 규칙',
     procurementRequisition: '구매 요청 관리', procurementRfq: '견적 요청 및 비교', procurementPurchaseOrder: '구매 주문', procurementGoodsReceipt: '입고 확인',
     assetManagement: '자산 관리', assetOverview: '자산 개요', assetLedger: '자산 원장', assetMyAssets: '내 자산', assetTransfer: '자산 이동', assetDisposal: '자산 처분',
+  },
+  oauth2Client: {
+    ...enUS.oauth2Client,
+    clientName: '클라이언트 이름', grantTypes: '권한 부여 유형', redirectUris: '리디렉션 URI', pkce: 'PKCE',
+    deleteConfirmTitle: '삭제 확인', deleteConfirm: '클라이언트 “{name}”({id})을 삭제할까요?', deleteSuccess: '삭제했습니다',
+  },
+  oauthCallback: {
+    completingLogin: '로그인을 완료하는 중...', loginFailed: 'OAuth2 로그인 실패: {error}', missingCode: '인증 코드가 없습니다',
+    stateValidationFailed: '보안 검증에 실패했습니다. 다시 로그인하세요.', missingPkce: 'PKCE 매개변수가 없습니다. 다시 로그인하세요.',
+    exchangingToken: '액세스 토큰을 가져오는 중...', exchangeFailed: '토큰 교환에 실패했습니다. 다시 로그인하세요.',
   },
   user: {
     ...enUS.user,
@@ -147,5 +157,8 @@ export default {
     ...enUS.srmOverviewPage,
     totalSuppliers: '전체 공급업체', approved: '승인됨', pendingReview: '심사 대기', suspended: '중지됨', blacklisted: '블랙리스트', eliminated: '탈락됨',
     strategic: '전략 등급', preferred: '우선 등급', qualified: '적격 등급', riskDashboard: '위험 대시보드',
+  },
+  srmRiskCommon: {
+    high: '고위험', medium: '중위험', low: '저위험',
   },
 }

@@ -143,7 +143,7 @@ watch(() => props.schema, () => {
         <el-input
           v-if="field.type === 'string'"
           v-model="formValues[field.key]"
-          :placeholder="'请输入' + field.label"
+          :placeholder="t('common.enterField', { field: field.label })"
           @input="emitValues" />
         <!-- number -->
         <el-input-number
@@ -161,13 +161,13 @@ watch(() => props.schema, () => {
           v-else-if="field.type === 'textarea'"
           v-model="formValues[field.key]"
           type="textarea" :rows="3"
-          :placeholder="'请输入' + field.label"
+          :placeholder="t('common.enterField', { field: field.label })"
           @input="emitValues" />
         <!-- select -->
         <el-select
           v-else-if="field.type === 'select'"
           v-model="formValues[field.key]"
-          :placeholder="'请选择' + field.label"
+          :placeholder="t('common.selectField', { field: field.label })"
           style="width: 100%"
           @change="emitValues">
           <el-option
