@@ -638,6 +638,15 @@ export default {
     jaJP: '日本語',
     koKR: '한국어',
     switch: 'Switch Language',
+    zhShort: 'ZH',
+    enShort: 'EN',
+    jaShort: 'JA',
+    koShort: 'KO',
+  },
+  crmUi: {
+    selectCustomer: 'Select a customer', noCustomerPermission: 'No permission to view customers', selectOwner: 'Select an owner', noOwnerPermission: 'No permission to view owner candidates',
+    departmentNumber: 'Department #{id}', noOpportunityStages: 'No opportunity stage data', customerNumber: 'Customer #{id}', moveStage: 'Move Stage',
+    noActivityPermission: 'This account cannot view follow-up activities', noActivities: 'No follow-up activity records', userNumber: 'User #{id}',
   },
   // ===== home — home page module =====
   home: {

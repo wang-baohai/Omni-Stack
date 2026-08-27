@@ -674,6 +674,15 @@ export default {
     jaJP: '日本語',
     koKR: '한국어',
     switch: '切换语言',
+    zhShort: '中',
+    enShort: 'EN',
+    jaShort: '日',
+    koShort: '한',
+  },
+  crmUi: {
+    selectCustomer: '请选择客户', noCustomerPermission: '无客户查看权限', selectOwner: '请选择负责人', noOwnerPermission: '无负责人候选权限',
+    departmentNumber: '部门 #{id}', noOpportunityStages: '暂无商机阶段数据', customerNumber: '客户 #{id}', moveStage: '迁移阶段',
+    noActivityPermission: '当前账号没有跟进活动查看权限', noActivities: '暂无跟进记录', userNumber: '用户 #{id}',
   },
   // ===== home — 首页模块 =====
   home: {

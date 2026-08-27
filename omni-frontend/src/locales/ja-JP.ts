@@ -64,7 +64,12 @@ export default {
     fallbackStrategy: 'フォールバック方針', fallbackHelp: '条件に合う承認者がいない場合の処理を選択します。', fallbackError: 'エラーをログのみに記録', fallbackErrorHelp: 'エラーを記録し、タスクが未割当のままになる場合があります。', fallbackAdmin: '管理者に割り当て', fallbackAdminHelp: 'SUPER_ADMIN ユーザーに割り当てて継続します。', fallbackParent: '上位組織にエスカレート', fallbackParentHelp: '上位組織で候補者を検索します。', previewCandidates: '候補者をプレビュー', candidatePreview: '候補者プレビュー', selectSimulatedUser: 'シミュレーションユーザーを選択', unassignedOrganization: '組織未割当', noCandidates: '一致する候補者がいません', organization: '所属組織', candidateCount: '候補者 {count} 名', resolveAgain: '再解析', selectApprovalRoleFirst: '先に承認ロールを選択してください', selectSimulatedInitiatorFirst: '先にシミュレーション申請者を選択してください', candidatePreviewFailed: '候補者プレビューの解析に失敗しました',
     paletteEvents: 'イベント', paletteActivities: 'アクティビティ', paletteGateways: 'ゲートウェイ', paletteConnections: '接続', paletteAnnotations: '注釈', paletteElements: '要素', ccNode: 'CC ノード', paletteHint: '要素をキャンバスにドラッグし、始点を選択してシーケンスフローを接続します。', modelLoadFailed: 'モデルデータを読み込めませんでした', draftSaved: '下書きを保存しました', draftSaveFailed: '下書きの保存に失敗しました', publishCurrentConfirmMessage: '現在のモデルを公開しますか？新しいバージョンをワークフローエンジンにデプロイします。', unsavedCloseConfirm: '未保存の変更があります。保存して閉じますか？', doNotSave: '保存しない', selectStartNodeFirst: '先に始点ノードを選択してください', unsaved: '未保存', saveDraft: '下書きを保存', errorsLabel: 'エラー:', warningsLabel: '警告:',
   },
-  lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '言語を切り替える' },
+  lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '言語を切り替える', zhShort: '中', enShort: 'EN', jaShort: '日', koShort: '한' },
+  crmUi: {
+    selectCustomer: '顧客を選択', noCustomerPermission: '顧客の表示権限がありません', selectOwner: '担当者を選択', noOwnerPermission: '担当者候補の表示権限がありません',
+    departmentNumber: '部門 #{id}', noOpportunityStages: '商談ステージデータがありません', customerNumber: '顧客 #{id}', moveStage: 'ステージを変更',
+    noActivityPermission: 'このアカウントに活動履歴の表示権限はありません', noActivities: 'フォローアップ履歴はありません', userNumber: 'ユーザー #{id}',
+  },
   theme: { ...enUS.theme, toggle: 'テーマを切り替える' },
   dashboardPage: {
     ...enUS.dashboardPage,

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** CRM 客户远程选择器，使用客户列表权限限定候选范围。 */
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { listCustomers, type CrmCustomer } from '@/api/crm-customer'
 import { usePermissionStore } from '@/stores/permission'
 
@@ -11,8 +12,10 @@ const props = withDefaults(defineProps<{
 }>(), {
   modelValue: undefined,
   disabled: false,
-  placeholder: '请选择客户',
+  placeholder: undefined,
 })
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   'update:modelValue': [value: number | undefined]
@@ -45,7 +48,7 @@ onMounted(() => loadOptions())
 <template>
   <el-select
     :model-value="props.modelValue"
-    :placeholder="permissionStore.hasPermission('crm:customer:list') ? props.placeholder : '无客户查看权限'"
+    :placeholder="permissionStore.hasPermission('crm:customer:list') ? (props.placeholder || t('crmUi.selectCustomer')) : t('crmUi.noCustomerPermission')"
     :disabled="props.disabled || !permissionStore.hasPermission('crm:customer:list')"
     :loading="loading"
     filterable

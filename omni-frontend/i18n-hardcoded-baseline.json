@@ -2,7 +2,7 @@
   "version": 1,
   "purpose": "记录尚未迁移到 vue-i18n 的可见中文基线；最终目标为零。",
   "generatedBy": "tools/omni-cli/scripts/ui-i18n-audit.mjs",
-  "total": 1514,
+  "total": 1501,
   "files": {
     "src/api/request.ts": {
       "template": 0,
@@ -12,33 +12,13 @@
       "template": 3,
       "script": 0
     },
-    "src/components/LanguageSelector.vue": {
-      "template": 0,
-      "script": 2
-    },
     "src/components/LoginForm.vue": {
       "template": 0,
       "script": 4
     },
-    "src/components/crm/ActivityTimeline.vue": {
-      "template": 3,
-      "script": 0
-    },
     "src/components/crm/CustomerOverview.vue": {
       "template": 26,
       "script": 0
-    },
-    "src/components/crm/CustomerPicker.vue": {
-      "template": 1,
-      "script": 1
-    },
-    "src/components/crm/OpportunityStageBoard.vue": {
-      "template": 3,
-      "script": 0
-    },
-    "src/components/crm/OwnerSelector.vue": {
-      "template": 2,
-      "script": 1
     },
     "src/components/procurement/GoodsReceiptForm.vue": {
       "template": 16,

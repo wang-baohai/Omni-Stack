@@ -58,7 +58,12 @@ export default {
     fallbackStrategy: '예외 처리 정책', fallbackHelp: '조건에 맞는 승인자가 없을 때의 처리를 선택합니다.', fallbackError: '오류 로그만 기록', fallbackErrorHelp: '오류를 기록하고 작업이 미할당 상태로 남을 수 있으며 개발과 테스트용입니다.', fallbackAdmin: '관리자에게 할당', fallbackAdminHelp: 'SUPER_ADMIN 사용자에게 할당하여 진행합니다.', fallbackParent: '상위 조직으로 에스컬레이션', fallbackParentHelp: '상위 조직에서 후보자를 찾습니다.', previewCandidates: '후보자 미리보기', candidatePreview: '후보자 미리보기', selectSimulatedUser: '모의 사용자 선택', unassignedOrganization: '조직 미할당', noCandidates: '일치하는 후보자가 없습니다', organization: '소속 조직', candidateCount: '후보자 {count}명', resolveAgain: '다시 해석', selectApprovalRoleFirst: '먼저 승인 역할을 선택하세요', selectSimulatedInitiatorFirst: '먼저 모의 신청자를 선택하세요', candidatePreviewFailed: '후보자 미리보기 해석에 실패했습니다',
     paletteEvents: '이벤트', paletteActivities: '활동', paletteGateways: '게이트웨이', paletteConnections: '연결', paletteAnnotations: '주석', paletteElements: '요소', ccNode: '참조 노드', paletteHint: '요소를 캔버스로 끌어오고 시작 노드를 선택한 후 순차 흐름으로 연결하세요.', modelLoadFailed: '모델 데이터를 불러오지 못했습니다', draftSaved: '초안을 저장했습니다', draftSaveFailed: '초안 저장에 실패했습니다', publishCurrentConfirmMessage: '현재 모델을 게시할까요? 새 버전을 워크플로 엔진에 배포합니다.', unsavedCloseConfirm: '저장하지 않은 변경이 있습니다. 저장하고 닫을까요?', doNotSave: '저장하지 않음', selectStartNodeFirst: '먼저 시작 노드를 선택하세요', unsaved: '저장되지 않음', saveDraft: '초안 저장', errorsLabel: '오류:', warningsLabel: '경고:',
   },
-  lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '언어 전환' },
+  lang: { zhCN: '简体中文', enUS: 'English', jaJP: '日本語', koKR: '한국어', switch: '언어 전환', zhShort: '中', enShort: 'EN', jaShort: '日', koShort: '한' },
+  crmUi: {
+    selectCustomer: '고객 선택', noCustomerPermission: '고객 조회 권한이 없습니다', selectOwner: '담당자 선택', noOwnerPermission: '담당자 후보 조회 권한이 없습니다',
+    departmentNumber: '부서 #{id}', noOpportunityStages: '영업 기회 단계 데이터가 없습니다', customerNumber: '고객 #{id}', moveStage: '단계 이동',
+    noActivityPermission: '이 계정은 후속 활동을 조회할 권한이 없습니다', noActivities: '후속 활동 기록이 없습니다', userNumber: '사용자 #{id}',
+  },
   theme: { ...enUS.theme, toggle: '테마 전환' },
   dashboardPage: {
     ...enUS.dashboardPage,

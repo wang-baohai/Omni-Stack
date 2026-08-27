@@ -10,14 +10,14 @@ import { storeLang, type SupportedLocale } from '@/i18n'
 interface LanguageOption {
   value: SupportedLocale
   labelKey: string
-  shortLabel: string
+  shortLabelKey: string
 }
 
 const options: LanguageOption[] = [
-  { value: 'zh-CN', labelKey: 'lang.zhCN', shortLabel: '中' },
-  { value: 'en-US', labelKey: 'lang.enUS', shortLabel: 'EN' },
-  { value: 'ja-JP', labelKey: 'lang.jaJP', shortLabel: '日' },
-  { value: 'ko-KR', labelKey: 'lang.koKR', shortLabel: '한' },
+  { value: 'zh-CN', labelKey: 'lang.zhCN', shortLabelKey: 'lang.zhShort' },
+  { value: 'en-US', labelKey: 'lang.enUS', shortLabelKey: 'lang.enShort' },
+  { value: 'ja-JP', labelKey: 'lang.jaJP', shortLabelKey: 'lang.jaShort' },
+  { value: 'ko-KR', labelKey: 'lang.koKR', shortLabelKey: 'lang.koShort' },
 ]
 
 const { t, locale } = useI18n()
@@ -34,7 +34,7 @@ function selectLanguage(value: SupportedLocale) {
   <el-dropdown trigger="click" @command="selectLanguage">
     <el-button text :title="t('lang.switch')" :aria-label="t('lang.switch')">
       <el-icon><Globe /></el-icon>
-      {{ current.shortLabel }}
+      {{ t(current.shortLabelKey) }}
     </el-button>
     <template #dropdown>
       <el-dropdown-menu>

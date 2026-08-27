@@ -1,9 +1,12 @@
 <script setup lang="ts">
 /** CRM 活动时间线。内容始终按纯文本渲染，禁止使用 v-html。 */
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { listActivityTimeline, type ActivityRootType, type CrmActivity } from '@/api/crm-activity'
 import { usePermissionStore } from '@/stores/permission'
 import { useDictOptions } from '@/composables/useDictOptions'
+
+const { t } = useI18n()
 
 const { options: activityTypeOptions } = useDictOptions('crm_activity_type')
 const { options: activityStatusOptions } = useDictOptions('crm_activity_status')
@@ -57,11 +60,11 @@ watch(() => [props.rootType, props.rootId], loadData, { immediate: true })
   <div v-loading="loading" class="activity-timeline">
     <el-alert
       v-if="!permissionStore.hasPermission('crm:activity:list')"
-      title="当前账号没有跟进活动查看权限"
+      :title="t('crmUi.noActivityPermission')"
       type="info"
       :closable="false"
     />
-    <el-empty v-else-if="activities.length === 0" description="暂无跟进记录" :image-size="80" />
+    <el-empty v-else-if="activities.length === 0" :description="t('crmUi.noActivities')" :image-size="80" />
     <el-timeline v-else>
       <el-timeline-item
         v-for="activity in activities"
@@ -76,7 +79,7 @@ watch(() => [props.rootType, props.rootId], loadData, { immediate: true })
           </div>
           <p v-if="activity.content" class="plain-content">{{ activity.content }}</p>
           <div class="timeline-meta">
-            {{ labelOf(activityTypeOptions, activity.activityType) }} · {{ activity.performedByName || activity.ownerName || `用户 #${activity.performedByUserId || activity.ownerUserId}` }}
+            {{ labelOf(activityTypeOptions, activity.activityType) }} · {{ activity.performedByName || activity.ownerName || t('crmUi.userNumber', { id: activity.performedByUserId || activity.ownerUserId }) }}
           </div>
         </el-card>
       </el-timeline-item>

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 /** CRM 商机阶段看板；阶段选择只触发受控迁移事件，不直接修改本地权威状态。 */
 import type { CrmOpportunity, OpportunityBoard, PipelineStage } from '@/api/crm-opportunity'
+import { useI18n } from 'vue-i18n'
+
+const { t, locale } = useI18n()
 
 defineProps<{
   board: OpportunityBoard | null
@@ -14,13 +17,13 @@ const emit = defineEmits<{
 }>()
 
 function formatAmount(amount: number, currencyCode = 'CNY') {
-  return new Intl.NumberFormat('zh-CN', { style: 'currency', currency: currencyCode }).format(amount || 0)
+  return new Intl.NumberFormat(locale.value, { style: 'currency', currency: currencyCode }).format(amount || 0)
 }
 </script>
 
 <template>
   <div v-loading="loading" class="stage-board">
-    <el-empty v-if="!board || board.columns.length === 0" description="暂无商机阶段数据" />
+    <el-empty v-if="!board || board.columns.length === 0" :description="t('crmUi.noOpportunityStages')" />
     <div v-else class="stage-columns">
       <section v-for="column in board.columns" :key="column.stage.id" class="stage-column">
         <header>
@@ -39,7 +42,7 @@ function formatAmount(amount: number, currencyCode = 'CNY') {
             @click="emit('open', opportunity)"
           >
             <strong>{{ opportunity.name }}</strong>
-            <span>{{ opportunity.customerName || `客户 #${opportunity.customerId}` }}</span>
+            <span>{{ opportunity.customerName || t('crmUi.customerNumber', { id: opportunity.customerId }) }}</span>
             <span>{{ formatAmount(opportunity.amount, opportunity.currencyCode) }}</span>
             <el-dropdown
               v-if="canMove && opportunity.status === 'OPEN'"
@@ -48,7 +51,7 @@ function formatAmount(amount: number, currencyCode = 'CNY') {
               @click.stop
             >
               <el-button v-permission="'crm:opportunity:stage'" size="small" text type="primary">
-                迁移阶段
+                {{ t('crmUi.moveStage') }}
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
