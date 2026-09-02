@@ -7,7 +7,7 @@ default_viewport: { width: 1440, height: 900 }
 
 modules:
   - id: authentication
-    status: partial
+    status: covered
     required_flows: [password-captcha, register, social-login, device-code, expired-session]
     existing_assets:
       - docs/images/login.png
@@ -16,29 +16,65 @@ modules:
       - docs/images/social-consent.png
       - docs/images/social-device-init.png
       - docs/images/social-device-verify.png
-    gaps: [four-locale-assets, expired-session, forbidden-state, reproducible-fixture]
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/auth-login.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/auth-register.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/auth-device-code.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/supplier-portal-login.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/session-expired-dialog.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/employee-forbidden-403.png
+    gaps: []
+    # expired-session：确定性测试故障（page.route 拦截待办接口 401，仅测试进程），
+    # 产品真实 handle401 弹出本地化过期对话框（标题/重新登录四语言）。
+    # forbidden-state：权限拒绝状态由 permissions-exceptions 模块闭环
+    # （employee-forbidden-403 四语言，AUTHENTICATED_BUT_FORBIDDEN 已区分 401）。
+    # social-login 由既有 social-* 四图覆盖（coverage gaps 中本无此项）。
+    # reproducible-fixture：manifest fixture 字段 + public 测试无 mutations 稳定重放。
   - id: system-management
     status: partial
     required_flows: [tenant, organization, user, role, permission, menu, data-scope, config, dictionary, oauth2, online-user, login-record, audit, xss]
-    existing_assets: [docs/images/dashboard.png, docs/images/system-user.png, docs/images/system-dict.png, docs/images/system-xss.png]
-    gaps: [most-management-flows, four-locale-assets, failure-states]
+    existing_assets:
+      - docs/images/dashboard.png
+      - docs/images/system-user.png
+      - docs/images/system-dict.png
+      - docs/images/system-xss.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-dashboard.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-users.png
+    gaps: [most-management-flows, detail-and-action-states, failure-states]
   - id: scheduling-workspace
-    status: partial
+    status: covered
     required_flows: [system-job, job-type, personal-create, schedule, trigger, pause, resume, execution-log]
-    existing_assets: [docs/images/job-system.png, docs/images/job-workspace.png]
-    gaps: [job-type, lifecycle-results, four-locale-assets, failure-states]
+    existing_assets:
+      - docs/images/job-system.png
+      - docs/images/job-workspace.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-system-jobs.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-job-type.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-personal-create-validation.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-personal-lifecycle.png
+    gaps: []
+    # 前批 ja/ko 对话框交互失败根因已定位（TEST_DEFECT）：表单 label 误用 common.userJobTypes，
+    # 真实 key 为 userJob.jobType（en/ja/ko = 'Job Type' 单数）；行操作按钮漏了 ko「편집」。
+    # personal-create：UI 创建唯一名称任务（喝水提醒 demo handler，无外部副作用）
+    #   + API fault（POST /base/my-job 500，仅测试进程）验证错误提示。
+    # lifecycle：创建 → 编辑改名 → 列表真实反映（key action + success result）。
+    # 清理：deleteMyJob 正式契约，E2E_MUTATIONS 自建自清理多轮实证。
   - id: messaging-monitoring
     status: partial
     required_flows: [message-status, retry, dead-letter, operation-log, trace-diagnosis]
-    existing_assets: [docs/images/monitor-mqmessage.png, docs/images/monitor-operlog.png]
-    gaps: [retry, dead-letter, trace-diagnosis, four-locale-assets]
+    existing_assets:
+      - docs/images/monitor-mqmessage.png
+      - docs/images/monitor-operlog.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/monitor-mq-messages.png
+    gaps: [retry, dead-letter, trace-diagnosis, detail-and-action-states]
   - id: workflow
     status: partial
     required_flows: [model-create, bpmn-design, candidate-config, validation, publish, start, approval, countersign, completion, instance-tracking]
-    existing_assets: [docs/images/workflow-designer.png, docs/images/workflow-approval.png]
-    gaps: [model-lifecycle, countersign, tracking, four-locale-assets, failure-states]
+    existing_assets:
+      - docs/images/workflow-designer.png
+      - docs/images/workflow-approval.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-models.png
+    gaps: [model-lifecycle, countersign, tracking, detail-and-action-states, failure-states]
   - id: crm
-    status: partial
+    status: covered
     required_flows: [lead, lead-conversion, customer, contact, opportunity-stage, activity, overview]
     existing_assets:
       - docs/images/crm-lead-list.png
@@ -50,7 +86,15 @@ modules:
       - docs/images/crm-opportunity-board.png
       - docs/images/crm-activity-timeline.png
       - docs/images/crm-overview.png
-    gaps: [four-locale-assets, permission-and-failure-states, reproducible-fixture]
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-overview.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-lead-create-validation.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-lead-create-success.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-lead-forbidden-403.png
+    gaps: []
+    # detail-and-action-states：新建对话框表单 + 必填校验失败 + 创建成功（E2E_MUTATIONS 自建唯一线索，
+    # finally deleteLead 正式契约清理，多次重跑实证 reproducible-fixture）。
+    # permission-and-failure-states：employee-forbidden-403 四语言（AUTHENTICATED_BUT_FORBIDDEN）
+    # + 业务校验失败（crmLead.nameRequired 四语言）。
   - id: srm
     status: partial
     required_flows: [invite, portal-register, admission, activation, lifecycle, evaluation, risk, supplier-quotation]
@@ -66,25 +110,42 @@ modules:
       - docs/images/srm-portal-login-simple.png
       - docs/images/srm-portal-profile-deployed.png
       - docs/images/srm-portal-profile-fixed.png
-    gaps: [admission-lifecycle, supplier-quotation, four-locale-assets, stable-mobile-flow]
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-overview.png
+    gaps: [admission-lifecycle, supplier-quotation, stable-mobile-flow, detail-and-action-states]
   - id: procurement
-    status: missing
+    status: partial
     required_flows: [material, approval-rule-match, requisition-approval, rfq, quotation-receipt, comparison, purchase-order, goods-receipt, overview]
-    existing_assets: []
+    existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-overview.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-approval-rules.png
+      - docs/images/zh-CN/procurement-approval-rules-mobile.png
+      - docs/images/zh-CN/procurement-approval-rules-tablet.png
     special_viewports:
       - { width: 390, height: 844, flow: approval-rule-match }
       - { width: 1024, height: 768, flow: approval-rule-match }
-    gaps: [all-scenes]
+    gaps: [material, requisition-approval, rfq, quotation-receipt, comparison, purchase-order, goods-receipt, detail-and-action-states, success-result, failure-or-forbidden]
   - id: asset
-    status: missing
+    status: partial
     required_flows: [receipt-card, ledger, allocation, acceptance, return, transfer-approval, disposal-approval, overview]
-    existing_assets: []
-    gaps: [all-scenes]
+    existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-overview.png
+    gaps: [receipt-card, ledger, allocation, acceptance, return, transfer-approval, disposal-approval, detail-and-action-states, success-result, failure-or-forbidden]
   - id: permissions-exceptions
-    status: missing
+    status: covered
     required_flows: [employee-scope, procurement-admin-scope, supplier-scope, forbidden-403, not-found-404, menu-failure, api-failure]
-    existing_assets: []
-    gaps: [all-scenes]
+    existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/employee-forbidden-403.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/employee-workspace-scope.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/supplier-portal-scope.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/resource-not-found-404.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/approval-route-list-failure.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/admin-menu-load-failure.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-approval-rules.png
+    gaps: []
+    # menu-failure 前次「白屏」结论经诊断推翻：降级页 /menu-load-error 完好（本地化标题 + 重试/回首页），
+    # 首批失败为测试断言设计错误（降级页无 header 用户名），已修正断言后四语言 PASS。
+    # api-failure/menu-failure 故障均为 deterministic test fault（page.route，仅测试进程）。
+    # reproducible-fixture 已由 manifest fixture 字段 + 测试自建自清理多轮实证闭环。
   - id: scaffold-development
     status: missing
     required_flows: [create-service, crud-generate, preset-select, lite-mode]
