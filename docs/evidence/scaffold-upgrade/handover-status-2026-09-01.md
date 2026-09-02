@@ -105,3 +105,11 @@
 - 恢复会话零 Token 泄露、零持久化违规、零未授权删除；
 - 临时 runner 全部 `scripts/.work` 批末清理（TEMP_FILES=0 多次验证）；
 - 用户已禁止自动 blocked audit 与等待轮询（永久规则，见任务指令十五/二十四节）。
+
+### Final Gate Unlock Preflight（2026-09-02）
+
+统一解锁包已固化：`final-gate-unlock-preflight-2026-09-02.md`。新依赖结论：
+- **G1 唯一残留 = adoption 运维确认**（EXTERNAL_INPUT），无其他未完成项；
+- **screenshot 8 red = G7 硬门组成部分**（依据 L42：深度截图是 G7 关闭路径），非可忽略项，等批量授权；
+- **G7 = 深度截图闭环 + 114 翻译人工复核** 双条件；
+- 推荐序列：BLOCKER-3 答复 → G1 CLOSED → 截图批量授权 → G7 条件① → Codex review → G7 条件② → G7 CLOSED → WP-10（A/B/C+悬空扫描）→ Gate re-check → G8 once-only。
