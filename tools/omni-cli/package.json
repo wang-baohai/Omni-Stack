@@ -26,12 +26,13 @@
     "ui:i18n:audit": "node scripts/ui-i18n-audit.mjs",
     "ui:i18n:check": "node scripts/ui-i18n-audit.mjs --check",
     "docs:quality": "node scripts/docs-quality.mjs",
-    "dev": "tsx src/cli.ts"
+    "dev": "tsx src/cli.ts",
+    "docs:source-digests:refresh": "node scripts/refresh-source-digests.mjs"
   },
   "dependencies": {
     "ajv": "^8.17.1",
     "commander": "^14.0.1",
-    "fast-xml-parser": "5.3.6",
+    "fast-xml-parser": "5.11.1",
     "handlebars": "^4.7.8",
     "yaml": "^2.8.1"
   },
