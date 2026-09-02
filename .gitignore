@@ -37,6 +37,8 @@ dist-ssr/
 .env
 .env.local
 .env.*.local
+# 敏感环境备份（WP-10：绝不提交，待人工确认后移出仓库）
+.env.before-rebuild-*
 
 # 本地敏感配置文件（含 OAuth2 真实凭证）
 application-local.yml

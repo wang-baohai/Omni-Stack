@@ -3,6 +3,10 @@ name: Quality Gate
 on:
   push:
   pull_request:
+  schedule:
+    # UTC 19:30 = 北京时间 03:30，夜间完整四语言截图与 Compose E2E。
+    - cron: '30 19 * * *'
+  workflow_dispatch:
 
 jobs:
   backend:
@@ -81,15 +85,248 @@ jobs:
       - name: Verify current README facts
         working-directory: tools/omni-cli
         run: npm run docs:readme:check
-      - name: Verify translation files and source digests
+      # 严格质量门：翻译状态未 synchronized 或截图覆盖未达标时直接失败，
+      # 阻塞状态必须保持可见，禁止用 --allow-draft 伪造绿色。
+      - name: Verify translation files and human review status (strict)
         working-directory: tools/omni-cli
-        run: node scripts/docs-quality.mjs --scope=i18n --allow-draft
-      - name: Verify screenshot manifest and draft coverage
+        run: node scripts/docs-quality.mjs --scope=i18n
+      - name: Verify screenshot manifest and coverage (strict)
         working-directory: tools/omni-cli
-        run: node scripts/docs-quality.mjs --scope=screenshots --allow-draft
+        run: node scripts/docs-quality.mjs --scope=screenshots
+      - name: Verify i18n review queue consistency
+        working-directory: tools/omni-cli
+        run: node scripts/docs-review-queue.mjs
+      - name: Verify admin screenshot manifest sync
+        working-directory: tools/omni-cli
+        run: node scripts/screenshot-manifest-sync.mjs
       - name: Scan documentation for sensitive content
         working-directory: tools/omni-cli
         run: node scripts/docs-quality.mjs --scope=sensitive
       - name: Prevent new hard-coded UI copy
         working-directory: tools/omni-cli
         run: npm run ui:i18n:check
+      - name: Verify locale key/placeholder parity and language residue (strict)
+        working-directory: omni-frontend
+        run: node ../tools/omni-cli/scripts/locale-parity-check.mjs --strict
+
+  database-migrations:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DB_MIGRATOR_ADMIN_URL: jdbc:mysql://127.0.0.1:3306/?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      DB_MIGRATOR_ADMIN_USERNAME: root
+      DB_MIGRATOR_ADMIN_PASSWORD: root
+      DB_MIGRATOR_APP_USERNAME: omni_app
+      DB_MIGRATOR_APP_PASSWORD: omni_app_ci_password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Package migrator
+        working-directory: omni-backend
+        run: ./mvnw -q -pl omni-db-migrator -am package -DskipTests
+      - name: Fresh migrate from empty instance
+        working-directory: omni-backend
+        env:
+          DB_MIGRATOR_COMMAND: migrate
+        run: java -jar omni-db-migrator/target/omni-db-migrator*.jar
+      - name: Re-run migrate as idempotent upgrade replay
+        working-directory: omni-backend
+        env:
+          DB_MIGRATOR_COMMAND: migrate
+        run: java -jar omni-db-migrator/target/omni-db-migrator*.jar
+      # adopt-current 不在 CI 执行：它要求与 baselineCommit 绑定的真实外部备份证据
+      # （BackupVerification），且当前冻结基线与 changelog 存在 sys_mq_message 漂移，
+      # 待基线刷新流程完成后由运维在真实接管场景执行。
+      - name: Validate changelogs and seeds
+        working-directory: omni-backend
+        env:
+          DB_MIGRATOR_COMMAND: validate
+        run: java -jar omni-db-migrator/target/omni-db-migrator*.jar
+      - name: Verify seed manifest against database
+        working-directory: omni-backend
+        env:
+          DB_MIGRATOR_COMMAND: verify-seed
+        run: java -jar omni-db-migrator/target/omni-db-migrator*.jar
+
+  cli-golden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tools/omni-cli/package-lock.json
+      - name: Install CLI tooling
+        working-directory: tools/omni-cli
+        run: npm ci
+      - name: CLI unit tests
+        working-directory: tools/omni-cli
+        run: npm test
+      - name: create-service golden
+        working-directory: tools/omni-cli
+        run: npm run test:golden
+      - name: CRUD generator goldens
+        working-directory: tools/omni-cli
+        run: |
+          npm run test:crud-golden
+          npm run test:crud-db-golden
+          npm run test:crud-runtime-golden
+      - name: Five-preset structural matrix
+        working-directory: tools/omni-cli
+        run: |
+          npm run test:preset-structure
+          npm run test:preset-smoke
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan tracked files for secret patterns
+        run: |
+          set -e
+          # 已知补丁文件属于 WP-10 清理对象，正式质量门只扫描将保留的内容。
+          if git grep -I -nE '(BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{82}|xox[baprs]-[A-Za-z0-9-]{10,})' -- . ':(exclude)*.patch' ':(exclude)*.env*'; then
+            echo '::error::检测到疑似 Secret 模式，禁止提交'
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frontend production dependency audit
+        working-directory: omni-frontend
+        run: npm audit --omit=dev --audit-level=critical
+      - name: CLI production dependency audit
+        working-directory: tools/omni-cli
+        run: npm audit --omit=dev --audit-level=critical
+
+  # 夜间/手动触发的完整矩阵：登录后 Compose E2E 与全量四语言截图。
+  # 未注入 E2E_*_TOKEN 时用例自动跳过并保留阻塞登记，不伪造执行结果。
+  compose-e2e-nightly:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      E2E_ADMIN_TOKEN: ${{ secrets.E2E_ADMIN_TOKEN }}
+      E2E_EMPLOYEE_TOKEN: ${{ secrets.E2E_EMPLOYEE_TOKEN }}
+      E2E_SUPPLIER_TOKEN: ${{ secrets.E2E_SUPPLIER_TOKEN }}
+      E2E_MUTATIONS: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: omni-frontend/package-lock.json
+      - name: Prepare CI environment file
+        run: |
+          cp .env.example .env
+          printf '\nMYSQL_ROOT_PASSWORD=root_ci_password\nOMNI_DB_PASSWORD=omni_app_ci_password\n' >> .env
+      - name: Build and start full stack
+        run: docker compose --profile full up -d --build
+      - name: Wait for stack health
+        run: |
+          for i in $(seq 1 60); do
+            if [ "$(docker compose ps --format json | grep -c '"Health":"healthy"')" -ge 5 ]; then
+              echo '核心服务已健康'; exit 0
+            fi
+            sleep 10
+          done
+          docker compose ps
+          exit 1
+      - name: Install frontend test tooling
+        working-directory: omni-frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Logged-in E2E suite (G2 fixtures, permissions, mutations)
+        working-directory: omni-frontend
+        run: npm run test:e2e
+      - name: Full four-locale screenshot suite
+        working-directory: omni-frontend
+        run: npm run docs:screenshots
+      - name: Upload screenshot artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-screenshots
+          path: docs/images
+          retention-days: 7
+
+  # G2-3 隔离依赖中断 E2E（ISOLATED_DEPENDENCY_OUTAGE）：
+  # 独立 compose project 内真实停止 omni-workflow，验证 procurement 降级语义
+  # （WORKFLOW_UNAVAILABLE + routeId/routeName 保留）。不触碰任何共享环境；
+  # 认证复用 E2E_ADMIN_TOKEN secret；PREPARE/ASSERT 两阶段通过 state file 传递 fixture。
+  # 真实执行成功后 G2-3 才能标 PASS；本 job 仅准备设施，不预先声明结果。
+  g2-workflow-unavailable-e2e:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      G2_OUTAGE_PROJECT: omni-g2-outage
+      G2_OUTAGE_STATE_FILE: /tmp/g2-outage-state.json
+      E2E_WORKFLOW_FAULT_INJECTION: 'true'
+      E2E_MUTATIONS: 'true'
+      E2E_ADMIN_TOKEN: ${{ secrets.E2E_ADMIN_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: omni-frontend/package-lock.json
+      - name: Prepare CI environment file
+        run: |
+          cp .env.example .env
+          printf '\nMYSQL_ROOT_PASSWORD=root_ci_password\nOMNI_DB_PASSWORD=omni_app_ci_password\n' >> .env
+      - name: Phase 1 - start isolated stack (dedicated project)
+        run: docker compose -p $G2_OUTAGE_PROJECT --profile full up -d --build
+      - name: Phase 2 - wait for stack health
+        run: |
+          for i in $(seq 1 60); do
+            if [ "$(docker compose -p $G2_OUTAGE_PROJECT ps --format json | grep -c '"Health":"healthy"')" -ge 5 ]; then
+              echo '核心服务已健康'; exit 0
+            fi
+            sleep 10
+          done
+          docker compose -p $G2_OUTAGE_PROJECT ps
+          exit 1
+      - name: Install frontend test tooling
+        working-directory: omni-frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Phase 4 - prepare G2-3 fixture (workflow healthy)
+        working-directory: omni-frontend
+        run: npx playwright test e2e/functional.spec.ts -g "G2OUTAGE-PREPARE" --reporter=list
+      - name: Phase 5 - stop isolated workflow service (dependency outage)
+        run: docker compose -p $G2_OUTAGE_PROJECT stop omni-workflow
+      - name: Phase 6 - G2-3 assertion under outage
+        working-directory: omni-frontend
+        run: npx playwright test e2e/functional.spec.ts -g "G2OUTAGE-ASSERT" --reporter=list
+      - name: Phase 8 - destroy isolated project
+        if: always()
+        run: docker compose -p $G2_OUTAGE_PROJECT down -v --remove-orphans
