@@ -137,13 +137,12 @@ Omni-Stack/
 │   ├── design/procurement-design.md    #   Procurement MVP 设计与实现基线
 │   ├── design/asset-design.md          #   Asset MVP 设计与实现基线
 │   └── docker-deployment.md            #   Docker 全家桶部署深度指南
-├── scripts/sql/                        # 数据库初始化脚本
-│   ├── init-all.sql                    #   权威 DDL + 种子数据
-│   ├── migrate-crm-mvp.sql             #   既有环境 CRM MVP 幂等迁移
-│   ├── migrate-srm-mvp.sql             #   既有环境 SRM MVP 幂等迁移
-│   ├── sp_init_tenant.sql              #   新租户初始化存储过程
-│   ├── init-nacos.sql                  #   Nacos MySQL 持久化
-│   └── init-xxl-job.sql               #   XXL-JOB 数据库
+├── database/                           # 数据库事实源
+│   ├── changelog/                      #   Liquibase changelog（权威 DDL 与升级）
+│   └── seed/manifest.yaml              #   种子清单（SHA-256 + 自然键断言）
+├── scripts/sql/seed/                   # 正式幂等种子（auth/base/crm/nacos/procurement/srm/workflow/xxl-job）
+│   ├── init-nacos.sql                  #   兼容期遗留：Nacos MySQL 持久化
+│   └── init-xxl-job.sql               #   兼容期遗留：XXL-JOB 数据库
 ├── omni-backend/                       # Maven 多模块后端
 │   ├── omni-common-core/               #   纯 POJO：R<T>, PageResult, XSS SPI
 │   ├── omni-common/                    #   Web 自动配置：Jackson, CORS, XSS Filter
