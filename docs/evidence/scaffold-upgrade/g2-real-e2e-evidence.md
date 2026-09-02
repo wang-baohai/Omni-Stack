@@ -117,7 +117,28 @@ Token 估算：本批 ~110K。
 
 ### 状态
 
-**`G2-3 = READY_FOR_ISOLATED_CI_EXECUTION`**（非 PASS / 非 G2 completed）
+**`G2-3 = PASS (LOCAL_ACCEPTANCE)`**（2026-09-02 验收方裁决）
+
+## G2-3 Acceptance Decision（2026-09-02，验收方裁决）
+
+当前验收采用**本地验证结果作为正式依据**：
+
+- Service 层降级语义单测：`ApprovalRouteInsightServiceImplTest` 覆盖 Workflow client failure
+  → `WORKFLOW_UNAVAILABLE` / routeId 保留 / routeName 保留
+- G2 本地浏览器/API 主链路真实执行：G2-1/2/4/5/6 全部 PASS
+- 产品当前真实 fallback 行为：Feign 快速失败（connect 3s/read 5s）+ matchedPreview catch FeignException → 降级
+- isolated CI facility 已实现并发布（wiring commit `7879680`）
+
+**限制（诚实登记）**：
+
+`REMOTE_ISOLATED_OUTAGE_CI = NOT_EXECUTED`
+
+远程 GitHub Actions isolated outage run 尚未执行。该 run 登记为
+**`G2_REMOTE_ISOLATED_CI = FOLLOW_UP_NON_BLOCKING`**（regression hardening 任务），
+**不是**当前 G2 验收决策的前置条件。`DISPATCH_SCOPE_NOT_ISOLATED`（Quality Gate 6 个无门槛 job）
+同步登记为 `REMOTE_CI_DISPATCH_ISOLATION = FOLLOW_UP`。
+
+**`G2 = CLOSED`**（G2-1/2/3/4/5/6 全部 PASS，G2-3 验收类型 LOCAL_ACCEPTANCE）
 
 ## 附：深度截图批次记录（2026-09-01 同日）
 

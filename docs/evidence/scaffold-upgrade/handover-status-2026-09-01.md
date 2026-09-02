@@ -95,7 +95,8 @@
 | 深度截图 ×6 partial + 2 missing | 批量授权（成本矩阵已出：全 >65K 或含不可构造 gap） | **方案 3 冻结** |
 | 114 篇翻译复核 | Codex 终审 | DEFERRED |
 | adoption 基线确认 | 运维 | BLOCKED |
-| G2-3 isolated CI 设施 | CI 环境 + 授权 | **READY_FOR_ISOLATED_CI_EXECUTION**（2026-09-02：quality.yml `g2-workflow-unavailable-e2e` job + PREPARE/ASSERT 两阶段测试已就绪并通过静态验证，待 GitHub Actions 实际执行；secret 前置：secrets.E2E_ADMIN_TOKEN） |
+| **G2（Gate 2）** | — | **CLOSED**（2026-09-02：G2-1/2/4/5/6 PASS + G2-3 PASS LOCAL_ACCEPTANCE；remote isolated CI = FOLLOW_UP_NON_BLOCKING） |
+| G2-3 isolated CI 设施 | CI 环境 + 授权 | **已发布；转 FOLLOW_UP_NON_BLOCKING**（2026-09-02 验收方裁决：G2-3 以本地验收 PASS（LOCAL_ACCEPTANCE）关闭，G2=CLOSED；remote isolated outage CI 未执行，登记为 regression hardening 非阻塞 follow-up；dispatch scope isolation（Quality Gate 6 无门槛 job）同属 follow-up） |
 | WP-10 分批清理 | G1-G7 关闭 | 禁止提前 |
 | G8 最终验收 | 全部前置 | 禁止提前 |
 
