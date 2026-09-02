@@ -326,7 +326,7 @@ omni-frontend/src/
 1. Add tables in the `omni_crm` database — must include `tenant_id`, `owner_user_id`, `owner_unit_id`, `version`, `deleted`, and audit fields
 2. Create Entity (extends BaseEntity), Mapper, Service interface + Impl, Controller
 3. Register the new table's owner column mapping in `CrmDataPermissionHandlerImpl`
-4. Append DDL and permission seed data to `init-all.sql`
+4. Add a Liquibase changelog under `database/changelog/crm/`, and provide seed data in `scripts/sql/seed/` (`crm.sql`, `auth.sql`) verified by `database/seed/manifest.yaml`
 5. Controller write endpoints declare `@PreAuthorize` + `@CrmDataScope` with new `crm:<resource>:<action>` permission codes
 
 ### Adding Opportunity Stages
@@ -338,7 +338,7 @@ MVP pipelines are not configurable. If opened up in the future, the following ar
 
 ### Adding Permission Codes
 
-1. Insert new permissions into `sys_permission` in `init-all.sql` with type `API`
+1. Insert new permissions into `sys_permission` in `scripts/sql/seed/auth.sql` with type `API`
 2. Assign to roles in `sys_role_permission` as needed
 3. Controller methods declare `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@CrmDataScope("crm:<resource>:<action>")`
 4. Add `v-permission="'crm:<resource>:<action'"` to the corresponding frontend button

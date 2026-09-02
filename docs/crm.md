@@ -326,7 +326,7 @@ omni-frontend/src/
 1. 在 `omni_crm` 数据库加表，必须包含 `tenant_id`、`owner_user_id`、`owner_unit_id`、`version`、`deleted` 和审计字段
 2. 创建 Entity（extends BaseEntity）、Mapper、Service 接口 + Impl、Controller
 3. 在 `CrmDataPermissionHandlerImpl` 中注册新表的 owner 列映射
-4. 在 `init-all.sql` 中追加 DDL 和权限种子数据
+4. 在 `database/changelog/crm/` 新增 Liquibase changelog，并在 `scripts/sql/seed/`（`crm.sql`、`auth.sql`）补充种子数据，经 `database/seed/manifest.yaml` 校验
 5. Controller 写接口声明 `@PreAuthorize` + `@ServiceDataScope`，使用新的 `crm:<resource>:<action>` 权限码
 
 ### 新增 Opportunity 阶段
@@ -338,7 +338,7 @@ MVP 管道不可配置。如果未来开放，需要：
 
 ### 新增权限码
 
-1. 在 `init-all.sql` 的 `sys_permission` 中插入新权限，type 为 `API`
+1. 在 `scripts/sql/seed/auth.sql` 的 `sys_permission` 中插入新权限，type 为 `API`
 2. 按角色分配到 `sys_role_permission`
 3. Controller 方法声明 `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@ServiceDataScope(permissionCode = "crm:<resource>:<action>")`
 4. 前端对应按钮添加 `v-permission="'crm:<resource>:<action'"`

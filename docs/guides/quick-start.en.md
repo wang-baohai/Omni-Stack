@@ -26,7 +26,7 @@ CRM only:
 npm --prefix tools/omni-cli run dev -- dev up --preset crm
 ```
 
-Available presets include `core`, `crm`, `srm`, `procurement`, `asset`, and `supply-chain`. See [Preset Quick Selection](../preset-quick-selection.en.md). On first startup, Liquibase migrates the database before services start. Do not run legacy `init-all.sql` or `migrate-*.sql` files.
+Available presets include `core`, `workflow`, `crm`, `supply-chain`, and `full`. See [Preset Quick Selection](../preset-quick-selection.en.md). On first startup, Liquibase migrates the database before services start. Do not run legacy `init-all.sql` or `migrate-*.sql` files.
 
 ## 3. Verify Service Health
 
@@ -60,6 +60,17 @@ An administrator should see System, Base Data, Scheduling, Monitoring, Workflow,
 4. My Workspace can open the Create Task dialog.
 
 A missing menu usually means the role lacks permission or the preset omits the module. Do not fix it by hard-coding frontend routes.
+
+### Screenshot
+
+#### Figure 1 `system-dashboard-en-US`: Console dashboard
+
+- Prerequisites: log in as an administrator
+- Actor: administrator
+- Action: after login the app lands on the approval workbench; click Console (top right) to open the admin dashboard
+- Expected result: the main area shows the Welcome card with backend/frontend/core services/infrastructure info, and the sidebar lists System, Base Data, Scheduler, Monitoring, and Workflow
+
+![Console dashboard](../images/en-US/system-dashboard.png)
 
 ## 6. Source Development
 

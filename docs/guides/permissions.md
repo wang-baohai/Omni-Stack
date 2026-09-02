@@ -67,6 +67,71 @@ Servlet 业务服务通过可信 Gateway 身份建立请求上下文，再由 My
 
 不要只使用超级管理员验收权限功能。
 
+### 操作截图
+
+#### 图 1 `system-users-zh-CN`：用户管理
+
+- 前置条件：以系统管理员身份登录，具备用户管理权限
+- 操作者：系统管理员
+- 操作：进入「系统管理 → 用户管理」
+- 预期结果：主内容区显示「用户管理」列表，可执行角色分配与启停
+
+![用户管理](../images/zh-CN/system-users.png)
+
+#### 图 2 `employee-forbidden-403-zh-CN`：员工越权访问被拒
+
+- 前置条件：以普通员工 zhangsan（EMPLOYEE 角色）登录，未授予 `procurement:approval-route:list`
+- 操作者：普通员工
+- 操作：直接访问「请购审批规则」管理页 `/admin/procurement/approval-route`
+- 预期结果：页面显示 403 与返回入口（AUTHENTICATED_BUT_FORBIDDEN，非登录跳转）；同接口 API 返回 HTTP 403
+
+![员工越权访问被拒](../images/zh-CN/employee-forbidden-403.png)
+
+#### 图 3 `employee-workspace-scope-zh-CN`：员工可见范围
+
+- 前置条件：以普通员工 zhangsan 登录
+- 操作者：普通员工
+- 操作：登录后进入审批工作台首页
+- 预期结果：工作台仅展示员工可见的待办任务与个人任务，不含管理端菜单与 403
+
+![员工可见范围](../images/zh-CN/employee-workspace-scope.png)
+
+#### 图 4 `supplier-portal-scope-zh-CN`：供应商门户范围
+
+- 前置条件：以正式 seed 供应商账号 supplier1（SUPPLIER 角色）登录
+- 操作者：供应商用户
+- 操作：打开 `/supplier-portal`
+- 预期结果：门户页面渲染且登录身份为 supplier1，仅可访问供应商合法范围
+
+![供应商门户范围](../images/zh-CN/supplier-portal-scope.png)
+
+#### 图 5 `resource-not-found-404-zh-CN`：未知路由 404
+
+- 前置条件：以管理员登录
+- 操作者：任意用户
+- 操作：访问未定义路由（catch-all NotFound，statusCode=404）
+- 预期结果：产品 NotFound 页显示 404 文案
+
+![未知路由 404](../images/zh-CN/resource-not-found-404.png)
+
+#### 图 6 `approval-route-list-failure-zh-CN`：列表接口失败表现
+
+- 前置条件：以管理员登录；测试进程内对审批规则列表接口注入确定性 500 故障
+- 操作者：管理员（配合确定性测试故障）
+- 操作：打开「请购审批规则」页，列表接口返回 500
+- 预期结果：页面框架保持，列表区呈现接口失败下的真实产品表现
+
+![列表接口失败](../images/zh-CN/approval-route-list-failure.png)
+
+#### 图 7 `admin-menu-load-failure-zh-CN`：菜单加载失败降级页
+
+- 前置条件：以管理员登录；测试进程内对菜单接口注入确定性 500 故障
+- 操作者：管理员（配合确定性测试故障）
+- 操作：访问管理端页面，菜单接口返回 500
+- 预期结果：守卫重定向菜单加载失败降级页，显示本地化错误标题与「重新加载/返回首页」恢复入口，不白屏、不伪装成功菜单
+
+![菜单加载失败降级页](../images/zh-CN/admin-menu-load-failure.png)
+
 ## 6. 新增权限的代码清单
 
 新增写功能时必须同时更新：

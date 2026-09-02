@@ -26,7 +26,7 @@ docker compose ps
 npm --prefix tools/omni-cli run dev -- dev up --preset crm
 ```
 
-可用预设包括 `core`、`crm`、`srm`、`procurement`、`asset` 和 `supply-chain`。选择依据见 [项目预设快速选择](../preset-quick-selection.md)。首次启动会先运行 Liquibase 迁移器，再启动服务；不要再执行历史 `init-all.sql` 或 `migrate-*.sql`。
+可用预设包括 `core`、`workflow`、`crm`、`supply-chain` 和 `full`。选择依据见 [项目预设快速选择](../preset-quick-selection.md)。首次启动会先运行 Liquibase 迁移器，再启动服务；不要再执行历史 `init-all.sql` 或 `migrate-*.sql`。
 
 ## 3. 确认服务状态
 
@@ -60,6 +60,17 @@ npm --prefix tools/omni-cli run dev -- dev up --preset crm
 4. 工作台“我的定时任务”能打开创建对话框。
 
 菜单缺失通常意味着当前角色没有对应权限，或预设没有包含该模块，不应通过手工修改前端路由解决。
+
+### 操作截图
+
+#### 图 1 `system-dashboard-zh-CN`：工作台首页
+
+- 前置条件：以管理员身份完成登录，进入主界面
+- 操作者：管理员
+- 操作：登录后默认进入审批工作台，点击右上角「控制台」进入管理仪表盘
+- 预期结果：主内容区显示「欢迎」卡片与后端/前端/核心服务/基础设施信息，侧边栏包含系统管理、基础数据、任务调度、运维监控、工作流管理
+
+![工作台首页](../images/zh-CN/system-dashboard.png)
 
 ## 6. 本地源码开发
 

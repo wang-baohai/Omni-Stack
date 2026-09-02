@@ -13,6 +13,17 @@ Platform work such as MQ relay, log archival, and compensation scans requires bo
 
 Without either one, `SystemJobRegistry` cannot expose the handler. The UI controls registration, start/stop, and immediate execution, while implementation remains versioned code.
 
+### Screenshot
+
+#### Figure 1 `scheduling-system-jobs-en-US`: System job list
+
+- Prerequisites: log in as an administrator with system job access
+- Actor: platform administrator
+- Action: open Scheduler → System Jobs
+- Expected result: the main area shows registered handlers with start/stop and run-once actions
+
+![System jobs](../images/en-US/scheduling-system-jobs.png)
+
 ## 2. Personal Jobs
 
 In My Workspace:

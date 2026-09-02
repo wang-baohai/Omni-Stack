@@ -26,7 +26,7 @@ CRM만 시작:
 npm --prefix tools/omni-cli run dev -- dev up --preset crm
 ```
 
-`core`, `crm`, `srm`, `procurement`, `asset`, `supply-chain` 프리셋을 제공합니다. [프리셋 선택](../preset-quick-selection.kr.md)을 참고하세요. 최초 시작 시 Liquibase가 먼저 마이그레이션합니다. 기존 `init-all.sql` 또는 `migrate-*.sql`을 실행하지 마세요.
+`core`, `workflow`, `crm`, `supply-chain`, `full` 프리셋을 제공합니다. [프리셋 선택](../preset-quick-selection.kr.md)을 참고하세요. 최초 시작 시 Liquibase가 먼저 마이그레이션합니다. 기존 `init-all.sql` 또는 `migrate-*.sql`을 실행하지 마세요.
 
 ## 3. 상태 확인
 
@@ -51,6 +51,17 @@ CAPTCHA는 요청마다 한 번만 사용합니다. 새로 고침이나 실패 �
 관리자는 시스템 관리, 기초 데이터, 작업 스케줄링, 운영 모니터링, 워크플로와 프리셋의 업무 모듈을 확인할 수 있어야 합니다. 사용자 목록, 프로세스 모델, 도메인 개요, 개인 작업 생성 대화상자를 차례로 확인합니다.
 
 메뉴가 없으면 권한과 프리셋을 점검하고 프론트엔드 정적 라우트로 우회하지 않습니다.
+
+### 스크린숏
+
+#### 그림 1 `system-dashboard-ko-KR`: 콘솔 대시보드
+
+- 전제 조건: 관리자로 로그인
+- 작업자: 관리자
+- 작업: 로그인 후 승인 워크벤치에 도착하므로 우측 상단의 '콘솔'을 클릭해 관리 대시보드 열기
+- 예상 결과: 메인 영역에 '환영합니다' 카드와 백엔드/프론트엔드/핵심 서비스/인프라 정보가, 사이드바에 시스템/기초 데이터/작업 스케줄링/운영 모니터링/워크플로 관리가 표시됨
+
+![콘솔 대시보드](../images/ko-KR/system-dashboard.png)
 
 ## 6. 소스 개발
 

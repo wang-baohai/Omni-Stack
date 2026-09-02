@@ -11,6 +11,17 @@ Maintain Materials → Configure Approval Rules → Create and Approve Requisiti
 
 Each stage has an independent state machine. Never skip prerequisites by changing database status.
 
+### Screenshot
+
+#### Figure 1 `procurement-overview-en-US`: Procurement overview
+
+- Prerequisites: log in as a procurement administrator with overview access
+- Actor: procurement administrator
+- Action: open Procurement → Overview
+- Expected result: the main area shows the "Procurement Overview" title with amounts grouped per currency
+
+![Procurement overview](../images/en-US/procurement-overview.png)
+
 ## 2. Materials
 
 Categories and materials are tenant-shared master data. A material defines code, name, category, unit, asset-management flag, and default asset quantity semantics. Check references before deletion.
@@ -29,6 +40,35 @@ The business-oriented UI asks users to:
 6. Resolve coverage gaps or conflicts before enabling.
 
 Deactivation and deletion show newly uncovered scope. The server owns matching logic; the frontend never duplicates it.
+
+### Screenshot
+
+#### Figure 2 `procurement-approval-rules-en-US`: Approval rules entry
+
+- Prerequisites: log in as a procurement administrator with `procurement:approval-route:list`
+- Actor: procurement administrator
+- Action: open Procurement → Requisition Approval Rules
+- Expected result: the main area shows the "Requisition Approval Rules" title, the match tester, and coverage risk cards
+
+![Requisition approval rules](../images/en-US/procurement-approval-rules.png)
+
+#### Figure 3 `procurement-approval-rules-mobile-zh-CN`: 390×844 responsive (layout reference, captured in zh-CN)
+
+- Prerequisites: same as Figure 2
+- Actor: procurement administrator
+- Action: open the same page at 390×844
+- Expected result: the page renders without horizontal scroll and core copy stays intact. Responsive captures are currently provided in zh-CN only; other locales follow the same fixture and viewport.
+
+![Approval rules mobile](../images/zh-CN/procurement-approval-rules-mobile.png)
+
+#### Figure 4 `procurement-approval-rules-tablet-zh-CN`: 1024×768 responsive (layout reference, captured in zh-CN)
+
+- Prerequisites: same as Figure 2
+- Actor: procurement administrator
+- Action: open the same page at 1024×768
+- Expected result: adaptive layout with all entry points available.
+
+![Approval rules tablet](../images/zh-CN/procurement-approval-rules-tablet.png)
 
 ## 4. Requisitions
 

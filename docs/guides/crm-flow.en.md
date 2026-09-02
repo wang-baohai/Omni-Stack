@@ -31,6 +31,17 @@ Activities associate calls, meetings, emails, visits, and notes with a lead, cus
 
 The overview uses real backend aggregates for funnels, customer state, opportunity amount, stage distribution, and recent activity. Empty data shows an explicit empty state rather than mock metrics.
 
+### Screenshot
+
+#### Figure 1 `crm-overview-en-US`: Sales overview
+
+- Prerequisites: log in as a salesperson or sales administrator
+- Actor: salesperson
+- Action: open CRM → Overview
+- Expected result: the main area shows the "Sales Overview" title with real aggregated metrics
+
+![Sales overview](../images/en-US/crm-overview.png)
+
 ## 7. Permission Acceptance
 
 Test with a super administrator, departmental salesperson, and self-only user:

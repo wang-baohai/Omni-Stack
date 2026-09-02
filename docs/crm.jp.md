@@ -340,7 +340,7 @@ MVP のパイプラインは設定不可です。将来的に開放する場合�
 
 ### 新しい権限コードの追加
 
-1. `init-all.sql` の `sys_permission` に新しい権限を挿入、type は `API`
+1. `scripts/sql/seed/auth.sql` の `sys_permission` に新しい権限を挿入、type は `API`
 2. ロールに応じて `sys_role_permission` に分配
 3. Controller メソッドに `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@CrmDataScope("crm:<resource>:<action>")` を宣言
 4. フロントエンドの該当ボタンに `v-permission="'crm:<resource>:<action'"` を追加

@@ -10,6 +10,17 @@ Create → Edit Draft → Server Validation → Publish Version → Business Sta
 
 A model key is tenant-unique and matches BPMN `<process id>`. `BpmnXmlValidator` runs before publishing, and a row lock prevents concurrent duplicate versions. A published version is immutable; later draft edits do not change running instances.
 
+### Screenshot
+
+#### Figure 1 `workflow-models-en-US`: Process model list
+
+- Prerequisites: log in as a workflow administrator
+- Actor: workflow administrator
+- Action: open Workflow → Models
+- Expected result: the main area shows the model list with seeded models
+
+![Process models](../images/en-US/workflow-models.png)
+
 ## 2. Modeling
 
 1. Open Workflow → Process Models.

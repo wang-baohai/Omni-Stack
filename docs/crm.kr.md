@@ -340,7 +340,7 @@ MVP 파이프라인은 설정 불가합니다. 향후 개방 시 다음이 필�
 
 ### 새 권한 코드 추가
 
-1. `init-all.sql`의 `sys_permission`에 새 권한을 삽입하며, type은 `API`로 설정합니다
+1. `scripts/sql/seed/auth.sql`의 `sys_permission`에 새 권한을 삽입하며, type은 `API`로 설정합니다
 2. 역할에 따라 `sys_role_permission`에 할당합니다
 3. Controller 메서드에 `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@CrmDataScope("crm:<resource>:<action>")`를 선언합니다
 4. 프론트엔드 해당 버튼에 `v-permission="'crm:<resource>:<action'"`를 추가합니다

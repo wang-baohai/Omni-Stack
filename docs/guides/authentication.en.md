@@ -47,6 +47,44 @@ Callback addresses, client secrets, and allowed origins come from environment co
 
 Device authorization is for input-constrained devices, not a general CAPTCHA bypass.
 
+### Screenshot
+
+#### Figure 1 `auth-login-en-US`: Login entry
+
+- Prerequisites: public, no login required
+- Actor: any user
+- Action: open `/login`
+- Expected result: tenant, username, password, CAPTCHA (masked), and sign-in methods are visible
+
+![Login entry](../images/en-US/auth-login.png)
+
+#### Figure 2 `auth-register-en-US`: Self-registration
+
+- Prerequisites: public
+- Actor: new user
+- Action: open the register page from login
+- Expected result: username, password, confirm password, and CAPTCHA inputs are visible
+
+![Self-registration](../images/en-US/auth-register.png)
+
+#### Figure 3 `auth-device-code-en-US`: Device authorization
+
+- Prerequisites: a headless device starts the OAuth2 device flow
+- Actor: device user
+- Action: open `/device` for the user code, then enter it at `/device/verify`
+- Expected result: the device user code is shown with a fixed 10:00 countdown
+
+![Device authorization](../images/en-US/auth-device-code.png)
+
+#### Figure 4 `supplier-portal-login-en-US`: Supplier portal login
+
+- Prerequisites: public
+- Actor: supplier user
+- Action: open the supplier portal login page
+- Expected result: the portal login form and registration entry are visible
+
+![Supplier portal login](../images/en-US/supplier-portal-login.png)
+
 ## 6. Expired Sessions
 
 When a token expires or permissions change, the client clears local authentication, returns to login, and preserves only a validated in-app redirect. `javascript:`, cross-origin, and protocol-relative redirect targets are rejected. A failed menu request displays a retryable error page instead of an infinite request loop.

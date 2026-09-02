@@ -11,6 +11,17 @@ Procurement 负责物料目录、请购审批规则、请购、RFQ、报价汇�
 
 每一步都有独立状态机。不能通过修改数据库状态跳过前置步骤。
 
+### 操作截图
+
+#### 图 1 `procurement-overview-zh-CN`：采购概览
+
+- 前置条件：以采购管理员身份登录，具备 `procurement:overview:view` 权限
+- 操作者：采购管理员
+- 操作：进入「采购执行管理 → 采购概览」
+- 预期结果：主内容区显示「采购概览」标题，金额按币种隔离汇总
+
+![采购概览](../images/zh-CN/procurement-overview.png)
+
 ## 2. 物料目录
 
 物料分类和物料是租户共享基础数据。物料记录包含编码、名称、分类、单位、是否资产化和默认资产数量规则。删除前必须检查是否已被请购或采购单据引用。
@@ -29,6 +40,35 @@ Procurement 负责物料目录、请购审批规则、请购、RFQ、报价汇�
 6. 确认覆盖分析无断档或冲突后启用。
 
 停用或删除前页面会展示新增断档和受影响范围。规则按服务端解析器匹配，前端不复制判断算法。
+
+### 操作截图
+
+#### 图 2 `procurement-approval-rules-zh-CN`：请购审批规则入口
+
+- 前置条件：以采购管理员身份登录，具备 `procurement:approval-route:list` 权限
+- 操作者：采购管理员
+- 操作：进入「采购执行管理 → 请购审批规则」
+- 预期结果：主内容区显示「请购审批规则」标题、「先试一笔」与审批覆盖风险卡片
+
+![请购审批规则](../images/zh-CN/procurement-approval-rules.png)
+
+#### 图 3 `procurement-approval-rules-mobile-zh-CN`：390×844 响应式
+
+- 前置条件：同图 2
+- 操作者：采购管理员
+- 操作：390×844 视口打开同一页面
+- 预期结果：页面正常渲染无横向滚动，核心文案完整
+
+![请购审批规则移动端](../images/zh-CN/procurement-approval-rules-mobile.png)
+
+#### 图 4 `procurement-approval-rules-tablet-zh-CN`：1024×768 响应式
+
+- 前置条件：同图 2
+- 操作者：采购管理员
+- 操作：1024×768 视口打开同一页面
+- 预期结果：布局自适应，功能入口完整
+
+![请购审批规则平板端](../images/zh-CN/procurement-approval-rules-tablet.png)
 
 ## 4. 请购
 

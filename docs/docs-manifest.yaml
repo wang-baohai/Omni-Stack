@@ -93,7 +93,7 @@ documents:
     module: crm
     owner: crm
     source: docs/crm.md
-    source_sha256: 29f71d97b6d37bbedd1f9b63c4746397545927015dc936c90e78d492dc20d058
+    source_sha256: 8ddf46014cbbab5204ae5693aa45699f383b6e03aa2dcb91237e7a6b85dc8383
     dependencies: [api, permissions, state-machine, screenshots]
     translations:
       en-US: { path: docs/crm.en.md, status: present-unverified, reviewed_at: null }
@@ -292,7 +292,7 @@ documents:
     module: platform
     owner: documentation
     source: docs/guides/quick-start.md
-    source_sha256: d2e9dbf61979cf80a17404d429dc3421cf51d90f80b2907b79dd1924a16d7ad7
+    source_sha256: 0da1a481ebf587a6c9c97aa8634032152be6e11cf2cc95c1dc94d908caca08c4
     dependencies: [compose, presets, authentication, screenshots]
     translations:
       en-US: { path: docs/guides/quick-start.en.md, status: present-unverified, reviewed_at: null }
@@ -303,7 +303,7 @@ documents:
     module: authentication
     owner: auth
     source: docs/guides/authentication.md
-    source_sha256: 814b54899799a6e43b1350a1b37e6419ca3eff833453dee49d1a02c53002b99f
+    source_sha256: 85c6160cf426f722ad7a75356490feec57fffea22ae16a62136e203836fb8ac7
     dependencies: [captcha, social-login, device-code, tenant, screenshots]
     translations:
       en-US: { path: docs/guides/authentication.en.md, status: present-unverified, reviewed_at: null }
@@ -314,7 +314,7 @@ documents:
     module: security
     owner: auth
     source: docs/guides/permissions.md
-    source_sha256: 56e2b23b96b492de05ef585a6aaa745fd0dbfc1d2fd8e485a5940caf2bbabfcd
+    source_sha256: 77ca09f78202c0a797982919c5424bde36bafd0b5ff0242e4bc3af302e89af21
     dependencies: [menus, roles, functional-permission, data-scope]
     translations:
       en-US: { path: docs/guides/permissions.en.md, status: present-unverified, reviewed_at: null }
@@ -336,7 +336,7 @@ documents:
     module: workflow
     owner: workflow
     source: docs/guides/workflow-approval.md
-    source_sha256: 86f3f2c1a165de630d42fe580d57a77fce4c004db35290db7f8186186219522b
+    source_sha256: ff4df819c13cf3a499a5f92ab3aadea11195de632c6b157d7f34b5ebf882aae9
     dependencies: [bpmn, candidates, publishing, approval, screenshots]
     translations:
       en-US: { path: docs/guides/workflow-approval.en.md, status: present-unverified, reviewed_at: null }
@@ -347,7 +347,7 @@ documents:
     module: scheduling
     owner: base
     source: docs/guides/scheduling.md
-    source_sha256: 3896bf01c3539720e183f3be8ea497809e2a039670264e329e6d930cb18e68d1
+    source_sha256: a870284445adcae20056c735b9c9e068fc421a34d503e4547e39640d3d7fc61a
     dependencies: [xxl-job, job-type, dynamic-schema, screenshots]
     translations:
       en-US: { path: docs/guides/scheduling.en.md, status: present-unverified, reviewed_at: null }
@@ -358,7 +358,7 @@ documents:
     module: crm
     owner: crm
     source: docs/guides/crm-flow.md
-    source_sha256: 7c4a669c5705326e5805aba1ac212b1c1e2874c193df8ea163f68b8421bd4a35
+    source_sha256: ebc23c148037485b86fd845593d3b17308e13f335b91a61c8055b672486e67bb
     dependencies: [crm, permissions, state-machine, screenshots]
     translations:
       en-US: { path: docs/guides/crm-flow.en.md, status: present-unverified, reviewed_at: null }
@@ -369,7 +369,7 @@ documents:
     module: srm
     owner: srm
     source: docs/guides/srm-flow.md
-    source_sha256: f4f0eb8870b88138699e0749c6b78daaa7eeb0a0ff4019509b137125b0907a4d
+    source_sha256: 432bd91c02ae72927b0881cbd04a9a1d6525796013ad7ae443e4e4551495994a
     dependencies: [srm, portal, saga, quotation, screenshots]
     translations:
       en-US: { path: docs/guides/srm-flow.en.md, status: present-unverified, reviewed_at: null }
@@ -380,7 +380,7 @@ documents:
     module: procurement
     owner: procurement
     source: docs/guides/procurement-flow.md
-    source_sha256: 72d82136c0f2c03aeb40ebf775a33448c418b5b23b8e5eb784d07bdc6860e316
+    source_sha256: d889d867c0ea97a19fbef4d5f9002a3ab1f89a3d18b20751231993240cf9aa65
     dependencies: [procurement, workflow, srm-events, asset-events, screenshots]
     translations:
       en-US: { path: docs/guides/procurement-flow.en.md, status: present-unverified, reviewed_at: null }
@@ -391,7 +391,7 @@ documents:
     module: asset
     owner: asset
     source: docs/guides/asset-flow.md
-    source_sha256: 5bb97118317fa442029048ceb212a49ba7585fd9a9007c2756c55461d3ceff3f
+    source_sha256: 99290d743a5554fcd95087b02d5f02af3e7b360a138931083dbd79147083e9b0
     dependencies: [asset, procurement-events, workflow, screenshots]
     translations:
       en-US: { path: docs/guides/asset-flow.en.md, status: present-unverified, reviewed_at: null }

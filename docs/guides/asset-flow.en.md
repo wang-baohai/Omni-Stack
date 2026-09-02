@@ -10,6 +10,17 @@ The consumer creates cards only when quality is PASS, `assetManaged=true`, and `
 
 Management views apply owner user/unit data scope; My Assets uses fixed `current_user_id`. Search supports number, name, state, category, department, and location. Every lifecycle action is a dedicated command with state and optimistic-lock validation.
 
+### Screenshot
+
+#### Figure 1 `asset-overview-en-US`: Asset overview
+
+- Prerequisites: log in as an asset administrator with overview access
+- Actor: asset administrator
+- Action: open Asset → Overview
+- Expected result: the main area shows the "Asset Overview" title with ledger aggregates
+
+![Asset overview](../images/en-US/asset-overview.png)
+
 ## 3. Assignment, Acceptance, and Return
 
 An administrator assigns an in-stock asset to a user and location. The recipient accepts it in My Assets. An in-use asset can be returned, which clears the current user and restores the appropriate stock state. Acceptance and return always validate `current_user_id`.

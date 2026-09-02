@@ -24,6 +24,17 @@ APPROVED/SUSPENDED → ELIMINATED
 
 Only approved suppliers are selectable by Procurement. Rejected suppliers may resubmit; suspended suppliers may resume; blacklist actions require dedicated permission. Elimination is final. SRM coordinators keep business and Workflow states aligned for submit, withdraw, cancel, and start retry.
 
+### Screenshot
+
+#### Figure 1 `srm-overview-en-US`: Supplier overview
+
+- Prerequisites: log in as a procurement or supplier administrator
+- Actor: supplier administrator
+- Action: open SRM → Supplier Overview
+- Expected result: the main area shows the "Supplier Overview" title with lifecycle distribution
+
+![Supplier overview](../images/en-US/srm-overview.png)
+
 ## 3. Profile and Children
 
 Profile data includes company details, contacts, qualifications, and bank accounts. Portal users access only their active supplier association. Internal child-resource scope inherits through the supplier root instead of nonexistent owner columns.

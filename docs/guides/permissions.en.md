@@ -53,6 +53,17 @@ Domain mappings are not interchangeable:
 
 Do not validate permission behavior only with the super administrator.
 
+### Screenshot
+
+#### Figure 1 `system-users-en-US`: User management
+
+- Prerequisites: log in as a system administrator with user management access
+- Actor: system administrator
+- Action: open System → Users
+- Expected result: the main area shows the "User Management" list with role assignment and status actions
+
+![User management](../images/en-US/system-users.png)
+
 ## 6. Adding a Permission
 
 Update together:

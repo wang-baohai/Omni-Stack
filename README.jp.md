@@ -124,11 +124,11 @@ Omni-Stack/
 │   ├── srm.md                          #   SRM サプライヤー関係管理 システムトゥルース（Harness ドキュメント）
 │   ├── design/srm-design.md            #   SRM MVP 設計および実装ベースライン
 │   └── docker-deployment.md            #   Docker フルスタックデプロイ 詳細ガイド
-├── database/changelog/                 # Liquibase 構造履歴とベンダースキーマ
-├── scripts/sql/seed/                   # 冪等なシードデータのみ
-│   ├── init-all.sql                    #   権威 DDL + シードデータ
-│   ├── init-nacos.sql                  #   Nacos MySQL 永続化
-│   └── init-xxl-job.sql               #   XXL-JOB データベース
+├── database/changelog/                 # Liquibase 構造履歴とベンダースキーマ（権威 DDL）
+├── database/seed/                      # シードマニフェスト（manifest.yaml、SHA-256 検証）
+├── scripts/sql/seed/                   # 正式な冪等シードのみ
+│   ├── init-nacos.sql                  #   互換期間のレガシー：Nacos MySQL 永続化
+│   └── init-xxl-job.sql               #   互換期間のレガシー：XXL-JOB データベース
 ├── omni-backend/                       # Maven マルチモジュール バックエンド
 │   ├── omni-common-core/               #   純粋 POJO：R<T>, PageResult, XSS SPI
 │   ├── omni-common/                    #   Web 自動設定：Jackson, CORS, XSS Filter
