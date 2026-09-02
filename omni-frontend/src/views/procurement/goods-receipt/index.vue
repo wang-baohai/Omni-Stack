@@ -1,6 +1,7 @@
 <script setup lang="ts">
-/** 采购收货页面，支持分批收货、确认占量和待定质检结转。 */
-import { onMounted, reactive, ref } from 'vue'
+/** 采购收货页面，支持分批收货、确认占量和待定质检转。 */
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   confirmProcurementGoodsReceipt,
@@ -14,6 +15,7 @@ import {
 } from '@/api/procurement-goods-receipt'
 import GoodsReceiptForm from '@/components/procurement/GoodsReceiptForm.vue'
 
+const { t } = useI18n()
 const loading = ref(false)
 const rows = ref<ProcurementGoodsReceiptSummary[]>([])
 const total = ref(0)
@@ -25,32 +27,22 @@ const query = reactive<{
   receiveTimeRange: string[]
 }>({ keyword: '', status: undefined, receiveTimeRange: [] })
 
-const receiptStatusOptions = [
-  { value: 'DRAFT' as const, label: '草稿', type: 'info' as const },
-  { value: 'CONFIRMED' as const, label: '已确认', type: 'success' as const },
-]
-const receiptStatusMap = Object.fromEntries(
-  receiptStatusOptions.map((item) => [item.value, item]),
-) as Record<ProcurementGoodsReceiptStatus, (typeof receiptStatusOptions)[number]>
-const qualityStatusOptions: Array<{
-  value: ProcurementGoodsReceiptQualityStatus
-  label: string
-  type: 'warning' | 'success' | 'danger'
-}> = [
-  { value: 'PASS', label: '合格', type: 'success' },
-  { value: 'FAIL', label: '不合格', type: 'danger' },
-  { value: 'PENDING', label: '待定', type: 'warning' },
-]
-const qualityStatusMap = Object.fromEntries(
-  qualityStatusOptions.map((item) => [item.value, item]),
-) as Record<ProcurementGoodsReceiptQualityStatus, (typeof qualityStatusOptions)[number]>
+const receiptStatusMap = computed<Record<ProcurementGoodsReceiptStatus, { label: string; type: 'info' | 'success' }>>(() => ({
+  DRAFT: { label: t('procurementGoodsReceiptPage.statusDraft'), type: 'info' },
+  CONFIRMED: { label: t('procurementGoodsReceiptPage.statusConfirmed'), type: 'success' },
+}))
+const qualityStatusMap = computed<Record<ProcurementGoodsReceiptQualityStatus, { label: string; type: 'warning' | 'success' | 'danger' }>>(() => ({
+  PASS: { label: t('procurementGoodsReceiptForm.qualityPass'), type: 'success' },
+  FAIL: { label: t('procurementGoodsReceiptForm.qualityFail'), type: 'danger' },
+  PENDING: { label: t('procurementGoodsReceiptForm.qualityPending'), type: 'warning' },
+}))
 
 function receiptStatusInfo(status: ProcurementGoodsReceiptStatus) {
-  return receiptStatusMap[status]
+  return receiptStatusMap.value[status]
 }
 
 function qualityStatusInfo(status: ProcurementGoodsReceiptQualityStatus) {
-  return qualityStatusMap[status]
+  return qualityStatusMap.value[status]
 }
 
 async function loadRows() {
@@ -107,15 +99,15 @@ async function openDetail(row: ProcurementGoodsReceiptSummary) {
   }
 }
 
-async function confirm(row: ProcurementGoodsReceiptSummary) {
+async function confirmReceipt(row: ProcurementGoodsReceiptSummary) {
   try {
     await ElMessageBox.confirm(
-      `确认收货单“${row.grNo}”？确认后将占用订单待收数量且不可撤回。`,
-      '确认收货',
+      t('procurementGoodsReceiptMessages.confirmText', { no: row.grNo }),
+      t('procurementGoodsReceiptMessages.confirmTitle'),
       { type: 'warning' },
     )
     await confirmProcurementGoodsReceipt(row.id, row.version)
-    ElMessage.success('收货单已确认')
+    ElMessage.success(t('procurementGoodsReceiptMessages.confirmed'))
   } finally {
     await loadRows()
   }
@@ -137,7 +129,7 @@ async function openQualityResult(row: ProcurementGoodsReceiptSummary) {
   const receipt = await loadDetail(row.id)
   const pending = receipt.lines.filter((line) => line.qualityStatus === 'PENDING')
   if (!pending.length) {
-    ElMessage.info('该收货单没有待定质检行')
+    ElMessage.info(t('procurementGoodsReceiptMessages.noPendingQualityLines'))
     return
   }
   qualityReceipt.value = receipt
@@ -155,7 +147,7 @@ async function submitQualityResult() {
   if (!qualityReceipt.value) return
   const selected = qualityLines.value.filter((line) => line.selected)
   if (!selected.length) {
-    ElMessage.warning('请至少选择一条待定质检行')
+    ElMessage.warning(t('procurementGoodsReceiptMessages.noSelectedQualityLines'))
     return
   }
   await submitProcurementGoodsReceiptQualityResult(
@@ -166,7 +158,7 @@ async function submitQualityResult() {
       qualityStatus: line.qualityStatus,
     })),
   )
-  ElMessage.success('质检结果已提交')
+  ElMessage.success(t('procurementGoodsReceiptMessages.qualitySubmitted'))
   qualityVisible.value = false
   await loadRows()
 }
@@ -180,83 +172,83 @@ onMounted(loadRows)
       type="info"
       :closable="false"
       show-icon
-      title="草稿不占用订单数量；确认时服务端会锁定订单并按所有已确认收货重新计算，防止并发超收。"
+      :title="t('procurementGoodsReceiptPage.notice')"
     />
 
     <el-card shadow="never">
       <template #header>
         <div class="card-header">
-          <span>采购收货</span>
+          <span>{{ t('procurementGoodsReceiptPage.title') }}</span>
           <el-button
             v-permission="'procurement:goods-receipt:create'"
             type="primary"
             @click="openCreate"
           >
-            新建收货
+            {{ t('procurementGoodsReceiptPage.create') }}
           </el-button>
         </div>
       </template>
 
       <el-form :inline="true" :model="query">
-        <el-form-item label="关键词">
+        <el-form-item :label="t('procurementRfqPage.keyword')">
           <el-input
             v-model="query.keyword"
             clearable
-            placeholder="收货单号或订单号"
+            :placeholder="t('procurementGoodsReceiptPage.keywordPlaceholder')"
             @keyup.enter="search"
           />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="query.status" clearable placeholder="全部" style="width: 130px">
+        <el-form-item :label="t('procurementRfqPage.status')">
+          <el-select v-model="query.status" clearable :placeholder="t('procurementRfqPage.all')" style="width: 130px">
             <el-option
-              v-for="option in receiptStatusOptions"
-              :key="option.value"
+              v-for="(option, value) in receiptStatusMap"
+              :key="value"
               :label="option.label"
-              :value="option.value"
+              :value="value"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="收货时间">
+        <el-form-item :label="t('procurementGoodsReceiptForm.receiveTime')">
           <el-date-picker
             v-model="query.receiveTimeRange"
             type="datetimerange"
             value-format="YYYY-MM-DD HH:mm:ss"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
+            :start-placeholder="t('procurementRfqPage.startTime')"
+            :end-placeholder="t('procurementRfqPage.endTime')"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="search">查询</el-button>
-          <el-button @click="resetQuery">重置</el-button>
+          <el-button type="primary" @click="search">{{ t('common.search') }}</el-button>
+          <el-button @click="resetQuery">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
       <el-table v-loading="loading" :data="rows" stripe>
-        <el-table-column prop="grNo" label="收货单号" min-width="180" />
-        <el-table-column prop="poNo" label="采购订单号" min-width="180" />
-        <el-table-column prop="receiveTime" label="收货时间" min-width="175" />
-        <el-table-column prop="remark" label="备注" min-width="180" show-overflow-tooltip />
-        <el-table-column label="状态" width="100">
+        <el-table-column prop="grNo" :label="t('procurementGoodsReceiptPage.receiptNo')" min-width="180" />
+        <el-table-column prop="poNo" :label="t('procurementGoodsReceiptPage.poNo')" min-width="180" />
+        <el-table-column prop="receiveTime" :label="t('procurementGoodsReceiptForm.receiveTime')" min-width="175" />
+        <el-table-column prop="remark" :label="t('procurementGoodsReceiptForm.remark')" min-width="180" show-overflow-tooltip />
+        <el-table-column :label="t('procurementRfqPage.status')" width="100">
           <template #default="{ row }">
             <el-tag :type="receiptStatusInfo(row.status).type">
               {{ receiptStatusInfo(row.status).label }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="confirmedTime" label="确认时间" min-width="175">
+        <el-table-column prop="confirmedTime" :label="t('procurementGoodsReceiptPage.confirmedTime')" min-width="175">
           <template #default="{ row }">{{ row.confirmedTime || '—' }}</template>
         </el-table-column>
-        <el-table-column label="操作" min-width="230" fixed="right">
+        <el-table-column :label="t('common.actions')" min-width="230" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDetail(row)">详情</el-button>
+            <el-button link type="primary" @click="openDetail(row)">{{ t('srmRiskPage.detail') }}</el-button>
             <el-button
               v-if="row.status === 'DRAFT'"
               v-permission="'procurement:goods-receipt:confirm'"
               link
               type="success"
-              @click="confirm(row)"
+              @click="confirmReceipt(row)"
             >
-              确认收货
+              {{ t('procurementGoodsReceiptPage.confirmReceipt') }}
             </el-button>
             <el-button
               v-if="row.status === 'CONFIRMED'"
@@ -265,7 +257,7 @@ onMounted(loadRows)
               type="warning"
               @click="openQualityResult(row)"
             >
-              质检结果
+              {{ t('procurementGoodsReceiptPage.qualityResult') }}
             </el-button>
           </template>
         </el-table-column>
@@ -286,71 +278,71 @@ onMounted(loadRows)
 
     <GoodsReceiptForm v-model="createVisible" @saved="loadRows" />
 
-    <el-drawer v-model="detailVisible" title="收货详情" size="72%">
+    <el-drawer v-model="detailVisible" :title="t('procurementGoodsReceiptPage.detailTitle')" size="72%">
       <div v-loading="detailLoading">
         <el-descriptions v-if="detail" :column="3" border>
-          <el-descriptions-item label="收货单号">{{ detail.grNo }}</el-descriptions-item>
-          <el-descriptions-item label="采购订单">{{ detail.poNo }}</el-descriptions-item>
-          <el-descriptions-item label="状态">
+          <el-descriptions-item :label="t('procurementGoodsReceiptPage.receiptNo')">{{ detail.grNo }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementGoodsReceiptForm.purchaseOrder')">{{ detail.poNo }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementRfqPage.status')">
             <el-tag :type="receiptStatusInfo(detail.status).type">
               {{ receiptStatusInfo(detail.status).label }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="收货时间">{{ detail.receiveTime }}</el-descriptions-item>
-          <el-descriptions-item label="确认时间">{{ detail.confirmedTime || '—' }}</el-descriptions-item>
-          <el-descriptions-item label="收货人 ID">{{ detail.receiverUserId }}</el-descriptions-item>
-          <el-descriptions-item label="备注" :span="3">{{ detail.remark || '—' }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementGoodsReceiptForm.receiveTime')">{{ detail.receiveTime }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementGoodsReceiptPage.confirmedTime')">{{ detail.confirmedTime || '—' }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementGoodsReceiptPage.receiverId')">{{ detail.receiverUserId }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementGoodsReceiptForm.remark')" :span="3">{{ detail.remark || '—' }}</el-descriptions-item>
         </el-descriptions>
 
         <template v-if="detail">
-          <h3>收货明细</h3>
+          <h3>{{ t('procurementGoodsReceiptPage.linesTitle') }}</h3>
           <el-table :data="detail.lines" border>
-            <el-table-column prop="lineNo" label="行号" width="70" />
-            <el-table-column prop="materialCode" label="物料编码" min-width="130" />
-            <el-table-column prop="materialName" label="物料名称" min-width="180" />
-            <el-table-column prop="orderedQuantity" label="订单数量" min-width="110" align="right" />
-            <el-table-column prop="receivedQuantity" label="本次数量" min-width="110" align="right" />
-            <el-table-column prop="unit" label="单位" width="80" />
-            <el-table-column label="质检状态" min-width="100">
+            <el-table-column prop="lineNo" :label="t('procurementPurchaseOrderTracker.lineNo')" width="70" />
+            <el-table-column prop="materialCode" :label="t('procurementGoodsReceiptForm.materialCode')" min-width="130" />
+            <el-table-column prop="materialName" :label="t('procurementGoodsReceiptForm.materialName')" min-width="180" />
+            <el-table-column prop="orderedQuantity" :label="t('procurementPurchaseOrderTracker.orderQuantity')" min-width="110" align="right" />
+            <el-table-column prop="receivedQuantity" :label="t('procurementGoodsReceiptForm.receivedQuantity')" min-width="110" align="right" />
+            <el-table-column prop="unit" :label="t('procurementGoodsReceiptForm.unit')" width="80" />
+            <el-table-column :label="t('procurementGoodsReceiptForm.qualityStatus')" min-width="100">
               <template #default="{ row }">
                 <el-tag :type="qualityStatusInfo(row.qualityStatus).type">
                   {{ qualityStatusInfo(row.qualityStatus).label }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="资产化" width="90">
-              <template #default="{ row }">{{ row.assetManaged ? '是' : '否' }}</template>
+            <el-table-column :label="t('procurementMaterialPage.assetManaged')" width="90">
+              <template #default="{ row }">{{ row.assetManaged ? t('srmResources.yes') : t('procurementMaterialPage.no') }}</template>
             </el-table-column>
-            <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
+            <el-table-column prop="remark" :label="t('procurementGoodsReceiptForm.remark')" min-width="150" show-overflow-tooltip />
           </el-table>
         </template>
       </div>
     </el-drawer>
 
-    <el-dialog v-model="qualityVisible" title="提交质检结果" width="720px">
+    <el-dialog v-model="qualityVisible" :title="t('procurementGoodsReceiptPage.qualityTitle')" width="720px">
       <el-alert
         type="warning"
         :closable="false"
-        title="仅处理从 PENDING 结转的行；合格的资产化物料会发布新的资产候选事件。"
+        :title="t('procurementGoodsReceiptPage.qualityNotice')"
       />
       <el-table :data="qualityLines" border class="quality-table">
-        <el-table-column label="处理" width="65" align="center">
+        <el-table-column :label="t('procurementGoodsReceiptPage.process')" width="65" align="center">
           <template #default="{ row }"><el-checkbox v-model="row.selected" /></template>
         </el-table-column>
-        <el-table-column prop="materialName" label="物料名称" min-width="200" />
-        <el-table-column prop="receivedQuantity" label="收货数量" min-width="110" />
-        <el-table-column label="最终结果" min-width="150">
+        <el-table-column prop="materialName" :label="t('procurementGoodsReceiptForm.materialName')" min-width="200" />
+        <el-table-column prop="receivedQuantity" :label="t('procurementGoodsReceiptPage.receivedQuantity')" min-width="110" />
+        <el-table-column :label="t('procurementGoodsReceiptPage.finalResult')" min-width="150">
           <template #default="{ row }">
             <el-radio-group v-model="row.qualityStatus" :disabled="!row.selected">
-              <el-radio value="PASS">合格</el-radio>
-              <el-radio value="FAIL">不合格</el-radio>
+              <el-radio value="PASS">{{ t('procurementGoodsReceiptForm.qualityPass') }}</el-radio>
+              <el-radio value="FAIL">{{ t('procurementGoodsReceiptForm.qualityFail') }}</el-radio>
             </el-radio-group>
           </template>
         </el-table-column>
       </el-table>
       <template #footer>
-        <el-button @click="qualityVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitQualityResult">提交结果</el-button>
+        <el-button @click="qualityVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="submitQualityResult">{{ t('procurementGoodsReceiptPage.submitResult') }}</el-button>
       </template>
     </el-dialog>
   </div>

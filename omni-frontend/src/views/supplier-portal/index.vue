@@ -67,53 +67,53 @@ const enrollForm = reactive<EnrollRequest>({
   region: '',
   address: '',
 })
-const enrollRules: FormRules<EnrollRequest> = {
+const enrollRules = computed<FormRules<EnrollRequest>>(() => ({
   inviteToken: [
-    { required: true, message: '请输入租户管理员提供的邀请令牌', trigger: 'blur' },
-    { max: 256, message: '邀请令牌不能超过 256 个字符', trigger: 'blur' },
+    { required: true, message: t('supplierPortal.messages.inviteTokenRequired'), trigger: 'blur' },
+    { max: 256, message: t('supplierPortal.messages.inviteTokenLength'), trigger: 'blur' },
   ],
   name: [
-    { required: true, message: '请输入企业名称', trigger: 'blur' },
-    { max: 200, message: '企业名称不能超过 200 个字符', trigger: 'blur' },
+    { required: true, message: t('supplierPortal.messages.companyNameRequired'), trigger: 'blur' },
+    { max: 200, message: t('supplierPortal.messages.companyNameLength'), trigger: 'blur' },
   ],
   creditCode: [
-    { required: true, message: '请输入统一社会信用代码', trigger: 'blur' },
-    { max: 50, message: '统一社会信用代码不能超过 50 个字符', trigger: 'blur' },
+    { required: true, message: t('supplierPortal.messages.creditCodeRequired'), trigger: 'blur' },
+    { max: 50, message: t('supplierPortal.messages.creditCodeLength'), trigger: 'blur' },
   ],
-  supplierType: [{ required: true, message: '请选择供应商类型', trigger: 'change' }],
-  industryCode: [{ max: 50, message: '行业代码不能超过 50 个字符', trigger: 'blur' }],
-  website: [{ max: 300, message: '网站地址不能超过 300 个字符', trigger: 'blur' }],
-  phone: [{ max: 32, message: '联系电话不能超过 32 个字符', trigger: 'blur' }],
+  supplierType: [{ required: true, message: t('supplierPortal.messages.supplierTypeRequired'), trigger: 'change' }],
+  industryCode: [{ max: 50, message: t('supplierPortal.messages.industryCodeLength'), trigger: 'blur' }],
+  website: [{ max: 300, message: t('supplierPortal.messages.websiteLength'), trigger: 'blur' }],
+  phone: [{ max: 32, message: t('supplierPortal.messages.phoneLength'), trigger: 'blur' }],
   email: [
-    { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
-    { max: 200, message: '邮箱不能超过 200 个字符', trigger: 'blur' },
+    { type: 'email', message: t('supplierPortal.messages.emailInvalid'), trigger: 'blur' },
+    { max: 200, message: t('supplierPortal.messages.emailLength'), trigger: 'blur' },
   ],
-  region: [{ max: 100, message: '地区不能超过 100 个字符', trigger: 'blur' }],
-  address: [{ max: 500, message: '地址不能超过 500 个字符', trigger: 'blur' }],
-}
+  region: [{ max: 100, message: t('supplierPortal.messages.regionLength'), trigger: 'blur' }],
+  address: [{ max: 500, message: t('supplierPortal.messages.addressLength'), trigger: 'blur' }],
+}))
 
-const enrollmentStatusMeta: Record<string, { title: string; description: string; icon: 'success' | 'warning' | 'error' | 'info' }> = {
+const enrollmentStatusMeta = computed<Record<string, { title: string; description: string; icon: 'success' | 'warning' | 'error' | 'info' }>>(() => ({
   PENDING_ROLE_ASSIGN: {
-    title: '入驻申请已提交',
-    description: '系统正在分配供应商门户角色，请稍后刷新进度。',
+    title: t('supplierPortal.enrollment.pendingTitle'),
+    description: t('supplierPortal.enrollment.pendingDescription'),
     icon: 'warning',
   },
   ROLE_ASSIGN_FAILED: {
-    title: '门户角色分配失败',
-    description: '企业资料已保留，可以直接重试，无需重复提交入驻申请。',
+    title: t('supplierPortal.enrollment.failedTitle'),
+    description: t('supplierPortal.enrollment.failedDescription'),
     icon: 'error',
   },
   COMPLETED: {
-    title: '门户授权已完成',
-    description: '请重新登录以刷新访问令牌，之后即可维护企业资料。',
+    title: t('supplierPortal.enrollment.completedTitle'),
+    description: t('supplierPortal.enrollment.completedDescription'),
     icon: 'success',
   },
   CANCELLED: {
-    title: '入驻申请已取消',
-    description: '如需重新入驻，请联系租户管理员。',
+    title: t('supplierPortal.enrollment.cancelledTitle'),
+    description: t('supplierPortal.enrollment.cancelledDescription'),
     icon: 'info',
   },
-}
+}))
 
 function requestStorageKey() {
   const tenantId = getTenantIdFromToken(userStore.token) || 'unknown'
@@ -152,7 +152,7 @@ async function submitEnrollment() {
   try {
     const response = await enrollSupplier({ ...enrollForm })
     enrollment.value = response.data.data
-    ElMessage.success('入驻申请已提交')
+    ElMessage.success(t('supplierPortal.messages.enrollmentSubmitted'))
   } finally {
     portalLoading.value = false
   }
@@ -172,7 +172,7 @@ async function retryEnrollment() {
   try {
     const response = await retryPortalEnrollment()
     enrollment.value = response.data.data
-    ElMessage.success('重试请求已提交')
+    ElMessage.success(t('supplierPortal.messages.retrySubmitted'))
   } finally {
     portalLoading.value = false
   }
@@ -195,35 +195,38 @@ const profile = ref<PortalProfile | null>(null)
 const profileFormRef = ref<FormInstance>()
 const profileForm = reactive<UpdatePortalProfileRequest>({ version: 0 })
 const profileSubmitting = ref(false)
-const profileRules: FormRules<UpdatePortalProfileRequest> = {
+const profileRules = computed<FormRules<UpdatePortalProfileRequest>>(() => ({
   name: [
-    { required: true, message: '请输入企业名称', trigger: 'blur' },
-    { max: 200, message: '企业名称不能超过 200 个字符', trigger: 'blur' },
+    { required: true, message: t('supplierPortal.messages.companyNameRequired'), trigger: 'blur' },
+    { max: 200, message: t('supplierPortal.messages.companyNameLength'), trigger: 'blur' },
   ],
-  website: [{ max: 300, message: '网站地址不能超过 300 个字符', trigger: 'blur' }],
-  phone: [{ max: 32, message: '联系电话不能超过 32 个字符', trigger: 'blur' }],
+  website: [{ max: 300, message: t('supplierPortal.messages.websiteLength'), trigger: 'blur' }],
+  phone: [{ max: 32, message: t('supplierPortal.messages.phoneLength'), trigger: 'blur' }],
   email: [
-    { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
-    { max: 200, message: '邮箱不能超过 200 个字符', trigger: 'blur' },
+    { type: 'email', message: t('supplierPortal.messages.emailInvalid'), trigger: 'blur' },
+    { max: 200, message: t('supplierPortal.messages.emailLength'), trigger: 'blur' },
   ],
-  region: [{ max: 100, message: '地区不能超过 100 个字符', trigger: 'blur' }],
-  address: [{ max: 500, message: '地址不能超过 500 个字符', trigger: 'blur' }],
-}
+  region: [{ max: 100, message: t('supplierPortal.messages.regionLength'), trigger: 'blur' }],
+  address: [{ max: 500, message: t('supplierPortal.messages.addressLength'), trigger: 'blur' }],
+}))
 
-const supplierTypeLabel: Record<string, string> = {
-  MANUFACTURER: '制造商', DISTRIBUTOR: '分销商', SERVICE: '服务商', OTHER: '其他',
-}
-const supplierStatusLabel: Record<string, string> = {
-  REGISTERING: '登记中',
-  REGISTERING_FAILED: '入驻失败',
-  PENDING_REVIEW: '待审核',
-  APPROVING: '审批中',
-  REJECTED: '已驳回',
-  APPROVED: '已通过',
-  SUSPENDED: '已冻结',
-  BLACKLISTED: '黑名单',
-  ELIMINATED: '已淘汰',
-}
+const supplierTypeLabel = computed<Record<string, string>>(() => ({
+  MANUFACTURER: t('supplierPortal.types.MANUFACTURER'),
+  DISTRIBUTOR: t('supplierPortal.types.DISTRIBUTOR'),
+  SERVICE: t('supplierPortal.types.SERVICE'),
+  OTHER: t('supplierPortal.types.OTHER'),
+}))
+const supplierStatusLabel = computed<Record<string, string>>(() => ({
+  REGISTERING: t('supplierPortal.statuses.REGISTERING'),
+  REGISTERING_FAILED: t('supplierPortal.statuses.REGISTERING_FAILED'),
+  PENDING_REVIEW: t('supplierPortal.statuses.PENDING_REVIEW'),
+  APPROVING: t('supplierPortal.statuses.APPROVING'),
+  REJECTED: t('supplierPortal.statuses.REJECTED'),
+  APPROVED: t('supplierPortal.statuses.APPROVED'),
+  SUSPENDED: t('supplierPortal.statuses.SUSPENDED'),
+  BLACKLISTED: t('supplierPortal.statuses.BLACKLISTED'),
+  ELIMINATED: t('supplierPortal.statuses.ELIMINATED'),
+}))
 
 async function loadProfile() {
   profileLoading.value = true
@@ -269,7 +272,7 @@ async function saveAndResubmitProfile() {
     const updated = await updatePortalProfile({ ...profileForm })
     profileUpdated = true
     await submitPortalProfile(updated.data.data.version)
-    ElMessage.success('企业资料已重新提交审核')
+    ElMessage.success(t('supplierPortal.messages.profileResubmitted'))
   } finally {
     if (profileUpdated) {
       try {
@@ -285,9 +288,11 @@ const evalList = ref<PortalEvaluation[]>([])
 const evalTotal = ref(0)
 const evalPage = ref(1)
 const evalPageSize = ref(10)
-const evalStatusLabel: Record<string, string> = {
-  COMPLETED: '已完成', PENDING: '待评估', IN_PROGRESS: '评估中',
-}
+const evalStatusLabel = computed<Record<string, string>>(() => ({
+  COMPLETED: t('supplierPortal.evaluation.completed'),
+  PENDING: t('supplierPortal.evaluation.pending'),
+  IN_PROGRESS: t('supplierPortal.evaluation.inProgress'),
+}))
 
 function scoreType(score: number): 'success' | 'warning' | 'danger' {
   if (score >= 90) return 'success'
@@ -532,10 +537,10 @@ onUnmounted(() => {
       <el-result
         v-if="accessDenied"
         icon="error"
-        title="无供应商门户访问权限"
-        sub-title="当前账号既没有入驻权限，也没有供应商门户权限，请联系租户管理员。"
+        :title="t('supplierPortal.accessDeniedTitle')"
+        :sub-title="t('supplierPortal.accessDeniedDescription')"
       >
-        <template #extra><el-button @click="router.push('/')">返回首页</el-button></template>
+        <template #extra><el-button @click="router.push('/')">{{ t('common.home') }}</el-button></template>
       </el-result>
 
       <el-card
@@ -552,48 +557,48 @@ onUnmounted(() => {
           >
             <template #extra>
               <el-space wrap>
-                <el-button v-if="enrollment.status === 'ROLE_ASSIGN_FAILED'" v-permission="'srm:portal:enroll'" type="primary" @click="retryEnrollment">重试角色分配</el-button>
-                <el-button v-if="enrollment.status === 'COMPLETED'" type="primary" @click="handleLogout">重新登录</el-button>
-                <el-button @click="refreshEnrollment">刷新进度</el-button>
+                <el-button v-if="enrollment.status === 'ROLE_ASSIGN_FAILED'" v-permission="'srm:portal:enroll'" type="primary" @click="retryEnrollment">{{ t('supplierPortal.actions.retryRoleAssignment') }}</el-button>
+                <el-button v-if="enrollment.status === 'COMPLETED'" type="primary" @click="handleLogout">{{ t('supplierPortal.actions.relogin') }}</el-button>
+                <el-button @click="refreshEnrollment">{{ t('supplierPortal.actions.refreshProgress') }}</el-button>
               </el-space>
             </template>
           </el-result>
           <el-descriptions :column="2" border class="enrollment-detail">
-            <el-descriptions-item label="申请编号">{{ enrollment.requestId }}</el-descriptions-item>
-            <el-descriptions-item label="供应商 ID">{{ enrollment.supplierId }}</el-descriptions-item>
-            <el-descriptions-item label="申请状态">{{ enrollment.status }}</el-descriptions-item>
-            <el-descriptions-item v-if="enrollment.lastErrorCode" label="失败代码" :span="2">{{ enrollment.lastErrorCode }}</el-descriptions-item>
-            <el-descriptions-item v-if="enrollment.nextRetryTime" label="下次重试时间">{{ enrollment.nextRetryTime }}</el-descriptions-item>
+            <el-descriptions-item :label="t('supplierPortal.labels.requestId')">{{ enrollment.requestId }}</el-descriptions-item>
+            <el-descriptions-item :label="t('supplierPortal.labels.supplierId')">{{ enrollment.supplierId }}</el-descriptions-item>
+            <el-descriptions-item :label="t('supplierPortal.labels.requestStatus')">{{ enrollment.status }}</el-descriptions-item>
+            <el-descriptions-item v-if="enrollment.lastErrorCode" :label="t('supplierPortal.labels.failureCode')" :span="2">{{ enrollment.lastErrorCode }}</el-descriptions-item>
+            <el-descriptions-item v-if="enrollment.nextRetryTime" :label="t('supplierPortal.labels.nextRetryTime')">{{ enrollment.nextRetryTime }}</el-descriptions-item>
           </el-descriptions>
         </template>
 
         <template v-else>
           <div class="enrollment-heading">
-            <h2>供应商邀请入驻</h2>
-            <p>账号注册仅创建登录身份。请填写企业资料并提交管理员提供的邀请令牌，完成供应商入驻。</p>
+            <h2>{{ t('supplierPortal.enrollmentTitle') }}</h2>
+            <p>{{ t('supplierPortal.enrollmentDescription') }}</p>
           </div>
-          <el-alert title="租户和当前用户信息取自登录令牌，无需也不能手工填写。" type="info" :closable="false" show-icon />
+          <el-alert :title="t('supplierPortal.identityNotice')" type="info" :closable="false" show-icon />
           <el-form ref="enrollFormRef" :model="enrollForm" :rules="enrollRules" label-width="120px" class="enrollment-form">
             <el-row :gutter="20">
-              <el-col :span="24"><el-form-item label="邀请令牌" prop="inviteToken"><el-input v-model="enrollForm.inviteToken" type="password" maxlength="256" show-password placeholder="请输入邀请令牌" /></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="企业名称" prop="name"><el-input v-model="enrollForm.name" maxlength="200" /></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="统一信用代码" prop="creditCode"><el-input v-model="enrollForm.creditCode" maxlength="50" /></el-form-item></el-col>
+              <el-col :span="24"><el-form-item :label="t('supplierPortal.labels.inviteToken')" prop="inviteToken"><el-input v-model="enrollForm.inviteToken" type="password" maxlength="256" show-password :placeholder="t('supplierPortal.labels.inviteTokenPlaceholder')" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item :label="t('supplierPortal.labels.companyName')" prop="name"><el-input v-model="enrollForm.name" maxlength="200" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item :label="t('supplierPortal.labels.creditCode')" prop="creditCode"><el-input v-model="enrollForm.creditCode" maxlength="50" /></el-form-item></el-col>
               <el-col :span="12">
-                <el-form-item label="供应商类型" prop="supplierType">
+                <el-form-item :label="t('supplierPortal.labels.supplierType')" prop="supplierType">
                   <el-select v-model="enrollForm.supplierType" style="width: 100%">
                     <el-option v-for="(label, value) in supplierTypeLabel" :key="value" :label="label" :value="value" />
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col :span="12"><el-form-item label="行业代码" prop="industryCode"><el-input v-model="enrollForm.industryCode" maxlength="50" /></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="联系电话" prop="phone"><el-input v-model="enrollForm.phone" maxlength="32" /></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="联系邮箱" prop="email"><el-input v-model="enrollForm.email" maxlength="200" /></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="网站" prop="website"><el-input v-model="enrollForm.website" maxlength="300" /></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="地区" prop="region"><el-input v-model="enrollForm.region" maxlength="100" /></el-form-item></el-col>
-              <el-col :span="24"><el-form-item label="地址" prop="address"><el-input v-model="enrollForm.address" maxlength="500" show-word-limit /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item :label="t('supplierPortal.labels.industryCode')" prop="industryCode"><el-input v-model="enrollForm.industryCode" maxlength="50" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item :label="t('supplierPortal.labels.phone')" prop="phone"><el-input v-model="enrollForm.phone" maxlength="32" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item :label="t('supplierPortal.labels.email')" prop="email"><el-input v-model="enrollForm.email" maxlength="200" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item :label="t('supplierPortal.labels.website')" prop="website"><el-input v-model="enrollForm.website" maxlength="300" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item :label="t('supplierPortal.labels.region')" prop="region"><el-input v-model="enrollForm.region" maxlength="100" /></el-form-item></el-col>
+              <el-col :span="24"><el-form-item :label="t('supplierPortal.labels.address')" prop="address"><el-input v-model="enrollForm.address" maxlength="500" show-word-limit /></el-form-item></el-col>
             </el-row>
             <el-form-item>
-              <el-button v-permission="'srm:portal:enroll'" type="primary" :loading="portalLoading" @click="submitEnrollment">提交入驻申请</el-button>
+              <el-button v-permission="'srm:portal:enroll'" type="primary" :loading="portalLoading" @click="submitEnrollment">{{ t('supplierPortal.actions.submitEnrollment') }}</el-button>
             </el-form-item>
           </el-form>
         </template>
@@ -615,8 +620,8 @@ onUnmounted(() => {
               </el-descriptions>
               <el-alert
                 v-if="profile.status === 'REJECTED'"
-                title="企业资料已被驳回"
-                description="请修订下方企业信息，然后保存并重新提交审核。"
+                :title="t('supplierPortal.profileRejectedTitle')"
+                :description="t('supplierPortal.profileRejectedDescription')"
                 type="error"
                 :closable="false"
                 show-icon
@@ -626,11 +631,11 @@ onUnmounted(() => {
               <el-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-width="100px">
                 <el-row :gutter="16">
                   <el-col :span="12"><el-form-item :label="t('portalRegister.companyName')" prop="name"><el-input v-model="profileForm.name" maxlength="200" show-word-limit /></el-form-item></el-col>
-                  <el-col :span="12"><el-form-item label="网站" prop="website"><el-input v-model="profileForm.website" maxlength="300" /></el-form-item></el-col>
+                  <el-col :span="12"><el-form-item :label="t('supplierPortal.labels.website')" prop="website"><el-input v-model="profileForm.website" maxlength="300" /></el-form-item></el-col>
                   <el-col :span="12"><el-form-item :label="t('portalRegister.phone')" prop="phone"><el-input v-model="profileForm.phone" maxlength="32" /></el-form-item></el-col>
                   <el-col :span="12"><el-form-item :label="t('portalRegister.email')" prop="email"><el-input v-model="profileForm.email" maxlength="200" /></el-form-item></el-col>
-                  <el-col :span="12"><el-form-item label="地区" prop="region"><el-input v-model="profileForm.region" maxlength="100" /></el-form-item></el-col>
-                  <el-col :span="24"><el-form-item label="地址" prop="address"><el-input v-model="profileForm.address" maxlength="500" show-word-limit /></el-form-item></el-col>
+                  <el-col :span="12"><el-form-item :label="t('supplierPortal.labels.region')" prop="region"><el-input v-model="profileForm.region" maxlength="100" /></el-form-item></el-col>
+                  <el-col :span="24"><el-form-item :label="t('supplierPortal.labels.address')" prop="address"><el-input v-model="profileForm.address" maxlength="500" show-word-limit /></el-form-item></el-col>
                 </el-row>
                 <el-form-item>
                   <el-space wrap>
@@ -642,7 +647,7 @@ onUnmounted(() => {
                       :loading="profileSubmitting"
                       @click="saveAndResubmitProfile"
                     >
-                      保存并重新提交审核
+                      {{ t('supplierPortal.actions.saveAndResubmit') }}
                     </el-button>
                   </el-space>
                 </el-form-item>

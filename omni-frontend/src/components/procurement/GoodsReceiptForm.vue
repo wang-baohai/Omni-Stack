@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** 收货表单共享组件——新建收货草稿对话框，含 PO 选择与收货货物明细。 */
 import { computed, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
@@ -28,15 +29,17 @@ const dialogVisible = computed({
   set: (value: boolean) => emit('update:modelValue', value),
 })
 
-const qualityStatusOptions: Array<{
+const { t } = useI18n()
+
+const qualityStatusOptions = computed<Array<{
   value: ProcurementGoodsReceiptQualityStatus
   label: string
   type: 'warning' | 'success' | 'danger'
-}> = [
-  { value: 'PASS', label: '合格', type: 'success' },
-  { value: 'FAIL', label: '不合格', type: 'danger' },
-  { value: 'PENDING', label: '待定', type: 'warning' },
-]
+}>>(() => [
+  { value: 'PASS', label: t('procurementGoodsReceiptForm.qualityPass'), type: 'success' },
+  { value: 'FAIL', label: t('procurementGoodsReceiptForm.qualityFail'), type: 'danger' },
+  { value: 'PENDING', label: t('procurementGoodsReceiptForm.qualityPending'), type: 'warning' },
+])
 
 const orderLoading = ref(false)
 const orderOptions = ref<ProcurementPurchaseOrderSummary[]>([])
@@ -86,8 +89,8 @@ const createForm = reactive<{
   lines: EditableReceiptLine[]
 }>({ receiveTime: '', remark: '', lines: [] })
 const createRules: FormRules = {
-  poId: [{ required: true, message: '请选择采购订单', trigger: 'change' }],
-  receiveTime: [{ required: true, message: '请选择收货时间', trigger: 'change' }],
+  poId: [{ required: true, message: t('procurementGoodsReceiptForm.poRequired'), trigger: 'change' }],
+  receiveTime: [{ required: true, message: t('procurementGoodsReceiptForm.receiveTimeRequired'), trigger: 'change' }],
 }
 
 function nowText() {
@@ -145,15 +148,15 @@ async function onOrderChanged() {
 const decimalPattern = /^\d{1,13}(?:\.\d{1,6})?$/
 function validateReceiptLines() {
   const selected = createForm.lines.filter((line) => line.selected)
-  if (!selected.length) return '请至少选择一条待收货明细'
+  if (!selected.length) return t('procurementGoodsReceiptForm.noSelectedLines')
   for (const [index, line] of selected.entries()) {
     if (!decimalPattern.test(line.receivedQuantity) || compareDecimal(line.receivedQuantity, '0') <= 0) {
-      return `第 ${index + 1} 条收货数量必须大于 0，且最多 6 位小数`
+      return t('procurementGoodsReceiptForm.invalidQuantity', { index: index + 1 })
     }
     if (compareDecimal(line.receivedQuantity, line.remainingQuantity) > 0) {
-      return `${line.materialName} 的本次收货数量不能超过待收数量 ${line.remainingQuantity}`
+      return t('procurementGoodsReceiptForm.quantityExceeded', { name: line.materialName, quantity: line.remainingQuantity })
     }
-    if (line.remark.length > 500) return `${line.materialName} 的备注不能超过 500 个字符`
+    if (line.remark.length > 500) return t('procurementGoodsReceiptForm.remarkTooLong', { name: line.materialName })
   }
   return ''
 }
@@ -179,23 +182,23 @@ async function createDraft() {
         remark: line.remark.trim() || undefined,
       })),
   })
-  ElMessage.success('收货草稿已创建，请核对后确认')
+  ElMessage.success(t('procurementGoodsReceiptForm.draftCreated'))
   dialogVisible.value = false
   emit('saved')
 }
 </script>
 
 <template>
-  <el-dialog v-model="dialogVisible" title="新建收货草稿" width="980px" destroy-on-close>
+  <el-dialog v-model="dialogVisible" :title="t('procurementGoodsReceiptForm.createDraftTitle')" width="980px" destroy-on-close>
     <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="100px">
-      <el-form-item label="采购订单" prop="poId">
+      <el-form-item :label="t('procurementGoodsReceiptForm.purchaseOrder')" prop="poId">
         <el-select
           v-model="createForm.poId"
           filterable
           remote
           :remote-method="loadOrderOptions"
           :loading="orderLoading"
-          placeholder="选择已确认且仍有待收数量的订单"
+          :placeholder="t('procurementGoodsReceiptForm.orderPlaceholder')"
           style="width: 100%"
           @change="onOrderChanged"
         >
@@ -207,7 +210,7 @@ async function createDraft() {
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="收货时间" prop="receiveTime">
+      <el-form-item :label="t('procurementGoodsReceiptForm.receiveTime')" prop="receiveTime">
         <el-date-picker
           v-model="createForm.receiveTime"
           type="datetime"
@@ -215,24 +218,24 @@ async function createDraft() {
           style="width: 100%"
         />
       </el-form-item>
-      <el-form-item label="备注">
+      <el-form-item :label="t('procurementGoodsReceiptForm.remark')">
         <el-input v-model="createForm.remark" type="textarea" maxlength="500" show-word-limit />
       </el-form-item>
 
       <el-table v-if="createForm.lines.length" :data="createForm.lines" border>
-        <el-table-column label="收货" width="65" align="center">
+        <el-table-column :label="t('procurementGoodsReceiptForm.receive')" width="65" align="center">
           <template #default="{ row }"><el-checkbox v-model="row.selected" /></template>
         </el-table-column>
-        <el-table-column prop="materialCode" label="物料编码" min-width="125" />
-        <el-table-column prop="materialName" label="物料名称" min-width="160" />
-        <el-table-column prop="remainingQuantity" label="待收数量" min-width="105" align="right" />
-        <el-table-column prop="unit" label="单位" width="70" />
-        <el-table-column label="本次数量" min-width="140">
+        <el-table-column prop="materialCode" :label="t('procurementGoodsReceiptForm.materialCode')" min-width="125" />
+        <el-table-column prop="materialName" :label="t('procurementGoodsReceiptForm.materialName')" min-width="160" />
+        <el-table-column prop="remainingQuantity" :label="t('procurementGoodsReceiptForm.remainingQuantity')" min-width="105" align="right" />
+        <el-table-column prop="unit" :label="t('procurementGoodsReceiptForm.unit')" width="70" />
+        <el-table-column :label="t('procurementGoodsReceiptForm.receivedQuantity')" min-width="140">
           <template #default="{ row }">
             <el-input v-model="row.receivedQuantity" :disabled="!row.selected" />
           </template>
         </el-table-column>
-        <el-table-column label="质检状态" min-width="130">
+        <el-table-column :label="t('procurementGoodsReceiptForm.qualityStatus')" min-width="130">
           <template #default="{ row }">
             <el-select v-model="row.qualityStatus" :disabled="!row.selected">
               <el-option
@@ -244,17 +247,17 @@ async function createDraft() {
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column label="行备注" min-width="160">
+        <el-table-column :label="t('procurementGoodsReceiptForm.lineRemark')" min-width="160">
           <template #default="{ row }">
             <el-input v-model="row.remark" :disabled="!row.selected" maxlength="500" />
           </template>
         </el-table-column>
       </el-table>
-      <el-empty v-else-if="createForm.poId" description="该订单没有可收货明细" />
+      <el-empty v-else-if="createForm.poId" :description="t('procurementGoodsReceiptForm.noLines')" />
     </el-form>
     <template #footer>
-      <el-button @click="dialogVisible = false">取消</el-button>
-      <el-button type="primary" @click="createDraft">创建草稿</el-button>
+      <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+      <el-button type="primary" @click="createDraft">{{ t('procurementGoodsReceiptForm.createDraft') }}</el-button>
     </template>
   </el-dialog>
 </template>

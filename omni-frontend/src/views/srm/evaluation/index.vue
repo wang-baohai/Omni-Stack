@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** SRM 绩效评估页面，包含评估列表、新建评估打分表单和评估详情抽屉。 */
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import {
   createEvaluation,
@@ -15,6 +16,7 @@ import {
 import { listSuppliers, type SrmSupplier } from '@/api/srm-supplier'
 import EvaluationScorecard from '@/components/srm/EvaluationScorecard.vue'
 
+const { t } = useI18n()
 const loading = ref(false)
 const tableData = ref<EvaluationVO[]>([])
 const total = ref(0)
@@ -43,18 +45,22 @@ const supplierLoading = ref(false)
 const detailDrawerVisible = ref(false)
 const currentEvaluation = ref<EvaluationVO | null>(null)
 
-/** 评估状态中文映射 */
-const evalStatusLabel: Record<string, string> = { COMPLETED: '已完成', PENDING: '待评估', IN_PROGRESS: '评估中' }
+/** 评估状态映射。 */
+const evalStatusLabel = computed<Record<string, string>>(() => ({
+  COMPLETED: t('srmEvaluationPage.statusCompleted'),
+  PENDING: t('srmEvaluationPage.statusPending'),
+  IN_PROGRESS: t('srmEvaluationPage.statusInProgress'),
+}))
 
 // 等级映射
 type EvaluationTagType = '' | 'success' | 'warning' | 'danger'
 
-const levelMap: Record<string, { label: string; type: EvaluationTagType }> = {
-  STRATEGIC: { label: '战略级', type: 'success' },
-  PREFERRED: { label: '优选级', type: '' },
-  QUALIFIED: { label: '合格级', type: 'warning' },
-  ELIMINATED: { label: '淘汰级', type: 'danger' },
-}
+const levelMap = computed<Record<string, { label: string; type: EvaluationTagType }>>(() => ({
+  STRATEGIC: { label: t('srmEvaluationPage.levelStrategic'), type: 'success' },
+  PREFERRED: { label: t('srmEvaluationPage.levelPreferred'), type: '' },
+  QUALIFIED: { label: t('srmEvaluationPage.levelQualified'), type: 'warning' },
+  ELIMINATED: { label: t('srmEvaluationPage.levelEliminated'), type: 'danger' },
+}))
 
 function levelLabel(score: number): string {
   if (score >= 90) return 'STRATEGIC'
@@ -120,15 +126,15 @@ function onScorecardUpdate(items: EvaluationItemInput[]) {
 
 async function submitCreate() {
   if (!createForm.supplierId) {
-    ElMessage.warning('请选择供应商')
+    ElMessage.warning(t('srmEvaluationMessages.supplierRequired'))
     return
   }
   if (!createForm.evaluationPeriod) {
-    ElMessage.warning('请输入评估周期')
+    ElMessage.warning(t('srmEvaluationMessages.periodRequired'))
     return
   }
   if (!defaultTemplate.value || createForm.items.length === 0) {
-    ElMessage.warning('当前租户未配置默认评估模板')
+    ElMessage.warning(t('srmEvaluationMessages.templateMissing'))
     return
   }
   const expectedDimensionIds = new Set(defaultTemplate.value.dimensions.map((item) => item.id))
@@ -137,13 +143,13 @@ async function submitCreate() {
     !Number.isInteger(item.score) || item.score < 1 || item.score > 5
   ))
   if (hasInvalidScore) {
-    ElMessage.warning('请为所有维度填写 1-5 的整数评分')
+    ElMessage.warning(t('srmEvaluationMessages.invalidScore'))
     return
   }
   if (createForm.items.length !== expectedDimensionIds.size
     || submittedDimensionIds.size !== expectedDimensionIds.size
     || [...submittedDimensionIds].some((id) => !expectedDimensionIds.has(id))) {
-    ElMessage.warning('评分维度与当前默认模板不一致，请重新打开评估表单')
+    ElMessage.warning(t('srmEvaluationMessages.dimensionsMismatch'))
     return
   }
   const request: CreateEvaluationRequest = {
@@ -152,7 +158,7 @@ async function submitCreate() {
     items: createForm.items,
   }
   await createEvaluation(request)
-  ElMessage.success('评估创建成功')
+  ElMessage.success(t('srmEvaluationMessages.created'))
   createDialogVisible.value = false
   loadData()
 }
@@ -185,14 +191,22 @@ onMounted(() => {
     <!-- 搜索栏 -->
     <el-card shadow="never" class="mb-4">
       <el-form :inline="true" @submit.prevent="loadData">
-        <el-form-item label="供应商">
-          <el-select v-model="query.supplierId" clearable filterable placeholder="全部供应商" @change="loadData">
+        <el-form-item :label="t('srmSupplierOverview.name')">
+          <el-select
+            v-model="query.supplierId"
+            clearable
+            filterable
+            :placeholder="t('srmEvaluationPage.allSuppliers')"
+            @change="loadData"
+          >
             <el-option v-for="s in supplierOptions" :key="s.id" :label="s.name" :value="s.id" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadData">查询</el-button>
-          <el-button v-permission="'srm:evaluation:create'" type="success" @click="openCreateDialog">新建评估</el-button>
+          <el-button type="primary" @click="loadData">{{ t('common.search') }}</el-button>
+          <el-button v-permission="'srm:evaluation:create'" type="success" @click="openCreateDialog">
+            {{ t('srmEvaluationPage.create') }}
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -200,29 +214,29 @@ onMounted(() => {
     <!-- 评估列表 -->
     <el-card shadow="never">
       <el-table v-loading="loading" :data="tableData" stripe>
-        <el-table-column prop="supplierName" label="供应商" min-width="150" />
-        <el-table-column prop="evaluationPeriod" label="评估周期" width="120" />
-        <el-table-column prop="totalScore" label="总分" width="80" align="center">
+        <el-table-column prop="supplierName" :label="t('srmSupplierOverview.name')" min-width="150" />
+        <el-table-column prop="evaluationPeriod" :label="t('srmEvaluationPage.period')" width="120" />
+        <el-table-column prop="totalScore" :label="t('srmSupplierOverview.totalScore')" width="80" align="center">
           <template #default="{ row }">
             <span class="score-text">{{ row.totalScore }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="等级" width="100" align="center">
+        <el-table-column :label="t('srmEvaluationPage.level')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="levelMap[levelLabel(row.totalScore)]?.type || ''">
               {{ levelMap[levelLabel(row.totalScore)]?.label || levelLabel(row.totalScore) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="evaluationTime" label="评估时间" width="170" />
-        <el-table-column label="状态" width="100">
+        <el-table-column prop="evaluationTime" :label="t('srmRiskPage.assessmentTime')" width="170" />
+        <el-table-column :label="t('srmSupplierOverview.status')" width="100">
           <template #default="{ row }">
             <el-tag size="small">{{ evalStatusLabel[row.status as string] || row.status }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80" fixed="right">
+        <el-table-column :label="t('common.actions')" width="80" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="viewDetail(row)">详情</el-button>
+            <el-button link type="primary" @click="viewDetail(row)">{{ t('srmRiskPage.detail') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -239,57 +253,79 @@ onMounted(() => {
     </el-card>
 
     <!-- 新建评估对话框 -->
-    <el-dialog v-model="createDialogVisible" title="新建绩效评估" width="640px" destroy-on-close>
+    <el-dialog
+      v-model="createDialogVisible"
+      :title="t('srmEvaluationPage.create')"
+      width="640px"
+      destroy-on-close
+    >
       <el-form v-loading="templateLoading" label-width="80px">
         <el-alert
           v-if="defaultTemplate"
-          :title="`当前模板：${defaultTemplate.name}`"
+          :title="t('srmEvaluationPage.currentTemplate', { name: defaultTemplate.name })"
           type="info"
           :closable="false"
           class="mb-4"
         />
-        <el-form-item label="供应商" required>
-          <el-select v-model="createForm.supplierId" filterable placeholder="请选择供应商" :loading="supplierLoading" style="width: 100%">
+        <el-form-item :label="t('srmSupplierOverview.name')" required>
+          <el-select
+            v-model="createForm.supplierId"
+            filterable
+            :placeholder="t('srmEvaluationMessages.supplierRequired')"
+            :loading="supplierLoading"
+            style="width: 100%"
+          >
             <el-option v-for="s in supplierOptions" :key="s.id" :label="s.name" :value="s.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="评估周期" required>
-          <el-input v-model="createForm.evaluationPeriod" maxlength="50" show-word-limit placeholder="如：2026-Q3" />
+        <el-form-item :label="t('srmEvaluationPage.period')" required>
+          <el-input
+            v-model="createForm.evaluationPeriod"
+            maxlength="50"
+            show-word-limit
+            placeholder="2026-Q3"
+          />
         </el-form-item>
-        <el-form-item label="评分">
-          <EvaluationScorecard v-if="defaultTemplate" :dimensions="defaultTemplate.dimensions" @update:items="onScorecardUpdate" />
-          <el-empty v-else description="当前租户未配置默认评估模板" />
+        <el-form-item :label="t('srmRiskPage.score')">
+          <EvaluationScorecard
+            v-if="defaultTemplate"
+            :dimensions="defaultTemplate.dimensions"
+            @update:items="onScorecardUpdate"
+          />
+          <el-empty v-else :description="t('srmEvaluationMessages.templateMissing')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="createDialogVisible = false">取消</el-button>
-        <el-button v-permission="'srm:evaluation:create'" type="primary" :disabled="!defaultTemplate" @click="submitCreate">提交评估</el-button>
+        <el-button @click="createDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button v-permission="'srm:evaluation:create'" type="primary" :disabled="!defaultTemplate" @click="submitCreate">
+          {{ t('srmRiskPage.submitAssessment') }}
+        </el-button>
       </template>
     </el-dialog>
 
     <!-- 评估详情抽屉 -->
-    <el-drawer v-model="detailDrawerVisible" title="评估详情" size="520px">
+    <el-drawer v-model="detailDrawerVisible" :title="t('srmEvaluationPage.detailTitle')" size="520px">
       <template v-if="currentEvaluation">
         <el-descriptions :column="1" border>
-          <el-descriptions-item label="供应商">{{ currentEvaluation.supplierName }}</el-descriptions-item>
-          <el-descriptions-item label="评估周期">{{ currentEvaluation.evaluationPeriod }}</el-descriptions-item>
-          <el-descriptions-item label="总分">
+          <el-descriptions-item :label="t('srmSupplierOverview.name')">{{ currentEvaluation.supplierName }}</el-descriptions-item>
+          <el-descriptions-item :label="t('srmEvaluationPage.period')">{{ currentEvaluation.evaluationPeriod }}</el-descriptions-item>
+          <el-descriptions-item :label="t('srmSupplierOverview.totalScore')">
             <span class="score-text-lg">{{ currentEvaluation.totalScore }}</span>
             <el-tag :type="levelMap[levelLabel(currentEvaluation.totalScore)]?.type || ''" class="ml-2">
               {{ levelMap[levelLabel(currentEvaluation.totalScore)]?.label || levelLabel(currentEvaluation.totalScore) }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="评估时间">{{ currentEvaluation.evaluationTime }}</el-descriptions-item>
+          <el-descriptions-item :label="t('srmRiskPage.assessmentTime')">{{ currentEvaluation.evaluationTime }}</el-descriptions-item>
         </el-descriptions>
         <el-table :data="currentEvaluation.items" class="mt-4" stripe>
-          <el-table-column prop="indicatorName" label="指标" />
-          <el-table-column prop="score" label="评分" width="60" align="center">
+          <el-table-column prop="indicatorName" :label="t('srmEvaluationPage.indicator')" />
+          <el-table-column prop="score" :label="t('srmRiskPage.score')" width="60" align="center">
             <template #default="{ row }">{{ row.score }}/5</template>
           </el-table-column>
-          <el-table-column prop="weight" label="权重" width="70" align="center">
+          <el-table-column prop="weight" :label="t('srmEvaluationPage.weight')" width="70" align="center">
             <template #default="{ row }">{{ row.weight }}%</template>
           </el-table-column>
-          <el-table-column prop="remark" label="备注" min-width="100" />
+          <el-table-column prop="remark" :label="t('procurementGoodsReceiptForm.remark')" min-width="100" />
         </el-table>
       </template>
     </el-drawer>

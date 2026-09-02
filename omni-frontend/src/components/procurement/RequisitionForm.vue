@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** 请购表单共享组件——新建 / 编辑请购对话框，含明细行动态增删。 */
 import { computed, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
@@ -25,6 +26,7 @@ const emit = defineEmits<{
   saved: []
 }>()
 
+const { t } = useI18n()
 const dialogVisible = computed({
   get: () => props.modelValue,
   set: (value: boolean) => emit('update:modelValue', value),
@@ -81,12 +83,12 @@ const form = reactive<{
   version?: number
   lines: EditableLine[]
 }>({ title: '', reason: '', lines: [emptyLine()] })
-const rules: FormRules = {
+const rules = computed<FormRules>(() => ({
   title: [
-    { required: true, message: '请输入请购标题', trigger: 'blur' },
-    { max: 200, message: '请购标题不能超过 200 个字符', trigger: 'blur' },
+    { required: true, message: t('procurementRequisitionFormMessages.titleRequired'), trigger: 'blur' },
+    { max: 200, message: t('procurementRequisitionFormMessages.titleLength'), trigger: 'blur' },
   ],
-}
+}))
 const selectedCategoryCode = computed(() => {
   const codes = form.lines
     .map((line) => findMaterial(line.materialId)?.categoryCode)
@@ -151,7 +153,7 @@ function addLine() {
 
 function removeLine(index: number) {
   if (form.lines.length === 1) {
-    ElMessage.warning('请购至少需要一条明细')
+    ElMessage.warning(t('procurementRequisitionFormMessages.minimumLine'))
     return
   }
   form.lines.splice(index, 1)
@@ -166,30 +168,36 @@ function onMaterialChanged(line: EditableLine) {
     .find(Boolean)
   if (otherCategory && otherCategory !== material.categoryCode) {
     line.materialId = undefined
-    ElMessage.warning('MVP 要求一张请购单的所有物料属于同一品类')
+    ElMessage.warning(t('procurementRequisitionFormMessages.sameCategoryRequired'))
   }
 }
 
 const decimalPattern = /^\d{1,13}(?:\.\d{1,6})?$/
 function validateLines() {
-  if (!form.lines.length) return '请购至少需要一条明细'
+  if (!form.lines.length) return t('procurementRequisitionFormMessages.minimumLine')
   const materialIds = new Set<number>()
   let categoryCode = ''
   for (const [index, line] of form.lines.entries()) {
-    if (!line.materialId) return `第 ${index + 1} 行请选择物料`
-    if (materialIds.has(line.materialId)) return `第 ${index + 1} 行物料重复`
+    if (!line.materialId) return t('procurementRequisitionFormMessages.selectMaterial', { index: index + 1 })
+    if (materialIds.has(line.materialId)) return t('procurementRequisitionFormMessages.duplicateMaterial', { index: index + 1 })
     materialIds.add(line.materialId)
     const material = findMaterial(line.materialId)
-    if (!material || material.status !== 'ACTIVE') return `第 ${index + 1} 行物料已停用，请重新选择`
-    if (categoryCode && material.categoryCode !== categoryCode) return '所有物料必须属于同一品类'
+    if (!material || material.status !== 'ACTIVE') {
+      return t('procurementRequisitionFormMessages.inactiveMaterial', { index: index + 1 })
+    }
+    if (categoryCode && material.categoryCode !== categoryCode) {
+      return t('procurementRequisitionFormMessages.sameCategoryRequired')
+    }
     categoryCode = material.categoryCode
     if (!decimalPattern.test(line.quantity) || !/[1-9]/.test(line.quantity)) {
-      return `第 ${index + 1} 行数量必须大于 0，且最多 6 位小数`
+      return t('procurementRequisitionFormMessages.invalidQuantity', { index: index + 1 })
     }
     if (!decimalPattern.test(line.estimatedUnitPrice)) {
-      return `第 ${index + 1} 行预估单价格式不正确，最多 6 位小数`
+      return t('procurementRequisitionFormMessages.invalidPrice', { index: index + 1 })
     }
-    if (line.remark.length > 500) return `第 ${index + 1} 行备注不能超过 500 个字符`
+    if (line.remark.length > 500) {
+      return t('procurementRequisitionFormMessages.remarkLength', { index: index + 1 })
+    }
   }
   return ''
 }
@@ -220,7 +228,7 @@ async function save() {
   } else {
     await createProcurementRequisition(request)
   }
-  ElMessage.success('保存成功')
+  ElMessage.success(t('common.save'))
   dialogVisible.value = false
   emit('saved')
 }
@@ -229,25 +237,25 @@ async function save() {
 <template>
   <el-dialog
     v-model="dialogVisible"
-    :title="editing ? '编辑请购' : '新建请购'"
+    :title="editing ? t('procurementRequisitionPage.editTitle') : t('procurementRequisitionPage.createTitle')"
     width="980px"
     destroy-on-close
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
-      <el-form-item label="请购标题" prop="title">
+      <el-form-item :label="t('procurementRequisitionFormMessages.titleLabel')" prop="title">
         <el-input v-model="form.title" maxlength="200" show-word-limit />
       </el-form-item>
-      <el-form-item label="请购原因">
+      <el-form-item :label="t('procurementRequisitionPage.reason')">
         <el-input v-model="form.reason" type="textarea" :rows="2" maxlength="1000" show-word-limit />
       </el-form-item>
-      <el-form-item label="物料品类">
+      <el-form-item :label="t('procurementRfqCompare.categoryLabel')">
         <el-tag v-if="selectedCategoryCode">{{ selectedCategoryCode }}</el-tag>
-        <span v-else class="form-tip">选择首条物料后自动确定；一张请购仅支持一个品类</span>
+        <span v-else class="form-tip">{{ t('procurementRequisitionFormMessages.categoryTip') }}</span>
       </el-form-item>
-      <el-form-item label="请购明细">
+      <el-form-item :label="t('procurementRequisitionPage.linesTitle')">
         <div class="line-editor">
           <el-table :data="form.lines" border>
-            <el-table-column label="物料" min-width="260">
+            <el-table-column :label="t('procurementRfqCompare.materialLabel')" min-width="260">
               <template #default="{ row }">
                 <el-select
                   v-model="row.materialId"
@@ -255,7 +263,7 @@ async function save() {
                   remote
                   :remote-method="loadMaterialOptions"
                   :loading="materialLoading"
-                  placeholder="搜索物料编码或名称"
+                  :placeholder="t('procurementRequisitionFormMessages.materialPlaceholder')"
                   style="width: 100%"
                   @change="onMaterialChanged(row)"
                 >
@@ -269,35 +277,37 @@ async function save() {
                 </el-select>
               </template>
             </el-table-column>
-            <el-table-column label="数量" min-width="145">
+            <el-table-column :label="t('procurementRequisitionPage.quantity')" min-width="145">
               <template #default="{ row }">
-                <el-input v-model="row.quantity" maxlength="20" placeholder="十进制字符串" />
+                <el-input v-model="row.quantity" maxlength="20" :placeholder="t('procurementRequisitionFormMessages.decimalText')" />
               </template>
             </el-table-column>
-            <el-table-column label="预估单价" min-width="145">
+            <el-table-column :label="t('procurementRequisitionPage.estimatedUnitPrice')" min-width="145">
               <template #default="{ row }">
-                <el-input v-model="row.estimatedUnitPrice" maxlength="20" placeholder="十进制字符串" />
+                <el-input v-model="row.estimatedUnitPrice" maxlength="20" :placeholder="t('procurementRequisitionFormMessages.decimalText')" />
               </template>
             </el-table-column>
-            <el-table-column label="备注" min-width="180">
+            <el-table-column :label="t('procurementGoodsReceiptForm.remark')" min-width="180">
               <template #default="{ row }">
                 <el-input v-model="row.remark" maxlength="500" />
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="70">
+            <el-table-column :label="t('common.actions')" width="70">
               <template #default="{ $index }">
-                <el-button link type="danger" @click="removeLine($index)">移除</el-button>
+                <el-button link type="danger" @click="removeLine($index)">{{ t('procurementRequisitionFormMessages.remove') }}</el-button>
               </template>
             </el-table-column>
           </el-table>
-          <el-button class="add-line" plain type="primary" @click="addLine">添加明细</el-button>
-          <div class="form-tip">行金额和总金额只由服务端使用 BigDecimal 计算，页面不使用浮点数推导。</div>
+          <el-button class="add-line" plain type="primary" @click="addLine">
+            {{ t('procurementRequisitionFormMessages.addLine') }}
+          </el-button>
+          <div class="form-tip">{{ t('procurementRequisitionFormMessages.serverCalculationTip') }}</div>
         </div>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="dialogVisible = false">取消</el-button>
-      <el-button type="primary" @click="save">保存草稿</el-button>
+      <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+      <el-button type="primary" @click="save">{{ t('procurementRfqPage.saveDraft') }}</el-button>
     </template>
   </el-dialog>
 </template>

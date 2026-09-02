@@ -1,11 +1,10 @@
 <script setup lang="ts">
 /**
  * 风险指标配置管理页面。
- * 左侧：指标类型列表（可增删改）
- * 右侧：选中指标类型的评分标准表格（可增删改）
- * 底部：得分阈值配置区域
+ * 左侧：指标类型列表（可增删改）；右侧：选中指标类型的评分标准表；底部：得分阈值配置区域。
  */
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getRiskIndicatorTypes,
@@ -24,6 +23,8 @@ import {
 import type { RiskLevel } from '@/api/srm-risk'
 import { getErrorMessage, isUserCancelled } from '@/utils/errors'
 
+const { t } = useI18n()
+
 // ===== 指标类型列表 =====
 const types = ref<RiskIndicatorTypeVO[]>([])
 const typesLoading = ref(false)
@@ -36,10 +37,10 @@ async function loadTypes() {
     types.value = res.data
     // 保持选中
     if (selectedType.value) {
-      selectedType.value = types.value.find(t => t.id === selectedType.value!.id) || null
+      selectedType.value = types.value.find(item => item.id === selectedType.value!.id) || null
     }
   } catch {
-    ElMessage.error('加载指标类型失败')
+    ElMessage.error(t('srmRiskConfigMessages.loadTypesFailed'))
   } finally {
     typesLoading.value = false
   }
@@ -81,33 +82,37 @@ function openEditType(row: RiskIndicatorTypeVO) {
 
 async function submitType() {
   if (!typeForm.value.typeCode.trim() || !typeForm.value.typeName.trim()) {
-    ElMessage.warning('编码和名称不能为空')
+    ElMessage.warning(t('srmRiskConfigMessages.codeNameRequired'))
     return
   }
   try {
     if (typeDialogIsEdit.value && typeEditingId.value) {
       await updateIndicatorType(typeEditingId.value, typeForm.value)
-      ElMessage.success('更新成功')
+      ElMessage.success(t('srmRiskConfigMessages.updated'))
     } else {
       await createIndicatorType(typeForm.value)
-      ElMessage.success('创建成功')
+      ElMessage.success(t('srmRiskConfigMessages.created'))
     }
     typeDialogVisible.value = false
     await loadTypes()
   } catch (error: unknown) {
-    ElMessage.error(getErrorMessage(error, '操作失败'))
+    ElMessage.error(getErrorMessage(error, t('srmRiskConfigMessages.operationFailed')))
   }
 }
 
 async function handleDeleteType(row: RiskIndicatorTypeVO) {
   try {
-    await ElMessageBox.confirm(`确定删除指标类型「${row.typeName}」？`, '确认删除', { type: 'warning' })
+    await ElMessageBox.confirm(
+      t('srmRiskConfigMessages.deleteTypeConfirm', { name: row.typeName }),
+      t('srmRiskConfigMessages.deleteTitle'),
+      { type: 'warning' },
+    )
     await deleteIndicatorType(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('srmRiskConfigMessages.deleted'))
     if (selectedType.value?.id === row.id) selectedType.value = null
     await loadTypes()
   } catch (error: unknown) {
-    if (!isUserCancelled(error)) ElMessage.error(getErrorMessage(error, '删除失败'))
+    if (!isUserCancelled(error)) ElMessage.error(getErrorMessage(error, t('srmRiskConfigMessages.deleteFailed')))
   }
 }
 
@@ -150,36 +155,40 @@ function openEditCriterion(row: RiskCriterionVO) {
 
 async function submitCriterion() {
   if (!criterionForm.value.criterionLabel.trim()) {
-    ElMessage.warning('评分标准描述不能为空')
+    ElMessage.warning(t('srmRiskConfigMessages.criterionRequired'))
     return
   }
   if (!selectedType.value) return
   try {
     if (criterionDialogIsEdit.value && criterionEditingId.value) {
       await updateCriterion(criterionEditingId.value, criterionForm.value)
-      ElMessage.success('更新成功')
+      ElMessage.success(t('srmRiskConfigMessages.updated'))
     } else {
       await createCriterion({
         indicatorTypeId: selectedType.value.id,
         ...criterionForm.value,
       })
-      ElMessage.success('创建成功')
+      ElMessage.success(t('srmRiskConfigMessages.created'))
     }
     criterionDialogVisible.value = false
     await loadTypes()
   } catch (error: unknown) {
-    ElMessage.error(getErrorMessage(error, '操作失败'))
+    ElMessage.error(getErrorMessage(error, t('srmRiskConfigMessages.operationFailed')))
   }
 }
 
 async function handleDeleteCriterion(row: RiskCriterionVO) {
   try {
-    await ElMessageBox.confirm(`确定删除评分标准「${row.criterionLabel}」？`, '确认删除', { type: 'warning' })
+    await ElMessageBox.confirm(
+      t('srmRiskConfigMessages.deleteCriterionConfirm', { name: row.criterionLabel }),
+      t('srmRiskConfigMessages.deleteTitle'),
+      { type: 'warning' },
+    )
     await deleteCriterion(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('srmRiskConfigMessages.deleted'))
     await loadTypes()
   } catch (error: unknown) {
-    if (!isUserCancelled(error)) ElMessage.error(getErrorMessage(error, '删除失败'))
+    if (!isUserCancelled(error)) ElMessage.error(getErrorMessage(error, t('srmRiskConfigMessages.deleteFailed')))
   }
 }
 
@@ -193,7 +202,7 @@ async function loadThresholds() {
     const { data: res } = await getScoreThresholds()
     thresholds.value = res.data
   } catch {
-    ElMessage.error('加载得分阈值失败')
+    ElMessage.error(t('srmRiskConfigMessages.loadThresholdsFailed'))
   } finally {
     thresholdsLoading.value = false
   }
@@ -202,10 +211,10 @@ async function loadThresholds() {
 async function saveThresholds() {
   try {
     await updateScoreThresholds(thresholds.value)
-    ElMessage.success('阈值保存成功')
+    ElMessage.success(t('srmRiskConfigMessages.thresholdSaved'))
     await loadThresholds()
   } catch (error: unknown) {
-    ElMessage.error(getErrorMessage(error, '保存失败'))
+    ElMessage.error(getErrorMessage(error, t('srmRiskConfigMessages.saveFailed')))
   }
 }
 
@@ -217,9 +226,9 @@ function riskTagType(level: string) {
 }
 
 function riskLabel(level: string) {
-  if (level === 'RED') return '高风险'
-  if (level === 'YELLOW') return '中风险'
-  return '低风险'
+  if (level === 'RED') return t('srmRiskPage.riskHigh')
+  if (level === 'YELLOW') return t('srmRiskPage.riskMedium')
+  return t('srmRiskPage.riskLow')
 }
 
 // ===== 初始化 =====
@@ -238,9 +247,9 @@ onMounted(() => {
         <el-card shadow="never">
           <template #header>
             <div class="card-header">
-              <span>指标类型</span>
+              <span>{{ t('srmRiskConfig.indicatorTypes') }}</span>
               <el-button v-permission="'srm:risk:config:update'" type="primary" size="small" @click="openCreateType">
-                新增
+                {{ t('srmRiskConfig.create') }}
               </el-button>
             </div>
           </template>
@@ -253,17 +262,21 @@ onMounted(() => {
             size="small"
             @current-change="(row: RiskIndicatorTypeVO) => selectedType = row"
           >
-            <el-table-column prop="typeName" label="名称" min-width="100" />
-            <el-table-column prop="typeCode" label="编码" width="120" />
-            <el-table-column label="自动" width="60" align="center">
+            <el-table-column prop="typeName" :label="t('srmSupplierOverview.name')" min-width="100" />
+            <el-table-column prop="typeCode" :label="t('srmRiskConfig.code')" width="120" />
+            <el-table-column :label="t('srmRiskConfig.auto')" width="60" align="center">
               <template #default="{ row }">
-                <el-tag v-if="row.autoCalc === 1" type="info" size="small">是</el-tag>
+                <el-tag v-if="row.autoCalc === 1" type="info" size="small">{{ t('srmResources.yes') }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="120" align="center">
+            <el-table-column :label="t('common.actions')" width="120" align="center">
               <template #default="{ row }">
-                <el-button v-permission="'srm:risk:config:update'" link type="primary" size="small" @click="openEditType(row)">编辑</el-button>
-                <el-button v-permission="'srm:risk:config:update'" link type="danger" size="small" @click="handleDeleteType(row)">删除</el-button>
+                <el-button v-permission="'srm:risk:config:update'" link type="primary" size="small" @click="openEditType(row)">
+                  {{ t('common.edit') }}
+                </el-button>
+                <el-button v-permission="'srm:risk:config:update'" link type="danger" size="small" @click="handleDeleteType(row)">
+                  {{ t('common.delete') }}
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -276,10 +289,12 @@ onMounted(() => {
           <template #header>
             <div class="card-header">
               <span>
-                评分标准
+                {{ t('srmRiskConfig.scoringCriteria') }}
                 <template v-if="selectedType">
                   — {{ selectedType.typeName }}
-                  <el-tag v-if="isAutoCalc" type="info" size="small" style="margin-left: 8px">自动计算</el-tag>
+                  <el-tag v-if="isAutoCalc" type="info" size="small" style="margin-left: 8px">
+                    {{ t('srmRiskPage.autoCalculated') }}
+                  </el-tag>
                 </template>
               </span>
               <el-button
@@ -289,11 +304,11 @@ onMounted(() => {
                 size="small"
                 @click="openCreateCriterion"
               >
-                新增
+                {{ t('srmRiskConfig.create') }}
               </el-button>
             </div>
           </template>
-          <el-empty v-if="!selectedType" description="请先选择左侧的指标类型" />
+          <el-empty v-if="!selectedType" :description="t('srmRiskConfig.selectTypeFirst')" />
           <el-table
             v-else
             :data="currentCriteria"
@@ -301,21 +316,25 @@ onMounted(() => {
             border
             size="small"
           >
-            <el-table-column prop="criterionLabel" label="评分标准描述" min-width="200" />
-            <el-table-column prop="score" label="分值" width="80" align="center" />
-            <el-table-column label="风险等级" width="100" align="center">
+            <el-table-column prop="criterionLabel" :label="t('srmRiskConfig.criterionDescription')" min-width="200" />
+            <el-table-column prop="score" :label="t('srmRiskConfig.score')" width="80" align="center" />
+            <el-table-column :label="t('srmSupplierOverview.riskLevel')" width="100" align="center">
               <template #default="{ row }">
                 <el-tag :type="riskTagType(row.riskLevel)" size="small">{{ riskLabel(row.riskLevel) }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="sort" label="排序" width="70" align="center" />
-            <el-table-column label="操作" width="120" align="center">
+            <el-table-column prop="sort" :label="t('procurementMaterialPage.sort')" width="70" align="center" />
+            <el-table-column :label="t('common.actions')" width="120" align="center">
               <template #default="{ row }">
                 <template v-if="!isAutoCalc">
-                  <el-button v-permission="'srm:risk:config:update'" link type="primary" size="small" @click="openEditCriterion(row)">编辑</el-button>
-                  <el-button v-permission="'srm:risk:config:update'" link type="danger" size="small" @click="handleDeleteCriterion(row)">删除</el-button>
+                  <el-button v-permission="'srm:risk:config:update'" link type="primary" size="small" @click="openEditCriterion(row)">
+                    {{ t('common.edit') }}
+                  </el-button>
+                  <el-button v-permission="'srm:risk:config:update'" link type="danger" size="small" @click="handleDeleteCriterion(row)">
+                    {{ t('common.delete') }}
+                  </el-button>
                 </template>
-                <span v-else style="color: #999; font-size: 12px">自动计算</span>
+                <span v-else style="color: #999; font-size: 12px">{{ t('srmRiskPage.autoCalculated') }}</span>
               </template>
             </el-table-column>
           </el-table>
@@ -327,31 +346,31 @@ onMounted(() => {
     <el-card shadow="never" style="margin-top: 16px">
       <template #header>
         <div class="card-header">
-          <span>得分 → 风险等级映射阈值</span>
+          <span>{{ t('srmRiskConfig.thresholdTitle') }}</span>
           <el-button v-permission="'srm:risk:config:update'" type="primary" size="small" @click="saveThresholds">
-            保存阈值
+            {{ t('srmRiskConfig.saveThresholds') }}
           </el-button>
         </div>
       </template>
       <el-table v-loading="thresholdsLoading" :data="thresholds" stripe border size="small">
-        <el-table-column label="风险等级" width="150" align="center">
+        <el-table-column :label="t('srmSupplierOverview.riskLevel')" width="150" align="center">
           <template #default="{ row }">
             <el-tag :type="riskTagType(row.riskLevel)">{{ riskLabel(row.riskLevel) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="最小分（含）" width="200" align="center">
+        <el-table-column :label="t('srmRiskConfig.minScore')" width="200" align="center">
           <template #default="{ row }">
             <el-input-number v-model="row.minScore" :min="0" :max="100" size="small" controls-position="right" />
           </template>
         </el-table-column>
-        <el-table-column label="最大分（含）" width="200" align="center">
+        <el-table-column :label="t('srmRiskConfig.maxScore')" width="200" align="center">
           <template #default="{ row }">
             <el-input-number v-model="row.maxScore" :min="0" :max="100" size="small" controls-position="right" />
           </template>
         </el-table-column>
-        <el-table-column label="说明" min-width="200">
+        <el-table-column :label="t('srmRiskConfig.description')" min-width="200">
           <template #default="{ row }">
-            总分在 {{ row.minScore }} ~ {{ row.maxScore }} 之间时，综合风险等级为
+            {{ t('srmRiskConfig.thresholdDescription', { min: row.minScore, max: row.maxScore }) }}
             <el-tag :type="riskTagType(row.riskLevel)" size="small">{{ riskLabel(row.riskLevel) }}</el-tag>
           </template>
         </el-table-column>
@@ -359,64 +378,84 @@ onMounted(() => {
     </el-card>
 
     <!-- 指标类型对话框 -->
-    <el-dialog v-model="typeDialogVisible" :title="typeDialogIsEdit ? '编辑指标类型' : '新增指标类型'" width="500px">
+    <el-dialog
+      v-model="typeDialogVisible"
+      :title="typeDialogIsEdit ? t('srmRiskConfig.editType') : t('srmRiskConfig.createType')"
+      width="500px"
+    >
       <el-form :model="typeForm" label-width="100px">
-        <el-form-item v-if="!typeDialogIsEdit" label="指标编码">
-          <el-input v-model="typeForm.typeCode" placeholder="如 FINANCIAL" :maxlength="50" />
+        <el-form-item v-if="!typeDialogIsEdit" :label="t('srmRiskConfig.code')">
+          <el-input v-model="typeForm.typeCode" placeholder="FINANCIAL" :maxlength="50" />
         </el-form-item>
-        <el-form-item v-else label="指标编码">
+        <el-form-item v-else :label="t('srmRiskConfig.code')">
           <el-input :model-value="typeForm.typeCode" disabled />
         </el-form-item>
-        <el-form-item label="指标名称">
-          <el-input v-model="typeForm.typeName" placeholder="如 财务风险" :maxlength="100" />
+        <el-form-item :label="t('srmSupplierOverview.name')">
+          <el-input v-model="typeForm.typeName" :placeholder="t('srmRiskConfig.typeNamePlaceholder')" :maxlength="100" />
         </el-form-item>
-        <el-form-item label="说明">
+        <el-form-item :label="t('srmRiskConfig.description')">
           <el-input v-model="typeForm.description" type="textarea" :rows="2" :maxlength="500" />
         </el-form-item>
-        <el-form-item label="排序">
+        <el-form-item :label="t('procurementMaterialPage.sort')">
           <el-input-number v-model="typeForm.sort" :min="0" :max="9999" />
         </el-form-item>
-        <el-form-item label="自动计算">
+        <el-form-item :label="t('srmRiskConfig.autoCalc')">
           <el-switch v-model="typeForm.autoCalc" :active-value="1" :inactive-value="0" />
-          <span style="margin-left: 8px; color: #999; font-size: 12px">开启后由系统自动计算（如资质风险）</span>
+          <span style="margin-left: 8px; color: #999; font-size: 12px">{{ t('srmRiskConfig.autoCalcHint') }}</span>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-switch v-model="typeForm.status" :active-value="1" :inactive-value="0" active-text="启用" inactive-text="禁用" />
+        <el-form-item :label="t('srmSupplierOverview.status')">
+          <el-switch
+            v-model="typeForm.status"
+            :active-value="1"
+            :inactive-value="0"
+            :active-text="t('common.enabled')"
+            :inactive-text="t('common.disabled')"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="typeDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitType">确定</el-button>
+        <el-button @click="typeDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="submitType">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 评分标准对话框 -->
-    <el-dialog v-model="criterionDialogVisible" :title="criterionDialogIsEdit ? '编辑评分标准' : '新增评分标准'" width="500px">
+    <el-dialog
+      v-model="criterionDialogVisible"
+      :title="criterionDialogIsEdit ? t('srmRiskConfig.editCriterion') : t('srmRiskConfig.createCriterion')"
+      width="500px"
+    >
       <el-form :model="criterionForm" label-width="100px">
-        <el-form-item label="标准描述">
-          <el-input v-model="criterionForm.criterionLabel" placeholder="如：流动比率 > 2" :maxlength="200" />
+        <el-form-item :label="t('srmRiskConfig.criterionDescription')">
+          <el-input v-model="criterionForm.criterionLabel" :placeholder="t('srmRiskConfig.criterionPlaceholder')" :maxlength="200" />
         </el-form-item>
-        <el-form-item label="分值">
+        <el-form-item :label="t('srmRiskConfig.score')">
           <el-input-number v-model="criterionForm.score" :min="0" :max="100" />
-          <span style="margin-left: 8px; color: #999; font-size: 12px">分值越高越危险</span>
+          <span style="margin-left: 8px; color: #999; font-size: 12px">{{ t('srmRiskConfig.higherScoreRiskier') }}</span>
         </el-form-item>
-        <el-form-item label="风险等级">
+        <el-form-item :label="t('srmSupplierOverview.riskLevel')">
           <el-select v-model="criterionForm.riskLevel">
-            <el-option label="低风险 (GREEN)" value="GREEN" />
-            <el-option label="中风险 (YELLOW)" value="YELLOW" />
-            <el-option label="高风险 (RED)" value="RED" />
+            <el-option :label="`${t('srmRiskPage.riskLow')} (GREEN)`" value="GREEN" />
+            <el-option :label="`${t('srmRiskPage.riskMedium')} (YELLOW)`" value="YELLOW" />
+            <el-option :label="`${t('srmRiskPage.riskHigh')} (RED)`" value="RED" />
           </el-select>
         </el-form-item>
-        <el-form-item label="排序">
+        <el-form-item :label="t('procurementMaterialPage.sort')">
           <el-input-number v-model="criterionForm.sort" :min="0" :max="9999" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-switch v-model="criterionForm.status" :active-value="1" :inactive-value="0" active-text="启用" inactive-text="禁用" />
+        <el-form-item :label="t('srmSupplierOverview.status')">
+          <el-switch
+            v-model="criterionForm.status"
+            :active-value="1"
+            :inactive-value="0"
+            :active-text="t('common.enabled')"
+            :inactive-text="t('common.disabled')"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="criterionDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitCriterion">确定</el-button>
+        <el-button @click="criterionDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="submitCriterion">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
   </div>
