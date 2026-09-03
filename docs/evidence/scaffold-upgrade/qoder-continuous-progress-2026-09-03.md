@@ -422,6 +422,30 @@ strict 模块失败数仍为 8（因为每个模块需**全部** required_flows 
 另将 system-management `most-management-flows` 精确化为两个产品缺失页面 gap。
 strict 模块失败数仍为 8（需全部 required_flows 达标才能转 covered）——与主交接 C1 一致，未降数、未改检查器。
 
+### 3.9 提交与推送台账（含一次瞬时推送失败的完整处置）
+
+| 提交 | 内容 | 文件数 | 交付 |
+| --- | --- | --- | --- |
+| `653afe3` | 阶段 A：SRM supplier-quotation gap 闭环 | 30 | PUSHED（gitee+github） |
+| `99ad567` | 阶段 C：srm 三语译文事实矛盾修正 + 队列重生成 | 5 | PUSHED |
+| `c40c7cc` | 阶段 B 第一批：72 张只读管理页截图，关闭 workflow `tracking` | 80 | PUSHED |
+| `31ee4e8` | 阶段 B 第二批：8 张响应式图，关闭 srm `stable-mobile-flow` | 14 | PUSHED |
+| `6c03b32` | 阶段 B 第三批：12 张字典三态图，关闭 system-management 两个状态 gap | 18 | PUSHED（见下方事件） |
+
+**`6c03b32` 推送事件（如实记录）**：
+
+1. 首次 push 守卫返回 `FAST_FORWARD_PROVEN=yes` 但 `PUSH_EXIT=128`，守卫按设计输出 `PUSH_FAILED: local commit retained, remote unchanged` 并**停止**，未拉取/合并/强推/改配置。
+2. 定向诊断：`git remote -v` 显示 `origin` 配了**两个 push URL**（gitee 与 github）。直接重试并捕获 stderr 得到真实原因：
+   gitee 返回 `Everything up-to-date`（已成功），github 报 `unable to access … Failed to connect to 127.0.0.1 port 7897`——本地代理端口不可达。
+3. 取证：`Test-NetConnection 127.0.0.1:7897` = **True**（已恢复）；`git ls-remote https://github.com/…` exit 0；
+   当时 gitee=`6c03b32`、github=`31ee4e8`（落后一个提交），`git config --get http.proxy/https.proxy` 均为空（代理非仓库级配置）。
+4. 带新证据重试（非盲试）：先 `git merge-base --is-ancestor 31ee4e8 HEAD` exit 0 证明可 fast-forward，再普通 push → **`PUSH_EXIT=0`**，github `31ee4e8..6c03b32`。
+5. 最终核验：**LOCAL = GITEE = GITHUB = `6c03b3254f1ce760fc779ce8b3623530eeef96a1`**；暂存区空；无未提交的跟踪变更。
+
+处置约束遵守情况：**未**修改 git config（含未删除 github push URL、未改代理）、**未** force push、**未** merge/rebase/reset 消除差异；
+失败时先保留本地现场并报告，仅在取得「代理已恢复 + github 可达 + 可 fast-forward」三项新证据后重试一次。
+分类：瞬时环境阻塞（已自消），**不构成 REMOTE_DIVERGENCE_STOP**（无分叉，两端均为本地 HEAD 祖先）。
+
 ## 4. 阶段 C：四语言文档预审与修订
 
 ### 4.1 队列实测
@@ -545,19 +569,56 @@ strict 预期：关闭 `supplier-quotation` 一个 gap 后 SRM 仍为 `partial`�
 - 本轮临时辅助文件（均不提交）：`scripts/.work/` 下 `issue-e2e-tokens.ps1`/`.sh`（已修）、`run-srm-e2e.ps1`、`destroy-e2e-credentials.ps1`、`qoder-push-guard.ps1`、`qoder-secret-scan.mjs`、`qoder-cleanup-batch.sql`、`qoder-check-*.sql`、`qoder-mvn-*.log`、`qoder-srm-e2e.log`、`qoder-cleanup-result.txt`、`qoder-stage-pathspec.txt`；`omni-frontend/scripts/.work/qoder-gap-survey.mjs`。
 - 工具异常记录：两次 PowerShell 命令返回 ExitCode=1 但实际成功（Maven 测试与 git push），原因是 PowerShell 将原生命令的 stderr 进度输出当作 NativeCommandError；已以命令自身的结构化输出（`BUILD SUCCESS`、`PUSH_EXIT=0`、`DELIVERY=PUSHED`）为准，未误判为失败。一次 `docker exec` 在 `has_risk` 沙箱下被拒（`docker.exe 拒绝访问`），改用与其余只读查询相同的执行路径后成功，未绕过任何用户级安全确认。无 TOOL_TIMEOUT。
 
-## 8. 恢复入口
+## 8. 暂停点与恢复入口
 
-上下文压缩或进程重启后：读本文件 → `git status --short` + `git log -1 --oneline` + `docker compose ls` 做最小增量核对 →
-按下列具体操作继续。**禁止重开全仓审计**，禁止丢弃已有成果。
+### 8.1 本次暂停状态（用户主动要求下班暂停，非阻塞、非失败）
 
-下一条具体操作（按优先序）：
+暂停时现场**干净且已全部交付**：
 
-1. **取得授权后修复 3.3 的 DATA_DEFECT**（还原 `proc_material_category` ids 1-13），随后重跑 `procurement-default-config` 断言确认 14 行；这会同时解锁 procurement `material` 与 asset 链。
-2. **最低成本可执行项**：workflow `tracking` —— 在 `omni-frontend/e2e-docs/flows/admin.flows.spec.ts` 的 `adminScenes` 增加
-   `{ id: 'workflow-instances', route: '/admin/workflow/instance', expectText: [...] }`（四语言文案需从 `src/locales/*.ts` 的
-   `workflow.processKey`/`businessKey`/`initiator`/`pending` 精确提取，控制台乱码不可信，应用 Node 以 UTF-8 读出）；
-   该场景**只读、无写入、无需 `E2E_MUTATIONS`、无需清理**；随后 manifest +4 条、coverage 移除 `tracking`、strict 重跑、提交推送。
-3. **阶段 C 下一组**：P0 `architecture`（源摘要 `bb2700158866`）及其 en/ja/ko 三份译文；同时补译 srm 组尚缺的截图章节（锚点：各译文 `## 10.` 之前）。
-4. 任何新增测试身份需求（如 workflow `countersign`）先登记待确认，不自行创建、不给 admin/supplier1 越权。
+- LOCAL = GITEE = GITHUB = `6c03b3254f1ce760fc779ce8b3623530eeef96a1`（本文件所在的收尾提交推送后会前进一格）。
+- 暂存区空；工作区只剩 §2.3 排除项（无本任务未提交的跟踪变更）。
+- 本会话共签发 5 份凭证（160646 / 172150 / 173240 / 180943 / 182228 / 184357），**全部已销毁**；
+  `%TEMP%\omni-e2e-tokens\` 仅剩 12 个更早会话文件（不属本任务，未触碰）。
+- 两个临时探测用例（`zz-probe.spec.ts`、`zz-probe-dict.spec.ts`、`zz-probe-details.spec.ts`）**均已删除**，从未进入提交。
+- Docker `omni-wp09-docs` 仍 15 容器 running，**未重建、未停服、未清卷**；无遗留后台进程。
+- 本批测试数据零残留：阶段 A 的 28 行软删 + 字典批 `E2EDICT-%` 硬删后实测 0，`sys_dict_type` 回到基线 17。
+
+### 8.2 已固化的探测成果（下次不必重跑）
+
+最后一轮只读探测（4 passed / 27.1s）已取得三个页面的**行操作按钮四语言真实文案**，可直接用于编写正式用例：
+
+| 页面 | 行数 | zh-CN | en-US | ja-JP | ko-KR |
+| --- | --- | --- | --- | --- | --- |
+| `/admin/workflow/instance` | 10 | 流转进度 / 审批记录 | Process Progress / Approval Records | プロセス進捗 / 承認履歴 | 프로세스 진행 상태 / 승인 기록 |
+| `/admin/workflow/model` | 8 | 设计 / 校验 / 发布 / 版本 / 删除 | Design / Validate / Publish / Version / Delete | 設計 / 検証 / 公開 / バージョン / 削除 | 설계 / 검증 / 게시 / 버전 / 삭제 |
+| `/admin/base/mqmessage` | 10 | 查看详情 | Detail | Detail | Detail |
+
+已验证的弹层行为：`/admin/base/mqmessage` 在 en/ja/ko 下点 `Detail` 可打开弹层，标题 `Detail`、按钮 `[Close]`（**只读**）。
+
+两个需注意的探测经验：
+
+1. 中文按钮为复合词（如「查看详情」「流转进度」），用 `^…$` 精确匹配会漏；下次应用 **includes + 排除写操作关键词**（删除/编辑/发布/终止/重发/跳过）的双重过滤。
+2. 上述探测**未对中文 mqmessage 打开弹层**（正则未命中复合词），因此缺 zh 的弹层标题/字段清单；已知按钮文案为「查看详情」，可直接使用。
+3. 新发现一个译文完整度实例：mqmessage 行操作在 **ja-JP/ko-KR 下也渲染为英文 `Detail`**（与 §3.5 的 i18n 观察同类）。
+
+### 8.3 下一条具体操作（按优先序）
+
+1. **最低成本、只读、无需清理**：workflow 与 messaging-monitoring 的 `detail-and-action-states`。
+   直接用 §8.2 的真实文案新建一个只读弹层用例：
+   - `/admin/workflow/instance` 首行点「流转进度/Process Progress/プロセス進捗/프로세스 진행 상태」与「审批记录/Approval Records/承認履歴/승인 기록」（各 4 语言）；
+   - `/admin/workflow/model` 首行点「版本/Version/バージョン/버전」（只读历史；**避开** 设计/校验/发布/删除 中的写操作，尤其发布与删除）；
+   - `/admin/base/mqmessage` 首行点「查看详情/Detail」，弹层标题与 `Close` 按钮已实测。
+   随后：manifest 登记（`step: detail`）、coverage 移除对应 `detail-and-action-states`、指南补节 + 刷新摘要、strict 重跑、提交推送。
+2. **阶段 C 下一组**：P0 `architecture`（源摘要 `bb2700158866`）及其 en/ja/ko 三份译文；同时补译 srm 组尚缺的截图章节（锚点：各译文 `## 10.` 之前）。
+3. **需授权才能推进**（不自行执行）：修复 §3.3 DATA_DEFECT（还原 `proc_material_category` ids 1-13，事务 + `ROW_COUNT()=13`）→ 解锁 procurement `material` 与 asset 全部 10 gaps；修复 §3.8 登记的 i18n PRODUCT_DEFECT（后端校验消息国际化 + 补齐 ja/ko 译文）。
+4. **需先确认身份**：workflow `countersign` 需多审批人；现有受信任测试身份仅 admin/supplier1，**登记待确认，不自行创建、不临时越权**。
+5. **scaffold-development / operations**（各 2 gaps）：非页面流程（CLI / 可观测基础设施），禁止伪造 UI 图；需先决定登记形态与证据标准（真实命令输出/仪表盘证据 vs 授权 `exempt`）。
+
+恢复步骤：读本文件 → `git status --short` + `git log -1 --oneline` + `git ls-remote origin refs/heads/codex/scaffold-upgrade` + `docker compose ls` 做最小增量核对 →
+按 8.3 第 1 项继续。**禁止重开全仓审计**，禁止丢弃已有成果。
+
+推送注意：`origin` 配了 gitee + github **两个 push URL**，github 走本地代理 `127.0.0.1:7897`；
+若再现 `PUSH_EXIT=128`，先分别 `git ls-remote` 两个 URL 定位哪端落后、`Test-NetConnection 127.0.0.1 -Port 7897` 确认代理，
+再在证明可 fast-forward 后重试；**不改 git config、不删 push URL、不 force push**（参见 §3.9 实例）。
 
 防空转：同一问题连续三次尝试无新证据或实质进展即标 BLOCKED，停止盲试，转向不依赖它的独立工作。
