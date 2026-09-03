@@ -519,7 +519,24 @@ omni-frontend/src/
 | 风险指标配置（risk） | ![风险指标配置（简体中文）](images/zh-CN/srm-risk-config.png) | ![风险指标配置（英文）](images/en-US/srm-risk-config.png) | ![风险指标配置（日文）](images/ja-JP/srm-risk-config.png) | ![风险指标配置（韩文）](images/ko-KR/srm-risk-config.png) |
 | 邀请管理（invite） | ![邀请管理（简体中文）](images/zh-CN/srm-invites.png) | ![邀请管理（英文）](images/en-US/srm-invites.png) | ![邀请管理（日文）](images/ja-JP/srm-invites.png) | ![邀请管理（韩文）](images/ko-KR/srm-invites.png) |
 
-本组只关闭列表/配置视图，**不等同于**关闭 `admission-lifecycle`（需完整 Portal 注册 Saga 与准入审批）、`stable-mobile-flow`（需移动/平板视口）与 `detail-and-action-states`（需详情弹层与操作结果），因此 SRM 仍为 `partial`。
+本组只关闭列表/配置视图，**不等同于**关闭 `admission-lifecycle`（需完整 Portal 注册 Saga 与准入审批）与 `detail-and-action-states`（需详情弹层与操作结果）；`stable-mobile-flow` 则由下一小节的响应式采集关闭。因此 SRM 仍为 `partial`。
+
+### 供应商门户响应式稳定性截图（四语言）
+
+由 `omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts` 在真实运行栈上生成，**只读采集**：仅打开门户、切换页签与点击刷新，不提交或修改任何报价。
+
+- 前置条件：与上两节一致（本地 Compose 全栈、`supplier1` 已建立 Portal 关联、短期 JWT 进程内签发并于收尾销毁）。
+- 操作者：`supplier1`。
+- 操作：分别在 **390×844（移动）** 与 **1024×768（平板）** 视口下打开供应商门户，切换到「询价报价」页签。
+- 预期状态：页签可见且可点击；「刷新询价」与逐行报价操作未被窄屏挤出或遮挡；列表按响应式收敛列（窄屏仅保留询价单号/主题/操作）且无溢出。
+- 实测结果：8 passed / 0 skipped（四语言 × 两个视口）。
+
+| 视口 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 390×844 移动 | ![供应商门户报价列表移动视口（简体中文）](images/zh-CN/srm-portal-quotation-mobile.png) | ![供应商门户报价列表移动视口（英文）](images/en-US/srm-portal-quotation-mobile.png) | ![供应商门户报价列表移动视口（日文）](images/ja-JP/srm-portal-quotation-mobile.png) | ![供应商门户报价列表移动视口（韩文）](images/ko-KR/srm-portal-quotation-mobile.png) |
+| 1024×768 平板 | ![供应商门户报价列表平板视口（简体中文）](images/zh-CN/srm-portal-quotation-tablet.png) | ![供应商门户报价列表平板视口（英文）](images/en-US/srm-portal-quotation-tablet.png) | ![供应商门户报价列表平板视口（日文）](images/ja-JP/srm-portal-quotation-tablet.png) | ![供应商门户报价列表平板视口（韩文）](images/ko-KR/srm-portal-quotation-tablet.png) |
+
+采集时列表中展示的是环境已有的历史询价行（本批报价数据已按归属清理完毕）；图片如实保留真实列表内容，不以造数据方式填充。
 
 ## 10. 测试
 

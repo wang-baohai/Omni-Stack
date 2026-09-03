@@ -347,6 +347,37 @@ procurement 请购/询价（当前仅存历史 E2ESQ 测试残留行，不宜作
 连带影响（已如实写入指南与 coverage 注释）：workflow 实例跟踪页的正式截图因此会显示带 `E2ESQ` 标识的真实标题。
 本批**未为美化图片而造数据、裁剪或隐藏真实标题**。
 
+### 3.7 阶段 B 第二批实际执行结果（srm `stable-mobile-flow` 已关闭）
+
+**新增用例**：`omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts`（2 视口 × 4 语言 = 8 用例）。
+视口沿用仓库既有响应式约定（390×844、1024×768，与 procurement approval-rules 一致）；
+页签/按钮文案**沿用阶段 A 已实测通过的 selector 值**，不重新推测。
+
+断言不只截图：页签 `toBeVisible` + 可点击，「刷新询价」按钮 `toBeVisible` + `toBeEnabled`，
+以此证明窄屏下操作入口未被挤出或遮挡（即「稳定可用」的实质判据）。
+
+| 项 | 实测结果 |
+| --- | --- |
+| 静态检查 | `eslint --max-warnings 0` exit 0；`tsc --noEmit --strict` exit 0；`playwright --list` = **Total: 8 tests** |
+| 真实运行 | **8 passed（6.4s）/ 0 failed / 0 skipped**，`PLAYWRIGHT_EXIT=0`，TTL 门禁 `1200L` 通过 |
+| 图片 | **8/8** 存在，26,032–46,304 bytes（窄屏故体积小于桌面图），mtime 18:00:42–18:00:48 |
+| 图片质检 | `zh-CN/srm-portal-quotation-mobile` 已目检：中文 UI、三页签渲染、表格响应式收敛为「询价单号/询价主题/操作」三列、`刷新询价` 与逐行「修改报价」均可见可点、无破损布局 |
+| 写入 | 无。仅开页/切页签/点刷新，`E2E_MUTATIONS=false`，**无数据需清理** |
+| 凭证 | `tokens-20260903-180033.json` **已销毁**（POINTER_REMOVED=yes、BATCH_TOKEN_FILE_REMOVED=yes），目录回到 12 个更早会话文件 |
+| manifest | **+8 条 → 共 202 条**（`step: responsive`，viewport 分别为 390×844 / 1024×768），零重复、零缺字段、图片/用例文件全在 |
+| coverage | srm 新增 2 行 assets + `special_viewports`（两个视口绑定 `supplier-quotation`）；**gaps 3→2**，移除 `stable-mobile-flow` |
+| 指南 | `docs/srm.md` 新增「供应商门户响应式稳定性截图（四语言）」小节；同时修正上一小节中已过时的表述（避免文档内部矛盾） |
+| 摘要 | `docs/srm.md` → `62c98f8e7ec8…`；全量复核 **38 份源文档、0 摘要不匹配** |
+| strict | exit 1、**恰好 8 个模块覆盖失败**、**非覆盖类错误 0** |
+| links / sensitive | 均 exit 0 |
+
+**附带佐证阶段 A 清理生效**：移动/平板图中列表仅剩 RFQ-1-15/16/17（历史残留），
+本批阶段 A 的 RFQ-1-18…21 **已不再出现** → 与 §1 Step 4 的 POST-CHECK（本批 0 残留）相互印证。
+图片如实保留真实列表内容，**未为填充画面而造数据**。
+
+**累计阶段 B 已关闭 gap：2 个**（workflow `tracking`、srm `stable-mobile-flow`）+ 1 个模糊 gap 精确化（system-management）。
+strict 模块失败数仍为 8（因为每个模块需**全部** required_flows 达标才能转 covered，关闭单个 gap 不会降数）——与主交接 C1 一致。
+
 ## 4. 阶段 C：四语言文档预审与修订
 
 ### 4.1 队列实测

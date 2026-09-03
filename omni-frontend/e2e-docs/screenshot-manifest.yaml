@@ -3076,3 +3076,131 @@ screenshots:
     test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
     version: 0.6.1
     last_success_at: 2026-09-03T17:34:00+08:00
+  - id: srm-portal-quotation-mobile-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 390, height: 844 }
+    fixture: isolated-fresh-docs-v1
+    action: 在 390×844 移动视口以 supplier1 打开供应商门户并切换到「询价报价」页签
+    expected: 在 390×844 下页签与「刷新询价」操作仍可见可用，列表按响应式收敛列且每行操作可点，无遮挡或溢出
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-mobile.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:42+08:00
+  - id: srm-portal-quotation-mobile-en-US
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 390, height: 844 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the supplier portal as supplier1 at the 390×844 mobile viewport and switch to the RFQ Quotations tab
+    expected: At 390×844 the tab and the Refresh RFQs action stay visible and enabled, and the list collapses columns while every row action remains clickable without overflow
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-mobile.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:44+08:00
+  - id: srm-portal-quotation-mobile-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 390, height: 844 }
+    fixture: isolated-fresh-docs-v1
+    action: 390×844 のモバイルビューポートで supplier1 としてサプライヤーポータルを開き「見積回答」タブに切り替える
+    expected: 390×844 でもタブと「見積依頼を更新」操作が表示され有効なまま、一覧は列を縮約しつつ各行の操作がクリック可能で遮蔽やはみ出しが無い
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-mobile.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:44+08:00
+  - id: srm-portal-quotation-mobile-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 390, height: 844 }
+    fixture: isolated-fresh-docs-v1
+    action: 390×844 모바일 뷰포트에서 supplier1로 공급업체 포털을 열고 「견적 응답」 탭으로 전환
+    expected: 390×844 에서도 탭과 「견적 요청 새로고침」 작업이 표시되고 활성화된 채 유지되며, 목록은 열을 축소하면서도 각 행 작업이 클릭 가능하고 가려짐이나 넘침이 없음
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-mobile.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:45+08:00
+  - id: srm-portal-quotation-tablet-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1024, height: 768 }
+    fixture: isolated-fresh-docs-v1
+    action: 在 1024×768 平板视口以 supplier1 打开供应商门户并切换到「询价报价」页签
+    expected: 在 1024×768 下页签与「刷新询价」操作仍可见可用，列表按响应式收敛列且每行操作可点，无遮挡或溢出
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-tablet.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:46+08:00
+  - id: srm-portal-quotation-tablet-en-US
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1024, height: 768 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the supplier portal as supplier1 at the 1024×768 tablet viewport and switch to the RFQ Quotations tab
+    expected: At 1024×768 the tab and the Refresh RFQs action stay visible and enabled, and the list collapses columns while every row action remains clickable without overflow
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-tablet.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:46+08:00
+  - id: srm-portal-quotation-tablet-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1024, height: 768 }
+    fixture: isolated-fresh-docs-v1
+    action: 1024×768 のタブレットビューポートで supplier1 としてサプライヤーポータルを開き「見積回答」タブに切り替える
+    expected: 1024×768 でもタブと「見積依頼を更新」操作が表示され有効なまま、一覧は列を縮約しつつ各行の操作がクリック可能で遮蔽やはみ出しが無い
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-tablet.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:47+08:00
+  - id: srm-portal-quotation-tablet-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1024, height: 768 }
+    fixture: isolated-fresh-docs-v1
+    action: 1024×768 태블릿 뷰포트에서 supplier1로 공급업체 포털을 열고 「견적 응답」 탭으로 전환
+    expected: 1024×768 에서도 탭과 「견적 요청 새로고침」 작업이 표시되고 활성화된 채 유지되며, 목록은 열을 축소하면서도 각 행 작업이 클릭 가능하고 가려짐이나 넘침이 없음
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-tablet.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:48+08:00

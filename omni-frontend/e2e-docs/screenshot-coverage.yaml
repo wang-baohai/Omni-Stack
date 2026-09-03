@@ -142,7 +142,17 @@ modules:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-risks.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-risk-config.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-invites.png
-    gaps: [admission-lifecycle, stable-mobile-flow, detail-and-action-states]
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-portal-quotation-mobile.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-portal-quotation-tablet.png
+    special_viewports:
+      - { width: 390, height: 844, flow: supplier-quotation }
+      - { width: 1024, height: 768, flow: supplier-quotation }
+    gaps: [admission-lifecycle, detail-and-action-states]
+    # stable-mobile-flow 已关闭：供应商门户在 390×844 与 1024×768 下四语言均稳定可用
+    # （页签可见可点、「刷新询价」与逐行报价操作未被窄屏挤出或遮挡、列表按响应式收敛列），
+    # 由 srm-portal-responsive.flows.spec.ts 实跑 8 passed / 0 skipped 证明；只读采集，无数据写入与收尾。
+    # admission-lifecycle 仍需完整 Portal 注册 Saga（inviteToken + requestId + 准入审批 + 激活）；
+    # detail-and-action-states 仍需详情弹层与操作结果（含写入与自建自清理）。
   - id: procurement
     status: partial
     required_flows: [material, approval-rule-match, requisition-approval, rfq, quotation-receipt, comparison, purchase-order, goods-receipt, overview]
