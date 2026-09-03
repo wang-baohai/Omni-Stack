@@ -3204,3 +3204,195 @@ screenshots:
     test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
     version: 0.6.1
     last_success_at: 2026-09-03T18:00:48+08:00
+  - id: system-dictionary-create-form-zh-CN
+    module: system-management
+    flow: dictionary
+    step: create-or-edit
+    locale: zh-CN
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在字典管理页点击「新建类型」打开新建对话框，四个字段全部留空
+    expected: 对话框按当前语言渲染标题与四个字段标签（类型编码/类型名称/备注/排序），字段为空且尚未提交
+    masks: []
+    image: docs/images/zh-CN/system-dictionary-create-form.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:38+08:00
+  - id: system-dictionary-create-form-en-US
+    module: system-management
+    flow: dictionary
+    step: create-or-edit
+    locale: en-US
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the create dialog from the Dictionary page via Create Type, leaving all four fields empty
+    expected: The dialog renders its title and the four field labels in the current language, all fields empty and nothing submitted
+    masks: []
+    image: docs/images/en-US/system-dictionary-create-form.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:39+08:00
+  - id: system-dictionary-create-form-ja-JP
+    module: system-management
+    flow: dictionary
+    step: create-or-edit
+    locale: ja-JP
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 辞書管理ページで新規作成ボタン（表示ラベルは Create Type）をクリックし、四項目を空のままダイアログを開く
+    expected: ダイアログが現在の言語でタイトルと四つの項目ラベルを描画し、全項目が空で未送信の状態
+    masks: []
+    image: docs/images/ja-JP/system-dictionary-create-form.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:41+08:00
+  - id: system-dictionary-create-form-ko-KR
+    module: system-management
+    flow: dictionary
+    step: create-or-edit
+    locale: ko-KR
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 사전 관리 페이지에서 생성 버튼(표시 라벨은 Create Type)을 클릭해 네 항목을 비운 채 대화상자를 열기
+    expected: 대화상자가 현재 언어로 제목과 네 개 항목 라벨을 렌더링하며 모든 항목이 비어 있고 미제출 상태
+    masks: []
+    image: docs/images/ko-KR/system-dictionary-create-form.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:43+08:00
+  - id: system-dictionary-create-validation-zh-CN
+    module: system-management
+    flow: dictionary
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在空表单上点击「确认」提交，触发后端必填校验
+    expected: 出现红色错误提示且对话框保持打开，未创建任何数据；实测提示为后端 @NotBlank 的中文硬编码消息（四语言一致），已登记为 i18n PRODUCT_DEFECT，图片如实保留不美化
+    masks: []
+    image: docs/images/zh-CN/system-dictionary-create-validation.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:38+08:00
+  - id: system-dictionary-create-validation-en-US
+    module: system-management
+    flow: dictionary
+    step: failure-or-forbidden
+    locale: en-US
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Submit the empty form via Confirm to trigger backend required-field validation
+    expected: A red error toast appears and the dialog stays open with no data created; the measured text is the backend @NotBlank Chinese hardcoded message (identical across all four locales), registered as an i18n PRODUCT_DEFECT and kept as-is
+    masks: []
+    image: docs/images/en-US/system-dictionary-create-validation.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:40+08:00
+  - id: system-dictionary-create-validation-ja-JP
+    module: system-management
+    flow: dictionary
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 空のフォームで確認ボタンを押してバックエンドの必須項目検証を発生させる
+    expected: 赤いエラー表示が出てダイアログは開いたまま、データは作成されない；実測文言はバックエンド @NotBlank の中国語ハードコードメッセージ（四言語とも同一）で、i18n PRODUCT_DEFECT として登録済み、画像はそのまま保持
+    masks: []
+    image: docs/images/ja-JP/system-dictionary-create-validation.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:41+08:00
+  - id: system-dictionary-create-validation-ko-KR
+    module: system-management
+    flow: dictionary
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 빈 폼에서 확인 버튼을 눌러 백엔드 필수 항목 검증을 발생시키기
+    expected: 빨간 오류 토스트가 나타나고 대화상자는 열린 채 유지되며 데이터가 생성되지 않음; 실측 문구는 백엔드 @NotBlank 의 중국어 하드코딩 메시지(네 언어 모두 동일)로 i18n PRODUCT_DEFECT 로 등록했으며 이미지를 있는 그대로 보존
+    masks: []
+    image: docs/images/ko-KR/system-dictionary-create-validation.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:43+08:00
+  - id: system-dictionary-create-success-zh-CN
+    module: system-management
+    flow: dictionary
+    step: key-action-success
+    locale: zh-CN
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 填入本轮唯一类型编码与名称后提交，并按该编码检索列表
+    expected: 对话框关闭，按唯一类型编码检索后列表出现本轮新建行并显示其名称；afterAll 经正式 DELETE 契约清理，实测残留 0 且字典类型总数回到基线 17
+    masks: []
+    image: docs/images/zh-CN/system-dictionary-create-success.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:39+08:00
+  - id: system-dictionary-create-success-en-US
+    module: system-management
+    flow: dictionary
+    step: key-action-success
+    locale: en-US
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Fill this run's unique type code and name, submit, then search the list by that code
+    expected: The dialog closes and searching by the unique type code shows this run's new row with its name; afterAll cleans up through the official DELETE contract, with measured residue 0 and the dict type total back to the baseline 17
+    masks: []
+    image: docs/images/en-US/system-dictionary-create-success.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:40+08:00
+  - id: system-dictionary-create-success-ja-JP
+    module: system-management
+    flow: dictionary
+    step: key-action-success
+    locale: ja-JP
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 本実行の一意なタイプコードと名称を入力して送信し、そのコードで一覧を検索
+    expected: ダイアログが閉じ、一意なタイプコードで検索すると本実行の新規行が名称とともに表示；afterAll が正式 DELETE 契約で清理し、実測残留 0 かつ辞書タイプ総数がベースライン 17 に復帰
+    masks: []
+    image: docs/images/ja-JP/system-dictionary-create-success.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:42+08:00
+  - id: system-dictionary-create-success-ko-KR
+    module: system-management
+    flow: dictionary
+    step: key-action-success
+    locale: ko-KR
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 이번 실행의 고유 타입 코드와 이름을 입력해 제출하고 해당 코드로 목록을 검색
+    expected: 대화상자가 닫히고 고유 타입 코드로 검색하면 이번 실행의 신규 행이 이름과 함께 표시; afterAll 이 공식 DELETE 계약으로 정리해 실측 잔여 0 및 사전 타입 총수가 기준선 17 로 복귀
+    masks: []
+    image: docs/images/ko-KR/system-dictionary-create-success.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:43+08:00

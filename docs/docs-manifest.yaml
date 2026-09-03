@@ -325,7 +325,7 @@ documents:
     module: security
     owner: operations
     source: docs/guides/system-security-audit.md
-    source_sha256: cd346252b455c4b5c324c6af97ff2249fa4af5f70016e564dede4d365e2f57d1
+    source_sha256: 8307115fbd85da0fd04c053f3d288c2f8446a0870cec851dfae20b518c625493
     dependencies: [oauth2, xss, audit, mq, observability]
     translations:
       en-US: { path: docs/guides/system-security-audit.en.md, status: present-unverified, reviewed_at: null }

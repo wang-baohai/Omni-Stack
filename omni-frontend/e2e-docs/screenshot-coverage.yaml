@@ -48,10 +48,23 @@ modules:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-audit-log.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-auth-records.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-xss-config.png
-    gaps: [config-page-absent, login-record-page-absent, detail-and-action-states, failure-states]
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-dictionary-create-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-dictionary-create-validation.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-dictionary-create-success.png
+    gaps: [config-page-absent, login-record-page-absent]
     # most-management-flows 已关闭：14 个 required_flows 中 12 个已有四语言正式图
     # （tenant/organization/user/role/permission/dictionary/oauth2/online-user/audit/xss 直接采集，
     #  menu 由权限管理的 MENU 类型节点承载、data-scope 由角色管理承载）。
+    # detail-and-action-states 已关闭：字典类型「新建对话框 → 必填校验失败 → 创建成功」三态四语言正式图
+    # （system-dictionary.flows.spec.ts，4 passed / 0 skipped；自建唯一 typeCode，afterAll 走正式 DELETE 契约，
+    #  实测残留 0、sys_dict_type 回到基线 17、base-dictionary-catalog 断言复现仍为 101）。
+    # failure-states 已关闭：业务必填校验失败四语言图（同上），而 403 权限拒绝由 permissions-exceptions 模块的
+    # employee-forbidden-403 四语言图闭环（与 authentication 模块同一分工约定）。
+    # PRODUCT_DEFECT（已登记，本批不修产品）：views/base/dict/index.vue 未定义任何 form rules，
+    # 必填校验完全依赖后端 CreateDictTypeRequest 的 @NotBlank(message="字典类型…不能为空") 中文硬编码，
+    # 因此四语言 UI 下错误提示均为中文；且 ja-JP/ko-KR 的 dict.createType/typeCode/typeName/remark
+    # 语言包取值本身即英文（ui:i18n:parity 四语言各 2319 键 0 缺失、ui:i18n:check 0/0 均通过，
+    # 属译文完整度而非硬编码缺陷）。截图如实保留真实文案，未 mock、未美化、未改产品。
     # config-page-absent / login-record-page-absent：实测 sys_permission 中无 system:config*/参数配置
     # 与登录记录相关权限，前端也无对应 view 目录，属产品未提供页面；按约束不删 required_flow、不自行 exempt。
     # online-users 与部分页面在当前环境为空状态，已在 manifest expected 中如实声明。

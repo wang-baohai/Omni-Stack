@@ -378,6 +378,50 @@ procurement 请购/询价（当前仅存历史 E2ESQ 测试残留行，不宜作
 **累计阶段 B 已关闭 gap：2 个**（workflow `tracking`、srm `stable-mobile-flow`）+ 1 个模糊 gap 精确化（system-management）。
 strict 模块失败数仍为 8（因为每个模块需**全部** required_flows 达标才能转 covered，关闭单个 gap 不会降数）——与主交接 C1 一致。
 
+### 3.8 阶段 B 第三批实际执行结果（system-management 两个状态 gap 已关闭）
+
+**先探测后编写**：用一次性临时探测用例（用后已删除，未提交）实测字典页对话框结构，
+并以**列表总数前后对比自证未写入**（四语言均 `noDataCreated=true`，before=17 / after=17，因为只提交空表单）。
+
+**新增用例**：`omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts`（3 态 × 4 语言 = 12 图，每语言 1 用例）。
+参照 crm/scheduling 已 covered 模块的既有范式：新建对话框 → 必填校验失败 → 创建成功。
+
+| 项 | 实测结果 |
+| --- | --- |
+| 静态检查 | `eslint --max-warnings 0` exit 0；`tsc --noEmit --strict` exit 0；`playwright --list` = **Total: 4 tests** |
+| 真实运行 | **4 passed（7.3s）/ 0 failed / 0 skipped**，`PLAYWRIGHT_EXIT=0`，`E2E_MUTATIONS=true`，TTL 门禁 `1200L` 通过 |
+| 图片 | **12/12** 存在，133,349–167,230 bytes，mtime 18:22:38–18:22:43 |
+| 图片质检 | `ja-JP/system-dictionary-create-validation` 已目检：日文 UI（並び順/キャンセル/確認）+ 红色错误提示 + 对话框保持打开 + 无敏感信息 |
+| 写入防护 | `E2E_MUTATIONS` 未开则整组 skip 且写入抛错；创建意图产生即登记（typeCode 含 runStamp） |
+| 清理 | afterAll 走正式 `DELETE /api/base/dict/type/{id}`：`registered=4 deleted=4 residual=0`；且用例内对残留做 `expect(...).toHaveLength(0)` 硬断言（字典为租户共享参考数据，不得静默留残） |
+| 独立 DB 复核 | `sys_dict_type` = **17**（回到基线）；`E2EDICT-%` 残留 = **0**（type 与 data 两表）；`base-dictionary-catalog` 断言复现 = **101** = expectedRows（未被本批污染） |
+| 凭证 | `tokens-20260903-182228.json` **已销毁**；目录回到 12 个更早会话文件 |
+| manifest | **+12 条 → 共 214 条**，零重复、零缺字段、图片/用例文件全在 |
+| coverage | system-management +3 assets；**gaps 4→2**，移除 `detail-and-action-states` 与 `failure-states` |
+| 指南 | `docs/guides/system-security-audit.md` +§9（三态四语言表 + PRODUCT_DEFECT 登记）；摘要 → `8307115fbd85…` |
+| strict | exit 1、**恰好 8 个模块覆盖失败**、**非覆盖类错误 0** |
+| links / sensitive | 均 exit 0；全量复核 **38 份源文档、0 摘要不匹配** |
+
+**gap 关闭依据**：
+
+- `detail-and-action-states`：三态齐备（create-or-edit / failure-or-forbidden / key-action-success）× 四语言，与 CRM 已 covered 模块的定义一致。
+- `failure-states`：业务必填校验失败四语言图（本批）+ 403 权限拒绝由 `permissions-exceptions` 模块的 `employee-forbidden-403` 四语言图闭环（与 authentication 模块同一分工约定，已在 coverage 注释中写明依据）。
+- system-management 仅剩 `config-page-absent` 与 `login-record-page-absent` 两个 **产品未提供页面**的 gap（实测无权限码、无 view 目录），因此仍为 `partial`，未擅自 exempt、未删 required_flow。
+
+**新登记 PRODUCT_DEFECT（i18n，本批不修产品）**：
+
+1. `views/base/dict/index.vue` **未定义任何 form rules** → 前端不做必填校验（`.el-form-item__error` 实测为空），错误完全依赖后端 400。
+2. `CreateDictTypeRequest` 的 `@NotBlank(message = "字典类型编码不能为空")` 为**中文硬编码** → 四语言 UI 下错误提示均为中文（已在 ja-JP 图中目检确认）。
+3. ja-JP/ko-KR 的 `dict.createType`/`typeCode`/`typeName`/`remark` 语言包**取值本身即英文**（仅「排序/並び順/정렬」已译）；
+   因 `ui:i18n:parity`（2319 键、0 缺失）与 `ui:i18n:check`（0/0）均通过，属**译文完整度**问题，现有工具无法检出「值语言错误」。
+
+处置：截图**如实保留真实文案**（未 mock、未美化、未隐藏），已在 coverage 注释、指南 §9 与 manifest `expected` 三处同步登记；
+修复需产品侧决策（后端消息国际化方案 + 补齐 ja/ko 译文），**所需输入：授权修改后端校验消息机制与语言包**。
+
+**累计阶段 B 已关闭 gap：4 个** —— workflow `tracking`、srm `stable-mobile-flow`、system-management `detail-and-action-states`、system-management `failure-states`；
+另将 system-management `most-management-flows` 精确化为两个产品缺失页面 gap。
+strict 模块失败数仍为 8（需全部 required_flows 达标才能转 covered）——与主交接 C1 一致，未降数、未改检查器。
+
 ## 4. 阶段 C：四语言文档预审与修订
 
 ### 4.1 队列实测

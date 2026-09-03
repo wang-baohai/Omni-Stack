@@ -92,6 +92,33 @@ Gateway 对所有响应添加：
 | XSS 防护（xss） | ![XSS 防护（简体中文）](../images/zh-CN/system-xss-config.png) | ![XSS 防护（英文）](../images/en-US/system-xss-config.png) | ![XSS 防护（日文）](../images/ja-JP/system-xss-config.png) | ![XSS 防护（韩文）](../images/ko-KR/system-xss-config.png) |
 | 操作日志（operation-log） | ![操作日志（简体中文）](../images/zh-CN/system-operation-log.png) | ![操作日志（英文）](../images/en-US/system-operation-log.png) | ![操作日志（日文）](../images/ja-JP/system-operation-log.png) | ![操作日志（韩文）](../images/ko-KR/system-operation-log.png) |
 
+## 9. 字典类型新建三态截图（四语言）
+
+由 `omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts` 在真实运行栈上生成，对应覆盖清单的 `detail-and-action-states` 与 `failure-states`。
+
+- 前置条件：本地 Compose 全栈运行，`omni-base` 健康；字典类型表已有真实基线数据（采集前 17 条）。
+- 操作者：`admin`（需 `dict:type:list`/`dict:type:create`/`dict:type:delete` 权限）。
+- 写入开关：本组**会创建数据**，因此仅在显式设置 `E2E_MUTATIONS=true` 时执行；未设置时整组跳过且任何写入调用直接抛错。
+- 数据归属与收尾：每语言自建唯一 `typeCode`（含本轮 `runStamp`），创建成功即登记；afterAll 走正式 `DELETE /api/base/dict/type/{id}` 契约逐条清理并核对响应与列表回查。
+- 实测收尾结果：4 passed / 0 skipped；`registered=4 deleted=4 residual=0`；`sys_dict_type` 回到基线 **17** 行，`E2EDICT-%` 残留 **0**，`base-dictionary-catalog` 种子断言复现仍为 **101** 行（未被本批污染）。
+
+| 状态 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 新建对话框（create-or-edit） | ![字典新建对话框（简体中文）](../images/zh-CN/system-dictionary-create-form.png) | ![字典新建对话框（英文）](../images/en-US/system-dictionary-create-form.png) | ![字典新建对话框（日文）](../images/ja-JP/system-dictionary-create-form.png) | ![字典新建对话框（韩文）](../images/ko-KR/system-dictionary-create-form.png) |
+| 必填校验失败（failure-or-forbidden） | ![字典必填校验失败（简体中文）](../images/zh-CN/system-dictionary-create-validation.png) | ![字典必填校验失败（英文）](../images/en-US/system-dictionary-create-validation.png) | ![字典必填校验失败（日文）](../images/ja-JP/system-dictionary-create-validation.png) | ![字典必填校验失败（韩文）](../images/ko-KR/system-dictionary-create-validation.png) |
+| 创建成功（key-action-success） | ![字典创建成功（简体中文）](../images/zh-CN/system-dictionary-create-success.png) | ![字典创建成功（英文）](../images/en-US/system-dictionary-create-success.png) | ![字典创建成功（日文）](../images/ja-JP/system-dictionary-create-success.png) | ![字典创建成功（韩文）](../images/ko-KR/system-dictionary-create-success.png) |
+
+### 已登记的 i18n PRODUCT_DEFECT（不在本批修复）
+
+校验失败图中，**四语言 UI 下的错误提示均为中文**（如 `typeCode: 字典类型编码不能为空`）。实测根因：
+
+1. `views/base/dict/index.vue` 未定义任何 `form rules`，前端不做必填校验（`.el-form-item__error` 为空），错误完全依赖后端 400 响应；
+2. `CreateDictTypeRequest` 的 `@NotBlank(message = "字典类型编码不能为空")` 为**中文硬编码**，未接后端消息国际化；
+3. 另：ja-JP/ko-KR 下对话框标题与 `Type Code`/`Type Name`/`Remark` 标签渲染为英文，因为语言包对应键的**取值本身就是英文**（仅「排序/並び順/정렬」已译）。
+   `npm run ui:i18n:parity`（四语言各 2319 键、0 缺失）与 `npm run ui:i18n:check`（0/0 项）均通过，因此属**译文完整度**问题而非硬编码缺陷。
+
+上述截图**如实保留真实文案**，未 mock、未美化、未隐藏，也未在本批修改产品代码；修复需产品侧决策（后端消息国际化方案 + 补齐 ja/ko 译文）。
+
 尚未覆盖的两个 required flow：`config`（参数配置）与 `login-record`（登录记录）。实测 `sys_permission` 中无对应权限码，前端也无对应 view 目录，属产品当前未提供页面；按约束**不删除 required flow、不自行标记 exempt**，在覆盖清单中保留为显式 gap。
 
 更多信息见 [可靠消息](../mq-reliability.md)、[可观测性](../observability.md) 和 [Docker 部署](../docker-deployment.md)。
