@@ -316,6 +316,31 @@ assertions:
     expectedRows: 14
     expectedSha256: "d1aebd181fed2e45958a31bdfeee88016492b0f16b20f122f02f7598050cac8f"
 
+  - id: procurement-admin-approval-candidate
+    module: procurement
+    database: omni_auth
+    # 采购审批候选人可用性：默认租户 admin 必须持有 PROCUREMENT_MANAGER 角色及 SAME_UNIT 作用域，
+    # 否则 procurement-approval 模型的 UserTask 候选解析为空，请购提交会在流程启动阶段失败。
+    # 数据由 forward-only changeSet auth-0005-admin-procurement-approval-candidate 保证。
+    query: >-
+      SELECT CONCAT_WS('|', 'role', role.role_code) AS seed_key
+      FROM sys_user_role user_role
+      JOIN sys_user account ON account.id = user_role.user_id
+      JOIN sys_role role ON role.id = user_role.role_id
+      WHERE account.username = 'admin'
+      AND account.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND role.role_code = 'PROCUREMENT_MANAGER'
+      UNION ALL SELECT CONCAT_WS('|', 'scope', role.role_code, scope.scope_mode)
+      FROM sys_user_role_scope scope
+      JOIN sys_user account ON account.id = scope.user_id
+      JOIN sys_role role ON role.id = scope.role_id
+      WHERE account.username = 'admin'
+      AND account.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND role.role_code = 'PROCUREMENT_MANAGER'
+      AND scope.status = 1
+    expectedRows: 2
+    expectedSha256: "97efdc606efa50789e6e3fea36c4ba77f770b74a2ce0378f3a268e6eb7597ada"
+
   - id: asset-role-catalog
     module: asset
     provisioning:

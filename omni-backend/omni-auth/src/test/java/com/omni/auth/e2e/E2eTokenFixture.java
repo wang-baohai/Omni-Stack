@@ -33,8 +33,8 @@ import com.omni.auth.service.impl.JwtTokenServiceImpl;
  */
 public final class E2eTokenFixture {
 
-    /** 短期测试令牌有效期，单位秒。 */
-    private static final long TOKEN_TTL_SECONDS = 600L;
+    /** 短期测试令牌有效期，单位秒。覆盖四语言串行长链 fixture（RFQ 链约 8-10 分钟）。 */
+    private static final long TOKEN_TTL_SECONDS = 1200L;
     /** 管理员角色。 */
     private static final String SUPER_ADMIN_ROLE = "SUPER_ADMIN";
     /** 员工角色。 */

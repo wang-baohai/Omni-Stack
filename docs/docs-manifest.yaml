@@ -104,7 +104,7 @@ documents:
     module: srm
     owner: srm
     source: docs/srm.md
-    source_sha256: 897f5a1bab964aec6991a93231c7b404c788ed73d028f7a867bfb5529a7e9331
+    source_sha256: aa1a1e2a96a5f37686f12c03b226224e8ff5d3eea69877b7bbbf14b0b12f1d8a
     dependencies: [api, permissions, portal, saga, screenshots]
     translations:
       en-US: { path: docs/srm.en.md, status: present-unverified, reviewed_at: null }

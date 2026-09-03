@@ -16,6 +16,7 @@ import com.omni.procurement.mapper.ProcRfqSupplierMapper;
 import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.QuotationSubmittedService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuotationSubmittedServiceImpl implements QuotationSubmittedService {
 
     private static final String EVENT_TYPE = "srm.quotation.submitted.v1";
@@ -157,8 +159,24 @@ public class QuotationSubmittedServiceImpl implements QuotationSubmittedService 
                 || !event.getProducer().equals(inbox.getSourceService())
                 || !event.getAggregateType().equals(inbox.getAggregateType())
                 || !String.valueOf(event.getAggregateId()).equals(inbox.getAggregateId())
-                || !toJson(event).equals(inbox.getPayload())) {
+                || !jsonEquals(toJson(event), inbox.getPayload())) {
             throw new BusinessException(409, "同一报价事件 ID 绑定了不同业务意图");
+        }
+    }
+
+    /**
+     * JSON 语义等价对比。MySQL JSON 列读回时会对键重排序并插入空白，
+     * 直接字符串对比会把同一事件误判为不同意图，必须按 JsonNode 语义比较。
+     *
+     * @param left  当前事件序列化结果
+     * @param right Inbox 读回的载荷
+     * @return 语义等价返回 true
+     */
+    private boolean jsonEquals(String left, String right) {
+        try {
+            return objectMapper.readTree(left).equals(objectMapper.readTree(right));
+        } catch (JsonProcessingException exception) {
+            throw new BusinessException(500, "报价事件载荷解析失败");
         }
     }
 

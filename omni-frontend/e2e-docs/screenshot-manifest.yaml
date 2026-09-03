@@ -1732,3 +1732,195 @@ screenshots:
     test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
     version: 0.6.1
     last_success_at: 2026-09-02T10:50:00+08:00
+  - id: srm-portal-quotation-invitations-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: list
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 supplier1 打开供应商门户并切换到「询价报价」页签
+    expected: 本轮唯一询价单显示 INVITED 与「未报价」，操作列为「提交报价」
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-invitations.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:01+08:00
+  - id: srm-portal-quotation-form-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: create-or-edit
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 点击「提交报价」打开报价对话框，填入单价 123.45 与报价有效期
+    expected: 对话框展示询价行快照（数量 2、币种 CNY、状态 SENT），单价与有效期已填入
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-form.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:02+08:00
+  - id: srm-portal-quotation-submitted-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: key-action-success
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在对话框提交真实报价后刷新询价列表
+    expected: 提示「报价已提交」且对话框关闭，邀请状态经 MQ 事件流转为 QUOTED、当前报价 CNY 246.9
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-submitted.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:18+08:00
+  - id: srm-portal-quotation-invitations-en-US
+    module: srm
+    flow: supplier-quotation
+    step: list
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the supplier portal as supplier1 and switch to the RFQ Quotations tab
+    expected: The single RFQ of this run shows INVITED and Not Quoted with a Submit Quotation action
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-invitations.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:21+08:00
+  - id: srm-portal-quotation-form-en-US
+    module: srm
+    flow: supplier-quotation
+    step: create-or-edit
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Submit Quotation to open the dialog, then enter unit price 123.45 and the validity date
+    expected: The dialog shows the RFQ line snapshot (quantity 2, currency CNY, status SENT) with price and validity filled
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-form.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:22+08:00
+  - id: srm-portal-quotation-submitted-en-US
+    module: srm
+    flow: supplier-quotation
+    step: key-action-success
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Submit the real quotation from the dialog, then refresh the RFQ list
+    expected: The Quotation submitted toast appears, the dialog closes, and the invitation turns QUOTED at CNY 246.9
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-submitted.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:38+08:00
+  - id: srm-portal-quotation-invitations-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: list
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: supplier1 としてサプライヤーポータルを開き「見積回答」タブに切り替える
+    expected: 本実行の唯一の見積依頼が INVITED と「未見積」で表示され、操作列は「見積を提出」
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-invitations.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:41+08:00
+  - id: srm-portal-quotation-form-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: create-or-edit
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 「見積を提出」をクリックしてダイアログを開き、単価 123.45 と見積有効期を入力
+    expected: ダイアログに見積行スナップショット（数量 2、通貨 CNY、状態 SENT）が表示され、単価と有効期が入力済み
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-form.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:42+08:00
+  - id: srm-portal-quotation-submitted-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: key-action-success
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: ダイアログで実際の見積を送信してから見積依頼一覧を更新
+    expected: 「見積を提出しました」が表示されてダイアログが閉じ、招待状態が MQ 事件経由で QUOTED、現在見積 CNY 246.9
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-submitted.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:58+08:00
+  - id: srm-portal-quotation-invitations-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: list
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: supplier1로 공급업체 포털을 열고 「견적 응답」 탭으로 전환
+    expected: 이번 실행의 단일 견적 요청이 INVITED와 「미견적」으로 표시되고 작업 열은 「견적 제출」
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-invitations.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:08:00+08:00
+  - id: srm-portal-quotation-form-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: create-or-edit
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 「견적 제출」을 클릭해 대화상자를 열고 단가 123.45와 견적 유효기간을 입력
+    expected: 대화상자에 견적 행 스냅샷(수량 2, 통화 CNY, 상태 SENT)이 표시되고 단가와 유효기간이 입력됨
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-form.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:08:01+08:00
+  - id: srm-portal-quotation-submitted-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: key-action-success
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 대화상자에서 실제 견적을 제출한 뒤 견적 요청 목록을 새로고침
+    expected: 「견적이 제출되었습니다」가 표시되고 대화상자가 닫히며 초대 상태가 MQ 이벤트로 QUOTED, 현재 견적 CNY 246.9
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-submitted.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:08:17+08:00

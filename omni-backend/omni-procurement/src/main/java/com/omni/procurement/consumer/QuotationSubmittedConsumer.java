@@ -7,6 +7,7 @@ import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.common.service.observability.InboxMetrics;
 import com.omni.procurement.service.QuotationSubmittedService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,6 +21,7 @@ import java.util.function.Consumer;
  */
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class QuotationSubmittedConsumer {
 
     private static final String EVENT_TYPE = "srm.quotation.submitted.v1";
@@ -35,6 +37,9 @@ public class QuotationSubmittedConsumer {
     @Bean(name = "quotationSubmittedFunction")
     public Consumer<RfqContracts.QuotationSubmittedEvent> quotationSubmittedFunction() {
         return event -> {
+            log.info("收到 SRM 报价提交事件: eventId={}, aggregateId={}",
+                    event == null ? null : event.getEventId(),
+                    event == null ? null : event.getAggregateId());
             if (event == null || !EVENT_TYPE.equals(event.getEventType())
                     || !AGGREGATE_TYPE.equals(event.getAggregateType())) {
                 return;
@@ -51,6 +56,8 @@ public class QuotationSubmittedConsumer {
                 InboxMetrics.record("quotation-submitted", "success");
             } catch (RuntimeException exception) {
                 InboxMetrics.record("quotation-submitted", "retry");
+                log.error("SRM 报价提交事件处理失败: eventId={}, 异常类型={}, 异常信息={}",
+                        event.getEventId(), exception.getClass().getName(), exception.getMessage());
                 throw exception;
             } finally {
                 ServiceDataScopeContext.clear();

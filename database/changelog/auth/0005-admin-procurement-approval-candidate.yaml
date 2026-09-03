@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: auth-0005-admin-procurement-approval-candidate
+      author: omni-stack
+      labels: database:auth,adoption-upgrade
+      comment: 为默认租户 admin 补齐采购经理角色及候选作用域，使 procurement-approval 模型可解析审批候选人
+      preConditions:
+        - onFail: MARK_RAN
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: omni_auth
+            sql: SELECT DATABASE()
+        - tableExists:
+            tableName: sys_user_role_scope
+        # 裁剪掉 procurement 模块的 preset 不含 PROCUREMENT_MANAGER 角色，此时标记为已执行而非失败。
+        - sqlCheck:
+            expectedResult: 1
+            sql: >-
+              SELECT COUNT(*) FROM sys_role role
+              JOIN sys_user account ON account.tenant_id = role.tenant_id
+              WHERE account.username = 'admin'
+              AND account.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+              AND role.role_code = 'PROCUREMENT_MANAGER' AND role.status = 1
+      changes:
+        # forward-only 数据修复：0003 引导种子已执行且不可改摘要，故本变更集独立承担增量，
+        # 新建库按 0003→0005 顺序收敛，已迁移库仅执行本变更集，两者终态一致。
+        # uk_user_role(user_id, role_id) 与 uk_role_scope(tenant_id, user_id, role_id, unit_id)
+        # 保证 INSERT IGNORE 对已手工修复的运行库幂等，不产生重复行。
+        - sql:
+            sql: |
+              INSERT IGNORE INTO sys_user_role (user_id, role_id)
+              SELECT account.id, role.id
+              FROM sys_user account
+              JOIN sys_role role ON role.tenant_id = account.tenant_id
+              WHERE account.username = 'admin'
+                AND account.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+                AND role.role_code = 'PROCUREMENT_MANAGER';
+
+              INSERT IGNORE INTO sys_user_role_scope (tenant_id, user_id, role_id, unit_id, scope_mode, status)
+              SELECT account.tenant_id, account.id, role.id, user_unit.unit_id, 'SAME_UNIT', 1
+              FROM sys_user account
+              JOIN sys_role role ON role.tenant_id = account.tenant_id
+              JOIN sys_user_unit user_unit ON user_unit.user_id = account.id AND user_unit.is_primary = 1
+              WHERE account.username = 'admin'
+                AND account.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+                AND role.role_code = 'PROCUREMENT_MANAGER';
+      rollback:
+        - sql:
+            sql: |
+              DELETE scope FROM sys_user_role_scope scope
+              JOIN sys_user account ON account.id = scope.user_id
+              JOIN sys_role role ON role.id = scope.role_id
+              WHERE account.username = 'admin'
+                AND account.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+                AND role.role_code = 'PROCUREMENT_MANAGER';
+
+              DELETE granted FROM sys_user_role granted
+              JOIN sys_user account ON account.id = granted.user_id
+              JOIN sys_role role ON role.id = granted.role_id
+              WHERE account.username = 'admin'
+                AND account.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+                AND role.role_code = 'PROCUREMENT_MANAGER';

@@ -111,7 +111,10 @@ modules:
       - docs/images/srm-portal-profile-deployed.png
       - docs/images/srm-portal-profile-fixed.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-overview.png
-    gaps: [admission-lifecycle, supplier-quotation, stable-mobile-flow, detail-and-action-states]
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-portal-quotation-invitations.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-portal-quotation-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-portal-quotation-submitted.png
+    gaps: [admission-lifecycle, stable-mobile-flow, detail-and-action-states]
   - id: procurement
     status: partial
     required_flows: [material, approval-rule-match, requisition-approval, rfq, quotation-receipt, comparison, purchase-order, goods-receipt, overview]

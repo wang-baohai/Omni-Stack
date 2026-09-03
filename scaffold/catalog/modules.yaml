@@ -229,7 +229,7 @@ modules:
       seedSourceIds: [procurement-bootstrap]
     tenantProvisioning: event
     permissionRoots: [procurement]
-    provisioningSeedIds: [procurement-role-catalog, procurement-permission-catalog, procurement-default-config]
+    provisioningSeedIds: [procurement-role-catalog, procurement-permission-catalog, procurement-default-config, procurement-admin-approval-candidate]
     nacosConfigs: [omni-procurement.yml]
     ports: [8106, 19906, 9906]
     mq:

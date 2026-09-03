@@ -445,6 +445,65 @@ omni-frontend/src/
 
 报价、明细、`srm_quotation_request` 与 `srm.quotation.submitted.v1` Outbox 必须在同一事务提交；同 requestId+requestHash 重试返回当前报价快照且不得重复发事件，同 requestId 的不同意图返回 409。首次请求使用创建哨兵 `version=0`，首版报价从 `version=1` 开始，避免并发创建意图把首版误当作可更新版本。事件 payload 至少包含 `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil`，Procurement 以 eventId Inbox 幂等消费。
 
+### 供应商报价流程截图（四语言）
+
+正式图片由文档专用 Playwright 用例 `omni-frontend/e2e-docs/flows/srm.flows.spec.ts` 在真实运行栈上生成，按语言分目录存放，不复用其他语言图片、不使用占位图或模拟成功响应。三个步骤共用同一份真实 fixture（同一询价单、同一次报价），因此三张图是同一业务链路的连续状态，而不是互不关联的页面快照。
+
+公共前置条件（三个步骤一致）：
+
+| 项 | 内容 |
+|---|---|
+| 环境 | 本地 Compose 全栈运行，前端 `127.0.0.1:3000`，经网关访问 `omni-procurement` 与 `omni-srm` |
+| 数据前置 | `admin` 经正式 API 创建唯一品类与物料 → 创建绑定 `procurement-approval` 流程模型的请购审批规则 → 创建请购并提交审批 → 审批通过后创建询价单并 `send`（DRAFT→SENT，邀请 `supplier1`） |
+| 操作者 | 数据构造为 `admin`（需 `SUPER_ADMIN` 与 `PROCUREMENT_MANAGER` 角色及 `SAME_UNIT` 候选作用域）；截图页面操作者为 `supplier1`（`SUPPLIER` 角色且已建立 `srm_supplier_portal_user` 关联） |
+| 令牌 | 由 `E2eTokenFixture` 在测试进程内签发短期 JWT（TTL 1200 秒），仅存在于进程内存与仓库外临时文件，收尾即销毁；不写入文档、日志或版本库 |
+| 写入开关 | 仅在显式设置 `E2E_MUTATIONS=true` 时执行；未设置时整组跳过，且任何写入调用都会直接抛错 |
+| 视口 | 1440×900，固定文档时钟并禁用动画，四语言完全一致 |
+
+共享本地环境的列表可能同时显示其他历史询价行；用例的断言与截图判定只针对本轮 `runStamp` 标识的唯一询价单，收尾也只清理本轮确认归属的数据。
+
+#### 步骤 1：邀请列表（未报价）
+
+- 操作者：`supplier1`
+- 操作：进入供应商门户，切换到「询价报价」页签
+- 预期状态：本轮唯一询价单出现在列表中，邀请状态为 `INVITED`，当前报价列显示「未报价」，操作列为「提交报价」
+
+| zh-CN | en-US |
+|---|---|
+| ![供应商门户询价报价邀请列表（简体中文）](images/zh-CN/srm-portal-quotation-invitations.png) | ![供应商门户询价报价邀请列表（英文）](images/en-US/srm-portal-quotation-invitations.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![供应商门户询价报价邀请列表（日文）](images/ja-JP/srm-portal-quotation-invitations.png) | ![供应商门户询价报价邀请列表（韩文）](images/ko-KR/srm-portal-quotation-invitations.png) |
+
+#### 步骤 2：报价表单（填写单价与有效期）
+
+- 操作者：`supplier1`
+- 操作：在目标行点击「提交报价」打开报价对话框，填入单价 `123.45`，并把报价有效期设为询价截止时间
+- 预期状态：对话框标题带上本轮询价单号，行快照显示物料编码与名称、数量 `2`、单位和币种 `CNY`，RFQ 状态为 `SENT`，单价与报价有效期均已填入
+
+| zh-CN | en-US |
+|---|---|
+| ![供应商门户报价表单（简体中文）](images/zh-CN/srm-portal-quotation-form.png) | ![供应商门户报价表单（英文）](images/en-US/srm-portal-quotation-form.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![供应商门户报价表单（日文）](images/ja-JP/srm-portal-quotation-form.png) | ![供应商门户报价表单（韩文）](images/ko-KR/srm-portal-quotation-form.png) |
+
+#### 步骤 3：提交成功（QUOTED 与报价总额）
+
+- 操作者：`supplier1`
+- 操作：在对话框点击「提交报价」提交真实报价，随后点击「刷新询价」
+- 预期状态：出现「报价已提交」提示且对话框关闭；邀请状态经 `srm.quotation.submitted.v1` MQ 事件异步流转为 `QUOTED`，当前报价列显示总额 `CNY 246.9`（单价 `123.45` × 数量 `2`），操作列变为「修改报价」
+
+| zh-CN | en-US |
+|---|---|
+| ![供应商门户报价提交成功（简体中文）](images/zh-CN/srm-portal-quotation-submitted.png) | ![供应商门户报价提交成功（英文）](images/en-US/srm-portal-quotation-submitted.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![供应商门户报价提交成功（日文）](images/ja-JP/srm-portal-quotation-submitted.png) | ![供应商门户报价提交成功（韩文）](images/ko-KR/srm-portal-quotation-submitted.png) |
+
 ## 10. 测试
 
 SRM 模块覆盖以下测试集：
