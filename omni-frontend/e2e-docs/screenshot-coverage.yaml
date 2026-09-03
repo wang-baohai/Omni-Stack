@@ -39,7 +39,22 @@ modules:
       - docs/images/system-xss.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-dashboard.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-users.png
-    gaps: [most-management-flows, detail-and-action-states, failure-states]
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-tenants.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-organizations.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-roles.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-permissions.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-dictionaries.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-online-users.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-audit-log.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-auth-records.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-xss-config.png
+    gaps: [config-page-absent, login-record-page-absent, detail-and-action-states, failure-states]
+    # most-management-flows 已关闭：14 个 required_flows 中 12 个已有四语言正式图
+    # （tenant/organization/user/role/permission/dictionary/oauth2/online-user/audit/xss 直接采集，
+    #  menu 由权限管理的 MENU 类型节点承载、data-scope 由角色管理承载）。
+    # config-page-absent / login-record-page-absent：实测 sys_permission 中无 system:config*/参数配置
+    # 与登录记录相关权限，前端也无对应 view 目录，属产品未提供页面；按约束不删 required_flow、不自行 exempt。
+    # online-users 与部分页面在当前环境为空状态，已在 manifest expected 中如实声明。
   - id: scheduling-workspace
     status: covered
     required_flows: [system-job, job-type, personal-create, schedule, trigger, pause, resume, execution-log]
@@ -64,6 +79,7 @@ modules:
       - docs/images/monitor-mqmessage.png
       - docs/images/monitor-operlog.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/monitor-mq-messages.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-operation-log.png
     gaps: [retry, dead-letter, trace-diagnosis, detail-and-action-states]
   - id: workflow
     status: partial
@@ -72,7 +88,14 @@ modules:
       - docs/images/workflow-designer.png
       - docs/images/workflow-approval.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-models.png
-    gaps: [model-lifecycle, countersign, tracking, detail-and-action-states, failure-states]
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-definitions.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-instances.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-stats.png
+    gaps: [model-lifecycle, countersign, detail-and-action-states, failure-states]
+    # tracking 已关闭：/admin/workflow/instance 四语言正式图，页面真实渲染 23 条流程实例、
+    # 流转进度与审批记录入口；definitions 与 stats 同时补齐 publish/instance-tracking 的只读视图。
+    # 内容注意：当前实例均由历次 E2E（含本批）产生，标题带 E2ESQ 标识；实例属 Flowable 审计历史，
+    # wf_process_instance_ext 无 deleted 列，不得用 SQL 硬删，故不为此造假数据或隐藏真实标题。
   - id: crm
     status: covered
     required_flows: [lead, lead-conversion, customer, contact, opportunity-stage, activity, overview]
@@ -114,6 +137,11 @@ modules:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-portal-quotation-invitations.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-portal-quotation-form.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-portal-quotation-submitted.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-suppliers.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-evaluations.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-risks.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-risk-config.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-invites.png
     gaps: [admission-lifecycle, stable-mobile-flow, detail-and-action-states]
   - id: procurement
     status: partial

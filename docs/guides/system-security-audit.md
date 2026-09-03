@@ -66,5 +66,33 @@ Gateway 对所有响应添加：
 - 定期验证备份可恢复，而不是只确认备份文件存在。
 - 截图、测试报告和支持工单不得包含密码、CAPTCHA 答案、JWT、内部令牌或真实个人数据。
 
+## 8. 管理端页面四语言截图
+
+正式图片由文档专用 Playwright 用例 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 在真实运行栈上生成，按语言分目录存放，不复用其他语言图片、不使用占位图或模拟响应。
+
+- 前置条件：本地 Compose 全栈运行，前端 `127.0.0.1:3000`；`omni-auth` 与 `omni-base` 健康。
+- 操作者：`admin`（`SUPER_ADMIN`，具备系统管理、基础数据与监控菜单权限）。
+- 操作：登录后依次进入租户、组织、角色、权限、字典、在线用户、审计日志、授权记录、XSS 防护与操作日志页面。
+- 预期状态：页面标题与列标签按当前语言渲染，列表展示真实系统数据；无记录时呈现产品自身空状态（不是截图失败）。
+- 令牌：`E2eTokenFixture` 在测试进程内签发短期 JWT（TTL 1200 秒），收尾即销毁，不写入文档、日志或版本库。
+- 本组全部为**只读采集**：不创建、不修改、不删除任何配置或审计数据，因此不需写入开关，也无数据收尾。
+
+敏感信息说明：授权记录页仅展示 OAuth2 `client_id`（公开标识符）、主体与授权类型，**不含 client secret、令牌或密码**；在线用户页在当前环境为空状态，不含任何会话令牌。
+
+| 页面 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 租户管理（tenant） | ![租户管理（简体中文）](../images/zh-CN/system-tenants.png) | ![租户管理（英文）](../images/en-US/system-tenants.png) | ![租户管理（日文）](../images/ja-JP/system-tenants.png) | ![租户管理（韩文）](../images/ko-KR/system-tenants.png) |
+| 组织管理（organization） | ![组织管理（简体中文）](../images/zh-CN/system-organizations.png) | ![组织管理（英文）](../images/en-US/system-organizations.png) | ![组织管理（日文）](../images/ja-JP/system-organizations.png) | ![组织管理（韩文）](../images/ko-KR/system-organizations.png) |
+| 角色管理（role，含 data-scope 入口） | ![角色管理（简体中文）](../images/zh-CN/system-roles.png) | ![角色管理（英文）](../images/en-US/system-roles.png) | ![角色管理（日文）](../images/ja-JP/system-roles.png) | ![角色管理（韩文）](../images/ko-KR/system-roles.png) |
+| 权限管理（permission，含 menu 节点） | ![权限管理（简体中文）](../images/zh-CN/system-permissions.png) | ![权限管理（英文）](../images/en-US/system-permissions.png) | ![权限管理（日文）](../images/ja-JP/system-permissions.png) | ![权限管理（韩文）](../images/ko-KR/system-permissions.png) |
+| 字典管理（dictionary） | ![字典管理（简体中文）](../images/zh-CN/system-dictionaries.png) | ![字典管理（英文）](../images/en-US/system-dictionaries.png) | ![字典管理（日文）](../images/ja-JP/system-dictionaries.png) | ![字典管理（韩文）](../images/ko-KR/system-dictionaries.png) |
+| 在线用户（online-user，空状态） | ![在线用户（简体中文）](../images/zh-CN/system-online-users.png) | ![在线用户（英文）](../images/en-US/system-online-users.png) | ![在线用户（日文）](../images/ja-JP/system-online-users.png) | ![在线用户（韩文）](../images/ko-KR/system-online-users.png) |
+| 审计日志（audit） | ![审计日志（简体中文）](../images/zh-CN/system-audit-log.png) | ![审计日志（英文）](../images/en-US/system-audit-log.png) | ![审计日志（日文）](../images/ja-JP/system-audit-log.png) | ![审计日志（韩文）](../images/ko-KR/system-audit-log.png) |
+| 授权记录（oauth2） | ![授权记录（简体中文）](../images/zh-CN/system-auth-records.png) | ![授权记录（英文）](../images/en-US/system-auth-records.png) | ![授权记录（日文）](../images/ja-JP/system-auth-records.png) | ![授权记录（韩文）](../images/ko-KR/system-auth-records.png) |
+| XSS 防护（xss） | ![XSS 防护（简体中文）](../images/zh-CN/system-xss-config.png) | ![XSS 防护（英文）](../images/en-US/system-xss-config.png) | ![XSS 防护（日文）](../images/ja-JP/system-xss-config.png) | ![XSS 防护（韩文）](../images/ko-KR/system-xss-config.png) |
+| 操作日志（operation-log） | ![操作日志（简体中文）](../images/zh-CN/system-operation-log.png) | ![操作日志（英文）](../images/en-US/system-operation-log.png) | ![操作日志（日文）](../images/ja-JP/system-operation-log.png) | ![操作日志（韩文）](../images/ko-KR/system-operation-log.png) |
+
+尚未覆盖的两个 required flow：`config`（参数配置）与 `login-record`（登录记录）。实测 `sys_permission` 中无对应权限码，前端也无对应 view 目录，属产品当前未提供页面；按约束**不删除 required flow、不自行标记 exempt**，在覆盖清单中保留为显式 gap。
+
 更多信息见 [可靠消息](../mq-reliability.md)、[可观测性](../observability.md) 和 [Docker 部署](../docker-deployment.md)。
 

@@ -561,3 +561,22 @@ bpmn-js Modeler (开源 BPMN 2.0 建模工具)
 | **deleteReason 显示错误** | MI_END vs deleted 混淆 | 参考 §3.1 MI DeleteReason 表格，`MI_END` = 自动完成，`deleted` = 流程终止 |
 | **租户隔离失效** | TenantInfoHolder 未设置 | 确认 Gateway 已注入 `X-Tenant-Id` 请求头；检查 `TenantInfoFilter` 是否正常执行 |
 | **BPMN 设计器无法加载** | bpmn-js 版本不兼容 | 确认 `bpmn-js` 版本为 18.x；检查浏览器控制台错误 |
+
+## 8. 管理端界面截图（四语言）
+
+正式图片由文档专用 Playwright 用例 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 在真实运行栈上生成，按语言分目录存放，不复用其他语言图片、不使用占位图或模拟响应。
+
+- 前置条件：本地 Compose 全栈运行，前端 `127.0.0.1:3000`；`omni-workflow` 健康；库中已有真实流程模型与实例（采集时为 8 个模型/版本、23 条实例）。
+- 操作者：`admin`（`SUPER_ADMIN`，具备工作流菜单权限）。
+- 操作：登录后依次进入「流程定义」「流程实例」「统计看板」页面。
+- 预期状态：页面标题与列标签按当前语言渲染；流程实例列表展示流程标题、流程 Key、业务主键、发起人、状态与发起时间，并提供「流转进度」与「审批记录」入口。
+- 令牌：由 `E2eTokenFixture` 在测试进程内签发短期 JWT（TTL 1200 秒），收尾即销毁，不写入文档、日志或版本库。
+- 本组全部为**只读采集**：不创建、不修改、不删除任何流程数据，因此不需写入开关，也无数据收尾。
+
+内容说明：当前环境中的流程实例均由历次端到端验证产生，标题带有测试标识（如 `E2ESQ`）。`wf_process_instance_ext` 与 Flowable `ACT_HI_*` 属引擎管理的审计历史且无软删列，不得用 SQL 硬删，因此图片如实保留真实标题，不以造数据或裁剪方式美化。
+
+| 页面 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 流程定义（publish） | ![流程定义（简体中文）](images/zh-CN/workflow-definitions.png) | ![流程定义（英文）](images/en-US/workflow-definitions.png) | ![流程定义（日文）](images/ja-JP/workflow-definitions.png) | ![流程定义（韩文）](images/ko-KR/workflow-definitions.png) |
+| 流程实例跟踪（instance-tracking） | ![流程实例（简体中文）](images/zh-CN/workflow-instances.png) | ![流程实例（英文）](images/en-US/workflow-instances.png) | ![流程实例（日文）](images/ja-JP/workflow-instances.png) | ![流程实例（韩文）](images/ko-KR/workflow-instances.png) |
+| 统计看板（汇总视图） | ![统计看板（简体中文）](images/zh-CN/workflow-stats.png) | ![统计看板（英文）](images/en-US/workflow-stats.png) | ![统计看板（日文）](images/ja-JP/workflow-stats.png) | ![统计看板（韩文）](images/ko-KR/workflow-stats.png) |

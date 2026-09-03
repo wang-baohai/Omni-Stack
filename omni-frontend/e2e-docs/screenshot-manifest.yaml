@@ -1924,3 +1924,1155 @@ screenshots:
     test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
     version: 0.6.1
     last_success_at: 2026-09-03T16:08:17+08:00
+  - id: system-tenants-zh-CN
+    module: system-management
+    flow: tenant
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/tenant
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「租户管理」页面
+    expected: 主内容区显示「租户管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-tenants.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:49+08:00
+  - id: system-tenants-en-US
+    module: system-management
+    flow: tenant
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/tenant
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Tenant Management page as admin
+    expected: Main area shows Tenant Management with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-tenants.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:05+08:00
+  - id: system-tenants-ja-JP
+    module: system-management
+    flow: tenant
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/tenant
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「テナント管理」ページを開く
+    expected: メイン領域に「テナント管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-tenants.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:25+08:00
+  - id: system-tenants-ko-KR
+    module: system-management
+    flow: tenant
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/tenant
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「테넌트 관리」 페이지 열기
+    expected: 메인 영역에 「테넌트 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-tenants.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:42+08:00
+  - id: system-organizations-zh-CN
+    module: system-management
+    flow: organization
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/org
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「组织管理」页面
+    expected: 主内容区显示「组织管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-organizations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:50+08:00
+  - id: system-organizations-en-US
+    module: system-management
+    flow: organization
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/org
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Organization Mgmt page as admin
+    expected: Main area shows Organization Mgmt with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-organizations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:05+08:00
+  - id: system-organizations-ja-JP
+    module: system-management
+    flow: organization
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/org
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「組織管理」ページを開く
+    expected: メイン領域に「組織管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-organizations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:26+08:00
+  - id: system-organizations-ko-KR
+    module: system-management
+    flow: organization
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/org
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「조직 관리」 페이지 열기
+    expected: 메인 영역에 「조직 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-organizations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:42+08:00
+  - id: system-roles-zh-CN
+    module: system-management
+    flow: role
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/role
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「角色管理」页面
+    expected: 主内容区显示「角色管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-roles.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:51+08:00
+  - id: system-roles-en-US
+    module: system-management
+    flow: role
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/role
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Role Management page as admin
+    expected: Main area shows Role Management with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-roles.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:06+08:00
+  - id: system-roles-ja-JP
+    module: system-management
+    flow: role
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/role
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「ロール管理」ページを開く
+    expected: メイン領域に「ロール管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-roles.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:27+08:00
+  - id: system-roles-ko-KR
+    module: system-management
+    flow: role
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/role
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「역할 관리」 페이지 열기
+    expected: 메인 영역에 「역할 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-roles.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:43+08:00
+  - id: system-permissions-zh-CN
+    module: system-management
+    flow: permission
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/permission
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「权限管理」页面
+    expected: 主内容区显示「权限管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-permissions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:52+08:00
+  - id: system-permissions-en-US
+    module: system-management
+    flow: permission
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/permission
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Permission Mgmt page as admin
+    expected: Main area shows Permission Mgmt with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-permissions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:07+08:00
+  - id: system-permissions-ja-JP
+    module: system-management
+    flow: permission
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/permission
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「権限管理」ページを開く
+    expected: メイン領域に「権限管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-permissions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:29+08:00
+  - id: system-permissions-ko-KR
+    module: system-management
+    flow: permission
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/permission
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「권한 관리」 페이지 열기
+    expected: 메인 영역에 「권한 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-permissions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:49+08:00
+  - id: system-dictionaries-zh-CN
+    module: system-management
+    flow: dictionary
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「字典管理」页面
+    expected: 主内容区显示「字典管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-dictionaries.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:53+08:00
+  - id: system-dictionaries-en-US
+    module: system-management
+    flow: dictionary
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Dictionary page as admin
+    expected: Main area shows Dictionary with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-dictionaries.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:08+08:00
+  - id: system-dictionaries-ja-JP
+    module: system-management
+    flow: dictionary
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「辞書管理」ページを開く
+    expected: メイン領域に「辞書管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-dictionaries.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:30+08:00
+  - id: system-dictionaries-ko-KR
+    module: system-management
+    flow: dictionary
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「사전 관리」 페이지 열기
+    expected: 메인 영역에 「사전 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-dictionaries.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:50+08:00
+  - id: system-online-users-zh-CN
+    module: system-management
+    flow: online-user
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/online
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「在线用户」页面
+    expected: 主内容区显示「在线用户」；当前环境无记录，呈现产品自身空状态（非截图失败）
+    masks: []
+    image: docs/images/zh-CN/system-online-users.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:53+08:00
+  - id: system-online-users-en-US
+    module: system-management
+    flow: online-user
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/online
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Online Users page as admin
+    expected: Main area shows Online Users; this environment has no records, so the product empty state is rendered (not a capture failure)
+    masks: []
+    image: docs/images/en-US/system-online-users.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:09+08:00
+  - id: system-online-users-ja-JP
+    module: system-management
+    flow: online-user
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/online
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「オンラインユーザー」ページを開く
+    expected: メイン領域に「オンラインユーザー」を表示；現環境にレコードが無いため製品自身の空状態を描画（キャプチャ失敗ではない）
+    masks: []
+    image: docs/images/ja-JP/system-online-users.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:31+08:00
+  - id: system-online-users-ko-KR
+    module: system-management
+    flow: online-user
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/online
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「온라인 사용자」 페이지 열기
+    expected: 메인 영역에 「온라인 사용자」 표시; 현재 환경에 레코드가 없어 제품 자체 빈 상태가 렌더링됨(캡처 실패 아님)
+    masks: []
+    image: docs/images/ko-KR/system-online-users.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:51+08:00
+  - id: system-audit-log-zh-CN
+    module: system-management
+    flow: audit
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/auditlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「审计日志」页面
+    expected: 主内容区显示「审计日志」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-audit-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:54+08:00
+  - id: system-audit-log-en-US
+    module: system-management
+    flow: audit
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/auditlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Audit Logs page as admin
+    expected: Main area shows Audit Logs with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-audit-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:10+08:00
+  - id: system-audit-log-ja-JP
+    module: system-management
+    flow: audit
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/auditlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「監査ログ」ページを開く
+    expected: メイン領域に「監査ログ」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-audit-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:32+08:00
+  - id: system-audit-log-ko-KR
+    module: system-management
+    flow: audit
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/auditlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「감사 로그」 페이지 열기
+    expected: 메인 영역에 「감사 로그」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-audit-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:51+08:00
+  - id: system-auth-records-zh-CN
+    module: system-management
+    flow: oauth2
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/authrecord
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「授权记录」页面
+    expected: 主内容区显示「授权记录」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-auth-records.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:55+08:00
+  - id: system-auth-records-en-US
+    module: system-management
+    flow: oauth2
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/authrecord
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Auth Records page as admin
+    expected: Main area shows Auth Records with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-auth-records.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:10+08:00
+  - id: system-auth-records-ja-JP
+    module: system-management
+    flow: oauth2
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/authrecord
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「認証記録」ページを開く
+    expected: メイン領域に「認証記録」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-auth-records.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:33+08:00
+  - id: system-auth-records-ko-KR
+    module: system-management
+    flow: oauth2
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/authrecord
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「인증 기록」 페이지 열기
+    expected: 메인 영역에 「인증 기록」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-auth-records.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:52+08:00
+  - id: system-xss-config-zh-CN
+    module: system-management
+    flow: xss
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/xssconfig
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「XSS 防护」页面
+    expected: 主内容区显示「XSS 防护」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-xss-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:56+08:00
+  - id: system-xss-config-en-US
+    module: system-management
+    flow: xss
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/xssconfig
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the XSS Protection page as admin
+    expected: Main area shows XSS Protection with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-xss-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:11+08:00
+  - id: system-xss-config-ja-JP
+    module: system-management
+    flow: xss
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/xssconfig
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「XSS 防御」ページを開く
+    expected: メイン領域に「XSS 防御」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-xss-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:33+08:00
+  - id: system-xss-config-ko-KR
+    module: system-management
+    flow: xss
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/xssconfig
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「XSS 보호」 페이지 열기
+    expected: 메인 영역에 「XSS 보호」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-xss-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:53+08:00
+  - id: system-operation-log-zh-CN
+    module: messaging-monitoring
+    flow: operation-log
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/base/operlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「操作日志」页面
+    expected: 主内容区显示「操作日志」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-operation-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:57+08:00
+  - id: system-operation-log-en-US
+    module: messaging-monitoring
+    flow: operation-log
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/base/operlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Operation Logs page as admin
+    expected: Main area shows Operation Logs with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-operation-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:15+08:00
+  - id: system-operation-log-ja-JP
+    module: messaging-monitoring
+    flow: operation-log
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/base/operlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「操作ログ」ページを開く
+    expected: メイン領域に「操作ログ」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-operation-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:34+08:00
+  - id: system-operation-log-ko-KR
+    module: messaging-monitoring
+    flow: operation-log
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/base/operlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「작업 로그」 페이지 열기
+    expected: 메인 영역에 「작업 로그」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-operation-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:54+08:00
+  - id: workflow-instances-zh-CN
+    module: workflow
+    flow: instance-tracking
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「流程实例」页面
+    expected: 主内容区显示「流程实例」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/workflow-instances.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:58+08:00
+  - id: workflow-instances-en-US
+    module: workflow
+    flow: instance-tracking
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Process Instances page as admin
+    expected: Main area shows Process Instances with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/workflow-instances.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:19+08:00
+  - id: workflow-instances-ja-JP
+    module: workflow
+    flow: instance-tracking
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「プロセスインスタンス」ページを開く
+    expected: メイン領域に「プロセスインスタンス」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/workflow-instances.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:35+08:00
+  - id: workflow-instances-ko-KR
+    module: workflow
+    flow: instance-tracking
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「프로세스 인스턴스」 페이지 열기
+    expected: 메인 영역에 「프로세스 인스턴스」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/workflow-instances.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:55+08:00
+  - id: workflow-definitions-zh-CN
+    module: workflow
+    flow: publish
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/definition
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「流程定义」页面
+    expected: 主内容区显示「流程定义」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/workflow-definitions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:58+08:00
+  - id: workflow-definitions-en-US
+    module: workflow
+    flow: publish
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/workflow/definition
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Process Definitions page as admin
+    expected: Main area shows Process Definitions with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/workflow-definitions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:19+08:00
+  - id: workflow-definitions-ja-JP
+    module: workflow
+    flow: publish
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/definition
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「プロセス定義」ページを開く
+    expected: メイン領域に「プロセス定義」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/workflow-definitions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:36+08:00
+  - id: workflow-definitions-ko-KR
+    module: workflow
+    flow: publish
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/definition
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「프로세스 정의」 페이지 열기
+    expected: 메인 영역에 「프로세스 정의」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/workflow-definitions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:55+08:00
+  - id: workflow-stats-zh-CN
+    module: workflow
+    flow: instance-tracking
+    step: entry
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/stats
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「统计看板」页面
+    expected: 主内容区显示「统计看板」；当前环境无记录，呈现产品自身空状态（非截图失败）
+    masks: []
+    image: docs/images/zh-CN/workflow-stats.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:59+08:00
+  - id: workflow-stats-en-US
+    module: workflow
+    flow: instance-tracking
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/workflow/stats
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Statistics page as admin
+    expected: Main area shows Statistics; this environment has no records, so the product empty state is rendered (not a capture failure)
+    masks: []
+    image: docs/images/en-US/workflow-stats.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:20+08:00
+  - id: workflow-stats-ja-JP
+    module: workflow
+    flow: instance-tracking
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/stats
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「統計ダッシュボード」ページを開く
+    expected: メイン領域に「統計ダッシュボード」を表示；現環境にレコードが無いため製品自身の空状態を描画（キャプチャ失敗ではない）
+    masks: []
+    image: docs/images/ja-JP/workflow-stats.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:37+08:00
+  - id: workflow-stats-ko-KR
+    module: workflow
+    flow: instance-tracking
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/stats
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「통계 대시보드」 페이지 열기
+    expected: 메인 영역에 「통계 대시보드」 표시; 현재 환경에 레코드가 없어 제품 자체 빈 상태가 렌더링됨(캡처 실패 아님)
+    masks: []
+    image: docs/images/ko-KR/workflow-stats.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:56+08:00
+  - id: srm-suppliers-zh-CN
+    module: srm
+    flow: lifecycle
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/supplier
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「供应商管理」页面
+    expected: 主内容区显示「供应商管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-suppliers.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:00+08:00
+  - id: srm-suppliers-en-US
+    module: srm
+    flow: lifecycle
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/srm/supplier
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Suppliers page as admin
+    expected: Main area shows Suppliers with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-suppliers.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:21+08:00
+  - id: srm-suppliers-ja-JP
+    module: srm
+    flow: lifecycle
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/supplier
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「サプライヤー管理」ページを開く
+    expected: メイン領域に「サプライヤー管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-suppliers.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:38+08:00
+  - id: srm-suppliers-ko-KR
+    module: srm
+    flow: lifecycle
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/supplier
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「공급업체 관리」 페이지 열기
+    expected: 메인 영역에 「공급업체 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-suppliers.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:57+08:00
+  - id: srm-evaluations-zh-CN
+    module: srm
+    flow: evaluation
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/evaluation
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「绩效评估」页面
+    expected: 主内容区显示「绩效评估」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-evaluations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:01+08:00
+  - id: srm-evaluations-en-US
+    module: srm
+    flow: evaluation
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/srm/evaluation
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Evaluations page as admin
+    expected: Main area shows Evaluations with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-evaluations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:22+08:00
+  - id: srm-evaluations-ja-JP
+    module: srm
+    flow: evaluation
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/evaluation
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「業績評価」ページを開く
+    expected: メイン領域に「業績評価」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-evaluations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:39+08:00
+  - id: srm-evaluations-ko-KR
+    module: srm
+    flow: evaluation
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/evaluation
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「성과 평가」 페이지 열기
+    expected: 메인 영역에 「성과 평가」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-evaluations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:58+08:00
+  - id: srm-risks-zh-CN
+    module: srm
+    flow: risk
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/risk
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「风险管理」页面
+    expected: 主内容区显示「风险管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-risks.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:02+08:00
+  - id: srm-risks-en-US
+    module: srm
+    flow: risk
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/srm/risk
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Risk Management page as admin
+    expected: Main area shows Risk Management with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-risks.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:23+08:00
+  - id: srm-risks-ja-JP
+    module: srm
+    flow: risk
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/risk
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「リスク管理」ページを開く
+    expected: メイン領域に「リスク管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-risks.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:39+08:00
+  - id: srm-risks-ko-KR
+    module: srm
+    flow: risk
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/risk
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「위험 관리」 페이지 열기
+    expected: 메인 영역에 「위험 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-risks.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:59+08:00
+  - id: srm-risk-config-zh-CN
+    module: srm
+    flow: risk
+    step: create-or-edit
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/risk/config
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「风险指标配置」页面
+    expected: 主内容区显示「风险指标配置」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-risk-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:03+08:00
+  - id: srm-risk-config-en-US
+    module: srm
+    flow: risk
+    step: create-or-edit
+    locale: en-US
+    role: admin
+    route: /admin/srm/risk/config
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Risk Indicator Config page as admin
+    expected: Main area shows Risk Indicator Config with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-risk-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:24+08:00
+  - id: srm-risk-config-ja-JP
+    module: srm
+    flow: risk
+    step: create-or-edit
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/risk/config
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「リスク指標設定」ページを開く
+    expected: メイン領域に「リスク指標設定」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-risk-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:40+08:00
+  - id: srm-risk-config-ko-KR
+    module: srm
+    flow: risk
+    step: create-or-edit
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/risk/config
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「위험 지표 설정」 페이지 열기
+    expected: 메인 영역에 「위험 지표 설정」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-risk-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:34:00+08:00
+  - id: srm-invites-zh-CN
+    module: srm
+    flow: invite
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/invite
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「邀请管理」页面
+    expected: 主内容区显示「邀请管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-invites.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:04+08:00
+  - id: srm-invites-en-US
+    module: srm
+    flow: invite
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/srm/invite
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Invitations page as admin
+    expected: Main area shows Invitations with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-invites.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:25+08:00
+  - id: srm-invites-ja-JP
+    module: srm
+    flow: invite
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/invite
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「招待管理」ページを開く
+    expected: メイン領域に「招待管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-invites.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:41+08:00
+  - id: srm-invites-ko-KR
+    module: srm
+    flow: invite
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/invite
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「초대 관리」 페이지 열기
+    expected: 메인 영역에 「초대 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-invites.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:34:00+08:00

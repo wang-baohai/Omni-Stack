@@ -176,10 +176,22 @@ db-migrator 22 项中与本批直接相关：`SeedManifestLoaderTest`(4) 加载�
 
 ### 2.2 阶段 B/C（待提交）
 
+阶段 B 第一批（只读采集）：
+
+- `omni-frontend/e2e-docs/flows/management.flows.spec.ts`（新增，18 scene × 4 语言）
+- `docs/images/{zh-CN,en-US,ja-JP,ko-KR}/<18 个页面 ID>.png`（**72 张**）
+- `omni-frontend/e2e-docs/screenshot-manifest.yaml`（+72 条 → 194）
+- `omni-frontend/e2e-docs/screenshot-coverage.yaml`（4 模块 assets；workflow 移除 `tracking`；system-management gap 精确化）
+- `docs/workflow.md`（+§8 四语言截图）、`docs/guides/system-security-audit.md`（+§8 十页四语言截图）、`docs/srm.md`（+SRM 管理端页面小节）
+
+阶段 C：
+
 - `docs/srm.en.md`、`docs/srm.jp.md`、`docs/srm.kr.md`（修正与源矛盾的「Phase 2 报价预留」陈旧章节）
 - `docs/i18n-review-queue.md`（`npm run docs:i18n:queue` 重生成）
-- `docs/evidence/scaffold-upgrade/qoder-continuous-progress-2026-09-03.md`（本文件，阶段 B/C/D 记录）
-- 阶段 B **未修改**任何代码、coverage、manifest 或图片（实际闭环数 0）
+- `docs/docs-manifest.yaml`（本批 3 份源摘要 + 修正 4 项既有陈旧摘要）
+- `docs/evidence/scaffold-upgrade/qoder-continuous-progress-2026-09-03.md`（本文件）
+
+临时探测用例 `e2e-docs/flows/zz-probe.spec.ts` **用后已删除**，从未进入提交；其产物仅存于未跟踪的 `.artifacts/probe/`。
 
 ### 2.3 不提交的临时文件
 
@@ -276,8 +288,64 @@ asset 建卡只能由采购收货（`qualityStatus=PASS && assetManaged=true`）
 | scaffold-development 2 gaps | BLOCKED / 需单独设计 | gap 名即 `implementation-not-yet-delivered`；4 个流程为 CLI 非页面流程，**不得伪造 UI 图**，需按既有文档标准提供可复核的真实命令输出证据，并需决定登记形态（`exempt` 需授权，不得自行标记） |
 | operations 2 gaps | BLOCKED / 需单独设计 | gap 名即 `observability-not-yet-delivered`；可观测栈为 Compose/Grafana 基础设施，非应用页面，同上 |
 
-**阶段 B 实际闭环数：0**。已完成的是范围核定、可构造性实测与逐项分类（含 1 项新发现 DATA_DEFECT 的完整取证）。
+**阶段 B 分诊阶段实际闭环数：0**（上表为分诊结论）。实际执行结果见 §3.5。
 未擅自 `exempt`、未删除任何 `required_flow`、未修改检查器或业务规则。
+
+### 3.5 阶段 B 第一批实际执行结果（只读采集，已闭环）
+
+**方法**：先用一次性临时探测用例（用后已删除，未提交）以 admin 只读遍历 27 个候选管理页，
+将四语言下**实际渲染**的 `document.title`、表头、行数写入 `.artifacts/probe/routes-*.json`；
+再据实测值编写正式用例。不依赖控制台输出（代码页会造成乱码误判），也不从语言包推测。
+
+探测结论：**27 页全部在四语言下正常渲染且标题已本地化，0 个 403/404**（`TITLE_NOT_LOCALIZED_or_DENIED = 0`）；
+9 页无表格数据（organizations、online-users、workflow-stats、procurement 物料/订单/收货、asset 台账/调拨/处置）。
+
+**新增用例**：`omni-frontend/e2e-docs/flows/management.flows.spec.ts`（18 个 scene × 4 语言 = 72 用例）。
+双重断言：`toHaveTitle(expectTitle[locale])`（证明语言包与动态路由/菜单 i18n 解析正确）
++ `.el-main` 包含实测本地化列标签（证明业务内容真实渲染，而非只等容器出现就截图）。
+
+| 项 | 实测结果 |
+| --- | --- |
+| 静态检查 | `eslint --max-warnings 0` exit 0；`tsc --noEmit --strict` exit 0；`playwright --list` = **Total: 72 tests** |
+| 真实运行 | **72 passed（1.2m）/ 0 failed / 0 skipped**，`PLAYWRIGHT_EXIT=0`，TTL 门禁 `1200L` 先行通过 |
+| 图片 | **72/72** 存在，体积 118,521–303,145 bytes（无异常小图），mtime 17:32:49–17:34:00 |
+| 写入 | 无。`E2E_MUTATIONS=false`，全部只读，因此**无数据需清理** |
+| 凭证 | 本轮两份（探测 `tokens-20260903-172150.json`、采集 `tokens-20260903-173240.json`）**均已销毁**；目录回到 12 个更早会话文件，未触碰 |
+| manifest | **+72 条 → 共 194 条**，零重复 ID、零缺字段、图片与用例文件全部存在 |
+| coverage | system-management +9 assets、messaging-monitoring +1、workflow +3、srm +5 |
+| strict | exit 1、**恰好 8 个模块覆盖失败**、**非覆盖类错误 0** |
+| links / sensitive | 均 exit 0 |
+
+**gap 变动（如实，不夸大）**：
+
+- workflow：移除 `tracking`（`/admin/workflow/instance` 四语言正式图，页面真实渲染 23 条实例与流转进度/审批记录入口）→ gaps 5→4。
+- system-management：移除 `most-management-flows`（14 个 required_flows 中 12 个已有四语言图；menu 由权限管理承载、data-scope 由角色管理承载），
+  新增**精确**的 `config-page-absent` 与 `login-record-page-absent` → gaps 数量仍 3→4，但语义从模糊变为可行动。
+  实测依据：`sys_permission` 中无任何 `menu`/`data-scope`/`config`/`login`/`param` 相关权限码（仅 `xssconfig` 与 `srm:risk:config`），且前端无对应 view 目录。
+  按约束**未删除这两个 required_flow、未自行 exempt**。
+- srm / messaging-monitoring：资产显著增加，但 gaps **未减少**（列表视图不等于关闭 admission-lifecycle / stable-mobile-flow / detail-and-action-states / retry / dead-letter / trace-diagnosis）。
+- 因此 strict 仍为 **8 个模块覆盖失败**，未降数；本批实际关闭 **1 个 gap**（workflow `tracking`）+ 1 个模糊 gap 精确化。
+
+**有意排除并说明理由**：procurement 物料/订单/收货与 asset 台账/调拨/处置（活行为 0，空表无文档价值，待 §3.3 DATA_DEFECT 修复后补采）；
+procurement 请购/询价（当前仅存历史 E2ESQ 测试残留行，不宜作正式文档图）；job-types（scheduling-workspace 已 covered，无 gap 收益）。
+
+**i18n 观察（非缺陷，已核）**：多个页面的表格列标签在 ja-JP/ko-KR 下渲染为英文（如 `Permission Name`/`Type Code`/`Tenant Code`）。
+两项权威检查均通过：`npm run ui:i18n:parity`（四语言各 **2319 键、0 缺失、0 placeholder 不一致**）与 `npm run ui:i18n:check`（**0/0 项**）。
+→ 判定为语言包既有取值（译文质量待优化），**不是**硬编码缺陷；用例按**实际渲染值**断言，不美化。
+
+### 3.6 对阶段 A 报告的诚实更正：workflow 历史实例残留
+
+阶段 A §4 声称「本批 0 残留」**不完整**。实测发现本批还在 **omni-workflow** 留下了跨服务记录：
+
+- `wf_process_instance_ext` ids **20-23**，`business_key` = `48:1`/`49:1`/`50:1`/`51:1`（即本批四份请购），`process_key=procurement-approval`，status=2，`create_time` 16:06:56 / 16:07:19 / 16:07:39 / 16:07:59 —— 与四语言运行时刻逐一对应。
+- Flowable `ACT_HI_PROCINST` 共 23 条（含本批 4 条）。
+
+为何未清理（与 `proc_event_inbox`/`srm_quotation_request` 同一类结论，但阶段 A **漏登记**）：
+`wf_process_instance_ext` **无 `deleted` 列**，且与引擎管理的 `ACT_HI_*` 历史表强关联；用 SQL 硬删会造成扩展表与 Flowable 历史不一致，
+正规删除需走引擎 `HistoryService`，不属本批授权的数据清理范围。→ 分类：**审计/历史台账，有意保留，现已显式登记**。
+
+连带影响（已如实写入指南与 coverage 注释）：workflow 实例跟踪页的正式截图因此会显示带 `E2ESQ` 标识的真实标题。
+本批**未为美化图片而造数据、裁剪或隐藏真实标题**。
 
 ## 4. 阶段 C：四语言文档预审与修订
 
@@ -304,6 +372,22 @@ asset 建卡只能由采购收货（`qualityStatus=PASS && assetManaged=true`）
 ### 4.3 阶段 C 其余项
 
 P0 3 篇 ×3、P1 其余 7 篇 ×3、P2 27 篇 ×3 = **111 项译文 NOT_STARTED**。按同一源成组推进，下一组建议 P0 `architecture`。
+
+### 4.4 新发现并修正：4 项既有源摘要陈旧（HEAD 即存在）
+
+刷新本批三份源文档摘要后做全量复核，发现 `docs/docs-manifest.yaml` 中 **4 份指南的 `source_sha256` 与真实源文件不匹配**：
+`guide-authentication`、`guide-permissions`、`guide-scheduling`、`guide-crm-flow`。
+
+归因证据：这 4 份 guide 在本轮工作区**未被修改**（`git status` 无条目），且 `sha256(git show HEAD:<file>)` 与当前工作区摘要完全相同、两者均与已提交 manifest 值不符
+→ **不匹配在 HEAD 即已存在**，属之前有人修改 guide 却未刷新 manifest，非本轮造成。
+
+影响：`docs-quality.mjs --scope=translations` 会对这 4 项报「中文事实源摘要已变化」，独立于 114 篇 `present-unverified` 问题。
+
+处置：按阶段 C 授权「允许修正文档/译文并刷新真实源摘要」，将 4 项刷新为真实当前摘要（行级精确替换，不重排 YAML）。
+刷新后全量复核：**38 份源文档、0 摘要不匹配**。
+该修正**不掩盖**译文陈旧：114 项译文状态仍全部为 `present-unverified` / `reviewed_at: null`（已程序化复核分布确认）。
+
+本批同时刷新的三份源摘要：`docs/srm.md` → `c8462a0cbbba…`、`docs/workflow.md` → `36f7622d14b9…`、`docs/guides/system-security-audit.md` → `cd346252b455…`。
 
 ## 5. 阶段 D：汇总验证与分类
 

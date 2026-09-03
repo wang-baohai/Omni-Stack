@@ -82,7 +82,7 @@ documents:
     module: workflow
     owner: workflow
     source: docs/workflow.md
-    source_sha256: 05c35992d406fcbe50797e431ef97393c1d67ac1d1bf33fc5442ec0ae8603ef8
+    source_sha256: 36f7622d14b9c978774117a4b6b6f4575c252bdf95ff959873b6613692c4b918
     dependencies: [api, bpmn, permissions, screenshots]
     translations:
       en-US: { path: docs/workflow.en.md, status: present-unverified, reviewed_at: null }
@@ -104,7 +104,7 @@ documents:
     module: srm
     owner: srm
     source: docs/srm.md
-    source_sha256: aa1a1e2a96a5f37686f12c03b226224e8ff5d3eea69877b7bbbf14b0b12f1d8a
+    source_sha256: c8462a0cbbba80b4cca343a172b492e85f1e68a313891aa447a1d6134b179502
     dependencies: [api, permissions, portal, saga, screenshots]
     translations:
       en-US: { path: docs/srm.en.md, status: present-unverified, reviewed_at: null }
@@ -303,7 +303,7 @@ documents:
     module: authentication
     owner: auth
     source: docs/guides/authentication.md
-    source_sha256: 85c6160cf426f722ad7a75356490feec57fffea22ae16a62136e203836fb8ac7
+    source_sha256: be86a53a1ba7812612bea8b399715b2c5c9ca550dc199db24dc8f92b97778829
     dependencies: [captcha, social-login, device-code, tenant, screenshots]
     translations:
       en-US: { path: docs/guides/authentication.en.md, status: present-unverified, reviewed_at: null }
@@ -314,7 +314,7 @@ documents:
     module: security
     owner: auth
     source: docs/guides/permissions.md
-    source_sha256: 77ca09f78202c0a797982919c5424bde36bafd0b5ff0242e4bc3af302e89af21
+    source_sha256: 34abe1aa188105ff45af5ad8ecde7df6b69fcaa716f2e49e97a3ce0e23f0a729
     dependencies: [menus, roles, functional-permission, data-scope]
     translations:
       en-US: { path: docs/guides/permissions.en.md, status: present-unverified, reviewed_at: null }
@@ -325,7 +325,7 @@ documents:
     module: security
     owner: operations
     source: docs/guides/system-security-audit.md
-    source_sha256: 727b84cdfa427476b388a61056edda483ca98d8835b85a6c7e2a1455fc99b5fb
+    source_sha256: cd346252b455c4b5c324c6af97ff2249fa4af5f70016e564dede4d365e2f57d1
     dependencies: [oauth2, xss, audit, mq, observability]
     translations:
       en-US: { path: docs/guides/system-security-audit.en.md, status: present-unverified, reviewed_at: null }
@@ -347,7 +347,7 @@ documents:
     module: scheduling
     owner: base
     source: docs/guides/scheduling.md
-    source_sha256: a870284445adcae20056c735b9c9e068fc421a34d503e4547e39640d3d7fc61a
+    source_sha256: 9720091cafc6bf94a5d01315cdcfee3916bac5b9ca6e1fa980c472bb9c6fc363
     dependencies: [xxl-job, job-type, dynamic-schema, screenshots]
     translations:
       en-US: { path: docs/guides/scheduling.en.md, status: present-unverified, reviewed_at: null }
@@ -358,7 +358,7 @@ documents:
     module: crm
     owner: crm
     source: docs/guides/crm-flow.md
-    source_sha256: ebc23c148037485b86fd845593d3b17308e13f335b91a61c8055b672486e67bb
+    source_sha256: b61be136ee600ce5276fd0f5a272a9d83ca6fed9a1c621d42efa8382c47f23c3
     dependencies: [crm, permissions, state-machine, screenshots]
     translations:
       en-US: { path: docs/guides/crm-flow.en.md, status: present-unverified, reviewed_at: null }

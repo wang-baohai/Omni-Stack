@@ -504,6 +504,23 @@ omni-frontend/src/
 |---|---|
 | ![供应商门户报价提交成功（日文）](images/ja-JP/srm-portal-quotation-submitted.png) | ![供应商门户报价提交成功（韩文）](images/ko-KR/srm-portal-quotation-submitted.png) |
 
+### SRM 管理端页面截图（四语言）
+
+同样由 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 在真实运行栈上生成，属**只读采集**：不创建、不修改、不删除任何供应商数据，因此不需写入开关，也无数据收尾。前置条件与操作者与上节一致（`admin` / `SUPER_ADMIN`，短期 JWT 由 `E2eTokenFixture` 进程内签发并于收尾销毁）。
+
+- 操作：登录后依次进入供应商管理、绩效评估、风险管理、风险指标配置与邀请管理页面。
+- 预期状态：页面标题与列标签按当前语言渲染；采集时库中各有 1 条真实供应商/评估/风险/邀请记录与 9 条风险指标配置。
+
+| 页面 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 供应商管理（lifecycle） | ![供应商管理（简体中文）](images/zh-CN/srm-suppliers.png) | ![供应商管理（英文）](images/en-US/srm-suppliers.png) | ![供应商管理（日文）](images/ja-JP/srm-suppliers.png) | ![供应商管理（韩文）](images/ko-KR/srm-suppliers.png) |
+| 绩效评估（evaluation） | ![绩效评估（简体中文）](images/zh-CN/srm-evaluations.png) | ![绩效评估（英文）](images/en-US/srm-evaluations.png) | ![绩效评估（日文）](images/ja-JP/srm-evaluations.png) | ![绩效评估（韩文）](images/ko-KR/srm-evaluations.png) |
+| 风险管理（risk） | ![风险管理（简体中文）](images/zh-CN/srm-risks.png) | ![风险管理（英文）](images/en-US/srm-risks.png) | ![风险管理（日文）](images/ja-JP/srm-risks.png) | ![风险管理（韩文）](images/ko-KR/srm-risks.png) |
+| 风险指标配置（risk） | ![风险指标配置（简体中文）](images/zh-CN/srm-risk-config.png) | ![风险指标配置（英文）](images/en-US/srm-risk-config.png) | ![风险指标配置（日文）](images/ja-JP/srm-risk-config.png) | ![风险指标配置（韩文）](images/ko-KR/srm-risk-config.png) |
+| 邀请管理（invite） | ![邀请管理（简体中文）](images/zh-CN/srm-invites.png) | ![邀请管理（英文）](images/en-US/srm-invites.png) | ![邀请管理（日文）](images/ja-JP/srm-invites.png) | ![邀请管理（韩文）](images/ko-KR/srm-invites.png) |
+
+本组只关闭列表/配置视图，**不等同于**关闭 `admission-lifecycle`（需完整 Portal 注册 Saga 与准入审批）、`stable-mobile-flow`（需移动/平板视口）与 `detail-and-action-states`（需详情弹层与操作结果），因此 SRM 仍为 `partial`。
+
 ## 10. 测试
 
 SRM 模块覆盖以下测试集：
