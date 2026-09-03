@@ -419,9 +419,19 @@ omni-frontend/src/
 3. イベントエンベロープは統一形式に従う；payload に完全な PII を含まない
 4. 消費者は `payload.eventId` で重複排除し冪等でなければならない
 
-### Phase 2 見積り予約
+### Procurement 見積統合
 
-見積りは未構築の `omni-procurement` の RFQ と招待関係に依存。MVP は見積りテーブルを作成せず、見積りエンドポイントを登録せず、`srm:portal:quotation` 権限を発行しません。Phase 2 統合時に `srm_quotation`/`srm_quotation_line` テーブルを作成し、DDL、移行スクリプト、権限、イベント契約を同時に補完します。
+ポータルエンドポイント：
+
+- `GET /api/srm/portal/quotation/invitations`：現在の PortalUser の RFQ 招待を一覧し、ローカルの見積状態をマージします。
+- `GET /api/srm/portal/quotation/invitations/{rfqId}`：招待、RFQ 行スナップショットと現在の見積を返します。
+- `POST /api/srm/portal/quotation`：見積を提出するか、`version` を指定して更新します。
+
+提出リクエストは `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]` のみを受け付けます。tenantId、supplierId、サプライヤー名、RFQ 番号、品目、単位、数量、通貨、行金額と総金額は、すべて信頼できる身分情報・PortalUser・Procurement 招待詳細から取得するかサーバ側で計算します。
+
+`srm_quotation.request_id` は最後に成功したリクエストを保存し、`srm_quotation_request` は `(tenant_id, request_id)` でリクエスト履歴と SHA-256 requestHash を永久に保持し、`(tenant_id, quotation_id, target_version)` で結果バージョンを関連付けます。`srm_quotation` は `(tenant_id, rfq_id, active_supplier_guard)` により、同一サプライヤーが同一 RFQ に対して未削除の見積を 1 件のみ持つことを保証します。`srm_quotation_line.rfq_line_id` は必須で、提出行の集合は RFQ スナップショットと完全一致しなければなりません。金額精度は：単価/数量 `DECIMAL(19,6)` かつ 0 より大、行金額/総金額 `DECIMAL(19,4)` かつ 0 より大。
+
+見積、明細、`srm_quotation_request` と `srm.quotation.submitted.v1` Outbox は同一トランザクションでコミットする必要があります。同一 requestId+requestHash の再試行は現在の見積スナップショットを返し、イベントを重複発行してはなりません；同一 requestId で意図が異なる場合は 409 を返します。初回リクエストは作成センチネル `version=0` を使用し、初版見積は `version=1` から開始することで、並行する作成意図が初版を更新可能版と誤認するのを防ぎます。イベント payload には少なくとも `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil` を含み、Procurement は eventId Inbox で冪等に消費します。
 
 ## 10. テスト
 

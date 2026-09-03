@@ -138,31 +138,50 @@ db-migrator 22 项中与本批直接相关：`SeedManifestLoaderTest`(4) 加载�
 | 链接检查 | `npm run docs:links:check` → **exit 0**（新增 12 个图片引用均解析成功） |
 | 敏感扫描 | `docs-quality.mjs --scope=sensitive --allow-draft` → **exit 0**（无 JWT/Bearer/私钥模式，含新增 checkpoint 与 srm.md 章节） |
 
-### Step 6 精确提交与推送 — IN_PROGRESS
+### Step 6 精确提交与推送 — DONE
 
-已完成：有界远端 fast-forward 核验 —— `git ls-remote origin refs/heads/codex/scaffold-upgrade` = `ace8bf737695e7a63e3c576882f29cbf200782ff`，
-与本地 HEAD 完全相同，`git merge-base --is-ancestor <remote> HEAD` exit 0 → **无分叉，可 fast-forward**。
+| 项 | 实测结果 |
+| --- | --- |
+| 提交前 fast-forward 核验 | `git ls-remote` = `ace8bf737695e7a63e3c576882f29cbf200782ff` == 本地 HEAD，`merge-base --is-ancestor` exit 0 → 无分叉 |
+| stage 方式 | `git add --pathspec-from-file=scripts/.work/qoder-stage-pathspec.txt`，**30 条显式路径**；未用 `git add .` |
+| `git diff --cached --name-only` | 恰好 30 个文件；未暂存余量 **正好等于 §2.3 排除项清单**（无 TEMP 凭证、无 `*.patch`、无 debug PNG、无 `scripts/.work/`） |
+| `git diff --cached --check` | exit 0（无空白错误） |
+| secret scan（仅暂存内容） | 18 个文本文件 / 1813 新增行 / 7 种模式（JWT、Bearer、私钥、URL 内凭证、secret 赋值、AWS、GH token）→ **CLEAN**；仅输出结论，未回显内容 |
+| commit | `653afe3c9ca148775e9c027f8d05cac25e8223e4` `test(e2e): close SRM supplier quotation gap`，30 files changed, +1813/-6 |
+| push | `FAST_FORWARD_PROVEN=yes` → `PUSH_EXIT=0` → `REMOTE_AFTER_PUSH=653afe3c9ca148775e9c027f8d05cac25e8223e4` |
+| 交付状态 | **DELIVERY=PUSHED**（remote HEAD == local HEAD）；`origin` 配了双 push URL，gitee 与 github **均** `ace8bf7..653afe3` fast-forward |
+| 未做的危险操作 | 未 amend 回填远端 SHA、未 reset/restore/checkout/stash/clean/rebase/merge/force push、未 unstage 任何不属于本批的内容 |
 
-待执行：用 `git add --pathspec-from-file=scripts/.work/qoder-stage-pathspec.txt`（**30 条显式路径，未用 `git add .`**）stage，
-再做 `git diff --cached --name-only` / `--check` / 仅暂存内容 secret scan，确认未混入 §2.3 排除项后 commit 并 push。
+阶段 A 完成定义（主交接 §7）五项**全部满足** → `SRM_SUPPLIER_QUOTATION_GAP=CLOSED; DELIVERY=PUSHED`。
 
-提交后远端 SHA 写入执行响应，**不 amend 回填、不循环创建文档提交**。
+备注：`.workbuddy/` 在 Step 0 时存在于 `git status`，本轮结束时已不在列表中——属其他工具活动，本批未读写也未提交该目录。
 
 
-## 2. 本轮变更文件（阶段 A）
+## 2. 本轮变更文件
 
-已修改/新增，均属本批范围：
+### 2.1 阶段 A（已提交于 `653afe3`）
 
-- `omni-frontend/e2e-docs/flows/srm.flows.spec.ts`（untracked，重写）
+- `omni-frontend/e2e-docs/flows/srm.flows.spec.ts`（重写，原为 untracked）
 - `database/changelog/auth/0005-admin-procurement-approval-candidate.yaml`（新增）
 - `database/changelog/auth/db.changelog-auth.yaml`（+2 行 include）
 - `database/seed/manifest.yaml`（+25 行断言）
 - `scaffold/catalog/modules.yaml`（procurement provisioningSeedIds +1）
-- `scripts/sql/seed/auth.sql`（**还原到 HEAD**，净变更 0）
-- `omni-backend/omni-auth/src/test/java/com/omni/auth/e2e/E2eTokenFixture.java`（TTL 600→1200，沿用既有未提交修改）
-- `omni-backend/omni-procurement/.../QuotationSubmittedConsumer.java`、`QuotationSubmittedServiceImpl.java`、`QuotationSubmittedServiceImplTest.java`（沿用既有未提交修改，本轮完成回归验证）
+- `scripts/sql/seed/auth.sql`（**还原到 HEAD**，净变更 0，未进入提交）
+- `docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-portal-quotation-{invitations,form,submitted}.png`（12 张）
+- `omni-frontend/e2e-docs/screenshot-manifest.yaml`（+12 条）、`screenshot-coverage.yaml`（SRM gaps/assets）
+- `docs/srm.md`（+59 行截图章节）、`docs/docs-manifest.yaml`（srm 源摘要）
+- `omni-backend/omni-auth/.../E2eTokenFixture.java`（TTL 600→1200）
+- `omni-backend/omni-procurement/.../QuotationSubmittedConsumer.java`、`QuotationSubmittedServiceImpl.java`、`QuotationSubmittedServiceImplTest.java`
+- 5 份证据文档：主交接、两份旧交接（含新增更正节）、本 checkpoint、用户执行提示词
 
-不提交的临时文件（§2.3 排除项 + 本轮新增辅助）：
+### 2.2 阶段 B/C（待提交）
+
+- `docs/srm.en.md`、`docs/srm.jp.md`、`docs/srm.kr.md`（修正与源矛盾的「Phase 2 报价预留」陈旧章节）
+- `docs/i18n-review-queue.md`（`npm run docs:i18n:queue` 重生成）
+- `docs/evidence/scaffold-upgrade/qoder-continuous-progress-2026-09-03.md`（本文件，阶段 B/C/D 记录）
+- 阶段 B **未修改**任何代码、coverage、manifest 或图片（实际闭环数 0）
+
+### 2.3 不提交的临时文件
 
 - `scripts/.work/issue-e2e-tokens.ps1`、`issue-e2e-tokens.sh`（本轮修正）
 - `scripts/.work/qoder-check-changelog.sql`、`qoder-check-assertion.sql`（本轮只读核查）
@@ -171,15 +190,179 @@ db-migrator 22 项中与本批直接相关：`SeedManifestLoaderTest`(4) 加载�
   `login-state-check.png`、`omni-frontend/console-btn-home.png`、`omni-frontend/.artifacts/`、`omni-frontend/scripts/`、
   `scripts/.work/` 既有脚本、`docs/scaffold-upgrade-task-handoff-2026-08-27.md`
 
-## 3. 阶段 B/C/D 状态
+## 3. 阶段 B：截图技术 gaps
 
-| 阶段 | 状态 | 说明 |
+### 3.1 实际范围（以 `screenshot-coverage.yaml` 为准，非沿用旧队列描述）
+
+12 个模块，**39 个 gaps**，其中 8 个模块未达 `covered`/`exempt`（即 strict 的 8 个失败）：
+
+| 模块 | status | required_flows | 已有 assets | manifest 条目 | gaps |
+| --- | --- | --- | --- | --- | --- |
+| authentication | covered | 5 | 12 | 16 | 0 |
+| scheduling-workspace | covered | 8 | 6 | 16 | 0 |
+| crm | covered | 7 | 13 | 16 | 0 |
+| permissions-exceptions | covered | 7 | 7 | 24 | 0 |
+| system-management | partial | 14 | 6 | 8 | 3（most-management-flows, detail-and-action-states, failure-states） |
+| messaging-monitoring | partial | 5 | 3 | 4 | 4（retry, dead-letter, trace-diagnosis, detail-and-action-states） |
+| workflow | partial | 10 | 3 | 4 | 5（model-lifecycle, countersign, tracking, detail-and-action-states, failure-states） |
+| srm | partial | 8 | 15 | 20 | 3（admission-lifecycle, stable-mobile-flow, detail-and-action-states） |
+| procurement | partial | 9 | 4 | 10 | 10（material, requisition-approval, rfq, quotation-receipt, comparison, purchase-order, goods-receipt + 3 状态） |
+| asset | partial | 8 | 1 | 4 | 10（receipt-card, ledger, allocation, acceptance, return, transfer-approval, disposal-approval + 3 状态） |
+| scaffold-development | missing | 4 | 0 | 0 | 2（implementation-not-yet-delivered, all-scenes） |
+| operations | missing | 5 | 0 | 0 | 2（observability-not-yet-delivered, all-scenes） |
+
+跨模块高频 gap：`detail-and-action-states` 出现于 6 个模块；`failure-states` 2、`success-result` 2、`failure-or-forbidden` 2、`all-scenes` 2。
+
+### 3.2 可构造性实测证据（决定哪些 gap 可真实关闭）
+
+只读数据库计数（`deleted=0`，2026-09-03 阶段 B 分诊时实测）：
+
+| 对象 | 活行 | 含义 |
 | --- | --- | --- |
-| B 截图 gaps 队列 | NOT_STARTED | 待 A 收口后以实际 `screenshot-coverage.yaml` 的 required_flows/gaps 为范围推进 |
-| C 四语言文档预审 | NOT_STARTED | 待与截图相关的源文档更新后，按实际 review queue P0→P1→P2 |
-| D 汇总验证与交付 | NOT_STARTED | 常规构建验证，不等于 G8 |
+| `proc_material` | **0**（总 51，全部 `deleted=1`，`update_by=admin`） | 物料目录页为空；每次截图需自建 fixture 物料 |
+| `proc_material_category` | **0**（总 74） | **含 13 行 bootstrap 种子品类被误删 —— 见 3.3** |
+| `proc_tenant_config` | 1 | 正常 |
+| `proc_approval_route` | 9 | 含历史 E2ESQ 残留 |
+| `proc_requisition` / `proc_rfq` | 3 / 3 | 均为历史 E2ESQ 残留（RFQ-1-15/16/17） |
+| `proc_purchase_order` / `proc_goods_receipt` | **0 / 0** | 订单与收货链从未跑通 |
+| `ast_asset` / `ast_transfer` / `ast_disposal` / `ast_asset_history` / `ast_inbox_event` | **全部 0** | 资产模块无任何业务数据 |
+| `srm_supplier` / `_enrollment` / `_invite` / `_portal_user` / `_evaluation` / `_risk_assessment` | 各 **1** | SRM 管理页可出列表/详情截图 |
+| `srm_quotation` | 3 | 历史残留 |
+| `wf_process_model` / `_version` | 8 / 8 | 模型页有真实数据 |
+| `wf_process_instance_ext` / `wf_process_start_request` | 23 / 23 | 实例跟踪页有真实数据 |
+| `wf_todo_task` / `wf_cc_record` / `wf_delegation_rule` / `wf_form_schema` | 全部 0 | 待办/抄送/委派/表单无数据 |
+| `sys_mq_message`（按库） | procurement 562、base 35、srm 34、workflow 23、crm 21、asset/auth 0 | MQ 页读 omni_base（35 行） |
 
-## 4. Gate 与外部阻塞（保持真实状态，不因 A-D 推进而改动）
+### 3.3 BLOCKED：新发现 DATA_DEFECT（种子品类被误删，影响 G1 与 procurement/asset 全部 gaps）
+
+**现象**：manifest 断言 `procurement-default-config` 期望 `expectedRows: 14`、`expectedSha256: d1aebd181f…`；
+按断言原文在运行库实跑只返回 **1 行**（仅 `config`，品类贡献 0 行）。
+→ `SeedVerificationService.verifyAll()` 在此库会失败，进而阻断 `adopt-current` 预检（G1 相关）。
+
+**根因归属（硬证据）**：
+
+- `proc_material_category` ids **1-13** 为 bootstrap 种子品类（`IT_DEVICE / OFFICE_SUPPLY / RAW_MATERIAL / OTHER / LAPTOP / MONITOR / PERIPHERAL / STATIONERY / PAPER / METAL / ELECTRONIC / PLASTIC / SERVICE`），`create_time` 均为 **2026-08-28 13:15:25**，与 `omni_procurement.DATABASECHANGELOG` 中 `procurement-0002-bootstrap-seed`（EXECUTED，同一时刻）吻合。
+- 这 13 行 `deleted=1`、`update_by=NULL`、`update_time` **全部为同一时刻 2026-09-03 12:20:12**。
+- 单一相同时间戳 + `update_by` 为空 = **直接批量 SQL UPDATE**，而非正式 API 删除（API 路径会写 `update_by='admin'`，对比：另 61 行 `update_by='admin'` 均为历次 E2E 自建自删的品类）。
+- 该时刻 **早于本批**（本批 E2E 为 16:06-16:08）；且本批清理标记为 `update_by='e2e-cleanup-1788422814826'`，**从未触碰品类表**（本批 4 个品类由 afterAll 经正式 API 删除，属 `admin` 那 61 行）。
+- 因此：**本批无责**。推断为更早会话的「精确 DB 软删」未严格限定 E2ESQ 前缀，连带抹除了 bootstrap 种子目录。
+
+**建议修复（未执行）**：将 ids 1-13 且 `tenant_id=1` 且 `update_by IS NULL` 且 `deleted=1` 的 13 行还原为 `deleted=0`（事务 + `ROW_COUNT()=13` 核对），即可使运行库重新满足 `procurement-default-config` 断言。
+
+**为何不自行修复**：用户执行指令明确「只清理本次任务各阶段确认归属的 tenant+runStamp+资源 ID；历史残留独立列出」、「无法构造的场景、新发现的 PRODUCT_DEFECT…逐项登记 BLOCKED 与所需输入」、「不擅自…拓展修复」。这 13 行不属本批归属，恢复它们是对共享环境历史数据的写入，需单独授权。
+→ 分类：**BLOCKED / DATA_DEFECT**，所需输入：授权执行上述 13 行还原（或由运维在正式迁移中重放种子）。
+
+**连带影响**：`procurement` 的 `material` gap 与 `asset` 全部 10 个 gap 在目录为空时无法产出有意义的正式图；
+asset 建卡只能由采购收货（`qualityStatus=PASS && assetManaged=true`）摄入，而 PO/GR 均为 0 行，
+因此 asset 任一 gap 都需先跑通「物料(assetManaged) → 请购 → 审批 → RFQ → 报价 → 定点 → PO → 收货 → 建卡」全链。
+
+### 3.4 阶段 B 逐项分类（未开始实际闭环）
+
+| 项 | 分类 | 依据 / 所需输入 |
+| --- | --- | --- |
+| workflow `tracking` | EXECUTABLE（低成本、只读） | `/admin/workflow/instance` 有 23 个真实实例；可复用 `admin.flows.spec.ts` 的 scene 模式，无写入、无清理 |
+| workflow `model-lifecycle`（只读部分） | EXECUTABLE（中） | 8 个模型/版本已在；发布/校验等写操作需额外 fixture |
+| srm `detail-and-action-states` | EXECUTABLE（中） | supplier/evaluation/risk 各 1 行真实数据可出详情页 |
+| srm `admission-lifecycle` | EXECUTABLE（高） | 需跑完整 Portal 注册 Saga（inviteToken + requestId + 准入审批 + 激活） |
+| srm `stable-mobile-flow` | EXECUTABLE（中） | 参照 procurement 已有 390×844 / 1024×768 special_viewports 模式 |
+| system-management 3 gaps | EXECUTABLE（高体量） | 14 个 required_flows × 4 语言；`most-management-flows` 本身即大批量 |
+| messaging-monitoring `retry`/`dead-letter` | EXECUTABLE（中，需谨慎） | 需构造 FAILED/DEAD_LETTER 消息；退避为 `2^retryCount × 10s`，构造死信耗时且会向共享 relay 注入失败消息 |
+| messaging-monitoring `trace-diagnosis` | EXECUTABLE（中） | 需 Trace ID 排障页面真实数据 |
+| workflow `countersign` | EXECUTABLE（高） | 需会签多实例模型与多审批人身份；现有测试身份仅 admin/supplier1，**可能需新增身份→待确认** |
+| procurement `material` | BLOCKED（依赖 3.3） | 目录活行为 0；修复种子后可低成本闭环 |
+| procurement `requisition-approval`/`rfq`/`quotation-receipt` | EXECUTABLE（高） | 阶段 A 已验证可构造该链；但截图内容将是自建测试数据 |
+| procurement `comparison`/`purchase-order`/`goods-receipt` | EXECUTABLE（很高） | 需定点→PO→收货全链；当前 PO/GR 为 0 |
+| asset 10 gaps | BLOCKED（依赖 3.3 + 全链） | `ast_*` 全 0；建卡依赖采购收货摄入，需先跑通 procurement 全链 |
+| scaffold-development 2 gaps | BLOCKED / 需单独设计 | gap 名即 `implementation-not-yet-delivered`；4 个流程为 CLI 非页面流程，**不得伪造 UI 图**，需按既有文档标准提供可复核的真实命令输出证据，并需决定登记形态（`exempt` 需授权，不得自行标记） |
+| operations 2 gaps | BLOCKED / 需单独设计 | gap 名即 `observability-not-yet-delivered`；可观测栈为 Compose/Grafana 基础设施，非应用页面，同上 |
+
+**阶段 B 实际闭环数：0**。已完成的是范围核定、可构造性实测与逐项分类（含 1 项新发现 DATA_DEFECT 的完整取证）。
+未擅自 `exempt`、未删除任何 `required_flow`、未修改检查器或业务规则。
+
+## 4. 阶段 C：四语言文档预审与修订
+
+### 4.1 队列实测
+
+`npm run docs:i18n:queue` 重新生成成功（exit 0）：**中文事实源 38 篇，译文待复核 114 篇（en/ja/ko 各 38），已完成人工复核 0 篇**。
+优先级：**P0 system-truth 3 篇**（architecture `bb2700158866`、api-contract `96cebb47233a`、core-flows `2d2afd48d592`）；
+**P1 开发/模块指南 8 篇**（backend-patterns、frontend-patterns、scheduling、workflow、crm、**srm `aa1a1e2a96a5`**、mq-reliability、guide-scaffold-development）；**P2 其他 27 篇**。
+`docs/i18n-review-queue.md` 因 srm 源摘要变化而重生成，已纳入本轮提交。
+
+### 4.2 srm 组预审记录（P1，本轮实质完成 1 组）
+
+- **源**：`docs/srm.md`，摘要 `aa1a1e2a96a5f37686f12c03b226224e8ff5d3eea69877b7bbbf14b0b12f1d8a`（本批阶段 A 新增截图章节后）。
+- **译文**：`docs/srm.en.md`、`docs/srm.jp.md`、`docs/srm.kr.md`（均 445-448 行，章节结构与源一致，`## 10.` 分别在 424/426/426 行）。
+- **检查范围**：章节结构对齐、主要流程与前置条件、API 路径、权限码、术语、数字与精度、代码块与反引号标识、图片引用、正字法。
+- **发现的问题（严重，事实性矛盾）**：三份译文在 §9 各保留一个中文源**已不存在**的子章节「Phase 2 报价预留 / Phase 2 Quotation Reservation / Phase 2 見積り予約 / Phase 2 견적 예약」，声称「MVP 不创建报价表、不注册报价端点、不发行 `srm:portal:quotation` 权限」。
+  该陈述与**本批已验证的运行事实直接矛盾**：`srm_quotation`/`srm_quotation_line`/`srm_quotation_request` 三表均存在且有真实数据；`srm:portal:quotation` 权限存在（MENU，path `/400/440/444/`，status=1）；四语言 E2E 已通过该端点真实提交报价并流转 QUOTED。
+  结构计数也印证偏差：中文源 27 个 `###`，en 译文 26 个。
+- **已做修改**：将三份译文的该子章节替换为与中文源一致的「Procurement 报价集成」完整译文（门户三端点、提交请求字段白名单、服务端派生字段、`srm_quotation`/`srm_quotation_request` 幂等与唯一性约束、金额精度 `DECIMAL(19,6)`/`DECIMAL(19,4)`、同事务与 409 语义、`version=0` 创建哨兵、事件 payload 字段与 Inbox 幂等消费）。代码块、API 路径、权限码、表名与字段名保持不翻译。另修正日文译文混入的中文字形（身份→身分、幂等→冪等）。
+- **剩余疑问 / 未完成**：中文源本批新增的「### 供应商报价流程截图（四语言）」（含公共前置条件表与三个步骤四要素、12 个图片引用）**尚未译入 en/ja/ko**，三份译文仍缺该节；插入锚点为各文件 `## 10.` 之前。这是明确、有界、可续做的下一项。
+- **状态处理**：三份译文在 `docs/docs-manifest.yaml` 中**仍保持 `present-unverified` / `reviewed_at: null`**。本轮属 Qoder 实质性预审与修订，**不替代 preflight 指定的独立 Codex final review 或人工验收**，未批量填 `synchronized`，未把自审冒充外部验收。
+- **校验**：修改后 `npm run docs:links:check` exit 0；`docs-quality.mjs --scope=sensitive --allow-draft` exit 0。
+
+### 4.3 阶段 C 其余项
+
+P0 3 篇 ×3、P1 其余 7 篇 ×3、P2 27 篇 ×3 = **111 项译文 NOT_STARTED**。按同一源成组推进，下一组建议 P0 `architecture`。
+
+## 5. 阶段 D：汇总验证与分类
+
+### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）
+
+| 验证 | 命令 | 结果 |
+| --- | --- | --- |
+| 后端定向编译 | `mvnw.cmd -pl omni-auth,omni-procurement,omni-db-migrator test-compile` | BUILD SUCCESS 13.9s |
+| fixture TTL | `javap -p -constants …E2eTokenFixture` | `TOKEN_TTL_SECONDS = 1200l` |
+| Quotation 回归 | `mvnw.cmd -pl omni-procurement test -Dtest=QuotationSubmittedServiceImplTest` | 9/0/0/0，BUILD SUCCESS |
+| 种子与迁移契约 | `mvnw.cmd -pl omni-db-migrator test` | 22/0/0/0，BUILD SUCCESS |
+| 前端定向静态检查 | `npx eslint …srm.flows.spec.ts --max-warnings 0`；`npx tsc --noEmit --strict …` | 均 exit 0 |
+| 用例发现 | `playwright test srm.flows --list` | Total: 4 tests |
+| 真实 E2E | `playwright test srm.flows --config playwright.docs.config.ts` | **4 passed / 0 skipped（1.4m）** |
+| strict 截图门禁 | `npm run docs:screenshots:check` | exit 1，**8 个模块覆盖失败**（预期值，无新增错误） |
+| 链接门禁 | `npm run docs:links:check` | exit 0 |
+| 敏感内容扫描 | `docs-quality.mjs --scope=sensitive --allow-draft` | exit 0 |
+| 暂存区 secret scan | `scripts/.work/qoder-secret-scan.mjs`（7 模式 / 1813 新增行） | CLEAN |
+| Git 交付 | `qoder-push-guard.ps1` | FAST_FORWARD_PROVEN=yes；PUSH_EXIT=0；DELIVERY=PUSHED |
+
+常规构建验证**不等于** G8；本会话**未**执行 G8 once-only 综合矩阵，未宣称全工程终验完成。
+
+### 5.2 状态分类
+
+**DONE（有本会话实测证据）**
+
+- 阶段 A 全部 Step 0-6：C3/C4/C5 前置修正、定向编译与验证、四语言真实 E2E（4 passed/0 skipped）、12/12 图片生成与质检、28 行本批数据事务软删与 0 残留、凭证销毁、manifest/coverage/`docs/srm.md`/docs-manifest 登记、两份旧交接与主交接结果记录更正、精确提交 `653afe3` 与推送（双远端 fast-forward）。
+- 阶段 B 的范围核定、可构造性实测取证、逐项分类，以及 1 项新 DATA_DEFECT 的完整归因。
+- 阶段 C 的队列重生成与 srm 组（1 源 + 3 译文）实质预审与修订。
+
+**IMPLEMENTED_NOT_EXECUTED**
+
+- 无。本批所有代码/数据/文档变更均已执行并通过对应定向验证。
+
+**BLOCKED（含所需输入）**
+
+| 项 | 阻塞原因 | 所需输入 |
+| --- | --- | --- |
+| `procurement-default-config` 种子断言在运行库失败（实际 1 行 / 期望 14） | 13 行 bootstrap 种子品类于 2026-09-03 12:20:12 被直接批量 SQL 软删（`update_by=NULL`），非本批所为 | 授权还原 ids 1-13（事务 + `ROW_COUNT()=13`），或由运维在正式迁移重放种子 |
+| procurement `material`；asset 全部 10 gaps | 依赖上一项；且 PO/GR/`ast_*` 全为 0 行 | 先修复种子目录，再授权跑通 采购→收货→建卡 全链 |
+| scaffold-development 2 gaps；operations 2 gaps | 非页面流程（CLI / 可观测基础设施），gap 名即 `*-not-yet-delivered`；禁止伪造 UI 图，且不得自行 `exempt` | 决定登记形态与证据标准（真实命令输出/仪表盘证据 vs 授权 `exempt`） |
+| workflow `countersign` | 需多审批人身份；现有受信任测试身份仅 admin/supplier1，禁止临时越权 | 确认新增测试身份（登记待确认，不自行创建） |
+| G1 / G7 / WP-10 / G8 | 外部运维 adoption 决策；独立 Codex final review 与 114 篇人工复核；前置未满足 | 外部输入，本会话不代办、不轮询、不提前执行 |
+| 历史残留（E2ESQ RFQ-1-15/16/17 及对应 `srm_quotation` 3 行）；TEMP 中 12 个更早会话凭证文件 | 不属本批归属 | 单独授权后清理 |
+
+**NOT_STARTED**
+
+- 阶段 B 的实际 gap 闭环：39 项中 0 项关闭（已完成分诊与取证）。
+- 阶段 C 其余 111 项译文预审（P0 3 篇、P1 其余 7 篇、P2 27 篇，各 ×3 语言），以及 srm 组截图章节的三语补译。
+- backend 全量 `clean install`、frontend 全仓 `npm run build` / `npm run lint`、G8。
+
+### 5.3 收口原因（如实说明，不谎称全部完成或全部外部阻塞）
+
+阶段 A 已按完成定义五项全部满足并推送。阶段 B/C 的剩余项**大多技术上可执行、并非外部阻塞**，
+但每一项闭环都需一轮与阶段 A 同量级的工作（四语言文案提取 → 重签 Token → 真实 E2E → 图片质检 → 清理 → manifest/coverage/指南/摘要 → strict → 提交推送）。
+本会话在**上下文/运行预算**这一平台限制下收口，而非因为剩余项全部被外部阻塞。
+下一接手方可从 5.2 的 EXECUTABLE 低成本项（workflow `tracking`）直接续做，无需重开全仓审计。
+
+## 6. Gate 与外部阻塞（保持真实状态，不因 A-D 推进而改动）
 
 | 项 | 状态 |
 | --- | --- |
@@ -194,16 +377,28 @@ strict 预期：关闭 `supplier-quotation` 一个 gap 后 SRM 仍为 `partial`�
 `detail-and-action-states`），`npm run docs:screenshots:check` 仍应是 **8 个已知模块覆盖失败、exit 1**。
 不得为降数修改检查器、造假 `covered` 或吞掉失败输出（主交接 C1，本轮继续遵守）。
 
-## 5. 用量与运行标识
+## 7. 用量与运行标识
 
 - 模型：客户端选定的 Qwen3.8-Max，未切换 Auto/其他计费模型，未购买资源包，未启用多 Agent 并发写入。
 - 免费额度剩余：**UNKNOWN** —— Agent 无法读取客户端用量面板，不编造计费数字；请在客户端用量面板核对。
-- 后台运行进程：terminal 1（`mvnw test-compile`，已结束，BUILD SUCCESS）。当前无遗留后台进程。
-- 共享 Docker/数据库的写入型 E2E 串行执行，未并发。
+- 后台运行进程：无遗留。曾使用 terminal 1 运行 `mvnw test-compile`（已结束，BUILD SUCCESS）与 `run-srm-e2e.ps1`（已结束，PLAYWRIGHT_EXIT=0）。
+- 共享 Docker/数据库的写入型 E2E 串行执行（`workers: 1`），未并发；未重建全栈、未清空卷、未关闭健康依赖服务。
+- 本轮临时辅助文件（均不提交）：`scripts/.work/` 下 `issue-e2e-tokens.ps1`/`.sh`（已修）、`run-srm-e2e.ps1`、`destroy-e2e-credentials.ps1`、`qoder-push-guard.ps1`、`qoder-secret-scan.mjs`、`qoder-cleanup-batch.sql`、`qoder-check-*.sql`、`qoder-mvn-*.log`、`qoder-srm-e2e.log`、`qoder-cleanup-result.txt`、`qoder-stage-pathspec.txt`；`omni-frontend/scripts/.work/qoder-gap-survey.mjs`。
+- 工具异常记录：两次 PowerShell 命令返回 ExitCode=1 但实际成功（Maven 测试与 git push），原因是 PowerShell 将原生命令的 stderr 进度输出当作 NativeCommandError；已以命令自身的结构化输出（`BUILD SUCCESS`、`PUSH_EXIT=0`、`DELIVERY=PUSHED`）为准，未误判为失败。一次 `docker exec` 在 `has_risk` 沙箱下被拒（`docker.exe 拒绝访问`），改用与其余只读查询相同的执行路径后成功，未绕过任何用户级安全确认。无 TOOL_TIMEOUT。
 
-## 6. 恢复入口
+## 8. 恢复入口
 
 上下文压缩或进程重启后：读本文件 → `git status --short` + `git log -1 --oneline` + `docker compose ls` 做最小增量核对 →
-按「下一条具体操作」继续。**禁止重开全仓审计**，禁止丢弃已有成果。
+按下列具体操作继续。**禁止重开全仓审计**，禁止丢弃已有成果。
+
+下一条具体操作（按优先序）：
+
+1. **取得授权后修复 3.3 的 DATA_DEFECT**（还原 `proc_material_category` ids 1-13），随后重跑 `procurement-default-config` 断言确认 14 行；这会同时解锁 procurement `material` 与 asset 链。
+2. **最低成本可执行项**：workflow `tracking` —— 在 `omni-frontend/e2e-docs/flows/admin.flows.spec.ts` 的 `adminScenes` 增加
+   `{ id: 'workflow-instances', route: '/admin/workflow/instance', expectText: [...] }`（四语言文案需从 `src/locales/*.ts` 的
+   `workflow.processKey`/`businessKey`/`initiator`/`pending` 精确提取，控制台乱码不可信，应用 Node 以 UTF-8 读出）；
+   该场景**只读、无写入、无需 `E2E_MUTATIONS`、无需清理**；随后 manifest +4 条、coverage 移除 `tracking`、strict 重跑、提交推送。
+3. **阶段 C 下一组**：P0 `architecture`（源摘要 `bb2700158866`）及其 en/ja/ko 三份译文；同时补译 srm 组尚缺的截图章节（锚点：各译文 `## 10.` 之前）。
+4. 任何新增测试身份需求（如 workflow `countersign`）先登记待确认，不自行创建、不给 admin/supplier1 越权。
 
 防空转：同一问题连续三次尝试无新证据或实质进展即标 BLOCKED，停止盲试，转向不依赖它的独立工作。

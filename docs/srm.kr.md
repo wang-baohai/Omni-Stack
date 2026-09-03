@@ -419,9 +419,19 @@ omni-frontend/src/
 3. 이벤트 봉투는 통일 형식 준수; payload에 전체 PII 포함 안 함
 4. 소비자는 `payload.eventId`로 중복 제거하여 멱등이어야 함
 
-### Phase 2 견적 예약
+### Procurement 견적 통합
 
-견적은 아직 구축되지 않은 `omni-procurement`의 RFQ와 초대 관계에 의존. MVP는 견적 테이블을 생성하지 않고, 견적 엔드포인트를 등록하지 않으며, `srm:portal:quotation` 권한을 발급하지 않음. Phase 2 통합 시 `srm_quotation`/`srm_quotation_line` 테이블을 생성하고, DDL, 마이그레이션 스크립트, 권한, 이벤트 계약을 동시에 보충.
+포털 엔드포인트:
+
+- `GET /api/srm/portal/quotation/invitations`: 현재 PortalUser의 RFQ 초대를 목록하고 로컬 견적 상태를 병합.
+- `GET /api/srm/portal/quotation/invitations/{rfqId}`: 초대, RFQ 행 스냅숏과 현재 견적 반환.
+- `POST /api/srm/portal/quotation`: 견적을 제출하거나 `version`으로 업데이트.
+
+제출 요청은 `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]` 만 허용. tenantId, supplierId, 공급업체명, RFQ 번호, 자재, 단위, 수량, 통화, 행 금액과 총액은 모두 신뢰할 수 있는 신원 정보·PortalUser·Procurement 초대 상세에서 획득하거나 서버측에서 계산.
+
+`srm_quotation.request_id` 는 마지막 성공 요청을 저장하고, `srm_quotation_request` 는 `(tenant_id, request_id)` 로 요청 이력과 SHA-256 requestHash 를 영구 보존하며 `(tenant_id, quotation_id, target_version)` 으로 결과 버전을 연관. `srm_quotation` 은 `(tenant_id, rfq_id, active_supplier_guard)` 로 동일 공급업체가 동일 RFQ 에 대해 미삭제 견적을 딱 1 건만 갖도록 보장. `srm_quotation_line.rfq_line_id` 는 필수이며 제출 행 집합은 RFQ 스냅숏과 완전히 일치해야 함. 금액 정밀도: 단가/수량 `DECIMAL(19,6)` 이고 0 보다 큼, 행 금액/총액 `DECIMAL(19,4)` 이고 0 보다 큼.
+
+견적, 명세, `srm_quotation_request` 와 `srm.quotation.submitted.v1` Outbox 는 반드시 동일 트랜잭션으로 커밋; 동일 requestId+requestHash 재시도는 현재 견적 스냅숏을 반환하고 이벤트를 중복 발행하면 안 됨, 동일 requestId 에 다른 의도는 409 반환. 첫 요청은 생성 센티널 `version=0` 을 사용하고 첫 버전 견적은 `version=1` 부터 시작하여, 동시 생성 의도가 첫 버전을 업데이트 가능 버전으로 오인하는 것을 방지. 이벤트 payload 에는 최소한 `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil` 를 포함하며, Procurement 은 eventId Inbox 로 멱등 소비.
 
 ## 10. 테스트
 

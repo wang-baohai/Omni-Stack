@@ -3,7 +3,7 @@
 > 本文件由 `node tools/omni-cli/scripts/docs-review-queue.mjs --generate` 自动生成，
 > 请勿手工编辑条目；复核结论由复核人在 docs/docs-manifest.yaml 更新 status/reviewed_at 后重新生成本文件。
 
-- 生成时间：2026-09-01
+- 生成时间：2026-09-03
 - 中文事实源：38 篇；译文待复核：114 篇（en-US/ja-JP/ko-KR 各 38）
 - 已完成人工复核：0 篇
 
@@ -31,7 +31,7 @@
 | scheduling | docs/scheduling.md | 677b2be31716 | present-unverified | present-unverified | present-unverified |
 | workflow | docs/workflow.md | 05c35992d406 | present-unverified | present-unverified | present-unverified |
 | crm | docs/crm.md | 8ddf46014cbb | present-unverified | present-unverified | present-unverified |
-| srm | docs/srm.md | 897f5a1bab96 | present-unverified | present-unverified | present-unverified |
+| srm | docs/srm.md | aa1a1e2a96a5 | present-unverified | present-unverified | present-unverified |
 | mq-reliability | docs/mq-reliability.md | 57de14bee422 | present-unverified | present-unverified | present-unverified |
 | guide-scaffold-development | docs/guides/scaffold-development.md | bb5c758f989a | present-unverified | present-unverified | present-unverified |
 

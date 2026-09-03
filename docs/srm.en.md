@@ -417,9 +417,19 @@ omni-frontend/src/
 3. Event envelopes follow the unified format; payload must not contain full PII
 4. Consumers must be idempotent, deduplicating by `payload.eventId`
 
-### Phase 2 Quotation Reservation
+### Procurement Quotation Integration
 
-Quotations depend on the yet-to-be-built `omni-procurement` RFQ and invitation relationships. MVP does not create quotation tables, register quotation endpoints, or issue `srm:portal:quotation` permissions. When Phase 2 integrates, `srm_quotation`/`srm_quotation_line` tables will be created alongside DDL, migration scripts, permissions, and event contracts.
+Portal endpoints:
+
+- `GET /api/srm/portal/quotation/invitations`: lists the RFQ invitations of the current PortalUser and merges the local quotation status.
+- `GET /api/srm/portal/quotation/invitations/{rfqId}`: returns the invitation, the RFQ line snapshot and the current quotation.
+- `POST /api/srm/portal/quotation`: submits a quotation, or updates it by `version`.
+
+The submit request only accepts `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]`. tenantId, supplierId, supplier name, RFQ number, material, unit, quantity, currency, line amount and total amount are all taken from the trusted identity, the PortalUser and the Procurement invitation detail, or computed server-side.
+
+`srm_quotation.request_id` stores the last successful request. `srm_quotation_request` permanently keeps the request history and the SHA-256 requestHash keyed by `(tenant_id, request_id)`, and links the resulting version through `(tenant_id, quotation_id, target_version)`. `srm_quotation` uses `(tenant_id, rfq_id, active_supplier_guard)` to guarantee that one supplier holds exactly one non-deleted quotation per RFQ. `srm_quotation_line.rfq_line_id` is mandatory, and the submitted line set must match the RFQ snapshot exactly. Amount precision: unit price/quantity `DECIMAL(19,6)` and greater than 0; line amount/total amount `DECIMAL(19,4)` and greater than 0.
+
+The quotation, its lines, `srm_quotation_request` and the `srm.quotation.submitted.v1` Outbox record must be committed in the same transaction. A retry with the same requestId+requestHash returns the current quotation snapshot and must not re-publish the event; a different intent under the same requestId returns 409. The first request uses the creation sentinel `version=0` and the first quotation version starts at `version=1`, so concurrent creation intents cannot mistake the first version for an updatable one. The event payload contains at least `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil`; Procurement consumes it idempotently through the eventId Inbox.
 
 ## 10. Testing
 
