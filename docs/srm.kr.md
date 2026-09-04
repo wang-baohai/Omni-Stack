@@ -433,6 +433,99 @@ omni-frontend/src/
 
 견적, 명세, `srm_quotation_request` 와 `srm.quotation.submitted.v1` Outbox 는 반드시 동일 트랜잭션으로 커밋; 동일 requestId+requestHash 재시도는 현재 견적 스냅숏을 반환하고 이벤트를 중복 발행하면 안 됨, 동일 requestId 에 다른 의도는 409 반환. 첫 요청은 생성 센티널 `version=0` 을 사용하고 첫 버전 견적은 `version=1` 부터 시작하여, 동시 생성 의도가 첫 버전을 업데이트 가능 버전으로 오인하는 것을 방지. 이벤트 payload 에는 최소한 `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil` 를 포함하며, Procurement 은 eventId Inbox 로 멱등 소비.
 
+### 공급업체 견적 흐름 스크린샷(4개 언어)
+
+공식 이미지는 문서 전용 Playwright 테스트 케이스 `omni-frontend/e2e-docs/flows/srm.flows.spec.ts` 가 실제 실행 스택에서 생성하며, 언어별 디렉터리에 저장합니다. 다른 언어 이미지를 재사용하지 않고, 자리표시자나 성공 응답 모의로 대체하지 않습니다. 세 단계는 동일한 실제 fixture(동일 견적 요청·동일 견적)를 공유하므로, 세 장은 서로 무관한 페이지 스냅샷이 아니라 동일 업무 체인의 연속 상태입니다.
+
+공통 전제 조건(세 단계 동일):
+
+| 항목 | 내용 |
+|---|---|
+| 환경 | 로컬 Compose 전체 스택 실행, 프런트엔드 `127.0.0.1:3000`, 게이트웨이를 거쳐 `omni-procurement` 와 `omni-srm` 에 도달 |
+| 데이터 전제 | `admin` 이 공식 API 로 고유한 품목 분류와 품목을 생성 → `procurement-approval` 프로세스 모델에 결속된 구매 요청 승인 규칙 생성 → 구매 요청을 생성하고 승인에 제출 → 승인 후 견적 요청을 생성하고 `send` 실행(DRAFT→SENT, `supplier1` 초대) |
+| 조작자 | 데이터 구축은 `admin`(`SUPER_ADMIN` 과 `PROCUREMENT_MANAGER` 역할 및 `SAME_UNIT` 후보 범위 필요); 촬영 페이지의 조작자는 `supplier1`(`SUPPLIER` 역할이며 `srm_supplier_portal_user` 연결 완료) |
+| 토큰 | `E2eTokenFixture` 가 테스트 프로세스 내부에서 발급하는 단기 JWT(TTL 1200 초). 프로세스 메모리와 저장소 밖 임시 파일에만 존재하며 종료 시 파기; 문서·로그·버전 관리에 기록하지 않음 |
+| 쓰기 스위치 | `E2E_MUTATIONS=true` 를 명시적으로 설정한 경우에만 실행; 미설정 시 전체 그룹을 건너뛰고 모든 쓰기 호출은 예외를 발생 |
+| 뷰포트 | 1440×900, 문서용 시계를 고정하고 애니메이션을 비활성화하여 4개 언어 완전 일치 |
+
+공유 로컬 환경에서는 목록에 다른 역사적 견적 요청 행이 함께 표시될 수 있습니다; 테스트 케이스의 어설션과 촬영 판정은 이번 실행의 `runStamp` 로 식별되는 단일 견적 요청만을 대상으로 하며, 종료 처리도 이번 실행에서 귀속이 확인된 데이터만 정리합니다.
+
+#### 단계 1: 초대 목록(미견적)
+
+- 조작자: `supplier1`
+- 조작: 공급업체 포털을 열고 「견적 응답」 탭으로 전환
+- 기대 상태: 이번 실행의 단일 견적 요청이 목록에 표시되고, 초대 상태는 `INVITED`, 현재 견적 열은 「미견적」, 작업 열은 「견적 제출」
+
+| zh-CN | en-US |
+|---|---|
+| ![공급업체 포털 견적 초대 목록(중국어)](images/zh-CN/srm-portal-quotation-invitations.png) | ![공급업체 포털 견적 초대 목록(영어)](images/en-US/srm-portal-quotation-invitations.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![공급업체 포털 견적 초대 목록(일본어)](images/ja-JP/srm-portal-quotation-invitations.png) | ![공급업체 포털 견적 초대 목록(한국어)](images/ko-KR/srm-portal-quotation-invitations.png) |
+
+#### 단계 2: 견적 양식(단가와 유효기간 입력)
+
+- 조작자: `supplier1`
+- 조작: 대상 행에서 「견적 제출」을 클릭해 대화상자를 열고, 단가 `123.45` 를 입력하고 견적 유효기간을 견적 마감일로 설정
+- 기대 상태: 대화상자 제목에 이번 실행의 견적 요청 번호가 포함되고, 행 스냅샷에 품목 코드와 명칭, 수량 `2`, 단위와 통화 `CNY` 가 표시되며, RFQ 상태는 `SENT`, 단가와 유효기간 모두 입력됨
+
+| zh-CN | en-US |
+|---|---|
+| ![공급업체 포털 견적 양식(중국어)](images/zh-CN/srm-portal-quotation-form.png) | ![공급업체 포털 견적 양식(영어)](images/en-US/srm-portal-quotation-form.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![공급업체 포털 견적 양식(일본어)](images/ja-JP/srm-portal-quotation-form.png) | ![공급업체 포털 견적 양식(한국어)](images/ko-KR/srm-portal-quotation-form.png) |
+
+#### 단계 3: 제출 성공(QUOTED 와 견적 총액)
+
+- 조작자: `supplier1`
+- 조작: 대화상자에서 「견적 제출」을 클릭해 실제 견적을 제출하고, 이어서 「견적 요청 새로고침」을 클릭
+- 기대 상태: 「견적이 제출되었습니다」가 표시되고 대화상자가 닫힘; 초대 상태는 `srm.quotation.submitted.v1` MQ 이벤트로 비동기 `QUOTED` 로 전환되고, 현재 견적 열에 총액 `CNY 246.9`(단가 `123.45` × 수량 `2`)가 표시되며 작업 열은 「견적 수정」으로 바뀜
+
+| zh-CN | en-US |
+|---|---|
+| ![공급업체 포털 견적 제출 성공(중국어)](images/zh-CN/srm-portal-quotation-submitted.png) | ![공급업체 포털 견적 제출 성공(영어)](images/en-US/srm-portal-quotation-submitted.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![공급업체 포털 견적 제출 성공(일본어)](images/ja-JP/srm-portal-quotation-submitted.png) | ![공급업체 포털 견적 제출 성공(한국어)](images/ko-KR/srm-portal-quotation-submitted.png) |
+
+### SRM 관리측 페이지 스크린샷(4개 언어)
+
+마찬가지로 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 가 실제 실행 스택에서 생성. **읽기 전용 수집**으로 공급업체 데이터를 생성·수정·삭제하지 않으므로 쓰기 스위치도 데이터 종료 처리도 불필요. 전제 조건과 조작자는 앞 절과 동일(`admin` / `SUPER_ADMIN`, 단기 JWT 는 `E2eTokenFixture` 가 프로세스 내부에서 발급하고 종료 시 파기).
+
+- 조작: 로그인 후 공급업체 관리, 성과 평가, 위험 관리, 위험 지표 설정, 초대 관리 페이지를 순서대로 열기.
+- 기대 상태: 페이지 제목과 열 레이블이 현재 언어로 렌더링; 수집 시점에 데이터베이스에는 공급업체/평가/위험/초대 실제 레코드가 각 1 건, 위험 지표 설정이 9 건 존재.
+
+| 페이지 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 공급업체 관리(lifecycle) | ![공급업체 관리(중국어)](images/zh-CN/srm-suppliers.png) | ![공급업체 관리(영어)](images/en-US/srm-suppliers.png) | ![공급업체 관리(일본어)](images/ja-JP/srm-suppliers.png) | ![공급업체 관리(한국어)](images/ko-KR/srm-suppliers.png) |
+| 성과 평가(evaluation) | ![성과 평가(중국어)](images/zh-CN/srm-evaluations.png) | ![성과 평가(영어)](images/en-US/srm-evaluations.png) | ![성과 평가(일본어)](images/ja-JP/srm-evaluations.png) | ![성과 평가(한국어)](images/ko-KR/srm-evaluations.png) |
+| 위험 관리(risk) | ![위험 관리(중국어)](images/zh-CN/srm-risks.png) | ![위험 관리(영어)](images/en-US/srm-risks.png) | ![위험 관리(일본어)](images/ja-JP/srm-risks.png) | ![위험 관리(한국어)](images/ko-KR/srm-risks.png) |
+| 위험 지표 설정(risk) | ![위험 지표 설정(중국어)](images/zh-CN/srm-risk-config.png) | ![위험 지표 설정(영어)](images/en-US/srm-risk-config.png) | ![위험 지표 설정(일본어)](images/ja-JP/srm-risk-config.png) | ![위험 지표 설정(한국어)](images/ko-KR/srm-risk-config.png) |
+| 초대 관리(invite) | ![초대 관리(중국어)](images/zh-CN/srm-invites.png) | ![초대 관리(영어)](images/en-US/srm-invites.png) | ![초대 관리(일본어)](images/ja-JP/srm-invites.png) | ![초대 관리(한국어)](images/ko-KR/srm-invites.png) |
+
+본 그룹은 목록/설정 뷰만 닫는 것으로, `admission-lifecycle`(완전한 Portal 등록 Saga 와 진입 승인 필요)이나 `detail-and-action-states`(상세 대화상자와 작업 결과 필요)를 닫는 것과 **동일하지 않음**; `stable-mobile-flow` 는 다음 소절의 반응형 수집으로 닫음. 따라서 SRM 은 여전히 `partial`.
+
+### 공급업체 포털 반응형 안정성 스크린샷(4개 언어)
+
+`omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts` 가 실제 실행 스택에서 생성. **읽기 전용 수집**: 포털을 열고 탭을 전환하고 새로고침을 클릭할 뿐이며, 견적 제출이나 수정은 일절 하지 않음.
+
+- 전제 조건: 앞 두 소절과 동일(로컬 Compose 전체 스택, `supplier1` 의 Portal 연결 완료, 단기 JWT 는 프로세스 내부에서 발급하고 종료 시 파기).
+- 조작자: `supplier1`.
+- 조작: **390×844(모바일)** 과 **1024×768(태블릿)** 뷰포트에서 각각 공급업체 포털을 열고 「견적 응답」 탭으로 전환.
+- 기대 상태: 탭이 표시되고 클릭 가능; 「견적 요청 새로고침」과 행별 견적 작업이 좁은 폭에서 밀려나거나 가려지지 않음; 목록은 반응형으로 열을 축소(모바일은 견적 번호/제목/작업만 유지)하며 넘침 없음.
+- 실측 결과: 8 passed / 0 skipped(4개 언어 × 두 뷰포트).
+
+| 뷰포트 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 390×844 모바일 | ![포털 견적 목록 모바일(중국어)](images/zh-CN/srm-portal-quotation-mobile.png) | ![포털 견적 목록 모바일(영어)](images/en-US/srm-portal-quotation-mobile.png) | ![포털 견적 목록 모바일(일본어)](images/ja-JP/srm-portal-quotation-mobile.png) | ![포털 견적 목록 모바일(한국어)](images/ko-KR/srm-portal-quotation-mobile.png) |
+| 1024×768 태블릿 | ![포털 견적 목록 태블릿(중국어)](images/zh-CN/srm-portal-quotation-tablet.png) | ![포털 견적 목록 태블릿(영어)](images/en-US/srm-portal-quotation-tablet.png) | ![포털 견적 목록 태블릿(일본어)](images/ja-JP/srm-portal-quotation-tablet.png) | ![포털 견적 목록 태블릿(한국어)](images/ko-KR/srm-portal-quotation-tablet.png) |
+
+수집 시점에 목록에 표시된 것은 환경에 기존하던 역사적 견적 요청 행입니다(본 배치 견적 데이터는 귀속별로 정리 완료); 이미지는 실제 목록 내용을 그대로 보존하며, 데이터를 만들어 채우지 않았습니다.
+
 ## 10. 테스트
 
 SRM 모듈은 다음 테스트 스위트를 커버:

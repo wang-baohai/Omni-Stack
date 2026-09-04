@@ -431,6 +431,99 @@ The submit request only accepts `requestId/rfqId/version/validUntil/lines[{rfqLi
 
 The quotation, its lines, `srm_quotation_request` and the `srm.quotation.submitted.v1` Outbox record must be committed in the same transaction. A retry with the same requestId+requestHash returns the current quotation snapshot and must not re-publish the event; a different intent under the same requestId returns 409. The first request uses the creation sentinel `version=0` and the first quotation version starts at `version=1`, so concurrent creation intents cannot mistake the first version for an updatable one. The event payload contains at least `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil`; Procurement consumes it idempotently through the eventId Inbox.
 
+### Supplier Quotation Flow Screenshots (four languages)
+
+The official images are generated on a real running stack by the docs-only Playwright suite `omni-frontend/e2e-docs/flows/srm.flows.spec.ts`, stored per language directory, never reused across languages, and never replaced by placeholders or mocked success responses. The three steps share one real fixture (the same RFQ and the same quotation), so the three images are consecutive states of one business chain rather than unrelated page snapshots.
+
+Common preconditions (identical for all three steps):
+
+| Item | Content |
+|---|---|
+| Environment | Local Compose full stack, frontend `127.0.0.1:3000`, reaching `omni-procurement` and `omni-srm` through the gateway |
+| Data precondition | `admin` creates a unique category and material through official APIs → creates a requisition approval rule bound to the `procurement-approval` process model → creates a requisition and submits it for approval → after approval creates an RFQ and calls `send` (DRAFT→SENT, inviting `supplier1`) |
+| Operator | Data setup as `admin` (requires the `SUPER_ADMIN` and `PROCUREMENT_MANAGER` roles plus a `SAME_UNIT` candidate scope); the operator in the captured pages is `supplier1` (the `SUPPLIER` role with an established `srm_supplier_portal_user` association) |
+| Token | A short-lived JWT (TTL 1200 seconds) issued inside the test process by `E2eTokenFixture`, living only in process memory and a temporary file outside the repository, destroyed at teardown; never written into docs, logs or version control |
+| Mutation switch | Runs only when `E2E_MUTATIONS=true` is set explicitly; otherwise the whole group is skipped and every mutating call throws |
+| Viewport | 1440×900, fixed docs clock and disabled animations, identical across the four languages |
+
+On a shared local environment the list may also show other historical RFQ rows; the suite's assertions and capture decisions target only the single RFQ identified by this run's `runStamp`, and teardown only cleans data whose ownership is confirmed for this run.
+
+#### Step 1: Invitation list (not quoted)
+
+- Operator: `supplier1`
+- Action: open the supplier portal and switch to the "RFQ Quotations" tab
+- Expected state: this run's single RFQ appears in the list with invitation status `INVITED`, the current quotation column shows "Not Quoted", and the action column shows "Submit Quotation"
+
+| zh-CN | en-US |
+|---|---|
+| ![Supplier portal RFQ invitation list (Simplified Chinese)](images/zh-CN/srm-portal-quotation-invitations.png) | ![Supplier portal RFQ invitation list (English)](images/en-US/srm-portal-quotation-invitations.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![Supplier portal RFQ invitation list (Japanese)](images/ja-JP/srm-portal-quotation-invitations.png) | ![Supplier portal RFQ invitation list (Korean)](images/ko-KR/srm-portal-quotation-invitations.png) |
+
+#### Step 2: Quotation form (unit price and validity)
+
+- Operator: `supplier1`
+- Action: click "Submit Quotation" on the target row to open the dialog, enter unit price `123.45`, and set the quotation validity to the RFQ deadline
+- Expected state: the dialog title carries this run's RFQ number, the line snapshot shows the material code and name, quantity `2`, unit and currency `CNY`, the RFQ status is `SENT`, and both unit price and validity are filled in
+
+| zh-CN | en-US |
+|---|---|
+| ![Supplier portal quotation form (Simplified Chinese)](images/zh-CN/srm-portal-quotation-form.png) | ![Supplier portal quotation form (English)](images/en-US/srm-portal-quotation-form.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![Supplier portal quotation form (Japanese)](images/ja-JP/srm-portal-quotation-form.png) | ![Supplier portal quotation form (Korean)](images/ko-KR/srm-portal-quotation-form.png) |
+
+#### Step 3: Submission success (QUOTED and total amount)
+
+- Operator: `supplier1`
+- Action: click "Submit Quotation" in the dialog to submit a real quotation, then click "Refresh RFQs"
+- Expected state: the "Quotation submitted" toast appears and the dialog closes; the invitation status turns `QUOTED` asynchronously through the `srm.quotation.submitted.v1` MQ event, the current quotation column shows the total `CNY 246.9` (unit price `123.45` × quantity `2`), and the action column becomes "Edit Quotation"
+
+| zh-CN | en-US |
+|---|---|
+| ![Supplier portal quotation submitted (Simplified Chinese)](images/zh-CN/srm-portal-quotation-submitted.png) | ![Supplier portal quotation submitted (English)](images/en-US/srm-portal-quotation-submitted.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![Supplier portal quotation submitted (Japanese)](images/ja-JP/srm-portal-quotation-submitted.png) | ![Supplier portal quotation submitted (Korean)](images/ko-KR/srm-portal-quotation-submitted.png) |
+
+### SRM Administration Page Screenshots (four languages)
+
+Also generated on a real running stack by `omni-frontend/e2e-docs/flows/management.flows.spec.ts`. These are **read-only captures**: no supplier data is created, modified or deleted, so no mutation switch and no data teardown are needed. Preconditions and operator are the same as the previous section (`admin` / `SUPER_ADMIN`, short-lived JWT issued inside the process by `E2eTokenFixture` and destroyed at teardown).
+
+- Action: after login, open the Supplier, Evaluation, Risk, Risk Indicator Config and Invitation pages in turn.
+- Expected state: page titles and column labels render in the current language; at capture time the database held one real supplier/evaluation/risk/invitation record each and nine risk indicator configurations.
+
+| Page | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| Suppliers (lifecycle) | ![Suppliers (Simplified Chinese)](images/zh-CN/srm-suppliers.png) | ![Suppliers (English)](images/en-US/srm-suppliers.png) | ![Suppliers (Japanese)](images/ja-JP/srm-suppliers.png) | ![Suppliers (Korean)](images/ko-KR/srm-suppliers.png) |
+| Evaluations (evaluation) | ![Evaluations (Simplified Chinese)](images/zh-CN/srm-evaluations.png) | ![Evaluations (English)](images/en-US/srm-evaluations.png) | ![Evaluations (Japanese)](images/ja-JP/srm-evaluations.png) | ![Evaluations (Korean)](images/ko-KR/srm-evaluations.png) |
+| Risk management (risk) | ![Risk management (Simplified Chinese)](images/zh-CN/srm-risks.png) | ![Risk management (English)](images/en-US/srm-risks.png) | ![Risk management (Japanese)](images/ja-JP/srm-risks.png) | ![Risk management (Korean)](images/ko-KR/srm-risks.png) |
+| Risk indicator config (risk) | ![Risk indicator config (Simplified Chinese)](images/zh-CN/srm-risk-config.png) | ![Risk indicator config (English)](images/en-US/srm-risk-config.png) | ![Risk indicator config (Japanese)](images/ja-JP/srm-risk-config.png) | ![Risk indicator config (Korean)](images/ko-KR/srm-risk-config.png) |
+| Invitations (invite) | ![Invitations (Simplified Chinese)](images/zh-CN/srm-invites.png) | ![Invitations (English)](images/en-US/srm-invites.png) | ![Invitations (Japanese)](images/ja-JP/srm-invites.png) | ![Invitations (Korean)](images/ko-KR/srm-invites.png) |
+
+This group only closes the list/configuration views. It is **not equivalent** to closing `admission-lifecycle` (which needs the full Portal registration Saga and admission approval) or `detail-and-action-states` (which needs detail dialogs and action results); `stable-mobile-flow` is closed by the responsive captures in the next subsection. SRM therefore remains `partial`.
+
+### Supplier Portal Responsive Stability Screenshots (four languages)
+
+Generated on a real running stack by `omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts`. **Read-only capture**: it only opens the portal, switches tab and clicks refresh, never submitting or modifying any quotation.
+
+- Preconditions: same as the two previous sections (local Compose full stack, `supplier1` with an established Portal association, short-lived JWT issued inside the process and destroyed at teardown).
+- Operator: `supplier1`.
+- Action: open the supplier portal at **390×844 (mobile)** and **1024×768 (tablet)** viewports, then switch to the "RFQ Quotations" tab.
+- Expected state: the tab is visible and clickable; "Refresh RFQs" and the per-row quotation actions are not squeezed out or obscured at the narrow width; the list collapses columns responsively (mobile keeps only RFQ No. / Title / Action) without overflow.
+- Measured result: 8 passed / 0 skipped (four languages × two viewports).
+
+| Viewport | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 390×844 mobile | ![Portal quotation list, mobile (Simplified Chinese)](images/zh-CN/srm-portal-quotation-mobile.png) | ![Portal quotation list, mobile (English)](images/en-US/srm-portal-quotation-mobile.png) | ![Portal quotation list, mobile (Japanese)](images/ja-JP/srm-portal-quotation-mobile.png) | ![Portal quotation list, mobile (Korean)](images/ko-KR/srm-portal-quotation-mobile.png) |
+| 1024×768 tablet | ![Portal quotation list, tablet (Simplified Chinese)](images/zh-CN/srm-portal-quotation-tablet.png) | ![Portal quotation list, tablet (English)](images/en-US/srm-portal-quotation-tablet.png) | ![Portal quotation list, tablet (Japanese)](images/ja-JP/srm-portal-quotation-tablet.png) | ![Portal quotation list, tablet (Korean)](images/ko-KR/srm-portal-quotation-tablet.png) |
+
+At capture time the list showed the environment's pre-existing historical RFQ rows (this batch's quotation data had already been cleaned by ownership); the images keep the real list content as-is and are not padded with fabricated data.
+
 ## 10. Testing
 
 SRM module covers the following test suite:

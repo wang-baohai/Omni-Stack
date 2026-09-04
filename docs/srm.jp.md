@@ -433,6 +433,99 @@ omni-frontend/src/
 
 見積、明細、`srm_quotation_request` と `srm.quotation.submitted.v1` Outbox は同一トランザクションでコミットする必要があります。同一 requestId+requestHash の再試行は現在の見積スナップショットを返し、イベントを重複発行してはなりません；同一 requestId で意図が異なる場合は 409 を返します。初回リクエストは作成センチネル `version=0` を使用し、初版見積は `version=1` から開始することで、並行する作成意図が初版を更新可能版と誤認するのを防ぎます。イベント payload には少なくとも `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil` を含み、Procurement は eventId Inbox で冪等に消費します。
 
+### サプライヤー見積フローのスクリーンショット（四言語）
+
+正式画像はドキュメント専用 Playwright テストケース `omni-frontend/e2e-docs/flows/srm.flows.spec.ts` により実稼働スタック上で生成され、言語別ディレクトリに保存します。他言語の画像を流用せず、プレースホルダや成功レスポンスのモックで代替しません。三つのステップは同一の実 fixture（同一の見積依頼・同一の見積）を共有するため、三枚は同一業務チェーンの連続した状態であり、互いに関係のないページスナップショットではありません。
+
+共通前提条件（三ステップとも同一）：
+
+| 項目 | 内容 |
+|---|---|
+| 環境 | ローカル Compose フルスタック稼働、フロントエンド `127.0.0.1:3000`、ゲートウェイ経由で `omni-procurement` と `omni-srm` に到達 |
+| データ前提 | `admin` が正式 API で一意な品目カテゴリと品目を作成 → `procurement-approval` プロセスモデルに紐づく購買申請承認ルールを作成 → 購買申請を作成して承認に提出 → 承認後に見積依頼を作成し `send` を実行（DRAFT→SENT、`supplier1` を招待） |
+| 操作者 | データ構築は `admin`（`SUPER_ADMIN` と `PROCUREMENT_MANAGER` ロールおよび `SAME_UNIT` 候補スコープが必要）；撮影ページの操作者は `supplier1`（`SUPPLIER` ロールかつ `srm_supplier_portal_user` 関連付け済み） |
+| トークン | `E2eTokenFixture` がテストプロセス内で発行する短期 JWT（TTL 1200 秒）。プロセスメモリとリポジトリ外の一時ファイルにのみ存在し、終了時に破棄；ドキュメント・ログ・バージョン管理には書き込まない |
+| 書き込みスイッチ | `E2E_MUTATIONS=true` を明示的に設定した時のみ実行；未設定ならグループ全体をスキップし、あらゆる書き込み呼び出しは例外を投げる |
+| ビューポート | 1440×900、ドキュメント用クロックを固定しアニメーションを無効化、四言語で完全一致 |
+
+共有ローカル環境では一覧に他の歴史的な見積依頼行が表示される場合があります；テストケースのアサーションと撮影判定は本実行の `runStamp` で識別される単一の見積依頼のみを対象とし、終了処理も本実行で帰属が確認できたデータのみをクリーンアップします。
+
+#### ステップ 1：招待一覧（未見積）
+
+- 操作者：`supplier1`
+- 操作：サプライヤーポータルを開き「見積回答」タブに切り替える
+- 期待状態：本実行の単一の見積依頼が一覧に表示され、招待状態は `INVITED`、現在の見積列は「未見積」、操作列は「見積を提出」
+
+| zh-CN | en-US |
+|---|---|
+| ![サプライヤーポータル見積招待一覧（簡体字中国語）](images/zh-CN/srm-portal-quotation-invitations.png) | ![サプライヤーポータル見積招待一覧（英語）](images/en-US/srm-portal-quotation-invitations.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![サプライヤーポータル見積招待一覧（日本語）](images/ja-JP/srm-portal-quotation-invitations.png) | ![サプライヤーポータル見積招待一覧（韓国語）](images/ko-KR/srm-portal-quotation-invitations.png) |
+
+#### ステップ 2：見積フォーム（単価と有効期の入力）
+
+- 操作者：`supplier1`
+- 操作：対象行で「見積を提出」をクリックしてダイアログを開き、単価 `123.45` を入力し、見積有効期を見積締切に設定する
+- 期待状態：ダイアログタイトルに本実行の見積依頼番号が付く；行スナップショットに品目コードと名称、数量 `2`、単位と通貨 `CNY` が表示され、RFQ 状態は `SENT`、単価と有効期ともに入力済み
+
+| zh-CN | en-US |
+|---|---|
+| ![サプライヤーポータル見積フォーム（簡体字中国語）](images/zh-CN/srm-portal-quotation-form.png) | ![サプライヤーポータル見積フォーム（英語）](images/en-US/srm-portal-quotation-form.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![サプライヤーポータル見積フォーム（日本語）](images/ja-JP/srm-portal-quotation-form.png) | ![サプライヤーポータル見積フォーム（韓国語）](images/ko-KR/srm-portal-quotation-form.png) |
+
+#### ステップ 3：提出成功（QUOTED と見積総額）
+
+- 操作者：`supplier1`
+- 操作：ダイアログで「見積を提出」をクリックして実際の見積を送信し、続いて「見積依頼を更新」をクリックする
+- 期待状態：「見積を提出しました」が表示されてダイアログが閉じる；招待状態は `srm.quotation.submitted.v1` MQ イベントにより非同期で `QUOTED` に転移し、現在の見積列に総額 `CNY 246.9`（単価 `123.45` × 数量 `2`）が表示され、操作列は「見積を修正」になる
+
+| zh-CN | en-US |
+|---|---|
+| ![サプライヤーポータル見積提出成功（簡体字中国語）](images/zh-CN/srm-portal-quotation-submitted.png) | ![サプライヤーポータル見積提出成功（英語）](images/en-US/srm-portal-quotation-submitted.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![サプライヤーポータル見積提出成功（日本語）](images/ja-JP/srm-portal-quotation-submitted.png) | ![サプライヤーポータル見積提出成功（韓国語）](images/ko-KR/srm-portal-quotation-submitted.png) |
+
+### SRM 管理側ページのスクリーンショット（四言語）
+
+同様に `omni-frontend/e2e-docs/flows/management.flows.spec.ts` により実稼働スタック上で生成。**読み取り専用の採取**であり、サプライヤーデータを作成・変更・削除しないため、書き込みスイッチもデータ終了処理も不要です。前提条件と操作者は前節と同一（`admin` / `SUPER_ADMIN`、短期 JWT は `E2eTokenFixture` がプロセス内で発行し終了時に破棄）。
+
+- 操作：ログイン後にサプライヤー管理、業績評価、リスク管理、リスク指標設定、招待管理のページを順に開く。
+- 期待状態：ページタイトルと列ラベルが現在の言語で描画される；採取時点でデータベースにはサプライヤー/評価/リスク/招待の実レコードが各 1 件、リスク指標設定が 9 件存在。
+
+| ページ | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| サプライヤー管理（lifecycle） | ![サプライヤー管理（簡体字中国語）](images/zh-CN/srm-suppliers.png) | ![サプライヤー管理（英語）](images/en-US/srm-suppliers.png) | ![サプライヤー管理（日本語）](images/ja-JP/srm-suppliers.png) | ![サプライヤー管理（韓国語）](images/ko-KR/srm-suppliers.png) |
+| 業績評価（evaluation） | ![業績評価（簡体字中国語）](images/zh-CN/srm-evaluations.png) | ![業績評価（英語）](images/en-US/srm-evaluations.png) | ![業績評価（日本語）](images/ja-JP/srm-evaluations.png) | ![業績評価（韓国語）](images/ko-KR/srm-evaluations.png) |
+| リスク管理（risk） | ![リスク管理（簡体字中国語）](images/zh-CN/srm-risks.png) | ![リスク管理（英語）](images/en-US/srm-risks.png) | ![リスク管理（日本語）](images/ja-JP/srm-risks.png) | ![リスク管理（韓国語）](images/ko-KR/srm-risks.png) |
+| リスク指標設定（risk） | ![リスク指標設定（簡体字中国語）](images/zh-CN/srm-risk-config.png) | ![リスク指標設定（英語）](images/en-US/srm-risk-config.png) | ![リスク指標設定（日本語）](images/ja-JP/srm-risk-config.png) | ![リスク指標設定（韓国語）](images/ko-KR/srm-risk-config.png) |
+| 招待管理（invite） | ![招待管理（簡体字中国語）](images/zh-CN/srm-invites.png) | ![招待管理（英語）](images/en-US/srm-invites.png) | ![招待管理（日本語）](images/ja-JP/srm-invites.png) | ![招待管理（韓国語）](images/ko-KR/srm-invites.png) |
+
+本グループは一覧/設定ビューのみを閉じるもので、`admission-lifecycle`（完全な Portal 登録 Saga と参入承認が必要）や `detail-and-action-states`（詳細ダイアログと操作結果が必要）を閉じることとは**同等ではありません**；`stable-mobile-flow` は次の小節のレスポンシブ採取により閉じます。したがって SRM は引き続き `partial` です。
+
+### サプライヤーポータルのレスポンシブ安定性スクリーンショット（四言語）
+
+`omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts` により実稼働スタック上で生成。**読み取り専用採取**：ポータルを開き、タブを切り替え、更新をクリックするのみで、見積の送信や変更は一切行いません。
+
+- 前提条件：前二節と同一（ローカル Compose フルスタック、`supplier1` の Portal 関連付け済み、短期 JWT はプロセス内で発行し終了時に破棄）。
+- 操作者：`supplier1`。
+- 操作：**390×844（モバイル）** と **1024×768（タブレット）** のビューポートでそれぞれサプライヤーポータルを開き、「見積回答」タブに切り替える。
+- 期待状態：タブが表示されクリック可能；「見積依頼を更新」と行ごとの見積操作が狭い幅で押し出されたり遮蔽されない；一覧はレスポンシブに列を縮約（モバイルは見積番号/テーマ/操作のみ保持）し、はみ出しがない。
+- 実測結果：8 passed / 0 skipped（四言語 × 二ビューポート）。
+
+| ビューポート | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 390×844 モバイル | ![ポータル見積一覧 モバイル（簡体字中国語）](images/zh-CN/srm-portal-quotation-mobile.png) | ![ポータル見積一覧 モバイル（英語）](images/en-US/srm-portal-quotation-mobile.png) | ![ポータル見積一覧 モバイル（日本語）](images/ja-JP/srm-portal-quotation-mobile.png) | ![ポータル見積一覧 モバイル（韓国語）](images/ko-KR/srm-portal-quotation-mobile.png) |
+| 1024×768 タブレット | ![ポータル見積一覧 タブレット（簡体字中国語）](images/zh-CN/srm-portal-quotation-tablet.png) | ![ポータル見積一覧 タブレット（英語）](images/en-US/srm-portal-quotation-tablet.png) | ![ポータル見積一覧 タブレット（日本語）](images/ja-JP/srm-portal-quotation-tablet.png) | ![ポータル見積一覧 タブレット（韓国語）](images/ko-KR/srm-portal-quotation-tablet.png) |
+
+採取時に一覧へ表示されていたのは環境に既存の歴史的な見積依頼行です（本バッチの見積データは帰属別にクリーンアップ済み）；画像は実際の一覧内容をそのまま保持しており、データを造って埋めてはいません。
+
 ## 10. テスト
 
 SRM モジュールは以下のテストスイートをカバー：
