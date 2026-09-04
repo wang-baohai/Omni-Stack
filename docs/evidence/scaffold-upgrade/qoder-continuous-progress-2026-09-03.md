@@ -663,6 +663,39 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 
 **下一可执行项（阶段 C P0 续）**：architecture 组已收尾；P0 剩 `api-contract`（parity=MAJOR_GAP，三语 53/85 标题、30/72 代码块、139/305 表格行，缺 101 API 路径 + 56 权限码）与 `core-flows`。`api-contract` 为大体量补译，需评估工量后分组推进；不属外部阻塞。
 
+#### 4.5.9 完整度矩阵：STUB / MAJOR_GAP 穷举清单（G7 真实工量，2026-09-04 parity 实跑）
+
+本清单由 `node scripts/.work/qoder-doc-parity.mjs` 客观生成（写 `scripts/.work/qoder-doc-parity.txt`，不提交），按文档分组穷举 **STUB 25 对 + MAJOR_GAP 20 对**（与 §4.5.8 分布一致）。指标格式：标题/代码块/表格行（译文/源）。这是 G7 翻译阻塞的**真实工量**——非「复核 114 篇」，而是下列 45 对存在实质内容缺失（另 19 对 PARTIAL 为局部缺失，50 对 ALIGNED 仅需语义复核）。
+
+**STUB（25 对，译文几乎为空壳，工量最重）**：
+
+| 文档 | 语言 | 标题 | 代码块 | 表格行 |
+| --- | --- | --- | --- | --- |
+| `asset-design` | en/ja/ko | 7〜8/52 | 0/18 | 0/124 |
+| `crm-design` | en/ja/ko | 8〜9/55 | 0/32 | 0/124 |
+| `procurement-design` | en/ja/ko | 7〜8/54 | 0/20 | 0/128 |
+| `srm-design` | en/ja/ko | 7〜8/53 | 0/22 | 0/138 |
+| `full-functional-audit` | en/ja/ko | 7〜11/74 | 0/2 | 0/97 |
+| `full-functional-audit-remediation` | en/ja/ko | 7〜8/10 | 0/0 | 0/80 |
+| `scaffold-upgrade-implementation-plan` | en/ja/ko | 23/133 | 0/28 | 11/265 |
+| `custom-preset-tutorial` | ja/ko | 1/6 | 4/8 | 0/0 |
+| `guide-troubleshooting` | ja/ko | 10/10 | 0/0 | 0/7 |
+
+**MAJOR_GAP（20 对，大块缺失）**：
+
+| 文档 | 语言 | 标题 | 代码块 | 表格行 |
+| --- | --- | --- | --- | --- |
+| `api-contract`（P0 系统真相） | en/ja/ko | 53/85 | 30/72 | 139/305 |
+| `workflow`（P1） | en/ja/ko | 32/39 | 22/40 | 58/92 |
+| `guide-system-security-audit` | en/ja/ko | 8/11 | 0/0 | 5/22 |
+| `observability` | en/ja/ko | 8/8 | 4/8 | 6〜14/29 |
+| `scaffold-upgrade-plan` | en/ja/ko | 11/36 | 0/0 | 12/54 |
+| `preset-quick-selection` | en/ja/ko | 2〜5/5 | 2/4 | 7/7 |
+| `custom-preset-tutorial` | en | 4/6 | 4/8 | 0/0 |
+| `preset-maintenance` | ko | 3/6 | 2/2 | 0/0 |
+
+观察：`*-design`（asset/crm/procurement/srm）四份设计文档三语均为 STUB（代码块/表格几乎全缺），是单一最大工量簇；`api-contract`（P0）三语均 MAJOR_GAP，缺 101 个 API 路径 + 56 个权限码（§4.5.1）。`guide-system-security-audit`/`observability` 的部分缺口由本目标阶段 B 新增图片表拉大（§4.5.1 已登记为新增待补译项）。本清单仅为 G7 提供客观工量底数，**不替代独立 Codex final review 或人工验收**，未据此修改任何译文 `status`/`reviewed_at`。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）
