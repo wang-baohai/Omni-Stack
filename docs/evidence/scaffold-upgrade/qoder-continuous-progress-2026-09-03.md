@@ -771,6 +771,14 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 
 验证：parity mq-reliability 三语 **ALIGNED**（38/38 标题、22/22 代码块、48/48 表格行）、**0 findings**（5 缺失链接已补齐）；links/sensitive/i18n exit 0；ko CJK 扫描 0。至此**阶段 B 自造的三处译文缺口（workflow §8、guide §8/§9、mq §10）全部闭合**。
 
+### 4.11 observability 组忠实重译（2026-09-04）
+
+parity 显示 observability 三语为 MAJOR_GAP（8/8 标题齐、但 4/8 代码块、en 14/29 表、ja/ko 6/29 表）。核查发现根因不同于前几组：**译文是源的缩写/概述版**，而非缺整节——en 把 §2 十行本地入口表压成 6 行、丢了 §2 两个 `dev down` 代码块、§5 SLO 九行表整段改为散文、§3 指标清单与 §4 生产清单也被概括；ja/ko 更简。
+
+处置：按**忠实全量重译**（非最小补差），以源 130 行为准重写 en/ja/ko（各 +88〜89/-21〜31），恢复全部 4 个代码块（含 §7 第 3 条 `check config`）、§2 十行表、§5 九行 SLO 表、§3 两组自定义指标清单与 trace 关联段、§4 五项生产清单。代码块/指标名/命令 verbatim；叙述与表格译为目标语言。自检出并修正 ko 1 处日文假名泄漏（`통제下の`→`통제하의`）、ja 2 处中文词（`開箱`→初期状態、`公衆網`→インターネット）。
+
+验证：parity observability 三语 **ALIGNED 且逐项满分**（8/8 标题、8/8 代码块、29/29 表格行）；ko CJK 扫描 0；links/sensitive/i18n exit 0；全库分布 ALIGNED 62→**65**、MAJOR_GAP 11→**8**。三份译文仍 `present-unverified`/`reviewed_at: null`（不替代独立复核）。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）
