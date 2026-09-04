@@ -847,6 +847,18 @@ ko §16.2 首次替换因原文用「프런트엔드」（含 트）失配，其
 
 **全库分布**：ALIGNED 88→**90**、PARTIAL 2→**0**、MAJOR_GAP 3、STUB 21（共 114 组）。**PARTIAL 清零**。
 
+### 4.18 计划/审查类文档改为仅中文：移除 4 组 en/ja/ko 译文（2026-09-04 用户决策）
+
+**用户决策**：阶段性计划文档与交接文档只需中文，不做 en/ja/ko 翻译，并将清理已有译文。经确认范围为 4 组（asset/crm/srm/procurement-design 等设计真相文档仍保留多语言）：`scaffold-upgrade-plan`（计划，原 MAJOR_GAP）、`scaffold-upgrade-implementation-plan`（实施计划，原 STUB）、`full-functional-audit-2026-08-14`（阶段审查快照，原 STUB）、`full-functional-audit-remediation-2026-08-17`（阶段审查修复，原 STUB）。
+
+**前置诚实说明**：本 Agent 在收到该决策前，已于本轮先行把 `scaffold-upgrade-plan` 忠实重译为 en/ja/ko（三语一度 ALIGNED 36/36、54/54）。收到「计划文档仅中文」决策后，立即 `git restore` 撤销这批**未提交**改动（含 checkpoint 旧稿），未进入任何提交，无副作用。
+
+**执行动作**：（1）删除 12 个译文文件（4 组 ×3 语言），Chinese 源文档全部保留；（2）`docs-manifest.yaml` 将 4 组 `translations:` 三行块改为 `translations: {}`（附中文决策注释），保留 doc 条目与 source/source_sha256；（3）用官方生成器 `docs-review-queue.mjs --generate` 重生成 `docs/i18n-review-queue.md`（4 组译文列变 `<missing>`，并同步此前已对齐文档从差异表移除 + architecture 源摘要刷新）。
+
+**验证**：links/sensitive PASS；i18n --allow-draft PASS；i18n strict 失败 **228→204**（-24 = 4 文档×3 语×2 消息）；队列对已删文件 **0 引用**；`translations: {}` 未导致 `checkTranslations` 崩溃（`Object.entries({})` 为空）。
+
+**parity 分布**：114 组 → **102 组**；ALIGNED 90 不变、MAJOR_GAP 3→**0**、STUB 21→**12**。剩余 STUB 12 = asset/crm/srm/procurement-design ×3（设计真相文档，按用户决策保留多语言，为后续唯一可执行翻译缺口）。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）
@@ -906,7 +918,7 @@ ko §16.2 首次替换因原文用「프런트엔드」（含 트）失配，其
 
 ### 5.4 本会话（2026-09-04 接管）交付小结
 
-用户以 `qoder-continuous-execution-prompt-2026-09-03.md` 再次接管，最小核对 Git/运行现场后连续推进阶段 C，共 20 个小提交（均 fast-forward 推送、三端一致）：
+用户以 `qoder-continuous-execution-prompt-2026-09-03.md` 再次接管，最小核对 Git/运行现场后连续推进阶段 C，共 21 个小提交（均 fast-forward 推送、三端一致）：
 
 | 提交 | 内容 |
 | --- | --- |
@@ -929,13 +941,14 @@ ko §16.2 首次替换因原文用「프런트엔드」（含 트）失配，其
 | `382d5f0` | guide-scheduling en/ja/ko 对齐 |
 | `c3d50a3` | guide-permissions en/ja/ko 对齐（恢复图 2-7） |
 | `6238ec7` | docker-deployment en 陈旧译文 reconcile（§4.16，ALIGNED 132/132） |
-| 本轮 | docker-deployment ja/ko reconcile（§4.17，三语 ALIGNED，PARTIAL 清零） |
+| `61744b6` | docker-deployment ja/ko reconcile（§4.17，三语 ALIGNED，PARTIAL 清零） |
+| 本轮 | 计划/审查类 4 组文档改为仅中文：移除 12 译文 + manifest `translations:{}` + 队列重生成（§4.18，MAJOR_GAP 清零、STUB 21→12） |
 
-**里程碑：P0 三篇系统真相文档（architecture、core-flows、api-contract）四语言全部 ALIGNED；P1 workflow 组补齐；阶段 B 自造的三处译文缺口全部闭合；observability/preset-*/guide-*/docker-deployment 等浓缩或陈旧译文已忠实重译或 reconcile**。全库完整度分布由接管时 ALIGNED 48 / PARTIAL 21 / MAJOR_GAP 20 / STUB 25 变为 **ALIGNED 90 / PARTIAL 0 / MAJOR_GAP 3 / STUB 21**（本会话 +42 ALIGNED，PARTIAL 清零）。20 个提交均 fast-forward 推送、三端一致。
+**里程碑：P0 三篇系统真相文档（architecture、core-flows、api-contract）四语言全部 ALIGNED；P1 workflow 组补齐；阶段 B 自造的三处译文缺口全部闭合；observability/preset-*/guide-*/docker-deployment 等浓缩或陈旧译文已忠实重译或 reconcile**。全库完整度分布由接管时 ALIGNED 48 / PARTIAL 21 / MAJOR_GAP 20 / STUB 25 变为 **ALIGNED 90 / PARTIAL 0 / MAJOR_GAP 0 / STUB 12（共 102 组）**（本会话 +42 ALIGNED；PARTIAL 清零；MAJOR_GAP 与 9 项 STUB 因计划/审查类文档改为仅中文而移出翻译范围）。21 个提交均 fast-forward 推送、三端一致。
 
 运行现场：`omni-wp09-docs running(15)` 全程未重建；本会话均为**文档只读 + 译文修订**，无 E2E、无 Token 签发、无数据写入、无凭证产生。免费额度剩余：**UNKNOWN**（Agent 无法读取客户端用量面板，请在客户端核对）。
 
-**下一可执行项（阶段 C，非外部阻塞）**：结构性缺口仅剩 **MAJOR_GAP 3**（scaffold-upgrade-plan 等）与 **STUB 21**（asset/crm/srm/procurement-design 各三语、full-functional-audit 等，工量最重，各需独立整轮）。每项闭环需与本轮同量级（读源→补译→parity→门禁→提交）。manifest 人工签核（`status: synchronized` + `reviewed_at`）系全仓 114 文档统一待办，属外部审批边界，本 Agent 不代办、不伪造复核日期。
+**下一可执行项（阶段 C，非外部阻塞）**：结构性缺口仅剩 **STUB 12**（asset/crm/srm/procurement-design ×3 设计真相文档，译文近乎空壳，各需独立整轮甚至多轮）。计划/审查/交接类文档已按用户决策定为仅中文，不再列入翻译范围。manifest 人工签核（`status: synchronized` + `reviewed_at`）系全仓统一待办，属外部审批边界，本 Agent 不代办、不伪造复核日期。
 
 **外部阻塞项不变**（见 §5.2 BLOCKED 表 + §6）：DATA_DEFECT 种子还原（需授权）、workflow countersign（需新增身份）、scaffold-development/operations（非页面流程，需决定登记形态）、G1/G7/G8/WP-10。
 

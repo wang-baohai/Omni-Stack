@@ -194,10 +194,7 @@ documents:
     source: docs/full-functional-audit-2026-08-14.md
     source_sha256: d2c3242f9cf881b7a5f5d7f8ea58d72d43ec9d9ac9c603ba41bbbf5cd4008708
     dependencies: [code, api, permissions, screenshots]
-    translations:
-      en-US: { path: docs/full-functional-audit-2026-08-14.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/full-functional-audit-2026-08-14.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/full-functional-audit-2026-08-14.kr.md, status: present-unverified, reviewed_at: null }
+    translations: {}  # 仅中文：阶段性审查快照文档，en/ja/ko 译文已按 2026-09-04 决策移除
   - id: full-functional-audit-remediation
     type: audit
     module: all
@@ -205,10 +202,7 @@ documents:
     source: docs/full-functional-audit-remediation-2026-08-17.md
     source_sha256: cdc31c14329cfb21a2be93e57708209bd3a447a1b82cde06190c67f747c393d2
     dependencies: [code, test-evidence]
-    translations:
-      en-US: { path: docs/full-functional-audit-remediation-2026-08-17.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/full-functional-audit-remediation-2026-08-17.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/full-functional-audit-remediation-2026-08-17.kr.md, status: present-unverified, reviewed_at: null }
+    translations: {}  # 仅中文：阶段性审查修复文档，en/ja/ko 译文已按 2026-09-04 决策移除
   - id: scaffold-upgrade-plan
     type: roadmap
     module: scaffold
@@ -216,10 +210,7 @@ documents:
     source: docs/scaffold-upgrade-plan.md
     source_sha256: 281cf5c5e6e90935d203ae0ca3c0189dbf8d2a58ec6f106866c99f31d337923b
     dependencies: [all-work-packages]
-    translations:
-      en-US: { path: docs/scaffold-upgrade-plan.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/scaffold-upgrade-plan.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/scaffold-upgrade-plan.kr.md, status: present-unverified, reviewed_at: null }
+    translations: {}  # 仅中文：阶段性升级计划文档，en/ja/ko 译文已按 2026-09-04 决策移除
   - id: scaffold-upgrade-implementation-plan
     type: implementation-plan
     module: scaffold
@@ -227,10 +218,7 @@ documents:
     source: docs/scaffold-upgrade-implementation-plan.md
     source_sha256: 1bbdc39b6c2bc700fec2ec65ac12c41e271a9e7c781a2831096bc789f60198ba
     dependencies: [all-work-packages, gates, evidence]
-    translations:
-      en-US: { path: docs/scaffold-upgrade-implementation-plan.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/scaffold-upgrade-implementation-plan.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/scaffold-upgrade-implementation-plan.kr.md, status: present-unverified, reviewed_at: null }
+    translations: {}  # 仅中文：阶段性实施计划文档，en/ja/ko 译文已按 2026-09-04 决策移除
   - id: preset-quick-selection
     type: user-guide
     module: scaffold

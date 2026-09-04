@@ -18,7 +18,7 @@
 
 | 文档 | 中文事实源 | 源摘要(前12) | en-US | ja-JP | ko-KR |
 | --- | --- | --- | --- | --- | --- |
-| architecture | docs/architecture.md | dc60013a2cba | present-unverified | present-unverified | present-unverified |
+| architecture | docs/architecture.md | 5fc881579377 | present-unverified | present-unverified | present-unverified |
 | api-contract | docs/api-contract.md | 96cebb47233a | present-unverified | present-unverified | present-unverified |
 | core-flows | docs/core-flows.md | 2d2afd48d592 | present-unverified | present-unverified | present-unverified |
 
@@ -45,10 +45,10 @@
 | srm-design | docs/design/srm-design.md | ceeb22198758 | present-unverified | present-unverified | present-unverified |
 | procurement-design | docs/design/procurement-design.md | 46b8f10e8e39 | present-unverified | present-unverified | present-unverified |
 | asset-design | docs/design/asset-design.md | bba9461126d8 | present-unverified | present-unverified | present-unverified |
-| full-functional-audit | docs/full-functional-audit-2026-08-14.md | d2c3242f9cf8 | present-unverified | present-unverified | present-unverified |
-| full-functional-audit-remediation | docs/full-functional-audit-remediation-2026-08-17.md | cdc31c14329c | present-unverified | present-unverified | present-unverified |
-| scaffold-upgrade-plan | docs/scaffold-upgrade-plan.md | 281cf5c5e6e9 | present-unverified | present-unverified | present-unverified |
-| scaffold-upgrade-implementation-plan | docs/scaffold-upgrade-implementation-plan.md | 1bbdc39b6c2b | present-unverified | present-unverified | present-unverified |
+| full-functional-audit | docs/full-functional-audit-2026-08-14.md | d2c3242f9cf8 | <missing> | <missing> | <missing> |
+| full-functional-audit-remediation | docs/full-functional-audit-remediation-2026-08-17.md | cdc31c14329c | <missing> | <missing> | <missing> |
+| scaffold-upgrade-plan | docs/scaffold-upgrade-plan.md | 281cf5c5e6e9 | <missing> | <missing> | <missing> |
+| scaffold-upgrade-implementation-plan | docs/scaffold-upgrade-implementation-plan.md | 1bbdc39b6c2b | <missing> | <missing> | <missing> |
 | preset-quick-selection | docs/preset-quick-selection.md | 1a2e8b84b19b | present-unverified | present-unverified | present-unverified |
 | preset-maintenance | docs/preset-maintenance.md | c168b62c7bb1 | present-unverified | present-unverified | present-unverified |
 | preset-dependency-matrix | docs/preset-dependency-matrix.md | 2b235bedcb4d | present-unverified | present-unverified | present-unverified |
@@ -79,18 +79,6 @@
 
 | 文档 | 语言 | 源 `##` 节数 | 译文 `##` 节数 | 文件 |
 | --- | --- | --- | --- | --- |
-| api-contract | en-US | 19 | 15 | docs/api-contract.en.md |
-| api-contract | ja-JP | 19 | 15 | docs/api-contract.jp.md |
-| api-contract | ko-KR | 19 | 15 | docs/api-contract.kr.md |
-| core-flows | en-US | 20 | 14 | docs/core-flows.en.md |
-| core-flows | ja-JP | 20 | 14 | docs/core-flows.jp.md |
-| core-flows | ko-KR | 20 | 14 | docs/core-flows.kr.md |
-| workflow | en-US | 8 | 7 | docs/workflow.en.md |
-| workflow | ja-JP | 8 | 7 | docs/workflow.jp.md |
-| workflow | ko-KR | 8 | 7 | docs/workflow.kr.md |
-| mq-reliability | en-US | 10 | 9 | docs/mq-reliability.en.md |
-| mq-reliability | ja-JP | 10 | 9 | docs/mq-reliability.jp.md |
-| mq-reliability | ko-KR | 10 | 9 | docs/mq-reliability.kr.md |
 | crm-design | en-US | 16 | 8 | docs/design/crm-design.en.md |
 | crm-design | ja-JP | 16 | 7 | docs/design/crm-design.jp.md |
 | crm-design | ko-KR | 16 | 7 | docs/design/crm-design.kr.md |
@@ -103,23 +91,3 @@
 | asset-design | en-US | 16 | 7 | docs/design/asset-design.en.md |
 | asset-design | ja-JP | 16 | 6 | docs/design/asset-design.jp.md |
 | asset-design | ko-KR | 16 | 6 | docs/design/asset-design.kr.md |
-| full-functional-audit | en-US | 12 | 7 | docs/full-functional-audit-2026-08-14.en.md |
-| full-functional-audit | ja-JP | 12 | 6 | docs/full-functional-audit-2026-08-14.jp.md |
-| full-functional-audit | ko-KR | 12 | 6 | docs/full-functional-audit-2026-08-14.kr.md |
-| full-functional-audit-remediation | en-US | 6 | 7 | docs/full-functional-audit-remediation-2026-08-17.en.md |
-| scaffold-upgrade-implementation-plan | en-US | 27 | 22 | docs/scaffold-upgrade-implementation-plan.en.md |
-| scaffold-upgrade-implementation-plan | ja-JP | 27 | 22 | docs/scaffold-upgrade-implementation-plan.jp.md |
-| scaffold-upgrade-implementation-plan | ko-KR | 27 | 22 | docs/scaffold-upgrade-implementation-plan.kr.md |
-| preset-quick-selection | ja-JP | 4 | 2 | docs/preset-quick-selection.jp.md |
-| preset-quick-selection | ko-KR | 4 | 1 | docs/preset-quick-selection.kr.md |
-| preset-maintenance | ja-JP | 5 | 3 | docs/preset-maintenance.jp.md |
-| preset-maintenance | ko-KR | 5 | 2 | docs/preset-maintenance.kr.md |
-| custom-preset-tutorial | en-US | 5 | 3 | docs/custom-preset-tutorial.en.md |
-| custom-preset-tutorial | ja-JP | 5 | 0 | docs/custom-preset-tutorial.jp.md |
-| custom-preset-tutorial | ko-KR | 5 | 0 | docs/custom-preset-tutorial.kr.md |
-| preset-upgrade-guide | en-US | 5 | 3 | docs/preset-upgrade-guide.en.md |
-| preset-upgrade-guide | ja-JP | 5 | 3 | docs/preset-upgrade-guide.jp.md |
-| preset-upgrade-guide | ko-KR | 5 | 3 | docs/preset-upgrade-guide.kr.md |
-| guide-system-security-audit | en-US | 9 | 7 | docs/guides/system-security-audit.en.md |
-| guide-system-security-audit | ja-JP | 9 | 7 | docs/guides/system-security-audit.jp.md |
-| guide-system-security-audit | ko-KR | 9 | 7 | docs/guides/system-security-audit.kr.md |
