@@ -41,6 +41,8 @@ TOKEN_USAGE=UNKNOWN（平台无可信计数，按约束不编造）。
 ### 2.3 本批 SRM 数据收口（实测）
 
 - 失败运行产生的供应商全部经正式 API 删除（PENDING_REVIEW 可删）：ids 2-6、7-11、12-13、28-35 等逐批删除，`keyword=E2ESD/E2EPROBE` 回查非种子残留 **0**。
+- 凭证收口：`destroy-e2e-credentials.ps1` 已执行（ENV_CLEARED=process-scope）；本批签发的 9 个 `tokens-20260905-*.json`（TTL 1200s 已过期）已逐一定向删除，`%TEMP%/omni-e2e-tokens` 仅余历史会话文件（不属本批，未触碰）。
+- 未登记半成品截图（create-validation ×4，manifest 无对应条目）已删除；untracked spec 骨架保留于 `omni-frontend/e2e-docs/flows/srm-supplier-detail.flows.spec.ts`（不提交，见 §2.2）。
 - `keyword` 搜索对种子 id=1（APPROVED，历史数据）任意关键字均命中，疑似搜索实现怪癖，与本批无关，未触碰。
 
 ## 3. 只读能力核实（ZF-2 三项，全部 CLOSED）
