@@ -1,23 +1,45 @@
 # プリセットプロジェクト アップグレードガイド
 
-`scaffold.lock` は source、catalog、preset、module、template の各バージョンを記録します。新しい空ディレクトリへ再生成して手書き部分を移行する方式が標準で、破壊的なインプレース裁断はサポートしません。
+プリセットプロジェクトは `scaffold.lock` で生成時の source バージョン、catalog バージョン、preset バージョン、module バージョン、および service/CRUD/preset テンプレートバージョンを記録します。アップグレードは「新しいディレクトリを生成し手書きの変更を移行する」を既定戦略とし、インプレースの破壊的裁断はサポートしません。
 
-## 事前確認
+## アップグレード前の評価
 
-1. プロジェクト、DB、環境設定を commit または backup します。
-2. 現在の lock を保存し、管理対象ファイルの手修正を検出します。
-3. release note と catalog の `compatibility` / `deprecation` を確認します。
-4. 公式 preset は `omni preset diff`、custom は解決済みクロージャを比較します。
-5. DB の expand/migrate/contract とサービス間契約を整理します。
+1. 既存のプロジェクト、データベース、環境設定を commit または backup する。
+2. 現在の `scaffold.lock` を保存し、管理対象ファイルに手動ドリフトがないか確認する。
+3. ソースリポジトリの release note、catalog の `compatibility`/`deprecation`、preset バージョンの変化を読む。
+4. `omni preset diff <old> <new>` で公式 preset を比較；カスタム preset は解決後の依存クロージャを比較。
+5. データベースの expand/migrate/contract 窓とサービス間契約の変化を特定する。
 
-## 手順
+## 推奨アップグレード手順
 
-新 CLI で validate・explain・dry-run を実行し、新しい空ディレクトリへ生成します。新旧 lock と生成物を比較し、古い Maven/Compose/Gateway/seed/catalog 登録で上書きしません。手書き domain code、test、秘密を含まない設定だけを移行し、管理領域の変更は declaration/template に戻します。
+1. 新バージョン CLI で元の preset またはカスタム YAML に `validate`、`explain`、`--dry-run` を実行。
+2. 全新の空ディレクトリに生成。
+3. 新旧 `scaffold.lock` と生成ファイルを比較；古い Maven、Compose、Gateway、seed、catalog 登録を直接コピーしない。
+4. 手書きのドメインコード、テスト、非機微の環境設定を移行；生成領域の変更は宣言やテンプレートでやり直す。
+5. データベースの backup、fresh、正式スナップショットの clone-upgrade 演習を実行。
+6. backend、frontend、Compose、残留、ログイン/メニュー/health、コアフロー、E2E ゲートを順に通過。
+7. デプロイを切り替え、1 リリース周期の互換ロールバック窓を保持。
 
-DB backup、fresh、正式 snapshot の clone-upgrade を行い、backend、frontend、Compose、残留、ログイン/メニュー/health、主要フロー、E2E を通します。1 リリース期間の互換 rollback を確保して切り替えます。
+## バージョン判断
 
-## ロールバックと完了
+- `preset.version`：モジュール構成とデフォルト境界のバージョン。
+- catalog `version`：モジュール事実構造のバージョン。
+- `modules[].version`：個別モジュール実装のバージョン。
+- `templates.*`：生成ファイル形態のバージョン。
+- `source.version`：生成に使用した Omni-Stack ソースバージョン。
 
-旧アプリは互換性のある拡張済み schema に戻します。未検証の down SQL は使わず、Liquibase の前方修正を追加します。未配備なら新ディレクトリを破棄するだけで元工程は変更されません。
+いずれかのテンプレートの major 変化や preset の major 変化は、移行ガイドに従い人手でレビューしなければならず、手書きファイルを自動上書きしてはいけない。
 
-lock と module/route/permission/DB/Compose が一致し、fresh と clone-upgrade が冪等、削除モジュールの残留がなく、tenant/role の主要フローと README・matrix・保守文書が同期した時点で完了です。
+## ロールバック
+
+アプリケーションのロールバックは前バージョンのイメージ/プロジェクトと互換なデータベース構造を使用する。データベースは未演習の down SQL を実行しない；構造問題が発生した場合は前方修正 changeSet の追加を優先する。旧アプリケーションへ戻す前に、拡張後の構造を読めることを確認しなければならない。
+
+新生成プロジェクトが未デプロイなら、その新ディレクトリを破棄するだけでよい。元のプロジェクトは生成コマンドで変更されない。デプロイ済みの場合は、ログ、移行レポート、`scaffold.lock`、失敗証拠を保持し、根因分析を完了してから再生成する。
+
+## アップグレード完了基準
+
+- 新しい lock ファイルが実際のモジュール、ルート、権限、データベース、Compose と一致。
+- fresh と clone-upgrade の双方が通過し、繰り返し移行と seed 実行が冪等。
+- 除去されたモジュールに Maven、frontend、権限、DB、MQ、ドキュメントの残留がない。
+- ユーザーコアフローとロール/テナント分離にリグレッションがない。
+- README、依存マトリクス、保守ドキュメントが新 catalog から再生成または同期済み。
