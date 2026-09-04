@@ -718,6 +718,27 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 
 **状态**：core-flows 组（1 源 + 3 译文）结构平价 100%、术语泄漏清零。P0 三篇中 architecture、core-flows 已收尾，剩 `api-contract`（MAJOR_GAP，大体量）。
 
+### 4.7 P0 api-contract 组实质预审与修订（2026-09-04 完成）
+
+- **源**：`docs/api-contract.md`（1381 行，本轮**未动源**，摘要不变；i18n 门禁 exit 0 佐证）。
+- **译文**：`docs/api-contract.en.md`、`.jp.md`、`.kr.md`（修订前各 586/587 行，均止于 §14）。
+- **检查范围**：章节结构、TOC 锚点、API 路径、权限码、字段/枚举、JSON/HTTP 代码块、表格、术语正字法、跨文档链接。
+
+**发现的问题（结构性缺失，P0 系统真相文档）**：三份译文均止于 §14，完全缺失源文档后增的 **§15-18 共 4 个业务域契约**：§15 SRM MVP、§16 Workflow 跨服务、§17 Procurement MVP、§18 Asset MVP。合计缺 30 个标题（4 `##` + 26 `###`）、20 个代码块（40 围栏行）、156 个表格行，以及 101 个 API 路径 + 56 个权限码（与 §4.5.1 parity 数据吻合）。归因：§15-18 是源在译文完成后新增的四业务域契约，译文从未回填；三份缺口一致。
+
+**已做修改**：
+
+1. 三份译文补入 §15-18 全文 + TOC 四条锚点（en +757 行、ja +755、ko +756）。遵循约定：API 路径、权限码、字段名、枚举、金额、日期、HTTP 方法 verbatim；叙述/表格说明列/标题译为目标语言；JSON 示例的自然语言值（名称/标题/事由/备注/地址/联系人/响应消息）按各语言既有 §12 约定本地化（en 英文、ja 日文、ko 韩文），字段名与枚举不动。
+2. 结构性核验（§15-end 分段计量，文件级脚本 `qoder-section-metrics.mjs`）：source §15-end = en §15-end = **{fences 40, headings 30, tables 156}** 完全一致；ja/ko parity 与 en 逐项相同（83/85、70/72、295/305）。
+3. 跨文档链接：源 §16 指向 `workflow.md#28-跨服务内部契约`，但 `workflow.{en,jp,kr}.md` 均无 §2.8（workflow 组为 MAJOR_GAP），故三语 §16 链接降为**文件级** `workflow.{en,jp,kr}.md`（去锚点，避免断链致 links 门禁失败）；待 workflow 译文补全 §2.8 后应恢复锚点。已登记。
+4. 术语正字法修正：`api-contract.jp.md` §8 既有 `身份` → `身分`（1 处，与 core-flows.jp 同类）；`api-contract.kr.md` 补译过程中自检出并修正 **7 处** CJK 泄漏（`基础`→기초、`時は`→시에는、`ヒット`→적중、`失效`→실효、`来源`×2→소스、`のみ`→만）+ 1 处谚文分写空格，复核 `grep '\p{Han}|\p{Hiragana}|\p{Katakana}'` ko = **0**、ja 简化字/谚文泄漏 = **0**。
+
+**验证（2026-09-04 实测）**：parity api-contract 三语均 **ALIGNED**（83/85 标题、70/72 代码块、295/305 表格行）；全库分布 ALIGNED 53→**56**、MAJOR_GAP 20→**17**（PARTIAL 16、STUB 25 不变）；links / sensitive / i18n 均 exit 0。
+
+**剩余疑问 / 未完成**：三语 §1-14 仍各有约 2 标题 / 1 代码块 / 10 表格行的既有小缺口（source §1-14 = {32,55,149} vs 译文 §1-14 = {30,53,139}），系译文早于源更新的历史缺口，**非本轮 §15-18 引入**（§15-18 分段计量已证完全一致）；不阻碍 ALIGNED，留待逐句语义复核。§16 workflow 锚点待 workflow 译文补全后恢复。三份译文 `docs-manifest.yaml` 仍 `present-unverified` / `reviewed_at: null`；本轮为 Qoder 实质预审与修订，不替代独立 Codex final review 或人工验收。
+
+**状态**：api-contract 组（1 源 + 3 译文）§15-18 补齐、结构平价三语 ALIGNED、CJK 泄漏清零。**至此 P0 三篇（architecture、core-flows、api-contract）全部收尾**。下一优先级为 P1（backend-patterns、frontend-patterns、scheduling、workflow、crm、mq-reliability、guide-scaffold-development 等）与 4 份 `*-design` STUB（asset/crm/srm/procurement-design，各三语）。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）
