@@ -580,3 +580,22 @@ bpmn-js Modeler (开源 BPMN 2.0 建模工具)
 | 流程定义（publish） | ![流程定义（简体中文）](images/zh-CN/workflow-definitions.png) | ![流程定义（英文）](images/en-US/workflow-definitions.png) | ![流程定义（日文）](images/ja-JP/workflow-definitions.png) | ![流程定义（韩文）](images/ko-KR/workflow-definitions.png) |
 | 流程实例跟踪（instance-tracking） | ![流程实例（简体中文）](images/zh-CN/workflow-instances.png) | ![流程实例（英文）](images/en-US/workflow-instances.png) | ![流程实例（日文）](images/ja-JP/workflow-instances.png) | ![流程实例（韩文）](images/ko-KR/workflow-instances.png) |
 | 统计看板（汇总视图） | ![统计看板（简体中文）](images/zh-CN/workflow-stats.png) | ![统计看板（英文）](images/en-US/workflow-stats.png) | ![统计看板（日文）](images/ja-JP/workflow-stats.png) | ![统计看板（韩文）](images/ko-KR/workflow-stats.png) |
+
+### 只读详情弹层（四语言）
+
+由 `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` 生成，同样为**只读采集**：仅点击行内查看类动作打开弹层，不提交表单，也不触发设计/校验/发布/删除/终止等任何写操作。
+
+- 操作者：`admin`；前置条件与上节一致。
+- 操作：在流程实例首行点「流转进度」与「审批记录」，在流程模型首行点「版本」。
+- 预期状态：弹层标题按当前语言渲染；流转进度弹层必须**等 BPMN 图形真实渲染完成**才截图（用例断言 `.bpmn-viewer-wrap .djs-element` 可见且 `.el-loading-mask` 已消失），不得截到异步加载中的转圈态。
+- 实测结果：16 passed / 0 skipped（含本文与可靠消息文档共用的四个弹层场景 × 四语言）。
+
+| 弹层 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 流转进度（instance-tracking） | ![流转进度（简体中文）](images/zh-CN/workflow-instance-progress.png) | ![流转进度（英文）](images/en-US/workflow-instance-progress.png) | ![流转进度（日文）](images/ja-JP/workflow-instance-progress.png) | ![流转进度（韩文）](images/ko-KR/workflow-instance-progress.png) |
+| 审批记录（approval） | ![审批记录（简体中文）](images/zh-CN/workflow-instance-approval-records.png) | ![审批记录（英文）](images/en-US/workflow-instance-approval-records.png) | ![审批记录（日文）](images/ja-JP/workflow-instance-approval-records.png) | ![审批记录（韩文）](images/ko-KR/workflow-instance-approval-records.png) |
+| 版本历史（publish） | ![版本历史（简体中文）](images/zh-CN/workflow-model-versions.png) | ![版本历史（英文）](images/en-US/workflow-model-versions.png) | ![版本历史（日文）](images/ja-JP/workflow-model-versions.png) | ![版本历史（韩文）](images/ko-KR/workflow-model-versions.png) |
+
+流转进度图中，绿色节点为本实例已执行的活动（`completed-node` 标记），灰色为未走过的分支（如「审批驳回」），与 §2.7 「进度与记录」所述语义一致。
+
+尚未覆盖的流程：`model-lifecycle` / `detail-and-action-states` / `failure-states` 需「建模 → BPMN 设计 → 校验 → 发布」写入链，而发布会向共享 Flowable 引擎部署流程定义（`ACT_RE_*`）且尚无经验证的干净删除/回滚路径；`countersign` 需多实例会签模型与多审批人身份。四项均**需单独授权/新增测试身份**，本轮不擅自部署也不临时越权，在覆盖清单中保留为显式 gap。

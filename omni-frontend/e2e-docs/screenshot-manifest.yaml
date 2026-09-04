@@ -3396,3 +3396,259 @@ screenshots:
     test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
     version: 0.6.1
     last_success_at: 2026-09-03T18:22:43+08:00
+  - id: workflow-instance-progress-zh-CN
+    module: workflow
+    flow: instance-tracking
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在流程实例列表首行点击「流转进度」打开只读进度弹层
+    expected: 弹层渲染真实 BPMN 流程图，已执行节点以绿色标记、未执行分支为灰色，右侧节点详情面板提示点击节点查看；已等待图形元素渲染完成，不含加载态
+    masks: []
+    image: docs/images/zh-CN/workflow-instance-progress.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:37+08:00
+  - id: workflow-instance-progress-en-US
+    module: workflow
+    flow: instance-tracking
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Process Progress on the first instance row to open the read-only progress dialog
+    expected: The dialog renders the real BPMN diagram with executed nodes marked green and unexecuted branches grey, and the node detail panel hints to click a node; the capture waits until diagram elements are rendered so no loading state appears
+    masks: []
+    image: docs/images/en-US/workflow-instance-progress.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:42+08:00
+  - id: workflow-instance-progress-ja-JP
+    module: workflow
+    flow: instance-tracking
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: プロセスインスタンス一覧の先頭行で「プロセス進捗」をクリックし読み取り専用の進捗ダイアログを開く
+    expected: ダイアログが実際の BPMN 図を描画し、実行済みノードは緑、未実行分岐は灰色で表示され、右側のノード詳細パネルはクリックを促す；図形要素の描画完了まで待機するため読み込み状態を含まない
+    masks: []
+    image: docs/images/ja-JP/workflow-instance-progress.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:47+08:00
+  - id: workflow-instance-progress-ko-KR
+    module: workflow
+    flow: instance-tracking
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 프로세스 인스턴스 목록 첫 행에서 「프로세스 진행 상태」를 클릭해 읽기 전용 진행 대화상자를 열기
+    expected: 대화상자가 실제 BPMN 다이어그램을 렌더링하고 실행된 노드는 녹색, 미실행 분기는 회색으로 표시되며 우측 노드 상세 패널은 클릭을 안내; 그래픽 요소 렌더링 완료까지 대기하므로 로딩 상태가 포함되지 않음
+    masks: []
+    image: docs/images/ko-KR/workflow-instance-progress.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:53+08:00
+  - id: workflow-instance-approval-records-zh-CN
+    module: workflow
+    flow: approval
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在流程实例列表首行点击「审批记录」打开只读审批历史弹层
+    expected: 弹层表格按当前语言渲染节点名称/审批人/审批结果/审批意见/审批时间列，并展示该实例的真实审批历史
+    masks: []
+    image: docs/images/zh-CN/workflow-instance-approval-records.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:39+08:00
+  - id: workflow-instance-approval-records-en-US
+    module: workflow
+    flow: approval
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Approval Records on the first instance row to open the read-only approval history dialog
+    expected: The dialog table renders the Node Name / Approver / Approval Result / Comment / Approval Time columns in the current language and shows that instance's real approval history
+    masks: []
+    image: docs/images/en-US/workflow-instance-approval-records.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:43+08:00
+  - id: workflow-instance-approval-records-ja-JP
+    module: workflow
+    flow: approval
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: プロセスインスタンス一覧の先頭行で「承認履歴」をクリックし読み取り専用の承認履歴ダイアログを開く
+    expected: ダイアログの表がノード名/承認者/承認結果/承認意見/承認日時を現在の言語で描画し、当該インスタンスの実際の承認履歴を表示
+    masks: []
+    image: docs/images/ja-JP/workflow-instance-approval-records.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:48+08:00
+  - id: workflow-instance-approval-records-ko-KR
+    module: workflow
+    flow: approval
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 프로세스 인스턴스 목록 첫 행에서 「승인 기록」을 클릭해 읽기 전용 승인 이력 대화상자를 열기
+    expected: 대화상자 표가 노드 이름/승인자/승인 결과/승인 의견/승인 일시를 현재 언어로 렌더링하고 해당 인스턴스의 실제 승인 이력을 표시
+    masks: []
+    image: docs/images/ko-KR/workflow-instance-approval-records.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:55+08:00
+  - id: workflow-model-versions-zh-CN
+    module: workflow
+    flow: publish
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在流程模型列表首行点击「版本」打开只读版本历史弹层
+    expected: 弹层按当前语言渲染业务版本/状态/引擎版本/发布人/发布时间/SHA-256 列并提供返回按钮，展示该模型的真实版本记录
+    masks: []
+    image: docs/images/zh-CN/workflow-model-versions.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:40+08:00
+  - id: workflow-model-versions-en-US
+    module: workflow
+    flow: publish
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Version on the first model row to open the read-only version history dialog
+    expected: The dialog renders the Business Version / Status / Engine Version / Published By / Published At / SHA-256 columns in the current language with a Back button, showing the model's real version records
+    masks: []
+    image: docs/images/en-US/workflow-model-versions.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:44+08:00
+  - id: workflow-model-versions-ja-JP
+    module: workflow
+    flow: publish
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: プロセスモデル一覧の先頭行で「バージョン」をクリックし読み取り専用のバージョン履歴ダイアログを開く
+    expected: ダイアログがビジネスバージョン/状態/エンジンバージョン/公開者/公開日時/SHA-256 を現在の言語で描画し戻るボタンを提供、当該モデルの実際のバージョン記録を表示
+    masks: []
+    image: docs/images/ja-JP/workflow-model-versions.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:49+08:00
+  - id: workflow-model-versions-ko-KR
+    module: workflow
+    flow: publish
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 프로세스 모델 목록 첫 행에서 「버전」을 클릭해 읽기 전용 버전 기록 대화상자를 열기
+    expected: 대화상자가 비즈니스 버전/상태/엔진 버전/게시자/게시 일시/SHA-256 을 현재 언어로 렌더링하고 뒤로 버튼을 제공하며 해당 모델의 실제 버전 기록을 표시
+    masks: []
+    image: docs/images/ko-KR/workflow-model-versions.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:58+08:00
+  - id: monitor-mq-message-detail-zh-CN
+    module: messaging-monitoring
+    flow: message-status
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在 MQ 消息列表首行点击「查看详情」打开只读消息详情弹层
+    expected: 弹层展示消息ID/Topic/Binding Name/Tag/业务键/中间件类型/状态/重试次数/来源服务/创建时间/下次重试时间等真实字段
+    masks: []
+    image: docs/images/zh-CN/monitor-mq-message-detail.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:41+08:00
+  - id: monitor-mq-message-detail-en-US
+    module: messaging-monitoring
+    flow: message-status
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Detail on the first message row to open the read-only message detail dialog
+    expected: The dialog shows the real Message ID / Topic / Binding Name / Tag / Business Key / Broker Type / Status / Retries / Service / Created At / Next Retry fields; the title and labels are English in ja-JP and ko-KR as measured, recorded as a translation-completeness issue
+    masks: []
+    image: docs/images/en-US/monitor-mq-message-detail.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:46+08:00
+  - id: monitor-mq-message-detail-ja-JP
+    module: messaging-monitoring
+    flow: message-status
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: MQ メッセージ一覧の先頭行で詳細ボタンをクリックし読み取り専用のメッセージ詳細ダイアログを開く
+    expected: ダイアログが Message ID / Topic / Binding Name / Tag / ビジネスキー / ブローカー種別 / 状態 / リトライ回数 / 送信元サービス / 作成日時 / 次回リトライ の実際フィールドを表示；実測により ja-JP ではタイトルとラベルが英語のまま（翻訳完成度の問題として登録）
+    masks: []
+    image: docs/images/ja-JP/monitor-mq-message-detail.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:51+08:00
+  - id: monitor-mq-message-detail-ko-KR
+    module: messaging-monitoring
+    flow: message-status
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: MQ 메시지 목록 첫 행에서 상세 버튼을 클릭해 읽기 전용 메시지 상세 대화상자를 열기
+    expected: 대화상자가 Message ID / Topic / Binding Name / Tag / 비즈니스 키 / 브로커 종류 / 상태 / 재시도 횟수 / 출처 서비스 / 생성 일시 / 다음 재시도 실제 필드를 표시; 실측상 ko-KR 에서 제목과 레이블이 영어 그대로(번역 완성도 문제로 등록)
+    masks: []
+    image: docs/images/ko-KR/monitor-mq-message-detail.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:24:00+08:00

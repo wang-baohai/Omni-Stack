@@ -82,7 +82,7 @@ documents:
     module: workflow
     owner: workflow
     source: docs/workflow.md
-    source_sha256: 36f7622d14b9c978774117a4b6b6f4575c252bdf95ff959873b6613692c4b918
+    source_sha256: 238d45b19b056c64d48bf78a199574ce9694fca74d9bc328ae41084fecdaa281
     dependencies: [api, bpmn, permissions, screenshots]
     translations:
       en-US: { path: docs/workflow.en.md, status: present-unverified, reviewed_at: null }
@@ -115,7 +115,7 @@ documents:
     module: messaging
     owner: platform
     source: docs/mq-reliability.md
-    source_sha256: 57de14bee4224b3a175d7c2be02db157e014e85e46fb4d3bd0b1c3d99bca92a1
+    source_sha256: 93cbfdcba530bc1ac4d76c10738465fa109658d133fc7c97bf9ce26dbebf5020
     dependencies: [outbox, api, tenant, observability]
     translations:
       en-US: { path: docs/mq-reliability.en.md, status: present-unverified, reviewed_at: null }

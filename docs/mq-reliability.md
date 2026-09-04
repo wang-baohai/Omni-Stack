@@ -401,3 +401,25 @@ spring:
 | **消费者未收到消息** | Topic 未创建或消费者未订阅 | RocketMQ 控制台检查 Topic 和 Consumer Group；确认消费者服务已启动 |
 | **租户隔离失效** | 查询未过滤 tenantId | 检查 Controller 中是否包含 `.eq(SysMqMessage::getTenantId, tenantId)` |
 | **重复投递** | 中继任务多次扫描同一消息 | 检查 `msgId` 唯一性约束；确认 `StreamBridge.send()` 幂等性 |
+
+## 10. 消息详情界面截图（四语言）
+
+由文档专用 Playwright 用例 `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` 在真实运行栈上生成，对应 §5 步骤 5「检查前端管理界面」。
+
+- 前置条件：本地 Compose 全栈运行，`omni-base` 健康且 `sys_mq_message` 已有真实消息（采集时 base 库 87 行）。
+- 操作者：`admin`（需消息查询权限；控制器按 `X-Tenant-Id` 过滤）。
+- 操作：进入消息记录页，在首行点击「查看详情」打开只读详情弹层。
+- 预期状态：弹层展示消息ID、Topic、Binding Name、Tag、业务键、中间件类型、状态、重试次数、来源服务、创建时间与下次重试时间，内容与 §2.1 状态机、§2.4 重试策略所述字段一致。
+- 本组为**只读采集**：不重发、不跳过、不修改任何消息，因此不需写入开关，也无数据收尾。
+
+| 页面 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 消息详情弹层（message-status） | ![消息详情（简体中文）](images/zh-CN/monitor-mq-message-detail.png) | ![消息详情（英文）](images/en-US/monitor-mq-message-detail.png) | ![消息详情（日文）](images/ja-JP/monitor-mq-message-detail.png) | ![消息详情（韩文）](images/ko-KR/monitor-mq-message-detail.png) |
+
+已登记的译文完整度问题：该弹层在 **en-US/ja-JP/ko-KR 下标题与全部字段标签实测为英文**（ja/ko 未译，仅 zh-CN 已本地化）。
+`npm run ui:i18n:parity`（四语言各 2319 键、0 缺失）与 `npm run ui:i18n:check`（0/0 项）均通过，因此属语言包取值问题而非硬编码缺陷；图片与 manifest 按实际渲染值如实登记，未美化。
+
+尚未覆盖的流程（均需单独授权，本轮不擅自构造）：
+
+- `retry` 与 `dead-letter`：实测 5 个库的 `sys_mq_message` 共 809 行（base 87、procurement 644、srm 34、workflow 23、crm 21），**status 全为 1，无任何 FAILED / DEAD_LETTER 记录**。要产出这两个状态，必须向跨租户共享的 outbox 注入必然失败的消息，并让中继按 §2.4 的 `2^retryCount × 10s` 退避反复重试报错——属在共享基础设施上制造故障，需明确授权后才能执行。
+- `trace-diagnosis`：需真实 Trace ID 排障链路证据，待与可观测栈（[docs/observability.md](observability.md)）一并设计。

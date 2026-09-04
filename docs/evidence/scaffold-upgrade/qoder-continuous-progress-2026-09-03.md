@@ -446,6 +446,51 @@ strict 模块失败数仍为 8（需全部 required_flows 达标才能转 covere
 失败时先保留本地现场并报告，仅在取得「代理已恢复 + github 可达 + 可 fast-forward」三项新证据后重试一次。
 分类：瞬时环境阻塞（已自消），**不构成 REMOTE_DIVERGENCE_STOP**（无分叉，两端均为本地 HEAD 祖先）。
 
+### 3.10 阶段 B 第四批实际执行结果（只读详情弹层；含一次质检拦截）
+
+**环境变化**：本批开始前发现 **Docker 守护进程已完全停止**（`dockerDesktopLinuxEngine` 管道不存在，无 docker 进程）。
+已启动 Docker Desktop（非破坏性：**未重建、未清卷、未改配置**），15 个容器自动恢复为 running / 14 healthy，前端 HTTP 200，与停机前一致。
+
+**探测**：用一次性临时用例（用后已删除）按 §8.2 已固化的四语言按钮文案逐个打开 4 个弹层，实测标题/字段标签/按钮（4 passed / 1.3m）。
+
+**新增用例**：`omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts`（4 弹层 × 4 语言 = 16 图，只读）：
+流程实例「流转进度」「审批记录」、流程模型「版本历史」、MQ 消息「查看详情」。
+
+**图片质检拦截到一个真实缺陷（重要过程记录）**：
+
+- 首轮 16 passed 后目检 `zh-CN/workflow-instance-progress.png`，发现弹层内是 **BPMN 异步加载中的转圈态**（画布空白 + spinner + BPMN.IO 水印），**不是有效文档图**。
+- 根因：该 scene 是四个场景中**唯一 `expectLabel: null`** 的，缺少内容就绪断言就截图；其余三个因断言了本地化字段标签而内容已确认渲染。
+- 定位：`components/workflow/ProcessProgressDialog.vue` 用 `v-loading="loading"` 包裹 `.bpmn-viewer-wrap`，`NavigatedViewer.importXML` 完成后才有 `.djs-container svg` 与 `.djs-element`，最后 `canvas.zoom('fit-viewport')`。
+- 修正：新增 `readySelector` 字段（该 scene 为 `.bpmn-viewer-wrap .djs-element`），并对**所有** scene 统一增加 `.el-loading-mask` 必须已消失的兜底断言（超时 30s）。
+- 重跑：**16 passed（25.9s）/ 0 skipped**，图片 mtime 由 01:20:29–01:20:48Z 更新为 01:23:37–01:24:00Z；
+  重拍后目检确认为**完整渲染的真实流程图**：提交 → 采购经理审批 → 审批结果网关 → 审批通过/审批驳回，
+  已执行节点绿色（`completed-node`）、未走过分支灰色，无加载态。**加载态图片未被登记为正式资产**。
+
+| 项 | 实测结果 |
+| --- | --- |
+| 静态检查 | `eslint --max-warnings 0` exit 0；`tsc --noEmit --strict` exit 0；`playwright --list` = **16 tests** |
+| 真实运行 | 修正后 **16 passed（25.9s）/ 0 failed / 0 skipped**，`PLAYWRIGHT_EXIT=0`，TTL 门禁 `1200L` |
+| 图片 | **16/16**，96,047–198,674 bytes，无异常小图 |
+| 写入 | 无。仅点击查看类动作，明确避开设计/校验/发布/删除/终止/重发/跳过；`E2E_MUTATIONS=false`，**无数据需清理** |
+| 凭证 | 本轮两份（`tokens-20260904-091315.json` 探测、`tokens-20260904-092328.json` 采集）**均已销毁**；目录实数回到 12 |
+| manifest | **+16 条 → 共 230 条**（`step: detail`），零重复、零缺字段、图片/用例文件全在 |
+| coverage | workflow +3 assets、messaging-monitoring +1 asset；**gaps 未减少**（理由已写入注释，见下） |
+| 指南 | `docs/workflow.md` §8 新增「只读详情弹层」小节；`docs/mq-reliability.md` 新增 §10；两份摘要已刷新（`238d45b19b05…` / `93cbfdcba530…`） |
+| strict | exit 1、**恰好 8 个模块覆盖失败**、**非覆盖类错误 0**；links / sensitive 均 exit 0；38 份源文档 0 摘要不匹配 |
+
+**本批未关闭任何 gap，已如实登记两项 BLOCKED（含硬证据）**：
+
+1. **messaging-monitoring `retry` / `dead-letter` / `detail-and-action-states`（操作态）**：实测 5 个库 `sys_mq_message` 共 **809 行**
+   （base 87、procurement 644、srm 34、workflow 23、crm 21），**status 全为 1，无任何 FAILED / DEAD_LETTER**。
+   要产出这两个状态必须向跨租户共享的 outbox 注入必然失败的消息并让 relay 按 `2^retryCount × 10s` 反复重试报错，
+   属「在共享基础设施上制造故障」，与指令「不制造生产故障」相冲 → **需单独授权**。
+2. **workflow `model-lifecycle` / `detail-and-action-states` / `failure-states` / `countersign`**：前三项需「建模→BPMN 设计→校验→发布」写入链，
+   而发布会向**共享 Flowable 引擎**部署流程定义（`ACT_RE_*`）且未经验证存在干净的删除/回滚路径；
+   `countersign` 另需**多审批人身份**（现有受信任身份仅 admin/supplier1，禁止临时越权）→ **需单独授权/新增身份确认**。
+
+**累计阶段 B 已关闭 gap：仍为 4 个**（workflow `tracking`、srm `stable-mobile-flow`、system-management `detail-and-action-states` 与 `failure-states`）；
+本批新增 **16 张真实只读详情图**作为 workflow/messaging-monitoring 的必需资产，但未谎报 gap 关闭。strict 仍 8。
+
 ## 4. 阶段 C：四语言文档预审与修订
 
 ### 4.1 队列实测

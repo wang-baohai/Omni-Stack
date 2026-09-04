@@ -93,7 +93,18 @@ modules:
       - docs/images/monitor-operlog.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/monitor-mq-messages.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-operation-log.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/monitor-mq-message-detail.png
     gaps: [retry, dead-letter, trace-diagnosis, detail-and-action-states]
+    # 已补：消息详情弹层四语言只读图（detail-overlays.flows.spec.ts，16 passed / 0 skipped）。
+    # 但 gaps 本批**未减少**，如实登记原因：
+    # - retry / dead-letter：实测 5 个库的 sys_mq_message 共 809 行（base 87、procurement 644、srm 34、
+    #   workflow 23、crm 21）**status 全为 1，无任何 FAILED / DEAD_LETTER 记录**，因此重试与死信状态无法只读构造；
+    #   要产出它们必须向跨租户共享的 outbox 注入必然失败的消息并让 relay 按 2^retryCount×10s 反复重试报错，
+    #   属「制造故障」且会污染共享基础设施，**需单独授权**（BLOCKED）。
+    # - detail-and-action-states：详情态已有图，但「操作态」（死信重发/跳过）依赖上述 DEAD_LETTER 数据，同步 BLOCKED。
+    # - trace-diagnosis：需真实 Trace ID 排障链路证据，待与可观测栈一并设计。
+    # 译文完整度登记：MQ 详情弹层在 en-US/ja-JP/ko-KR 下标题与全部字段标签实测为英文（ja/ko 未译），
+    # 图片与 manifest 均按实际渲染值如实登记，未美化。
   - id: workflow
     status: partial
     required_flows: [model-create, bpmn-design, candidate-config, validation, publish, start, approval, countersign, completion, instance-tracking]
@@ -104,9 +115,23 @@ modules:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-definitions.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-instances.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-stats.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-instance-progress.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-instance-approval-records.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-model-versions.png
     gaps: [model-lifecycle, countersign, detail-and-action-states, failure-states]
     # tracking 已关闭：/admin/workflow/instance 四语言正式图，页面真实渲染 23 条流程实例、
     # 流转进度与审批记录入口；definitions 与 stats 同时补齐 publish/instance-tracking 的只读视图。
+    # 已补（本批）：三个只读详情弹层四语言图 —— 流转进度（真实 BPMN 图，已执行节点绿色/未执行分支灰色）、
+    # 审批记录（节点名称/审批人/审批结果/审批意见/审批时间）、版本历史（业务版本/状态/引擎版本/发布人/发布时间/SHA-256）。
+    # 但 gaps 本批**未减少**，如实登记原因：
+    # - model-lifecycle / detail-and-action-states / failure-states 需「建模→BPMN 设计→校验→发布」写入链，
+    #   发布会向**共享 Flowable 引擎**部署流程定义（ACT_RE_*），且未经验证存在干净的删除/回滚路径，
+    #   在共享环境上风险偏高，**需单独授权**（BLOCKED）；本批不擅自部署。
+    # - countersign 需多实例会签模型与**多审批人身份**；现有受信任测试身份仅 admin/supplier1，
+    #   禁止临时越权或硬编码 Token，新增身份**登记待确认**（BLOCKED）。
+    # 图片质检拦截记录：首轮采集时「流转进度」弹层截到的是 BPMN 异步加载中的转圈态（画布空白），
+    # 经质检发现后已在用例中补上就绪断言（`.bpmn-viewer-wrap .djs-element` 可见 + `.el-loading-mask` 已消失）并重拍，
+    # 现图为完整渲染的真实流程图；未将加载态图片登记为正式资产。
     # 内容注意：当前实例均由历次 E2E（含本批）产生，标题带 E2ESQ 标识；实例属 Flowable 审计历史，
     # wf_process_instance_ext 无 deleted 列，不得用 SQL 硬删，故不为此造假数据或隐藏真实标题。
   - id: crm
