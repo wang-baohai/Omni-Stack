@@ -802,6 +802,15 @@ parity 显示 guide-troubleshooting ja/ko 为 STUB（10/10 标题齐、但 0/7 �
 
 验证：parity 两组六对全 ALIGNED；ko CJK 0；links/i18n exit 0；全库分布 ALIGNED 75→**81**、PARTIAL 15→**9**、MAJOR_GAP 3、STUB 21。
 
+### 4.15 guide-scheduling + guide-permissions 组补译（2026-09-04）
+
+清理最后两个 PARTIAL 指南组（均为 stage B 截图小节 + 浓缩散文）：
+
+- **guide-scheduling**（提交 `382d5f0`）：三语均缺 §1 操作截图的图 2/3/4（任务类型、创建接口失败、个人任务生命周期），ja/ko 另把 §2/§4/§6 列表压成单句。en 补图 2-4；ja/ko 忠实重译（恢复 §2 五步、§4 六步、§6 bullets + 全部 4 图）→ ALIGNED 12/12、2/2。12 张 scheduling 图实测存在。
+- **guide-permissions**：三语均缺 §5 操作截图的图 2-7（员工越权 403、员工可见范围、供应商门户范围、404、列表接口失败、菜单加载失败降级页，共 6 图），ja/ko 另把 §1/§2/§4/§5/§6 列表压成散文（charRatio 0.48/0.50）。en 补图 2-7；ja/ko 忠实重译（恢复 §1 四层 bullet、§2 五步、§4 范围+映射 bullets、§5 六步、§6 七步 + 全部 7 图）→ ALIGNED 15/15、2/2。21 张 permissions 图实测存在。自检出并修正 ko 1 处 CJK 泄漏（`실패下の`→`실패 상황의`）。
+
+验证：parity 两组六对全 ALIGNED；ko CJK 0；links/i18n exit 0；全库分布 ALIGNED 81→**87**、PARTIAL 9→**3**（仅剩 docker-deployment×3）、MAJOR_GAP 3、STUB 21。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）

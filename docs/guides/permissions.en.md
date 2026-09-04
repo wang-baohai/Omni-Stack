@@ -64,6 +64,60 @@ Do not validate permission behavior only with the super administrator.
 
 ![User management](../images/en-US/system-users.png)
 
+#### Figure 2 `employee-forbidden-403-en-US`: Employee forbidden access denied
+
+- Prerequisites: log in as the ordinary employee zhangsan (EMPLOYEE role), not granted `procurement:approval-route:list`
+- Actor: ordinary employee
+- Action: access the Requisition Approval Rules admin page `/admin/procurement/approval-route` directly
+- Expected result: the page shows 403 with a return entry (AUTHENTICATED_BUT_FORBIDDEN, not a login redirect); the same API returns HTTP 403
+
+![Employee forbidden access denied](../images/en-US/employee-forbidden-403.png)
+
+#### Figure 3 `employee-workspace-scope-en-US`: Employee visible scope
+
+- Prerequisites: log in as the ordinary employee zhangsan
+- Actor: ordinary employee
+- Action: after login, open the approval workbench home
+- Expected result: the workbench shows only the employee's visible to-do and personal jobs, without admin menus or a 403
+
+![Employee visible scope](../images/en-US/employee-workspace-scope.png)
+
+#### Figure 4 `supplier-portal-scope-en-US`: Supplier portal scope
+
+- Prerequisites: log in as the official seed supplier account supplier1 (SUPPLIER role)
+- Actor: supplier user
+- Action: open `/supplier-portal`
+- Expected result: the portal page renders with the login identity supplier1, accessible only within the supplier's legitimate scope
+
+![Supplier portal scope](../images/en-US/supplier-portal-scope.png)
+
+#### Figure 5 `resource-not-found-404-en-US`: Unknown route 404
+
+- Prerequisites: log in as an administrator
+- Actor: any user
+- Action: access an undefined route (catch-all NotFound, statusCode=404)
+- Expected result: the product NotFound page shows the 404 text
+
+![Unknown route 404](../images/en-US/resource-not-found-404.png)
+
+#### Figure 6 `approval-route-list-failure-en-US`: List-API failure presentation
+
+- Prerequisites: log in as an administrator; a deterministic 500 fault is injected into the approval-rule list API within the test process
+- Actor: administrator (with a deterministic test fault)
+- Action: open the Requisition Approval Rules page; the list API returns 500
+- Expected result: the page frame holds and the list area shows the real product behavior under an API failure
+
+![List-API failure](../images/en-US/approval-route-list-failure.png)
+
+#### Figure 7 `admin-menu-load-failure-en-US`: Menu-load-failure fallback page
+
+- Prerequisites: log in as an administrator; a deterministic 500 fault is injected into the menu API within the test process
+- Actor: administrator (with a deterministic test fault)
+- Action: access an admin page; the menu API returns 500
+- Expected result: the guard redirects to the menu-load-failure fallback page, showing a localized error title and Reload/Back-home recovery entries, without a blank screen or faking a successful menu
+
+![Menu-load-failure fallback page](../images/en-US/admin-menu-load-failure.png)
+
 ## 6. Adding a Permission
 
 Update together:
