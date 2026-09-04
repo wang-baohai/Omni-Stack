@@ -839,12 +839,16 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 | `22cf8ee` | 阶段 C：P0 core-flows 补译 Flow 13-18（三语 ALIGNED 111/111）+ CJK 字形修正 | 4 |
 | `afadfe2` | 阶段 C：P0 api-contract §15-18 补译 en（ALIGNED 83/85） | 1 |
 | `f372084` | 阶段 C：P0 api-contract §15-18 补译 ja/ko + checkpoint §4.7 | 3 |
+| `afa591e` | checkpoint：§5.4 会话交付小结 + §8.3 恢复指针刷新 | 1 |
+| `33aaf6e` | 阶段 C：P1 workflow §2.8+§8 补译三语 ALIGNED + 恢复 api-contract §16 锚点 | 7 |
+| `ea0904a` | 阶段 C：guide-system-security-audit §8/§9 截图章节补译三语 ALIGNED | 4 |
+| `b219c7d` | 阶段 C：mq-reliability §10 补译三语 ALIGNED（闭合阶段 B 自造缺口） | 4 |
 
-**里程碑：P0 三篇系统真相文档（architecture、core-flows、api-contract）四语言全部 ALIGNED**。全库完整度分布由接管时 ALIGNED 48 / PARTIAL 21 / MAJOR_GAP 20 / STUB 25 变为 **ALIGNED 56 / PARTIAL 16 / MAJOR_GAP 17 / STUB 25**（本会话 +8 ALIGNED）。
+**里程碑：P0 三篇系统真相文档（architecture、core-flows、api-contract）四语言全部 ALIGNED；P1 workflow 组补齐；阶段 B 自造的三处译文缺口（workflow §8、guide §8/§9、mq §10）全部闭合**。全库完整度分布由接管时 ALIGNED 48 / PARTIAL 21 / MAJOR_GAP 20 / STUB 25 变为 **ALIGNED 62 / PARTIAL 16 / MAJOR_GAP 11 / STUB 25**（本会话 +14 ALIGNED）。9 个提交均 fast-forward 推送、三端一致（LOCAL=GITEE=GITHUB=`b219c7d`）。
 
 运行现场：`omni-wp09-docs running(15)` 全程未重建；本会话均为**文档只读 + 译文修订**，无 E2E、无 Token 签发、无数据写入、无凭证产生。免费额度剩余：**UNKNOWN**（Agent 无法读取客户端用量面板，请在客户端核对）。
 
-**下一可执行项（阶段 C，非外部阻塞）**：P1 组——`workflow`（MAJOR_GAP 32/39、22/40、58/92，且 §2.8 缺失连带 api-contract §16 锚点待恢复）、`backend-patterns`、`frontend-patterns`、`scheduling`、`crm`、`mq-reliability`、`guide-scaffold-development`；以及 4 份 `*-design` STUB（asset/crm/srm/procurement-design，各三语，工量最重）。每项闭环需与本轮同量级（读源→补译→parity→门禁→提交）。
+**下一可执行项（阶段 C，非外部阻塞）**：P1 剩 backend-patterns/frontend-patterns/scheduling/crm/guide-scaffold-development 结构已 ALIGNED（仅需逐句语义复核）；结构性缺口集中在 **MAJOR_GAP 11**（observability、scaffold-upgrade-plan、preset-quick-selection、custom-preset-tutorial en、preset-maintenance ko）与 **STUB 25**（asset/crm/srm/procurement-design 各三语、full-functional-audit 等，工量最重）及 PARTIAL 16、P2。每项闭环需与本轮同量级（读源→补译→parity→门禁→提交）。
 
 **外部阻塞项不变**（见 §5.2 BLOCKED 表 + §6）：DATA_DEFECT 种子还原（需授权）、workflow countersign（需新增身份）、scaffold-development/operations（非页面流程，需决定登记形态）、G1/G7/G8/WP-10。
 
