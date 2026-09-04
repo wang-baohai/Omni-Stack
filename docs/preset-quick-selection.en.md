@@ -31,7 +31,14 @@ The preview reports the dependency closure, backend modules, Compose services, p
 
 ## Required verification
 
-Build the generated backend, then run frontend `npm ci`, lint/build, and `docker compose config --quiet`. Maintainers also run `npm run test:preset-structure` and `npm run test:preset-smoke`. `test:preset-golden` covers all five presets before a release. Database fresh migration, real startup, login/menu/health, and browser smoke tests remain mandatory runtime gates.
+Build the generated backend, then run frontend `npm ci`, lint/build, and `docker compose config --quiet`. Repository maintainers also run:
+
+~~~powershell
+npm run test:preset-structure
+npm run test:preset-smoke
+~~~
+
+`test:preset-golden` runs the full build matrix for all five presets, suitable for nightly or pre-release. Database fresh migration, real startup, and browser smoke tests are runtime acceptance and cannot be replaced by structure checks.
 
 ## Boundaries
 
