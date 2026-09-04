@@ -811,6 +811,23 @@ parity 显示 guide-troubleshooting ja/ko 为 STUB（10/10 标题齐、但 0/7 �
 
 验证：parity 两组六对全 ALIGNED；ko CJK 0；links/i18n exit 0；全库分布 ALIGNED 81→**87**、PARTIAL 9→**3**（仅剩 docker-deployment×3）、MAJOR_GAP 3、STUB 21。
 
+### 4.16 docker-deployment 组：en 陈旧译文 reconcile（2026-09-04；ja/ko 待续）
+
+parity 曾显示 docker-deployment 三语 PARTIAL（99/100 标题、78/78 代码块、108/132 表格）。深入核查发现**根因是译文整体陈旧**（早于四项重大源变更），非简单浓缩：
+
+1. §2 容器网络拓扑缺 9 行（crm/srm/procurement/asset 的跨服务通信）+ 缺「生产网络边界」注；
+2. §3.1 启动链写「5 层」且层级图缺 crm/srm/procurement/asset（源为 8 层）；
+3. §3.2 健康检查缺 4 个业务服务行；
+4. §5.6 标题「4 instances」（源「8 个」）+ 环境变量表缺 `OMNI_INTERNAL_API_TOKEN`/`MYSQL_URL` + 缺 `.env` 首启说明；
+5. §16.1 端口表陈旧（`8100` 而非 `127.0.0.1:8100` 回环绑定，缺安全说明；Nacos 拆成 3 行 vs 源 1 行）；
+6. §16.2 是**完全不同的旧节**（散文「Credentials and Exposure」）vs 源「本地初始化账号与密钥来源」5 行表；
+7. §16.3 关键文件表写 `docker-compose.yml`（源已拆为 `compose.yaml`+`compose.infra.yaml`+`compose.apps.yaml`）+ 缺 Migrator 镜像行；
+8. 附录构建产物缺 omni-crm 行。
+
+本轮**忠实 reconcile en**（8 处修正，表格 108→132 与源逐项一致）→ en ALIGNED（99/100、78/78、132/132）；全库分布 ALIGNED 87→**88**、PARTIAL 3→**2**。
+
+**ja/ko 待续（同样 8 处陈旧，与 en 修正前一一对应）**：ja/ko docker-deployment 仍 108/132 表格、§3.1「5 層/5계층」、§5.6「4 instances」、§16.2 旧散文节、§16.3 `docker-compose.yml`。下一轮按 en 本次 diff 为模板，对 ja/ko 施加相同 8 处 reconcile（描述列译为目标语言，服务名/端口/路径/命令 verbatim）；§3.2 健康行与附录 omni-crm 行为语言中性，可直接复用 en 行。这是明确、有界、可续做的下一项。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）

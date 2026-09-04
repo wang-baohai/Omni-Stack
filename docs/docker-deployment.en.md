@@ -78,10 +78,24 @@ networks:
 | omni-auth | nacos | `nacos:8848` | Service registry/config |
 | omni-base | rocketmq-namesrv | `rocketmq-namesrv:9876` | MQ message sending |
 | omni-base | xxl-job-admin | `xxl-job-admin:8080` | Job executor registration |
+| omni-crm | omni-auth | `omni-auth:8080` | User, organization, data-scope and XSS internal queries |
+| omni-crm | rocketmq-namesrv | `rocketmq-namesrv:9876` | CRM Outbox message delivery |
+| omni-crm | xxl-job-admin | `xxl-job-admin:8080` | CRM relay executor registration |
+| omni-srm | mysql | `mysql:3306` | SRM business database and local Outbox |
+| omni-srm | omni-auth | `omni-auth:8080` | User/organization internal queries and Portal Saga |
+| omni-procurement | omni-srm | `omni-srm:8080` | Supplier invitation, quotation and award validation |
+| omni-procurement | omni-workflow | `omni-workflow:8080` | Requisition approval internal contract |
+| omni-asset | omni-procurement | `omni-procurement:8080` | Goods-receipt asset-candidate historical compensation |
+| omni-asset | omni-workflow | `omni-workflow:8080` | Transfer and disposal approval internal contract |
 | Host Browser | omni-frontend | `localhost:3000` | User access entry point |
 | Host Browser | Nacos Console | `localhost:8080` | Operations management |
 
-> **Key Distinction**: Inter-container communication uses internal ports (e.g., 8080), while host access uses mapped ports (e.g., 8100/8101/8102/8103).
+> **Key Distinction**: Inter-container communication uses internal container ports (e.g., 8080), while host access uses mapped ports (e.g., 8100-8107); MySQL always uses 3306 inside the container and maps to 13306 on the host.
+
+> **Production network boundary**: The repository-root `compose.yaml` and its include files are local development/integration orchestration. Frontend 3000 and Gateway 8102
+> are host-accessible; all other services, middleware and management consoles bind only to `127.0.0.1` as diagnostic entries. Production deployment must publish only the
+> Frontend/Gateway HTTPS entries and remove all diagnostic port mappings; the downstream `X-Gateway-Forwarded` is only a forwarding marker and cannot replace a private
+> network and inter-service tokens.
 
 ---
 
@@ -89,7 +103,7 @@ networks:
 
 ### 3.1 Layered Startup Order
 
-Containers are organized into 5 layers using `depends_on` + `condition: service_healthy` for ordered startup:
+Containers are organized into 8 layers by dependency, using `depends_on` + `condition: service_healthy` for ordered startup:
 
 ```
 Layer 0:  mysql · redis · rocketmq-namesrv          (no dependencies, start first)
@@ -98,9 +112,15 @@ Layer 1:  nacos     xxl-job   rocketmq-broker        (depend on Layer 0)
             │         │          │
 Layer 2:  omni-auth                                  (depends on nacos + redis + mysql)
             │
-Layer 3:  omni-base · omni-workflow · omni-gateway   (depend on Layer 1 + Layer 2)
+Layer 3:  omni-base · omni-workflow · omni-crm · omni-srm
                                                 │
-Layer 4:  omni-frontend                           (depends on omni-gateway)
+Layer 4:  omni-procurement                           (depends on workflow + srm)
+                                                │
+Layer 5:  omni-asset                                 (depends on procurement + workflow)
+                                                │
+Layer 6:  omni-gateway                               (depends on all downstream services)
+                                                │
+Layer 7:  omni-frontend                              (depends on omni-gateway)
 ```
 
 ### 3.2 Health Check Configuration Overview
@@ -117,6 +137,10 @@ Layer 4:  omni-frontend                           (depends on omni-gateway)
 | omni-base | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 | omni-gateway | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 | omni-workflow | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-crm | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-srm | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-procurement | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-asset | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 
 > **Why start_period = 90s?**  
 > Spring Boot microservices need to load many beans + initialize databases + register with Nacos on cold start, which may take 60-80 seconds. Setting 90s prevents false unhealthy status.
@@ -281,9 +305,9 @@ xxl-job-admin:
       --xxl.job.accessToken=           # Empty token (no auth in dev)
 ```
 
-### 5.6 Backend Microservices (4 instances)
+### 5.6 Backend Microservices (8 services)
 
-All four backend microservices use the same Dockerfile, differentiated by `build.args.SERVICE_NAME`. Each service's `environment` overrides key configurations:
+The eight backend microservices use the same Dockerfile, differentiated by `build.args.SERVICE_NAME`. Each service's `environment` overrides key configurations:
 
 | Environment Variable | Description | Example Value |
 |---------------------|-------------|---------------|
@@ -294,6 +318,10 @@ All four backend microservices use the same Dockerfile, differentiated by `build
 | `SPRING_CLOUD_NACOS_DISCOVERY_IP` | Registration IP (empty = auto-detect container IP) | `""` |
 | `AUTH_ISSUER` | JWT Issuer (auth only) | `http://omni-auth:8080` |
 | `AUTH_JWKS_URI` | JWKS endpoint (gateway only) | `http://omni-auth:8080/oauth2/jwks` |
+| `OMNI_INTERNAL_API_TOKEN` | Inter-service shared secret (identical across all Servlet services) | Injected from `.env` |
+| `MYSQL_URL` | Current business-service database connection | `jdbc:mysql://mysql:3306/omni_asset?...` |
+
+On first startup you must run `cp .env.example .env` and replace `OMNI_INTERNAL_API_TOKEN` with a random value of at least 32 bytes. Compose uses required-variable syntax and refuses to start when a secret is missing, providing no in-repository default.
 
 ### 5.7 Frontend
 
@@ -789,42 +817,51 @@ docker compose logs --timestamps omni-auth | head -5
 
 | Service | Internal Port | Host Mapped Port | Protocol | Description |
 |---------|--------------|-----------------|----------|-------------|
-| omni-frontend | 3000 | 3000 | HTTP | User access entry |
-| omni-auth | 8080 | 8100 | HTTP | Auth service |
-| omni-base | 8080 | 8101 | HTTP | Base data service |
+| omni-frontend | 3000 | 3000 | HTTP | User access entry point |
+| omni-auth | 8080 | 127.0.0.1:8100 | HTTP | Authentication/authorization service; loopback debugging only |
+| omni-base | 8080 | 127.0.0.1:8101 | HTTP | Base data service; loopback debugging only |
 | omni-gateway | 8080 | 8102 | HTTP | API Gateway |
-| omni-workflow | 8080 | 8103 | HTTP | Workflow service |
-| omni-crm | 8080 | 8104 | HTTP | CRM service |
-| omni-srm | 8080 | 8105 | HTTP | SRM service |
-| omni-procurement | 8080 | 8106 | HTTP | Procurement service |
-| omni-asset | 8080 | 8107 | HTTP | Asset service |
-| MySQL | 3306 | 13306 | TCP | Database |
-| Redis | 6379 | 6379 | TCP | Cache |
-| Nacos Console | 8080 | 8080 | HTTP | Console |
-| Nacos API | 8848 | 8848 | HTTP | Service registry/config |
-| Nacos gRPC | 9848 | 9848 | gRPC | Long connections |
-| RocketMQ NameServer | 9876 | **19876** | TCP | Name service |
-| RocketMQ Broker | 10909-10912 | 10909-10912 | TCP | Message broker |
-| XXL-JOB Admin | 8080 | 18080 | HTTP | Job scheduler |
+| omni-workflow | 8080 | 127.0.0.1:8103 | HTTP | Workflow service; loopback debugging only |
+| omni-crm | 8080 | 127.0.0.1:8104 | HTTP | CRM sales pre-close service; loopback debugging only |
+| omni-srm | 8080 | 127.0.0.1:8105 | HTTP | SRM service; production traffic only via Gateway, host loopback debugging only |
+| omni-procurement | 8080 | 127.0.0.1:8106 | HTTP | Procurement service; production traffic only via Gateway |
+| omni-asset | 8080 | 127.0.0.1:8107 | HTTP | Asset service; production traffic only via Gateway |
+| MySQL | 3306 | 127.0.0.1:13306 | TCP | Database; explicit named volume, loopback debugging only |
+| Redis | 6379 | 127.0.0.1:6379 | TCP | Password-protected cache, loopback debugging only |
+| Nacos Console/API/gRPC | 8080/8848/9848 | 127.0.0.1 same ports only | HTTP/gRPC | Registry/config and console |
+| RocketMQ NameServer | 9876 | **127.0.0.1:19876** | TCP | Name service |
+| RocketMQ Broker | 10909-10912 | 127.0.0.1 same ports only | TCP | Message broker |
+| XXL-JOB Admin | 8080 | 127.0.0.1:18080 | HTTP | Job scheduler; login and executor tokens injected from `.env` |
 
-### 16.2 Credentials and Exposure
+### 16.2 Local Initialization Accounts and Secret Sources
 
-No production credential is hard-coded. Configure MySQL, Redis, Nacos, XXL-JOB, OAuth state, JWK encryption, internal API, and application database secrets in `.env` before startup. Seed application accounts are local-demo data only and must be changed or removed before any shared deployment. Only the frontend (`3000`) and Gateway (`8102`) are intended as public entry points; all other published ports bind to `127.0.0.1`.
+| Service | Account | Password | Access address |
+|------|------|------|----------|
+| Frontend app | Local seed `admin` | Local seed `admin123`; change immediately on first login, never use in production | http://localhost:3000 |
+| MySQL | root | `.env: MYSQL_ROOT_PASSWORD` | 127.0.0.1:13306 |
+| Redis | No username | `.env: REDIS_PASSWORD` | 127.0.0.1:6379 |
+| Nacos auth identity | `.env: NACOS_AUTH_IDENTITY_KEY` | `.env: NACOS_AUTH_IDENTITY_VALUE/TOKEN` | http://127.0.0.1:8080 |
+| XXL-JOB Admin | `.env: XXL_JOB_ADMIN_USERNAME` | `.env: XXL_JOB_ADMIN_PASSWORD` | http://127.0.0.1:18080 |
+
+All `replace-with-*` values must be replaced before startup; Compose fails closed using required-variable syntax. A new tenant administrator's password is provided explicitly by the create request, and the backend stores only the BCrypt hash, no longer generating `admin123`.
 
 ### 16.3 Key File Paths
 
 | File | Path | Description |
 |------|------|-------------|
-| docker-compose.yml | `docker-compose.yml` | Container orchestration config |
+| Compose entry | `compose.yaml` | Includes infrastructure and application orchestration |
+| Compose infrastructure | `compose.infra.yaml` | MySQL, Redis, Nacos, RocketMQ, XXL-JOB |
+| Compose applications | `compose.apps.yaml` | Backend services and frontend |
 | Backend Dockerfile | `docker/backend/Dockerfile` | Microservice multi-stage build |
 | Frontend Dockerfile | `docker/frontend/Dockerfile` | Vue frontend multi-stage build |
 | Nginx Config | `docker/frontend/nginx.conf` | Frontend reverse proxy rules |
 | Broker Config | `docker/rocketmq/broker-docker.conf` | RocketMQ Docker network config |
 | Maven Mirror | `omni-backend/docker-settings.xml` | Aliyun Maven acceleration |
-| DB Migrations | `database/changelog/` | Liquibase schema, constraints, and upgrades for all nine databases |
-| DB Seeds | `scripts/sql/seed/`, `database/seed/manifest.yaml` | Idempotent DML, source checksums, and natural-key assertions |
+| DB Migrations | `database/changelog/` | Liquibase schema, constraints, and upgrade source of truth for all nine databases |
+| DB Seeds | `scripts/sql/seed/`, `database/seed/manifest.yaml` | Idempotent DML, source-file checksums, and natural-key assertions |
+| Migrator image | `docker/migrator/Dockerfile` | Builds the one-shot Liquibase migration service |
 | Start Script (Linux) | `start.sh` | One-click start |
-| Start Script (Windows) | `start.bat` | One-click start (with port protection) |
+| Start Script (Windows) | `start.bat` | Starts a specified preset without administrator rights, without modifying the system port policy |
 | Stop Script (Linux) | `stop.sh` | One-click stop |
 | Stop Script (Windows) | `stop.bat` | One-click stop |
 
@@ -838,6 +875,7 @@ No production credential is hard-coded. Configure MySQL, Redis, Nacos, XXL-JOB, 
 | omni-base:latest | ~200MB | JRE + Fat JAR |
 | omni-gateway:latest | ~200MB | JRE + Fat JAR |
 | omni-workflow:latest | ~250MB | JRE + Fat JAR + Flowable engine |
+| omni-crm:latest | ~210MB | JRE + Fat JAR + CRM/Outbox |
 | omni-frontend:latest | ~50MB | Nginx + Vue static files |
 | mysql:8.4 | ~600MB | Official image |
 | nacos/nacos-server:v3.1.1 | ~800MB | Official image |
