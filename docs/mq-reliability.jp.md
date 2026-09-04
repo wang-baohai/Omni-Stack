@@ -399,3 +399,25 @@ spring:
 | **コンシューマがメッセージを受信していない** | Topic が未作成またはコンシューマが未購読 | RocketMQ コンソールで Topic と Consumer Group を確認；コンシューマサービスが起動しているか確認 |
 | **テナント分離が機能しない** | クエリが tenantId でフィルタリングされていない | Controller に `.eq(SysMqMessage::getTenantId, tenantId)` が含まれているか確認 |
 | **重複配信** | リレータスクが同じメッセージを複数回スキャン | `msgId` のユニーク制約を確認；`StreamBridge.send()` の冪等性を確認 |
+
+## 10. メッセージ詳細画面のスクリーンショット（4言語）
+
+ドキュメント専用 Playwright ケース `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` により実際の実行スタック上で生成、§5 ステップ 5「フロントエンド管理画面の確認」に対応。
+
+- 前提条件：ローカル Compose フルスタックが実行中、`omni-base` ヘルスかつ `sys_mq_message` に実際のメッセージが存在（採集時 base データベース 87 行）。
+- 操作者：`admin`（メッセージ照会権限が必要；コントローラーは `X-Tenant-Id` でフィルタ）。
+- 操作：メッセージ記録ページに入り、先頭行で「詳細表示」をクリックして読み取り専用詳細オーバーレイを開く。
+- 期待状態：オーバーレイはメッセージ ID、Topic、Binding Name、Tag、ビジネスキー、ミドルウェアタイプ、ステータス、リトライ回数、ソースサービス、作成時刻と次回リトライ時刻を表示し、内容は §2.1 ステートマシン、§2.4 リトライ戦略のフィールドと一致。
+- 本グループは**読み取り専用採集**：いかなるメッセージも再送信・スキップ・変更しないため、書き込みスイッチは不要でデータ収尾もない。
+
+| ページ | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| メッセージ詳細オーバーレイ（message-status） | ![メッセージ詳細（簡体字中国語）](images/zh-CN/monitor-mq-message-detail.png) | ![メッセージ詳細（英語）](images/en-US/monitor-mq-message-detail.png) | ![メッセージ詳細（日本語）](images/ja-JP/monitor-mq-message-detail.png) | ![メッセージ詳細（韓国語）](images/ko-KR/monitor-mq-message-detail.png) |
+
+登録済みの翻訳完全度問題：このオーバーレイは **en-US/ja-JP/ko-KR でタイトルと全フィールドラベルが実測で英語**（ja/ko 未翻訳、zh-CN のみローカライズ済み）。
+`npm run ui:i18n:parity`（4言語各 2319 キー、0 欠落）と `npm run ui:i18n:check`（0/0 項目）はいずれも通過するため、言語パックの取値問題でありハードコード欠陥ではない；画像と manifest は実際のレンダリング値でそのまま登録し、美化していない。
+
+未カバーのプロセス（いずれも個別の承認が必要、本ラウンドでは勝手に構築しない）：
+
+- `retry` と `dead-letter`：実測で 5 つのデータベースの `sys_mq_message` は計 809 行（base 87、procurement 644、srm 34、workflow 23、crm 21）、**status はすべて 1、FAILED / DEAD_LETTER 記録は皆無**。この 2 つの状態を生成するには、クロステナント共有の outbox に必ず失敗するメッセージを注入し、リレーに §2.4 の `2^retryCount × 10s` バックオフで繰り返しリトライ・エラーさせねばならず——共有インフラ上での障害製造にあたり、明確な承認後にのみ実行可能。
+- `trace-diagnosis`：実際の Trace ID 排障チェーン証拠が必要、可観測スタック（[docs/observability.md](observability.md)）と併せて設計予定。

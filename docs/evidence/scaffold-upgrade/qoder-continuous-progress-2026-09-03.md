@@ -765,6 +765,12 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 
 验证：parity 三语均 **ALIGNED**（11/11 标题、22/22 表格）；ko CJK 扫描仅剩 3 处**有意的**中文缺陷引用（非泄漏）；links/sensitive/i18n exit 0；全库分布 ALIGNED 59→**62**、MAJOR_GAP 14→**11**。
 
+### 4.10 mq-reliability 组补译（2026-09-04，闭合阶段 B 自造缺口）
+
+阶段 B 第四批曾向源 `docs/mq-reliability.md` 新增 §10（消息详情弹层四语言截图 + retry/dead-letter/trace-diagnosis 未覆盖说明），三份译文未回填 → parity 缺 1 标题 / 3 表格行 / 5 链接（4 张 monitor-mq-message-detail 图 + observability.md）。本轮补入 §10 全文（en/ja/ko 各 +22 行），图片路径 verbatim、observability 链接沿用既有 en/jp/ko 约定指向 `observability.md`（该组译文尚不完整，与 guide See-also 一致）。另修正 ko §2 既有 1 处日文片假名泄漏 `クリア`→`초기화`。
+
+验证：parity mq-reliability 三语 **ALIGNED**（38/38 标题、22/22 代码块、48/48 表格行）、**0 findings**（5 缺失链接已补齐）；links/sensitive/i18n exit 0；ko CJK 扫描 0。至此**阶段 B 自造的三处译文缺口（workflow §8、guide §8/§9、mq §10）全部闭合**。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）

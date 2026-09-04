@@ -140,7 +140,7 @@ reliableMessageRelay.send("order-out-0", orderPayload, tenantId, "order:12345");
 
 데드 레터는 프론트엔드 관리 UI(`운영 모니터링 → 메시지 기록`)를 통해 관리자의 수동 개입이 필요합니다:
 
-- **재전송** (`POST /api/base/mq-message/{msgId}/resend`): 상태를 PENDING으로 초기화하고, 재시도 카운트와 백오프 타이머를クリア합니다. 릴레이 작업이 다음 폴링에서 처리합니다.
+- **재전송** (`POST /api/base/mq-message/{msgId}/resend`): 상태를 PENDING으로 초기화하고, 재시도 카운트와 백오프 타이머를 초기화합니다. 릴레이 작업이 다음 폴링에서 처리합니다.
 - **건너뛰기** (`POST /api/base/mq-message/{msgId}/skip`): DEAD_LETTER → SKIPPED로 전환하여, 메시지가 전달되지 않음을 확인합니다.
 
 ## 3. Tenant Isolation
@@ -399,3 +399,25 @@ spring:
 | **컨슈머가 메시지를 수신하지 못함** | Topic이 생성되지 않았거나 컨슈머가 구독하지 않음 | RocketMQ 콘솔에서 Topic과 Consumer Group 확인; 컨슈머 서비스가 시작되었는지 확인 |
 | **테넌트 격리 실패** | 쿼리가 tenantId로 필터링되지 않음 | Controller에 `.eq(SysMqMessage::getTenantId, tenantId)`가 포함되어 있는지 확인 |
 | **중복 전달** | 릴레이 작업이 동일한 메시지를 여러 번 스캔 | `msgId` 고유성 제약 확인; `StreamBridge.send()` 멱등성 확인 |
+
+## 10. 메시지 상세 화면 스크린샷(4개 언어)
+
+문서 전용 Playwright 케이스 `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` 에 의해 실제 실행 스택에서 생성되며, §5 단계 5 「프론트엔드 관리 화면 확인」에 대응.
+
+- 전제 조건: 로컬 Compose 전체 스택 실행 중, `omni-base` 헬스 및 `sys_mq_message` 에 실제 메시지 존재(수집 시 base DB 87 행).
+- 조작자: `admin`(메시지 조회 권한 필요; 컨트롤러는 `X-Tenant-Id` 로 필터).
+- 조작: 메시지 기록 페이지에 진입해 첫 행에서 「상세 보기」를 클릭해 읽기 전용 상세 오버레이를 엽니다.
+- 기대 상태: 오버레이는 메시지 ID, Topic, Binding Name, Tag, 비즈니스 키, 미들웨어 유형, 상태, 재시도 횟수, 소스 서비스, 생성 시간과 다음 재시도 시간을 표시하며, 내용은 §2.1 상태 머신, §2.4 재시도 전략의 필드와 일치.
+- 본 그룹은 **읽기 전용 수집**: 어떤 메시지도 재전송·건너뛰기·수정하지 않으므로, 쓰기 스위치가 불필요하고 데이터 마무리도 없습니다.
+
+| 페이지 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 메시지 상세 오버레이(message-status) | ![메시지 상세(간체 중국어)](images/zh-CN/monitor-mq-message-detail.png) | ![메시지 상세(영어)](images/en-US/monitor-mq-message-detail.png) | ![메시지 상세(일본어)](images/ja-JP/monitor-mq-message-detail.png) | ![메시지 상세(한국어)](images/ko-KR/monitor-mq-message-detail.png) |
+
+등록된 번역 완전도 문제: 이 오버레이는 **en-US/ja-JP/ko-KR 에서 제목과 모든 필드 레이블이 실측으로 영어**(ja/ko 미번역, zh-CN 만 현지화).
+`npm run ui:i18n:parity`(4개 언어 각 2319 키, 0 누락)와 `npm run ui:i18n:check`(0/0 항목)가 모두 통과하므로, 언어 팩 값 문제이며 하드코딩 결함이 아님; 이미지와 manifest 는 실제 렌더링 값으로 그대로 등록하고 미화하지 않음.
+
+아직 커버되지 않은 프로세스(모두 개별 승인 필요, 본 라운드에서 임의로 구성하지 않음):
+
+- `retry` 와 `dead-letter`: 실측으로 5개 DB의 `sys_mq_message` 는 총 809 행(base 87, procurement 644, srm 34, workflow 23, crm 21), **status 는 모두 1, FAILED / DEAD_LETTER 기록은 전혀 없음**. 이 두 상태를 생성하려면 크로스 테넌트 공유 outbox 에 반드시 실패하는 메시지를 주입하고 릴레이가 §2.4 의 `2^retryCount × 10s` 백오프로 반복 재시도·오류하게 해야 하며——공유 인프라에서 장애를 제조하는 것으로, 명시적 승인 후에만 실행 가능.
+- `trace-diagnosis`: 실제 Trace ID 진단 체인 증거가 필요하며, 관측 스택([docs/observability.md](observability.md))과 함께 설계 예정.
