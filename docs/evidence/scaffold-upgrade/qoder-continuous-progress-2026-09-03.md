@@ -796,6 +796,26 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 本会话在**上下文/运行预算**这一平台限制下收口，而非因为剩余项全部被外部阻塞。
 下一接手方可从 5.2 的 EXECUTABLE 低成本项（workflow `tracking`）直接续做，无需重开全仓审计。
 
+### 5.4 本会话（2026-09-04 接管）交付小结
+
+用户以 `qoder-continuous-execution-prompt-2026-09-03.md` 再次接管，最小核对 Git/运行现场后连续推进阶段 C P0，共 5 个小提交（均 fast-forward 推送、三端一致）：
+
+| 提交 | 内容 | 文件 |
+| --- | --- | --- |
+| `dd8ce78` | 阶段 C：P0 architecture 收尾（§5 +4 行 + 缺陷 A/B/C，三语 ALIGNED 138/138） | 6 |
+| `e8eb034` | checkpoint：architecture parity 复验（§4.5.8）+ G7 完整度矩阵（§4.5.9） | 1 |
+| `22cf8ee` | 阶段 C：P0 core-flows 补译 Flow 13-18（三语 ALIGNED 111/111）+ CJK 字形修正 | 4 |
+| `afadfe2` | 阶段 C：P0 api-contract §15-18 补译 en（ALIGNED 83/85） | 1 |
+| `f372084` | 阶段 C：P0 api-contract §15-18 补译 ja/ko + checkpoint §4.7 | 3 |
+
+**里程碑：P0 三篇系统真相文档（architecture、core-flows、api-contract）四语言全部 ALIGNED**。全库完整度分布由接管时 ALIGNED 48 / PARTIAL 21 / MAJOR_GAP 20 / STUB 25 变为 **ALIGNED 56 / PARTIAL 16 / MAJOR_GAP 17 / STUB 25**（本会话 +8 ALIGNED）。
+
+运行现场：`omni-wp09-docs running(15)` 全程未重建；本会话均为**文档只读 + 译文修订**，无 E2E、无 Token 签发、无数据写入、无凭证产生。免费额度剩余：**UNKNOWN**（Agent 无法读取客户端用量面板，请在客户端核对）。
+
+**下一可执行项（阶段 C，非外部阻塞）**：P1 组——`workflow`（MAJOR_GAP 32/39、22/40、58/92，且 §2.8 缺失连带 api-contract §16 锚点待恢复）、`backend-patterns`、`frontend-patterns`、`scheduling`、`crm`、`mq-reliability`、`guide-scaffold-development`；以及 4 份 `*-design` STUB（asset/crm/srm/procurement-design，各三语，工量最重）。每项闭环需与本轮同量级（读源→补译→parity→门禁→提交）。
+
+**外部阻塞项不变**（见 §5.2 BLOCKED 表 + §6）：DATA_DEFECT 种子还原（需授权）、workflow countersign（需新增身份）、scaffold-development/operations（非页面流程，需决定登记形态）、G1/G7/G8/WP-10。
+
 ## 6. Gate 与外部阻塞（保持真实状态，不因 A-D 推进而改动）
 
 | 项 | 状态 |
@@ -860,7 +880,7 @@ strict 预期：关闭 `supplier-quotation` 一个 gap 后 SRM 仍为 `partial`�
    - `/admin/workflow/model` 首行点「版本/Version/バージョン/버전」（只读历史；**避开** 设计/校验/发布/删除 中的写操作，尤其发布与删除）；
    - `/admin/base/mqmessage` 首行点「查看详情/Detail」，弹层标题与 `Close` 按钮已实测。
    随后：manifest 登记（`step: detail`）、coverage 移除对应 `detail-and-action-states`、指南补节 + 刷新摘要、strict 重跑、提交推送。
-2. **阶段 C 下一组**：P0 `architecture` 组**已收尾**（三语 ALIGNED 138/138，缺陷 A/B/C 已修，见 §4.5.3-4.5.8）；srm 组截图章节补译亦已完成（`4047e5b`）。下一 P0 组为 `api-contract`（源摘要见 manifest，parity=MAJOR_GAP，需大体量补译）与 `core-flows`，按同一源成组推进。
+2. **阶段 C**：P0 三篇（architecture、core-flows、api-contract）**已全部收尾**（见 §4.5-4.7、§5.4）。下一组为 P1（`workflow` MAJOR_GAP 优先，其 §2.8 补全后可恢复 api-contract §16 锚点；及 backend-patterns/frontend-patterns/scheduling/crm/mq-reliability/guide-scaffold-development）与 4 份 `*-design` STUB，按同一源成组推进。
 3. **需授权才能推进**（不自行执行）：修复 §3.3 DATA_DEFECT（还原 `proc_material_category` ids 1-13，事务 + `ROW_COUNT()=13`）→ 解锁 procurement `material` 与 asset 全部 10 gaps；修复 §3.8 登记的 i18n PRODUCT_DEFECT（后端校验消息国际化 + 补齐 ja/ko 译文）。
 4. **需先确认身份**：workflow `countersign` 需多审批人；现有受信任测试身份仅 admin/supplier1，**登记待确认，不自行创建、不临时越权**。
 5. **scaffold-development / operations**（各 2 gaps）：非页面流程（CLI / 可观测基础设施），禁止伪造 UI 图；需先决定登记形态与证据标准（真实命令输出/仪表盘证据 vs 授权 `exempt`）。
