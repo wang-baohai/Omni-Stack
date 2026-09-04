@@ -774,7 +774,7 @@ X-Tenant-Id: 1
 ## 16. Workflow 크로스 서비스 계약
 
 Workflow 내부 엔드포인트는 §8.3 의 `X-Internal-Token` 과 `X-Tenant-Id` 를 통일적으로 사용하고, 응답은 표준
-`R<T>` 를 계속 사용합니다. 상세한 실행 메커니즘은 [workflow.kr.md](workflow.kr.md) 참조.
+`R<T>` 를 계속 사용합니다. 상세한 실행 메커니즘은 [workflow.kr.md](workflow.kr.md#28-크로스-서비스-내부-계약) 참조.
 
 ### 16.1 멱등 프로세스 시작
 

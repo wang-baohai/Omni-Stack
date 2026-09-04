@@ -179,6 +179,174 @@ POST /api/workflow/approval/{taskId}/complete  (workflow:approval:complete)
 - 작업별 결과 판정: `approved` / `rejected` / `auto-approved`(MI_END) / `cancelled` / `pending`
 - 승인 의견의 `Comment`와 승인/거부 구분을 위한 `approved` 변수 조회
 
+### 2.8 크로스 서비스 내부 계약
+
+모든 서비스 간 인터페이스는 통일적으로 `/api/internal/**` 경로를 사용하며, Gateway 사용자 사전 인증을 거치지 않습니다. 호출자는 둘 다 휴대해야 합니다:
+
+```http
+X-Internal-Token: <공유 내부 토큰>
+X-Tenant-Id: 1
+Content-Type: application/json
+```
+
+컨테이너 수준 `InternalApiAuthFilter` 는 Spring Security 체인 전에 공유 토큰을 검증하고 모든 `/api/internal/**` 에 대해 실패 차단합니다; 이 경로는 Gateway 사용자 사전 인증을 다시 사용하지 않습니다. 토큰 누락 또는 불일치는 HTTP 401 을 반환; 서버측에 공유 토큰이 미구성된 경우 HTTP 503 을 반환합니다. 내부 요청의 `X-Tenant-Id` 는 요청 본문이나 쿼리 파라미터의 `tenantId` 와 완전히 일치해야 하며, 불일치는 비즈니스 코드 403 을 반환합니다.
+
+#### 2.8.1 멱등 프로세스 시작
+
+```http
+POST /api/internal/workflow/process-instance/start
+```
+
+요청 본문:
+
+```json
+{
+  "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
+  "tenantId": 1,
+  "modelVersionId": 42,
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001",
+  "startUserId": 7,
+  "startUserName": "buyer",
+  "title": "구매 신청 PR-202607-0001",
+  "variables": {
+    "amount": 120000
+  }
+}
+```
+
+| 필드 | 필수 | 제약 | 설명 |
+|---|---|---|---|
+| `requestId` | 예 | 비어 있지 않음, 최대 64 | 호출자 생성 멱등 요청 ID |
+| `tenantId` | 예 | 양의 정수 | `X-Tenant-Id` 와 같아야 함 |
+| `modelVersionId` | 예 | 양의 정수 | 현재 테넌트에 속하고 Flowable `processDefinitionId` 와 연결되어 있어야 함 |
+| `businessType` | 예 | 비어 있지 않음, 최대 100 | 안정된 크로스 서비스 비즈니스 타입 |
+| `businessKey` | 예 | 비어 있지 않음, 최대 255 | 호출자 비즈니스 기본 키 |
+| `startUserId` | 예 | 양의 정수 | 프로세스 발기인 |
+| `startUserName` | 아니오 | 최대 100 | 발기인 표시 이름 |
+| `title` | 아니오 | 최대 500 | 비어 있으면 `{businessType}:{businessKey}` 생성 |
+| `variables` | 아니오 | JSON 객체 | 비즈니스 프로세스 변수; 서비스가 세 개의 연관 변수를 덮어씀 |
+
+서비스는 항상 `modelVersionId` 로 `processDefinitionId` 를 해석한 뒤
+`startProcessInstanceById` 를 호출합니다. `requestId`, `businessType`, `businessKey` 는 프로세스 변수와 인스턴스 확장 기록 양쪽에 기록됩니다.
+
+성공 응답:
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
+    "businessType": "PROCUREMENT_REQUISITION",
+    "businessKey": "10001",
+    "processInstanceId": "22501",
+    "replayed": false
+  }
+}
+```
+
+멱등 규칙:
+
+- `wf_process_start_request` 는 `(tenant_id, request_id)` 와
+  `(tenant_id, business_type, business_key)` 유일 제약을 각각 확립; 어떤 차원도 프로세스를 중복 생성할 수 없습니다.
+- 동일 요청 의도(동일 비즈니스 키, `modelVersionId`, `startUserId`)가 이미 성공한 경우, 재시도는 원래
+  `processInstanceId` 를 반환하고 `replayed = true` 로 설정합니다.
+- 기존 예약이 여전히 처리 중이면 비즈니스 코드 409 를 반환; 호출자는 동일 `requestId` 로 백오프 재시도해야 합니다.
+- 동일 `requestId` 가 다른 비즈니스에 사용되거나, 동일 비즈니스 키가 프로세스 모델/발기인을 교체하면 비즈니스 코드 409 를 반환하며, 조용한 재사용을 금지합니다.
+
+#### 2.8.2 작업 처리 자격 검증
+
+```http
+POST /api/internal/workflow/task/assignment/validate
+```
+
+요청 본문:
+
+```json
+{
+  "tenantId": 1,
+  "taskId": "25017",
+  "userId": 7,
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001"
+}
+```
+
+검증은 네 개의 경계 층을 동시에 커버합니다: Flowable 작업 테넌트, 인스턴스 확장 기록 테넌트, `businessType + businessKey`
+비즈니스 귀속, 그리고 사용자가 현재 `ASSIGNEE` 또는 미수령 작업의 `CANDIDATE` 인지. 어떤 층의 불일치도 처리 자격을 부여하지 않습니다.
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "valid": true,
+    "processInstanceId": "22501",
+    "assignmentType": "ASSIGNEE",
+    "message": "검증 통과"
+  }
+}
+```
+
+`assignmentType` 은 `ASSIGNEE`, `CANDIDATE`, `NONE` 만 사용합니다. 작업이 존재하지 않거나 경계가 불일치할 때 정상적으로
+`valid = false` 를 반환; 요청 헤더와 요청 본문의 테넌트 불일치는 호출자 보안 오류로, 비즈니스 코드 403 을 반환합니다.
+
+#### 2.8.3 프로세스 완료 이벤트
+
+크로스 서비스 프로세스는 최종 승인이 끝나거나 종료될 때 `workflow.process.completed.v1` 을 생성합니다. 이벤트는
+`workflow-domain-out-0` binding 을 통해 `workflow-domain-event` 에 기록되며, 페이로드는 다음과 같습니다:
+
+```json
+{
+  "eventId": "3f206832-9dc1-4422-870a-a286a979404d",
+  "eventType": "workflow.process.completed.v1",
+  "occurredAt": "2026-07-21 10:30:00",
+  "tenantId": 1,
+  "producer": "omni-workflow",
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001",
+  "processInstanceId": "22501",
+  "result": "APPROVED",
+  "completedTime": "2026-07-21 10:30:00"
+}
+```
+
+| 필드 | 설명 |
+|---|---|
+| `eventId` | UUID; Outbox `msgKey` 와 소비자측 멱등 키도 겸함 |
+| `eventType` | `workflow.process.completed.v1` 로 고정 |
+| `occurredAt` | 이벤트 기록 생성 시간 |
+| `tenantId` | 비즈니스 테넌트 ID |
+| `producer` | `omni-workflow` 로 고정 |
+| `businessType` / `businessKey` | 호출자 집계를 재조회하는 안정 비즈니스 식별자 |
+| `processInstanceId` | Flowable 프로세스 인스턴스 ID |
+| `result` | `APPROVED`, `REJECTED`, `CANCELLED` |
+| `completedTime` | 프로세스 실제 완료 또는 종료 시간 |
+
+인스턴스 상태/완료 메타데이터 갱신과 `sys_mq_message` 의 PENDING Outbox 기록은 동일 로컬 트랜잭션에서 커밋됩니다.
+`completion_event_id IS NULL` 조건부 갱신은 데이터베이스 발행 래치로, 동일 프로세스 인스턴스가 하나의 논리 완료 이벤트만 생성함을 보장; 트랜잭션 실패 시 둘이 함께 롤백됩니다.
+릴레이 작업은 커밋 후 비동기로 전달·재시도하므로, 메시지 전송 의미는 **최소 한 번**이며, 컨슈머는 여전히 `eventId` 로 멱등 소비해야 합니다.
+
+#### 2.8.4 게시된 모델 버전 조회
+
+```http
+GET /api/internal/workflow/model-version/{modelVersionId}
+X-Internal-Token: <공유 내부 토큰>
+X-Tenant-Id: 1
+```
+
+응답은 `id/modelId/modelKey/category/version/processDefinitionId/status` 를 포함합니다. 그중:
+
+- `modelKey` 는 테넌트 내 유일하고 BPMN process id 와 일치해야 하는 모델 식별자.
+- `category` 는 비즈니스 서비스가 승인 용도를 바인딩하기 위한 안정 분류로, 자유롭게 표시할 수 있는 모델 이름과 같지 않습니다.
+- 모델 주 기록이 보관되었거나, 버전이 `PUBLISHED` 가 아니거나, 버전이 요청 테넌트에 속하지 않거나,
+  `processDefinitionId` 가 누락된 경우 통일적으로 404 를 반환합니다.
+
+비즈니스 서비스는 시작 전에 자신의 안정 `businessType` 과 `category` 를 정확히 일치시켜, 다른 비즈니스의 게시된 모델 오용을 방지할 수 있습니다. Workflow 내부 시작 엔드포인트는 실제로 인스턴스를 생성하기 전에
+`ASSET_TRANSFER/ASSET_DISPOSAL` 과 모델 분류를 재검증하며, 불일치는 404 로 명시적으로 거부하고 인스턴스를 생성하지 않습니다; 기존
+Procurement 승인 라우트는 이 Asset 전용 바인딩의 영향을 받지 않습니다. 이 조회는 모델 메타데이터만 제공하고 프로세스 시작이나 승인 권한을 부여하지 않습니다.
+
 ---
 
 ## 3. Constraints & Pitfalls
@@ -381,3 +549,41 @@ bpmn-js Modeler (오픈소스 BPMN 2.0 모델링 도구)
 | **deleteReason이 잘못 표시됨** | MI_END vs deleted 혼동 | §3.1 MI DeleteReason 테이블 참조; `MI_END` = 자동 완료, `deleted` = 프로세스 종료 |
 | **테넌트 격리가 작동하지 않음** | TenantInfoHolder가 설정되지 않음 | Gateway가 `X-Tenant-Id` 요청 헤더를 주입했는지 확인; `TenantInfoFilter`가 정상 실행되는지 확인 |
 | **BPMN 디자이너를 로드할 수 없음** | bpmn-js 버전 비호환 | `bpmn-js` 버전이 18.x인지 확인; 브라우저 콘솔 오류 확인 |
+
+## 8. 관리 화면 스크린샷(4개 언어)
+
+공식 이미지는 문서 전용 Playwright 케이스 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 에 의해 실제 실행 스택에서 생성되며, 언어별 디렉토리에 저장되고, 다른 언어 이미지를 재사용하지 않으며, 자리표시자 이미지나 목 응답을 사용하지 않습니다.
+
+- 전제 조건: 로컬 Compose 전체 스택 실행 중, 프론트엔드 `127.0.0.1:3000`; `omni-workflow` 헬스; DB에 실제 프로세스 모델과 인스턴스 존재(수집 시 8개 모델/버전, 23건 인스턴스).
+- 조작자: `admin`(`SUPER_ADMIN`, 워크플로 메뉴 권한 보유).
+- 조작: 로그인 후 「프로세스 정의」「프로세스 인스턴스」「통계 대시보드」 페이지에 순차 진입.
+- 기대 상태: 페이지 제목과 열 레이블이 현재 언어로 렌더링; 프로세스 인스턴스 목록은 프로세스 제목, 프로세스 Key, 비즈니스 기본 키, 발기인, 상태 및 시작 시간을 표시하고, 「프로세스 진행」과 「승인 기록」 입구를 제공.
+- 토큰: `E2eTokenFixture` 가 테스트 프로세스 내에서 단기 JWT(TTL 1200초)를 발급, 마무리 시 파기하며, 문서, 로그, 저장소에 쓰지 않습니다.
+- 본 그룹은 모두 **읽기 전용 수집**: 프로세스 데이터를 전혀 생성, 수정, 삭제하지 않으므로, 쓰기 스위치가 불필요하고 데이터 마무리도 없습니다.
+
+내용 설명: 현재 환경의 프로세스 인스턴스는 모두 역대 엔드투엔드 검증으로 생성되었으며 제목에 테스트 식별(예 `E2ESQ`)을 가집니다. `wf_process_instance_ext` 와 Flowable `ACT_HI_*` 는 엔진 관리 감사 이력으로 소프트 삭제 열이 없어 SQL 하드 삭제가 불가하므로, 이미지는 실제 제목을 그대로 보존하고 데이터 조작이나 자르기로 미화하지 않습니다.
+
+| 페이지 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 프로세스 정의(publish) | ![프로세스 정의(간체 중국어)](images/zh-CN/workflow-definitions.png) | ![프로세스 정의(영어)](images/en-US/workflow-definitions.png) | ![프로세스 정의(일본어)](images/ja-JP/workflow-definitions.png) | ![프로세스 정의(한국어)](images/ko-KR/workflow-definitions.png) |
+| 프로세스 인스턴스 추적(instance-tracking) | ![프로세스 인스턴스(간체 중국어)](images/zh-CN/workflow-instances.png) | ![프로세스 인스턴스(영어)](images/en-US/workflow-instances.png) | ![프로세스 인스턴스(일본어)](images/ja-JP/workflow-instances.png) | ![프로세스 인스턴스(한국어)](images/ko-KR/workflow-instances.png) |
+| 통계 대시보드(요약 뷰) | ![통계 대시보드(간체 중국어)](images/zh-CN/workflow-stats.png) | ![통계 대시보드(영어)](images/en-US/workflow-stats.png) | ![통계 대시보드(일본어)](images/ja-JP/workflow-stats.png) | ![통계 대시보드(한국어)](images/ko-KR/workflow-stats.png) |
+
+### 읽기 전용 상세 오버레이(4개 언어)
+
+`omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` 에 의해 생성되며, 마찬가지로 **읽기 전용 수집**: 행 내 보기형 액션만 클릭해 오버레이를 열고, 폼을 제출하지 않으며, 설계/검증/게시/삭제/종료 등 어떤 쓰기 조작도 트리거하지 않습니다.
+
+- 조작자: `admin`; 전제 조건은 전 절과 동일.
+- 조작: 프로세스 인스턴스 첫 행에서 「프로세스 진행」과 「승인 기록」을 클릭, 프로세스 모델 첫 행에서 「버전」을 클릭.
+- 기대 상태: 오버레이 제목이 현재 언어로 렌더링; 프로세스 진행 오버레이는 **BPMN 그래픽이 실제로 렌더링 완료될 때까지 기다린 후** 촬영해야 하며(케이스는 `.bpmn-viewer-wrap .djs-element` 가 보이고 `.el-loading-mask` 가 사라졌음을 단정), 비동기 로딩 중인 스피너 상태를 촬영해서는 안 됩니다.
+- 실측 결과: 16 passed / 0 skipped(본 문서와 신뢰성 메시지 문서가 공용하는 네 개의 오버레이 시나리오 × 4 언어 포함).
+
+| 오버레이 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 프로세스 진행(instance-tracking) | ![프로세스 진행(간체 중국어)](images/zh-CN/workflow-instance-progress.png) | ![프로세스 진행(영어)](images/en-US/workflow-instance-progress.png) | ![프로세스 진행(일본어)](images/ja-JP/workflow-instance-progress.png) | ![프로세스 진행(한국어)](images/ko-KR/workflow-instance-progress.png) |
+| 승인 기록(approval) | ![승인 기록(간체 중국어)](images/zh-CN/workflow-instance-approval-records.png) | ![승인 기록(영어)](images/en-US/workflow-instance-approval-records.png) | ![승인 기록(일본어)](images/ja-JP/workflow-instance-approval-records.png) | ![승인 기록(한국어)](images/ko-KR/workflow-instance-approval-records.png) |
+| 버전 이력(publish) | ![버전 이력(간체 중국어)](images/zh-CN/workflow-model-versions.png) | ![버전 이력(영어)](images/en-US/workflow-model-versions.png) | ![버전 이력(일본어)](images/ja-JP/workflow-model-versions.png) | ![버전 이력(한국어)](images/ko-KR/workflow-model-versions.png) |
+
+프로세스 진행 그림에서 녹색 노드는 본 인스턴스가 실행한 활동(`completed-node` 마크), 회색은 지나지 않은 분기(예 「승인 거부」)로, §2.7 「진행 상황 및 기록」의 의미와 일치합니다.
+
+아직 커버되지 않은 프로세스: `model-lifecycle` / `detail-and-action-states` / `failure-states` 는 「모델링 → BPMN 설계 → 검증 → 게시」 쓰기 체인이 필요하고, 게시는 공유 Flowable 엔진에 프로세스 정의(`ACT_RE_*`)를 배포하며 검증된 깨끗한 삭제/롤백 경로가 아직 없습니다; `countersign` 는 다중 인스턴스 합동 결재 모델과 여러 승인자 신분이 필요합니다. 네 항목 모두 **개별 승인/신규 테스트 신분이 필요**하며, 본 라운드에서는 임의 배포도 일시적 권한 초과도 하지 않고, 커버리지 목록에서 명시적 gap 으로 보존합니다.

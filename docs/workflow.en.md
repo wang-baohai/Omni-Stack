@@ -179,6 +179,175 @@ POST /api/workflow/approval/{taskId}/complete  (workflow:approval:complete)
 - Determines result per task: `approved` / `rejected` / `auto-approved` (MI_END) / `cancelled` / `pending`
 - Fetches `Comment` for approval opinions and `approved` variable for approve/reject distinction
 
+### 2.8 Cross-Service Internal Contract
+
+All inter-service interfaces uniformly use the `/api/internal/**` path and do not go through Gateway user pre-authentication. Callers must carry both:
+
+```http
+X-Internal-Token: <shared internal token>
+X-Tenant-Id: 1
+Content-Type: application/json
+```
+
+The container-level `InternalApiAuthFilter` validates the shared token before the Spring Security chain and fails closed for all `/api/internal/**`; these paths no longer use Gateway user pre-authentication. A missing or mismatched token returns HTTP 401; when the server has no shared token configured, it returns HTTP 503. The `X-Tenant-Id` in an internal request must exactly match the `tenantId` in the request body or query parameter; a mismatch returns business code 403.
+
+#### 2.8.1 Idempotent Process Start
+
+```http
+POST /api/internal/workflow/process-instance/start
+```
+
+Request body:
+
+```json
+{
+  "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
+  "tenantId": 1,
+  "modelVersionId": 42,
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001",
+  "startUserId": 7,
+  "startUserName": "buyer",
+  "title": "Purchase Requisition PR-202607-0001",
+  "variables": {
+    "amount": 120000
+  }
+}
+```
+
+| Field | Required | Constraint | Description |
+|---|---|---|---|
+| `requestId` | Yes | Non-empty, max 64 | Caller-generated idempotent request ID |
+| `tenantId` | Yes | Positive integer | Must equal `X-Tenant-Id` |
+| `modelVersionId` | Yes | Positive integer | Must belong to the current tenant and be linked to a Flowable `processDefinitionId` |
+| `businessType` | Yes | Non-empty, max 100 | Stable cross-service business type |
+| `businessKey` | Yes | Non-empty, max 255 | Caller business key |
+| `startUserId` | Yes | Positive integer | Process initiator |
+| `startUserName` | No | Max 100 | Initiator display name |
+| `title` | No | Max 500 | When empty, generated as `{businessType}:{businessKey}` |
+| `variables` | No | JSON object | Business process variables; the service overwrites three linked variables |
+
+The service always resolves `processDefinitionId` by `modelVersionId`, then calls
+`startProcessInstanceById`. `requestId`, `businessType` and `businessKey` are written to both the process variables and the instance-extension record.
+
+Success response:
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
+    "businessType": "PROCUREMENT_REQUISITION",
+    "businessKey": "10001",
+    "processInstanceId": "22501",
+    "replayed": false
+  }
+}
+```
+
+Idempotency rules:
+
+- `wf_process_start_request` establishes unique constraints on `(tenant_id, request_id)` and
+  `(tenant_id, business_type, business_key)` respectively; neither dimension may create a duplicate process.
+- When the same request intent (same business key, `modelVersionId`, `startUserId`) has already succeeded, a retry returns the original
+  `processInstanceId` and sets `replayed = true`.
+- An existing reservation still in progress returns business code 409; the caller should back off and retry with the same `requestId`.
+- The same `requestId` used by different business, or the same business key switching process model/initiator, returns business code 409; silent reuse is forbidden.
+
+#### 2.8.2 Task Handling Eligibility Validation
+
+```http
+POST /api/internal/workflow/task/assignment/validate
+```
+
+Request body:
+
+```json
+{
+  "tenantId": 1,
+  "taskId": "25017",
+  "userId": 7,
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001"
+}
+```
+
+The validation covers four boundary layers simultaneously: the Flowable task tenant, the instance-extension-record tenant, the `businessType + businessKey`
+business ownership, and whether the user is the current `ASSIGNEE` or a `CANDIDATE` of an unclaimed task. A mismatch at any layer grants no handling eligibility.
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "valid": true,
+    "processInstanceId": "22501",
+    "assignmentType": "ASSIGNEE",
+    "message": "Validation passed"
+  }
+}
+```
+
+`assignmentType` takes only `ASSIGNEE`, `CANDIDATE`, `NONE`. When the task does not exist or a boundary mismatches,
+`valid = false` is returned normally; a mismatch between the request-header and request-body tenant is a caller security error and returns business code 403.
+
+#### 2.8.3 Process Completed Event
+
+A cross-service process produces `workflow.process.completed.v1` when the final approval ends or it is terminated. The event is written to
+`workflow-domain-event` via the `workflow-domain-out-0` binding, with the payload:
+
+```json
+{
+  "eventId": "3f206832-9dc1-4422-870a-a286a979404d",
+  "eventType": "workflow.process.completed.v1",
+  "occurredAt": "2026-07-21 10:30:00",
+  "tenantId": 1,
+  "producer": "omni-workflow",
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001",
+  "processInstanceId": "22501",
+  "result": "APPROVED",
+  "completedTime": "2026-07-21 10:30:00"
+}
+```
+
+| Field | Description |
+|---|---|
+| `eventId` | UUID; also serves as the Outbox `msgKey` and the consumer-side idempotency key |
+| `eventType` | Fixed as `workflow.process.completed.v1` |
+| `occurredAt` | Time the event record was produced |
+| `tenantId` | Business tenant ID |
+| `producer` | Fixed as `omni-workflow` |
+| `businessType` / `businessKey` | Stable business identifier for looking up the caller aggregate |
+| `processInstanceId` | Flowable process instance ID |
+| `result` | `APPROVED`, `REJECTED`, `CANCELLED` |
+| `completedTime` | Actual process completion or termination time |
+
+The instance-status/completion-metadata update and the PENDING Outbox record in `sys_mq_message` are committed in the same local transaction.
+The `completion_event_id IS NULL` conditional update is the database publish latch, ensuring one logical completion event per process instance; on transaction failure both roll back together.
+The relay task delivers and retries asynchronously after commit, so the message transport semantics are **at-least-once**, and consumers must still consume idempotently by `eventId`.
+
+#### 2.8.4 Query Published Model Version
+
+```http
+GET /api/internal/workflow/model-version/{modelVersionId}
+X-Internal-Token: <shared internal token>
+X-Tenant-Id: 1
+```
+
+The response contains `id/modelId/modelKey/category/version/processDefinitionId/status`. Among them:
+
+- `modelKey` is the model identifier, unique within the tenant and required to match the BPMN process id.
+- `category` is a stable classification for business services to bind approval purposes, not equivalent to the freely displayable model name.
+- When the model main record is archived, the version is not `PUBLISHED`, the version does not belong to the requesting tenant, or
+  `processDefinitionId` is missing, 404 is returned uniformly.
+
+A business service can exactly match its own stable `businessType` against `category` before starting, to prevent misusing another business's
+published model. The Workflow internal start endpoint re-validates
+`ASSET_TRANSFER/ASSET_DISPOSAL` against the model category before actually creating an instance; a mismatch is explicitly rejected with 404 and no instance is created; existing
+Procurement approval routes are not affected by this Asset-specific binding. This query only provides model metadata and grants no process-start or approval permission.
+
 ---
 
 ## 3. Constraints & Pitfalls
@@ -381,3 +550,41 @@ Property Panels (panels/)
 | **deleteReason displayed incorrectly** | MI_END vs deleted confusion | Refer to §3.1 MI DeleteReason table; `MI_END` = auto-completed, `deleted` = process terminated |
 | **Tenant isolation not working** | TenantInfoHolder not set | Confirm Gateway has injected `X-Tenant-Id` request header; verify `TenantInfoFilter` is executing normally |
 | **BPMN designer fails to load** | bpmn-js version incompatible | Confirm `bpmn-js` version is 18.x; check browser console for errors |
+
+## 8. Admin UI Screenshots (Four Languages)
+
+The official images are generated by the docs-only Playwright spec `omni-frontend/e2e-docs/flows/management.flows.spec.ts` on the real running stack, stored in per-language directories, without reusing other languages' images, placeholder images or mocked responses.
+
+- Preconditions: the local Compose full stack is running, frontend at `127.0.0.1:3000`; `omni-workflow` healthy; the database already has real process models and instances (8 models/versions and 23 instances at capture time).
+- Operator: `admin` (`SUPER_ADMIN`, with workflow menu permissions).
+- Steps: after login, enter the “Process Definitions”, “Process Instances” and “Statistics Dashboard” pages in turn.
+- Expected state: page titles and column labels render in the current language; the process-instance list shows the process title, process key, business key, initiator, status and start time, and provides “Process Progress” and “Approval Records” entries.
+- Token: `E2eTokenFixture` issues a short-lived JWT (TTL 1200s) within the test process, destroyed on teardown, never written to docs, logs or the repository.
+- This whole group is **read-only capture**: it creates, modifies or deletes no process data, so no write switch is needed and there is no data teardown.
+
+Content note: the process instances in the current environment were all produced by successive end-to-end validations and carry test markers in their titles (e.g. `E2ESQ`). `wf_process_instance_ext` and Flowable `ACT_HI_*` are engine-managed audit history with no soft-delete column and must not be hard-deleted via SQL, so the images faithfully keep the real titles without beautifying by fabricating data or cropping.
+
+| Page | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| Process Definitions (publish) | ![Process Definitions (Simplified Chinese)](images/zh-CN/workflow-definitions.png) | ![Process Definitions (English)](images/en-US/workflow-definitions.png) | ![Process Definitions (Japanese)](images/ja-JP/workflow-definitions.png) | ![Process Definitions (Korean)](images/ko-KR/workflow-definitions.png) |
+| Process Instance Tracking (instance-tracking) | ![Process Instances (Simplified Chinese)](images/zh-CN/workflow-instances.png) | ![Process Instances (English)](images/en-US/workflow-instances.png) | ![Process Instances (Japanese)](images/ja-JP/workflow-instances.png) | ![Process Instances (Korean)](images/ko-KR/workflow-instances.png) |
+| Statistics Dashboard (summary view) | ![Statistics Dashboard (Simplified Chinese)](images/zh-CN/workflow-stats.png) | ![Statistics Dashboard (English)](images/en-US/workflow-stats.png) | ![Statistics Dashboard (Japanese)](images/ja-JP/workflow-stats.png) | ![Statistics Dashboard (Korean)](images/ko-KR/workflow-stats.png) |
+
+### Read-Only Detail Overlays (Four Languages)
+
+Generated by `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts`, also **read-only capture**: it only clicks in-row view-type actions to open overlays, submits no forms, and triggers no write operations such as design/validate/publish/delete/terminate.
+
+- Operator: `admin`; preconditions same as the previous section.
+- Steps: on the first process-instance row click “Process Progress” and “Approval Records”; on the first process-model row click “Version”.
+- Expected state: overlay titles render in the current language; the process-progress overlay must **wait until the BPMN diagram is truly rendered** before capture (the spec asserts `.bpmn-viewer-wrap .djs-element` is visible and `.el-loading-mask` has disappeared), and must not capture the async loading spinner.
+- Measured result: 16 passed / 0 skipped (including the four overlay scenarios × four languages shared by this doc and the reliable-messaging doc).
+
+| Overlay | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| Process Progress (instance-tracking) | ![Process Progress (Simplified Chinese)](images/zh-CN/workflow-instance-progress.png) | ![Process Progress (English)](images/en-US/workflow-instance-progress.png) | ![Process Progress (Japanese)](images/ja-JP/workflow-instance-progress.png) | ![Process Progress (Korean)](images/ko-KR/workflow-instance-progress.png) |
+| Approval Records (approval) | ![Approval Records (Simplified Chinese)](images/zh-CN/workflow-instance-approval-records.png) | ![Approval Records (English)](images/en-US/workflow-instance-approval-records.png) | ![Approval Records (Japanese)](images/ja-JP/workflow-instance-approval-records.png) | ![Approval Records (Korean)](images/ko-KR/workflow-instance-approval-records.png) |
+| Version History (publish) | ![Version History (Simplified Chinese)](images/zh-CN/workflow-model-versions.png) | ![Version History (English)](images/en-US/workflow-model-versions.png) | ![Version History (Japanese)](images/ja-JP/workflow-model-versions.png) | ![Version History (Korean)](images/ko-KR/workflow-model-versions.png) |
+
+In the process-progress diagram, green nodes are activities already executed by this instance (marked `completed-node`), grey are branches not taken (e.g. “Approval Rejected”), consistent with the semantics described in §2.7 “Progress & Records”.
+
+Flows not yet covered: `model-lifecycle` / `detail-and-action-states` / `failure-states` require the “model → BPMN design → validate → publish” write chain, and publishing deploys a process definition to the shared Flowable engine (`ACT_RE_*`) with no yet-verified clean delete/rollback path; `countersign` requires a multi-instance countersign model and multiple approver identities. All four **require separate authorization / new test identities**; this round neither deploys nor temporarily escalates privileges, keeping them as explicit gaps in the coverage list.

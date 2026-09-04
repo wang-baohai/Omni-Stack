@@ -739,6 +739,26 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 
 **状态**：api-contract 组（1 源 + 3 译文）§15-18 补齐、结构平价三语 ALIGNED、CJK 泄漏清零。**至此 P0 三篇（architecture、core-flows、api-contract）全部收尾**。下一优先级为 P1（backend-patterns、frontend-patterns、scheduling、workflow、crm、mq-reliability、guide-scaffold-development 等）与 4 份 `*-design` STUB（asset/crm/srm/procurement-design，各三语）。
 
+### 4.8 P1 workflow 组实质预审与修订（2026-09-04 完成）
+
+- **源**：`docs/workflow.md`（602 行，本轮**未动源**，摘要不变；i18n exit 0 佐证）。
+- **译文**：`docs/workflow.en.md`、`.jp.md`、`.kr.md`（修订前各 384 行、32 个真实标题，三份结构一致）。
+- **检查范围**：章节结构、跨服务内部契约、API 路径、权限码、字段/枚举、JSON/HTTP 代码块、表格、截图图片引用、术语正字法、跨文档链接锚点。
+
+**发现的问题（结构性缺失）**：三份译文均缺 **§2.8 跨服务内部契约（含 2.8.1-2.8.4）** 与 **§8 管理端界面截图（四语言，含只读详情弹层）**，共 7 个真实标题（39-32）。§2.8 是 workflow 侧的幂等启动/任务资格校验/完成事件/模型版本查询内部契约（与 api-contract §16 相关但独立，businessKey 格式、表列、幂等表名均不同，**不可复用**）；§8 是阶段 B 采集的管理端截图小节（含 6 张 workflow 图片引用）。
+
+**已做修改**：
+
+1. 三份译文补入 §2.8（2.8.1-2.8.4）+ §8（含只读详情弹层）全文（en/ja/ko 各 +206〜207 行），插入源对应位置（§2.8 在 §2.7 与 §3 之间、§8 在 §7 之后 EOF）。API 路径/权限码/字段名/枚举/金额 verbatim；`X-Internal-Token` 占位符与 JSON 自然语言值（title/message）按各语言本地化；§8 图片路径 verbatim、alt 文本与页面名译为目标语言。
+2. **恢复 api-contract §16 跨文档锚点**：workflow.{en,jp,kr}.md 补入 §2.8 后，将上一轮降为文件级的 api-contract §16 链接恢复为精确锚点（`#28-cross-service-internal-contract` / `#28-クロスサービス内部契約` / `#28-크로스-서비스-내부-계약`）；links 门禁 exit 0 证明三锚点均可解析。
+3. 术语正字法：ko §8 自检出并修正 1 处 CJK 泄漏（`任何`→`어떤`）+ 1 处助词（`집계을`→`집계를`）；复核 ko `\p{Han}|\p{Hiragana}|\p{Katakana}` = **0**、ja 简化字/谚文 = **0**。
+
+**验证（2026-09-04 实测）**：parity workflow 三语均 **ALIGNED**（39/39 标题、40/40 代码块、90/92 表格行）；links / sensitive / i18n 均 exit 0；全库分布 ALIGNED 56→**59**、MAJOR_GAP 17→**14**（PARTIAL 16、STUB 25 不变）。
+
+**剩余疑问 / 未完成**：workflow 三语 §1-7 仍有约 2 表格行的既有小缺口（parity 90/92），非本轮引入，不阻碍 ALIGNED。**既有译文质量项**：workflow.jp/ko 的 §3、§3.1 等少数标题仍为英文（如 `## 3. Constraints & Pitfalls`、`### 3.1 MI DeleteReason`）而正文已译，属既有标题未本地化，本轮聚焦结构补齐未逐一改标题，登记为待办（不影响 parity 计数）。三份译文 `docs-manifest.yaml` 仍 `present-unverified` / `reviewed_at: null`；不替代独立 Codex final review 或人工验收。
+
+**状态**：workflow 组（1 源 + 3 译文）§2.8+§8 补齐、三语 ALIGNED、api-contract §16 锚点已恢复。P1 已启动，剩 backend-patterns、frontend-patterns、scheduling、crm、mq-reliability、guide-scaffold-development。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）

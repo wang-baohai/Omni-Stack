@@ -179,6 +179,174 @@ POST /api/workflow/approval/{taskId}/complete  (workflow:approval:complete)
 - タスクごとの結果を判定：`approved` / `rejected` / `auto-approved`（MI_END）/ `cancelled` / `pending`
 - 承認意見の `Comment` と承認/却下の区別のための `approved` 変数を取得
 
+### 2.8 クロスサービス内部契約
+
+すべてのサービス間インターフェースは統一的に `/api/internal/**` パスを使用し、Gateway ユーザー事前認証を経由しません。呼び出し元は両方を携帯しなければなりません：
+
+```http
+X-Internal-Token: <共有内部トークン>
+X-Tenant-Id: 1
+Content-Type: application/json
+```
+
+コンテナレベルの `InternalApiAuthFilter` は Spring Security チェーンの前で共有トークンを検証し、すべての `/api/internal/**` に対してフェイルクローズします；これらのパスは Gateway ユーザー事前認証を再使用しません。トークンの欠落や不一致は HTTP 401 を返し；サーバー側に共有トークンが未設定の場合は HTTP 503 を返します。内部リクエストの `X-Tenant-Id` はリクエストボディやクエリパラメータの `tenantId` と完全一致しなければならず、不一致はビジネスコード 403 を返します。
+
+#### 2.8.1 冪等プロセス起動
+
+```http
+POST /api/internal/workflow/process-instance/start
+```
+
+リクエストボディ：
+
+```json
+{
+  "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
+  "tenantId": 1,
+  "modelVersionId": 42,
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001",
+  "startUserId": 7,
+  "startUserName": "buyer",
+  "title": "購買申請 PR-202607-0001",
+  "variables": {
+    "amount": 120000
+  }
+}
+```
+
+| フィールド | 必須 | 制約 | 説明 |
+|---|---|---|---|
+| `requestId` | はい | 非空、最大 64 | 呼び出し元生成の冪等リクエスト ID |
+| `tenantId` | はい | 正整数 | `X-Tenant-Id` と等しくなければならない |
+| `modelVersionId` | はい | 正整数 | 現在のテナントに属し Flowable `processDefinitionId` に関連済みでなければならない |
+| `businessType` | はい | 非空、最大 100 | 安定したクロスサービスビジネスタイプ |
+| `businessKey` | はい | 非空、最大 255 | 呼び出し元ビジネス主キー |
+| `startUserId` | はい | 正整数 | プロセス発起者 |
+| `startUserName` | いいえ | 最大 100 | 発起者表示名 |
+| `title` | いいえ | 最大 500 | 空の場合 `{businessType}:{businessKey}` を生成 |
+| `variables` | いいえ | JSON オブジェクト | ビジネスプロセス変数；サービスが 3 つの関連変数を上書き |
+
+サービスは常に `modelVersionId` で `processDefinitionId` を解決し、次に
+`startProcessInstanceById` を呼び出します。`requestId`、`businessType`、`businessKey` はプロセス変数とインスタンス拡張記録の両方に書き込まれます。
+
+成功レスポンス：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
+    "businessType": "PROCUREMENT_REQUISITION",
+    "businessKey": "10001",
+    "processInstanceId": "22501",
+    "replayed": false
+  }
+}
+```
+
+冪等ルール：
+
+- `wf_process_start_request` は `(tenant_id, request_id)` と
+  `(tenant_id, business_type, business_key)` の一意制約をそれぞれ確立；いずれの次元もプロセスを重複作成できません。
+- 同一のリクエスト意図（同一ビジネスキー、`modelVersionId`、`startUserId`）が既に成功している場合、リトライは元の
+  `processInstanceId` を返し、`replayed = true` を設定します。
+- 既存の予約が処理中の場合はビジネスコード 409 を返します；呼び出し元は同一 `requestId` でバックオフ・リトライすべきです。
+- 同一 `requestId` が異なるビジネスに使用される、または同一ビジネスキーがプロセスモデル/発起者を切り替える場合はビジネスコード 409 を返し、静かな再利用を禁止します。
+
+#### 2.8.2 タスク処理資格の検証
+
+```http
+POST /api/internal/workflow/task/assignment/validate
+```
+
+リクエストボディ：
+
+```json
+{
+  "tenantId": 1,
+  "taskId": "25017",
+  "userId": 7,
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001"
+}
+```
+
+検証は 4 層の境界を同時にカバーします：Flowable タスクテナント、インスタンス拡張記録テナント、`businessType + businessKey`
+ビジネス帰属、およびユーザーが現在の `ASSIGNEE` または未受領タスクの `CANDIDATE` かどうか。任何の層の不一致も処理資格を付与しません。
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "valid": true,
+    "processInstanceId": "22501",
+    "assignmentType": "ASSIGNEE",
+    "message": "検証通過"
+  }
+}
+```
+
+`assignmentType` は `ASSIGNEE`、`CANDIDATE`、`NONE` のみ。タスクが存在しないか境界が不一致の場合は正常に
+`valid = false` を返します；リクエストヘッダーとリクエストボディのテナント不一致は呼び出し元のセキュリティエラーで、ビジネスコード 403 を返します。
+
+#### 2.8.3 プロセス完了イベント
+
+クロスサービスプロセスは最終承認の終了または終了時に `workflow.process.completed.v1` を生成します。イベントは
+`workflow-domain-out-0` binding 経由で `workflow-domain-event` に書き込まれ、ペイロードは以下：
+
+```json
+{
+  "eventId": "3f206832-9dc1-4422-870a-a286a979404d",
+  "eventType": "workflow.process.completed.v1",
+  "occurredAt": "2026-07-21 10:30:00",
+  "tenantId": 1,
+  "producer": "omni-workflow",
+  "businessType": "PROCUREMENT_REQUISITION",
+  "businessKey": "10001",
+  "processInstanceId": "22501",
+  "result": "APPROVED",
+  "completedTime": "2026-07-21 10:30:00"
+}
+```
+
+| フィールド | 説明 |
+|---|---|
+| `eventId` | UUID；Outbox `msgKey` とコンシューマ側冪等キーも兼ねる |
+| `eventType` | `workflow.process.completed.v1` に固定 |
+| `occurredAt` | イベント記録の生成時刻 |
+| `tenantId` | ビジネステナント ID |
+| `producer` | `omni-workflow` に固定 |
+| `businessType` / `businessKey` | 呼び出し元集約を再照会する安定ビジネス識別子 |
+| `processInstanceId` | Flowable プロセスインスタンス ID |
+| `result` | `APPROVED`、`REJECTED`、`CANCELLED` |
+| `completedTime` | プロセスの実際の完了または終了時刻 |
+
+インスタンスステータス/完了メタデータの更新と `sys_mq_message` の PENDING Outbox 記録は同一ローカルトランザクションでコミットされます。
+`completion_event_id IS NULL` 条件付き更新はデータベース発行ラッチで、同一プロセスインスタンスが論理完了イベントを 1 条だけ生成することを保証；トランザクション失敗時は両者が一緒にロールバックします。
+リレータスクはコミット後に非同期で配信・リトライするため、メッセージ伝送セマンティクスは**少なくとも一度**であり、コンシューマは引き続き `eventId` で冪等消費しなければなりません。
+
+#### 2.8.4 公開済みモデルバージョンの照会
+
+```http
+GET /api/internal/workflow/model-version/{modelVersionId}
+X-Internal-Token: <共有内部トークン>
+X-Tenant-Id: 1
+```
+
+レスポンスは `id/modelId/modelKey/category/version/processDefinitionId/status` を含みます。うち：
+
+- `modelKey` はテナント内で一意かつ BPMN process id と一致しなければならないモデル識別子。
+- `category` はビジネスサービスが承認用途をバインドするための安定分類で、自由に表示できるモデル名とは異なります。
+- モデル主記録がアーカイブ済み、バージョンが `PUBLISHED` でない、バージョンがリクエストテナントに属さない、または
+  `processDefinitionId` を欠く場合は統一的に 404 を返します。
+
+ビジネスサービスは起動前に自身の安定 `businessType` と `category` を正確一致させ、他のビジネスの公開済みモデルの誤用を防げます。Workflow 内部起動エンドポイントは実際にインスタンスを作成する前に
+`ASSET_TRANSFER/ASSET_DISPOSAL` とモデル分類を再検証し、誤設定は 404 で明示的に拒否しインスタンスを作成しません；既存の
+Procurement 承認ルートはこの Asset 専用バインドの影響を受けません。この照会はモデルメタデータのみを提供し、プロセス起動や承認権限を付与しません。
+
 ---
 
 ## 3. Constraints & Pitfalls
@@ -381,3 +549,41 @@ bpmn-js Modeler (オープンソース BPMN 2.0 モデリングツール)
 | **deleteReason が誤って表示される** | MI_END と deleted の混同 | §3.1 MI DeleteReason テーブルを参照；`MI_END` = 自動完了、`deleted` = プロセス終了 |
 | **テナント分離が機能しない** | TenantInfoHolder が未設定 | Gateway が `X-Tenant-Id` リクエストヘッダーを注入しているか確認；`TenantInfoFilter` が正常に実行されているか確認 |
 | **BPMN デザイナーが読み込めない** | bpmn-js のバージョン非互換 | `bpmn-js` のバージョンが 18.x であることを確認；ブラウザコンソールエラーを確認 |
+
+## 8. 管理画面スクリーンショット（4言語）
+
+正式画像はドキュメント専用 Playwright ケース `omni-frontend/e2e-docs/flows/management.flows.spec.ts` により実際の実行スタック上で生成され、言語別ディレクトリに保存され、他言語の画像を再利用せず、プレースホルダー画像やモック応答を使用しません。
+
+- 前提条件：ローカル Compose フルスタックが実行中、フロントエンド `127.0.0.1:3000`；`omni-workflow` ヘルス；DB に実際のプロセスモデルとインスタンスが存在（採集時は 8 個のモデル/バージョン、23 件のインスタンス）。
+- 操作者：`admin`（`SUPER_ADMIN`、ワークフローメニュー権限を保持）。
+- 操作：ログイン後に「プロセス定義」「プロセスインスタンス」「統計ダッシュボード」ページに順に移動。
+- 期待状態：ページタイトルと列ラベルが現在の言語でレンダリング；プロセスインスタンスリストはプロセスタイトル、プロセス Key、ビジネス主キー、発起者、状態と起動時刻を表示し、「プロセス進捗」と「承認記録」の入口を提供。
+- トークン：`E2eTokenFixture` がテストプロセス内で短期 JWT（TTL 1200 秒）を発行、収尾で破棄し、ドキュメント、ログ、リポジトリに書き込みません。
+- 本グループはすべて**読み取り専用採集**：プロセスデータを一切作成、変更、削除しないため、書き込みスイッチは不要で、データ収尾もありません。
+
+内容説明：現在の環境のプロセスインスタンスはすべて歴代のエンドツーエンド検証で生成され、タイトルにテスト識別（例 `E2ESQ`）を持ちます。`wf_process_instance_ext` と Flowable `ACT_HI_*` はエンジン管理の監査履歴でソフト削除列を持たず、SQL でのハード削除は不可のため、画像は実際のタイトルをそのまま保持し、データ造形やトリミングで美化しません。
+
+| ページ | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| プロセス定義（publish） | ![プロセス定義（簡体字中国語）](images/zh-CN/workflow-definitions.png) | ![プロセス定義（英語）](images/en-US/workflow-definitions.png) | ![プロセス定義（日本語）](images/ja-JP/workflow-definitions.png) | ![プロセス定義（韓国語）](images/ko-KR/workflow-definitions.png) |
+| プロセスインスタンス追跡（instance-tracking） | ![プロセスインスタンス（簡体字中国語）](images/zh-CN/workflow-instances.png) | ![プロセスインスタンス（英語）](images/en-US/workflow-instances.png) | ![プロセスインスタンス（日本語）](images/ja-JP/workflow-instances.png) | ![プロセスインスタンス（韓国語）](images/ko-KR/workflow-instances.png) |
+| 統計ダッシュボード（サマリービュー） | ![統計ダッシュボード（簡体字中国語）](images/zh-CN/workflow-stats.png) | ![統計ダッシュボード（英語）](images/en-US/workflow-stats.png) | ![統計ダッシュボード（日本語）](images/ja-JP/workflow-stats.png) | ![統計ダッシュボード（韓国語）](images/ko-KR/workflow-stats.png) |
+
+### 読み取り専用詳細オーバーレイ（4言語）
+
+`omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` により生成、同様に**読み取り専用採集**：行内の閲覧系アクションのみをクリックしてオーバーレイを開き、フォームを提出せず、設計/検証/公開/削除/終了などの書き込み操作を一切トリガーしません。
+
+- 操作者：`admin`；前提条件は前節と同じ。
+- 操作：プロセスインスタンスの先頭行で「プロセス進捗」と「承認記録」をクリック、プロセスモデルの先頭行で「バージョン」をクリック。
+- 期待状態：オーバーレイタイトルが現在の言語でレンダリング；プロセス進捗オーバーレイは **BPMN グラフィックが実際にレンダリング完了するまで待ってから**撮影しなければならず（ケースは `.bpmn-viewer-wrap .djs-element` が可視かつ `.el-loading-mask` が消えたことをアサート）、非同期読み込み中のスピナー状態を撮影してはいけません。
+- 実測結果：16 passed / 0 skipped（本文書と信頼性メッセージ文書が共用する 4 つのオーバーレイシナリオ × 4 言語を含む）。
+
+| オーバーレイ | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| プロセス進捗（instance-tracking） | ![プロセス進捗（簡体字中国語）](images/zh-CN/workflow-instance-progress.png) | ![プロセス進捗（英語）](images/en-US/workflow-instance-progress.png) | ![プロセス進捗（日本語）](images/ja-JP/workflow-instance-progress.png) | ![プロセス進捗（韓国語）](images/ko-KR/workflow-instance-progress.png) |
+| 承認記録（approval） | ![承認記録（簡体字中国語）](images/zh-CN/workflow-instance-approval-records.png) | ![承認記録（英語）](images/en-US/workflow-instance-approval-records.png) | ![承認記録（日本語）](images/ja-JP/workflow-instance-approval-records.png) | ![承認記録（韓国語）](images/ko-KR/workflow-instance-approval-records.png) |
+| バージョン履歴（publish） | ![バージョン履歴（簡体字中国語）](images/zh-CN/workflow-model-versions.png) | ![バージョン履歴（英語）](images/en-US/workflow-model-versions.png) | ![バージョン履歴（日本語）](images/ja-JP/workflow-model-versions.png) | ![バージョン履歴（韓国語）](images/ko-KR/workflow-model-versions.png) |
+
+プロセス進捗図では、緑のノードは本インスタンスが実行済みのアクティビティ（`completed-node` マーク）、灰色は通っていない分岐（例「承認却下」）で、§2.7「進捗と記録」の意味と一致します。
+
+未カバーのプロセス：`model-lifecycle` / `detail-and-action-states` / `failure-states` は「モデリング → BPMN 設計 → 検証 → 公開」の書き込みチェーンを必要とし、公開は共有 Flowable エンジンにプロセス定義（`ACT_RE_*`）をデプロイし、検証済みのクリーンな削除/ロールバック経路がまだありません；`countersign` はマルチインスタンス会署モデルと複数の承認者身分を必要とします。4 項はいずれも**個別の承認/新規テスト身分が必要**で、本ラウンドでは勝手にデプロイも一時的な権限昇格も行わず、カバレッジリストで明示的な gap として保持します。

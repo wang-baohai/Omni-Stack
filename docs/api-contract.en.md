@@ -774,7 +774,7 @@ The quotation header, details, `srm_quotation_request` and the `srm.quotation.su
 ## 16. Workflow Cross-Service Contract
 
 Workflow internal endpoints uniformly use the `X-Internal-Token` and `X-Tenant-Id` from §8.3, and responses continue to use the standard
-`R<T>`. For detailed runtime mechanics, see [workflow.en.md](workflow.en.md).
+`R<T>`. For detailed runtime mechanics, see [workflow.en.md](workflow.en.md#28-cross-service-internal-contract).
 
 ### 16.1 Idempotent Process Start
 
