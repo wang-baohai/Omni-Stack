@@ -66,7 +66,7 @@ Omni-Stack은 즉시 사용 가능한 Spring Cloud + Vue 3 풀스택 개발 환�
 | **gRPC 장기간 연결** | v3는 HTTP 단기 폴링 대신 gRPC 사용. 서비스 등록/검색 지연이 초 단위에서 밀리초 단위로 단축 |
 | **헬스 체크 엔드포인트 변경** | v3.1.1에서 엔드포인트가 `/nacos/actuator/health`에서 `GET /nacos/`로 변경. Docker healthcheck 적응 필요 |
 
-### 2.4 Flowable 7.x를 선택한 이유
+### 2.4 Flowable 8.x를 선택한 이유
 
 | 고려사항 | 결정 근거 |
 |---------|---------|
@@ -98,7 +98,7 @@ Omni-Stack은 즉시 사용 가능한 Spring Cloud + Vue 3 풀스택 개발 환�
 
 ## 4. 모듈 맵
 
-### 4.1 Common Starter 생태계 (8개 자동 구성 모듈)
+### 4.1 Common Starter 생태계 (10개 공통 모듈)
 
 | 모듈 | 역할 | 기술 스택 | 경계 제약 |
 |------|------|-----------|-----------|
@@ -110,14 +110,20 @@ Omni-Stack은 즉시 사용 가능한 Spring Cloud + Vue 3 풀스택 개발 환�
 | `omni-common-job` | XXL-JOB 통합: 자동 구성, Admin HTTP 클라이언트, 시스템 작업 레지스트리 | XXL-JOB Core 3.3.1 | 스케줄링 인프라만. 비즈니스 작업 로직 없음 |
 | `omni-common-mqlog` | 신뢰 MQ 메시지 전송: Transactional Outbox, 릴레이 작업, 전략 기반 송신자 | Spring Cloud Stream RocketMQ(optional) | MQ 인프라만. 비즈니스 메시지 로직 없음 |
 | `omni-common-operlog` | 운영 로그 관점 및 프로듀서: `@OperLog` 어노테이션 기반 | Spring AOP, omni-common-mqlog(optional) | 운영 로그 관심사만 |
+| `omni-common-workflow` | Flowable 자동 구성 및 승인 SPI | Flowable 8.0.0 | Workflow 서비스만 사용, 비즈니스 서비스는 프로세스 런타임에 의존 금지 |
+| `omni-common-service` | Servlet 비즈니스 서비스 조합 Starter: Gateway 사전 인증, 요청 신원/테넌트, 내부 API, DataScope, 고정 MyBatis 순서, XSS 원점 폴백과 보안 기준선 | Spring Security, OpenFeign, MyBatis-Plus, Redis | Gateway/Auth 에는 미적용; 도메인 테이블 매핑과 AccessGuard 는 계속 서비스에서 구현 |
 
-### 4.2 마이크로서비스 모듈 (4개)
+### 4.2 마이크로서비스 모듈 (8개)
 
 | 모듈 | 포트 | 역할 | 핵심 의존성 |
 |------|------|------|-------------|
 | `omni-auth` :8100 | 8100 | 인증 및 인가: 로그인, CAPTCHA, JWT, 멀티 테넌트, OAuth2 인가 서버, XSS 설정 관리, RBAC 권한 | Spring Boot Web, Spring Security, OAuth2 Authorization Server |
 | `omni-base` :8101 | 8101 | 기초 데이터: 사전 CRUD, 예약 작업 관리, 운영 로그 아카이브, MQ 메시지 관리 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
-| `omni-workflow` :8103 | 8103 | 워크플로우 엔진: BPMN 모델 관리, 프로세스 인스턴스, 승인, 작업 할당, 통계 | Spring Boot Web, Spring Security, omni-common-workflow, Flowable 7.x |
+| `omni-workflow` :8103 | 8103 | 워크플로우 엔진: BPMN 모델 관리, 프로세스 인스턴스, 승인, 작업 할당, 통계 | Spring Boot Web, Spring Security, omni-common-workflow, Flowable 8.0.0 |
+| `omni-crm` :8104 | 8104 | CRM 영업 전 클로즈드 루프: 리드, 고객, 연락처, 기회, 후속 관리, 전환 및 개요 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
+| `omni-srm` :8105 | 8105 | SRM 공급업체 클로즈드 루프: 마스터, 진입 상태 머신, 연락처/자격/은행, 성과 평가, 위험, 초대 및 공급업체 포털 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
+| `omni-procurement` :8106 | 8106 | 조달 실행 클로즈드 루프: 품목 카탈로그, 구매 요청 승인, 견적 요청 및 비교, 구매 주문과 입고 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
+| `omni-asset` :8107 | 8107 | 자산 전체 수명주기: 조달 검수 계상, 원장, 할당/반환, 이동, 처분 및 개요 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
 | `omni-gateway` :8102 | 8102 | API Gateway: 요청 라우팅, JWT 인증 필터링, CORS 처리, 보안 헤더 | Spring Cloud Gateway Server(WebFlux), omni-common-redis-reactive |
 
 ### 4.3 프론트엔드 모듈
@@ -341,9 +347,9 @@ RocketMQ Broker (StreamBridge 경유)
 | XXL-JOB Admin | 분산 작업 스케줄링 콘솔 | 3.3.1 | 18080 |
 | RocketMQ | 메시지 큐 (NameServer + Broker) | 5.3.2 | 9876, 10909-10912 |
 
-모든 서비스는 한 명령어로 시작 가능: `docker compose up -d`. 프로젝트 루트의 `docker-compose.yml` 참조.
+전체 스택은 `docker compose --profile full up -d` 로 시작할 수 있습니다. 일상 개발은 `omni dev up --preset <id>` 로 최소 의존성 클로저를 시작합니다. `--observability` 를 추가하면 Prometheus, Pushgateway, Node Exporter, cAdvisor, Grafana, Tempo, Loki, Alloy, OTel Collector 와 Alertmanager 가 시작되고 로컬 Trace 내보내기가 활성화됩니다. 통일 진입점은 저장소 루트의 `compose.yaml` 이며, 관측 의미와 보안 경계는 [observability.kr.md](observability.kr.md) 참조.
 
-**시작 순서**: MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 백엔드 서비스(Auth, Base, Workflow, Gateway) → 프론트엔드
+**시작 순서**: MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 백엔드 서비스(Auth, Base, Workflow, CRM, SRM, Procurement, Asset, Gateway) → 프론트엔드
 
 ---
 
@@ -351,7 +357,7 @@ RocketMQ Broker (StreamBridge 경유)
 
 ### 9.1 Docker Compose 오케스트레이션
 
-프로젝트 루트 `docker-compose.yml`은 전체 12개 컨테이너를 정의:
+저장소 루트 `compose.yaml` 이 include 로 `compose.infra.yaml` 와 `compose.apps.yaml` 을 통합하며, full profile 이 16 개 컨테이너를 정의:
 
 - **이름 있는 볼륨**(`mysql-data`, `redis-data`)으로 재시작 시 데이터 영속화
 - **헬스 체크**(depends_on + service_healthy)로 계층적 시작 체인 보장
@@ -390,7 +396,33 @@ erDiagram
 
 #### omni_workflow 데이터베이스
 
-**워크플로우 (7 테이블)**: `wf_process_model` + `wf_process_model_version` + `wf_process_instance_ext` + `wf_todo_task` + `wf_cc_record` + `wf_form_schema` + `wf_delegation_rule`
+**워크플로우 (7 테이블)**: `wf_process_model`(모델 등록) + `wf_process_model_version`(버전 이력) + `wf_process_instance_ext`(인스턴스 확장) + `wf_todo_task`(할 일 캐시) + `wf_cc_record`(참조 기록) + `wf_form_schema`(폼 스키마) + `wf_delegation_rule`(승인 위임 규칙)
+
+> 상세는 [workflow.kr.md](workflow.kr.md)
+
+#### omni_crm 데이터베이스
+
+**CRM 핵심 테이블(11 테이블)**: `crm_tenant_config`, `crm_pipeline`, `crm_pipeline_stage`, `crm_lead`, `crm_lead_conversion`, `crm_customer`, `crm_contact`, `crm_opportunity`, `crm_opportunity_stage_history`, `crm_activity`, `crm_owner_change_log`, 그리고 서비스별 독립 `sys_mq_message` Outbox. 모든 `crm_*` 테이블은 `tenant_id` 를 포함하며, 권한 부여 루트 테이블은 owner 스냅샷을 보존하고 낙관적 잠금을 사용.
+
+> 도메인 실행 제약은 [crm.kr.md](crm.kr.md), 설계 기준선은 [design/crm-design.kr.md](design/crm-design.kr.md)
+
+#### omni_srm 데이터베이스
+
+**SRM 핵심 테이블**: 공급업체 마스터, 연락처, 자격, 은행 계좌, 평가, 위험, 포털 사용자 연결, 초대 Saga 및 견적 협업 테이블, 그리고 서비스 독립 `sys_mq_message` Outbox. 권한이 부여된 하위 리소스는 모두 Supplier 또는 Evaluation 집계 루트를 거쳐 테넌트와 데이터 범위를 상속.
+
+> 상세는 [design/srm-design.kr.md](design/srm-design.kr.md)
+
+#### omni_procurement 데이터베이스
+
+**Procurement 핵심 테이블**: 테넌트 설정, 품목/분류, 승인 경로, 구매 요청 및 명세, RFQ 및 공급업체/명세, 구매 주문 및 명세, 입고 및 명세, 공통 Inbox 와 서비스 독립 Outbox. 구매 요청은 신청자 범위로 필터링하고, RFQ/PO/GR 은 owner 범위로 필터링하며, 하위 테이블은 집계 루트를 거쳐 상속.
+
+> 상세는 [design/procurement-design.kr.md](design/procurement-design.kr.md)
+
+#### omni_asset 데이터베이스
+
+**Asset 핵심 테이블**: `ast_asset`(자산 집계 루트), `ast_asset_history`(불변 이력), `ast_transfer`(이동), `ast_disposal`(처분), `ast_inbox_event`(서비스 간 소비 멱등성), 그리고 서비스 독립 `sys_mq_message` Outbox. 구매 유래 카드 생성은 입고 행과 단위 일련번호로 멱등성을 보장하며, 이동과 처분은 집계 루트의 활동 작업 필드로 동시 점유를 통일.
+
+> 상세는 [design/asset-design.kr.md](design/asset-design.kr.md)
 
 **데이터베이스 공식 소스**: 스키마, 인덱스, 제약 조건 및 업그레이드는 `database/changelog/`가 관리합니다. 공식 멱등 시드는 `scripts/sql/seed/`가 관리하며 `database/seed/manifest.yaml`의 SHA-256 및 자연 키 검증으로 보호됩니다. `scripts/sql/init-all.sql`은 호환 기간의 레거시 파일이며 Compose 초기화에는 사용되지 않습니다.
 
@@ -704,7 +736,7 @@ spring:
 
 ### 14.7 Docker 배포 설정
 
-`docker-compose.yml`에 서비스 정의 추가:
+`compose.apps.yaml` 에 유일한 서비스 정의를 추가하고 적용할 profiles 를 선언:
 
 ```yaml
 omni-order:

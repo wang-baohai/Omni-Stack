@@ -16,7 +16,7 @@ documents:
     module: platform
     owner: architecture
     source: docs/architecture.md
-    source_sha256: bb27001588661f6cca71429951c52905cc15e18fae1de2ccf62ea54bfb9e1b66
+    source_sha256: dc60013a2cbad62ee1007730c2d11238501e12126f81d046ff9d2e117e010da4
     dependencies: [module-structure, ports, data-flow, permissions]
     translations:
       en-US: { path: docs/architecture.en.md, status: present-unverified, reviewed_at: null }
@@ -82,7 +82,7 @@ documents:
     module: workflow
     owner: workflow
     source: docs/workflow.md
-    source_sha256: 238d45b19b056c64d48bf78a199574ce9694fca74d9bc328ae41084fecdaa281
+    source_sha256: f6dc03e604a0a2e065ee7c4f3bb4819acb4d86d17312acb9a9cad01df9d40013
     dependencies: [api, bpmn, permissions, screenshots]
     translations:
       en-US: { path: docs/workflow.en.md, status: present-unverified, reviewed_at: null }

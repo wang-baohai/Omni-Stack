@@ -36,7 +36,7 @@
 - **双轨制定时任务**：XXL-JOB 3.3.1 系统任务 + 用户任务双模式，前端 Cron 编辑器 + 执行日志实时推送，详见 [docs/scheduling.md](docs/scheduling.md)
 - **Transactional Outbox 可靠消息**：本地发件箱 + XXL-JOB 中继 + 指数退避重试 + 死信管理，详见 [docs/mq-reliability.md](docs/mq-reliability.md)
 - **可选全栈可观测性**：OpenTelemetry + Prometheus + Pushgateway + Grafana + Tempo + Loki + Alloy，默认关闭、一条 CLI 参数开启，详见 [docs/observability.md](docs/observability.md)
-- **可视化 BPMN 工作流**：Flowable 7.x 引擎，前端拖拽建模 + 双版本管理 + 多实例会签 + 动态候选人解析，详见 [docs/workflow.md](docs/workflow.md)
+- **可视化 BPMN 工作流**：Flowable 8.x 引擎，前端拖拽建模 + 双版本管理 + 多实例会签 + 动态候选人解析，详见 [docs/workflow.md](docs/workflow.md)
 - **完整 RBAC 权限体系**：功能权限（动态菜单 + v-permission + @PreAuthorize）+ 数据权限（DataPermissionInterceptor 六级过滤），详见 [docs/architecture.md](docs/architecture.md)
 - **AI 原生工程**：AGENTS.md 执行手册 + docs/ 系统真相 + Skills 行为扩展，前两层定住，第三层交给 AI 高速生产
 

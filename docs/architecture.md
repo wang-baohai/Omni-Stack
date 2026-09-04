@@ -66,7 +66,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 | **gRPC 长连接** | v3 使用 gRPC 替代 HTTP 短轮询，服务注册/发现的延迟从秒级降到毫秒级 |
 | **健康检查端点变更** | v3.1.1 的端点从 `/nacos/actuator/health` 变为 `GET /nacos/`，Docker healthcheck 需适配 |
 
-### 2.4 为什么选择 Flowable 7.x
+### 2.4 为什么选择 Flowable 8.x
 
 | 考量 | 决策理由 |
 |------|----------|

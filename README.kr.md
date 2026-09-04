@@ -35,7 +35,7 @@
 - **선택형 전체 관측성**: OpenTelemetry, Prometheus, Pushgateway, Grafana, Tempo, Loki, Alloy는 기본 비활성화이며 명시적으로 켭니다. [docs/observability.kr.md](docs/observability.kr.md)를 참조하세요.
 - **이중 트랙 스케줄링**: XXL-JOB 3.3.1 시스템 작업 + 사용자 작업 듀얼 모드, 프론트엔드 Cron 에디터 + 실행 로그 실시간 푸시, 자세한 내용은 [docs/scheduling.kr.md](docs/scheduling.kr.md) 참조
 - **Transactional Outbox 신뢰성 메시지**: 로컬 아웃박스 + XXL-JOB 릴레이 + 지수 백오프 재시도 + 데드레터 관리, 자세한 내용은 [docs/mq-reliability.kr.md](docs/mq-reliability.kr.md) 참조
-- **시각적 BPMN 워크플로우**: Flowable 7.x 엔진, 프론트엔드 드래그 앤 드롭 모델링 + 이중 버전 관리 + 다중 인스턴스 countersign + 동적 후보자 해석, 자세한 내용은 [docs/workflow.kr.md](docs/workflow.kr.md) 참조
+- **시각적 BPMN 워크플로우**: Flowable 8.x 엔진, 프론트엔드 드래그 앤 드롭 모델링 + 이중 버전 관리 + 다중 인스턴스 countersign + 동적 후보자 해석, 자세한 내용은 [docs/workflow.kr.md](docs/workflow.kr.md) 참조
 - **완전한 RBAC 권한 체계**: 기능 권한 (동적 메뉴 + v-permission + @PreAuthorize) + 데이터 권한 (DataPermissionInterceptor 6단계 필터링), 자세한 내용은 [docs/architecture.kr.md](docs/architecture.kr.md) 참조
 - **AI 네이티브 프로젝트**: AGENTS.md 실행 매뉴얼 + docs/ 시스템 진실 + Skills 행동 확장, 첫 두 레이어를 고정하고 세 번째 레이어는 AI가 고속 생산
 

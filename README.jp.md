@@ -35,7 +35,7 @@
 - **任意のフルスタック可観測性**：OpenTelemetry、Prometheus、Pushgateway、Grafana、Tempo、Loki、Alloy は既定で無効です。詳しくは [docs/observability.jp.md](docs/observability.jp.md) を参照してください。
 - **デュアルトラック定期タスク**：XXL-JOB 3.3.1 システムタスク + ユーザータスクのデュアルモード、フロントエンド Cron エディター + 実行ログのリアルタイムプッシュ、詳しくは [docs/scheduling.jp.md](docs/scheduling.jp.md)
 - **Transactional Outbox 信頼性メッセージ**：ローカルアウトボックス + XXL-JOB リレー + 指数バックオフリトライ + デッドレター管理、詳しくは [docs/mq-reliability.jp.md](docs/mq-reliability.jp.md)
-- **ビジュアル BPMN ワークフロー**：Flowable 7.x エンジン、フロントエンドのドラッグ&ドロップモデリング + デュアルバージョン管理 + マルチインスタンス会籤 + 動的候補者解決、詳しくは [docs/workflow.jp.md](docs/workflow.jp.md)
+- **ビジュアル BPMN ワークフロー**：Flowable 8.x エンジン、フロントエンドのドラッグ&ドロップモデリング + デュアルバージョン管理 + マルチインスタンス会署 + 動的候補者解決、詳しくは [docs/workflow.jp.md](docs/workflow.jp.md)
 - **完全な RBAC 権限体系**：機能権限（動的メニュー + v-permission + @PreAuthorize）+ データ権限（DataPermissionInterceptor 6段階フィルタリング）、詳しくは [docs/architecture.jp.md](docs/architecture.jp.md)
 - **AI ネイティブプロジェクト**：AGENTS.md 実行マニュアル + docs/ システムの真実 + Skills 行動拡張、最初の2層を固め、3層目は AI に高速生産を任せる
 

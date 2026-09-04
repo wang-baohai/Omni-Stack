@@ -3,7 +3,7 @@
 > 本文書は、Omni-Stack ワークフローエンジンのアーキテクチャ、コアフロー、制約事項、および拡張ガイドについて説明します。  
 > アーキテクチャの概要は [architecture.jp.md](architecture.jp.md) を参照してください。Docker デプロイメント構成は [docker-deployment.jp.md](docker-deployment.jp.md) を参照してください。
 
-Omni-Stack は、**Flowable 7.x** をベースにした可視化 BPMN ワークフローエンジンであり、モデル設計、デュアルバージョン管理、マルチインスタンス回覧承認、およびエンドツーエンドのプロセス追跡をサポートします。
+Omni-Stack は、**Flowable 8.x** をベースにした可視化 BPMN ワークフローエンジンであり、モデル設計、デュアルバージョン管理、マルチインスタンス回覧承認、およびエンドツーエンドのプロセス追跡をサポートします。
 
 ## 1. Architecture Overview
 
@@ -322,7 +322,7 @@ BPMN デザイナーで `ccNotifyDelegate` デリゲート式を持つ `ServiceT
 
 ---
 
-## 5. 技術選定：Flowable 7.x を選択した理由
+## 5. 技術選定：Flowable 8.x を選択した理由
 
 | 検討項目 | Flowable | Camunda | Activiti |
 |------|---------|---------|----------|
@@ -333,7 +333,7 @@ BPMN デザイナーで `ccNotifyDelegate` デリゲート式を持つ `ServiceT
 | **コミュニティ活発度** | 活発（GitHub 8k+ stars） | 活発（商用サポート） | メンテナンス停止 |
 | **バージョン 7.x** | Jakarta EE 互換、Spring Boot 3/4 サポート | バージョン 8 は大幅なアーキテクチャ変更 | 新バージョンなし |
 
-**結論**：Flowable 7.x はオープンソースライセンス、Spring Boot ネイティブ統合、マルチインスタンスサポートにおいて明確な優位性があり、Omni-Stack ワークフローエンジンの最適な選択です。
+**結論**：Flowable 8.x はオープンソースライセンス、Spring Boot ネイティブ統合、マルチインスタンスサポートにおいて明確な優位性があり、Omni-Stack ワークフローエンジンの最適な選択です。
 
 ## 6. BPMN モデリングベストプラクティス
 

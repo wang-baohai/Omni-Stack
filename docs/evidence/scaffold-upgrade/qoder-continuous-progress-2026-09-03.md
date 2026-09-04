@@ -533,6 +533,64 @@ P0 3 篇 ×3、P1 其余 7 篇 ×3、P2 27 篇 ×3 = **111 项译文 NOT_STARTED
 
 本批同时刷新的三份源摘要：`docs/srm.md` → `c8462a0cbbba…`、`docs/workflow.md` → `36f7622d14b9…`、`docs/guides/system-security-audit.md` → `cd346252b455…`。
 
+### 4.5 P0 architecture 组实质预审与修订（本轮完成）
+
+#### 4.5.1 先建立客观度量工具（对剩余 102 项均有杠杆）
+
+依据仓库自有约定（`docs/i18n-review-queue.md` 复核流程第 2 条：「代码块、命令、API 路径、权限码不翻译」），
+编写平价检查器（`scripts/.work/qoder-doc-parity.mjs`，不提交），对 **114 组源/译文** 客观比对：
+围栏代码块数、表格行数、标题数与层级序列、Markdown 链接集合、反引号内联代码集合、`/api/` 路径集合、权限码集合。
+链接比对已做归一化（译文指向 `xxx.en.md` 等本地化交叉链接是正确行为，不计作差异；剔除随语言变化的 `#锚点`）。
+
+**全量完整度分级结果**（按标题/代码块/表格行最差比值判定）：
+
+| 分级 | 组数 | 含义 |
+| --- | --- | --- |
+| ALIGNED | 48 | 结构齐备，仅需语义复核 |
+| PARTIAL | 21 | 局部缺失 |
+| MAJOR_GAP | 20 | 大块缺失 |
+| **STUB** | **25** | 译文几乎为空壳 |
+
+**关键结论：G7 的翻译阻塞不是「复核 114 篇」，而是约 45 个文档-语言对存在内容缺失，其中 25 组几乎为空壳。**
+
+STUB 清单（译文/源 标题数，代码块，表格行）：
+`asset-design` 8/52、0/18、0/124；`crm-design` 9/55、0/32、0/124；`srm-design` 8/53、0/22、0/138；
+`procurement-design` 8/54、0/20、0/128；`full-functional-audit` 11/74、0/2、0/97；
+`full-functional-audit-remediation` 8/10、0/0、0/80；`scaffold-upgrade-implementation-plan` 23/133、0/28、11/265；
+`custom-preset-tutorial` ja/ko 1/6；`guide-troubleshooting` ja/ko 表格 0/7。
+
+MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、139/305 表格行，缺 101 个 API 路径与 56 个权限码**（P0 系统真相文档）；
+`workflow` 三语 32/39、22/40、58/92；`guide-system-security-audit` 8/11、5/22（部分因本目标阶段 B 新增图片表而拉大，已登记为新增待补译项）；
+`observability`、4/8 代码块、6〜14/29 表格行；`scaffold-upgrade-plan` 11/36、12/54；`preset-quick-selection`、`preset-maintenance` ko、`custom-preset-tutorial` en。
+
+已验证的正向结果：**`srm` 三语言均 ALIGNED**（43/43 标题、18/18 代码块、94/94 表格行），证明 §4.2 的补译是结构完整的。
+
+#### 4.5.2 architecture 组已修正的四类缺陷（均有硬证据）
+
+1. **§9.2 缺 4 个数据库章节**：源有 7 个 `####` 逐库子章节，en/ja/ko 均只有 3 个 —— `omni_crm`、`omni_srm`、`omni_procurement`、`omni_asset` 在三语言中完全缺失。已补全（包含表清单、租户/数据范围继承语义、幂等约束与指向各 design 译文的链接）。jp/ko 另补回了缺失的 workflow「详见」链接行。
+2. **§4 模块清单数量错误（最严重的事实缺陷）**：源为「Common 生态（**10 个**）」与「微服务模块（**8 个**）」，而三份译文写成「**8** Auto-Configuration Modules」与「Microservice Modules (**4**)」，且表中缺 `omni-common-workflow`、`omni-common-service` 与 `omni-crm`/`omni-srm`/`omni-procurement`/`omni-asset`。
+   → 照译文阅读会以为平台只有 4 个微服务。已补齐至 10 + 8，标题数量同步更正。现四份文档均含全部 18 个模块名（程序化核验 `missingModules=NONE`）。
+3. **Compose 命令陈旧（会导致实操失败）**：三份译文写 `docker compose up -d` + `docker-compose.yml` + 「12 容器」，而实际仓库为根目录 `compose.yaml` 通过 include 合并 `compose.infra.yaml`/`compose.apps.yaml`、`--profile full` 共 **16 容器**，日常开发用 `omni dev up --preset <id>`，可选 `--observability`。已按源改写 3 处/语言，并补全启动顺序中缺失的 CRM/SRM/Procurement/Asset。核验：四份文档 `stale_refs=0`。
+4. **全仓 Flowable 版本陈述陈旧**：`omni-backend/pom.xml` 为 `<flowable.version>8.0.0</flowable.version>`，且 `architecture.md` 模块表自身已写 `Flowable 8.0.0`，但全仓 **9 个文件共 20 处**仍写 `Flowable 7.x`（含中文源、三语译文、`workflow.md` 组与 4 份 README）。
+   已先确认**无任何 `flowable-7` 锚点入站引用**（改标题不断链），再统一改为 `Flowable 8.x`。
+   核验：`Flowable 7.x` **20 → 0**，独立 `git grep 'Flowable 7'` 无匹配，`Flowable 8.x` 分布 20 处与原位置一致。
+   同时修正 `README.jp.md` 混入的中文 `会籤` → 日文 `会署`，以及 `architecture.jp.md` 的 `定时` → `定期`。
+
+源文档修改后已刷新摘要：`docs/architecture.md` → `dc60013a2cba…`、`docs/workflow.md` → `f6dc03e604a0…`；全量复核 **38 份源文档、0 摘要不匹配**。
+门禁：`docs:links:check` exit 0（含锚点校验）、`docs:readme:check` exit 0、`--scope=sensitive` exit 0、`docs:i18n:queue` 重生成 exit 0。
+
+修复后平价：architecture **en-US → ALIGNED**（57/57 标题、36/36 代码块、129/133 表格行）；ja-JP 56/57、32/36、119/133；ko-KR 57/57、34/36、109/133（仍 PARTIAL）。
+
+#### 4.5.3 architecture 组剩余待办（已定位，未完成）
+
+- ja-JP 缺 4 个代码块、ko-KR 缺 2 个代码块；三语各缺 4〜24 行表格（en 129/133、ja 119/133、ko 109/133）。
+- ja-JP 标题 56/57（尚缺 1 个）。
+- 缺失的内联代码提示位置：`/api/auth/menus`、`/api/order/**`、`DataPermissionHandlerImpl`、`SocialLoginServiceImpl`、`Map<String, OAuth2ProviderHandler>`、`buildAuthorizationUrl()`、`exchangeCodeForAccessToken()`、`fetchUserProfile()`、`getProviderId()`、`XxlJobAdminClient`、`XxlJobSpringExecutor`、`spring.cloud.gateway`、`xss:enabled:{tenantId}`、`DIRECTORY`/`MENU`/`BUTTON`/`API` 等（集中于 §6 局部架构、§11 RBAC、§13 扩展点）。
+- §5 依赖关系图的 ASCII 图在译文中仅含 auth/base/gateway，缺 crm/srm/procurement/asset（属代码块内内容，需整块重绘）。
+
+**状态处理**：`architecture` 三项译文在 `docs/docs-manifest.yaml` 中**仍保持 `present-unverified` / `reviewed_at: null`**。
+本轮为 Qoder 实质预审与修订，**不替代独立 Codex final review 或人工验收**，未批量填 `synchronized`。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）

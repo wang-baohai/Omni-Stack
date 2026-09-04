@@ -66,7 +66,7 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 | **gRPC Long Connections** | v3 uses gRPC instead of HTTP short polling, reducing service registration/discovery latency from seconds to milliseconds |
 | **Health Check Endpoint Change** | v3.1.1 changed the endpoint from `/nacos/actuator/health` to `GET /nacos/`, requiring Docker healthcheck adaptation |
 
-### 2.4 Why Flowable 7.x
+### 2.4 Why Flowable 8.x
 
 | Consideration | Decision Rationale |
 |--------------|-------------------|
@@ -98,7 +98,7 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 
 ## 4. Module Map
 
-### 4.1 Common Starter Ecosystem (8 Auto-Configuration Modules)
+### 4.1 Common Starter Ecosystem (10 Common Modules)
 
 | Module | Role | Technology | Boundary Constraint |
 |--------|------|------------|---------------------|
@@ -110,14 +110,20 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 | `omni-common-job` | XXL-JOB integration: auto-configuration, admin HTTP client, system job registry, job metadata annotations | XXL-JOB Core 3.3.1, Spring Boot Web (optional) | Scheduling infrastructure only; no business task logic |
 | `omni-common-mqlog` | Reliable MQ message sending: Transactional Outbox, relay job, strategy-based sender, internal query API | Spring Cloud Stream RocketMQ (optional), omni-common-job (optional) | MQ infrastructure only; no business message logic |
 | `omni-common-operlog` | Operation log aspect and producer: `@OperLog` annotation-driven, supports both reliable and direct sending modes | Spring AOP, omni-common-mqlog (optional) | Operation log concern only |
+| `omni-common-workflow` | Flowable auto-configuration and the approval SPI | Flowable 8.0.0 | Workflow service only; business services must not depend on the process runtime |
+| `omni-common-service` | Composite starter for Servlet business services: Gateway pre-authentication, request identity/tenant, internal APIs, DataScope, fixed MyBatis interceptor order, XSS origin fallback and the security baseline | Spring Security, OpenFeign, MyBatis-Plus, Redis | Not applicable to Gateway/Auth; domain table mapping and AccessGuard remain service-implemented |
 
-### 4.2 Microservice Modules (4)
+### 4.2 Microservice Modules (8)
 
 | Module | Port | Role | Core Dependencies |
 |--------|------|------|-------------------|
 | `omni-auth` :8100 | 8100 | Authentication & authorization: login, captcha, JWT, multi-tenant, OAuth2 Authorization Server, XSS config management, RBAC permissions, online user management | Spring Boot Web, Spring Security, OAuth2 Authorization Server |
 | `omni-base` :8101 | 8101 | Base data management: dictionary CRUD, scheduled tasks (system + user), operation log archival, MQ message management | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
-| `omni-workflow` :8103 | 8103 | Workflow engine: BPMN model management, process instances, approvals, task assignment, statistics | Spring Boot Web, Spring Security, omni-common-workflow, Flowable 7.x |
+| `omni-workflow` :8103 | 8103 | Workflow engine: BPMN model management, process instances, approvals, task assignment, statistics | Spring Boot Web, Spring Security, omni-common-workflow, Flowable 8.0.0 |
+| `omni-crm` :8104 | 8104 | CRM pre-sales loop: leads, customers, contacts, opportunities, activities, conversion and overview | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
+| `omni-srm` :8105 | 8105 | SRM supplier loop: master data, admission state machine, contacts/qualifications/bank accounts, evaluation, risk, invitations and the supplier portal | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
+| `omni-procurement` :8106 | 8106 | Procurement execution loop: material catalog, requisition approval, RFQ and comparison, purchase orders and goods receipts | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
+| `omni-asset` :8107 | 8107 | Asset full lifecycle: procurement receipt ingestion, ledger, allocation/return, transfer, disposal and overview | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
 | `omni-gateway` :8102 | 8102 | API Gateway: request routing, JWT authentication filtering, CORS handling, security headers | Spring Cloud Gateway Server (WebFlux), omni-common-redis-reactive |
 
 ### 4.3 Frontend Module
@@ -343,9 +349,9 @@ Monitoring Page: query/resend/skip dead-letter messages
 | XXL-JOB Admin | Distributed task scheduling console | 3.3.1 | 18080 |
 | RocketMQ | Message queue (NameServer + Broker) | 5.3.2 | 9876, 10909-10912 |
 
-All services can be started with a single command: `docker compose up -d`. See `docker-compose.yml` in the project root.
+The full stack can be started with `docker compose --profile full up -d`; for daily development use `omni dev up --preset <id>` to start the minimal dependency closure. Adding `--observability` starts Prometheus, Pushgateway, Node Exporter, cAdvisor, Grafana, Tempo, Loki, Alloy, the OTel Collector and Alertmanager, and enables local Trace export. The single entry point is `compose.yaml` at the repository root; see [observability.en.md](observability.en.md) for observability semantics and security boundaries.
 
-**Start order**: MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → Backend services (Auth, Base, Workflow, Gateway) → Frontend
+**Start order**: MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → Backend services (Auth, Base, Workflow, CRM, SRM, Procurement, Asset, Gateway) → Frontend
 
 ---
 
@@ -353,7 +359,7 @@ All services can be started with a single command: `docker compose up -d`. See `
 
 ### 9.1 Docker Compose Orchestration
 
-The project root `docker-compose.yml` defines all 12 containers:
+The repository root `compose.yaml` merges `compose.infra.yaml` and `compose.apps.yaml` through include; the full profile defines 16 containers:
 
 - **Named volumes** (`mysql-data`, `redis-data`) for data persistence across restarts
 - **Health checks** (depends_on + service_healthy) ensuring layered startup chain
@@ -419,6 +425,30 @@ erDiagram
 **Workflow (7 tables)**: `wf_process_model` (model registry) + `wf_process_model_version` (version history) + `wf_process_instance_ext` (instance extension) + `wf_todo_task` (pending task cache) + `wf_cc_record` (CC records) + `wf_form_schema` (form schemas) + `wf_delegation_rule` (delegation rules)
 
 > See [workflow.en.md](workflow.en.md) for details.
+
+#### omni_crm Database
+
+**CRM core tables (11 tables)**: `crm_tenant_config`, `crm_pipeline`, `crm_pipeline_stage`, `crm_lead`, `crm_lead_conversion`, `crm_customer`, `crm_contact`, `crm_opportunity`, `crm_opportunity_stage_history`, `crm_activity`, `crm_owner_change_log`, plus a per-service `sys_mq_message` Outbox. Every `crm_*` table carries `tenant_id`; authorization root tables keep an owner snapshot and use optimistic locking.
+
+> See [crm.en.md](crm.en.md) for domain runtime constraints and [design/crm-design.en.md](design/crm-design.en.md) for the design baseline.
+
+#### omni_srm Database
+
+**SRM core tables**: supplier master, contacts, qualifications, bank accounts, evaluations, risks, portal user associations, the invitation Saga and the quotation collaboration tables, plus a service-specific `sys_mq_message` Outbox. All authorized child resources inherit tenant and data scope through the Supplier or Evaluation aggregate root.
+
+> See [design/srm-design.en.md](design/srm-design.en.md) for details.
+
+#### omni_procurement Database
+
+**Procurement core tables**: tenant config, material/category, approval routes, requisitions and their lines, RFQs with suppliers and lines, purchase orders and lines, goods receipts and lines, the shared Inbox and a service-specific Outbox. Requisitions are filtered by requester scope, RFQ/PO/GR by owner scope, and child tables inherit through their aggregate root.
+
+> See [design/procurement-design.en.md](design/procurement-design.en.md) for details.
+
+#### omni_asset Database
+
+**Asset core tables**: `ast_asset` (asset aggregate root), `ast_asset_history` (immutable history), `ast_transfer` (transfers), `ast_disposal` (disposals), `ast_inbox_event` (cross-service consumption idempotency), plus a service-specific `sys_mq_message` Outbox. Procurement-sourced card creation is made idempotent by the receipt line and unit sequence; transfers and disposals share concurrency occupancy through the aggregate root's active-operation fields.
+
+> See [design/asset-design.en.md](design/asset-design.en.md) for details.
 
 **Authoritative database sources**: `database/changelog/` owns schema, indexes, constraints, and upgrades. `scripts/sql/seed/` owns formal idempotent seeds, guarded by source SHA-256 values and natural-key assertions in `database/seed/manifest.yaml`. `scripts/sql/init-all.sql` is a compatibility-era legacy file and is not used by Compose initialization.
 
@@ -759,7 +789,7 @@ INSERT INTO sys_permission (tenant_id, parent_id, name, code, type, path, ...) V
 
 ### 14.7 Docker Deployment Configuration
 
-Add service definition to `docker-compose.yml`:
+Add the single service definition in `compose.apps.yaml` and declare the profiles it applies to:
 
 ```yaml
 omni-order:

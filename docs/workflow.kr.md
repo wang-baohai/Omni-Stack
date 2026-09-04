@@ -3,7 +3,7 @@
 > 본 문서는 Omni-Stack 워크플로우 엔진의 아키텍처, 핵심 플로우, 제약 사항 및 확장 가이드를 다룹니다.  
 > 아키텍처 개요는 [architecture.kr.md](architecture.kr.md)를 참조하십시오. Docker 배포 구성은 [docker-deployment.kr.md](docker-deployment.kr.md)를 참조하십시오.
 
-Omni-Stack은 **Flowable 7.x** 기반의 시각적 BPMN 워크플로우 엔진을 제공하며, 모델 설계, 이중 버전 관리, 다중 인스턴스 합의 승인 및 엔드투엔드 프로세스 추적을 지원합니다.
+Omni-Stack은 **Flowable 8.x** 기반의 시각적 BPMN 워크플로우 엔진을 제공하며, 모델 설계, 이중 버전 관리, 다중 인스턴스 합의 승인 및 엔드투엔드 프로세스 추적을 지원합니다.
 
 ## 1. Architecture Overview
 
@@ -322,7 +322,7 @@ BPMN 디자이너에서 `ccNotifyDelegate` 델리게이트 표현식을 가진 `
 
 ---
 
-## 5. 기술 선정: Flowable 7.x를 선택한 이유
+## 5. 기술 선정: Flowable 8.x를 선택한 이유
 
 | 고려 사항 | Flowable | Camunda | Activiti |
 |------|---------|---------|----------|
@@ -333,7 +333,7 @@ BPMN 디자이너에서 `ccNotifyDelegate` 델리게이트 표현식을 가진 `
 | **커뮤니티 활성도** | 활발(GitHub 8k+ stars) | 활발(상업 지원) | 유지보수 중단 |
 | **버전 7.x** | Jakarta EE 호환, Spring Boot 3/4 지원 | 버전 8은 대규모 아키텍처 변경 | 새 버전 없음 |
 
-**결론**: Flowable 7.x는 오픈소스 라이선스, Spring Boot 네이티브 통합, 다중 인스턴스 지원 측면에서 명확한 우위를 가지며, Omni-Stack 워크플로우 엔진의 최적 선택입니다.
+**결론**: Flowable 8.x는 오픈소스 라이선스, Spring Boot 네이티브 통합, 다중 인스턴스 지원 측면에서 명확한 우위를 가지며, Omni-Stack 워크플로우 엔진의 최적 선택입니다.
 
 ## 6. BPMN 모델링 모범 사례
 

@@ -66,7 +66,7 @@ Omni-Stack は、すぐに使える Spring Cloud + Vue 3 フルスタック開�
 | **gRPC 長接続** | v3 は HTTP ショートポーリングの代わりに gRPC を使用。サービス登録/ディスカバリの遅延が秒単位からミリ秒単位に短縮 |
 | **ヘルスチェックエンドポイント変更** | v3.1.1 でエンドポイントが `/nacos/actuator/health` から `GET /nacos/` に変更。Docker healthcheck の適応が必要 |
 
-### 2.4 Flowable 7.x を選んだ理由
+### 2.4 Flowable 8.x を選んだ理由
 
 | 検討事項 | 決定理由 |
 |---------|---------|
@@ -98,7 +98,7 @@ Omni-Stack は、すぐに使える Spring Cloud + Vue 3 フルスタック開�
 
 ## 4. モジュールマップ
 
-### 4.1 Common Starter エコシステム（8 つの自動設定モジュール）
+### 4.1 Common Starter エコシステム（10 個の共通モジュール）
 
 | モジュール | 役割 | 技術スタック | 境界制約 |
 |-----------|------|-------------|---------|
@@ -110,14 +110,20 @@ Omni-Stack は、すぐに使える Spring Cloud + Vue 3 フルスタック開�
 | `omni-common-job` | XXL-JOB 統合：自動設定、Admin HTTP クライアント、システムジョブレジストリ、ジョブメタデータアノテーション | XXL-JOB Core 3.3.1、Spring Boot Web（optional） | スケジューリングインフラのみ。ビジネスタスクロジックなし |
 | `omni-common-mqlog` | 信頼 MQ メッセージ送信：Transactional Outbox、リレイジョブ、ストラテジーベース送信、内部クエリ API | Spring Cloud Stream RocketMQ（optional）、omni-common-job（optional） | MQ インフラのみ。ビジネスメッセージロジックなし |
 | `omni-common-operlog` | 操作ログアスペクトとプロデューサー：`@OperLog` アノテーション駆動、信頼メッセージと直接送信の両モード対応 | Spring AOP、omni-common-mqlog（optional） | 操作ログ関心事のみ |
+| `omni-common-workflow` | Flowable 自動設定と承認 SPI | Flowable 8.0.0 | Workflow サービスのみ使用可、ビジネスサービスはプロセスランタイムに依存してはならない |
+| `omni-common-service` | Servlet ビジネスサービス用構成 Starter：Gateway 事前認証、リクエスト識別情報/テナント、内部 API、DataScope、MyBatis インターセプター順序の固定、XSS オリジンフォールバックとセキュリティベースライン | Spring Security、OpenFeign、MyBatis-Plus、Redis | Gateway/Auth には適用外；ドメインテーブルマッピングと AccessGuard は引き続きサービス側で実装 |
 
-### 4.2 マイクロサービスモジュール（4 つ）
+### 4.2 マイクロサービスモジュール（8 個）
 
 | モジュール | ポート | 役割 | コア依存 |
 |-----------|--------|------|---------|
 | `omni-auth` :8100 | 8100 | 認証認可：ログイン、CAPTCHA、JWT、マルチテナント、OAuth2 認可サーバー、XSS 設定管理、RBAC 権限、オンラインユーザー管理 | Spring Boot Web、Spring Security、OAuth2 Authorization Server |
-| `omni-base` :8101 | 8101 | 基礎データ：辞書 CRUD、定时タスク管理（システム + ユーザー）、操作ログアーカイブ、MQ メッセージ管理 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
-| `omni-workflow` :8103 | 8103 | ワークフローエンジン：BPMN モデル管理、プロセスインスタンス、承認、タスク割り当て、統計 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 7.x |
+| `omni-base` :8101 | 8101 | 基礎データ：辞書 CRUD、定期タスク管理（システム + ユーザー）、操作ログアーカイブ、MQ メッセージ管理 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
+| `omni-workflow` :8103 | 8103 | ワークフローエンジン：BPMN モデル管理、プロセスインスタンス、承認、タスク割り当て、統計 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 8.0.0 |
+| `omni-crm` :8104 | 8104 | CRM 営業前クローズドループ：リード、顧客、連絡先、商談、フォローアップ、変換と概要 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
+| `omni-srm` :8105 | 8105 | SRM サプライヤークローズドループ：マスタ、参入ステートマシン、連絡先/資格/銀行、業績評価、リスク、招待とサプライヤーポータル | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
+| `omni-procurement` :8106 | 8106 | 調達実行クローズドループ：品目カタログ、購買申請承認、見積依頼と比較、発注および入荷 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog、OpenFeign |
+| `omni-asset` :8107 | 8107 | 資産フルライフサイクル：調達検収計上、台帳、割当/返却、移管、廃棄と概要 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog、OpenFeign |
 | `omni-gateway` :8102 | 8102 | API Gateway：リクエストルーティング、JWT 認証フィルタリング、CORS 処理、セキュリティヘッダー | Spring Cloud Gateway Server（WebFlux）、omni-common-redis-reactive |
 
 ### 4.3 フロントエンドモジュール
@@ -343,9 +349,9 @@ RocketMQ Broker (StreamBridge 経由)
 | XXL-JOB Admin | 分散タスクスケジューリングコンソール | 3.3.1 | 18080 |
 | RocketMQ | メッセージキュー（NameServer + Broker） | 5.3.2 | 9876, 10909-10912 |
 
-全サービスは1コマンドで起動可能：`docker compose up -d`。プロジェクトルートの `docker-compose.yml` を参照。
+フルスタックは `docker compose --profile full up -d` で起動できます。日常開発は `omni dev up --preset <id>` で最小依存クロージャを起動します。`--observability` を追加すると Prometheus、Pushgateway、Node Exporter、cAdvisor、Grafana、Tempo、Loki、Alloy、OTel Collector と Alertmanager が起動し、ローカル Trace エクスポートが有効になります。統一エントリポイントはリポジトリルートの `compose.yaml` で、観測セマンティクスとセキュリティ境界は [observability.jp.md](observability.jp.md) を参照。
 
-**起動順序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → バックエンドサービス（Auth, Base, Workflow, Gateway）→ フロントエンド
+**起動順序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → バックエンドサービス（Auth, Base, Workflow, CRM, SRM, Procurement, Asset, Gateway）→ フロントエンド
 
 ---
 
@@ -353,7 +359,7 @@ RocketMQ Broker (StreamBridge 経由)
 
 ### 9.1 Docker Compose オーケストレーション
 
-プロジェクトルートの `docker-compose.yml` は全12コンテナを定義：
+リポジトリルートの `compose.yaml` が include で `compose.infra.yaml` と `compose.apps.yaml` を統合し、full profile が 16 コンテナを定義します：
 
 - **名前付きボリューム**（`mysql-data`、`redis-data`）で再起動時のデータ永続化
 - **ヘルスチェック**（depends_on + service_healthy）で段階的起動チェーンを保証
@@ -414,7 +420,33 @@ erDiagram
 
 #### omni_workflow データベース
 
-**ワークフロー（7 テーブル）**：`wf_process_model` + `wf_process_model_version` + `wf_process_instance_ext` + `wf_todo_task` + `wf_cc_record` + `wf_form_schema` + `wf_delegation_rule`
+**ワークフロー（7 テーブル）**：`wf_process_model`（モデル登録）+ `wf_process_model_version`（バージョン履歴）+ `wf_process_instance_ext`（インスタンス拡張）+ `wf_todo_task`（未処理タスクキャッシュ）+ `wf_cc_record`（CC 記録）+ `wf_form_schema`（フォーム Schema）+ `wf_delegation_rule`（承認委任ルール）
+
+> 詳細は [workflow.jp.md](workflow.jp.md)
+
+#### omni_crm データベース
+
+**CRM コアテーブル（11 テーブル）**：`crm_tenant_config`、`crm_pipeline`、`crm_pipeline_stage`、`crm_lead`、`crm_lead_conversion`、`crm_customer`、`crm_contact`、`crm_opportunity`、`crm_opportunity_stage_history`、`crm_activity`、`crm_owner_change_log`、およびサービスごとに独立した `sys_mq_message` Outbox。すべての `crm_*` テーブルは `tenant_id` を含み、権限付与のルートテーブルは owner スナップショットを保存して楽観ロックを使用します。
+
+> ドメイン実行制約は [crm.jp.md](crm.jp.md)、設計ベースラインは [design/crm-design.jp.md](design/crm-design.jp.md)
+
+#### omni_srm データベース
+
+**SRM コアテーブル**：サプライヤーマスタ、連絡先、資格、銀行口座、評価、リスク、ポータルユーザー関連付け、招待 Saga および見積協働テーブル、およびサービス独立の `sys_mq_message` Outbox。権限付与された子リソースはすべて Supplier または Evaluation 集約ルート経由でテナントとデータ範囲を継承します。
+
+> 詳細は [design/srm-design.jp.md](design/srm-design.jp.md)
+
+#### omni_procurement データベース
+
+**Procurement コアテーブル**：テナント設定、品目/カテゴリ、承認ルート、購買申請および明細、RFQ およびサプライヤー/明細、発注および明細、入荷および明細、共通 Inbox とサービス独立 Outbox。購買申請は申請者範囲でフィルタし、RFQ/PO/GR は owner 範囲でフィルタし、子テーブルは集約ルート経由で継承します。
+
+> 詳細は [design/procurement-design.jp.md](design/procurement-design.jp.md)
+
+#### omni_asset データベース
+
+**Asset コアテーブル**：`ast_asset`（資産集約ルート）、`ast_asset_history`（不変履歴）、`ast_transfer`（移管）、`ast_disposal`（廃棄）、`ast_inbox_event`（サービス間消費の冪等性）、およびサービス独立の `sys_mq_message` Outbox。購買由来のカード作成は入荷行と単位連番で冪等性を保証し、移管と廃棄は集約ルートの活動操作フィールドで並行占有を統一します。
+
+> 詳細は [design/asset-design.jp.md](design/asset-design.jp.md)
 
 **データベースの正規情報源**：スキーマ、インデックス、制約、アップグレードは `database/changelog/`、正式な冪等シードは `scripts/sql/seed/` で管理し、`database/seed/manifest.yaml` の SHA-256 と自然キー検証で保護します。`scripts/sql/init-all.sql` は互換期間のレガシーファイルであり、Compose 初期化では使用しません。
 
@@ -676,7 +708,7 @@ spring:
 
 ### 14.7 Docker デプロイ設定
 
-`docker-compose.yml` にサービス定義を追加：
+`compose.apps.yaml` に唯一のサービス定義を追加し、適用する profiles を宣言します：
 
 ```yaml
 omni-order:

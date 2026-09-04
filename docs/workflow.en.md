@@ -3,7 +3,7 @@
 > This document covers the architecture, core flows, constraints, and extension guide for the Omni-Stack workflow engine.  
 > For architecture overview, see [architecture.en.md](architecture.en.md). For Docker deployment configuration, see [docker-deployment.en.md](docker-deployment.en.md).
 
-Omni-Stack provides a visual BPMN workflow engine built on **Flowable 7.x**, supporting model design, dual-version management, multi-instance countersign approval, and end-to-end process tracking.
+Omni-Stack provides a visual BPMN workflow engine built on **Flowable 8.x**, supporting model design, dual-version management, multi-instance countersign approval, and end-to-end process tracking.
 
 ## 1. Architecture Overview
 
@@ -322,7 +322,7 @@ Add a `ServiceTask` node in the BPMN designer with the `ccNotifyDelegate` delega
 
 ---
 
-## 5. Technology Selection: Why Flowable 7.x
+## 5. Technology Selection: Why Flowable 8.x
 
 | Consideration | Flowable | Camunda | Activiti |
 |------|---------|---------|----------|
@@ -333,7 +333,7 @@ Add a `ServiceTask` node in the BPMN designer with the `ccNotifyDelegate` delega
 | **Community Activity** | Active (GitHub 8k+ stars) | Active (commercially backed) | No longer maintained |
 | **Version 7.x** | Jakarta EE compatible, Spring Boot 3/4 support | Version 8 has major architectural changes | No new versions |
 
-**Conclusion**: Flowable 7.x has clear advantages in open-source licensing, native Spring Boot integration, and multi-instance support, making it the optimal choice for the Omni-Stack workflow engine.
+**Conclusion**: Flowable 8.x has clear advantages in open-source licensing, native Spring Boot integration, and multi-instance support, making it the optimal choice for the Omni-Stack workflow engine.
 
 ## 6. BPMN Modeling Best Practices
 

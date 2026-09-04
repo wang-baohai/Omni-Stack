@@ -35,7 +35,7 @@ Best suited to enterprise admin systems, tenant-aware data applications, and mic
 - **Optional full-stack observability**: OpenTelemetry, Prometheus, Pushgateway, Grafana, Tempo, Loki, and Alloy are disabled by default and enabled explicitly — see [docs/observability.en.md](docs/observability.en.md).
 - **Dual-track scheduling**: XXL-JOB 3.3.1 with system-task + user-task modes, frontend Cron editor + live execution log streaming — see [docs/scheduling.en.md](docs/scheduling.en.md)
 - **Transactional Outbox reliable messaging**: local outbox + XXL-JOB relay + exponential backoff retry + dead-letter management — see [docs/mq-reliability.en.md](docs/mq-reliability.en.md)
-- **Visual BPMN workflow**: Flowable 7.x engine, drag-and-drop modeling + dual-version management + multi-instance countersign + dynamic candidate resolution — see [docs/workflow.en.md](docs/workflow.en.md)
+- **Visual BPMN workflow**: Flowable 8.x engine, drag-and-drop modeling + dual-version management + multi-instance countersign + dynamic candidate resolution — see [docs/workflow.en.md](docs/workflow.en.md)
 - **Full RBAC permission system**: functional permissions (dynamic menus + v-permission + @PreAuthorize) + data permissions (DataPermissionInterceptor six-level filter) — see [docs/architecture.en.md](docs/architecture.en.md)
 - **AI-native engineering**: AGENTS.md execution manual + docs/ system truth + Skills behavior extensions — lock down the first two layers, then let AI produce code at full speed
 

@@ -3,7 +3,7 @@
 > 本文件由 `node tools/omni-cli/scripts/docs-review-queue.mjs --generate` 自动生成，
 > 请勿手工编辑条目；复核结论由复核人在 docs/docs-manifest.yaml 更新 status/reviewed_at 后重新生成本文件。
 
-- 生成时间：2026-09-03
+- 生成时间：2026-09-04
 - 中文事实源：38 篇；译文待复核：114 篇（en-US/ja-JP/ko-KR 各 38）
 - 已完成人工复核：0 篇
 
@@ -18,7 +18,7 @@
 
 | 文档 | 中文事实源 | 源摘要(前12) | en-US | ja-JP | ko-KR |
 | --- | --- | --- | --- | --- | --- |
-| architecture | docs/architecture.md | bb2700158866 | present-unverified | present-unverified | present-unverified |
+| architecture | docs/architecture.md | dc60013a2cba | present-unverified | present-unverified | present-unverified |
 | api-contract | docs/api-contract.md | 96cebb47233a | present-unverified | present-unverified | present-unverified |
 | core-flows | docs/core-flows.md | 2d2afd48d592 | present-unverified | present-unverified | present-unverified |
 
@@ -29,10 +29,10 @@
 | backend-patterns | docs/backend-patterns.md | 9d60b1049ac8 | present-unverified | present-unverified | present-unverified |
 | frontend-patterns | docs/frontend-patterns.md | 982ebd308674 | present-unverified | present-unverified | present-unverified |
 | scheduling | docs/scheduling.md | 677b2be31716 | present-unverified | present-unverified | present-unverified |
-| workflow | docs/workflow.md | 05c35992d406 | present-unverified | present-unverified | present-unverified |
+| workflow | docs/workflow.md | f6dc03e604a0 | present-unverified | present-unverified | present-unverified |
 | crm | docs/crm.md | 8ddf46014cbb | present-unverified | present-unverified | present-unverified |
-| srm | docs/srm.md | aa1a1e2a96a5 | present-unverified | present-unverified | present-unverified |
-| mq-reliability | docs/mq-reliability.md | 57de14bee422 | present-unverified | present-unverified | present-unverified |
+| srm | docs/srm.md | 62c98f8e7ec8 | present-unverified | present-unverified | present-unverified |
+| mq-reliability | docs/mq-reliability.md | 93cbfdcba530 | present-unverified | present-unverified | present-unverified |
 | guide-scaffold-development | docs/guides/scaffold-development.md | bb5c758f989a | present-unverified | present-unverified | present-unverified |
 
 ## P2 其他（27 篇 × 3 语言）
@@ -55,12 +55,12 @@
 | custom-preset-tutorial | docs/custom-preset-tutorial.md | e4d58bf268d1 | present-unverified | present-unverified | present-unverified |
 | preset-upgrade-guide | docs/preset-upgrade-guide.md | 3a91cf33fb23 | present-unverified | present-unverified | present-unverified |
 | guide-quick-start | docs/guides/quick-start.md | 0da1a481ebf5 | present-unverified | present-unverified | present-unverified |
-| guide-authentication | docs/guides/authentication.md | 85c6160cf426 | present-unverified | present-unverified | present-unverified |
-| guide-permissions | docs/guides/permissions.md | 77ca09f78202 | present-unverified | present-unverified | present-unverified |
-| guide-system-security-audit | docs/guides/system-security-audit.md | 727b84cdfa42 | present-unverified | present-unverified | present-unverified |
+| guide-authentication | docs/guides/authentication.md | be86a53a1ba7 | present-unverified | present-unverified | present-unverified |
+| guide-permissions | docs/guides/permissions.md | 34abe1aa1881 | present-unverified | present-unverified | present-unverified |
+| guide-system-security-audit | docs/guides/system-security-audit.md | 8307115fbd85 | present-unverified | present-unverified | present-unverified |
 | guide-workflow-approval | docs/guides/workflow-approval.md | ff4df819c13c | present-unverified | present-unverified | present-unverified |
-| guide-scheduling | docs/guides/scheduling.md | a870284445ad | present-unverified | present-unverified | present-unverified |
-| guide-crm-flow | docs/guides/crm-flow.md | ebc23c148037 | present-unverified | present-unverified | present-unverified |
+| guide-scheduling | docs/guides/scheduling.md | 9720091cafc6 | present-unverified | present-unverified | present-unverified |
+| guide-crm-flow | docs/guides/crm-flow.md | b61be136ee60 | present-unverified | present-unverified | present-unverified |
 | guide-srm-flow | docs/guides/srm-flow.md | 432bd91c02ae | present-unverified | present-unverified | present-unverified |
 | guide-procurement-flow | docs/guides/procurement-flow.md | d889d867c0ea | present-unverified | present-unverified | present-unverified |
 | guide-asset-flow | docs/guides/asset-flow.md | 99290d743a55 | present-unverified | present-unverified | present-unverified |
@@ -85,6 +85,12 @@
 | core-flows | en-US | 20 | 14 | docs/core-flows.en.md |
 | core-flows | ja-JP | 20 | 14 | docs/core-flows.jp.md |
 | core-flows | ko-KR | 20 | 14 | docs/core-flows.kr.md |
+| workflow | en-US | 8 | 7 | docs/workflow.en.md |
+| workflow | ja-JP | 8 | 7 | docs/workflow.jp.md |
+| workflow | ko-KR | 8 | 7 | docs/workflow.kr.md |
+| mq-reliability | en-US | 10 | 9 | docs/mq-reliability.en.md |
+| mq-reliability | ja-JP | 10 | 9 | docs/mq-reliability.jp.md |
+| mq-reliability | ko-KR | 10 | 9 | docs/mq-reliability.kr.md |
 | crm-design | en-US | 16 | 8 | docs/design/crm-design.en.md |
 | crm-design | ja-JP | 16 | 7 | docs/design/crm-design.jp.md |
 | crm-design | ko-KR | 16 | 7 | docs/design/crm-design.kr.md |
@@ -114,3 +120,6 @@
 | preset-upgrade-guide | en-US | 5 | 3 | docs/preset-upgrade-guide.en.md |
 | preset-upgrade-guide | ja-JP | 5 | 3 | docs/preset-upgrade-guide.jp.md |
 | preset-upgrade-guide | ko-KR | 5 | 3 | docs/preset-upgrade-guide.kr.md |
+| guide-system-security-audit | en-US | 9 | 7 | docs/guides/system-security-audit.en.md |
+| guide-system-security-audit | ja-JP | 9 | 7 | docs/guides/system-security-audit.jp.md |
+| guide-system-security-audit | ko-KR | 9 | 7 | docs/guides/system-security-audit.kr.md |

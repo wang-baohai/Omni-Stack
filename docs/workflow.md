@@ -3,7 +3,7 @@
 > 本文档覆盖 Omni-Stack 工作流引擎的架构、核心流程、约束和扩展指南。  
 > 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。
 
-Omni-Stack 提供基于 **Flowable 7.x** 的可视化 BPMN 工作流引擎，支持模型设计、双版本管理、多实例会签审批和端到端流程跟踪。
+Omni-Stack 提供基于 **Flowable 8.x** 的可视化 BPMN 工作流引擎，支持模型设计、双版本管理、多实例会签审批和端到端流程跟踪。
 
 ## 1. 架构概览
 
@@ -502,7 +502,7 @@ public class MyNotificationService implements WorkflowNotificationService {
 
 ---
 
-## 5. 技术选型思考：为什么选择 Flowable 7.x
+## 5. 技术选型思考：为什么选择 Flowable 8.x
 
 | 考量 | Flowable | Camunda | Activiti |
 |------|---------|---------|----------|
@@ -513,7 +513,7 @@ public class MyNotificationService implements WorkflowNotificationService {
 | **社区活跃度** | 活跃（GitHub 8k+ stars） | 活跃（商业支持） | 已停止维护 |
 | **版本 7.x** | Jakarta EE 兼容，Spring Boot 3/4 支持 | 版本 8 架构变动大 | 无新版 |
 
-**结论**：Flowable 7.x 在开源许可、Spring Boot 原生集成、多实例支持方面优势明显，是 Omni-Stack 工作流引擎的最佳选择。
+**结论**：Flowable 8.x 在开源许可、Spring Boot 原生集成、多实例支持方面优势明显，是 Omni-Stack 工作流引擎的最佳选择。
 
 ## 6. BPMN 建模最佳实践
 
