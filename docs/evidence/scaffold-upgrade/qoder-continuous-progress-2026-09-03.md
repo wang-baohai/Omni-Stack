@@ -5,7 +5,56 @@
 本文件是持续执行的断点记录，按阶段/模块批次更新，不逐文件记流水。主交接事实入口仍是
 `srm-supplier-quotation-qoder-handoff-2026-09-03.md`；本文件与其冲突时以本文件的**实测证据**为准。
 
-## 0. 接管基线（Step 0 实测，非沿用旧快照）
+## CURRENT STATUS（唯一现行状态 · 2026-09-04 ZCode GLM-5.3-Flash Flash 批次）
+
+执行方案：`zcode-glm53-flash-execution-plan-2026-09-04.md`（本批唯一入口）。本文其余章节为历史过程记录，与下列现状冲突时一律以本节为准；被取代的旧结论已就地标注 `SUPERSEDED_BY_CURRENT_STATUS`，原文与时点保留不改写。
+
+### 接管核验（ZF-0，2026-09-04 实测一次，输入未变不重查）
+
+| 项 | 实测值 |
+| --- | --- |
+| 分支 | `codex/scaffold-upgrade`（与预期一致） |
+| 本地 HEAD | `52b2c5c`（`52b2c5cd693479a3cab994ddac4427478a24a554`，procurement-design 三语重译收官提交） |
+| Gitee `origin`（fetch+push） | `52b2c5c…` == 本地 HEAD，无分叉 |
+| GitHub（第二 push URL） | `52b2c5c…` == 本地 HEAD，无分叉 |
+| 未提交变更 | 19 条 untracked（其中 4 条为本批方案/提示词，待 ZF-0 提交；其余为 excluded 临时项，不提交不删除）；0 条 tracked modified |
+| Docker | `omni-wp09-docs` 15 容器 running（约 6 小时），全部 healthy（frontend 无 healthcheck）；未重建、未停服、未清卷 |
+| REMOTE_DIVERGENCE | 无（LOCAL == GITEE == GITHUB） |
+
+### 冻结事实（本批快照，来源：Flash 方案 §2，与旧记录冲突处以本表为准）
+
+- 截图门禁基线：strict `docs:screenshots:check` 已知 **8 个 red、36 个 gaps**；必须实时执行后才能写成当前结果。
+- i18n strict 基线：**204 findings**；旧记录的「102 组全 ALIGNED」仅是宽松结构分类，其中 **74 组仍有 findings**。
+- 独立语义复核未完成前，禁止标记 `synchronized`、禁止填写 `reviewed_at`（本批不签核，只生成独立复核包）。
+- G1、G7 仍待外部输入；WP-10、G8 仍锁定；G2/G3-G6 沿用已关闭结论不重验。
+- excluded untracked 临时项（`*.patch`、`scripts/.work/`、`omni-frontend/.artifacts/`、debug PNG 等）不提交、不删除。
+- 本批**不是纯文档批次**：ZF-2 含真实 SRM 截图 E2E 与只读能力核实；历史「全程文档只读」表述仅描述 2026-09-04 阶段 C 会话，不适用于本批。
+
+### Flash 批次执行状态（随进展滚动更新）
+
+| ZF | 状态 | checkpoint 摘要 |
+| --- | --- | --- |
+| ZF-0 | IN_PROGRESS | 接管核验完成（上表）；current state 统一（本节）；四份方案/提示词纳入首个精确提交 |
+| ZF-1 | PENDING | i18n findings 队列 → `i18n-findings-resolution-2026-09-04.md`（待创建） |
+| ZF-2 | PENDING | SRM `admission-lifecycle`、`detail-and-action-states` 截图闭环 + system-management/scaffold-development/operations 三项只读核实 |
+| ZF-3 | PENDING | 定向验证（文档门禁 + 修改过的 Playwright 套件 + frontend build/lint；后端代码未改则不跑 Maven 全量） |
+| ZF-4 | PENDING | 精确提交、fast-forward 推送、最终验收 checkpoint |
+| STRONG_MODEL_QUEUE | PENDING | 采购 bootstrap 数据恢复等高风险项，见 Flash 方案 §4 |
+
+TOKEN_USAGE=UNKNOWN（平台无可信计数，按约束不编造）。
+
+### 本节取代的旧表述（SUPERSEDED_BY_CURRENT_STATUS 索引）
+
+- §0「本地 HEAD `ace8bf7`、未提交计数 32」→ 现行 HEAD 为 `52b2c5c`，见上表接管核验。
+- §5.2 NOT_STARTED「阶段 C 其余 111 项译文预审」→ 阶段 C 队列此后已推进至 102 组全 ALIGNED（宽松分类）；strict 口径仍有 204 findings，本批 ZF-1 继续处理。
+- §5.4「里程碑：102 组全 ALIGNED / 阶段 C 文档翻译收官 / 结构性缺口已全部清零」→ ALIGNED 属宽松结构分类，74 组仍有 strict findings；翻译待办**未全部完成**，独立语义复核未开始。
+- §5.4「本会话均为文档只读 + 译文修订」→ 仅描述阶段 C 会话；Flash 批次含截图 E2E 与只读核实，非纯文档。
+- §8.1 暂停现场 SHA `6c03b32` → 已被后续合法提交推进至 `52b2c5c`（快进链，无分叉）。
+- §8.3 恢复入口（workflow `tracking` 弹层等优先序）→ 已由 Flash 方案 ZF-1～ZF-4 取代；下一恢复入口以本节执行状态表为准。
+
+## 0. 接管基线（Step 0 实测，非沿用旧快照）`SUPERSEDED_BY_CURRENT_STATUS`
+
+> 以下为 2026-09-03 阶段 A 接管时的历史快照。HEAD 与未提交计数已被后续合法提交推进，现行值见顶部 CURRENT STATUS 接管核验表。
 
 | 项目 | 实测值 | 备注 |
 | --- | --- | --- |
@@ -965,7 +1014,7 @@ procurement-design（源 789 行/16 节含 §5.2.1/54 标题/约 12 表/64 代�
 本会话在**上下文/运行预算**这一平台限制下收口，而非因为剩余项全部被外部阻塞。
 下一接手方可从 5.2 的 EXECUTABLE 低成本项（workflow `tracking`）直接续做，无需重开全仓审计。
 
-### 5.4 本会话（2026-09-04 接管）交付小结
+### 5.4 本会话（2026-09-04 接管）交付小结 `SUPERSEDED_BY_CURRENT_STATUS`（ALIGNED 口径与翻译收官结论被现行 i18n strict 基线 204 取代；「文档只读」仅限本会话）
 
 用户以 `qoder-continuous-execution-prompt-2026-09-03.md` 再次接管，最小核对 Git/运行现场后连续推进阶段 C，共 25 个小提交（均 fast-forward 推送、三端一致）：
 
@@ -1031,7 +1080,7 @@ strict 预期：关闭 `supplier-quotation` 一个 gap 后 SRM 仍为 `partial`�
 
 ## 8. 暂停点与恢复入口
 
-### 8.1 本次暂停状态（用户主动要求下班暂停，非阻塞、非失败）
+### 8.1 本次暂停状态（用户主动要求下班暂停，非阻塞、非失败）`SUPERSEDED_BY_CURRENT_STATUS`（现场 SHA 已推进至 52b2c5c）
 
 暂停时现场**干净且已全部交付**：
 
@@ -1061,7 +1110,7 @@ strict 预期：关闭 `supplier-quotation` 一个 gap 后 SRM 仍为 `partial`�
 2. 上述探测**未对中文 mqmessage 打开弹层**（正则未命中复合词），因此缺 zh 的弹层标题/字段清单；已知按钮文案为「查看详情」，可直接使用。
 3. 新发现一个译文完整度实例：mqmessage 行操作在 **ja-JP/ko-KR 下也渲染为英文 `Detail`**（与 §3.5 的 i18n 观察同类）。
 
-### 8.3 下一条具体操作（按优先序）
+### 8.3 下一条具体操作（按优先序）`SUPERSEDED_BY_CURRENT_STATUS`（优先序已由 Flash 方案 ZF-0→ZF-4 取代，恢复入口见顶部 CURRENT STATUS）
 
 1. **最低成本、只读、无需清理**：workflow 与 messaging-monitoring 的 `detail-and-action-states`。
    直接用 §8.2 的真实文案新建一个只读弹层用例：
