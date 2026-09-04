@@ -6,7 +6,7 @@ SRM は招待、Portal 入居、審査、ライフサイクル、評価、リス
 
 管理者が招待を作成し、サプライヤーが `/portal-register` で認証アカウントを登録します。Portal で招待トークン、一意のクライアント要求 ID、企業情報を送信すると、SRM がサプライヤーを作成し、Saga が Auth に `SUPPLIER` ロールを要求します。
 
-`inviteToken` と `requestId` は必須で、再試行は同じ ID を使います。Portal ユーザー ID を内部 owner 列へ書きません。
+入居リクエストは `inviteToken` とクライアント `requestId` の両方を含む必要があります。再試行は同じリクエスト ID を使って冪等を保ちます。Portal ユーザー ID を内部の `owner_user_id` や `owner_unit_id` に書き込んではいけません。
 
 ## 2. 審査とライフサイクル
 

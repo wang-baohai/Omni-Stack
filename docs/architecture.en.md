@@ -510,9 +510,9 @@ Nacos registration: service=omni-auth, ip=<container-internal-IP>, port=8080
     │
 omni-gateway starts
     │ @EnableDiscoveryClient
-    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=true
+    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=false
     ▼
-Gateway routing: lb://omni-auth → query Nacos for instance list → load-balanced forwarding
+Gateway explicit routes: /api/crm/** → lb://omni-crm → query Nacos for instance list → load-balanced forwarding
 ```
 
 **Key Configuration**:
@@ -677,7 +677,7 @@ The XSS defense system is modular — new services inherit protection by dependi
 1. Add `omni-common-core` + `omni-common` dependencies
 2. Implement `XssConfigProvider` SPI interface
 3. Use Redis caching strategy (`xss:enabled:{tenantId}` + `xss:rules:{tenantId}`, 30-minute TTL)
-4. `XssAutoConfiguration` is registered via `AutoConfiguration.imports` — no manual `@ComponentScan` needed
+4. `XssAutoConfiguration` is registered automatically via `AutoConfiguration.imports`
 
 ### 13.3 Adding a New User Task Type
 

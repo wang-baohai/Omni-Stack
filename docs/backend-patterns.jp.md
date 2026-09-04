@@ -422,31 +422,29 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 
 ## Common Starter Onboarding Specification
 
-プロジェクトは共有機能を6つのモジュールに分割しています。新マイクロサービスは Maven 依存関係を追加するだけで使用可能、手動設定は不要です。
+プロジェクトは共通能力を組合せ Starter とオプション能力モジュールに分割します。Servlet ビジネスサービスは `omni-common-service` を優先的に使用し、Gateway・Auth・Workflow はそれぞれの特殊な境界に応じて下位モジュールを選択します。
 
-### Starter Module Overview
+### Starter モジュール概要
 
-| モジュール | 責務 | 自動設定 | 対象サービスタイプ |
-|--------|----------------|--------------------|--------------------|
-| `omni-common-core` | 純 POJO レイヤー | なし（Spring 依存なし） | すべてのモジュール |
-| `omni-common` | Web 自動設定 | `JacksonConfig`（日時シリアライゼーション）, `WebMvcConfig` (CORS), `GlobalExceptionHandler`, `XssAutoConfiguration` (Filter + Jackson Module) | Servlet サービス |
-| `omni-common-mybatis` | データベース機能 | `MybatisPlusAutoConfiguration`: `MybatisPlusInterceptor` (MySQL `PaginationInnerInterceptor`) + YAML デフォルト（キャメルケースマッピング, 論理削除, オートインクリメント ID） | Servlet サービス |
-| `omni-common-redis` | ブロッキング Redis | `RedisAutoConfiguration`: `RedisTemplate<String, Object>` (Jackson シリアライゼーション) + `RedisUtils` ユーティリティ + Lettuce 接続プール設定 | Servlet サービス |
-| `omni-common-redis-reactive` | リアクティブ Redis | `spring-boot-starter-data-redis-reactive` + YAML デフォルトタイムアウト設定 | WebFlux サービス（例: Gateway） |
-| `omni-common-mqlog` | 信頼性 MQ 送信 | `ReliableMessageTemplate` (Transactional Outbox), `MqMessageRelayService` (XXL-JOB 非同期配信), `MessageSender` 戦略インタフェース, `MqMessageInternalController` (Feign 内部照会), `schema.sql`（自動テーブル作成） | Servlet サービス（MQ 機能が必要） |
+| モジュール | 責務 | 自動設定内容 | 適用サービスタイプ |
+|--------|------|-------------|------------------|
+| `omni-common-core` | 純 POJO 層 | なし（Spring 依存なし） | 全モジュール |
+| `omni-common` | Web 自動設定 | `JacksonConfig`（時刻シリアライズ）、`WebMvcConfig`（CORS）、`GlobalExceptionHandler`、`XssAutoConfiguration`（Filter + Jackson Module） | Servlet サービス |
+| `omni-common-mybatis` | データベース能力 | `MybatisPlusAutoConfiguration`：`MybatisPlusInterceptor`（MySQL `PaginationInnerInterceptor`）+ YAML デフォルト設定（キャメルケースマッピング、論理削除、自動増分 ID） | Servlet サービス |
+| `omni-common-redis` | ブロッキング Redis | `RedisAutoConfiguration`：`RedisTemplate<String, Object>`（Jackson シリアライズ）+ `RedisUtils` ユーティリティ + Lettuce 接続プール設定 | Servlet サービス |
+| `omni-common-redis-reactive` | リアクティブ Redis | `spring-boot-starter-data-redis-reactive` + YAML デフォルトタイムアウト設定 | WebFlux サービス（Gateway など） |
+| `omni-common-mqlog` | 信頼性 MQ メッセージ送信 | `ReliableMessageTemplate`（Transactional Outbox）、`MqMessageRelayService`（XXL-JOB 非同期配信）、`MessageSender` ストラテジーインターフェース、`MqMessageInternalController`（Feign 内部照会）、`schema.sql`（自動テーブル作成） | Servlet サービス（MQ 能力が必要） |
+| `omni-common-service` | Servlet ビジネスサービスのセキュリティとコンテキストの組合せ | Gateway 事前認証 Filter、不変リクエスト識別、内部 API Token、DataScope SPI/アスペクト、Tenant/DataPermission 固定順序、Auth XSS フォールバックとセキュリティベースライン | CRM/SRM/Procurement/Asset などの Servlet ビジネスサービス |
 
-**自動設定登録**: すべての starter は `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` を通じて登録されます。これは Spring Boot 3+/4+ の標準メカニズムです（旧版の `spring.factories` を置き換え）。
+**自動設定登録メカニズム**：すべての starter は `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` ファイルで登録されます。これは Spring Boot 3+/4+ の標準メカニズムです（旧 `spring.factories` の代替）。
 
-### Steps to Onboard a New Service
+### 新規サービス接入手順
 
-1. **POM 依存関係**: `pom.xml` に必要な starter を宣言:
+1. **POM 依存**：Servlet ビジネスサービスは組合せ Starter を宣言し、必要に応じて OperLog/Job/MQ を追加します：
    ```xml
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-core</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-mybatis</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-redis</artifactId></dependency>
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common-service</artifactId></dependency>
    ```
-2. **application.yml**: データソースと Redis 接続情報のみ設定:
+2. **application.yml**：データソースと Redis に加えて、サービス識別と有効化するセキュリティ能力を明示的に設定します。内部 Token は環境変数から取得する必要があり、弱いデフォルト値は使用できません：
    ```yaml
    spring:
      datasource:
@@ -458,10 +456,27 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
          host: 127.0.0.1
          port: 6379
          database: 0
+   omni:
+     service:
+       name: omni-xxx
+       display-name: Xxx
+       gateway-preauth:
+         enabled: true
+       internal-api:
+         enabled: true
+         token: ${OMNI_INTERNAL_API_TOKEN}
+       tenant:
+         enabled: true
+       data-scope:
+         enabled: true
+       xss:
+         enabled: true
    ```
-3. **メインクラス**: `@MapperScan("com.omni.xxx.mapper")` を追加
-4. **XSS 防御**: `XssConfigProvider` SPI インタフェースを実装（`omni-common` が Filter + Jackson Module を自動登録）
-5. **自動適用**: ページネーションプラグイン、Jackson 日時シリアライゼーション、CORS 設定、`GlobalExceptionHandler`、`RedisUtils` ユーティリティはすべて自動設定されるため、追加の設定は不要
+3. **ドメイン SPI**：tenant/data-scope を有効化する際は、それぞれ一意の `TenantTablePolicy` と `DataScopeTablePolicy` を提供します。ドメインのテーブル名や owner 列を Starter に入れてはいけません。
+4. **セキュリティチェーン**：Starter が提供する Gateway Filter を `AuthorizationFilter` の前に、識別コンテキスト Filter を Gateway Filter の後に配置します。両者の Servlet コンテナによる重複登録は禁止されています。
+5. **オプション能力**：OperLog・Job・MQ・Workflow は引き続き独立した依存として、業務ニーズに応じて有効化します。
+
+現在 `omni-common-service` は v0 の自動設定とテストを提供しており、CRM・SRM・Procurement・Asset はすべて移行・モジュールテスト・分離ランタイム再検証を完了しています。Starter の XSS Provider 自動設定は `XssAutoConfiguration` より先に有効化される必要があり、コンテキストテストで Provider、Servlet FilterRegistration、Jackson 2/3 クリーニングモジュールを同時にアサートし、条件評価順序によるサイレント失效を回避します。
 
 ### Override Mechanism
 

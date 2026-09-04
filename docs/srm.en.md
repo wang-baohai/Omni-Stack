@@ -161,7 +161,7 @@ DataPermissionInterceptor does not protect writes. Every update/delete/approve/s
 | Invite | `srm:invite:list/create/revoke`, `srm:portal:invite` |
 | Owner Options | `srm:owner:list` |
 | PII View | `srm:pii:view` |
-| Portal | `srm:portal:enroll/profile/evaluation` |
+| Portal | `srm:portal:enroll/profile/evaluation/quotation` |
 
 The `/` shorthand represents multiple full permission codes under the same resource; each is stored individually in the database. `@PreAuthorize` and `@SrmDataScope` use the same full permission code.
 
@@ -186,7 +186,7 @@ SRM implements the `XssConfigProvider` SPI, reading `xss:enabled:{tenantId}` and
 | `SUPPLIER` | SELF | Portal self-service: post-enrollment profile maintenance, own performance viewing |
 | `SUPER_ADMIN` | ALL | All functions; SRM data still limited to the current tenant |
 
-Default USER role only grants `srm:portal:enroll`; no SRM admin or portal profile/evaluation permissions. Portal profile/evaluation access requires the SUPPLIER role added after enrollment.
+Default USER is only granted `srm:portal:enroll`, not SRM admin or portal profile/evaluation/quotation permissions; profile/evaluation/quotation access requires the SUPPLIER role added after enrollment. `srm:portal:quotation` is strictly granted only to `SUPPLIER` and to `SUPER_ADMIN` which owns the full permission tree per platform rules; internal roles such as `SRM_ADMIN` and `PROCUREMENT_MANAGER` must not submit quotations on behalf of suppliers. The quotation Controller requires both the SUPPLIER role and a valid PortalUser association; SUPER_ADMIN alone still cannot impersonate a supplier.
 
 ## 4. State Machines & Core Flows
 
@@ -241,7 +241,7 @@ Manual/automatic risk indicator update
 → If level changes to RED, write Outbox event notification
 ```
 
-Certificate expiry alert logic: `expiry_date - today ≤ 30 days` → CERTIFICATE indicator auto-set to YELLOW; `expiry_date < today` → CERTIFICATE indicator auto-set to RED. Proactive scanning via XXL-JOB scheduled task is planned for Phase 2 (MVP: manual trigger or disabled).
+Certificate expiry alert logic: `expiry_date - today <= 30` → CERTIFICATE indicator auto-set to YELLOW; `expiry_date < today` → CERTIFICATE indicator auto-set to RED. Proactive scanning via XXL-JOB scheduled task is planned for Phase 2 (MVP: manual trigger or disabled).
 
 ### 4.4 Portal Account Opening & Enrollment
 
@@ -334,10 +334,21 @@ Events only carry IDs and status snapshots; no full bank account numbers, contac
 
 ### 6.4 Internal APIs
 
-SRM pre-provisions the following capabilities for future Procurement/Asset services:
+SRM provides the following capabilities for the Procurement/Asset services to call:
 - `GET /api/internal/supplier/{id}?tenantId={tenantId}` — supplier summary
 - `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}` — search approved suppliers
-- All internal APIs use `X-Internal-Token` authentication; not exposed via Gateway
+- `POST /api/internal/supplier/batch` — body is `{tenantId,supplierIds}`; returns at most 100 summaries in first-occurrence order of the input; missing IDs are omitted
+- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}` — fetch valid quotations, versions and line snapshots of an RFQ
+- All internal APIs use `X-Internal-Token` and `X-Tenant-Id`; the query/body tenant must match the header, not exposed via the Gateway; supplier summaries contain no contact or bank-account PII
+
+When SRM queries portal-visible RFQs it calls Procurement:
+
+- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`
+- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`
+
+supplierId can only be the `srm_supplier_portal_user` corresponding to the current userId; values passed in by portal requests are not accepted. All internal requests also carry `X-Tenant-Id`; if an API has an additional query/body tenant, it must match the header.
+
+Quotation submission or update is only allowed when the RFQ `status=SENT`, the invitation `status IN (INVITED, QUOTED)`, and quotationDeadline is not exceeded; `DRAFT/CLOSED/AWARDED/CANCELLED` are always rejected.
 
 ## 7. Hard Constraints
 

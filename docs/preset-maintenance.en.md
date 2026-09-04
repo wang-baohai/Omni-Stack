@@ -4,7 +4,7 @@ This guide is for scaffold maintainers. `scaffold/catalog/modules.yaml` is the s
 
 ## Managed artifacts
 
-- Catalog and Schemas: `scaffold/catalog/modules.yaml`, `module.schema.json`, and `preset.schema.json`.
+- Catalog and Schemas: `scaffold/catalog/modules.yaml`, `scaffold/schemas/module.schema.json`, and `scaffold/schemas/preset.schema.json`.
 - Official declarations: `scaffold/presets/*.yaml`.
 - Generator: `tools/omni-cli/src/preset-generator.ts`.
 - Golden matrix: `tools/omni-cli/scripts/preset-golden.mjs`.
@@ -15,8 +15,8 @@ This guide is for scaffold maintainers. `scaffold/catalog/modules.yaml` is the s
 1. Complete its code, migration, idempotent seed, permissions, Compose, Gateway, and documentation.
 2. Append it to the catalog in valid dependency order. `dependencies` may only reference earlier catalog modules.
 3. Declare backend modules; frontend views/components/APIs/i18n; routes; Compose services; changelogs and seeds; provisioning; Nacos; ports; MQ; XXL-JOB; docs; resources; compatibility; and deprecation.
-4. Use `optionalModules` only for optional integration. It does not replace a runtime feature switch. Declare conflicts explicitly.
-5. Run catalog validation and fix missing paths, dangling Compose dependencies, port collisions, and unmanaged formal modules.
+4. Use `optionalModules` only for optional integration. It does not replace a runtime feature switch. Declare `conflicts`; they must be bidirectional or explicitly handled by validation rules.
+5. Run `omni catalog validate` and fix nonexistent paths, dangling Compose dependencies, duplicate ports, and unmanaged formal modules.
 6. Add the entry module to the appropriate preset without copying transitive dependencies.
 7. Add pruning tests, generated-build evidence, and runtime smoke coverage.
 
@@ -34,11 +34,11 @@ npm run docs:preset
 npm run docs:preset:check
 ~~~
 
-Bump patch for fixes, minor for backward-compatible capability additions, and major for breaking boundary changes. Module and preset versions are independent.
+Bump `version` when module sets, default configuration, or generated output change compatibly: patch for fixes, minor for backward-compatible capability additions, and major for breaking boundary changes. Module and preset versions are independent.
 
 ## Gates
 
-- PR: `npm run test:preset-smoke` validates `core` and one business preset with Maven `clean verify`.
+- PR: `npm run test:preset-smoke` validates `core` and one business preset; the backend uses `clean verify` to avoid shared `.m2` write conflicts.
 - Nightly/release: `npm run test:preset-golden` runs five-preset `clean install`, frontend ci/lint/build, Compose validation, and residual scans.
 - Runtime: db-migrator fresh, real startup, login, menu, health, and a core flow for every preset; full E2E for `full`.
 

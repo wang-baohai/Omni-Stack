@@ -1025,7 +1025,7 @@ Admin (Frontend XSS Protection Configuration Page)
 
 - **Three-Layer Sanitization**: Jackson deserializer + Servlet Filter + Gateway security headers all implemented and auto-configured
 - **Configuration Management**: Global toggle + rule CRUD + single rule toggle — 7 API endpoints fully implemented
-- **Frontend Page**: `System Management → XSS Protection Config` ready, supports paginated rule list, create/edit dialogs, v-permission button authorization
+- **Frontend Page**: `System Management → XSS Protection` ready, supports paginated rule list, create/edit dialogs, v-permission button authorization
 - **Cache Strategy**: Redis cache + write-operation proactive invalidation implemented
 - **Tenant Isolation**: Configuration and rules isolated by `tenant_id`
 

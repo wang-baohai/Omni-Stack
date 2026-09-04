@@ -505,9 +505,9 @@ Nacos 등록: service=omni-auth, ip=<컨테이너 내부 IP>, port=8080
     │
 omni-gateway 시작
     │ @EnableDiscoveryClient
-    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=true
+    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=false
     ▼
-Gateway 라우팅: lb://omni-auth → Nacos에서 인스턴스 목록 조회 → 부하 분산 전달
+Gateway 명시적 라우트: /api/crm/** → lb://omni-crm → Nacos에서 인스턴스 목록 조회 → 부하 분산 전달
 ```
 
 **핵심 설정**:
@@ -616,7 +616,7 @@ DataScopeContext.clear() (finally 블록, ThreadLocal 누수 방지)
 
 | 모드 | 사용 사례 | 구현 방식 |
 |------|-----------|-----------|
-| SQL 인터셉트 | 데이터베이스 쿼리(예: 사용자 목록) | `DataPermissionInterceptor`가 WHERE 자동 추가 |
+| SQL 인터셉트 | 데이터베이스 쿼리(예: 사용자 목록) | `DataPermissionInterceptor` + `DataPermissionHandlerImpl`이 WHERE 자동 추가 |
 | 메모리 필터링 | 비 DB 데이터(예: Redis의 온라인 사용자) | Controller가 `DataScopeContext`를 읽어 `primaryUnitId`로 필터링 |
 
 ### 11.4 RBAC 관리 흐름
@@ -631,12 +631,12 @@ DataScopeContext.clear() (finally 블록, ThreadLocal 누수 방지)
 ## 12. 주요 제약사항
 
 1. **JDK 25 필수**: Spring Boot 4.x Maven plugin은 Java 17+ 필수. 본 프로젝트는 JDK 25 대상. `JAVA_HOME`을 Maven 명령 실행 전에 설정해야 함.
-2. **Gateway 5.x 설정 접두사**: 라우트와 설정은 `spring.cloud.gateway.server.webflux` 아래에 배치해야 함. 구 접두사는 자동으로 무시됨.
+2. **Gateway 5.x 설정 접두사**: 라우트와 설정은 `spring.cloud.gateway.server.webflux` 아래에 배치해야 함. 구 접두사 `spring.cloud.gateway`는 자동으로 무시됨.
 3. **빌드 순서**: `omni-common-core`를 먼저 설치한 후 `omni-common`, 그 다음 common starters. `./mvnw clean install`을 부모 POM에서 실행.
 4. **직접 서비스 간 호출 금지**: 서비스 간 통신은 반드시 OpenFeign 클라이언트 경유. 원시 HTTP 호출 금지.
 5. **Gateway는 리액티브**: `omni-gateway`는 WebFlux에서 실행. `omni-common-core`와 `omni-common-redis-reactive`에 의존하지만 `omni-common`과 `omni-common-redis`에는 **의존하지 않음**.
 6. **Redis Starter 상호 배타성**: 블로킹 버전과 리액티브 버전은 동일 서비스에서 혼재 불가.
-7. **XXL-JOB Admin 선행 실행 필수**: `omni-base` 시작 전에 Admin이 실행 중이어야 함.
+7. **XXL-JOB Admin 선행 실행 필수**: `XxlJobSpringExecutor`가 시작 시 Admin에 등록되며, 사용자 작업 생성/갱신에는 `XxlJobAdminClient` HTTP 호출이 필요함. `omni-base` 시작 전에 Admin이 실행 중이어야 함.
 8. **omni-common-job은 라이브러리 모듈**: 독립 실행 불가. Servlet 서비스만 의존 가능.
 
 ---

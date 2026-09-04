@@ -75,19 +75,4 @@
 
 ## 章节结构差异（复核优先级提示）
 
-以下译文的 `##` 节数与中文源不一致（可能缺少新增章节或残留旧结构），建议优先复核：
-
-| 文档 | 语言 | 源 `##` 节数 | 译文 `##` 节数 | 文件 |
-| --- | --- | --- | --- | --- |
-| crm-design | en-US | 16 | 8 | docs/design/crm-design.en.md |
-| crm-design | ja-JP | 16 | 7 | docs/design/crm-design.jp.md |
-| crm-design | ko-KR | 16 | 7 | docs/design/crm-design.kr.md |
-| srm-design | en-US | 16 | 7 | docs/design/srm-design.en.md |
-| srm-design | ja-JP | 16 | 6 | docs/design/srm-design.jp.md |
-| srm-design | ko-KR | 16 | 6 | docs/design/srm-design.kr.md |
-| procurement-design | en-US | 16 | 7 | docs/design/procurement-design.en.md |
-| procurement-design | ja-JP | 16 | 6 | docs/design/procurement-design.jp.md |
-| procurement-design | ko-KR | 16 | 6 | docs/design/procurement-design.kr.md |
-| asset-design | en-US | 16 | 7 | docs/design/asset-design.en.md |
-| asset-design | ja-JP | 16 | 6 | docs/design/asset-design.jp.md |
-| asset-design | ko-KR | 16 | 6 | docs/design/asset-design.kr.md |
+未发现 `##` 节数不一致的译文；结构漂移风险低。

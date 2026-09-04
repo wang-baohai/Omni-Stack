@@ -40,7 +40,7 @@ Domain mappings are not interchangeable:
 - CRM, SRM, Procurement, and Asset define their own aggregate visibility.
 - Child tables inherit through the aggregate root instead of receiving nonexistent owner columns.
 - Requisitions use requester columns; RFQ, orders, and receipts use owner columns.
-- Asset self-service uses `current_user_id`; management views use owner columns.
+- Asset "My Assets", acceptance, and return are fixed to the current user; management views use owner columns.
 
 ## 5. Role Maintenance
 

@@ -95,6 +95,8 @@ interface ApiResponse<T = unknown> {
 | 401 | 401 | 미인증 | Gateway `AuthFilter`가 401 JSON 응답 | 프론트엔드 자동으로 로그인 페이지 이동 |
 | 403 | 403 | 권한 부족 | `AccessDeniedException` / `AuthorizationDeniedException`이 `GlobalExceptionHandler`에 의해 처리됨 | 프론트엔드에서 "권한 부족" 안내 표시 |
 | 200 | 404 | 리소스 없음 | `throw new BusinessException(404, "xxx가 존재하지 않습니다")` | 프론트엔드에서 오류 메시지 표시 |
+| 200 | 409 | 상태/동시성 충돌 | 낙관적 잠금 버전 불일치 또는 상태 머신이 전환을 거부 | 프론트엔드가 데이터를 새로 고친 후 재시도 안내 |
+| 200 | 503 | 하위 의존 서비스 사용 불가 | CRM이 Auth 데이터 범위 API를 호출하여 fail-close | 프론트엔드가 서비스 일시 중단 안내. 권한 초과 데이터로 격하하지 않음 |
 | 200 | 500 | 비즈니스 예외 | `BusinessException`이 `GlobalExceptionHandler`에 의해 처리됨 | 프론트엔드에서 오류 메시지 표시 |
 | 500 | 500 | 알 수 없는 시스템 오류 | 최종 `Exception` 핸들러 | 프론트엔드에서 "서버 내부 오류" 표시 |
 
@@ -110,6 +112,8 @@ interface ApiResponse<T = unknown> {
 | 400 | 고유성 충돌 | "사용자 이름이 이미 존재합니다" / "작업 유형 코드가 이미 존재합니다" |
 | 404 | 리소스 없음 | "조직 단위가 존재하지 않습니다" / "사전 데이터가 존재하지 않습니다" |
 | 403 | 권한 부족 | "권한이 부족하여 접근이 거부되었습니다" |
+| 409 | 낙관적 잠금 또는 상태 충돌 | "데이터가 다른 사용자에 의해 수정되었습니다. 새로 고친 후 재시도하십시오" |
+| 503 | 필수 의존 서비스 사용 불가 | "인증/권한 서비스를 일시적으로 사용할 수 없습니다" |
 
 ### 2.3 Gateway 수준 오류 코드
 
@@ -216,9 +220,7 @@ export function listUsers(page: number, size: number) {
 | 삭제 | DELETE | `/{resource}/{id}` | `DELETE /user/1` |
 | 일괄 작업 | POST | `/{resource}/batch` | `POST /user/batch` |
 
-**Gateway 경로 접두사**: 모든 프론트엔드 요청은 `/api/<service>/<resource>`를 사용합니다(예: `/api/auth/user/list`). Gateway가 `/api/<service>`를 제거하고(StripPrefix=2), 다운스트림 서비스는 `/<resource>`를 수신합니다.
-
-**예외**: Base 서비스의 `/api/base/**` 라우팅에는 StripPrefix 필터가 **없으며**, Base 서비스 컨트롤러는 전체 경로를 사용합니다(예: `@RequestMapping("/api/base/dict/type")`).
+**Gateway 경로 접두사**: 모든 프론트엔드 요청은 `/api/<service>/<resource>`를 사용합니다(예: `/api/auth/user/list`). 현재 Gateway는 Auth·Base·Workflow·CRM·SRM·Procurement·Asset 등 비즈니스 라우팅에 `StripPrefix`를 사용하지 않으며, 다운스트림 Controller가 전체 `/api/**` 경로를 선언하고 수신합니다.
 
 ---
 
@@ -232,7 +234,7 @@ Gateway `application.yml`의 라우팅 설정(`spring.cloud.gateway.server.webfl
 |---------|---------|---------|-------------|------|
 | `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` | 없음 | OAuth2 인증 서버 엔드포인트 |
 | `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` | 없음 | OpenID Connect Discovery 엔드포인트 |
-| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | 2 | Auth 서비스 REST API |
+| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | **없음** | Auth 서비스 REST API(전체 경로 사용) |
 | `omni-base` | `/api/base/**` | `lb://omni-base` | **없음** | Base 서비스(전체 경로 사용) |
 | `omni-base-job` | `/api/job/**` | `lb://omni-base` | **없음** | 스케줄링 작업 관리 |
 | `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` | **없음** | 워크플로우 엔진 |
@@ -243,7 +245,7 @@ Docker 배포 시 라우팅 설정은 동일하며, 대상 서비스의 URI는 N
 
 | 프론트엔드 요청 | Gateway 라우트 | 다운스트림 수신 경로 | 설명 |
 |---------|-------------|-------------|------|
-| `GET /api/auth/user/list` | `lb://omni-auth` + StripPrefix=2 | `GET /user/list` | Auth 서비스는 접두사 제거 |
+| `GET /api/auth/user/list` | `lb://omni-auth` StripPrefix 없음 | `GET /api/auth/user/list` | Auth 서비스는 전체 경로 유지 |
 | `GET /api/base/dict/type/list` | `lb://omni-base` StripPrefix 없음 | `GET /api/base/dict/type/list` | Base 서비스는 전체 경로 유지 |
 | `POST /api/workflow/model` | `lb://omni-workflow` StripPrefix 없음 | `POST /api/workflow/model` | Workflow 서비스는 전체 경로 유지 |
 | `GET /api/job/type/list` | `lb://omni-base` StripPrefix 없음 | `GET /api/job/type/list` | Job 라우트는 Base 서비스로 |
@@ -325,15 +327,30 @@ Gateway의 `AuthFilter`는 JWT 검증 성공 후 다운스트림 요청에 다�
 | `X-Tenant-Id` | Axios 인터셉터 자동 주입 | `useUserStore()`에서 테넌트 ID 획득 |
 | `Content-Type: application/json` | Axios 기본값 | JSON 요청 본문 |
 
-### 8.3 보안 응답 헤더(Gateway 주입)
+### 8.3 내부 서비스 요청 헤더
+
+모든 서비스 간 인터페이스는 `/api/internal/**` 아래에 두며, 공유 토큰 인증을 사용하고 엔드유저 JWT를 사용하지 않습니다:
+
+| 헤더 | 필수 | 설명 |
+|--------|------|------|
+| `X-Internal-Token` | 예 | 서비스 간 공유 토큰. `InternalApiAuthFilter`가 검증 |
+| `X-Tenant-Id` | 예 | 현재 비즈니스 테넌트. body/query의 `tenantId`와 일치해야 함 |
+| `Content-Type: application/json` | JSON 요청 시 필수 | JSON 요청 본문 |
+
+`InternalApiAuthFilter`는 컨테이너 수준의 전면 필터로서 `/api/internal/**`을 일괄 보호합니다. 서비스 보안 체인이 Gateway 사용자 신원을 다시 요구해서는 안 됩니다. 토큰이 누락되거나 불일치하면 HTTP 401을 반환하고, 서버 측에 토큰이 설정되지 않았으면 fail-closed로 HTTP 503을 반환하며, 헤더와 body/query의 테넌트가 불일치하면 비즈니스 코드 403을 반환합니다. 내부 경로는 `X-Gateway-Forwarded`나 사용자 권한 헤더에 의존해서는 안 됩니다.
+
+### 8.4 보안 응답 헤더(Gateway 주입)
 
 `SecurityHeadersFilter`(WebFlux WebFilter)는 게이트웨이를 거치는 모든 응답에 다음을 추가합니다:
 
 | 응답 헤더 | 값 | 용도 |
 |--------|-----|------|
 | `X-Content-Type-Options` | `nosniff` | 브라우저 MIME 타입 스니핑 방지 |
-| `X-Frame-Options` | `SAMEORIGIN` | 클릭재킹 방지 |
+| `X-Frame-Options` | `DENY` | 페이지가 iframe에 중첩되는 것을 금지하여 클릭재킹 방지 |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Referer 헤더 유출 제어 |
+| `X-Trace-Id` | 32자 소문자 16진수 문자열 | Gateway·Servlet·Feign과 오류 피드백을 연관 |
+
+Gateway는 항상 새로운 `X-Trace-Id`를 생성하며 공용망 클라이언트가 제공한 같은 이름의 헤더를 신뢰하지 않습니다. 다운스트림 Servlet 서비스는 유효한 값을 MDC와 응답 헤더에 기록하고, 공통 Feign 인터셉터는 내부 호출로 계속 전파합니다. 프론트엔드 오류 패널은 응답의 traceId를 표시할 수 있으며, 로그 조사 시에는 같은 값으로 전체 호출 체인을 검색하는 것이 우선입니다.
 
 ---
 
@@ -413,7 +430,7 @@ Docker 배포 시 소셜 로그인의 `redirect_uri`는 **호스트 머신에서
 
 ## 11. XSS 설정 관리 엔드포인트
 
-Base path: `/api/auth/xss-config`(Gateway StripPrefix=2 → 다운스트림 `/xss-config/...`)
+Base path: `/api/auth/xss-config`(Gateway는 접두사를 제거하지 않으며 다운스트림이 전체 경로를 유지)
 
 ### 현재 XSS 설정 조회
 
@@ -558,6 +575,24 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 ### 테넌트 격리
 
 모든 목록 조회 및 생성 작업은 `X-Tenant-Id` 요청 헤더를 요구합니다(프론트엔드에서 JWT Token에서 추출, Gateway가 주입). 데이터는 SQL 쿼리 수준에서 `tenant_id` 기준으로 격리됩니다. 사전 타입 고유성 제약 조건 범위는 `(tenant_id, type_code)`입니다.
+
+### MQ 전송 런타임 상태
+
+`GET /api/base/mq-message/runtime`은 `base:mqmessage:list` 권한을 요구하며, 현재 Outbox와 백그라운드 전송 능력을 반환합니다:
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "outboxWriteEnabled": true,
+    "deliveryEnabled": false,
+    "mode": "OUTBOX_ONLY"
+  }
+}
+```
+
+`OUTBOX_ONLY`는 비즈니스 트랜잭션은 여전히 로컬 Outbox에 기록하지만 MQ relay/XXL-JOB이 실행되지 않음을 의미합니다. 프론트엔드는 성능 저하 안내를 표시하고 재전송 작업을 비활성화해야 합니다. `FULL`은 쓰기와 비동기 전송이 모두 활성화되었음을 의미합니다.
 
 ---
 

@@ -168,7 +168,7 @@ omni-frontend/
 - **timeout**: 15000ms
 - **withCredentials**: `true` (carries cookies for OAuth2 session management)
 - **Request interceptor**: Reads token from `useUserStore()` and injects `Authorization: Bearer <token>`
-- **Response interceptor**: Checks `code === 200`; business errors trigger `ElMessage.error`; 401 triggers an expiration dialog and redirects to the login page (with a `redirect` parameter)
+- **Response interceptor**: Checks `code === 200`; business errors trigger `ElMessage.error`; 401 triggers an expiration dialog and redirects to the login page (with a redirect parameter)
 
 ### API Function Pattern
 

@@ -138,7 +138,7 @@ Default `max_retry = 3`. After 3 failures the message enters DEAD_LETTER status.
 
 ### 2.5 Dead Letter Handling
 
-Dead letters require manual admin intervention via the frontend management UI (`Operations Monitor → Message Records`):
+Dead letters require manual admin intervention via the frontend management UI (`Monitoring → MQ Messages`):
 
 - **Resend** (`POST /api/base/mq-message/{msgId}/resend`): Resets status to PENDING, clears retry count and backoff timer. The relay job will pick it up on the next poll.
 - **Skip** (`POST /api/base/mq-message/{msgId}/skip`): Transitions DEAD_LETTER → SKIPPED, acknowledging the message will not be delivered.
@@ -250,14 +250,17 @@ public class OrderServiceImpl implements OrderService {
 Start the service and check XXL-JOB admin console (`http://localhost:18080`):
 - Executor: your service's AppName should appear in the executor list
 - Task: `mqRelayHandler` should be registered with cron `0/10 * * * * ?`
+- `MqRelayJobRegistrar` registers and starts the task asynchronously once the application is ready; if the scheduler is temporarily unavailable it retries every 10 seconds, up to 12 times
 - Start the task if not already running
 
 ### Step 5: Check Frontend Admin UI
 
-Navigate to `Operations Monitor → Message Records` in the frontend:
+Navigate to `Monitoring → MQ Messages` in the frontend:
 - New messages should appear with `status = PENDING` (0) then transition to `SENT` (1) after relay
 - Filter by `tenantId`, `status`, `topic`, `serviceName`, or time range
 - Resend failed messages or skip dead letters
+
+The Base admin API aggregates the local Outboxes of onboarded services through Feign calls carrying `X-Internal-Token`. Currently it aggregates `omni-base` and `omni-crm`; when adding a new service its internal `/api/internal/mq-message/**` client must be included in the aggregation, otherwise messages are still delivered reliably but never appear on the unified operations page.
 
 ## 6. Extension Guide
 
@@ -393,7 +396,7 @@ spring:
 
 | Issue | Possible Cause | Troubleshooting Steps |
 |------|---------|----------|
-| **Message stuck in PENDING** | Relay task not started | Check XXL-JOB console to verify `mqRelayHandler` is registered and started; check cron configuration |
+| **Message stuck in PENDING** | Relay task auto-registration failed or the task was not started | Check `MqRelayJobRegistrar` retry logs, XXL-JOB credentials and the `mqRelayHandler` status |
 | **Message send failed, enters FAILED** | RocketMQ Broker not started | Check RocketMQ container status; verify `spring.cloud.stream.rocketmq.binder.name-server` configuration is correct |
 | **Message enters DEAD_LETTER** | Exceeded max retry count (3 times) | Check message details and error info in frontend admin UI; fix the issue and manually resend |
 | **Consumer did not receive message** | Topic not created or consumer not subscribed | Check Topic and Consumer Group in RocketMQ console; confirm consumer service is started |

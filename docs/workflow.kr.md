@@ -43,6 +43,7 @@ Omni-Stack은 **Flowable 8.x** 기반의 시각적 BPMN 워크플로우 엔진�
 - `omni-common-mybatis` — MyBatis-Plus + MySQL 드라이버 + 테넌트 인터셉터
 - `omni-common-redis` — XSS 구성 및 세션 데이터용 Redis 캐시
 - `omni-common-workflow` — Flowable 자동 구성, 승인 SPI, 테넌트 필터, 알림 SPI
+- `omni-common-mqlog` — Transactional Outbox, 내부 API 공유 토큰 필터, 신뢰성 메시지 릴레이
 - `omni-workflow` — 비즈니스 레이어: 컨트롤러, 서비스, 델리게이트, BPMN 엔진 도구
 
 **주요 설계 결정**:
@@ -51,6 +52,8 @@ Omni-Stack은 **Flowable 8.x** 기반의 시각적 BPMN 워크플로우 엔진�
 - **이중 버전 관리**: 비즈니스 버전은 `wf_process_model_version`에서 추적(DRAFT → PUBLISHED → ARCHIVED), 엔진 버전은 Flowable 배포에서 관리
 - **비주얼 디자이너**: 프론트엔드 BPMN 모델러가 디자이너 JSON을 생성하고, `BpmnXmlBuilder`가 BPMN 2.0 XML로 변환
 - **동적 후보자 해결**: `omni:assignment` JSON 확장 요소가 작업 시작 시 `ScopedRoleAssignmentListener`에 의해 파싱되며, 하드코딩된 담당자는 없습니다
+- **크로스 서비스 시작 이중 멱등**: 테넌트 내 `requestId`와 `(businessType, businessKey)`로 각각 프로세스 시작을 제약합니다
+- **신뢰성 있는 완료 알림**: 완료 메타데이터와 Outbox 레코드를 동일 로컬 트랜잭션에 커밋하고 릴레이 작업이 비동기로 전달합니다
 
 ### 데이터 모델
 
@@ -68,11 +71,13 @@ erDiagram
 |-------|---------|
 | `wf_process_model` | 프로세스 모델 레지스트리, `model_key`는 테넌트별 고유 |
 | `wf_process_model_version` | 버전 이력: BPMN XML, 디자이너 JSON, 배포 정보 |
-| `wf_process_instance_ext` | 인스턴스 확장: Flowable 인스턴스와 모델 버전 연결 |
+| `wf_process_instance_ext` | 인스턴스 확장: 모델 버전에 연결하고 `requestId`·비즈니스 키·완료 이벤트 래치를 기록합니다 |
+| `wf_process_start_request` | 크로스 서비스 시작 예약 레코드. 요청 ID와 비즈니스 키는 테넌트 내에서 각각 고유 |
 | `wf_todo_task` | 담당자 범위 고속 쿼리용 대기 작업 캐시 |
 | `wf_cc_record` | 읽음 상태가 포함된 CC 알림 레코드 |
 | `wf_form_schema` | JSON Schema 폼 정의 |
 | `wf_delegation_rule` | 승인 위임 규칙(사용자 간, 선택적 프로세스 범위) |
+| `sys_mq_message` | Transactional Outbox 메시지 기록. 신뢰성 메시지 릴레이가 비동기로 전달 |
 
 ---
 

@@ -6,7 +6,7 @@ SRM은 초대, Portal 입점, 심사, 수명주기, 평가, 위험, 공급업체
 
 관리자가 초대를 만들고 공급업체가 `/portal-register`에서 인증 계정을 등록합니다. Portal에서 초대 토큰, 고유 클라이언트 요청 ID, 기업 정보를 제출하면 SRM이 공급업체를 만들고 Saga가 Auth에 `SUPPLIER` 역할을 요청합니다.
 
-`inviteToken`과 `requestId`는 필수이며 재시도는 같은 ID를 사용합니다. Portal 사용자 ID를 내부 owner 열에 쓰지 않습니다.
+입점 요청은 `inviteToken`과 클라이언트 `requestId`를 모두 포함해야 합니다. 재시도는 같은 요청 ID를 사용하여 멱등성을 유지합니다. Portal 사용자 ID를 내부 `owner_user_id` 또는 `owner_unit_id`에 기록해서는 안 됩니다.
 
 ## 2. 심사와 수명주기
 

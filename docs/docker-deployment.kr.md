@@ -235,7 +235,8 @@ mysql:
 - MySQL entrypoint에는 통합 SQL을 마운트하지 않으며 신규 및 업그레이드 환경에서 동일한 Liquibase 체인을 사용
 - one-shot `omni-db-migrator`가 DB 생성, 구조 마이그레이션, 공식 시드 및 검증을 수행하고 성공 종료 후에만 Nacos, XXL-JOB 및 애플리케이션 시작
 - 애플리케이션은 마이그레이션 관리자 대신 최소 권한 `MYSQL_APP_USERNAME` / `MYSQL_APP_PASSWORD` 계정을 사용
-- MySQL은 이름 있는 볼륨 `omni-mysql-data`를 사용하며 일반적인 컨테이너 재생성 시 데이터를 유지
+- MySQL은 명시적인 이름 있는 볼륨 `omni-stack-mysql-data`를 사용합니다. 일반적인 `docker compose down`과 컨테이너 재생성으로는 데이터가 삭제되지 않으며, `docker compose down -v`는 볼륨을 복구 불가하게 삭제합니다.
+- 기존 비어있지 않은 데이터베이스의 최초 인수는 반드시 먼저 백업 후 `omni-db-migrator adopt-current`의 구조 지문과 확인 게이트를 통해서 수행합니다. `migrate`를 직접 실행하여 인수를 우회해서는 안 됩니다.
 
 ### 5.2 Redis 7.4
 
@@ -363,12 +364,12 @@ Spring Boot는 환경 변수를 통한 `application.yml` 설정 오버라이드�
 
 | 설정 | application.yml 값 (로컬 개발) | Docker 환경 변수 값 |
 |------|-------------------------------|-------------------|
-| DB URL | `localhost:3306` | `mysql:3306` |
+| 데이터베이스 주소 | `localhost:13306`(이 Compose MySQL에 접속) | `mysql:3306` |
 | Redis 호스트 | `localhost` | `redis` |
 | Nacos 주소 | `localhost:8848` | `nacos:8848` |
 | RocketMQ | `localhost:9876` | `rocketmq-namesrv:9876` |
 | JWT Issuer | `http://localhost:8100` | `http://omni-auth:8080` |
-| OAuth2 콜백 | `http://localhost:8102/api/auth/...` | `http://localhost:8102/api/auth/...` |
+| OAuth2 콜백 | `http://localhost:8100/api/auth/...` | `http://localhost:8100/api/auth/...` |
 
 > **주의**: OAuth2 콜백 URI는 Gateway 주소 `localhost:8102`를 사용합니다. Auth 등 내부 서비스 포트는 진단용으로 루프백에 바인딩하며 외부에 공개하지 않습니다.
 
@@ -442,18 +443,20 @@ MySQL healthy
 
 ### 8.2 데이터 영속화 전략
 
-현재 설정은 MySQL을 이름 있는 볼륨 `omni-mysql-data`에 영속화합니다. `docker compose down`은 데이터를 유지하고, `docker compose down -v`는 복구할 수 없게 삭제합니다.
+현재 Compose는 명시적인 MySQL 이름 있는 볼륨을 사용합니다:
 
 ```yaml
+# compose.infra.yaml에 Volume 추가
 mysql:
   volumes:
     - omni-mysql-data:/var/lib/mysql
 
 volumes:
   omni-mysql-data:
+    name: omni-stack-mysql-data
 ```
 
----
+`docker compose down`은 볼륨을 유지하고, `docker compose down -v`는 볼륨과 모든 비즈니스 데이터를 삭제합니다. Redis는 현재 인증번호, 세션/캐시 등 재생성 가능한 런타임 데이터만 저장하며 영속화 볼륨을 구성하지 않습니다. 프로덕션에서는 외부 데이터베이스 또는 백업이 관리되는 영속 볼륨을 사용하고 복구 절차를 정기적으로 훈련해야 합니다. 저장소 Compose의 단일 노드 MySQL·Nacos·RocketMQ·XXL-JOB을 그대로 고가용 프로덕션 토폴로지로 간주해서는 안 됩니다.
 
 ## 9. Docker 레지스트리 미러 설정
 

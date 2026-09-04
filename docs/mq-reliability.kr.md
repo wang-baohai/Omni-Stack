@@ -250,6 +250,7 @@ public class OrderServiceImpl implements OrderService {
 서비스를 시작하고 XXL-JOB 관리 콘솔(`http://localhost:18080`)을 확인하십시오:
 - 실행자: 서비스의 AppName이 실행자 목록에 표시되어야 합니다
 - 작업: `mqRelayHandler`가 cron `0/10 * * * * ?`로 등록되어야 합니다
+- `MqRelayJobRegistrar`는 애플리케이션 준비 후 비동기로 작업을 등록·시작합니다. 스케줄러를 일시적으로 사용할 수 없으면 10초마다 최대 12회 재시도합니다
 - 아직 실행 중이 아니면 작업을 시작하십시오
 
 ### Step 5: Check Frontend Admin UI
@@ -258,6 +259,8 @@ public class OrderServiceImpl implements OrderService {
 - 새 메시지가 `status = PENDING` (0)으로 표시된 후 릴레이 이후 `SENT` (1)로 전환되어야 합니다
 - `tenantId`, `status`, `topic`, `serviceName` 또는 시간 범위로 필터링
 - 실패한 메시지 재전송 또는 데드 레터 건너뛰기
+
+Base 관리 인터페이스는 `X-Internal-Token`을 포함한 Feign 호출로 온보딩된 서비스의 로컬 Outbox를 집계합니다. 현재는 `omni-base`와 `omni-crm`을 집계하며, 새 서비스를 추가할 때는 해당 서비스의 내부 `/api/internal/mq-message/**` 클라이언트를 집계에 포함해야 합니다. 포함하지 않으면 메시지는 안정적으로 전달되지만 통합 운영 페이지에는 표시되지 않습니다.
 
 ## 6. Extension Guide
 
@@ -393,7 +396,7 @@ spring:
 
 | 문제 | 가능한 원인 | 확인 방법 |
 |------|---------|----------|
-| **메시지가 PENDING 상태에 머무름** | 릴레이 작업이 시작되지 않음 | XXL-JOB 콘솔에서 `mqRelayHandler`가 등록되고 시작되었는지 확인; cron 구성 확인 |
+| **메시지가 PENDING 상태에 머무름** | 릴레이 작업 자동 등록 실패 또는 작업 미기동 | `MqRelayJobRegistrar` 재시도 로그, XXL-JOB 자격 증명, `mqRelayHandler` 상태 확인 |
 | **메시지 전송 실패하여 FAILED 진입** | RocketMQ Broker가 시작되지 않음 | RocketMQ 컨테이너 상태 확인; `spring.cloud.stream.rocketmq.binder.name-server` 구성이 올바른지 확인 |
 | **메시지가 DEAD_LETTER에 진입** | 최대 재시도 횟수 (3회) 초과 | 프론트엔드 관리 페이지에서 메시지 상세 및 오류 정보 확인; 문제 해결 후 수동 재전송 |
 | **컨슈머가 메시지를 수신하지 못함** | Topic이 생성되지 않았거나 컨슈머가 구독하지 않음 | RocketMQ 콘솔에서 Topic과 Consumer Group 확인; 컨슈머 서비스가 시작되었는지 확인 |

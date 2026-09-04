@@ -95,6 +95,8 @@ interface ApiResponse<T = unknown> {
 | 401 | 401 | Unauthenticated | Gateway `AuthFilter` returns 401 JSON | Frontend redirects to login page |
 | 403 | 403 | Insufficient permissions | `AccessDeniedException` / `AuthorizationDeniedException` caught by `GlobalExceptionHandler` | Frontend displays "Insufficient permissions" notification |
 | 200 | 404 | Resource not found | `throw new BusinessException(404, "xxx not found")` | Frontend displays error message |
+| 200 | 409 | Status/concurrency conflict | Optimistic-lock version mismatch or state machine rejects the transition | Frontend refreshes data and prompts the user to retry |
+| 200 | 503 | Downstream dependency unavailable | CRM calls the Auth data-scope API and fails closed | Frontend shows the service is temporarily unavailable; never degrade into unauthorized data |
 | 200 | 500 | Business exception | `BusinessException` caught by `GlobalExceptionHandler` | Frontend displays error message |
 | 500 | 500 | Unknown system error | Catch-all `Exception` handler | Frontend displays "Internal server error" |
 
@@ -110,6 +112,8 @@ interface ApiResponse<T = unknown> {
 | 400 | Uniqueness conflict | "Username already exists" / "Job type code already exists" |
 | 404 | Resource not found | "Organization unit not found" / "Dictionary data not found" |
 | 403 | Insufficient permissions | "Insufficient permissions, access denied" |
+| 409 | Optimistic-lock or state conflict | "Data has been modified by another user, please refresh and retry" |
+| 503 | Required dependency unavailable | "Authentication/authorization service is temporarily unavailable" |
 
 ### 2.3 Gateway-Level Error Codes
 
@@ -216,9 +220,7 @@ export function listUsers(page: number, size: number) {
 | Delete | DELETE | `/{resource}/{id}` | `DELETE /user/1` |
 | Batch operation | POST | `/{resource}/batch` | `POST /user/batch` |
 
-**Gateway path prefix**: All frontend requests use `/api/<service>/<resource>` (e.g., `/api/auth/user/list`). The Gateway strips `/api/<service>` (StripPrefix=2), and the downstream service receives `/<resource>`.
-
-**Exception**: The Base service's `/api/base/**` route does **not** have a StripPrefix filter. Base service controllers use the full path (e.g., `@RequestMapping("/api/base/dict/type")`).
+**Gateway path prefix**: All frontend requests use `/api/<service>/<resource>` (e.g., `/api/auth/user/list`). Currently the Gateway does not use `StripPrefix` for the business routes of Auth, Base, Workflow, CRM, SRM, Procurement and Asset; downstream Controllers declare and receive the full `/api/**` path.
 
 ---
 
@@ -232,7 +234,7 @@ Gateway `application.yml` route configuration (`spring.cloud.gateway.server.webf
 |---------|---------|---------|-------------|------|
 | `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` | None | OAuth2 authorization server endpoints |
 | `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` | None | OpenID Connect discovery endpoint |
-| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | 2 | Auth service REST API |
+| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | **None** | Auth service REST API (uses full path) |
 | `omni-base` | `/api/base/**` | `lb://omni-base` | **None** | Base service (uses full path) |
 | `omni-base-job` | `/api/job/**` | `lb://omni-base` | **None** | Scheduled job management |
 | `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` | **None** | Workflow engine |
@@ -243,7 +245,7 @@ In Docker deployment, the route configuration is the same, but the target servic
 
 | Frontend Request | Gateway Route | Downstream Received Path | Description |
 |---------|-------------|-------------|------|
-| `GET /api/auth/user/list` | `lb://omni-auth` + StripPrefix=2 | `GET /user/list` | Auth service strips prefix |
+| `GET /api/auth/user/list` | `lb://omni-auth` no StripPrefix | `GET /api/auth/user/list` | Auth service retains full path |
 | `GET /api/base/dict/type/list` | `lb://omni-base` no StripPrefix | `GET /api/base/dict/type/list` | Base service retains full path |
 | `POST /api/workflow/model` | `lb://omni-workflow` no StripPrefix | `POST /api/workflow/model` | Workflow service retains full path |
 | `GET /api/job/type/list` | `lb://omni-base` no StripPrefix | `GET /api/job/type/list` | Job route to Base service |
@@ -325,15 +327,30 @@ After successful JWT verification, the Gateway's `AuthFilter` injects the follow
 | `X-Tenant-Id` | Automatically injected by Axios interceptor | Tenant ID obtained from `useUserStore()` |
 | `Content-Type: application/json` | Axios default | JSON request body |
 
-### 8.3 Security Response Headers (Injected by Gateway)
+### 8.3 Internal Service Request Headers
+
+All service-to-service interfaces live under `/api/internal/**` and use shared-token authentication, not end-user JWT:
+
+| Header | Required | Description |
+|--------|------|------|
+| `X-Internal-Token` | Yes | Shared service-to-service token; validated by `InternalApiAuthFilter` |
+| `X-Tenant-Id` | Yes | Current business tenant; must match the `tenantId` in body/query |
+| `Content-Type: application/json` | Required for JSON requests | JSON request body |
+
+`InternalApiAuthFilter` acts as a container-level pre-filter that uniformly protects `/api/internal/**`; the service security chain must not require the Gateway user identity again. A missing or mismatched token returns HTTP 401; if the server has no token configured it fails closed with HTTP 503; a mismatch between the header tenant and the body/query tenant returns business code 403. Internal paths must not rely on `X-Gateway-Forwarded` or user permission headers.
+
+### 8.4 Security Response Headers (Injected by Gateway)
 
 `SecurityHeadersFilter` (WebFlux WebFilter) adds the following to all responses passing through the gateway:
 
 | Response Header | Value | Purpose |
 |--------|-----|------|
 | `X-Content-Type-Options` | `nosniff` | Prevent browser MIME-type sniffing |
-| `X-Frame-Options` | `SAMEORIGIN` | Prevent clickjacking |
+| `X-Frame-Options` | `DENY` | Forbid the page from being embedded in an iframe, preventing clickjacking |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Control Referer header leakage |
+| `X-Trace-Id` | 32-char lowercase hexadecimal string | Correlates Gateway, Servlet, Feign and error feedback |
+
+The Gateway always generates a new `X-Trace-Id` and does not trust a same-named header supplied by the public network; downstream Servlet services write the valid value into the MDC and the response header, and the common Feign interceptor keeps propagating it to internal calls. The frontend error panel can display the traceId from the response, and log troubleshooting should prefer searching the full call chain with the same value.
 
 ---
 
@@ -413,7 +430,7 @@ The `/callback` page (`src/views/callback/index.vue`) is responsible for:
 
 ## 11. XSS Config Management Endpoints
 
-Base path: `/api/auth/xss-config` (Gateway StripPrefix=2 → downstream `/xss-config/...`)
+Base path: `/api/auth/xss-config` (the Gateway does not strip the prefix; the downstream keeps the full path)
 
 ### Get Current XSS Configuration
 
@@ -558,6 +575,24 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 ### Tenant Isolation
 
 All list queries and create operations require the `X-Tenant-Id` header (extracted from the JWT token by the frontend, injected by the Gateway). Data is isolated by `tenant_id` at the SQL query layer. The dictionary type uniqueness constraint scope is `(tenant_id, type_code)`.
+
+### MQ Delivery Runtime Status
+
+`GET /api/base/mq-message/runtime` requires the `base:mqmessage:list` permission and returns the current Outbox and background delivery capability:
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "outboxWriteEnabled": true,
+    "deliveryEnabled": false,
+    "mode": "OUTBOX_ONLY"
+  }
+}
+```
+
+`OUTBOX_ONLY` means business transactions still write to the local Outbox, but the MQ relay/XXL-JOB is not running; the frontend must show a degraded-mode notice and disable resend operations. `FULL` means both writing and asynchronous delivery are enabled.
 
 ---
 

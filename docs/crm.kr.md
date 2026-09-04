@@ -20,11 +20,11 @@ CRM은 독립 마이크로서비스 `omni-crm`으로, 세일즈 전단 폐쇄 �
 | Gateway 라우트 | `/api/crm/**` → `lb://omni-crm`(StripPrefix 사용하지 않음) |
 | Redis | DB 0, Auth의 XSS 설정 공유, 키 접두사 `crm:` |
 
-**의존 모듈**: `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`.
+**의존 모듈**: `omni-common-service`, `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`.
 
 **의존 금지**: `omni-common-workflow`를 의존하면 Flowable 엔진이 CRM에 포함됩니다.
 
-**크로스 서비스 호출**: OpenFeign + `X-Internal-Token`을 통해 Auth 내부 API를 호출합니다. CRM은 userId/unitId만 저장하며, `omni_auth` 데이터베이스를 크로스 조회하지 않습니다.
+**크로스 서비스 호출**: OpenFeign + `InternalFeignHeadersFactory`가 생성한 `X-Internal-Token`을 통해 Auth 내부 API를 호출합니다. CRM은 userId/unitId만 저장하며, `omni_auth` 데이터베이스를 크로스 조회하지 않습니다.
 
 ## 2. 도메인 모델
 
@@ -79,13 +79,13 @@ erDiagram
 
 ```
 Gateway JWT 검증 → CRM Tenant 검증 → Spring Security @PreAuthorize
-→ @CrmDataScope AOP → MyBatis DataPermission 인터셉터 → CrmRecordAccessGuard 행 수준 쓰기 권한
+→ @ServiceDataScope AOP → MyBatis DataPermission 인터셉터 → CrmRecordAccessGuard 행 수준 쓰기 권한
 ```
 
 1. Gateway가 RS256 JWT를 검증하고, `X-User-*`, `X-Tenant-Id`, `X-Gateway-Forwarded` 헤더 주입을 커버합니다
-2. `GatewayPreAuthFilter`가 `Authentication`을 구성하고, userId/tenantId를 검증합니다
+2. `omni-common-service`의 `GatewayPreAuthenticationFilter`가 `Authentication`을 구성하고, `ServiceIdentityFilter`가 userId/tenantId를 검증하여 바인딩합니다
 3. Controller `@PreAuthorize`가 기능 권한을 검증합니다
-4. `@CrmDataScope(permissionCode)` AOP가 Auth 내부 API를 호출하여 dataScope를 해석합니다
+4. `@ServiceDataScope(permissionCode)` 공통 AOP가 Auth 내부 API를 호출하여 dataScope를 해석합니다
 5. MyBatis-Plus가 tenant + owner 조건을 추가합니다
 6. `CrmRecordAccessGuard`가 쓰기 작업의 행 수준 권한을 검증합니다
 
@@ -93,7 +93,7 @@ Gateway JWT 검증 → CRM Tenant 검증 → Spring Security @PreAuthorize
 
 ### 3.2 MyBatis 인터셉터 순서
 
-CRM은 `mybatisPlusInterceptor`를 커스터마이징하며, 순서는 고정되어 변경할 수 없습니다:
+CRM은 `CrmTenantTablePolicy`와 `CrmDataPermissionHandler`를 통해 `omni-common-service`에 도메인 정책을 제공하며, 공통 Starter가 `mybatisPlusInterceptor`를 조립합니다. 순서는 고정되어 변경할 수 없습니다:
 
 ```
 TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInterceptor
@@ -135,7 +135,7 @@ DataPermissionInterceptor는 쓰기를 보호하지 않습니다. 모든 업데�
 | Owner 후보 | `crm:owner:list` |
 | PII 조회 | `crm:pii:view` |
 
-표에서 `/`는 동일 리소스 내 여러 전체 권한 코드의 축약형이며, 데이터베이스에 저장할 때 각 코드를 개별적으로 저장합니다. `@PreAuthorize`와 `@CrmDataScope`은 동일한 전체 권한 코드를 사용합니다.
+표에서 `/`는 동일 리소스 내 여러 전체 권한 코드의 축약형이며, 데이터베이스에 저장할 때 각 코드를 개별적으로 저장합니다. `@PreAuthorize`와 `@ServiceDataScope`은 동일한 전체 권한 코드를 사용합니다.
 
 ### 3.6 PII 마스킹
 
@@ -244,7 +244,7 @@ POST /lead/{id}/convert → SELECT Lead FOR UPDATE
 
 ### 5.3 Customer 360 블록별 권한
 
-`/customer/{id}/overview`는 연락처, 기회, 활동, 리드 요약을 반환합니다. 그러나 이것이 "고객이 보이면 모든 하위 데이터도 볼 수 있다"는 의미가 아닙니다. 각 블록은 해당 list permission으로 데이터 범위를 독립적으로 해석하며, 특정 블록 권한이 없으면 해당 블록을 조회하지 않습니다. 구현은 `CrmPermissionScopeExecutor`를 사용하여 블록별로 scope를 설정하고 정리합니다.
+`/customer/{id}/overview`는 연락처, 기회, 활동, 리드 요약을 반환합니다. 그러나 이것이 "고객이 보이면 모든 하위 데이터도 볼 수 있다"는 의미가 아닙니다. 각 블록은 해당 list permission으로 데이터 범위를 독립적으로 해석하며, 특정 블록 권한이 없으면 해당 블록을 조회하지 않습니다. 구현은 `CrmPermissionScopeExecutor`를 사용하여 블록별로 `ServiceDataScopeContext`를 설정하고 정리합니다.
 
 ### 5.4 Overview 집계 쿼리
 
@@ -278,8 +278,8 @@ CRM 코드를 수정하기 전에 반드시 준수해야 하는 규칙:
 1. **테넌트 격리**: 모든 `crm_*` 테이블에는 `tenant_id`가 필수이며, TenantLine은 항상 추가되고, 일반 API는 절대 크로스 테넌트를 허용하지 않습니다
 2. **낙관적 잠금**: 모든 쓰기 작업은 `tenant_id + id + version` 조건으로 업데이트해야 합니다
 3. **실패 시 차단**: tenant 누락 → 401, scope 누락 → `id=-1`, Auth 사용 불가 → 503, 절대 격하하지 않습니다
-4. **ThreadLocal 정리**: `CrmDataScopeContext`는 반드시 `finally` 블록에서 정리하여 메모리 누수를 방지해야 합니다
-5. **권한 이중 선언**: 쓰기 인터페이스는 `@PreAuthorize`(기능 권한)와 `@CrmDataScope`(데이터 범위)을 동시에 선언해야 하며, 동일한 전체 권한 코드를 사용합니다
+4. **ThreadLocal 정리**: `ServiceIdentityContext`와 `ServiceDataScopeContext`는 반드시 `finally` 블록에서 정리하여 메모리 누수를 방지해야 합니다
+5. **권한 이중 선언**: 쓰기 인터페이스는 `@PreAuthorize`(기능 권한)와 `@ServiceDataScope`(데이터 범위)을 동시에 선언해야 하며, 동일한 전체 권한 코드를 사용합니다
 6. **PII 백엔드 마스킹**: `crm:pii:view` 권한이 없으면 백엔드 VO에서 직접 마스킹된 값을 반환하며, 프론트엔드에 의존하지 않습니다
 7. **Outbox tenantId 명시**: `ReliableMessageRelay.send()`는 `Long tenantId`를 반드시 명시적으로 전달해야 하며, ThreadLocal 암시적 사용을 금지합니다
 8. **인터셉터 순서**: TenantLine → DataPermission → Pagination, 변경 불가
@@ -328,8 +328,8 @@ omni-frontend/src/
 1. `omni_crm` 데이터베이스에 테이블을 추가하며, `tenant_id`, `owner_user_id`, `owner_unit_id`, `version`, `deleted` 및 감사 필드를 반드시 포함해야 합니다
 2. Entity(BaseEntity 상속), Mapper, Service 인터페이스 + Impl, Controller를 생성합니다
 3. `CrmDataPermissionHandlerImpl`에 새 테이블의 owner 열 매핑을 등록합니다
-4. `init-all.sql`에 DDL과 권한 시드 데이터를 추가합니다
-5. Controller 쓰기 인터페이스에 `@PreAuthorize` + `@CrmDataScope`를 선언하고, 새 `crm:<resource>:<action>` 권한 코드를 사용합니다
+4. `database/changelog/crm/`에 Liquibase changelog를 추가하고, `scripts/sql/seed/`(`crm.sql`, `auth.sql`)에 시드 데이터를 보강하며, `database/seed/manifest.yaml`으로 검증합니다
+5. Controller 쓰기 인터페이스에 `@PreAuthorize` + `@ServiceDataScope`를 선언하고, 새 `crm:<resource>:<action>` 권한 코드를 사용합니다
 
 ### 새 Opportunity 단계 추가
 
@@ -342,7 +342,7 @@ MVP 파이프라인은 설정 불가합니다. 향후 개방 시 다음이 필�
 
 1. `scripts/sql/seed/auth.sql`의 `sys_permission`에 새 권한을 삽입하며, type은 `API`로 설정합니다
 2. 역할에 따라 `sys_role_permission`에 할당합니다
-3. Controller 메서드에 `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@CrmDataScope("crm:<resource>:<action>")`를 선언합니다
+3. Controller 메서드에 `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@ServiceDataScope(permissionCode = "crm:<resource>:<action>")`를 선언합니다
 4. 프론트엔드 해당 버튼에 `v-permission="'crm:<resource>:<action'"`를 추가합니다
 
 ### Outbox 이벤트 연동

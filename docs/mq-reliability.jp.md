@@ -250,6 +250,7 @@ public class OrderServiceImpl implements OrderService {
 サービスを起動し、XXL-JOB 管理コンソール（`http://localhost:18080`）を確認：
 - エグゼキュータ：サービスの AppName がエグゼキュータリストに表示されるはずです
 - タスク：`mqRelayHandler` が cron `0/10 * * * * ?` で登録されているはずです
+- `MqRelayJobRegistrar` はアプリ起動後に非同期でタスクを登録・開始します。スケジューラが一時的に利用不可の場合は 10 秒ごとに最大 12 回リトライします
 - まだ実行中でない場合はタスクを開始してください
 
 ### Step 5: Check Frontend Admin UI
@@ -258,6 +259,8 @@ public class OrderServiceImpl implements OrderService {
 - 新しいメッセージが `status = PENDING` (0) で表示され、リレー後に `SENT` (1) に遷移するはずです
 - `tenantId`、`status`、`topic`、`serviceName`、または時間範囲でフィルタリング
 - 失敗したメッセージの再送信またはデッドレターのスキップ
+
+Base 管理インターフェースは `X-Internal-Token` を付与した Feign 呼び出しで、接続済みサービスのローカル Outbox を集約します。現在は `omni-base` と `omni-crm` を集約しており、新しいサービスを追加する際はその内部 `/api/internal/mq-message/**` クライアントを集約に組み込む必要があります。組み込まない場合、メッセージは確実に配信されますが統合運用ページには表示されません。
 
 ## 6. Extension Guide
 
@@ -393,7 +396,7 @@ spring:
 
 | 問題 | 考えられる原因 | 確認方法 |
 |------|---------|----------|
-| **メッセージが PENDING のまま** | リレータスクが起動していない | XXL-JOB コンソールで `mqRelayHandler` が登録され起動しているか確認；cron 設定を確認 |
+| **メッセージが PENDING のまま** | リレータスクの自動登録に失敗、またはタスクが未起動 | `MqRelayJobRegistrar` のリトライログ、XXL-JOB 認証情報、`mqRelayHandler` の状態を確認 |
 | **メッセージ送信失敗で FAILED に入る** | RocketMQ Broker が起動していない | RocketMQ コンテナの状態を確認；`spring.cloud.stream.rocketmq.binder.name-server` 設定が正しいか確認 |
 | **メッセージが DEAD_LETTER に入る** | 最大リトライ回数（3回）を超過 | フロントエンド管理画面でメッセージ詳細とエラー情報を確認；問題を修正後、手動で再送信 |
 | **コンシューマがメッセージを受信していない** | Topic が未作成またはコンシューマが未購読 | RocketMQ コンソールで Topic と Consumer Group を確認；コンシューマサービスが起動しているか確認 |

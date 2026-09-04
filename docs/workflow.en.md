@@ -43,6 +43,7 @@ The workflow system is organized into a standalone microservice and a shared sta
 - `omni-common-mybatis` — MyBatis-Plus + MySQL driver + tenant interceptor
 - `omni-common-redis` — Redis cache for XSS config and session data
 - `omni-common-workflow` — Flowable auto-configuration, approval SPI, tenant filter, notification SPI
+- `omni-common-mqlog` — Transactional Outbox, internal API shared-token filter and reliable message relay
 - `omni-workflow` — business layer: controllers, services, delegates, BPMN engine tools
 
 **Key design decisions**:
@@ -51,6 +52,8 @@ The workflow system is organized into a standalone microservice and a shared sta
 - **Dual-version management**: business versions tracked in `wf_process_model_version` (DRAFT → PUBLISHED → ARCHIVED), engine versions managed by Flowable deployment
 - **Visual designer**: front-end BPMN modeler generates designer JSON, `BpmnXmlBuilder` converts to BPMN 2.0 XML
 - **Dynamic candidate resolution**: `omni:assignment` JSON extension element parsed at task start by `ScopedRoleAssignmentListener`, no hardcoded assignees
+- **Cross-service start double idempotency**: process start is constrained by the in-tenant `requestId` and the `(businessType, businessKey)` pair respectively
+- **Reliable completion notification**: completion metadata and the Outbox record are committed in the same local transaction and delivered asynchronously by the relay task
 
 ### Data Model
 
@@ -68,11 +71,13 @@ erDiagram
 |-------|---------|
 | `wf_process_model` | Process model registry, `model_key` unique per tenant |
 | `wf_process_model_version` | Version history: BPMN XML, designer JSON, deployment info |
-| `wf_process_instance_ext` | Instance extension: links Flowable instance to model version |
+| `wf_process_instance_ext` | Instance extension: links the model version and records `requestId`, the business key and the completion-event latch |
+| `wf_process_start_request` | Cross-service start reservation record; request ID and business key are respectively unique within a tenant |
 | `wf_todo_task` | Pending task cache for fast assignee-scoped queries |
 | `wf_cc_record` | CC notification records with read status |
 | `wf_form_schema` | JSON Schema form definitions |
 | `wf_delegation_rule` | Approval delegation rules (user-to-user, optional process scope) |
+| `sys_mq_message` | Transactional Outbox message record, delivered asynchronously by the reliable message relay |
 
 ---
 

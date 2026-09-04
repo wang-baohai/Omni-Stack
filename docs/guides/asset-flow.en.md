@@ -4,11 +4,11 @@ Asset creates cards from accepted procurement events and manages ledger, assignm
 
 ## 1. Receipt Card Creation
 
-The consumer creates cards only when quality is PASS, `assetManaged=true`, and `assetQuantity` is an exact positive integer. Inbox event ID and source receipt-line/unit sequence provide dual idempotency. Each card retains its source receipt and purchase facts.
+The consumer creates cards only when `qualityStatus=PASS`, `assetManaged=true`, and `assetQuantity` is an exact positive integer. Inbox event ID and source receipt-line/unit sequence provide dual idempotency. Each card retains its source receipt and purchase facts.
 
 ## 2. Ledger
 
-Management views apply owner user/unit data scope; My Assets uses fixed `current_user_id`. Search supports number, name, state, category, department, and location. Every lifecycle action is a dedicated command with state and optimistic-lock validation.
+Management views apply data scope on `owner_user_id/owner_unit_id`; My Assets uses fixed `current_user_id`. Search supports number, name, state, category, department, and location. Every lifecycle action is a dedicated command with state and optimistic-lock validation.
 
 ### Screenshot
 
@@ -31,7 +31,7 @@ A transfer moves responsibility or location and starts Workflow. `active_operati
 
 ## 5. Disposal Approval
 
-Disposal covers scrapping, sale, donation, and other end-of-life actions. Submission checks occupancy; approval records method, date, residual value, and reason. A terminal asset cannot be reassigned or transferred. Workflow runtime remains independent from Asset.
+Disposal covers scrapping, sale, donation, and other end-of-life actions. Submission checks occupancy; approval records method, date, residual value, and reason. A terminal asset cannot be reassigned or transferred. Approval runtime remains in `omni-workflow`; Asset maintains domain state only through the coordinator.
 
 ## 6. Maintenance Boundary
 

@@ -47,7 +47,7 @@ npm --prefix tools/omni-cli run dev -- crud generate path/to/spec.yaml
 
 ## 5. DB と権限
 
-forward-only Liquibase changeSet、安定 seed、`auth.sql` 権限、seed manifest、fresh/upgrade の両経路を更新します。`migrate-*.sql` や一時修復スクリプトを正式成果物にしません。
+forward-only Liquibase changeSet、安定 seed、`scripts/sql/seed/auth.sql` 権限、`database/seed/manifest.yaml`、fresh/upgrade の両経路を更新します。`migrate-*.sql` や一時修復スクリプトを正式成果物にしません。
 
 ## 6. カスタムプリセット
 

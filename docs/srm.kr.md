@@ -163,7 +163,7 @@ DataPermissionInterceptor는 쓰기를 보호하지 않습니다. 모든 업데�
 | Invite | `srm:invite:list/create/revoke`, `srm:portal:invite` |
 | Owner 후보 | `srm:owner:list` |
 | PII 조회 | `srm:pii:view` |
-| Portal | `srm:portal:enroll/profile/evaluation` |
+| Portal | `srm:portal:enroll/profile/evaluation/quotation` |
 
 `/`는 동일 리소스 내 여러 완전한 권한 코드의 약어; 데이터베이스에는 개별 저장. `@PreAuthorize`와 `@SrmDataScope`는 동일한 완전한 권한 코드 사용.
 
@@ -188,7 +188,7 @@ SRM은 `XssConfigProvider` SPI를 구현하여 Redis DB 0의 `xss:enabled:{tenan
 | `SUPPLIER` | SELF | 포털 셀프 서비스: 입점 후 기업 정보 관리, 자체 성과 조회 |
 | `SUPER_ADMIN` | ALL | 모든 기능, SRM 데이터는 현재 테넌트에 한정 |
 
-기본 USER 역할은 `srm:portal:enroll`만 부여; SRM 관리 또는 포털 자료/성과 권한 없음. 입점 완료 후 SUPPLIER 역할을 추가해야 profile/evaluation 접근 가능.
+기본 USER 역할은 `srm:portal:enroll`만 부여되며 SRM 관리나 포털 profile/evaluation/quotation 권한은 부여되지 않습니다. 입점 완료 후 SUPPLIER 역할을 추가해야 profile/evaluation/quotation에 접근할 수 있습니다. `srm:portal:quotation`은 `SUPPLIER`와 플랫폼 규칙에 따라 전체 권한 트리를 보유한 `SUPER_ADMIN`에만 엄격히 부여되며, `SRM_ADMIN`·`PROCUREMENT_MANAGER` 등 내부 역할이 공급업체를 대신하여 견적을 제출할 수 없습니다. 견적 Controller는 SUPPLIER 역할과 유효한 PortalUser 연결을 동시에 요구하며, SUPER_ADMIN만으로는 공급업체를 사칭할 수 없습니다.
 
 ## 4. 상태 머신 및 핵심 흐름
 
@@ -207,7 +207,7 @@ SUSPENDED → APPROVED(협력 재개)
 APPROVED → BLACKLISTED(블랙리스트 추가)
 BLACKLISTED → APPROVED(블랙리스트 해제, srm:supplier:restore 필요)
 APPROVED/SUSPENDED → ELIMINATED(도태 퇴출)
-ELIMINATED → [*](종단 상태, 복구 불가)
+ELIMINATED → [*] (종단 상태, 복구 불가)
 ```
 
 - `APPROVED` 상태의 공급업체만 조달 모듈에서 참조 가능
@@ -243,7 +243,7 @@ POST /evaluation (supplierId, period, items[])
 → 레벨이 RED로 변경 시 Outbox 이벤트 알림 작성
 ```
 
-자격 만료 알림 로직: `expiry_date - today ≤ 30일` → CERTIFICATE 지표 자동 YELLOW; `expiry_date < today` → CERTIFICATE 지표 자동 RED. XXL-JOB 정기 작업을 통한 사전 스캔은 Phase 2에서 활성화 예정(MVP: 수동 트리거 또는 비활성).
+자격 만료 알림 로직: `expiry_date - today <= 30` → CERTIFICATE 지표 자동 YELLOW; `expiry_date < today` → CERTIFICATE 지표 자동 RED. XXL-JOB 정기 작업을 통한 사전 스캔은 Phase 2에서 활성화 예정(MVP: 수동 트리거 또는 비활성).
 
 ### 4.4 포털 계좌 개설 및 입점
 
@@ -336,10 +336,21 @@ POST /api/auth/register(공개 Auth 자체 등록, 기본 USER 역할 할당)
 
 ### 6.4 내부 API
 
-SRM은 향후 Procurement/Asset 서비스를 위해 다음 기능을 사전 준비:
+SRM은 Procurement/Asset 서비스에 다음 기능을 제공합니다:
 - `GET /api/internal/supplier/{id}?tenantId={tenantId}` — 공급업체 요약
 - `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}` — 승인된 공급업체 검색
-- 모든 내부 API는 `X-Internal-Token` 인증 사용; Gateway를 통해 노출하지 않음
+- `POST /api/internal/supplier/batch` — body는 `{tenantId,supplierIds}`. 입력의 첫 출현 순서대로 최대 100개의 요약을 반환하고 존재하지 않는 ID는 생략
+- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}` — RFQ의 유효 견적·버전·라인 스냅샷 조회
+- 모든 내부 API는 `X-Internal-Token`과 `X-Tenant-Id`를 사용하며 query/body 테넌트는 헤더와 일치해야 함. Gateway를 통해 노출하지 않고 공급업체 요약에 연락처·계좌 PII를 포함하지 않음
+
+SRM이 포털에 보이는 RFQ를 조회할 때는 Procurement를 호출합니다:
+
+- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`
+- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`
+
+supplierId는 현재 userId에 해당하는 `srm_supplier_portal_user`만 지정할 수 있으며 포털 요청이 전달하는 값은 받지 않습니다. 모든 내부 요청은 `X-Tenant-Id`도 함께 전달하고, API에 추가 query/body 테넌트가 있으면 헤더와 일치해야 합니다.
+
+RFQ `status=SENT`, 초대 `status IN (INVITED, QUOTED)`, 그리고 quotationDeadline 미초과인 경우에만 견적 제출·갱신이 허용되며 `DRAFT/CLOSED/AWARDED/CANCELLED`는 일괄 거부됩니다.
 
 ## 7. 하드 제약
 

@@ -70,13 +70,24 @@ GitHub, Google, Gitee는 PKCE와 임의 `state`를 생성하고 콜백에서 `st
 
 ![공급사 포털 로그인](../images/ko-KR/supplier-portal-login.png)
 
+#### 그림 5 `session-expired-dialog-ko-KR`: 세션 만료 다이얼로그
+
+- 전제 조건: 로그인됨. 테스트 프로세스 내에서 비즈니스 API에 결정론적 401 장애를 주입(실제 사용에서는 Token 만료)
+- 작업자: 로그인된 사용자
+- 작업: 비즈니스 API가 401을 반환하면 앱이 만료 다이얼로그를 표시
+- 예상 결과: "세션이 만료되었습니다" 다이얼로그(현지화된 제목 + 재로그인 버튼)가 표시됨. 확인 후 검증된 `redirect` 파라미터와 함께 로그인 페이지로 이동. 내부 예외 노출 없음
+
+![세션 만료 다이얼로그](../images/ko-KR/session-expired-dialog.png)
+
 ## 6. 세션 만료
 
 토큰 만료나 권한 변경 시 로컬 인증을 지우고 로그인으로 돌아가며 검증된 앱 내부 리다이렉트만 유지합니다. `javascript:`, 외부 URL, 프로토콜 상대 URL은 거부합니다. 메뉴 실패는 무한 요청 대신 재시도 화면을 표시합니다.
 
 ## 7. 점검 순서
 
-테넌트, 최신 CAPTCHA, Auth 로그인 기록을 확인합니다. 소셜 로그인은 콜백 URI, 클라이언트 ID, PKCE, `state`, Portal은 `SUPPLIER` 역할과 `srm_supplier_portal_user` 연결을 확인합니다.
+1. 올바른 테넌트가 선택되었는지 확인합니다.
+2. CAPTCHA를 새로 고친 후 다시 입력합니다.
+3. Auth 로그인 기록을 확인합니다. `omni-auth`에서는 로그인 기록 대신 작업 로그를 사용하지 않습니다.
 
 [API 계약](../api-contract.kr.md)과 [핵심 흐름](../core-flows.kr.md)을 참고하세요.
 

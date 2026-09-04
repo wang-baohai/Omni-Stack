@@ -85,6 +85,15 @@ Device authorization is for input-constrained devices, not a general CAPTCHA byp
 
 ![Supplier portal login](../images/en-US/supplier-portal-login.png)
 
+#### Figure 5 `session-expired-dialog-en-US`: Session expired dialog
+
+- Precondition: Logged in; a deterministic 401 fault is injected into a business API within the test process (in real usage this is Token expiry)
+- Operator: Logged-in user
+- Action: When a business API returns 401, the app pops up the expiry dialog
+- Expected result: A "Session expired" dialog appears (localized title + re-login button); after confirmation it redirects to the login page with a validated `redirect` parameter; no internal exception is leaked
+
+![Session expired dialog](../images/en-US/session-expired-dialog.png)
+
 ## 6. Expired Sessions
 
 When a token expires or permissions change, the client clears local authentication, returns to login, and preserves only a validated in-app redirect. `javascript:`, cross-origin, and protocol-relative redirect targets are rejected. A failed menu request displays a retryable error page instead of an infinite request loop.

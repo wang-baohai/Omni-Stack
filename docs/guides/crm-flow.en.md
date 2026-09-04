@@ -21,7 +21,7 @@ Every contact belongs to a customer. Visibility of contacts and other children i
 
 ## 4. Opportunities
 
-An opportunity records pipeline, stage, amount, currency, probability, close date, and owner. The table supports precise search; the board supports stage progression. Backend state rules reject invalid jumps. Won or lost opportunities are closed and use a dedicated reopen action that preserves history.
+An opportunity records pipeline, stage, amount, currency, probability, close date, and owner. The table supports precise search; the board supports stage progression. Backend state rules reject invalid jumps. Won or lost opportunities are closed; reopening uses a dedicated action that preserves history instead of setting the state directly back to `OPEN`.
 
 ## 5. Activities
 

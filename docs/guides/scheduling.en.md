@@ -74,7 +74,7 @@ Dynamic parameters accept standard JSON Schema `object/properties` and the compa
 1. Implement `UserJobHandler` with a stable bean name.
 2. Validate parameters and return a user-readable result.
 3. Add the matching `typeCode` and Schema.
-4. Build `omni-base` and verify registry discovery.
+4. Build `omni-base` and verify the handler enters `UserJobHandlerRegistry`.
 5. Create and trigger a job against isolated XXL-JOB.
 6. Verify success/failure logs, pause/resume, update, and delete.
 

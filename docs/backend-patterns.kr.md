@@ -422,31 +422,29 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 
 ## Common Starter 온보딩 규범
 
-프로젝트는 공통 기능을 6개 모듈로 분리하였으며, 새 마이크로서비스는 Maven 의존성으로 도입 즉시 사용 가능하며 수동 구성이 필요 없습니다.
+프로젝트는 공통 기능을 조합 Starter와 선택 기능 모듈로 분리합니다. Servlet 비즈니스 서비스는 `omni-common-service`를 우선 사용하고, Gateway·Auth·Workflow는 각자의 특수한 경계에 따라 하위 모듈을 선택합니다.
 
 ### Starter 모듈 개요
 
-| 모듈 | 책임 | 자동 구성 내용 | 대상 서비스 유형 |
-|------|------|-------------|-------------|
-| `omni-common-core` | 순수 POJO 계층 | 없음(Spring 의존성 없음) | 모든 모듈 |
+| 모듈 | 책임 | 자동 구성 내용 | 적용 서비스 유형 |
+|--------|------|---------------|----------------|
+| `omni-common-core` | 순수 POJO 계층 | 없음(Spring 의존 없음) | 모든 모듈 |
 | `omni-common` | Web 자동 구성 | `JacksonConfig`(시간 직렬화), `WebMvcConfig`(CORS), `GlobalExceptionHandler`, `XssAutoConfiguration`(Filter + Jackson Module) | Servlet 서비스 |
-| `omni-common-mybatis` | 데이터베이스 기능 | `MybatisPlusAutoConfiguration`: `MybatisPlusInterceptor`(MySQL `PaginationInnerInterceptor`) + YAML 기본 구성(카멜 매핑, 논리 삭제, 자동 증가 ID) | Servlet 서비스 |
-| `omni-common-redis` | 블로킹 Redis | `RedisAutoConfiguration`: `RedisTemplate<String, Object>`(Jackson 직렬화) + `RedisUtils` 유틸리티 클래스 + Lettuce 연결 풀 구성 | Servlet 서비스 |
-| `omni-common-redis-reactive` | 리액티브 Redis | `spring-boot-starter-data-redis-reactive` + YAML 기본 타임아웃 구성 | WebFlux 서비스(예: Gateway) |
-| `omni-common-mqlog` | 신뢰성 있는 MQ 메시지 전송 | `ReliableMessageTemplate`(Transactional Outbox), `MqMessageRelayService`(XXL-JOB 비동기 전달), `MessageSender` 전략 인터페이스, `MqMessageInternalController`(Feign 내부 조회), `schema.sql`(자동 테이블 생성) | Servlet 서비스(MQ 기능 필요) |
+| `omni-common-mybatis` | 데이터베이스 기능 | `MybatisPlusAutoConfiguration`: `MybatisPlusInterceptor`(MySQL `PaginationInnerInterceptor`) + YAML 기본 설정(카멜케이스 매핑, 논리 삭제, 자동 증가 ID) | Servlet 서비스 |
+| `omni-common-redis` | 블로킹 Redis | `RedisAutoConfiguration`: `RedisTemplate<String, Object>`(Jackson 직렬화) + `RedisUtils` 유틸리티 + Lettuce 커넥션 풀 설정 | Servlet 서비스 |
+| `omni-common-redis-reactive` | 리액티브 Redis | `spring-boot-starter-data-redis-reactive` + YAML 기본 타임아웃 설정 | WebFlux 서비스(Gateway 등) |
+| `omni-common-mqlog` | 신뢰성 MQ 메시지 전송 | `ReliableMessageTemplate`(Transactional Outbox), `MqMessageRelayService`(XXL-JOB 비동기 전송), `MessageSender` 전략 인터페이스, `MqMessageInternalController`(Feign 내부 조회), `schema.sql`(자동 테이블 생성) | Servlet 서비스(MQ 기능 필요) |
+| `omni-common-service` | Servlet 비즈니스 서비스 보안 및 컨텍스트 조합 | Gateway 사전인증 Filter, 불변 요청 식별, 내부 API Token, DataScope SPI/Aspect, Tenant/DataPermission 고정 순서, Auth XSS 폴백과 보안 기준선 | CRM/SRM/Procurement/Asset 등 Servlet 비즈니스 서비스 |
 
-**자동 구성 등록 메커니즘**: 모든 starter는 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 파일을 통해 등록되며, 이는 Spring Boot 3+/4+의 표준 메커니즘입니다(구버전 `spring.factories`를 대체).
+**자동 구성 등록 메커니즘**: 모든 starter는 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 파일로 등록됩니다. 이는 Spring Boot 3+/4+의 표준 메커니즘입니다(구 `spring.factories` 대체).
 
-### 새 서비스 온보딩 단계
+### 신규 서비스 온보딩 절차
 
-1. **POM 의존성**: `pom.xml`에 필요한 starter를 선언:
+1. **POM 의존**: Servlet 비즈니스 서비스는 조합 Starter를 선언한 후 필요에 따라 OperLog/Job/MQ를 추가합니다:
    ```xml
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-core</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-mybatis</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-redis</artifactId></dependency>
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common-service</artifactId></dependency>
    ```
-2. **application.yml**: 데이터소스와 Redis 연결 정보만 구성하면 됨:
+2. **application.yml**: 데이터소스와 Redis 외에 서비스 식별과 활성화할 보안 기능을 명시적으로 구성합니다. 내부 Token은 반드시 환경 변수에서 가져와야 하며 약한 기본값을 사용할 수 없습니다:
    ```yaml
    spring:
      datasource:
@@ -458,10 +456,27 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
          host: 127.0.0.1
          port: 6379
          database: 0
+   omni:
+     service:
+       name: omni-xxx
+       display-name: Xxx
+       gateway-preauth:
+         enabled: true
+       internal-api:
+         enabled: true
+         token: ${OMNI_INTERNAL_API_TOKEN}
+       tenant:
+         enabled: true
+       data-scope:
+         enabled: true
+       xss:
+         enabled: true
    ```
-3. **시작 클래스**: `@MapperScan("com.omni.xxx.mapper")` 추가
-4. **XSS 방어**: `XssConfigProvider` SPI 인터페이스 구현(`omni-common`이 Filter + Jackson Module을 자동 등록)
-5. **자동 적용**: 페이지네이션 플러그인, Jackson 시간 직렬화, CORS 구성, `GlobalExceptionHandler`, `RedisUtils` 유틸리티 클래스가 모두 자동으로 어셈블되며 추가 구성 불필요
+3. **도메인 SPI**: tenant/data-scope를 활성화할 때 각각 유일한 `TenantTablePolicy`와 `DataScopeTablePolicy`를 제공해야 합니다. 도메인 테이블 이름이나 owner 열을 Starter에 넣어서는 안 됩니다.
+4. **보안 체인**: Starter가 제공하는 Gateway Filter를 `AuthorizationFilter` 앞에, 식별 컨텍스트 Filter를 Gateway Filter 뒤에 배치합니다. 두 항목의 Servlet 컨테이너 중복 등록은 금지됩니다.
+5. **선택 기능**: OperLog·Job·MQ·Workflow는 계속 독립 의존으로 유지되며 비즈니스 필요에 따라 활성화합니다.
+
+현재 `omni-common-service`는 v0 자동 구성과 테스트를 제공하며, CRM·SRM·Procurement·Asset은 모두 마이그레이션·모듈 테스트·격리 런타임 재검증을 완료했습니다. Starter의 XSS Provider 자동 구성은 `XssAutoConfiguration`보다 먼저 적용되어야 하며, 컨텍스트 테스트가 Provider·Servlet FilterRegistration·Jackson 2/3 클리닝 모듈을 동시에 검증하여 조건 평가 순서로 인한 조용한 실패를 방지합니다.
 
 ### 오버라이드 메커니즘
 

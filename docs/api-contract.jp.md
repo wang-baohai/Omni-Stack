@@ -95,6 +95,8 @@ interface ApiResponse<T = unknown> {
 | 401 | 401 | 未認証 | Gateway `AuthFilter` が 401 JSON を返却 | フロントエンドがログインページに自動リダイレクト |
 | 403 | 403 | 権限不足 | `AccessDeniedException` / `AuthorizationDeniedException` が `GlobalExceptionHandler` に捕捉された場合 | フロントエンドが「権限不足」メッセージを表示 |
 | 200 | 404 | リソースが存在しない | `throw new BusinessException(404, "xxxが存在しません")` | フロントエンドがエラーメッセージを表示 |
+| 200 | 409 | ステータス/並行性競合 | 楽観ロックバージョン不一致またはステートマシンが遷移を拒否 | フロントエンドがデータを更新してユーザーに再試行を促す |
+| 200 | 503 | 下流依存が利用不可 | CRM が Auth データスコープ API を呼び出してフェイルクローズ | フロントエンドがサービス一時停止を表示。権限超過データにダウングレードしない |
 | 200 | 500 | ビジネス例外 | `BusinessException` が `GlobalExceptionHandler` に捕捉された場合 | フロントエンドがエラーメッセージを表示 |
 | 500 | 500 | 不明なシステムエラー | フォールバック `Exception` ハンドラー | フロントエンドが「サーバー内部エラー」を表示 |
 
@@ -110,6 +112,8 @@ interface ApiResponse<T = unknown> {
 | 400 | 一意性制約違反 | "ユーザー名が既に存在します" / "タスクタイプコードが既に存在します" |
 | 404 | リソースが存在しない | "組織ユニットが存在しません" / "辞書データが存在しません" |
 | 403 | 権限不足 | "権限が不足しているため、アクセスを拒否します" |
+| 409 | 楽観ロックまたはステータス競合 | "データが他のユーザーによって変更されました。更新して再試行してください" |
+| 503 | 必須依存が利用不可 | "認証認可サービスが一時的に利用できません" |
 
 ### 2.3 Gateway レベルエラーコード
 
@@ -216,9 +220,7 @@ export function listUsers(page: number, size: number) {
 | 削除 | DELETE | `/{resource}/{id}` | `DELETE /user/1` |
 | バッチ操作 | POST | `/{resource}/batch` | `POST /user/batch` |
 
-**Gateway パスプレフィックス**：すべてのフロントエンドリクエストは `/api/<service>/<resource>` を使用します（例：`/api/auth/user/list`）。Gateway は `/api/<service>` を除去し（StripPrefix=2）、ダウンストリームサービスは `/<resource>` を受け取ります。
-
-**例外**：Base サービスの `/api/base/**` ルートには StripPrefix フィルターが**ありません**。Base サービスのコントローラーは完全なパスを使用します（例：`@RequestMapping("/api/base/dict/type")`）。
+**Gateway パスプレフィックス**：すべてのフロントエンドリクエストは `/api/<service>/<resource>` を使用します（例：`/api/auth/user/list`）。現在、Gateway は Auth・Base・Workflow・CRM・SRM・Procurement・Asset などの業務ルートに対して `StripPrefix` を使用せず、ダウンストリームの Controller が完全な `/api/**` パスを宣言して受け取ります。
 
 ---
 
@@ -232,7 +234,7 @@ Gateway の `application.yml` 内のルート設定（`spring.cloud.gateway.serv
 |---------|---------|---------|-------------|------|
 | `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` | なし | OAuth2 認可サーバーエンドポイント |
 | `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` | なし | OpenID Connect ディスカバリーエンドポイント |
-| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | 2 | Auth サービス REST API |
+| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | **なし** | Auth サービス REST API（完全なパスを使用） |
 | `omni-base` | `/api/base/**` | `lb://omni-base` | **なし** | Base サービス（完全なパスを使用） |
 | `omni-base-job` | `/api/job/**` | `lb://omni-base` | **なし** | 定期タスク管理 |
 | `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` | **なし** | ワークフローエンジン |
@@ -243,7 +245,7 @@ Docker デプロイメント時、ルート設定は同じですが、ターゲ�
 
 | フロントエンドリクエスト | Gateway ルート | ダウンストリーム受信パス | 説明 |
 |---------|-------------|-------------|------|
-| `GET /api/auth/user/list` | `lb://omni-auth` + StripPrefix=2 | `GET /user/list` | Auth サービスはプレフィックスを除去 |
+| `GET /api/auth/user/list` | `lb://omni-auth` StripPrefix なし | `GET /api/auth/user/list` | Auth サービスは完全なパスを保持 |
 | `GET /api/base/dict/type/list` | `lb://omni-base` StripPrefix なし | `GET /api/base/dict/type/list` | Base サービスは完全なパスを保持 |
 | `POST /api/workflow/model` | `lb://omni-workflow` StripPrefix なし | `POST /api/workflow/model` | Workflow サービスは完全なパスを保持 |
 | `GET /api/job/type/list` | `lb://omni-base` StripPrefix なし | `GET /api/job/type/list` | Job ルートは Base サービスへ |
@@ -325,15 +327,30 @@ Gateway の `AuthFilter` は JWT 検証成功後、ダウンストリームリ�
 | `X-Tenant-Id` | Axios インターセプターが自動注入 | `useUserStore()` からテナント ID を取得 |
 | `Content-Type: application/json` | Axios デフォルト | JSON リクエストボディ |
 
-### 8.3 セキュリティレスポンスヘッダー（Gateway 注入）
+### 8.3 内部サービスリクエストヘッダー
+
+サービス間インターフェースはすべて `/api/internal/**` の下に置かれ、共有トークン認証を使用し、エンドユーザーの JWT は使用しません：
+
+| ヘッダー | 必須 | 説明 |
+|--------|------|------|
+| `X-Internal-Token` | はい | サービス間共有トークン。`InternalApiAuthFilter` が検証 |
+| `X-Tenant-Id` | はい | 現在の業務テナント。body/query の `tenantId` と一致する必要がある |
+| `Content-Type: application/json` | JSON リクエストでは必須 | JSON リクエストボディ |
+
+`InternalApiAuthFilter` はコンテナレベルの前置フィルターとして `/api/internal/**` を一括保護します。サービスのセキュリティチェーンが再度 Gateway ユーザー識別情報を要求してはなりません。トークンが欠落または不一致の場合は HTTP 401 を返します。サーバー側でトークンが未設定の場合はフェイルクローズで HTTP 503 を返します。ヘッダーと body/query のテナントが不一致の場合は業務コード 403 を返します。内部パスは `X-Gateway-Forwarded` やユーザー権限ヘッダーに依存してはなりません。
+
+### 8.4 セキュリティレスポンスヘッダー（Gateway 注入）
 
 `SecurityHeadersFilter`（WebFlux WebFilter）は、ゲートウェイを経由するすべてのレスポンスに以下を追加します：
 
 | レスポンスヘッダー | 値 | 用途 |
 |--------|-----|------|
 | `X-Content-Type-Options` | `nosniff` | ブラウザーの MIME タイプスニッフィングを防止 |
-| `X-Frame-Options` | `SAMEORIGIN` | クリックジャッキングを防止 |
+| `X-Frame-Options` | `DENY` | ページが iframe にネストされるのを禁止し、クリックジャッキングを防止 |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Referer ヘッダーの情報漏洩を制御 |
+| `X-Trace-Id` | 32 桁の小文字 16 進数文字列 | Gateway・Servlet・Feign とエラー フィードバックを関連付け |
+
+Gateway は常に新しい `X-Trace-Id` を生成し、公網クライアントが提供する同名ヘッダーを信頼しません。ダウンストリームの Servlet サービスは有効な値を MDC とレスポンスヘッダーに書き込み、共通 Feign インターセプターは引き続き内部呼び出しへ伝播します。フロントエンドのエラーパネルはレスポンス内の traceId を表示でき、ログ調査では同じ値で完全な呼び出しチェーンを検索するのが優先です。
 
 ---
 
@@ -413,7 +430,7 @@ Docker デプロイメント時、ソーシャルログインの `redirect_uri` 
 
 ## 11. XSS 設定管理エンドポイント
 
-Base path: `/api/auth/xss-config`（Gateway StripPrefix=2 → ダウンストリーム `/xss-config/...`）
+Base path: `/api/auth/xss-config`（Gateway はプレフィックスを除去せず、ダウンストリームが完全なパスを保持）
 
 ### 現在の XSS 設定を取得
 
@@ -558,6 +575,24 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 ### テナント分離
 
 すべてのリスト検索と作成操作には `X-Tenant-Id` リクエストヘッダーが必要です（フロントエンドが JWT Token から抽出し、Gateway が注入）。データは SQL クエリレベルで `tenant_id` により分離されます。辞書タイプの一意性制約の範囲は `(tenant_id, type_code)` です。
+
+### MQ 配信ランタイム状態
+
+`GET /api/base/mq-message/runtime` は `base:mqmessage:list` 権限を要求し、現在の Outbox とバックグラウンド配信能力を返します：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "outboxWriteEnabled": true,
+    "deliveryEnabled": false,
+    "mode": "OUTBOX_ONLY"
+  }
+}
+```
+
+`OUTBOX_ONLY` は、業務トランザクションは引き続きローカル Outbox に書き込むものの、MQ relay/XXL-JOB が動作していないことを意味します。フロントエンドは縮退中の旨を表示し、再送操作を無効化する必要があります。`FULL` は書き込みと非同期配信の両方が有効であることを意味します。
 
 ---
 

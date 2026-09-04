@@ -43,6 +43,7 @@ Omni-Stack は、**Flowable 8.x** をベースにした可視化 BPMN ワーク�
 - `omni-common-mybatis` — MyBatis-Plus + MySQL ドライバ + テナントインターセプター
 - `omni-common-redis` — XSS 構成およびセッションデータ用の Redis キャッシュ
 - `omni-common-workflow` — Flowable 自動構成、承認 SPI、テナントフィルター、通知 SPI
+- `omni-common-mqlog` — Transactional Outbox、内部 API 共有トークンフィルター、信頼性メッセージリレー
 - `omni-workflow` — ビジネス層：コントローラー、サービス、デリゲート、BPMN エンジンツール
 
 **主要な設計判断**：
@@ -51,6 +52,8 @@ Omni-Stack は、**Flowable 8.x** をベースにした可視化 BPMN ワーク�
 - **デュアルバージョン管理**：ビジネスバージョンは `wf_process_model_version` で追跡（DRAFT → PUBLISHED → ARCHIVED）、エンジンバージョンは Flowable デプロイメントで管理
 - **ビジュアルデザイナー**：フロントエンド BPMN モデラーがデザイナー JSON を生成し、`BpmnXmlBuilder` が BPMN 2.0 XML に変換
 - **動的候補解決**：`omni:assignment` JSON 拡張要素がタスク開始時に `ScopedRoleAssignmentListener` によって解析され、ハードコードされた担当者はいません
+- **クロスサービス起動の二重冪等**：テナント内 `requestId` と `(businessType, businessKey)` のそれぞれでプロセス起動を制約します
+- **信頼性のある完了通知**：完了メタデータと Outbox レコードを同一ローカルトランザクション内でコミットし、リレータスクが非同期で配信します
 
 ### データモデル
 
@@ -68,11 +71,13 @@ erDiagram
 |-------|---------|
 | `wf_process_model` | プロセスモデルレジストリ、`model_key` はテナントごとに一意 |
 | `wf_process_model_version` | バージョン履歴：BPMN XML、デザイナー JSON、デプロイメント情報 |
-| `wf_process_instance_ext` | インスタンス拡張：Flowable インスタンスとモデルバージョンを関連付け |
+| `wf_process_instance_ext` | インスタンス拡張：モデルバージョンに関連付け、`requestId`・業務キー・完了イベントラッチを記録します |
+| `wf_process_start_request` | クロスサービス起動の予約レコード。リクエスト ID と業務キーはテナント内でそれぞれ一意 |
 | `wf_todo_task` | 担当者スコープの高速クエリ用の未処理タスクキャッシュ |
 | `wf_cc_record` | 既読ステータス付き CC 通知レコード |
 | `wf_form_schema` | JSON Schema フォーム定義 |
 | `wf_delegation_rule` | 承認委任ルール（ユーザー間、任意のプロセススコープ） |
+| `sys_mq_message` | Transactional Outbox メッセージ記録。信頼性メッセージリレーが非同期で配信 |
 
 ---
 

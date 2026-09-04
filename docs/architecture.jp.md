@@ -507,9 +507,9 @@ Nacos 登録: service=omni-auth, ip=<コンテナ内部IP>, port=8080
     │
 omni-gateway 起動
     │ @EnableDiscoveryClient
-    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=true
+    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=false
     ▼
-Gateway ルーティング: lb://omni-auth → Nacos からインスタンスリストを取得 → 負荷分散転送
+Gateway 明示的ルート: /api/crm/** → lb://omni-crm → Nacos からインスタンスリストを取得 → 負荷分散転送
 ```
 
 **主要設定**：
@@ -538,6 +538,8 @@ Omni-Stack は **RBAC-0 基礎権限モデル**（ユーザー・ロール・権
 
 1. **機能権限**：ユーザーが「何ができるか」を制御 — メニュー表示 + ボタン/API レベル操作権限
 2. **データ権限**：ユーザーが「どのデータを見られるか」を制御 — 組織所属に基づく行レベルフィルタリング
+
+マルチテナント環境では、ユーザー名はテナント内で一意です（`sys_user` テーブルは `(username, tenant_id)` 複合一意キーを使用）。権限コード形式は `resource:action`（細粒度 API レベル）です。
 
 ### 11.2 機能権限アーキテクチャ
 
@@ -634,12 +636,12 @@ DataScopeContext.clear() (finally ブロック、ThreadLocal リーク防止)
 ## 12. 主要制約
 
 1. **JDK 25 必須**：Spring Boot 4.x Maven plugin は Java 17+ 必須。本プロジェクトは JDK 25 を対象。`JAVA_HOME` を Maven コマンド実行前に設定すること。
-2. **Gateway 5.x 設定プレフィックス**：ルートと設定は `spring.cloud.gateway.server.webflux` の下に配置。旧プレフィックスはサイレントに無視される。
+2. **Gateway 5.x 設定プレフィックス**：ルートと設定は `spring.cloud.gateway.server.webflux` の下に配置。旧プレフィックス `spring.cloud.gateway` はサイレントに無視される。
 3. **ビルド順序**：`omni-common-core` → `omni-common` → common starters → マイクロサービス。`./mvnw clean install` を親 POM から実行。
 4. **直接サービス間呼び出し禁止**：サービス間通信は OpenFeign クライアント経由。生の HTTP 呼び出しは禁止。
 5. **Gateway はリアクティブ**：`omni-gateway` は WebFlux 上で動作。`omni-common-core` と `omni-common-redis-reactive` に依存するが、`omni-common` と `omni-common-redis` には**依存しない**。
 6. **Redis Starter 排他性**：ブロッキング版とリアクティブ版は同じサービスで混在不可。
-7. **XXL-JOB Admin 先行起動必須**：`omni-base` 起動前に Admin が稼働していること。
+7. **XXL-JOB Admin 先行起動必須**：`XxlJobSpringExecutor` が起動時に Admin へ登録します。ユーザータスクの作成/更新には `XxlJobAdminClient` による HTTP 呼び出しが必要です。`omni-base` 起動前に Admin が稼働していること。
 8. **omni-common-job はライブラリモジュール**：独立実行不可。Servlet サービスのみ依存可能。
 
 ---

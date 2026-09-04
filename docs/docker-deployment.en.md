@@ -238,7 +238,8 @@ mysql:
 - MySQL entrypoint no longer mounts aggregate SQL files; fresh and upgraded environments use the same Liquibase chain
 - The one-shot `omni-db-migrator` creates databases, migrates schema, applies formal seeds, and verifies assertions; Nacos, XXL-JOB, and applications start only after it exits successfully
 - Application services use the least-privileged `MYSQL_APP_USERNAME` / `MYSQL_APP_PASSWORD` account, not the migration administrator
-- MySQL uses the named volume `omni-mysql-data`; normal container recreation preserves data
+- MySQL uses the explicit named volume `omni-stack-mysql-data`; a normal `docker compose down` and container recreation do not delete data, while `docker compose down -v` deletes the volume irreversibly.
+- An existing non-empty database must be backed up before first-time adoption via the `omni-db-migrator adopt-current` structural fingerprint and confirmation gate; running `migrate` directly to bypass adoption is not allowed.
 
 ### 5.2 Redis 7.4
 
@@ -367,13 +368,14 @@ Spring Boot supports overriding `application.yml` configurations via environment
 | Config | application.yml Value (local dev) | Docker Environment Value |
 |--------|----------------------------------|------------------------|
 | Database URL | `localhost:3306` | `mysql:3306` |
+| Database address | `localhost:13306` (connect to this Compose MySQL) | `mysql:3306` |
 | Redis host | `localhost` | `redis` |
 | Nacos address | `localhost:8848` | `nacos:8848` |
 | RocketMQ | `localhost:9876` | `rocketmq-namesrv:9876` |
 | JWT Issuer | `http://localhost:8100` | `http://omni-auth:8080` |
-| OAuth2 Callback | `http://localhost:8102/api/auth/...` | `http://localhost:8102/api/auth/...` |
+| OAuth2 Callback | `http://localhost:8100/api/auth/...` | `http://localhost:8100/api/auth/...` |
 
-> **Note**: OAuth2 callback URIs use the Gateway address `localhost:8102`. Auth and other private service ports are bound to loopback for diagnostics only and must not be exposed publicly.
+> **Note**: OAuth2 callback URIs use `localhost:8100` (the host port), because that is the address end users actually visit in the browser.
 
 ---
 
@@ -445,18 +447,20 @@ only until compatibility cleanup and do not participate in Compose startup. Flow
 
 ### 8.2 Data Persistence Strategy
 
-The current configuration persists MySQL in the named volume `omni-mysql-data`. `docker compose down` retains it; `docker compose down -v` deletes it irreversibly.
+The current Compose uses an explicit MySQL named volume:
 
 ```yaml
+# Add Volume in compose.infra.yaml
 mysql:
   volumes:
     - omni-mysql-data:/var/lib/mysql
 
 volumes:
   omni-mysql-data:
+    name: omni-stack-mysql-data
 ```
 
----
+`docker compose down` retains the volume; `docker compose down -v` deletes the volume and all business data. Redis currently only stores rebuildable runtime data such as captchas and sessions/caches, with no persistence volume configured. Production should use an external database or a backup-managed persistent volume, and rehearse the recovery process regularly; the repository Compose single-node MySQL, Nacos, RocketMQ and XXL-JOB must not be treated directly as a highly available production topology.
 
 ## 9. Docker Registry Mirror Configuration
 
@@ -618,7 +622,7 @@ docker compose ps
 - Docker automatically assigns different host ports for multiple instances
 - Nacos service discovery auto-registers all instances
 - Spring Cloud Gateway load-balances across instances via Nacos
-- For fixed ports, manual specification is needed
+- For fixed ports, manual specification is needed: `docker compose up -d --scale omni-base=3` (ports are auto-assigned incrementally)
 
 ### 13.2 Database Connection Pool Considerations
 
@@ -757,7 +761,7 @@ lsof -i :8080
 
 **Solutions**:
 - Stop the process occupying the port
-- Modify host port mapping in docker-compose.yml
+- Modify the corresponding `OMNI_*_HOST_PORT` in `.env`; Compose maps the host ports
 - Windows users: check Hyper-V port reservation (see [Section 10](#10-windows-hyper-vwsl2-port-reservation-issues))
 
 ### 15.5 Nacos Registration Failure

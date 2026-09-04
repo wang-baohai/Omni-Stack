@@ -10,7 +10,7 @@ SRM covers invitations, Portal enrollment, admission, lifecycle, evaluation, ris
 4. SRM creates the supplier and a Saga asks Auth for the `SUPPLIER` role.
 5. Successful role assignment and association move the supplier to review.
 
-Enrollment requires both `inviteToken` and `requestId`; retries reuse the request ID. Portal user IDs never populate internal owner columns.
+Enrollment requests must include both `inviteToken` and a client `requestId`. Retries reuse the same request ID to stay idempotent. Portal user IDs must never be written into internal `owner_user_id` or `owner_unit_id`.
 
 ## 2. Admission and Lifecycle
 

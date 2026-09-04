@@ -15,7 +15,7 @@ Each stage has an independent state machine. Never skip prerequisites by changin
 
 #### Figure 1 `procurement-overview-en-US`: Procurement overview
 
-- Prerequisites: log in as a procurement administrator with overview access
+- Prerequisites: log in as a procurement administrator with the `procurement:overview:view` permission
 - Actor: procurement administrator
 - Action: open Procurement → Overview
 - Expected result: the main area shows the "Procurement Overview" title with amounts grouped per currency
@@ -84,7 +84,7 @@ An awarded quotation produces a draft order, then sent, supplier-confirmed, part
 
 ## 7. Goods Receipt
 
-Each line records actual quantity, quality, and asset quantity. Asset candidates require PASS quality, asset-managed material, and an exact positive quantity. Submission, message redelivery, and Asset backfill remain idempotent. Verify both procurement status and resulting asset cards.
+Each receipt line records the actual received quantity, quality status, and asset quantity. Asset candidate events are published only when `qualityStatus=PASS`, the material has `assetManaged=true`, and the asset quantity is an exact positive integer. Duplicate submission, message redelivery, and Asset backfill must remain idempotent. After completion, verify order and receipt status in the Procurement overview and the actual card results in the Asset ledger.
 
 ## 8. Permissions and Diagnostics
 

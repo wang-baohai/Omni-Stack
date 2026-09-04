@@ -235,7 +235,8 @@ mysql:
 - MySQL entrypoint には集約 SQL をマウントせず、新規環境とアップグレード環境で同じ Liquibase チェーンを使用
 - one-shot の `omni-db-migrator` が DB 作成、構造移行、正式シード、検証を行い、正常終了後にのみ Nacos、XXL-JOB、各アプリを起動
 - アプリケーションは移行管理者ではなく、最小権限の `MYSQL_APP_USERNAME` / `MYSQL_APP_PASSWORD` を使用
-- MySQL は名前付きボリューム `omni-mysql-data` を使用し、通常のコンテナ再作成ではデータを保持
+- MySQL は明示的な名前付きボリューム `omni-stack-mysql-data` を使用します。通常の `docker compose down` とコンテナ再作成ではデータは削除されず、`docker compose down -v` はボリュームを復元不可能に削除します。
+- 既存の非空データベースの初回引き受けは必ず先にバックアップし、`omni-db-migrator adopt-current` の構造フィンガープリントと確認ゲートを通じて行います。`migrate` を直接実行して引き受けを迂回してはなりません。
 
 ### 5.2 Redis 7.4
 
@@ -363,14 +364,14 @@ Spring Boot は環境変数による `application.yml` 設定のオーバーラ�
 
 | 設定 | application.yml 値（ローカル開発） | Docker 環境変数値 |
 |------|----------------------------------|-----------------|
-| データベース URL | `localhost:3306` | `mysql:3306` |
+| データベースアドレス | `localhost:13306`（本 Compose の MySQL に接続） | `mysql:3306` |
 | Redis ホスト | `localhost` | `redis` |
 | Nacos アドレス | `localhost:8848` | `nacos:8848` |
 | RocketMQ | `localhost:9876` | `rocketmq-namesrv:9876` |
 | JWT Issuer | `http://localhost:8100` | `http://omni-auth:8080` |
-| OAuth2 コールバック | `http://localhost:8102/api/auth/...` | `http://localhost:8102/api/auth/...` |
+| OAuth2 コールバック | `http://localhost:8100/api/auth/...` | `http://localhost:8100/api/auth/...` |
 
-> **注意**：OAuth2 コールバック URI は Gateway の `localhost:8102` を使用します。Auth などの内部サービスポートは診断用にループバックへバインドし、外部公開しません。
+> **注意**：OAuth2 コールバック URI は `localhost:8100`（ホストポート）を使用します。これはユーザーのブラウザーが実際にアクセスするアドレスであるためです。
 
 ---
 
@@ -442,18 +443,20 @@ MySQL healthy
 
 ### 8.2 データ永続化戦略
 
-現在の設定では MySQL を名前付きボリューム `omni-mysql-data` に永続化します。`docker compose down` では保持され、`docker compose down -v` では復元不能で削除されます。
+現在の Compose は明示的な MySQL 名前付きボリュームを使用します：
 
 ```yaml
+# compose.infra.yaml に Volume を追加
 mysql:
   volumes:
     - omni-mysql-data:/var/lib/mysql
 
 volumes:
   omni-mysql-data:
+    name: omni-stack-mysql-data
 ```
 
----
+`docker compose down` はボリュームを保持し、`docker compose down -v` はボリュームと全業務データを削除します。Redis は現在、再構築可能な認証コードやセッション/キャッシュなどのランタイムデータのみを保存し、永続化ボリュームは設定していません。本番環境では外部データベースかバックアップ管理された永続ボリュームを使用し、復旧手順を定期的に訓練してください。リポジトリ Compose のシングルノード MySQL・Nacos・RocketMQ・XXL-JOB をそのまま高可用本番トポロジーと見なしてはなりません。
 
 ## 9. Docker レジストリミラー設定
 

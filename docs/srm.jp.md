@@ -163,7 +163,7 @@ DataPermissionInterceptor は書込みを保護しません。更新/削除/承�
 | Invite | `srm:invite:list/create/revoke`、`srm:portal:invite` |
 | Owner 候補 | `srm:owner:list` |
 | PII 閲覧 | `srm:pii:view` |
-| Portal | `srm:portal:enroll/profile/evaluation` |
+| Portal | `srm:portal:enroll/profile/evaluation/quotation` |
 
 `/` は同一リソース内の複数完全権限コードの略記；データベースには個別に保存。`@PreAuthorize` と `@SrmDataScope` は同じ完全権限コードを使用。
 
@@ -188,7 +188,7 @@ SRM は `XssConfigProvider` SPI を実装し、Redis DB 0 の `xss:enabled:{tena
 | `SUPPLIER` | SELF | ポータルセルフサービス：入居後の企業情報管理、自身のパフォーマンス閲覧 |
 | `SUPER_ADMIN` | ALL | 全機能、SRM データは現在のテナントに限定 |
 
-デフォルト USER ロールは `srm:portal:enroll` のみ付与；SRM 管理やポータル資料/パフォーマンス権限はなし。入居完了後 SUPPLIER ロールを追加して初めて profile/evaluation にアクセス可能。
+デフォルト USER ロールは `srm:portal:enroll` のみ付与され、SRM 管理やポータル profile/evaluation/quotation 権限は付与されません。入居完了後に SUPPLIER ロールを追加して初めて profile/evaluation/quotation にアクセスできます。`srm:portal:quotation` は `SUPPLIER` と、プラットフォーム規則により全権限ツリーを保持する `SUPER_ADMIN` にのみ厳格に付与され、`SRM_ADMIN`・`PROCUREMENT_MANAGER` などの内部ロールがサプライヤーに代わって見積を行うことはできません。見積 Controller は SUPPLIER ロールと有効な PortalUser 関連を同時に要求し、SUPER_ADMIN だけではサプライヤーになりすませません。
 
 ## 4. ステートマシンとコアフロー
 
@@ -243,7 +243,7 @@ POST /evaluation (supplierId, period, items[])
 → レベルが RED に変更された場合、Outbox イベント通知を書込み
 ```
 
-資格期限アラートロジック：`expiry_date - today ≤ 30日` → CERTIFICATE 指標自動 YELLOW；`expiry_date < today` → CERTIFICATE 指標自動 RED。XXL-JOB 定期タスクによる事前スキャンは Phase 2 で有効化予定（MVP：手動トリガーまたは無効）。
+資格期限アラートロジック：`expiry_date - today <= 30` → CERTIFICATE 指標自動 YELLOW；`expiry_date < today` → CERTIFICATE 指標自動 RED。XXL-JOB 定期タスクによる事前スキャンは Phase 2 で有効化予定（MVP：手動トリガーまたは無効）。
 
 ### 4.4 ポータル口座開設と入居
 
@@ -336,10 +336,21 @@ POST /api/auth/register（公開 Auth 自己登録、デフォルト USER ロー
 
 ### 6.4 内部 API
 
-SRM は将来の Procurement/Asset サービス向けに以下の機能を事前 provision：
+SRM は Procurement/Asset サービスに以下の機能を提供します：
 - `GET /api/internal/supplier/{id}?tenantId={tenantId}` — サプライヤー概要
 - `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}` — 承認済みサプライヤー検索
-- 全内部 API は `X-Internal-Token` 認証を使用；Gateway 経由で公開しない
+- `POST /api/internal/supplier/batch` — body は `{tenantId,supplierIds}`。入力の最初の出現順に最大 100 件の概要を返し、存在しない ID は省略
+- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}` — RFQ の有効見積・バージョン・行スナップショットを取得
+- 全内部 API は `X-Internal-Token` と `X-Tenant-Id` を使用し、query/body テナントはヘッダーと一致が必要。Gateway 経由で公開せず、サプライヤー概要に連絡先や銀行口座の PII は含まれない
+
+SRM がポータル可視の RFQ を照会する場合は Procurement を呼び出します：
+
+- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`
+- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`
+
+supplierId は現在の userId に対応する `srm_supplier_portal_user` のみ指定でき、ポータルリクエストが渡す値は受け付けません。すべての内部リクエストは `X-Tenant-Id` も同時に運搬し、API に追加の query/body テナントがある場合はヘッダーと一致が必要です。
+
+RFQ `status=SENT`、招待 `status IN (INVITED, QUOTED)`、かつ quotationDeadline 未超過の場合のみ見積の送信・更新を許可し、`DRAFT/CLOSED/AWARDED/CANCELLED` は一律拒否します。
 
 ## 7. 硬制約
 
