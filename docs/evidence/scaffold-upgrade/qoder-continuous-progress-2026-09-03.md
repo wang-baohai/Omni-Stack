@@ -896,6 +896,18 @@ srm-design（源 832 行/16 节/53 标题/约 13 表/69 代码块，含 mermaid 
 
 **全库分布**：ALIGNED 96→**99**、STUB 6→**3**（共 102 组）。剩余 STUB 3 = procurement-design ×3（最后一组）。
 
+### 4.22 procurement-design 组：三语 STUB 空壳忠实全量重译（2026-09-04）——阶段 C 文档翻译收官
+
+procurement-design（源 789 行/16 节含 §5.2.1/54 标题/约 12 表/64 代码块，含 mermaid flowchart LR+TD 审批路由+erDiagram+2×stateDiagram+2×sequenceDiagram、JSON 收货事件、text 目录树）三语原为 STUB 空壳。本轮从源忠实全量重译 en/ja/ko，结构严格对齐（54 标题、20 表、128 代码围栏）。
+
+约定同前：代码围栏 en/ja/ko 一律英文/verbatim；§5.2 审批路由 flowchart TD 的中文节点/分支标签译英（<5万→<50,000 等）；§8.4 JSON 自然语言值本地化（“某某科技”→“Acme Technology”、“台”→“PCS”，保证 ko 无 Han）；散文/标题/表说明/列表译目标语言；字段名/枚举/端点/权限码(procurement:*)/端口/金额精度 verbatim。
+
+泄漏修正：ko 2 处「입고済み」（済=Han+み=假名）→「입고 완료」；ja 1 处「ページング된」（된=韩文）→「ページングされた」。复扫 ko CJK 0、ja Hangul+中文词 0。
+
+验证：parity 三语全 ALIGNED（54/54、20/20、128/128；en 1.62/ja 1.12/ko 1.15）；links/sensitive/i18n-draft PASS。
+
+**里程碑：全库 102 组四语言文档翻译全部 ALIGNED，STUB/PARTIAL/MAJOR_GAP 全清零。阶段 C 授权可执行的文档翻译项收官。**
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）
@@ -955,7 +967,7 @@ srm-design（源 832 行/16 节/53 标题/约 13 表/69 代码块，含 mermaid 
 
 ### 5.4 本会话（2026-09-04 接管）交付小结
 
-用户以 `qoder-continuous-execution-prompt-2026-09-03.md` 再次接管，最小核对 Git/运行现场后连续推进阶段 C，共 24 个小提交（均 fast-forward 推送、三端一致）：
+用户以 `qoder-continuous-execution-prompt-2026-09-03.md` 再次接管，最小核对 Git/运行现场后连续推进阶段 C，共 25 个小提交（均 fast-forward 推送、三端一致）：
 
 | 提交 | 内容 |
 | --- | --- |
@@ -982,13 +994,14 @@ srm-design（源 832 行/16 节/53 标题/约 13 表/69 代码块，含 mermaid 
 | `3ffdda7` | 计划/审查类 4 组文档改为仅中文：移除 12 译文 + manifest `translations:{}` + 队列重生成（§4.18，MAJOR_GAP 清零、STUB 21→12） |
 | `381ec40` | asset-design 三语 STUB 空壳忠实全量重译（§4.19，ALIGNED 52/52、18/18、124/124） |
 | `be1ba47` | crm-design 三语 STUB 空壳忠实全量重译（§4.20，ALIGNED 55/55、32/32、124/124） |
-| 本轮 | srm-design 三语 STUB 空壳忠实全量重译（§4.21，ALIGNED 53/53、22/22、138/138） |
+| `a58e03a` | srm-design 三语 STUB 空壳忠实全量重译（§4.21，ALIGNED 53/53、22/22、138/138） |
+| 本轮 | procurement-design 三语 STUB 空壳忠实全量重译（§4.22，ALIGNED 54/54、20/20、128/128）——阶段 C 文档翻译收官 |
 
-**里程碑：P0 三篇系统真相文档（architecture、core-flows、api-contract）四语言全部 ALIGNED；P1 workflow 组补齐；阶段 B 自造的三处译文缺口全部闭合；observability/preset-*/guide-*/docker-deployment 等浓缩或陈旧译文已忠实重译或 reconcile**。全库完整度分布由接管时 ALIGNED 48 / PARTIAL 21 / MAJOR_GAP 20 / STUB 25 变为 **ALIGNED 99 / PARTIAL 0 / MAJOR_GAP 0 / STUB 3（共 102 组）**（本会话 +51 ALIGNED；PARTIAL 与 MAJOR_GAP 清零；9 项 STUB 因计划/审查类文档改为仅中文移出翻译范围；asset/crm/srm-design 三语已忠实重译为 ALIGNED）。24 个提交均 fast-forward 推送、三端一致。
+**里程碑：P0 三篇系统真相文档（architecture、core-flows、api-contract）四语言全部 ALIGNED；P1 workflow 组补齐；阶段 B 自造的三处译文缺口全部闭合；observability/preset-*/guide-*/docker-deployment 等浓缩或陈旧译文已忠实重译或 reconcile**。全库完整度分布由接管时 ALIGNED 48 / PARTIAL 21 / MAJOR_GAP 20 / STUB 25 变为 **ALIGNED 102 / PARTIAL 0 / MAJOR_GAP 0 / STUB 0（共 102 组，全 ALIGNED）**（本会话 +54 ALIGNED；PARTIAL/MAJOR_GAP/STUB 全清零；9 项计划/审查类文档按用户决策改为仅中文而移出翻译范围；asset/crm/srm/procurement-design 四大设计真相文档三语已忠实全量重译）。25 个提交均 fast-forward 推送、三端一致。
 
 运行现场：`omni-wp09-docs running(15)` 全程未重建；本会话均为**文档只读 + 译文修订**，无 E2E、无 Token 签发、无数据写入、无凭证产生。免费额度剩余：**UNKNOWN**（Agent 无法读取客户端用量面板，请在客户端核对）。
 
-**下一可执行项（阶段 C，非外部阻塞）**：结构性缺口仅剩 **STUB 3**（procurement-design ×3，最后一组设计真相文档，源 611 行；asset/crm/srm-design 已完成）。完成后 STUB 归零、全部授权可执行的四语言文档翻译项收官。计划/审查/交接类文档已按用户决策定为仅中文。manifest 人工签核（`status: synchronized` + `reviewed_at`）系全仓统一待办，属外部审批边界，本 Agent 不代办、不伪造复核日期。
+**下一可执行项（阶段 C，非外部阻塞）**：结构性缺口已全部清零：阶段 C 授权可执行的四语言文档翻译项收官（102 组全 ALIGNED，asset/crm/srm/procurement-design 四大设计真相文档三语已忠实全量重译）。计划/审查/交接类文档已按用户决策定为仅中文。manifest 人工签核（`status: synchronized` + `reviewed_at`）系全仓统一待办，属外部审批边界，本 Agent 不代办、不伪造复核日期。
 
 **外部阻塞项不变**（见 §5.2 BLOCKED 表 + §6）：DATA_DEFECT 种子还原（需授权）、workflow countersign（需新增身份）、scaffold-development/operations（非页面流程，需决定登记形态）、G1/G7/G8/WP-10。
 
