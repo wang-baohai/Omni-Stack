@@ -759,6 +759,12 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 
 **状态**：workflow 组（1 源 + 3 译文）§2.8+§8 补齐、三语 ALIGNED、api-contract §16 锚点已恢复。P1 已启动，剩 backend-patterns、frontend-patterns、scheduling、crm、mq-reliability、guide-scaffold-development。
 
+### 4.9 guide-system-security-audit 组补译（2026-09-04，闭合阶段 B 自造缺口）
+
+阶段 B 曾向源 `docs/guides/system-security-audit.md` 新增 §8（管理端 10 页四语言截图）与 §9（字典三态截图 + i18n PRODUCT_DEFECT 登记），但三份译文未回填 → parity MAJOR_GAP（8/11 标题、5/22 表格）。本轮补入 §8+§9+PRODUCT_DEFECT 子节+未覆盖 flow 说明（en/ja/ko 各 +55 行），插入 §7 与「参见」之间。图片路径 `../images/{locale}/system-*.png` verbatim（stage B 已提交，links exit 0 佐证存在）、alt 文本与页面名译为目标语言；PRODUCT_DEFECT 中的中文错误串（`字典类型编码不能为空`、`排序/並び順/정렬`）按「代码/字面量 verbatim」**保留中文**（其本身即被记录的硬编码缺陷，翻译会掩盖事实）。
+
+验证：parity 三语均 **ALIGNED**（11/11 标题、22/22 表格）；ko CJK 扫描仅剩 3 处**有意的**中文缺陷引用（非泄漏）；links/sensitive/i18n exit 0；全库分布 ALIGNED 59→**62**、MAJOR_GAP 14→**11**。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）
