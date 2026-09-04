@@ -30,16 +30,16 @@
 - excluded untracked 临时项（`*.patch`、`scripts/.work/`、`omni-frontend/.artifacts/`、debug PNG 等）不提交、不删除。
 - 本批**不是纯文档批次**：ZF-2 含真实 SRM 截图 E2E 与只读能力核实；历史「全程文档只读」表述仅描述 2026-09-04 阶段 C 会话，不适用于本批。
 
-### Flash 批次执行状态（随进展滚动更新）
+### Flash 批次执行状态（2026-09-04 收口：FLASH_BATCH=PARTIAL_CHECKPOINT）
 
 | ZF | 状态 | checkpoint 摘要 |
 | --- | --- | --- |
-| ZF-0 | IN_PROGRESS | 接管核验完成（上表）；current state 统一（本节）；四份方案/提示词纳入首个精确提交 |
-| ZF-1 | PENDING | i18n findings 队列 → `i18n-findings-resolution-2026-09-04.md`（待创建） |
-| ZF-2 | PENDING | SRM `admission-lifecycle`、`detail-and-action-states` 截图闭环 + system-management/scaffold-development/operations 三项只读核实 |
-| ZF-3 | PENDING | 定向验证（文档门禁 + 修改过的 Playwright 套件 + frontend build/lint；后端代码未改则不跑 Maven 全量） |
-| ZF-4 | PENDING | 精确提交、fast-forward 推送、最终验收 checkpoint |
-| STRONG_MODEL_QUEUE | PENDING | 采购 bootstrap 数据恢复等高风险项，见 Flash 方案 §4 |
+| ZF-0 | DONE | 提交 `29379b5`：current state 统一 + 四份方案/提示词 |
+| ZF-1 | DONE | 提交 `8b43263`：objective 缺漏清零（parity 74→63，objective 残留 0）+ 独立复核包 |
+| ZF-2 | PARTIAL | 三项只读核实完成；SRM 两组截图 E2E 经 5 轮修复仍 BLOCKED（详见 flash-batch-checkpoint-2026-09-04.md §2），残留 0 |
+| ZF-3 | DONE | parity/links/sensitive/i18n 四门禁 exit 0；build exit 0；tracked lint exit 0；strict 8-red 基线复核一致 |
+| ZF-4 | DONE | 精确提交 + 一次性 fast-forward 推送 + flash-batch-checkpoint-2026-09-04.md |
+| STRONG_MODEL_QUEUE | UPDATED | 新增 SRM 截图两项恢复入口（checkpoint §2）；其余高风险项维持 Flash 方案 §4 |
 
 TOKEN_USAGE=UNKNOWN（平台无可信计数，按约束不编造）。
 
