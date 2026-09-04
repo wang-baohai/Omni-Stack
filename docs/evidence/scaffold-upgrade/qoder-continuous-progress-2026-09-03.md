@@ -789,6 +789,10 @@ parity 显示 observability 三语为 MAJOR_GAP（8/8 标题齐、但 4/8 代码
 
 验证：parity 三组九对全部 **ALIGNED**；ko CJK 扫描（preset-maintenance/custom-preset-tutorial）= 0；links/sensitive/i18n exit 0。全库分布 ALIGNED 68→**73**、PARTIAL 16→**15**、MAJOR_GAP 5→**3**、STUB 25→**23**（本批 +5 ALIGNED，含 2 个 STUB 转 ALIGNED）。三份译文仍 `present-unverified`/`reviewed_at: null`。
 
+### 4.13 guide-troubleshooting ja/ko 忠实重译（2026-09-04）
+
+parity 显示 guide-troubleshooting ja/ko 为 STUB（10/10 标题齐、但 0/7 表格）。核查：ja/ko 把源每个 `##` 小节压成单句散文，丢了 §1 启动失败的 7 行「现象/检查/处理」表，标题也被缩写（如「起動」应为「起動失敗」）。忠实重译 ja/ko：恢复 §1 七行表 + §2-9 全部 bullets/编号列表 + 完整标题（en 本已 ALIGNED，未改）。验证：parity 三语 ALIGNED 10/10、7/7；ko CJK 0；links/i18n exit 0；全库分布 ALIGNED 73→**75**、STUB 23→**21**（MAJOR_GAP 3、PARTIAL 15）。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）

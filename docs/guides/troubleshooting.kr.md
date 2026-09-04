@@ -1,40 +1,83 @@
 # 문제 해결 안내서
 
-먼저 실패 계층을 정하고 Trace ID, 업무 ID, 로그를 연결합니다. 반복 재시작이나 DB 직접 변경으로 근본 원인을 숨기지 않습니다.
+문제 해결 원칙: 먼저 실패 계층을 확정한 뒤 Trace ID, 업무 ID, 로그 증거로 위치를 특정합니다; 반복 재시작이나 데이터베이스 직접 수정으로 근본 원인을 가리지 않습니다.
 
-## 1. 시작
+## 1. 시작 실패
 
-Maven 문제는 JDK 25와 `./mvnw`, Nacos 대기는 health/8848/9848/인증, migrator는 새 changeSet과 환경, MySQL은 대상 Compose와 URL, 선택하지 않은 의존 재시도는 CLI plan/profile을 확인합니다.
+| 현상 | 검사 | 처리 |
+|---|---|---|
+| Maven 플러그인 비호환 | `java -version`, `JAVA_HOME` | JDK 25 로 전환 후 `./mvnw` 사용 |
+| 앱이 Nacos 대기 | Nacos 헬스, 8848/9848, 신원 구성 | 먼저 Nacos 를 복구한 뒤 대상 서비스 재시작 |
+| migrator 실패 | migrator 로그, DATABASECHANGELOG | 새 changeSet 이나 환경을 수정하고 실행된 changeSet 은 고치지 않음 |
+| MySQL 연결 거부 | 컨테이너 헬스, 포트, 계정, 데이터베이스 | 대상 Compose project 와 연결 문자열 확인 |
+| 미선택 의존 반복 재시도 | CLI dev plan, profile | 올바른 프리셋 사용 또는 선택적 통합을 명시적으로 비활성화 |
 
-## 2. 인증
+## 2. 로그인 실패
 
-새 CAPTCHA Key와 테넌트를 확인합니다. 리다이렉트 반복은 토큰 만료, 시간, Gateway ID, 소셜은 URI/PKCE/state/client, Portal 403은 역할, 연결, 공급업체 상태를 확인합니다.
+- CAPTCHA 가 비어 있거나 오류: 이미지를 새로고침하고 새 `captchaKey` 를 사용.
+- 사용자가 존재하지 않음: 테넌트와 테넌트 내 사용자 이름 확인.
+- 로그인 후 로그인 페이지로 반복 이동: 토큰 유효기간, 로컬 시간, Gateway 신원 헤더 확인.
+- 소셜 콜백 실패: 콜백 URI, PKCE, `state`, 클라이언트 구성 확인.
+- Portal 403: `SUPPLIER` 역할, Portal 연관, 공급업체 상태 확인.
 
-## 3. 메뉴와 권한
+인증 로그는 로그인 로그에 있으며, Auth 작업 로그에서 찾지 않습니다.
 
-JWT authorities, `/api/auth/menus`, seed, 역할 관계를 확인하고 변경 후 다시 로그인합니다. 금지된 쓰기를 직접 호출해 403을 확인하고 `v-permission`과 백엔드 코드를 비교합니다.
+## 3. 메뉴 또는 권한 이상
 
-## 4. 데이터 범위
+1. API 로 JWT authorities 와 `/api/auth/menus` 반환을 확인.
+2. 권한 시드, 역할 관계, 조직 범위를 확인.
+3. 권한 변경 후 다시 로그인.
+4. 권한 없는 계정으로 쓰기 API 를 직접 호출해 백엔드가 403 을 반환하는지 확인.
+5. 프론트엔드 버튼만 비정상이면 `v-permission` 과 백엔드 권한 코드가 완전히 일치하는지 대조.
 
-Gateway 경유, 테넌트, 사용자, 조직, 역할, 도메인 테이블/열, 자식 집계 상속, Interceptor 순서를 확인합니다. 존재하지 않는 owner 열을 추가하지 않습니다.
+## 4. 데이터가 안 보이거나 권한 초과
+
+- 요청이 Gateway 를 거치는지 확인(신원 헤더를 위조해 비즈니스 서비스에 직접 연결하지 않음).
+- 테넌트 ID, 현재 사용자, 조직, 역할 범위를 확인.
+- 도메인 DataPermission 테이블 이름과 열 매핑을 확인.
+- 자식 테이블은 집계 루트를 통해 상속해야 하며, 존재하지 않는 owner 열에 조건을 추가하지 않음.
+- DataPermission 인터셉터가 Pagination 앞에 있는지 확인.
 
 ## 5. Workflow
 
-BPMN과 후보자 설정을 검증하고 시작 실패는 업무 ID와 예약 기록, 후보자 없음은 role/anchor/scope, 다중 승인은 `MI_END`와 카운터를 확인합니다.
+- 모델을 저장할 수 없음: BPMN XML 과 디자이너 상태 확인.
+- 검증 실패: 검증 목록에 따라 process id, 연결선, 후보자 구성, 표현식 수정.
+- 게시 충돌: 동일 모델의 동시 작업과 현재 초안 확인.
+- 시작 실패: 업무 전표 번호로 시작 요청 예약 기록과 재시도 상태 조회.
+- 승인자가 비어 있음: 후보자 미리보기로 role, anchor, 조직 범위, 폴백 전략 확인.
+- 합동 결재 결과 이상: `MI_END` 이력 작업 삭제 사유와 카운터 변수 확인.
 
 ## 6. XXL-JOB
 
-시스템 작업은 두 어노테이션, 개인 처리기는 Bean 이름=`typeCode`, 등록 실패는 DB 행 삭제, 즉시 실행 로그 없음은 Admin, 실행기, 처리기, 로그 저장을 확인합니다.
+- 시스템 작업이 안 보임: `@XxlJob` 과 `@SystemJobMeta` 이중 어노테이션 확인.
+- 개인 작업에 처리기 없음: Bean 이름은 `typeCode` 와 같아야 함.
+- 생성이 고아 기록을 남김: 등록 실패 후 데이터베이스 삭제 보상 확인.
+- 즉시 실행에 로그 없음: Admin, 실행기 등록, 처리기 예외, 로그 쓰기 확인.
 
-## 7. 메시지
+## 7. MQ 및 크로스 서비스
 
-Outbox → Broker → Inbox를 메시지 ID, topic/key, producer/consumer trace로 추적합니다. 하류 멱등성을 확인한 뒤 데드레터를 재전송합니다. relay 전체 테넌트 스캔은 설계이며 외부 조회는 테넌트로 필터링합니다.
+1. Outbox 에서 메시지 ID, Topic, 업무 Key 로 조회.
+2. PENDING, FAILED, DEAD_LETTER 상태와 다음 재시도 시간 확인.
+3. Broker 전달과 컨슈머 Inbox 확인.
+4. producer traceId 와 consumer traceId 로 Loki/Tempo 에서 연관.
+5. 하류 멱등성을 확인한 뒤에만 수동 재전송.
+
+Relay 의 크로스 테넌트 스캔은 설계된 동작이며, 외부 조회 인터페이스는 여전히 테넌트로 필터링해야 합니다.
 
 ## 8. 프론트엔드
 
-빈 화면은 메뉴, chunk, 401/403/404, 동적 폼은 Schema, 언어는 `omni-lang`, 날짜/금액은 현재 locale을 확인합니다. `--max-warnings 0`을 약화하지 않습니다.
+- 빈 페이지: 동적 메뉴 로드, 라우트 chunk, 브라우저 콘솔, API 401/403/404 확인.
+- 동적 폼 필드 유형 오류: JSON Schema `type`, `enum`, `options`, required 확인.
+- 언어가 지속되지 않음: `omni-lang` 이 `zh-CN`, `en-US`, `ja-JP`, `ko-KR` 인지 확인.
+- 날짜/금액 형식 오류: 현재 locale 을 사용하는지 확인, 인터페이스 값은 번역으로 바뀌면 안 됨.
+- lint 실패: 규칙을 낮추지 말고 소스를 수정해 `--max-warnings 0` 을 유지.
 
-## 9. 지원 정보
+## 9. 지원 요청 시 제공
 
-버전/commit, preset, Compose project, 시간, Trace/업무 ID, 마스킹 응답·로그, 재현, 기대/실제를 제공합니다. 비밀번호, CAPTCHA 답, JWT, 내부 토큰, 개인 키, 원본 개인정보를 제공하지 않습니다.
+- 해당 버전과 커밋 ID.
+- 대상 프리셋과 Compose project 이름.
+- 시간 범위, Trace ID, 업무 ID.
+- 마스킹된 오류 응답과 관련 서비스 로그.
+- 재현 절차, 기대 결과, 실제 결과.
 
+비밀번호, CAPTCHA 답, JWT, 내부 토큰, 개인 키, 마스킹되지 않은 개인 데이터를 제공하지 마세요.
