@@ -779,6 +779,16 @@ parity 显示 observability 三语为 MAJOR_GAP（8/8 标题齐、但 4/8 代码
 
 验证：parity observability 三语 **ALIGNED 且逐项满分**（8/8 标题、8/8 代码块、29/29 表格行）；ko CJK 扫描 0；links/sensitive/i18n exit 0；全库分布 ALIGNED 62→**65**、MAJOR_GAP 11→**8**。三份译文仍 `present-unverified`/`reviewed_at: null`（不替代独立复核）。
 
+### 4.12 preset 三组补译（2026-09-04：preset-quick-selection / preset-maintenance / custom-preset-tutorial）
+
+继续清理 MAJOR_GAP/STUB 中的 scaffold CLI 预设文档三组（均小体量、纯 CLI/散文，无运行栈依赖）：
+
+- **preset-quick-selection**（已提交 `7f04a40`）：en 把 §生成后必须验证的 `test:preset` 代码块并进散文（缺 1 块）；ja 缺 2 个 `##`、ko 缺 3 个 `##`。en 补回代码块，ja/ko 忠实重译补齐 5 个 `##` + 代码块 → 三语 ALIGNED 5/5、4/4、7/7。
+- **preset-maintenance**：en 本已 ALIGNED（6/6）；ja 缺 2 个 `##`（§修改正式预设+§黄金样例 并为单一标题、§失败回滚 无标题）、ko 缺 3 个 `##`。忠实重译 ja/ko 补齐 5 个 `##` + 受管理文件 7 项明细 → 三语 ALIGNED 6/6、2/2。
+- **custom-preset-tutorial**：en MAJOR_GAP（4/6，§2/§3 合并、§4 代码块降为散文）、ja/ko **STUB**（仅 1 个标题、无 `##` 分节）。三语忠实重译补齐 §1-4 + 常见错误共 6 标题、4 代码块（yaml/powershell）→ 三语 ALIGNED 6/6、8/8。yaml 示例的 displayName/description 按各语言本地化（en 英、ja 日、ko 韩），命令/路径/模块 ID verbatim。
+
+验证：parity 三组九对全部 **ALIGNED**；ko CJK 扫描（preset-maintenance/custom-preset-tutorial）= 0；links/sensitive/i18n exit 0。全库分布 ALIGNED 68→**73**、PARTIAL 16→**15**、MAJOR_GAP 5→**3**、STUB 25→**23**（本批 +5 ALIGNED，含 2 个 STUB 转 ALIGNED）。三份译文仍 `present-unverified`/`reviewed_at: null`。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）

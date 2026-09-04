@@ -1,8 +1,10 @@
 # Custom Preset Tutorial
 
-A custom preset combines catalog-known modules outside the five official choices. It uses the same Schema, dependency closure, conflict validation, atomic generation, and residual checks.
+A custom preset is suitable for combining catalog-known modules beyond the five official presets. It uses the same Schema, dependency closure, conflict check, atomic generation and residual check as the official presets.
 
-## Define the YAML
+## 1. Write the YAML
+
+For example, if you only need supplier and workflow capabilities:
 
 ~~~yaml
 id: supplier-workspace
@@ -12,24 +14,51 @@ description: Core platform, workflow, and supplier management.
 modules: [srm, gateway, mysql, redis, nacos]
 ~~~
 
-List entry modules only. `srm` resolves `workflow → base → auth → platform`; unrelated Procurement and Asset modules are not added.
+`modules` lists only entry modules. `srm` automatically pulls in `workflow → base → auth → platform`; the generator does not automatically add Procurement or Asset, which are unrelated to the dependencies.
 
-## Validate, preview, and create
+## 2. Validate and explain
 
 ~~~powershell
 Set-Location tools/omni-cli
 npm run build
 node dist/src/cli.js preset validate C:\WorkSpace\supplier-workspace.yaml
 node dist/src/cli.js preset explain C:\WorkSpace\supplier-workspace.yaml
+~~~
+
+Unknown modules, Schema errors or conflicts fail before any file is written.
+
+## 3. Preview and generate
+
+~~~powershell
 node dist/src/cli.js preset create C:\WorkSpace\supplier-workspace.yaml --output C:\WorkSpace\supplier-app --dry-run
 node dist/src/cli.js preset create C:\WorkSpace\supplier-workspace.yaml --output C:\WorkSpace\supplier-app
 node dist/src/cli.js preset validate C:\WorkSpace\supplier-workspace.yaml --output C:\WorkSpace\supplier-app
 ~~~
 
-Schema errors, unknown modules, and conflicts fail before any write. The output contains normalized `scaffold/presets/supplier-workspace.yaml` and `scaffold.lock`. Shared Workflow seeds are filtered so this example retains supplier onboarding but not procurement or asset approval models.
+The generated project saves the normalized `scaffold/presets/supplier-workspace.yaml` and `scaffold.lock`. In the shared Workflow service, the procurement and asset default processes are pruned by the combination, keeping only the supplier admission process.
 
-## Verify
+## 4. Verify the generated project
 
-Run backend `mvnw.cmd clean install`, frontend `npm ci`, lint/build, and `docker compose config --quiet`. Then use an isolated Compose project and volume for fresh migration, startup, and browser smoke tests.
+~~~powershell
+Set-Location C:\WorkSpace\supplier-app\omni-backend
+$env:JAVA_HOME='C:\APP\JDK25\jdk-25.0.2'
+.\mvnw.cmd clean install
 
-Common mistakes include using Maven artifact names instead of catalog IDs, copying every transitive dependency, targeting a non-empty directory, manually deleting output modules, and assuming optional infrastructure is automatically disabled. Change the YAML or catalog and regenerate instead.
+Set-Location ..\omni-frontend
+npm ci
+npm run lint
+npm run build
+
+Set-Location ..
+docker compose config --quiet
+~~~
+
+Then use an isolated Compose project/volume to run a fresh database, startup and browser smoke tests. Do not share the database volume with the existing development stack.
+
+## Common mistakes
+
+- Writing `omni-*` artifact names into `modules`: you must use the catalog module IDs here.
+- Explicitly copying all transitive dependencies: unnecessary, and it adds maintenance noise.
+- Outputting to the current repository or a non-empty directory: the generator rejects it.
+- Manually deleting modules after generation: this distorts `scaffold.lock`, seed digests and routes; modify the YAML and regenerate instead.
+- Assuming optional infrastructure is automatically disabled: you still need to check the corresponding runtime switches after generation.
