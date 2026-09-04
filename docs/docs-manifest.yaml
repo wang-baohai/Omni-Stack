@@ -16,7 +16,7 @@ documents:
     module: platform
     owner: architecture
     source: docs/architecture.md
-    source_sha256: dc60013a2cbad62ee1007730c2d11238501e12126f81d046ff9d2e117e010da4
+    source_sha256: 5fc881579377ccfe822db2a3cf4f11b640cbc259db2ade682f2de905b01e26a1
     dependencies: [module-structure, ports, data-flow, permissions]
     translations:
       en-US: { path: docs/architecture.en.md, status: present-unverified, reviewed_at: null }

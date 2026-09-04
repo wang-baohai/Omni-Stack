@@ -174,6 +174,10 @@ omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 | `omni-gateway` | **트래픽 진입점**: 모든 HTTP 요청의 유일한 진입점. JWT 검증 + 아이덴티티 전파 + 라우팅 분배 |
 | `omni-base` | **데이터 기반**: 사전, 로그, 예약 작업 등 공통 비즈니스 데이터의 관리 센터 |
 | `omni-workflow` | **프로세스 엔진**: 독립 배포 BPMN 워크플로우 서비스. Flowable 의존성을 `omni-common-workflow` starter로 격리 |
+| `omni-crm` | **영업 도메인**: CRM 데이터를 독립적으로 소유하며, Auth 내부 인터페이스로 테넌트 사용자·조직·permission-aware 데이터 범위를 재사용 |
+| `omni-srm` | **공급업체 도메인**: SRM 데이터를 독립적으로 소유하며, Portal Saga 로 Auth 와 함께 SUPPLIER 역할을 할당하고 조달/자산에 내부 토큰 보호 공급업체 요약 API 를 제공 |
+| `omni-procurement` | **조달 실행 도메인**: 조달 데이터를 독립적으로 소유하며, Workflow 로 구매 요청 승인을 구동하고 SRM 로 공급업체 초대와 견적 협업을 완료하며, 자산 도메인에 합격 입고 이벤트와 이력 보장 인터페이스를 발행 |
+| `omni-asset` | **자산 수명주기 도메인**: 자산 데이터를 독립적으로 소유하며, 조달 합격 입고 이벤트를 소비해 카드를 생성하고 Workflow 로 이동/처분 승인을 구동하며 자산 집계 루트로 귀속과 사용 범위를 통일 관리 |
 
 ---
 
@@ -366,11 +370,41 @@ RocketMQ Broker (StreamBridge 경유)
 
 ### 9.2 데이터베이스 스키마
 
-#### omni_auth 데이터베이스 (14 테이블)
+#### omni_auth 데이터베이스 (19 테이블)
 
-**OAuth2 인가 (3 테이블)**: `oauth2_registered_client`, `oauth2_authorization`, `oauth2_authorization_consent`
+**OAuth2 인가 (3 테이블)**:
 
-**멀티 테넌트 RBAC (11 테이블)**: `sys_tenant`, `sys_org_unit`, `sys_user`, `sys_role`, `sys_permission`, `sys_user_role`, `sys_role_permission`, `sys_user_unit`, `sys_role_dept`, `sys_token_blacklist`, `sys_user_oauth_provider`, `sys_xss_config`, `sys_xss_blacklist_rule`
+| 테이블 | 용도 |
+|------|------|
+| `oauth2_registered_client` | OAuth2 클라이언트 등록(client_id, 시크릿, 인가 유형, 범위) |
+| `oauth2_authorization` | 활성 OAuth2 인가 레코드(Access Token, Refresh Token, 인가 코드) |
+| `oauth2_authorization_consent` | 사용자가 동의한 범위 |
+
+**멀티 테넌트 RBAC (14 테이블)**:
+
+| 테이블 | 용도 |
+|------|------|
+| `sys_tenant` | 테넌트 레지스트리(멀티 테넌시 루트) |
+| `sys_org_unit` | 조직 단위(구체화된 경로 계층) |
+| `sys_user` | 사용자 계정(테넌트 + 조직 단위 연결) |
+| `sys_role` | 역할 정의(테넌트 범위) |
+| `sys_permission` | 권한 트리(메뉴, 버튼, API; 구체화된 경로) |
+| `sys_user_role` | 사용자-역할 할당 |
+| `sys_role_permission` | 역할-권한 할당 |
+| `sys_user_unit` | 사용자-조직 단위 할당(주/부) |
+| `sys_role_dept` | 역할-부서 데이터 범위 바인딩 |
+| `sys_user_role_scope` | 사용자 역할 범위(`unit_id` + `scope_mode`: SAME_UNIT / UNIT_AND_BELOW; 고유 키 `tenant_id`+`user_id`+`role_id`+`unit_id`), 데이터 권한과 워크플로우 후보자 해석을 구동 |
+| `sys_token_blacklist` | 취소된 JWT 블랙리스트 |
+| `sys_user_oauth_provider` | 서드파티 소셜 로그인 ID 연결 |
+| `sys_xss_config` | 테넌트 수준 XSS 전역 스위치 |
+| `sys_xss_blacklist_rule` | XSS 블랙리스트 규칙 |
+
+**보안 감사와 포털 역할 (2 테이블)**:
+
+| 테이블 | 용도 |
+|------|------|
+| `sys_audit_log` | 보안 감사 로그(`event_type`: LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED) |
+| `sys_portal_role_request` | 포털 역할 할당 요청 멱등 Inbox(`status`: PROCESSING/COMPLETED/FAILED, 고유 키 `tenant_id`+`request_id`) |
 
 ```mermaid
 erDiagram
@@ -613,12 +647,16 @@ DataScopeContext.clear() (finally 블록, ThreadLocal 누수 방지)
 
 소셜 로그인 프레임워크는 `OAuth2ProviderHandler` 인터페이스를 통한 전략 패턴 사용:
 
-1. `XxxOAuth2Handler.java`를 생성하고 `OAuth2ProviderHandler` 구현. `@Component("xxx")`로 어노테이션
-2. `OAuth2Properties.java`에 `XxxProperties` 내부 정적 클래스 추가
-3. `application.yml`에 `auth.oauth2.xxx.*` 설정 섹션 추가
+1. **핸들러 구현 생성**: `XxxOAuth2Handler.java` 를 생성하고 `OAuth2ProviderHandler` 구현, `@Component("xxx")` 로 어노테이션. `getProviderId()`, `buildAuthorizationUrl()`, `exchangeCodeForAccessToken()`, `fetchUserProfile()`(통일된 `ProviderUser` DTO 반환) 구현
+2. `OAuth2Properties.java` 에 `XxxProperties` 내부 정적 클래스 추가
+3. `application.yml` 에 `auth.oauth2.xxx.*` 설정 섹션 추가
 4. `SocialLoginServiceImpl.getUsernamePrefix()` switch 표현식에 case 추가
 
+`SocialLoginServiceImpl` 은 Spring 의 `Map<String, OAuth2ProviderHandler>` 주입으로 새 핸들러를 자동 감지합니다.
+
 **현재 구현됨**: GitHub, Google, Gitee.
+
+> 상세는 [core-flows.kr.md](core-flows.kr.md) Flow 4
 
 ### 13.2 새 서비스에 XSS 보호 추가
 
@@ -626,7 +664,7 @@ XSS 방어 시스템은 모듈식 — 새 서비스는 Common Starter 생태계�
 
 1. `omni-common-core` + `omni-common` 의존성 추가
 2. `XssConfigProvider` SPI 인터페이스 구현
-3. Redis 캐시 전략 사용(30분 TTL)
+3. Redis 캐시 전략 사용(`xss:enabled:{tenantId}` + `xss:rules:{tenantId}`, 30분 TTL)
 4. `XssAutoConfiguration`은 `AutoConfiguration.imports`로 자동 등록
 
 ### 13.3 새 사용자 작업 유형 추가
@@ -636,6 +674,8 @@ XSS 방어 시스템은 모듈식 — 새 서비스는 Common Starter 생태계�
 1. `sys_user_job_type`에 INSERT하여 작업 유형 등록(고유 `type_code`, Bean 이름에 매핑)
 2. `@Component("{type_code}")` 클래스를 생성하고 `UserJobHandler` 구현
 3. `UserJobHandlerRegistry`가 `Map<String, UserJobHandler>` 주입으로 자동 감지
+
+> 전체 튜토리얼은 [scheduling.kr.md](scheduling.kr.md) 4장
 
 ---
 
@@ -726,13 +766,21 @@ spring:
   uri: lb://omni-order
   predicates:
     - Path=/api/order/**
-  filters:
-    - StripPrefix=2
 ```
+
+하위 Controller 는 전체 `/api/order/**` 경로를 유지하고 선언합니다; 현재 게이트웨이는 `StripPrefix` 를 적용하지 않습니다.
 
 ### 14.6 권한 시드 데이터 추가
 
 `scripts/sql/seed/auth.sql`에 멱등 `sys_permission` 레코드를 추가하고 `database/seed/manifest.yaml`의 체크섬과 자연 키 검증을 갱신합니다.
+
+```sql
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_name, permission_code, type, path, depth, sort, status) VALUES
+(1, 0, '订单管理', 'order', 'DIRECTORY', '/<目录ID>/', 1, 1, 1),
+(1, @order_dir, '订单列表', 'order:list', 'MENU', '/<目录ID>/<菜单ID>/', 2, 1, 1),
+(1, @order_list, '查看订单', 'order:detail:query', 'API', '/<目录ID>/<菜单ID>/<权限ID>/', 3, 1, 1);
+```
 
 ### 14.7 Docker 배포 설정
 

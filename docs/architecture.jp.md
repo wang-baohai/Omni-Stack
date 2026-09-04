@@ -173,8 +173,12 @@ omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 | `omni-common-*` starters | **自動設定層**：`AutoConfiguration.imports` によるゼロコンフィグアクセス。新サービスは Maven 依存追加のみ |
 | `omni-auth` | **セキュリティハブ**：認証・認可・JWT 発行を集中処理。システム全体の信頼チェーンの起点 |
 | `omni-gateway` | **トラフィックエントリ**：全 HTTP リクエストの唯一のエントリポイント。JWT 検証 + アイデンティティ伝播 + ルート配布 |
-| `omni-base` | **データ基盤**：辞書、ログ、定时タスクなどの共通ビジネスデータの管理センター |
+| `omni-base` | **データ基盤**：辞書、ログ、定期タスクなどの共通ビジネスデータの管理センター |
 | `omni-workflow` | **プロセスエンジン**：独立デプロイの BPMN ワークフローサービス。Flowable 依存を `omni-common-workflow` starter で分離 |
+| `omni-crm` | **営業ドメイン**：CRM データを独立して所有し、Auth 内部インターフェース経由でテナントユーザー・組織・permission-aware データ範囲を再利用 |
+| `omni-srm` | **サプライヤードメイン**：SRM データを独立して所有し、Portal Saga で Auth とともに SUPPLIER ロールを割当、調達/資産に内部トークン保護のサプライヤーサマリー API を提供 |
+| `omni-procurement` | **調達実行ドメイン**：調達データを独立して所有し、Workflow で購買申請承認を駆動、SRM でサプライヤー招待と見積協働を完了、資産ドメインに合格入荷イベントと履歴補償インターフェースを発行 |
+| `omni-asset` | **資産ライフサイクルドメイン**：資産データを独立して所有し、調達の合格入荷イベントを消費してカードを作成、Workflow で移管/廃棄承認を駆動、資産集約ルートで帰属と使用範囲を統一管理 |
 
 ---
 
@@ -368,7 +372,7 @@ RocketMQ Broker (StreamBridge 経由)
 
 ### 9.2 データベーススキーマ
 
-#### omni_auth データベース（14 テーブル）
+#### omni_auth データベース（19 テーブル）
 
 **OAuth2 認可（3 テーブル）**：
 
@@ -378,7 +382,7 @@ RocketMQ Broker (StreamBridge 経由)
 | `oauth2_authorization` | アクティブな OAuth2 認可レコード |
 | `oauth2_authorization_consent` | ユーザー同意済みスコープ |
 
-**マルチテナント RBAC（11 テーブル）**：
+**マルチテナント RBAC（14 テーブル）**：
 
 | テーブル | 用途 |
 |---------|------|
@@ -391,10 +395,18 @@ RocketMQ Broker (StreamBridge 経由)
 | `sys_role_permission` | ロール・権限関連 |
 | `sys_user_unit` | ユーザー・組織単位関連 |
 | `sys_role_dept` | ロール・部署データスコープバインディング |
+| `sys_user_role_scope` | ユーザーロールスコープ（`unit_id` + `scope_mode`：SAME_UNIT / UNIT_AND_BELOW；一意キー `tenant_id`+`user_id`+`role_id`+`unit_id`）、データ権限とワークフロー候補者解決を駆動 |
 | `sys_token_blacklist` | 無効化 JWT ブラックリスト |
 | `sys_user_oauth_provider` | サードパーティソーシャルログイン ID リンク |
 | `sys_xss_config` | テナントレベル XSS グローバルスイッチ |
 | `sys_xss_blacklist_rule` | XSS ブラックリストルール |
+
+**セキュリティ監査とポータルロール（2 テーブル）**：
+
+| テーブル | 用途 |
+|---------|------|
+| `sys_audit_log` | セキュリティ監査ログ（`event_type`：LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED） |
+| `sys_portal_role_request` | ポータルロール割当リクエストの冪等 Inbox（`status`：PROCESSING/COMPLETED/FAILED、一意キー `tenant_id`+`request_id`） |
 
 ```mermaid
 erDiagram
@@ -548,6 +560,15 @@ Omni-Stack は **RBAC-0 基礎権限モデル**（ユーザー・ロール・権
 └─────────────────────────────────────────────────────────────┘
 ```
 
+**権限ツリー構造**（`sys_permission` テーブル、マテリアライズドパス）：
+
+| ノードタイプ | 用途 | 例 |
+|---------|------|------|
+| `DIRECTORY` | メニューグループディレクトリ | 「システム管理」 |
+| `MENU` | ルーティング可能なメニューページ | 「ユーザー管理」 (path: /system/user) |
+| `BUTTON` | ボタン/API 操作 | 「ユーザー作成」 (code: system:user:create) |
+| `API` | 細粒度 API エンドポイント | 「GET /api/auth/user/list」 |
+
 ### 11.3 データ権限アーキテクチャ
 
 データ権限は **MyBatis-Plus `DataPermissionInterceptor`** に基づく SQL 自動インターセプトで、ビジネスコードへの侵入ゼロ。
@@ -564,6 +585,49 @@ Omni-Stack は **RBAC-0 基礎権限モデル**（ユーザー・ロール・権
 | 最も厳格 | `SELF` | 自分のデータのみ | 6 |
 
 **マルチロールマージルール**：最も緩和が優先。複数ロールを持つユーザーは最小の優先度数値の dataScope を使用。
+
+**リクエストレベルのデータフロー**：
+
+```
+HTTP Request (X-User-Id, X-Tenant-Id Header を含む)
+    │
+    ▼
+DataScopeResolveFilter (OncePerRequestFilter, @Order(0))
+    │ 1. Header から userId, tenantId を抽出
+    │ 2. ユーザーの全ロールを照会 → sys_role_mapper.selectRolesByUserId()
+    │ 3. 全ロールの dataScope をマージ → 最も緩和を採用
+    │ 4. アクセス可能な組織ユニット ID 集合を解決（DEPT*/CUSTOM はマテリアライズドパスの子孫を照会）
+    │ 5. DataScopeContext (ThreadLocal) に書き込み
+    ▼
+MyBatis-Plus DataPermissionInterceptor
+    │ sys_user テーブルの SELECT クエリをインターセプト
+    │ DataPermissionHandlerImpl.getSqlSegment() を呼び出し
+    │ effectiveScope に基づき WHERE 条件を自動付加：
+    │   ALL/TENANT → 付加なし
+    │   SELF       → WHERE sys_user.id = {userId}
+    │   DEPT*/CUSTOM → WHERE sys_user.primary_unit_id IN (...)
+    ▼
+ビジネスコード（Controller → Service → Mapper）
+    │ 侵入ゼロ、データ権限の存在を意識不要
+    ▼
+DataScopeContext.clear() (finally ブロック、ThreadLocal リーク防止)
+```
+
+**2 種類のフィルタリングモード**：
+
+| モード | 適用場面 | 実装方式 |
+|------|---------|---------|
+| SQL インターセプト | データベースクエリ（ユーザー一覧など） | `DataPermissionInterceptor` + `DataPermissionHandlerImpl` が WHERE を自動付加 |
+| メモリフィルタリング | 非データベースデータ（Redis 内のオンラインユーザーなど） | Controller が `DataScopeContext` を読み `primaryUnitId` でフィルタリング |
+
+### 11.4 RBAC 管理フロー
+
+- **ロール管理**：ロール作成 → 権限割当（`sys_role_permission`）→ データ範囲設定（`sys_role.data_scope`）→ カスタム部署（`sys_role_dept`、CUSTOM 範囲のみ）
+- **ユーザー権限付与**：ユーザー作成 → ロール割当（`sys_user_role`）→ 組織ユニット割当（`sys_user_unit`、primary をマーク）
+- **メニューレンダリング**：ログイン → JWT に権限コードを含む → フロントエンドが `/api/auth/menus` を呼ぶ → バックエンドが再帰フィルタリング → フロントエンドが動的にルートを登録
+- **データクエリ**：リクエスト → Gateway が身分ヘッダーを注入 → Filter がデータ範囲を解決 → MyBatis-Plus が SQL を自動付加 → フィルタリング済みデータを返却
+
+> 完全な RBAC フローのシーケンス図は [core-flows.jp.md](core-flows.jp.md)
 
 ---
 
@@ -586,12 +650,16 @@ Omni-Stack は **RBAC-0 基礎権限モデル**（ユーザー・ロール・権
 
 ソーシャルログインフレームワークは `OAuth2ProviderHandler` インターフェースによるストラテジーパターンを使用：
 
-1. `XxxOAuth2Handler.java` を作成し `OAuth2ProviderHandler` を実装。`@Component("xxx")` でアノテート
+1. **ハンドラー実装の作成**：`XxxOAuth2Handler.java` を作成し `OAuth2ProviderHandler` を実装、`@Component("xxx")` でアノテート。`getProviderId()`、`buildAuthorizationUrl()`、`exchangeCodeForAccessToken()`、`fetchUserProfile()`（統一の `ProviderUser` DTO を返す）を実装
 2. `OAuth2Properties.java` に `XxxProperties` 内部静的クラスを追加
 3. `application.yml` に `auth.oauth2.xxx.*` 設定セクションを追加
 4. `SocialLoginServiceImpl.getUsernamePrefix()` switch 式に case を追加
 
+`SocialLoginServiceImpl` は Spring の `Map<String, OAuth2ProviderHandler>` 注入により新しいハンドラーを自動検出します。
+
 **現在実装済み**：GitHub、Google、Gitee。
+
+> 詳細は [core-flows.jp.md](core-flows.jp.md) Flow 4
 
 ### 13.2 新サービスへの XSS 防護追加
 
@@ -599,16 +667,18 @@ XSS 防御システムはモジュラー — 新サービスは Common Starter �
 
 1. `omni-common-core` + `omni-common` 依存を追加
 2. `XssConfigProvider` SPI インターフェースを実装
-3. Redis キャッシュ戦略を使用（30 分 TTL）
+3. Redis キャッシュ戦略を使用（`xss:enabled:{tenantId}` + `xss:rules:{tenantId}`、30 分 TTL）
 4. `XssAutoConfiguration` は `AutoConfiguration.imports` で自動登録
 
 ### 13.3 新規ユーザータスクタイプの追加
 
 ユーザータスクシステムは `UserJobHandler` による SPI パターンを使用：
 
-1. `sys_user_job_type` に INSERT してタスクタイプを登録
+1. `sys_user_job_type` に INSERT してタスクタイプを登録（`type_code` は一意、Bean 名にマッピング）
 2. `@Component("{type_code}")` クラスを作成し `UserJobHandler` を実装
 3. `UserJobHandlerRegistry` が `Map<String, UserJobHandler>` 注入で自動検出
+
+> 完全なチュートリアルは [scheduling.jp.md](scheduling.jp.md) 第 4 章
 
 ---
 
@@ -698,13 +768,21 @@ spring:
   uri: lb://omni-order
   predicates:
     - Path=/api/order/**
-  filters:
-    - StripPrefix=2
 ```
+
+下流の Controller は完全な `/api/order/**` パスを保持・宣言します；現在ゲートウェイは `StripPrefix` を行いません。
 
 ### 14.6 権限シードデータの追加
 
 `scripts/sql/seed/auth.sql` に冪等な `sys_permission` レコードを追加し、`database/seed/manifest.yaml` のチェックサムと自然キー検証を更新します。
+
+```sql
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_name, permission_code, type, path, depth, sort, status) VALUES
+(1, 0, '订单管理', 'order', 'DIRECTORY', '/<目录ID>/', 1, 1, 1),
+(1, @order_dir, '订单列表', 'order:list', 'MENU', '/<目录ID>/<菜单ID>/', 2, 1, 1),
+(1, @order_list, '查看订单', 'order:detail:query', 'API', '/<目录ID>/<菜单ID>/<权限ID>/', 3, 1, 1);
+```
 
 ### 14.7 Docker デプロイ設定
 

@@ -431,6 +431,11 @@ strict 模块失败数仍为 8（需全部 required_flows 达标才能转 covere
 | `c40c7cc` | 阶段 B 第一批：72 张只读管理页截图，关闭 workflow `tracking` | 80 | PUSHED |
 | `31ee4e8` | 阶段 B 第二批：8 张响应式图，关闭 srm `stable-mobile-flow` | 14 | PUSHED |
 | `6c03b32` | 阶段 B 第三批：12 张字典三态图，关闭 system-management 两个状态 gap | 18 | PUSHED（见下方事件） |
+| `cc5cdfd` | 阶段 B：记录进度与暂停 checkpoint（`docs(evidence)`） | 1 | PUSHED |
+| `4047e5b` | 阶段 C：srm 三个截图章节补译 en/ja/ko（结构对齐） | 3 | PUSHED |
+| `1f01f55` | 阶段 B 第四批：16 张只读详情弹层图（含加载态质检拦截修正，§3.10） | 23 | PUSHED |
+| `e299d1e` | 阶段 C：P0 architecture 首轮（四库章节 + 模块计数 + Compose + Flowable 8.x，§4.5.1-4.5.2） | 15 | PUSHED |
+| 本批 | 阶段 C：P0 architecture 收尾（§5 +4 行 + 缺陷 A/B/C，三语 ALIGNED 138/138，§4.5.3-4.5.8） | 6 | 提交推送后 remote==local（见 §4.5.8） |
 
 **`6c03b32` 推送事件（如实记录）**：
 
@@ -581,7 +586,52 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 
 修复后平价：architecture **en-US → ALIGNED**（57/57 标题、36/36 代码块、129/133 表格行）；ja-JP 56/57、32/36、119/133；ko-KR 57/57、34/36、109/133（仍 PARTIAL）。
 
-#### 4.5.3 architecture 组剩余待办（已定位，未完成）
+#### 4.5.3 architecture 组已完全对齐（本轮收尾）
+
+续修后逐节比对结果：**en / ja / ko 三份译文的「有内容缺口的章节数 = 0」**，且平价指标均为 **57/57 标题、36/36 代码块、138/138 表格行**（三份均 ALIGNED）。全库完整度分布由 ALIGNED 48 / PARTIAL 21 变为 **ALIGNED 50 / PARTIAL 19**（MAJOR_GAP 20、STUB 25 不变）。
+
+本轮续修的三项：
+
+1. **ja §11 RBAC 内容补齐**：§11.2 权限树表（`DIRECTORY`/`MENU`/`BUTTON`/`API`）、§11.3 请求级数据流图与两种过滤模式表、§11.4 整节（含 `core-flows` 链接）。
+2. **ja/ko §13 被缩写的内容补齐**：§13.1 的 `getProviderId()`/`buildAuthorizationUrl()`/`exchangeCodeForAccessToken()`/`fetchUserProfile()` 与 `ProviderUser` DTO、`Map<String, OAuth2ProviderHandler>` 自动发现句；§13.2 的 `xss:enabled:{tenantId}` + `xss:rules:{tenantId}`；§13.3 的 `type_code` 唯一性与 `scheduling` 链接。
+3. **三语 §5「局部与整体关系」表补 4 行**：`omni-crm`/`omni-srm`/`omni-procurement`/`omni-asset` 四个业务域（此前译文只到 `omni-workflow`，读者无法从架构文档得知四个业务域存在）。
+
+#### 4.5.4 本轮新发现的三个事实缺陷（已修，均有权威证据）
+
+**缺陷 A：`omni_auth` 表清单与计数错（源文档自身缺陷，影响四份）**
+
+- 权威证据：`database/changelog/auth/0001-auth-schema.yaml`（`adoption-baseline` 结构基线）共 **19 张表** = 3 个 `oauth2_*` + 16 个 `sys_*`。
+- 文档原状：标题写「omni_auth 数据库（**14 表**）」「多租户 RBAC（**11 表**）」，但实际列出 3 + 13 = 16 行；且**完全遗漏 3 张表**：`sys_user_role_scope`、`sys_audit_log`、`sys_portal_role_request`。
+- 严重性：`sys_user_role_scope` 正是阶段 A workflow-500 修复与数据权限/候选人解析的核心表，在 P0 架构文档中缺席影响很大。
+- 修正：标题改为 19 表，RBAC 组改为 14 表并补 `sys_user_role_scope` 行，新增「安全审计与门户角色（2 表）」分组；用途描述均取自 DDL 真实 COMMENT 与列定义（`scope_mode`: SAME_UNIT / UNIT_AND_BELOW、`event_type` 枚举、`status`: PROCESSING/COMPLETED/FAILED），**未臆测语义**。en/ja 同步；ko 原本把两张表写成**逗号散文列表**（丢失用途列、0/20 表格行），已重建为与源一致的三张表。
+
+**缺陷 B：§14.5 Gateway 路由示例在三份译文中均错（高危、可操作）**
+
+- 译文 yaml 均多出 `filters:` + `- StripPrefix=2`，且均丢失源文档那句「下游 Controller 保留并声明完整 `/api/order/**` 路径；当前网关不做 `StripPrefix`」。
+- 权威证据：`omni-backend/omni-gateway/src/main/resources/application.yml` 中 `StripPrefix` 出现 **0 次**，所有业务路由仅 `predicates: - Path=/api/<service>/**` 无 filters；Controller 声明完整路径（如 `@RequestMapping("/api/crm/lead")`）。
+- 危害：照译文配置会剥掉 `/api/<service>` 前缀，**直接打断新服务路由**。
+- 修正：三份译文删除错误 `filters`，补回源文档该句（与源逐字一致，未自行添加额外解释以免与源分叉）。
+
+**缺陷 C：§14.6 权限种子 SQL 在 en 中也是错的（附带发现）**
+
+- en 代码块用 `name, code` 列名、`'order:list:page'`、类型 `'BUTTON'`、path `'/order'`/`'list'`/`NULL`；而真实 schema 与源文档为 `permission_name, permission_code`、`'order:list'`、类型 `'API'`、物化路径 `'/<目录ID>/'`。已用阶段 A 核实的真实 seed 语句交叉印证（`INSERT IGNORE INTO sys_permission (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)`）。
+- ja/ko 则**完全缺失该 SQL 代码块**。
+- 修正：按仓库「代码块不翻译」约定，三份译文统一采用源的 verbatim SQL。
+
+#### 4.5.5 architecture 组剩余细小差异（不阻碍 ALIGNED）
+
+- ja 缺 4 个内联代码提及：`(username, tenant_id)`、`XxlJobAdminClient`、`XxlJobSpringExecutor`、`resource:action`。
+- ko 缺 4 个：`DataPermissionHandlerImpl`、`XxlJobAdminClient`、`XxlJobSpringExecutor`、`spring.cloud.gateway`。
+- 三语均缺 `/api/crm/` 路径提及（1 处）；en 有 1 个额外内联代码。
+- 均为已对齐章节内的散文级提及，**结构平价已 100%**，待后续逐句语义复核时一并处理。
+
+#### 4.5.6 附带发现（待验证，本轮未改 coverage）
+
+`sys_audit_log.event_type` 的 DDL 枚举包含 **LOGIN_SUCCESS / LOGIN_FAILED / LOGOUT / ACCOUNT_LOCKED / PASSWORD_CHANGED** 等，说明登录记录可能实际由「审计日志」页（`system:auditlog`，本目标已采四语言图 `system-audit-log`）承载。因此阶段 B 将 system-management 的 `login-record` 归为「产品未提供页面」可能过于保守。**但本轮 Docker 守护进程已停，无法查运行库确认该页确实展示登录类事件**，故**未改 coverage**，仅登记为待验证项（恢复运行栈后用一条只读查询可定：按 `event_type` 统计 `sys_audit_log`）。另：AGENTS.md 称登录日志表为 `sys_login_log`，而实际 DDL 为 `sys_audit_log`（AGENTS.md 不在 docs-manifest 范围内，本轮未改）。
+
+#### 4.5.7 以下为中间过程的定位记录（已被 4.5.3–4.5.6 取代，保留不删）
+
+##### 旧：architecture 组剩余待办（当时定位，现已完成）
 
 - ja-JP 缺 4 个代码块、ko-KR 缺 2 个代码块；三语各缺 4〜24 行表格（en 129/133、ja 119/133、ko 109/133）。
 - ja-JP 标题 56/57（尚缺 1 个）。
@@ -590,6 +640,28 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 
 **状态处理**：`architecture` 三项译文在 `docs/docs-manifest.yaml` 中**仍保持 `present-unverified` / `reviewed_at: null`**。
 本轮为 Qoder 实质预审与修订，**不替代独立 Codex final review 或人工验收**，未批量填 `synchronized`。
+
+#### 4.5.8 接管复验（2026-09-04 新会话，对已 stage 字节独立重跑，非沿用上一会话结论）
+
+新会话按用户执行提示「先最小核对当前 Git 与运行现场」接管，对**已 stage 但未提交的 architecture 批次字节**独立重跑客观门禁，全部通过：
+
+| 检查 | 命令 | 结果（2026-09-04 实测） |
+| --- | --- | --- |
+| 平价（architecture 三语） | `node scripts/.work/qoder-doc-parity.mjs` | en/ja/ko 均 **ALIGNED**，57/57 标题、36/36 代码块、**138/138** 表格行 |
+| 全库完整度分布 | 同上 | **ALIGNED 50 / PARTIAL 19 / MAJOR_GAP 20 / STUB 25**（=114），与 §4.5.3 一致 |
+| 源摘要新鲜度 | `docs-quality.mjs --scope=i18n --allow-draft` | exit 0；`architecture.md` 实测 SHA256=`5fc881579377…` == manifest 值（缺陷 A 改源后已刷新） |
+| 链接 | `docs-quality.mjs --scope=links` | exit 0 |
+| 敏感内容 | `docs-quality.mjs --scope=sensitive --allow-draft` | exit 0 |
+| Flowable 版本 | `git grep "Flowable 7" -- docs/*.md` | 0 处真实陈旧引用（仅本 checkpoint 的修复叙述行命中，非产品文档） |
+| Compose 陈旧引用 | `git grep "docker-compose.yml" / "12 容器"` | `docs/architecture*.md` 0 处 |
+
+注：`docs-quality.mjs` 无 `--scope=translations`（§4.4 旧称），源摘要新鲜度实际由 `--scope=i18n` 承载，本轮以其为准。
+
+**运行现场**：`docker compose ls` = `omni-wp09-docs running(15)`；14 healthy + frontend（无 healthcheck），与 §8.1 一致，**未重建、未清卷、未改配置**。
+
+**Git 现场**：本地 HEAD = 远端 = `e299d1e`（`git ls-remote origin` 单值，无分叉）；本批 6 个文件（`architecture.md`/`.en`/`.jp`/`.kr` + `docs-manifest.yaml` + 本 checkpoint）已 stage，工作区无未暂存跟踪变更（用户手动编辑的 `architecture.kr.md` 已与 index 一致，parity 未因该编辑破对齐）。提交后 local 领先 `e299d1e` 一格，fast-forward 推送。
+
+**下一可执行项（阶段 C P0 续）**：architecture 组已收尾；P0 剩 `api-contract`（parity=MAJOR_GAP，三语 53/85 标题、30/72 代码块、139/305 表格行，缺 101 API 路径 + 56 权限码）与 `core-flows`。`api-contract` 为大体量补译，需评估工量后分组推进；不属外部阻塞。
 
 ## 5. 阶段 D：汇总验证与分类
 
@@ -712,7 +784,7 @@ strict 预期：关闭 `supplier-quotation` 一个 gap 后 SRM 仍为 `partial`�
    - `/admin/workflow/model` 首行点「版本/Version/バージョン/버전」（只读历史；**避开** 设计/校验/发布/删除 中的写操作，尤其发布与删除）；
    - `/admin/base/mqmessage` 首行点「查看详情/Detail」，弹层标题与 `Close` 按钮已实测。
    随后：manifest 登记（`step: detail`）、coverage 移除对应 `detail-and-action-states`、指南补节 + 刷新摘要、strict 重跑、提交推送。
-2. **阶段 C 下一组**：P0 `architecture`（源摘要 `bb2700158866`）及其 en/ja/ko 三份译文；同时补译 srm 组尚缺的截图章节（锚点：各译文 `## 10.` 之前）。
+2. **阶段 C 下一组**：P0 `architecture` 组**已收尾**（三语 ALIGNED 138/138，缺陷 A/B/C 已修，见 §4.5.3-4.5.8）；srm 组截图章节补译亦已完成（`4047e5b`）。下一 P0 组为 `api-contract`（源摘要见 manifest，parity=MAJOR_GAP，需大体量补译）与 `core-flows`，按同一源成组推进。
 3. **需授权才能推进**（不自行执行）：修复 §3.3 DATA_DEFECT（还原 `proc_material_category` ids 1-13，事务 + `ROW_COUNT()=13`）→ 解锁 procurement `material` 与 asset 全部 10 gaps；修复 §3.8 登记的 i18n PRODUCT_DEFECT（后端校验消息国际化 + 补齐 ja/ko 译文）。
 4. **需先确认身份**：workflow `countersign` 需多审批人；现有受信任测试身份仅 admin/supplier1，**登记待确认，不自行创建、不临时越权**。
 5. **scaffold-development / operations**（各 2 gaps）：非页面流程（CLI / 可观测基础设施），禁止伪造 UI 图；需先决定登记形态与证据标准（真实命令输出/仪表盘证据 vs 授权 `exempt`）。

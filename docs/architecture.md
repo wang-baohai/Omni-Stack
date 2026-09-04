@@ -372,7 +372,7 @@ RocketMQ Broker (通过 StreamBridge)
 
 ### 9.2 数据库 Schema
 
-#### omni_auth 数据库（14 表）
+#### omni_auth 数据库（19 表）
 
 **OAuth2 授权（3 表）**：
 
@@ -382,7 +382,7 @@ RocketMQ Broker (通过 StreamBridge)
 | `oauth2_authorization` | 活跃的 OAuth2 授权记录（Access Token、Refresh Token、授权码） |
 | `oauth2_authorization_consent` | 用户同意的作用域 |
 
-**多租户 RBAC（11 表）**：
+**多租户 RBAC（14 表）**：
 
 | 表名 | 用途 |
 |------|------|
@@ -395,10 +395,18 @@ RocketMQ Broker (通过 StreamBridge)
 | `sys_role_permission` | 角色-权限关联 |
 | `sys_user_unit` | 用户-组织单元关联（主/副） |
 | `sys_role_dept` | 角色-部门数据范围绑定 |
+| `sys_user_role_scope` | 用户角色作用域（`unit_id` + `scope_mode`：SAME_UNIT / UNIT_AND_BELOW；唯一键 `tenant_id`+`user_id`+`role_id`+`unit_id`），驱动数据权限与工作流候选人解析 |
 | `sys_token_blacklist` | 已撤销 JWT 黑名单 |
 | `sys_user_oauth_provider` | 第三方社交登录身份绑定 |
 | `sys_xss_config` | 租户级 XSS 全局开关 |
 | `sys_xss_blacklist_rule` | XSS 黑名单规则 |
+
+**安全审计与门户角色（2 表）**：
+
+| 表名 | 用途 |
+|------|------|
+| `sys_audit_log` | 安全审计日志（`event_type`：LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED） |
+| `sys_portal_role_request` | 门户角色分配请求幂等 Inbox（`status`：PROCESSING/COMPLETED/FAILED，唯一键 `tenant_id`+`request_id`） |
 
 ```mermaid
 erDiagram

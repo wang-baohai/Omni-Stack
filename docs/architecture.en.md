@@ -175,6 +175,10 @@ Each module plays a clearly defined role in the overall architecture:
 | `omni-gateway` | **Traffic entry**: The sole entry point for all HTTP requests; JWT verification + identity propagation + route distribution |
 | `omni-base` | **Data foundation**: Central management of dictionary, logs, scheduled tasks, and other shared business data |
 | `omni-workflow` | **Process engine**: Independently deployed BPMN workflow service; Flowable dependencies isolated via `omni-common-workflow` starter |
+| `omni-crm` | **Sales domain**: Owns CRM data independently; reuses tenant users, organizations and permission-aware data scopes through Auth internal APIs |
+| `omni-srm` | **Supplier domain**: Owns SRM data independently; assigns the SUPPLIER role together with Auth through the Portal Saga, and exposes internal-token-protected supplier summary APIs to Procurement/Asset |
+| `omni-procurement` | **Procurement execution domain**: Owns procurement data independently; drives requisition approval through Workflow, completes supplier invitation and quotation collaboration through SRM, and publishes qualified goods-receipt events plus a historical backfill API to the Asset domain |
+| `omni-asset` | **Asset lifecycle domain**: Owns asset data independently; creates cards by consuming qualified procurement receipt events, drives transfer/disposal approval through Workflow, and manages ownership and usage scope uniformly through the asset aggregate root |
 
 ---
 
@@ -368,7 +372,7 @@ The repository root `compose.yaml` merges `compose.infra.yaml` and `compose.apps
 
 ### 9.2 Database Schema
 
-#### omni_auth Database (14 tables)
+#### omni_auth Database (19 tables)
 
 **OAuth2 Authorization (3 tables)**:
 
@@ -378,7 +382,7 @@ The repository root `compose.yaml` merges `compose.infra.yaml` and `compose.apps
 | `oauth2_authorization` | Active OAuth2 authorization records (access tokens, refresh tokens, authorization codes) |
 | `oauth2_authorization_consent` | User-consented scopes per client |
 
-**Multi-Tenant RBAC (11 tables)**:
+**Multi-Tenant RBAC (14 tables)**:
 
 | Table | Purpose |
 |-------|---------|
@@ -391,10 +395,18 @@ The repository root `compose.yaml` merges `compose.infra.yaml` and `compose.apps
 | `sys_role_permission` | Role-to-permission assignments |
 | `sys_user_unit` | User-to-org-unit assignments (primary/secondary) |
 | `sys_role_dept` | Role-to-department data scope bindings |
+| `sys_user_role_scope` | User role scope (`unit_id` + `scope_mode`: SAME_UNIT / UNIT_AND_BELOW; unique key `tenant_id`+`user_id`+`role_id`+`unit_id`), driving data permissions and workflow candidate resolution |
 | `sys_token_blacklist` | Revoked JWT token blacklist |
 | `sys_user_oauth_provider` | Third-party social login identity linking |
 | `sys_xss_config` | Per-tenant XSS global toggle |
 | `sys_xss_blacklist_rule` | XSS blacklist rules |
+
+**Security Audit and Portal Roles (2 tables)**:
+
+| Table | Purpose |
+|-------|---------|
+| `sys_audit_log` | Security audit log (`event_type`: LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED) |
+| `sys_portal_role_request` | Idempotent inbox for portal role assignment requests (`status`: PROCESSING/COMPLETED/FAILED, unique key `tenant_id`+`request_id`) |
 
 ```mermaid
 erDiagram
@@ -772,19 +784,20 @@ Add to `omni-gateway/application.yml`:
   uri: lb://omni-order
   predicates:
     - Path=/api/order/**
-  filters:
-    - StripPrefix=2
 ```
+
+Downstream Controllers keep and declare the full `/api/order/**` path; the gateway currently does not apply `StripPrefix`.
 
 ### 14.6 Add Permission Seed Data
 
 Add idempotent `sys_permission` records in `scripts/sql/seed/auth.sql`, then refresh its checksum and natural-key assertions in `database/seed/manifest.yaml`:
 
 ```sql
-INSERT INTO sys_permission (tenant_id, parent_id, name, code, type, path, ...) VALUES
-(1, 0, 'Order Management', NULL, 'DIRECTORY', '/order', ...),
-(1, @order_dir, 'Order List', 'order:list:page', 'MENU', 'list', ...),
-(1, @order_list, 'View Order', 'order:detail:query', 'BUTTON', NULL, ...);
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_name, permission_code, type, path, depth, sort, status) VALUES
+(1, 0, '订单管理', 'order', 'DIRECTORY', '/<目录ID>/', 1, 1, 1),
+(1, @order_dir, '订单列表', 'order:list', 'MENU', '/<目录ID>/<菜单ID>/', 2, 1, 1),
+(1, @order_list, '查看订单', 'order:detail:query', 'API', '/<目录ID>/<菜单ID>/<权限ID>/', 3, 1, 1);
 ```
 
 ### 14.7 Docker Deployment Configuration
