@@ -42,6 +42,33 @@ The overview uses real backend aggregates for funnels, customer state, opportuni
 
 ![Sales overview](../images/en-US/crm-overview.png)
 
+#### Figure 2 `crm-lead-create-validation-en-US`: New-lead required-field validation
+
+- Prerequisites: log in as a user with CRM permission and open the lead list
+- Actor: sales user
+- Action: click "New Lead" to open the dialog and submit without entering a name
+- Expected result: the required-field error "Please enter a contact name" appears deterministically, and no data is created
+
+![New-lead required-field validation](../images/en-US/crm-lead-create-validation.png)
+
+#### Figure 3 `crm-lead-create-success-en-US`: Lead created successfully
+
+- Prerequisites: same as Figure 2; in the E2E scenario a unique name is auto-created and auto-cleaned
+- Actor: sales user
+- Action: fill in the contact name, save, and search by name
+- Expected result: the dialog closes and the new lead really appears in the list (creation-success result)
+
+![Lead created successfully](../images/en-US/crm-lead-create-success.png)
+
+#### Figure 4 `crm-lead-forbidden-403-en-US`: Forbidden CRM access
+
+- Prerequisites: log in as the ordinary employee zhangsan (not granted CRM permission)
+- Actor: ordinary employee
+- Action: access the lead-management page directly
+- Expected result: the 403 page with a return entry (AUTHENTICATED_BUT_FORBIDDEN, not a login redirect)
+
+![Forbidden CRM access](../images/en-US/crm-lead-forbidden-403.png)
+
 ## 7. Permission Acceptance
 
 Test with a super administrator, departmental salesperson, and self-only user:

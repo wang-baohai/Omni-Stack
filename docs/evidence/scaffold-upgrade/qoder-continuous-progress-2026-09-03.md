@@ -793,6 +793,15 @@ parity 显示 observability 三语为 MAJOR_GAP（8/8 标题齐、但 4/8 代码
 
 parity 显示 guide-troubleshooting ja/ko 为 STUB（10/10 标题齐、但 0/7 表格）。核查：ja/ko 把源每个 `##` 小节压成单句散文，丢了 §1 启动失败的 7 行「现象/检查/处理」表，标题也被缩写（如「起動」应为「起動失敗」）。忠实重译 ja/ko：恢复 §1 七行表 + §2-9 全部 bullets/编号列表 + 完整标题（en 本已 ALIGNED，未改）。验证：parity 三语 ALIGNED 10/10、7/7；ko CJK 0；links/i18n exit 0；全库分布 ALIGNED 73→**75**、STUB 23→**21**（MAJOR_GAP 3、PARTIAL 15）。
 
+### 4.14 preset-upgrade-guide + guide-crm-flow 组补译（2026-09-04）
+
+继续清理 PARTIAL：
+
+- **preset-upgrade-guide**（提交 `1758683`）：三语把 §版本判断 并入 §推荐流程、§回滚+§升级完成标准 合为一节（4/6 标题），bullet 列表压成散文。忠实重译三语，恢复 5 个 `##` + 全部 bullet → ALIGNED 6/6。
+- **guide-crm-flow**：三语均缺 §6 的图 2/3/4（新建线索必填校验、创建成功、无权限 403）三个 `####` 子节（10/13 标题）；ja/ko 另把 §2-7 压成单段（charRatio 0.57/0.63）。en 补入图 2/3/4（实测 9 张 en/ja/ko `crm-lead-*` 图均存在）；ja/ko 忠实重译（恢复 §2 五步编号、§3-7 明细、§6 四图）→ 三语 ALIGNED 13/13、2/2。图片路径 `../images/{locale}/crm-*.png` verbatim。
+
+验证：parity 两组六对全 ALIGNED；ko CJK 0；links/i18n exit 0；全库分布 ALIGNED 75→**81**、PARTIAL 15→**9**、MAJOR_GAP 3、STUB 21。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）
