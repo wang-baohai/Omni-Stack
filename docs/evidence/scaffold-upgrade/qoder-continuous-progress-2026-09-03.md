@@ -696,6 +696,28 @@ MAJOR_GAP 清单：**`api-contract` 三语均 53/85 标题、30/72 代码块、1
 
 观察：`*-design`（asset/crm/procurement/srm）四份设计文档三语均为 STUB（代码块/表格几乎全缺），是单一最大工量簇；`api-contract`（P0）三语均 MAJOR_GAP，缺 101 个 API 路径 + 56 个权限码（§4.5.1）。`guide-system-security-audit`/`observability` 的部分缺口由本目标阶段 B 新增图片表拉大（§4.5.1 已登记为新增待补译项）。本清单仅为 G7 提供客观工量底数，**不替代独立 Codex final review 或人工验收**，未据此修改任何译文 `status`/`reviewed_at`。
 
+### 4.6 P0 core-flows 组实质预审与修订（2026-09-04 完成）
+
+- **源**：`docs/core-flows.md`（1871 行，本轮**未动源**，摘要不变；i18n 门禁 exit 0 佐证）。
+- **译文**：`docs/core-flows.en.md`、`.jp.md`、`.kr.md`（修订前各 1619 行，三份结构与行号完全一致）。
+- **检查范围**：标题层级序列、围栏代码块、表格行、Markdown 链接、`/api/` 路径、权限码、术语正字法、mermaid 约定。
+
+**发现的问题（结构性缺失，P0 系统真相文档）**：三份译文均缺 **Flow 13-18 共 6 个流程**（源 20 个 `##`，译文仅 14 个）：Flow 13/14（CRM 线索幂等转换、商机推进与权限隔离）、Flow 15/15.1（SRM 供应商准入审批、请购审批规则配置与匹配试算）、Flow 16（Procurement 请购审批与异步回写）、Flow 17（Procurement 收货到 Asset 建卡/调拨/处置）、Flow 18（SRM 门户邀请入驻与角色分配 Saga）。合计缺 14 个标题（6 `##` + 8 `###`）+ 7 个 mermaid 代码块。归因：这 6 个流程是源文档在译文完成之后新增（CRM/SRM/Procurement/Asset 四个业务域的端到端流程），译文从未回填；en/ja/ko 三份缺口完全一致。严重性：P0 文档中四个业务域的核心流程在三语言译文里**完全缺席**。
+
+**已做修改**：
+
+1. 三份译文补入 Flow 13-18 全文（各 **+243 行**），按源顺序插入（Flow 13/14 置于 Docker 章节前，Flow 15-18 置于故障排查章节后，与源一致：Flow 15-18 之间无 `---` 分隔）。遵循仓库既有约定：叙述文案/标题译为目标语言，`/api/` 路径、权限码、字段名、SQL、内联代码保持 verbatim。**mermaid 沿用现有 jp/ko 约定（英文）**——现有 Flow 1-12 的 jp/ko mermaid 即为英文，故新增 6 个流程的 jp/ko mermaid 同样用英文以保内部一致；en mermaid 按 en Flow 1 约定译为英文。
+2. 术语正字法修正（本轮预审新发现，均为 Flow 1-12 既有泄漏的中文字形）：
+   - `core-flows.jp.md`：`身份` → `身分` **11 处**（日语正确字形为 身分）。
+   - `core-flows.kr.md`：**13 处**汉字泄漏 → 谚文：`身份`→`신원`、`排查 방법`→`문제 해결 방법`（5 处表头，并补齐列分隔空格）、`入口`→`진입점`、`本部门`→`본 부서`（4 处）、`装配`→`구성`、`自助`→`셀프서비스`、`生效`→`적용`。
+   - 复核：`grep '\p{Han}' core-flows.kr.md` = **0**；`grep 身份 core-flows.jp.md` = **0**。
+
+**验证（2026-09-04 实测）**：平价 core-flows 三语均 **ALIGNED**（111/111 标题、84/84 代码块、250/250 表格行）；parity **0 findings**（api 路径/权限码/链接/内联代码集合与源一致）；全库分布 ALIGNED 50→**53**、PARTIAL 19→**16**（MAJOR_GAP 20、STUB 25 不变）；links / sensitive 均 exit 0。
+
+**剩余疑问 / 未完成**：jp/ko 现有 Flow 1-12 的 mermaid 为英文（未译为日/韩），是既有的译文完整度问题；本轮为保内部一致，新增流程 mermaid 沿用英文，**未**回溯翻译既有 mermaid（属更大范围的译文质量决策，需单独评估）。三份译文在 `docs-manifest.yaml` 仍保持 `present-unverified` / `reviewed_at: null`；本轮为 Qoder 实质预审与修订，不替代独立 Codex final review 或人工验收。
+
+**状态**：core-flows 组（1 源 + 3 译文）结构平价 100%、术语泄漏清零。P0 三篇中 architecture、core-flows 已收尾，剩 `api-contract`（MAJOR_GAP，大体量）。
+
 ## 5. 阶段 D：汇总验证与分类
 
 ### 5.1 本会话已执行的验证（均为实跑，非沿用历史报告）

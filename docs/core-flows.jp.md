@@ -8,7 +8,7 @@
 ### 概要
 
 ユーザーはフロントエンドのログインページからユーザー名、パスワード、認証コードを送信し、Gateway を経由して Auth サービスで認証を行います。
-認証成功後、以降のリクエストで身份認証に使用する JWT Token が返されます。マルチテナントログイン（`tenantId:username` 形式）に対応しています。
+認証成功後、以降のリクエストで身分認証に使用する JWT Token が返されます。マルチテナントログイン（`tenantId:username` 形式）に対応しています。
 
 ### シーケンス
 
@@ -194,12 +194,12 @@ Browser            Frontend               Gateway :8102           Downstream Ser
 | Token 保存 | `src/stores/user.ts` | `setToken()` + `setUsername()` で `localStorage` に永続化 |
 | リクエスト認証 | `src/api/request.ts` | Axios リクエストインターセプター：`Authorization: Bearer <token>` |
 | Vite プロキシ | `vite.config.ts` | `/api` -> `http://localhost:8102` (Gateway) |
-| Gateway フィルター | `AuthFilter.java` | JWT RS256 署名検証 + claims 抽出 + 身份ヘッダー注入 |
+| Gateway フィルター | `AuthFilter.java` | JWT RS256 署名検証 + claims 抽出 + 身分ヘッダー注入 |
 | JWK プロバイダー | `JwkKeyProvider.java` | Auth の `/oauth2/jwks` から RSA 公開鍵を取得し、5 分間キャッシュ |
 | CAPTCHA サービス | `CaptchaServiceImpl.java` | SpecCaptcha 生成 + Redis 保存（TTL 300 秒、ワンタイム使用） |
 | Auth コントローラー | `AuthController.java` | `POST /login`: CAPTCHA -> 認証 -> ロール -> JWT |
 | ユーザー詳細 | `OmniUserDetailsService.java` | マルチテナント解析 `tenantId:username` + BCrypt パスワード検証 |
-| JWT サービス | `JwtTokenServiceImpl.java` | RSA 秘密鍵で署名し、ユーザー身份と権限を含む JWT を生成 |
+| JWT サービス | `JwtTokenServiceImpl.java` | RSA 秘密鍵で署名し、ユーザー身分と権限を含む JWT を生成 |
 
 ### JWT Token 構造
 
@@ -260,7 +260,7 @@ Auth サービスが発行する JWT には以下の claims が含まれます�
 ### 現在のステータス
 
 - **ログイン**：完全実装済み、CAPTCHA + マルチテナント + JWT Token 発行
-- **Gateway JWT 検証**：完全実装済み、RS256 署名チェック + claims 抽出 + 身份ヘッダー注入
+- **Gateway JWT 検証**：完全実装済み、RS256 署名チェック + claims 抽出 + 身分ヘッダー注入
 - **フロントエンド**：すべての mock コードは削除済み、実 API に接続済み
 - **Token 有効期間**：15 分（900 秒）、refresh token 機構は未実装
 
@@ -472,7 +472,7 @@ sequenceDiagram
 
     alt 初回ログイン（関連レコードなし）
         A->>M: 21a. INSERT INTO sys_user (ローカルユーザーを自動作成, username=gh_{login} または ge_{login})
-        A->>M: 21b. INSERT INTO sys_user_oauth_provider (身份関連を作成)
+        A->>M: 21b. INSERT INTO sys_user_oauth_provider (身分関連を作成)
     else 既存バインドあり
         A->>M: 21c. UPDATE sys_user_oauth_provider (access_token とユーザー情報を更新)
         A->>M: 21d. SELECT * FROM sys_user (ローカルユーザーを読み込み)
@@ -579,7 +579,7 @@ Browser            Frontend :3000          Gateway :8102          Auth :8100    
 | Gitee 実装 | `GiteeOAuth2Handler.java` | Gitee OAuth2 実装（`@Component("gitee")`）、Gitee OAuth2 API に接続 |
 | 統一ユーザー DTO | `ProviderUser.java` | 統一されたサードパーティユーザー情報 DTO、各プロバイダーのフィールド差異を吸収 |
 | State 署名 | `OAuth2StateUtils.java` | HMAC-SHA256 署名の生成と検証（`tenantId|timestamp|hmac`） |
-| 身份関連 | `SysUserOauthProviderMapper.java` | ユーザーとサードパーティ身份のバインド関係の照会と永続化 |
+| 身分関連 | `SysUserOauthProviderMapper.java` | ユーザーとサードパーティ身分のバインド関係の照会と永続化 |
 | JWT 発行 | `JwtTokenServiceImpl.java` | ソーシャルログインユーザーにロールと権限を含む RS256 JWT を発行 |
 
 ### State 署名メカニズム
@@ -645,7 +645,7 @@ OAuth2 state パラメーターは HMAC-SHA256 署名を採用し、形式は `t
 
 - **OAuth2 ソーシャルログイン**：GitHub、Google、Gitee を実装済み、エンドツーエンドの完全実装で検証通過
 - **State 署名**：HMAC-SHA256 改ざん防止 + リプレイ防止
-- **自動ユーザー作成**：初回サードパーティログインでローカルユーザーを自動登録 + 身份関連（GitHub: `gh_` プレフィックス、Google: `go_` プレフィックス、Gitee: `ge_` プレフィックス）
+- **自動ユーザー作成**：初回サードパーティログインでローカルユーザーを自動登録 + 身分関連（GitHub: `gh_` プレフィックス、Google: `go_` プレフィックス、Gitee: `ge_` プレフィックス）
 - **redirect_uri**：設定対応可能（`application.yml` + 環境変数オーバーライド）
 - **フロントエンドコールバック**：`/callback` ページで URL fragment 内の JWT を解析し自動ログイン
 - **Strategy Pattern**：`OAuth2ProviderHandler` インターフェース + `Map<String, OAuth2ProviderHandler>` 注入、新プロバイダー追加は Handler インターフェースの実装のみ
@@ -924,7 +924,7 @@ Client Request
 │  → X-Content-Type-Options: nosniff を追加│
 │  → X-Frame-Options: DENY を追加         │
 │  → Referrer-Policy: strict-origin を追加│
-│  → AuthFilter: JWT 検証 + 身份ヘッダー注入│
+│  → AuthFilter: JWT 検証 + 身分ヘッダー注入│
 └────────────────┬────────────────────────┘
                  │ omni-auth へ転送
                  ▼
@@ -1050,7 +1050,7 @@ sequenceDiagram
 
     B->>F: 1. /admin/dict にナビゲート（動的ルート）
     F->>G: 2. GET /api/base/dict/type/list?page=1&size=10（X-Tenant-Id: 1）
-    G->>Base: 3. AuthFilter が JWT を検証 → 身份ヘッダーを注入 → /api/base/dict/type/list に転送
+    G->>Base: 3. AuthFilter が JWT を検証 → 身分ヘッダーを注入 → /api/base/dict/type/list に転送
     Base->>M: 4. SELECT sys_dict_type WHERE tenant_id=1（ページネーション）
     M-->>Base: type records
     Base-->>F: 5. R<PageResult<SysDictType>>
@@ -1073,7 +1073,7 @@ sequenceDiagram
     Note over B,M: 管理者の作成/更新/削除操作 → 書き込み操作でキャッシュ失効
     B->>F: 15. ディクショナリデータを作成 → POST /api/base/dict/data
     F->>G: 16. 転送（Bearer JWT）
-    G->>Base: 17. @PreAuthorize('dict:data:create') → GatewayPreAuthFilter が身份を解析
+    G->>Base: 17. @PreAuthorize('dict:data:create') → GatewayPreAuthFilter が身分を解析
     Base->>M: 18. INSERT sys_dict_data
     Base->>R: 19. DEL dict:type:{tenantId}:{typeCode}（書き込み操作でキャッシュ失効）
     Base-->>F: 20. R<SysDictData>
@@ -1198,7 +1198,7 @@ base (DIRECTORY, id=50)             ← "基礎データ" 第 1 レベルメニ�
 - **キャッシュ**：Cache-aside + 書き込み操作失効 + 手動リフレッシュ実装済み
 - **シードデータ**：3 つのプリセットディクショナリタイプ（`sys_user_gender`, `sys_common_status`, `sys_notice_type`）+ 7 件のデータ（テナント 1）
 - **Gateway ルート**：`Path=/api/base/**` → `lb://omni-base` 設定済み（StripPrefix なし、コントローラーは完全パスを使用）
-- **セキュリティアーキテクチャ**：`GatewayPreAuthFilter` は Gateway から注入された身份ヘッダーから Spring Security コンテキストを構築、`XssConfigProviderImpl` は Redis-only 戦略で XSS 対策を継承
+- **セキュリティアーキテクチャ**：`GatewayPreAuthFilter` は Gateway から注入された身分ヘッダーから Spring Security コンテキストを構築、`XssConfigProviderImpl` は Redis-only 戦略で XSS 対策を継承
 
 ---
 
@@ -1507,6 +1507,100 @@ setInterval 10 秒ごと：
 
 ---
 
+## Flow 13: CRM リード冪等変換 — Customer + Contact + Opportunity + Outbox
+
+### 概要
+
+営業担当者が `QUALIFIED` リードを顧客に変換し、顧客/連絡先の新規作成または関連付けを選択でき、同時に商談を作成できます。変換は `omni_crm` 単一データベーストランザクションで完了します；同一リードは 1 件の `crm_lead_conversion` のみ生成でき、重複リクエストは生成済みのオブジェクト ID をそのまま返します。サービス間呼び出しはトランザクション前のデータ範囲と owner の権威検証にのみ使用し、トランザクション内で実際の MQ は送信せず、ローカル Outbox のみ書き込みます。
+
+### シーケンス
+
+```mermaid
+sequenceDiagram
+    participant F as Frontend CRM
+    participant G as Gateway :8102
+    participant C as CRM :8104
+    participant A as Auth :8100
+    participant DB as omni_crm
+    participant MQ as Outbox Relay
+
+    F->>G: POST /api/crm/lead/{id}/convert + JWT + version
+    G->>G: Verify JWT/blacklist, override X-User-* and X-Tenant-Id
+    G->>C: Forward request + X-Gateway-Forwarded
+    C->>C: GatewayPreAuthFilter + CrmTenantContextFilter
+    C->>C: @PreAuthorize(crm:lead:convert)
+    C->>A: GET /internal/data-scopes/{userId}?tenantId&permissionCode=crm:lead:convert
+    A-->>C: permission-aware scope
+    C->>C: Bind CrmDataScopeContext (cleared in finally)
+    C->>DB: SELECT lead FOR UPDATE (TenantLine + DataPermission)
+    C->>DB: SELECT conversion WHERE lead_id=?
+    alt Already converted
+        DB-->>C: customer/contact/opportunity IDs
+        C-->>F: Original result (idempotent replay)
+    else First conversion
+        C->>DB: INSERT/validate customer
+        C->>DB: Clear original primary contact and INSERT/validate contact
+        opt Create opportunity
+            C->>DB: INSERT opportunity
+            C->>DB: INSERT opportunity_stage_history(reason=CREATE)
+        end
+        C->>DB: INSERT crm_lead_conversion (unique tenant_id + lead_id)
+        C->>DB: UPDATE lead status=CONVERTED + version
+        C->>DB: UPDATE lead activities root/owner snapshot
+        C->>DB: INSERT sys_mq_message(crm.lead.converted.v1)
+        C->>DB: COMMIT
+        MQ->>DB: Async scan PENDING
+        MQ-->>MQ: At-least-once delivery, exponential backoff on failure
+        C-->>F: ConversionResultVO
+    end
+```
+
+### 整合性境界
+
+- `crm_lead_conversion(tenant_id, lead_id)` が変換の冪等事実；Service の行ロックと楽観的バージョンが並行性を共同で処理します。
+- Customer、Contact、Opportunity、初期 Stage History、Lead ステータスと Outbox は同一コミットまたは同一ロールバックでなければなりません。
+- 新規作成されるすべてのオブジェクトは現在のリードの owner スナップショットを継承；対象ユーザー/組織は Auth の権威インターフェースに由来し、フロントエンドの ownerUnitId を信頼してはいけません。
+- Outbox payload には tenantId、集約 ID、ステータス、バージョン、イベント ID のみを含み、電話、メール、住所、備考は含みません。
+- `@OperLog` はリクエストがプロセスを離れる前にパラメータとスナップショットを再帰的に秘匿化；変換コマンドは顧客、連絡先、商談名を明示的に除外します。
+
+---
+
+## Flow 14: CRM 商談推進と権限分離 — Stage History + Customer 活性化
+
+### 概要
+
+商談のステージ変更は汎用更新ではなく独立したコマンドです。各リクエストは完全な権限コード `crm:opportunity:stage` で Auth からデータ範囲を解決し、CRM の TenantLine、DataPermission、楽観的ロックで共同に制約されます；正当な遷移は不変のステージ履歴とドメイン Outbox を書き込みます。受注時、CRM は TenantLine を保持し DataPermission のみを無視する専用 SQL で関連する潜在顧客を活性化し、Customer と Opportunity の owner が異なることによる更新漏れを回避します。
+
+### 状態遷移
+
+```mermaid
+flowchart LR
+    O["OPEN stage"] -->|"crm:opportunity:stage"| N["Next OPEN stage"]
+    O -->|"target stageType=WON"| W["WON"]
+    O -->|"target stageType=LOST + lossReason"| L["LOST"]
+    W -->|"crm:opportunity:reopen"| R["Last OPEN stage"]
+    L -->|"crm:opportunity:reopen"| R
+    W --> C["POTENTIAL Customer → ACTIVE"]
+```
+
+### コマンド実行規則
+
+1. Gateway が JWT を検証し身分ヘッダーを上書き；CRM は転送マーカー、userId、tenantId のないビジネスリクエストを拒否します。
+2. `@PreAuthorize` がまず機能権限を検証し、`@CrmDataScope` が現在のコマンドの完全な permissionCode で Auth から scope を取得します。
+3. MyBatis は常に `TenantLine → DataPermission → Pagination` を実行；通常の CRM API の `ALL` も現在のテナントの全データを意味するにすぎません。
+4. Service は商談をロックし、リクエストの version、現在のステータス、対象ステージが属する pipeline、ステートマシンの正当性を検証；同一ステージへの no-op は即座に拒否します。
+5. 商談のステージ/ステータス/確度/失注理由と version を更新し、`crm_opportunity_stage_history` を追加し、`stage-changed/won/lost` Outbox を書き込みます。
+6. 受注時に顧客を活性化する専用 Mapper は owner データ権限のみをバイパスし、TenantLine はバイパスせず、customer id、ステータス、`deleted=0` を明示的に検証します。
+7. 再開は `crm:opportunity:reopen` を使用し、最後のオープンステージを復元して `REOPEN` 履歴を書き込みます；通常の update でステートマシンをバイパスしてはいけません。
+
+### PII 返却規則
+
+- Lead、Customer、Contact のリストは常に秘匿化された連絡先を返します；完全な値は `crm:pii:view` を持つ場合のみ返されます。
+- Activity のリスト/タイムラインの content は常に `[REDACTED]`；詳細は引き続き `crm:pii:view` に制御されます。
+- フロントエンドは編集前に詳細を再読込；PII 権限がない場合は機微フィールドを無効化し、update payload に含めず、秘匿化テキストで実データを上書きすることを回避します。
+
+---
+
 ## Docker デプロイメントでのフロー設定注意事項
 
 ### OAuth2 コールバック URL 設定
@@ -1617,3 +1711,152 @@ Gateway コンテナ(:8080)
 | **ログが記録されていない** | RocketMQ が起動していない | RocketMQ コンテナの状態を確認；`OperLogProducer` ログ内の送信結果を確認 |
 | **ログの遅延** | MQ 消費の滞留 | omni-base サービスコンシューマーログを確認；RocketMQ コンソールの消費進捗を確認 |
 | **アーカイブタスクが実行されない** | @Scheduled がトリガーされていない | omni-base サービスが 1 インスタンスのみであることを確認（マルチインスタンスでの重複アーカイブを防止）；ログ内のアーカイブ記録を確認 |
+
+---
+
+## Flow 15: SRM サプライヤー参入承認
+
+```mermaid
+sequenceDiagram
+    participant U as Admin Console
+    participant S as SRM
+    participant W as Workflow
+    participant M as RocketMQ
+    participant D as SRM Inbox
+
+    U->>S: POST /api/srm/supplier
+    S->>W: Query the published version of category=SRM_SUPPLIER_ONBOARDING for the current tenant
+    S->>S: Save Supplier=PENDING_REVIEW and the Workflow idempotent snapshot
+    S->>W: POST /api/internal/workflow/process/start
+    W-->>S: processInstanceId / idempotentReplay
+    S->>S: Supplier=APPROVING, startStatus=STARTED
+    W->>M: workflow.process.completed.v1 (Outbox)
+    M->>D: eventId Inbox idempotent consumption
+    D->>S: Verify tenant/businessType/businessKey/processInstanceId
+    S->>S: Supplier=APPROVED or REJECTED
+```
+
+主要な制約：
+
+- ユーザーはモデルバージョンを選択しません；SRM は常に `SRM_SUPPLIER_ONBOARDING` で現在の公開済みモデルを自動解決します。
+- デフォルトテナントが必要とするモデルは Workflow 起動イニシャライザが検証し公開します；欠落または公開不可の場合、Workflow は起動に失敗します。
+- 起動結果が不確実な場合は元の `requestId/businessKey/modelVersionId/startUser` を保持し、冪等リトライのみを許可します。
+- 承認完了は信頼性イベントでライトバックされます；重複、順序不同、クロステナント、またはインスタンス不一致のイベントはサプライヤーステータスを変更してはいけません。
+
+### Flow 15.1: 購買申請承認ルールの設定とマッチング試算
+
+```mermaid
+sequenceDiagram
+    participant U as Procurement Manager
+    participant P as Procurement
+    participant W as Workflow
+
+    U->>P: Open the requisition approval rule page
+    P->>W: Query the currently published version of category=purchase
+    W-->>P: Process name, version and safe approval diagram
+    P-->>U: Show process options, coverage risk and the business-friendly rule list
+    U->>P: Save rule name, category, amount range and process option
+    P->>W: Batch-validate that modelVersionId is still the current purchase published version
+    P->>P: Validate conflicts under a row lock, generate APR-{ULID} and priority
+    P-->>U: Return readable rules without exposing editable technical IDs
+    U->>P: Enter category and amount for a match simulation
+    P->>P: Call ApprovalRouteResolver.evaluate shared with requisition submission
+    P-->>U: Unique hit, no match, conflict or process unavailable, plus the safe approval diagram
+```
+
+ルールリストは Workflow 経由で現在のページのモデルバージョンを一括解決し、行ごとの呼び出しは禁止します。Workflow が一時的に利用不可の場合、読み取り専用リストはローカルルールを保持して `UNAVAILABLE` とマークし、作成、更新、購買申請の提出はフェイルクローズします。無効化または削除前の影響分析はメモリ内で対象ルールを除外するのみで、データベースは変更しません；カバレッジアルゴリズムは「正確なカテゴリ優先、デフォルトルールで空隙を補完」により 0 から無限までの断絶と競合を計算します。
+
+## Flow 16: Procurement 購買申請承認と非同期ライトバック
+
+```mermaid
+sequenceDiagram
+    participant U as Procurement User
+    participant P as Procurement
+    participant W as Workflow
+    participant O as Workflow Outbox
+    participant M as RocketMQ
+    participant I as Procurement Inbox
+
+    U->>P: Create draft and submit
+    P->>P: Re-check material/category, recompute decimal amounts, select approval route
+    P->>P: Save approvalAttempt + idempotent start snapshot
+    P->>W: Start process with tenant + businessKey={id}:{attempt}
+    W-->>P: processInstanceId
+    W->>O: Approval-completed event
+    O->>M: Reliable relay
+    M->>I: eventId Inbox idempotent consumption
+    I->>P: APPROVING → APPROVED/REJECTED
+    P-->>U: Page polls silently every 5 seconds; manual refresh on timeout
+```
+
+明示的に失敗した起動は `FAILED` として記録し、元のスナップショットを再利用したリトライを許可します；ネットワーク結果が不確実な場合に第 2 のビジネスキーを作成してはいけません。ページは「Workflow 完了、ビジネスステータス同期中」と最終ビジネスステータスを区別しなければならず、一時的な遅延を失敗として表示してはいけません。
+
+RFQ 見積チェーンは Procurement の招待を権威とし、SRM の見積を権威とします：Portal は必要に応じて招待を読み取り見積を提出し、SRM は同一トランザクションで見積と Outbox を書き込み、Procurement Inbox は招待ステータスを更新します；選定前に Procurement は現在の見積バージョンを再確認して不変スナップショットを保存し、その後購買注文を作成します。
+
+## Flow 17: Procurement 入荷から Asset カード作成・移管・廃棄まで
+
+```mermaid
+sequenceDiagram
+    participant P as Procurement
+    participant O as Procurement Outbox
+    participant M as RocketMQ
+    participant A as Asset
+    participant W as Workflow
+
+    P->>P: Confirm goods receipt / quality check passed
+    P->>O: goods-receipt confirmed or quality-passed event
+    O->>M: Reliable relay
+    M->>A: At-least-once delivery
+    A->>A: eventId Inbox + dual idempotency by source line/unit sequence
+    A->>A: Create asset card only for PASS + assetManaged + positive integer quantity
+    A->>P: Historical candidate cursor backfill (compensation path)
+    A->>W: Transfer/disposal auto-resolves model by category and starts idempotently
+    W->>M: workflow.process.completed.v1
+    M->>A: Approval-result Inbox write-back
+    A->>A: Complete operation on approval; restore previousStatus and clear occupancy on rejection/cancellation
+```
+
+資産ページの使用者、組織、サプライヤー、移管/廃棄資産はいずれも現在のテナントとデータ範囲内の検索候補を使用します；モデルバージョンはサーバー側で自動選択されます。移管と廃棄は `active_operation_type/id` のアトミックな占有を共有し、いかなる終了パスも同一トランザクション内でステータスを復元し占有をクリアしなければなりません。金額は JSON 内で常に十進文字列を使用します。
+
+## Flow 18: SRM ポータル招待登録とロール割り当て Saga
+
+```mermaid
+sequenceDiagram
+    participant U as Portal User
+    participant G as Gateway
+    participant A as Auth
+    participant S as SRM
+    participant O as SRM Outbox
+    participant M as RocketMQ
+    participant I as Auth Inbox/Outbox
+
+    U->>G: Auth registration (tenant + captcha)
+    G->>A: POST /api/auth/register
+    A-->>U: USER account created
+    U->>G: After login, submit requestId + inviteToken + enterprise info
+    G->>S: POST /api/srm/portal/enroll
+    S->>S: Validate tenant/user, invitation quota, creditCode uniqueness
+    S->>S: Create REGISTERING Supplier and PENDING_ROLE_ASSIGN Enrollment
+    S->>O: Write srm.portal-role.assign-requested.v1 in the same transaction
+    O->>M: Reliable relay
+    M->>A: requestId/tenantId/supplierId/userId/SUPPLIER
+    A->>I: requestId Inbox idempotency + validate user and tenant + assign role
+    A->>I: Write success/failure result Outbox in the same transaction
+    I->>M: Reliable relay
+    M->>S: Auth role-assignment result
+    S->>S: Establish tenant context and consume idempotently by requestId
+    alt Assignment succeeded
+        S->>S: Create PortalUser, Supplier → PENDING_REVIEW, Enrollment → COMPLETED
+    else Assignment failed
+        S->>S: Supplier → REGISTERING_FAILED, Enrollment → ROLE_ASSIGN_FAILED
+    end
+    U->>S: GET /api/srm/portal/enrollment
+    S-->>U: Current Saga status or retryable info
+```
+
+主要な制約：
+
+- USER は `srm:portal:enroll` のみを持ちます；企業プロフィールと評価は SUPPLIER 権限と有効な PortalUser 関連付けの両方を必要とします。
+- inviteToken の原文はデータベースに保存せず、ログに残さず、MQ に入れず；招待回数はバージョン条件付きでアトミックに増加します。
+- Portal userId を内部 owner フィールドに書き込んではいけません；Portal サプライヤーは内部責任者の割り当て前まで owner が空であることを許可します。
+- リクエストと結果はいずれも Transactional Outbox を使用します；コンシューマーは requestId で冪等であり、すべての MQ ThreadLocal は finally でクリアされます。

@@ -8,7 +8,7 @@
 ### 개요
 
 사용자가 프론트엔드 로그인 페이지에서 사용자명, 비밀번호, 캡차를 제출하면 Gateway를 통해 Auth 서비스로 전달되어 인증을 수행하고,
-이후 요청의身份 인증에 사용할 JWT Token을 반환합니다. 다중 테넌트 로그인(`tenantId:username` 형식)을 지원합니다.
+이후 요청의 신원 인증에 사용할 JWT Token을 반환합니다. 다중 테넌트 로그인(`tenantId:username` 형식)을 지원합니다.
 
 ### 시퀀스
 
@@ -340,7 +340,7 @@ sequenceDiagram
 
 디바이스 인가 모드(RFC 8628)는 브라우저가 없거나 입력이 제한된 디바이스(IoT, CLI 도구 등)에 적합합니다. 디바이스 측에서 `/oauth2/device_authorization`을 통해 `device_code`와 `user_code`를 획득하고, 사용자가 다른 디바이스에서 `user_code`를 입력하여 인가를 완료하면, 디바이스 측에서 `/oauth2/token`을 폴링하여 액세스 토큰을 획득합니다.
 
-프론트엔드에서 테스트入口(`/device` 페이지)를 제공하여 브라우저에서 전체 디바이스 인가 플로우를 테스트할 수 있습니다.
+프론트엔드에서 테스트 진입점(`/device` 페이지)를 제공하여 브라우저에서 전체 디바이스 인가 플로우를 테스트할 수 있습니다.
 
 ### 시퀀스
 
@@ -763,9 +763,9 @@ sequenceDiagram
 |---------------|---------------|------|
 | `ALL` | 없음 | 테넌트 간 전체 데이터 조회 가능 |
 | `TENANT` | 없음 | 기존 `tenant_id` 필터로 충분 |
-| `DEPT` | `WHERE sys_user.primary_unit_id IN ({자本部门ID})` | 자本部门 사용자만 |
-| `DEPT_AND_BELOW` | `WHERE sys_user.primary_unit_id IN ({자本部门및하위ID})` | 자本部门 + 하위 |
-| `CUSTOM` | `WHERE sys_user.primary_unit_id IN ({커스텀本部门+하위ID})` | 커스텀 범위 |
+| `DEPT` | `WHERE sys_user.primary_unit_id IN ({본 부서 ID})` | 본 부서 사용자만 |
+| `DEPT_AND_BELOW` | `WHERE sys_user.primary_unit_id IN ({본 부서 및 하위 ID})` | 본 부서 + 하위 |
+| `CUSTOM` | `WHERE sys_user.primary_unit_id IN ({커스텀 본부서 + 하위 ID})` | 커스텀 범위 |
 | `SELF` | `WHERE sys_user.id = {현재사용자ID}` | 본인만 |
 
 ### 조직 단위 후손 조회
@@ -1023,7 +1023,7 @@ Admin (프론트엔드 XSS 방어 구성 페이지)
 
 ### 현재 상태
 
-- **3계층 정화**: Jackson 역직렬화기 + Servlet Filter + Gateway 보안 헤더 모두 구현 및 자동装配 완료
+- **3계층 정화**: Jackson 역직렬화기 + Servlet Filter + Gateway 보안 헤더 모두 구현 및 자동 구성 완료
 - **구성 관리**: 글로벌 스위치 + 규칙 CRUD + 개별 규칙 toggle 총 7개 API 엔드포인트 완전 구현
 - **프론트엔드 페이지**: `시스템 관리 → XSS 방어 구성` 준비 완료, 페이지네이션 규칙 목록, 생성/편집 대화상자, v-permission 버튼 권한 제어 지원
 - **캐시 전략**: Redis 캐시 + 쓰기 작업 능동 무효화 구현 완료
@@ -1304,11 +1304,11 @@ sequenceDiagram
 
 ---
 
-## Flow 11: 사용자 작업 생성 — 워크벤치自助 생성에서 XXL-JOB 직접 등록까지
+## Flow 11: 사용자 작업 생성 — 워크벤치 셀프서비스 생성에서 XXL-JOB 직접 등록까지
 
 ### 개요
 
-사용자가 워크벤치의 「내 작업」 영역에서 셀프 서비스로 예약 작업을 생성합니다. 프론트엔드는 작업 유형 선택, 동적 파라미터 폼, Cron 표현식 편집기를 제공하고, 백엔드는 유형 유효성을 검증한 후 데이터베이스에 저장하고 XXL-JOB 스케줄링 센터에 직접 등록하여 생성 즉시生效됩니다.
+사용자가 워크벤치의 「내 작업」 영역에서 셀프 서비스로 예약 작업을 생성합니다. 프론트엔드는 작업 유형 선택, 동적 파라미터 폼, Cron 표현식 편집기를 제공하고, 백엔드는 유형 유효성을 검증한 후 데이터베이스에 저장하고 XXL-JOB 스케줄링 센터에 직접 등록하여 생성 즉시 적용됩니다.
 
 ### 시퀀스
 
@@ -1507,6 +1507,100 @@ setInterval 매 10초:
 
 ---
 
+## Flow 13: CRM 리드 멱등 변환 — Customer + Contact + Opportunity + Outbox
+
+### 개요
+
+영업 담당자가 `QUALIFIED` 리드를 고객으로 변환하며, 고객/연락처를 새로 생성하거나 연결할 수 있고, 동시에 기회를 생성할 수 있습니다. 변환은 `omni_crm` 단일 데이터베이스 트랜잭션으로 완료됩니다; 동일 리드는 하나의 `crm_lead_conversion` 만 생성할 수 있으며, 중복 요청은 이미 생성된 객체 ID 를 그대로 반환합니다. 서비스 간 호출은 트랜잭션 전의 데이터 범위와 owner 권위 검증에만 사용되며, 트랜잭션 내에서 실제 MQ 를 보내지 않고 로컬 Outbox 만 기록합니다.
+
+### 시퀀스
+
+```mermaid
+sequenceDiagram
+    participant F as Frontend CRM
+    participant G as Gateway :8102
+    participant C as CRM :8104
+    participant A as Auth :8100
+    participant DB as omni_crm
+    participant MQ as Outbox Relay
+
+    F->>G: POST /api/crm/lead/{id}/convert + JWT + version
+    G->>G: Verify JWT/blacklist, override X-User-* and X-Tenant-Id
+    G->>C: Forward request + X-Gateway-Forwarded
+    C->>C: GatewayPreAuthFilter + CrmTenantContextFilter
+    C->>C: @PreAuthorize(crm:lead:convert)
+    C->>A: GET /internal/data-scopes/{userId}?tenantId&permissionCode=crm:lead:convert
+    A-->>C: permission-aware scope
+    C->>C: Bind CrmDataScopeContext (cleared in finally)
+    C->>DB: SELECT lead FOR UPDATE (TenantLine + DataPermission)
+    C->>DB: SELECT conversion WHERE lead_id=?
+    alt Already converted
+        DB-->>C: customer/contact/opportunity IDs
+        C-->>F: Original result (idempotent replay)
+    else First conversion
+        C->>DB: INSERT/validate customer
+        C->>DB: Clear original primary contact and INSERT/validate contact
+        opt Create opportunity
+            C->>DB: INSERT opportunity
+            C->>DB: INSERT opportunity_stage_history(reason=CREATE)
+        end
+        C->>DB: INSERT crm_lead_conversion (unique tenant_id + lead_id)
+        C->>DB: UPDATE lead status=CONVERTED + version
+        C->>DB: UPDATE lead activities root/owner snapshot
+        C->>DB: INSERT sys_mq_message(crm.lead.converted.v1)
+        C->>DB: COMMIT
+        MQ->>DB: Async scan PENDING
+        MQ-->>MQ: At-least-once delivery, exponential backoff on failure
+        C-->>F: ConversionResultVO
+    end
+```
+
+### 일관성 경계
+
+- `crm_lead_conversion(tenant_id, lead_id)` 는 변환 멱등 사실입니다; Service 의 행 잠금과 낙관적 버전이 함께 동시성을 처리합니다.
+- Customer, Contact, Opportunity, 초기 Stage History, Lead 상태와 Outbox 는 함께 커밋되거나 함께 롤백되어야 합니다.
+- 새로 생성되는 모든 객체는 현재 리드의 owner 스냅샷을 상속합니다; 대상 사용자/조직은 Auth 권위 인터페이스에서 비롯되며, 프론트엔드의 ownerUnitId 를 신뢰해서는 안 됩니다.
+- Outbox payload 에는 tenantId, 집계 ID, 상태, 버전, 이벤트 ID 만 포함되고 전화, 이메일, 주소, 비고는 포함되지 않습니다.
+- `@OperLog` 는 요청이 프로세스를 떠나기 전에 매개변수와 스냅샷을 재귀적으로 비식별화합니다; 변환 명령은 고객, 연락처, 기회 이름을 명시적으로 제외합니다.
+
+---
+
+## Flow 14: CRM 기회 추진과 권한 격리 — Stage History + Customer 활성화
+
+### 개요
+
+기회 단계 변경은 일반 업데이트가 아니라 독립된 명령입니다. 각 요청은 완전한 권한 코드 `crm:opportunity:stage` 로 Auth 에서 데이터 범위를 해석한 뒤, CRM 의 TenantLine, DataPermission, 낙관적 잠금으로 함께 제약됩니다; 정당한 전이는 불변 단계 이력과 도메인 Outbox 를 기록합니다. 수주 시, CRM 은 TenantLine 을 유지하고 DataPermission 만 무시하는 전용 SQL 로 연관된 잠재 고객을 활성화하여, Customer 와 Opportunity 의 owner 가 다름으로 인한 조용한 업데이트 누락을 방지합니다.
+
+### 상태 전이
+
+```mermaid
+flowchart LR
+    O["OPEN stage"] -->|"crm:opportunity:stage"| N["Next OPEN stage"]
+    O -->|"target stageType=WON"| W["WON"]
+    O -->|"target stageType=LOST + lossReason"| L["LOST"]
+    W -->|"crm:opportunity:reopen"| R["Last OPEN stage"]
+    L -->|"crm:opportunity:reopen"| R
+    W --> C["POTENTIAL Customer → ACTIVE"]
+```
+
+### 명령 실행 규칙
+
+1. Gateway 가 JWT 를 검증하고 신분 헤더를 덮어씁니다; CRM 은 전달 마커, userId 또는 tenantId 가 없는 비즈니스 요청을 거부합니다.
+2. `@PreAuthorize` 가 먼저 기능 권한을 검증하고, `@CrmDataScope` 가 현재 명령의 완전한 permissionCode 로 Auth 에서 scope 를 가져옵니다.
+3. MyBatis 는 항상 `TenantLine → DataPermission → Pagination` 을 실행합니다; 일반 CRM API 에서 `ALL` 도 현재 테넌트의 전체 데이터를 의미할 뿐입니다.
+4. Service 는 기회를 잠그고 요청 version, 현재 상태, 대상 단계가 속한 pipeline, 상태 머신의 정당성을 검증합니다; 동일 단계로의 no-op 은 즉시 거부됩니다.
+5. 기회의 단계/상태/확률/실패 사유와 version 을 업데이트하고, `crm_opportunity_stage_history` 를 추가한 뒤, `stage-changed/won/lost` Outbox 를 기록합니다.
+6. 수주 시 고객을 활성화하는 전용 Mapper 는 owner 데이터 권한만 우회하고 TenantLine 은 우회하지 않으며, customer id, 상태, `deleted=0` 를 명시적으로 검증합니다.
+7. 재개는 `crm:opportunity:reopen` 을 사용하고, 마지막 개방 단계를 복원하여 `REOPEN` 이력을 기록합니다; 일반 update 로 상태 머신을 우회해서는 안 됩니다.
+
+### PII 반환 규칙
+
+- Lead, Customer, Contact 목록은 항상 마스킹된 연락처를 반환합니다; 전체 값은 `crm:pii:view` 를 보유할 때만 반환됩니다.
+- Activity 목록/타임라인의 content 는 항상 `[REDACTED]` 입니다; 상세는 계속 `crm:pii:view` 의 통제를 받습니다.
+- 프론트엔드는 편집 전 상세를 다시 읽습니다; PII 권한이 없으면 민감 필드를 비활성화하고 update payload 에 넣지 않아, 마스킹 텍스트로 실제 데이터를 덮어쓰는 것을 방지합니다.
+
+---
+
 ## Docker 배포 시 플로우 구성 주의사항
 
 ### OAuth2 콜백 URL 구성
@@ -1578,7 +1672,7 @@ Gateway 컨테이너(:8080)
 
 ### 로그인 플로우 문제
 
-| 문제 | 가능한 원인 |排查 방법 |
+| 문제 | 가능한 원인 | 문제 해결 방법 |
 |------|-------------|----------|
 | **캡차가 표시되지 않음** | Redis가 시작되지 않았거나 연결 실패 | Redis 컨테이너 상태 확인; Auth 서비스 로그에서 Redis 연결 오류 확인 |
 | **로그인 시 「사용자명 또는 비밀번호 오류」 반환** | 테넌트 ID 불일치 | 프론트엔드 `tenantId` 파라미터 확인; `sys_user` 테이블의 `tenant_id` 필드 확인 |
@@ -1587,7 +1681,7 @@ Gateway 컨테이너(:8080)
 
 ### 소셜 로그인 문제
 
-| 문제 | 가능한 원인 |排查 방법 |
+| 문제 | 가능한 원인 | 문제 해결 방법 |
 |------|-------------|----------|
 | **GitHub 콜백 404** | redirect_uri 구성 오류 | GitHub OAuth App의 `Authorization callback URL`이 `application.yml`의 구성과 일치하는지 확인 |
 | **State 검증 실패** | HMAC 서명 불일치 | Auth 서비스의 `omni.oauth2.state-secret` 구성이 일치하는지 확인 (단일 인스턴스 배포에서는 해당 문제 없음) |
@@ -1597,7 +1691,7 @@ Gateway 컨테이너(:8080)
 
 ### 권한 및 메뉴 문제
 
-| 문제 | 가능한 원인 |排查 방법 |
+| 문제 | 가능한 원인 | 문제 해결 방법 |
 |------|-------------|----------|
 | **동적 메뉴가 표시되지 않음** | 백엔드 `/api/auth/menus`가 빈 값 반환 | JWT에 `authorities` 필드가 포함되어 있는지 확인; `sys_role_permission` 테이블의 역할-권한 연관 확인 |
 | **버튼이 항상 숨겨짐** | v-permission 인코딩 불일치 | 프론트엔드 `v-permission` 값과 `sys_permission` 테이블의 `permission_code` 비교 |
@@ -1605,15 +1699,164 @@ Gateway 컨테이너(:8080)
 
 ### 데이터 사전 문제
 
-| 문제 | 가능한 원인 |排查 방법 |
+| 문제 | 가능한 원인 | 문제 해결 방법 |
 |------|-------------|----------|
 | **사전 데이터가 갱신되지 않음** | Redis 캐시가 무효화되지 않음 | 수동으로 `PUT /api/base/dict/data/refresh` 호출하여 캐시 새로고침; 또는 TTL(30분) 만료 대기 |
 | **사전 유형 삭제 후 데이터 잔류** | 연쇄 삭제가 트리거되지 않음 | `DictTypeServiceImpl.deleteType()`의 트랜잭션이 정상 커밋되는지 확인 |
 
 ### 작업 로그 문제
 
-| 문제 | 가능한 원인 |排查 방법 |
+| 문제 | 가능한 원인 | 문제 해결 방법 |
 |------|-------------|----------|
 | **로그가 기록되지 않음** | RocketMQ가 시작되지 않음 | RocketMQ 컨테이너 상태 확인; `OperLogProducer` 로그에서 전송 결과 확인 |
 | **로그 지연** | MQ 소비 적체 | omni-base 서비스 소비자 로그 확인; RocketMQ 콘솔에서 소비 진행 상황 확인 |
 | **아카이브 작업이 실행되지 않음** | @Scheduled가 트리거되지 않음 | omni-base 서비스가 단일 인스턴스인지 확인 (다중 인스턴스 중복 아카이브 방지); 로그에서 아카이브 기록 확인 |
+
+---
+
+## Flow 15: SRM 공급업체 진입 승인
+
+```mermaid
+sequenceDiagram
+    participant U as Admin Console
+    participant S as SRM
+    participant W as Workflow
+    participant M as RocketMQ
+    participant D as SRM Inbox
+
+    U->>S: POST /api/srm/supplier
+    S->>W: Query the published version of category=SRM_SUPPLIER_ONBOARDING for the current tenant
+    S->>S: Save Supplier=PENDING_REVIEW and the Workflow idempotent snapshot
+    S->>W: POST /api/internal/workflow/process/start
+    W-->>S: processInstanceId / idempotentReplay
+    S->>S: Supplier=APPROVING, startStatus=STARTED
+    W->>M: workflow.process.completed.v1 (Outbox)
+    M->>D: eventId Inbox idempotent consumption
+    D->>S: Verify tenant/businessType/businessKey/processInstanceId
+    S->>S: Supplier=APPROVED or REJECTED
+```
+
+주요 제약:
+
+- 사용자는 모델 버전을 선택하지 않습니다; SRM 은 항상 `SRM_SUPPLIER_ONBOARDING` 으로 현재 게시된 모델을 자동 해석합니다.
+- 기본 테넌트에 필요한 모델은 Workflow 시작 초기화 프로그램이 검증하고 게시합니다; 누락 또는 게시 불가 시 Workflow 는 시작에 실패합니다.
+- 시작 결과가 불확실한 경우 원래의 `requestId/businessKey/modelVersionId/startUser` 를 유지하고 멱등 재시도만 허용합니다.
+- 승인 완료는 신뢰성 이벤트로 라이트백됩니다; 중복, 순서 뒤섞임, 크로스 테넌트 또는 인스턴스 불일치 이벤트는 공급업체 상태를 변경해서는 안 됩니다.
+
+### Flow 15.1: 구매 요청 승인 규칙 구성 및 매칭 시산
+
+```mermaid
+sequenceDiagram
+    participant U as Procurement Manager
+    participant P as Procurement
+    participant W as Workflow
+
+    U->>P: Open the requisition approval rule page
+    P->>W: Query the currently published version of category=purchase
+    W-->>P: Process name, version and safe approval diagram
+    P-->>U: Show process options, coverage risk and the business-friendly rule list
+    U->>P: Save rule name, category, amount range and process option
+    P->>W: Batch-validate that modelVersionId is still the current purchase published version
+    P->>P: Validate conflicts under a row lock, generate APR-{ULID} and priority
+    P-->>U: Return readable rules without exposing editable technical IDs
+    U->>P: Enter category and amount for a match simulation
+    P->>P: Call ApprovalRouteResolver.evaluate shared with requisition submission
+    P-->>U: Unique hit, no match, conflict or process unavailable, plus the safe approval diagram
+```
+
+규칙 목록은 Workflow 를 통해 현재 페이지의 모델 버전을 일괄 해석하며, 행별 호출은 금지됩니다. Workflow 가 일시적으로 사용 불가일 때 읽기 전용 목록은 로컬 규칙을 유지하고 `UNAVAILABLE` 로 표시하며, 생성·업데이트·구매 요청 제출은 실패 차단됩니다. 비활성화 또는 삭제 전의 영향 분석은 메모리에서 대상 규칙만 제외하고 데이터베이스는 수정하지 않습니다; 커버리지 알고리즘은 '정확한 품목 우선, 기본 규칙으로 공백 보완' 방식에 따라 0 부터 무한까지의 단절과 충돌을 계산합니다.
+
+## Flow 16: Procurement 구매 요청 승인과 비동기 라이트백
+
+```mermaid
+sequenceDiagram
+    participant U as Procurement User
+    participant P as Procurement
+    participant W as Workflow
+    participant O as Workflow Outbox
+    participant M as RocketMQ
+    participant I as Procurement Inbox
+
+    U->>P: Create draft and submit
+    P->>P: Re-check material/category, recompute decimal amounts, select approval route
+    P->>P: Save approvalAttempt + idempotent start snapshot
+    P->>W: Start process with tenant + businessKey={id}:{attempt}
+    W-->>P: processInstanceId
+    W->>O: Approval-completed event
+    O->>M: Reliable relay
+    M->>I: eventId Inbox idempotent consumption
+    I->>P: APPROVING → APPROVED/REJECTED
+    P-->>U: Page polls silently every 5 seconds; manual refresh on timeout
+```
+
+명시적으로 실패한 시작은 `FAILED` 로 기록하고 원래 스냅샷을 재사용한 재시도를 허용합니다; 네트워크 결과가 불확실할 때 두 번째 비즈니스 키를 생성해서는 안 됩니다. 페이지는 'Workflow 완료, 비즈니스 상태 동기화 중'과 최종 비즈니스 상태를 구분해야 하며, 짧은 지연을 실패로 표시해서는 안 됩니다.
+
+RFQ 견적 체인은 Procurement 의 초대를 권위로, SRM 의 견적을 권위로 합니다: Portal 은 필요에 따라 초대를 읽고 견적을 제출하며, SRM 은 동일 트랜잭션에서 견적과 Outbox 를 기록하고, Procurement Inbox 는 초대 상태를 업데이트합니다; 선정 전 Procurement 은 현재 견적 버전을 다시 확인하고 불변 스냅샷을 저장한 뒤, 구매 주문을 생성합니다.
+
+## Flow 17: Procurement 입고에서 Asset 카드 생성·이동·처분까지
+
+```mermaid
+sequenceDiagram
+    participant P as Procurement
+    participant O as Procurement Outbox
+    participant M as RocketMQ
+    participant A as Asset
+    participant W as Workflow
+
+    P->>P: Confirm goods receipt / quality check passed
+    P->>O: goods-receipt confirmed or quality-passed event
+    O->>M: Reliable relay
+    M->>A: At-least-once delivery
+    A->>A: eventId Inbox + dual idempotency by source line/unit sequence
+    A->>A: Create asset card only for PASS + assetManaged + positive integer quantity
+    A->>P: Historical candidate cursor backfill (compensation path)
+    A->>W: Transfer/disposal auto-resolves model by category and starts idempotently
+    W->>M: workflow.process.completed.v1
+    M->>A: Approval-result Inbox write-back
+    A->>A: Complete operation on approval; restore previousStatus and clear occupancy on rejection/cancellation
+```
+
+자산 페이지의 사용자, 조직, 공급업체, 이동/처분 자산은 모두 현재 테넌트와 데이터 범위 내의 검색 후보를 사용합니다; 모델 버전은 서버 측에서 자동 선택됩니다. 이동과 처분은 `active_operation_type/id` 원자적 점유를 공유하며, 모든 종료 경로는 동일 트랜잭션에서 상태를 복원하고 점유를 정리해야 합니다. 금액은 JSON 에서 항상 십진 문자열을 사용합니다.
+
+## Flow 18: SRM 포털 초대 등록과 역할 할당 Saga
+
+```mermaid
+sequenceDiagram
+    participant U as Portal User
+    participant G as Gateway
+    participant A as Auth
+    participant S as SRM
+    participant O as SRM Outbox
+    participant M as RocketMQ
+    participant I as Auth Inbox/Outbox
+
+    U->>G: Auth registration (tenant + captcha)
+    G->>A: POST /api/auth/register
+    A-->>U: USER account created
+    U->>G: After login, submit requestId + inviteToken + enterprise info
+    G->>S: POST /api/srm/portal/enroll
+    S->>S: Validate tenant/user, invitation quota, creditCode uniqueness
+    S->>S: Create REGISTERING Supplier and PENDING_ROLE_ASSIGN Enrollment
+    S->>O: Write srm.portal-role.assign-requested.v1 in the same transaction
+    O->>M: Reliable relay
+    M->>A: requestId/tenantId/supplierId/userId/SUPPLIER
+    A->>I: requestId Inbox idempotency + validate user and tenant + assign role
+    A->>I: Write success/failure result Outbox in the same transaction
+    I->>M: Reliable relay
+    M->>S: Auth role-assignment result
+    S->>S: Establish tenant context and consume idempotently by requestId
+    alt Assignment succeeded
+        S->>S: Create PortalUser, Supplier → PENDING_REVIEW, Enrollment → COMPLETED
+    else Assignment failed
+        S->>S: Supplier → REGISTERING_FAILED, Enrollment → ROLE_ASSIGN_FAILED
+    end
+    U->>S: GET /api/srm/portal/enrollment
+    S-->>U: Current Saga status or retryable info
+```
+
+주요 제약:
+
+- USER 는 `srm:portal:enroll` 만 가집니다; 기업 프로필과 평가는 SUPPLIER 권한과 유효한 PortalUser 연관을 모두 갖춰야 합니다.
+- inviteToken 원문은 데이터베이스에 저장되지 않고, 로그에 남지 않으며, MQ 에 들어가지 않습니다; 초대 횟수는 버전 조건으로 원자적으로 증가합니다.
+- Portal userId 는 내부 owner 필드에 기록해서는 안 됩니다; Portal 공급업체는 내부 담당자 할당 전까지 owner 가 비어 있는 것을 허용합니다.
+- 요청과 결과는 모두 Transactional Outbox 를 사용합니다; 컨슈머는 requestId 로 멱등이며, 모든 MQ ThreadLocal 은 finally 에서 정리됩니다.
