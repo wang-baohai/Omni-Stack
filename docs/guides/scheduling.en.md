@@ -24,6 +24,33 @@ Without either one, `SystemJobRegistry` cannot expose the handler. The UI contro
 
 ![System jobs](../images/en-US/scheduling-system-jobs.png)
 
+#### Figure 2 `scheduling-job-type-en-US`: Job type management
+
+- Prerequisites: log in as an administrator with scheduling permission
+- Actor: platform administrator
+- Action: open Scheduler → Job Types
+- Expected result: the Job Types list-management UI is shown (consistent across four languages)
+
+![Job type management](../images/en-US/scheduling-job-type.png)
+
+#### Figure 3 `scheduling-personal-create-validation-en-US`: Create-API failure prompt
+
+- Prerequisites: log in as an administrator; in the test scenario a deterministic 500 fault is injected into the create API
+- Actor: ordinary user
+- Action: fill in the job form under My Scheduled Jobs and submit
+- Expected result: the page pops an error message (real error-handling path) and the dialog stays retryable
+
+![Create-API failure prompt](../images/en-US/scheduling-personal-create-validation.png)
+
+#### Figure 4 `scheduling-personal-lifecycle-en-US`: Personal job create and edit
+
+- Prerequisites: log in as an ordinary user, open My Scheduled Jobs
+- Actor: ordinary user
+- Action: create a uniquely-named personal job (drink-water reminder, no external side effect), then edit and rename it
+- Expected result: the list truly reflects the create and rename results (create/edit/list three-state loop)
+
+![Personal job create and edit](../images/en-US/scheduling-personal-lifecycle.png)
+
 ## 2. Personal Jobs
 
 In My Workspace:
