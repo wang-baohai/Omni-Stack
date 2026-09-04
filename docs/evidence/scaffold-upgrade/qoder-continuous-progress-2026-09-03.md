@@ -826,7 +826,26 @@ parity 曾显示 docker-deployment 三语 PARTIAL（99/100 标题、78/78 代码
 
 本轮**忠实 reconcile en**（8 处修正，表格 108→132 与源逐项一致）→ en ALIGNED（99/100、78/78、132/132）；全库分布 ALIGNED 87→**88**、PARTIAL 3→**2**。
 
-**ja/ko 待续（同样 8 处陈旧，与 en 修正前一一对应）**：ja/ko docker-deployment 仍 108/132 表格、§3.1「5 層/5계층」、§5.6「4 instances」、§16.2 旧散文节、§16.3 `docker-compose.yml`。下一轮按 en 本次 diff 为模板，对 ja/ko 施加相同 8 处 reconcile（描述列译为目标语言，服务名/端口/路径/命令 verbatim）；§3.2 健康行与附录 omni-crm 行为语言中性，可直接复用 en 行。这是明确、有界、可续做的下一项。
+**ja/ko 已于 §4.17 完成**（同样 8 处陈旧，按 en diff 为模板 reconcile）。
+
+### 4.17 docker-deployment 组：ja/ko 陈旧译文 reconcile（2026-09-04）
+
+按 §4.16 en 的 8 处 diff 为模板，对 ja/ko 施加相同 reconcile（描述列译为目标语言，服务名/端口/路径/命令/环境变量名 verbatim）：
+
+1. §2 拓扑补 9 行（crm→auth/namesrv/xxl-job、srm→mysql/auth、procurement→srm/workflow、asset→procurement/workflow）+ 补「生产网络边界」注；
+2. §3.1「5 層/5계층」→「8 レイヤー/8개 계층」+ 层级图补 crm/srm/procurement/asset（Layer 3-7）；
+3. §3.2 健康检查补 4 业务服务行（语言中性，复用 en）；
+4. §5.6「4 インスタンス/4개 인스턴스」→「8 サービス/8개 서비스」+ 环境变量表补 `OMNI_INTERNAL_API_TOKEN`/`MYSQL_URL` + 补 `.env` 首启说明；
+5. §16.1 端口表改回环绑定（`8100`→`127.0.0.1:8100` 等）+ 补安全说明；Nacos 合并为 `Console/API/gRPC` 1 行；
+6. §16.2 旧散文节「認証情報と公開範囲/인증 정보와 공개 범위」→「本地初始化账号与密钥来源」5 行表；
+7. §16.3 `docker-compose.yml`→`compose.yaml`+`compose.infra.yaml`+`compose.apps.yaml` 3 行 + 补 Migrator 镜像行 + start.bat 说明更新；
+8. 附录构建产物补 omni-crm 行（语言中性）。
+
+ko §16.2 首次替换因原文用「프런트엔드」（含 트）失配，其余 10 处已成功应用；读取实际内容后以修正锚点单独重试 §16.2 成功。
+
+**验证**：parity → docker-deployment 三语全 **ALIGNED（en/ja/ko 各 99/100 标题、78/78 代码块、132/132 表格）**；ko CJK 泄漏扫描（Han/Hiragana/Katakana）**0 匹配**；门禁 `links` PASS、`sensitive` PASS、`i18n --allow-draft` PASS（源校验和新鲜——本轮仅改译文内容未动源）。i18n 非 draft 模式下 docker-deployment 三语各 2 条既有失败（`status != synchronized` + `reviewed_at: null`）属**全仓 114 文档统一的人工签核待办**（manifest 仅 1 处 synchronized），系外部审批边界，本 Agent 不伪造人工复核日期。
+
+**全库分布**：ALIGNED 88→**90**、PARTIAL 2→**0**、MAJOR_GAP 3、STUB 21（共 114 组）。**PARTIAL 清零**。
 
 ## 5. 阶段 D：汇总验证与分类
 
@@ -887,25 +906,36 @@ parity 曾显示 docker-deployment 三语 PARTIAL（99/100 标题、78/78 代码
 
 ### 5.4 本会话（2026-09-04 接管）交付小结
 
-用户以 `qoder-continuous-execution-prompt-2026-09-03.md` 再次接管，最小核对 Git/运行现场后连续推进阶段 C P0，共 5 个小提交（均 fast-forward 推送、三端一致）：
+用户以 `qoder-continuous-execution-prompt-2026-09-03.md` 再次接管，最小核对 Git/运行现场后连续推进阶段 C，共 20 个小提交（均 fast-forward 推送、三端一致）：
 
-| 提交 | 内容 | 文件 |
-| --- | --- | --- |
-| `dd8ce78` | 阶段 C：P0 architecture 收尾（§5 +4 行 + 缺陷 A/B/C，三语 ALIGNED 138/138） | 6 |
-| `e8eb034` | checkpoint：architecture parity 复验（§4.5.8）+ G7 完整度矩阵（§4.5.9） | 1 |
-| `22cf8ee` | 阶段 C：P0 core-flows 补译 Flow 13-18（三语 ALIGNED 111/111）+ CJK 字形修正 | 4 |
-| `afadfe2` | 阶段 C：P0 api-contract §15-18 补译 en（ALIGNED 83/85） | 1 |
-| `f372084` | 阶段 C：P0 api-contract §15-18 补译 ja/ko + checkpoint §4.7 | 3 |
-| `afa591e` | checkpoint：§5.4 会话交付小结 + §8.3 恢复指针刷新 | 1 |
-| `33aaf6e` | 阶段 C：P1 workflow §2.8+§8 补译三语 ALIGNED + 恢复 api-contract §16 锚点 | 7 |
-| `ea0904a` | 阶段 C：guide-system-security-audit §8/§9 截图章节补译三语 ALIGNED | 4 |
-| `b219c7d` | 阶段 C：mq-reliability §10 补译三语 ALIGNED（闭合阶段 B 自造缺口） | 4 |
+| 提交 | 内容 |
+| --- | --- |
+| `dd8ce78` | P0 architecture 收尾（三语 ALIGNED 138/138） |
+| `e8eb034` | checkpoint：architecture parity 复验 + G7 完整度矩阵 |
+| `22cf8ee` | P0 core-flows 补译 Flow 13-18（三语 ALIGNED 111/111）+ CJK 修正 |
+| `afadfe2` | P0 api-contract §15-18 补译 en |
+| `f372084` | P0 api-contract §15-18 补译 ja/ko + checkpoint §4.7 |
+| `afa591e` | checkpoint：§5.4 会话小结 + §8.3 恢复指针 |
+| `33aaf6e` | P1 workflow §2.8+§8 补译三语 ALIGNED + 恢复 api-contract §16 锚点 |
+| `ea0904a` | guide-system-security-audit §8/§9 截图章节补译三语 ALIGNED |
+| `b219c7d` | mq-reliability §10 补译三语 ALIGNED（闭合阶段 B 自造缺口） |
+| `903bb07` | checkpoint：§5.4 刷新（workflow/guide/mq 提交登记） |
+| `6be975a` | observability 忠实重译 en/ja/ko（ALIGNED） |
+| `7f04a40` | preset-quick-selection en/ja/ko 对齐 |
+| `cafa81d` | preset-maintenance + custom-preset-tutorial en/ja/ko 对齐 |
+| `1db646b` | guide-troubleshooting ja/ko 忠实重译 |
+| `1758683` | preset-upgrade-guide en/ja/ko 对齐 |
+| `b1aec40` | guide-crm-flow en/ja/ko 对齐（恢复图 2-4） |
+| `382d5f0` | guide-scheduling en/ja/ko 对齐 |
+| `c3d50a3` | guide-permissions en/ja/ko 对齐（恢复图 2-7） |
+| `6238ec7` | docker-deployment en 陈旧译文 reconcile（§4.16，ALIGNED 132/132） |
+| 本轮 | docker-deployment ja/ko reconcile（§4.17，三语 ALIGNED，PARTIAL 清零） |
 
-**里程碑：P0 三篇系统真相文档（architecture、core-flows、api-contract）四语言全部 ALIGNED；P1 workflow 组补齐；阶段 B 自造的三处译文缺口（workflow §8、guide §8/§9、mq §10）全部闭合**。全库完整度分布由接管时 ALIGNED 48 / PARTIAL 21 / MAJOR_GAP 20 / STUB 25 变为 **ALIGNED 62 / PARTIAL 16 / MAJOR_GAP 11 / STUB 25**（本会话 +14 ALIGNED）。9 个提交均 fast-forward 推送、三端一致（LOCAL=GITEE=GITHUB=`b219c7d`）。
+**里程碑：P0 三篇系统真相文档（architecture、core-flows、api-contract）四语言全部 ALIGNED；P1 workflow 组补齐；阶段 B 自造的三处译文缺口全部闭合；observability/preset-*/guide-*/docker-deployment 等浓缩或陈旧译文已忠实重译或 reconcile**。全库完整度分布由接管时 ALIGNED 48 / PARTIAL 21 / MAJOR_GAP 20 / STUB 25 变为 **ALIGNED 90 / PARTIAL 0 / MAJOR_GAP 3 / STUB 21**（本会话 +42 ALIGNED，PARTIAL 清零）。20 个提交均 fast-forward 推送、三端一致。
 
 运行现场：`omni-wp09-docs running(15)` 全程未重建；本会话均为**文档只读 + 译文修订**，无 E2E、无 Token 签发、无数据写入、无凭证产生。免费额度剩余：**UNKNOWN**（Agent 无法读取客户端用量面板，请在客户端核对）。
 
-**下一可执行项（阶段 C，非外部阻塞）**：P1 剩 backend-patterns/frontend-patterns/scheduling/crm/guide-scaffold-development 结构已 ALIGNED（仅需逐句语义复核）；结构性缺口集中在 **MAJOR_GAP 11**（observability、scaffold-upgrade-plan、preset-quick-selection、custom-preset-tutorial en、preset-maintenance ko）与 **STUB 25**（asset/crm/srm/procurement-design 各三语、full-functional-audit 等，工量最重）及 PARTIAL 16、P2。每项闭环需与本轮同量级（读源→补译→parity→门禁→提交）。
+**下一可执行项（阶段 C，非外部阻塞）**：结构性缺口仅剩 **MAJOR_GAP 3**（scaffold-upgrade-plan 等）与 **STUB 21**（asset/crm/srm/procurement-design 各三语、full-functional-audit 等，工量最重，各需独立整轮）。每项闭环需与本轮同量级（读源→补译→parity→门禁→提交）。manifest 人工签核（`status: synchronized` + `reviewed_at`）系全仓 114 文档统一待办，属外部审批边界，本 Agent 不代办、不伪造复核日期。
 
 **外部阻塞项不变**（见 §5.2 BLOCKED 表 + §6）：DATA_DEFECT 种子还原（需授权）、workflow countersign（需新增身份）、scaffold-development/operations（非页面流程，需决定登记形态）、G1/G7/G8/WP-10。
 

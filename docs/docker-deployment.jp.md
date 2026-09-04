@@ -78,10 +78,21 @@ networks:
 | omni-auth | nacos | `nacos:8848` | サービス登録/設定 |
 | omni-base | rocketmq-namesrv | `rocketmq-namesrv:9876` | MQ メッセージ送信 |
 | omni-base | xxl-job-admin | `xxl-job-admin:8080` | ジョブ実行登録 |
+| omni-crm | omni-auth | `omni-auth:8080` | ユーザー/組織/データスコープ/XSS 内部クエリ |
+| omni-crm | rocketmq-namesrv | `rocketmq-namesrv:9876` | CRM Outbox メッセージ配信 |
+| omni-crm | xxl-job-admin | `xxl-job-admin:8080` | CRM リレー実行体登録 |
+| omni-srm | mysql | `mysql:3306` | SRM 業務データベースとローカル Outbox |
+| omni-srm | omni-auth | `omni-auth:8080` | ユーザー/組織内部クエリと Portal Saga |
+| omni-procurement | omni-srm | `omni-srm:8080` | サプライヤー招待/見積/落札検証 |
+| omni-procurement | omni-workflow | `omni-workflow:8080` | 購買申請承認内部契約 |
+| omni-asset | omni-procurement | `omni-procurement:8080` | 入庫資産候補の履歴補償 |
+| omni-asset | omni-workflow | `omni-workflow:8080` | 移管/廃棄承認内部契約 |
 | ホストブラウザ | omni-frontend | `localhost:3000` | ユーザーアクセス入口 |
 | ホストブラウザ | Nacos Console | `localhost:8080` | 運用管理 |
 
-> **重要な区別**：コンテナ間通信は内部ポート（例：8080）を使用し、ホストからのアクセスはマッピングポート（例：8100/8101/8102/8103）を使用します。
+> **重要な区別**：コンテナ間通信は内部コンテナポート（例：8080）を使用し、ホストからのアクセスはマッピングポート（例：8100-8107）を使用します。MySQL はコンテナ内では常に 3306 を使い、ホストには 13306 にマッピングされます。
+
+> **本番ネットワーク境界**：リポジトリルートの `compose.yaml` とその include ファイルはローカル開発/統合オーケストレーションです。フロントエンド 3000 と Gateway 8102 のみがホストからアクセス可能で、その他の全サービス/ミドルウェア/管理コンソールは診断用入口として `127.0.0.1` にのみバインドされます。本番デプロイではフロントエンド/Gateway の HTTPS 入口のみを公開し、すべての診断用ポートマッピングを除去しなければなりません。下流の `X-Gateway-Forwarded` は転送マーカーに過ぎず、プライベートネットワークとサービス間トークンの代替にはなりません。
 
 ---
 
@@ -89,7 +100,7 @@ networks:
 
 ### 3.1 レイヤー起動順序
 
-コンテナは `depends_on` + `condition: service_healthy` を使用して 5 レイヤーに整理され、順序付き起動を確保します：
+コンテナは依存関係により 8 レイヤーに整理され、`depends_on` + `condition: service_healthy` で順序付き起動を確保します：
 
 ```
 Layer 0:  mysql · redis · rocketmq-namesrv          （依存関係なし、最初に起動）
@@ -98,9 +109,15 @@ Layer 1:  nacos     xxl-job   rocketmq-broker        （Layer 0 に依存）
             │         │          │
 Layer 2:  omni-auth                                  （nacos + redis + mysql に依存）
             │
-Layer 3:  omni-base · omni-workflow · omni-gateway   （Layer 1 + Layer 2 に依存）
+Layer 3:  omni-base · omni-workflow · omni-crm · omni-srm
                                                 │
-Layer 4:  omni-frontend                           （omni-gateway に依存）
+Layer 4:  omni-procurement                           （workflow + srm に依存）
+                                                │
+Layer 5:  omni-asset                                 （procurement + workflow に依存）
+                                                │
+Layer 6:  omni-gateway                               （全下流サービスに依存）
+                                                │
+Layer 7:  omni-frontend                              （omni-gateway に依存）
 ```
 
 ### 3.2 ヘルスチェック設定一覧
@@ -117,6 +134,10 @@ Layer 4:  omni-frontend                           （omni-gateway に依存）
 | omni-base | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 | omni-gateway | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 | omni-workflow | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-crm | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-srm | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-procurement | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-asset | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 
 > **なぜ start_period = 90s？**  
 > Spring Boot マイクロサービスはコールドスタート時に多数の Bean のロード + データベース初期化 + Nacos 登録が必要で、60-80 秒かかる場合があります。90s に設定することで誤判定を防止します。
@@ -281,9 +302,9 @@ xxl-job-admin:
       --xxl.job.accessToken=           # 空トークン（開発環境では認証なし）
 ```
 
-### 5.6 バックエンドマイクロサービス（4 インスタンス）
+### 5.6 バックエンドマイクロサービス（8 サービス）
 
-4 つのバックエンドマイクロサービスは同一の Dockerfile を使用し、`build.args.SERVICE_NAME` で区別します。各サービスの `environment` で主要設定をオーバーライド：
+8 つのバックエンドマイクロサービスは同一の Dockerfile を使用し、`build.args.SERVICE_NAME` で区別します。各サービスの `environment` で主要設定をオーバーライド：
 
 | 環境変数 | 説明 | 例値 |
 |---------|------|------|
@@ -294,6 +315,10 @@ xxl-job-admin:
 | `SPRING_CLOUD_NACOS_DISCOVERY_IP` | 登録 IP（空=自動検出コンテナ IP） | `""` |
 | `AUTH_ISSUER` | JWT Issuer（auth のみ） | `http://omni-auth:8080` |
 | `AUTH_JWKS_URI` | JWKS エンドポイント（gateway のみ） | `http://omni-auth:8080/oauth2/jwks` |
+| `OMNI_INTERNAL_API_TOKEN` | サービス間共有シークレット（全 Servlet サービスで同一） | `.env` から注入 |
+| `MYSQL_URL` | 現在の業務サービスデータベース接続 | `jdbc:mysql://mysql:3306/omni_asset?...` |
+
+初回起動時には必ず `cp .env.example .env` を実行し、`OMNI_INTERNAL_API_TOKEN` を 32 バイト以上のランダム値に置き換えてください。Compose は必須変数構文を使用しており、シークレットが欠落すると起動を拒否します。リポジトリ内のデフォルト値は提供されません。
 
 ### 5.7 フロントエンド
 
@@ -790,32 +815,40 @@ docker compose logs --timestamps omni-auth | head -5
 | サービス | 内部ポート | ホストマッピングポート | プロトコル | 説明 |
 |---------|-----------|---------------------|-----------|------|
 | omni-frontend | 3000 | 3000 | HTTP | ユーザーアクセス入口 |
-| omni-auth | 8080 | 8100 | HTTP | 認証サービス |
-| omni-base | 8080 | 8101 | HTTP | 基礎データサービス |
+| omni-auth | 8080 | 127.0.0.1:8100 | HTTP | 認証/認可サービス、ループバックデバッグのみ |
+| omni-base | 8080 | 127.0.0.1:8101 | HTTP | 基礎データサービス、ループバックデバッグのみ |
 | omni-gateway | 8080 | 8102 | HTTP | API ゲートウェイ |
-| omni-workflow | 8080 | 8103 | HTTP | ワークフローサービス |
-| omni-crm | 8080 | 8104 | HTTP | CRM サービス |
-| omni-srm | 8080 | 8105 | HTTP | SRM サービス |
-| omni-procurement | 8080 | 8106 | HTTP | 調達サービス |
-| omni-asset | 8080 | 8107 | HTTP | 資産サービス |
-| MySQL | 3306 | 13306 | TCP | データベース |
-| Redis | 6379 | 6379 | TCP | キャッシュ |
-| Nacos Console | 8080 | 8080 | HTTP | コンソール |
-| Nacos API | 8848 | 8848 | HTTP | サービス登録/設定 |
-| Nacos gRPC | 9848 | 9848 | gRPC | ロングコネクション |
-| RocketMQ NameServer | 9876 | **19876** | TCP | ネームサービス |
-| RocketMQ Broker | 10909-10912 | 10909-10912 | TCP | メッセージブローカー |
-| XXL-JOB Admin | 8080 | 18080 | HTTP | ジョブスケジューラー |
+| omni-workflow | 8080 | 127.0.0.1:8103 | HTTP | ワークフローサービス、ループバックデバッグのみ |
+| omni-crm | 8080 | 127.0.0.1:8104 | HTTP | CRM 商談前段サービス、ループバックデバッグのみ |
+| omni-srm | 8080 | 127.0.0.1:8105 | HTTP | SRM サービス、本番トラフィックは Gateway 経由のみ、ホストはループバックデバッグのみ |
+| omni-procurement | 8080 | 127.0.0.1:8106 | HTTP | 調達サービス、本番トラフィックは Gateway 経由のみ |
+| omni-asset | 8080 | 127.0.0.1:8107 | HTTP | 資産サービス、本番トラフィックは Gateway 経由のみ |
+| MySQL | 3306 | 127.0.0.1:13306 | TCP | データベース、明示的な名前付きボリューム、ループバックデバッグのみ |
+| Redis | 6379 | 127.0.0.1:6379 | TCP | パスワード保護キャッシュ、ループバックデバッグのみ |
+| Nacos Console/API/gRPC | 8080/8848/9848 | 127.0.0.1 同一ポートのみ | HTTP/gRPC | レジストリ/設定とコンソール |
+| RocketMQ NameServer | 9876 | **127.0.0.1:19876** | TCP | ネームサービス |
+| RocketMQ Broker | 10909-10912 | 127.0.0.1 同一ポートのみ | TCP | メッセージブローカー |
+| XXL-JOB Admin | 8080 | 127.0.0.1:18080 | HTTP | ジョブスケジューラー、ログイン/実行体トークンは `.env` から注入 |
 
-### 16.2 認証情報と公開範囲
+### 16.2 ローカル初期化アカウントとシークレット供給源
 
-本番用の認証情報はハードコードされていません。起動前に `.env` で MySQL、Redis、Nacos、XXL-JOB、OAuth state、JWK 暗号化、内部 API、アプリケーション DB の各シークレットを設定してください。初期アプリケーションアカウントはローカルデモ専用であり、共有環境では変更または削除が必要です。公開入口はフロントエンド（`3000`）と Gateway（`8102`）のみで、その他のポートは `127.0.0.1` にバインドされます。
+| サービス | アカウント | パスワード | アクセスアドレス |
+|------|------|------|----------|
+| フロントエンドアプリ | ローカルシード `admin` | ローカルシード `admin123`、初回ログイン時に即時変更、本番では使用禁止 | http://localhost:3000 |
+| MySQL | root | `.env: MYSQL_ROOT_PASSWORD` | 127.0.0.1:13306 |
+| Redis | ユーザー名なし | `.env: REDIS_PASSWORD` | 127.0.0.1:6379 |
+| Nacos 認証アイデンティティ | `.env: NACOS_AUTH_IDENTITY_KEY` | `.env: NACOS_AUTH_IDENTITY_VALUE/TOKEN` | http://127.0.0.1:8080 |
+| XXL-JOB Admin | `.env: XXL_JOB_ADMIN_USERNAME` | `.env: XXL_JOB_ADMIN_PASSWORD` | http://127.0.0.1:18080 |
+
+すべての `replace-with-*` 値は起動前に置き換える必要があります。Compose は必須変数構文によりフェイルクローズドします。新規テナント管理者のパスワードは作成リクエストで明示的に指定され、バックエンドは BCrypt ハッシュのみを保存し、`admin123` は生成しなくなりました。
 
 ### 16.3 主要ファイルパス
 
 | ファイル | パス | 説明 |
 |---------|------|------|
-| docker-compose.yml | `docker-compose.yml` | コンテナオーケストレーション設定 |
+| Compose エントリ | `compose.yaml` | インフラとアプリケーションのオーケストレーションを include |
+| Compose インフラ | `compose.infra.yaml` | MySQL、Redis、Nacos、RocketMQ、XXL-JOB |
+| Compose アプリケーション | `compose.apps.yaml` | バックエンドサービスとフロントエンド |
 | バックエンド Dockerfile | `docker/backend/Dockerfile` | マイクロサービスマルチステージビルド |
 | フロントエンド Dockerfile | `docker/frontend/Dockerfile` | Vue フロントエンドマルチステージビルド |
 | Nginx 設定 | `docker/frontend/nginx.conf` | フロントエンドリバースプロキシルール |
@@ -823,8 +856,9 @@ docker compose logs --timestamps omni-auth | head -5
 | Maven ミラー | `omni-backend/docker-settings.xml` | Aliyun Maven 高速化 |
 | DB マイグレーション | `database/changelog/` | 9 DB の Liquibase スキーマ、制約、アップグレード |
 | DB シード | `scripts/sql/seed/`、`database/seed/manifest.yaml` | 冪等 DML、ソースチェックサム、自然キー検証 |
+| Migrator イメージ | `docker/migrator/Dockerfile` | 一回限りの Liquibase マイグレーションサービスをビルド |
 | 起動スクリプト (Linux) | `start.sh` | ワンクリック起動 |
-| 起動スクリプト (Windows) | `start.bat` | ワンクリック起動（ポート保護付き） |
+| 起動スクリプト (Windows) | `start.bat` | 管理者権限なしで指定プリセットを起動、システムポートポリシーは変更しない |
 | 停止スクリプト (Linux) | `stop.sh` | ワンクリック停止 |
 | 停止スクリプト (Windows) | `stop.bat` | ワンクリック停止 |
 
@@ -838,6 +872,7 @@ docker compose logs --timestamps omni-auth | head -5
 | omni-base:latest | ~200MB | JRE + Fat JAR |
 | omni-gateway:latest | ~200MB | JRE + Fat JAR |
 | omni-workflow:latest | ~250MB | JRE + Fat JAR + Flowable エンジン |
+| omni-crm:latest | ~210MB | JRE + Fat JAR + CRM/Outbox |
 | omni-frontend:latest | ~50MB | Nginx + Vue 静的ファイル |
 | mysql:8.4 | ~600MB | 公式イメージ |
 | nacos/nacos-server:v3.1.1 | ~800MB | 公式イメージ |
