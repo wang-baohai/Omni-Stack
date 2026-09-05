@@ -1,5 +1,7 @@
 # Omni-Stack 高效率脚手架升级详细实施计划
 
+> 历史设计明细，2026-09-05起不再作为当前执行入口。完整目标以 [MASTER DELIVERY GOAL](scaffold-upgrade-plan.md) 为准，执行只读 [Qoder Handoff](evidence/project-consolidation/qoder-handoff.md)。本文保留到有效设计/验收细节逐项归并完成后由Qoder按清单删除；原G0～G8及D-01～09追溯不因入口切换丢失。
+
 > 文档状态：可执行基线，待按本文决策门逐阶段实施
 > 编制日期：2026-08-20
 > 代码基线：main 分支，提交 09a29fe
