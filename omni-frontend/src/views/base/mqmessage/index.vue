@@ -7,26 +7,60 @@ import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   listMqMessages,
+  getMqRelayRuntimeStatus,
   resendMessage,
   skipMessage,
   MqMessageStatus,
   statusMap,
   type MqMessage,
   type MqMessageQuery,
+  type MqRelayRuntimeStatus,
 } from '@/api/mqMessage'
 import type { PageResult } from '@/types/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const { t } = useI18n()
 
-/** 状态下拉选项 */
+/** 状态下拉选项（label 走 i18n key，四语真实渲染） */
 const statusOptions = [
-  { value: MqMessageStatus.PENDING, label: 'PENDING' },
-  { value: MqMessageStatus.SENT, label: 'SENT' },
-  { value: MqMessageStatus.FAILED, label: 'FAILED' },
-  { value: MqMessageStatus.DEAD_LETTER, label: 'DEAD_LETTER' },
-  { value: MqMessageStatus.SKIPPED, label: 'SKIPPED' },
+  { value: MqMessageStatus.PENDING, labelKey: 'mqMessage.statusPending' },
+  { value: MqMessageStatus.SENT, labelKey: 'mqMessage.statusSent' },
+  { value: MqMessageStatus.FAILED, labelKey: 'mqMessage.statusFailed' },
+  { value: MqMessageStatus.DEAD_LETTER, labelKey: 'mqMessage.statusDeadLetter' },
+  { value: MqMessageStatus.SKIPPED, labelKey: 'mqMessage.statusSkipped' },
+  // relay 投递中的瞬态，一般停留极短，保留筛选入口便于排障。
+  { value: MqMessageStatus.PROCESSING, labelKey: 'mqMessage.statusProcessing' },
 ]
+
+/**
+ * 状态标签文案：未知状态码如实回退为原始数字，不伪造翻译。
+ */
+function statusLabel(status: number): string {
+  const entry = statusMap[status]
+  return entry ? t(entry.labelKey) : String(status)
+}
+
+/**
+ * 统一日期时间展示为 yyyy-MM-dd HH:mm:ss；后端已是该格式时原样呈现。
+ */
+function formatDateTime(value: string | null): string {
+  if (!value) return '-'
+  const normalized = value.replace('T', ' ')
+  const match = /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/.exec(normalized)
+  return match ? match[1] : value
+}
+
+/**
+ * errorMsg 脱敏展示：折叠常见凭证模式，避免密码/令牌原值出现在截图与界面上；
+ * 服务端已脱敏的内容不受影响。
+ */
+function maskErrorMsg(text: string | null): string {
+  if (!text) return '-'
+  return text.replace(
+    /((?:password|passwd|token|secret|api[-_]?key|authorization|cookie)\s*[=:]\s*)[^\s,;&"']+/gi,
+    '$1***',
+  )
+}
 
 /** 查询表单 */
 const queryForm = reactive({
@@ -49,6 +83,8 @@ const pageSize = ref(10)
 const loading = ref(false)
 /** 持久加载错误；与“查询成功但无数据”明确区分。 */
 const loadError = ref('')
+/** 轻量模式下异步投递关闭，但事务 Outbox 仍可写入。 */
+const runtimeStatus = ref<MqRelayRuntimeStatus | null>(null)
 
 /** 详情弹窗 */
 const dialogVisible = ref(false)
@@ -61,6 +97,8 @@ async function loadData() {
   loading.value = true
   loadError.value = ''
   try {
+    const runtimeResponse = await getMqRelayRuntimeStatus()
+    runtimeStatus.value = runtimeResponse.data.data
     const params: MqMessageQuery = {
       page: currentPage.value,
       size: pageSize.value,
@@ -89,8 +127,8 @@ async function loadData() {
     const response = (error as { response?: { headers?: Record<string, string> } }).response
     const traceId = response?.headers?.['x-trace-id']
     loadError.value = traceId
-      ? `消息聚合服务加载失败，请重试。追踪号：${traceId}`
-      : '消息聚合服务加载失败，请检查相关业务服务后重试。'
+      ? t('mqMessage.loadFailedWithTrace', { traceId })
+      : t('mqMessage.loadFailed')
   } finally {
     loading.value = false
   }
@@ -118,7 +156,7 @@ function handlePageChange(page: number) {
   loadData()
 }
 
-/** 打开详情弹窗 */
+/** 打开详情弹窗（行内真实数据，后端列表接口已返回全字段） */
 function handleViewDetail(row: MqMessage) {
   selectedMessage.value = row
   dialogVisible.value = true
@@ -142,7 +180,8 @@ function formatJson(jsonStr: string | null): string {
 
 /** 判断是否可重发 */
 function canResend(status: number): boolean {
-  return [MqMessageStatus.PENDING, MqMessageStatus.FAILED, MqMessageStatus.DEAD_LETTER].includes(status)
+  return runtimeStatus.value?.deliveryEnabled === true
+    && [MqMessageStatus.PENDING, MqMessageStatus.FAILED, MqMessageStatus.DEAD_LETTER].includes(status)
 }
 
 /** 判断是否可忽略 */
@@ -159,7 +198,7 @@ async function handleResend(row: MqMessage) {
       type: 'warning',
     })
     await resendMessage(row.msgId)
-    ElMessage.success(t('common.success'))
+    ElMessage.success(t('mqMessage.resendSuccess'))
     loadData()
   } catch (e: unknown) {
     if (e !== 'cancel') {
@@ -177,7 +216,7 @@ async function handleSkip(row: MqMessage) {
       type: 'warning',
     })
     await skipMessage(row.msgId)
-    ElMessage.success(t('common.success'))
+    ElMessage.success(t('mqMessage.skipSuccess'))
     loadData()
   } catch (e: unknown) {
     if (e !== 'cancel') {
@@ -203,6 +242,7 @@ onMounted(loadData)
         <el-form-item :label="t('mqMessage.status')">
           <el-select
             v-model="queryForm.status"
+            data-testid="mq-status-filter"
             :placeholder="t('mqMessage.statusPlaceholder')"
             clearable
             style="width: 160px"
@@ -210,7 +250,7 @@ onMounted(loadData)
             <el-option
               v-for="opt in statusOptions"
               :key="opt.value"
-              :label="opt.label"
+              :label="t(opt.labelKey)"
               :value="opt.value"
             />
           </el-select>
@@ -257,7 +297,18 @@ onMounted(loadData)
       </el-form>
 
       <el-alert
+        v-if="runtimeStatus && !runtimeStatus.deliveryEnabled"
+        :title="t('mqMessage.deliveryDisabledTitle')"
+        :description="t('mqMessage.deliveryDisabledDescription')"
+        type="warning"
+        :closable="false"
+        show-icon
+        class="runtime-warning"
+      />
+
+      <el-alert
         v-if="loadError"
+        data-testid="mq-load-error"
         :title="loadError"
         type="error"
         :closable="false"
@@ -291,8 +342,12 @@ onMounted(loadData)
         </el-table-column>
         <el-table-column prop="status" :label="t('mqMessage.status')" width="130">
           <template #default="{ row }">
-            <el-tag :type="statusMap[row.status]?.tagType || 'info'" size="small">
-              {{ statusMap[row.status]?.label || row.status }}
+            <el-tag
+              data-testid="mq-status-tag"
+              :type="statusMap[row.status]?.tagType || 'info'"
+              size="small"
+            >
+              {{ statusLabel(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -302,10 +357,14 @@ onMounted(loadData)
             {{ row.retryCount }} / {{ row.maxRetry }}
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" :label="t('mqMessage.createTime')" width="170" />
+        <el-table-column prop="createTime" :label="t('mqMessage.createTime')" width="170">
+          <template #default="{ row }">
+            {{ formatDateTime(row.createTime) }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('common.actions')" width="220" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleViewDetail(row)">
+            <el-button size="small" data-testid="mq-detail-button" @click="handleViewDetail(row)">
               {{ t('mqMessage.detail') }}
             </el-button>
             <el-button
@@ -313,6 +372,7 @@ onMounted(loadData)
               v-permission="'base:mqmessage:resend'"
               size="small"
               type="warning"
+              data-testid="mq-resend-button"
               @click="handleResend(row)"
             >
               {{ t('mqMessage.resend') }}
@@ -322,6 +382,7 @@ onMounted(loadData)
               v-permission="'base:mqmessage:skip'"
               size="small"
               type="info"
+              data-testid="mq-skip-button"
               @click="handleSkip(row)"
             >
               {{ t('mqMessage.skip') }}
@@ -349,6 +410,7 @@ onMounted(loadData)
       v-model="dialogVisible"
       :title="t('mqMessage.detail')"
       width="720px"
+      data-testid="mq-detail-dialog"
       destroy-on-close
     >
       <template v-if="selectedMessage">
@@ -361,24 +423,28 @@ onMounted(loadData)
           <el-descriptions-item :label="t('mqMessage.msgKey')">{{ selectedMessage.msgKey || '-' }}</el-descriptions-item>
           <el-descriptions-item :label="t('mqMessage.brokerType')">{{ selectedMessage.brokerType }}</el-descriptions-item>
           <el-descriptions-item :label="t('mqMessage.status')">
-            <el-tag :type="statusMap[selectedMessage.status]?.tagType || 'info'" size="small">
-              {{ statusMap[selectedMessage.status]?.label || selectedMessage.status }}
+            <el-tag
+              data-testid="mq-detail-status"
+              :type="statusMap[selectedMessage.status]?.tagType || 'info'"
+              size="small"
+            >
+              {{ statusLabel(selectedMessage.status) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item :label="t('mqMessage.retryCount')">{{ selectedMessage.retryCount }} / {{ selectedMessage.maxRetry }}</el-descriptions-item>
           <el-descriptions-item :label="t('mqMessage.serviceName')">{{ selectedMessage.serviceName }}</el-descriptions-item>
-          <el-descriptions-item :label="t('mqMessage.createTime')">{{ selectedMessage.createTime }}</el-descriptions-item>
-          <el-descriptions-item :label="t('mqMessage.nextRetryTime')" :span="2">{{ selectedMessage.nextRetryTime || '-' }}</el-descriptions-item>
+          <el-descriptions-item :label="t('mqMessage.createTime')">{{ formatDateTime(selectedMessage.createTime) }}</el-descriptions-item>
+          <el-descriptions-item :label="t('mqMessage.nextRetryTime')" :span="2">{{ formatDateTime(selectedMessage.nextRetryTime) }}</el-descriptions-item>
         </el-descriptions>
 
         <!-- Payload -->
         <div class="section-title">{{ t('mqMessage.payload') }}</div>
         <pre class="json-block">{{ formatJson(selectedMessage.payload) }}</pre>
 
-        <!-- 错误信息 -->
+        <!-- 错误信息（前端再脱敏一层，避免凭证原值上屏） -->
         <template v-if="selectedMessage.errorMsg">
           <div class="section-title">{{ t('mqMessage.errorMsg') }}</div>
-          <div class="error-block">{{ selectedMessage.errorMsg }}</div>
+          <div class="error-block" data-testid="mq-detail-errormsg">{{ maskErrorMsg(selectedMessage.errorMsg) }}</div>
         </template>
       </template>
 
@@ -403,6 +469,9 @@ onMounted(loadData)
   margin-bottom: 16px;
 }
 .load-error {
+  margin-bottom: 16px;
+}
+.runtime-warning {
   margin-bottom: 16px;
 }
 .pagination {

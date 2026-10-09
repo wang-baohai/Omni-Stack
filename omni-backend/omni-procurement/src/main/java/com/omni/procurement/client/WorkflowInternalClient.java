@@ -1,9 +1,10 @@
 package com.omni.procurement.client;
 
 import com.omni.common.core.result.R;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.internal.InternalFeignHeadersFactory;
 import com.omni.procurement.dto.WorkflowContracts;
 import feign.RequestInterceptor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * Workflow 跨服务内部客户端。
@@ -31,6 +35,42 @@ public interface WorkflowInternalClient {
      */
     @GetMapping("/api/internal/workflow/model-version/{modelVersionId}")
     R<WorkflowContracts.ModelVersionResponse> getModelVersion(
+            @RequestHeader("X-Tenant-Id") Long tenantId,
+            @PathVariable("modelVersionId") Long modelVersionId);
+
+    /**
+     * 查询采购分类下当前可绑定的已发布流程。
+     *
+     * @param tenantId 租户 ID
+     * @param category 流程分类
+     * @return 可绑定流程
+     */
+    @GetMapping("/api/internal/workflow/model-versions/published")
+    R<List<WorkflowContracts.ModelVersionResponse>> listPublishedModelVersions(
+            @RequestHeader("X-Tenant-Id") Long tenantId,
+            @RequestParam("category") String category);
+
+    /**
+     * 批量解析既有规则引用的模型版本。
+     *
+     * @param tenantId 租户 ID
+     * @param request 批量请求
+     * @return 模型版本元数据
+     */
+    @PostMapping("/api/internal/workflow/model-versions/resolve")
+    R<List<WorkflowContracts.ModelVersionResponse>> resolveModelVersions(
+            @RequestHeader("X-Tenant-Id") Long tenantId,
+            @RequestBody WorkflowContracts.ModelVersionResolveRequest request);
+
+    /**
+     * 查询不含原始设计数据的安全审批图。
+     *
+     * @param tenantId 租户 ID
+     * @param modelVersionId 模型版本 ID
+     * @return 安全审批图
+     */
+    @GetMapping("/api/internal/workflow/model-version/{modelVersionId}/preview")
+    R<WorkflowContracts.ApprovalPreviewResponse> getApprovalPreview(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @PathVariable("modelVersionId") Long modelVersionId);
 
@@ -61,18 +101,15 @@ public interface WorkflowInternalClient {
     /** Workflow Feign 内部认证配置。 */
     @Configuration
     class FeignConfig {
-
-        @Value("${omni.internal.api.token:}")
-        private String internalToken;
-
         /**
          * 注入服务间共享认证令牌。
          *
          * @return Feign 请求拦截器
          */
         @Bean
-        public RequestInterceptor workflowInternalTokenInterceptor() {
-            return template -> template.header("X-Internal-Token", internalToken);
+        public RequestInterceptor workflowInternalTokenInterceptor(
+                ServiceIdentityProperties properties, InternalFeignHeadersFactory factory) {
+            return factory.create(properties.getInternalApi().getToken());
         }
     }
 }

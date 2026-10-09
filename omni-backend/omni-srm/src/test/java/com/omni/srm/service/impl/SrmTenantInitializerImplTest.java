@@ -6,7 +6,8 @@ import com.omni.srm.entity.SrmEvaluationDimension;
 import com.omni.srm.entity.SrmEvaluationTemplate;
 import com.omni.srm.mapper.SrmEvaluationDimensionMapper;
 import com.omni.srm.mapper.SrmEvaluationTemplateMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -49,13 +50,13 @@ class SrmTenantInitializerImplTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        SrmTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 新租户必须自动获得四个总权重为一百的默认评估维度。 */
     @Test
     void shouldCreateDefaultTemplateAndDimensionsForNewTenant() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         when(templateMapper.insert(any(SrmEvaluationTemplate.class))).thenAnswer(invocation -> {
             SrmEvaluationTemplate template = invocation.getArgument(0);
             template.setId(99L);
@@ -97,7 +98,7 @@ class SrmTenantInitializerImplTest {
     /** 已初始化租户仍需收敛为唯一默认模板和固定四个启用维度。 */
     @Test
     void shouldReconcileExistingTenantToSingleDefaultAndFourDimensions() {
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(7L, 3L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
         SrmEvaluationTemplate template = new SrmEvaluationTemplate();
         template.setId(99L);
         template.setTenantId(3L);

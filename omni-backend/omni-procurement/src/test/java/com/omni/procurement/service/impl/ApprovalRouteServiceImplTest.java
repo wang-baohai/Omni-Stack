@@ -13,8 +13,10 @@ import com.omni.procurement.entity.ProcApprovalRoute;
 import com.omni.procurement.entity.ProcMaterialCategory;
 import com.omni.procurement.mapper.ProcApprovalRouteMapper;
 import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.ProcTenantInitializer;
+import com.omni.procurement.service.support.ApprovalRouteCodeGenerator;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -54,20 +56,21 @@ class ApprovalRouteServiceImplTest {
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        ProcTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 同品类活动金额区间重叠时必须在写库前返回 409。 */
     @Test
     void shouldRejectOverlappingActiveRoute() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         when(routeMapper.lockTenantConfig(41L)).thenReturn(1L);
         when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
         stubPublishedVersion();
         when(routeMapper.selectCount(any())).thenReturn(0L);
         when(routeMapper.selectList(any())).thenReturn(List.of(existingRoute("0", "100")));
         ApprovalRouteServiceImpl service = new ApprovalRouteServiceImpl(
-                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient);
+                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient,
+                new ApprovalRouteCodeGenerator());
 
         assertThatThrownBy(() -> service.create(createRequest("50", "200")))
                 .isInstanceOf(BusinessException.class)
@@ -78,7 +81,7 @@ class ApprovalRouteServiceImplTest {
     /** 并发插入触发数据库唯一键时必须翻译为稳定的 409。 */
     @Test
     void shouldTranslateConcurrentRouteCodeConflict() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         when(routeMapper.lockTenantConfig(41L)).thenReturn(1L);
         when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
         stubPublishedVersion();
@@ -87,7 +90,8 @@ class ApprovalRouteServiceImplTest {
         doThrow(new DuplicateKeyException("duplicate route code"))
                 .when(routeMapper).insert(any(ProcApprovalRoute.class));
         ApprovalRouteServiceImpl service = new ApprovalRouteServiceImpl(
-                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient);
+                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient,
+                new ApprovalRouteCodeGenerator());
 
         assertThatThrownBy(() -> service.create(createRequest("0", "100")))
                 .isInstanceOf(BusinessException.class)
@@ -97,7 +101,7 @@ class ApprovalRouteServiceImplTest {
     /** 创建必须先锁定租户配置行，再检查活动区间并写入。 */
     @Test
     void shouldLockTenantBeforeCreateOverlapCheckAndInsert() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         when(routeMapper.lockTenantConfig(41L)).thenReturn(1L);
         when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
         stubPublishedVersion();
@@ -105,7 +109,8 @@ class ApprovalRouteServiceImplTest {
         when(routeMapper.selectList(any())).thenReturn(List.of());
         when(routeMapper.insert(any(ProcApprovalRoute.class))).thenReturn(1);
         ApprovalRouteServiceImpl service = new ApprovalRouteServiceImpl(
-                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient);
+                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient,
+                new ApprovalRouteCodeGenerator());
 
         service.create(createRequest("0", "100"));
 
@@ -119,7 +124,7 @@ class ApprovalRouteServiceImplTest {
     /** 更新同样必须在读取和重叠校验前锁定租户配置行。 */
     @Test
     void shouldLockTenantBeforeUpdateOverlapCheck() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         ProcApprovalRoute current = existingRoute("0", "100");
         current.setId(5L);
         current.setTenantId(41L);
@@ -138,7 +143,8 @@ class ApprovalRouteServiceImplTest {
                 org.mockito.ArgumentMatchers.<ProcApprovalRoute>isNull(),
                 org.mockito.ArgumentMatchers.<Wrapper<ProcApprovalRoute>>any())).thenReturn(1);
         ApprovalRouteServiceImpl service = new ApprovalRouteServiceImpl(
-                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient);
+                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient,
+                new ApprovalRouteCodeGenerator());
 
         service.update(5L, updateRequest());
 
@@ -155,15 +161,17 @@ class ApprovalRouteServiceImplTest {
     /** 未发布或缺少流程定义的模型版本不得写入审批路由。 */
     @Test
     void shouldRejectWorkflowModelVersionWithoutPublishedDefinition() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
         when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
         WorkflowContracts.ModelVersionResponse invalid = new WorkflowContracts.ModelVersionResponse();
         invalid.setId(12L);
         invalid.setStatus("PUBLISHED");
         invalid.setProcessDefinitionId("  ");
-        when(workflowInternalClient.getModelVersion(41L, 12L)).thenReturn(R.ok(invalid));
+        when(workflowInternalClient.resolveModelVersions(
+                org.mockito.ArgumentMatchers.eq(41L), any())).thenReturn(R.ok(List.of(invalid)));
         ApprovalRouteServiceImpl service = new ApprovalRouteServiceImpl(
-                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient);
+                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient,
+                new ApprovalRouteCodeGenerator());
 
         assertThatThrownBy(() -> service.create(createRequest("0", "100")))
                 .isInstanceOf(BusinessException.class)
@@ -173,9 +181,33 @@ class ApprovalRouteServiceImplTest {
         verify(routeMapper, never()).insert(any(ProcApprovalRoute.class));
     }
 
+    /** 新建规则不得绑定非 purchase 分类的遗留流程。 */
+    @Test
+    void shouldRejectLegacyWorkflowCategory() {
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
+        when(categoryMapper.selectOne(any())).thenReturn(activeCategory());
+        WorkflowContracts.ModelVersionResponse legacy = new WorkflowContracts.ModelVersionResponse();
+        legacy.setId(12L);
+        legacy.setCategory("PROCUREMENT_REQUISITION");
+        legacy.setStatus("PUBLISHED");
+        legacy.setAvailability("AVAILABLE");
+        legacy.setProcessDefinitionId("legacy:1:12");
+        when(workflowInternalClient.resolveModelVersions(
+                org.mockito.ArgumentMatchers.eq(41L), any())).thenReturn(R.ok(List.of(legacy)));
+        ApprovalRouteServiceImpl service = new ApprovalRouteServiceImpl(
+                tenantInitializer, routeMapper, categoryMapper, workflowInternalClient,
+                new ApprovalRouteCodeGenerator());
+
+        assertThatThrownBy(() -> service.create(createRequest("0", "100")))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo(400);
+        verify(routeMapper, never()).lockTenantConfig(41L);
+    }
+
     private ApprovalRouteRequests.CreateRouteRequest createRequest(String min, String max) {
         ApprovalRouteRequests.CreateRouteRequest request = new ApprovalRouteRequests.CreateRouteRequest();
         request.setRouteCode("IT_DEFAULT");
+        request.setRouteName("IT 设备审批规则");
         request.setCategoryCode("IT_DEVICE");
         request.setMinAmount(new BigDecimal(min));
         request.setMaxAmount(new BigDecimal(max));
@@ -188,6 +220,7 @@ class ApprovalRouteServiceImplTest {
     private ApprovalRouteRequests.UpdateRouteRequest updateRequest() {
         ApprovalRouteRequests.UpdateRouteRequest request = new ApprovalRouteRequests.UpdateRouteRequest();
         request.setVersion(3);
+        request.setRouteName("IT 设备审批规则");
         request.setCategoryCode("IT_DEVICE");
         request.setMinAmount(new BigDecimal("100"));
         request.setMaxAmount(new BigDecimal("200"));
@@ -202,6 +235,7 @@ class ApprovalRouteServiceImplTest {
         route.setMinAmount(new BigDecimal(min));
         route.setMaxAmount(new BigDecimal(max));
         route.setStatus(ApprovalRoutePolicy.ACTIVE);
+        route.setRouteName("既有审批规则");
         return route;
     }
 
@@ -219,9 +253,12 @@ class ApprovalRouteServiceImplTest {
         response.setId(12L);
         response.setModelId(5L);
         response.setVersion(2);
+        response.setCategory("purchase");
         response.setProcessDefinitionId("procurement-approval:2:12");
         response.setStatus("PUBLISHED");
-        when(workflowInternalClient.getModelVersion(41L, 12L)).thenReturn(R.ok(response));
+        response.setAvailability("AVAILABLE");
+        when(workflowInternalClient.resolveModelVersions(
+                org.mockito.ArgumentMatchers.eq(41L), any())).thenReturn(R.ok(List.of(response)));
     }
 
     private static void initialize(Class<?> entityType, String mapperName) {

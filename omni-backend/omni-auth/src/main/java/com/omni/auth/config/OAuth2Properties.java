@@ -53,6 +53,12 @@ public class OAuth2Properties {
         private String clientSecret;
         /** GitHub 回调地址（需与 GitHub OAuth App 的 Authorization Callback URL 一致） */
         private String redirectUri = "http://localhost:8100/api/auth/oauth2/github/callback";
+        /** GitHub 授权页面 URL（可覆盖为受控 peer 地址） */
+        private String authorizeUrl = "https://github.com/login/oauth/authorize";
+        /** GitHub Token 端点 URL（可覆盖为受控 peer 地址） */
+        private String tokenUrl = "https://github.com/login/oauth/access_token";
+        /** GitHub 用户信息 API URL（可覆盖为受控 peer 地址） */
+        private String userApiUrl = "https://api.github.com/user";
     }
 
     /**
@@ -66,6 +72,12 @@ public class OAuth2Properties {
         private String clientSecret;
         /** Gitee 回调地址（需与 Gitee OAuth2 应用的回调 URL 一致） */
         private String redirectUri = "http://localhost:8100/api/auth/oauth2/gitee/callback";
+        /** Gitee 授权页面 URL（可覆盖为受控 peer 地址） */
+        private String authorizeUrl = "https://gitee.com/oauth/authorize";
+        /** Gitee Token 端点 URL（可覆盖为受控 peer 地址） */
+        private String tokenUrl = "https://gitee.com/oauth/token";
+        /** Gitee 用户信息 API URL（可覆盖为受控 peer 地址） */
+        private String userApiUrl = "https://gitee.com/api/v5/user";
     }
 
     /**
@@ -79,5 +91,11 @@ public class OAuth2Properties {
         private String clientSecret;
         /** Google 回调地址（需与 Google Cloud Console 的授权重定向 URI 一致） */
         private String redirectUri = "http://localhost:8100/api/auth/oauth2/google/callback";
+        /** Google 授权页面 URL（可覆盖为受控 peer 地址） */
+        private String authorizeUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+        /** Google Token 端点 URL（可覆盖为受控 peer 地址） */
+        private String tokenUrl = "https://oauth2.googleapis.com/token";
+        /** Google 用户信息 API URL（可覆盖为受控 peer 地址） */
+        private String userinfoUrl = "https://www.googleapis.com/oauth2/v3/userinfo";
     }
 }

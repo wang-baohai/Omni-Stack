@@ -9,7 +9,7 @@ Omni-Stack은 **Transactional Outbox** 패턴 + **XXL-JOB** 릴레이 스케줄�
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│                        Business Service (e.g., omni-auth)                 │
+│                        Business Service (e.g., omni-base)                 │
 │                                                                            │
 │  @OperLog method ──> OperLogAspect ──> OperLogProducer                     │
 │                                            │                               │
@@ -98,6 +98,7 @@ Omni-Stack은 **Transactional Outbox** 패턴 + **XXL-JOB** 릴레이 스케줄�
 | FAILED | 2 | 전달 실패, 다음 재시도 대기 중 (백오프) |
 | DEAD_LETTER | 3 | 최대 재시도 횟수 초과 (종단 상태, 수동 조치 필요) |
 | SKIPPED | 4 | 관리자에 의해 수동으로 무시 표시 (종단 상태) |
+| PROCESSING | 5 | relay 가 발송 전 단일 UPDATE 로 원자적으로 claim 하는 전이 상태의 리스 상태(기본 120 초). 종단 쓰기는 `status=PROCESSING` 을 CAS 전제 조건으로 사용하며, 리스 만료 시 다른 executor 가 회수 가능 |
 
 ### 2.2 Write Path
 
@@ -140,7 +141,7 @@ reliableMessageRelay.send("order-out-0", orderPayload, tenantId, "order:12345");
 
 데드 레터는 프론트엔드 관리 UI(`운영 모니터링 → 메시지 기록`)를 통해 관리자의 수동 개입이 필요합니다:
 
-- **재전송** (`POST /api/base/mq-message/{msgId}/resend`): 상태를 PENDING으로 초기화하고, 재시도 카운트와 백오프 타이머를クリア합니다. 릴레이 작업이 다음 폴링에서 처리합니다.
+- **재전송** (`POST /api/base/mq-message/{msgId}/resend`): 상태를 PENDING으로 초기화하고, 재시도 카운트와 백오프 타이머를 초기화합니다. 릴레이 작업이 다음 폴링에서 처리합니다.
 - **건너뛰기** (`POST /api/base/mq-message/{msgId}/skip`): DEAD_LETTER → SKIPPED로 전환하여, 메시지가 전달되지 않음을 확인합니다.
 
 ## 3. Tenant Isolation
@@ -186,14 +187,14 @@ reliableMessageRelay.send("oper-log-out-0", message);
 
 ### 4.3 Idempotent DDL
 
-`schema.sql`은 안전하고 멱등인 테이블 생성을 위해 `CREATE TABLE IF NOT EXISTS`를 사용합니다. `omni-common-mqlog`가 클래스패스에 있을 때 서비스 시작 시 테이블이 자동 생성됩니다. 수동 DDL 실행이 필요하지 않습니다.
+`sys_mq_message` 테이블은 Liquibase 이관에 의해 생성됩니다: `database/changelog/common/0001-mq-schema.yaml`(changeset `common-mq-0001-schema`)은 시작 시 `omni-db-migrator` 컨테이너에 의해 적용됩니다. 이 changeSet은 `CREATE TABLE`를 실행합니다(`IF NOT EXISTS`는 **사용되지 않습니다**). 멱등성은 선행 조건과 Liquibase 이력으로 보장됩니다: `preConditions`에서 먼저 `dbms`가 `mysql`임을 요구하고, 이어 `sqlCheck`(`expectedResult: "0"`)로 `information_schema`에 `sys_mq_message` 테이블이 존재하지 않음을 확인한 후 변경을 실행합니다. 중복 실행은 Liquibase `DATABASECHANGELOG` 이력으로 방지됩니다 — 이미 실행 기록이 있는 changeSet은 다시 실행되지 않습니다. `omni-common-mqlog/src/main/resources/schema.sql`은 더 이상 비즈니스 classpath 자동 DDL 주 경로가 아니며, 역사적 참고용으로만 유지됩니다.
 
 ### 4.4 MessageSender Strategy Pattern
 
 새 MQ 브로커(예: Kafka)를 추가하려면:
 1. `MessageSender` 인터페이스 구현: `brokerType()`은 `"kafka"`를 반환하고, `send(SysMqMessage)`는 실제 전달을 처리합니다.
 2. Spring Bean으로 등록 — `MqLogAutoConfiguration`은 모든 `MessageSender` Bean을 `brokerType`을 키로 하는 맵에 수집합니다.
-3. `ReliableMessageTemplate.send()` 호출 시 `broker_type = "kafka"`를 설정합니다 (또는 적절한 바인딩을 사용하십시오).
+3. **중요**: 현재 `ReliableMessageTemplate.send()` 에는 **`brokerType` 매개변수가 없**고, `broker_type` 은 항상 `"rocketmq"` 로 기록됩니다(§2.2 참고). 기존 `send()` 로 kafka 를 선택할 수 없으며, 새 broker 연결에는 대응하는 `broker_type` 을 기록하는 신뢰 큐잉 계약 확장(broker 선택 오버로드 또는 명시적 확장 지점)이 필요합니다. 아래 Kafka 는 미래 확장 예시이며 현재 활성화된 기능이 아닙니다.
 
 `MqMessageRelayService`나 릴레이 로직의 변경은 필요하지 않습니다.
 
@@ -215,12 +216,13 @@ reliableMessageRelay.send("oper-log-out-0", message);
 
 이를 통해 `omni-common-core`(`ReliableMessageRelay` 인터페이스용)와 `omni-common-mybatis`(`SysMqMessageMapper`용)가 자동으로 포함됩니다.
 
-### Step 2: Table Auto-Creation
+### Step 2: Liquibase 이관 DDL
 
-`schema.sql`은 시작 시 자동 실행됩니다 (`CREATE TABLE IF NOT EXISTS sys_mq_message`). 확인:
+`sys_mq_message` 테이블은 `database/changelog/common/0001-mq-schema.yaml`에 의해 Liquibase 이관 경유로 생성됩니다(시작 시 `omni-db-migrator` 컨테이너에 의해 적용). 확인 방법:
 
 ```sql
-SELECT COUNT(*) FROM sys_mq_message;
+SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message';
+-- 1을 반환해야 합니다; DATABASECHANGELOG에 common-mq-0001-schema 레코드가 있어야 합니다
 ```
 
 ### Step 3: Inject and Use
@@ -250,6 +252,7 @@ public class OrderServiceImpl implements OrderService {
 서비스를 시작하고 XXL-JOB 관리 콘솔(`http://localhost:18080`)을 확인하십시오:
 - 실행자: 서비스의 AppName이 실행자 목록에 표시되어야 합니다
 - 작업: `mqRelayHandler`가 cron `0/10 * * * * ?`로 등록되어야 합니다
+- `MqRelayJobRegistrar`는 애플리케이션 준비 후 비동기로 작업을 등록·시작합니다. 스케줄러를 일시적으로 사용할 수 없으면 10초마다 최대 12회 재시도합니다
 - 아직 실행 중이 아니면 작업을 시작하십시오
 
 ### Step 5: Check Frontend Admin UI
@@ -259,6 +262,8 @@ public class OrderServiceImpl implements OrderService {
 - `tenantId`, `status`, `topic`, `serviceName` 또는 시간 범위로 필터링
 - 실패한 메시지 재전송 또는 데드 레터 건너뛰기
 
+Base 관리 인터페이스는 `X-Internal-Token`을 포함한 Feign 호출로 온보딩된 서비스의 로컬 Outbox를 집계합니다. 현재는 `omni-base`와 `omni-crm`을 집계하며, 새 서비스를 추가할 때는 해당 서비스의 내부 `/api/internal/mq-message/**` 클라이언트를 집계에 포함해야 합니다. 포함하지 않으면 메시지는 안정적으로 전달되지만 통합 운영 페이지에는 표시되지 않습니다.
+
 ## 6. Extension Guide
 
 ### 6.1 Adding a New MQ Broker
@@ -267,6 +272,7 @@ public class OrderServiceImpl implements OrderService {
 
 ```java
 @Component
+@RequiredArgsConstructor // 생성자 주입(본 프로젝트는 필드 @Autowired 금지)
 public class KafkaMessageSender implements MessageSender {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -278,7 +284,15 @@ public class KafkaMessageSender implements MessageSender {
 
     @Override
     public void send(SysMqMessage msg) {
-        kafkaTemplate.send(msg.getTopic(), msg.getMsgKey(), msg.getPayload()).get();
+        try {
+            // MessageSender.send 는 throws 를 선언하지 않으므로 Kafka get() 의 검사 예외를 처리/변환하지 않으면 컴파일 불가(그대로 복사 불가)
+            kafkaTemplate.send(msg.getTopic(), msg.getMsgKey(), msg.getPayload()).get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Kafka send interrupted", e);
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Kafka send failed", e);
+        }
     }
 }
 ```
@@ -339,16 +353,16 @@ public class KafkaMessageSender implements MessageSender {
 ```yaml
 # docker-compose.yml
 rocketmq-namesrv:
-  image: apache/rocketmq:5.3.1
+  image: apache/rocketmq:5.3.2
   container_name: omni-rocketmq-namesrv
   ports:
     - "9876:9876"
   command: sh mqnamesrv
   networks:
-    - omni-network
+    - default
 
 rocketmq-broker:
-  image: apache/rocketmq:5.3.1
+  image: apache/rocketmq:5.3.2
   container_name: omni-rocketmq-broker
   ports:
     - "10911:10911"
@@ -359,7 +373,7 @@ rocketmq-broker:
     NAMESRV_ADDR: rocketmq-namesrv:9876
   command: sh mqbroker -n rocketmq-namesrv:9876
   networks:
-    - omni-network
+    - default
 ```
 
 ### 주요 구성 상세
@@ -369,7 +383,7 @@ rocketmq-broker:
 | NameServer 포트 | 9876 | RocketMQ 서비스 디스커버리 포트 |
 | Broker 포트 | 10911 | Broker 메인 포트 |
 | Broker VIP 포트 | 10909 | Broker VIP 채널 (빠른 응답) |
-| 네트워크 | omni-network | 다른 서비스와 동일한 Bridge 네트워크 |
+| 네트워크 | default | 다른 서비스와 동일한 Bridge 네트워크 |
 
 ### Spring Cloud Stream 구성
 
@@ -393,9 +407,31 @@ spring:
 
 | 문제 | 가능한 원인 | 확인 방법 |
 |------|---------|----------|
-| **메시지가 PENDING 상태에 머무름** | 릴레이 작업이 시작되지 않음 | XXL-JOB 콘솔에서 `mqRelayHandler`가 등록되고 시작되었는지 확인; cron 구성 확인 |
+| **메시지가 PENDING 상태에 머무름** | 릴레이 작업 자동 등록 실패 또는 작업 미기동 | `MqRelayJobRegistrar` 재시도 로그, XXL-JOB 자격 증명, `mqRelayHandler` 상태 확인 |
 | **메시지 전송 실패하여 FAILED 진입** | RocketMQ Broker가 시작되지 않음 | RocketMQ 컨테이너 상태 확인; `spring.cloud.stream.rocketmq.binder.name-server` 구성이 올바른지 확인 |
 | **메시지가 DEAD_LETTER에 진입** | 최대 재시도 횟수 (3회) 초과 | 프론트엔드 관리 페이지에서 메시지 상세 및 오류 정보 확인; 문제 해결 후 수동 재전송 |
 | **컨슈머가 메시지를 수신하지 못함** | Topic이 생성되지 않았거나 컨슈머가 구독하지 않음 | RocketMQ 콘솔에서 Topic과 Consumer Group 확인; 컨슈머 서비스가 시작되었는지 확인 |
 | **테넌트 격리 실패** | 쿼리가 tenantId로 필터링되지 않음 | Controller에 `.eq(SysMqMessage::getTenantId, tenantId)`가 포함되어 있는지 확인 |
 | **중복 전달** | 릴레이 작업이 동일한 메시지를 여러 번 스캔 | `msgId` 고유성 제약 확인; `StreamBridge.send()` 멱등성 확인 |
+
+## 10. 메시지 상세 화면 스크린샷(4개 언어)
+
+문서 전용 Playwright 케이스 `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` 에 의해 실제 실행 스택에서 생성되며, §5 단계 5 「프론트엔드 관리 화면 확인」에 대응.
+
+- 전제 조건: 로컬 Compose 전체 스택 실행 중, `omni-base` 헬스 및 `sys_mq_message` 에 실제 메시지 존재(수집 시 base DB 87 행).
+- 조작자: `admin`(메시지 조회 권한 필요; 컨트롤러는 `X-Tenant-Id` 로 필터).
+- 조작: 메시지 기록 페이지에 진입해 첫 행에서 「상세 보기」를 클릭해 읽기 전용 상세 오버레이를 엽니다.
+- 기대 상태: 오버레이는 메시지 ID, Topic, Binding Name, Tag, 비즈니스 키, 미들웨어 유형, 상태, 재시도 횟수, 소스 서비스, 생성 시간과 다음 재시도 시간을 표시하며, 내용은 §2.1 상태 머신, §2.4 재시도 전략의 필드와 일치.
+- 본 그룹은 **읽기 전용 수집**: 어떤 메시지도 재전송·건너뛰기·수정하지 않으므로, 쓰기 스위치가 불필요하고 데이터 마무리도 없습니다.
+
+| 페이지 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 메시지 상세 오버레이(message-status) | ![메시지 상세(간체 중국어)](images/zh-CN/monitor-mq-message-detail.png) | ![메시지 상세(영어)](images/en-US/monitor-mq-message-detail.png) | ![메시지 상세(일본어)](images/ja-JP/monitor-mq-message-detail.png) | ![메시지 상세(한국어)](images/ko-KR/monitor-mq-message-detail.png) |
+
+등록된 번역 완전도 문제: 이 오버레이는 **en-US/ja-JP/ko-KR 에서 제목과 모든 필드 레이블이 실측으로 영어**(ja/ko 미번역, zh-CN 만 현지화).
+`npm run ui:i18n:parity`(4개 언어 각 2319 키, 0 누락)와 `npm run ui:i18n:check`(0/0 항목)가 모두 통과하므로, 언어 팩 값 문제이며 하드코딩 결함이 아님; 이미지와 manifest 는 실제 렌더링 값으로 그대로 등록하고 미화하지 않음.
+
+아직 커버되지 않은 프로세스(모두 개별 승인 필요, 본 라운드에서 임의로 구성하지 않음):
+
+- `retry` 와 `dead-letter`: 실측으로 5개 DB의 `sys_mq_message` 는 총 809 행(base 87, procurement 644, srm 34, workflow 23, crm 21), **status 는 모두 1, FAILED / DEAD_LETTER 기록은 전혀 없음**. 이 두 상태를 생성하려면 크로스 테넌트 공유 outbox 에 반드시 실패하는 메시지를 주입하고 릴레이가 §2.4 의 `2^retryCount × 10s` 백오프로 반복 재시도·오류하게 해야 하며——공유 인프라에서 장애를 제조하는 것으로, 명시적 승인 후에만 실행 가능.
+- `trace-diagnosis`: 실제 Trace ID 진단 체인 증거가 필요하며, 관측 스택([docs/observability.md](observability.md))과 함께 설계 예정.

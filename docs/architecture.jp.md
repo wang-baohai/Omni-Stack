@@ -66,7 +66,7 @@ Omni-Stack は、すぐに使える Spring Cloud + Vue 3 フルスタック開�
 | **gRPC 長接続** | v3 は HTTP ショートポーリングの代わりに gRPC を使用。サービス登録/ディスカバリの遅延が秒単位からミリ秒単位に短縮 |
 | **ヘルスチェックエンドポイント変更** | v3.1.1 でエンドポイントが `/nacos/actuator/health` から `GET /nacos/` に変更。Docker healthcheck の適応が必要 |
 
-### 2.4 Flowable 7.x を選んだ理由
+### 2.4 Flowable 8.x を選んだ理由
 
 | 検討事項 | 決定理由 |
 |---------|---------|
@@ -98,7 +98,7 @@ Omni-Stack は、すぐに使える Spring Cloud + Vue 3 フルスタック開�
 
 ## 4. モジュールマップ
 
-### 4.1 Common Starter エコシステム（8 つの自動設定モジュール）
+### 4.1 Common Starter エコシステム（10 個の共通モジュール）
 
 | モジュール | 役割 | 技術スタック | 境界制約 |
 |-----------|------|-------------|---------|
@@ -110,21 +110,27 @@ Omni-Stack は、すぐに使える Spring Cloud + Vue 3 フルスタック開�
 | `omni-common-job` | XXL-JOB 統合：自動設定、Admin HTTP クライアント、システムジョブレジストリ、ジョブメタデータアノテーション | XXL-JOB Core 3.3.1、Spring Boot Web（optional） | スケジューリングインフラのみ。ビジネスタスクロジックなし |
 | `omni-common-mqlog` | 信頼 MQ メッセージ送信：Transactional Outbox、リレイジョブ、ストラテジーベース送信、内部クエリ API | Spring Cloud Stream RocketMQ（optional）、omni-common-job（optional） | MQ インフラのみ。ビジネスメッセージロジックなし |
 | `omni-common-operlog` | 操作ログアスペクトとプロデューサー：`@OperLog` アノテーション駆動、信頼メッセージと直接送信の両モード対応 | Spring AOP、omni-common-mqlog（optional） | 操作ログ関心事のみ |
+| `omni-common-workflow` | Flowable 自動設定と承認 SPI | Flowable 8.0.0 | Workflow サービスのみ使用可、ビジネスサービスはプロセスランタイムに依存してはならない |
+| `omni-common-service` | Servlet ビジネスサービス用構成 Starter：Gateway 事前認証、リクエスト識別情報/テナント、内部 API、DataScope、MyBatis インターセプター順序の固定、XSS オリジンフォールバックとセキュリティベースライン | Spring Security、OpenFeign、MyBatis-Plus、Redis | Gateway/Auth には適用外；ドメインテーブルマッピングと AccessGuard は引き続きサービス側で実装 |
 
-### 4.2 マイクロサービスモジュール（4 つ）
+### 4.2 マイクロサービスモジュール（8 個）
 
 | モジュール | ポート | 役割 | コア依存 |
 |-----------|--------|------|---------|
 | `omni-auth` :8100 | 8100 | 認証認可：ログイン、CAPTCHA、JWT、マルチテナント、OAuth2 認可サーバー、XSS 設定管理、RBAC 権限、オンラインユーザー管理 | Spring Boot Web、Spring Security、OAuth2 Authorization Server |
-| `omni-base` :8101 | 8101 | 基礎データ：辞書 CRUD、定时タスク管理（システム + ユーザー）、操作ログアーカイブ、MQ メッセージ管理 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
-| `omni-workflow` :8103 | 8103 | ワークフローエンジン：BPMN モデル管理、プロセスインスタンス、承認、タスク割り当て、統計 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 7.x |
+| `omni-base` :8101 | 8101 | 基礎データ：辞書 CRUD、定期タスク管理（システム + ユーザー）、操作ログアーカイブ、MQ メッセージ管理 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
+| `omni-workflow` :8103 | 8103 | ワークフローエンジン：BPMN モデル管理、プロセスインスタンス、承認、タスク割り当て、統計 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 8.0.0 |
+| `omni-crm` :8104 | 8104 | CRM 営業前クローズドループ：リード、顧客、連絡先、商談、フォローアップ、変換と概要 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
+| `omni-srm` :8105 | 8105 | SRM サプライヤークローズドループ：マスタ、参入ステートマシン、連絡先/資格/銀行、業績評価、リスク、招待とサプライヤーポータル | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
+| `omni-procurement` :8106 | 8106 | 調達実行クローズドループ：品目カタログ、購買申請承認、見積依頼と比較、発注および入荷 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog、OpenFeign |
+| `omni-asset` :8107 | 8107 | 資産フルライフサイクル：調達検収計上、台帳、割当/返却、移管、廃棄と概要 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog、OpenFeign |
 | `omni-gateway` :8102 | 8102 | API Gateway：リクエストルーティング、JWT 認証フィルタリング、CORS 処理、セキュリティヘッダー | Spring Cloud Gateway Server（WebFlux）、omni-common-redis-reactive |
 
 ### 4.3 フロントエンドモジュール
 
 | モジュール | ポート | 技術スタック | 役割 |
 |-----------|--------|-------------|------|
-| `omni-frontend` | 3000（dev）/ 3000（Nginx） | Vue 3、Pinia 3、Vue Router 4、Element Plus、Axios、Vite 8 | 表示層 SPA。データ権威性のあるビジネスルールなし |
+| `omni-frontend` | 3000（dev）/ 3000（Nginx） | Vue 3、Pinia 3、Vue Router 5、Element Plus、Axios、Vite 8 | 表示層 SPA。データ権威性のあるビジネスルール なし |
 
 ---
 
@@ -167,8 +173,12 @@ omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 | `omni-common-*` starters | **自動設定層**：`AutoConfiguration.imports` によるゼロコンフィグアクセス。新サービスは Maven 依存追加のみ |
 | `omni-auth` | **セキュリティハブ**：認証・認可・JWT 発行を集中処理。システム全体の信頼チェーンの起点 |
 | `omni-gateway` | **トラフィックエントリ**：全 HTTP リクエストの唯一のエントリポイント。JWT 検証 + アイデンティティ伝播 + ルート配布 |
-| `omni-base` | **データ基盤**：辞書、ログ、定时タスクなどの共通ビジネスデータの管理センター |
+| `omni-base` | **データ基盤**：辞書、ログ、定期タスクなどの共通ビジネスデータの管理センター |
 | `omni-workflow` | **プロセスエンジン**：独立デプロイの BPMN ワークフローサービス。Flowable 依存を `omni-common-workflow` starter で分離 |
+| `omni-crm` | **営業ドメイン**：CRM データを独立して所有し、Auth 内部インターフェース経由でテナントユーザー・組織・permission-aware データ範囲を再利用 |
+| `omni-srm` | **サプライヤードメイン**：SRM データを独立して所有し、Portal Saga で Auth とともに SUPPLIER ロールを割当、調達/資産に内部トークン保護のサプライヤーサマリー API を提供 |
+| `omni-procurement` | **調達実行ドメイン**：調達データを独立して所有し、Workflow で購買申請承認を駆動、SRM でサプライヤー招待と見積協働を完了、資産ドメインに合格入荷イベントと履歴補償インターフェースを発行 |
+| `omni-asset` | **資産ライフサイクルドメイン**：資産データを独立して所有し、調達の合格入荷イベントを消費してカードを作成、Workflow で移管/廃棄承認を駆動、資産集約ルートで帰属と使用範囲を統一管理 |
 
 ---
 
@@ -242,7 +252,7 @@ SecurityHeadersFilter (WebFilter)
     ▼
 Spring Cloud Gateway ルーティングエンジン
     │ 1. ルートマッチング：Path=/api/auth/** → lb://omni-auth
-    │ 2. StripPrefix=2：/api/auth/login → /login
+    │ 2. フルパス保持：/api/auth/login → /api/auth/login
     │ 3. 負荷分散：Nacos サービスディスカバリからインスタンスリストを取得
     ▼
 下流マイクロサービスに転送（omni-auth / omni-base / omni-workflow）
@@ -254,15 +264,19 @@ Spring Cloud Gateway ルーティングエンジン
 - **公開鍵 5 分キャッシュ**：毎リクエストの JWKS エンドポイント呼び出しを回避。`volatile` でマルチスレッド可視性を保証
 - **`onErrorResume` は `SecurityException` のみキャッチ**：下流ルーティングエラー（サービス利用不可、タイムアウト）が JWT 検証失敗として誤報告されることを防止
 
-### 6.3 omni-base / omni-workflow セキュリティモデル
+### 6.3 Servlet 業務サービスのセキュリティモデル
 
-下流マイクロサービス（base、workflow）は統一された**Gateway 事前認証モデル**を採用：
+下流 Servlet マイクロサービスは**Gateway 事前認証モデル**を採用し、全サービスが HMAC 署名アサーションを要求します：
+
+- **全 Servlet 業務サービス**（omni-auth、omni-base、omni-workflow、omni-crm、omni-srm、omni-procurement、omni-asset）は、`GatewayPreAuthenticationFilter` または各自の `GatewayPreAuthFilter` で `X-Gateway-Assertion`（Gateway と `GATEWAY_ASSERTION_SECRET` を共有する HmacSHA256 署名アサーション）と `X-Tenant-Id` を検証し、通過後に `X-User-*` ヘッダーから `Authentication` を構築します。キー未設定の場合も同様に 401 で拒否し（fail-closed）、平文アイデンティティヘッダーを信頼しません。
+
+CRM、SRM、Procurement、Asset はさらに完全な permissionCode で Auth からデータ範囲を解決し、TenantLine と DataPermission インターセプターが全ての業務 SQL を共同制約します：
 
 ```
 リクエスト受信（Gateway により JWT 検証済み）
     │
     ▼
-GatewayPreAuthFilter（OncePerRequestFilter）
+事前認証フィルター（全サービスが GatewayPreAuthenticationFilter または各自の GatewayPreAuthFilter を経由し、先に X-Gateway-Assertion(HmacSHA256)+X-Tenant-Id を検証；キー未設定でも fail-closed 401 拒否）
     │ X-User-* ヘッダーから UsernamePasswordAuthenticationToken を構築
     │ ロールには ROLE_ プレフィックスを付与、権限は直接 authority として追加
     │ SecurityContextHolder に書き込み
@@ -273,7 +287,7 @@ AuthorizationFilter
 ビジネス Controller → Service → Mapper
 ```
 
-**設計原理**：JWT 検証は Gateway に集中。下流サービスは Gateway が注入するヘッダーを信頼。これにより各サービスが独立した JWT 検証設定を必要とせず、複雑さとキー管理コストを削減。
+**設計原理**：JWT 検証は Gateway に集中。全ての下流サービスは `X-Gateway-Assertion` HMAC 署名アサーションの通過を要求し、キー未設定時は fail-closed で拒否するため、下流が偽造アイデンティティヘッダーを無条件に受け入れることを防ぎます。これにより各サービスが独立した JWT 検証設定を必要とせず、複雑さとキー管理コストを削減。
 
 ---
 
@@ -289,10 +303,10 @@ Vite Dev Server (:3000)  -- /api/** をプロキシ -->
     │
 Gateway (:8102)
     │  1. ルートマッチング: Path=/api/auth/** -> lb://omni-auth
-    │  2. StripPrefix=2: /api/auth/login -> /login
+    │  2. フルパス保持: /api/auth/login -> /api/auth/login
     ▼
 Auth Service (:8100)
-    │  1. AuthController が /login を受信
+    │  1. AuthController が完全な /api/auth/login を受信
     │  2. CaptchaService が CAPTCHA を検証 (Redis)
     │  3. OmniUserDetailsService がユーザーを認証（マルチテナント tenantId:username）
     │  4. JwtTokenService が RS256 署名 JWT を生成
@@ -308,7 +322,7 @@ JSON レスポンス: { code: 200, message: "success", data: { accessToken, toke
 ```
 ビジネスサービス (例: omni-base)
     │  @Transactional
-    │  ReliableMessageTemplate.send(bindingName, payload)
+    │  ReliableMessageTemplate.send(bindingName, payload, tenantId)
     ▼
 sys_mq_message テーブル (status=PENDING、同一ローカルトランザクション)
     │
@@ -343,9 +357,9 @@ RocketMQ Broker (StreamBridge 経由)
 | XXL-JOB Admin | 分散タスクスケジューリングコンソール | 3.3.1 | 18080 |
 | RocketMQ | メッセージキュー（NameServer + Broker） | 5.3.2 | 9876, 10909-10912 |
 
-全サービスは1コマンドで起動可能：`docker compose up -d`。プロジェクトルートの `docker-compose.yml` を参照。
+フルスタックは `docker compose --profile full up -d` で起動できます。日常開発は `omni dev up --preset <id>` で最小依存クロージャを起動します。`--observability` を追加すると Prometheus、Pushgateway、Node Exporter、cAdvisor、Grafana、Tempo、Loki、Alloy、OTel Collector と Alertmanager が起動し、ローカル Trace エクスポートが有効になります。統一エントリポイントはリポジトリルートの `compose.yaml` で、観測セマンティクスとセキュリティ境界は [observability.jp.md](observability.jp.md) を参照。
 
-**起動順序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → バックエンドサービス（Auth, Base, Workflow, Gateway）→ フロントエンド
+**起動順序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → バックエンドサービス（Auth, Base, Workflow, CRM, SRM, Procurement, Asset, Gateway）→ フロントエンド
 
 ---
 
@@ -353,16 +367,16 @@ RocketMQ Broker (StreamBridge 経由)
 
 ### 9.1 Docker Compose オーケストレーション
 
-プロジェクトルートの `docker-compose.yml` は全12コンテナを定義：
+リポジトリルートの `compose.yaml` が include で `compose.infra.yaml` と `compose.apps.yaml` を統合し、full profile が 16 コンテナを定義します：
 
 - **名前付きボリューム**（`mysql-data`、`redis-data`）で再起動時のデータ永続化
 - **ヘルスチェック**（depends_on + service_healthy）で段階的起動チェーンを保証
-- **ブリッジネットワーク**（`omni-network`）でコンテナ間通信
-- **SQL 初期化マウント**：`scripts/sql/init-all.sql`、`init-nacos.sql`、`init-xxl-job.sql` を MySQL の `docker-entrypoint-initdb.d/` にマウント
+- **ブリッジネットワーク**（Compose デフォルト、プロジェクトスコープ）でコンテナ間通信
+- **マイグレーション起動ゲート**：one-shot の `omni-db-migrator` が Liquibase により 9 DB の構造と冪等シードを適用し、成功後にのみ Nacos、XXL-JOB、各アプリを起動
 
 ### 9.2 データベーススキーマ
 
-#### omni_auth データベース（14 テーブル）
+#### omni_auth データベース（19 テーブル）
 
 **OAuth2 認可（3 テーブル）**：
 
@@ -372,7 +386,7 @@ RocketMQ Broker (StreamBridge 経由)
 | `oauth2_authorization` | アクティブな OAuth2 認可レコード |
 | `oauth2_authorization_consent` | ユーザー同意済みスコープ |
 
-**マルチテナント RBAC（11 テーブル）**：
+**マルチテナント RBAC（14 テーブル）**：
 
 | テーブル | 用途 |
 |---------|------|
@@ -385,10 +399,18 @@ RocketMQ Broker (StreamBridge 経由)
 | `sys_role_permission` | ロール・権限関連 |
 | `sys_user_unit` | ユーザー・組織単位関連 |
 | `sys_role_dept` | ロール・部署データスコープバインディング |
+| `sys_user_role_scope` | ユーザーロールスコープ（`unit_id` + `scope_mode`：SAME_UNIT / UNIT_AND_BELOW；一意キー `tenant_id`+`user_id`+`role_id`+`unit_id`）、データ権限とワークフロー候補者解決を駆動 |
 | `sys_token_blacklist` | 無効化 JWT ブラックリスト |
 | `sys_user_oauth_provider` | サードパーティソーシャルログイン ID リンク |
 | `sys_xss_config` | テナントレベル XSS グローバルスイッチ |
 | `sys_xss_blacklist_rule` | XSS ブラックリストルール |
+
+**セキュリティ監査とポータルロール（2 テーブル）**：
+
+| テーブル | 用途 |
+|---------|------|
+| `sys_audit_log` | セキュリティ監査ログ（`event_type`：LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED） |
+| `sys_portal_role_request` | ポータルロール割当リクエストの冪等 Inbox（`status`：PROCESSING/COMPLETED/FAILED、一意キー `tenant_id`+`request_id`） |
 
 ```mermaid
 erDiagram
@@ -414,9 +436,35 @@ erDiagram
 
 #### omni_workflow データベース
 
-**ワークフロー（7 テーブル）**：`wf_process_model` + `wf_process_model_version` + `wf_process_instance_ext` + `wf_todo_task` + `wf_cc_record` + `wf_form_schema` + `wf_delegation_rule`
+**ワークフロー（7 テーブル）**：`wf_process_model`（モデル登録）+ `wf_process_model_version`（バージョン履歴）+ `wf_process_instance_ext`（インスタンス拡張）+ `wf_todo_task`（未処理タスクキャッシュ）+ `wf_cc_record`（CC 記録）+ `wf_form_schema`（フォーム Schema）+ `wf_delegation_rule`（承認委任ルール）
 
-**権威 DDL とシードデータ**：`scripts/sql/init-all.sql`
+> 詳細は [workflow.jp.md](workflow.jp.md)
+
+#### omni_crm データベース
+
+**CRM コアテーブル（11 テーブル）**：`crm_tenant_config`、`crm_pipeline`、`crm_pipeline_stage`、`crm_lead`、`crm_lead_conversion`、`crm_customer`、`crm_contact`、`crm_opportunity`、`crm_opportunity_stage_history`、`crm_activity`、`crm_owner_change_log`、およびサービスごとに独立した `sys_mq_message` Outbox。すべての `crm_*` テーブルは `tenant_id` を含み、権限付与のルートテーブルは owner スナップショットを保存して楽観ロックを使用します。
+
+> ドメイン実行制約は [crm.jp.md](crm.jp.md)、設計ベースラインは [design/crm-design.jp.md](design/crm-design.jp.md)
+
+#### omni_srm データベース
+
+**SRM コアテーブル**：サプライヤーマスタ、連絡先、資格、銀行口座、評価、リスク、ポータルユーザー関連付け、招待 Saga および見積協働テーブル、およびサービス独立の `sys_mq_message` Outbox。権限付与された子リソースはすべて Supplier または Evaluation 集約ルート経由でテナントとデータ範囲を継承します。
+
+> 詳細は [design/srm-design.jp.md](design/srm-design.jp.md)
+
+#### omni_procurement データベース
+
+**Procurement コアテーブル**：テナント設定、品目/カテゴリ、承認ルート、購買申請および明細、RFQ およびサプライヤー/明細、発注および明細、入荷および明細、共通 Inbox とサービス独立 Outbox。購買申請は申請者範囲でフィルタし、RFQ/PO/GR は owner 範囲でフィルタし、子テーブルは集約ルート経由で継承します。
+
+> 詳細は [design/procurement-design.jp.md](design/procurement-design.jp.md)
+
+#### omni_asset データベース
+
+**Asset コアテーブル**：`ast_asset`（資産集約ルート）、`ast_asset_history`（不変履歴）、`ast_transfer`（移管）、`ast_disposal`（廃棄）、`ast_inbox_event`（サービス間消費の冪等性）、およびサービス独立の `sys_mq_message` Outbox。購買由来のカード作成は入荷行と単位連番で冪等性を保証し、移管と廃棄は集約ルートの活動操作フィールドで並行占有を統一します。
+
+> 詳細は [design/asset-design.jp.md](design/asset-design.jp.md)
+
+**データベースの正規情報源**：スキーマ、インデックス、制約、アップグレードは `database/changelog/`、正式な冪等シードは `scripts/sql/seed/` で管理し、`database/seed/manifest.yaml` の SHA-256 と自然キー検証で保護します。旧手動 `init-all.sql` と `migrate-*.sql` は現在のツリーから撤去しました。構造は `database/changelog/`、初期データは `scripts/sql/seed/` を使用し、旧スクリプトを手動で実行しません。
 
 ---
 
@@ -424,11 +472,11 @@ erDiagram
 
 ### 10.1 コンテナネットワークトポロジ
 
-全コンテナは Docker Bridge ネットワーク `omni-network` を共有：
+全コンテナは Compose のデフォルト bridge ネットワーク（プロジェクト名から派生；`compose.yaml`/`compose.apps.yaml` は `omni-network` という具名ネットワークを明示宣言せず、コンテナ間はサービス名で相互アクセス）を共有：
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│                      Docker Network: omni-network                     │
+│            Docker Network: <project>_default（Compose デフォルト）     │
 │                                                                       │
 │  ┌─────────────┐    ┌──────────┐    ┌────────┐    ┌──────────────┐  │
 │  │ omni-       │    │ omni-    │    │ omni-  │    │ omni-        │  │
@@ -463,9 +511,9 @@ Nacos 登録: service=omni-auth, ip=<コンテナ内部IP>, port=8080
     │
 omni-gateway 起動
     │ @EnableDiscoveryClient
-    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=true
+    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=false
     ▼
-Gateway ルーティング: lb://omni-auth → Nacos からインスタンスリストを取得 → 負荷分散転送
+Gateway 明示的ルート: /api/crm/** → lb://omni-crm → Nacos からインスタンスリストを取得 → 負荷分散転送
 ```
 
 **主要設定**：
@@ -495,6 +543,8 @@ Omni-Stack は **RBAC-0 基礎権限モデル**（ユーザー・ロール・権
 1. **機能権限**：ユーザーが「何ができるか」を制御 — メニュー表示 + ボタン/API レベル操作権限
 2. **データ権限**：ユーザーが「どのデータを見られるか」を制御 — 組織所属に基づく行レベルフィルタリング
 
+マルチテナント環境では、ユーザー名はテナント内で一意です（`sys_user` テーブルは `(username, tenant_id)` 複合一意キーを使用）。権限コード形式は `resource:action`（細粒度 API レベル）です。
+
 ### 11.2 機能権限アーキテクチャ
 
 機能権限は **メニューフィルタリング + ボタンレベル制御 + API 認可** の3層防御で実装：
@@ -516,6 +566,15 @@ Omni-Stack は **RBAC-0 基礎権限モデル**（ユーザー・ロール・権
 └─────────────────────────────────────────────────────────────┘
 ```
 
+**権限ツリー構造**（`sys_permission` テーブル、マテリアライズドパス）：
+
+| ノードタイプ | 用途 | 例 |
+|---------|------|------|
+| `DIRECTORY` | メニューグループディレクトリ | 「システム管理」 |
+| `MENU` | ルーティング可能なメニューページ | 「ユーザー管理」 (path: /system/user) |
+| `BUTTON` | ボタン/API 操作 | 「ユーザー作成」 (code: system:user:create) |
+| `API` | 細粒度 API エンドポイント | 「GET /api/auth/user/list」 |
+
 ### 11.3 データ権限アーキテクチャ
 
 データ権限は **MyBatis-Plus `DataPermissionInterceptor`** に基づく SQL 自動インターセプトで、ビジネスコードへの侵入ゼロ。
@@ -533,17 +592,60 @@ Omni-Stack は **RBAC-0 基礎権限モデル**（ユーザー・ロール・権
 
 **マルチロールマージルール**：最も緩和が優先。複数ロールを持つユーザーは最小の優先度数値の dataScope を使用。
 
+**リクエストレベルのデータフロー**：
+
+```
+HTTP Request (X-User-Id, X-Tenant-Id Header を含む)
+    │
+    ▼
+DataScopeResolveFilter (OncePerRequestFilter, @Order(0))
+    │ 1. Header から userId, tenantId を抽出
+    │ 2. ユーザーの全ロールを照会 → sys_role_mapper.selectRolesByUserId()
+    │ 3. 全ロールの dataScope をマージ → 最も緩和を採用
+    │ 4. アクセス可能な組織ユニット ID 集合を解決（DEPT*/CUSTOM はマテリアライズドパスの子孫を照会）
+    │ 5. DataScopeContext (ThreadLocal) に書き込み
+    ▼
+MyBatis-Plus DataPermissionInterceptor
+    │ sys_user テーブルの SELECT クエリをインターセプト
+    │ DataPermissionHandlerImpl.getSqlSegment() を呼び出し
+    │ effectiveScope に基づき WHERE 条件を自動付加：
+    │   ALL/TENANT → 付加なし
+    │   SELF       → WHERE sys_user.id = {userId}
+    │   DEPT*/CUSTOM → WHERE sys_user.primary_unit_id IN (...)
+    ▼
+ビジネスコード（Controller → Service → Mapper）
+    │ 侵入ゼロ、データ権限の存在を意識不要
+    ▼
+DataScopeContext.clear() (finally ブロック、ThreadLocal リーク防止)
+```
+
+**2 種類のフィルタリングモード**：
+
+| モード | 適用場面 | 実装方式 |
+|------|---------|---------|
+| SQL インターセプト | データベースクエリ（ユーザー一覧など） | `DataPermissionInterceptor` + `DataPermissionHandlerImpl` が WHERE を自動付加 |
+| メモリフィルタリング | 非データベースデータ（Redis 内のオンラインユーザーなど） | Controller が `DataScopeContext` を読み `primaryUnitId` でフィルタリング |
+
+### 11.4 RBAC 管理フロー
+
+- **ロール管理**：ロール作成 → 権限割当（`sys_role_permission`）→ データ範囲設定（`sys_role.data_scope`）→ カスタム部署（`sys_role_dept`、CUSTOM 範囲のみ）
+- **ユーザー権限付与**：ユーザー作成 → ロール割当（`sys_user_role`）→ 組織ユニット割当（`sys_user_unit`、primary をマーク）
+- **メニューレンダリング**：ログイン → JWT に権限コードを含む → フロントエンドが `/api/auth/menus` を呼ぶ → バックエンドが再帰フィルタリング → フロントエンドが動的にルートを登録
+- **データクエリ**：リクエスト → Gateway が身分ヘッダーを注入 → Filter がデータ範囲を解決 → MyBatis-Plus が SQL を自動付加 → フィルタリング済みデータを返却
+
+> 完全な RBAC フローのシーケンス図は [core-flows.jp.md](core-flows.jp.md)
+
 ---
 
 ## 12. 主要制約
 
 1. **JDK 25 必須**：Spring Boot 4.x Maven plugin は Java 17+ 必須。本プロジェクトは JDK 25 を対象。`JAVA_HOME` を Maven コマンド実行前に設定すること。
-2. **Gateway 5.x 設定プレフィックス**：ルートと設定は `spring.cloud.gateway.server.webflux` の下に配置。旧プレフィックスはサイレントに無視される。
+2. **Gateway 5.x 設定プレフィックス**：ルートと設定は `spring.cloud.gateway.server.webflux` の下に配置。旧プレフィックス `spring.cloud.gateway` はサイレントに無視される。
 3. **ビルド順序**：`omni-common-core` → `omni-common` → common starters → マイクロサービス。`./mvnw clean install` を親 POM から実行。
 4. **直接サービス間呼び出し禁止**：サービス間通信は OpenFeign クライアント経由。生の HTTP 呼び出しは禁止。
 5. **Gateway はリアクティブ**：`omni-gateway` は WebFlux 上で動作。`omni-common-core` と `omni-common-redis-reactive` に依存するが、`omni-common` と `omni-common-redis` には**依存しない**。
 6. **Redis Starter 排他性**：ブロッキング版とリアクティブ版は同じサービスで混在不可。
-7. **XXL-JOB Admin 先行起動必須**：`omni-base` 起動前に Admin が稼働していること。
+7. **XXL-JOB Admin 先行起動必須**：`XxlJobSpringExecutor` が起動時に Admin へ登録します。ユーザータスクの作成/更新には `XxlJobAdminClient` による HTTP 呼び出しが必要です。`omni-base` 起動前に Admin が稼働していること。
 8. **omni-common-job はライブラリモジュール**：独立実行不可。Servlet サービスのみ依存可能。
 
 ---
@@ -554,12 +656,16 @@ Omni-Stack は **RBAC-0 基礎権限モデル**（ユーザー・ロール・権
 
 ソーシャルログインフレームワークは `OAuth2ProviderHandler` インターフェースによるストラテジーパターンを使用：
 
-1. `XxxOAuth2Handler.java` を作成し `OAuth2ProviderHandler` を実装。`@Component("xxx")` でアノテート
+1. **ハンドラー実装の作成**：`XxxOAuth2Handler.java` を作成し `OAuth2ProviderHandler` を実装、`@Component("xxx")` でアノテート。`getProviderId()`、`buildAuthorizationUrl()`、`exchangeCodeForAccessToken()`、`fetchUserProfile()`（統一の `ProviderUser` DTO を返す）を実装
 2. `OAuth2Properties.java` に `XxxProperties` 内部静的クラスを追加
 3. `application.yml` に `auth.oauth2.xxx.*` 設定セクションを追加
 4. `SocialLoginServiceImpl.getUsernamePrefix()` switch 式に case を追加
 
+`SocialLoginServiceImpl` は Spring の `Map<String, OAuth2ProviderHandler>` 注入により新しいハンドラーを自動検出します。
+
 **現在実装済み**：GitHub、Google、Gitee。
+
+> 詳細は [core-flows.jp.md](core-flows.jp.md) Flow 4
 
 ### 13.2 新サービスへの XSS 防護追加
 
@@ -567,16 +673,18 @@ XSS 防御システムはモジュラー — 新サービスは Common Starter �
 
 1. `omni-common-core` + `omni-common` 依存を追加
 2. `XssConfigProvider` SPI インターフェースを実装
-3. Redis キャッシュ戦略を使用（30 分 TTL）
+3. Redis キャッシュ戦略を使用（`xss:enabled:{tenantId}` + `xss:rules:{tenantId}`、30 分 TTL）
 4. `XssAutoConfiguration` は `AutoConfiguration.imports` で自動登録
 
 ### 13.3 新規ユーザータスクタイプの追加
 
 ユーザータスクシステムは `UserJobHandler` による SPI パターンを使用：
 
-1. `sys_user_job_type` に INSERT してタスクタイプを登録
+1. `sys_user_job_type` に INSERT してタスクタイプを登録（`type_code` は一意、Bean 名にマッピング）
 2. `@Component("{type_code}")` クラスを作成し `UserJobHandler` を実装
 3. `UserJobHandlerRegistry` が `Map<String, UserJobHandler>` 注入で自動検出
+
+> 完全なチュートリアルは [scheduling.jp.md](scheduling.jp.md) 第 4 章
 
 ---
 
@@ -637,7 +745,7 @@ omni-backend/
 
 ```yaml
 server:
-  port: 8104
+  port: 8108                        # 未使用ポート（8100〜8107 は認証/base/gateway/workflow/crm/srm/調達の各サービスが占有）
 spring:
   application:
     name: omni-order
@@ -666,17 +774,25 @@ spring:
   uri: lb://omni-order
   predicates:
     - Path=/api/order/**
-  filters:
-    - StripPrefix=2
 ```
+
+下流の Controller は完全な `/api/order/**` パスを保持・宣言します；現在ゲートウェイは `StripPrefix` を行いません。
 
 ### 14.6 権限シードデータの追加
 
-`scripts/sql/init-all.sql` に `sys_permission` レコードを追加。
+`scripts/sql/seed/auth.sql` に冪等な `sys_permission` レコードを追加し、`database/seed/manifest.yaml` のチェックサムと自然キー検証を更新します。
+
+```sql
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_name, permission_code, type, path, depth, sort, status) VALUES
+(1, 0, '订单管理', 'order', 'DIRECTORY', '/<目录ID>/', 1, 1, 1),
+(1, @order_dir, '订单列表', 'order:list', 'MENU', '/<目录ID>/<菜单ID>/', 2, 1, 1),
+(1, @order_list, '查看订单', 'order:detail:query', 'API', '/<目录ID>/<菜单ID>/<权限ID>/', 3, 1, 1);
+```
 
 ### 14.7 Docker デプロイ設定
 
-`docker-compose.yml` にサービス定義を追加：
+`compose.apps.yaml` に唯一のサービス定義を追加し、適用する profiles を宣言します：
 
 ```yaml
 omni-order:
@@ -686,7 +802,7 @@ omni-order:
     args:
       SERVICE_NAME: omni-order
   ports:
-    - "8104:8080"
+    - "8108:8080"
   environment:
     SERVER_PORT: "8080"
     SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_order?..."
@@ -700,7 +816,7 @@ omni-order:
 
 ### 14.8 検証チェックリスト
 
-- [ ] `mvn clean install` が正常にコンパイルされる
+- [ ] `./mvnw clean install` が正常にコンパイルされる（リポジトリの Maven Wrapper と JDK 25 を使用）
 - [ ] ローカル起動後、Nacos コンソールで `omni-order` サービスが可視
 - [ ] `GET /api/order/xxx` が Gateway 経由で正常にルーティングされる
 - [ ] `@PreAuthorize` アノテーションが機能する

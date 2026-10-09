@@ -1,0 +1,87 @@
+groups:
+  - name: omni-platform
+    rules:
+      - alert: OmniServiceDown
+        expr: up{job="omni-platform"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "Omni 服务不可用（示例阈值，发布前校准）"
+      - alert: OmniHighHttp5xxRate
+        expr: sum by (service_name) (rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / clamp_min(sum by (service_name) (rate(http_server_requests_seconds_count[5m])), 0.001) > 0.05
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "HTTP 5xx 比例超过 5%（示例阈值）"
+      - alert: OmniHighHttpP95Latency
+        expr: histogram_quantile(0.95, sum by (le, service_name) (rate(http_server_requests_seconds_bucket[5m]))) > 1
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "HTTP P95 超过 1 秒（示例阈值）"
+      - alert: OmniHighHttpP99Latency
+        expr: histogram_quantile(0.99, sum by (le, service_name) (rate(http_server_requests_seconds_bucket[5m]))) > 2
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "HTTP P99 超过 2 秒（示例阈值）"
+      - alert: OmniDatabasePoolSaturation
+        expr: hikaricp_connections_active / clamp_min(hikaricp_connections_max, 1) > 0.85
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "数据库连接池使用率超过 85%（示例阈值）"
+      - alert: OmniOutboxOldestPending
+        expr: omni_mq_outbox_oldest_age_seconds > 300
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "Outbox 最旧待投递消息超过 5 分钟（示例阈值）"
+      - alert: OmniOutboxDeadLetter
+        expr: omni_mq_outbox_messages{status="dead_letter"} > 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "Outbox 存在死信"
+      - alert: OmniWorkflowStartFailure
+        expr: increase(omni_workflow_start_operations_total{result="failure"}[10m]) > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: "Workflow 启动失败持续出现（示例窗口）"
+      - alert: OmniJobRegistrationFailure
+        expr: increase(omni_job_registrations_total{result="failure"}[10m]) > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: "XXL-JOB 注册失败（示例窗口）"
+      - alert: OmniInboxRetry
+        expr: increase(omni_inbox_operations_total{result="retry"}[10m]) > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: "业务 Inbox 触发 Broker 重试（示例窗口）"
+      - alert: OmniHostDiskSpaceLow
+        expr: node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / clamp_min(node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}, 1) < 0.10
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "宿主文件系统可用空间低于 10%（示例阈值）"
+      - alert: OmniContainerRestarted
+        expr: changes(container_start_time_seconds{name=~"/?omni-.*"}[10m]) > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: "Omni 容器在 10 分钟内重启（示例窗口）"
+      - alert: OmniProcessMemoryHigh
+        expr: sum by (service_name) (jvm_memory_used_bytes{area="heap"}) / clamp_min(sum by (service_name) (jvm_memory_max_bytes{area="heap"}), 1) > 0.90
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "JVM 堆内存使用率超过 90%（示例阈值）"
+      - alert: OmniJvmThreadDeadlock
+        expr: jvm_threads_deadlocked > 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "JVM 检测到线程死锁"

@@ -6,7 +6,7 @@ import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
 import com.omni.crm.dto.CrmRequests;
 import com.omni.crm.dto.CrmViews;
-import com.omni.crm.security.CrmDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.crm.service.ContactService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,26 +29,26 @@ public class ContactController {
     private final ContactService contactService;
 
     /** 分页查询联系人。 */
-    @GetMapping("/contact/list") @PreAuthorize("hasAuthority('crm:contact:list')") @CrmDataScope(permissionCode = "crm:contact:list")
+    @GetMapping("/contact/list") @PreAuthorize("hasAuthority('crm:contact:list')") @ServiceDataScope(permissionCode = "crm:contact:list")
     public R<PageResult<CrmViews.ContactVO>> list(@Valid CrmRequests.ContactQuery query) {
         return R.ok(contactService.list(query));
     }
 
     /** 查询指定客户的联系人。 */
     @GetMapping("/customer/{customerId}/contact/list") @PreAuthorize("hasAuthority('crm:contact:list')")
-    @CrmDataScope(permissionCode = "crm:contact:list")
+    @ServiceDataScope(permissionCode = "crm:contact:list")
     public R<PageResult<CrmViews.ContactVO>> listByCustomer(@PathVariable Long customerId,
                                                             @Valid CrmRequests.ContactQuery query) {
         return R.ok(contactService.listByCustomer(customerId, query));
     }
 
     /** 查询联系人详情。 */
-    @GetMapping("/contact/{id}") @PreAuthorize("hasAuthority('crm:contact:list')") @CrmDataScope(permissionCode = "crm:contact:list")
+    @GetMapping("/contact/{id}") @PreAuthorize("hasAuthority('crm:contact:list')") @ServiceDataScope(permissionCode = "crm:contact:list")
     public R<CrmViews.ContactVO> get(@PathVariable Long id) { return R.ok(contactService.get(id)); }
 
     /** 创建客户联系人。 */
     @PostMapping("/customer/{customerId}/contact") @PreAuthorize("hasAuthority('crm:contact:create')")
-    @CrmDataScope(permissionCode = "crm:contact:create")
+    @ServiceDataScope(permissionCode = "crm:contact:create")
     @OperLog(module = "CRM联系人", operType = OperType.CREATE, recordSnapshot = false, excludeFields = {"name"})
     public R<CrmViews.ContactVO> create(@PathVariable Long customerId,
                                         @Valid @RequestBody CrmRequests.CreateContactRequest request) {
@@ -56,7 +56,7 @@ public class ContactController {
     }
 
     /** 更新联系人。 */
-    @PutMapping("/contact/{id}") @PreAuthorize("hasAuthority('crm:contact:update')") @CrmDataScope(permissionCode = "crm:contact:update")
+    @PutMapping("/contact/{id}") @PreAuthorize("hasAuthority('crm:contact:update')") @ServiceDataScope(permissionCode = "crm:contact:update")
     @OperLog(module = "CRM联系人", operType = OperType.UPDATE, idExpr = "#id", recordSnapshot = false,
             excludeFields = {"name"})
     public R<CrmViews.ContactVO> update(@PathVariable Long id,
@@ -65,14 +65,14 @@ public class ContactController {
     }
 
     /** 删除联系人。 */
-    @DeleteMapping("/contact/{id}") @PreAuthorize("hasAuthority('crm:contact:delete')") @CrmDataScope(permissionCode = "crm:contact:delete")
+    @DeleteMapping("/contact/{id}") @PreAuthorize("hasAuthority('crm:contact:delete')") @ServiceDataScope(permissionCode = "crm:contact:delete")
     @OperLog(module = "CRM联系人", operType = OperType.DELETE, idExpr = "#id")
     public R<Void> delete(@PathVariable Long id, @RequestParam Integer version) {
         contactService.delete(id, version); return R.ok();
     }
 
     /** 设置主要联系人。 */
-    @PostMapping("/contact/{id}/primary") @PreAuthorize("hasAuthority('crm:contact:update')") @CrmDataScope(permissionCode = "crm:contact:update")
+    @PostMapping("/contact/{id}/primary") @PreAuthorize("hasAuthority('crm:contact:update')") @ServiceDataScope(permissionCode = "crm:contact:update")
     @OperLog(module = "CRM联系人", operType = OperType.UPDATE, idExpr = "#id")
     public R<CrmViews.ContactVO> primary(@PathVariable Long id, @Valid @RequestBody CrmRequests.VersionRequest request) {
         return R.ok(contactService.setPrimary(id, request.getVersion()));

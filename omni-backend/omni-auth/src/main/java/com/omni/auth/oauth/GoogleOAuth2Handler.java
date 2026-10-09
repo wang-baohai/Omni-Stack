@@ -41,11 +41,11 @@ import java.time.Duration;
 @Component("google")
 public class GoogleOAuth2Handler implements OAuth2ProviderHandler {
 
-    /** Google OAuth2 授权页面 URL */
+    /** Google OAuth2 授权页面 URL（默认值，可通过配置覆盖） */
     private static final String GOOGLE_AUTHORIZE_URL = "https://accounts.google.com/o/oauth2/v2/auth";
-    /** Google OAuth2 Token 端点 URL */
+    /** Google OAuth2 Token 端点 URL（默认值，可通过配置覆盖） */
     private static final String GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
-    /** Google 用户信息 API URL */
+    /** Google 用户信息 API URL（默认值，可通过配置覆盖） */
     private static final String GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
     /** 请求的 OAuth2 授权范围：用户 ID、基本资料和邮箱 */
     private static final String SCOPE = "openid profile email";
@@ -115,7 +115,7 @@ public class GoogleOAuth2Handler implements OAuth2ProviderHandler {
     public String buildAuthorizationUrl(String state) {
         String clientId = oauth2Properties.getGoogle().getClientId();
         String redirectUri = oauth2Properties.getGoogle().getRedirectUri();
-        return GOOGLE_AUTHORIZE_URL
+        return oauth2Properties.getGoogle().getAuthorizeUrl()
                 + "?client_id=" + encode(clientId)
                 + "&redirect_uri=" + encode(redirectUri)
                 + "&response_type=code"
@@ -140,7 +140,7 @@ public class GoogleOAuth2Handler implements OAuth2ProviderHandler {
                     + "&grant_type=authorization_code";
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GOOGLE_TOKEN_URL))
+                    .uri(URI.create(oauth2Properties.getGoogle().getTokenUrl()))
                     .timeout(Duration.ofSeconds(30))
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/x-www-form-urlencoded")
@@ -185,7 +185,7 @@ public class GoogleOAuth2Handler implements OAuth2ProviderHandler {
     public ProviderUser fetchUserProfile(String accessToken) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GOOGLE_USERINFO_URL))
+                    .uri(URI.create(oauth2Properties.getGoogle().getUserinfoUrl()))
                     .timeout(Duration.ofSeconds(30))
                     .header("Authorization", "Bearer " + accessToken)
                     .header("Accept", "application/json")

@@ -622,6 +622,39 @@ html.dark .el-table {
   --el-table-border-color: var(--omni-border-color);
   --el-table-text-color: var(--omni-text-primary);
   --el-table-header-text-color: var(--omni-text-secondary);
+
+  // D4 全局修复：暗色模式下固定列（fixed="right"/"left"）背景色继承不到表格行，
+  // 导致固定列显示为白色或与页面背景不协调。统一使用行背景色 + 边缘阴影。
+  .el-table-fixed-column--left,
+  .el-table-fixed-column--right {
+    background-color: var(--el-bg-color, var(--omni-bg-surface)) !important;
+  }
+  .el-table__header-wrapper tr th.el-table-fixed-column--left,
+  .el-table__header-wrapper tr th.el-table-fixed-column--right {
+    background-color: var(--el-table-header-bg-color, rgba(255, 255, 255, 0.03)) !important;
+  }
+  // 固定列边缘投影（暗色模式下调低不透明度）
+  .el-table-fixed-column--right::before,
+  .el-table-fixed-column--left::before {
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.15), transparent);
+  }
+  // 固定列右侧补丁（Element Plus 内部用于填充固定列与滚动区之间的间隙）
+  .el-table__fixed-right-patch {
+    background-color: var(--el-bg-color, var(--omni-bg-surface)) !important;
+  }
+}
+
+// --- el-table 操作列固定列全局可达性 ---
+// 所有带 fixed="right" 操作列的表格，确保操作列有足够背景对比度和阴影分隔
+.omni-table-fixed-actions {
+  .el-table-fixed-column--right {
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+  }
+}
+html.dark .omni-table-fixed-actions {
+  .el-table-fixed-column--right {
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.25);
+  }
 }
 
 // --- el-message (toast) ---

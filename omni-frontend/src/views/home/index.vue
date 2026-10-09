@@ -14,7 +14,7 @@ import { usePermissionStore } from '@/stores/permission'
 import { hasManagementAccess, isAssetSelfServiceUser } from '@/utils/access'
 import { getRolesFromToken } from '@/utils/jwt'
 import { useDictOptions } from '@/composables/useDictOptions'
-import { storeLang } from '@/i18n'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 import { clearAuthenticatedSession } from '@/router'
 import {
   listMyJobs, createMyJob, updateMyJob, deleteMyJob,
@@ -25,6 +25,7 @@ import {
 import type { UserJob, CreateUserJobRequest, UserJobLog } from '@/api/myJob'
 import type { UserJobType } from '@/api/userJobType'
 import type { PageResult } from '@/types/api'
+import { isRecord, type DynamicFormValues } from '@/types/schema'
 import CronGenerator from '@/components/CronGenerator.vue'
 import DynamicFormRenderer from '@/components/DynamicFormRenderer.vue'
 import { CronExpressionParser } from 'cron-parser'
@@ -103,7 +104,7 @@ const form = reactive<{
   jobName: string
   jobType: string
   cronExpression: string
-  jobParams: Record<string, any>
+  jobParams: DynamicFormValues
 }>({
   jobName: '',
   jobType: '',
@@ -112,11 +113,12 @@ const form = reactive<{
 })
 
 /** 当前选中类型的 paramTemplate schema */
-const currentSchema = computed<Record<string, any> | null>(() => {
+const currentSchema = computed<Record<string, unknown> | null>(() => {
   const selected = enabledTypes.value.find(tp => tp.typeCode === form.jobType)
   if (!selected?.paramTemplate) return null
   try {
-    return JSON.parse(selected.paramTemplate)
+    const parsed: unknown = JSON.parse(selected.paramTemplate)
+    return isRecord(parsed) ? parsed : null
   } catch {
     return null
   }
@@ -160,11 +162,6 @@ function toggleTheme() {
 }
 
 /** 切换语言 */
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 
 // ─── 工作台函数 ───
 
@@ -246,9 +243,10 @@ function openCreateDialog() {
 async function openEditDialog(row: UserJob) {
   isEdit.value = true
   editingId.value = row.id
-  let params: Record<string, any> = {}
+  let params: DynamicFormValues = {}
   try {
-    params = row.jobParams ? JSON.parse(row.jobParams) : {}
+    const parsed: unknown = row.jobParams ? JSON.parse(row.jobParams) : {}
+    params = isRecord(parsed) ? parsed as DynamicFormValues : {}
   } catch { /* ignore */ }
   Object.assign(form, {
     jobName: row.jobName,
@@ -520,7 +518,7 @@ function getNextFireTime(cronExpression: string): string {
   try {
     const interval = CronExpressionParser.parse(cronExpression)
     const next = interval.next()
-    return next.toDate().toLocaleString(locale.value === 'zh-CN' ? 'zh-CN' : 'en-US', {
+    return next.toDate().toLocaleString(locale.value, {
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit',
     })
@@ -628,22 +626,22 @@ async function openApproval(task: TodoTask) {
     const variables = formResponse.data.data.variables || {}
     if (variables.businessType === 'PROCUREMENT_REQUISITION') {
       const requisitionId = positiveInteger(variables.requisitionId)
-      if (!requisitionId) throw new Error('采购请购流程缺少合法的 requisitionId')
+      if (!requisitionId) throw new Error(t('workspaceApproval.invalidRequisitionId'))
       const businessResponse = await getProcurementRequisitionApprovalView(requisitionId, task.taskId)
       requisitionApprovalView.value = businessResponse.data.data
     } else if (variables.businessType === 'ASSET_TRANSFER') {
       const transferId = positiveInteger(variables.transferId)
-      if (!transferId) throw new Error('资产调拨流程缺少合法的 transferId')
+      if (!transferId) throw new Error(t('workspaceApproval.invalidTransferId'))
       const businessResponse = await getAssetTransferApprovalView(transferId, task.taskId)
       assetTransferApprovalView.value = businessResponse.data.data
     } else if (variables.businessType === 'ASSET_DISPOSAL') {
       const disposalId = positiveInteger(variables.disposalId)
-      if (!disposalId) throw new Error('资产处置流程缺少合法的 disposalId')
+      if (!disposalId) throw new Error(t('workspaceApproval.invalidDisposalId'))
       const businessResponse = await getAssetDisposalApprovalView(disposalId, task.taskId)
       assetDisposalApprovalView.value = businessResponse.data.data
     }
   } catch (error) {
-    businessFormError.value = error instanceof Error ? error.message : '业务表单加载失败'
+    businessFormError.value = error instanceof Error ? error.message : t('workspaceApproval.formLoadFailed')
   } finally {
     businessFormLoading.value = false
   }
@@ -651,7 +649,7 @@ async function openApproval(task: TodoTask) {
 
 async function submitApproval() {
   if (!approvalTask.value || !approvalCanSubmit.value) {
-    ElMessage.warning('业务表单尚未通过校验，不能审批')
+    ElMessage.warning(t('workspaceApproval.formNotValidated'))
     return
   }
   await completeApproval(approvalTask.value.taskId, {
@@ -660,8 +658,8 @@ async function submitApproval() {
   })
   if (hasBusinessApprovalView.value) {
     ElNotification.success({
-      title: '审批已处理',
-      message: '业务状态正在通过可靠消息同步，可在对应业务列表中查看最终结果。',
+      title: t('workspaceApproval.processed'),
+      message: t('workspaceApproval.syncing'),
       duration: 5000,
     })
   } else {
@@ -701,10 +699,7 @@ function instanceStatusType(status: number): string {
       </div>
       <div class="home-header-right">
         <!-- 语言切换 -->
-        <el-button text :title="t('lang.switch')" @click="toggleLang">
-          <el-icon><Globe /></el-icon>
-          {{ locale === 'zh-CN' ? 'EN' : '中' }}
-        </el-button>
+        <LanguageSelector />
         <!-- 主题切换 -->
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>
@@ -785,11 +780,12 @@ function instanceStatusType(status: number): string {
             </el-table-column>
           </el-table>
           <el-empty v-if="!todoLoading && todoList.length === 0" :description="t('workflow.noTodo')" />
-          <el-pagination v-model:current-page="todoPage" v-model:page-size="todoPageSize" class="pagination"
-                         :page-sizes="[5, 10, 20, 50, 100]" :total="todoTotal"
-                         layout="total, sizes, prev, pager, next"
-                         @current-change="loadTodoList"
-                         @size-change="todoPage = 1; loadTodoList()" />
+          <el-pagination
+            v-model:current-page="todoPage" v-model:page-size="todoPageSize" class="pagination"
+            :page-sizes="[5, 10, 20, 50, 100]" :total="todoTotal"
+            layout="total, sizes, prev, pager, next"
+            @current-change="loadTodoList"
+            @size-change="todoPage = 1; loadTodoList()" />
         </el-tab-pane>
 
         <!-- Tab 2: 我发起的 -->
@@ -817,11 +813,12 @@ function instanceStatusType(status: number): string {
             <el-table-column prop="createTime" :label="t('workflow.startTime')" width="170" />
           </el-table>
           <el-empty v-if="!initiatedLoading && initiatedList.length === 0" :description="t('workflow.noInitiated')" />
-          <el-pagination v-model:current-page="initiatedPage" v-model:page-size="initiatedPageSize" class="pagination"
-                         :page-sizes="[5, 10, 20, 50, 100]" :total="initiatedTotal"
-                         layout="total, sizes, prev, pager, next"
-                         @current-change="loadInitiatedList"
-                         @size-change="initiatedPage = 1; loadInitiatedList()" />
+          <el-pagination
+            v-model:current-page="initiatedPage" v-model:page-size="initiatedPageSize" class="pagination"
+            :page-sizes="[5, 10, 20, 50, 100]" :total="initiatedTotal"
+            layout="total, sizes, prev, pager, next"
+            @current-change="loadInitiatedList"
+            @size-change="initiatedPage = 1; loadInitiatedList()" />
         </el-tab-pane>
 
         <!-- Tab 3: 我已办的 -->
@@ -842,11 +839,12 @@ function instanceStatusType(status: number): string {
             <el-table-column prop="createTime" :label="t('workflow.startTime')" width="170" />
           </el-table>
           <el-empty v-if="!completedLoading && completedList.length === 0" :description="t('workflow.noCompleted')" />
-          <el-pagination v-model:current-page="completedPage" v-model:page-size="completedPageSize" class="pagination"
-                         :page-sizes="[5, 10, 20, 50, 100]" :total="completedTotal"
-                         layout="total, sizes, prev, pager, next"
-                         @current-change="loadCompletedList"
-                         @size-change="completedPage = 1; loadCompletedList()" />
+          <el-pagination
+            v-model:current-page="completedPage" v-model:page-size="completedPageSize" class="pagination"
+            :page-sizes="[5, 10, 20, 50, 100]" :total="completedTotal"
+            layout="total, sizes, prev, pager, next"
+            @current-change="loadCompletedList"
+            @size-change="completedPage = 1; loadCompletedList()" />
         </el-tab-pane>
 
         <!-- Tab 4: 我的定时任务 -->
@@ -879,61 +877,62 @@ function instanceStatusType(status: number): string {
               </div>
             </template>
 
-        <!-- 搜索栏 -->
-        <el-form inline style="margin-bottom: 16px">
-          <el-form-item :label="t('userJob.jobName')">
-            <el-input v-model="searchJobName" clearable />
-          </el-form-item>
-          <el-form-item :label="t('userJob.jobType')">
-            <el-input v-model="searchJobType" clearable />
-          </el-form-item>
-          <el-form-item :label="t('common.status')">
-            <el-select v-model="searchStatus" clearable style="width: 120px">
-              <el-option :label="t('common.enabled')" :value="1" />
-              <el-option :label="t('common.disabled')" :value="0" />
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
-            <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
-          </el-form-item>
-        </el-form>
+            <!-- 搜索栏 -->
+            <el-form inline style="margin-bottom: 16px">
+              <el-form-item :label="t('userJob.jobName')">
+                <el-input v-model="searchJobName" clearable />
+              </el-form-item>
+              <el-form-item :label="t('userJob.jobType')">
+                <el-input v-model="searchJobType" clearable />
+              </el-form-item>
+              <el-form-item :label="t('common.status')">
+                <el-select v-model="searchStatus" clearable style="width: 120px">
+                  <el-option :label="t('common.enabled')" :value="1" />
+                  <el-option :label="t('common.disabled')" :value="0" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+                <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
+              </el-form-item>
+            </el-form>
 
-        <el-table v-loading="loading" :data="tableData" stripe border>
-          <el-table-column prop="jobName" :label="t('userJob.jobName')" min-width="150" />
-          <el-table-column prop="jobType" :label="t('userJob.jobType')" width="130" />
-          <el-table-column prop="cronExpression" :label="t('userJob.cronExpression')" width="150" />
-          <el-table-column :label="t('common.status')" width="90" align="center">
-            <template #default="{ row }">
-              <el-switch :model-value="row.status === 1" @change="handleToggleStatus(row)" />
-            </template>
-          </el-table-column>
-          <el-table-column prop="lastFireTime" :label="t('userJob.lastFireTime')" width="170" />
-          <el-table-column :label="t('userJob.nextFireTime')" width="170">
-            <template #default="{ row }">
-              {{ row.status === 1 ? getNextFireTime(row.cronExpression) : '-' }}
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('common.actions')" width="300" fixed="right">
-            <template #default="{ row }">
-              <el-button size="small" @click="openEditDialog(row)">{{ t('common.edit') }}</el-button>
-              <el-button size="small" type="primary" @click="handleTrigger(row)">
-                {{ t('userJob.triggerNow') }}
-              </el-button>
-              <el-button size="small" @click="openLogDialog(row)">{{ t('workspace.viewLogs') }}</el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+            <el-table v-loading="loading" :data="tableData" stripe border>
+              <el-table-column prop="jobName" :label="t('userJob.jobName')" min-width="150" />
+              <el-table-column prop="jobType" :label="t('userJob.jobType')" width="130" />
+              <el-table-column prop="cronExpression" :label="t('userJob.cronExpression')" width="150" />
+              <el-table-column :label="t('common.status')" width="90" align="center">
+                <template #default="{ row }">
+                  <el-switch :model-value="row.status === 1" @change="handleToggleStatus(row)" />
+                </template>
+              </el-table-column>
+              <el-table-column prop="lastFireTime" :label="t('userJob.lastFireTime')" width="170" />
+              <el-table-column :label="t('userJob.nextFireTime')" width="170">
+                <template #default="{ row }">
+                  {{ row.status === 1 ? getNextFireTime(row.cronExpression) : '-' }}
+                </template>
+              </el-table-column>
+              <el-table-column :label="t('common.actions')" width="300" fixed="right">
+                <template #default="{ row }">
+                  <el-button size="small" @click="openEditDialog(row)">{{ t('common.edit') }}</el-button>
+                  <el-button size="small" type="primary" @click="handleTrigger(row)">
+                    {{ t('userJob.triggerNow') }}
+                  </el-button>
+                  <el-button size="small" @click="openLogDialog(row)">{{ t('workspace.viewLogs') }}</el-button>
+                  <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
 
-        <!-- 空状态提示 -->
-        <el-empty v-if="!loading && tableData.length === 0" :description="t('workspace.noJobs')" />
+            <!-- 空状态提示 -->
+            <el-empty v-if="!loading && tableData.length === 0" :description="t('workspace.noJobs')" />
 
-        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination"
-                       :page-sizes="[5, 10, 20, 50, 100]" :total="total"
-                       layout="total, sizes, prev, pager, next"
-                       @current-change="handlePageChange"
-                       @size-change="currentPage = 1; handlePageChange(1)" />
+            <el-pagination
+              v-model:current-page="currentPage" v-model:page-size="pageSize" class="pagination"
+              :page-sizes="[5, 10, 20, 50, 100]" :total="total"
+              layout="total, sizes, prev, pager, next"
+              @current-change="handlePageChange"
+              @size-change="currentPage = 1; handlePageChange(1)" />
           </el-card>
         </el-tab-pane>
       </el-tabs>
@@ -950,33 +949,33 @@ function instanceStatusType(status: number): string {
             type="error"
             :closable="false"
             show-icon
-            :title="`业务表单校验失败：${businessFormError}`"
+            :title="t('workspaceApproval.validationFailed', { error: businessFormError })"
           />
           <template v-if="requisitionApprovalView">
             <el-descriptions :column="2" border class="approval-business-form">
-              <el-descriptions-item label="请购单号">
+              <el-descriptions-item :label="t('workspaceApproval.requisitionNo')">
                 {{ requisitionApprovalView.requisition.requisitionNo }}
               </el-descriptions-item>
-              <el-descriptions-item label="品类">
+              <el-descriptions-item :label="t('workspaceApproval.category')">
                 {{ requisitionApprovalView.requisition.primaryCategoryCode }}
               </el-descriptions-item>
-              <el-descriptions-item label="标题" :span="2">
+              <el-descriptions-item :label="t('workspaceApproval.title')" :span="2">
                 {{ requisitionApprovalView.requisition.title }}
               </el-descriptions-item>
-              <el-descriptions-item label="申请人">
+              <el-descriptions-item :label="t('workspaceApproval.requester')">
                 #{{ requisitionApprovalView.requisition.requesterUserId }}
               </el-descriptions-item>
-              <el-descriptions-item label="申请组织">
+              <el-descriptions-item :label="t('workspaceApproval.requesterOrg')">
                 #{{ requisitionApprovalView.requisition.requesterUnitId }}
               </el-descriptions-item>
-              <el-descriptions-item label="预估金额">
+              <el-descriptions-item :label="t('workspaceApproval.estimatedAmount')">
                 {{ requisitionApprovalView.requisition.totalAmount }}
                 {{ requisitionApprovalView.requisition.currencyCode }}
               </el-descriptions-item>
-              <el-descriptions-item label="审批轮次">
+              <el-descriptions-item :label="t('workspaceApproval.approvalRound')">
                 {{ requisitionApprovalView.requisition.approvalAttempt }}
               </el-descriptions-item>
-              <el-descriptions-item label="请购原因" :span="2">
+              <el-descriptions-item :label="t('workspaceApproval.requisitionReason')" :span="2">
                 {{ requisitionApprovalView.requisition.reason || '—' }}
               </el-descriptions-item>
             </el-descriptions>
@@ -987,12 +986,12 @@ function instanceStatusType(status: number): string {
               class="approval-business-lines"
             >
               <el-table-column prop="lineNo" label="#" width="50" />
-              <el-table-column prop="materialCode" label="物料编码" min-width="120" />
-              <el-table-column prop="materialName" label="物料名称" min-width="150" />
-              <el-table-column prop="quantity" label="数量" min-width="105" align="right" />
-              <el-table-column prop="unit" label="单位" width="70" />
-              <el-table-column prop="estimatedUnitPrice" label="预估单价" min-width="110" align="right" />
-              <el-table-column prop="estimatedTotalPrice" label="行金额" min-width="120" align="right" />
+              <el-table-column prop="materialCode" :label="t('workspaceApproval.materialCode')" min-width="120" />
+              <el-table-column prop="materialName" :label="t('workspaceApproval.materialName')" min-width="150" />
+              <el-table-column prop="quantity" :label="t('workspaceApproval.quantity')" min-width="105" align="right" />
+              <el-table-column prop="unit" :label="t('workspaceApproval.unit')" width="70" />
+              <el-table-column prop="estimatedUnitPrice" :label="t('workspaceApproval.estimatedUnitPrice')" min-width="110" align="right" />
+              <el-table-column prop="estimatedTotalPrice" :label="t('workspaceApproval.lineAmount')" min-width="120" align="right" />
             </el-table>
           </template>
           <el-descriptions
@@ -1001,30 +1000,30 @@ function instanceStatusType(status: number): string {
             border
             class="approval-business-form"
           >
-            <el-descriptions-item label="调拨单号">
+            <el-descriptions-item :label="t('workspaceApproval.transferNo')">
               {{ assetTransferApprovalView.transferNo }}
             </el-descriptions-item>
-            <el-descriptions-item label="当前状态">
+            <el-descriptions-item :label="t('workspaceApproval.currentStatus')">
               {{ assetTransferApprovalView.status }}
             </el-descriptions-item>
-            <el-descriptions-item label="资产" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.asset')" :span="2">
               {{ assetTransferApprovalView.assetNo }} /
               {{ assetTransferApprovalView.assetName }}
             </el-descriptions-item>
-            <el-descriptions-item label="原用户/部门">
+            <el-descriptions-item :label="t('workspaceApproval.fromUserOrg')">
               {{ assetTransferApprovalView.fromUserId || '—' }} /
               {{ assetTransferApprovalView.fromUnitId || '—' }}
             </el-descriptions-item>
-            <el-descriptions-item label="目标用户/部门">
+            <el-descriptions-item :label="t('workspaceApproval.toUserOrg')">
               {{ assetTransferApprovalView.toUserId }} /
               {{ assetTransferApprovalView.toUnitId }}
             </el-descriptions-item>
-            <el-descriptions-item label="位置" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.location')" :span="2">
               {{ assetTransferApprovalView.fromLocation || '—' }}
               →
               {{ assetTransferApprovalView.toLocation || '—' }}
             </el-descriptions-item>
-            <el-descriptions-item label="调拨原因" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.transferReason')" :span="2">
               {{ assetTransferApprovalView.reason }}
             </el-descriptions-item>
           </el-descriptions>
@@ -1034,26 +1033,26 @@ function instanceStatusType(status: number): string {
             border
             class="approval-business-form"
           >
-            <el-descriptions-item label="处置单号">
+            <el-descriptions-item :label="t('workspaceApproval.disposalNo')">
               {{ assetDisposalApprovalView.disposalNo }}
             </el-descriptions-item>
-            <el-descriptions-item label="处置类型">
-              {{ assetDisposalApprovalView.disposalType === 'SCRAP' ? '报废' : '丢弃' }}
+            <el-descriptions-item :label="t('workspaceApproval.disposalType')">
+              {{ assetDisposalApprovalView.disposalType === 'SCRAP' ? t('workspaceApproval.scrap') : t('workspaceApproval.discard') }}
             </el-descriptions-item>
-            <el-descriptions-item label="资产" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.asset')" :span="2">
               {{ assetDisposalApprovalView.assetNo }} /
               {{ assetDisposalApprovalView.assetName }}
             </el-descriptions-item>
-            <el-descriptions-item label="原资产状态">
+            <el-descriptions-item :label="t('workspaceApproval.previousAssetStatus')">
               {{ assetDisposalApprovalView.previousAssetStatus }}
             </el-descriptions-item>
-            <el-descriptions-item label="残值">
+            <el-descriptions-item :label="t('workspaceApproval.residualValue')">
               {{ assetDisposalApprovalView.residualValue || '—' }}
             </el-descriptions-item>
-            <el-descriptions-item label="处置方式" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.disposalMethod')" :span="2">
               {{ assetDisposalApprovalView.disposalMethod || '—' }}
             </el-descriptions-item>
-            <el-descriptions-item label="处置原因" :span="2">
+            <el-descriptions-item :label="t('workspaceApproval.disposalReason')" :span="2">
               {{ assetDisposalApprovalView.reason }}
             </el-descriptions-item>
           </el-descriptions>
@@ -1087,18 +1086,21 @@ function instanceStatusType(status: number): string {
     </footer>
 
     <!-- ═══ 创建/编辑任务对话框 ═══ -->
-    <el-dialog v-model="formDialogVisible"
-               :title="isEdit ? t('workspace.editJob') : t('workspace.createJob')"
-               width="700px">
+    <el-dialog
+      v-model="formDialogVisible"
+      :title="isEdit ? t('workspace.editJob') : t('workspace.createJob')"
+      width="700px">
       <el-form :model="form" label-width="120px">
         <el-form-item :label="t('userJob.jobName')">
           <el-input v-model="form.jobName" />
         </el-form-item>
         <el-form-item :label="t('userJob.jobType')">
-          <el-select v-model="form.jobType" :disabled="isEdit"
-                     style="width: 100%" @change="onJobTypeChange">
-            <el-option v-for="jt in enabledTypes" :key="jt.typeCode"
-                       :label="jt.typeName" :value="jt.typeCode" />
+          <el-select
+            v-model="form.jobType" :disabled="isEdit"
+            style="width: 100%" @change="onJobTypeChange">
+            <el-option
+              v-for="jt in enabledTypes" :key="jt.typeCode"
+              :label="jt.typeName" :value="jt.typeCode" />
           </el-select>
         </el-form-item>
         <el-form-item :label="t('userJob.cronExpression')">
@@ -1106,7 +1108,7 @@ function instanceStatusType(status: number): string {
         </el-form-item>
         <!-- 动态参数表单 -->
         <el-form-item v-if="currentSchema" :label="t('userJob.jobParams')">
-          <DynamicFormRenderer :schema="currentSchema" v-model="form.jobParams" />
+          <DynamicFormRenderer v-model="form.jobParams" :schema="currentSchema" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -1116,9 +1118,10 @@ function instanceStatusType(status: number): string {
     </el-dialog>
 
     <!-- ═══ 执行日志弹窗 ═══ -->
-    <el-dialog v-model="logDialogVisible"
-               :title="`${t('workspace.executionLogs')} — ${logJobName}`"
-               width="800px">
+    <el-dialog
+      v-model="logDialogVisible"
+      :title="`${t('workspace.executionLogs')} — ${logJobName}`"
+      width="800px">
       <el-table v-loading="logLoading" :data="logData" stripe border size="small">
         <el-table-column prop="fireTime" :label="t('userJobLog.fireTime')" width="170" />
         <el-table-column prop="executeTimeMs" :label="t('userJobLog.executeTimeMs')" width="130" align="right" />
@@ -1132,11 +1135,12 @@ function instanceStatusType(status: number): string {
         <el-table-column prop="resultMessage" :label="t('userJobLog.resultMessage')" show-overflow-tooltip min-width="180" />
         <el-table-column prop="errorMessage" :label="t('userJobLog.errorMessage')" show-overflow-tooltip />
       </el-table>
-      <el-pagination v-model:current-page="logPage" v-model:page-size="logPageSize" class="pagination"
-                     :page-sizes="[5, 10, 20, 50, 100]" :total="logTotal"
-                     layout="total, sizes, prev, pager, next"
-                     @current-change="handleLogPageChange"
-                     @size-change="logPage = 1; handleLogPageChange(1)" />
+      <el-pagination
+        v-model:current-page="logPage" v-model:page-size="logPageSize" class="pagination"
+        :page-sizes="[5, 10, 20, 50, 100]" :total="logTotal"
+        layout="total, sizes, prev, pager, next"
+        @current-change="handleLogPageChange"
+        @size-change="logPage = 1; handleLogPageChange(1)" />
     </el-dialog>
   </div>
 </template>

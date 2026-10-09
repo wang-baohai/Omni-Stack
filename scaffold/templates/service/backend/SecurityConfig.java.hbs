@@ -1,0 +1,98 @@
+package {{javaPackage}}.config;
+
+import com.omni.common.service.identity.GatewayPreAuthenticationFilter;
+import com.omni.common.service.identity.ServiceIdentityFilter;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+
+/**
+ * {{displayName}}无状态预认证安全配置。
+ *
+ * <p>由 @omni-stack/cli {{generatorVersion}} 生成，模板版本 {{templateVersion}}。</p>
+ *
+ * @author Omni-Stack Team
+ */
+@Configuration
+@EnableMethodSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    /** 断言密钥最小长度（UTF-8 字节），与网关 AuthFilter 同标准，低于此强度视为弱密钥。 */
+    private static final int MIN_ASSERTION_SECRET_BYTES = 32;
+
+    private final GatewayPreAuthenticationFilter gatewayPreAuthenticationFilter;
+    private final ServiceIdentityFilter serviceIdentityFilter;
+
+    /**
+     * Gateway 签名断言共享密钥。
+     *
+     * <p>优先取配置项 {@code omni.gateway.assertion-secret}，未配置时回退环境变量
+     * {@code GATEWAY_ASSERTION_SECRET}；两处都未提供时本服务启动失败（fail-closed），
+     * 绝不在无密钥状态下退回信任可伪造明文身份头的过渡模式。</p>
+     */
+    @Value("${omni.gateway.assertion-secret:#{systemEnvironment['GATEWAY_ASSERTION_SECRET'] ?: ''}}")
+    private String gatewayAssertionSecret;
+
+    /**
+     * 启动时强制要求断言密钥并注入共享过滤器。
+     *
+     * @throws IllegalStateException 密钥未配置时拒绝启动
+     */
+    @PostConstruct
+    public void requireGatewayAssertionSecret() {
+        if (gatewayAssertionSecret == null || gatewayAssertionSecret.isBlank()) {
+            throw new IllegalStateException(
+                    "网关断言密钥未配置：请设置环境变量 GATEWAY_ASSERTION_SECRET（或 omni.gateway.assertion-secret）。"
+                            + "本服务 fail-closed，拒绝以可伪造的 X-Gateway-Forwarded/X-User-* 明文头信任身份。");
+        }
+        if (gatewayAssertionSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8).length < MIN_ASSERTION_SECRET_BYTES) {
+            throw new IllegalStateException(
+                    "网关断言密钥强度不足（需至少 " + MIN_ASSERTION_SECRET_BYTES + " UTF-8 字节），与网关签发端同标准，拒绝启动。");
+        }
+        gatewayPreAuthenticationFilter.setAssertionSecret(gatewayAssertionSecret);
+    }
+
+    /**
+     * 构建安全过滤器链。
+     *
+     * @param http 安全构建器
+     * @return 安全过滤器链
+     * @throws Exception 配置异常
+     */
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/error", "/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
+                        .requestMatchers("/api/internal/**").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, exception) ->
+                                writeError(response, 401, "未认证"))
+                        .accessDeniedHandler((request, response, exception) ->
+                                writeError(response, 403, "权限不足，拒绝访问")));
+        http.addFilterBefore(gatewayPreAuthenticationFilter, AuthorizationFilter.class);
+        http.addFilterAfter(serviceIdentityFilter, GatewayPreAuthenticationFilter.class);
+        return http.build();
+    }
+
+    private void writeError(HttpServletResponse response, int code, String message) throws java.io.IOException {
+        response.setStatus(code);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"code\":" + code + ",\"message\":\"" + message
+                + "\",\"data\":null}");
+    }
+}

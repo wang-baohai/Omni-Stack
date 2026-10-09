@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { EvaluationDimension, EvaluationItemInput } from '@/api/srm-evaluation'
 
 const props = defineProps<{ dimensions: EvaluationDimension[] }>()
+const { t } = useI18n()
 const emit = defineEmits<{ (e: 'update:items', value: EvaluationItemInput[]): void }>()
 
 const scores = reactive<Array<{ score: number; remark: string }>>(
@@ -36,10 +38,10 @@ const computedTotal = computed(() => {
 
 const levelLabel = computed(() => {
   const s = Number(computedTotal.value)
-  if (s >= 90) return '战略级 STRATEGIC'
-  if (s >= 75) return '优选级 PREFERRED'
-  if (s >= 60) return '合格级 QUALIFIED'
-  return '淘汰级 ELIMINATED'
+  if (s >= 90) return t('srmEvaluationCommon.strategic')
+  if (s >= 75) return t('srmEvaluationCommon.preferred')
+  if (s >= 60) return t('srmEvaluationCommon.qualified')
+  return t('srmEvaluationCommon.eliminated')
 })
 
 const levelTagType = computed(() => {
@@ -56,18 +58,18 @@ const levelTagType = computed(() => {
     <div v-for="(dim, index) in dimensions" :key="dim.id" class="score-item">
       <div class="score-item__header">
         <span class="score-item__name">{{ dim.indicatorName }}</span>
-        <el-tag size="small" type="info">权重 {{ dim.weight }}%</el-tag>
+        <el-tag size="small" type="info">{{ t('srmEvaluationCommon.weight', { value: dim.weight }) }}</el-tag>
       </div>
       <div class="score-item__body">
         <el-rate
           v-model="scores[index].score"
           :max="5"
           show-score
-          :texts="['差', '较差', '一般', '良好', '优秀']"
+          :texts="[t('srmEvaluationCommon.bad'), t('srmEvaluationCommon.poor'), t('srmEvaluationCommon.average'), t('srmEvaluationCommon.good'), t('srmEvaluationCommon.excellent')]"
         />
         <el-input
           v-model="scores[index].remark"
-          placeholder="备注（可选）"
+          :placeholder="t('srmEvaluationCommon.remarkOptional')"
           maxlength="500"
           show-word-limit
           size="small"
@@ -76,7 +78,7 @@ const levelTagType = computed(() => {
       </div>
     </div>
     <div class="scorecard-summary">
-      <span>加权总分：</span>
+      <span>{{ t('srmEvaluationCommon.weightedTotal') }}</span>
       <span class="scorecard-summary__total">{{ computedTotal }}</span>
       <el-tag :type="levelTagType" class="scorecard-summary__level">{{ levelLabel }}</el-tag>
     </div>

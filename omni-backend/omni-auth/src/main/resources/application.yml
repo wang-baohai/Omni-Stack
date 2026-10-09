@@ -8,7 +8,31 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus,metrics
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.0}
+    export:
+      otlp:
+        enabled: ${OTLP_EXPORT_ENABLED:false}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+    tags:
+      service.name: ${spring.application.name}
+      environment: ${OMNI_ENVIRONMENT:local}
+      instance: ${HOSTNAME:local}
 
 spring:
   application:
@@ -20,7 +44,7 @@ spring:
       - optional:nacos:omni-auth.yml
   cloud:
     function:
-      definition: portalRoleAssignFunction
+      definition: portalRoleAssignFunction;tenantProvisionResultFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
@@ -46,11 +70,24 @@ spring:
         authPortalRoleResult-out-0:
           destination: auth-portal-role-result
           content-type: application/json
+        tenantProvisionRequested-out-0:
+          destination: tenant-provisioning
+          content-type: application/json
+        tenantProvisionResultFunction-in-0:
+          destination: tenant-provision-result
+          content-type: application/json
+          group: auth-tenant-provision-result-group
   datasource:
-    url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    # RF04/RF07 FC02 修复：MySQL Connector/J 的 connectTimeout/socketTimeout 默认均为 0（无限）。
+    # DB 被暂停/网络黑丢时，已建立的 TCP 连接不会报错，策略读取会无限挂起，
+    # “fail-closed”无法在合理时间内体现（实测表现为测试侧 40s API 超时）。
+    # 显式限定连接/读超时 + Hikari 取连接超时，使 DB 故障快速失败而非无限阻塞（15s 对认证类短查询宽裕）。
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_auth?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&connectTimeout=5000&socketTimeout=15000
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 8000
   data:
     redis:
       host: 127.0.0.1

@@ -1,8 +1,11 @@
 package com.omni.srm.consumer;
 
+import com.omni.srm.security.SrmPortalScope;
 import com.omni.srm.dto.PortalRoleResultEvent;
-import com.omni.srm.security.SrmDataScopeContext;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
+import com.omni.common.service.observability.InboxMetrics;
 import com.omni.srm.service.PortalRoleResultService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,16 +43,20 @@ public class PortalRoleResultConsumer {
                 return;
             }
             PortalRoleResultEvent event = parse(message, eventType);
-            SrmTenantContext.set(new SrmTenantContext.RequestIdentity(
+            ServiceIdentityContext.set(new ServiceRequestIdentity(
                     event.getUserId(), event.getTenantId(), "portal-role-saga"));
             try {
-                SrmDataScopeContext.runAsPortal(() -> {
+                SrmPortalScope.run(() -> {
                     portalRoleResultService.handle(event);
                     return null;
                 });
+                InboxMetrics.record("portal-role-result", "success");
+            } catch (RuntimeException exception) {
+                InboxMetrics.record("portal-role-result", "retry");
+                throw exception;
             } finally {
-                SrmDataScopeContext.clear();
-                SrmTenantContext.clear();
+                ServiceDataScopeContext.clear();
+                ServiceIdentityContext.clear();
             }
         };
     }

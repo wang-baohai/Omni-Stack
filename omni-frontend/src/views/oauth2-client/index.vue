@@ -68,12 +68,12 @@ function handleEdit(client: OAuth2ClientVO) {
 async function handleDelete(client: OAuth2ClientVO) {
   try {
     await ElMessageBox.confirm(
-      `确认删除客户端 "${client.clientName}" (${client.clientId})？`,
-      '确认删除',
+      t('oauth2Client.deleteConfirm', { name: client.clientName, id: client.clientId }),
+      t('oauth2Client.deleteConfirmTitle'),
       { type: 'warning' },
     )
     await deleteOAuth2Client(client.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('oauth2Client.deleteSuccess'))
     loadClients()
   } catch {
     // 用户取消或删除失败
@@ -111,9 +111,9 @@ onMounted(() => {
     </div>
 
     <el-table v-loading="loading" :data="clients" stripe style="width: 100%">
-      <el-table-column prop="clientName" label="客户端名称" min-width="150" />
-      <el-table-column prop="clientId" label="Client ID" min-width="200" show-overflow-tooltip />
-      <el-table-column label="授权类型" min-width="200">
+      <el-table-column prop="clientName" :label="t('oauth2Client.clientName')" min-width="150" />
+      <el-table-column prop="clientId" :label="t('oauth2Client.clientId')" min-width="200" show-overflow-tooltip />
+      <el-table-column :label="t('oauth2Client.grantTypes')" min-width="200">
         <template #default="{ row }">
           <el-tag
             v-for="grant in row.grantTypes"
@@ -125,19 +125,19 @@ onMounted(() => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="回调地址" min-width="200" show-overflow-tooltip>
+      <el-table-column :label="t('oauth2Client.redirectUris')" min-width="200" show-overflow-tooltip>
         <template #default="{ row }">
           {{ row.redirectUris?.join(', ') || '-' }}
         </template>
       </el-table-column>
-      <el-table-column label="PKCE" width="80" align="center">
+      <el-table-column :label="t('oauth2Client.pkce')" width="80" align="center">
         <template #default="{ row }">
           <el-tag :type="row.requireProofKey ? 'success' : 'info'" size="small">
-            {{ row.requireProofKey ? '是' : '否' }}
+            {{ row.requireProofKey ? t('common.yes') : t('common.no') }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column :label="t('common.actions')" width="160" fixed="right">
         <template #default="{ row }">
           <el-button v-permission="'system:oauth2:update'" type="primary" link size="small" @click="handleEdit(row)">
             {{ t('common.edit') }}

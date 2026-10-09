@@ -3,7 +3,7 @@ package com.omni.asset.controller;
 import com.omni.asset.dto.AssetRequests;
 import com.omni.asset.dto.AssetViews;
 import com.omni.asset.entity.AstAsset;
-import com.omni.asset.security.AssetDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.asset.service.AssetService;
 import com.omni.common.core.operlog.OperLog;
 import com.omni.common.core.operlog.OperType;
@@ -46,7 +46,7 @@ public class AssetController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('asset:asset:list')")
-    @AssetDataScope(permissionCode = "asset:asset:list")
+    @ServiceDataScope(permissionCode = "asset:asset:list")
     public R<PageResult<AssetViews.AssetVO>> list(@Valid AssetRequests.AssetQuery query) {
         return R.ok(assetService.page(query));
     }
@@ -59,7 +59,7 @@ public class AssetController {
      */
     @GetMapping("/my")
     @PreAuthorize("hasAuthority('asset:asset:self')")
-    @AssetDataScope(permissionCode = "asset:asset:self")
+    @ServiceDataScope(permissionCode = "asset:asset:self")
     public R<PageResult<AssetViews.AssetVO>> my(@Valid AssetRequests.MyAssetQuery query) {
         return R.ok(assetService.pageMine(query));
     }
@@ -72,7 +72,7 @@ public class AssetController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('asset:asset:list')")
-    @AssetDataScope(permissionCode = "asset:asset:list")
+    @ServiceDataScope(permissionCode = "asset:asset:list")
     public R<AssetViews.AssetVO> get(@PathVariable @Positive Long id) {
         return R.ok(assetService.get(id));
     }
@@ -86,7 +86,7 @@ public class AssetController {
      */
     @GetMapping("/{id}/history")
     @PreAuthorize("hasAuthority('asset:asset:list')")
-    @AssetDataScope(permissionCode = "asset:asset:list")
+    @ServiceDataScope(permissionCode = "asset:asset:list")
     public R<PageResult<AssetViews.HistoryVO>> history(
             @PathVariable @Positive Long id, @Valid AssetRequests.HistoryQuery query) {
         return R.ok(assetService.history(id, query));
@@ -100,7 +100,7 @@ public class AssetController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('asset:asset:create')")
-    @AssetDataScope(permissionCode = "asset:asset:create")
+    @ServiceDataScope(permissionCode = "asset:asset:create")
     @OperLog(module = "资产台账", operType = OperType.CREATE,
             entityClass = AstAsset.class, idExpr = "#result.data.id")
     public R<AssetViews.AssetVO> create(@Valid @RequestBody AssetRequests.CreateAssetRequest request) {
@@ -116,7 +116,7 @@ public class AssetController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('asset:asset:update')")
-    @AssetDataScope(permissionCode = "asset:asset:update")
+    @ServiceDataScope(permissionCode = "asset:asset:update")
     @OperLog(module = "资产台账", operType = OperType.UPDATE,
             entityClass = AstAsset.class, idExpr = "#id")
     public R<AssetViews.AssetVO> update(
@@ -134,7 +134,7 @@ public class AssetController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('asset:asset:delete')")
-    @AssetDataScope(permissionCode = "asset:asset:delete")
+    @ServiceDataScope(permissionCode = "asset:asset:delete")
     @OperLog(module = "资产台账", operType = OperType.DELETE,
             entityClass = AstAsset.class, idExpr = "#id")
     public R<Void> delete(
@@ -153,7 +153,7 @@ public class AssetController {
      */
     @PostMapping("/{id}/allocate")
     @PreAuthorize("hasAuthority('asset:asset:allocate')")
-    @AssetDataScope(permissionCode = "asset:asset:allocate")
+    @ServiceDataScope(permissionCode = "asset:asset:allocate")
     @OperLog(module = "资产台账", operType = OperType.UPDATE,
             entityClass = AstAsset.class, idExpr = "#id")
     public R<AssetViews.AssetVO> allocate(
@@ -171,7 +171,7 @@ public class AssetController {
      */
     @PostMapping("/{id}/accept")
     @PreAuthorize("hasAuthority('asset:asset:accept')")
-    @AssetDataScope(permissionCode = "asset:asset:accept")
+    @ServiceDataScope(permissionCode = "asset:asset:accept")
     @OperLog(module = "资产台账", operType = OperType.UPDATE,
             entityClass = AstAsset.class, idExpr = "#id")
     public R<AssetViews.AssetVO> accept(
@@ -189,7 +189,7 @@ public class AssetController {
      */
     @PostMapping("/{id}/return")
     @PreAuthorize("hasAuthority('asset:asset:return')")
-    @AssetDataScope(permissionCode = "asset:asset:return")
+    @ServiceDataScope(permissionCode = "asset:asset:return")
     @OperLog(module = "资产台账", operType = OperType.UPDATE,
             entityClass = AstAsset.class, idExpr = "#id")
     public R<AssetViews.AssetVO> returnAsset(
@@ -207,7 +207,7 @@ public class AssetController {
      */
     @PostMapping("/{id}/maintenance/start")
     @PreAuthorize("hasAuthority('asset:asset:maintenance')")
-    @AssetDataScope(permissionCode = "asset:asset:maintenance")
+    @ServiceDataScope(permissionCode = "asset:asset:maintenance")
     @OperLog(module = "资产台账", operType = OperType.UPDATE,
             entityClass = AstAsset.class, idExpr = "#id")
     public R<AssetViews.AssetVO> startMaintenance(
@@ -225,7 +225,7 @@ public class AssetController {
      */
     @PostMapping("/{id}/maintenance/complete")
     @PreAuthorize("hasAuthority('asset:asset:maintenance')")
-    @AssetDataScope(permissionCode = "asset:asset:maintenance")
+    @ServiceDataScope(permissionCode = "asset:asset:maintenance")
     @OperLog(module = "资产台账", operType = OperType.UPDATE,
             entityClass = AstAsset.class, idExpr = "#id")
     public R<AssetViews.AssetVO> completeMaintenance(

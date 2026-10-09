@@ -187,10 +187,10 @@ Browser            Frontend               Gateway :8102           Downstream Ser
 
 | Step | File | Logic |
 |------|------|-------|
-| Form UI | `src/views/login/LoginForm.vue` | Element Plus form: username, password, captcha, tenant dropdown |
-| Captcha load | `src/views/login/LoginForm.vue` | `GET /api/auth/captcha` -> display base64 PNG, store captchaKey |
-| Tenant load | `src/views/login/LoginForm.vue` | `GET /api/auth/tenants` -> populate `<el-select>` dropdown |
-| Login submit | `src/views/login/LoginForm.vue` | `handleLogin()`: validate form -> POST `/api/auth/login` |
+| Form UI | `src/components/LoginForm.vue` | Element Plus form: username, password, captcha, tenant dropdown |
+| Captcha load | `src/components/LoginForm.vue` | `GET /api/auth/captcha` -> display base64 PNG, store captchaKey |
+| Tenant load | `src/components/LoginForm.vue` | `GET /api/auth/tenants` -> populate `<el-select>` dropdown |
+| Login submit | `src/components/LoginForm.vue` | `handleLogin()`: validate form -> POST `/api/auth/login` |
 | Token storage | `src/stores/user.ts` | `setToken()` + `setUsername()` persist to `localStorage` |
 | Request auth | `src/api/request.ts` | Axios request interceptor: `Authorization: Bearer <token>` |
 | Vite proxy | `vite.config.ts` | `/api` -> `http://localhost:8102` (Gateway) |
@@ -285,7 +285,7 @@ sequenceDiagram
     B->>F: 1. Click "OAuth2 Login"
     F->>F: 2. Generate PKCE: code_verifier + code_challenge (SHA256)
     F->>F: 3. Store {pkce_verifier, pkce_state} in sessionStorage
-    F->>G: 4. Redirect to /api/oauth2/authorize?response_type=code&client_id=...&code_challenge=...&code_challenge_method=S256
+    F->>G: 4. Redirect to /oauth2/authorize?response_type=code&client_id=...&code_challenge=...&code_challenge_method=S256
     G->>A: 5. Proxy to Auth authorization endpoint
     A-->>B: 6. Login form page (or session-based redirect if already logged in)
     B->>A: 7. Submit credentials (username + password)
@@ -309,9 +309,9 @@ sequenceDiagram
 
 | Step | File | Logic |
 |------|------|-------|
-| PKCE generator | `src/utils/oauth2.ts` | Generates code_verifier (43-128 char random string) + SHA256 code_challenge |
-| PKCE storage | `src/utils/oauth2.ts` | Stores `pkce_verifier` and `pkce_state` in sessionStorage |
-| Authorization redirect | `src/utils/oauth2.ts` | Constructs `/oauth2/authorize` URL with PKCE parameters |
+| PKCE generator | `src/utils/pkce.ts` | Generates code_verifier (43-128 char random string) + SHA256 code_challenge |
+| PKCE storage | `src/components/LoginForm.vue` | Stores `pkce_verifier` and `pkce_state` in sessionStorage |
+| Authorization redirect | `src/api/auth.ts` | `buildAuthorizeUrl()` constructs `/oauth2/authorize` URL with PKCE parameters |
 | Token exchange | `src/api/auth.ts` | POST `/oauth2/token`, sends code_verifier to Auth service for verification |
 | Token storage | `src/stores/user.ts` | Stores access_token + id_token in localStorage |
 | Authorization endpoint | Spring Authorization Server | `/oauth2/authorize` — login form + authorization consent |
@@ -329,7 +329,7 @@ sequenceDiagram
 
 - **Authorization Server**: Spring Authorization Server 7.x configured with RS256 JWK signing
 - **OAuth2 Client**: `omni-spa` client registered (authorization_code + PKCE grant type)
-- **Frontend PKCE Utility**: `src/utils/oauth2.ts` implements verifier/challenge generation and token exchange
+- **Frontend PKCE Utility**: `src/utils/pkce.ts` implements verifier/challenge generation; `src/api/auth.ts` implements `buildAuthorizeUrl()` and `exchangeCodeForToken()` (`/oauth2/token`); `src/components/LoginForm.vue` stores PKCE in sessionStorage
 - **Token Types**: access_token (opaque) + id_token (JWT, containing user information)
 
 ---
@@ -613,7 +613,7 @@ On first third-party login, the system automatically creates a local user:
 5. Password: null (cannot log in via password, social login only)
 6. Status: Enabled (status=1)
 7. Tenant: The tenantId specified at login time
-8. Roles: No default roles (admin must manually assign)
+8. Roles: automatically assigns the current tenant's default `USER` role (`data_scope=SELF`); if the tenant has no USER role or assignment throws, only a warn is logged and creation is not blocked (admin may adjust later)
 ```
 
 ### sys_user_oauth_provider Table Design
@@ -700,7 +700,7 @@ sequenceDiagram
 2. First filter: keep only nodes with `type = DIRECTORY | MENU` (discard BUTTON and API)
 3. Second filter: extract current user's permission set from `SecurityContext` (excluding `ROLE_` prefix)
 4. Recursive filtering: MENU nodes check if `permissionCode` is in the permission set; DIRECTORY nodes first recurse into children, kept only if visible children exist
-5. Falls back to returning all menus when permission info is unavailable
+5. Fails closed when permission info is unavailable: returns an empty permission set (`Set.of()`) and an empty menu; never falls back to all menus
 
 **Frontend button permission control** (`v-permission` directive):
 
@@ -1025,7 +1025,7 @@ Admin (Frontend XSS Protection Configuration Page)
 
 - **Three-Layer Sanitization**: Jackson deserializer + Servlet Filter + Gateway security headers all implemented and auto-configured
 - **Configuration Management**: Global toggle + rule CRUD + single rule toggle — 7 API endpoints fully implemented
-- **Frontend Page**: `System Management → XSS Protection Config` ready, supports paginated rule list, create/edit dialogs, v-permission button authorization
+- **Frontend Page**: `System Management → XSS Protection` ready, supports paginated rule list, create/edit dialogs, v-permission button authorization
 - **Cache Strategy**: Redis cache + write-operation proactive invalidation implemented
 - **Tenant Isolation**: Configuration and rules isolated by `tenant_id`
 
@@ -1243,7 +1243,7 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant S as Scheduler (@Scheduled)
+    participant S as XXL-JOB Scheduler
     participant Arc as OperLogArchiver
     participant M as MySQL
 
@@ -1289,7 +1289,7 @@ sequenceDiagram
 |----------|-------|-------|-------------------|----------------|
 | Operation Log | `sys_oper_log` / `sys_oper_log_archive` | Business data changes (CRUD) | `@OperLog` + AOP + MQ async | omni-base / omni-common-operlog |
 | Audit Log | `sys_audit_log` | Security events (login, token, permission changes) | Event-driven (`AuditEventPublisher`) | omni-auth |
-| Login Log | `sys_login_log` | Login activity (success/failure) | Recorded within authentication flow | omni-auth |
+| Login records | `sys_audit_log` (read-only projection of `LOGIN_SUCCESS`/`LOGIN_FAILED`) | Login activity (success/failure) | Recorded within authentication flow | omni-auth |
 
 These three log types each serve their purpose, together forming a complete audit trail system: operation logs record "how business data changed", audit logs record "what security events occurred", and login logs record "who logged in and when".
 
@@ -1300,7 +1300,7 @@ These three log types each serve their purpose, together forming a complete audi
 - **SpEL Extraction**: Supports expressions like `#id`, `#result.data.id` to extract entity IDs from method parameters and return values
 - **MQ Async**: `OperLogProducer` sends asynchronously via RocketMQ, non-blocking to business requests
 - **Hot/Cold Archiving**: `OperLogArchiver` runs daily at 02:00, 180-day retention policy, batch processing 1000 records/batch
-- **omni-auth Disabled**: The authentication module does not include `omni-common-operlog`; authentication behavior is covered by `sys_login_log` + `sys_audit_log`
+- **omni-auth Disabled**: The authentication module does not include `omni-common-operlog`; authentication behavior is covered by `sys_audit_log` security-audit events (the "Login Records" page is a read-only projection of its login events) — there is no separate `sys_login_log` table
 
 ---
 
@@ -1507,6 +1507,100 @@ When `XxlJobAdminClient.addJob()` registers a task, the `executorParam` field co
 
 ---
 
+## Flow 13: CRM Idempotent Lead Conversion — Customer + Contact + Opportunity + Outbox
+
+### Overview
+
+A salesperson converts a `QUALIFIED` lead into a customer, optionally creating or linking a customer/contact, and can create an opportunity at the same time. The conversion completes in a single-database transaction within `omni_crm`; a lead may produce only one `crm_lead_conversion`, and a duplicate request directly returns the already-generated object IDs. Cross-service calls are used only for pre-transaction data-scope and owner authoritative validation; no real MQ is sent inside the transaction — only the local Outbox is written.
+
+### Sequence
+
+```mermaid
+sequenceDiagram
+    participant F as Frontend CRM
+    participant G as Gateway :8102
+    participant C as CRM :8104
+    participant A as Auth :8100
+    participant DB as omni_crm
+    participant MQ as Outbox Relay
+
+    F->>G: POST /api/crm/lead/{id}/convert + JWT + version
+    G->>G: Verify JWT/blacklist, override X-User-* and X-Tenant-Id
+    G->>C: Forward request + X-Gateway-Forwarded
+    C->>C: GatewayPreAuthenticationFilter (common-service identity) + TenantLine(CrmTenantTablePolicy)
+    C->>C: @PreAuthorize(crm:lead:convert)
+    C->>A: GET /internal/data-scopes/{userId}?tenantId&permissionCode=crm:lead:convert
+    A-->>C: permission-aware scope
+    C->>C: Bind ServiceDataScopeContext (cleared in finally)
+    C->>DB: SELECT lead FOR UPDATE (TenantLine + DataPermission)
+    C->>DB: SELECT conversion WHERE lead_id=?
+    alt Already converted
+        DB-->>C: customer/contact/opportunity IDs
+        C-->>F: Original result (idempotent replay)
+    else First conversion
+        C->>DB: INSERT/validate customer
+        C->>DB: Clear original primary contact and INSERT/validate contact
+        opt Create opportunity
+            C->>DB: INSERT opportunity
+            C->>DB: INSERT opportunity_stage_history(reason=CREATE)
+        end
+        C->>DB: INSERT crm_lead_conversion (unique tenant_id + lead_id)
+        C->>DB: UPDATE lead status=CONVERTED + version
+        C->>DB: UPDATE lead activities root/owner snapshot
+        C->>DB: INSERT sys_mq_message(crm.lead.converted.v1)
+        C->>DB: COMMIT
+        MQ->>DB: Async scan PENDING
+        MQ-->>MQ: At-least-once delivery, exponential backoff on failure
+        C-->>F: ConversionResultVO
+    end
+```
+
+### Consistency Boundaries
+
+- `crm_lead_conversion(tenant_id, lead_id)` is the conversion idempotency fact; the Service's row lock and optimistic version together handle concurrency.
+- Customer, Contact, Opportunity, initial Stage History, Lead status and Outbox must commit or roll back together.
+- All newly created objects inherit the current lead's owner snapshot; the target user/org come from the Auth authoritative API — the frontend ownerUnitId must not be trusted.
+- The Outbox payload contains only tenantId, aggregate IDs, status, version and event ID — no phone, email, address or remark.
+- `@OperLog` recursively desensitizes parameters and snapshots before the request leaves the process; the conversion command explicitly excludes customer, contact and opportunity names.
+
+---
+
+## Flow 14: CRM Opportunity Advancement and Permission Isolation — Stage History + Customer Activation
+
+### Overview
+
+An opportunity stage change is not a generic update but a dedicated command. Each request resolves the data scope from Auth using the full permission code `crm:opportunity:stage`, then is jointly constrained by CRM's TenantLine, DataPermission and optimistic lock; a legal transition writes immutable stage history and a domain Outbox. On a win, CRM activates the associated potential customer using dedicated SQL that keeps TenantLine and ignores only DataPermission, avoiding a silent missed update when the Customer and Opportunity owners differ.
+
+### State Advancement
+
+```mermaid
+flowchart LR
+    O["OPEN stage"] -->|"crm:opportunity:stage"| N["Next OPEN stage"]
+    O -->|"target stageType=WON"| W["WON"]
+    O -->|"target stageType=LOST + lossReason"| L["LOST"]
+    W -->|"crm:opportunity:reopen"| R["Last OPEN stage"]
+    L -->|"crm:opportunity:reopen"| R
+    W --> C["POTENTIAL Customer → ACTIVE"]
+```
+
+### Command Execution Rules
+
+1. The Gateway verifies the JWT and overrides identity headers; CRM rejects business requests without a forwarding marker, userId or tenantId.
+2. `@PreAuthorize` first verifies the functional permission, then `@ServiceDataScope` fetches the scope from Auth with the current command's full permissionCode.
+3. MyBatis always executes `TenantLine → DataPermission → Pagination`; even `ALL` in an ordinary CRM API means only all data of the current tenant.
+4. The Service locks the opportunity and validates the request version, current status, the pipeline the target stage belongs to, and state-machine legality; a no-op to the same stage is rejected directly.
+5. Update the opportunity stage/status/probability/loss reason and version, append `crm_opportunity_stage_history`, then write the `stage-changed/won/lost` Outbox.
+6. The dedicated Mapper that activates the customer on a win bypasses only the owner data permission, not TenantLine, and explicitly validates the customer id, status and `deleted=0`.
+7. Reopen uses `crm:opportunity:reopen`, restores the last open stage and writes `REOPEN` history; the state machine must not be bypassed via an ordinary update.
+
+### PII Return Rules
+
+- Lead, Customer and Contact lists always return masked contact details; full values are returned only with `crm:pii:view`.
+- The content of Activity lists/timelines is always `[REDACTED]`; details remain controlled by `crm:pii:view`.
+- The frontend re-reads details before editing; without PII permission it disables sensitive fields and omits them from the update payload, avoiding overwriting real data with masked text.
+
+---
+
 ## Docker Deployment Flow Configuration Notes
 
 ### OAuth2 Callback URL Configuration
@@ -1558,7 +1652,7 @@ In Docker deployment, the Nginx container serves frontend static files, and the 
 
 ### Inter-Container Gateway Network
 
-In Docker deployment, all containers are in the same `omni-network` Bridge network:
+In Docker deployment, all containers are in the same `omni-stack_default` Bridge network:
 
 ```
 Frontend browser → Host:8100 → Nginx container(:80)
@@ -1616,4 +1710,153 @@ Gateway container(:8080)
 |---------|---------------|------------------------|
 | **Logs not recorded** | RocketMQ not started | Check RocketMQ container status; check `OperLogProducer` logs for send results |
 | **Log delay** | MQ consumption backlog | Check omni-base service consumer logs; check RocketMQ console for consumption progress |
-| **Archiving task not running** | @Scheduled not triggered | Confirm omni-base service has only one instance (to avoid multi-instance duplicate archiving); check archiving records in logs |
+| **Archiving task not running** | XXL-JOB schedule not triggered (`operLogArchiveHandler`, `@XxlJob`+`@SystemJobMeta`) | Confirm the omni-base executor is registered in XXL-JOB and the task is scheduled; with multiple instances the routing strategy must ensure single-instance execution to avoid duplicate archiving; check archiving records in logs |
+
+---
+
+## Flow 15: SRM Supplier Admission Approval
+
+```mermaid
+sequenceDiagram
+    participant U as Admin Console
+    participant S as SRM
+    participant W as Workflow
+    participant M as RocketMQ
+    participant D as SRM Inbox
+
+    U->>S: POST /api/srm/supplier
+    S->>W: Query the published version of category=SRM_SUPPLIER_ONBOARDING for the current tenant
+    S->>S: Save Supplier=PENDING_REVIEW and the Workflow idempotent snapshot
+    S->>W: POST /api/internal/workflow/process/start
+    W-->>S: processInstanceId / idempotentReplay
+    S->>S: Supplier=APPROVING, startStatus=STARTED
+    W->>M: workflow.process.completed.v1 (Outbox)
+    M->>D: eventId Inbox idempotent consumption
+    D->>S: Verify tenant/businessType/businessKey/processInstanceId
+    S->>S: Supplier=APPROVED or REJECTED
+```
+
+Key constraints:
+
+- Users do not select a model version; SRM always auto-resolves the currently published model by `SRM_SUPPLIER_ONBOARDING`.
+- The models required by the default tenant are validated and published by the Workflow startup initializer; Workflow fails to start when they are missing or cannot be published.
+- When the start outcome is uncertain, the original `requestId/businessKey/modelVersionId/startUser` is retained and only idempotent retries are allowed.
+- Approval completion is written back by reliable events; duplicate, out-of-order, cross-tenant or instance-mismatched events must not change the supplier status.
+
+### Flow 15.1: Requisition Approval Rule Configuration and Match Simulation
+
+```mermaid
+sequenceDiagram
+    participant U as Procurement Manager
+    participant P as Procurement
+    participant W as Workflow
+
+    U->>P: Open the requisition approval rule page
+    P->>W: Query the currently published version of category=purchase
+    W-->>P: Process name, version and safe approval diagram
+    P-->>U: Show process options, coverage risk and the business-friendly rule list
+    U->>P: Save rule name, category, amount range and process option
+    P->>W: Batch-validate that modelVersionId is still the current purchase published version
+    P->>P: Validate conflicts under a row lock, generate APR-{ULID} and priority
+    P-->>U: Return readable rules without exposing editable technical IDs
+    U->>P: Enter category and amount for a match simulation
+    P->>P: Call ApprovalRouteResolver.evaluate shared with requisition submission
+    P-->>U: Unique hit, no match, conflict or process unavailable, plus the safe approval diagram
+```
+
+The rule list resolves the current page's model versions in batch through Workflow; per-row calls are forbidden. When Workflow is temporarily unavailable, the read-only list keeps the local rules and marks them `UNAVAILABLE`, while create, update and requisition submission fail closed. The impact analysis before disabling or deleting excludes the target rule in memory only and does not modify the database; the coverage algorithm computes gaps and conflicts from 0 to infinity by "exact category first, default rule fills the gaps".
+
+## Flow 16: Procurement Requisition Approval and Async Write-Back
+
+```mermaid
+sequenceDiagram
+    participant U as Procurement User
+    participant P as Procurement
+    participant W as Workflow
+    participant O as Workflow Outbox
+    participant M as RocketMQ
+    participant I as Procurement Inbox
+
+    U->>P: Create draft and submit
+    P->>P: Re-check material/category, recompute decimal amounts, select approval route
+    P->>P: Save approvalAttempt + idempotent start snapshot
+    P->>W: Start process with tenant + businessKey={id}:{attempt}
+    W-->>P: processInstanceId
+    W->>O: Approval-completed event
+    O->>M: Reliable relay
+    M->>I: eventId Inbox idempotent consumption
+    I->>P: APPROVING → APPROVED/REJECTED
+    P-->>U: Page polls silently every 5 seconds; manual refresh on timeout
+```
+
+An explicitly failed start is recorded as `FAILED` and may be retried by reusing the original snapshot; when the network outcome is uncertain, a second business key must not be created. The page must distinguish "Workflow completed, business status syncing" from the final business status, and must not present a brief delay as a failure.
+
+The RFQ quotation chain treats Procurement's invitation as authoritative and SRM's quotation as authoritative: the Portal reads invitations on demand and submits quotations, SRM writes the quotation and Outbox in the same transaction, and the Procurement Inbox updates the invitation status; before awarding, Procurement re-checks the current quotation version and saves an immutable snapshot, then creates the purchase order.
+
+## Flow 17: Procurement Goods Receipt to Asset Card Creation, Transfer and Disposal
+
+```mermaid
+sequenceDiagram
+    participant P as Procurement
+    participant O as Procurement Outbox
+    participant M as RocketMQ
+    participant A as Asset
+    participant W as Workflow
+
+    P->>P: Confirm goods receipt / quality check passed
+    P->>O: goods-receipt confirmed or quality-passed event
+    O->>M: Reliable relay
+    M->>A: At-least-once delivery
+    A->>A: eventId Inbox + dual idempotency by source line/unit sequence
+    A->>A: Create asset card only for PASS + assetManaged + positive integer quantity
+    A->>P: Historical candidate cursor backfill (compensation path)
+    A->>W: Transfer/disposal auto-resolves model by category and starts idempotently
+    W->>M: workflow.process.completed.v1
+    M->>A: Approval-result Inbox write-back
+    A->>A: Complete operation on approval; restore previousStatus and clear occupancy on rejection/cancellation
+```
+
+The asset page's user, org, supplier, and transfer/disposal asset all use search candidates within the current tenant and data scope; the model version is selected automatically by the server. Transfer and disposal share the atomic `active_operation_type/id` occupancy; any termination path must restore the status and clear the occupancy within the same transaction. Monetary amounts always use decimal strings in JSON.
+
+## Flow 18: SRM Portal Invitation Enrollment and Role Assignment Saga
+
+```mermaid
+sequenceDiagram
+    participant U as Portal User
+    participant G as Gateway
+    participant A as Auth
+    participant S as SRM
+    participant O as SRM Outbox
+    participant M as RocketMQ
+    participant I as Auth Inbox/Outbox
+
+    U->>G: Auth registration (tenant + captcha)
+    G->>A: POST /api/auth/register
+    A-->>U: USER account created
+    U->>G: After login, submit requestId + inviteToken + enterprise info
+    G->>S: POST /api/srm/portal/enroll
+    S->>S: Validate tenant/user, invitation quota, creditCode uniqueness
+    S->>S: Create REGISTERING Supplier and PENDING_ROLE_ASSIGN Enrollment
+    S->>O: Write srm.portal-role.assign-requested.v1 in the same transaction
+    O->>M: Reliable relay
+    M->>A: requestId/tenantId/supplierId/userId/SUPPLIER
+    A->>I: requestId Inbox idempotency + validate user and tenant + assign role
+    A->>I: Write success/failure result Outbox in the same transaction
+    I->>M: Reliable relay
+    M->>S: Auth role-assignment result
+    S->>S: Establish tenant context and consume idempotently by requestId
+    alt Assignment succeeded
+        S->>S: Create PortalUser, Supplier → PENDING_REVIEW, Enrollment → COMPLETED
+    else Assignment failed
+        S->>S: Supplier → REGISTERING_FAILED, Enrollment → ROLE_ASSIGN_FAILED
+    end
+    U->>S: GET /api/srm/portal/enrollment
+    S-->>U: Current Saga status or retryable info
+```
+
+Key constraints:
+
+- USER has only `srm:portal:enroll`; the enterprise profile and evaluation require both the SUPPLIER permission and a valid PortalUser association.
+- The raw inviteToken is never persisted, logged, or sent into MQ; the invitation count is incremented atomically under a version condition.
+- The Portal userId must not be written into internal owner fields; a Portal Supplier may have an empty owner until an internal responsible party is assigned.
+- Both the request and the result use the Transactional Outbox; consumers are idempotent by requestId, and all MQ ThreadLocals are cleared in finally.

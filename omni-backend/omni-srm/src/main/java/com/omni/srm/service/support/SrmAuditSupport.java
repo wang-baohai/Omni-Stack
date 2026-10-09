@@ -1,7 +1,7 @@
 package com.omni.srm.service.support;
 
 import com.omni.common.core.model.BaseEntity;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 
 import java.time.LocalDateTime;
 
@@ -40,8 +40,8 @@ public final class SrmAuditSupport {
     }
 
     private static String operator() {
-        String username = SrmTenantContext.require().username();
+        String username = ServiceIdentityContext.require().username();
         return username == null || username.isBlank()
-                ? String.valueOf(SrmTenantContext.require().userId()) : username;
+                ? String.valueOf(ServiceIdentityContext.require().userId()) : username;
     }
 }

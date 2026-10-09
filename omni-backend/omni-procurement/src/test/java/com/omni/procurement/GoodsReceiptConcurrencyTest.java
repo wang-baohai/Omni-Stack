@@ -17,8 +17,9 @@ import com.omni.procurement.mapper.ProcGoodsReceiptMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.impl.GoodsReceiptServiceImpl;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -102,17 +103,17 @@ class GoodsReceiptConcurrencyTest {
                 receiptMapper, receiptLineMapper, orderMapper,
                 orderLineMapper, materialMapper, reliableMessageRelay,
                 new ProcRecordAccessGuard());
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 USER_ID, TENANT_ID, "receiver"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                 USER_ID, UNIT_ID, "procurement:goods-receipt:confirm",
-                UNIT_ID, "ALL", Set.of()));
+                UNIT_ID, "ALL", Set.of(), null));
     }
 
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /**

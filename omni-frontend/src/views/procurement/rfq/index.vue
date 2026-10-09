@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** 采购询价页面，覆盖草稿维护、供应商邀请、发送及状态跟踪。 */
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
@@ -23,6 +24,7 @@ import {
 } from '@/api/procurement-requisition'
 import RfqCompareView from '@/components/procurement/RfqCompareView.vue'
 
+const { t } = useI18n()
 const loading = ref(false)
 const rows = ref<ProcurementRfqSummary[]>([])
 const total = ref(0)
@@ -34,24 +36,19 @@ const query = reactive<{
   deadlineRange: string[]
 }>({ keyword: '', status: undefined, deadlineRange: [] })
 
-const statusOptions: Array<{
-  value: ProcurementRfqStatus
-  label: string
-  type: 'info' | 'primary' | 'warning' | 'success' | 'danger'
-}> = [
-  { value: 'DRAFT', label: '草稿', type: 'info' },
-  { value: 'SENT', label: '报价中', type: 'primary' },
-  { value: 'CLOSED', label: '已截止', type: 'warning' },
-  { value: 'AWARDED', label: '已定标', type: 'success' },
-  { value: 'CANCELLED', label: '已取消', type: 'danger' },
-]
-const statusMap = Object.fromEntries(statusOptions.map((item) => [item.value, item])) as Record<
+const statusMap = computed<Record<
   ProcurementRfqStatus,
-  (typeof statusOptions)[number]
->
+  { label: string; type: 'info' | 'primary' | 'warning' | 'success' | 'danger' }
+>>(() => ({
+  DRAFT: { label: t('procurementRfqPage.statusDraft'), type: 'info' },
+  SENT: { label: t('procurementRfqPage.statusSent'), type: 'primary' },
+  CLOSED: { label: t('procurementRfqPage.statusClosed'), type: 'warning' },
+  AWARDED: { label: t('procurementRfqPage.statusAwarded'), type: 'success' },
+  CANCELLED: { label: t('procurementRfqPage.statusCancelled'), type: 'danger' },
+}))
 
 function statusInfo(status: ProcurementRfqStatus) {
-  return statusMap[status]
+  return statusMap.value[status]
 }
 
 async function loadRows() {
@@ -133,15 +130,15 @@ const form = reactive<{
   supplierIds: number[]
   version?: number
 }>({ title: '', quotationDeadline: '', supplierIds: [] })
-const rules: FormRules = {
-  requisitionId: [{ required: true, message: '请选择已审批请购单', trigger: 'change' }],
+const rules = computed<FormRules>(() => ({
+  requisitionId: [{ required: true, message: t('procurementRfqMessages.requisitionRequired'), trigger: 'change' }],
   title: [
-    { required: true, message: '请输入询价标题', trigger: 'blur' },
-    { max: 200, message: '询价标题不能超过 200 个字符', trigger: 'blur' },
+    { required: true, message: t('procurementRfqMessages.titleRequired'), trigger: 'blur' },
+    { max: 200, message: t('procurementRfqMessages.titleLength'), trigger: 'blur' },
   ],
-  quotationDeadline: [{ required: true, message: '请选择报价截止时间', trigger: 'change' }],
-  supplierIds: [{ required: true, type: 'array', min: 1, message: '请至少选择一个供应商' }],
-}
+  quotationDeadline: [{ required: true, message: t('procurementRfqMessages.deadlineRequired'), trigger: 'change' }],
+  supplierIds: [{ required: true, type: 'array', min: 1, message: t('procurementRfqMessages.supplierRequired') }],
+}))
 
 async function openCreate() {
   editing.value = undefined
@@ -161,7 +158,7 @@ async function onRequisitionChanged() {
   const requisition = selectedRequisition()
   form.supplierIds = []
   supplierOptions.value = []
-  if (requisition && !form.title.trim()) form.title = `${requisition.title}询价`
+  if (requisition && !form.title.trim()) form.title = `${requisition.title}${t('procurementRfqPage.titleSuffix')}`
   if (requisition) await loadSupplierOptions()
 }
 
@@ -233,7 +230,7 @@ async function save() {
   } else {
     await createProcurementRfq({ ...request, requisitionId: form.requisitionId })
   }
-  ElMessage.success('询价单保存成功')
+  ElMessage.success(t('procurementRfqMessages.saveSuccess'))
   dialogVisible.value = false
   await loadRows()
 }
@@ -255,11 +252,13 @@ async function openDetail(row: ProcurementRfqSummary) {
 
 async function remove(row: ProcurementRfqSummary) {
   try {
-    await ElMessageBox.confirm(`确认删除询价单“${row.rfqNo}”？`, '删除确认', {
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      t('procurementRfqMessages.deleteConfirm', { no: row.rfqNo }),
+      t('procurementRfqMessages.deleteTitle'),
+      { type: 'warning' },
+    )
     await deleteProcurementRfq(row.id, row.version)
-    ElMessage.success('询价单已删除')
+    ElMessage.success(t('procurementRfqMessages.deleteSuccess'))
     await loadRows()
   } catch {
     // 用户取消或请求失败时保留当前列表。
@@ -269,12 +268,12 @@ async function remove(row: ProcurementRfqSummary) {
 async function send(row: ProcurementRfqSummary) {
   try {
     await ElMessageBox.confirm(
-      `发送后将锁定询价快照并通知供应商，确认发送“${row.rfqNo}”？`,
-      '发送询价',
+      t('procurementRfqMessages.sendConfirm', { no: row.rfqNo }),
+      t('procurementRfqMessages.sendTitle'),
       { type: 'warning' },
     )
     await sendProcurementRfq(row.id, row.version)
-    ElMessage.success('询价单已发送')
+    ElMessage.success(t('procurementRfqMessages.sendSuccess'))
   } finally {
     await loadRows()
   }
@@ -290,11 +289,13 @@ function openComparison(row: ProcurementRfqSummary) {
 
 async function cancel(row: ProcurementRfqSummary) {
   try {
-    await ElMessageBox.confirm(`确认取消询价单“${row.rfqNo}”？`, '取消确认', {
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      t('procurementRfqMessages.cancelConfirm', { no: row.rfqNo }),
+      t('procurementRfqMessages.cancelTitle'),
+      { type: 'warning' },
+    )
     await cancelProcurementRfq(row.id, row.version)
-    ElMessage.success('询价单已取消')
+    ElMessage.success(t('procurementRfqMessages.cancelSuccess'))
   } finally {
     await loadRows()
   }
@@ -309,67 +310,69 @@ onMounted(loadRows)
       type="info"
       :closable="false"
       show-icon
-      title="询价单从已审批请购生成；发送时会再次校验供应商资格并锁定物料与邀请快照。"
+      :title="t('procurementRfqPage.notice')"
     />
 
     <el-card shadow="never">
       <template #header>
         <div class="card-header">
-          <span>询价管理</span>
+          <span>{{ t('procurementRfqPage.title') }}</span>
           <el-button v-permission="'procurement:rfq:create'" type="primary" @click="openCreate">
-            新建询价
+            {{ t('procurementRfqPage.create') }}
           </el-button>
         </div>
       </template>
 
       <el-form :inline="true" :model="query">
-        <el-form-item label="关键词">
+        <el-form-item :label="t('procurementRfqPage.keyword')">
           <el-input
             v-model="query.keyword"
             clearable
-            placeholder="询价单号或标题"
+            :placeholder="t('procurementRfqPage.keywordPlaceholder')"
             @keyup.enter="search"
           />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="query.status" clearable placeholder="全部" style="width: 130px">
+        <el-form-item :label="t('procurementRfqPage.status')">
+          <el-select v-model="query.status" clearable :placeholder="t('procurementRfqPage.all')" style="width: 130px">
             <el-option
-              v-for="option in statusOptions"
-              :key="option.value"
+              v-for="(option, key) in statusMap"
+              :key="key"
               :label="option.label"
-              :value="option.value"
+              :value="key"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="截止时间">
+        <el-form-item :label="t('procurementRfqPage.deadlineRange')">
           <el-date-picker
             v-model="query.deadlineRange"
             type="datetimerange"
             value-format="YYYY-MM-DD HH:mm:ss"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
+            :start-placeholder="t('procurementRfqPage.startTime')"
+            :end-placeholder="t('procurementRfqPage.endTime')"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="search">查询</el-button>
-          <el-button @click="resetQuery">重置</el-button>
+          <el-button type="primary" @click="search">{{ t('common.search') }}</el-button>
+          <el-button @click="resetQuery">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
       <el-table v-loading="loading" :data="rows" stripe>
-        <el-table-column prop="rfqNo" label="询价单号" min-width="180" />
-        <el-table-column prop="title" label="标题" min-width="220" show-overflow-tooltip />
-        <el-table-column prop="quotationDeadline" label="报价截止时间" min-width="175" />
-        <el-table-column prop="currencyCode" label="币种" width="80" />
-        <el-table-column label="状态" width="100">
+        <el-table-column prop="rfqNo" :label="t('procurementRfqPage.rfqNo')" min-width="180" />
+        <el-table-column prop="title" :label="t('procurementRfqPage.titleColumn')" min-width="220" show-overflow-tooltip />
+        <el-table-column prop="quotationDeadline" :label="t('procurementRfqPage.deadline')" min-width="175" />
+        <el-table-column prop="currencyCode" :label="t('procurementOverviewPage.currency')" width="80" />
+        <el-table-column :label="t('procurementRfqPage.status')" width="100">
           <template #default="{ row }">
             <el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" min-width="175" />
-        <el-table-column label="操作" min-width="300" fixed="right">
+        <el-table-column prop="createTime" :label="t('procurementRequisitionPage.createTime')" min-width="175" />
+        <el-table-column :label="t('common.actions')" min-width="300" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDetail(row)">详情</el-button>
+            <el-button link type="primary" @click="openDetail(row)">
+              {{ t('procurementRequisitionPage.detail') }}
+            </el-button>
             <el-button
               v-if="row.status === 'DRAFT'"
               v-permission="'procurement:rfq:update'"
@@ -377,7 +380,7 @@ onMounted(loadRows)
               type="primary"
               @click="openEdit(row)"
             >
-              编辑
+              {{ t('common.edit') }}
             </el-button>
             <el-button
               v-if="row.status === 'DRAFT'"
@@ -386,7 +389,7 @@ onMounted(loadRows)
               type="success"
               @click="send(row)"
             >
-              发送
+              {{ t('procurementPurchaseOrderPage.send') }}
             </el-button>
             <el-button
               v-if="row.status === 'SENT'"
@@ -395,7 +398,7 @@ onMounted(loadRows)
               type="success"
               @click="openComparison(row)"
             >
-              比价定标
+              {{ t('procurementRfqPage.compareAward') }}
             </el-button>
             <el-button
               v-if="row.status === 'DRAFT'"
@@ -404,7 +407,7 @@ onMounted(loadRows)
               type="danger"
               @click="remove(row)"
             >
-              删除
+              {{ t('common.delete') }}
             </el-button>
             <el-button
               v-if="row.status === 'DRAFT' || row.status === 'SENT'"
@@ -413,7 +416,7 @@ onMounted(loadRows)
               type="danger"
               @click="cancel(row)"
             >
-              取消
+              {{ t('common.cancel') }}
             </el-button>
           </template>
         </el-table-column>
@@ -434,12 +437,12 @@ onMounted(loadRows)
 
     <el-dialog
       v-model="dialogVisible"
-      :title="editing ? '编辑询价单' : '新建询价单'"
+      :title="editing ? t('procurementRfqPage.editTitle') : t('procurementRfqPage.createTitle')"
       width="720px"
       destroy-on-close
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
-        <el-form-item label="来源请购" prop="requisitionId">
+        <el-form-item :label="t('procurementRfqPage.sourceRequisition')" prop="requisitionId">
           <el-select
             v-model="form.requisitionId"
             :disabled="Boolean(editing)"
@@ -447,7 +450,7 @@ onMounted(loadRows)
             remote
             :remote-method="loadRequisitionOptions"
             :loading="requisitionLoading"
-            placeholder="选择已审批请购单"
+            :placeholder="t('procurementRfqPage.requisitionPlaceholder')"
             style="width: 100%"
             @change="onRequisitionChanged"
           >
@@ -459,19 +462,19 @@ onMounted(loadRows)
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="询价标题" prop="title">
+        <el-form-item :label="t('procurementRfqPage.titleField')" prop="title">
           <el-input v-model="form.title" maxlength="200" show-word-limit />
         </el-form-item>
-        <el-form-item label="报价截止" prop="quotationDeadline">
+        <el-form-item :label="t('procurementRfqPage.quotationDeadline')" prop="quotationDeadline">
           <el-date-picker
             v-model="form.quotationDeadline"
             type="datetime"
             value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="选择未来时间"
+            :placeholder="t('procurementRfqPage.futureTimePlaceholder')"
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="受邀供应商" prop="supplierIds">
+        <el-form-item :label="t('procurementRfqPage.invitedSuppliers')" prop="supplierIds">
           <el-select
             v-model="form.supplierIds"
             multiple
@@ -480,7 +483,7 @@ onMounted(loadRows)
             :remote-method="loadSupplierOptions"
             :loading="supplierLoading"
             :disabled="!form.requisitionId"
-            placeholder="选择合格供应商"
+            :placeholder="t('procurementRfqPage.supplierPlaceholder')"
             style="width: 100%"
           >
             <el-option
@@ -490,63 +493,63 @@ onMounted(loadRows)
               :value="item.id"
             >
               <span>{{ item.supplierNo }} · {{ item.name }}</span>
-              <span class="option-extra">{{ item.categoryCode || '未分类' }}</span>
+              <span class="option-extra">{{ item.categoryCode || t('procurementRfqPage.uncategorized') }}</span>
             </el-option>
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="save">保存草稿</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="save">{{ t('procurementRfqPage.saveDraft') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-drawer v-model="detailVisible" title="询价详情" size="72%">
+    <el-drawer v-model="detailVisible" :title="t('procurementRfqPage.detailTitle')" size="72%">
       <div v-loading="detailLoading">
         <el-descriptions v-if="detail" :column="3" border>
-          <el-descriptions-item label="询价单号">{{ detail.rfqNo }}</el-descriptions-item>
-          <el-descriptions-item label="状态">
+          <el-descriptions-item :label="t('procurementRfqPage.rfqNo')">{{ detail.rfqNo }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementRfqPage.status')">
             <el-tag :type="statusInfo(detail.status).type">
               {{ statusInfo(detail.status).label }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="币种">{{ detail.currencyCode }}</el-descriptions-item>
-          <el-descriptions-item label="标题" :span="2">{{ detail.title }}</el-descriptions-item>
-          <el-descriptions-item label="请购 ID">{{ detail.requisitionId }}</el-descriptions-item>
-          <el-descriptions-item label="报价截止">{{ detail.quotationDeadline }}</el-descriptions-item>
-          <el-descriptions-item label="发送时间">{{ detail.sentTime || '—' }}</el-descriptions-item>
-          <el-descriptions-item label="版本">{{ detail.version }}</el-descriptions-item>
-          <el-descriptions-item v-if="detail.awardedQuotationId" label="中标报价">
+          <el-descriptions-item :label="t('procurementOverviewPage.currency')">{{ detail.currencyCode }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementRfqPage.titleColumn')" :span="2">{{ detail.title }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementRfqPage.requisitionId')">{{ detail.requisitionId }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementRfqPage.deadline')">{{ detail.quotationDeadline }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementRfqPage.sentTime')">{{ detail.sentTime || '—' }}</el-descriptions-item>
+          <el-descriptions-item :label="t('procurementRfqPage.version')">{{ detail.version }}</el-descriptions-item>
+          <el-descriptions-item v-if="detail.awardedQuotationId" :label="t('procurementRfqCompare.winningQuotation')">
             #{{ detail.awardedQuotationId }} / v{{ detail.awardedQuotationVersion }}
           </el-descriptions-item>
-          <el-descriptions-item v-if="detail.awardedTime" label="定标时间">
+          <el-descriptions-item v-if="detail.awardedTime" :label="t('procurementRfqPage.awardedTime')">
             {{ detail.awardedTime }}
           </el-descriptions-item>
         </el-descriptions>
 
         <template v-if="detail">
-          <h3>询价明细</h3>
+          <h3>{{ t('procurementRfqPage.linesTitle') }}</h3>
           <el-table :data="detail.lines" border>
-            <el-table-column prop="lineNo" label="行号" width="70" />
-            <el-table-column prop="materialCode" label="物料编码" min-width="140" />
-            <el-table-column prop="materialName" label="物料名称" min-width="180" />
-            <el-table-column prop="categoryCode" label="品类" min-width="120" />
-            <el-table-column prop="quantity" label="数量" min-width="120" align="right" />
-            <el-table-column prop="unit" label="单位" width="90" />
-            <el-table-column prop="remark" label="备注" min-width="160" show-overflow-tooltip />
+            <el-table-column prop="lineNo" :label="t('procurementPurchaseOrderTracker.lineNo')" width="70" />
+            <el-table-column prop="materialCode" :label="t('procurementRequisitionPage.materialCode')" min-width="140" />
+            <el-table-column prop="materialName" :label="t('procurementRequisitionPage.materialName')" min-width="180" />
+            <el-table-column prop="categoryCode" :label="t('procurementRequisitionPage.category')" min-width="120" />
+            <el-table-column prop="quantity" :label="t('procurementRequisitionPage.quantity')" min-width="120" align="right" />
+            <el-table-column prop="unit" :label="t('procurementRequisitionPage.unit')" width="90" />
+            <el-table-column prop="remark" :label="t('procurementGoodsReceiptForm.remark')" min-width="160" show-overflow-tooltip />
           </el-table>
 
-          <h3>供应商邀请</h3>
+          <h3>{{ t('procurementRfqPage.suppliersTitle') }}</h3>
           <el-table :data="detail.suppliers" border>
-            <el-table-column prop="supplierName" label="供应商" min-width="200" />
-            <el-table-column prop="status" label="邀请状态" width="110" />
-            <el-table-column prop="invitedTime" label="邀请时间" min-width="175">
+            <el-table-column prop="supplierName" :label="t('procurementPurchaseOrderTracker.supplier')" min-width="200" />
+            <el-table-column prop="status" :label="t('procurementRfqPage.invitationStatus')" width="110" />
+            <el-table-column prop="invitedTime" :label="t('procurementRfqPage.invitedTime')" min-width="175">
               <template #default="{ row }">{{ row.invitedTime || '—' }}</template>
             </el-table-column>
-            <el-table-column prop="quotationId" label="报价 ID" min-width="110">
+            <el-table-column prop="quotationId" :label="t('procurementRfqPage.quotationId')" min-width="110">
               <template #default="{ row }">{{ row.quotationId || '—' }}</template>
             </el-table-column>
-            <el-table-column prop="quotationVersion" label="报价版本" width="100">
+            <el-table-column prop="quotationVersion" :label="t('procurementRfqPage.quotationVersion')" width="100">
               <template #default="{ row }">{{ row.quotationVersion ?? '—' }}</template>
             </el-table-column>
           </el-table>

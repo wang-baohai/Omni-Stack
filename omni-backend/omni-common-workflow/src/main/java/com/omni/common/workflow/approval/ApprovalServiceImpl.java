@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
+import org.flowable.engine.runtime.Execution;
 import org.flowable.task.api.Task;
 
 import java.util.Map;
@@ -58,17 +59,25 @@ public class ApprovalServiceImpl implements ApprovalService {
         String procInstId = task.getProcessInstanceId();
         runtimeService.setVariable(procInstId, "approved", approved);
 
-        // 递增流程实例级计数器（用于多实例完成条件判断）。
-        // 关键：必须使用 task.getExecutionId()（多实例子执行 ID）而非 procInstId，
-        // 因为 setVariable 会沿执行树向上查找已有变量并就地更新——
-        // approvedCount/rejectedCount 由 CandidateResolverBean 初始化在 MI 根执行上，
-        // completionCondition 也在 MI 根执行上评估。若写入 procInstId（流程实例级），
-        // 会在流程实例层创建独立副本，MI 根执行上的值不变，导致完成条件永远不满足。
+        // 递增审批计数器（用于多实例完成条件判断）。
+        // WP-015 FR04：计数器必须写在**本 MI 活动的根执行本地**。上溯定位成功时
+        // 用 setVariableLocal 精确落在 MI 根；定位失败（非多实例节点或旧定义将变量
+        // 放在流程实例级）时保持原有行为，仍沿执行树就地更新，保证向后兼容。
         String execId = task.getExecutionId();
+        String miRoot = resolveMultiInstanceRoot(procInstId, execId);
+        String scope = miRoot != null ? miRoot : execId;
         String counterKey = approved ? "approvedCount" : "rejectedCount";
-        Object countObj = runtimeService.getVariable(execId, counterKey);
+        Object countObj = runtimeService.getVariableLocal(scope, counterKey);
+        if (countObj == null) {
+            // 兼容：变量不在该作用域本地（例如历史定义写在流程实例级）
+            countObj = runtimeService.getVariable(execId, counterKey);
+        }
         int currentCount = countObj instanceof Number ? ((Number) countObj).intValue() : 0;
-        runtimeService.setVariable(execId, counterKey, currentCount + 1);
+        if (miRoot != null) {
+            runtimeService.setVariableLocal(miRoot, counterKey, currentCount + 1);
+        } else {
+            runtimeService.setVariable(execId, counterKey, currentCount + 1);
+        }
 
         // 附加变量也分别写入
         if (variables != null) {
@@ -87,6 +96,10 @@ public class ApprovalServiceImpl implements ApprovalService {
      * <p>
      * 通过 {@link RuntimeService#addMultiInstanceExecution} 在当前多实例活动中
      * 添加新的执行实例，新审批人会收到一个待办任务。</p>
+     * <p>
+     * WP-015 FR04（Codex RF01）：加签后 **ALL 模式的有效阈值必须随当前应参与人数
+     * 同步**，否则加签人会被完成条件提前跳过。阈值按“已同意 + 仍在待办”重算，
+     * 既不重置已有票数，也不改变已完成的那一票。</p>
      *
      * @param taskId    当前任务 ID
      * @param newUserId 新增审批人用户 ID
@@ -99,8 +112,9 @@ public class ApprovalServiceImpl implements ApprovalService {
         }
 
         String activityId = task.getTaskDefinitionKey();
-        Map<String, Object> variables = Map.of("assignee", newUserId);
+        Map<String, Object> variables = Map.of("userId", newUserId);
         runtimeService.addMultiInstanceExecution(activityId, task.getProcessInstanceId(), variables);
+        refreshRequiredApprovals(task.getProcessInstanceId(), task.getExecutionId(), activityId);
         log.info("加签成功: taskId={}, activityId={}, newUserId={}", taskId, activityId, newUserId);
     }
 
@@ -132,7 +146,71 @@ public class ApprovalServiceImpl implements ApprovalService {
 
         // 通过执行 ID 删除多实例
         runtimeService.deleteMultiInstanceExecution(targetTask.getExecutionId(), false);
+        refreshRequiredApprovals(task.getProcessInstanceId(), task.getExecutionId(), task.getTaskDefinitionKey());
         log.info("减签成功: taskId={}, targetUserId={}, executionId={}", taskId, targetUserId, targetTask.getExecutionId());
+    }
+
+    /**
+     * 重算 ALL 模式下的有效全员阈值：已同意票数 + 本活动仍在待办的任务数。
+     * <p>
+     * ANY 模式阈值恒为 1，不重算；非多实例节点（定位不到 MI 根）也不重算，
+     * 保持原有行为。</p>
+     *
+     * @param processInstanceId 流程实例 ID
+     * @param executionId       发起变动的子执行 ID
+     * @param activityId        多实例活动的任务定义 KEY
+     */
+    private void refreshRequiredApprovals(String processInstanceId, String executionId, String activityId) {
+        String miRoot = resolveMultiInstanceRoot(processInstanceId, executionId);
+        if (miRoot == null) {
+            return;
+        }
+        Object mode = runtimeService.getVariableLocal(miRoot, "approvalMode");
+        if (mode == null) {
+            mode = runtimeService.getVariable(executionId, "approvalMode");
+        }
+        if ("ANY".equals(mode)) {
+            return;
+        }
+        Object approvedObj = runtimeService.getVariableLocal(miRoot, "approvedCount");
+        int approved = approvedObj instanceof Number ? ((Number) approvedObj).intValue() : 0;
+        long pending = taskService.createTaskQuery()
+                .processInstanceId(processInstanceId)
+                .taskDefinitionKey(activityId)
+                .count();
+        int effective = approved + (int) pending;
+        runtimeService.setVariableLocal(miRoot, "requiredApprovals", effective);
+        log.info("重算 ALL 阈值: miRoot={}, activityId={}, approved={}, pending={}, requiredApprovals={}",
+                miRoot, activityId, approved, pending, effective);
+    }
+
+    /**
+     * 沿执行树向上定位多实例根执行。
+     * <p>
+     * 以 MI 根本地变量 {@code nrOfInstances} 为识别凭据：Flowable 在多实例根执行上
+     * 以 local 变量维护 {@code nrOfInstances}，而子执行与流程实例根都没有。
+     * 最多上溯 32 层；定位失败返回 {@code null}，调用方保持原有行为。</p>
+     *
+     * @param processInstanceId 流程实例 ID
+     * @param executionId       起始执行 ID（通常为任务所在的子执行）
+     * @return MI 根执行 ID；非多实例时返回 {@code null}
+     */
+    private String resolveMultiInstanceRoot(String processInstanceId, String executionId) {
+        String current = executionId;
+        for (int depth = 0; depth < 32 && current != null; depth++) {
+            if (runtimeService.getVariableLocal(current, "nrOfInstances") instanceof Number) {
+                return current;
+            }
+            if (current.equals(processInstanceId)) {
+                return null;
+            }
+            Execution parentScope = runtimeService.createExecutionQuery().executionId(current).singleResult();
+            if (parentScope == null) {
+                return null;
+            }
+            current = parentScope.getParentId();
+        }
+        return null;
     }
 
     /**

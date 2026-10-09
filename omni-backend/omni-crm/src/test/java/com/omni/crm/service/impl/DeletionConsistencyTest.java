@@ -16,7 +16,8 @@ import com.omni.crm.mapper.CrmOpportunityMapper;
 import com.omni.crm.mapper.CrmOpportunityStageHistoryMapper;
 import com.omni.crm.mapper.CrmOwnerChangeLogMapper;
 import com.omni.crm.mapper.CrmPipelineStageMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.crm.service.CrmTenantInitializer;
 import com.omni.crm.service.support.CrmOwnerEnricher;
 import com.omni.crm.service.support.CrmOwnerResolver;
@@ -73,7 +74,7 @@ class DeletionConsistencyTest {
     /** 清理租户请求上下文。 */
     @AfterEach
     void clear() {
-        CrmTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 删除客户时同步清理联系人、客户活动，并解除保留商机上的联系人引用。 */
@@ -159,6 +160,6 @@ class DeletionConsistencyTest {
     }
 
     private void identity() {
-        CrmTenantContext.set(new CrmTenantContext.RequestIdentity(12L, 3L, "sales"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(12L, 3L, "sales"));
     }
 }

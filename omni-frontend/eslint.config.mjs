@@ -6,7 +6,13 @@ import globals from 'globals'
 
 export default [
   {
-    ignores: ['dist/**', 'dist-ssr/**', 'node_modules/**'],
+    ignores: [
+      'dist/**',
+      'dist-ssr/**',
+      'node_modules/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -54,6 +60,20 @@ export default [
       // General
       'no-console': 'warn',
       'no-debugger': 'warn',
+    },
+  },
+  {
+    // WP-012: Node 端脚本（E2E/辅助 CLI）运行时正确性覆盖。仅收窄到 Node 脚本 glob，
+    // 注入 globals.node 并在该作用域关闭 no-console；不改动上面的全局/浏览器/.vue 块，
+    // 也不影响 src/**。globals 已在文件顶部 import。semi/quotes/indent/comma-dangle 仍生效。
+    files: ['e2e/**/*.mjs', 'scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-console': 'off',
     },
   },
 ]

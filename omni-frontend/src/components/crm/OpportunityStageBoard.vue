@@ -1,8 +1,12 @@
 <script setup lang="ts">
-/** CRM 商机阶段看板；阶段选择只触发受控迁移事件，不直接修改本地权威状态。 */
+/** CRM 商机阶段看板；阶段选择/拖拽均只触发受控迁移事件，不直接修改本地权威状态。 */
+import { ref } from 'vue'
 import type { CrmOpportunity, OpportunityBoard, PipelineStage } from '@/api/crm-opportunity'
+import { useI18n } from 'vue-i18n'
 
-defineProps<{
+const { t, locale } = useI18n()
+
+const props = defineProps<{
   board: OpportunityBoard | null
   loading?: boolean
   canMove?: boolean
@@ -13,14 +17,56 @@ const emit = defineEmits<{
   open: [opportunity: CrmOpportunity]
 }>()
 
+/** 拖拽瞬态视觉状态：仅用于反馈，不作为权威阶段来源；提交/失败后由父级刷新看板恢复。 */
+const draggingId = ref<number | null>(null)
+const dragOverStageId = ref<number | null>(null)
+
 function formatAmount(amount: number, currencyCode = 'CNY') {
-  return new Intl.NumberFormat('zh-CN', { style: 'currency', currency: currencyCode }).format(amount || 0)
+  return new Intl.NumberFormat(locale.value, { style: 'currency', currency: currencyCode }).format(amount || 0)
+}
+
+/** 卡片是否可拖拽：仅开放商机且有迁移权限。 */
+function draggable(o: CrmOpportunity): boolean {
+  return !!props.canMove && o.status === 'OPEN'
+}
+
+function onDragStart(o: CrmOpportunity) {
+  if (!draggable(o)) {
+    return
+  }
+  draggingId.value = o.id
+}
+
+function onDragEnd() {
+  draggingId.value = null
+  dragOverStageId.value = null
+}
+
+function onColumnDragOver(stage: PipelineStage) {
+  dragOverStageId.value = stage.id
+}
+
+/** 落入目标列：复用与下拉相同的受控 move 事件（权限/version/原因/状态限制由父级 stage API 强制）；不本地改权威状态。 */
+function onDrop(stage: PipelineStage) {
+  const id = draggingId.value
+  dragOverStageId.value = null
+  if (!id) {
+    return
+  }
+  const opportunity = props.board?.columns
+    .flatMap((c) => c.opportunities)
+    .find((o) => o.id === id)
+  draggingId.value = null
+  if (!opportunity || !draggable(opportunity) || opportunity.stageId === stage.id) {
+    return
+  }
+  emit('move', opportunity, stage)
 }
 </script>
 
 <template>
   <div v-loading="loading" class="stage-board">
-    <el-empty v-if="!board || board.columns.length === 0" description="暂无商机阶段数据" />
+    <el-empty v-if="!board || board.columns.length === 0" :description="t('crmUi.noOpportunityStages')" />
     <div v-else class="stage-columns">
       <section v-for="column in board.columns" :key="column.stage.id" class="stage-column">
         <header>
@@ -30,16 +76,26 @@ function formatAmount(amount: number, currencyCode = 'CNY') {
           </div>
           <span>{{ formatAmount(column.totalAmount) }}</span>
         </header>
-        <div class="stage-list">
+        <div
+          class="stage-list"
+          :class="{ 'stage-list--over': dragOverStageId === column.stage.id }"
+          @dragover.prevent="canMove && onColumnDragOver(column.stage)"
+          @dragleave="dragOverStageId === column.stage.id && (dragOverStageId = null)"
+          @drop.prevent="onDrop(column.stage)"
+        >
           <el-card
             v-for="opportunity in column.opportunities"
             :key="opportunity.id"
             class="opportunity-card"
+            :class="{ 'opportunity-card--dragging': draggingId === opportunity.id }"
+            :draggable="String(draggable(opportunity))"
             shadow="hover"
+            @dragstart="onDragStart(opportunity)"
+            @dragend="onDragEnd"
             @click="emit('open', opportunity)"
           >
             <strong>{{ opportunity.name }}</strong>
-            <span>{{ opportunity.customerName || `客户 #${opportunity.customerId}` }}</span>
+            <span>{{ opportunity.customerName || t('crmUi.customerNumber', { id: opportunity.customerId }) }}</span>
             <span>{{ formatAmount(opportunity.amount, opportunity.currencyCode) }}</span>
             <el-dropdown
               v-if="canMove && opportunity.status === 'OPEN'"
@@ -48,7 +104,7 @@ function formatAmount(amount: number, currencyCode = 'CNY') {
               @click.stop
             >
               <el-button v-permission="'crm:opportunity:stage'" size="small" text type="primary">
-                迁移阶段
+                {{ t('crmUi.moveStage') }}
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -121,5 +177,15 @@ function formatAmount(amount: number, currencyCode = 'CNY') {
 .opportunity-card span {
   color: var(--el-text-color-secondary);
   font-size: 13px;
+}
+
+.opportunity-card--dragging {
+  opacity: 0.5;
+}
+
+.stage-list--over {
+  outline: 2px dashed var(--el-color-primary);
+  outline-offset: 4px;
+  border-radius: 8px;
 }
 </style>

@@ -1,7 +1,16 @@
 # Docker Full-Stack Deployment Deep Guide
 
+The standard environment uses project `omni-stack` and network `omni-stack_default`. MySQL, Redis and the RocketMQ Broker use named volumes `omni-stack_omni-mysql-data`, `omni-stack_omni-redis-data` and `omni-stack_omni-rocketmq-data`. Broker data is preserved across container recreation. `docker/rocketmq/Dockerfile` prepares its data directory for uid 3000 using official version 5.3.2. Asset transfer and disposal approvals require an `ASSET_MANAGER` role assignment and organizational candidate scope; the seed does not assign this approval duty to the demo administrator.
+
 > This document is the complete technical reference for Omni-Stack Docker deployment. It covers architecture design, build principles, configuration details, operations, and troubleshooting.  
 > For quick start, refer to the Docker One-Click Deployment section in [README.en.md](../README.en.md).
+
+
+The standard local project is `omni-stack`, its default network is `omni-stack_default`, and its MySQL volume is `omni-stack_omni-mysql-data`. Run every application and business verification in local Docker. Edit source on the host and rebuild through Compose. Keep the default ports fixed; identify and resolve conflicts instead of shifting ports.
+
+The XXL-JOB login account is fixed as `admin`. On first initialization the migrator replaces the public seed password with the SHA-256 of `XXL_JOB_ADMIN_PASSWORD` from `.env`; every executor uses these credentials. Migration replay preserves modified passwords. Changing an existing administrator password requires updating both `.env` and the database account.
+
+Nacos server authentication is enabled. Its console and registry/config clients share `NACOS_USERNAME=nacos` and `NACOS_PASSWORD` from `.env`. The migrator replaces the public seed BCrypt password only on first bootstrap and preserves modified accounts on replay. `NACOS_AUTH_TOKEN` and `NACOS_AUTH_IDENTITY_KEY/VALUE` are server signing and node identity secrets, not console login credentials.
 
 ---
 
@@ -11,12 +20,12 @@
 - [2. Container Network Topology](#2-container-network-topology)
 - [3. Startup Chain & Health Checks](#3-startup-chain--health-checks)
 - [4. Multi-Stage Build Principles](#4-multi-stage-build-principles)
-- [5. docker-compose.yml Service-by-Service Breakdown](#5-docker-composeyml-service-by-service-breakdown)
+- [5. compose.yaml Service-by-Service Breakdown](#5-composeyaml-service-by-service-breakdown)
 - [6. Environment Variable Override Mechanism](#6-environment-variable-override-mechanism)
 - [7. Nginx Reverse Proxy Configuration](#7-nginx-reverse-proxy-configuration)
 - [8. Data Initialization & Persistence](#8-data-initialization--persistence)
 - [9. Docker Registry Mirror Configuration](#9-docker-registry-mirror-configuration)
-- [10. Windows Hyper-V/WSL2 Port Reservation Issues](#10-windows-hyper-vws12-port-reservation-issues)
+- [10. Windows Hyper-V/WSL2 Port Reservation Issues](#10-windows-hyper-vwsl2-port-reservation-issues)
 - [11. Nacos v3.1.1 Health Check Endpoint Changes](#11-nacos-v311-health-check-endpoint-changes)
 - [12. RocketMQ Broker Docker Network Configuration](#12-rocketmq-broker-docker-network-configuration)
 - [13. Scaling Guide](#13-scaling-guide)
@@ -28,7 +37,7 @@
 
 ## 1. Architecture Overview
 
-The Omni-Stack Docker full-stack contains **15 containers** organized in three layers:
+The Omni-Stack Docker full-stack contains **15 persistent containers and 1 one-shot migration container** organized in three layers:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -52,19 +61,18 @@ The Omni-Stack Docker full-stack contains **15 containers** organized in three l
 
 **Design Principles**:
 - All backend microservice containers use internal port **8080**, differentiated via host port mapping
-- Inter-container communication uses **Docker internal network** (`omni-network`) with container name resolution
+- Inter-container communication uses **Docker internal network** (`omni-stack_default`) with container name resolution
 - Frontend Nginx serves both static files and API reverse proxy — users only access one port (3000)
 
 ---
 
 ## 2. Container Network Topology
 
-All containers share a Docker Bridge network `omni-network`:
+All containers share a Docker Bridge network `omni-stack_default`:
 
 ```yaml
-networks:
-  omni-network:
-    driver: bridge
+name: omni-stack
+# Compose 自动创建 omni-stack_default
 ```
 
 **Network Communication Rules**:
@@ -78,10 +86,24 @@ networks:
 | omni-auth | nacos | `nacos:8848` | Service registry/config |
 | omni-base | rocketmq-namesrv | `rocketmq-namesrv:9876` | MQ message sending |
 | omni-base | xxl-job-admin | `xxl-job-admin:8080` | Job executor registration |
+| omni-crm | omni-auth | `omni-auth:8080` | User, organization, data-scope and XSS internal queries |
+| omni-crm | rocketmq-namesrv | `rocketmq-namesrv:9876` | CRM Outbox message delivery |
+| omni-crm | xxl-job-admin | `xxl-job-admin:8080` | CRM relay executor registration |
+| omni-srm | mysql | `mysql:3306` | SRM business database and local Outbox |
+| omni-srm | omni-auth | `omni-auth:8080` | User/organization internal queries and Portal Saga |
+| omni-procurement | omni-srm | `omni-srm:8080` | Supplier invitation, quotation and award validation |
+| omni-procurement | omni-workflow | `omni-workflow:8080` | Requisition approval internal contract |
+| omni-asset | omni-procurement | `omni-procurement:8080` | Goods-receipt asset-candidate historical compensation |
+| omni-asset | omni-workflow | `omni-workflow:8080` | Transfer and disposal approval internal contract |
 | Host Browser | omni-frontend | `localhost:3000` | User access entry point |
 | Host Browser | Nacos Console | `localhost:8080` | Operations management |
 
-> **Key Distinction**: Inter-container communication uses internal ports (e.g., 8080), while host access uses mapped ports (e.g., 8100/8101/8102/8103).
+> **Key Distinction**: Inter-container communication uses internal container ports (e.g., 8080), while host access uses mapped ports (e.g., 8100-8107); MySQL always uses 3306 inside the container and maps to 3306 on the host.
+
+> **Production network boundary**: The repository-root `compose.yaml` and its include files are local development/integration orchestration. Frontend 3000 and Gateway 8102
+> are host-accessible; all other services, middleware and management consoles bind only to `127.0.0.1` as diagnostic entries. Production deployment must publish only the
+> Frontend/Gateway HTTPS entries and remove all diagnostic port mappings; the downstream `X-Gateway-Forwarded` is only a forwarding marker and cannot replace a private
+> network and inter-service tokens.
 
 ---
 
@@ -89,18 +111,13 @@ networks:
 
 ### 3.1 Layered Startup Order
 
-Containers are organized into 5 layers using `depends_on` + `condition: service_healthy` for ordered startup:
+These are the dependencies actually declared in Compose. Wait for application health checks after startup. Successful migrator exit is expected.
 
-```
-Layer 0:  mysql · redis · rocketmq-namesrv          (no dependencies, start first)
-            │         │          │
-Layer 1:  nacos     xxl-job   rocketmq-broker        (depend on Layer 0)
-            │         │          │
-Layer 2:  omni-auth                                  (depends on nacos + redis + mysql)
-            │
-Layer 3:  omni-base · omni-workflow · omni-gateway   (depend on Layer 1 + Layer 2)
-                                                │
-Layer 4:  omni-frontend                           (depends on omni-gateway)
+```text
+mysql healthy -> omni-db-migrator exit 0 -> nacos / xxl-job-admin / applications
+redis healthy ---------------------------------------------> applications
+rocketmq-namesrv healthy -> rocketmq-broker healthy
+all downstream applications healthy -> omni-gateway -> omni-frontend
 ```
 
 ### 3.2 Health Check Configuration Overview
@@ -117,6 +134,12 @@ Layer 4:  omni-frontend                           (depends on omni-gateway)
 | omni-base | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 | omni-gateway | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
 | omni-workflow | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-crm | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-srm | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-procurement | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+| omni-asset | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+
+> Note: the omni-* `HEALTHCHECK` is actually `curl http://localhost:${MANAGEMENT_SERVER_PORT:-8080}/actuator/health`. Under Compose each service sets `MANAGEMENT_SERVER_PORT` to `19900`–`19907`, so the probe targets the in-container management port (the `8080` in the table is the Dockerfile fallback default when not overridden); the management port is not published to the host, so do not access `localhost:8080/actuator/health` from the host (it returns 404).
 
 > **Why start_period = 90s?**  
 > Spring Boot microservices need to load many beans + initialize databases + register with Nacos on cold start, which may take 60-80 seconds. Setting 90s prevents false unhealthy status.
@@ -130,39 +153,26 @@ Layer 4:  omni-frontend                           (depends on omni-gateway)
 All backend microservices share a single Dockerfile (`docker/backend/Dockerfile`), differentiated by the `SERVICE_NAME` build argument:
 
 ```dockerfile
-# Stage 1: Build
 FROM maven:3.9-eclipse-temurin-25-alpine AS build
-COPY docker-settings.xml /root/.m2/settings.xml   # Aliyun Maven mirror
+COPY omni-backend/docker-settings.xml /build/docker-settings.xml
 WORKDIR /build
-
-# Copy POM files first (leverage Docker layer caching)
-COPY mvnw pom.xml ./
-COPY omni-common-core/pom.xml omni-common-core/
-COPY omni-common/pom.xml omni-common/
-# ... other module POMs ...
-RUN mvn dependency:go-offline -B -q || true
-
-# Copy source and build the specified service
-COPY . .
-ARG SERVICE_NAME
-RUN mvn package -pl ${SERVICE_NAME} -am -DskipTests -B -q
-
-# Stage 2: Runtime
+COPY omni-backend/ .
+COPY scaffold/ /scaffold/
+COPY database/seed/ /database/seed/
+RUN --mount=type=cache,id=omni-maven-repository,target=/root/.m2,sharing=locked \
+    sh ./mvnw -s docker-settings.xml package -pl '!omni-db-migrator' -B -q
 FROM eclipse-temurin:25-jre-alpine
-RUN apk add --no-cache curl bash
 ARG SERVICE_NAME
 COPY --from=build /build/${SERVICE_NAME}/target/*.jar /app/app.jar
 ENV SERVER_PORT=8080
-EXPOSE 8080
-HEALTHCHECK ...
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "--enable-native-access=ALL-UNNAMED", "-jar", "/app/app.jar"]
 ```
 
 **Layer Caching Optimization Strategy**:
 
 1. **POM layer caching**: Copy all `pom.xml` files and run `dependency:go-offline` first — as long as POMs don't change, subsequent builds reuse the cached layer and skip dependency downloads
 2. **Source isolation**: `COPY . .` only triggers a rebuild when source code changes (POM cache still valid)
-3. **Single-service build**: `mvn package -pl ${SERVICE_NAME} -am` only builds the target service and its dependencies, avoiding full compilation
+3. **Full-reactor build + final jar selection**: the publish layer `sh ./mvnw -s docker-settings.xml package -pl '!omni-db-migrator'` builds all modules except the migrator in one pass (**tests not skipped**, no `-DskipTests` faking); service images share the same build layer; `SERVICE_NAME` only selects the final jar in Stage 2 via `COPY --from=build .../${SERVICE_NAME}/target/*.jar` and does not control the compile scope
 
 **Image Selection Considerations**:
 
@@ -193,7 +203,7 @@ EXPOSE 3000
 
 ---
 
-## 5. docker-compose.yml Service-by-Service Breakdown
+## 5. compose.yaml Service-by-Service Breakdown
 
 ### 5.1 MySQL 8.4
 
@@ -208,16 +218,14 @@ mysql:
     TZ: Asia/Shanghai                  # Timezone
   volumes:
     - omni-mysql-data:/var/lib/mysql
-  volumes:
-    - ./scripts/sql/init-all.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-    - ./scripts/sql/init-nacos.sql:/docker-entrypoint-initdb.d/02-init-nacos.sql:ro
-    - ./scripts/sql/init-xxl-job.sql:/docker-entrypoint-initdb.d/03-init-xxl-job.sql:ro
 ```
 
 **Key Points**:
-- Three SQL scripts auto-execute in order: `01-init.sql` (business DBs + seed data) → `02-init-nacos.sql` (Nacos config DB) → `03-init-xxl-job.sql` (XXL-JOB DB)
-- Mounted as `:ro` (read-only) to prevent accidental modification
-- MySQL uses the named volume `omni-mysql-data`; normal container recreation preserves data
+- MySQL entrypoint no longer mounts aggregate SQL files; fresh and upgraded environments use the same Liquibase chain
+- The one-shot `omni-db-migrator` creates databases, migrates schema, applies formal seeds, and verifies assertions; Nacos, XXL-JOB, and applications start only after it exits successfully
+- Application services use the least-privileged `omni_app` / `OMNI_DB_PASSWORD` account, not the migration administrator
+- MySQL uses the explicit named volume `omni-stack_omni-mysql-data`; a normal `docker compose down` and container recreation do not delete data, while `docker compose down -v` deletes the volume irreversibly.
+- An existing non-empty database must be backed up before first-time adoption via the `omni-db-migrator adopt-current` structural fingerprint and confirmation gate; running `migrate` directly to bypass adoption is not allowed.
 
 ### 5.2 Redis 7.4
 
@@ -236,6 +244,7 @@ nacos:
     MODE: standalone                      # Single-node mode
     SPRING_DATASOURCE_PLATFORM: mysql     # External MySQL storage (not embedded Derby)
     MYSQL_SERVICE_HOST: mysql             # Points to MySQL container name
+    NACOS_AUTH_ENABLE: "true"
     NACOS_AUTH_TOKEN: ...                 # JWT signing secret (Base64 encoded)
   ports:
     - "8080:8080"                         # Console
@@ -267,7 +276,7 @@ rocketmq-broker:
   command: sh mqbroker -n rocketmq-namesrv:9876 -c ... --enable-proxy
 ```
 
-> **Why port mapping 19876:9876**: Windows Hyper-V/WSL2 reserves port ranges including 9859-9958. Mapping 9876 directly causes conflicts. See [Section 10](#10-windows-hyper-vws12-port-reservation-issues).
+> **Why port mapping 19876:9876**: Windows Hyper-V/WSL2 reserves port ranges including 9859-9958. Mapping 9876 directly causes conflicts. See [Section 10](#10-windows-hyper-vwsl2-port-reservation-issues).
 
 ### 5.5 XXL-JOB Admin v3.3.1
 
@@ -277,16 +286,15 @@ xxl-job-admin:
     PARAMS: >
       --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?...
       --spring.datasource.username=root
-      --spring.datasource.password=${MYSQL_ROOT_PASSWORD}
-      --xxl.job.login.username=${XXL_JOB_ADMIN_USERNAME}
-      --xxl.job.login.password=${XXL_JOB_ADMIN_PASSWORD}
-      --xxl.job.accessToken=${XXL_JOB_ACCESS_TOKEN}
-      --xxl.job.accessToken=           # Empty token (no auth in dev)
+      --spring.datasource.password=${MYSQL_ROOT_PASSWORD:?required in .env}
+      --xxl.job.login.username=${XXL_JOB_ADMIN_USERNAME:?required in .env}
+      --xxl.job.login.password=${XXL_JOB_ADMIN_PASSWORD:?required in .env}
+      --xxl.job.accessToken=${XXL_JOB_ACCESS_TOKEN:?required in .env}   # required non-empty (must match executor); do not re-append an empty token
 ```
 
-### 5.6 Backend Microservices (4 instances)
+### 5.6 Backend Microservices (8 services)
 
-All four backend microservices use the same Dockerfile, differentiated by `build.args.SERVICE_NAME`. Each service's `environment` overrides key configurations:
+The eight backend microservices use the same Dockerfile, differentiated by `build.args.SERVICE_NAME`. Each service's `environment` overrides key configurations:
 
 | Environment Variable | Description | Example Value |
 |---------------------|-------------|---------------|
@@ -297,6 +305,10 @@ All four backend microservices use the same Dockerfile, differentiated by `build
 | `SPRING_CLOUD_NACOS_DISCOVERY_IP` | Registration IP (empty = auto-detect container IP) | `""` |
 | `AUTH_ISSUER` | JWT Issuer (auth only) | `http://omni-auth:8080` |
 | `AUTH_JWKS_URI` | JWKS endpoint (gateway only) | `http://omni-auth:8080/oauth2/jwks` |
+| `OMNI_INTERNAL_API_TOKEN` | Inter-service shared secret (identical across all Servlet services) | Injected from `.env` |
+| `MYSQL_URL` | Current business-service database connection | `jdbc:mysql://mysql:3306/omni_asset?...` |
+
+On first startup you must run `cp .env.example .env` and replace `OMNI_INTERNAL_API_TOKEN` with a random value of at least 32 bytes. Compose uses required-variable syntax and refuses to start when a secret is missing, providing no in-repository default.
 
 ### 5.7 Frontend
 
@@ -341,14 +353,14 @@ Spring Boot supports overriding `application.yml` configurations via environment
 
 | Config | application.yml Value (local dev) | Docker Environment Value |
 |--------|----------------------------------|------------------------|
-| Database URL | `localhost:3306` | `mysql:3306` |
+| Database address | `localhost:3306` (connect to this Compose MySQL) | `mysql:3306` |
 | Redis host | `localhost` | `redis` |
 | Nacos address | `localhost:8848` | `nacos:8848` |
 | RocketMQ | `localhost:9876` | `rocketmq-namesrv:9876` |
 | JWT Issuer | `http://localhost:8100` | `http://omni-auth:8080` |
-| OAuth2 Callback | `http://localhost:8102/api/auth/...` | `http://localhost:8102/api/auth/...` |
+| OAuth2 Callback | `http://localhost:8100/api/auth/...` | `http://localhost:8100/api/auth/...` |
 
-> **Note**: OAuth2 callback URIs use the Gateway address `localhost:8102`. Auth and other private service ports are bound to loopback for diagnostics only and must not be exposed publicly.
+> **Note**: OAuth2 callback URIs use `localhost:8100` (the host port), because that is the address end users actually visit in the browser.
 
 ---
 
@@ -404,28 +416,35 @@ server {
 
 ### 8.1 Database Initialization Chain
 
-MySQL container auto-executes SQL scripts in `/docker-entrypoint-initdb.d/` on first startup:
+Compose enforces one migration startup gate for both empty volumes and later upgrades:
 
 ```
-01-init.sql       → Create omni_auth / omni_base / omni_workflow databases + seed data
-02-init-nacos.sql → Create nacos_config database + Nacos config data
-03-init-xxl-job.sql → Create xxl_job database + XXL-JOB scheduling data
+MySQL healthy
+  → omni-db-migrator migrate (Liquibase changes for all nine databases)
+  → verify SHA-256 for 8 seed sources and the natural-key assertions in the official manifest
+  → migrator exits successfully
+  → Nacos / XXL-JOB / backend services start
 ```
+
+`database/changelog/` is the schema source of truth. Formal DML seeds live in `scripts/sql/seed/` and are
+declared by `database/seed/manifest.yaml`. Legacy manual `init-all.sql` and `migrate-*.sql` scripts have been retired from the current tree. Use `database/changelog/` for schema and `scripts/sql/seed/` for initialization; do not import old scripts. Flowable runtime schema updates are disabled.
 
 ### 8.2 Data Persistence Strategy
 
-The current configuration persists MySQL in the named volume `omni-mysql-data`. `docker compose down` retains it; `docker compose down -v` deletes it irreversibly.
+The current Compose uses an explicit MySQL named volume:
 
 ```yaml
+# Add Volume in compose.infra.yaml
 mysql:
   volumes:
     - omni-mysql-data:/var/lib/mysql
 
 volumes:
   omni-mysql-data:
+    name: omni-stack_omni-mysql-data
 ```
 
----
+`docker compose down` retains the three named volumes for MySQL, Redis and RocketMQ Broker; `docker compose down -v` deletes them and all business data. Redis uses AOF and its named volume to retain sessions, caches and signing keys. Production should use an external database or backup-managed persistent volumes and rehearse recovery regularly; the single-node Compose topology is not a highly available production environment.
 
 ## 9. Docker Registry Mirror Configuration
 
@@ -485,33 +504,11 @@ Error starting userland proxy: listen tcp4 0.0.0.0:9876: bind: An attempt was ma
 
 ### 10.2 Solutions
 
-**Solution A: Port Offset (Adopted)**
-
-Change RocketMQ NameServer host port from 9876 to 19876:
-
-```yaml
-ports:
-  - "19876:9876"    # Host 19876 → Container 9876
-```
-
-Inter-container communication is unaffected (still uses `rocketmq-namesrv:9876`); only host access uses 19876.
-
-**Solution B: Port Reservation Protection (Implemented in start.bat)**
-
-Reserve required ports with admin privileges before starting Docker:
-
-```batch
-:: Stop winnat → Reserve ports → Restart winnat
-net stop winnat
-netsh int ipv4 add excludedportrange protocol=tcp startport=9876 numberofports=1 persistent=yes
-net start winnat
-```
-
-**Solution C: Restart WSL (Temporary)**
+Identify listening processes, other containers and reserved Windows ports, resolve the conflict, then restart with the official default ports. The standard local environment does not shift ports with `OMNI_*_HOST_PORT`.
 
 ```powershell
-wsl --shutdown
-# Then restart Docker Desktop
+Get-NetTCPConnection -State Listen
+netsh interface ipv4 show excludedportrange protocol=tcp
 ```
 
 ### 10.3 Verify Reserved Ports
@@ -533,7 +530,7 @@ Starting from Nacos v3.x, the `/nacos/actuator/health` endpoint was removed. Hea
 | v2.x | `/nacos/actuator/health` | GET |
 | v3.0+ | `/nacos/` | GET |
 
-### 11.2 docker-compose.yml Configuration
+### 11.2 compose.yaml Configuration
 
 ```yaml
 healthcheck:
@@ -584,10 +581,10 @@ docker compose ps
 ```
 
 **Important Notes**:
-- Docker automatically assigns different host ports for multiple instances
+- Multi-instance with `--scale` requires first removing/changing the fixed host port mapping via an override; the current fixed `127.0.0.1:8101:8080` mapping does **not** auto-assign different/incrementing host ports (parallel instances would collide)
 - Nacos service discovery auto-registers all instances
 - Spring Cloud Gateway load-balances across instances via Nacos
-- For fixed ports, manual specification is needed
+- For fixed ports, manual specification is needed: `docker compose up -d --scale omni-base=3` (ports are auto-assigned incrementally)
 
 ### 13.2 Database Connection Pool Considerations
 
@@ -650,13 +647,13 @@ docker compose logs omni-base > base-logs.txt
 
 ```bash
 # Enter backend service container
-docker exec -it omni-auth sh
+docker compose exec omni-auth sh
 
 # View processes inside container
-docker exec -it omni-auth ps aux
+docker compose exec omni-auth ps aux
 
 # Test inter-container network connectivity
-docker exec -it omni-auth curl -s http://nacos:8848/nacos/
+docker compose exec omni-auth curl -s http://nacos:8848/nacos/
 ```
 
 ---
@@ -679,7 +676,7 @@ docker compose ps omni-gateway
 docker compose logs omni-frontend
 
 # 4. Test inter-container connectivity
-docker exec -it omni-frontend curl -s http://omni-gateway:8080/actuator/health
+docker compose exec omni-frontend curl -s http://omni-gateway:8080/actuator/health
 ```
 
 **Common Causes**:
@@ -726,8 +723,8 @@ lsof -i :8080
 
 **Solutions**:
 - Stop the process occupying the port
-- Modify host port mapping in docker-compose.yml
-- Windows users: check Hyper-V port reservation (see [Section 10](#10-windows-hyper-vws12-port-reservation-issues))
+- Modify the corresponding `OMNI_*_HOST_PORT` in `.env`; Compose maps the host ports
+- Windows users: check Hyper-V port reservation (see [Section 10](#10-windows-hyper-vwsl2-port-reservation-issues))
 
 ### 15.5 Nacos Registration Failure
 
@@ -737,7 +734,7 @@ lsof -i :8080
 ```bash
 # Check if Nacos is healthy
 docker compose ps nacos
-docker exec -it omni-nacos curl -s http://localhost:8848/nacos/
+docker compose exec nacos curl -s http://localhost:8848/nacos/
 
 # Check backend service Nacos config
 docker compose exec omni-auth env | grep NACOS
@@ -755,10 +752,10 @@ docker compose exec omni-auth env | grep NACOS
 **Diagnosis**:
 ```bash
 # Check if Broker is registered to NameServer
-docker exec -it omni-rocketmq-namesrv sh mqadmin clusterList -n localhost:9876
+docker compose exec rocketmq-namesrv sh mqadmin clusterList -n localhost:9876
 
 # Check brokerIP1 configuration
-docker exec -it omni-rocketmq-broker cat /home/rocketmq/rocketmq-5.3.2/conf/broker.conf
+docker compose exec rocketmq-broker cat /home/rocketmq/rocketmq-5.3.2/conf/broker.conf
 ```
 
 **Common Causes**:
@@ -786,43 +783,51 @@ docker compose logs --timestamps omni-auth | head -5
 
 | Service | Internal Port | Host Mapped Port | Protocol | Description |
 |---------|--------------|-----------------|----------|-------------|
-| omni-frontend | 3000 | 3000 | HTTP | User access entry |
-| omni-auth | 8080 | 8100 | HTTP | Auth service |
-| omni-base | 8080 | 8101 | HTTP | Base data service |
+| omni-frontend | 3000 | 3000 | HTTP | User access entry point |
+| omni-auth | 8080 | 127.0.0.1:8100 | HTTP | Authentication/authorization service; loopback debugging only |
+| omni-base | 8080 | 127.0.0.1:8101 | HTTP | Base data service; loopback debugging only |
 | omni-gateway | 8080 | 8102 | HTTP | API Gateway |
-| omni-workflow | 8080 | 8103 | HTTP | Workflow service |
-| omni-crm | 8080 | 8104 | HTTP | CRM service |
-| omni-srm | 8080 | 8105 | HTTP | SRM service |
-| omni-procurement | 8080 | 8106 | HTTP | Procurement service |
-| omni-asset | 8080 | 8107 | HTTP | Asset service |
-| MySQL | 3306 | 13306 | TCP | Database |
-| Redis | 6379 | 6379 | TCP | Cache |
-| Nacos Console | 8080 | 8080 | HTTP | Console |
-| Nacos API | 8848 | 8848 | HTTP | Service registry/config |
-| Nacos gRPC | 9848 | 9848 | gRPC | Long connections |
-| RocketMQ NameServer | 9876 | **19876** | TCP | Name service |
-| RocketMQ Broker | 10909-10912 | 10909-10912 | TCP | Message broker |
-| XXL-JOB Admin | 8080 | 18080 | HTTP | Job scheduler |
+| omni-workflow | 8080 | 127.0.0.1:8103 | HTTP | Workflow service; loopback debugging only |
+| omni-crm | 8080 | 127.0.0.1:8104 | HTTP | CRM sales pre-close service; loopback debugging only |
+| omni-srm | 8080 | 127.0.0.1:8105 | HTTP | SRM service; production traffic only via Gateway, host loopback debugging only |
+| omni-procurement | 8080 | 127.0.0.1:8106 | HTTP | Procurement service; production traffic only via Gateway |
+| omni-asset | 8080 | 127.0.0.1:8107 | HTTP | Asset service; production traffic only via Gateway |
+| MySQL | 3306 | 127.0.0.1:3306 | TCP | Database; explicit named volume, loopback debugging only |
+| Redis | 6379 | 127.0.0.1:6379 | TCP | Password-protected cache, loopback debugging only |
+| Nacos Console/API/gRPC | 8080/8848/9848 | 127.0.0.1 same ports only | HTTP/gRPC | Registry/config and console |
+| RocketMQ NameServer | 9876 | **127.0.0.1:19876** | TCP | Name service |
+| RocketMQ Broker | 10909-10912 | 127.0.0.1 same ports only | TCP | Message broker |
+| XXL-JOB Admin | 8080 | 127.0.0.1:18080 | HTTP | Job scheduler; login and executor tokens injected from `.env` |
 
-### 16.2 Credentials and Exposure
+### 16.2 Local Initialization Accounts and Secret Sources
 
-No production credential is hard-coded. Configure MySQL, Redis, Nacos, XXL-JOB, OAuth state, JWK encryption, internal API, and application database secrets in `.env` before startup. Seed application accounts are local-demo data only and must be changed or removed before any shared deployment. Only the frontend (`3000`) and Gateway (`8102`) are intended as public entry points; all other published ports bind to `127.0.0.1`.
+| Service | Account | Password | Access address |
+|------|------|------|----------|
+| Frontend app | Local seed `admin` | Local seed `admin123`; change immediately on first login, never use in production | http://localhost:3000 |
+| MySQL | root | `.env: MYSQL_ROOT_PASSWORD` | 127.0.0.1:3306 |
+| Redis | No username | `.env: REDIS_PASSWORD` | 127.0.0.1:6379 |
+| Nacos admin | `.env: NACOS_USERNAME` (fixed `nacos`) | `.env: NACOS_PASSWORD` | http://127.0.0.1:8080 |
+| XXL-JOB Admin | `.env: XXL_JOB_ADMIN_USERNAME` | `.env: XXL_JOB_ADMIN_PASSWORD` | http://127.0.0.1:18080 |
+
+All `replace-with-*` values must be replaced before startup; Compose fails closed using required-variable syntax. A new tenant administrator's password is provided explicitly by the create request, and the backend stores only the BCrypt hash, no longer generating `admin123`.
 
 ### 16.3 Key File Paths
 
 | File | Path | Description |
 |------|------|-------------|
-| docker-compose.yml | `docker-compose.yml` | Container orchestration config |
+| Compose entry | `compose.yaml` | Includes infrastructure and application orchestration |
+| Compose infrastructure | `compose.infra.yaml` | MySQL, Redis, Nacos, RocketMQ, XXL-JOB |
+| Compose applications | `compose.apps.yaml` | Backend services and frontend |
 | Backend Dockerfile | `docker/backend/Dockerfile` | Microservice multi-stage build |
 | Frontend Dockerfile | `docker/frontend/Dockerfile` | Vue frontend multi-stage build |
 | Nginx Config | `docker/frontend/nginx.conf` | Frontend reverse proxy rules |
 | Broker Config | `docker/rocketmq/broker-docker.conf` | RocketMQ Docker network config |
 | Maven Mirror | `omni-backend/docker-settings.xml` | Aliyun Maven acceleration |
-| DB Init | `scripts/sql/init-all.sql` | Business schema & seed data |
-| Nacos Init | `scripts/sql/init-nacos.sql` | Nacos config data |
-| XXL-JOB Init | `scripts/sql/init-xxl-job.sql` | Scheduling task data |
+| DB Migrations | `database/changelog/` | Liquibase schema, constraints, and upgrade source of truth for all nine databases |
+| DB Seeds | `scripts/sql/seed/`, `database/seed/manifest.yaml` | Idempotent DML, source-file checksums, and natural-key assertions |
+| Migrator image | `docker/migrator/Dockerfile` | Builds the one-shot Liquibase migration service |
 | Start Script (Linux) | `start.sh` | One-click start |
-| Start Script (Windows) | `start.bat` | One-click start (with port protection) |
+| Start Script (Windows) | `start.bat` | Starts a specified preset without administrator rights, without modifying the system port policy |
 | Stop Script (Linux) | `stop.sh` | One-click stop |
 | Stop Script (Windows) | `stop.bat` | One-click stop |
 
@@ -836,7 +841,9 @@ No production credential is hard-coded. Configure MySQL, Redis, Nacos, XXL-JOB, 
 | omni-base:latest | ~200MB | JRE + Fat JAR |
 | omni-gateway:latest | ~200MB | JRE + Fat JAR |
 | omni-workflow:latest | ~250MB | JRE + Fat JAR + Flowable engine |
+| omni-crm:latest | ~210MB | JRE + Fat JAR + CRM/Outbox |
 | omni-frontend:latest | ~50MB | Nginx + Vue static files |
+> Note: image names can carry an `OMNI_IMAGE_NAMESPACE` prefix (default `omni-`). Parallel isolated ranges should set it to their own Compose project name so stacks cannot overwrite each other's `omni-*:latest` tags and silently reuse them.
 | mysql:8.4 | ~600MB | Official image |
 | nacos/nacos-server:v3.1.1 | ~800MB | Official image |
 | apache/rocketmq:5.3.2 | ~700MB | Official image |

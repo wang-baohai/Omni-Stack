@@ -6,7 +6,7 @@ import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
 import com.omni.srm.dto.SrmRequests;
 import com.omni.srm.dto.SrmViews;
-import com.omni.srm.security.SrmDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.srm.service.RiskService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -36,7 +36,7 @@ public class RiskController {
     /** 分页查询每个供应商的当前风险。 */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('srm:risk:list')")
-    @SrmDataScope(permissionCode = "srm:risk:list")
+    @ServiceDataScope(permissionCode = "srm:risk:list")
     public R<PageResult<SrmViews.RiskSupplierSummaryVO>> list(
             @RequestParam(required = false) String riskLevel,
             @RequestParam(defaultValue = "1") @Min(1) int page,
@@ -47,7 +47,7 @@ public class RiskController {
     /** 查询供应商风险指标列表。 */
     @GetMapping("/indicators/{supplierId}")
     @PreAuthorize("hasAuthority('srm:risk:list')")
-    @SrmDataScope(permissionCode = "srm:risk:list")
+    @ServiceDataScope(permissionCode = "srm:risk:list")
     public R<List<SrmViews.RiskIndicatorVO>> listIndicators(@PathVariable Long supplierId) {
         return R.ok(riskService.listIndicators(supplierId));
     }
@@ -55,7 +55,7 @@ public class RiskController {
     /** 更新风险指标。 */
     @PutMapping("/indicator/{id}")
     @PreAuthorize("hasAuthority('srm:risk:update')")
-    @SrmDataScope(permissionCode = "srm:risk:update")
+    @ServiceDataScope(permissionCode = "srm:risk:update")
     @OperLog(module = "SRM风险指标", operType = OperType.UPDATE, idExpr = "#id")
     public R<SrmViews.RiskIndicatorVO> updateIndicator(@PathVariable Long id,
                                                        @Valid @RequestBody SrmRequests.UpdateRiskIndicatorRequest request) {
@@ -65,7 +65,7 @@ public class RiskController {
     /** 创建综合风险评估。 */
     @PostMapping("/assessment/{supplierId}")
     @PreAuthorize("hasAuthority('srm:risk:assess')")
-    @SrmDataScope(permissionCode = "srm:risk:assess")
+    @ServiceDataScope(permissionCode = "srm:risk:assess")
     @OperLog(module = "SRM风险评估", operType = OperType.CREATE, idExpr = "#supplierId", recordSnapshot = false)
     public R<SrmViews.RiskAssessmentVO> createAssessment(@PathVariable Long supplierId,
                                                          @Valid @RequestBody SrmRequests.CreateRiskAssessmentRequest request) {
@@ -75,7 +75,7 @@ public class RiskController {
     /** 查询供应商风险评估历史。 */
     @GetMapping("/assessment/history/{supplierId}")
     @PreAuthorize("hasAuthority('srm:risk:list')")
-    @SrmDataScope(permissionCode = "srm:risk:list")
+    @ServiceDataScope(permissionCode = "srm:risk:list")
     public R<List<SrmViews.RiskAssessmentVO>> assessmentHistory(@PathVariable Long supplierId) {
         return R.ok(riskService.assessmentHistory(supplierId));
     }

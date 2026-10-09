@@ -6,10 +6,11 @@ import com.omni.common.core.internal.InternalUserDTO;
 import com.omni.common.core.internal.InternalUserOptionDTO;
 import com.omni.common.core.result.R;
 import com.omni.common.core.security.XssSettings;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.internal.InternalFeignHeadersFactory;
 import feign.RequestInterceptor;
 import feign.codec.Decoder;
 import feign.optionals.OptionalDecoder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.support.FeignHttpMessageConverters;
@@ -113,17 +114,15 @@ public interface AuthInternalClient {
      */
     class FeignConfig {
 
-        @Value("${omni.internal.api.token:}")
-        private String internalToken;
-
         /**
          * 注入服务间认证头。
          *
          * @return Feign 请求拦截器
          */
         @Bean
-        public RequestInterceptor internalTokenInterceptor() {
-            return template -> template.header("X-Internal-Token", internalToken);
+        public RequestInterceptor internalTokenInterceptor(
+                ServiceIdentityProperties properties, InternalFeignHeadersFactory factory) {
+            return factory.create(properties.getInternalApi().getToken());
         }
 
         /**

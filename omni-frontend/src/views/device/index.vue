@@ -10,14 +10,14 @@ import { ElMessage } from 'element-plus'
 import QRCode from 'qrcode'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
-import { storeLang } from '@/i18n'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 import {
   requestDeviceAuthorization,
   pollDeviceToken,
   DEVICE_CLIENT_ID,
 } from '@/api/auth'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
 const appStore = useAppStore()
@@ -137,11 +137,6 @@ function toggleTheme() {
 }
 
 /** 切换语言 */
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 
 /** 格式化倒计时 */
 function formatCountdown(seconds: number): string {
@@ -165,10 +160,7 @@ onUnmounted(() => clearTimers())
         </el-button>
       </div>
       <div class="device-top-right">
-        <el-button text :title="t('lang.switch')" @click="toggleLang">
-          <el-icon><Globe /></el-icon>
-          {{ locale === 'zh-CN' ? 'EN' : '中' }}
-        </el-button>
+        <LanguageSelector />
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>
             <Moon v-if="appStore.theme === 'dark'" />

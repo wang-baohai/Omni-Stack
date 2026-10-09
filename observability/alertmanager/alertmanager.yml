@@ -1,0 +1,12 @@
+# 标准本地模板只汇总告警，不依赖阶段验收中的临时 webhook 容器。
+# 如需验证通知送达，可在容器中使用 scripts/fixtures/observability/alert-receiver.py。
+# 生产接收通道需在部署时配置，并通过安全渠道注入凭据。
+route:
+  receiver: local-null
+  group_by: [alertname, service_name]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: local-null

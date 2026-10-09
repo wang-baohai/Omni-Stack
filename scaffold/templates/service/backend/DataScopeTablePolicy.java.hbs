@@ -1,0 +1,37 @@
+package {{javaPackage}}.security;
+
+import com.omni.common.service.persistence.DataScopeTablePolicy;
+import java.util.Set;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.schema.Table;
+import org.springframework.stereotype.Component;
+
+/**
+ * {{displayName}}数据权限策略骨架。
+ *
+ * <p>生成策略对已声明表默认拒绝全部数据。接入领域 owner 字段前不得改为放行。</p>
+ * <p>由 @omni-stack/cli {{generatorVersion}} 生成，模板版本 {{templateVersion}}。</p>
+ *
+ * @author Omni-Stack Team
+ */
+@Component
+public class {{className}}DataScopeTablePolicy implements DataScopeTablePolicy {
+
+    private static final Set<String> PROTECTED_TABLES = Set.of(
+{{#each dataScopeTables}}
+            "{{this}}"{{#unless @last}},{{/unless}}
+{{/each}}
+    );
+
+    /** {@inheritDoc} */
+    @Override
+    public Expression getSqlSegment(Table table, Expression where, String mappedStatementId) {
+        if (table == null || !PROTECTED_TABLES.contains(table.getName().toLowerCase())) {
+            return null;
+        }
+        // TODO: [{{serviceId}}] 按领域 owner 字段和 ServiceIdentityContext 实现真实 DataScope。
+        return new EqualsTo(new LongValue(1), new LongValue(0));
+    }
+}

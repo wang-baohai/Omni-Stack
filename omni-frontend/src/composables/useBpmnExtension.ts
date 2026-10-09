@@ -5,6 +5,13 @@
  */
 
 import { toRaw } from 'vue'
+import type BpmnModeler from 'bpmn-js/lib/Modeler'
+import type {
+  BpmnElement,
+  BpmnModeling,
+  BpmnModdle,
+  BpmnModdleElement,
+} from '@/types/bpmn'
 
 const OMNI_NS = 'http://omni.com/workflow'
 const FLOWABLE_NS = 'http://flowable.org/bpmn'
@@ -14,7 +21,7 @@ const FLOWABLE_NS = 'http://flowable.org/bpmn'
  * moddle.create 依赖类型注册表，若 Omni:assignment 等类型未注册会抛出 unknown type 错误。
  * 此函数作为防御性兜底，在 moddle.create 之前调用。
  */
-function ensureTypesRegistered(moddle: any) {
+function ensureTypesRegistered(moddle: BpmnModdle) {
   if (!moddle?.registry) return
 
   if (!moddle.registry.packageMap?.['omni']) {
@@ -93,7 +100,7 @@ export interface CcConfig {
  * @param element bpmn-js 元素
  * @returns assignment 配置 JSON，未配置时返回 null
  */
-export function readAssignment(element: any): AssignmentConfig | null {
+export function readAssignment(element: BpmnElement): AssignmentConfig | null {
   const bo = element?.businessObject
   if (!bo) return null
 
@@ -121,18 +128,18 @@ export function readAssignment(element: any): AssignmentConfig | null {
  * @param element BPMN 元素
  * @param config assignment 配置
  */
-export function writeAssignment(modeler: any, element: any, config: AssignmentConfig) {
+export function writeAssignment(modeler: BpmnModeler, element: BpmnElement, config: AssignmentConfig) {
   if (!modeler || !element) return
 
   // 解包 Vue 响应式 Proxy，避免与 bpmn-js 内部 Proxy 冲突
   const rawElement = toRaw(element)
-  const moddle = modeler.get('moddle')
-  const modeling = modeler.get('modeling')
+  const moddle = modeler.get<BpmnModdle>('moddle')
+  const modeling = modeler.get<BpmnModeling>('modeling')
   const bo = rawElement.businessObject
 
   // 保留已有的非 assignment/taskListener 扩展元素
   const existingExt = bo.extensionElements
-  const keptValues: any[] = []
+  const keptValues: BpmnModdleElement[] = []
   if (existingExt?.values) {
     for (const v of existingExt.values) {
       if (!v.$type?.includes('assignment')
@@ -173,7 +180,7 @@ export function writeAssignment(modeler: any, element: any, config: AssignmentCo
  * @param element bpmn-js 元素
  * @returns cc 配置 JSON，未配置时返回 null
  */
-export function readCcConfig(element: any): CcConfig | null {
+export function readCcConfig(element: BpmnElement): CcConfig | null {
   const bo = element?.businessObject
   if (!bo) return null
 
@@ -201,18 +208,18 @@ export function readCcConfig(element: any): CcConfig | null {
  * @param element BPMN 元素
  * @param config cc 配置
  */
-export function writeCcConfig(modeler: any, element: any, config: CcConfig) {
+export function writeCcConfig(modeler: BpmnModeler, element: BpmnElement, config: CcConfig) {
   if (!modeler || !element) return
 
   // 解包 Vue 响应式 Proxy，避免与 bpmn-js 内部 Proxy 冲突
   const rawElement = toRaw(element)
-  const moddle = modeler.get('moddle')
-  const modeling = modeler.get('modeling')
+  const moddle = modeler.get<BpmnModdle>('moddle')
+  const modeling = modeler.get<BpmnModeling>('modeling')
   const bo = rawElement.businessObject
 
   // 保留已有的非 cc 扩展元素
   const existingExt = bo.extensionElements
-  const keptValues: any[] = []
+  const keptValues: BpmnModdleElement[] = []
   if (existingExt?.values) {
     for (const v of existingExt.values) {
       if (!v.$type?.includes('cc')) {
@@ -246,7 +253,7 @@ export function writeCcConfig(modeler: any, element: any, config: CcConfig) {
  * @param element bpmn-js Gateway 元素
  * @returns 默认分支 ID 和分支条件映射
  */
-export function readGatewayConditions(element: any): {
+export function readGatewayConditions(element: BpmnElement): {
   defaultFlow: string | null
   conditions: Record<string, string>
 } {
@@ -260,7 +267,7 @@ export function readGatewayConditions(element: any): {
   for (const flow of outgoing) {
     const condExpr = flow.conditionExpression
     if (condExpr) {
-      conditions[flow.id] = condExpr.body || ''
+      if (flow.id) conditions[flow.id] = typeof condExpr.body === 'string' ? condExpr.body : ''
     }
   }
 
@@ -274,14 +281,14 @@ export function readGatewayConditions(element: any): {
  * @param element Gateway 元素
  * @param defaultFlowId 默认分支 SequenceFlow ID
  */
-export function writeGatewayDefault(modeler: any, element: any, defaultFlowId: string) {
+export function writeGatewayDefault(modeler: BpmnModeler, element: BpmnElement, defaultFlowId: string) {
   if (!modeler || !element) return
 
   const rawElement = toRaw(element)
-  const modeling = modeler.get('modeling')
+  const modeling = modeler.get<BpmnModeling>('modeling')
   const bo = rawElement.businessObject
   const outgoing = bo.outgoing || []
-  const targetFlow = outgoing.find((f: any) => f.id === defaultFlowId)
+  const targetFlow = outgoing.find(flow => flow.id === defaultFlowId)
 
   if (targetFlow) {
     modeling.updateProperties(rawElement, { default: targetFlow })
@@ -295,12 +302,12 @@ export function writeGatewayDefault(modeler: any, element: any, defaultFlowId: s
  * @param flowElement SequenceFlow 元素
  * @param condition 条件表达式
  */
-export function writeGatewayCondition(modeler: any, flowElement: any, condition: string) {
+export function writeGatewayCondition(modeler: BpmnModeler, flowElement: BpmnElement, condition: string) {
   if (!modeler || !flowElement) return
 
   const rawElement = toRaw(flowElement)
-  const moddle = modeler.get('moddle')
-  const modeling = modeler.get('modeling')
+  const moddle = modeler.get<BpmnModdle>('moddle')
+  const modeling = modeler.get<BpmnModeling>('modeling')
 
   if (condition && condition.trim()) {
     const conditionExpr = moddle.create('bpmn:FormalExpression', {
@@ -367,7 +374,7 @@ export const MODDLE_EXTENSIONS = {
  *
  * @param moddle bpmn-js moddle 实例
  */
-export function registerOmniModdle(moddle: any) {
+export function registerOmniModdle(moddle: BpmnModdle) {
   if (!moddle) return
 
   // 注册 omni 命名空间

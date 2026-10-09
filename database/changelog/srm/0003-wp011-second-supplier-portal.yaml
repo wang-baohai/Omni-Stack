@@ -1,0 +1,53 @@
+databaseChangeLog:
+  # WP-011 S18(P0-2) forward-only 增量：supplier2 需要一个独立的供应商主体与门户关联，
+  # 否则其令牌虽可签发，但供应商门户域（srm_supplier_portal_user）无归属，后续报价/准入链无法验证。
+  # canonical scripts/sql/seed/srm.sql 同步追加同一批语句；历史冻结种子副本不改动。
+  - changeSet:
+      id: srm-0003-wp011-second-supplier-portal
+      author: omni-stack
+      labels: database:srm,wp011
+      runInTransaction: false
+      comment: 新增第二供应商主体（SUP-2026-002）及其门户用户 201 与入驻记录，幂等可重复执行
+      preConditions:
+        - onFail: HALT
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: omni_srm
+            sql: SELECT DATABASE()
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `srm_supplier`
+                (`id`, `tenant_id`, `supplier_no`, `name`, `normalized_name`, `supplier_type`, `industry_code`, `credit_code`,
+                 `website`, `phone`, `email`, `region`, `address`, `category_code`, `level_code`, `status`,
+                 `assigned_time`, `last_evaluation_time`, `owner_user_id`, `owner_unit_id`, `version`, `deleted`, `create_by`)
+              VALUES
+                (2, 1, 'SUP-2026-002', '远启新材料股份有限公司', '远启新材料股份有限公司', 'MANUFACTURER', 'C39', '91320500MB2EXAMPLE',
+                 'https://www.yuanqi-materials.com', '0512-66882222', 'contact@yuanqi-materials.com', '江苏省苏州市', '苏州工业园区远启路18号',
+                 'ELECTRONICS', 'QUALIFIED', 'APPROVED', '2026-01-05 09:00:00', '2026-01-20 10:00:00', 1, 1, 0, 0, 'system');
+              INSERT IGNORE INTO `srm_supplier_portal_user` (`tenant_id`, `supplier_id`, `user_id`, `create_by`)
+              VALUES (1, 2, 201, 'system');
+              INSERT IGNORE INTO `srm_supplier_enrollment`
+                (`id`, `tenant_id`, `supplier_id`, `user_id`, `request_id`, `status`, `create_by`)
+              VALUES (2, 1, 2, 201, 'enroll-yuanqi-20260105', 'COMPLETED', 'system');
+  - changeSet:
+      id: srm-0003-wp011-second-supplier-assert
+      author: omni-stack
+      labels: database:srm,wp011
+      runInTransaction: false
+      comment: 迁移后校验 supplier2 已关联到独立供应商主体
+      preConditions:
+        - onFail: HALT
+        - dbms:
+            type: mysql
+      changes:
+        - sql:
+            sql: |
+              SELECT IF(
+                (SELECT COUNT(*) FROM `srm_supplier_portal_user` pu
+                   JOIN `srm_supplier` s ON s.id = pu.supplier_id AND s.tenant_id = pu.tenant_id
+                  WHERE pu.user_id = 201 AND pu.tenant_id = 1 AND s.supplier_no = 'SUP-2026-002') = 1,
+                'second-supplier-ready',
+                'second-supplier-missing'
+              );

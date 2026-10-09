@@ -11,14 +11,18 @@ import com.omni.auth.event.AuditEvent;
 import com.omni.auth.mapper.SysAuditLogMapper;
 import com.omni.auth.service.AuditLogService;
 import com.omni.auth.service.AuditLogVO;
+import com.omni.auth.service.LoginProjectionRules;
 import com.omni.common.core.result.PageResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 审计日志服务实现。
@@ -97,13 +101,15 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     /**
      * 将实体转换为视图对象。
+     * <p>与登录记录投影共享同一安全脱敏规则（RF02）：IP 可靠掩码、UA 仅留类别，
+     * extra 丢弃凭据/地址类敏感键，保留其他审计事件的必要非秘密语义；不重写历史审计。</p>
      */
     private AuditLogVO toVO(SysAuditLog entity) {
         Map<String, Object> extraMap = Collections.emptyMap();
         if (entity.getExtra() != null && !entity.getExtra().isBlank()) {
             try {
-                extraMap = objectMapper.readValue(entity.getExtra(),
-                        new TypeReference<Map<String, Object>>() {});
+                extraMap = redactExtra(objectMapper.readValue(entity.getExtra(),
+                        new TypeReference<Map<String, Object>>() {}));
             } catch (JsonProcessingException e) {
                 log.warn("反序列化审计日志 extra 字段失败: id={}", entity.getId());
             }
@@ -115,12 +121,29 @@ public class AuditLogServiceImpl implements AuditLogService {
                 .eventType(entity.getEventType())
                 .username(entity.getUsername())
                 .userId(entity.getUserId())
-                .ipAddress(entity.getIpAddress())
-                .userAgent(entity.getUserAgent())
+                .ipAddress(LoginProjectionRules.maskIp(entity.getIpAddress()))
+                .userAgent(LoginProjectionRules.summarizeUserAgent(entity.getUserAgent()))
                 .description(entity.getDescription())
                 .extra(extraMap)
                 .createBy(entity.getCreateBy())
                 .createTime(entity.getCreateTime())
                 .build();
+    }
+
+    /** 与旧审计页面同批的敏感键不得回显（IP/UA/凭据/会话/验证码/token）。 */
+    private static final Set<String> SENSITIVE_EXTRA_KEYS = Set.of(
+            "ip", "ipaddress", "ip_address", "clientip", "useragent", "user_agent", "ua",
+            "password", "pwd", "token", "accesstoken", "refreshtoken", "code", "state",
+            "sessionid", "session_id", "captcha", "captchacode", "secret", "authorization");
+
+    private Map<String, Object> redactExtra(Map<String, Object> extra) {
+        Map<String, Object> safe = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> e : extra.entrySet()) {
+            if (e.getKey() != null && SENSITIVE_EXTRA_KEYS.contains(e.getKey().toLowerCase(Locale.ROOT))) {
+                continue;
+            }
+            safe.put(e.getKey(), e.getValue());
+        }
+        return safe;
     }
 }

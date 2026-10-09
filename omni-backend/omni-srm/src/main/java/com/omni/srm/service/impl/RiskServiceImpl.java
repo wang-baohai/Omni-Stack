@@ -27,7 +27,7 @@ import com.omni.srm.mapper.SrmRiskIndicatorTypeMapper;
 import com.omni.srm.mapper.SrmRiskScoreThresholdMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
 import com.omni.srm.mapper.SrmSupplierQualificationMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.RiskService;
 import com.omni.srm.service.support.SrmAuditSupport;
 import com.omni.srm.service.support.SrmRecordAccessGuard;
@@ -147,7 +147,7 @@ public class RiskServiceImpl implements RiskService {
         }
         update.set(SrmRiskIndicator::getAssessmentTime, LocalDateTime.now())
                 .set(SrmRiskIndicator::getUpdateTime, LocalDateTime.now())
-                .set(SrmRiskIndicator::getUpdateBy, SrmTenantContext.require().username());
+                .set(SrmRiskIndicator::getUpdateBy, ServiceIdentityContext.require().username());
         requireUpdated(riskIndicatorMapper.update(null, update));
 
         createAssessmentInternal(indicator.getSupplierId(), "风险指标更新后自动重算");
@@ -171,7 +171,7 @@ public class RiskServiceImpl implements RiskService {
     }
 
     private SrmRiskAssessment createAssessmentInternal(Long supplierId, String remark) {
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         riskInitializer.initialize(tenantId, supplierId);
         refreshCertificateIndicator(supplierId);
         List<SrmRiskIndicator> indicators = findIndicators(supplierId);
@@ -196,7 +196,7 @@ public class RiskServiceImpl implements RiskService {
         assessment.setSupplierId(supplierId);
         assessment.setOverallLevel(overallLevel.name());
         assessment.setAssessmentTime(LocalDateTime.now());
-        assessment.setAssessorUserId(SrmTenantContext.require().userId());
+        assessment.setAssessorUserId(ServiceIdentityContext.require().userId());
         assessment.setRemark(remark);
         assessment.setVersion(0);
         assessment.setDeleted(0);
@@ -239,7 +239,7 @@ public class RiskServiceImpl implements RiskService {
                 .set(SrmRiskIndicator::getAssessmentTime, LocalDateTime.now())
                 .set(SrmRiskIndicator::getRemark, certificateRisk.remark())
                 .set(SrmRiskIndicator::getUpdateTime, LocalDateTime.now())
-                .set(SrmRiskIndicator::getUpdateBy, SrmTenantContext.require().username())
+                .set(SrmRiskIndicator::getUpdateBy, ServiceIdentityContext.require().username())
                 .setSql("version = version + 1");
         requireUpdated(riskIndicatorMapper.update(null, update));
     }

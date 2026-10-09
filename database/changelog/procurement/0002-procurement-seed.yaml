@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: procurement-0002-bootstrap-seed
+      author: omni-stack
+      labels: seed-v1
+      context: procurement
+      comment: 按业务自然键幂等写入采购配置和物料分类种子
+      changes:
+        - sqlFile:
+            path: scripts/sql/seed/procurement.sql
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: SELECT 1;

@@ -1,6 +1,7 @@
 package com.omni.asset.security;
 
 import com.omni.common.core.internal.InternalDataScopeDTO;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.AfterEach;
@@ -18,7 +19,7 @@ class AssetDataPermissionHandlerTest {
     /** 每次测试后清理数据范围。 */
     @AfterEach
     void clearScope() {
-        AssetDataScopeContext.clear();
+        ServiceDataScopeContext.clear();
     }
 
     /** 缺少上下文时资产根必须失败关闭。 */
@@ -32,7 +33,7 @@ class AssetDataPermissionHandlerTest {
     /** 管理列表的 SELF 范围必须使用资产管理员列。 */
     @Test
     void shouldUseOwnerForManagementSelfScope() {
-        AssetDataScopeContext.set(scope("asset:asset:list", "SELF", Set.of()));
+        ServiceDataScopeContext.set(scope("asset:asset:list", "SELF", Set.of()));
 
         Expression expression = handler.getSqlSegment(new Table("ast_asset"), null, "mapper.select");
 
@@ -44,7 +45,7 @@ class AssetDataPermissionHandlerTest {
     /** 我的资产即使 Auth 返回 TENANT 也必须固定当前使用人。 */
     @Test
     void shouldFixMyAssetToCurrentUserEvenWithTenantScope() {
-        AssetDataScopeContext.set(scope("asset:asset:self", "TENANT", Set.of()));
+        ServiceDataScopeContext.set(scope("asset:asset:self", "TENANT", Set.of()));
 
         Expression expression = handler.getSqlSegment(new Table("ast_asset"), null, "mapper.select");
 
@@ -54,11 +55,11 @@ class AssetDataPermissionHandlerTest {
     /** 领用和退还命令不能因 ALL 范围扩大到他人资产。 */
     @Test
     void shouldFixSelfCommandsToCurrentUser() {
-        AssetDataScopeContext.set(scope("asset:asset:accept", "ALL", Set.of()));
+        ServiceDataScopeContext.set(scope("asset:asset:accept", "ALL", Set.of()));
         assertThat(handler.getSqlSegment(new Table("ast_asset"), null, "mapper.select").toString())
                 .contains("ast_asset.current_user_id = 12");
 
-        AssetDataScopeContext.set(scope("asset:asset:return", "TENANT", Set.of()));
+        ServiceDataScopeContext.set(scope("asset:asset:return", "TENANT", Set.of()));
         assertThat(handler.getSqlSegment(new Table("ast_asset"), null, "mapper.select").toString())
                 .contains("ast_asset.current_user_id = 12");
     }
@@ -66,7 +67,7 @@ class AssetDataPermissionHandlerTest {
     /** SELF 资产使用人发起调拨时必须使用当前使用人维度。 */
     @Test
     void shouldUseCurrentUserForSelfTransferCreation() {
-        AssetDataScopeContext.set(scope("asset:transfer:create", "SELF", Set.of()));
+        ServiceDataScopeContext.set(scope("asset:transfer:create", "SELF", Set.of()));
 
         Expression expression = handler.getSqlSegment(new Table("ast_asset"), null, "mapper.select");
 
@@ -76,7 +77,7 @@ class AssetDataPermissionHandlerTest {
     /** 资产历史必须通过同租户资产根继承管理部门范围。 */
     @Test
     void shouldInheritAssetDepartmentForHistory() {
-        AssetDataScopeContext.set(scope("asset:asset:list", "DEPT_AND_BELOW", Set.of(8L, 9L)));
+        ServiceDataScopeContext.set(scope("asset:asset:list", "DEPT_AND_BELOW", Set.of(8L, 9L)));
 
         Expression expression = handler.getSqlSegment(
                 new Table("ast_asset_history"), null, "mapper.select");
@@ -89,11 +90,11 @@ class AssetDataPermissionHandlerTest {
     /** 调拨与处置子表必须通过资产根继承 owner 范围。 */
     @Test
     void shouldInheritOwnerForOperationChildren() {
-        AssetDataScopeContext.set(scope("asset:transfer:list", "DEPT", Set.of()));
+        ServiceDataScopeContext.set(scope("asset:transfer:list", "DEPT", Set.of()));
         assertThat(handler.getSqlSegment(new Table("ast_transfer"), null, "mapper.select").toString())
                 .contains("ast_asset", "asset_id", "owner_unit_id = 8");
 
-        AssetDataScopeContext.set(scope("asset:disposal:list", "SELF", Set.of()));
+        ServiceDataScopeContext.set(scope("asset:disposal:list", "SELF", Set.of()));
         assertThat(handler.getSqlSegment(new Table("ast_disposal"), null, "mapper.select").toString())
                 .contains("ast_asset", "asset_id", "owner_user_id = 12");
     }
@@ -108,7 +109,7 @@ class AssetDataPermissionHandlerTest {
     /** CUSTOM 空组织集合必须失败关闭。 */
     @Test
     void shouldFailClosedForEmptyCustomScope() {
-        AssetDataScopeContext.set(scope("asset:asset:list", "CUSTOM", Set.of()));
+        ServiceDataScopeContext.set(scope("asset:asset:list", "CUSTOM", Set.of()));
 
         Expression expression = handler.getSqlSegment(new Table("ast_asset"), null, "mapper.select");
 

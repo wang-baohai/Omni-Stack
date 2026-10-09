@@ -25,6 +25,9 @@ public class ProcApprovalRoute extends ProcTenantEntity {
     /** 租户内稳定路由编码，创建后不可修改。 */
     private String routeCode;
 
+    /** 业务可读的审批规则名称。 */
+    private String routeName;
+
     /** 精确品类编码或通配符 *。 */
     private String categoryCode;
 

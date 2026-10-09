@@ -1,0 +1,152 @@
+databaseChangeLog:
+  # WP-009 forward-only 增量：D01 登录保护策略表 + D03 五权限目录（已初始化租户自然键补齐）。
+  # 设计依据 Codex Goal D01~D04；不改动任何旧已执行 changeSet（除 D04 批准的 0003 sqlFile.path 单一路径调整）。
+  - changeSet:
+      id: auth-0006-wp009-login-policy-table
+      author: omni-stack
+      labels: database:auth,wp009
+      runInTransaction: false
+      comment: 新建 D01 租户级登录保护策略表 sys_auth_login_policy（tenant_id 主键，乐观锁 version；无软删除，无 key/value）
+      preConditions:
+        - onFail: HALT
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: omni_auth
+            sql: SELECT DATABASE()
+        - not:
+            - tableExists:
+                tableName: sys_auth_login_policy
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE `sys_auth_login_policy` (
+                `tenant_id` bigint NOT NULL COMMENT '租户ID(主键，一租户一行)',
+                `failure_threshold` int NOT NULL COMMENT '窗口内锁定阈值 3~10',
+                `failure_window_seconds` int NOT NULL COMMENT '固定失败窗口秒数 3600~86400',
+                `version` bigint NOT NULL DEFAULT '0' COMMENT '乐观并发版本，首次保存产生 1',
+                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `create_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `update_by` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                PRIMARY KEY (`tenant_id`)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='D01 登录保护策略';
+      rollback:
+        - sql:
+            sql: DROP TABLE IF EXISTS `sys_auth_login_policy`;
+
+  - changeSet:
+      id: auth-0006-wp009-oauth2-metadata-widen
+      author: omni-stack
+      labels: database:auth,wp009
+      comment: >-
+        修复 FA06/AC06 PKCE 发现的原合同缺陷：oauth2_authorization 的 *_metadata 列 baseline 为 varchar(2000)，
+        authorization_code+PKCE 颁发 JWT 时 SAS 写入的 access_token_metadata 超出导致 MysqlDataTruncation(token 端点 500)。
+        forward-only 将 6 个 *_metadata 列拓宽为 TEXT(与 access_token_value 一致), 不改语义/不删数据。
+      preConditions:
+        - onFail: HALT
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: omni_auth
+            sql: SELECT DATABASE()
+        - tableExists:
+            tableName: oauth2_authorization
+      changes:
+        - sql:
+            sql: |
+              ALTER TABLE `oauth2_authorization`
+                MODIFY COLUMN `authorization_code_metadata` TEXT NULL,
+                MODIFY COLUMN `access_token_metadata` TEXT NULL,
+                MODIFY COLUMN `oidc_id_token_metadata` TEXT NULL,
+                MODIFY COLUMN `refresh_token_metadata` TEXT NULL,
+                MODIFY COLUMN `user_code_metadata` TEXT NULL,
+                MODIFY COLUMN `device_code_metadata` TEXT NULL;
+      rollback:
+        - sql:
+            sql: |
+              ALTER TABLE `oauth2_authorization`
+                MODIFY COLUMN `authorization_code_metadata` VARCHAR(2000) NULL,
+                MODIFY COLUMN `access_token_metadata` VARCHAR(2000) NULL,
+                MODIFY COLUMN `oidc_id_token_metadata` VARCHAR(2000) NULL,
+                MODIFY COLUMN `refresh_token_metadata` VARCHAR(2000) NULL,
+                MODIFY COLUMN `user_code_metadata` VARCHAR(2000) NULL,
+                MODIFY COLUMN `device_code_metadata` VARCHAR(2000) NULL;
+
+  - changeSet:
+      id: auth-0006-wp009-permissions
+      author: omni-stack
+      labels: database:auth,adoption-upgrade,wp009
+      comment: >-
+        为已初始化租户按 (tenant_id, permission_code) 自然键增补 D03 五个权限码并仅授予该租户现有 SUPER_ADMIN；
+        新建库经 0003(历史seed)+本变更集收敛，本变更集对已存在的租户1行以 NOT EXISTS 去重，终态与 canonical auth.sql 一致。
+        默认 USER 角色不获任何新权限。sys_permission 无 (tenant_id,permission_code) 唯一键，故用 NOT EXISTS 反连接保证幂等，
+        sys_role_permission 的 uk_role_permission 保证授权 INSERT IGNORE 幂等；不新增/改动任何既有权限 ID。
+      preConditions:
+        - onFail: HALT
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: omni_auth
+            sql: SELECT DATABASE()
+        - tableExists:
+            tableName: sys_permission
+      changes:
+        - sql:
+            splitStatements: true
+            sql: |
+              -- MENU 根节点：system:config / system:loginrecord（父=各租户 system 目录）
+              INSERT INTO sys_permission (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+              SELECT s.tenant_id, s.id, 'system:config', '系统配置', 'MENU', '', 2, 11, 1, 'system'
+              FROM sys_permission s
+              WHERE s.permission_code = 'system' AND s.parent_id = 0
+                AND NOT EXISTS (SELECT 1 FROM sys_permission x WHERE x.tenant_id = s.tenant_id AND x.permission_code = 'system:config');
+
+              INSERT INTO sys_permission (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+              SELECT s.tenant_id, s.id, 'system:loginrecord', '登录记录', 'MENU', '', 2, 12, 1, 'system'
+              FROM sys_permission s
+              WHERE s.permission_code = 'system' AND s.parent_id = 0
+                AND NOT EXISTS (SELECT 1 FROM sys_permission x WHERE x.tenant_id = s.tenant_id AND x.permission_code = 'system:loginrecord');
+
+              -- API 叶子：config:list/update（父=system:config）
+              INSERT INTO sys_permission (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+              SELECT p.tenant_id, p.id, 'system:config:list', '查看登录保护配置', 'API', '', 3, 1, 1, 'system'
+              FROM sys_permission p
+              WHERE p.permission_code = 'system:config'
+                AND NOT EXISTS (SELECT 1 FROM sys_permission x WHERE x.tenant_id = p.tenant_id AND x.permission_code = 'system:config:list');
+
+              INSERT INTO sys_permission (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+              SELECT p.tenant_id, p.id, 'system:config:update', '更新登录保护配置', 'API', '', 3, 2, 1, 'system'
+              FROM sys_permission p
+              WHERE p.permission_code = 'system:config'
+                AND NOT EXISTS (SELECT 1 FROM sys_permission x WHERE x.tenant_id = p.tenant_id AND x.permission_code = 'system:config:update');
+
+              -- API 叶子：loginrecord:list（父=system:loginrecord）
+              INSERT INTO sys_permission (tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
+              SELECT p.tenant_id, p.id, 'system:loginrecord:list', '查看登录记录', 'API', '', 3, 1, 1, 'system'
+              FROM sys_permission p
+              WHERE p.permission_code = 'system:loginrecord'
+                AND NOT EXISTS (SELECT 1 FROM sys_permission x WHERE x.tenant_id = p.tenant_id AND x.permission_code = 'system:loginrecord:list');
+
+              -- 统一计算物化路径与深度（按父节点回填，跨租户正确；幂等重算）
+              UPDATE sys_permission c
+              JOIN sys_permission par ON c.parent_id = par.id
+              SET c.path = CONCAT(par.path, c.id, '/'), c.depth = par.depth + 1
+              WHERE c.permission_code IN ('system:config','system:config:list','system:config:update','system:loginrecord','system:loginrecord:list');
+
+              -- 仅授予各租户现有 SUPER_ADMIN 这五个码（uk_role_permission 保证幂等；不扩权其他角色）
+              INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM sys_role r
+              JOIN sys_permission p ON p.tenant_id = r.tenant_id
+              WHERE r.role_code = 'SUPER_ADMIN'
+                AND p.permission_code IN ('system:config','system:config:list','system:config:update','system:loginrecord','system:loginrecord:list');
+      rollback:
+        - sql:
+            splitStatements: true
+            sql: |
+              DELETE rp FROM sys_role_permission rp
+              JOIN sys_permission p ON rp.permission_id = p.id
+              WHERE p.permission_code IN ('system:config','system:config:list','system:config:update','system:loginrecord','system:loginrecord:list');
+              DELETE FROM sys_permission
+              WHERE permission_code IN ('system:config','system:config:list','system:config:update','system:loginrecord','system:loginrecord:list');

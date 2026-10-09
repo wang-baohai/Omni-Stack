@@ -1,10 +1,13 @@
 package com.omni.base.controller;
 
 import com.omni.base.service.MqMessageAggregationService;
+import com.omni.common.core.operlog.OperLog;
+import com.omni.common.core.operlog.OperType;
 import com.omni.common.core.result.PageResult;
 import com.omni.common.core.result.R;
 import com.omni.common.mqlog.entity.SysMqMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +35,26 @@ import java.time.LocalDateTime;
 public class MqMessageController {
 
     private final MqMessageAggregationService mqMessageAggregationService;
+    private final Environment environment;
+
+    /**
+     * 查询当前消息投递运行状态。
+     *
+     * @return Outbox 写入与异步投递能力状态
+     */
+    @GetMapping("/runtime")
+    @PreAuthorize("hasAuthority('base:mqmessage:list')")
+    public R<MqRelayRuntimeStatus> runtime() {
+        boolean relayEnabled = environment.getProperty(
+                "omni.mqlog.relay.enabled", Boolean.class, true);
+        boolean executorEnabled = environment.getProperty(
+                "xxl.job.executor.enabled", Boolean.class, true);
+        boolean deliveryEnabled = relayEnabled && executorEnabled;
+        return R.ok(new MqRelayRuntimeStatus(
+                true,
+                deliveryEnabled,
+                deliveryEnabled ? "FULL" : "OUTBOX_ONLY"));
+    }
 
     /**
      * 分页查询消息记录。
@@ -83,7 +106,8 @@ public class MqMessageController {
 
     /**
      * 手动重发消息。
-     * <p>将 PENDING/FAILED/DEAD_LETTER 状态的消息重置为 PENDING，relay 任务下次轮询时重新投递。</p>
+     * <p>WP010 R04：原子 CAS 条件更新——仅 FAILED/DEAD_LETTER 状态可重置为 PENDING（retry_count 归零、退避清空）；
+     * 若并发操作已改变状态则返回业务码 400，不静默覆盖终态。</p>
      *
      * @param tenantId 租户 ID
      * @param msgId    消息ID
@@ -91,6 +115,7 @@ public class MqMessageController {
      */
     @PostMapping("/{msgId}/resend")
     @PreAuthorize("hasAuthority('base:mqmessage:resend')")
+    @OperLog(module = "消息记录管理", operType = OperType.UPDATE)
     public R<Void> resend(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @PathVariable String msgId) {
@@ -100,7 +125,7 @@ public class MqMessageController {
 
     /**
      * 标记忽略（DEAD_LETTER -> SKIPPED）。
-     * <p>确认该消息无需再投递，标记为已忽略终态。</p>
+     * <p>WP010 R04：原子 CAS 仅当当前状态为 DEAD_LETTER 时生效；并发重复操作返回 400，确认终态不可静默覆盖。</p>
      *
      * @param tenantId 租户 ID
      * @param msgId    消息ID
@@ -108,10 +133,24 @@ public class MqMessageController {
      */
     @PostMapping("/{msgId}/skip")
     @PreAuthorize("hasAuthority('base:mqmessage:skip')")
+    @OperLog(module = "消息记录管理", operType = OperType.UPDATE)
     public R<Void> skip(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @PathVariable String msgId) {
         mqMessageAggregationService.skip(tenantId, msgId);
         return R.ok();
+    }
+
+    /**
+     * 消息投递运行状态。
+     *
+     * @param outboxWriteEnabled 本地事务 Outbox 是否可写
+     * @param deliveryEnabled    后台异步投递是否启用
+     * @param mode               运行模式
+     */
+    public record MqRelayRuntimeStatus(
+            boolean outboxWriteEnabled,
+            boolean deliveryEnabled,
+            String mode) {
     }
 }

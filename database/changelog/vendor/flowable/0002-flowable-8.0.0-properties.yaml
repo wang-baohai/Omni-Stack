@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: vendor-flowable-0002-8.0.0-properties
+      author: omni-scaffold
+      labels: database:vendor-flowable,adoption-upgrade
+      comment: 补齐 Flowable 8.0.0 官方建库脚本中的引擎、公共、事件注册和 IDM 版本属性
+      preConditions:
+        - dbms:
+            type: mysql
+        - tableExists:
+            tableName: ACT_GE_PROPERTY
+        - tableExists:
+            tableName: ACT_ID_PROPERTY
+      changes:
+        - sql:
+            splitStatements: true
+            stripComments: true
+            sql: |
+              INSERT IGNORE INTO ACT_GE_PROPERTY (NAME_, VALUE_, REV_)
+              VALUES ('schema.version', '8.0.0.0', 1);
+              INSERT IGNORE INTO ACT_GE_PROPERTY (NAME_, VALUE_, REV_)
+              VALUES ('schema.history', 'create(8.0.0.0)', 1);
+              INSERT IGNORE INTO ACT_GE_PROPERTY (NAME_, VALUE_, REV_)
+              VALUES ('common.schema.version', '8.0.0.0', 1);
+              INSERT IGNORE INTO ACT_GE_PROPERTY (NAME_, VALUE_, REV_)
+              VALUES ('next.dbid', '1', 1);
+              INSERT IGNORE INTO ACT_GE_PROPERTY (NAME_, VALUE_, REV_)
+              VALUES ('eventregistry.schema.version', '8.0.0.0', 1);
+              INSERT IGNORE INTO ACT_ID_PROPERTY (NAME_, VALUE_, REV_)
+              VALUES ('schema.version', '8.0.0.0', 1);

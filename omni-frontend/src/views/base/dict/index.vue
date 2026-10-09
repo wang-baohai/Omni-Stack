@@ -371,9 +371,9 @@ onMounted(() => {
 
           <el-pagination
             v-if="typeTotal > 0"
+            v-model:page-size="typeSize"
             class="type-pagination"
             :current-page="typePage"
-            v-model:page-size="typeSize"
             :page-sizes="[5, 10, 20, 50, 100]"
             :total="typeTotal"
             layout="total, sizes, prev, pager, next"
@@ -452,9 +452,9 @@ onMounted(() => {
 
             <el-pagination
               v-if="dataTotal > 0"
+              v-model:page-size="dataSize"
               class="data-pagination"
               :current-page="dataPage"
-              v-model:page-size="dataSize"
               :page-sizes="[5, 10, 20, 50, 100]"
               :total="dataTotal"
               layout="total, sizes, prev, pager, next"
@@ -561,5 +561,25 @@ onMounted(() => {
   margin-top: 12px;
   display: flex;
   justify-content: flex-end;
+}
+
+/* WP-012 F12：移动/竖屏平板（<992px）左右两栏由固定 10/14 分栏改为整宽堆叠，
+   避免卡片被压扁导致表格列不可达与横向溢出；>=992px 维持原桌面分栏不变。 */
+@media (max-width: 992px) {
+  .dict-row :deep(.el-col) {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+}
+
+/* 弹层宽度在 390 视口溢出视口边界：el-dialog 的 width 以行内样式落地，
+   故需 !important 覆盖第三方内联宽度（AGENTS 允许覆盖第三方组件样式）。
+   scoped :deep 是否命中弹层覆盖层须 S12 运行时确认。 */
+@media (max-width: 600px) {
+  .dict-management :deep(.el-dialog) {
+    width: 92% !important;
+    margin-top: 8vh !important;
+  }
 }
 </style>

@@ -1,0 +1,66 @@
+baselineCommit: "09a29fe10af9c7ddffe5001238d048947868dc98"
+algorithm: "mysql-information-schema-v1"
+targets:
+  - id: auth
+    database: omni_auth
+    expectedTables: 20
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 1
+    expectedSha256: "acb200c9499f643be8d9e045d94c5a520c34c953d03cc51ff2f511bfc8db1b55"
+  - id: base
+    database: omni_base
+    expectedTables: 8
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "c3ffaf8e835520f420bf2f8dfcce803af60bdef1c5a4504c42cca679348b648a"
+  - id: workflow
+    database: omni_workflow
+    expectedTables: 54
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "198fe5312d31abb81d865c368d0a5a530ef0cbba60f5b4cf159c51b8a17a6678"
+  - id: crm
+    database: omni_crm
+    expectedTables: 12
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "d590a0e19b9b42212df7420e9bf59a3d3aa651ef3fa016ecc9269e02284e4c0d"
+  - id: srm
+    database: omni_srm
+    expectedTables: 21
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "d0af9e04d58225fa6300bf07e1c3d8450b04a2c71078dfefb3f2a10713c7f9e4"
+  - id: procurement
+    database: omni_procurement
+    expectedTables: 15
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "2f4213dcbe7eeae8d5bded181c58c2f438dc83394fb737be46fd3bf8a44e9376"
+  - id: asset
+    database: omni_asset
+    expectedTables: 6
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "b8911dc8f5657d5bf544a7dbd15672dfbecbe9ef5afff426cf197fb4d2636c8d"
+  - id: nacos
+    database: nacos_config
+    expectedTables: 10
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "47372dd8400ee1d01e4bb8339af82b153582119937bda89139d8cafd780d88c2"
+  - id: xxl-job
+    database: xxl_job
+    expectedTables: 8
+    expectedViews: 0
+    expectedTriggers: 0
+    expectedRoutines: 0
+    expectedSha256: "9dc5f8a30ff67dd5556b4b191e2b11fd56e56d9233dad15c981909dcf7cde981"

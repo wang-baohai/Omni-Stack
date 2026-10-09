@@ -3,7 +3,7 @@
  * 用户管理页面。
  * 提供用户的增删改查、角色分配和状态切换功能。
  */
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listUsers, createUser, deleteUser, toggleUserStatus, assignUserRoles, getUserRoleIds, type SysUser } from '@/api/user'
@@ -35,7 +35,7 @@ async function loadTenants() {
     const { data: res } = await listTenants()
     tenants.value = res.data
   } catch {
-    ElMessage.error('租户列表加载失败')
+    ElMessage.error(t('user.tenantLoadFailed'))
     tenants.value = []
   }
 }
@@ -52,11 +52,14 @@ const createForm = ref({
   tenantId: undefined as number | undefined,
 })
 const createFormRef = ref()
-const createRules = {
-  username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
-  password: [{ required: true, message: '密码不能为空', trigger: 'blur' }, { min: 6, message: '密码至少 6 个字符', trigger: 'blur' }],
-  tenantId: [{ required: true, message: '请选择租户', trigger: 'change' }],
-}
+const createRules = computed(() => ({
+  username: [{ required: true, message: t('user.usernameRequired'), trigger: 'blur' }],
+  password: [
+    { required: true, message: t('user.passwordRequired'), trigger: 'blur' },
+    { min: 6, message: t('user.passwordMinLength'), trigger: 'blur' },
+  ],
+  tenantId: [{ required: true, message: t('user.tenantRequired'), trigger: 'change' }],
+}))
 
 /** 角色分配对话框 */
 const roleDialogVisible = ref(false)
@@ -166,7 +169,7 @@ async function handleCreate() {
   if (!valid) return
   try {
     await createUser({ ...createForm.value, tenantId: createForm.value.tenantId! })
-    ElMessage.success('创建成功')
+    ElMessage.success(t('user.createSuccess'))
     createDialogVisible.value = false
     loadData()
   } catch {
@@ -183,6 +186,27 @@ function getGenderText(gender: number): string {
   return t('user.genderUnknown')
 }
 
+/**
+ * 手机号掩码显示：保留前3后4（138****8000），短号退化为全掩码。
+ * 列表页展示层脱敏，避免完整手机号进入截图/泄露面；编辑能力不受影响。
+ */
+function maskPhone(phone?: string): string {
+  if (!phone) return '-'
+  const p = String(phone)
+  return p.length >= 8 ? `${p.slice(0, 3)}****${p.slice(-4)}` : '****'
+}
+
+/**
+ * 邮箱掩码显示：保留首字符与@域名（w***@example.com）。
+ */
+function maskEmail(email?: string): string {
+  if (!email) return '-'
+  const e = String(email)
+  const at = e.indexOf('@')
+  if (at <= 0) return '****'
+  return `${e.slice(0, 1)}***${e.slice(at)}`
+}
+
 onMounted(() => {
   loadData()
   loadTenants()
@@ -196,17 +220,25 @@ onMounted(() => {
         <div class="card-header">
           <span>{{ t('common.users') }}</span>
           <el-button v-permission="'system:user:create'" type="primary" @click="openCreateDialog">
-            新增用户
+            {{ t('user.createUser') }}
           </el-button>
         </div>
       </template>
 
-      <el-table v-loading="loading" :data="tableData" stripe border>
+      <el-table v-loading="loading" :data="tableData" class="user-table" stripe border>
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="username" :label="t('user.username')" width="120" />
         <el-table-column prop="nickname" :label="t('user.nickname')" width="120" />
-        <el-table-column prop="email" :label="t('user.email')" min-width="180" />
-        <el-table-column prop="phone" :label="t('user.phone')" width="140" />
+        <el-table-column prop="email" :label="t('user.email')" min-width="180">
+          <template #default="{ row }">
+            {{ maskEmail(row.email) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="phone" :label="t('user.phone')" width="140">
+          <template #default="{ row }">
+            {{ maskPhone(row.phone) }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('user.gender')" width="80">
           <template #default="{ row }">
             {{ getGenderText(row.gender) }}
@@ -269,25 +301,25 @@ onMounted(() => {
     </el-dialog>
 
     <!-- 新增用户对话框 -->
-    <el-dialog v-model="createDialogVisible" title="新增用户" width="500px">
+    <el-dialog v-model="createDialogVisible" :title="t('user.createUser')" width="500px">
       <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="80px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="createForm.username" placeholder="请输入用户名" />
+        <el-form-item :label="t('user.username')" prop="username">
+          <el-input v-model="createForm.username" :placeholder="t('user.usernamePlaceholder')" />
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="createForm.password" type="password" placeholder="请输入密码（至少6位）" show-password />
+        <el-form-item :label="t('user.password')" prop="password">
+          <el-input v-model="createForm.password" type="password" :placeholder="t('user.passwordPlaceholder')" show-password />
         </el-form-item>
-        <el-form-item label="昵称" prop="nickname">
-          <el-input v-model="createForm.nickname" placeholder="请输入昵称" />
+        <el-form-item :label="t('user.nickname')" prop="nickname">
+          <el-input v-model="createForm.nickname" :placeholder="t('user.nicknamePlaceholder')" />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="createForm.email" placeholder="请输入邮箱" />
+        <el-form-item :label="t('user.email')" prop="email">
+          <el-input v-model="createForm.email" :placeholder="t('user.emailPlaceholder')" />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="createForm.phone" placeholder="请输入手机号" />
+        <el-form-item :label="t('user.phone')" prop="phone">
+          <el-input v-model="createForm.phone" :placeholder="t('user.phonePlaceholder')" />
         </el-form-item>
-        <el-form-item label="租户" prop="tenantId">
-          <el-select v-model="createForm.tenantId" placeholder="请选择租户" style="width: 100%">
+        <el-form-item :label="t('user.tenant')" prop="tenantId">
+          <el-select v-model="createForm.tenantId" :placeholder="t('user.tenantPlaceholder')" style="width: 100%">
             <el-option
               v-for="tenant in tenants"
               :key="tenant.id"
@@ -319,5 +351,39 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+/* 仅窄屏生效的布局修复：桌面端（含 1440px 已有四语截图证据）不进入本断点，外观完全不变 */
+@media (max-width: 600px) {
+  .page-container { padding: 4px; }
+  /* 用更高权重压过全局 html.dark .el-card .el-card__body 的 20px 内边距，为表格争取可视宽度 */
+  .page-container :deep(.el-card .el-card__body) { padding: 12px; }
+
+  /* D4 修复：标题与“新增用户”按钮在窄屏并排会重叠，改为允许换行并把标题占满一行，按钮落到第二行 */
+  .card-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card-header > span { flex: 1 1 100%; }
+
+  /* D1 修复：“操作”列宽 280px 大于窄屏可视宽度，fixed="right" 的 sticky 会把它
+     钉满整个视口，导致 ID/用户名等 7 列被完全遮挡。窄屏下取消吸位，
+     使其回到正常文档流，配合表体原生横向滚动即可左右滑动看到全部列。 */
+  .page-container .user-table { overflow-x: auto; }
+  .user-table :deep(.el-table__body-wrapper) { overflow-x: auto; }
+  .user-table :deep(.el-table__body-wrapper tr td.el-table-fixed-column--right),
+  .user-table :deep(.el-table__header-wrapper tr th.el-table-fixed-column--right),
+  .user-table :deep(.el-table__header-wrapper tr th.el-table__fixed-right-patch) {
+    /* 覆盖 Element Plus 对固定列的 position: sticky !important（项目规范允许为第三方组件样式使用 !important） */
+    position: static !important;
+  }
+  /* 去掉固定列遗留的边缘投影占位，避免取消吸位后在表格中部出现多余阴影 */
+  .user-table :deep(.el-table__body-wrapper tr td.el-table-fixed-column--right:before),
+  .user-table :deep(.el-table__header-wrapper tr th.el-table-fixed-column--right:before) {
+    display: none;
+  }
+
+  /* 分页控件在窄屏靠左对齐并允许横向滚动，避免整块被挤出视口 */
+  .pagination { justify-content: flex-start; overflow-x: auto; }
 }
 </style>

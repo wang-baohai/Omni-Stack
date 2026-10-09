@@ -5,8 +5,9 @@ import com.omni.common.core.result.BusinessException;
 import com.omni.srm.dto.InternalSupplierSummary;
 import com.omni.srm.entity.SrmSupplier;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmDataScopeContext;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.InternalSupplierService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -119,13 +120,13 @@ public class InternalSupplierServiceImpl implements InternalSupplierService {
             throw new BusinessException(400, "tenantId 必须为正整数");
         }
         try {
-            SrmTenantContext.set(new SrmTenantContext.RequestIdentity(0L, tenantId, "internal-service"));
-            SrmDataScopeContext.set(new SrmDataScopeContext.ScopeInfo(
-                    0L, tenantId, "INTERNAL", null, "TENANT", Collections.emptySet()));
+            ServiceIdentityContext.set(new ServiceRequestIdentity(0L, tenantId, "internal-service"));
+            ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                    0L, tenantId, "INTERNAL", null, "TENANT", Collections.emptySet(), null));
             return action.get();
         } finally {
-            SrmDataScopeContext.clear();
-            SrmTenantContext.clear();
+            ServiceDataScopeContext.clear();
+            ServiceIdentityContext.clear();
         }
     }
 

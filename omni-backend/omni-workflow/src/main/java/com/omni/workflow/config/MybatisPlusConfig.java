@@ -2,6 +2,7 @@ package com.omni.workflow.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import net.sf.jsqlparser.expression.Expression;
@@ -21,6 +22,7 @@ import java.util.Locale;
  * <h3>插件注册顺序</h3>
  * <ol>
  *   <li>{@link TenantLineInnerInterceptor} — 业务表（wf_*）的租户隔离</li>
+ *   <li>{@link OptimisticLockerInnerInterceptor} — 支持 {@code @Version} 并发更新</li>
  *   <li>{@link PaginationInnerInterceptor} — MySQL 分页（自动改写 LIMIT/OFFSET）</li>
  * </ol>
  *
@@ -59,6 +61,7 @@ public class MybatisPlusConfig {
         });
 
         interceptor.addInnerInterceptor(tenantInterceptor);
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
     }

@@ -46,6 +46,8 @@ export const menuI18nMap: Record<string, string> = {
   'system:authrecord': 'common.authRecords',
   'system:auditlog': 'common.auditLogs',
   'system:xssconfig': 'common.xssConfig',
+  'system:config': 'common.systemConfig',
+  'system:loginrecord': 'common.loginRecords',
   'base': 'common.baseManagement',
   'base:dict': 'common.dictManagement',
   'base:operlog': 'common.operLogs',

@@ -1,0 +1,38 @@
+package com.omni.asset.client;
+
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.internal.InternalFeignHeadersFactory;
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/** Asset 内部 Feign 客户端统一认证头配置测试。 */
+class AssetInternalFeignConfigTest {
+
+    private static final String TOKEN = "asset-feign-test-token-0123456789abcdef";
+
+    /** Auth、SRM、Procurement 与 Workflow 客户端都必须使用 Starter 工厂注入内部令牌。 */
+    @Test
+    void shouldUseStarterFactoryForEveryInternalClient() {
+        ServiceIdentityProperties properties = new ServiceIdentityProperties();
+        properties.getInternalApi().setToken(TOKEN);
+        InternalFeignHeadersFactory factory = new InternalFeignHeadersFactory();
+        List<RequestInterceptor> interceptors = List.of(
+                new AuthInternalClient.FeignConfig().internalTokenInterceptor(properties, factory),
+                new SrmInternalClient.FeignConfig().assetSrmInternalTokenInterceptor(properties, factory),
+                new ProcurementInternalClient.FeignConfig()
+                        .assetProcurementInternalTokenInterceptor(properties, factory),
+                new WorkflowInternalClient.FeignConfig()
+                        .assetWorkflowInternalTokenInterceptor(properties, factory));
+
+        for (RequestInterceptor interceptor : interceptors) {
+            RequestTemplate template = new RequestTemplate();
+            interceptor.apply(template);
+            assertThat(template.headers().get("X-Internal-Token")).containsExactly(TOKEN);
+        }
+    }
+}

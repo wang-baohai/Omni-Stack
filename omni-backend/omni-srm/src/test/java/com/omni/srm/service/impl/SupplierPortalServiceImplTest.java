@@ -12,8 +12,9 @@ import com.omni.srm.entity.SrmSupplierPortalUser;
 import com.omni.srm.mapper.SrmSupplierEnrollmentMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
 import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
-import com.omni.srm.security.SrmDataScopeContext;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.PortalInviteService;
 import com.omni.srm.service.support.SupplierRiskInitializer;
 import com.omni.srm.workflow.SupplierWorkflowCoordinator;
@@ -64,13 +65,13 @@ class SupplierPortalServiceImplTest {
         initTableInfo(SrmSupplierPortalUser.class);
         service = new SupplierPortalServiceImpl(supplierMapper, portalUserMapper, enrollmentMapper,
                 portalInviteService, supplierRiskInitializer, reliableMessageRelay, workflowCoordinator);
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(20L, 1L, "supplier-user"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(20L, 1L, "supplier-user"));
     }
 
     @AfterEach
     void tearDown() {
-        SrmDataScopeContext.clear();
-        SrmTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     @Test

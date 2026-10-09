@@ -11,6 +11,8 @@ spring:
     import:
       - optional:nacos:${spring.application.name}.yml?group=DEFAULT_GROUP&refreshEnabled=true
   cloud:
+    function:
+      definition: tenantProvisionRequestedFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
@@ -37,6 +39,13 @@ spring:
         crm-domain-out-0:
           destination: crm-domain-event
           content-type: application/json
+        tenantProvisionRequestedFunction-in-0:
+          destination: tenant-provisioning
+          content-type: application/json
+          group: crm-tenant-provision-group
+        tenantProvisionResult-out-0:
+          destination: tenant-provision-result
+          content-type: application/json
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/omni_crm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
@@ -56,6 +65,30 @@ management:
     web:
       exposure:
         include: health,info,prometheus,metrics
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.0}
+    export:
+      otlp:
+        enabled: ${OTLP_EXPORT_ENABLED:false}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+    tags:
+      service.name: ${spring.application.name}
+      environment: ${OMNI_ENVIRONMENT:local}
+      instance: ${HOSTNAME:local}
   endpoint:
     health:
       show-details: when_authorized
@@ -64,6 +97,20 @@ omni:
   internal:
     api:
       token: ${OMNI_INTERNAL_API_TOKEN:}
+  service:
+    name: omni-crm
+    display-name: CRM
+    gateway-preauth:
+      enabled: true
+    internal-api:
+      enabled: true
+      token: ${OMNI_INTERNAL_API_TOKEN:}
+    tenant:
+      enabled: true
+    data-scope:
+      enabled: true
+    xss:
+      enabled: true
 
 xxl:
   job:

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -37,6 +38,12 @@ import java.io.IOException;
  * 过滤器在 {@code SecurityContextPersistenceFilter} 之后执行，
  * 将已认证的客户端主体写入 {@link SecurityContextHolder}，
  * 使后续 SAS 端点过滤器能正确获取已认证的客户端。
+ * 请求处理完成后在 finally 中把 SecurityContext 还原为进入前的原始值：
+ * 该客户端主体仅供本次请求内的 SAS 端点过滤器消费，不能被外层
+ * {@code SecurityContextPersistenceFilter}/{@code SecurityContextHolderFilter} 回写到
+ * 共享 JSESSIONID 会话；一旦泄漏到后续用户侧请求（如 device_verification），
+ * SAS 7.0.5 会把它无条件存进 OAuth2Authorization 的 {@code java.security.Principal}
+ * 属性，而 Jackson 无法反序列化该类型（no Creators），后续回读即抛异常（实测）。
  * </p>
  *
  * @author Omni-Stack Team
@@ -97,6 +104,9 @@ public class DeviceClientAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication originalAuthentication = context.getAuthentication();
+        boolean clientAuthApplied = false;
         try {
             // 从请求参数中提取 client_id（兼容 form body 和 query string）
             String clientId = request.getParameter("client_id");
@@ -123,19 +133,25 @@ public class DeviceClientAuthenticationFilter extends OncePerRequestFilter {
                     new OAuth2ClientAuthenticationToken(
                             client, ClientAuthenticationMethod.NONE, null);
 
-            SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(clientAuth);
+            clientAuthApplied = true;
 
             log.debug("公有客户端 '{}' 已通过设备授权认证（端点: {}）", clientId, request.getRequestURI());
+
+            filterChain.doFilter(request, response);
         } catch (OAuth2AuthenticationException ex) {
             log.warn("设备授权客户端认证失败: {}", ex.getError().getDescription());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write(
                     "{\"error\":\"" + ex.getError().getErrorCode() + "\"}");
-            return;
+        } finally {
+            // 请求处理完成后必须把 SecurityContext 还原为进入本过滤器时的原始值：
+            // OAuth2ClientAuthenticationToken 只能存在于本次请求的认证上下文内，
+            // 绝不能被外层 session 持久化过滤器回写进共享 JSESSIONID（详见类注释）。
+            if (clientAuthApplied) {
+                context.setAuthentication(originalAuthentication);
+            }
         }
-
-        filterChain.doFilter(request, response);
     }
 }

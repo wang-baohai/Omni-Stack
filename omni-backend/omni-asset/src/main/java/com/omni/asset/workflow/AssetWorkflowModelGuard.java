@@ -2,7 +2,7 @@ package com.omni.asset.workflow;
 
 import com.omni.asset.client.WorkflowInternalClient;
 import com.omni.asset.dto.WorkflowContracts;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import feign.FeignException;
@@ -30,7 +30,7 @@ public class AssetWorkflowModelGuard {
         if (businessType == null || businessType.isBlank()) {
             throw new BusinessException(400, "资产审批业务类型不能为空");
         }
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         try {
             R<WorkflowContracts.ModelVersionResponse> response =
                     workflowInternalClient.getCurrentPublishedModelVersion(tenantId, businessType);
@@ -54,7 +54,7 @@ public class AssetWorkflowModelGuard {
         if (businessType == null || businessType.isBlank()) {
             throw new BusinessException(400, "资产审批业务类型不能为空");
         }
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         try {
             R<WorkflowContracts.ModelVersionResponse> response =
                     workflowInternalClient.getModelVersion(tenantId, modelVersionId);

@@ -1,0 +1,48 @@
+{
+  "name": "@omni-stack/cli",
+  "version": "0.6.1",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "omni": "dist/src/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test --experimental-test-isolation=none dist/test/*.test.js",
+    "test:golden": "npm run build && node scripts/service-golden.mjs",
+    "test:crud-golden": "npm run build && node scripts/crud-golden.mjs",
+    "test:crud-db-golden": "npm run build && node scripts/crud-database-golden.mjs",
+    "test:crud-runtime-golden": "npm run build && node scripts/crud-runtime-golden.mjs",
+    "test:preset-smoke": "npm run build && node scripts/preset-golden.mjs --presets=core,supply-chain --verify-only",
+    "test:preset-golden": "npm run build && node scripts/preset-golden.mjs",
+    "test:preset-structure": "npm run build && node scripts/preset-golden.mjs --structural-only",
+    "test:preset-runtime": "npm run build && node scripts/preset-runtime-golden.mjs",
+    "docs:preset": "npm run build && node scripts/preset-docs.mjs",
+    "docs:preset:check": "npm run build && node scripts/preset-docs.mjs --check",
+    "docs:links:check": "node scripts/docs-quality.mjs --scope=links",
+    "docs:i18n:check": "node scripts/docs-quality.mjs --scope=i18n",
+    "docs:screenshots:check": "node scripts/docs-quality.mjs --scope=screenshots",
+    "docs:readme:check": "node scripts/docs-quality.mjs --scope=readme",
+    "ui:i18n:audit": "node scripts/ui-i18n-audit.mjs",
+    "ui:i18n:check": "node scripts/ui-i18n-audit.mjs --check",
+    "docs:quality": "node scripts/docs-quality.mjs",
+    "docs:sensitive:check": "node scripts/docs-quality.mjs --scope=sensitive",
+    "secret:scan": "node scripts/secret-scan.mjs",
+    "test:quality-gates": "node scripts/docs-quality.mjs --scope=links && node scripts/docs-quality.mjs --scope=i18n && node scripts/docs-quality.mjs --scope=screenshots && node scripts/docs-quality.mjs --scope=sensitive && node scripts/docs-quality.mjs --scope=readme && node scripts/docs-review-queue.mjs",
+    "test:quality-runtime": "node scripts/quality-runtime-runner.mjs",
+    "dev": "tsx src/cli.ts",
+    "docs:source-digests:refresh": "node scripts/refresh-source-digests.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "commander": "^14.0.1",
+    "fast-xml-parser": "5.11.1",
+    "handlebars": "^4.7.8",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.6",
+    "tsx": "^4.20.6",
+    "typescript": "~5.9.3"
+  }
+}

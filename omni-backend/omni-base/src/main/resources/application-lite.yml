@@ -1,0 +1,26 @@
+# 轻量模式关闭 Nacos，使用 Spring Cloud SimpleDiscoveryClient 静态解析容器服务。
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+    discovery:
+      client:
+        simple:
+          instances:
+            omni-auth:
+              - uri: ${OMNI_AUTH_URL:http://omni-auth:8080}
+            omni-base:
+              - uri: ${OMNI_BASE_URL:http://omni-base:8080}
+            omni-workflow:
+              - uri: ${OMNI_WORKFLOW_URL:http://omni-workflow:8080}
+            omni-crm:
+              - uri: ${OMNI_CRM_URL:http://omni-crm:8080}
+            omni-srm:
+              - uri: ${OMNI_SRM_URL:http://omni-srm:8080}
+            omni-procurement:
+              - uri: ${OMNI_PROCUREMENT_URL:http://omni-procurement:8080}
+            omni-asset:
+              - uri: ${OMNI_ASSET_URL:http://omni-asset:8080}

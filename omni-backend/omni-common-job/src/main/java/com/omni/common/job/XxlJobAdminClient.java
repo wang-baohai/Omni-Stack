@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.time.Duration;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -178,6 +178,20 @@ public class XxlJobAdminClient {
         return doRequest(path, HttpMethod.POST, form);
     }
 
+    /**
+     * 写操作专用：认证重试后仍为业务失败（code!=200）时抛出异常，不得静默吞掉。
+     *
+     * @param path 接口路径
+     * @param form 表单参数
+     */
+    private void postFormChecked(String path, MultiValueMap<String, String> form) {
+        Map<String, Object> body = postForm(path, form);
+        Object code = body.get("code");
+        if (!(code instanceof Number) || ((Number) code).intValue() != 200) {
+            throw new RuntimeException("XXL-JOB API 业务失败: " + path + ", code=" + code + ", msg=" + body.get("msg"));
+        }
+    }
+
     // ─── 执行器管理 ───
 
     /**
@@ -222,8 +236,8 @@ public class XxlJobAdminClient {
      */
     public int getJobGroupId(String appname) {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-        form.add("start", "0");
-        form.add("length", "100");
+        form.add("offset", "0");
+        form.add("pagesize", "100");
         form.add("appname", appname);
 
         Map<String, Object> body = postForm("/jobgroup/pageList", form);
@@ -245,33 +259,128 @@ public class XxlJobAdminClient {
 
     // ─── 任务管理 ───
 
+    /** 分页硬性预算上限（防实现/契约变化后仍出现无上限循环；正常量级远不到此上限）。 */
+    private static final int MAX_PAGE_LIST_PAGES = 100;
+
     /**
-     * 查询已注册的任务列表。
+     * 查询已注册的任务列表（完整分页，杜绝首 100 条截断误判目标不存在）。
+     * <p>逐页遍历直到取满 {@code total}（XXL-JOB 3.3.1 {@code PageModel} 字段为 {@code offset/pagesize/data/total}，
+     * 不是 {@code start/length/recordsTotal}）；响应结构异常/内层非列表时显式抛错，
+     * 不得把解析异常或空返回当作“远端不存在”，交由上层保留可恢复关联。</p>
+     * <p>若 Admin 连续两次返回相同的一页内容（通常意味着请求参数名与 Admin 实际字段不匹配，Admin 忽略了
+     * 不认识的分页参数），或翻页次数超过硬性预算，均显式抛错终止——本方法被 {@code ApplicationRunner}
+     * 同步调用，一旦不返回会阻断 {@code ApplicationReadyEvent}，导致 readiness 永久不翻转。</p>
      *
      * @param jobGroup        执行器 ID
      * @param executorHandler Handler 名称（可选）
-     * @return 任务列表
+     * @return 该执行器组下的全量任务列表
      */
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> pageList(int jobGroup, String executorHandler) {
-        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-        form.add("start", "0");
-        form.add("length", "100");
-        form.add("jobGroup", String.valueOf(jobGroup));
-        form.add("triggerStatus", "-1");
-        form.add("jobDesc", "");
-        form.add("executorHandler", executorHandler != null ? executorHandler : "");
-        form.add("author", "");
+        List<Map<String, Object>> all = new ArrayList<>();
+        int offset = 0;
+        final int pagesize = 100;
+        List<Object> lastPageIds = null;
+        int pages = 0;
+        while (true) {
+            if (++pages > MAX_PAGE_LIST_PAGES) {
+                throw new RuntimeException("XXL-JOB pageList 翻页次数超过预算上限 " + MAX_PAGE_LIST_PAGES + "，终止以避免无限循环: jobGroup=" + jobGroup);
+            }
+            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+            form.add("offset", String.valueOf(offset));
+            form.add("pagesize", String.valueOf(pagesize));
+            form.add("jobGroup", String.valueOf(jobGroup));
+            form.add("triggerStatus", "-1");
+            form.add("jobDesc", "");
+            form.add("executorHandler", executorHandler != null ? executorHandler : "");
+            form.add("author", "");
 
-        Map<String, Object> body = postForm("/jobinfo/pageList", form);
-        Object data = body.get("data");
-        if (data instanceof Map<?, ?> pageData) {
-            Object dataArray = pageData.get("data");
-            if (dataArray instanceof List<?> list) {
-                return (List<Map<String, Object>>) list;
+            Map<String, Object> body = postForm("/jobinfo/pageList", form);
+            Object data = body.get("data");
+            if (!(data instanceof Map<?, ?> pageData)) {
+                throw new RuntimeException("XXL-JOB pageList 响应结构异常，无法确认远端任务集合: jobGroup=" + jobGroup);
+            }
+            Object inner = pageData.get("data");
+            if (!(inner instanceof List<?> list)) {
+                throw new RuntimeException("XXL-JOB pageList data 非列表，无法确认远端任务集合: jobGroup=" + jobGroup);
+            }
+            if (list.isEmpty()) {
+                break;
+            }
+            // 重复页保护：若本页 id 集合与上一页完全相同，说明 Admin 未按 offset 翻页（典型为请求参数名不匹配），
+            // 显式抛错终止，而不是无限累加重复行。
+            List<Object> thisPageIds = new ArrayList<>();
+            for (Object o : list) {
+                if (o instanceof Map<?, ?> m) {
+                    thisPageIds.add(m.get("id"));
+                }
+            }
+            if (lastPageIds != null && !thisPageIds.isEmpty() && thisPageIds.equals(lastPageIds)) {
+                throw new RuntimeException("XXL-JOB pageList 检测到重复页，疑似分页参数与 Admin 实际字段不匹配，" +
+                        "终止以避免无限循环: jobGroup=" + jobGroup + ", offset=" + offset);
+            }
+            lastPageIds = thisPageIds;
+            for (Object o : list) {
+                if (o instanceof Map<?, ?> m) {
+                    all.add((Map<String, Object>) m);
+                }
+            }
+            Object totalField = pageData.get("total");
+            long total = totalField instanceof Number n ? n.longValue() : -1L;
+            if (total >= 0 && all.size() >= total) {
+                break;
+            }
+            offset += pagesize;
+        }
+        return all;
+    }
+
+    /**
+     * 按可信关联精确定位远端任务 ID：执行器组 + Handler + executorParam（内含 tenantId+本地 jobId）。
+     * <p>不依赖任务名称（同名不同用户/租户会误伤）；pageList 异常时向上抛出，交由调用方保留恢复关联。</p>
+     *
+     * @param jobGroup        执行器组 ID
+     * @param executorHandler Handler 名称
+     * @param executorParam   执行器参数 JSON（与本地构造一致）
+     * @return 命中的 XXL 任务 ID；确认不存在时返回 null
+     */
+    public Integer findJobIdByTrustedCorrelation(int jobGroup, String executorHandler, String executorParam) {
+        for (Map<String, Object> job : pageList(jobGroup, executorHandler)) {
+            String eh = str(job.get("executorHandler"));
+            String ep = str(job.get("executorParam"));
+            if (executorHandler != null && executorHandler.equals(eh) && sameParam(executorParam, ep)) {
+                Object id = job.get("id");
+                if (id instanceof Number n) {
+                    return n.intValue();
+                }
             }
         }
-        return Collections.emptyList();
+        return null;
+    }
+
+    /**
+     * 按精确 ID 判断远端任务是否存在（完整分页后判定；pageList 异常向上抛出）。
+     *
+     * @param jobGroup 执行器组 ID
+     * @param xxlJobId XXL 任务 ID
+     * @return 存在返回 true，完整遍历后确认不存在返回 false
+     */
+    public boolean jobExistsById(int jobGroup, int xxlJobId) {
+        for (Map<String, Object> job : pageList(jobGroup, null)) {
+            Object id = job.get("id");
+            if (id instanceof Number n && n.intValue() == xxlJobId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** 归一化比较 executorParam：去空白后比对，容忍序列化空白差异。 */
+    private static boolean sameParam(String expected, String actual) {
+        if (expected == null || actual == null) {
+            return false;
+        }
+        return expected.replaceAll("\\s+", "").equals(actual.replaceAll("\\s+", ""));
     }
 
     /**
@@ -306,26 +415,65 @@ public class XxlJobAdminClient {
         }
 
         Map<String, Object> body = postForm("/jobinfo/insert", form);
+        Object code = body.get("code");
+        if (!(code instanceof Number) || ((Number) code).intValue() != 200) {
+            throw new RuntimeException("XXL-JOB 新增任务业务失败: code=" + code + ", msg=" + body.get("msg"));
+        }
         Object data = body.get("data");
-        return data != null ? data.toString() : "";
+        if (data == null) {
+            // 受理成功但无 ID：不可静默返回空串造成调用方回滚后孤儿，显式失败交由上层反查恢复
+            throw new RuntimeException("XXL-JOB 新增任务未返回任务ID，需反查调度中心确认");
+        }
+        return data.toString();
     }
 
     /**
      * 更新已有任务的调度配置（cron/参数）。
+     * <p>XXL-JOB 3.3.1 的 /jobinfo/update 要求全字段表单（实测：最小表单返回
+     * “请输入任务描述”业务错）。先按 jobGroup+id 反查现有行全量配置，再仅覆盖
+     * cron/executorParam 整体提交；业务失败（code!=200）抛异常，绝不静默假报成功。</p>
      *
+     * @param jobGroup      执行器 ID（反查用）
      * @param xxlJobId      XXL-JOB 任务 ID
      * @param cron          新的 Cron 表达式
      * @param executorParam 新的执行器参数（JSON 字符串）
      */
-    public void updateJob(int xxlJobId, String cron, String executorParam) {
+    public void updateJob(int jobGroup, int xxlJobId, String cron, String executorParam) {
+        Map<String, Object> existing = null;
+        for (Map<String, Object> job : pageList(jobGroup, null)) {
+            Object id = job.get("id");
+            if (id instanceof Number num && num.intValue() == xxlJobId) {
+                existing = job;
+                break;
+            }
+        }
+        if (existing == null) {
+            throw new RuntimeException("XXL-JOB 待更新任务反查不到: id=" + xxlJobId + ", jobGroup=" + jobGroup);
+        }
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("id", String.valueOf(xxlJobId));
+        form.add("jobGroup", str(existing.getOrDefault("jobGroup", jobGroup)));
+        form.add("jobDesc", str(existing.get("jobDesc")));
+        form.add("author", str(existing.getOrDefault("author", "admin")));
+        form.add("alarmEmail", str(existing.get("alarmEmail")));
         form.add("scheduleType", "CRON");
         form.add("scheduleConf", cron);
-        if (executorParam != null && !executorParam.isBlank()) {
-            form.add("executorParam", executorParam);
-        }
-        postForm("/jobinfo/update", form);
+        form.add("glueType", "BEAN");
+        form.add("glueRemark", str(existing.getOrDefault("glueRemark", "DEFAULT")));
+        form.add("childJobid", str(existing.get("childJobid")));
+        form.add("executorHandler", str(existing.get("executorHandler")));
+        form.add("executorParam", executorParam != null ? executorParam : str(existing.get("executorParam")));
+        form.add("executorRouteStrategy", str(existing.getOrDefault("executorRouteStrategy", "FIRST")));
+        form.add("executorBlockStrategy", str(existing.getOrDefault("executorBlockStrategy", "SERIAL_EXECUTION")));
+        form.add("executorTimeout", str(existing.getOrDefault("executorTimeout", 0)));
+        form.add("executorFailRetryCount", str(existing.getOrDefault("executorFailRetryCount", 0)));
+        form.add("misfireStrategy", str(existing.getOrDefault("misfireStrategy", "DO_NOTHING")));
+        form.add("triggerStatus", str(existing.get("triggerStatus")));
+        postFormChecked("/jobinfo/update", form);
+    }
+
+    private static String str(Object v) {
+        return v == null ? "" : String.valueOf(v);
     }
 
     /**
@@ -336,7 +484,7 @@ public class XxlJobAdminClient {
     public void startJob(int jobId) {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("ids[]", String.valueOf(jobId));
-        postForm("/jobinfo/start", form);
+        postFormChecked("/jobinfo/start", form);
     }
 
     /**
@@ -347,7 +495,7 @@ public class XxlJobAdminClient {
     public void stopJob(int jobId) {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("ids[]", String.valueOf(jobId));
-        postForm("/jobinfo/stop", form);
+        postFormChecked("/jobinfo/stop", form);
     }
 
     /**
@@ -361,7 +509,7 @@ public class XxlJobAdminClient {
         form.add("id", String.valueOf(jobId));
         form.add("executorParam", executorParam != null ? executorParam : "");
         form.add("addressList", "");
-        postForm("/jobinfo/trigger", form);
+        postFormChecked("/jobinfo/trigger", form);
     }
 
     /**
@@ -372,6 +520,6 @@ public class XxlJobAdminClient {
     public void removeJob(int jobId) {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("ids[]", String.valueOf(jobId));
-        postForm("/jobinfo/delete", form);
+        postFormChecked("/jobinfo/delete", form);
     }
 }

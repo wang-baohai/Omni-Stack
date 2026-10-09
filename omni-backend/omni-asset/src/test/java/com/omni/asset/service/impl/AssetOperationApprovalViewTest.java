@@ -12,8 +12,9 @@ import com.omni.asset.mapper.AstAssetHistoryMapper;
 import com.omni.asset.mapper.AstAssetMapper;
 import com.omni.asset.mapper.AstDisposalMapper;
 import com.omni.asset.mapper.AstTransferMapper;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.service.AssetOperationWorkflowStateService;
 import com.omni.asset.service.support.AssetIdentityGuard;
 import com.omni.asset.service.support.AssetRecordAccessGuard;
@@ -70,24 +71,24 @@ class AssetOperationApprovalViewTest {
     /** 清理请求身份与数据范围线程上下文。 */
     @AfterEach
     void clearContext() {
-        AssetDataScopeContext.clear();
-        AssetTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 调拨审批视图必须完整校验任务意图，并仅在详情读取期间提升到租户范围。 */
     @Test
     void shouldReadTransferApprovalViewWithinTemporaryTenantScope() {
         bindIdentity();
-        AssetDataScopeContext.ScopeInfo previous = previousScope("asset:transfer:approve");
-        AssetDataScopeContext.set(previous);
+        ServiceDataScopeContext.ScopeInfo previous = previousScope("asset:transfer:approve");
+        ServiceDataScopeContext.set(previous);
         AstTransfer transfer = transfer();
         AstAsset asset = asset();
-        AtomicReference<AssetDataScopeContext.ScopeInfo> scopeDuringRead =
+        AtomicReference<ServiceDataScopeContext.ScopeInfo> scopeDuringRead =
                 new AtomicReference<>();
         when(transferMapper.selectWorkflowIdentity(31L, 100L)).thenReturn(transfer);
         when(transferMapper.selectOne(ArgumentMatchers.<Wrapper<AstTransfer>>any()))
                 .thenAnswer(invocation -> {
-                    scopeDuringRead.set(AssetDataScopeContext.require());
+                    scopeDuringRead.set(ServiceDataScopeContext.require());
                     return transfer;
                 });
         when(assetMapper.selectOne(ArgumentMatchers.<Wrapper<AstAsset>>any()))
@@ -107,22 +108,22 @@ class AssetOperationApprovalViewTest {
         assertThat(scopeDuringRead.get().effectiveScope()).isEqualTo("TENANT");
         assertThat(scopeDuringRead.get().permissionCode())
                 .isEqualTo("asset:transfer:approve");
-        assertThat(AssetDataScopeContext.get()).isEqualTo(previous);
+        assertThat(ServiceDataScopeContext.get()).isEqualTo(previous);
     }
 
     /** 处置审批视图必须使用处置业务键和本地流程实例执行任务校验。 */
     @Test
     void shouldReadDisposalApprovalViewWithinTemporaryTenantScope() {
         bindIdentity();
-        AssetDataScopeContext.ScopeInfo previous = previousScope("asset:disposal:approve");
-        AssetDataScopeContext.set(previous);
+        ServiceDataScopeContext.ScopeInfo previous = previousScope("asset:disposal:approve");
+        ServiceDataScopeContext.set(previous);
         AstDisposal disposal = disposal();
-        AtomicReference<AssetDataScopeContext.ScopeInfo> scopeDuringRead =
+        AtomicReference<ServiceDataScopeContext.ScopeInfo> scopeDuringRead =
                 new AtomicReference<>();
         when(disposalMapper.selectWorkflowIdentity(31L, 200L)).thenReturn(disposal);
         when(disposalMapper.selectOne(ArgumentMatchers.<Wrapper<AstDisposal>>any()))
                 .thenAnswer(invocation -> {
-                    scopeDuringRead.set(AssetDataScopeContext.require());
+                    scopeDuringRead.set(ServiceDataScopeContext.require());
                     return disposal;
                 });
         when(assetMapper.selectOne(ArgumentMatchers.<Wrapper<AstAsset>>any()))
@@ -142,15 +143,15 @@ class AssetOperationApprovalViewTest {
         assertThat(scopeDuringRead.get().effectiveScope()).isEqualTo("TENANT");
         assertThat(scopeDuringRead.get().permissionCode())
                 .isEqualTo("asset:disposal:approve");
-        assertThat(AssetDataScopeContext.get()).isEqualTo(previous);
+        assertThat(ServiceDataScopeContext.get()).isEqualTo(previous);
     }
 
     /** 非活动审批快照不得调用 Workflow，也不得进入租户范围详情读取。 */
     @Test
     void shouldRejectInactiveTransferBeforeApprovalScopeBypass() {
         bindIdentity();
-        AssetDataScopeContext.ScopeInfo previous = previousScope("asset:transfer:approve");
-        AssetDataScopeContext.set(previous);
+        ServiceDataScopeContext.ScopeInfo previous = previousScope("asset:transfer:approve");
+        ServiceDataScopeContext.set(previous);
         AstTransfer transfer = transfer();
         transfer.setStatus(AssetOperationStateMachine.APPROVED);
         when(transferMapper.selectWorkflowIdentity(31L, 100L)).thenReturn(transfer);
@@ -161,15 +162,15 @@ class AssetOperationApprovalViewTest {
 
         verifyNoInteractions(workflowApprovalGuard);
         verify(transferMapper, never()).selectOne(any());
-        assertThat(AssetDataScopeContext.get()).isEqualTo(previous);
+        assertThat(ServiceDataScopeContext.get()).isEqualTo(previous);
     }
 
     /** Workflow 拒绝任务资格时不得读取处置详情或提升 DataScope。 */
     @Test
     void shouldRejectUnassignedDisposalWithoutApprovalScopeBypass() {
         bindIdentity();
-        AssetDataScopeContext.ScopeInfo previous = previousScope("asset:disposal:approve");
-        AssetDataScopeContext.set(previous);
+        ServiceDataScopeContext.ScopeInfo previous = previousScope("asset:disposal:approve");
+        ServiceDataScopeContext.set(previous);
         when(disposalMapper.selectWorkflowIdentity(31L, 200L)).thenReturn(disposal());
         doThrow(new BusinessException(403, "任务未分配"))
                 .when(workflowApprovalGuard)
@@ -181,19 +182,19 @@ class AssetOperationApprovalViewTest {
 
         verify(disposalMapper, never()).selectOne(any());
         verify(assetMapper, never()).selectOne(any());
-        assertThat(AssetDataScopeContext.get()).isEqualTo(previous);
+        assertThat(ServiceDataScopeContext.get()).isEqualTo(previous);
     }
 
     /** 资格通过后详情查询异常也必须恢复调用方原始 DataScope。 */
     @Test
     void shouldRestorePreviousScopeWhenTransferDetailReadFails() {
         bindIdentity();
-        AssetDataScopeContext.ScopeInfo previous = previousScope("asset:transfer:approve");
-        AssetDataScopeContext.set(previous);
+        ServiceDataScopeContext.ScopeInfo previous = previousScope("asset:transfer:approve");
+        ServiceDataScopeContext.set(previous);
         when(transferMapper.selectWorkflowIdentity(31L, 100L)).thenReturn(transfer());
         when(transferMapper.selectOne(ArgumentMatchers.<Wrapper<AstTransfer>>any()))
                 .thenAnswer(invocation -> {
-                    assertThat(AssetDataScopeContext.require().effectiveScope())
+                    assertThat(ServiceDataScopeContext.require().effectiveScope())
                             .isEqualTo("TENANT");
                     throw new IllegalStateException("database unavailable");
                 });
@@ -201,7 +202,7 @@ class AssetOperationApprovalViewTest {
         assertThatThrownBy(() -> transferService().approvalView(100L, "task-transfer"))
                 .isInstanceOf(IllegalStateException.class);
 
-        assertThat(AssetDataScopeContext.get()).isEqualTo(previous);
+        assertThat(ServiceDataScopeContext.get()).isEqualTo(previous);
     }
 
     private AssetTransferServiceImpl transferService() {
@@ -219,12 +220,12 @@ class AssetOperationApprovalViewTest {
     }
 
     private void bindIdentity() {
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 31L, "approver"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "approver"));
     }
 
-    private AssetDataScopeContext.ScopeInfo previousScope(String permissionCode) {
-        return new AssetDataScopeContext.ScopeInfo(
-                7L, 31L, permissionCode, 12L, "DEPT", Set.of(12L));
+    private ServiceDataScopeContext.ScopeInfo previousScope(String permissionCode) {
+        return new ServiceDataScopeContext.ScopeInfo(
+                7L, 31L, permissionCode, 12L, "DEPT", Set.of(12L), null);
     }
 
     private AstTransfer transfer() {

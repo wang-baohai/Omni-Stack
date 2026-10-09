@@ -1,6 +1,7 @@
 <script setup lang="ts">
-/** 采购订单页面，跟踪询价定标后生成订单的发送、确认和收货进度。 */
-import { onMounted, reactive, ref } from 'vue'
+/** 采购订单页面，跟踪询价定标后订单的发送、确认和收货进度。 */
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
@@ -17,6 +18,7 @@ import {
 } from '@/api/procurement-purchase-order'
 import PurchaseOrderTracker from '@/components/procurement/PurchaseOrderTracker.vue'
 
+const { t } = useI18n()
 const loading = ref(false)
 const rows = ref<ProcurementPurchaseOrderSummary[]>([])
 const total = ref(0)
@@ -28,26 +30,21 @@ const query = reactive<{
   expectedDeliveryRange: string[]
 }>({ keyword: '', status: undefined, expectedDeliveryRange: [] })
 
-const statusOptions: Array<{
-  value: ProcurementPurchaseOrderStatus
-  label: string
-  type: 'info' | 'primary' | 'warning' | 'success' | 'danger'
-}> = [
-  { value: 'DRAFT', label: '草稿', type: 'info' },
-  { value: 'SENT', label: '已发送', type: 'primary' },
-  { value: 'CONFIRMED', label: '已确认', type: 'success' },
-  { value: 'PARTIAL_RECEIVED', label: '部分收货', type: 'warning' },
-  { value: 'RECEIVED', label: '已收齐', type: 'success' },
-  { value: 'CLOSED', label: '已关闭', type: 'info' },
-  { value: 'CANCELLED', label: '已取消', type: 'danger' },
-]
-const statusMap = Object.fromEntries(statusOptions.map((item) => [item.value, item])) as Record<
+const statusMap = computed<Record<
   ProcurementPurchaseOrderStatus,
-  (typeof statusOptions)[number]
->
+  { label: string; type: 'info' | 'primary' | 'warning' | 'success' | 'danger' }
+>>(() => ({
+  DRAFT: { label: t('procurementPurchaseOrderTracker.statusDraft'), type: 'info' },
+  SENT: { label: t('procurementPurchaseOrderTracker.statusSent'), type: 'primary' },
+  CONFIRMED: { label: t('procurementPurchaseOrderTracker.statusConfirmed'), type: 'success' },
+  PARTIAL_RECEIVED: { label: t('procurementPurchaseOrderTracker.statusPartialReceived'), type: 'warning' },
+  RECEIVED: { label: t('procurementPurchaseOrderTracker.statusReceived'), type: 'success' },
+  CLOSED: { label: t('procurementPurchaseOrderTracker.statusClosed'), type: 'info' },
+  CANCELLED: { label: t('procurementPurchaseOrderTracker.statusCancelled'), type: 'danger' },
+}))
 
 function statusInfo(status: ProcurementPurchaseOrderStatus) {
-  return statusMap[status]
+  return statusMap.value[status]
 }
 
 async function loadRows() {
@@ -89,24 +86,24 @@ const form = reactive({
   contactPhone: '',
   version: 0,
 })
-const rules: FormRules = {
+const rules = computed<FormRules>(() => ({
   title: [
-    { required: true, message: '请输入订单标题', trigger: 'blur' },
-    { max: 200, message: '订单标题不能超过 200 个字符', trigger: 'blur' },
+    { required: true, message: t('procurementPurchaseOrderMessages.titleRequired'), trigger: 'blur' },
+    { max: 200, message: t('procurementPurchaseOrderMessages.titleLength'), trigger: 'blur' },
   ],
   deliveryAddress: [
-    { required: true, message: '请输入收货地址', trigger: 'blur' },
-    { max: 500, message: '收货地址不能超过 500 个字符', trigger: 'blur' },
+    { required: true, message: t('procurementPurchaseOrderMessages.addressRequired'), trigger: 'blur' },
+    { max: 500, message: t('procurementPurchaseOrderMessages.addressLength'), trigger: 'blur' },
   ],
   contactName: [
-    { required: true, message: '请输入联系人', trigger: 'blur' },
-    { max: 100, message: '联系人不能超过 100 个字符', trigger: 'blur' },
+    { required: true, message: t('procurementPurchaseOrderMessages.contactRequired'), trigger: 'blur' },
+    { max: 100, message: t('procurementPurchaseOrderMessages.contactLength'), trigger: 'blur' },
   ],
   contactPhone: [
-    { required: true, message: '请输入联系电话', trigger: 'blur' },
-    { max: 50, message: '联系电话不能超过 50 个字符', trigger: 'blur' },
+    { required: true, message: t('procurementPurchaseOrderMessages.phoneRequired'), trigger: 'blur' },
+    { max: 50, message: t('procurementPurchaseOrderMessages.phoneLength'), trigger: 'blur' },
   ],
-}
+}))
 
 async function openEdit(row: ProcurementPurchaseOrderSummary) {
   const response = await getProcurementPurchaseOrder(row.id)
@@ -133,7 +130,7 @@ async function save() {
     contactName: form.contactName.trim(),
     contactPhone: form.contactPhone.trim(),
   })
-  ElMessage.success('采购订单已更新')
+  ElMessage.success(t('procurementPurchaseOrderMessages.updateSuccess'))
   editVisible.value = false
   await loadRows()
 }
@@ -155,11 +152,13 @@ async function openDetail(row: ProcurementPurchaseOrderSummary) {
 
 async function remove(row: ProcurementPurchaseOrderSummary) {
   try {
-    await ElMessageBox.confirm(`确认删除采购订单“${row.poNo}”？`, '删除确认', {
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      t('procurementPurchaseOrderMessages.deleteConfirm', { no: row.poNo }),
+      t('procurementPurchaseOrderMessages.deleteTitle'),
+      { type: 'warning' },
+    )
     await deleteProcurementPurchaseOrder(row.id, row.version)
-    ElMessage.success('采购订单已删除')
+    ElMessage.success(t('procurementPurchaseOrderMessages.deleteSuccess'))
     await loadRows()
   } catch {
     // 用户取消或请求失败时保留当前列表。
@@ -168,33 +167,40 @@ async function remove(row: ProcurementPurchaseOrderSummary) {
 
 async function send(row: ProcurementPurchaseOrderSummary) {
   try {
-    await ElMessageBox.confirm(`确认发送采购订单“${row.poNo}”？`, '发送订单', {
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      t('procurementPurchaseOrderMessages.sendConfirm', { no: row.poNo }),
+      t('procurementPurchaseOrderMessages.sendTitle'),
+      { type: 'warning' },
+    )
     await sendProcurementPurchaseOrder(row.id, row.version)
-    ElMessage.success('采购订单已发送')
+    ElMessage.success(t('procurementPurchaseOrderMessages.sendSuccess'))
   } finally {
     await loadRows()
   }
 }
 
-async function confirm(row: ProcurementPurchaseOrderSummary) {
+async function confirmOrder(row: ProcurementPurchaseOrderSummary) {
   try {
-    await ElMessageBox.confirm(`确认供应商已接受订单“${row.poNo}”？`, '确认订单')
+    await ElMessageBox.confirm(
+      t('procurementPurchaseOrderMessages.confirmText', { no: row.poNo }),
+      t('procurementPurchaseOrderMessages.confirmTitle'),
+    )
     await confirmProcurementPurchaseOrder(row.id, row.version)
-    ElMessage.success('采购订单已确认')
+    ElMessage.success(t('procurementPurchaseOrderTracker.statusConfirmed'))
   } finally {
     await loadRows()
   }
 }
 
-async function cancel(row: ProcurementPurchaseOrderSummary) {
+async function cancelOrder(row: ProcurementPurchaseOrderSummary) {
   try {
-    await ElMessageBox.confirm(`确认取消采购订单“${row.poNo}”？`, '取消确认', {
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      t('procurementPurchaseOrderMessages.cancelConfirm', { no: row.poNo }),
+      t('procurementPurchaseOrderMessages.cancelTitle'),
+      { type: 'warning' },
+    )
     await cancelProcurementPurchaseOrder(row.id, row.version)
-    ElMessage.success('采购订单已取消')
+    ElMessage.success(t('procurementPurchaseOrderMessages.cancelSuccess'))
   } finally {
     await loadRows()
   }
@@ -209,77 +215,79 @@ onMounted(loadRows)
       type="info"
       :closable="false"
       show-icon
-      title="采购订单只由询价定标生成，中标报价及金额快照不可由客户端修改。"
+      :title="t('procurementPurchaseOrderPage.notice')"
     />
 
     <el-card shadow="never">
       <template #header>
         <div class="card-header">
-          <span>采购订单</span>
-          <span class="header-tip">请在询价比价页完成定标以生成订单</span>
+          <span>{{ t('procurementPurchaseOrderPage.title') }}</span>
+          <span class="header-tip">{{ t('procurementPurchaseOrderPage.headerTip') }}</span>
         </div>
       </template>
 
       <el-form :inline="true" :model="query">
-        <el-form-item label="关键词">
+        <el-form-item :label="t('procurementPurchaseOrderPage.keyword')">
           <el-input
             v-model="query.keyword"
             clearable
-            placeholder="订单号、标题或供应商"
+            :placeholder="t('procurementPurchaseOrderPage.keywordPlaceholder')"
             @keyup.enter="search"
           />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="query.status" clearable placeholder="全部" style="width: 150px">
+        <el-form-item :label="t('procurementPurchaseOrderPage.status')">
+          <el-select v-model="query.status" clearable :placeholder="t('procurementPurchaseOrderPage.all')" style="width: 150px">
             <el-option
-              v-for="option in statusOptions"
-              :key="option.value"
+              v-for="(option, key) in statusMap"
+              :key="key"
               :label="option.label"
-              :value="option.value"
+              :value="key"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="预计交付">
+        <el-form-item :label="t('procurementPurchaseOrderTracker.expectedDelivery')">
           <el-date-picker
             v-model="query.expectedDeliveryRange"
             type="daterange"
             value-format="YYYY-MM-DD"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            :start-placeholder="t('procurementPurchaseOrderPage.startDate')"
+            :end-placeholder="t('procurementPurchaseOrderPage.endDate')"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="search">查询</el-button>
-          <el-button @click="resetQuery">重置</el-button>
+          <el-button type="primary" @click="search">{{ t('common.search') }}</el-button>
+          <el-button @click="resetQuery">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
       <el-table v-loading="loading" :data="rows" stripe>
-        <el-table-column prop="poNo" label="订单号" min-width="180" />
-        <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="poNo" :label="t('procurementPurchaseOrderTracker.orderNo')" min-width="180" />
+        <el-table-column prop="title" :label="t('procurementPurchaseOrderTracker.orderTitle')" min-width="200" show-overflow-tooltip />
         <el-table-column
           prop="supplierNameSnapshot"
-          label="供应商"
+          :label="t('procurementPurchaseOrderTracker.supplier')"
           min-width="180"
           show-overflow-tooltip
         />
-        <el-table-column label="订单金额" min-width="150" align="right">
+        <el-table-column :label="t('procurementPurchaseOrderTracker.orderAmount')" min-width="150" align="right">
           <template #default="{ row }">{{ row.totalAmount }} {{ row.currencyCode }}</template>
         </el-table-column>
-        <el-table-column prop="expectedDeliveryDate" label="预计交付" min-width="120">
+        <el-table-column prop="expectedDeliveryDate" :label="t('procurementPurchaseOrderTracker.expectedDelivery')" min-width="120">
           <template #default="{ row }">{{ row.expectedDeliveryDate || '—' }}</template>
         </el-table-column>
-        <el-table-column label="状态" min-width="120">
+        <el-table-column :label="t('procurementPurchaseOrderPage.status')" min-width="120">
           <template #default="{ row }">
             <el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="contactPhoneMasked" label="联系电话" min-width="130">
+        <el-table-column prop="contactPhoneMasked" :label="t('procurementPurchaseOrderTracker.contact')" min-width="130">
           <template #default="{ row }">{{ row.contactPhoneMasked || '—' }}</template>
         </el-table-column>
-        <el-table-column label="操作" min-width="320" fixed="right">
+        <el-table-column :label="t('common.actions')" min-width="320" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDetail(row)">详情</el-button>
+            <el-button link type="primary" @click="openDetail(row)">
+              {{ t('procurementRequisitionPage.detail') }}
+            </el-button>
             <el-button
               v-if="row.status === 'DRAFT'"
               v-permission="'procurement:purchase-order:update'"
@@ -287,7 +295,7 @@ onMounted(loadRows)
               type="primary"
               @click="openEdit(row)"
             >
-              编辑交付信息
+              {{ t('procurementPurchaseOrderPage.editDelivery') }}
             </el-button>
             <el-button
               v-if="row.status === 'DRAFT'"
@@ -296,16 +304,16 @@ onMounted(loadRows)
               type="success"
               @click="send(row)"
             >
-              发送
+              {{ t('procurementPurchaseOrderPage.send') }}
             </el-button>
             <el-button
               v-if="row.status === 'SENT'"
               v-permission="'procurement:purchase-order:confirm'"
               link
               type="success"
-              @click="confirm(row)"
+              @click="confirmOrder(row)"
             >
-              确认
+              {{ t('common.confirm') }}
             </el-button>
             <el-button
               v-if="row.status === 'DRAFT'"
@@ -314,16 +322,16 @@ onMounted(loadRows)
               type="danger"
               @click="remove(row)"
             >
-              删除
+              {{ t('common.delete') }}
             </el-button>
             <el-button
               v-if="['DRAFT', 'SENT', 'CONFIRMED'].includes(row.status)"
               v-permission="'procurement:purchase-order:cancel'"
               link
               type="danger"
-              @click="cancel(row)"
+              @click="cancelOrder(row)"
             >
-              取消
+              {{ t('common.cancel') }}
             </el-button>
           </template>
         </el-table-column>
@@ -342,37 +350,37 @@ onMounted(loadRows)
       />
     </el-card>
 
-    <el-dialog v-model="editVisible" title="编辑订单交付信息" width="640px">
+    <el-dialog v-model="editVisible" :title="t('procurementPurchaseOrderPage.editDeliveryTitle')" width="640px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
-        <el-form-item label="订单标题" prop="title">
+        <el-form-item :label="t('procurementPurchaseOrderTracker.orderTitle')" prop="title">
           <el-input v-model="form.title" maxlength="200" show-word-limit />
         </el-form-item>
-        <el-form-item label="预计交付">
+        <el-form-item :label="t('procurementPurchaseOrderTracker.expectedDelivery')">
           <el-date-picker
             v-model="form.expectedDeliveryDate"
             type="date"
             value-format="YYYY-MM-DD"
-            placeholder="可留空"
+            :placeholder="t('procurementPurchaseOrderPage.optional')"
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="收货地址" prop="deliveryAddress">
+        <el-form-item :label="t('procurementPurchaseOrderTracker.deliveryAddress')" prop="deliveryAddress">
           <el-input v-model="form.deliveryAddress" type="textarea" :rows="3" maxlength="500" />
         </el-form-item>
-        <el-form-item label="联系人" prop="contactName">
+        <el-form-item :label="t('procurementPurchaseOrderTracker.contact')" prop="contactName">
           <el-input v-model="form.contactName" maxlength="100" />
         </el-form-item>
-        <el-form-item label="联系电话" prop="contactPhone">
+        <el-form-item :label="t('procurementPurchaseOrderPage.contactPhone')" prop="contactPhone">
           <el-input v-model="form.contactPhone" maxlength="50" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editVisible = false">取消</el-button>
-        <el-button type="primary" @click="save">保存</el-button>
+        <el-button @click="editVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="save">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-drawer v-model="detailVisible" title="采购订单详情" size="76%">
+    <el-drawer v-model="detailVisible" :title="t('procurementPurchaseOrderPage.detailTitle')" size="76%">
       <div v-loading="detailLoading">
         <PurchaseOrderTracker :order-detail="detail" />
       </div>
@@ -402,5 +410,4 @@ onMounted(loadRows)
   justify-content: flex-end;
   margin-top: 16px;
 }
-
 </style>

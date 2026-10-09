@@ -1,6 +1,12 @@
 package com.omni.gateway.config;
 
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.handler.TracingObservationHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.http.HttpHeaders;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -8,6 +14,7 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 /**
  * 安全响应头过滤器（WebFlux 响应式技术栈）。
@@ -26,6 +33,19 @@ import java.util.UUID;
 @Component
 public class SecurityHeadersFilter implements WebFilter {
 
+    private final Supplier<Tracer> tracerSupplier;
+
+    /** 无追踪运行时场景使用，仅保留兼容关联 ID。 */
+    public SecurityHeadersFilter() {
+        this.tracerSupplier = () -> null;
+    }
+
+    /** 创建安全响应头过滤器。 */
+    @Autowired
+    public SecurityHeadersFilter(ObjectProvider<Tracer> tracerProvider) {
+        this.tracerSupplier = tracerProvider::getIfAvailable;
+    }
+
     /**
      * 为响应添加安全 HTTP 头。
      * <p>
@@ -42,20 +62,44 @@ public class SecurityHeadersFilter implements WebFilter {
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String traceId = UUID.randomUUID().toString().replace("-", "");
-        ServerWebExchange tracedExchange = exchange.mutate()
-                .request(exchange.getRequest().mutate()
-                        .headers(headers -> headers.set("X-Trace-Id", traceId))
-                        .build())
-                .build();
-        exchange.getResponse().beforeCommit(() -> {
-            HttpHeaders headers = exchange.getResponse().getHeaders();
-            headers.set("X-Trace-Id", traceId);
-            headers.set("X-Content-Type-Options", "nosniff");
-            headers.set("X-Frame-Options", "DENY");
-            headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-            return Mono.empty();
+        return Mono.defer(() -> {
+            String requestTraceId = currentTraceId(exchange);
+            ServerWebExchange tracedExchange = exchange.mutate()
+                    .request(exchange.getRequest().mutate()
+                            .headers(headers -> {
+                                headers.remove("X-Trace-Id");
+                                if (requestTraceId != null) {
+                                    headers.set("X-Trace-Id", requestTraceId);
+                                }
+                            })
+                            .build())
+                    .build();
+            exchange.getResponse().beforeCommit(() -> {
+                HttpHeaders headers = exchange.getResponse().getHeaders();
+                String responseTraceId = currentTraceId(exchange);
+                headers.set("X-Trace-Id", responseTraceId == null
+                        ? UUID.randomUUID().toString().replace("-", "") : responseTraceId);
+                headers.set("X-Content-Type-Options", "nosniff");
+                headers.set("X-Frame-Options", "DENY");
+                headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+                return Mono.empty();
+            });
+            return chain.filter(tracedExchange);
         });
-        return chain.filter(tracedExchange);
+    }
+
+    /** 优先从 WebFlux Observation 上下文读取真实 traceId。 */
+    private String currentTraceId(ServerWebExchange exchange) {
+        Span observationSpan = ServerRequestObservationContext.findCurrent(exchange.getAttributes())
+                .map(context -> context.<TracingObservationHandler.TracingContext>get(
+                        TracingObservationHandler.TracingContext.class))
+                .map(TracingObservationHandler.TracingContext::getSpan)
+                .orElse(null);
+        if (observationSpan != null) {
+            return observationSpan.context().traceId();
+        }
+        Tracer tracer = tracerSupplier.get();
+        Span currentSpan = tracer == null ? null : tracer.currentSpan();
+        return currentSpan == null ? null : currentSpan.context().traceId();
     }
 }

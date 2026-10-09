@@ -9,7 +9,7 @@ import com.omni.srm.dto.SrmViews;
 import com.omni.srm.entity.SrmSupplierContact;
 import com.omni.srm.mapper.SrmSupplierContactMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.ContactService;
 import com.omni.srm.service.support.SrmAuditSupport;
 import com.omni.srm.service.support.SrmRecordAccessGuard;
@@ -57,7 +57,7 @@ public class ContactServiceImpl implements ContactService {
             clearPrimary(supplierId, null);
         }
         SrmSupplierContact contact = new SrmSupplierContact();
-        contact.setTenantId(SrmTenantContext.requireTenantId());
+        contact.setTenantId(ServiceIdentityContext.requireTenantId());
         contact.setSupplierId(supplierId);
         contact.setName(request.getName());
         contact.setDepartment(request.getDepartment());
@@ -98,7 +98,7 @@ public class ContactServiceImpl implements ContactService {
         if (request.getDecisionRole() != null) update.set(SrmSupplierContact::getDecisionRole, request.getDecisionRole());
         if (request.getPrimaryFlag() != null) update.set(SrmSupplierContact::getPrimaryFlag, request.getPrimaryFlag());
         update.set(SrmSupplierContact::getUpdateTime, LocalDateTime.now())
-                .set(SrmSupplierContact::getUpdateBy, SrmTenantContext.require().username());
+                .set(SrmSupplierContact::getUpdateBy, ServiceIdentityContext.require().username());
         if (contactMapper.update(null, update) != 1) {
             throw new BusinessException(409, "记录已被其他用户修改，请刷新后重试");
         }
@@ -118,7 +118,7 @@ public class ContactServiceImpl implements ContactService {
                 .set(SrmSupplierContact::getDeleted, 1)
                 .setSql("version = version + 1");
         update.set(SrmSupplierContact::getUpdateTime, LocalDateTime.now())
-                .set(SrmSupplierContact::getUpdateBy, SrmTenantContext.require().username());
+                .set(SrmSupplierContact::getUpdateBy, ServiceIdentityContext.require().username());
         if (contactMapper.update(null, update) != 1) {
             throw new BusinessException(409, "记录已被其他用户修改，请刷新后重试");
         }
@@ -152,7 +152,7 @@ public class ContactServiceImpl implements ContactService {
                 .ne(excludeId != null, SrmSupplierContact::getId, excludeId)
                 .set(SrmSupplierContact::getPrimaryFlag, false)
                 .set(SrmSupplierContact::getUpdateTime, LocalDateTime.now())
-                .set(SrmSupplierContact::getUpdateBy, SrmTenantContext.require().username())
+                .set(SrmSupplierContact::getUpdateBy, ServiceIdentityContext.require().username())
                 .setSql("version = version + 1");
         contactMapper.update(null, update);
     }

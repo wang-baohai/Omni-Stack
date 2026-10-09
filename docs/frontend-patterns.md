@@ -280,7 +280,7 @@ Omni-Stack 采用**静态路由 + 动态路由**混合架构：
 router.beforeEach()
     ↓
 判断 to.meta.requiresAuth
-    ├── false → 已登录用户访问 /login → 重定向到 /home
+    ├── false → 已登录用户访问 /login → 重定向到 Home（实际 path 为 `/`，非 `/home`）
     │           其他公开页面 → 放行
     └── true  → 检查 userStore.token
                 ├── 无 Token → 重定向到 /login?redirect=<path>
@@ -467,7 +467,8 @@ const i18n = createI18n({
   legacy: false,
   locale: getStoredLang(),        // 从 localStorage 读取，默认 'zh-CN'
   fallbackLocale: 'en-US',
-  messages: { 'zh-CN': zhCN, 'en-US': enUS },
+  // 当前 SUPPORTED_LOCALES = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR']，新增模块必须四语齐全
+  messages: { 'zh-CN': zhCN, 'en-US': enUS, 'ja-JP': jaJP, 'ko-KR': koKR },
 })
 ```
 
@@ -511,7 +512,9 @@ export default {
 |------|------|------|
 | 1 | `src/locales/zh-CN.ts` | 添加 `common.<feature>Management` 和功能级翻译 key |
 | 2 | `src/locales/en-US.ts` | 添加对应英文翻译 |
-| 3 | `src/constants/menu.ts` → `menuI18nMap` | 添加 `permissionCode → i18n key` 映射 |
+| 3 | `src/locales/ja-JP.ts` | 添加对应日文翻译（当前为四语体系，缺项会导致日文回退） |
+| 4 | `src/locales/ko-KR.ts` | 添加对应韩文翻译 |
+| 5 | `src/constants/menu.ts` → `menuI18nMap` | 添加 `permissionCode → i18n key` 映射 |
 
 ---
 
@@ -622,9 +625,9 @@ src/
 |------|------|------|
 | 1 | `src/router/index.ts` → `iconMap` | 添加 `'<module>:<feature>': '<IconName>'`（如 `'base:dict': 'Collection'`） |
 | 2 | `src/constants/menu.ts` → `menuI18nMap` | 添加模块目录和菜单项的 i18n key 映射 |
-| 3 | `src/locales/zh-CN.ts` + `en-US.ts` | 添加 `common.<module>Management`（目录名）、`common.<feature>Management`（菜单名）和功能级翻译 key |
-| 4 | `scripts/sql/init-all.sql` → `sys_permission` | 添加 DIRECTORY（模块分组）+ MENU（功能页面）+ BUTTON/API（操作权限）种子数据 |
-| 5 | `scripts/sql/init-all.sql` → `sys_role_permission` | 为 SUPER_ADMIN 角色分配新权限节点 |
+| 3 | `src/locales/zh-CN.ts` + `en-US.ts` + `ja-JP.ts` + `ko-KR.ts` | 四个 locale 同步添加 `common.<module>Management`（目录名）、`common.<feature>Management`（菜单名）和功能级翻译 key |
+| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | 添加幂等 DIRECTORY（模块分组）+ MENU（功能页面）+ BUTTON/API（操作权限）种子数据，并刷新 seed manifest |
+| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | 幂等地为 SUPER_ADMIN 角色分配新权限节点，并增加自然键断言 |
 
 ### 参考实现：字典管理模块
 
@@ -730,7 +733,7 @@ COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 build: {
   target: 'es2020',            // 构建目标：支持可选链、空值合并等现代语法
   outDir: 'dist',
-  chunkSizeWarningLimit: 2000, // Element Plus 体积较大，适当调高阈值
+  chunkSizeWarningLimit: 750, // 当前仓库实际阈值
 }
 ```
 
@@ -739,16 +742,16 @@ build: {
 | 优化项 | 说明 |
 |--------|------|
 | **路由懒加载** | 所有 views 组件使用 `() => import()` 动态导入，实现按需加载 |
-| **Element Plus 按需** | 通过 `@vitejs/plugin-vue` 自动 tree-shake 未使用的组件 |
+| **Element Plus 按需** | 通过 `src/plugins/element-plus.ts` 显式导入并注册实际使用的组件（非插件自动 tree-shake） |
 | **`import.meta.glob`** | 视图模块扫描编译时静态分析，不会打包无关文件 |
-| **chunk splitting** | Vite/Rollup 自动将 vendor（vue、element-plus、axios）拆分为独立 chunk |
+| **chunk splitting** | `vite.config.ts` 的 `build.rollupOptions.output.manualChunks` 显式将 bpmn、vendor、Element Plus 拆分为独立 chunk |
 | **CSS 提取** | 生产构建自动提取 CSS 为独立文件，支持浏览器缓存 |
 
 ### Nginx 配置要点
 
 ```nginx
 server {
-    listen 80;
+    listen 3000;  # 容器内监听 3000（与 Compose 宿主 3000 → 容器 3000 一致）
     root /usr/share/nginx/html;
     index index.html;
 

@@ -119,8 +119,8 @@ public class AuthController {
         // 第一步：检查账号是否被锁定
         if (accountLockoutService.isLocked(request.getTenantId(), request.getUsername())) {
             publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "account_locked",
-                    "账号已被锁定，请稍后重试");
-            return R.fail(423, "账号已被锁定，请 1 小时后重试");
+                    "账号已被锁定，请稍后重试", "password");
+            return R.fail(423, lockMessage(request.getTenantId(), request.getUsername()));
         }
 
         // 第二步：校验验证码（一次性使用，存储在 Redis 中，带 TTL 自动过期）
@@ -128,16 +128,18 @@ public class AuthController {
             captchaService.validate(request.getCaptchaKey(), request.getCaptchaCode());
         } catch (Exception e) {
             publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "invalid_captcha",
-                    "验证码校验失败");
+                    "验证码校验失败", "password");
             throw e;
         }
+
+        tenantService.requireLoginAvailable(request.getTenantId());
 
         // 第三步：查询该租户下是否存在此用户
         SysUser user = userService.findByUsername(request.getUsername(), request.getTenantId());
         if (user == null) {
             accountLockoutService.recordFailure(request.getTenantId(), request.getUsername());
             publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "user_not_found",
-                    "该租户下不存在此用户名");
+                    "该租户下不存在此用户名", "password");
             return R.fail(401, "该租户下不存在此用户名，请检查租户选择和用户名");
         }
 
@@ -145,7 +147,7 @@ public class AuthController {
         if (!userService.verifyPassword(request.getPassword(), user.getPassword())) {
             int failCount = accountLockoutService.recordFailure(request.getTenantId(), request.getUsername());
             publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "wrong_password",
-                    "密码错误，已连续失败 " + failCount + " 次");
+                    "密码错误，已连续失败 " + failCount + " 次", "password");
             return R.fail(401, "密码错误");
         }
 
@@ -215,8 +217,8 @@ public class AuthController {
         // 检查账号是否被锁定
         if (accountLockoutService.isLocked(request.getTenantId(), request.getUsername())) {
             publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "account_locked",
-                    "账号已被锁定");
-            return R.fail(423, "账号已被锁定，请 1 小时后重试");
+                    "账号已被锁定", "session");
+            return R.fail(423, lockMessage(request.getTenantId(), request.getUsername()));
         }
 
         // 验证码校验
@@ -224,9 +226,11 @@ public class AuthController {
             captchaService.validate(request.getCaptchaKey(), request.getCaptchaCode());
         } catch (Exception e) {
             publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "invalid_captcha",
-                    "验证码校验失败");
+                    "验证码校验失败", "session");
             throw e;
         }
+
+        tenantService.requireLoginAvailable(request.getTenantId());
 
         // 构造多租户用户名格式 "tenantId:username"
         String tenantUsername = request.getTenantId() + ":" + request.getUsername();
@@ -243,7 +247,11 @@ public class AuthController {
             securityContext.setAuthentication(authentication);
             SecurityContextHolder.setContext(securityContext);
 
+            // RF03/FA05：认证成功后轮换会话标识（Servlet 3.1 changeSessionId）防会话固定攻击，
+            // 确保旧预认证会话 ID 不能获得权限，再将 SecurityContext 写入新标识会话。
             HttpSession session = httpRequest.getSession(true);
+            httpRequest.changeSessionId();
+            session = httpRequest.getSession(false);
             session.setAttribute(
                     HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                     securityContext);
@@ -259,13 +267,12 @@ public class AuthController {
                     .extra("method", "session")
                     .build());
 
-            log.info("用户 '{}' 会话登录成功，租户={}，sessionId={}",
-                    request.getUsername(), request.getTenantId(), session.getId());
+            log.info("用户 '{}' 会话登录成功，租户={}", request.getUsername(), request.getTenantId());
             return R.ok(request.getUsername());
         } catch (AuthenticationException e) {
             accountLockoutService.recordFailure(request.getTenantId(), request.getUsername());
             publishLoginFailed(request.getTenantId(), request.getUsername(), ip, ua, "wrong_password",
-                    "会话登录认证失败");
+                    "会话登录认证失败", "session");
             log.warn("用户 '{}' 会话登录失败: {}", request.getUsername(), e.getMessage());
             return R.fail(401, "用户名或密码错误");
         }
@@ -344,10 +351,24 @@ public class AuthController {
     }
 
     /**
+     * 构造锁定提示语，使用当前窗口实际剩余秒数，不写死“1小时后”。
+     */
+    private String lockMessage(Long tenantId, String username) {
+        long remainSeconds = accountLockoutService.getRemainingLockSeconds(tenantId, username);
+        if (remainSeconds <= 0) {
+            return "账号已被锁定，请稍后重试";
+        }
+        long minutes = (long) Math.ceil(remainSeconds / 60.0);
+        return "账号已被锁定，请在约 " + minutes + " 分钟后重试";
+    }
+
+    /**
      * 发布登录失败审计事件的便捷方法。
+     *
+     * @param method 认证方式（password/session），写入 extra.method 供登录记录白名单映射
      */
     private void publishLoginFailed(Long tenantId, String username, String ip, String ua,
-                                    String reason, String description) {
+                                    String reason, String description, String method) {
         eventPublisher.publishEvent(AuditEvent.of(AuditEvent.LOGIN_FAILED)
                 .tenantId(tenantId)
                 .username(username)
@@ -356,7 +377,7 @@ public class AuthController {
                 .description(description)
                 .createBy(username)
                 .extra("reason", reason)
-                .extra("method", "password")
+                .extra("method", method)
                 .build());
     }
 }

@@ -1,0 +1,132 @@
+# Omni-Stack 可选本地观测栈；需与一个应用 profile 同时启用。
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.159.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./observability/otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - 127.0.0.1:${OTEL_GRPC_HOST_PORT:-4317}:4317
+      - 127.0.0.1:${OTEL_HTTP_HOST_PORT:-4318}:4318
+    depends_on:
+      - tempo
+    profiles: [observability]
+
+  prometheus:
+    image: prom/prometheus:v3.14.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-7d}
+    volumes:
+      - ./observability/prometheus:/etc/prometheus:ro
+      - omni-prometheus-data:/prometheus
+    ports:
+      - 127.0.0.1:${PROMETHEUS_HOST_PORT:-9090}:9090
+    depends_on:
+      - alertmanager
+      - pushgateway
+    profiles: [observability]
+
+  pushgateway:
+    image: prom/pushgateway:v1.11.3
+    command: ["--persistence.file=/data/pushgateway.data"]
+    volumes:
+      - omni-pushgateway-data:/data
+    ports:
+      - 127.0.0.1:${PUSHGATEWAY_HOST_PORT:-9091}:9091
+    profiles: [observability]
+
+  node-exporter:
+    image: prom/node-exporter:v1.12.1
+    command: ["--path.rootfs=/host"]
+    pid: host
+    volumes:
+      - /:/host:ro
+    ports:
+      - 127.0.0.1:${NODE_EXPORTER_HOST_PORT:-9100}:9100
+    profiles: [observability]
+
+  cadvisor:
+    image: ghcr.io/google/cadvisor:v0.60.5
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    ports:
+      - 127.0.0.1:${CADVISOR_HOST_PORT:-8088}:8080
+    profiles: [observability]
+
+  alertmanager:
+    image: prom/alertmanager:v0.30.1
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml", "--storage.path=/alertmanager"]
+    volumes:
+      - ./observability/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - omni-alertmanager-data:/alertmanager
+    ports:
+      - 127.0.0.1:${ALERTMANAGER_HOST_PORT:-9093}:9093
+    profiles: [observability]
+
+  tempo:
+    image: grafana/tempo:2.10.5
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - omni-tempo-data:/var/tempo
+    ports:
+      - 127.0.0.1:${TEMPO_HOST_PORT:-3200}:3200
+    profiles: [observability]
+
+  loki:
+    image: grafana/loki:3.7.4
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./observability/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - omni-loki-data:/loki
+    ports:
+      - 127.0.0.1:${LOKI_HOST_PORT:-3100}:3100
+    profiles: [observability]
+
+  alloy:
+    image: grafana/alloy:v1.18.0
+    command: ["run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy"]
+    environment:
+      OMNI_COMPOSE_PROJECT: ${COMPOSE_PROJECT_NAME:-omni-stack}
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 127.0.0.1:${ALLOY_HOST_PORT:-12345}:12345
+    depends_on:
+      - loki
+    profiles: [observability]
+
+  grafana:
+    image: grafana/grafana:13.1.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-omni-local-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - omni-grafana-data:/var/lib/grafana
+    ports:
+      - 127.0.0.1:${GRAFANA_HOST_PORT:-3001}:3000
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+    profiles: [observability]
+
+volumes:
+  omni-prometheus-data:
+  omni-alertmanager-data:
+  omni-tempo-data:
+  omni-loki-data:
+  omni-grafana-data:
+  omni-pushgateway-data:

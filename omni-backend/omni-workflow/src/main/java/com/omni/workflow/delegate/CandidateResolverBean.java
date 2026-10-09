@@ -56,15 +56,36 @@ public class CandidateResolverBean {
                         execution.getProcessDefinitionId(), activityId);
                 String fallbackStrategy = "ERROR";
                 String approvalMode = "ALL";
+                String roleCode = null;
+                String anchorType = null;
+                String scopeMode = null;
+                JsonNode anchorParams = null;
                 if (assignmentJson != null && !assignmentJson.isBlank()) {
                     JsonNode config = objectMapper.readTree(assignmentJson);
                     String fb = candidateResolutionService.getTextValue(config, "fallbackStrategy");
                     if (fb != null) fallbackStrategy = fb;
                     String mode = candidateResolutionService.getTextValue(config, "approvalMode");
                     if (mode != null) approvalMode = mode;
+                    roleCode = candidateResolutionService.getTextValue(config, "roleCode");
+                    anchorType = candidateResolutionService.getTextValue(config, "anchorType");
+                    scopeMode = candidateResolutionService.getTextValue(config, "scopeMode");
+                    anchorParams = config.get("anchorParams");
                 }
-                List<String> result = candidateResolutionService.handleFallback(
-                        fallbackStrategy, "未找到候选人", tenantId);
+                List<String> result;
+                // ESCALATE_PARENT（D1 批准语义）：从锚点组织父级逐级上溯重解同 roleCode+scopeMode 候选，
+                // 命中即用；上溯至根仍空则抛错失败关闭（与 ERROR 同路径，不 fail-open、不自动审批）。
+                if ("ESCALATE_PARENT".equals(fallbackStrategy)) {
+                    List<Long> escalated = candidateResolutionService.escalateToParentForCandidates(
+                            roleCode, anchorType, scopeMode, anchorParams, startUserId, tenantId);
+                    if (escalated.isEmpty()) {
+                        throw new IllegalStateException(
+                                "候选人解析失败且 fallback=ESCALATE_PARENT 上溯至根仍无候选: roleCode=" + roleCode);
+                    }
+                    result = escalated.stream().map(String::valueOf).collect(Collectors.toList());
+                } else {
+                    result = candidateResolutionService.handleFallback(
+                            fallbackStrategy, "未找到候选人", tenantId);
+                }
                 candidateResolutionService.initApprovalCounters(execution, approvalMode, result.size());
                 return result;
             }

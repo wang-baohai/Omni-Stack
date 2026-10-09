@@ -305,7 +305,7 @@ The MQ message sending records and compensation management system is built on a 
 ```
 Business transaction (@Transactional)
     ↓
-ReliableMessageTemplate.send(bindingName, payload)
+ReliableMessageTemplate.send(bindingName, payload, tenantId)
     ↓ INSERT sys_mq_message (status=PENDING) -- within the same local transaction
     ↓
 XXL-JOB mqRelayHandler (10s polling)
@@ -322,7 +322,7 @@ Success → status=SENT | Failure → retry_count++, exponential backoff | Excee
 
 | Component | Responsibility |
 |-----------|----------------|
-| `ReliableMessageTemplate` | Provides `send(bindingName, payload)` / `send(bindingName, payload, msgKey)` overloads; INSERTs message record within the caller's transaction |
+| `ReliableMessageTemplate` | Provides `send(bindingName, payload, tenantId)` / `send(bindingName, payload, tenantId, msgKey)` overloads (`tenantId` is a required positive integer and must not be omitted); INSERTs message record within the caller's transaction |
 | `MqMessageRelayService` | Polls pending messages, invokes `MessageSender` strategy for delivery, handles retry backoff and dead letter marking |
 | `MqMessageRelayJob` | XXL-JOB handler (`@XxlJob("mqRelayHandler")` + `@SystemJobMeta`), triggers relay logic |
 | `MessageSender` | Strategy interface, routed by `broker_type`. Current implementation: `RocketMqMessageSender` (based on StreamBridge); extensible for `KafkaMessageSender` |
@@ -333,7 +333,7 @@ Success → status=SENT | Failure → retry_count++, exponential backoff | Excee
 1. Add `omni-common-mqlog` dependency in POM
 2. Ensure `omni-common-mybatis` (database) and `omni-common-job` (XXL-JOB) are already included
 3. For RocketMQ sending capability, add `spring-cloud-starter-stream-rocketmq` dependency
-4. `sys_mq_message` table is auto-created (`schema.sql` + `CREATE TABLE IF NOT EXISTS`)
+4. `sys_mq_message` table is created by Liquibase migration (`database/changelog/common/0001-mq-schema.yaml`, applied by `omni-db-migrator` container at startup)
 5. `mqRelayHandler` auto-registers with XXL-JOB (each service executor has a different AppName, so handler names are naturally isolated)
 6. Inject `ReliableMessageTemplate` in business code and call `send()`
 
@@ -405,7 +405,7 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 ### Development Constraints
 
 1. **All new write-operation Controller methods must be annotated with `@OperLog`**, specifying `module` and `operType`; for entity changes, also specify `entityClass` and `idExpr`
-2. **omni-auth module disables `@OperLog`**: Authentication behavior is fully recorded by login logs (`sys_login_log`) and audit logs (`sys_audit_log`); omni-auth does not include the `omni-common-operlog` dependency and does not use `@OperLog` on controller methods
+2. **omni-auth module disables `@OperLog`**: Authentication behavior is fully recorded in `sys_audit_log` security-audit events (`LOGIN_SUCCESS`/`LOGIN_FAILED`/`ACCOUNT_LOCKED`, etc.; the "Login Records" page is a read-only projection of its login events) — there is no separate `sys_login_log` table; omni-auth does not include the `omni-common-operlog` dependency and does not use `@OperLog` on controller methods
 3. **Onboarding new microservices**: Add `omni-common-operlog` dependency in `pom.xml` and configure RocketMQ; the module auto-registers AOP aspects and MQ producers via `AutoConfiguration.imports`
 4. **`entityClass` purpose**: AOP uses `ApplicationContext` to find the `BaseMapper` for the corresponding entity type, automatically executing `selectById` to obtain pre/post-change snapshots
 5. **`idExpr` SpEL syntax**: Supports referencing method parameters (`#id`, `#request.id`) and return values (`#result.data.id`); resolution failure logs a warning but does not affect business logic
@@ -422,31 +422,29 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 
 ## Common Starter Onboarding Specification
 
-The project splits shared capabilities into 6 modules. New microservices simply add Maven dependencies — no manual configuration required.
+The project splits shared capabilities into composite starters and optional capability modules. Servlet business services should prefer `omni-common-service`; Gateway, Auth and Workflow choose the underlying modules according to their own special boundaries.
 
 ### Starter Module Overview
 
-| Module | Responsibility | Auto-Configuration | Target Service Type |
-|--------|----------------|--------------------|--------------------|
+| Module | Responsibility | Auto-Configuration Content | Target Service Type |
+|--------|----------------|---------------------------|--------------------|
 | `omni-common-core` | Pure POJO layer | None (no Spring dependency) | All modules |
 | `omni-common` | Web auto-configuration | `JacksonConfig` (time serialization), `WebMvcConfig` (CORS), `GlobalExceptionHandler`, `XssAutoConfiguration` (Filter + Jackson Module) | Servlet services |
 | `omni-common-mybatis` | Database capabilities | `MybatisPlusAutoConfiguration`: `MybatisPlusInterceptor` (MySQL `PaginationInnerInterceptor`) + YAML defaults (camelCase mapping, logical delete, auto-increment ID) | Servlet services |
 | `omni-common-redis` | Blocking Redis | `RedisAutoConfiguration`: `RedisTemplate<String, Object>` (Jackson serialization) + `RedisUtils` utility + Lettuce connection pool config | Servlet services |
 | `omni-common-redis-reactive` | Reactive Redis | `spring-boot-starter-data-redis-reactive` + YAML default timeout config | WebFlux services (e.g., Gateway) |
-| `omni-common-mqlog` | Reliable MQ sending | `ReliableMessageTemplate` (Transactional Outbox), `MqMessageRelayService` (XXL-JOB async delivery), `MessageSender` strategy interface, `MqMessageInternalController` (Feign internal query), `schema.sql` (auto-create table) | Servlet services (requiring MQ) |
+| `omni-common-mqlog` | Reliable MQ sending | `ReliableMessageTemplate` (Transactional Outbox), `MqMessageRelayService` (XXL-JOB async delivery), `MessageSender` strategy interface, `MqMessageInternalController` (Feign internal query), Liquibase migration DDL (`database/changelog/common/0001-mq-schema.yaml`) | Servlet services (requiring MQ) |
+| `omni-common-service` | Servlet business service security and context composite | Gateway pre-authentication Filter, immutable request identity, internal API Token, DataScope SPI/aspect, fixed Tenant/DataPermission order, Auth XSS fallback and security baseline | Servlet business services such as CRM/SRM/Procurement/Asset |
 
 **Auto-Configuration Registration**: All starters register via `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` — the standard mechanism for Spring Boot 3+/4+ (replacing the legacy `spring.factories`).
 
 ### Steps to Onboard a New Service
 
-1. **POM Dependencies**: Declare required starters in `pom.xml`:
+1. **POM Dependencies**: Servlet business services declare the composite starter, then add OperLog/Job/MQ as needed:
    ```xml
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-core</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-mybatis</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-redis</artifactId></dependency>
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common-service</artifactId></dependency>
    ```
-2. **application.yml**: Only configure datasource and Redis connection info:
+2. **application.yml**: Besides datasource and Redis, explicitly configure the service identity and enabled security capabilities; the internal Token must come from an environment variable, weak defaults are not allowed:
    ```yaml
    spring:
      datasource:
@@ -458,10 +456,27 @@ The project splits shared capabilities into 6 modules. New microservices simply 
          host: 127.0.0.1
          port: 6379
          database: 0
+   omni:
+     service:
+       name: omni-xxx
+       display-name: Xxx
+       gateway-preauth:
+         enabled: true
+       internal-api:
+         enabled: true
+         token: ${OMNI_INTERNAL_API_TOKEN}
+       tenant:
+         enabled: true
+       data-scope:
+         enabled: true
+       xss:
+         enabled: true
    ```
-3. **Main class**: Add `@MapperScan("com.omni.xxx.mapper")`
-4. **XSS Protection**: Implement the `XssConfigProvider` SPI interface (`omni-common` auto-registers Filter + Jackson Module)
-5. **Auto-applied**: Pagination plugin, Jackson time serialization, CORS config, `GlobalExceptionHandler`, `RedisUtils` utility are all auto-configured — no additional setup needed
+3. **Domain SPI**: When tenant/data-scope is enabled, provide the unique `TenantTablePolicy` and `DataScopeTablePolicy` respectively; domain table names or owner columns must not be placed into the Starter.
+4. **Security chain**: Place the Starter-provided Gateway Filter before `AuthorizationFilter`, and the identity context Filter after the Gateway Filter; duplicate Servlet container registration of the two is forbidden.
+5. **Optional capabilities**: OperLog, Job, MQ and Workflow remain independent dependencies, enabled per business needs.
+
+`omni-common-service` currently provides the v0 auto-configuration and tests; CRM, SRM, Procurement and Asset have all completed migration, module tests and isolated runtime re-verification. The Starter's XSS Provider auto-configuration must take effect before `XssAutoConfiguration`, and context tests must assert the Provider, the Servlet FilterRegistration and the Jackson 2/3 cleaning modules together, avoiding silent failure caused by condition evaluation order.
 
 ### Override Mechanism
 
@@ -566,7 +581,7 @@ GlobalExceptionHandler (@RestControllerAdvice)
 Unified R<Void> response
 ```
 
-**Special handling for omni-auth**: The Auth module depends on `omni-common-core` (not `omni-common`), so `GlobalExceptionHandler` is not in its component scan scope. The Auth module provides equivalent exception handling via `AuthExceptionHandler` (scoped `@RestControllerAdvice`).
+**Special handling for omni-auth**: omni-auth depends on BOTH `omni-common-core` and `omni-common`. The `GlobalExceptionHandler` in `omni-common` (`com.omni.common.result`) is auto-configured via `AutoConfiguration.imports` and applies to every service depending on `omni-common` (including Auth) — it is neither component-scanned nor absent for Auth. On top of that, omni-auth provides a narrower `AuthExceptionHandler` (`@RestControllerAdvice(basePackages = "com.omni.auth.controller")`) for Auth-specific mapping of `BusinessException`/validation/`AccessDeniedException`, coexisting with the global handler rather than replacing its auto-configuration premise.
 
 ## Troubleshooting Guide
 

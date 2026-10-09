@@ -151,6 +151,13 @@ public class CandidateResolutionService {
             return Collections.emptyList();
         }
 
+        return resolveScoped(roleCode, scopeMode, anchorUnitId, tenantId);
+    }
+
+    /**
+     * 按 scopeMode 在指定锚点单位解析候选人（SAME_UNIT/UNIT_AND_BELOW/CHILDREN_ONLY 的唯一分发入口）。
+     */
+    private List<Long> resolveScoped(String roleCode, String scopeMode, Long anchorUnitId, Long tenantId) {
         if ("UNIT_AND_BELOW".equals(scopeMode)) {
             return resolveCandidatesInUnitAndBelow(roleCode, anchorUnitId, tenantId);
         } else if ("CHILDREN_ONLY".equals(scopeMode)) {
@@ -158,6 +165,43 @@ public class CandidateResolutionService {
         } else {
             return resolveCandidatesInSameUnit(roleCode, anchorUnitId, tenantId);
         }
+    }
+
+    /**
+     * ESCALATE_PARENT 候选策略（D1 批准的语义）：无候选人时，从锚点组织的父级开始逐级向上
+     * 沿组织树重解同一 roleCode + 同一 scopeMode 的候选人，命中即返回。
+     * <p>上溯层级：到根单位（parent_id 为空）为止；角色/组织过滤：维持现有 scopeMode 与安全 JOIN
+     * （仅取启用用户）；多锚点：由调用侧保证 anchor 解析为单一单位（ABSOLUTE_UNIT 多 unitIds 场景
+     * 取首个解析锚点后上溯）。上溯至根仍无候选→返回空，由调用方按 ERROR 语义失败关闭（不 fail-open、
+     * 不自动审批）。依赖故障（组织/权限表查询异常）在底层 helper 已吐空→最终表现为根未命中而抛错，
+     * 不会虚报成功。</p>
+     *
+     * @param roleCode     角色编码
+     * @param anchorType   锚点类型
+     * @param scopeMode    作用域模式
+     * @param anchorParams 锚点参数
+     * @param startUserId  发起人 ID
+     * @param tenantId     租户 ID
+     * @return 命中的上级候选集；上溯至根仍空则空
+     */
+    public List<Long> escalateToParentForCandidates(String roleCode, String anchorType, String scopeMode,
+                                                    JsonNode anchorParams, Long startUserId, Long tenantId) {
+        Long anchorUnitId = resolveAnchorUnitId(anchorType, anchorParams, startUserId, tenantId);
+        if (anchorUnitId == null) {
+            return Collections.emptyList();
+        }
+        Long current = findParentId(anchorUnitId, tenantId);
+        int maxDepth = 20;
+        while (current != null && maxDepth-- > 0) {
+            List<Long> found = resolveScoped(roleCode, scopeMode, current, tenantId);
+            if (!found.isEmpty()) {
+                log.warn("ESCALATE_PARENT 命中上级单位候选: roleCode={}, ancestorUnitId={}, candidates={}",
+                        roleCode, current, found);
+                return found;
+            }
+            current = findParentId(current, tenantId);
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -189,23 +233,77 @@ public class CandidateResolutionService {
     }
 
     /**
-     * 初始化审批计数器（仅在变量尚未初始化时设置，防止重复调用重置）。
+     * 初始化审批计数器（每个多实例审批活动实例进入时写入一次）。
+     * <p>
+     * WP-015 FR04 修正（Codex RF01）：作用域必须绑定到**本 MI 活动的根执行**，
+     * 而不是沿执行树向上落到流程实例作用域。旧实现注释声称使用
+     * {@code setVariableLocal}，实际却调用 {@code setVariable}，导致
+     * {@code _counters_init} 沉淀在流程实例级：顺序审批的下一个 MI 节点会读到
+     * 遗留标志而跳过初始化，使票数/阈值跳节点泄漏。
+     * </p>
+     * <p>
+     * 当前实现：
+     * <ol>
+     *   <li>从传入执行沿 {@code getParent()} 上溯，定位第一个
+     *       {@code isMultiInstanceRoot()} 为真的执行作为 MI 根；定位失败（非多实例节点）
+     *       时退化为在传入执行本地写入；</li>
+     *   <li>全部计数器与 {@code _counters_init}、{@code approvalMode} 均用
+     *       {@code setVariableLocal} 写在该 MI 根上，完成条件在同一作用域求值；</li>
+     *   <li>幂等标志只在 MI 根本地读（{@code getVariableLocal}）：同一活动实例内
+     *       重入（如 addSigner 触发集合重解析）不重置已有票数；不同 MI 活动实例
+     *       拥有各自根执行，互不可见，因此正常初始化。</li>
+     * </ol>
+     * 加签导致的有效全员阈值变化不由本方法负责，而是由
+     * {@code ApprovalServiceImpl} 在加签/减签后按“已同意 + 仍在待办”重算。
+     * </p>
      *
-     * @param execution      执行委托
+     * @param execution      执行委托（MI 根、子执行或其它活动执行均可）
      * @param approvalMode   "ALL" 全员通过 / "ANY" 任一人通过
      * @param candidateCount 候选人总数
      */
     public void initApprovalCounters(DelegateExecution execution, String approvalMode, int candidateCount) {
-        if (execution.getVariable("approvedCount") == null) {
-            execution.setVariable("approvedCount", 0);
+        DelegateExecution miRoot = findMultiInstanceRoot(execution);
+        Object flag = miRoot.getVariableLocal("_counters_init");
+        if (Boolean.TRUE.equals(flag)) {
+            log.debug("审批计数器已在本 MI 活动实例初始化，跳过重复写入（不重置己有票数）: activityId={}",
+                    execution.getCurrentActivityId());
+            return;
         }
-        if (execution.getVariable("rejectedCount") == null) {
-            execution.setVariable("rejectedCount", 0);
+        int requiredApprovals = "ANY".equals(approvalMode) ? 1 : candidateCount;
+        miRoot.setVariableLocal("approvedCount", 0);
+        miRoot.setVariableLocal("rejectedCount", 0);
+        miRoot.setVariableLocal("requiredApprovals", requiredApprovals);
+        miRoot.setVariableLocal("approvalMode", approvalMode);
+        miRoot.setVariableLocal("_counters_init", Boolean.TRUE);
+        log.debug("审批计数器初始化完成: miRootExecution={}, activityId={}, mode={}, requiredApprovals={}",
+                miRoot.getId(), execution.getCurrentActivityId(), approvalMode, requiredApprovals);
+    }
+
+    /**
+     * 沿执行树上溯定位多实例根执行。
+     * <p>
+     * 最多上溯 32 层防止异常拓扑死循环；若未找到 MI 根（非多实例节点），
+     * 返回传入执行本身，保持原有行为可用。
+     * </p>
+     *
+     * @param execution 当前执行
+     * @return MI 根执行；找不到时退化为传入执行
+     */
+    private DelegateExecution findMultiInstanceRoot(DelegateExecution execution) {
+        DelegateExecution current = execution;
+        int depth = 0;
+        while (current != null && depth < 32) {
+            if (current.isMultiInstanceRoot()) {
+                return current;
+            }
+            DelegateExecution parent = current.getParent();
+            if (parent == null) {
+                break;
+            }
+            current = parent;
+            depth++;
         }
-        if (execution.getVariable("requiredApprovals") == null) {
-            int requiredApprovals = "ANY".equals(approvalMode) ? 1 : candidateCount;
-            execution.setVariable("requiredApprovals", requiredApprovals);
-        }
+        return execution;
     }
 
     /**

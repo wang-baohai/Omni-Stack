@@ -105,13 +105,13 @@ erDiagram
 
 ```
 Gateway JWT 検証 → SRM テナントチェック → Spring Security @PreAuthorize
-→ @SrmDataScope アスペクト → MyBatis DataPermission インターセプター → SrmRecordAccessGuard 行レベル書込み認可
+→ @ServiceDataScope アスペクト → MyBatis DataPermission インターセプター → SrmRecordAccessGuard 行レベル書込み認可
 ```
 
 1. Gateway が RS256 JWT を検証、`X-User-*`、`X-Tenant-Id`、`X-Gateway-Forwarded` を上書き注入
-2. `GatewayPreAuthFilter` が `Authentication` を構築、userId/tenantId を検証
+2. common-service の `GatewayPreAuthenticationFilter` が `Authentication` を構築、userId/tenantId を検証
 3. Controller の `@PreAuthorize` で機能権限を検証
-4. `@SrmDataScope(permissionCode)` アスペクトが Auth 内部 API を呼び出し dataScope を解決
+4. `@ServiceDataScope(permissionCode)` アスペクトが Auth 内部 API を呼び出し dataScope を解決
 5. MyBatis-Plus が tenant + owner 条件を追加
 6. `SrmRecordAccessGuard` が行レベル書込み認可を検証
 
@@ -163,9 +163,9 @@ DataPermissionInterceptor は書込みを保護しません。更新/削除/承�
 | Invite | `srm:invite:list/create/revoke`、`srm:portal:invite` |
 | Owner 候補 | `srm:owner:list` |
 | PII 閲覧 | `srm:pii:view` |
-| Portal | `srm:portal:enroll/profile/evaluation` |
+| Portal | `srm:portal:enroll/profile/evaluation/quotation` |
 
-`/` は同一リソース内の複数完全権限コードの略記；データベースには個別に保存。`@PreAuthorize` と `@SrmDataScope` は同じ完全権限コードを使用。
+`/` は同一リソース内の複数完全権限コードの略記；データベースには個別に保存。`@PreAuthorize` と `@ServiceDataScope` は同じ完全権限コードを使用。
 
 ### 3.6 PII マスキング
 
@@ -188,7 +188,7 @@ SRM は `XssConfigProvider` SPI を実装し、Redis DB 0 の `xss:enabled:{tena
 | `SUPPLIER` | SELF | ポータルセルフサービス：入居後の企業情報管理、自身のパフォーマンス閲覧 |
 | `SUPER_ADMIN` | ALL | 全機能、SRM データは現在のテナントに限定 |
 
-デフォルト USER ロールは `srm:portal:enroll` のみ付与；SRM 管理やポータル資料/パフォーマンス権限はなし。入居完了後 SUPPLIER ロールを追加して初めて profile/evaluation にアクセス可能。
+デフォルト USER ロールは `srm:portal:enroll` のみ付与され、SRM 管理やポータル profile/evaluation/quotation 権限は付与されません。入居完了後に SUPPLIER ロールを追加して初めて profile/evaluation/quotation にアクセスできます。`srm:portal:quotation` は `SUPPLIER` と、プラットフォーム規則により全権限ツリーを保持する `SUPER_ADMIN` にのみ厳格に付与され、`SRM_ADMIN`・`PROCUREMENT_MANAGER` などの内部ロールがサプライヤーに代わって見積を行うことはできません。見積 Controller は SUPPLIER ロールと有効な PortalUser 関連を同時に要求し、SUPER_ADMIN だけではサプライヤーになりすませません。
 
 ## 4. ステートマシンとコアフロー
 
@@ -243,7 +243,7 @@ POST /evaluation (supplierId, period, items[])
 → レベルが RED に変更された場合、Outbox イベント通知を書込み
 ```
 
-資格期限アラートロジック：`expiry_date - today ≤ 30日` → CERTIFICATE 指標自動 YELLOW；`expiry_date < today` → CERTIFICATE 指標自動 RED。XXL-JOB 定期タスクによる事前スキャンは Phase 2 で有効化予定（MVP：手動トリガーまたは無効）。
+資格期限アラートロジック：`expiry_date - today <= 30` → CERTIFICATE 指標自動 YELLOW；`expiry_date < today` → CERTIFICATE 指標自動 RED。XXL-JOB 定期タスクによる事前スキャンは Phase 2 で有効化予定（MVP：手動トリガーまたは無効）。
 
 ### 4.4 ポータル口座開設と入居
 
@@ -336,10 +336,21 @@ POST /api/auth/register（公開 Auth 自己登録、デフォルト USER ロー
 
 ### 6.4 内部 API
 
-SRM は将来の Procurement/Asset サービス向けに以下の機能を事前 provision：
+SRM は Procurement/Asset サービスに以下の機能を提供します：
 - `GET /api/internal/supplier/{id}?tenantId={tenantId}` — サプライヤー概要
 - `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}` — 承認済みサプライヤー検索
-- 全内部 API は `X-Internal-Token` 認証を使用；Gateway 経由で公開しない
+- `POST /api/internal/supplier/batch` — body は `{tenantId,supplierIds}`。入力の最初の出現順に最大 100 件の概要を返し、存在しない ID は省略
+- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}` — RFQ の有効見積・バージョン・行スナップショットを取得
+- 全内部 API は `X-Internal-Token` と `X-Tenant-Id` を使用し、query/body テナントはヘッダーと一致が必要。Gateway 経由で公開せず、サプライヤー概要に連絡先や銀行口座の PII は含まれない
+
+SRM がポータル可視の RFQ を照会する場合は Procurement を呼び出します：
+
+- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`
+- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`
+
+supplierId は現在の userId に対応する `srm_supplier_portal_user` のみ指定でき、ポータルリクエストが渡す値は受け付けません。すべての内部リクエストは `X-Tenant-Id` も同時に運搬し、API に追加の query/body テナントがある場合はヘッダーと一致が必要です。
+
+RFQ `status=SENT`、招待 `status IN (INVITED, QUOTED)`、かつ quotationDeadline 未超過の場合のみ見積の送信・更新を許可し、`DRAFT/CLOSED/AWARDED/CANCELLED` は一律拒否します。
 
 ## 7. 硬制約
 
@@ -348,8 +359,8 @@ SRM コードを変更する前に遵守すべきルール：
 1. **テナント分離**：全 `srm_*` テーブルに `tenant_id` 必須；TenantLine は常に追加；通常 API はクロステナント不可
 2. **楽観ロック**：全书込みは `tenant_id + id + version` 条件で更新
 3. **フェイルクローズ**：tenant 欠落 → 401、scope 欠落 → `id=-1`、Auth 不可用 → 503、決して degraded しない
-4. **ThreadLocal クリーンアップ**：`SrmDataScopeContext` と `SrmTenantContext` は `finally` ブロックで必ずクリア、メモリリーク防止
-5. **権限二重宣言**：書込みエンドポイントは `@PreAuthorize`（機能権限）と `@SrmDataScope`（データスコープ）の両方を同じ完全権限コードで宣言
+4. **ThreadLocal クリーンアップ**：common-service の `ServiceDataScopeContext` は `finally` ブロックで必ずクリア、メモリリーク防止
+5. **権限二重宣言**：書込みエンドポイントは `@PreAuthorize`（機能権限）と `@ServiceDataScope`（データスコープ）の両方を同じ完全権限コードで宣言
 6. **バックエンド PII マスキング**：`srm:pii:view` なし時バックエンド VO はマスク値を直接返却；フロントエンドに依存しない
 7. **明示的 Outbox tenantId**：`ReliableMessageRelay.send()` は `Long tenantId` を明示的に渡す；ThreadLocal 暗黙解決は禁止
 8. **インターセプター順序**：TenantLine → DataPermission → Pagination、入替不可
@@ -402,14 +413,14 @@ omni-frontend/src/
 1. `omni_srm` データベースにテーブル追加；`tenant_id`、`owner_user_id`、`owner_unit_id`、`version`、`deleted`、監査フィールドが必須
 2. Entity（SrmOwnedEntity を継承）、Mapper、Service インターフェース + Impl、Controller を作成
 3. `SrmDataPermissionHandler` に新しいテーブルの owner 列マッピングを登録
-4. `init-all.sql` に DDL と権限シードデータを追加
-5. Controller の書込みエンドポイントに `@PreAuthorize` + `@SrmDataScope` を宣言、新しい `srm:<resource>:<action>` 権限コードを使用
+4. `database/changelog/srm/` に forward-only の Liquibase changeSet を追加してテーブルを作成；既定の冪等シードは `scripts/sql/seed/srm.sql` に、権限シードは `scripts/sql/seed/auth.sql` に書き、`database/seed/manifest.yaml` を更新（互換期のレガシー `init-all.sql` は変更しない）
+5. Controller の書込みエンドポイントに `@PreAuthorize` + `@ServiceDataScope` を宣言、新しい `srm:<resource>:<action>` 権限コードを使用
 
 ### 権限コードの追加
 
-1. `init-all.sql` の `sys_permission` に新しい権限を挿入、type は `API`
+1. `scripts/sql/seed/auth.sql` の `sys_permission` に新しい権限を挿入、type は `API`（Liquibase/seed の正式入口経由で、廃止済みの `init-all.sql` は変更しない）
 2. `sys_role_permission` でロールに割り当て
-3. Controller メソッドに `@PreAuthorize("hasAuthority('srm:<resource>:<action>')")` + `@SrmDataScope("srm:<resource>:<action>")` を宣言
+3. Controller メソッドに `@PreAuthorize("hasAuthority('srm:<resource>:<action>')")` + `@ServiceDataScope(permissionCode = "srm:<resource>:<action>")` を宣言
 4. フロントエンドの対応ボタンに `v-permission="'srm:<resource>:<action'"` を追加
 
 ### Outbox イベントの統合
@@ -419,9 +430,112 @@ omni-frontend/src/
 3. イベントエンベロープは統一形式に従う；payload に完全な PII を含まない
 4. 消費者は `payload.eventId` で重複排除し冪等でなければならない
 
-### Phase 2 見積り予約
+### Procurement 見積統合
 
-見積りは未構築の `omni-procurement` の RFQ と招待関係に依存。MVP は見積りテーブルを作成せず、見積りエンドポイントを登録せず、`srm:portal:quotation` 権限を発行しません。Phase 2 統合時に `srm_quotation`/`srm_quotation_line` テーブルを作成し、DDL、移行スクリプト、権限、イベント契約を同時に補完します。
+ポータルエンドポイント：
+
+- `GET /api/srm/portal/quotation/invitations`：現在の PortalUser の RFQ 招待を一覧し、ローカルの見積状態をマージします。
+- `GET /api/srm/portal/quotation/invitations/{rfqId}`：招待、RFQ 行スナップショットと現在の見積を返します。
+- `POST /api/srm/portal/quotation`：見積を提出するか、`version` を指定して更新します。
+
+提出リクエストは `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]` のみを受け付けます。tenantId、supplierId、サプライヤー名、RFQ 番号、品目、単位、数量、通貨、行金額と総金額は、すべて信頼できる身分情報・PortalUser・Procurement 招待詳細から取得するかサーバ側で計算します。
+
+`srm_quotation.request_id` は最後に成功したリクエストを保存し、`srm_quotation_request` は `(tenant_id, request_id)` でリクエスト履歴と SHA-256 requestHash を永久に保持し、`(tenant_id, quotation_id, target_version)` で結果バージョンを関連付けます。`srm_quotation` は `(tenant_id, rfq_id, active_supplier_guard)` により、同一サプライヤーが同一 RFQ に対して未削除の見積を 1 件のみ持つことを保証します。`srm_quotation_line.rfq_line_id` は必須で、提出行の集合は RFQ スナップショットと完全一致しなければなりません。金額精度は：単価/数量 `DECIMAL(19,6)` かつ 0 より大、行金額/総金額 `DECIMAL(19,4)` かつ 0 より大。
+
+見積、明細、`srm_quotation_request` と `srm.quotation.submitted.v1` Outbox は同一トランザクションでコミットする必要があります。同一 requestId+requestHash の再試行は現在の見積スナップショットを返し、イベントを重複発行してはなりません；同一 requestId で意図が異なる場合は 409 を返します。初回リクエストは作成センチネル `version=0` を使用し、初版見積は `version=1` から開始することで、並行する作成意図が初版を更新可能版と誤認するのを防ぎます。イベント payload には少なくとも `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil` を含み、Procurement は eventId Inbox で冪等に消費します。
+
+### サプライヤー見積フローのスクリーンショット（四言語）
+
+正式画像はドキュメント専用 Playwright テストケース `omni-frontend/e2e-docs/flows/srm.flows.spec.ts` により実稼働スタック上で生成され、言語別ディレクトリに保存します。他言語の画像を流用せず、プレースホルダや成功レスポンスのモックで代替しません。三つのステップは同一の実 fixture（同一の見積依頼・同一の見積）を共有するため、三枚は同一業務チェーンの連続した状態であり、互いに関係のないページスナップショットではありません。
+
+共通前提条件（三ステップとも同一）：
+
+| 項目 | 内容 |
+|---|---|
+| 環境 | ローカル Compose フルスタック稼働、フロントエンド `127.0.0.1:3000`、ゲートウェイ経由で `omni-procurement` と `omni-srm` に到達 |
+| データ前提 | `admin` が正式 API で一意な品目カテゴリと品目を作成 → `procurement-approval` プロセスモデルに紐づく購買申請承認ルールを作成 → 購買申請を作成して承認に提出 → 承認後に見積依頼を作成し `send` を実行（DRAFT→SENT、`supplier1` を招待） |
+| 操作者 | データ構築は `admin`（`SUPER_ADMIN` と `PROCUREMENT_MANAGER` ロールおよび `SAME_UNIT` 候補スコープが必要）；撮影ページの操作者は `supplier1`（`SUPPLIER` ロールかつ `srm_supplier_portal_user` 関連付け済み） |
+| トークン | `E2eTokenFixture` がテストプロセス内で発行する短期 JWT（TTL 1200 秒）。プロセスメモリとリポジトリ外の一時ファイルにのみ存在し、終了時に破棄；ドキュメント・ログ・バージョン管理には書き込まない |
+| 書き込みスイッチ | `E2E_MUTATIONS=true` を明示的に設定した時のみ実行；未設定ならグループ全体をスキップし、あらゆる書き込み呼び出しは例外を投げる |
+| ビューポート | 1440×900、ドキュメント用クロックを固定しアニメーションを無効化、四言語で完全一致 |
+
+共有ローカル環境では一覧に他の歴史的な見積依頼行が表示される場合があります；テストケースのアサーションと撮影判定は本実行の `runStamp` で識別される単一の見積依頼のみを対象とし、終了処理も本実行で帰属が確認できたデータのみをクリーンアップします。
+
+#### ステップ 1：招待一覧（未見積）
+
+- 操作者：`supplier1`
+- 操作：サプライヤーポータルを開き「見積回答」タブに切り替える
+- 期待状態：本実行の単一の見積依頼が一覧に表示され、招待状態は `INVITED`、現在の見積列は「未見積」、操作列は「見積を提出」
+
+| zh-CN | en-US |
+|---|---|
+| ![サプライヤーポータル見積招待一覧（簡体字中国語）](images/zh-CN/srm-portal-quotation-invitations.png) | ![サプライヤーポータル見積招待一覧（英語）](images/en-US/srm-portal-quotation-invitations.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![サプライヤーポータル見積招待一覧（日本語）](images/ja-JP/srm-portal-quotation-invitations.png) | ![サプライヤーポータル見積招待一覧（韓国語）](images/ko-KR/srm-portal-quotation-invitations.png) |
+
+#### ステップ 2：見積フォーム（単価と有効期の入力）
+
+- 操作者：`supplier1`
+- 操作：対象行で「見積を提出」をクリックしてダイアログを開き、単価 `123.45` を入力し、見積有効期を見積締切に設定する
+- 期待状態：ダイアログタイトルに本実行の見積依頼番号が付く；行スナップショットに品目コードと名称、数量 `2`、単位と通貨 `CNY` が表示され、RFQ 状態は `SENT`、単価と有効期ともに入力済み
+
+| zh-CN | en-US |
+|---|---|
+| ![サプライヤーポータル見積フォーム（簡体字中国語）](images/zh-CN/srm-portal-quotation-form.png) | ![サプライヤーポータル見積フォーム（英語）](images/en-US/srm-portal-quotation-form.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![サプライヤーポータル見積フォーム（日本語）](images/ja-JP/srm-portal-quotation-form.png) | ![サプライヤーポータル見積フォーム（韓国語）](images/ko-KR/srm-portal-quotation-form.png) |
+
+#### ステップ 3：提出成功（QUOTED と見積総額）
+
+- 操作者：`supplier1`
+- 操作：ダイアログで「見積を提出」をクリックして実際の見積を送信し、続いて「見積依頼を更新」をクリックする
+- 期待状態：「見積を提出しました」が表示されてダイアログが閉じる；招待状態は `srm.quotation.submitted.v1` MQ イベントにより非同期で `QUOTED` に転移し、現在の見積列に総額 `CNY 246.9`（単価 `123.45` × 数量 `2`）が表示され、操作列は「見積を修正」になる
+
+| zh-CN | en-US |
+|---|---|
+| ![サプライヤーポータル見積提出成功（簡体字中国語）](images/zh-CN/srm-portal-quotation-submitted.png) | ![サプライヤーポータル見積提出成功（英語）](images/en-US/srm-portal-quotation-submitted.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![サプライヤーポータル見積提出成功（日本語）](images/ja-JP/srm-portal-quotation-submitted.png) | ![サプライヤーポータル見積提出成功（韓国語）](images/ko-KR/srm-portal-quotation-submitted.png) |
+
+### SRM 管理側ページのスクリーンショット（四言語）
+
+同様に `omni-frontend/e2e-docs/flows/management.flows.spec.ts` により実稼働スタック上で生成。**読み取り専用の採取**であり、サプライヤーデータを作成・変更・削除しないため、書き込みスイッチもデータ終了処理も不要です。前提条件と操作者は前節と同一（`admin` / `SUPER_ADMIN`、短期 JWT は `E2eTokenFixture` がプロセス内で発行し終了時に破棄）。
+
+- 操作：ログイン後にサプライヤー管理、業績評価、リスク管理、リスク指標設定、招待管理のページを順に開く。
+- 期待状態：ページタイトルと列ラベルが現在の言語で描画される；採取時点でデータベースにはサプライヤー/評価/リスク/招待の実レコードが各 1 件、リスク指標設定が 9 件存在。
+
+| ページ | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| サプライヤー管理（lifecycle） | ![サプライヤー管理（簡体字中国語）](images/zh-CN/srm-suppliers.png) | ![サプライヤー管理（英語）](images/en-US/srm-suppliers.png) | ![サプライヤー管理（日本語）](images/ja-JP/srm-suppliers.png) | ![サプライヤー管理（韓国語）](images/ko-KR/srm-suppliers.png) |
+| 業績評価（evaluation） | ![業績評価（簡体字中国語）](images/zh-CN/srm-evaluations.png) | ![業績評価（英語）](images/en-US/srm-evaluations.png) | ![業績評価（日本語）](images/ja-JP/srm-evaluations.png) | ![業績評価（韓国語）](images/ko-KR/srm-evaluations.png) |
+| リスク管理（risk） | ![リスク管理（簡体字中国語）](images/zh-CN/srm-risks.png) | ![リスク管理（英語）](images/en-US/srm-risks.png) | ![リスク管理（日本語）](images/ja-JP/srm-risks.png) | ![リスク管理（韓国語）](images/ko-KR/srm-risks.png) |
+| リスク指標設定（risk） | ![リスク指標設定（簡体字中国語）](images/zh-CN/srm-risk-config.png) | ![リスク指標設定（英語）](images/en-US/srm-risk-config.png) | ![リスク指標設定（日本語）](images/ja-JP/srm-risk-config.png) | ![リスク指標設定（韓国語）](images/ko-KR/srm-risk-config.png) |
+| 招待管理（invite） | ![招待管理（簡体字中国語）](images/zh-CN/srm-invites.png) | ![招待管理（英語）](images/en-US/srm-invites.png) | ![招待管理（日本語）](images/ja-JP/srm-invites.png) | ![招待管理（韓国語）](images/ko-KR/srm-invites.png) |
+
+本グループは一覧/設定ビューのみを閉じるもので、`admission-lifecycle`（完全な Portal 登録 Saga と参入承認が必要）や `detail-and-action-states`（詳細ダイアログと操作結果が必要）を閉じることとは**同等ではありません**；`stable-mobile-flow` は次の小節のレスポンシブ採取により閉じます。したがって SRM は引き続き `partial` です。
+
+### サプライヤーポータルのレスポンシブ安定性スクリーンショット（四言語）
+
+`omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts` により実稼働スタック上で生成。**読み取り専用採取**：ポータルを開き、タブを切り替え、更新をクリックするのみで、見積の送信や変更は一切行いません。
+
+- 前提条件：前二節と同一（ローカル Compose フルスタック、`supplier1` の Portal 関連付け済み、短期 JWT はプロセス内で発行し終了時に破棄）。
+- 操作者：`supplier1`。
+- 操作：**390×844（モバイル）** と **1024×768（タブレット）** のビューポートでそれぞれサプライヤーポータルを開き、「見積回答」タブに切り替える。
+- 期待状態：タブが表示されクリック可能；「見積依頼を更新」と行ごとの見積操作が狭い幅で押し出されたり遮蔽されない；一覧はレスポンシブに列を縮約（モバイルは見積番号/テーマ/操作のみ保持）し、はみ出しがない。
+- 実測結果：8 passed / 0 skipped（四言語 × 二ビューポート）。
+
+| ビューポート | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 390×844 モバイル | ![ポータル見積一覧 モバイル（簡体字中国語）](images/zh-CN/srm-portal-quotation-mobile.png) | ![ポータル見積一覧 モバイル（英語）](images/en-US/srm-portal-quotation-mobile.png) | ![ポータル見積一覧 モバイル（日本語）](images/ja-JP/srm-portal-quotation-mobile.png) | ![ポータル見積一覧 モバイル（韓国語）](images/ko-KR/srm-portal-quotation-mobile.png) |
+| 1024×768 タブレット | ![ポータル見積一覧 タブレット（簡体字中国語）](images/zh-CN/srm-portal-quotation-tablet.png) | ![ポータル見積一覧 タブレット（英語）](images/en-US/srm-portal-quotation-tablet.png) | ![ポータル見積一覧 タブレット（日本語）](images/ja-JP/srm-portal-quotation-tablet.png) | ![ポータル見積一覧 タブレット（韓国語）](images/ko-KR/srm-portal-quotation-tablet.png) |
+
+採取時に一覧へ表示されていたのは環境に既存の歴史的な見積依頼行です（本バッチの見積データは帰属別にクリーンアップ済み）；画像は実際の一覧内容をそのまま保持しており、データを造って埋めてはいません。
 
 ## 10. テスト
 

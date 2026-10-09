@@ -2,8 +2,9 @@ package com.omni.asset.client;
 
 import com.omni.asset.dto.AssetViews;
 import com.omni.common.core.result.R;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.internal.InternalFeignHeadersFactory;
 import feign.RequestInterceptor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,13 +31,11 @@ public interface SrmInternalClient {
     /** Feign 内部认证配置。 */
     @Configuration
     class FeignConfig {
-        @Value("${omni.internal.api.token:}")
-        private String internalToken;
-
         /** 注入服务间共享认证令牌。 */
         @Bean
-        public RequestInterceptor assetSrmInternalTokenInterceptor() {
-            return template -> template.header("X-Internal-Token", internalToken);
+        public RequestInterceptor assetSrmInternalTokenInterceptor(
+                ServiceIdentityProperties properties, InternalFeignHeadersFactory factory) {
+            return factory.create(properties.getInternalApi().getToken());
         }
     }
 }

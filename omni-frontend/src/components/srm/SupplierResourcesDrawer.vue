@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** 供应商联系人、资质和银行账户维护抽屉。 */
 import { computed, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { usePermissionStore } from '@/stores/permission'
@@ -31,6 +32,7 @@ const props = defineProps<{
   supplierName?: string
 }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
+const { t } = useI18n()
 const permissionStore = usePermissionStore()
 const visible = computed({
   get: () => props.modelValue,
@@ -76,22 +78,23 @@ const contactDialogVisible = ref(false)
 const contactFormRef = ref<FormInstance>()
 const editingContact = ref<SrmContact | null>(null)
 const contactForm = reactive<SaveContactRequest>({ name: '', primaryFlag: false })
-const contactRules: FormRules<SaveContactRequest> = {
+const contactRules = computed<FormRules<SaveContactRequest>>(() => ({
   name: [
-    { required: true, message: '请输入联系人姓名', trigger: 'blur' },
-    { max: 100, message: '联系人姓名不能超过 100 个字符', trigger: 'blur' },
+    { required: true, message: t('srmResourcesMessages.contactNameRequired'), trigger: 'blur' },
+    { max: 100, message: t('srmResourcesMessages.contactNameLength'), trigger: 'blur' },
   ],
-  department: [{ max: 100, message: '部门不能超过 100 个字符', trigger: 'blur' }],
-  jobTitle: [{ max: 100, message: '职务不能超过 100 个字符', trigger: 'blur' }],
-  mobile: [{ max: 32, message: '手机号码不能超过 32 个字符', trigger: 'blur' }],
-  phone: [{ max: 32, message: '电话号码不能超过 32 个字符', trigger: 'blur' }],
+  department: [{ max: 100, message: t('srmResourcesMessages.departmentLength'), trigger: 'blur' }],
+  jobTitle: [{ max: 100, message: t('srmResourcesMessages.jobTitleLength'), trigger: 'blur' }],
+  mobile: [{ max: 32, message: t('srmResourcesMessages.mobileLength'), trigger: 'blur' }],
+  phone: [{ max: 32, message: t('srmResourcesMessages.phoneLength'), trigger: 'blur' }],
   email: [
-    { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
-    { max: 200, message: '邮箱不能超过 200 个字符', trigger: 'blur' },
+    { type: 'email', message: t('srmResourcesMessages.emailInvalid'), trigger: 'blur' },
+    { max: 200, message: t('srmResourcesMessages.emailLength'), trigger: 'blur' },
   ],
-  decisionRole: [{ max: 50, message: '决策角色不能超过 50 个字符', trigger: 'blur' }],
-}
+  decisionRole: [{ max: 50, message: t('srmResourcesMessages.decisionRoleLength'), trigger: 'blur' }],
+}))
 const maskedContactFields = ref(new Set<'mobile' | 'phone' | 'email'>())
+const maskedPlaceholder = computed(() => t('srmResourcesMessages.maskedPlaceholder'))
 
 function openContact(row?: SrmContact) {
   editingContact.value = row || null
@@ -124,7 +127,7 @@ async function saveContact() {
   } else {
     await createContact(props.supplierId, { ...request, version: undefined })
   }
-  ElMessage.success('联系人保存成功')
+  ElMessage.success(t('srmResourcesMessages.contactSaved'))
   contactDialogVisible.value = false
   await loadResources()
 }
@@ -132,9 +135,13 @@ async function saveContact() {
 async function removeContact(row: SrmContact) {
   if (!props.supplierId) return
   try {
-    await ElMessageBox.confirm(`确认删除联系人“${row.name}”？`, '删除确认', { type: 'warning' })
+    await ElMessageBox.confirm(
+      t('srmResourcesMessages.contactDeleteConfirm', { name: row.name }),
+      t('srmResourcesMessages.deleteTitle'),
+      { type: 'warning' },
+    )
     await deleteContact(props.supplierId, row.id, row.version)
-    ElMessage.success('联系人已删除')
+    ElMessage.success(t('srmResourcesMessages.contactDeleted'))
     await loadResources()
   } catch { /* 用户取消 */ }
 }
@@ -143,14 +150,14 @@ const qualificationDialogVisible = ref(false)
 const qualificationFormRef = ref<FormInstance>()
 const editingQualification = ref<SrmQualification | null>(null)
 const qualificationForm = reactive<SaveQualificationRequest>({ qualificationName: '' })
-const qualificationRules: FormRules<SaveQualificationRequest> = {
+const qualificationRules = computed<FormRules<SaveQualificationRequest>>(() => ({
   qualificationName: [
-    { required: true, message: '请输入资质名称', trigger: 'blur' },
-    { max: 200, message: '资质名称不能超过 200 个字符', trigger: 'blur' },
+    { required: true, message: t('srmResourcesMessages.qualificationNameRequired'), trigger: 'blur' },
+    { max: 200, message: t('srmResourcesMessages.qualificationNameLength'), trigger: 'blur' },
   ],
-  certificateNo: [{ max: 100, message: '证书编号不能超过 100 个字符', trigger: 'blur' }],
-  issuingAuthority: [{ max: 200, message: '发证机关不能超过 200 个字符', trigger: 'blur' }],
-}
+  certificateNo: [{ max: 100, message: t('srmResourcesMessages.certificateNoLength'), trigger: 'blur' }],
+  issuingAuthority: [{ max: 200, message: t('srmResourcesMessages.issuingAuthorityLength'), trigger: 'blur' }],
+}))
 
 function openQualification(row?: SrmQualification) {
   editingQualification.value = row || null
@@ -169,7 +176,7 @@ async function saveQualification() {
   if (!props.supplierId || !(await qualificationFormRef.value?.validate().catch(() => false))) return
   if (qualificationForm.issueDate && qualificationForm.expiryDate
     && qualificationForm.expiryDate < qualificationForm.issueDate) {
-    ElMessage.warning('资质到期日期不能早于发证日期')
+    ElMessage.warning(t('srmResourcesMessages.expiryBeforeIssue'))
     return
   }
   if (editingQualification.value) {
@@ -177,7 +184,7 @@ async function saveQualification() {
   } else {
     await createQualification(props.supplierId, { ...qualificationForm, version: undefined })
   }
-  ElMessage.success('资质保存成功')
+  ElMessage.success(t('srmResourcesMessages.qualificationSaved'))
   qualificationDialogVisible.value = false
   await loadResources()
 }
@@ -185,9 +192,13 @@ async function saveQualification() {
 async function removeQualification(row: SrmQualification) {
   if (!props.supplierId) return
   try {
-    await ElMessageBox.confirm(`确认删除资质“${row.qualificationName}”？`, '删除确认', { type: 'warning' })
+    await ElMessageBox.confirm(
+      t('srmResourcesMessages.qualificationDeleteConfirm', { name: row.qualificationName }),
+      t('srmResourcesMessages.deleteTitle'),
+      { type: 'warning' },
+    )
     await deleteQualification(props.supplierId, row.id, row.version)
-    ElMessage.success('资质已删除')
+    ElMessage.success(t('srmResourcesMessages.qualificationDeleted'))
     await loadResources()
   } catch { /* 用户取消 */ }
 }
@@ -197,26 +208,26 @@ const bankFormRef = ref<FormInstance>()
 const editingBank = ref<SrmBankAccount | null>(null)
 const bankForm = reactive<SaveBankAccountRequest>({ accountName: '', accountNo: '', bankName: '', primaryFlag: false })
 const maskedBankAccount = ref(false)
-const bankRules: FormRules<SaveBankAccountRequest> = {
+const bankRules = computed<FormRules<SaveBankAccountRequest>>(() => ({
   accountName: [
-    { required: true, message: '请输入账户名', trigger: 'blur' },
-    { max: 200, message: '账户名不能超过 200 个字符', trigger: 'blur' },
+    { required: true, message: t('srmResourcesMessages.accountNameRequired'), trigger: 'blur' },
+    { max: 200, message: t('srmResourcesMessages.accountNameLength'), trigger: 'blur' },
   ],
   accountNo: [{
     validator: (_rule: unknown, value: string, callback: (error?: Error) => void) => {
-      if (!value && !editingBank.value) callback(new Error('请输入银行账号'))
-      else if (value && value.length > 100) callback(new Error('银行账号不能超过 100 个字符'))
+      if (!value && !editingBank.value) callback(new Error(t('srmResourcesMessages.accountNoRequired')))
+      else if (value && value.length > 100) callback(new Error(t('srmResourcesMessages.accountNoLength')))
       else callback()
     },
     trigger: 'blur',
   }],
   bankName: [
-    { required: true, message: '请输入银行名称', trigger: 'blur' },
-    { max: 200, message: '银行名称不能超过 200 个字符', trigger: 'blur' },
+    { required: true, message: t('srmResourcesMessages.bankNameRequired'), trigger: 'blur' },
+    { max: 200, message: t('srmResourcesMessages.bankNameLength'), trigger: 'blur' },
   ],
-  bankBranch: [{ max: 200, message: '开户支行不能超过 200 个字符', trigger: 'blur' }],
-  bankCode: [{ max: 50, message: '银行代码不能超过 50 个字符', trigger: 'blur' }],
-}
+  bankBranch: [{ max: 200, message: t('srmResourcesMessages.bankBranchLength'), trigger: 'blur' }],
+  bankCode: [{ max: 50, message: t('srmResourcesMessages.bankCodeLength'), trigger: 'blur' }],
+}))
 
 function openBank(row?: SrmBankAccount) {
   editingBank.value = row || null
@@ -242,7 +253,7 @@ async function saveBank() {
   } else {
     await createBankAccount(props.supplierId, { ...request, version: undefined })
   }
-  ElMessage.success('银行账户保存成功')
+  ElMessage.success(t('srmResourcesMessages.bankSaved'))
   bankDialogVisible.value = false
   await loadResources()
 }
@@ -250,128 +261,178 @@ async function saveBank() {
 async function removeBank(row: SrmBankAccount) {
   if (!props.supplierId) return
   try {
-    await ElMessageBox.confirm(`确认删除银行账户“${row.accountName}”？`, '删除确认', { type: 'warning' })
+    await ElMessageBox.confirm(
+      t('srmResourcesMessages.bankDeleteConfirm', { name: row.accountName }),
+      t('srmResourcesMessages.deleteTitle'),
+      { type: 'warning' },
+    )
     await deleteBankAccount(props.supplierId, row.id, row.version)
-    ElMessage.success('银行账户已删除')
+    ElMessage.success(t('srmResourcesMessages.bankDeleted'))
     await loadResources()
   } catch { /* 用户取消 */ }
 }
 </script>
 
 <template>
-  <el-drawer v-model="visible" :title="`${supplierName || '供应商'} · 资料维护`" size="860px" destroy-on-close>
+  <el-drawer
+    v-model="visible"
+    :title="t('srmResources.title', { name: supplierName || t('srmResources.supplier') })"
+    size="860px"
+    destroy-on-close
+  >
     <el-tabs v-model="activeTab" v-loading="loading">
-      <el-tab-pane v-if="canListContact" label="联系人" name="contact">
+      <el-tab-pane v-if="canListContact" :label="t('srmResources.contacts')" name="contact">
         <div class="toolbar">
-          <el-button v-permission="'srm:contact:create'" type="primary" @click="openContact()">新增联系人</el-button>
+          <el-button v-permission="'srm:contact:create'" type="primary" @click="openContact()">
+            {{ t('srmResources.createContact') }}
+          </el-button>
         </div>
         <el-table :data="contacts" border stripe>
-          <el-table-column prop="name" label="姓名" width="110" />
-          <el-table-column prop="department" label="部门" width="110" />
-          <el-table-column prop="jobTitle" label="职务" width="110" />
-          <el-table-column prop="mobile" label="手机" width="130" />
-          <el-table-column prop="email" label="邮箱" min-width="160" />
-          <el-table-column label="主要" width="70" align="center">
-            <template #default="{ row }"><el-tag v-if="row.primaryFlag" type="success">是</el-tag></template>
-          </el-table-column>
-          <el-table-column label="操作" width="130" fixed="right">
+          <el-table-column prop="name" :label="t('srmSupplierOverview.contactName')" width="110" />
+          <el-table-column prop="department" :label="t('srmResources.department')" width="110" />
+          <el-table-column prop="jobTitle" :label="t('srmSupplierOverview.jobTitle')" width="110" />
+          <el-table-column prop="mobile" :label="t('srmSupplierOverview.mobile')" width="130" />
+          <el-table-column prop="email" :label="t('srmSupplierOverview.email')" min-width="160" />
+          <el-table-column :label="t('srmSupplierOverview.primary')" width="70" align="center">
             <template #default="{ row }">
-              <el-button v-permission="'srm:contact:update'" link type="primary" @click="openContact(row)">编辑</el-button>
-              <el-button v-permission="'srm:contact:delete'" link type="danger" @click="removeContact(row)">删除</el-button>
+              <el-tag v-if="row.primaryFlag" type="success">{{ t('srmResources.yes') }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column :label="t('common.actions')" width="130" fixed="right">
+            <template #default="{ row }">
+              <el-button v-permission="'srm:contact:update'" link type="primary" @click="openContact(row)">
+                {{ t('common.edit') }}
+              </el-button>
+              <el-button v-permission="'srm:contact:delete'" link type="danger" @click="removeContact(row)">
+                {{ t('common.delete') }}
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
 
-      <el-tab-pane v-if="canListQualification" label="资质" name="qualification">
+      <el-tab-pane v-if="canListQualification" :label="t('srmResources.qualifications')" name="qualification">
         <div class="toolbar">
-          <el-button v-permission="'srm:qualification:create'" type="primary" @click="openQualification()">新增资质</el-button>
+          <el-button v-permission="'srm:qualification:create'" type="primary" @click="openQualification()">
+            {{ t('srmResources.createQualification') }}
+          </el-button>
         </div>
         <el-table :data="qualifications" border stripe>
-          <el-table-column prop="qualificationName" label="资质名称" min-width="150" />
-          <el-table-column prop="certificateNo" label="证书编号" min-width="140" />
-          <el-table-column prop="issuingAuthority" label="发证机关" min-width="140" />
-          <el-table-column prop="issueDate" label="发证日期" width="110" />
-          <el-table-column prop="expiryDate" label="到期日期" width="110" />
-          <el-table-column prop="status" label="状态" width="90" />
-          <el-table-column label="操作" width="130" fixed="right">
+          <el-table-column prop="qualificationName" :label="t('srmSupplierOverview.qualificationName')" min-width="150" />
+          <el-table-column prop="certificateNo" :label="t('srmSupplierOverview.certificateNo')" min-width="140" />
+          <el-table-column prop="issuingAuthority" :label="t('srmSupplierOverview.issuingAuthority')" min-width="140" />
+          <el-table-column prop="issueDate" :label="t('srmResources.issueDate')" width="110" />
+          <el-table-column prop="expiryDate" :label="t('srmSupplierOverview.expiryDate')" width="110" />
+          <el-table-column prop="status" :label="t('srmSupplierOverview.status')" width="90" />
+          <el-table-column :label="t('common.actions')" width="130" fixed="right">
             <template #default="{ row }">
-              <el-button v-permission="'srm:qualification:update'" link type="primary" @click="openQualification(row)">编辑</el-button>
-              <el-button v-permission="'srm:qualification:delete'" link type="danger" @click="removeQualification(row)">删除</el-button>
+              <el-button v-permission="'srm:qualification:update'" link type="primary" @click="openQualification(row)">
+                {{ t('common.edit') }}
+              </el-button>
+              <el-button v-permission="'srm:qualification:delete'" link type="danger" @click="removeQualification(row)">
+                {{ t('common.delete') }}
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
 
-      <el-tab-pane v-if="canListBank" label="银行账户" name="bank">
+      <el-tab-pane v-if="canListBank" :label="t('srmResources.bankAccounts')" name="bank">
         <div class="toolbar">
-          <el-button v-permission="'srm:bank-account:create'" type="primary" @click="openBank()">新增银行账户</el-button>
+          <el-button v-permission="'srm:bank-account:create'" type="primary" @click="openBank()">
+            {{ t('srmResources.createBank') }}
+          </el-button>
         </div>
         <el-table :data="bankAccounts" border stripe>
-          <el-table-column prop="accountName" label="账户名" min-width="140" />
-          <el-table-column prop="accountNo" label="银行账号" min-width="180" />
-          <el-table-column prop="bankName" label="银行" min-width="140" />
-          <el-table-column prop="bankBranch" label="支行" min-width="140" />
-          <el-table-column label="默认" width="70" align="center">
-            <template #default="{ row }"><el-tag v-if="row.primaryFlag" type="success">是</el-tag></template>
-          </el-table-column>
-          <el-table-column label="操作" width="130" fixed="right">
+          <el-table-column prop="accountName" :label="t('srmSupplierOverview.accountName')" min-width="140" />
+          <el-table-column prop="accountNo" :label="t('srmSupplierOverview.accountNo')" min-width="180" />
+          <el-table-column prop="bankName" :label="t('srmSupplierOverview.bankName')" min-width="140" />
+          <el-table-column prop="bankBranch" :label="t('srmSupplierOverview.bankBranch')" min-width="140" />
+          <el-table-column :label="t('srmResources.default')" width="70" align="center">
             <template #default="{ row }">
-              <el-button v-permission="'srm:bank-account:update'" link type="primary" @click="openBank(row)">编辑</el-button>
-              <el-button v-permission="'srm:bank-account:delete'" link type="danger" @click="removeBank(row)">删除</el-button>
+              <el-tag v-if="row.primaryFlag" type="success">{{ t('srmResources.yes') }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column :label="t('common.actions')" width="130" fixed="right">
+            <template #default="{ row }">
+              <el-button v-permission="'srm:bank-account:update'" link type="primary" @click="openBank(row)">
+                {{ t('common.edit') }}
+              </el-button>
+              <el-button v-permission="'srm:bank-account:delete'" link type="danger" @click="removeBank(row)">
+                {{ t('common.delete') }}
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
     </el-tabs>
 
-    <el-dialog v-model="contactDialogVisible" :title="editingContact ? '编辑联系人' : '新增联系人'" width="620px" append-to-body>
+    <el-dialog
+      v-model="contactDialogVisible"
+      :title="editingContact ? t('srmResources.editContact') : t('srmResources.createContact')"
+      width="620px"
+      append-to-body
+    >
       <el-form ref="contactFormRef" :model="contactForm" :rules="contactRules" label-width="90px">
         <el-row :gutter="16">
-          <el-col :span="12"><el-form-item label="姓名" prop="name"><el-input v-model="contactForm.name" maxlength="100" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="部门" prop="department"><el-input v-model="contactForm.department" maxlength="100" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="职务" prop="jobTitle"><el-input v-model="contactForm.jobTitle" maxlength="100" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="决策角色" prop="decisionRole"><el-input v-model="contactForm.decisionRole" maxlength="50" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="手机" prop="mobile"><el-input v-model="contactForm.mobile" maxlength="32" :placeholder="maskedContactFields.has('mobile') ? '已脱敏，留空保持不变' : ''" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="电话" prop="phone"><el-input v-model="contactForm.phone" maxlength="32" :placeholder="maskedContactFields.has('phone') ? '已脱敏，留空保持不变' : ''" /></el-form-item></el-col>
-          <el-col :span="24"><el-form-item label="邮箱" prop="email"><el-input v-model="contactForm.email" maxlength="200" :placeholder="maskedContactFields.has('email') ? '已脱敏，留空保持不变' : ''" /></el-form-item></el-col>
-          <el-col :span="24"><el-form-item label="主要联系人"><el-switch v-model="contactForm.primaryFlag" /></el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item :label="t('srmSupplierOverview.contactName')" prop="name">
+              <el-input v-model="contactForm.name" maxlength="100" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12"><el-form-item :label="t('srmResources.department')" prop="department"><el-input v-model="contactForm.department" maxlength="100" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item :label="t('srmSupplierOverview.jobTitle')" prop="jobTitle"><el-input v-model="contactForm.jobTitle" maxlength="100" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item :label="t('srmResources.decisionRole')" prop="decisionRole"><el-input v-model="contactForm.decisionRole" maxlength="50" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item :label="t('srmSupplierOverview.mobile')" prop="mobile"><el-input v-model="contactForm.mobile" maxlength="32" :placeholder="maskedContactFields.has('mobile') ? maskedPlaceholder : ''" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item :label="t('srmResources.phone')" prop="phone"><el-input v-model="contactForm.phone" maxlength="32" :placeholder="maskedContactFields.has('phone') ? maskedPlaceholder : ''" /></el-form-item></el-col>
+          <el-col :span="24"><el-form-item :label="t('srmSupplierOverview.email')" prop="email"><el-input v-model="contactForm.email" maxlength="200" :placeholder="maskedContactFields.has('email') ? maskedPlaceholder : ''" /></el-form-item></el-col>
+          <el-col :span="24"><el-form-item :label="t('srmResources.primaryContact')"><el-switch v-model="contactForm.primaryFlag" /></el-form-item></el-col>
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="contactDialogVisible = false">取消</el-button>
-        <el-button v-permission="editingContact ? 'srm:contact:update' : 'srm:contact:create'" type="primary" @click="saveContact">保存</el-button>
+        <el-button @click="contactDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button v-permission="editingContact ? 'srm:contact:update' : 'srm:contact:create'" type="primary" @click="saveContact">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="qualificationDialogVisible" :title="editingQualification ? '编辑资质' : '新增资质'" width="620px" append-to-body>
+    <el-dialog
+      v-model="qualificationDialogVisible"
+      :title="editingQualification ? t('srmResources.editQualification') : t('srmResources.createQualification')"
+      width="620px"
+      append-to-body
+    >
       <el-form ref="qualificationFormRef" :model="qualificationForm" :rules="qualificationRules" label-width="90px">
-        <el-form-item label="资质名称" prop="qualificationName"><el-input v-model="qualificationForm.qualificationName" maxlength="200" /></el-form-item>
-        <el-form-item label="证书编号" prop="certificateNo"><el-input v-model="qualificationForm.certificateNo" maxlength="100" /></el-form-item>
-        <el-form-item label="发证机关" prop="issuingAuthority"><el-input v-model="qualificationForm.issuingAuthority" maxlength="200" /></el-form-item>
+        <el-form-item :label="t('srmSupplierOverview.qualificationName')" prop="qualificationName"><el-input v-model="qualificationForm.qualificationName" maxlength="200" /></el-form-item>
+        <el-form-item :label="t('srmSupplierOverview.certificateNo')" prop="certificateNo"><el-input v-model="qualificationForm.certificateNo" maxlength="100" /></el-form-item>
+        <el-form-item :label="t('srmSupplierOverview.issuingAuthority')" prop="issuingAuthority"><el-input v-model="qualificationForm.issuingAuthority" maxlength="200" /></el-form-item>
         <el-row :gutter="16">
-          <el-col :span="12"><el-form-item label="发证日期"><el-date-picker v-model="qualificationForm.issueDate" type="date" value-format="YYYY-MM-DD" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="到期日期"><el-date-picker v-model="qualificationForm.expiryDate" type="date" value-format="YYYY-MM-DD" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item :label="t('srmResources.issueDate')"><el-date-picker v-model="qualificationForm.issueDate" type="date" value-format="YYYY-MM-DD" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item :label="t('srmSupplierOverview.expiryDate')"><el-date-picker v-model="qualificationForm.expiryDate" type="date" value-format="YYYY-MM-DD" /></el-form-item></el-col>
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="qualificationDialogVisible = false">取消</el-button>
-        <el-button v-permission="editingQualification ? 'srm:qualification:update' : 'srm:qualification:create'" type="primary" @click="saveQualification">保存</el-button>
+        <el-button @click="qualificationDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button v-permission="editingQualification ? 'srm:qualification:update' : 'srm:qualification:create'" type="primary" @click="saveQualification">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="bankDialogVisible" :title="editingBank ? '编辑银行账户' : '新增银行账户'" width="620px" append-to-body>
+    <el-dialog
+      v-model="bankDialogVisible"
+      :title="editingBank ? t('srmResources.editBank') : t('srmResources.createBank')"
+      width="620px"
+      append-to-body
+    >
       <el-form ref="bankFormRef" :model="bankForm" :rules="bankRules" label-width="90px">
-        <el-form-item label="账户名" prop="accountName"><el-input v-model="bankForm.accountName" maxlength="200" /></el-form-item>
-        <el-form-item label="银行账号" prop="accountNo"><el-input v-model="bankForm.accountNo" maxlength="100" :placeholder="maskedBankAccount ? '已脱敏，留空保持不变' : ''" /></el-form-item>
-        <el-form-item label="银行名称" prop="bankName"><el-input v-model="bankForm.bankName" maxlength="200" /></el-form-item>
-        <el-form-item label="开户支行" prop="bankBranch"><el-input v-model="bankForm.bankBranch" maxlength="200" /></el-form-item>
-        <el-form-item label="银行代码" prop="bankCode"><el-input v-model="bankForm.bankCode" maxlength="50" /></el-form-item>
-        <el-form-item label="默认账户"><el-switch v-model="bankForm.primaryFlag" /></el-form-item>
+        <el-form-item :label="t('srmResources.accountName')" prop="accountName"><el-input v-model="bankForm.accountName" maxlength="200" /></el-form-item>
+        <el-form-item :label="t('srmSupplierOverview.accountNo')" prop="accountNo"><el-input v-model="bankForm.accountNo" maxlength="100" :placeholder="maskedBankAccount ? maskedPlaceholder : ''" /></el-form-item>
+        <el-form-item :label="t('srmSupplierOverview.bankName')" prop="bankName"><el-input v-model="bankForm.bankName" maxlength="200" /></el-form-item>
+        <el-form-item :label="t('srmSupplierOverview.bankBranch')" prop="bankBranch"><el-input v-model="bankForm.bankBranch" maxlength="200" /></el-form-item>
+        <el-form-item :label="t('srmResources.bankCode')" prop="bankCode"><el-input v-model="bankForm.bankCode" maxlength="50" /></el-form-item>
+        <el-form-item :label="t('srmResources.defaultAccount')"><el-switch v-model="bankForm.primaryFlag" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="bankDialogVisible = false">取消</el-button>
-        <el-button v-permission="editingBank ? 'srm:bank-account:update' : 'srm:bank-account:create'" type="primary" @click="saveBank">保存</el-button>
+        <el-button @click="bankDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button v-permission="editingBank ? 'srm:bank-account:update' : 'srm:bank-account:create'" type="primary" @click="saveBank">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </el-drawer>

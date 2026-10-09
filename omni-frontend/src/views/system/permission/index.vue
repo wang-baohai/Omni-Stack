@@ -98,4 +98,18 @@ onMounted(loadData)
 .card-header {
   font-weight: 600;
 }
+
+/* WP-012 F12：小屏收紧页面外边距，保证表格容器不越界；多列固定最小宽度时
+   改为容器内部横向滚动而非整页溢出（不得用 overflow:hidden 裁剪可达控件）。 */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 8px;
+  }
+  .page-container :deep(.el-card__body) {
+    padding: 12px;
+  }
+  .page-container :deep(.el-table) {
+    max-width: 100%;
+  }
+}
 </style>

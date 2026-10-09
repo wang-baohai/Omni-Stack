@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: crm-0003-fix-opportunity-status-semantics
+      author: omni-stack
+      labels: seed-fix
+      context: crm
+      comment: >
+        D05 修复：crm_opportunity.status 应存储生命周期状态（OPEN/WON/LOST），
+        而非管道阶段名（QUALIFICATION/NEGOTIATION/DISCOVERY/PROPOSAL）。
+        阶段信息已通过 stage_id 关联 crm_pipeline_stage 保留。
+        同时修复 crm_opportunity_stage_history 的 from_status/to_status 语义。
+      changes:
+        # 修复 crm_opportunity.status：阶段名 → OPEN（stage_type 为 OPEN 的阶段）
+        - sql:
+            sql: >
+              UPDATE crm_opportunity
+              SET status = 'OPEN', version = version + 1
+              WHERE status IN ('DISCOVERY', 'QUALIFICATION', 'PROPOSAL', 'NEGOTIATION')
+                AND deleted = 0;
+        # 修复 crm_opportunity_stage_history：from_status 阶段名 → OPEN
+        - sql:
+            sql: >
+              UPDATE crm_opportunity_stage_history
+              SET from_status = 'OPEN'
+              WHERE from_status IN ('DISCOVERY', 'QUALIFICATION', 'PROPOSAL', 'NEGOTIATION');
+        # 修复 crm_opportunity_stage_history：to_status 阶段名 → OPEN
+        - sql:
+            sql: >
+              UPDATE crm_opportunity_stage_history
+              SET to_status = 'OPEN'
+              WHERE to_status IN ('DISCOVERY', 'QUALIFICATION', 'PROPOSAL', 'NEGOTIATION');
+      rollback:
+        - sql:
+            sql: SELECT 1;

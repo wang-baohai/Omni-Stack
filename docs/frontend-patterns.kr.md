@@ -280,7 +280,7 @@ Omni-Stack은 **정적 라우트 + 동적 라우트** 혼합 아키텍처를 사
 router.beforeEach()
     ↓
 to.meta.requiresAuth 판단
-    ├── false → 로그인 사용자가 /login 접근 → /home으로 리다이렉트
+    ├── false → 로그인 사용자가 /login 접근 → Home(실제 path 는 `/`, `/home` 아님)으로 리다이렉트
     │           기타 공개 페이지 → 허용
     └── true  → userStore.token 확인
                 ├── Token 없음 → /login?redirect=<path>로 리다이렉트
@@ -467,7 +467,8 @@ const i18n = createI18n({
   legacy: false,
   locale: getStoredLang(),        // localStorage에서 읽기, 기본값 'zh-CN'
   fallbackLocale: 'en-US',
-  messages: { 'zh-CN': zhCN, 'en-US': enUS },
+  // 현재 SUPPORTED_LOCALES = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR'], 신규 모듈은 4개 언어 필수
+  messages: { 'zh-CN': zhCN, 'en-US': enUS, 'ja-JP': jaJP, 'ko-KR': koKR },
 })
 ```
 
@@ -622,9 +623,9 @@ src/
 |------|------|------|
 | 1 | `src/router/index.ts` → `iconMap` | `'<module>:<feature>': '<IconName>'` 추가(예: `'base:dict': 'Collection'`) |
 | 2 | `src/constants/menu.ts` → `menuI18nMap` | 모듈 디렉터리 및 메뉴 항목의 i18n key 매핑 추가 |
-| 3 | `src/locales/zh-CN.ts` + `en-US.ts` | `common.<module>Management`(디렉터리명), `common.<feature>Management`(메뉴명) 및 기능별 번역 key 추가 |
-| 4 | `scripts/sql/init-all.sql` → `sys_permission` | DIRECTORY(모듈 그룹) + MENU(기능 페이지) + BUTTON/API(조작 권한) 시드 데이터 추가 |
-| 5 | `scripts/sql/init-all.sql` → `sys_role_permission` | SUPER_ADMIN 역할에 신규 권한 노드 할당 |
+| 3 | `src/locales/zh-CN.ts` + `en-US.ts` + `ja-JP.ts` + `ko-KR.ts` | 4개 로케일 모두에 `common.<module>Management`(디렉터리명), `common.<feature>Management`(메뉴명) 및 기능별 번역 key 추가 |
+| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | 멱등 DIRECTORY(모듈 그룹) + MENU(기능 페이지) + BUTTON/API(조작 권한) 시드를 추가하고 seed manifest 갱신 |
+| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | SUPER_ADMIN 역할에 신규 권한 노드를 멱등 할당하고 자연 키 검증 추가 |
 
 ### 참고 구현: 사전 관리 모듈
 
@@ -730,7 +731,7 @@ COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 build: {
   target: 'es2020',            // 빌드 대상: 옵셔널 체이닝, 널 병합 등 최신 문법 지원
   outDir: 'dist',
-  chunkSizeWarningLimit: 2000, // Element Plus의 용량이 크므로 임계값을 적절히 상향 조정
+  chunkSizeWarningLimit: 750, // 현재 저장소 임계값
 }
 ```
 
@@ -748,7 +749,7 @@ build: {
 
 ```nginx
 server {
-    listen 80;
+    listen 3000;  # 컨테이너는 3000 에서 리스닝(Compose 호스트 3000 → 컨테이너 3000 과 일치)
     root /usr/share/nginx/html;
     index index.html;
 

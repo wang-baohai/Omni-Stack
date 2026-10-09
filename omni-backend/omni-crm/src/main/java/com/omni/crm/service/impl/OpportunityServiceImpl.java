@@ -25,7 +25,7 @@ import com.omni.crm.mapper.CrmOpportunityMapper;
 import com.omni.crm.mapper.CrmOpportunityStageHistoryMapper;
 import com.omni.crm.mapper.CrmOwnerChangeLogMapper;
 import com.omni.crm.mapper.CrmPipelineStageMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.crm.service.CrmTenantInitializer;
 import com.omni.crm.service.OpportunityService;
 import com.omni.crm.service.support.CrmAuditSupport;
@@ -123,7 +123,7 @@ public class OpportunityServiceImpl implements OpportunityService {
         CrmOwnerResolver.Owner owner = ownerResolver.resolveForCreate(request.getOwnerUserId(), "crm:opportunity:assign");
         Long pipelineId = request.getPipelineId() == null ? defaultPipeline : request.getPipelineId();
         CrmPipelineStage stage = resolveInitialStage(pipelineId, request.getStageId());
-        CrmOpportunity entity = new CrmOpportunity(); entity.setTenantId(CrmTenantContext.requireTenantId());
+        CrmOpportunity entity = new CrmOpportunity(); entity.setTenantId(ServiceIdentityContext.requireTenantId());
         entity.setOpportunityNo("TMP-" + UUID.randomUUID()); entity.setName(request.getName()); entity.setCustomerId(request.getCustomerId());
         entity.setPrimaryContactId(request.getPrimaryContactId()); entity.setPipelineId(pipelineId); entity.setStageId(stage.getId());
         entity.setStatus(stage.getStageType()); entity.setAmount(request.getAmount());
@@ -166,7 +166,7 @@ public class OpportunityServiceImpl implements OpportunityService {
         LambdaUpdateWrapper<CrmOpportunity> update = versioned(id, version).set(CrmOpportunity::getDeleted, 1);
         audit(update); requireUpdated(opportunityMapper.update(null, update));
         activityMapper.softDeleteByRoot("OPPORTUNITY", id, LocalDateTime.now(),
-                CrmTenantContext.require().username());
+                ServiceIdentityContext.require().username());
     }
 
     /** {@inheritDoc} */
@@ -181,10 +181,10 @@ public class OpportunityServiceImpl implements OpportunityService {
         activityMapper.update(null, new LambdaUpdateWrapper<CrmActivity>().eq(CrmActivity::getRootType, "OPPORTUNITY")
                 .eq(CrmActivity::getRootId, id).set(CrmActivity::getOwnerUserId, owner.userId())
                 .set(CrmActivity::getOwnerUnitId, owner.unitId()).setSql("version = version + 1"));
-        CrmOwnerChangeLog log = new CrmOwnerChangeLog(); log.setTenantId(CrmTenantContext.requireTenantId());
+        CrmOwnerChangeLog log = new CrmOwnerChangeLog(); log.setTenantId(ServiceIdentityContext.requireTenantId());
         log.setEntityType("OPPORTUNITY"); log.setEntityId(id); log.setOldOwnerUserId(current.getOwnerUserId());
         log.setOldOwnerUnitId(current.getOwnerUnitId()); log.setNewOwnerUserId(owner.userId()); log.setNewOwnerUnitId(owner.unitId());
-        log.setOperationType("ASSIGN"); log.setReason(request.getReason()); log.setOperatorUserId(CrmTenantContext.require().userId());
+        log.setOperationType("ASSIGN"); log.setReason(request.getReason()); log.setOperatorUserId(ServiceIdentityContext.require().userId());
         log.setOperatedTime(LocalDateTime.now()); CrmAuditSupport.created(log); ownerLogMapper.insert(log);
         return get(id);
     }
@@ -214,7 +214,7 @@ public class OpportunityServiceImpl implements OpportunityService {
         appendHistory(id, from.getId(), target.getId(), current.getStatus(), target.getStageType(), request.getReason());
         if ("WON".equals(target.getStageType())) {
             customerMapper.activatePotentialAfterOpportunityWin(current.getCustomerId(), now,
-                    CrmTenantContext.require().username());
+                    ServiceIdentityContext.require().username());
         }
         emitStageEvent(current, target, request.getVersion() + 1, now);
         return get(id);
@@ -272,9 +272,9 @@ public class OpportunityServiceImpl implements OpportunityService {
 
     private void appendHistory(Long id, Long fromStage, Long toStage, String fromStatus, String toStatus, String reason) {
         CrmOpportunityStageHistory history = new CrmOpportunityStageHistory();
-        history.setTenantId(CrmTenantContext.requireTenantId()); history.setOpportunityId(id); history.setFromStageId(fromStage);
+        history.setTenantId(ServiceIdentityContext.requireTenantId()); history.setOpportunityId(id); history.setFromStageId(fromStage);
         history.setToStageId(toStage); history.setFromStatus(fromStatus); history.setToStatus(toStatus); history.setChangeReason(reason);
-        history.setChangedByUserId(CrmTenantContext.require().userId()); history.setChangedTime(LocalDateTime.now());
+        history.setChangedByUserId(ServiceIdentityContext.require().userId()); history.setChangedTime(LocalDateTime.now());
         CrmAuditSupport.created(history); historyMapper.insert(history);
     }
 
@@ -282,10 +282,10 @@ public class OpportunityServiceImpl implements OpportunityService {
         String eventId = UUID.randomUUID().toString(); String suffix = target.getStageType().toLowerCase();
         String type = "OPEN".equals(target.getStageType()) ? "crm.opportunity.stage-changed.v1" : "crm.opportunity." + suffix + ".v1";
         DomainEventEnvelope envelope = DomainEventEnvelope.builder().eventId(eventId).eventType(type).occurredAt(now)
-                .tenantId(CrmTenantContext.requireTenantId()).producer("omni-crm").aggregateType("OPPORTUNITY")
-                .aggregateId(current.getId()).aggregateVersion(version).actorUserId(CrmTenantContext.require().userId())
+                .tenantId(ServiceIdentityContext.requireTenantId()).producer("omni-crm").aggregateType("OPPORTUNITY")
+                .aggregateId(current.getId()).aggregateVersion(version).actorUserId(ServiceIdentityContext.require().userId())
                 .payload(Map.of("opportunityId", current.getId(), "stageId", target.getId(), "status", target.getStageType())).build();
-        reliableMessageRelay.send("crm-domain-out-0", envelope, CrmTenantContext.requireTenantId(), eventId);
+        reliableMessageRelay.send("crm-domain-out-0", envelope, ServiceIdentityContext.requireTenantId(), eventId);
     }
 
     private LambdaUpdateWrapper<CrmOpportunity> versioned(Long id, Integer version) {
@@ -295,7 +295,7 @@ public class OpportunityServiceImpl implements OpportunityService {
 
     private void audit(LambdaUpdateWrapper<CrmOpportunity> update) {
         update.set(CrmOpportunity::getUpdateTime, LocalDateTime.now())
-                .set(CrmOpportunity::getUpdateBy, CrmTenantContext.require().username());
+                .set(CrmOpportunity::getUpdateBy, ServiceIdentityContext.require().username());
     }
 
     private <T> void setIf(LambdaUpdateWrapper<CrmOpportunity> update, T value,

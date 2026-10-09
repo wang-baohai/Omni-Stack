@@ -66,7 +66,7 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 | **gRPC Long Connections** | v3 uses gRPC instead of HTTP short polling, reducing service registration/discovery latency from seconds to milliseconds |
 | **Health Check Endpoint Change** | v3.1.1 changed the endpoint from `/nacos/actuator/health` to `GET /nacos/`, requiring Docker healthcheck adaptation |
 
-### 2.4 Why Flowable 7.x
+### 2.4 Why Flowable 8.x
 
 | Consideration | Decision Rationale |
 |--------------|-------------------|
@@ -98,7 +98,7 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 
 ## 4. Module Map
 
-### 4.1 Common Starter Ecosystem (8 Auto-Configuration Modules)
+### 4.1 Common Starter Ecosystem (10 Common Modules)
 
 | Module | Role | Technology | Boundary Constraint |
 |--------|------|------------|---------------------|
@@ -110,21 +110,27 @@ Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spri
 | `omni-common-job` | XXL-JOB integration: auto-configuration, admin HTTP client, system job registry, job metadata annotations | XXL-JOB Core 3.3.1, Spring Boot Web (optional) | Scheduling infrastructure only; no business task logic |
 | `omni-common-mqlog` | Reliable MQ message sending: Transactional Outbox, relay job, strategy-based sender, internal query API | Spring Cloud Stream RocketMQ (optional), omni-common-job (optional) | MQ infrastructure only; no business message logic |
 | `omni-common-operlog` | Operation log aspect and producer: `@OperLog` annotation-driven, supports both reliable and direct sending modes | Spring AOP, omni-common-mqlog (optional) | Operation log concern only |
+| `omni-common-workflow` | Flowable auto-configuration and the approval SPI | Flowable 8.0.0 | Workflow service only; business services must not depend on the process runtime |
+| `omni-common-service` | Composite starter for Servlet business services: Gateway pre-authentication, request identity/tenant, internal APIs, DataScope, fixed MyBatis interceptor order, XSS origin fallback and the security baseline | Spring Security, OpenFeign, MyBatis-Plus, Redis | Not applicable to Gateway/Auth; domain table mapping and AccessGuard remain service-implemented |
 
-### 4.2 Microservice Modules (4)
+### 4.2 Microservice Modules (8)
 
 | Module | Port | Role | Core Dependencies |
 |--------|------|------|-------------------|
 | `omni-auth` :8100 | 8100 | Authentication & authorization: login, captcha, JWT, multi-tenant, OAuth2 Authorization Server, XSS config management, RBAC permissions, online user management | Spring Boot Web, Spring Security, OAuth2 Authorization Server |
 | `omni-base` :8101 | 8101 | Base data management: dictionary CRUD, scheduled tasks (system + user), operation log archival, MQ message management | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
-| `omni-workflow` :8103 | 8103 | Workflow engine: BPMN model management, process instances, approvals, task assignment, statistics | Spring Boot Web, Spring Security, omni-common-workflow, Flowable 7.x |
+| `omni-workflow` :8103 | 8103 | Workflow engine: BPMN model management, process instances, approvals, task assignment, statistics | Spring Boot Web, Spring Security, omni-common-workflow, Flowable 8.0.0 |
+| `omni-crm` :8104 | 8104 | CRM pre-sales loop: leads, customers, contacts, opportunities, activities, conversion and overview | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
+| `omni-srm` :8105 | 8105 | SRM supplier loop: master data, admission state machine, contacts/qualifications/bank accounts, evaluation, risk, invitations and the supplier portal | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
+| `omni-procurement` :8106 | 8106 | Procurement execution loop: material catalog, requisition approval, RFQ and comparison, purchase orders and goods receipts | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
+| `omni-asset` :8107 | 8107 | Asset full lifecycle: procurement receipt ingestion, ledger, allocation/return, transfer, disposal and overview | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
 | `omni-gateway` :8102 | 8102 | API Gateway: request routing, JWT authentication filtering, CORS handling, security headers | Spring Cloud Gateway Server (WebFlux), omni-common-redis-reactive |
 
 ### 4.3 Frontend Module
 
 | Module | Port | Technology Stack | Role |
 |--------|------|-----------------|------|
-| `omni-frontend` | 3000 (dev) / 3000 (Nginx) | Vue 3, Pinia 3, Vue Router 4, Element Plus, Axios, Vite 8 | Presentation-layer SPA; no data-authoritative business rules |
+| `omni-frontend` | 3000 (dev) / 3000 (Nginx) | Vue 3, Pinia 3, Vue Router 5, Element Plus, Axios, Vite 8 | Presentation-layer SPA; no data-authoritative business rules |
 
 ---
 
@@ -169,6 +175,10 @@ Each module plays a clearly defined role in the overall architecture:
 | `omni-gateway` | **Traffic entry**: The sole entry point for all HTTP requests; JWT verification + identity propagation + route distribution |
 | `omni-base` | **Data foundation**: Central management of dictionary, logs, scheduled tasks, and other shared business data |
 | `omni-workflow` | **Process engine**: Independently deployed BPMN workflow service; Flowable dependencies isolated via `omni-common-workflow` starter |
+| `omni-crm` | **Sales domain**: Owns CRM data independently; reuses tenant users, organizations and permission-aware data scopes through Auth internal APIs |
+| `omni-srm` | **Supplier domain**: Owns SRM data independently; assigns the SUPPLIER role together with Auth through the Portal Saga, and exposes internal-token-protected supplier summary APIs to Procurement/Asset |
+| `omni-procurement` | **Procurement execution domain**: Owns procurement data independently; drives requisition approval through Workflow, completes supplier invitation and quotation collaboration through SRM, and publishes qualified goods-receipt events plus a historical backfill API to the Asset domain |
+| `omni-asset` | **Asset lifecycle domain**: Owns asset data independently; creates cards by consuming qualified procurement receipt events, drives transfer/disposal approval through Workflow, and manages ownership and usage scope uniformly through the asset aggregate root |
 
 ---
 
@@ -242,7 +252,7 @@ SecurityHeadersFilter (WebFilter)
     ▼
 Spring Cloud Gateway Route Engine
     │ 1. Route matching: Path=/api/auth/** → lb://omni-auth
-    │ 2. StripPrefix=2: /api/auth/login → /login
+    │ 2. Preserve the full path: /api/auth/login → /api/auth/login
     │ 3. Load balancing: fetch instance list from Nacos service discovery
     ▼
 Forward to downstream microservice (omni-auth / omni-base / omni-workflow)
@@ -254,15 +264,19 @@ Forward to downstream microservice (omni-auth / omni-base / omni-workflow)
 - **Public key cached 5 minutes**: Avoids calling the JWKS endpoint on every request; `volatile` ensures multi-thread visibility
 - **`onErrorResume` catches only `SecurityException`**: Prevents downstream routing errors (service unavailable, timeout) from being misreported as JWT verification failures
 
-### 6.3 omni-base / omni-workflow Security Model
+### 6.3 Servlet Business Services Security Model
 
-Downstream microservices (base, workflow) adopt a unified **gateway pre-authentication model**:
+Downstream Servlet microservices adopt a **gateway pre-authentication model**; all services require the HMAC signature assertion:
+
+- **All Servlet business services** (omni-auth, omni-base, omni-workflow, omni-crm, omni-srm, omni-procurement, omni-asset) validate `X-Gateway-Assertion` (an HmacSHA256 signature assertion sharing `GATEWAY_ASSERTION_SECRET` with the Gateway) and `X-Tenant-Id` via `GatewayPreAuthenticationFilter` or their own `GatewayPreAuthFilter`, and only build `Authentication` from the `X-User-*` headers after validation passes. When the secret is not configured, they likewise reject with 401 (fail-closed) and no longer trust plaintext identity headers.
+
+CRM, SRM, Procurement and Asset further resolve data scope from Auth by full permissionCode; TenantLine and DataPermission interceptors jointly constrain every business SQL:
 
 ```
 Request enters (already JWT-verified by Gateway)
     │
     ▼
-GatewayPreAuthFilter (OncePerRequestFilter)
+Pre-auth filter (all services go through GatewayPreAuthenticationFilter or their own GatewayPreAuthFilter; first validates X-Gateway-Assertion (HmacSHA256) + X-Tenant-Id; a missing secret also fails closed with 401)
     │ Builds UsernamePasswordAuthenticationToken from X-User-* headers
     │ Roles get ROLE_ prefix, permissions added directly as authority
     │ Written to SecurityContextHolder
@@ -273,7 +287,7 @@ AuthorizationFilter
 Business Controller → Service → Mapper
 ```
 
-**Design Rationale**: JWT verification is centralized at the Gateway; downstream services trust the headers injected by the Gateway. This way, each service doesn't need independent JWT verification configuration, reducing complexity and key management overhead.
+**Design Rationale**: JWT verification is centralized at the Gateway. All downstream services require a passing `X-Gateway-Assertion` HMAC signature assertion and fail closed when the secret is not configured, preventing downstream from unconditionally accepting forged identity headers. This way, each service doesn't need independent JWT verification configuration, reducing complexity and key management overhead.
 
 ---
 
@@ -289,10 +303,10 @@ Vite Dev Server (:3000)  -- proxy /api/** -->
     │
 Gateway (:8102)
     │  1. Route matching: Path=/api/auth/** -> lb://omni-auth
-    │  2. StripPrefix=2: /api/auth/login -> /login
+    │  2. Preserve the full path: /api/auth/login -> /api/auth/login
     ▼
 Auth Service (:8100)
-    │  1. AuthController receives /login
+    │  1. AuthController receives the full /api/auth/login
     │  2. CaptchaService validates captcha (Redis)
     │  3. OmniUserDetailsService authenticates user (multi-tenant tenantId:username)
     │  4. JwtTokenService generates RS256-signed JWT
@@ -308,7 +322,7 @@ Browser stores JWT and uses it for subsequent authenticated requests
 ```
 Business Service (e.g., omni-base)
     │  @Transactional
-    │  ReliableMessageTemplate.send(bindingName, payload)
+    │  ReliableMessageTemplate.send(bindingName, payload, tenantId)
     ▼
 sys_mq_message table (status=PENDING, same local transaction)
     │
@@ -343,9 +357,9 @@ Monitoring Page: query/resend/skip dead-letter messages
 | XXL-JOB Admin | Distributed task scheduling console | 3.3.1 | 18080 |
 | RocketMQ | Message queue (NameServer + Broker) | 5.3.2 | 9876, 10909-10912 |
 
-All services can be started with a single command: `docker compose up -d`. See `docker-compose.yml` in the project root.
+The full stack can be started with `docker compose --profile full up -d`; for daily development use `omni dev up --preset <id>` to start the minimal dependency closure. Adding `--observability` starts Prometheus, Pushgateway, Node Exporter, cAdvisor, Grafana, Tempo, Loki, Alloy, the OTel Collector and Alertmanager, and enables local Trace export. The single entry point is `compose.yaml` at the repository root; see [observability.en.md](observability.en.md) for observability semantics and security boundaries.
 
-**Start order**: MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → Backend services (Auth, Base, Workflow, Gateway) → Frontend
+**Start order**: MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → Backend services (Auth, Base, Workflow, CRM, SRM, Procurement, Asset, Gateway) → Frontend
 
 ---
 
@@ -353,16 +367,16 @@ All services can be started with a single command: `docker compose up -d`. See `
 
 ### 9.1 Docker Compose Orchestration
 
-The project root `docker-compose.yml` defines all 12 containers:
+The repository root `compose.yaml` merges `compose.infra.yaml` and `compose.apps.yaml` through include; the full profile defines 16 containers:
 
 - **Named volumes** (`mysql-data`, `redis-data`) for data persistence across restarts
 - **Health checks** (depends_on + service_healthy) ensuring layered startup chain
-- **Bridge network** (`omni-network`) for inter-container communication
-- **SQL init mounts**: `scripts/sql/init-all.sql`, `init-nacos.sql`, `init-xxl-job.sql` mounted into MySQL's `docker-entrypoint-initdb.d/`
+- **Bridge network** (Compose default, project-scoped) for inter-container communication
+- **Migration startup gate**: the one-shot `omni-db-migrator` applies Liquibase structure and idempotent seeds for all nine databases; Nacos, XXL-JOB, and applications start only after it succeeds
 
 ### 9.2 Database Schema
 
-#### omni_auth Database (14 tables)
+#### omni_auth Database (19 tables)
 
 **OAuth2 Authorization (3 tables)**:
 
@@ -372,7 +386,7 @@ The project root `docker-compose.yml` defines all 12 containers:
 | `oauth2_authorization` | Active OAuth2 authorization records (access tokens, refresh tokens, authorization codes) |
 | `oauth2_authorization_consent` | User-consented scopes per client |
 
-**Multi-Tenant RBAC (11 tables)**:
+**Multi-Tenant RBAC (14 tables)**:
 
 | Table | Purpose |
 |-------|---------|
@@ -385,10 +399,18 @@ The project root `docker-compose.yml` defines all 12 containers:
 | `sys_role_permission` | Role-to-permission assignments |
 | `sys_user_unit` | User-to-org-unit assignments (primary/secondary) |
 | `sys_role_dept` | Role-to-department data scope bindings |
+| `sys_user_role_scope` | User role scope (`unit_id` + `scope_mode`: SAME_UNIT / UNIT_AND_BELOW; unique key `tenant_id`+`user_id`+`role_id`+`unit_id`), driving data permissions and workflow candidate resolution |
 | `sys_token_blacklist` | Revoked JWT token blacklist |
 | `sys_user_oauth_provider` | Third-party social login identity linking |
 | `sys_xss_config` | Per-tenant XSS global toggle |
 | `sys_xss_blacklist_rule` | XSS blacklist rules |
+
+**Security Audit and Portal Roles (2 tables)**:
+
+| Table | Purpose |
+|-------|---------|
+| `sys_audit_log` | Security audit log (`event_type`: LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED) |
+| `sys_portal_role_request` | Idempotent inbox for portal role assignment requests (`status`: PROCESSING/COMPLETED/FAILED, unique key `tenant_id`+`request_id`) |
 
 ```mermaid
 erDiagram
@@ -420,7 +442,31 @@ erDiagram
 
 > See [workflow.en.md](workflow.en.md) for details.
 
-**Authoritative DDL and seed data**: `scripts/sql/init-all.sql`
+#### omni_crm Database
+
+**CRM core tables (11 tables)**: `crm_tenant_config`, `crm_pipeline`, `crm_pipeline_stage`, `crm_lead`, `crm_lead_conversion`, `crm_customer`, `crm_contact`, `crm_opportunity`, `crm_opportunity_stage_history`, `crm_activity`, `crm_owner_change_log`, plus a per-service `sys_mq_message` Outbox. Every `crm_*` table carries `tenant_id`; authorization root tables keep an owner snapshot and use optimistic locking.
+
+> See [crm.en.md](crm.en.md) for domain runtime constraints and [design/crm-design.en.md](design/crm-design.en.md) for the design baseline.
+
+#### omni_srm Database
+
+**SRM core tables**: supplier master, contacts, qualifications, bank accounts, evaluations, risks, portal user associations, the invitation Saga and the quotation collaboration tables, plus a service-specific `sys_mq_message` Outbox. All authorized child resources inherit tenant and data scope through the Supplier or Evaluation aggregate root.
+
+> See [design/srm-design.en.md](design/srm-design.en.md) for details.
+
+#### omni_procurement Database
+
+**Procurement core tables**: tenant config, material/category, approval routes, requisitions and their lines, RFQs with suppliers and lines, purchase orders and lines, goods receipts and lines, the shared Inbox and a service-specific Outbox. Requisitions are filtered by requester scope, RFQ/PO/GR by owner scope, and child tables inherit through their aggregate root.
+
+> See [design/procurement-design.en.md](design/procurement-design.en.md) for details.
+
+#### omni_asset Database
+
+**Asset core tables**: `ast_asset` (asset aggregate root), `ast_asset_history` (immutable history), `ast_transfer` (transfers), `ast_disposal` (disposals), `ast_inbox_event` (cross-service consumption idempotency), plus a service-specific `sys_mq_message` Outbox. Procurement-sourced card creation is made idempotent by the receipt line and unit sequence; transfers and disposals share concurrency occupancy through the aggregate root's active-operation fields.
+
+> See [design/asset-design.en.md](design/asset-design.en.md) for details.
+
+**Authoritative database sources**: `database/changelog/` owns schema, indexes, constraints, and upgrades. `scripts/sql/seed/` owns formal idempotent seeds, guarded by source SHA-256 values and natural-key assertions in `database/seed/manifest.yaml`. Legacy manual `init-all.sql` and `migrate-*.sql` scripts have been retired from the current tree. Use `database/changelog/` for schema and `scripts/sql/seed/` for initialization; do not import old scripts.
 
 ---
 
@@ -428,11 +474,11 @@ erDiagram
 
 ### 10.1 Container Network Topology
 
-All containers share a Docker Bridge network `omni-network`:
+All containers share the Compose default bridge network (derived from the project name; `compose.yaml`/`compose.apps.yaml` do not declare a named `omni-network`; containers reach each other by service name):
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│                      Docker Network: omni-network                     │
+│            Docker Network: <project>_default (Compose default)         │
 │                                                                       │
 │  ┌─────────────┐    ┌──────────┐    ┌────────┐    ┌──────────────┐  │
 │  │ omni-       │    │ omni-    │    │ omni-  │    │ omni-        │  │
@@ -468,9 +514,9 @@ Nacos registration: service=omni-auth, ip=<container-internal-IP>, port=8080
     │
 omni-gateway starts
     │ @EnableDiscoveryClient
-    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=true
+    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=false
     ▼
-Gateway routing: lb://omni-auth → query Nacos for instance list → load-balanced forwarding
+Gateway explicit routes: /api/crm/** → lb://omni-crm → query Nacos for instance list → load-balanced forwarding
 ```
 
 **Key Configuration**:
@@ -635,7 +681,7 @@ The XSS defense system is modular — new services inherit protection by dependi
 1. Add `omni-common-core` + `omni-common` dependencies
 2. Implement `XssConfigProvider` SPI interface
 3. Use Redis caching strategy (`xss:enabled:{tenantId}` + `xss:rules:{tenantId}`, 30-minute TTL)
-4. `XssAutoConfiguration` is registered via `AutoConfiguration.imports` — no manual `@ComponentScan` needed
+4. `XssAutoConfiguration` is registered automatically via `AutoConfiguration.imports`
 
 ### 13.3 Adding a New User Task Type
 
@@ -712,7 +758,7 @@ Add to `omni-backend/pom.xml` `<modules>`:
 
 ```yaml
 server:
-  port: 8104                        # Unique port
+  port: 8108                        # Unused port (omni-auth 8100 / base 8101 / gateway 8102 / workflow 8103 / crm 8104 / srm 8105 / procurement 8106 / asset 8107 are all taken)
 
 spring:
   application:
@@ -742,24 +788,25 @@ Add to `omni-gateway/application.yml`:
   uri: lb://omni-order
   predicates:
     - Path=/api/order/**
-  filters:
-    - StripPrefix=2
 ```
+
+Downstream Controllers keep and declare the full `/api/order/**` path; the gateway currently does not apply `StripPrefix`.
 
 ### 14.6 Add Permission Seed Data
 
-Add `sys_permission` records in `scripts/sql/init-all.sql`:
+Add idempotent `sys_permission` records in `scripts/sql/seed/auth.sql`, then refresh its checksum and natural-key assertions in `database/seed/manifest.yaml`:
 
 ```sql
-INSERT INTO sys_permission (tenant_id, parent_id, name, code, type, path, ...) VALUES
-(1, 0, 'Order Management', NULL, 'DIRECTORY', '/order', ...),
-(1, @order_dir, 'Order List', 'order:list:page', 'MENU', 'list', ...),
-(1, @order_list, 'View Order', 'order:detail:query', 'BUTTON', NULL, ...);
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_name, permission_code, type, path, depth, sort, status) VALUES
+(1, 0, '订单管理', 'order', 'DIRECTORY', '/<目录ID>/', 1, 1, 1),
+(1, @order_dir, '订单列表', 'order:list', 'MENU', '/<目录ID>/<菜单ID>/', 2, 1, 1),
+(1, @order_list, '查看订单', 'order:detail:query', 'API', '/<目录ID>/<菜单ID>/<权限ID>/', 3, 1, 1);
 ```
 
 ### 14.7 Docker Deployment Configuration
 
-Add service definition to `docker-compose.yml`:
+Add the single service definition in `compose.apps.yaml` and declare the profiles it applies to:
 
 ```yaml
 omni-order:
@@ -769,7 +816,7 @@ omni-order:
     args:
       SERVICE_NAME: omni-order
   ports:
-    - "8104:8080"
+    - "8108:8080"
   environment:
     SERVER_PORT: "8080"
     SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_order?..."
@@ -783,10 +830,10 @@ omni-order:
 
 ### 14.8 Verification Checklist
 
-- [ ] `mvn clean install` compiles successfully
+- [ ] `./mvnw clean install` compiles successfully (use the repo Maven Wrapper and JDK 25, not a system mvn)
 - [ ] Service visible in Nacos console after local startup
 - [ ] `GET /api/order/xxx` routes successfully through Gateway
-- [ ] `@PreAuthorize` annotations work (requires `GatewayPreAuthFilter`)
+- [ ] `@PreAuthorize` annotations work (a new Servlet business service depends on `GatewayPreAuthenticationFilter` from omni-common-service; for base/workflow-style services with their own filter it is `GatewayPreAuthFilter`)
 - [ ] XSS protection auto-configured (depends on `omni-common`)
 - [ ] MyBatis-Plus pagination auto-configured
 

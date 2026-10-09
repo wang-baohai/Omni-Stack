@@ -58,6 +58,44 @@ class AuthFilterTest {
         assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
+    /** AD-02：公开路径(/oauth2/token)携带 client_secret_basic 的 Basic 头必须透传到下游，不能被无条件剥离。 */
+    @Test
+    void shouldPreserveBasicAuthHeaderOnOAuth2PublicPath() {
+        AuthFilter filter = filter();
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.post("/oauth2/token")
+                        .header("Authorization", "Basic dGVzdDp0ZXN0"));
+        AtomicReference<ServerWebExchange> forwarded = new AtomicReference<>();
+        GatewayFilterChain chain = current -> {
+            forwarded.set(current);
+            return Mono.empty();
+        };
+
+        filter.filter(exchange, chain).block();
+
+        assertThat(forwarded.get()).isNotNull();
+        assertThat(forwarded.get().getRequest().getHeaders().getFirst("Authorization"))
+                .isEqualTo("Basic dGVzdDp0ZXN0");
+    }
+
+    /** AD-02：公开路径携带超大 Bearer JWT 时仍按原设计剥离，避免转发下游触发 400。 */
+    @Test
+    void shouldStillStripBearerAuthHeaderOnOAuth2PublicPath() {
+        AuthFilter filter = filter();
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.post("/oauth2/token")
+                        .header("Authorization", "Bearer oversized-jwt-that-should-stay-stripped"));
+        AtomicReference<ServerWebExchange> forwarded = new AtomicReference<>();
+        GatewayFilterChain chain = current -> {
+            forwarded.set(current);
+            return Mono.empty();
+        };
+
+        filter.filter(exchange, chain).block();
+
+        assertThat(forwarded.get().getRequest().getHeaders().get("Authorization")).isNull();
+    }
+
     private AuthFilter filter() {
         return new AuthFilter(mock(JwkKeyProvider.class), mock(ReactiveStringRedisTemplate.class));
     }

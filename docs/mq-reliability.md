@@ -9,7 +9,7 @@ Omni-Stack 通过 **Transactional Outbox** 模式 + **XXL-JOB** 中继调度，�
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│                        业务服务（如 omni-auth）                             │
+│                        业务服务（如 omni-base）                           │
 │                                                                            │
 │  @OperLog 方法 ──> OperLogAspect ──> OperLogProducer                       │
 │                                            │                               │
@@ -65,39 +65,36 @@ Omni-Stack 通过 **Transactional Outbox** 模式 + **XXL-JOB** 中继调度，�
 
 ```
                          ┌──────────┐
-                INSERT   │          │   中继成功
-  ─────────────────────> │ PENDING  │ ──────────────────> SENT
-                         │  (0)     │                      (1)
-                         │          │
+                INSERT   │          │
+  ─────────────────────> │ PENDING  │ <─────────────┐
+                         │  (0)     │               │
+                         └────┬─────┘               │
+                              │ claim（发送前单语句原子 UPDATE，写租约到期时间）
+                              ▼                     │ resend
+                         ┌───────────┐              │
+   租约(120s)内持有     │ PROCESSING│  到期则允许其他 executor 回收（崩溃恢复）
+                         │  (5,瞬态) │ ─────────────┘
                          └────┬─────┘
-                              │ 中继失败
-                              ▼
-                         ┌──────────┐
-                         │          │   重试次数 < 最大重试次数
-                         │ FAILED   │ ──────────────────> 回到 PENDING
-                         │  (2)     │   （next_retry_time = now + 2^count × 10s）
-                         │          │
-                         └────┬─────┘
-                              │ 重试次数 >= 最大重试次数
-                              ▼
-                         ┌──────────┐
-                         │DEAD_LETTER│
-                         │  (3)     │
-                         └────┬─────┘
-                              │
-                    ┌─────────┴─────────┐
-                    │ 重发               │ 跳过
-                    ▼                    ▼
-               PENDING (0)         SKIPPED (4)
+                              │ 发送结果以 status=PROCESSING 为 CAS 前置条件写回
+                 ┌────────────┼────────────────┐
+            成功 ▼        失败 ▼                ▼ retry>=max
+                SENT(1)    FAILED(2)        DEAD_LETTER(3)
+                (终态)     │ 退避后由 relay 直接重扫 PENDING/FAILED 再次 claim
+                           │ （非“自动回到 PENDING”，FAILED 本身即重试候选）
+                           └── 超过 max_retry → DEAD_LETTER(3)
+               DEAD_LETTER ──跳过──> SKIPPED(4)（终态）
 ```
+
+> 说明：FAILED 不回写为 PENDING，而是作为 `status IN (PENDING, FAILED)` 的重试候选被 relay 直接重新 claim；PROCESSING 是 relay 投递期间的瞬态租约态，用于多 executor 并行时的原子抢占与去重。
 
 | 状态 | 编码 | 描述 |
 |------|------|------|
-| PENDING | 0 | 等待投递或就绪待重试 |
+| PENDING | 0 | 等待投递 |
 | SENT | 1 | 已成功投递到 MQ（终态） |
-| FAILED | 2 | 投递失败，等待下次重试（退避中） |
+| FAILED | 2 | 投递失败，退避后作为重试候选被重新 claim |
 | DEAD_LETTER | 3 | 超过最大重试次数（终态，需人工处理） |
 | SKIPPED | 4 | 管理员手动标记为忽略（终态） |
+| PROCESSING | 5 | relay 发送前单语句原子 claim 的瞬态租约态（默认 120 秒），终态写回以 `status=PROCESSING` 为 CAS 前置；租约到期可被其他 executor 回收 |
 
 ### 2.2 写入路径
 
@@ -119,10 +116,10 @@ reliableMessageRelay.send("order-out-0", orderPayload, tenantId, "order:12345");
 
 `MqMessageRelayJob` 由 XXL-JOB 调度（默认：每 10 秒，FIRST 路由策略）：
 
-1. `fetchPendingMessages()` — 查询 `status IN (PENDING, FAILED)` 且 (`next_retry_time IS NULL` 或 `next_retry_time <= NOW()`) 的记录，按 `create_time ASC` 排序，限制 100 条
-2. 对每条消息，根据 `broker_type` 从 sender 映射表中查找对应的 `MessageSender`
-3. 调用 `sender.send(msg)` — 成功则标记 SENT；失败则递增重试次数并应用指数退避
-4. 如果 `retryCount >= maxRetry`，标记为 DEAD_LETTER
+1. `fetchPendingMessages()` — 扫描候选集：`status IN (PENDING, FAILED)` 且 (`next_retry_time IS NULL` 或 `next_retry_time <= NOW()`)，**外加 PROCESSING 但租约已到期**（持有 executor 崩溃，允许其他执行流回收），按 `create_time ASC` 排序，限制 100 条
+2. **claim（原子抢占）**：对每条消息，先以单语句 UPDATE 将 `status` 从 PENDING/FAILED 原子改为 PROCESSING，并把 `next_retry_time` 临时借用为租约到期时间（默认 120 秒）；只有受影响行数 == 1 的执行流才继续发送，避免并行 executor 重复投递。claim 为单语句自动提交，不包裹跨网络发送的长事务
+3. 抢占成功者根据 `broker_type` 从 sender 映射表查找对应 `MessageSender` 并 `sender.send(msg)`
+4. 发送成功/失败均以 `status=PROCESSING` 为 CAS 前置条件写回：成功 → SENT；失败 → retry_count++、指数退避回到 FAILED；`retryCount >= maxRetry` → DEAD_LETTER
 
 ### 2.4 重试策略
 
@@ -186,14 +183,14 @@ reliableMessageRelay.send("oper-log-out-0", message);
 
 ### 4.3 幂等 DDL
 
-`schema.sql` 使用 `CREATE TABLE IF NOT EXISTS` 实现安全、幂等的建表。当 `omni-common-mqlog` 在 classpath 中时，表会在服务启动时自动创建。无需手动执行 DDL。
+`sys_mq_message` 表由 Liquibase 迁移创建：`database/changelog/common/0001-mq-schema.yaml`（changeset `common-mq-0001-schema`）通过 `omni-db-migrator` 容器在启动时应用。该 changeSet 执行的是 `CREATE TABLE`（**不带** `IF NOT EXISTS`），幂等性由前置条件与 Liquibase 历史共同保证：preConditions 先要求 `dbms` 为 `mysql`，再用 `sqlCheck`（`expectedResult: "0"`）校验 `information_schema` 中 `sys_mq_message` 表不存在才允许执行；重复执行由 Liquibase `DATABASECHANGELOG` 历史防重——已记录执行的 changeSet 不会再次运行。`omni-common-mqlog/src/main/resources/schema.sql` 已不再是业务 classpath 自动建表主路径，仅保留为历史参考。
 
 ### 4.4 MessageSender 策略模式
 
 添加新的 MQ Broker（如 Kafka）需要：
 1. 实现 `MessageSender` 接口：`brokerType()` 返回 `"kafka"`，`send(SysMqMessage)` 处理实际投递。
 2. 注册为 Spring Bean——`MqLogAutoConfiguration` 会将所有 `MessageSender` Bean 收集到以 `brokerType` 为键的映射表中。
-3. 调用 `ReliableMessageTemplate.send()` 时设置 `broker_type = "kafka"`（或使用对应的 binding）。
+3. **重要**：当前 `ReliableMessageTemplate.send()` **无 `brokerType` 参数**，写入时 `broker_type` 恒置 `"rocketmq"`（见 §2.2），因此无法仅靠现有 `send()` 选择 kafka。接入新 broker 必须**扩展可靠入队契约**（新增带 broker 选择的入队重载或显式扩展点），将新消息写为对应的 `broker_type`，否则中继不会路由到新 sender。下文 Kafka 为未来扩展示例，非当前可直接启用能力。
 
 无需修改 `MqMessageRelayService` 或中继逻辑。
 
@@ -215,12 +212,13 @@ reliableMessageRelay.send("oper-log-out-0", message);
 
 这会自动引入 `omni-common-core`（提供 `ReliableMessageRelay` 接口）和 `omni-common-mybatis`（提供 `SysMqMessageMapper`）。
 
-### 步骤 2：自动建表
+### 步骤 2：Liquibase 迁移建表
 
-`schema.sql` 在启动时自动执行（`CREATE TABLE IF NOT EXISTS sys_mq_message`）。验证方式：
+`sys_mq_message` 表由 `database/changelog/common/0001-mq-schema.yaml` 通过 Liquibase 迁移创建（`omni-db-migrator` 容器启动时应用）。验证方式：
 
 ```sql
-SELECT COUNT(*) FROM sys_mq_message;
+SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message';
+-- 应返回 1；DATABASECHANGELOG 中应有 common-mq-0001-schema 记录
 ```
 
 ### 步骤 3：注入并使用
@@ -269,6 +267,7 @@ Base 管理接口通过带 `X-Internal-Token` 的 Feign 调用聚合已接入服
 
 ```java
 @Component
+@RequiredArgsConstructor // 构造注入（项目禁用字段 @Autowired）
 public class KafkaMessageSender implements MessageSender {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -280,7 +279,16 @@ public class KafkaMessageSender implements MessageSender {
 
     @Override
     public void send(SysMqMessage msg) {
-        kafkaTemplate.send(msg.getTopic(), msg.getMsgKey(), msg.getPayload()).get();
+        // interface MessageSender.send 不声明 throws，需将 Kafka 的受检异常（get()）
+        // 转换或处理，否则无法编译；示例以 Unchecked 包装表达（不可直接拷贝使用）。
+        try {
+            kafkaTemplate.send(msg.getTopic(), msg.getMsgKey(), msg.getPayload()).get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Kafka 发送被中断", e);
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Kafka 发送失败", e);
+        }
     }
 }
 ```
@@ -341,16 +349,16 @@ public class KafkaMessageSender implements MessageSender {
 ```yaml
 # docker-compose.yml
 rocketmq-namesrv:
-  image: apache/rocketmq:5.3.1
+  image: apache/rocketmq:5.3.2
   container_name: omni-rocketmq-namesrv
   ports:
     - "9876:9876"
   command: sh mqnamesrv
   networks:
-    - omni-network
+    - default
 
 rocketmq-broker:
-  image: apache/rocketmq:5.3.1
+  image: apache/rocketmq:5.3.2
   container_name: omni-rocketmq-broker
   ports:
     - "10911:10911"
@@ -361,7 +369,7 @@ rocketmq-broker:
     NAMESRV_ADDR: rocketmq-namesrv:9876
   command: sh mqbroker -n rocketmq-namesrv:9876
   networks:
-    - omni-network
+    - default
 ```
 
 ### 关键配置说明
@@ -371,7 +379,7 @@ rocketmq-broker:
 | NameServer 端口 | 9876 | RocketMQ 服务发现端口 |
 | Broker 端口 | 10911 | Broker 主端口 |
 | Broker VIP 端口 | 10909 | Broker VIP 通道（快速响应） |
-| 网络 | omni-network | 与其他服务同一 Bridge 网络 |
+| 网络 | default | 与其他服务同一 Bridge 网络 |
 
 ### Spring Cloud Stream 配置
 
@@ -401,3 +409,25 @@ spring:
 | **消费者未收到消息** | Topic 未创建或消费者未订阅 | RocketMQ 控制台检查 Topic 和 Consumer Group；确认消费者服务已启动 |
 | **租户隔离失效** | 查询未过滤 tenantId | 检查 Controller 中是否包含 `.eq(SysMqMessage::getTenantId, tenantId)` |
 | **重复投递** | 中继任务多次扫描同一消息 | 检查 `msgId` 唯一性约束；确认 `StreamBridge.send()` 幂等性 |
+
+## 10. 消息详情界面截图（四语言）
+
+由文档专用 Playwright 用例 `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` 在真实运行栈上生成，对应 §5 步骤 5「检查前端管理界面」。
+
+- 前置条件：本地 Compose 全栈运行，`omni-base` 健康且 `sys_mq_message` 已有真实消息（采集时 base 库 87 行）。
+- 操作者：`admin`（需消息查询权限；控制器按 `X-Tenant-Id` 过滤）。
+- 操作：进入消息记录页，在首行点击「查看详情」打开只读详情弹层。
+- 预期状态：弹层展示消息ID、Topic、Binding Name、Tag、业务键、中间件类型、状态、重试次数、来源服务、创建时间与下次重试时间，内容与 §2.1 状态机、§2.4 重试策略所述字段一致。
+- 本组为**只读采集**：不重发、不跳过、不修改任何消息，因此不需写入开关，也无数据收尾。
+
+| 页面 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 消息详情弹层（message-status） | ![消息详情（简体中文）](images/zh-CN/monitor-mq-message-detail.png) | ![消息详情（英文）](images/en-US/monitor-mq-message-detail.png) | ![消息详情（日文）](images/ja-JP/monitor-mq-message-detail.png) | ![消息详情（韩文）](images/ko-KR/monitor-mq-message-detail.png) |
+
+已登记的译文完整度问题：该弹层在 **en-US/ja-JP/ko-KR 下标题与全部字段标签实测为英文**（ja/ko 未译，仅 zh-CN 已本地化）。
+`npm run ui:i18n:parity`（四语言各 2319 键、0 缺失）与 `npm run ui:i18n:check`（0/0 项）均通过，因此属语言包取值问题而非硬编码缺陷；图片与 manifest 按实际渲染值如实登记，未美化。
+
+尚未覆盖的流程（均需单独授权，本轮不擅自构造）：
+
+- `retry` 与 `dead-letter`：实测 5 个库的 `sys_mq_message` 共 809 行（base 87、procurement 644、srm 34、workflow 23、crm 21），**status 全为 1，无任何 FAILED / DEAD_LETTER 记录**。要产出这两个状态，必须向跨租户共享的 outbox 注入必然失败的消息，并让中继按 §2.4 的 `2^retryCount × 10s` 退避反复重试报错——属在共享基础设施上制造故障，需明确授权后才能执行。
+- `trace-diagnosis`：需真实 Trace ID 排障链路证据，待与可观测栈（[docs/observability.md](observability.md)）一并设计。

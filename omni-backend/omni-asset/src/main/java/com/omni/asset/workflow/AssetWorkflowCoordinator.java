@@ -2,7 +2,7 @@ package com.omni.asset.workflow;
 
 import com.omni.asset.client.WorkflowInternalClient;
 import com.omni.asset.dto.WorkflowContracts;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.asset.service.AssetOperationWorkflowStateService;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
@@ -35,7 +35,7 @@ public class AssetWorkflowCoordinator {
      * @param command 启动快照
      */
     public void start(AssetWorkflowCommand command) {
-        if (!command.tenantId().equals(AssetTenantContext.requireTenantId())) {
+        if (!command.tenantId().equals(ServiceIdentityContext.requireTenantId())) {
             throw new BusinessException(403, "Workflow 启动快照与当前租户不一致");
         }
         WorkflowContracts.StartRequest request = requestOf(command);

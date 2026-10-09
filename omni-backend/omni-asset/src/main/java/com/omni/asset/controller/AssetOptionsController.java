@@ -1,7 +1,7 @@
 package com.omni.asset.controller;
 
 import com.omni.asset.dto.AssetViews;
-import com.omni.asset.security.AssetDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.asset.service.AssetOptionService;
 import com.omni.common.core.result.R;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class AssetOptionsController {
     /** 查询当前数据范围内可发起调拨的资产候选。 */
     @GetMapping("/transfer-assets")
     @PreAuthorize("hasAuthority('asset:transfer:create')")
-    @AssetDataScope(permissionCode = "asset:transfer:create")
+    @ServiceDataScope(permissionCode = "asset:transfer:create")
     public R<List<AssetViews.AssetOptionVO>> transferAssets(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "30") int limit) {
@@ -45,7 +45,7 @@ public class AssetOptionsController {
     /** 查询当前数据范围内可发起处置的资产候选。 */
     @GetMapping("/disposal-assets")
     @PreAuthorize("hasAuthority('asset:disposal:create')")
-    @AssetDataScope(permissionCode = "asset:disposal:create")
+    @ServiceDataScope(permissionCode = "asset:disposal:create")
     public R<List<AssetViews.AssetOptionVO>> disposalAssets(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "30") int limit) {

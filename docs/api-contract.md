@@ -91,9 +91,9 @@ interface ApiResponse<T = unknown> {
 | HTTP 状态码 | 业务码 | 场景 | 触发条件 | 处理方 |
 |------------|--------|------|---------|--------|
 | 200 | 200 | 成功 | `R.ok(data)` | — |
-| 400 | 400 | 参数校验失败 | `MethodArgumentNotValidException` / `BindException` 被 `GlobalExceptionHandler` 捕获 | 前端显示 `message` 中的字段错误 |
-| 401 | 401 | 未认证 | Gateway `AuthFilter` 返回 401 JSON | 前端自动跳转登录页 |
-| 403 | 403 | 权限不足 | `AccessDeniedException` / `AuthorizationDeniedException` 被 `GlobalExceptionHandler` 捕获 | 前端显示"权限不足"提示 |
+| 400 | 400 | 参数校验失败 | `MethodArgumentNotValidException` / `BindException` 被 `GlobalExceptionHandler` 捕获 | 前端按业务码本地化提示（不回显后端原始 `message`） |
+| 401 | 401 | 未认证 | Gateway `AuthFilter` 返回 401 JSON | 仅会话过期时安全登出并回跳登录；凭据类 401 保留会话与输入 |
+| 403 | 403 | 权限不足 | `AccessDeniedException` / `AuthorizationDeniedException` 被 `GlobalExceptionHandler` 捕获 | 保持会话，本地化提示权限不足（不登出/不强制回退） |
 | 200 | 404 | 资源不存在 | `throw new BusinessException(404, "xxx不存在")` | 前端显示错误信息 |
 | 200 | 409 | 状态/并发冲突 | 乐观锁版本不一致或状态机拒绝迁移 | 前端刷新数据后提示用户重试 |
 | 200 | 503 | 下游依赖不可用 | CRM 调用 Auth 数据范围接口失败关闭 | 前端提示服务暂不可用，不降级为越权数据 |
@@ -135,14 +135,13 @@ interface ApiResponse<T = unknown> {
 ### 2.5 前端错误处理流程
 
 Axios 响应拦截器（`src/api/request.ts`）检查 `res.code !== 200`：
-1. 显示 `ElMessage.error(res.message)` 错误提示
-2. 当 code 为 `401` 时：调用 `userStore.logout()` 并重定向到 `/login`
-3. 返回 `Promise.reject(new Error(res.message))`
+1. 依业务码从 `error-display.ts` 解析本地化描述符（`i18nKey`/`displayMessage`）；前端只展示码值驱动的本地化文案，**后端 `res.message` 与 Axios `error.message` 一律不上屏**（原始 message 仅随 `ApiError` 附带供诊断）。
+2. 返回 `Promise.reject(new ApiError(display, readServerMessage(res)))`，错误对象携带 `businessCode`/`httpStatus`/`traceId`/`i18nKey`/`displayMessage`，由调用方分类处理。
 
-**HTTP 状态码处理**：
-- HTTP 401（Gateway JWT 验证失败）：Axios `onError` 拦截器捕获，清除 Token 并跳转登录页
-- HTTP 403（权限不足）：显示 `ElMessage.error("权限不足")` 并返回上一页
-- HTTP 400（参数校验失败）：显示 `GlobalExceptionHandler` 返回的字段级错误信息
+**HTTP 状态码处理**（区分「会话过期」与「登录凭据校验失败」，非任何文案匹配）：
+- HTTP 401：仅当 `error-display.ts` 判定 `shouldLogout`（会话过期 / 携带过期 `Authorization`）时才安全登出并回跳登录页；登录/会话登录/注册等凭据端点返回的 401 属凭据校验失败，**保留会话与用户输入，不登出、不清表单**。
+- HTTP 403（权限不足）：保持当前会话，**不登出、不强制返回上一页**，仅本地化提示权限不足。
+- HTTP 400/409/5xx：按业务码本地化提示；409 建议刷新后重试，503 提示服务暂不可用且不降级为越权数据，均不清会话。
 
 ---
 
@@ -366,7 +365,7 @@ Authorization: Bearer <token>
 
 - 由 Axios 请求拦截器（`src/api/request.ts`）使用 `useUserStore()` 中的 Token 设置
 - 由 `omni-gateway` 中的 `AuthFilter` 验证（JWT RS256 签名验证 + claims 提取 + 身份头注入）
-- 公开路径免认证：`/api/auth/**`、`/actuator/**`、`/favicon.ico`
+- 公开路径免认证（依 `AuthFilter` 精确/前缀白名单，**非整族 `/api/auth/**`**）：精确匹配 `/api/auth/login`、`/api/auth/session-login`、`/api/auth/register`、`/api/auth/captcha`、`/api/auth/tenants`、`/favicon.ico`；前缀匹配 `/api/auth/oauth2/`、`/actuator/`、`/oauth2/`、`/.well-known/`、`/login`、`/error`。用户/角色等管理 API（`/api/auth/user/**`、`/api/auth/role/**`）必须携带有效 JWT。
 
 ---
 
@@ -579,6 +578,24 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 ### 租户隔离
 
 所有列表查询和创建操作要求 `X-Tenant-Id` 请求头（前端从 JWT Token 提取，Gateway 注入）。数据在 SQL 查询层按 `tenant_id` 隔离。字典类型唯一性约束范围为 `(tenant_id, type_code)`。
+
+### MQ 投递运行状态
+
+`GET /api/base/mq-message/runtime` 使用 `base:mqmessage:list` 权限，返回当前 Outbox 与后台投递能力：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "outboxWriteEnabled": true,
+    "deliveryEnabled": false,
+    "mode": "OUTBOX_ONLY"
+  }
+}
+```
+
+`OUTBOX_ONLY` 表示业务事务仍写入本地 Outbox，但 MQ relay/XXL-JOB 未运行；前端必须显示降级提示并禁用重发操作。`FULL` 表示写入和异步投递均启用。
 
 ---
 
@@ -984,6 +1001,19 @@ X-Tenant-Id: 1
 `ASSET_TRANSFER`，处置模型分类为 `ASSET_DISPOSAL`，不得交叉复用或使用其他业务模型；
 Workflow 在实际创建资产审批实例前再次执行相同校验，关闭预校验后的模型变更窗口。
 
+### 16.5 审批规则只读模型聚合
+
+| 方法 | 路径 | 约束 |
+|---|---|---|
+| GET | `/api/internal/workflow/model-versions/published?category=purchase` | 只返回当前租户、分类精确匹配、主模型有效且 currentPublishedVersionId 指向可部署已发布版本的记录 |
+| POST | `/api/internal/workflow/model-versions/resolve` | body 为 `{ "modelVersionIds": [1, 2] }`，单次 1–200 个正整数，按请求顺序返回 |
+| GET | `/api/internal/workflow/model-version/{id}/preview` | 返回安全审批图，不返回 BPMN XML 或 designerJson |
+
+批量解析的 `availability` 仅取 `AVAILABLE/NOT_CURRENT/UNAVAILABLE/MODEL_ARCHIVED/NOT_FOUND`。
+安全预览只包含节点、脱敏边和模型元数据；UserTask 可包含 `roleCode/approvalMode`，条件表达式只返回
+“已配置条件（内容已隐藏）”。有分支或环时 `linearSummary=null`，前端必须提示实际路径由业务数据决定，
+不得把当前组织解析成未来实际审批人。
+
 ## 17. Procurement MVP 契约
 
 ### 17.1 通用边界
@@ -1015,11 +1045,29 @@ Workflow 在实际创建资产审批实例前再次执行相同校验，关闭�
 | 方法 | 路径 | 权限 |
 |---|---|---|
 | GET | `/api/procurement/approval-route/list` | `procurement:approval-route:list` |
+| GET | `/api/procurement/approval-route/workflow-options` | `procurement:approval-route:list` |
+| POST | `/api/procurement/approval-route/match-preview` | `procurement:approval-route:list` |
+| GET | `/api/procurement/approval-route/coverage` | `procurement:approval-route:list` |
+| GET | `/api/procurement/approval-route/impact?routeId={id}` | `procurement:approval-route:list` |
 | POST | `/api/procurement/approval-route` | `procurement:approval-route:create` |
 | PUT | `/api/procurement/approval-route/{id}` | `procurement:approval-route:update` |
 | DELETE | `/api/procurement/approval-route/{id}?version={version}` | `procurement:approval-route:delete` |
 
-路由请求包含 `routeCode/categoryCode/minAmount/maxAmount/modelVersionId/priority/status`；更新不接受 `routeCode`。`minAmount/maxAmount` 必须使用 JSON 十进制字符串（`maxAmount=null` 除外），JSON number 返回 400。活动区间使用 `minAmount <= amount < maxAmount`，`maxAmount=null` 表示无上限。同品类活动区间不得重叠，写事务以租户配置行锁串行化校验。`modelVersionId` 写入前必须属于当前租户、状态为 `PUBLISHED` 且已有非空 `processDefinitionId`，创建新流程实例前 Workflow 再次校验。提交请购时优先选择精确 `categoryCode`，无匹配才回退 `*`；匹配零条或多条均返回 409。
+新 UI 创建请求包含 `routeName/categoryCode/minAmount/maxAmount/modelVersionId/status`。`routeCode` 由服务端生成
+`APR-{ULID}` 且创建后不可修改；一个兼容发布周期内，旧创建请求可以传 `routeCode` 作为缺失
+`routeName` 的回退，服务端记录弃用日志。`priority` 只为兼容高级调用方保留；新建未传时在租户配置锁内取
+同品类最大值加 10，前端不显示该字段。
+
+`minAmount/maxAmount` 必须使用 JSON 十进制字符串（`maxAmount=null` 除外），JSON number 返回 400。
+活动区间使用 `minAmount <= amount < maxAmount`，`maxAmount=null` 表示无上限。同品类活动区间不得重叠，
+写事务以租户配置行锁串行化校验。新建或更换 `modelVersionId` 时只允许当前租户、`category=purchase`、
+`availability=AVAILABLE` 的当前已发布版本；遗留非 purchase 引用在列表标记 `LEGACY_CATEGORY`，不能静默迁移。
+
+`match-preview` 请求为 `{ "categoryCode": "IT_DEVICE", "totalAmount": "10000.0000" }`，响应
+`outcome` 仅取 `MATCHED/NO_MATCH/AMBIGUOUS/WORKFLOW_UNAVAILABLE`。它与请购提交共同调用
+`ApprovalRouteResolver.evaluate`；提交路径把非 MATCHED 结果转换为原有 409，因此浏览器不计算命中。
+`coverage` 按全部启用品类输出从 0 到无穷的 `COVERED/GAP/AMBIGUOUS` 半开片段，并标记默认兜底、
+失效模型和 Workflow 不可用。`impact` 在内存中排除指定规则后复用同一算法，不修改数据库。
 
 ### 17.4 请购申请
 

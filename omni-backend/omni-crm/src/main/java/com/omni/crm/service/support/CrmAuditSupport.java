@@ -1,7 +1,7 @@
 package com.omni.crm.service.support;
 
 import com.omni.common.core.model.BaseEntity;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 
 import java.time.LocalDateTime;
 
@@ -40,8 +40,8 @@ public final class CrmAuditSupport {
     }
 
     private static String operator() {
-        String username = CrmTenantContext.require().username();
+        String username = ServiceIdentityContext.require().username();
         return username == null || username.isBlank()
-                ? String.valueOf(CrmTenantContext.require().userId()) : username;
+                ? String.valueOf(ServiceIdentityContext.require().userId()) : username;
     }
 }

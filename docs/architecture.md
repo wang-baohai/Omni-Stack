@@ -31,7 +31,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 **核心设计哲学**：
 
 - **Harness 模式**：Architecture → Patterns → Code 三层递进，架构决策驱动代码规范
-- **Common Starter 生态**：8 个自动装配模块，新服务零配置接入基础设施
+- **Common 生态**：10 个公共模块（9 个自动装配模块 + 纯 POJO core），新服务按需接入基础设施
 - **Gateway 中心化认证**：JWT 验证集中在网关，下游服务通过请求头信任链传递身份
 - **Transactional Outbox**：MQ 消息可靠性通过本地事务表 + 异步中继保障
 
@@ -66,7 +66,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 | **gRPC 长连接** | v3 使用 gRPC 替代 HTTP 短轮询，服务注册/发现的延迟从秒级降到毫秒级 |
 | **健康检查端点变更** | v3.1.1 的端点从 `/nacos/actuator/health` 变为 `GET /nacos/`，Docker healthcheck 需适配 |
 
-### 2.4 为什么选择 Flowable 7.x
+### 2.4 为什么选择 Flowable 8.x
 
 | 考量 | 决策理由 |
 |------|----------|
@@ -98,7 +98,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 
 ## 4. 模块地图
 
-### 4.1 Common Starter 生态（8 个自动装配模块）
+### 4.1 Common 生态（10 个公共模块）
 
 | 模块 | 职责 | 技术栈 | 边界约束 |
 |------|------|--------|----------|
@@ -110,6 +110,8 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 | `omni-common-job` | XXL-JOB 集成：自动装配、Admin HTTP Client、系统任务注册、任务元数据注解 | XXL-JOB Core 3.3.1、Spring Boot Web（optional） | 仅调度基础设施，无业务任务逻辑 |
 | `omni-common-mqlog` | 可靠 MQ 消息发送：Transactional Outbox、中继任务、策略模式发送器、内部查询 API | Spring Cloud Stream RocketMQ（optional）、omni-common-job（optional） | 仅 MQ 基础设施，无业务消息逻辑 |
 | `omni-common-operlog` | 操作日志切面与生产者：`@OperLog` 注解驱动，支持可靠消息和直接发送两种模式 | Spring AOP、omni-common-mqlog（optional） | 仅操作日志关注点 |
+| `omni-common-workflow` | Flowable 自动配置与审批 SPI | Flowable 8.0.0 | 仅 Workflow 服务使用，业务服务不得依赖流程运行时 |
+| `omni-common-service` | Servlet 业务服务组合 Starter：Gateway 预认证、请求身份/租户、内部 API、DataScope、固定 MyBatis 顺序、XSS 回源与安全基线 | Spring Security、OpenFeign、MyBatis-Plus、Redis | 不适用于 Gateway/Auth；领域表映射和 AccessGuard 仍由服务实现 |
 
 ### 4.2 微服务模块（8 个）
 
@@ -117,7 +119,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 |------|------|------|----------|
 | `omni-auth` :8100 | 8100 | 认证授权：登录、验证码、JWT、多租户、OAuth2 授权服务器、XSS 配置管理、RBAC 权限、在线用户管理 | Spring Boot Web、Spring Security、OAuth2 Authorization Server |
 | `omni-base` :8101 | 8101 | 基础数据：字典 CRUD、定时任务管理（系统 + 用户）、操作日志归档、MQ 消息管理 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
-| `omni-workflow` :8103 | 8103 | 工作流引擎：BPMN 模型管理、流程实例、审批、任务分派、统计 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 7.x |
+| `omni-workflow` :8103 | 8103 | 工作流引擎：BPMN 模型管理、流程实例、审批、任务分派、统计 | Spring Boot Web、Spring Security、omni-common-workflow、Flowable 8.0.0 |
 | `omni-crm` :8104 | 8104 | CRM 销售前闭环：线索、客户、联系人、商机、跟进、转换与概览 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
 | `omni-srm` :8105 | 8105 | SRM 供应商闭环：主档、准入状态机、联系人/资质/银行、绩效、风险、邀请与供应商门户 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog |
 | `omni-procurement` :8106 | 8106 | 采购执行闭环：物料目录、请购审批、询价比价、采购订单与收货 | Spring Boot Web、Spring Security、mybatis、redis、job、mqlog、OpenFeign |
@@ -128,7 +130,7 @@ Omni-Stack 是一个微服务脚手架平台，提供开箱即用的 Spring Clou
 
 | 模块 | 端口 | 技术栈 | 职责 |
 |------|------|--------|------|
-| `omni-frontend` | 3000（dev）/ 3000（Nginx） | Vue 3、Pinia 3、Vue Router 4、Element Plus、Axios、Vite 8 | 展示层 SPA，不含数据权威性业务规则 |
+| `omni-frontend` | 3000（dev）/ 3000（Nginx） | Vue 3、Pinia 3、Vue Router 5、Element Plus、Axios、Vite 8 | 展示层 SPA，不含数据权威性业务规则 |
 
 ---
 
@@ -159,7 +161,7 @@ omni-frontend --- /api 代理 :3000 ---> omni-gateway :8102
 omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 ```
 
-**构建依赖顺序**：`omni-common-core` → `omni-common` → `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive` → `omni-auth` / `omni-base` / `omni-workflow` / `omni-crm` / `omni-srm` / `omni-procurement` / `omni-asset` / `omni-gateway`。Maven reactor 从 `<modules>` 声明自动解析顺序。
+**构建依赖顺序**：`omni-common-core` → `omni-common` → `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive` → `omni-common-service` → 各可运行服务。Maven reactor 从 `<modules>` 声明自动解析顺序。
 
 ### 局部与整体关系
 
@@ -263,13 +265,17 @@ Spring Cloud Gateway 路由引擎
 
 ### 6.3 Servlet 业务服务安全模型
 
-下游 Servlet 微服务（base、workflow、crm、srm、procurement、asset）采用统一的**网关预认证模型**。CRM、SRM、Procurement 与 Asset 进一步以完整 permissionCode 从 Auth 解析数据范围，TenantLine 与 DataPermission 拦截器共同约束每条业务 SQL：
+下游 Servlet 微服务采用**网关预认证模型**，所有服务均要求 HMAC 签名断言：
+
+- **所有 Servlet 业务服务**（omni-auth、omni-base、omni-workflow、omni-crm、omni-srm、omni-procurement、omni-asset）均通过 `GatewayPreAuthenticationFilter` 或各自的 `GatewayPreAuthFilter` 校验 `X-Gateway-Assertion`（与 Gateway 共享 `GATEWAY_ASSERTION_SECRET` 的 HmacSHA256 签名断言）与 `X-Tenant-Id`，通过后才据 `X-User-*` 头构建 `Authentication`。密钥未配置时同样 401 拒绝（fail-closed），不再信任明文身份头。
+
+CRM、SRM、Procurement 与 Asset 进一步以完整 permissionCode 从 Auth 解析数据范围，TenantLine 与 DataPermission 拦截器共同约束每条业务 SQL：
 
 ```
 请求进入（已经 Gateway JWT 验证）
     │
     ▼
-GatewayPreAuthFilter（OncePerRequestFilter）
+预认证过滤器（所有服务均经 GatewayPreAuthenticationFilter 或自有 GatewayPreAuthFilter，先校验 X-Gateway-Assertion(HmacSHA256)+X-Tenant-Id；密钥未配置也 fail-closed 401 拒绝）
     │ 从 X-User-* 请求头构建 UsernamePasswordAuthenticationToken
     │ 角色加 ROLE_ 前缀，权限直接作为 authority
     │ 写入 SecurityContextHolder
@@ -280,7 +286,7 @@ AuthorizationFilter
 业务 Controller → Service → Mapper
 ```
 
-**设计原理**：JWT 验证集中在 Gateway，下游服务信任 Gateway 注入的请求头。这样每个服务不需要独立配置 JWT 验证逻辑，降低复杂度和密钥管理成本。
+**设计原理**：JWT 验证集中在 Gateway。所有下游服务均要求 `X-Gateway-Assertion` HMAC 签名断言通过，密钥未配置时 fail-closed 拒绝，避免下游无条件接受伪造身份头。这样每个服务不需要独立配置 JWT 验证逻辑，降低复杂度和密钥管理成本。
 
 ---
 
@@ -315,7 +321,7 @@ Browser 存储 JWT，后续请求自动携带
 ```
 业务服务 (e.g., omni-base / omni-crm)
     │  @Transactional
-    │  ReliableMessageTemplate.send(bindingName, payload)
+    │  ReliableMessageTemplate.send(bindingName, payload, tenantId)
     ▼
 sys_mq_message 表 (status=PENDING，同一本地事务)
     │
@@ -350,7 +356,7 @@ RocketMQ Broker (通过 StreamBridge)
 | XXL-JOB Admin | 分布式任务调度控制台 | 3.3.1 | 18080 |
 | RocketMQ | 消息队列（NameServer + Broker） | 5.3.2 | 9876, 10909-10912 |
 
-所有服务可通过一条命令启动：`docker compose up -d`。详见项目根目录 `docker-compose.yml`。
+完整服务可通过 `docker compose --profile full up -d` 启动；日常开发使用 `omni dev up --preset <id>` 启动最小依赖闭包。追加 `--observability` 会启动 Prometheus、Pushgateway、Node Exporter、cAdvisor、Grafana、Tempo、Loki、Alloy、OTel Collector 与 Alertmanager，并开启本地 Trace 导出。统一入口为根目录 `compose.yaml`，观测语义与安全边界见 [observability.md](observability.md)。
 
 **启动顺序**：MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 后端服务（Auth、Base、Workflow、CRM、SRM、Procurement、Asset、Gateway）→ 前端
 
@@ -360,16 +366,17 @@ RocketMQ Broker (通过 StreamBridge)
 
 ### 9.1 Docker Compose 编排
 
-项目根目录 `docker-compose.yml` 定义了 15 个容器：
+项目根目录 `compose.yaml` 通过 include 合并 `compose.infra.yaml` 与 `compose.apps.yaml`，完整 profile 定义 16 个容器：
 
 - **命名卷**（`mysql-data`、`redis-data`）用于数据持久化
 - **健康检查**（depends_on + service_healthy）确保分层启动链
-- **Bridge 网络**（`omni-network`）用于容器间通信
-- **SQL 初始化挂载**：`scripts/sql/init-all.sql`、`init-nacos.sql`、`init-xxl-job.sql` 挂载到 MySQL 的 `docker-entrypoint-initdb.d/`
+- **共享默认 Bridge 网络**用于 include 后所有容器间通信，不重复声明服务或网络
+- **Profiles**（core、workflow、crm、supply-chain、full）组合唯一服务定义
+- **迁移启动门**：一次性 `omni-db-migrator` 使用 Liquibase 完成九库结构和幂等种子；Nacos、XXL-JOB 与应用只在迁移成功后启动
 
 ### 9.2 数据库 Schema
 
-#### omni_auth 数据库（14 表）
+#### omni_auth 数据库（19 表）
 
 **OAuth2 授权（3 表）**：
 
@@ -379,7 +386,7 @@ RocketMQ Broker (通过 StreamBridge)
 | `oauth2_authorization` | 活跃的 OAuth2 授权记录（Access Token、Refresh Token、授权码） |
 | `oauth2_authorization_consent` | 用户同意的作用域 |
 
-**多租户 RBAC（11 表）**：
+**多租户 RBAC（14 表）**：
 
 | 表名 | 用途 |
 |------|------|
@@ -392,10 +399,18 @@ RocketMQ Broker (通过 StreamBridge)
 | `sys_role_permission` | 角色-权限关联 |
 | `sys_user_unit` | 用户-组织单元关联（主/副） |
 | `sys_role_dept` | 角色-部门数据范围绑定 |
+| `sys_user_role_scope` | 用户角色作用域（`unit_id` + `scope_mode`：SAME_UNIT / UNIT_AND_BELOW；唯一键 `tenant_id`+`user_id`+`role_id`+`unit_id`），驱动数据权限与工作流候选人解析 |
 | `sys_token_blacklist` | 已撤销 JWT 黑名单 |
 | `sys_user_oauth_provider` | 第三方社交登录身份绑定 |
 | `sys_xss_config` | 租户级 XSS 全局开关 |
 | `sys_xss_blacklist_rule` | XSS 黑名单规则 |
+
+**安全审计与门户角色（2 表）**：
+
+| 表名 | 用途 |
+|------|------|
+| `sys_audit_log` | 安全审计日志（`event_type`：LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED） |
+| `sys_portal_role_request` | 门户角色分配请求幂等 Inbox（`status`：PROCESSING/COMPLETED/FAILED，唯一键 `tenant_id`+`request_id`） |
 
 ```mermaid
 erDiagram
@@ -451,7 +466,7 @@ erDiagram
 
 > 详见 [design/asset-design.md](design/asset-design.md)
 
-**权威 DDL 和种子数据**：`scripts/sql/init-all.sql`
+**权威数据库事实源**：结构、索引、约束和升级由 `database/changelog/` 管理；正式幂等种子由 `scripts/sql/seed/` 管理，并受 `database/seed/manifest.yaml` 的 SHA-256 和自然键断言约束。历史手工 `init-all.sql` 与 `migrate-*.sql` 已退出当前仓库；结构使用 `database/changelog/`，初始化数据使用 `scripts/sql/seed/`，不再手工导入旧脚本。
 
 ---
 
@@ -459,11 +474,11 @@ erDiagram
 
 ### 10.1 容器网络拓扑
 
-所有容器共享 Docker Bridge 网络 `omni-network`：
+所有容器共享由 Compose 按项目名派生的默认 bridge 网络（`compose.yaml`/`compose.apps.yaml` 未显式声明名为 `omni-network` 的具名网络，容器间用服务名互访）：
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│                      Docker Network: omni-network                     │
+│            Docker Network: <project>_default (Compose 默认)            │
 │                                                                       │
 │  ┌─────────────┐    ┌──────────┐    ┌────────┐    ┌──────────────┐  │
 │  │ omni-       │    │ omni-    │    │ omni-  │    │ omni-        │  │
@@ -741,7 +756,7 @@ omni-backend/
 
 ```yaml
 server:
-  port: 8104                        # 唯一端口
+  port: 8108                        # 未被占用的端口（omni-auth 8100 / base 8101 / gateway 8102 / workflow 8103 / crm 8104 / srm 8105 / procurement 8106 / asset 8107 均已占用）
 
 spring:
   application:
@@ -777,7 +792,7 @@ spring:
 
 ### 14.6 添加权限种子数据
 
-在 `scripts/sql/init-all.sql` 中添加 `sys_permission` 记录：
+在 `scripts/sql/seed/auth.sql` 中添加幂等 `sys_permission` 记录，并刷新 `database/seed/manifest.yaml` 的校验和与自然键断言：
 
 ```sql
 INSERT INTO sys_permission
@@ -789,7 +804,7 @@ INSERT INTO sys_permission
 
 ### 14.7 Docker 部署配置
 
-在 `docker-compose.yml` 中添加服务定义：
+在 `compose.apps.yaml` 中添加唯一服务定义，并为其声明适用 profiles：
 
 ```yaml
 omni-order:
@@ -799,7 +814,7 @@ omni-order:
     args:
       SERVICE_NAME: omni-order
   ports:
-    - "8104:8080"
+    - "8108:8080"
   environment:
     SERVER_PORT: "8080"
     SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_order?..."
@@ -813,10 +828,10 @@ omni-order:
 
 ### 14.8 验证清单
 
-- [ ] `mvn clean install` 编译通过
+- [ ] `./mvnw clean install` 编译通过（使用仓库 Maven Wrapper 与 JDK 25，不设系统 mvn）
 - [ ] 本地启动后 Nacos 控制台可见 `omni-order` 服务
 - [ ] `GET /api/order/xxx` 通过 Gateway 路由成功
-- [ ] `@PreAuthorize` 权限注解生效（需要 `GatewayPreAuthFilter`）
+- [ ] `@PreAuthorize` 权限注解生效（新 Servlet 业务服务依赖 omni-common-service 的 `GatewayPreAuthenticationFilter`；若为 base/workflow 同类自有过滤器则为 `GatewayPreAuthFilter`）
 - [ ] XSS 防护自动生效（依赖 `omni-common`）
 - [ ] MyBatis-Plus 分页自动配置
 

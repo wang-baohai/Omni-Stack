@@ -2,7 +2,7 @@ package com.omni.srm.controller;
 
 import com.omni.common.core.result.R;
 import com.omni.srm.dto.SrmViews;
-import com.omni.srm.security.SrmDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.srm.service.EvaluationService;
 import com.omni.srm.service.RiskService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class SupplierInsightController {
     /** 查询供应商评估历史。 */
     @GetMapping("/evaluation/history")
     @PreAuthorize("hasAuthority('srm:evaluation:list')")
-    @SrmDataScope(permissionCode = "srm:evaluation:list")
+    @ServiceDataScope(permissionCode = "srm:evaluation:list")
     public R<List<SrmViews.EvaluationVO>> evaluationHistory(@PathVariable Long supplierId) {
         return R.ok(evaluationService.supplierHistory(supplierId));
     }
@@ -38,7 +38,7 @@ public class SupplierInsightController {
     /** 查询供应商风险聚合详情。 */
     @GetMapping("/risk")
     @PreAuthorize("hasAuthority('srm:risk:list')")
-    @SrmDataScope(permissionCode = "srm:risk:list")
+    @ServiceDataScope(permissionCode = "srm:risk:list")
     public R<SrmViews.RiskProfileVO> risk(@PathVariable Long supplierId) {
         return R.ok(riskService.profile(supplierId));
     }

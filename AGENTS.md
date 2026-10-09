@@ -38,6 +38,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 | `docs/design/procurement-design.md` | Procurement: material catalog, requisition approval, RFQ/quotation, purchase order and goods receipt boundaries |
 | `docs/design/asset-design.md` | Asset MVP: asset ledger, procurement receipt ingestion, allocation/return, transfer/disposal approval and data scope |
 | `docs/mq-reliability.md` | Reliable message sending: Transactional Outbox pattern, status machine, retry strategy, tenant isolation, new service onboarding |
+| `docs/observability.md` | Metrics, W3C tracing, structured logs, local observability stack, dashboards, alerts and SLO template |
 
 ## Entry Points
 
@@ -55,6 +56,7 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Common Redis starter (blocking): `omni-backend/omni-common-redis/src/main/java/com/omni/common/redis/`
 - Common Redis starter (reactive): `omni-backend/omni-common-redis-reactive/src/main/java/com/omni/common/redis/reactive/`
 - Common MQ Log starter: `omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/`
+- Common Servlet business starter: `omni-backend/omni-common-service/src/main/java/com/omni/common/service/`
 
 **Frontend:**
 - App bootstrap: `omni-frontend/src/main.ts`
@@ -139,11 +141,11 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 
 **CRM:**
 - CRM service: `omni-backend/omni-crm/src/main/java/com/omni/crm/CrmApplication.java`
-- Domain model: `omni-backend/omni-crm/src/main/java/com/omni/crm/model/` (Lead, Customer, Contact, Opportunity, Activity, Overview)
-- Security: `omni-backend/omni-crm/src/main/java/com/omni/crm/security/` (CrmDataScope, CrmRecordAccessGuard, CrmTenantFilter)
+- Domain model: `omni-backend/omni-crm/src/main/java/com/omni/crm/entity/` (持久实体) 与 `omni-backend/omni-crm/src/main/java/com/omni/crm/domain/` (Lead/Customer/Contact/Opportunity/Activity 状态枚举)
+- Security: `omni-backend/omni-crm/src/main/java/com/omni/crm/security/` (CrmDataPermissionHandler, CrmTenantTablePolicy, PiiMasker); 行级写授权守卫 `CrmRecordAccessGuard` 位于 `omni-crm/.../service/support/`
 - Controllers: `omni-backend/omni-crm/src/main/java/com/omni/crm/controller/` (Lead/Customer/Contact/Opportunity/Activity/Overview)
 - Frontend pages: `omni-frontend/src/views/crm/` (overview, lead, customer, contact, opportunity, activity)
-- Frontend API: `omni-frontend/src/api/crm.ts` (lead, customer, contact, opportunity, activity, overview)
+- Frontend API: `omni-frontend/src/api/crm-<resource>.ts`（按资源拆分：crm-lead / crm-customer / crm-contact / crm-opportunity / crm-activity / crm-overview）
 
 **SRM:**
 - SRM service: `omni-backend/omni-srm/src/main/java/com/omni/srm/SrmApplication.java`
@@ -154,29 +156,29 @@ Architecture, patterns, API contracts, and core flows are documented in `docs/`.
 - Evaluation/Risk: `omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/EvaluationServiceImpl.java`, `omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskServiceImpl.java`
 - Frontend management pages: `omni-frontend/src/views/srm/`
 - Supplier portal: `omni-frontend/src/views/supplier-portal/`
-- SRM migration: `scripts/sql/migrate-srm-mvp.sql`
+- SRM database source: `database/changelog/srm/`, `scripts/sql/seed/srm.sql`
 
 **Procurement:**
 - Procurement service: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java`
 - Tenant/DataScope: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/`
-- MyBatis interceptor chain: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/config/MybatisPlusConfig.java`
+- MyBatis data-scope wiring: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java` and `ProcTenantTablePolicy.java`; the business interceptor chain (fixed order TenantLine → DataPermission → OptimisticLocker → Pagination) is assembled by `omni-common-service` `ServicePersistenceAutoConfiguration` (`@AutoConfigureBefore` common-mybatis), which consumes each domain's `TenantTablePolicy`/`DataScopeTablePolicy`; `omni-common-mybatis` `MybatisPlusAutoConfiguration` is only the default base (no module-local MybatisPlusConfig)
 - Material, approval route, requisition and RFQ aggregates: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/entity/`
 - Requisition workflow: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RequisitionController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinator.java`
 - RFQ lifecycle and quotation integration: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RfqController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/consumer/QuotationSubmittedConsumer.java`
 - Purchase order and goods receipt: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/PurchaseOrderController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/GoodsReceiptController.java`
 - Procurement overview: `omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/OverviewController.java`, `omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcOverviewMapper.java`
-- Procurement schema and RBAC: `scripts/sql/migrate-procurement-mvp.sql`, `scripts/sql/init-all.sql`
+- Procurement database source: `database/changelog/procurement/`, `scripts/sql/seed/procurement.sql`; RBAC seed: `scripts/sql/seed/auth.sql`
 
 **Asset:**
 - Asset service: `omni-backend/omni-asset/src/main/java/com/omni/asset/AssetApplication.java`
 - Tenant/DataScope: `omni-backend/omni-asset/src/main/java/com/omni/asset/security/`
-- MyBatis interceptor chain: `omni-backend/omni-asset/src/main/java/com/omni/asset/config/MybatisPlusConfig.java`
+- MyBatis data-scope wiring: `omni-backend/omni-asset/src/main/java/com/omni/asset/security/AssetDataPermissionHandler.java` and `AssetTenantTablePolicy.java`; the business interceptor chain (fixed order TenantLine → DataPermission → OptimisticLocker → Pagination) is assembled by `omni-common-service` `ServicePersistenceAutoConfiguration` (`@AutoConfigureBefore` common-mybatis), which consumes each domain's `TenantTablePolicy`/`DataScopeTablePolicy`; `omni-common-mybatis` `MybatisPlusAutoConfiguration` is only the default base (no module-local MybatisPlusConfig)
 - Asset ledger and lifecycle commands: `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetController.java`
 - Procurement receipt ingestion/backfill: `omni-backend/omni-asset/src/main/java/com/omni/asset/consumer/ProcurementGoodsReceiptConsumer.java`, `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/InternalProcurementBackfillController.java`
 - Transfer/disposal approval: `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetTransferController.java`, `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetDisposalController.java`
 - Asset overview: `omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetOverviewController.java`
 - Frontend pages: `omni-frontend/src/views/asset/`
-- Asset schema and RBAC: `scripts/sql/migrate-asset-mvp.sql`, `scripts/sql/init-all.sql`
+- Asset database source: `database/changelog/asset/`; RBAC seed: `scripts/sql/seed/auth.sql`
 
 ## Build & Run Commands
 
@@ -200,37 +202,6 @@ cd omni-backend
 # Build a specific module with its dependencies
 ./mvnw clean install -pl omni-base -am
 
-# Run Auth service (port 8100)
-cd omni-backend/omni-auth
-./mvnw spring-boot:run
-
-# Run Base service (port 8101)
-cd omni-backend/omni-base
-./mvnw spring-boot:run
-
-# Run Gateway (port 8102)
-cd omni-backend/omni-gateway
-./mvnw spring-boot:run
-
-# Run Workflow service (port 8103)
-cd omni-backend/omni-workflow
-./mvnw spring-boot:run
-
-# Run CRM service (port 8104)
-cd omni-backend/omni-crm
-./mvnw spring-boot:run
-
-# Run SRM service (port 8105)
-cd omni-backend/omni-srm
-./mvnw spring-boot:run
-
-# Run Procurement service (port 8106)
-cd omni-backend/omni-procurement
-./mvnw spring-boot:run
-
-# Run Asset service (port 8107)
-cd omni-backend/omni-asset
-./mvnw spring-boot:run
 ```
 
 **Build order**: `omni-common-core` must be installed first, then `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-redis-reactive` before `omni-auth`, `omni-base`, or `omni-gateway` can compile. Maven reactor resolves this automatically from `<modules>` declaration order.
@@ -243,8 +214,6 @@ cd omni-frontend
 # Install dependencies
 npm install
 
-# Dev server (port 3000, proxies /api to gateway:8102)
-npm run dev
 
 # Type-check and build for production
 npm run build
@@ -253,32 +222,27 @@ npm run build
 npm run lint
 ```
 
-### External Services (Docker)
+### Local Applications and External Services (Docker)
 
 **Primary method** — Docker Compose (recommended):
 
 ```bash
-# Start the repository stack (MySQL, Redis, Nacos, RocketMQ, XXL-JOB, services, frontend)
-docker compose up -d
+# Start the full repository stack (MySQL, Redis, Nacos, RocketMQ, XXL-JOB, services, frontend)
+docker compose --profile full up -d
+
+# Start a minimal preset through the repository CLI
+npm --prefix tools/omni-cli run dev -- dev up --preset crm
 
 # Check service health
 docker compose ps
 ```
 
-**Fallback** — individual `docker run` commands:
+Nacos is initialized by the formal migrator and Compose with server authentication enabled. Set the private `NACOS_PASSWORD` and server identity/signing secrets in `.env`; all discovery/config clients use the same `NACOS_USERNAME=nacos` and password. See `docs/docker-deployment.md` for credential changes and persistent volumes.
+
+**Optional Sentinel Dashboard:**
 
 ```bash
-# Nacos Server (port 8080, 8848, 9848)
-# Nacos v3.x requires auth configuration to start
-docker run -d --name nacos \
-  -p 8080:8080 -p 8848:8848 -p 9848:9848 \
-  -e MODE=standalone \
-  -e NACOS_AUTH_TOKEN=U2VjcmV0S2V5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5 \
-  -e NACOS_AUTH_IDENTITY_KEY=nacos \
-  -e NACOS_AUTH_IDENTITY_VALUE=nacos \
-  nacos/nacos-server:v3.1.1
-
-# Optional Sentinel Dashboard (not included in docker-compose.yml, port 8858)
+# Optional Sentinel Dashboard (not included in the base Compose model, port 8858)
 docker run -d --name sentinel -p 8858:8858 bladex/sentinel-dashboard:1.8.8
 ```
 
@@ -353,7 +317,7 @@ Start the optional Sentinel Dashboard separately only when interactive rule moni
 - `MqMessageRelayService` (relay job) scans ALL PENDING/FAILED messages regardless of tenant — this is intentional, relay is a background process not subject to tenant isolation.
 - `MessageSender` uses strategy pattern routed by `broker_type`. Current implementation: `RocketMqMessageSender` (StreamBridge). New MQ brokers (e.g., Kafka) require implementing `MessageSender` interface — no changes to relay logic needed.
 - MQ message retry uses exponential backoff: `2^retryCount × 10s`. Messages exceeding `max_retry` enter DEAD_LETTER status. Dead letters can be manually resent or skipped via the admin UI.
-- `sys_mq_message` auto-creates via `schema.sql` (`CREATE TABLE IF NOT EXISTS`) on service startup. No manual DDL required.
+- `sys_mq_message` DDL 唯一所有者为 Liquibase 迁移 `database/changelog/common/0001-mq-schema.yaml`，服务启动时由 Liquibase 自动执行。`omni-common-mqlog/src/main/resources/schema.sql` 为历史兼容保留，不再作为建表主路径。
 - System tasks MUST use dual annotation: `@XxlJob("handlerName")` + `@SystemJobMeta(...)`. Missing either annotation makes the handler invisible to `SystemJobRegistry`.
 - User task handler `@Component` Bean name MUST exactly match `sys_user_job_type.type_code`. A mismatch causes silent routing failure in `UserJobHandlerRegistry`.
 - `MyJobController` uses `verifyOwnership()` instead of `@PreAuthorize`. Never add `@PreAuthorize` to `MyJobController` endpoints — ownership check is per-row (createBy == currentUser), not per-endpoint.
@@ -368,6 +332,8 @@ Start the optional Sentinel Dashboard separately only when interactive rule moni
 
 ## Execution Rules
 
+- 所有应用、服务、前端和业务运行验证均在本机 Docker 内进行；不得在宿主机启动 Spring Boot、Vite 或其他应用服务器。构建与测试也优先在容器中执行。标准本地项目为 `omni-stack`；默认端口固定，MySQL 使用 3306，不自动漂移。
+
 - Before writing backend code: read `docs/backend-patterns.md`.
 - Before writing frontend code: read `docs/frontend-patterns.md`.
 - Before designing or modifying an API: read `docs/api-contract.md`.
@@ -375,7 +341,7 @@ Start the optional Sentinel Dashboard separately only when interactive rule moni
 - After backend changes: run `cd omni-backend && ./mvnw clean install` to verify compilation.
 - After frontend changes: run `npm run build` and `npm run lint` in `omni-frontend/`.
 - Use `./mvnw` (not `mvn`) for all Maven commands.
-- Before adding new write-operation endpoints: declare `@PreAuthorize` with `resource:action` permission codes and update `sys_permission` seed data in `scripts/sql/init-all.sql`.
+- Before adding new write-operation endpoints: declare `@PreAuthorize` with `resource:action` permission codes, update `sys_permission` in `scripts/sql/seed/auth.sql`, refresh its SHA-256 in `database/seed/manifest.yaml`, and add/update seed assertions.
 - Before adding data permission to a new table: update `DataPermissionHandlerImpl` with the target table name and column mapping; ensure `DataPermissionInterceptor` is registered before `PaginationInnerInterceptor`.
 - Before adding frontend buttons: add `v-permission` directive with the corresponding permission code.
 - Before adding a new microservice: implement `XssConfigProvider` SPI in the new service module; `omni-common` dependency auto-registers XSS filter chain.
@@ -385,10 +351,10 @@ Start the optional Sentinel Dashboard separately only when interactive rule moni
 - Before writing workflow engine or approval logic: read `docs/workflow.md`.
 - Before adding a new candidate resolution strategy or anchor type: read `docs/workflow.md` Section 4 (Extension Guide).
 - Before adding CRM aggregate roots, stages, or permission codes: read `docs/crm.md` (domain model, state machines, hard constraints, extension guide).
-- Before modifying SRM lifecycle, portal, evaluation, risk, permission codes or schema: read `docs/design/srm-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-srm-mvp.sql`.
-- Before modifying Procurement material, requisition, RFQ, purchase order, goods receipt, permission codes or schema: read `docs/design/procurement-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-procurement-mvp.sql`.
-- Before modifying Asset lifecycle, receipt ingestion, transfer, disposal, permission codes or schema: read `docs/design/asset-design.md` and update both `scripts/sql/init-all.sql` and `scripts/sql/migrate-asset-mvp.sql`.
-- Before adding MQ message sending to a new service: depend on `omni-common-mqlog` (auto-registers `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, and `MqMessageInternalController`), ensure `sys_mq_message` table exists via `schema.sql`, and call `ReliableMessageRelay.send(bindingName, payload, tenantId)` with explicit tenantId. Read `docs/mq-reliability.md` for onboarding details.
+- Before modifying SRM lifecycle, portal, evaluation, risk, permission codes or schema: read `docs/design/srm-design.md`; add a forward-only changeSet under `database/changelog/srm/`, update `scripts/sql/seed/srm.sql` and/or `scripts/sql/seed/auth.sql`, then refresh `database/seed/manifest.yaml` checksums and assertions.
+- Before modifying Procurement material, requisition, RFQ, purchase order, goods receipt, permission codes or schema: read `docs/design/procurement-design.md`; add a forward-only changeSet under `database/changelog/procurement/`, update `scripts/sql/seed/procurement.sql` and/or `scripts/sql/seed/auth.sql`, then refresh `database/seed/manifest.yaml` checksums and assertions.
+- Before modifying Asset lifecycle, receipt ingestion, transfer, disposal, permission codes or schema: read `docs/design/asset-design.md`; add a forward-only changeSet under `database/changelog/asset/`, update `scripts/sql/seed/auth.sql` when RBAC changes, then refresh `database/seed/manifest.yaml` checksums and assertions.
+- Before adding MQ message sending to a new service: depend on `omni-common-mqlog` (auto-registers `ReliableMessageTemplate`, `MqMessageRelayService`, `MqMessageRelayJob`, and `MqMessageInternalController`), `sys_mq_message` 表由 Liquibase `database/changelog/common/0001-mq-schema.yaml` 自动创建，无需手动 DDL。Call `ReliableMessageRelay.send(bindingName, payload, tenantId)` with explicit tenantId. Read `docs/mq-reliability.md` for onboarding details.
 
 ## Completion Checklist
 
@@ -445,8 +411,8 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 **配置步骤**：
 1. 从 `.env.example` 复制一份为 `.env`
 2. 填入真实的 OAuth2 凭证（从各平台 OAuth 应用管理页获取）
-3. Docker 部署时 `docker-compose.yml` 会自动读取 `.env` 并注入到容器
-4. 本地开发时，在 IDE 的 Run Configuration 中配置 Environment variables，或手动加载 `.env` 文件
+3. Docker 部署时 `compose.yaml` 及其 include 文件会自动读取 `.env` 并注入到容器
+4. 本地运行和验收也使用正式 Docker Compose，由容器读取这些配置，不在宿主机启动应用
 
 **配置项说明**：
 
@@ -484,16 +450,17 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 
 ### Common Starter 模块
 
-项目提供 3 个自动装配的 Common Starter，新微服务引入即用：
+项目提供底层 Starter 与 Servlet 业务组合 Starter，新微服务按运行模型选择：
 
 | 模块 | 职责 | 适用服务类型 |
 |------|------|-------------|
 | `omni-common-mybatis` | MyBatis-Plus + MySQL 驱动 + 分页插件 + YAML 默认配置 | Servlet 服务 |
 | `omni-common-redis` | 阻塞式 Redis + RedisTemplate 序列化 + RedisUtils | Servlet 服务 |
 | `omni-common-redis-reactive` | 响应式 Redis + ReactiveRedisTemplate + ReactiveRedisUtils | WebFlux 服务（Gateway） |
+| `omni-common-service` | Gateway 预认证、请求身份/租户、内部 API、DataScope、固定 MyBatis 顺序与 XSS 安全回退 | Servlet 业务服务 |
 
 **新服务接入步骤**：
-1. POM 中依赖 `omni-common-mybatis` + `omni-common-redis`（或 `omni-common-redis-reactive`）
+1. Servlet 业务服务优先依赖 `omni-common-service`；Gateway 只依赖 reactive 底层模块
 2. `application.yml` 中配置 `spring.datasource.*` 和 `spring.data.redis.host/port/database`
 3. 启动类添加 `@MapperScan("com.omni.xxx.mapper")`
 4. 分页、序列化、RedisUtils 自动生效
@@ -502,4 +469,4 @@ Spring Boot 4.x Maven plugin requires Java 17+. Always set `JAVA_HOME` to JDK 25
 
 ## Testing
 
-Backend tests now exist in `omni-auth`, `omni-crm`, and `omni-common-operlog`. Use JUnit 5 + Mockito for unit tests, keep security and tenant-boundary regressions alongside the affected module, and run the Maven reactor test phase after backend changes.
+Backend tests cover the Maven reactor modules. Use JUnit 5 + Mockito for unit tests, keep security and tenant-boundary regressions alongside the affected module, and run the Maven reactor clean install in Docker after backend changes.

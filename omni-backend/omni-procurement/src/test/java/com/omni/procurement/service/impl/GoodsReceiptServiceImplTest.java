@@ -19,8 +19,9 @@ import com.omni.procurement.mapper.ProcGoodsReceiptMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
@@ -75,16 +76,16 @@ class GoodsReceiptServiceImplTest {
         service = new GoodsReceiptServiceImpl(receiptMapper, lineMapper, orderMapper,
                 orderLineMapper, materialMapper, reliableMessageRelay,
                 new ProcRecordAccessGuard());
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "receiver"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                7L, 41L, "procurement:goods-receipt:create", 12L, "SELF", Set.of(12L)));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "receiver"));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                7L, 41L, "procurement:goods-receipt:create", 12L, "SELF", Set.of(12L), null));
     }
 
     /** 清理线程上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 创建草稿只复制快照，不占用订单数量且不发送事件。 */

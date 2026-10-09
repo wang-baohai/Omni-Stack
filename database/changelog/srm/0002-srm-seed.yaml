@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: srm-0002-bootstrap-seed
+      author: omni-stack
+      labels: seed-v1
+      context: srm
+      comment: 按业务自然键幂等写入 SRM 默认配置与演示基线
+      changes:
+        - sqlFile:
+            path: scripts/sql/seed/srm.sql
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: SELECT 1;

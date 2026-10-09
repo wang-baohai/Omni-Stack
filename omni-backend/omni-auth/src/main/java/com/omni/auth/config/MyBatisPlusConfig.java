@@ -3,6 +3,7 @@ package com.omni.auth.config;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.omni.auth.security.DataPermissionHandlerImpl;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
  * <h3>插件注册顺序</h3>
  * <ol>
  *   <li>{@link DataPermissionInterceptor} — 基于 {@link DataPermissionHandlerImpl} 的租户数据隔离</li>
+ *   <li>{@link OptimisticLockerInnerInterceptor} — 支持 {@code @Version} 并发更新</li>
  *   <li>{@link PaginationInnerInterceptor} — MySQL 分页（自动改写 LIMIT/OFFSET）</li>
  * </ol>
  *
@@ -32,6 +34,7 @@ public class MyBatisPlusConfig {
      * 注册以下拦截器（顺序敏感）：</p>
      * <ol>
      *   <li>{@link DataPermissionInterceptor} — 在 SQL 执行前追加租户过滤条件</li>
+     *   <li>{@link OptimisticLockerInnerInterceptor} — 填充原始版本参数并校验并发更新</li>
      *   <li>{@link PaginationInnerInterceptor} — 自动改写分页 SQL（MySQL 方言）</li>
      * </ol>
      *
@@ -42,6 +45,7 @@ public class MyBatisPlusConfig {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         // 数据权限拦截器必须在分页拦截器之前
         interceptor.addInnerInterceptor(new DataPermissionInterceptor(new DataPermissionHandlerImpl()));
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
     }

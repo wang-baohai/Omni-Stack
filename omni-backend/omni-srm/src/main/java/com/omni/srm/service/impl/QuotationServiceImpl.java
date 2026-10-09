@@ -1,5 +1,6 @@
 package com.omni.srm.service.impl;
 
+import com.omni.srm.security.SrmPortalScope;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.omni.common.core.mq.ReliableMessageRelay;
@@ -24,8 +25,9 @@ import com.omni.srm.mapper.SrmQuotationLineMapper;
 import com.omni.srm.mapper.SrmQuotationMapper;
 import com.omni.srm.mapper.SrmQuotationRequestMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmDataScopeContext;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.srm.service.QuotationService;
 import com.omni.srm.service.SupplierPortalService;
 import com.omni.srm.service.support.SrmAuditSupport;
@@ -87,8 +89,8 @@ public class QuotationServiceImpl implements QuotationService {
     @Override
     @Transactional(readOnly = true)
     public List<QuotationInvitationSummaryVO> listPortalInvitations() {
-        return SrmDataScopeContext.runAsPortal(() -> {
-            Long tenantId = SrmTenantContext.requireTenantId();
+        return SrmPortalScope.run(() -> {
+            Long tenantId = ServiceIdentityContext.requireTenantId();
             Long supplierId = supplierPortalService.getCurrentSupplierId();
             requireApprovedSupplier(tenantId, supplierId);
             List<ProcurementRfqInvitationSummary> invitations = fetchInvitations(tenantId, supplierId);
@@ -105,8 +107,8 @@ public class QuotationServiceImpl implements QuotationService {
     @Override
     @Transactional(readOnly = true)
     public QuotationInvitationDetailVO getPortalInvitation(Long rfqId) {
-        return SrmDataScopeContext.runAsPortal(() -> {
-            Long tenantId = SrmTenantContext.requireTenantId();
+        return SrmPortalScope.run(() -> {
+            Long tenantId = ServiceIdentityContext.requireTenantId();
             Long supplierId = supplierPortalService.getCurrentSupplierId();
             requireApprovedSupplier(tenantId, supplierId);
             ProcurementRfqInvitationDetail invitation = fetchInvitation(
@@ -131,7 +133,7 @@ public class QuotationServiceImpl implements QuotationService {
     @Override
     @Transactional
     public QuotationVO submit(QuotationSubmitRequest request) {
-        return SrmDataScopeContext.runAsPortal(() -> doSubmit(request));
+        return SrmPortalScope.run(() -> doSubmit(request));
     }
 
     /** {@inheritDoc} */
@@ -166,7 +168,7 @@ public class QuotationServiceImpl implements QuotationService {
     }
 
     private QuotationVO doSubmit(QuotationSubmitRequest request) {
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         Long supplierId = supplierPortalService.getCurrentSupplierId();
         String requestId = normalizeRequestId(request.getRequestId());
         String requestHash = hashRequest(request);
@@ -760,7 +762,7 @@ public class QuotationServiceImpl implements QuotationService {
                 .aggregateType("QUOTATION")
                 .aggregateId(quotation.getId())
                 .aggregateVersion(quotation.getVersion())
-                .actorUserId(SrmTenantContext.require().userId())
+                .actorUserId(ServiceIdentityContext.require().userId())
                 .correlationId(requestId)
                 .payload(Map.of(
                         "requestId", requestId,
@@ -780,13 +782,13 @@ public class QuotationServiceImpl implements QuotationService {
 
     private <T> T runAsInternalTenant(Long tenantId, Supplier<T> action) {
         try {
-            SrmTenantContext.set(new SrmTenantContext.RequestIdentity(0L, tenantId, "internal-service"));
-            SrmDataScopeContext.set(new SrmDataScopeContext.ScopeInfo(
-                    0L, tenantId, "INTERNAL", null, "TENANT", Collections.emptySet()));
+            ServiceIdentityContext.set(new ServiceRequestIdentity(0L, tenantId, "internal-service"));
+            ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                    0L, tenantId, "INTERNAL", null, "TENANT", Collections.emptySet(), null));
             return action.get();
         } finally {
-            SrmDataScopeContext.clear();
-            SrmTenantContext.clear();
+            ServiceDataScopeContext.clear();
+            ServiceIdentityContext.clear();
         }
     }
 
@@ -835,9 +837,9 @@ public class QuotationServiceImpl implements QuotationService {
     }
 
     private String currentOperator() {
-        String username = SrmTenantContext.require().username();
+        String username = ServiceIdentityContext.require().username();
         return username == null || username.isBlank()
-                ? String.valueOf(SrmTenantContext.require().userId()) : username;
+                ? String.valueOf(ServiceIdentityContext.require().userId()) : username;
     }
 
     private void requirePositive(Long value, String field) {

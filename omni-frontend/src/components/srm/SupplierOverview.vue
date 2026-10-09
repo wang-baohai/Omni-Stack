@@ -1,9 +1,11 @@
 <script setup lang="ts">
 /** SRM 供应商 360 聚合视图。 */
 import { onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getSupplierOverview, type SupplierOverview } from '@/api/srm-supplier'
 
 const props = defineProps<{ supplierId?: number }>()
+const { t } = useI18n()
 const loading = ref(false)
 const data = ref<SupplierOverview | null>(null)
 
@@ -23,77 +25,83 @@ onMounted(load)
 <template>
   <div v-loading="loading" class="supplier-overview">
     <template v-if="data">
-      <el-descriptions :column="2" border title="基本信息">
-        <el-descriptions-item label="编号">{{ data.supplierNo }}</el-descriptions-item>
-        <el-descriptions-item label="名称">{{ data.name }}</el-descriptions-item>
-        <el-descriptions-item label="类型">{{ data.supplierType }}</el-descriptions-item>
-        <el-descriptions-item label="等级">{{ data.levelCode }}</el-descriptions-item>
-        <el-descriptions-item label="状态"><el-tag>{{ data.status }}</el-tag></el-descriptions-item>
-        <el-descriptions-item label="负责人">{{ data.ownerName || (data.ownerUserId ? `#${data.ownerUserId}` : '未分配') }}</el-descriptions-item>
-        <el-descriptions-item label="电话">{{ data.phone }}</el-descriptions-item>
-        <el-descriptions-item label="邮箱">{{ data.email }}</el-descriptions-item>
-        <el-descriptions-item label="地区">{{ data.region }}</el-descriptions-item>
-        <el-descriptions-item label="地址" :span="2">{{ data.address }}</el-descriptions-item>
+      <el-descriptions :column="2" border :title="t('srmSupplierOverview.basicInfo')">
+        <el-descriptions-item :label="t('srmSupplierOverview.no')">{{ data.supplierNo }}</el-descriptions-item>
+        <el-descriptions-item :label="t('srmSupplierOverview.name')">{{ data.name }}</el-descriptions-item>
+        <el-descriptions-item :label="t('srmSupplierOverview.type')">{{ data.supplierType }}</el-descriptions-item>
+        <el-descriptions-item :label="t('srmSupplierOverview.level')">{{ data.levelCode }}</el-descriptions-item>
+        <el-descriptions-item :label="t('srmSupplierOverview.status')"><el-tag>{{ data.status }}</el-tag></el-descriptions-item>
+        <el-descriptions-item :label="t('srmSupplierOverview.owner')">
+          {{ data.ownerName || (data.ownerUserId ? `#${data.ownerUserId}` : t('srmSupplierOverview.unassigned')) }}
+        </el-descriptions-item>
+        <el-descriptions-item :label="t('srmSupplierOverview.phone')">{{ data.phone }}</el-descriptions-item>
+        <el-descriptions-item :label="t('srmSupplierOverview.email')">{{ data.email }}</el-descriptions-item>
+        <el-descriptions-item :label="t('srmSupplierOverview.region')">{{ data.region }}</el-descriptions-item>
+        <el-descriptions-item :label="t('srmSupplierOverview.address')" :span="2">{{ data.address }}</el-descriptions-item>
       </el-descriptions>
 
-      <el-divider content-position="left">联系人</el-divider>
+      <el-divider content-position="left">{{ t('srmSupplierOverview.contacts') }}</el-divider>
       <el-table :data="data.contacts" size="small" border>
-        <el-table-column prop="name" label="姓名" width="100" />
-        <el-table-column prop="jobTitle" label="职位" width="100" />
-        <el-table-column prop="mobile" label="手机" width="130" />
-        <el-table-column prop="email" label="邮箱" />
-        <el-table-column prop="decisionRole" label="角色" width="80" />
-        <el-table-column label="主要" width="60">
+        <el-table-column prop="name" :label="t('srmSupplierOverview.contactName')" width="100" />
+        <el-table-column prop="jobTitle" :label="t('srmSupplierOverview.jobTitle')" width="100" />
+        <el-table-column prop="mobile" :label="t('srmSupplierOverview.mobile')" width="130" />
+        <el-table-column prop="email" :label="t('srmSupplierOverview.email')" />
+        <el-table-column prop="decisionRole" :label="t('srmSupplierOverview.role')" width="80" />
+        <el-table-column :label="t('srmSupplierOverview.primary')" width="60">
           <template #default="{ row }"><el-icon v-if="row.primaryFlag"><Star /></el-icon></template>
         </el-table-column>
       </el-table>
 
-      <el-divider content-position="left">资质</el-divider>
+      <el-divider content-position="left">{{ t('srmSupplierOverview.qualifications') }}</el-divider>
       <el-table :data="data.qualifications" size="small" border>
-        <el-table-column prop="qualificationName" label="资质名称" />
-        <el-table-column prop="certificateNo" label="证书编号" width="150" />
-        <el-table-column prop="issuingAuthority" label="发证机关" width="150" />
-        <el-table-column prop="expiryDate" label="到期日" width="110" />
-        <el-table-column prop="status" label="状态" width="80" />
+        <el-table-column prop="qualificationName" :label="t('srmSupplierOverview.qualificationName')" />
+        <el-table-column prop="certificateNo" :label="t('srmSupplierOverview.certificateNo')" width="150" />
+        <el-table-column prop="issuingAuthority" :label="t('srmSupplierOverview.issuingAuthority')" width="150" />
+        <el-table-column prop="expiryDate" :label="t('srmSupplierOverview.expiryDate')" width="110" />
+        <el-table-column prop="status" :label="t('srmSupplierOverview.status')" width="80" />
       </el-table>
 
-      <el-divider content-position="left">银行账户</el-divider>
+      <el-divider content-position="left">{{ t('srmSupplierOverview.bankAccounts') }}</el-divider>
       <el-table :data="data.bankAccounts" size="small" border>
-        <el-table-column prop="accountName" label="户名" width="150" />
-        <el-table-column prop="accountNo" label="账号" />
-        <el-table-column prop="bankName" label="银行" width="150" />
-        <el-table-column prop="bankBranch" label="支行" width="150" />
+        <el-table-column prop="accountName" :label="t('srmSupplierOverview.accountName')" width="150" />
+        <el-table-column prop="accountNo" :label="t('srmSupplierOverview.accountNo')" />
+        <el-table-column prop="bankName" :label="t('srmSupplierOverview.bankName')" width="150" />
+        <el-table-column prop="bankBranch" :label="t('srmSupplierOverview.bankBranch')" width="150" />
       </el-table>
 
-      <el-divider content-position="left">近期评估</el-divider>
+      <el-divider content-position="left">{{ t('srmSupplierOverview.recentEvaluations') }}</el-divider>
       <el-table :data="data.recentEvaluations" size="small" border>
-        <el-table-column prop="evaluationPeriod" label="周期" width="100" />
-        <el-table-column prop="totalScore" label="总分" width="80" />
-        <el-table-column prop="evaluationTime" label="时间" width="170" />
-        <el-table-column prop="status" label="状态" width="80" />
+        <el-table-column prop="evaluationPeriod" :label="t('srmSupplierOverview.period')" width="100" />
+        <el-table-column prop="totalScore" :label="t('srmSupplierOverview.totalScore')" width="80" />
+        <el-table-column prop="evaluationTime" :label="t('srmSupplierOverview.time')" width="170" />
+        <el-table-column prop="status" :label="t('srmSupplierOverview.status')" width="80" />
       </el-table>
 
-      <el-divider content-position="left">风险指标</el-divider>
+      <el-divider content-position="left">{{ t('srmSupplierOverview.riskIndicators') }}</el-divider>
       <el-table :data="data.riskIndicators" size="small" border>
-        <el-table-column prop="indicatorType" label="指标类型" width="120" />
-        <el-table-column prop="indicatorValue" label="指标值" />
-        <el-table-column label="风险等级" width="100">
+        <el-table-column prop="indicatorType" :label="t('srmSupplierOverview.indicatorType')" width="120" />
+        <el-table-column prop="indicatorValue" :label="t('srmSupplierOverview.indicatorValue')" />
+        <el-table-column :label="t('srmSupplierOverview.riskLevel')" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.riskLevel === 'RED' ? 'danger' : row.riskLevel === 'YELLOW' ? 'warning' : 'success'">{{ row.riskLevel }}</el-tag>
+            <el-tag :type="row.riskLevel === 'RED' ? 'danger' : row.riskLevel === 'YELLOW' ? 'warning' : 'success'">
+              {{ row.riskLevel }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="assessmentTime" label="评估时间" width="170" />
+        <el-table-column prop="assessmentTime" :label="t('srmSupplierOverview.assessmentTime')" width="170" />
       </el-table>
 
       <template v-if="data.latestRiskAssessment">
-        <el-divider content-position="left">最新风险评估</el-divider>
+        <el-divider content-position="left">{{ t('srmSupplierOverview.latestRiskAssessment') }}</el-divider>
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="综合等级">
+          <el-descriptions-item :label="t('srmSupplierOverview.overallLevel')">
             <el-tag :type="data.latestRiskAssessment.overallLevel === 'RED' ? 'danger' : data.latestRiskAssessment.overallLevel === 'YELLOW' ? 'warning' : 'success'">
               {{ data.latestRiskAssessment.overallLevel }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="评估时间">{{ data.latestRiskAssessment.assessmentTime }}</el-descriptions-item>
+          <el-descriptions-item :label="t('srmSupplierOverview.assessmentTime')">
+            {{ data.latestRiskAssessment.assessmentTime }}
+          </el-descriptions-item>
         </el-descriptions>
       </template>
     </template>

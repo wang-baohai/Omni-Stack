@@ -4,6 +4,7 @@ import com.omni.auth.dto.LoginResult;
 import com.omni.auth.dto.ProviderUser;
 import com.omni.auth.entity.SysRole;
 import com.omni.auth.entity.SysTenant;
+import com.omni.auth.entity.TenantProvisionStatusEnum;
 import com.omni.auth.entity.SysUser;
 import com.omni.auth.entity.SysUserOauthProvider;
 import com.omni.auth.event.AuditEvent;
@@ -89,11 +90,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
             throw new BusinessException(400, "不支持的登录方式: " + provider);
         }
 
-        // 校验租户存在
-        SysTenant tenant = sysTenantMapper.selectById(tenantId);
-        if (tenant == null || tenant.getStatus() != 1) {
-            throw new BusinessException(400, "指定的租户不存在");
-        }
+        requireLoginTenant(tenantId);
 
         // 生成签名 state 并构建授权 URL
         String state = oAuth2StateUtils.createState(tenantId);
@@ -125,6 +122,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
 
         // 2. 验证 state 并提取租户 ID
         Long tenantId = oAuth2StateUtils.extractTenantId(state);
+        requireLoginTenant(tenantId);
 
         // 3. 用授权码换取 Access Token
         String accessToken = handler.exchangeCodeForAccessToken(code);
@@ -204,6 +202,21 @@ public class SocialLoginServiceImpl implements SocialLoginService {
                 .tokenType("Bearer")
                 .expiresIn(accessTokenTtl)
                 .build();
+    }
+
+    /**
+     * 校验社交登录目标租户已启用并完成初始化。
+     *
+     * @param tenantId 租户 ID
+     */
+    private void requireLoginTenant(Long tenantId) {
+        SysTenant tenant = tenantId == null ? null : sysTenantMapper.selectById(tenantId);
+        if (tenant == null || !Integer.valueOf(1).equals(tenant.getStatus())) {
+            throw new BusinessException(400, "指定的租户不存在");
+        }
+        if (TenantProvisionStatusEnum.ACTIVE != tenant.getProvisioningStatus()) {
+            throw new BusinessException(409, "租户初始化未完成，暂时无法登录");
+        }
     }
 
     /**

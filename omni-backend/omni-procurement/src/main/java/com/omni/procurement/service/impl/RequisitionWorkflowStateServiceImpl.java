@@ -17,7 +17,8 @@ import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcRequisitionLineMapper;
 import com.omni.procurement.mapper.ProcRequisitionMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.RequisitionWorkflowStateService;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
 import com.omni.procurement.workflow.RequisitionWorkflowCommand;
@@ -64,7 +65,7 @@ public class RequisitionWorkflowStateServiceImpl implements RequisitionWorkflowS
     @Override
     @Transactional
     public RequisitionWorkflowCommand prepareSubmit(Long requisitionId, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRequisition requisition = requireLocked(tenantId, requisitionId);
         RequisitionStateMachine.requireSubmittable(requisition.getStatus());
         requireVersion(requisition, version);
@@ -102,7 +103,7 @@ public class RequisitionWorkflowStateServiceImpl implements RequisitionWorkflowS
     @Override
     @Transactional
     public RequisitionWorkflowCommand prepareRetry(Long requisitionId, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcRequisition requisition = requireLocked(tenantId, requisitionId);
         RequisitionStateMachine.requireStartRetryable(
                 requisition.getStatus(), requisition.getWorkflowStartStatus());
@@ -306,7 +307,7 @@ public class RequisitionWorkflowStateServiceImpl implements RequisitionWorkflowS
     }
 
     private String operator() {
-        ProcTenantContext.RequestIdentity identity = ProcTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         return identity.username() == null || identity.username().isBlank()
                 ? String.valueOf(identity.userId()) : identity.username();
     }

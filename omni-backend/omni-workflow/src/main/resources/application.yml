@@ -8,7 +8,34 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus,metrics
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.0}
+    export:
+      otlp:
+        enabled: ${OTLP_EXPORT_ENABLED:false}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+        # WP010 R04: 审批/流程耗时 Timer 开启桶，支撑 Workflow 看板 P95 面板（仅观测语义）
+        "[omni.workflow.approval.duration]": true
+        "[omni.workflow.process.duration]": true
+    tags:
+      service.name: ${spring.application.name}
+      environment: ${OMNI_ENVIRONMENT:local}
+      instance: ${HOSTNAME:local}
 
 spring:
   application:
@@ -22,6 +49,8 @@ spring:
     import:
       - optional:nacos:omni-workflow.yml
   cloud:
+    function:
+      definition: tenantProvisionRequestedFunction
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
@@ -46,6 +75,13 @@ spring:
         workflow-domain-out-0:
           destination: workflow-domain-event
           content-type: application/json
+        tenantProvisionRequestedFunction-in-0:
+          destination: tenant-provisioning
+          content-type: application/json
+          group: workflow-tenant-provision-group
+        tenantProvisionResult-out-0:
+          destination: tenant-provision-result
+          content-type: application/json
   datasource:
     url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/omni_workflow?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:root}
@@ -59,7 +95,8 @@ spring:
 
 # Flowable 流程引擎配置
 flowable:
-  database-schema-update: true
+  # 正式结构只允许由 omni-db-migrator 管理，运行时引擎不得隐式建表或升级。
+  database-schema-update: false
   async-executor-activate: true
   history-level: audit
 

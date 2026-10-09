@@ -1,7 +1,7 @@
 package com.omni.asset.controller;
 
 import com.omni.asset.dto.AssetRequests;
-import com.omni.asset.security.AssetDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.common.core.operlog.OperLog;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,7 +47,7 @@ class AssetControllerSecurityTest {
         Method method = AssetController.class.getMethod(methodName, parameterTypes);
         assertThat(method.getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAuthority('" + permission + "')");
-        assertThat(method.getAnnotation(AssetDataScope.class).permissionCode())
+        assertThat(method.getAnnotation(ServiceDataScope.class).permissionCode())
                 .isEqualTo(permission);
         if (requiresOperLog) {
             assertThat(method.getAnnotation(OperLog.class)).isNotNull();

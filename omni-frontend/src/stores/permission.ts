@@ -8,6 +8,8 @@ import { ref, computed } from 'vue'
 import { getPermissionsFromToken, getTenantIdFromToken } from '@/utils/jwt'
 import { useUserStore } from './user'
 import { fetchMenuTree, type MenuNode } from '@/api/menu'
+import { getErrorMessage } from '@/utils/errors'
+import { translate } from '@/i18n'
 
 /** 菜单加载状态。 */
 export type MenuLoadState = 'idle' | 'loading' | 'loaded' | 'failed'
@@ -28,6 +30,9 @@ export const usePermissionStore = defineStore('permission', () => {
 
   /** 菜单加载状态，用于区分尚未加载和加载失败。 */
   const menuLoadState = ref<MenuLoadState>('idle')
+
+  /** 最近一次菜单加载失败信息。 */
+  const menuLoadError = ref<string | null>(null)
 
   /** 合并并发菜单请求。 */
   let menuLoadPromise: Promise<void> | null = null
@@ -56,6 +61,7 @@ export const usePermissionStore = defineStore('permission', () => {
     if (menuLoadState.value === 'loaded') return Promise.resolve()
     if (menuLoadPromise) return menuLoadPromise
     menuLoadState.value = 'loading'
+    menuLoadError.value = null
     menuLoadPromise = performMenuLoad().finally(() => {
       menuLoadPromise = null
     })
@@ -78,10 +84,10 @@ export const usePermissionStore = defineStore('permission', () => {
       menusLoaded.value = true
       menuLoadState.value = 'loaded'
     } catch (error) {
-      console.error('菜单加载失败，请检查 /api/auth/menus 接口响应', error)
       menuTree.value = []
       menusLoaded.value = true
       menuLoadState.value = 'failed'
+      menuLoadError.value = getErrorMessage(error, translate('request.menuLoadFailed'))
       throw error
     }
   }
@@ -90,6 +96,7 @@ export const usePermissionStore = defineStore('permission', () => {
   async function retryLoadMenus() {
     menusLoaded.value = false
     menuLoadState.value = 'idle'
+    menuLoadError.value = null
     await loadMenus()
   }
 
@@ -101,6 +108,7 @@ export const usePermissionStore = defineStore('permission', () => {
     menuTree.value = []
     menusLoaded.value = false
     menuLoadState.value = 'idle'
+    menuLoadError.value = null
     menuLoadPromise = null
   }
 
@@ -109,6 +117,7 @@ export const usePermissionStore = defineStore('permission', () => {
     menuTree,
     menusLoaded,
     menuLoadState,
+    menuLoadError,
     hasPermission,
     initFromToken,
     loadMenus,

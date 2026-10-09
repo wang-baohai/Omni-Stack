@@ -280,7 +280,7 @@ Omni-Stack は**静的ルート + 動的ルート**のハイブリッドアー�
 router.beforeEach()
     ↓
 to.meta.requiresAuth を判定
-    ├── false → ログイン済みユーザーが /login にアクセス → /home にリダイレクト
+    ├── false → ログイン済みユーザーが /login にアクセス → Home（実際の path は `/`、`/home` ではない）へリダイレクト
     │           その他の公開ページ → 通過許可
     └── true  → userStore.token をチェック
                 ├── Token なし → /login?redirect=<path> にリダイレクト
@@ -467,7 +467,8 @@ const i18n = createI18n({
   legacy: false,
   locale: getStoredLang(),        // localStorage から読み取り、デフォルトは 'zh-CN'
   fallbackLocale: 'en-US',
-  messages: { 'zh-CN': zhCN, 'en-US': enUS },
+  // 現在の SUPPORTED_LOCALES = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR']、新規モジュールは四言語必須
+  messages: { 'zh-CN': zhCN, 'en-US': enUS, 'ja-JP': jaJP, 'ko-KR': koKR },
 })
 ```
 
@@ -622,9 +623,9 @@ src/
 |------|------|------|
 | 1 | `src/router/index.ts` → `iconMap` | `'<module>:<feature>': '<IconName>'` を追加（例：`'base:dict': 'Collection'`） |
 | 2 | `src/constants/menu.ts` → `menuI18nMap` | モジュールディレクトリとメニュー項目の i18n key マッピングを追加 |
-| 3 | `src/locales/zh-CN.ts` + `en-US.ts` | `common.<module>Management`（ディレクトリ名）、`common.<feature>Management`（メニュー名）および機能レベルの翻訳 key を追加 |
-| 4 | `scripts/sql/init-all.sql` → `sys_permission` | DIRECTORY（モジュールグループ）+ MENU（機能ページ）+ BUTTON/API（操作権限）のシードデータを追加 |
-| 5 | `scripts/sql/init-all.sql` → `sys_role_permission` | SUPER_ADMIN ロールに新規権限ノードを割り当て |
+| 3 | `src/locales/zh-CN.ts` + `en-US.ts` + `ja-JP.ts` + `ko-KR.ts` | 四ロケール全てに `common.<module>Management`（ディレクトリ名）、`common.<feature>Management`（メニュー名）および機能レベルの翻訳 key を追加 |
+| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | 冪等な DIRECTORY（モジュールグループ）+ MENU（機能ページ）+ BUTTON/API（操作権限）シードを追加し、seed manifest を更新 |
+| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | SUPER_ADMIN に新規権限ノードを冪等に割り当て、自然キー検証を追加 |
 
 ### 参考実装：ディクショナリ管理モジュール
 
@@ -730,7 +731,7 @@ COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 build: {
   target: 'es2020',            // ビルドターゲット：オプションチェーン、Null 合体演算子などのモダン構文をサポート
   outDir: 'dist',
-  chunkSizeWarningLimit: 2000, // Element Plus のサイズが大きいため、閾値を適度に引き上げ
+  chunkSizeWarningLimit: 750, // 現行リポジトリの閾値
 }
 ```
 
@@ -748,7 +749,7 @@ build: {
 
 ```nginx
 server {
-    listen 80;
+    listen 3000;  # コンテナは 3000 でリッスン（Compose のホスト 3000 → コンテナ 3000 と一致）
     root /usr/share/nginx/html;
     index index.html;
 

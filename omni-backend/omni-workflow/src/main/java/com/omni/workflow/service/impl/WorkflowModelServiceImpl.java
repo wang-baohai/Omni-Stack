@@ -103,6 +103,25 @@ public class WorkflowModelServiceImpl implements WorkflowModelService {
             throw new BusinessException("草稿版本不存在");
         }
 
+        // 版本保护：currentDraftVersionId 指向已发布/已归档行时，不能原地覆盖，必须新建独立草稿
+        if (!"DRAFT".equals(draft.getStatus())) {
+            log.info("草稿指针指向非 DRAFT 版本(versionId={}, status={})，创建独立新草稿",
+                    draft.getId(), draft.getStatus());
+            WfProcessModelVersion newDraft = new WfProcessModelVersion();
+            newDraft.setTenantId(model.getTenantId());
+            newDraft.setModelId(modelId);
+            newDraft.setVersion(0);
+            newDraft.setStatus("DRAFT");
+            newDraft.setCreateTime(LocalDateTime.now());
+            newDraft.setUpdateTime(LocalDateTime.now());
+            versionMapper.insert(newDraft);
+            model.setCurrentDraftVersionId(newDraft.getId());
+            model.setUpdateBy(userName);
+            model.setUpdateTime(LocalDateTime.now());
+            modelMapper.updateById(model);
+            draft = newDraft;
+        }
+
         // 计算 SHA-256
         String xmlSha256 = null;
         if (request.getBpmnXml() != null && !request.getBpmnXml().isBlank()) {
@@ -165,6 +184,10 @@ public class WorkflowModelServiceImpl implements WorkflowModelService {
         WfProcessModelVersion draft = versionMapper.selectById(model.getCurrentDraftVersionId());
         if (draft == null || draft.getBpmnXml() == null || draft.getBpmnXml().isBlank()) {
             throw new BusinessException("BPMN XML 为空，无法发布");
+        }
+        if (!"DRAFT".equals(draft.getStatus())) {
+            throw new BusinessException("当前草稿指针指向非 DRAFT 版本(" + draft.getStatus()
+                    + ")，请先通过 saveDraft 创建独立草稿");
         }
 
         // 3. 校验

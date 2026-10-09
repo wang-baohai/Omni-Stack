@@ -359,9 +359,9 @@ sequenceDiagram
 ### 6.1 信任链
 
 1. Gateway 验证 RS256 JWT 和黑名单，覆盖并注入 `X-User-*`、`X-Tenant-Id`、`X-Gateway-Forwarded`。
-2. SRM `GatewayPreAuthFilter` 构建 `Authentication`。
+2. 公共 Starter 的 `GatewayPreAuthenticationFilter` 构建 `Authentication`。
 3. Controller 用 `@PreAuthorize` 验证功能权限。
-4. SRM 租户过滤器建立 tenant 上下文；`@SrmDataScope(permissionCode)` 切面按当前端点权限解析 dataScope。
+4. 公共 `ServiceIdentityFilter` 建立不可变请求身份；`@ServiceDataScope(permissionCode)` 切面按当前端点权限解析 dataScope。
 5. MyBatis-Plus 追加 tenant 和该 permission 对应的 owner 条件。
 
 `X-Gateway-Forwarded:true` 不是密码学证明。生产环境不得公开 SRM 业务端口。
@@ -411,15 +411,20 @@ GET /api/internal/data-scopes/{userId}?tenantId={tenantId}&permissionCode=srm:su
 - 只合并授予该 `permissionCode` 的角色。
 - SRM 调用失败/超时/tenant 不一致时返回 503/403，不降级。
 
-### 6.4 SRM 上下文与 SQL 拦截
+### 6.4 公共上下文与 SRM SQL 策略
 
-新增 `SrmTenantContext`、`SrmTenantContextFilter`、`SrmDataScopeContext`、`SrmDataScope` 注解/切面、`SrmDataPermissionHandler`、`SrmRecordAccessGuard`。
+SRM 依赖 `omni-common-service`，复用 `ServiceIdentityContext`、`ServiceDataScopeContext`、
+`@ServiceDataScope`、内部 API Token Filter、XSS 回源/安全基线以及 MyBatis-Plus 自动装配。
+SRM 只实现领域策略 `SrmTenantTablePolicy`、`SrmDataPermissionHandler` 和
+`SrmRecordAccessGuard`；供应商门户通过 `SrmPortalScope` 临时切换为 PORTAL/TENANT 范围，执行后恢复
+原 DataScope，不再维护第二套 ThreadLocal、Filter 或切面。
 
-SRM 自定义同名 `mybatisPlusInterceptor`，顺序固定：
+公共 Starter 组合 SRM 策略后的拦截器顺序固定：
 
 ```text
 TenantLineInnerInterceptor
 → DataPermissionInterceptor
+→ OptimisticLockerInnerInterceptor
 → PaginationInnerInterceptor
 ```
 
@@ -655,7 +660,7 @@ omni-backend/omni-srm/
         └── mapper/
 ```
 
-`SrmApplication` 使用 `@EnableDiscoveryClient`、`@EnableFeignClients(basePackages="com.omni.srm.client")`、`@MapperScan("com.omni.srm.mapper")`。服务自带 `SecurityConfig`、`GatewayPreAuthFilter`、`XssConfigProviderImpl`。
+`SrmApplication` 使用 `@EnableDiscoveryClient`、`@EnableFeignClients(basePackages="com.omni.srm.client")`、`@MapperScan("com.omni.srm.mapper")`。服务保留领域 `SecurityConfig`，公共 `omni-common-service` 提供 Gateway 预认证、请求身份、内部 API 认证、DataScope、持久化拦截链和 XSS 配置能力。
 
 ### 11.2 必改文件
 
@@ -666,12 +671,14 @@ omni-backend/omni-srm/
 | `docker/backend/Dockerfile` | POM 缓存层 `COPY omni-srm/pom.xml omni-srm/` |
 | `docker-compose.yml` | SRM 服务、8105、DB/Redis/Nacos/MQ/XXL/internal token |
 | `start.bat/start.sh` | build 列表加入 SRM；Windows 端口保护加入 8105 |
-| `scripts/sql/init-all.sql` | `omni_srm` DDL、默认评估模板、权限和角色 |
-| `scripts/sql/sp_init_tenant.sql` | 与内嵌过程同步 |
+| `database/changelog/srm/` | 为 SRM 结构变更增加 forward-only Liquibase changeSet |
+| `scripts/sql/seed/srm.sql` | 默认评估模板等正式幂等种子；更新后刷新 seed manifest |
+| `scripts/sql/seed/auth.sql` | SRM 权限和角色正式幂等种子；更新后刷新 seed manifest |
+| SRM `TenantModuleProvisioner` | 新租户模板与风险目录的幂等初始化 |
 | `omni-auth` | 消费 portal-role assign 请求并以 requestId 幂等分配 SUPPLIER 角色，发布成功/失败结果事件 |
 | Frontend router/layout/menu/locales | 图标、菜单、i18n |
 
-权限迁移按 tenant + code 的 `NOT EXISTS` 幂等插入，正确重建 parent/path；同时更新 SUPER_ADMIN、SRM 角色及新租户初始化。默认 USER 只增加 `srm:portal:enroll`，SUPPLIER 增加 profile/evaluation/quotation，SRM 管理角色增加 invite 管理但显式排除全部供应商自助门户能力；不得把管理权限整体授给 USER。`srm:portal:quotation` 只授予 SUPPLIER 与 SUPER_ADMIN。
+权限种子按 tenant + code 的 `NOT EXISTS` 幂等插入，正确重建 parent/path；同时更新 SUPER_ADMIN、SRM 角色、seed manifest 断言及新租户初始化。默认 USER 只增加 `srm:portal:enroll`，SUPPLIER 增加 profile/evaluation/quotation，SRM 管理角色增加 invite 管理但显式排除全部供应商自助门户能力；不得把管理权限整体授给 USER。`srm:portal:quotation` 只授予 SUPPLIER 与 SUPER_ADMIN。
 
 配置要点：server 8105、management 19905、Redis DB 0、XXL appname `omni-srm`/port 9905。
 

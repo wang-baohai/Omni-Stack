@@ -7,7 +7,7 @@ import com.omni.asset.domain.AssetStateMachine;
 import com.omni.asset.dto.AssetViews;
 import com.omni.asset.entity.AstAsset;
 import com.omni.asset.mapper.AstAssetMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.asset.service.AssetOptionService;
 import com.omni.common.core.internal.InternalUserOptionDTO;
 import com.omni.common.core.result.BusinessException;
@@ -32,7 +32,7 @@ public class AssetOptionServiceImpl implements AssetOptionService {
     @Override
     public List<AssetViews.UserOptionVO> listUsers(String keyword, int limit) {
         requireLimit(limit);
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         R<List<InternalUserOptionDTO>> response;
         try {
             response = authInternalClient.listUserOptions(tenantId, keyword, limit);
@@ -53,7 +53,7 @@ public class AssetOptionServiceImpl implements AssetOptionService {
     @Override
     public List<AssetViews.AssetOptionVO> listEligibleAssets(String keyword, int limit) {
         requireLimit(limit);
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String trimmedKeyword = keyword == null ? null : keyword.trim();
         String normalizedKeyword = trimmedKeyword == null || trimmedKeyword.isEmpty()
                 ? null : trimmedKeyword;
@@ -79,7 +79,7 @@ public class AssetOptionServiceImpl implements AssetOptionService {
     @Override
     public List<AssetViews.SupplierOptionVO> listSuppliers(String keyword, int limit) {
         requireLimit(limit);
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         try {
             R<List<AssetViews.SupplierOptionVO>> response = srmInternalClient.search(
                     tenantId, tenantId, "APPROVED", keyword, limit);

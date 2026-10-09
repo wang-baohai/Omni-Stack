@@ -14,8 +14,9 @@ import com.omni.procurement.entity.ProcRfqSupplier;
 import com.omni.procurement.mapper.ProcEventInboxMapper;
 import com.omni.procurement.mapper.ProcRfqMapper;
 import com.omni.procurement.mapper.ProcRfqSupplierMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -62,17 +63,17 @@ class QuotationSubmittedServiceImplTest {
         objectMapper = new ObjectMapper().findAndRegisterModules();
         service = new QuotationSubmittedServiceImpl(
                 inboxMapper, rfqMapper, supplierMapper, objectMapper);
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 0L, 41L, "srm-quotation-event"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                0L, 41L, "srm-quotation-event", null, "TENANT", Set.of()));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                0L, 41L, "srm-quotation-event", null, "TENANT", Set.of(), null));
     }
 
     /** 清理消息线程上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 完全匹配的 typed payload 必须推进 QUOTED 并完成 Inbox。 */
@@ -101,6 +102,37 @@ class QuotationSubmittedServiceImplTest {
                 .containsValue("quote-request-1")
                 .containsValue(event.getOccurredAt());
         verify(inboxMapper).update(any(), any());
+    }
+
+    /** Inbox 读回 payload 为 MySQL JSON 规范化字符串（键重排+空白）时不得误判为不同意图。 */
+    @Test
+    void shouldAcceptJsonNormalizedInboxPayload() throws Exception {
+        RfqContracts.QuotationSubmittedEvent event = event("evt-json-normalized", 1);
+        String rawJson = objectMapper.writeValueAsString(event);
+        // 模拟 MySQL JSON 列规范化：顶层键字典序重排 + 冒号后空格（与原始字符串必然不同）。
+        com.fasterxml.jackson.databind.JsonNode tree = objectMapper.readTree(rawJson);
+        java.util.TreeMap<String, com.fasterxml.jackson.databind.JsonNode> sorted =
+                new java.util.TreeMap<>();
+        tree.fields().forEachRemaining(entry -> sorted.put(entry.getKey(), entry.getValue()));
+        StringBuilder normalized = new StringBuilder("{");
+        sorted.forEach((key, value) -> normalized.append('"').append(key).append("\": ")
+                .append(value).append(", "));
+        normalized.setLength(normalized.length() - 2);
+        normalized.append('}');
+        assertThat(normalized.toString()).isNotEqualTo(rawJson);
+
+        ProcEventInbox inbox = inbox(event, "RECEIVED");
+        inbox.setPayload(normalized.toString());
+        when(inboxMapper.selectForUpdate(event.getTenantId(), event.getEventId()))
+                .thenReturn(inbox);
+        when(rfqMapper.selectForUpdate(41L, 100L)).thenReturn(rfq(RfqStateMachine.SENT));
+        when(supplierMapper.selectForUpdate(41L, 100L, 501L)).thenReturn(invitation(null));
+        when(supplierMapper.update(any(), any())).thenReturn(1);
+        when(inboxMapper.update(any(), any())).thenReturn(1);
+
+        assertThat(service.handle(event)).isTrue();
+
+        verify(supplierMapper).update(any(), any());
     }
 
     /** 消费延迟到本地截止时间之后时仍应接收 SRM 已严格校验并提交的事件。 */

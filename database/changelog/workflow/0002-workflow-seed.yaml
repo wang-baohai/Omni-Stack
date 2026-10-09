@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: workflow-0002-bootstrap-seed
+      author: omni-stack
+      labels: seed-v1
+      context: workflow
+      comment: 按模型业务键幂等写入默认工作流模型种子
+      changes:
+        - sqlFile:
+            path: scripts/sql/seed/workflow.sql
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: SELECT 1;

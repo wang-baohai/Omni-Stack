@@ -1,6 +1,8 @@
 package com.omni.procurement.security;
 
 import com.baomidou.mybatisplus.extension.plugins.handler.MultiDataPermissionHandler;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.persistence.DataScopeTablePolicy;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -9,6 +11,7 @@ import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionLi
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 import java.util.Map;
@@ -19,7 +22,8 @@ import java.util.Set;
  *
  * @author Omni-Stack Team
  */
-public class ProcDataPermissionHandler implements MultiDataPermissionHandler {
+@Component
+public class ProcDataPermissionHandler implements MultiDataPermissionHandler, DataScopeTablePolicy {
 
     private static final Map<String, ScopeColumns> ROOT_TABLES = Map.of(
             "proc_requisition", new ScopeColumns("requester_user_id", "requester_unit_id"),
@@ -57,7 +61,7 @@ public class ProcDataPermissionHandler implements MultiDataPermissionHandler {
             return null;
         }
         String alias = table.getAlias() == null ? table.getName() : table.getAlias().getName();
-        ProcDataScopeContext.ScopeInfo scope = ProcDataScopeContext.get();
+        ServiceDataScopeContext.ScopeInfo scope = ServiceDataScopeContext.get();
         if (scope == null || scope.effectiveScope() == null) {
             return deny(alias);
         }
@@ -70,7 +74,7 @@ public class ProcDataPermissionHandler implements MultiDataPermissionHandler {
         return inherited(alias, parentRelation, scope);
     }
 
-    private Expression scoped(String alias, ScopeColumns columns, ProcDataScopeContext.ScopeInfo scope) {
+    private Expression scoped(String alias, ScopeColumns columns, ServiceDataScopeContext.ScopeInfo scope) {
         return switch (scope.effectiveScope()) {
             case "SELF" -> equals(alias, columns.selfColumn(), scope.userId());
             case "DEPT" -> equals(alias, columns.unitColumn(), scope.primaryUnitId());
@@ -80,7 +84,7 @@ public class ProcDataPermissionHandler implements MultiDataPermissionHandler {
     }
 
     private Expression inherited(String alias, ParentRelation relation,
-                                 ProcDataScopeContext.ScopeInfo scope) {
+                                 ServiceDataScopeContext.ScopeInfo scope) {
         if (scope.tenantId() == null) {
             return deny(alias);
         }

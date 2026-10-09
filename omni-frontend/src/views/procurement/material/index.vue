@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** 采购物料目录页面，维护多级品类树和租户共享物料。 */
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
@@ -33,6 +34,8 @@ const query = reactive<{
   status?: ProcurementMaterialStatus
   assetManaged?: boolean
 }>({ keyword: '' })
+
+const { t } = useI18n()
 
 /** 物料品类选择树数据，非叶子节点 disabled。 */
 const categoryTreeOptions = computed(() => {
@@ -122,10 +125,10 @@ const categoryForm = reactive<CreateProcurementCategoryRequest & { version?: num
 })
 const categoryRules: FormRules = {
   categoryCode: [
-    { required: true, message: '请输入品类编码', trigger: 'blur' },
-    { pattern: /^[A-Za-z0-9][A-Za-z0-9_-]*$/, message: '仅支持字母、数字、下划线和短横线', trigger: 'blur' },
+    { required: true, message: t('procurementCategoryMessages.codeRequired'), trigger: 'blur' },
+    { pattern: /^[A-Za-z0-9][A-Za-z0-9_-]*$/, message: t('procurementCategoryMessages.codePattern'), trigger: 'blur' },
   ],
-  categoryName: [{ required: true, message: '请输入品类名称', trigger: 'blur' }],
+  categoryName: [{ required: true, message: t('procurementCategoryMessages.nameRequired'), trigger: 'blur' }],
 }
 
 function openCategoryCreate(parentId = 0) {
@@ -174,7 +177,7 @@ async function saveCategory() {
       status: categoryForm.status ?? 1,
     })
   }
-  ElMessage.success('保存成功')
+  ElMessage.success(t('procurementMaterialPage.saveSuccess'))
   categoryDialogVisible.value = false
   await loadCategories()
 }
@@ -182,13 +185,13 @@ async function saveCategory() {
 async function removeCategory(category: ProcurementMaterialCategory) {
   try {
     await ElMessageBox.confirm(
-      `确认删除品类“${category.categoryName}”？存在子品类或物料时将无法删除。`,
-      '删除确认',
+      t('procurementMaterialPage.categoryDeleteConfirm', { name: category.categoryName }),
+      t('procurementMaterialPage.deleteTitle'),
       { type: 'warning' },
     )
     await deleteProcurementCategory(category.id, category.version)
     if (selectedCategoryId.value === category.id) selectedCategoryId.value = undefined
-    ElMessage.success('删除成功')
+    ElMessage.success(t('procurementMaterialPage.deleteSuccess'))
     await Promise.all([loadCategories(), loadMaterials()])
   } catch {
     // 用户取消时保持当前页面状态。
@@ -208,13 +211,13 @@ const materialForm = reactive<CreateProcurementMaterialRequest & { version?: num
   status: 'ACTIVE',
 })
 const materialRules: FormRules = {
-  categoryId: [{ required: true, message: '请选择启用的物料品类', trigger: 'change' }],
+  categoryId: [{ required: true, message: t('procurementMaterialMessages.categoryRequired'), trigger: 'change' }],
   materialCode: [
-    { required: true, message: '请输入物料编码', trigger: 'blur' },
-    { pattern: /^[A-Za-z0-9][A-Za-z0-9_.-]*$/, message: '物料编码格式不正确', trigger: 'blur' },
+    { required: true, message: t('procurementMaterialMessages.codeRequired'), trigger: 'blur' },
+    { pattern: /^[A-Za-z0-9][A-Za-z0-9_.-]*$/, message: t('procurementMaterialMessages.codePattern'), trigger: 'blur' },
   ],
-  materialName: [{ required: true, message: '请输入物料名称', trigger: 'blur' }],
-  unit: [{ required: true, message: '请输入计量单位', trigger: 'change' }],
+  materialName: [{ required: true, message: t('procurementMaterialMessages.nameRequired'), trigger: 'blur' }],
+  unit: [{ required: true, message: t('procurementMaterialMessages.unitRequired'), trigger: 'change' }],
 }
 const unitOptions = ['EA', 'PCS', 'UNIT', 'SET', 'KG', 'M', 'L', 'BOX', 'HOUR', 'SERVICE']
 const assetUnits = new Set(['EA', 'PCS', 'UNIT', 'SET'])
@@ -292,18 +295,18 @@ async function saveMaterial() {
       materialCode: materialForm.materialCode.trim(),
     })
   }
-  ElMessage.success('保存成功')
+  ElMessage.success(t('procurementMaterialPage.saveSuccess'))
   materialDialogVisible.value = false
   loadMaterials()
 }
 
 async function removeMaterial(row: ProcurementMaterial) {
   try {
-    await ElMessageBox.confirm(`确认删除物料“${row.materialName}”？`, '删除确认', {
+    await ElMessageBox.confirm(t('procurementMaterialMessages.materialDeleteConfirm', { name: row.materialName }), t('procurementMaterialPage.deleteTitle'), {
       type: 'warning',
     })
     await deleteProcurementMaterial(row.id, row.version)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('procurementMaterialPage.deleteSuccess'))
     loadMaterials()
   } catch {
     // 用户取消时保持当前页面状态。
@@ -321,18 +324,18 @@ onMounted(async () => {
     <el-card class="category-panel" shadow="never">
       <template #header>
         <div class="panel-header">
-          <span>物料品类</span>
+          <span>{{ t('procurementMaterialPage.categoryPanelTitle') }}</span>
           <el-button
             v-permission="'procurement:material:create'"
             type="primary"
             link
             @click="openCategoryCreate(0)"
           >
-            新建一级
+            {{ t('procurementMaterialPage.createRootCategory') }}
           </el-button>
         </div>
       </template>
-      <el-button class="all-materials" link @click="selectCategory()">全部物料</el-button>
+      <el-button class="all-materials" link @click="selectCategory()">{{ t('procurementMaterialPage.allMaterials') }}</el-button>
       <el-tree
         v-loading="categoryLoading"
         :data="categories"
@@ -351,18 +354,18 @@ onMounted(async () => {
                 v-permission="'procurement:material:create'"
                 link
                 @click.stop="openCategoryCreate(data.id)"
-              >子级</el-button>
+              >{{ t('procurementMaterialPage.childCategory') }}</el-button>
               <el-button
                 v-permission="'procurement:material:update'"
                 link
                 @click.stop="openCategoryEdit(data)"
-              >编辑</el-button>
+              >{{ t('common.edit') }}</el-button>
               <el-button
                 v-permission="'procurement:material:delete'"
                 link
                 type="danger"
                 @click.stop="removeCategory(data)"
-              >删除</el-button>
+              >{{ t('common.delete') }}</el-button>
             </span>
           </div>
         </template>
@@ -372,60 +375,60 @@ onMounted(async () => {
     <el-card class="material-panel" shadow="never">
       <template #header>
         <div class="panel-header">
-          <span>{{ selectedCategory ? selectedCategory.categoryName : '全部物料' }}</span>
+          <span>{{ selectedCategory ? selectedCategory.categoryName : t('procurementMaterialPage.materialPanelTitleAll') }}</span>
           <el-button
             v-permission="'procurement:material:create'"
             type="primary"
             @click="openMaterialCreate"
           >
-            新建物料
+            {{ t('procurementMaterialPage.createMaterial') }}
           </el-button>
         </div>
       </template>
 
       <el-form :inline="true" :model="query" class="query-form">
-        <el-form-item label="关键词">
-          <el-input v-model="query.keyword" clearable placeholder="物料编码或名称" @keyup.enter="search" />
+        <el-form-item :label="t('procurementMaterialPage.keyword')">
+          <el-input v-model="query.keyword" clearable :placeholder="t('procurementMaterialPage.keywordPlaceholder')" @keyup.enter="search" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="query.status" clearable placeholder="全部" style="width: 120px">
-            <el-option label="启用" value="ACTIVE" />
-            <el-option label="停用" value="INACTIVE" />
+        <el-form-item :label="t('procurementMaterialPage.status')">
+          <el-select v-model="query.status" clearable :placeholder="t('procurementApprovalRules.allStatuses')" style="width: 120px">
+            <el-option :label="t('procurementApprovalRules.active')" value="ACTIVE" />
+            <el-option :label="t('procurementApprovalRules.inactive')" value="INACTIVE" />
           </el-select>
         </el-form-item>
-        <el-form-item label="资产化">
-          <el-select v-model="query.assetManaged" clearable placeholder="全部" style="width: 120px">
-            <el-option label="是" :value="true" />
-            <el-option label="否" :value="false" />
+        <el-form-item :label="t('procurementMaterialPage.assetManaged')">
+          <el-select v-model="query.assetManaged" clearable :placeholder="t('procurementApprovalRules.allStatuses')" style="width: 120px">
+            <el-option :label="t('procurementMaterialPage.yes')" :value="true" />
+            <el-option :label="t('procurementMaterialPage.no')" :value="false" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="search">查询</el-button>
-          <el-button @click="resetQuery">重置</el-button>
+          <el-button type="primary" @click="search">{{ t('procurementApprovalRules.search') }}</el-button>
+          <el-button @click="resetQuery">{{ t('procurementApprovalRules.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
       <el-table v-loading="materialLoading" :data="materials" stripe>
-        <el-table-column prop="materialCode" label="物料编码" min-width="150" />
-        <el-table-column prop="materialName" label="物料名称" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="categoryName" label="品类" min-width="140" />
-        <el-table-column prop="specification" label="规格" min-width="160" show-overflow-tooltip />
-        <el-table-column prop="unit" label="单位" width="80" />
-        <el-table-column label="资产化" width="90">
+        <el-table-column prop="materialCode" :label="t('procurementMaterialPage.materialCode')" min-width="150" />
+        <el-table-column prop="materialName" :label="t('procurementMaterialPage.materialName')" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="categoryName" :label="t('procurementMaterialPage.categoryName')" min-width="140" />
+        <el-table-column prop="specification" :label="t('procurementMaterialPage.specification')" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="unit" :label="t('procurementMaterialPage.unit')" width="80" />
+        <el-table-column :label="t('procurementMaterialPage.assetManaged')" width="90">
           <template #default="{ row }">
             <el-tag :type="row.assetManaged ? 'success' : 'info'">
-              {{ row.assetManaged ? '是' : '否' }}
+              {{ row.assetManaged ? t('procurementMaterialPage.yes') : t('procurementMaterialPage.no') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="90">
+        <el-table-column :label="t('procurementMaterialPage.status')" width="90">
           <template #default="{ row }">
             <el-tag :type="row.status === 'ACTIVE' ? 'success' : 'info'">
-              {{ row.status === 'ACTIVE' ? '启用' : '停用' }}
+              {{ row.status === 'ACTIVE' ? t('procurementMaterialPage.active') : t('procurementMaterialPage.inactive') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column :label="t('procurementMaterialPage.actions')" width="150" fixed="right">
           <template #default="{ row }">
             <el-button
               v-permission="'procurement:material:update'"
@@ -433,7 +436,7 @@ onMounted(async () => {
               type="primary"
               @click="openMaterialEdit(row)"
             >
-              编辑
+              {{ t('common.edit') }}
             </el-button>
             <el-button
               v-permission="'procurement:material:delete'"
@@ -441,7 +444,7 @@ onMounted(async () => {
               type="danger"
               @click="removeMaterial(row)"
             >
-              删除
+              {{ t('common.delete') }}
             </el-button>
           </template>
         </el-table-column>
@@ -461,15 +464,15 @@ onMounted(async () => {
 
     <el-dialog
       v-model="categoryDialogVisible"
-      :title="editingCategory ? '编辑物料品类' : '新建物料品类'"
+      :title="editingCategory ? t('procurementMaterialPage.editCategoryTitle') : t('procurementMaterialPage.createCategoryTitle')"
       width="520px"
       destroy-on-close
     >
       <el-form ref="categoryFormRef" :model="categoryForm" :rules="categoryRules" label-width="100px">
-        <el-form-item label="上级品类">
+        <el-form-item :label="t('procurementMaterialPage.parentCategory')">
           <el-tree-select
             v-model="categoryForm.parentId"
-            :data="[{ value: 0, label: '无（一级品类）', disabled: false, children: categoryTreeOptions }]"
+            :data="[{ value: 0, label: t('procurementMaterialPage.noParentCategory'), disabled: false, children: categoryTreeOptions }]"
             :disabled="Boolean(editingCategory)"
             :check-strictly="true"
             filterable
@@ -477,74 +480,74 @@ onMounted(async () => {
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="品类编码" prop="categoryCode">
+        <el-form-item :label="t('procurementMaterialPage.categoryCode')" prop="categoryCode">
           <el-input v-model="categoryForm.categoryCode" :disabled="Boolean(editingCategory)" maxlength="50" />
         </el-form-item>
-        <el-form-item label="品类名称" prop="categoryName">
+        <el-form-item :label="t('procurementMaterialPage.categoryName')" prop="categoryName">
           <el-input v-model="categoryForm.categoryName" maxlength="100" />
         </el-form-item>
-        <el-form-item label="排序">
+        <el-form-item :label="t('procurementMaterialPage.sort')">
           <el-input-number v-model="categoryForm.sort" :min="0" :max="999999" />
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item :label="t('procurementMaterialPage.status')">
           <el-switch v-model="categoryForm.status" :active-value="1" :inactive-value="0" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="categoryDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveCategory">保存</el-button>
+        <el-button @click="categoryDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="saveCategory">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
 
     <el-dialog
       v-model="materialDialogVisible"
-      :title="editingMaterial ? '编辑物料' : '新建物料'"
+      :title="editingMaterial ? t('procurementMaterialPage.editMaterialTitle') : t('procurementMaterialPage.createMaterialTitle')"
       width="620px"
       destroy-on-close
     >
       <el-form ref="materialFormRef" :model="materialForm" :rules="materialRules" label-width="100px">
-        <el-form-item label="物料编码" prop="materialCode">
+        <el-form-item :label="t('procurementMaterialPage.materialCode')" prop="materialCode">
           <el-input v-model="materialForm.materialCode" :disabled="Boolean(editingMaterial)" maxlength="64" />
         </el-form-item>
-        <el-form-item label="物料名称" prop="materialName">
+        <el-form-item :label="t('procurementMaterialPage.materialName')" prop="materialName">
           <el-input v-model="materialForm.materialName" maxlength="200" />
         </el-form-item>
-        <el-form-item label="物料品类" prop="categoryId">
+        <el-form-item :label="t('procurementMaterialPage.category')" prop="categoryId">
           <el-tree-select
             v-model="materialForm.categoryId"
             :data="categoryTreeOptions"
             filterable
             :check-strictly="true"
             :render-after-expand="false"
-            placeholder="请选择叶子品类"
+            :placeholder="t('procurementMaterialPage.leafCategoryPlaceholder')"
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="规格">
+        <el-form-item :label="t('procurementMaterialPage.specification')">
           <el-input v-model="materialForm.specification" type="textarea" maxlength="500" show-word-limit />
         </el-form-item>
-        <el-form-item label="计量单位" prop="unit">
+        <el-form-item :label="t('procurementMaterialPage.unit')" prop="unit">
           <el-select v-model="materialForm.unit" allow-create filterable style="width: 100%">
             <el-option v-for="unit in unitOptions" :key="unit" :label="unit" :value="unit" />
           </el-select>
         </el-form-item>
-        <el-form-item label="纳入资产">
+        <el-form-item :label="t('procurementMaterialPage.assetManaged')">
           <el-switch
             v-model="materialForm.assetManaged"
             :disabled="!assetUnits.has((materialForm.unit || '').toUpperCase())"
           />
-          <span class="form-tip">仅 EA / PCS / UNIT / SET 可按件生成资产卡片</span>
+          <span class="form-tip">{{ t('procurementMaterialPage.assetUnitTip') }}</span>
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item :label="t('procurementMaterialPage.status')">
           <el-radio-group v-model="materialForm.status">
-            <el-radio value="ACTIVE">启用</el-radio>
-            <el-radio value="INACTIVE">停用</el-radio>
+            <el-radio value="ACTIVE">{{ t('procurementMaterialPage.active') }}</el-radio>
+            <el-radio value="INACTIVE">{{ t('procurementMaterialPage.inactive') }}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="materialDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveMaterial">保存</el-button>
+        <el-button @click="materialDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="saveMaterial">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>

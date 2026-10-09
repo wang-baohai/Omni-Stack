@@ -7,6 +7,7 @@ import com.omni.workflow.dto.ApprovalRequest;
 import com.omni.workflow.dto.WorkflowCompletionResult;
 import com.omni.workflow.entity.WfProcessInstanceExt;
 import com.omni.workflow.mapper.WfProcessInstanceExtMapper;
+import com.omni.workflow.metrics.WorkflowMetrics;
 import com.omni.workflow.service.WorkflowApprovalService;
 import com.omni.workflow.service.WorkflowCompletionEventService;
 import com.omni.workflow.service.WorkflowTodoSyncService;
@@ -46,10 +47,17 @@ public class WorkflowApprovalServiceImpl implements WorkflowApprovalService {
     /** {@inheritDoc} */
     @Override
     public void complete(String taskId, ApprovalRequest request, Long userId, Long tenantId) {
-        Task task = requireCurrentAssigneeTask(taskId, userId, tenantId);
-        approvalService.complete(taskId, request.isApproved(), request.getComment(), request.getVariables());
-        publishIfCrossServiceProcessCompleted(task.getProcessInstanceId(), tenantId, request.isApproved());
-        syncAfterCommit(task.getProcessInstanceId());
+        long startedNanos = System.nanoTime();
+        String result = "failure";
+        try {
+            Task task = requireCurrentAssigneeTask(taskId, userId, tenantId);
+            approvalService.complete(taskId, request.isApproved(), request.getComment(), request.getVariables());
+            publishIfCrossServiceProcessCompleted(task.getProcessInstanceId(), tenantId, request.isApproved());
+            syncAfterCommit(task.getProcessInstanceId());
+            result = "success";
+        } finally {
+            WorkflowMetrics.recordApproval(result, System.nanoTime() - startedNanos);
+        }
     }
 
     /**

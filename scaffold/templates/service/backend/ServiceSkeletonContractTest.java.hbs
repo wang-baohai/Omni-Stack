@@ -1,0 +1,24 @@
+package {{javaPackage}};
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import {{javaPackage}}.security.{{className}}TenantTablePolicy;
+import org.junit.jupiter.api.Test;
+
+/**
+ * 生成服务的租户边界契约测试。
+ *
+ * @author Omni-Stack Team
+ */
+class ServiceSkeletonContractTest {
+
+    private final {{className}}TenantTablePolicy policy = new {{className}}TenantTablePolicy();
+
+    @Test
+    void shouldOnlyApplyTenantIsolationToOwnedTables() {
+        assertTrue(policy.appliesTo("{{tablePrefix}}sample"));
+        assertFalse(policy.appliesTo("sys_mq_message"));
+        assertFalse(policy.appliesTo(null));
+    }
+}

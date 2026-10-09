@@ -7,6 +7,7 @@ import com.omni.base.mapper.SysUserJobLogMapper;
 import com.omni.base.mapper.SysUserJobMapper;
 import com.omni.common.core.job.UserJobHandler;
 import com.omni.common.core.job.UserJobMessage;
+import com.omni.common.job.JobMetrics;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,7 @@ public class UserJobExecuteHandler {
         try {
             message = objectMapper.readValue(param, UserJobMessage.class);
         } catch (Exception e) {
+            JobMetrics.recordExecution("failure");
             XxlJobHelper.log("参数解析失败：{}", e.getMessage());
             XxlJobHelper.handleFail("参数解析失败: " + e.getMessage());
             return;
@@ -117,8 +119,10 @@ public class UserJobExecuteHandler {
 
         // 设置 XXL-JOB 执行结果
         if (status == 1) {
+            JobMetrics.recordExecution("success");
             XxlJobHelper.handleSuccess(resultMessage != null ? resultMessage : "执行成功");
         } else {
+            JobMetrics.recordExecution("failure");
             XxlJobHelper.handleFail(errorMsg);
         }
 

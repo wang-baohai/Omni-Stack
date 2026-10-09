@@ -30,7 +30,7 @@ import com.omni.crm.mapper.CrmOpportunityMapper;
 import com.omni.crm.mapper.CrmOpportunityStageHistoryMapper;
 import com.omni.crm.mapper.CrmOwnerChangeLogMapper;
 import com.omni.crm.mapper.CrmPipelineStageMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.crm.security.PiiMasker;
 import com.omni.crm.service.CrmTenantInitializer;
 import com.omni.crm.service.LeadService;
@@ -103,7 +103,7 @@ public class LeadServiceImpl implements LeadService {
     public CrmViews.LeadVO create(CrmRequests.CreateLeadRequest request) {
         CrmOwnerResolver.Owner owner = ownerResolver.resolveForCreate(request.getOwnerUserId(), "crm:lead:assign");
         CrmLead lead = new CrmLead();
-        lead.setTenantId(CrmTenantContext.requireTenantId()); lead.setLeadNo("TMP-" + UUID.randomUUID());
+        lead.setTenantId(ServiceIdentityContext.requireTenantId()); lead.setLeadNo("TMP-" + UUID.randomUUID());
         lead.setFullName(request.getFullName()); lead.setCompanyName(request.getCompanyName()); lead.setJobTitle(request.getJobTitle());
         lead.setMobile(request.getMobile()); lead.setPhone(request.getPhone()); lead.setEmail(request.getEmail());
         lead.setRegion(request.getRegion()); lead.setAddress(request.getAddress()); lead.setSourceCode(request.getSourceCode());
@@ -152,7 +152,7 @@ public class LeadServiceImpl implements LeadService {
                 .set(CrmLead::getDeleted, 1);
         audit(update); requireUpdated(leadMapper.update(null, update));
         activityMapper.softDeleteByRoot("LEAD", id, LocalDateTime.now(),
-                CrmTenantContext.require().username());
+                ServiceIdentityContext.require().username());
     }
 
     /** {@inheritDoc} */
@@ -182,7 +182,7 @@ public class LeadServiceImpl implements LeadService {
                 .set(CrmLead::getAssignedTime, LocalDateTime.now());
         audit(update); requireUpdated(leadMapper.update(null, update));
         activityMapper.syncOwnerByRoot("LEAD", id, owner.userId(), owner.unitId(), LocalDateTime.now(),
-                CrmTenantContext.require().username());
+                ServiceIdentityContext.require().username());
         appendOwnerLog("LEAD", id, current.getOwnerUserId(), current.getOwnerUnitId(), owner, "ASSIGN", request.getReason());
         publishLeadAssignmentEvent(current, owner, request.getVersion() + 1);
         return get(id);
@@ -201,7 +201,7 @@ public class LeadServiceImpl implements LeadService {
                     .set(CrmLead::getAssignedTime, LocalDateTime.now());
             audit(update); requireUpdated(leadMapper.update(null, update));
             activityMapper.syncOwnerByRoot("LEAD", item.getId(), owner.userId(), owner.unitId(),
-                    LocalDateTime.now(), CrmTenantContext.require().username());
+                    LocalDateTime.now(), ServiceIdentityContext.require().username());
             appendOwnerLog("LEAD", item.getId(), current.getOwnerUserId(), current.getOwnerUnitId(), owner,
                     "BATCH_ASSIGN", request.getReason());
             publishLeadAssignmentEvent(current, owner, item.getVersion() + 1);
@@ -271,25 +271,25 @@ public class LeadServiceImpl implements LeadService {
                 .set(CrmActivity::getOwnerUserId, customer.getOwnerUserId())
                 .set(CrmActivity::getOwnerUnitId, customer.getOwnerUnitId())
                 .set(CrmActivity::getUpdateTime, now)
-                .set(CrmActivity::getUpdateBy, CrmTenantContext.require().username())
+                .set(CrmActivity::getUpdateBy, ServiceIdentityContext.require().username())
                 .setSql("version = version + 1"));
         CrmLeadConversion conversion = new CrmLeadConversion();
-        conversion.setTenantId(CrmTenantContext.requireTenantId()); conversion.setLeadId(id); conversion.setCustomerId(customer.getId());
+        conversion.setTenantId(ServiceIdentityContext.requireTenantId()); conversion.setLeadId(id); conversion.setCustomerId(customer.getId());
         conversion.setContactId(contact.getId()); conversion.setOpportunityId(opportunity == null ? null : opportunity.getId());
-        conversion.setConvertedByUserId(CrmTenantContext.require().userId()); conversion.setConvertedTime(now);
+        conversion.setConvertedByUserId(ServiceIdentityContext.require().userId()); conversion.setConvertedTime(now);
         CrmAuditSupport.created(conversion); conversionMapper.insert(conversion);
         String eventId = UUID.randomUUID().toString();
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("leadId", id); payload.put("customerId", customer.getId()); payload.put("contactId", contact.getId());
         payload.put("opportunityId", opportunity == null ? null : opportunity.getId());
         DomainEventEnvelope envelope = DomainEventEnvelope.builder().eventId(eventId)
-                .eventType("crm.lead.converted.v1").occurredAt(now).tenantId(CrmTenantContext.requireTenantId())
+                .eventType("crm.lead.converted.v1").occurredAt(now).tenantId(ServiceIdentityContext.requireTenantId())
                 .producer("omni-crm").aggregateType("LEAD").aggregateId(id)
-                .aggregateVersion(request.getVersion() + 1).actorUserId(CrmTenantContext.require().userId())
+                .aggregateVersion(request.getVersion() + 1).actorUserId(ServiceIdentityContext.require().userId())
                 .payload(payload).build();
-        reliableMessageRelay.send("crm-domain-out-0", envelope, CrmTenantContext.requireTenantId(), eventId);
+        reliableMessageRelay.send("crm-domain-out-0", envelope, ServiceIdentityContext.requireTenantId(), eventId);
         log.info("线索转换完成：tenantId={}, leadId={}, customerId={}, eventId={}",
-                CrmTenantContext.requireTenantId(), id, customer.getId(), eventId);
+                ServiceIdentityContext.requireTenantId(), id, customer.getId(), eventId);
         return conversionResult(conversion, false);
     }
 
@@ -325,7 +325,7 @@ public class LeadServiceImpl implements LeadService {
         }
         if (!"CREATE".equalsIgnoreCase(request.getContactMode())) throw new BusinessException(400, "联系人转换模式无效");
         contactMapper.clearPrimaryByCustomer(customer.getId(), LocalDateTime.now(),
-                CrmTenantContext.require().username());
+                ServiceIdentityContext.require().username());
         CrmContact contact = new CrmContact();
         contact.setTenantId(lead.getTenantId()); contact.setCustomerId(customer.getId());
         contact.setName(hasText(request.getContactName()) ? request.getContactName() : lead.getFullName());
@@ -364,7 +364,7 @@ public class LeadServiceImpl implements LeadService {
         history.setToStageId(stage.getId());
         history.setToStatus("OPEN");
         history.setChangeReason("CONVERSION_CREATE");
-        history.setChangedByUserId(CrmTenantContext.require().userId());
+        history.setChangedByUserId(ServiceIdentityContext.require().userId());
         history.setChangedTime(opportunity.getStageChangeTime());
         CrmAuditSupport.created(history);
         opportunityHistoryMapper.insert(history);
@@ -388,10 +388,10 @@ public class LeadServiceImpl implements LeadService {
 
     private void appendOwnerLog(String type, Long id, Long oldUser, Long oldUnit, CrmOwnerResolver.Owner owner,
                                 String operation, String reason) {
-        CrmOwnerChangeLog log = new CrmOwnerChangeLog(); log.setTenantId(CrmTenantContext.requireTenantId());
+        CrmOwnerChangeLog log = new CrmOwnerChangeLog(); log.setTenantId(ServiceIdentityContext.requireTenantId());
         log.setEntityType(type); log.setEntityId(id); log.setOldOwnerUserId(oldUser); log.setOldOwnerUnitId(oldUnit);
         log.setNewOwnerUserId(owner.userId()); log.setNewOwnerUnitId(owner.unitId()); log.setOperationType(operation);
-        log.setReason(reason); log.setOperatorUserId(CrmTenantContext.require().userId()); log.setOperatedTime(LocalDateTime.now());
+        log.setReason(reason); log.setOperatorUserId(ServiceIdentityContext.require().userId()); log.setOperatedTime(LocalDateTime.now());
         CrmAuditSupport.created(log); ownerLogMapper.insert(log);
     }
 
@@ -409,16 +409,16 @@ public class LeadServiceImpl implements LeadService {
                 .eventId(eventId)
                 .eventType(eventType)
                 .occurredAt(LocalDateTime.now())
-                .tenantId(CrmTenantContext.requireTenantId())
+                .tenantId(ServiceIdentityContext.requireTenantId())
                 .producer("omni-crm")
                 .aggregateType("LEAD")
                 .aggregateId(lead.getId())
                 .aggregateVersion(aggregateVersion)
-                .actorUserId(CrmTenantContext.require().userId())
+                .actorUserId(ServiceIdentityContext.require().userId())
                 .payload(payload)
                 .build();
         reliableMessageRelay.send("crm-domain-out-0", envelope,
-                CrmTenantContext.requireTenantId(), eventId);
+                ServiceIdentityContext.requireTenantId(), eventId);
     }
 
     private CrmViews.ConversionResultVO conversionResult(CrmLeadConversion conversion, boolean replay) {
@@ -435,7 +435,7 @@ public class LeadServiceImpl implements LeadService {
 
     private void audit(LambdaUpdateWrapper<CrmLead> update) {
         update.set(CrmLead::getUpdateTime, LocalDateTime.now())
-                .set(CrmLead::getUpdateBy, CrmTenantContext.require().username());
+                .set(CrmLead::getUpdateBy, ServiceIdentityContext.require().username());
     }
 
     private <T> void setIf(LambdaUpdateWrapper<CrmLead> update, T value,

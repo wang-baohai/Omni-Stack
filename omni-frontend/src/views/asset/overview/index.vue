@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** 资产概览页面，按管理 DataScope 展示状态、原值与多维分布。 */
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   getAssetDistribution,
   getAssetOverviewSummary,
@@ -9,16 +10,17 @@ import {
   type AssetOverviewSummary,
 } from '@/api/asset-overview'
 
+const { t } = useI18n()
 const loading = ref(false)
 const summary = ref<AssetOverviewSummary>()
 const distribution = ref<AssetDistributionItem[]>([])
 const dimension = ref<AssetDistributionDimension>('STATUS')
-const dimensionOptions: Array<{ label: string; value: AssetDistributionDimension }> = [
-  { label: '状态', value: 'STATUS' },
-  { label: '品类', value: 'CATEGORY' },
-  { label: '部门', value: 'DEPARTMENT' },
-  { label: '位置', value: 'LOCATION' },
-]
+const dimensionOptions = computed<Array<{ label: string; value: AssetDistributionDimension }>>(() => [
+  { label: t('assetOverviewPage.status'), value: 'STATUS' },
+  { label: t('assetOverviewPage.category'), value: 'CATEGORY' },
+  { label: t('assetOverviewPage.department'), value: 'DEPARTMENT' },
+  { label: t('assetOverviewPage.location'), value: 'LOCATION' },
+])
 
 async function load() {
   loading.value = true
@@ -40,21 +42,21 @@ onMounted(load)
 <template>
   <div v-loading="loading" class="asset-overview-page">
     <div class="stat-grid">
-      <el-card shadow="never"><el-statistic title="资产总数" :value="summary?.totalCount || 0" /></el-card>
-      <el-card shadow="never"><el-statistic title="在库" :value="summary?.inStockCount || 0" /></el-card>
-      <el-card shadow="never"><el-statistic title="使用中" :value="summary?.inUseCount || 0" /></el-card>
-      <el-card shadow="never"><el-statistic title="待领用" :value="summary?.allocatedCount || 0" /></el-card>
-      <el-card shadow="never"><el-statistic title="维修中" :value="summary?.maintenanceCount || 0" /></el-card>
-      <el-card shadow="never"><el-statistic title="调拨中" :value="summary?.transferCount || 0" /></el-card>
+      <el-card shadow="never"><el-statistic :title="t('assetOverviewPage.total')" :value="summary?.totalCount || 0" /></el-card>
+      <el-card shadow="never"><el-statistic :title="t('assetOverviewPage.inStock')" :value="summary?.inStockCount || 0" /></el-card>
+      <el-card shadow="never"><el-statistic :title="t('assetOverviewPage.inUse')" :value="summary?.inUseCount || 0" /></el-card>
+      <el-card shadow="never"><el-statistic :title="t('assetOverviewPage.allocated')" :value="summary?.allocatedCount || 0" /></el-card>
+      <el-card shadow="never"><el-statistic :title="t('assetOverviewPage.maintenance')" :value="summary?.maintenanceCount || 0" /></el-card>
+      <el-card shadow="never"><el-statistic :title="t('assetOverviewPage.transfer')" :value="summary?.transferCount || 0" /></el-card>
       <el-card shadow="never">
-        <el-statistic title="待处置" :value="summary?.disposalPendingCount || 0" />
+        <el-statistic :title="t('assetOverviewPage.disposalPending')" :value="summary?.disposalPendingCount || 0" />
       </el-card>
-      <el-card shadow="never"><el-statistic title="已终结" :value="summary?.terminalCount || 0" /></el-card>
+      <el-card shadow="never"><el-statistic :title="t('assetOverviewPage.terminal')" :value="summary?.terminalCount || 0" /></el-card>
     </div>
 
     <el-card shadow="never">
-      <template #header><span>资产原值（按币种独立统计）</span></template>
-      <el-empty v-if="!summary?.amountsByCurrency.length" description="暂无金额数据" />
+      <template #header><span>{{ t('assetOverviewPage.originalValue') }}</span></template>
+      <el-empty v-if="!summary?.amountsByCurrency.length" :description="t('assetOverviewPage.noAmount')" />
       <div v-else class="amount-grid">
         <div v-for="item in summary.amountsByCurrency" :key="item.currencyCode" class="amount-item">
           <span>{{ item.currencyCode }}</span>
@@ -66,17 +68,17 @@ onMounted(load)
     <el-card shadow="never">
       <template #header>
         <div class="card-header">
-          <span>资产分布</span>
+          <span>{{ t('assetOverviewPage.distribution') }}</span>
           <el-segmented v-model="dimension" :options="dimensionOptions" @change="load" />
         </div>
       </template>
       <el-table :data="distribution" stripe>
-        <el-table-column prop="dimensionName" label="维度项" min-width="200" />
-        <el-table-column prop="count" label="资产数量" min-width="120" align="right" />
-        <el-table-column prop="currencyCode" label="币种" min-width="100">
+        <el-table-column prop="dimensionName" :label="t('assetOverviewPage.dimensionItem')" min-width="200" />
+        <el-table-column prop="count" :label="t('assetOverviewPage.assetCount')" min-width="120" align="right" />
+        <el-table-column prop="currencyCode" :label="t('assetOverviewPage.currency')" min-width="100">
           <template #default="{ row }">{{ row.currencyCode || '—' }}</template>
         </el-table-column>
-        <el-table-column prop="amount" label="资产原值" min-width="160" align="right">
+        <el-table-column prop="amount" :label="t('assetOverviewPage.assetValue')" min-width="160" align="right">
           <template #default="{ row }">{{ row.amount || '—' }}</template>
         </el-table-column>
       </el-table>

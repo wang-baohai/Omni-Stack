@@ -3,7 +3,7 @@ package com.omni.asset.service.impl;
 import com.omni.asset.dto.AssetOverviewRequests;
 import com.omni.asset.dto.AssetOverviewViews;
 import com.omni.asset.mapper.AssetOverviewMapper;
-import com.omni.asset.security.AssetDataScopeContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.common.core.result.BusinessException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,14 +32,14 @@ class AssetOverviewServiceImplTest {
     @BeforeEach
     void setUp() {
         service = new AssetOverviewServiceImpl(overviewMapper);
-        AssetDataScopeContext.set(new AssetDataScopeContext.ScopeInfo(
-                7L, 41L, "asset:overview:list", 12L, "DEPT", Set.of(12L)));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                7L, 41L, "asset:overview:list", 12L, "DEPT", Set.of(12L), null));
     }
 
     /** 清理线程数据范围。 */
     @AfterEach
     void clearContext() {
-        AssetDataScopeContext.clear();
+        ServiceDataScopeContext.clear();
     }
 
     /** 摘要必须补齐零值状态并保持不同币种独立。 */
@@ -87,7 +87,7 @@ class AssetOverviewServiceImplTest {
     /** 缺失数据范围时必须失败关闭。 */
     @Test
     void shouldFailClosedWithoutDataScope() {
-        AssetDataScopeContext.clear();
+        ServiceDataScopeContext.clear();
 
         assertThatThrownBy(service::summary)
                 .isInstanceOf(BusinessException.class)

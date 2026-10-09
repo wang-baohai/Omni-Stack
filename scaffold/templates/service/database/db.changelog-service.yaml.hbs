@@ -1,0 +1,5 @@
+{{#if dependencyMqTransport}}databaseChangeLog:
+  - include:
+      file: database/changelog/common/db.changelog-common-mq.yaml
+{{else}}databaseChangeLog: []
+{{/if}}

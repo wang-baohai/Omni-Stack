@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: auth-generated-{{serviceId}}-permissions
+      author: omni-cli
+      labels: adoption-upgrade
+      context: auth
+      comment: "按自然键登记{{yamlDoubleQuotedDisplayName}}菜单、接口权限和默认管理员授权"
+      changes:
+        - sqlFile:
+            path: scripts/sql/seed/{{serviceId}}-permissions.sql
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: SELECT 1;

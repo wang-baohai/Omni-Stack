@@ -23,7 +23,7 @@ import com.omni.srm.mapper.SrmEvaluationItemMapper;
 import com.omni.srm.mapper.SrmEvaluationMapper;
 import com.omni.srm.mapper.SrmEvaluationTemplateMapper;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.EvaluationService;
 import com.omni.srm.service.SrmTenantInitializer;
 import com.omni.srm.service.support.SrmAuditSupport;
@@ -129,8 +129,8 @@ public class EvaluationServiceImpl implements EvaluationService {
     @Override
     @Transactional
     public SrmViews.EvaluationVO create(SrmRequests.CreateEvaluationRequest request) {
-        Long tenantId = SrmTenantContext.requireTenantId();
-        Long userId = SrmTenantContext.require().userId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        Long userId = ServiceIdentityContext.require().userId();
 
         SrmSupplier supplier = supplierMapper.selectVisibleForUpdate(request.getSupplierId());
         if (supplier == null) {
@@ -297,7 +297,7 @@ public class EvaluationServiceImpl implements EvaluationService {
                 .eventId(eventId)
                 .eventType("srm.evaluation.completed.v1")
                 .occurredAt(LocalDateTime.now())
-                .tenantId(SrmTenantContext.requireTenantId())
+                .tenantId(ServiceIdentityContext.requireTenantId())
                 .producer("omni-srm")
                 .aggregateType("EVALUATION")
                 .aggregateId(evaluation.getId())
@@ -311,6 +311,6 @@ public class EvaluationServiceImpl implements EvaluationService {
                         "evaluationPeriod", evaluation.getEvaluationPeriod()))
                 .build();
         reliableMessageRelay.send("srm-domain-out-0", envelope,
-                SrmTenantContext.requireTenantId(), eventId);
+                ServiceIdentityContext.requireTenantId(), eventId);
     }
 }

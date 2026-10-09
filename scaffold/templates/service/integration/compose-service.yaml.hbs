@@ -1,0 +1,29 @@
+# 由 @omni-stack/cli {{generatorVersion}} 生成；结构化合并到 compose services。
+{{artifactId}}:
+  image: ${OMNI_IMAGE_NAMESPACE:-omni}-{{artifactId}}:latest
+  build:
+    context: .
+    dockerfile: docker/backend/Dockerfile
+    args:
+      MODULE: {{artifactId}}
+  environment:
+    OMNI_ENVIRONMENT: ${OMNI_ENVIRONMENT:-local}
+    OTLP_EXPORT_ENABLED: ${OTLP_EXPORT_ENABLED:-false}
+    MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED: "false"
+    OTLP_TRACES_ENDPOINT: ${OTLP_TRACES_ENDPOINT:-http://otel-collector:4318/v1/traces}
+    TRACING_SAMPLING_PROBABILITY: ${TRACING_SAMPLING_PROBABILITY:-0.0}
+    LOGGING_STRUCTURED_FORMAT_CONSOLE: ${STRUCTURED_LOGGING_FORMAT:-ecs}
+    SPRING_PROFILES_ACTIVE: docker
+    MYSQL_URL: jdbc:mysql://omni-mysql:3306/{{databaseName}}
+    MANAGEMENT_PORT: {{managementPort}}
+    # Gateway HMAC 断言密钥：必须来自 .env，缺失时 compose 直接报错，不容忍 fail-open 启动。
+    GATEWAY_ASSERTION_SECRET: ${GATEWAY_ASSERTION_SECRET:?请在 .env 中配置 GATEWAY_ASSERTION_SECRET}
+    OMNI_INTERNAL_API_TOKEN: ${OMNI_INTERNAL_API_TOKEN:?请在 .env 中配置 OMNI_INTERNAL_API_TOKEN}
+  ports:
+    - "{{servicePort}}:{{servicePort}}"
+    - "{{managementPort}}:{{managementPort}}"
+  healthcheck:
+    test: ["CMD", "wget", "--spider", "-q", "http://localhost:{{managementPort}}/actuator/health"]
+    interval: 10s
+    timeout: 5s
+    retries: 12

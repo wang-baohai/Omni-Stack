@@ -262,6 +262,19 @@ flowchart TD
 
 **MVP 约束**：单张请购仅允许一个品类；审批路由支持精确品类与 `*` 默认路由，BPMN 可按金额分支。后续需要跨品类请购时再定义明确的主品类或多流程策略，禁止当前版本隐式取第一行。
 
+### 5.2.1 请购审批规则管理
+
+管理界面以业务名称、适用品类、金额范围和流程名称为主，不要求业务人员输入技术编码、模型版本 ID
+或 priority。`route_code` 由服务端生成 `APR-{ULID}`，仅在高级信息中只读展示；`route_name` 是业务必填名。
+可绑定流程固定为 Workflow `category=purchase` 的当前已发布版本，而运行实例继续使用
+`businessType=PROCUREMENT_REQUISITION`，两类标识不能混用。
+
+列表按当前页去重 `modelVersionId` 后使用不超过 200 条的批量内部接口补充流程元数据，禁止逐行调用。
+Workflow 不可用时只读列表保留本地规则并标记 `UNAVAILABLE`；创建、更新和请购提交仍失败关闭。
+匹配测试调用与请购提交相同的 `ApprovalRouteResolver.evaluate`，明确返回唯一命中、无匹配和历史脏数据
+多匹配。覆盖分析对每个有效品类从 0 到无穷切分半开区间，先应用精确规则，再以默认规则补缺；
+停用和删除前在内存排除目标规则复用同一算法生成影响提示。
+
 ### 5.3 询价/比价（RFQ）
 
 ```mermaid
@@ -344,7 +357,7 @@ sequenceDiagram
 
 ### 6.1 信任链
 
-与 SRM 一致：Gateway JWT → Procurement Tenant 校验 → @PreAuthorize → @ProcDataScope → MyBatis DataPermission → ProcRecordAccessGuard。
+与 SRM 一致：Gateway JWT → `GatewayPreAuthenticationFilter` → `ServiceIdentityFilter`（Tenant/用户身份校验）→ `@PreAuthorize` → `@ServiceDataScope` → MyBatis DataPermission → `ProcRecordAccessGuard`。
 
 ### 6.2 权限树与角色
 
@@ -373,9 +386,9 @@ API 权限：
 
 ### 6.3 Procurement 上下文与 SQL 拦截
 
-与 SRM/CRM 模式一致：`ProcTenantContext`、`ProcDataScopeContext`、`@ProcDataScope` 切面、`ProcDataPermissionHandler`、`ProcRecordAccessGuard`。
+通用请求身份、DataScope 上下文与切面由 `omni-common-service` 提供：`ServiceIdentityContext`、`ServiceDataScopeContext`、`@ServiceDataScope` 和 `ServicePersistenceAutoConfiguration`。采购模块只保留领域差异：`ProcTenantTablePolicy`、`ProcDataPermissionHandler` 与 `ProcRecordAccessGuard`。
 
-拦截器顺序固定：`TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInterceptor`。
+拦截器顺序固定：`TenantLineInnerInterceptor → DataPermissionInterceptor → OptimisticLockerInnerInterceptor → PaginationInnerInterceptor`。`ProcTenantTablePolicy` 只对 `proc_*` 表启用 TenantLine；`sys_mq_message` 必须排除，保证跨租户 Outbox Relay 可以扫描待发送消息。领域表的数据权限映射仍由 `ProcDataPermissionHandler` 按下表定义。
 
 | dataScope | 条件 |
 |---|---|
@@ -582,7 +595,7 @@ Outbox 只保证事件可靠投递到 Broker；消息一旦发送成功会进入
 
 ### 9.3 XSS
 
-Procurement 必须实现 `XssConfigProvider`，读取 Redis DB 0 配置。MVP 备注只允许纯文本。
+Procurement 通过 `omni-common-service` 的 `CachedServiceXssConfigProvider` 获得 XSS 配置，不再重复实现模块级 `XssConfigProvider`。配置优先读取 Redis DB 0，缓存未命中时回源 Auth；Auth 不可用且无缓存时采用安全基线继续过滤。MVP 备注只允许纯文本。
 
 ## 10. 前端设计
 
@@ -646,8 +659,10 @@ omni-backend/omni-procurement/
 | `docker/backend/Dockerfile` | POM 缓存层 |
 | `docker-compose.yml` | Procurement 服务、8106 |
 | `start.bat/start.sh` | build 列表加入 Procurement |
-| `scripts/sql/init-all.sql` | `omni_procurement` DDL、物料品类种子数据、权限和角色 |
-| `scripts/sql/sp_init_tenant.sql` | 新租户初始化同步 |
+| `database/changelog/procurement/` | 为采购结构变更增加 forward-only Liquibase changeSet |
+| `scripts/sql/seed/procurement.sql` | 物料品类等正式幂等种子；更新后刷新 seed manifest |
+| `scripts/sql/seed/auth.sql` | 采购权限和角色正式幂等种子；更新后刷新 seed manifest |
+| Procurement `TenantModuleProvisioner` | 新租户 13 项物料分类的幂等初始化 |
 | `omni-workflow` | 增加幂等内部启动/任务分配校验 API，以及 `workflow.process.completed.v1` Outbox 事件 |
 | `docs/workflow.md` | 补充跨服务幂等启动、结果事件和采购审批流程模型说明 |
 | Frontend router/layout/menu/locales | 图标、菜单、i18n |

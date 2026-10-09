@@ -1,7 +1,7 @@
 package com.omni.procurement.controller;
 
 import com.omni.procurement.dto.OverviewRequests;
-import com.omni.procurement.security.ProcDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -23,7 +23,7 @@ class OverviewControllerSecurityTest {
     private void assertPermission(Method method) {
         assertThat(method.getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAuthority('procurement:overview:list')");
-        assertThat(method.getAnnotation(ProcDataScope.class).permissionCode())
+        assertThat(method.getAnnotation(ServiceDataScope.class).permissionCode())
                 .isEqualTo("procurement:overview:list");
     }
 }

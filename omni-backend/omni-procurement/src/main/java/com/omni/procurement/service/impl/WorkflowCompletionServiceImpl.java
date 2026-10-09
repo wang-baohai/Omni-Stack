@@ -13,7 +13,7 @@ import com.omni.procurement.entity.ProcEventInbox;
 import com.omni.procurement.entity.ProcRequisition;
 import com.omni.procurement.mapper.ProcEventInboxMapper;
 import com.omni.procurement.mapper.ProcRequisitionMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.WorkflowCompletionService;
 import com.omni.procurement.workflow.RequisitionWorkflowCoordinator;
 import com.omni.procurement.workflow.RetryableWorkflowEventException;
@@ -52,7 +52,7 @@ public class WorkflowCompletionServiceImpl implements WorkflowCompletionService 
     @Transactional
     public boolean handle(WorkflowContracts.ProcessCompletedEvent event) {
         validate(event);
-        if (!event.getTenantId().equals(ProcTenantContext.requireTenantId())) {
+        if (!event.getTenantId().equals(ServiceIdentityContext.requireTenantId())) {
             throw new BusinessException(403, "Workflow 完成事件与当前租户上下文不一致");
         }
         BusinessKey businessKey = parseBusinessKey(event.getBusinessKey());

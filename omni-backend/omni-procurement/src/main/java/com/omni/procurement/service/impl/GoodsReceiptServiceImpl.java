@@ -21,8 +21,9 @@ import com.omni.procurement.mapper.ProcGoodsReceiptMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.GoodsReceiptService;
 import com.omni.procurement.service.support.ProcAuditSupport;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
@@ -71,7 +72,7 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     @Override
     @Transactional(readOnly = true)
     public PageResult<GoodsReceiptViews.Summary> page(GoodsReceiptRequests.Query query) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         LambdaQueryWrapper<ProcGoodsReceipt> wrapper = new LambdaQueryWrapper<ProcGoodsReceipt>()
                 .eq(ProcGoodsReceipt::getTenantId, tenantId);
         String keyword = trimToNull(query.getKeyword());
@@ -120,15 +121,15 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     @Override
     @Transactional(readOnly = true)
     public GoodsReceiptViews.Detail get(Long id) {
-        return loadVisibleDetail(ProcTenantContext.requireTenantId(), id);
+        return loadVisibleDetail(ServiceIdentityContext.requireTenantId(), id);
     }
 
     /** {@inheritDoc} */
     @Override
     @Transactional
     public GoodsReceiptViews.Detail create(GoodsReceiptRequests.CreateRequest request) {
-        Long tenantId = ProcTenantContext.requireTenantId();
-        ProcDataScopeContext.ScopeInfo scope = requireOwnerScope();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
+        ServiceDataScopeContext.ScopeInfo scope = requireOwnerScope();
         if (request == null || request.getPoId() == null || request.getReceiveTime() == null) {
             throw new BusinessException(400, "采购订单和收货时间不能为空");
         }
@@ -179,7 +180,7 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     @Override
     @Transactional
     public GoodsReceiptViews.Detail confirm(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcGoodsReceipt receipt = requireLocked(tenantId, id);
         GoodsReceiptStateMachine.requireConfirmable(receipt.getStatus());
         requireVersion(receipt, version);
@@ -220,7 +221,7 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     @Transactional
     public GoodsReceiptViews.Detail updateQualityResult(
             Long id, GoodsReceiptRequests.QualityResultCommand command) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         if (command == null) {
             throw new BusinessException(400, "质检结果命令不能为空");
         }
@@ -742,8 +743,8 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
         return normalized.isEmpty() ? null : normalized;
     }
 
-    private ProcDataScopeContext.ScopeInfo requireOwnerScope() {
-        ProcDataScopeContext.ScopeInfo scope = ProcDataScopeContext.require();
+    private ServiceDataScopeContext.ScopeInfo requireOwnerScope() {
+        ServiceDataScopeContext.ScopeInfo scope = ServiceDataScopeContext.require();
         if (scope.userId() == null || scope.userId() <= 0
                 || scope.primaryUnitId() == null || scope.primaryUnitId() <= 0) {
             throw new BusinessException(403, "当前用户缺少有效的负责人或主组织上下文");
@@ -752,7 +753,7 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     }
 
     private String operator() {
-        ProcTenantContext.RequestIdentity identity = ProcTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         return identity.username() == null || identity.username().isBlank()
                 ? String.valueOf(identity.userId()) : identity.username();
     }

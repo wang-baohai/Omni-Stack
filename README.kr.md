@@ -2,7 +2,7 @@
 
 > Spring Boot 4 + Vue 3 기반의 마이크로서비스 스캐폴딩 플랫폼으로, Harness 산업 설계 패턴을 채택하여 AI 보조 개발을 위한 업계 모범 사례 기반을 제공합니다.
 >
-> **단 한 번의 명령으로 전체 스택 시작: 미들웨어 + 5개 마이크로서비스 + 프론트엔드, 총 12개의 Docker 컨테이너.**
+> **한 번의 명령으로 미들웨어, 데이터베이스 마이그레이터, 8개 마이크로서비스와 프론트엔드를 시작합니다. full 모드는 Docker 컨테이너 16개입니다.**
 
 **[中文](README.md)** | **[English](README.en.md)** | **[日本語](README.jp.md)**
 
@@ -10,20 +10,32 @@
 
 **연락처 이메일**: wangbaohai1993@gmail.com
 
+## 처음 시작하기
+
+- [5분 빠른 시작](docs/guides/quick-start.kr.md)에서 시작, 로그인, 검증까지 가장 짧은 경로를 제공합니다.
+- [인증 가이드](docs/guides/authentication.kr.md)에서 권한, Workflow, Scheduling, CRM, SRM, `omni-procurement`, `omni-asset` 사용 가이드로 이어집니다.
+- 프리셋, `create-service`, CRUD 생성과 경량 모드는 [스캐폴드 개발 가이드](docs/guides/scaffold-development.kr.md)를 참조하세요. 유지 관리 CLI는 `tools/omni-cli`에 있습니다.
+- 스키마는 `omni-db-migrator`와 `database/changelog/`에서 관리하며 `scripts/sql/seed`에는 멱등 시드 데이터만 둡니다.
+- 로컬 관측성과 운영 보안 경계는 [docs/observability.kr.md](docs/observability.kr.md)와 [운영·업그레이드 가이드](docs/guides/operations-upgrade.kr.md)를 참조하세요.
+- [한국어 화면 캡처 색인](docs/images/ko-KR/auth-login.png)은 문서 전용 Playwright에서 생성하며 각 가이드에 역할, 전제 조건, 단계와 기대 결과를 기록합니다.
+
+기업 관리 화면, 테넌트 인식 데이터 애플리케이션, Workflow·CRM·공급망 기능이 필요한 마이크로서비스에 적합합니다. 노코드 플랫폼이 아니며 도메인 모델링, 운영 Secret 관리, 용량 계획과 사람의 배포 승인을 대체하지 않습니다.
+
 ---
 
 ## 주요 특징
 
 - **JDK 25** + Spring Boot 4.0.6 + Spring Cloud 2025.1.1 + Spring Cloud Alibaba 2025.1.0.0 최신 기술 스택
-- **Docker 원클릭 배포**: `start.bat` / `./start.sh` 한 명령으로 12개 컨테이너 시작 (MySQL, Redis, Nacos, RocketMQ, XXL-JOB, 4개 백엔드 마이크로서비스, 프론트엔드), 자세한 내용은 [Docker 배포 가이드](docs/docker-deployment.kr.md) 참조
+- **온디맨드 개발과 원클릭 배포**: Omni CLI는 core/workflow/crm/supply-chain/full의 최소 의존 구성을 시작하고 `start.bat` / `./start.sh`는 기본으로 16개 컨테이너 full 모드를 시작합니다.
 - **CRM 프리세일즈 폐쇄 루프**: 독립 `omni-crm` 서비스가 리드, 고객, 연락처, 기회, 팔로업, 전환, 대시보드를 커버 — 테넌트, RBAC, 데이터 범위, XSS, 감사, Outbox 기능 재사용
 - **SRM 공급업체 수명주기**: 독립 `omni-srm` 서비스가 공급업체 입점, 심사, 등급 분류, 성과 평가, 리스크 관리, 포털 셀프서비스, 공급업체 360을 커버 — 자세한 내용은 [docs/srm.kr.md](docs/srm.kr.md) 참조
 - **멀티 제공자 소셜 로그인**: GitHub + Google + Gitee OAuth2 원클릭 로그인 (전략 패턴으로 확장 가능), 최초 로그인 시 자동 회원가입
 - **3계층 XSS 종심 방어**: Jackson 역직렬화기 + Servlet Filter + Gateway 보안 응답 헤더, 테넌트별 설정 가능, 프론트엔드 관리 UI 완전 지원
-- **Common Starter 생태계**: 8개 자동 설정 모듈 (mybatis / redis / operlog / job / mqlog / workflow), 새 서비스에서 의존성 추가만으로 기능 획득, 제로 설정
+- **Common Starter 생태계**: Servlet 조합 Starter `omni-common-service`를 포함한 10개 모듈이며 필수 보안 컨텍스트가 없으면 안전하게 거부합니다.
+- **선택형 전체 관측성**: OpenTelemetry, Prometheus, Pushgateway, Grafana, Tempo, Loki, Alloy는 기본 비활성화이며 명시적으로 켭니다. [docs/observability.kr.md](docs/observability.kr.md)를 참조하세요.
 - **이중 트랙 스케줄링**: XXL-JOB 3.3.1 시스템 작업 + 사용자 작업 듀얼 모드, 프론트엔드 Cron 에디터 + 실행 로그 실시간 푸시, 자세한 내용은 [docs/scheduling.kr.md](docs/scheduling.kr.md) 참조
 - **Transactional Outbox 신뢰성 메시지**: 로컬 아웃박스 + XXL-JOB 릴레이 + 지수 백오프 재시도 + 데드레터 관리, 자세한 내용은 [docs/mq-reliability.kr.md](docs/mq-reliability.kr.md) 참조
-- **시각적 BPMN 워크플로우**: Flowable 7.x 엔진, 프론트엔드 드래그 앤 드롭 모델링 + 이중 버전 관리 + 다중 인스턴스 countersign + 동적 후보자 해석, 자세한 내용은 [docs/workflow.kr.md](docs/workflow.kr.md) 참조
+- **시각적 BPMN 워크플로우**: Flowable 8.x 엔진, 프론트엔드 드래그 앤 드롭 모델링 + 이중 버전 관리 + 다중 인스턴스 countersign + 동적 후보자 해석, 자세한 내용은 [docs/workflow.kr.md](docs/workflow.kr.md) 참조
 - **완전한 RBAC 권한 체계**: 기능 권한 (동적 메뉴 + v-permission + @PreAuthorize) + 데이터 권한 (DataPermissionInterceptor 6단계 필터링), 자세한 내용은 [docs/architecture.kr.md](docs/architecture.kr.md) 참조
 - **AI 네이티브 프로젝트**: AGENTS.md 실행 매뉴얼 + docs/ 시스템 진실 + Skills 행동 확장, 첫 두 레이어를 고정하고 세 번째 레이어는 AI가 고속 생산
 
@@ -39,7 +51,7 @@
 | 흐름 제어/서킷 브레이커 | Sentinel Dashboard | 1.8.8 |
 | 메시지 큐 | Apache RocketMQ | 5.3.2 |
 | 작업 스케줄링 | XXL-JOB Admin | 3.3.1 |
-| 워크플로우 엔진 | Flowable BPMN | 7.x |
+| 워크플로우 엔진 | Flowable BPMN | 8.0.0 |
 | 프론트엔드 프레임워크 | Vue 3 + TypeScript | 3.5.35 / 5.9.3 |
 | 빌드 도구 | Vite 8 (Rolldown) | 8.2.1 |
 | UI 프레임워크 | Element Plus | 2.14.0 |
@@ -91,7 +103,9 @@ Omni-Stack/
 ├── AGENTS.md                           # AI 실행 매뉴얼 (하드 제약 + 빌드 명령 + 체크리스트)
 ├── start.bat / start.sh                # Docker 원클릭 시작 스크립트
 ├── stop.bat / stop.sh                  # 원클릭 정지 스크립트
-├── docker-compose.yml                  # 12 컨테이너 전체 스택 오케스트레이션
+├── compose.yaml                        # Compose 통합 진입점
+├── compose.infra.yaml / compose.apps.yaml
+├── compose.observability.yaml          # 선택형 로컬 관측성 스택
 ├── docker/
 │   ├── backend/Dockerfile              # 백엔드 멀티스테이지 빌드 (Maven 컴파일 + JRE 실행)
 │   ├── frontend/Dockerfile             # 프론트엔드 멀티스테이지 빌드 (npm 컴파일 + Nginx)
@@ -110,10 +124,11 @@ Omni-Stack/
 │   ├── srm.md                          #   SRM 공급업체 관계 관리 시스템 진실 (Harness 문서)
 │   ├── design/srm-design.md            #   SRM MVP 설계 및 구현 베이스라인
 │   └── docker-deployment.md            #   Docker 전체 스택 배포 심층 가이드
-├── scripts/sql/                        # 데이터베이스 초기화 스크립트
-│   ├── init-all.sql                    #   공식 DDL + 시드 데이터
-│   ├── init-nacos.sql                  #   Nacos MySQL 영구 저장
-│   └── init-xxl-job.sql               #   XXL-JOB 데이터베이스
+├── database/changelog/                 # Liquibase 구조 이력과 벤더 스키마(공식 DDL)
+├── database/seed/                      # 시드 매니페스트(manifest.yaml, SHA-256 검증)
+├── scripts/sql/seed/                   # 공식 멱등 시드만 보관
+│   ├── init-nacos.sql                  #   호환 기간 레거시: Nacos MySQL 영구 저장
+│   └── init-xxl-job.sql               #   호환 기간 레거시: XXL-JOB 데이터베이스
 ├── omni-backend/                       # Maven 멀티 모듈 백엔드
 │   ├── omni-common-core/               #   순수 POJO: R<T>, PageResult, XSS SPI
 │   ├── omni-common/                    #   Web 자동 설정: Jackson, CORS, XSS Filter
@@ -124,33 +139,37 @@ Omni-Stack/
 │   ├── omni-common-job/                #   스케줄링 작업 Starter
 │   ├── omni-common-mqlog/              #   MQ 메시지 신뢰성 Starter
 │   ├── omni-common-workflow/           #   워크플로우 Starter
+│   ├── omni-common-service/            #   Servlet 비즈니스 서비스 조합 Starter
 │   ├── omni-auth/                      #   인증 서비스 (8100)
 │   ├── omni-base/                      #   기초 데이터 서비스 (8101)
 │   ├── omni-workflow/                  #   워크플로우 엔진 서비스 (8103)
 │   ├── omni-crm/                       #   CRM 프리세일즈 폐쇄 루프 서비스 (8104)
 │   ├── omni-srm/                       #   SRM 공급업체 관계 관리 서비스 (8105)
+│   ├── omni-procurement/               #   Procurement 실행 서비스 (8106)
+│   ├── omni-asset/                     #   Asset 수명주기 서비스 (8107)
 │   └── omni-gateway/                   #   API 게이트웨이 (8102)
 └── omni-frontend/                      # Vue 3 SPA (3000)
 ```
 
 ## Docker 원클릭 배포 (권장)
 
-한 명령으로 전체 컨테이너를 시작합니다: 미들웨어 (MySQL, Redis, Nacos, RocketMQ, XXL-JOB) + 6개 백엔드 마이크로서비스 + 프론트엔드.
+full 모드는 미들웨어, `omni-db-migrator`, 8개 백엔드 마이크로서비스와 프론트엔드를 시작합니다. 프리셋은 검증된 더 작은 의존 구성만 시작할 수 있습니다.
 
 ### 사전 요구사항
 
 | 소프트웨어 | 버전 요구사항 | 설명 |
 |------|---------|------|
 | Docker Desktop | 최신 안정 버전 | Windows는 WSL2 백엔드 필요 |
+| Node.js | >= 22.12.0 | Omni CLI와 시작 스크립트 실행 |
 | Git | 최신 버전 | 프로젝트 클론 |
 
-> JDK, Node.js, Maven 설치 불필요 — 모든 빌드와 실행은 Docker 컨테이너 내에서 완료됩니다.
+> 컨테이너 시작에는 로컬 JDK/Maven이 필요 없지만 Omni CLI에는 Node.js가 필요합니다.
 
 ### 시작
 
 | 플랫폼 | 명령 |
 |------|------|
-| Windows | `start.bat` 우클릭 → **관리자 권한으로 실행** |
+| Windows | `start.bat` (관리자 권한 불필요) |
 | Linux / macOS | `./start.sh` |
 
 스크립트 자동 수행: Docker 감지 → Docker 엔진 시작 (미실행 시) → 포트 보호 (Windows Hyper-V/WSL2) → 미들웨어 이미지 풀 → 애플리케이션 이미지 빌드 → 전체 컨테이너 시작.
@@ -159,8 +178,12 @@ Omni-Stack/
 # 전체 서비스 시작
 ./start.sh
 
-# 지정 서비스만 시작 (예: 미들웨어만 시작)
-./start.sh mysql redis
+# 검증된 CRM 최소 구성 시작
+./start.sh crm
+
+# 동등한 CLI와 선택형 관측성
+npm --prefix tools/omni-cli run dev -- dev up --preset crm --build
+npm --prefix tools/omni-cli run dev -- dev up --preset full --observability
 
 # 서비스 상태 확인
 docker compose ps
@@ -182,7 +205,7 @@ docker compose ps
 | SRM 서비스 | http://127.0.0.1:8105 | 공급업체, 포털, 평가, 리스크 |
 | Procurement 서비스 | http://127.0.0.1:8106 | 구매 요청, 견적, 발주, 입고 |
 | Asset 서비스 | http://127.0.0.1:8107 | 자산 원장, 이관, 폐기 |
-| MySQL | 127.0.0.1:13306 | `root` + `.env`의 `MYSQL_ROOT_PASSWORD` |
+| MySQL | 127.0.0.1:3306 | `root` + `.env`의 `MYSQL_ROOT_PASSWORD` |
 | Redis | 127.0.0.1:6379 | `.env`의 `REDIS_PASSWORD` |
 | Nacos 콘솔 | http://127.0.0.1:8080 | 자격 증명은 `.env`에서 주입 |
 | XXL-JOB 스케줄링 센터 | http://127.0.0.1:18080 | 로컬 초기 계정, 실행 토큰은 `.env`에서 주입 |
@@ -210,7 +233,7 @@ docker compose ps
 | 문제 | 원인 | 해결 방법 |
 |------|------|---------|
 | 이미지 풀 실패 | 네트워크 문제 | Docker 미러 가속 설정: `"registry-mirrors": ["https://docker.1ms.run"]` |
-| 포트 바인딩 실패 (Windows) | Hyper-V/WSL2 포트 예약 충돌 | `start.bat`에서 자동으로 포트 보호 처리, 관리자 권한으로 실행 필요 |
+| 포트 바인딩 실패 | 다른 프로세스나 Compose 프로젝트가 포트를 사용 중 | `dev status`로 충돌 프로젝트를 찾아 중지하며 관리자 권한은 불필요 |
 | RocketMQ 포트 9876 충돌 | Windows Hyper-V 예약 포트 범위 | 호스트 매핑을 19876으로 변경, 컨테이너 내부는 여전히 9876 |
 | 502 Bad Gateway | Nginx 리버스 프록시 포트 설정 오류 | nginx.conf에서 proxy_pass가 컨테이너 내부 포트 `8080`을 사용하는지 확인 (호스트 포트 `8102` 아님) |
 | Nacos 시작 실패 | 헬스체크 엔드포인트 변경 | Nacos v3.1.1은 `GET /nacos/` 사용 (`/nacos/actuator/health` 아님) |
@@ -220,41 +243,17 @@ docker compose ps
 
 ## 로컬 개발
 
-디버깅과 코드 수정이 필요한 경우에 적합합니다. 미들웨어는 Docker를 사용하고, 백엔드와 프론트엔드는 로컬에서 실행합니다.
+표준 로컬 프로젝트는 `omni-stack`, 기본 네트워크는 `omni-stack_default`, MySQL 볼륨은 `omni-stack_omni-mysql-data`입니다. 모든 앱과 업무 검증을 로컬 Docker 안에서 실행합니다. 호스트에서 소스를 편집하고 Compose로 다시 빌드합니다. 기본 포트를 고정하고 충돌 원인을 해결합니다.
 
-### 사전 요구사항
-
-| 소프트웨어 | 버전 | 설명 |
-|------|------|------|
-| JDK | 25 | `JAVA_HOME` 필수 설정 |
-| Node.js | >= 22.12.0 | npm 포함 |
-| Docker Desktop | 최신 버전 | 미들웨어만 실행 |
-
-### 단계
+소스를 수정한 후 저장소 루트에서 해당 이미지를 다시 빌드하고 실행합니다. 백엔드 빌드 단계는 JDK 25와 Maven Wrapper를, 프론트엔드 빌드 단계는 Node를 사용합니다. 모든 앱은 Docker 안에서 실행합니다.
 
 ```bash
-# 1. 미들웨어 시작 (미들웨어만, 애플리케이션 컨테이너 제외)
-./start.sh mysql redis nacos rocketmq-namesrv rocketmq-broker xxl-job-admin
-
-# Nacos 준비 대기 (약 30초), http://localhost:8080 접속하여 확인
-
-# 2. 백엔드 빌드 및 시작
-export JAVA_HOME="/path/to/jdk-25"
-cd omni-backend && ./mvnw clean install
-cd omni-auth && ./mvnw spring-boot:run       # 포트 8100 (새 터미널에서 계속)
-cd omni-base && ./mvnw spring-boot:run        # 포트 8101
-cd omni-gateway && ./mvnw spring-boot:run     # 포트 8102
-cd omni-workflow && ./mvnw spring-boot:run    # 포트 8103
-
-# 3. 프론트엔드 시작
-cd omni-frontend && npm install && npm run dev  # 포트 3000
+docker compose --profile full up -d --build
+docker compose ps
+docker compose logs -f omni-gateway
 ```
 
-> Maven Wrapper가 내장되어 있어 (3.9.16) Maven 전역 설치가 불필요합니다. 빌드 순서는 Maven reactor가 자동으로 해결합니다.
-
-### 소셜 로그인 설정
-
-GitHub, Google, Gitee 세 가지 OAuth2 제공자를 지원합니다. 자격 증명 설정은 `application-local.yml`에 구성하며 (`.gitignore`로 제외됨), 자세한 내용은 [docs/core-flows.kr.md](docs/core-flows.kr.md)를 참조하세요.
+설정은 Git에서 제외된 `.env`에서 가져옵니다. 모든 백엔드는 같은 `GATEWAY_ASSERTION_SECRET`을 사용합니다. GitHub, Google, Gitee 자격 증명은 `.env.example`의 변수로 설정합니다. [핵심 흐름](docs/core-flows.kr.md)을 참조하세요.
 
 ## 기능 개요
 
@@ -371,7 +370,7 @@ SRM 모듈은 공급업체의 전체 수명주기를 커버합니다: 등록/입
 | omni-srm | 8105 | SRM: 공급업체 마스터 데이터, 입점, 평가, 리스크, 포털, 공급업체 360 | [srm.kr.md](docs/srm.kr.md) |
 | omni-gateway | 8102 | API 게이트웨이: 라우팅 전달, JWT 검증, CORS, 보안 응답 헤더 | [architecture.kr.md](docs/architecture.kr.md) |
 
-### Common Starter 생태계 (8개 모듈)
+### Common Starter 생태계 (10개 모듈)
 
 새 마이크로서비스에서 의존성 추가만으로 기능을 획득하며, `AutoConfiguration.imports` 제로 설정 자동 어셈블리:
 
@@ -386,6 +385,7 @@ SRM 모듈은 공급업체의 전체 수명주기를 커버합니다: 등록/입
 | `omni-common-job` | 스케줄링 작업: XXL-JOB 자동 설정 + @SystemJobMeta 이중 어노테이션 기반 | 비즈니스 서비스 |
 | `omni-common-mqlog` | 신뢰성 메시지: Transactional Outbox + 릴레이 전송 + 데드레터 관리 | Servlet 서비스 |
 | `omni-common-workflow` | 워크플로우: Flowable 자동 설정 + ApprovalService SPI | 워크플로우 서비스 |
+| `omni-common-service` | Servlet 공통 Web·DB·Redis·보안·관측성 조합 | 비즈니스 서비스 |
 
 > 자세한 설계는 [docs/backend-patterns.kr.md](docs/backend-patterns.kr.md) 및 [docs/architecture.kr.md](docs/architecture.kr.md) 참조
 
@@ -431,7 +431,7 @@ cd omni-frontend && npm run build && npm run lint  # 프론트엔드 빌드 + Li
 | Maven class version 오류 | JAVA_HOME이 JDK 25를 가리키지 않음 | `JAVA_HOME`을 JDK 25 디렉토리로 설정 |
 | Redis Starter 혼용 | 블로킹 방식을 WebFlux 서비스에 도입 | Gateway는 `omni-common-redis-reactive`만 사용 가능 |
 | Docker 502 오류 | Nginx proxy_pass 포트 오류 | 컨테이너 간 통신은 내부 포트 `8080` 사용, 호스트 매핑 포트 아님 |
-| Docker 포트 충돌 | Hyper-V/WSL2 예약 포트 | `start.bat`에서 자동 처리, 관리자 권한으로 실행 필요 |
+| Docker 포트 충돌 | 다른 프로세스나 Compose 프로젝트가 포트를 사용 중 | `dev status`로 충돌 프로젝트를 찾아 중지하며 관리자 권한은 불필요 |
 | Nacos 헬스체크 실패 | v3.1.1 엔드포인트 변경 | `GET /nacos/` 사용, `/nacos/actuator/health` 아님 |
 | 프론트엔드 타입 불일치 | `ApiResponse` 다중 정의 | `@/types/api`에서만 가져오기 |
 | Stream 컨슈머 OFFLINE | function.definition 네임스페이스 오류 | `spring.cloud.stream.function`이 아닌 `spring.cloud.function` 아래 배치 |
@@ -462,3 +462,17 @@ cd omni-frontend && npm run build && npm run lint  # 프론트엔드 빌드 + Li
 ---
 
 **© Wang Baohai**
+
+<!-- omni:preset-table:start -->
+## 프로젝트 프리셋
+
+| 프리셋 | 명시 모듈 | 의존성 클로저 |
+|---|---|---|
+| core | base, gateway, mysql, redis, nacos | platform, auth, base, nacos, gateway, mysql, redis |
+| crm | crm, gateway, mysql, redis, nacos | platform, auth, base, crm, nacos, gateway, mysql, redis |
+| full | crm, asset, gateway, mysql, redis, nacos, rocketmq, xxl-job | platform, auth, base, workflow, crm, srm, procurement, asset, nacos, xxl-job, gateway, mysql, redis, rocketmq |
+| supply-chain | asset, gateway, mysql, redis, nacos, rocketmq, xxl-job | platform, auth, base, workflow, srm, procurement, asset, nacos, xxl-job, gateway, mysql, redis, rocketmq |
+| workflow | workflow, gateway, mysql, redis, nacos | platform, auth, base, workflow, nacos, gateway, mysql, redis |
+
+[선택 가이드](docs/preset-quick-selection.kr.md) · [프리셋 의존성 매트릭스](docs/preset-dependency-matrix.kr.md)
+<!-- omni:preset-table:end -->

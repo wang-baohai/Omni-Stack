@@ -81,10 +81,23 @@ public class ScopedRoleAssignmentListener implements TaskListener, ExecutionList
                     roleCode, anchorType, scopeMode, anchorParams, startUserId, tenantId);
 
             if (candidateUserIds.isEmpty()) {
-                List<String> fallbackIds = candidateResolutionService.handleFallback(
-                        fallbackStrategy,
-                        "未找到候选人: roleCode=" + roleCode,
-                        tenantId);
+                // 无候选人：按 fallback 策略处理。ESCALATE_PARENT 沿组织父链上溯重解（D1 批准语义），
+                // 上溯至根仍无候选则抛错失败关闭（与 ERROR 同路径，不 fail-open、不自动审批）。
+                List<String> fallbackIds;
+                if ("ESCALATE_PARENT".equals(fallbackStrategy)) {
+                    List<Long> escalated = candidateResolutionService.escalateToParentForCandidates(
+                            roleCode, anchorType, scopeMode, anchorParams, startUserId, tenantId);
+                    if (escalated.isEmpty()) {
+                        throw new IllegalStateException(
+                                "候选人解析失败且 fallback=ESCALATE_PARENT 上溯至根仍无候选: roleCode=" + roleCode);
+                    }
+                    fallbackIds = escalated.stream().map(String::valueOf).collect(Collectors.toList());
+                } else {
+                    fallbackIds = candidateResolutionService.handleFallback(
+                            fallbackStrategy,
+                            "未找到候选人: roleCode=" + roleCode,
+                            tenantId);
+                }
                 delegateExecution.setVariable("candidateUserIds", fallbackIds);
                 candidateResolutionService.initApprovalCounters(
                         delegateExecution, approvalMode != null ? approvalMode : "ALL", fallbackIds.size());
@@ -104,8 +117,16 @@ public class ScopedRoleAssignmentListener implements TaskListener, ExecutionList
                     delegateExecution.getCurrentActivityId(), roleCode, candidateUserIds);
 
         } catch (Exception e) {
-            log.error("ScopedRoleAssignmentListener(ExecutionListener) 执行异常: activityId={}",
+            log.error("ScopedRoleAssignmentListener(ExecutionListener) 执行异常，候选人未写入将直接失败关闭: activityId={}",
                     delegateExecution.getCurrentActivityId(), e);
+            // fail-close 语义不得吞异常：吞掉后 multiInstance 集合变量缺失，
+            // 会被 Flowable 转成 “Variable 'candidateUserIds' was not found” 的无关 500，
+            // 使发起方无法区分“确定失败”与“结果待确认”。
+            if (e instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new IllegalStateException("候选人解析失败: activityId="
+                    + delegateExecution.getCurrentActivityId(), e);
         }
     }
 

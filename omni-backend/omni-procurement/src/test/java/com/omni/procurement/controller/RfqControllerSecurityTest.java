@@ -1,7 +1,7 @@
 package com.omni.procurement.controller;
 
 import com.omni.procurement.dto.RfqRequests;
-import com.omni.procurement.security.ProcDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -20,7 +20,7 @@ class RfqControllerSecurityTest {
 
         assertThat(method.getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAnyAuthority('procurement:rfq:create', 'procurement:rfq:list')");
-        assertThat(method.getAnnotation(ProcDataScope.class)).isNull();
+        assertThat(method.getAnnotation(ServiceDataScope.class)).isNull();
     }
 
     /** 所有询价写命令必须声明与数据范围一致的独立权限码。 */
@@ -47,7 +47,7 @@ class RfqControllerSecurityTest {
 
         assertThat(method.getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAuthority('procurement:rfq:list')");
-        assertThat(method.getAnnotation(ProcDataScope.class).permissionCode())
+        assertThat(method.getAnnotation(ServiceDataScope.class).permissionCode())
                 .isEqualTo("procurement:rfq:list");
     }
 
@@ -56,7 +56,7 @@ class RfqControllerSecurityTest {
         Method method = RfqController.class.getMethod(methodName, parameterTypes);
         assertThat(method.getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAuthority('" + permission + "')");
-        assertThat(method.getAnnotation(ProcDataScope.class).permissionCode())
+        assertThat(method.getAnnotation(ServiceDataScope.class).permissionCode())
                 .isEqualTo(permission);
     }
 }

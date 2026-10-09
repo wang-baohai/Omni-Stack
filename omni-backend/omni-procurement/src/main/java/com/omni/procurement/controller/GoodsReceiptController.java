@@ -7,7 +7,7 @@ import com.omni.common.core.result.R;
 import com.omni.procurement.dto.GoodsReceiptRequests;
 import com.omni.procurement.dto.GoodsReceiptViews;
 import com.omni.procurement.entity.ProcGoodsReceipt;
-import com.omni.procurement.security.ProcDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.procurement.service.GoodsReceiptService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -42,7 +42,7 @@ public class GoodsReceiptController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('procurement:goods-receipt:list')")
-    @ProcDataScope(permissionCode = "procurement:goods-receipt:list")
+    @ServiceDataScope(permissionCode = "procurement:goods-receipt:list")
     public R<PageResult<GoodsReceiptViews.Summary>> list(
             @Valid GoodsReceiptRequests.Query query) {
         return R.ok(goodsReceiptService.page(query));
@@ -56,7 +56,7 @@ public class GoodsReceiptController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:goods-receipt:list')")
-    @ProcDataScope(permissionCode = "procurement:goods-receipt:list")
+    @ServiceDataScope(permissionCode = "procurement:goods-receipt:list")
     public R<GoodsReceiptViews.Detail> get(@PathVariable @Positive Long id) {
         return R.ok(goodsReceiptService.get(id));
     }
@@ -69,7 +69,7 @@ public class GoodsReceiptController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('procurement:goods-receipt:create')")
-    @ProcDataScope(permissionCode = "procurement:goods-receipt:create")
+    @ServiceDataScope(permissionCode = "procurement:goods-receipt:create")
     @OperLog(module = "采购收货", operType = OperType.CREATE,
             entityClass = ProcGoodsReceipt.class, idExpr = "#result.data.id")
     public R<GoodsReceiptViews.Detail> create(
@@ -86,7 +86,7 @@ public class GoodsReceiptController {
      */
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasAuthority('procurement:goods-receipt:confirm')")
-    @ProcDataScope(permissionCode = "procurement:goods-receipt:confirm")
+    @ServiceDataScope(permissionCode = "procurement:goods-receipt:confirm")
     @OperLog(module = "采购收货", operType = OperType.UPDATE,
             entityClass = ProcGoodsReceipt.class, idExpr = "#id")
     public R<GoodsReceiptViews.Detail> confirm(
@@ -104,7 +104,7 @@ public class GoodsReceiptController {
      */
     @PostMapping("/{id}/quality-result")
     @PreAuthorize("hasAuthority('procurement:goods-receipt:confirm')")
-    @ProcDataScope(permissionCode = "procurement:goods-receipt:confirm")
+    @ServiceDataScope(permissionCode = "procurement:goods-receipt:confirm")
     @OperLog(module = "采购收货", operType = OperType.UPDATE,
             entityClass = ProcGoodsReceipt.class, idExpr = "#id")
     public R<GoodsReceiptViews.Detail> qualityResult(

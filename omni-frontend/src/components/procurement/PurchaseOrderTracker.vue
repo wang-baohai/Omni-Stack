@@ -1,27 +1,26 @@
 <script setup lang="ts">
 /** 采购订单进度跟踪共享组件——订单详情与收货进度展示。 */
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { ProcurementPurchaseOrderDetail, ProcurementPurchaseOrderStatus } from '@/api/procurement-purchase-order'
 
-const statusOptions: Array<{
-  value: ProcurementPurchaseOrderStatus
-  label: string
-  type: 'info' | 'primary' | 'warning' | 'success' | 'danger'
-}> = [
-  { value: 'DRAFT', label: '草稿', type: 'info' },
-  { value: 'SENT', label: '已发送', type: 'primary' },
-  { value: 'CONFIRMED', label: '已确认', type: 'success' },
-  { value: 'PARTIAL_RECEIVED', label: '部分收货', type: 'warning' },
-  { value: 'RECEIVED', label: '已收齐', type: 'success' },
-  { value: 'CLOSED', label: '已关闭', type: 'info' },
-  { value: 'CANCELLED', label: '已取消', type: 'danger' },
-]
-const statusMap = Object.fromEntries(statusOptions.map((item) => [item.value, item])) as Record<
+const { t } = useI18n()
+
+const statusMap = computed<Record<
   ProcurementPurchaseOrderStatus,
-  (typeof statusOptions)[number]
->
+  { label: string; type: 'info' | 'primary' | 'warning' | 'success' | 'danger' }
+>>(() => ({
+  DRAFT: { label: t('procurementPurchaseOrderTracker.statusDraft'), type: 'info' },
+  SENT: { label: t('procurementPurchaseOrderTracker.statusSent'), type: 'primary' },
+  CONFIRMED: { label: t('procurementPurchaseOrderTracker.statusConfirmed'), type: 'success' },
+  PARTIAL_RECEIVED: { label: t('procurementPurchaseOrderTracker.statusPartialReceived'), type: 'warning' },
+  RECEIVED: { label: t('procurementPurchaseOrderTracker.statusReceived'), type: 'success' },
+  CLOSED: { label: t('procurementPurchaseOrderTracker.statusClosed'), type: 'info' },
+  CANCELLED: { label: t('procurementPurchaseOrderTracker.statusCancelled'), type: 'danger' },
+}))
 
 function statusInfo(status: ProcurementPurchaseOrderStatus) {
-  return statusMap[status]
+  return statusMap.value[status]
 }
 
 defineProps<{
@@ -32,44 +31,50 @@ defineProps<{
 <template>
   <div v-if="orderDetail" class="order-tracker">
     <el-descriptions :column="3" border>
-      <el-descriptions-item label="订单号">{{ orderDetail.poNo }}</el-descriptions-item>
-      <el-descriptions-item label="状态">
+      <el-descriptions-item :label="t('procurementPurchaseOrderTracker.orderNo')">
+        {{ orderDetail.poNo }}
+      </el-descriptions-item>
+      <el-descriptions-item :label="t('procurementPurchaseOrderTracker.status')">
         <el-tag :type="statusInfo(orderDetail.status).type">
           {{ statusInfo(orderDetail.status).label }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="RFQ ID">{{ orderDetail.rfqId }}</el-descriptions-item>
-      <el-descriptions-item label="供应商">{{ orderDetail.supplierNameSnapshot }}</el-descriptions-item>
-      <el-descriptions-item label="中标报价">
+      <el-descriptions-item :label="t('procurementPurchaseOrderTracker.supplier')">
+        {{ orderDetail.supplierNameSnapshot }}
+      </el-descriptions-item>
+      <el-descriptions-item :label="t('procurementPurchaseOrderTracker.winningQuotation')">
         #{{ orderDetail.quotationId }} / v{{ orderDetail.quotationVersion }}
       </el-descriptions-item>
-      <el-descriptions-item label="订单金额">
+      <el-descriptions-item :label="t('procurementPurchaseOrderTracker.orderAmount')">
         {{ orderDetail.totalAmount }} {{ orderDetail.currencyCode }}
       </el-descriptions-item>
-      <el-descriptions-item label="订单标题" :span="2">{{ orderDetail.title }}</el-descriptions-item>
-      <el-descriptions-item label="预计交付">
+      <el-descriptions-item :label="t('procurementPurchaseOrderTracker.orderTitle')" :span="2">
+        {{ orderDetail.title }}
+      </el-descriptions-item>
+      <el-descriptions-item :label="t('procurementPurchaseOrderTracker.expectedDelivery')">
         {{ orderDetail.expectedDeliveryDate || '—' }}
       </el-descriptions-item>
-      <el-descriptions-item label="收货地址" :span="2">
+      <el-descriptions-item :label="t('procurementPurchaseOrderTracker.deliveryAddress')" :span="2">
         {{ orderDetail.deliveryAddress }}
       </el-descriptions-item>
-      <el-descriptions-item label="联系人">
+      <el-descriptions-item :label="t('procurementPurchaseOrderTracker.contact')">
         {{ orderDetail.contactName }} / {{ orderDetail.contactPhone }}
       </el-descriptions-item>
     </el-descriptions>
 
-    <h3>订单明细与收货进度</h3>
+    <h3>{{ t('procurementPurchaseOrderTracker.linesProgress') }}</h3>
     <el-table :data="orderDetail.lines" border>
-      <el-table-column prop="lineNo" label="行号" width="70" />
-      <el-table-column prop="materialCode" label="物料编码" min-width="130" />
-      <el-table-column prop="materialName" label="物料名称" min-width="180" />
-      <el-table-column prop="quantity" label="订单数量" min-width="110" align="right" />
-      <el-table-column prop="receivedQuantity" label="已收数量" min-width="110" align="right" />
-      <el-table-column prop="remainingQuantity" label="待收数量" min-width="110" align="right" />
-      <el-table-column prop="unit" label="单位" width="80" />
-      <el-table-column prop="unitPrice" label="单价" min-width="120" align="right" />
-      <el-table-column prop="totalPrice" label="金额" min-width="130" align="right" />
-      <el-table-column prop="expectedDeliveryDate" label="预计交付" min-width="120" />
+      <el-table-column prop="lineNo" :label="t('procurementPurchaseOrderTracker.lineNo')" width="70" />
+      <el-table-column prop="materialCode" :label="t('procurementPurchaseOrderTracker.materialCode')" min-width="130" />
+      <el-table-column prop="materialName" :label="t('procurementPurchaseOrderTracker.materialName')" min-width="180" />
+      <el-table-column prop="quantity" :label="t('procurementPurchaseOrderTracker.orderQuantity')" min-width="110" align="right" />
+      <el-table-column prop="receivedQuantity" :label="t('procurementPurchaseOrderTracker.receivedQuantity')" min-width="110" align="right" />
+      <el-table-column prop="remainingQuantity" :label="t('procurementPurchaseOrderTracker.remainingQuantity')" min-width="110" align="right" />
+      <el-table-column prop="unit" :label="t('procurementPurchaseOrderTracker.unit')" width="80" />
+      <el-table-column prop="unitPrice" :label="t('procurementPurchaseOrderTracker.unitPrice')" min-width="120" align="right" />
+      <el-table-column prop="totalPrice" :label="t('procurementPurchaseOrderTracker.amount')" min-width="130" align="right" />
+      <el-table-column prop="expectedDeliveryDate" :label="t('procurementPurchaseOrderTracker.expectedDelivery')" min-width="120" />
     </el-table>
   </div>
 </template>

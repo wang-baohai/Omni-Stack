@@ -187,10 +187,10 @@ sequenceDiagram
 
 | 步骤 | 文件 | 逻辑 |
 |------|------|------|
-| 表单 UI | `src/views/login/LoginForm.vue` | Element Plus 表单：用户名、密码、验证码、租户下拉 |
-| 验证码加载 | `src/views/login/LoginForm.vue` | `GET /api/auth/captcha` -> 展示 base64 PNG，存储 captchaKey |
-| 租户加载 | `src/views/login/LoginForm.vue` | `GET /api/auth/tenants` -> 填充 `<el-select>` 下拉框 |
-| 登录提交 | `src/views/login/LoginForm.vue` | `handleLogin()`：校验表单 -> POST `/api/auth/login` |
+| 表单 UI | `src/components/LoginForm.vue` | Element Plus 表单：用户名、密码、验证码、租户下拉 |
+| 验证码加载 | `src/components/LoginForm.vue` | `GET /api/auth/captcha` -> 展示 base64 PNG，存储 captchaKey |
+| 租户加载 | `src/components/LoginForm.vue` | `GET /api/auth/tenants` -> 填充 `<el-select>` 下拉框 |
+| 登录提交 | `src/components/LoginForm.vue` | `handleLogin()`：校验表单 -> POST `/api/auth/login` |
 | Token 存储 | `src/stores/user.ts` | `setToken()` + `setUsername()` 持久化到 `localStorage` |
 | 请求鉴权 | `src/api/request.ts` | Axios 请求拦截器：`Authorization: Bearer <token>` |
 | Vite 代理 | `vite.config.ts` | `/api` -> `http://localhost:8102`（Gateway） |
@@ -285,7 +285,7 @@ sequenceDiagram
     B->>F: 1. 点击"OAuth2 登录"
     F->>F: 2. 生成 PKCE：code_verifier + code_challenge (SHA256)
     F->>F: 3. 存储 {pkce_verifier, pkce_state} 到 sessionStorage
-    F->>G: 4. 重定向到 /api/oauth2/authorize?response_type=code&client_id=...&code_challenge=...&code_challenge_method=S256
+    F->>G: 4. 重定向到 /oauth2/authorize?response_type=code&client_id=...&code_challenge=...&code_challenge_method=S256
     G->>A: 5. 代理到认证服务授权端点
     A-->>B: 6. 登录表单页面（已登录则基于 session 直接重定向）
     B->>A: 7. 提交凭证（用户名 + 密码）
@@ -309,9 +309,9 @@ sequenceDiagram
 
 | 步骤 | 文件 | 逻辑 |
 |------|------|------|
-| PKCE 生成器 | `src/utils/oauth2.ts` | 生成 code_verifier（43-128 字符随机串）+ SHA256 code_challenge |
-| PKCE 存储 | `src/utils/oauth2.ts` | sessionStorage 存储 `pkce_verifier` 和 `pkce_state` |
-| 授权重定向 | `src/utils/oauth2.ts` | 构造 `/oauth2/authorize` URL，携带 PKCE 参数 |
+| PKCE 生成器 | `src/utils/pkce.ts` | 生成 code_verifier（43-128 字符随机串）+ SHA256 code_challenge |
+| PKCE 存储 | `src/components/LoginForm.vue` | sessionStorage 存储 `pkce_verifier` 和 `pkce_state` |
+| 授权重定向 | `src/api/auth.ts` | `buildAuthorizeUrl()` 构造 `/oauth2/authorize` URL，携带 PKCE 参数 |
 | Token 交换 | `src/api/auth.ts` | POST `/oauth2/token`，code_verifier 发送给 Auth 服务验证 |
 | Token 存储 | `src/stores/user.ts` | 存储 access_token + id_token 到 localStorage |
 | 授权端点 | Spring Authorization Server | `/oauth2/authorize` — 登录表单 + 授权确认 |
@@ -329,7 +329,7 @@ sequenceDiagram
 
 - **Authorization Server**：Spring Authorization Server 7.x 已配置，RS256 JWK 签名
 - **OAuth2 客户端**：`omni-spa` 客户端已注册（authorization_code + PKCE grant type）
-- **前端 PKCE 工具**：`src/utils/oauth2.ts` 已实现 verifier/challenge 生成和 token 交换
+- **前端 PKCE 工具**：`src/utils/pkce.ts` 实现 verifier/challenge 生成，`src/api/auth.ts` 实现 `buildAuthorizeUrl()` 与 `exchangeCodeForToken()`（`/oauth2/token`），`src/components/LoginForm.vue` 将 PKCE 存入 sessionStorage
 - **Token 类型**：access_token (opaque) + id_token (JWT, 包含用户信息)
 
 ---
@@ -613,7 +613,7 @@ OAuth2 state 参数采用 HMAC-SHA256 签名，格式为 `tenantId|timestamp|hma
 5. 密码: null（无法通过密码登录，仅第三方登录）
 6. 状态: 启用 (status=1)
 7. 租户: 登录时指定的 tenantId
-8. 角色: 无默认角色（管理员需手动分配）
+8. 角色: 自动分配当前租户下的默认 `USER` 角色（`data_scope=SELF`）；若未查到该租户的 USER 角色或分配异常，仅记录 warn 不阻塞创建（需管理员后续手动处理）
 ```
 
 ### sys_user_oauth_provider 表设计
@@ -700,7 +700,7 @@ sequenceDiagram
 2. 第一步过滤：仅保留 `type = DIRECTORY | MENU` 的节点（丢弃 BUTTON 和 API）
 3. 第二步过滤：从 `SecurityContext` 提取当前用户权限集合（排除 `ROLE_` 前缀）
 4. 递归过滤：MENU 节点检查 `permissionCode` 是否在权限集合中；DIRECTORY 节点先递归处理子节点，仅当有可见子节点时保留
-5. 无法获取权限信息时降级返回全部菜单
+5. 无法获取权限信息时 fail closed：返回空权限集合（`Set.of()`）与空菜单，绝不降级返回全部菜单
 
 **前端按钮权限控制**（`v-permission` 指令）：
 
@@ -1206,7 +1206,7 @@ base (DIRECTORY, id=50)             ← "基础数据" 一级菜单
 
 ### 概述
 
-操作日志系统基于 `@OperLog` 注解 + AOP 切面实现无侵入式采集，通过 RocketMQ 异步发送日志消息，由 omni-base 服务消费写入热表（`sys_oper_log`），定时归档到冷表（`sys_oper_log_archive`）实现长期合规留存。整个流程对业务代码零侵入，仅在 Controller 方法上添加注解即可。
+操作日志系统基于 `@OperLog` 注解 + AOP 切面实现无侵入式采集，日志消息优先经 Transactional Outbox（`ReliableMessageRelay` 写入 `sys_mq_message`）由中继任务异步投递到 RocketMQ（具备补偿重试）；仅当 `ReliableMessageRelay` 不可用时才回退直发 StreamBridge（失败只记 WARN）。由 omni-base 服务消费写入热表（`sys_oper_log`），再由 XXL-JOB 系统任务归档到冷表（`sys_oper_log_archive`）实现长期合规留存。整个流程对业务代码零侵入，仅在 Controller 方法上添加注解即可。
 
 ### 10A. 操作日志记录流程（每次写操作触发）
 
@@ -1231,7 +1231,7 @@ sequenceDiagram
     A->>M: 8. (UPDATE) selectById → newValue 快照
     A->>A: 9. EntityDiffer.diff(oldValue, newValue) 字段级差异
     A->>P: 10. OperLogProducer.send(OperLogMessage)
-    P->>Q: 11. RocketMQ 异步发送
+    P->>Q: 11. 优先 Outbox 写 sys_mq_message 由中继投递；ReliableMessageRelay 不可用时直发（失败仅 WARN）
     A-->>B: 12. 返回业务响应 R<T>
 
     Note over Q,Base: 异步消费
@@ -1239,15 +1239,15 @@ sequenceDiagram
     Base->>M: 14. INSERT INTO sys_oper_log (热表)
 ```
 
-### 10B. 操作日志归档流程（每日 02:00 定时执行）
+### 10B. 操作日志归档流程（XXL-JOB 系统任务，默认每日 02:00）
 
 ```mermaid
 sequenceDiagram
-    participant S as Scheduler (@Scheduled)
+    participant S as XXL-JOB 调度中心
     participant Arc as OperLogArchiver
     participant M as MySQL
 
-    S->>Arc: 1. cron="0 0 2 * * ?" 触发
+    S->>Arc: 1. 触发 @XxlJob("operLogArchiveHandler")（默认 cron 0 0 2 * * ?）
     Arc->>Arc: 2. AtomicBoolean 防重入检查
     loop 批次循环（每批 1000 条）
         Arc->>M: 3. SELECT id FROM sys_oper_log WHERE oper_time < (NOW-180天) LIMIT 1000
@@ -1269,7 +1269,7 @@ sequenceDiagram
 | `EntityDiffer` | `omni-common-operlog/.../diff/EntityDiffer.java` | 字段级差异比对，仅返回变更字段 |
 | `OperLogProducer` | `omni-common-operlog/.../producer/OperLogProducer.java` | RocketMQ 生产者，异步发送日志消息 |
 | `OperLogConsumer` | `omni-base/.../consumer/OperLogConsumer.java` | RocketMQ 消费者，写入 sys_oper_log 热表 |
-| `OperLogArchiver` | `omni-base/.../service/OperLogArchiver.java` | 定时归档任务，180 天热表→冷表迁移 |
+| `OperLogArchiver` | `omni-base/.../service/OperLogArchiver.java` | XXL-JOB 系统任务（`@XxlJob("operLogArchiveHandler")` + `@SystemJobMeta`），180 天热表→冷表迁移 |
 
 ### 审计追踪维度
 
@@ -1289,7 +1289,7 @@ sequenceDiagram
 |---------|------|---------|---------|--------|
 | 操作日志 | `sys_oper_log` / `sys_oper_log_archive` | 业务数据变更（CRUD） | `@OperLog` + AOP + MQ 异步 | omni-base / omni-common-operlog |
 | 审计日志 | `sys_audit_log` | 安全事件（登录、Token、权限变更） | 事件驱动（`AuditEventPublisher`） | omni-auth |
-| 登录日志 | `sys_login_log` | 登录行为（成功/失败） | 认证流程内部记录 | omni-auth |
+| 登录记录 | `sys_audit_log`（`LOGIN_SUCCESS`/`LOGIN_FAILED` 只读投影） | 登录行为（成功/失败） | 认证流程内部记录 | omni-auth |
 
 三类日志各司其职，共同构成完整的审计追踪体系：操作日志记录「业务数据怎么变」，审计日志记录「安全事件发生了什么」，登录日志记录「谁在什么时候登录」。
 
@@ -1300,7 +1300,7 @@ sequenceDiagram
 - **SpEL 提取**：支持 `#id`、`#result.data.id` 等表达式，从方法参数和返回值中提取实体 ID
 - **MQ 异步**：`OperLogProducer` 通过 RocketMQ 异步发送，不阻塞业务请求
 - **热冷归档**：`OperLogArchiver` 每日 02:00 执行，180 天保留策略，批次处理 1000 条/批
-- **omni-auth 禁用**：认证模块不引入 `omni-common-operlog`，认证行为由 `sys_login_log` + `sys_audit_log` 覆盖
+- **omni-auth 禁用**：认证模块不引入 `omni-common-operlog`，认证行为由 `sys_audit_log` 安全审计事件覆盖（“登录记录”页是其登录事件的只读投影），不存在独立的 `sys_login_log` 表
 
 ---
 
@@ -1527,11 +1527,11 @@ sequenceDiagram
     F->>G: POST /api/crm/lead/{id}/convert + JWT + version
     G->>G: 验证 JWT/黑名单，覆盖 X-User-* 与 X-Tenant-Id
     G->>C: 转发请求 + X-Gateway-Forwarded
-    C->>C: GatewayPreAuthFilter + CrmTenantContextFilter
+    C->>C: GatewayPreAuthenticationFilter（common-service 身份） + TenantLine(CrmTenantTablePolicy)
     C->>C: @PreAuthorize(crm:lead:convert)
     C->>A: GET /internal/data-scopes/{userId}?tenantId&permissionCode=crm:lead:convert
     A-->>C: permission-aware scope
-    C->>C: CrmDataScopeContext 绑定（finally 清理）
+    C->>C: ServiceDataScopeContext 绑定（finally 清理）
     C->>DB: SELECT lead FOR UPDATE（TenantLine + DataPermission）
     C->>DB: SELECT conversion WHERE lead_id=?
     alt 已转换
@@ -1586,8 +1586,8 @@ flowchart LR
 ### 命令执行规则
 
 1. Gateway 验证 JWT 并覆盖身份头；CRM 拒绝没有转发标记、userId 或 tenantId 的业务请求。
-2. `@PreAuthorize` 先验证功能权限，`@CrmDataScope` 再以当前命令完整 permissionCode 向 Auth 取 scope。
-3. MyBatis 固定执行 `TenantLine → DataPermission → Pagination`；普通 CRM API 中 `ALL` 也只表示当前租户全部数据。
+2. `@PreAuthorize` 先验证功能权限，`@ServiceDataScope` 再以当前命令完整 permissionCode 向 Auth 取 scope。
+3. MyBatis 固定执行 `TenantLine → DataPermission → OptimisticLocker → Pagination`；普通 CRM API 中 `ALL` 也只表示当前租户全部数据。
 4. Service 锁定商机，校验请求 version、当前状态、目标阶段所属 pipeline 以及状态机合法性；相同阶段的空操作直接拒绝。
 5. 更新商机阶段/状态/概率/输单原因和 version，追加 `crm_opportunity_stage_history`，再写 `stage-changed/won/lost` Outbox。
 6. 赢单激活客户的专用 Mapper 只绕过 owner 数据权限，不绕过 TenantLine，并显式校验 customer id、状态和 `deleted=0`。
@@ -1652,10 +1652,10 @@ Docker 部署中，Nginx 容器负责服务前端静态文件，`/callback` 路�
 
 ### Gateway 容器间网络
 
-Docker 部署时所有容器在同一个 `omni-network` Bridge 网络中：
+Docker 部署时所有容器位于同一网络：`compose.yaml`/`compose.apps.yaml` 不为业务服务显式定义名为 `omni-network` 的网络，而由 Compose 按项目名派生默认 bridge 网络（容器间用服务名互访）：
 
 ```
-前端浏览器 → 宿主机:8100 → Nginx 容器(:80)
+前端浏览器 → 宿主机:3000 → Nginx 容器(:3000)
     ├── 静态文件 → Nginx 直接返回
     ├── /api/*   → proxy_pass http://omni-gateway:8080
     └── /oauth2/* → proxy_pass http://omni-gateway:8080
@@ -1688,7 +1688,7 @@ Gateway 容器(:8080)
 | **State 验证失败** | HMAC 签名不匹配 | 检查 Auth 服务的 `omni.oauth2.state-secret` 配置是否一致（单实例部署不存在此问题） |
 | **Google API 超时** | 网络代理问题 | Google API 需要通过代理访问；检查 `application.yml` 中的 `proxy` 配置 |
 | **自动创建用户失败** | 用户名冲突且 fallback 也冲突 | 检查 `sys_user` 表是否存在 `gh_`/`go_`/`ge_` 前缀的用户名冲突 |
-| **Docker 部署回调到容器内部地址** | redirect_uri 使用了容器内部端口 | 确保 redirect_uri 使用宿主机映射端口（8100），而非容器内部端口（8080） |
+| **Docker 部署回调到容器内部地址** | redirect_uri 使用了容器内部端口 | Docker 部署时 redirect_uri 应使用宿主机映射的 **Gateway 端口（8102）**，而非容器内部端口（8080）；仅本地非 Docker 直接联调 Auth 时才用 8100 |
 
 ### 权限与菜单问题
 
@@ -1711,7 +1711,7 @@ Gateway 容器(:8080)
 |------|---------|----------|
 | **日志未记录** | RocketMQ 未启动 | 检查 RocketMQ 容器状态；查看 `OperLogProducer` 日志中发送结果 |
 | **日志延迟** | MQ 消费积压 | 检查 omni-base 服务消费者日志；查看 RocketMQ 控制台消费进度 |
-| **归档任务未执行** | @Scheduled 未触发 | 确认 omni-base 服务只有一个实例（避免多实例重复归档）；检查日志中归档记录 |
+| **归档任务未执行** | XXL-JOB 调度未触发（`operLogArchiveHandler`，`@XxlJob`+`@SystemJobMeta`） | 确认 omni-base 执行器已在 XXL-JOB 注册且任务已调度；多实例下路由策略应保证单实例执行避免重复归档；检查日志中归档记录 |
 
 ---
 
@@ -1728,7 +1728,7 @@ sequenceDiagram
     U->>S: POST /api/srm/supplier
     S->>W: 查询当前租户 category=SRM_SUPPLIER_ONBOARDING 的发布版本
     S->>S: 保存 Supplier=PENDING_REVIEW 与 Workflow 幂等快照
-    S->>W: POST /api/internal/workflow/process/start
+    S->>W: POST /api/internal/workflow/process-instance/start
     W-->>S: processInstanceId / idempotentReplay
     S->>S: Supplier=APPROVING, startStatus=STARTED
     W->>M: workflow.process.completed.v1（Outbox）
@@ -1743,6 +1743,31 @@ sequenceDiagram
 - 默认租户所需模型由 Workflow 启动初始化器校验并发布，缺失或无法发布时 Workflow 失败启动。
 - 启动结果不确定时保留原 `requestId/businessKey/modelVersionId/startUser`，只允许幂等重试。
 - 审批完成由可靠事件回写；重复、乱序、跨租户或实例不匹配事件不得改变供应商状态。
+
+### Flow 15.1：请购审批规则配置与匹配试算
+
+```mermaid
+sequenceDiagram
+    participant U as 采购经理
+    participant P as Procurement
+    participant W as Workflow
+
+    U->>P: 打开请购审批规则页
+    P->>W: 查询 category=purchase 的当前已发布版本
+    W-->>P: 流程名称、版本和安全审批图
+    P-->>U: 展示流程选项、覆盖风险和业务化规则列表
+    U->>P: 保存规则名称、品类、金额区间和流程选项
+    P->>W: 批量校验 modelVersionId 仍为当前 purchase 发布版本
+    P->>P: 行锁下校验冲突，生成 APR-{ULID} 和 priority
+    P-->>U: 返回可读规则，不暴露可编辑技术 ID
+    U->>P: 输入品类和金额进行匹配试算
+    P->>P: 调用请购提交共用的 ApprovalRouteResolver.evaluate
+    P-->>U: 唯一命中、无匹配、冲突或流程不可用，并返回安全审批图
+```
+
+规则列表通过 Workflow 批量解析当前页模型版本，禁止逐行调用。Workflow 暂时不可用时只读列表保留
+本地规则并标记 `UNAVAILABLE`，创建、更新和请购提交则失败关闭。停用或删除前的影响分析只在内存中
+排除目标规则，不修改数据库；覆盖算法按“精确品类优先、默认规则补空缺”计算从 0 到无穷的断档和冲突。
 
 ## Flow 16：Procurement 请购审批与异步回写
 

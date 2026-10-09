@@ -168,7 +168,7 @@ omni-frontend/
 - **timeout**: 15000ms
 - **withCredentials**: `true` (carries cookies for OAuth2 session management)
 - **Request interceptor**: Reads token from `useUserStore()` and injects `Authorization: Bearer <token>`
-- **Response interceptor**: Checks `code === 200`; business errors trigger `ElMessage.error`; 401 triggers an expiration dialog and redirects to the login page (with a `redirect` parameter)
+- **Response interceptor**: Checks `code === 200`; business errors trigger `ElMessage.error`; 401 triggers an expiration dialog and redirects to the login page (with a redirect parameter)
 
 ### API Function Pattern
 
@@ -280,7 +280,7 @@ Dynamic Routes (permission-driven, registered at runtime)
 router.beforeEach()
     ↓
 Check to.meta.requiresAuth
-    ├── false → Authenticated user visiting /login → redirect to /home
+    ├── false → Authenticated user visiting /login → redirect to Home (actual path is `/`, not `/home`)
     │           Other public pages → allow
     └── true  → Check userStore.token
                 ├── No token → redirect to /login?redirect=<path>
@@ -467,7 +467,8 @@ const i18n = createI18n({
   legacy: false,
   locale: getStoredLang(),        // Read from localStorage, defaults to 'zh-CN'
   fallbackLocale: 'en-US',
-  messages: { 'zh-CN': zhCN, 'en-US': enUS },
+  // Current SUPPORTED_LOCALES = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR']; new modules must cover all four
+  messages: { 'zh-CN': zhCN, 'en-US': enUS, 'ja-JP': jaJP, 'ko-KR': koKR },
 })
 ```
 
@@ -622,9 +623,9 @@ Each new business module requires the following registrations:
 |------|------|--------|
 | 1 | `src/router/index.ts` → `iconMap` | Add `'<module>:<feature>': '<IconName>'` (e.g., `'base:dict': 'Collection'`) |
 | 2 | `src/constants/menu.ts` → `menuI18nMap` | Add i18n key mappings for module directory and menu items |
-| 3 | `src/locales/zh-CN.ts` + `en-US.ts` | Add `common.<module>Management` (directory name), `common.<feature>Management` (menu name), and feature-level translation keys |
-| 4 | `scripts/sql/init-all.sql` → `sys_permission` | Add DIRECTORY (module group) + MENU (feature page) + BUTTON/API (operation permissions) seed data |
-| 5 | `scripts/sql/init-all.sql` → `sys_role_permission` | Assign new permission nodes to the SUPER_ADMIN role |
+| 3 | `src/locales/zh-CN.ts` + `en-US.ts` + `ja-JP.ts` + `ko-KR.ts` | Add `common.<module>Management` (directory name), `common.<feature>Management` (menu name), and feature-level translation keys across all four locales |
+| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | Add idempotent DIRECTORY (module group) + MENU (feature page) + BUTTON/API (operation permission) seeds and refresh the seed manifest |
+| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | Idempotently assign new permission nodes to SUPER_ADMIN and add natural-key assertions |
 
 ### Reference Implementation: Dictionary Management Module
 
@@ -730,7 +731,7 @@ COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 build: {
   target: 'es2020',            // Build target: supports optional chaining, nullish coalescing, etc.
   outDir: 'dist',
-  chunkSizeWarningLimit: 2000, // Element Plus is relatively large; raise the threshold accordingly
+  chunkSizeWarningLimit: 750, // current repo threshold
 }
 ```
 
@@ -739,16 +740,16 @@ build: {
 | Optimization | Description |
 |--------------|-------------|
 | **Route lazy loading** | All view components use `() => import()` dynamic imports for on-demand loading |
-| **Element Plus on-demand** | `@vitejs/plugin-vue` automatically tree-shakes unused components |
+| **Element Plus on-demand** | Explicitly import and register the components actually used via `src/plugins/element-plus.ts` (not plugin auto tree-shake) |
 | **`import.meta.glob`** | View module scanning is statically analyzed at compile time; unrelated files are not bundled |
-| **Chunk splitting** | Vite/Rollup automatically splits vendors (vue, element-plus, axios) into separate chunks |
+| **Chunk splitting** | `build.rollupOptions.output.manualChunks` in `vite.config.ts` explicitly splits bpmn, vendor, and Element Plus into separate chunks |
 | **CSS extraction** | Production builds automatically extract CSS into separate files for browser caching |
 
 ### Nginx Configuration Highlights
 
 ```nginx
 server {
-    listen 80;
+    listen 3000;  # container listens on 3000 (matches Compose host 3000 → container 3000)
     root /usr/share/nginx/html;
     index index.html;
 

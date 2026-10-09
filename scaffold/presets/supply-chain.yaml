@@ -1,0 +1,5 @@
+id: supply-chain
+version: "1.0.0"
+displayName: 供应链与资产平台
+description: 供应商、采购、资产与审批闭环。
+modules: [asset, gateway, mysql, redis, nacos, rocketmq, xxl-job]

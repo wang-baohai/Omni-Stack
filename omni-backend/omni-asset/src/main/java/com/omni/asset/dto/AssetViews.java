@@ -33,7 +33,12 @@ public final class AssetViews {
     @Data
     public static class AssetOptionVO implements Serializable {
         @Serial private static final long serialVersionUID = 1L;
-        /** 资产 ID。 */ private Long id;
+        /** 资产 ID，JSON 中固定输出字符串，避免雪花主键超出 JS 安全整数。 */
+        @com.fasterxml.jackson.databind.annotation.JsonSerialize(
+                using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)
+        @tools.jackson.databind.annotation.JsonSerialize(
+                using = tools.jackson.databind.ser.std.ToStringSerializer.class)
+        private Long id;
         /** 资产编号。 */ private String assetNo;
         /** 资产名称。 */ private String name;
         /** 当前状态。 */ private String status;
@@ -57,7 +62,12 @@ public final class AssetViews {
     @Data
     public static class AssetVO implements Serializable {
         @Serial private static final long serialVersionUID = 1L;
-        /** 主键 ID。 */ private Long id;
+        /** 主键 ID，JSON 中固定输出字符串，避免雪花主键超出 JS 安全整数。 */
+        @com.fasterxml.jackson.databind.annotation.JsonSerialize(
+                using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)
+        @tools.jackson.databind.annotation.JsonSerialize(
+                using = tools.jackson.databind.ser.std.ToStringSerializer.class)
+        private Long id;
         /** 资产编号。 */ private String assetNo;
         /** 资产名称。 */ private String name;
         /** 品类编码。 */ private String categoryCode;
@@ -101,8 +111,18 @@ public final class AssetViews {
     @Data
     public static class HistoryVO implements Serializable {
         @Serial private static final long serialVersionUID = 1L;
-        /** 主键 ID。 */ private Long id;
-        /** 资产 ID。 */ private Long assetId;
+        /** 主键 ID，JSON 中固定输出字符串，避免雪花主键超出 JS 安全整数。 */
+        @com.fasterxml.jackson.databind.annotation.JsonSerialize(
+                using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)
+        @tools.jackson.databind.annotation.JsonSerialize(
+                using = tools.jackson.databind.ser.std.ToStringSerializer.class)
+        private Long id;
+        /** 资产 ID，与被关联资产保持同一字符串形态。 */
+        @com.fasterxml.jackson.databind.annotation.JsonSerialize(
+                using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)
+        @tools.jackson.databind.annotation.JsonSerialize(
+                using = tools.jackson.databind.ser.std.ToStringSerializer.class)
+        private Long assetId;
         /** 变更前状态。 */ private String fromStatus;
         /** 变更后状态。 */ private String toStatus;
         /** 变更用户 ID。 */ private Long changedByUserId;

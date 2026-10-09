@@ -94,6 +94,10 @@ public class MqMessageInternalController {
 
     /**
      * 手动重发消息（将状态改回 PENDING）。
+     * <p>
+     * 采用带状态前置条件的 CAS 更新（仅 FAILED/DEAD_LETTER 可重发），
+     * 并发下命中 0 行时返回 400 明确告知"操作未生效"，不静默覆盖新状态。
+     * </p>
      *
      * @param tenantId 租户 ID
      * @param msgId    消息ID
@@ -111,23 +115,20 @@ public class MqMessageInternalController {
         if (message == null) {
             return R.fail(404, "消息不存在");
         }
-        int status = message.getStatus();
-        if (status != SysMqMessage.STATUS_PENDING
-                && status != SysMqMessage.STATUS_FAILED
-                && status != SysMqMessage.STATUS_DEAD_LETTER) {
-            return R.fail(400, "仅 PENDING/FAILED/DEAD_LETTER 状态的消息可重发");
+        // 读出仅作 404 判定；并发守卫落在带 status IN (2,3) 前置条件的单语句 UPDATE 上
+        int affected = sysMqMessageMapper.casAdminResend(tenantId, msgId, LocalDateTime.now());
+        if (affected == 0) {
+            return R.fail(400, "消息状态已变更，操作未生效");
         }
-        message.setStatus(SysMqMessage.STATUS_PENDING);
-        message.setRetryCount(0);
-        message.setNextRetryTime(null);
-        message.setErrorMsg(null);
-        message.setUpdateTime(LocalDateTime.now());
-        sysMqMessageMapper.updateById(message);
         return R.ok(null);
     }
 
     /**
      * 标记忽略（DEAD_LETTER -> SKIPPED）。
+     * <p>
+     * 采用带状态前置条件的 CAS 更新（仅 DEAD_LETTER 可忽略），
+     * 并发下命中 0 行时返回 400 明确告知"操作未生效"，不静默覆盖新状态。
+     * </p>
      *
      * @param tenantId 租户 ID
      * @param msgId    消息ID
@@ -145,12 +146,11 @@ public class MqMessageInternalController {
         if (message == null) {
             return R.fail(404, "消息不存在");
         }
-        if (message.getStatus() != SysMqMessage.STATUS_DEAD_LETTER) {
-            return R.fail(400, "仅死信状态的消息可标记忽略");
+        // 读出仅作 404 判定；并发守卫落在带 status = 3 前置条件的单语句 UPDATE 上
+        int affected = sysMqMessageMapper.casAdminSkip(tenantId, msgId, LocalDateTime.now());
+        if (affected == 0) {
+            return R.fail(400, "消息状态已变更，操作未生效");
         }
-        message.setStatus(SysMqMessage.STATUS_SKIPPED);
-        message.setUpdateTime(LocalDateTime.now());
-        sysMqMessageMapper.updateById(message);
         return R.ok(null);
     }
 }

@@ -1,0 +1,29 @@
+package {{javaPackage}};
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+/**
+ * {{displayName}}微服务启动类。
+ *
+ * <p>由 @omni-stack/cli {{generatorVersion}} 生成，模板版本 {{templateVersion}}。</p>
+ *
+ * @author Omni-Stack Team
+ */
+@EnableDiscoveryClient
+@MapperScan("{{javaPackage}}.mapper")
+@SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
+public class {{className}}Application {
+
+    /**
+     * 启动微服务。
+     *
+     * @param args 启动参数
+     */
+    public static void main(String[] args) {
+        SpringApplication.run({{className}}Application.class, args);
+    }
+}

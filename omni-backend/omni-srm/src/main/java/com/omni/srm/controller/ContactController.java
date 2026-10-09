@@ -5,7 +5,7 @@ import com.omni.common.core.operlog.OperType;
 import com.omni.common.core.result.R;
 import com.omni.srm.dto.SrmRequests;
 import com.omni.srm.dto.SrmViews;
-import com.omni.srm.security.SrmDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.srm.service.ContactService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,19 +30,19 @@ public class ContactController {
     private final ContactService contactService;
 
     /** 查询联系人列表。 */
-    @GetMapping({"", "/list"}) @PreAuthorize("hasAuthority('srm:contact:list')") @SrmDataScope(permissionCode = "srm:contact:list")
+    @GetMapping({"", "/list"}) @PreAuthorize("hasAuthority('srm:contact:list')") @ServiceDataScope(permissionCode = "srm:contact:list")
     public R<List<SrmViews.ContactVO>> list(@PathVariable Long supplierId) {
         return R.ok(contactService.list(supplierId));
     }
 
     /** 查询联系人详情。 */
-    @GetMapping("/{id}") @PreAuthorize("hasAuthority('srm:contact:list')") @SrmDataScope(permissionCode = "srm:contact:list")
+    @GetMapping("/{id}") @PreAuthorize("hasAuthority('srm:contact:list')") @ServiceDataScope(permissionCode = "srm:contact:list")
     public R<SrmViews.ContactVO> get(@PathVariable Long supplierId, @PathVariable Long id) {
         return R.ok(contactService.get(supplierId, id));
     }
 
     /** 创建联系人。 */
-    @PostMapping @PreAuthorize("hasAuthority('srm:contact:create')") @SrmDataScope(permissionCode = "srm:contact:create")
+    @PostMapping @PreAuthorize("hasAuthority('srm:contact:create')") @ServiceDataScope(permissionCode = "srm:contact:create")
     @OperLog(module = "SRM联系人", operType = OperType.CREATE, recordSnapshot = false,
             excludeFields = {"mobile", "phone", "email"})
     public R<SrmViews.ContactVO> create(@PathVariable Long supplierId,
@@ -51,7 +51,7 @@ public class ContactController {
     }
 
     /** 更新联系人。 */
-    @PutMapping("/{id}") @PreAuthorize("hasAuthority('srm:contact:update')") @SrmDataScope(permissionCode = "srm:contact:update")
+    @PutMapping("/{id}") @PreAuthorize("hasAuthority('srm:contact:update')") @ServiceDataScope(permissionCode = "srm:contact:update")
     @OperLog(module = "SRM联系人", operType = OperType.UPDATE, idExpr = "#id", recordSnapshot = false,
             excludeFields = {"mobile", "phone", "email"})
     public R<SrmViews.ContactVO> update(@PathVariable Long supplierId, @PathVariable Long id,
@@ -60,7 +60,7 @@ public class ContactController {
     }
 
     /** 删除联系人。 */
-    @DeleteMapping("/{id}") @PreAuthorize("hasAuthority('srm:contact:delete')") @SrmDataScope(permissionCode = "srm:contact:delete")
+    @DeleteMapping("/{id}") @PreAuthorize("hasAuthority('srm:contact:delete')") @ServiceDataScope(permissionCode = "srm:contact:delete")
     @OperLog(module = "SRM联系人", operType = OperType.DELETE, idExpr = "#id")
     public R<Void> delete(@PathVariable Long supplierId, @PathVariable Long id, @RequestParam Integer version) {
         contactService.delete(supplierId, id, version);

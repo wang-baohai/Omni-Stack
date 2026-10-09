@@ -32,6 +32,7 @@ class RequiredWorkflowModelInitializerTest {
     @Test
     void shouldNormalizeAndPublishRequiredDefaultModels() {
         List<WfProcessModel> models = List.of(
+                model(2L, "procurement-approval", "PROCUREMENT_REQUISITION"),
                 model(3L, "asset-transfer", "asset_transfer"),
                 model(4L, "asset-disposal", "asset_disposal"),
                 model(5L, "supplier-onboarding", "supplier"));
@@ -42,7 +43,8 @@ class RequiredWorkflowModelInitializerTest {
         initializer.run(applicationArguments);
 
         assertThat(models).extracting(WfProcessModel::getCategory)
-                .containsExactly("ASSET_TRANSFER", "ASSET_DISPOSAL", "SRM_SUPPLIER_ONBOARDING");
+                .containsExactly("purchase", "ASSET_TRANSFER", "ASSET_DISPOSAL", "SRM_SUPPLIER_ONBOARDING");
+        verify(workflowModelService).publishModel(2L, "system");
         verify(workflowModelService).publishModel(3L, "system");
         verify(workflowModelService).publishModel(4L, "system");
         verify(workflowModelService).publishModel(5L, "system");

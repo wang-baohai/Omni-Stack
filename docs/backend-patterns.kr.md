@@ -305,7 +305,7 @@ MQ 메시지 전송 기록 및 보상 관리 시스템은 Transactional Outbox +
 ```
 비즈니스 트랜잭션（@Transactional）
     ↓
-ReliableMessageTemplate.send(bindingName, payload)
+ReliableMessageTemplate.send(bindingName, payload, tenantId)
     ↓ INSERT sys_mq_message (status=PENDING) -- 동일한 로컬 트랜잭션
     ↓
 XXL-JOB mqRelayHandler (10초 폴링)
@@ -322,7 +322,7 @@ MessageSender.send(message) -- 전략 패턴, broker_type별 라우팅
 
 | 컴포넌트 | 책임 |
 |------|------|
-| `ReliableMessageTemplate` | `send(bindingName, payload)` / `send(bindingName, payload, msgKey)` 두 가지 오버로드를 제공하며, 호출자의 트랜잭션에서 메시지 레코드를 INSERT |
+| `ReliableMessageTemplate` | `send(bindingName, payload, tenantId)` / `send(bindingName, payload, tenantId, msgKey)` 두 가지 오버로드를 제공하며(`tenantId` 는 필수 양의 정수, 생략 불가), 호출자의 트랜잭션에서 메시지 레코드를 INSERT |
 | `MqMessageRelayService` | 전달 대기 메시지를 폴링하고 `MessageSender` 전략 구현을 호출하여 전송, 재시도 백오프 및 데드레터 마킹 처리 |
 | `MqMessageRelayJob` | XXL-JOB handler（`@XxlJob("mqRelayHandler")` + `@SystemJobMeta`）, relay 로직 트리거 |
 | `MessageSender` | 전략 인터페이스, `broker_type`별 라우팅. 현재 `RocketMqMessageSender`(StreamBridge 기반) 구현, 향후 `KafkaMessageSender` 확장 가능 |
@@ -333,7 +333,7 @@ MessageSender.send(message) -- 전략 패턴, broker_type별 라우팅
 1. POM에 `omni-common-mqlog` 의존성 추가
 2. `omni-common-mybatis`(데이터베이스)와 `omni-common-job`(XXL-JOB) 의존성이 이미 있는지 확인
 3. RocketMQ 전송 기능이 필요하면 `spring-cloud-starter-stream-rocketmq` 의존성 추가
-4. `sys_mq_message` 테이블은 자동으로 생성됨(`schema.sql` + `CREATE TABLE IF NOT EXISTS`)
+4. `sys_mq_message` 테이블은 Liquibase 이관에 의해 생성됨 (`database/changelog/common/0001-mq-schema.yaml`, `omni-db-migrator` 컨테이너 시작 시 적용)
 5. `mqRelayHandler`는 자동으로 XXL-JOB에 등록됨(각 서비스 실행자 AppName이 다르므로 handler name이 자연스럽게 분리)
 6. 비즈니스 코드에서 `ReliableMessageTemplate`을 주입하고 `send()` 메서드를 호출하면 됨
 
@@ -405,7 +405,7 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 ### 개발 제약사항
 
 1. **새로운 쓰기 작업 Controller 메서드에는 반드시 `@OperLog`를 붙여야 하며**, `module`, `operType`을 지정하고, 엔티티 변경이 있을 경우 `entityClass`와 `idExpr`도 지정해야 함
-2. **omni-auth 모듈에서는 `@OperLog` 사용 금지**: 인증 행위는 로그인 로그(`sys_login_log`)와 감사 로그(`sys_audit_log`)로 완전하게 기록되며, omni-auth는 `omni-common-operlog` 의존성을 도입하지 않고 Controller 메서드에 `@OperLog` 어노테이션을 사용하지 않음
+2. **omni-auth 모듈에서는 `@OperLog` 사용 금지**: 인증 행위는 보안 감사 로그(`sys_audit_log`의 `LOGIN_SUCCESS`/`LOGIN_FAILED`/`ACCOUNT_LOCKED` 등 이벤트; “로그인 기록” 페이지는 그 로그인 이벤트의 읽기 전용 프로젝션)에 완전히 기록되며, 독립적인 `sys_login_log` 테이블은 존재하지 않습니다. omni-auth는 `omni-common-operlog` 의존성을 도입하지 않고 Controller 메서드에 `@OperLog` 어노테이션을 사용하지 않음
 3. **새 마이크로서비스 온보딩**: `pom.xml`에 `omni-common-operlog` 의존성을 추가하고 RocketMQ를 구성해야 하며, 이 모듈은 `AutoConfiguration.imports`를 통해 AOP 어드바이스와 MQ Producer를 자동 등록
 4. **`entityClass` 용도**: AOP가 `ApplicationContext`를 통해 해당 엔티티 타입의 `BaseMapper`를 찾아 자동으로 `selectById`를 실행하여 변경 전후 스냅샷을 획득
 5. **`idExpr` SpEL 문법**: 메서드 파라미터(`#id`, `#request.id`)와 반환값(`#result.data.id`) 참조를 지원하며, 파싱 실패 시 경고 로그를 기록하지만 비즈니스에 영향 없음
@@ -422,31 +422,29 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 
 ## Common Starter 온보딩 규범
 
-프로젝트는 공통 기능을 6개 모듈로 분리하였으며, 새 마이크로서비스는 Maven 의존성으로 도입 즉시 사용 가능하며 수동 구성이 필요 없습니다.
+프로젝트는 공통 기능을 조합 Starter와 선택 기능 모듈로 분리합니다. Servlet 비즈니스 서비스는 `omni-common-service`를 우선 사용하고, Gateway·Auth·Workflow는 각자의 특수한 경계에 따라 하위 모듈을 선택합니다.
 
 ### Starter 모듈 개요
 
-| 모듈 | 책임 | 자동 구성 내용 | 대상 서비스 유형 |
-|------|------|-------------|-------------|
-| `omni-common-core` | 순수 POJO 계층 | 없음(Spring 의존성 없음) | 모든 모듈 |
+| 모듈 | 책임 | 자동 구성 내용 | 적용 서비스 유형 |
+|--------|------|---------------|----------------|
+| `omni-common-core` | 순수 POJO 계층 | 없음(Spring 의존 없음) | 모든 모듈 |
 | `omni-common` | Web 자동 구성 | `JacksonConfig`(시간 직렬화), `WebMvcConfig`(CORS), `GlobalExceptionHandler`, `XssAutoConfiguration`(Filter + Jackson Module) | Servlet 서비스 |
-| `omni-common-mybatis` | 데이터베이스 기능 | `MybatisPlusAutoConfiguration`: `MybatisPlusInterceptor`(MySQL `PaginationInnerInterceptor`) + YAML 기본 구성(카멜 매핑, 논리 삭제, 자동 증가 ID) | Servlet 서비스 |
-| `omni-common-redis` | 블로킹 Redis | `RedisAutoConfiguration`: `RedisTemplate<String, Object>`(Jackson 직렬화) + `RedisUtils` 유틸리티 클래스 + Lettuce 연결 풀 구성 | Servlet 서비스 |
-| `omni-common-redis-reactive` | 리액티브 Redis | `spring-boot-starter-data-redis-reactive` + YAML 기본 타임아웃 구성 | WebFlux 서비스(예: Gateway) |
-| `omni-common-mqlog` | 신뢰성 있는 MQ 메시지 전송 | `ReliableMessageTemplate`(Transactional Outbox), `MqMessageRelayService`(XXL-JOB 비동기 전달), `MessageSender` 전략 인터페이스, `MqMessageInternalController`(Feign 내부 조회), `schema.sql`(자동 테이블 생성) | Servlet 서비스(MQ 기능 필요) |
+| `omni-common-mybatis` | 데이터베이스 기능 | `MybatisPlusAutoConfiguration`: `MybatisPlusInterceptor`(MySQL `PaginationInnerInterceptor`) + YAML 기본 설정(카멜케이스 매핑, 논리 삭제, 자동 증가 ID) | Servlet 서비스 |
+| `omni-common-redis` | 블로킹 Redis | `RedisAutoConfiguration`: `RedisTemplate<String, Object>`(Jackson 직렬화) + `RedisUtils` 유틸리티 + Lettuce 커넥션 풀 설정 | Servlet 서비스 |
+| `omni-common-redis-reactive` | 리액티브 Redis | `spring-boot-starter-data-redis-reactive` + YAML 기본 타임아웃 설정 | WebFlux 서비스(Gateway 등) |
+| `omni-common-mqlog` | 신뢰성 MQ 메시지 전송 | `ReliableMessageTemplate`(Transactional Outbox), `MqMessageRelayService`(XXL-JOB 비동기 전송), `MessageSender` 전략 인터페이스, `MqMessageInternalController`(Feign 내부 조회), Liquibase 이관 DDL(`database/changelog/common/0001-mq-schema.yaml`) | Servlet 서비스(MQ 기능 필요) |
+| `omni-common-service` | Servlet 비즈니스 서비스 보안 및 컨텍스트 조합 | Gateway 사전인증 Filter, 불변 요청 식별, 내부 API Token, DataScope SPI/Aspect, Tenant/DataPermission 고정 순서, Auth XSS 폴백과 보안 기준선 | CRM/SRM/Procurement/Asset 등 Servlet 비즈니스 서비스 |
 
-**자동 구성 등록 메커니즘**: 모든 starter는 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 파일을 통해 등록되며, 이는 Spring Boot 3+/4+의 표준 메커니즘입니다(구버전 `spring.factories`를 대체).
+**자동 구성 등록 메커니즘**: 모든 starter는 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 파일로 등록됩니다. 이는 Spring Boot 3+/4+의 표준 메커니즘입니다(구 `spring.factories` 대체).
 
-### 새 서비스 온보딩 단계
+### 신규 서비스 온보딩 절차
 
-1. **POM 의존성**: `pom.xml`에 필요한 starter를 선언:
+1. **POM 의존**: Servlet 비즈니스 서비스는 조합 Starter를 선언한 후 필요에 따라 OperLog/Job/MQ를 추가합니다:
    ```xml
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-core</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-mybatis</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-redis</artifactId></dependency>
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common-service</artifactId></dependency>
    ```
-2. **application.yml**: 데이터소스와 Redis 연결 정보만 구성하면 됨:
+2. **application.yml**: 데이터소스와 Redis 외에 서비스 식별과 활성화할 보안 기능을 명시적으로 구성합니다. 내부 Token은 반드시 환경 변수에서 가져와야 하며 약한 기본값을 사용할 수 없습니다:
    ```yaml
    spring:
      datasource:
@@ -458,10 +456,27 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
          host: 127.0.0.1
          port: 6379
          database: 0
+   omni:
+     service:
+       name: omni-xxx
+       display-name: Xxx
+       gateway-preauth:
+         enabled: true
+       internal-api:
+         enabled: true
+         token: ${OMNI_INTERNAL_API_TOKEN}
+       tenant:
+         enabled: true
+       data-scope:
+         enabled: true
+       xss:
+         enabled: true
    ```
-3. **시작 클래스**: `@MapperScan("com.omni.xxx.mapper")` 추가
-4. **XSS 방어**: `XssConfigProvider` SPI 인터페이스 구현(`omni-common`이 Filter + Jackson Module을 자동 등록)
-5. **자동 적용**: 페이지네이션 플러그인, Jackson 시간 직렬화, CORS 구성, `GlobalExceptionHandler`, `RedisUtils` 유틸리티 클래스가 모두 자동으로 어셈블되며 추가 구성 불필요
+3. **도메인 SPI**: tenant/data-scope를 활성화할 때 각각 유일한 `TenantTablePolicy`와 `DataScopeTablePolicy`를 제공해야 합니다. 도메인 테이블 이름이나 owner 열을 Starter에 넣어서는 안 됩니다.
+4. **보안 체인**: Starter가 제공하는 Gateway Filter를 `AuthorizationFilter` 앞에, 식별 컨텍스트 Filter를 Gateway Filter 뒤에 배치합니다. 두 항목의 Servlet 컨테이너 중복 등록은 금지됩니다.
+5. **선택 기능**: OperLog·Job·MQ·Workflow는 계속 독립 의존으로 유지되며 비즈니스 필요에 따라 활성화합니다.
+
+현재 `omni-common-service`는 v0 자동 구성과 테스트를 제공하며, CRM·SRM·Procurement·Asset은 모두 마이그레이션·모듈 테스트·격리 런타임 재검증을 완료했습니다. Starter의 XSS Provider 자동 구성은 `XssAutoConfiguration`보다 먼저 적용되어야 하며, 컨텍스트 테스트가 Provider·Servlet FilterRegistration·Jackson 2/3 클리닝 모듈을 동시에 검증하여 조건 평가 순서로 인한 조용한 실패를 방지합니다.
 
 ### 오버라이드 메커니즘
 
@@ -566,7 +581,7 @@ GlobalExceptionHandler (@RestControllerAdvice)
 통합 R<Void> 응답
 ```
 
-**omni-auth의 특수 처리**: Auth 모듈은 `omni-common-core`에 의존하며(`omni-common`이 아님), 따라서 `GlobalExceptionHandler`가 컴포넌트 스캔 범위에 없습니다. Auth 모듈은 `AuthExceptionHandler`(부분 `@RestControllerAdvice`)를 통해 동등한 예외 처리를 제공합니다.
+**omni-auth의 특수 처리**: omni-auth는 `omni-common-core`와 `omni-common`에 모두 의존합니다. `omni-common`의 `GlobalExceptionHandler`(`com.omni.common.result`)는 `AutoConfiguration.imports`로 자동 구성되어 `omni-common`에 의존하는 모든 서비스(Auth 포함)에 적용됩니다(컴포넌트 스캔이 아니며 Auth에서 누락되지도 않음). 그 위에서 omni-auth는 더 좁은 스코프의 `AuthExceptionHandler`(`@RestControllerAdvice(basePackages = "com.omni.auth.controller")`)를 제공해 인증 컨트롤러 패키지 내의 `BusinessException`/검증/`AccessDeniedException`을 Auth 전용 매핑하며, 전역 핸들러의 자동 구성 전제를 대체하지 않고 공존합니다.
 
 ## 문제 해결 가이드
 

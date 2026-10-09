@@ -37,11 +37,11 @@ import java.time.Duration;
 @Component("github")
 public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
 
-    /** GitHub OAuth2 授权页面 URL */
+    /** GitHub OAuth2 授权页面 URL（默认值，可通过配置覆盖） */
     private static final String GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
-    /** GitHub OAuth2 Token 端点 URL */
+    /** GitHub OAuth2 Token 端点 URL（默认值，可通过配置覆盖） */
     private static final String GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
-    /** GitHub 用户信息 API URL */
+    /** GitHub 用户信息 API URL（默认值，可通过配置覆盖） */
     private static final String GITHUB_USER_API = "https://api.github.com/user";
     /** 请求的 OAuth2 授权范围：读取用户资料和邮箱 */
     private static final String SCOPE = "read:user user:email";
@@ -89,7 +89,7 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
     public String buildAuthorizationUrl(String state) {
         String clientId = oauth2Properties.getGithub().getClientId();
         String redirectUri = oauth2Properties.getGithub().getRedirectUri();
-        return GITHUB_AUTHORIZE_URL
+        return oauth2Properties.getGithub().getAuthorizeUrl()
                 + "?client_id=" + encode(clientId)
                 + "&redirect_uri=" + encode(redirectUri)
                 + "&scope=" + encode(SCOPE)
@@ -112,7 +112,7 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
                     + "&redirect_uri=" + encode(oauth2Properties.getGithub().getRedirectUri());
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GITHUB_TOKEN_URL))
+                    .uri(URI.create(oauth2Properties.getGithub().getTokenUrl()))
                     .timeout(Duration.ofSeconds(30))
                     .header("Accept", "application/json")
                     .header("User-Agent", USER_AGENT)
@@ -155,7 +155,7 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
     public ProviderUser fetchUserProfile(String accessToken) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GITHUB_USER_API))
+                    .uri(URI.create(oauth2Properties.getGithub().getUserApiUrl()))
                     .timeout(Duration.ofSeconds(30))
                     .header("Authorization", "Bearer " + accessToken)
                     .header("Accept", "application/json")

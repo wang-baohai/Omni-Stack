@@ -15,7 +15,8 @@ import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcRequisitionLineMapper;
 import com.omni.procurement.mapper.ProcRequisitionMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
 import com.omni.procurement.workflow.RequisitionWorkflowCommand;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -65,13 +66,13 @@ class RequisitionWorkflowStateServiceImplTest {
         service = new RequisitionWorkflowStateServiceImpl(
                 requisitionMapper, lineMapper, materialMapper, categoryMapper, routeResolver,
                 new ProcRecordAccessGuard(), reliableMessageRelay);
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
     }
 
     /** 清理租户上下文。 */
     @AfterEach
     void clearContext() {
-        ProcTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 新提交必须 attempt+1，并按当前活动物料刷新提交快照和审批路由。 */

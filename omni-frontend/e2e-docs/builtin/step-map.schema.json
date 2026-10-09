@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Omni-Stack 内置浏览器声明式步骤映射（WP-014 新增，与 Playwright 断言源并存）",
+  "purpose": "历史 Playwright flows 是受保护的断言源；本映射提供可被 Qoder 内置浏览器逐步骤真实执行的声明式步骤与稳定 ID，执行结果写步骤收据。运行本映射不等于运行旧 runner。",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "execution_id",
+    "runner",
+    "cases"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer"
+    },
+    "execution_id": {
+      "type": "string"
+    },
+    "runner": {
+      "type": "object",
+      "required": [
+        "kind",
+        "provider",
+        "legacy_runner_status"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "QODER_BUILTIN_BROWSER"
+        },
+        "provider": {
+          "type": "string",
+          "description": "UA 实测串，例如 QoderIDE/1.32.2 ... Electron/42.2.0"
+        },
+        "legacy_runner_status": {
+          "type": "string",
+          "const": "NOT_RUN_PER_USER_BROWSER_CONSTRAINT"
+        },
+        "css_viewport_gate": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "BLOCKED"
+          ],
+          "description": "无 resize 能力时 BLOCKED，相应格子不得申请正式"
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "module",
+          "flow",
+          "state",
+          "locale",
+          "legacy_case_ref",
+          "steps"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "flow": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "role_key": {
+            "type": "string",
+            "description": "身份 key（由 test-only fixture 签发，值不入文档）"
+          },
+          "target_url": {
+            "type": "string"
+          },
+          "legacy_case_ref": {
+            "type": "string",
+            "description": "Playwright 断言源引用：file#test-title 或 case id"
+          },
+          "precondition": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "step_id",
+                "action",
+                "expected"
+              ],
+              "properties": {
+                "step_id": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "navigate",
+                    "click",
+                    "fill",
+                    "press_key",
+                    "select",
+                    "set_locale",
+                    "reload",
+                    "wait_visible",
+                    "intercept_fetch",
+                    "screenshot",
+                    "read_dom",
+                    "read_network"
+                  ]
+                },
+                "target": {
+                  "type": "string",
+                  "description": "selector/accessible name（优先 role/test-id/稳定结构定位器）"
+                },
+                "value_ref": {
+                  "type": "string",
+                  "description": "受控输入引用名；禁止把秘密/ token 明文写入本文件"
+                },
+                "expected": {
+                  "type": "string"
+                },
+                "assert_via": {
+                  "type": "string",
+                  "enum": [
+                    "snapshot",
+                    "evaluate_script",
+                    "network_list",
+                    "console_list",
+                    "screenshot"
+                  ]
+                }
+              }
+            }
+          },
+          "receipts_required": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cleanup": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -7,7 +7,7 @@ import com.omni.srm.dto.SrmViewAssembler;
 import com.omni.srm.dto.SrmViews;
 import com.omni.srm.entity.SrmSupplierInvite;
 import com.omni.srm.mapper.SrmSupplierInviteMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.PortalInviteService;
 import com.omni.srm.service.support.SrmAuditSupport;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class PortalInviteServiceImpl implements PortalInviteService {
     /** {@inheritDoc} */
     @Override
     public List<SrmViews.InviteVO> list() {
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         return inviteMapper.selectList(new LambdaQueryWrapper<SrmSupplierInvite>()
                         .eq(SrmSupplierInvite::getTenantId, tenantId)
                         .eq(SrmSupplierInvite::getDeleted, 0)
@@ -49,7 +49,7 @@ public class PortalInviteServiceImpl implements PortalInviteService {
         int maxUses = request.getMaxUses() != null ? Math.max(1, request.getMaxUses()) : 10;
         int expiresHours = request.getExpiresHours() != null ? Math.max(1, request.getExpiresHours()) : 72;
         SrmSupplierInvite invite = new SrmSupplierInvite();
-        invite.setTenantId(SrmTenantContext.requireTenantId());
+        invite.setTenantId(ServiceIdentityContext.requireTenantId());
         invite.setInviteCodeHash(hash);
         invite.setStatus("ACTIVE");
         invite.setExpiresTime(LocalDateTime.now().plusHours(expiresHours));
@@ -69,7 +69,7 @@ public class PortalInviteServiceImpl implements PortalInviteService {
     @Override
     @Transactional
     public void revoke(Long inviteId) {
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         SrmSupplierInvite invite = inviteMapper.selectOne(new LambdaQueryWrapper<SrmSupplierInvite>()
                 .eq(SrmSupplierInvite::getTenantId, tenantId)
                 .eq(SrmSupplierInvite::getId, inviteId)
@@ -88,7 +88,7 @@ public class PortalInviteServiceImpl implements PortalInviteService {
         if (inviteToken == null || inviteToken.isBlank()) {
             throw new BusinessException(400, "邀请令牌不能为空");
         }
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         String hash = sha256(inviteToken);
         SrmSupplierInvite invite = inviteMapper.selectOne(new LambdaQueryWrapper<SrmSupplierInvite>()
                 .eq(SrmSupplierInvite::getTenantId, tenantId)
@@ -110,9 +110,9 @@ public class PortalInviteServiceImpl implements PortalInviteService {
     }
 
     private String operator() {
-        String username = SrmTenantContext.require().username();
+        String username = ServiceIdentityContext.require().username();
         return username == null || username.isBlank()
-                ? String.valueOf(SrmTenantContext.require().userId()) : username;
+                ? String.valueOf(ServiceIdentityContext.require().userId()) : username;
     }
 
     private SrmViews.InviteVO inviteView(SrmSupplierInvite invite) {

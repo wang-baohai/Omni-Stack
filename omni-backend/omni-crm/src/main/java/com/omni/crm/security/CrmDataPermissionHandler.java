@@ -1,6 +1,8 @@
 package com.omni.crm.security;
 
 import com.baomidou.mybatisplus.extension.plugins.handler.MultiDataPermissionHandler;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.persistence.DataScopeTablePolicy;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -8,6 +10,7 @@ import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
@@ -16,7 +19,8 @@ import java.util.Set;
  *
  * @author Omni-Stack Team
  */
-public class CrmDataPermissionHandler implements MultiDataPermissionHandler {
+@Component
+public class CrmDataPermissionHandler implements MultiDataPermissionHandler, DataScopeTablePolicy {
 
     private static final Set<String> AUTHORIZED_TABLES = Set.of(
             "crm_lead", "crm_customer", "crm_contact", "crm_opportunity", "crm_activity");
@@ -29,7 +33,7 @@ public class CrmDataPermissionHandler implements MultiDataPermissionHandler {
             return null;
         }
         String alias = table.getAlias() == null ? table.getName() : table.getAlias().getName();
-        CrmDataScopeContext.ScopeInfo info = CrmDataScopeContext.get();
+        ServiceDataScopeContext.ScopeInfo info = ServiceDataScopeContext.get();
         if (info == null || info.effectiveScope() == null) {
             return deny(alias);
         }

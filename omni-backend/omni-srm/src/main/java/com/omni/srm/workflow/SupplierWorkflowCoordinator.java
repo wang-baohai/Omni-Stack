@@ -8,7 +8,8 @@ import com.omni.srm.domain.SrmStateMachine;
 import com.omni.srm.dto.WorkflowContracts;
 import com.omni.srm.entity.SrmSupplier;
 import com.omni.srm.mapper.SrmSupplierMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +37,10 @@ public class SupplierWorkflowCoordinator {
      * 使用已持久化快照启动 Workflow；任何不确定失败均保留原幂等键供重试。
      *
      * @param command 已持久化启动快照
+     * @return 流程实例 ID
      */
-    public void start(SupplierWorkflowCommand command) {
-        if (!command.tenantId().equals(SrmTenantContext.requireTenantId())) {
+    public String start(SupplierWorkflowCommand command) {
+        if (!command.tenantId().equals(ServiceIdentityContext.requireTenantId())) {
             throw new BusinessException(403, "Workflow 启动快照与当前租户不一致");
         }
         try {
@@ -47,6 +49,7 @@ public class SupplierWorkflowCoordinator {
                     workflowInternalClient.start(command.tenantId(), request);
             WorkflowContracts.StartResponse data = validateResponse(command, response);
             workflowStateService.markStarted(command, data.getProcessInstanceId());
+            return data.getProcessInstanceId();
         } catch (FeignException exception) {
             markFailedSafely(command, exception);
             throw new BusinessException(503, "Workflow 服务暂时不可用，请稍后重试启动");
@@ -81,14 +84,17 @@ public class SupplierWorkflowCoordinator {
                 .set(SrmSupplier::getWorkflowCompletedTime, null));
 
         supplier.setApprovalAttempt(nextAttempt);
-        SrmTenantContext.RequestIdentity identity = SrmTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         SupplierWorkflowCommand command = new SupplierWorkflowCommand(
                 supplier.getId(), tenantId, supplier.getSupplierNo(),
                 supplier.getName(), supplier.getCategoryCode(),
                 nextAttempt, requestId, businessKey, modelVersionId,
                 identity.userId(), identity.username());
         try {
-            start(command);
+            String processInstanceId = start(command);
+            supplier.setProcessInstanceId(processInstanceId);
+            supplier.setWorkflowStartStatus(SrmStateMachine.START_STARTED);
+            supplier.setStatus(SrmStateMachine.SupplierStatus.APPROVING.name());
         } catch (RuntimeException startException) {
             log.warn("供应商准入工作流启动失败，供应商保留 PENDING_REVIEW 状态: tenantId={}, supplierId={}",
                     tenantId, supplier.getId(), startException);
@@ -97,16 +103,27 @@ public class SupplierWorkflowCoordinator {
 
     /**
      * 终止供应商准入流程实例。
+     * <p>校验远端业务响应：null/非 200/HTTP 异常均视为终止失败，调用方须据此保留本地状态。</p>
      *
      * @param tenantId          租户 ID
      * @param processInstanceId 流程实例 ID
      * @param reason            终止原因
      */
     public void terminate(Long tenantId, String processInstanceId, String reason) {
+        R<Void> response;
         try {
-            workflowInternalClient.terminate(tenantId, processInstanceId, reason);
+            Long userId = ServiceIdentityContext.require().userId();
+            response = workflowInternalClient.terminate(tenantId, userId, processInstanceId, reason);
         } catch (FeignException exception) {
             throw new BusinessException(503, "Workflow 服务暂时不可用，无法终止流程");
+        }
+        if (response == null || response.getCode() != 200) {
+            int code = response != null ? response.getCode() : 503;
+            String msg = response != null ? response.getMessage() : "null response";
+            log.warn("Workflow 终止远端业务拒绝: tenantId={}, processInstanceId={}, code={}, msg={}",
+                    tenantId, processInstanceId, code, msg);
+            throw new BusinessException(code != 0 ? code : 503,
+                    "Workflow 终止被远端拒绝，本地状态保持不变");
         }
     }
 

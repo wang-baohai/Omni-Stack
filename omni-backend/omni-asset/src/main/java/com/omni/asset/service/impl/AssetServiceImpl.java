@@ -12,7 +12,8 @@ import com.omni.asset.entity.AstAsset;
 import com.omni.asset.entity.AstAssetHistory;
 import com.omni.asset.mapper.AstAssetHistoryMapper;
 import com.omni.asset.mapper.AstAssetMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.service.AssetService;
 import com.omni.asset.service.support.AssetAuditSupport;
 import com.omni.asset.service.support.AssetIdentityGuard;
@@ -58,7 +59,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional(readOnly = true)
     public PageResult<AssetViews.AssetVO> page(AssetRequests.AssetQuery query) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         LambdaQueryWrapper<AstAsset> wrapper = baseQuery(tenantId);
         String keyword = trimToNull(query.getKeyword());
         if (keyword != null) {
@@ -87,14 +88,14 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional(readOnly = true)
     public AssetViews.AssetVO get(Long id) {
-        return AssetViewAssembler.asset(requireVisible(AssetTenantContext.requireTenantId(), id));
+        return AssetViewAssembler.asset(requireVisible(ServiceIdentityContext.requireTenantId(), id));
     }
 
     /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
     public PageResult<AssetViews.AssetVO> pageMine(AssetRequests.MyAssetQuery query) {
-        AssetTenantContext.RequestIdentity identity = AssetTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         LambdaQueryWrapper<AstAsset> wrapper = baseQuery(identity.tenantId())
                 .eq(AstAsset::getCurrentUserId, identity.userId());
         String keyword = trimToNull(query.getKeyword());
@@ -116,7 +117,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional
     public AssetViews.AssetVO create(AssetRequests.CreateAssetRequest request) {
-        AssetTenantContext.RequestIdentity identity = AssetTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         accessGuard.requireOwnerWritable(request.getOwnerUserId(), request.getOwnerUnitId());
         identityGuard.requireActiveUserInUnit(
                 identity.tenantId(), request.getOwnerUserId(), request.getOwnerUnitId());
@@ -152,7 +153,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional
     public AssetViews.AssetVO update(Long id, AssetRequests.UpdateAssetRequest request) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         accessGuard.requireOwnerWritable(request.getOwnerUserId(), request.getOwnerUnitId());
         identityGuard.requireActiveUserInUnit(
                 tenantId, request.getOwnerUserId(), request.getOwnerUnitId());
@@ -190,7 +191,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional
     public void delete(Long id, Integer version) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstAsset current = requireLocked(tenantId, id);
         requireVersion(current, version);
         if (!AssetStateMachine.IN_STOCK.equals(current.getStatus())
@@ -219,7 +220,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional(readOnly = true)
     public PageResult<AssetViews.HistoryVO> history(Long id, AssetRequests.HistoryQuery query) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         requireVisible(tenantId, id);
         Page<AstAssetHistory> page = historyMapper.selectPage(
                 new Page<>(query.getPage(), query.getSize()),
@@ -238,7 +239,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional
     public AssetViews.AssetVO allocate(Long id, AssetRequests.AllocateRequest request) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         accessGuard.requireUnitWritable(request.getTargetUnitId());
         identityGuard.requireActiveUserInUnit(
                 tenantId, request.getTargetUserId(), request.getTargetUnitId());
@@ -275,7 +276,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional
     public AssetViews.AssetVO accept(Long id, AssetRequests.VersionCommandRequest request) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstAsset current = requireLocked(tenantId, id);
         accessGuard.requireAssignedToCurrentUser(current);
         requireVersion(current, request.getVersion());
@@ -288,7 +289,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional
     public AssetViews.AssetVO returnAsset(Long id, AssetRequests.VersionCommandRequest request) {
-        Long tenantId = AssetTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         AstAsset current = requireLocked(tenantId, id);
         accessGuard.requireAssignedToCurrentUser(current);
         requireVersion(current, request.getVersion());
@@ -326,7 +327,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional
     public AssetViews.AssetVO startMaintenance(Long id, AssetRequests.VersionCommandRequest request) {
-        AstAsset current = requireLocked(AssetTenantContext.requireTenantId(), id);
+        AstAsset current = requireLocked(ServiceIdentityContext.requireTenantId(), id);
         requireVersion(current, request.getVersion());
         requireNoActiveOperation(current);
         return transition(current, request.getVersion(), AssetStateMachine.MAINTENANCE,
@@ -337,7 +338,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     @Transactional
     public AssetViews.AssetVO completeMaintenance(Long id, AssetRequests.VersionCommandRequest request) {
-        AstAsset current = requireLocked(AssetTenantContext.requireTenantId(), id);
+        AstAsset current = requireLocked(ServiceIdentityContext.requireTenantId(), id);
         requireVersion(current, request.getVersion());
         requireNoActiveOperation(current);
         return transition(current, request.getVersion(), AssetStateMachine.IN_USE,
@@ -471,7 +472,7 @@ public class AssetServiceImpl implements AssetService {
         history.setAssetId(asset.getId());
         history.setFromStatus(fromStatus);
         history.setToStatus(toStatus);
-        history.setChangedByUserId(AssetTenantContext.require().userId());
+        history.setChangedByUserId(ServiceIdentityContext.require().userId());
         history.setChangedTime(LocalDateTime.now());
         history.setRemark(trimToNull(remark));
         AssetAuditSupport.created(history);

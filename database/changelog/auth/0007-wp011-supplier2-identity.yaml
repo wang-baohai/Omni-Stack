@@ -1,0 +1,45 @@
+databaseChangeLog:
+  # WP-011 S18(P0-2) forward-only 增量：补齐 full 预设 E2E 所需的第二供应商身份 supplier2。
+  # 背景：E2eTokenFixture 硬需要 admin/zhangsan/supplier1/supplier2 四个身份，但历史种子（0003 引用的
+  # database/seed/history 冻结副本）只含到 supplier1，全新库无法复现该身份，导致 full 预设 E2E 夹具 fail-fast。
+  # 已应用的 changeSet 与历史种子副本一律不改；canonical scripts/sql/seed/auth.sql 同步追加同一批语句。
+  - changeSet:
+      id: auth-0007-wp011-supplier2-identity
+      author: omni-stack
+      labels: database:auth,wp011
+      runInTransaction: false
+      comment: 新增 supplier2 种子用户（租户 1、SUPPLIER 角色 33、主组织 1），幂等 INSERT IGNORE 可重复执行
+      preConditions:
+        - onFail: HALT
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: omni_auth
+            sql: SELECT DATABASE()
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO `sys_user`
+                (`id`, `tenant_id`, `username`, `password`, `nickname`, `email`, `phone`, `gender`, `primary_unit_id`, `status`, `create_by`)
+              VALUES
+                (201, 1, 'supplier2', '$2b$10$TWIuwQVfxgsioXe/2O9cgOXtuZwOREr1IBkgTj2.nhA1NSlnad1oa', '李思远', 'lisiyuan@yuanqi-materials.com', '13987654321', 1, 1, 1, 'system');
+              INSERT IGNORE INTO `sys_user_role` (`user_id`, `role_id`) VALUES (201, 33);
+              INSERT IGNORE INTO `sys_user_unit` (`user_id`, `unit_id`, `is_primary`) VALUES (201, 1, 1);
+  - changeSet:
+      id: auth-0007-wp011-supplier2-assert
+      author: omni-stack
+      labels: database:auth,wp011
+      runInTransaction: false
+      comment: 迁移后即校验 supplier2 已启用，避免再次出现“种子存在但夹具找不到身份”的静默漂移
+      preConditions:
+        - onFail: HALT
+        - dbms:
+            type: mysql
+      changes:
+        - sql:
+            sql: |
+              SELECT IF(
+                (SELECT COUNT(*) FROM `sys_user` WHERE `tenant_id` = 1 AND `username` = 'supplier2' AND `status` = 1) = 1,
+                'supplier2-ready',
+                (SELECT CONCAT('supplier2-missing:', COUNT(*)) FROM `sys_user` WHERE `username` = 'supplier2')
+              );

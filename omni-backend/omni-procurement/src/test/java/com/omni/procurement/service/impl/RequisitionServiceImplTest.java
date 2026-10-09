@@ -18,8 +18,9 @@ import com.omni.procurement.mapper.ProcMaterialCategoryMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcRequisitionLineMapper;
 import com.omni.procurement.mapper.ProcRequisitionMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.ProcTenantInitializer;
 import com.omni.procurement.service.RequisitionWorkflowStateService;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
@@ -79,14 +80,14 @@ class RequisitionServiceImplTest {
                 tenantInitializer, requisitionMapper, lineMapper, materialMapper, categoryMapper,
                 new ProcRecordAccessGuard(), workflowStateService, workflowCoordinator,
                 workflowInternalClient);
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(7L, 41L, "buyer"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 41L, "buyer"));
     }
 
     /** 清理请求上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 未分配给当前用户的 taskId 不能触发完整审批业务视图读取。 */
@@ -133,14 +134,14 @@ class RequisitionServiceImplTest {
         assertThat(captor.getValue().getBusinessKey()).isEqualTo("100:2");
         assertThat(result.getTaskId()).isEqualTo("task-9");
         assertThat(result.getRequisition().getId()).isEqualTo(100L);
-        assertThat(ProcDataScopeContext.get()).isNull();
+        assertThat(ServiceDataScopeContext.get()).isNull();
     }
 
     /** 更新被拒绝请购必须显式回到 DRAFT 并清理上一轮 Workflow 快照。 */
     @Test
     void shouldMoveRejectedRequisitionBackToDraftAndClearWorkflowSnapshot() {
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
-                7L, 41L, "procurement:requisition:update", 12L, "SELF", Set.of(12L)));
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
+                7L, 41L, "procurement:requisition:update", 12L, "SELF", Set.of(12L), null));
         ProcRequisition rejected = approving();
         rejected.setStatus(RequisitionStateMachine.REJECTED);
         rejected.setWorkflowStartStatus(RequisitionStateMachine.START_STARTED);

@@ -6,10 +6,16 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.omni.common.core.internal.InternalDataScopeDTO;
-import com.omni.crm.config.MybatisPlusConfig;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.config.ServicePersistenceAutoConfiguration;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
+import com.omni.common.service.persistence.DataScopeTablePolicy;
+import com.omni.common.service.persistence.TenantTablePolicy;
 import com.omni.crm.entity.CrmLead;
-import com.omni.crm.security.CrmDataScopeContext;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.crm.security.CrmDataPermissionHandler;
+import com.omni.crm.security.CrmTenantTablePolicy;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -22,6 +28,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -64,7 +71,16 @@ class CrmMysqlInterceptorIntegrationTest {
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
         factoryBean.setDataSource(dataSource);
         factoryBean.setConfiguration(configuration);
-        MybatisPlusInterceptor interceptor = new MybatisPlusConfig().mybatisPlusInterceptor();
+        ServiceIdentityProperties properties = new ServiceIdentityProperties();
+        properties.getTenant().setEnabled(true);
+        properties.getDataScope().setEnabled(true);
+        StaticListableBeanFactory beans = new StaticListableBeanFactory();
+        beans.addBean("tenantTablePolicy", new CrmTenantTablePolicy());
+        beans.addBean("dataScopeTablePolicy", new CrmDataPermissionHandler());
+        MybatisPlusInterceptor interceptor = new ServicePersistenceAutoConfiguration().mybatisPlusInterceptor(
+                properties,
+                beans.getBeanProvider(TenantTablePolicy.class),
+                beans.getBeanProvider(DataScopeTablePolicy.class));
         factoryBean.setPlugins(interceptor);
         sqlSessionFactory = factoryBean.getObject();
     }
@@ -88,20 +104,20 @@ class CrmMysqlInterceptorIntegrationTest {
                     (2, 1, 11, 101, 0),
                     (3, 2, 10, 100, 0)
                 """);
-        CrmTenantContext.set(new CrmTenantContext.RequestIdentity(10L, 1L, "integration"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(10L, 1L, "integration"));
     }
 
     /** 每个用例后必须清理线程上下文。 */
     @AfterEach
     void clearContexts() {
-        CrmDataScopeContext.clear();
-        CrmTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 分页 records 与 total 必须使用相同 SELF 范围，并排除其他租户。 */
     @Test
     void shouldApplyTenantAndSelfScopeToPageRecordsAndTotal() {
-        CrmDataScopeContext.set(scope("SELF", Set.of()));
+        ServiceDataScopeContext.set(scope("SELF", Set.of()));
 
         try (SqlSession session = sqlSessionFactory.openSession(true)) {
             IPage<CrmLead> result = session.getMapper(ScopedLeadMapper.class)
@@ -115,7 +131,7 @@ class CrmMysqlInterceptorIntegrationTest {
     /** TENANT 范围必须看见当前租户全部记录，但不能看见第二租户。 */
     @Test
     void shouldKeepAllScopeInsideCurrentTenant() {
-        CrmDataScopeContext.set(scope("ALL", Set.of()));
+        ServiceDataScopeContext.set(scope("ALL", Set.of()));
 
         try (SqlSession session = sqlSessionFactory.openSession(true)) {
             ScopedLeadMapper mapper = session.getMapper(ScopedLeadMapper.class);
@@ -136,7 +152,7 @@ class CrmMysqlInterceptorIntegrationTest {
     /** 跨租户 UPDATE 必须被 TenantLine 拦截，同租户 SELF 越权也必须被拒绝。 */
     @Test
     void shouldRejectCrossTenantAndOutOfScopeUpdates() {
-        CrmDataScopeContext.set(scope("SELF", Set.of()));
+        ServiceDataScopeContext.set(scope("SELF", Set.of()));
 
         try (SqlSession session = sqlSessionFactory.openSession(true)) {
             ScopedLeadMapper mapper = session.getMapper(ScopedLeadMapper.class);

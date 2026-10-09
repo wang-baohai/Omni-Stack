@@ -9,7 +9,7 @@ import com.omni.srm.dto.SrmViews;
 import com.omni.srm.entity.SrmSupplier;
 import com.omni.srm.entity.SrmSupplierQualification;
 import com.omni.srm.mapper.SrmSupplierQualificationMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.QualificationService;
 import com.omni.srm.service.RiskService;
 import com.omni.srm.service.support.SrmAuditSupport;
@@ -58,7 +58,7 @@ public class QualificationServiceImpl implements QualificationService {
         SrmSupplier supplier = accessGuard.requireSupplier(supplierId);
         validateDateRange(request.getIssueDate(), request.getExpiryDate());
         SrmSupplierQualification qualification = new SrmSupplierQualification();
-        qualification.setTenantId(SrmTenantContext.requireTenantId());
+        qualification.setTenantId(ServiceIdentityContext.requireTenantId());
         qualification.setSupplierId(supplierId);
         qualification.setQualificationName(request.getQualificationName());
         qualification.setCertificateNo(request.getCertificateNo());
@@ -95,7 +95,7 @@ public class QualificationServiceImpl implements QualificationService {
         if (request.getIssueDate() != null) update.set(SrmSupplierQualification::getIssueDate, request.getIssueDate());
         if (request.getExpiryDate() != null) update.set(SrmSupplierQualification::getExpiryDate, request.getExpiryDate());
         update.set(SrmSupplierQualification::getUpdateTime, LocalDateTime.now())
-                .set(SrmSupplierQualification::getUpdateBy, SrmTenantContext.require().username());
+                .set(SrmSupplierQualification::getUpdateBy, ServiceIdentityContext.require().username());
         if (qualificationMapper.update(null, update) != 1) {
             throw new BusinessException(409, "记录已被其他用户修改，请刷新后重试");
         }
@@ -117,7 +117,7 @@ public class QualificationServiceImpl implements QualificationService {
                 .set(SrmSupplierQualification::getDeleted, 1)
                 .setSql("version = version + 1");
         update.set(SrmSupplierQualification::getUpdateTime, LocalDateTime.now())
-                .set(SrmSupplierQualification::getUpdateBy, SrmTenantContext.require().username());
+                .set(SrmSupplierQualification::getUpdateBy, ServiceIdentityContext.require().username());
         if (qualificationMapper.update(null, update) != 1) {
             throw new BusinessException(409, "记录已被其他用户修改，请刷新后重试");
         }

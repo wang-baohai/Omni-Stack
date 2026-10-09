@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - include:
+      file: database/changelog/auth/0001-auth-schema.yaml
+  - include:
+      file: database/changelog/auth/0002-tenant-provisioning.yaml
+  - include:
+      file: database/changelog/common/db.changelog-common-mq.yaml
+  - include:
+      file: database/changelog/auth/0003-auth-seed.yaml
+  - include:
+      file: database/changelog/auth/0004-procurement-approval-rule-labels.yaml
+  - include:
+      file: database/changelog/auth/0005-admin-procurement-approval-candidate.yaml
+  - include:
+      file: database/changelog/auth/0006-wp009-auth-management.yaml
+  # WP-011 S18(P0-2)：forward-only 补齐 full 预设 E2E 第二供应商身份 supplier2
+  - include:
+      file: database/changelog/auth/0007-wp011-supplier2-identity.yaml

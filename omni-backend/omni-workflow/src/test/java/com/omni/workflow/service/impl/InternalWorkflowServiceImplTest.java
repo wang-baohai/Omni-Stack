@@ -3,10 +3,13 @@ package com.omni.workflow.service.impl;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.omni.common.core.result.BusinessException;
 import com.omni.workflow.dto.StartProcessRequest;
+import com.omni.workflow.dto.internal.InternalApprovalPreviewResponse;
+import com.omni.workflow.dto.internal.InternalModelVersionProjection;
 import com.omni.workflow.dto.internal.InternalModelVersionResponse;
 import com.omni.workflow.dto.internal.InternalStartProcessRequest;
 import com.omni.workflow.dto.internal.InternalTaskAssignmentRequest;
 import com.omni.workflow.dto.internal.InternalTaskAssignmentResponse;
+import com.omni.workflow.engine.ApprovalPreviewParser;
 import com.omni.workflow.entity.WfProcessInstanceExt;
 import com.omni.workflow.entity.WfProcessStartRequest;
 import com.omni.workflow.mapper.WfProcessInstanceExtMapper;
@@ -24,6 +27,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
+import java.util.List;
+import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -60,6 +65,9 @@ class InternalWorkflowServiceImplTest {
     private WfProcessModelVersionMapper processModelVersionMapper;
 
     @Mock
+    private ApprovalPreviewParser approvalPreviewParser;
+
+    @Mock
     private TaskQuery taskQuery;
 
     @Mock
@@ -74,7 +82,7 @@ class InternalWorkflowServiceImplTest {
     void setUp() {
         service = new InternalWorkflowServiceImpl(
                 processInstanceService, processStartRequestService, taskService,
-                processInstanceExtMapper, processModelVersionMapper);
+                processInstanceExtMapper, processModelVersionMapper, approvalPreviewParser);
     }
 
     @Test
@@ -119,6 +127,66 @@ class InternalWorkflowServiceImplTest {
                 () -> service.getCurrentPublishedModelVersion(7L, "SRM_SUPPLIER_ONBOARDING"));
 
         assertEquals(404, exception.getCode());
+    }
+
+    @Test
+    void shouldListOnlyMapperApprovedCurrentPublishedModels() {
+        InternalModelVersionProjection projection = projection(88L);
+        when(processModelVersionMapper.selectPublishedByCategory(7L, "purchase"))
+                .thenReturn(List.of(projection));
+
+        var response = service.listPublishedModelVersions(7L, " purchase ");
+
+        assertEquals(1, response.size());
+        assertEquals("采购审批", response.getFirst().getModelName());
+        assertEquals("AVAILABLE", response.getFirst().getAvailability());
+        assertEquals(1, response.getFirst().getApprovalPreviewVersion());
+    }
+
+    @Test
+    void shouldResolveMissingAndUnavailableModelVersionsWithoutCrossTenantFallback() {
+        InternalModelVersionProjection unavailable = projection(88L);
+        unavailable.setStatus("ARCHIVED");
+        when(processModelVersionMapper.selectInternalBatch(7L, List.of(88L, 99L)))
+                .thenReturn(List.of(unavailable));
+
+        var response = service.resolveModelVersions(7L, List.of(88L, 99L));
+
+        assertEquals("UNAVAILABLE", response.get(0).getAvailability());
+        assertEquals("NOT_FOUND", response.get(1).getAvailability());
+        assertEquals(99L, response.get(1).getId());
+    }
+
+    @Test
+    void shouldRejectResolveRequestOverTwoHundredIdsBeforeMapperQuery() {
+        List<Long> ids = LongStream.rangeClosed(1, 201).boxed().toList();
+
+        BusinessException exception = assertThrows(
+                BusinessException.class, () -> service.resolveModelVersions(7L, ids));
+
+        assertEquals(400, exception.getCode());
+        verify(processModelVersionMapper, never()).selectInternalBatch(any(), any());
+    }
+
+    @Test
+    void shouldBuildSafePreviewFromTenantScopedProjection() {
+        InternalModelVersionProjection projection = projection(88L);
+        projection.setBpmnXml("<definitions/>");
+        when(processModelVersionMapper.selectPreviewDetails(7L, 88L)).thenReturn(projection);
+        InternalApprovalPreviewResponse.Node node = InternalApprovalPreviewResponse.Node.builder()
+                .id("approve")
+                .name("经理审批")
+                .type("APPROVAL")
+                .build();
+        when(approvalPreviewParser.parse("<definitions/>"))
+                .thenReturn(new ApprovalPreviewParser.PreviewGraph(
+                        List.of(node), List.of(), false, List.of("经理审批")));
+
+        InternalApprovalPreviewResponse response = service.previewModelVersion(7L, 88L);
+
+        assertEquals(1, response.getApprovalPreviewVersion());
+        assertEquals("经理审批", response.getLinearSummary().getFirst());
+        assertFalse(response.isHasBranches());
     }
 
     @Test
@@ -322,6 +390,21 @@ class InternalWorkflowServiceImplTest {
         request.setStartUserName("buyer");
         request.setVariables(Map.of("amount", 100));
         return request;
+    }
+
+    private InternalModelVersionProjection projection(Long id) {
+        InternalModelVersionProjection projection = new InternalModelVersionProjection();
+        projection.setId(id);
+        projection.setModelId(31L);
+        projection.setModelKey("purchase-approval");
+        projection.setModelName("采购审批");
+        projection.setCategory("purchase");
+        projection.setVersion(3);
+        projection.setProcessDefinitionId("definition-88");
+        projection.setStatus("PUBLISHED");
+        projection.setModelStatus(1);
+        projection.setCurrentPublishedVersionId(id);
+        return projection;
     }
 
     private WorkflowProcessStartRequestService.StartReservationRequest

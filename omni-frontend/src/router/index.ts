@@ -98,7 +98,10 @@ const iconMap: Record<string, string> = {
   'system:oauth2': 'Key',
   'system:online': 'Monitor',
   'system:authrecord': 'Document',
+  'system:auditlog': 'Document',
   'system:xssconfig': 'Filter',
+  'system:config': 'Setting',
+  'system:loginrecord': 'Histogram',
   'base:dict': 'Collection',
   'base:operlog': 'Tickets',
   'base:mqmessage': 'MessageBox',
@@ -299,12 +302,33 @@ export function clearAuthenticatedSession(explicit = true) {
  * - 无需认证的页面：已登录用户访问登录页时重定向到仪表盘，否则放行
  * - 需要认证的页面：未登录用户重定向到首页；已登录但菜单未加载时先加载动态路由
  */
-router.beforeEach(async (to, _from, next) => {
+/**
+ * 公开路由 name → docTitle 语言包键映射（WP-012 F10）。
+ * document.title 经 i18n 解析，不再把英文字面量裸显给 en/ja/ko 用户；
+ * 原 meta.title 保留供面包屑等回退使用，不删字段。
+ */
+const STATIC_DOC_TITLE_KEYS: Record<string, string> = {
+  Home: 'home',
+  Login: 'login',
+  Register: 'register',
+  PortalLogin: 'portalLogin',
+  PortalRegister: 'portalRegister',
+  OAuth2Callback: 'oauthCallback',
+  DeviceAuth: 'deviceAuth',
+  DeviceVerify: 'deviceVerify',
+  Consent: 'consent',
+  SupplierPortal: 'supplierPortal',
+}
+
+router.beforeEach(async (to) => {
   // 使用 i18n 解析页面标题（动态路由优先使用 i18n 翻译，避免数据库乱码）
   const { t } = i18n.global
   const permCode = to.meta.permissionCode as string | undefined
+  const staticTitleKey = typeof to.name === 'string' ? STATIC_DOC_TITLE_KEYS[to.name] : undefined
   if (permCode && menuI18nMap[permCode]) {
     document.title = t(menuI18nMap[permCode])
+  } else if (staticTitleKey) {
+    document.title = t(`docTitle.${staticTitleKey}`)
   } else if (to.meta.title) {
     document.title = to.meta.title as string
   }
@@ -315,19 +339,19 @@ router.beforeEach(async (to, _from, next) => {
   if (to.meta.requiresAuth === false) {
     // 已登录用户访问登录页时重定向
     if (to.name === 'Login' && userStore.token) {
-      next({ name: 'Home' })
+      return { name: 'Home' }
     } else if (to.name === 'PortalLogin' && userStore.token) {
-      next('/supplier-portal')
+      return '/supplier-portal'
     } else {
-      next()
+      return true
     }
   } else if (!userStore.token) {
     const redirect = safeAppRedirect(to.fullPath)
     // 门户入口保留独立登录体验，其他受保护页面进入管理端登录。
     if (to.meta.portalAccess) {
-      next({ name: 'PortalLogin', query: redirect ? { redirect } : undefined })
+      return { name: 'PortalLogin', query: redirect ? { redirect } : undefined }
     } else {
-      next({ name: 'Login', query: redirect ? { redirect } : undefined })
+      return { name: 'Login', query: redirect ? { redirect } : undefined }
     }
   } else {
     // 静态门户路由同样依赖 JWT 权限，不能只依赖动态菜单加载时的初始化。
@@ -343,9 +367,9 @@ router.beforeEach(async (to, _from, next) => {
         await permissionStore.loadMenus()
         registerDynamicRoutes(permissionStore.menuTree)
         // 重新导航到目标路由（使用 fullPath 避免传递内部路由对象状态）
-        next({ path: to.fullPath, replace: true })
+        return { path: to.fullPath, replace: true }
       } catch {
-        next({ name: 'MenuLoadError', query: { redirect: to.fullPath } })
+        return { name: 'MenuLoadError', query: { redirect: to.fullPath } }
       }
     } else {
       // 菜单已加载（可能由 Home 页预加载），确保动态路由已注册
@@ -358,24 +382,20 @@ router.beforeEach(async (to, _from, next) => {
       const canAccessPortal = isSupplier || (canEnroll && !hasManagementPermission)
 
       if (to.meta.portalAccess && !canAccessPortal) {
-        next({ name: 'Home' })
-        return
+        return { name: 'Home' }
       }
 
       // 只有门户权限的 USER/SUPPLIER 账号不得进入管理后台。
       if (to.path.startsWith('/admin') && isSupplier && !hasManagementPermission) {
-        next('/supplier-portal')
-        return
+        return '/supplier-portal'
       }
       if (to.path.startsWith('/admin') && !hasManagementPermission) {
-        next(canAccessPortal ? '/supplier-portal' : '/')
-        return
+        return canAccessPortal ? '/supplier-portal' : '/'
       }
       if (to.path === '/admin/dashboard' && assetSelfServiceOnly) {
-        next('/admin/asset/asset')
-        return
+        return '/admin/asset/asset'
       }
-      next()
+      return true
     }
   }
 })

@@ -10,9 +10,9 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { fetchCaptcha, registerUser, listTenants } from '@/api/auth'
 import type { TenantOption } from '@/api/auth'
 import { useAppStore } from '@/stores/app'
-import { storeLang } from '@/i18n'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const router = useRouter()
 const appStore = useAppStore()
 
@@ -45,11 +45,11 @@ function validateConfirmPassword(_rule: unknown, value: string, callback: (error
 const rules: FormRules = {
   username: [
     { required: true, message: () => t('register.username'), trigger: 'blur' },
-    { min: 3, max: 32, message: '用户名长度 3-32 个字符', trigger: 'blur' },
+    { min: 3, max: 32, message: () => t('validation.usernameLength'), trigger: 'blur' },
   ],
   password: [
     { required: true, message: () => t('register.password'), trigger: 'blur' },
-    { min: 6, message: '密码至少 6 个字符', trigger: 'blur' },
+    { min: 6, message: () => t('validation.passwordMin'), trigger: 'blur' },
   ],
   confirmPassword: [
     { required: true, message: () => t('register.confirmPassword'), trigger: 'blur' },
@@ -121,11 +121,6 @@ function toggleTheme() {
   appStore.setTheme(appStore.theme === 'dark' ? 'light' : 'dark')
 }
 
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 
 onMounted(() => {
   loadCaptcha()
@@ -144,10 +139,7 @@ onMounted(() => {
         </el-button>
       </div>
       <div class="register-top-right">
-        <el-button text :title="t('lang.switch')" @click="toggleLang">
-          <el-icon><Globe /></el-icon>
-          {{ locale === 'zh-CN' ? 'EN' : '中' }}
-        </el-button>
+        <LanguageSelector />
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>
             <Moon v-if="appStore.theme === 'dark'" />

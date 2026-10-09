@@ -6,6 +6,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.omni.gateway.config.JwkKeyProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -18,8 +19,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +48,8 @@ import java.util.List;
  *       拒绝已被管理员强制踢出的 Token</li>
  *   <li><b>身份注入</b> — 从 JWT claims 中提取用户信息，注入到请求头中供下游服务使用：
  *       <ul>
+ *         <li>{@code X-Gateway-Assertion} — HMAC-SHA256 签名断言（{@code userId|tenantId|username|issuedAt}），
+ *             下游服务据此校验身份未被伪造</li>
  *         <li>{@code X-User-Id} — 用户 ID（sub claim）</li>
  *         <li>{@code X-Tenant-Id} — 租户 ID（tenant_id claim）</li>
  *         <li>{@code X-User-Name} — 用户名（username claim）</li>
@@ -50,6 +58,14 @@ import java.util.List;
  *       </ul>
  *   </li>
  * </ol>
+ *
+ * <h3>服务间身份信任边界</h3>
+ * <p>
+ * 仅靠 {@code X-Gateway-Forwarded} 与明文身份头无法区分“网关注入”与“攻击者直连服务端口伪造”，
+ * 因此网关使用共享密钥（{@code omni.gateway.assertion-secret} / 环境变量
+ * {@code GATEWAY_ASSERTION_SECRET}）对身份签发短时效 HMAC 断言。
+ * 密钥缺失时（非 test profile）网关 fail-closed：不转发任何身份，直接返回 503。
+ * </p>
  *
  * <h3>错误处理设计</h3>
  * <ul>
@@ -77,15 +93,36 @@ public class AuthFilter implements GlobalFilter, Ordered {
     /** Gateway 转发标记头，下游服务据此判断请求是否经过 Gateway */
     private static final String GATEWAY_FORWARDED_HEADER = "X-Gateway-Forwarded";
     private static final String GATEWAY_FORWARDED_VALUE = "true";
+    /** 网关 HMAC 签名断言头，下游服务用它判定身份头未被伪造 */
+    static final String GATEWAY_ASSERTION_HEADER = "X-Gateway-Assertion";
+    /** 断言头格式：{@code Base64URL(payload) + ":" + Base64URL(HMAC-SHA256(payload))} */
+    private static final String ASSERTION_SEPARATOR = ":";
+    /** 断言 payload 字段分隔符：{@code userId|tenantId|username|issuedAtEpochSecond} */
+    private static final String ASSERTION_PAYLOAD_SEPARATOR = "|";
+    /** 断言签名算法 */
+    private static final String ASSERTION_HMAC_ALGORITHM = "HmacSHA256";
+    /** HMAC 密钥最小长度（字节），低于此强度视为弱密钥，fail-closed 拒绝签发。 */
+    private static final int MIN_ASSERTION_SECRET_BYTES = 32;
     /** 所有只能由网关注入、不能信任客户端输入的身份头。 */
     private static final List<String> TRUSTED_IDENTITY_HEADERS = List.of(
             "X-User-Id", "X-Tenant-Id", "X-User-Name", "X-User-Roles", "X-User-Scopes",
-            "X-Internal-Token", GATEWAY_FORWARDED_HEADER);
+            "X-Internal-Token", GATEWAY_FORWARDED_HEADER, GATEWAY_ASSERTION_HEADER);
 
     /** RSA 公钥提供者，用于获取 JWT 签名验证所需的公钥 */
     private final JwkKeyProvider jwkKeyProvider;
     /** Redis 响应式模板，用于查询 Token 黑名单 */
     private final ReactiveStringRedisTemplate redisTemplate;
+
+    /**
+     * 网关签名断言密钥。优先取配置项 {@code omni.gateway.assertion-secret}，
+     * 未配置时回退环境变量 {@code GATEWAY_ASSERTION_SECRET}；两者都为空时 fail-closed。
+     */
+    @Value("${omni.gateway.assertion-secret:#{systemEnvironment['GATEWAY_ASSERTION_SECRET'] ?: ''}}")
+    private String gatewayAssertionSecret;
+
+    /** 当前激活 profile，包含 {@code test} 时允许密钥缺失（单测/切片测试场景）。 */
+    @Value("${spring.profiles.active:}")
+    private String activeProfiles;
 
     /**
      * 过滤器主方法，拦截所有经过网关的请求。
@@ -109,12 +146,17 @@ public class AuthFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-        // Step 1: 公开路径直接放行（登录、验证码、租户列表、健康检查等）
+        // Step 1: 公开路径直接放行（登录、验证码、租户列表、健康检查、OAuth2 端点等）
         if (isPublicPath(path)) {
-            // 公开路径剥离 Authorization 头，避免超大 JWT 转发到下游 Tomcat 触发 400
+            // 公开路径仅剥离超大 Bearer JWT 的 Authorization 头，避免转发到下游 Tomcat 触发 400；
+            // 但 OAuth2 confidential 客户端(client_secret_basic)需要在该头里携带客户端凭据访问
+            // /oauth2/token 等端点，若一并剥离会导致 SAS 收到匿名请求并报 invalid_client，因此 Basic 头必须透传。
             ServerHttpRequest mutatedRequest = request.mutate()
                     .headers(h -> {
-                        h.remove(AUTH_HEADER);
+                        String authValue = h.getFirst(AUTH_HEADER);
+                        if (authValue == null || authValue.startsWith(BEARER_PREFIX)) {
+                            h.remove(AUTH_HEADER);
+                        }
                         TRUSTED_IDENTITY_HEADERS.forEach(h::remove);
                         h.set(GATEWAY_FORWARDED_HEADER, GATEWAY_FORWARDED_VALUE);
                     })
@@ -140,16 +182,44 @@ public class AuthFilter implements GlobalFilter, Ordered {
                     // Step 6: 将 JWT claims 注入请求头，传递给下游微服务
                     // 下游服务通过 @RequestHeader("X-User-Id") 等方式获取用户身份
                     // 移除原始 Authorization 头，避免转发超大 JWT 导致下游 Tomcat 拒绝请求
+                    String secret = resolveAssertionSecret();
+                    if (secret.isEmpty() && !isTestProfile()) {
+                        // fail-closed：无密钥则无法签发可验证断言，宁可不转发身份也不能留下可伪造的信任链
+                        log.error("网关签名断言密钥未配置（omni.gateway.assertion-secret / GATEWAY_ASSERTION_SECRET），"
+                                + "拒绝为受保护请求签发身份断言: path={}", path);
+                        return writeServiceUnavailableResponse(exchange, "网关身份签名未就绪，请联系管理员");
+                    }
+                    if (isWeakSecret(secret)) {
+                        log.error("网关签名断言密钥强度没有达到 {} 字节最低要求，拒绝签发断言: path={}",
+                                MIN_ASSERTION_SECRET_BYTES, path);
+                        return writeServiceUnavailableResponse(exchange, "网关身份签名未就绪，请联系管理员");
+                    }
+                    String assertion;
+                    try {
+                        assertion = secret.isEmpty()
+                                ? null
+                                : buildGatewayAssertion(claims.getSubject(),
+                                        getClaimAsString(claims, "tenant_id"),
+                                        getClaimAsString(claims, "username"), secret);
+                    } catch (IllegalStateException e) {
+                        log.error("网关签名断言生成失败，拒绝转发身份: path={}, reason={}", path, e.getMessage());
+                        return writeServiceUnavailableResponse(exchange, "网关身份签名未就绪，请联系管理员");
+                    }
+                    final String assertionHeader = assertion;
                     ServerHttpRequest mutatedRequest = request.mutate()
                             .headers(h -> {
                                 h.remove(AUTH_HEADER);
                                 TRUSTED_IDENTITY_HEADERS.forEach(h::remove);
                                 h.set(GATEWAY_FORWARDED_HEADER, GATEWAY_FORWARDED_VALUE);
+                                // 向后兼容：旧服务仍可读明文身份头；新服务必须验证 X-Gateway-Assertion
                                 h.set("X-User-Id", claims.getSubject());
                                 h.set("X-Tenant-Id", getClaimAsString(claims, "tenant_id"));
                                 h.set("X-User-Name", getClaimAsString(claims, "username"));
                                 h.set("X-User-Roles", getClaimAsString(claims, "roles"));
                                 h.set("X-User-Scopes", getClaimAsString(claims, "scope"));
+                                if (assertionHeader != null) {
+                                    h.set(GATEWAY_ASSERTION_HEADER, assertionHeader);
+                                }
                             })
                             .build();
                     return chain.filter(exchange.mutate().request(mutatedRequest).build());
@@ -174,6 +244,77 @@ public class AuthFilter implements GlobalFilter, Ordered {
     @Override
     public int getOrder() {
         return -100;
+    }
+
+    /**
+     * 解析签名断言密钥：配置项优先，未配置时回退环境变量。
+     *
+     * @return 去空白后的密钥，未配置时返回空字符串
+     */
+    private String resolveAssertionSecret() {
+        return gatewayAssertionSecret == null ? "" : gatewayAssertionSecret.trim();
+    }
+
+    /**
+     * 判断当前是否为测试 profile（测试环境允许不配置密钥）。
+     *
+     * @return 激活 profile 包含 {@code test} 时返回 true
+     */
+    private boolean isTestProfile() {
+        return activeProfiles != null && activeProfiles.toLowerCase().contains("test");
+    }
+
+    /**
+     * 判断密钥是否过弱（非空但不足 {@value #MIN_ASSERTION_SECRET_BYTES} 字节）。
+     *
+     * @param secret 已trim 的密钥
+     * @return 弱密钥返回 true；空密钥由 {@link #isTestProfile()} 分支单独处理
+     */
+    private boolean isWeakSecret(String secret) {
+        return !secret.isEmpty()
+                && secret.getBytes(StandardCharsets.UTF_8).length < MIN_ASSERTION_SECRET_BYTES;
+    }
+
+    /**
+     * 生成 {@code X-Gateway-Assertion} 头值。
+     * <p>
+     * 格式：{@code Base64URL(payload) + ":" + Base64URL(HMAC-SHA256(payload, secret))}，
+     * payload 为 {@code userId|tenantId|username|issuedAtEpochSecond}，均使用无填充 Base64。
+     * 下游服务用同一密钥重算签名并校验时间戳窗口（±5 分钟）。
+     * </p>
+     *
+     * @param userId   用户 ID（JWT sub）
+     * @param tenantId 租户 ID
+     * @param username 用户名
+     * @param secret   共享签名密钥，调用方保证非空
+     * @return 签名断言头值
+     * @throws IllegalStateException 密钥不合法或 HMAC 不可用时抛出，由调用方 fail-closed 返回 503
+     */
+    String buildGatewayAssertion(String userId, String tenantId, String username, String secret) {
+        String payload = userId + ASSERTION_PAYLOAD_SEPARATOR + tenantId + ASSERTION_PAYLOAD_SEPARATOR
+                + (username == null ? "" : username) + ASSERTION_PAYLOAD_SEPARATOR
+                + (System.currentTimeMillis() / 1000L);
+        Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+        return encoder.encodeToString(payload.getBytes(StandardCharsets.UTF_8))
+                + ASSERTION_SEPARATOR
+                + encoder.encodeToString(hmacSha256(payload, secret));
+    }
+
+    /**
+     * 计算 payload 的 HMAC-SHA256 签名。
+     *
+     * @param payload 待签名文本
+     * @param secret  共享密钥
+     * @return 签名字节数组
+     */
+    private byte[] hmacSha256(String payload, String secret) {
+        try {
+            Mac mac = Mac.getInstance(ASSERTION_HMAC_ALGORITHM);
+            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), ASSERTION_HMAC_ALGORITHM));
+            return mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new IllegalStateException("HMAC-SHA256 签名计算失败: " + e.getMessage(), e);
+        }
     }
 
     /** 无需认证的公开路径（精确匹配） */
@@ -340,9 +481,33 @@ public class AuthFilter implements GlobalFilter, Ordered {
      * @return 响应写入完成的 Mono 信号
      */
     private Mono<Void> writeUnauthorizedResponse(ServerWebExchange exchange, String message) {
-        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        return writeJsonResponse(exchange, HttpStatus.UNAUTHORIZED, 401, message);
+    }
+
+    /**
+     * 写入 503 结构化错误响应（签名能力未就绪）。
+     *
+     * @param exchange 当前请求上下文
+     * @param message  错误消息
+     * @return 响应写入完成的 Mono 信号
+     */
+    private Mono<Void> writeServiceUnavailableResponse(ServerWebExchange exchange, String message) {
+        return writeJsonResponse(exchange, HttpStatus.SERVICE_UNAVAILABLE, 503, message);
+    }
+
+    /**
+     * 以 {@code R.fail()} 一致的结构写回 JSON 错误响应。
+     *
+     * @param exchange 当前请求上下文
+     * @param status   HTTP 状态码
+     * @param code     业务错误码
+     * @param message  错误消息
+     * @return 响应写入完成的 Mono 信号
+     */
+    private Mono<Void> writeJsonResponse(ServerWebExchange exchange, HttpStatus status, int code, String message) {
+        exchange.getResponse().setStatusCode(status);
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        String json = "{\"code\":401,\"message\":\"" + message + "\",\"data\":null}";
+        String json = "{\"code\":" + code + ",\"message\":\"" + message + "\",\"data\":null}";
         DataBuffer buffer = exchange.getResponse().bufferFactory()
                 .wrap(json.getBytes(StandardCharsets.UTF_8));
         return exchange.getResponse().writeWith(Mono.just(buffer));

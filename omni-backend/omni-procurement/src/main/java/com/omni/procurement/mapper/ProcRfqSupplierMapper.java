@@ -31,13 +31,12 @@ public interface ProcRfqSupplierMapper extends BaseMapper<ProcRfqSupplier> {
 
     /**
      * 按询价单锁定全部有效供应商邀请，避免定点与报价事件并发覆盖。
+     * <p>使用 XML 映射定义以确保 TenantLine 拦截器在 FOR UPDATE 之前正确插入租户条件。</p>
      *
-     * @param tenantId 租户 ID
+     * @param tenantId 租户 ID（保留用于服务层签名，XML 中由拦截器自动注入）
      * @param rfqId 询价单 ID
      * @return 已锁定的供应商邀请
      */
-    @Select("SELECT * FROM proc_rfq_supplier WHERE tenant_id = #{tenantId} "
-            + "AND rfq_id = #{rfqId} AND deleted = 0 ORDER BY id FOR UPDATE")
-    List<ProcRfqSupplier> selectForUpdateByRfq(@Param("tenantId") Long tenantId,
-                                               @Param("rfqId") Long rfqId);
+    List<ProcRfqSupplier> selectForUpdateByRfqXml(@Param("tenantId") Long tenantId,
+                                                   @Param("rfqId") Long rfqId);
 }

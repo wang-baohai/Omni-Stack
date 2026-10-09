@@ -78,8 +78,8 @@ public class CaptchaServiceImpl implements CaptchaService {
      * {@inheritDoc}
      *
      * <p>校验用户提交的验证码是否与 Redis 中存储的值匹配。
-     * 验证码为<b>一次性使用</b>：Redis 键在获取后立即删除，
-     * 无论验证码是否匹配，防止重放攻击。</p>
+     * 验证码为<b>一次性使用</b>：以原子 GETDEL（{@code getAndDelete}）读取并删除键，
+     * 无论验证码是否匹配均单次消费，防止并发双读与重放攻击。</p>
      *
      * @throws BusinessException 验证码已过期（Redis 键不存在）或验证码不匹配时抛出，错误码 400
      */
@@ -87,12 +87,12 @@ public class CaptchaServiceImpl implements CaptchaService {
     public void validate(String captchaKey, String captchaCode) {
         String redisKey = CAPTCHA_PREFIX + captchaKey;
 
-        // 从 Redis 获取存储的验证码文本，并立即删除键（一次性使用）
-        String stored = stringRedisTemplate.opsForValue().get(redisKey);
-        stringRedisTemplate.delete(redisKey);
+        // RF03/FA01：原子读取并删除（Redis GETDEL），消除 GET 与 DELETE 之间的并发双读窗口，
+        // 保证并发提交同一有效 key 时至多一个消费者可取到验证码文本；无论匹配与否均一次性消费。
+        String stored = stringRedisTemplate.opsForValue().getAndDelete(redisKey);
 
         if (stored == null) {
-            // 键不存在，说明验证码已过期或从未生成
+            // 键不存在，说明验证码已过期、不存在或已被并发消费
             throw new BusinessException(400, "验证码已过期");
         }
         if (!stored.equalsIgnoreCase(captchaCode)) {

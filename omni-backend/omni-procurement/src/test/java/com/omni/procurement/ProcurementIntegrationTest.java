@@ -18,8 +18,9 @@ import com.omni.procurement.mapper.ProcGoodsReceiptMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.impl.GoodsReceiptServiceImpl;
 import com.omni.procurement.service.impl.PurchaseOrderServiceImpl;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
@@ -92,11 +93,11 @@ class ProcurementIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 USER_ID, TENANT_ID, "procurement-user"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                 USER_ID, UNIT_ID, "procurement:goods-receipt:create",
-                UNIT_ID, "ALL", Set.of()));
+                UNIT_ID, "ALL", Set.of(), null));
 
         goodsReceiptService = new GoodsReceiptServiceImpl(
                 receiptMapper, receiptLineMapper, orderMapper,
@@ -110,8 +111,8 @@ class ProcurementIntegrationTest {
 
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 端到端验证：已确认订单 → 创建收货草稿 → 确认收货 → 资产候选事件发布。 */

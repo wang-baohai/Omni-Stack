@@ -1,0 +1,65 @@
+databaseChangeLog:
+  - changeSet:
+      id: common-0003-tenant-provision-receipt
+      author: omni-stack
+      comment: 为各服务增加租户模块初始化幂等回执
+      changes:
+        - createTable:
+            tableName: sys_tenant_provision_receipt
+            remarks: 租户模块初始化消费回执
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: request_id
+                  type: VARCHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tenant_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: module_id
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(16)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: error_code
+                  type: VARCHAR(64)
+              - column:
+                  name: error_message
+                  type: VARCHAR(500)
+              - column:
+                  name: create_time
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: update_time
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: sys_tenant_provision_receipt
+            columnNames: request_id,module_id
+            constraintName: uk_tenant_provision_request_module
+        - createIndex:
+            tableName: sys_tenant_provision_receipt
+            indexName: idx_tenant_provision_tenant_time
+            columns:
+              - column:
+                  name: tenant_id
+              - column:
+                  name: update_time

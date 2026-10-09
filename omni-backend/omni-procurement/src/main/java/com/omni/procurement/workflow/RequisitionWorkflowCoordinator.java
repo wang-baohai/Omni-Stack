@@ -4,7 +4,7 @@ import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import com.omni.procurement.client.WorkflowInternalClient;
 import com.omni.procurement.dto.WorkflowContracts;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.procurement.service.RequisitionWorkflowStateService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class RequisitionWorkflowCoordinator {
      * @param command 已持久化启动快照
      */
     public void start(RequisitionWorkflowCommand command) {
-        if (!command.tenantId().equals(ProcTenantContext.requireTenantId())) {
+        if (!command.tenantId().equals(ServiceIdentityContext.requireTenantId())) {
             throw new BusinessException(403, "Workflow 启动快照与当前租户不一致");
         }
         try {

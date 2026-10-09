@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "types": ["node", "@playwright/test"],
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": [
+    "e2e/**/*.ts",
+    "e2e-docs/**/*.ts",
+    "playwright.config.ts",
+    "playwright.docs.config.ts",
+    "playwright.wp009-f.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src"
+  ]
+}

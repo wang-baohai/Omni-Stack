@@ -74,13 +74,28 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String start(StartProcessRequest request, Long userId, String userName, Long tenantId) {
-        // 支持模拟发起人：如果提供了 simulateUserId，则替换发起人身份
-        Long effectiveUserId = request.getSimulateUserId() != null ? request.getSimulateUserId() : userId;
-        String effectiveUserName = request.getSimulateUserName() != null && !request.getSimulateUserName().isBlank()
-                ? request.getSimulateUserName() : userName;
+        // WP-008 FW07 安全收口：普通启动拒绝借 simulateUserId/Name 覆盖可信认证上下文；
+        // 只读候选预览走独立 preview 接口，不经过本方法。
+        if (request.getSimulateUserId() != null && !request.getSimulateUserId().equals(userId)) {
+            throw new BusinessException(403, "普通流程启动不允许指定他人为发起人");
+        }
+        if (request.getSimulateUserName() != null && !request.getSimulateUserName().isBlank()
+                && !request.getSimulateUserName().equals(userName)) {
+            throw new BusinessException(403, "普通流程启动不允许指定他人为发起人");
+        }
+        Long effectiveUserId = userId;
+        String effectiveUserName = userName;
 
         String tenantIdStr = TenantInfoHolder.getTenantId();
         String effectiveTenantId = tenantIdStr != null ? tenantIdStr : String.valueOf(tenantId);
+
+        // 受保护变量清洗：发起人相关保留键只能由认证上下文写入（FW07-5 可信 actor 不被 variables 篡改）
+        Map<String, Object> safeVariables = request.getVariables() == null
+                ? new HashMap<>() : new HashMap<>(request.getVariables());
+        safeVariables.remove("initiator");
+        safeVariables.remove("startUserId");
+        safeVariables.remove("authenticatedUserId");
+        safeVariables.remove("START_USER_ID");
 
         // 设置流程发起人（Flowable 通过 Authentication 获取发起人信息）
         Authentication.setAuthenticatedUserId(String.valueOf(effectiveUserId));
@@ -104,7 +119,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 instance = runtimeService.startProcessInstanceById(
                         modelVersion.getProcessDefinitionId(),
                         request.getBusinessKey(),
-                        request.getVariables() != null ? request.getVariables() : Collections.emptyMap());
+                        safeVariables);
             } else {
                 // 向后兼容：使用 processKey 启动
                 if (request.getProcessKey() == null || request.getProcessKey().isBlank()) {
@@ -113,7 +128,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 instance = runtimeService.startProcessInstanceByKeyAndTenantId(
                         request.getProcessKey(),
                         request.getBusinessKey(),
-                        request.getVariables() != null ? request.getVariables() : Collections.emptyMap(),
+                        safeVariables,
                         effectiveTenantId);
             }
 

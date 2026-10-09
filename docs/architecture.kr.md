@@ -66,7 +66,7 @@ Omni-Stack은 즉시 사용 가능한 Spring Cloud + Vue 3 풀스택 개발 환�
 | **gRPC 장기간 연결** | v3는 HTTP 단기 폴링 대신 gRPC 사용. 서비스 등록/검색 지연이 초 단위에서 밀리초 단위로 단축 |
 | **헬스 체크 엔드포인트 변경** | v3.1.1에서 엔드포인트가 `/nacos/actuator/health`에서 `GET /nacos/`로 변경. Docker healthcheck 적응 필요 |
 
-### 2.4 Flowable 7.x를 선택한 이유
+### 2.4 Flowable 8.x를 선택한 이유
 
 | 고려사항 | 결정 근거 |
 |---------|---------|
@@ -98,7 +98,7 @@ Omni-Stack은 즉시 사용 가능한 Spring Cloud + Vue 3 풀스택 개발 환�
 
 ## 4. 모듈 맵
 
-### 4.1 Common Starter 생태계 (8개 자동 구성 모듈)
+### 4.1 Common Starter 생태계 (10개 공통 모듈)
 
 | 모듈 | 역할 | 기술 스택 | 경계 제약 |
 |------|------|-----------|-----------|
@@ -110,21 +110,27 @@ Omni-Stack은 즉시 사용 가능한 Spring Cloud + Vue 3 풀스택 개발 환�
 | `omni-common-job` | XXL-JOB 통합: 자동 구성, Admin HTTP 클라이언트, 시스템 작업 레지스트리 | XXL-JOB Core 3.3.1 | 스케줄링 인프라만. 비즈니스 작업 로직 없음 |
 | `omni-common-mqlog` | 신뢰 MQ 메시지 전송: Transactional Outbox, 릴레이 작업, 전략 기반 송신자 | Spring Cloud Stream RocketMQ(optional) | MQ 인프라만. 비즈니스 메시지 로직 없음 |
 | `omni-common-operlog` | 운영 로그 관점 및 프로듀서: `@OperLog` 어노테이션 기반 | Spring AOP, omni-common-mqlog(optional) | 운영 로그 관심사만 |
+| `omni-common-workflow` | Flowable 자동 구성 및 승인 SPI | Flowable 8.0.0 | Workflow 서비스만 사용, 비즈니스 서비스는 프로세스 런타임에 의존 금지 |
+| `omni-common-service` | Servlet 비즈니스 서비스 조합 Starter: Gateway 사전 인증, 요청 신원/테넌트, 내부 API, DataScope, 고정 MyBatis 순서, XSS 원점 폴백과 보안 기준선 | Spring Security, OpenFeign, MyBatis-Plus, Redis | Gateway/Auth 에는 미적용; 도메인 테이블 매핑과 AccessGuard 는 계속 서비스에서 구현 |
 
-### 4.2 마이크로서비스 모듈 (4개)
+### 4.2 마이크로서비스 모듈 (8개)
 
 | 모듈 | 포트 | 역할 | 핵심 의존성 |
 |------|------|------|-------------|
 | `omni-auth` :8100 | 8100 | 인증 및 인가: 로그인, CAPTCHA, JWT, 멀티 테넌트, OAuth2 인가 서버, XSS 설정 관리, RBAC 권한 | Spring Boot Web, Spring Security, OAuth2 Authorization Server |
 | `omni-base` :8101 | 8101 | 기초 데이터: 사전 CRUD, 예약 작업 관리, 운영 로그 아카이브, MQ 메시지 관리 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
-| `omni-workflow` :8103 | 8103 | 워크플로우 엔진: BPMN 모델 관리, 프로세스 인스턴스, 승인, 작업 할당, 통계 | Spring Boot Web, Spring Security, omni-common-workflow, Flowable 7.x |
+| `omni-workflow` :8103 | 8103 | 워크플로우 엔진: BPMN 모델 관리, 프로세스 인스턴스, 승인, 작업 할당, 통계 | Spring Boot Web, Spring Security, omni-common-workflow, Flowable 8.0.0 |
+| `omni-crm` :8104 | 8104 | CRM 영업 전 클로즈드 루프: 리드, 고객, 연락처, 기회, 후속 관리, 전환 및 개요 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
+| `omni-srm` :8105 | 8105 | SRM 공급업체 클로즈드 루프: 마스터, 진입 상태 머신, 연락처/자격/은행, 성과 평가, 위험, 초대 및 공급업체 포털 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
+| `omni-procurement` :8106 | 8106 | 조달 실행 클로즈드 루프: 품목 카탈로그, 구매 요청 승인, 견적 요청 및 비교, 구매 주문과 입고 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
+| `omni-asset` :8107 | 8107 | 자산 전체 수명주기: 조달 검수 계상, 원장, 할당/반환, 이동, 처분 및 개요 | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
 | `omni-gateway` :8102 | 8102 | API Gateway: 요청 라우팅, JWT 인증 필터링, CORS 처리, 보안 헤더 | Spring Cloud Gateway Server(WebFlux), omni-common-redis-reactive |
 
 ### 4.3 프론트엔드 모듈
 
 | 모듈 | 포트 | 기술 스택 | 역할 |
 |------|------|-----------|------|
-| `omni-frontend` | 3000(dev) / 3000(Nginx) | Vue 3, Pinia 3, Vue Router 4, Element Plus, Axios, Vite 8 | 프레젠테이션 계층 SPA. 데이터 권위 비즈니스 규칙 없음 |
+| `omni-frontend` | 3000(dev) / 3000(Nginx) | Vue 3, Pinia 3, Vue Router 5, Element Plus, Axios, Vite 8 | 프레젠테이션 계층 SPA. 데이터 권위 비즈니스 규칙 없음 |
 
 ---
 
@@ -168,6 +174,10 @@ omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
 | `omni-gateway` | **트래픽 진입점**: 모든 HTTP 요청의 유일한 진입점. JWT 검증 + 아이덴티티 전파 + 라우팅 분배 |
 | `omni-base` | **데이터 기반**: 사전, 로그, 예약 작업 등 공통 비즈니스 데이터의 관리 센터 |
 | `omni-workflow` | **프로세스 엔진**: 독립 배포 BPMN 워크플로우 서비스. Flowable 의존성을 `omni-common-workflow` starter로 격리 |
+| `omni-crm` | **영업 도메인**: CRM 데이터를 독립적으로 소유하며, Auth 내부 인터페이스로 테넌트 사용자·조직·permission-aware 데이터 범위를 재사용 |
+| `omni-srm` | **공급업체 도메인**: SRM 데이터를 독립적으로 소유하며, Portal Saga 로 Auth 와 함께 SUPPLIER 역할을 할당하고 조달/자산에 내부 토큰 보호 공급업체 요약 API 를 제공 |
+| `omni-procurement` | **조달 실행 도메인**: 조달 데이터를 독립적으로 소유하며, Workflow 로 구매 요청 승인을 구동하고 SRM 로 공급업체 초대와 견적 협업을 완료하며, 자산 도메인에 합격 입고 이벤트와 이력 보장 인터페이스를 발행 |
+| `omni-asset` | **자산 수명주기 도메인**: 자산 데이터를 독립적으로 소유하며, 조달 합격 입고 이벤트를 소비해 카드를 생성하고 Workflow 로 이동/처분 승인을 구동하며 자산 집계 루트로 귀속과 사용 범위를 통일 관리 |
 
 ---
 
@@ -240,7 +250,7 @@ SecurityHeadersFilter (WebFilter)
     ▼
 Spring Cloud Gateway 라우팅 엔진
     │ 1. 라우트 매칭: Path=/api/auth/** → lb://omni-auth
-    │ 2. StripPrefix=2: /api/auth/login → /login
+    │ 2. 전체 경로 보존: /api/auth/login → /api/auth/login
     │ 3. 부하 분산: Nacos 서비스 검색에서 인스턴스 목록 획득
     ▼
 하위 마이크로서비스로 전달 (omni-auth / omni-base / omni-workflow)
@@ -252,15 +262,19 @@ Spring Cloud Gateway 라우팅 엔진
 - **공개키 5분 캐시**: 매 요청마다 JWKS 엔드포인트 호출 회피. `volatile`로 멀티스레드 가시성 보장
 - **`onErrorResume`은 `SecurityException`만 캡처**: 하위 라우팅 오류(서비스 불가용, 타임아웃)가 JWT 검증 실패로 오보고되는 것 방지
 
-### 6.3 omni-base / omni-workflow 보안 모델
+### 6.3 Servlet 업무 서비스 보안 모델
 
-하위 마이크로서비스(base, workflow)는 통합된 **Gateway 사전 인증 모델**을 채택:
+하위 Servlet 마이크로서비스는 **Gateway 사전 인증 모델**을 채택하며, 모든 서비스가 HMAC 서명 어서션을 요구합니다:
+
+- **모든 Servlet 업무 서비스**(omni-auth、omni-base、omni-workflow、omni-crm、omni-srm、omni-procurement、omni-asset)는 `GatewayPreAuthenticationFilter` 또는 각자의 `GatewayPreAuthFilter` 로 `X-Gateway-Assertion`(Gateway 와 `GATEWAY_ASSERTION_SECRET` 를 공유하는 HmacSHA256 서명 어서션)와 `X-Tenant-Id` 를 검증한 뒤, 통과 시에만 `X-User-*` 헤더로 `Authentication` 을 구축합니다. 키 미설정 시에도 동일하게 401 로 거부하며(fail-closed), 평문 신원 헤더를 신뢰하지 않습니다.
+
+CRM、SRM、Procurement、Asset 은 추가로 완전한 permissionCode 로 Auth 에서 데이터 범위를 해석하고, TenantLine 및 DataPermission 인터셉터가 모든 업무 SQL 을 공동 제약합니다:
 
 ```
 요청 수신 (Gateway에서 이미 JWT 검증됨)
     │
     ▼
-GatewayPreAuthFilter (OncePerRequestFilter)
+사전 인증 필터 (모든 서비스가 GatewayPreAuthenticationFilter 또는 자체 GatewayPreAuthFilter 를 거치며, 먼저 X-Gateway-Assertion(HmacSHA256)+X-Tenant-Id 검증; 키 미설정 시에도 fail-closed 401 거부)
     │ X-User-* 헤더에서 UsernamePasswordAuthenticationToken 구축
     │ 역할에는 ROLE_ 접두사 추가, 권한은 직접 authority로 추가
     │ SecurityContextHolder에 기록
@@ -271,7 +285,7 @@ AuthorizationFilter
 비즈니스 Controller → Service → Mapper
 ```
 
-**설계 원리**: JWT 검증은 Gateway에 집중. 하위 서비스는 Gateway가 주입하는 헤더를 신뢰. 각 서비스가 독립적인 JWT 검증 설정을 필요로 하지 않아 복잡도와 키 관리 비용 절감.
+**설계 원리**: JWT 검증은 Gateway에 집중. 모든 하위 서비스는 `X-Gateway-Assertion` HMAC 서명 어서션 통과를 요구하며 키 미설정 시 fail-closed 로 거부해, 하위가 위조 신원 헤더를 무조건 수용하는 것을 방지합니다. 각 서비스가 독립적인 JWT 검증 설정을 필요로 하지 않아 복잡도와 키 관리 비용 절감.
 
 ---
 
@@ -287,10 +301,10 @@ Vite Dev Server (:3000)  -- /api/** 프록시 -->
     │
 Gateway (:8102)
     │  1. 라우트 매칭: Path=/api/auth/** -> lb://omni-auth
-    │  2. StripPrefix=2: /api/auth/login -> /login
+    │  2. 전체 경로 보존: /api/auth/login -> /api/auth/login
     ▼
 Auth Service (:8100)
-    │  1. AuthController가 /login 수신
+    │  1. AuthController가 전체 /api/auth/login 을 수신
     │  2. CaptchaService가 CAPTCHA 검증 (Redis)
     │  3. OmniUserDetailsService가 사용자 인증 (멀티 테넌트 tenantId:username)
     │  4. JwtTokenService가 RS256 서명 JWT 생성
@@ -306,7 +320,7 @@ JSON 응답: { code: 200, message: "success", data: { accessToken, tokenType, ex
 ```
 비즈니스 서비스 (예: omni-base)
     │  @Transactional
-    │  ReliableMessageTemplate.send(bindingName, payload)
+    │  ReliableMessageTemplate.send(bindingName, payload, tenantId)
     ▼
 sys_mq_message 테이블 (status=PENDING, 동일 로컬 트랜잭션)
     │
@@ -341,9 +355,9 @@ RocketMQ Broker (StreamBridge 경유)
 | XXL-JOB Admin | 분산 작업 스케줄링 콘솔 | 3.3.1 | 18080 |
 | RocketMQ | 메시지 큐 (NameServer + Broker) | 5.3.2 | 9876, 10909-10912 |
 
-모든 서비스는 한 명령어로 시작 가능: `docker compose up -d`. 프로젝트 루트의 `docker-compose.yml` 참조.
+전체 스택은 `docker compose --profile full up -d` 로 시작할 수 있습니다. 일상 개발은 `omni dev up --preset <id>` 로 최소 의존성 클로저를 시작합니다. `--observability` 를 추가하면 Prometheus, Pushgateway, Node Exporter, cAdvisor, Grafana, Tempo, Loki, Alloy, OTel Collector 와 Alertmanager 가 시작되고 로컬 Trace 내보내기가 활성화됩니다. 통일 진입점은 저장소 루트의 `compose.yaml` 이며, 관측 의미와 보안 경계는 [observability.kr.md](observability.kr.md) 참조.
 
-**시작 순서**: MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 백엔드 서비스(Auth, Base, Workflow, Gateway) → 프론트엔드
+**시작 순서**: MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → 백엔드 서비스(Auth, Base, Workflow, CRM, SRM, Procurement, Asset, Gateway) → 프론트엔드
 
 ---
 
@@ -351,20 +365,50 @@ RocketMQ Broker (StreamBridge 경유)
 
 ### 9.1 Docker Compose 오케스트레이션
 
-프로젝트 루트 `docker-compose.yml`은 전체 12개 컨테이너를 정의:
+저장소 루트 `compose.yaml` 이 include 로 `compose.infra.yaml` 와 `compose.apps.yaml` 을 통합하며, full profile 이 16 개 컨테이너를 정의:
 
 - **이름 있는 볼륨**(`mysql-data`, `redis-data`)으로 재시작 시 데이터 영속화
 - **헬스 체크**(depends_on + service_healthy)로 계층적 시작 체인 보장
-- **브리지 네트워크**(`omni-network`)로 컨테이너 간 통신
-- **SQL 초기화 마운트**: `scripts/sql/init-all.sql`, `init-nacos.sql`, `init-xxl-job.sql`을 MySQL의 `docker-entrypoint-initdb.d/`에 마운트
+- **브리지 네트워크**(Compose 기본, 프로젝트 스코프)로 컨테이너 간 통신
+- **마이그레이션 시작 게이트**: one-shot `omni-db-migrator`가 Liquibase로 9개 DB의 구조와 멱등 시드를 적용하며, 성공한 뒤에만 Nacos, XXL-JOB 및 애플리케이션이 시작됨
 
 ### 9.2 데이터베이스 스키마
 
-#### omni_auth 데이터베이스 (14 테이블)
+#### omni_auth 데이터베이스 (19 테이블)
 
-**OAuth2 인가 (3 테이블)**: `oauth2_registered_client`, `oauth2_authorization`, `oauth2_authorization_consent`
+**OAuth2 인가 (3 테이블)**:
 
-**멀티 테넌트 RBAC (11 테이블)**: `sys_tenant`, `sys_org_unit`, `sys_user`, `sys_role`, `sys_permission`, `sys_user_role`, `sys_role_permission`, `sys_user_unit`, `sys_role_dept`, `sys_token_blacklist`, `sys_user_oauth_provider`, `sys_xss_config`, `sys_xss_blacklist_rule`
+| 테이블 | 용도 |
+|------|------|
+| `oauth2_registered_client` | OAuth2 클라이언트 등록(client_id, 시크릿, 인가 유형, 범위) |
+| `oauth2_authorization` | 활성 OAuth2 인가 레코드(Access Token, Refresh Token, 인가 코드) |
+| `oauth2_authorization_consent` | 사용자가 동의한 범위 |
+
+**멀티 테넌트 RBAC (14 테이블)**:
+
+| 테이블 | 용도 |
+|------|------|
+| `sys_tenant` | 테넌트 레지스트리(멀티 테넌시 루트) |
+| `sys_org_unit` | 조직 단위(구체화된 경로 계층) |
+| `sys_user` | 사용자 계정(테넌트 + 조직 단위 연결) |
+| `sys_role` | 역할 정의(테넌트 범위) |
+| `sys_permission` | 권한 트리(메뉴, 버튼, API; 구체화된 경로) |
+| `sys_user_role` | 사용자-역할 할당 |
+| `sys_role_permission` | 역할-권한 할당 |
+| `sys_user_unit` | 사용자-조직 단위 할당(주/부) |
+| `sys_role_dept` | 역할-부서 데이터 범위 바인딩 |
+| `sys_user_role_scope` | 사용자 역할 범위(`unit_id` + `scope_mode`: SAME_UNIT / UNIT_AND_BELOW; 고유 키 `tenant_id`+`user_id`+`role_id`+`unit_id`), 데이터 권한과 워크플로우 후보자 해석을 구동 |
+| `sys_token_blacklist` | 취소된 JWT 블랙리스트 |
+| `sys_user_oauth_provider` | 서드파티 소셜 로그인 ID 연결 |
+| `sys_xss_config` | 테넌트 수준 XSS 전역 스위치 |
+| `sys_xss_blacklist_rule` | XSS 블랙리스트 규칙 |
+
+**보안 감사와 포털 역할 (2 테이블)**:
+
+| 테이블 | 용도 |
+|------|------|
+| `sys_audit_log` | 보안 감사 로그(`event_type`: LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED) |
+| `sys_portal_role_request` | 포털 역할 할당 요청 멱등 Inbox(`status`: PROCESSING/COMPLETED/FAILED, 고유 키 `tenant_id`+`request_id`) |
 
 ```mermaid
 erDiagram
@@ -390,9 +434,35 @@ erDiagram
 
 #### omni_workflow 데이터베이스
 
-**워크플로우 (7 테이블)**: `wf_process_model` + `wf_process_model_version` + `wf_process_instance_ext` + `wf_todo_task` + `wf_cc_record` + `wf_form_schema` + `wf_delegation_rule`
+**워크플로우 (7 테이블)**: `wf_process_model`(모델 등록) + `wf_process_model_version`(버전 이력) + `wf_process_instance_ext`(인스턴스 확장) + `wf_todo_task`(할 일 캐시) + `wf_cc_record`(참조 기록) + `wf_form_schema`(폼 스키마) + `wf_delegation_rule`(승인 위임 규칙)
 
-**권위 DDL 및 시드 데이터**: `scripts/sql/init-all.sql`
+> 상세는 [workflow.kr.md](workflow.kr.md)
+
+#### omni_crm 데이터베이스
+
+**CRM 핵심 테이블(11 테이블)**: `crm_tenant_config`, `crm_pipeline`, `crm_pipeline_stage`, `crm_lead`, `crm_lead_conversion`, `crm_customer`, `crm_contact`, `crm_opportunity`, `crm_opportunity_stage_history`, `crm_activity`, `crm_owner_change_log`, 그리고 서비스별 독립 `sys_mq_message` Outbox. 모든 `crm_*` 테이블은 `tenant_id` 를 포함하며, 권한 부여 루트 테이블은 owner 스냅샷을 보존하고 낙관적 잠금을 사용.
+
+> 도메인 실행 제약은 [crm.kr.md](crm.kr.md), 설계 기준선은 [design/crm-design.kr.md](design/crm-design.kr.md)
+
+#### omni_srm 데이터베이스
+
+**SRM 핵심 테이블**: 공급업체 마스터, 연락처, 자격, 은행 계좌, 평가, 위험, 포털 사용자 연결, 초대 Saga 및 견적 협업 테이블, 그리고 서비스 독립 `sys_mq_message` Outbox. 권한이 부여된 하위 리소스는 모두 Supplier 또는 Evaluation 집계 루트를 거쳐 테넌트와 데이터 범위를 상속.
+
+> 상세는 [design/srm-design.kr.md](design/srm-design.kr.md)
+
+#### omni_procurement 데이터베이스
+
+**Procurement 핵심 테이블**: 테넌트 설정, 품목/분류, 승인 경로, 구매 요청 및 명세, RFQ 및 공급업체/명세, 구매 주문 및 명세, 입고 및 명세, 공통 Inbox 와 서비스 독립 Outbox. 구매 요청은 신청자 범위로 필터링하고, RFQ/PO/GR 은 owner 범위로 필터링하며, 하위 테이블은 집계 루트를 거쳐 상속.
+
+> 상세는 [design/procurement-design.kr.md](design/procurement-design.kr.md)
+
+#### omni_asset 데이터베이스
+
+**Asset 핵심 테이블**: `ast_asset`(자산 집계 루트), `ast_asset_history`(불변 이력), `ast_transfer`(이동), `ast_disposal`(처분), `ast_inbox_event`(서비스 간 소비 멱등성), 그리고 서비스 독립 `sys_mq_message` Outbox. 구매 유래 카드 생성은 입고 행과 단위 일련번호로 멱등성을 보장하며, 이동과 처분은 집계 루트의 활동 작업 필드로 동시 점유를 통일.
+
+> 상세는 [design/asset-design.kr.md](design/asset-design.kr.md)
+
+**데이터베이스 공식 소스**: 스키마, 인덱스, 제약 조건 및 업그레이드는 `database/changelog/`가 관리합니다. 공식 멱등 시드는 `scripts/sql/seed/`가 관리하며 `database/seed/manifest.yaml`의 SHA-256 및 자연 키 검증으로 보호됩니다. 기존 수동 `init-all.sql`과 `migrate-*.sql`은 현재 트리에서 제거했습니다. 스키마는 `database/changelog/`, 초기 데이터는 `scripts/sql/seed/`를 사용하며 이전 스크립트를 수동으로 실행하지 않습니다.
 
 ---
 
@@ -400,11 +470,11 @@ erDiagram
 
 ### 10.1 컨테이너 네트워크 토폴로지
 
-모든 컨테이너는 Docker 브리지 네트워크 `omni-network`를 공유:
+모든 컨테이너는 Compose 기본 bridge 네트워크(프로젝트명에서 파생; `compose.yaml`/`compose.apps.yaml` 은 `omni-network` 라는 지정 이름을 가진 네트워크를 명시 선언하지 않음; 컨테이너 간은 서비스명으로 상호 접근)를 공유합니다:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│                      Docker Network: omni-network                     │
+│            Docker Network: <project>_default (Compose 기본)            │
 │                                                                       │
 │  ┌─────────────┐    ┌──────────┐    ┌────────┐    ┌──────────────┐  │
 │  │ omni-       │    │ omni-    │    │ omni-  │    │ omni-        │  │
@@ -439,9 +509,9 @@ Nacos 등록: service=omni-auth, ip=<컨테이너 내부 IP>, port=8080
     │
 omni-gateway 시작
     │ @EnableDiscoveryClient
-    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=true
+    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=false
     ▼
-Gateway 라우팅: lb://omni-auth → Nacos에서 인스턴스 목록 조회 → 부하 분산 전달
+Gateway 명시적 라우트: /api/crm/** → lb://omni-crm → Nacos에서 인스턴스 목록 조회 → 부하 분산 전달
 ```
 
 **핵심 설정**:
@@ -550,7 +620,7 @@ DataScopeContext.clear() (finally 블록, ThreadLocal 누수 방지)
 
 | 모드 | 사용 사례 | 구현 방식 |
 |------|-----------|-----------|
-| SQL 인터셉트 | 데이터베이스 쿼리(예: 사용자 목록) | `DataPermissionInterceptor`가 WHERE 자동 추가 |
+| SQL 인터셉트 | 데이터베이스 쿼리(예: 사용자 목록) | `DataPermissionInterceptor` + `DataPermissionHandlerImpl`이 WHERE 자동 추가 |
 | 메모리 필터링 | 비 DB 데이터(예: Redis의 온라인 사용자) | Controller가 `DataScopeContext`를 읽어 `primaryUnitId`로 필터링 |
 
 ### 11.4 RBAC 관리 흐름
@@ -565,12 +635,12 @@ DataScopeContext.clear() (finally 블록, ThreadLocal 누수 방지)
 ## 12. 주요 제약사항
 
 1. **JDK 25 필수**: Spring Boot 4.x Maven plugin은 Java 17+ 필수. 본 프로젝트는 JDK 25 대상. `JAVA_HOME`을 Maven 명령 실행 전에 설정해야 함.
-2. **Gateway 5.x 설정 접두사**: 라우트와 설정은 `spring.cloud.gateway.server.webflux` 아래에 배치해야 함. 구 접두사는 자동으로 무시됨.
+2. **Gateway 5.x 설정 접두사**: 라우트와 설정은 `spring.cloud.gateway.server.webflux` 아래에 배치해야 함. 구 접두사 `spring.cloud.gateway`는 자동으로 무시됨.
 3. **빌드 순서**: `omni-common-core`를 먼저 설치한 후 `omni-common`, 그 다음 common starters. `./mvnw clean install`을 부모 POM에서 실행.
 4. **직접 서비스 간 호출 금지**: 서비스 간 통신은 반드시 OpenFeign 클라이언트 경유. 원시 HTTP 호출 금지.
 5. **Gateway는 리액티브**: `omni-gateway`는 WebFlux에서 실행. `omni-common-core`와 `omni-common-redis-reactive`에 의존하지만 `omni-common`과 `omni-common-redis`에는 **의존하지 않음**.
 6. **Redis Starter 상호 배타성**: 블로킹 버전과 리액티브 버전은 동일 서비스에서 혼재 불가.
-7. **XXL-JOB Admin 선행 실행 필수**: `omni-base` 시작 전에 Admin이 실행 중이어야 함.
+7. **XXL-JOB Admin 선행 실행 필수**: `XxlJobSpringExecutor`가 시작 시 Admin에 등록되며, 사용자 작업 생성/갱신에는 `XxlJobAdminClient` HTTP 호출이 필요함. `omni-base` 시작 전에 Admin이 실행 중이어야 함.
 8. **omni-common-job은 라이브러리 모듈**: 독립 실행 불가. Servlet 서비스만 의존 가능.
 
 ---
@@ -581,12 +651,16 @@ DataScopeContext.clear() (finally 블록, ThreadLocal 누수 방지)
 
 소셜 로그인 프레임워크는 `OAuth2ProviderHandler` 인터페이스를 통한 전략 패턴 사용:
 
-1. `XxxOAuth2Handler.java`를 생성하고 `OAuth2ProviderHandler` 구현. `@Component("xxx")`로 어노테이션
-2. `OAuth2Properties.java`에 `XxxProperties` 내부 정적 클래스 추가
-3. `application.yml`에 `auth.oauth2.xxx.*` 설정 섹션 추가
+1. **핸들러 구현 생성**: `XxxOAuth2Handler.java` 를 생성하고 `OAuth2ProviderHandler` 구현, `@Component("xxx")` 로 어노테이션. `getProviderId()`, `buildAuthorizationUrl()`, `exchangeCodeForAccessToken()`, `fetchUserProfile()`(통일된 `ProviderUser` DTO 반환) 구현
+2. `OAuth2Properties.java` 에 `XxxProperties` 내부 정적 클래스 추가
+3. `application.yml` 에 `auth.oauth2.xxx.*` 설정 섹션 추가
 4. `SocialLoginServiceImpl.getUsernamePrefix()` switch 표현식에 case 추가
 
+`SocialLoginServiceImpl` 은 Spring 의 `Map<String, OAuth2ProviderHandler>` 주입으로 새 핸들러를 자동 감지합니다.
+
 **현재 구현됨**: GitHub, Google, Gitee.
+
+> 상세는 [core-flows.kr.md](core-flows.kr.md) Flow 4
 
 ### 13.2 새 서비스에 XSS 보호 추가
 
@@ -594,7 +668,7 @@ XSS 방어 시스템은 모듈식 — 새 서비스는 Common Starter 생태계�
 
 1. `omni-common-core` + `omni-common` 의존성 추가
 2. `XssConfigProvider` SPI 인터페이스 구현
-3. Redis 캐시 전략 사용(30분 TTL)
+3. Redis 캐시 전략 사용(`xss:enabled:{tenantId}` + `xss:rules:{tenantId}`, 30분 TTL)
 4. `XssAutoConfiguration`은 `AutoConfiguration.imports`로 자동 등록
 
 ### 13.3 새 사용자 작업 유형 추가
@@ -604,6 +678,8 @@ XSS 방어 시스템은 모듈식 — 새 서비스는 Common Starter 생태계�
 1. `sys_user_job_type`에 INSERT하여 작업 유형 등록(고유 `type_code`, Bean 이름에 매핑)
 2. `@Component("{type_code}")` 클래스를 생성하고 `UserJobHandler` 구현
 3. `UserJobHandlerRegistry`가 `Map<String, UserJobHandler>` 주입으로 자동 감지
+
+> 전체 튜토리얼은 [scheduling.kr.md](scheduling.kr.md) 4장
 
 ---
 
@@ -665,7 +741,7 @@ omni-backend/
 
 ```yaml
 server:
-  port: 8104
+  port: 8108                        # 미사용 포트(8100~8107 은 인증/base/gateway/workflow/crm/srm/조달 서비스가 점유)
 spring:
   application:
     name: omni-order
@@ -694,17 +770,25 @@ spring:
   uri: lb://omni-order
   predicates:
     - Path=/api/order/**
-  filters:
-    - StripPrefix=2
 ```
+
+하위 Controller 는 전체 `/api/order/**` 경로를 유지하고 선언합니다; 현재 게이트웨이는 `StripPrefix` 를 적용하지 않습니다.
 
 ### 14.6 권한 시드 데이터 추가
 
-`scripts/sql/init-all.sql`에 `sys_permission` 레코드 추가.
+`scripts/sql/seed/auth.sql`에 멱등 `sys_permission` 레코드를 추가하고 `database/seed/manifest.yaml`의 체크섬과 자연 키 검증을 갱신합니다.
+
+```sql
+INSERT INTO sys_permission
+    (tenant_id, parent_id, permission_name, permission_code, type, path, depth, sort, status) VALUES
+(1, 0, '订单管理', 'order', 'DIRECTORY', '/<目录ID>/', 1, 1, 1),
+(1, @order_dir, '订单列表', 'order:list', 'MENU', '/<目录ID>/<菜单ID>/', 2, 1, 1),
+(1, @order_list, '查看订单', 'order:detail:query', 'API', '/<目录ID>/<菜单ID>/<权限ID>/', 3, 1, 1);
+```
 
 ### 14.7 Docker 배포 설정
 
-`docker-compose.yml`에 서비스 정의 추가:
+`compose.apps.yaml` 에 유일한 서비스 정의를 추가하고 적용할 profiles 를 선언:
 
 ```yaml
 omni-order:
@@ -714,7 +798,7 @@ omni-order:
     args:
       SERVICE_NAME: omni-order
   ports:
-    - "8104:8080"
+    - "8108:8080"
   environment:
     SERVER_PORT: "8080"
     SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_order?..."
@@ -728,7 +812,7 @@ omni-order:
 
 ### 14.8 검증 체크리스트
 
-- [ ] `mvn clean install`이 성공적으로 컴파일됨
+- [ ] `./mvnw clean install`이 성공적으로 컴파일됨(저장소 Maven Wrapper와 JDK 25 사용)
 - [ ] 로컬 시작 후 Nacos 콘솔에서 `omni-order` 서비스가 표시됨
 - [ ] `GET /api/order/xxx`가 Gateway를 통해 성공적으로 라우팅됨
 - [ ] `@PreAuthorize` 어노테이션이 작동함

@@ -305,7 +305,7 @@ MQ 消息发送记录与补偿管理系统基于 Transactional Outbox + XXL-JOB 
 ```
 业务事务（@Transactional）
     ↓
-ReliableMessageTemplate.send(bindingName, payload)
+ReliableMessageTemplate.send(bindingName, payload, tenantId)
     ↓ INSERT sys_mq_message (status=PENDING) -- 同一本地事务
     ↓
 XXL-JOB mqRelayHandler (10s 轮询)
@@ -322,7 +322,7 @@ MessageSender.send(message) -- 策略模式，按 broker_type 路由
 
 | 组件 | 职责 |
 |------|------|
-| `ReliableMessageTemplate` | 提供 `send(bindingName, payload)` / `send(bindingName, payload, msgKey)` 两个重载，在调用方事务中 INSERT 消息记录 |
+| `ReliableMessageTemplate` | 提供 `send(bindingName, payload, tenantId)` / `send(bindingName, payload, tenantId, msgKey)` 两个重载（`tenantId` 为必传正整数，不得省略），在调用方事务中 INSERT 消息记录 |
 | `MqMessageRelayService` | 轮询待投递消息，调用 `MessageSender` 策略实现发送，处理重试退避和死信标记 |
 | `MqMessageRelayJob` | XXL-JOB handler（`@XxlJob("mqRelayHandler")` + `@SystemJobMeta`），触发 relay 逻辑 |
 | `MessageSender` | 策略接口，按 `broker_type` 路由。当前实现 `RocketMqMessageSender`（基于 StreamBridge），后续可扩展 `KafkaMessageSender` |
@@ -333,7 +333,7 @@ MessageSender.send(message) -- 策略模式，按 broker_type 路由
 1. POM 中依赖 `omni-common-mqlog`
 2. 确保已依赖 `omni-common-mybatis`（数据库）和 `omni-common-job`（XXL-JOB）
 3. 如需 RocketMQ 发送能力，依赖 `spring-cloud-starter-stream-rocketmq`
-4. `sys_mq_message` 表自动创建（`schema.sql` + `CREATE TABLE IF NOT EXISTS`）
+4. `sys_mq_message` 表由 Liquibase 迁移创建（`database/changelog/common/0001-mq-schema.yaml`，`omni-db-migrator` 容器启动时应用）
 5. `mqRelayHandler` 自动注册到 XXL-JOB（各服务执行器 AppName 不同，handler name 天然隔离）
 6. 业务代码注入 `ReliableMessageTemplate`，调用 `send()` 方法即可
 
@@ -405,7 +405,7 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 ### 开发约束
 
 1. **新增写操作 Controller 方法必须标注 `@OperLog`**，指定 `module`、`operType`，涉及实体变更时还需指定 `entityClass` 和 `idExpr`
-2. **omni-auth 模块禁用 `@OperLog`**：认证行为由登录日志（`sys_login_log`）和审计日志（`sys_audit_log`）完整留存，omni-auth 不引入 `omni-common-operlog` 依赖，不在控制器方法上使用 `@OperLog` 注解
+2. **omni-auth 模块禁用 `@OperLog`**：认证行为由安全审计日志（`sys_audit_log` 的 `LOGIN_SUCCESS`/`LOGIN_FAILED`/`ACCOUNT_LOCKED` 等事件；“登录记录”页是其中登录事件的只读投影）完整留存，不存在独立的 `sys_login_log` 表；omni-auth 不引入 `omni-common-operlog` 依赖，不在控制器方法上使用 `@OperLog` 注解
 3. **新微服务接入**：需在 `pom.xml` 中依赖 `omni-common-operlog` 并配置 RocketMQ，该模块通过 `AutoConfiguration.imports` 自动注册 AOP 切面和 MQ 生产者
 4. **`entityClass` 用途**：AOP 通过 `ApplicationContext` 查找对应实体类型的 `BaseMapper`，自动执行 `selectById` 获取变更前后快照
 5. **`idExpr` SpEL 语法**：支持引用方法参数（`#id`、`#request.id`）和返回值（`#result.data.id`），解析失败时记录警告日志但不影响业务
@@ -422,7 +422,8 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 
 ## Common Starter 接入规范
 
-项目将公共能力拆分为 6 个模块，新微服务通过 Maven 依赖引入即用，无需手动配置。
+项目将公共能力拆分为组合 Starter 与可选能力模块。Servlet 业务服务优先使用
+`omni-common-service`；Gateway、Auth 和 Workflow 按各自特殊边界选择底层模块。
 
 ### Starter 模块概览
 
@@ -433,20 +434,19 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
 | `omni-common-mybatis` | 数据库能力 | `MybatisPlusAutoConfiguration`：`MybatisPlusInterceptor`（MySQL `PaginationInnerInterceptor`）+ YAML 默认配置（驼峰映射、逻辑删除、自增 ID） | Servlet 服务 |
 | `omni-common-redis` | 阻塞式 Redis | `RedisAutoConfiguration`：`RedisTemplate<String, Object>`（Jackson 序列化）+ `RedisUtils` 工具类 + Lettuce 连接池配置 | Servlet 服务 |
 | `omni-common-redis-reactive` | 响应式 Redis | `spring-boot-starter-data-redis-reactive` + YAML 默认超时配置 | WebFlux 服务（如 Gateway） |
-| `omni-common-mqlog` | 可靠 MQ 消息发送 | `ReliableMessageTemplate`（Transactional Outbox）、`MqMessageRelayService`（XXL-JOB 异步投递）、`MessageSender` 策略接口、`MqMessageInternalController`（Feign 内部查询）、`schema.sql`（自动建表） | Servlet 服务（需 MQ 能力） |
+| `omni-common-mqlog` | 可靠 MQ 消息发送 | `ReliableMessageTemplate`（Transactional Outbox）、`MqMessageRelayService`（XXL-JOB 异步投递）、`MessageSender` 策略接口、`MqMessageInternalController`（Feign 内部查询）、Liquibase 迁移建表（`database/changelog/common/0001-mq-schema.yaml`） | Servlet 服务（需 MQ 能力） |
+| `omni-common-service` | Servlet 业务服务安全与上下文组合 | Gateway 预认证 Filter、不可变请求身份、内部 API Token、DataScope SPI/切面、Tenant/DataPermission 固定顺序、Auth XSS 回源与安全基线 | CRM/SRM/Procurement/Asset 等 Servlet 业务服务 |
 
 **自动配置注册机制**：所有 starter 通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 文件注册，这是 Spring Boot 3+/4+ 的标准机制（替代了旧版 `spring.factories`）。
 
 ### 新服务接入步骤
 
-1. **POM 依赖**：在 `pom.xml` 中声明所需 starter：
+1. **POM 依赖**：Servlet 业务服务声明组合 Starter，再按需增加 OperLog/Job/MQ：
    ```xml
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-core</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-mybatis</artifactId></dependency>
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-redis</artifactId></dependency>
+   <dependency><groupId>com.omni</groupId><artifactId>omni-common-service</artifactId></dependency>
    ```
-2. **application.yml**：仅需配置数据源和 Redis 连接信息：
+2. **application.yml**：除数据源和 Redis 外，显式配置服务身份和启用的安全能力；内部 Token
+   必须来自环境变量，不能使用弱默认值：
    ```yaml
    spring:
      datasource:
@@ -458,10 +458,31 @@ public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
          host: 127.0.0.1
          port: 6379
          database: 0
+   omni:
+     service:
+       name: omni-xxx
+       display-name: Xxx
+       gateway-preauth:
+         enabled: true
+       internal-api:
+         enabled: true
+         token: ${OMNI_INTERNAL_API_TOKEN}
+       tenant:
+         enabled: true
+       data-scope:
+         enabled: true
+       xss:
+         enabled: true
    ```
-3. **启动类**：添加 `@MapperScan("com.omni.xxx.mapper")`
-4. **XSS 防护**：实现 `XssConfigProvider` SPI 接口（`omni-common` 自动注册 Filter + Jackson Module）
-5. **自动生效**：分页插件、Jackson 时间序列化、CORS 配置、`GlobalExceptionHandler`、`RedisUtils` 工具类均自动装配，无需额外配置
+3. **领域 SPI**：启用 tenant/data-scope 时分别提供唯一的 `TenantTablePolicy` 和
+   `DataScopeTablePolicy`；不得把领域表名或 owner 列放入 Starter。
+4. **安全链**：将 Starter 提供的 Gateway Filter 放在 `AuthorizationFilter` 前，将身份上下文 Filter
+   放在 Gateway Filter 后；二者已禁止 Servlet 容器重复注册。
+5. **可选能力**：OperLog、Job、MQ 与 Workflow 继续作为独立依赖，按业务需要启用。
+
+当前 `omni-common-service` 已提供 v0 自动配置和测试，CRM、SRM、Procurement、Asset 均已完成迁移、模块测试与隔离运行态复验。
+Starter 的 XSS Provider 自动配置必须先于 `XssAutoConfiguration` 生效，并由上下文测试同时断言
+Provider、Servlet FilterRegistration 以及 Jackson 2/3 清洗模块，避免条件求值顺序导致静默失效。
 
 ### 覆盖机制
 
@@ -566,7 +587,7 @@ GlobalExceptionHandler (@RestControllerAdvice)
 统一 R<Void> 响应
 ```
 
-**omni-auth 的特殊处理**：Auth 模块依赖 `omni-common-core`（非 `omni-common`），因此 `GlobalExceptionHandler` 不在组件扫描范围。Auth 模块通过 `AuthExceptionHandler`（局部 `@RestControllerAdvice`）提供等价的异常处理。
+**omni-auth 的特殊处理**：omni-auth 同时依赖 `omni-common-core` 与 `omni-common`。`omni-common` 的 `GlobalExceptionHandler`（`com.omni.common.result`）通过 `AutoConfiguration.imports` 自动装配，对所有依赖 `omni-common` 的服务（含 Auth）生效，**不是靠组件扫描、也不因 Auth 而缺失**。在此基础上 omni-auth 另提供作用域更窄的 `AuthExceptionHandler`（`@RestControllerAdvice(basePackages = "com.omni.auth.controller")`），针对认证控制器包内的 `BusinessException`/参数校验/`AccessDeniedException` 等做 Auth 专属映射，与全局处理器共存而非替代其装配前提。
 
 ## 故障排查指南
 

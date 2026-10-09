@@ -1,6 +1,7 @@
 package com.omni.asset.service.support;
 
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.common.core.model.BaseEntity;
 
 import java.time.LocalDateTime;
@@ -45,7 +46,7 @@ public final class AssetAuditSupport {
      * @return 用户名或用户 ID 字符串
      */
     public static String operator() {
-        AssetTenantContext.RequestIdentity identity = AssetTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         return identity.username() == null || identity.username().isBlank()
                 ? String.valueOf(identity.userId()) : identity.username();
     }

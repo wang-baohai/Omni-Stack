@@ -19,7 +19,8 @@ import com.omni.crm.mapper.CrmOpportunityMapper;
 import com.omni.crm.mapper.CrmOpportunityStageHistoryMapper;
 import com.omni.crm.mapper.CrmOwnerChangeLogMapper;
 import com.omni.crm.mapper.CrmPipelineStageMapper;
-import com.omni.crm.security.CrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.crm.service.CrmTenantInitializer;
 import com.omni.crm.service.support.CrmOwnerEnricher;
 import com.omni.crm.service.support.CrmOwnerResolver;
@@ -78,12 +79,12 @@ class LeadServiceImplTest {
 
     /** 清理租户上下文。 */
     @AfterEach
-    void clear() { CrmTenantContext.clear(); }
+    void clear() { ServiceIdentityContext.clear(); }
 
     /** 已存在 conversion 时返回原结果且不重复写业务或 Outbox。 */
     @Test
     void shouldReplayExistingConversionWithoutWrites() {
-        CrmTenantContext.set(new CrmTenantContext.RequestIdentity(12L, 3L, "sales"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(12L, 3L, "sales"));
         CrmLead lead = new CrmLead(); lead.setId(100L); lead.setStatus("CONVERTED"); lead.setVersion(4);
         CrmLeadConversion conversion = new CrmLeadConversion(); conversion.setId(200L); conversion.setLeadId(100L);
         conversion.setCustomerId(300L); conversion.setContactId(400L); conversion.setConvertedTime(LocalDateTime.now());
@@ -102,7 +103,7 @@ class LeadServiceImplTest {
     /** 线索分配必须同步其活动 owner 快照。 */
     @Test
     void shouldSynchronizeLeadActivityOwnerOnAssign() {
-        CrmTenantContext.set(new CrmTenantContext.RequestIdentity(12L, 3L, "sales"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(12L, 3L, "sales"));
         CrmLead lead = new CrmLead(); lead.setId(100L); lead.setOwnerUserId(12L); lead.setOwnerUnitId(8L);
         lead.setVersion(2); lead.setStatus("FOLLOWING");
         when(accessGuard.requireLead(100L)).thenReturn(lead);
@@ -121,7 +122,7 @@ class LeadServiceImplTest {
     /** 线索转换创建商机时必须同步写入首条阶段历史。 */
     @Test
     void shouldAppendInitialStageHistoryForConvertedOpportunity() {
-        CrmTenantContext.set(new CrmTenantContext.RequestIdentity(12L, 3L, "sales"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(12L, 3L, "sales"));
         CrmLead lead = new CrmLead();
         lead.setId(100L); lead.setTenantId(3L); lead.setOwnerUserId(12L); lead.setOwnerUnitId(8L);
         CrmCustomer customer = new CrmCustomer(); customer.setId(300L); customer.setName("示例客户");

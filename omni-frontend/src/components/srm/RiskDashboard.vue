@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { RiskDashboardVO } from '@/api/srm-risk'
+import { useI18n } from 'vue-i18n'
 
 defineProps<{ dashboard: RiskDashboardVO }>()
+const { t } = useI18n()
 </script>
 
 <template>
@@ -9,30 +11,30 @@ defineProps<{ dashboard: RiskDashboardVO }>()
     <div class="risk-cards">
       <el-card shadow="hover" class="risk-card risk-card--red">
         <div class="risk-card__count">{{ dashboard.redCount }}</div>
-        <div class="risk-card__label">高风险 RED</div>
+        <div class="risk-card__label">{{ t('srmRiskCommon.high') }} RED</div>
       </el-card>
       <el-card shadow="hover" class="risk-card risk-card--yellow">
         <div class="risk-card__count">{{ dashboard.yellowCount }}</div>
-        <div class="risk-card__label">中风险 YELLOW</div>
+        <div class="risk-card__label">{{ t('srmRiskCommon.medium') }} YELLOW</div>
       </el-card>
       <el-card shadow="hover" class="risk-card risk-card--green">
         <div class="risk-card__count">{{ dashboard.greenCount }}</div>
-        <div class="risk-card__label">低风险 GREEN</div>
+        <div class="risk-card__label">{{ t('srmRiskCommon.low') }} GREEN</div>
       </el-card>
     </div>
     <div v-if="dashboard.topRiskSuppliers?.length" class="risk-top">
-      <h4>风险供应商 TOP</h4>
+      <h4>{{ t('srmRiskCommon.topSuppliers') }}</h4>
       <el-table :data="dashboard.topRiskSuppliers" size="small" stripe>
-        <el-table-column prop="supplierName" label="供应商" min-width="150">
+        <el-table-column prop="supplierName" :label="t('srmCommon.supplier')" min-width="150">
           <template #default="{ row }">{{ row.supplierName || row.supplierId }}</template>
         </el-table-column>
-        <el-table-column label="风险等级" width="100" align="center">
+        <el-table-column :label="t('srmRiskCommon.riskLevel')" width="100" align="center">
           <template #default="{ row }">
             <span :class="['risk-dot', `risk-dot--${row.overallLevel?.toLowerCase()}`]" />
             {{ row.overallLevel }}
           </template>
         </el-table-column>
-        <el-table-column prop="redIndicatorCount" label="红色指标数" width="100" align="center" />
+        <el-table-column prop="redIndicatorCount" :label="t('srmRiskCommon.redIndicatorCount')" width="100" align="center" />
       </el-table>
     </div>
   </div>

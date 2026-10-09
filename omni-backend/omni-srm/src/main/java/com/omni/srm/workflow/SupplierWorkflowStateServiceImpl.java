@@ -28,7 +28,7 @@ public class SupplierWorkflowStateServiceImpl implements SupplierWorkflowStateSe
 
     /** {@inheritDoc} */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void markStarted(SupplierWorkflowCommand command, String processInstanceId) {
         if (processInstanceId == null || processInstanceId.isBlank() || processInstanceId.length() > 64) {
             throw new BusinessException(503, "Workflow 返回了无效的流程实例 ID");
@@ -47,7 +47,7 @@ public class SupplierWorkflowStateServiceImpl implements SupplierWorkflowStateSe
 
     /** {@inheritDoc} */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void markFailed(SupplierWorkflowCommand command) {
         LambdaUpdateWrapper<SrmSupplier> update = matchingPending(command)
                 .set(SrmSupplier::getWorkflowStartStatus, SrmStateMachine.START_FAILED)

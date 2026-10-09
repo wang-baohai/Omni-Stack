@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # ============================================================
 # Omni-Stack 后端微服务 — 共享多阶段 Dockerfile
 # ============================================================
@@ -13,38 +14,46 @@
 FROM maven:3.9-eclipse-temurin-25-alpine AS build
 
 # 配置阿里云 Maven 镜像（加速依赖下载）
-COPY docker-settings.xml /root/.m2/settings.xml
+COPY omni-backend/docker-settings.xml /build/docker-settings.xml
 
 WORKDIR /build
 
 # 先拷入 Maven Wrapper + 所有 POM（利用 Docker 层缓存，POM 不变时跳过依赖下载）
-COPY mvnw pom.xml ./
-COPY omni-common-core/pom.xml omni-common-core/
-COPY omni-common/pom.xml omni-common/
-COPY omni-common-mybatis/pom.xml omni-common-mybatis/
-COPY omni-common-redis/pom.xml omni-common-redis/
-COPY omni-common-redis-reactive/pom.xml omni-common-redis-reactive/
-COPY omni-common-operlog/pom.xml omni-common-operlog/
-COPY omni-common-job/pom.xml omni-common-job/
-COPY omni-common-mqlog/pom.xml omni-common-mqlog/
-COPY omni-common-workflow/pom.xml omni-common-workflow/
-COPY omni-auth/pom.xml omni-auth/
-COPY omni-base/pom.xml omni-base/
-COPY omni-gateway/pom.xml omni-gateway/
-COPY omni-workflow/pom.xml omni-workflow/
-COPY omni-crm/pom.xml omni-crm/
-COPY omni-srm/pom.xml omni-srm/
-COPY omni-procurement/pom.xml omni-procurement/
-COPY omni-asset/pom.xml omni-asset/
+COPY omni-backend/mvnw omni-backend/pom.xml ./
+COPY omni-backend/.mvn/ .mvn/
+COPY omni-backend/omni-common-core/pom.xml omni-common-core/
+COPY omni-backend/omni-common/pom.xml omni-common/
+COPY omni-backend/omni-common-mybatis/pom.xml omni-common-mybatis/
+COPY omni-backend/omni-common-redis/pom.xml omni-common-redis/
+COPY omni-backend/omni-common-redis-reactive/pom.xml omni-common-redis-reactive/
+COPY omni-backend/omni-common-operlog/pom.xml omni-common-operlog/
+COPY omni-backend/omni-common-job/pom.xml omni-common-job/
+COPY omni-backend/omni-common-mqlog/pom.xml omni-common-mqlog/
+COPY omni-backend/omni-common-workflow/pom.xml omni-common-workflow/
+COPY omni-backend/omni-common-service/pom.xml omni-common-service/
+COPY omni-backend/omni-db-migrator/pom.xml omni-db-migrator/
+COPY omni-backend/omni-auth/pom.xml omni-auth/
+COPY omni-backend/omni-base/pom.xml omni-base/
+COPY omni-backend/omni-gateway/pom.xml omni-gateway/
+COPY omni-backend/omni-workflow/pom.xml omni-workflow/
+COPY omni-backend/omni-crm/pom.xml omni-crm/
+COPY omni-backend/omni-srm/pom.xml omni-srm/
+COPY omni-backend/omni-procurement/pom.xml omni-procurement/
+COPY omni-backend/omni-asset/pom.xml omni-asset/
 
-RUN mvn dependency:go-offline -B -q || true
+RUN --mount=type=cache,id=omni-maven-repository,target=/root/.m2,sharing=locked \
+    sh ./mvnw -s docker-settings.xml dependency:go-offline -B -q -Dmaven.wagon.http.retryHandler.count=5 || true
 
-# 拷入全部源码并构建指定服务
-COPY . .
+# 拷入全部后端源码和运行时目录事实源。Auth 的 Maven resources 会将后两者打入应用包。
+COPY omni-backend/ .
+COPY scaffold/ /scaffold/
+COPY database/seed/ /database/seed/
 
-ARG SERVICE_NAME
-# 镜像构建也是发布门禁：目标服务及其依赖测试失败时不得产出镜像。
-RUN mvn package -pl ${SERVICE_NAME} -am -B -q
+# 镜像构建也是发布门禁：当前预设服务 reactor 任一模块测试失败时不得产出镜像。
+# 数据库迁移器由独立镜像携带完整 database/scripts 上下文构建和测试，此处排除它。
+# 本步骤不依赖 SERVICE_NAME，因此多个服务镜像共享同一个完整构建层，避免重复编译。
+RUN --mount=type=cache,id=omni-maven-repository,target=/root/.m2,sharing=locked \
+    sh ./mvnw -s docker-settings.xml package -pl '!omni-db-migrator' -B -q -Dmaven.wagon.http.retryHandler.count=5
 
 # ---------- Stage 2: 运行 ----------
 FROM eclipse-temurin:25-jre-alpine
@@ -64,7 +73,7 @@ ENV JAVA_OPTS=""
 EXPOSE 8080
 
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 --start-period=90s \
-  CMD curl -sf http://localhost:${MANAGEMENT_PORT}/actuator/health || exit 1
+  CMD curl -sf http://localhost:${MANAGEMENT_SERVER_PORT:-8080}/actuator/health || exit 1
 
 # 使用 JSON 形式固定进程入口；JDK 25 下显式开放 Netty 等依赖所需的受限原生访问。
 ENTRYPOINT ["/bin/bash", "-c", "exec java --enable-native-access=ALL-UNNAMED $JAVA_OPTS -jar /app/app.jar"]

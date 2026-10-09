@@ -10,7 +10,8 @@ import com.omni.asset.entity.AstInboxEvent;
 import com.omni.asset.mapper.AssetReceiptImportMapper;
 import com.omni.asset.mapper.AstAssetHistoryMapper;
 import com.omni.asset.mapper.AstInboxEventMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.common.core.mq.ReliableMessageRelay;
 import com.omni.common.core.result.BusinessException;
 import org.junit.jupiter.api.AfterEach;
@@ -68,14 +69,14 @@ class ProcurementAssetImportServiceImplTest {
         service = new ProcurementAssetImportServiceImpl(
                 inboxMapper, importMapper, historyMapper,
                 reliableMessageRelay, objectMapper);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 0L, TENANT_ID, "test-procurement-event"));
     }
 
     /** 清理 ThreadLocal，避免测试线程污染。 */
     @AfterEach
     void tearDown() {
-        AssetTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 验证一行多单位会生成独立资产、历史与单个 Outbox 批事件。 */
@@ -241,11 +242,11 @@ class ProcurementAssetImportServiceImplTest {
             throws InterruptedException {
         start.await(10, TimeUnit.SECONDS);
         try {
-            AssetTenantContext.set(new AssetTenantContext.RequestIdentity(
+            ServiceIdentityContext.set(new ServiceRequestIdentity(
                     0L, TENANT_ID, "concurrent-backfill"));
             return service.importCandidate(TENANT_ID, candidate);
         } finally {
-            AssetTenantContext.clear();
+            ServiceIdentityContext.clear();
         }
     }
 

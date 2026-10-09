@@ -1,0 +1,4709 @@
+version: 1
+product_version: 0.6.1
+generated_at: 2026-08-26T09:52:03+08:00
+fixture: isolated-fresh-docs-v1
+rules:
+  token_storage: process-memory-only
+  captcha: display-only
+  sensitive_masking: required
+  animation: disabled
+
+screenshots:
+  - id: auth-login-zh-CN
+    module: authentication
+    flow: password-captcha
+    step: entry
+    locale: zh-CN
+    role: public
+    route: /login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开登录页
+    expected: 显示租户、用户名、密码、验证码和登录方式
+    masks: [captcha]
+    image: docs/images/zh-CN/auth-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-login-en-US
+    module: authentication
+    flow: password-captcha
+    step: entry
+    locale: en-US
+    role: public
+    route: /login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the login page
+    expected: Tenant, username, password, CAPTCHA, and login methods are visible
+    masks: [captcha]
+    image: docs/images/en-US/auth-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-login-ja-JP
+    module: authentication
+    flow: password-captcha
+    step: entry
+    locale: ja-JP
+    role: public
+    route: /login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: ログイン画面を開く
+    expected: テナント、ユーザー名、パスワード、認証コード、ログイン方法が表示される
+    masks: [captcha]
+    image: docs/images/ja-JP/auth-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-login-ko-KR
+    module: authentication
+    flow: password-captcha
+    step: entry
+    locale: ko-KR
+    role: public
+    route: /login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 로그인 화면 열기
+    expected: 테넌트, 사용자 이름, 비밀번호, 보안 문자와 로그인 방식이 표시됨
+    masks: [captcha]
+    image: docs/images/ko-KR/auth-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+
+  - id: auth-register-zh-CN
+    module: authentication
+    flow: register
+    step: create-account
+    locale: zh-CN
+    role: public
+    route: /register
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开注册页
+    expected: 显示账号、租户、验证码和注册入口
+    masks: [captcha, password]
+    image: docs/images/zh-CN/auth-register.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-register-en-US
+    module: authentication
+    flow: register
+    step: create-account
+    locale: en-US
+    role: public
+    route: /register
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open registration
+    expected: Account, tenant, CAPTCHA, and registration controls are visible
+    masks: [captcha, password]
+    image: docs/images/en-US/auth-register.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-register-ja-JP
+    module: authentication
+    flow: register
+    step: create-account
+    locale: ja-JP
+    role: public
+    route: /register
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 登録画面を開く
+    expected: アカウント、テナント、認証コード、登録操作が表示される
+    masks: [captcha, password]
+    image: docs/images/ja-JP/auth-register.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-register-ko-KR
+    module: authentication
+    flow: register
+    step: create-account
+    locale: ko-KR
+    role: public
+    route: /register
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 가입 화면 열기
+    expected: 계정, 테넌트, 보안 문자와 가입 작업이 표시됨
+    masks: [captcha, password]
+    image: docs/images/ko-KR/auth-register.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+
+  - id: auth-device-code-zh-CN
+    module: authentication
+    flow: device-code
+    step: request-code
+    locale: zh-CN
+    role: public
+    route: /device
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开设备授权页
+    expected: 显示设备验证码、验证地址和二维码
+    masks: []
+    image: docs/images/zh-CN/auth-device-code.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-device-code-en-US
+    module: authentication
+    flow: device-code
+    step: request-code
+    locale: en-US
+    role: public
+    route: /device
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open device authorization
+    expected: Device code, verification URL, and QR code are visible
+    masks: []
+    image: docs/images/en-US/auth-device-code.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-device-code-ja-JP
+    module: authentication
+    flow: device-code
+    step: request-code
+    locale: ja-JP
+    role: public
+    route: /device
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: デバイス認証画面を開く
+    expected: 確認コード、確認 URL、QR コードが表示される
+    masks: []
+    image: docs/images/ja-JP/auth-device-code.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: auth-device-code-ko-KR
+    module: authentication
+    flow: device-code
+    step: request-code
+    locale: ko-KR
+    role: public
+    route: /device
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 기기 인증 화면 열기
+    expected: 확인 코드, 확인 URL과 QR 코드가 표시됨
+    masks: []
+    image: docs/images/ko-KR/auth-device-code.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+
+  - id: supplier-portal-login-zh-CN
+    module: srm
+    flow: portal-login
+    step: entry
+    locale: zh-CN
+    role: supplier-public
+    route: /portal-login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开供应商门户登录页
+    expected: 显示供应商登录和开户注册入口
+    masks: [captcha, password]
+    image: docs/images/zh-CN/supplier-portal-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: supplier-portal-login-en-US
+    module: srm
+    flow: portal-login
+    step: entry
+    locale: en-US
+    role: supplier-public
+    route: /portal-login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open supplier portal login
+    expected: Supplier login and registration entries are visible
+    masks: [captcha, password]
+    image: docs/images/en-US/supplier-portal-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: supplier-portal-login-ja-JP
+    module: srm
+    flow: portal-login
+    step: entry
+    locale: ja-JP
+    role: supplier-public
+    route: /portal-login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: サプライヤーポータルのログイン画面を開く
+    expected: サプライヤーのログインと登録入口が表示される
+    masks: [captcha, password]
+    image: docs/images/ja-JP/supplier-portal-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  - id: supplier-portal-login-ko-KR
+    module: srm
+    flow: portal-login
+    step: entry
+    locale: ko-KR
+    role: supplier-public
+    route: /portal-login
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 공급업체 포털 로그인 화면 열기
+    expected: 공급업체 로그인과 가입 진입점이 표시됨
+    masks: [captcha, password]
+    image: docs/images/ko-KR/supplier-portal-login.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-08-26T09:52:03+08:00
+  # BEGIN admin-flows (generated by tools/omni-cli/scripts/screenshot-manifest-sync.mjs)
+  - id: system-dashboard-zh-CN
+    module: system-management
+    flow: dashboard
+    step: entry
+    locale: zh-CN
+    role: admin
+    route: /admin/dashboard
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开欢迎页面
+    expected: 主内容区显示「欢迎」
+    masks: []
+    image: docs/images/zh-CN/system-dashboard.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: system-dashboard-en-US
+    module: system-management
+    flow: dashboard
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/dashboard
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Welcome page
+    expected: Main area shows "Welcome"
+    masks: []
+    image: docs/images/en-US/system-dashboard.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: system-dashboard-ja-JP
+    module: system-management
+    flow: dashboard
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/dashboard
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: ようこそページを開く
+    expected: メイン領域に「ようこそ」を表示
+    masks: []
+    image: docs/images/ja-JP/system-dashboard.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: system-dashboard-ko-KR
+    module: system-management
+    flow: dashboard
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/dashboard
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 환영합니다 페이지 열기
+    expected: 메인 영역에 "환영합니다" 표시
+    masks: []
+    image: docs/images/ko-KR/system-dashboard.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: system-users-zh-CN
+    module: system-management
+    flow: user
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/user
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开用户管理页面
+    expected: 主内容区显示「用户管理」
+    masks: []
+    image: docs/images/zh-CN/system-users.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: system-users-en-US
+    module: system-management
+    flow: user
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/user
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the User Management page
+    expected: Main area shows "User Management"
+    masks: []
+    image: docs/images/en-US/system-users.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: system-users-ja-JP
+    module: system-management
+    flow: user
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/user
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: ユーザー管理ページを開く
+    expected: メイン領域に「ユーザー管理」を表示
+    masks: []
+    image: docs/images/ja-JP/system-users.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: system-users-ko-KR
+    module: system-management
+    flow: user
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/user
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 사용자 관리 페이지 열기
+    expected: 메인 영역에 "사용자 관리" 표시
+    masks: []
+    image: docs/images/ko-KR/system-users.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: scheduling-system-jobs-zh-CN
+    module: scheduling-workspace
+    flow: system-job
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/job/system-job
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开任务调度页面
+    expected: 主内容区显示「任务调度」
+    masks: []
+    image: docs/images/zh-CN/scheduling-system-jobs.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: scheduling-system-jobs-en-US
+    module: scheduling-workspace
+    flow: system-job
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/job/system-job
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Job Scheduler page
+    expected: Main area shows "Job Scheduler"
+    masks: []
+    image: docs/images/en-US/scheduling-system-jobs.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: scheduling-system-jobs-ja-JP
+    module: scheduling-workspace
+    flow: system-job
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/job/system-job
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: ジョブ管理ページを開く
+    expected: メイン領域に「ジョブ管理」を表示
+    masks: []
+    image: docs/images/ja-JP/scheduling-system-jobs.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: scheduling-system-jobs-ko-KR
+    module: scheduling-workspace
+    flow: system-job
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/job/system-job
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 작업 스케줄링 페이지 열기
+    expected: 메인 영역에 "작업 스케줄링" 표시
+    masks: []
+    image: docs/images/ko-KR/scheduling-system-jobs.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: monitor-mq-messages-zh-CN
+    module: messaging-monitoring
+    flow: message-status
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开MQ 消息记录页面
+    expected: 主内容区显示「MQ 消息记录」
+    masks: []
+    image: docs/images/zh-CN/monitor-mq-messages.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: monitor-mq-messages-en-US
+    module: messaging-monitoring
+    flow: message-status
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the MQ Messages page
+    expected: Main area shows "MQ Messages"
+    masks: []
+    image: docs/images/en-US/monitor-mq-messages.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: monitor-mq-messages-ja-JP
+    module: messaging-monitoring
+    flow: message-status
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: MQ Messagesページを開く
+    expected: メイン領域に「MQ Messages」を表示
+    masks: []
+    image: docs/images/ja-JP/monitor-mq-messages.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: monitor-mq-messages-ko-KR
+    module: messaging-monitoring
+    flow: message-status
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: MQ Messages 페이지 열기
+    expected: 메인 영역에 "MQ Messages" 표시
+    masks: []
+    image: docs/images/ko-KR/monitor-mq-messages.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: workflow-models-zh-CN
+    module: workflow
+    flow: model-create
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开工作流管理页面
+    expected: 主内容区显示「工作流管理」
+    masks: []
+    image: docs/images/zh-CN/workflow-models.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: workflow-models-en-US
+    module: workflow
+    flow: model-create
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Workflow page
+    expected: Main area shows "Workflow"
+    masks: []
+    image: docs/images/en-US/workflow-models.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: workflow-models-ja-JP
+    module: workflow
+    flow: model-create
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: ワークフロー管理ページを開く
+    expected: メイン領域に「ワークフロー管理」を表示
+    masks: []
+    image: docs/images/ja-JP/workflow-models.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: workflow-models-ko-KR
+    module: workflow
+    flow: model-create
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 워크플로 관리 페이지 열기
+    expected: 메인 영역에 "워크플로 관리" 표시
+    masks: []
+    image: docs/images/ko-KR/workflow-models.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: crm-overview-zh-CN
+    module: crm
+    flow: overview
+    step: entry
+    locale: zh-CN
+    role: admin
+    route: /admin/crm/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开销售概览页面
+    expected: 主内容区显示「销售概览」
+    masks: []
+    image: docs/images/zh-CN/crm-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: crm-overview-en-US
+    module: crm
+    flow: overview
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/crm/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Sales Overview page
+    expected: Main area shows "Sales Overview"
+    masks: []
+    image: docs/images/en-US/crm-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: crm-overview-ja-JP
+    module: crm
+    flow: overview
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/crm/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 営業概要ページを開く
+    expected: メイン領域に「営業概要」を表示
+    masks: []
+    image: docs/images/ja-JP/crm-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: crm-overview-ko-KR
+    module: crm
+    flow: overview
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/crm/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 영업 개요 페이지 열기
+    expected: 메인 영역에 "영업 개요" 표시
+    masks: []
+    image: docs/images/ko-KR/crm-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: srm-overview-zh-CN
+    module: srm
+    flow: lifecycle
+    step: entry
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开供应商概览页面
+    expected: 主内容区显示「供应商概览」
+    masks: []
+    image: docs/images/zh-CN/srm-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: srm-overview-en-US
+    module: srm
+    flow: lifecycle
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/srm/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Supplier Overview page
+    expected: Main area shows "Supplier Overview"
+    masks: []
+    image: docs/images/en-US/srm-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: srm-overview-ja-JP
+    module: srm
+    flow: lifecycle
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: サプライヤー概要ページを開く
+    expected: メイン領域に「サプライヤー概要」を表示
+    masks: []
+    image: docs/images/ja-JP/srm-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: srm-overview-ko-KR
+    module: srm
+    flow: lifecycle
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 공급업체 개요 페이지 열기
+    expected: 메인 영역에 "공급업체 개요" 표시
+    masks: []
+    image: docs/images/ko-KR/srm-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-overview-zh-CN
+    module: procurement
+    flow: overview
+    step: entry
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: wp006-real-chain-v1
+    action: 打开采购概览页面
+    expected: 主内容区显示「采购概览」
+    masks: []
+    image: docs/images/zh-CN/procurement-overview.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-overview-en-US
+    module: procurement
+    flow: overview
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/procurement/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: wp006-real-chain-v1
+    action: Open the Procurement Overview page
+    expected: Main area shows "Procurement Overview"
+    masks: []
+    image: docs/images/en-US/procurement-overview.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-overview-ja-JP
+    module: procurement
+    flow: overview
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: wp006-real-chain-v1
+    action: 調達概要ページを開く
+    expected: メイン領域に「調達概要」を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-overview.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-overview-ko-KR
+    module: procurement
+    flow: overview
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: wp006-real-chain-v1
+    action: 조달 개요 페이지 열기
+    expected: 메인 영역에 "조달 개요" 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-overview.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-zh-CN
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: wp006-real-chain-v1
+    action: 打开请购审批规则页面
+    expected: 主内容区显示「请购审批规则」
+    masks: []
+    image: docs/images/zh-CN/procurement-approval-rules.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-en-US
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: wp006-real-chain-v1
+    action: Open the Requisition Approval Rules page
+    expected: Main area shows "Requisition Approval Rules"
+    masks: []
+    image: docs/images/en-US/procurement-approval-rules.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-ja-JP
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: wp006-real-chain-v1
+    action: 購買申請承認ルールページを開く
+    expected: メイン領域に「購買申請承認ルール」を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-approval-rules.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-ko-KR
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: wp006-real-chain-v1
+    action: 구매 신청 승인 규칙 페이지 열기
+    expected: 메인 영역에 "구매 신청 승인 규칙" 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-approval-rules.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-material-list-zh-CN
+    module: procurement
+    flow: material
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 打开物料目录页（真实 WP005 基础物料只读呈现）
+    expected: 列表显示 WP005FIX 两类真实物料
+    masks: []
+    image: docs/images/zh-CN/procurement-material-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-requisition-list-zh-CN
+    module: procurement
+    flow: requisition-approval
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/requisition
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 打开请购管理页
+    expected: 列表显示真实 PR-1-1（APPROVED）
+    masks: []
+    image: docs/images/zh-CN/procurement-requisition-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-requisition-detail-zh-CN
+    module: procurement
+    flow: requisition-approval
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/requisition
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 打开 PR-1-1 详情抽屉
+    expected: 显示审批 attempt、流程实例 ID 与明细行
+    masks: []
+    image: docs/images/zh-CN/procurement-requisition-detail.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-list-zh-CN
+    module: procurement
+    flow: rfq
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 打开询价比价页
+    expected: 列表显示真实 RFQ-1-1（已定标）
+    masks: []
+    image: docs/images/zh-CN/procurement-rfq-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-detail-award-zh-CN
+    module: procurement
+    flow: rfq
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 打开 RFQ-1-1 详情抽屉
+    expected: "显示两供应商报价 ID 与中标报价 #2 / v1 定点结果"
+    masks: []
+    image: docs/images/zh-CN/procurement-rfq-detail-award.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-award-comparison-zh-CN
+    module: procurement
+    flow: comparison
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 在 RFQ-1-1 详情核对报价接收与比价定点结果（定标后比价入口收起，以定点快照呈现）
+    expected: "中标报价 #2 / v1 与两供应商报价版本并排呈现"
+    masks: []
+    image: docs/images/zh-CN/procurement-rfq-detail-award.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-purchase-order-list-zh-CN
+    module: procurement
+    flow: purchase-order
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/purchase-order
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 打开采购订单页
+    expected: 列表显示真实 PO-1-1（已收货）
+    masks: []
+    image: docs/images/zh-CN/procurement-purchase-order-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-purchase-order-detail-zh-CN
+    module: procurement
+    flow: purchase-order
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/purchase-order
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 打开 PO-1-1 详情（订单跟踪器）
+    expected: 两行明细展示订单数量、已收数量与金额
+    masks: []
+    image: docs/images/zh-CN/procurement-purchase-order-detail.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-goods-receipt-list-zh-CN
+    module: procurement
+    flow: goods-receipt
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/goods-receipt
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 打开收货管理页
+    expected: 列表显示三张真实收货单 GR-1-1 / GR-1-2 / GR-1-3
+    masks: []
+    image: docs/images/zh-CN/procurement-goods-receipt-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-goods-receipt-detail-quality-zh-CN
+    module: procurement
+    flow: goods-receipt
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/goods-receipt
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 打开 GR-1-2 详情抽屉（质检两态）
+    expected: material1 行不合格、material2 行合格的真实质检结果
+    masks: []
+    image: docs/images/zh-CN/procurement-goods-receipt-detail-quality.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rule-match-success-zh-CN
+    module: procurement
+    flow: approval-rule-match
+    step: success
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 先试一笔：品类 LAPTOP、金额 5000 触发服务端试算
+    expected: MATCHED 命中 WP006FIX-LAPTOP-small（0≤x<10000）并展示真实审批图
+    masks: []
+    image: docs/images/zh-CN/procurement-rule-match-success.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-forbidden-403-zh-CN
+    module: procurement
+    flow: material
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: employee
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 以 EMPLOYEE 身份访问物料目录页
+    expected: 呈现 403 无权访问拒绝页而非空列表
+    masks: []
+    image: docs/images/zh-CN/procurement-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-supplier-domain-isolation-zh-CN
+    module: procurement
+    flow: material
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: supplier
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 以 SUPPLIER 身份访问采购管理路由
+    expected: 路由守卫重定向回供应商门户（角色域隔离），不泄露管理界面
+    masks: []
+    image: docs/images/zh-CN/procurement-supplier-domain-isolation.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-portal-quotation-record-zh-CN
+    module: procurement
+    flow: quotation-receipt
+    step: success
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 以 supplier2 打开门户询价报价页签
+    expected: 显示本轮真实报价记录 RFQ-1-1（当前报价 CNY 9000，已中标）
+    masks: []
+    image: docs/images/zh-CN/procurement-portal-quotation-record.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-material-list-en-US
+    module: procurement
+    flow: material
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the Material Catalog page (real WP005 base materials, read-only)
+    expected: List shows both real WP005FIX materials
+    masks: []
+    image: docs/images/en-US/procurement-material-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-requisition-list-en-US
+    module: procurement
+    flow: requisition-approval
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/procurement/requisition
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the Requisition page
+    expected: List shows real PR-1-1 (APPROVED)
+    masks: []
+    image: docs/images/en-US/procurement-requisition-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-requisition-detail-en-US
+    module: procurement
+    flow: requisition-approval
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/procurement/requisition
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the PR-1-1 detail drawer
+    expected: Shows approval attempt, process instance ID and lines
+    masks: []
+    image: docs/images/en-US/procurement-requisition-detail.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-list-en-US
+    module: procurement
+    flow: rfq
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the RFQ page
+    expected: List shows real RFQ-1-1 (AWARDED)
+    masks: []
+    image: docs/images/en-US/procurement-rfq-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-detail-award-en-US
+    module: procurement
+    flow: rfq
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the RFQ-1-1 detail drawer
+    expected: "Shows two suppliers quotation IDs and winning quotation #2 / v1"
+    masks: []
+    image: docs/images/en-US/procurement-rfq-detail-award.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-award-comparison-en-US
+    module: procurement
+    flow: comparison
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Review quotation receipt and comparison/award result in RFQ-1-1 detail (compare entry closes after award; award snapshot shown)
+    expected: "Winning quotation #2 / v1 with both suppliers quotation versions side by side"
+    masks: []
+    image: docs/images/en-US/procurement-rfq-detail-award.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-purchase-order-list-en-US
+    module: procurement
+    flow: purchase-order
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/procurement/purchase-order
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the Purchase Order page
+    expected: List shows real PO-1-1 (RECEIVED)
+    masks: []
+    image: docs/images/en-US/procurement-purchase-order-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-purchase-order-detail-en-US
+    module: procurement
+    flow: purchase-order
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/procurement/purchase-order
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the PO-1-1 detail (order tracker)
+    expected: Two line rows show ordered/received quantities and amounts
+    masks: []
+    image: docs/images/en-US/procurement-purchase-order-detail.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-goods-receipt-list-en-US
+    module: procurement
+    flow: goods-receipt
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/procurement/goods-receipt
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the Goods Receipt page
+    expected: List shows three real receipts GR-1-1 / GR-1-2 / GR-1-3
+    masks: []
+    image: docs/images/en-US/procurement-goods-receipt-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-goods-receipt-detail-quality-en-US
+    module: procurement
+    flow: goods-receipt
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/procurement/goods-receipt
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the GR-1-2 detail drawer (two quality states)
+    expected: "Real quality results: material1 line FAIL, material2 line PASS"
+    masks: []
+    image: docs/images/en-US/procurement-goods-receipt-detail-quality.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-mobile-en-US
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 390
+      height: 844
+    fixture: wp006-real-chain-v1
+    action: Open the rules page at 390×844 viewport
+    expected: No horizontal overflow; key entries intact and usable
+    masks: []
+    image: docs/images/en-US/procurement-approval-rules-mobile.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-tablet-en-US
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 1024
+      height: 768
+    fixture: wp006-real-chain-v1
+    action: Open the rules page at 1024×768 viewport
+    expected: Adaptive layout; forms and tables not truncated
+    masks: []
+    image: docs/images/en-US/procurement-approval-rules-tablet.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rule-match-success-en-US
+    module: procurement
+    flow: approval-rule-match
+    step: success
+    locale: en-US
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: "Match tester: category LAPTOP, amount 5000, server-side preview"
+    expected: MATCHED on WP006FIX-LAPTOP-small (0≤x<10000) with real approval graph
+    masks: []
+    image: docs/images/en-US/procurement-rule-match-success.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-forbidden-403-en-US
+    module: procurement
+    flow: material
+    step: failure-or-forbidden
+    locale: en-US
+    role: employee
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Access the Material Catalog page as EMPLOYEE
+    expected: Shows 403 forbidden page, not an empty list
+    masks: []
+    image: docs/images/en-US/procurement-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-supplier-domain-isolation-en-US
+    module: procurement
+    flow: material
+    step: failure-or-forbidden
+    locale: en-US
+    role: supplier
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Access a procurement admin route as SUPPLIER
+    expected: Route guard redirects back to supplier portal (role-domain isolation); admin UI never leaked
+    masks: []
+    image: docs/images/en-US/procurement-supplier-domain-isolation.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-portal-quotation-record-en-US
+    module: procurement
+    flow: quotation-receipt
+    step: success
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: Open the portal RFQ Quotations tab as supplier2
+    expected: Shows this round real quotation record RFQ-1-1 (current CNY 9000, awarded)
+    masks: []
+    image: docs/images/en-US/procurement-portal-quotation-record.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-material-list-ja-JP
+    module: procurement
+    flow: material
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 物料カタログページを開く（実際の WP005 基本物料を参照のみ）
+    expected: 一覧に WP005FIX の実物料 2 件を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-material-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-requisition-list-ja-JP
+    module: procurement
+    flow: requisition-approval
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/requisition
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 購買申請ページを開く
+    expected: 一覧に実際の PR-1-1（承認済み）を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-requisition-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-requisition-detail-ja-JP
+    module: procurement
+    flow: requisition-approval
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/requisition
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: PR-1-1 詳細ドロワーを開く
+    expected: 承認 attempt・プロセスインスタンス ID・明細を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-requisition-detail.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-list-ja-JP
+    module: procurement
+    flow: rfq
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 見積依頼ページを開く
+    expected: 一覧に実際の RFQ-1-1（内定済み）を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-rfq-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-detail-award-ja-JP
+    module: procurement
+    flow: rfq
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: RFQ-1-1 詳細ドロワーを開く
+    expected: "2 社の見積 ID と落札見積 #2 / v1 を表示"
+    masks: []
+    image: docs/images/ja-JP/procurement-rfq-detail-award.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-award-comparison-ja-JP
+    module: procurement
+    flow: comparison
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: RFQ-1-1 詳細で見積受領と比較内定結果を確認（内定後は比較入口が非表示、内定スナップショットを表示）
+    expected: "落札見積 #2 / v1 と 2 社の見積バージョンを並べて表示"
+    masks: []
+    image: docs/images/ja-JP/procurement-rfq-detail-award.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-purchase-order-list-ja-JP
+    module: procurement
+    flow: purchase-order
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/purchase-order
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 発注書ページを開く
+    expected: 一覧に実際の PO-1-1（入荷済み）を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-purchase-order-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-purchase-order-detail-ja-JP
+    module: procurement
+    flow: purchase-order
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/purchase-order
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: PO-1-1 詳細（注文トラッカー）を開く
+    expected: 2 明細行に発注数量・入荷数量・金額を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-purchase-order-detail.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-goods-receipt-list-ja-JP
+    module: procurement
+    flow: goods-receipt
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/goods-receipt
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 入庫管理ページを開く
+    expected: 一覧に実際の 3 伝票 GR-1-1 / GR-1-2 / GR-1-3 を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-goods-receipt-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-goods-receipt-detail-quality-ja-JP
+    module: procurement
+    flow: goods-receipt
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/goods-receipt
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: GR-1-2 詳細ドロワーを開く（検品 2 状態）
+    expected: material1 行不良・material2 行合格の実際の検品結果
+    masks: []
+    image: docs/images/ja-JP/procurement-goods-receipt-detail-quality.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-mobile-ja-JP
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 390
+      height: 844
+    fixture: wp006-real-chain-v1
+    action: 390×844 ビューポートでルールページを開く
+    expected: 横スクロールなし、主要入口が利用可能
+    masks: []
+    image: docs/images/ja-JP/procurement-approval-rules-mobile.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-tablet-ja-JP
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 1024
+      height: 768
+    fixture: wp006-real-chain-v1
+    action: 1024×768 ビューポートでルールページを開く
+    expected: レイアウトが適応し、フォームと一覧が切れない
+    masks: []
+    image: docs/images/ja-JP/procurement-approval-rules-tablet.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rule-match-success-ja-JP
+    module: procurement
+    flow: approval-rule-match
+    step: success
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: マッチングテスト：カテゴリ LAPTOP・金額 5000 でサーバー試算
+    expected: MATCHED で WP006FIX-LAPTOP-small（0≤x<10000）と実際の承認図を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-rule-match-success.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-forbidden-403-ja-JP
+    module: procurement
+    flow: material
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: employee
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: EMPLOYEE として物料カタログページへアクセス
+    expected: 空一覧ではなく 403 拒否ページを表示
+    masks: []
+    image: docs/images/ja-JP/procurement-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-supplier-domain-isolation-ja-JP
+    module: procurement
+    flow: material
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: supplier
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: SUPPLIER として調達管理ルートへアクセス
+    expected: ルートガードがサプライヤーポータルへリダイレクト（役割ドメイン分離）
+    masks: []
+    image: docs/images/ja-JP/procurement-supplier-domain-isolation.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-portal-quotation-record-ja-JP
+    module: procurement
+    flow: quotation-receipt
+    step: success
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: supplier2 でポータル見積回答タブを開く
+    expected: 今回の実際の見積記録 RFQ-1-1（現在 CNY 9000・内定済み）を表示
+    masks: []
+    image: docs/images/ja-JP/procurement-portal-quotation-record.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-material-list-ko-KR
+    module: procurement
+    flow: material
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 자재 카탈로그 페이지 열기(실제 WP005 기초 자재 읽기 전용)
+    expected: 목록에 WP005FIX 실제 자재 2건 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-material-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-requisition-list-ko-KR
+    module: procurement
+    flow: requisition-approval
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/requisition
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 구매 신청 페이지 열기
+    expected: 목록에 실제 PR-1-1(승인됨) 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-requisition-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-requisition-detail-ko-KR
+    module: procurement
+    flow: requisition-approval
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/requisition
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: PR-1-1 상세 서랍 열기
+    expected: 승인 attempt·프로세스 인스턴스 ID·내역 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-requisition-detail.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-list-ko-KR
+    module: procurement
+    flow: rfq
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 견적 요청 페이지 열기
+    expected: 목록에 실제 RFQ-1-1(선정됨) 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-rfq-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-detail-award-ko-KR
+    module: procurement
+    flow: rfq
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: RFQ-1-1 상세 서랍 열기
+    expected: "2개 공급사 견적 ID와 낙찰 견적 #2 / v1 표시"
+    masks: []
+    image: docs/images/ko-KR/procurement-rfq-detail-award.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rfq-award-comparison-ko-KR
+    module: procurement
+    flow: comparison
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/rfq
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: RFQ-1-1 상세에서 견적 접수 및 비교 선정 결과 확인(선정 후 비교 입구 숨김, 선정 스냅샷 표시)
+    expected: "낙찰 견적 #2 / v1과 2개 공급사 견적 버전을 나란히 표시"
+    masks: []
+    image: docs/images/ko-KR/procurement-rfq-detail-award.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-purchase-order-list-ko-KR
+    module: procurement
+    flow: purchase-order
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/purchase-order
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 구매 주문 페이지 열기
+    expected: 목록에 실제 PO-1-1(수령 완료) 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-purchase-order-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-purchase-order-detail-ko-KR
+    module: procurement
+    flow: purchase-order
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/purchase-order
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: PO-1-1 상세(주문 트래커) 열기
+    expected: 2개 내역 행에 주문/수령 수량과 금액 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-purchase-order-detail.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-goods-receipt-list-ko-KR
+    module: procurement
+    flow: goods-receipt
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/goods-receipt
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: 입고 관리 페이지 열기
+    expected: 목록에 실제 3전표 GR-1-1 / GR-1-2 / GR-1-3 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-goods-receipt-list.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-goods-receipt-detail-quality-ko-KR
+    module: procurement
+    flow: goods-receipt
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/goods-receipt
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: GR-1-2 상세 서랍 열기(검사 2가지 상태)
+    expected: material1 행 불합격·material2 행 합격의 실제 검사 결과
+    masks: []
+    image: docs/images/ko-KR/procurement-goods-receipt-detail-quality.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-mobile-ko-KR
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 390
+      height: 844
+    fixture: wp006-real-chain-v1
+    action: 390×844 뷰포트에서 규칙 페이지 열기
+    expected: 가로 넘침 없음, 핵심 진입점 정상
+    masks: []
+    image: docs/images/ko-KR/procurement-approval-rules-mobile.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-tablet-ko-KR
+    module: procurement
+    flow: approval-rule-match
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 1024
+      height: 768
+    fixture: wp006-real-chain-v1
+    action: 1024×768 뷰포트에서 규칙 페이지 열기
+    expected: 레이아웃 적응, 폼과 목록 잘림 없음
+    masks: []
+    image: docs/images/ko-KR/procurement-approval-rules-tablet.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-rule-match-success-ko-KR
+    module: procurement
+    flow: approval-rule-match
+    step: success
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: "매칭 테스트: 카테고리 LAPTOP·금액 5000 서버 시험"
+    expected: MATCHED로 WP006FIX-LAPTOP-small(0≤x<10000)와 실제 승인 그래프 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-rule-match-success.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-forbidden-403-ko-KR
+    module: procurement
+    flow: material
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: employee
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: EMPLOYEE로 자재 카탈로그 페이지 접근
+    expected: 빈 목록이 아닌 403 거부 페이지 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-supplier-domain-isolation-ko-KR
+    module: procurement
+    flow: material
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: supplier
+    route: /admin/procurement/material
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: SUPPLIER로 조달 관리 라우트 접근
+    expected: 라우트 가드가 공급사 포털로 리다이렉트(역할 도메인 분리)
+    masks: []
+    image: docs/images/ko-KR/procurement-supplier-domain-isolation.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-portal-quotation-record-ko-KR
+    module: procurement
+    flow: quotation-receipt
+    step: success
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport:
+      width: 1440
+      height: 900
+    fixture: wp006-real-chain-v1
+    action: supplier2로 포털 견적 응답 탭 열기
+    expected: 이번 라운드 실제 견적 기록 RFQ-1-1(현재 CNY 9000, 선정됨) 표시
+    masks: []
+    image: docs/images/ko-KR/procurement-portal-quotation-record.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+
+  - id: asset-overview-zh-CN
+    module: asset
+    flow: overview
+    step: entry
+    locale: zh-CN
+    role: admin
+    route: /admin/asset/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开资产概览页面
+    expected: 主内容区显示「资产概览」
+    masks: []
+    image: docs/images/zh-CN/asset-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: asset-overview-en-US
+    module: asset
+    flow: overview
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/asset/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Asset Overview page
+    expected: Main area shows "Asset Overview"
+    masks: []
+    image: docs/images/en-US/asset-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: asset-overview-ja-JP
+    module: asset
+    flow: overview
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/asset/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 資産概要ページを開く
+    expected: メイン領域に「資産概要」を表示
+    masks: []
+    image: docs/images/ja-JP/asset-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: asset-overview-ko-KR
+    module: asset
+    flow: overview
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/asset/overview
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 자산 개요 페이지 열기
+    expected: 메인 영역에 "자산 개요" 표시
+    masks: []
+    image: docs/images/ko-KR/asset-overview.png
+    test: omni-frontend/e2e-docs/flows/admin.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-mobile-zh-CN
+    module: procurement
+    flow: approval-rule-match
+    step: responsive
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 390, height: 844 }
+    fixture: wp006-real-chain-v1
+    action: 打开请购审批规则页面
+    expected: 主内容区显示「请购审批规则」（390×844）
+    masks: []
+    image: docs/images/zh-CN/procurement-approval-rules-mobile.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  - id: procurement-approval-rules-tablet-zh-CN
+    module: procurement
+    flow: approval-rule-match
+    step: responsive
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 1024, height: 768 }
+    fixture: wp006-real-chain-v1
+    action: 打开请购审批规则页面
+    expected: 主内容区显示「请购审批规则」（1024×768）
+    masks: []
+    image: docs/images/zh-CN/procurement-approval-rules-tablet.png
+    test: omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts
+    version: 0.6.1
+  # END admin-flows
+  - id: employee-forbidden-403-zh-CN
+    module: permissions-exceptions
+    flow: forbidden-403
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: employee
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 访问无权限的请购审批规则页
+    expected: 显示 403 页面与返回入口（AUTHENTICATED_BUT_FORBIDDEN，非登录跳转）
+    masks: []
+    image: docs/images/zh-CN/employee-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T15:30:00+08:00
+  - id: employee-forbidden-403-en-US
+    module: permissions-exceptions
+    flow: forbidden-403
+    step: failure-or-forbidden
+    locale: en-US
+    role: employee
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 访问无权限的请购审批规则页
+    expected: 显示 403 页面与返回入口（AUTHENTICATED_BUT_FORBIDDEN，非登录跳转）
+    masks: []
+    image: docs/images/en-US/employee-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T15:30:00+08:00
+  - id: employee-forbidden-403-ja-JP
+    module: permissions-exceptions
+    flow: forbidden-403
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: employee
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 访问无权限的请购审批规则页
+    expected: 显示 403 页面与返回入口（AUTHENTICATED_BUT_FORBIDDEN，非登录跳转）
+    masks: []
+    image: docs/images/ja-JP/employee-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T15:30:00+08:00
+  - id: employee-forbidden-403-ko-KR
+    module: permissions-exceptions
+    flow: forbidden-403
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: employee
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 访问无权限的请购审批规则页
+    expected: 显示 403 页面与返回入口（AUTHENTICATED_BUT_FORBIDDEN，非登录跳转）
+    masks: []
+    image: docs/images/ko-KR/employee-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T15:30:00+08:00
+  - id: employee-workspace-scope-zh-CN
+    module: permissions-exceptions
+    flow: employee-scope
+    step: entry
+    locale: zh-CN
+    role: employee
+    route: /
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 打开审批工作台
+    expected: 工作台待办列表渲染（待我审批/My Tasks）且不含管理端 403
+    masks: []
+    image: docs/images/zh-CN/employee-workspace-scope.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T15:30:00+08:00
+  - id: employee-workspace-scope-en-US
+    module: permissions-exceptions
+    flow: employee-scope
+    step: entry
+    locale: en-US
+    role: employee
+    route: /
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 打开审批工作台
+    expected: 工作台待办列表渲染（待我审批/My Tasks）且不含管理端 403
+    masks: []
+    image: docs/images/en-US/employee-workspace-scope.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T15:30:00+08:00
+  - id: employee-workspace-scope-ja-JP
+    module: permissions-exceptions
+    flow: employee-scope
+    step: entry
+    locale: ja-JP
+    role: employee
+    route: /
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 打开审批工作台
+    expected: 工作台待办列表渲染（待我审批/My Tasks）且不含管理端 403
+    masks: []
+    image: docs/images/ja-JP/employee-workspace-scope.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T15:30:00+08:00
+  - id: employee-workspace-scope-ko-KR
+    module: permissions-exceptions
+    flow: employee-scope
+    step: entry
+    locale: ko-KR
+    role: employee
+    route: /
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 打开审批工作台
+    expected: 工作台待办列表渲染（待我审批/My Tasks）且不含管理端 403
+    masks: []
+    image: docs/images/ko-KR/employee-workspace-scope.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T15:30:00+08:00
+  - id: supplier-portal-scope-zh-CN
+    module: permissions-exceptions
+    flow: supplier-scope
+    step: entry
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 正式 seed supplier1（SUPPLIER 角色）打开供应商门户
+    expected: 门户页面渲染且登录身份为 supplier1
+    masks: []
+    image: docs/images/zh-CN/supplier-portal-scope.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: supplier-portal-scope-en-US
+    module: permissions-exceptions
+    flow: supplier-scope
+    step: entry
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 正式 seed supplier1（SUPPLIER 角色）打开供应商门户
+    expected: 门户页面渲染且登录身份为 supplier1
+    masks: []
+    image: docs/images/en-US/supplier-portal-scope.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: supplier-portal-scope-ja-JP
+    module: permissions-exceptions
+    flow: supplier-scope
+    step: entry
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 正式 seed supplier1（SUPPLIER 角色）打开供应商门户
+    expected: 门户页面渲染且登录身份为 supplier1
+    masks: []
+    image: docs/images/ja-JP/supplier-portal-scope.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: supplier-portal-scope-ko-KR
+    module: permissions-exceptions
+    flow: supplier-scope
+    step: entry
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 正式 seed supplier1（SUPPLIER 角色）打开供应商门户
+    expected: 门户页面渲染且登录身份为 supplier1
+    masks: []
+    image: docs/images/ko-KR/supplier-portal-scope.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: resource-not-found-404-zh-CN
+    module: permissions-exceptions
+    flow: not-found-404
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: admin
+    route: /e2e-nonexistent-404-probe
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin 访问未知路由（catch-all NotFound，statusCode=404）
+    expected: 产品 NotFound 页显示 404 文案
+    masks: []
+    image: docs/images/zh-CN/resource-not-found-404.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: resource-not-found-404-en-US
+    module: permissions-exceptions
+    flow: not-found-404
+    step: failure-or-forbidden
+    locale: en-US
+    role: admin
+    route: /e2e-nonexistent-404-probe
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin 访问未知路由（catch-all NotFound，statusCode=404）
+    expected: 产品 NotFound 页显示 404 文案
+    masks: []
+    image: docs/images/en-US/resource-not-found-404.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: resource-not-found-404-ja-JP
+    module: permissions-exceptions
+    flow: not-found-404
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: admin
+    route: /e2e-nonexistent-404-probe
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin 访问未知路由（catch-all NotFound，statusCode=404）
+    expected: 产品 NotFound 页显示 404 文案
+    masks: []
+    image: docs/images/ja-JP/resource-not-found-404.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: resource-not-found-404-ko-KR
+    module: permissions-exceptions
+    flow: not-found-404
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: admin
+    route: /e2e-nonexistent-404-probe
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin 访问未知路由（catch-all NotFound，statusCode=404）
+    expected: 产品 NotFound 页显示 404 文案
+    masks: []
+    image: docs/images/ko-KR/resource-not-found-404.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: approval-route-list-failure-zh-CN
+    module: permissions-exceptions
+    flow: api-failure
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截审批规则列表接口返回 500（仅测试进程）
+    expected: 列表页在接口 500 下的真实错误处理表现（页面框架保持）
+    masks: []
+    image: docs/images/zh-CN/approval-route-list-failure.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: approval-route-list-failure-en-US
+    module: permissions-exceptions
+    flow: api-failure
+    step: failure-or-forbidden
+    locale: en-US
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截审批规则列表接口返回 500（仅测试进程）
+    expected: 列表页在接口 500 下的真实错误处理表现（页面框架保持）
+    masks: []
+    image: docs/images/en-US/approval-route-list-failure.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: approval-route-list-failure-ja-JP
+    module: permissions-exceptions
+    flow: api-failure
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截审批规则列表接口返回 500（仅测试进程）
+    expected: 列表页在接口 500 下的真实错误处理表现（页面框架保持）
+    masks: []
+    image: docs/images/ja-JP/approval-route-list-failure.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: approval-route-list-failure-ko-KR
+    module: permissions-exceptions
+    flow: api-failure
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: admin
+    route: /admin/procurement/approval-route
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截审批规则列表接口返回 500（仅测试进程）
+    expected: 列表页在接口 500 下的真实错误处理表现（页面框架保持）
+    masks: []
+    image: docs/images/ko-KR/approval-route-list-failure.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T16:40:00+08:00
+  - id: admin-menu-load-failure-zh-CN
+    module: permissions-exceptions
+    flow: menu-failure
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: admin
+    route: /admin/dashboard
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截菜单接口返回 500（仅测试进程）
+    expected: 守卫重定向菜单加载失败降级页（本地化标题 + 重新加载/返回首页），不白屏不伪装成功
+    masks: []
+    image: docs/images/zh-CN/admin-menu-load-failure.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T17:20:00+08:00
+  - id: admin-menu-load-failure-en-US
+    module: permissions-exceptions
+    flow: menu-failure
+    step: failure-or-forbidden
+    locale: en-US
+    role: admin
+    route: /admin/dashboard
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截菜单接口返回 500（仅测试进程）
+    expected: 守卫重定向菜单加载失败降级页（本地化标题 + 重新加载/返回首页），不白屏不伪装成功
+    masks: []
+    image: docs/images/en-US/admin-menu-load-failure.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T17:20:00+08:00
+  - id: admin-menu-load-failure-ja-JP
+    module: permissions-exceptions
+    flow: menu-failure
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: admin
+    route: /admin/dashboard
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截菜单接口返回 500（仅测试进程）
+    expected: 守卫重定向菜单加载失败降级页（本地化标题 + 重新加载/返回首页），不白屏不伪装成功
+    masks: []
+    image: docs/images/ja-JP/admin-menu-load-failure.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T17:20:00+08:00
+  - id: admin-menu-load-failure-ko-KR
+    module: permissions-exceptions
+    flow: menu-failure
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: admin
+    route: /admin/dashboard
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截菜单接口返回 500（仅测试进程）
+    expected: 守卫重定向菜单加载失败降级页（本地化标题 + 重新加载/返回首页），不白屏不伪装成功
+    masks: []
+    image: docs/images/ko-KR/admin-menu-load-failure.png
+    test: omni-frontend/e2e-docs/flows/permissions.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T17:20:00+08:00
+  - id: session-expired-dialog-zh-CN
+    module: authentication
+    flow: expired-session
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: admin
+    route: /（审批工作台）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截待办接口返回结构化 401（仅测试进程）
+    expected: 弹出会话过期对话框（本地化标题 + 重新登录），确认后携带 redirect 跳转登录页
+    masks: []
+    image: docs/images/zh-CN/session-expired-dialog.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T18:10:00+08:00
+  - id: session-expired-dialog-en-US
+    module: authentication
+    flow: expired-session
+    step: failure-or-forbidden
+    locale: en-US
+    role: admin
+    route: /（审批工作台）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截待办接口返回结构化 401（仅测试进程）
+    expected: 弹出会话过期对话框（本地化标题 + 重新登录），确认后携带 redirect 跳转登录页
+    masks: []
+    image: docs/images/en-US/session-expired-dialog.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T18:10:00+08:00
+  - id: session-expired-dialog-ja-JP
+    module: authentication
+    flow: expired-session
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: admin
+    route: /（审批工作台）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截待办接口返回结构化 401（仅测试进程）
+    expected: 弹出会话过期对话框（本地化标题 + 重新登录），确认后携带 redirect 跳转登录页
+    masks: []
+    image: docs/images/ja-JP/session-expired-dialog.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T18:10:00+08:00
+  - id: session-expired-dialog-ko-KR
+    module: authentication
+    flow: expired-session
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: admin
+    route: /（审批工作台）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：拦截待办接口返回结构化 401（仅测试进程）
+    expected: 弹出会话过期对话框（本地化标题 + 重新登录），确认后携带 redirect 跳转登录页
+    masks: []
+    image: docs/images/ko-KR/session-expired-dialog.png
+    test: omni-frontend/e2e-docs/flows/public.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T18:10:00+08:00
+  - id: crm-lead-create-validation-zh-CN
+    module: crm
+    flow: lead
+    step: create-validation
+    locale: zh-CN
+    role: admin
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开新建线索对话框并空提交
+    expected: 必填校验错误（联系人姓名必填）确定性出现
+    masks: []
+    image: docs/images/zh-CN/crm-lead-create-validation.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-create-validation-en-US
+    module: crm
+    flow: lead
+    step: create-validation
+    locale: en-US
+    role: admin
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开新建线索对话框并空提交
+    expected: 必填校验错误（联系人姓名必填）确定性出现
+    masks: []
+    image: docs/images/en-US/crm-lead-create-validation.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-create-validation-ja-JP
+    module: crm
+    flow: lead
+    step: create-validation
+    locale: ja-JP
+    role: admin
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开新建线索对话框并空提交
+    expected: 必填校验错误（联系人姓名必填）确定性出现
+    masks: []
+    image: docs/images/ja-JP/crm-lead-create-validation.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-create-validation-ko-KR
+    module: crm
+    flow: lead
+    step: create-validation
+    locale: ko-KR
+    role: admin
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开新建线索对话框并空提交
+    expected: 必填校验错误（联系人姓名必填）确定性出现
+    masks: []
+    image: docs/images/ko-KR/crm-lead-create-validation.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-create-success-zh-CN
+    module: crm
+    flow: lead
+    step: create-success
+    locale: zh-CN
+    role: admin
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: E2E_MUTATIONS 下 UI 创建唯一名称线索并检索
+    expected: 对话框关闭且列表真实出现新线索（自建自清理 fixture）
+    masks: []
+    image: docs/images/zh-CN/crm-lead-create-success.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-create-success-en-US
+    module: crm
+    flow: lead
+    step: create-success
+    locale: en-US
+    role: admin
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: E2E_MUTATIONS 下 UI 创建唯一名称线索并检索
+    expected: 对话框关闭且列表真实出现新线索（自建自清理 fixture）
+    masks: []
+    image: docs/images/en-US/crm-lead-create-success.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-create-success-ja-JP
+    module: crm
+    flow: lead
+    step: create-success
+    locale: ja-JP
+    role: admin
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: E2E_MUTATIONS 下 UI 创建唯一名称线索并检索
+    expected: 对话框关闭且列表真实出现新线索（自建自清理 fixture）
+    masks: []
+    image: docs/images/ja-JP/crm-lead-create-success.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-create-success-ko-KR
+    module: crm
+    flow: lead
+    step: create-success
+    locale: ko-KR
+    role: admin
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: E2E_MUTATIONS 下 UI 创建唯一名称线索并检索
+    expected: 对话框关闭且列表真实出现新线索（自建自清理 fixture）
+    masks: []
+    image: docs/images/ko-KR/crm-lead-create-success.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-forbidden-403-zh-CN
+    module: crm
+    flow: lead
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: employee
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 访问 CRM 线索页
+    expected: 403 页面与返回入口（AUTHENTICATED_BUT_FORBIDDEN）
+    masks: []
+    image: docs/images/zh-CN/crm-lead-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-forbidden-403-en-US
+    module: crm
+    flow: lead
+    step: failure-or-forbidden
+    locale: en-US
+    role: employee
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 访问 CRM 线索页
+    expected: 403 页面与返回入口（AUTHENTICATED_BUT_FORBIDDEN）
+    masks: []
+    image: docs/images/en-US/crm-lead-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-forbidden-403-ja-JP
+    module: crm
+    flow: lead
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: employee
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 访问 CRM 线索页
+    expected: 403 页面与返回入口（AUTHENTICATED_BUT_FORBIDDEN）
+    masks: []
+    image: docs/images/ja-JP/crm-lead-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: crm-lead-forbidden-403-ko-KR
+    module: crm
+    flow: lead
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: employee
+    route: /admin/crm/lead
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 已认证员工 zhangsan 访问 CRM 线索页
+    expected: 403 页面与返回入口（AUTHENTICATED_BUT_FORBIDDEN）
+    masks: []
+    image: docs/images/ko-KR/crm-lead-forbidden-403.png
+    test: omni-frontend/e2e-docs/flows/crm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-01T19:10:00+08:00
+  - id: scheduling-job-type-zh-CN
+    module: scheduling-workspace
+    flow: job-type
+    step: entry
+    locale: zh-CN
+    role: admin
+    route: /admin/job/user-job-type
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开任务类型管理页
+    expected: 显示「任务类型」列表管理界面（四语言）
+    masks: []
+    image: docs/images/zh-CN/scheduling-job-type.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-job-type-en-US
+    module: scheduling-workspace
+    flow: job-type
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/job/user-job-type
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开任务类型管理页
+    expected: 显示「任务类型」列表管理界面（四语言）
+    masks: []
+    image: docs/images/en-US/scheduling-job-type.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-job-type-ja-JP
+    module: scheduling-workspace
+    flow: job-type
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/job/user-job-type
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开任务类型管理页
+    expected: 显示「任务类型」列表管理界面（四语言）
+    masks: []
+    image: docs/images/ja-JP/scheduling-job-type.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-job-type-ko-KR
+    module: scheduling-workspace
+    flow: job-type
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/job/user-job-type
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 打开任务类型管理页
+    expected: 显示「任务类型」列表管理界面（四语言）
+    masks: []
+    image: docs/images/ko-KR/scheduling-job-type.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-personal-create-validation-zh-CN
+    module: scheduling-workspace
+    flow: personal-create
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: admin
+    route: /（审批工作台-我的定时任务）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：填写完整表单后拦截创建接口返回 500（仅测试进程）
+    expected: 页面弹出错误消息（真实 handle401 之外的错误处理路径），对话框保持
+    masks: []
+    image: docs/images/zh-CN/scheduling-personal-create-validation.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-personal-create-validation-en-US
+    module: scheduling-workspace
+    flow: personal-create
+    step: failure-or-forbidden
+    locale: en-US
+    role: admin
+    route: /（审批工作台-我的定时任务）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：填写完整表单后拦截创建接口返回 500（仅测试进程）
+    expected: 页面弹出错误消息（真实 handle401 之外的错误处理路径），对话框保持
+    masks: []
+    image: docs/images/en-US/scheduling-personal-create-validation.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-personal-create-validation-ja-JP
+    module: scheduling-workspace
+    flow: personal-create
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: admin
+    route: /（审批工作台-我的定时任务）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：填写完整表单后拦截创建接口返回 500（仅测试进程）
+    expected: 页面弹出错误消息（真实 handle401 之外的错误处理路径），对话框保持
+    masks: []
+    image: docs/images/ja-JP/scheduling-personal-create-validation.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-personal-create-validation-ko-KR
+    module: scheduling-workspace
+    flow: personal-create
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: admin
+    route: /（审批工作台-我的定时任务）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: deterministic test fault：填写完整表单后拦截创建接口返回 500（仅测试进程）
+    expected: 页面弹出错误消息（真实 handle401 之外的错误处理路径），对话框保持
+    masks: []
+    image: docs/images/ko-KR/scheduling-personal-create-validation.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-personal-lifecycle-zh-CN
+    module: scheduling-workspace
+    flow: personal-create
+    step: key-action-success
+    locale: zh-CN
+    role: admin
+    route: /（审批工作台-我的定时任务）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: UI 创建唯一名称个人任务（喝水提醒 demo handler）并编辑改名
+    expected: 列表真实反映创建与改名结果（创建/编辑/列表三态闭环）
+    masks: []
+    image: docs/images/zh-CN/scheduling-personal-lifecycle.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-personal-lifecycle-en-US
+    module: scheduling-workspace
+    flow: personal-create
+    step: key-action-success
+    locale: en-US
+    role: admin
+    route: /（审批工作台-我的定时任务）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: UI 创建唯一名称个人任务（喝水提醒 demo handler）并编辑改名
+    expected: 列表真实反映创建与改名结果（创建/编辑/列表三态闭环）
+    masks: []
+    image: docs/images/en-US/scheduling-personal-lifecycle.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-personal-lifecycle-ja-JP
+    module: scheduling-workspace
+    flow: personal-create
+    step: key-action-success
+    locale: ja-JP
+    role: admin
+    route: /（审批工作台-我的定时任务）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: UI 创建唯一名称个人任务（喝水提醒 demo handler）并编辑改名
+    expected: 列表真实反映创建与改名结果（创建/编辑/列表三态闭环）
+    masks: []
+    image: docs/images/ja-JP/scheduling-personal-lifecycle.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: scheduling-personal-lifecycle-ko-KR
+    module: scheduling-workspace
+    flow: personal-create
+    step: key-action-success
+    locale: ko-KR
+    role: admin
+    route: /（审批工作台-我的定时任务）
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: UI 创建唯一名称个人任务（喝水提醒 demo handler）并编辑改名
+    expected: 列表真实反映创建与改名结果（创建/编辑/列表三态闭环）
+    masks: []
+    image: docs/images/ko-KR/scheduling-personal-lifecycle.png
+    test: omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-02T10:50:00+08:00
+  - id: srm-portal-quotation-invitations-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: list
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 supplier1 打开供应商门户并切换到「询价报价」页签
+    expected: 本轮唯一询价单显示 INVITED 与「未报价」，操作列为「提交报价」
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-invitations.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:01+08:00
+  - id: srm-portal-quotation-form-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: create-or-edit
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 点击「提交报价」打开报价对话框，填入单价 123.45 与报价有效期
+    expected: 对话框展示询价行快照（数量 2、币种 CNY、状态 SENT），单价与有效期已填入
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-form.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:02+08:00
+  - id: srm-portal-quotation-submitted-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: key-action-success
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在对话框提交真实报价后刷新询价列表
+    expected: 提示「报价已提交」且对话框关闭，邀请状态经 MQ 事件流转为 QUOTED、当前报价 CNY 246.9
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-submitted.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:18+08:00
+  - id: srm-portal-quotation-invitations-en-US
+    module: srm
+    flow: supplier-quotation
+    step: list
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the supplier portal as supplier1 and switch to the RFQ Quotations tab
+    expected: The single RFQ of this run shows INVITED and Not Quoted with a Submit Quotation action
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-invitations.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:21+08:00
+  - id: srm-portal-quotation-form-en-US
+    module: srm
+    flow: supplier-quotation
+    step: create-or-edit
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Submit Quotation to open the dialog, then enter unit price 123.45 and the validity date
+    expected: The dialog shows the RFQ line snapshot (quantity 2, currency CNY, status SENT) with price and validity filled
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-form.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:22+08:00
+  - id: srm-portal-quotation-submitted-en-US
+    module: srm
+    flow: supplier-quotation
+    step: key-action-success
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Submit the real quotation from the dialog, then refresh the RFQ list
+    expected: The Quotation submitted toast appears, the dialog closes, and the invitation turns QUOTED at CNY 246.9
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-submitted.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:38+08:00
+  - id: srm-portal-quotation-invitations-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: list
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: supplier1 としてサプライヤーポータルを開き「見積回答」タブに切り替える
+    expected: 本実行の唯一の見積依頼が INVITED と「未見積」で表示され、操作列は「見積を提出」
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-invitations.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:41+08:00
+  - id: srm-portal-quotation-form-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: create-or-edit
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 「見積を提出」をクリックしてダイアログを開き、単価 123.45 と見積有効期を入力
+    expected: ダイアログに見積行スナップショット（数量 2、通貨 CNY、状態 SENT）が表示され、単価と有効期が入力済み
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-form.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:42+08:00
+  - id: srm-portal-quotation-submitted-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: key-action-success
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: ダイアログで実際の見積を送信してから見積依頼一覧を更新
+    expected: 「見積を提出しました」が表示されてダイアログが閉じ、招待状態が MQ 事件経由で QUOTED、現在見積 CNY 246.9
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-submitted.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:07:58+08:00
+  - id: srm-portal-quotation-invitations-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: list
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: supplier1로 공급업체 포털을 열고 「견적 응답」 탭으로 전환
+    expected: 이번 실행의 단일 견적 요청이 INVITED와 「미견적」으로 표시되고 작업 열은 「견적 제출」
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-invitations.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:08:00+08:00
+  - id: srm-portal-quotation-form-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: create-or-edit
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 「견적 제출」을 클릭해 대화상자를 열고 단가 123.45와 견적 유효기간을 입력
+    expected: 대화상자에 견적 행 스냅샷(수량 2, 통화 CNY, 상태 SENT)이 표시되고 단가와 유효기간이 입력됨
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-form.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:08:01+08:00
+  - id: srm-portal-quotation-submitted-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: key-action-success
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 대화상자에서 실제 견적을 제출한 뒤 견적 요청 목록을 새로고침
+    expected: 「견적이 제출되었습니다」가 표시되고 대화상자가 닫히며 초대 상태가 MQ 이벤트로 QUOTED, 현재 견적 CNY 246.9
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-submitted.png
+    test: omni-frontend/e2e-docs/flows/srm.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T16:08:17+08:00
+  - id: system-tenants-zh-CN
+    module: system-management
+    flow: tenant
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/tenant
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「租户管理」页面
+    expected: 主内容区显示「租户管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-tenants.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:49+08:00
+  - id: system-tenants-en-US
+    module: system-management
+    flow: tenant
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/tenant
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Tenant Management page as admin
+    expected: Main area shows Tenant Management with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-tenants.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:05+08:00
+  - id: system-tenants-ja-JP
+    module: system-management
+    flow: tenant
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/tenant
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「テナント管理」ページを開く
+    expected: メイン領域に「テナント管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-tenants.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:25+08:00
+  - id: system-tenants-ko-KR
+    module: system-management
+    flow: tenant
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/tenant
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「테넌트 관리」 페이지 열기
+    expected: 메인 영역에 「테넌트 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-tenants.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:42+08:00
+  - id: system-organizations-zh-CN
+    module: system-management
+    flow: organization
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/org
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「组织管理」页面
+    expected: 主内容区显示「组织管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-organizations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:50+08:00
+  - id: system-organizations-en-US
+    module: system-management
+    flow: organization
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/org
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Organization Mgmt page as admin
+    expected: Main area shows Organization Mgmt with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-organizations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:05+08:00
+  - id: system-organizations-ja-JP
+    module: system-management
+    flow: organization
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/org
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「組織管理」ページを開く
+    expected: メイン領域に「組織管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-organizations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:26+08:00
+  - id: system-organizations-ko-KR
+    module: system-management
+    flow: organization
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/org
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「조직 관리」 페이지 열기
+    expected: 메인 영역에 「조직 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-organizations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:42+08:00
+  - id: system-roles-zh-CN
+    module: system-management
+    flow: role
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/role
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「角色管理」页面
+    expected: 主内容区显示「角色管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-roles.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:51+08:00
+  - id: system-roles-en-US
+    module: system-management
+    flow: role
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/role
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Role Management page as admin
+    expected: Main area shows Role Management with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-roles.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:06+08:00
+  - id: system-roles-ja-JP
+    module: system-management
+    flow: role
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/role
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「ロール管理」ページを開く
+    expected: メイン領域に「ロール管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-roles.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:27+08:00
+  - id: system-roles-ko-KR
+    module: system-management
+    flow: role
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/role
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「역할 관리」 페이지 열기
+    expected: 메인 영역에 「역할 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-roles.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:43+08:00
+  - id: system-permissions-zh-CN
+    module: system-management
+    flow: permission
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/permission
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「权限管理」页面
+    expected: 主内容区显示「权限管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-permissions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:52+08:00
+  - id: system-permissions-en-US
+    module: system-management
+    flow: permission
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/permission
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Permission Mgmt page as admin
+    expected: Main area shows Permission Mgmt with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-permissions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:07+08:00
+  - id: system-permissions-ja-JP
+    module: system-management
+    flow: permission
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/permission
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「権限管理」ページを開く
+    expected: メイン領域に「権限管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-permissions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:29+08:00
+  - id: system-permissions-ko-KR
+    module: system-management
+    flow: permission
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/permission
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「권한 관리」 페이지 열기
+    expected: 메인 영역에 「권한 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-permissions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:49+08:00
+  - id: system-dictionaries-zh-CN
+    module: system-management
+    flow: dictionary
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「字典管理」页面
+    expected: 主内容区显示「字典管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-dictionaries.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:53+08:00
+  - id: system-dictionaries-en-US
+    module: system-management
+    flow: dictionary
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Dictionary page as admin
+    expected: Main area shows Dictionary with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-dictionaries.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:08+08:00
+  - id: system-dictionaries-ja-JP
+    module: system-management
+    flow: dictionary
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「辞書管理」ページを開く
+    expected: メイン領域に「辞書管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-dictionaries.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:30+08:00
+  - id: system-dictionaries-ko-KR
+    module: system-management
+    flow: dictionary
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「사전 관리」 페이지 열기
+    expected: 메인 영역에 「사전 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-dictionaries.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:50+08:00
+  - id: system-online-users-zh-CN
+    module: system-management
+    flow: online-user
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/online
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「在线用户」页面
+    expected: 主内容区显示「在线用户」；当前环境无记录，呈现产品自身空状态（非截图失败）
+    masks: []
+    image: docs/images/zh-CN/system-online-users.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:53+08:00
+  - id: system-online-users-en-US
+    module: system-management
+    flow: online-user
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/online
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Online Users page as admin
+    expected: Main area shows Online Users; this environment has no records, so the product empty state is rendered (not a capture failure)
+    masks: []
+    image: docs/images/en-US/system-online-users.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:09+08:00
+  - id: system-online-users-ja-JP
+    module: system-management
+    flow: online-user
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/online
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「オンラインユーザー」ページを開く
+    expected: メイン領域に「オンラインユーザー」を表示；現環境にレコードが無いため製品自身の空状態を描画（キャプチャ失敗ではない）
+    masks: []
+    image: docs/images/ja-JP/system-online-users.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:31+08:00
+  - id: system-online-users-ko-KR
+    module: system-management
+    flow: online-user
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/online
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「온라인 사용자」 페이지 열기
+    expected: 메인 영역에 「온라인 사용자」 표시; 현재 환경에 레코드가 없어 제품 자체 빈 상태가 렌더링됨(캡처 실패 아님)
+    masks: []
+    image: docs/images/ko-KR/system-online-users.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:51+08:00
+  - id: system-audit-log-zh-CN
+    module: system-management
+    flow: audit
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/auditlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「审计日志」页面
+    expected: 主内容区显示「审计日志」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-audit-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:54+08:00
+  - id: system-audit-log-en-US
+    module: system-management
+    flow: audit
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/auditlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Audit Logs page as admin
+    expected: Main area shows Audit Logs with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-audit-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:10+08:00
+  - id: system-audit-log-ja-JP
+    module: system-management
+    flow: audit
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/auditlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「監査ログ」ページを開く
+    expected: メイン領域に「監査ログ」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-audit-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:32+08:00
+  - id: system-audit-log-ko-KR
+    module: system-management
+    flow: audit
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/auditlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「감사 로그」 페이지 열기
+    expected: 메인 영역에 「감사 로그」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-audit-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:51+08:00
+  - id: system-auth-records-zh-CN
+    module: system-management
+    flow: oauth2
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/authrecord
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「授权记录」页面
+    expected: 主内容区显示「授权记录」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-auth-records.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:55+08:00
+  - id: system-auth-records-en-US
+    module: system-management
+    flow: oauth2
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/authrecord
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Auth Records page as admin
+    expected: Main area shows Auth Records with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-auth-records.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:10+08:00
+  - id: system-auth-records-ja-JP
+    module: system-management
+    flow: oauth2
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/authrecord
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「認証記録」ページを開く
+    expected: メイン領域に「認証記録」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-auth-records.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:33+08:00
+  - id: system-auth-records-ko-KR
+    module: system-management
+    flow: oauth2
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/authrecord
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「인증 기록」 페이지 열기
+    expected: 메인 영역에 「인증 기록」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-auth-records.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:52+08:00
+  - id: system-xss-config-zh-CN
+    module: system-management
+    flow: xss
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/system/xssconfig
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「XSS 防护」页面
+    expected: 主内容区显示「XSS 防护」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-xss-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:56+08:00
+  - id: system-xss-config-en-US
+    module: system-management
+    flow: xss
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/system/xssconfig
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the XSS Protection page as admin
+    expected: Main area shows XSS Protection with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-xss-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:11+08:00
+  - id: system-xss-config-ja-JP
+    module: system-management
+    flow: xss
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/system/xssconfig
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「XSS 防御」ページを開く
+    expected: メイン領域に「XSS 防御」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-xss-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:33+08:00
+  - id: system-xss-config-ko-KR
+    module: system-management
+    flow: xss
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/system/xssconfig
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「XSS 보호」 페이지 열기
+    expected: 메인 영역에 「XSS 보호」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-xss-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:53+08:00
+  - id: system-operation-log-zh-CN
+    module: messaging-monitoring
+    flow: operation-log
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/base/operlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「操作日志」页面
+    expected: 主内容区显示「操作日志」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/system-operation-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:57+08:00
+  - id: system-operation-log-en-US
+    module: messaging-monitoring
+    flow: operation-log
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/base/operlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Operation Logs page as admin
+    expected: Main area shows Operation Logs with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/system-operation-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:15+08:00
+  - id: system-operation-log-ja-JP
+    module: messaging-monitoring
+    flow: operation-log
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/base/operlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「操作ログ」ページを開く
+    expected: メイン領域に「操作ログ」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/system-operation-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:34+08:00
+  - id: system-operation-log-ko-KR
+    module: messaging-monitoring
+    flow: operation-log
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/base/operlog
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「작업 로그」 페이지 열기
+    expected: 메인 영역에 「작업 로그」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/system-operation-log.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:54+08:00
+  - id: workflow-instances-zh-CN
+    module: workflow
+    flow: instance-tracking
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「流程实例」页面
+    expected: 主内容区显示「流程实例」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/workflow-instances.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:58+08:00
+  - id: workflow-instances-en-US
+    module: workflow
+    flow: instance-tracking
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Process Instances page as admin
+    expected: Main area shows Process Instances with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/workflow-instances.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:19+08:00
+  - id: workflow-instances-ja-JP
+    module: workflow
+    flow: instance-tracking
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「プロセスインスタンス」ページを開く
+    expected: メイン領域に「プロセスインスタンス」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/workflow-instances.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:35+08:00
+  - id: workflow-instances-ko-KR
+    module: workflow
+    flow: instance-tracking
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「프로세스 인스턴스」 페이지 열기
+    expected: 메인 영역에 「프로세스 인스턴스」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/workflow-instances.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:55+08:00
+  - id: workflow-definitions-zh-CN
+    module: workflow
+    flow: publish
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/definition
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「流程定义」页面
+    expected: 主内容区显示「流程定义」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/workflow-definitions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:58+08:00
+  - id: workflow-definitions-en-US
+    module: workflow
+    flow: publish
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/workflow/definition
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Process Definitions page as admin
+    expected: Main area shows Process Definitions with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/workflow-definitions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:19+08:00
+  - id: workflow-definitions-ja-JP
+    module: workflow
+    flow: publish
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/definition
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「プロセス定義」ページを開く
+    expected: メイン領域に「プロセス定義」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/workflow-definitions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:36+08:00
+  - id: workflow-definitions-ko-KR
+    module: workflow
+    flow: publish
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/definition
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「프로세스 정의」 페이지 열기
+    expected: 메인 영역에 「프로세스 정의」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/workflow-definitions.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:55+08:00
+  - id: workflow-stats-zh-CN
+    module: workflow
+    flow: instance-tracking
+    step: entry
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/stats
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「统计看板」页面
+    expected: 主内容区显示「统计看板」；当前环境无记录，呈现产品自身空状态（非截图失败）
+    masks: []
+    image: docs/images/zh-CN/workflow-stats.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:32:59+08:00
+  - id: workflow-stats-en-US
+    module: workflow
+    flow: instance-tracking
+    step: entry
+    locale: en-US
+    role: admin
+    route: /admin/workflow/stats
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Statistics page as admin
+    expected: Main area shows Statistics; this environment has no records, so the product empty state is rendered (not a capture failure)
+    masks: []
+    image: docs/images/en-US/workflow-stats.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:20+08:00
+  - id: workflow-stats-ja-JP
+    module: workflow
+    flow: instance-tracking
+    step: entry
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/stats
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「統計ダッシュボード」ページを開く
+    expected: メイン領域に「統計ダッシュボード」を表示；現環境にレコードが無いため製品自身の空状態を描画（キャプチャ失敗ではない）
+    masks: []
+    image: docs/images/ja-JP/workflow-stats.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:37+08:00
+  - id: workflow-stats-ko-KR
+    module: workflow
+    flow: instance-tracking
+    step: entry
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/stats
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「통계 대시보드」 페이지 열기
+    expected: 메인 영역에 「통계 대시보드」 표시; 현재 환경에 레코드가 없어 제품 자체 빈 상태가 렌더링됨(캡처 실패 아님)
+    masks: []
+    image: docs/images/ko-KR/workflow-stats.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:56+08:00
+  - id: srm-suppliers-zh-CN
+    module: srm
+    flow: lifecycle
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/supplier
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「供应商管理」页面
+    expected: 主内容区显示「供应商管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-suppliers.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:00+08:00
+  - id: srm-suppliers-en-US
+    module: srm
+    flow: lifecycle
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/srm/supplier
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Suppliers page as admin
+    expected: Main area shows Suppliers with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-suppliers.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:21+08:00
+  - id: srm-suppliers-ja-JP
+    module: srm
+    flow: lifecycle
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/supplier
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「サプライヤー管理」ページを開く
+    expected: メイン領域に「サプライヤー管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-suppliers.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:38+08:00
+  - id: srm-suppliers-ko-KR
+    module: srm
+    flow: lifecycle
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/supplier
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「공급업체 관리」 페이지 열기
+    expected: 메인 영역에 「공급업체 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-suppliers.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:57+08:00
+  - id: srm-evaluations-zh-CN
+    module: srm
+    flow: evaluation
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/evaluation
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「绩效评估」页面
+    expected: 主内容区显示「绩效评估」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-evaluations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:01+08:00
+  - id: srm-evaluations-en-US
+    module: srm
+    flow: evaluation
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/srm/evaluation
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Evaluations page as admin
+    expected: Main area shows Evaluations with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-evaluations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:22+08:00
+  - id: srm-evaluations-ja-JP
+    module: srm
+    flow: evaluation
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/evaluation
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「業績評価」ページを開く
+    expected: メイン領域に「業績評価」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-evaluations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:39+08:00
+  - id: srm-evaluations-ko-KR
+    module: srm
+    flow: evaluation
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/evaluation
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「성과 평가」 페이지 열기
+    expected: 메인 영역에 「성과 평가」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-evaluations.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:58+08:00
+  - id: srm-risks-zh-CN
+    module: srm
+    flow: risk
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/risk
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「风险管理」页面
+    expected: 主内容区显示「风险管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-risks.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:02+08:00
+  - id: srm-risks-en-US
+    module: srm
+    flow: risk
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/srm/risk
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Risk Management page as admin
+    expected: Main area shows Risk Management with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-risks.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:23+08:00
+  - id: srm-risks-ja-JP
+    module: srm
+    flow: risk
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/risk
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「リスク管理」ページを開く
+    expected: メイン領域に「リスク管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-risks.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:39+08:00
+  - id: srm-risks-ko-KR
+    module: srm
+    flow: risk
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/risk
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「위험 관리」 페이지 열기
+    expected: 메인 영역에 「위험 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-risks.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:59+08:00
+  - id: srm-risk-config-zh-CN
+    module: srm
+    flow: risk
+    step: create-or-edit
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/risk/config
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「风险指标配置」页面
+    expected: 主内容区显示「风险指标配置」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-risk-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:03+08:00
+  - id: srm-risk-config-en-US
+    module: srm
+    flow: risk
+    step: create-or-edit
+    locale: en-US
+    role: admin
+    route: /admin/srm/risk/config
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Risk Indicator Config page as admin
+    expected: Main area shows Risk Indicator Config with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-risk-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:24+08:00
+  - id: srm-risk-config-ja-JP
+    module: srm
+    flow: risk
+    step: create-or-edit
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/risk/config
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「リスク指標設定」ページを開く
+    expected: メイン領域に「リスク指標設定」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-risk-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:40+08:00
+  - id: srm-risk-config-ko-KR
+    module: srm
+    flow: risk
+    step: create-or-edit
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/risk/config
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「위험 지표 설정」 페이지 열기
+    expected: 메인 영역에 「위험 지표 설정」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-risk-config.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:34:00+08:00
+  - id: srm-invites-zh-CN
+    module: srm
+    flow: invite
+    step: list
+    locale: zh-CN
+    role: admin
+    route: /admin/srm/invite
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 以 admin 打开「邀请管理」页面
+    expected: 主内容区显示「邀请管理」，页面标签与列表按当前语言渲染真实系统状态
+    masks: []
+    image: docs/images/zh-CN/srm-invites.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:04+08:00
+  - id: srm-invites-en-US
+    module: srm
+    flow: invite
+    step: list
+    locale: en-US
+    role: admin
+    route: /admin/srm/invite
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the Invitations page as admin
+    expected: Main area shows Invitations with labels and list rendered in the current language against real system state
+    masks: []
+    image: docs/images/en-US/srm-invites.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:25+08:00
+  - id: srm-invites-ja-JP
+    module: srm
+    flow: invite
+    step: list
+    locale: ja-JP
+    role: admin
+    route: /admin/srm/invite
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin で「招待管理」ページを開く
+    expected: メイン領域に「招待管理」を表示し、ラベルと一覧が現在の言語で実際のシステム状態を描画
+    masks: []
+    image: docs/images/ja-JP/srm-invites.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:33:41+08:00
+  - id: srm-invites-ko-KR
+    module: srm
+    flow: invite
+    step: list
+    locale: ko-KR
+    role: admin
+    route: /admin/srm/invite
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: admin으로 「초대 관리」 페이지 열기
+    expected: 메인 영역에 「초대 관리」 표시, 레이블과 목록이 현재 언어로 실제 시스템 상태를 렌더링
+    masks: []
+    image: docs/images/ko-KR/srm-invites.png
+    test: omni-frontend/e2e-docs/flows/management.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T17:34:00+08:00
+  - id: srm-portal-quotation-mobile-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 390, height: 844 }
+    fixture: isolated-fresh-docs-v1
+    action: 在 390×844 移动视口以 supplier1 打开供应商门户并切换到「询价报价」页签
+    expected: 在 390×844 下页签与「刷新询价」操作仍可见可用，列表按响应式收敛列且每行操作可点，无遮挡或溢出
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-mobile.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:42+08:00
+  - id: srm-portal-quotation-mobile-en-US
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 390, height: 844 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the supplier portal as supplier1 at the 390×844 mobile viewport and switch to the RFQ Quotations tab
+    expected: At 390×844 the tab and the Refresh RFQs action stay visible and enabled, and the list collapses columns while every row action remains clickable without overflow
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-mobile.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:44+08:00
+  - id: srm-portal-quotation-mobile-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 390, height: 844 }
+    fixture: isolated-fresh-docs-v1
+    action: 390×844 のモバイルビューポートで supplier1 としてサプライヤーポータルを開き「見積回答」タブに切り替える
+    expected: 390×844 でもタブと「見積依頼を更新」操作が表示され有効なまま、一覧は列を縮約しつつ各行の操作がクリック可能で遮蔽やはみ出しが無い
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-mobile.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:44+08:00
+  - id: srm-portal-quotation-mobile-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 390, height: 844 }
+    fixture: isolated-fresh-docs-v1
+    action: 390×844 모바일 뷰포트에서 supplier1로 공급업체 포털을 열고 「견적 응답」 탭으로 전환
+    expected: 390×844 에서도 탭과 「견적 요청 새로고침」 작업이 표시되고 활성화된 채 유지되며, 목록은 열을 축소하면서도 각 행 작업이 클릭 가능하고 가려짐이나 넘침이 없음
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-mobile.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:45+08:00
+  - id: srm-portal-quotation-tablet-zh-CN
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: zh-CN
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1024, height: 768 }
+    fixture: isolated-fresh-docs-v1
+    action: 在 1024×768 平板视口以 supplier1 打开供应商门户并切换到「询价报价」页签
+    expected: 在 1024×768 下页签与「刷新询价」操作仍可见可用，列表按响应式收敛列且每行操作可点，无遮挡或溢出
+    masks: []
+    image: docs/images/zh-CN/srm-portal-quotation-tablet.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:46+08:00
+  - id: srm-portal-quotation-tablet-en-US
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: en-US
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1024, height: 768 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the supplier portal as supplier1 at the 1024×768 tablet viewport and switch to the RFQ Quotations tab
+    expected: At 1024×768 the tab and the Refresh RFQs action stay visible and enabled, and the list collapses columns while every row action remains clickable without overflow
+    masks: []
+    image: docs/images/en-US/srm-portal-quotation-tablet.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:46+08:00
+  - id: srm-portal-quotation-tablet-ja-JP
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: ja-JP
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1024, height: 768 }
+    fixture: isolated-fresh-docs-v1
+    action: 1024×768 のタブレットビューポートで supplier1 としてサプライヤーポータルを開き「見積回答」タブに切り替える
+    expected: 1024×768 でもタブと「見積依頼を更新」操作が表示され有効なまま、一覧は列を縮約しつつ各行の操作がクリック可能で遮蔽やはみ出しが無い
+    masks: []
+    image: docs/images/ja-JP/srm-portal-quotation-tablet.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:47+08:00
+  - id: srm-portal-quotation-tablet-ko-KR
+    module: srm
+    flow: supplier-quotation
+    step: responsive
+    locale: ko-KR
+    role: supplier
+    route: /supplier-portal
+    viewport: { width: 1024, height: 768 }
+    fixture: isolated-fresh-docs-v1
+    action: 1024×768 태블릿 뷰포트에서 supplier1로 공급업체 포털을 열고 「견적 응답」 탭으로 전환
+    expected: 1024×768 에서도 탭과 「견적 요청 새로고침」 작업이 표시되고 활성화된 채 유지되며, 목록은 열을 축소하면서도 각 행 작업이 클릭 가능하고 가려짐이나 넘침이 없음
+    masks: []
+    image: docs/images/ko-KR/srm-portal-quotation-tablet.png
+    test: omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:00:48+08:00
+  - id: system-dictionary-create-form-zh-CN
+    module: system-management
+    flow: dictionary
+    step: create-or-edit
+    locale: zh-CN
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在字典管理页点击「新建类型」打开新建对话框，四个字段全部留空
+    expected: 对话框按当前语言渲染标题与四个字段标签（类型编码/类型名称/备注/排序），字段为空且尚未提交
+    masks: []
+    image: docs/images/zh-CN/system-dictionary-create-form.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:38+08:00
+  - id: system-dictionary-create-form-en-US
+    module: system-management
+    flow: dictionary
+    step: create-or-edit
+    locale: en-US
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Open the create dialog from the Dictionary page via Create Type, leaving all four fields empty
+    expected: The dialog renders its title and the four field labels in the current language, all fields empty and nothing submitted
+    masks: []
+    image: docs/images/en-US/system-dictionary-create-form.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:39+08:00
+  - id: system-dictionary-create-form-ja-JP
+    module: system-management
+    flow: dictionary
+    step: create-or-edit
+    locale: ja-JP
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 辞書管理ページで新規作成ボタン（表示ラベルは Create Type）をクリックし、四項目を空のままダイアログを開く
+    expected: ダイアログが現在の言語でタイトルと四つの項目ラベルを描画し、全項目が空で未送信の状態
+    masks: []
+    image: docs/images/ja-JP/system-dictionary-create-form.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:41+08:00
+  - id: system-dictionary-create-form-ko-KR
+    module: system-management
+    flow: dictionary
+    step: create-or-edit
+    locale: ko-KR
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 사전 관리 페이지에서 생성 버튼(표시 라벨은 Create Type)을 클릭해 네 항목을 비운 채 대화상자를 열기
+    expected: 대화상자가 현재 언어로 제목과 네 개 항목 라벨을 렌더링하며 모든 항목이 비어 있고 미제출 상태
+    masks: []
+    image: docs/images/ko-KR/system-dictionary-create-form.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:43+08:00
+  - id: system-dictionary-create-validation-zh-CN
+    module: system-management
+    flow: dictionary
+    step: failure-or-forbidden
+    locale: zh-CN
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在空表单上点击「确认」提交，触发后端必填校验
+    expected: 出现红色错误提示且对话框保持打开，未创建任何数据；实测提示为后端 @NotBlank 的中文硬编码消息（四语言一致），已登记为 i18n PRODUCT_DEFECT，图片如实保留不美化
+    masks: []
+    image: docs/images/zh-CN/system-dictionary-create-validation.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:38+08:00
+  - id: system-dictionary-create-validation-en-US
+    module: system-management
+    flow: dictionary
+    step: failure-or-forbidden
+    locale: en-US
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Submit the empty form via Confirm to trigger backend required-field validation
+    expected: A red error toast appears and the dialog stays open with no data created; the measured text is the backend @NotBlank Chinese hardcoded message (identical across all four locales), registered as an i18n PRODUCT_DEFECT and kept as-is
+    masks: []
+    image: docs/images/en-US/system-dictionary-create-validation.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:40+08:00
+  - id: system-dictionary-create-validation-ja-JP
+    module: system-management
+    flow: dictionary
+    step: failure-or-forbidden
+    locale: ja-JP
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 空のフォームで確認ボタンを押してバックエンドの必須項目検証を発生させる
+    expected: 赤いエラー表示が出てダイアログは開いたまま、データは作成されない；実測文言はバックエンド @NotBlank の中国語ハードコードメッセージ（四言語とも同一）で、i18n PRODUCT_DEFECT として登録済み、画像はそのまま保持
+    masks: []
+    image: docs/images/ja-JP/system-dictionary-create-validation.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:41+08:00
+  - id: system-dictionary-create-validation-ko-KR
+    module: system-management
+    flow: dictionary
+    step: failure-or-forbidden
+    locale: ko-KR
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 빈 폼에서 확인 버튼을 눌러 백엔드 필수 항목 검증을 발생시키기
+    expected: 빨간 오류 토스트가 나타나고 대화상자는 열린 채 유지되며 데이터가 생성되지 않음; 실측 문구는 백엔드 @NotBlank 의 중국어 하드코딩 메시지(네 언어 모두 동일)로 i18n PRODUCT_DEFECT 로 등록했으며 이미지를 있는 그대로 보존
+    masks: []
+    image: docs/images/ko-KR/system-dictionary-create-validation.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:43+08:00
+  - id: system-dictionary-create-success-zh-CN
+    module: system-management
+    flow: dictionary
+    step: key-action-success
+    locale: zh-CN
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 填入本轮唯一类型编码与名称后提交，并按该编码检索列表
+    expected: 对话框关闭，按唯一类型编码检索后列表出现本轮新建行并显示其名称；afterAll 经正式 DELETE 契约清理，实测残留 0 且字典类型总数回到基线 17
+    masks: []
+    image: docs/images/zh-CN/system-dictionary-create-success.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:39+08:00
+  - id: system-dictionary-create-success-en-US
+    module: system-management
+    flow: dictionary
+    step: key-action-success
+    locale: en-US
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Fill this run's unique type code and name, submit, then search the list by that code
+    expected: The dialog closes and searching by the unique type code shows this run's new row with its name; afterAll cleans up through the official DELETE contract, with measured residue 0 and the dict type total back to the baseline 17
+    masks: []
+    image: docs/images/en-US/system-dictionary-create-success.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:40+08:00
+  - id: system-dictionary-create-success-ja-JP
+    module: system-management
+    flow: dictionary
+    step: key-action-success
+    locale: ja-JP
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 本実行の一意なタイプコードと名称を入力して送信し、そのコードで一覧を検索
+    expected: ダイアログが閉じ、一意なタイプコードで検索すると本実行の新規行が名称とともに表示；afterAll が正式 DELETE 契約で清理し、実測残留 0 かつ辞書タイプ総数がベースライン 17 に復帰
+    masks: []
+    image: docs/images/ja-JP/system-dictionary-create-success.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:42+08:00
+  - id: system-dictionary-create-success-ko-KR
+    module: system-management
+    flow: dictionary
+    step: key-action-success
+    locale: ko-KR
+    role: admin
+    route: /admin/base/dict
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 이번 실행의 고유 타입 코드와 이름을 입력해 제출하고 해당 코드로 목록을 검색
+    expected: 대화상자가 닫히고 고유 타입 코드로 검색하면 이번 실행의 신규 행이 이름과 함께 표시; afterAll 이 공식 DELETE 계약으로 정리해 실측 잔여 0 및 사전 타입 총수가 기준선 17 로 복귀
+    masks: []
+    image: docs/images/ko-KR/system-dictionary-create-success.png
+    test: omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-03T18:22:43+08:00
+  - id: workflow-instance-progress-zh-CN
+    module: workflow
+    flow: instance-tracking
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在流程实例列表首行点击「流转进度」打开只读进度弹层
+    expected: 弹层渲染真实 BPMN 流程图，已执行节点以绿色标记、未执行分支为灰色，右侧节点详情面板提示点击节点查看；已等待图形元素渲染完成，不含加载态
+    masks: []
+    image: docs/images/zh-CN/workflow-instance-progress.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:37+08:00
+  - id: workflow-instance-progress-en-US
+    module: workflow
+    flow: instance-tracking
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Process Progress on the first instance row to open the read-only progress dialog
+    expected: The dialog renders the real BPMN diagram with executed nodes marked green and unexecuted branches grey, and the node detail panel hints to click a node; the capture waits until diagram elements are rendered so no loading state appears
+    masks: []
+    image: docs/images/en-US/workflow-instance-progress.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:42+08:00
+  - id: workflow-instance-progress-ja-JP
+    module: workflow
+    flow: instance-tracking
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: プロセスインスタンス一覧の先頭行で「プロセス進捗」をクリックし読み取り専用の進捗ダイアログを開く
+    expected: ダイアログが実際の BPMN 図を描画し、実行済みノードは緑、未実行分岐は灰色で表示され、右側のノード詳細パネルはクリックを促す；図形要素の描画完了まで待機するため読み込み状態を含まない
+    masks: []
+    image: docs/images/ja-JP/workflow-instance-progress.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:47+08:00
+  - id: workflow-instance-progress-ko-KR
+    module: workflow
+    flow: instance-tracking
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 프로세스 인스턴스 목록 첫 행에서 「프로세스 진행 상태」를 클릭해 읽기 전용 진행 대화상자를 열기
+    expected: 대화상자가 실제 BPMN 다이어그램을 렌더링하고 실행된 노드는 녹색, 미실행 분기는 회색으로 표시되며 우측 노드 상세 패널은 클릭을 안내; 그래픽 요소 렌더링 완료까지 대기하므로 로딩 상태가 포함되지 않음
+    masks: []
+    image: docs/images/ko-KR/workflow-instance-progress.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:53+08:00
+  - id: workflow-instance-approval-records-zh-CN
+    module: workflow
+    flow: approval
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在流程实例列表首行点击「审批记录」打开只读审批历史弹层
+    expected: 弹层表格按当前语言渲染节点名称/审批人/审批结果/审批意见/审批时间列，并展示该实例的真实审批历史
+    masks: []
+    image: docs/images/zh-CN/workflow-instance-approval-records.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:39+08:00
+  - id: workflow-instance-approval-records-en-US
+    module: workflow
+    flow: approval
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Approval Records on the first instance row to open the read-only approval history dialog
+    expected: The dialog table renders the Node Name / Approver / Approval Result / Comment / Approval Time columns in the current language and shows that instance's real approval history
+    masks: []
+    image: docs/images/en-US/workflow-instance-approval-records.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:43+08:00
+  - id: workflow-instance-approval-records-ja-JP
+    module: workflow
+    flow: approval
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: プロセスインスタンス一覧の先頭行で「承認履歴」をクリックし読み取り専用の承認履歴ダイアログを開く
+    expected: ダイアログの表がノード名/承認者/承認結果/承認意見/承認日時を現在の言語で描画し、当該インスタンスの実際の承認履歴を表示
+    masks: []
+    image: docs/images/ja-JP/workflow-instance-approval-records.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:48+08:00
+  - id: workflow-instance-approval-records-ko-KR
+    module: workflow
+    flow: approval
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/instance
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 프로세스 인스턴스 목록 첫 행에서 「승인 기록」을 클릭해 읽기 전용 승인 이력 대화상자를 열기
+    expected: 대화상자 표가 노드 이름/승인자/승인 결과/승인 의견/승인 일시를 현재 언어로 렌더링하고 해당 인스턴스의 실제 승인 이력을 표시
+    masks: []
+    image: docs/images/ko-KR/workflow-instance-approval-records.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:55+08:00
+  - id: workflow-model-versions-zh-CN
+    module: workflow
+    flow: publish
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在流程模型列表首行点击「版本」打开只读版本历史弹层
+    expected: 弹层按当前语言渲染业务版本/状态/引擎版本/发布人/发布时间/SHA-256 列并提供返回按钮，展示该模型的真实版本记录
+    masks: []
+    image: docs/images/zh-CN/workflow-model-versions.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:40+08:00
+  - id: workflow-model-versions-en-US
+    module: workflow
+    flow: publish
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Version on the first model row to open the read-only version history dialog
+    expected: The dialog renders the Business Version / Status / Engine Version / Published By / Published At / SHA-256 columns in the current language with a Back button, showing the model's real version records
+    masks: []
+    image: docs/images/en-US/workflow-model-versions.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:44+08:00
+  - id: workflow-model-versions-ja-JP
+    module: workflow
+    flow: publish
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: プロセスモデル一覧の先頭行で「バージョン」をクリックし読み取り専用のバージョン履歴ダイアログを開く
+    expected: ダイアログがビジネスバージョン/状態/エンジンバージョン/公開者/公開日時/SHA-256 を現在の言語で描画し戻るボタンを提供、当該モデルの実際のバージョン記録を表示
+    masks: []
+    image: docs/images/ja-JP/workflow-model-versions.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:49+08:00
+  - id: workflow-model-versions-ko-KR
+    module: workflow
+    flow: publish
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/workflow/model
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 프로세스 모델 목록 첫 행에서 「버전」을 클릭해 읽기 전용 버전 기록 대화상자를 열기
+    expected: 대화상자가 비즈니스 버전/상태/엔진 버전/게시자/게시 일시/SHA-256 을 현재 언어로 렌더링하고 뒤로 버튼을 제공하며 해당 모델의 실제 버전 기록을 표시
+    masks: []
+    image: docs/images/ko-KR/workflow-model-versions.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:58+08:00
+  - id: monitor-mq-message-detail-zh-CN
+    module: messaging-monitoring
+    flow: message-status
+    step: detail
+    locale: zh-CN
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: 在 MQ 消息列表首行点击「查看详情」打开只读消息详情弹层
+    expected: 弹层展示消息ID/Topic/Binding Name/Tag/业务键/中间件类型/状态/重试次数/来源服务/创建时间/下次重试时间等真实字段
+    masks: []
+    image: docs/images/zh-CN/monitor-mq-message-detail.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:41+08:00
+  - id: monitor-mq-message-detail-en-US
+    module: messaging-monitoring
+    flow: message-status
+    step: detail
+    locale: en-US
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: Click Detail on the first message row to open the read-only message detail dialog
+    expected: The dialog shows the real Message ID / Topic / Binding Name / Tag / Business Key / Broker Type / Status / Retries / Service / Created At / Next Retry fields; the title and labels are English in ja-JP and ko-KR as measured, recorded as a translation-completeness issue
+    masks: []
+    image: docs/images/en-US/monitor-mq-message-detail.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:46+08:00
+  - id: monitor-mq-message-detail-ja-JP
+    module: messaging-monitoring
+    flow: message-status
+    step: detail
+    locale: ja-JP
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: MQ メッセージ一覧の先頭行で詳細ボタンをクリックし読み取り専用のメッセージ詳細ダイアログを開く
+    expected: ダイアログが Message ID / Topic / Binding Name / Tag / ビジネスキー / ブローカー種別 / 状態 / リトライ回数 / 送信元サービス / 作成日時 / 次回リトライ の実際フィールドを表示；実測により ja-JP ではタイトルとラベルが英語のまま（翻訳完成度の問題として登録）
+    masks: []
+    image: docs/images/ja-JP/monitor-mq-message-detail.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:23:51+08:00
+  - id: monitor-mq-message-detail-ko-KR
+    module: messaging-monitoring
+    flow: message-status
+    step: detail
+    locale: ko-KR
+    role: admin
+    route: /admin/base/mqmessage
+    viewport: { width: 1440, height: 900 }
+    fixture: isolated-fresh-docs-v1
+    action: MQ 메시지 목록 첫 행에서 상세 버튼을 클릭해 읽기 전용 메시지 상세 대화상자를 열기
+    expected: 대화상자가 Message ID / Topic / Binding Name / Tag / 비즈니스 키 / 브로커 종류 / 상태 / 재시도 횟수 / 출처 서비스 / 생성 일시 / 다음 재시도 실제 필드를 표시; 실측상 ko-KR 에서 제목과 레이블이 영어 그대로(번역 완성도 문제로 등록)
+    masks: []
+    image: docs/images/ko-KR/monitor-mq-message-detail.png
+    test: omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts
+    version: 0.6.1
+    last_success_at: 2026-09-04T09:24:00+08:00

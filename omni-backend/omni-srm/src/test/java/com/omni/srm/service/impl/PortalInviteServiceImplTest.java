@@ -5,7 +5,8 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.omni.common.core.result.BusinessException;
 import com.omni.srm.entity.SrmSupplierInvite;
 import com.omni.srm.mapper.SrmSupplierInviteMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,12 +42,12 @@ class PortalInviteServiceImplTest {
         assistant.setCurrentNamespace("portal-invite-test");
         TableInfoHelper.initTableInfo(assistant, SrmSupplierInvite.class);
         service = new PortalInviteServiceImpl(inviteMapper);
-        SrmTenantContext.set(new SrmTenantContext.RequestIdentity(20L, 1L, "supplier-user"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(20L, 1L, "supplier-user"));
     }
 
     @AfterEach
     void tearDown() {
-        SrmTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     @Test

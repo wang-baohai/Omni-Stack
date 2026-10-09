@@ -1,28 +1,40 @@
 package com.omni.common.mqlog.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.omni.common.core.mq.ReliableMessageRelay;
+import com.omni.common.core.tenant.TenantModuleProvisioner;
+import com.omni.common.core.tenant.TenantProvisionContracts.ProvisionRequestedEvent;
+import com.omni.common.job.XxlJobProperties;
 import com.omni.common.mqlog.controller.MqMessageInternalController;
 import com.omni.common.mqlog.filter.InternalApiAuthFilter;
 import com.omni.common.mqlog.mapper.SysMqMessageMapper;
+import com.omni.common.mqlog.mapper.SysTenantProvisionReceiptMapper;
+import com.omni.common.mqlog.metrics.MqLogMetrics;
 import com.omni.common.mqlog.relay.MqMessageRelayJob;
 import com.omni.common.mqlog.relay.MqMessageRelayService;
 import com.omni.common.mqlog.relay.MqRelayJobRegistrar;
-import com.omni.common.job.XxlJobProperties;
 import com.omni.common.mqlog.sender.MessageSender;
 import com.omni.common.mqlog.sender.RocketMqMessageSender;
 import com.omni.common.mqlog.template.ReliableMessageTemplate;
+import com.omni.common.mqlog.tenant.TenantProvisionRequestHandler;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.tracing.Tracer;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * MQ 消息记录自动装配。
@@ -50,6 +62,8 @@ public class MqLogAutoConfiguration {
      */
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @ConditionalOnProperty(prefix = "omni.service.internal-api", name = "enabled",
+            havingValue = "false", matchIfMissing = true)
     public FilterRegistrationBean<InternalApiAuthFilter> internalApiAuthFilter(
             @Value("${omni.internal.api.token:}") String internalToken) {
         FilterRegistrationBean<InternalApiAuthFilter> registration = new FilterRegistrationBean<>();
@@ -66,8 +80,45 @@ public class MqLogAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ReliableMessageTemplate reliableMessageTemplate(SysMqMessageMapper mapper,
-                                                            ObjectMapper objectMapper) {
-        return new ReliableMessageTemplate(mapper, objectMapper);
+                                                            ObjectMapper objectMapper,
+                                                            ObjectProvider<MqLogMetrics> metricsProvider) {
+        return new ReliableMessageTemplate(mapper, objectMapper,
+                metricsProvider.getIfAvailable(MqLogMetrics::new));
+    }
+
+    /** 注册可靠消息数量、年龄与投递结果指标。 */
+    @Bean
+    @ConditionalOnMissingBean
+    public MqLogMetrics mqLogMetrics(ObjectProvider<MeterRegistry> registryProvider,
+                                     SysMqMessageMapper mapper) {
+        MeterRegistry registry = registryProvider.getIfAvailable();
+        return registry == null ? new MqLogMetrics() : new MqLogMetrics(registry, mapper);
+    }
+
+    /**
+     * 租户模块初始化通用事务处理器。
+     */
+    @Bean
+    @ConditionalOnBean(TenantModuleProvisioner.class)
+    @ConditionalOnMissingBean
+    public TenantProvisionRequestHandler tenantProvisionRequestHandler(
+            TenantModuleProvisioner provisioner,
+            SysTenantProvisionReceiptMapper receiptMapper,
+            ReliableMessageRelay reliableMessageRelay,
+            PlatformTransactionManager transactionManager) {
+        return new TenantProvisionRequestHandler(
+                provisioner, receiptMapper, reliableMessageRelay, transactionManager);
+    }
+
+    /**
+     * 租户模块初始化请求函数。
+     */
+    @Bean
+    @ConditionalOnBean(TenantModuleProvisioner.class)
+    @ConditionalOnMissingBean(name = "tenantProvisionRequestedFunction")
+    public Consumer<ProvisionRequestedEvent> tenantProvisionRequestedFunction(
+            TenantProvisionRequestHandler handler) {
+        return handler::handle;
     }
 
     /**
@@ -76,6 +127,8 @@ public class MqLogAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(MessageSender.class)
     @ConditionalOnClass(StreamBridge.class)
+    @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "enabled",
+            havingValue = "true", matchIfMissing = true)
     public RocketMqMessageSender rocketMqMessageSender(StreamBridge streamBridge) {
         return new RocketMqMessageSender(streamBridge);
     }
@@ -85,9 +138,14 @@ public class MqLogAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "enabled",
+            havingValue = "true", matchIfMissing = true)
     public MqMessageRelayService mqMessageRelayService(SysMqMessageMapper mapper,
-                                                        List<MessageSender> senders) {
-        return new MqMessageRelayService(mapper, senders);
+                                                        List<MessageSender> senders,
+                                                        ObjectProvider<MqLogMetrics> metricsProvider,
+                                                        ObjectProvider<Tracer> tracerProvider) {
+        return new MqMessageRelayService(mapper, senders,
+                metricsProvider.getIfAvailable(MqLogMetrics::new), tracerProvider::getIfAvailable);
     }
 
     /**
@@ -96,6 +154,8 @@ public class MqLogAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass(name = "com.xxl.job.core.handler.annotation.XxlJob")
+    @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "enabled",
+            havingValue = "true", matchIfMissing = true)
     public MqMessageRelayJob mqMessageRelayJob(MqMessageRelayService relayService) {
         return new MqMessageRelayJob(relayService);
     }
@@ -107,6 +167,8 @@ public class MqLogAutoConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnClass(name = "com.xxl.job.core.handler.annotation.XxlJob")
     @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "auto-register",
+            havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "omni.mqlog.relay", name = "enabled",
             havingValue = "true", matchIfMissing = true)
     @ConditionalOnProperty(prefix = "xxl.job.executor", name = "enabled",
             havingValue = "true", matchIfMissing = true)

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.omni.procurement.mapper.ProcRfqSupplierMapper">
+
+    <!--
+        按询价单锁定全部有效供应商邀请（FOR UPDATE）。
+        使用 XML 定义以确保 TenantLine 拦截器在 FOR UPDATE 之前正确插入租户条件，
+        避免注解方式下 TenantLine 在 FOR UPDATE 之后追加租户条件导致 MySQL 语法错误。
+        WP006-REPAIR: 恢复缺失的 FOR UPDATE 子句。
+        WP006-R10: 移除 ORDER BY，因 TenantLine 拦截器会将 FOR UPDATE 插入到 ORDER BY 之前，
+        导致 MySQL 语法错误 (FOR UPDATE 必须是 SELECT 语句最后一个子句)。
+    -->
+    <select id="selectForUpdateByRfqXml"
+            resultType="com.omni.procurement.entity.ProcRfqSupplier">
+        SELECT * FROM proc_rfq_supplier
+        WHERE rfq_id = #{rfqId} AND deleted = 0
+        FOR UPDATE
+    </select>
+
+</mapper>

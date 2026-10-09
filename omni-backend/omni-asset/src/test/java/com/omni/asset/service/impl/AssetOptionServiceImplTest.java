@@ -4,7 +4,8 @@ import com.omni.asset.client.AuthInternalClient;
 import com.omni.asset.client.SrmInternalClient;
 import com.omni.asset.dto.AssetViews;
 import com.omni.asset.mapper.AstAssetMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.common.core.internal.InternalUserOptionDTO;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
@@ -25,7 +26,7 @@ class AssetOptionServiceImplTest {
     /** 清理租户身份，避免线程复用污染其他测试。 */
     @AfterEach
     void clearContext() {
-        AssetTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 用户候选仅接受当前租户且包含主组织的最小响应。 */
@@ -41,7 +42,7 @@ class AssetOptionServiceImplTest {
         user.setUsername("employee");
         user.setNickname("员工");
         when(authClient.listUserOptions(1L, "员", 30)).thenReturn(R.ok(List.of(user)));
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         List<AssetViews.UserOptionVO> result =
                 new AssetOptionServiceImpl(authClient, mapper, srmClient).listUsers("员", 30);
@@ -62,7 +63,7 @@ class AssetOptionServiceImplTest {
         user.setTenantId(2L);
         user.setPrimaryUnitId(9L);
         when(authClient.listUserOptions(1L, null, 30)).thenReturn(R.ok(List.of(user)));
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         assertThatThrownBy(() -> new AssetOptionServiceImpl(
                 authClient, mock(AstAssetMapper.class), mock(SrmInternalClient.class))
@@ -80,7 +81,7 @@ class AssetOptionServiceImplTest {
         unassignedUser.setTenantId(1L);
         unassignedUser.setUsername("social-user");
         when(authClient.listUserOptions(1L, null, 30)).thenReturn(R.ok(List.of(unassignedUser)));
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         List<AssetViews.UserOptionVO> result = new AssetOptionServiceImpl(
                 authClient, mock(AstAssetMapper.class), mock(SrmInternalClient.class))
@@ -100,7 +101,7 @@ class AssetOptionServiceImplTest {
         supplier.setName("云采供应商");
         when(srmClient.search(1L, 1L, "APPROVED", "云采", 30))
                 .thenReturn(R.ok(List.of(supplier)));
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         List<AssetViews.SupplierOptionVO> result =
                 new AssetOptionServiceImpl(authClient, mapper, srmClient)

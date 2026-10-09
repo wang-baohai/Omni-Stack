@@ -67,7 +67,7 @@ function handleReset() {
 
 // ===== 操作 =====
 async function handleSuspend(row: ProcessDefinition) {
-  await ElMessageBox.confirm('确认挂起此流程定义？挂起后将无法发起新流程。', '提示', {
+  await ElMessageBox.confirm(t('workflow.suspendConfirmMessage'), t('common.notice'), {
     type: 'warning',
   })
   await suspendProcessDefinition(row.id)
@@ -82,7 +82,7 @@ async function handleActivate(row: ProcessDefinition) {
 }
 
 async function handleDelete(row: ProcessDefinition) {
-  await ElMessageBox.confirm('确认删除此部署？将级联删除关联的流程实例！', '警告', {
+  await ElMessageBox.confirm(t('workflow.deleteDeploymentConfirmMessage'), t('common.warning'), {
     type: 'warning',
     confirmButtonClass: 'el-button--danger',
   })
@@ -126,11 +126,11 @@ function onUserChange(id: number) {
 
 async function handleStart() {
   if (!startForm.title.trim()) {
-    ElMessage.warning('请输入流程标题')
+    ElMessage.warning(t('workflow.titleRequired'))
     return
   }
   if (!startForm.simulateUserId) {
-    ElMessage.warning('请选择模拟发起人')
+    ElMessage.warning(t('workflow.simulatedInitiatorRequired'))
     return
   }
   startLoading.value = true
@@ -142,7 +142,7 @@ async function handleStart() {
       simulateUserId: startForm.simulateUserId,
       simulateUserName: selectedUser?.nickname || selectedUser?.username,
     })
-    ElMessage.success('模拟发起成功')
+    ElMessage.success(t('workflow.simulatedStartSuccess'))
     startDialogVisible.value = false
   } finally {
     startLoading.value = false
@@ -183,7 +183,7 @@ async function handleStart() {
     <!-- 工具栏 -->
     <div class="toolbar">
       <el-text type="info" size="small">
-        如需新建流程，请前往「流程模型」页面创建并设计。
+        {{ t('workflow.createDefinitionHint') }}
       </el-text>
     </div>
 
@@ -213,7 +213,7 @@ async function handleStart() {
             type="primary"
             @click="openStartDialog(row)"
           >
-            模拟发起
+            {{ t('workflow.simulatedStart') }}
           </el-button>
           <el-button
             v-if="!row.suspended"
@@ -253,18 +253,18 @@ async function handleStart() {
       />
     </div>
     <!-- 模拟发起流程弹窗 -->
-    <el-dialog v-model="startDialogVisible" title="模拟发起流程" width="420px" :close-on-click-modal="false">
+    <el-dialog v-model="startDialogVisible" :title="t('workflow.simulatedStartTitle')" width="420px" :close-on-click-modal="false">
       <el-form label-width="100px">
-        <el-form-item label="流程 Key">
+        <el-form-item :label="t('workflow.processKey')">
           <el-input :model-value="startForm.key" disabled />
         </el-form-item>
-        <el-form-item label="流程标题">
-          <el-input v-model="startForm.title" placeholder="请输入流程标题" />
+        <el-form-item :label="t('workflow.title')">
+          <el-input v-model="startForm.title" :placeholder="t('workflow.titlePlaceholder')" />
         </el-form-item>
-        <el-form-item label="模拟发起人">
+        <el-form-item :label="t('workflow.simulatedInitiator')">
           <el-select
             v-model="startForm.simulateUserId"
-            placeholder="请选择模拟发起人"
+            :placeholder="t('workflow.simulatedInitiatorPlaceholder')"
             filterable
             style="width: 100%"
             @change="onUserChange"
@@ -279,8 +279,8 @@ async function handleStart() {
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="startDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="startLoading" @click="handleStart">确认发起</el-button>
+        <el-button @click="startDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="startLoading" @click="handleStart">{{ t('workflow.confirmStart') }}</el-button>
       </template>
     </el-dialog>
   </div>

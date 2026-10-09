@@ -11,8 +11,8 @@ import com.omni.procurement.entity.ProcRfqSupplier;
 import com.omni.procurement.mapper.ProcRfqLineMapper;
 import com.omni.procurement.mapper.ProcRfqMapper;
 import com.omni.procurement.mapper.ProcRfqSupplierMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,8 +58,8 @@ class InternalRfqInvitationServiceImplTest {
     /** 每个测试后确认内部调用没有泄漏线程上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 返回当前租户中已经发送的邀请摘要。 */
@@ -77,8 +77,8 @@ class InternalRfqInvitationServiceImplTest {
             assertThat(summary.getStatus()).isEqualTo(RfqStateMachine.SENT);
             assertThat(summary.getInvitationStatus()).isEqualTo(RfqStateMachine.INVITED);
         });
-        assertThat(ProcDataScopeContext.get()).isNull();
-        assertThatThrownBy(ProcTenantContext::requireTenantId)
+        assertThat(ServiceDataScopeContext.get()).isNull();
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
                 .isInstanceOf(BusinessException.class);
     }
 
@@ -181,8 +181,8 @@ class InternalRfqInvitationServiceImplTest {
         assertThatThrownBy(() -> service.get(41L, 100L, 501L))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo(404);
-        assertThat(ProcDataScopeContext.get()).isNull();
-        assertThatThrownBy(ProcTenantContext::requireTenantId)
+        assertThat(ServiceDataScopeContext.get()).isNull();
+        assertThatThrownBy(ServiceIdentityContext::requireTenantId)
                 .isInstanceOf(BusinessException.class);
     }
 

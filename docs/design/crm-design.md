@@ -291,9 +291,9 @@ sequenceDiagram
 ### 6.1 信任链
 
 1. Gateway 验证 RS256 JWT 和黑名单，覆盖并注入 `X-User-*`、`X-Tenant-Id`、`X-Gateway-Forwarded`。
-2. CRM `GatewayPreAuthFilter` 构建 `Authentication`。
+2. common-service `GatewayPreAuthenticationFilter` 构建 `Authentication`。
 3. Controller 用 `@PreAuthorize` 验证功能权限。
-4. CRM 租户过滤器建立 tenant 上下文；`@CrmDataScope(permissionCode)` 切面按当前端点权限解析 dataScope。
+4. TenantLine(`CrmTenantTablePolicy`) 建立租户约束；`@ServiceDataScope(permissionCode)` 切面按当前端点权限解析 dataScope。
 5. MyBatis-Plus 追加 tenant 和该 permission 对应的 owner 条件。
 
 `X-Gateway-Forwarded:true` 不是密码学证明。生产环境不得公开 CRM 业务端口；需使用私有网络/安全组，后续可增加签名内部头或下游 JWT 校验。
@@ -357,13 +357,13 @@ InternalDataScopeDTO:
 
 ### 6.4 CRM 上下文与 SQL 拦截
 
-新增 `CrmTenantContext`、`CrmTenantContextFilter`、`CrmDataScopeContext`、`CrmDataScope` 注解/切面、`CrmDataPermissionHandler`、`CrmRecordAccessGuard`。
+复用 common-service 提供的 `GatewayPreAuthenticationFilter`、`ServiceIdentityFilter`、`ServiceDataScope` 注解/切面与 `ServiceDataScopeContext`；CRM 侧新增 `CrmTenantTablePolicy`、`CrmDataPermissionHandler`、`CrmRecordAccessGuard`。
 
 ```text
 读取 Gateway 头
 → Filter 校验 userId/tenantId，写 tenant ThreadLocal
 → @PreAuthorize 验证端点功能权限
-→ @CrmDataScope(permissionCode) 调 Auth 解析同一权限的 dataScope
+→ @ServiceDataScope(permissionCode) 调 Auth 解析同一权限的 dataScope
 → 写 scope ThreadLocal
 → OperLog/Controller/Service/Mapper
 → Aspect finally 清 scope，Filter finally 清 tenant
@@ -445,7 +445,7 @@ Customer 360 不是“客户可见即所有子数据可见”。客户、联系�
 
 ### 7.3 端点与 DataScope permission 映射
 
-`@PreAuthorize` 与 `@CrmDataScope` 使用同一个完整业务权限码，不能由实现者临时选择：
+`@PreAuthorize` 与 `@ServiceDataScope` 使用同一个完整业务权限码，不能由实现者临时选择：
 
 | 操作 | permissionCode |
 |---|---|
@@ -631,7 +631,7 @@ omni-backend/omni-crm/
         └── mapper/
 ```
 
-`CrmApplication` 使用 `@EnableDiscoveryClient`、`@EnableFeignClients(basePackages="com.omni.crm.client")`、`@MapperScan("com.omni.crm.mapper")`。服务必须自带 `SecurityConfig`、`GatewayPreAuthFilter`、`XssConfigProviderImpl`，因为 common 当前没有下游预认证 Starter。
+`CrmApplication` 使用 `@EnableDiscoveryClient`、`@EnableFeignClients(basePackages="com.omni.crm.client")`、`@MapperScan("com.omni.crm.mapper")`。服务复用 `omni-common-service` 提供的下游预认证能力（`GatewayPreAuthenticationFilter`/`ServiceIdentityFilter`/`ServiceDataScope`），仅需自带 `SecurityConfig` 与 `XssConfigProviderImpl`。
 
 ### 11.2 必改文件
 
@@ -642,15 +642,15 @@ omni-backend/omni-crm/
 | `docker/backend/Dockerfile` | POM 缓存层 `COPY omni-crm/pom.xml omni-crm/` |
 | `docker-compose.yml` | CRM 服务、8104、DB/Redis/Nacos/MQ/XXL/internal token |
 | `start.bat/start.sh` | build 列表加入 CRM；Windows 端口保护加入 8104 |
-| `scripts/sql/init-all.sql` | `omni_crm` DDL、默认配置、权限和角色 |
-| `scripts/sql/sp_init_tenant.sql` | 与内嵌过程同步 |
-| `scripts/sql/init-tenant-a.sql` | 演示租户同步（若继续维护） |
-| `scripts/sql/migrate-crm-mvp.sql` | 已有库/已有租户幂等迁移 |
+| `database/changelog/crm/` | 为 CRM 结构变更增加 forward-only Liquibase changeSet |
+| `scripts/sql/seed/crm.sql` | CRM 默认配置的正式幂等种子；更新后刷新 seed manifest |
+| `scripts/sql/seed/auth.sql` | CRM 权限和角色的正式幂等种子；更新后刷新 seed manifest |
+| CRM `TenantModuleProvisioner` | 新租户 CRM 配置和阶段的幂等初始化 |
 | Frontend router/layout/menu/locales | 图标、菜单、i18n |
 
-权威 DDL 目前是 `scripts/sql/init-all.sql`；仓库没有统一启用 Flyway。Docker entrypoint 也只在空卷首次执行，因此必须提供已有环境迁移，后续再引入版本化迁移工具。
+权威结构事实源是 `database/changelog/crm/`；正式种子由 `scripts/sql/seed/crm.sql` 与 `scripts/sql/seed/auth.sql` 管理，并由 `database/seed/manifest.yaml` 校验。Compose 对 fresh 和 upgrade 统一运行 `omni-db-migrator`，旧聚合 SQL 不再参与启动。
 
-权限迁移不能只用固定 ID + `INSERT IGNORE`：`sys_permission` 没有 `(tenant_id,permission_code)` 唯一键。应按 tenant + code 的 `NOT EXISTS` 幂等插入，并正确重建 parent/path；同时更新 SUPER_ADMIN、CRM 角色及新租户初始化。
+权限种子不能只用固定 ID + `INSERT IGNORE`：`sys_permission` 没有 `(tenant_id,permission_code)` 唯一键。应按 tenant + code 的 `NOT EXISTS` 幂等插入，并正确重建 parent/path；同时更新 SUPER_ADMIN、CRM 角色、seed manifest 断言及新租户初始化。
 
 Gateway 已有显式业务路由时，生产推荐关闭 discovery locator；若暂时保留，必须同时阻断 `/internal/**`、`/api/internal/**` 和 `/omni-crm/internal/**` 等服务发现直达路径。
 

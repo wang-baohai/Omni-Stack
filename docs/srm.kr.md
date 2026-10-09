@@ -105,13 +105,13 @@ erDiagram
 
 ```
 Gateway JWT 검증 → SRM 테넌트 확인 → Spring Security @PreAuthorize
-→ @SrmDataScope 애스펙트 → MyBatis DataPermission 인터셉터 → SrmRecordAccessGuard 행 수준 쓰기 인가
+→ @ServiceDataScope 애스펙트 → MyBatis DataPermission 인터셉터 → SrmRecordAccessGuard 행 수준 쓰기 인가
 ```
 
 1. Gateway가 RS256 JWT 검증, `X-User-*`, `X-Tenant-Id`, `X-Gateway-Forwarded` 덮어쓰기 주입
-2. `GatewayPreAuthFilter`가 `Authentication` 구축, userId/tenantId 검증
+2. common-service 의 `GatewayPreAuthenticationFilter` 가 `Authentication` 구축, userId/tenantId 검증
 3. Controller `@PreAuthorize`로 기능 권한 검증
-4. `@SrmDataScope(permissionCode)` 애스펙트가 Auth 내부 API를 호출하여 dataScope 해결
+4. `@ServiceDataScope(permissionCode)` 애스펙트가 Auth 내부 API를 호출하여 dataScope 해결
 5. MyBatis-Plus가 tenant + owner 조건 추가
 6. `SrmRecordAccessGuard`가 행 수준 쓰기 인가 검증
 
@@ -163,9 +163,9 @@ DataPermissionInterceptor는 쓰기를 보호하지 않습니다. 모든 업데�
 | Invite | `srm:invite:list/create/revoke`, `srm:portal:invite` |
 | Owner 후보 | `srm:owner:list` |
 | PII 조회 | `srm:pii:view` |
-| Portal | `srm:portal:enroll/profile/evaluation` |
+| Portal | `srm:portal:enroll/profile/evaluation/quotation` |
 
-`/`는 동일 리소스 내 여러 완전한 권한 코드의 약어; 데이터베이스에는 개별 저장. `@PreAuthorize`와 `@SrmDataScope`는 동일한 완전한 권한 코드 사용.
+`/`는 동일 리소스 내 여러 완전한 권한 코드의 약어; 데이터베이스에는 개별 저장. `@PreAuthorize`와 `@ServiceDataScope`는 동일한 완전한 권한 코드 사용.
 
 ### 3.6 PII 마스킹
 
@@ -188,7 +188,7 @@ SRM은 `XssConfigProvider` SPI를 구현하여 Redis DB 0의 `xss:enabled:{tenan
 | `SUPPLIER` | SELF | 포털 셀프 서비스: 입점 후 기업 정보 관리, 자체 성과 조회 |
 | `SUPER_ADMIN` | ALL | 모든 기능, SRM 데이터는 현재 테넌트에 한정 |
 
-기본 USER 역할은 `srm:portal:enroll`만 부여; SRM 관리 또는 포털 자료/성과 권한 없음. 입점 완료 후 SUPPLIER 역할을 추가해야 profile/evaluation 접근 가능.
+기본 USER 역할은 `srm:portal:enroll`만 부여되며 SRM 관리나 포털 profile/evaluation/quotation 권한은 부여되지 않습니다. 입점 완료 후 SUPPLIER 역할을 추가해야 profile/evaluation/quotation에 접근할 수 있습니다. `srm:portal:quotation`은 `SUPPLIER`와 플랫폼 규칙에 따라 전체 권한 트리를 보유한 `SUPER_ADMIN`에만 엄격히 부여되며, `SRM_ADMIN`·`PROCUREMENT_MANAGER` 등 내부 역할이 공급업체를 대신하여 견적을 제출할 수 없습니다. 견적 Controller는 SUPPLIER 역할과 유효한 PortalUser 연결을 동시에 요구하며, SUPER_ADMIN만으로는 공급업체를 사칭할 수 없습니다.
 
 ## 4. 상태 머신 및 핵심 흐름
 
@@ -207,7 +207,7 @@ SUSPENDED → APPROVED(협력 재개)
 APPROVED → BLACKLISTED(블랙리스트 추가)
 BLACKLISTED → APPROVED(블랙리스트 해제, srm:supplier:restore 필요)
 APPROVED/SUSPENDED → ELIMINATED(도태 퇴출)
-ELIMINATED → [*](종단 상태, 복구 불가)
+ELIMINATED → [*] (종단 상태, 복구 불가)
 ```
 
 - `APPROVED` 상태의 공급업체만 조달 모듈에서 참조 가능
@@ -243,7 +243,7 @@ POST /evaluation (supplierId, period, items[])
 → 레벨이 RED로 변경 시 Outbox 이벤트 알림 작성
 ```
 
-자격 만료 알림 로직: `expiry_date - today ≤ 30일` → CERTIFICATE 지표 자동 YELLOW; `expiry_date < today` → CERTIFICATE 지표 자동 RED. XXL-JOB 정기 작업을 통한 사전 스캔은 Phase 2에서 활성화 예정(MVP: 수동 트리거 또는 비활성).
+자격 만료 알림 로직: `expiry_date - today <= 30` → CERTIFICATE 지표 자동 YELLOW; `expiry_date < today` → CERTIFICATE 지표 자동 RED. XXL-JOB 정기 작업을 통한 사전 스캔은 Phase 2에서 활성화 예정(MVP: 수동 트리거 또는 비활성).
 
 ### 4.4 포털 계좌 개설 및 입점
 
@@ -336,10 +336,21 @@ POST /api/auth/register(공개 Auth 자체 등록, 기본 USER 역할 할당)
 
 ### 6.4 내부 API
 
-SRM은 향후 Procurement/Asset 서비스를 위해 다음 기능을 사전 준비:
+SRM은 Procurement/Asset 서비스에 다음 기능을 제공합니다:
 - `GET /api/internal/supplier/{id}?tenantId={tenantId}` — 공급업체 요약
 - `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}` — 승인된 공급업체 검색
-- 모든 내부 API는 `X-Internal-Token` 인증 사용; Gateway를 통해 노출하지 않음
+- `POST /api/internal/supplier/batch` — body는 `{tenantId,supplierIds}`. 입력의 첫 출현 순서대로 최대 100개의 요약을 반환하고 존재하지 않는 ID는 생략
+- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}` — RFQ의 유효 견적·버전·라인 스냅샷 조회
+- 모든 내부 API는 `X-Internal-Token`과 `X-Tenant-Id`를 사용하며 query/body 테넌트는 헤더와 일치해야 함. Gateway를 통해 노출하지 않고 공급업체 요약에 연락처·계좌 PII를 포함하지 않음
+
+SRM이 포털에 보이는 RFQ를 조회할 때는 Procurement를 호출합니다:
+
+- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`
+- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`
+
+supplierId는 현재 userId에 해당하는 `srm_supplier_portal_user`만 지정할 수 있으며 포털 요청이 전달하는 값은 받지 않습니다. 모든 내부 요청은 `X-Tenant-Id`도 함께 전달하고, API에 추가 query/body 테넌트가 있으면 헤더와 일치해야 합니다.
+
+RFQ `status=SENT`, 초대 `status IN (INVITED, QUOTED)`, 그리고 quotationDeadline 미초과인 경우에만 견적 제출·갱신이 허용되며 `DRAFT/CLOSED/AWARDED/CANCELLED`는 일괄 거부됩니다.
 
 ## 7. 하드 제약
 
@@ -348,8 +359,8 @@ SRM 코드를 수정하기 전에 반드시 준수해야 할 규칙:
 1. **테넌트 격리**: 모든 `srm_*` 테이블에 `tenant_id` 필수; TenantLine은 항상 추가; 일반 API는 크로스 테넌트 불가
 2. **낙관적 잠금**: 모든 쓰기는 `tenant_id + id + version` 조건으로 업데이트
 3. **실패 시 닫힘**: tenant 누락 → 401, scope 누락 → `id=-1`, Auth 불가용 → 503, 절대 저하 안 됨
-4. **ThreadLocal 정리**: `SrmDataScopeContext`와 `SrmTenantContext`는 `finally` 블록에서 반드시 클리어, 메모리 누수 방지
-5. **권한 이중 선언**: 쓰기 엔드포인트는 `@PreAuthorize`(기능 권한)와 `@SrmDataScope`(데이터 범위) 모두 동일한 완전한 권한 코드로 선언
+4. **ThreadLocal 정리**: common-service 의 `ServiceDataScopeContext` 는 `finally` 블록에서 반드시 클리어, 메모리 누수 방지
+5. **권한 이중 선언**: 쓰기 엔드포인트는 `@PreAuthorize`(기능 권한)와 `@ServiceDataScope`(데이터 범위) 모두 동일한 완전한 권한 코드로 선언
 6. **백엔드 PII 마스킹**: `srm:pii:view` 없이 백엔드 VO는 마스크 값을 직접 반환; 프론트엔드에 의존 안 함
 7. **명시적 Outbox tenantId**: `ReliableMessageRelay.send()`는 `Long tenantId`를 명시적으로 전달; ThreadLocal 암시적 해결 금지
 8. **인터셉터 순서**: TenantLine → DataPermission → Pagination, 변경 불가
@@ -402,14 +413,14 @@ omni-frontend/src/
 1. `omni_srm` 데이터베이스에 테이블 추가; `tenant_id`, `owner_user_id`, `owner_unit_id`, `version`, `deleted`, 감사 필드 필수
 2. Entity(SrmOwnedEntity 상속), Mapper, Service 인터페이스 + Impl, Controller 생성
 3. `SrmDataPermissionHandler`에 새 테이블의 owner 열 매핑 등록
-4. `init-all.sql`에 DDL과 권한 시드 데이터 추가
-5. Controller 쓰기 엔드포인트에 `@PreAuthorize` + `@SrmDataScope` 선언, 새 `srm:<resource>:<action>` 권한 코드 사용
+4. `database/changelog/srm/`에 forward-only Liquibase changeSet을 추가해 테이블 생성；기본 멱등 시드는 `scripts/sql/seed/srm.sql`에, 권한 시드는 `scripts/sql/seed/auth.sql`에 기록하고 `database/seed/manifest.yaml`을 갱신（호환기 유산인 `init-all.sql`은 수정하지 않음）
+5. Controller 쓰기 엔드포인트에 `@PreAuthorize` + `@ServiceDataScope` 선언, 새 `srm:<resource>:<action>` 권한 코드 사용
 
 ### 권한 코드 추가
 
-1. `init-all.sql`의 `sys_permission`에 새 권한 삽입, type은 `API`
+1. `scripts/sql/seed/auth.sql`의 `sys_permission`에 새 권한 삽입, type은 `API`（Liquibase/seed 정식 진입경을 통해, 폐기된 `init-all.sql`은 수정하지 않음）
 2. `sys_role_permission`에서 역할에 할당
-3. Controller 메서드에 `@PreAuthorize("hasAuthority('srm:<resource>:<action>')")` + `@SrmDataScope("srm:<resource>:<action>")` 선언
+3. Controller 메서드에 `@PreAuthorize("hasAuthority('srm:<resource>:<action>')")` + `@ServiceDataScope(permissionCode = "srm:<resource>:<action>")` 선언
 4. 프론트엔드 해당 버튼에 `v-permission="'srm:<resource>:<action'"` 추가
 
 ### Outbox 이벤트 통합
@@ -419,9 +430,112 @@ omni-frontend/src/
 3. 이벤트 봉투는 통일 형식 준수; payload에 전체 PII 포함 안 함
 4. 소비자는 `payload.eventId`로 중복 제거하여 멱등이어야 함
 
-### Phase 2 견적 예약
+### Procurement 견적 통합
 
-견적은 아직 구축되지 않은 `omni-procurement`의 RFQ와 초대 관계에 의존. MVP는 견적 테이블을 생성하지 않고, 견적 엔드포인트를 등록하지 않으며, `srm:portal:quotation` 권한을 발급하지 않음. Phase 2 통합 시 `srm_quotation`/`srm_quotation_line` 테이블을 생성하고, DDL, 마이그레이션 스크립트, 권한, 이벤트 계약을 동시에 보충.
+포털 엔드포인트:
+
+- `GET /api/srm/portal/quotation/invitations`: 현재 PortalUser의 RFQ 초대를 목록하고 로컬 견적 상태를 병합.
+- `GET /api/srm/portal/quotation/invitations/{rfqId}`: 초대, RFQ 행 스냅숏과 현재 견적 반환.
+- `POST /api/srm/portal/quotation`: 견적을 제출하거나 `version`으로 업데이트.
+
+제출 요청은 `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]` 만 허용. tenantId, supplierId, 공급업체명, RFQ 번호, 자재, 단위, 수량, 통화, 행 금액과 총액은 모두 신뢰할 수 있는 신원 정보·PortalUser·Procurement 초대 상세에서 획득하거나 서버측에서 계산.
+
+`srm_quotation.request_id` 는 마지막 성공 요청을 저장하고, `srm_quotation_request` 는 `(tenant_id, request_id)` 로 요청 이력과 SHA-256 requestHash 를 영구 보존하며 `(tenant_id, quotation_id, target_version)` 으로 결과 버전을 연관. `srm_quotation` 은 `(tenant_id, rfq_id, active_supplier_guard)` 로 동일 공급업체가 동일 RFQ 에 대해 미삭제 견적을 딱 1 건만 갖도록 보장. `srm_quotation_line.rfq_line_id` 는 필수이며 제출 행 집합은 RFQ 스냅숏과 완전히 일치해야 함. 금액 정밀도: 단가/수량 `DECIMAL(19,6)` 이고 0 보다 큼, 행 금액/총액 `DECIMAL(19,4)` 이고 0 보다 큼.
+
+견적, 명세, `srm_quotation_request` 와 `srm.quotation.submitted.v1` Outbox 는 반드시 동일 트랜잭션으로 커밋; 동일 requestId+requestHash 재시도는 현재 견적 스냅숏을 반환하고 이벤트를 중복 발행하면 안 됨, 동일 requestId 에 다른 의도는 409 반환. 첫 요청은 생성 센티널 `version=0` 을 사용하고 첫 버전 견적은 `version=1` 부터 시작하여, 동시 생성 의도가 첫 버전을 업데이트 가능 버전으로 오인하는 것을 방지. 이벤트 payload 에는 최소한 `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil` 를 포함하며, Procurement 은 eventId Inbox 로 멱등 소비.
+
+### 공급업체 견적 흐름 스크린샷(4개 언어)
+
+공식 이미지는 문서 전용 Playwright 테스트 케이스 `omni-frontend/e2e-docs/flows/srm.flows.spec.ts` 가 실제 실행 스택에서 생성하며, 언어별 디렉터리에 저장합니다. 다른 언어 이미지를 재사용하지 않고, 자리표시자나 성공 응답 모의로 대체하지 않습니다. 세 단계는 동일한 실제 fixture(동일 견적 요청·동일 견적)를 공유하므로, 세 장은 서로 무관한 페이지 스냅샷이 아니라 동일 업무 체인의 연속 상태입니다.
+
+공통 전제 조건(세 단계 동일):
+
+| 항목 | 내용 |
+|---|---|
+| 환경 | 로컬 Compose 전체 스택 실행, 프런트엔드 `127.0.0.1:3000`, 게이트웨이를 거쳐 `omni-procurement` 와 `omni-srm` 에 도달 |
+| 데이터 전제 | `admin` 이 공식 API 로 고유한 품목 분류와 품목을 생성 → `procurement-approval` 프로세스 모델에 결속된 구매 요청 승인 규칙 생성 → 구매 요청을 생성하고 승인에 제출 → 승인 후 견적 요청을 생성하고 `send` 실행(DRAFT→SENT, `supplier1` 초대) |
+| 조작자 | 데이터 구축은 `admin`(`SUPER_ADMIN` 과 `PROCUREMENT_MANAGER` 역할 및 `SAME_UNIT` 후보 범위 필요); 촬영 페이지의 조작자는 `supplier1`(`SUPPLIER` 역할이며 `srm_supplier_portal_user` 연결 완료) |
+| 토큰 | `E2eTokenFixture` 가 테스트 프로세스 내부에서 발급하는 단기 JWT(TTL 1200 초). 프로세스 메모리와 저장소 밖 임시 파일에만 존재하며 종료 시 파기; 문서·로그·버전 관리에 기록하지 않음 |
+| 쓰기 스위치 | `E2E_MUTATIONS=true` 를 명시적으로 설정한 경우에만 실행; 미설정 시 전체 그룹을 건너뛰고 모든 쓰기 호출은 예외를 발생 |
+| 뷰포트 | 1440×900, 문서용 시계를 고정하고 애니메이션을 비활성화하여 4개 언어 완전 일치 |
+
+공유 로컬 환경에서는 목록에 다른 역사적 견적 요청 행이 함께 표시될 수 있습니다; 테스트 케이스의 어설션과 촬영 판정은 이번 실행의 `runStamp` 로 식별되는 단일 견적 요청만을 대상으로 하며, 종료 처리도 이번 실행에서 귀속이 확인된 데이터만 정리합니다.
+
+#### 단계 1: 초대 목록(미견적)
+
+- 조작자: `supplier1`
+- 조작: 공급업체 포털을 열고 「견적 응답」 탭으로 전환
+- 기대 상태: 이번 실행의 단일 견적 요청이 목록에 표시되고, 초대 상태는 `INVITED`, 현재 견적 열은 「미견적」, 작업 열은 「견적 제출」
+
+| zh-CN | en-US |
+|---|---|
+| ![공급업체 포털 견적 초대 목록(중국어)](images/zh-CN/srm-portal-quotation-invitations.png) | ![공급업체 포털 견적 초대 목록(영어)](images/en-US/srm-portal-quotation-invitations.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![공급업체 포털 견적 초대 목록(일본어)](images/ja-JP/srm-portal-quotation-invitations.png) | ![공급업체 포털 견적 초대 목록(한국어)](images/ko-KR/srm-portal-quotation-invitations.png) |
+
+#### 단계 2: 견적 양식(단가와 유효기간 입력)
+
+- 조작자: `supplier1`
+- 조작: 대상 행에서 「견적 제출」을 클릭해 대화상자를 열고, 단가 `123.45` 를 입력하고 견적 유효기간을 견적 마감일로 설정
+- 기대 상태: 대화상자 제목에 이번 실행의 견적 요청 번호가 포함되고, 행 스냅샷에 품목 코드와 명칭, 수량 `2`, 단위와 통화 `CNY` 가 표시되며, RFQ 상태는 `SENT`, 단가와 유효기간 모두 입력됨
+
+| zh-CN | en-US |
+|---|---|
+| ![공급업체 포털 견적 양식(중국어)](images/zh-CN/srm-portal-quotation-form.png) | ![공급업체 포털 견적 양식(영어)](images/en-US/srm-portal-quotation-form.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![공급업체 포털 견적 양식(일본어)](images/ja-JP/srm-portal-quotation-form.png) | ![공급업체 포털 견적 양식(한국어)](images/ko-KR/srm-portal-quotation-form.png) |
+
+#### 단계 3: 제출 성공(QUOTED 와 견적 총액)
+
+- 조작자: `supplier1`
+- 조작: 대화상자에서 「견적 제출」을 클릭해 실제 견적을 제출하고, 이어서 「견적 요청 새로고침」을 클릭
+- 기대 상태: 「견적이 제출되었습니다」가 표시되고 대화상자가 닫힘; 초대 상태는 `srm.quotation.submitted.v1` MQ 이벤트로 비동기 `QUOTED` 로 전환되고, 현재 견적 열에 총액 `CNY 246.9`(단가 `123.45` × 수량 `2`)가 표시되며 작업 열은 「견적 수정」으로 바뀜
+
+| zh-CN | en-US |
+|---|---|
+| ![공급업체 포털 견적 제출 성공(중국어)](images/zh-CN/srm-portal-quotation-submitted.png) | ![공급업체 포털 견적 제출 성공(영어)](images/en-US/srm-portal-quotation-submitted.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![공급업체 포털 견적 제출 성공(일본어)](images/ja-JP/srm-portal-quotation-submitted.png) | ![공급업체 포털 견적 제출 성공(한국어)](images/ko-KR/srm-portal-quotation-submitted.png) |
+
+### SRM 관리측 페이지 스크린샷(4개 언어)
+
+마찬가지로 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 가 실제 실행 스택에서 생성. **읽기 전용 수집**으로 공급업체 데이터를 생성·수정·삭제하지 않으므로 쓰기 스위치도 데이터 종료 처리도 불필요. 전제 조건과 조작자는 앞 절과 동일(`admin` / `SUPER_ADMIN`, 단기 JWT 는 `E2eTokenFixture` 가 프로세스 내부에서 발급하고 종료 시 파기).
+
+- 조작: 로그인 후 공급업체 관리, 성과 평가, 위험 관리, 위험 지표 설정, 초대 관리 페이지를 순서대로 열기.
+- 기대 상태: 페이지 제목과 열 레이블이 현재 언어로 렌더링; 수집 시점에 데이터베이스에는 공급업체/평가/위험/초대 실제 레코드가 각 1 건, 위험 지표 설정이 9 건 존재.
+
+| 페이지 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 공급업체 관리(lifecycle) | ![공급업체 관리(중국어)](images/zh-CN/srm-suppliers.png) | ![공급업체 관리(영어)](images/en-US/srm-suppliers.png) | ![공급업체 관리(일본어)](images/ja-JP/srm-suppliers.png) | ![공급업체 관리(한국어)](images/ko-KR/srm-suppliers.png) |
+| 성과 평가(evaluation) | ![성과 평가(중국어)](images/zh-CN/srm-evaluations.png) | ![성과 평가(영어)](images/en-US/srm-evaluations.png) | ![성과 평가(일본어)](images/ja-JP/srm-evaluations.png) | ![성과 평가(한국어)](images/ko-KR/srm-evaluations.png) |
+| 위험 관리(risk) | ![위험 관리(중국어)](images/zh-CN/srm-risks.png) | ![위험 관리(영어)](images/en-US/srm-risks.png) | ![위험 관리(일본어)](images/ja-JP/srm-risks.png) | ![위험 관리(한국어)](images/ko-KR/srm-risks.png) |
+| 위험 지표 설정(risk) | ![위험 지표 설정(중국어)](images/zh-CN/srm-risk-config.png) | ![위험 지표 설정(영어)](images/en-US/srm-risk-config.png) | ![위험 지표 설정(일본어)](images/ja-JP/srm-risk-config.png) | ![위험 지표 설정(한국어)](images/ko-KR/srm-risk-config.png) |
+| 초대 관리(invite) | ![초대 관리(중국어)](images/zh-CN/srm-invites.png) | ![초대 관리(영어)](images/en-US/srm-invites.png) | ![초대 관리(일본어)](images/ja-JP/srm-invites.png) | ![초대 관리(한국어)](images/ko-KR/srm-invites.png) |
+
+본 그룹은 목록/설정 뷰만 닫는 것으로, `admission-lifecycle`(완전한 Portal 등록 Saga 와 진입 승인 필요)이나 `detail-and-action-states`(상세 대화상자와 작업 결과 필요)를 닫는 것과 **동일하지 않음**; `stable-mobile-flow` 는 다음 소절의 반응형 수집으로 닫음. 따라서 SRM 은 여전히 `partial`.
+
+### 공급업체 포털 반응형 안정성 스크린샷(4개 언어)
+
+`omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts` 가 실제 실행 스택에서 생성. **읽기 전용 수집**: 포털을 열고 탭을 전환하고 새로고침을 클릭할 뿐이며, 견적 제출이나 수정은 일절 하지 않음.
+
+- 전제 조건: 앞 두 소절과 동일(로컬 Compose 전체 스택, `supplier1` 의 Portal 연결 완료, 단기 JWT 는 프로세스 내부에서 발급하고 종료 시 파기).
+- 조작자: `supplier1`.
+- 조작: **390×844(모바일)** 과 **1024×768(태블릿)** 뷰포트에서 각각 공급업체 포털을 열고 「견적 응답」 탭으로 전환.
+- 기대 상태: 탭이 표시되고 클릭 가능; 「견적 요청 새로고침」과 행별 견적 작업이 좁은 폭에서 밀려나거나 가려지지 않음; 목록은 반응형으로 열을 축소(모바일은 견적 번호/제목/작업만 유지)하며 넘침 없음.
+- 실측 결과: 8 passed / 0 skipped(4개 언어 × 두 뷰포트).
+
+| 뷰포트 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 390×844 모바일 | ![포털 견적 목록 모바일(중국어)](images/zh-CN/srm-portal-quotation-mobile.png) | ![포털 견적 목록 모바일(영어)](images/en-US/srm-portal-quotation-mobile.png) | ![포털 견적 목록 모바일(일본어)](images/ja-JP/srm-portal-quotation-mobile.png) | ![포털 견적 목록 모바일(한국어)](images/ko-KR/srm-portal-quotation-mobile.png) |
+| 1024×768 태블릿 | ![포털 견적 목록 태블릿(중국어)](images/zh-CN/srm-portal-quotation-tablet.png) | ![포털 견적 목록 태블릿(영어)](images/en-US/srm-portal-quotation-tablet.png) | ![포털 견적 목록 태블릿(일본어)](images/ja-JP/srm-portal-quotation-tablet.png) | ![포털 견적 목록 태블릿(한국어)](images/ko-KR/srm-portal-quotation-tablet.png) |
+
+수집 시점에 목록에 표시된 것은 환경에 기존하던 역사적 견적 요청 행입니다(본 배치 견적 데이터는 귀속별로 정리 완료); 이미지는 실제 목록 내용을 그대로 보존하며, 데이터를 만들어 채우지 않았습니다.
 
 ## 10. 테스트
 

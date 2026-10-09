@@ -8,7 +8,7 @@ import com.omni.procurement.dto.MaterialRequests;
 import com.omni.procurement.dto.MaterialViews;
 import com.omni.procurement.entity.ProcMaterial;
 import com.omni.procurement.entity.ProcMaterialCategory;
-import com.omni.procurement.security.ProcDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.procurement.service.MaterialService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -47,7 +47,7 @@ public class MaterialController {
      */
     @GetMapping("/category/list")
     @PreAuthorize("hasAuthority('procurement:material:list')")
-    @ProcDataScope(permissionCode = "procurement:material:list")
+    @ServiceDataScope(permissionCode = "procurement:material:list")
     public R<List<MaterialViews.CategoryVO>> listCategories() {
         return R.ok(materialService.listCategories());
     }
@@ -60,7 +60,7 @@ public class MaterialController {
      */
     @PostMapping("/category")
     @PreAuthorize("hasAuthority('procurement:material:create')")
-    @ProcDataScope(permissionCode = "procurement:material:create")
+    @ServiceDataScope(permissionCode = "procurement:material:create")
     @OperLog(module = "采购物料品类", operType = OperType.CREATE,
             entityClass = ProcMaterialCategory.class, idExpr = "#result.data.id")
     public R<MaterialViews.CategoryVO> createCategory(
@@ -77,7 +77,7 @@ public class MaterialController {
      */
     @PutMapping("/category/{id}")
     @PreAuthorize("hasAuthority('procurement:material:update')")
-    @ProcDataScope(permissionCode = "procurement:material:update")
+    @ServiceDataScope(permissionCode = "procurement:material:update")
     @OperLog(module = "采购物料品类", operType = OperType.UPDATE,
             entityClass = ProcMaterialCategory.class, idExpr = "#id")
     public R<MaterialViews.CategoryVO> updateCategory(
@@ -94,7 +94,7 @@ public class MaterialController {
      */
     @DeleteMapping("/category/{id}")
     @PreAuthorize("hasAuthority('procurement:material:delete')")
-    @ProcDataScope(permissionCode = "procurement:material:delete")
+    @ServiceDataScope(permissionCode = "procurement:material:delete")
     @OperLog(module = "采购物料品类", operType = OperType.DELETE,
             entityClass = ProcMaterialCategory.class, idExpr = "#id")
     public R<Void> deleteCategory(@PathVariable Long id,
@@ -111,7 +111,7 @@ public class MaterialController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('procurement:material:list')")
-    @ProcDataScope(permissionCode = "procurement:material:list")
+    @ServiceDataScope(permissionCode = "procurement:material:list")
     public R<PageResult<MaterialViews.MaterialVO>> list(@Valid MaterialRequests.MaterialQuery query) {
         return R.ok(materialService.page(query));
     }
@@ -124,7 +124,7 @@ public class MaterialController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:material:list')")
-    @ProcDataScope(permissionCode = "procurement:material:list")
+    @ServiceDataScope(permissionCode = "procurement:material:list")
     public R<MaterialViews.MaterialVO> get(@PathVariable Long id) {
         return R.ok(materialService.get(id));
     }
@@ -137,7 +137,7 @@ public class MaterialController {
      */
     @PostMapping
     @PreAuthorize("hasAuthority('procurement:material:create')")
-    @ProcDataScope(permissionCode = "procurement:material:create")
+    @ServiceDataScope(permissionCode = "procurement:material:create")
     @OperLog(module = "采购物料", operType = OperType.CREATE,
             entityClass = ProcMaterial.class, idExpr = "#result.data.id")
     public R<MaterialViews.MaterialVO> create(
@@ -154,7 +154,7 @@ public class MaterialController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:material:update')")
-    @ProcDataScope(permissionCode = "procurement:material:update")
+    @ServiceDataScope(permissionCode = "procurement:material:update")
     @OperLog(module = "采购物料", operType = OperType.UPDATE,
             entityClass = ProcMaterial.class, idExpr = "#id")
     public R<MaterialViews.MaterialVO> update(
@@ -171,7 +171,7 @@ public class MaterialController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('procurement:material:delete')")
-    @ProcDataScope(permissionCode = "procurement:material:delete")
+    @ServiceDataScope(permissionCode = "procurement:material:delete")
     @OperLog(module = "采购物料", operType = OperType.DELETE,
             entityClass = ProcMaterial.class, idExpr = "#id")
     public R<Void> delete(@PathVariable Long id,

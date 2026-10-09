@@ -29,7 +29,7 @@ public final class ApprovalRouteRequests {
     @EqualsAndHashCode(callSuper = true)
     public static class RouteQuery extends ProcPageQuery {
         @Serial private static final long serialVersionUID = 1L;
-        /** 路由编码或品类编码关键词。 */ @Size(max = 100) private String keyword;
+        /** 规则名称、技术编码或品类编码关键词。 */ @Size(max = 100) private String keyword;
         /** 精确品类编码或通配符 *。 */ @Size(max = 50) private String categoryCode;
         /** ACTIVE/INACTIVE。 */ @Pattern(regexp = "ACTIVE|INACTIVE") private String status;
     }
@@ -38,9 +38,10 @@ public final class ApprovalRouteRequests {
     @Data
     public static class CreateRouteRequest implements Serializable {
         @Serial private static final long serialVersionUID = 1L;
-        /** 租户内稳定路由编码。 */
-        @NotBlank @Size(max = 64) @Pattern(regexp = "[A-Za-z0-9][A-Za-z0-9_.-]*")
+        /** 兼容旧调用方的规则编码输入；新调用方不得传入。 */
+        @Size(max = 64) @Pattern(regexp = "[A-Za-z0-9][A-Za-z0-9_.-]*")
         private String routeCode;
+        /** 业务可读的规则名称；兼容期允许旧调用方不传。 */ @Size(max = 100) private String routeName;
         /** 精确品类编码或通配符 *。 */ @NotBlank @Size(max = 50) private String categoryCode;
         /** 金额下界，包含。 */
         @NotNull @Digits(integer = 15, fraction = 4)
@@ -57,7 +58,7 @@ public final class ApprovalRouteRequests {
                 using = Jackson3DecimalStringDeserializer.class)
         private BigDecimal maxAmount;
         /** 已发布工作流模型版本 ID。 */ @NotNull @Positive private Long modelVersionId;
-        /** 管理列表排序优先级。 */ @NotNull @Min(0) private Integer priority;
+        /** 兼容高级调用方的排序优先级；为空时由服务端生成。 */ @Min(0) private Integer priority;
         /** ACTIVE/INACTIVE。 */ @Pattern(regexp = "ACTIVE|INACTIVE") private String status = "ACTIVE";
     }
 
@@ -66,6 +67,7 @@ public final class ApprovalRouteRequests {
     public static class UpdateRouteRequest implements Serializable {
         @Serial private static final long serialVersionUID = 1L;
         /** 乐观锁版本。 */ @NotNull @Min(0) private Integer version;
+        /** 业务可读的规则名称；兼容期允许旧调用方不传。 */ @Size(max = 100) private String routeName;
         /** 精确品类编码或通配符 *。 */ @NotBlank @Size(max = 50) private String categoryCode;
         /** 金额下界，包含。 */
         @NotNull @Digits(integer = 15, fraction = 4)
@@ -82,7 +84,7 @@ public final class ApprovalRouteRequests {
                 using = Jackson3DecimalStringDeserializer.class)
         private BigDecimal maxAmount;
         /** 已发布工作流模型版本 ID。 */ @NotNull @Positive private Long modelVersionId;
-        /** 管理列表排序优先级。 */ @NotNull @Min(0) private Integer priority;
+        /** 兼容高级调用方的排序优先级；为空时保留既有值。 */ @Min(0) private Integer priority;
         /** ACTIVE/INACTIVE。 */ @NotBlank @Pattern(regexp = "ACTIVE|INACTIVE") private String status;
     }
 }

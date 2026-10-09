@@ -14,7 +14,8 @@ import com.omni.asset.mapper.AstAssetHistoryMapper;
 import com.omni.asset.mapper.AstAssetMapper;
 import com.omni.asset.mapper.AstDisposalMapper;
 import com.omni.asset.mapper.AstTransferMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.service.support.AssetRecordAccessGuard;
 import com.omni.asset.workflow.AssetWorkflowCommand;
 import com.omni.common.core.result.BusinessException;
@@ -55,7 +56,7 @@ class AssetOperationWorkflowStateServiceImplTest {
     /** 清理身份上下文。 */
     @AfterEach
     void clearContext() {
-        AssetTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 原子占位未命中时必须返回 409，不能写历史。 */
@@ -74,7 +75,7 @@ class AssetOperationWorkflowStateServiceImplTest {
                 ArgumentMatchers.<Wrapper<AstTransfer>>any())).thenReturn(1);
         when(assetMapper.occupyOperation(
                 asset, AssetStateMachine.TRANSFER, "TRANSFER", 10L, "admin")).thenReturn(0);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         assertThatThrownBy(() -> service().prepareTransfer(transferRequest()))
                 .isInstanceOf(BusinessException.class)
@@ -111,7 +112,7 @@ class AssetOperationWorkflowStateServiceImplTest {
         when(transferMapper.update(
                 ArgumentMatchers.<AstTransfer>isNull(),
                 ArgumentMatchers.<Wrapper<AstTransfer>>any())).thenReturn(1);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         AssetWorkflowCommand command = service().prepareRetry("TRANSFER", 10L, 3);
 
@@ -148,7 +149,7 @@ class AssetOperationWorkflowStateServiceImplTest {
         asset.setActiveOperationId(10L);
         when(transferMapper.selectForUpdate(1L, 10L)).thenReturn(transfer);
         when(assetMapper.selectForUpdate(1L, 50L)).thenReturn(asset);
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 1L, "admin"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 1L, "admin"));
 
         AssetWorkflowCommand command = service().prepareRetry("TRANSFER", 10L, 3);
 

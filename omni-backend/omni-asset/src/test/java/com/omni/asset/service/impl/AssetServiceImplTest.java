@@ -11,7 +11,8 @@ import com.omni.asset.entity.AstAsset;
 import com.omni.asset.entity.AstAssetHistory;
 import com.omni.asset.mapper.AstAssetHistoryMapper;
 import com.omni.asset.mapper.AstAssetMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.service.support.AssetIdentityGuard;
 import com.omni.asset.service.support.AssetRecordAccessGuard;
 import com.omni.common.core.mq.ReliableMessageRelay;
@@ -57,13 +58,13 @@ class AssetServiceImplTest {
     /** 清理资产身份上下文。 */
     @AfterEach
     void clearContext() {
-        AssetTenantContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** “我的资产”必须显式追加 current_user_id，不能依赖宽权限角色。 */
     @Test
     void shouldAlwaysFilterMyAssetsByCurrentUser() {
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 31L, "employee"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "employee"));
         AtomicReference<Wrapper<AstAsset>> wrapperRef = new AtomicReference<>();
         when(assetMapper.selectPage(
                 ArgumentMatchers.<Page<AstAsset>>any(),
@@ -86,7 +87,7 @@ class AssetServiceImplTest {
     /** 退还必须校验本人、版本和状态，并原子清空使用关系。 */
     @Test
     void shouldReturnAssignedAssetWithOptimisticCondition() {
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 31L, "employee"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "employee"));
         AstAsset asset = asset(AssetStateMachine.ALLOCATED, 2);
         asset.setCurrentUserId(7L);
         asset.setCurrentUnitId(12L);
@@ -123,7 +124,7 @@ class AssetServiceImplTest {
     /** 过期版本必须在写数据库前以 409 拒绝。 */
     @Test
     void shouldRejectStaleVersionBeforeUpdate() {
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(7L, 31L, "employee"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 31L, "employee"));
         AstAsset asset = asset(AssetStateMachine.ALLOCATED, 3);
         asset.setCurrentUserId(7L);
         when(assetMapper.selectForUpdate(31L, 100L)).thenReturn(asset);
@@ -139,7 +140,7 @@ class AssetServiceImplTest {
     /** 非在库资产不得重新分配。 */
     @Test
     void shouldRejectAllocationFromInUse() {
-        AssetTenantContext.set(new AssetTenantContext.RequestIdentity(9L, 31L, "manager"));
+        ServiceIdentityContext.set(new ServiceRequestIdentity(9L, 31L, "manager"));
         AstAsset asset = asset(AssetStateMachine.IN_USE, 1);
         when(assetMapper.selectForUpdate(31L, 100L)).thenReturn(asset);
         when(accessGuard.requireVisible(asset, "资产不存在")).thenReturn(asset);

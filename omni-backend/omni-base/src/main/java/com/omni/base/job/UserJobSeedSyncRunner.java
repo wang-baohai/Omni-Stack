@@ -10,6 +10,7 @@ import com.omni.common.job.XxlJobProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,7 +19,7 @@ import java.util.List;
 /**
  * 用户任务种子数据 XXL-JOB 同步器。
  * <p>
- * 解决 SQL 种子脚本（init-all.sql）插入的用户任务记录（{@code xxl_job_id = NULL}）
+ * 解决正式种子脚本（scripts/sql/seed/base.sql）插入的用户任务记录（{@code xxl_job_id = NULL}）
  * 不会自动注册到 XXL-JOB 的问题。
  * 应用启动后，扫描 {@code sys_user_job} 表中 {@code xxl_job_id IS NULL} 且 {@code status = 1}
  * 的记录，逐一调用 XXL-JOB Admin API 完成注册，并回写 {@code xxl_job_id}。
@@ -41,6 +42,7 @@ public class UserJobSeedSyncRunner {
      * @return 启动后执行的同步逻辑
      */
     @Bean
+    @ConditionalOnProperty(prefix = "xxl.job.executor", name = "enabled", havingValue = "true", matchIfMissing = true)
     public ApplicationRunner syncUserJobSeeds() {
         return args -> {
             String appname = xxlJobProperties.getExecutor().getAppname();

@@ -2,7 +2,7 @@ package com.omni.crm.controller;
 
 import com.omni.common.core.result.R;
 import com.omni.crm.dto.CrmViews;
-import com.omni.crm.security.CrmDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.crm.service.PipelineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,13 +23,13 @@ public class PipelineController {
     /** 查询管道。 */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('crm:opportunity:list')")
-    @CrmDataScope(permissionCode = "crm:opportunity:list")
+    @ServiceDataScope(permissionCode = "crm:opportunity:list")
     public R<List<CrmViews.PipelineVO>> list() { return R.ok(pipelineService.list()); }
 
     /** 查询管道阶段。 */
     @GetMapping("/{id}/stages")
     @PreAuthorize("hasAuthority('crm:opportunity:list')")
-    @CrmDataScope(permissionCode = "crm:opportunity:list")
+    @ServiceDataScope(permissionCode = "crm:opportunity:list")
     public R<List<CrmViews.PipelineStageVO>> stages(@PathVariable Long id) {
         return R.ok(pipelineService.stages(id));
     }

@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * 必需业务流程模型启动初始化器。
  * <p>
- * 对默认 SQL 中的供应商准入、资产调拨和资产处置模型执行幂等分类校正与发布，
+ * 对默认 SQL 中的供应商准入、采购审批、资产调拨和资产处置模型执行幂等分类校正与发布，
  * 避免新环境需要人工进入设计器发布后业务入口才能使用。
  * </p>
  */
@@ -33,6 +33,7 @@ public class RequiredWorkflowModelInitializer implements ApplicationRunner {
     private static final Long DEFAULT_TENANT_ID = 1L;
     private static final Map<String, String> REQUIRED_MODELS = Map.of(
             "supplier-onboarding", "SRM_SUPPLIER_ONBOARDING",
+            "procurement-approval", "purchase",
             "asset-transfer", "ASSET_TRANSFER",
             "asset-disposal", "ASSET_DISPOSAL");
 

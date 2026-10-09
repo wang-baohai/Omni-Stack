@@ -1,21 +1,17 @@
 package com.omni.asset.client;
 
-import com.omni.asset.security.AssetTenantContext;
 import com.omni.common.core.internal.InternalDataScopeDTO;
 import com.omni.common.core.internal.InternalOrgDTO;
 import com.omni.common.core.internal.InternalUserDTO;
 import com.omni.common.core.internal.InternalUserOptionDTO;
-import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import com.omni.common.core.security.XssSettings;
+import com.omni.common.service.config.ServiceIdentityProperties;
+import com.omni.common.service.internal.InternalFeignHeadersFactory;
 import feign.RequestInterceptor;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -115,40 +111,15 @@ public interface AuthInternalClient {
     @Configuration
     class FeignConfig {
 
-        @Value("${omni.internal.api.token:}")
-        private String internalToken;
-
         /**
          * 注入服务间认证头。
          *
          * @return Feign 请求拦截器
          */
         @Bean
-        public RequestInterceptor internalTokenInterceptor() {
-            return template -> {
-                template.header("X-Internal-Token", internalToken);
-                template.header("X-Tenant-Id", Long.toString(resolveTenantId()));
-            };
-        }
-
-        private Long resolveTenantId() {
-            try {
-                return AssetTenantContext.requireTenantId();
-            } catch (BusinessException ignored) {
-                // XSS Filter 可能早于业务租户过滤器执行，此时从原始请求头解析。
-            }
-            if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes) {
-                HttpServletRequest request = attributes.getRequest();
-                try {
-                    Long tenantId = Long.valueOf(request.getHeader("X-Tenant-Id"));
-                    if (tenantId > 0) {
-                        return tenantId;
-                    }
-                } catch (NumberFormatException | NullPointerException ignored) {
-                    // 统一在下方失败关闭。
-                }
-            }
-            throw new BusinessException(403, "缺少内部调用租户上下文");
+        public RequestInterceptor internalTokenInterceptor(
+                ServiceIdentityProperties properties, InternalFeignHeadersFactory factory) {
+            return factory.create(properties.getInternalApi().getToken());
         }
     }
 }

@@ -9,7 +9,7 @@ import com.omni.srm.entity.SrmRiskScoreThreshold;
 import com.omni.srm.mapper.SrmRiskCriterionMapper;
 import com.omni.srm.mapper.SrmRiskIndicatorTypeMapper;
 import com.omni.srm.mapper.SrmRiskScoreThresholdMapper;
-import com.omni.srm.security.SrmTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.srm.service.RiskIndicatorConfigService;
 import com.omni.srm.service.support.SrmAuditSupport;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +61,7 @@ public class RiskIndicatorConfigServiceImpl implements RiskIndicatorConfigServic
         }
 
         SrmRiskIndicatorType entity = new SrmRiskIndicatorType();
-        entity.setTenantId(SrmTenantContext.requireTenantId());
+        entity.setTenantId(ServiceIdentityContext.requireTenantId());
         entity.setTypeCode(request.getTypeCode().toUpperCase());
         entity.setTypeName(request.getTypeName());
         entity.setDescription(request.getDescription());
@@ -130,7 +130,7 @@ public class RiskIndicatorConfigServiceImpl implements RiskIndicatorConfigServic
         }
 
         SrmRiskCriterion entity = new SrmRiskCriterion();
-        entity.setTenantId(SrmTenantContext.requireTenantId());
+        entity.setTenantId(ServiceIdentityContext.requireTenantId());
         entity.setIndicatorTypeId(request.getIndicatorTypeId());
         entity.setCriterionLabel(request.getCriterionLabel());
         entity.setScore(request.getScore());
@@ -192,7 +192,7 @@ public class RiskIndicatorConfigServiceImpl implements RiskIndicatorConfigServic
         if (requests == null || requests.isEmpty()) {
             throw new BusinessException(400, "阈值列表不能为空");
         }
-        Long tenantId = SrmTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         // 删除现有阈值并重新插入
         thresholdMapper.delete(new LambdaQueryWrapper<SrmRiskScoreThreshold>()
                 .eq(SrmRiskScoreThreshold::getTenantId, tenantId));

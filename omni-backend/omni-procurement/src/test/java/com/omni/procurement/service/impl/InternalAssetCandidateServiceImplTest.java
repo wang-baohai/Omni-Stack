@@ -12,8 +12,8 @@ import com.omni.procurement.mapper.ProcGoodsReceiptLineMapper;
 import com.omni.procurement.mapper.ProcGoodsReceiptMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -53,8 +53,8 @@ class InternalAssetCandidateServiceImplTest {
     /** 清理内部查询创建的线程上下文。 */
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 回扫结果必须复用实时事件 ID，并返回完整采购快照和精确金额。 */
@@ -86,10 +86,10 @@ class InternalAssetCandidateServiceImplTest {
             assertThat(candidate.getTotalPrice()).isEqualByComparingTo("12800.0000");
         });
         verify(lineMapper).selectAssetCandidateLines(41L, 900L, 20);
-        assertThatThrownBy(ProcTenantContext::require)
+        assertThatThrownBy(ServiceIdentityContext::require)
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo(403);
-        assertThat(ProcDataScopeContext.get()).isNull();
+        assertThat(ServiceDataScopeContext.get()).isNull();
     }
 
     /** 非法游标参数必须在访问数据库前拒绝。 */

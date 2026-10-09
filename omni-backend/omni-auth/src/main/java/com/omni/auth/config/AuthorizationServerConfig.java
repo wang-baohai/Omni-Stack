@@ -9,6 +9,7 @@ import com.omni.auth.mapper.SysUserMapper;
 import com.omni.auth.security.DeviceClientAuthenticationFilter;
 import com.omni.auth.security.GatewayPreAuthFilter;
 import com.omni.auth.security.OmniUserDetails;
+import com.omni.auth.security.SasConsentOriginFilter;
 import com.omni.auth.security.InternalApiFilter;
 import com.omni.auth.security.RedisKeyStoreLoader;
 import com.omni.auth.security.OmniUserDetailsService;
@@ -40,6 +41,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.jackson.OAuth2AuthorizationServerJacksonModule;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
@@ -132,6 +134,8 @@ public class AuthorizationServerConfig {
                 PathPatternRequestMatcher.pathPattern("/.well-known/openid-configuration"),
                 PathPatternRequestMatcher.pathPattern("/oauth2/token/introspect"),
                 PathPatternRequestMatcher.pathPattern("/oauth2/token/revocation"),
+                PathPatternRequestMatcher.pathPattern("/oauth2/introspect"),
+                PathPatternRequestMatcher.pathPattern("/oauth2/revoke"),
                 PathPatternRequestMatcher.pathPattern("/oauth2/register"),
                 PathPatternRequestMatcher.pathPattern("/connect/register"),
                 PathPatternRequestMatcher.pathPattern("/connect/logout"),
@@ -229,6 +233,11 @@ public class AuthorizationServerConfig {
                 new DeviceClientAuthenticationFilter(registeredClientRepository),
                 SecurityContextPersistenceFilter.class);
 
+        // G01/WP-015：SAS 默认对全部 OAuth2 端点忽略 CSRF，consent 写端点可被跨站伪造
+        // （运行时实证：跨站 POST device_verification 可使已登录会话批准攻击者设备并换发 token）。
+        // 注册 Origin 校验过滤器（RFC 6819 §5.2.2.3 最小实现）拦截浏览器跨站提交。
+        http.addFilterBefore(new SasConsentOriginFilter(), AuthorizationFilter.class);
+
         return http.build();
     }
 
@@ -261,8 +270,8 @@ public class AuthorizationServerConfig {
                         ).permitAll()
                         // 内部服务间 API：InternalApiFilter 校验令牌并授予 INTERNAL_SERVICE 角色
                         .requestMatchers("/internal/**").hasRole("INTERNAL_SERVICE")
-                        // Actuator health/info 放行（容器健康检查 + 端口隔离为第一层防护）
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        // Actuator 健康、信息与 Prometheus 抓取端点放行，管理端口隔离为第一层防护
+                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                         // 其他 Actuator 端点仅允许 ADMIN 角色
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         // 其他所有请求需要认证
@@ -438,11 +447,26 @@ public class AuthorizationServerConfig {
         // 默认的 PolymorphicTypeValidator 仅信任 Spring Security 内置类型，
         // 自定义的 OmniUserDetails 作为 principal 存储在授权记录中时，
         // 反序列化会被拒绝。需要显式添加为可信类型。
+        // RF05/FA06：授权记录元数据中以 epoch/issued-time 形式持久化的 java.lang.Long 会被默认
+        // PTV 拒绝，重读抛 InvalidTypeIdException → code 重放返回 HTTP500。精确允许该可信标量
+        // （不使用 java.* / Object / 全开放多态），修复持久化往返兼容，不吞异常或伪装 invalid_grant。
+        // RF05/FA07（device 完整链）根因更正：实测确认 device_verification 批准后 500（'Cannot construct
+        // instance of OAuth2ClientAuthenticationToken, no Creators'）不是 SAS/Jackson 配置缺漏，而是
+        // 本应用自定义 DeviceClientAuthenticationFilter 把该客户端主体写进 SecurityContextHolder 后未还原，
+        // 叠加本类下方 requireExplicitSave(false) 使其被回写进共享 JSESSIONID；device_verification 请求把它
+        // 当用户主体带入 OAuth2Authorization 的 java.security.Principal 属性，而 SAS 7.0.5 的 Jackson 模块
+        // 本就不为该类型提供反序列化 mixin（该类型本就不应被持久化）。修复落在过滤器侧（请求结束后
+        // 还原 SecurityContext），因此这里不将 OAuth2ClientAuthenticationToken 加入 PTV 白名单
+        // （手工加入只能过'类型可解析'一关，反序列化仍会因 no Creators 失败，且会扩大多态白名单攻击面）。
         BasicPolymorphicTypeValidator.Builder ptvBuilder = BasicPolymorphicTypeValidator.builder()
-                .allowIfSubType(OmniUserDetails.class.getName());
+                .allowIfSubType(OmniUserDetails.class.getName())
+                .allowIfSubType(Long.class.getName());
+        OAuth2AuthorizationServerJacksonModule authServerJacksonModule = new OAuth2AuthorizationServerJacksonModule();
+        authServerJacksonModule.configurePolymorphicTypeValidator(ptvBuilder);
 
         JsonMapper jsonMapper = JsonMapper.builder()
                 .addModules(SecurityJacksonModules.getModules(getClass().getClassLoader(), ptvBuilder))
+                .addModule(authServerJacksonModule)
                 .build();
 
         JdbcOAuth2AuthorizationService service =

@@ -19,8 +19,9 @@ import com.omni.procurement.mapper.ProcGoodsReceiptMapper;
 import com.omni.procurement.mapper.ProcMaterialMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderMapper;
-import com.omni.procurement.security.ProcDataScopeContext;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.impl.GoodsReceiptServiceImpl;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
@@ -106,19 +107,19 @@ class TenantIsolationIntegrationTest {
 
     @AfterEach
     void clearContext() {
-        ProcDataScopeContext.clear();
-        ProcTenantContext.clear();
+        ServiceDataScopeContext.clear();
+        ServiceIdentityContext.clear();
     }
 
     /** 租户 A 创建的收货草稿必须属于租户 A，租户 B 无法看到或操作。 */
     @Test
     void shouldIsolateReceiptCreationBetweenTenants() {
         // ── 租户 A 创建收货草稿 ──
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 USER_A, TENANT_A, "tenant-a-user"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                 USER_A, UNIT_A, "procurement:goods-receipt:create",
-                UNIT_A, "ALL", Set.of()));
+                UNIT_A, "ALL", Set.of(), null));
 
         ProcPurchaseOrder orderA = buildOrder(TENANT_A, 801L,
                 PurchaseOrderStateMachine.CONFIRMED, 0);
@@ -149,11 +150,11 @@ class TenantIsolationIntegrationTest {
         assertThat(resultA.getStatus()).isEqualTo(GoodsReceiptStateMachine.DRAFT);
 
         // ── 租户 B 尝试操作租户 A 的收货单（应该查不到）──
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 USER_B, TENANT_B, "tenant-b-user"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                 USER_B, UNIT_B, "procurement:goods-receipt:confirm",
-                UNIT_B, "ALL", Set.of()));
+                UNIT_B, "ALL", Set.of(), null));
 
         // 租户 B 查询租户 A 的收货单，FOR UPDATE 使用 TENANT_B 查不到
         when(receiptMapper.selectForUpdate(TENANT_B, 901L)).thenReturn(null);
@@ -170,11 +171,11 @@ class TenantIsolationIntegrationTest {
     @Test
     void shouldIsolateReceiptConfirmationBetweenTenants() {
         // ── 租户 A 确认收货 ──
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 USER_A, TENANT_A, "tenant-a-user"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                 USER_A, UNIT_A, "procurement:goods-receipt:confirm",
-                UNIT_A, "ALL", Set.of()));
+                UNIT_A, "ALL", Set.of(), null));
 
         ProcGoodsReceipt draftA = buildReceipt(TENANT_A, 901L,
                 GoodsReceiptStateMachine.DRAFT, 0);
@@ -212,11 +213,11 @@ class TenantIsolationIntegrationTest {
         assertThat(result.getStatus()).isEqualTo(GoodsReceiptStateMachine.CONFIRMED);
 
         // ── 租户 B 的订单完全不受影响 ──
-        ProcTenantContext.set(new ProcTenantContext.RequestIdentity(
+        ServiceIdentityContext.set(new ServiceRequestIdentity(
                 USER_B, TENANT_B, "tenant-b-user"));
-        ProcDataScopeContext.set(new ProcDataScopeContext.ScopeInfo(
+        ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                 USER_B, UNIT_B, "procurement:goods-receipt:confirm",
-                UNIT_B, "ALL", Set.of()));
+                UNIT_B, "ALL", Set.of(), null));
 
         // 租户 B 查询时使用的是 TENANT_B，不会查到租户 A 的数据
         verify(orderMapper, never()).selectForUpdate(TENANT_B, 801L);

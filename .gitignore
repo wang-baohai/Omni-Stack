@@ -24,6 +24,9 @@ Thumbs.db
 *.log
 logs/
 
+# Liquibase offline validation artifacts
+databasechangelog.csv
+
 # Node
 node_modules/
 dist/
@@ -32,8 +35,12 @@ dist-ssr/
 
 # Env
 .env
+.env.wp001
 .env.local
 .env.*.local
+# 敏感环境备份（WP-10：绝不提交，待人工确认后移出仓库）
+.env.before-rebuild-*
+.env.wp010f
 
 # 本地敏感配置文件（含 OAuth2 真实凭证）
 application-local.yml
@@ -41,3 +48,18 @@ application-local.yml
 # Playwright
 test-results/
 playwright-report/
+
+# WP010 R04: 证据目录秘密防再入库（token/存储状态/密钥文件）
+.qoder/**/*-token.txt
+.qoder/**/*tokens.json
+.qoder/**/*.secret
+.qoder/**/storage-state*.json
+
+.env.wp012f
+.env.wp012r
+.env.wp013
+
+# WP015 FR01: 本次新产敏感件防误提交（原始全库备份/隔离 F 栈 env；仅排除入库，原件仍留盘保全）
+.env.wp015f
+.qoder/**/main-stack-mysqldump*.sql
+.qoder/**/*.sql.gz

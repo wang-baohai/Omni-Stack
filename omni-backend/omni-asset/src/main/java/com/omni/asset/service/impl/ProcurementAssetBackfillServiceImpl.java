@@ -2,8 +2,9 @@ package com.omni.asset.service.impl;
 
 import com.omni.asset.client.ProcurementInternalClient;
 import com.omni.asset.dto.ProcurementAssetContracts;
-import com.omni.asset.security.AssetDataScopeContext;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.datascope.ServiceDataScopeContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.asset.service.ProcurementAssetBackfillService;
 import com.omni.asset.service.ProcurementAssetImportService;
 import com.omni.common.core.result.BusinessException;
@@ -38,11 +39,11 @@ public class ProcurementAssetBackfillServiceImpl implements ProcurementAssetBack
             Long tenantId, Long afterId, Integer size) {
         validateRequest(tenantId, afterId, size);
         try {
-            AssetTenantContext.set(new AssetTenantContext.RequestIdentity(
+            ServiceIdentityContext.set(new ServiceRequestIdentity(
                     0L, tenantId, "procurement-backfill"));
-            AssetDataScopeContext.set(new AssetDataScopeContext.ScopeInfo(
+            ServiceDataScopeContext.set(new ServiceDataScopeContext.ScopeInfo(
                     0L, tenantId, "asset:procurement:import",
-                    null, "TENANT", Set.of()));
+                    null, "TENANT", Set.of(), null));
             List<ProcurementAssetContracts.AssetCandidate> candidates =
                     fetchCandidates(tenantId, afterId, size);
             validateCursorPage(candidates, afterId);
@@ -65,8 +66,8 @@ public class ProcurementAssetBackfillServiceImpl implements ProcurementAssetBack
                     .hasMore(candidates.size() == size)
                     .build();
         } finally {
-            AssetDataScopeContext.clear();
-            AssetTenantContext.clear();
+            ServiceDataScopeContext.clear();
+            ServiceIdentityContext.clear();
         }
     }
 

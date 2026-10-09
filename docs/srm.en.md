@@ -103,13 +103,13 @@ Every `srm_*` table must have `tenant_id`. Authorizable business tables addition
 
 ```
 Gateway JWT validation → SRM Tenant check → Spring Security @PreAuthorize
-→ @SrmDataScope aspect → MyBatis DataPermission interceptor → SrmRecordAccessGuard row-level write authorization
+→ @ServiceDataScope aspect → MyBatis DataPermission interceptor → SrmRecordAccessGuard row-level write authorization
 ```
 
 1. Gateway verifies RS256 JWT, overwrites and injects `X-User-*`, `X-Tenant-Id`, `X-Gateway-Forwarded`
-2. `GatewayPreAuthFilter` builds `Authentication`, validates userId/tenantId
+2. common-service `GatewayPreAuthenticationFilter` builds `Authentication`, validates userId/tenantId
 3. Controller `@PreAuthorize` checks functional permissions
-4. `@SrmDataScope(permissionCode)` aspect calls Auth internal API to resolve dataScope
+4. `@ServiceDataScope(permissionCode)` aspect calls Auth internal API to resolve dataScope
 5. MyBatis-Plus appends tenant + owner conditions
 6. `SrmRecordAccessGuard` validates row-level write authorization
 
@@ -161,9 +161,9 @@ DataPermissionInterceptor does not protect writes. Every update/delete/approve/s
 | Invite | `srm:invite:list/create/revoke`, `srm:portal:invite` |
 | Owner Options | `srm:owner:list` |
 | PII View | `srm:pii:view` |
-| Portal | `srm:portal:enroll/profile/evaluation` |
+| Portal | `srm:portal:enroll/profile/evaluation/quotation` |
 
-The `/` shorthand represents multiple full permission codes under the same resource; each is stored individually in the database. `@PreAuthorize` and `@SrmDataScope` use the same full permission code.
+The `/` shorthand represents multiple full permission codes under the same resource; each is stored individually in the database. `@PreAuthorize` and `@ServiceDataScope` use the same full permission code.
 
 ### 3.6 PII Masking
 
@@ -186,7 +186,7 @@ SRM implements the `XssConfigProvider` SPI, reading `xss:enabled:{tenantId}` and
 | `SUPPLIER` | SELF | Portal self-service: post-enrollment profile maintenance, own performance viewing |
 | `SUPER_ADMIN` | ALL | All functions; SRM data still limited to the current tenant |
 
-Default USER role only grants `srm:portal:enroll`; no SRM admin or portal profile/evaluation permissions. Portal profile/evaluation access requires the SUPPLIER role added after enrollment.
+Default USER is only granted `srm:portal:enroll`, not SRM admin or portal profile/evaluation/quotation permissions; profile/evaluation/quotation access requires the SUPPLIER role added after enrollment. `srm:portal:quotation` is strictly granted only to `SUPPLIER` and to `SUPER_ADMIN` which owns the full permission tree per platform rules; internal roles such as `SRM_ADMIN` and `PROCUREMENT_MANAGER` must not submit quotations on behalf of suppliers. The quotation Controller requires both the SUPPLIER role and a valid PortalUser association; SUPER_ADMIN alone still cannot impersonate a supplier.
 
 ## 4. State Machines & Core Flows
 
@@ -241,7 +241,7 @@ Manual/automatic risk indicator update
 → If level changes to RED, write Outbox event notification
 ```
 
-Certificate expiry alert logic: `expiry_date - today ≤ 30 days` → CERTIFICATE indicator auto-set to YELLOW; `expiry_date < today` → CERTIFICATE indicator auto-set to RED. Proactive scanning via XXL-JOB scheduled task is planned for Phase 2 (MVP: manual trigger or disabled).
+Certificate expiry alert logic: `expiry_date - today <= 30` → CERTIFICATE indicator auto-set to YELLOW; `expiry_date < today` → CERTIFICATE indicator auto-set to RED. Proactive scanning via XXL-JOB scheduled task is planned for Phase 2 (MVP: manual trigger or disabled).
 
 ### 4.4 Portal Account Opening & Enrollment
 
@@ -334,10 +334,21 @@ Events only carry IDs and status snapshots; no full bank account numbers, contac
 
 ### 6.4 Internal APIs
 
-SRM pre-provisions the following capabilities for future Procurement/Asset services:
+SRM provides the following capabilities for the Procurement/Asset services to call:
 - `GET /api/internal/supplier/{id}?tenantId={tenantId}` — supplier summary
 - `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}` — search approved suppliers
-- All internal APIs use `X-Internal-Token` authentication; not exposed via Gateway
+- `POST /api/internal/supplier/batch` — body is `{tenantId,supplierIds}`; returns at most 100 summaries in first-occurrence order of the input; missing IDs are omitted
+- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}` — fetch valid quotations, versions and line snapshots of an RFQ
+- All internal APIs use `X-Internal-Token` and `X-Tenant-Id`; the query/body tenant must match the header, not exposed via the Gateway; supplier summaries contain no contact or bank-account PII
+
+When SRM queries portal-visible RFQs it calls Procurement:
+
+- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`
+- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`
+
+supplierId can only be the `srm_supplier_portal_user` corresponding to the current userId; values passed in by portal requests are not accepted. All internal requests also carry `X-Tenant-Id`; if an API has an additional query/body tenant, it must match the header.
+
+Quotation submission or update is only allowed when the RFQ `status=SENT`, the invitation `status IN (INVITED, QUOTED)`, and quotationDeadline is not exceeded; `DRAFT/CLOSED/AWARDED/CANCELLED` are always rejected.
 
 ## 7. Hard Constraints
 
@@ -346,8 +357,8 @@ Rules that must be followed before modifying SRM code:
 1. **Tenant isolation**: All `srm_*` tables must have `tenant_id`; TenantLine is always appended; normal APIs never cross tenants
 2. **Optimistic locking**: All writes must update with `tenant_id + id + version` condition
 3. **Fail closed**: Missing tenant → 401, missing scope → `id=-1`, Auth unavailable → 503, never degrades
-4. **ThreadLocal cleanup**: `SrmDataScopeContext` and `SrmTenantContext` must be cleared in `finally` blocks to prevent memory leaks
-5. **Dual permission declaration**: Write endpoints must declare both `@PreAuthorize` (functional) and `@SrmDataScope` (data scope) using the same full permission code
+4. **ThreadLocal cleanup**: common-service `ServiceDataScopeContext` must be cleared in `finally` blocks to prevent memory leaks
+5. **Dual permission declaration**: Write endpoints must declare both `@PreAuthorize` (functional) and `@ServiceDataScope` (data scope) using the same full permission code
 6. **Backend PII masking**: Without `srm:pii:view`, backend VO returns masked values directly; not relying on frontend
 7. **Explicit Outbox tenantId**: `ReliableMessageRelay.send()` must explicitly pass `Long tenantId`; ThreadLocal implicit resolution is forbidden
 8. **Interceptor order**: TenantLine → DataPermission → Pagination; order cannot be swapped
@@ -400,14 +411,14 @@ omni-frontend/src/
 1. Add table to `omni_srm` database; must include `tenant_id`, `owner_user_id`, `owner_unit_id`, `version`, `deleted`, and audit fields
 2. Create Entity (extends SrmOwnedEntity), Mapper, Service interface + Impl, Controller
 3. Register new table's owner column mapping in `SrmDataPermissionHandler`
-4. Append DDL and permission seed data in `init-all.sql`
-5. Controller write endpoints declare `@PreAuthorize` + `@SrmDataScope` with new `srm:<resource>:<action>` permission codes
+4. Add a forward-only Liquibase changeSet under `database/changelog/srm/` for the table; write default idempotent seeds into `scripts/sql/seed/srm.sql` and permission seeds into `scripts/sql/seed/auth.sql`, then refresh `database/seed/manifest.yaml` (do not modify the compatibility-era legacy `init-all.sql`)
+5. Controller write endpoints declare `@PreAuthorize` + `@ServiceDataScope` with new `srm:<resource>:<action>` permission codes
 
 ### Adding Permission Codes
 
-1. Insert new permissions in `sys_permission` in `init-all.sql`, type `API`
+1. Insert new permissions in `sys_permission` in `scripts/sql/seed/auth.sql`, type `API` (via the formal Liquibase/seed entry point; never edit the deprecated `init-all.sql`)
 2. Assign to roles in `sys_role_permission`
-3. Controller method declares `@PreAuthorize("hasAuthority('srm:<resource>:<action>')")` + `@SrmDataScope("srm:<resource>:<action>")`
+3. Controller method declares `@PreAuthorize("hasAuthority('srm:<resource>:<action>')")` + `@ServiceDataScope(permissionCode = "srm:<resource>:<action>")`
 4. Add `v-permission="'srm:<resource>:<action'"` to the corresponding frontend button
 
 ### Integrating Outbox Events
@@ -417,9 +428,112 @@ omni-frontend/src/
 3. Event envelopes follow the unified format; payload must not contain full PII
 4. Consumers must be idempotent, deduplicating by `payload.eventId`
 
-### Phase 2 Quotation Reservation
+### Procurement Quotation Integration
 
-Quotations depend on the yet-to-be-built `omni-procurement` RFQ and invitation relationships. MVP does not create quotation tables, register quotation endpoints, or issue `srm:portal:quotation` permissions. When Phase 2 integrates, `srm_quotation`/`srm_quotation_line` tables will be created alongside DDL, migration scripts, permissions, and event contracts.
+Portal endpoints:
+
+- `GET /api/srm/portal/quotation/invitations`: lists the RFQ invitations of the current PortalUser and merges the local quotation status.
+- `GET /api/srm/portal/quotation/invitations/{rfqId}`: returns the invitation, the RFQ line snapshot and the current quotation.
+- `POST /api/srm/portal/quotation`: submits a quotation, or updates it by `version`.
+
+The submit request only accepts `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]`. tenantId, supplierId, supplier name, RFQ number, material, unit, quantity, currency, line amount and total amount are all taken from the trusted identity, the PortalUser and the Procurement invitation detail, or computed server-side.
+
+`srm_quotation.request_id` stores the last successful request. `srm_quotation_request` permanently keeps the request history and the SHA-256 requestHash keyed by `(tenant_id, request_id)`, and links the resulting version through `(tenant_id, quotation_id, target_version)`. `srm_quotation` uses `(tenant_id, rfq_id, active_supplier_guard)` to guarantee that one supplier holds exactly one non-deleted quotation per RFQ. `srm_quotation_line.rfq_line_id` is mandatory, and the submitted line set must match the RFQ snapshot exactly. Amount precision: unit price/quantity `DECIMAL(19,6)` and greater than 0; line amount/total amount `DECIMAL(19,4)` and greater than 0.
+
+The quotation, its lines, `srm_quotation_request` and the `srm.quotation.submitted.v1` Outbox record must be committed in the same transaction. A retry with the same requestId+requestHash returns the current quotation snapshot and must not re-publish the event; a different intent under the same requestId returns 409. The first request uses the creation sentinel `version=0` and the first quotation version starts at `version=1`, so concurrent creation intents cannot mistake the first version for an updatable one. The event payload contains at least `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil`; Procurement consumes it idempotently through the eventId Inbox.
+
+### Supplier Quotation Flow Screenshots (four languages)
+
+The official images are generated on a real running stack by the docs-only Playwright suite `omni-frontend/e2e-docs/flows/srm.flows.spec.ts`, stored per language directory, never reused across languages, and never replaced by placeholders or mocked success responses. The three steps share one real fixture (the same RFQ and the same quotation), so the three images are consecutive states of one business chain rather than unrelated page snapshots.
+
+Common preconditions (identical for all three steps):
+
+| Item | Content |
+|---|---|
+| Environment | Local Compose full stack, frontend `127.0.0.1:3000`, reaching `omni-procurement` and `omni-srm` through the gateway |
+| Data precondition | `admin` creates a unique category and material through official APIs → creates a requisition approval rule bound to the `procurement-approval` process model → creates a requisition and submits it for approval → after approval creates an RFQ and calls `send` (DRAFT→SENT, inviting `supplier1`) |
+| Operator | Data setup as `admin` (requires the `SUPER_ADMIN` and `PROCUREMENT_MANAGER` roles plus a `SAME_UNIT` candidate scope); the operator in the captured pages is `supplier1` (the `SUPPLIER` role with an established `srm_supplier_portal_user` association) |
+| Token | A short-lived JWT (TTL 1200 seconds) issued inside the test process by `E2eTokenFixture`, living only in process memory and a temporary file outside the repository, destroyed at teardown; never written into docs, logs or version control |
+| Mutation switch | Runs only when `E2E_MUTATIONS=true` is set explicitly; otherwise the whole group is skipped and every mutating call throws |
+| Viewport | 1440×900, fixed docs clock and disabled animations, identical across the four languages |
+
+On a shared local environment the list may also show other historical RFQ rows; the suite's assertions and capture decisions target only the single RFQ identified by this run's `runStamp`, and teardown only cleans data whose ownership is confirmed for this run.
+
+#### Step 1: Invitation list (not quoted)
+
+- Operator: `supplier1`
+- Action: open the supplier portal and switch to the "RFQ Quotations" tab
+- Expected state: this run's single RFQ appears in the list with invitation status `INVITED`, the current quotation column shows "Not Quoted", and the action column shows "Submit Quotation"
+
+| zh-CN | en-US |
+|---|---|
+| ![Supplier portal RFQ invitation list (Simplified Chinese)](images/zh-CN/srm-portal-quotation-invitations.png) | ![Supplier portal RFQ invitation list (English)](images/en-US/srm-portal-quotation-invitations.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![Supplier portal RFQ invitation list (Japanese)](images/ja-JP/srm-portal-quotation-invitations.png) | ![Supplier portal RFQ invitation list (Korean)](images/ko-KR/srm-portal-quotation-invitations.png) |
+
+#### Step 2: Quotation form (unit price and validity)
+
+- Operator: `supplier1`
+- Action: click "Submit Quotation" on the target row to open the dialog, enter unit price `123.45`, and set the quotation validity to the RFQ deadline
+- Expected state: the dialog title carries this run's RFQ number, the line snapshot shows the material code and name, quantity `2`, unit and currency `CNY`, the RFQ status is `SENT`, and both unit price and validity are filled in
+
+| zh-CN | en-US |
+|---|---|
+| ![Supplier portal quotation form (Simplified Chinese)](images/zh-CN/srm-portal-quotation-form.png) | ![Supplier portal quotation form (English)](images/en-US/srm-portal-quotation-form.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![Supplier portal quotation form (Japanese)](images/ja-JP/srm-portal-quotation-form.png) | ![Supplier portal quotation form (Korean)](images/ko-KR/srm-portal-quotation-form.png) |
+
+#### Step 3: Submission success (QUOTED and total amount)
+
+- Operator: `supplier1`
+- Action: click "Submit Quotation" in the dialog to submit a real quotation, then click "Refresh RFQs"
+- Expected state: the "Quotation submitted" toast appears and the dialog closes; the invitation status turns `QUOTED` asynchronously through the `srm.quotation.submitted.v1` MQ event, the current quotation column shows the total `CNY 246.9` (unit price `123.45` × quantity `2`), and the action column becomes "Edit Quotation"
+
+| zh-CN | en-US |
+|---|---|
+| ![Supplier portal quotation submitted (Simplified Chinese)](images/zh-CN/srm-portal-quotation-submitted.png) | ![Supplier portal quotation submitted (English)](images/en-US/srm-portal-quotation-submitted.png) |
+
+| ja-JP | ko-KR |
+|---|---|
+| ![Supplier portal quotation submitted (Japanese)](images/ja-JP/srm-portal-quotation-submitted.png) | ![Supplier portal quotation submitted (Korean)](images/ko-KR/srm-portal-quotation-submitted.png) |
+
+### SRM Administration Page Screenshots (four languages)
+
+Also generated on a real running stack by `omni-frontend/e2e-docs/flows/management.flows.spec.ts`. These are **read-only captures**: no supplier data is created, modified or deleted, so no mutation switch and no data teardown are needed. Preconditions and operator are the same as the previous section (`admin` / `SUPER_ADMIN`, short-lived JWT issued inside the process by `E2eTokenFixture` and destroyed at teardown).
+
+- Action: after login, open the Supplier, Evaluation, Risk, Risk Indicator Config and Invitation pages in turn.
+- Expected state: page titles and column labels render in the current language; at capture time the database held one real supplier/evaluation/risk/invitation record each and nine risk indicator configurations.
+
+| Page | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| Suppliers (lifecycle) | ![Suppliers (Simplified Chinese)](images/zh-CN/srm-suppliers.png) | ![Suppliers (English)](images/en-US/srm-suppliers.png) | ![Suppliers (Japanese)](images/ja-JP/srm-suppliers.png) | ![Suppliers (Korean)](images/ko-KR/srm-suppliers.png) |
+| Evaluations (evaluation) | ![Evaluations (Simplified Chinese)](images/zh-CN/srm-evaluations.png) | ![Evaluations (English)](images/en-US/srm-evaluations.png) | ![Evaluations (Japanese)](images/ja-JP/srm-evaluations.png) | ![Evaluations (Korean)](images/ko-KR/srm-evaluations.png) |
+| Risk management (risk) | ![Risk management (Simplified Chinese)](images/zh-CN/srm-risks.png) | ![Risk management (English)](images/en-US/srm-risks.png) | ![Risk management (Japanese)](images/ja-JP/srm-risks.png) | ![Risk management (Korean)](images/ko-KR/srm-risks.png) |
+| Risk indicator config (risk) | ![Risk indicator config (Simplified Chinese)](images/zh-CN/srm-risk-config.png) | ![Risk indicator config (English)](images/en-US/srm-risk-config.png) | ![Risk indicator config (Japanese)](images/ja-JP/srm-risk-config.png) | ![Risk indicator config (Korean)](images/ko-KR/srm-risk-config.png) |
+| Invitations (invite) | ![Invitations (Simplified Chinese)](images/zh-CN/srm-invites.png) | ![Invitations (English)](images/en-US/srm-invites.png) | ![Invitations (Japanese)](images/ja-JP/srm-invites.png) | ![Invitations (Korean)](images/ko-KR/srm-invites.png) |
+
+This group only closes the list/configuration views. It is **not equivalent** to closing `admission-lifecycle` (which needs the full Portal registration Saga and admission approval) or `detail-and-action-states` (which needs detail dialogs and action results); `stable-mobile-flow` is closed by the responsive captures in the next subsection. SRM therefore remains `partial`.
+
+### Supplier Portal Responsive Stability Screenshots (four languages)
+
+Generated on a real running stack by `omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts`. **Read-only capture**: it only opens the portal, switches tab and clicks refresh, never submitting or modifying any quotation.
+
+- Preconditions: same as the two previous sections (local Compose full stack, `supplier1` with an established Portal association, short-lived JWT issued inside the process and destroyed at teardown).
+- Operator: `supplier1`.
+- Action: open the supplier portal at **390×844 (mobile)** and **1024×768 (tablet)** viewports, then switch to the "RFQ Quotations" tab.
+- Expected state: the tab is visible and clickable; "Refresh RFQs" and the per-row quotation actions are not squeezed out or obscured at the narrow width; the list collapses columns responsively (mobile keeps only RFQ No. / Title / Action) without overflow.
+- Measured result: 8 passed / 0 skipped (four languages × two viewports).
+
+| Viewport | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 390×844 mobile | ![Portal quotation list, mobile (Simplified Chinese)](images/zh-CN/srm-portal-quotation-mobile.png) | ![Portal quotation list, mobile (English)](images/en-US/srm-portal-quotation-mobile.png) | ![Portal quotation list, mobile (Japanese)](images/ja-JP/srm-portal-quotation-mobile.png) | ![Portal quotation list, mobile (Korean)](images/ko-KR/srm-portal-quotation-mobile.png) |
+| 1024×768 tablet | ![Portal quotation list, tablet (Simplified Chinese)](images/zh-CN/srm-portal-quotation-tablet.png) | ![Portal quotation list, tablet (English)](images/en-US/srm-portal-quotation-tablet.png) | ![Portal quotation list, tablet (Japanese)](images/ja-JP/srm-portal-quotation-tablet.png) | ![Portal quotation list, tablet (Korean)](images/ko-KR/srm-portal-quotation-tablet.png) |
+
+At capture time the list showed the environment's pre-existing historical RFQ rows (this batch's quotation data had already been cleaned by ownership); the images keep the real list content as-is and are not padded with fabricated data.
 
 ## 10. Testing
 

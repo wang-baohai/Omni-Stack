@@ -6,6 +6,7 @@
  * 2. OAuth2 授权码回调（企业 SSO）：通过 authorization code + PKCE 换取令牌
  */
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
@@ -14,11 +15,12 @@ import { exchangeCodeForToken } from '@/api/auth'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const { t } = useI18n()
 
 /** 加载状态 */
 const loading = ref(true)
 /** 提示信息 */
-const message = ref('Completing login...')
+const message = ref(t('oauthCallback.completingLogin'))
 
 /** sessionStorage 中存储 PKCE 参数的 key */
 const STORAGE_KEY_CODE_VERIFIER = 'oauth2_code_verifier'
@@ -78,7 +80,7 @@ function handleSocialLoginCallback(): boolean {
     userStore.setUsername(username)
   }
 
-  ElMessage.success('登录成功')
+  ElMessage.success(t('login.loginSuccess'))
   loading.value = false
   router.replace({ name: 'Dashboard' })
   return true
@@ -94,7 +96,7 @@ async function handleOAuth2CodeCallback() {
 
   // 处理错误响应
   if (error) {
-    ElMessage.error(`OAuth2 登录失败: ${error}`)
+    ElMessage.error(t('oauthCallback.loginFailed', { error }))
     loading.value = false
     router.replace({ name: 'Login' })
     return
@@ -102,7 +104,7 @@ async function handleOAuth2CodeCallback() {
 
   // 验证 code 参数
   if (!code) {
-    ElMessage.error('缺少授权码')
+    ElMessage.error(t('oauthCallback.missingCode'))
     loading.value = false
     router.replace({ name: 'Login' })
     return
@@ -111,7 +113,7 @@ async function handleOAuth2CodeCallback() {
   // 验证 state 参数（CSRF 防护）
   const storedState = sessionStorage.getItem(STORAGE_KEY_STATE)
   if (state !== storedState) {
-    ElMessage.error('安全验证失败，请重新登录')
+    ElMessage.error(t('oauthCallback.stateValidationFailed'))
     loading.value = false
     router.replace({ name: 'Login' })
     return
@@ -120,7 +122,7 @@ async function handleOAuth2CodeCallback() {
   // 获取 PKCE 参数
   const codeVerifier = sessionStorage.getItem(STORAGE_KEY_CODE_VERIFIER)
   if (!codeVerifier) {
-    ElMessage.error('PKCE 参数缺失，请重新登录')
+    ElMessage.error(t('oauthCallback.missingPkce'))
     loading.value = false
     router.replace({ name: 'Login' })
     return
@@ -137,7 +139,7 @@ async function handleOAuth2CodeCallback() {
   sessionStorage.removeItem(STORAGE_KEY_REDIRECT_URI)
 
   try {
-    message.value = '正在换取访问令牌...'
+    message.value = t('oauthCallback.exchangingToken')
     const tokenResponse = await exchangeCodeForToken({
       code,
       codeVerifier,
@@ -154,10 +156,10 @@ async function handleOAuth2CodeCallback() {
       userStore.setUsername(username)
     }
 
-    ElMessage.success('登录成功')
+    ElMessage.success(t('login.loginSuccess'))
     router.replace({ name: 'Dashboard' })
   } catch {
-    ElMessage.error('令牌换取失败，请重新登录')
+    ElMessage.error(t('oauthCallback.exchangeFailed'))
     router.replace({ name: 'Login' })
   } finally {
     loading.value = false

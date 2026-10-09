@@ -20,7 +20,8 @@ import com.omni.procurement.entity.ProcRfqLine;
 import com.omni.procurement.mapper.ProcGoodsReceiptLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderLineMapper;
 import com.omni.procurement.mapper.ProcPurchaseOrderMapper;
-import com.omni.procurement.security.ProcTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
+import com.omni.common.service.identity.ServiceRequestIdentity;
 import com.omni.procurement.service.PurchaseOrderService;
 import com.omni.procurement.service.support.ProcAuditSupport;
 import com.omni.procurement.service.support.ProcRecordAccessGuard;
@@ -65,7 +66,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional(readOnly = true)
     public PageResult<PurchaseOrderViews.Summary> page(PurchaseOrderRequests.Query query) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         LambdaQueryWrapper<ProcPurchaseOrder> wrapper = new LambdaQueryWrapper<ProcPurchaseOrder>()
                 .eq(ProcPurchaseOrder::getTenantId, tenantId);
         String keyword = trimToNull(query.getKeyword());
@@ -108,7 +109,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional(readOnly = true)
     public PurchaseOrderViews.Detail get(Long id) {
-        return loadVisibleDetail(ProcTenantContext.requireTenantId(), id);
+        return loadVisibleDetail(ServiceIdentityContext.requireTenantId(), id);
     }
 
     /** {@inheritDoc} */
@@ -119,7 +120,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             List<ProcRfqLine> rfqLines,
             PurchaseOrderContracts.QuotationSnapshot quotation,
             PurchaseOrderRequests.AwardTerms terms) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         requireAwardInput(tenantId, rfq, rfqLines, quotation, terms);
         ProcPurchaseOrder existing = orderMapper.selectForUpdateByRfq(tenantId, rfq.getId());
         LocalDateTime awardTime = resolveAwardTime(existing);
@@ -176,7 +177,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional
     public PurchaseOrderViews.Detail update(Long id, PurchaseOrderRequests.UpdateRequest request) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcPurchaseOrder current = requireLocked(tenantId, id);
         PurchaseOrderStateMachine.requireEditable(current.getStatus());
         requireVersion(current, request.getVersion());
@@ -200,7 +201,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional
     public void delete(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcPurchaseOrder current = requireLocked(tenantId, id);
         PurchaseOrderStateMachine.requireDeletable(current.getStatus());
         requireVersion(current, version);
@@ -222,7 +223,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional
     public PurchaseOrderViews.Detail send(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcPurchaseOrder current = requireLocked(tenantId, id);
         PurchaseOrderStateMachine.requireSendable(current.getStatus());
         requireVersion(current, version);
@@ -238,7 +239,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional
     public PurchaseOrderViews.Detail confirm(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcPurchaseOrder current = requireLocked(tenantId, id);
         PurchaseOrderStateMachine.requireConfirmable(current.getStatus());
         requireVersion(current, version);
@@ -255,7 +256,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional
     public PurchaseOrderViews.Detail cancel(Long id, Integer version) {
-        Long tenantId = ProcTenantContext.requireTenantId();
+        Long tenantId = ServiceIdentityContext.requireTenantId();
         ProcPurchaseOrder current = requireLocked(tenantId, id);
         PurchaseOrderStateMachine.requireCancellable(current.getStatus());
         requireVersion(current, version);
@@ -744,7 +745,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     private String operator() {
-        ProcTenantContext.RequestIdentity identity = ProcTenantContext.require();
+        ServiceRequestIdentity identity = ServiceIdentityContext.require();
         return identity.username() == null || identity.username().isBlank()
                 ? String.valueOf(identity.userId()) : identity.username();
     }

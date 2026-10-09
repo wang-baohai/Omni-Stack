@@ -17,7 +17,7 @@ import com.omni.asset.mapper.AstAssetMapper;
 import com.omni.asset.mapper.AstDisposalMapper;
 import com.omni.asset.mapper.AstInboxEventMapper;
 import com.omni.asset.mapper.AstTransferMapper;
-import com.omni.asset.security.AssetTenantContext;
+import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.asset.service.WorkflowCompletionService;
 import com.omni.asset.service.support.AssetAuditSupport;
 import com.omni.asset.workflow.AssetWorkflowCoordinator;
@@ -61,7 +61,7 @@ public class WorkflowCompletionServiceImpl implements WorkflowCompletionService 
     @Transactional
     public boolean handle(WorkflowContracts.ProcessCompletedEvent event) {
         validate(event);
-        if (!event.getTenantId().equals(AssetTenantContext.requireTenantId())) {
+        if (!event.getTenantId().equals(ServiceIdentityContext.requireTenantId())) {
             throw new BusinessException(403, "Workflow 完成事件与当前租户上下文不一致");
         }
         Long operationId = parseBusinessKey(event.getBusinessKey());
@@ -263,7 +263,7 @@ public class WorkflowCompletionServiceImpl implements WorkflowCompletionService 
         history.setAssetId(asset.getId());
         history.setFromStatus(intent.currentStatus());
         history.setToStatus(intent.previousStatus());
-        history.setChangedByUserId(AssetTenantContext.require().userId());
+        history.setChangedByUserId(ServiceIdentityContext.require().userId());
         history.setChangedTime(LocalDateTime.now());
         history.setRemark(intent.remark());
         AssetAuditSupport.created(history);

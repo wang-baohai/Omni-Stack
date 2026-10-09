@@ -3,7 +3,7 @@
 > 本文档覆盖 Omni-Stack 工作流引擎的架构、核心流程、约束和扩展指南。  
 > 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。
 
-Omni-Stack 提供基于 **Flowable 7.x** 的可视化 BPMN 工作流引擎，支持模型设计、双版本管理、多实例会签审批和端到端流程跟踪。
+Omni-Stack 提供基于 **Flowable 8.x** 的可视化 BPMN 工作流引擎，支持模型设计、双版本管理、多实例会签审批和端到端流程跟踪。
 
 ## 1. 架构概览
 
@@ -414,6 +414,8 @@ Procurement 审批路由不受该 Asset 专用绑定影响。该查询只提供�
 | `fallbackStrategy` | `ERROR`、`ASSIGN_ADMIN`、`ESCALATE_PARENT` | 未找到候选人时的行为 |
 | `approvalMode` | `ALL`（默认）、`ANY` | 多实例会签模式 |
 
+**`ESCALATE_PARENT` 语义**：当按 `roleCode + anchorType + scopeMode` 解析不到候选人时，从锚点组织单元的父级开始，沿组织树**逐级向上**，在每一上级保持**同一 `roleCode` 与同一 `scopeMode`** 过滤下重新解析，命中即返回该级候选集（仅启用用户，租户隔离）。上溯至根单元（`parent_id` 为空）仍无候选人时，**按 `ERROR` 语义失败关闭**——抛出异常中断启动，不 fail-open、不自动审批、不伪装有候选。依赖故障（组织/权限表查询异常）按空候选处理后同样落入失败关闭路径，不虚报成功。多锚点场景由 `anchorType` 解析为单一锚点单位后再上溯。
+
 ### 3.3 审批模式
 
 - **ALL**：所有候选人都必须审批。`requiredApprovals = candidateUserIds.size()`。当 `approvedCount >= requiredApprovals` 时流程推进。
@@ -502,7 +504,7 @@ public class MyNotificationService implements WorkflowNotificationService {
 
 ---
 
-## 5. 技术选型思考：为什么选择 Flowable 7.x
+## 5. 技术选型思考：为什么选择 Flowable 8.x
 
 | 考量 | Flowable | Camunda | Activiti |
 |------|---------|---------|----------|
@@ -513,7 +515,7 @@ public class MyNotificationService implements WorkflowNotificationService {
 | **社区活跃度** | 活跃（GitHub 8k+ stars） | 活跃（商业支持） | 已停止维护 |
 | **版本 7.x** | Jakarta EE 兼容，Spring Boot 3/4 支持 | 版本 8 架构变动大 | 无新版 |
 
-**结论**：Flowable 7.x 在开源许可、Spring Boot 原生集成、多实例支持方面优势明显，是 Omni-Stack 工作流引擎的最佳选择。
+**结论**：Flowable 8.x 在开源许可、Spring Boot 原生集成、多实例支持方面优势明显，是 Omni-Stack 工作流引擎的最佳选择。
 
 ## 6. BPMN 建模最佳实践
 
@@ -561,3 +563,41 @@ bpmn-js Modeler (开源 BPMN 2.0 建模工具)
 | **deleteReason 显示错误** | MI_END vs deleted 混淆 | 参考 §3.1 MI DeleteReason 表格，`MI_END` = 自动完成，`deleted` = 流程终止 |
 | **租户隔离失效** | TenantInfoHolder 未设置 | 确认 Gateway 已注入 `X-Tenant-Id` 请求头；检查 `TenantInfoFilter` 是否正常执行 |
 | **BPMN 设计器无法加载** | bpmn-js 版本不兼容 | 确认 `bpmn-js` 版本为 18.x；检查浏览器控制台错误 |
+
+## 8. 管理端界面截图（四语言）
+
+正式图片由文档专用 Playwright 用例 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 在真实运行栈上生成，按语言分目录存放，不复用其他语言图片、不使用占位图或模拟响应。
+
+- 前置条件：本地 Compose 全栈运行，前端 `127.0.0.1:3000`；`omni-workflow` 健康；库中已有真实流程模型与实例（采集时为 8 个模型/版本、23 条实例）。
+- 操作者：`admin`（`SUPER_ADMIN`，具备工作流菜单权限）。
+- 操作：登录后依次进入「流程定义」「流程实例」「统计看板」页面。
+- 预期状态：页面标题与列标签按当前语言渲染；流程实例列表展示流程标题、流程 Key、业务主键、发起人、状态与发起时间，并提供「流转进度」与「审批记录」入口。
+- 令牌：由 `E2eTokenFixture` 在测试进程内签发短期 JWT（TTL 1200 秒），收尾即销毁，不写入文档、日志或版本库。
+- 本组全部为**只读采集**：不创建、不修改、不删除任何流程数据，因此不需写入开关，也无数据收尾。
+
+内容说明：当前环境中的流程实例均由历次端到端验证产生，标题带有测试标识（如 `E2ESQ`）。`wf_process_instance_ext` 与 Flowable `ACT_HI_*` 属引擎管理的审计历史且无软删列，不得用 SQL 硬删，因此图片如实保留真实标题，不以造数据或裁剪方式美化。
+
+| 页面 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 流程定义（publish） | ![流程定义（简体中文）](images/zh-CN/workflow-definitions.png) | ![流程定义（英文）](images/en-US/workflow-definitions.png) | ![流程定义（日文）](images/ja-JP/workflow-definitions.png) | ![流程定义（韩文）](images/ko-KR/workflow-definitions.png) |
+| 流程实例跟踪（instance-tracking） | ![流程实例（简体中文）](images/zh-CN/workflow-instances.png) | ![流程实例（英文）](images/en-US/workflow-instances.png) | ![流程实例（日文）](images/ja-JP/workflow-instances.png) | ![流程实例（韩文）](images/ko-KR/workflow-instances.png) |
+| 统计看板（汇总视图） | ![统计看板（简体中文）](images/zh-CN/workflow-stats.png) | ![统计看板（英文）](images/en-US/workflow-stats.png) | ![统计看板（日文）](images/ja-JP/workflow-stats.png) | ![统计看板（韩文）](images/ko-KR/workflow-stats.png) |
+
+### 只读详情弹层（四语言）
+
+由 `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` 生成，同样为**只读采集**：仅点击行内查看类动作打开弹层，不提交表单，也不触发设计/校验/发布/删除/终止等任何写操作。
+
+- 操作者：`admin`；前置条件与上节一致。
+- 操作：在流程实例首行点「流转进度」与「审批记录」，在流程模型首行点「版本」。
+- 预期状态：弹层标题按当前语言渲染；流转进度弹层必须**等 BPMN 图形真实渲染完成**才截图（用例断言 `.bpmn-viewer-wrap .djs-element` 可见且 `.el-loading-mask` 已消失），不得截到异步加载中的转圈态。
+- 实测结果：16 passed / 0 skipped（含本文与可靠消息文档共用的四个弹层场景 × 四语言）。
+
+| 弹层 | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| 流转进度（instance-tracking） | ![流转进度（简体中文）](images/zh-CN/workflow-instance-progress.png) | ![流转进度（英文）](images/en-US/workflow-instance-progress.png) | ![流转进度（日文）](images/ja-JP/workflow-instance-progress.png) | ![流转进度（韩文）](images/ko-KR/workflow-instance-progress.png) |
+| 审批记录（approval） | ![审批记录（简体中文）](images/zh-CN/workflow-instance-approval-records.png) | ![审批记录（英文）](images/en-US/workflow-instance-approval-records.png) | ![审批记录（日文）](images/ja-JP/workflow-instance-approval-records.png) | ![审批记录（韩文）](images/ko-KR/workflow-instance-approval-records.png) |
+| 版本历史（publish） | ![版本历史（简体中文）](images/zh-CN/workflow-model-versions.png) | ![版本历史（英文）](images/en-US/workflow-model-versions.png) | ![版本历史（日文）](images/ja-JP/workflow-model-versions.png) | ![版本历史（韩文）](images/ko-KR/workflow-model-versions.png) |
+
+流转进度图中，绿色节点为本实例已执行的活动（`completed-node` 标记），灰色为未走过的分支（如「审批驳回」），与 §2.7 「进度与记录」所述语义一致。
+
+尚未覆盖的流程：`model-lifecycle` / `detail-and-action-states` / `failure-states` 需「建模 → BPMN 设计 → 校验 → 发布」写入链，而发布会向共享 Flowable 引擎部署流程定义（`ACT_RE_*`）且尚无经验证的干净删除/回滚路径；`countersign` 需多实例会签模型与多审批人身份。四项均**需单独授权/新增测试身份**，本轮不擅自部署也不临时越权，在覆盖清单中保留为显式 gap。

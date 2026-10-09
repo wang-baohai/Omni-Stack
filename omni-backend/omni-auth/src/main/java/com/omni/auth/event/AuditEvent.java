@@ -51,6 +51,8 @@ public class AuditEvent extends ApplicationEvent {
     public static final String ROLE_ASSIGNED = "ROLE_ASSIGNED";
     /** 角色撤销 */
     public static final String ROLE_REVOKED = "ROLE_REVOKED";
+    /** 登录保护策略更新（D01；归“审计日志”分类，不进入登录记录投影） */
+    public static final String AUTH_CONFIG_UPDATED = "AUTH_CONFIG_UPDATED";
 
     /** 事件类型 */
     private final String eventType;

@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: base-0002-bootstrap-seed
+      author: omni-stack
+      labels: seed-v1
+      context: base
+      comment: 按稳定业务键幂等写入基础字典和任务类型种子
+      changes:
+        - sqlFile:
+            path: scripts/sql/seed/base.sql
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: SELECT 1;

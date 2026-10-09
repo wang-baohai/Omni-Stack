@@ -9,7 +9,7 @@ Omni-Stack uses the **Transactional Outbox** pattern + **XXL-JOB** relay schedul
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│                        Business Service (e.g., omni-auth)                 │
+│                        Business Service (e.g., omni-base)                 │
 │                                                                            │
 │  @OperLog method ──> OperLogAspect ──> OperLogProducer                     │
 │                                            │                               │
@@ -65,39 +65,36 @@ Omni-Stack uses the **Transactional Outbox** pattern + **XXL-JOB** relay schedul
 
 ```
                          ┌──────────┐
-                INSERT   │          │   relay success
-  ─────────────────────> │ PENDING  │ ──────────────────> SENT
-                         │  (0)     │                      (1)
-                         │          │
+                INSERT   │          │
+  ─────────────────────> │ PENDING  │ <─────────────┐
+                         │  (0)     │               │
+                         └────┬─────┘               │
+                              │ claim (single atomic UPDATE before send, sets lease expiry)
+                              ▼                     │ resend
+                         ┌───────────┐              │
+   held within lease   │ PROCESSING│  expired lease allows reclaim by another executor (crash recovery)
+   (120s default)       │  (5,transient) │ ───────────┘
                          └────┬─────┘
-                              │ relay failure
-                              ▼
-                         ┌──────────┐
-                         │          │   retry < max_retry
-                         │ FAILED   │ ──────────────────> back to PENDING
-                         │  (2)     │   (with next_retry_time = now + 2^count × 10s)
-                         │          │
-                         └────┬─────┘
-                              │ retry >= max_retry
-                              ▼
-                         ┌──────────┐
-                         │DEAD_LETTER│
-                         │  (3)     │
-                         └────┬─────┘
-                              │
-                    ┌─────────┴─────────┐
-                    │ resend             │ skip
-                    ▼                    ▼
-               PENDING (0)         SKIPPED (4)
+                              │ terminal write uses status=PROCESSING as CAS precondition
+                 ┌────────────┼────────────────┐
+         success ▼        fail ▼                ▼ retry>=max
+                SENT(1)    FAILED(2)        DEAD_LETTER(3)
+                (terminal) │ relay re-scans status IN (PENDING, FAILED) and re-claims after backoff
+                           │ (NOT "back to PENDING"; FAILED itself is a retry candidate)
+                           └── exceeds max_retry → DEAD_LETTER(3)
+               DEAD_LETTER ──skip──> SKIPPED(4) (terminal)
 ```
+
+> FAILED is not rewritten as PENDING; it is directly re-claimed by the relay as part of the `status IN (PENDING, FAILED)` retry set. PROCESSING is a transient lease state during relay delivery, used for atomic claim and dedup across parallel executors.
 
 | Status | Code | Description |
 |--------|------|-------------|
-| PENDING | 0 | Awaiting delivery or ready for retry |
+| PENDING | 0 | Awaiting delivery |
 | SENT | 1 | Successfully delivered to MQ (terminal) |
-| FAILED | 2 | Delivery failed, waiting for next retry (backoff) |
+| FAILED | 2 | Delivery failed; a retry candidate re-claimed after backoff |
 | DEAD_LETTER | 3 | Exceeded max retry count (terminal, manual action required) |
 | SKIPPED | 4 | Manually marked as ignored by admin (terminal) |
+| PROCESSING | 5 | Transient lease state atomically claimed by the relay via a single UPDATE before sending (default 120s); terminal write uses `status=PROCESSING` as CAS precondition; expired leases are reclaimable by other executors |
 
 ### 2.2 Write Path
 
@@ -119,10 +116,10 @@ Under the hood:
 
 `MqMessageRelayJob` is scheduled by XXL-JOB (default: every 10 seconds, FIRST route strategy):
 
-1. `fetchPendingMessages()` — SELECT records where `status IN (PENDING, FAILED)` AND (`next_retry_time IS NULL` OR `next_retry_time <= NOW()`), ordered by `create_time ASC`, LIMIT 100
-2. For each message, look up the `MessageSender` by `broker_type` from the sender map
-3. Call `sender.send(msg)` — on success, mark SENT; on failure, increment retry count and apply exponential backoff
-4. If `retryCount >= maxRetry`, mark as DEAD_LETTER
+1. `fetchPendingMessages()` — scans candidates: `status IN (PENDING, FAILED)` AND (`next_retry_time IS NULL` OR `next_retry_time <= NOW()`), **plus PROCESSING whose lease has expired** (a holding executor crashed; other executors may reclaim), ordered by `create_time ASC`, LIMIT 100
+2. **claim (atomic preemption)**: for each message, a single-statement UPDATE atomically moves `status` from PENDING/FAILED to PROCESSING and temporarily borrows `next_retry_time` as the lease expiry (default 120s); only the executor whose UPDATE affects exactly 1 row proceeds to send, preventing parallel executors from double-delivering. claim is a single auto-committed statement and does not wrap the cross-network send in a long transaction
+3. The winner looks up `MessageSender` by `broker_type` and calls `sender.send(msg)`
+4. Success/failure writes back with `status=PROCESSING` as the CAS precondition: success → SENT; failure → retry_count++ and exponential backoff to FAILED; `retryCount >= maxRetry` → DEAD_LETTER
 
 ### 2.4 Retry Strategy
 
@@ -138,7 +135,7 @@ Default `max_retry = 3`. After 3 failures the message enters DEAD_LETTER status.
 
 ### 2.5 Dead Letter Handling
 
-Dead letters require manual admin intervention via the frontend management UI (`Operations Monitor → Message Records`):
+Dead letters require manual admin intervention via the frontend management UI (`Monitoring → MQ Messages`):
 
 - **Resend** (`POST /api/base/mq-message/{msgId}/resend`): Resets status to PENDING, clears retry count and backoff timer. The relay job will pick it up on the next poll.
 - **Skip** (`POST /api/base/mq-message/{msgId}/skip`): Transitions DEAD_LETTER → SKIPPED, acknowledging the message will not be delivered.
@@ -186,14 +183,14 @@ Every new endpoint that queries `sys_mq_message` MUST include a `tenantId` filte
 
 ### 4.3 Idempotent DDL
 
-`schema.sql` uses `CREATE TABLE IF NOT EXISTS` for safe, idempotent table creation. The table is auto-created on service startup when `omni-common-mqlog` is on the classpath. No manual DDL execution is required.
+The `sys_mq_message` table is created by Liquibase migration: `database/changelog/common/0001-mq-schema.yaml` (changeset `common-mq-0001-schema`) applied by the `omni-db-migrator` container at startup. The changeSet runs a plain `CREATE TABLE` (**no** `IF NOT EXISTS`); idempotency comes from the preconditions plus Liquibase history: `preConditions` first require the `dbms` to be `mysql`, then a `sqlCheck` (`expectedResult: "0"`) verifies that `sys_mq_message` does not yet exist in `information_schema` before the change runs; repeated execution is prevented by the Liquibase `DATABASECHANGELOG` history — a changeSet already recorded as executed will not run again. `omni-common-mqlog/src/main/resources/schema.sql` is no longer the primary classpath auto-DDL path; it is retained as historical reference only.
 
 ### 4.4 MessageSender Strategy Pattern
 
 Adding a new MQ broker (e.g., Kafka) requires:
 1. Implement the `MessageSender` interface: `brokerType()` returns `"kafka"`, `send(SysMqMessage)` handles the actual delivery.
 2. Register as a Spring Bean — `MqLogAutoConfiguration` collects all `MessageSender` beans into a map keyed by `brokerType`.
-3. Set `broker_type = "kafka"` when calling `ReliableMessageTemplate.send()` (or use the appropriate binding).
+3. **Important**: the current `ReliableMessageTemplate.send()` has **no `brokerType` parameter**, and `broker_type` is always written as `"rocketmq"` (see §2.2), so kafka cannot be selected through the existing `send()`. Onboarding a new broker requires **extending the reliable-enqueue contract** (add an overload with broker selection or an explicit extension point) to write new messages with the corresponding `broker_type`; otherwise the relay will not route to the new sender. The Kafka below is a future-extension example, not a currently enabled capability.
 
 No changes to `MqMessageRelayService` or relay logic are needed.
 
@@ -215,12 +212,13 @@ In `omni-order/pom.xml`:
 
 This automatically pulls in `omni-common-core` (for the `ReliableMessageRelay` interface) and `omni-common-mybatis` (for `SysMqMessageMapper`).
 
-### Step 2: Table Auto-Creation
+### Step 2: Liquibase Migration DDL
 
-`schema.sql` runs automatically on startup (`CREATE TABLE IF NOT EXISTS sys_mq_message`). Verify:
+The `sys_mq_message` table is created by `database/changelog/common/0001-mq-schema.yaml` via Liquibase migration (applied by `omni-db-migrator` container at startup). Verify:
 
 ```sql
-SELECT COUNT(*) FROM sys_mq_message;
+SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message';
+-- Should return 1; DATABASECHANGELOG should contain common-mq-0001-schema record
 ```
 
 ### Step 3: Inject and Use
@@ -250,14 +248,17 @@ public class OrderServiceImpl implements OrderService {
 Start the service and check XXL-JOB admin console (`http://localhost:18080`):
 - Executor: your service's AppName should appear in the executor list
 - Task: `mqRelayHandler` should be registered with cron `0/10 * * * * ?`
+- `MqRelayJobRegistrar` registers and starts the task asynchronously once the application is ready; if the scheduler is temporarily unavailable it retries every 10 seconds, up to 12 times
 - Start the task if not already running
 
 ### Step 5: Check Frontend Admin UI
 
-Navigate to `Operations Monitor → Message Records` in the frontend:
+Navigate to `Monitoring → MQ Messages` in the frontend:
 - New messages should appear with `status = PENDING` (0) then transition to `SENT` (1) after relay
 - Filter by `tenantId`, `status`, `topic`, `serviceName`, or time range
 - Resend failed messages or skip dead letters
+
+The Base admin API aggregates the local Outboxes of onboarded services through Feign calls carrying `X-Internal-Token`. Currently it aggregates `omni-base` and `omni-crm`; when adding a new service its internal `/api/internal/mq-message/**` client must be included in the aggregation, otherwise messages are still delivered reliably but never appear on the unified operations page.
 
 ## 6. Extension Guide
 
@@ -267,6 +268,7 @@ Implement the `MessageSender` interface:
 
 ```java
 @Component
+@RequiredArgsConstructor // constructor injection (project forbids field @Autowired)
 public class KafkaMessageSender implements MessageSender {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -278,7 +280,17 @@ public class KafkaMessageSender implements MessageSender {
 
     @Override
     public void send(SysMqMessage msg) {
-        kafkaTemplate.send(msg.getTopic(), msg.getMsgKey(), msg.getPayload()).get();
+        // interface MessageSender.send declares no throws; the checked exception from
+        // Kafka get() must be handled/converted or it will not compile; shown here wrapped
+        // as unchecked (not directly copy-pastable).
+        try {
+            kafkaTemplate.send(msg.getTopic(), msg.getMsgKey(), msg.getPayload()).get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Kafka send interrupted", e);
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Kafka send failed", e);
+        }
     }
 }
 ```
@@ -339,16 +351,16 @@ Scenario 3: MQ Broker goes down
 ```yaml
 # docker-compose.yml
 rocketmq-namesrv:
-  image: apache/rocketmq:5.3.1
+  image: apache/rocketmq:5.3.2
   container_name: omni-rocketmq-namesrv
   ports:
     - "9876:9876"
   command: sh mqnamesrv
   networks:
-    - omni-network
+    - default
 
 rocketmq-broker:
-  image: apache/rocketmq:5.3.1
+  image: apache/rocketmq:5.3.2
   container_name: omni-rocketmq-broker
   ports:
     - "10911:10911"
@@ -359,7 +371,7 @@ rocketmq-broker:
     NAMESRV_ADDR: rocketmq-namesrv:9876
   command: sh mqbroker -n rocketmq-namesrv:9876
   networks:
-    - omni-network
+    - default
 ```
 
 ### Key Configuration Details
@@ -369,7 +381,7 @@ rocketmq-broker:
 | NameServer Port | 9876 | RocketMQ service discovery port |
 | Broker Port | 10911 | Broker main port |
 | Broker VIP Port | 10909 | Broker VIP channel (fast response) |
-| Network | omni-network | Same Bridge network as other services |
+| Network | default | Same Bridge network as other services |
 
 ### Spring Cloud Stream Configuration
 
@@ -393,9 +405,31 @@ spring:
 
 | Issue | Possible Cause | Troubleshooting Steps |
 |------|---------|----------|
-| **Message stuck in PENDING** | Relay task not started | Check XXL-JOB console to verify `mqRelayHandler` is registered and started; check cron configuration |
+| **Message stuck in PENDING** | Relay task auto-registration failed or the task was not started | Check `MqRelayJobRegistrar` retry logs, XXL-JOB credentials and the `mqRelayHandler` status |
 | **Message send failed, enters FAILED** | RocketMQ Broker not started | Check RocketMQ container status; verify `spring.cloud.stream.rocketmq.binder.name-server` configuration is correct |
 | **Message enters DEAD_LETTER** | Exceeded max retry count (3 times) | Check message details and error info in frontend admin UI; fix the issue and manually resend |
 | **Consumer did not receive message** | Topic not created or consumer not subscribed | Check Topic and Consumer Group in RocketMQ console; confirm consumer service is started |
 | **Tenant isolation failure** | Query not filtering tenantId | Check if Controller includes `.eq(SysMqMessage::getTenantId, tenantId)` |
 | **Duplicate delivery** | Relay task scans same message multiple times | Check `msgId` uniqueness constraint; confirm `StreamBridge.send()` idempotency |
+
+## 10. Message Detail UI Screenshots (Four Languages)
+
+Generated by the docs-only Playwright spec `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` on the real running stack, corresponding to §5 step 5 “Inspect the frontend admin UI”.
+
+- Preconditions: the local Compose full stack is running, `omni-base` healthy and `sys_mq_message` already has real messages (87 rows in the base database at capture time).
+- Operator: `admin` (requires message-query permission; the controller filters by `X-Tenant-Id`).
+- Steps: enter the message-record page and click “Detail” on the first row to open the read-only detail overlay.
+- Expected state: the overlay shows the message ID, Topic, Binding Name, Tag, business key, middleware type, status, retry count, source service, creation time and next-retry time, consistent with the fields described in the §2.1 state machine and §2.4 retry strategy.
+- This group is **read-only capture**: it resends, skips or modifies no message, so no write switch is needed and there is no data teardown.
+
+| Page | zh-CN | en-US | ja-JP | ko-KR |
+|---|---|---|---|---|
+| Message Detail Overlay (message-status) | ![Message Detail (Simplified Chinese)](images/zh-CN/monitor-mq-message-detail.png) | ![Message Detail (English)](images/en-US/monitor-mq-message-detail.png) | ![Message Detail (Japanese)](images/ja-JP/monitor-mq-message-detail.png) | ![Message Detail (Korean)](images/ko-KR/monitor-mq-message-detail.png) |
+
+Registered translation-completeness issue: this overlay's title and all field labels are measured to be in English under **en-US/ja-JP/ko-KR** (ja/ko untranslated, only zh-CN localized).
+`npm run ui:i18n:parity` (2319 keys per language, 0 missing) and `npm run ui:i18n:check` (0/0 items) both pass, so this is a language-pack value issue rather than a hardcoding defect; the images and manifest are faithfully registered by the actual rendered values, without beautifying.
+
+Flows not yet covered (all require separate authorization; this round does not construct them arbitrarily):
+
+- `retry` and `dead-letter`: measured `sys_mq_message` across 5 databases totals 809 rows (base 87, procurement 644, srm 34, workflow 23, crm 21), **all status 1, with no FAILED / DEAD_LETTER records at all**. To produce these two states, one must inject necessarily-failing messages into the cross-tenant shared outbox and let the relay retry repeatedly with the §2.4 `2^retryCount × 10s` backoff until it errors — creating a fault on shared infrastructure, which requires explicit authorization before execution.
+- `trace-diagnosis`: requires real Trace ID diagnosis-chain evidence, to be designed together with the observability stack ([docs/observability.md](observability.md)).

@@ -12,9 +12,9 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { fetchCaptcha, registerUser, listTenants } from '@/api/auth'
 import type { RegisterParams, TenantOption } from '@/api/auth'
 import { useAppStore } from '@/stores/app'
-import { storeLang } from '@/i18n'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const router = useRouter()
 const appStore = useAppStore()
 
@@ -55,18 +55,18 @@ function validateConfirmPassword(_rule: unknown, value: string, callback: (error
 const rules: FormRules = {
   username: [
     { required: true, message: () => t('register.username'), trigger: 'blur' },
-    { min: 3, max: 32, message: '用户名长度 3-32 个字符', trigger: 'blur' },
+    { min: 3, max: 32, message: () => t('validation.usernameLength'), trigger: 'blur' },
   ],
   password: [
     { required: true, message: () => t('register.password'), trigger: 'blur' },
-    { min: 6, message: '密码至少 6 个字符', trigger: 'blur' },
+    { min: 6, message: () => t('validation.passwordMin'), trigger: 'blur' },
   ],
   confirmPassword: [
     { required: true, message: () => t('register.confirmPassword'), trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: 'blur' },
   ],
   email: [
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' },
+    { type: 'email', message: () => t('validation.emailFormat'), trigger: 'blur' },
   ],
   tenantId: [{ required: true, message: () => t('login.tenantPlaceholder'), trigger: 'change' }],
   captchaCode: [{ required: true, message: () => t('register.captchaPlaceholder'), trigger: 'blur' }],
@@ -82,7 +82,7 @@ async function loadCaptcha() {
     captchaKey.value = res.data.captchaKey
     captchaImage.value = res.data.captchaImage
   } catch {
-    ElMessage.error('验证码加载失败')
+    ElMessage.error(t('login.captchaFailed'))
     captchaImage.value = ''
   } finally {
     captchaLoading.value = false
@@ -97,7 +97,7 @@ async function loadTenants() {
     const { data: res } = await listTenants()
     tenants.value = res.data
   } catch {
-    ElMessage.error('租户列表加载失败')
+    ElMessage.error(t('login.tenantLoadFailed'))
     tenants.value = []
   }
 }
@@ -143,11 +143,6 @@ function toggleTheme() {
 }
 
 /** 切换语言 */
-function toggleLang() {
-  const newLang = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
-  locale.value = newLang
-  storeLang(newLang)
-}
 
 /** 组件挂载后加载验证码和租户列表 */
 onMounted(() => {
@@ -168,10 +163,7 @@ onMounted(() => {
       </div>
       <div class="register-top-right">
         <!-- 语言切换 -->
-        <el-button text :title="t('lang.switch')" @click="toggleLang">
-          <el-icon><Globe /></el-icon>
-          {{ locale === 'zh-CN' ? 'EN' : '中' }}
-        </el-button>
+        <LanguageSelector />
         <!-- 主题切换 -->
         <el-button text :title="t('theme.toggle')" @click="toggleTheme">
           <el-icon>

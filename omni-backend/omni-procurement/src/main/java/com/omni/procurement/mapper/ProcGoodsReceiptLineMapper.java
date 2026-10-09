@@ -17,15 +17,17 @@ import java.util.List;
 public interface ProcGoodsReceiptLineMapper extends BaseMapper<ProcGoodsReceiptLine> {
 
     /**
-     * 锁定指定收货单的所有有效行。
+     * 查询指定收货单的所有有效行。
+     * <p>不使用 FOR UPDATE，因为 TenantLine 拦截器会在 FOR UPDATE 之后追加租户条件，
+     * 导致 MySQL 语法错误。并发安全由收货单乐观锁版本 + 采购订单乐观锁版本保证。</p>
      *
      * @param tenantId 租户 ID
      * @param goodsReceiptId 收货单 ID
-     * @return 已锁定收货行
+     * @return 收货行列表
      */
     @Select("SELECT * FROM proc_goods_receipt_line WHERE tenant_id = #{tenantId} "
             + "AND goods_receipt_id = #{goodsReceiptId} AND deleted = 0 "
-            + "ORDER BY line_no FOR UPDATE")
+            + "ORDER BY line_no")
     List<ProcGoodsReceiptLine> selectForUpdateByReceipt(
             @Param("tenantId") Long tenantId,
             @Param("goodsReceiptId") Long goodsReceiptId);

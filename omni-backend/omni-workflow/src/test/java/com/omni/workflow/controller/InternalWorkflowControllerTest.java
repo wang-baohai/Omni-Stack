@@ -3,6 +3,7 @@ package com.omni.workflow.controller;
 import com.omni.common.mqlog.filter.InternalApiAuthFilter;
 import com.omni.workflow.dto.internal.InternalModelVersionResponse;
 import com.omni.workflow.service.InternalWorkflowService;
+import com.omni.workflow.service.ProcessInstanceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,11 +30,14 @@ class InternalWorkflowControllerTest {
     @Mock
     private InternalWorkflowService internalWorkflowService;
 
+    @Mock
+    private ProcessInstanceService processInstanceService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        InternalWorkflowController controller = new InternalWorkflowController(internalWorkflowService);
+        InternalWorkflowController controller = new InternalWorkflowController(internalWorkflowService, processInstanceService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .addFilters(new InternalApiAuthFilter("shared-secret"))
                 .build();

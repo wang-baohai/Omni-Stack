@@ -37,11 +37,11 @@ import java.time.Duration;
 @Component("gitee")
 public class GiteeOAuth2Handler implements OAuth2ProviderHandler {
 
-    /** Gitee OAuth2 授权页面 URL */
+    /** Gitee OAuth2 授权页面 URL（默认值，可通过配置覆盖） */
     private static final String GITEE_AUTHORIZE_URL = "https://gitee.com/oauth/authorize";
-    /** Gitee OAuth2 Token 端点 URL */
+    /** Gitee OAuth2 Token 端点 URL（默认值，可通过配置覆盖） */
     private static final String GITEE_TOKEN_URL = "https://gitee.com/oauth/token";
-    /** Gitee 用户信息 API URL */
+    /** Gitee 用户信息 API URL（默认值，可通过配置覆盖） */
     private static final String GITEE_USER_API = "https://gitee.com/api/v5/user";
     /** 请求的 OAuth2 授权范围：仅获取基本用户信息 */
     private static final String SCOPE = "user_info";
@@ -89,7 +89,7 @@ public class GiteeOAuth2Handler implements OAuth2ProviderHandler {
     public String buildAuthorizationUrl(String state) {
         String clientId = oauth2Properties.getGitee().getClientId();
         String redirectUri = oauth2Properties.getGitee().getRedirectUri();
-        return GITEE_AUTHORIZE_URL
+        return oauth2Properties.getGitee().getAuthorizeUrl()
                 + "?client_id=" + encode(clientId)
                 + "&redirect_uri=" + encode(redirectUri)
                 + "&response_type=code"
@@ -114,7 +114,7 @@ public class GiteeOAuth2Handler implements OAuth2ProviderHandler {
                     + "&grant_type=authorization_code";
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GITEE_TOKEN_URL))
+                    .uri(URI.create(oauth2Properties.getGitee().getTokenUrl()))
                     .timeout(Duration.ofSeconds(30))
                     .header("Accept", "application/json")
                     .header("User-Agent", USER_AGENT)
@@ -157,7 +157,7 @@ public class GiteeOAuth2Handler implements OAuth2ProviderHandler {
     public ProviderUser fetchUserProfile(String accessToken) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GITEE_USER_API))
+                    .uri(URI.create(oauth2Properties.getGitee().getUserApiUrl()))
                     .timeout(Duration.ofSeconds(30))
                     .header("Authorization", "Bearer " + accessToken)
                     .header("Accept", "application/json")

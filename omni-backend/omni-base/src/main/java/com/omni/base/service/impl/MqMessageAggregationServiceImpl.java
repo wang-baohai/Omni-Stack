@@ -88,7 +88,7 @@ public class MqMessageAggregationServiceImpl implements MqMessageAggregationServ
     public void resend(Long tenantId, String msgId) {
         SysMqMessage local = findLocal(tenantId, msgId);
         if (local != null) {
-            resetLocal(local);
+            resetLocal(tenantId, msgId);
             return;
         }
         ensureSuccess(callCrm(() -> crmClient.resend(tenantId, msgId)));
@@ -99,12 +99,12 @@ public class MqMessageAggregationServiceImpl implements MqMessageAggregationServ
     public void skip(Long tenantId, String msgId) {
         SysMqMessage local = findLocal(tenantId, msgId);
         if (local != null) {
-            if (local.getStatus() != SysMqMessage.STATUS_DEAD_LETTER) {
-                throw new BusinessException(400, "仅死信状态的消息可标记忽略");
+            // CAS：仅 DEAD_LETTER 可标记忽略；命中 0 行说明状态已被并发修改，
+            // 不得先读后无条件写把 SENT/PENDING/PROCESSING 覆盖成 SKIPPED。
+            int affected = sysMqMessageMapper.casAdminSkip(tenantId, msgId, LocalDateTime.now());
+            if (affected == 0) {
+                throw new BusinessException(400, "消息状态已变更，操作未生效");
             }
-            local.setStatus(SysMqMessage.STATUS_SKIPPED);
-            local.setUpdateTime(LocalDateTime.now());
-            sysMqMessageMapper.updateById(local);
             return;
         }
         ensureSuccess(callCrm(() -> crmClient.skip(tenantId, msgId)));
@@ -155,19 +155,20 @@ public class MqMessageAggregationServiceImpl implements MqMessageAggregationServ
                 .last("LIMIT 1"));
     }
 
-    private void resetLocal(SysMqMessage message) {
-        int status = message.getStatus();
-        if (status != SysMqMessage.STATUS_PENDING
-                && status != SysMqMessage.STATUS_FAILED
-                && status != SysMqMessage.STATUS_DEAD_LETTER) {
-            throw new BusinessException(400, "仅 PENDING/FAILED/DEAD_LETTER 状态的消息可重发");
+    /**
+     * 本地重发：条件更新（CAS）仅当消息仍处于 FAILED/DEAD_LETTER 时重置为 PENDING。
+     * <p>
+     * 读出快照仅用于区分本地/CRM 路由与 404 语义；真正的并发守卫落在带状态前置条件的
+     * 单语句 UPDATE 上，命中 0 行说明状态已被并发修改（如已被重发、已被 relay 抢占、
+     * 已被忽略或已发送成功），必须显式告知操作未生效，而不是静默覆盖造成重复重投。
+     * 租户隔离条件（tenant_id + msg_id）在 CAS 语句中保留。
+     * </p>
+     */
+    private void resetLocal(Long tenantId, String msgId) {
+        int affected = sysMqMessageMapper.casAdminResend(tenantId, msgId, LocalDateTime.now());
+        if (affected == 0) {
+            throw new BusinessException(400, "消息状态已变更，操作未生效");
         }
-        message.setStatus(SysMqMessage.STATUS_PENDING);
-        message.setRetryCount(0);
-        message.setNextRetryTime(null);
-        message.setErrorMsg(null);
-        message.setUpdateTime(LocalDateTime.now());
-        sysMqMessageMapper.updateById(message);
     }
 
     private void ensureSuccess(R<Void> response) {

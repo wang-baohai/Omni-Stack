@@ -3,7 +3,7 @@ package com.omni.procurement.controller;
 import com.omni.common.core.result.R;
 import com.omni.procurement.dto.OverviewRequests;
 import com.omni.procurement.dto.OverviewViews;
-import com.omni.procurement.security.ProcDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import com.omni.procurement.service.OverviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class OverviewController {
      */
     @GetMapping("/summary")
     @PreAuthorize("hasAuthority('procurement:overview:list')")
-    @ProcDataScope(permissionCode = "procurement:overview:list")
+    @ServiceDataScope(permissionCode = "procurement:overview:list")
     public R<OverviewViews.Summary> summary() {
         return R.ok(overviewService.summary());
     }
@@ -48,7 +48,7 @@ public class OverviewController {
      */
     @GetMapping("/spend-analysis")
     @PreAuthorize("hasAuthority('procurement:overview:list')")
-    @ProcDataScope(permissionCode = "procurement:overview:list")
+    @ServiceDataScope(permissionCode = "procurement:overview:list")
     public R<List<OverviewViews.SpendItem>> spendAnalysis(
             @Valid OverviewRequests.SpendAnalysisQuery query) {
         return R.ok(overviewService.spendAnalysis(query));

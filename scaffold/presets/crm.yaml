@@ -1,0 +1,5 @@
+id: crm
+version: "1.0.0"
+displayName: CRM 销售平台
+description: 核心平台加 CRM 销售管道，不包含供应链。
+modules: [crm, gateway, mysql, redis, nacos]

@@ -1,6 +1,6 @@
 package com.omni.asset.controller;
 
-import com.omni.asset.security.AssetDataScope;
+import com.omni.common.service.datascope.ServiceDataScope;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +33,7 @@ class AssetOperationControllerSecurityTest {
         assertThat(writes).isNotEmpty();
         assertThat(writes).allSatisfy(method -> {
             PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
-            AssetDataScope dataScope = method.getAnnotation(AssetDataScope.class);
+            ServiceDataScope dataScope = method.getAnnotation(ServiceDataScope.class);
             assertThat(preAuthorize).isNotNull();
             assertThat(preAuthorize.value()).contains(permissionPrefix);
             assertThat(dataScope).isNotNull();
