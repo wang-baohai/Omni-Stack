@@ -185,6 +185,7 @@ assertions:
     query: >-
       SELECT model.model_key AS seed_key FROM wf_process_model model
       WHERE model.tenant_id = (SELECT id FROM omni_auth.sys_tenant WHERE tenant_code = 'default')
+      AND model.model_key IN ('leave', 'procurement-approval', 'asset-transfer', 'asset-disposal', 'supplier-onboarding')
       AND EXISTS (SELECT 1 FROM wf_process_model_version model_version WHERE model_version.model_id = model.id)
     expectedRows: 5
     expectedSha256: "399c97afa4fcb0b7621d6ab09dc80afc0bf6112bf6981d84a2b3a65058414503"

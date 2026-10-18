@@ -1,0 +1,118 @@
+{
+  "document_id": "project-readme",
+  "source": "README.md",
+  "source_sha256": "9884ad04e96f5a32774b2678bb5239e3fa6efddf2e82e1907f3eca299754f42b",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "reviewed_at": "2026-10-18T06:44:23.993Z",
+  "method": "Actual incremental four-language review of split capability bullets and explicit module guards. Complete new blocks were read back from allfour source files. Exact inverse replacement proves the remaining original body unchanged;reuse valid previous full-body review without claiming a new whole-document reread.",
+  "source_baseline_commit": "52297f7359afa4730a36ff8adf52aee28558b61e",
+  "source_baseline_sha256": "cabf1b684dcf9281d22f4af0b65b86aecaddd288bc06680a01d7c74a9d7f04b4",
+  "incremental_semantics": "Workflow and XXL-JOB become independent clauses. CRM and SRM/Procurement/Asset become independent clauses. workflow,xxl-job,crm,and srm/procurement/asset module guards restrict derived projects to actual included capabilities. The full source project retains all capabilities. No runtime behavior,API,security boundary,startup command,ports,private config or OAuth screenshot policy changes.",
+  "checked_source_files": [
+    {
+      "path": "README.md",
+      "sha256": "9884ad04e96f5a32774b2678bb5239e3fa6efddf2e82e1907f3eca299754f42b"
+    },
+    {
+      "path": "README.en.md",
+      "sha256": "bfece04f6aaa41b344ca1bf0904be600ebf7473331f6366bacfa078bc393162c"
+    },
+    {
+      "path": "README.jp.md",
+      "sha256": "2fb632779305bbf26dd986c6edb171eadf42563e0cb8fa822616ef814a9ce848"
+    },
+    {
+      "path": "README.kr.md",
+      "sha256": "d3b3168ceb20823043266e1c0e1c64be6d7023b3d901fe5e9bf124721d9a2a32"
+    },
+    {
+      "path": "tools/omni-cli/test/preset-generator.test.ts",
+      "sha256": "adc855c3fd4c0d3ca814f305d05fd22d0742f16789298532dbe8efd3e152366a"
+    },
+    {
+      "path": "tools/omni-cli/src/documentation-delivery.ts",
+      "sha256": "df9927cf014c3ac0a79c5815e1519ee8cd7a4b0de22a9fb945fde1ef4aa6d337"
+    },
+    {
+      "path": "scaffold/catalog/modules.yaml",
+      "sha256": "96fce7b277ee60b4a0d132ea22f0932481000779b8293241738da4c0edfdba9c"
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "README.en.md",
+      "translation_sha256": "bfece04f6aaa41b344ca1bf0904be600ebf7473331f6366bacfa078bc393162c",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18T06:44:23.993Z",
+      "result": "approved",
+      "checks": {
+        "coverage_and_meaning": "The actual four-language split clauses preserve Workflow,BPMN,publishing,approvals,countersign,XXL-JOBsystem/personal jobs,CRM sales and the SRM→Procurement→Asset collaboration. Explicit module guards carry the same scope in all languages;the rest of each body is exact prior approved bytes.",
+        "technical_literals": "Module identifiers workflow,xxl-job,crm,srm,procurement,asset and the existing feature names remain exact. No startup command,CLI argument,permission code,protocol field,version,port or data value changes.",
+        "security_and_failure_semantics": "The previous full-body source review remains valid for the unchanged portion. ManualCAPTCHA,tenant/role identity and externalOAuth limits are retained. Guards neither grant access nor claim omitted features or successful authorization.",
+        "language_and_terminology": "Read back the full new Chinese,English,Japanese and Korean blocks. Four short capability sentences retain the original meaning and terminology;punctuation and conjunctions are adjusted only to split the compound bullets.",
+        "images_and_links": "No images,captions,link targets or navigation entries are changed. The root source retains all14modules. Fresh generated capability assertions and README-site rendering checks remain separate verification steps."
+      },
+      "findings": [],
+      "previous_body_review": {
+        "path": "docs/reference/reviews/project-readme.json",
+        "sha256": "fb6c312bba61df24274b768de4a8182d8aa1e36424da647beab047a4f477791c",
+        "source_sha256": "cabf1b684dcf9281d22f4af0b65b86aecaddd288bc06680a01d7c74a9d7f04b4",
+        "translation_sha256": "07b03753b2a902ac4cbf8dc2906e274d3f58c6a95f63ed7087632301cc9b1fdf",
+        "review_type": "AI_REVIEW"
+      }
+    },
+    "ja-JP": {
+      "path": "README.jp.md",
+      "translation_sha256": "2fb632779305bbf26dd986c6edb171eadf42563e0cb8fa822616ef814a9ce848",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18T06:44:23.993Z",
+      "result": "approved",
+      "checks": {
+        "coverage_and_meaning": "The actual four-language split clauses preserve Workflow,BPMN,publishing,approvals,countersign,XXL-JOBsystem/personal jobs,CRM sales and the SRM→Procurement→Asset collaboration. Explicit module guards carry the same scope in all languages;the rest of each body is exact prior approved bytes.",
+        "technical_literals": "Module identifiers workflow,xxl-job,crm,srm,procurement,asset and the existing feature names remain exact. No startup command,CLI argument,permission code,protocol field,version,port or data value changes.",
+        "security_and_failure_semantics": "The previous full-body source review remains valid for the unchanged portion. ManualCAPTCHA,tenant/role identity and externalOAuth limits are retained. Guards neither grant access nor claim omitted features or successful authorization.",
+        "language_and_terminology": "Read back the full new Chinese,English,Japanese and Korean blocks. Four short capability sentences retain the original meaning and terminology;punctuation and conjunctions are adjusted only to split the compound bullets.",
+        "images_and_links": "No images,captions,link targets or navigation entries are changed. The root source retains all14modules. Fresh generated capability assertions and README-site rendering checks remain separate verification steps."
+      },
+      "findings": [],
+      "previous_body_review": {
+        "path": "docs/reference/reviews/project-readme.json",
+        "sha256": "fb6c312bba61df24274b768de4a8182d8aa1e36424da647beab047a4f477791c",
+        "source_sha256": "cabf1b684dcf9281d22f4af0b65b86aecaddd288bc06680a01d7c74a9d7f04b4",
+        "translation_sha256": "302890b7a080f9d40916d195dd349a5c4f19813bd94042bf77020cfae21dd1ec",
+        "review_type": "AI_REVIEW"
+      }
+    },
+    "ko-KR": {
+      "path": "README.kr.md",
+      "translation_sha256": "d3b3168ceb20823043266e1c0e1c64be6d7023b3d901fe5e9bf124721d9a2a32",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18T06:44:23.993Z",
+      "result": "approved",
+      "checks": {
+        "coverage_and_meaning": "The actual four-language split clauses preserve Workflow,BPMN,publishing,approvals,countersign,XXL-JOBsystem/personal jobs,CRM sales and the SRM→Procurement→Asset collaboration. Explicit module guards carry the same scope in all languages;the rest of each body is exact prior approved bytes.",
+        "technical_literals": "Module identifiers workflow,xxl-job,crm,srm,procurement,asset and the existing feature names remain exact. No startup command,CLI argument,permission code,protocol field,version,port or data value changes.",
+        "security_and_failure_semantics": "The previous full-body source review remains valid for the unchanged portion. ManualCAPTCHA,tenant/role identity and externalOAuth limits are retained. Guards neither grant access nor claim omitted features or successful authorization.",
+        "language_and_terminology": "Read back the full new Chinese,English,Japanese and Korean blocks. Four short capability sentences retain the original meaning and terminology;punctuation and conjunctions are adjusted only to split the compound bullets.",
+        "images_and_links": "No images,captions,link targets or navigation entries are changed. The root source retains all14modules. Fresh generated capability assertions and README-site rendering checks remain separate verification steps."
+      },
+      "findings": [],
+      "previous_body_review": {
+        "path": "docs/reference/reviews/project-readme.json",
+        "sha256": "fb6c312bba61df24274b768de4a8182d8aa1e36424da647beab047a4f477791c",
+        "source_sha256": "cabf1b684dcf9281d22f4af0b65b86aecaddd288bc06680a01d7c74a9d7f04b4",
+        "translation_sha256": "ccfc9aea390f0efacc103a454047a066747aeee83da6d7c2621a7fc9c5e70bce",
+        "review_type": "AI_REVIEW"
+      }
+    }
+  },
+  "new_whole_document_rereads": 0,
+  "human_review": false,
+  "limitations": [
+    "Approves current source README content. Actual generated README conformance and source tests are separately pending;the known generated README defect is not marked closed by this record alone.",
+    "Unchanged application builds are reused only after exact input equivalence.",
+    "SRM realCAPTCHA/screenshot and actual externalOAuthcallbacks remain unmet;OAuthscreenshots owner-deferred."
+  ]
+}

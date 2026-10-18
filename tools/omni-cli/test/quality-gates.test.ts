@@ -77,11 +77,13 @@ afterEach(() => {
 describe('WP002 quality-gate contract tests', () => {
   describe('W2-T01: Chinese-only docs do not generate false translation rows', () => {
     it('docs-review-queue passes with Chinese-only docs in real manifest', () => {
-      // 使用真实 manifest 验证：4 个 Chinese-only 文档不产生假缺失
+      // 使用真实清单验证，新增正式文档不会改变语言豁免行为。
       const result = runQueueScript(workspaceRoot);
       assert.equal(result.exitCode, 0, `queue check should pass: ${result.stderr}`);
-      assert.match(result.stdout, /Chinese-only 4/);
-      assert.match(result.stdout, /译文行 102/);
+      const manifest = YAML.parse(readFileSync(join(workspaceRoot, 'docs/docs-manifest.yaml'), 'utf8'));
+      const exempt = manifest.documents.filter((doc: { language_scope?: string }) => doc.language_scope === 'zh-CN').length;
+      assert.ok(result.stdout.includes(`Chinese-only ${exempt}`));
+      assert.ok(result.stdout.includes(`译文行 ${(manifest.documents.length - exempt) * 3}`));
     });
   });
 
@@ -157,7 +159,7 @@ describe('WP002 quality-gate contract tests', () => {
       writeFileSync(join(fixture, 'manifest.yaml'), YAML.stringify(manifest));
       const result = runQualityScript(fixture, 'i18n', { WP002_MANIFEST: 'manifest.yaml' });
       assert.notEqual(result.exitCode, 0, 'should fail without reviewed_at');
-      assert.match(result.stderr, /缺少人工复核日期/);
+      assert.match(result.stderr, /缺少有效人工复核日期/);
     });
   });
 
@@ -165,7 +167,7 @@ describe('WP002 quality-gate contract tests', () => {
     it('screenshot checker passes with valid fixture', () => {
       const fixture = createScreenshotFixture();
       fixtureCleanup.push(fixture);
-      writeFileSync(join(fixture, 'images', 'test.png'), 'x'.repeat(200));
+      writeFileSync(join(fixture, 'images', 'test.png'), readFileSync(join(workspaceRoot, 'docs/images/zh-CN/auth-login.png')));
       writeFileSync(join(fixture, 'tests', 'test.spec.ts'), '// test');
       const screenshotManifest = {
         screenshots: [{
@@ -194,6 +196,62 @@ describe('WP002 quality-gate contract tests', () => {
         WP002_SCREENSHOT_COVERAGE: 'screenshot-coverage.yaml',
       });
       assert.equal(result.exitCode, 0, `should pass with valid fixture: ${result.stderr}`);
+    });
+  });
+
+  describe('PNG and terminal evidence integrity', () => {
+    it('rejects renamed text, truncated PNG and a forged signature', () => {
+      const fixture = createScreenshotFixture();
+      fixtureCleanup.push(fixture);
+      writeFileSync(join(fixture, 'tests/test.spec.ts'), '// 仅用于质量门契约测试');
+      const item = { id: 'png', image: 'images/test.png', test: 'tests/test.spec.ts', fixture: 'isolated',
+        viewport: { width: 1440, height: 900 }, locale: 'zh-CN', version: '1', module: 'mod', flow: 'fl' };
+      writeFileSync(join(fixture, 'screenshot-manifest.yaml'), YAML.stringify({ screenshots: [item] }));
+      writeFileSync(join(fixture, 'screenshot-coverage.yaml'), YAML.stringify({ modules: [{ id: 'mod', status: 'covered', required_flows: ['fl'] }] }));
+      const valid = readFileSync(join(workspaceRoot, 'docs/images/zh-CN/auth-login.png'));
+      const forged = Buffer.alloc(200);
+      valid.copy(forged, 0, 0, 8);
+      for (const bytes of [Buffer.from('x'.repeat(200)), valid.subarray(0, valid.length - 5), forged]) {
+        writeFileSync(join(fixture, 'images/test.png'), bytes);
+        const result = runQualityScript(fixture, 'screenshots', {
+          WP002_SCREENSHOT_MANIFEST: 'screenshot-manifest.yaml', WP002_SCREENSHOT_COVERAGE: 'screenshot-coverage.yaml',
+        });
+        assert.notEqual(result.exitCode, 0);
+        assert.match(result.stderr, /PNG/);
+      }
+    });
+
+    it('requires hashed Docker terminal output and keeps screenshot flows separate', () => {
+      const fixture = createScreenshotFixture();
+      fixtureCleanup.push(fixture);
+      writeFileSync(join(fixture, 'tests/test.spec.ts'), '// 仅用于终端质量门契约测试');
+      const content = 'CLI PREVIEW PASS\nNo business data changed.\n';
+      const artifact = join(fixture, 'docs/cli.txt');
+      writeFileSync(artifact, content);
+      const item = { id: 'cli-preview', kind: 'terminal', module: 'scaffold-development', flow: 'create-service', step: 'success',
+        locale: 'shared', runtime: 'local Docker', artifact: 'docs/cli.txt', sha256: createHash('sha256').update(content).digest('hex'),
+        command: 'omni create-service --module demo', source_commit: 'a'.repeat(40), source_sha256: 'b'.repeat(64),
+        captured_at: '2026-10-09T00:00:00Z', exit_code: 0, test: 'tests/test.spec.ts',
+        tool: { name: 'Node.js', version: '22.23.3', image_id: `sha256:${'c'.repeat(64)}` },
+        review: { status: 'passed', reviewer: 'Contract fixture reviewer' }, assertions: [{ contains: 'CLI PREVIEW PASS' }] };
+      writeFileSync(join(fixture, 'screenshot-manifest.yaml'), YAML.stringify({ screenshots: [], terminal_evidence: [item] }));
+      const coverage = { modules: [{ id: 'scaffold-development', status: 'covered', required_flows: ['create-service'],
+        flow_evidence: { 'create-service': 'terminal' } }] };
+      const saveCoverage = (): void => { writeFileSync(join(fixture, 'screenshot-coverage.yaml'), YAML.stringify(coverage)); };
+      saveCoverage();
+      const check = (): ReturnType<typeof runQualityScript> => runQualityScript(fixture, 'screenshots', {
+        WP002_SCREENSHOT_MANIFEST: 'screenshot-manifest.yaml', WP002_SCREENSHOT_COVERAGE: 'screenshot-coverage.yaml',
+      });
+      assert.equal(check().exitCode, 0);
+      writeFileSync(artifact, 'changed output');
+      assert.match(check().stderr, /SHA-256 不匹配/);
+      writeFileSync(artifact, content);
+      coverage.modules[0]!.flow_evidence['create-service'] = 'screenshot';
+      saveCoverage();
+      assert.match(check().stderr, /无对应截图/);
+      item.module = 'authentication'; item.flow = 'register';
+      writeFileSync(join(fixture, 'screenshot-manifest.yaml'), YAML.stringify({ screenshots: [], terminal_evidence: [item] }));
+      assert.match(check().stderr, /不允许用终端证据替代截图/);
     });
   });
 
@@ -227,7 +285,7 @@ describe('WP002 quality-gate contract tests', () => {
     it('screenshot checker fails when required flow has no screenshot', () => {
       const fixture = createScreenshotFixture();
       fixtureCleanup.push(fixture);
-      writeFileSync(join(fixture, 'images', 'test.png'), 'x'.repeat(200));
+      writeFileSync(join(fixture, 'images', 'test.png'), readFileSync(join(workspaceRoot, 'docs/images/zh-CN/auth-login.png')));
       writeFileSync(join(fixture, 'tests', 'test.spec.ts'), '// test');
       const screenshotManifest = {
         screenshots: [{
@@ -260,8 +318,8 @@ describe('WP002 quality-gate contract tests', () => {
     it('screenshot checker fails with duplicate IDs', () => {
       const fixture = createScreenshotFixture();
       fixtureCleanup.push(fixture);
-      writeFileSync(join(fixture, 'images', 'a.png'), 'x'.repeat(200));
-      writeFileSync(join(fixture, 'images', 'b.png'), 'x'.repeat(200));
+      writeFileSync(join(fixture, 'images', 'a.png'), readFileSync(join(workspaceRoot, 'docs/images/zh-CN/auth-login.png')));
+      writeFileSync(join(fixture, 'images', 'b.png'), readFileSync(join(workspaceRoot, 'docs/images/zh-CN/auth-login.png')));
       writeFileSync(join(fixture, 'tests', 'a.spec.ts'), '// a');
       const screenshotManifest = {
         screenshots: [
@@ -298,7 +356,7 @@ describe('WP002 quality-gate contract tests', () => {
     it('screenshot checker fails when module status is not covered or exempt', () => {
       const fixture = createScreenshotFixture();
       fixtureCleanup.push(fixture);
-      writeFileSync(join(fixture, 'images', 'test.png'), 'x'.repeat(200));
+      writeFileSync(join(fixture, 'images', 'test.png'), readFileSync(join(workspaceRoot, 'docs/images/zh-CN/auth-login.png')));
       writeFileSync(join(fixture, 'tests', 'test.spec.ts'), '// test');
       const screenshotManifest = {
         screenshots: [{
@@ -361,7 +419,7 @@ describe('WP002 quality-gate contract tests', () => {
   describe('W2-T18: Missing required secret causes preflight failure', () => {
     it('runtime runner preflight fails without required env vars', () => {
       try {
-        execFileSync('node', [join(scriptsDir, 'quality-runtime-runner.mjs'), 'preflight'], {
+        execFileSync(process.execPath, [join(scriptsDir, 'quality-runtime-runner.mjs'), 'preflight'], {
           encoding: 'utf8',
           env: {},  // 清空环境变量
           timeout: 10_000,
@@ -376,7 +434,7 @@ describe('WP002 quality-gate contract tests', () => {
 
     it('runtime runner preflight reports specific missing vars', () => {
       try {
-        execFileSync('node', [join(scriptsDir, 'quality-runtime-runner.mjs'), 'preflight'], {
+        execFileSync(process.execPath, [join(scriptsDir, 'quality-runtime-runner.mjs'), 'preflight'], {
           encoding: 'utf8',
           env: {
             E2E_BASE_URL: 'http://localhost:3000',
@@ -417,5 +475,22 @@ describe('WP002 quality-gate contract tests', () => {
       // W2-R4 修复：临时脚本已清理，.work ignore 已移除
       assert.doesNotMatch(eslintConfig, /scripts\/\.work\/\*\*/);
     });
+  });
+});
+
+
+describe('README language-specific AI entry gate', () => {
+  it('accepts localized entries and rejects an English link to the Chinese AI page', () => {
+    const fixture = createFixtureDir();
+    fixtureCleanup.push(fixture);
+    for (const name of ['README.md', 'README.en.md', 'README.jp.md', 'README.kr.md']) {
+      writeFileSync(join(fixture, name), readFileSync(join(workspaceRoot, name), 'utf8'));
+    }
+    assert.equal(runQualityScript(fixture, 'readme').exitCode, 0);
+    const englishPath = join(fixture, 'README.en.md');
+    writeFileSync(englishPath, readFileSync(englishPath, 'utf8').replace('ai/README.en.md', 'ai/README.md'));
+    const result = runQualityScript(fixture, 'readme');
+    assert.notEqual(result.exitCode, 0);
+    assert.match(result.stderr, /README\.en\.md: 缺少当前事实：ai\/README\.en\.md/);
   });
 });

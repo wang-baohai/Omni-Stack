@@ -1,0 +1,456 @@
+{
+  "schema": 1,
+  "status": "PASS_WITH_DOCUMENTED_LIMITS",
+  "runtime": "local Docker",
+  "source_baseline": "63d9ba565e6b85f89e915c4420b79ef90ce6063c",
+  "source_state": "Uncommitted native UI change at capture time, bound by exact source and image digests",
+  "source_files": {
+    "docker/alertmanager-ui/Dockerfile": "b040db36b6e8da7e348d94b55413e8a60b7302b1e9b0d0e893a7db4abe6933fc",
+    "docker/alertmanager-ui/nginx.conf": "49b6280abcdee7a08274c29ba84cf575471842aeb329bd33ab65c9438ffbfb0d",
+    "observability/alertmanager-ui/build.mjs": "e2546b69b026afb31da9e025f42d73d0ffb2e30be0268a47b966819b6051a515",
+    "observability/alertmanager-ui/messages.tsv": "1ac2c807ec80a22c887807d5f4ef7be4dada07315d11e0114b328a0f7cc4b27f",
+    "scripts/fixtures/capture-alertmanager-i18n.mjs": "1987ad2e29c067f40ab1167c6697ddbd1ade822baf1becfa3267497b3205fb73"
+  },
+  "upstream": "prometheus/alertmanager@v0.30.1",
+  "upstream_archive_sha256": "b3577c531d4c05e0f45f90b02224c81684be9f4083720a01cc05bfa07107fc93",
+  "native_ui": "Official Elm with source-level translations and a native Elm language selector",
+  "compiled_locales": [
+    {
+      "locale": "en-US",
+      "script_sha256": "0012e9ea170ff3d17a1be7364dadfb5e7c4f519d7434db490b65bb1504af1f7d",
+      "html_sha256": "dc8b85acf47fe762bfb9488b92b0d0a0097d595891abc6698b79746684d324c8"
+    },
+    {
+      "locale": "zh-CN",
+      "script_sha256": "8483546b24b187d6ddeed2a554f163251db2c8cbb5f8dc872c5355b6bc6a41d2",
+      "html_sha256": "45645997f2c593e0aab14ee30e3ff0f6b2ca5f5b9364f17b33d1dcd7dda4966f"
+    },
+    {
+      "locale": "ja-JP",
+      "script_sha256": "f438caee14ceb3ff5940f168ece9d5d1a8097ec252f626b5842c78798a1bb8ff",
+      "html_sha256": "c7016aa68004ff71b060fd44a1d868fcf5b2ed4b255c3cd720c5d38ea15efd67"
+    },
+    {
+      "locale": "ko-KR",
+      "script_sha256": "f788d8da11e566f4108bd6fc6969f403c5765cc516b6ba815718f61e01bfd351",
+      "html_sha256": "43e4e5423558ef8623a5ad338ce3ec6925273ed4f4de6b0c1a4c3f8a473ad4c2"
+    }
+  ],
+  "compiler": "Elm 0.19.1",
+  "node_builder": "22.23.3",
+  "browser_image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+  "ui_image": "sha256:dfbf6b4869e67b58d7495e98ab90e8066afc03d792564fc91489d03fb28202e8",
+  "backend_image": "prom/alertmanager:v0.30.1",
+  "backend_recreated": false,
+  "ui_host_port_contract": "127.0.0.1:9093 -> alertmanager-ui:8080; official backend stays internal at alertmanager:9093",
+  "actual_capture_environment": "Owned isolated Docker network; UI had no host port; no shared project changed",
+  "exercise": {
+    "recovery_exit_code": 0,
+    "stop_requested_at": "2026-10-13T14:11:32.5714352+08:00",
+    "base_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+    "test_sha256": "1987ad2e29c067f40ab1167c6697ddbd1ade822baf1becfa3267497b3205fb73",
+    "completed_at": "2026-10-13T14:15:15.6306268+08:00",
+    "restored": true,
+    "browser_exit_code": 0,
+    "backend_image": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+    "started_at": "2026-10-13T14:11:31.2978332+08:00",
+    "shared_environment_touched": false,
+    "start_requested_at": "2026-10-13T14:14:33.8482311+08:00",
+    "start_exit_code": 0,
+    "firing": {
+      "mode": "firing",
+      "status": "PASS",
+      "runtime": "local Docker",
+      "started_at": "2026-10-13T06:11:47.148Z",
+      "completed_at": "2026-10-13T06:14:12.359Z",
+      "records": [
+        {
+          "at": "2026-10-13T06:11:47.208Z",
+          "prometheus": [],
+          "received": 0,
+          "target": "up"
+        },
+        {
+          "at": "2026-10-13T06:12:02.229Z",
+          "prometheus": [],
+          "received": 0,
+          "target": "down"
+        },
+        {
+          "at": "2026-10-13T06:12:12.241Z",
+          "prometheus": [
+            "pending"
+          ],
+          "received": 0,
+          "target": "down"
+        },
+        {
+          "at": "2026-10-13T06:14:12.358Z",
+          "prometheus": [
+            "firing"
+          ],
+          "received": 1,
+          "target": "down"
+        }
+      ]
+    },
+    "recovered": {
+      "mode": "recovered",
+      "status": "PASS",
+      "runtime": "local Docker",
+      "started_at": "2026-10-13T06:14:34.96Z",
+      "completed_at": "2026-10-13T06:15:15.089Z",
+      "records": [
+        {
+          "at": "2026-10-13T06:14:35.027Z",
+          "prometheus": [
+            "firing"
+          ],
+          "received": 1,
+          "target": "down"
+        },
+        {
+          "at": "2026-10-13T06:15:00.076Z",
+          "prometheus": [
+            "firing"
+          ],
+          "received": 1,
+          "target": "up"
+        },
+        {
+          "at": "2026-10-13T06:15:15.089Z",
+          "prometheus": [],
+          "received": 0,
+          "target": "up"
+        }
+      ]
+    },
+    "receiver": "local-null",
+    "external_notification_channels": 0,
+    "fake_alert_injected": false
+  },
+  "verification": {
+    "captures_passed": 12,
+    "control_scenarios_passed": 8,
+    "page_errors": [],
+    "blocked_writes": [],
+    "browser_server_writes": 0,
+    "checks": [
+      {
+        "locale": "zh-CN",
+        "width": 1440,
+        "settings_protocol_value": "Monday",
+        "language_switch_preserves_route": true,
+        "silence_validation_localized": true,
+        "calendar_localized": true,
+        "native_muted_control_restored": true
+      },
+      {
+        "locale": "zh-CN",
+        "width": 390,
+        "settings_protocol_value": "Monday",
+        "language_switch_preserves_route": true,
+        "silence_validation_localized": true,
+        "calendar_localized": true,
+        "native_muted_control_restored": true
+      },
+      {
+        "locale": "en-US",
+        "width": 1440,
+        "settings_protocol_value": "Monday",
+        "language_switch_preserves_route": true,
+        "silence_validation_localized": true,
+        "calendar_localized": true,
+        "native_muted_control_restored": true
+      },
+      {
+        "locale": "en-US",
+        "width": 390,
+        "settings_protocol_value": "Monday",
+        "language_switch_preserves_route": true,
+        "silence_validation_localized": true,
+        "calendar_localized": true,
+        "native_muted_control_restored": true
+      },
+      {
+        "locale": "ja-JP",
+        "width": 1440,
+        "settings_protocol_value": "Monday",
+        "language_switch_preserves_route": true,
+        "silence_validation_localized": true,
+        "calendar_localized": true,
+        "native_muted_control_restored": true
+      },
+      {
+        "locale": "ja-JP",
+        "width": 390,
+        "settings_protocol_value": "Monday",
+        "language_switch_preserves_route": true,
+        "silence_validation_localized": true,
+        "calendar_localized": true,
+        "native_muted_control_restored": true
+      },
+      {
+        "locale": "ko-KR",
+        "width": 1440,
+        "settings_protocol_value": "Monday",
+        "language_switch_preserves_route": true,
+        "silence_validation_localized": true,
+        "calendar_localized": true,
+        "native_muted_control_restored": true
+      },
+      {
+        "locale": "ko-KR",
+        "width": 390,
+        "settings_protocol_value": "Monday",
+        "language_switch_preserves_route": true,
+        "silence_validation_localized": true,
+        "calendar_localized": true,
+        "native_muted_control_restored": true
+      }
+    ]
+  },
+  "limits": [
+    "Phone navigation remains vertical; alert detail/actions may require normal vertical scrolling below the first viewport.",
+    "Alert labels, receiver names and protocol timestamps are real backend data and remain unchanged.",
+    "Real email/chat notification delivery and positive silence creation/deletion were not exercised in this read-only browser run."
+  ],
+  "images": [
+    {
+      "id": "operations-alert-localized-zh-CN-1440",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/operations-alert-localized.png",
+      "image_sha256": "ee6c3c5d83b2f608db2d1ce7624194e0573f616875bf680399fd3395d79db99f",
+      "route": "/zh-CN/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:15.076Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-zh-CN-1024",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "image": "docs/images/zh-CN/operations-alert-localized-tablet.png",
+      "image_sha256": "a1460bd3731a107d353a958ea3a47999fa5589c7a28907f47d88466a5e4fb410",
+      "route": "/zh-CN/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:17.177Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-zh-CN-390",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "image": "docs/images/zh-CN/operations-alert-localized-mobile.png",
+      "image_sha256": "95dfae77ada9e2f6ba4f4f44dce9cd6be43d765d6e32894f6c570cce5f8ba334",
+      "route": "/zh-CN/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:18.013Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-en-US-1440",
+      "locale": "en-US",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/operations-alert-localized.png",
+      "image_sha256": "e1ed22a74721e62e31165821d481d7f4b05cbf2f80fd2c7aee4a684a18bd8973",
+      "route": "/en-US/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:19.952Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-en-US-1024",
+      "locale": "en-US",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "image": "docs/images/en-US/operations-alert-localized-tablet.png",
+      "image_sha256": "bd2adade3d46ec3fbf6a02d2203b5c2e5768250ddc1eb4c86489b1b9fc028adb",
+      "route": "/en-US/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:21.9Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-en-US-390",
+      "locale": "en-US",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "image": "docs/images/en-US/operations-alert-localized-mobile.png",
+      "image_sha256": "2ef3f6c4aec7a55be95f4b395a9a7f1f22d63ebcbf56fb5efdc828f81752207c",
+      "route": "/en-US/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:22.712Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-ja-JP-1440",
+      "locale": "ja-JP",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/operations-alert-localized.png",
+      "image_sha256": "c3f912f59a755f441d5160de5f44048efc31a26f534bd25f1987f407bce5fc91",
+      "route": "/ja-JP/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:24.634Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-ja-JP-1024",
+      "locale": "ja-JP",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "image": "docs/images/ja-JP/operations-alert-localized-tablet.png",
+      "image_sha256": "53f72b456f28e669419a1025df115557614f3fcbfe675b8e47d1b4a265012b36",
+      "route": "/ja-JP/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:26.567Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-ja-JP-390",
+      "locale": "ja-JP",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "image": "docs/images/ja-JP/operations-alert-localized-mobile.png",
+      "image_sha256": "284b8da587282de9655bc456f4e543fa9a977d9d328be553549fd5aa342b336e",
+      "route": "/ja-JP/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:27.389Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-ko-KR-1440",
+      "locale": "ko-KR",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/operations-alert-localized.png",
+      "image_sha256": "5753c8c035a84463ca68b8a66541e8e08d70f0983aeaca8572b1b18f3bd7380b",
+      "route": "/ko-KR/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:29.351Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-ko-KR-1024",
+      "locale": "ko-KR",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "image": "docs/images/ko-KR/operations-alert-localized-tablet.png",
+      "image_sha256": "83189c1904a53a815c0e8dc53aace9b7c524fc2bee93414cafca8263a5cd587d",
+      "route": "/ko-KR/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:31.25Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    },
+    {
+      "id": "operations-alert-localized-ko-KR-390",
+      "locale": "ko-KR",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "image": "docs/images/ko-KR/operations-alert-localized-mobile.png",
+      "image_sha256": "ba529be428b708c3f1805d0481d5cf386b2b87c3c6fdf61830eef90d3cdf21de",
+      "route": "/ko-KR/#/alerts?silenced=false&inhibited=false&muted=false&active=true&filter=%7Balertname%3D%22OmniServiceDown%22%7D",
+      "captured_at": "2026-10-13T06:14:32.046Z",
+      "expected": "Real active alert visible with localized navigation, filter and action labels; no horizontal viewport overflow",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "dom_text_rewrite": false
+    }
+  ],
+  "maintenance_equivalence": {
+    "status": "PASS",
+    "runtime": "local Docker",
+    "verified_at": "2026-10-13T08:21:45.691Z",
+    "format_change": "Seven trailing U+0020 characters are stored as explicit escapes and decoded by both readers",
+    "decoded_table_byte_identical": true,
+    "compiled_assets_identical": 8,
+    "locales": [
+      {
+        "locale": "en-US",
+        "script_sha256": "0012e9ea170ff3d17a1be7364dadfb5e7c4f519d7434db490b65bb1504af1f7d",
+        "html_sha256": "dc8b85acf47fe762bfb9488b92b0d0a0097d595891abc6698b79746684d324c8",
+        "identical": true
+      },
+      {
+        "locale": "zh-CN",
+        "script_sha256": "8483546b24b187d6ddeed2a554f163251db2c8cbb5f8dc872c5355b6bc6a41d2",
+        "html_sha256": "45645997f2c593e0aab14ee30e3ff0f6b2ca5f5b9364f17b33d1dcd7dda4966f",
+        "identical": true
+      },
+      {
+        "locale": "ja-JP",
+        "script_sha256": "f438caee14ceb3ff5940f168ece9d5d1a8097ec252f626b5842c78798a1bb8ff",
+        "html_sha256": "c7016aa68004ff71b060fd44a1d868fcf5b2ed4b255c3cd720c5d38ea15efd67",
+        "identical": true
+      },
+      {
+        "locale": "ko-KR",
+        "script_sha256": "f788d8da11e566f4108bd6fc6969f403c5765cc516b6ba815718f61e01bfd351",
+        "html_sha256": "43e4e5423558ef8623a5ad338ce3ec6925273ed4f4de6b0c1a4c3f8a473ad4c2",
+        "identical": true
+      }
+    ],
+    "current_source_files": {
+      "observability/alertmanager-ui/build.mjs": "81481f285eba6a58018666202edffd421d4f09a8c820e1f366326061c5c97cec",
+      "observability/alertmanager-ui/messages.tsv": "2d033aa2eaf7ff399db79164afc8e0d777f038acbdef70fae768881d8f7a2916",
+      "scripts/fixtures/capture-alertmanager-i18n.mjs": "1b24dfa7785cb9a19162cf540d0c338649b714fa9e68ddaca56758b13e470425"
+    },
+    "current_capture_syntax": "PASS",
+    "original_capture_preserved": true,
+    "repeated_fault_injection": false,
+    "rebuilt_image": "sha256:ea96b1e555e3995a00de59ac1a814b09066f6100b6dbda1b4fd7316ad9eb9b44",
+    "original_capture_note": "Original source_files, test hash, image identity and capture times above describe the real capture and are intentionally retained. Current source formatting was verified to produce byte-identical UI assets; no new fault injection or screenshot is claimed."
+  }
+}

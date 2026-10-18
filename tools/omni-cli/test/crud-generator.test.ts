@@ -52,7 +52,7 @@ describe('CRUD generator', () => {
     // AC05/AC17：运行时的四语言 i18n 键必须同源登记（旧实现只写 zh-CN/en-US）。
     assert.match(required(byTarget, 'omni-frontend/src/locales/ja-JP.ts'), /\n  materialBrand: \{/);
     assert.match(required(byTarget, 'omni-frontend/src/locales/ja-JP.ts'), /削除しました/);
-    assert.match(required(byTarget, 'omni-frontend/src/locales/ja-JP.ts'), /TODO\(WP-012\)/);
+    assert.match(required(byTarget, 'omni-frontend/src/locales/ja-JP.ts'), /TODO: \[crud\]/);
     assert.match(required(byTarget, 'omni-frontend/src/locales/ko-KR.ts'), /\n  materialBrand: \{/);
     assert.match(required(byTarget, 'omni-frontend/src/locales/ko-KR.ts'), /삭제했습니다/);
     assert.match(required(byTarget, 'omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/MaterialBrandServiceImpl.java'), /com\.omni\.common\.core\.result\.BusinessException/);

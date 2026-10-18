@@ -1,0 +1,231 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "srm-design",
+  "source": "docs/design/srm-design.md",
+  "source_sha256": "84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f2607c1bdf7605645d5eb68d7ab5bfc956cee7f8",
+  "source_state": "Actual semantic review of all changed ownership declarations; complete unchanged design content reuses the matching prior whole-document semantic review.",
+  "method": "Reused the exact matching prior complete four-language semantic review;verified all four originals match its source/translation hashes and Git commit9b23ab9,c185ba. Actually read every final ownership/governance/AGENTS delta in308e27. Docker verifies the whole body from firstH2 is byte-identical and renders all six edited documents. This is a declaration-only revalidation,not new whole-document rereading or domain behavior testing.",
+  "prior_complete_semantic_review": {
+    "path": "docs/reference/reviews/srm-design.json",
+    "sha256": "cffc5d996c9ff5bb0e9eb91b40db89cb9e91e23e2e3650a68823f384eb91b50f",
+    "source_sha256": "401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211",
+    "translations": {
+      "en-US": {
+        "path": "docs/design/srm-design.en.md",
+        "sha256": "b435531984cbcc01647378182f1e04a5a36b59912fa2243656040c380261fb5d"
+      },
+      "ja-JP": {
+        "path": "docs/design/srm-design.jp.md",
+        "sha256": "48e72ba2e7c4cf8fb7c290c74b44ca8263025d3f5d9fa6a6976684a22896a8fd"
+      },
+      "ko-KR": {
+        "path": "docs/design/srm-design.kr.md",
+        "sha256": "a097b26813ddb1076bd04c076e0ea74545ac3f9b2161d6054a887c2dedc56990"
+      }
+    }
+  },
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/srm-design.json",
+      "sha256": "cffc5d996c9ff5bb0e9eb91b40db89cb9e91e23e2e3650a68823f384eb91b50f"
+    },
+    {
+      "path": "docs/reference/reviews/srm.json",
+      "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/srm.md",
+      "sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03"
+    },
+    {
+      "path": "docs/srm.en.md",
+      "sha256": "1e147b3fbe8dd1d40dec801b18341af562242567b8e7e5710ed8dbe5a215d534"
+    },
+    {
+      "path": "docs/srm.jp.md",
+      "sha256": "981822e9042ad22d8dc488a3ece89a5a80e7c56d41da5ac6ac814a7e212d93e1"
+    },
+    {
+      "path": "docs/srm.kr.md",
+      "sha256": "652a77c1ae78d9c0d5a54e8161e8ef47016f2e7a68a19909b36efca0dabeb58a"
+    },
+    {
+      "path": "docs/reference/evidence/srm-document-ownership-2026-10-18.json",
+      "sha256": "fecb4a9719f2c76654c3d39b619bf6b8c47e1b448bb2d3e89d4b37fbdd54b6b5"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "885c3574e4ff6ab98feb0a1216a6d80541005b7a2021e8c46e2130206fa4673d"
+    },
+    {
+      "path": "docs/repository-governance.md",
+      "sha256": "9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08"
+    }
+  ],
+  "source_inspection_scope": "Actual semantic review of all changed ownership declarations; complete unchanged design content reuses the matching prior whole-document semantic review.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "review_scope": "ownership declarations and navigation/governance only",
+    "prior_whole_design_review_reused": true,
+    "prior_complete_semantic_review": {
+      "path": "docs/reference/reviews/srm-design.json",
+      "sha256": "cffc5d996c9ff5bb0e9eb91b40db89cb9e91e23e2e3650a68823f384eb91b50f",
+      "source_sha256": "401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211",
+      "translations": {
+        "en-US": {
+          "path": "docs/design/srm-design.en.md",
+          "sha256": "b435531984cbcc01647378182f1e04a5a36b59912fa2243656040c380261fb5d"
+        },
+        "ja-JP": {
+          "path": "docs/design/srm-design.jp.md",
+          "sha256": "48e72ba2e7c4cf8fb7c290c74b44ca8263025d3f5d9fa6a6976684a22896a8fd"
+        },
+        "ko-KR": {
+          "path": "docs/design/srm-design.kr.md",
+          "sha256": "a097b26813ddb1076bd04c076e0ea74545ac3f9b2161d6054a887c2dedc56990"
+        }
+      }
+    },
+    "current_fact_review": {
+      "path": "docs/reference/reviews/srm.json",
+      "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f",
+      "source_sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03"
+    },
+    "new_whole_document_rereads": 0,
+    "actual_delta_read_output": "308e27",
+    "body_from_first_h2_byte_identical_all_four": true,
+    "rendered_documents": 6,
+    "new_domain_contract_changes": 0,
+    "new_translation_rows": 0,
+    "renewed_translation_rows": 3,
+    "source_bindings": 10,
+    "current_evidence": "docs/reference/evidence/srm-document-ownership-2026-10-18.json",
+    "application_source_changes": false,
+    "new_application_runs": 0,
+    "business_writes": 0,
+    "limitations": [
+      "No domain source,API,state machine,permission,transaction,diagram,command or historical section changed;no new domain behavior approval.",
+      "No new application build/test,capture,login,CAPTCHA,external authorization or business write. The matching complete historical semantic review is reused at its actual recorded scope.",
+      "This renews three existing translation rows and adds zero rows. The four historical dependency changes found by audit522 still need explicit final impact assessment. Other fullA-G work remains open."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/design/srm-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 01:31:44",
+      "result": "approved",
+      "translation_sha256": "8e816a45b5ef5b270fa92419f141cc44da9ab21e76159266b672dc318e580bfc",
+      "checks": {
+        "coverage_and_meaning": "实际阅读全部最终差异308e27。四语职责句和新增段落等义：当前契约唯一在对应SRM事实文档维护，设计保留既有决策与指定提交的快照，长期设计变化仍说明事实/ADR关系，教程和运行证据仍归Wiki。全部第一节及其后正文逐字未变，既有完整语义复核按当前原始摘要复用，没有声称本轮重读整篇。",
+        "technical_literals": "四语同一40位提交号9b23ab972f1dcac4116ae95fb5cd56442e2961e4与实际Git对象核对c185ba一致；SRM事实链接分别对应md/en/jp/kr。现有端口、状态、81条方法/路径、权限、金额字符串、数据范围、事务、幂等、命令和图表未修改。",
+        "security_and_failure_semantics": "设计内原有租户、身份/权限、Portal关联、Saga失败恢复和幂等语义均保持原字节。AGENTS改为同时读取当前SRM事实及设计；保留forward-only迁移、seed摘要、权限/v-permission同步约束。治理明确实际AI_REVIEW通过即可、HUMAN_REVIEW仅记录真实人工工作，未放宽摘要/授权/严格质量门。",
+        "images_and_links": "没有新增或变更图片、标题、锚点、命令和领域正文。四语新增事实链接指向已通过完整复核且摘要匹配的当前SRM事实；保留原Wiki/源码/设计/ADR入口。六个修改文档在本机Docker渲染；正式链接门另行核验。",
+        "language_and_terminology": "Compared the exact final purpose and ownership paragraphs with Chinese in308e27. Current rules versus the reviewed implementation snapshot, the unchanged original design date, subsequent long-term decisions and Wiki procedures/evidence retain the same meaning. The commit and current English SRM link are exact. The unchanged complete body reuses the actual prior whole semantic review,not a newly claimed full reread."
+      },
+      "findings": [
+        {
+          "id": "SO01",
+          "status": "resolved",
+          "resolution": "Make SRM facts the sole owner of subsequent current contracts;retain the already reviewed design content as an explicitly commit-bound snapshot."
+        },
+        {
+          "id": "SO02",
+          "status": "resolved",
+          "resolution": "Preserve the original2026-07-27 design date and all important history without backdating implementation results to that date."
+        },
+        {
+          "id": "SO03",
+          "status": "resolved",
+          "resolution": "Route execution rules to both current facts and design while preserving every existing migration,seed,permission and frontend authorization requirement."
+        },
+        {
+          "id": "SO04",
+          "status": "resolved",
+          "resolution": "State actual authorizedAI_REVIEW suffices and distinguish genuineHUMAN_REVIEW;keep strict authorization and current digest checks."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/design/srm-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 01:31:44",
+      "result": "approved",
+      "translation_sha256": "83aba64dc5c68d99025a32f01cfe090978b545caf951912f7194abdeb35b2ffa",
+      "checks": {
+        "coverage_and_meaning": "实际阅读全部最终差异308e27。四语职责句和新增段落等义：当前契约唯一在对应SRM事实文档维护，设计保留既有决策与指定提交的快照，长期设计变化仍说明事实/ADR关系，教程和运行证据仍归Wiki。全部第一节及其后正文逐字未变，既有完整语义复核按当前原始摘要复用，没有声称本轮重读整篇。",
+        "technical_literals": "四语同一40位提交号9b23ab972f1dcac4116ae95fb5cd56442e2961e4与实际Git对象核对c185ba一致；SRM事实链接分别对应md/en/jp/kr。现有端口、状态、81条方法/路径、权限、金额字符串、数据范围、事务、幂等、命令和图表未修改。",
+        "security_and_failure_semantics": "设计内原有租户、身份/权限、Portal关联、Saga失败恢复和幂等语义均保持原字节。AGENTS改为同时读取当前SRM事实及设计；保留forward-only迁移、seed摘要、权限/v-permission同步约束。治理明确实际AI_REVIEW通过即可、HUMAN_REVIEW仅记录真实人工工作，未放宽摘要/授权/严格质量门。",
+        "images_and_links": "没有新增或变更图片、标题、锚点、命令和领域正文。四语新增事实链接指向已通过完整复核且摘要匹配的当前SRM事实；保留原Wiki/源码/设计/ADR入口。六个修改文档在本机Docker渲染；正式链接门另行核验。",
+        "language_and_terminology": "308e27の最終変更を中文と照合した。設計判断・実装済みベースラインのスナップショット・現行契約の一元管理・原設計日への遡及禁止・ADRとの関係を自然な日本語で区別する。コミット値と日本語SRM事実文書へのリンクは正確で、変更のない本文は既存の完全レビューを再利用する。"
+      },
+      "findings": [
+        {
+          "id": "SO01",
+          "status": "resolved",
+          "resolution": "Make SRM facts the sole owner of subsequent current contracts;retain the already reviewed design content as an explicitly commit-bound snapshot."
+        },
+        {
+          "id": "SO02",
+          "status": "resolved",
+          "resolution": "Preserve the original2026-07-27 design date and all important history without backdating implementation results to that date."
+        },
+        {
+          "id": "SO03",
+          "status": "resolved",
+          "resolution": "Route execution rules to both current facts and design while preserving every existing migration,seed,permission and frontend authorization requirement."
+        },
+        {
+          "id": "SO04",
+          "status": "resolved",
+          "resolution": "State actual authorizedAI_REVIEW suffices and distinguish genuineHUMAN_REVIEW;keep strict authorization and current digest checks."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/design/srm-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 01:31:44",
+      "result": "approved",
+      "translation_sha256": "e8d79e62bceda2a5c2d4fb6ba4bc5b0f7c81421fc851553143ea5b63d4cc0081",
+      "checks": {
+        "coverage_and_meaning": "实际阅读全部最终差异308e27。四语职责句和新增段落等义：当前契约唯一在对应SRM事实文档维护，设计保留既有决策与指定提交的快照，长期设计变化仍说明事实/ADR关系，教程和运行证据仍归Wiki。全部第一节及其后正文逐字未变，既有完整语义复核按当前原始摘要复用，没有声称本轮重读整篇。",
+        "technical_literals": "四语同一40位提交号9b23ab972f1dcac4116ae95fb5cd56442e2961e4与实际Git对象核对c185ba一致；SRM事实链接分别对应md/en/jp/kr。现有端口、状态、81条方法/路径、权限、金额字符串、数据范围、事务、幂等、命令和图表未修改。",
+        "security_and_failure_semantics": "设计内原有租户、身份/权限、Portal关联、Saga失败恢复和幂等语义均保持原字节。AGENTS改为同时读取当前SRM事实及设计；保留forward-only迁移、seed摘要、权限/v-permission同步约束。治理明确实际AI_REVIEW通过即可、HUMAN_REVIEW仅记录真实人工工作，未放宽摘要/授权/严格质量门。",
+        "images_and_links": "没有新增或变更图片、标题、锚点、命令和领域正文。四语新增事实链接指向已通过完整复核且摘要匹配的当前SRM事实；保留原Wiki/源码/设计/ADR入口。六个修改文档在本机Docker渲染；正式链接门另行核验。",
+        "language_and_terminology": "308e27의 최종 역할 문장과 추가 단락을 중국어와 대조했다. 현재 규칙의 단일 관리 원본, 검토한 설계 기준선 스냅샷, 원 설계 날짜로 소급하지 않는다는 조건, 장기 결정과 ADR 및 Wiki의 역할을 동일하게 설명한다. 커밋 값과 한국어 SRM 사실 링크가 정확하며, 변경하지 않은 본문은 기존 전체 의미 검토를 재사용한다."
+      },
+      "findings": [
+        {
+          "id": "SO01",
+          "status": "resolved",
+          "resolution": "Make SRM facts the sole owner of subsequent current contracts;retain the already reviewed design content as an explicitly commit-bound snapshot."
+        },
+        {
+          "id": "SO02",
+          "status": "resolved",
+          "resolution": "Preserve the original2026-07-27 design date and all important history without backdating implementation results to that date."
+        },
+        {
+          "id": "SO03",
+          "status": "resolved",
+          "resolution": "Route execution rules to both current facts and design while preserving every existing migration,seed,permission and frontend authorization requirement."
+        },
+        {
+          "id": "SO04",
+          "status": "resolved",
+          "resolution": "State actual authorizedAI_REVIEW suffices and distinguish genuineHUMAN_REVIEW;keep strict authorization and current digest checks."
+        }
+      ]
+    }
+  }
+}

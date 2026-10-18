@@ -1,0 +1,35 @@
+# {{displayName}} モジュールの保守
+
+<!-- @omni-stack/cli {{generatorVersion}} により生成。テンプレート {{templateVersion}}。 -->
+
+## モジュールの境界
+
+- サービス：`{{artifactId}}`
+- Java パッケージ：`{{javaPackage}}`
+- API 接頭辞：`{{apiPrefix}}`
+- データベース：`{{databaseName}}`
+- テナントテーブル接頭辞：`{{tablePrefix}}`
+- DataScope：`{{enableDataScope}}`{{#if enableDataScope}}（現状は安全側で拒否。テーブル：{{dataScopeTablesCsv}}）{{/if}}
+- OperLog / Job / MQ：`{{enableOperLog}} / {{enableJob}} / {{enableMq}}`
+
+## 生成する範囲
+
+安全なサービス骨格と接続宣言を生成します。業務エンティティ、状態遷移、Saga、承認の補償やサービス間の冪等性は実装しません。`ModuleInfoController` は初回の接続確認用です。実際の業務 API が完成した後に削除できます。
+
+## 接続手順
+
+1. `integration/` の親 POM、catalog、Gateway、Compose、権限とフロントエンドの断片を確認します。
+2. プロジェクトルートから `docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run dev -- service integrate {{serviceId}} --source generated/{{serviceId}}` を実行します。計画を確認してから `--apply` を追加します。パッケージのパスは実際の生成先と一致させます。
+3. スキーマ変更には forward-only の Liquibase changeSet を追加します。SQL seed ディレクトリには正式な初期データを保存します。
+4. 業務の書き込み API を公開する前に、ドメイン規則、権限と DataScope を実装します。
+5. `compose.tools.yaml` の `backend` と `frontend` サービスで、ローカル Docker 内のビルドと lint を実行します。続いて Compose と 401/403/503 の動作を確認します。アプリケーションも Docker 内で起動します。
+
+## 文書と受け入れの範囲
+
+接続トランザクションは四言語の文書、中国語原文の SHA-256 とレビュー一覧を登録します。生成はファイルと構造の検査のみを示し、業務受入や意味レビューを証明しません。訳文の初期状態は `present-unverified` です。対象プロジェクトの `docs/docs-manifest.yaml` にある `release_policy` に従います。本プロジェクトの所有者が承認した実際の `AI_REVIEW` で翻訳レビューを満たせるため、人手レビューは必須ではありません。確認者、日付、原文と訳文のハッシュ、文書ごとの `review_evidence` とそのハッシュを記録します。AI レビューを `HUMAN_REVIEW` として記録してはいけません。
+
+[スキャフォールドガイド](guides/scaffold-development.jp.md) と [バックエンドの規約](backend-patterns.jp.md) を参照してください。初回の受け入れでは独立した Docker プロジェクトと合成データを使用します。リクエスト、期待する結果と復旧手順を記録し、スクリーンショットからトークンと非公開の認証情報を除外します。
+
+## 手書きのコード
+
+生成器はドメインの Entity、DTO、Mapper、Service 実装と業務 Controller を管理しません。登録済みの生成ファイルを変更すると、`omni service validate` がハッシュの差異を報告します。新しい生成計画の確認時にも手書きの変更を保持してください。

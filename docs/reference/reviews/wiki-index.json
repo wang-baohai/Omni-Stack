@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-index",
+  "source": "docs/wiki/index.md",
+  "source_sha256": "371317d798e6851282487da8de4f031bf7e2eb204042867724ea4dbe2ab76e1a",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/index.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:58:03",
+      "result": "approved",
+      "translation_sha256": "de1d687ec00e3f149946b5b1d5540a34e38d6127ac2da6cd28d223d4fcc12c90",
+      "checks": {
+        "coverage_and_meaning": "完整核对五步入门、七种角色路径、源码入口、十个术语和维护说明，覆盖初学者从启动到二次开发。",
+        "technical_literals": "fc165e3、Docker、五种预设、SUPPLIER、RBAC/DataScope、Outbox/Inbox 与 Saga 的含义均保持一致。",
+        "security_and_failure_semantics": "保留真实 CAPTCHA、ALL 仍受租户边界、禁止 SQL 跳过审批、历史截图 ID 不复用与预览不等于发布。",
+        "language_and_terminology": "English role and glossary descriptions agree with Chinese; actual review status now accurately distinguishes HUMAN_REVIEW and owner-authorized AI_REVIEW.",
+        "images_and_links": "各入门和业务链接指向 .en.md，治理与清单指向规范源；本页无图片，没有将社交登录入口当作成功证明。"
+      },
+      "findings": [
+        {
+          "id": "superseded-review-label",
+          "status": "resolved",
+          "description": "首尾仍将全部译审描述为真人审校。",
+          "resolution": "按当前授权区分 HUMAN_REVIEW/AI_REVIEW，预览不能代替实际译审。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/index.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:58:03",
+      "result": "approved",
+      "translation_sha256": "880a6cebebaa53bec924218c6313f5332cd14c1128e6097e20d1779e52375c53",
+      "checks": {
+        "coverage_and_meaning": "五つの入門段階、役割別経路、ソース開発、十用語と保守说明已逐项核对，无遗漏前置条件。",
+        "technical_literals": "fc165e3、Docker、预设标识、SUPPLIER、功能/数据范围及事务/去重术语一致，Saga不等于跨服务ACID。",
+        "security_and_failure_semantics": "保留人工 CAPTCHA、租户边界、不得直接改 SQL 和历史数据不可假定存在，审校类型区分人和授权 AI。",
+        "language_and_terminology": "登录/承认/冪等/候補者/テナント等日文与项目含义相符，原人によるレビュー唯一表述已更新。",
+        "images_and_links": "所有教程和事实入口使用 .jp.md，清单与治理规范源可解析；没有截图需要切换或重新取证。"
+      },
+      "findings": [
+        {
+          "id": "superseded-review-label",
+          "status": "resolved",
+          "description": "译文仍将实际审校唯一描述为真人。",
+          "resolution": "明确 HUMAN_REVIEW 和所有者授权 AI_REVIEW，保留预览与审校完成的区别。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/index.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:58:03",
+      "result": "approved",
+      "translation_sha256": "7a9a3676c83582d3cede1868dd6c87b5c0f7f0252a0854b4517210f765686590",
+      "checks": {
+        "coverage_and_meaning": "核对首次启动五步、角色路径、源码与扩展入口、术语和维护五节，顺序与前置条件完整。",
+        "technical_literals": "全部预设、fc165e3、Docker、SUPPLIER、Gateway assertion、Outbox/Inbox、Saga字面及概念与中文一致。",
+        "security_and_failure_semantics": "保留真实 CAPTCHA、ALL不能跨租户、禁止SQL改状态和历史图不证明当前数据，AI复核不得冒充人。",
+        "language_and_terminology": "테넌트、멱등、기능 권한、행 가시성等词与工程含义一致，审校状态描述更新为当前明确授权。",
+        "images_and_links": "本语言入口使用 .kr.md，规范源治理/清单链接正确；本页无图片，未隐去角色或数据隔离前提。"
+      },
+      "findings": [
+        {
+          "id": "superseded-review-label",
+          "status": "resolved",
+          "description": "旧表述仅提사람의검토。",
+          "resolution": "记录实际译审，区分HUMAN_REVIEW和所有者授权AI_REVIEW。"
+        }
+      ]
+    }
+  }
+}

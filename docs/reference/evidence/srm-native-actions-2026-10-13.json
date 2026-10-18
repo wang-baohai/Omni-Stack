@@ -1,0 +1,2090 @@
+{
+  "schema": 1,
+  "kind": "isolated-docker-srm-native-create-and-lifecycle",
+  "recorded_at": "2026-10-13T00:46:54.416Z",
+  "project": "omni-wiki-acceptance-20261009",
+  "run_id": "WIKI-20261013-SRM-F",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "status": "NATIVE_COMMANDS_PASS_HISTORY_RETAINED",
+  "test": "scripts/fixtures/capture-srm-native-actions.mjs",
+  "phases": [
+    "prepare",
+    "suspend",
+    "resume",
+    "blacklist",
+    "restore",
+    "eliminate"
+  ],
+  "tools": {
+    "node": "v24.17.0",
+    "playwright": "1.61.1",
+    "chromium": "149.0.7827.55"
+  },
+  "business_sample": {
+    "supplier_id": 9,
+    "supplier_no": "S1-9",
+    "final_status": "ELIMINATED",
+    "final_version": 7,
+    "process_instance_id": "5c4eb3f5-c69e-11f1-b821-ba9702317d61",
+    "internal_owner_user_id": 206,
+    "internal_owner_unit_id": 604
+  },
+  "operations": [
+    {
+      "key": "create",
+      "status": "COMMITTED",
+      "actor": "srmstaff",
+      "native_ui": true,
+      "at": "2026-10-13T00:38:07.688Z",
+      "finished_at": "2026-10-13T00:38:08.396Z",
+      "after": {
+        "supplier_id": 9,
+        "status": "APPROVING",
+        "version": 1
+      }
+    },
+    {
+      "key": "approve:srmmanager",
+      "status": "COMMITTED",
+      "actor": "srmmanager",
+      "native_ui": false,
+      "at": "2026-10-13T00:38:08.567Z",
+      "finished_at": "2026-10-13T00:38:08.835Z",
+      "task_id": "5c59feb2-c69e-11f1-b821-ba9702317d61"
+    },
+    {
+      "key": "approve:compliance",
+      "status": "COMMITTED",
+      "actor": "compliance",
+      "native_ui": false,
+      "at": "2026-10-13T00:38:08.885Z",
+      "finished_at": "2026-10-13T00:38:09.065Z",
+      "task_id": "5caf71ca-c69e-11f1-b821-ba9702317d61"
+    },
+    {
+      "key": "approve:director",
+      "status": "COMMITTED",
+      "actor": "director",
+      "native_ui": false,
+      "at": "2026-10-13T00:38:09.098Z",
+      "finished_at": "2026-10-13T00:38:09.243Z",
+      "task_id": "5cd659d1-c69e-11f1-b821-ba9702317d61"
+    },
+    {
+      "key": "native:suspend",
+      "status": "COMMITTED",
+      "actor": "srmstaff",
+      "native_ui": true,
+      "at": "2026-10-13T00:39:14.111Z",
+      "finished_at": "2026-10-13T00:39:14.357Z",
+      "before": "APPROVED",
+      "before_version": 2,
+      "path": "/api/srm/supplier/9/suspend",
+      "after": {
+        "supplier_id": 9,
+        "status": "SUSPENDED",
+        "version": 3
+      }
+    },
+    {
+      "key": "native:resume",
+      "status": "COMMITTED",
+      "actor": "srmstaff",
+      "native_ui": true,
+      "at": "2026-10-13T00:42:28.240Z",
+      "finished_at": "2026-10-13T00:42:28.427Z",
+      "before": "SUSPENDED",
+      "before_version": 3,
+      "path": "/api/srm/supplier/9/resume",
+      "after": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 4
+      }
+    },
+    {
+      "key": "native:blacklist",
+      "status": "COMMITTED",
+      "actor": "srmstaff",
+      "native_ui": true,
+      "at": "2026-10-13T00:43:23.450Z",
+      "finished_at": "2026-10-13T00:43:23.673Z",
+      "before": "APPROVED",
+      "before_version": 4,
+      "path": "/api/srm/supplier/9/blacklist",
+      "after": {
+        "supplier_id": 9,
+        "status": "BLACKLISTED",
+        "version": 5
+      }
+    },
+    {
+      "key": "native:restore",
+      "status": "COMMITTED",
+      "actor": "srmstaff",
+      "native_ui": true,
+      "at": "2026-10-13T00:44:03.867Z",
+      "finished_at": "2026-10-13T00:44:04.034Z",
+      "before": "BLACKLISTED",
+      "before_version": 5,
+      "path": "/api/srm/supplier/9/restore-from-blacklist",
+      "after": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 6
+      }
+    },
+    {
+      "key": "native:eliminate",
+      "status": "COMMITTED",
+      "actor": "srmstaff",
+      "native_ui": true,
+      "at": "2026-10-13T00:44:51.186Z",
+      "finished_at": "2026-10-13T00:44:51.331Z",
+      "before": "APPROVED",
+      "before_version": 6,
+      "path": "/api/srm/supplier/9/eliminate",
+      "after": {
+        "supplier_id": 9,
+        "status": "ELIMINATED",
+        "version": 7
+      }
+    }
+  ],
+  "native_persisted_commands": 6,
+  "candidate_api_decisions": 3,
+  "observations": [
+    {
+      "at": "2026-10-13T00:38:06.513Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/list?name=WIKI-20261013-SRM-F%20Native%20Vendor%20F&page=1&size=100",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:38:08.493Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:38:08.544Z",
+      "actor": "srmmanager",
+      "path": "/api/workflow/task/todo?page=1&size=100",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:38:08.824Z",
+      "actor": "srmmanager",
+      "path": "/api/workflow/approval/5c59feb2-c69e-11f1-b821-ba9702317d61/complete",
+      "method": "POST",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:38:08.873Z",
+      "actor": "compliance",
+      "path": "/api/workflow/task/todo?page=1&size=100",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:38:09.056Z",
+      "actor": "compliance",
+      "path": "/api/workflow/approval/5caf71ca-c69e-11f1-b821-ba9702317d61/complete",
+      "method": "POST",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:38:09.089Z",
+      "actor": "director",
+      "path": "/api/workflow/task/todo?page=1&size=100",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:38:09.232Z",
+      "actor": "director",
+      "path": "/api/workflow/approval/5cd659d1-c69e-11f1-b821-ba9702317d61/complete",
+      "method": "POST",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:38:09.320Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:38:10.886Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:39:06.974Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:39:14.461Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:42:27.093Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:42:28.498Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:43:22.009Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:43:23.784Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:44:02.809Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:44:04.108Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:44:50.121Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-13T00:44:51.405Z",
+      "actor": "srmstaff",
+      "path": "/api/srm/supplier/9",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    }
+  ],
+  "runtime": [
+    {
+      "service": "omni-frontend",
+      "container_id": "01ec18abb3a87f08348434184f12660bf8d1294145d7afa64ac9ae51b5d703e6",
+      "image_id": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-base",
+      "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+      "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-gateway",
+      "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+      "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+      "host_ports": 0
+    },
+    {
+      "service": "grafana",
+      "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+      "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+      "host_ports": 0
+    },
+    {
+      "service": "prometheus",
+      "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+      "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+      "host_ports": 0
+    },
+    {
+      "service": "otel-collector",
+      "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+      "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+      "host_ports": 0
+    },
+    {
+      "service": "alloy",
+      "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+      "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+      "host_ports": 0
+    },
+    {
+      "service": "tempo",
+      "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+      "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+      "host_ports": 0
+    },
+    {
+      "service": "pushgateway",
+      "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+      "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+      "host_ports": 0
+    },
+    {
+      "service": "loki",
+      "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+      "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+      "host_ports": 0
+    },
+    {
+      "service": "alertmanager",
+      "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+      "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-workflow",
+      "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+      "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-asset",
+      "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+      "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-procurement",
+      "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+      "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-crm",
+      "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+      "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-srm",
+      "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+      "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-auth",
+      "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+      "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+      "host_ports": 0
+    },
+    {
+      "service": "nacos",
+      "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+      "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+      "host_ports": 0
+    },
+    {
+      "service": "xxl-job-admin",
+      "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+      "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-db-migrator",
+      "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+      "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+      "host_ports": 0
+    },
+    {
+      "service": "rocketmq-broker",
+      "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+      "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+      "host_ports": 0
+    },
+    {
+      "service": "mysql",
+      "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+      "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "host_ports": 0
+    },
+    {
+      "service": "redis",
+      "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+      "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+      "host_ports": 0
+    },
+    {
+      "service": "rocketmq-namesrv",
+      "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+      "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+      "host_ports": 0
+    }
+  ],
+  "visual_review": {
+    "status": "passed-with-documented-limits",
+    "reviewer": "Agent original-image inspection, not human translation signature",
+    "reviewed": 32,
+    "published_unique_files": 24,
+    "byte_identical_reuse": 8,
+    "human_translation_review": "pending",
+    "limits": [
+      "Only supplier creation and five lifecycle commands use real native UI clicks.",
+      "Three admission decisions use ordinary candidate API identities, not native approval clicks.",
+      "No portal account, CAPTCHA self-registration or social login is claimed.",
+      "All 32 original PNGs individually inspected by the agent; 24 distinct images published, with 8 byte-identical APPROVED detail results reusing the first image per locale.",
+      "Desktop 1440x1000 only. Actual dark product theme; no injected UI styles, forced clicks or mocked responses.",
+      "Long supplier input clips visually; the complete value is asserted. English/Japanese labels wrap, the English Primary table heading breaks across lines, and some optional form labels remain raw English.",
+      "Detail images prove the supplier identity and status at the top. Lower risk rows are outside the viewport; empty contact/bank/evaluation sections are not evidence of those flows. Status, type and level remain raw enums.",
+      "Versions are verified from real API responses, not displayed in the detail screenshot. The native Chinese command executes once; other locales are previews and subsequent read-only result captures.",
+      "The terminal supplier and approval history remain in the dedicated isolated project. No portal account or invite was created for this internal-only sample; final project cleanup remains pending.",
+      "Human translation review remains pending and is independent of agent visual inspection."
+    ]
+  },
+  "captures": [
+    {
+      "name": "srm-native-create-form",
+      "locale": "zh-CN",
+      "flow": "admission",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "name": "WIKI-20261013-SRM-F Native Vendor F",
+        "native_form": true,
+        "submitted": false
+      },
+      "image": "docs/images/zh-CN/srm-native-create-form.png",
+      "sha256": "da20a2384a669625cbc3373408c9c4e5045fb26e1d3d68c1c364259230976d4a",
+      "captured_at": "2026-10-13T00:38:01.847Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-create-form",
+      "locale": "en-US",
+      "flow": "admission",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "name": "WIKI-20261013-SRM-F Native Vendor F",
+        "native_form": true,
+        "submitted": false
+      },
+      "image": "docs/images/en-US/srm-native-create-form.png",
+      "sha256": "d69d22e5c4f90d4a84921560eb95d6a3abb0a835e9296758c41430ae4c387b3b",
+      "captured_at": "2026-10-13T00:38:03.432Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-create-form",
+      "locale": "ja-JP",
+      "flow": "admission",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "name": "WIKI-20261013-SRM-F Native Vendor F",
+        "native_form": true,
+        "submitted": false
+      },
+      "image": "docs/images/ja-JP/srm-native-create-form.png",
+      "sha256": "7747815b16826d15e77b9a31f1ca5613f29f1b6b09fd149346231a1713067d88",
+      "captured_at": "2026-10-13T00:38:04.965Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-create-form",
+      "locale": "ko-KR",
+      "flow": "admission",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "name": "WIKI-20261013-SRM-F Native Vendor F",
+        "native_form": true,
+        "submitted": false
+      },
+      "image": "docs/images/ko-KR/srm-native-create-form.png",
+      "sha256": "f3a0e899c5dc7ae6b906a57b259f9a3060cd4b3b9174e7bab706ab533c0bf498",
+      "captured_at": "2026-10-13T00:38:06.452Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-approved-detail",
+      "locale": "zh-CN",
+      "flow": "activation",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 2,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/zh-CN/srm-native-approved-detail.png",
+      "sha256": "1da0e9b3d25079b62a8511bb2e1b22a646524ec9f9d92b861547985b6c5fa976",
+      "captured_at": "2026-10-13T00:38:12.271Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-approved-detail",
+      "locale": "en-US",
+      "flow": "activation",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 2,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/en-US/srm-native-approved-detail.png",
+      "sha256": "003949d6a7ec108c1e9b1b29f090706c31fabee4fb9c1530af5552c5a9304f11",
+      "captured_at": "2026-10-13T00:38:13.792Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-approved-detail",
+      "locale": "ja-JP",
+      "flow": "activation",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 2,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ja-JP/srm-native-approved-detail.png",
+      "sha256": "af68440f9a98eaae8816f58a8ed65bc4a4d953f772507a1f075d62d7e7768a69",
+      "captured_at": "2026-10-13T00:38:15.259Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-approved-detail",
+      "locale": "ko-KR",
+      "flow": "activation",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 2,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ko-KR/srm-native-approved-detail.png",
+      "sha256": "d02b1ba47a444f1e472b03b201fcca6f19033d29b5d0bfb65a49afa6c536615d",
+      "captured_at": "2026-10-13T00:38:16.662Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-suspend-confirmation",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "before": "APPROVED",
+        "confirmation_only": true,
+        "submitted": false
+      },
+      "image": "docs/images/zh-CN/srm-native-suspend-confirmation.png",
+      "sha256": "13dba1bbde1d72f312c2ac48ab8a395a58577b233a3a043938b9fa59d9a8ac2e",
+      "captured_at": "2026-10-13T00:39:08.643Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-suspend-confirmation",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "before": "APPROVED",
+        "confirmation_only": true,
+        "submitted": false
+      },
+      "image": "docs/images/en-US/srm-native-suspend-confirmation.png",
+      "sha256": "d31cef9e83028882be33651cbfcbe55e160fa3c730d49158e1e55131cfbeec4d",
+      "captured_at": "2026-10-13T00:39:10.133Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-suspend-confirmation",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "before": "APPROVED",
+        "confirmation_only": true,
+        "submitted": false
+      },
+      "image": "docs/images/ja-JP/srm-native-suspend-confirmation.png",
+      "sha256": "f6148c85c69da503f73c8364efb9c959beb6591ee42c7896da12a8714cb1759d",
+      "captured_at": "2026-10-13T00:39:11.579Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-suspend-confirmation",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "before": "APPROVED",
+        "confirmation_only": true,
+        "submitted": false
+      },
+      "image": "docs/images/ko-KR/srm-native-suspend-confirmation.png",
+      "sha256": "7e4aa90d95c226f92afd32c3a927123d4c8a7042536aa5510844551a663af243",
+      "captured_at": "2026-10-13T00:39:12.940Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-suspend-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "SUSPENDED",
+        "version": 3,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/zh-CN/srm-native-suspend-detail.png",
+      "sha256": "bc03203a67efb1837935492331a974384ccd77aa02b65b406fd2aa3692b01e70",
+      "captured_at": "2026-10-13T00:39:16.000Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-suspend-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "SUSPENDED",
+        "version": 3,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/en-US/srm-native-suspend-detail.png",
+      "sha256": "6482115557336bacbb165fea4096f6a735aac9f4a9e189ac4f26163959fc0a1b",
+      "captured_at": "2026-10-13T00:39:17.536Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-suspend-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "SUSPENDED",
+        "version": 3,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ja-JP/srm-native-suspend-detail.png",
+      "sha256": "a54260a3bc51548b1f5f3dac49fab0cbbee8fbf207bfc9b5f997dd0237cd49d2",
+      "captured_at": "2026-10-13T00:39:19.218Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-suspend-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "SUSPENDED",
+        "version": 3,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ko-KR/srm-native-suspend-detail.png",
+      "sha256": "eb1332621da9e3a47b87bb5c41b3a4117ff17f7e72279c9caf4a89f614fbce4f",
+      "captured_at": "2026-10-13T00:39:20.799Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-resume-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 4,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/zh-CN/srm-native-approved-detail.png",
+      "sha256": "1da0e9b3d25079b62a8511bb2e1b22a646524ec9f9d92b861547985b6c5fa976",
+      "captured_at": "2026-10-13T00:42:30.127Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "byte_identical_reuse": true
+    },
+    {
+      "name": "srm-native-resume-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 4,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/en-US/srm-native-approved-detail.png",
+      "sha256": "003949d6a7ec108c1e9b1b29f090706c31fabee4fb9c1530af5552c5a9304f11",
+      "captured_at": "2026-10-13T00:42:31.595Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "byte_identical_reuse": true
+    },
+    {
+      "name": "srm-native-resume-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 4,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ja-JP/srm-native-approved-detail.png",
+      "sha256": "af68440f9a98eaae8816f58a8ed65bc4a4d953f772507a1f075d62d7e7768a69",
+      "captured_at": "2026-10-13T00:42:33.107Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "byte_identical_reuse": true
+    },
+    {
+      "name": "srm-native-resume-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 4,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ko-KR/srm-native-approved-detail.png",
+      "sha256": "d02b1ba47a444f1e472b03b201fcca6f19033d29b5d0bfb65a49afa6c536615d",
+      "captured_at": "2026-10-13T00:42:34.633Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "byte_identical_reuse": true
+    },
+    {
+      "name": "srm-native-blacklist-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "BLACKLISTED",
+        "version": 5,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/zh-CN/srm-native-blacklist-detail.png",
+      "sha256": "243dd2e49afa92dad5a52c38eb34e3f6b6c43ea10e1cfbfe5f2a3688046ff85d",
+      "captured_at": "2026-10-13T00:43:25.711Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-blacklist-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "BLACKLISTED",
+        "version": 5,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/en-US/srm-native-blacklist-detail.png",
+      "sha256": "72c672079ffcddb1673e89952ddd53d989201a2a85753e5086e0dc11df260132",
+      "captured_at": "2026-10-13T00:43:27.207Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-blacklist-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "BLACKLISTED",
+        "version": 5,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ja-JP/srm-native-blacklist-detail.png",
+      "sha256": "94dd620b1f0836a73c82d5b66445431c2b6ad3f086597f651b1340073c732ce0",
+      "captured_at": "2026-10-13T00:43:28.668Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-blacklist-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "BLACKLISTED",
+        "version": 5,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ko-KR/srm-native-blacklist-detail.png",
+      "sha256": "6e64e82a66f1990326671ad944c07e1db4485eac6885bc59348136e2fe8afd3b",
+      "captured_at": "2026-10-13T00:43:30.456Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-restore-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 6,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/zh-CN/srm-native-approved-detail.png",
+      "sha256": "1da0e9b3d25079b62a8511bb2e1b22a646524ec9f9d92b861547985b6c5fa976",
+      "captured_at": "2026-10-13T00:44:05.637Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "byte_identical_reuse": true
+    },
+    {
+      "name": "srm-native-restore-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 6,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/en-US/srm-native-approved-detail.png",
+      "sha256": "003949d6a7ec108c1e9b1b29f090706c31fabee4fb9c1530af5552c5a9304f11",
+      "captured_at": "2026-10-13T00:44:07.118Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "byte_identical_reuse": true
+    },
+    {
+      "name": "srm-native-restore-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 6,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ja-JP/srm-native-approved-detail.png",
+      "sha256": "af68440f9a98eaae8816f58a8ed65bc4a4d953f772507a1f075d62d7e7768a69",
+      "captured_at": "2026-10-13T00:44:08.668Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "byte_identical_reuse": true
+    },
+    {
+      "name": "srm-native-restore-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "APPROVED",
+        "version": 6,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ko-KR/srm-native-approved-detail.png",
+      "sha256": "d02b1ba47a444f1e472b03b201fcca6f19033d29b5d0bfb65a49afa6c536615d",
+      "captured_at": "2026-10-13T00:44:10.261Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false,
+      "byte_identical_reuse": true
+    },
+    {
+      "name": "srm-native-eliminate-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "ELIMINATED",
+        "version": 7,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/zh-CN/srm-native-eliminate-detail.png",
+      "sha256": "34b9fcacf60091b34c6faa15eb3b5204a4f20a068855bf6731189e0baf520051",
+      "captured_at": "2026-10-13T00:44:52.947Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-eliminate-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "ELIMINATED",
+        "version": 7,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/en-US/srm-native-eliminate-detail.png",
+      "sha256": "ce2b246a5c91c70454999d09da131f5c78c9f69bc72d890ce9566b6846d7b80f",
+      "captured_at": "2026-10-13T00:44:54.320Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-eliminate-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "ELIMINATED",
+        "version": 7,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ja-JP/srm-native-eliminate-detail.png",
+      "sha256": "1e44d314e33edc77ca2255f438b576cb10a264f02747bb0fd5a51418b439827c",
+      "captured_at": "2026-10-13T00:44:55.880Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "srm-native-eliminate-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "USER",
+        "SRM_ADMIN"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "assertions": {
+        "supplier_id": 9,
+        "status": "ELIMINATED",
+        "version": 7,
+        "detail_opened_natively": true
+      },
+      "image": "docs/images/ko-KR/srm-native-eliminate-detail.png",
+      "sha256": "9347caf01bf9d48ad22eda57a1b47aade8e8cf936b40ce6c25f9db5a23c93e4b",
+      "captured_at": "2026-10-13T00:44:57.378Z",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+          "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-supplier.ts",
+          "sha256": "a0149a3ace5a02ab5b917640aa55952fb77c4ab3837f752d50df1e6edaf44608"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "test_sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    }
+  ]
+}

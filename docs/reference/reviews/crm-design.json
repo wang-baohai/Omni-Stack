@@ -1,0 +1,1518 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "crm-design",
+  "source": "docs/design/crm-design.md",
+  "source_sha256": "07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "3ef2fbcb4c45ae8da532036383c55dc106a43754",
+  "source_state": "Entire current Chinese CRM design and three translations actually reviewed. All16main topics and54original headings retained. Current facts/contracts stay with CRM/API;design owns choices,implementation boundaries and future proposals,while Git retains prior fulltext. Source-bound corrections cover identity/scope/schema/commands/common-service/Workflow/jobs/event envelope/Relay/OperLog/XSS/frontend/Docker/testing/milestones. No application changes or business writes;full originalA-G and owner AI-only amendment retained.",
+  "method": "All four original CRM-design documents821lines each actually read318,total3284. Current source audit320 includes11newwhole sources,57exact priorCRMcomparisons with their original selected/whole scopes,and named currentarchitecture/backend/API scopes. All four current339line documents freshly read in untruncated1-110/111-225/226-339 outputs,total1356lines. Final Japanese terminology edits actually read in full seven-hunk diff df9187. Strict245sourcehash/54heading/16topic/11table/4candidatehandler/12JSONfield/two-diagram/link checks supplement real semantic reading;they do not generate approval automatically.",
+  "checked_source_files": [
+    {
+      "path": "compose.apps.yaml",
+      "sha256": "57781677a1d2b04ee6aaea5e6ee431fbe2bb57f38ef43c418bb8913454efb123"
+    },
+    {
+      "path": "compose.infra.yaml",
+      "sha256": "c9dd1a7542520148b3b3d5397fa37669fb4132cd41ad5cf10ff878995646dab6"
+    },
+    {
+      "path": "compose.tools.yaml",
+      "sha256": "24d37d4437eb8f2c1bce2a7478a8566162c9d65f9ee111393b0131463732f035"
+    },
+    {
+      "path": "compose.yaml",
+      "sha256": "49c8ab0a7f3317ae800773812322a0ee29ee3ffdd18a3b7650108ae6c9c2e8fb"
+    },
+    {
+      "path": "database/changelog/crm/0001-crm-schema.yaml",
+      "sha256": "59b38d94db0bb368ae8d54e049bd66bc735eab67c4f1f749125f5d59661f9a82"
+    },
+    {
+      "path": "database/changelog/crm/0002-crm-seed.yaml",
+      "sha256": "502f7799af4cdd0278628032fbcacbe0e2afbbc75694c7ade5587242310b387b"
+    },
+    {
+      "path": "database/changelog/crm/0003-crm-opportunity-status-fix.yaml",
+      "sha256": "1e824f8cc9cdf52595f2f16da0f01ba919f838873e78c8cab919d7707d8b7d02"
+    },
+    {
+      "path": "database/changelog/crm/db.changelog-crm.yaml",
+      "sha256": "96453c0e9fbae15bba2e614c57e97fa39203be2d0fbb7fcfca79fd8d5d842233"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/api-contract.md",
+      "sha256": "63bb7c8c879ae25e46dc17642a41b61e9445efe48583def3e7afa92a7d2bd837"
+    },
+    {
+      "path": "docs/architecture.md",
+      "sha256": "abb00d78daadc8a36fb82b71d62c4134a7bc9b4c0de8e82eb64be7924db9949d"
+    },
+    {
+      "path": "docs/backend-patterns.md",
+      "sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7"
+    },
+    {
+      "path": "docs/crm.md",
+      "sha256": "dbb748468d43a479f89eacacc28a9c4056a7b8db87fa37a7e29973a6fde4e23d"
+    },
+    {
+      "path": "docs/frontend-patterns.md",
+      "sha256": "0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1"
+    },
+    {
+      "path": "docs/repository-governance.md",
+      "sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12"
+    },
+    {
+      "path": "docs/workflow.md",
+      "sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389"
+    },
+    {
+      "path": "omni-backend/omni-auth/pom.xml",
+      "sha256": "02e514abafe6b610311e297cabd686b31028bd877b34c8e5fd2679cbfab292ad"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/AuthExceptionHandler.java",
+      "sha256": "3207c455515648ffd4dc07b9b433173cdc5116d4c147ca1402f5073fa3d38b40"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/AuthorizationServerConfig.java",
+      "sha256": "527d5efbef4742c06f256e4003d3dc7f273634e5d56a709083ec25b20f899c42"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/DeviceClientInitializer.java",
+      "sha256": "e8db2e48565093ae1166f2a9ee20dafaacc7d2bb52099e88a214167a3793528d"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/MybatisPlusConfig.java",
+      "sha256": "a4de63c2a9e4613ea44ea4558386d6cb307fa3772f7a4afc7670ea20e27a160c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/MyBatisPlusConfig.java",
+      "sha256": "a4de63c2a9e4613ea44ea4558386d6cb307fa3772f7a4afc7670ea20e27a160c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/OAuth2ClientInitializer.java",
+      "sha256": "e2acc1b363986b95052f77f22a4c2372b4dddde07a752e6026c069ee97711dfe"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/OAuth2Properties.java",
+      "sha256": "f38241b6a2e0d6f918e633d70a507f4716ee0c92a0bda2b223a3a8dde480129c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/consumer/PortalRoleAssignConsumer.java",
+      "sha256": "3281bb60d1d0a5d0560f5efb845b7910d5552447bd45d29fb2f4c01a91574459"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthController.java",
+      "sha256": "b973052c2787ac95547edaa93be6bb8de48becc34017d8666e02e2a52b6662fb"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/internal/InternalXssController.java",
+      "sha256": "9ba0577f085642c9ed9cafc71d2dc77cacb514df198cad2beee69046b80498a5"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/MenuController.java",
+      "sha256": "eed9b466770f01f6bde80a5c60230a97b76544b0bf64d402a7ee6f5a3c22fe31"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/OnlineUserController.java",
+      "sha256": "a0fccf953cbf4708c27fd866b3807c0400ae489d5912f24648ee6defa761ee91"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SocialLoginController.java",
+      "sha256": "e401bc70a37340c3a55b4a1cffbeeabc9a3ca7ae363b9e752f06ce855704135f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/UserController.java",
+      "sha256": "eb1c952f78fc62a0a7415daba32a3882c322961d1f560e78e040a97d2fcbaf6c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/XssConfigController.java",
+      "sha256": "3c0046a334064254a7a1ab9ab884265b8af9b0732d3910fa07f064023cc3c9a0"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/CaptchaResult.java",
+      "sha256": "6be677f8c20defa880aadd0bc1b4e8efc74054821967182a2943c8629060ca2c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/CreateUserRequest.java",
+      "sha256": "f0211a5fcc48eb870cb80854d8887cf1940a140ca6562373b6766e2302014a0a"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/CreateXssRuleRequest.java",
+      "sha256": "fd75405c3333004d92b2e6384a982ee1be68869eaa5e923900d6e3c7d385fbab"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/LoginRequest.java",
+      "sha256": "707638595954a19d4f6ddb1af5119a305b4aa07c4248fd9c5cbeeef41e7b3ad0"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/ProviderUser.java",
+      "sha256": "26ebedbcc66b3310e802c43a0574f0ffd2482c6ea1c75fb9e348364663e62d99"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/RegisterRequest.java",
+      "sha256": "4841f298fb08652df2f6df71016aceaf27f357e54d186a034385e65478fb337b"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/UpdateXssRuleRequest.java",
+      "sha256": "21ffcd31f661f7aa9435da26ba22bce97595f905fa3334c3df2e0f1546279011"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/entity/SysUserOauthProvider.java",
+      "sha256": "e1eaddf56b1bf202cd3b421923378e14ff16915ea39781d720755dbd4f9ece0c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/event/AuditEventListener.java",
+      "sha256": "afaaf2eb6c39917bd420f96ff00c7503ab49544286ceeb5dc10cb501ddf10a4e"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysOrgUnitMapper.java",
+      "sha256": "419126c8b655bff8e1eb3e8e27e28b698e0817a1bfcdf91dd8b3fa297ff5709a"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysPortalRoleRequestMapper.java",
+      "sha256": "6e47933e2a947a1b3ae8acaa0689e6acbfb1e49e0afc1276a226d908aec0d767"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysRoleMapper.java",
+      "sha256": "1a83a094e35d0c8dcb91d8982f2a3dab3041a5c6c1ca7780dd36541e33132bfa"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysUserOauthProviderMapper.java",
+      "sha256": "2979f1e20a3ecd827217d385cfd5d08bf56b2c977b61d5ffd4845fa977d0c74e"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/GiteeOAuth2Handler.java",
+      "sha256": "6c52c5652f317815aef2c84c5378fc5c8c65b401ea6ece1831e598c961d55a51"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/GitHubOAuth2Handler.java",
+      "sha256": "e0f7422f038400efc332980f6bdd49417cd1cef9a2da7c8b13ed41fbe03e1a7f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/GoogleOAuth2Handler.java",
+      "sha256": "ade9ff290543ada330bbc269b929385c50017743e50af409fe2db7fa83df46c3"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/OAuth2ProviderHandler.java",
+      "sha256": "9e567a1906ac4320dbe105aeef1c12bbc380a285d4f47e391df053a3f180c443"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataPermissionHandlerImpl.java",
+      "sha256": "c5e1aecc634138eb7e4c925b4883009b9f0f73412a047f135c704b505556daab"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeContext.java",
+      "sha256": "bfaf6a60176be53e82037ba62df507823229619ad7f89f26343549b4bd686c12"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeResolveFilter.java",
+      "sha256": "cf32b3ba6d1b95e4f4d5c0a6fd38924f2186cd04aa52cf48e67fb205472c77d8"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DeviceClientAuthenticationFilter.java",
+      "sha256": "f88ef360d2933b31c7e0d77d73f8279c30be9af530198c0661bf23b80f6ba3e3"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/GatewayPreAuthFilter.java",
+      "sha256": "ba56c6bda6838d5430b063d652f6003f0865e3be462347ccb6acc5c508b7236a"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/OmniUserDetailsService.java",
+      "sha256": "16877ccc08a206470c44f23ae40990b55c28324bf92185aa7d9265ae93244eff"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/SasConsentOriginFilter.java",
+      "sha256": "b77666ba006ba90f712b06fa713653e42b5431e05d47a0e01b62f4d0ce3844a5"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/XssConfigProviderImpl.java",
+      "sha256": "df5908da4d7d240805de6c569504a4d8891ad5932124fd9c7066777b3d52977c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/AuditLogServiceImpl.java",
+      "sha256": "cec1f4fa1cf96b39145fef6da0c451be373b5a6702593d24892bd2aca6e311b1"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/CaptchaServiceImpl.java",
+      "sha256": "ac901105b2f949e32bb5e76789f7a5b4dc32a4860cf24da49b0f657e229381e4"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/DataScopeServiceImpl.java",
+      "sha256": "5f9a6c657349e0039f1c419305bc0aa74dea7c23df79d3a0e615f621751f415f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/JwtTokenServiceImpl.java",
+      "sha256": "c84fa86c7c90c63b1b075e5d0558bdc04bf34ec95ae3f0f9a03d585322ff5fa1"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/OnlineUserServiceImpl.java",
+      "sha256": "591a2e51edea59fc1d7b2056488d84551763786d88da532d955c2edd22c1f69e"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PermissionServiceImpl.java",
+      "sha256": "269589cbdb75758f41772da287fc061d61a459fa342f93e2703a4854090fb0cf"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PortalRoleAssignmentServiceImpl.java",
+      "sha256": "bb6efb8c4536f80ada2ff8ebb6cf98fc32c633c85f7add99b94d15b8373b36bf"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/SocialLoginServiceImpl.java",
+      "sha256": "6af297a030dea03c0f6d817e3834a756f0935e6b55208749e00831c42bf6b0f3"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/UserServiceImpl.java",
+      "sha256": "aee5b14ab535cbd943ac22661117d2bcffac74e0e39bdb8bee76d812753a3d29"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/XssConfigServiceImpl.java",
+      "sha256": "a40f4156e3001ac94df57a235df3ce877062aea461bb7902caed159ca98c898b"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/OnlineUserService.java",
+      "sha256": "a19d76f2651735b3343b64ab949a5a237153dd0e703ba8717ae5c1d0cce61197"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/XssConfigService.java",
+      "sha256": "566bfc9726f764cea65b20c7f6aa2efa557adbea81381bb4700184f195988fd3"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/util/OAuth2StateUtils.java",
+      "sha256": "d8df64afd8910daef4308c75e8d38f7a26665996ee8c2bb814d42a62f974afed"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/resources/application.yml",
+      "sha256": "d1ce2ce3f6bd0ecc11ce641fc23475b571b0cbe382274be5cdc4e4d47dfc25f9"
+    },
+    {
+      "path": "omni-backend/omni-common-core/pom.xml",
+      "sha256": "8e660c5ff16dfc24d5108b3c61919ee089d9b7ebdf6f59d6504e8463f30a8ab9"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/internal/InternalDataScopeDTO.java",
+      "sha256": "bd53ecaa14871a5f2f19c9a21bb62b05aa0e295c69576af4a3ef3adc4f28b4e5"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobHandler.java",
+      "sha256": "0e90610ea5544b2520285e507ed94030c9f1017e93385149973129fb17df3f1a"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobMessage.java",
+      "sha256": "6f5fe8eb970b3683d586f5ef50c923b3a305616a05073e2559c322f263edfd2e"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/model/BaseEntity.java",
+      "sha256": "0723fa3b71e2216483194dde7801d4ff7fd294c6d2975cba7aec5abba1a7b48a"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/mq/ReliableMessageRelay.java",
+      "sha256": "399ece831ed218c6938f9987e15e3e2f86f90fc3a95693a85e65c8145d7f33cb"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/operlog/OperLog.java",
+      "sha256": "5912dddc0e780eea5acc4179b53060ceeb21d290db4d177a24454667442f57ab"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/operlog/OperLogMessage.java",
+      "sha256": "2abbcd8493c1c80b7aa94627d4721bee9d309a2c298b9724dacea2c5d9ff275c"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/operlog/OperType.java",
+      "sha256": "3aabf73f9705144000ac04b4ab0212666a82d84a8ad8283d37866896ecaab3c2"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/BusinessException.java",
+      "sha256": "1879b749fba5ee52a781e541240a6690addca63e3004309aaf0e8da44b695ffb"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/PageResult.java",
+      "sha256": "972689d5ecde471310d2c094b4f6aa840aaa2d159fc70d680d7e6d0a67bd9679"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/R.java",
+      "sha256": "b406cbe93dec21f2d7ece8d83e55b3c1fcba368681b885ba1e1477f00be4a5fc"
+    },
+    {
+      "path": "omni-backend/omni-common-job/pom.xml",
+      "sha256": "2c0816b62967658018b18601342563005119c21a60e700cc25724f4579f0843a"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java",
+      "sha256": "9e77ff40bc35ee35b12970b5b850c00a2c670db05d712cfa23f672e6790c5005"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/JobMetrics.java",
+      "sha256": "b4961d97db747cac01fb900a73cfda38b058185d4707093d803b1e8c9b916426"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/SystemJobRegistry.java",
+      "sha256": "bf2b704901d2e13c1d0a558d52263c3e00f308e61554e0000bec85773ecf655a"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobAdminClient.java",
+      "sha256": "891e46d4744f7257f3bcde6c718862f29986e9a3148acb70175fe715aafe6b15"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobProperties.java",
+      "sha256": "e6cf4844ef2d393faade4821b1ec00912cd06f0c9d7a58c36b1e0504f8ef003b"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "2844e6688d0c3def6bc71c71708651c58d8f13681de7f0ff4ab80d39976dca5e"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/pom.xml",
+      "sha256": "080373b3803a9749c94d4e367eb1afebc3ad79f709948a62f37f05e213e954c5"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/config/MqLogAutoConfiguration.java",
+      "sha256": "bfb434ba1c5e5b8b1cf5d93d87cbb38954a7dbc65f14eab8bf47a717ecbad9c2"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/filter/InternalApiAuthFilter.java",
+      "sha256": "21bd8ca3cf57a86683db0b54f68ad87066ac9998a045d58cca36676de9677a9d"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/mapper/SysMqMessageMapper.java",
+      "sha256": "75bb5ba38a9aef06e716b90f235852ad5efd559e80d737cb0c5302b3226e64aa"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java",
+      "sha256": "bfe1ce1806668c8e28c80a7614d7a5fff1fed2b7f65b3e18a56137e2cca627bf"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java",
+      "sha256": "db640b6e594ab53272c078e42776e904b7e6ca33a4ae625e2f9bcf5c1c9ea928"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "c6f773059036d48cc1d8b0c0e0d5c676773e106a0043c3c40ad4f9479d70ebef"
+    },
+    {
+      "path": "omni-backend/omni-common-mybatis/pom.xml",
+      "sha256": "0cfd068f5797e8c12cbae96babdb863e897bb053cc8c48b97b33dcdd5ac1ea8f"
+    },
+    {
+      "path": "omni-backend/omni-common-mybatis/src/main/java/com/omni/common/mybatis/config/MybatisPlusAutoConfiguration.java",
+      "sha256": "d6d75ead8dd29327e2081a038500d0321c4b6ab63476914646c59a4d800e0ffa"
+    },
+    {
+      "path": "omni-backend/omni-common-mybatis/src/main/resources/application.yml",
+      "sha256": "b1103a3b5f0ad4a704b21efa16a8bf70b6b858b6d9464d0cd45d10f9e9b97ce8"
+    },
+    {
+      "path": "omni-backend/omni-common-mybatis/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "d180231f630757e974e5e79bc31f42350dda7f8a68607e028c411bf950452e80"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/pom.xml",
+      "sha256": "e476cf537636a8b5530fc0f4552e34d9318b0cf02e75d74b40fbf79c64ec9cd5"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/aspect/OperLogAspect.java",
+      "sha256": "6c14f32505e15e89585fd98376c656f2a9dce0feb05d74559fd57509206a8ac0"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/config/OperLogAutoConfiguration.java",
+      "sha256": "c0b2d210eb54cf339b9e77f1ab24f015cd06f695b665e67f8cda4d72e9f78afc"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/diff/EntityDiffer.java",
+      "sha256": "220da9d2c6c25ac841b6bff70749104736ce0ab3ba0018cec268b8c07ecb44c9"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/producer/OperLogProducer.java",
+      "sha256": "be5c6234193b374960cddf4344b07db74eb98e3320b329752be3ac6e7c15d574"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/sanitize/OperLogSanitizer.java",
+      "sha256": "8f5d34bca9097343ca596b409e69bc15a1472b02a0aa6fc6cefd04a27cc31479"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "6f4d4795c97283611cf64d2dc1a03b55732926897c9daa643cd6a1c1a75f62e0"
+    },
+    {
+      "path": "omni-backend/omni-common-redis-reactive/pom.xml",
+      "sha256": "a9ee460e9ebdb2a95ee0fe0656b7e3089d3b8659dcf751ddfb6bb6b47cfc148d"
+    },
+    {
+      "path": "omni-backend/omni-common-redis-reactive/src/main/resources/application.yml",
+      "sha256": "ed82690d31d6cef0fa7ef9411376bc7961a1eb18987e04b3da2d0d7cbc008e4d"
+    },
+    {
+      "path": "omni-backend/omni-common-redis/pom.xml",
+      "sha256": "3a81617ffeb15ab0953896cca6c5577f934550373f864e26cbd9c1dc09c3b891"
+    },
+    {
+      "path": "omni-backend/omni-common-redis/src/main/java/com/omni/common/redis/config/RedisAutoConfiguration.java",
+      "sha256": "31f6c615c14a328087183467453a51f4731f2a3f80995914b0b7ab0a9b3f4585"
+    },
+    {
+      "path": "omni-backend/omni-common-redis/src/main/resources/application.yml",
+      "sha256": "f4f3922e5b9f005be20bc1372619a0580f625787622e3bfde8a21d28ef2119af"
+    },
+    {
+      "path": "omni-backend/omni-common-redis/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "fd435fd8dee7012d7ea7c16557c19878bb49a37318e823d1ee033abfd79adc6f"
+    },
+    {
+      "path": "omni-backend/omni-common-service/pom.xml",
+      "sha256": "10cac501ee7f5c055237c9376c67a702d6a057e40ab32f0ba59ddc36768001f1"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthDataScopeResolver.java",
+      "sha256": "8c8b2c3d5818682e93e3f0874d8b23e359680015cbc9bcb68b3f156675807531"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthSecuritySettingsClient.java",
+      "sha256": "b8650890b1807b9b099bd9082aa98f5785a658595db55debe0b1b63b89e35a61"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthXssSettingsResolver.java",
+      "sha256": "f43e509df635acfc3b28b817263df7615952a335c68aaa2441af4e36cd2b4576"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceConfigurationValidator.java",
+      "sha256": "2019df35b95271027aea48ddfdd34d9c484a844437d36460231950930b042476"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceCoreAutoConfiguration.java",
+      "sha256": "831aa2fa80742dfbf17fe4c5faa928116d988c05384c768c87735c985e1e9e8a"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceIdentityProperties.java",
+      "sha256": "f17e5d5123df3dcbdf1b1cab4fcd3f429199c5028aac2067b18d6012f34386f8"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java",
+      "sha256": "4fcaa7b87b3547392e77284334ad8553546cdac8351a402b726ce1f2d9697220"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceXssAutoConfiguration.java",
+      "sha256": "9274353be73edd87ed851ae5684d1886a16095a87248f596f076f7824142237e"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/datascope/ServiceDataScopeAspect.java",
+      "sha256": "e47082d659d8ecda501066b2a4de6693eafbb9dc390d63bbf7ef3f6afaf50a32"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/identity/GatewayPreAuthenticationFilter.java",
+      "sha256": "222cac194f8d6adf7b060cf88a8b82a83feb61dcc60fb8b84cf5a0b45846b912"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/identity/ServiceIdentityFilter.java",
+      "sha256": "ca6d6c99dad790c0599c785d3362bdc9987e92a2240bde92e8dd94af567beac5"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/internal/InternalApiAuthenticationFilter.java",
+      "sha256": "a2f1b584ad0c4723ccb577ea455f3a23749bf54e9faa84f8585b5319cdf2ece9"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java",
+      "sha256": "796424bf5067b1e80c3658572f2d1d3fb60a0db68c5bf349db10b5ddd323328d"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/DefaultXssSettingsFallback.java",
+      "sha256": "3b6881f0ff8c5855a8711732ee5268fb38ea1176bc4a987cad93a136ad4c2f16"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "9b042dfc687ee0c3f4f1e17e2b4dd99cb31e69d43cb6a6f9344b8cd8f114bce0"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/pom.xml",
+      "sha256": "76302d6e470b88599093b6fd81bef957c38fb030c65328a42f2212f4d553b8c4"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/approval/ApprovalServiceImpl.java",
+      "sha256": "bb3835b2067a5cca21f63fad58ceec5550b8751cc705eb476c268f9b299a35be"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/config/FlowableAutoConfiguration.java",
+      "sha256": "6f37d9e50fc3d081a79c6cbac2a84f36761d54e5019dcb7a489b55df2816c2c2"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/notification/NoOpNotificationService.java",
+      "sha256": "20ce08ddbbdee024659e4fb022d7b7848689a9383b12c1a420bd614d04c77959"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/tenant/TenantInfoFilter.java",
+      "sha256": "a7008bd20d0a358fa0af2220dc8dd2e025e0fdc4b54c31a77f351fd78869bee2"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "50a4a374ef2aeab939721ba6b5d87058ac58e4ab2f2ab8cf65bcaa5e3fac8482"
+    },
+    {
+      "path": "omni-backend/omni-common/pom.xml",
+      "sha256": "fe079f62675d7eec7cb0289a095c046a2f9823146c49c43b2273aa8fdba833dd"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/config/JacksonConfig.java",
+      "sha256": "2c7a585a9cf5725bc682650c655e67368c5a804ed4ebfd358baf6c29ce43f0f6"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/result/GlobalExceptionHandler.java",
+      "sha256": "ccf9bf26ae825f8f81e4db294992e8ae7afabd24850a6295bb8adf9772ddaacf"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssAutoConfiguration.java",
+      "sha256": "c49eb19091de4cfb885cfb09893d09cdfb581ca2b6a71b2b872e9d207824cd75"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssFilter.java",
+      "sha256": "97fcb44f91b67e3749f2fa2ceff23952d9a6fd8815ca839635fa3ab6766c8373"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssHttpServletRequestWrapper.java",
+      "sha256": "1d3dab14470e2c25878a7fd15f500d6589425c7bbbabb42bcb3e28400cffe0c8"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssRuleHolder.java",
+      "sha256": "541cec49717f51105a7cd49a6d911e0b08a56a0b08baa601277a7bf3d131e5b6"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssSanitizer.java",
+      "sha256": "c60a69f43a3142a46802544af830aec02dbe0c7a1cdb70bde883a0883e80baf7"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssStringDeserializer.java",
+      "sha256": "7c350e118220c612fcd811c3e390a9f8e4f3c363091add6c0483efd8124f6b83"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssStringDeserializer3.java",
+      "sha256": "213564eed416fc8111a6b51be2297800fd4abbad7f81da5ee72833ce20c4052b"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "af7f602b550724c8faf31da5d81c3f61d94615763937b506b618017f9d96d4bc"
+    },
+    {
+      "path": "omni-backend/omni-crm/pom.xml",
+      "sha256": "4801a220e50bf13340174238835977b6e5d2f9e89fabf00e205dc8a23c96557c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/client/AuthInternalClient.java",
+      "sha256": "4f91dc278dfe5fe41057cb4dc03eecf0703be8c1b2af8f46d8867125ba078497"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/config/SecurityConfig.java",
+      "sha256": "2ac6252751ce3ec997ca8d8b566c01b72e4d9c50699a72b08af462924cc094a7"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/ActivityController.java",
+      "sha256": "9d3af091afb224b347e50ea67a60c5005b432f63407a2129b6d6c9c7dc949a4f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/ContactController.java",
+      "sha256": "17f7712928d62a572d51d56b50e827dfa802cd1c689925e4fa8fb85689365030"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/CustomerController.java",
+      "sha256": "2cd745e3903b0b87a023271a4b02f7748eb0c39dd512923d0dc664ea169802e0"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/LeadController.java",
+      "sha256": "f81e64deac6c0674a3f180eb8569d5d88f1c2967ad3e2a2d3f396506842488ac"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OpportunityController.java",
+      "sha256": "5e908c7ccb970de52464ec427b73b2643f0a413c86faa22d229a894f45ac2def"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OptionsController.java",
+      "sha256": "a8e1910b02fffe26971210f8b23240ca1ae244974dc28a49bfd1b93317982701"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OverviewController.java",
+      "sha256": "6ce47ad02a385a96fb1d0c576cc28f1e4a3d798d8e08d2c06a5f7ca700e8a8e2"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/PipelineController.java",
+      "sha256": "36b1471b582315216700a26eb9e48bc8d573a3a4edde7ac7e00b4cad4b345263"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/CrmApplication.java",
+      "sha256": "834e39df1ecde0bda8b82f5dd1cbee944a8f2cebe0d9c00fbd883ec45aa58ffa"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/domain/ActivityStatus.java",
+      "sha256": "937f900906229583d80f3d30b3a2bf84b12527701dbb2b80b569659b4485c86f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/domain/CrmStateMachine.java",
+      "sha256": "1d6286fa82b101e7f0c4b0c815d89df6a2b35f13db27f07e3fb3265182fc72b4"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/domain/CustomerStatus.java",
+      "sha256": "ae15dd59dc9e580e4d05dbec64163b73a41223623809695f4146af9573c4474a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/domain/LeadStatus.java",
+      "sha256": "d4d785c5c4116c97efb9a792815be9dcf900d28f0ba4c3d7563e717b2994027e"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/domain/OpportunityStatus.java",
+      "sha256": "aeb5cce51815d1e596a9905f420f07c5ad01aefc511091d8755a0fb910927edc"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmRequests.java",
+      "sha256": "4a0019ce1e5d5bd6bf474d548f6fa4ed150bc94399b650f1f19d89aea6f3e7ff"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmViewAssembler.java",
+      "sha256": "bc03388bcc9b538ccec2a2ecc4a04af061f7c7062a4e85d01f25f7ff8b4a2c2f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmViews.java",
+      "sha256": "8dee7c2d370d3ffd6fd05579730b391fcf009b64635af2b8222b96f9621cfd50"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/DomainEventEnvelope.java",
+      "sha256": "36df88c43801cdde71f0b1cc3fc8e5999add5efa15ca5a6bc420fa960e17d85c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmActivity.java",
+      "sha256": "092e37182a9ecf4cfc8bdbe81828632c8ecf3dafc6dcf6a74ce0db6606090280"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmContact.java",
+      "sha256": "a3bf0868406586386a216829763185923c46f0e413ddb54b5427af597fa87c53"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmCustomer.java",
+      "sha256": "faf58f220f15597b7d0452020b59add662e3c32834ad460e002c4104488dba17"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmLead.java",
+      "sha256": "0a47f803e315d75fa0fa5a98bf9c9e70f233b1197678d55c99ba9e4231012135"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmLeadConversion.java",
+      "sha256": "88fae8d6f54526bd5a563c79529f0a03e11464a7a9ff84158b3ec44beb1a0e8c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmOpportunity.java",
+      "sha256": "618edcf3c3d6e25f4d28e2c00f884e61acdafbb364380cc1ff4ad2a40c56626e"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmOpportunityStageHistory.java",
+      "sha256": "f8b6f67c2542bb98ec54b85fbbaac251df58cabe8159becfa4583297043e6f36"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmOwnedEntity.java",
+      "sha256": "ec2e02d66ab10e8330752b33011e595b780f8c83c8eead9a1210c8f5d0b3f7db"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmOwnerChangeLog.java",
+      "sha256": "4abf90dfb4445a86a748051b8361d6f0541ef41571308ab76146cb76683e1375"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmPipeline.java",
+      "sha256": "62eea62e5a35433c4d046a91334ad4191f12ed04498a0df368aa39dee781401d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmPipelineStage.java",
+      "sha256": "5f3707f43700e87e3fb81e7837258b3aed36401913080f5bd5b6e79d723e2a67"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmTenantConfig.java",
+      "sha256": "2ef16d57aad84721216075d6c7b4522f81e1dbc02717e1a0801c9811ca5b41de"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmTenantEntity.java",
+      "sha256": "974a6d15124c6c6fd41e596eeaff0d4aeb1a1e18482bca214fd18f9d15965d23"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmActivityMapper.java",
+      "sha256": "883eeb2849830380572f6a839cd58f5b51cd5859219dd3c324c76e34c33fb624"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmContactMapper.java",
+      "sha256": "64798a6d13f4cc65675fd53656b225c4d995c19ba333e5065e0f59616842f95f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmCustomerMapper.java",
+      "sha256": "55de5926efa1898e566944124af4d3e2c763dae0811147883a5f36aca5059ae7"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmLeadConversionMapper.java",
+      "sha256": "0ce95e08af7970076792bcd7752affb47270f9c38e1762e668b7b9c8b4946f33"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmLeadMapper.java",
+      "sha256": "f05303453ca1952e4bda4830df837b03022f89c1d19711ec7c585a0a73f49d46"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmOpportunityMapper.java",
+      "sha256": "662df629986892e38dc91473ab081ed2734dc01e773987e92e6ac5241c355abc"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmOpportunityStageHistoryMapper.java",
+      "sha256": "9043bea39b77e21665a27e7cad288c25704b12e338b6e3d710c5dd75b1fe7678"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmOwnerChangeLogMapper.java",
+      "sha256": "48c909caad8cd25b10a2fda1f213909a529bc569a2e5060c2cdd9cbea851b77b"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmPipelineMapper.java",
+      "sha256": "8e9d246c9ee6f45f853144515318d4cfcad878c2f95e6449c1149cf2c166c05e"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmPipelineStageMapper.java",
+      "sha256": "2c8496756e6740a3bdefee9b00d008d64da38be585ecfe8851d8391169f10796"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmTenantConfigMapper.java",
+      "sha256": "af3b4ccd105208a5d612c7a4a87c1c503d1fd6d4a33bb063f69e5992939b26c6"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmDataPermissionHandler.java",
+      "sha256": "e62727dc2c3fa241d35f8a9d1304b78f94798d37d7936e185469c767c49b1b0b"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmTenantTablePolicy.java",
+      "sha256": "ca15c2631c038f6caf049846712f7329eb0c6581e998eb03032de4aeedb5335e"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/PiiMasker.java",
+      "sha256": "a037ef266fb69149dcfbe69f3dd8ec491589f086fb87a345086e2ac2b04c2229"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/ActivityService.java",
+      "sha256": "06ad496b16e731d0897e43a8b806687b4a368845411a7fcf8caaaf7776d3c07f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/ContactService.java",
+      "sha256": "855e29952b3d27e961d7383b7eb0c6f30f14f400d377991e0657692923b06edc"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/CrmTenantInitializer.java",
+      "sha256": "bdfd03dd9921c3e8f1bccfe54449611ad24c35a917581036a873f50677d165cf"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/CustomerService.java",
+      "sha256": "14ee8194fcc664f7603b06a1286d57cfa69a58067184eee196a7bfc521636116"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ActivityServiceImpl.java",
+      "sha256": "1465bce958b3a9d3d14862512cdfd2785bd9b6c014853335a85e0ced8cb4fa27"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ContactServiceImpl.java",
+      "sha256": "9eb9b26eee085dba3a8fdbc23c9f9fb86a2a29a5ef757361dcf1f168a65b6a2a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CrmTenantInitializerImpl.java",
+      "sha256": "20c810e6e0f28ae512022a582c9a943fba444e8e4d3aa302559909ac12127f0c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CrmTenantModuleProvisioner.java",
+      "sha256": "5afd274bc5d29f7259f81b2223ae7541c19ef4e69d472074b93ef600a4df746c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CustomerServiceImpl.java",
+      "sha256": "ab9264767541b880da0e88d3660fdc679e6e8117c29bf75b6e1c549c21702978"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/LeadServiceImpl.java",
+      "sha256": "ddd0317511aeb7b73b1199ad9c1a90c8d59488b866180e4ab96cff27c1c2b67a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OpportunityServiceImpl.java",
+      "sha256": "e45d967c578e0437f3c6eddbf5d3c20cd99ea31d22a44ecf0bd8ef805525cd3f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OverviewServiceImpl.java",
+      "sha256": "a611a7fad36c8cce7ae0d0a86aa58b94374f7933f75a6f0f7849b63865d64b1c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OwnerOptionServiceImpl.java",
+      "sha256": "e573b2be1878783b4117744b26f2223207650ee0704f6006f13c1a9f8a253ddf"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/PipelineServiceImpl.java",
+      "sha256": "a890d153d411e58a4a47c646c20d1ef1878268ac345720c9653ed7d2a0cf348a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/LeadService.java",
+      "sha256": "f9cf91b6fb55aeb729905a9dd5e69d5235168e05513d8f98417b3a6ef95d24fb"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/OpportunityService.java",
+      "sha256": "3a0d16e0da300072d2ceaa8e19e07451fa04388b85f7f9fa7b1fd722a7e388f7"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/OverviewService.java",
+      "sha256": "8756033fb2e149a5a53e04bf597b6fda080b713a39010e5f83b9bc954f94299b"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/OwnerOptionService.java",
+      "sha256": "2efc0ea1b475584bac7aac46a97d9da143b0518b6b157082a4f605460072c3e4"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/PipelineService.java",
+      "sha256": "8ab6ea6277af842be7ea6bed24b729d15117a78bbbe0d0ab4e6b0f6fee2d76dc"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmAuditSupport.java",
+      "sha256": "caa449ef43068edc6dd360998e50b01767513135fe283f182bcdb980f3f2ed89"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmOwnerEnricher.java",
+      "sha256": "0770f1287b559874e44730f2bea08b98396961bf51d1e7eb5f5171619398fd4d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmOwnerResolver.java",
+      "sha256": "0318d455f1dbfc43d1c921902fb620b2800208269af4c55fdb2e1d9021dbd09d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmPermissionScopeExecutor.java",
+      "sha256": "b0f1f39646f3433457beddd651682c55b9b9273b2a84323dd5f30e0ea3e97523"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmRecordAccessGuard.java",
+      "sha256": "63d3bbc0e0d0fa52afa31e651c0916ce299d12395dedadd492d1ba6b24f6c780"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/resources/application-dev.yml",
+      "sha256": "456e539ab14b61921101fbb0ab6b2077146367a28ee94f6a4008175312b621ed"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/resources/application.yml",
+      "sha256": "e35d392d9730485362b41f79aad28339769fe790830c7a6b570b5a310eae5288"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/integration/CrmMysqlInterceptorIntegrationTest.java",
+      "sha256": "561ebd83b943a40951c31b184d81755aa4753f5a6d7080b3ace25185c28415e4"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/it/AbstractFcIT.java",
+      "sha256": "418a14ff4e4c856355865d8c82b668bf661142a0d4aab2a809f08e7c0487601c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/security/PiiMaskerTest.java",
+      "sha256": "1c557676c601021e5fa6b27725b2964a7e7e7e52d00d9a8f5b02e09736106ad0"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/LeadServiceImplTest.java",
+      "sha256": "ed980d81d2d65a910f3784c5372f167c4b9f6ab7721a309bd96452e5b0f43f2d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/OpportunityServiceImplTest.java",
+      "sha256": "2f021264bc7799ed8115aa24fcd1999903d99c35b7bbeb2bf97954c1a1fccd8d"
+    },
+    {
+      "path": "omni-backend/omni-gateway/pom.xml",
+      "sha256": "9c862355c8a3c192b214a3ba7b5519ea4fb979653a1d270d6aeb3eb825fdf422"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/CorsConfig.java",
+      "sha256": "158ade2839323df157706193c9a4215f3329d9fc80118a0ee28bb9edd9ff3592"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/JwkKeyProvider.java",
+      "sha256": "8c57fe2764d65cd0a023c7cb92e11f95a37bdb3f327a5699419e0630790c7a6d"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/SecurityHeadersFilter.java",
+      "sha256": "79bb875e9299be756a97a967271528f658131ed359a93a305ffa948288140a74"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/filter/AuthFilter.java",
+      "sha256": "a0773cce8e6ba3d7e90e40c088fb9bae1f77c049577665ad9a0201a4e1c3d76e"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/resources/application.yml",
+      "sha256": "b759994853839263e125044cb5a99b51a22aee7c5b38bdbdb646176fdf87c0f2"
+    },
+    {
+      "path": "omni-backend/pom.xml",
+      "sha256": "18a2eda967a3dc9147decf645518f80692eae6d8b89c2cd3f230d07c14f33275"
+    },
+    {
+      "path": "omni-frontend/src/components/crm/CustomerOverview.vue",
+      "sha256": "f4b0a76b9734a7da0a448f07b64e100377ae056f2a8c674d9a3fffcbcf1cdacd"
+    },
+    {
+      "path": "omni-frontend/src/constants/menu.ts",
+      "sha256": "baed24fc8643ae8d306dcb179629b7fc8ab43d03fc122b0dc9b1fbdb5e24eb73"
+    },
+    {
+      "path": "omni-frontend/src/layout/index.vue",
+      "sha256": "e2e6e022e9e1d1789a6993dda8af088ea80bfd78186f0fc4fc3565e555b40f4c"
+    },
+    {
+      "path": "omni-frontend/src/router/index.ts",
+      "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/activity/index.vue",
+      "sha256": "fb5def60e696a6a57ad184273f15b38bf134687c09ce99120cb6333d6ff200ac"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/contact/index.vue",
+      "sha256": "c257748349e645970ac109e131f64baf936b9060fe8c05ffd10bd5eb3831e921"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/customer/index.vue",
+      "sha256": "4dc3d43c162a96e1364d8f5840428ef928ba7820ed6a56a33c4adeb9aaec2f91"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/lead/index.vue",
+      "sha256": "87f94fb10bd65d3959a43fa622319e5d3a048f2ddc1c3b8df56aeb0cf05f2c03"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/opportunity/index.vue",
+      "sha256": "1da0226185ce7429237ec914631c35a715ccacdea00d0873cb77e12eb55c427c"
+    },
+    {
+      "path": "scripts/sql/seed/auth.sql",
+      "sha256": "131d495c9b1eed92d4d2a7f0aaf92026117c25c6d8d13b8773fdc00fb94c357c"
+    },
+    {
+      "path": "scripts/sql/seed/crm.sql",
+      "sha256": "ec11e5e6fe0c7c690dfd6a21b1359e791e8226074b906742bf20413c25d90bc6"
+    }
+  ],
+  "source_inspection_scope": "11actual newwhole source reads320 pluscurrentselectedinterceptor/annotations/frontendmetadata,57exactpriorCRMcomparisons andnamed currentbackend/API/architecture scopes from319. Proposednameabsence/scannedfilehashes andDDLmetadata are notwhole semantic reads orruntimeproof.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_markdown_rendered_documents": 4,
+    "mermaid_blocks": 8,
+    "mermaid_blocks_per_document": 2,
+    "diagrams_are_responsibility_or_future_proposal": true,
+    "strict_diagram_structure_equality": true,
+    "json_examples": 4,
+    "json_fields": 12,
+    "strict_json_equality": true,
+    "current_table_names": 11,
+    "strict_table_names_equal": true,
+    "candidate_handler_names": 4,
+    "strict_candidate_handler_names_equal": true,
+    "locale_normalized_link_sets_equal": true,
+    "headings_per_document": 54,
+    "main_sections_per_document": 16,
+    "raster_images": 0,
+    "source_bindings": 245,
+    "current_new_whole_source_reads": 11,
+    "prior_crm_exact_comparisons": 57,
+    "prior_comparisons_retain_selected_or_whole_scope": true,
+    "proposed_name_scan_files": 79,
+    "scan_metadata_is_not_whole_source_read": true,
+    "actual_document_read": {
+      "all4whole_documents": true,
+      "total_lines": 1356,
+      "per_document_ranges": [
+        [
+          1,
+          110
+        ],
+        [
+          111,
+          225
+        ],
+        [
+          226,
+          339
+        ]
+      ],
+      "outputs": {
+        "zh": [
+          "353086",
+          "0220e8",
+          "eda698"
+        ],
+        "en": [
+          "29d650",
+          "12009f",
+          "99954e"
+        ],
+        "jp": [
+          "70b0aa",
+          "ee4507",
+          "fd6497"
+        ],
+        "kr": [
+          "677e79",
+          "fa1007",
+          "747415"
+        ]
+      },
+      "lost_previous_attempt_excluded": "Previous zh/en1-115 attempt was wholly truncated and not counted;all ranges freshly read above.",
+      "small_final_Japanese_polish_requires_diff_read": true
+    },
+    "small_final_Japanese_diff": {
+      "output": "df9187",
+      "hunks": 7,
+      "actual_read": true,
+      "expected_git_no_index_difference_exit_code": 1
+    },
+    "unchanged_build_proofs": {
+      "git_bridge": "crm-design-git-reuse-320.json",
+      "backend_tree": "cf01beedbbf55676885fa8c469dc0d7e0b9de98d",
+      "frontend_tree": "2f9d8b826adacd1bf3707632eb18071168b37ac5",
+      "backend_receipt": "backend-workflow-boundary-260.json",
+      "backend_eol_bridge": "workflow-source-eol-preserved-260c.json",
+      "backend_closure": "workflow-stage-closure-268.json",
+      "backend_tests": {
+        "suites": 211,
+        "tests": 811,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 5,
+        "passed": 806
+      },
+      "frontend_receipt": "frontend-dict-checks-144.json",
+      "frontend_bridge": "frontend-git-reuse-285.json",
+      "frontend_tests": 33,
+      "frontend_passed": 33,
+      "frontend_lint_build_pass": true,
+      "new_build_or_test_run": false
+    },
+    "new_build_lint_or_test_runs": false,
+    "application_or_business_execution": false,
+    "svg_or_browser_acceptance": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "Only this CRM-design family and3translation rows approved;expected99/138aftergates,39pending. All originalA-G retained.",
+      "245source bindings include11actualnewwhole sources,57priorCRMcomparisons retaining selected/whole scopes,named prior architecture/backend/API/source references,DDL metadata and79file literal absence scan. They are not245newwhole semantic reads.",
+      "8Mermaid MarkdownHTML renders,structure/JSON/link/source checks do not establish realSVG/site/browser/tutorial acceptance or globalrelease.",
+      "No application implementation changes or business writes/newcostlybuilds. Exact320source-tree bridge reuses backend260811tests(806pass,5conditional skips) andfrontend14433pass+lint/build.",
+      "Future CRM approval/Inbox/reminder and platform cross-tenant APIs remain proposals;status-only RelayCAS,identity-onlyHMAC,PII/XSS/OperLog existing limits are documented,not fixed."
+    ],
+    "underlying_business_limits_not_fixed": [
+      "Relay terminalCAS checks status only,not owner/generation after lease takeover;long/uncertain sends need at-least-once consumer idempotency.",
+      "Existing identity-onlyHMAC,rulemasking/XSS,OperLogpre-target/status/truncation/archive transaction limits remain.",
+      "Approval/Inbox/reminder/cross-tenant platform interfaces are candidates,not shipped by documentation review.",
+      "Source/Markdown/tests-by-reuse do not establish realDB/MQ/business/externalauth/CAPTCHA/nativeSkill/site acceptance."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/design/crm-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 08:24:10",
+      "result": "approved",
+      "translation_sha256": "47b28d5026762e4fa2348cf19a0b78f6f190df1b72184bd49673d4eb3fad7104",
+      "checks": {
+        "coverage_and_meaning": "逐篇对照当前中文与三译文及具名源码范围。保留16主节、54原标题与产品/聚合/状态/权限/API/一致性/隐私/前端/工程/非功能/验收/分期/ADR/风险主题；20项文档发现以修正或如实限定闭合，事实/设计/Wiki/历史各归其职责，原A-G不缩减。",
+        "technical_literals": "核对common-service实际类名、TenantLine/DataPermission/OptimisticLock/Pagination次序、tenant_id+lead_id唯一键、11表、四候选handler/频率、六审批状态与租户businessKey、12字段JSON/eventId/msgKey/msgId/correlation/causation、120秒租约和仅状态CAS、Compose/migrator与专用MySQL测试变量；两图结构、JSON、表名、handler和归一化链接严格一致。",
+        "security_and_failure_semantics": "身份签名/网络、方法权/范围/PII、租户内ALL、默认USER、根可见性/子块/版本、Auth显示降级与授权拒绝、Outbox本地事务/消费幂等/租约CAS限制、OperLog/XSS实际跳过与事务边界分别保留；候选审批/提醒/跨租户方案不作当前端点或全面安全保证。",
+        "images_and_links": "四篇当前Markdown在本机Docker整篇渲染，保留54原标题锚点和16主题。每篇两Mermaid分别为职责图/未来审批方案，结构相同、动作标签本地化；每篇一JSON严格一致，11表名及候选handler一致。语言归一化链接集合相同，无光栅图；MarkdownHTML不替代实际SVG、站点根/子路径、浏览器布局与教程证据。",
+        "language_and_terminology": "Read all16topics against Chinese and named current source scopes. Preserve current facts/proposals/history,tenant/permission/PII,identity-only signing,local transaction/delivery,claim/status-CAS and source evidence/runtime acceptance distinctions. The JSON,identifiers and diagram roles stay exact;English narrative is complete. AI-only authorization is not a claim of human review."
+      },
+      "findings": [
+        {
+          "id": "CD01",
+          "status": "resolved",
+          "description": "Design/current-fact/history responsibilities overlap;oldfc165baseline,MVPimplemented header and human-only release wording must align with current owned facts and AI-only authorization.",
+          "resolution": "设计页改为取舍、实现边界与演进前提；现状唯一指向CRM事实/API，原全文由Git3ef2fbc保存，原日期不冒称当日验收；遵循已授权AI-only规则，无人工阻塞。"
+        },
+        {
+          "id": "CD02",
+          "status": "resolved",
+          "description": "MVP/Phase2/Phase3 scope and proposed sales domains must remain explicit decisions,not newly certified implementation or deadlines.",
+          "resolution": "当前MVP与Phase2/3候选、独立sales/营销/客服/财务职责分开；保留阶段管理只读现状及迁移前提，分期不作完成记录或新增交付承诺。"
+        },
+        {
+          "id": "CD03",
+          "status": "resolved",
+          "description": "Service/port/management/executor/DB/route/Redis/module dependency claims need current raw source comparison,including common-service adoption and formal container boundary.",
+          "resolution": "按现有独立Servlet/模块/DB/Gateway/common-service与按需OperLog/Job/MQ解释架构理由；端口、profiles、executor、完整POM由部署/架构唯一维护，职责图不冒称调用或启动全链。"
+        },
+        {
+          "id": "CD04",
+          "status": "resolved",
+          "description": "Aggregate/table/field/index/leadconversion uniqueness/owner snapshot claims need exact current schema ownership;futureapproval/inbox tables must not appear alreadyinstalled.",
+          "resolution": "11张当前crm表分类与tenant_id事实保留，转换唯一键修为tenant_id+lead_id；不假定相同owner/version/deleted列；未来approval/inbox未列入当前表，DDL不冒称已迁移。"
+        },
+        {
+          "id": "CD05",
+          "status": "resolved",
+          "description": "Lead/customer/opportunity/activity transitions and conversion sequence duplicate CRMfacts;distinguish design intent from actual command/state/localtransaction/currentevents.",
+          "resolution": "保留五类状态/转换的设计不变量，精确边和重放顺序指向现有CRM事实；本地转换加Outbox不泛化为所有Auth调用事务外，不复制另一份状态机。"
+        },
+        {
+          "id": "CD06",
+          "status": "resolved",
+          "description": "Trust chain still calls signing a futureaddition;compare actual current HMACpreauthentication and identity-only signing/network limits.",
+          "resolution": "HMAC签名预认证写为已实现；身份/时间覆盖、roles/scopes/request未绑定与网络信任限制保留，X-Gateway-Forwarded本身不作身份凭证。"
+        },
+        {
+          "id": "CD07",
+          "status": "resolved",
+          "description": "Permission/menu/roles/defaultUSER/PII mappings need currentseeds/backend/frontend source,not universal success inferredfromdeclaredroles.",
+          "resolution": "功能权限/范围/PII与前端显示分别解释，ALL仍租户内，角色仅配置示例，默认USER不得由登录推导授权，跨租户权限名标明未来候选。"
+        },
+        {
+          "id": "CD08",
+          "status": "resolved",
+          "description": "Auth internalAPI/DTO/securityVersion/permission-aware merge/tenantchecks/cache descriptions mix proposals and current behavior;verify actual paths/contracts/failures.",
+          "resolution": "现有Auth显式tenantId/完整permissionCode及授权目标角色合并、InternalDataScopeDTO securityVersion如实描述；指纹不证明缓存失效/请求绑定，显示降级与403/503授权失败边界保留。"
+        },
+        {
+          "id": "CD09",
+          "status": "resolved",
+          "description": "CRM common-service class names/filter/aspect/tableSPI and interceptor order need currentsource;advisor ordering is not provenbydiagram alone.",
+          "resolution": "实际SecurityConfig/CrmTenantTablePolicy/CrmDataPermissionHandler与DataScopeTablePolicy组合、common-service持久化与Filter/Aspect职责明确；拦截器次序TenantLine/DataPermission/OptimisticLock/Pagination修正，旧独立配置模板不再待建。"
+        },
+        {
+          "id": "CD10",
+          "status": "resolved",
+          "description": "AccessGuard/writecondition/version/cross-tenant platform endpoint rules must distinguish constraints from actual endpoint guarantees and proposed cross-tenant API.",
+          "resolution": "写命令需可见根、状态关联和适用条件更新，创建/级联/外部命令版本不能一律；子资源与360分块拥有范围，owner候选不能扩大，跨租户API不冒称已实现。"
+        },
+        {
+          "id": "CD11",
+          "status": "resolved",
+          "description": "Duplicated endpoint/permission/pagination/date/VO/version inventory must reference unique current API/CRMfacts rather than another drifting current contract.",
+          "resolution": "R/PageResult、命令意图、受控PII请求与新命令契约理由保留；现有路径/权限/VO/日期/分页/金额清单归唯一CRM/API，不保留失效缩写端点。"
+        },
+        {
+          "id": "CD12",
+          "status": "resolved",
+          "description": "Workflow readiness/proposed crm_approval_request/businessKey/eventInbox integration need explicitfuture scope and actualcurrentWorkflow limits.",
+          "resolution": "CRM审批/Inbox与Workflow序列明确未来候选；六状态和租户businessKey保留为方案，可靠结果/终结/对账/取消需契约，不从现有局部事件推导全部引擎已可靠发布。"
+        },
+        {
+          "id": "CD13",
+          "status": "resolved",
+          "description": "Proposed reminder/SLA/stale/reconcile jobs and claim algorithms must not be described as live executors or recurring deployedbusinesswrites.",
+          "resolution": "四个系统handler和频率均标候选并限于79文件扫描证据；按类别扫描、租户枚举/context清理/原子领取/重入去重仍为实施前提，不启动或宣称已有调度业务。"
+        },
+        {
+          "id": "CD14",
+          "status": "resolved",
+          "description": "Eventenvelope/suggestedevents/msgkey/UUID/tenant/inbox/version rules need actualproducer/consumer comparison;futurecontract notruntimecertification.",
+          "resolution": "DomainEventEnvelope示例含12字段及correlationId/causationId，明确非已发送事件；顶层eventId/msgKey与另生成Outbox msgId分开，实际生产类型/字段与未来Inbox去重乱序边界由源/事实说明。"
+        },
+        {
+          "id": "CD15",
+          "status": "resolved",
+          "description": "Outbox claim/lease/singleinstance and operations aggregation descriptions need currentexistingimplementation comparison;do not change scope or run costlybusiness probes blindly.",
+          "resolution": "纠正共享Relay无claim/lease旧结论，明确PROCESSING原子领取/120秒next_retry_time租约以及仅状态终态CAS；owner/generation未校验，不承诺exactly-once，保留消费幂等和副作用核对要求。"
+        },
+        {
+          "id": "CD16",
+          "status": "resolved",
+          "description": "OperLog prerequisite text is stale relativeto currentmasker/snapshotflags/eventdedup;retain actualpre-target/HTTPstatus/truncation/archiver limits from completedbackend review andPII fieldscope.",
+          "resolution": "已有脱敏器/快照参数开关/排除字段/事件去重与消费者错误传播不再列为缺失；端点最小化、列表/360区别及后端前置采集/responseStatus/截断JSON/归档自调用限制保留，不做合规或审计全面保证。"
+        },
+        {
+          "id": "CD17",
+          "status": "resolved",
+          "description": "XSS saysownProviderrequiredandfallbackfuture;compare common-serviceactivation/cache/Authfallback/authoritativedisabled and outputencoding scope.",
+          "resolution": "common-service已有缓存/Auth回源/启用基线与Provider/Servlet/Jackson条件、权威关闭设置明确；不要求复制CRM独立Provider；纯文本、输入规则、响应头和输出编码各层边界保留。"
+        },
+        {
+          "id": "CD18",
+          "status": "resolved",
+          "description": "Frontend/API/componenttrees/dynamicroute/iconMaps/zh-enonly locale and startupfiles/docker-compose names need actualcurrentpaths,all4languages and generator boundary.",
+          "resolution": "前端现有共享类型、组件、动态路由和router单iconMap由现事实/规范拥有；layout使用已解析图标，四语言同步；正式Compose/migrator/catalog代替旧docker-compose/start/fixedcounts，生成器验收留待原A/G。"
+        },
+        {
+          "id": "CD19",
+          "status": "resolved",
+          "description": "HostMaven/npm commands conflict withDockeronly;conditionaldestructiveMySQLtest requiresdedicatedcontainer/database scope;no-testfoundation/historicalacceptance notcurrentproof.",
+          "resolution": "已有业务/common测试事实修正，原验收主题完整保留；真实MySQL条件测试会创建/删除crm_lead，须专用可销毁库，WP008开关单独，skip非pass；Docker/JDK25/Wrapper规范和精确树复用报告保留。"
+        },
+        {
+          "id": "CD20",
+          "status": "resolved",
+          "description": "Milestones/ADR/risk matrix combine oldassumptions aboutmigration/tests/signing/OperLog withcurrentsuccessclaims;preserve decisionrationale/history and label remainingrequirements honestly.",
+          "resolution": "六里程碑、ADR和风险表解释依赖/代价/剩余证据，不作全业务已通过回执；四语16主节/54原锚点保留，所有当前文档全文真实复读，日文残留已修，AI审核不冒称人工。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/design/crm-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 08:24:10",
+      "result": "approved",
+      "translation_sha256": "9413cd9e1d8914c56f08b713913c39bb4da2e0c609d99ff61771cd88816b48a4",
+      "checks": {
+        "coverage_and_meaning": "逐篇对照当前中文与三译文及具名源码范围。保留16主节、54原标题与产品/聚合/状态/权限/API/一致性/隐私/前端/工程/非功能/验收/分期/ADR/风险主题；20项文档发现以修正或如实限定闭合，事实/设计/Wiki/历史各归其职责，原A-G不缩减。",
+        "technical_literals": "核对common-service实际类名、TenantLine/DataPermission/OptimisticLock/Pagination次序、tenant_id+lead_id唯一键、11表、四候选handler/频率、六审批状态与租户businessKey、12字段JSON/eventId/msgKey/msgId/correlation/causation、120秒租约和仅状态CAS、Compose/migrator与专用MySQL测试变量；两图结构、JSON、表名、handler和归一化链接严格一致。",
+        "security_and_failure_semantics": "身份签名/网络、方法权/范围/PII、租户内ALL、默认USER、根可见性/子块/版本、Auth显示降级与授权拒绝、Outbox本地事务/消费幂等/租约CAS限制、OperLog/XSS实际跳过与事务边界分别保留；候选审批/提醒/跨租户方案不作当前端点或全面安全保证。",
+        "images_and_links": "四篇当前Markdown在本机Docker整篇渲染，保留54原标题锚点和16主题。每篇两Mermaid分别为职责图/未来审批方案，结构相同、动作标签本地化；每篇一JSON严格一致，11表名及候选handler一致。语言归一化链接集合相同，无光栅图；MarkdownHTML不替代实际SVG、站点根/子路径、浏览器布局与教程证据。",
+        "language_and_terminology": "全16章を中国語と現在のソース範囲に照合。現実装・候補・履歴、テナント/権限/PII、識別のみの署名、ローカルトランザクションと配信、leaseと状態CAS、ソースと実稼働証拠を区別。中国語残留の信封をイベントエンベロープに直し、コンシューマーの冪等性・例外伝播、デッドレター等を文脈に合わせて修正。最終七差分も実読し、技術識別子とJSONを保持。AIレビューを人手レビューと呼ばない。"
+      },
+      "findings": [
+        {
+          "id": "CD01",
+          "status": "resolved",
+          "description": "Design/current-fact/history responsibilities overlap;oldfc165baseline,MVPimplemented header and human-only release wording must align with current owned facts and AI-only authorization.",
+          "resolution": "设计页改为取舍、实现边界与演进前提；现状唯一指向CRM事实/API，原全文由Git3ef2fbc保存，原日期不冒称当日验收；遵循已授权AI-only规则，无人工阻塞。"
+        },
+        {
+          "id": "CD02",
+          "status": "resolved",
+          "description": "MVP/Phase2/Phase3 scope and proposed sales domains must remain explicit decisions,not newly certified implementation or deadlines.",
+          "resolution": "当前MVP与Phase2/3候选、独立sales/营销/客服/财务职责分开；保留阶段管理只读现状及迁移前提，分期不作完成记录或新增交付承诺。"
+        },
+        {
+          "id": "CD03",
+          "status": "resolved",
+          "description": "Service/port/management/executor/DB/route/Redis/module dependency claims need current raw source comparison,including common-service adoption and formal container boundary.",
+          "resolution": "按现有独立Servlet/模块/DB/Gateway/common-service与按需OperLog/Job/MQ解释架构理由；端口、profiles、executor、完整POM由部署/架构唯一维护，职责图不冒称调用或启动全链。"
+        },
+        {
+          "id": "CD04",
+          "status": "resolved",
+          "description": "Aggregate/table/field/index/leadconversion uniqueness/owner snapshot claims need exact current schema ownership;futureapproval/inbox tables must not appear alreadyinstalled.",
+          "resolution": "11张当前crm表分类与tenant_id事实保留，转换唯一键修为tenant_id+lead_id；不假定相同owner/version/deleted列；未来approval/inbox未列入当前表，DDL不冒称已迁移。"
+        },
+        {
+          "id": "CD05",
+          "status": "resolved",
+          "description": "Lead/customer/opportunity/activity transitions and conversion sequence duplicate CRMfacts;distinguish design intent from actual command/state/localtransaction/currentevents.",
+          "resolution": "保留五类状态/转换的设计不变量，精确边和重放顺序指向现有CRM事实；本地转换加Outbox不泛化为所有Auth调用事务外，不复制另一份状态机。"
+        },
+        {
+          "id": "CD06",
+          "status": "resolved",
+          "description": "Trust chain still calls signing a futureaddition;compare actual current HMACpreauthentication and identity-only signing/network limits.",
+          "resolution": "HMAC签名预认证写为已实现；身份/时间覆盖、roles/scopes/request未绑定与网络信任限制保留，X-Gateway-Forwarded本身不作身份凭证。"
+        },
+        {
+          "id": "CD07",
+          "status": "resolved",
+          "description": "Permission/menu/roles/defaultUSER/PII mappings need currentseeds/backend/frontend source,not universal success inferredfromdeclaredroles.",
+          "resolution": "功能权限/范围/PII与前端显示分别解释，ALL仍租户内，角色仅配置示例，默认USER不得由登录推导授权，跨租户权限名标明未来候选。"
+        },
+        {
+          "id": "CD08",
+          "status": "resolved",
+          "description": "Auth internalAPI/DTO/securityVersion/permission-aware merge/tenantchecks/cache descriptions mix proposals and current behavior;verify actual paths/contracts/failures.",
+          "resolution": "现有Auth显式tenantId/完整permissionCode及授权目标角色合并、InternalDataScopeDTO securityVersion如实描述；指纹不证明缓存失效/请求绑定，显示降级与403/503授权失败边界保留。"
+        },
+        {
+          "id": "CD09",
+          "status": "resolved",
+          "description": "CRM common-service class names/filter/aspect/tableSPI and interceptor order need currentsource;advisor ordering is not provenbydiagram alone.",
+          "resolution": "实际SecurityConfig/CrmTenantTablePolicy/CrmDataPermissionHandler与DataScopeTablePolicy组合、common-service持久化与Filter/Aspect职责明确；拦截器次序TenantLine/DataPermission/OptimisticLock/Pagination修正，旧独立配置模板不再待建。"
+        },
+        {
+          "id": "CD10",
+          "status": "resolved",
+          "description": "AccessGuard/writecondition/version/cross-tenant platform endpoint rules must distinguish constraints from actual endpoint guarantees and proposed cross-tenant API.",
+          "resolution": "写命令需可见根、状态关联和适用条件更新，创建/级联/外部命令版本不能一律；子资源与360分块拥有范围，owner候选不能扩大，跨租户API不冒称已实现。"
+        },
+        {
+          "id": "CD11",
+          "status": "resolved",
+          "description": "Duplicated endpoint/permission/pagination/date/VO/version inventory must reference unique current API/CRMfacts rather than another drifting current contract.",
+          "resolution": "R/PageResult、命令意图、受控PII请求与新命令契约理由保留；现有路径/权限/VO/日期/分页/金额清单归唯一CRM/API，不保留失效缩写端点。"
+        },
+        {
+          "id": "CD12",
+          "status": "resolved",
+          "description": "Workflow readiness/proposed crm_approval_request/businessKey/eventInbox integration need explicitfuture scope and actualcurrentWorkflow limits.",
+          "resolution": "CRM审批/Inbox与Workflow序列明确未来候选；六状态和租户businessKey保留为方案，可靠结果/终结/对账/取消需契约，不从现有局部事件推导全部引擎已可靠发布。"
+        },
+        {
+          "id": "CD13",
+          "status": "resolved",
+          "description": "Proposed reminder/SLA/stale/reconcile jobs and claim algorithms must not be described as live executors or recurring deployedbusinesswrites.",
+          "resolution": "四个系统handler和频率均标候选并限于79文件扫描证据；按类别扫描、租户枚举/context清理/原子领取/重入去重仍为实施前提，不启动或宣称已有调度业务。"
+        },
+        {
+          "id": "CD14",
+          "status": "resolved",
+          "description": "Eventenvelope/suggestedevents/msgkey/UUID/tenant/inbox/version rules need actualproducer/consumer comparison;futurecontract notruntimecertification.",
+          "resolution": "DomainEventEnvelope示例含12字段及correlationId/causationId，明确非已发送事件；顶层eventId/msgKey与另生成Outbox msgId分开，实际生产类型/字段与未来Inbox去重乱序边界由源/事实说明。"
+        },
+        {
+          "id": "CD15",
+          "status": "resolved",
+          "description": "Outbox claim/lease/singleinstance and operations aggregation descriptions need currentexistingimplementation comparison;do not change scope or run costlybusiness probes blindly.",
+          "resolution": "纠正共享Relay无claim/lease旧结论，明确PROCESSING原子领取/120秒next_retry_time租约以及仅状态终态CAS；owner/generation未校验，不承诺exactly-once，保留消费幂等和副作用核对要求。"
+        },
+        {
+          "id": "CD16",
+          "status": "resolved",
+          "description": "OperLog prerequisite text is stale relativeto currentmasker/snapshotflags/eventdedup;retain actualpre-target/HTTPstatus/truncation/archiver limits from completedbackend review andPII fieldscope.",
+          "resolution": "已有脱敏器/快照参数开关/排除字段/事件去重与消费者错误传播不再列为缺失；端点最小化、列表/360区别及后端前置采集/responseStatus/截断JSON/归档自调用限制保留，不做合规或审计全面保证。"
+        },
+        {
+          "id": "CD17",
+          "status": "resolved",
+          "description": "XSS saysownProviderrequiredandfallbackfuture;compare common-serviceactivation/cache/Authfallback/authoritativedisabled and outputencoding scope.",
+          "resolution": "common-service已有缓存/Auth回源/启用基线与Provider/Servlet/Jackson条件、权威关闭设置明确；不要求复制CRM独立Provider；纯文本、输入规则、响应头和输出编码各层边界保留。"
+        },
+        {
+          "id": "CD18",
+          "status": "resolved",
+          "description": "Frontend/API/componenttrees/dynamicroute/iconMaps/zh-enonly locale and startupfiles/docker-compose names need actualcurrentpaths,all4languages and generator boundary.",
+          "resolution": "前端现有共享类型、组件、动态路由和router单iconMap由现事实/规范拥有；layout使用已解析图标，四语言同步；正式Compose/migrator/catalog代替旧docker-compose/start/fixedcounts，生成器验收留待原A/G。"
+        },
+        {
+          "id": "CD19",
+          "status": "resolved",
+          "description": "HostMaven/npm commands conflict withDockeronly;conditionaldestructiveMySQLtest requiresdedicatedcontainer/database scope;no-testfoundation/historicalacceptance notcurrentproof.",
+          "resolution": "已有业务/common测试事实修正，原验收主题完整保留；真实MySQL条件测试会创建/删除crm_lead，须专用可销毁库，WP008开关单独，skip非pass；Docker/JDK25/Wrapper规范和精确树复用报告保留。"
+        },
+        {
+          "id": "CD20",
+          "status": "resolved",
+          "description": "Milestones/ADR/risk matrix combine oldassumptions aboutmigration/tests/signing/OperLog withcurrentsuccessclaims;preserve decisionrationale/history and label remainingrequirements honestly.",
+          "resolution": "六里程碑、ADR和风险表解释依赖/代价/剩余证据，不作全业务已通过回执；四语16主节/54原锚点保留，所有当前文档全文真实复读，日文残留已修，AI审核不冒称人工。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/design/crm-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 08:24:10",
+      "result": "approved",
+      "translation_sha256": "100f82cb2378a9e59c9f3f269d8635c6dd69563acf8c5e33c5febb9bad821feb",
+      "checks": {
+        "coverage_and_meaning": "逐篇对照当前中文与三译文及具名源码范围。保留16主节、54原标题与产品/聚合/状态/权限/API/一致性/隐私/前端/工程/非功能/验收/分期/ADR/风险主题；20项文档发现以修正或如实限定闭合，事实/设计/Wiki/历史各归其职责，原A-G不缩减。",
+        "technical_literals": "核对common-service实际类名、TenantLine/DataPermission/OptimisticLock/Pagination次序、tenant_id+lead_id唯一键、11表、四候选handler/频率、六审批状态与租户businessKey、12字段JSON/eventId/msgKey/msgId/correlation/causation、120秒租约和仅状态CAS、Compose/migrator与专用MySQL测试变量；两图结构、JSON、表名、handler和归一化链接严格一致。",
+        "security_and_failure_semantics": "身份签名/网络、方法权/范围/PII、租户内ALL、默认USER、根可见性/子块/版本、Auth显示降级与授权拒绝、Outbox本地事务/消费幂等/租约CAS限制、OperLog/XSS实际跳过与事务边界分别保留；候选审批/提醒/跨租户方案不作当前端点或全面安全保证。",
+        "images_and_links": "四篇当前Markdown在本机Docker整篇渲染，保留54原标题锚点和16主题。每篇两Mermaid分别为职责图/未来审批方案，结构相同、动作标签本地化；每篇一JSON严格一致，11表名及候选handler一致。语言归一化链接集合相同，无光栅图；MarkdownHTML不替代实际SVG、站点根/子路径、浏览器布局与教程证据。",
+        "language_and_terminology": "16개 주제 전체를 중국어와 현재 소스 범위에 대조했습니다. 현재 구현·후보·이력,테넌트/권한/PII,신원만 서명하는 범위,로컬 트랜잭션/전달,lease와 상태CAS,소스/실제 실행 증거를 구분합니다. 이벤트 봉투와 consumer 멱등성·폴백·스냅샷 용어를 문맥에 맞추고 JSON·식별자·다이어그램 역할을 유지했습니다. AI 검토를 사람 검토나 실제 업무 검증으로 부르지 않습니다."
+      },
+      "findings": [
+        {
+          "id": "CD01",
+          "status": "resolved",
+          "description": "Design/current-fact/history responsibilities overlap;oldfc165baseline,MVPimplemented header and human-only release wording must align with current owned facts and AI-only authorization.",
+          "resolution": "设计页改为取舍、实现边界与演进前提；现状唯一指向CRM事实/API，原全文由Git3ef2fbc保存，原日期不冒称当日验收；遵循已授权AI-only规则，无人工阻塞。"
+        },
+        {
+          "id": "CD02",
+          "status": "resolved",
+          "description": "MVP/Phase2/Phase3 scope and proposed sales domains must remain explicit decisions,not newly certified implementation or deadlines.",
+          "resolution": "当前MVP与Phase2/3候选、独立sales/营销/客服/财务职责分开；保留阶段管理只读现状及迁移前提，分期不作完成记录或新增交付承诺。"
+        },
+        {
+          "id": "CD03",
+          "status": "resolved",
+          "description": "Service/port/management/executor/DB/route/Redis/module dependency claims need current raw source comparison,including common-service adoption and formal container boundary.",
+          "resolution": "按现有独立Servlet/模块/DB/Gateway/common-service与按需OperLog/Job/MQ解释架构理由；端口、profiles、executor、完整POM由部署/架构唯一维护，职责图不冒称调用或启动全链。"
+        },
+        {
+          "id": "CD04",
+          "status": "resolved",
+          "description": "Aggregate/table/field/index/leadconversion uniqueness/owner snapshot claims need exact current schema ownership;futureapproval/inbox tables must not appear alreadyinstalled.",
+          "resolution": "11张当前crm表分类与tenant_id事实保留，转换唯一键修为tenant_id+lead_id；不假定相同owner/version/deleted列；未来approval/inbox未列入当前表，DDL不冒称已迁移。"
+        },
+        {
+          "id": "CD05",
+          "status": "resolved",
+          "description": "Lead/customer/opportunity/activity transitions and conversion sequence duplicate CRMfacts;distinguish design intent from actual command/state/localtransaction/currentevents.",
+          "resolution": "保留五类状态/转换的设计不变量，精确边和重放顺序指向现有CRM事实；本地转换加Outbox不泛化为所有Auth调用事务外，不复制另一份状态机。"
+        },
+        {
+          "id": "CD06",
+          "status": "resolved",
+          "description": "Trust chain still calls signing a futureaddition;compare actual current HMACpreauthentication and identity-only signing/network limits.",
+          "resolution": "HMAC签名预认证写为已实现；身份/时间覆盖、roles/scopes/request未绑定与网络信任限制保留，X-Gateway-Forwarded本身不作身份凭证。"
+        },
+        {
+          "id": "CD07",
+          "status": "resolved",
+          "description": "Permission/menu/roles/defaultUSER/PII mappings need currentseeds/backend/frontend source,not universal success inferredfromdeclaredroles.",
+          "resolution": "功能权限/范围/PII与前端显示分别解释，ALL仍租户内，角色仅配置示例，默认USER不得由登录推导授权，跨租户权限名标明未来候选。"
+        },
+        {
+          "id": "CD08",
+          "status": "resolved",
+          "description": "Auth internalAPI/DTO/securityVersion/permission-aware merge/tenantchecks/cache descriptions mix proposals and current behavior;verify actual paths/contracts/failures.",
+          "resolution": "现有Auth显式tenantId/完整permissionCode及授权目标角色合并、InternalDataScopeDTO securityVersion如实描述；指纹不证明缓存失效/请求绑定，显示降级与403/503授权失败边界保留。"
+        },
+        {
+          "id": "CD09",
+          "status": "resolved",
+          "description": "CRM common-service class names/filter/aspect/tableSPI and interceptor order need currentsource;advisor ordering is not provenbydiagram alone.",
+          "resolution": "实际SecurityConfig/CrmTenantTablePolicy/CrmDataPermissionHandler与DataScopeTablePolicy组合、common-service持久化与Filter/Aspect职责明确；拦截器次序TenantLine/DataPermission/OptimisticLock/Pagination修正，旧独立配置模板不再待建。"
+        },
+        {
+          "id": "CD10",
+          "status": "resolved",
+          "description": "AccessGuard/writecondition/version/cross-tenant platform endpoint rules must distinguish constraints from actual endpoint guarantees and proposed cross-tenant API.",
+          "resolution": "写命令需可见根、状态关联和适用条件更新，创建/级联/外部命令版本不能一律；子资源与360分块拥有范围，owner候选不能扩大，跨租户API不冒称已实现。"
+        },
+        {
+          "id": "CD11",
+          "status": "resolved",
+          "description": "Duplicated endpoint/permission/pagination/date/VO/version inventory must reference unique current API/CRMfacts rather than another drifting current contract.",
+          "resolution": "R/PageResult、命令意图、受控PII请求与新命令契约理由保留；现有路径/权限/VO/日期/分页/金额清单归唯一CRM/API，不保留失效缩写端点。"
+        },
+        {
+          "id": "CD12",
+          "status": "resolved",
+          "description": "Workflow readiness/proposed crm_approval_request/businessKey/eventInbox integration need explicitfuture scope and actualcurrentWorkflow limits.",
+          "resolution": "CRM审批/Inbox与Workflow序列明确未来候选；六状态和租户businessKey保留为方案，可靠结果/终结/对账/取消需契约，不从现有局部事件推导全部引擎已可靠发布。"
+        },
+        {
+          "id": "CD13",
+          "status": "resolved",
+          "description": "Proposed reminder/SLA/stale/reconcile jobs and claim algorithms must not be described as live executors or recurring deployedbusinesswrites.",
+          "resolution": "四个系统handler和频率均标候选并限于79文件扫描证据；按类别扫描、租户枚举/context清理/原子领取/重入去重仍为实施前提，不启动或宣称已有调度业务。"
+        },
+        {
+          "id": "CD14",
+          "status": "resolved",
+          "description": "Eventenvelope/suggestedevents/msgkey/UUID/tenant/inbox/version rules need actualproducer/consumer comparison;futurecontract notruntimecertification.",
+          "resolution": "DomainEventEnvelope示例含12字段及correlationId/causationId，明确非已发送事件；顶层eventId/msgKey与另生成Outbox msgId分开，实际生产类型/字段与未来Inbox去重乱序边界由源/事实说明。"
+        },
+        {
+          "id": "CD15",
+          "status": "resolved",
+          "description": "Outbox claim/lease/singleinstance and operations aggregation descriptions need currentexistingimplementation comparison;do not change scope or run costlybusiness probes blindly.",
+          "resolution": "纠正共享Relay无claim/lease旧结论，明确PROCESSING原子领取/120秒next_retry_time租约以及仅状态终态CAS；owner/generation未校验，不承诺exactly-once，保留消费幂等和副作用核对要求。"
+        },
+        {
+          "id": "CD16",
+          "status": "resolved",
+          "description": "OperLog prerequisite text is stale relativeto currentmasker/snapshotflags/eventdedup;retain actualpre-target/HTTPstatus/truncation/archiver limits from completedbackend review andPII fieldscope.",
+          "resolution": "已有脱敏器/快照参数开关/排除字段/事件去重与消费者错误传播不再列为缺失；端点最小化、列表/360区别及后端前置采集/responseStatus/截断JSON/归档自调用限制保留，不做合规或审计全面保证。"
+        },
+        {
+          "id": "CD17",
+          "status": "resolved",
+          "description": "XSS saysownProviderrequiredandfallbackfuture;compare common-serviceactivation/cache/Authfallback/authoritativedisabled and outputencoding scope.",
+          "resolution": "common-service已有缓存/Auth回源/启用基线与Provider/Servlet/Jackson条件、权威关闭设置明确；不要求复制CRM独立Provider；纯文本、输入规则、响应头和输出编码各层边界保留。"
+        },
+        {
+          "id": "CD18",
+          "status": "resolved",
+          "description": "Frontend/API/componenttrees/dynamicroute/iconMaps/zh-enonly locale and startupfiles/docker-compose names need actualcurrentpaths,all4languages and generator boundary.",
+          "resolution": "前端现有共享类型、组件、动态路由和router单iconMap由现事实/规范拥有；layout使用已解析图标，四语言同步；正式Compose/migrator/catalog代替旧docker-compose/start/fixedcounts，生成器验收留待原A/G。"
+        },
+        {
+          "id": "CD19",
+          "status": "resolved",
+          "description": "HostMaven/npm commands conflict withDockeronly;conditionaldestructiveMySQLtest requiresdedicatedcontainer/database scope;no-testfoundation/historicalacceptance notcurrentproof.",
+          "resolution": "已有业务/common测试事实修正，原验收主题完整保留；真实MySQL条件测试会创建/删除crm_lead，须专用可销毁库，WP008开关单独，skip非pass；Docker/JDK25/Wrapper规范和精确树复用报告保留。"
+        },
+        {
+          "id": "CD20",
+          "status": "resolved",
+          "description": "Milestones/ADR/risk matrix combine oldassumptions aboutmigration/tests/signing/OperLog withcurrentsuccessclaims;preserve decisionrationale/history and label remainingrequirements honestly.",
+          "resolution": "六里程碑、ADR和风险表解释依赖/代价/剩余证据，不作全业务已通过回执；四语16主节/54原锚点保留，所有当前文档全文真实复读，日文残留已修，AI审核不冒称人工。"
+        }
+      ]
+    }
+  }
+}

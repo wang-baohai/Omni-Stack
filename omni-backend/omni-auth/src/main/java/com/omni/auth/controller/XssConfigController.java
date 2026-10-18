@@ -124,15 +124,17 @@ public class XssConfigController {
      * <!-- 权限码: system:xssconfig:update -->
      *
      * @param id      规则 ID（路径变量）
+     * @param tenantId 当前登录租户 ID（网关注入）
      * @param request 更新请求
      * @return 更新后的规则视图对象 {@code R<BlacklistRuleVO>}
      */
     @PutMapping("/rules/{id}")
     @PreAuthorize("hasAuthority('system:xssconfig:update')")
     public R<BlacklistRuleVO> updateRule(@PathVariable Long id,
+                                         @RequestHeader("X-Tenant-Id") Long tenantId,
                                          @Valid @RequestBody UpdateXssRuleRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return R.ok(xssConfigService.updateRule(id, request, username));
+        return R.ok(xssConfigService.updateRule(id, tenantId, request, username));
     }
 
     /**
@@ -141,12 +143,14 @@ public class XssConfigController {
      * <!-- 权限码: system:xssconfig:delete -->
      *
      * @param id 规则 ID（路径变量）
+     * @param tenantId 当前登录租户 ID（网关注入）
      * @return 操作结果
      */
     @DeleteMapping("/rules/{id}")
     @PreAuthorize("hasAuthority('system:xssconfig:delete')")
-    public R<Void> deleteRule(@PathVariable Long id) {
-        xssConfigService.deleteRule(id);
+    public R<Void> deleteRule(@PathVariable Long id,
+                               @RequestHeader("X-Tenant-Id") Long tenantId) {
+        xssConfigService.deleteRule(id, tenantId);
         return R.ok();
     }
 
@@ -156,14 +160,16 @@ public class XssConfigController {
      * <!-- 权限码: system:xssconfig:update -->
      *
      * @param id      规则 ID（路径变量）
+     * @param tenantId 当前登录租户 ID（网关注入）
      * @param enabled 是否启用（{@code true} 启用，{@code false} 禁用）
      * @return 操作结果
      */
     @PutMapping("/rules/{id}/toggle")
     @PreAuthorize("hasAuthority('system:xssconfig:update')")
     public R<Void> toggleRule(@PathVariable Long id,
+                              @RequestHeader("X-Tenant-Id") Long tenantId,
                               @RequestParam boolean enabled) {
-        xssConfigService.toggleRule(id, enabled);
+        xssConfigService.toggleRule(id, tenantId, enabled);
         return R.ok();
     }
 }

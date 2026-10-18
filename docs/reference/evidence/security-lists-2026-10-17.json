@@ -1,0 +1,2043 @@
+{
+  "schema": 1,
+  "recorded_at": "2026-10-17T10:37:58.245Z",
+  "baseline": "7a4219e9a4469966c723eb5cac503e138b046f26",
+  "runtime": "local Docker;isolated existing acceptance network;native core lite",
+  "identity_method": "Current test-classpath E2eTokenFixture;enabled DB users and actual roles/permissions;short-lived1200second tokens;not password/CAPTCHA login",
+  "actor": {
+    "username": "admin",
+    "tenantId": 1,
+    "roles": [
+      "PROCUREMENT_MANAGER",
+      "SUPER_ADMIN"
+    ],
+    "expires_at": "2026-10-17T10:56:47.000Z"
+  },
+  "capture_script": {
+    "path": "docs/reference/evidence/scripts/security-lists-2026-10-17.mjs",
+    "sha256": "d8cb39b01f548f892ca4d69d4447cd12081dbec6f230f62df70177ede8eb6cb2",
+    "execution": "Exact bytes of successful standalone Playwright script398;no application server,password or CAPTCHA login test"
+  },
+  "tools": {
+    "node": "v24.17.0",
+    "playwright": "1.61.1",
+    "chromium": "149.0.7827.55"
+  },
+  "source_files": [
+    {
+      "path": "omni-frontend/src/views/system/tenant/index.vue",
+      "sha256": "024dfffd40ea875523a9e7edea7779328e5c8e5693b78f1b741a0db1e51225c2"
+    },
+    {
+      "path": "omni-frontend/src/views/system/org/index.vue",
+      "sha256": "909e99df926e6bdd265eae7cb0bbdce48d5dc8def0e0a13ecec77ae68ba42c75"
+    },
+    {
+      "path": "omni-frontend/src/views/system/role/index.vue",
+      "sha256": "a80a892ed0d0f7150d8ce7665a5c28ea640e81fbd2ed98921f1181bd2dca3dfb"
+    },
+    {
+      "path": "omni-frontend/src/views/system/permission/index.vue",
+      "sha256": "9fb1dc7888cf514d02a1ce4710d6ebbdeb6d91be295f207d8cbcee40514768bb"
+    },
+    {
+      "path": "omni-frontend/src/views/base/dict/index.vue",
+      "sha256": "810dd1f572773026719a483b18c2153013536b9786bb55a6c7204066ee5fff9d"
+    },
+    {
+      "path": "omni-frontend/src/views/system/online/index.vue",
+      "sha256": "836c46deee50169815d43a31ded7c8f8b74f694f781ba3b47981c4c20c35b182"
+    },
+    {
+      "path": "omni-frontend/src/views/system/auditlog/index.vue",
+      "sha256": "b22c038ddda5d21f443bdf94c2d3f4ea49075437099852af92a46f4c64e5b490"
+    },
+    {
+      "path": "omni-frontend/src/views/system/authrecord/index.vue",
+      "sha256": "7902636147b609c794b913b3cf3909973e262930ebac52be9b411b9bc95611b3"
+    },
+    {
+      "path": "omni-frontend/src/views/system/xssconfig/index.vue",
+      "sha256": "83dd2127608d7ae78c2d816ce087a3ba2b8101be756144f30fc131baf1a0e0bf"
+    },
+    {
+      "path": "omni-frontend/src/views/monitor/oper-log/index.vue",
+      "sha256": "32c8b3b1aa618008f3979b256eb500c65cd64ebc435057ba7b8ef432dbeb4387"
+    },
+    {
+      "path": "omni-frontend/src/router/index.ts",
+      "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+    },
+    {
+      "path": "omni-frontend/src/api/tenant.ts",
+      "sha256": "b33438daeb856db94320db84fe8317953b0efbba0013409e91bf063fb363f75c"
+    },
+    {
+      "path": "omni-frontend/src/api/org.ts",
+      "sha256": "8bac90c15626997ddff761da72c8c1546f32abf76f58b69eb4b8f4f103e06c7b"
+    },
+    {
+      "path": "omni-frontend/src/api/role.ts",
+      "sha256": "085669dc33255cb8588e142b723e788973dfef2f8c2b4388f99409b204fb5f32"
+    },
+    {
+      "path": "omni-frontend/src/api/permission.ts",
+      "sha256": "704812d5db7cc5866a016bf9780c09319a036e2eba82ead6a757e82b07974a7f"
+    },
+    {
+      "path": "omni-frontend/src/api/dict.ts",
+      "sha256": "0f0f9d07f6f9a4634d63edff22219b126555f98166a160276a98f1e07c020c9f"
+    },
+    {
+      "path": "omni-frontend/src/api/online.ts",
+      "sha256": "12d43ebac280407aa2432ca61ab331ae96b0d53152fde0b87ff1d9d46c57ba45"
+    },
+    {
+      "path": "omni-frontend/src/api/audit-log.ts",
+      "sha256": "2d61bb138b7d0b702cad37ff1690b370165f6d6b6b1a61c6c6d9253f2cd13c4b"
+    },
+    {
+      "path": "omni-frontend/src/api/auth-record.ts",
+      "sha256": "2d1accf0d0bc9966aa2bc0468b0f0fbf8fcaf6c77d0031a0764aa19e7626d422"
+    },
+    {
+      "path": "omni-frontend/src/api/xss-config.ts",
+      "sha256": "cba5f7e47a89745ac7ee1d8827093132b584d6a19d95a655594fe76a9009b153"
+    },
+    {
+      "path": "omni-frontend/src/api/oper-log.ts",
+      "sha256": "88d324e74dc23e7fe926178fb7d2e4ffcb943f9c6511eb6b0dc3d6e307468c35"
+    },
+    {
+      "path": "omni-frontend/src/api/system-config.ts",
+      "sha256": "bbdb1c97eba0c51680dc847d0af72dc109b0bdae30d35a0004edee75cf2fb837"
+    },
+    {
+      "path": "omni-frontend/src/api/request.ts",
+      "sha256": "71f7d1f5003fd81fb41a4fa82386b3fe281c10ccd6e25a40816ca370e460a789"
+    },
+    {
+      "path": "omni-frontend/src/i18n/index.ts",
+      "sha256": "1f03b35f5616586da17441dd5dda7e877ffbc3a197eccef75641ad4794d48618"
+    },
+    {
+      "path": "docker/frontend/nginx.conf",
+      "sha256": "d652b7c896a04755354bc8f691873e402d344804e0682bbcc2baa29866d88990"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/e2e/E2eTokenFixture.java",
+      "sha256": "2d6eafa8e333882845ab9b2f1c831124175234685a9e3830aa60355f3e04a3c0"
+    }
+  ],
+  "source_sha256": "69115cd694b9f39fc4f0f7bdc4f37de2c8621e9ff0c9b2f997b009be6108bedc",
+  "artifacts": {
+    "backend_tree": "cf01beedbbf55676885fa8c469dc0d7e0b9de98d",
+    "frontend_runtime_tree": "2f9d8b826adacd1bf3707632eb18071168b37ac5",
+    "frontend_current_metadata_tree": "0b332ce1c3f4910c74668cbd2fb64bf9841839cd",
+    "jars": [
+      {
+        "service": "auth",
+        "sha256": "0e7033116591b5c6cf409d6374b9acde8b3cae4aed8315d65a4d5a7ee2f3b162"
+      },
+      {
+        "service": "base",
+        "sha256": "0b07ff1a7dc0bb9b008938bb2e0ddbea452c08865480e990b78c2ee44ba79f20"
+      },
+      {
+        "service": "gateway",
+        "sha256": "a89b071de7759315aae09a5d8acf29bafd3d4d7c9dfc2dbf98c9c31afd636165"
+      }
+    ],
+    "frontend_dist_files": 159,
+    "reuse": "Current source/JAR classes,nested local modules,211preserved report hashes and159frontend outputs attested370;no unchanged Maven/npm rebuild"
+  },
+  "containers": [
+    {
+      "id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+      "service": "mysql",
+      "image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "state_after_capture": "stopped"
+    },
+    {
+      "id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+      "service": "redis",
+      "image": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+      "state_after_capture": "stopped"
+    },
+    {
+      "id": "65bea4ef1a4314e674fa9cd82ec98cdffbcf94f38a1e7d53fbddce8a4ca42e86",
+      "service": "auth",
+      "image": "sha256:6e67f17b3ff1420f6a1891257298745335585002425b8809e8b8f759d5d4c815",
+      "state_after_capture": "stopped"
+    },
+    {
+      "id": "88ff953d2dda854ac887fc3bd9a202815f7cc0036e7015064fa4649e4d752e09",
+      "service": "base",
+      "image": "sha256:60f176a03e7660b903530b9d323944eecbd3de39ae6154e12c963403e2e0e526",
+      "state_after_capture": "stopped"
+    },
+    {
+      "id": "ae1241e848b6b0e7b413ed1de1dc3b2a13a969782332105f6a4c1cef189c293c",
+      "service": "gateway",
+      "image": "sha256:afd58b5547f378897b515ce9293a7fbeb8f4aa68e1d14d226846d1072db735ad",
+      "state_after_capture": "stopped"
+    },
+    {
+      "id": "7c82ec5794da84dead90af206eb591cbf851303e5a59a094d1fb0623802974cd",
+      "service": "frontend",
+      "image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "state_after_capture": "stopped"
+    }
+  ],
+  "observations": [
+    {
+      "at": "2026-10-17T10:36:53.340Z",
+      "locale": "zh-CN",
+      "scenario": "system-tenants",
+      "method": "GET",
+      "path": "/api/auth/tenant/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 1,
+      "total": 1
+    },
+    {
+      "at": "2026-10-17T10:36:54.958Z",
+      "locale": "zh-CN",
+      "scenario": "system-organizations",
+      "method": "GET",
+      "path": "/api/auth/org/tree",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 1,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:36:56.548Z",
+      "locale": "zh-CN",
+      "scenario": "system-roles",
+      "method": "GET",
+      "path": "/api/auth/role/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 22
+    },
+    {
+      "at": "2026-10-17T10:36:58.564Z",
+      "locale": "zh-CN",
+      "scenario": "system-permissions",
+      "method": "GET",
+      "path": "/api/auth/permission/tree",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 9,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:01.749Z",
+      "locale": "zh-CN",
+      "scenario": "system-dictionaries",
+      "method": "GET",
+      "path": "/api/base/dict/type/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 17
+    },
+    {
+      "at": "2026-10-17T10:37:03.327Z",
+      "locale": "zh-CN",
+      "scenario": "system-online-users",
+      "method": "GET",
+      "path": "/api/auth/online/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 0,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:04.928Z",
+      "locale": "zh-CN",
+      "scenario": "system-audit-log",
+      "method": "GET",
+      "path": "/api/auth/audit-log/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 52
+    },
+    {
+      "at": "2026-10-17T10:37:06.425Z",
+      "locale": "zh-CN",
+      "scenario": "system-auth-records",
+      "method": "GET",
+      "path": "/api/auth/auth-record/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 16
+    },
+    {
+      "at": "2026-10-17T10:37:08.446Z",
+      "locale": "zh-CN",
+      "scenario": "system-xss-config",
+      "method": "GET",
+      "path": "/api/auth/xss-config/settings",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": null,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:08.522Z",
+      "locale": "zh-CN",
+      "scenario": "system-xss-config",
+      "method": "GET",
+      "path": "/api/auth/xss-config/rules/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 10
+    },
+    {
+      "at": "2026-10-17T10:37:10.048Z",
+      "locale": "zh-CN",
+      "scenario": "system-operation-log",
+      "method": "GET",
+      "path": "/api/base/oper-log/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 260
+    },
+    {
+      "at": "2026-10-17T10:37:11.432Z",
+      "locale": "en-US",
+      "scenario": "system-tenants",
+      "method": "GET",
+      "path": "/api/auth/tenant/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 1,
+      "total": 1
+    },
+    {
+      "at": "2026-10-17T10:37:13.049Z",
+      "locale": "en-US",
+      "scenario": "system-organizations",
+      "method": "GET",
+      "path": "/api/auth/org/tree",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 1,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:14.654Z",
+      "locale": "en-US",
+      "scenario": "system-roles",
+      "method": "GET",
+      "path": "/api/auth/role/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 22
+    },
+    {
+      "at": "2026-10-17T10:37:16.523Z",
+      "locale": "en-US",
+      "scenario": "system-permissions",
+      "method": "GET",
+      "path": "/api/auth/permission/tree",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 9,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:18.730Z",
+      "locale": "en-US",
+      "scenario": "system-dictionaries",
+      "method": "GET",
+      "path": "/api/base/dict/type/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 17
+    },
+    {
+      "at": "2026-10-17T10:37:19.927Z",
+      "locale": "en-US",
+      "scenario": "system-online-users",
+      "method": "GET",
+      "path": "/api/auth/online/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 0,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:21.443Z",
+      "locale": "en-US",
+      "scenario": "system-audit-log",
+      "method": "GET",
+      "path": "/api/auth/audit-log/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 52
+    },
+    {
+      "at": "2026-10-17T10:37:22.834Z",
+      "locale": "en-US",
+      "scenario": "system-auth-records",
+      "method": "GET",
+      "path": "/api/auth/auth-record/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 16
+    },
+    {
+      "at": "2026-10-17T10:37:24.648Z",
+      "locale": "en-US",
+      "scenario": "system-xss-config",
+      "method": "GET",
+      "path": "/api/auth/xss-config/settings",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": null,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:24.733Z",
+      "locale": "en-US",
+      "scenario": "system-xss-config",
+      "method": "GET",
+      "path": "/api/auth/xss-config/rules/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 10
+    },
+    {
+      "at": "2026-10-17T10:37:26.147Z",
+      "locale": "en-US",
+      "scenario": "system-operation-log",
+      "method": "GET",
+      "path": "/api/base/oper-log/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 260
+    },
+    {
+      "at": "2026-10-17T10:37:27.737Z",
+      "locale": "ja-JP",
+      "scenario": "system-tenants",
+      "method": "GET",
+      "path": "/api/auth/tenant/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 1,
+      "total": 1
+    },
+    {
+      "at": "2026-10-17T10:37:29.055Z",
+      "locale": "ja-JP",
+      "scenario": "system-organizations",
+      "method": "GET",
+      "path": "/api/auth/org/tree",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 1,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:30.652Z",
+      "locale": "ja-JP",
+      "scenario": "system-roles",
+      "method": "GET",
+      "path": "/api/auth/role/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 22
+    },
+    {
+      "at": "2026-10-17T10:37:32.426Z",
+      "locale": "ja-JP",
+      "scenario": "system-permissions",
+      "method": "GET",
+      "path": "/api/auth/permission/tree",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 9,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:34.641Z",
+      "locale": "ja-JP",
+      "scenario": "system-dictionaries",
+      "method": "GET",
+      "path": "/api/base/dict/type/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 17
+    },
+    {
+      "at": "2026-10-17T10:37:36.031Z",
+      "locale": "ja-JP",
+      "scenario": "system-online-users",
+      "method": "GET",
+      "path": "/api/auth/online/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 0,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:37.645Z",
+      "locale": "ja-JP",
+      "scenario": "system-audit-log",
+      "method": "GET",
+      "path": "/api/auth/audit-log/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 52
+    },
+    {
+      "at": "2026-10-17T10:37:39.033Z",
+      "locale": "ja-JP",
+      "scenario": "system-auth-records",
+      "method": "GET",
+      "path": "/api/auth/auth-record/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 16
+    },
+    {
+      "at": "2026-10-17T10:37:40.638Z",
+      "locale": "ja-JP",
+      "scenario": "system-xss-config",
+      "method": "GET",
+      "path": "/api/auth/xss-config/settings",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": null,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:40.724Z",
+      "locale": "ja-JP",
+      "scenario": "system-xss-config",
+      "method": "GET",
+      "path": "/api/auth/xss-config/rules/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 10
+    },
+    {
+      "at": "2026-10-17T10:37:42.119Z",
+      "locale": "ja-JP",
+      "scenario": "system-operation-log",
+      "method": "GET",
+      "path": "/api/base/oper-log/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 260
+    },
+    {
+      "at": "2026-10-17T10:37:43.434Z",
+      "locale": "ko-KR",
+      "scenario": "system-tenants",
+      "method": "GET",
+      "path": "/api/auth/tenant/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 1,
+      "total": 1
+    },
+    {
+      "at": "2026-10-17T10:37:44.733Z",
+      "locale": "ko-KR",
+      "scenario": "system-organizations",
+      "method": "GET",
+      "path": "/api/auth/org/tree",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 1,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:46.317Z",
+      "locale": "ko-KR",
+      "scenario": "system-roles",
+      "method": "GET",
+      "path": "/api/auth/role/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 22
+    },
+    {
+      "at": "2026-10-17T10:37:48.276Z",
+      "locale": "ko-KR",
+      "scenario": "system-permissions",
+      "method": "GET",
+      "path": "/api/auth/permission/tree",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 9,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:50.427Z",
+      "locale": "ko-KR",
+      "scenario": "system-dictionaries",
+      "method": "GET",
+      "path": "/api/base/dict/type/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 17
+    },
+    {
+      "at": "2026-10-17T10:37:51.722Z",
+      "locale": "ko-KR",
+      "scenario": "system-online-users",
+      "method": "GET",
+      "path": "/api/auth/online/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "array",
+      "records": 0,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:53.042Z",
+      "locale": "ko-KR",
+      "scenario": "system-audit-log",
+      "method": "GET",
+      "path": "/api/auth/audit-log/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 52
+    },
+    {
+      "at": "2026-10-17T10:37:54.432Z",
+      "locale": "ko-KR",
+      "scenario": "system-auth-records",
+      "method": "GET",
+      "path": "/api/auth/auth-record/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 16
+    },
+    {
+      "at": "2026-10-17T10:37:55.933Z",
+      "locale": "ko-KR",
+      "scenario": "system-xss-config",
+      "method": "GET",
+      "path": "/api/auth/xss-config/settings",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": null,
+      "total": null
+    },
+    {
+      "at": "2026-10-17T10:37:56.020Z",
+      "locale": "ko-KR",
+      "scenario": "system-xss-config",
+      "method": "GET",
+      "path": "/api/auth/xss-config/rules/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 10
+    },
+    {
+      "at": "2026-10-17T10:37:57.543Z",
+      "locale": "ko-KR",
+      "scenario": "system-operation-log",
+      "method": "GET",
+      "path": "/api/base/oper-log/list",
+      "http": 200,
+      "code": 200,
+      "data_kind": "object",
+      "records": 10,
+      "total": 260
+    }
+  ],
+  "guard_checks": [
+    {
+      "at": "2026-10-17T10:36:51.874Z",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/auth/system-config/login-policy",
+      "http": 200,
+      "code": 200,
+      "policy": {
+        "failureThreshold": 10,
+        "failureWindowSeconds": 3600,
+        "source": "TENANT_OVERRIDE",
+        "updateTime": "2026-10-12 16:16:21",
+        "updatedBy": "admin",
+        "version": 10
+      }
+    },
+    {
+      "at": "2026-10-17T10:36:52.006Z",
+      "actor": "employee",
+      "method": "GET",
+      "path": "/api/auth/system-config/login-policy",
+      "http": 403,
+      "code": 403
+    }
+  ],
+  "database_guard": {
+    "observed_values_unchanged": true,
+    "fields": "Registered client public settings,user/role counts,login policy,dictionary count,XSS existing row and enabled value",
+    "xss_settings_row_already_existed": true,
+    "xss_enabled_before": 0,
+    "xss_enabled_after": 0,
+    "login_policy_before_after": {
+      "failureThreshold": 10,
+      "failureWindowSeconds": 3600,
+      "version": 10
+    },
+    "settings_read_caveat": "XSS settings GET creates a disabled default row if missing;this stage explicitly required an existing tenant1 row before opening the page."
+  },
+  "captures": [
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-tenants.png",
+      "sha256": "07320ad457210fa73a8794fd910752d01796c9540c99b381382a2ee9c462c16e",
+      "route": "/admin/system/tenant",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:36:54.179Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:36:53.340Z",
+          "locale": "zh-CN",
+          "scenario": "system-tenants",
+          "method": "GET",
+          "path": "/api/auth/tenant/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 1,
+          "total": 1
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "One Default Tenant row visible;contact/domain blank as returned. Initialization/actions headers touch or overlap. Japanese/Korean Domain,Initialization,Ready remain English. No creation or migration demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-organizations.png",
+      "sha256": "dd8df6efdf3423ba93f5b75dc54828ccb1e826215a90840527210bd2362a9c1e",
+      "route": "/admin/system/org",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:36:55.671Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:36:54.958Z",
+          "locale": "zh-CN",
+          "scenario": "system-organizations",
+          "method": "GET",
+          "path": "/api/auth/org/tree",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 1,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Expanded existing organization/departments/groups visible,including historical WIKI departments. Database business names remain Chinese;Japanese/Korean Organization and Department labels remain English. No edit demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-roles.png",
+      "sha256": "686008e4cbd2f892c31158705a65480d346441fc3ee15d2a520ade426de8fe5d",
+      "route": "/admin/system/role",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:36:57.374Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:36:56.548Z",
+          "locale": "zh-CN",
+          "scenario": "system-roles",
+          "method": "GET",
+          "path": "/api/auth/role/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 22
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of22existing roles visible;scope names readable;PROCUREMENT_MANAGER wraps. Assignment buttons wrap;data-permission button disabled for non-CUSTOM scopes. No role assignment or row-isolation test demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-permissions.png",
+      "sha256": "876901ee67d25089d668c23bd1b5add8653d33199efbd758c5982f7a5773f603",
+      "route": "/admin/system/permission",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:36:59.734Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:36:58.564Z",
+          "locale": "zh-CN",
+          "scenario": "system-permissions",
+          "method": "GET",
+          "path": "/api/auth/permission/tree",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 9,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Native expanded Directory/Menu/API tree and stable codes readable;lower nodes extend beyond viewport and require scrolling. Japanese/Korean Type,Depth,Directory,Menu remain English. No full-tree visibility claim.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-dictionaries.png",
+      "sha256": "815716910672473888d698232753a513ffb56190ce6d591ac2c0aed681c97132",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:02.452Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:01.749Z",
+          "locale": "zh-CN",
+          "scenario": "system-dictionaries",
+          "method": "GET",
+          "path": "/api/base/dict/type/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 17
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of17types visible;right panel correctly asks to select a type. Long code ellipsized. Seed names remain Chinese in translated UI. No new dictionary or validation in these current list captures.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-online-users.png",
+      "sha256": "533ccc47cbae8b9af90fcb29e31d112b3e49b97314458d0d389acec7d41867bb",
+      "route": "/admin/system/online",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:03.944Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:03.327Z",
+          "locale": "zh-CN",
+          "scenario": "system-online-users",
+          "method": "GET",
+          "path": "/api/auth/online/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 0,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Native localized empty state,not a loading placeholder. Controlled fixture authentication creates no real browser-login session. No online-user kick or token-revocation proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-audit-log.png",
+      "sha256": "ef1d0a46b3c5497fac0aced04ca1548e8bd8f62e98821522915553c76df30441",
+      "route": "/admin/system/auditlog",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:05.646Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:04.928Z",
+          "locale": "zh-CN",
+          "scenario": "system-audit-log",
+          "method": "GET",
+          "path": "/api/auth/audit-log/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 52
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of52historical events visible,including dated AUTH_CONFIG_UPDATED;event descriptions remain Chinese and raw unmapped event codes are retained. Some usernames wrap;unavailable is native missing-value display. No new authentication event.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-auth-records.png",
+      "sha256": "92e22e7de06173de31f768227fc464aa57e463e7dbd7cad3b6e0fd08651b72b4",
+      "route": "/admin/system/authrecord",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:07.085Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:06.425Z",
+          "locale": "zh-CN",
+          "scenario": "system-auth-records",
+          "method": "GET",
+          "path": "/api/auth/auth-record/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 16
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Historical omni-device device-code grant rows visible. Long IDs and grant URN wrap;list extends vertically beyond viewport. Scopes and Created At are blank in returned rows. No token/secret shown and no new grant or external OAuth proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-xss-config.png",
+      "sha256": "b2e0e763993e066142a7e6754528bf40c51640f3e2f7edadd255dd2fef37ef05",
+      "route": "/admin/system/xssconfig",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:09.165Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:08.446Z",
+          "locale": "zh-CN",
+          "scenario": "system-xss-config",
+          "method": "GET",
+          "path": "/api/auth/xss-config/settings",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": null,
+          "total": null
+        },
+        {
+          "at": "2026-10-17T10:37:08.522Z",
+          "locale": "zh-CN",
+          "scenario": "system-xss-config",
+          "method": "GET",
+          "path": "/api/auth/xss-config/rules/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 10
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Global switch visibly OFF;ten existing rule switches ON. Seed rule names/descriptions remain Chinese. Japanese/Korean Pattern and Description remain English;some translated type/sort labels wrap or ellipsize. List cannot prove active filtering or mutation. Existing settings row and OFF value guarded before and after capture.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-operation-log.png",
+      "sha256": "13077d0cb857e198a7265e9d3a8d388b1ac33ba048753d6ee50944ffb8c2f0fb",
+      "route": "/admin/base/operlog",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:10.708Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:10.048Z",
+          "locale": "zh-CN",
+          "scenario": "system-operation-log",
+          "method": "GET",
+          "path": "/api/base/oper-log/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 260
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of260historical rows visible,including an old failed asset deletion. Native actor/module values remain Chinese and some truncate/wrap. Request path and ID are visible;no Trace ID filter or column. No fresh write or asynchronous delivery proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-tenants.png",
+      "sha256": "35669ba1a1918c67077c4fc250a138a5b5024d25ff405fec1c954a7986fe127b",
+      "route": "/admin/system/tenant",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:12.070Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:11.432Z",
+          "locale": "en-US",
+          "scenario": "system-tenants",
+          "method": "GET",
+          "path": "/api/auth/tenant/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 1,
+          "total": 1
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "One Default Tenant row visible;contact/domain blank as returned. Initialization/actions headers touch or overlap. Japanese/Korean Domain,Initialization,Ready remain English. No creation or migration demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-organizations.png",
+      "sha256": "f721c76b962cbd1fb9e2b69f2ccb8c26a091e0b77ece28f94902365c88c53bfb",
+      "route": "/admin/system/org",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:13.752Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:13.049Z",
+          "locale": "en-US",
+          "scenario": "system-organizations",
+          "method": "GET",
+          "path": "/api/auth/org/tree",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 1,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Expanded existing organization/departments/groups visible,including historical WIKI departments. Database business names remain Chinese;Japanese/Korean Organization and Department labels remain English. No edit demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-roles.png",
+      "sha256": "78cdab34800d9b46ef45339ac40b63866965c36216657992773a7f727c6b7a03",
+      "route": "/admin/system/role",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:15.386Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:14.654Z",
+          "locale": "en-US",
+          "scenario": "system-roles",
+          "method": "GET",
+          "path": "/api/auth/role/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 22
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of22existing roles visible;scope names readable;PROCUREMENT_MANAGER wraps. Assignment buttons wrap;data-permission button disabled for non-CUSTOM scopes. No role assignment or row-isolation test demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-permissions.png",
+      "sha256": "17741f85c9920d135eaafbed9000f94d926cc2446ef8ae906aaa582992eca4aa",
+      "route": "/admin/system/permission",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:17.900Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:16.523Z",
+          "locale": "en-US",
+          "scenario": "system-permissions",
+          "method": "GET",
+          "path": "/api/auth/permission/tree",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 9,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Native expanded Directory/Menu/API tree and stable codes readable;lower nodes extend beyond viewport and require scrolling. Japanese/Korean Type,Depth,Directory,Menu remain English. No full-tree visibility claim.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-dictionaries.png",
+      "sha256": "944071185f3942dc0492ddf239736a38d88c99702efef25ff5a22911604052f2",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:19.253Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:18.730Z",
+          "locale": "en-US",
+          "scenario": "system-dictionaries",
+          "method": "GET",
+          "path": "/api/base/dict/type/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 17
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of17types visible;right panel correctly asks to select a type. Long code ellipsized. Seed names remain Chinese in translated UI. No new dictionary or validation in these current list captures.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-online-users.png",
+      "sha256": "50af584cd00b3b4b6d1ebf7d1db622edc0c979e1e68e26cb4fced9a52b96fa04",
+      "route": "/admin/system/online",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:20.519Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:19.927Z",
+          "locale": "en-US",
+          "scenario": "system-online-users",
+          "method": "GET",
+          "path": "/api/auth/online/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 0,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Native localized empty state,not a loading placeholder. Controlled fixture authentication creates no real browser-login session. No online-user kick or token-revocation proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-audit-log.png",
+      "sha256": "8a71f66fcd61e35bb624ba2f92e14dcc7f9d4911541594643a8ca11b2e20e75d",
+      "route": "/admin/system/auditlog",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:22.054Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:21.443Z",
+          "locale": "en-US",
+          "scenario": "system-audit-log",
+          "method": "GET",
+          "path": "/api/auth/audit-log/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 52
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of52historical events visible,including dated AUTH_CONFIG_UPDATED;event descriptions remain Chinese and raw unmapped event codes are retained. Some usernames wrap;unavailable is native missing-value display. No new authentication event.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-auth-records.png",
+      "sha256": "34bd37394a870daf7d30057e1457e5bb84354927320361533ab2cca7f26f232e",
+      "route": "/admin/system/authrecord",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:23.546Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:22.834Z",
+          "locale": "en-US",
+          "scenario": "system-auth-records",
+          "method": "GET",
+          "path": "/api/auth/auth-record/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 16
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Historical omni-device device-code grant rows visible. Long IDs and grant URN wrap;list extends vertically beyond viewport. Scopes and Created At are blank in returned rows. No token/secret shown and no new grant or external OAuth proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-xss-config.png",
+      "sha256": "570f7a1caa7b9be0a8a722d5a0827cc3b5725a74e03c094fea88a5c5c7fb1f0a",
+      "route": "/admin/system/xssconfig",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:25.335Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:24.648Z",
+          "locale": "en-US",
+          "scenario": "system-xss-config",
+          "method": "GET",
+          "path": "/api/auth/xss-config/settings",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": null,
+          "total": null
+        },
+        {
+          "at": "2026-10-17T10:37:24.733Z",
+          "locale": "en-US",
+          "scenario": "system-xss-config",
+          "method": "GET",
+          "path": "/api/auth/xss-config/rules/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 10
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Global switch visibly OFF;ten existing rule switches ON. Seed rule names/descriptions remain Chinese. Japanese/Korean Pattern and Description remain English;some translated type/sort labels wrap or ellipsize. List cannot prove active filtering or mutation. Existing settings row and OFF value guarded before and after capture.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-operation-log.png",
+      "sha256": "4a6c083350018166c85ba72b0639530f700e526a79ca13b4dfce3e5d17be2e1d",
+      "route": "/admin/base/operlog",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:26.785Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:26.147Z",
+          "locale": "en-US",
+          "scenario": "system-operation-log",
+          "method": "GET",
+          "path": "/api/base/oper-log/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 260
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of260historical rows visible,including an old failed asset deletion. Native actor/module values remain Chinese and some truncate/wrap. Request path and ID are visible;no Trace ID filter or column. No fresh write or asynchronous delivery proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-tenants.png",
+      "sha256": "600ca8a061526c2ffef1abbcb1daeb5ba0e0b353da42d253a34003bfe96701bf",
+      "route": "/admin/system/tenant",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:28.324Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:27.737Z",
+          "locale": "ja-JP",
+          "scenario": "system-tenants",
+          "method": "GET",
+          "path": "/api/auth/tenant/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 1,
+          "total": 1
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "One Default Tenant row visible;contact/domain blank as returned. Initialization/actions headers touch or overlap. Japanese/Korean Domain,Initialization,Ready remain English. No creation or migration demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-organizations.png",
+      "sha256": "8903dd061909f22b5b922c09e2438328fea3f4f07171c031b2fde1c463b8c571",
+      "route": "/admin/system/org",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:29.826Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:29.055Z",
+          "locale": "ja-JP",
+          "scenario": "system-organizations",
+          "method": "GET",
+          "path": "/api/auth/org/tree",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 1,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Expanded existing organization/departments/groups visible,including historical WIKI departments. Database business names remain Chinese;Japanese/Korean Organization and Department labels remain English. No edit demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-roles.png",
+      "sha256": "c3f44784ae08f2d3cef03b331eabbdd6e46ef9dad920831219ab9758d485b58e",
+      "route": "/admin/system/role",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:31.301Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:30.652Z",
+          "locale": "ja-JP",
+          "scenario": "system-roles",
+          "method": "GET",
+          "path": "/api/auth/role/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 22
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of22existing roles visible;scope names readable;PROCUREMENT_MANAGER wraps. Assignment buttons wrap;data-permission button disabled for non-CUSTOM scopes. No role assignment or row-isolation test demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-permissions.png",
+      "sha256": "d4bb5a119f0ec2ae76b24d8ea466b85c9cb77efd7491dc405aabee5af7a27083",
+      "route": "/admin/system/permission",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:33.579Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:32.426Z",
+          "locale": "ja-JP",
+          "scenario": "system-permissions",
+          "method": "GET",
+          "path": "/api/auth/permission/tree",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 9,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Native expanded Directory/Menu/API tree and stable codes readable;lower nodes extend beyond viewport and require scrolling. Japanese/Korean Type,Depth,Directory,Menu remain English. No full-tree visibility claim.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-dictionaries.png",
+      "sha256": "6c68907f426646b074e30a9154afb8f2ea6287ec2fe9ecc0d3a316fe8e133e70",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:35.344Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:34.641Z",
+          "locale": "ja-JP",
+          "scenario": "system-dictionaries",
+          "method": "GET",
+          "path": "/api/base/dict/type/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 17
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of17types visible;right panel correctly asks to select a type. Long code ellipsized. Seed names remain Chinese in translated UI. No new dictionary or validation in these current list captures.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-online-users.png",
+      "sha256": "c7e420787af2700f8ee356282060e1b12ed3f8594142c8f772e9e8b41d419cf8",
+      "route": "/admin/system/online",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:36.623Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:36.031Z",
+          "locale": "ja-JP",
+          "scenario": "system-online-users",
+          "method": "GET",
+          "path": "/api/auth/online/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 0,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Native localized empty state,not a loading placeholder. Controlled fixture authentication creates no real browser-login session. No online-user kick or token-revocation proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-audit-log.png",
+      "sha256": "0935b2b52bb7cb6c85631895d211b210ec76b586cf86c4b61b2075ef6e4557b1",
+      "route": "/admin/system/auditlog",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:38.326Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:37.645Z",
+          "locale": "ja-JP",
+          "scenario": "system-audit-log",
+          "method": "GET",
+          "path": "/api/auth/audit-log/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 52
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of52historical events visible,including dated AUTH_CONFIG_UPDATED;event descriptions remain Chinese and raw unmapped event codes are retained. Some usernames wrap;unavailable is native missing-value display. No new authentication event.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-auth-records.png",
+      "sha256": "faf49d1ea8a32ce7764374e70bf3c78e16840bfbcdd54564a21c51c272b22032",
+      "route": "/admin/system/authrecord",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:39.697Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:39.033Z",
+          "locale": "ja-JP",
+          "scenario": "system-auth-records",
+          "method": "GET",
+          "path": "/api/auth/auth-record/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 16
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Historical omni-device device-code grant rows visible. Long IDs and grant URN wrap;list extends vertically beyond viewport. Scopes and Created At are blank in returned rows. No token/secret shown and no new grant or external OAuth proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-xss-config.png",
+      "sha256": "81cefe26cc34ee6af89ad9b05f252d26bd2672e3271d370d6a67c7e960d38191",
+      "route": "/admin/system/xssconfig",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:41.265Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:40.638Z",
+          "locale": "ja-JP",
+          "scenario": "system-xss-config",
+          "method": "GET",
+          "path": "/api/auth/xss-config/settings",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": null,
+          "total": null
+        },
+        {
+          "at": "2026-10-17T10:37:40.724Z",
+          "locale": "ja-JP",
+          "scenario": "system-xss-config",
+          "method": "GET",
+          "path": "/api/auth/xss-config/rules/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 10
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Global switch visibly OFF;ten existing rule switches ON. Seed rule names/descriptions remain Chinese. Japanese/Korean Pattern and Description remain English;some translated type/sort labels wrap or ellipsize. List cannot prove active filtering or mutation. Existing settings row and OFF value guarded before and after capture.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-operation-log.png",
+      "sha256": "850fee65f49b6203c2f6842b66e0439b552d26cef3523c3715bb05cd0864c166",
+      "route": "/admin/base/operlog",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:42.629Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:42.119Z",
+          "locale": "ja-JP",
+          "scenario": "system-operation-log",
+          "method": "GET",
+          "path": "/api/base/oper-log/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 260
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of260historical rows visible,including an old failed asset deletion. Native actor/module values remain Chinese and some truncate/wrap. Request path and ID are visible;no Trace ID filter or column. No fresh write or asynchronous delivery proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-tenants.png",
+      "sha256": "3610412d786620b8f0571e447245b1afbbb9565ae99863f73ee25cf436d418d0",
+      "route": "/admin/system/tenant",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:43.995Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:43.434Z",
+          "locale": "ko-KR",
+          "scenario": "system-tenants",
+          "method": "GET",
+          "path": "/api/auth/tenant/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 1,
+          "total": 1
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "One Default Tenant row visible;contact/domain blank as returned. Initialization/actions headers touch or overlap. Japanese/Korean Domain,Initialization,Ready remain English. No creation or migration demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-organizations.png",
+      "sha256": "75c282c59f15a10e3fc706530a08f7e3510c6a81ba3eae4bfb756f0a2111d5f8",
+      "route": "/admin/system/org",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:45.288Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:44.733Z",
+          "locale": "ko-KR",
+          "scenario": "system-organizations",
+          "method": "GET",
+          "path": "/api/auth/org/tree",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 1,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Expanded existing organization/departments/groups visible,including historical WIKI departments. Database business names remain Chinese;Japanese/Korean Organization and Department labels remain English. No edit demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-roles.png",
+      "sha256": "e5875ccde27f6b58cc11a38615bc971e5a0d1d57aeb76145906eb9c4f3cee572",
+      "route": "/admin/system/role",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:46.873Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:46.317Z",
+          "locale": "ko-KR",
+          "scenario": "system-roles",
+          "method": "GET",
+          "path": "/api/auth/role/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 22
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of22existing roles visible;scope names readable;PROCUREMENT_MANAGER wraps. Assignment buttons wrap;data-permission button disabled for non-CUSTOM scopes. No role assignment or row-isolation test demonstrated.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-permissions.png",
+      "sha256": "e68c26a54e28b2b89ea36b51f7ce730697cac01419591661fa445ba7db7050c9",
+      "route": "/admin/system/permission",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:49.516Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:48.276Z",
+          "locale": "ko-KR",
+          "scenario": "system-permissions",
+          "method": "GET",
+          "path": "/api/auth/permission/tree",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 9,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Native expanded Directory/Menu/API tree and stable codes readable;lower nodes extend beyond viewport and require scrolling. Japanese/Korean Type,Depth,Directory,Menu remain English. No full-tree visibility claim.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-dictionaries.png",
+      "sha256": "f580980e925c65e7bd695b1df68b3e9faa85cef01171353cdfccc583c3e4d2a5",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:51.016Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:50.427Z",
+          "locale": "ko-KR",
+          "scenario": "system-dictionaries",
+          "method": "GET",
+          "path": "/api/base/dict/type/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 17
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of17types visible;right panel correctly asks to select a type. Long code ellipsized. Seed names remain Chinese in translated UI. No new dictionary or validation in these current list captures.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-online-users.png",
+      "sha256": "2c7e389b8bcc7563fc9f6cc7aa6d0811bfb1bd992d03c5baad825c47bdc939da",
+      "route": "/admin/system/online",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:52.224Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:51.722Z",
+          "locale": "ko-KR",
+          "scenario": "system-online-users",
+          "method": "GET",
+          "path": "/api/auth/online/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "array",
+          "records": 0,
+          "total": null
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Native localized empty state,not a loading placeholder. Controlled fixture authentication creates no real browser-login session. No online-user kick or token-revocation proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-audit-log.png",
+      "sha256": "85ff5420da2b470fb88e35eb0bd3eeef3d2d8750432278a564a56ffb5a36c4de",
+      "route": "/admin/system/auditlog",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:53.644Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:53.042Z",
+          "locale": "ko-KR",
+          "scenario": "system-audit-log",
+          "method": "GET",
+          "path": "/api/auth/audit-log/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 52
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of52historical events visible,including dated AUTH_CONFIG_UPDATED;event descriptions remain Chinese and raw unmapped event codes are retained. Some usernames wrap;unavailable is native missing-value display. No new authentication event.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-auth-records.png",
+      "sha256": "a87088900d87018553252a656620ac480e6ec11c03fc7ea98a5db4ec1182cac0",
+      "route": "/admin/system/authrecord",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:55.106Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:54.432Z",
+          "locale": "ko-KR",
+          "scenario": "system-auth-records",
+          "method": "GET",
+          "path": "/api/auth/auth-record/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 16
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Historical omni-device device-code grant rows visible. Long IDs and grant URN wrap;list extends vertically beyond viewport. Scopes and Created At are blank in returned rows. No token/secret shown and no new grant or external OAuth proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-xss-config.png",
+      "sha256": "5c217ba731d46d3a6bc86acda02ac30d9b3906c1f1e5cd326fa54b0482103656",
+      "route": "/admin/system/xssconfig",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:56.526Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:55.933Z",
+          "locale": "ko-KR",
+          "scenario": "system-xss-config",
+          "method": "GET",
+          "path": "/api/auth/xss-config/settings",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": null,
+          "total": null
+        },
+        {
+          "at": "2026-10-17T10:37:56.020Z",
+          "locale": "ko-KR",
+          "scenario": "system-xss-config",
+          "method": "GET",
+          "path": "/api/auth/xss-config/rules/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 10
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "Global switch visibly OFF;ten existing rule switches ON. Seed rule names/descriptions remain Chinese. Japanese/Korean Pattern and Description remain English;some translated type/sort labels wrap or ellipsize. List cannot prove active filtering or mutation. Existing settings row and OFF value guarded before and after capture.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-operation-log.png",
+      "sha256": "360107d14260d926d2b43714f7dbf49068e7cd2260b7d39afff8fa5334d5abac",
+      "route": "/admin/base/operlog",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T10:37:58.140Z",
+      "api_observations": [
+        {
+          "at": "2026-10-17T10:37:57.543Z",
+          "locale": "ko-KR",
+          "scenario": "system-operation-log",
+          "method": "GET",
+          "path": "/api/base/oper-log/list",
+          "http": 200,
+          "code": 200,
+          "data_kind": "object",
+          "records": 10,
+          "total": 260
+        }
+      ],
+      "visual_review": "passed-with-recorded-limits",
+      "visual_review_type": "AI_REVIEW",
+      "visual_reviewer": "Codex",
+      "visual_observation": "First ten of260historical rows visible,including an old failed asset deletion. Native actor/module values remain Chinese and some truncate/wrap. Request path and ID are visible;no Trace ID filter or column. No fresh write or asynchronous delivery proof.",
+      "common_visual_limits": "Fixed1680x1050 native viewport;first page or visible tree only. English and some Japanese sidebar labels clip;sidebar lower sections require native scrolling. No DOM replacement,response mock,composite or image editing."
+    }
+  ],
+  "page_api_reads": 44,
+  "business_form_submissions": 0,
+  "blocked_mutations": [],
+  "page_errors": [],
+  "errors": [],
+  "mocks": false,
+  "password_captcha_login": false,
+  "temporary_token_file_removed": true,
+  "temporary_fixture_env_removed": true,
+  "all_six_started_containers_stopped": true,
+  "volumes_preserved": true,
+  "historical_successful_writes_replayed": false,
+  "prior_attempts": [
+    {
+      "attempt": 396,
+      "result": "Private fetch status method mismatch before browser images;no writes,temporary files removed,containers stopped"
+    },
+    {
+      "attempt": 397,
+      "result": "Private XSS preflight query splice did not execute the intended probe;not evidence that row was absent;no browser/token issuance;containers stopped"
+    },
+    {
+      "attempt": "398 preparation before recovery",
+      "result": "Automatic approval service quota failure;rejected action not executed;subsequent normal Auto-review action succeeded before398 capture"
+    }
+  ],
+  "scope_limits": [
+    "40read-only list/settings images only;not active XSS filtering,kick,externalOAuth callback or async delivery acceptance",
+    "Prior dictionary12 and platform32 images remain dated original evidence;not replayed or recaptured here",
+    "Originals individually AI reviewed;native clipping,wrapping,English fallback andChinese database values explicitly retained",
+    "No human review claimed or required;document semantic review is separate from image inspection"
+  ]
+}

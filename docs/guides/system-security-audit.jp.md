@@ -1,100 +1,124 @@
 # システム設定、セキュリティ設定、監査ログ
 
-テナント設定、XSS 防御、オンラインセッション、ログイン記録、操作ログ、信頼性メッセージ記録の保守方法を説明します。
+対象は本リポジトリの Spring Boot 4 / Vue 3 実装です。core または core を含むプリセットを使い、[初回起動](quick-start.jp.md)と[認証](authentication.jp.md)を先に完了してください。本書は操作手順です。セキュリティ境界とイベント契約は[コアフロー](../core-flows.jp.md)に従います。
 
-## 1. 基本データ
+## 1. 環境と利用者を準備する
 
-システム管理にはテナント、組織、ユーザー、ロール、権限、OAuth2 クライアント、オンラインユーザー、認可記録、監査、XSS 設定があります。基本データには辞書があります。変更前にテナントと権限範囲を確認してください。
+- マイグレーション、Auth、Base、Gateway、フロントエンドをローカル Docker で実行し、移行完了と稼働状態を確認します。画面の読み取りには標準 lite モードを使えます。第 6 節の非同期配信には完全なメッセージ実行環境が必要です。[Docker デプロイ](../docker-deployment.jp.md)を参照してください。
+- 同じテナントの管理者と一般従業員を用意し、ユーザー ID、ロール、実際の権限を記録します。管理操作には対応する書き込み権限を使い、拒否の確認には従業員本人のセッションを使います。
+- 毎回一意の `WIKI-{run-id}` 接頭辞を使い、元の値、作成 ID、応答、後片付けの記録をリポジトリ外に保存します。パスワード、トークン、クライアント secret、非公開環境ファイルをコミットしないでください。
+- 以下の書き込みは隔離した学習環境で行う手順です。2026-10-10/12 の成功済み書き込みには記録があり、今回は再実行していません。2026-10-17 の新しい画像は既存データの読み取りのみです。第 7 節を参照してください。
 
-辞書は安定した表示列挙に使います。翻訳は表示だけを変え、状態値、権限コード、API パラメータは変えません。
+## 2. 組織、ロール、メニューを理解する
 
-## 2. OAuth2 クライアント
+1. 管理者で「システム管理 → 組織管理」を開き、一意の接頭辞を付けた学習用部門を作成し、返された ID を記録します。
+2. ユーザー管理で学習用アカウントを作り、既定の `USER` ロールを確認します。現在のユーザー画面には主組織の編集欄がありません。設定が必要なら `system:user:update` を持つ管理者が正式な `PUT /api/auth/user/{id}` で `primaryUnitId` を更新し、再取得します。組織一覧の画像だけでユーザーとの関連付けを証明しないでください。
+3. 機能ロールを割り当てる前に元の集合を読み取ります。割り当ては全件置換なので、必要な既存ロールを残します。対象アカウントで再ログインしてから、メニュー、ボタン、API を確認します。
+4. ロールの範囲 `ALL/TENANT/DEPT/DEPT_AND_CHILD/SELF/CUSTOM` を確認します。`CUSTOM` では部門集合も必要です。従業員と管理職の結果を比較し、`SUPER_ADMIN` の表示から両者の範囲を推測しないでください。
 
-クライアント ID、許可グラント、リダイレクト URI、スコープ、同意要否を設定します。本番では HTTPS、正確な URI、Secret 管理、最小グラント、定期ローテーションと認可レビューが必要です。
+**機能ロールとワークフロー候補者のスコープは別です。** ユーザー管理は `sys_user_role` に書き込みますが、主組織を変えても `sys_user_role_scope` は作成されません。既定の承認モデルは後者から候補者を探すため、機能ロールだけでは承認者が不在になることがあります。現在、そのスコープを管理する公開 API はありません。隔離環境では記録付きの制御されたフィクスチャを使い、本番テーブルの直接編集を日常手順にしないでください。サプライチェーンの演習前に[ワークフロー手順](workflow-approval.jp.md)で候補者をプレビューします。
 
-## 3. XSS 防御
+### 2.1. ロール範囲を保存し、メニュー権限を割り当てる
 
-`@RequestBody` を持つ新規サービスは `XssConfigProvider` SPI を実装します。共通層はリクエストフィルター、Jackson 文字列サニタイズ、Gateway ヘッダーを提供します。
+1. 誰にも割り当てていない、一意コードの学習用ロールを用意します。「ロール管理 → 新規作成」も使えます。2026-10-12 の証跡準備では正式な `POST /api/auth/role` と初期値 `dataScope=DEPT` を使い、シードロールは変更していません。
+2. そのロールを編集し、「本人のデータのみ」`SELF` を選んで確定します。`GET /api/auth/role/{id}` を再取得し、`dataScope=SELF` と一覧表示が一致することを確認します。
 
-ルールや有効状態の変更時は直ちに `xss:enabled:{tenantId}` と `xss:rules:{tenantId}` を無効化し、TTL だけに依存しません。イベント属性、スクリプトプロトコル、許可するリッチテキスト境界を再検証します。
+![過去の手順：保存前に SELF を選択](../images/ja-JP/system-role-scope-form.png)
+![過去の手順：保存後の SELF 表示](../images/ja-JP/system-role-scope-saved.png)
 
-## 4. セキュリティヘッダー
+3. 権限管理の 3 階層を読み取ります。ディレクトリは `DIRECTORY`、メニューは `MENU`、API は `API` です。表示しただけではメニューの作成・変更にはなりません。
 
-Gateway は `X-Content-Type-Options: nosniff`、`X-Frame-Options: DENY`、`Referrer-Policy` を付与します。入力サニタイズ、出力エンコード、CSP、認可の代替ではありません。
+![過去の権限ツリー：3 階層と固定コード](../images/ja-JP/system-menu-permission-tree.png)
 
-## 5. 監査情報
+4. 学習用ロールの「機能権限を割り当て」で、メニュー `system:loginrecord` と API `system:loginrecord:list` だけを選びます。確定後に `GET /api/auth/permission/role/{id}` を読み、返された ID を権限ツリーと照合して、この 2 件だけであることを確認します。全件置換なので、業務ロールをこの手順で上書きしないでください。
 
-| 情報 | 場所 | 用途 |
-|---|---|---|
-| ログイン記録 | `sys_audit_log`（`LOGIN_SUCCESS`/`LOGIN_FAILED` の読み取り専用プロジェクション。管理画面「ログイン記録」） | ログイン成否、送信元（IP マスク）、認証方式（パスワード/セッション/サードパーティ/不明） |
-| セキュリティ監査 | `sys_audit_log` | アカウントロック/解除、ロール割当/取消、パスワード変更、ログイン保護ポリシー更新 |
-| 操作ログ | 管理画面 | 業務更新、操作者、結果、Trace ID |
-| MQ 記録 | メッセージ画面 | Outbox、再試行、デッドレター、相関 |
+![過去の手順：ログイン記録の 2 権限だけを選択](../images/ja-JP/system-role-permission-dialog.png)
 
-`omni-auth` は `@OperLog` を使わず、認証はログイン記録で保持します。外部照会はテナントで絞り、バックグラウンド relay の全テナント走査は意図した設計です。
+5. 自分の未割り当てロールだけを一意コードと ID で削除し、`GET /api/auth/role/all` で残存がないことを確認します。設定の永続化は行単位の分離の証明ではありません。[権限手順](permissions.jp.md)の比較を参照してください。失敗時は先に状態を再取得し、成功済み書き込みを繰り返さないでください。
 
-## 6. 調査フロー
+## 3. 学習用辞書を作成して削除する
 
-Trace ID を取得し、操作ログ、MQ 記録、Tempo、Loki の順で同期・非同期経路を関連付けます。デッドレターの再送は下流の冪等性と状態を確認してから行います。
+辞書の書き込み権限が必要です。過去の画像は隔離テナントの `admin/SUPER_ADMIN` によるもので、従業員の書き込み権限を証明しません。先に `WIKI_DICT_{run-id}` などの一意コードを記録します。
 
-## 7. 本番チェック
+1. 「基本データ → 辞書管理 → タイプ新規作成」で、タイプコード、タイプ名、備考、並び順を確認します。コードと名前は空のままにし、並び順は既定値でも構いません。
 
-開発用アカウントと各種秘密を交換し、MySQL、Redis、Nacos、XXL-JOB、観測・管理ポートを公開しません。TLS、最小権限、保持期間、マスキング、通知先、復旧演習を設定します。画像やレポートに認証情報や個人データを含めません。
+![2026-10-10：未送信の辞書フォーム](../images/ja-JP/system-dictionary-create-form.png)
 
-## 8. 管理画面ページの4言語スクリーンショット
+2. 確定すると、空のコード・名前に対する `POST /api/base/dict/type` は HTTP 400、業務コード 400 を返し、ダイアログは開いたままでタイプは作成されません。現在の画面にはローカル必須 rules がなく、バックエンド検証結果を共通エラー処理で表示します。
+3. エラーが完全に表示されるまで待ちます。接頭部は画面言語に従い、フィールド名は `typeCode/typeName` と調査用 Trace ID のままです。アニメーション途中の空白を失敗証跡にしないでください。
 
-正式な画像はドキュメント専用 Playwright ケース `omni-frontend/e2e-docs/flows/management.flows.spec.ts` により実際の実行スタック上で生成され、言語別ディレクトリに保存され、他言語の画像を再利用せず、プレースホルダー画像やモック応答を使用しません。
+![2026-10-10：エラー全文と開いたままのフォーム](../images/ja-JP/system-dictionary-create-validation.png)
 
-- 前提条件：ローカル Compose フルスタックが実行中、フロントエンド `127.0.0.1:3000`；`omni-auth` と `omni-base` ヘルス。
-- 操作者：`admin`（`SUPER_ADMIN`、システム管理・基礎データ・監視メニュー権限を保持）。
-- 操作：ログイン後にテナント、組織、ロール、権限、辞書、オンラインユーザー、監査ログ、認可記録、XSS 防護、操作ログページに順に移動。
-- 期待状態：ページタイトルと列ラベルが現在の言語でレンダリング、リストは実際のシステムデータを表示；レコードがない場合は製品自身の空状態を表示（撮影失敗ではない）。
-- トークン：`E2eTokenFixture` がテストプロセス内で短期 JWT（TTL 1200 秒）を発行、収尾で破棄し、ドキュメント・ログ・リポジトリに書き込まない。
-- 本グループはすべて**読み取り専用採集**：設定や監査データを一切作成・変更・削除しないため、書き込みスイッチは不要でデータ収尾もない。
+4. エラーが消えてから一意コードと名前を入力し、確定します。成功時はダイアログが閉じます。完全なコードで検索し、読み込み完了後に対象行を確認します。タイプ未選択なら右ペインは空で正常です。
+5. 過去の取得では `E2EDICT-{runStamp}-{locale}` を使い、言語ごとに 1 件作成しました。画像のコードをシード値として再利用しないでください。
 
-機微情報説明：認可記録ページは OAuth2 `client_id`（公開識別子）、主体と認可タイプのみを表示し、**client secret・トークン・パスワードを含まない**；オンラインユーザーページは現在の環境で空状態であり、セッショントークンを含まない。
+![2026-10-10：一意コードによる作成結果の確認](../images/ja-JP/system-dictionary-create-success.png)
 
-| ページ | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| テナント管理（tenant） | ![テナント管理（簡体字中国語）](../images/zh-CN/system-tenants.png) | ![テナント管理（英語）](../images/en-US/system-tenants.png) | ![テナント管理（日本語）](../images/ja-JP/system-tenants.png) | ![テナント管理（韓国語）](../images/ko-KR/system-tenants.png) |
-| 組織管理（organization） | ![組織管理（簡体字中国語）](../images/zh-CN/system-organizations.png) | ![組織管理（英語）](../images/en-US/system-organizations.png) | ![組織管理（日本語）](../images/ja-JP/system-organizations.png) | ![組織管理（韓国語）](../images/ko-KR/system-organizations.png) |
-| ロール管理（role、data-scope 入口を含む） | ![ロール管理（簡体字中国語）](../images/zh-CN/system-roles.png) | ![ロール管理（英語）](../images/en-US/system-roles.png) | ![ロール管理（日本語）](../images/ja-JP/system-roles.png) | ![ロール管理（韓国語）](../images/ko-KR/system-roles.png) |
-| 権限管理（permission、menu ノードを含む） | ![権限管理（簡体字中国語）](../images/zh-CN/system-permissions.png) | ![権限管理（英語）](../images/en-US/system-permissions.png) | ![権限管理（日本語）](../images/ja-JP/system-permissions.png) | ![権限管理（韓国語）](../images/ko-KR/system-permissions.png) |
-| 辞書管理（dictionary） | ![辞書管理（簡体字中国語）](../images/zh-CN/system-dictionaries.png) | ![辞書管理（英語）](../images/en-US/system-dictionaries.png) | ![辞書管理（日本語）](../images/ja-JP/system-dictionaries.png) | ![辞書管理（韓国語）](../images/ko-KR/system-dictionaries.png) |
-| オンラインユーザー（online-user、空状態） | ![オンラインユーザー（簡体字中国語）](../images/zh-CN/system-online-users.png) | ![オンラインユーザー（英語）](../images/en-US/system-online-users.png) | ![オンラインユーザー（日本語）](../images/ja-JP/system-online-users.png) | ![オンラインユーザー（韓国語）](../images/ko-KR/system-online-users.png) |
-| 監査ログ（audit） | ![監査ログ（簡体字中国語）](../images/zh-CN/system-audit-log.png) | ![監査ログ（英語）](../images/en-US/system-audit-log.png) | ![監査ログ（日本語）](../images/ja-JP/system-audit-log.png) | ![監査ログ（韓国語）](../images/ko-KR/system-audit-log.png) |
-| 認可記録（oauth2） | ![認可記録（簡体字中国語）](../images/zh-CN/system-auth-records.png) | ![認可記録（英語）](../images/en-US/system-auth-records.png) | ![認可記録（日本語）](../images/ja-JP/system-auth-records.png) | ![認可記録（韓国語）](../images/ko-KR/system-auth-records.png) |
-| XSS 防護（xss） | ![XSS 防護（簡体字中国語）](../images/zh-CN/system-xss-config.png) | ![XSS 防護（英語）](../images/en-US/system-xss-config.png) | ![XSS 防護（日本語）](../images/ja-JP/system-xss-config.png) | ![XSS 防護（韓国語）](../images/ko-KR/system-xss-config.png) |
-| 操作ログ（operation-log） | ![操作ログ（簡体字中国語）](../images/zh-CN/system-operation-log.png) | ![操作ログ（英語）](../images/en-US/system-operation-log.png) | ![操作ログ（日本語）](../images/ja-JP/system-operation-log.png) | ![操作ログ（韓国語）](../images/ko-KR/system-operation-log.png) |
+6. 一覧が返したタイプ ID を記録し、そのタイプだけを `DELETE /api/base/dict/type/{id}` で削除します。HTTP・業務コード 200 と、一意コードでの再検索 0 件を確認します。失敗・切断時は完了済みかを先に照会します。シードを削除したり、全体の固定件数で後片付けを判断したりしないでください。
 
-## 9. 辞書タイプ新規作成の3状態スクリーンショット（4言語）
+自動化の入口 `omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts` は Docker、external モード、明示的な `E2E_MUTATIONS=true`、一致する隔離プロジェクトと実行イメージ記録を要求します。画像、リソース台帳、実行記録のパスはリポジトリ外に指定します。制御されたテストトークンをコマンドやリポジトリにコピーしないでください。
 
-`omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts` により実際の実行スタック上で生成、カバレッジリストの `detail-and-action-states` と `failure-states` に対応。
+[2026-10-10 の記録](../reference/evidence/dictionary-2026-10-10.json)は 4 passed、0 failed、0 skipped と、原画像 12 枚の個別 AI 目視確認を記録しています。タイプ ID 27–30 は正式 API で削除済みで、残存なしも確認済みです。今回は再作成していません。日韓の備考は `Remark` のまま、日本語の備考行は不鮮明、英語サイドバーは切れ、エラーのフィールド名は API 識別子という制限を保持します。
 
-- 前提条件：ローカル Compose フルスタックが実行中、`omni-base` ヘルス；辞書タイプテーブルに実際のベースラインデータが存在（採集前 17 件）。
-- 操作者：`admin`（`dict:type:list`/`dict:type:create`/`dict:type:delete` 権限が必要）。
-- 書き込みスイッチ：本グループは**データを作成する**ため、`E2E_MUTATIONS=true` を明示設定した時のみ実行；未設定時はグループ全体がスキップされ、あらゆる書き込み呼び出しは直接エラーを投げる。
-- データ帰属と収尾：各言語が一意の `typeCode`（本ラウンドの `runStamp` を含む）を自作し、作成成功時に登録；afterAll が正式な `DELETE /api/base/dict/type/{id}` 契約で 1 件ずつクリーンアップし、応答とリスト再照合を検証。
-- 実測収尾結果：4 passed / 0 skipped；`registered=4 deleted=4 residual=0`；`sys_dict_type` はベースライン **17** 行に戻り、`E2EDICT-%` 残留 **0**、`base-dictionary-catalog` シードアサーションは **101** 行を再現（本バッチで汚染されていない）。
+## 4. ログイン保護を変更し、監査を確認する
 
-| 状態 | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| 新規作成ダイアログ（create-or-edit） | ![辞書新規作成ダイアログ（簡体字中国語）](../images/zh-CN/system-dictionary-create-form.png) | ![辞書新規作成ダイアログ（英語）](../images/en-US/system-dictionary-create-form.png) | ![辞書新規作成ダイアログ（日本語）](../images/ja-JP/system-dictionary-create-form.png) | ![辞書新規作成ダイアログ（韓国語）](../images/ko-KR/system-dictionary-create-form.png) |
-| 必須項目検証失敗（failure-or-forbidden） | ![辞書必須項目検証失敗（簡体字中国語）](../images/zh-CN/system-dictionary-create-validation.png) | ![辞書必須項目検証失敗（英語）](../images/en-US/system-dictionary-create-validation.png) | ![辞書必須項目検証失敗（日本語）](../images/ja-JP/system-dictionary-create-validation.png) | ![辞書必須項目検証失敗（韓国語）](../images/ko-KR/system-dictionary-create-validation.png) |
-| 作成成功（key-action-success） | ![辞書作成成功（簡体字中国語）](../images/zh-CN/system-dictionary-create-success.png) | ![辞書作成成功（英語）](../images/en-US/system-dictionary-create-success.png) | ![辞書作成成功（日本語）](../images/ja-JP/system-dictionary-create-success.png) | ![辞書作成成功（韓国語）](../images/ko-KR/system-dictionary-create-success.png) |
+1. 「システム管理 → システム設定」で `GET /api/auth/system-config/login-policy` を読み、元の `failureThreshold/failureWindowSeconds/version` を保存します。永続化された行がなければ、書き込みなしで既定ビューを返します。
+2. 元の値と異なる有効な学習用値を選びます。過去の例は `10 → 9`、ウィンドウ `3600` 秒です。どの環境も 10 から始まるとは限りません。最新の `expectedVersion` を付けて `PUT /api/auth/system-config/login-policy` で保存し、新しい値とバージョンを再取得します。
+3. 第 2 クライアントで最新バージョンを使って元の値に戻し、未更新の第 1 画面から再送します。HTTP 200、業務コード 409 になるはずです。画面は下書きを保持し、サーバーの最新設定バージョンを取得します。比較してからサーバー値の採用か下書きの再試行を明示的に選び、並行更新を自動上書きしません。
+4. 操作者と時刻で安全監査の `AUTH_CONFIG_UPDATED` を探します。現バージョンで元の閾値・ウィンドウに戻し、再取得します。「既定値に戻す」は `10/3600` であり、今回の元の値と同じとは限りません。値を戻してもバージョンは巻き戻らず、監査も消えません。
 
-### 登録済みの i18n PRODUCT_DEFECT（本バッチでは修正しない）
+閾値は `3–10`、ウィンドウは `3600–86400` 秒で、保護は無効化できません。新設定は次の失敗ウィンドウから使われ、既存ウィンドウは作成時の設定を保持します。読み取りは `system:config:list`、更新は `system:config:update` が必要です。ボタン非表示はバックエンド拒否の証明ではありません。2026-10-17 の実際の読み取りは管理者が HTTP・業務コード 200、従業員が 403 でした。従業員の書き込みは再実行していません。
 
-検証失敗画像では、**4言語 UI すべてでエラーメッセージが中国語**（例 `typeCode: 字典类型编码不能为空`）。実測根本原因：
+![2026-10-12：元の設定とバージョン](../images/ja-JP/system-config-policy.png)
+![2026-10-12：閾値 9 の保存とバージョン増加](../images/ja-JP/system-config-saved.png)
+![2026-10-12：409 競合でも下書き 9 を保持](../images/ja-JP/system-config-conflict.png)
 
-1. `views/base/dict/index.vue` は `form rules` を一切定義せず、フロントエンドは必須検証を行わず（`.el-form-item__error` が空）、エラーは完全にバックエンド 400 応答に依存；
-2. `CreateDictTypeRequest` の `@NotBlank(message = "字典类型编码不能为空")` は**中国語ハードコード**で、バックエンドメッセージ国際化に未接続；
-3. また：ja-JP/ko-KR ではダイアログタイトルと `Type Code`/`Type Name`/`Remark` ラベルが英語でレンダリングされる。言語パックの対応キーの**取値自体が英語**だからである（「排序/並び順/정렬」のみ翻訳済み）。
-   `npm run ui:i18n:parity`（4言語各 2319 キー、0 欠落）と `npm run ui:i18n:check`（0/0 項目）はいずれも通過するため、**翻訳完全度**の問題でありハードコード欠陥ではない。
+競合画像の緑色メッセージは直前の成功した保存に対応します。現在の結果は赤いエラー、競合説明、業務コード 409 で判断します。通信失敗時は先に GET で保存済みかを確認します。
 
-上記スクリーンショットは**実際の文言をそのまま保持**し、モック・美化・隠蔽せず、本バッチで製品コードも変更していない；修正には製品側の意思決定（バックエンドメッセージ国際化方案 + ja/ko 翻訳の補完）が必要。
+ログイン記録は `sys_audit_log` の `LOGIN_SUCCESS/LOGIN_FAILED` の読み取り専用投影です。アカウント、パスワード方式、実際の期間を選んで検索し、利用者、方式、結果、理由コード、マスク済み IP を確認します。既定は直近 7 日です。明示的な期間は開始・終了を両方指定し、最大 90 日、日時形式は `yyyy-MM-dd HH:mm:ss` です。ロック、ロール・パスワード変更は安全監査、OAuth 許可は認可記録を確認します。
 
-未カバーの 2 つの required flow：`config`（パラメータ設定）と `login-record`（ログイン記録）。実測で `sys_permission` に対応権限コードがなく、フロントエンドにも対応 view ディレクトリがないため、製品が現在ページを提供していない；制約に従い **required flow を削除せず、勝手に exempt とマークせず**、カバレッジリストで明示的な gap として保持。
+![過去の検索：admin のパスワードログイン 2 件](../images/ja-JP/system-login-record-filtered.png)
 
-[MQ 信頼性](../mq-reliability.jp.md)、[可観測性](../observability.jp.md)、[Docker デプロイ](../docker-deployment.jp.md)を参照してください。
+この 2 件は 2026-10-09 に発生しました。2026-10-12 は履歴の検索のみで、今回もパスワードや CAPTCHA を送信していません。一覧更新を新しいログインと呼ばないでください。
 
+[2026-10-12 の基盤記録](../reference/evidence/system-platform-2026-10-12.json)は、先行試行で成功した中国語 6 枚と後続 26 枚、計 32 枚を保持し、後続の四言語テストは 4 passed です。先行タイムアウトの副作用を照合し、設定を復元し、該当ロールを削除済みです。すべての画像が失敗のない 1 回の実行から得られたわけではありません。試行間で一時ロールは異なり、すべて削除済みです。元の `10/3600` は復元し、増加したバージョンと監査は保持しました。今回は書き込みを繰り返していません。
+
+過去のダイアログには中国語へのフォールバック、日韓の権限表には英語があり、英語のサイドバーやログイン表の右端は切れる場合があります。これらは記録当時の保存・競合・権限永続化・履歴検索の証跡で、学習用ロールによる利用者分離の証明ではありません。
+
+## 5. OAuth2、XSS、セッション
+
+OAuth2 クライアントでは許可 grant、完全一致のコールバック、scope、同意設定を確認します。クライアント ID は公開識別子で、secret は非公開設定に保持します。外部ソーシャルログインとローカル認可コード/PKCE は[認証手順](authentication.jp.md)を参照してください。認可一覧の古い device-code 行は新規認可や外部コールバック成功を証明しません。
+
+「XSS 防御」では設定とルールの両リクエスト成功を確認します。現在の settings GET は、そのテナントに行がなければ既定の無効行を作ります。今回はテナント 1 の既存行を先に確認し、読み取り前後で値が不変でした。2026-10-17 の原画像はグローバルスイッチが OFF です。個別ルールが有効でも防御が機能している証明にはなりません。
+
+XSS 変更を検証する際は隔離環境で元の設定・ルールを記録し、所有と復元方法が明確な学習用ルールだけを操作します。[コアフロー](../core-flows.jp.md)に沿い、イベント属性、スクリプトプロトコル、許可されたリッチテキストの実際の保存・応答を確認してから元に戻します。書き込みでは `xss:enabled:{tenantId}` と `xss:rules:{tenantId}` を無効化する必要があります。今回は切り替え、ルール変更、攻撃入力の検証をしていません。合格のために防御を無効にしないでください。
+
+オンラインユーザー、画面の「認証記録」（OAuth 許可履歴）、ログイン記録、安全監査は別の一覧です。強制切断 API は `DELETE /api/auth/online/{userId}` で、ユーザーを対象とし、任意の単一 `jti` を削除するボタンではありません。今回所有するテストユーザーだけに実施し、旧セッション拒否と再ログインでの回復を確認します。他者には実施しません。今回のオンライン一覧は空で、強制切断は行っていません。
+
+## 6. 操作から非同期ログをたどる
+
+Auth は `@OperLog` を使わず、認証イベントは安全監査に残ります。業務操作ログは Outbox、MQ、コンシューマーを経て非同期で保存されます。標準 lite モードは relay、XXL-JOB、コンシューマーを無効にします。履歴閲覧には不要ですが、新規配信の検証には[Docker デプロイ](../docker-deployment.jp.md)と[信頼性のあるメッセージ](../mq-reliability.jp.md)に従って完全な実行モード、部品、バインディングを有効にします。MQ コンテナだけを起動しても準備完了とはいえません。
+
+1. 許可済み業務リクエストのテナント、操作者、モジュール、時刻、URL、結果、応答 Trace ID を記録します。画像のために成功済み操作を再送しません。
+2. 操作ログを操作者、モジュール、種別、時刻で絞ります。現在の画面に Trace ID 検索欄や専用列はないため、そこで Trace ID 検索を指示しないでください。
+3. リクエスト情報を構造化ログと照合し、送信元サービスの Outbox で `msgId`、任意の `msgKey`、`serviceName` を確認します。送信元は `producerTraceId` を保存しますが、relay のトレース文脈は異なる場合があります。[可観測性](../observability.jp.md)の関連付けに従います。全メッセージに業務キーがある、全フィールドが画面に出るとは限りません。
+4. broker の確認とコンシューマーの結果を確認します。Outbox の `SENT` は業務処理完了ではありません。最大再試行に達したら、下流状態と冪等性を確認してから再送・スキップを判断します。一覧取得成功は障害回復の証明ではありません。
+
+## 7. 画像と検証範囲
+
+[2026-10-17 の画面読み取り記録](../reference/evidence/security-lists-2026-10-17.json)は、以下の四言語 40 原画像を実行済みスクリプト、ソース、実行成果物に結び付けます。Docker の制御されたテスト利用者が既存テナントデータを読み、画面 API 44 回が成功しました。業務フォーム送信と過去の書き込み再実行はなく、パスワード/CAPTCHA ログインでもありません。取得用に起動した 6 コンテナはすべて停止済みです。
+
+![既定テナント 1 件の一覧](../images/ja-JP/system-tenants.png)
+![未編集の既存組織ツリー](../images/ja-JP/system-organizations.png)
+![ロールの先頭ページとデータ範囲の入口](../images/ja-JP/system-roles.png)
+![権限ツリーの表示部分、続きはスクロール](../images/ja-JP/system-permissions.png)
+![タイプ未選択の辞書一覧](../images/ja-JP/system-dictionaries.png)
+![空のオンライン一覧、強制切断なし](../images/ja-JP/system-online-users.png)
+![過去の安全監査イベント](../images/ja-JP/system-audit-log.png)
+![過去の device-code 行、新規認可ではない](../images/ja-JP/system-auth-records.png)
+![XSS 全体 OFF、フィルタ効果は未検証](../images/ja-JP/system-xss-config.png)
+![新規リクエストを伴わない過去の操作ログ](../images/ja-JP/system-operation-log.png)
+
+全原画像を個別に AI 確認し、元の表示制限を保持しました。一部のサイドバーとテナント初期化・操作ヘッダーは重なりや切れがあり、長い ID・grant は折り返されスクロールが必要です。日韓の一部ラベルは英語、DB の業務名・説明は中国語のままです。認可行の scope・作成日時とオンライン一覧は空で、値を捏造していません。画像は見えている内容と記録された読み取りのみを証明し、XSS 効果、強制切断、外部 OAuth、消費完了、画面全体の翻訳完了は証明しません。
+
+四言語文書は許可済み `AI_REVIEW` と内容ハッシュで受け入れます。人によるレビューは必須ではなく、AI レビューを `HUMAN_REVIEW` と呼びません。画像、テスト、ハッシュは文書全体の意味確認を代替しません。現状は[レビュー一覧](../i18n-review-queue.md)を参照してください。

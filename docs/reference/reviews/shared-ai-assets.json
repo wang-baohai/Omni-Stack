@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "shared-ai-assets",
+  "source": "ai/README.md",
+  "source_sha256": "bdcbdec404f49b2a40e5c4f97018b034d326d598db52e41dbd32a9bccbd229e6",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "ai/README.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:28:17",
+      "result": "approved",
+      "translation_sha256": "7e9770845b899b74116a04c786761a6dbb1366b10083d0abeb0566c5d9721cc6",
+      "checks": {
+        "coverage_and_meaning": "完整核对规范源、四个子目录、安装核对、预设交付和维护边界；保留历史导入过程尚未独立证实的限定。",
+        "technical_literals": "七条容器命令逐条一致；bootstrap.mjs 的 --tool、--apply、--check 与原生入口路径保持字面量，预览不写入。",
+        "security_and_failure_semantics": "保留用户修改保护、实际加载另验、禁止提交凭据/个人记忆及 Skill 不授予外部写权限；按最新授权区分 HUMAN_REVIEW 与 AI_REVIEW。",
+        "language_and_terminology": "canonical source、native discovery、invalidation、generated presets 和来源许可表达准确；用户授权语义没有被改成自动批准即审校。",
+        "images_and_links": "本页无截图；事实与维护指南链接指向英文版本，固定上游提交、MIT 许可和 manifest 链接与规范源一致。"
+      },
+      "findings": [
+        {
+          "id": "superseded-review-policy",
+          "status": "resolved",
+          "description": "结尾仍指向旧的实际人工复核要求。",
+          "resolution": "同步当前所有者授权策略，说明 AI_REVIEW 及正文/证据摘要绑定，并链接英文维护指南。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "ai/README.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:28:17",
+      "result": "approved",
+      "translation_sha256": "7205241bacacc38cb6e5e44bc909a9e028719ae8a0260c882b1ad35729f862e1",
+      "checks": {
+        "coverage_and_meaning": "逐段检查正規ソース、内容、導入、保守与预设说明，保留个人全局工具不复制和上游来源验证的历史边界。",
+        "technical_literals": "所有七条 Docker/Node 命令与中文相同，.agents/.qoder、两个 --tool 值和 --apply/--check 含义保持一致。",
+        "security_and_failure_semantics": "用户入口修改保护、目录检查不等于实际ロード、私密凭据不入库、Skill 权限边界均完整；新审校记录明确区分人和 Codex。",
+        "language_and_terminology": "正規ソース、派生ファイル、失効条件、再読込等日文表达可读，AI 授权及哈希绑定要求没有遗漏。",
+        "images_and_links": "无图片；架构和维护指南使用 .jp.md，许可与固定上游提交链接保留完整，adapter 相对路径可从仓库根执行。"
+      },
+      "findings": [
+        {
+          "id": "superseded-review-policy",
+          "status": "resolved",
+          "description": "结尾只描述人によるレビュー规则，与最新授权不一致。",
+          "resolution": "加入明确授权的 AI_REVIEW 与证据哈希要求，并改指向日文维护指南。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "ai/README.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:28:17",
+      "result": "approved",
+      "translation_sha256": "bc0c3eed09aa81e316b940dd0a88fbeae740b70b6b2ed8490b156c8865a973a9",
+      "checks": {
+        "coverage_and_meaning": "核对 기준 원본、内容、安装和维护全部段落；工具来源、固定提交核对、历史导入未证实和独立生成物条件均保留。",
+        "technical_literals": "七条命令及所有路径、预览/apply/check 字面量完整，Codex/Qoder 两种目标和用户改动保护没有被翻译成不同操作。",
+        "security_and_failure_semantics": "保留 token/Cookie/OAuth 密钥和个人状态禁止入库、实际工具加载须另验、无额外外部写权限；Codex 审校需所有者明确授权。",
+        "language_and_terminology": "기준 원본、파생 파일、프리셋、검토 증거和 해시 均符合本页含义，授权审校与平台操作批准区分清晰。",
+        "images_and_links": "无截图；事实与维护指南均链接韩文版本，MIT 与固定上游提交路径正确，manifest 和 adapter 路径保持规范源。"
+      },
+      "findings": [
+        {
+          "id": "superseded-review-policy",
+          "status": "resolved",
+          "description": "末段仍使用仅由人复核的旧描述。",
+          "resolution": "同步 HUMAN_REVIEW/AI_REVIEW 与本次明确授权及正文/证据哈希绑定要求。"
+        }
+      ]
+    }
+  }
+}

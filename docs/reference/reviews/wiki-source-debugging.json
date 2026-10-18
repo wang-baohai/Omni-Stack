@@ -1,0 +1,596 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-source-debugging",
+  "source": "docs/wiki/source-debugging.md",
+  "source_sha256": "82f7572b9aaeebda0effba0633f0a6f1ffc13ce73d36ec54e45f7d1b55b2029c",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "fdd3a311b518ffb1a16571fafdad1e565e829200",
+  "source_state": "Actually read all1004 original Wiki lines,then every final delta against Chinese/current source and named prior reviewed facts. Exact unchanged-line mapping completes1012current lines;not four fresh final whole rereads. Five whole current files577lines plus explicit selected implementation/test reads,nine named prior scope reuse. 661dependency comparisons/512matching unique files are hash checks,not semantic whole reads;one changed unrelated historical troubleshooting dependency excluded. No new application tests,IDE attachment,Broker/DB/business execution or captures claimed.",
+  "method": "Actually read all1004 original Wiki lines,then every final delta against Chinese/current source and named prior reviewed facts. Exact unchanged-line mapping completes1012current lines;not four fresh final whole rereads. Five whole current files577lines plus explicit selected implementation/test reads,nine named prior scope reuse. 661dependency comparisons/512matching unique files are hash checks,not semantic whole reads;one changed unrelated historical troubleshooting dependency excluded. No new application tests,IDE attachment,Broker/DB/business execution or captures claimed.",
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/source-map.json",
+      "sha256": "855099603da44c5392aedd30dc3d4d1de82c6ef8d3a29cf26939e6e8394a6038"
+    },
+    {
+      "path": "docs/reference/source-map.md",
+      "sha256": "a1a85b47805818ec2343e905a104a2030c636ea3c9cf61b4fc03fbc085425657"
+    },
+    {
+      "path": "docs/reference/reviews/backend-patterns.json",
+      "sha256": "f88e81c0d3153d8e1648e61dc0d6c2b12ea13faf2ba63f09f847417727104d84"
+    },
+    {
+      "path": "docs/backend-patterns.md",
+      "sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7"
+    },
+    {
+      "path": "docs/reference/reviews/workflow.json",
+      "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f"
+    },
+    {
+      "path": "docs/workflow.md",
+      "sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389"
+    },
+    {
+      "path": "docs/reference/reviews/mq-reliability.json",
+      "sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf"
+    },
+    {
+      "path": "docs/mq-reliability.md",
+      "sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957"
+    },
+    {
+      "path": "docs/reference/reviews/srm.json",
+      "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f"
+    },
+    {
+      "path": "docs/srm.md",
+      "sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03"
+    },
+    {
+      "path": "docs/reference/reviews/asset-design.json",
+      "sha256": "fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747"
+    },
+    {
+      "path": "docs/design/asset-design.md",
+      "sha256": "65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620"
+    },
+    {
+      "path": "docs/reference/reviews/guide-scaffold-development.json",
+      "sha256": "27b7ba81bf232998d903b635074dd8498b3597354d0d8ddfc7795f470524ab21"
+    },
+    {
+      "path": "docs/guides/scaffold-development.md",
+      "sha256": "6777bfff1f5df08ed873439137df9bba9dd389e211ec8d11de59877e54472351"
+    },
+    {
+      "path": "docs/reference/reviews/guide-authentication.json",
+      "sha256": "ff34f4c780b1d8ad98ea0cf06fd45a869863511936f53426028abad50e418ec2"
+    },
+    {
+      "path": "docs/guides/authentication.md",
+      "sha256": "127d2a8396618e2dbb787d9a72e838cf26991b719bb8a9c81a93d6e4d04cf09f"
+    },
+    {
+      "path": "docs/reference/reviews/guide-permissions.json",
+      "sha256": "234b4df9b9bff01ad1f976b0cbb53f9a45a022d049e81ca0c30ddecef571ec89"
+    },
+    {
+      "path": "docs/guides/permissions.md",
+      "sha256": "8878710f45b3aab84590c57c5539a6f321e5a31c168de1f7e37edcfdf0a76ad2"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/CaptchaServiceImpl.java",
+      "sha256": "ac901105b2f949e32bb5e76789f7a5b4dc32a4860cf24da49b0f657e229381e4"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/JwtTokenServiceImpl.java",
+      "sha256": "c84fa86c7c90c63b1b075e5d0558bdc04bf34ec95ae3f0f9a03d585322ff5fa1"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/filter/AuthFilter.java",
+      "sha256": "a0773cce8e6ba3d7e90e40c088fb9bae1f77c049577665ad9a0201a4e1c3d76e"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/test/java/com/omni/gateway/filter/AuthFilterHmacTest.java",
+      "sha256": "784210cee008c5e4b078052d77912b8d4f60e84fad2ab81d7d9a0815660193f9"
+    },
+    {
+      "path": "omni-backend/omni-base/src/test/java/com/omni/base/security/GatewayPreAuthFilterHmacTest.java",
+      "sha256": "c510674af3fb0f0ee63977364cac9a336aac3b1f91e2276fdce1d287dd494092"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/datascope/ServiceDataScopeAspect.java",
+      "sha256": "e47082d659d8ecda501066b2a4de6693eafbb9dc390d63bbf7ef3f6afaf50a32"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/test/java/com/omni/common/service/datascope/ServiceDataScopeAspectTest.java",
+      "sha256": "1c73c71764d2603fc27461575395d7c79a79a6111969ca6a644a82d3a852f061"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/security/DataScopeResolveFilterTest.java",
+      "sha256": "c473bd55afc3069d5e8a982da1f0ac0bfbe24d8bb413fc7253e542fd76799a5e"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowModelServiceImpl.java",
+      "sha256": "ddeeae6a0c93612f503ea63c1394e38253e6d2ca5ccf51418b6116429cfd2ce2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessInstanceServiceImpl.java",
+      "sha256": "f650ad68e8836e46cec0eac145697cd628fdd2757700e8c118b973e4f442a82a"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/service/impl/WorkflowModelServiceImplTest.java",
+      "sha256": "558747ce98747fc89d5808c6ef86b02d3e55fb899874f1200e1c8c0e0dc2571b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/service/impl/WorkflowApprovalServiceImplTest.java",
+      "sha256": "3c1ea0632fb9757072c9bd2e58a703974b65229ffa7eb7fc9a01585c010fe8a5"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java",
+      "sha256": "bfe1ce1806668c8e28c80a7614d7a5fff1fed2b7f65b3e18a56137e2cca627bf"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceTest.java",
+      "sha256": "70849370ea3d1010a6e5752e75458469b9886112889384720416ff7a282a8eb7"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceCasTest.java",
+      "sha256": "285db1618adc38c0a4025480439d68ef4abed95069973e3048d08ed69c46d1ba"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceUnknownBrokerTest.java",
+      "sha256": "1d1a9e3153a666aca8309df54a353144d1e4c7ae57386461cb6a1f8a8452c0ba"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+      "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/SupplierPortalServiceImplTest.java",
+      "sha256": "63423723e10dc55947f3e3662976f09e5f67986f4d357ff5fe205d4d21aaa63b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/PortalRoleResultServiceImplTest.java",
+      "sha256": "18f7979ded2cee6a8c6930a60b236b01b717fea6b401e57f2a9fd8f0a6f9fefe"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImpl.java",
+      "sha256": "d5932e2e482a7e936c4c31810aacfe858fd2e702e8e799e076d6363e14af5c4f"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImplTest.java",
+      "sha256": "47402543759f886fb28e328ce59db146ecf54eead0dec6aac25691e0ef4d5b58"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImpl.java",
+      "sha256": "090b0c041065cca3bc8d8cd8df56ab9fc2758744b5cacc6f6312d679b830aead"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/WorkflowCompletionServiceImpl.java",
+      "sha256": "976068f09a92536fdf284e6504ac6e806ca38399ff257a18278d3193dee926d2"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImplTest.java",
+      "sha256": "f00013b89da9e4a1e1ad9d9fdf85ae619985e168653253966f910589b445ac91"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/WorkflowCompletionServiceImplTest.java",
+      "sha256": "748e5286e7f9356f0a114a4b9b1720444a823b9098a51e6c4f18690436973aa7"
+    },
+    {
+      "path": "tools/omni-cli/src/service-integration-transaction.ts",
+      "sha256": "4ee021e95be7d74337b4eac23a3fe54a3794e9c13326349c6df09ca92cb46d7e"
+    },
+    {
+      "path": "tools/omni-cli/src/preset-generator.ts",
+      "sha256": "2139e233787024453b57f9dcb0ae46b9544a42f69970b3cf6c4f9c71121f3bd0"
+    },
+    {
+      "path": "tools/omni-cli/test/service-integration.test.ts",
+      "sha256": "e51713dcd4fd0bcba4e817accb7934cea814874c93401d431f260711f03ddee4"
+    },
+    {
+      "path": "tools/omni-cli/test/preset-generator.test.ts",
+      "sha256": "832eedda8979000c11a3c047a3d3b7292329cf202ef68dd53d91c896e0e07b56"
+    },
+    {
+      "path": "tools/omni-cli/test/service-integration-renderer.test.ts",
+      "sha256": "0c9f35dc1f8366b6b89e616b366732ad44b97107cec92aa39c7068505da68d50"
+    },
+    {
+      "path": "compose.tools.yaml",
+      "sha256": "24d37d4437eb8f2c1bce2a7478a8566162c9d65f9ee111393b0131463732f035"
+    },
+    {
+      "path": "docs/scripts/source-excerpts.test.mjs",
+      "sha256": "794ac97f0b4da0ab0cf98addae2ca7ca3648adae626c2402fd422235c477fca0"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/reference/evidence/source-debugging-wiki-review-2026-10-17.json",
+      "sha256": "cf49a7a9f2037a86ab3b974afbb10d2cbfccc8e119b5f0623fa4691b2d5b1002"
+    }
+  ],
+  "source_inspection_scope": "All1004 original Wiki lines actually read. Complete current semantic coverage requires every final delta read plus exact unchanged-line mapping. Five whole current files577lines,selected source/test assertions andnine named priorreview reuse at their actual original scopes. 661dependency comparisons/512matching unique files are not fresh whole reads;one changed historical troubleshooting dependency excluded. No tests,IDE attachment,Broker,DB,businesswrites or runtime/capture claims added.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "complete_current_semantic_coverage": true,
+    "original_whole_lines_actually_read": 1004,
+    "current_combined_semantic_lines": 1012,
+    "fresh_whole_final_rereads": false,
+    "original_full_read_outputs": {
+      "zh-CN": "145920",
+      "en-US": "91dc01",
+      "ja-JP": "65acfc",
+      "ko-KR": "ad9b6a"
+    },
+    "final_exact_delta_outputs": {
+      "zh-CN": "7655af",
+      "en-US": "7655af",
+      "ja-JP": "819693",
+      "ko-KR": "819693"
+    },
+    "lines_each": 253,
+    "headings_each": 12,
+    "h2_each": 11,
+    "images_each": 0,
+    "technical_fences_each": 6,
+    "normalized_inline_literals_outside_fences_each": 15,
+    "normalized_links_each": 33,
+    "whole_markdown_rendered_documents": 4,
+    "source_bindings": 52,
+    "current_whole_source_files": 5,
+    "current_whole_source_lines": 577,
+    "current_source_reads": [
+      {
+        "path": "omni-backend/omni-gateway/src/test/java/com/omni/gateway/filter/AuthFilterHmacTest.java",
+        "sha256": "784210cee008c5e4b078052d77912b8d4f60e84fad2ab81d7d9a0815660193f9",
+        "read_scope": "Matched actual valid HMAC issuance, forged assertion overwrite, missing/weak key503 and test-profile exception assertions;not whole test.",
+        "outputs": [
+          "f73c32"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/test/java/com/omni/base/security/GatewayPreAuthFilterHmacTest.java",
+        "sha256": "c510674af3fb0f0ee63977364cac9a336aac3b1f91e2276fdce1d287dd494092",
+        "read_scope": "Matched direct/forged rejection and valid assertion;selected127-170 tampered signature and stale timestamp401 assertions;not whole.",
+        "outputs": [
+          "f73c32",
+          "d9b6d0"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/datascope/ServiceDataScopeAspect.java",
+        "sha256": "e47082d659d8ecda501066b2a4de6693eafbb9dc390d63bbf7ef3f6afaf50a32",
+        "read_scope": "Whole current file: verified identity, permission/user/tenant validation and finally ThreadLocal clear.",
+        "outputs": [
+          "489b5d"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/test/java/com/omni/common/service/datascope/ServiceDataScopeAspectTest.java",
+        "sha256": "1c73c71764d2603fc27461575395d7c79a79a6111969ca6a644a82d3a852f061",
+        "read_scope": "Matched authoritative scope binding and tenant-mismatch rejection with context clearing;not whole.",
+        "outputs": [
+          "f73c32"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/security/DataScopeResolveFilterTest.java",
+        "sha256": "c473bd55afc3069d5e8a982da1f0ac0bfbe24d8bb413fc7253e542fd76799a5e",
+        "read_scope": "Matched internal skip,service-resolved scope/finally-clear,missing tenant400/no service/chain assertions;not whole.",
+        "outputs": [
+          "12663a"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowModelServiceImpl.java",
+        "sha256": "ddeeae6a0c93612f503ea63c1394e38253e6d2ca5ccf51418b6116429cfd2ce2",
+        "read_scope": "Matched publish lock-before-validation-before-deploy; unchanged named whole Workflow review retained.",
+        "outputs": [
+          "18b4e6"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessInstanceServiceImpl.java",
+        "sha256": "f650ad68e8836e46cec0eac145697cd628fdd2757700e8c118b973e4f442a82a",
+        "read_scope": "Selected591-621 plus MI_END matches:auto-approved history projection differs from actual manual approved/rejected variable.",
+        "outputs": [
+          "18b4e6",
+          "dbc2ab"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/service/impl/WorkflowModelServiceImplTest.java",
+        "sha256": "558747ce98747fc89d5808c6ef86b02d3e55fb899874f1200e1c8c0e0dc2571b",
+        "read_scope": "Matched new draft from published pointer and non-DRAFT publish rejection without createDeployment;not full invalid-BPMN or concurrent DB proof.",
+        "outputs": [
+          "12663a"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/service/impl/WorkflowApprovalServiceImplTest.java",
+        "sha256": "3c1ea0632fb9757072c9bd2e58a703974b65229ffa7eb7fc9a01585c010fe8a5",
+        "read_scope": "Matched cross-service completion event,not-running/not-legacy guards,ended task409;not MI_END engine execution.",
+        "outputs": [
+          "12663a"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceTest.java",
+        "sha256": "70849370ea3d1010a6e5752e75458469b9886112889384720416ff7a282a8eb7",
+        "read_scope": "Matched lazy tracer construction test only;CAS and unknown broker behavior are in separate linked tests.",
+        "outputs": [
+          "a7460e"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceCasTest.java",
+        "sha256": "285db1618adc38c0a4025480439d68ef4abed95069973e3048d08ed69c46d1ba",
+        "read_scope": "Whole current test via remainder in 9d95fe and first70 lines in 489b5d: mocked claims/terminal CAS, concurrent AtomicBoolean and static SQL annotations. Not real DB/Broker execution.",
+        "outputs": [
+          "9d95fe",
+          "489b5d"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceUnknownBrokerTest.java",
+        "sha256": "1d1a9e3153a666aca8309df54a353144d1e4c7ae57386461cb6a1f8a8452c0ba",
+        "read_scope": "Selected31-75 actual mocked unknown broker FAILED/backoff and retry-ceiling DEAD_LETTER assertions;matched redaction/success declarations;not whole.",
+        "outputs": [
+          "a7460e",
+          "d9b6d0"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImpl.java",
+        "sha256": "d5932e2e482a7e936c4c31810aacfe858fd2e702e8e799e076d6363e14af5c4f",
+        "read_scope": "Selected64-107:processed/ignored same-event returns replayed=true,empty created IDs/count0; source-item backfill separately deduplicates. Prior current Asset review retains full original scope.",
+        "outputs": [
+          "b5b78d",
+          "9d95fe"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "tools/omni-cli/src/service-integration-transaction.ts",
+        "sha256": "4ee021e95be7d74337b4eac23a3fe54a3794e9c13326349c6df09ca92cb46d7e",
+        "read_scope": "Whole current file: preflight, sibling temporary/backup paths, inner restore/rethrow, outer reverse rollback, incomplete rollback reporting, cleanup warnings and test-only failAfter.",
+        "outputs": [
+          "9d95fe"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "tools/omni-cli/test/preset-generator.test.ts",
+        "sha256": "832eedda8979000c11a3c047a3d3b7292329cf202ef68dd53d91c896e0e07b56",
+        "read_scope": "Matched generated output and pruning assertions;selected135-173 dependency preflight and isolated failed-staging cleanup,no target publication;not whole.",
+        "outputs": [
+          "a7460e",
+          "d9b6d0"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "tools/omni-cli/test/service-integration-renderer.test.ts",
+        "sha256": "0c9f35dc1f8366b6b89e616b366732ad44b97107cec92aa39c7068505da68d50",
+        "read_scope": "Selected185-235 and matched inventory:39 changes, inject failure after38, remove created paths and restore modified bytes/own transaction artifacts. Not new test execution.",
+        "outputs": [
+          "d19fcb",
+          "dbc2ab"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "compose.tools.yaml",
+        "sha256": "24d37d4437eb8f2c1bce2a7478a8566162c9d65f9ee111393b0131463732f035",
+        "read_scope": "Whole current Compose:backend JDK25/JAVA_HOME,working dir,source/cache binds,loopback-only127.0.0.1:5005:5005 service port; cli build/mount commands.",
+        "outputs": [
+          "43ca33"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "docs/scripts/source-excerpts.test.mjs",
+        "sha256": "794ac97f0b4da0ab0cf98addae2ca7ca3648adae626c2402fd422235c477fca0",
+        "read_scope": "Whole current guard:8documents and exact normalized source excerpts; text equivalence alone is not semantic/runtime approval.",
+        "outputs": [
+          "43ca33"
+        ],
+        "whole_current_file_actually_read": true
+      }
+    ],
+    "prior_named_reviews": 9,
+    "prior_dependency_occurrences_checked": 661,
+    "prior_matching_unique_files": 512,
+    "changed_historical_dependencies_excluded": 1,
+    "prior_hash_checks_are_not_whole_reads": true,
+    "current_evidence": "docs/reference/evidence/source-debugging-wiki-review-2026-10-17.json",
+    "new_application_test_or_build_runs": 0,
+    "business_writes": 0,
+    "new_ide_attachments": 0,
+    "historical_business_writes_replayed": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "No new application test/build,real SQL/Broker delivery,IDE attachment/debugger image,CAPTCHA/login or business write executed.",
+      "Five whole current source/tool files577lines plus selected reads and named prior actual scopes;661dependency hash checks are not new semantic whole reads. One changed historical backend-patterns reference to the now-reviewed troubleshooting guide excluded from reuse;final current dependency alignment remains an integrated acceptance item.",
+      "Other6translationrows after this family and full A-G remain:OAuth0/3,real SRM CAPTCHA,native Qoder,current full goldens/five presets,SRM fact/design ownership and final site/integrated acceptance."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/source-debugging.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 21:07:11",
+      "result": "approved",
+      "translation_sha256": "3c30975897638c9a7809ff7d3e15adb4e8fb75a9da6271941b9078e6a106c7a2",
+      "checks": {
+        "coverage_and_meaning": "四语原稿1004行及全部最终变更已实际阅读，逐行摘要对应覆盖当前1012行。每语9组症状/源码/断点/失败/测试和2节容器调试说明保留，12个围栏外标题、11个H2、6个代码围栏及模块剪裁标记不缺失。",
+        "technical_literals": "四语15个围栏外技术字面量、33个归一化链接及6个代码围栏完全对应。前三段Java和事务TypeScript及第一段Bash原样保留；选定测试的Bash改为显式Surefire JDWP address=*:5005，宿主仍只发布127.0.0.1:5005。纠正重放字段replayed=true/createdCount=0及renderer回滚测试链接，39项变更在38项后注入失败。",
+        "security_and_failure_semantics": "保持真实CAPTCHA由人输入、Redis GETDEL一次消费、禁止记录答案/密码/完整token。保留JWT/HMAC验证与缺钥503、租户/权限/数据范围/ThreadLocal清理、Workflow发布锁与校验顺序、MI_END跳过与人工票分离、Outbox租约CAS/退避/跨租户后台扫描与外部租户约束、Portal角色+有效关联、资产双幂等/金额字符串/占位恢复、CLI内外catch与不完整回滚。隔离调试、固定端口和不得抢占他人进程的边界保留。",
+        "images_and_links": "四篇在本机Docker完整渲染并解析相对链接，本文无截图。当前测试与实现链接匹配，命令参数依据Surefire和JDK25官方说明。Mock/AtomicBoolean并发与SQL注解断言不是实际数据库/Broker或IDE连接证据；链接、摘要与渲染仅支持实际语义阅读。",
+        "language_and_terminology": "All251original lines and every final delta compared with Chinese/current source;mapping covers253current lines. Distinguishes engine skip/manual vote,actual replay fields,inner restore/outer rollback,38of39 failure and Docker-interface versus host-loopback binding. Preserves all tenant/permission/CAPTCHA/idempotency and no-secret/no-unperformed-runtime boundaries;actual AI_REVIEW sufficient,human document review optional."
+      },
+      "findings": [
+        {
+          "id": "SD01",
+          "status": "resolved",
+          "resolution": "Replace Japanese mandatory human review and align all four languages with actual authorized AI_REVIEW;CAPTCHA human input is a separate unchanged boundary."
+        },
+        {
+          "id": "SD02",
+          "status": "resolved",
+          "resolution": "Replace nonexistent Chinese REPLAY result with actual replayed=true/createdCount=0 for processed/ignored same-event replay in every locale."
+        },
+        {
+          "id": "SD03",
+          "status": "resolved",
+          "resolution": "Link actual service-integration-renderer test;39 changes with failAfter38,not two failure positions38/39;clarify inner restore/rethrow versus outer rollback."
+        },
+        {
+          "id": "SD04",
+          "status": "resolved",
+          "resolution": "Clarify MI_END history auto-approved is an engine skip,not a manual YES/vote or rejection."
+        },
+        {
+          "id": "SD05",
+          "status": "resolved",
+          "resolution": "Explicit Surefire fork-agent wildcard interface inside Docker with existing host loopback-only5005;avoid global JAVA_TOOL_OPTIONS contention,retain fixed port ownership boundary."
+        },
+        {
+          "id": "SD06",
+          "status": "resolved",
+          "resolution": "Distinguish current mocked CAS/AtomicBoolean and static SQL assertions from actual database/Broker delivery or IDE attachment;no new execution claimed."
+        },
+        {
+          "id": "SD07",
+          "status": "resolved",
+          "resolution": "Preserve all identity,scope,workflow,Outbox,Portal,Inbox,asset occupancy and CLI rollback/failure contracts;correct Japanese dependency/seed/delivery calques."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/source-debugging.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 21:07:11",
+      "result": "approved",
+      "translation_sha256": "93bb8c8806125f51c03053a1308f34ad36b277d158a47cf7b04a53cba72b241e",
+      "checks": {
+        "coverage_and_meaning": "四语原稿1004行及全部最终变更已实际阅读，逐行摘要对应覆盖当前1012行。每语9组症状/源码/断点/失败/测试和2节容器调试说明保留，12个围栏外标题、11个H2、6个代码围栏及模块剪裁标记不缺失。",
+        "technical_literals": "四语15个围栏外技术字面量、33个归一化链接及6个代码围栏完全对应。前三段Java和事务TypeScript及第一段Bash原样保留；选定测试的Bash改为显式Surefire JDWP address=*:5005，宿主仍只发布127.0.0.1:5005。纠正重放字段replayed=true/createdCount=0及renderer回滚测试链接，39项变更在38项后注入失败。",
+        "security_and_failure_semantics": "保持真实CAPTCHA由人输入、Redis GETDEL一次消费、禁止记录答案/密码/完整token。保留JWT/HMAC验证与缺钥503、租户/权限/数据范围/ThreadLocal清理、Workflow发布锁与校验顺序、MI_END跳过与人工票分离、Outbox租约CAS/退避/跨租户后台扫描与外部租户约束、Portal角色+有效关联、资产双幂等/金额字符串/占位恢复、CLI内外catch与不完整回滚。隔离调试、固定端口和不得抢占他人进程的边界保留。",
+        "images_and_links": "四篇在本机Docker完整渲染并解析相对链接，本文无截图。当前测试与实现链接匹配，命令参数依据Surefire和JDK25官方说明。Mock/AtomicBoolean并发与SQL注解断言不是实际数据库/Broker或IDE连接证据；链接、摘要与渲染仅支持实际语义阅读。",
+        "language_and_terminology": "全251行と最終変更行を中文事実源・現在の実装に照合し、未変更行対応で現在253行を網羅した。人手確認の必須条件を実際のAI_REVIEWに変更し、依存関係を保つ削除・シード・成果物の表現を自然にした。MI_ENDの自動スキップと人の賛成票、実際の再送結果、内外catch、39件中38件後の故障、コンテナの待受けとホストのローカル公開を区別し、機密・権限・テナントとCAPTCHAの直接入力条件を保持する。"
+      },
+      "findings": [
+        {
+          "id": "SD01",
+          "status": "resolved",
+          "resolution": "Replace Japanese mandatory human review and align all four languages with actual authorized AI_REVIEW;CAPTCHA human input is a separate unchanged boundary."
+        },
+        {
+          "id": "SD02",
+          "status": "resolved",
+          "resolution": "Replace nonexistent Chinese REPLAY result with actual replayed=true/createdCount=0 for processed/ignored same-event replay in every locale."
+        },
+        {
+          "id": "SD03",
+          "status": "resolved",
+          "resolution": "Link actual service-integration-renderer test;39 changes with failAfter38,not two failure positions38/39;clarify inner restore/rethrow versus outer rollback."
+        },
+        {
+          "id": "SD04",
+          "status": "resolved",
+          "resolution": "Clarify MI_END history auto-approved is an engine skip,not a manual YES/vote or rejection."
+        },
+        {
+          "id": "SD05",
+          "status": "resolved",
+          "resolution": "Explicit Surefire fork-agent wildcard interface inside Docker with existing host loopback-only5005;avoid global JAVA_TOOL_OPTIONS contention,retain fixed port ownership boundary."
+        },
+        {
+          "id": "SD06",
+          "status": "resolved",
+          "resolution": "Distinguish current mocked CAS/AtomicBoolean and static SQL assertions from actual database/Broker delivery or IDE attachment;no new execution claimed."
+        },
+        {
+          "id": "SD07",
+          "status": "resolved",
+          "resolution": "Preserve all identity,scope,workflow,Outbox,Portal,Inbox,asset occupancy and CLI rollback/failure contracts;correct Japanese dependency/seed/delivery calques."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/source-debugging.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 21:07:11",
+      "result": "approved",
+      "translation_sha256": "ba582857966db0de7bc6834e2d38c83be4c7d1d17506de4a09c5a75402e26aa1",
+      "checks": {
+        "coverage_and_meaning": "四语原稿1004行及全部最终变更已实际阅读，逐行摘要对应覆盖当前1012行。每语9组症状/源码/断点/失败/测试和2节容器调试说明保留，12个围栏外标题、11个H2、6个代码围栏及模块剪裁标记不缺失。",
+        "technical_literals": "四语15个围栏外技术字面量、33个归一化链接及6个代码围栏完全对应。前三段Java和事务TypeScript及第一段Bash原样保留；选定测试的Bash改为显式Surefire JDWP address=*:5005，宿主仍只发布127.0.0.1:5005。纠正重放字段replayed=true/createdCount=0及renderer回滚测试链接，39项变更在38项后注入失败。",
+        "security_and_failure_semantics": "保持真实CAPTCHA由人输入、Redis GETDEL一次消费、禁止记录答案/密码/完整token。保留JWT/HMAC验证与缺钥503、租户/权限/数据范围/ThreadLocal清理、Workflow发布锁与校验顺序、MI_END跳过与人工票分离、Outbox租约CAS/退避/跨租户后台扫描与外部租户约束、Portal角色+有效关联、资产双幂等/金额字符串/占位恢复、CLI内外catch与不完整回滚。隔离调试、固定端口和不得抢占他人进程的边界保留。",
+        "images_and_links": "四篇在本机Docker完整渲染并解析相对链接，本文无截图。当前测试与实现链接匹配，命令参数依据Surefire和JDK25官方说明。Mock/AtomicBoolean并发与SQL注解断言不是实际数据库/Broker或IDE连接证据；链接、摘要与渲染仅支持实际语义阅读。",
+        "language_and_terminology": "원본251행과최종변경행을중국어원문및현재소스와대조하고미변경행대응으로현재253행을확인했다. 엔진의작업생략과사람의찬성표,실제재전송결과필드,안쪽복원/바깥롤백,39개중38번째쓰기뒤실패,컨테이너인터페이스와호스트로컬포트를구분했다. 실제AI_REVIEW충분/사람의문서검토선택조건과CAPTCHA직접입력,권한·테넌트·멱등성·민감정보보호조건을보존한다."
+      },
+      "findings": [
+        {
+          "id": "SD01",
+          "status": "resolved",
+          "resolution": "Replace Japanese mandatory human review and align all four languages with actual authorized AI_REVIEW;CAPTCHA human input is a separate unchanged boundary."
+        },
+        {
+          "id": "SD02",
+          "status": "resolved",
+          "resolution": "Replace nonexistent Chinese REPLAY result with actual replayed=true/createdCount=0 for processed/ignored same-event replay in every locale."
+        },
+        {
+          "id": "SD03",
+          "status": "resolved",
+          "resolution": "Link actual service-integration-renderer test;39 changes with failAfter38,not two failure positions38/39;clarify inner restore/rethrow versus outer rollback."
+        },
+        {
+          "id": "SD04",
+          "status": "resolved",
+          "resolution": "Clarify MI_END history auto-approved is an engine skip,not a manual YES/vote or rejection."
+        },
+        {
+          "id": "SD05",
+          "status": "resolved",
+          "resolution": "Explicit Surefire fork-agent wildcard interface inside Docker with existing host loopback-only5005;avoid global JAVA_TOOL_OPTIONS contention,retain fixed port ownership boundary."
+        },
+        {
+          "id": "SD06",
+          "status": "resolved",
+          "resolution": "Distinguish current mocked CAS/AtomicBoolean and static SQL assertions from actual database/Broker delivery or IDE attachment;no new execution claimed."
+        },
+        {
+          "id": "SD07",
+          "status": "resolved",
+          "resolution": "Preserve all identity,scope,workflow,Outbox,Portal,Inbox,asset occupancy and CLI rollback/failure contracts;correct Japanese dependency/seed/delivery calques."
+        }
+      ]
+    }
+  }
+}

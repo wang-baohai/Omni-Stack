@@ -27,10 +27,19 @@ describe('preset generator', () => {
     const plan = planPresetGeneration(workspaceRoot, 'core', target);
 
     assert.deepEqual(plan.omittedModules, ['workflow', 'crm', 'srm', 'procurement', 'asset', 'xxl-job', 'rocketmq']);
-    const lock = applyPresetGeneration(workspaceRoot, plan);
+    const transientDirectory = resolve(workspaceRoot, 'docs/.vitepress/.temp');
+    const transientFile = resolve(transientDirectory, `preset-test-${process.pid}.txt`);
+    mkdirSync(transientDirectory, { recursive: true });
+    writeFileSync(transientFile, 'VitePress 构建中间文件，不属于规范源', { flag: 'wx' });
+    let lock;
+    try {
+      lock = applyPresetGeneration(workspaceRoot, plan);
+    } finally {
+      rmSync(transientFile, { force: true });
+    }
 
     assert.equal(lock.preset.id, 'core');
-    for (const field of ['sourceDigest', 'catalogDigest', 'presetDigest', 'scaffoldDigest'] as const) {
+    for (const field of ['sourceDigest', 'catalogDigest', 'presetDigest', 'scaffoldDigest', 'docsDigest', 'aiDigest'] as const) {
       assert.match(lock[field], /^[0-9a-f]{64}$/, `scaffold.lock 缺少数值合法的 ${field}`);
     }
     const digest = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
@@ -39,8 +48,56 @@ describe('preset generator', () => {
     assert.notEqual(lock.sourceDigest, lock.catalogDigest);
     assert.equal(validateGeneratedPreset(target, 'core').modules.length, 7);
     assert.equal(existsSync(resolve(target, 'omni-backend/omni-crm')), false);
+    for (const suffix of ['', '.en', '.jp', '.kr']) {
+      const readme = readFileSync(resolve(target, `README${suffix}.md`), 'utf8');
+      assert.doesNotMatch(readme, /^- .*\b(?:Workflow|XXL-JOB|CRM|SRM|Procurement|Asset)\b/m, 'core README 不得宣传未交付业务能力');
+    }
     assert.equal(existsSync(resolve(target, 'omni-frontend/src/views/crm')), false);
     assert.equal(existsSync(resolve(target, 'scaffold.lock')), true);
+    assert.ok(existsSync(resolve(target, 'ai/adapters/bootstrap.mjs')));
+    assert.ok(existsSync(resolve(target, 'docs/.vitepress/config.mjs')));
+    assert.equal(existsSync(resolve(target, 'docs/.vitepress/source')), false);
+    assert.equal(existsSync(resolve(target, 'docs/.vitepress/.temp')), false);
+    mkdirSync(resolve(target, 'docs/.vitepress/.temp'), { recursive: true });
+    writeFileSync(resolve(target, 'docs/.vitepress/.temp/runtime.js'), '临时构建结果改变不得使文档规范摘要失效');
+    assert.equal(validateGeneratedPreset(target, 'core').modules.length, 7);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/tsconfig.tsbuildinfo')), false);
+    assert.equal(existsSync(resolve(target, 'scripts/fixtures/run-workflow-scope-fixture.ps1')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/e2e-docs/flows/workflow-teaching.flows.spec.ts')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/e2e-docs/flows/workflow-teaching-ui.flows.spec.ts')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/tests/workflow')), false);
+    assert.equal(existsSync(resolve(target, 'docs/reference/evidence/workflow-2026-10-10.json')), false);
+    const frontendPackage = JSON.parse(readFileSync(resolve(target, 'omni-frontend/package.json'), 'utf8')) as { scripts: Record<string, string> };
+    assert.doesNotMatch(frontendPackage.scripts['test:unit']!, /tests\/workflow/);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts')), false);
+    assert.equal(existsSync(resolve(target, 'docs/reference/evidence/crm-2026-10-10.json')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/e2e-docs/flows/workflow-negative-teaching.flows.spec.ts')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/e2e-docs/fixtures/xxl-audit.ts')), false);
+    assert.equal(existsSync(resolve(target, 'docs/reference/evidence/scheduling-2026-10-10.json')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts')), false);
+    assert.equal(existsSync(resolve(target, 'docs/reference/evidence/supply-chain-2026-10-09.json')), false);
+    assert.equal(existsSync(resolve(target, 'docs/guides/asset-flow.jp.md')), false);
+    assert.equal(existsSync(resolve(target, 'docs/images/zh-CN/procurement-overview.png')), false);
+    assert.ok(existsSync(resolve(target, 'docs/images/zh-CN/auth-login.png')), '保留认证正文与取证依赖的图片');
+    const docsManifest = parse(readFileSync(resolve(target, 'docs/docs-manifest.yaml'), 'utf8')) as { documents: Array<{ module: string }>; release_policy: { ai_review_authorization: { reference: string; reference_sha256: string } } };
+    assert.equal(docsManifest.documents.some((entry) => ['crm', 'srm', 'procurement', 'asset', 'workflow'].includes(entry.module)), false);
+    const authorization = docsManifest.release_policy.ai_review_authorization;
+    assert.equal(digest(resolve(target, authorization.reference)), authorization.reference_sha256, '生成工程必须保留有效授权依据的原始摘要');
+    assert.equal(readFileSync(resolve(target, authorization.reference), 'utf8'), readFileSync(resolve(workspaceRoot, authorization.reference), 'utf8'));
+    const screenshots = parse(readFileSync(resolve(target, 'omni-frontend/e2e-docs/screenshot-manifest.yaml'), 'utf8')) as { screenshots: Array<{ module: string; route: string }> };
+    assert.equal(screenshots.screenshots.some((entry) => entry.route.startsWith('/admin/procurement/')), false);
+    assert.equal(screenshots.screenshots.some((entry) => entry.module === 'scheduling-workspace'), false, 'XXL-JOB 未交付时不得残留其截图登记');
+    const coverage = parse(readFileSync(resolve(target, 'omni-frontend/e2e-docs/screenshot-coverage.yaml'), 'utf8')) as { modules: Array<{ id: string; required_flows: string[]; status: string }> };
+    assert.equal(coverage.modules.some((entry) => entry.id === 'scheduling-workspace'), false, 'XXL-JOB 未交付时不得保留调度覆盖要求');
+    const permissionCoverage = coverage.modules.find((entry) => entry.id === 'permissions-exceptions')!;
+    assert.equal(permissionCoverage.required_flows.includes('procurement-admin-scope'), false);
+    assert.equal(permissionCoverage.required_flows.includes('supplier-scope'), false);
+    assert.ok(permissionCoverage.required_flows.includes('forbidden-403'), '保留适用于 core 的拒绝场景要求');
+    const sourceCoverage = parse(readFileSync(resolve(workspaceRoot, 'omni-frontend/e2e-docs/screenshot-coverage.yaml'), 'utf8')) as { modules: Array<{ id: string; status: string }> };
+    assert.equal(permissionCoverage.status, sourceCoverage.modules.find((entry) => entry.id === 'permissions-exceptions')!.status, '裁剪必须保留源清单的真实验收状态，不能擅自提高状态');
     const backendDockerfile = readFileSync(resolve(target, 'docker/backend/Dockerfile'), 'utf8');
     assert.match(backendDockerfile, /^# syntax=docker\/dockerfile:1\.7/);
     assert.match(backendDockerfile, /COPY omni-backend\/mvnw omni-backend\/pom\.xml \.\//);
@@ -65,6 +122,16 @@ describe('preset generator', () => {
     const expectedDigest = createHash('sha256').update(authSeed, 'utf8').digest('hex');
     assert.equal(seedManifest.sources.find((source) => source.id === 'auth-bootstrap')?.sha256, expectedDigest);
 
+    const aiSkillPath = resolve(target, 'ai/skills/omni-change/SKILL.md');
+    const originalSkill = readFileSync(aiSkillPath, 'utf8');
+    writeFileSync(aiSkillPath, originalSkill + '\nChanged\n');
+    assert.throws(() => validateGeneratedPreset(target, 'core'), /aiDigest/);
+    writeFileSync(aiSkillPath, originalSkill);
+    const siteConfig = resolve(target, 'docs/.vitepress/config.mjs');
+    const originalConfig = readFileSync(siteConfig, 'utf8');
+    writeFileSync(siteConfig, originalConfig + '\n// 修改隐藏目录里的站点配置\n');
+    assert.throws(() => validateGeneratedPreset(target, 'core'), /docsDigest/);
+    writeFileSync(siteConfig, originalConfig);
     writeFileSync(resolve(target, 'scaffold/catalog/modules.yaml'), '# 注入漂移\n' + readFileSync(resolve(target, 'scaffold/catalog/modules.yaml'), 'utf8'), 'utf8');
     assert.throws(() => validateGeneratedPreset(target, 'core'), /catalogDigest/);
   });
@@ -145,6 +212,8 @@ describe('preset generator', () => {
     const target = resolve(temporaryRoot, 'workflow-project');
 
     applyPresetGeneration(workspaceRoot, planPresetGeneration(workspaceRoot, 'workflow', target));
+
+    assert.ok(existsSync(resolve(target, 'scripts/fixtures/run-workflow-scope-fixture.ps1')));
 
     const homeWorkspace = readFileSync(resolve(target, 'omni-frontend/src/views/home/index.vue'), 'utf8');
     assert.doesNotMatch(homeWorkspace, /positiveInteger/);

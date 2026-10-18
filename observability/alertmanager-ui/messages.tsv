@@ -1,0 +1,123 @@
+# English source key|简体中文|日本語|한국어
+Alerts|告警|アラート|알림
+Silences|静默规则|サイレンス|일시 중지 규칙
+Status|状态|状態|상태
+Settings|设置|設定|설정
+Help|帮助|ヘルプ|도움말
+Language|语言|言語|언어
+New Silence|新建静默|サイレンスを作成|일시 중지 규칙 만들기
+Edit Silence|编辑静默|サイレンスを編集|일시 중지 규칙 편집
+Group (custom)|分组（自定义）|グループ（カスタム）|그룹(사용자 지정)
+Group|分组|グループ|그룹
+Filter|筛选|フィルター|필터
+Silenced|已静默|サイレンス中|일시 중지됨
+Inhibited|已抑制|抑制中|억제됨
+Muted|时段静音|時間帯ミュート中|시간대 음소거됨
+Collapse all groups|折叠全部分组|すべてのグループを折りたたむ|모든 그룹 접기
+Expand all groups|展开全部分组|すべてのグループを展開|모든 그룹 펼치기
+No alert groups found|没有匹配的告警分组|一致するアラートグループはありません|일치하는 알림 그룹이 없습니다
+Not grouped|未分组|グループなし|그룹 없음
+Filter by this label|按此标签筛选|このラベルで絞り込む|이 레이블로 필터링
+ alert| 条告警| 件のアラート|개 알림
+ alerts| 条告警| 件のアラート|개 알림
+Receiver: |接收器：|レシーバー：|수신기:\u0020
+All|全部|すべて|전체
+Enable custom grouping|启用自定义分组|カスタムグループを有効化|사용자 지정 그룹 사용
+Label key for grouping alerts|用于告警分组的标签键|アラートをグループ化するラベルキー|알림을 그룹화할 레이블 키
+Label key for grouping alerts, e.g.|用于告警分组的标签键，例如|グループ化するラベルキー（例）|그룹화할 레이블 키(예:)
+Silence|静默|サイレンス|일시 중지
+Custom matcher, e.g.|自定义匹配条件，例如|カスタムマッチャー（例）|사용자 지정 일치 조건(예:)
+Creator|创建人|作成者|작성자
+Comment|说明|コメント|설명
+Cancel|取消|キャンセル|취소
+Set Date/Time|设置日期和时间|日時を設定|날짜와 시간 설정
+Start|开始|開始|시작
+Duration|持续时间|期間|기간
+End|结束|終了|종료
+Matchers |匹配条件 |マッチャー |일치 조건\u0020
+Alerts affected by this silence|此静默规则影响的告警|このサイレンスの対象アラート|이 일시 중지 규칙의 대상 알림
+Reset|重置|リセット|초기화
+Update|更新|更新|업데이트
+Create|创建|作成|만들기
+Preview Alerts|预览告警|アラートをプレビュー|알림 미리 보기
+No silences found|没有匹配的静默规则|一致するサイレンスはありません|일치하는 일시 중지 규칙이 없습니다
+active|生效中|有効|활성
+pending|待生效|開始待ち|시작 대기
+expired|已过期|期限切れ|만료됨
+ID|ID|ID|ID
+Starts at|开始时间|開始日時|시작 시각
+Ends at|结束时间|終了日時|종료 시각
+Updated at|更新时间|更新日時|수정 시각
+Created by|创建人|作成者|작성자
+State|状态|状態|상태
+Matchers|匹配条件|マッチャー|일치 조건
+Expire Silence|终止静默|サイレンスを終了|일시 중지 종료
+Are you sure you want to expire this silence?|确定立即终止此静默规则吗？|このサイレンスを今すぐ終了しますか？|이 일시 중지 규칙을 지금 종료하시겠습니까?
+Confirm|确认|確認|확인
+Expire|立即终止|今すぐ終了|지금 종료
+Delete|删除|削除|삭제
+Ends|结束于|終了|종료
+Starts|开始于|開始|시작
+Expired|已过期|期限切れ|만료됨
+Edit|编辑|編集|편집
+Recreate|重新创建|再作成|다시 만들기
+View|查看|表示|보기
+No affected alerts|没有受影响的告警|対象アラートはありません|대상 알림이 없습니다
+Affected alerts: |受影响的告警：|対象アラート：|대상 알림:\u0020
+Info|详情|詳細|상세
+Source|来源|ソース|출처
+Link|链接|リンク|링크
+Uptime:|启动时间：|起動時刻：|시작 시각:
+Config|配置|設定内容|구성
+Cluster Status|集群状态|クラスターの状態|클러스터 상태
+Name:|名称：|名前：|이름:
+Status:|状态：|状態：|상태:
+Peers:|对等节点：|ピア：|피어:
+Name: |名称：|名前：|이름:\u0020
+Address: |地址：|アドレス：|주소:\u0020
+Version Information|版本信息|バージョン情報|버전 정보
+Branch:|分支：|ブランチ：|브랜치:
+BuildDate:|构建日期：|ビルド日時：|빌드 시각:
+BuildUser:|构建用户：|ビルドユーザー：|빌드 사용자:
+GoVersion:|Go 版本：|Go バージョン：|Go 버전:
+Revision:|修订版本：|リビジョン：|리비전:
+Version:|版本：|バージョン：|버전:
+First day of the week:|每周开始于：|週の開始曜日：|한 주의 시작 요일:
+Note: This setting is saved in local storage of your browser|此设置保存在当前浏览器的本地存储中|この設定はブラウザーのローカルストレージに保存されます|이 설정은 브라우저의 로컬 저장소에 저장됩니다
+Monday|星期一|月曜日|월요일
+Sunday|星期日|日曜日|일요일
+Saturday|星期六|土曜日|토요일
+Sun|日|日|일
+Mon|一|月|월
+Tue|二|火|화
+Wed|三|水|수
+Thu|四|木|목
+Fri|五|金|금
+Sat|六|土|토
+January|1 月|1月|1월
+February|2 月|2月|2월
+March|3 月|3月|3월
+April|4 月|4月|4월
+May|5 月|5月|5월
+June|6 月|6月|6월
+July|7 月|7月|7월
+August|8 月|8月|8월
+September|9 月|9月|9월
+October|10 月|10月|10월
+November|11 月|11月|11월
+December|12 月|12月|12월
+could not convert string|无法转换输入值|入力値を変換できません|입력값을 변환할 수 없습니다
+Loading...|加载中…|読み込み中…|불러오는 중…
+not found|页面不存在|ページが見つかりません|페이지를 찾을 수 없습니다
+Wrong duration format|持续时间格式错误，例如 2h 30m|期間の形式が正しくありません（例：2h 30m）|기간 형식이 올바르지 않습니다(예: 2h 30m)
+Should not be empty|不能为空|空にできません|비워 둘 수 없습니다
+Wrong ISO8601 format|请输入 ISO 8601 格式的时间|ISO 8601 形式で日時を入力してください|ISO 8601 형식으로 시각을 입력하세요
+Timeout exceeded|请求超时|リクエストがタイムアウトしました|요청 시간이 초과되었습니다
+Network error|网络错误|ネットワークエラー|네트워크 오류
+Unexpected response from api: |API 返回了非预期响应：|API の応答が想定外です：|예상하지 못한 API 응답:\u0020
+Malformed url: |URL 格式错误：|URL の形式が正しくありません：|잘못된 URL 형식:\u0020
+Please complete adding the matcher|请先完成添加匹配条件|マッチャーの追加を完了してください|일치 조건 추가를 완료하세요
+Matchers are required|至少需要一个匹配条件|マッチャーを1つ以上指定してください|일치 조건을 하나 이상 지정하세요
+Can't be in the past|结束时间不能早于开始时间|終了日時は開始日時以降にしてください|종료 시각은 시작 시각 이후여야 합니다
+Could not submit the form, Silence is not yet valid.|静默表单尚未通过校验，无法提交|入力が有効でないため、サイレンスを送信できません|입력값이 유효하지 않아 일시 중지 규칙을 제출할 수 없습니다
+Cannot display affected Alerts, Silence is not yet valid.|静默表单尚未通过校验，无法预览告警|入力が有効でないため、対象アラートを表示できません|입력값이 유효하지 않아 대상 알림을 표시할 수 없습니다

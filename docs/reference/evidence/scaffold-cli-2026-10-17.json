@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "source_commit": "064dc20ab2236a0f7d44881a8eab8731667a3837",
+  "runtime": "local Docker",
+  "image": "scaffold-tool-image-345a.json",
+  "tool_versions": {
+    "node": "v22.23.3",
+    "java": "Temurin25.0.4.1+1",
+    "docker_cli": "29.8.2"
+  },
+  "installed_entrypoint_sha256": "16559b16119b78e7951bab9b2c1d3aba4b03c88fa7ff0e3b434dd9b4fc1d220f",
+  "service_template": "1.5.1",
+  "crud_template": "1.1.1",
+  "preset_template": "1.1.0",
+  "workspace_readonly": true,
+  "dependency_cache_readonly": true,
+  "network": "none",
+  "commands": [
+    {
+      "name": "preset-list",
+      "args": [
+        "preset",
+        "list"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "ef49c07a7f03fee539bc106bd77fa9b406ca7c885aa3a4498cce152414f909a4",
+      "output_sha256": "53164c13e87f53c19b2799e8405a84a0c8fac712f8d13c9dc95f48bfd4743949"
+    },
+    {
+      "name": "preset-explain",
+      "args": [
+        "preset",
+        "explain",
+        "crm"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "7c3fb31d3ccae20d21da3c509d49f970ddfdf2734233c2f48e7779172bb776a7",
+      "output_sha256": "23cf40babedaa0bd752a1ff4a56c500cb645ca48ff2823657de2472fabe0c2ed"
+    },
+    {
+      "name": "preset-preview",
+      "args": [
+        "preset",
+        "create",
+        "crm",
+        "--output",
+        "<PREVIEW_PROJECT_DIR>",
+        "--dry-run"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "168fd719543cba4cf54b4d1bf133d3883553ddb0af34d6827a85bb566a3e36ab",
+      "output_sha256": "83e75273cdd3bd1fe43d4f345ef37163c6122a3255727891695e1bafe6a7d662"
+    },
+    {
+      "name": "service-preview",
+      "args": [
+        "create-service",
+        "tutorial-check-r345",
+        "--output",
+        "<PRIVATE_BUNDLE_DIR>"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "71bbbe7f0ae4fa0d684d06285e3a6a37116970cf9008fac272dcd01588645341",
+      "output_sha256": "8ad71ff261ec9a09527b7b2fd4cd252a3fb96497a171d0825554f0d6e4d8dd55"
+    },
+    {
+      "name": "service-create",
+      "args": [
+        "create-service",
+        "tutorial-check-r345",
+        "--output",
+        "<PRIVATE_BUNDLE_DIR>",
+        "--apply"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "59a69ad0d1fc80c19a3b39a804013c449f8cab0aa459df48ce1127302e34daff",
+      "output_sha256": "d5b332e2400bcebca4f338165784b8d7f19588e74d22290422894f317384ebe1"
+    },
+    {
+      "name": "service-validate",
+      "args": [
+        "service",
+        "validate",
+        "tutorial-check-r345",
+        "--output",
+        "<PRIVATE_BUNDLE_DIR>"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "fca69eda38d7caf23e5bdc4f48bdb2f407258eb7c55e433ec67bed2abe80e17f",
+      "output_sha256": "1c5788c8dd9108ac7e59736583e8e7e834479b5538500b6e6601f68b5d643b1d"
+    },
+    {
+      "name": "crud-check",
+      "args": [
+        "generate",
+        "crud",
+        "--spec",
+        "scaffold/specs/material-brand.yaml",
+        "--check"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "1ccb7c92bcae801b2fb425883581142f164925fa0ed65505ed6194bbc6614d60",
+      "output_sha256": "de733e50b6554ddd561517166dab104bff5fc95d770c6ffb874b476a939ac405"
+    },
+    {
+      "name": "dev-help",
+      "args": [
+        "dev",
+        "--help"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "8257cfdc083ab933192813fd5d76db5d8bc05feccf039354cf2300efde296f67",
+      "output_sha256": "037e35d2b215da1fc404a1254b2d2e3c4e457f58b46de2fd0c8c53fa2e2b5adf"
+    },
+    {
+      "name": "dev-up-help",
+      "args": [
+        "dev",
+        "up",
+        "--help"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "2d51b6c700a22780439fc7c36c2974f796426488cad05c8b017073ec30b8bac8",
+      "output_sha256": "3d458104551183ee0cab0fe53b7b415f02e7a3b1c8620aaa1c77dc403e54cc14"
+    },
+    {
+      "name": "integrate-help",
+      "args": [
+        "service",
+        "integrate",
+        "--help"
+      ],
+      "exit_code": 0,
+      "raw_log_sha256": "3f526874401a149610424b8a508440489cbdf9b7344d0a3a574c93b0e1d98583",
+      "output_sha256": "6b8368475d4c2c4ff2e1fbbb0fd8708862dafd105e3150b7931ba762544a43a2"
+    }
+  ],
+  "terminal_transcript": "scaffold-cli-2026-10-17.txt",
+  "terminal_transcript_sha256": "1af6519d93fda12d300b4715b44d8a647ab40f30789c01ccf9ff602e951ef323",
+  "source_bindings": [
+    {
+      "path": "compose.tools.yaml",
+      "sha256": "24d37d4437eb8f2c1bce2a7478a8566162c9d65f9ee111393b0131463732f035"
+    },
+    {
+      "path": "docker/tools/Dockerfile",
+      "sha256": "a1527b14fb0955be6044ef96ec2012ec959fb20b6f9ed892e1cf697fb3fd5b7c"
+    },
+    {
+      "path": "docker/tools/entrypoint.mjs",
+      "sha256": "16559b16119b78e7951bab9b2c1d3aba4b03c88fa7ff0e3b434dd9b4fc1d220f"
+    },
+    {
+      "path": "tools/omni-cli/package.json",
+      "sha256": "965b40d3620e09bbe7bdba25da2bcde8909b502a98759cbfd7a74829869ee756"
+    },
+    {
+      "path": "tools/omni-cli/src/cli.ts",
+      "sha256": "d0b5df88164319f5b4308ca68bb587aa9ae8ce68fb3b74ac3eecf82ffe030c97"
+    },
+    {
+      "path": "tools/omni-cli/src/crud-generator.ts",
+      "sha256": "d49af40be12c2e517a97a160d1f723f94559d4530d012664743739c7f92f8288"
+    },
+    {
+      "path": "tools/omni-cli/src/development.ts",
+      "sha256": "98a2e15bfe7441e5634ea2e280e9c9867157f955b68fc4bba5bc3da9bffecaea"
+    },
+    {
+      "path": "tools/omni-cli/src/preset-generator.ts",
+      "sha256": "2139e233787024453b57f9dcb0ae46b9544a42f69970b3cf6c4f9c71121f3bd0"
+    },
+    {
+      "path": "tools/omni-cli/src/service-generator.ts",
+      "sha256": "2218c24f96016bdef198531a15bfce0fc8a70196f43b62a2dbfc50f747454558"
+    },
+    {
+      "path": "tools/omni-cli/src/service-integration-renderer.ts",
+      "sha256": "b7dd8cf9d6178eb41c5659b40bc46ab234ef55e3df3fd9533df34a90ad693e09"
+    },
+    {
+      "path": "tools/omni-cli/src/service-integration.ts",
+      "sha256": "fa1c9fa327d7be02cccc27aa0b471aaff06e7d0356a3c7c6dcbded7e4f4d0312"
+    }
+  ],
+  "generated_service_bundle": {
+    "service_id": "tutorial-check-r345",
+    "locked_files": 32,
+    "created_once": true,
+    "preserved_in_private_storage": true,
+    "integrated": false,
+    "compiled": false,
+    "started": false
+  },
+  "initial_input_error": {
+    "input": "tutorial-check-345",
+    "category": "invalid_derived_Java_package",
+    "exit_code": 2,
+    "before_write": true,
+    "resolution": "Used legal tutorial-check-r345;only seven remaining commands executed. The first three successful commands were reused,not replayed."
+  },
+  "side_effects": {
+    "one_private_service_bundle_created": true,
+    "applications_started": false,
+    "business_writes": false,
+    "delivery_source_modified_by_cli": false,
+    "runner_containers_remaining": 0
+  },
+  "review_policy": "Current owner-authorized actual AI_REVIEW is sufficient;no mandatory human review. This execution record does not approve translations.",
+  "limits": [
+    "Existing verified image and cache;no fresh network installation.",
+    "Preset list/explain/dry-run do not prove a newly generated complete preset.",
+    "No service integration,application startup,new Maven test or database operation.",
+    "11service-related/13CRUD tests and generated-artifact comparisons have separate scoped evidence;full current goldens and five-preset structural matrix remain finalG.",
+    "The 2026-10-12 recordings remain historical and retain their original limits.",
+    "CLI execution and an active Goal do not establish full A-G completion."
+  ],
+  "output_normalization": "ANSI removed;private paths replaced;line endings normalized to LF;trailing spaces/tabs removed in public copies. Private original logs and their raw digests unchanged."
+}

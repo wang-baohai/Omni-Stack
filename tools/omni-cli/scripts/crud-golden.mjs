@@ -7,6 +7,7 @@ import { renderCrudGeneration, validateExistingCrud } from '../dist/src/crud-gen
 import { applyRenderedIntegration } from '../dist/src/service-integration-transaction.js';
 import { findWorkspaceRoot } from '../dist/src/workspace.js';
 import { captureLint, lintFingerprint } from './lint-baseline.mjs';
+import { jdkEnvironment } from './jdk-environment.mjs';
 
 const workspaceRoot = findWorkspaceRoot(resolve(import.meta.dirname, '..'));
 const systemTempRoot = mkdtempSync(resolve(tmpdir(), 'omni-crud-golden-'));
@@ -86,16 +87,6 @@ function run(command, args, cwd, extraEnvironment = {}) {
 }
 
 /** 捕获 lint 输出与指纹提取已抽到 lint-baseline.mjs，供 preset-golden 共用（避免导入即执行本脚本）。 */
-
-function jdkEnvironment() {
-  const javaHome = process.env.JAVA_HOME && process.env.JAVA_HOME.includes('jdk-25')
-    ? process.env.JAVA_HOME
-    : 'C:\\APP\\JDK25\\jdk-25.0.2';
-  return {
-    JAVA_HOME: javaHome,
-    PATH: `${resolve(javaHome, 'bin')}${process.platform === 'win32' ? ';' : ':'}${process.env.PATH ?? ''}`,
-  };
-}
 
 function removeVerifiedTree(target, allowedParent) {
   const resolvedTarget = resolve(target);

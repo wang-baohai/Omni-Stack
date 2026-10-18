@@ -16,7 +16,7 @@ import type {
 } from './types.js';
 
 export const CRUD_GENERATOR_VERSION = '0.1.0';
-export const CRUD_TEMPLATE_VERSION = '1.1.0';
+export const CRUD_TEMPLATE_VERSION = '1.1.1';
 
 const SUPPORTED_MODULES = {
   procurement: {
@@ -379,8 +379,8 @@ function renderDocumentation(context: CrudContext): string {
 }
 
 function renderFutureLocale(context: CrudContext, locale: 'ja-JP' | 'ko-KR'): string {
-  // 不伪造业务术语翻译：框架键以声明原文（中文）占位，术语由 WP-09B 人工翻译后启用运行时注册。
-  return `# ${locale} 将在全局语言包 WP-09B 启用；当前作为生成契约保留，业务术语待人工翻译，禁止直接合入运行时语言包。\n${context.lowerAggregate}:\n  title: "${context.spec.displayName}"\n  description: "维护${context.spec.displayName}主数据"\n  messages:\n    saved: "保存成功"\n    deleted: "删除成功"\n${context.spec.fields.map((field) => `  fields.${field.name}: "${field.comment}"`).join('\n')}\n`;
+  // 术语参考仍保留声明原文；运行时四语框架已登记，业务术语须完成翻译与项目授权的实际语义复核。
+  return `# ${locale} 业务术语参考保留声明原文，不代表完整译文；运行时框架文案已登记，术语须完成翻译并按项目策略实际语义复核，已授权 AI_REVIEW 可满足，无需强制人工复核。\n${context.lowerAggregate}:\n  title: "${context.spec.displayName}"\n  description: "维护${context.spec.displayName}主数据"\n  messages:\n    saved: "保存成功"\n    deleted: "删除成功"\n${context.spec.fields.map((field) => `  fields.${field.name}: "${field.comment}"`).join('\n')}\n`;
 }
 
 function createChange(workspaceRoot: string, file: GeneratedFile): IntegrationFileChange {
@@ -617,7 +617,7 @@ function insertLocale(content: string, context: CrudContext, locale: CrudLocale)
   if (last < 0) throw new CliError(`语言包缺少根对象：${locale}`);
   const text = localeCopy(locale, context);
   const fields = context.spec.fields.map((field) => `      ${field.name}: '${sqlText(locale === 'en-US' ? humanize(field.name) : field.comment)}',`).join('\n');
-  const reviewNote = text.pendingReview ? `  // TODO(WP-012): ${locale} 业务名词为源语言回退，需人工语义审定后再发布。\n` : '';
+  const reviewNote = text.pendingReview ? `  // TODO: [crud] ${locale} 业务术语仍为源语言占位；须完成翻译与项目授权的实际语义复核，已授权 AI_REVIEW 可满足，无需强制人工复核。\n` : '';
   const block = `${reviewNote}  ${key}: {\n    title: '${sqlText(text.title)}',\n    description: '${sqlText(text.description)}',\n    detail: '${sqlText(text.detail)}',\n    fields: {\n${fields}\n    },\n    messages: {\n      saved: '${sqlText(text.saved)}',\n      deleted: '${sqlText(text.deleted)}',\n      deleteConfirm: '${sqlText(text.confirm)}',\n    },\n  },`;
   return `${content.slice(0, last)}\n${block}${content.slice(last)}`;
 }

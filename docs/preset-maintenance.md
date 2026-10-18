@@ -28,12 +28,13 @@
 
 只编辑 `scaffold/presets/<id>.yaml` 的入口模块和说明。随后执行：
 
-~~~powershell
-Set-Location tools/omni-cli
-npm test
-npm run test:preset-structure
-npm run docs:preset
-npm run docs:preset:check
+以下命令从源仓库根目录执行，并在本机 Docker CLI 工具容器中运行；先按首次启动教程准备工具镜像和依赖。
+
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm test
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-structure
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run docs:preset
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run docs:preset:check
 ~~~
 
 模块集合、默认配置或生成结果发生兼容性变化时递增 `version`：修复用 patch，向后兼容能力增加用 minor，破坏性边界变化用 major。catalog 模块版本与预设版本分别维护。

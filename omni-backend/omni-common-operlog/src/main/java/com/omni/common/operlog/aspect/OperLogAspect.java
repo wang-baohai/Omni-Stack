@@ -16,6 +16,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.expression.ExpressionParser;
@@ -108,7 +110,7 @@ public class OperLogAspect {
             if (mapper != null) {
                 entityId = evaluateSpEL(operLog.idExpr(), joinPoint, null);
                 if (entityId != null) {
-                    Object oldEntity = mapper.selectById((Serializable) entityId);
+                    Object oldEntity = readTenantSnapshot(mapper, (Serializable) entityId, tenantId);
                     if (oldEntity != null) {
                         oldValue = toJson(oldEntity);
                     }
@@ -137,7 +139,7 @@ public class OperLogAspect {
                 String newValue = null;
                 if (needDiff && mapper != null && entityId != null) {
                     if (operLog.operType() == OperType.UPDATE) {
-                        Object newEntity = mapper.selectById((Serializable) entityId);
+                        Object newEntity = readTenantSnapshot(mapper, (Serializable) entityId, tenantId);
                         if (newEntity != null) {
                             newValue = toJson(newEntity);
                         }
@@ -157,7 +159,7 @@ public class OperLogAspect {
                     if (createMapper != null && !operLog.idExpr().isEmpty()) {
                         Object newId = evaluateSpEL(operLog.idExpr(), joinPoint, result);
                         if (newId != null) {
-                            Object newEntity = createMapper.selectById((Serializable) newId);
+                            Object newEntity = readTenantSnapshot(createMapper, (Serializable) newId, tenantId);
                             if (newEntity != null) {
                                 newValue = toJson(newEntity);
                             }
@@ -189,6 +191,31 @@ public class OperLogAspect {
                 log.warn("操作日志：后处理失败: {}", e.getMessage());
             }
         }
+    }
+
+    /**
+     * 读取可归属于当前租户的实体快照。
+     * <p>具有 tenantId 属性的实体必须匹配请求租户，避免失败请求或并发变化泄露其他租户字段。
+     * 不具有该属性的全局实体保持原快照行为。</p>
+     *
+     * @param mapper 实体 Mapper
+     * @param entityId 实体 ID
+     * @param tenantId 当前请求租户 ID
+     * @return 当前租户或全局实体，所属租户不匹配时返回 null
+     */
+    private Object readTenantSnapshot(BaseMapper<Object> mapper, Serializable entityId, Long tenantId) {
+        Object entity = mapper.selectById(entityId);
+        if (entity == null) {
+            return null;
+        }
+        BeanWrapper properties = PropertyAccessorFactory.forBeanPropertyAccess(entity);
+        if (!properties.isReadableProperty("tenantId")) {
+            return entity;
+        }
+        if (tenantId == null || tenantId <= 0 || !tenantId.equals(properties.getPropertyValue("tenantId"))) {
+            return null;
+        }
+        return entity;
     }
 
     /**

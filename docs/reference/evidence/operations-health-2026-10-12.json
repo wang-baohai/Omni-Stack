@@ -1,0 +1,132 @@
+{
+  "status": "PASS",
+  "runtime": "local Docker",
+  "started_at": "2026-10-12T07:36:57.361Z",
+  "finished_at": "2026-10-12T07:36:57.521Z",
+  "readiness": [
+    {
+      "service": "collector",
+      "http": 200
+    },
+    {
+      "service": "prometheus",
+      "http": 200
+    },
+    {
+      "service": "pushgateway",
+      "http": 200
+    },
+    {
+      "service": "alertmanager",
+      "http": 200
+    },
+    {
+      "service": "tempo",
+      "http": 200
+    },
+    {
+      "service": "loki",
+      "http": 200
+    },
+    {
+      "service": "alloy",
+      "http": 200
+    },
+    {
+      "service": "grafana",
+      "http": 200
+    }
+  ],
+  "expected_services": [
+    "omni-asset",
+    "omni-auth",
+    "omni-base",
+    "omni-crm",
+    "omni-gateway",
+    "omni-procurement",
+    "omni-srm",
+    "omni-workflow"
+  ],
+  "business_targets_up": 8,
+  "targets": [
+    {
+      "job": "cadvisor",
+      "instance": "cadvisor:8080",
+      "health": "down"
+    },
+    {
+      "job": "node-exporter",
+      "instance": "node-exporter:9100",
+      "health": "down"
+    },
+    {
+      "job": "omni-platform",
+      "instance": "omni-asset:19907",
+      "health": "up"
+    },
+    {
+      "job": "omni-platform",
+      "instance": "omni-auth:19900",
+      "health": "up"
+    },
+    {
+      "job": "omni-platform",
+      "instance": "omni-base:19901",
+      "health": "up"
+    },
+    {
+      "job": "omni-platform",
+      "instance": "omni-gateway:19902",
+      "health": "up"
+    },
+    {
+      "job": "omni-platform",
+      "instance": "omni-workflow:19903",
+      "health": "up"
+    },
+    {
+      "job": "omni-platform",
+      "instance": "omni-crm:19904",
+      "health": "up"
+    },
+    {
+      "job": "omni-platform",
+      "instance": "omni-srm:19905",
+      "health": "up"
+    },
+    {
+      "job": "omni-platform",
+      "instance": "omni-procurement:19906",
+      "health": "up"
+    },
+    {
+      "job": "otel-collector",
+      "instance": "otel-collector:8888",
+      "health": "up"
+    },
+    {
+      "job": "prometheus",
+      "instance": "prometheus:9090",
+      "health": "up"
+    },
+    {
+      "job": "pushgateway",
+      "instance": "pushgateway:9091",
+      "health": "up"
+    }
+  ],
+  "historical_trace": {
+    "trace_id": "b8e0d5eb7d9c346cda61c49218695527",
+    "http": 200,
+    "services": [
+      "omni-base",
+      "omni-gateway"
+    ],
+    "span_count": 56,
+    "historical_read_only": true
+  },
+  "limits": [
+    "Only listed components and business targets are asserted; omitted host exporters may remainDOWN",
+    "No external notification delivery or human login is asserted"
+  ]
+}

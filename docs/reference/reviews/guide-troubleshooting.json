@@ -1,0 +1,591 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-troubleshooting",
+  "source": "docs/guides/troubleshooting.md",
+  "source_sha256": "2481ddc1de179b76290b46c2506b8f71fce0d3c6d60be1ceca25369f940b7dbb",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "d26c075103f601135ec64fb6550fa7f0a0cbcbce",
+  "source_state": "Actually read all421original lines in fourcompleteguides,then everyfinaldelta againstChinese,current sourceandnamedpriorreviewedfacts. Exactunchanged-line/per-linehashmapping completes432currentlines;not fourfreshwholefinalrereads. Sevenwhole548current source lines plusselectedreads;335priorbindingoccurrences/299uniquehashchecks areseparate historicalscope reuse,not335newwholereads. Currentreview binds37actuallyneededsource/fact/policy/evidencefiles. No newruntimefault orrecoveryexecutionclaimed. SubsequentENCRLF->LFequalityandidenticalrenderchecked;no semanticcontentchangedornewwhole-finalrereadclaimed.",
+  "method": "Actually read all421original lines in fourcompleteguides,then everyfinaldelta againstChinese,current sourceandnamedpriorreviewedfacts. Exactunchanged-line/per-linehashmapping completes432currentlines;not fourfreshwholefinalrereads. Sevenwhole548current source lines plusselectedreads;335priorbindingoccurrences/299uniquehashchecks areseparate historicalscope reuse,not335newwholereads. Currentreview binds37actuallyneededsource/fact/policy/evidencefiles. No newruntimefault orrecoveryexecutionclaimed. SubsequentENCRLF->LFequalityandidenticalrenderchecked;no semanticcontentchangedornewwhole-finalrereadclaimed.",
+  "checked_source_files": [
+    {
+      "path": "docs/backend-patterns.md",
+      "sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthController.java",
+      "sha256": "b973052c2787ac95547edaa93be6bb8de48becc34017d8666e02e2a52b6662fb"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/MenuController.java",
+      "sha256": "eed9b466770f01f6bde80a5c60230a97b76544b0bf64d402a7ee6f5a3c22fe31"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SocialLoginController.java",
+      "sha256": "e401bc70a37340c3a55b4a1cffbeeabc9a3ca7ae363b9e752f06ce855704135f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/CaptchaServiceImpl.java",
+      "sha256": "ac901105b2f949e32bb5e76789f7a5b4dc32a4860cf24da49b0f657e229381e4"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/resources/application.yml",
+      "sha256": "d1ce2ce3f6bd0ecc11ce641fc23475b571b0cbe382274be5cdc4e4d47dfc25f9"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/DictTypeServiceImpl.java",
+      "sha256": "81a7eeb41ce81a01270efd4f11ea79640a8c5212b2f911522a51199efad72284"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/OperLogArchiver.java",
+      "sha256": "297b676471f4c5212cbf883a3af3e4392b61d51d043ade9a39d6516b8b5cbf49"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/SystemJobRegistry.java",
+      "sha256": "bf2b704901d2e13c1d0a558d52263c3e00f308e61554e0000bec85773ecf655a"
+    },
+    {
+      "path": "docs/observability.md",
+      "sha256": "798c160e3208af2f06a1159df25a2ef4cf42ab6006dcaa4ced3a761a5ff3b0d4"
+    },
+    {
+      "path": "docs/mq-reliability.md",
+      "sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957"
+    },
+    {
+      "path": "docs/scheduling.md",
+      "sha256": "af1e4a539d551605e6d4466de4fc740b78a527a50660a5f4f4d82c2c3247b8a7"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/reference/reviews/backend-patterns.json",
+      "sha256": "f88e81c0d3153d8e1648e61dc0d6c2b12ea13faf2ba63f09f847417727104d84"
+    },
+    {
+      "path": "docs/guides/authentication.md",
+      "sha256": "127d2a8396618e2dbb787d9a72e838cf26991b719bb8a9c81a93d6e4d04cf09f"
+    },
+    {
+      "path": "docs/reference/reviews/guide-authentication.json",
+      "sha256": "ff34f4c780b1d8ad98ea0cf06fd45a869863511936f53426028abad50e418ec2"
+    },
+    {
+      "path": "docs/guides/permissions.md",
+      "sha256": "8878710f45b3aab84590c57c5539a6f321e5a31c168de1f7e37edcfdf0a76ad2"
+    },
+    {
+      "path": "omni-frontend/src/directives/permission.ts",
+      "sha256": "b52bb4b166510e09cd07a82471b722409716182a0442f4269b2fa8a40e3805fc"
+    },
+    {
+      "path": "omni-frontend/src/i18n/index.ts",
+      "sha256": "1f03b35f5616586da17441dd5dda7e877ffbc3a197eccef75641ad4794d48618"
+    },
+    {
+      "path": "docs/reference/reviews/guide-permissions.json",
+      "sha256": "234b4df9b9bff01ad1f976b0cbb53f9a45a022d049e81ca0c30ddecef571ec89"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobHandlerRegistry.java",
+      "sha256": "136ac3d8cea3b290212929779fa7a72ddc9f0aad76f226d3bf315d438ca45fb8"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java",
+      "sha256": "2e4ee9762caaa45cf6f70404dff0bf1448cfd11615ba8df80f2fb2e27fd1826a"
+    },
+    {
+      "path": "docs/reference/reviews/scheduling.json",
+      "sha256": "57adc3a811be042dcfad96bc91e45ca48d897628d54e4e2deecae44578df9d0b"
+    },
+    {
+      "path": "docs/reference/reviews/mq-reliability.json",
+      "sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf"
+    },
+    {
+      "path": "docs/reference/reviews/observability.json",
+      "sha256": "acb59ba016afabefe31efc3689c7bfc6f28d717a6f0dfc87f75f6f50bc41f56c"
+    },
+    {
+      "path": "docs/workflow.md",
+      "sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389"
+    },
+    {
+      "path": "docs/reference/reviews/workflow.json",
+      "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuditLogController.java",
+      "sha256": "4d4196b7f7967d3a20e1455d2592b047abfafbd696ea7743b32a26e54b48d26a"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthRecordController.java",
+      "sha256": "eaeee5ac92dc53b7e33eab54cb9e636fc334b87755d2fa6583f09df2e57bd485"
+    },
+    {
+      "path": "tools/omni-cli/src/cli.ts",
+      "sha256": "d0b5df88164319f5b4308ca68bb587aa9ae8ce68fb3b74ac3eecf82ffe030c97"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/DictDataController.java",
+      "sha256": "9936e714b52f96e21918653d1f9bcbea16542443ebc9b4d5536ff69fb9509615"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/DictDataServiceImpl.java",
+      "sha256": "f6b86ad13da6a0d63825d4a4ee20fd345d6728487bf2fa844c96c127c5f63ec6"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MqMessageController.java",
+      "sha256": "722fb645de7c96df62e6ce27c7031d39e244e0ec9361186ba7eb635cf38e1f28"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/controller/MqMessageInternalController.java",
+      "sha256": "80614b1c1446126563d7574881c513ca8ba22b45a044d30631ac3aa62ec15845"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java",
+      "sha256": "bfe1ce1806668c8e28c80a7614d7a5fff1fed2b7f65b3e18a56137e2cca627bf"
+    },
+    {
+      "path": "omni-frontend/package.json",
+      "sha256": "24c2338b1e5fdda8063dab364a44c20b9038a2308769638230511d07f3807162"
+    },
+    {
+      "path": "docs/reference/evidence/troubleshooting-guide-review-2026-10-17.json",
+      "sha256": "e277278a449ac65c87c1c3551953377f3e0aa79b9622ee5464962d1dd9ab1c64"
+    }
+  ],
+  "source_inspection_scope": "All421originalguide lines actuallyread;complete currentcoveragecombines that whole read witheveryfinaldelta andexactunchanged-line mapping. Sevenwhole548current source lines plusselectedreads andseparatelyscoped sevennamedpriorfact/reviewreuse. 335exactdependencychecks/299unique inprivate479arenotnewwholereads. No source/render/digestchecksautomaticallyapprove meaning.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "complete_current_semantic_coverage": true,
+    "original_whole_lines_actually_read": 421,
+    "current_combined_semantic_lines": 432,
+    "fresh_whole_final_rereads": false,
+    "original_full_read_outputs": {
+      "zh-CN": "c8419c",
+      "en-US": "1382c4",
+      "ja-JP": "a2ccbe",
+      "ko-KR": "e19cd6"
+    },
+    "final_exact_delta_outputs": {
+      "zh-CN": "c3ecb5",
+      "en-US": "c3ecb5",
+      "ja-JP": "c3ecb5",
+      "ko-KR": "c3ecb5"
+    },
+    "lines_each": 108,
+    "headings_each": 11,
+    "h2_each": 10,
+    "h3_each": 0,
+    "numbered_operations_each": 10,
+    "tables_each": 3,
+    "images_each": 0,
+    "technical_fences_each": 0,
+    "normalized_inline_literals_each": 52,
+    "normalized_relative_links_each": 3,
+    "whole_markdown_rendered_documents": 4,
+    "source_bindings": 37,
+    "current_whole_source_files": 7,
+    "current_whole_source_lines": 548,
+    "current_source_reads": [
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthController.java",
+        "sha256": "b973052c2787ac95547edaa93be6bb8de48becc34017d8666e02e2a52b6662fb",
+        "read_scope": "Matched87-89fallback900and167/188runtimeTTLuse;selected151-189actualpasswordtoken flowcompleted in finalcurrent followup479. Notwhole.",
+        "outputs": [
+          "224d85",
+          "44de46"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/MenuController.java",
+        "sha256": "eed9b466770f01f6bde80a5c60230a97b76544b0bf64d402a7ee6f5a3c22fe31",
+        "read_scope": "MatchedactualRequestMapping/api/auth/menusandpermissionfilteredreturn;notwhole.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SocialLoginController.java",
+        "sha256": "e401bc70a37340c3a55b4a1cffbeeabc9a3ca7ae363b9e752f06ce855704135f",
+        "read_scope": "MatchedHMACstatecontractandcallbackdelegation;priorcurrentguide-authentication source semantics reused. Notwhole.",
+        "outputs": [
+          "224d85"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/CaptchaServiceImpl.java",
+        "sha256": "ac901105b2f949e32bb5e76789f7a5b4dc32a4860cf24da49b0f657e229381e4",
+        "read_scope": "Whole:Redisone-timeatomicGETDELonvalidationbeforecomparison,CAPTCHArefreshafterfailure/expiry,300fallback. NotactualCAPTCHAexecution.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/resources/application.yml",
+        "sha256": "d1ce2ce3f6bd0ecc11ce641fc23475b571b0cbe382274be5cdc4e4d47dfc25f9",
+        "read_scope": "Selected99-111:repoaccess-token-ttl7200/refresh604800/captcha300;fallback900isnotrepoeffectiveTTL. Notwholeconfigurationorcurrentcontainerenv.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/DictTypeServiceImpl.java",
+        "sha256": "81a7eeb41ce81a01270efd4f11ea79640a8c5212b2f911522a51199efad72284",
+        "read_scope": "Selected120-140:transactional same-tenant/typechilddelete+typedelete+cacheinvalidate. Notwhole.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/OperLogArchiver.java",
+        "sha256": "297b676471f4c5212cbf883a3af3e4392b61d51d043ade9a39d6516b8b5cbf49",
+        "read_scope": "MatchedXxlJob/SystemJobMetadualannotations,archive/batchhistory;priorobservability/backendsource review reused. Notnewarchiveexecution.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/SystemJobRegistry.java",
+        "sha256": "bf2b704901d2e13c1d0a558d52263c3e00f308e61554e0000bec85773ecf655a",
+        "read_scope": "Whole:beanmethodscanonlyregistersbothXxlJobandSystemJobMeta,handlerkeyandmetadata.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/directives/permission.ts",
+        "sha256": "b52bb4b166510e09cd07a82471b722409716182a0442f4269b2fa8a40e3805fc",
+        "read_scope": "Whole:permissionstorecheck,displaynone/restore,mounted/updatednotremoveChild.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/i18n/index.ts",
+        "sha256": "1f03b35f5616586da17441dd5dda7e877ffbc3a197eccef75641ad4794d48618",
+        "read_scope": "Whole:fourSUPPORTED_LOCALES,omni-langstorage/defaultzh-CN,fallbacken-US,html.langandtranslatehelper.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobHandlerRegistry.java",
+        "sha256": "136ac3d8cea3b290212929779fa7a72ddc9f0aad76f226d3bf315d438ca45fb8",
+        "read_scope": "Whole:SpringMapkeyisbeannameandlookupbyjobType,typecodeconvention.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java",
+        "sha256": "2e4ee9762caaa45cf6f70404dff0bf1448cfd11615ba8df80f2fb2e27fd1826a",
+        "read_scope": "Selected88-123finalfollowup:XXLregistrationfailuredeleteslocaljobthenbusiness500;notwhole.",
+        "outputs": [
+          "44de46"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuditLogController.java",
+        "sha256": "4d4196b7f7967d3a20e1455d2592b047abfafbd696ea7743b32a26e54b48d26a",
+        "read_scope": "Whole:readonlyauditlist,system:auditlog:list,Gatewaytenantheader,filtersdelegated.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthRecordController.java",
+        "sha256": "eaeee5ac92dc53b7e33eab54cb9e636fc334b87755d2fa6583f09df2e57bd485",
+        "read_scope": "Whole:separateOAuthauthorizationrecordquery,notallauthenticationeventsareloginrecords.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "tools/omni-cli/src/cli.ts",
+        "sha256": "d0b5df88164319f5b4308ca68bb587aa9ae8ce68fb3b74ac3eecf82ffe030c97",
+        "read_scope": "Selected123-186:devupprintsplanbeforestart,mode/preset/project,nobuildrequiresartifactproof;downretainsvolumesunlessexplicittwoflags,status/doctor/logs;nodevplancommand. NotCLIexecution/wholefile.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/DictDataController.java",
+        "sha256": "9936e714b52f96e21918653d1f9bcbea16542443ebc9b4d5536ff69fb9509615",
+        "read_scope": "Selected136-150:POSTrefresh-cache,dict:data:refresh,tenantheader/typecode;notwhole.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/DictDataServiceImpl.java",
+        "sha256": "f6b86ad13da6a0d63825d4a4ee20fd345d6728487bf2fa844c96c127c5f63ec6",
+        "read_scope": "Selected171-196+matchedwriteinvalidations:tenantcachedeleteandrepopulateactiveorderedvalues;TTLnotconsistencyguarantee. Notwhole.",
+        "outputs": [
+          "12cfc1",
+          "224d85"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MqMessageController.java",
+        "sha256": "722fb645de7c96df62e6ce27c7031d39e244e0ec9361186ba7eb635cf38e1f28",
+        "read_scope": "Matchedallpublictenantheaderandaggregationcalls;priorMQfactscope reused,notwhole.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/controller/MqMessageInternalController.java",
+        "sha256": "80614b1c1446126563d7574881c513ca8ba22b45a044d30631ac3aa62ec15845",
+        "read_scope": "MatchedtenantqueryconstraintandCASresend/skip;priorMQfactscope reused,notwhole.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java",
+        "sha256": "bfe1ce1806668c8e28c80a7614d7a5fff1fed2b7f65b3e18a56137e2cca627bf",
+        "read_scope": "Matchedstatus/nextretry/cross-tenantrelaylogicinfinalfollowup;priorMQfactsource reused,notwhole.",
+        "outputs": [
+          "44de46"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/package.json",
+        "sha256": "24c2338b1e5fdda8063dab364a44c20b9038a2308769638230511d07f3807162",
+        "read_scope": "Matchedlinteslint --max-warnings0;no currentnewlint/buildrun.",
+        "outputs": [
+          "5bee06"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ],
+    "prior_named_reviews": 7,
+    "prior_binding_occurrences_checked": 335,
+    "prior_unique_binding_files_checked": 299,
+    "prior_hash_checks_are_not_whole_reads": true,
+    "current_evidence": "docs/reference/evidence/troubleshooting-guide-review-2026-10-17.json",
+    "new_application_test_or_build_runs": 0,
+    "business_writes": 0,
+    "historical_business_writes_replayed": false,
+    "screenshot_manifest_changed": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "No newapplicationtest/build/runtimefaultreproduction,recoverycommand,CAPTCHA/login,XXLjob,MQ/cache/archivebusinessmutationorvisualcapture.",
+      "Sevenwhole548source lines plusselectedranges/namedpriorfactreuse;olderguide-authentication/MQ/observabilityrecordsbindfactsourceonlyandhavenoadditionalimplementationarray,notinvented. 335dependencyoccurrences/299uniquecheckedseparately;only37neededfilesboundtocurrentreview.",
+      "ExternalOAuth,realSRMCAPTCHAselfregistration,nativeQoder,currentgoldens/fivepresets/globalroot-subpathacceptanceandremaining9translationrowsafterthisprospectivefamilyremaininfullA-G;globalcoverageisnotapproved."
+    ],
+    "english_eol_normalization": {
+      "at": "2026-10-17T12:49:41.773Z",
+      "phase": "ENGLISH_EOL_ONLY_NORMALIZED_LOGICAL_TEXT_AND_HTML_IDENTICAL",
+      "source_head": "d26c075103f601135ec64fb6550fa7f0a0cbcbce",
+      "path": "docs/guides/troubleshooting.en.md",
+      "before_sha256": "a544511fac4df1196e57685e700ff30e288ce1970ce762c6a14af2cd95fe0b81",
+      "after_sha256": "ca458481a9cebb3ebbb53090a82029d9fe3a547d86775b1ac8494fa2173e9c7f",
+      "source_proof": "troubleshooting-guide-semantic-proof-481b.json",
+      "conclusions": "troubleshooting-guide-review-conclusions-482b.json",
+      "original_whole_lines_read": 421,
+      "current_combined_semantic_lines": 432,
+      "new_review_rows": 0,
+      "business_writes": 0,
+      "stage_not_started": true,
+      "known_failure_output": "e6e2f7"
+    }
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/troubleshooting.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 20:49:46",
+      "result": "approved",
+      "translation_sha256": "ca458481a9cebb3ebbb53090a82029d9fe3a547d86775b1ac8494fa2173e9c7f",
+      "checks": {
+        "coverage_and_meaning": "四语原稿421行及最终全部变更行已实际阅读，未变行对应覆盖当前432行。每语10节、10项编号步骤、3表保留；启动、认证、菜单/权限、数据范围、Workflow、任务、MQ、前端及支持脱敏、旧运行说明迁入内容完整对应。",
+        "technical_literals": "四语52个归一化行内技术字面量和3个相对链接一致。补齐英日韩code_verifier/code_challenge，并把OperLogArchiver类和operLogArchiveHandler处理器标识分开。保留JDK25/MavenWrapper、真实CLI命令、API/权限、locale/key、MI_END、刷新路径和模块剪裁标记；无围栏或图片被删改。",
+        "security_and_failure_semantics": "区分HTTP状态与R.code、登录事件只读投影与其他安全审计。密码TTL代码回退900秒、仓库YAML7200秒，实际看部署覆盖与exp，其他grant另查。验证码GETDEL单次消费与人亲自输入边界保持；外部HMACstate与本地SPAPKCE区分。保留服务端权限/租户/数据范围、任务注册补偿、Outbox/Broker/Inbox/跨租户relay、缓存失效与归档副作用先对账，敏感信息不外泄。",
+        "images_and_links": "四篇完整Markdown在本机Docker渲染，全部相对链接解析成功。本文没有截图，不新增视觉或运行验收断言。代码、源摘要和渲染支持实际语义阅读，不代表重跑当前登录、任务调度、消息投递、缓存刷新或日志归档，也未重放历史业务写入。",
+        "language_and_terminology": "Complete106lineoriginalandeveryfinaldelta comparedwithChinese;mappingcovers108currentlines. Explicitcodefallbackversusrepository/runtimeTTL,login-auditprojection,HTTP/businesscodeseparation,PKCEparametersandclass/handlernames. RepairedSocial/Portalbulletformatwithoutdroppingrecovery/securityconditions;EnglishCRLFsubsequentlynormalizedtoLF;logicaltextandrenderunchanged."
+      },
+      "findings": [
+        {
+          "id": "TG01",
+          "status": "resolved",
+          "resolution": "ActualAIsemanticapprovalfulfillsfour-languagereview;CAPTCHA/humanaccountboundariesremainseparatetasks."
+        },
+        {
+          "id": "TG02",
+          "status": "resolved",
+          "resolution": "DockerdiagnosticboundaryandHTTP/R.codeseparationmovedupfront;newdocauditdoesnotclaimcurrentfaultrecovery."
+        },
+        {
+          "id": "TG03",
+          "status": "resolved",
+          "resolution": "Loginlogisreadonlylogin-eventsecurityauditprojection;otherAuthsecurityrecordsarenotallloginlogs,Authoperlogisnotused."
+        },
+        {
+          "id": "TG04",
+          "status": "resolved",
+          "resolution": "900secondsiscodefallback,repoYAML7200;deploymentoverride/actualexpdetermineeffectivepasswordTTL;othergrantsseparate."
+        },
+        {
+          "id": "TG05",
+          "status": "resolved",
+          "resolution": "Restorecode_verifier/code_challengeinthreetranslations;keepHMACexternalsocialstateversuslocalSPAPKCE distinction."
+        },
+        {
+          "id": "TG06",
+          "status": "resolved",
+          "resolution": "ClarifyOperLogArchiverclassversusoperLogArchiveHandlerannotationname,nofalseJavamethodclaim;EnglishSocial/Portalbulletsrestored."
+        },
+        {
+          "id": "TG07",
+          "status": "resolved",
+          "resolution": "Retainalltenant/scope/interceptor,taskregistries/compensation,MQrelay/Inbox,dictrefresh/cacheandarchivehistory/single-instance/reconciliationconditions."
+        },
+        {
+          "id": "TG08",
+          "status": "resolved",
+          "resolution": "Seven548whole-sourceactualreadsplusselectedscopeandsevenpriorreviewedfacts;335hashchecksnotnewsemanticreads,noscreenshot/newruntime/unchangedbuildreplay. OriginalEnglishCRLFnormalizedtoLFafterGitwhitespaceguard;alllogicaltextandrenderidentical."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/troubleshooting.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 20:46:23",
+      "result": "approved",
+      "translation_sha256": "5f7bdedfed1abd445ef19c53c4abfdd6d1db2526c919f81c620b369037b974fa",
+      "checks": {
+        "coverage_and_meaning": "四语原稿421行及最终全部变更行已实际阅读，未变行对应覆盖当前432行。每语10节、10项编号步骤、3表保留；启动、认证、菜单/权限、数据范围、Workflow、任务、MQ、前端及支持脱敏、旧运行说明迁入内容完整对应。",
+        "technical_literals": "四语52个归一化行内技术字面量和3个相对链接一致。补齐英日韩code_verifier/code_challenge，并把OperLogArchiver类和operLogArchiveHandler处理器标识分开。保留JDK25/MavenWrapper、真实CLI命令、API/权限、locale/key、MI_END、刷新路径和模块剪裁标记；无围栏或图片被删改。",
+        "security_and_failure_semantics": "区分HTTP状态与R.code、登录事件只读投影与其他安全审计。密码TTL代码回退900秒、仓库YAML7200秒，实际看部署覆盖与exp，其他grant另查。验证码GETDEL单次消费与人亲自输入边界保持；外部HMACstate与本地SPAPKCE区分。保留服务端权限/租户/数据范围、任务注册补偿、Outbox/Broker/Inbox/跨租户relay、缓存失效与归档副作用先对账，敏感信息不外泄。",
+        "images_and_links": "四篇完整Markdown在本机Docker渲染，全部相对链接解析成功。本文没有截图，不新增视觉或运行验收断言。代码、源摘要和渲染支持实际语义阅读，不代表重跑当前登录、任务调度、消息投递、缓存刷新或日志归档，也未重放历史业务写入。",
+        "language_and_terminology": "全105行原稿と最終変更行を中文事実源に照合し、未変更行対応で現在108行を網羅。フォールバック値とリポジトリ設定/実際の期限、ログイン投影と安全監査、HTTPと業務コード、外部stateとSPAのPKCEを区別した。クラスとハンドラ名、権限・テナント・再送・機密保護と人が入力するCAPTCHA条件を保持する。"
+      },
+      "findings": [
+        {
+          "id": "TG01",
+          "status": "resolved",
+          "resolution": "ActualAIsemanticapprovalfulfillsfour-languagereview;CAPTCHA/humanaccountboundariesremainseparatetasks."
+        },
+        {
+          "id": "TG02",
+          "status": "resolved",
+          "resolution": "DockerdiagnosticboundaryandHTTP/R.codeseparationmovedupfront;newdocauditdoesnotclaimcurrentfaultrecovery."
+        },
+        {
+          "id": "TG03",
+          "status": "resolved",
+          "resolution": "Loginlogisreadonlylogin-eventsecurityauditprojection;otherAuthsecurityrecordsarenotallloginlogs,Authoperlogisnotused."
+        },
+        {
+          "id": "TG04",
+          "status": "resolved",
+          "resolution": "900secondsiscodefallback,repoYAML7200;deploymentoverride/actualexpdetermineeffectivepasswordTTL;othergrantsseparate."
+        },
+        {
+          "id": "TG05",
+          "status": "resolved",
+          "resolution": "Restorecode_verifier/code_challengeinthreetranslations;keepHMACexternalsocialstateversuslocalSPAPKCE distinction."
+        },
+        {
+          "id": "TG06",
+          "status": "resolved",
+          "resolution": "ClarifyOperLogArchiverclassversusoperLogArchiveHandlerannotationname,nofalseJavamethodclaim;EnglishSocial/Portalbulletsrestored."
+        },
+        {
+          "id": "TG07",
+          "status": "resolved",
+          "resolution": "Retainalltenant/scope/interceptor,taskregistries/compensation,MQrelay/Inbox,dictrefresh/cacheandarchivehistory/single-instance/reconciliationconditions."
+        },
+        {
+          "id": "TG08",
+          "status": "resolved",
+          "resolution": "Seven548whole-sourceactualreadsplusselectedscopeandsevenpriorreviewedfacts;335hashchecksnotnewsemanticreads,noscreenshot/newruntime/unchangedbuildreplay. OriginalEnglishCRLFnormalizedtoLFafterGitwhitespaceguard;alllogicaltextandrenderidentical."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/troubleshooting.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 20:46:23",
+      "result": "approved",
+      "translation_sha256": "e78de2c939d30b2d9e8da39ba819badfcc9f9c37c07401e37e8763ce60d555c3",
+      "checks": {
+        "coverage_and_meaning": "四语原稿421行及最终全部变更行已实际阅读，未变行对应覆盖当前432行。每语10节、10项编号步骤、3表保留；启动、认证、菜单/权限、数据范围、Workflow、任务、MQ、前端及支持脱敏、旧运行说明迁入内容完整对应。",
+        "technical_literals": "四语52个归一化行内技术字面量和3个相对链接一致。补齐英日韩code_verifier/code_challenge，并把OperLogArchiver类和operLogArchiveHandler处理器标识分开。保留JDK25/MavenWrapper、真实CLI命令、API/权限、locale/key、MI_END、刷新路径和模块剪裁标记；无围栏或图片被删改。",
+        "security_and_failure_semantics": "区分HTTP状态与R.code、登录事件只读投影与其他安全审计。密码TTL代码回退900秒、仓库YAML7200秒，实际看部署覆盖与exp，其他grant另查。验证码GETDEL单次消费与人亲自输入边界保持；外部HMACstate与本地SPAPKCE区分。保留服务端权限/租户/数据范围、任务注册补偿、Outbox/Broker/Inbox/跨租户relay、缓存失效与归档副作用先对账，敏感信息不外泄。",
+        "images_and_links": "四篇完整Markdown在本机Docker渲染，全部相对链接解析成功。本文没有截图，不新增视觉或运行验收断言。代码、源摘要和渲染支持实际语义阅读，不代表重跑当前登录、任务调度、消息投递、缓存刷新或日志归档，也未重放历史业务写入。",
+        "language_and_terminology": "원본105행과최종변경행을중국어원문에대조하고미변경행대응으로현재108행을모두확인했다. 코드대체기본값/저장소설정/배포후TTL,로그인투영/보안감사,HTTP/업무코드,외부state/로컬PKCE를구분했다. 실제처리기이름,권한·테넌트·메시지재전송·부수효과확인·민감정보보호와CAPTCHA직접입력조건을보존한다."
+      },
+      "findings": [
+        {
+          "id": "TG01",
+          "status": "resolved",
+          "resolution": "ActualAIsemanticapprovalfulfillsfour-languagereview;CAPTCHA/humanaccountboundariesremainseparatetasks."
+        },
+        {
+          "id": "TG02",
+          "status": "resolved",
+          "resolution": "DockerdiagnosticboundaryandHTTP/R.codeseparationmovedupfront;newdocauditdoesnotclaimcurrentfaultrecovery."
+        },
+        {
+          "id": "TG03",
+          "status": "resolved",
+          "resolution": "Loginlogisreadonlylogin-eventsecurityauditprojection;otherAuthsecurityrecordsarenotallloginlogs,Authoperlogisnotused."
+        },
+        {
+          "id": "TG04",
+          "status": "resolved",
+          "resolution": "900secondsiscodefallback,repoYAML7200;deploymentoverride/actualexpdetermineeffectivepasswordTTL;othergrantsseparate."
+        },
+        {
+          "id": "TG05",
+          "status": "resolved",
+          "resolution": "Restorecode_verifier/code_challengeinthreetranslations;keepHMACexternalsocialstateversuslocalSPAPKCE distinction."
+        },
+        {
+          "id": "TG06",
+          "status": "resolved",
+          "resolution": "ClarifyOperLogArchiverclassversusoperLogArchiveHandlerannotationname,nofalseJavamethodclaim;EnglishSocial/Portalbulletsrestored."
+        },
+        {
+          "id": "TG07",
+          "status": "resolved",
+          "resolution": "Retainalltenant/scope/interceptor,taskregistries/compensation,MQrelay/Inbox,dictrefresh/cacheandarchivehistory/single-instance/reconciliationconditions."
+        },
+        {
+          "id": "TG08",
+          "status": "resolved",
+          "resolution": "Seven548whole-sourceactualreadsplusselectedscopeandsevenpriorreviewedfacts;335hashchecksnotnewsemanticreads,noscreenshot/newruntime/unchangedbuildreplay. OriginalEnglishCRLFnormalizedtoLFafterGitwhitespaceguard;alllogicaltextandrenderidentical."
+        }
+      ]
+    }
+  }
+}

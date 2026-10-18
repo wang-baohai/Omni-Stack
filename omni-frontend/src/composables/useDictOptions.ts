@@ -1,58 +1,117 @@
 /**
  * @module composables/useDictOptions
- * 字典选项 composable，用于前端下拉组件。
- * <p>按 typeCode 缓存字典选项，多组件共享同一份响应式数据，不重复请求。</p>
+ * 按租户缓存字典选项，并隔离身份切换期间的在途响应。
  */
-import { reactive, computed, type ComputedRef } from 'vue'
+import { reactive, computed, ref, watch, effectScope, type ComputedRef, type Ref } from 'vue'
 import { getDictOptions, type DictOption } from '@/api/dict'
+import { useUserStore } from '@/stores/user'
+import { getTenantIdFromToken } from '@/utils/jwt'
 
-/** 响应式缓存：typeCode → 选项列表（所有消费者共享） */
+/** 响应式缓存：租户 ID 与 typeCode 共同确定选项归属。 */
 const store = reactive<Record<string, DictOption[]>>({})
 
-/** 模块级加载 Promise：typeCode → 正在进行的请求（防止并发重复请求） */
-const pendingMap = new Map<string, Promise<DictOption[]>>()
+/** 同一身份上下文中的在途请求。 */
+interface PendingDictRequest {
+  token: string
+  valid: boolean
+  promise: Promise<DictOption[]>
+}
+
+const pendingMap = new Map<string, PendingDictRequest>()
+
+let observedStore: ReturnType<typeof useUserStore> | null = null
+let contextScope: ReturnType<typeof effectScope> | null = null
+
+/** 清除会话缓存，并阻止已退出上下文的请求回填。 */
+function clearSessionCache() {
+  for (const key of Object.keys(store)) delete store[key]
+  for (const request of pendingMap.values()) request.valid = false
+  pendingMap.clear()
+}
+
+/** 模块缓存的身份观察独立于页面消费者生命周期。 */
+function observeContext(userStore: ReturnType<typeof useUserStore>) {
+  if (observedStore === userStore) return
+  contextScope?.stop()
+  clearSessionCache()
+  observedStore = userStore
+  contextScope = effectScope(true)
+  contextScope.run(() => watch(() => userStore.token, (token) => {
+    for (const request of pendingMap.values()) {
+      if (request.token !== token) request.valid = false
+    }
+    if (!getTenantIdFromToken(token)) clearSessionCache()
+  }, { immediate: true, flush: 'sync' }))
+}
+
+import.meta.hot?.dispose(() => {
+  contextScope?.stop()
+  clearSessionCache()
+})
 
 /**
- * 获取字典选项。
- * <p>首次调用时从后端加载，之后命中模块级缓存。多组件共享同一份响应式缓存，
- * 并发调用复用同一个 Promise，不会出现竞态导致部分组件拿到空数据。</p>
+ * 获取当前租户的字典选项，租户或身份变化时立即隔离旧响应。
  *
- * @param typeCode - 字典类型编码
- * @returns options 响应式选项列表（computed），loading 响应式加载状态
+ * @param typeCode 字典类型编码
+ * @returns 当前租户选项与响应式加载状态
  */
 export function useDictOptions(typeCode: string): {
   options: ComputedRef<DictOption[]>
-  loading: { value: boolean }
+  loading: Ref<boolean>
 } {
-  const loading = { value: false }
-
-  // 已有缓存，直接返回
-  if (store[typeCode]) {
-    return { options: computed(() => store[typeCode] ?? []), loading }
-  }
-
-  // 已有正在进行的请求，复用 Promise
-  let pending = pendingMap.get(typeCode)
-
-  if (!pending) {
-    // 首次加载
-    loading.value = true
-    pending = getDictOptions(typeCode)
-      .then((res) => {
-        const data = res.data.data || []
-        store[typeCode] = data
-        return data
-      })
-      .finally(() => {
-        pendingMap.delete(typeCode)
-      })
-    pendingMap.set(typeCode, pending)
-  }
-
-  // 等待加载完成后更新 loading 状态
-  pending.finally(() => {
-    loading.value = false
+  const userStore = useUserStore()
+  observeContext(userStore)
+  const loading = ref(false)
+  const cacheKey = computed(() => {
+    const tenantId = getTenantIdFromToken(userStore.token)
+    return tenantId ? `${tenantId}:${typeCode}` : null
   })
 
-  return { options: computed(() => store[typeCode] ?? []), loading }
+  watch(() => userStore.token, (token, _previous, onCleanup) => {
+    const key = cacheKey.value
+    if (!key) {
+      loading.value = false
+      return
+    }
+    if (store[key]) {
+      loading.value = false
+      return
+    }
+
+    let pending = pendingMap.get(key)
+    if (!pending || !pending.valid || pending.token !== token) {
+      const request: PendingDictRequest = {
+        token,
+        valid: true,
+        promise: getDictOptions(typeCode)
+          .then((res) => {
+            const data = res.data.data || []
+            if (request.valid && userStore.token === token) store[key] = data
+            return data
+          })
+          .finally(() => {
+            if (pendingMap.get(key) === request) pendingMap.delete(key)
+          }),
+      }
+      pendingMap.set(key, request)
+      pending = request
+    }
+
+    const request = pending
+    let active = true
+    loading.value = true
+    onCleanup(() => {
+      active = false
+      if (userStore.token !== request.token) request.valid = false
+    })
+    const finish = () => {
+      if (active) loading.value = false
+    }
+    void request.promise.then(finish, finish)
+  }, { immediate: true, flush: 'sync' })
+
+  return {
+    options: computed(() => cacheKey.value ? store[cacheKey.value] ?? [] : []),
+    loading,
+  }
 }

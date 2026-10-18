@@ -1,0 +1,1077 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-srm-flow",
+  "source": "docs/guides/srm-flow.md",
+  "source_sha256": "10b8ea68357084cfd923a495b63bc4567416549b23122d19bd54e92c1094f082",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "1f085b93bcb9ef04d2e5b3bdade4148f8f96a2d0",
+  "source_state": "Completecurrentsemanticcoverage:648original lines actuallyread plusallfinaldeltas andexactunchanged-line mapping cover680currentlines.33operations/ninesections/fivesubsections/20imagesperlocale retained. Current3whole210source lines,selectedranges,76unchangedpriorbindings,80historicalfiles/88recordsand20selectedrawviews separatelyscoped. No businessorunchangedbuildreplay. ActualAIreviewwithoutmandatoryhumantranslation;realCAPTCHAandfullA-Gremainopen.",
+  "method": "Actually read all four complete162line originals,648lines,and every final changed line in all four current170line guides. Exact unchanged-line mapping/per-line hashes combine those reads into complete680line current semantic coverage;not fourfreshwholefinalrereads. Compared translations withChinese,current scopedsource anddated evidence. Individually viewed20selected raw originals;retainedhistoricalmethods forother60files. Rendering/digest checks supportactualreading,notautomaticapproval.",
+  "checked_source_files": [
+    {
+      "path": "database/changelog/srm/0001-srm-schema.yaml",
+      "sha256": "76edbd94ddfe5e146afa6faa6a01d02219b514901156bd9e1b99c8671cc92591"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/consumer/PortalRoleAssignConsumer.java",
+      "sha256": "3281bb60d1d0a5d0560f5efb845b7910d5552447bd45d29fb2f4c01a91574459"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthController.java",
+      "sha256": "b973052c2787ac95547edaa93be6bb8de48becc34017d8666e02e2a52b6662fb"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysPortalRoleRequestMapper.java",
+      "sha256": "6e47933e2a947a1b3ae8acaa0689e6acbfb1e49e0afc1276a226d908aec0d767"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PortalRoleAssignmentServiceImpl.java",
+      "sha256": "bb6efb8c4536f80ada2ff8ebb6cf98fc32c633c85f7add99b94d15b8373b36bf"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/UserServiceImpl.java",
+      "sha256": "aee5b14ab535cbd943ac22661117d2bcffac74e0e39bdb8bee76d812753a3d29"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/service/impl/PortalRoleAssignmentServiceImplTest.java",
+      "sha256": "fb48db22f1aad8ff570f6931becee170381c71c174523a7d3577b769782f9852"
+    },
+    {
+      "path": "omni-backend/omni-srm/pom.xml",
+      "sha256": "50fc38206395819c1ea108dd0c25041972c73731a89e63074dd4fea4a1f1742d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/client/WorkflowInternalClient.java",
+      "sha256": "7aa64d3006b8498646ed0a7d9fa65662e5d7ed4b305970c17e804def7c858144"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/consumer/PortalRoleResultConsumer.java",
+      "sha256": "daa3063db197f8b9ed0ea676c9b1998df59aeb0cbc2cdb12995383eb39750956"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/consumer/WorkflowProcessCompletedConsumer.java",
+      "sha256": "645db9aa619e6c73fef8f376c397e58002eb0e5adfbb183f8261bc4f48c9b2c5"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/BankAccountController.java",
+      "sha256": "0a4c430abb7092c1bbe91564cc65e48b665d0e375d15efea08460a5178916883"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/ContactController.java",
+      "sha256": "3d64c96047199f6d5580b58531e6219db28ba5eb56a0f129bed94b6daf20a270"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/EvaluationController.java",
+      "sha256": "e926bdb93440f60d68f0c503569edf86e83407566d17972858616f92ad91e547"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/InternalQuotationController.java",
+      "sha256": "65c72a5dd1451f2cafb453bb792c727d3dac52774eda5e3b59afe60da8c9c7da"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/InternalSupplierController.java",
+      "sha256": "24fe6064e7a8d504383c286d9b2ad42ac3f846d12709a08da71bfb4c045734e7"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/OptionsController.java",
+      "sha256": "14803dc21255ebf6fe6428fa55248b814f2bc4d4d5e7faaa162c1e9830773719"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/OverviewController.java",
+      "sha256": "1d31a6cf31e222935bf40c4cf8474ee9107638761a09a839a38218b3a3cd789d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalController.java",
+      "sha256": "22f8a2e188ef7cf36a9cd086206d6cbd286aface2a0a1902d42aad7e308e518d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalEvaluationController.java",
+      "sha256": "ab2dc6cf8ab35006740c766f2eef3d3ee7443c5c68706ef3cfcef9308fa8cada"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalInviteController.java",
+      "sha256": "ed1f52210ac5a3b6ee2a5397bde3858b5cead2f1ca971bfd5ab31d404d6b2aa3"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalQuotationController.java",
+      "sha256": "60273a0a09b8eca2365f1889f8aad02f8c23adf5f9eceaecbc40cf70a3c51297"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/QualificationController.java",
+      "sha256": "b8f2dbc3d91fdcb86f4ce4b926063c45e86eea458e8f6610df393386e9bc96f8"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/RiskController.java",
+      "sha256": "6ae0c12de2e76a71120675b4a61142bef35d1c16afed29ea0416a846fa5c600f"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/RiskIndicatorConfigController.java",
+      "sha256": "386b2ed6ef769743f390711cb42383708b0fecc6e47703a8319dace0b8c46bda"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/SupplierController.java",
+      "sha256": "b329152e40cd52d83908ec4bf5c5ebc624526cf3f1855de343c18c3502c3b6ac"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/SupplierInsightController.java",
+      "sha256": "ea828e3e2c452b1c741f3aaa61970a7e807e534ed2657c50c8f4863cc46b4f69"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmEvaluationPolicy.java",
+      "sha256": "a85ae635aaf6a922d728e1ae9446fc9688f8c57443f5ef902334d294f05fa291"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmEvaluationScoreCalculator.java",
+      "sha256": "96a2de999e19946c73b56227ffac597124dc8e260ab99f92904a145d50b700f0"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmRiskCalculator.java",
+      "sha256": "dfea0fcd1321c7fdee642e4348d3c84ac73f5f98baa8295d2e8ad35114363808"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmStateMachine.java",
+      "sha256": "23b50960e0ef730fafdfc0804d1972fc7fd879bfaad34bacc17e1890466456ff"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/Jackson2DecimalStringDeserializer.java",
+      "sha256": "7fdc6e74bffe9d5c5b16f2444f3bd99f1564f36cbd9141247e1ca8440f753876"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/Jackson3DecimalStringDeserializer.java",
+      "sha256": "d6595663f13cb37eab371c18116270dc05062fb5d355992e5a97299fdc702ca6"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationLineRequest.java",
+      "sha256": "2c3d9192820c781c17ac5a9c855588dd1a6eb75e2f78c94b5fd252ebea2809d5"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationLineVO.java",
+      "sha256": "3cc702526fa9f93514586a351ba7bca5c21a574928806035901d5a44334b23fc"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationSubmitRequest.java",
+      "sha256": "c5192dbda68a83df71b99e53be85b484d5f800185f01962bc7e7dd8c62bd63ee"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationVO.java",
+      "sha256": "164c8d349ed46761b08db68b486274f638ca134d8702af93b677b137b1c47e48"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/SrmRequests.java",
+      "sha256": "43433b0b5f45a75f780345b53a52d4769a4a025f3eccadeeef73e4bda6916787"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/SrmViewAssembler.java",
+      "sha256": "d48baade929890b8530a953a13a79d2dce4d531cb6fa4607efdf41fad534267b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/WorkflowContracts.java",
+      "sha256": "d1dfa02839cae90412e76a891f0ad46c3aabc563614e04914644e92c67b0adbe"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmEvaluation.java",
+      "sha256": "938b5aad0040af0a6cd5f0e6614c2971feb5d9c71c68027fca07024965c1251b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplier.java",
+      "sha256": "fba5431db8ff49eb3114eeb8bf3ef41289efc5e7442c929907c07af78ad4905e"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplierBankAccount.java",
+      "sha256": "e60065d75e13b5d41b3507148c50b146d50ec54dbe06ead912a730a08a43cd21"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplierContact.java",
+      "sha256": "3b70b3e87d8174039b51c146196596596ae6f9d2fce8131276dfd14f21315b47"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/mapper/SrmEventInboxMapper.java",
+      "sha256": "a8fce30e4f80b54d8478210b6544e9d43c3173a746676139f72bca597460ce4b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/mapper/SrmSupplierInviteMapper.java",
+      "sha256": "e787643166227dbc20c9e156752f7bf47b6f22b8cae102191ae858a6a39f68db"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmDataPermissionHandler.java",
+      "sha256": "c44aacdf9fb3cb52dcca347b1c2d4eafb962240f99e4df719ff570575e1b600d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmPortalScope.java",
+      "sha256": "eff1452e9b4349d44b2dd2275054513e2817bac14ad19309a9521f0c683adf68"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/EvaluationServiceImpl.java",
+      "sha256": "be27cb3d943742ebae647e6a40e5a15721cd437bc49e33054243fff6b1dd86ac"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/InternalSupplierServiceImpl.java",
+      "sha256": "c8bf5508b306fef83573708ef32d02fd38a69bec119e6aa2affa00c56622a1f1"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/PortalInviteServiceImpl.java",
+      "sha256": "cbb4265347bcb4d1138444ddad831ad5cd9f80bb29abf0527cfe424ff01277dc"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/PortalRoleResultServiceImpl.java",
+      "sha256": "fc418de204fcf651a887cfab4e76428fe03981765851360464c1a04ec46fda1c"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/QualificationServiceImpl.java",
+      "sha256": "61ee02db716e6d9fb1e0b6f9ac72c2ea72494ec9dec9cf4318639d112342f771"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/QuotationServiceImpl.java",
+      "sha256": "0323b4f79842bc409be42e3b2823a1f9018e6925d66c8202c3184156bd22ad9b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskIndicatorConfigServiceImpl.java",
+      "sha256": "7001beb02897c269b4d86dbb53f81a88ba1f1d2da5c3dbb81557adcb915b1027"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskServiceImpl.java",
+      "sha256": "f414b9593f1e14a410df88c269c742b369c9b0ca695f7a6b84075470a2d28f29"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SrmTenantInitializerImpl.java",
+      "sha256": "48f5f132f8a6b8b8764b1dbbf0471ab2795da5ede97d51ae66f7a8929371cb7e"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+      "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+      "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierWorkflowCompletionServiceImpl.java",
+      "sha256": "0747a9bd1d22281646e3fad2808c7de80e295a30438e31a23cc3a4e0365de836"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SrmOwnerEnricher.java",
+      "sha256": "4107528b850d6f99f8a5e047905938f5ec3f8f8c8123df3ac9fc5c4a385ad652"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SrmPermissionScopeExecutor.java",
+      "sha256": "e4f7c84f65cdd5cfcb6adb1f7edf9103d0202943ac13eb3ecdade34781b357f2"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/workflow/SupplierWorkflowCoordinator.java",
+      "sha256": "1a239aadb6a43eee1c66e16f063fc65435cc21c22b1d60a5d075715e5925b246"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/workflow/SupplierWorkflowStateServiceImpl.java",
+      "sha256": "ca55d16c520227ccad2fb619f61f3744412d0ad0da86b93a9940674c55c5eb6a"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/resources/application.yml",
+      "sha256": "33cb88e595135c1d5b1c19288ecdf000860973a110a5816643e924e4808081a6"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/PortalInviteServiceImplTest.java",
+      "sha256": "98b50607037b2a08f25bd3c0a642fdbef3ec61e5db51519dbeba37c38bdd20f7"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/PortalRoleResultServiceImplTest.java",
+      "sha256": "18f7979ded2cee6a8c6930a60b236b01b717fea6b401e57f2a9fd8f0a6f9fefe"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/SupplierPortalServiceImplTest.java",
+      "sha256": "63423723e10dc55947f3e3662976f09e5f67986f4d357ff5fe205d4d21aaa63b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/SupplierServiceImplTest.java",
+      "sha256": "762ee68676b4d9012c69904393fb6e7e361074df1fe83e984d37ec97340f033a"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+      "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b"
+    },
+    {
+      "path": "omni-frontend/src/router/index.ts",
+      "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+    },
+    {
+      "path": "omni-frontend/src/stores/permission.ts",
+      "sha256": "1194fe1457d924e4fb483e7fd1f54c01fe6499af8cb388e01f5fcf9933e91419"
+    },
+    {
+      "path": "omni-frontend/src/views/supplier-portal/index.vue",
+      "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+    },
+    {
+      "path": "scripts/sql/seed/auth.sql",
+      "sha256": "131d495c9b1eed92d4d2a7f0aaf92026117c25c6d8d13b8773fdc00fb94c357c"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SupplierRiskInitializer.java",
+      "sha256": "d41649bee4a84e7012ac8453bda885c630907defbbb56071ad9d18758e37852b"
+    },
+    {
+      "path": "scripts/sql/seed/srm.sql",
+      "sha256": "e1a353dfc623e44f267ff7e0e18bf8bcc3e70f8f1b7a7210ca32a2edf118e698"
+    },
+    {
+      "path": "omni-frontend/src/views/srm/supplier/index.vue",
+      "sha256": "c5774d6d7a8c99d28340051bbe4cfc288feb9c538e92db4d719d9bf1a479dd07"
+    },
+    {
+      "path": "omni-frontend/src/api/srm-supplier.ts",
+      "sha256": "8351cf5af3e5c76a1d6cb4f40956da0228833f7ec344df9aaaffbf52578d1dfa"
+    },
+    {
+      "path": "scripts/fixtures/capture-srm-teaching.mjs",
+      "sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844"
+    },
+    {
+      "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+      "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244"
+    },
+    {
+      "path": "docs/srm.md",
+      "sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03"
+    },
+    {
+      "path": "docs/design/srm-design.md",
+      "sha256": "401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211"
+    },
+    {
+      "path": "docs/reference/reviews/srm.json",
+      "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f"
+    },
+    {
+      "path": "docs/reference/reviews/srm-design.json",
+      "sha256": "cffc5d996c9ff5bb0e9eb91b40db89cb9e91e23e2e3650a68823f384eb91b50f"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/reference/evidence/srm-2026-10-12.json",
+      "sha256": "6c53e3404f0590955ec2f7abc3f54f8639fa5f103899102a8ce7ce50101d66bd"
+    },
+    {
+      "path": "docs/reference/evidence/srm-native-actions-2026-10-13.json",
+      "sha256": "3ac61ee2f1cc5c21cfd7aab1e3c00605f5052eed8eeb9f86064c27b2da4562dd"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-invite-create-form.png",
+      "sha256": "2d9c955ab4c1614b34f0af1bb0b8c460751aebd57cbb29f5df45b8e74bd4981c"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-account-entry.png",
+      "sha256": "ffc9b3e6b60968cb82f4f9c2ffcad13c5b4fa4ee77da0f84b673f559e0e94aa0"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-enrollment-form.png",
+      "sha256": "94b4ae49ed60ccab12e133d3baac88eee394c49446f2cf39e8fa9b7ebdea2ca1"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-enrollment-completed.png",
+      "sha256": "f2c164384bce7e561cce31537f2c7531e84eaa79335021984b49027b50f3b7af"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-enterprise-reviewing.png",
+      "sha256": "a4ce7a6da1ba100ff22ce8a9ec5f8096e2aefc96836614e3766952bd2c70016b"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-admission-manager-todo.png",
+      "sha256": "e926e3dd69a2949c6c0558ef7b012052a9d79efbf52622f0900358068212081c"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-supplier-approved.png",
+      "sha256": "159f1822ec60be569e06098c1ddc9adc64a0a1eeaf2e1caf9488a04c042a360c"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-enterprise-approved.png",
+      "sha256": "7d72da9b94ac5ba103325079405e4bf00930580995216e646a49f5276b53d555"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-lifecycle-suspend-detail.png",
+      "sha256": "164bacd5bc48732dc25298443f087d25449c8d741fa0701158233cf28031ecaf"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-lifecycle-resume-detail.png",
+      "sha256": "159f1822ec60be569e06098c1ddc9adc64a0a1eeaf2e1caf9488a04c042a360c"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-lifecycle-blacklist-detail.png",
+      "sha256": "9783ab9359b6104c769a333821c953aa6dfa7dee4591f00458b2eff6a99aa5e2"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-lifecycle-restore-from-blacklist-detail.png",
+      "sha256": "159f1822ec60be569e06098c1ddc9adc64a0a1eeaf2e1caf9488a04c042a360c"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-approved-uninvited-quotation-empty.png",
+      "sha256": "bed29a04af65a71986d9ce8d1f62c1afaf35f033ddffd55eb34428632f1495f1"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-lifecycle-eliminated-detail.png",
+      "sha256": "80e6110eab955144b857be5ebbe66bde4648bab8af56e8da33c0b15ce847d666"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-native-create-form.png",
+      "sha256": "da20a2384a669625cbc3373408c9c4e5045fb26e1d3d68c1c364259230976d4a"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-native-approved-detail.png",
+      "sha256": "1da0e9b3d25079b62a8511bb2e1b22a646524ec9f9d92b861547985b6c5fa976"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-native-suspend-confirmation.png",
+      "sha256": "13dba1bbde1d72f312c2ac48ab8a395a58577b233a3a043938b9fa59d9a8ac2e"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-native-suspend-detail.png",
+      "sha256": "bc03203a67efb1837935492331a974384ccd77aa02b65b406fd2aa3692b01e70"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-native-blacklist-detail.png",
+      "sha256": "243dd2e49afa92dad5a52c38eb34e3f6b6c43ea10e1cfbfe5f2a3688046ff85d"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-native-eliminate-detail.png",
+      "sha256": "34b9fcacf60091b34c6faa15eb3b5204a4f20a068855bf6731189e0baf520051"
+    },
+    {
+      "path": "docs/images/en-US/srm-invite-create-form.png",
+      "sha256": "1ff37080e75a2ff85bd9dd6279a401bd4fcf8f63d0a87f0c7b7613515025a189"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-account-entry.png",
+      "sha256": "afabe58ae4bd8ca640da8d76fc0e8d7733fea5bb55900d47d4c2d45510802363"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-enrollment-form.png",
+      "sha256": "00cb5166d69d5e458319bf607fb54999cd271a525f965c59e7eb2d8918bea86d"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-enrollment-completed.png",
+      "sha256": "7fa85e155436c5942de32bc1fb9b224a1828db72bef12b33f19232fd226f9d86"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-enterprise-reviewing.png",
+      "sha256": "844196f61356e93adbaecf58e664ec6e919274a7f607cc6c4026d79c8629efc8"
+    },
+    {
+      "path": "docs/images/en-US/srm-admission-manager-todo.png",
+      "sha256": "c5b2b55465dbca70c857f9c4f214f7d9ab6bf284537d25f361047c849eb1cbf2"
+    },
+    {
+      "path": "docs/images/en-US/srm-supplier-approved.png",
+      "sha256": "10937b8c5814c26a19311dec7d0c814a8d4538c86004e4fe24f893f409aa80ef"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-enterprise-approved.png",
+      "sha256": "12fa637a8a43d5e38a61d7d67458440ad64b1f1e439ae0b836cb47556af00676"
+    },
+    {
+      "path": "docs/images/en-US/srm-lifecycle-suspend-detail.png",
+      "sha256": "433a3fa5d03170e6af90bf0ca6570f60e2dd453c2a3bba550217413bbe5f3e21"
+    },
+    {
+      "path": "docs/images/en-US/srm-lifecycle-resume-detail.png",
+      "sha256": "10937b8c5814c26a19311dec7d0c814a8d4538c86004e4fe24f893f409aa80ef"
+    },
+    {
+      "path": "docs/images/en-US/srm-lifecycle-blacklist-detail.png",
+      "sha256": "6db84ef33aaeb7c3f232410ed283ae88958c41562718bd1264adfd5a15dff736"
+    },
+    {
+      "path": "docs/images/en-US/srm-lifecycle-restore-from-blacklist-detail.png",
+      "sha256": "10937b8c5814c26a19311dec7d0c814a8d4538c86004e4fe24f893f409aa80ef"
+    },
+    {
+      "path": "docs/images/en-US/srm-approved-uninvited-quotation-empty.png",
+      "sha256": "f1910290e09f17ccc12b0536339882137b6c8b2fcb2be263d9eb85d06c032511"
+    },
+    {
+      "path": "docs/images/en-US/srm-lifecycle-eliminated-detail.png",
+      "sha256": "b0d0913c3cd36c0f08f8266b0bf6ff119b580c9204a6f127559e11764b200fb0"
+    },
+    {
+      "path": "docs/images/en-US/srm-native-create-form.png",
+      "sha256": "d69d22e5c4f90d4a84921560eb95d6a3abb0a835e9296758c41430ae4c387b3b"
+    },
+    {
+      "path": "docs/images/en-US/srm-native-approved-detail.png",
+      "sha256": "003949d6a7ec108c1e9b1b29f090706c31fabee4fb9c1530af5552c5a9304f11"
+    },
+    {
+      "path": "docs/images/en-US/srm-native-suspend-confirmation.png",
+      "sha256": "d31cef9e83028882be33651cbfcbe55e160fa3c730d49158e1e55131cfbeec4d"
+    },
+    {
+      "path": "docs/images/en-US/srm-native-suspend-detail.png",
+      "sha256": "6482115557336bacbb165fea4096f6a735aac9f4a9e189ac4f26163959fc0a1b"
+    },
+    {
+      "path": "docs/images/en-US/srm-native-blacklist-detail.png",
+      "sha256": "72c672079ffcddb1673e89952ddd53d989201a2a85753e5086e0dc11df260132"
+    },
+    {
+      "path": "docs/images/en-US/srm-native-eliminate-detail.png",
+      "sha256": "ce2b246a5c91c70454999d09da131f5c78c9f69bc72d890ce9566b6846d7b80f"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-invite-create-form.png",
+      "sha256": "536226773f0e1d3b33c4b27990b92e1d7790253dab885c7257541f53620368b8"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-account-entry.png",
+      "sha256": "0ee06077df862543ff713cdd09f90eac9a5be7f4926838e675584f1b4b3a1a62"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-enrollment-form.png",
+      "sha256": "c4084d9c168151b4d0525f69853560dd0943e1ca76b50f664bd7972f1246f10c"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-enrollment-completed.png",
+      "sha256": "4f170202836b2bddfff07ced21c930631f0f119c8f9d7ee9a97c3c042cf9244e"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-enterprise-reviewing.png",
+      "sha256": "9e5e560769e7c29fdaa97bc95be9eaf41c9fdc42db49b3e92043a62fbd65342d"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-admission-manager-todo.png",
+      "sha256": "6563c99ac7c85c76081ae3a3be553b2118f87842910d85f427274695e1100054"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-supplier-approved.png",
+      "sha256": "ed8633a001ef77722a8f8b9001625304f18bac4578049658ff82d4ff17d3379d"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-enterprise-approved.png",
+      "sha256": "2084fe576714aec83430f65360de13d47d9f1897470a9edcd7605e3eda02f9ce"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-lifecycle-suspend-detail.png",
+      "sha256": "9e39675cc4b9caaa101bad83dcf726feea9ce24a2e867e0e479f8d725f2bd4ef"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-lifecycle-resume-detail.png",
+      "sha256": "ed8633a001ef77722a8f8b9001625304f18bac4578049658ff82d4ff17d3379d"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-lifecycle-blacklist-detail.png",
+      "sha256": "e58084a9291c89531ceb1a4f4c145abbc86a4ebdedb1acdea8bd8c56eb710253"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-lifecycle-restore-from-blacklist-detail.png",
+      "sha256": "ed8633a001ef77722a8f8b9001625304f18bac4578049658ff82d4ff17d3379d"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-approved-uninvited-quotation-empty.png",
+      "sha256": "efcffcad38ccd64795c48593e8c327c0c999f4c87bf3bcfb155994ae0e62dbb2"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-lifecycle-eliminated-detail.png",
+      "sha256": "a31e33bec2cdfdabff9a7fadfb06ff8fe58577288b8fd8601388d73901fd13f5"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-native-create-form.png",
+      "sha256": "7747815b16826d15e77b9a31f1ca5613f29f1b6b09fd149346231a1713067d88"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-native-approved-detail.png",
+      "sha256": "af68440f9a98eaae8816f58a8ed65bc4a4d953f772507a1f075d62d7e7768a69"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-native-suspend-confirmation.png",
+      "sha256": "f6148c85c69da503f73c8364efb9c959beb6591ee42c7896da12a8714cb1759d"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-native-suspend-detail.png",
+      "sha256": "a54260a3bc51548b1f5f3dac49fab0cbbee8fbf207bfc9b5f997dd0237cd49d2"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-native-blacklist-detail.png",
+      "sha256": "94dd620b1f0836a73c82d5b66445431c2b6ad3f086597f651b1340073c732ce0"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-native-eliminate-detail.png",
+      "sha256": "1e44d314e33edc77ca2255f438b576cb10a264f02747bb0fd5a51418b439827c"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-invite-create-form.png",
+      "sha256": "f313ab0d5a26b42912c8456aa848c36e55c91477020cd37f997cacc480d398a7"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-account-entry.png",
+      "sha256": "55a6c190ad865337b11bd3de47fb02b34861802ff27dc5ce2567b3d8070fa714"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-enrollment-form.png",
+      "sha256": "d360573b1a9096af2eb19140297ceb75b59d69f0b7c55cc80c758423416ec65c"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-enrollment-completed.png",
+      "sha256": "10df1317b7100f0f388c3dfacf38f915edb5bd7f9bbebe8b8e2b5e670bd50f69"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-enterprise-reviewing.png",
+      "sha256": "dbdfbebe7dfdb068536d975492f66756337de0aaf304a99eac9df0e3f5d3d103"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-admission-manager-todo.png",
+      "sha256": "a7f21ce860372a500efc4818f4c7fdb6f861a2f96fddc990dfea58c837499fec"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-supplier-approved.png",
+      "sha256": "d595c49ab154d65007a13876b8b71703ccb0c63af246a9c2f4ccd8342f77c6d2"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-enterprise-approved.png",
+      "sha256": "dd62ab669e4f034b9ea5533eeb1b7279be334b81d0e1ddac2e4aeacdff4f6653"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-lifecycle-suspend-detail.png",
+      "sha256": "c03d04306855fb6be0db2f4fdeb82268a9d0bbff4c5d609043196c5ebdbfa77a"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-lifecycle-resume-detail.png",
+      "sha256": "d595c49ab154d65007a13876b8b71703ccb0c63af246a9c2f4ccd8342f77c6d2"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-lifecycle-blacklist-detail.png",
+      "sha256": "55ca64d1936331ba1c3ea0e42e0cb37a2e3879b24765f61ae0e717a8f81309a0"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-lifecycle-restore-from-blacklist-detail.png",
+      "sha256": "d595c49ab154d65007a13876b8b71703ccb0c63af246a9c2f4ccd8342f77c6d2"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-approved-uninvited-quotation-empty.png",
+      "sha256": "1616d0439b6aff1d925cd2a6388aa52e5a0820f7e80077c1a050c4b37e647394"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-lifecycle-eliminated-detail.png",
+      "sha256": "af13977744834ead10edd3295ff7003817e030217e5d985a6fad6c40a5b45f81"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-native-create-form.png",
+      "sha256": "f3a0e899c5dc7ae6b906a57b259f9a3060cd4b3b9174e7bab706ab533c0bf498"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-native-approved-detail.png",
+      "sha256": "d02b1ba47a444f1e472b03b201fcca6f19033d29b5d0bfb65a49afa6c536615d"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-native-suspend-confirmation.png",
+      "sha256": "7e4aa90d95c226f92afd32c3a927123d4c8a7042536aa5510844551a663af243"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-native-suspend-detail.png",
+      "sha256": "eb1332621da9e3a47b87bb5c41b3a4117ff17f7e72279c9caf4a89f614fbce4f"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-native-blacklist-detail.png",
+      "sha256": "6e64e82a66f1990326671ad944c07e1db4485eac6885bc59348136e2fe8afd3b"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-native-eliminate-detail.png",
+      "sha256": "9347caf01bf9d48ad22eda57a1b47aade8e8cf936b40ce6c25f9db5a23c93e4b"
+    },
+    {
+      "path": "docs/reference/evidence/srm-guide-review-2026-10-17.json",
+      "sha256": "970fcf728ed3a6f31d5f6b81db1a104228cd923a6dccc112c00f4dba60a31a60"
+    }
+  ],
+  "source_inspection_scope": "All648originalguide lines actuallyread;complete current coverage combines that whole read with every final delta and exact unchanged-line mapping.3whole210current source lines,selectedreads and76unchangedpriorbindingsare separately scoped;hashes/rendering do not approve meaning automatically.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "complete_current_semantic_coverage": true,
+    "original_whole_lines_actually_read": 648,
+    "current_combined_semantic_lines": 680,
+    "fresh_whole_final_rereads": false,
+    "original_full_read_outputs": {
+      "zh-CN": "b93c69",
+      "en-US": "b13c91",
+      "ja-JP": "675608",
+      "ko-KR": "d3186c"
+    },
+    "final_exact_delta_outputs": {
+      "zh-CN": "eb45b1",
+      "en-US": "8dd096",
+      "ja-JP": "823e70",
+      "ko-KR": "dd1aac"
+    },
+    "lines_each": 170,
+    "headings_each": 15,
+    "h2_each": 9,
+    "h3_each": 5,
+    "numbered_operations_each": 33,
+    "images_each": 20,
+    "tables_each": 1,
+    "localized_state_text_fences_preserved_each": 1,
+    "whole_markdown_rendered_documents": 4,
+    "normalized_inline_literals_each": 86,
+    "translated_formula_variables_explicitly_normalized": true,
+    "normalized_relative_links_each": 30,
+    "source_bindings": 168,
+    "current_whole_source_files": 3,
+    "current_whole_source_lines": 210,
+    "unchanged_prior_fact_source_bindings": 76,
+    "current_source_reads": [
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmEvaluationScoreCalculator.java",
+        "sha256": "96a2de999e19946c73b56227ffac597124dc8e260ab99f92904a145d50b700f0",
+        "read_scope": "Whole96lines read;positive enabled weights sum100,score1..5,HALF_UP total2decimals,level thresholds. Formula variables translated in guides.",
+        "outputs": [
+          "d32b38"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmStateMachine.java",
+        "sha256": "23b50960e0ef730fafdfc0804d1972fc7fd879bfaad34bacc17e1890466456ff",
+        "read_scope": "Whole68lines read;9supplierstates,terminalELIMINATED,allowedtransitions andbusiness409.",
+        "outputs": [
+          "50904c"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmPortalScope.java",
+        "sha256": "eff1452e9b4349d44b2dd2275054513e2817bac14ad19309a9521f0c683adf68",
+        "read_scope": "Whole46lines read;PortalUser association mustprevalidate tenant/user/supplier;restore prior sharedscope infinally.",
+        "outputs": [
+          "d32b38"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/EvaluationServiceImpl.java",
+        "sha256": "be27cb3d943742ebae647e6a40e5a15721cd437bc49e33054243fff6b1dd86ac",
+        "read_scope": "Selected125-215;visible supplierlock,eligibility/dimensions,score,COMPLETED,levelsupplierCAS andOutbox. Notwhole.",
+        "outputs": [
+          "9d5a6d",
+          "6a7365"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/PortalInviteServiceImpl.java",
+        "sha256": "cbb4265347bcb4d1138444ddad831ad5cd9f80bb29abf0527cfe424ff01277dc",
+        "read_scope": "Selected63-86,104-130;rawACTIVE revocation andcomputedUSED viewwhenmaxusesreached. Notwhole.",
+        "outputs": [
+          "9d5a6d"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/PortalRoleResultServiceImpl.java",
+        "sha256": "fc418de204fcf651a887cfab4e76428fe03981765851360464c1a04ec46fda1c",
+        "read_scope": "Selected66-112;idempotentCOMPLETED,tenant/user/supplierbinding andACTIVEassociation. Notwhole.",
+        "outputs": [
+          "9d5a6d"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/QuotationServiceImpl.java",
+        "sha256": "0323b4f79842bc409be42e3b2823a1f9018e6925d66c8202c3184156bd22ad9b",
+        "read_scope": "Selected223-261;procurementresponseidentity/invitationvalidation and404/503 boundaries;notwhole.",
+        "outputs": [
+          "selectedquotation followup444"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskServiceImpl.java",
+        "sha256": "f414b9593f1e14a410df88c269c742b369c9b0ca695f7a6b84075470a2d28f29",
+        "read_scope": "Selected100-156 andmatchedcomputeFromScore/sum context;onlyenabledtypeautoCalcguard,criterionexistswithoutsame-typeguard,automaticnewassessment andsumthresholdsemantics. Notwhole.",
+        "outputs": [
+          "9d5a6d",
+          "selectedsum followup444"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+        "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d",
+        "read_scope": "Selected119-192,288-339;sameapplicant/request/credit guards,consumeinvite,roleassignOutbox,retryenrollment distinction,REJECTED-onlyprofile-resubmit. Notwhole.",
+        "outputs": [
+          "50904c"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+        "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26",
+        "read_scope": "Selected187-226,370-437,542-573;nativecreateownership,versionedstatuscommands,REJECTED-onlysubmit,remote termination beforelocalversionwrite. Notwhole.",
+        "outputs": [
+          "56e2be",
+          "d32b38"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/workflow/SupplierWorkflowCoordinator.java",
+        "sha256": "1a239aadb6a43eee1c66e16f063fc65435cc21c22b1d60a5d075715e5925b246",
+        "read_scope": "Selected68-145;modelresolvebeforecatch,synchronousstart,identity/request/attempt;remote503/responsecheck. Notwhole/distributedatomicproof.",
+        "outputs": [
+          "50904c"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/srm/supplier/index.vue",
+        "sha256": "c5774d6d7a8c99d28340051bbe4cfc288feb9c538e92db4d719d9bf1a479dd07",
+        "read_scope": "Selected300-352;nativeconfirmationdialog hasno reasoninput,calls versionedlifecycleAPI. Notwhole.",
+        "outputs": [
+          "6a7365"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/srm-supplier.ts",
+        "sha256": "8351cf5af3e5c76a1d6cb4f40956da0228833f7ec344df9aaaffbf52578d1dfa",
+        "read_scope": "Selectedtypes1-225visiblein6a7365,matchedfunctions250-268in56e2be;reasonoptional inAPIhelper butnativeUI doesnot passit. Output6a7365middletruncated;notwhole.",
+        "outputs": [
+          "6a7365",
+          "56e2be"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "scripts/fixtures/capture-srm-teaching.mjs",
+        "sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844",
+        "read_scope": "Selected367-403;reconcileexistingretire,eliminateonce,onlyrevokeifdisplaystatusACTIVE,recordactualinviteafterUSED. Lastgenericlimitsentenceoverstatesrevocation;currentauditcorrectswithoutreplayingoroverwritingdatedreceipt.",
+        "outputs": [
+          "9d5a6d"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+        "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+        "read_scope": "Selected1-88;Docker/project/runtimeguard,phase/unknownsubmissionjournal,ordinaryshort-livedidentities. Notwholeornewexecution.",
+        "outputs": [
+          "6a7365"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/srm-2026-10-12.json",
+        "sha256": "6c53e3404f0590955ec2f7abc3f54f8639fa5f103899102a8ce7ce50101d66bd",
+        "read_scope": "Actualregistermetadata,visualscope,primarycapture,phases,businesssample/operations/boundary/cleanupfieldsread. Originalversiongroups andhistoricalpendinghumanfieldkeptasdateddata;currentpolicyoverridesmandatoryhumanacceptance.",
+        "outputs": [
+          "2beb46",
+          "4c0f09",
+          "d4b89e"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/srm-native-actions-2026-10-13.json",
+        "sha256": "3ac61ee2f1cc5c21cfd7aab1e3c00605f5052eed8eeb9f86064c27b2da4562dd",
+        "read_scope": "Actualregistermetadata,visualscope,primarycapture,phases,businesssample/operations/boundary/cleanupfieldsread. Originalversiongroups andhistoricalpendinghumanfieldkeptasdateddata;currentpolicyoverridesmandatoryhumanacceptance.",
+        "outputs": [
+          "2beb46",
+          "4c0f09",
+          "d4b89e"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ],
+    "current_evidence": "docs/reference/evidence/srm-guide-review-2026-10-17.json",
+    "unchanged_guide_image_files": 80,
+    "historical_capture_records": 88,
+    "byte_identical_alias_records": 8,
+    "rejected_old_images_retained": 20,
+    "capture_source_groups": 7,
+    "current_selected_raw_images_individually_viewed": 20,
+    "other60_freshly_viewed": false,
+    "prior_visual_scope": "2026-10-12:76individualoriginals reviewed,56published/20rejected.2026-10-13:32individualcaptures,24unique/8byteidenticalreuse. Datedrecords,notcurrentfreshviews.",
+    "new_application_test_or_build_runs": 0,
+    "business_writes": 0,
+    "historical_business_writes_replayed": false,
+    "application_source_changes": false,
+    "screenshot_manifest_changed": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "No new application/business run,test/build orcapture. Current20individualrawviewsareadditional;other60guidefilesretainactualdatedmethods.",
+      "3currentwholefiles/210lines plusselectedranges and76unchangedpriorbindings;hashesbindscope,notwholesourceordeployedbehavior.",
+      "Publicresubmitstartrecovery,typeeligibilityguard,remote/localatomicity andunshownbusinessbranchesremainexplicitlimits;thisdocumentationchangednoapplicationcode.",
+      "RealCAPTCHAselfregistration/passwordlogin,externalOAuth,nativeQoder,currentgoldens/fivepresets/globalroot-subpathacceptance andremaining18translationrows afterthis prospectivefamily remaininfullA-G. Globalauthentication/social-login/SRMcoverageisnotapproved."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/srm-flow.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 20:03:36",
+      "result": "approved",
+      "translation_sha256": "b2ad7c203828a88fb44ebbd9a9bb8d65b3940f624107dcd11d6262e71b06793e",
+      "checks": {
+        "coverage_and_meaning": "四语原稿648行和最终全部变更行已实际阅读，逐行哈希映射覆盖当前680行。每语9节、5小节、20图、版本表与原状态图保留；33项编号操作涵盖角色/组织/模型、邀请注册入驻、准入、生命周期、绩效、风险及原生按钮。已授权AI复核独立于真实验证码注册和各业务验收。",
+        "technical_literals": "四语86个归一化行内技术字面量与30个归一化相对链接一致。评分公式仅将已实际对照的翻译变量名归一化，保留Σ(score/5×weight)运算，原状态图text围栏各语原样。SUPER_ADMIN、RED、1.0–5.0和code代码格式对齐；没有改API、状态、角色或日期版本。",
+        "security_and_failure_semantics": "核对内部owner与Portal关联分离、角色范围/功能权限并行、REJECTED-only重新提交、Saga重试不等于工作流重试、远端终止先于本地版本更新。原生冻结无原因输入，正式API可选reason；自动指标检查依赖启用类型，criterion存在不证明类型匹配，风险汇总取分数和及租户阈值。USED邀请是已用尽显示，条件ACTIVE撤销不能冒称执行；保留终态、历史及最终账号清理待办。",
+        "images_and_links": "四篇完整Markdown已在Docker渲染，链接均可达。80个教程文件匹配两批88条采集记录及8条相同字节复用，20张被拒绝列表图保持排除，7组采集源码/镜像保留。本轮20张原图逐张查看，其他60保留实际历史方法；注册图不证明验证码或密码登录，空列表不单独证明404，结果图不证明审批按钮点击或四语均发生写入。",
+        "language_and_terminology": "Complete162line original and every final delta read againstChinese. Combined170line coverage preserves separate enrollmentSaga/admission,internalowner/Portal identity,ordinary role scope,REJECTED-onlyresubmit,lifecycle version table andterminalcleanup. Distinguishes USED from anexecutedrevocation,nativeconfirmation fromoptionalAPIreason,enabledautoCalc/typeeligibility,datedcaptures andcurrentaudit."
+      },
+      "findings": [
+        {
+          "id": "SG01",
+          "status": "resolved",
+          "resolution": "Actual AI_REVIEW suffices;remove mandatory human translation condition while preserving realCAPTCHAselfregistration asaseparatependingtask."
+        },
+        {
+          "id": "SG02",
+          "status": "resolved",
+          "resolution": "DatePortal2026-10-12andnative2026-10-13journeys;retain7capturegroups,80files/88records/8aliases,20rejectedoldimages and20currentselectedviews versus60retainedfiles."
+        },
+        {
+          "id": "SG03",
+          "status": "resolved",
+          "resolution": "Correctrevokedclaim:actualinviteviewUSED;script revokesonlydisplayACTIVE. Do notreplayoroverwritehistoricbusinesswrites/receipt."
+        },
+        {
+          "id": "SG04",
+          "status": "resolved",
+          "resolution": "Nativeconfirmationhasnoreasoninput;optionalreasonisformalAPIfield. Keepcurrentversionandactualidentity/statechecks."
+        },
+        {
+          "id": "SG05",
+          "status": "resolved",
+          "resolution": "Documentenabled-type-onlyautoCalcguard,criterionexistencewithouttypeeligibilityguard,andsumscore/tenantthresholds ratherthanonecolor."
+        },
+        {
+          "id": "SG06",
+          "status": "resolved",
+          "resolution": "Currentstatic/AI/documentauditdoesnotestablishunshownruntimebranches,CAPTCHA/passwordlogin,nativeapprovalclicks orall-languagewrites. Mathematicalscoreexampleisnotnewexecution."
+        },
+        {
+          "id": "SG07",
+          "status": "resolved",
+          "resolution": "Alignliteralformatting,explicitlynormalizetranslatedformulavariables andexplainJapaneseprojectterminology;retainalllocalizedstatefences,linksandimages."
+        },
+        {
+          "id": "SG08",
+          "status": "resolved",
+          "resolution": "Reviewcompleteoriginalprocedureswithcurrent3whole210source lines,selectedreadsand76unchangedpriorfactdependencies;neverclaim76newwholereadsornewbuilds."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/srm-flow.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 20:03:36",
+      "result": "approved",
+      "translation_sha256": "4042c143ff92aa7ee9b54964f2e50451dcba6c27e92530e3ee8b8a9aeca3ab32",
+      "checks": {
+        "coverage_and_meaning": "四语原稿648行和最终全部变更行已实际阅读，逐行哈希映射覆盖当前680行。每语9节、5小节、20图、版本表与原状态图保留；33项编号操作涵盖角色/组织/模型、邀请注册入驻、准入、生命周期、绩效、风险及原生按钮。已授权AI复核独立于真实验证码注册和各业务验收。",
+        "technical_literals": "四语86个归一化行内技术字面量与30个归一化相对链接一致。评分公式仅将已实际对照的翻译变量名归一化，保留Σ(score/5×weight)运算，原状态图text围栏各语原样。SUPER_ADMIN、RED、1.0–5.0和code代码格式对齐；没有改API、状态、角色或日期版本。",
+        "security_and_failure_semantics": "核对内部owner与Portal关联分离、角色范围/功能权限并行、REJECTED-only重新提交、Saga重试不等于工作流重试、远端终止先于本地版本更新。原生冻结无原因输入，正式API可选reason；自动指标检查依赖启用类型，criterion存在不证明类型匹配，风险汇总取分数和及租户阈值。USED邀请是已用尽显示，条件ACTIVE撤销不能冒称执行；保留终态、历史及最终账号清理待办。",
+        "images_and_links": "四篇完整Markdown已在Docker渲染，链接均可达。80个教程文件匹配两批88条采集记录及8条相同字节复用，20张被拒绝列表图保持排除，7组采集源码/镜像保留。本轮20张原图逐张查看，其他60保留实际历史方法；注册图不证明验证码或密码登录，空列表不单独证明404，结果图不证明审批按钮点击或四语均发生写入。",
+        "language_and_terminology": "全162行原稿と最終変更行を中文事実源に照合し、未変更行対応と合わせ170行を網羅。「入居」を登録申請、「准入」を取引開始審査と説明し、既存画面用語との対応を明示。USEDと取消実行、標準確認と任意reason、採点式と色による推測、過去画像と今回確認を区別し、履歴・復旧・権限条件を保持。"
+      },
+      "findings": [
+        {
+          "id": "SG01",
+          "status": "resolved",
+          "resolution": "Actual AI_REVIEW suffices;remove mandatory human translation condition while preserving realCAPTCHAselfregistration asaseparatependingtask."
+        },
+        {
+          "id": "SG02",
+          "status": "resolved",
+          "resolution": "DatePortal2026-10-12andnative2026-10-13journeys;retain7capturegroups,80files/88records/8aliases,20rejectedoldimages and20currentselectedviews versus60retainedfiles."
+        },
+        {
+          "id": "SG03",
+          "status": "resolved",
+          "resolution": "Correctrevokedclaim:actualinviteviewUSED;script revokesonlydisplayACTIVE. Do notreplayoroverwritehistoricbusinesswrites/receipt."
+        },
+        {
+          "id": "SG04",
+          "status": "resolved",
+          "resolution": "Nativeconfirmationhasnoreasoninput;optionalreasonisformalAPIfield. Keepcurrentversionandactualidentity/statechecks."
+        },
+        {
+          "id": "SG05",
+          "status": "resolved",
+          "resolution": "Documentenabled-type-onlyautoCalcguard,criterionexistencewithouttypeeligibilityguard,andsumscore/tenantthresholds ratherthanonecolor."
+        },
+        {
+          "id": "SG06",
+          "status": "resolved",
+          "resolution": "Currentstatic/AI/documentauditdoesnotestablishunshownruntimebranches,CAPTCHA/passwordlogin,nativeapprovalclicks orall-languagewrites. Mathematicalscoreexampleisnotnewexecution."
+        },
+        {
+          "id": "SG07",
+          "status": "resolved",
+          "resolution": "Alignliteralformatting,explicitlynormalizetranslatedformulavariables andexplainJapaneseprojectterminology;retainalllocalizedstatefences,linksandimages."
+        },
+        {
+          "id": "SG08",
+          "status": "resolved",
+          "resolution": "Reviewcompleteoriginalprocedureswithcurrent3whole210source lines,selectedreadsand76unchangedpriorfactdependencies;neverclaim76newwholereadsornewbuilds."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/srm-flow.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 20:03:36",
+      "result": "approved",
+      "translation_sha256": "41efe61ea05994d469552b50f69832cedad2dcf8607eabb02d10aa444f01c5e6",
+      "checks": {
+        "coverage_and_meaning": "四语原稿648行和最终全部变更行已实际阅读，逐行哈希映射覆盖当前680行。每语9节、5小节、20图、版本表与原状态图保留；33项编号操作涵盖角色/组织/模型、邀请注册入驻、准入、生命周期、绩效、风险及原生按钮。已授权AI复核独立于真实验证码注册和各业务验收。",
+        "technical_literals": "四语86个归一化行内技术字面量与30个归一化相对链接一致。评分公式仅将已实际对照的翻译变量名归一化，保留Σ(score/5×weight)运算，原状态图text围栏各语原样。SUPER_ADMIN、RED、1.0–5.0和code代码格式对齐；没有改API、状态、角色或日期版本。",
+        "security_and_failure_semantics": "核对内部owner与Portal关联分离、角色范围/功能权限并行、REJECTED-only重新提交、Saga重试不等于工作流重试、远端终止先于本地版本更新。原生冻结无原因输入，正式API可选reason；自动指标检查依赖启用类型，criterion存在不证明类型匹配，风险汇总取分数和及租户阈值。USED邀请是已用尽显示，条件ACTIVE撤销不能冒称执行；保留终态、历史及最终账号清理待办。",
+        "images_and_links": "四篇完整Markdown已在Docker渲染，链接均可达。80个教程文件匹配两批88条采集记录及8条相同字节复用，20张被拒绝列表图保持排除，7组采集源码/镜像保留。本轮20张原图逐张查看，其他60保留实际历史方法；注册图不证明验证码或密码登录，空列表不单独证明404，结果图不证明审批按钮点击或四语均发生写入。",
+        "language_and_terminology": "원본162행과 최종 변경 행을 중국어 사실 원문과 대조하고 미변경 행 매핑으로 현재170행을 모두 확인했다. 입점Saga와승인,내부담당자와포털연결,반려후재제출,버전/종료조건을 보존한다. USED표시와취소실행,기본확인창과선택적reason,활성유형검증과기준존재,과거이미지와현재검토를 구분한다."
+      },
+      "findings": [
+        {
+          "id": "SG01",
+          "status": "resolved",
+          "resolution": "Actual AI_REVIEW suffices;remove mandatory human translation condition while preserving realCAPTCHAselfregistration asaseparatependingtask."
+        },
+        {
+          "id": "SG02",
+          "status": "resolved",
+          "resolution": "DatePortal2026-10-12andnative2026-10-13journeys;retain7capturegroups,80files/88records/8aliases,20rejectedoldimages and20currentselectedviews versus60retainedfiles."
+        },
+        {
+          "id": "SG03",
+          "status": "resolved",
+          "resolution": "Correctrevokedclaim:actualinviteviewUSED;script revokesonlydisplayACTIVE. Do notreplayoroverwritehistoricbusinesswrites/receipt."
+        },
+        {
+          "id": "SG04",
+          "status": "resolved",
+          "resolution": "Nativeconfirmationhasnoreasoninput;optionalreasonisformalAPIfield. Keepcurrentversionandactualidentity/statechecks."
+        },
+        {
+          "id": "SG05",
+          "status": "resolved",
+          "resolution": "Documentenabled-type-onlyautoCalcguard,criterionexistencewithouttypeeligibilityguard,andsumscore/tenantthresholds ratherthanonecolor."
+        },
+        {
+          "id": "SG06",
+          "status": "resolved",
+          "resolution": "Currentstatic/AI/documentauditdoesnotestablishunshownruntimebranches,CAPTCHA/passwordlogin,nativeapprovalclicks orall-languagewrites. Mathematicalscoreexampleisnotnewexecution."
+        },
+        {
+          "id": "SG07",
+          "status": "resolved",
+          "resolution": "Alignliteralformatting,explicitlynormalizetranslatedformulavariables andexplainJapaneseprojectterminology;retainalllocalizedstatefences,linksandimages."
+        },
+        {
+          "id": "SG08",
+          "status": "resolved",
+          "resolution": "Reviewcompleteoriginalprocedureswithcurrent3whole210source lines,selectedreadsand76unchangedpriorfactdependencies;neverclaim76newwholereadsornewbuilds."
+        }
+      ]
+    }
+  }
+}

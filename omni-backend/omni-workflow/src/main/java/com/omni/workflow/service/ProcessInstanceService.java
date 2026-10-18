@@ -90,9 +90,11 @@ public interface ProcessInstanceService {
      * <p>返回已完成、进行中、未到达的活动节点，用于渲染流程全景图。</p>
      *
      * @param processInstanceId 流程实例 ID
+     * @param tenantId 当前请求租户 ID，必须为正整数
      * @return 流程进度信息
+     * @throws com.omni.common.core.result.BusinessException 实例不存在或不属于当前租户
      */
-    ProcessProgressResponse getProgress(String processInstanceId);
+    ProcessProgressResponse getProgress(String processInstanceId, Long tenantId);
 
     /**
      * 获取流程实例的审批记录列表。
@@ -101,7 +103,9 @@ public interface ProcessInstanceService {
      * 包含审批结果（通过/驳回/自动通过/已取消/待审批）和审批意见。</p>
      *
      * @param processInstanceId 流程实例 ID
+     * @param tenantId 当前请求租户 ID，必须为正整数
      * @return 审批记录列表
+     * @throws com.omni.common.core.result.BusinessException 实例不存在或不属于当前租户
      */
-    List<ApprovalRecord> getApprovalRecords(String processInstanceId);
+    List<ApprovalRecord> getApprovalRecords(String processInstanceId, Long tenantId);
 }

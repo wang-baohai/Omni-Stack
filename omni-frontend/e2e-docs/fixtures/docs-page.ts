@@ -20,50 +20,53 @@ interface PrepareOptions {
 
 /** 在应用启动前注入语言和隔离环境短期令牌。 */
 export async function prepareDocsPage(page: Page, options: PrepareOptions) {
-  // 固定文档时钟，避免设备码倒计时和时间列在重复生成时产生像素漂移。
-  await page.clock.install({ time: new Date('2026-08-26T09:00:00+08:00') })
-  const captchaSvg = `data:image/svg+xml;base64,${Buffer.from(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
-      <rect width="120" height="40" rx="6" fill="#eef3fb"/>
-      <path d="M4 31L116 9M8 8L112 34" stroke="#91a4c4" stroke-width="2" opacity=".65"/>
-      <circle cx="28" cy="20" r="8" fill="#5b7db6" opacity=".8"/>
-      <rect x="52" y="12" width="16" height="16" rx="3" fill="#6f8fc4" opacity=".8"/>
-      <path d="M88 29L98 11L108 29Z" fill="#4f6f9f" opacity=".8"/>
-    </svg>
-  `).toString('base64')}`
-  await page.route('**/api/auth/captcha', async (route) => {
-    await route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({
-        code: 200,
-        message: 'success',
-        data: { captchaKey: 'docs-display-only', captchaImage: captchaSvg },
-      }),
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  // 展示夹具必须显式选择；正式 external 取证使用真实接口和真实时钟。
+  if (process.env.E2E_RUNTIME_MODE === 'display-fixtures') {
+    await page.clock.install({ time: new Date('2026-08-26T09:00:00+08:00') })
+    const captchaSvg = `data:image/svg+xml;base64,${Buffer.from(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+        <rect width="120" height="40" rx="6" fill="#eef3fb"/>
+        <path d="M4 31L116 9M8 8L112 34" stroke="#91a4c4" stroke-width="2" opacity=".65"/>
+        <circle cx="28" cy="20" r="8" fill="#5b7db6" opacity=".8"/>
+        <rect x="52" y="12" width="16" height="16" rx="3" fill="#6f8fc4" opacity=".8"/>
+        <path d="M88 29L98 11L108 29Z" fill="#4f6f9f" opacity=".8"/>
+      </svg>
+    `).toString('base64')}`
+    await page.route('**/api/auth/captcha', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 200,
+          message: 'success',
+          data: { captchaKey: 'docs-display-only', captchaImage: captchaSvg },
+        }),
+      })
     })
-  })
-  await page.route('**/api/auth/tenants', async (route) => {
-    await route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({
-        code: 200,
-        message: 'success',
-        data: [{ id: 1, name: 'Omni-Stack Docs', code: 'docs' }],
-      }),
+    await page.route('**/api/auth/tenants', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 200,
+          message: 'success',
+          data: [{ id: 1, name: 'Omni-Stack Docs', code: 'docs' }],
+        }),
+      })
     })
-  })
-  await page.route('**/oauth2/device_authorization', async (route) => {
-    await route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({
-        device_code: 'docs-display-only',
-        user_code: 'DOCS-CODE',
-        verification_uri: 'http://localhost:3000/device/verify',
-        verification_uri_complete: 'http://localhost:3000/device/verify?user_code=DOCS-CODE',
-        expires_in: 600,
-        interval: 5,
-      }),
+    await page.route('**/oauth2/device_authorization', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          device_code: 'docs-display-only',
+          user_code: 'DOCS-CODE',
+          verification_uri: 'http://localhost:3000/device/verify',
+          verification_uri_complete: 'http://localhost:3000/device/verify?user_code=DOCS-CODE',
+          expires_in: 600,
+          interval: 5,
+        }),
+      })
     })
-  })
+  }
   if (options.viewport) await page.setViewportSize(options.viewport)
   await page.addInitScript(({ locale, token, username }) => {
     localStorage.setItem('omni-lang', locale)
@@ -93,22 +96,24 @@ export async function waitForDocsPage(page: Page, selector: string) {
       animation: none !important;
       transform: none !important;
     }
-    .device-countdown span {
-      font-size: 0 !important;
-    }
-    .device-countdown span::after {
-      content: "10:00";
-      font-size: 14px;
-    }
   ` })
 }
 
-/** 将正式截图写入 docs/images 的语言目录。 */
+/** 将截图写入显式取证目录，默认使用文档语言目录。 */
 export async function captureDocsImage(page: Page, locale: DocsLocale, imageName: string) {
-  const output = resolve(process.cwd(), '..', 'docs', 'images', locale, `${imageName}.png`)
+  const directory = process.env.E2E_DOCS_IMAGE_DIR || resolve(process.cwd(), '..', 'docs', 'images')
+  const output = resolve(directory, locale, `${imageName}.png`)
   const temporaryOutput = `${output}.next`
   mkdirSync(dirname(output), { recursive: true })
-  const image = await page.screenshot({ fullPage: false })
+  const image = await page.screenshot({
+    animations: 'disabled',
+    fullPage: false,
+    maskColor: '#64748b',
+    mask: [
+      page.locator('input[type="password"], .captcha-image, .captcha-img, [data-docs-mask="true"]'),
+      page.locator('.user-code-display, .qr-code-image, .verify-link'),
+    ],
+  })
   writeFileSync(temporaryOutput, image)
   renameSync(temporaryOutput, output)
 }

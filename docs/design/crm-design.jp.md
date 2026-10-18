@@ -1,520 +1,209 @@
-# CRM モジュール アーキテクチャと実装ベースライン
+# CRM の設計判断と拡張境界
 
-> 状態：MVP 実装済み、後続イテレーションのベースライン  
-> プロジェクト：Omni-Stack  
-> 日付：2026-07-12  
-> 目標：既に DB へ反映済みの CRM MVP のアーキテクチャ、サービス横断契約、後続イテレーションの境界を説明する。実装入口は `omni-backend/omni-crm` と `omni-frontend/src/views/crm`。
-
-設計根拠：`README.md`、および `docs/` 内の architecture、api-contract、backend-patterns、frontend-patterns、core-flows、scheduling、workflow、mq-reliability、docker-deployment の全トピックドキュメント。同時に現在の POM、Gateway、SQL、Docker Compose、フロントエンド動的ルーティング実装でドキュメント例を照合する。
+> 本書は CRM の設計上の取捨選択、実装範囲と拡張の前提を管理します。現在の状態遷移、フィールド、API、失敗動作は [CRM の事実](../crm.jp.md)、[API 契約](../api-contract.jp.md)とソースが管理し、操作・画像は [CRM Wiki](../guides/crm-flow.jp.md)が管理します。
+> 元の日付フィールドは 2026-07-12 ですが、その日の実装・受入状態は推定しません。以前の全文は Git の `3ef2fbc:docs/design/crm-design.jp.md` に残ります。旧マイルストーンは現在の証拠を代替しません。四言語の受入は[承認済み AI_REVIEW](../adr/0003-authorized-ai-translation-review.md)に従い、人手の翻訳レビューを必須としません。
 
 ## 1. 設計結論
 
-CRM は `omni-base` に入れ続けるのではなく、独立した Servlet マイクロサービスとして構築すべきである。
+独立した Servlet サービス `omni-crm` を選び、販売前のデータ、業務コマンド、デプロイに明確な所有者を置きます。Auth は識別・認可、Base は共通機能、Workflow はエンジンを所有します。CRM は Auth をデータベース横断で照会せず、Flowable を内蔵しません。
 
-| 項目 | 決定 |
-|---|---|
-| Maven モジュール / サービス名 | `omni-crm` |
-| ローカルポート / 管理ポート | `8104` / `19904` |
-| XXL-JOB 実行体 | `omni-crm` / `9904`（Outbox/タスク有効時） |
-| データベース | `omni_crm` |
-| Gateway | `/api/crm/**` → `lb://omni-crm`、`StripPrefix` は使用しない |
-| Redis | DB 0、Auth が書き込む XSS 設定を共有；CRM キーは `crm:` プレフィックスを使用 |
-| フロントエンド | 引き続き `omni-frontend` を使用し、`views/crm/**` を新設 |
+| 判断領域 | 既存構造と現在の参照先 | 拡張境界 |
+|---|---|---|
+| サービスと保存 | 独立 CRM モジュール・DB、Gateway ルート、画面。[CRM](../crm.jp.md)参照 | モジュールの存在だけで全業務の受入完了にはならない |
+| 識別と範囲 | common-service 事前認証、permission-aware 範囲、ドメイン表方針 | ネットワーク信頼と実署名対象の限界を維持 |
+| プライバシーとイベント | バックエンド PII ビュー、操作ログ設定、ドメイン Outbox | マスク、監査、配信は別々に検証 |
+| 承認と通知 | 以下の Phase 2/3 候補 | 現在デプロイ済み機能とは扱わない |
 
-CRM の初版はプリセールスの閉ループのみを完成する：
-
-> リード → フォローアップ → 顧客/連絡先 → 商談 → 受注または失注。
-
-製品、見積、契約、注文、請求書発行、回収、マーケティングオートメーション、サポートチケットは MVP に含めない。契約/注文段階に入った後は `omni-sales` の分離を評価すべきで、CRM を ERP に進化させない。
-
-実施前に必ず 4 つの P0 前提項目を完成しなければならない：
-
-1. Auth が permission-aware のデータ範囲内部 API を提供する；CRM は `omni_auth` をクロス DB で読まない。
-2. `@OperLog` に電話番号、メール、住所、備考などの PII マスキング/無視能力を追加する。
-3. CRM のテナントとデータ権限はフェイルクローズド；コンテキスト欠落時にテナント 1 をデフォルトにせず、無条件に通さない。
-4. CRM の `ALL` は「現テナントの全データ」と明確に定義；テナント横断クエリは別のプラットフォーム権限と専用インターフェースを設ける。
+テナント分離、明示認可、コンテキスト欠落時の拒否、同期的なドメイン不変条件が前提です。旧文書の Auth・秘匿・移行・テストの事前整備には対応実装があります。全面的な欠落とも全安全場面の検証完了とも記述しません。
 
 ## 2. 製品範囲
 
 ### 2.1 ユーザーと目標
 
-| ユーザー | コアニーズ |
-|---|---|
-| 営業担当 | 自分のリード、顧客、連絡先、商談、フォロー待ち事項を管理 |
-| 営業マネージャー | 自部門および下位を確認、担当者を割当、ファネルと期限超過事項を検査 |
-| CRM 管理者 | テナント内の全 CRM データとビジネス設定を管理 |
-| 読み取り専用オブザーバー | 認可範囲内の統計と記録を閲覧、変更せず、完全な PII をデフォルトで閲覧しない |
+営業担当、マネージャー、テナント CRM 管理者、読み取り専用利用者向けに、リード・顧客・連絡先・商談・活動・ダッシュボードを整理します。ロール名は設定例であり、実際の利用範囲はテナント権限、データ範囲と PII 権限が決めます。
 
-MVP は次に答えられるべきである：現在 新規/合格/転換済みリードがどれだけあるか；どの事項が本日または期限超過か；ある顧客にどんな連絡先・フォロー・商談があるか；商談がどのステージか；ファネル金額・転換率・受注率はどうなっているか；誰が主要ビジネス記録を変更したか。
+販売前の一連の業務で進捗、期限到達のフォロー、顧客関係、ステージ/ファネル、重要コマンドの履歴を扱います。共通 UI を理由に製品、見積、契約、注文、請求、入金、マーケティング自動化、サポートを MVP の暗黙の責務に加えません。
 
 ### 2.2 フェーズ分け
 
-| フェーズ | 能力 |
+| 段階 | 設計範囲 |
 |---|---|
-| MVP | リード、割当、フォローアップ活動、顧客、連絡先、顧客 360、商談、ステージ、受注/失注、基本ボード、重複候補ヒント |
-| Phase 2 | パブリックプール、タグ、インポート・エクスポート、マージ、自動リマインド、共有、設定可能ステージ、カスタムフィールド、フィールドレベル暗号化 |
-| Phase 3 | 製品、価格表、見積、契約、割引/契約承認、回収計画、販売予測 |
-| 独立ドメイン | マーケティング活動と育成、サポートチケット/SLA、請求書と財務消込 |
+| 現 MVP | リード/顧客/連絡先/商談/活動、割当/移管、転換、ステージ、基本ダッシュボード、重複候補。正確な入口は事実文書を参照 |
+| Phase 2 候補 | 共有プール、タグ、インポート/エクスポート、統合、通知、共有、ステージ管理、独自フィールド、フィールド暗号化 |
+| Phase 3 候補 | 製品/価格表、見積、契約、割引承認、入金計画、販売予測。先に独立 sales ドメインを検討 |
+| 独立ドメイン | マーケティング育成、サポート SLA、財務消込を明示契約で連携 |
+
+段階分けは依存と境界の記録で、納品完了記録ではありません。現在の pipeline/stage API は読み取り専用で、管理機能には既存商談の移行方針が必要です。
 
 ## 3. システム境界
 
-| コンポーネント | 権威的責務 | CRM の利用方式 |
-|---|---|---|
-| `omni-auth` | テナント、ユーザー、組織、ロール、権限、データ範囲、XSS 設定 | 内部 OpenFeign；CRM はユーザー/組織 ID のみ保存 |
-| `omni-crm` | リード、顧客、連絡先、商談、フォローと CRM 状態 | 唯一のビジネス書き込み側 |
-| `omni-base` | 辞書、操作ログ、タスク/MQ 運用 | 操作ログ集約；MVP は辞書のオンラインに強依存しない |
-| `omni-workflow` | BPMN、プロセスインスタンス、未処理タスク、承認履歴 | Phase 3 で冪等統合、Flowable を埋め込まない |
-| XXL-JOB | バッチスキャンのトリガー | リマインドや CRM 状態の権威ストレージとしない |
-| RocketMQ | 非同期輸送 | 少なくとも一度；コンシューマーは冪等でなければならない |
-| Redis | XSS 共有設定、短期キャッシュ | CRM の権威ビジネスデータを保存しない |
-
 ```mermaid
 flowchart LR
-    UI["omni-frontend"] --> GW["omni-gateway<br/>JWT validation / identity headers"]
-    GW --> CRM["omni-crm :8104"]
-    GW --> AUTH["omni-auth :8100"]
-    GW --> WF["omni-workflow :8103"]
-    CRM -->|"OpenFeign + X-Internal-Token"| AUTH
+    UI["omni-frontend"] --> GW["omni-gateway"]
+    GW --> CRM["omni-crm"]
+    CRM -->|"X-Internal-Token"| AUTH["omni-auth"]
     CRM --> DB[("omni_crm")]
-    CRM --> R[("Redis DB 0")]
-    CRM --> O["sys_mq_message"]
-    O -->|"mqRelayHandler"| MQ["RocketMQ"]
-    XXL["XXL-JOB"] --> CRM
-    CRM -. "Phase 3" .-> WF
+    CRM --> O["Outbox"]
+    O --> R["Relay"]
+    R --> MQ["RocketMQ"]
 ```
 
-推奨依存：`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`、および Web、Validation、Security、AspectJ、OpenFeign、LoadBalancer、Nacos、RocketMQ Stream、Actuator、Lombok。
+図は責務関係を示し、起動順、コンテナポート、全呼出を示しません。ポート、profiles、Nacos、Redis、実行器設定は[デプロイ](../docker-deployment.jp.md)が管理します。
 
-`omni-common-workflow` に依存しないこと。さもないと Flowable エンジンを CRM に埋め込んでしまう。
+CRM が業務を書き、Auth がユーザー・組織・権限範囲を提供し、Base が共通ログを集約します。RocketMQ はイベントを運び、XXL-JOB はバックグラウンド処理を起動し、Redis は XSS などの設定をキャッシュします。キャッシュやスケジューラの記録を DB の業務事実の代替にしません。MVP の起動は Workflow に依存しません。
+
+common-service と必要な OperLog/Job/MQ を組み合わせます。完全な依存表は[アーキテクチャ](../architecture.jp.md)が管理し、ここに別の POM 一覧を作りません。
 
 ## 4. ドメインとデータ設計
 
 ### 4.1 アグリゲート
 
-| アグリゲート | テーブル | 責務 |
-|---|---|---|
-| Lead | `crm_lead`、`crm_lead_conversion` | リードのライフサイクル、担当者、転換冪等 |
-| Customer | `crm_customer`、`crm_contact` | 顧客プロファイル、連絡先、顧客 360 |
-| Opportunity | `crm_opportunity`、`crm_opportunity_stage_history` | ステージ、金額、確度、受注/失注履歴 |
-| Activity | `crm_activity` | フォローの計画、完了、キャンセル |
-| Pipeline | `crm_pipeline`、`crm_pipeline_stage` | 商談パイプラインとステージ定義 |
-| Ownership Audit | `crm_owner_change_log` | 担当者/組織変更の不変履歴 |
+Lead、Customer/Contact、Opportunity、Activity、Pipeline ごとに責務を分けます。転換、ステージ、owner 変更は履歴・関連を記録し、ルート認可を迂回する独立汎用リソースにはしません。
 
-```mermaid
-erDiagram
-    CRM_PIPELINE ||--o{ CRM_PIPELINE_STAGE : contains
-    CRM_LEAD ||--o| CRM_LEAD_CONVERSION : converts
-    CRM_CUSTOMER ||--o{ CRM_CONTACT : has
-    CRM_CUSTOMER ||--o{ CRM_OPPORTUNITY : owns
-    CRM_OPPORTUNITY ||--o{ CRM_OPPORTUNITY_STAGE_HISTORY : changes
-    CRM_LEAD_CONVERSION }o--|| CRM_CUSTOMER : links
-    CRM_LEAD_CONVERSION }o--|| CRM_CONTACT : links
-    CRM_LEAD_CONVERSION }o--o| CRM_OPPORTUNITY : optionally_creates
-```
-
-`crm_activity` は `root_type + root_id` で Lead、Customer、Opportunity に関連付ける。多態関係は通常の外部キーを使えないため、Service は対象が存在し、同一テナントで、現在ユーザーがアクセス可能であることを検証しなければならない。
+Activity の `root_type + root_id` は多態的な関連です。通常の外部キーだけで業務可視性を表現できず、Service が存在・同一テナント・アクセスを確認します。連絡先/活動の owner スナップショットは照会時の集約間依存を減らす一方、移管・転換時の同期保守が必要です。
 
 ### 4.2 共通フィールドとルール
 
-すべての `crm_*` テーブルは `tenant_id` を含まなければならない（tenant config、pipeline stage、conversion、stage history、owner history、approval request、inbox を含む）。これにより TenantLine が存在しない列に書き換えない。認可可能なビジネステーブルはさらに次を含める必要がある：
+テナントと業務 owner を分け、`create_by` はユーザー名の監査に使い SELF の帰属にはしません。新フィールドが現在の owner、過去の実行者、監査人のどれを表すか明示します。BaseEntity だけで全項目の自動設定を推定しません。
 
-- `tenant_id`：テナント分離。
-- `owner_user_id`：SELF 範囲とビジネス担当者。
-- `owner_unit_id`：DEPT/DEPT_AND_BELOW/CUSTOM 範囲。
-- `version`：楽観ロック。
-- `deleted`：論理削除。
-- `id/create_time/update_time/create_by/update_by`：プロジェクト監査フィールド。
+金額、通貨、日時は[現在の CRM 規則](../crm.jp.md)と[API 契約](../api-contract.jp.md)に従います。MVP の単一通貨は根拠となる為替レートなしの合計を防ぎます。番号と一意性は DB/Service の境界で扱い、電話・メールは重複候補に用います。
 
-制約：
-
-- ユーザー/組織 ID は Auth が管理し、クロス DB 外部キーを作らず、フロントエンド提出のユーザー名や ownerUnitId を信頼しない。
-- インデックスは `tenant_id` で始まり、次に owner、状態、フォロー時間を組み合わせる。
-- `create_by` はユーザー名の監査フィールドで、SELF データ権限に使えない。
-- 金額は `DECIMAL(18,2)` / `BigDecimal`、通貨は ISO 4217 三桁コードを使用。MVP の全商談はテナント設定の単一デフォルト通貨を強制使用し、統計で通貨横断の直接合計を禁止；多通貨と為替換算は後続バージョンに残す。
-- 時刻は `yyyy-MM-dd HH:mm:ss` に統一；予定成約日は `LocalDate` を使える。
-- `lead_no/customer_no/opportunity_no` は生成済みデータベース ID または専用シーケンステーブルで生成しテナント内ユニークにする。`SELECT MAX(...) + 1` は禁止。
-- 通常の PUT では owner、ライフサイクル status、opportunity stage を直接変更できない。
-- 外部リクエストは素の `selectById/updateById/deleteById` を使用してはならない。
-- 論理削除されるビジネスエンティティに粗暴なユニークキーを作らない；安定した設定 code、Lead Conversion はユニーク制約を作れる。
-
-現在の `BaseEntity` の注釈は自動監査充填が存在すると主張するが、リポジトリに検証可能な `MetaObjectHandler` はない。CRM 開発前に共通の監査充填を補完しテストすべき；さもなくば Service が監査フィールドを明示的に書き込む。
+通常編集を status/owner/stage コマンドと分け、version、履歴、関連更新の入口を明確にします。転換の一意キーは `(tenant_id, lead_id)` で、全テナントを通じた leadId 一意ではありません。関連追加前にライフサイクル、削除、認可継承を決めます。
 
 ### 4.3 主要テーブル
 
-`crm_tenant_config`
+現在の `crm_*` DDL は `database/changelog/crm/` が一元管理します。本書には設計分類を残し、全列・索引一覧を複製しません。
 
-- `tenant_id` ユニーク、`default_pipeline_id`、`currency_code=CNY`、`lead_duplicate_policy=WARN`、`initialized_time`。
-- テナントが初めて CRM に入る時、`CrmTenantInitializer` が冪等にデフォルト設定を作成し、Auth がクロスサービストランザクションで CRM DB に書き込むことを避ける。
+| 設計責務 | 現在のテーブル |
+|---|---|
+| リードと転換 | `crm_lead`、`crm_lead_conversion` |
+| 顧客と連絡先 | `crm_customer`、`crm_contact` |
+| 商談とステージ履歴 | `crm_opportunity`、`crm_opportunity_stage_history` |
+| 活動と帰属履歴 | `crm_activity`、`crm_owner_change_log` |
+| パイプライン、ステージ、テナント設定 | `crm_pipeline`、`crm_pipeline_stage`、`crm_tenant_config` |
 
-`crm_pipeline` / `crm_pipeline_stage`
-
-- Pipeline：`tenant_id/code/name/status/default_flag/sort/version/deleted`。
-- Stage：`pipeline_id/stage_code/stage_name/stage_type/probability/sort/status/deleted`。
-- `stage_type` は `OPEN/WON/LOST` に固定。
-- MVP は `DISCOVERY → QUALIFICATION → PROPOSAL → NEGOTIATION → WON/LOST` をプリセットし、当面管理 UI を開放しない。
-
-`crm_lead`
-
-- `lead_no/full_name/company_name/job_title/mobile/phone/email/region/address`。
-- `source_code/industry_code/rating/status/disqualify_reason`。
-- owner、assigned、lastActivity、nextFollowup、converted、version と監査フィールド。
-- コアインデックス：tenant + owner/status、tenant + unit/status、tenant + nextFollowup/status、tenant + company/mobile/email。
-
-`crm_lead_conversion`
-
-- `tenant_id/lead_id/customer_id/contact_id/opportunity_id/converted_by_user_id/converted_time`。
-- `lead_id` はユニーク、記録は削除不可、Lead 転換の冪等根拠である。
-
-電話番号、メール、会社名は重複候補にのみ使い、ビジネス上のハードユニークにしない。同一会社に複数の連絡先があり得るし、同一電話は会社の代表電話かもしれない。デフォルトでは候補を返し警告し、ユーザーが既存記録への関連付けか新規作成かを選択する。
-
-`crm_customer`
-
-- `customer_no/name/normalized_name/customer_type/industry_code/level_code/source_code`。
-- `credit_code/website/phone/email/region/address/status`。
-- owner、lastActivity、nextFollowup、version、deleted と監査フィールド。
-
-`crm_contact`
-
-- `customer_id/name/department/job_title/mobile/phone/email/decision_role/primary_flag/status`。
-- owner は Customer owner の権限スナップショット；顧客移管時に同一トランザクションで同期。
-- 各顧客は有効な主要連絡先を最大 1 つ持つ；Service は顧客行ロック下で切替え、生成列ユニークインデックスでさらにフォールバックできる。
-
-`crm_opportunity`
-
-- `opportunity_no/name/customer_id/primary_contact_id/source_lead_id`。
-- `pipeline_id/stage_id/status/amount/currency_code/probability`。
-- `expected_close_date/actual_close_time/loss_reason`、owner、stageChange、nextFollowup、version。
-
-`crm_opportunity_stage_history`
-
-- `opportunity_id/from_stage_id/to_stage_id/from_status/to_status/change_reason/changed_by_user_id/changed_time`。
-- 追記のみで、更新・削除しない。
-
-Opportunity の `status` は対象 Stage の `stage_type` と一致しなければならず、Stage コマンド Service だけが同時に更新できる；`probability` は移行時のステージ確度スナップショットを保存する。
-
-`crm_activity`
-
-- `root_type/root_id`（LEAD/CUSTOMER/OPPORTUNITY）、任意で `contact_id`。
-- `activity_type/subject/content/status`。
-- `planned_start_time/planned_end_time/completed_time/next_action_time`。
-- `performed_by_user_id` は実際の執行者を記録；owner はアクセスルートの現在権限スナップショット、他に version、deleted と監査フィールド。
-- MVP の content はプレーンテキストのみ許可し、フロントエンドは `v-html` を禁止。
-
-`crm_owner_change_log`
-
-- entity、旧/新 owner user/unit、operationType、reason、operator と time。
-- 追記のみで、通常の削除インターフェースを提供しない。
-
-連絡先と Customer をアクセスルートとする Activity は顧客 owner に追従して同期；執行履歴は `performed_by_user_id/create_by` が保持する。オープン Opportunity を Customer とともに移管するかはコマンドパラメータで明示的に決め、デフォルトはカスケードしない；Opportunity をカスケードする場合、その Activity も併せて同期する。Lead 転換時に元の Lead Activity のアクセスルートを新しい Customer へ移行し、Conversion 記録はソース関係を保持する。
+11 表はいずれも tenant_id を宣言しますが、owner/version/deleted の組合せが全表同一ではなく、DDL メタデータは実 DB の移行証明でもありません。`crm_approval_request` と `crm_inbox_event` は候補で、今回の CRM main/schema/seed 範囲には実装が見つかっておらず、現行の導入済み表には数えません。
 
 ## 5. 状態マシンとコアフロー
 
 ### 5.1 Lead
 
-```mermaid
-stateDiagram-v2
-    [*] --> NEW
-    NEW --> FOLLOWING: First valid follow-up
-    FOLLOWING --> QUALIFIED: Judged qualified
-    QUALIFIED --> CONVERTED: Convert
-    NEW --> DISQUALIFIED: Invalid
-    FOLLOWING --> DISQUALIFIED: Invalid
-    QUALIFIED --> DISQUALIFIED: Invalid
-    DISQUALIFIED --> FOLLOWING: Reactivate
-    CONVERTED --> [*]
-```
-
-- `QUALIFIED` のみ転換可能；`DISQUALIFIED` は理由が必須；`CONVERTED` は終端状態。
-- owner/public-pool は帰属次元で、ライフサイクル状態に混ぜない。
+ライフサイクルと owner/共有プールは別軸です。合格、無効化、再開、転換は明示コマンドを使い、通常編集から状態検証を迂回させません。全遷移・現例外は[CRM 状態機械](../crm.jp.md)が管理します。共有プールには別途取得・返却・競合方針が必要です。
 
 ### 5.2 Customer
 
-```text
-POTENTIAL → ACTIVE → DORMANT
-               ├──→ LOST
-               └──→ BLACKLISTED
-DORMANT / LOST → ACTIVE
-BLACKLISTED → ACTIVE (dedicated permission)
-```
-
-商談の受注は POTENTIAL を自動的に ACTIVE へ変えられる。顧客にオープン商談がある時は直接削除できず、優先して DORMANT/LOST へ変える。
+顧客の稼働状態、ブラックリスト、owner 移管は異なる不変条件に関わります。ブラックリスト/解除は専用権限とコマンドを使います。連絡先/活動の帰属と未完商談を連動させるかを明示し、UI で暗黙に決めません。
 
 ### 5.3 Opportunity
 
-```text
-DISCOVERY → QUALIFICATION → PROPOSAL → NEGOTIATION → WON / LOST
-```
-
-- オープンステージは前進または後退可能；後退は理由を書かなければならない。
-- LOST は失注理由が必須；WON/LOST は終端状態。
-- 再開には `crm:opportunity:reopen` が必要で、最後のオープンステージへ回復する。
-- すべての移行は Stage History を追記し、通常の PUT は stage/status を受け付けない。
+ステージは pipeline の業務意味を持ち、状態文字列だけではありません。前進、後退、受注/失注、再開は version、理由、履歴、顧客への効果を扱います。現在の遷移は事実文書を参照し、将来のステージ管理には既存確度・終端状態・統計の移行も定義します。
 
 ### 5.4 Activity
 
-```text
-PLANNED → COMPLETED
-       └→ CANCELLED
-CANCELLED → PLANNED (reschedule)
-```
-
-COMPLETED は終端状態；履歴として完了済み活動を直接作成することを許可するが、完了時刻を提供しなければならない。
+計画、完了、取消、再計画、履歴入力では実行者とアクセス帰属を区別します。プレーンテキストはリッチテキストの信頼面を狭めます。通知スケジュールは後続機能で、nextFollowup の存在は通知配信の証明ではありません。
 
 ### 5.5 Lead 転換
 
-```mermaid
-sequenceDiagram
-    participant UI as Frontend
-    participant S as LeadConversionService
-    participant DB as omni_crm
-    participant O as Outbox
+生成/関連付け、転換記録、元状態、ローカルイベントを CRM 単一 DB トランザクションで扱い、主要オブジェクトの部分成功を避けます。再送も要求検証・権限・可視性が必要です。正確な再送/version/帰属順序は[CRM 転換](../crm.jp.md)が管理します。
 
-    UI->>S: POST /lead/{id}/convert (version, choices)
-    S->>DB: SELECT Lead FOR UPDATE + tenant/scope
-    S->>DB: Query Conversion by lead_id
-    alt already converted
-        S-->>UI: return the existing ConversionResult
-    else first conversion
-        S->>DB: create or associate Customer
-        S->>DB: create or associate Contact
-        S->>DB: optionally create Opportunity
-        S->>DB: INSERT Conversion + Lead->CONVERTED
-        S->>O: INSERT crm.lead.converted.v1 (same transaction)
-        S-->>UI: ConversionResultVO
-    end
-```
-
-リクエストは顧客/連絡先が新規作成か関連付けか、および商談を作成するかを明示する。Feign、Workflow、実際の MQ 送信は CRM DB トランザクション内で発生させてはならない；必要なイベントはローカル Outbox にのみ書く。
+転換は Workflow や Broker を直接呼びませんが、すべての CRM Auth Feign が DB トランザクション外とは限りません。作成、移管、表示情報の補完の各境界は[コアフロー](../core-flows.jp.md)を参照します。
 
 ## 6. テナント、RBAC とデータ権限
 
 ### 6.1 信頼チェーン
 
-1. Gateway が RS256 JWT とブラックリストを検証し、`X-User-*`、`X-Tenant-Id`、`X-Gateway-Forwarded` を上書き注入する。
-2. common-service の `GatewayPreAuthenticationFilter` が `Authentication` を構築する。
-3. Controller が `@PreAuthorize` で機能権限を検証する。
-4. `TenantLine`（`CrmTenantTablePolicy`）がテナント制約を確立；`@ServiceDataScope(permissionCode)` アスペクトが現在のエンドポイント権限で dataScope を解決する。
-5. MyBatis-Plus が tenant とその permission に対応する owner 条件を追加する。
-
-`X-Gateway-Forwarded:true` は暗号学的証明ではない。本番では CRM ビジネスポートを公開してはならない；プライベートネットワーク/セキュリティグループを使用し、後で署名付き内部ヘッダーや下流 JWT 検証を追加できる。
+Gateway が JWT を検証し、サービスが署名済み識別アサーションを検証して Authentication を構築します。`X-Gateway-Forwarded:true` 自体は証明ではありません。現署名は識別/時刻を対象とし、全ロール、範囲、要求内容を含みません。署名とネットワークの境界は[アーキテクチャ](../architecture.jp.md)を参照します。
 
 ### 6.2 権限ツリーとロール
 
-ボードメニューは `crm:overview` を使い、`crm:dashboard` は使わない。静的な `/admin/dashboard` との衝突を避けるためである。
+機能権限、データ範囲、PII 表示権を分けます。CRM の ALL も現在 tenant に制限されます。メニュー/ボタンは表示制御で、サーバー認可を代替しません。実ロールと完全な code は事実文書・正式 Auth seed が管理します。
 
-メニュー：`crm`（DIRECTORY）および `crm:overview`、`crm:lead`、`crm:customer`、`crm:contact`、`crm:opportunity`、`crm:activity`（MENU）。
-
-API 権限：
-
-- `crm:overview:list`
-- `crm:lead:list/create/update/delete/assign/convert/disqualify`
-- `crm:customer:list/create/update/delete/transfer/status/blacklist`
-- `crm:contact:list/create/update/delete`
-- `crm:opportunity:list/create/update/delete/assign/stage/reopen`
-- `crm:activity:list/create/update/delete/complete/cancel`
-- `crm:owner:list`（担当者候補クエリ）
-- `crm:pii:view`
-
-上記の `/` は同一リソース配下の複数の完全な権限コードの簡記である。例えば `crm:lead:list/create` は `crm:lead:list` と `crm:lead:create` を表し、DB 反映時は完全な code を 1 件ずつ保存しなければならない。実際の `sys_permission.type` は `DIRECTORY/MENU/API` を使い、旧例の BUTTON は使わない。
-
-| ロール | dataScope | 能力 |
-|---|---|---|
-| `CRM_ADMIN` | TENANT | 現テナントの全 CRM 機能/データ |
-| `SALES_MANAGER` | DEPT_AND_BELOW | 部門および下位、割当/移管、統計 |
-| `SALES_REP` | SELF | 自分が担当するデータと通常の営業操作 |
-| `CRM_VIEWER` | TENANT | テナントレベル読み取り専用、PII はデフォルト付与しない |
-| `SUPER_ADMIN` | ALL | 全機能、CRM データは引き続き現テナントに限定 |
-
-デフォルトの USER には CRM 権限を付与しない。フロントエンド `v-permission` とバックエンド `@PreAuthorize` は同一コード；メニュー非表示はセキュリティ境界ではない。
-
-Phase 2 のパブリックプールは独立したメニュー/権限と明示的な `owner_user_id IS NULL` クエリを使う。通常リストの DataPermission はパブリックプール機能のために緩和せず、リクエストパラメータで owner 条件をバイパスするのも許可しない。
+共有プールとテナント横断管理は別設計です。`platform:crm:cross-tenant` は原案の候補名で、ここで納品済み API を宣言するものではありません。ログイン成功から default USER の CRM 権限は推定しません。
 
 ### 6.3 Auth 内部データ範囲契約
 
-既存の DataScope コードは Auth にあり Auth Mapper に依存する。CRM は Mapper を複製せず、Workflow の歴史的実装のように `omni_auth.*` をクロス DB で読まない。
+現 Auth クライアントは tenantId と完全な permissionCode を明示し、対象権限を付与するロールを統合します。`InternalDataScopeDTO` は securityVersion 指紋を持ちますが、その存在はキャッシュ・失効伝播・要求結合の全面実装を証明しません。
 
-Auth は統一された `DataScopeService` を抽出し、元の Auth Filter と内部インターフェースで再利用すべきである：
-
-```text
-GET /internal/data-scopes/{userId}?tenantId={tenantId}&permissionCode=crm:lead:update
-
-InternalDataScopeDTO:
-  userId, tenantId, permissionCode, primaryUnitId,
-  effectiveScope, accessibleUnitIds, securityVersion
-```
-
-ルール：
-
-- ユーザーが有効で tenant に属することを検証する。
-- その `permissionCode` を実際に付与されたロールのみをマージ；ユーザー自身がその権限を持たない場合は解決を拒否。
-- 同一 permission に複数のロールがある場合のみ、プロジェクトルールに従って最も広い範囲を取る。
-- `resource=crm` だけでマージしてはならない。さもないと TENANT 読み取り専用ロールと SELF 書き込みロールの組み合わせが「テナントレベル範囲 + 書き込み権限」の権限スパイシング脆弱性を生む。
-- `X-Internal-Token` 認証で、Gateway 経由で公開しない。
-- Auth はキャッシュでき、ロール権限、dataScope、ユーザー組織、カスタム部門の変化時に能動的に無効化する。
-- CRM 呼び出しの失敗/タイムアウト/tenant 不一致時は 503/403 を返し、フィルタなしに縮退しない。
-
-既存の Auth user/org 内部インターフェースは ID クエリ時に tenant を強制していない。CRM 接続前に tenant パラメータと SQL 制約を追加するか、少なくとも tenantId が不一致の DTO を拒否すべきである。
+表示名は縮退できても認可範囲は拡大できません。403/503 と組織 batch の実動作は [CRM 連携](../crm.jp.md)が管理します。CRM は Auth Mapper をコピーせず、業務表を DB 横断で読みません。
 
 ### 6.4 CRM コンテキストと SQL インターセプト
 
-common-service が提供する `GatewayPreAuthenticationFilter`、`ServiceIdentityFilter`、`ServiceDataScope` アノテーション/アスペクトと `ServiceDataScopeContext` を再利用し；CRM 側では `CrmTenantTablePolicy`、`CrmDataPermissionHandler`、`CrmRecordAccessGuard` を新設する。
+common-service の事前認証、識別 Filter、メソッド DataScope、永続化構成を再利用します。CRM は SecurityConfig、CrmTenantTablePolicy、DataScopeTablePolicy を実装する CrmDataPermissionHandler を提供します。旧独立構成テンプレートの未実装扱いにはしません。
 
-```text
-Read Gateway headers
-→ Filter validates userId/tenantId, writes tenant ThreadLocal
-→ @PreAuthorize validates endpoint functional permission
-→ @ServiceDataScope(permissionCode) calls Auth to resolve the dataScope of the same permission
-→ write scope ThreadLocal
-→ OperLog/Controller/Service/Mapper
-→ Aspect finally clears scope, Filter finally clears tenant
-```
-
-Advisor の順序は「メソッド権限 → DataScope → OperLog → ビジネスメソッド」に固定しなければならず、OperLog がスナップショットを事前読み取りする時点で正しい permission scope を既に持つことを保証する。リスト、詳細、統計と各書き込みコマンドは自身の完全な permissionCode を宣言し、粗粒度の `resource=crm` コンテキストを共有しない。
-
-CRM は同名の `mybatisPlusInterceptor` をカスタマイズし、順序は固定：
-
-```text
-TenantLineInnerInterceptor
-→ DataPermissionInterceptor
-→ PaginationInnerInterceptor
-```
-
-- TenantLine は `crm_*` テーブルのみ処理し、常に現在の tenant を追加する。
-- `sys_mq_message` は 2 つの権限インターセプターから除外する。Relay が設計上全テナントをスキャンするため；ユーザークエリは引き続き明示的に tenant フィルタする。
-- DataPermission は Lead、Customer、Contact、Opportunity、Activity の owner 列をマップする。
-- DataPermission は Pagination の前に置き、COUNT と records が同一範囲であることを保証する。
-- Pipeline/Stage は tenant + 機能権限のみで制御；Conversion、Stage History、Owner History はアグリゲートルートを離れた汎用クエリを提供せず、必ず先に同一 permission でルートオブジェクトに AccessGuard を実行し、その後 tenant + rootId でクエリする。
-
-| dataScope | 条件 |
-|---|---|
-| SELF | `owner_user_id = currentUserId` |
-| DEPT | `owner_unit_id = primaryUnitId` |
-| DEPT_AND_BELOW / CUSTOM | `owner_unit_id IN accessibleUnitIds` |
-| TENANT / ALL | owner 条件を追加しない、ただし TenantLine は常に保持 |
-
-これは明確なセキュリティ強化である：通常の CRM API は決してテナントを横断しない。プラットフォームのテナント横断能力は独立した `platform:crm:cross-tenant`、専用 Controller、明示的な tenant と追加監査を使用する。
+現在は `TenantLine → DataPermission → OptimisticLock → Pagination` の順です。scope はエンドポイント権限で解決し finally で復元/クリアします。表方針とルート確認にはドメインの関与が必要です。Advisor/Filter 図だけで実 proxy、非同期、統合検証を代替しません。
 
 ### 6.5 書き込み操作の行レベル認可
 
-DataPermissionInterceptor は書き込み認可を代替できない。各 update/delete/convert/transfer/stage コマンドは必ず：
+SELECT フィルタだけでは書込認可になりません。コマンドは可視ルート、状態/関連、適用される tenant/id/version 条件更新、履歴を確認し、行数競合を契約に従って扱います。生成、連動更新、既存レコードへの外部コマンドの version 要件を一律にしません。
 
-1. `tenant_id + id + data scope` で可視レコードをクエリ；不可視は一律 404 で ID 列挙を防ぐ。
-2. 状態マシンとビジネス不変条件を検証。
-3. `tenant_id + id + version` 条件で更新。
-4. 更新行数が 1 でない時は並行競合を返す。
-5. 重要な変更は行ロックまたは楽観ロックを使い、ドメイン履歴を同期して書く。
-
-`CrmRecordAccessGuard` が詳細、コマンド、サブリソースのアクセスチェックを統一実装する。
+子リソースはルート関係と固有権限範囲を必要とします。顧客の可視性で全 360 ブロックを広げず、owner 候補もコマンドの範囲内に制限します。
 
 ## 7. API 設計
 
 ### 7.1 共通契約
 
-- すべてのレスポンスは `R<T>`；ページングは `R<PageResult<T>>`。
-- `page=1`、`size=10`、CRM は `size <= 100` に制限。
-- Entity を直接 Request/Response にしない；状態コマンドは独立 DTO を使う。
-- 日付パラメータは `@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")` を宣言；フロントエンドは `value-format="YYYY-MM-DD HH:mm:ss"` を使う。
-- 状態、転換、移管のリクエストは `version` を携行。
-- PII 重複検出は POST body を使い、URL やアクセスログに置かない。
-- 書き込みインターフェースは `@PreAuthorize` と `@OperLog` を同時に宣言；主要コマンドは別途ドメイン履歴を書く。
+通常 API は R/PageResult と意図別 DTO を使い、日時・金額は [API 契約](../api-contract.jp.md)に従います。PII 重複確認は管理された body と最小候補を使います。名前だけでログや通信記録の PII 不在は証明しません。
 
 ### 7.2 エンドポイント
 
-| ドメイン | エンドポイント |
-|---|---|
-| Overview | `GET /api/crm/overview/summary`、`/funnel`、`/follow-ups` |
-| Pipeline | `GET /api/crm/pipeline/list`、`/{id}/stages` |
-| Lead | `GET /lead/list`、`GET /lead/{id}`、`POST /lead`、`PUT/DELETE /lead/{id}` |
-| Lead コマンド | `POST /lead/duplicate-check`、`/{id}/assign`、`/batch-assign`、`/{id}/qualify`、`/disqualify`、`/reopen`、`/convert` |
-| Customer | `GET /customer/list`、`/{id}`、`/{id}/overview`、`POST /customer`、`PUT/DELETE /customer/{id}` |
-| Customer コマンド | `POST /customer/duplicate-check`、`/{id}/status`、`/{id}/transfer` |
-| Contact | `GET /contact/list`、`GET /customer/{id}/contact/list`、`POST /customer/{id}/contact`、`PUT/DELETE /contact/{id}`、`POST /contact/{id}/primary` |
-| Opportunity | `GET /opportunity/list`、`/board`、`/{id}`、`/{id}/stage-history`、`POST /opportunity`、`PUT/DELETE /opportunity/{id}` |
-| Opportunity コマンド | `POST /opportunity/{id}/assign`、`/stage`、`/reopen` |
-| Activity | `GET /activity/list`、`/timeline`、`/{id}`、`POST /activity`、`PUT/DELETE /activity/{id}` |
-| Activity コマンド | `POST /activity/{id}/complete`、`/cancel`、`/reschedule` |
-| Owner 選択肢 | `GET /api/crm/options/owners`、権限 `crm:owner:list` |
-
-表中で `/api/crm` を省略したエンドポイントはいずれもそのプレフィックスで始まる。すべてのリスト/詳細と集約統計は同一の TenantLine/DataPermission を適用する。Owner、unit のクエリパラメータは現在の範囲を狭めるだけで、拡大できない。
-
-Customer 360 は顧客、連絡先、オープン商談、最近の活動、転換リードの要約を返す。`crm:pii:view` がない場合、バックエンド VO は直接マスク値を返し、フロントエンドの遮蔽に依存しない。
-
-Customer 360 は「顧客が見えるなら全サブデータが見える」ではない。顧客、連絡先、商談、活動のブロックは各自の完全な list permission でデータ範囲を解決；あるブロックの権限が欠ける時はそのブロックをクエリせず、あるサブレコードがその独立 scope 内にない時は顧客詳細を介してバイパスしてはならない。実装は `CrmPermissionScopeExecutor` で同一 Facade 内にブロックごとに scope を確立しクリアできる。
-
-顧客の `BLACKLISTED` への進入または復元は独立した `/customer/{id}/blacklist`、`/restore-from-blacklist` コマンドと `crm:customer:blacklist` 権限を使い、通常の status/update 権限を再利用しない。
+overview、pipeline、lead、customer、contact、opportunity、activity、owner options の現メソッド・パス全体は [CRM API 入口](../crm.jp.md)が管理します。新コマンドは冪等性、version、帰属、エラー、連動を設計し、旧省略パスを第二の API 事実として複製しません。
 
 ### 7.3 エンドポイントと DataScope permission のマッピング
 
-`@PreAuthorize` と `@ServiceDataScope` は同一の完全なビジネス権限コードを使い、実装者が一時的に選択してはならない：
-
-| 操作 | permissionCode |
-|---|---|
-| Overview 全統計 | `crm:overview:list` |
-| Pipeline/Stage クエリ、Opportunity board/history | `crm:opportunity:list` |
-| 各リソース list/detail/overview/timeline/duplicate-check | 対応する `crm:<resource>:list` |
-| 各リソース create/update/delete | 対応する `crm:<resource>:create/update/delete` |
-| Lead qualify/reopen | `crm:lead:update` |
-| Lead disqualify/assign/batch-assign/convert | `crm:lead:disqualify/assign/assign/convert` |
-| Customer status/transfer/blacklist/restore | `crm:customer:status/transfer/blacklist/blacklist` |
-| Contact primary | `crm:contact:update` |
-| Opportunity assign/stage/reopen | `crm:opportunity:assign/stage/reopen` |
-| Activity complete/cancel/reschedule | `crm:activity:complete/cancel/update` |
-| Owner options | `crm:owner:list` |
-
-表内の `/` は複数のエンドポイントがそれぞれ対応する完全な権限コードを表す。Create はデフォルトで owner を現在ユーザーにする；作成時に他の owner を指定する場合はそのリソースの assign/transfer 権限も必要で、かつ対象ユーザーがそのコマンド permission のアクセス可能組織範囲内になければならない。
+メソッド権限と対応 DataScope に同じ完全な業務権限を使い、ユーザー scope を使わない内部/バックグラウンド入口はモジュール契約に従います。他者を owner にする生成は assign/transfer 権限と対象確認も必要です。詳細、統計、重複候補、360 ブロックで広い粗粒度権限を借用しません。
 
 ## 8. サービス横断の一貫性
 
 ### 8.1 ユーザーと組織
 
-- CRM は userId/unitId のみ保存；割当前に tenant 限定の Auth Feign でユーザーが存在し、有効で、同一テナントであることを検証。
-- ownerUnitId は Auth の権威的な主組織を取り、フロントエンドを信頼できない。
-- リスト表示はまず ID を収集し、次に batch API を一度呼び出す。行ごとの Feign は禁止。
-- 名称/アバターは短期キャッシュ可；データ範囲と関係 ID は長期キャッシュに依存しない。
-- ユーザーの組織異動は履歴の顧客帰属をサイレントに一括書き換えない；ownerUnitId は前回の明示割当時のビジネス帰属を保持し、後で監査可能な一括移管で修正する。
-- Compose で Auth と呼び出し側は同一の必須 `OMNI_INTERNAL_API_TOKEN` を使用；リポジトリ内にデフォルト秘密鍵は提供せず、欠落時は Compose が直接起動を拒否し、各サービスの内部インターフェースもフェイルクローズドする。
+CRM は user/unit ID を保持し、Auth が現識別・主組織を所有します。割当時に同テナント・有効性を確認し、ユーザー/組織をそれぞれ batch 取得して行別呼出を避けます。組織異動で既存帰属を黙って書き換えず、追跡可能な移管で決定します。
+
+内部 Token は非公開設定から取得します。通常識別、内部プロトコル、表示縮退を分け、Compose の一つの検証条件から全パスの HTTP エラーが同じとは推定しません。
 
 ### 8.2 辞書
 
-ライフサイクル、stageType、権限セマンティクスは固定列挙で、辞書は状態マシンを変えられない。MVP のソース、業界、顧客レベル、活動タイプは安定した code と組み込みデフォルト選択肢を使い、新テナントが Base 辞書を欠いて CRM が使えなくなることを避ける。Phase 2 でクロスサービスのテナント初期化を整備した後、純粋に表示用の選択肢を `omni-base` へ移せる；CRM は常に code のみ保存する。
+表示辞書はライフサイクル、stageType、権限意味を変更しません。安定 code と組込み選択肢で新テナントの Base オンライン依存を減らします。共有辞書へ移す前に初期化、旧 code、キャッシュ、縮退を設計します。
 
 ### 8.3 Workflow
 
-MVP は承認を接続しない。Phase 3 で高額割引、契約、顧客マージ、大口顧客移管に使えるが、Workflow が先に補完する：
+承認、契約、顧客統合は候補です。今回の範囲では CRM approval/inbox の実装はありません。導入前にテナント安全な冪等開始、信頼できる結果イベント、APPROVED/REJECTED/CANCELLED 対応、タイムアウト照合、取消/再試行を定義します。既存の一部イベントから全エンジン終了の信頼性配信を推定しません。
 
-1. `(tenant_id, business_key)` ユニーク制約または冪等起動。
-2. 信頼できる `workflow.process.started/completed/terminated.v1` イベント。
-3. 標準結果 `APPROVED/REJECTED/CANCELLED`。
-4. テナント安全な内部オーケストレーション API。
+以下は将来の協調案で、現在の実行受領証ではありません。
 
-CRM は `crm_approval_request` を新設し、状態は `PENDING_START/RUNNING/APPROVED/REJECTED/CANCELLED/START_FAILED`、businessKey：
-
-```text
-crm:{aggregateType}:{tenantId}:{aggregateId}:{approvalRequestId}
+```mermaid
+sequenceDiagram
+    participant C as CRM
+    participant D as CRM DB
+    participant W as Workflow
+    C->>D: 承認要求をローカルでコミット
+    C->>W: トランザクション外で冪等開始
+    W-->>C: 信頼できる結果イベント（案）
+    C->>D: Inbox 重複排除と業務更新（同一トランザクション）
+    Note over C,W: 候補案。照合と取消の契約が必要
 ```
 
-CRM はまず承認申請をローカルでコミットし、次にトランザクション外で冪等に Workflow を起動；完了イベントは Inbox の重複排除後に CRM ローカル状態を駆動する。Flowable は CRM DB を直接変更せず、CRM DB トランザクション内で Feign 呼び出しを保持しない。
+候補状態は `PENDING_START/RUNNING/APPROVED/REJECTED/CANCELLED/START_FAILED`、businessKey 案は `crm:{aggregateType}:{tenantId}:{aggregateId}:{approvalRequestId}` です。CRM が業務を書き、Workflow は CRM DB を直接変更しません。
 
 ### 8.4 XXL-JOB
 
-Phase 2 はシステムタスク軌道を使い、各 Handler は `@XxlJob` と `@SystemJobMeta` を同時に宣言する：
+次は候補システムジョブで、今回の CRM main/schema/seed 範囲に四つの handler は見つかっていません。
 
-| Handler | デフォルト頻度 | 責務 |
-|---|---:|---|
-| `crmFollowupReminderHandler` | 毎分 | 期限到達のフォローをスキャンし、リマインドイベントを生成 |
-| `crmLeadSlaHandler` | 5 分ごと | 時間内に未接触のリードを識別/回収 |
-| `crmOpportunityStaleHandler` | 毎時または毎日 | 長期間フォローのない商談を識別 |
-| `crmApprovalReconcileHandler` | 10 分ごと | Phase 3 で Workflow 射影を照合 |
+| 候補 Handler | 候補頻度 | 設計責務 |
+|---|---|---|
+| `crmFollowupReminderHandler` | 毎分 | 期限到達のフォロー通知イベント |
+| `crmLeadSlaHandler` | 5 分ごと | 時間内に連絡されないリードの処理 |
+| `crmOpportunityStaleHandler` | 毎時または毎日 | 長期未活動商談の識別 |
+| `crmApprovalReconcileHandler` | 10 分ごと | 将来の承認投影照合 |
 
-フォローごとに XXL-JOB を作らない。時刻は CRM テーブルに保存し、1 つのタスクが一括スキャン・原子的クレーム・Outbox 書き込みを行う。バックグラウンドタスクはまず tenantId のみを返す専用 Mapper で初期化済みテナント一覧を取得し、次にテナントごとにシステム TenantContext を設定し、明示的な tenant 条件のバッチを実行し、`finally` でクリアする。そのテナント列挙 Mapper だけが `@InterceptorIgnore(tenantLine = "true")` を使える；通常のビジネス Mapper はバイパスを禁止。タスクはユーザー DataScope を使わず、状態クレーム、楽観ロック、または `FOR UPDATE SKIP LOCKED` で再入を防ぐ。
+記録種類で走査し、各フォローにスケジューラのジョブを作りません。実装時に tenant 列挙、system context の finally クリア、原子的な取得、再入、重複排除を定義します。二つの注釈と実行前提は[スケジューリング](../scheduling.jp.md)が管理します。
 
 ### 8.5 Outbox とイベント
 
-統一イベントエンベロープ：
+現在のイベントエンベロープはトップレベル eventId を msgKey として渡し、Outbox は独自 msgId を生成します。転送記録 ID は消費側の業務識別を代替しません。以下は DTO 項目の例で、送信済みイベントではありません。
 
 ```json
 {
-  "eventId": "UUID",
+  "eventId": "example-event-id",
   "eventType": "crm.lead.converted.v1",
   "occurredAt": "2026-07-12 10:30:00",
   "tenantId": 1,
@@ -523,297 +212,128 @@ Phase 2 はシステムタスク軌道を使い、各 Handler は `@XxlJob` と 
   "aggregateId": 1001,
   "aggregateVersion": 4,
   "actorUserId": 12,
-  "correlationId": "...",
-  "causationId": "...",
+  "correlationId": null,
+  "causationId": null,
   "payload": {}
 }
 ```
 
-`ReliableMessageRelay.send("crm-domain-out-0", envelope, tenantId, eventId)` を使用；tenantId は明示的でなければならない。第 4 引数は eventId を運用用の `msg_key` として保存し、Outbox 自身の `msg_id` は引き続き独立した UUID；したがって eventId は payload 内にも同時に存在しなければならず、コンシューマーは payload の eventId でのみビジネス冪等を行える。
+実イベント、最小 payload、任意 correlation/causation の設定は production と [CRM イベント事実](../crm.jp.md)が定義します。created/assigned/converted、owner-changed、stage/won/lost、activity completed の候補すべてが発生済みとはしません。
 
-推奨イベント：
-
-- `crm.lead.created/assigned/converted.v1`
-- `crm.customer.owner-changed.v1`
-- `crm.opportunity.stage-changed/won/lost.v1`
-- `crm.activity.completed.v1`
-
-イベントは ID、状態、必要なスナップショットのみを渡し、完全な電話番号、メール、住所、備考を渡さない。CRM が Workflow などのイベントを消費する際、まずイベントの tenantId を検証し、次に今回の消費のためにシステム TenantContext を設定/クリア；同一トランザクションで `crm_inbox_event` とビジネス変更を書き、`(consumer_name,event_id)` ユニークキーで重複排除し、aggregateVersion で順序不同を防ぐ。
-
-既存の Outbox は少なくとも一度で、Relay に claim/lease はない。クレーム機構の完成前、CRM はまず単一インスタンスでデプロイ；水平スケール前に `PROCESSING + lock_owner/lock_time` または `SKIP LOCKED` を追加する。
-
-現在の「メッセージ記録」ページは主に `omni-base` のローカル Outbox をクエリし、CRM 追加後に自然には `omni_crm.sys_mq_message` を集約しない。本番前に各サービスの内部クエリ能力で Feign 集約を行うか、CRM 専用の運用入口を追加すべき；共通の `schema.sql` を CRM の DDL と可観測性の唯一の保証として扱ってはならない。
+共有 Relay には PROCESSING 取得と 120 秒 lease があり、next_retry_time が期限を保持します。旧「claim/lease なし」は失効しています。終端 CAS は状態だけを見て owner/generation を照合しません。長い送信、lease 回収、不確定結果には少なくとも一度の配信とコンシューマーの冪等性が必要で、exactly-once を保証しません。将来の Inbox は tenant、consumer/eventId 重複排除、version 順序逆転、業務 commit 境界も必要です。
 
 ## 9. プライバシー、操作ログと XSS
 
 ### 9.1 OperLog の前提改修
 
-現在の `OperLogAspect` は全パラメータとエンティティスナップショットをシリアライズし、直接使用すると PII が RocketMQ、Outbox、ホット/コールドログテーブルに入る。CRM Controller 開発前に common-operlog を拡張する：
+秘匿器、引数/スナップショットスイッチ、除外項目、イベント重複排除、コンシューマーの例外伝播は実装済みです。複数の CRM 入口はスナップショットを無効にし氏名などを除外します。入口別の最小化は継続確認し、汎用ログで同期 owner/stage 履歴を代替しません。
 
-- フィールドレベルの機微アノテーションまたは統一マスク処理で、password、token、secret、mobile、phone、email、address、idCard、content をカバー。
-- requestParams、oldValue、newValue、errorMsg を同時に処理。
-- `recordParams=false`、`recordSnapshot=false` またはフィールド除外をサポートし、インポート/エクスポート/大テキストインターフェースに供する。
-- ログ消費の永続化失敗は必ずリトライし、例外を飲み込んでから ack してはならない。
-- 消費にユニーク eventId を追加し、Outbox の重複配信に対抗。
-- AOP が oldValue/newValue を読む時は必ず同一 tenant/dataScope を経由し、対象コマンドの認可失敗時は事前読み取りスナップショットをログに書いてはならない。
-
-Owner Change と Stage History は同期的なドメイン事実で、非同期の汎用ログで代替できない。
+前置収集エラー、responseStatus、JSON 切詰め、同 Bean の archive トランザクション制約は[バックエンド規約](../backend-patterns.jp.md)を参照します。全エラーの業務隔離や全ログの確実な保持を保証しません。
 
 ### 9.2 PII
 
-- 完全な電話番号、メール、住所は `crm:pii:view` にのみ返す。
-- 他のユーザーにはバックエンド VO がマスクを返す、例 `138****1234`、`a***@example.com`。
-- リストはデフォルトでマスク；詳細は権限で決める。
-- 重複検出は最小の候補要約のみを返し、権限のない記録を漏らさない。
-- エクスポートは Phase 2 に移し、独立した権限、データ範囲、監査を使う。
-- バックアップ、デッドレター、Outbox/MQ 運用ページは PII を含むシステムとして管理。
+実入口・権限に応じバックエンドがマスクを選び、専用一覧と Customer 360 は異なる方針を持ちます。[CRM PII](../crm.jp.md)が全動作を管理し、UI 遮蔽をアクセス制御としません。
 
-明確なコンプライアンス要件が出た場合に、フィールドレベル暗号化と検索可能 HMAC を追加；MVP は少なくとも最小権限、バックエンドマスキング、監査、TLS を完成する。
+重複候補、イベント、ログ、export、backup、デッドレター、運用入口で項目/アクセスを制限します。暗号化、検索用 HMAC、リッチテキストは鍵・移行・検索の別設計が必要です。既存マスクで準拠認証や全個人の識別不能を断言しません。
 
 ### 9.3 XSS
 
-CRM は必ず `XssConfigProvider` を実装し、Redis DB 0 の `xss:enabled:{tenantId}` と `xss:rules:{tenantId}` を読む。旧例の DB 4 を使ってはならず、さもないと Auth 設定を読めず XSS を無効化する方向に縮退する。
+現在 common-service が cache、Auth への設定照会、有効な基準規則を提供し、Provider/Servlet/Jackson 条件と正式な無効設定を保ちます。組合せ機能が既に提供する CRM XssConfigProviderImpl の複製を要求しません。
 
-CRM は「cache miss → enabled=false」のフェイルオープン戦略を複製しない。miss 時は Auth 内部設定インターフェースを呼んでオリジンへフォールバックすることを推奨；Auth が利用不可の時は組み込みベースラインルールを使う。MVP の備考はプレーンテキストのみ許可し `v-html` を禁止；将来のリッチテキストは許可リストサニタイザーを使い、正規表現ブラックリストを拡張し続けない。
+プレーンテキストと出力 encoding は設計原則です。規則フィルタ、応答 Header、リッチテキスト allowlist は別層です。cache miss は無効化を意味せず、全入力取得・非同期・出力の安全性も証明しません。
 
 ## 10. フロントエンド設計
 
-```text
-omni-frontend/src/
-├── api/
-│   ├── crm-overview.ts
-│   ├── crm-lead.ts
-│   ├── crm-customer.ts
-│   ├── crm-contact.ts
-│   ├── crm-opportunity.ts
-│   └── crm-activity.ts
-├── views/crm/
-│   ├── overview/index.vue
-│   ├── lead/index.vue
-│   ├── customer/index.vue
-│   ├── contact/index.vue
-│   ├── opportunity/index.vue
-│   └── activity/index.vue
-└── components/crm/
-    ├── OwnerSelector.vue
-    ├── CustomerPicker.vue
-    ├── ActivityTimeline.vue
-    ├── OpportunityStageBoard.vue
-    └── CustomerOverview.vue
-```
+共通 API 型、要求識別/tenant 処理、画面状態、制御されたコマンドを使います。Customer 360 は権限ブロック単位で表示し、ステージ board はコマンド入口として、認可と状態判断をバックエンドに残します。
 
-- 共有 `ApiResponse/PageResult` は `src/types/api.ts` からのみインポート。
-- CRM API は統一して 1 つの tenant ヘッダーヘルパーを再利用するか、`X-Tenant-Id` の注入を共有 Axios request interceptor に収束；各関数が各自に解析ロジックを複製することを禁止。
-- 通常の CRUD 状態はページに残す；ページ横断の下書き/永続フィルタのみ Pinia を追加。
-- 権限コードは約束どおり `views/crm/**/index.vue` にマップ；メニュー入口は必ず index.vue。
-- 動的ルーティングは `/admin/{最後のセグメント}` にフラットにマウントし、最後のセグメントはグローバルにユニークでなければならない；overview は dashboard 衝突を回避。
-- `router/index.ts` と `layout/index.vue` にそれぞれ iconMap があり、両方に CRM を補う。
-- `constants/menu.ts`、`zh-CN.ts`、`en-US.ts` を同期。
-- Customer 360 は Drawer/コンポーネントを使用；パラメータルータを使う場合は保護された静的ルートを明示的に登録。
-- Opportunity ページはテーブル/Kanban を提供；ステージのドラッグは最終的に引き続き制御された stage API を呼ぶ。
-- すべてのボタンは同一コードの `v-permission` を使うが、バックエンドが最終境界。
+現ディレクトリ、部品、動的ルートは [CRM フロントエンド事実](../crm.jp.md)と[フロントエンド規約](../frontend-patterns.jp.md)が管理します。router が CRM icon 対応を持ち、layout は解決済み icon を使うため第二の iconMap は不要です。新文言は四言語を同期し、共有目的だけで通常 CRUD にグローバル Pinia を強制しません。
 
 ## 11. エンジニアリング着地点
 
 ### 11.1 新モジュール
 
-```text
-omni-backend/omni-crm/
-├── pom.xml
-└── src/main/
-    ├── java/com/omni/crm/
-    │   ├── CrmApplication.java
-    │   ├── client/ config/ controller/ dto/ entity/
-    │   ├── mapper/ security/ service/ service/impl/
-    └── resources/
-        ├── application.yml
-        ├── application-dev.yml
-        └── mapper/
-```
-
-`CrmApplication` は `@EnableDiscoveryClient`、`@EnableFeignClients(basePackages="com.omni.crm.client")`、`@MapperScan("com.omni.crm.mapper")` を使用。サービスは `omni-common-service` が提供する下流事前認証（`GatewayPreAuthenticationFilter`/`ServiceIdentityFilter`/`ServiceDataScope`）を再利用し、自身の `SecurityConfig` と `XssConfigProviderImpl` のみ持てばよい。
+CRM モジュール、application 入口、Feign/Mapper scan、shared Starter は既存です。新集約は先に境界と認可継承を決め、[開発 Wiki](../guides/scaffold-development.jp.md)を使います。旧モジュール生成手順を未実施一覧にしません。
 
 ### 11.2 必ず変更するファイル
 
-| ファイル | 変更 |
-|---|---|
-| `omni-backend/pom.xml` | `omni-crm` を追加 |
-| Gateway `application.yml` | `/api/crm/**` ルートを明示；内部パス遮断に CRM を追加 |
-| `docker/backend/Dockerfile` | POM キャッシュ層 `COPY omni-crm/pom.xml omni-crm/` |
-| `docker-compose.yml` | CRM サービス、8104、DB/Redis/Nacos/MQ/XXL/internal token |
-| `start.bat/start.sh` | build リストに CRM を追加；Windows ポート保護に 8104 を追加 |
-| `database/changelog/crm/` | CRM 構造変更に forward-only の Liquibase changeSet を追加 |
-| `scripts/sql/seed/crm.sql` | CRM デフォルト設定の正式冪等シード；更新後に seed manifest をリフレッシュ |
-| `scripts/sql/seed/auth.sql` | CRM 権限とロールの正式冪等シード；更新後に seed manifest をリフレッシュ |
-| CRM `TenantModuleProvisioner` | 新テナントの CRM 設定とステージの冪等初期化 |
-| Frontend router/layout/menu/locales | アイコン、メニュー、i18n |
+forward-only Liquibase 変更と正式 seed/manifest を同期します。権限変更は Auth seed、frontend 同 code、新テナント初期化に関わります。CrmTenantModuleProvisioner は event tenant を system identity とし、初期化を呼んで finally でクリアします。
 
-権威的な構造の事実源は `database/changelog/crm/`；正式シードは `scripts/sql/seed/crm.sql` と `scripts/sql/seed/auth.sql` が管理し、`database/seed/manifest.yaml` が検証する。Compose は fresh と upgrade で統一して `omni-db-migrator` を実行し、旧集約 SQL は起動に関与しない。
-
-権限シードは固定 ID + `INSERT IGNORE` だけではだめ：`sys_permission` に `(tenant_id,permission_code)` ユニークキーがない。tenant + code の `NOT EXISTS` で冪等に挿入し、parent/path を正しく再構築すべき；同時に SUPER_ADMIN、CRM ロール、seed manifest アサーション、新テナント初期化を更新する。
-
-Gateway に明示的なビジネスルートが既にある場合、本番では discovery locator を無効化することを推奨；一時的に保持するなら、`/internal/**`、`/api/internal/**`、`/omni-crm/internal/**` などのサービスディスカバリ直行パスを同時に遮断しなければならない。
-
-設定要点：server 8104、management 19904、Redis DB 0、XXL appname `omni-crm`/port 9904。Docker 内部のアプリケーションポートは引き続き 8080 で、ホストマッピングは 8104。Workflow は CRM の起動依存としない。
-
-現在の `docker compose config --services` は実際に 12 個のサービス（CRM を含み、Sentinel を含まない）。後で Sentinel を Compose に戻す場合、サービス総数は 13；README とデプロイドキュメントは実際の Compose の基準で維持する。
+正式起動は compose.yaml / compose.apps.yaml / compose.infra.yaml と omni-db-migrator です。旧 docker-compose.yml/start scripts、固定 12/13 サービス数を現入口にしません。設定・image・preset 連携は[デプロイ](../docker-deployment.jp.md)、[開発ガイド](../guides/scaffold-development.jp.md)、現 catalog に従います。
 
 ## 12. 非機能設計
 
 ### 性能
 
-- すべてのリストはページング、最大 100；owner/status/followup は tenant プレフィックスの複合インデックスを使用。
-- ユーザー/組織は一度に batch enrich、N+1 を禁止。
-- Customer 360 はブロックごとにクエリし、最近の活動数を制限。
-- ファネルはまずインデックス集約；データ閾値に達した後に日次サマリテーブルを作る。
+ページ上限、複合索引、ユーザー/組織 batch、360 ブロック制限は実データ規模で評価します。ファネル集計表は閾値後の選択で、設計目標から性能達成を推定しません。
 
 ### 並行と冪等
 
-- Lead 転換：行ロック + conversion leadId ユニーク。
-- Owner 移管/Stage：version 楽観ロック + 履歴テーブル。
-- バッチコマンドは最大 100 件、API は逐件結果または全体トランザクションセマンティクスを明示。
-- Outbox は少なくとも一度、Inbox は重複排除；定期スキャンは原子的クレームとユニークビジネスキーを使用。
+転換一意性、行ロック、version 条件、同期履歴は別々の不変条件を守ります。batch 上限と全体/逐件の意味を定めます。Outbox、ジョブ取得、コンシューマーの冪等性は同じ保証ではありません。
 
 ### 縮退
 
-- Auth dataScope 利用不可：503、フェイルクローズド。
-- Auth 表示 enrich 利用不可：ID/不明ユーザーを返せる；割当と移管は継続できない。
-- RocketMQ 利用不可：ビジネスと Outbox はコミットし、Relay が後補。
-- Workflow 利用不可：MVP は影響なし；後続の承認は PENDING_START で停止し照合。
-- Redis XSS miss：オリジン/ベースラインルールへフォールバック、防御を無効化しない。
+認可依存失敗は閉じ、表示情報の補完は ID を残せます。MQ 障害時のローカル commit は実業務/Outbox トランザクションを前提とし、後続配信を保証しません。将来の承認は待機/失敗/照合状態を明示し、XSS は現在の設定取得/基準と正式スイッチを保ちます。
 
 ### 可観測性
 
-ログは tenantId、aggregateId、eventId、状態、所要時間を記録し、PII は記録しない。Auth scope の遅延/失敗率、CRM の 5xx/403/並行競合、Outbox の滞留と最古経過時間、タスク滞留、転換/移管/ステージ失敗率、スロー SQL とコネクションプールを監視する。
+tenant/aggregate/event/trace で scope 解決、拒否/競合、転換、ステージ、Outbox age、ジョブ滞留を関連付け、完全 PII を記録しません。画面・運用集約の存在と現在のデータは[可観測性](../observability.jp.md)と実ソースで確認します。
 
 ## 13. テストと検収
 
-プロジェクトは CRM 導入前にテスト基盤を持たなかった；CRM は PII、マルチテナント、状態マシンに関わるため、継続的に維持する最小テストセットは必ず次を含む：
+業務・common テストは既にあり、旧「テスト基盤なし」を現状にはしません。継続テーマは有効/無効な遷移、転換再送/並行、帰属連動、PII/ログ、六範囲の一覧/詳細/COUNT/集計、越境コマンド拒否、コンテキスト欠落、version 競合、業務/Outbox トランザクション、将来 Inbox 重複排除、XSS です。
 
-- 状態マシンの合法/不正遷移。
-- Lead 転換の冪等と並行。
-- Customer 移管のカスケード。
-- PII マスクと OperLog マスキング。
-- 6 種の dataScope のリスト、詳細、COUNT、集約。
-- テナント横断の読み、変更、削除、移管、転換はすべて失敗。
-- tenant/scope 欠落時にフェイルクローズド。
-- tenant + id + version の並行更新。
-- DataPermission が Pagination の前にあり、total と records が一致。
-- ビジネスと Outbox が同一コミット/同一ロールバック；Inbox は重複メッセージを一度だけ処理。
-- XSS の JSON、クエリパラメータ、プレーンテキスト備考。
+build、隔離 unit/MVC、実 MySQL/MQ、browser、権限拒否を分けます。Mock/メモリロックは実並行性を証明しません。CRM_TEST_MYSQL_URL テストは crm_lead を生成/削除するため専用破棄可能 DB を使い、旧 WP008 IT にも専用スイッチ/環境があります。skip を pass にしません。
 
-エンドツーエンド検収：SALES_REP は自分のみ見える；SALES_MANAGER は自部門および下位が見える；CRM_ADMIN は現テナント内でのみ管理；PII 権限がなければマスクのみ取得；Lead の冪等転換；Customer 360 が完全；Stage History が完全；UI をバイパスして API を呼んでも 403；Token がなければ 401。
-
-検証コマンド：
-
-```powershell
-$env:JAVA_HOME='C:\APP\JDK25\jdk-25.0.2'
-$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
-cd omni-backend
-.\mvnw.cmd clean install
-
-cd ..\omni-frontend
-npm run build
-npm run lint
-
-cd ..
-docker compose config
-docker compose build omni-crm omni-gateway omni-frontend
-```
-
-実際の MySQL インターセプター統合テストは、外部テスト DB がない場合デフォルトでスキップされる。CI またはローカルで一度限りの MySQL を起動した後、明示的に実行できる：
-
-```powershell
-$env:CRM_TEST_MYSQL_URL='jdbc:mysql://127.0.0.1:3306/crm_it?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false'
-$env:CRM_TEST_MYSQL_USERNAME='root'
-$env:CRM_TEST_MYSQL_PASSWORD='your-test-password'
-cd omni-backend
-.\mvnw.cmd -pl omni-crm -am '-Dtest=CrmMysqlInterceptorIntegrationTest' '-Dsurefire.failIfNoSpecifiedTests=false' test
-```
-
-このテストはテスト DB に `crm_lead` テーブルを作成して削除するため、専用の空テスト DB のみを使用でき、開発または本番データベースを指してはならない。
+[AGENTS.md](../../AGENTS.md) に従いローカル Docker で JDK 25/Maven Wrapper と frontend build/lint を使い、操作手順は開発 Wiki に置きます。文書のみの本変更はソースツリーの完全一致後に既存報告を再利用し、不変の高価な検証を再実行しません。承認済み AI_REVIEW でも現在の hash/link/content gate が必要です。
 
 ## 14. 実装順序
 
+以下は実装依存の設計意義で、今回全業務が通過したマイルストーン受領証ではありません。
+
 ### Milestone 0：プラットフォーム強化
 
-- Auth DataScopeService + permission-aware 内部インターフェース。
-- user/org 内部 tenant 検証と共有 Token の修正。
-- OperLog PII マスキング、スナップショットスイッチ、消費冪等。
-- XSS miss のセキュリティ戦略。
-- 検証可能な監査フィールド充填と CRM テスト骨格。
-
-完了条件：誤った/欠落した身分コンテキストが CRM データを返さず、操作ログに完全な PII が現れない。
+識別、permission-aware 範囲、tenant、ログ最小化、XSS、テスト基準が業務接続に先行します。既存機構と残る限界を分けて確認し、段階名を完了証明にしません。
 
 ### Milestone 1：サービスとセキュリティ基盤
 
-- モジュール、設定、Gateway、Docker、DB、デフォルト Pipeline を作成。
-- TenantLine + DataPermission + Pagination。
-- 権限ツリー、CRM ロール、既存テナント移行、フロントエンド root メニュー。
-
-完了条件：登録、ルーティング、401/403、テナント分離、XSS、ヘルスチェックが通過。
+module/route/migration/default/role 方針を確立し、現 shared Starter 順で境界を検証します。テナント別初期化・アクセスには対応証拠が必要です。
 
 ### Milestone 2：Lead + Activity
 
-- Lead CRUD、割当、合格/無効/再開。
-- Activity の計画、完了、キャンセル、次回アクション。
-- 重複候補、リスト、クイックフォロー、タイムライン。
-
-完了条件：入力 → 割当 → 複数回フォロー → 合格判定の閉ループ。
+入力、割当、フォロー、判定、活動履歴の実経路を検証し、重複候補、拒否、再試行も含めます。
 
 ### Milestone 3：Customer + Contact + Conversion
 
-- Customer/Contact、主要連絡先、Lead 冪等転換、Customer 360、Owner Transfer。
-
-完了条件：並行転換が重複せず、顧客帰属とサブレコード権限が一致。
+新規/関連、主要連絡先、転換再送、顧客移管の不変条件を確認し、unit 証拠と実 DB 並行を分けます。
 
 ### Milestone 4：Opportunity + Pipeline
 
-- Opportunity、ステージコマンド、受注/失注/再開、History、Kanban。
-
-完了条件：営業プロセスが監査可能な WON/LOST まで進行。
+ステージ、理由、終端/再開、履歴、顧客効果でコマンド経路を閉じます。読み取り専用設定は管理機能の納品ではありません。
 
 ### Milestone 5：Overview + 本番強化
 
-- Summary/Funnel/Follow-ups、PII、監査、インデックス、セキュリティ/トランザクション/E2E テスト。
-- README、architecture、api-contract、core-flows、docker-deployment、AGENTS を更新。
-
-完了条件：MVP、バックエンドビルド、フロントエンド Build/Lint、Docker とセキュリティ検収がすべて通過。
-
-Phase 2 でパブリックプール、リマインド、インポート・エクスポート、タグ、マージを行う；Phase 3 は Workflow の冪等/イベント能力が整った後にのみ承認と契約を追加する。
+ダッシュボード、プライバシー、監査、索引、実業務検証を仕上げます。Phase 2/3 は各契約・依存の充足後に別途実装し、候補を現在の完了機能に加えません。
 
 ## 15. ADR 要約
 
-| 決定 | 選択 | 理由 |
-|---|---|---|
-| サービス | 独立 `omni-crm` | ビジネス、データ、デプロイの境界が明確 |
-| ルーティング | `/api/crm/**`、StripPrefix なし | リポジトリの実際の Base/Workflow 方式に合致 |
-| tenant | 通常 API は決してテナント横断しない | CRM は大量の PII を含む |
-| ALL | 現テナントの全データ | ロール誤設定によるテナント横断漏洩を防ぐ |
-| scope | Auth permission-aware + CRM アノテーション式ローカルインターセプト | ロール横断の権限スパイシングを防ぎ、クロス DB せず Auth Mapper を複製しない |
-| サブテーブル権限 | owner スナップショット + トランザクション維持 | ページングと SQL インターセプトを統一 |
-| 書き込み認可 | AccessGuard + tenant/id/version | SELECT インターセプトは書き込みを保護できない |
-| Conversion | CRM 単一 DB トランザクション + Outbox | コアオブジェクトの強一貫性 |
-| Workflow | MVP は延期 | 現在 冪等起動と信頼できる完了イベントを欠く |
-| スケジューリング | 1 種の記録に 1 つのスキャンタスク | XXL-JOB タスク爆発を避ける |
-| MQ | Outbox は少なくとも一度 + Inbox | ちょうど一度を仮定しない |
-| Redis | DB 0 + key namespace | XSS 設定を必ず共有 |
-| PII | バックエンドが権限でマスク、ログ/イベントを最小化 | フロントエンド遮蔽はセキュリティ対策ではない |
-| デフォルトロール | USER に CRM 権限なし | 明示的な認可があって初めて CRM を使える |
+| 取捨選択 | 理由と代価 |
+|---|---|
+| 独立 service、通常 API は tenant 内、明示権限 | 所有を明確にし、識別とサービス間失敗境界を維持 |
+| owner snapshot と明示コマンド | 範囲照会を直接化。移管/転換の連動と履歴を同期 |
+| ローカル転換トランザクション + Outbox | 中核のローカル整合性。配信/コンシューマーの冪等性は別途必要 |
+| backend PII、plain text、最小 event | 露出を減らすが、全出力/ログ検証を規則で代替しない |
+| 承認/通知/sales 段階分け | 契約を先に定義。候補は利用可能能力ではない |
+| 事実/設計/Wiki の分担 | 現規則を一元管理。設計が理由、教材が再現を説明 |
 
 ## 16. 主要リスク
 
-| 優先度 | リスク | 対処 |
-|---|---|---|
-| P0 | DataScope が Auth のみ、空コンテキストでフィルタを追加しない | 内部契約 + CRM フェイルクローズド |
-| P0 | OperLog が完全な PII をシリアライズ | まず common のマスキングを改修 |
-| P0 | サービス直結で信頼ヘッダーを偽造可能 | 本番ポート分離、後で署名/JWT |
-| P0 | 書き込み操作がクエリデータ権限をバイパス | AccessGuard + 条件付き更新 |
-| P1 | XSS miss がフェイルオープン | Auth オリジンフォールバックまたは組み込みベースライン |
-| P1 | Outbox のマルチインスタンス競合/重複 | 単一インスタンスで開始、claim + Inbox |
-| P1 | Workflow が非冪等、信頼できる完了イベントなし | 延期してまず契約を補完 |
-| P1 | コンテナ数/Sentinel ドキュメントが Compose と不一致 | Compose を基準に統一 |
-| P1 | 統一 DB Migration なし | まず existing migration を提供し、その後ツールを導入 |
-| P1 | テスト基盤なし | CRM の第一弾で状態マシン/セキュリティテストを構築 |
+| リスク | 設計対応と証拠範囲 |
+|---|---|
+| 識別・範囲の拡大 | 実信頼経路、tenant、permission を検証し署名限界を保持 |
+| 書込/子資源が root 可視性を迂回 | AccessGuard、適用条件更新、block 権限。SELECT だけに頼らない |
+| ログ/event/export の PII | 入口ごとに最小化し出力確認。汎用規則を全面保証にしない |
+| lease 期限・不確定結果の重複 | 状態 CAS の限界を認識し、コンシューマーの冪等性と回復前の副作用確認 |
+| 将来の承認/通知を実装済みと誤認 | 候補、契約、状態、実デプロイ証拠を明示 |
+| 旧図/コマンド/段階を現状扱い | 現ソースと対象を明記した証拠を優先。旧全文は Git に保存 |
 
-今回の実装はまず Milestone 0 を完成し、その後 `crm_lead` などのビジネステーブルを導入した。後続イテレーションでもデータ範囲のフェイルクローズド、操作ログのマスキング、テナント境界の検証可能性を維持しなければ、CRM は実際の顧客情報を担うのに適さない。
+設計の意味レビューは実 CRM end-to-end、全 tenant、全外部依存の受入を意味しません。設計案の実装・業務受入には対象バージョンと実シナリオに対応する証拠が必要です。

@@ -1,0 +1,3292 @@
+{
+  "schema": 1,
+  "kind": "local-docker-crm-business-and-ui-evidence",
+  "recorded_at": "2026-10-10T01:48:24.936Z",
+  "project": "omni-wiki-acceptance-20261009",
+  "run_id": "WIKI-20261009A",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "application_source_sha256": "bf79b59b41711af75af465e0977e03b0e5c64a2d05b92f0025772eb2c6418930",
+  "application_source_digest_method": "Sorted repository-relative tracked paths under omni-backend and omni-frontend/src, space, raw-file SHA-256, LF; SHA-256 over UTF-8 list",
+  "application_source_file_count": 1339,
+  "runtime": [
+    {
+      "service": "omni-frontend-1",
+      "image": "omni-wiki-acceptance-frontend:crm-evidence-20261010",
+      "image_id": "sha256:4620b954ea71ea14f6cee4d3ecbf9edcc3976a93f61b05d25972acce8e722220",
+      "host_ports": []
+    },
+    {
+      "service": "omni-asset-1",
+      "image": "omni-wiki-acceptance-asset:latest",
+      "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+      "host_ports": []
+    },
+    {
+      "service": "omni-procurement-1",
+      "image": "omni-wiki-acceptance-procurement:latest",
+      "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+      "host_ports": []
+    },
+    {
+      "service": "omni-gateway-1",
+      "image": "omni-wiki-acceptance-gateway:latest",
+      "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+      "host_ports": []
+    },
+    {
+      "service": "omni-crm-1",
+      "image": "omni-wiki-acceptance-crm:latest",
+      "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+      "host_ports": []
+    },
+    {
+      "service": "omni-srm-1",
+      "image": "omni-wiki-acceptance-srm:latest",
+      "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+      "host_ports": []
+    },
+    {
+      "service": "omni-auth-1",
+      "image": "omni-wiki-acceptance-auth:latest",
+      "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+      "host_ports": []
+    },
+    {
+      "service": "nacos-1",
+      "image": "nacos/nacos-server:v3.1.1",
+      "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+      "host_ports": []
+    },
+    {
+      "service": "omni-base-1",
+      "image": "omni-wiki-acceptance-base:latest",
+      "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+      "host_ports": []
+    },
+    {
+      "service": "omni-workflow-1",
+      "image": "omni-wiki-acceptance-workflow:latest",
+      "image_id": "sha256:b2296a5b1206b492176bfa5aae197aed5cb473e32934467142fbaa81371d4b86",
+      "host_ports": []
+    },
+    {
+      "service": "xxl-job-admin-1",
+      "image": "xuxueli/xxl-job-admin:3.3.1",
+      "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+      "host_ports": []
+    },
+    {
+      "service": "rocketmq-broker-1",
+      "image": "omni-wiki-acceptance-rocketmq-broker:5.3.2",
+      "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+      "host_ports": []
+    },
+    {
+      "service": "mysql-1",
+      "image": "mysql:8.4",
+      "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "host_ports": []
+    },
+    {
+      "service": "redis-1",
+      "image": "redis:7.4",
+      "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+      "host_ports": []
+    },
+    {
+      "service": "rocketmq-namesrv-1",
+      "image": "apache/rocketmq:5.3.2",
+      "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+      "host_ports": []
+    }
+  ],
+  "verification": {
+    "tests_passed": 32,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "locales": [
+      "zh-CN",
+      "en-US",
+      "ja-JP",
+      "ko-KR"
+    ],
+    "business_mutation_proof": "Preceding real isolated API scenario: completed follow-up, qualification, atomic conversion and replay, owner scope, won/lost/reopen. Final screenshot tests are read-only.",
+    "customer_360": "Live opportunity list requests status=OPEN; WON record excluded and reopened OPEN record included.",
+    "human_translation_review": "Pending; agent visual checks are not human translation sign-off.",
+    "production_image_limit": "Frontend evidence runtime uses a documented cached Nginx build after formal registry DNS/auth failure; formal production base-image build remains unproven."
+  },
+  "records": [
+    {
+      "id": "crm-teaching-lead-converted-zh-CN",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-teaching-lead-converted",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "CONVERTED",
+      "image": "docs/images/zh-CN/crm-teaching-lead-converted.png",
+      "sha256": "caead6973fff866aec6c2c6699a0b4e1348679c1196e7dc2cd5fc17124a2cd45",
+      "captured_at": "2026-10-10T01:16:07.814Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-lead-converted",
+        "locale": "zh-CN",
+        "sha256": "caead6973fff866aec6c2c6699a0b4e1348679c1196e7dc2cd5fc17124a2cd45",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-lead-reopened-zh-CN",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-teaching-lead-reopened",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "FOLLOWING",
+      "image": "docs/images/zh-CN/crm-teaching-lead-reopened.png",
+      "sha256": "bfd242d667373dfd05f7830348d00cf0277989c43b7fc3b9e08708342b23c458",
+      "captured_at": "2026-10-10T01:16:09.017Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-lead-reopened",
+        "locale": "zh-CN",
+        "sha256": "bfd242d667373dfd05f7830348d00cf0277989c43b7fc3b9e08708342b23c458",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-activity-completed-zh-CN",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-teaching-activity-completed",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/zh-CN/crm-teaching-activity-completed.png",
+      "sha256": "bdee6039d39bee2967395f790a1d1bbec737e4c02d9202557872d7a6296bd5cf",
+      "captured_at": "2026-10-10T01:16:10.067Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-activity-completed",
+        "locale": "zh-CN",
+        "sha256": "bdee6039d39bee2967395f790a1d1bbec737e4c02d9202557872d7a6296bd5cf",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-customer-active-360-zh-CN",
+      "module": "crm",
+      "flow": "customer",
+      "step": "crm-teaching-customer-active-360",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/customer",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "ACTIVE",
+      "image": "docs/images/zh-CN/crm-teaching-customer-active-360.png",
+      "sha256": "88a1df4f5584977760420f7c0390167aeedee3d216931bc91dba906058ba70ed",
+      "captured_at": "2026-10-10T01:16:11.276Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-customer-active-360",
+        "locale": "zh-CN",
+        "sha256": "88a1df4f5584977760420f7c0390167aeedee3d216931bc91dba906058ba70ed",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "The open opportunity displays stage fallback #1 and masked activity content; this image does not prove human-readable stage names or unmasked PII. The name Lost opportunity is historical: its current state is OPEN."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-contact-zh-CN",
+      "module": "crm",
+      "flow": "contact",
+      "step": "crm-teaching-contact",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/contact",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": 1,
+      "image": "docs/images/zh-CN/crm-teaching-contact.png",
+      "sha256": "849cdcfa6776013ac244e651595b6e60d418642479e49d4897ec5472e71a3999",
+      "captured_at": "2026-10-10T01:16:12.262Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-contact",
+        "locale": "zh-CN",
+        "sha256": "849cdcfa6776013ac244e651595b6e60d418642479e49d4897ec5472e71a3999",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-opportunity-won-zh-CN",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-teaching-opportunity-won",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "WON",
+      "image": "docs/images/zh-CN/crm-teaching-opportunity-won.png",
+      "sha256": "4e004d0e2b0da47d192a8c31b5934481a9bf016b5a15590388a80c0819808c73",
+      "captured_at": "2026-10-10T01:16:13.296Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-opportunity-won",
+        "locale": "zh-CN",
+        "sha256": "4e004d0e2b0da47d192a8c31b5934481a9bf016b5a15590388a80c0819808c73",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-opportunity-reopened-history-zh-CN",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-teaching-opportunity-reopened-history",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "OPEN",
+      "image": "docs/images/zh-CN/crm-teaching-opportunity-reopened-history.png",
+      "sha256": "33eb68ad30eae0f02c651e991e667a0a8751e3f1000ae61360b5947ebbf35daa",
+      "captured_at": "2026-10-10T01:16:14.676Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-opportunity-reopened-history",
+        "locale": "zh-CN",
+        "sha256": "33eb68ad30eae0f02c651e991e667a0a8751e3f1000ae61360b5947ebbf35daa",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Persisted remarks remain Chinese and operator identity uses User#210; the image proves history actions, not translated remarks or a resolved display name."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-outside-scope-zh-CN",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-teaching-outside-scope",
+      "locale": "zh-CN",
+      "actor": "outsider",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "OUTSIDE_SCOPE",
+      "image": "docs/images/zh-CN/crm-teaching-outside-scope.png",
+      "sha256": "bad447e4f1d9230492cffea154316448a45b6e30c4e36c98f2319d15c70312d4",
+      "captured_at": "2026-10-10T01:16:15.565Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-outside-scope",
+        "locale": "zh-CN",
+        "sha256": "bad447e4f1d9230492cffea154316448a45b6e30c4e36c98f2319d15c70312d4",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "This image proves an empty list for an authenticated same-tenant SALES_REP outside the owner scope; it is not a 403 page or cross-tenant evidence."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-lead-converted-en-US",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-teaching-lead-converted",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "CONVERTED",
+      "image": "docs/images/en-US/crm-teaching-lead-converted.png",
+      "sha256": "e1599a9a7fc1979f0c239bc6c2735012b88a49a7e87585aa3892237616eeaf37",
+      "captured_at": "2026-10-10T01:16:16.581Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-lead-converted",
+        "locale": "en-US",
+        "sha256": "e1599a9a7fc1979f0c239bc6c2735012b88a49a7e87585aa3892237616eeaf37",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "Converted status uses an ellipsis in the narrow tag; the API assertion verifies the full CONVERTED value."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-lead-reopened-en-US",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-teaching-lead-reopened",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "FOLLOWING",
+      "image": "docs/images/en-US/crm-teaching-lead-reopened.png",
+      "sha256": "e1599a9a7fc1979f0c239bc6c2735012b88a49a7e87585aa3892237616eeaf37",
+      "captured_at": "2026-10-10T01:16:17.565Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-lead-reopened",
+        "locale": "en-US",
+        "sha256": "e1599a9a7fc1979f0c239bc6c2735012b88a49a7e87585aa3892237616eeaf37",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-activity-completed-en-US",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-teaching-activity-completed",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/en-US/crm-teaching-activity-completed.png",
+      "sha256": "19f3a9f54f668603f6d7a03a4195f381cef4b81b3a5b7688309b84db4bd7a0e3",
+      "captured_at": "2026-10-10T01:16:18.590Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-activity-completed",
+        "locale": "en-US",
+        "sha256": "19f3a9f54f668603f6d7a03a4195f381cef4b81b3a5b7688309b84db4bd7a0e3",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-customer-active-360-en-US",
+      "module": "crm",
+      "flow": "customer",
+      "step": "crm-teaching-customer-active-360",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/customer",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "ACTIVE",
+      "image": "docs/images/en-US/crm-teaching-customer-active-360.png",
+      "sha256": "24ac131dfbfef0b3e0dcc59bff2404b4fbe87d5536d70af4eb523ae7e922e329",
+      "captured_at": "2026-10-10T01:16:19.862Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-customer-active-360",
+        "locale": "en-US",
+        "sha256": "24ac131dfbfef0b3e0dcc59bff2404b4fbe87d5536d70af4eb523ae7e922e329",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "The open opportunity displays stage fallback #1 and masked activity content; this image does not prove human-readable stage names or unmasked PII. The name Lost opportunity is historical: its current state is OPEN."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-contact-en-US",
+      "module": "crm",
+      "flow": "contact",
+      "step": "crm-teaching-contact",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/contact",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": 1,
+      "image": "docs/images/en-US/crm-teaching-contact.png",
+      "sha256": "8f1a0c481032577cbb10b14fc0aa32707d0875d4b7bef1a6ece7e37bf1de1943",
+      "captured_at": "2026-10-10T01:16:21.046Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-contact",
+        "locale": "en-US",
+        "sha256": "8f1a0c481032577cbb10b14fc0aa32707d0875d4b7bef1a6ece7e37bf1de1943",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-opportunity-won-en-US",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-teaching-opportunity-won",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "WON",
+      "image": "docs/images/en-US/crm-teaching-opportunity-won.png",
+      "sha256": "fb8d7a5ea008a3be860105c98e74a9a4516099745bcc1dd5f7426deb17a3006b",
+      "captured_at": "2026-10-10T01:16:22.115Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-opportunity-won",
+        "locale": "en-US",
+        "sha256": "fb8d7a5ea008a3be860105c98e74a9a4516099745bcc1dd5f7426deb17a3006b",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-opportunity-reopened-history-en-US",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-teaching-opportunity-reopened-history",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "OPEN",
+      "image": "docs/images/en-US/crm-teaching-opportunity-reopened-history.png",
+      "sha256": "d3af2716be830e0c479af5db3840ff9a0624e88c0342bd8af7c2ddd58c2ba546",
+      "captured_at": "2026-10-10T01:16:23.433Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-opportunity-reopened-history",
+        "locale": "en-US",
+        "sha256": "d3af2716be830e0c479af5db3840ff9a0624e88c0342bd8af7c2ddd58c2ba546",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "Persisted remarks remain Chinese and operator identity uses User#210; the image proves history actions, not translated remarks or a resolved display name."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-outside-scope-en-US",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-teaching-outside-scope",
+      "locale": "en-US",
+      "actor": "outsider",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "OUTSIDE_SCOPE",
+      "image": "docs/images/en-US/crm-teaching-outside-scope.png",
+      "sha256": "c4b5bbdb5b5069dfb3f617a588688784085bc73d6f7973f01cb0ff80777c4b88",
+      "captured_at": "2026-10-10T01:16:24.365Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-outside-scope",
+        "locale": "en-US",
+        "sha256": "c4b5bbdb5b5069dfb3f617a588688784085bc73d6f7973f01cb0ff80777c4b88",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "This image proves an empty list for an authenticated same-tenant SALES_REP outside the owner scope; it is not a 403 page or cross-tenant evidence."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-lead-converted-ja-JP",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-teaching-lead-converted",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "CONVERTED",
+      "image": "docs/images/ja-JP/crm-teaching-lead-converted.png",
+      "sha256": "ebf8ab55050359ec9d41221b331f97a5c50367e2cf6561e89fff81a50198f7fe",
+      "captured_at": "2026-10-10T01:16:25.393Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-lead-converted",
+        "locale": "ja-JP",
+        "sha256": "ebf8ab55050359ec9d41221b331f97a5c50367e2cf6561e89fff81a50198f7fe",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-lead-reopened-ja-JP",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-teaching-lead-reopened",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "FOLLOWING",
+      "image": "docs/images/ja-JP/crm-teaching-lead-reopened.png",
+      "sha256": "ebf8ab55050359ec9d41221b331f97a5c50367e2cf6561e89fff81a50198f7fe",
+      "captured_at": "2026-10-10T01:16:26.383Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-lead-reopened",
+        "locale": "ja-JP",
+        "sha256": "ebf8ab55050359ec9d41221b331f97a5c50367e2cf6561e89fff81a50198f7fe",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "The end of the Following label is clipped; the API assertion verifies FOLLOWING."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-activity-completed-ja-JP",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-teaching-activity-completed",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/ja-JP/crm-teaching-activity-completed.png",
+      "sha256": "0b3aee9e75b0bd0279afebe595df8ce2b956d28313e84fbd3332c79b7b4a54cc",
+      "captured_at": "2026-10-10T01:16:28.187Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-activity-completed",
+        "locale": "ja-JP",
+        "sha256": "0b3aee9e75b0bd0279afebe595df8ce2b956d28313e84fbd3332c79b7b4a54cc",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-customer-active-360-ja-JP",
+      "module": "crm",
+      "flow": "customer",
+      "step": "crm-teaching-customer-active-360",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/customer",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "ACTIVE",
+      "image": "docs/images/ja-JP/crm-teaching-customer-active-360.png",
+      "sha256": "0f344bb8cb910e0c9e52e68cbd17e0bb36d795a525c3c67ea16c7726457e039c",
+      "captured_at": "2026-10-10T01:16:30.207Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-customer-active-360",
+        "locale": "ja-JP",
+        "sha256": "0f344bb8cb910e0c9e52e68cbd17e0bb36d795a525c3c67ea16c7726457e039c",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "The open opportunity displays stage fallback #1 and masked activity content; this image does not prove human-readable stage names or unmasked PII. The name Lost opportunity is historical: its current state is OPEN."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-contact-ja-JP",
+      "module": "crm",
+      "flow": "contact",
+      "step": "crm-teaching-contact",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/contact",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": 1,
+      "image": "docs/images/ja-JP/crm-teaching-contact.png",
+      "sha256": "5feeb749229974edf95f37390d5bcab414aacd1c1fedcb9d20d858b719749f98",
+      "captured_at": "2026-10-10T01:16:31.543Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-contact",
+        "locale": "ja-JP",
+        "sha256": "5feeb749229974edf95f37390d5bcab414aacd1c1fedcb9d20d858b719749f98",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-opportunity-won-ja-JP",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-teaching-opportunity-won",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "WON",
+      "image": "docs/images/ja-JP/crm-teaching-opportunity-won.png",
+      "sha256": "9780a54c859663df672d1c220d0ab346ef3503557d2b98b438aef75581ddf693",
+      "captured_at": "2026-10-10T01:16:33.599Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-opportunity-won",
+        "locale": "ja-JP",
+        "sha256": "9780a54c859663df672d1c220d0ab346ef3503557d2b98b438aef75581ddf693",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-opportunity-reopened-history-ja-JP",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-teaching-opportunity-reopened-history",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "OPEN",
+      "image": "docs/images/ja-JP/crm-teaching-opportunity-reopened-history.png",
+      "sha256": "b6be18e2c2e4d91f2774c518b04fc9804ca5e3747d639770637d0f4b0af8fe6b",
+      "captured_at": "2026-10-10T01:16:36.183Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-opportunity-reopened-history",
+        "locale": "ja-JP",
+        "sha256": "b6be18e2c2e4d91f2774c518b04fc9804ca5e3747d639770637d0f4b0af8fe6b",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "Persisted remarks remain Chinese and operator identity uses User#210; the image proves history actions, not translated remarks or a resolved display name."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-outside-scope-ja-JP",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-teaching-outside-scope",
+      "locale": "ja-JP",
+      "actor": "outsider",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "OUTSIDE_SCOPE",
+      "image": "docs/images/ja-JP/crm-teaching-outside-scope.png",
+      "sha256": "0aaf8d616c08a701975232a6a367c709d753a95dd669e0f6ebe1743c2e18d90c",
+      "captured_at": "2026-10-10T01:16:37.207Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-outside-scope",
+        "locale": "ja-JP",
+        "sha256": "0aaf8d616c08a701975232a6a367c709d753a95dd669e0f6ebe1743c2e18d90c",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "This image proves an empty list for an authenticated same-tenant SALES_REP outside the owner scope; it is not a 403 page or cross-tenant evidence."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-lead-converted-ko-KR",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-teaching-lead-converted",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "CONVERTED",
+      "image": "docs/images/ko-KR/crm-teaching-lead-converted.png",
+      "sha256": "989b03b14553731950020fc3ba350346675142b9c08243ed6c9b3b7a954f60b5",
+      "captured_at": "2026-10-10T01:16:38.272Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-lead-converted",
+        "locale": "ko-KR",
+        "sha256": "989b03b14553731950020fc3ba350346675142b9c08243ed6c9b3b7a954f60b5",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-lead-reopened-ko-KR",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-teaching-lead-reopened",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "FOLLOWING",
+      "image": "docs/images/ko-KR/crm-teaching-lead-reopened.png",
+      "sha256": "989b03b14553731950020fc3ba350346675142b9c08243ed6c9b3b7a954f60b5",
+      "captured_at": "2026-10-10T01:16:39.287Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-lead-reopened",
+        "locale": "ko-KR",
+        "sha256": "989b03b14553731950020fc3ba350346675142b9c08243ed6c9b3b7a954f60b5",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-activity-completed-ko-KR",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-teaching-activity-completed",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/ko-KR/crm-teaching-activity-completed.png",
+      "sha256": "21f60498c1fa5f12e386f4e15e5455c481bd2ff4a618d7c9edbe84a5eb8d588c",
+      "captured_at": "2026-10-10T01:16:40.284Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-activity-completed",
+        "locale": "ko-KR",
+        "sha256": "21f60498c1fa5f12e386f4e15e5455c481bd2ff4a618d7c9edbe84a5eb8d588c",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-customer-active-360-ko-KR",
+      "module": "crm",
+      "flow": "customer",
+      "step": "crm-teaching-customer-active-360",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/customer",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "ACTIVE",
+      "image": "docs/images/ko-KR/crm-teaching-customer-active-360.png",
+      "sha256": "5a9bdb1d7259d63bec999afceb437ffdd8e887a91edbb42a49cf8bf0e4ac08d7",
+      "captured_at": "2026-10-10T01:16:41.432Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-customer-active-360",
+        "locale": "ko-KR",
+        "sha256": "5a9bdb1d7259d63bec999afceb437ffdd8e887a91edbb42a49cf8bf0e4ac08d7",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "The open opportunity displays stage fallback #1 and masked activity content; this image does not prove human-readable stage names or unmasked PII. The name Lost opportunity is historical: its current state is OPEN."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-contact-ko-KR",
+      "module": "crm",
+      "flow": "contact",
+      "step": "crm-teaching-contact",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/contact",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": 1,
+      "image": "docs/images/ko-KR/crm-teaching-contact.png",
+      "sha256": "193bfbffba38a09ae89eb2163e09e3fadc3aa27ce27a3a7385e147adff601f71",
+      "captured_at": "2026-10-10T01:16:42.347Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-contact",
+        "locale": "ko-KR",
+        "sha256": "193bfbffba38a09ae89eb2163e09e3fadc3aa27ce27a3a7385e147adff601f71",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-opportunity-won-ko-KR",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-teaching-opportunity-won",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "WON",
+      "image": "docs/images/ko-KR/crm-teaching-opportunity-won.png",
+      "sha256": "6c17b4d354e7b574ee91ed4af405566ead38d51df63e50ccdee94cc1163a1612",
+      "captured_at": "2026-10-10T01:16:43.346Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-opportunity-won",
+        "locale": "ko-KR",
+        "sha256": "6c17b4d354e7b574ee91ed4af405566ead38d51df63e50ccdee94cc1163a1612",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-opportunity-reopened-history-ko-KR",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-teaching-opportunity-reopened-history",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "OPEN",
+      "image": "docs/images/ko-KR/crm-teaching-opportunity-reopened-history.png",
+      "sha256": "9eb4d34e4ad0075c561c1d0b3e9df84c48dbc831902c276fc363eca9a62e65a6",
+      "captured_at": "2026-10-10T01:16:44.730Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-opportunity-reopened-history",
+        "locale": "ko-KR",
+        "sha256": "9eb4d34e4ad0075c561c1d0b3e9df84c48dbc831902c276fc363eca9a62e65a6",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "Persisted remarks remain Chinese and operator identity uses User#210; the image proves history actions, not translated remarks or a resolved display name."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-teaching-outside-scope-ko-KR",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-teaching-outside-scope",
+      "locale": "ko-KR",
+      "actor": "outsider",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "OUTSIDE_SCOPE",
+      "image": "docs/images/ko-KR/crm-teaching-outside-scope.png",
+      "sha256": "df89aeeda805b906eff7664b73819ac2604d455d8ce59eb5559dc63fff117c68",
+      "captured_at": "2026-10-10T01:16:45.578Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "test_sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3",
+      "visual_review": {
+        "step": "crm-teaching-outside-scope",
+        "locale": "ko-KR",
+        "sha256": "df89aeeda805b906eff7664b73819ac2604d455d8ce59eb5559dc63fff117c68",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T01:48:24.936Z",
+        "method": "All eight original-resolution four-locale contact sheets inspected; all 32 originals checked against bounded visible claims",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values may remain Chinese; UI headers and buttons use the selected locale.",
+          "This image proves an empty list for an authenticated same-tenant SALES_REP outside the owner scope; it is not a 403 page or cross-tenant evidence."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-create-form-zh-CN",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-ui-lead-create-form",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Unique lead form, no write yet",
+      "image": "docs/images/zh-CN/crm-ui-lead-create-form.png",
+      "sha256": "f871f02a345531d3ea4bb1bb329242d30addd9b2c8526d2e9b7a401cd1475060",
+      "captured_at": "2026-10-10T02:11:27.675Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-create-form",
+        "locale": "zh-CN",
+        "sha256": "f871f02a345531d3ea4bb1bb329242d30addd9b2c8526d2e9b7a401cd1475060",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-plan-form-zh-CN",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-plan-form",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "LEAD/CALL/PLANNED form",
+      "image": "docs/images/zh-CN/crm-ui-activity-plan-form.png",
+      "sha256": "7dd3f0c046d8af9fe98639c0dbf5a5f38a845b169f7e66d0118545503a867bc3",
+      "captured_at": "2026-10-10T02:11:29.009Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-plan-form",
+        "locale": "zh-CN",
+        "sha256": "7dd3f0c046d8af9fe98639c0dbf5a5f38a845b169f7e66d0118545503a867bc3",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-planned-result-zh-CN",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-planned-result",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "PLANNED; lead remains NEW",
+      "image": "docs/images/zh-CN/crm-ui-activity-planned-result.png",
+      "sha256": "a7c399ea7238033d85a733357803e4554827343f4a99181bcf2de604fc3462eb",
+      "captured_at": "2026-10-10T02:11:29.511Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-planned-result",
+        "locale": "zh-CN",
+        "sha256": "a7c399ea7238033d85a733357803e4554827343f4a99181bcf2de604fc3462eb",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row.",
+          "The activity list visibly proves PLANNED. The lead remaining NEW is a separate live API assertion, not visible in this image."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-complete-form-zh-CN",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-complete-form",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Actual completion time before submit",
+      "image": "docs/images/zh-CN/crm-ui-activity-complete-form.png",
+      "sha256": "5ae366d01f60cbdf0f7b5f0b9239af0dd29e11207d86e8e6c6951c6f834168c1",
+      "captured_at": "2026-10-10T02:11:30.413Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-complete-form",
+        "locale": "zh-CN",
+        "sha256": "5ae366d01f60cbdf0f7b5f0b9239af0dd29e11207d86e8e6c6951c6f834168c1",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-qualified-zh-CN",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-ui-lead-qualified",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "QUALIFIED after completed follow-up",
+      "image": "docs/images/zh-CN/crm-ui-lead-qualified.png",
+      "sha256": "cf6be618614abf166a6666f0a40ee7f14d366e8c95c9bfd626c78e0a72b463fb",
+      "captured_at": "2026-10-10T02:11:31.879Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-qualified",
+        "locale": "zh-CN",
+        "sha256": "cf6be618614abf166a6666f0a40ee7f14d366e8c95c9bfd626c78e0a72b463fb",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-customer-zh-CN",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-customer",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 1 CREATE customer",
+      "image": "docs/images/zh-CN/crm-ui-convert-customer.png",
+      "sha256": "a7ac72c8be234acb262c83e17b1d78323e73bba4eda80cea3791690e5e7da260",
+      "captured_at": "2026-10-10T02:11:32.436Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-customer",
+        "locale": "zh-CN",
+        "sha256": "a7ac72c8be234acb262c83e17b1d78323e73bba4eda80cea3791690e5e7da260",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-contact-zh-CN",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-contact",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 2 CREATE contact",
+      "image": "docs/images/zh-CN/crm-ui-convert-contact.png",
+      "sha256": "29aa37a1e411490d0c09539390d482acf2bec3545214e0cee751c10b7a0d0419",
+      "captured_at": "2026-10-10T02:11:32.783Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-contact",
+        "locale": "zh-CN",
+        "sha256": "29aa37a1e411490d0c09539390d482acf2bec3545214e0cee751c10b7a0d0419",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-opportunity-zh-CN",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-opportunity",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 3 CREATE opportunity amount 12500",
+      "image": "docs/images/zh-CN/crm-ui-convert-opportunity.png",
+      "sha256": "ae2dd2b31d884e5bc3c430ec130dbb8ffde6f07f81f80a2e886679156d11686e",
+      "captured_at": "2026-10-10T02:11:33.386Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-opportunity",
+        "locale": "zh-CN",
+        "sha256": "ae2dd2b31d884e5bc3c430ec130dbb8ffde6f07f81f80a2e886679156d11686e",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-confirm-zh-CN",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-confirm",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 4 verify before atomic conversion",
+      "image": "docs/images/zh-CN/crm-ui-convert-confirm.png",
+      "sha256": "67cb013e946353d306afbd2ef8a8d7edb734bbc3ba9fffbba511974103fa0ac0",
+      "captured_at": "2026-10-10T02:11:33.728Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-confirm",
+        "locale": "zh-CN",
+        "sha256": "67cb013e946353d306afbd2ef8a8d7edb734bbc3ba9fffbba511974103fa0ac0",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-converted-result-zh-CN",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-lead-converted-result",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "CONVERTED from the four real wizard steps",
+      "image": "docs/images/zh-CN/crm-ui-lead-converted-result.png",
+      "sha256": "36db7601dcc57948187a69f229d6215c2be2001c19ca1bf188506e86e6560bb8",
+      "captured_at": "2026-10-10T02:11:34.185Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-converted-result",
+        "locale": "zh-CN",
+        "sha256": "36db7601dcc57948187a69f229d6215c2be2001c19ca1bf188506e86e6560bb8",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-opportunity-stage-form-zh-CN",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-ui-opportunity-stage-form",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Target PROPOSAL and change reason before submit",
+      "image": "docs/images/zh-CN/crm-ui-opportunity-stage-form.png",
+      "sha256": "1091fb4822389ba9ff00ddecacf41f089896e0fc7c6c0a5c79a95338d4f6e7ef",
+      "captured_at": "2026-10-10T02:11:35.529Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-opportunity-stage-form",
+        "locale": "zh-CN",
+        "sha256": "1091fb4822389ba9ff00ddecacf41f089896e0fc7c6c0a5c79a95338d4f6e7ef",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-opportunity-won-result-zh-CN",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-ui-opportunity-won-result",
+      "locale": "zh-CN",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "WON; linked customer ACTIVE",
+      "image": "docs/images/zh-CN/crm-ui-opportunity-won-result.png",
+      "sha256": "e889130e6a57d10a4ebc5678c2317de6a51f73289a8e80f2cf191d233b56710c",
+      "captured_at": "2026-10-10T02:11:37.784Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-opportunity-won-result",
+        "locale": "zh-CN",
+        "sha256": "e889130e6a57d10a4ebc5678c2317de6a51f73289a8e80f2cf191d233b56710c",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row.",
+          "The list visibly proves WON, 12500 CNY and 100 percent probability; the customer becoming ACTIVE and activity migration are separate live API assertions."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-create-form-en-US",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-ui-lead-create-form",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Unique lead form, no write yet",
+      "image": "docs/images/en-US/crm-ui-lead-create-form.png",
+      "sha256": "1c4f23d168cdd0e48f7e7d16d7f4828d1c6676c023d4925bb654103f46edb4e6",
+      "captured_at": "2026-10-10T02:11:39.080Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-create-form",
+        "locale": "en-US",
+        "sha256": "1c4f23d168cdd0e48f7e7d16d7f4828d1c6676c023d4925bb654103f46edb4e6",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout.",
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-plan-form-en-US",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-plan-form",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "LEAD/CALL/PLANNED form",
+      "image": "docs/images/en-US/crm-ui-activity-plan-form.png",
+      "sha256": "6537973005979923cd2680fb4d687ebb60da3001d2dd0b385f49723972731cb4",
+      "captured_at": "2026-10-10T02:11:40.542Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-plan-form",
+        "locale": "en-US",
+        "sha256": "6537973005979923cd2680fb4d687ebb60da3001d2dd0b385f49723972731cb4",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-planned-result-en-US",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-planned-result",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "PLANNED; lead remains NEW",
+      "image": "docs/images/en-US/crm-ui-activity-planned-result.png",
+      "sha256": "700f137306146ac154b90d587dab4145be04898dcb3d6de37caa67e3135a97a2",
+      "captured_at": "2026-10-10T02:11:41.032Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-planned-result",
+        "locale": "en-US",
+        "sha256": "700f137306146ac154b90d587dab4145be04898dcb3d6de37caa67e3135a97a2",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row.",
+          "The activity list visibly proves PLANNED. The lead remaining NEW is a separate live API assertion, not visible in this image."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-complete-form-en-US",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-complete-form",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Actual completion time before submit",
+      "image": "docs/images/en-US/crm-ui-activity-complete-form.png",
+      "sha256": "cd7e33622d1008a1fcd46eece3c22618494b6cf5d36b1cd7fb65da727e0b71eb",
+      "captured_at": "2026-10-10T02:11:41.897Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-complete-form",
+        "locale": "en-US",
+        "sha256": "cd7e33622d1008a1fcd46eece3c22618494b6cf5d36b1cd7fb65da727e0b71eb",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-qualified-en-US",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-ui-lead-qualified",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "QUALIFIED after completed follow-up",
+      "image": "docs/images/en-US/crm-ui-lead-qualified.png",
+      "sha256": "c6d967d84afa41666fa6e07fc337a1d7bfc74f305e3a652f5553dd4da2bfd0ed",
+      "captured_at": "2026-10-10T02:11:43.245Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-qualified",
+        "locale": "en-US",
+        "sha256": "c6d967d84afa41666fa6e07fc337a1d7bfc74f305e3a652f5553dd4da2bfd0ed",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-customer-en-US",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-customer",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 1 CREATE customer",
+      "image": "docs/images/en-US/crm-ui-convert-customer.png",
+      "sha256": "4dd9960f75a37b04511357bdc1ccb131f1c4b5257b046d3689120f8192b7daa3",
+      "captured_at": "2026-10-10T02:11:43.739Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-customer",
+        "locale": "en-US",
+        "sha256": "4dd9960f75a37b04511357bdc1ccb131f1c4b5257b046d3689120f8192b7daa3",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-contact-en-US",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-contact",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 2 CREATE contact",
+      "image": "docs/images/en-US/crm-ui-convert-contact.png",
+      "sha256": "55c2a0a27dad01adea5d57ef0cfe1c2173644918b83e9690655ac179c5141679",
+      "captured_at": "2026-10-10T02:11:44.066Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-contact",
+        "locale": "en-US",
+        "sha256": "55c2a0a27dad01adea5d57ef0cfe1c2173644918b83e9690655ac179c5141679",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-opportunity-en-US",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-opportunity",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 3 CREATE opportunity amount 12500",
+      "image": "docs/images/en-US/crm-ui-convert-opportunity.png",
+      "sha256": "07c879c93cbd30c433b5e2b392146354c09d2f93dd6cddfcc6261ffd7eb164ce",
+      "captured_at": "2026-10-10T02:11:44.546Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-opportunity",
+        "locale": "en-US",
+        "sha256": "07c879c93cbd30c433b5e2b392146354c09d2f93dd6cddfcc6261ffd7eb164ce",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-confirm-en-US",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-confirm",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 4 verify before atomic conversion",
+      "image": "docs/images/en-US/crm-ui-convert-confirm.png",
+      "sha256": "c7a70b400ffcf6aabb9e56d1aa41fadf932832005c35fae1b4183ec8ec2f1c68",
+      "captured_at": "2026-10-10T02:11:44.882Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-confirm",
+        "locale": "en-US",
+        "sha256": "c7a70b400ffcf6aabb9e56d1aa41fadf932832005c35fae1b4183ec8ec2f1c68",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-converted-result-en-US",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-lead-converted-result",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "CONVERTED from the four real wizard steps",
+      "image": "docs/images/en-US/crm-ui-lead-converted-result.png",
+      "sha256": "8806b8ef05f714d316cf6ec17c0723528155df2a16e969d30c55640dcd722388",
+      "captured_at": "2026-10-10T02:11:45.374Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-converted-result",
+        "locale": "en-US",
+        "sha256": "8806b8ef05f714d316cf6ec17c0723528155df2a16e969d30c55640dcd722388",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row.",
+          "The narrow Converted status tag has an ellipsis; live API confirms CONVERTED."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-opportunity-stage-form-en-US",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-ui-opportunity-stage-form",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Target PROPOSAL and change reason before submit",
+      "image": "docs/images/en-US/crm-ui-opportunity-stage-form.png",
+      "sha256": "054e0f43bc3d6dc93dd26d9c89b13baf73b29fd0b042d7e845d5f06f254df6f5",
+      "captured_at": "2026-10-10T02:11:46.609Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-opportunity-stage-form",
+        "locale": "en-US",
+        "sha256": "054e0f43bc3d6dc93dd26d9c89b13baf73b29fd0b042d7e845d5f06f254df6f5",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-opportunity-won-result-en-US",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-ui-opportunity-won-result",
+      "locale": "en-US",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "WON; linked customer ACTIVE",
+      "image": "docs/images/en-US/crm-ui-opportunity-won-result.png",
+      "sha256": "3eb6a7a5d7492b1f7ed619873c8618d11fdf3a6074d13633bb27196ea66e59d5",
+      "captured_at": "2026-10-10T02:11:48.564Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-opportunity-won-result",
+        "locale": "en-US",
+        "sha256": "3eb6a7a5d7492b1f7ed619873c8618d11fdf3a6074d13633bb27196ea66e59d5",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row.",
+          "The list visibly proves WON, 12500 CNY and 100 percent probability; the customer becoming ACTIVE and activity migration are separate live API assertions."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-create-form-ja-JP",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-ui-lead-create-form",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Unique lead form, no write yet",
+      "image": "docs/images/ja-JP/crm-ui-lead-create-form.png",
+      "sha256": "6b4d0437213e170f14544ab860e9f2c53585e7a5de5328d313e4f290905f1c20",
+      "captured_at": "2026-10-10T02:11:49.932Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-create-form",
+        "locale": "ja-JP",
+        "sha256": "6b4d0437213e170f14544ab860e9f2c53585e7a5de5328d313e4f290905f1c20",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout.",
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-plan-form-ja-JP",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-plan-form",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "LEAD/CALL/PLANNED form",
+      "image": "docs/images/ja-JP/crm-ui-activity-plan-form.png",
+      "sha256": "3dfed8f8dd68fcea12fd4f4c145b955ed3eafdbc6565bbc96654c6312a1d2960",
+      "captured_at": "2026-10-10T02:11:51.294Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-plan-form",
+        "locale": "ja-JP",
+        "sha256": "3dfed8f8dd68fcea12fd4f4c145b955ed3eafdbc6565bbc96654c6312a1d2960",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-planned-result-ja-JP",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-planned-result",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "PLANNED; lead remains NEW",
+      "image": "docs/images/ja-JP/crm-ui-activity-planned-result.png",
+      "sha256": "c83190b0273ef3d53d8c0ef13766c3c4c23523c5566282311624413e4bd08fed",
+      "captured_at": "2026-10-10T02:11:51.740Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-planned-result",
+        "locale": "ja-JP",
+        "sha256": "c83190b0273ef3d53d8c0ef13766c3c4c23523c5566282311624413e4bd08fed",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row.",
+          "The activity list visibly proves PLANNED. The lead remaining NEW is a separate live API assertion, not visible in this image."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-complete-form-ja-JP",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-complete-form",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Actual completion time before submit",
+      "image": "docs/images/ja-JP/crm-ui-activity-complete-form.png",
+      "sha256": "9c83ccee1f8fca28c661bf9874effc8effb54fc44af0d8f4f9a966fabeec95da",
+      "captured_at": "2026-10-10T02:11:52.618Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-complete-form",
+        "locale": "ja-JP",
+        "sha256": "9c83ccee1f8fca28c661bf9874effc8effb54fc44af0d8f4f9a966fabeec95da",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-qualified-ja-JP",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-ui-lead-qualified",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "QUALIFIED after completed follow-up",
+      "image": "docs/images/ja-JP/crm-ui-lead-qualified.png",
+      "sha256": "b35fcf9d51f875ecf2e2521b67f98bac61df02d5efae094672b0080b66e12670",
+      "captured_at": "2026-10-10T02:11:54.065Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-qualified",
+        "locale": "ja-JP",
+        "sha256": "b35fcf9d51f875ecf2e2521b67f98bac61df02d5efae094672b0080b66e12670",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-customer-ja-JP",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-customer",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 1 CREATE customer",
+      "image": "docs/images/ja-JP/crm-ui-convert-customer.png",
+      "sha256": "b6370ce206138c2538cf28196b47b7421d354ed1d95ceb6fb1b1f0d9cdf6e471",
+      "captured_at": "2026-10-10T02:11:54.558Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-customer",
+        "locale": "ja-JP",
+        "sha256": "b6370ce206138c2538cf28196b47b7421d354ed1d95ceb6fb1b1f0d9cdf6e471",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-contact-ja-JP",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-contact",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 2 CREATE contact",
+      "image": "docs/images/ja-JP/crm-ui-convert-contact.png",
+      "sha256": "94cec04dd9dbd6d6de45207e60ab6fd540312bc85587ebbf1c2e5994c35951b7",
+      "captured_at": "2026-10-10T02:11:54.911Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-contact",
+        "locale": "ja-JP",
+        "sha256": "94cec04dd9dbd6d6de45207e60ab6fd540312bc85587ebbf1c2e5994c35951b7",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-opportunity-ja-JP",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-opportunity",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 3 CREATE opportunity amount 12500",
+      "image": "docs/images/ja-JP/crm-ui-convert-opportunity.png",
+      "sha256": "66ed0294d5c084eeb79b74b32f5c2ce8c5c90f075711b743445221b492f68ce3",
+      "captured_at": "2026-10-10T02:11:55.492Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-opportunity",
+        "locale": "ja-JP",
+        "sha256": "66ed0294d5c084eeb79b74b32f5c2ce8c5c90f075711b743445221b492f68ce3",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-confirm-ja-JP",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-confirm",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 4 verify before atomic conversion",
+      "image": "docs/images/ja-JP/crm-ui-convert-confirm.png",
+      "sha256": "7bcc16b8b461221a951c050c37269afb447b5586a9750caba7c0bf01c7ca38a0",
+      "captured_at": "2026-10-10T02:11:55.857Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-confirm",
+        "locale": "ja-JP",
+        "sha256": "7bcc16b8b461221a951c050c37269afb447b5586a9750caba7c0bf01c7ca38a0",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-converted-result-ja-JP",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-lead-converted-result",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "CONVERTED from the four real wizard steps",
+      "image": "docs/images/ja-JP/crm-ui-lead-converted-result.png",
+      "sha256": "f3ebc38771db6631697dd33b7896c1e750bb809c1499cbac09b7d8608c31037c",
+      "captured_at": "2026-10-10T02:11:56.374Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-converted-result",
+        "locale": "ja-JP",
+        "sha256": "f3ebc38771db6631697dd33b7896c1e750bb809c1499cbac09b7d8608c31037c",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-opportunity-stage-form-ja-JP",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-ui-opportunity-stage-form",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Target PROPOSAL and change reason before submit",
+      "image": "docs/images/ja-JP/crm-ui-opportunity-stage-form.png",
+      "sha256": "f35d83881237d1b3ab30b18dd8a2682b3affe9ac851bbcc393b5a4fbc94db07e",
+      "captured_at": "2026-10-10T02:11:57.725Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-opportunity-stage-form",
+        "locale": "ja-JP",
+        "sha256": "f35d83881237d1b3ab30b18dd8a2682b3affe9ac851bbcc393b5a4fbc94db07e",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-opportunity-won-result-ja-JP",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-ui-opportunity-won-result",
+      "locale": "ja-JP",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "WON; linked customer ACTIVE",
+      "image": "docs/images/ja-JP/crm-ui-opportunity-won-result.png",
+      "sha256": "4bbe278f8070f34714a70c6b54f390ae7e507e9b5ca1e3f172c23e9478823b07",
+      "captured_at": "2026-10-10T02:11:59.696Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-opportunity-won-result",
+        "locale": "ja-JP",
+        "sha256": "4bbe278f8070f34714a70c6b54f390ae7e507e9b5ca1e3f172c23e9478823b07",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row.",
+          "The list visibly proves WON, 12500 CNY and 100 percent probability; the customer becoming ACTIVE and activity migration are separate live API assertions."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-create-form-ko-KR",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-ui-lead-create-form",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Unique lead form, no write yet",
+      "image": "docs/images/ko-KR/crm-ui-lead-create-form.png",
+      "sha256": "b3452dc10a0498056d7af05fb69947c30fcf295b1ae7054f865714740f715956",
+      "captured_at": "2026-10-10T02:12:01.267Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-create-form",
+        "locale": "ko-KR",
+        "sha256": "b3452dc10a0498056d7af05fb69947c30fcf295b1ae7054f865714740f715956",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout.",
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-plan-form-ko-KR",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-plan-form",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "LEAD/CALL/PLANNED form",
+      "image": "docs/images/ko-KR/crm-ui-activity-plan-form.png",
+      "sha256": "753cabab97d86dfa213f6fe2089e6bee6cb3f3f128df79eea1553fc9dd77684a",
+      "captured_at": "2026-10-10T02:12:02.581Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-plan-form",
+        "locale": "ko-KR",
+        "sha256": "753cabab97d86dfa213f6fe2089e6bee6cb3f3f128df79eea1553fc9dd77684a",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-planned-result-ko-KR",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-planned-result",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "PLANNED; lead remains NEW",
+      "image": "docs/images/ko-KR/crm-ui-activity-planned-result.png",
+      "sha256": "8861bf76e9fc7580805a0ea8987de78979bf46829b139f3ffaf4c4ec8d1bfd4d",
+      "captured_at": "2026-10-10T02:12:03.052Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-planned-result",
+        "locale": "ko-KR",
+        "sha256": "8861bf76e9fc7580805a0ea8987de78979bf46829b139f3ffaf4c4ec8d1bfd4d",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row.",
+          "The activity list visibly proves PLANNED. The lead remaining NEW is a separate live API assertion, not visible in this image."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-activity-complete-form-ko-KR",
+      "module": "crm",
+      "flow": "activity",
+      "step": "crm-ui-activity-complete-form",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/activity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Actual completion time before submit",
+      "image": "docs/images/ko-KR/crm-ui-activity-complete-form.png",
+      "sha256": "e27afe95f08955a694a322fa22b72ecb2b9e2c00eee4f9b25117ff1058564b19",
+      "captured_at": "2026-10-10T02:12:03.891Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-activity-complete-form",
+        "locale": "ko-KR",
+        "sha256": "e27afe95f08955a694a322fa22b72ecb2b9e2c00eee4f9b25117ff1058564b19",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-qualified-ko-KR",
+      "module": "crm",
+      "flow": "lead",
+      "step": "crm-ui-lead-qualified",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "QUALIFIED after completed follow-up",
+      "image": "docs/images/ko-KR/crm-ui-lead-qualified.png",
+      "sha256": "0564af218109fb29431012e5b7aa83b869dbfadfc8ae394c6f21b66e3ada5946",
+      "captured_at": "2026-10-10T02:12:05.212Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-qualified",
+        "locale": "ko-KR",
+        "sha256": "0564af218109fb29431012e5b7aa83b869dbfadfc8ae394c6f21b66e3ada5946",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-customer-ko-KR",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-customer",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 1 CREATE customer",
+      "image": "docs/images/ko-KR/crm-ui-convert-customer.png",
+      "sha256": "47327693a4052aca781dafe2e7e472f87ff6b57a5e2d8d234e2d9f7f24a666b1",
+      "captured_at": "2026-10-10T02:12:05.802Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-customer",
+        "locale": "ko-KR",
+        "sha256": "47327693a4052aca781dafe2e7e472f87ff6b57a5e2d8d234e2d9f7f24a666b1",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-contact-ko-KR",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-contact",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 2 CREATE contact",
+      "image": "docs/images/ko-KR/crm-ui-convert-contact.png",
+      "sha256": "e7e8bd7348f9c034b827d009fd14c106a2a299ae0c2682e2660e3ee361e40861",
+      "captured_at": "2026-10-10T02:12:06.183Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-contact",
+        "locale": "ko-KR",
+        "sha256": "e7e8bd7348f9c034b827d009fd14c106a2a299ae0c2682e2660e3ee361e40861",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-opportunity-ko-KR",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-opportunity",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 3 CREATE opportunity amount 12500",
+      "image": "docs/images/ko-KR/crm-ui-convert-opportunity.png",
+      "sha256": "08244c0d9bc8a787bf59f20e4930feaa3a0e4ac592bdeea92a7348c0e466e5d7",
+      "captured_at": "2026-10-10T02:12:06.794Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-opportunity",
+        "locale": "ko-KR",
+        "sha256": "08244c0d9bc8a787bf59f20e4930feaa3a0e4ac592bdeea92a7348c0e466e5d7",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-convert-confirm-ko-KR",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-convert-confirm",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Step 4 verify before atomic conversion",
+      "image": "docs/images/ko-KR/crm-ui-convert-confirm.png",
+      "sha256": "c8ff2f53c1abb98954ef8c5216287446a7b5c1c221652bb5f4b745bf599d5a04",
+      "captured_at": "2026-10-10T02:12:07.226Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-convert-confirm",
+        "locale": "ko-KR",
+        "sha256": "c8ff2f53c1abb98954ef8c5216287446a7b5c1c221652bb5f4b745bf599d5a04",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-lead-converted-result-ko-KR",
+      "module": "crm",
+      "flow": "lead-conversion",
+      "step": "crm-ui-lead-converted-result",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/lead",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "CONVERTED from the four real wizard steps",
+      "image": "docs/images/ko-KR/crm-ui-lead-converted-result.png",
+      "sha256": "b85fc1b735646eba76cf179fa860b1087959236b191aac0137ef10c2c3543d1a",
+      "captured_at": "2026-10-10T02:12:07.698Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-lead-converted-result",
+        "locale": "ko-KR",
+        "sha256": "b85fc1b735646eba76cf179fa860b1087959236b191aac0137ef10c2c3543d1a",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Long practice names wrap or truncate in inputs and table columns; full names and state are verified against live API responses.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-opportunity-stage-form-ko-KR",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-ui-opportunity-stage-form",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "Target PROPOSAL and change reason before submit",
+      "image": "docs/images/ko-KR/crm-ui-opportunity-stage-form.png",
+      "sha256": "bcfdcc11c886d2cdf31a5c392e2a291981db3eec0632686090089333fd33d476",
+      "captured_at": "2026-10-10T02:12:09.095Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-opportunity-stage-form",
+        "locale": "ko-KR",
+        "sha256": "bcfdcc11c886d2cdf31a5c392e2a291981db3eec0632686090089333fd33d476",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Some longer field labels wrap onto several lines; controls and entered values remain visible. This is not a claim of flawless localized layout."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "crm-ui-opportunity-won-result-ko-KR",
+      "module": "crm",
+      "flow": "opportunity-stage",
+      "step": "crm-ui-opportunity-won-result",
+      "locale": "ko-KR",
+      "actor": "crmrep",
+      "roles": [
+        "USER",
+        "SALES_REP"
+      ],
+      "route": "/admin/crm/opportunity",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "status": "WON; linked customer ACTIVE",
+      "image": "docs/images/ko-KR/crm-ui-opportunity-won-result.png",
+      "sha256": "f3b97fed7491f1366ee14f522e628e37c350437c7491ebfb2927a35c7d57fc87",
+      "captured_at": "2026-10-10T02:12:11.060Z",
+      "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+      "evidence_run": "crm-ui-playwright-002",
+      "visual_review": {
+        "step": "crm-ui-opportunity-won-result",
+        "locale": "ko-KR",
+        "sha256": "f3b97fed7491f1366ee14f522e628e37c350437c7491ebfb2927a35c7d57fc87",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T02:20:18.402Z",
+        "method": "All 12 original-resolution four-locale contact sheets inspected, including each of the 48 unchanged originals; bounded visible claims only.",
+        "limitations": [
+          "Server-provided activity dictionary and pipeline stage values remain Chinese. Interface labels and actions follow the selected locale.",
+          "Lists contain earlier owned practice records as well. Match the locale-specific WIKI-20261009A-UI prefix rather than assuming the list contains one row.",
+          "The list visibly proves WON, 12500 CNY and 100 percent probability; the customer becoming ACTIVE and activity migration are separate live API assertions."
+        ],
+        "human_translation_review": false
+      }
+    }
+  ],
+  "updated_at": "2026-10-10T02:20:18.402Z",
+  "ui_verification": {
+    "run": "crm-ui-playwright-002",
+    "run_id": "WIKI-20261009A-UI",
+    "tests_passed": 4,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "duration_ms": 46335.321,
+    "screenshots": 48,
+    "locales": [
+      "zh-CN",
+      "en-US",
+      "ja-JP",
+      "ko-KR"
+    ],
+    "test": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+    "test_sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3",
+    "role": "USER + SALES_REP, SELF, same tenant",
+    "mocks": false,
+    "runtime": [
+      {
+        "service": "omni-frontend-1",
+        "image": "omni-wiki-acceptance-frontend:crm-evidence-20261010",
+        "image_id": "sha256:4620b954ea71ea14f6cee4d3ecbf9edcc3976a93f61b05d25972acce8e722220",
+        "host_ports": []
+      },
+      {
+        "service": "omni-asset-1",
+        "image": "omni-wiki-acceptance-asset:latest",
+        "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+        "host_ports": []
+      },
+      {
+        "service": "omni-procurement-1",
+        "image": "omni-wiki-acceptance-procurement:latest",
+        "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+        "host_ports": []
+      },
+      {
+        "service": "omni-gateway-1",
+        "image": "omni-wiki-acceptance-gateway:latest",
+        "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+        "host_ports": []
+      },
+      {
+        "service": "omni-crm-1",
+        "image": "omni-wiki-acceptance-crm:latest",
+        "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+        "host_ports": []
+      },
+      {
+        "service": "omni-srm-1",
+        "image": "omni-wiki-acceptance-srm:latest",
+        "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+        "host_ports": []
+      },
+      {
+        "service": "omni-auth-1",
+        "image": "omni-wiki-acceptance-auth:latest",
+        "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+        "host_ports": []
+      },
+      {
+        "service": "nacos-1",
+        "image": "nacos/nacos-server:v3.1.1",
+        "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+        "host_ports": []
+      },
+      {
+        "service": "omni-base-1",
+        "image": "omni-wiki-acceptance-base:latest",
+        "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+        "host_ports": []
+      },
+      {
+        "service": "omni-workflow-1",
+        "image": "omni-wiki-acceptance-workflow:latest",
+        "image_id": "sha256:b2296a5b1206b492176bfa5aae197aed5cb473e32934467142fbaa81371d4b86",
+        "host_ports": []
+      },
+      {
+        "service": "xxl-job-admin-1",
+        "image": "xuxueli/xxl-job-admin:3.3.1",
+        "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+        "host_ports": []
+      },
+      {
+        "service": "rocketmq-broker-1",
+        "image": "omni-wiki-acceptance-rocketmq-broker:5.3.2",
+        "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+        "host_ports": []
+      },
+      {
+        "service": "mysql-1",
+        "image": "mysql:8.4",
+        "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+        "host_ports": []
+      },
+      {
+        "service": "redis-1",
+        "image": "redis:7.4",
+        "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+        "host_ports": []
+      },
+      {
+        "service": "rocketmq-namesrv-1",
+        "image": "apache/rocketmq:5.3.2",
+        "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+        "host_ports": []
+      }
+    ],
+    "journey": "Lead NEW; planned activity leaves NEW; UI completion changes FOLLOWING; qualify QUALIFIED; four-step CREATE conversion; PROPOSAL then WON; API verifies customer ACTIVE and activity migrated to CUSTOMER.",
+    "writes": "Seven committed UI operations per locale. Successful business history retained in owned isolated project; journal prevents blind replay after interruption.",
+    "earlier_failure": "Run 001 used the wrong internal frontend port and failed before any business mutation. Failure preserved privately with sensitive headers redacted. Run 002 uses the actual container port 3000.",
+    "human_translation_review": "Pending. Agent visual review is not a human translation signature."
+  }
+}

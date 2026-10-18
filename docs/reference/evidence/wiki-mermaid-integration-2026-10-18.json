@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "kind": "bundled-wiki-mermaid-client-rendering",
+  "at": "2026-10-17T18:57:41.531Z",
+  "source_baseline": "303d6a39875a624f7c5b7c26df06184749a53b6f",
+  "actual_source_review_output": "73929e",
+  "root_cause": "The actual four-language architecture browser probe rendered raw Mermaid source with zero SVGs. The VitePress default theme had no diagram renderer.",
+  "implementation": "Extend the default theme with a client-side Layout. Lazily load pinned Mermaid11.17.2, use strict security, retain canonical v-pre guarded Markdown, wait for fonts, rerender on route/theme changes with generation guards, replace source only on success and keep large diagrams locally scrollable.",
+  "checked_source_files": [
+    {
+      "path": "docs/.vitepress/theme/index.mjs",
+      "sha256": "af860ce8f9ea054965f0ae1aa58fbad27d003e965ce7320a3b0e17aee7279d9c"
+    },
+    {
+      "path": "docs/.vitepress/theme/DiagramLayout.vue",
+      "sha256": "0bac16ab90e68db668a02f2aaf19afb32faeeb62fbbcdd81c0171a45de5c32fa"
+    },
+    {
+      "path": "docs/package.json",
+      "sha256": "90ea9d68c2b7d30bd2203b7ec7fa1edadc80dc4dbcb286355aea271eddf1c2bd"
+    },
+    {
+      "path": "docs/package-lock.json",
+      "sha256": "8dc8a419a660feb88855b304c875f97da0c832554a9d45437e709821d909e5d1"
+    },
+    {
+      "path": "docs/scripts/prepare-site.mjs",
+      "sha256": "1f105d33b72ee8bd9dc52c2d1a886a0d9ff4e840c934175e86448d1f30c5655c"
+    },
+    {
+      "path": "docs/.vitepress/config.mjs",
+      "sha256": "1634a1821170bb9dc9c42952854499287be6ceb7cef404a6f3f66b1871a13a29"
+    },
+    {
+      "path": "docker/docs/Dockerfile",
+      "sha256": "8435a28785a37d637fad2a19fd921ce37e8f26e5256d0e499c70e293953100f4"
+    },
+    {
+      "path": "docs/reference/reviews/wiki-site-maintenance.json",
+      "sha256": "447cfaeb12ececd14027a46e899e804666897197098bf2614545a4d9616907df"
+    }
+  ],
+  "maintenance_documents": [
+    {
+      "path": "docs/wiki/site-maintenance.md",
+      "locale": "zh-CN",
+      "before_sha256": "a56b27a8c5263fc2aea5f538de896d7e6d5bebe581dc9e57336140d8ebb06ffb",
+      "after_sha256": "c1e408112efd4176dfc4bf4ec303248c7b0c1042720365651ed59eb024dd8f34"
+    },
+    {
+      "path": "docs/wiki/site-maintenance.en.md",
+      "locale": "en-US",
+      "before_sha256": "2f8c6e413056692034bfd6482fb02404c63f9a8a10a4bf3705bf9268b4bedaa7",
+      "after_sha256": "89cfe8d6b5188ae05d73976f6a15b432a57eb24e57b70aba55fa7e78e624c3f5"
+    },
+    {
+      "path": "docs/wiki/site-maintenance.jp.md",
+      "locale": "ja-JP",
+      "before_sha256": "6fe7b2297222174777a98a9bae5b4101cdfcc6d48c22836545571cc2751f2c03",
+      "after_sha256": "e4a7f4a152fbff174d75c43ed1c5975d0e06bca454600c7f36313c486a5cb938"
+    },
+    {
+      "path": "docs/wiki/site-maintenance.kr.md",
+      "locale": "ko-KR",
+      "before_sha256": "3e4a6361e3a826e365f06f7056eb5ddea34f0c25c5103d08328f84670b0c2cc1",
+      "after_sha256": "31f6fedbca9ff9f1bd95a21053c4c15d08ba802738b1a273329378af7362204c"
+    }
+  ],
+  "prior_complete_semantic_review": {
+    "path": "docs/reference/reviews/wiki-site-maintenance.json",
+    "sha256": "447cfaeb12ececd14027a46e899e804666897197098bf2614545a4d9616907df"
+  },
+  "registry_integrity": "sha512-V6K3C8EBdEsPFZXSKMJe6ppQOENxuHARr9GvHX4hh47lAbhMRD9qf4oEK7LoaRQxULMa80/qt5gHO73aCleBBg==",
+  "existing_dependency_versions_and_integrities_unchanged": true,
+  "added_dependency_resolutions": 112,
+  "canonical_diagram_fences_changed": false,
+  "v_pre_preserved": true,
+  "build_browser_and_visual_acceptance": "pending; source integration and real AI delta review only",
+  "new_translation_rows": 0,
+  "renewed_translation_rows": 3,
+  "human_review": false,
+  "business_writes": 0,
+  "full_original_A_G_preserved": true,
+  "global_release_complete": false
+}

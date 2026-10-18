@@ -1,6 +1,6 @@
 # Omni-Stack 可观测性运行与维护
 
-本文是 WP-07 的运行事实源，说明应用指标、分布式追踪、结构化日志、本地观测栈、告警和 SLO 模板。观测能力默认关闭，不是应用启动前置条件。
+本文定义应用指标、追踪、结构化日志、告警和 SLO 的当前工程边界。观测默认关闭，不是应用启动前置条件。
 
 ## 1. 数据流与边界
 
@@ -17,47 +17,13 @@
 
 ## 2. 启动与停止
 
-先按 `.env.example` 创建完整 `.env`，再从仓库根目录执行：
-
-~~~powershell
-npm --prefix tools/omni-cli run dev -- dev up --preset full --observability
-npm --prefix tools/omni-cli run dev -- dev status
-~~~
-
-CLI 会为本次进程设置 `OTLP_EXPORT_ENABLED=true`、ECS JSON 日志、本地 100% 采样，并让一次性迁移器在退出时向 Pushgateway 推送结果。没有 `--observability` 时 OTLP 和迁移指标推送均关闭，采样率为 0，应用仍可正常启动且不导出 Span。
-
-本地入口：
-
-| 组件 | 地址 | 默认用途 |
-|---|---|---|
-| Grafana | `http://127.0.0.1:3001` | Dashboard、日志和 Trace |
-| Prometheus | `http://127.0.0.1:9090` | Targets、PromQL、规则 |
-| Pushgateway | `http://127.0.0.1:9091` | 短生命周期迁移指标 |
-| Node Exporter | `http://127.0.0.1:9100` | 本地节点与文件系统指标 |
-| cAdvisor | `http://127.0.0.1:8088` | 容器资源与生命周期指标 |
-| Alertmanager | `http://127.0.0.1:9093` | 告警状态 |
-| Tempo | `http://127.0.0.1:3200` | Trace API |
-| Loki | `http://127.0.0.1:3100` | 日志 API |
-| Alloy | `http://127.0.0.1:12345` | 日志采集状态 |
-| OTLP | `127.0.0.1:4317/4318` | gRPC/HTTP 接收 |
-
-停止默认保留观测数据卷：
-
-~~~powershell
-npm --prefix tools/omni-cli run dev -- dev down
-~~~
-
-只有确认不再需要本地指标、Trace、日志和数据库数据时，才可显式删除所有命名卷：
-
-~~~powershell
-npm --prefix tools/omni-cli run dev -- dev down --volumes --confirm-delete-volumes
-~~~
+观测能力由 observability profile 和显式导出配置共同控制，默认关闭。标准业务端口不因观测而漂移；观测管理入口不得暴露公网。应用指标使用独立 management 端口，业务端口的 404 不能视为指标缺失。启动、端口、健康检查和安全停止步骤见 [运维指南](guides/operations-upgrade.md)。
 
 ## 3. Dashboard 与指标契约
 
 Grafana 自动加载 7 个只读 Dashboard：Platform Overview、Service RED、JVM and Pools、Feign Clients、MQ and Outbox、Workflow、Database Migrations。JSON 位于 `observability/grafana/dashboards/`，数据源和 Dashboard provider 位于 `observability/grafana/provisioning/`。
 
-Alloy 只采集与自己相同 `COMPOSE_PROJECT_NAME` 标签的容器日志。使用 `docker compose -p <name>` 或设置 `COMPOSE_PROJECT_NAME` 时该过滤值会同步变化，不会扫描主机上其他 Compose 项目。
+Alloy 用 Docker 标签 `com.docker.compose.project` 筛选日志目标，只采集当前 Compose 项目的容器日志。过滤值由 `OMNI_COMPOSE_PROJECT` 提供，来自 `COMPOSE_PROJECT_NAME`；使用 `docker compose -p <name>` 或设置 `COMPOSE_PROJECT_NAME` 时同步变化。Docker discovery 会发现容器元数据，日志采集在筛选后执行，不采集其他 Compose 项目的日志。
 
 允许的指标标签只有：`service.name`、`environment`、`instance`、HTTP method/route template/status、exception class、MQ destination/result，以及代码中封闭枚举的 operation/status。数据库迁移信息可额外使用仓库受控的 schema version。禁止把 tenantId、userId、username、businessKey、原始 URL、请求体、消息体、动态 SQL、表名或连接地址放入标签。新增标签必须先证明取值集合固定，并评估基数上界。
 
@@ -77,6 +43,10 @@ Alloy 只采集与自己相同 `COMPOSE_PROJECT_NAME` 标签的容器日志。�
 - `omni_db_migration_operations_total{result}`、`omni_db_migration_duration_seconds`、`omni_db_schema_version_info{version}`：一次性迁移器退出时推送的结果、耗时和受控清单版本。
 
 Outbox 创建时把真实 traceId 保存为 `producer_trace_id`，发送时通过 `omniProducerTraceId` 和 `omniMessageId` 消息头传给消费者；历史记录缺少生产 traceId 时仍可正常投递。中继为每次投递建立新的 relay span，日志只输出 `msgId`、`producerTraceId`、`relayTraceId` 与固定 destination/result；Asset Consumer 从消息头取出关联字段，并记录 `msgId`、`producerTraceId` 和自己的 `consumerTraceId`。任何一侧都不输出 payload、租户或业务键。通过 `msgId` 可从生产日志跳转到中继和消费日志，再分别查询对应 Trace。
+
+### Alertmanager 界面边界
+
+`alertmanager-ui` 从官方 v0.30.1 Elm 源码构建四语界面，代理同一 `alertmanager:9093` 后端；宿主入口保持 `127.0.0.1:9093`，后端不重复映射该端口。界面使用 `/zh-CN/`、`/en-US/`、`/ja-JP/`、`/ko-KR/`，语言切换保留 hash 路由和筛选条件。API、标签、状态枚举与接收器名称保持原值；星期设置仍保存上游英文协议值。构建固定上游归档 SHA-256，保留 Apache-2.0 LICENSE/NOTICE，并在文案或结构不匹配时失败。来源与维护决策见 [ADR-0004](adr/0004-native-alertmanager-localization.md)，操作与截图见[运维指南](guides/operations-upgrade.md)。这不是新增业务服务或公开管理入口。
 
 ## 4. 告警与阈值校准
 
@@ -116,14 +86,4 @@ Outbox 创建时把真实 traceId 保存为 `producer_trace_id`，发送时通�
 
 ## 7. 验证与排障
 
-配置级校验：
-
-~~~powershell
-docker compose --profile observability config --quiet
-docker run --rm --entrypoint /bin/promtool --mount type=bind,source=${PWD}/observability/prometheus,target=/etc/prometheus,readonly prom/prometheus:v3.14.0 check rules /etc/prometheus/alerts.yml
-docker run --rm --entrypoint /bin/promtool --mount type=bind,source=${PWD}/observability/prometheus,target=/etc/prometheus,readonly prom/prometheus:v3.14.0 check config /etc/prometheus/prometheus.yml
-~~~
-
-运行后检查 Prometheus `/targets` 的已启动应用为 UP；未被当前预设包含的服务显示 DOWN 是预期现象。Grafana 无数据时依次检查应用 `/actuator/prometheus`、Prometheus target、OTel Collector 日志、Tempo/Loki readiness 和 Alloy targets。
-
-性能验收使用相同 fixture 分别测量观测关闭与开启后的启动时间、CPU、内存、吞吐和 P95/P99。结果写入 `docs/evidence/scaffold-upgrade/`；本地 100% 采样只用于验收，生产采样率按容量和 SLO 校准。
+配置校验、运行健康、Trace/日志关联、告警送达和性能比较分别验收。配置语法通过不能证明 targets UP 或通知已送达。未被当前预设启动的服务需按部署集合解释，不能把所有 DOWN 都忽略。记录当前源码、镜像、预设、时间、真实失败与范围；历史验收只证明当时基线。操作步骤和本次恢复边界见 [运维指南](guides/operations-upgrade.md)。

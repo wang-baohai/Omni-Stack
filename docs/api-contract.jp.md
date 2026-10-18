@@ -1,7 +1,7 @@
 # API 契約
 
-> 本ドキュメントはフロントエンドとバックエンド間の権威ある API 契約を定義します。双方はこれらの構造に準拠しなければなりません。いかなる逸脱もチームの明示的な承認が必要です。  
-> ソーシャルログインの完全なフローは [core-flows.jp.md](core-flows.jp.md) を参照してください。データ辞書とワークフローのエンドポイントについてはそれぞれのドキュメントを参照してください。
+> 本書はレスポンス、フィールド、ルート、ID ヘッダー、サービス間メッセージの現在の通信形式を定義します。実際の動作はソース、設定、Controller/DTO が決定します。例の ID、日時、住所、状態は構造の説明用であり、現在の環境データや検証結果ではありません。
+> 状態遷移と実装上の制約は各ドメインの事実・設計文書で管理します。設定、ログイン、ブラウザー操作、復旧は [Wiki](wiki/index.jp.md) と[認証ガイド](guides/authentication.jp.md)を参照してください。ローカルのプロトコル認可と外部ソーシャルログインは別のフローです。
 
 ---
 
@@ -30,181 +30,86 @@
 
 ## 1. レスポンスラッパー
 
-すべての API レスポンスは統一された `R<T>` ラッパーを使用します。
+通常の業務 Controller は `R<T>`、ページ取得は `R<PageResult<T>>` を返します。OAuth2/OIDC プロトコル、ソーシャルログインのリダイレクト、Actuator、フィルターやフレームワークが生成するレスポンスに、この形式を一律に適用することはできません。
 
 ```json
-// 成功
-{
-  "code": 200,
-  "message": "success",
-  "data": { ... }
-}
-
-// 失敗（ビジネスエラー）
-{
-  "code": 500,
-  "message": "操作に失敗しました"
-}
-
-// 失敗（バリデーションエラー）
-{
-  "code": 400,
-  "message": "username: ユーザー名は必須です; email: メールアドレスは必須です"
-}
+{"code":200,"message":"success","data":{"id":1}}
 ```
 
-### バックエンド型：`R<T>`
-
-```java
-@Data
-public class R<T> implements Serializable {
-    private int code;
-    private String message;
-    private T data;
-
-    public static <T> R<T> ok(T data) { ... }
-    public static <T> R<T> fail(String message) { ... }
-    public static <T> R<T> fail(int code, String message) { ... }
-}
+```json
+{"code":500,"message":"操作失败","data":null}
 ```
 
-**配置場所**：`omni-common-core` モジュール、`com.omni.common.core.result.R`。
-
-### フロントエンド型：`ApiResponse<T>`
-
-```typescript
-interface ApiResponse<T = unknown> {
-  code: number
-  message: string
-  data: T
-}
+```json
+{"code":400,"message":"username: 用户名不能为空","data":null}
 ```
 
-**正規の配置場所**：`src/types/api.ts`（唯一の信頼できる情報源；他のファイルで重複定義しないでください）。
+`R.ok(data)` は業務コード 200、message `success` を使用します。`R.ok()` と失敗レスポンスの data は null です。`R.fail(message)` の既定コードは 500 で、コード指定のオーバーロードは指定値を使用します。JSON プロパティの順序は契約に含みません。
+
+バックエンドの唯一の型は [R.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/R.java) です。フロントエンドの唯一の宣言は [src/types/api.ts](../omni-frontend/src/types/api.ts) の `ApiResponse<T>` です。`data: T` という宣言は実行時の null を除去しません。本書ではコンパイル可能な型を複製せず、利用側は各エンドポイントの空値を処理します。
 
 ---
 
 ## 2. エラーコード一覧
 
-### 2.1 システムレベルエラーコード
+### 2.1 システムエラーコード
 
-| HTTP ステータスコード | ビジネスコード | シナリオ | 発生条件 | 処理側 |
-|------------|--------|------|---------|--------|
-| 200 | 200 | 成功 | `R.ok(data)` | — |
-| 400 | 400 | パラメータバリデーション失敗 | `MethodArgumentNotValidException` / `BindException` が `GlobalExceptionHandler` に捕捉された場合 | フロントエンドはコード駆動のローカライズ通知を表示（バックエンドの生の `message` は表示しない） |
-| 401 | 401 | 未認証 | Gateway `AuthFilter` が 401 JSON を返却 | セッション期限切れのみ安全にログアウトしログインへリダイレクト；認証情報系の 401 はセッションと入力を保持 |
-| 403 | 403 | 権限不足 | `AccessDeniedException` / `AuthorizationDeniedException` が `GlobalExceptionHandler` に捕捉された場合 | セッションを保持し、権限不足のローカライズ通知を表示（ログアウト/強制戻りなし） |
-| 200 | 404 | リソースが存在しない | `throw new BusinessException(404, "xxxが存在しません")` | フロントエンドがエラーメッセージを表示 |
-| 200 | 409 | ステータス/並行性競合 | 楽観ロックバージョン不一致またはステートマシンが遷移を拒否 | フロントエンドがデータを更新してユーザーに再試行を促す |
-| 200 | 503 | 下流依存が利用不可 | CRM が Auth データスコープ API を呼び出してフェイルクローズ | フロントエンドがサービス一時停止を表示。権限超過データにダウングレードしない |
-| 200 | 500 | ビジネス例外 | `BusinessException` が `GlobalExceptionHandler` に捕捉された場合 | フロントエンドがエラーメッセージを表示 |
-| 500 | 500 | 不明なシステムエラー | フォールバック `Exception` ハンドラー | フロントエンドが「サーバー内部エラー」を表示 |
+HTTP ステータスと `R.code` は別々に確認します。
 
-### 2.2 ビジネスレベルエラーコード
+| HTTP ステータス | 業務コード | 現在の対応 |
+|---|---|---|
+| 200 | 200 | 通常の業務成功 |
+| 200 | 例外発生箇所で指定したコード。既定は 500 | `BusinessException`。業務 400/403/404/409/503 を含む |
+| 400 | 400 | 対応する advice が処理する Bean 検証、バインド、query パラメーター欠落、型不一致 |
+| 403 | 403 | `AccessDeniedException/AuthorizationDeniedException` |
+| 404 / 405 / 415 | HTTP ステータスと同じ | advice が処理するリソース、メソッド、メディア型のエラー |
+| 500 | 500 | 専用ハンドラーのない例外 |
 
-| ビジネスコード | シナリオ | メッセージ例 |
-|--------|------|---------|
-| 500 | 認証コード無効/期限切れ | "認証コードが期限切れです" |
-| 500 | 認証失敗 | "ユーザー名またはパスワードが正しくありません" |
-| 500 | アカウント無効化 | "アカウントが無効化されています" |
-| 500 | アカウントロック | "アカウントがロックされています。N 分後に再試行してください" |
-| 500 | テナントが存在しない/無効 | "テナントが存在しないか、無効化されています" |
-| 400 | 一意性制約違反 | "ユーザー名が既に存在します" / "タスクタイプコードが既に存在します" |
-| 404 | リソースが存在しない | "組織ユニットが存在しません" / "辞書データが存在しません" |
-| 403 | 権限不足 | "権限が不足しているため、アクセスを拒否します" |
-| 409 | 楽観ロックまたはステータス競合 | "データが他のユーザーによって変更されました。更新して再試行してください" |
-| 503 | 必須依存が利用不可 | "認証認可サービスが一時的に利用できません" |
+JSON 読み取りエラーの対応はサービスごとに異なります。SRM/Procurement の advice は `HttpMessageNotReadableException` を 400 に変換しますが、現在の Asset の共通ハンドラーでは 500 になります。制御された MockMvc では、Asset 金額を JSON number または不正な十進数文字列で送ると 500 になりました。リクエストが有効という意味ではなく、全サービスで同じステータスを保証するものでもありません。
 
-### 2.3 Gateway レベルエラーコード
+### 2.2 業務エラーコード
 
-| HTTP ステータスコード | シナリオ | レスポンス形式 |
-|------------|------|---------|
-| 401 | JWT 署名無効 | `{"code":401,"message":"Invalid JWT signature","data":null}` |
-| 401 | JWT 期限切れ | `{"code":401,"message":"JWT token expired","data":null}` |
-| 401 | Token 失効済み | `{"code":401,"message":"Token has been revoked","data":null}` |
-| 401 | Authorization ヘッダー欠如 | `{"code":401,"message":"Missing Authorization header","data":null}` |
+業務コードは現在の例外発生箇所で決まり、message から推測しません。CAPTCHA、アカウント、テナントの失敗には既定の 500 を使う経路があります。業務 400、403、404、409、503 が HTTP 200 の本文に入る場合もあります。フロントエンドに 410、423、429、502 の表示分類があっても、すべてのエンドポイントがその分岐を実装しているわけではありません。
+
+### 2.3 Gateway エラーコード
+
+| HTTP ステータス / code | 条件 | 現在の message |
+|---|---|---|
+| 401 / 401 | Bearer 認証がない | 请先登录 |
+| 401 / 401 | JWT の期限切れ | 登录已过期，请重新登录 |
+| 401 / 401 | 失効記録への一致を含む、その他の JWT/セキュリティ検証失敗 | 认证失败，请重新登录 |
+| 503 / 503 | test 以外の設定で署名鍵がない・弱い、または署名生成失敗 | 网关身份签名未就绪，请联系管理员 |
+
+これは `AuthFilter` の分岐です。他のフィルター、レート制限、下流サービス、フレームワークには別のエラー対応があります。表の中国語は診断用の実際の message 値であり、フロントエンドの認証状態判定には使いません。
 
 ### 2.4 ソーシャルログインエラーコード
 
-| error パラメータ | 意味 | 発生条件 |
-|------------|------|---------|
-| `user_denied` | ユーザーが認可を拒否 | サードパーティプラットフォームからのコールバックに `error=access_denied` が含まれる |
-| `invalid_callback` | コールバックパラメータ欠如 | code または state が空 |
-| `social_login_failed` | ログインフロー異常 | state 検証失敗、サードパーティ API エラー、ユーザー情報取得失敗、ユーザー無効化 |
+`user_denied/invalid_callback/social_login_failed` は 302 Location の query 値であり、`R.code` ではありません。条件と遷移先は第 10 節で定義します。
 
-### 2.5 フロントエンドエラー処理フロー
+### 2.5 フロントエンドのエラー処理
 
-Axios レスポンスインターセプター（`src/api/request.ts`）は `res.code !== 200` をチェックします：
-1. ビジネスコードから `error-display.ts` でローカライズ記述子（`i18nKey`/`displayMessage`）を解決；フロントエンドはコード駆動のローカライズ文のみ表示し、**バックエンドの `res.message` と Axios の `error.message` は一切画面に表示しない**（生 message は診断用に `ApiError` に添付されるのみ）。
-2. `Promise.reject(new ApiError(display, readServerMessage(res)))` を返却；エラーオブジェクトは `businessCode`/`httpStatus`/`traceId`/`i18nKey`/`displayMessage` を携え、呼び出し側で分類処理。
+[request.ts](../omni-frontend/src/api/request.ts) と [error-display.ts](../omni-frontend/src/utils/error-display.ts) は HTTP ステータス、業務コード、レスポンスがない場合の Axios 通信エラーコードを分類します。HTTP 401/403 を本文の業務コードより優先し、それ以外は業務コード、HTTP ステータスの順に使用します。
 
-**HTTP ステータスコード処理**（「セッション期限切れ」と「ログイン認証情報のバリデーション失敗」を区別、いかなる文言照合でもない）：
-- HTTP 401：`error-display.ts` が `shouldLogout`（セッション期限切れ / 失効した `Authorization` 携行）と判定した場合のみ安全にログアウトしログインへリダイレクト；login/session-login/register の認証情報エンドポイントからの 401 は認証情報バリデーション失敗であり、**セッションと入力内容を保持し、ログアウトもフォームクリアもしない**。
-- HTTP 403（権限不足）：現在のセッションを保持し、**ログアウトも強制戻るもしない**、権限不足のローカライズ通知のみ表示。
-- HTTP 400/409/5xx：ビジネスコードでローカライズ通知；409 はリフレッシュ後の再試行を促し、503 はサービス一時利用不可を越権データへ退化させずに示す、いずれもセッションをクリアしない。
+- 業務失敗は `businessCode/httpStatus/traceId/i18nKey/displayMessage` を持つ `ApiError` を送出します。HTTP 失敗では AxiosError を保持して情報を追加します。同じコンストラクターを使う二つの経路ではありません。
+- サーバーや Axios の生の message は直接表示しません。コードに基づく四言語の安全な文言を使い、400 の項目別ヒントには検証済みの ASCII フィールド名だけを使います。
+- 401 でも認証情報を送るエンドポイントではセッションと入力を保持します。それ以外はセッションの有無で未ログインと期限切れを区別し、どちらも `shouldLogout=true` として安全にセッションを削除しログイン画面へ移動します。認証情報用の判定対象は `/auth/login`、`/auth/session-login`、`/auth/register`、`/auth/social-login`、`/srm/portal/auth/login` です。この分類は Gateway の許可リストとは異なります。
+- 403 はセッションを保持します。400/409/5xx、通信失敗、タイムアウトは各分類の翻訳文を使い、技術メッセージから意味を推測しません。競合時の再取得とリトライ判断は呼び出し側が行います。
 
 ---
 
 ## 3. ページネーション契約
 
-### バックエンド型：`PageResult<T>`
+バックエンドの型は [PageResult.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/PageResult.java)、フロントエンドの型は [src/types/api.ts](../omni-frontend/src/types/api.ts) に一本化されています。レスポンスの data は次を含みます。
 
-```java
-@Data
-public class PageResult<T> implements Serializable {
-    private List<T> records;
-    private long total;
-    private long size;
-    private long current;
-    private long pages;   // 自動計算: (total + size - 1) / size
+| フィールド | 意味 |
+|---|---|
+| `records` | 現在のページのレコード |
+| `total` | 総レコード数 |
+| `size` | ページサイズ |
+| `current` | 現在のページ番号 |
+| `pages` | コンストラクターが `(total + size - 1) / size` で計算 |
 
-    public PageResult(List<T> records, long total, long size, long current) { ... }
-}
-```
-
-### フロントエンド型：`PageResult<T>`
-
-```typescript
-interface PageResult<T> {
-  records: T[]
-  total: number
-  size: number
-  current: number
-  pages: number
-}
-```
-
-**正規の配置場所**：`src/types/api.ts`。
-
-### 使用パターン
-
-```java
-// バックエンド Controller
-@GetMapping("/list")
-public R<PageResult<UserVO>> listUsers(@RequestParam(defaultValue = "1") int page,
-                                        @RequestParam(defaultValue = "10") int size) {
-    return R.ok(userService.listUsers(page, size));
-}
-```
-
-```typescript
-// フロントエンド API 呼び出し
-export function listUsers(page: number, size: number) {
-  return request.get<ApiResponse<PageResult<UserInfo>>>(
-    `/auth/user/list?page=${page}&size=${size}`,
-  )
-}
-```
-
-### ページネーションパラメータ規約
-
-| パラメータ | 型 | デフォルト値 | 説明 |
-|------|------|--------|------|
-| `page` | int | 1 | 現在のページ番号（1 から開始） |
-| `size` | int | 10 | 1 ページあたりの件数 |
-| `records` | List | — | 現在のページのデータリスト |
-| `total` | long | — | 総レコード数 |
-| `pages` | long | — | 総ページ数（自動計算） |
+query の一般例は `page=1&size=10` です。範囲、既定値、フィルター、上限は各 Controller/検索 DTO が定義し、例の既定値が全エンドポイントの制限になるわけではありません。コンストラクターは渡された records を保持し、null→[] の共通変換やページ引数検証は行いません。有効な size を指定し、空レコードは各エンドポイントの定義に従って処理します。
 
 ---
 
@@ -219,52 +124,46 @@ export function listUsers(page: number, size: number) {
 | 削除 | DELETE | `/{resource}/{id}` | `DELETE /user/1` |
 | バッチ操作 | POST | `/{resource}/batch` | `POST /user/batch` |
 
-**Gateway パスプレフィックス**：すべてのフロントエンドリクエストは `/api/<service>/<resource>` を使用します（例：`/api/auth/user/list`）。現在、Gateway は Auth・Base・Workflow・CRM・SRM・Procurement・Asset などの業務ルートに対して `StripPrefix` を使用せず、ダウンストリームの Controller が完全な `/api/**` パスを宣言して受け取ります。
+**Gateway パス接頭辞**：通常のフロントエンド業務リソースは `/api/<service>/<resource>` を使います。例は /api/auth/user/list です。Auth、Base、Workflow、CRM、SRM、Procurement、Asset は StripPrefix を使わず完全なパスを保持します。プロトコルと内部パスは各エンドポイントの定義に従います。
+
+表は業務リソースの命名規約です。操作コマンド、OAuth2/OIDC、内部 API は実際の Controller のルートを使用し、例から未実装のエンドポイントを推定してはいけません。
 
 ---
 
 ## 5. Gateway ルーティング設定
 
-### 5.1 ローカル開発環境ルート
+### 5.1 ローカル開発環境のルート
 
-Gateway の `application.yml` 内のルート設定（`spring.cloud.gateway.server.webflux.routes`）：
+現在の [Gateway application.yml](../omni-backend/omni-gateway/src/main/resources/application.yml) の `spring.cloud.gateway.server.webflux.routes` は 12 個の明示的なルートを定義し、サービス検出による自動ルーティングは無効です。
 
-| ルート ID | パスマッチ | ターゲットサービス | StripPrefix | 説明 |
-|---------|---------|---------|-------------|------|
-| `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` | なし | OAuth2 認可サーバーエンドポイント |
-| `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` | なし | OpenID Connect ディスカバリーエンドポイント |
-| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | **なし** | Auth サービス REST API（完全なパスを使用） |
-| `omni-base` | `/api/base/**` | `lb://omni-base` | **なし** | Base サービス（完全なパスを使用） |
-| `omni-base-job` | `/api/job/**` | `lb://omni-base` | **なし** | 定期タスク管理 |
-| `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` | **なし** | ワークフローエンジン |
+| ルート ID | Path 一致 | 転送先 |
+|---|---|---|
+| `block-internal-api` | `/internal/**,/api/internal/**` | `no://op` |
+| `block-internal-api-services` | `/omni-auth/internal/**,/omni-auth/api/internal/**,/omni-base/internal/**,/omni-base/api/internal/**,/omni-workflow/internal/**,/omni-workflow/api/internal/**,/omni-crm/internal/**,/omni-crm/api/internal/**,/omni-srm/internal/**,/omni-srm/api/internal/**,/omni-procurement/internal/**,/omni-procurement/api/internal/**,/omni-asset/internal/**,/omni-asset/api/internal/**,/omni-gateway/internal/**` | `no://op` |
+| `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` |
+| `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` |
+| `omni-auth` | `/api/auth/**` | `lb://omni-auth` |
+| `omni-base` | `/api/base/**` | `lb://omni-base` |
+| `omni-base-job` | `/api/job/**` | `lb://omni-base` |
+| `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` |
+| `omni-crm` | `/api/crm/**` | `lb://omni-crm` |
+| `omni-srm` | `/api/srm/**` | `lb://omni-srm` |
+| `omni-procurement` | `/api/procurement/**` | `lb://omni-procurement` |
+| `omni-asset` | `/api/asset/**` | `lb://omni-asset` |
 
-### 5.2 Docker デプロイメントルート
+通常の業務ルートは `StripPrefix` を使わず完全なパスを保持します。二つの `no://op` ルートは `SetStatus=404` で内部パスを遮断しますが、認証などの前段フィルターが先に別のエラーを返す場合があります。
 
-Docker デプロイメント時、ルート設定は同じですが、ターゲットサービスの URI は Nacos サービスディスカバリーにより自動解決されます：
+### 5.2 Docker デプロイ時のルート
 
-| フロントエンドリクエスト | Gateway ルート | ダウンストリーム受信パス | 説明 |
-|---------|-------------|-------------|------|
-| `GET /api/auth/user/list` | `lb://omni-auth` StripPrefix なし | `GET /api/auth/user/list` | Auth サービスは完全なパスを保持 |
-| `GET /api/base/dict/type/list` | `lb://omni-base` StripPrefix なし | `GET /api/base/dict/type/list` | Base サービスは完全なパスを保持 |
-| `POST /api/workflow/model` | `lb://omni-workflow` StripPrefix なし | `POST /api/workflow/model` | Workflow サービスは完全なパスを保持 |
-| `GET /api/job/type/list` | `lb://omni-base` StripPrefix なし | `GET /api/job/type/list` | Job ルートは Base サービスへ |
+正式な Compose は Nacos で同じ `lb://` サービス名を解決します。到達できるかは環境、設定の上書き、起動済みモジュールに依存し、ルート設定だけでは下流の正常性を証明できません。例えば `/api/base/dict/type/list` はそのまま Base に到達し、`/api/job/**` も Base が受け取ります。
 
-### 5.3 AuthFilter ホワイトリストパス
+### 5.3 AuthFilter 許可リスト
 
-以下のパスは JWT 検証をスキップします（`AuthFilter` がインターセプトしない）：
+完全一致：`/api/auth/login`、`/api/auth/session-login`、`/api/auth/register`、`/api/auth/captcha`、`/api/auth/tenants`、`/favicon.ico`。
 
-```
-/api/auth/login          — ログイン
-/api/auth/register       — 新規登録
-/api/auth/captcha        — CAPTCHA
-/api/auth/tenants        — テナント一覧
-/api/auth/oauth2/        — ソーシャルログイン
-/actuator/               — ヘルスチェック
-/oauth2/                 — OAuth2 エンドポイント
-/.well-known/            — OIDC ディスカバリー
-/login                   — Spring Security ログイン
-/error                   — エラーページ
-```
+前方一致：`/api/auth/oauth2/`、`/actuator/`、`/oauth2/`、`/.well-known/`、`/login`、`/error`。startsWith による判定であり、完全一致に置き換えてはいけません。`/api/auth/**` 全体が公開されるわけでもありません。
+
+許可リストはこのフィルターの JWT 検証だけを省略し、ルート、Controller、下流の認可を作成しません。公開リクエストでも偽装された信頼ヘッダーと Bearer Authorization を除去し、OAuth2 に必要な Basic Authorization を保持して `X-Gateway-Forwarded=true` を設定します。
 
 ---
 
@@ -306,124 +205,74 @@ DTO は Controller の静的内部クラス（シンプルな場合）または�
 
 ## 8. リクエストヘッダー規約
 
-### 8.1 Gateway が注入するリクエストヘッダー
+### 8.1 Gateway が設定するリクエストヘッダー
 
-Gateway の `AuthFilter` は JWT 検証成功後、ダウンストリームリクエストに以下のヘッダーを注入します：
+保護対象パスの JWT 検証後、Gateway はクライアントの Authorization と同名の信頼ヘッダーを削除し、次を設定します。
 
-| ヘッダー | 型 | 説明 | 例 |
-|--------|------|------|------|
-| `X-User-Id` | String | ユーザー ID | `"1"` |
-| `X-User-Name` | String | ユーザー名 | `"admin"` |
-| `X-Tenant-Id` | String | テナント ID | `"1"` |
-| `X-User-Roles` | String | カンマ区切りのロールコード | `"SUPER_ADMIN,DEPT_LEADER"` |
-| `X-User-Scopes` | String | スペース/カンマ区切りの権限コード | `"dict:type:list dict:data:create"` |
+| ヘッダー | 取得元・意味 |
+|---|---|
+| `X-User-Id` | JWT ユーザー ID。正整数 |
+| `X-Tenant-Id` | JWT テナント ID。正整数 |
+| `X-User-Name` | JWT ユーザー名。`X-Username` ではない |
+| `X-User-Roles` | ロール claim |
+| `X-User-Scopes` | 権限 claim |
+| `X-Gateway-Forwarded` | `true` |
+| `X-Gateway-Assertion` | Gateway が生成した ID アサーション |
 
-### 8.2 フロントエンドが送信するリクエストヘッダー
+ロール・権限の claim が List ならコンマで連結し、その他の非 null 値は文字列、欠落時は空文字列にします。アサーションは `userId|tenantId|username|issuedAt` を HMAC-SHA256 で署名し、padding なしの `base64url(payload):base64url(signature)` を使用します。test 以外の設定では強い秘密鍵が必要です。サービス側も事前認証チェーンで検証し、同名ヘッダーがあるだけで ID を信頼してはいけません。
 
-| ヘッダー | 送信元 | 説明 |
-|--------|------|------|
-| `Authorization: Bearer <JWT>` | Axios インターセプターが自動注入 | `useUserStore()` から Token を取得 |
-| `X-Tenant-Id` | Axios インターセプターが自動注入 | `useUserStore()` からテナント ID を取得 |
-| `Content-Type: application/json` | Axios デフォルト | JSON リクエストボディ |
+### 8.2 フロントエンドが送るヘッダー
 
-### 8.3 内部サービスリクエストヘッダー
+Axios は `useUserStore().token` から `Authorization: Bearer <JWT>` を設定し、`getTenantIdFromToken(token)` でテナントヘッダーを取得します。独立して編集できるテナント項目を信頼する方式ではありません。Gateway は保護対象の信頼ヘッダーを上書きします。JSON の Content-Type は実際の本文に従い、共有 Axios インスタンスに明示的な共通 Content-Type 設定はありません。
 
-サービス間インターフェースはすべて `/api/internal/**` の下に置かれ、共有トークン認証を使用し、エンドユーザーの JWT は使用しません：
+### 8.3 サービス内部のリクエストヘッダー
 
-| ヘッダー | 必須 | 説明 |
-|--------|------|------|
-| `X-Internal-Token` | はい | サービス間共有トークン。`InternalApiAuthFilter` が検証 |
-| `X-Tenant-Id` | はい | 現在の業務テナント。body/query の `tenantId` と一致する必要がある |
-| `Content-Type: application/json` | JSON リクエストでは必須 | JSON リクエストボディ |
+本書の業務内部 API は `X-Internal-Token` と明示的な `X-Tenant-Id` を使用し、エンドユーザー JWT で内部認証を代用しません。JSON 本文には `Content-Type: application/json` を指定します。body/query tenantId が必要なエンドポイントではヘッダーとの一致も確認し、不一致時のエラーは各節で定義します。
 
-`InternalApiAuthFilter` はコンテナレベルの前置フィルターとして `/api/internal/**` を一括保護します。サービスのセキュリティチェーンが再度 Gateway ユーザー識別情報を要求してはなりません。トークンが欠落または不一致の場合は HTTP 401 を返します。サーバー側でトークンが未設定の場合はフェイルクローズで HTTP 503 を返します。ヘッダーと body/query のテナントが不一致の場合は業務コード 403 を返します。内部パスは `X-Gateway-Forwarded` やユーザー権限ヘッダーに依存してはなりません。
+検証器はサービス設定に従って動作します。`omni-common-service` の内部フィルターは無効なリクエストトークンに HTTP 401 を返しますが、関連機能が必要とする秘密トークンが未設定・弱い場合は設定検証器が起動を止めます。互換用 MQ `InternalApiAuthFilter` はサーバートークン未設定で HTTP 503、リクエストトークン欠落・不一致で 401 を返します。全サービスに共通の実行時 503 分岐ではありません。
 
-### 8.4 セキュリティレスポンスヘッダー（Gateway 注入）
+内部ルートは Gateway が明示的に遮断し、クライアントの `X-Gateway-Forwarded` やロール・権限ヘッダーを信頼しません。信頼済み内部呼び出し元も毎回正しい業務テナントを渡す必要があり、トークン自体はテナントを選択しません。
 
-`SecurityHeadersFilter`（WebFlux WebFilter）は、ゲートウェイを経由するすべてのレスポンスに以下を追加します：
+### 8.4 セキュリティレスポンスヘッダー（Gateway が設定）
 
-| レスポンスヘッダー | 値 | 用途 |
-|--------|-----|------|
-| `X-Content-Type-Options` | `nosniff` | ブラウザーの MIME タイプスニッフィングを防止 |
-| `X-Frame-Options` | `DENY` | ページが iframe にネストされるのを禁止し、クリックジャッキングを防止 |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | Referer ヘッダーの情報漏洩を制御 |
-| `X-Trace-Id` | 32 桁の小文字 16 進数文字列 | Gateway・Servlet・Feign とエラー フィードバックを関連付け |
+| レスポンスヘッダー | 現在の値 |
+|---|---|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `X-Trace-Id` | tracer の実 trace ID。span がなければハイフンを除いた 32 文字の UUID |
 
-Gateway は常に新しい `X-Trace-Id` を生成し、公網クライアントが提供する同名ヘッダーを信頼しません。ダウンストリームの Servlet サービスは有効な値を MDC とレスポンスヘッダーに書き込み、共通 Feign インターセプターは引き続き内部呼び出しへ伝播します。フロントエンドのエラーパネルはレスポンス内の traceId を表示でき、ログ調査では同じ値で完全な呼び出しチェーンを検索するのが優先です。
+[SecurityHeadersFilter](../omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/SecurityHeadersFilter.java) は公開リクエストの同名 trace ヘッダーを除去します。実際の tracer span があればその ID を下流リクエストとレスポンスに設定します。span がなければレスポンス専用の fallback を生成し、下流リクエストには設定しません。レスポンスヘッダーだけで Gateway、Servlet、Feign の完全な関連付けを証明することはできません。フロントエンドは 1–128 文字の安全な ASCII traceId だけを受け入れ、異常値を拒否します。
 
 ---
 
 ## 9. 認証ヘッダー
 
-```
-Authorization: Bearer <token>
-```
-
-- Axios リクエストインターセプター（`src/api/request.ts`）が `useUserStore()` の Token を使用して設定
-- `omni-gateway` の `AuthFilter` により検証（JWT RS256 署名検証 + claims 抽出 + 身分ヘッダー注入）
-- 公開パスは認証不要（`AuthFilter` の完全一致/プレフィックスホワイトリストに従い、**`/api/auth/**` 全体ではない**）：完全一致 `/api/auth/login`、`/api/auth/session-login`、`/api/auth/register`、`/api/auth/captcha`、`/api/auth/tenants`、`/favicon.ico`；プレフィックス `/api/auth/oauth2/`、`/actuator/`、`/oauth2/`、`/.well-known/`、`/login`、`/error`。ユーザー/ロール管理 API（`/api/auth/user/**`、`/api/auth/role/**`）は有効な JWT が必要。
+フロントエンドのインターセプターが `Authorization: Bearer <token>` を設定します。Gateway は JWT 署名、期限、正整数のユーザー・テナント、適用対象の失効記録を検証して ID を設定します。現在の失効検証は JWT の jti に依存し、jti のないトークンにもブラックリスト照会済みとは言えません。公開範囲の完全一致・前方一致は第 5.3 節に一本化し、ユーザー・ロール管理には有効な認証とエンドポイント権限が必要です。
 
 ---
 
 ## 10. ソーシャルログインエンドポイント
 
-ソーシャルログインエンドポイントは HTTP 302 リダイレクトを返します（標準の `R<T>` レスポンスではありません）。これはフロントエンドが `window.location.href` によりブラウザーナビゲーションをトリガーするためです。
+次のブラウザーナビゲーション用エンドポイントは正常な認可フローで HTTP 302 を返し、`R<T>` で包みません。提供者識別子は `github`、`google`、`gitee` です。
 
-| HTTP メソッド | URL | 説明 |
-|-----------|-----|------|
-| GET | `/api/auth/oauth2/{provider}?tenant_id=1` | サードパーティログインを開始し、302 リダイレクトでサードパーティ認可ページへ遷移 |
-| GET | `/api/auth/oauth2/{provider}/callback?code=XXX&state=YYY` | サードパーティコールバックを処理し、成功時は 302 リダイレクトでフロントエンドコールバックページへ遷移 |
+| メソッド | URL / パラメーター | 契約 |
+|---|---|---|
+| GET | `/api/auth/oauth2/{provider}?tenant_id=1` | `tenant_id` 必須。提供者とテナントを検証してから提供者の認可画面へ302 |
+| GET | `/api/auth/oauth2/{provider}/callback`。`code`、`state`、`error` は任意のバインド引数 | 下表の拒否、引数欠落、業務失敗、成功を処理。任意バインドでも成功には code/state が必要 |
 
-### ログイン開始
+| コールバック条件 | HTTP 302 Location |
+|---|---|
+| 提供者の `error` が空白以外 | フロントエンド `/login?error=user_denied` |
+| `code` または `state` が欠落/空白 | フロントエンド `/login?error=invalid_callback` |
+| state 検証・提供者のコード交換失敗等の `BusinessException` | フロントエンド `/login?error=social_login_failed&message=<URLエンコード済みメッセージ>` |
+| 成功 | 設定されたフロントエンド `/callback#token=<URLエンコード済みJWT>&username=<URLエンコード済みユーザー名>` |
 
-```
-# GitHub
-GET /api/auth/oauth2/github?tenant_id=1
-→ 302 Location: https://github.com/login/oauth/authorize?client_id=...&redirect_uri=...&scope=...&state=...
+`OAuth2StateUtils` の形式は `tenantId|timestamp|hex(HMAC-SHA256(tenantId|timestamp, secret))` です。完全性を検証し、10分を超えて古い時刻を拒否してテナントを復元します。現実装には消費済み記録、ランダム nonce、ブラウザーセッションとの結合がなく、完全な一回限りの CSRF・リプレイ防御を証明しません。アプリ資格情報は外部ユーザーのログイン・同意を代替しません。
 
-# Google
-GET /api/auth/oauth2/google?tenant_id=1
-→ 302 Location: https://accounts.google.com/o/oauth2/v2/auth?client_id=...&redirect_uri=...&response_type=code&scope=openid+profile+email&state=...
+正式 Docker Compose の入口は Gateway 経由の `http://localhost:8102/api/auth/oauth2/{provider}/callback` です。本番は設定した Frontend/Gateway の HTTPS ドメインを使用します。提供者登録値は実際の redirect_uri と一致させ、非公開コンテナアドレスを公開入口にしません。開始時の引数・提供者・テナント検証失敗は Auth のエラー処理に従い、302 を保証しません。
 
-# Gitee
-GET /api/auth/oauth2/gitee?tenant_id=1
-→ 302 Location: https://gitee.com/oauth/authorize?client_id=...&redirect_uri=...&response_type=code&scope=user_info&state=...
-```
-
-- `{provider}` は `github`、`google`、`gitee` をサポート
-- `tenant_id` は必須で、ログイン対象のテナントを指定
-- State パラメータには HMAC-SHA256 署名（`tenantId|timestamp|hmac`）が含まれ、CSRF 攻撃を防止
-
-### コールバック処理
-
-```
-# GitHub/Google/Gitee コールバック
-GET /api/auth/oauth2/{provider}/callback?code=XXX&state=YYY
-
-→ 成功: 302 Location: /callback#token=<JWT>&username=<username>
-→ 失敗: 302 Location: /login?error=<error_code>&message=<message>
-```
-
-### Docker デプロイメント時の OAuth2 コールバック URL 設定
-
-Docker デプロイメント時、ソーシャルログインの `redirect_uri` は**ホストマシンからアクセス可能な URL** を使用する必要があります：
-
-| デプロイメント環境 | redirect_uri 例 |
-|---------|------------------|
-| ローカル開発 | `http://localhost:8100/api/auth/oauth2/github/callback` |
-| Docker デプロイメント | `http://<ホストマシンIP>:8100/api/auth/oauth2/github/callback` |
-| 本番環境 | `https://your-domain.com/api/auth/oauth2/github/callback` |
-
-> **注意**：Docker デプロイメントでは、Auth サービスコンテナの内部ポートは 8080 ですが、OAuth2 コールバック URL はホストマシンのマッピングポート 8100 を使用する必要があります（サードパーティプラットフォームはホストマシンのパブリック/LAN 到達可能アドレスにコールバックする必要があるため）。
-
-### フロントエンドコールバックページ
-
-`/callback` ページ（`src/views/callback/index.vue`）の役割：
-1. URL フラグメントから `token` と `username` を解析
-2. `localStorage` に保存（`useUserStore` 経由）
-3. ダッシュボードにリダイレクト
-
-> 完全なフローのシーケンス図は [core-flows.jp.md](core-flows.jp.md) Flow 4 を参照してください。
+ソース：[SocialLoginController](../omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SocialLoginController.java)、[OAuth2StateUtils](../omni-backend/omni-auth/src/main/java/com/omni/auth/util/OAuth2StateUtils.java)、[Compose 設定](../compose.apps.yaml)。設定、画面操作と失敗再現は[認証ガイド](guides/authentication.jp.md)が管理します。ローカル認可コード・PKCE とデバイスコードは別のプロトコルです。
 
 ---
 
@@ -453,7 +302,7 @@ Response 200:
 ### グローバルスイッチの切り替え
 
 ```
-PUT /api/auth/xss-config/toggle
+PUT /api/auth/xss-config/toggle?enabled=true
 Authorization: Bearer <token>
 X-Tenant-Id: 1
 
@@ -469,7 +318,7 @@ Response 200: { "code": 200, "message": "success" }
 | POST | `/api/auth/xss-config/rules` | `system:xssconfig:create` | ルール作成 |
 | PUT | `/api/auth/xss-config/rules/{id}` | `system:xssconfig:update` | ルール更新 |
 | DELETE | `/api/auth/xss-config/rules/{id}` | `system:xssconfig:delete` | ルール削除 |
-| PUT | `/api/auth/xss-config/rules/{id}/toggle` | `system:xssconfig:update` | ルール有効/無効の切り替え |
+| PUT | `/api/auth/xss-config/rules/{id}/toggle?enabled=true` | `system:xssconfig:update` | ルール有効/無効の切り替え |
 
 **ruleType 列挙値**：`HTML_TAG` | `EVENT_HANDLER` | `DANGEROUS_PROTOCOL` | `CUSTOM_PATTERN`
 
@@ -482,98 +331,67 @@ Response 200: { "code": 200, "message": "success" }
 | `system:xssconfig:create` | ルール作成 |
 | `system:xssconfig:delete` | ルール削除 |
 
+ルールの更新・削除・状態切替は Gateway が注入する `X-Tenant-Id` で所属を確認します。不在または他テナントの場合、更新とキャッシュ失効前に HTTP 200 + `R.code=404` を返します。テナントが正整数でない場合は業務コード 400。既存の権限コードは維持します。
+
+スイッチ API の `enabled` は必須クエリです。作成には非空の `ruleName`、`ruleType`、`pattern` が必要で、更新は非 null フィールドを扱い、指定された pattern の正規表現構文を検証します。対応型は上記のとおりですが、現在の DTO に列挙検証はなく、不明な実行型は処理を行いません。適用条件、Jackson 2/3、権威読取とキャッシュ境界は[核心フロー](core-flows.jp.md)を参照してください。
+
 ---
 
 ## 12. Base サービス辞書管理エンドポイント
 
-Base サービス（`omni-base :8101`）はデータ辞書管理を提供し、「タイプ + データ」の二段階構造を採用しています。
+Base は Gateway の `/api/base/**` ルート経由で完全パスの API を公開する。認証チェーンと既定ポートはコアフローを参照。タイプとデータに各 6 エンドポイントがあり、検証済みの現テナント文脈を使用する。
 
-**ルート説明**：Gateway ルート `Path=/api/base/**` には StripPrefix フィルターが**ありません**。Base サービスのコントローラーは完全なパスを使用します（例：`@RequestMapping("/api/base/dict/type")`）。
+### 辞書タイプのエンドポイント
 
-### Dictionary Type エンドポイント
+基底パス: `/api/base/dict/type`
 
-Base path: `/api/base/dict/type`
+| メソッド | パス | 権限 | 動作 |
+| --- | --- | --- | --- |
+| GET | `/api/base/dict/type/list` | `dict:type:list` | テナント別ページ検索。typeCode/typeName 部分一致、任意 status、sort/id 昇順 |
+| GET | `/api/base/dict/type/{id}` | `dict:type:list` | 現テナントのタイプ取得。欠落・他テナント ID は業務コード 404 |
+| POST | `/api/base/dict/type` | `dict:type:create` | typeCode/typeName は空白不可。コードはテナント内で一意 |
+| PUT | `/api/base/dict/type/{id}` | `dict:type:update` | 非 null フィールドのみ更新。typeCode は変更不可 |
+| DELETE | `/api/base/dict/type/{id}` | `dict:type:delete` | 所属検証後、同テナント同タイプのデータを連鎖削除 |
+| PUT | `/api/base/dict/type/{id}/status?status=...` | `dict:type:update` | status クエリは必須。更新後にキャッシュ無効化 |
 
-| HTTP メソッド | URL | 権限コード | 説明 |
-|-----------|-----|--------|------|
-| GET | `/api/base/dict/type/list?page=1&size=10&typeCode=&typeName=&status=` | `dict:type:list` | ページネーションリスト、フィルター対応 |
-| GET | `/api/base/dict/type/{id}` | `dict:type:list` | ID で検索 |
-| POST | `/api/base/dict/type` | `dict:type:create` | 作成（テナント内の typeCode 一意性を検証） |
-| PUT | `/api/base/dict/type/{id}` | `dict:type:update` | 更新（部分更新） |
-| DELETE | `/api/base/dict/type/{id}` | `dict:type:delete` | 削除（関連データのカスケード削除） |
-| PUT | `/api/base/dict/type/{id}/status` | `dict:type:update` | 有効/無効の切り替え |
+ページ既定値は `page=1,size=10`。タイプ検索は `typeCode/typeName/status` を任意指定する。タイプ作成は `remark/sort`、データ作成は `tagType/remark/sort` が任意。サービスが `status=1`、sort 未指定時は 0 を設定する。
 
-**リクエスト例**：
+### 辞書データのエンドポイント
 
-```
-GET /api/base/dict/type/list?page=1&size=10
-Authorization: Bearer <token>
-X-Tenant-Id: 1
+基底パス: `/api/base/dict/data`
 
-Response 200:
-{
-  "code": 200,
-  "data": {
-    "records": [
-      { "id": 1, "typeCode": "sys_user_gender", "typeName": "ユーザー性別", "status": 1, "sort": 0 }
-    ],
-    "total": 3,
-    "size": 10,
-    "current": 1,
-    "pages": 1
-  }
-}
-```
+| メソッド | パス | 権限 | 動作 |
+| --- | --- | --- | --- |
+| GET | `/api/base/dict/data/options?typeCode=...` | 認証済み。個別操作権限なし | 認証のみ。value/label の有効データ選択肢をキャッシュして返す |
+| GET | `/api/base/dict/data/list?typeCode=...` | `dict:data:list` | 管理ページは DB を直接参照。typeCode 必須、sort/id 昇順 |
+| POST | `/api/base/dict/data` | `dict:data:create` | typeCode/dictValue/dictLabel は空白不可。現テナントの親タイプ存在を検証 |
+| PUT | `/api/base/dict/data/{id}` | `dict:data:update` | 非 null フィールドのみ更新。DTO に typeCode はない |
+| DELETE | `/api/base/dict/data/{id}` | `dict:data:delete` | 所属検証後に削除してキャッシュ無効化 |
+| POST | `/api/base/dict/data/refresh-cache?typeCode=...` | `dict:data:refresh` | typeCode クエリ必須。キー削除後、有効データを取得して再格納 |
 
-### Dictionary Data エンドポイント
-
-Base path: `/api/base/dict/data`
-
-| HTTP メソッド | URL | 権限コード | 説明 |
-|-----------|-----|--------|------|
-| GET | `/api/base/dict/data/list?typeCode=sys_user_gender&page=1&size=10` | `dict:data:list` | typeCode でページネーション検索 |
-| POST | `/api/base/dict/data` | `dict:data:create` | 作成（親タイプの存在を検証） |
-| PUT | `/api/base/dict/data/{id}` | `dict:data:update` | 更新（部分更新） |
-| DELETE | `/api/base/dict/data/{id}` | `dict:data:delete` | 単件削除 |
-| POST | `/api/base/dict/data/refresh-cache` | `dict:data:refresh` | Redis キャッシュの手動リフレッシュ |
-
-**リクエスト例**：
-
-```
-POST /api/base/dict/data
-Authorization: Bearer <token>
-X-Tenant-Id: 1
-Content-Type: application/json
-
-{
-  "typeCode": "sys_user_gender",
-  "dictValue": "3",
-  "dictLabel": "非公開",
-  "tagType": "warning",
-  "sort": 3
-}
-
-@PreAuthorize("hasAuthority('dict:data:create')")
-Response 200: { "code": 200, "data": { "id": 8, ... } }
-```
+更新 DTO は非 null フィールドのみ処理し、null 送信による消去には対応しない。`/options` は `value` と `label` のみを持つ `R<List<DictOptionVO>>` を返す。管理ページは `R<PageResult<SysDictType>>` または `R<PageResult<SysDictData>>`。
 
 ### 辞書権限コード
 
-| 権限コード | 説明 |
-|--------|------|
-| `dict:type:list` | 辞書タイプリストを閲覧 |
-| `dict:type:create` | 辞書タイプを作成 |
-| `dict:type:update` | 辞書タイプの更新/ステータス切り替え |
-| `dict:type:delete` | 辞書タイプを削除（カスケード） |
-| `dict:data:list` | 辞書データリストを閲覧 |
-| `dict:data:create` | 辞書データを作成 |
-| `dict:data:update` | 辞書データを更新 |
-| `dict:data:delete` | 辞書データを削除 |
-| `dict:data:refresh` | 辞書キャッシュを手動リフレッシュ |
+| 権限コード | 用途 |
+| --- | --- |
+| `dict:type:list` | タイプ一覧・詳細 |
+| `dict:type:create` | タイプ作成 |
+| `dict:type:update` | タイプ更新・状態変更 |
+| `dict:type:delete` | タイプ連鎖削除 |
+| `dict:data:list` | 管理データ一覧 |
+| `dict:data:create` | データ作成 |
+| `dict:data:update` | データ更新 |
+| `dict:data:delete` | データ削除 |
+| `dict:data:refresh` | キャッシュ更新 |
 
 ### テナント分離
 
-すべてのリスト検索と作成操作には `X-Tenant-Id` リクエストヘッダーが必要です（フロントエンドが JWT Token から抽出し、Gateway が注入）。データは SQL クエリレベルで `tenant_id` により分離されます。辞書タイプの一意性制約の範囲は `(tenant_id, type_code)` です。
+一覧・作成・選択肢・更新はテナントを明示的に渡す。6 個の ID 指定読み書き入口も Gateway の `X-Tenant-Id` をサービスへ渡し、正の ID と所属を検証してから返却・書き込み・キャッシュ操作を実行する。タイプ一意制約は `(tenant_id,type_code)`。
+
+欠落・他テナント ID はともに `BusinessException(404)` となり、共通ハンドラーが HTTP 200 + `R.code=404` に変換する。テナント ID が欠落または非正数なら業務コード 400。Gateway とメソッド権限の検証は別途実行する。キャッシュ・クライアントのライフサイクル・ソース入口はコアフローとフロントエンド規約に集約する。
+
+[Flow 9](core-flows.jp.md) / [Composable](frontend-patterns.jp.md)
 
 ### MQ 配信ランタイム状態
 
@@ -591,37 +409,23 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 }
 ```
 
-`OUTBOX_ONLY` は、業務トランザクションは引き続きローカル Outbox に書き込むものの、MQ relay/XXL-JOB が動作していないことを意味します。フロントエンドは縮退中の旨を表示し、再送操作を無効化する必要があります。`FULL` は書き込みと非同期配信の両方が有効であることを意味します。
+結果は設定値から計算します。`outboxWriteEnabled=true`、`deliveryEnabled = omni.mqlog.relay.enabled && xxl.job.executor.enabled`（どちらも読取時の既定値は true）で、mode は `FULL/OUTBOX_ONLY` です。relay プロセス、XXL-JOB のスケジュール、Broker、DB、メッセージ到達は検査しません。FULL は関連スイッチが有効、OUTBOX_ONLY は少なくとも一つの配信スイッチが無効であることを示します。信頼性と復旧は [MQ 信頼性](mq-reliability.jp.md)を参照してください。
 
 ---
 
 ## 13. API バージョン管理ポリシー
 
-### 現在の決定
+現在の Gateway と Controller は `/api/auth/user/list` 等、バージョン接頭辞のない `/api/...` を使用します。`/api/v1/...`・`/api/v2/...` の並行ルートは未実装です。
 
-スキャフォールディング段階では URL バージョン番号を使用しません。API が安定し、複数のコンシューマーが存在するようになった時点で、プレフィックスバージョン制御を導入します。
-
-### 将来の進化パス
-
-| 段階 | バージョン戦略 | URL 例 |
-|------|---------|---------|
-| **現在（スキャフォールディング）** | バージョン番号なし | `/api/auth/user/list` |
-| **V1（API 安定後）** | URL プレフィックスバージョン | `/api/v1/auth/user/list` |
-| **V2（Breaking Change）** | URL プレフィックスバージョン | `/api/v2/auth/user/list` |
-
-**バージョニングルール**：
-- フィールドの追加（後方互換）：バージョン変更不要
-- フィールドの削除/名前変更：新バージョンが必要
-- リクエスト/レスポンス構造の変更：新バージョンが必要
-- 旧バージョンは最低 6 ヶ月間維持
+将来の URL バージョン、破壊的変更の移行と旧版の保持期間は実装済み契約ではありません。必要なら設計・ADR で利用者、互換範囲、移行とサポート期間を先に決め、実装と文書を同期します。未実装の接頭辞や6か月保守を保証しません。現在のフィールド、エラーと状態は本契約とソースに従います。
 
 ---
 
 ## 14. Null セマンティクス
 
-- `null` フィールドは JSON 出力に含まれます（省略しません）
-- 空コレクションは `null` ではなく `[]` として返されます
-- オプションの単一値は、存在しないことを示すために空文字列ではなく `null` を使用します
+`R.ok()` と失敗レスポンスの data は null で、現在の通常 mapper はその null フィールドを出力します。[] になるのは生成側が実際に空の List を返した場合です。`PageResult` は null records を保持し、共通の変換保証はありません。任意項目の null、空文字列、省略は各 DTO、serializer、エンドポイントに従います。
+
+JSON バインド、業務入力項目、ID の取得元は別の制約です。未知のプロパティが一律に 400 になるわけではなく、制御された現在の Asset DTO バインドでは追加項目が無視されました。DTO にない tenant、user、金額スナップショットが操作可能な入力になるわけではありませんが、パーサーが偽装項目を必ず明示的に拒否するとも言えません。定義された項目だけを送信してください。
 
 ---
 
@@ -629,7 +433,7 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 
 ### 15.1 サプライヤーとサブリソース
 
-- 管理側のサプライヤーライフサイクルコマンドはすべて `version` を携行します；ブラックリスト復旧は
+- 管理側のサプライヤーライフサイクルコマンドはすべて `version` を含めます；ブラックリスト復旧は
   `POST /api/srm/supplier/{id}/restore-from-blacklist` を使用します。
 - 連絡先、資格、銀行口座パス内の `supplierId` はサブリソースの実際の帰属と一致しなければなりません；不一致は一律 404 を返します。
 - `creditCode` はテナント内で一意；ページネーション `size` は最大 100。
@@ -637,7 +441,7 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 
 ### 15.2 ポータル登録
 
-`POST /api/srm/portal/enroll` は Gateway が注入した tenant/user 身分のみを受け付け、リクエストは tenantId や userId を携行してはなりません：
+`POST /api/srm/portal/enroll` は Gateway が注入した tenant/user の IDのみを受け付け、リクエストは tenantId や userId を含めてはいけません：
 
 ```json
 {
@@ -652,17 +456,21 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 現在のユーザーは `GET /api/srm/portal/enrollment` でステータスを照会でき、失敗後は
 `POST /api/srm/portal/enrollment/retry` で冪等リトライを呼び出せます。ロール割り当てが完了するまで PortalUser は作成されず、企業プロフィールインターフェースも開放されません。
 
+登録 DTO の必須項目は requestId（非空・最大64）、inviteToken（非空・最大256）、name（非空・最大200）、creditCode（非空・最大50）です。creditCode は trim して大文字にします。例は実在企業の登録コードではありません。通常の未知項目とは異なり、この DTO は JsonAnySetter で tenantId/userId を含むすべての未定義項目を明示的に拒否します。SRM advice は JSON 読み取り例外を400に変換します。
+
 ### 15.3 評価とリスク
 
 - `GET /api/srm/evaluation/template/default/dimensions` は現在のテナントのデフォルトテンプレートと有効な次元を返します；フロントエンドはデータベース ID をハードコードしてはいけません。
-- 評分範囲は 1–5 で、デフォルトテンプレートのすべての次元をカバーし、重複してはいけません。
+- 採点範囲は 1–5 で、デフォルトテンプレートのすべての次元をカバーし、重複してはいけません。
 - `GET /api/srm/risk/list` はサプライヤーの最新評価で集約したリスクサマリーのページネーションを返し、`riskLevel` でフィルタリングできます。
 - `GET /api/srm/supplier/{id}/risk` は `indicators/latestAssessment/history` の集約ビューを返します。
-- リスク指標の更新は `version` を携行；総合等級が非 RED から RED に変わった場合のみ `srm.risk.level-changed.v1` を生成します。
+- リスク指標の更新は `version` を指定します。総合等級が非 RED から RED に変わった場合のみ `srm.risk.level-changed.v1` を生成します。
+
+評価作成ではテナントの有効なデフォルトテンプレートをサービスが選び、DTO に templateId はありません。items は 1–100 件で有効な全評価軸を重複なく含めます。score は 1–5、小数は最大一桁です。dimensionId はデフォルトテンプレート API から取得し、テンプレート、評価軸名、重みはサーバーが決定します。
 
 ### 15.4 内部サプライヤーサマリー
 
-後続の Procurement/Asset は `X-Internal-Token` と `X-Tenant-Id` の両方を携行する場合のみ呼び出せます：
+後続の Procurement/Asset は `X-Internal-Token` と `X-Tenant-Id` の両方を指定する場合のみ呼び出せます：
 
 - `GET /api/internal/supplier/{id}?tenantId={tenantId}`
 - `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}&limit=50`
@@ -724,7 +532,7 @@ GET の query tenantId、batch の body tenantId は `X-Tenant-Id` と完全一�
       "rfqLineId": 10011,
       "materialCode": "IT-LAPTOP-001",
       "materialName": "ビジネスノートPC",
-      "unit": "台",
+      "unit": "EA",
       "quantity": "20.000000",
       "remark": "3年保証付き"
     }
@@ -762,20 +570,17 @@ GET の query tenantId、batch の body tenantId は `X-Tenant-Id` と完全一�
 | `lines[].rfqLineId` | Long | はい | 正整数かつ重複不可 |
 | `lines[].unitPrice` | Decimal String | はい | 十進文字列；`DECIMAL(19,6)`、0 より大きく整数部は最大 13 桁 |
 | `lines[].deliveryDays` | Integer | はい | 0–3650 |
-| `lines[].remark` | String | いいえ | 最大 500、プレーンテキスト |
+| `lines[].remark` | String | いいえ | 最大500。サービスが trim し空白を正規化 |
 
-リクエストは `tenantId/supplierId/rfqNo/material/quantity/currencyCode/lineAmount/totalAmount` を受け付けません。これらのフィールドはそれぞれ信頼できる身分ヘッダー、PortalUser、Procurement 招待詳細から読み取るか、サーバー側で
-`unitPrice × quantity` により計算します；行金額と総金額は `DECIMAL(19,4)` で保存します。レスポンスは `R<QuotationVO>` で、見積ヘッダー、`version`、すべての行スナップショットを含みます。
+`tenantId/supplierId/rfqNo/material/quantity/currencyCode/lineAmount/totalAmount` はこの DTO で操作できる入力ではありません。サービスが信頼済み ID、PortalUser、Procurement 招待スナップショットから取得・計算します。追加 JSON 項目は無視される場合があり、必ず明示的エラーになるとは限りません。`R<QuotationVO>` はヘッダー、version、行スナップショットを含み、金額・数量の通信形式は次節で定義します。
 
 冪等と並行ルール：
 
-- `srm_quotation_request` は `(tenantId, requestId)`、正規化リクエストボディ SHA-256、quotationId、targetVersion を恒久的に保存します；同一 requestId・同一 requestHash のリトライは現在の見積スナップショットを返し、見積や Outbox を再度書き込みません。
-- 同一 requestId が異なる rfqId やリクエスト内容に紐づく場合はビジネスコード 409 を返します。
-- `(tenantId, rfqId, supplierId)` は未削除見積を最大 1 件；初回リクエストは作成センチネル `version=0` を使用し、初版が永続化され `version=1` でレスポンスされ、以降の更新は現在の version を携行しなければならず、期限切れバージョンや 0 の再使用はいずれも 409 を返します。
-- 提出前に RFQ `status=SENT`、招待 `status IN (INVITED, QUOTED)`、締切時間、行集合を再検証しなければなりません；その他の RFQ ステータス（`DRAFT/CLOSED/AWARDED/CANCELLED`）は拒否します。Procurement が利用不可の場合は 503 を返し、オフライン書き込みは許可しません。
-
-requestHash は requestId を含めず、本段階の正規化入力は
-`rfqId/version/validUntil/lines`；lines は `rfqLineId` 昇順、単価は 6 桁小数に正規化し非科学記数法文字列を使用し、備考は trim 後に null/空白を null に統一します。サーバー側はフィールド順による同一意図の誤判定を避けるため、生の JSON バイトを直接ハッシュしてはいけません。
+- `srm_quotation_request` はテナント内 requestId、正規化した SHA-256、quotationId、targetVersion を保存します。過去の COMPLETED は、新規リクエストのサプライヤー状態、RFQ、期限、招待明細の検証より先に再生されます。現在の見積スナップショットを返し、見積・Outbox を再度書き込みません。成功再生で新規送信の検証をすべて繰り返すわけではありません。
+- 同じ requestId で hash、supplierId、rfqId が異なる場合、RESERVED・無効な記録の場合、または現在の見積が targetVersion より古い場合は業務 409 です。
+- 新規リクエストは現在承認済みのサプライヤーから送信し、SENT RFQ、INVITED/QUOTED 招待、期限を読み直します。validUntil は現在より後、RFQ 期限以降でなければなりません。1–200 行で全 RFQ 行を過不足・重複なく含めます。依存先が利用不可なら 503 で閉じます。
+- `(tenantId, rfqId, supplierId)` ごとに未削除見積は最大一件です。初回 version=0 は version 1 として保存し、更新には現在の version を使い、競合は 409 です。
+- requestHash は requestId を含まず、`rfqId/version/validUntil/lines` を対象とします。rfqLineId 順に並べ、単価を小数 6 桁の非指数表記に正規化し、備考は trim して null/空白を統一します。生の JSON バイト列はハッシュしません。`unitPrice × quantity` は小数 4 桁で HALF_UP してから合計します。
 
 ### 15.6 SRM と Procurement の見積内部契約
 
@@ -808,7 +613,7 @@ X-Tenant-Id: 1
 ## 16. Workflow クロスサービス契約
 
 Workflow 内部エンドポイントは §8.3 の `X-Internal-Token` と `X-Tenant-Id` を統一的に使用し、レスポンスは標準の
-`R<T>` を引き続き使用します。詳細な実行メカニズムは [workflow.jp.md](workflow.jp.md#28-クロスサービス内部契約) を参照。
+`R<T>` を引き続き使用します。詳細な実行メカニズムは [workflow.jp.md](workflow.jp.md#6-内部起動と完了イベント) を参照。
 
 ### 16.1 冪等プロセス起動
 
@@ -869,12 +674,11 @@ Content-Type: application/json
 }
 ```
 
-冪等性は 2 つのテナント内一意キーで共同に保証されます：
+冪等記録はテナント内の `(tenantId, requestId)` と `(tenantId, businessType, businessKey)` の二つの一意キーを使います。競合時に比較するのは業務種別・キー、modelVersionId、startUserId です。title、variables、startUserName は比較せず、完全な payload hash もありません。
 
-- `(tenantId, requestId)`：リクエストレベル冪等；同一リクエスト ID を異なるビジネスに紐づけてはいけません。
-- `(tenantId, businessType, businessKey)`：ビジネスレベル冪等；同一ビジネスは複数プロセスを起動してはいけません。
-- 既に成功した同一意図のリトライは元の `processInstanceId` を返し、`replayed = true`。
-- 処理中、リクエスト ID の競合、またはビジネスキーに対応する `modelVersionId/startUserId` の変化はいずれもビジネスコード 409 を返します。
+成功記録は元の processInstanceId と replayed=true を返しますが、requestId は今回の値を返します。処理中、業務・モデル・開始ユーザーの不一致は業務 409 です。同じ requestId の FAILED 分岐は原子的にリトライを確保できますが、別 requestId で同じ FAILED 業務キーに一致してもその分岐には自動で入りません。
+
+実際の新規開始では PUBLISHED と非空 processDefinitionId を再検証し、`ASSET_TRANSFER/ASSET_DISPOSAL/SRM_SUPPLIER_ONBOARDING` の分類を完全一致させます。title が空白なら `{businessType}:{businessKey}` です。任意の variables が信頼済み ID になるわけではありません。開始ユーザー、テナント、保護変数、ルーティングの制約は [Workflow](workflow.jp.md)を参照してください。
 
 ### 16.2 タスク処理資格の検証
 
@@ -920,9 +724,7 @@ Content-Type: application/json
 }
 ```
 
-サービスは Flowable タスクテナント、インスタンス拡張記録テナント、`businessType + businessKey` ビジネス帰属を同時に一致させ、
-`userId` が現在の `ASSIGNEE` または未受領タスクの `CANDIDATE` であることを確認しなければなりません。`assignmentType` は
-`ASSIGNEE`、`CANDIDATE`、`NONE` のみ；タスクが存在しないか任一の境界が不一致の場合 `valid = false` を返します。
+ヘッダーと本文の tenantId が異なる場合は先に業務 403 を返します。その後、Flowable タスクと拡張記録のテナント、businessType/businessKey、現在の ASSIGNEE または未取得タスクの CANDIDATE を確認します。タスクなし、業務不一致、資格なしは `R.code=200,data.valid=false` で、assignmentType は `ASSIGNEE/CANDIDATE/NONE` です。false は承認コマンド実行時の権限・並行実行検証の代わりにはなりません。
 
 ### 16.3 プロセス完了イベント
 
@@ -961,9 +763,7 @@ Content-Type: application/json
 | `result` | Enum | `APPROVED`、`REJECTED`、`CANCELLED` |
 | `completedTime` | LocalDateTime | プロセスの実際の完了または終了時刻 |
 
-完了ステータスと `completionEventId` の条件付き更新および PENDING Outbox 記録は同一ローカルトランザクション内でコミットされます；
-`completion_event_id IS NULL` は同一プロセスインスタンスが論理完了イベントを一度だけ生成することを保証するデータベースラッチです。
-コミット後は信頼性メッセージリレーが非同期に配信・リトライし、転送セマンティクスは少なくとも一度なので、コンシューマーは `eventId` で冪等処理しなければなりません。
+接続済みの承認完了と明示的終了の経路が、完了状態・completionEventId の更新と PENDING Outbox 追加を同じローカルトランザクションで行います。`completion_event_id IS NULL` が論理完了イベントの重複を防ぎます。すべての Flowable engine-end や即時終了を扱う共通リスナーはありません。成功や Outbox コミットは Broker 配信・消費完了を意味しません。有効な配信機能と利用可能な依存先がある場合に relay が非同期で配信・再試行し、消費側は eventId で冪等化します。
 
 ### 16.4 公開済みモデルバージョンの照会
 
@@ -991,36 +791,39 @@ X-Tenant-Id: 1
 }
 ```
 
-エンドポイントはリクエストされたテナント内で引き続き利用可能なモデルとバージョンのみを返します。`modelKey` はテナント内で一意かつ BPMN process id と
-一致するモデル識別子；`category` はクロスサービスのビジネス分類です。呼び出し元は `PUBLISHED` と非空の
-`processDefinitionId` の検証に加え、安定したビジネスタイプを `category` に紐づけられます。Asset は移管モデル分類を
-`ASSET_TRANSFER`、処分モデル分類を `ASSET_DISPOSAL` とすることを強制し、クロス再利用や他のビジネスモデルの使用は不可；
-Workflow は実際の資産承認インスタンス作成前に同じ検証を再実行し、事前検証後のモデル変更ウィンドウを閉じます。
+テナントを限定し、PUBLISHED と非空 processDefinitionId を要求します。存在しない・利用不可のバージョンは業務 404 です。modelKey と BPMN process id の一致は公開時の検証が維持し、返却文字列だけで engine の現在の実行可能性を証明することはできません。
+
+分類別の現在バージョンは `GET /api/internal/workflow/model-version/current?category={category}` でも取得できます。新規開始では `ASSET_TRANSFER/ASSET_DISPOSAL/SRM_SUPPLIER_ONBOARDING` を分類に結び付け、同じ意図の成功再生は既存インスタンスを使います。内部終了は `POST /api/internal/workflow/process-instance/{processInstanceId}/terminate?reason={reason}` で、内部トークンに加えて X-Tenant-Id、X-User-Id を明示します。reason は任意です。
 
 ### 16.5 承認ルールの読み取り専用モデル集約
 
-| メソッド | パス | 制約 |
+| メソッド | パス | 現在の制約 |
 |---|---|---|
-| GET | `/api/internal/workflow/model-versions/published?category=purchase` | 現在のテナント、分類の完全一致、メインモデル有効かつ currentPublishedVersionId がデプロイ可能な公開済みバージョンを指す記録のみ返す |
-| POST | `/api/internal/workflow/model-versions/resolve` | body は `{ "modelVersionIds": [1, 2] }`、1 回 1–200 個の正整数、リクエスト順に返却 |
-| GET | `/api/internal/workflow/model-version/{id}/preview` | 安全承認図を返し、BPMN XML や designerJson は返さない |
+| GET | `/api/internal/workflow/model-versions/published?category=purchase` | 現在のテナント、完全一致の分類、有効なモデル、現在の公開版、非空 processDefinitionId |
+| POST | `/api/internal/workflow/model-versions/resolve` | body は `{ "modelVersionIds": [1, 2] }`。1–200 個の正整数を初出順で重複排除 |
+| GET | `/api/internal/workflow/model-version/{id}/preview` | 安全な承認グラフとメタデータ。生の BPMN XML/designerJson は返さない |
 
-バッチ解決の `availability` は `AVAILABLE/NOT_CURRENT/UNAVAILABLE/MODEL_ARCHIVED/NOT_FOUND` のみ。
-安全プレビューはノード、秘匿化エッジ、モデルメタデータのみを含み；UserTask は `roleCode/approvalMode` を含めることができ、条件式は
-「条件設定済み（内容は非表示）」のみを返します。分岐やループがある場合 `linearSummary=null`、フロントエンドは実際のパスがビジネスデータで決まることを提示しなければならず、
-現在の組織を将来の実際の承認者に解決してはいけません。
+availability は `AVAILABLE/NOT_CURRENT/UNAVAILABLE/MODEL_ARCHIVED/NOT_FOUND` で、モデル・バージョンのメタデータから計算します。Flowable のデプロイ、停止、実行可否をリアルタイムで検査するものではありません。
 
----
+ルート項目は `approvalPreviewVersion/modelVersion/nodes/edges/hasBranches/linearSummary` です。nodes は `id/name/type/roleCode/approvalMode/description`、type は `START/END/APPROVAL/GATEWAY/SERVICE`。edges は `id/name/source/target/defaultBranch/conditionSummary` です。条件は実際の固定文言「已配置条件（内容已隐藏）」だけを返します。分岐があるか単一路線の要約を作れない場合、linearSummary は null です。現在の組織プレビューを将来の実際の承認者とみなしてはいけません。
+
+### 16.6 デザイナーの候補者プレビュー
+
+`POST /api/workflow/identity/resolve-preview` は `workflow:identity:list` と信頼済みテナントヘッダーが必要です。入力は `assignmentType/roleCode/anchorType/anchorParams/scopeMode/simulateUserId` で assignmentType は必須です。data は `candidateCount/candidates`、候補者は `userId/username/nickname/unitName` を含みます。解決失敗・互換モード・基点の意味は [Workflow 第 3 節](workflow.jp.md#3-候補者リスナー複数人承認)を参照し、内部の安全なグラフ DTO と混同しないでください。
+
+### 16.7 インスタンス参照のテナント境界
+
+外部 `GET /api/workflow/process-instance/{id}/progress` と `GET /api/workflow/process-instance/{id}/approval-records` は Gateway の X-Tenant-Id を明示的に使います。欠落・不正値は失敗し、正でないテナントは業務 400 です。同じテナントの履歴インスタンスがない場合と他テナントの場合は、活動・コメント・候補者を読む前に共に業務 404 です。参加者 ACL を追加する変更ではなく、すべての履歴定義 API に同じ保護があることも意味しません。
 
 ## 17. Procurement MVP 契約
 
 ### 17.1 共通境界
 
-- 外部 Base path は `/api/procurement`、Gateway は完全パスを保持し `StripPrefix` を使用しません。
-- すべてのリクエストは Gateway が注入した `X-User-Id`、`X-Tenant-Id` と権限ヘッダーを使用；ビジネステーブルは TenantLine と permission-aware DataScope の両方で制約されます。
-- 数量、単価は `DECIMAL(19,6)`、金額は `DECIMAL(19,4)` を使用；すべてのレスポンスの数量、単価、金額は JSON string であり、フロントエンドは JavaScript `number` でビジネス金額を計算してはいけません。
-- 更新 body と削除 query は `version` を携行しなければなりません；バージョン競合はビジネスコード 409 を返します。
-- 内部エンドポイントは統一的に `/api/internal/procurement/**` を使用し、`X-Internal-Token` と `X-Tenant-Id` を要求し、Gateway 経由で公開してはいけません。
+- 外部基底パスは `/api/procurement` で完全なパスと Gateway の ID・権限を使います。TenantLine は proc_* 業務表だけを対象とし、Outbox スキャンはこのテナントフィルターを使いません。
+- DataScope は購買申請に requester_user_id/requester_unit_id、RFQ/PO/GR に owner_user_id/owner_unit_id を使い、子行は集約ルートから継承します。品目、分類、承認ルート、設定はテナント内で共有し、存在しない owner 列は追加しません。
+- 数量・単価は DECIMAL(19,6)、金額は DECIMAL(19,4) で、レスポンスは十進数文字列です。入力も各 DTO の文字列制約に従い、業務金額を JavaScript number で計算してはいけません。
+- 更新・削除・バージョン付き状態コマンドは DTO に従って版を指定します。RFQ 選定は rfqVersion/quotationVersion を使うため、すべての書き込みに version 項目があるわけではありません。作成には既存行の版はありません。
+- 内部 `/api/internal/procurement/**` は X-Internal-Token/X-Tenant-Id を要求し Gateway が遮断します。状態・トランザクション境界は [Procurement 設計](design/procurement-design.jp.md)を参照してください。
 
 ### 17.2 資材とカテゴリ
 
@@ -1028,12 +831,12 @@ Workflow は実際の資産承認インスタンス作成前に同じ検証を�
 |---|---|---|---|
 | GET | `/api/procurement/material/category/list` | `procurement:material:list` | 最大 2 階層のカテゴリツリーを返す |
 | POST | `/api/procurement/material/category` | `procurement:material:create` | カテゴリを作成；`categoryCode` は作成後変更不可 |
-| PUT | `/api/procurement/material/category/{id}` | `procurement:material:update` | body は `version` を携行 |
+| PUT | `/api/procurement/material/category/{id}` | `procurement:material:update` | body は `version` を指定 |
 | DELETE | `/api/procurement/material/category/{id}?version={version}` | `procurement:material:delete` | 子カテゴリや資材が存在する場合は 409 を返す |
 | GET | `/api/procurement/material/list` | `procurement:material:list` | `keyword/categoryId/status/assetManaged/page/size` |
 | GET | `/api/procurement/material/{id}` | `procurement:material:list` | 資材詳細を照会 |
 | POST | `/api/procurement/material` | `procurement:material:create` | 資材を作成；`materialCode` は作成後変更不可 |
-| PUT | `/api/procurement/material/{id}` | `procurement:material:update` | body は `version` を携行 |
+| PUT | `/api/procurement/material/{id}` | `procurement:material:update` | body は `version` を指定 |
 | DELETE | `/api/procurement/material/{id}?version={version}` | `procurement:material:delete` | 論理削除 |
 
 `assetManaged=true` のとき `unit` は `EA/PCS/UNIT/SET` のみ許可；購買申請はステータスが `ACTIVE` かつカテゴリが有効な資材のみを参照できます。
@@ -1113,16 +916,13 @@ Workflow 完了イベントは `eventId` で `proc_event_inbox` に入ります�
 | GET | `/api/procurement/rfq/{id}` | `procurement:rfq:list` | RFQ、行と招待スナップショットを照会 |
 | GET | `/api/procurement/rfq/{id}/comparison` | `procurement:rfq:list` | SRM から現在の有効見積と完全な行スナップショットを再読込 |
 | POST | `/api/procurement/rfq` | `procurement:rfq:create` | 承認済み購買申請から DRAFT を作成 |
-| PUT | `/api/procurement/rfq/{id}` | `procurement:rfq:update` | DRAFT のみ；body は `version` を携行 |
+| PUT | `/api/procurement/rfq/{id}` | `procurement:rfq:update` | DRAFT のみ；body は `version` を指定 |
 | DELETE | `/api/procurement/rfq/{id}?version={version}` | `procurement:rfq:delete` | DRAFT のみ |
 | POST | `/api/procurement/rfq/{id}/send` | `procurement:rfq:send` | body `{ "version": 0 }`、招待されたサプライヤーに公開 |
 | POST | `/api/procurement/rfq/{id}/award` | `procurement:rfq:award` | 見積バージョンをロックし購買注文をアトミックに生成 |
 | POST | `/api/procurement/rfq/{id}/cancel` | `procurement:rfq:cancel` | body `{ "version": 0 }`；DRAFT/SENT のみ |
 
-作成と更新リクエストは `requisitionId/title/quotationDeadline/supplierIds` を含み；更新時の時間形式は
-`yyyy-MM-dd HH:mm:ss` に統一。`SENT` の RFQ のみ比較と選定が可能です。招待ステータスは
-`INVITED/QUOTED/EXPIRED/AWARDED/REJECTED`；選定後に落札招待は `AWARDED`、その他は
-`REJECTED` になり、これらの終態はサプライヤーポータルの履歴閲覧専用で、見積を継続できません。
+作成は `requisitionId/title/quotationDeadline/supplierIds`、下書き更新は `version/title/quotationDeadline/supplierIds` を受け付け、requisitionId は変更しません。quotationDeadline は `yyyy-MM-dd HH:mm:ss` の未来日時で、supplierIds は 1–100 個の正整数です。比較・選定は SENT RFQ のみ可能です。招待状態は `INVITED/QUOTED/EXPIRED/AWARDED/REJECTED` で、最後の二つは履歴参照だけを許可し、見積を再送できません。
 
 選定リクエスト例：
 
@@ -1151,9 +951,9 @@ Workflow 完了イベントは `eventId` で `proc_event_inbox` に入ります�
 | GET | `/api/procurement/purchase-order/{id}` | `procurement:purchase-order:list` | 注文と不変な見積行スナップショットを照会 |
 | PUT | `/api/procurement/purchase-order/{id}` | `procurement:purchase-order:update` | DRAFT のみ、タイトルと納品情報を変更可能 |
 | DELETE | `/api/procurement/purchase-order/{id}?version={version}` | `procurement:purchase-order:delete` | DRAFT のみ |
-| POST | `/api/procurement/purchase-order/{id}/send` | `procurement:purchase-order:send` | DRAFT → SENT、body は `version` を携行 |
-| POST | `/api/procurement/purchase-order/{id}/confirm` | `procurement:purchase-order:confirm` | SENT → CONFIRMED、body は `version` を携行 |
-| POST | `/api/procurement/purchase-order/{id}/cancel` | `procurement:purchase-order:cancel` | 入荷発生前のキャンセル、body は `version` を携行 |
+| POST | `/api/procurement/purchase-order/{id}/send` | `procurement:purchase-order:send` | DRAFT → SENT、body は `version` を指定 |
+| POST | `/api/procurement/purchase-order/{id}/confirm` | `procurement:purchase-order:confirm` | SENT → CONFIRMED、body は `version` を指定 |
+| POST | `/api/procurement/purchase-order/{id}/cancel` | `procurement:purchase-order:cancel` | 入荷発生前のキャンセル、body は `version` を指定 |
 
 外部 API は購買注文作成エンドポイントを提供しません；MVP 注文は RFQ 選定トランザクションでのみ生成でき、クライアントはサプライヤー、見積や
 注文行を偽造できません。ステータスは `DRAFT/SENT/CONFIRMED/PARTIAL_RECEIVED/RECEIVED/CLOSED/CANCELLED`。
@@ -1181,17 +981,17 @@ number は 400 を返します。DRAFT 作成は入荷済み数量を占有し�
 `GET /api/internal/procurement/goods-receipt/asset-candidates?tenantId={tenantId}&afterId={id}&size={size}` を使用；
 リアルタイム消費とバックスキャンはいずれも `tenantId + goodsReceiptLineId + unitSequence` で冪等です。
 
-2 つのイベントと履歴候補は入荷管理帰属 `ownerUserId/ownerUnitId` を携行しなければならず、Asset はそれを新資産の
+2 つのイベントと履歴候補は入荷管理帰属 `ownerUserId/ownerUnitId` を指定しなければならず、Asset はそれを新資産の
 管理帰属として継承；フィールドが欠落または正整数でない場合はフェイルクローズします。イベント行の `receivedQuantity/unitPrice/totalPrice`
 は引き続き JSON 十進文字列を使用し、単位レベルカウント `assetQuantity` のみ正整数を使用します。Asset リアルタイムコンシューマーは
-`consumerName + eventId` で Inbox 冪等ラッチも確立；同一イベント ID や来源単位が異なる完全なビジネス意図に紐づく場合は
+`consumerName + eventId` で Inbox 冪等ラッチも確立；同一イベント ID や取得元単位が異なる完全なビジネス意図に紐づく場合は
 競合を返し、作成済み資産を上書きしてはいけません。
 
 ### 17.8 調達概要
 
 | メソッド | パス | 権限 | 説明 |
 |---|---|---|---|
-| GET | `/api/procurement/overview/summary` | `procurement:overview:list` | 調達フローの待办、注文ステータスと通貨別コミット金額 |
+| GET | `/api/procurement/overview/summary` | `procurement:overview:list` | 調達フローの未処理タスク、注文ステータスと通貨別コミット金額 |
 | GET | `/api/procurement/overview/spend-analysis?dimension={dimension}&limit={limit}` | `procurement:overview:list` | 次元と通貨別に確認済み調達支出を集約 |
 
 `dimension` は必須で `CATEGORY`、`SUPPLIER`、`DEPARTMENT` のみ許可；`limit` はデフォルト 20、範囲 1–100。
@@ -1232,13 +1032,12 @@ DEPARTMENT は購買注文の担当部門 `ownerUnitId` を表します。支出
 
 ### 18.1 共通境界
 
-- 外部 Base path は `/api/asset`；Gateway は完全パスを保持し `StripPrefix` を使用しません。
-- 外部リクエストは Gateway が注入した `X-User-Id`、`X-Tenant-Id`、`X-Username`、ロールと権限ヘッダーを使用。ビジネステーブルは常に TenantLine で制約され、管理リスト、サブリソースと概要はさらに permission-aware DataScope で制約されます。
-- 管理リストは `owner_user_id/owner_unit_id` でフィルタ；`GET /api/asset/asset/my` は常に `current_user_id` で照会し、同一ユーザーが管理ロールを持つことで拡大できません。
-- 書き込みコマンドは `version` を携行し楽観的ロック検証を実行；バージョンやアクティブ操作占有の不一致はビジネス競合を返します。
-- 資産原価、残存価値と集計金額は `DECIMAL(18,2)` を使用し、リクエストとレスポンスはいずれも JSON 十進文字列を使用；JSON number は 400 を返します。通貨は 3 桁 ISO 4217 コードを使用。
-- 資産ステータスは `IN_STOCK/ALLOCATED/IN_USE/MAINTENANCE/TRANSFER/DISPOSAL_PENDING/DISPOSED/SCRAPPED`。
-- 内部エンドポイントは `/api/internal/asset/**` を使用し、`X-Internal-Token` と `X-Tenant-Id` を携行しなければならず、Gateway で明示的にブロックされます。
+- 外部基底パスは `/api/asset` で完全なパスを保持します。ID ヘッダーは `X-User-Id/X-Tenant-Id/X-User-Name` とロール・権限で、X-Username ではありません。TenantLine は ast_* だけに適用し、Outbox relay は全テナントを走査します。
+- 管理参照は owner_user_id/owner_unit_id、子リソースは資産の範囲を継承します。自分の資産・受領・返却は current_user_id に固定され、管理権限によって個人資産の参照範囲は広がりません。
+- 更新・削除・既存資産のコマンドは version を指定し、作成には既存版はありません。操作占有・バージョンの競合では書き込みを拒否します。
+- 原価・残存価額・集計金額は DECIMAL(18,2) で、非 null の入出力は JSON 十進数文字列です。数値・不正文字列は拒否しますが、現在の共通 JSON 読み取り例外は 500 に変換され、400 は保証しません。currencyCode は英字三文字を検証するだけで、ISO 4217 登録表との照合ではありません。
+- 状態は `IN_STOCK/ALLOCATED/IN_USE/MAINTENANCE/TRANSFER/DISPOSAL_PENDING/DISPOSED/SCRAPPED` です。
+- 内部 `/api/internal/asset/**` は X-Internal-Token/X-Tenant-Id を要求し Gateway が遮断します。ライフサイクル・資産計上・承認トランザクションは [Asset 設計](design/asset-design.jp.md)を参照してください。
 
 ### 18.2 資産台帳とコマンド
 
@@ -1287,7 +1086,7 @@ Asset は `procurement.goods-receipt.confirmed.v1` と
 
 - リアルタイム消費は `consumerName + eventId` で `ast_inbox_event` に書き込み、同一イベント ID が異なる完全なビジネス意図に紐づかないことを検証します。
 - リアルタイム消費と履歴バックスキャンは共同で
-  `tenantId + goodsReceiptLineId + unitSequence` により来源一意キーを確立し、いかなる入口も資産を重複作成できません。
+  `tenantId + goodsReceiptLineId + unitSequence` により取得元一意キーを確立し、いかなる入口も資産を重複作成できません。
 - 新資産は入荷管理帰属 `ownerUserId/ownerUnitId` を継承し、PO、GR、サプライヤー、資材、カテゴリ、通貨と金額スナップショットを保存します。
 - 内部制御の補償エンドポイントは
   `POST /api/internal/asset/procurement/backfill?tenantId={tenantId}&afterId={id}&size={size}`；リクエストヘッダー
@@ -1360,9 +1159,9 @@ Workflow 起動呼び出しはローカル作成トランザクションのコ�
 いずれもリモートで受理済みの可能性があり、したがって `PENDING_APPROVAL + PENDING` を保持し、ローカルキャンセルを禁止し、同一冪等スナップショットでのリトライを許可します。
 Workflow ビジネスレスポンス 404 はモデルバージョンが起動不可かつリモートトランザクションがインスタンスを作成しなかったことを意味し、申請は
 `START_FAILED + FAILED` に入る；この明確な失敗ステータスはリトライやローカルキャンセルを許可します。
-两类のリトライはいずれも冪等スナップショットを再利用しなければならず：`businessType` は移管/処分集約タイプから固定に導出され、永続化済みの
+二種類のリトライはいずれも冪等スナップショットを再利用しなければならず：`businessType` は移管/処分集約タイプから固定に導出され、永続化済みの
 `requestId/businessKey/modelVersionId/workflowStartUserId/workflowStartUserName` を再利用し、
-異なるユーザーがリトライを実行する場合も元の発起者身分を使い続けることを含み、第 2 のプロセスインスタンス作成を禁止します。
+異なるユーザーがリトライを実行する場合も元の開始ユーザーの ID を使い続けることを含み、第 2 のプロセスインスタンス作成を禁止します。
 
 ### 18.7 資産概要
 

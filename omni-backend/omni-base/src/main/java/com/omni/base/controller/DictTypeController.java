@@ -72,12 +72,14 @@ public class DictTypeController {
      * 按 ID 查询字典类型。
      *
      * @param id 字典类型 ID
+     * @param tenantId 当前登录租户 ID（网关注入）
      * @return 字典类型实体
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('dict:type:list')")
-    public R<SysDictType> getById(@PathVariable Long id) {
-        return R.ok(dictTypeService.getTypeById(id));
+    public R<SysDictType> getById(@PathVariable Long id,
+                                  @RequestHeader("X-Tenant-Id") Long tenantId) {
+        return R.ok(dictTypeService.getTypeById(id, tenantId));
     }
 
     /**
@@ -101,6 +103,7 @@ public class DictTypeController {
      * 更新字典类型。
      *
      * @param id      字典类型 ID
+     * @param tenantId 当前登录租户 ID（网关注入）
      * @param request 更新请求
      * @return 更新后的实体
      */
@@ -108,22 +111,25 @@ public class DictTypeController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('dict:type:update')")
     public R<SysDictType> update(@PathVariable Long id,
+                                  @RequestHeader("X-Tenant-Id") Long tenantId,
                                   @Valid @RequestBody UpdateDictTypeRequest request) {
         String operator = SecurityContextHolder.getContext().getAuthentication().getName();
-        return R.ok(dictTypeService.updateType(id, request, operator));
+        return R.ok(dictTypeService.updateType(id, tenantId, request, operator));
     }
 
     /**
      * 删除字典类型（级联删除关联的字典数据）。
      *
      * @param id 字典类型 ID
+     * @param tenantId 当前登录租户 ID（网关注入）
      * @return 操作结果
      */
     @OperLog(module = "字典类型管理", operType = OperType.DELETE)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('dict:type:delete')")
-    public R<Void> delete(@PathVariable Long id) {
-        dictTypeService.deleteType(id);
+    public R<Void> delete(@PathVariable Long id,
+                          @RequestHeader("X-Tenant-Id") Long tenantId) {
+        dictTypeService.deleteType(id, tenantId);
         return R.ok();
     }
 
@@ -131,6 +137,7 @@ public class DictTypeController {
      * 切换字典类型启用状态。
      *
      * @param id     字典类型 ID
+     * @param tenantId 当前登录租户 ID（网关注入）
      * @param status 目标状态
      * @return 操作结果
      */
@@ -138,8 +145,9 @@ public class DictTypeController {
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAuthority('dict:type:update')")
     public R<Void> toggleStatus(@PathVariable Long id,
+                                @RequestHeader("X-Tenant-Id") Long tenantId,
                                 @RequestParam Integer status) {
-        dictTypeService.toggleStatus(id, status);
+        dictTypeService.toggleStatus(id, tenantId, status);
         return R.ok();
     }
 }

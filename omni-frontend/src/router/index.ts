@@ -10,7 +10,7 @@ import { useUserStore } from '@/stores/user'
 import { usePermissionStore } from '@/stores/permission'
 import type { MenuNode } from '@/api/menu'
 import { menuI18nMap } from '@/constants/menu'
-import { hasManagementAccess, isAssetSelfServiceUser } from '@/utils/access'
+import { hasManagementAccess, hasSupplierPortalAccess, isAssetSelfServiceUser } from '@/utils/access'
 import { getRolesFromToken } from '@/utils/jwt'
 import i18n from '@/i18n'
 import { safeAppRedirect } from '@/utils/navigation'
@@ -378,8 +378,7 @@ router.beforeEach(async (to) => {
       registerDynamicRoutes(permissionStore.menuTree)
       const isSupplier = roles.includes('SUPPLIER')
       const hasManagementPermission = hasManagementAccess(permissionStore.permissions, roles)
-      const canEnroll = permissionStore.hasPermission('srm:portal:enroll')
-      const canAccessPortal = isSupplier || (canEnroll && !hasManagementPermission)
+      const canAccessPortal = hasSupplierPortalAccess(permissionStore.permissions, roles)
 
       if (to.meta.portalAccess && !canAccessPortal) {
         return { name: 'Home' }

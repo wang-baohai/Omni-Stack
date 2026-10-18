@@ -49,18 +49,20 @@ public interface DictDataService {
      * 更新字典数据。
      *
      * @param id       字典数据 ID
+     * @param tenantId 当前登录租户 ID
      * @param request  更新请求
      * @param operator 操作人
      * @return 更新后的实体
      */
-    SysDictData updateData(Long id, UpdateDictDataRequest request, String operator);
+    SysDictData updateData(Long id, Long tenantId, UpdateDictDataRequest request, String operator);
 
     /**
      * 删除字典数据。
      *
      * @param id 字典数据 ID
+     * @param tenantId 当前登录租户 ID
      */
-    void deleteData(Long id);
+    void deleteData(Long id, Long tenantId);
 
     /**
      * 手动刷新指定类型编码的 Redis 缓存。

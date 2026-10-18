@@ -13,7 +13,7 @@ public final class AssetOperationStateMachine {
 
     /** 等待 Workflow 审批。 */
     public static final String PENDING_APPROVAL = "PENDING_APPROVAL";
-    /** Workflow 启动失败。 */
+    /** 申请状态（status 列）取值：Workflow 明确启动失败，可重试启动或本地取消。 */
     public static final String START_FAILED = "START_FAILED";
     /** 审批通过，等待业务完成。 */
     public static final String APPROVED = "APPROVED";
@@ -23,11 +23,11 @@ public final class AssetOperationStateMachine {
     public static final String COMPLETED = "COMPLETED";
     /** 已取消。 */
     public static final String CANCELLED = "CANCELLED";
-    /** Workflow 启动待确认。 */
+    /** 工作流启动标记（workflow_start_status 列）取值：已登记待启动，远端结果待确认。 */
     public static final String START_PENDING = "PENDING";
-    /** Workflow 已启动。 */
+    /** 工作流启动标记（workflow_start_status 列）取值：Workflow 已启动。 */
     public static final String START_STARTED = "STARTED";
-    /** Workflow 启动失败。 */
+    /** 工作流启动标记（workflow_start_status 列）取值：启动失败。与 {@link #START_FAILED} 分属不同列，失败态需两者同时命中，不可混用。 */
     public static final String START_FAILED_FLAG = "FAILED";
 
     private static final Set<String> OPERATION_SOURCE_STATUSES = Set.of(

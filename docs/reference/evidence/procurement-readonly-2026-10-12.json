@@ -1,0 +1,862 @@
+{
+  "schema": 1,
+  "kind": "isolated-docker-procurement-readonly-material-rule-overview",
+  "recorded_at": "2026-10-12T13:24:41.185Z",
+  "project": "omni-wiki-acceptance-20261009",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "status": "FOUR_LANGUAGE_READONLY_CAPTURE_PASS",
+  "started_at": "2026-10-12T13:15:32.170Z",
+  "completed_at": "2026-10-12T13:15:56.555Z",
+  "test": "scripts/fixtures/capture-procurement-readonly.mjs",
+  "actor": "manager",
+  "roles": [
+    "USER",
+    "PROCUREMENT_MANAGER",
+    "ASSET_MANAGER",
+    "TEAM_LEADER",
+    "WIKI_20261009A_WORKFLOW_DESIGNER"
+  ],
+  "tools": {
+    "node": "v24.17.0",
+    "playwright": "1.61.1",
+    "chromium": "149.0.7827.55"
+  },
+  "sources": [
+    {
+      "path": "scripts/fixtures/capture-procurement-readonly.mjs",
+      "sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+      "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+    },
+    {
+      "path": "omni-frontend/src/views/procurement/material/index.vue",
+      "sha256": "14834f28a9be11dbcfa2c353849be72d089443eb7a8ff2f802671a11dc32f45b"
+    },
+    {
+      "path": "omni-frontend/src/views/procurement/overview/index.vue",
+      "sha256": "9bad6d519b4caf207dd81e52c37680fd4d7adc6b9a2ee9ec6c69cd2c38011fc8"
+    },
+    {
+      "path": "omni-frontend/src/views/procurement/approval-route/index.vue",
+      "sha256": "432850494e11f6b1ec280dcc4a2512ac2e68ee7520245475c1366afedc898a06"
+    },
+    {
+      "path": "omni-frontend/src/views/procurement/approval-route/components/RuleMatchTester.vue",
+      "sha256": "fbcbd7b73b9bc379c131cd3c18e7e44b4f4995cfb1d1029e1c56f662c5164185"
+    },
+    {
+      "path": "omni-frontend/src/layout/index.vue",
+      "sha256": "e2e6e022e9e1d1789a6993dda8af088ea80bfd78186f0fc4fc3565e555b40f4c"
+    },
+    {
+      "path": "omni-frontend/src/stores/app.ts",
+      "sha256": "102ecb63326390cde805044dfd84b9f769012c7a423d72378b09d6c86dbb2c68"
+    },
+    {
+      "path": "omni-frontend/src/api/procurement-material.ts",
+      "sha256": "1641274d9fd1c3b15c0301b8c3c5c948cc9d3331842b8edf95e145b8522ae8dc"
+    },
+    {
+      "path": "omni-frontend/src/api/procurement-overview.ts",
+      "sha256": "eab57c9576e69ec2ff74c0ec2a95fd63ccf3bf145a68aac053f8475efdba9efb"
+    },
+    {
+      "path": "omni-frontend/src/api/procurement-approval-route.ts",
+      "sha256": "52f50da6765f2a2412c61c616aaa477f795124677a41961f8362c77ec69f7750"
+    }
+  ],
+  "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+  "runtime": [
+    {
+      "service": "omni-frontend",
+      "container_id": "01ec18abb3a87f08348434184f12660bf8d1294145d7afa64ac9ae51b5d703e6",
+      "image_id": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-base",
+      "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+      "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-gateway",
+      "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+      "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+      "host_ports": 0
+    },
+    {
+      "service": "grafana",
+      "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+      "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+      "host_ports": 0
+    },
+    {
+      "service": "prometheus",
+      "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+      "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+      "host_ports": 0
+    },
+    {
+      "service": "otel-collector",
+      "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+      "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+      "host_ports": 0
+    },
+    {
+      "service": "alloy",
+      "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+      "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+      "host_ports": 0
+    },
+    {
+      "service": "tempo",
+      "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+      "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+      "host_ports": 0
+    },
+    {
+      "service": "pushgateway",
+      "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+      "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+      "host_ports": 0
+    },
+    {
+      "service": "loki",
+      "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+      "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+      "host_ports": 0
+    },
+    {
+      "service": "alertmanager",
+      "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+      "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-workflow",
+      "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+      "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-asset",
+      "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+      "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-procurement",
+      "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+      "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-crm",
+      "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+      "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-srm",
+      "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+      "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-auth",
+      "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+      "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+      "host_ports": 0
+    },
+    {
+      "service": "nacos",
+      "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+      "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+      "host_ports": 0
+    },
+    {
+      "service": "xxl-job-admin",
+      "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+      "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-db-migrator",
+      "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+      "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+      "host_ports": 0
+    },
+    {
+      "service": "rocketmq-broker",
+      "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+      "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+      "host_ports": 0
+    },
+    {
+      "service": "mysql",
+      "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+      "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "host_ports": 0
+    },
+    {
+      "service": "redis",
+      "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+      "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+      "host_ports": 0
+    },
+    {
+      "service": "rocketmq-namesrv",
+      "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+      "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+      "host_ports": 0
+    }
+  ],
+  "observations": [
+    {
+      "at": "2026-10-12T13:15:32.309Z",
+      "path": "/api/procurement/material/list?page=1&size=100&keyword=WIKI-20261009A&categoryId=20",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:15:32.408Z",
+      "path": "/api/procurement/approval-route/list?page=1&size=100&keyword=WIKI-20261009A",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:15:32.502Z",
+      "path": "/api/procurement/overview/summary",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:15:56.369Z",
+      "path": "/api/procurement/material/list?page=1&size=100&keyword=WIKI-20261009A&categoryId=20",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:15:56.448Z",
+      "path": "/api/procurement/approval-route/list?page=1&size=100&keyword=WIKI-20261009A",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:15:56.540Z",
+      "path": "/api/procurement/overview/summary",
+      "method": "GET",
+      "http": 200,
+      "code": 200
+    }
+  ],
+  "rule_previews": [
+    {
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "en-US",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "en-US",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "ja-JP",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "ja-JP",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "ko-KR",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    },
+    {
+      "locale": "ko-KR",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "code": 200,
+      "outcome": "MATCHED",
+      "route_id": 1,
+      "model_version": 2,
+      "availability": "AVAILABLE",
+      "amount": "4000"
+    }
+  ],
+  "persisted_writes": 0,
+  "before_sha256": "04c03e2e2a4a8ab87b881f05e1acfe6297bb7e666992d69cfa2538a95916ebc7",
+  "after_sha256": "04c03e2e2a4a8ab87b881f05e1acfe6297bb7e666992d69cfa2538a95916ebc7",
+  "cleanup": "NO_BUSINESS_WRITES",
+  "visual_review": {
+    "status": "passed-with-documented-limits",
+    "reviewer": "Agent individually inspected 20 original PNGs; not a human translation signature",
+    "reviewed": 20,
+    "published": 20,
+    "human_translation_review": "pending",
+    "limits": [
+      "Existing teaching material/routing data is reused; no persisted business command was attempted. Twelve real POST match-preview requests are read-only evaluations.",
+      "Ordinary manager has additional non-SUPER_ADMIN roles listed here; this is an effective-actor experiment, not a single-role experiment.",
+      "All 20 originals were individually inspected. UI labels follow the selected locale; existing category, model, node and raw server diagnostic strings remain Chinese.",
+      "The mobile result table requires its own horizontal scrolling. The screenshot proves the amount, actionable Test button and MATCHED result; API assertions verify the model and route fields outside the narrow viewport.",
+      "The English desktop sidebar clips long navigation labels. Japanese and Korean tablet captures focus the match card and partially scroll the page heading under the fixed header. These images do not claim every sidebar/page label is simultaneously visible.",
+      "The new frontend defaults mobile sidebar to collapsed and keeps its toggle above the drawer. Each locale was opened/closed with native clicks before mobile rule interaction; no forced click, CSS injection or mocked response.",
+      "The previously recorded supply-chain commands and receipts retain their original timestamps and runtime identities. This supplement does not replay approvals, quotations, orders or receipts.",
+      "Human translation review is pending and is independent of agent visual inspection."
+    ]
+  },
+  "captures": [
+    {
+      "name": "procurement-current-material",
+      "locale": "zh-CN",
+      "flow": "material",
+      "route": "/admin/procurement/material",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Two ACTIVE materials in same teaching category; asset-managed true and false"
+      ],
+      "image": "docs/images/zh-CN/procurement-current-material.png",
+      "sha256": "43a811851b7155e8e8694ce6e24ef99f4c7441055713df899a7eb25a4fb36c59",
+      "captured_at": "2026-10-12T13:15:33.826Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match",
+      "locale": "zh-CN",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/zh-CN/procurement-current-rule-match.png",
+      "sha256": "ea8b0a25b7b1f1171f49ccf5c432ec8e2025a654bed0e37e9692031a92f22109",
+      "captured_at": "2026-10-12T13:15:35.222Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match-mobile",
+      "locale": "zh-CN",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/zh-CN/procurement-current-rule-match-mobile.png",
+      "sha256": "e7c564aed733fca1d9068307b3eb62748bd507bfddd0e5be15ecd33eb34f18e1",
+      "captured_at": "2026-10-12T13:15:36.677Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match-tablet",
+      "locale": "zh-CN",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/zh-CN/procurement-current-rule-match-tablet.png",
+      "sha256": "e432e38fbb7571ce39d7b459fcd16bff6983183a52631305afd00851aecd85fa",
+      "captured_at": "2026-10-12T13:15:37.920Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-overview",
+      "locale": "zh-CN",
+      "flow": "overview",
+      "route": "/admin/procurement/overview",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Current manager data scope; order status and CNY committed amount; no cross-currency sum"
+      ],
+      "image": "docs/images/zh-CN/procurement-current-overview.png",
+      "sha256": "c56031158ee6a4cfdd2febc37f6c2ec1560aece797d2a9c905419c50c8f07244",
+      "captured_at": "2026-10-12T13:15:38.714Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-material",
+      "locale": "en-US",
+      "flow": "material",
+      "route": "/admin/procurement/material",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Two ACTIVE materials in same teaching category; asset-managed true and false"
+      ],
+      "image": "docs/images/en-US/procurement-current-material.png",
+      "sha256": "f6342a9a4e270e331fa158f70c46bbc6600602bb63169d41f98ce07491d4034c",
+      "captured_at": "2026-10-12T13:15:39.733Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match",
+      "locale": "en-US",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/en-US/procurement-current-rule-match.png",
+      "sha256": "5fa5713e524b4b3071b8b35685d5ee6e1d39bcab9576cda732d146fa33900ac8",
+      "captured_at": "2026-10-12T13:15:41.064Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match-mobile",
+      "locale": "en-US",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/en-US/procurement-current-rule-match-mobile.png",
+      "sha256": "30f09a79aa22f9943203d2f96827f189e389098bb0c37da5bd951491953e35de",
+      "captured_at": "2026-10-12T13:15:42.479Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match-tablet",
+      "locale": "en-US",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/en-US/procurement-current-rule-match-tablet.png",
+      "sha256": "9a643d7d95803c6556d1e55bba168cfefda8c66dbecd1be23879783f9bcf8193",
+      "captured_at": "2026-10-12T13:15:43.896Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-overview",
+      "locale": "en-US",
+      "flow": "overview",
+      "route": "/admin/procurement/overview",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Current manager data scope; order status and CNY committed amount; no cross-currency sum"
+      ],
+      "image": "docs/images/en-US/procurement-current-overview.png",
+      "sha256": "da9c37f75bd4fe708e24e0d0b65dadc9af3e6775d73d37dbb39813851bd3a139",
+      "captured_at": "2026-10-12T13:15:44.685Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-material",
+      "locale": "ja-JP",
+      "flow": "material",
+      "route": "/admin/procurement/material",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Two ACTIVE materials in same teaching category; asset-managed true and false"
+      ],
+      "image": "docs/images/ja-JP/procurement-current-material.png",
+      "sha256": "abb921824fa3940605329b69ce9f5dfa5899a9ce9f5c8c90d020b8b5b981cba1",
+      "captured_at": "2026-10-12T13:15:45.579Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match",
+      "locale": "ja-JP",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/ja-JP/procurement-current-rule-match.png",
+      "sha256": "03e26893ef97f329731586c2e90019ed16aba28f98877d297da6666b09e99b0b",
+      "captured_at": "2026-10-12T13:15:46.791Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match-mobile",
+      "locale": "ja-JP",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/ja-JP/procurement-current-rule-match-mobile.png",
+      "sha256": "eef2699ad7e8f6123c0f97514d9acefcb607a92cf6409e3c3a0d8d12ae14f3e6",
+      "captured_at": "2026-10-12T13:15:48.197Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match-tablet",
+      "locale": "ja-JP",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/ja-JP/procurement-current-rule-match-tablet.png",
+      "sha256": "277a04edf9a382a41af1b643e9df710fd4294a5960c0103e054606bc80985808",
+      "captured_at": "2026-10-12T13:15:49.557Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-overview",
+      "locale": "ja-JP",
+      "flow": "overview",
+      "route": "/admin/procurement/overview",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Current manager data scope; order status and CNY committed amount; no cross-currency sum"
+      ],
+      "image": "docs/images/ja-JP/procurement-current-overview.png",
+      "sha256": "43a2ab0ac87da248d2f82f82f5175fe1fc1c306caa87460ddfb029094b90a9db",
+      "captured_at": "2026-10-12T13:15:50.418Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-material",
+      "locale": "ko-KR",
+      "flow": "material",
+      "route": "/admin/procurement/material",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Two ACTIVE materials in same teaching category; asset-managed true and false"
+      ],
+      "image": "docs/images/ko-KR/procurement-current-material.png",
+      "sha256": "c64ae446022fe0fd6271d190fd5ac7b869a4b8160b029a7f8e80e58c6093b8c8",
+      "captured_at": "2026-10-12T13:15:51.740Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match",
+      "locale": "ko-KR",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/ko-KR/procurement-current-rule-match.png",
+      "sha256": "35f3b5c5fbfaab592613c121824aa620335cf66063b0ead36c6c62a7f4731381",
+      "captured_at": "2026-10-12T13:15:53.121Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match-mobile",
+      "locale": "ko-KR",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/ko-KR/procurement-current-rule-match-mobile.png",
+      "sha256": "6879f9d278699e231e197ad9288d36a1033f06b781ac1c1a6ba74c058a2dc74c",
+      "captured_at": "2026-10-12T13:15:54.295Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-rule-match-tablet",
+      "locale": "ko-KR",
+      "flow": "approval-rule-match",
+      "route": "/admin/procurement/approval-route",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "expected": [
+        "Real UI rule preview MATCHED; selected category/4000; correct active route and AVAILABLE model; no persisted write"
+      ],
+      "image": "docs/images/ko-KR/procurement-current-rule-match-tablet.png",
+      "sha256": "2cc85ac9ec554ce8343d6965fa7aa9101f1e90e061bc926b53aca5006415b68a",
+      "captured_at": "2026-10-12T13:15:55.343Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-overview",
+      "locale": "ko-KR",
+      "flow": "overview",
+      "route": "/admin/procurement/overview",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": [
+        "Current manager data scope; order status and CNY committed amount; no cross-currency sum"
+      ],
+      "image": "docs/images/ko-KR/procurement-current-overview.png",
+      "sha256": "56c367f222f3646d8d509b894621f6613fef02e55dd9ff38205fa8e094855cbd",
+      "captured_at": "2026-10-12T13:15:56.291Z",
+      "test_sha256": "cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "source_sha256": "2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    }
+  ]
+}

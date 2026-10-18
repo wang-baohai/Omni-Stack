@@ -1,0 +1,518 @@
+{
+  "status": "PASS_RECORDED_SCOPES",
+  "runtime": "local Docker",
+  "source_commit": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "source_sha256": "044454b0ceed553187e9bcd36796d9313e3ea21c64214e14ede3f4b5f4eabf33",
+  "source_scope": "Tracked and nonignored untracked input worktree, sorted path plus per-file SHA256; both capture snapshots unchanged. Published evidence and guide updates are later changes.",
+  "tool": {
+    "name": "Omni CLI",
+    "version": "0.6.1",
+    "image_id": "sha256:52123b8b2132c69d877407346d4d03661a6be99890bae45e8db28d298788ad79",
+    "node": "v22.23.3"
+  },
+  "golden": {
+    "status": "PASS",
+    "commands": [
+      {
+        "command": "npm run build",
+        "cwd": "tools/omni-cli",
+        "started_at": "2026-10-12T08:36:21.565Z",
+        "finished_at": "2026-10-12T08:36:25.031Z",
+        "exit_code": 0,
+        "sha256": "206b367c218e02c42fd6a224034fed33aad7697c246adf7ebee45972ead0c0bc",
+        "private_log_name": "scaffold-cli-build-001.log"
+      },
+      {
+        "command": "node scripts/service-golden.mjs",
+        "cwd": "tools/omni-cli",
+        "started_at": "2026-10-12T08:36:25.038Z",
+        "finished_at": "2026-10-12T08:37:17.434Z",
+        "exit_code": 0,
+        "sha256": "3d282130474773ca1e91940dbdfdc4b2905fe9ca4affab6e9b0d2457a6b9ed1d",
+        "private_log_name": "scaffold-service-golden-001.log"
+      },
+      {
+        "command": "node scripts/crud-golden.mjs",
+        "cwd": "tools/omni-cli",
+        "started_at": "2026-10-12T08:37:17.437Z",
+        "finished_at": "2026-10-12T08:41:47.035Z",
+        "exit_code": 0,
+        "sha256": "57b812d6ec7c26ffdc0fb0609ba6e0de224f9307e2e8615e06cbbdb77d5a77d3",
+        "private_log_name": "scaffold-crud-golden-001.log"
+      }
+    ],
+    "service_scope": "Extended inventory-sample generated=33 integrated=39; separate fixture from basic CLI inventory-basic generated=32 integrated=38",
+    "crud_scope": "MaterialBrand generated=18 changes=29; backend clean verify and frontend build/lint pass"
+  },
+  "cli": {
+    "status": "PASS",
+    "commands": [
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset list",
+        "started_at": "2026-10-12T08:46:20.272Z",
+        "finished_at": "2026-10-12T08:46:21.314Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-preset-select-001.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset explain crm",
+        "started_at": "2026-10-12T08:46:21.318Z",
+        "finished_at": "2026-10-12T08:46:22.266Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-preset-select-001.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset create core --output <original-core> --dry-run",
+        "started_at": "2026-10-12T08:46:22.269Z",
+        "finished_at": "2026-10-12T08:46:24.781Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-preset-select-001.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset create core --output <original-core>",
+        "started_at": "2026-10-12T08:46:24.790Z",
+        "finished_at": "2026-10-12T08:48:33.857Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-preset-select-001.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset validate core --output <original-core>",
+        "started_at": "2026-10-12T08:48:33.862Z",
+        "finished_at": "2026-10-12T08:48:49.113Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-preset-select-001.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset validate core --output <moved-core>",
+        "started_at": "2026-10-12T08:48:49.133Z",
+        "finished_at": "2026-10-12T08:49:00.673Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-preset-select-001.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset create supply-chain --output <learning-supply-chain>",
+        "started_at": "2026-10-12T08:49:21.872Z",
+        "finished_at": "2026-10-12T08:54:58.741Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-preset-select-001.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset validate supply-chain --output <learning-supply-chain>",
+        "started_at": "2026-10-12T08:54:58.767Z",
+        "finished_at": "2026-10-12T08:55:46.595Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-preset-select-001.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <learning-core-service> create-service inventory-basic --output generated/inventory-basic-bundle",
+        "started_at": "2026-10-12T08:58:51.898Z",
+        "finished_at": "2026-10-12T08:58:53.406Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-create-service-003.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <learning-core-service> create-service inventory-basic --output generated/inventory-basic-bundle --apply",
+        "started_at": "2026-10-12T08:58:53.412Z",
+        "finished_at": "2026-10-12T08:58:55.911Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-create-service-003.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <learning-core-service> service validate inventory-basic --output generated/inventory-basic-bundle",
+        "started_at": "2026-10-12T08:58:55.916Z",
+        "finished_at": "2026-10-12T08:58:57.541Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-create-service-003.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <learning-core-service> service integrate inventory-basic --source generated/inventory-basic-bundle",
+        "started_at": "2026-10-12T08:58:57.544Z",
+        "finished_at": "2026-10-12T08:59:02.699Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-create-service-003.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <learning-core-service> service integrate inventory-basic --source generated/inventory-basic-bundle --apply",
+        "started_at": "2026-10-12T08:59:02.729Z",
+        "finished_at": "2026-10-12T08:59:09.797Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-create-service-003.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <learning-supply-chain> generate crud --spec scaffold/specs/material-brand.yaml --check",
+        "started_at": "2026-10-12T08:59:09.810Z",
+        "finished_at": "2026-10-12T08:59:10.874Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-crud-generate-003.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <learning-supply-chain> generate crud --spec scaffold/specs/material-brand.yaml --dry-run",
+        "started_at": "2026-10-12T08:59:10.879Z",
+        "finished_at": "2026-10-12T08:59:12.067Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-crud-generate-003.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <learning-supply-chain> generate crud --spec scaffold/specs/material-brand.yaml --apply",
+        "started_at": "2026-10-12T08:59:12.071Z",
+        "finished_at": "2026-10-12T08:59:15.249Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-crud-generate-003.log"
+      },
+      {
+        "command": "node tools/omni-cli/dist/src/cli.js --root <learning-supply-chain> generate crud --spec scaffold/specs/material-brand.yaml --dry-run",
+        "started_at": "2026-10-12T08:59:15.252Z",
+        "finished_at": "2026-10-12T08:59:17.032Z",
+        "exit_code": 0,
+        "private_log_name": "scaffold-cli-crud-generate-003.log"
+      }
+    ],
+    "prior_failure": {
+      "artifact": "scaffold-cli-create-service-001.log",
+      "actual": "core rejects MQ and XXL-JOB service because its catalog omits those infrastructure modules",
+      "guard_preserved": true,
+      "unintegrated_bundle_retained": true
+    }
+  },
+  "lite": {
+    "status": "PASS",
+    "project": "omni-e2e-lite-20261012a",
+    "core_lock_sha256": "21d884250ea62368dfa2c821f41d7f27e1581da457876de7a9b44add6e2bd2b1",
+    "images": [
+      {
+        "service": "omni-auth",
+        "tag": "omni-e2e-lite-20261012a-auth:latest",
+        "image_id": "sha256:570c46b5d3b9aa9f17faf99e4b660d2285dd935e52394d5d3dee5f85b324a27b",
+        "artifact_sha256": "95b6062def6feadfa5331ff8a89f957a8a5623009e25b6f13ab95e1be5474f27",
+        "dockerfile_sha256": "a590912bffd494c20dbbbae759a7dcddc6fcc620c9b3d1800d17155ee59f69b1",
+        "parent_image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe"
+      },
+      {
+        "service": "omni-base",
+        "tag": "omni-e2e-lite-20261012a-base:latest",
+        "image_id": "sha256:81d12b6dbb2f6471e76c70ad9183a2a53deced808f413ae94c15a2a917238f1b",
+        "artifact_sha256": "948bffc7dbe7b2107c409f2dc1d00fa2e60548d0f5847f639a3755f19fbbfb7e",
+        "dockerfile_sha256": "a590912bffd494c20dbbbae759a7dcddc6fcc620c9b3d1800d17155ee59f69b1",
+        "parent_image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe"
+      },
+      {
+        "service": "omni-gateway",
+        "tag": "omni-e2e-lite-20261012a-gateway:latest",
+        "image_id": "sha256:40cfc83ea990f4dfa3b4a45a000e5409ee35c03b27437749e5600c1e50872c10",
+        "artifact_sha256": "7ed98e43d9cfd9e28f381512e37d31ca0018f2f6d4daa86799b2825123d3e75b",
+        "dockerfile_sha256": "a590912bffd494c20dbbbae759a7dcddc6fcc620c9b3d1800d17155ee59f69b1",
+        "parent_image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe"
+      },
+      {
+        "service": "omni-db-migrator",
+        "tag": "omni-e2e-lite-20261012a-db-migrator:latest",
+        "image_id": "sha256:cf73b4344fc8cd3d6d180357e318f976ecb88c43dde3a35bdfeec4b076392091",
+        "artifact_sha256": "5597926650689d63bdef5c5a3a1331b8bce13fc2b73b897b4015f3684701ca60",
+        "dockerfile_sha256": "737272465dc5c0c8335ebb1822a78e15d2434449ae0129f98ccdb5dd058fdfbf",
+        "parent_image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8"
+      },
+      {
+        "service": "omni-frontend",
+        "tag": "omni-e2e-lite-20261012a-frontend:latest",
+        "image_id": "sha256:98745c562a3d3a2d1579a9cac3e03ddf0e1742b9be7259f9ca4faa82e416afa9",
+        "dockerfile_sha256": "0b4a0f9e87e6c23c5638e6998cecd77a98000f0a89f282d63f80539a61feba1b",
+        "parent_image_id": "sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236"
+      }
+    ],
+    "parents": {
+      "backend": {
+        "tag": "omni-wiki-acceptance-auth:latest",
+        "id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe"
+      },
+      "migrator": {
+        "tag": "omni-wiki-acceptance-db-migrator:latest",
+        "id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8"
+      },
+      "frontend": {
+        "tag": "nginx:1.28-alpine",
+        "id": "sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236"
+      }
+    },
+    "build_commands": [
+      {
+        "command": "npm ci --prefer-offline",
+        "cwd": "<generated-core>/tools/omni-cli",
+        "started_at": "2026-10-12T09:01:23.430Z",
+        "finished_at": "2026-10-12T09:01:31.357Z",
+        "exit_code": 0,
+        "sha256": "fd704e4664ce73dc324494650a70dc5fb6ca180502510e1a05bdf24b6fabd56e",
+        "private_log_name": "lite-cli-ci-001.log"
+      },
+      {
+        "command": "npm run build",
+        "cwd": "<generated-core>/tools/omni-cli",
+        "started_at": "2026-10-12T09:01:31.367Z",
+        "finished_at": "2026-10-12T09:01:34.663Z",
+        "exit_code": 0,
+        "sha256": "d841e1570a16bcda92a137fec2fbd7898b5af200c7b718d18c3b175692e803d5",
+        "private_log_name": "lite-cli-build-001.log"
+      },
+      {
+        "command": "node tools/omni-cli/scripts/init-env.mjs",
+        "cwd": "<generated-core>",
+        "started_at": "2026-10-12T09:01:34.669Z",
+        "finished_at": "2026-10-12T09:01:34.723Z",
+        "exit_code": 0,
+        "sha256": "baeb9b807cac0188106522c4e6dd05af1b7a0af69ba44422c232d609822784af",
+        "private_log_name": "lite-init-env-001.log"
+      },
+      {
+        "command": "./mvnw clean install",
+        "cwd": "<generated-core>/omni-backend",
+        "started_at": "2026-10-12T09:01:34.730Z",
+        "finished_at": "2026-10-12T09:06:36.917Z",
+        "exit_code": 0,
+        "sha256": "e1d82234a026f05b1695a11ca9ca233def27b750a7d186edc6bdb329d4d83dd1",
+        "private_log_name": "lite-backend-build-001.log"
+      },
+      {
+        "command": "npm ci --prefer-offline",
+        "cwd": "<generated-core>/omni-frontend",
+        "started_at": "2026-10-12T09:06:36.940Z",
+        "finished_at": "2026-10-12T09:06:53.848Z",
+        "exit_code": 0,
+        "sha256": "4d6b5fc93091e941e6d29293a289137f5c94bddd7c95c3db8d7128804e6246d1",
+        "private_log_name": "lite-frontend-ci-001.log"
+      },
+      {
+        "command": "npm run build",
+        "cwd": "<generated-core>/omni-frontend",
+        "started_at": "2026-10-12T09:06:53.859Z",
+        "finished_at": "2026-10-12T09:07:05.933Z",
+        "exit_code": 0,
+        "sha256": "837ae356997b12459904019ac8ccf45f67cdc05d63bd574859183db205e2cf7f",
+        "private_log_name": "lite-frontend-build-001.log"
+      },
+      {
+        "command": "npm run lint",
+        "cwd": "<generated-core>/omni-frontend",
+        "started_at": "2026-10-12T09:07:05.940Z",
+        "finished_at": "2026-10-12T09:07:11.142Z",
+        "exit_code": 0,
+        "sha256": "5aace8e8cf59b2c37540470139499fb464051e37e95f2cf24881a3601bf52cf1",
+        "private_log_name": "lite-frontend-lint-001.log"
+      },
+      {
+        "command": "docker build --pull=false --network=none --tag omni-e2e-lite-20261012a-auth:latest /evidence/acceptance/lite-image-inputs-001/auth",
+        "cwd": "<generated-core>",
+        "started_at": "2026-10-12T09:07:14.332Z",
+        "finished_at": "2026-10-12T09:07:31.369Z",
+        "exit_code": 0,
+        "sha256": "ef202368d7b01a9e15d4a9430066d4369f388d22ceab44a4f21b531c673bac51",
+        "private_log_name": "lite-image-auth-001.log"
+      },
+      {
+        "command": "docker build --pull=false --network=none --tag omni-e2e-lite-20261012a-base:latest /evidence/acceptance/lite-image-inputs-001/base",
+        "cwd": "<generated-core>",
+        "started_at": "2026-10-12T09:07:35.303Z",
+        "finished_at": "2026-10-12T09:07:53.074Z",
+        "exit_code": 0,
+        "sha256": "d738d6996daf6f24b15ee60e0739bcbd60da4f94ca997ba48b45d884b6478ed4",
+        "private_log_name": "lite-image-base-001.log"
+      },
+      {
+        "command": "docker build --pull=false --network=none --tag omni-e2e-lite-20261012a-gateway:latest /evidence/acceptance/lite-image-inputs-001/gateway",
+        "cwd": "<generated-core>",
+        "started_at": "2026-10-12T09:07:55.729Z",
+        "finished_at": "2026-10-12T09:08:05.791Z",
+        "exit_code": 0,
+        "sha256": "ccfb6b1a2312970366a7aecfcb507e6cb61d74739b97014d5fd77b778fbe4fe3",
+        "private_log_name": "lite-image-gateway-001.log"
+      },
+      {
+        "command": "docker build --pull=false --network=none --tag omni-e2e-lite-20261012a-db-migrator:latest /evidence/acceptance/lite-image-inputs-001/db-migrator",
+        "cwd": "<generated-core>",
+        "started_at": "2026-10-12T09:08:06.886Z",
+        "finished_at": "2026-10-12T09:08:10.801Z",
+        "exit_code": 0,
+        "sha256": "2129e3fc301da092490362fe2e107bcc464b97d3049df1f75b46eb505734a412",
+        "private_log_name": "lite-image-db-migrator-001.log"
+      },
+      {
+        "command": "docker build --pull=false --network=none --tag omni-e2e-lite-20261012a-frontend:latest /evidence/acceptance/lite-image-inputs-001/frontend",
+        "cwd": "<generated-core>",
+        "started_at": "2026-10-12T09:08:12.123Z",
+        "finished_at": "2026-10-12T09:08:13.839Z",
+        "exit_code": 0,
+        "sha256": "20064410aa577b9b5c90e50e5e1e5711c3935729a49edd8d5648193264fa5a04",
+        "private_log_name": "lite-image-frontend-001.log"
+      }
+    ],
+    "checks": [
+      {
+        "check": "omni-auth health",
+        "http_status": 200,
+        "status": "UP"
+      },
+      {
+        "check": "omni-base health",
+        "http_status": 200,
+        "status": "UP"
+      },
+      {
+        "check": "omni-gateway health",
+        "http_status": 200,
+        "status": "UP"
+      },
+      {
+        "check": "frontend login route",
+        "http_status": 200
+      },
+      {
+        "check": "Gateway->Auth public formal tenant read",
+        "http_status": 200,
+        "business_code": 200,
+        "rows": 1
+      },
+      {
+        "check": "anonymous protected Base route",
+        "http_status": 401
+      }
+    ],
+    "containers": [
+      {
+        "service": "mysql",
+        "id": "261896473f9ff85b0fbc1a1134f3a263b7f325e99e8f80d12217ce144f027465",
+        "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "published_bindings": 0,
+        "flags": {}
+      },
+      {
+        "service": "redis",
+        "id": "6bb6db1983479d476d425ddc791d3b54da58d78d3821c6e1751d8230b3005e79",
+        "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "published_bindings": 0,
+        "flags": {}
+      },
+      {
+        "service": "omni-db-migrator",
+        "id": "7f2245f3653fbb2bb4f71b0092648ae12a0e94e327df0baafaa555efe4c435cb",
+        "image_id": "sha256:cf73b4344fc8cd3d6d180357e318f976ecb88c43dde3a35bdfeec4b076392091",
+        "status": "exited",
+        "health": "unhealthy",
+        "exit_code": 0,
+        "published_bindings": 0,
+        "flags": {
+          "XXL_JOB_EXECUTOR_ENABLED": "false"
+        }
+      },
+      {
+        "service": "omni-gateway",
+        "id": "82c736e65cd6d891efea83a3aa82bc4f8c7ab22d9903bdadc2dcb1da59c367cc",
+        "image_id": "sha256:40cfc83ea990f4dfa3b4a45a000e5409ee35c03b27437749e5600c1e50872c10",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "published_bindings": 0,
+        "flags": {
+          "SPRING_PROFILES_ACTIVE": "lite",
+          "SPRING_CLOUD_NACOS_DISCOVERY_ENABLED": "false",
+          "SPRING_CLOUD_NACOS_CONFIG_ENABLED": "false"
+        }
+      },
+      {
+        "service": "omni-base",
+        "id": "de8c47c0fbdb5a4e8a059eba059e404c66ddf126c327c71250bc9faad61fc3b0",
+        "image_id": "sha256:81d12b6dbb2f6471e76c70ad9183a2a53deced808f413ae94c15a2a917238f1b",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "published_bindings": 0,
+        "flags": {
+          "SPRING_CLOUD_NACOS_DISCOVERY_ENABLED": "false",
+          "SPRING_PROFILES_ACTIVE": "lite",
+          "OMNI_MQLOG_RELAY_AUTO_REGISTER": "false",
+          "OMNI_MQLOG_RELAY_ENABLED": "false",
+          "SPRING_CLOUD_FUNCTION_DEFINITION": "",
+          "XXL_JOB_EXECUTOR_ENABLED": "false",
+          "SPRING_CLOUD_NACOS_CONFIG_ENABLED": "false",
+          "SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT": "false"
+        }
+      },
+      {
+        "service": "omni-frontend",
+        "id": "deb82340c504a46507ffc825d78b7d39305dd742805e55839dcebe7097b118be",
+        "image_id": "sha256:98745c562a3d3a2d1579a9cac3e03ddf0e1742b9be7259f9ca4faa82e416afa9",
+        "status": "running",
+        "health": null,
+        "exit_code": 0,
+        "published_bindings": 0,
+        "flags": {}
+      },
+      {
+        "service": "omni-auth",
+        "id": "f2fcefbf19537c2b1cd4986c314049a5d3c1f6856ce6d77e5bcefa74cebfa262",
+        "image_id": "sha256:570c46b5d3b9aa9f17faf99e4b660d2285dd935e52394d5d3dee5f85b324a27b",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "published_bindings": 0,
+        "flags": {
+          "SPRING_CLOUD_NACOS_CONFIG_ENABLED": "false",
+          "SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT": "false",
+          "SPRING_PROFILES_ACTIVE": "lite",
+          "OMNI_MQLOG_RELAY_AUTO_REGISTER": "false",
+          "OMNI_MQLOG_RELAY_ENABLED": "false",
+          "SPRING_CLOUD_NACOS_DISCOVERY_ENABLED": "false",
+          "SPRING_CLOUD_FUNCTION_DEFINITION": "",
+          "XXL_JOB_EXECUTOR_ENABLED": "false"
+        }
+      }
+    ],
+    "retained_volumes": [
+      "omni-e2e-lite-20261012a_omni-mysql-data",
+      "omni-e2e-lite-20261012a_omni-redis-data"
+    ],
+    "cleanup": {
+      "containers": 0,
+      "volumes": "",
+      "networks": ""
+    },
+    "original_teaching_identities_preserved": true,
+    "limits": [
+      "Private prebuilt runtime images of exact Docker-built generated-core artifacts; formal production multistage build is a separate unpassed gate.",
+      "Read-only runtime/API health checks; no password login, no CAPTCHA answer access, no claim of Outbox delivery or complete core business E2E."
+    ]
+  },
+  "artifacts": {
+    "create-service": {
+      "path": "docs/reference/evidence/scaffold-create-service-2026-10-12.txt",
+      "sha256": "dc314e21f67768b77dd24f32e16f21d3751fed2759f1414d245eb7728b7f4686"
+    },
+    "crud-generate": {
+      "path": "docs/reference/evidence/scaffold-crud-generate-2026-10-12.txt",
+      "sha256": "0e848ef5da7bb2836b0b4bebb45beb2ac9038123263362bff7a0047e66a2947b"
+    },
+    "preset-select": {
+      "path": "docs/reference/evidence/scaffold-preset-select-2026-10-12.txt",
+      "sha256": "37683fab0023647c467a5ab9d240e60a4b991f6ef84b6bf93d88de1c5885f400"
+    },
+    "lite-mode": {
+      "path": "docs/reference/evidence/scaffold-lite-mode-2026-10-12.txt",
+      "sha256": "92c47b54290e45effec35690f7e5567324c3ef68d05c00c83461510b91908a31"
+    }
+  },
+  "extraction": "Complete real CLI transcripts with only private path aliases; Maven aggregate result and build-success lines are excerpts. No synthesized terminal screenshots.",
+  "review": {
+    "type": "AI_TERMINAL_TEXT_REVIEW",
+    "reviewer": "Codex",
+    "reviewed_at": "2026-10-12T09:23:51.696Z",
+    "human_translation_review": "pending; no human signoff"
+  },
+  "limitations": [
+    "Independent five-preset strict release gates remain unpassed.",
+    "Four language Wiki updates require separate human review.",
+    "Core deliberately rejects MQ/XXL-JOB service integration; use a suitable preset rather than disabling that guard."
+  ]
+}

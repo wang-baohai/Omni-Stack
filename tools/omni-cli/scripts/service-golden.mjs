@@ -11,6 +11,8 @@ import {
 import { renderServiceIntegration } from '../dist/src/service-integration-renderer.js';
 import { applyRenderedIntegration } from '../dist/src/service-integration-transaction.js';
 import { findWorkspaceRoot } from '../dist/src/workspace.js';
+import { initializeEnvironment } from './init-env.mjs';
+import { jdkEnvironment } from './jdk-environment.mjs';
 
 const workspaceRoot = findWorkspaceRoot(resolve(import.meta.dirname, '..'));
 const systemTempRoot = mkdtempSync(resolve(tmpdir(), 'omni-service-golden-'));
@@ -30,19 +32,22 @@ try {
   assert.equal(applyServiceGeneration(plan), 'created');
   const lock = validateGeneratedService(output, plan.spec);
   assert.equal(lock.spec.enableJob, true, 'MQ 必须自动启用 Job');
-  // S04 模板 1.4.0：service 生成包新增 ja-JP/ko-KR i18n fragment，28→30（WP-011 CC-2 合同变更）
-  assert.equal(lock.files.length, 30, '黄金生成包锁定文件数量漂移');
+  // 模板 1.5.1 保留四语言维护文档。
+  assert.equal(lock.files.length, 33, '黄金生成包锁定文件数量漂移');
 
   const rendered = renderServiceIntegration(fixtureRoot, output, 'inventory-sample', { checkGit: false });
-  assert.equal(rendered.plan.operations.length, 21, '黄金接入操作数量漂移');
-  // S04 模板 1.4.0：接入新增 ja-JP/ko-KR 两处前端注入，32→34（WP-011 CC-2 合同变更）
-  assert.equal(rendered.changes.length, 34, '黄金接入文件数量漂移');
-  assert.deepEqual(applyRenderedIntegration(fixtureRoot, rendered), { files: 34, cleanupWarnings: [] });
+  // 文档清单登记与复核队列生成各占一项；与正式 planner 的 28 项契约一致。
+  assert.equal(rendered.plan.operations.length, 28, '黄金接入操作数量漂移');
+  // 文档正文、正式清单和复核队列一并进入接入事务。
+  assert.equal(rendered.changes.length, 39, '黄金接入文件数量漂移');
+  assert.deepEqual(applyRenderedIntegration(fixtureRoot, rendered), { files: 39, cleanupWarnings: [] });
 
+  // 复用正式初始化入口，先验证所有必填配置，避免构建后才发现环境模板漂移。
+  initializeEnvironment(fixtureRoot);
+  run('docker', ['compose', '--env-file', '.env', 'config', '--quiet'], fixtureRoot);
   const backendRoot = resolve(fixtureRoot, 'omni-backend');
   const wrapper = process.platform === 'win32' ? 'mvnw.cmd' : './mvnw';
-  run(wrapper, ['clean', 'install', '-pl', 'omni-inventory-sample,omni-db-migrator', '-am'], backendRoot);
-  run('docker', ['compose', 'config', '--quiet'], fixtureRoot, composeEnvironment());
+  run(wrapper, ['clean', 'install', '-pl', 'omni-inventory-sample,omni-db-migrator', '-am'], backendRoot, jdkEnvironment());
 
   console.log(`golden service valid: ${lock.spec.artifactId}, generated=${lock.files.length}, integrated=${rendered.changes.length}`);
 } finally {
@@ -85,26 +90,6 @@ function run(command, args, cwd, extraEnvironment = {}) {
   });
   if (result.error) throw result.error;
   assert.equal(result.status, 0, `黄金命令失败：${command} ${args.join(' ')}`);
-}
-
-function composeEnvironment() {
-  return {
-    MYSQL_ROOT_PASSWORD: 'golden-only-root-password',
-    OMNI_DB_PASSWORD: 'golden-only-app-password',
-    REDIS_PASSWORD: 'golden-only-redis-password',
-    XXL_JOB_ACCESS_TOKEN: 'golden-only-xxl-token',
-    XXL_JOB_ADMIN_USERNAME: 'golden-admin',
-    XXL_JOB_ADMIN_PASSWORD: 'golden-only-admin-password',
-    NACOS_AUTH_TOKEN: 'golden-only-nacos-token-value-that-is-long-enough-for-validation',
-    NACOS_AUTH_IDENTITY_KEY: 'golden-only-key',
-    NACOS_AUTH_IDENTITY_VALUE: 'golden-only-value',
-    JWK_ENCRYPT_KEY: 'golden-only-jwk-encryption-key-32bytes',
-    OAUTH2_STATE_SECRET: 'golden-only-oauth2-state-secret',
-    OMNI_INTERNAL_API_TOKEN: 'golden-only-internal-token',
-    // WP-011 S06：service 模板 1.4.0 强制注入 HMAC 断言密钥（${VAR:?} fail-closed），黄金环境必须提供占位值
-    GATEWAY_ASSERTION_SECRET: 'golden-only-gateway-assertion-secret-32b',
-    OMNI_IMAGE_NAMESPACE: 'omni',
-  };
 }
 
 function removeVerifiedTree(target, allowedParent) {

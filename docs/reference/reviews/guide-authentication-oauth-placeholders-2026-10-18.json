@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-authentication",
+  "source": "docs/guides/authentication.md",
+  "source_sha256": "e395fe11bda18af88f391049eed7e8296bf4554071bbe6678000fd4223439323",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "ffcc4a45070e3bf711839d4adb0be3ae27f44160",
+  "source_state": "Actually compare the four added authentication-guide sections and the exact screenshot-policy diff; byte-match all unchanged text to the existing complete semantic review. This is a delta review, not a new whole-document reread or external authorization test.",
+  "method": "Actually read the complete four-language added sections and precise screenshot-policy diff in4716af. Reuse hash-matching prior complete semantic reviews for unchanged body text,which is byte-identical after removing the recorded insertion. Approve translation meaning only;no provider sign-in,positive callback or screenshot capture is asserted.",
+  "prior_complete_semantic_reviews": [
+    {
+      "path": "docs/reference/reviews/guide-authentication.json",
+      "sha256": "ff34f4c780b1d8ad98ea0cf06fd45a869863511936f53426028abad50e418ec2"
+    }
+  ],
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/guide-authentication.json",
+      "sha256": "ff34f4c780b1d8ad98ea0cf06fd45a869863511936f53426028abad50e418ec2"
+    },
+    {
+      "path": "docs/reference/evidence/oauth-screenshot-deferral-2026-10-18.json",
+      "sha256": "65202c94b1b4fff4a203995fdd1a7cd74b91cf8866c05f5886984b01754605c9"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/screenshot-coverage.yaml",
+      "sha256": "81028a10490155242ac58b52f4e2f3fa82d5117137349d8792d8cd2db8216930"
+    }
+  ],
+  "source_inspection_scope": "Actually compare the four added authentication-guide sections and the exact screenshot-policy diff; byte-match all unchanged text to the existing complete semantic review. This is a delta review, not a new whole-document reread or external authorization test.",
+  "technical_verification": {
+    "runtime": "local Docker source/provenance checks",
+    "placeholder_regions": 12,
+    "all_other_document_text_byte_identical": true,
+    "new_whole_document_rereads": 0,
+    "actual_provider_authorization_tests": 0,
+    "actual_new_screenshots": 0,
+    "callback_verification": "unverified",
+    "remaining_site_and_business_acceptance_preserved": true
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/authentication.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 08:50:36",
+      "result": "approved",
+      "translation_sha256": "bd4da3cc04c76df61684528ebc1bee95bb537f2c56ef65a01da0cc766c2c24b8",
+      "checks": {
+        "coverage_and_meaning": "All three provider regions are visible and explicitly pending. Each translation preserves account-holder secondary verification, the owner-authorized capture deferral, three still-unverified success stages, and the limited scope of the deferral.",
+        "technical_literals": "GitHub/Google/Gitee, local Docker, CAPTCHA, PKCE, SRM and Cookie are preserved; no endpoint, client setting, tenant rule, state behavior or existing image reference changed.",
+        "security_and_failure_semantics": "No password, verification-code, token, Cookie or personal-account capture is requested. Placeholder content never claims successful authorization, code exchange or local login. Existing password/CAPTCHA, local PKCE, device-code, SRM and other module requirements remain.",
+        "images_and_links": "Twelve Markdown blockquote regions introduce no fake PNG, broken image path or replacement of historical originals. Future redacted originals require language, role, tenant, source version and actual-scope provenance. Coverage records only the external social-login flow as deferred, never covered.",
+        "language_and_terminology": "Secondary sign-in verification and authorization remain distinct; pending screenshots and unverified callbacks are explicit. The four other flow scopes and all backfill/provenance requirements match Chinese."
+      },
+      "findings": [
+        {
+          "id": "external-provider-screenshot-deferral",
+          "status": "resolved",
+          "description": "The owner explicitly deferred provider screenshots because secondary sign-in verification requires the account holder, but guides and coverage still treated them as unexplained missing screenshots.",
+          "resolution": "Add three visible pending regions in every language and record a single scoped, owner-authorized screenshot deferral. Preserve unverified actual callbacks and all other evidence requirements."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/authentication.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 08:50:36",
+      "result": "approved",
+      "translation_sha256": "99e13ad6169c66519895dc6b7cd879ac7336479729f2674c86e988055503286f",
+      "checks": {
+        "coverage_and_meaning": "All three provider regions are visible and explicitly pending. Each translation preserves account-holder secondary verification, the owner-authorized capture deferral, three still-unverified success stages, and the limited scope of the deferral.",
+        "technical_literals": "GitHub/Google/Gitee, local Docker, CAPTCHA, PKCE, SRM and Cookie are preserved; no endpoint, client setting, tenant rule, state behavior or existing image reference changed.",
+        "security_and_failure_semantics": "No password, verification-code, token, Cookie or personal-account capture is requested. Placeholder content never claims successful authorization, code exchange or local login. Existing password/CAPTCHA, local PKCE, device-code, SRM and other module requirements remain.",
+        "images_and_links": "Twelve Markdown blockquote regions introduce no fake PNG, broken image path or replacement of historical originals. Future redacted originals require language, role, tenant, source version and actual-scope provenance. Coverage records only the external social-login flow as deferred, never covered.",
+        "language_and_terminology": "追加ログイン確認, 認可 and 未検証 express the intended distinctions. Three provider regions, future redacted originals and each unaffected acceptance scope match the Chinese source."
+      },
+      "findings": [
+        {
+          "id": "external-provider-screenshot-deferral",
+          "status": "resolved",
+          "description": "The owner explicitly deferred provider screenshots because secondary sign-in verification requires the account holder, but guides and coverage still treated them as unexplained missing screenshots.",
+          "resolution": "Add three visible pending regions in every language and record a single scoped, owner-authorized screenshot deferral. Preserve unverified actual callbacks and all other evidence requirements."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/authentication.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 08:50:36",
+      "result": "approved",
+      "translation_sha256": "2765f5d06f97c268cbd485473f652ba6f25f23e8b4b181cf2f2c1cbbeded6461",
+      "checks": {
+        "coverage_and_meaning": "All three provider regions are visible and explicitly pending. Each translation preserves account-holder secondary verification, the owner-authorized capture deferral, three still-unverified success stages, and the limited scope of the deferral.",
+        "technical_literals": "GitHub/Google/Gitee, local Docker, CAPTCHA, PKCE, SRM and Cookie are preserved; no endpoint, client setting, tenant rule, state behavior or existing image reference changed.",
+        "security_and_failure_semantics": "No password, verification-code, token, Cookie or personal-account capture is requested. Placeholder content never claims successful authorization, code exchange or local login. Existing password/CAPTCHA, local PKCE, device-code, SRM and other module requirements remain.",
+        "images_and_links": "Twelve Markdown blockquote regions introduce no fake PNG, broken image path or replacement of historical originals. Future redacted originals require language, role, tenant, source version and actual-scope provenance. Coverage records only the external social-login flow as deferred, never covered.",
+        "language_and_terminology": "추가 로그인 확인, 인가 and 아직 검증하지 않았습니다 preserve verification/authorization/unverified meanings. All three regions, provenance and the limited deferral match the source; final Korean punctuation is corrected."
+      },
+      "findings": [
+        {
+          "id": "external-provider-screenshot-deferral",
+          "status": "resolved",
+          "description": "The owner explicitly deferred provider screenshots because secondary sign-in verification requires the account holder, but guides and coverage still treated them as unexplained missing screenshots.",
+          "resolution": "Add three visible pending regions in every language and record a single scoped, owner-authorized screenshot deferral. Preserve unverified actual callbacks and all other evidence requirements."
+        }
+      ]
+    }
+  }
+}

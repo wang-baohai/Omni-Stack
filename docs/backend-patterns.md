@@ -1,630 +1,424 @@
 # 后端模式与规范
 
-> 本文档定义了 Omni-Stack 后端的内部组织方式。所有后端代码必须遵循这些模式。  
-> 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。
+> 本文维护后端分层、编码约定和公共能力接入边界。下列“应当”约束新增或修改代码，不代表历史代码已全部符合或已通过业务验收。
+> 模块与信任边界见[架构](architecture.md)，线协议见[API 契约](api-contract.md)，部署变量见[Docker 部署](docker-deployment.md)。完整实操由 Wiki 和开发指南维护。
 
 ## 分层架构
 
-```
-Controller --> Service --> Repository (DAO)
-     |            |            |
-  参数校验      业务逻辑      数据访问
-  结果包装      逻辑处理      SQL / ORM
-                事务管理
+```text
+Controller --> Service --> Mapper (DAO)
+HTTP/validation   Domain rules   SQL/data access
+                  Local transaction boundary
 ```
 
 ### Controller 层
 
-- **职责**：接收 HTTP 请求，校验参数，调用 Service，封装响应
-- Controller 中**禁止编写业务逻辑**
-- 所有方法返回 `R<T>`（成功）或 `R<PageResult<T>>`（分页）
-- 请求 DTO 使用 `@Valid`（Jakarta Bean Validation）校验
-- DTO 可以是 Controller 的内部静态类或独立文件
-- RESTful 风格：`GET /user/{id}`、`POST /user`、`GET /user/list`
+- 接收 HTTP 请求、触发已声明的参数约束、执行入口权限和身份检查，再调用 Service。领域状态机与持久化规则由 Service 承担。
+- 普通业务 API 使用 `R<T>`，分页使用 `R<PageResult<T>>`。OAuth/OIDC、重定向、Actuator 等协议端点按各自契约返回，不强行包装。
+- `@Valid` 只触发 DTO 已声明的约束，不能代替租户归属、资源可见性、唯一性或业务状态校验。DTO 可独立定义或使用内部静态类。
+- 路径、HTTP 方法和字段以实际 Controller 为准；示意类和代码节选不是可以直接调用的完整接口。新增写入口需同步权限种子、迁移校验与前端按钮权限。
 
 ### Service 层
 
-- **接口 + 实现**：`XxxService`（接口）+ `XxxServiceImpl`（实现类）
-- 实现类上添加 `@Service` 注解
-- 实现方法上添加 `@Transactional`：
-  - 读操作：`@Transactional(readOnly = true)`
-  - 写操作：`@Transactional`
-- Service 层禁止使用 `HttpServletRequest` / `HttpServletResponse`
-- 通过 `@RequiredArgsConstructor` + `final` 字段进行构造器注入
+- 使用 `XxxService` 接口与 `XxxServiceImpl` 实现，业务实现标注 `@Service`，以构造器传入依赖。
+- 在实际需要原子性的本地业务边界声明事务；读取是否需要只读事务由一致性需求决定。不能从分层约定推断每个现有方法已有事务。
+- 新领域 Service 尽量接收明确的身份、租户和业务参数；HTTP 对象留在适配层。历史实现有特例，变更时按模块契约处理。
 
 ### Repository / DAO 层
 
-- 使用 MyBatis-Plus 或 JPA；Mapper 接口命名：`XxxMapper`
-- Mapper 中禁止编写业务逻辑
-- SQL 参数：始终使用 `#{}`，禁止使用 `${}`（防止 SQL 注入）
+- 当前业务持久化以 MyBatis-Plus Mapper 为主，接口使用 `XxxMapper`。Flowable 的内部持久化由引擎管理，不据此宣称项目另有通用 JPA 接入方案。
+- Mapper 负责数据访问，领域决策由 Service 承担。`#{}` 绑定参数值；表名、列名、排序等动态 SQL 标识符必须来自受控映射，不能拼接用户输入。
+- 自定义 SQL、关联子表与后台跨租户任务需要显式核对租户和数据范围；仅引入 Starter 不能证明所有 SQL 已受保护。
 
 ## 依赖注入（DI）
 
+下面是构造器注入示意，省略 imports；不是新增的生产 Controller。
+
 ```java
-// 正确：通过 Lombok 构造器注入
+// 构造器注入示意，省略 imports
 @RequiredArgsConstructor
 @RestController
 public class UserController {
     private final UserService userService;
 }
-
-// 禁止：字段注入
-@Autowired
-private UserService userService;
 ```
 
-**规则**：所有依赖注入必须使用 `@RequiredArgsConstructor` + `final` 字段。禁止 `@Autowired` 字段注入。
+禁止 `@Autowired` 字段注入。通常用 `@RequiredArgsConstructor` 与 `final` 字段；需要 `@Lazy`、可选依赖或初始化分支时可写显式构造器、`@Bean` 方法或使用 `ObjectProvider`。`OperLogProducer` 和 `OperLogAutoConfiguration` 提供了现有例子。
 
 ### 技术选型思考：为什么用 @RequiredArgsConstructor 而非 @Autowired
 
-| 考量 | 理由 |
-|------|------|
-| **不可变性** | `final` 字段保证依赖一旦构造就不可更改，避免运行时被意外替换 |
-| **编译时安全** | 遗漏依赖导致编译错误，而非运行时 `NullPointerException` |
-| **测试友好** | 构造器注入可直接在测试中传入 Mock 对象，无需 Spring 容器或反射工具 |
-| **明确性** | 所有依赖在类的构造器中一目了然，不需要扫描全部字段寻找 `@Autowired` |
-| **Spring 官方推荐** | Spring 团队从 4.x 开始推荐构造器注入，字段注入在 5.x 后被标记为不推荐 |
+| 考虑 | 实际收益与边界 |
+|---|---|
+| 依赖可见 | 构造参数表明创建对象需要什么，测试可以直接传入 Mock |
+| 字段不变 | `final` 阻止字段被重新赋值，不保证所引用对象不可变或线程安全 |
+| 失败定位 | 手工构造缺少参数可被编译器发现；Spring Bean 缺失、歧义或配置错误仍可能在启动时失败 |
+| 可选能力 | 可选依赖需明确声明和处理，不能用 Lombok 消除运行期条件 |
 
 ## 参数校验
 
-- 在请求 DTO 上使用 Jakarta Bean Validation 注解
-- 在 Controller 方法参数上使用 `@Valid` 触发校验
-- `MethodArgumentNotValidException` 和 `BindException` 由 `GlobalExceptionHandler` 统一捕获
+`@Valid @RequestBody` 配合 Jakarta Bean Validation。以下摘自 `CreateDictTypeRequest`，其余字段与 imports 省略；源码中文诊断文案在四语版本中保持原样。
 
 ```java
-@Data
-public static class CreateUserRequest {
-    @NotBlank(message = "用户名不能为空")
-    private String username;
-    @NotBlank(message = "邮箱不能为空")
-    private String email;
-}
+/** 字典类型编码 */
+@NotBlank(message = "字典类型编码不能为空")
+private String typeCode;
+
+/** 字典类型名称 */
+@NotBlank(message = "字典类型名称不能为空")
+private String typeName;
 ```
+
+Bean Validation 失败、参数缺失和类型不匹配由匹配的 MVC advice 处理。业务层仍需校验租户、权限、资源和状态；嵌套对象、集合元素及方法参数是否验证取决于实际声明和调用路径。
 
 ## 异常处理
 
 ### BusinessException
 
+以下是两个独立的抛出示例：单参数构造器的业务码为 500，双参数构造器使用指定码。业务码与 HTTP 状态分开记录。
+
 ```java
-// 业务规则违反
-throw new BusinessException("用户不存在");           // code: 500
-throw new BusinessException(404, "用户不存在");      // code: 404
+// 两个独立示例：默认业务码与显式业务码
+throw new BusinessException("资源不存在");
+throw new BusinessException(404, "资源不存在");
 ```
 
 ### GlobalExceptionHandler
 
-位于 `omni-common`，捕获所有异常并转换为 `R<Void>`：
+`omni-common` 的自动配置导入 `GlobalExceptionHandler`。下表针对异常确实到达该 MVC advice 的路径；不覆盖 Gateway、Security Filter、OAuth 协议或响应提交后的异常。
 
-| 异常 | 处理方式 |
-|------|----------|
-| `BusinessException` | `log.warn` + `R.fail(code, message)` |
-| `MethodArgumentNotValidException` | HTTP 400 + 聚合字段错误 + `R.fail(400, ...)` |
-| `BindException` | HTTP 400 + 聚合字段错误 + `R.fail(400, ...)` |
-| `Exception`（兜底捕获） | `log.error`（完整堆栈）+ `R.fail("服务器内部错误")` |
+| 异常 | HTTP 状态 | `R.code` 与处理 |
+|---|---|---|
+| `BusinessException` | 方法不设置状态；普通未改状态的响应通常为 200 | 异常携带的业务码；WARN |
+| `MethodArgumentNotValidException` / `BindException` | 400 | 400；聚合字段错误 |
+| `MissingServletRequestParameterException` / `MethodArgumentTypeMismatchException` | 400 | 400；参数错误 |
+| `AccessDeniedException` / `AuthorizationDeniedException` | 403 | 403；权限不足 |
+| `NoResourceFoundException` | 404 | 404；服务内无匹配资源 |
+| `HttpRequestMethodNotSupportedException` | 405 | 405 |
+| `HttpMediaTypeNotSupportedException` | 415 | 415 |
+| 兜底 `Exception` | 500 | 500；ERROR 保留堆栈，响应使用通用文案 |
+
+完整错误、空值、日期及金额序列化语义由 [API 契约](api-contract.md)维护；不能把所有 JSON 解析问题自动视为 400。
 
 ### 规则
 
-- 禁止使用空的 `catch` 块
-- 禁止使用异常进行流程控制
-- NPE 防御：使用 `Optional`、`Objects.requireNonNull()`、提前进行空值检查
-- 使用 `log.error("msg", e)` 记录异常并保留完整堆栈；禁止使用 `e.printStackTrace()`
+- 不吞掉需要处理的异常；预期拒绝与非预期故障分别记录。明确降级策略的 `catch` 需要说明日志、返回值和恢复行为。
+- 在边界检查空值；`Optional`、`Objects.requireNonNull` 不替代业务异常契约。
+- 使用带异常参数的日志保存所需堆栈，避免 `e.printStackTrace()`；日志和返回信息均需避免泄露凭据与个人数据。
 
 ## 日志规范
 
-使用 Lombok `@Slf4j` 和 `log` 对象：
-
-| 级别 | 用途 |
-|------|------|
-| `ERROR` | 需要立即关注的系统级错误 |
-| `WARN` | 业务异常，可恢复的问题 |
-| `INFO` | 关键业务流程检查点 |
-| `DEBUG` | 开发和调试 |
+使用 `@Slf4j` 与参数化占位符。级别按实际影响选择：ERROR 表示失败，WARN 表示预期拒绝或降级，INFO 用于关键业务节点，DEBUG 用于诊断。
 
 ```java
-// 正确：参数化占位符
+// 使用占位符，示意日志不包含凭据
 log.info("用户 {} 从 {} 登录", userId, ip);
-
-// 禁止：字符串拼接
-log.info("User " + userId + " logged in");
-
-// 禁止：控制台输出
-System.out.println("debug info");
 ```
 
-- 禁止记录敏感信息（密码、令牌、身份证号）
+不使用 `System.out.println`，不拼接日志字符串。密码、Bearer/Refresh Token、客户端秘密和完整个人信息不得进入普通日志。操作日志的规则脱敏不能保证任意自定义字段已脱敏；选择字段和访问权限仍由业务负责。追踪、指标和日志关联见[可观测性](observability.md)。
 
 ## 面向对象规范
 
-- 所有 POJO 类实现 `Serializable` 并声明 `serialVersionUID`
-- 使用 Lombok：`@Data`、`@Getter`、`@Slf4j`、`@RequiredArgsConstructor`
-- 类成员顺序：静态常量 -> 静态变量 -> 实例变量 -> 构造方法 -> 公共方法 -> 私有方法
-- `equals`：将常量/确定值放在左侧：`"success".equals(status)`
-- 包装类型：使用 `valueOf()`，禁止使用 `new Integer()`
-- 浮点数比较：使用 `BigDecimal` 或指定精度（epsilon）
+- 根据模型用途选用 Lombok；实现 `Serializable` 的类必须声明 `serialVersionUID`，不强制每个 DTO、record 或领域类都实现序列化接口。
+- 成员通常按常量、静态变量、字段、构造器、public 方法、private 方法排列。使用明确的封装和职责，避免依赖顺序隐藏不变量。
+- 常量放在 `equals` 左侧可避免该接收者为空；装箱使用 `valueOf`。金额使用 `BigDecimal` 并明确精度、舍入与比较规则；浮点近似比较需有业务容差。
 
 ## 集合与并发
 
-- 初始化集合时指定容量：`new ArrayList<>(16)`、`new HashMap<>(16)`
-- 空判断：使用 `CollectionUtils.isEmpty()`，而非 `== null` 或 `size() == 0`
-- 迭代过程中禁止 `remove`；使用 `Iterator` 或 `removeIf()`
-- Map 遍历：使用 `entrySet()`，而非先 `keySet()` 再 `get()`
-- 线程池：使用 `ThreadPoolExecutor`，禁止使用 `Executors.newXxx()`
-- 并发修改：使用 `ConcurrentHashMap`、`AtomicXxx`；除非必要，避免手动加锁
+- 集合容量按可预期规模选择，避免机械地为所有集合分配固定容量。`CollectionUtils.isEmpty` 可处理空引用；对于非空集合，`isEmpty()` 也是有效表达。
+- 迭代修改使用适用的 Iterator、`removeIf` 或分阶段操作。需要键和值时优先遍历 `entrySet()`。
+- 新线程池应显式设置队列、线程上限、拒绝策略和关闭生命周期，避免不受控的 `Executors.newXxx()` 默认配置。
+- `ConcurrentHashMap`、原子变量不自动保护跨对象不变量。复合更新、数据库并发和审批占用按模块锁、版本或事务协议处理，不以“用了并发集合”代替并发验证。
 
 ## 命名规范（Java）
 
-| 类型 | 风格 | 示例 |
-|------|------|------|
-| 包名 | 小写，点分隔 | `com.omni.business.controller` |
-| 类名 | UpperCamelCase | `UserController`、`BusinessException` |
-| 方法名 / 变量名 | lowerCamelCase | `getUserById`、`createTime` |
-| 常量 | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`、`DEFAULT_PAGE_SIZE` |
-| Boolean 变量 | 不加 `is` 前缀 | `deleted`、`enabled`（而非 `isDeleted`） |
-| 抽象类 | `Abstract` 前缀 | `AbstractEntity` |
-| 异常类 | `Exception` 后缀 | `BusinessException` |
-| 枚举类 | `Enum` 后缀 | `OrderStatusEnum` |
-| DTO 类 | `Request` / `Response` / `VO` 后缀 | `CreateUserRequest`、`UserVO` |
-| Feign 接口 | `FeignClient` 后缀 | `RemoteServiceFeignClient` |
-| Service 接口 | `XxxService` | `UserService` |
-| Service 实现 | `XxxServiceImpl` | `UserServiceImpl` |
-| Mapper 接口 | `XxxMapper` | `UserMapper` |
+以下是新增代码的约定，现有类名以源码为准；例如 `OperType` 未使用 `Enum` 后缀，不应为追求格式重命名公开类型。
+
+| 类型 | 约定或实例 |
+|---|---|
+| 包 / 类 / 方法和变量 | 小写点分包；UpperCamelCase；lowerCamelCase |
+| 常量 / 布尔变量 | UPPER_SNAKE_CASE；通常避免字段 `is` 前缀 |
+| 抽象类 / 异常 | `AbstractXxx` / `XxxException` |
+| 枚举 / DTO | 含义清晰的类型名；Request、Response、VO 按职责选用 |
+| Feign / Service / 实现 / Mapper | 按所在模块保持命名一致；`XxxService` / `XxxServiceImpl` / `XxxMapper` |
 
 ## 代码格式（Java）
 
-- 缩进：4 个空格，禁止使用 Tab
-- 最大行宽：120 字符
-- 花括号：K&R 风格（左花括号不换行）
-- 方法之间保留一个空行
-- 运算符两侧加空格：`a + b`、`if (x == y)`
-- 逗号后加空格：`method(a, b, c)`
-- 方法参数最多 5 个；超出时封装为 Request 对象
-- import 顺序：`java.*` -> `jakarta.*` -> 第三方 -> `com.omni.*`，各组之间空行分隔
-- 禁止通配符导入（`import xxx.*`），Controller 注解包除外
+新增或修改代码使用 4 空格缩进、K&R 花括号、运算符及逗号间距，方法之间留空行。以 120 字符和较短参数列表为可读性目标，参数过多时评估参数对象；现有 Controller 可能超过 5 个参数。
+
+imports 按 `java`、`jakarta`、第三方和 `com.omni` 分组。不用通配符 imports，Controller 注解包例外。当前 Maven POM 扫描未发现 Checkstyle、Spotless 或 PMD 声明；编译通过不代表这些格式目标已由检查器证明。
 
 ## 注释规范
 
-- 类、类属性和类方法必须添加 Javadoc（`/** ... */`）
-- 使用 `//` 作为行内注释，解释关键逻辑
-- 禁止无意义的注释（例如 `// get name` 对应 `getName()`）
-- TODO 格式：`// TODO: [模块] 描述`，定期清理
-- FIXME 格式：`// FIXME: 描述`，用于已知问题
+新增 public 类与方法提供 Javadoc，关键字段和不直观逻辑按需解释。代码注释使用中文，不重复方法名。TODO 使用 `// TODO: [module] description`，FIXME 明确问题和边界；不把文档约定表述为历史代码全量符合的结论。
 
 ## 安全与权限
 
 ### 功能权限（API 鉴权）
 
-Controller 方法使用 `@PreAuthorize` 声明所需权限编码：
+普通受保护业务入口依赖 Gateway 校验 JWT，再由服务验证可信身份断言、建立 Authentication 并执行方法权限。不能直接相信客户端提交的身份/权限 Header。身份签名的覆盖范围与网络信任限制见[架构](architecture.md)。
+
+以下两个注解摘自 Base 字典类型更新入口；它们不代替资源归属检查：
 
 ```java
-@PreAuthorize("hasAuthority('system:user:create')")
-@PostMapping
-public R<Void> create(@Valid @RequestBody CreateUserRequest request) {
-    userService.createUser(request);
-    return R.ok();
-}
+@PutMapping("/{id}")
+@PreAuthorize("hasAuthority('dict:type:update')")
 ```
 
-- 权限编码格式：`resource:action`（如 `system:user:update`、`system:role:delete`）
-- 权限集合在 JWT Claims 中携带，Spring Security 在方法调用前自动校验
-- 无权限时返回 403 Forbidden
+权限码按 `resource:action` 分层命名，例如 `dict:type:update`。新增写入口需同步 `@PreAuthorize`、`scripts/sql/seed/auth.sql`、`database/seed/manifest.yaml` 和前端 `v-permission`。公开注册、OAuth/OIDC、内部 Token 协议和按行 ownership 的 `MyJobController` 分别遵循各自契约，不机械追加同一注解。普通方法鉴权拒绝为 403；实际过滤器错误需按对应路径判断。
 
 ### 数据权限（DataPermission）
 
-基于 MyBatis-Plus `DataPermissionInterceptor` 实现行级数据过滤，业务代码零侵入。
-
-**核心组件协作**：
-
-```
-Gateway → X-User-Id/X-Tenant-Id Header
-    ↓
-DataScopeResolveFilter（@Order(0), OncePerRequestFilter）
-    ↓ 查询角色 → 合并 dataScope（最宽松优先）→ 解析可访问组织单元 ID
-    ↓
-DataScopeContext（ThreadLocal 存储 userId, tenantId, primaryUnitId, effectiveScope, accessibleUnitIds）
-    ↓
-DataPermissionInterceptor（MyBatis-Plus InnerInterceptor）
-    ↓ 调用 DataPermissionHandlerImpl.getSqlSegment(Table, Expression, String)
-    ↓ 仅对 sys_user 表追加 WHERE 条件
-    ↓
-业务 SQL 执行（自动过滤后的结果集）
-    ↓
-DataScopeContext.clear()（finally 块，防 ThreadLocal 泄漏）
+```text
+Trusted identity --> Request context --> Permission-aware scope
+    --> Domain table/aggregate policy --> SQL + explicit tenant predicates
+    --> finally: restore/clear context
 ```
 
-**六级数据范围**：
+Auth 的 `MybatisPlusConfig` 顺序为 DataPermission → OptimisticLock → Pagination，没有通用 TenantLine。`DataPermissionHandlerImpl` 映射 `sys_user`、`sys_org_unit`、`sys_role`，租户条件仍需相应 Mapper/Service 显式承担。
 
-| dataScope | SQL 行为 |
-|-----------|---------|
-| `ALL` | 不追加条件（跨租户可见） |
-| `TENANT` | 不追加条件（现有 tenant_id 过滤已满足） |
-| `DEPT_AND_BELOW` | `WHERE sys_user.primary_unit_id IN (本部门及后代 ID)` |
-| `DEPT` | `WHERE sys_user.primary_unit_id IN (本部门 ID)` |
-| `CUSTOM` | `WHERE sys_user.primary_unit_id IN (自定义部门+后代 ID)` |
-| `SELF` | `WHERE sys_user.id = {当前用户ID}` |
+| dataScope | Auth `sys_user` 条件示例 |
+|---|---|
+| `ALL` / `TENANT` | 此 handler 不附加条件；不等于所有调用都允许跨租户 |
+| `DEPT_AND_BELOW` / `DEPT` / `CUSTOM` | 按解析后的组织 ID 集合过滤 `primary_unit_id` |
+| `SELF` | 按当前 `id` 过滤 |
 
-**多角色合并**：用户拥有多个角色时，取优先级最高的 dataScope（ALL > TENANT > DEPT_AND_BELOW > DEPT > CUSTOM > SELF）。
+无权限上下文时该 Auth handler 也可能不附加条件，不能以拦截器存在代替入口授权。普通两参数角色解析与指定 permission 的三参数解析不同：后者仅合并授予目标权限的角色，没有匹配授权时拒绝。完整六种范围与优先级见[核心流程](core-flows.md)。
 
-**新增表的数据权限扩展**：
+CRM/SRM/Procurement/Asset 启用 common-service 持久化能力时采用 TenantLine → DataPermission → OptimisticLock → Pagination。表策略、owner 映射、子表经根聚合继承及 `AccessGuard` 由各领域拥有；TenantLine 只作用于对应业务前缀，`sys_mq_message` 保留跨租户中继用途。
 
-1. 在 `DataPermissionHandlerImpl` 中添加目标表名和对应的列映射
-2. 目标表必须包含关联到 `sys_user` 的外键列（如 `primary_unit_id`、`create_by`）
-3. `DataPermissionInterceptor` 注册顺序必须在 `PaginationInnerInterceptor` 之前
+扩展新表时更新所属服务的 `DataScopeTablePolicy` / handler，区分 owner、当前使用人、租户共享表和子聚合关联。不要给无 owner 列的子表凭空追加条件，也不要把组织 ID 当成用户外键。DataPermission 必须在分页之前。
 
-**内存过滤模式**：对于非数据库查询的数据（如 Redis 中的在线用户列表），Controller 从 `DataScopeContext.get()` 读取数据范围，手动按 `primaryUnitId` 过滤。
+Redis 在线用户由 `OnlineUserServiceImpl` 显式检查：`ALL` 保留跨租户语义，其余先验证租户所属再应用 SELF 或组织范围；强制下线在 Redis 操作和成功审计之前检查目标。缺少身份/租户/有效范围时为业务码 403；这条特定逻辑不应泛化到全部 SQL。
 
 ### ThreadLocal 使用规范
 
-- `DataScopeContext` 使用 `ThreadLocal<DataScopeInfo>` 存储请求级上下文
-- **必须**在 `try/finally` 块中清除，避免线程池场景下的泄漏
-- 写入时机：`DataScopeResolveFilter.doFilterInternal()` 中 `try` 块之前
-- 清除时机：`DataScopeResolveFilter.doFilterInternal()` 中 `finally` 块
+Auth `DataScopeResolveFilter` 在 `try` 内解析并设置上下文，在 `finally` 清理；内部路径有独立分支。common-service 的身份 Filter 与方法 DataScope Aspect 分别管理其生命周期，也需恢复或清理上下文。
+
+`DataScopeContext`、身份上下文与 `XssRuleHolder` 不会自动随异步任务传播。线程池任务应显式传入所需身份/tenantId 并单独管理生命周期；可靠消息发送不得从 ThreadLocal 猜测租户。
 
 ### XSS 防护（三层防御架构）
 
-XSS 防护采用三层纵深防御，配置通过数据库 + Redis 缓存管理，支持按租户隔离。
-
-```
-Layer 1: Jackson StringDeserializer — 自动清洗 @RequestBody JSON 中的 String 字段
-Layer 2: Servlet Filter + HttpServletRequestWrapper — 清洗查询参数
-Layer 3: Gateway WebFilter — 添加安全响应头
+```text
+JSON String conversion --> Jackson 2/3 XSS modules + request rules
+Query/form access --> XssHttpServletRequestWrapper
+Gateway response --> SecurityHeadersFilter (no input sanitization)
 ```
 
-**核心组件**：
+`omni-common` 的 `XssAutoConfiguration` 在 Servlet 环境和 `XssConfigProvider` Bean 条件满足时注册 `/*` Filter，以及按 classpath 条件注册 Jackson 2/3 String 模块。JSON 字符串净化需要实际转换器使用对应模块和请求线程规则；仅实现接口但未注册 Bean 不能证明生效。
 
-| 组件 | 模块 | 职责 |
-|------|------|------|
-| `XssConfigProvider` | omni-common-core | SPI 接口，由具体服务模块实现 |
-| `XssSettings` / `XssRule` | omni-common-core | 配置值对象（enabled + 规则列表） |
-| `XssSanitizer` | omni-common | 核心净化逻辑（HTML_TAG / EVENT_HANDLER / DANGEROUS_PROTOCOL / CUSTOM_PATTERN） |
-| `XssStringDeserializer` | omni-common | Jackson String 反序列化器包装，自动清洗 |
-| `XssFilter` | omni-common | OncePerRequestFilter，加载配置 + 设置 ThreadLocal |
-| `XssHttpServletRequestWrapper` | omni-common | 重写 getParameter/getParameterValues |
-| `XssAutoConfiguration` | omni-common | 自动注册 Filter + Jackson SimpleModule |
-| `XssConfigProviderImpl` | omni-auth | 实现配置加载（Redis 缓存 + 数据库回源） |
-| `SecurityHeadersFilter` | omni-gateway | 添加 X-Content-Type-Options / X-Frame-Options / Referrer-Policy |
+`XssFilter` 从租户 Header 取得配置，缺失/不可解析租户、关闭开关或空规则会直接放行。启用时包装 `getParameter` / `getParameterValues` 并通过 `finally` 清理规则；它未覆盖 `getParameterMap`，不能宣称任意输入访问方式都已净化。
 
-**规则类型**：
+| ruleType | 当前处理 |
+|---|---|
+| `HTML_TAG` | 按指定标签去除标签/配对内容，竖线分隔的标签按字面量转义 |
+| `EVENT_HANDLER` | 按配置模式移除事件属性 |
+| `DANGEROUS_PROTOCOL` | 不区分大小写去除配置协议，竖线分隔值按字面量处理 |
+| `CUSTOM_PATTERN` | 正则替换；非法正则记录 WARN 并跳过该规则 |
 
-| ruleType | 匹配与清洗方式 |
-|----------|---------------|
-| `HTML_TAG` | 剥离成对标签和自闭合标签 |
-| `EVENT_HANDLER` | 剥离 `on*` 属性 |
-| `DANGEROUS_PROTOCOL` | 替换 `javascript:` / `vbscript:` / `data:` 等协议字符串 |
-| `CUSTOM_PATTERN` | 自定义正则替换 |
+这些是规则过滤，不能替代前端输出编码和富文本信任策略。Gateway 的 `X-Content-Type-Options: nosniff`、`X-Frame-Options: DENY`、`Referrer-Policy` 是响应头防御，不执行输入净化。
 
-**扩展新服务**：实现 `XssConfigProvider` 接口即可自动获得 XSS 防护能力。`omni-common` 依赖引入后通过 `AutoConfiguration.imports` 自动装配。
+Auth `XssConfigProviderImpl` 使用 `xss:enabled:{tenantId}` 与 `xss:rules:{tenantId}`，TTL 30 分钟；写入开关或规则后由 `XssConfigServiceImpl` 主动删两键，不能仅等 TTL。删除位于本地事务内，不据此证明提交与并发缓存回填完全无竞态。Auth Provider 也不是任意 Redis 故障均自动回源。
 
-**缓存策略**：Redis 键 `xss:enabled:{tenantId}` + `xss:rules:{tenantId}`，TTL 30 分钟。所有写操作（开关切换、规则 CRUD）后主动失效缓存。
+common-service 的 `CachedServiceXssConfigProvider` 在缓存失败后尝试 Auth，失败或无结果后使用 `DefaultXssSettingsFallback` 的启用基线；权威关闭配置仍应保留。Provider 自动配置顺序和实际 Jackson/Filter Bean 需同时验证，接入步骤见[开发指南](guides/scaffold-development.md)。
 
 ## MQ 消息发送记录与补偿管理（omni-common-mqlog）
 
-MQ 消息发送记录与补偿管理系统基于 Transactional Outbox + XXL-JOB 异步投递架构，为各微服务提供可靠消息发送能力，引入即用、零业务代码。
+业务可靠发送使用 `omni-common-mqlog` 及 DB、Job 能力。`ReliableMessageRelay` / `ReliableMessageTemplate` 的 `send(bindingName, payload, tenantId[, msgKey])` 显式要求正 tenantId。Outbox 写入只有在调用处存在实际本地事务时才能与业务更新共同提交，不能覆盖远程服务或 Broker 事务。
 
-### 核心架构
+`sys_mq_message` DDL 唯一所有者是 `database/changelog/common/0001-mq-schema.yaml`，历史 `schema.sql` 不是主建表路径。`mqRelayHandler` 同时声明 `@XxlJob` 与 `@SystemJobMeta`；中继跨租户扫描 PENDING/FAILED，外部及内部管理查询按 tenantId 过滤。`MessageSender` 按 broker_type 路由，现有实现为 `RocketMqMessageSender`。
 
-```
-业务事务（@Transactional）
-    ↓
-ReliableMessageTemplate.send(bindingName, payload, tenantId)
-    ↓ INSERT sys_mq_message (status=PENDING) -- 同一本地事务
-    ↓
-XXL-JOB mqRelayHandler (10s 轮询)
-    ↓
-MqMessageRelayService.relayAll()
-    ↓ 批量查询 PENDING/FAILED 且 next_retry_time <= NOW()
-    ↓
-MessageSender.send(message) -- 策略模式，按 broker_type 路由
-    ↓
-成功 → status=SENT | 失败 → retry_count++, 指数退避 | 超限 → DEAD_LETTER
-```
-
-### 核心组件
-
-| 组件 | 职责 |
-|------|------|
-| `ReliableMessageTemplate` | 提供 `send(bindingName, payload, tenantId)` / `send(bindingName, payload, tenantId, msgKey)` 两个重载（`tenantId` 为必传正整数，不得省略），在调用方事务中 INSERT 消息记录 |
-| `MqMessageRelayService` | 轮询待投递消息，调用 `MessageSender` 策略实现发送，处理重试退避和死信标记 |
-| `MqMessageRelayJob` | XXL-JOB handler（`@XxlJob("mqRelayHandler")` + `@SystemJobMeta`），触发 relay 逻辑 |
-| `MessageSender` | 策略接口，按 `broker_type` 路由。当前实现 `RocketMqMessageSender`（基于 StreamBridge），后续可扩展 `KafkaMessageSender` |
-| `MqMessageInternalController` | Feign 内部查询 API（`/api/internal/mq-message`），供聚合查询服务调用 |
-
-### 新服务接入步骤
-
-1. POM 中依赖 `omni-common-mqlog`
-2. 确保已依赖 `omni-common-mybatis`（数据库）和 `omni-common-job`（XXL-JOB）
-3. 如需 RocketMQ 发送能力，依赖 `spring-cloud-starter-stream-rocketmq`
-4. `sys_mq_message` 表由 Liquibase 迁移创建（`database/changelog/common/0001-mq-schema.yaml`，`omni-db-migrator` 容器启动时应用）
-5. `mqRelayHandler` 自动注册到 XXL-JOB（各服务执行器 AppName 不同，handler name 天然隔离）
-6. 业务代码注入 `ReliableMessageTemplate`，调用 `send()` 方法即可
-
-### 指数退避策略
-
-重试间隔：`2^retryCount × 10s`。第1次 20s，第2次 40s，第3次 80s。超过 `max_retry`（默认 3）进入死信状态（DEAD_LETTER）。
-
-### 死信处理
-
-- **重发**：将 PENDING/FAILED/DEAD_LETTER 状态重置为 PENDING，`retry_count` 清零，relay 任务下次轮询重新投递
-- **忽略**：DEAD_LETTER → SKIPPED，确认无需再投递的终态
+状态机、指数退避、死信重发/跳过与扩展由 [MQ 可靠性](mq-reliability.md)维护，实际断点和失败恢复见 [Outbox 开发](wiki/outbox-development.md)。依赖或注解存在不证明执行器、Broker、消费与补偿当前都在运行。
 
 ## 操作日志（OperLog）
 
-操作日志系统基于 AOP + RocketMQ 异步架构，自动采集 Controller 方法的请求上下文和实体变更快照，实现对业务操作的完整审计追踪。
+`@OperLog` AOP 为已标注入口记录操作元数据和可选实体快照，经 MQ 由 Base 存储。它不覆盖全部业务事件，也不提供完整审计、零丢失或合规保证。
 
 ### 核心记录流程
 
+```text
+@OperLog --> OperLogAspect --> OperLogProducer
+    --> ReliableMessageRelay / Outbox (if available)
+    --> StreamBridge direct send (fallback)
+    --> Base OperLogConsumer --> sys_oper_log
+XXL-JOB operLogArchiveHandler --> sys_oper_log_archive
 ```
-Controller 方法（@OperLog 注解）
-    ↓
-OperLogAspect（AOP @Around 切面）
-    ↓ 采集请求上下文：username、tenantId、IP、URL、请求参数
-    ↓ 实体变更快照：UPDATE/DELETE 操作前查询 oldValue，操作后查询 newValue
-    ↓ EntityDiffer.diff()：字段级差异比对（仅 UPDATE）
-    ↓
-OperLogProducer.send(OperLogMessage)
-    ↓ RocketMQ 异步发送
-    ↓
-omni-base 消费者
-    ↓ INSERT INTO sys_oper_log（热表）
-    ↓
-OperLogArchiver（@Scheduled 每日 02:00）
-    ↓ 将超过 180 天的热表记录迁移到 sys_oper_log_archive（冷表）
-    ↓ 批次处理（每批 1000 条），迁移后从热表删除
-```
+
+`OperLogProducer` 有 ReliableMessageRelay 时走 Outbox，否则用 StreamBridge 直发；捕获发送异常并 WARN。直发代码没有检查返回布尔值，不能当作可靠投递回执。Outbox 与业务是否同事务还取决于调用边界。
+
+Base 消费者按 `event_id` 唯一约束忽略 DuplicateKeyException，其他异常向消息中间件抛出；旧消息缺少 eventId 时由服务构造确定性 legacy ID。这不等于全部业务消费已证明 exactly-once。
+
+`OperLogArchiver` 是 `operLogArchiveHandler`，同时具有 `@XxlJob` / `@SystemJobMeta`；元数据默认 cron 为 `0 0 2 * * ?`，默认 retentionDays 为 180，批大小为 1000。实际调度需 XXL-JOB 配置与运行。它先插冷表再删热表，失败批次停止；同 Bean 内部调用 `archiveBatch`，不能仅凭该方法的 `@Transactional` 注解宣称当前路径已受代理事务保护。冷表存在不证明长期保留策略或合规验收。
 
 ### @OperLog 注解使用
 
+以下是现有 `DictTypeController.update` 的节选，省略 imports/Javadoc；中文 module 与方法参数保持源码原样。Auth 用户管理不能用作 OperLog 接入示例。
+
 ```java
-@OperLog(module = "用户管理", operType = OperType.CREATE, entityClass = SysUser.class, idExpr = "#result.data.id")
-@PreAuthorize("hasAuthority('system:user:create')")
-@PostMapping
-public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
-    return R.ok(userService.createUser(request));
+@OperLog(module = "字典类型管理", operType = OperType.UPDATE, entityClass = SysDictType.class, idExpr = "#id")
+@PutMapping("/{id}")
+@PreAuthorize("hasAuthority('dict:type:update')")
+public R<SysDictType> update(@PathVariable Long id,
+                              @RequestHeader("X-Tenant-Id") Long tenantId,
+                              @Valid @RequestBody UpdateDictTypeRequest request) {
+    String operator = SecurityContextHolder.getContext().getAuthentication().getName();
+    return R.ok(dictTypeService.updateType(id, tenantId, request, operator));
 }
 ```
 
-**注解参数说明**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `module` | String | 是 | 业务模块名称，如"用户管理"、"字典类型管理" |
-| `operType` | OperType | 是 | 操作类型枚举（见下表） |
-| `entityClass` | Class<?> | 条件 | 目标实体类，用于 AOP 自动 diff 变更快照。QUERY/EXPORT/IMPORT 类型无需指定 |
-| `idExpr` | String | 条件 | SpEL 表达式，从方法参数或返回值中提取实体 ID。如 `"#id"`、`"#result.data.id"` |
+| 参数 | 当前含义 |
+|---|---|
+| `module` / `operType` | 模块名默认空串，项目约定明确填写；operType 无默认值 |
+| `entityClass` / `idExpr` | 默认 Object.class / 空串；启用快照时按 Mapper 与参数/返回值 SpEL 提取 ID |
+| `recordParams` / `recordSnapshot` | 默认 true，可为敏感或大文本业务关闭 |
+| `excludeFields` | 额外排除字段，默认空数组，脱敏时规范化字段名 |
 
 ### OperType 枚举
 
-| 枚举值 | 含义 | 是否需要 entityClass | 说明 |
-|--------|------|---------------------|------|
-| `CREATE` | 新增 | 建议指定 | AOP 从返回值中提取新实体 ID 并查询 newValue |
-| `UPDATE` | 修改 | 是 | AOP 在操作前查询 oldValue，操作后查询 newValue，执行字段级 diff |
-| `DELETE` | 删除 | 是 | AOP 在操作前查询 oldValue，newValue 为 null |
-| `QUERY` | 查询 | 否 | 仅记录查询行为，无实体快照 |
-| `EXPORT` | 导出 | 否 | 仅记录导出行为，无实体快照 |
-| `IMPORT` | 导入 | 否 | 仅记录导入行为，无实体快照 |
+| 类型 | 开启快照且配置满足时的行为 |
+|---|---|
+| `CREATE` | 从返回值提取 ID，查询 newValue |
+| `UPDATE` | 前后查询，按顶层字段值比较输出差异 |
+| `DELETE` | 查询 oldValue，newValue 保持 null |
+| `QUERY` / `EXPORT` / `IMPORT` | 此快照分支不读取实体 |
 
 ### 开发约束
 
-1. **新增写操作 Controller 方法必须标注 `@OperLog`**，指定 `module`、`operType`，涉及实体变更时还需指定 `entityClass` 和 `idExpr`
-2. **omni-auth 模块禁用 `@OperLog`**：认证行为由安全审计日志（`sys_audit_log` 的 `LOGIN_SUCCESS`/`LOGIN_FAILED`/`ACCOUNT_LOCKED` 等事件；“登录记录”页是其中登录事件的只读投影）完整留存，不存在独立的 `sys_login_log` 表；omni-auth 不引入 `omni-common-operlog` 依赖，不在控制器方法上使用 `@OperLog` 注解
-3. **新微服务接入**：需在 `pom.xml` 中依赖 `omni-common-operlog` 并配置 RocketMQ，该模块通过 `AutoConfiguration.imports` 自动注册 AOP 切面和 MQ 生产者
-4. **`entityClass` 用途**：AOP 通过 `ApplicationContext` 查找对应实体类型的 `BaseMapper`，自动执行 `selectById` 获取变更前后快照
-5. **`idExpr` SpEL 语法**：支持引用方法参数（`#id`、`#request.id`）和返回值（`#result.data.id`），解析失败时记录警告日志但不影响业务
-6. **JSON 快照限制**：单条 oldValue/newValue 最大 4000 字符，超出自动截断
-7. **热冷表分离**：热表 `sys_oper_log` 保留近 180 天数据供快速查询，冷表 `sys_oper_log_archive` 长期留存满足合规要求。归档任务每日 02:00 执行，单批次 1000 条，失败时停止当次归档
+- 需要操作日志的新增写入口按业务敏感性配置注解。**omni-auth 禁止引入 `omni-common-operlog` 或使用 `@OperLog`**；认证事件由 `sys_audit_log` 保存，登录记录是其只读投影，不另建 `sys_login_log`。
+- Mapper 查询与 SpEL 需要实际可解析。具有 tenantId 属性的快照仅保留匹配当前正 tenantId 的实体；无该属性的全局实体保留既有行为。不要把此检查当成业务写权限校验。
+- `OperLogSanitizer` 对命中字段、电话、邮箱与凭据片段作规则脱敏，不是任意文本的完整脱敏。快照/参数等字符串超长时取前 4000 字符并追加 `...[TRUNCATED]`，并非总长度最多 4000；截断可能使 JSON 无效，而数据库快照列为 JSON，不能宣称超长快照一定能持久化。
+- 目标方法异常继续向上抛；后处理捕获 Exception，SpEL/Mapper 查找有局部降级。执行目标前的快照查询及 ID 类型转换不全在保护块中，不能承诺所有采集错误均不影响业务。
+- 日志 `responseStatus` 正常返回时记 200、目标抛错时记 500，不是最终 MVC HTTP 状态或 `R.code`。
 
 ### 模块职责
 
-| 模块 | 组件 | 职责 |
-|------|------|------|
-| `omni-common-core` | `OperLog` 注解、`OperType` 枚举、`OperLogMessage` POJO | 纯 POJO 层，无 Spring 依赖 |
-| `omni-common-operlog` | `OperLogAspect`、`OperLogProducer`、`EntityDiffer`、`OperLogAutoConfiguration` | AOP 切面 + MQ 生产者 + 实体 diff + 自动装配 |
-| `omni-base` | `OperLogConsumer`、`OperLogArchiver` | MQ 消费写入热表 + 定时归档到冷表 |
+| 模块 | 组件 |
+|---|---|
+| `omni-common-core` | OperLog、OperType、OperLogMessage；生产代码无 Spring 依赖 |
+| `omni-common-operlog` | Aspect、Producer、Sanitizer、EntityDiffer 与有条件自动配置 |
+| `omni-base` | Consumer、OperLogService、Archiver 与热/冷表 |
 
 ## Common Starter 接入规范
 
-项目将公共能力拆分为组合 Starter 与可选能力模块。Servlet 业务服务优先使用
-`omni-common-service`；Gateway、Auth 和 Workflow 按各自特殊边界选择底层模块。
-
 ### Starter 模块概览
 
-| 模块 | 职责 | 自动配置内容 | 适用服务类型 |
-|------|------|-------------|-------------|
-| `omni-common-core` | 纯 POJO 层 | 无（无 Spring 依赖） | 所有模块 |
-| `omni-common` | Web 自动配置 | `JacksonConfig`（时间序列化）、`WebMvcConfig`（CORS）、`GlobalExceptionHandler`、`XssAutoConfiguration`（Filter + Jackson Module） | Servlet 服务 |
-| `omni-common-mybatis` | 数据库能力 | `MybatisPlusAutoConfiguration`：`MybatisPlusInterceptor`（MySQL `PaginationInnerInterceptor`）+ YAML 默认配置（驼峰映射、逻辑删除、自增 ID） | Servlet 服务 |
-| `omni-common-redis` | 阻塞式 Redis | `RedisAutoConfiguration`：`RedisTemplate<String, Object>`（Jackson 序列化）+ `RedisUtils` 工具类 + Lettuce 连接池配置 | Servlet 服务 |
-| `omni-common-redis-reactive` | 响应式 Redis | `spring-boot-starter-data-redis-reactive` + YAML 默认超时配置 | WebFlux 服务（如 Gateway） |
-| `omni-common-mqlog` | 可靠 MQ 消息发送 | `ReliableMessageTemplate`（Transactional Outbox）、`MqMessageRelayService`（XXL-JOB 异步投递）、`MessageSender` 策略接口、`MqMessageInternalController`（Feign 内部查询）、Liquibase 迁移建表（`database/changelog/common/0001-mq-schema.yaml`） | Servlet 服务（需 MQ 能力） |
-| `omni-common-service` | Servlet 业务服务安全与上下文组合 | Gateway 预认证 Filter、不可变请求身份、内部 API Token、DataScope SPI/切面、Tenant/DataPermission 固定顺序、Auth XSS 回源与安全基线 | CRM/SRM/Procurement/Asset 等 Servlet 业务服务 |
+当前有 10 个 common 模块，其中 core 为基础类型，其余 9 个按能力组合。完整依赖与模块表以[架构](architecture.md)为唯一入口。
 
-**自动配置注册机制**：所有 starter 通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 文件注册，这是 Spring Boot 3+/4+ 的标准机制（替代了旧版 `spring.factories`）。
+| 模块 | 接入边界 |
+|---|---|
+| `omni-common-core` | 基础类型；生产代码无 Spring 自动配置 |
+| `omni-common` | Servlet Web/MVC、Jackson、异常 advice 与有条件 XSS |
+| `omni-common-mybatis` | 默认 OptimisticLock → MySQL Pagination；YAML 映射/逻辑删除/ID 约定 |
+| `omni-common-redis` | 阻塞 RedisTemplate、RedisUtils 与默认连接配置 |
+| `omni-common-redis-reactive` | reactive 依赖与超时 YAML，无本模块自定义 AutoConfiguration.imports |
+| `omni-common-job` | XXL-JOB 执行器、系统任务登记等，按实际条件激活 |
+| `omni-common-mqlog` | Outbox、中继、发送策略与管理查询，另需 DB/Job/Broker 配置 |
+| `omni-common-operlog` | 注解 AOP 与发送，需匹配 Servlet/AspectJ/Mapper/StreamBridge 等依赖 |
+| `omni-common-workflow` | Workflow 公共能力，不能向业务域服务引入引擎运行时 |
+| `omni-common-service` | Servlet 身份、内部 API、DataScope、持久化与 XSS 组合 |
+
+8 个能力模块具有自定义 `AutoConfiguration.imports`。导入条目仅证明注册入口，不能证明条件已满足或 Bean 已激活；不要写成所有模块都有同一自动配置机制。
 
 ### 新服务接入步骤
 
-1. **POM 依赖**：Servlet 业务服务声明组合 Starter，再按需增加 OperLog/Job/MQ：
-   ```xml
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-service</artifactId></dependency>
-   ```
-2. **application.yml**：除数据源和 Redis 外，显式配置服务身份和启用的安全能力；内部 Token
-   必须来自环境变量，不能使用弱默认值：
-   ```yaml
-   spring:
-     datasource:
-       url: jdbc:mysql://127.0.0.1:3306/omni_xxx?useSSL=false&serverTimezone=Asia/Shanghai
-       username: root
-       password: root
-     data:
-       redis:
-         host: 127.0.0.1
-         port: 6379
-         database: 0
-   omni:
-     service:
-       name: omni-xxx
-       display-name: Xxx
-       gateway-preauth:
-         enabled: true
-       internal-api:
-         enabled: true
-         token: ${OMNI_INTERNAL_API_TOKEN}
-       tenant:
-         enabled: true
-       data-scope:
-         enabled: true
-       xss:
-         enabled: true
-   ```
-3. **领域 SPI**：启用 tenant/data-scope 时分别提供唯一的 `TenantTablePolicy` 和
-   `DataScopeTablePolicy`；不得把领域表名或 owner 列放入 Starter。
-4. **安全链**：将 Starter 提供的 Gateway Filter 放在 `AuthorizationFilter` 前，将身份上下文 Filter
-   放在 Gateway Filter 后；二者已禁止 Servlet 容器重复注册。
-5. **可选能力**：OperLog、Job、MQ 与 Workflow 继续作为独立依赖，按业务需要启用。
+Servlet 领域服务优先 common-service，按需选 OperLog/Job/MQ；Gateway、Auth、Base、Workflow 保持各自边界。身份配置、`GATEWAY_ASSERTION_SECRET`、`OMNI_INTERNAL_API_TOKEN` 从私有环境取得，启用能力需满足启动校验。
 
-当前 `omni-common-service` 已提供 v0 自动配置和测试，CRM、SRM、Procurement、Asset 均已完成迁移、模块测试与隔离运行态复验。
-Starter 的 XSS Provider 自动配置必须先于 `XssAutoConfiguration` 生效，并由上下文测试同时断言
-Provider、Servlet FilterRegistration 以及 Jackson 2/3 清洗模块，避免条件求值顺序导致静默失效。
+租户和数据范围能力启用时提供唯一、与领域表匹配的 TenantTablePolicy/DataScopeTablePolicy；身份断言 Filter 在 AuthorizationFilter 前，身份上下文在预认证后，避免再次注册到 Servlet 容器。XSS Provider 配置应先于条件消费，并同时验证 FilterRegistration 与 Jackson 2/3 Bean。完整接入、生成器和 Docker 步骤见[开发指南](guides/scaffold-development.md)。
 
 ### 覆盖机制
 
-所有 starter 的自动配置 Bean 均使用 `@ConditionalOnMissingBean` 注解，服务可按需覆盖：
-
-- **MybatisPlusInterceptor**：服务定义同名 `mybatisPlusInterceptor` Bean 即可覆盖默认分页配置。典型场景：添加 `DataPermissionInterceptor`（**必须在 `PaginationInnerInterceptor` 之前注册**）
-- **RedisTemplate**：服务定义 `@Bean(name = "redisTemplate")` 即可替换默认序列化策略
-- **XSS 配置**：`XssAutoConfiguration` 条件依赖 `XssConfigProvider` Bean，不实现 SPI 则 XSS 过滤链不激活
+- MyBatis 默认拦截器按 `MybatisPlusInterceptor` 类型缺失条件注册；按项目惯例定义同名 Bean，并保留正确顺序。
+- RedisTemplate 按 Bean 名 `redisTemplate` 缺失条件注册，RedisUtils 按其返回类型条件注册。二者的替换条件不能混为一谈。
+- XSS 以 Provider Bean 和 Servlet/classpath 为条件；OperLog 的若干 Bean 并未声明 ConditionalOnMissingBean。不可宣称全部 Starter Bean 都可以同样覆盖；先读对应配置并用容器上下文验证。
 
 ### Redis Starter 互斥约束
 
-`omni-common-redis`（阻塞式）和 `omni-common-redis-reactive`（响应式）**不可在同一服务中混用**：
-
-- **WebFlux 服务**（如 Gateway）：只能依赖 `omni-common-redis-reactive`，阻塞式 Redis 调用会导致 Netty 事件循环线程饥饿
-- **Servlet 服务**：使用 `omni-common-redis`（阻塞式），`RedisUtils` 提供同步 API
+WebFlux Gateway 只用 `omni-common-redis-reactive`，Servlet 服务使用阻塞模块；同一服务不混用。不要在 Netty 事件循环执行阻塞调用；反应式依赖也不自动把业务中的阻塞操作变成非阻塞。
 
 ## 配置参考表
 
 ### application.yml 关键配置项
 
-以下为后端微服务 `application.yml` 中的核心配置项：
+以下区分仓库 YAML 与正式 Compose；完整设置仍以[部署文档](docker-deployment.md)和当前配置为准。
 
-| 配置键 | 说明 | 默认值 | Docker 环境变量覆盖 |
-|--------|------|--------|-------------------|
-| `server.port` | 服务端口 | 8100/8101/8102/8103 | `SERVER_PORT=8080` |
-| `spring.application.name` | Nacos 服务名 | omni-auth/base/gateway/workflow | — |
-| `spring.datasource.url` | 数据库连接 | `jdbc:mysql://127.0.0.1:3306/omni_xxx` | `SPRING_DATASOURCE_URL` |
-| `spring.datasource.username` | 数据库用户 | `root` | `SPRING_DATASOURCE_USERNAME` |
-| `spring.datasource.password` | 数据库密码 | `root` | `SPRING_DATASOURCE_PASSWORD` |
-| `spring.data.redis.host` | Redis 地址 | `127.0.0.1` | `SPRING_DATA_REDIS_HOST` |
-| `spring.data.redis.port` | Redis 端口 | `6379` | `SPRING_DATA_REDIS_PORT` |
-| `spring.data.redis.database` | Redis DB 索引 | 0 | `SPRING_DATA_REDIS_DATABASE` |
-| `spring.cloud.nacos.discovery.server-addr` | Nacos 地址 | `127.0.0.1:8848` | `SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR` |
-| `spring.cloud.nacos.discovery.ip` | 注册 IP | `127.0.0.1` | `SPRING_CLOUD_NACOS_DISCOVERY_IP` |
-| `auth.jwks.uri` | JWKS 端点 | `http://localhost:8100/oauth2/jwks` | `AUTH_JWKS_URI` |
-| `auth.jwks.cache-ttl` | 公钥缓存时间 | `5m` | — |
-| `spring.profiles.active` | 激活 Profile | `default` | `SPRING_PROFILES_ACTIVE` |
+| 项 | 当前约定或正式 Docker 值 |
+|---|---|
+| `server.port` / `SERVER_PORT` | 宿主入口 8100–8107；应用容器 HTTP 8080；Frontend 3000 |
+| `spring.application.name` | omni-auth/base/gateway/workflow/crm/srm/procurement/asset，按服务配置 |
+| `spring.datasource.*` | 正式容器 mysql:3306，用户 omni_app，密码来自 OMNI_DB_PASSWORD；Gateway 无业务数据源 |
+| `spring.data.redis.*` | 正式 redis:6379；DB 与序列化按服务设置 |
+| `spring.cloud.nacos.discovery.server-addr` | 正式 nacos:8848；Auth/Base/Workflow 与领域服务的变量接入方式按各自配置 |
+| `spring.cloud.nacos.discovery.ip` | Compose 留空用于容器发现，不固定为宿主回环地址 |
+| `auth.jwks.uri` / `AUTH_JWKS_URI` | Gateway YAML 为 `http://localhost:8100/oauth2/jwks`；Compose 为 `http://omni-auth:8080/oauth2/jwks` |
+| `auth.jwks.cache-ttl` | Gateway 默认 5m |
+| `spring.profiles.active` | 不混淆 Spring Profile、Compose profile 与 CLI preset |
+
+密码、Nacos 身份/签名秘密、Gateway 断言密钥和内部 Token 使用私有配置；源码中的历史回退值不是推荐部署凭据。
 
 ### MyBatis-Plus 配置
 
-| 配置键 | 说明 | 默认值 |
-|--------|------|--------|
-| `mybatis-plus.configuration.map-underscore-to-camel-case` | 下划线转驼峰 | `true` |
-| `mybatis-plus.global-config.db-config.logic-delete-field` | 逻辑删除字段 | `deleted` |
-| `mybatis-plus.global-config.db-config.logic-delete-value` | 逻辑删除值 | `1` |
-| `mybatis-plus.global-config.db-config.logic-not-delete-value` | 逻辑未删除值 | `0` |
-| `mybatis-plus.global-config.db-config.id-type` | ID 策略 | `AUTO`（数据库自增） |
+common-mybatis YAML 声明 `map-underscore-to-camel-case=true`、逻辑删除字段 `deleted`（删除 1、未删 0）与 `id-type=auto`。实际实体和服务可有独立映射/策略，不能据默认值推断每张表都有这些字段。自定义拦截器必须保留 DataPermission 在 Pagination 之前。
 
 ### XXL-JOB 配置（omni-base）
 
-| 配置键 | 说明 | 默认值 |
-|--------|------|--------|
-| `xxl.job.admin.addresses` | Admin 地址 | `http://127.0.0.1:18080/xxl-job-admin` |
-| `xxl.job.executor.appname` | 执行器名称 | `omni-base` |
-| `xxl.job.executor.port` | 执行器端口 | `9999` |
-| `xxl.job.accessToken` | 通信令牌 | `default_token` |
+| 项 | Base 当前值或正式 Docker 值 |
+|---|---|
+| `xxl.job.admin.addresses` | YAML http://127.0.0.1:18080/xxl-job-admin；Compose http://xxl-job-admin:8080/xxl-job-admin |
+| `xxl.job.executor.appname` | omni-base |
+| `xxl.job.executor.port` | Base YAML 9901；属性类通用回退 9999，其他服务独立配置 |
+| `xxl.job.executor.address` / `ip` | Compose http://omni-base:9901/ / omni-base |
+| `xxl.job.access-token` | 通用属性默认空；Compose 要求私有 XXL_JOB_ACCESS_TOKEN，两端一致 |
+| `xxl.job.executor.enabled` | 自动配置默认开启；Compose 受 XXL_JOB_ENABLED 控制 |
+
+管理员账号密码由私有环境提供；默认 cron、自动登记成功和任务实际执行是不同状态。系统 handler 必须同时声明 `@XxlJob` 与 `@SystemJobMeta`，用户任务路由和补偿规则见[调度文档](scheduling.md)。
 
 ## Service 层设计模式
 
 ### 接口 + 实现分离
 
-```
-UserService (interface)     — 定义业务方法签名
-    ↑ implements
-UserServiceImpl (@Service)  — 实现业务逻辑 + @Transactional
+```text
+XxxService (contract)
+    ^ implements
+XxxServiceImpl (business behavior; local transactions where configured)
 ```
 
-**设计理由**：
-- 接口层可被 OpenFeign 客户端复用
-- 单元测试可直接 Mock 接口，不依赖实现类
-- 实现类可替换而不影响调用方
+接口方便隔离调用与 Mock，但替换实现仍需保持语义和事务契约。Feign 是独立的远程协议适配，不能直接把任意 Service 接口当成已可用 Feign 客户端。
 
 ### 事务管理策略
 
-| 场景 | 注解 | 说明 |
-|------|------|------|
-| 只读查询 | `@Transactional(readOnly = true)` | 优化数据库查询性能，禁止写操作 |
-| 写操作 | `@Transactional` | 默认 REQUIRED 传播级别 |
-| 跨服务调用 | `@Transactional` + Outbox 模式 | 本地事务写 Outbox 表，不直接参与远程事务 |
-| 独立事务 | `@Transactional(propagation = REQUIRES_NEW)` | 如日志记录，确保主事务回滚时日志仍被记录 |
+| 场景 | 约定与限制 |
+|---|---|
+| 只读 | `@Transactional(readOnly = true)` 是事务提示/配置，不是授权或普遍禁止写入的证明 |
+| 本地写 | `@Transactional` 默认 REQUIRED；需明确实际代理调用、异常回滚规则和数据库边界 |
+| 远程操作 | 本地事务与 Outbox 可记录待发消息，不能回滚已发生的 HTTP/Broker/外部账号副作用 |
+| 独立事务 | `REQUIRES_NEW` 需经过适用代理并成功提交；它本身不保证日志一定保留 |
+
+不要从注解单独推断同类内部调用会经过代理，也不要把某个日志发送路径统一描述成独立事务。关键状态变更、占用与幂等以对应领域事实文档和回归为准。
 
 ### 异常处理链路
 
-```
-Controller 方法
-    │ 调用 Service 方法
-    ▼
-Service 层
-    │ 业务校验失败 → throw new BusinessException(400, "用户名已存在")
-    │ 资源不存在   → throw new BusinessException(404, "用户不存在")
-    ▼
-GlobalExceptionHandler (@RestControllerAdvice)
-    │ @ExceptionHandler(BusinessException.class)
-    │   → log.warn + R.fail(code, message)
-    │ @ExceptionHandler(MethodArgumentNotValidException.class)
-    │   → HTTP 400 + 聚合字段错误 + R.fail(400, "field: message")
-    │ @ExceptionHandler(AccessDeniedException.class)
-    │   → HTTP 403 + R.fail(403, "权限不足")
-    │ @ExceptionHandler(Exception.class)
-    │   → log.error（完整堆栈）+ R.fail("服务器内部错误")
-    ▼
-统一 R<Void> 响应
+```text
+Controller --> Service --> matching MVC advice --> R
+Gateway / Security Filter / protocol endpoint --> own response boundary
 ```
 
-**omni-auth 的特殊处理**：omni-auth 同时依赖 `omni-common-core` 与 `omni-common`。`omni-common` 的 `GlobalExceptionHandler`（`com.omni.common.result`）通过 `AutoConfiguration.imports` 自动装配，对所有依赖 `omni-common` 的服务（含 Auth）生效，**不是靠组件扫描、也不因 Auth 而缺失**。在此基础上 omni-auth 另提供作用域更窄的 `AuthExceptionHandler`（`@RestControllerAdvice(basePackages = "com.omni.auth.controller")`），针对认证控制器包内的 `BusinessException`/参数校验/`AccessDeniedException` 等做 Auth 专属映射，与全局处理器共存而非替代其装配前提。
+Auth 实际依赖 common-core 与 common；common 的 imports 注册全局 advice，AuthExceptionHandler 限定 `com.omni.auth.controller` 并共存。源码旧 Javadoc 关于“不依赖 common”的说明不能覆盖当前 POM/imports。实际异常由匹配的 handler 或 Filter/协议层处理；不同 advice 的通用中文错误文案也不应翻译成后端实际返回值。
 
 ## 故障排查指南
 
-### 常见问题
+[故障排查](guides/troubleshooting.md)维护复现步骤，[源码调试](wiki/source-debugging.md)维护调用关系、变量和断点。分别检查身份断言、方法权限、租户、资源可见性和事务状态，空列表、403、404与连接失败不是同一结论。
 
-| 问题 | 可能原因 | 解决方案 |
-|------|---------|----------|
-| `@PreAuthorize` 不生效 | `GatewayPreAuthFilter` 未注册 | 检查 SecurityConfig 中是否 `addFilterBefore(new GatewayPreAuthFilter(), AuthorizationFilter.class)` |
-| 分页查询返回空 | `PaginationInnerInterceptor` 未注册 | 检查 `MybatisPlusConfig` 中的拦截器注册顺序 |
-| `@Transactional` 无效 | 方法不是 public / 自调用 | `@Transactional` 仅对 public 方法生效；同类内部方法调用不触发代理 |
-| Redis 连接超时 | 容器网络不通 | `docker compose exec omni-auth ping redis` 检查网络连通性 |
-| Nacos 注册失败 | 地址配置错误 | 确认 `server-addr` 使用容器名 `nacos:8848` 而非 `localhost` |
-| JWT 验证失败 | 公钥缓存过期 | 检查 `auth.jwks.cache-ttl` 配置，或重启 Gateway 清除缓存 |
-| XXL-JOB 注册失败 | Admin 未启动 | 确认 `xxl-job-admin` 容器健康运行 |
-| MQ 消息不投递 | Relay Job 未触发 | 在 XXL-JOB Admin 控制台检查 `mqRelayHandler` 是否正常调度 |
-
-### 调试技巧
-
-```bash
-# 查看后端服务日志
-docker compose logs -f omni-auth
-
-# 检查环境变量
-docker compose exec omni-auth env | grep SPRING
-
-# 测试数据库连接
-docker compose exec omni-auth sh -c 'nc -zv mysql 3306'
-
-# 检查 Nacos 注册的实例
-curl -s http://localhost:8848/nacos/v1/ns/instance/list?serviceName=omni-auth
-```
+按 [AGENTS.md](../AGENTS.md) 在本机 Docker 构建、测试与运行，记录具体容器、会话、退出码和已发生副作用；保护日志和私有配置。修复前核对当前执行句柄，不通过重置数据、关闭授权或删除共享资源制造成功。
 
 ## 测试
 
-Auth、CRM 和部分 Common 模块已经建立测试目录。新增或修改后端能力时：
+JUnit 5 / Mockito 用于隔离逻辑；MockMvc 可验证特定 MVC wire 行为，但 Mock 身份、Service 或引擎的测试不证明真实 Gateway、数据库、Flowable、Broker 或浏览器流程。`@SpringBootTest` 的证明范围也取决于实际启用的依赖、环境和断言，不能从类名推断集成已验证。
 
-- **单元测试**：JUnit 5 + Mockito，放在 `src/test/java/`
-- **集成测试**：`@SpringBootTest` + 嵌入式数据库或 Test Containers
-- 测试类命名：`XxxTest`（单元）或 `XxxIntegrationTest`（集成）
-- 测试方法命名：`should_<expected>_when_<condition>`
+测试放在对应模块 `src/test/java`，名称表达行为和前提，新增变更遵循模块约定。已有测试覆盖多个业务与公共模块，不能仅列 Auth/CRM 或把条件跳过算作成功。
+
+后端实现变化按仓库要求在 Docker 执行 Maven Wrapper reactor：
+
+```bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm backend ./mvnw clean install
+```
+
+JDK 25、JAVA_HOME 与模块顺序由工具容器/reactor 提供。文档单独变化可在精确核对实现与构建输入未变后复用已有记录，明确来源、通过、跳过与限制；不要把 Markdown 渲染、单元测试或构建成功当成全部业务验收。

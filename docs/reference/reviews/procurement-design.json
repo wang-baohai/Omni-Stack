@@ -1,0 +1,1225 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "procurement-design",
+  "source": "docs/design/procurement-design.md",
+  "source_sha256": "06735bfc48c6082fb9e96e92d80c62c4a5be24f40659500acee7565233c47303",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "69ffe89f58039bd86511983d9404b306b6aff57d",
+  "source_state": "Whole current four-language Procurement design/fact baseline reviewed;original2026-07-27 decisions,phases and important history retained with applicability.Only this document family is approved,not the linked operation/developer Wiki.",
+  "method": "Read all four complete 790-line original documents with clipped segments explicitly reread, inspect selected current source ranges and prior unchanged Core Flow16/17 evidence, then manually author and compare every replacement in all four languages. Review covers the whole resulting documents by retaining the fully read unchanged content and comparing all changed prose, tables, seven diagrams, sample JSON and navigation. Final generated ranges and Git diff were inspected; original idempotency bullets were restored rather than lost, unconditional FAILED wording was replaced, actual AwardRequest/AwardResult was made explicit, and the engineering-table labels were corrected in219b. Current source/file hashes and four complete Markdown renders bind this final result. Automated checks supplement the semantic decision; rendering alone does not award review.",
+  "checked_source_files": [
+    {
+      "path": "database/changelog/asset/0001-asset-schema.yaml",
+      "sha256": "e4b5f80df2e380ee71fb664d0c73ee4b4515e52d1c1e98ade30394b5cdc5fbb6"
+    },
+    {
+      "path": "database/changelog/procurement/0001-procurement-schema.yaml",
+      "sha256": "e1db7a749d924de2c3b6a4ff4789fa193b1904ccc7f38b6624e1a45dcdacca2a"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/entity/AstInboxEvent.java",
+      "sha256": "0ae4ef7cf045c5ded5fac742709c783f5aeffd1fff0da8206ebe5b4a5c27b8de"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/sanitize/OperLogSanitizer.java",
+      "sha256": "8f5d34bca9097343ca596b409e69bc15a1472b02a0aa6fc6cefd04a27cc31479"
+    },
+    {
+      "path": "omni-backend/omni-procurement/pom.xml",
+      "sha256": "6dec4a7577f3807b3a9420c3fe49682d5a65d26f73f024b17ec7e9f148b521f2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/WorkflowInternalClient.java",
+      "sha256": "232525732c21dd069311ba3c1776f7db76e2e815cf5f5d1bc437e2753178ccff"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/ApprovalRouteController.java",
+      "sha256": "5553119b83e7881a97efcdd0086e1cc9d219e942f11e4b0e28012c46da3e73b0"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/GoodsReceiptController.java",
+      "sha256": "c1878e6fb97c4c0a89c6e9d446e78ac059c97e0108987c515c7611cb118de362"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/InternalAssetCandidateController.java",
+      "sha256": "d5bee68ebbe2b294365ae40b9369755956806f7ce03d52fa3b3bfd2f6c1cdb88"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/InternalRfqInvitationController.java",
+      "sha256": "235f12e203b2424614c321bf968844fcd983e5788a9bd0eaecd5775612cef7a1"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/MaterialController.java",
+      "sha256": "adf7c0a0411e1f79dd6775a413bd6dc5c212f205b7a121a0e7e70157bb1f119b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/OverviewController.java",
+      "sha256": "d4672bfaa95a39a36f878bf2bc2c4fc2e62dffb3280b7e7c83db6a274c077720"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/PurchaseOrderController.java",
+      "sha256": "5d3d3ea6b9a9fa993bbce8562346ad8fc730fdb7534daeb5951cd21a4f2835b0"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RequisitionController.java",
+      "sha256": "6db55a427c4ea94d9e04f757ba29a8ac9ae3104b7588783031aeab76f06b44d9"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RfqController.java",
+      "sha256": "05dbcbf2c7fd904ebd9264424e3d62819f4f8567e5768c48e198e4c92f10cbaa"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/ApprovalRouteCoverageAnalyzer.java",
+      "sha256": "bcb0fc894d62b3229c3853dd3b27fabaa03591dd998dc22ef1a3541aed17f6b9"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/ApprovalRouteResolver.java",
+      "sha256": "70293fec161d64a8f2d1a08fd5935cddfbd90db2a4a168a406deeda473b79746"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/GoodsReceiptStateMachine.java",
+      "sha256": "c487970c9966aa0e059e49b6db51a77a5c33d0f37907aba3d02eec4aaabeddf5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/MaterialDomainPolicy.java",
+      "sha256": "c938033816e379cc0e2b1d16ee07bb800ab0c68f59311f1095f05d875cff0d55"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/PurchaseOrderStateMachine.java",
+      "sha256": "987b59710d85a3b57f40dc5709769736712443504c1a27babbc7b5609b622e2b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RequisitionStateMachine.java",
+      "sha256": "bf473a86a15317df69a8a821816bcd7615858ef017a7538064ade67f9a33e20d"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RfqStateMachine.java",
+      "sha256": "c6c9f4e79144f36b9f16572f6c8f84a19d005a09e960421512b613755acd5f77"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/PurchaseOrderViews.java",
+      "sha256": "4b5a61f35e6d8fe7912319403a2be07cf3fd1c0cb45687658b5636c3819bf6c0"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/RequisitionRequests.java",
+      "sha256": "148db8f6c79990d2ce241edd578489fcf460a840fe686856edd0938670cb70c8"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/RfqRequests.java",
+      "sha256": "a651e19bc043501755b9a475a77ada42500b3bf5636f801f88f9dbfcfedcade7"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcEventInboxMapper.java",
+      "sha256": "494eb3a24065f8eba1ab6745d65c16806389242cda99733539efa52f46c5dc04"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcGoodsReceiptLineMapper.java",
+      "sha256": "515d468b0052998986c59c5cff125b92a1f7788127b6ae7dc5c6fa592be92f0b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcGoodsReceiptMapper.java",
+      "sha256": "10c4c513f99c4c4dda3bb554b1af19d051965aa4ab5fa8e1afa7222890698ef5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcPurchaseOrderMapper.java",
+      "sha256": "ebdc96b81c0c67a1d402baeb10a342c62fda6aa3197eb55f79947592119ae51b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcRequisitionMapper.java",
+      "sha256": "73aa68d4aba4072254602ca2b5e1384204d35ac586dfa54b8c6eb453829afb3f"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcRfqMapper.java",
+      "sha256": "3ad3496f95bf68c806c25895d381349b0e825c3d69cb618b4e39d432ee586047"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java",
+      "sha256": "862a902bdcd8dd57fd07b6280284f712f2203149a0bf40f84d3fe590507efddf"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ApprovalRouteInsightServiceImpl.java",
+      "sha256": "cabfc8cbe87a192287f505b1cb2c2f3699907d4a80e536ebd6cc4d22a657ce70"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ApprovalRouteServiceImpl.java",
+      "sha256": "88f80a5161cdb50a5bef098e28bdf145b5296a6ae80fda93f643a2338f13f637"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/GoodsReceiptServiceImpl.java",
+      "sha256": "6863e2187ddcbec101a1d4c04c02d40ffc0277c361d01aee74d150c1bde4b610"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/InternalAssetCandidateServiceImpl.java",
+      "sha256": "3bce8c5b42752d764034d8c94d430df0559db72470e2f72cae51b2263c17637a"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantInitializerImpl.java",
+      "sha256": "48e0579d06012035c66e7d97d184ca29bee51295248aa49d022ca0957ffb946e"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantModuleProvisioner.java",
+      "sha256": "19328c9903adb5c32ec875c8c11faab945cfad224fe488ad12a700af31c1160f"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/PurchaseOrderServiceImpl.java",
+      "sha256": "0230a7d599669c3d082ab3f4ff3fb947b37be4b0cd1c8224f8a1e3447f47bbe6"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/QuotationSubmittedServiceImpl.java",
+      "sha256": "6d0c94bec3c430750fa2f37e4b21caf990309be8949c277c2db5c06da6464421"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionServiceImpl.java",
+      "sha256": "49860f021ec548cb8e993a251b2557ad9d0145b19cdb78c85312909143f06066"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionWorkflowStateServiceImpl.java",
+      "sha256": "c30d0c09ddfd7746e3013b195939f447751e99a8da4bdf9eb13e1b7241d21f5c"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RfqServiceImpl.java",
+      "sha256": "6a6356496869d0f8aa822234b74618a7a90588e3dfce233be296336c9dcd7ac7"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/WorkflowCompletionServiceImpl.java",
+      "sha256": "b1982df5b9cd24025b2dc757e55628d7e251985f3c43f0a9f6fdf58d357c95c2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinator.java",
+      "sha256": "d3761c42d613f6f512fde07e71ed2bb3cb057fe140e9315287b0a94e0b0c7e20"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/domain/ApprovalRouteResolverTest.java",
+      "sha256": "cda14903a9ea2c374bc87b56f8b92d2e84d7d3a56b1b64336274b5cd90bf9c18"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/service/impl/RequisitionWorkflowStateServiceImplTest.java",
+      "sha256": "ec66dab1fa9d3b8b9ccf169923f75274556e03cbb9e335f25414e63ecb198c3d"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/service/impl/WorkflowCompletionServiceImplTest.java",
+      "sha256": "c2efb43294ddf0d343f46b95a328839ea76f784ad7e3ec973241b4d7fd4d3873"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinatorTest.java",
+      "sha256": "d79cf3ce0fbb8713e14c3262e66fdadff46401c96b398e68ac715cf030d148a1"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+      "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+      "sha256": "fb540dc12ae8c821fd9324a06de566beee5aa7bf4e0f105668f3a1bd139ac020"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+      "sha256": "65012a8fc6a5311a06e32e6201ff3f6ec9da84c58341e2f0c678ca19f5037c16"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+      "sha256": "63a1a2bd58ae7b696d77f8ec1e1e5616020f297999f11ec412c32de1fff09ac8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+      "sha256": "f63cb03ab55045944f20e206bec4c5d59d04f4a7abc5abebb37e641054dabd83"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java",
+      "sha256": "7fc8e3ee17cc3d4a2c0e09ebc937b83e061782c294be22ba49300a3c60f62ad5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcOverviewMapper.java",
+      "sha256": "ab8edd039391a6eeb0c27f0070c186739511b4ace98a6d176b749c64b7aff4c5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/AuthInternalClient.java",
+      "sha256": "7489727316858bc8b9d3a0eed24b46fe0bdd6943a59d1ce466d97eb638bed9ac"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/SrmInternalClient.java",
+      "sha256": "b2f1a0d99579733809aeb4ccb6526cb9b45fbb3a6030ac5451041d1ff436079d"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/resources/application.yml",
+      "sha256": "e4dde986037907125e1d92f325f387623f8ce471fae64151c32dc9164e0d7430"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    }
+  ],
+  "source_inspection_scope": "Selected current source ranges and all nine Controller mappings inspected directly;prior unchanged Core Flow16/17 evidence reused.Whole-file digests do not mean every implementation line or deployed behavior was inspected.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_markdown_rendered_documents": 4,
+    "mermaid_fenced_blocks": 28,
+    "raster_images": 0,
+    "domain_tables": 14,
+    "controller_count": 9,
+    "external_http_method_paths": 50,
+    "internal_http_method_paths": 3,
+    "controller_method_paths_matched": 53,
+    "original_design_date": "2026-07-27",
+    "srm_quotation_and_workflow_idempotency_preserved": true,
+    "unit_reports": [
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.GoodsReceiptConcurrencyTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "d5bacae82f20e08080f9625310c8a1b58e273a5216657fddf50408a6d9642a45",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.ProcurementIntegrationTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "82c23d76186a78176b22c63c065b3a86244f2dc3b8746d6f3802d77ff05a7cff",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.TenantIsolationIntegrationTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "ee3f0412d594b2c5c2db733bb55a3a48370534de4e671cf3108cd87c3e2e1db6",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.client.ProcInternalFeignConfigTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "3a8c60efb6b2557dacd2bc9d11bdb045cb308b642759129dea3459ec66b26a01",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.config.MybatisPlusConfigTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "f89a1c237477846e732bbc303a6ee319af6df5a68b71a86eca465260be6e12ab",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.consumer.QuotationSubmittedConsumerTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "65b444473469d429ac728296dcd4531148d0973ca7279b75f655524c39e8beec",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.controller.InternalAssetCandidateControllerTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "20045b23cbaef0f2ed0ee56bbc345c56f225ddc94780e9e7b0cd490eeac6ebdf",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.controller.OverviewControllerSecurityTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "71d94b623b0ddb970be72d753f40fb66571b2f6df69d622deec3fa0f178526a2",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.controller.RfqControllerSecurityTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "dcb52afff44a34c295700bebf0739a489f3380b99b776f905409000f6abb47e8",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.domain.ApprovalRouteCoverageAnalyzerTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "462cd5283a5438e863013810f3bd209ab2744fdcce7277a0831c070a911e01da",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.domain.ApprovalRoutePolicyTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "42691a022275895e375490ec4d58858be266e754eb8f336daf4057cd04bf7050",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.domain.ApprovalRouteResolverTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "757dea40986fd79bea9162ac6273a9f35b2a53a2b38ee1e797a692e72696b5aa",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.domain.GoodsReceiptStateMachineTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "2ab4e811fe902536617e420de5fe6dc34c9cdd3714fa33df823813461ff04cfd",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.domain.MaterialDomainPolicyTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "e7b593fe982813a0731984951ee4cd941e7e0c991e4d5f81e9eb22e7db42ac0c",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.domain.PurchaseOrderStateMachineTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "b034f7962df5480636a888a68f7d024e288497d378f26bad1d6a904475fea95b",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.domain.RequisitionStateMachineTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "5f89a5eb593a06ba1a84b4cef51355ed1fb204033fdd5cbaadbdfed7fd3718e3",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.domain.RfqStateMachineTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8adc8276c847c5eff97f528294d0b2e8fa8c9610d25ab7c7b3980503091db546",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.dto.ApprovalRouteJsonSerializationTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "e49478324d914bd47cf50dd17a24373fa63c577717cb739278ac4bd4db9a09ee",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.dto.GoodsReceiptJsonSerializationTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "786f3032218deeb38d6b177adbe0299adae0393e610856d38f2a5f8d1e276bae",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.dto.RequisitionJsonSerializationTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "7d0b099ef3b59f3b2602b6bf0faae5d1ece995b44d8adb793c29fd4fcf7602cb",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.dto.RfqJsonSerializationTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "ed5d92b8f575684d723f880b0fca7c0337bd3c673c33bc772def1525582f291a",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.fixture.FixtureGuardProcessTest.xml",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "bc842d3987a0c8d21f0b9590a6b9d84865676d328c34d7d8b3c51078ba76bf90",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.fixture.FixtureHttpClientContractTest.xml",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "9f2ac9df43c6241374e4ced2641c75be0983ac54d64c97238358cedcdc7c65e3",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.fixture.ProcurementFixtureToolTest.xml",
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "45e6eb1102cbb9c60b2b7e83d6813f73f83f101f52804924978ddf1c5b381d3f",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.mapper.ProcApprovalRouteMapperContractTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "81246fdebb87248be6983cfdcaa6ab8f74d611799347ad4080af0c5260336e9b",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.mapper.ProcOverviewMapperContractTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "b27a66f07e58a26a7744b5aba65087724cbe7eb9a9a57cd93ba8a51f0c8da3bc",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.security.InternalApiAuthFilterTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "0d00bfb7346941c906d66dffe4854c551cfb96871922b5667e575a19795188ee",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.security.MasterDataDataScopeAspectTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "308b374be4721e54c234224e779f11265316c5cc519d1f1182c7439c35964745",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.security.OverviewDataScopeTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "3df82fbf53261cf0c56f0157b74e2a194f22c0dc15dce9e6331f6d5961453d0e",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.security.ProcDataPermissionHandlerTest.xml",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "a8f64de1025b099dc1c01dbf797a9260623c6cf432229b9e0eac8f5e63e0525c",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.security.ProcStarterSecurityTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8a4e0f5d71541e6a4e058cb957838e7d3ff7ee2ce82957ed96cef2b9160e8af2",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.security.ProcStarterXssTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "e354783ff18754352f0609b3785b41b4f9e978a4ccbb51e67c513be03859d9de",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.ApprovalRouteInsightServiceImplTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "ae87cbd0a99e486f01f0995910318d74e2e65be22adbb8843f2252e3fd086322",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.ApprovalRouteServiceImplTest.xml",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "983567400a0dc60f91b76edf8ab6ec0c95d6cf985220e39aa1331259e92cc2b3",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.GoodsReceiptServiceImplTest.xml",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "c5feeb01c6e6b5c29a36bda839876dfa53b0a84126f2ec58fadd8cbdbfdf8973",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.InternalAssetCandidateServiceImplTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "60e847b8a5a686760e0c94e413520b67a9ba73d2d51af3acc3a6a06db2a9dbb7",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.InternalRfqInvitationServiceImplTest.xml",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "f0decf93701f376366f3a7ba7e0da607dbc1944c645eff697446778511aef477",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.MaterialServiceImplTest.xml",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "72cfd55aa949451cabce0fc5a288794c39cb63c97e458a6944863a46a95f8ae3",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.OverviewServiceImplTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8343001903c2f9ae7d28faa9657c2fedb71c8ef7b37932c57a800b17d8327ee0",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.ProcTenantInitializerImplTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "47c044f9bd7ed47ee3fec3329fbe23b124d379cb47ce324eef93f91bc26f939c",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.ProcTenantModuleProvisionerTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "50a072aef61a08a962ac66861525b662f8166b650ec2c3d527b8420736ee0d12",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.PurchaseOrderServiceImplTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "2e45a729aad7d04556bc9538341df206013413b1191bb7b2df9944621345d935",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.QuotationSubmittedServiceImplTest.xml",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "7578e1d83974b8b034da2b21790b53cbce708dccc8392b7bf7d03e5506dfca69",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.RequisitionServiceImplTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "202acf99158534d4631cdaa49891cbdd32a178aedf7a17704172277cbd3eedf9",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.RequisitionWorkflowStateServiceImplTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "220f24c4e2d22750f534673f4ccb4e327e2cc6709efd55c10d6df7eee7815a19",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.RfqServiceImplTest.xml",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "51c2477b24b6d5dcbc4cfe77835cbd775a57c3c6292cdd4763c40e16bbb2c5db",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.impl.WorkflowCompletionServiceImplTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "6001ad87662c8e2865dab3cb2cd1235be758046abf270941907d1de22463b91e",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.service.support.ApprovalRouteCodeGeneratorTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "2b99d2466fa1908205247a28f52bce90bd96f2b3db31c7beb035d09b1da29f8d",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-procurement",
+        "file": "TEST-com.omni.procurement.workflow.RequisitionWorkflowCoordinatorTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "a4892b88573ff42e3bdc16e8833050c5a4c12c7a411ce4a11402d892597a4bd4",
+        "skip_reasons": []
+      }
+    ],
+    "reused_report_totals": {
+      "reports": 49,
+      "tests": 213,
+      "passed": 213,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "rerun": false
+    },
+    "application_or_business_execution": false,
+    "wiki_reviews_awarded": false,
+    "limitations": [
+      "Authorized AI semantic review is not HUMAN_REVIEW or current runtime/release acceptance.",
+      "Selected inspected ranges and prior unchanged source evidence are bound; file hashes do not mean every implementation line was read.",
+      "Four full Markdown renders contain28 Mermaid fences; browser diagram layout and final root/subpath site remain G requirements.",
+      "Existing49reports/213passing assertions were reused without expensive rebuilds or repeated successful business writes.",
+      "Procurement operation/developer Wiki reviews remain separate;C OAuth,D real CAPTCHA,E native Qoder and all other pending A-G remain."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/design/procurement-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 08:42:31",
+      "result": "approved",
+      "translation_sha256": "54a7800021fc41c6845735fdb24236d30ed03871993298c9a7088b6946f53574",
+      "checks": {
+        "coverage_and_meaning": "完整逐段覆盖16节：原设计日期/历史状态和分期、独立服务/Workflow边界、14表与Requester/Owner/子资源范围、物料/金额、六状态请购及四种启动状态、审批规则与真实任务资格、RFQ/报价/定点/PO/收货/质检/Asset回扫、50外部+3内部路径、十类采购事件、PII/日志/XSS、前端、当前工程入口、并发/降级、最低测试要求、原里程碑/ADR/风险。保留重要决策与历史计划并标记适用性；工程清单改为当前入口，实际操作和扩展指向既有Wiki，未批准对应Wiki整篇。",
+        "technical_literals": "核对8106/19906/9906、omni_procurement、/api/procurement无StripPrefix、八个公共依赖及Workflow排除、14个实际表名含proc_event_inbox、完整四层MyBatis链、完整权限代码/Requesters与Owners、全部53方法路径、APPROVING/STARTED与requisitionId:attempt/实例任务校验、REQUIRES_NEW及原轮次重试、RFQ当前报价version/AwardRequest全字段与AwardResult、PO继承RFQ/GR当前scope归属、DECIMAL(19,6)/(19,4)/字符串JSON、PCS与LAPTOP例子、consumerName/eventId与来源单位唯一性、tenant/eventId及JSON语义意图、十类采购事件含cancelled、真实compose.yaml/application-lite.yml和首次CNY/13类初始化。49份现有报告213通过0跳过逐份摘要匹配，无重跑源码相同构建。",
+        "security_and_failure_semantics": "四语均保留聚合特定scope、TenantLine和分页前DataPermission，不将owner条件拼所有子表。approval-view仅对当前APPROVING/STARTED的完整业务键/实例/本人任务资格临时TENANT读取并finally恢复，普通详情不复用例外。SUBMITTED取消只FAILED，采购cancel不终止Workflow；提交前解析失败回滚、提交后不确定尝试FAILED且标记可失败、FAILED不证明远程未启动。PO确认/取消是管理权限命令，无虚构门户确认/取消审批/close入口。PO详情真实返回完整PII且无独立PII授权；日志规则和XSS权威enabled/基线区分。收货实际锁头/PO+全租户累计+版本，行查询不因名字而锁行；质检终态重复为冲突，候选仅资产合格行。SRM历史重放、PO后续本地快照、Outbox可靠路径与实际投递、Inbox及来源幂等均限定范围。",
+        "images_and_links": "本设计无光栅截图。每语七个Mermaid块，共28个，架构运输路径、ER逻辑关系、状态/事务边界和协议值已核对，人用标签本地化；图不宣称跨库外键。原日期与原计划保留，审批金额图明确为示例，原单金额优先风险不覆盖当前品类/金额规则。源码入口用真实文件/目录与四语Wiki/索引，旧application-dev.yml/docker-compose.yml已移除。Markdown渲染不是Mermaid浏览器布局或整站根/子路径验收；正式链接门仍需通过，G完整验收保留。",
+        "language_and_terminology": "完整阅读原英文并对照中文与所有手写修订片段。统一requisition/requester、RFQ/award/quotation snapshot、receiver/owner、attempt/persisted intent/replay、conditional FAILED marking、local Outbox versus delivery。requires/only/attempts/not proof 保留失败与授权限定；完整保留半开审批区间、原模型金额示例、币种隔离、十进制字符串、资产候选游标和实际接口。"
+      },
+      "findings": [
+        {
+          "id": "design-history-and-review-policy",
+          "status": "resolved",
+          "description": "原历史状态/分期可能被理解为当前验收，页首只认人工复核。",
+          "resolution": "四语保留2026-07-27原状态/计划/重要决策并说明适用性，按ADR0003区分授权AI与人审。"
+        },
+        {
+          "id": "service-dependency-cache-and-workflow",
+          "status": "resolved",
+          "description": "公共service依赖遗漏，proc:缓存和采购直接取消Workflow被过度概括。",
+          "resolution": "补omni-common-service，改公共XSS键，Workflow限定真实模型/启动/任务资格接口。"
+        },
+        {
+          "id": "domain-inbox-and-scope-columns",
+          "status": "resolved",
+          "description": "领域表遗漏Inbox且通用owner说明混淆Requester。",
+          "resolution": "列14表，按聚合区分requester/owner、子资源继承及租户共享配置。"
+        },
+        {
+          "id": "requisition-cancel-and-failed-marking",
+          "status": "resolved",
+          "description": "原SUBMITTED无条件可取消、调用失败必然FAILED不符合实现。",
+          "resolution": "限定DRAFT或SUBMITTED/FAILED，区分提交前回滚、提交后尝试标记、标记失败/零行与远程不确定；保留原快照重试。"
+        },
+        {
+          "id": "approval-view-full-identity",
+          "status": "resolved",
+          "description": "只按requisitionId解释任务资格，遗漏启动/实例/轮次条件。",
+          "resolution": "按APPROVING/STARTED、完整业务键/实例/用户/task/businessType验证，临时TENANT及finally恢复。"
+        },
+        {
+          "id": "api-inventory",
+          "status": "resolved",
+          "description": "列了不存在的POST订单，漏审批试算/覆盖/影响/模型选项及RFQ选项/比价。",
+          "resolution": "按九个Controller生成完整50外部+3内部方法路径，参数按真实DTO/query。"
+        },
+        {
+          "id": "order-management-state",
+          "status": "resolved",
+          "description": "订单图虚构供应商门户确认、取消审批和close命令，漏首次全收直接RECEIVED。",
+          "resolution": "改管理权限命令，取消无附加审批，说明CLOSED值与无close入口，补直接全收边。"
+        },
+        {
+          "id": "po-pii-and-log-rules",
+          "status": "resolved",
+          "description": "详情按权限表述容易误以为有独立PII授权，日志脱敏概括不清。",
+          "resolution": "明确普通list权限+可见行即返回详情全值，Summary掩码；按规范化字段包含规则解释日志，不保证任意PII。"
+        },
+        {
+          "id": "rfq-source-and-current-quotation",
+          "status": "resolved",
+          "description": "原按品类拆RFQ和deadline包含端点、仅supplierId定点描述不准确。",
+          "resolution": "当前复制已批请购全部行，新报价未来deadline；列AwardRequest实际字段、当前报价版本及AwardResult。"
+        },
+        {
+          "id": "award-transaction-order",
+          "status": "resolved",
+          "description": "原图先更新RFQ再生成PO，未解释保存快照及同事务。",
+          "resolution": "读取校验报价→生成/核对PO快照→RFQ/邀请/Outbox，同一采购本地事务。"
+        },
+        {
+          "id": "receipt-locks-and-full-tenant-totals",
+          "status": "resolved",
+          "description": "并发章节仅写乐观锁，方法名掩盖明细无FOR UPDATE及跨收货人累计。",
+          "resolution": "区分头/PO真实锁、明细普通SELECT、全租户CONFIRMED累计与版本/影响行数。"
+        },
+        {
+          "id": "quality-candidates-and-replay",
+          "status": "resolved",
+          "description": "质检新通过行与资产候选事件范围混淆，终态重复被误作成功重放。",
+          "resolution": "限定CONFIRMED/PENDING→PASS/FAIL，只发新资产合格行，重复终态冲突，空候选合法。"
+        },
+        {
+          "id": "asset-backfill-inbox-and-source",
+          "status": "resolved",
+          "description": "回扫参数/事件门闩不足，单Inbox被说成全部并行幂等保证。",
+          "resolution": "补升序游标/size1-100/afterId、唯一来源事件及owner，区分消费事件与租户/来源行/单位唯一性。"
+        },
+        {
+          "id": "outbox-delivery-and-srm-outage",
+          "status": "resolved",
+          "description": "Outbox被当成送达保证，SRM不可用被泛化为所有后续订单命令不可用。",
+          "resolution": "说明可重试发送而非送达证据；现供应商/报价操作依赖SRM，已有PO本地命令使用保存快照。"
+        },
+        {
+          "id": "inbox-intent-and-permanent-ledger",
+          "status": "resolved",
+          "description": "原事件幂等只泛称eventId，新整理可能丢失已正确的永久报价账本约束。",
+          "resolution": "保留原工作流/报价幂等三条约束，补tenant/eventId、类型/来源/聚合及JSON语义意图冲突。"
+        },
+        {
+          "id": "missing-cancelled-event",
+          "status": "resolved",
+          "description": "采购事件清单漏Workflow取消结果事件。",
+          "resolution": "补procurement.requisition.cancelled.v1，十类完整类型与源码一致。"
+        },
+        {
+          "id": "frontend-current-entry-and-locales",
+          "status": "resolved",
+          "description": "目录遗漏审批规则，图/目录说明日韩文仍为英文，只提两种语言。",
+          "resolution": "补审批规则API/界面入口，七图及目录本地化，保留四语同步职责。"
+        },
+        {
+          "id": "current-files-and-initialization",
+          "status": "resolved",
+          "description": "工程清单仍指不存在的docker-compose.yml/application-dev.yml，并泛化持续补齐13类。",
+          "resolution": "换当前compose.yaml/application-lite.yml及真实入口表，说明首次初始化/已有配置提前返回。"
+        },
+        {
+          "id": "auth-client-declaration",
+          "status": "resolved",
+          "description": "把SRM负责人转移和列表batch能力直接套用到采购。",
+          "resolution": "描述真实scope创建/PO继承与保留的Auth契约，声明不等于每条路径实际调用。"
+        },
+        {
+          "id": "example-unit-and-category",
+          "status": "resolved",
+          "description": "中文台单位与离散资产约束冲突，四语例子用父类IT_DEVICE。",
+          "resolution": "统一PCS和有效叶子LAPTOP，金额字符串/assetQuantity整数保持。"
+        },
+        {
+          "id": "required-tests-versus-proof",
+          "status": "resolved",
+          "description": "原最低测试/端到端计划可能被当作全部已执行。",
+          "resolution": "明确要求清单，引用49报告213断言，保持实Workflow/MQ/MySQL/浏览器/Wiki/最终G验收独立。"
+        },
+        {
+          "id": "localized-prose-and-file-labels",
+          "status": "resolved",
+          "description": "日韩错误词/混入异语及工程入口复用了API列名。",
+          "resolution": "修正语言术语、七图标签和当前文件列名，技术标识符保持。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/design/procurement-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 08:42:31",
+      "result": "approved",
+      "translation_sha256": "3090ee93a6939a5281c7302b3e1285589a5091021433ed48d7d037db0c78a427",
+      "checks": {
+        "coverage_and_meaning": "完整逐段覆盖16节：原设计日期/历史状态和分期、独立服务/Workflow边界、14表与Requester/Owner/子资源范围、物料/金额、六状态请购及四种启动状态、审批规则与真实任务资格、RFQ/报价/定点/PO/收货/质检/Asset回扫、50外部+3内部路径、十类采购事件、PII/日志/XSS、前端、当前工程入口、并发/降级、最低测试要求、原里程碑/ADR/风险。保留重要决策与历史计划并标记适用性；工程清单改为当前入口，实际操作和扩展指向既有Wiki，未批准对应Wiki整篇。",
+        "technical_literals": "核对8106/19906/9906、omni_procurement、/api/procurement无StripPrefix、八个公共依赖及Workflow排除、14个实际表名含proc_event_inbox、完整四层MyBatis链、完整权限代码/Requesters与Owners、全部53方法路径、APPROVING/STARTED与requisitionId:attempt/实例任务校验、REQUIRES_NEW及原轮次重试、RFQ当前报价version/AwardRequest全字段与AwardResult、PO继承RFQ/GR当前scope归属、DECIMAL(19,6)/(19,4)/字符串JSON、PCS与LAPTOP例子、consumerName/eventId与来源单位唯一性、tenant/eventId及JSON语义意图、十类采购事件含cancelled、真实compose.yaml/application-lite.yml和首次CNY/13类初始化。49份现有报告213通过0跳过逐份摘要匹配，无重跑源码相同构建。",
+        "security_and_failure_semantics": "四语均保留聚合特定scope、TenantLine和分页前DataPermission，不将owner条件拼所有子表。approval-view仅对当前APPROVING/STARTED的完整业务键/实例/本人任务资格临时TENANT读取并finally恢复，普通详情不复用例外。SUBMITTED取消只FAILED，采购cancel不终止Workflow；提交前解析失败回滚、提交后不确定尝试FAILED且标记可失败、FAILED不证明远程未启动。PO确认/取消是管理权限命令，无虚构门户确认/取消审批/close入口。PO详情真实返回完整PII且无独立PII授权；日志规则和XSS权威enabled/基线区分。收货实际锁头/PO+全租户累计+版本，行查询不因名字而锁行；质检终态重复为冲突，候选仅资产合格行。SRM历史重放、PO后续本地快照、Outbox可靠路径与实际投递、Inbox及来源幂等均限定范围。",
+        "images_and_links": "本设计无光栅截图。每语七个Mermaid块，共28个，架构运输路径、ER逻辑关系、状态/事务边界和协议值已核对，人用标签本地化；图不宣称跨库外键。原日期与原计划保留，审批金额图明确为示例，原单金额优先风险不覆盖当前品类/金额规则。源码入口用真实文件/目录与四语Wiki/索引，旧application-dev.yml/docker-compose.yml已移除。Markdown渲染不是Mermaid浏览器布局或整站根/子路径验收；正式链接门仍需通过，G完整验收保留。",
+        "language_and_terminology": "完整阅读日文并对照全部修订。统一購買申請/調達/資材/カテゴリ、受取人/担当帰属、選定/見積版、再実行/冪等性、ローカルトランザクション/安全基準。七张图与目录说明改日文，三-way改三点照合、発起改開始，保持协议值和原设计适用性。FAILED記録を試みます、全テナントを保証しません等条件未丢失。"
+      },
+      "findings": [
+        {
+          "id": "design-history-and-review-policy",
+          "status": "resolved",
+          "description": "原历史状态/分期可能被理解为当前验收，页首只认人工复核。",
+          "resolution": "四语保留2026-07-27原状态/计划/重要决策并说明适用性，按ADR0003区分授权AI与人审。"
+        },
+        {
+          "id": "service-dependency-cache-and-workflow",
+          "status": "resolved",
+          "description": "公共service依赖遗漏，proc:缓存和采购直接取消Workflow被过度概括。",
+          "resolution": "补omni-common-service，改公共XSS键，Workflow限定真实模型/启动/任务资格接口。"
+        },
+        {
+          "id": "domain-inbox-and-scope-columns",
+          "status": "resolved",
+          "description": "领域表遗漏Inbox且通用owner说明混淆Requester。",
+          "resolution": "列14表，按聚合区分requester/owner、子资源继承及租户共享配置。"
+        },
+        {
+          "id": "requisition-cancel-and-failed-marking",
+          "status": "resolved",
+          "description": "原SUBMITTED无条件可取消、调用失败必然FAILED不符合实现。",
+          "resolution": "限定DRAFT或SUBMITTED/FAILED，区分提交前回滚、提交后尝试标记、标记失败/零行与远程不确定；保留原快照重试。"
+        },
+        {
+          "id": "approval-view-full-identity",
+          "status": "resolved",
+          "description": "只按requisitionId解释任务资格，遗漏启动/实例/轮次条件。",
+          "resolution": "按APPROVING/STARTED、完整业务键/实例/用户/task/businessType验证，临时TENANT及finally恢复。"
+        },
+        {
+          "id": "api-inventory",
+          "status": "resolved",
+          "description": "列了不存在的POST订单，漏审批试算/覆盖/影响/模型选项及RFQ选项/比价。",
+          "resolution": "按九个Controller生成完整50外部+3内部方法路径，参数按真实DTO/query。"
+        },
+        {
+          "id": "order-management-state",
+          "status": "resolved",
+          "description": "订单图虚构供应商门户确认、取消审批和close命令，漏首次全收直接RECEIVED。",
+          "resolution": "改管理权限命令，取消无附加审批，说明CLOSED值与无close入口，补直接全收边。"
+        },
+        {
+          "id": "po-pii-and-log-rules",
+          "status": "resolved",
+          "description": "详情按权限表述容易误以为有独立PII授权，日志脱敏概括不清。",
+          "resolution": "明确普通list权限+可见行即返回详情全值，Summary掩码；按规范化字段包含规则解释日志，不保证任意PII。"
+        },
+        {
+          "id": "rfq-source-and-current-quotation",
+          "status": "resolved",
+          "description": "原按品类拆RFQ和deadline包含端点、仅supplierId定点描述不准确。",
+          "resolution": "当前复制已批请购全部行，新报价未来deadline；列AwardRequest实际字段、当前报价版本及AwardResult。"
+        },
+        {
+          "id": "award-transaction-order",
+          "status": "resolved",
+          "description": "原图先更新RFQ再生成PO，未解释保存快照及同事务。",
+          "resolution": "读取校验报价→生成/核对PO快照→RFQ/邀请/Outbox，同一采购本地事务。"
+        },
+        {
+          "id": "receipt-locks-and-full-tenant-totals",
+          "status": "resolved",
+          "description": "并发章节仅写乐观锁，方法名掩盖明细无FOR UPDATE及跨收货人累计。",
+          "resolution": "区分头/PO真实锁、明细普通SELECT、全租户CONFIRMED累计与版本/影响行数。"
+        },
+        {
+          "id": "quality-candidates-and-replay",
+          "status": "resolved",
+          "description": "质检新通过行与资产候选事件范围混淆，终态重复被误作成功重放。",
+          "resolution": "限定CONFIRMED/PENDING→PASS/FAIL，只发新资产合格行，重复终态冲突，空候选合法。"
+        },
+        {
+          "id": "asset-backfill-inbox-and-source",
+          "status": "resolved",
+          "description": "回扫参数/事件门闩不足，单Inbox被说成全部并行幂等保证。",
+          "resolution": "补升序游标/size1-100/afterId、唯一来源事件及owner，区分消费事件与租户/来源行/单位唯一性。"
+        },
+        {
+          "id": "outbox-delivery-and-srm-outage",
+          "status": "resolved",
+          "description": "Outbox被当成送达保证，SRM不可用被泛化为所有后续订单命令不可用。",
+          "resolution": "说明可重试发送而非送达证据；现供应商/报价操作依赖SRM，已有PO本地命令使用保存快照。"
+        },
+        {
+          "id": "inbox-intent-and-permanent-ledger",
+          "status": "resolved",
+          "description": "原事件幂等只泛称eventId，新整理可能丢失已正确的永久报价账本约束。",
+          "resolution": "保留原工作流/报价幂等三条约束，补tenant/eventId、类型/来源/聚合及JSON语义意图冲突。"
+        },
+        {
+          "id": "missing-cancelled-event",
+          "status": "resolved",
+          "description": "采购事件清单漏Workflow取消结果事件。",
+          "resolution": "补procurement.requisition.cancelled.v1，十类完整类型与源码一致。"
+        },
+        {
+          "id": "frontend-current-entry-and-locales",
+          "status": "resolved",
+          "description": "目录遗漏审批规则，图/目录说明日韩文仍为英文，只提两种语言。",
+          "resolution": "补审批规则API/界面入口，七图及目录本地化，保留四语同步职责。"
+        },
+        {
+          "id": "current-files-and-initialization",
+          "status": "resolved",
+          "description": "工程清单仍指不存在的docker-compose.yml/application-dev.yml，并泛化持续补齐13类。",
+          "resolution": "换当前compose.yaml/application-lite.yml及真实入口表，说明首次初始化/已有配置提前返回。"
+        },
+        {
+          "id": "auth-client-declaration",
+          "status": "resolved",
+          "description": "把SRM负责人转移和列表batch能力直接套用到采购。",
+          "resolution": "描述真实scope创建/PO继承与保留的Auth契约，声明不等于每条路径实际调用。"
+        },
+        {
+          "id": "example-unit-and-category",
+          "status": "resolved",
+          "description": "中文台单位与离散资产约束冲突，四语例子用父类IT_DEVICE。",
+          "resolution": "统一PCS和有效叶子LAPTOP，金额字符串/assetQuantity整数保持。"
+        },
+        {
+          "id": "required-tests-versus-proof",
+          "status": "resolved",
+          "description": "原最低测试/端到端计划可能被当作全部已执行。",
+          "resolution": "明确要求清单，引用49报告213断言，保持实Workflow/MQ/MySQL/浏览器/Wiki/最终G验收独立。"
+        },
+        {
+          "id": "localized-prose-and-file-labels",
+          "status": "resolved",
+          "description": "日韩错误词/混入异语及工程入口复用了API列名。",
+          "resolution": "修正语言术语、七图标签和当前文件列名，技术标识符保持。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/design/procurement-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 08:42:31",
+      "result": "approved",
+      "translation_sha256": "d6118959cb44e49815d72db4404966d5541946cb96a07ae9b08e8fb5e98ac8d9",
+      "checks": {
+        "coverage_and_meaning": "完整逐段覆盖16节：原设计日期/历史状态和分期、独立服务/Workflow边界、14表与Requester/Owner/子资源范围、物料/金额、六状态请购及四种启动状态、审批规则与真实任务资格、RFQ/报价/定点/PO/收货/质检/Asset回扫、50外部+3内部路径、十类采购事件、PII/日志/XSS、前端、当前工程入口、并发/降级、最低测试要求、原里程碑/ADR/风险。保留重要决策与历史计划并标记适用性；工程清单改为当前入口，实际操作和扩展指向既有Wiki，未批准对应Wiki整篇。",
+        "technical_literals": "核对8106/19906/9906、omni_procurement、/api/procurement无StripPrefix、八个公共依赖及Workflow排除、14个实际表名含proc_event_inbox、完整四层MyBatis链、完整权限代码/Requesters与Owners、全部53方法路径、APPROVING/STARTED与requisitionId:attempt/实例任务校验、REQUIRES_NEW及原轮次重试、RFQ当前报价version/AwardRequest全字段与AwardResult、PO继承RFQ/GR当前scope归属、DECIMAL(19,6)/(19,4)/字符串JSON、PCS与LAPTOP例子、consumerName/eventId与来源单位唯一性、tenant/eventId及JSON语义意图、十类采购事件含cancelled、真实compose.yaml/application-lite.yml和首次CNY/13类初始化。49份现有报告213通过0跳过逐份摘要匹配，无重跑源码相同构建。",
+        "security_and_failure_semantics": "四语均保留聚合特定scope、TenantLine和分页前DataPermission，不将owner条件拼所有子表。approval-view仅对当前APPROVING/STARTED的完整业务键/实例/本人任务资格临时TENANT读取并finally恢复，普通详情不复用例外。SUBMITTED取消只FAILED，采购cancel不终止Workflow；提交前解析失败回滚、提交后不确定尝试FAILED且标记可失败、FAILED不证明远程未启动。PO确认/取消是管理权限命令，无虚构门户确认/取消审批/close入口。PO详情真实返回完整PII且无独立PII授权；日志规则和XSS权威enabled/基线区分。收货实际锁头/PO+全租户累计+版本，行查询不因名字而锁行；质检终态重复为冲突，候选仅资产合格行。SRM历史重放、PO后续本地快照、Outbox可靠路径与实际投递、Inbox及来源幂等均限定范围。",
+        "images_and_links": "本设计无光栅截图。每语七个Mermaid块，共28个，架构运输路径、ER逻辑关系、状态/事务边界和协议值已核对，人用标签本地化；图不宣称跨库外键。原日期与原计划保留，审批金额图明确为示例，原单金额优先风险不覆盖当前品类/金额规则。源码入口用真实文件/目录与四语Wiki/索引，旧application-dev.yml/docker-compose.yml已移除。Markdown渲染不是Mermaid浏览器布局或整站根/子路径验收；正式链接门仍需通过，G完整验收保留。",
+        "language_and_terminology": "完整阅读韩文并对照全部修订。统一구매요청/조달/자재/품목、수령인/담당 귀속、선정/견적 버전、재실행/멱등성、로컬 트랜잭션/보안 기본값。修正印尼语jenis和발기误译，DDD 집계改애그리거트，七张图和目录说明采用韩文；保留실패 기록 시도、실제 상태 재조회、원격 미시작 증명 아님、别立PII权限不存在与历史规划边界。"
+      },
+      "findings": [
+        {
+          "id": "design-history-and-review-policy",
+          "status": "resolved",
+          "description": "原历史状态/分期可能被理解为当前验收，页首只认人工复核。",
+          "resolution": "四语保留2026-07-27原状态/计划/重要决策并说明适用性，按ADR0003区分授权AI与人审。"
+        },
+        {
+          "id": "service-dependency-cache-and-workflow",
+          "status": "resolved",
+          "description": "公共service依赖遗漏，proc:缓存和采购直接取消Workflow被过度概括。",
+          "resolution": "补omni-common-service，改公共XSS键，Workflow限定真实模型/启动/任务资格接口。"
+        },
+        {
+          "id": "domain-inbox-and-scope-columns",
+          "status": "resolved",
+          "description": "领域表遗漏Inbox且通用owner说明混淆Requester。",
+          "resolution": "列14表，按聚合区分requester/owner、子资源继承及租户共享配置。"
+        },
+        {
+          "id": "requisition-cancel-and-failed-marking",
+          "status": "resolved",
+          "description": "原SUBMITTED无条件可取消、调用失败必然FAILED不符合实现。",
+          "resolution": "限定DRAFT或SUBMITTED/FAILED，区分提交前回滚、提交后尝试标记、标记失败/零行与远程不确定；保留原快照重试。"
+        },
+        {
+          "id": "approval-view-full-identity",
+          "status": "resolved",
+          "description": "只按requisitionId解释任务资格，遗漏启动/实例/轮次条件。",
+          "resolution": "按APPROVING/STARTED、完整业务键/实例/用户/task/businessType验证，临时TENANT及finally恢复。"
+        },
+        {
+          "id": "api-inventory",
+          "status": "resolved",
+          "description": "列了不存在的POST订单，漏审批试算/覆盖/影响/模型选项及RFQ选项/比价。",
+          "resolution": "按九个Controller生成完整50外部+3内部方法路径，参数按真实DTO/query。"
+        },
+        {
+          "id": "order-management-state",
+          "status": "resolved",
+          "description": "订单图虚构供应商门户确认、取消审批和close命令，漏首次全收直接RECEIVED。",
+          "resolution": "改管理权限命令，取消无附加审批，说明CLOSED值与无close入口，补直接全收边。"
+        },
+        {
+          "id": "po-pii-and-log-rules",
+          "status": "resolved",
+          "description": "详情按权限表述容易误以为有独立PII授权，日志脱敏概括不清。",
+          "resolution": "明确普通list权限+可见行即返回详情全值，Summary掩码；按规范化字段包含规则解释日志，不保证任意PII。"
+        },
+        {
+          "id": "rfq-source-and-current-quotation",
+          "status": "resolved",
+          "description": "原按品类拆RFQ和deadline包含端点、仅supplierId定点描述不准确。",
+          "resolution": "当前复制已批请购全部行，新报价未来deadline；列AwardRequest实际字段、当前报价版本及AwardResult。"
+        },
+        {
+          "id": "award-transaction-order",
+          "status": "resolved",
+          "description": "原图先更新RFQ再生成PO，未解释保存快照及同事务。",
+          "resolution": "读取校验报价→生成/核对PO快照→RFQ/邀请/Outbox，同一采购本地事务。"
+        },
+        {
+          "id": "receipt-locks-and-full-tenant-totals",
+          "status": "resolved",
+          "description": "并发章节仅写乐观锁，方法名掩盖明细无FOR UPDATE及跨收货人累计。",
+          "resolution": "区分头/PO真实锁、明细普通SELECT、全租户CONFIRMED累计与版本/影响行数。"
+        },
+        {
+          "id": "quality-candidates-and-replay",
+          "status": "resolved",
+          "description": "质检新通过行与资产候选事件范围混淆，终态重复被误作成功重放。",
+          "resolution": "限定CONFIRMED/PENDING→PASS/FAIL，只发新资产合格行，重复终态冲突，空候选合法。"
+        },
+        {
+          "id": "asset-backfill-inbox-and-source",
+          "status": "resolved",
+          "description": "回扫参数/事件门闩不足，单Inbox被说成全部并行幂等保证。",
+          "resolution": "补升序游标/size1-100/afterId、唯一来源事件及owner，区分消费事件与租户/来源行/单位唯一性。"
+        },
+        {
+          "id": "outbox-delivery-and-srm-outage",
+          "status": "resolved",
+          "description": "Outbox被当成送达保证，SRM不可用被泛化为所有后续订单命令不可用。",
+          "resolution": "说明可重试发送而非送达证据；现供应商/报价操作依赖SRM，已有PO本地命令使用保存快照。"
+        },
+        {
+          "id": "inbox-intent-and-permanent-ledger",
+          "status": "resolved",
+          "description": "原事件幂等只泛称eventId，新整理可能丢失已正确的永久报价账本约束。",
+          "resolution": "保留原工作流/报价幂等三条约束，补tenant/eventId、类型/来源/聚合及JSON语义意图冲突。"
+        },
+        {
+          "id": "missing-cancelled-event",
+          "status": "resolved",
+          "description": "采购事件清单漏Workflow取消结果事件。",
+          "resolution": "补procurement.requisition.cancelled.v1，十类完整类型与源码一致。"
+        },
+        {
+          "id": "frontend-current-entry-and-locales",
+          "status": "resolved",
+          "description": "目录遗漏审批规则，图/目录说明日韩文仍为英文，只提两种语言。",
+          "resolution": "补审批规则API/界面入口，七图及目录本地化，保留四语同步职责。"
+        },
+        {
+          "id": "current-files-and-initialization",
+          "status": "resolved",
+          "description": "工程清单仍指不存在的docker-compose.yml/application-dev.yml，并泛化持续补齐13类。",
+          "resolution": "换当前compose.yaml/application-lite.yml及真实入口表，说明首次初始化/已有配置提前返回。"
+        },
+        {
+          "id": "auth-client-declaration",
+          "status": "resolved",
+          "description": "把SRM负责人转移和列表batch能力直接套用到采购。",
+          "resolution": "描述真实scope创建/PO继承与保留的Auth契约，声明不等于每条路径实际调用。"
+        },
+        {
+          "id": "example-unit-and-category",
+          "status": "resolved",
+          "description": "中文台单位与离散资产约束冲突，四语例子用父类IT_DEVICE。",
+          "resolution": "统一PCS和有效叶子LAPTOP，金额字符串/assetQuantity整数保持。"
+        },
+        {
+          "id": "required-tests-versus-proof",
+          "status": "resolved",
+          "description": "原最低测试/端到端计划可能被当作全部已执行。",
+          "resolution": "明确要求清单，引用49报告213断言，保持实Workflow/MQ/MySQL/浏览器/Wiki/最终G验收独立。"
+        },
+        {
+          "id": "localized-prose-and-file-labels",
+          "status": "resolved",
+          "description": "日韩错误词/混入异语及工程入口复用了API列名。",
+          "resolution": "修正语言术语、七图标签和当前文件列名，技术标识符保持。"
+        }
+      ]
+    }
+  }
+}

@@ -37,11 +37,11 @@ import java.time.Duration;
 @Component("gitee")
 public class GiteeOAuth2Handler implements OAuth2ProviderHandler {
 
-    /** Gitee OAuth2 授权页面 URL（默认值，可通过配置覆盖） */
+    /** Gitee OAuth2 授权页面 URL。运行时实际取值来自 {@link OAuth2Properties.GiteeProperties#getAuthorizeUrl()}，本常量未被引用。 */
     private static final String GITEE_AUTHORIZE_URL = "https://gitee.com/oauth/authorize";
-    /** Gitee OAuth2 Token 端点 URL（默认值，可通过配置覆盖） */
+    /** Gitee OAuth2 Token 端点 URL。运行时实际取值来自 {@link OAuth2Properties.GiteeProperties#getTokenUrl()}，本常量未被引用。 */
     private static final String GITEE_TOKEN_URL = "https://gitee.com/oauth/token";
-    /** Gitee 用户信息 API URL（默认值，可通过配置覆盖） */
+    /** Gitee 用户信息 API URL。运行时实际取值来自 {@link OAuth2Properties.GiteeProperties#getUserApiUrl()}，本常量未被引用。 */
     private static final String GITEE_USER_API = "https://gitee.com/api/v5/user";
     /** 请求的 OAuth2 授权范围：仅获取基本用户信息 */
     private static final String SCOPE = "user_info";

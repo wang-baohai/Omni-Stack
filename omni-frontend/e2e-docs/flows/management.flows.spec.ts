@@ -3,13 +3,11 @@
  * 管理端只读页面四语言正式截图：系统管理、工作流定义/实例/看板、SRM 管理视图。
  *
  * 全部场景均为只读采集：不创建、不修改、不删除任何业务数据，因此不要求 `E2E_MUTATIONS`，
- * 也无需数据收尾。expectTitle 与 expectMain 取自对运行中应用的实测探测（document.title 与
- * 真实渲染的表格列标签），不是从语言包推测；ja-JP/ko-KR 下列标签渲染为英文属当前语言包
- * 既有取值（`npm run ui:i18n:check` 与 `ui:i18n:parity` 均通过），此处如实断言实际渲染结果。
+ * 也无需业务数据收尾。expectTitle 与 expectMain 对照当前源码与本地 Docker 的实际渲染，
+ * 使用各语言的标题和表格标签，不再继承旧环境中的日、韩英文回退断言。
  *
- * 有意排除：procurement 物料/订单/收货与 asset 台账/调拨/处置（活行为 0，空表不具文档价值，
- * 待种子目录 DATA_DEFECT 修复后补采）；procurement 请购/询价（当前仅存历史 E2ESQ 测试残留行，
- * 不宜作为正式文档图片）。
+ * 采购和资产的业务动作使用独立教学数据与用例取证；基础种子没有订单不是数据缺陷，
+ * 本组只证明页面和当前语言加载，不证明完整业务链路。
  */
 import { expect, test } from '@playwright/test'
 import { captureDocsImage, docsLocales, prepareDocsPage, waitForDocsPage } from '../fixtures/docs-page'
@@ -35,7 +33,7 @@ const scenes: Scene[] = [
     id: 'system-tenants',
     route: '/admin/system/tenant',
     expectTitle: ['租户管理', 'Tenant Management', 'テナント管理', '테넌트 관리'],
-    expectMain: ['租户编码', 'Tenant Code', 'Tenant Code', 'Tenant Code'],
+    expectMain: ['租户编码', 'Tenant Code', 'テナントコード', '테넌트 코드'],
   },
   {
     id: 'system-organizations',
@@ -47,19 +45,19 @@ const scenes: Scene[] = [
     id: 'system-roles',
     route: '/admin/system/role',
     expectTitle: ['角色管理', 'Role Management', 'ロール管理', '역할 관리'],
-    expectMain: ['角色编码', 'Role Code', 'Role Code', 'Role Code'],
+    expectMain: ['角色编码', 'Role Code', 'ロールコード', '역할 코드'],
   },
   {
     id: 'system-permissions',
     route: '/admin/system/permission',
     expectTitle: ['权限管理', 'Permission Mgmt', '権限管理', '권한 관리'],
-    expectMain: ['权限名称', 'Permission Name', 'Permission Name', 'Permission Name'],
+    expectMain: ['权限名称', 'Permission Name', '権限名', '권한 이름'],
   },
   {
     id: 'system-dictionaries',
     route: '/admin/base/dict',
     expectTitle: ['字典管理', 'Dictionary', '辞書管理', '사전 관리'],
-    expectMain: ['类型编码', 'Type Code', 'Type Code', 'Type Code'],
+    expectMain: ['类型编码', 'Type Code', 'タイプコード', '타입 코드'],
   },
   {
     id: 'system-online-users',
@@ -71,19 +69,19 @@ const scenes: Scene[] = [
     id: 'system-audit-log',
     route: '/admin/system/auditlog',
     expectTitle: ['审计日志', 'Audit Logs', '監査ログ', '감사 로그'],
-    expectMain: ['事件类型', 'Event Type', 'Event Type', 'Event Type'],
+    expectMain: ['事件类型', 'Event Type', 'イベント種別', '이벤트 유형'],
   },
   {
     id: 'system-auth-records',
     route: '/admin/system/authrecord',
     expectTitle: ['授权记录', 'Auth Records', '認証記録', '인증 기록'],
-    expectMain: ['客户端 ID', 'Client ID', 'Client ID', 'Client ID'],
+    expectMain: ['客户端 ID', 'Client ID', 'クライアント ID', '클라이언트 ID'],
   },
   {
     id: 'system-xss-config',
     route: '/admin/system/xssconfig',
     expectTitle: ['XSS 防护', 'XSS Protection', 'XSS 防御', 'XSS 보호'],
-    expectMain: ['规则名称', 'Rule Name', 'Rule Name', 'Rule Name'],
+    expectMain: ['规则名称', 'Rule Name', 'ルール名', '규칙 이름'],
   },
   {
     id: 'system-operation-log',
@@ -95,7 +93,7 @@ const scenes: Scene[] = [
     id: 'workflow-instances',
     route: '/admin/workflow/instance',
     expectTitle: ['流程实例', 'Process Instances', 'プロセスインスタンス', '프로세스 인스턴스'],
-    expectMain: ['流程标题', 'Title', 'Title', 'Title'],
+    expectMain: ['流程标题', 'Title', 'タイトル', '제목'],
   },
   {
     id: 'workflow-definitions',

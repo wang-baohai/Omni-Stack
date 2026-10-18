@@ -16,28 +16,30 @@
 
 ## 使用手順
 
-~~~powershell
-Set-Location tools/omni-cli
-npm ci
-npm run build
-node dist/src/cli.js preset list
-node dist/src/cli.js preset explain workflow
-node dist/src/cli.js preset create workflow --output C:\WorkSpace\my-workflow --dry-run
-node dist/src/cli.js preset create workflow --output C:\WorkSpace\my-workflow
-node dist/src/cli.js preset validate workflow --output C:\WorkSpace\my-workflow
+以下はソースリポジトリ直下で実行します。依存のインストール、CLI のビルドと実行はローカル Docker のツールコンテナを使い、教材の出力を独立した generated/my-workflow ディレクトリへ保存します。
+
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml build cli
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm ci
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run build
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset list
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset explain workflow
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create workflow --output generated/my-workflow --dry-run
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create workflow --output generated/my-workflow
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset validate workflow --output generated/my-workflow
 ~~~
 
 生成前に依存クロージャ、バックエンドモジュール、Compose サービス、ポート、データベース、権限ルート、メモリ見積もりを表示します。出力ディレクトリは存在しないか空でなければなりません。生成完了後、`scaffold.lock` にソースバージョン、プリセットバージョン、モジュールバージョン、テンプレートバージョンを記録します。
 
 ## 生成後に必ず検証
 
-まず生成物に同梱の `.env.example` から `.env` を作成し、自前で生成したランダムな秘密情報を填入する（必須項目と隔離 project/ポート/ボリューム/イメージ名前空間は「カスタムプリセットチュートリアル」第4節参照；`.env` が無いと `docker compose config` は required variable missing で失敗する）。
+まず生成物に同梱の `.env.example` から `.env` を作成し、自前で生成したランダムな秘密情報を入力します（必須項目と隔離 project/ポート/ボリューム/イメージ名前空間は「カスタムプリセットチュートリアル」第4節参照；`.env` が無いと `docker compose config` は required variable missing で失敗する）。
 
 その上で生成されたプロジェクトでバックエンドビルド、`npm ci`、フロントエンド lint/build、`docker compose config --quiet` を実行します。リポジトリ保守者は次も実行すべきです：
 
-~~~powershell
-npm run test:preset-structure
-npm run test:preset-smoke
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-structure
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-smoke
 ~~~
 
 `test:preset-golden` は 5 種すべてのプリセットの完全なビルドマトリクスを実行し、夜間やリリース前の実行に適します。データベース fresh、実起動、ブラウザ smoke はランタイム受け入れであり、構造チェックで代替できません。

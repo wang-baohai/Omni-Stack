@@ -145,7 +145,8 @@ function toggleTheme() {
   .header {
     position: sticky;
     top: 0;
-    z-index: 1000;
+    /* 折叠按钮必须高于侧栏，展开后仍可通过真实点击关闭。 */
+    z-index: 1002;
   }
   .header-right {
     flex-wrap: wrap;

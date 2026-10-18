@@ -1,846 +1,264 @@
 # Frontend Patterns & Conventions
 
-> This document defines the internal organization of the Omni-Stack frontend. All frontend code must follow these patterns.  
-> For an architecture overview, see [architecture.en.md](architecture.en.md). For Docker deployment configuration, see [docker-deployment.en.md](docker-deployment.en.md).
+> This document maintains current frontend organization, shared client state, routing, permission visibility, language and lifecycle constraints. Source and configuration determine behavior. Conventions for new code do not certify every historical line.
+> The [API contract](api-contract.en.md) owns wire formats and error classification; domain facts/designs own business invariants. The [Wiki](wiki/index.en.md), [scaffold guide](guides/scaffold-development.en.md) and [Docker deployment](docker-deployment.en.md) own installation, onboarding, operations and recovery.
 
 ---
 
 ## Table of Contents
 
-- [1. Technology Choices](#1-technology-choices)
+- [1. Technology Baseline](#1-technology-baseline)
 - [2. Directory Structure](#2-directory-structure)
-- [3. API Layer](#3-api-layer-srcapi)
-- [4. State Management](#4-state-management-srcstores)
-- [5. Router](#5-router-srcrouter)
+- [3. API Layer (src/api/)](#3-api-layer-srcapi)
+- [4. State Management (src/stores/)](#4-state-management-srcstores)
+- [5. Router (src/router/)](#5-router-srcrouter)
 - [6. Component Design Patterns](#6-component-design-patterns)
 - [7. Component Conventions](#7-component-conventions)
-- [8. Naming Conventions](#8-naming-conventions-typescript)
-- [9. Code Format](#9-code-format-typescript--vue)
+- [8. Naming Conventions (TypeScript)](#8-naming-conventions-typescript)
+- [9. Code Format (TypeScript / Vue)](#9-code-format-typescript--vue)
 - [10. UI Framework](#10-ui-framework)
 - [11. Internationalization (i18n)](#11-internationalization-i18n)
 - [12. Permission & Access Control](#12-permission--access-control)
 - [13. Business Module Structure Pattern](#13-business-module-structure-pattern)
 - [14. Composables Pattern](#14-composables-pattern)
-- [15. Vite Build Optimization for Docker Deployment](#15-vite-build-optimization-for-docker-deployment)
+- [15. Build and Static Serving Boundaries](#15-build-and-static-serving-boundaries)
 - [16. Build & Tooling](#16-build--tooling)
 - [17. Troubleshooting Guide](#17-troubleshooting-guide)
 
 ---
 
-## 1. Technology Choices
+## 1. Technology Baseline
 
-### Why Vue 3.5 + Composition API
+The frontend uses Vue 3 Composition API, TypeScript, Pinia, Vue Router, Element Plus, vue-i18n and Vite. [package.json](../omni-frontend/package.json) owns declared ranges; [package-lock.json](../omni-frontend/package-lock.json) owns resolved versions. A range's lower bound is not the installed version.
 
-| Consideration | Rationale |
-|---------------|-----------|
-| **First-class TypeScript support** | Vue 3.5 provides top-tier type inference for `<script setup lang="ts">`; `defineProps<T>()` requires no runtime declaration |
-| **Composition API** | Logic reuse via Composables, eliminating the naming conflicts and opaque origins of Mixins |
-| **Tree-shaking friendly** | Import APIs on demand (`ref`, `computed`, `watch`); unused features are excluded from the bundle |
-| **Performance** | Proxy-based reactivity is faster than Vue 2's `Object.defineProperty` and supports `Map`/`Set` collection types |
-| **Teleport / Suspense** | Built-in `<Teleport>` and `<Suspense>` components simplify modal and async component handling |
-
-### Why Vite 8
-
-| Consideration | Rationale |
-|---------------|-----------|
-| **Native ESM** | Dev server runs on native browser ES Modules — no bundling needed at startup; cold start drops from Webpack's 30s+ to < 2s |
-| **HMR speed** | Module-level HMR updates only the changed module, not the entire chunk; hot update latency < 50ms |
-| **Rollup compatibility** | Production builds are powered by Rollup with mature tree-shaking and chunk splitting |
-| **Plugin ecosystem** | `@vitejs/plugin-vue` 6.x provides SFC compilation and HMR integration |
-
-### Why Pinia 3 over Vuex
-
-| Consideration | Rationale |
-|---------------|-----------|
-| **Officially recommended** | Vue has recommended Pinia over Vuex since Vue 3; Vuex is in maintenance mode |
-| **Composition API style** | `defineStore('id', () => { ... })` aligns with Vue 3's `<script setup>` style |
-| **TypeScript support** | Full type inference without `@Mutation` / `@Action` decorators |
-| **No Mutations** | Only State + Getters + Actions, simplifying the data flow (mutate state directly or via actions) |
-| **Lightweight** | Core package < 1KB gzipped, zero boilerplate |
-| **DevTools** | Vue DevTools integration with time-travel debugging and state snapshots |
-
-### Why Element Plus 2.x
-
-| Consideration | Rationale |
-|---------------|-----------|
-| **Vue 3 native** | The Vue 3 version of Element UI with full Composition API support |
-| **Enterprise-grade components** | Mature components for tables (`el-table`), forms (`el-form`), dialogs (`el-dialog`), etc. |
-| **Built-in i18n** | `vue-i18n` integration with built-in Chinese and English messages |
-| **Dark mode** | One-line dark theme toggle via `theme-chalk/dark/css-vars.css` |
-| **Icon library** | `@element-plus/icons-vue` provides 280+ vector icons |
+The app uses `<script setup lang="ts">` and Pinia setup stores. [plugins/element-plus.ts](../omni-frontend/src/plugins/element-plus.ts) explicitly registers shared components, with Element Plus locale linked to application language. Cold-start/HMR/bundle/production measurements must identify the environment; versions do not establish fixed performance or global UI acceptance.
 
 ---
 
 ## 2. Directory Structure
 
-```
-omni-frontend/
-├── index.html              # Vite entry HTML
-├── package.json
-├── vite.config.ts          # Vite config (proxy, alias, build)
-├── tsconfig.json
-├── eslint.config.mjs       # ESLint flat config
-└── src/
-    ├── main.ts             # App bootstrap (Pinia, Router, Element Plus, I18n)
-    ├── App.vue             # Root component (<router-view />)
-    ├── api/                # API layer (one file per business domain)
-    │   ├── request.ts      # Shared Axios instance + interceptors
-    │   ├── user.ts         # User API functions
-    │   ├── dict.ts         # Dictionary API (type + data CRUD)
-    │   ├── auth.ts         # Auth API (login, register, captcha, social login, OAuth2)
-    │   ├── menu.ts         # Menu API (dynamic menu tree)
-    │   ├── workflow.ts     # Workflow API (models, definitions, instances, approvals)
-    │   └── myJob.ts        # User scheduled job API
-    ├── stores/             # Pinia stores (one per business domain)
-    │   ├── user.ts         # User auth store (token, user info)
-    │   ├── app.ts          # App settings store (theme, sidebar)
-    │   └── permission.ts   # Permission store (permission codes, dynamic menu tree)
-    ├── router/
-    │   └── index.ts        # Route definitions + navigation guard + dynamic route registration
-    ├── views/              # Page components (kebab-case directories)
-    │   ├── home/index.vue          # Home (landing page for guests / workspace for authenticated users)
-    │   ├── login/index.vue         # Login page
-    │   ├── register/index.vue      # Registration page
-    │   ├── callback/index.vue      # OAuth2 callback page
-    │   ├── dashboard/index.vue     # Dashboard
-    │   ├── consent/index.vue       # OAuth2 authorization consent page
-    │   ├── device/                 # Device authorization (Device Code Flow)
-    │   │   ├── index.vue           # Device simulator: displays QR code + polls for token
-    │   │   └── verify.vue          # User consent/verification page
-    │   ├── base/                   # Base data module
-    │   │   └── dict/index.vue      # Dictionary management (master-detail layout)
-    │   ├── system/                 # System administration module
-    │   │   ├── user/index.vue      # User management
-    │   │   ├── role/index.vue      # Role management
-    │   │   ├── permission/index.vue # Permission management
-    │   │   ├── org/index.vue       # Organization management
-    │   │   ├── tenant/index.vue    # Tenant management
-    │   │   ├── oauth2/index.vue    # OAuth2 client management
-    │   │   ├── online/index.vue    # Online user monitoring
-    │   │   └── xssconfig/index.vue # XSS protection configuration
-    │   ├── workflow/               # Workflow module
-    │   │   ├── model/index.vue     # Process model management + BPMN designer
-    │   │   ├── definition/index.vue # Process definition management
-    │   │   ├── instance/index.vue  # Process instance management
-    │   │   └── stats/index.vue     # Process statistics
-    │   └── monitor/                # Monitoring module
-    │       └── oper-log/index.vue  # Operation logs
-    ├── layout/
-    │   └── index.vue       # App shell layout (sidebar, header, content area)
-    ├── components/         # Shared/reusable UI components
-    │   ├── LoginForm.vue           # Login form (password + SSO + third-party OAuth2)
-    │   ├── CronGenerator.vue       # Cron expression generator
-    │   ├── DynamicFormRenderer.vue # Dynamic form renderer
-    │   └── workflow/               # Workflow-specific components
-    │       ├── ModelDesigner.vue   # BPMN modeling designer
-    │       └── panels/             # BPMN property panels
-    ├── composables/        # Vue Composables (logic reuse)
-    │   ├── useDictOptions.ts       # Dictionary option loading
-    │   ├── useBpmnModeler.ts       # BPMN Modeler lifecycle management
-    │   └── useBpmnExtension.ts     # BPMN extension element read/write
-    ├── constants/          # Constant definitions
-    │   └── menu.ts                 # Menu i18n mapping table
-    ├── directives/         # Vue custom directives
-    │   └── permission.ts           # v-permission directive
-    ├── utils/              # Utility functions
-    │   ├── jwt.ts                  # JWT parsing (extract permissions, tenant ID)
-    │   └── pkce.ts                 # PKCE utilities (OAuth2 Device Code Flow)
-    ├── i18n/
-    │   └── index.ts        # vue-i18n instance configuration
-    ├── locales/            # Translation files
-    │   ├── zh-CN.ts        # Chinese translations
-    │   └── en-US.ts        # English translations
-    ├── types/              # Shared TypeScript types
-    │   └── api.ts          # ApiResponse<T>, PageResult<T>
-    └── styles/
-        └── index.scss      # Global styles (reset, layout, theme)
-```
+These are responsibilities and representative entry points, not a complete file tree. All business modules remain organized by current source and module definitions.
+
+| Directory/entry | Current responsibility |
+|---|---|
+| [main.ts](../omni-frontend/src/main.ts), [App.vue](../omni-frontend/src/App.vue) | Pinia/Router/UI/i18n/directive/theme bootstrap; root outlet and component locale |
+| `src/api/` | Shared request.ts and subdomain files such as user.ts, dict.ts, `crm-*`, `srm-*`, `procurement-*`, `asset-*` |
+| `src/stores/` | user.ts, app.ts, permission.ts |
+| [router/index.ts](../omni-frontend/src/router/index.ts) | Static/dynamic routes, view/icon mapping, session cleanup and guards |
+| `src/views/`, `src/components/`, `src/layout/` | Pages, shared components and admin layout; OAuth clients live in views/oauth2-client, not system/oauth2 |
+| `src/composables/` | Dictionary state and BPMN lifecycle; extension modules may also export plain functions |
+| `src/utils/`, `src/constants/` | JWT decoding, errors/redirect/access policy, PKCE and menu labels; PKCE belongs to authorization-code flow |
+| `src/i18n/`, `src/locales/` | Language instance and zh-CN.ts, en-US.ts, ja-JP.ts, ko-KR.ts |
+| [types/api.ts](../omni-frontend/src/types/api.ts), `src/styles/` | Sole shared response types and global styles |
 
 ---
 
 ## 3. API Layer (`src/api/`)
 
-### Shared Axios Instance
+The shared Axios client in [request.ts](../omni-frontend/src/api/request.ts) uses VITE_API_BASE_URL (default /api), timeout 15000 ms and withCredentials=true. It obtains Bearer and X-Tenant-Id from userStore.token. Client decoding does not verify JWT signatures; Gateway establishes trusted identity.
 
-`request.ts` exports a single configured Axios instance:
+Success returns the whole AxiosResponse without unwrapping business data:
 
-- **baseURL**: Read from `VITE_API_BASE_URL` env variable, defaults to `/api`
-- **timeout**: 15000ms
-- **withCredentials**: `true` (carries cookies for OAuth2 session management)
-- **Request interceptor**: Reads token from `useUserStore()` and injects `Authorization: Bearer <token>`
-- **Response interceptor**: Checks `code === 200`; business errors trigger `ElMessage.error`; 401 triggers an expiration dialog and redirects to the login page (with a redirect parameter)
+| Layer | Current example |
+|---|---|
+| HTTP response | `AxiosResponse<ApiResponse<PageResult<SysUser>>>` |
+| `response.data` | ApiResponse corresponding to `R<T>` |
+| `response.data.data` | Business PageResult |
 
-### API Function Pattern
+Current [user.ts](../omni-frontend/src/api/user.ts) uses SysUser/listUsers/getUser; Axios generics infer domain function return types. Import shared ApiResponse/PageResult only from `@/types/api`; DTO/null semantics remain in the API contract.
 
-One file per business domain. Function naming conventions:
+[error-display.ts](../omni-frontend/src/utils/error-display.ts) and [errors.ts](../omni-frontend/src/utils/errors.ts) classify and localize errors. A 401 is not always expiry: credential endpoints preserve session/input, while applicable unauthenticated/expired branches reauthenticate. 403 preserves the session. Reauthentication first clears shared state, then navigates when the dialog ends; flags suppress concurrent dialogs and explicit-logout responses.
 
-| Operation | Prefix | Example |
-|-----------|--------|---------|
-| Get by ID | `getXxx` | `getUserById(id)` |
-| Paginated list | `listXxx` | `listUsers(page, size)` |
-| Create | `createXxx` | `createUser(data)` |
-| Update | `updateXxx` | `updateUser(id, data)` |
-| Delete | `deleteXxx` | `deleteUser(id)` |
-
-All functions must have typed parameters and return types using `ApiResponse<T>`:
-
-```typescript
-import request from './request'
-import type { ApiResponse, PageResult } from '@/types/api'
-
-export function listUsers(page: number, size: number) {
-  return request.get<ApiResponse<PageResult<UserInfo>>>(
-    `/auth/user/list?page=${page}&size=${size}`,
-  )
-}
-```
-
-### Type System
-
-- **Shared types** (`ApiResponse<T>`, `PageResult<T>`): Defined in `src/types/api.ts` as the single source of truth
-- **Domain types** (e.g., `UserInfo`, `SysUser`): Co-located in the API files where they are used (`src/api/user.ts`)
-- **Never duplicate** shared type definitions; always import from `@/types/api`
-- Use `import type { ... }` for type-only imports
+Remote/Axios technical messages remain diagnostic; callers use displayMessage/getErrorMessage. For a local non-Axios Error, getErrorMessage retains its message, so not all local exceptions are guaranteed translated. Standard OAuth2 token requests use separate fetch/protocol responses rather than this R-client contract.
 
 ---
 
 ## 4. State Management (`src/stores/`)
 
-### Pinia Composition API Style
+Current setup-store responsibilities:
 
-```typescript
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+| Store | State/persistence |
+|---|---|
+| [user](../omni-frontend/src/stores/user.ts) | Persists token and username; isLoggedIn tests token presence only; isLoggingOut marks explicit logout |
+| [app](../omni-frontend/src/stores/app.ts) | sidebarCollapsed/theme; omni-theme defaults dark; initial sidebar uses the 768px media condition and is not persisted |
+| [permission](../omni-frontend/src/stores/permission.ts) | permissions/menuTree/menusLoaded/menuLoadState/menuLoadError; in-memory state and shared pending menu Promise |
 
-export const useUserStore = defineStore('user', () => {
-  const token = ref<string>(localStorage.getItem('token') || '')
-  const username = ref<string>('')
+nickname/avatar are not current userStore fields. i18n owns omni-lang, outside appStore. A token-only logout example is not complete session cleanup.
 
-  function setToken(newToken: string) {
-    token.value = newToken
-    localStorage.setItem('token', newToken)
-  }
+Router `clearAuthenticatedSession(explicit)` calls user.logout, permission.reset and clearDynamicRoutes in order. user.logout itself clears only token/username; dictionary cache separately observes identity. appStore's theme helper changes the HTML dark class as an explicitly owned DOM side effect; ordinary business stores should not manipulate page DOM freely.
 
-  function logout() {
-    token.value = ''
-    username.value = ''
-    localStorage.removeItem('token')
-  }
-
-  return { token, username, setToken, logout }
-})
-```
-
-### Rules
-
-- One store per business domain: `user.ts`, `app.ts`, `permission.ts`
-- Store file naming: kebab-case
-- Store hook naming: `use` prefix (`useUserStore`, `useAppStore`, `usePermissionStore`)
-- Use Composition API style (`defineStore('id', () => { ... })`)
-- Persist with `localStorage`; non-persistent state uses `ref()`
-- No direct DOM manipulation in stores
-
-### Core Store Responsibilities
-
-| Store | Responsibility | Persistence |
-|-------|---------------|-------------|
-| `useUserStore` | Token management, basic user info (username, nickname, avatar) | `localStorage` (token) |
-| `useAppStore` | Theme switching (light/dark), sidebar collapse state, language preference | `localStorage` (theme, lang) |
-| `usePermissionStore` | Permission code list (parsed from JWT), dynamic menu tree (loaded from backend), `menusLoaded` flag | None (re-fetched on every login) |
+Current menu requests lack the dictionary cache's Token/generation result guard. reset clears state/Promise references, not already-sent requests. Dictionary regressions do not certify equivalent isolation for every shared state module.
 
 ---
 
 ## 5. Router (`src/router/`)
 
-### Route Architecture
+Router uses `createWebHistory(import.meta.env.BASE_URL)`. Static means predeclared, not public. Only `requiresAuth === false` takes the public branch; an unset value follows the protected branch.
 
-Omni-Stack uses a **static routes + dynamic routes** hybrid architecture:
+| Static path | Current access behavior |
+|---|---|
+| `/`, `/login`, `/register` | Public; Login with a token returns Home |
+| `/portal-login`, `/portal-register` | Public; PortalLogin with a token returns supplier-portal |
+| `/callback`, `/device`, `/device/verify`, `/consent` | Public routes; pages/protocols retain their own checks |
+| `/supplier-portal` | Token and portalAccess policy |
+| `/menu-load-error` | Token required; menu retry |
+| `/admin`, `/admin/dashboard` | Admin layout/default child, subject to management policy |
+| `/admin/:pathMatch(.*)*`, `/:pathMatch(.*)*` | 403/404 views respectively; the former protected, the latter public |
 
-```
-Static Routes (public pages)
-├── /            → Home (landing page / workspace)
-├── /login       → Login
-├── /register    → Register
-├── /callback    → OAuth2Callback
-├── /device      → DeviceAuth
-├── /device/verify → DeviceVerify
-├── /consent     → OAuth2 authorization consent
-└── /admin       → Layout (admin shell)
-    └── /admin/dashboard → Dashboard (static child route)
+Without a token, protected navigation uses safeAppRedirect and selects Login/PortalLogin. With a token, initFromToken runs each time. Unfinished menus are awaited, registered and replace-navigated; failures go to MenuLoadError. Remaining branches ensure registration and apply management/supplier-portal/asset-self-service policy. Token presence and local decoding do not prove validity or expiry; server requests still authenticate.
 
-Dynamic Routes (permission-driven, registered at runtime)
-└── /admin/<feature> → maps to views/<module>/<feature>/index.vue
-    e.g.: /admin/user → views/system/user/index.vue
-          /admin/dict → views/base/dict/index.vue
-```
+Dynamic registration handles matching MENU components, excludes srm:portal: children and recurses through children. Colons become slashes in admin child paths and hyphens in route names: `system:user → /admin/system/user`, `base:dict → /admin/base/dict`, not /admin/user or /admin/dict. MenuNode.path is a materialized permission-tree path, not a frontend URL.
 
-### Navigation Guard Flow
+`import.meta.glob('../views/**/index.vue')` supplies lazy views. Exactly two viewOverrides exist: system:oauth2→views/oauth2-client/index.vue and base:operlog→views/monitor/oper-log/index.vue. Dynamic meta has title/icon/requiresAuth/permissionCode. Meta types are optional; not every static record explicitly supplies all fields. Registered names prevent duplicates and are removed on logout.
 
-```
-router.beforeEach()
-    ↓
-Check to.meta.requiresAuth
-    ├── false → Authenticated user visiting /login → redirect to Home (actual path is `/`, not `/home`)
-    │           Other public pages → allow
-    └── true  → Check userStore.token
-                ├── No token → redirect to /login?redirect=<path>
-                └── Has token → Check permissionStore.menusLoaded
-                    ├── false → initFromToken() → loadMenus() → registerDynamicRoutes() → re-navigate
-                    └── true  → registerDynamicRoutes() (idempotent) → allow
-```
-
-### Convention-Based View Component Mapping
-
-Dynamic routes use `import.meta.glob` to scan all `index.vue` files under `views/`, achieving automatic permissionCode → view component mapping:
-
-```typescript
-// router/index.ts
-const viewModules = import.meta.glob('../views/**/index.vue')
-
-// Mapping rule: permissionCode "system:user" → "views/system/user/index.vue"
-function resolveViewComponent(permissionCode: string) {
-  if (viewOverrides[permissionCode]) return viewModules[viewOverrides[permissionCode]]
-  const modulePath = permissionCode.replace(/:/g, '/')
-  return viewModules[`../views/${modulePath}/index.vue`]
-}
-```
-
-**Override mappings** (`viewOverrides`):
-
-| permissionCode | Override Path | Reason |
-|----------------|---------------|--------|
-| `system:oauth2` | `views/oauth2-client/index.vue` | Avoid conflict with OAuth2 callback page |
-| `base:operlog` | `views/monitor/oper-log/index.vue` | Categorized under monitor directory |
-
-### Rules
-
-- All route components use lazy loading: `() => import('@/views/xxx/index.vue')`
-- `meta` fields: `title` (required), `icon` (optional), `requiresAuth` (required), `permissionCode` (set automatically for dynamic routes)
-- Auth-required routes: explicitly set `requiresAuth: true`
-- Public routes: explicitly set `requiresAuth: false`
-- On logout, call `clearDynamicRoutes()` to remove all dynamic routes
+Menu failure also sets menusLoaded=true. Inspect idle/loading/loaded/failed state as well; retryLoadMenus resets then reloads. Operational recovery belongs in the Wiki.
 
 ---
 
 ## 6. Component Design Patterns
 
-### Page Components (Views)
+Separate reactive data, loading/form state, actions and templates. Domain modules own API/types, Composables own reusable logic, and business components may be colocated with views. See the actual [user view](../omni-frontend/src/views/system/user/index.vue), rather than maintaining a second “runnable” page with missing imports or ellipses.
 
-Page components follow a standard **data + operations + UI** three-layer structure:
+Release loading in finally, await validation before submitting, and apply button permissions plus server checks. New actions should distinguish user cancellation from real failure instead of treating every catch as cancellation. Existing handling remains source-defined.
 
-```vue
-<script setup lang="ts">
-// 1. Imports (API, types, components, i18n)
-import { ref, reactive, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { listUsers, createUser, type SysUser } from '@/api/user'
-
-const { t } = useI18n()
-
-// 2. Reactive state
-const tableData = ref<SysUser[]>([])
-const total = ref(0)
-const currentPage = ref(1)
-const pageSize = ref(10)
-const loading = ref(false)
-
-// 3. Form state
-const dialogVisible = ref(false)
-const formRef = ref<FormInstance>()
-const form = reactive({ username: '', password: '' })
-const rules: FormRules = { username: [{ required: true, ... }] }
-
-// 4. Business functions
-async function loadData() { loading.value = true; try { ... } finally { loading.value = false } }
-function handleCreate() { dialogVisible.value = true }
-async function handleSubmit() { await formRef.value?.validate(); ... }
-async function handleDelete(id: number) { await ElMessageBox.confirm(...); ... }
-</script>
-```
-
-### Shared Components (Components)
-
-- General-purpose UI components go in `src/components/`
-- Business-specific components are co-located with their corresponding views
-- Components use UpperCamelCase (`<UserCard />`); files use kebab-case directories
-
-### Component Communication Patterns
-
-| Scenario | Pattern | Example |
-|----------|---------|---------|
-| Parent-child | `defineProps<T>()` + `defineEmits<T>()` | `<LoginForm @login-success="onLogin" />` |
-| Cross-component state | Pinia Store | `useUserStore().token` |
-| Logic reuse | Composable | `useDictOptions('dict_type_code')` |
-| Slot extension | `<slot>` + named slots | `<template #header>...</template>` |
+Use defineProps/defineEmits for parent-child communication, Pinia for shared client state and slots for UI extension. Inferred types do not validate runtime payloads.
 
 ---
 
 ## 7. Component Conventions
 
-### SFC Element Order
+New Vue SFCs follow `<script setup lang="ts">` → `<template>` → `<style scoped>`. Pages commonly use kebab-case directories with index.vue. Shared components may use UpperCamelCase filenames such as LoginForm.vue/LanguageSelector.vue; page directory conventions do not dictate every component filename.
 
-```vue
-<script setup lang="ts">
-// Script first
-</script>
-
-<template>
-  <!-- Template middle -->
-</template>
-
-<style scoped lang="scss">
-/* Styles last */
-</style>
-```
-
-### Rules
-
-- All components use `<script setup lang="ts">`
-- Props: use `defineProps<T>()` with TypeScript generics
-- Directory: kebab-case directory + `index.vue` (e.g., `views/login/index.vue`)
-- Styles: `<style scoped lang="scss">` for per-component isolation
-- Global styles go in `src/styles/`
-- No `!important` except when overriding third-party component styles
+Type props/events with defineProps/defineEmits. Scope component styles and keep global styles in src/styles; third-party overrides need a clear scope. Dates, money and shared response types follow the [API contract](api-contract.en.md) and [AGENTS](../AGENTS.md), without a competing format.
 
 ---
 
 ## 8. Naming Conventions (TypeScript)
 
-| Type | Style | Example |
-|------|-------|---------|
-| Variable / Function | lowerCamelCase | `getUserById`, `userList` |
-| Interface / Type | UpperCamelCase | `ApiResponse`, `UserInfo` |
-| Component file | kebab-case dir + `index.vue` | `views/login/index.vue` |
-| Store file | kebab-case | `stores/user.ts` |
-| Store hook | `use` prefix | `useUserStore` |
-| Composable | `use` prefix | `useDictOptions` |
-| Constant | UPPER_SNAKE_CASE | `MAX_PAGE_SIZE` |
-| CSS class | kebab-case | `sidebar-menu`, `login-container` |
+| Object | New-code convention |
+|---|---|
+| Variables/functions | lowerCamelCase |
+| Interfaces/types/components | UpperCamelCase |
+| Page directories | kebab-case + index.vue |
+| Store/domain files | Follow current domain entry points; prefer kebab-case for new files |
+| Store/state Composables | use prefix |
+| Constants/CSS classes | UPPER_SNAKE_CASE / kebab-case |
+
+Historical myJob.ts/systemJob.ts still exist; conventions do not claim a completed bulk rename. Plain helpers do not require Ref returns or Hook names merely because they live in composables. New code comments use Chinese as required by AGENTS.
 
 ---
 
 ## 9. Code Format (TypeScript / Vue)
 
-- Indentation: 2 spaces
-- No semicolons (ASI style)
-- Single quotes; double quotes in JSX
-- Trailing commas in multi-line structures
-- Use `import type { ... }` for type-only imports
-- Use `@` path alias for `src/` imports
-- Vue SFC order: `<script setup>` → `<template>` → `<style scoped>`
+[eslint.config.mjs](../omni-frontend/eslint.config.mjs) checks two-space indentation, no semicolons, single quotes, multiline trailing commas and SFC block-order. lint uses `--max-warnings 0`, so warn-level findings still fail that command. Node-script globals/no-console exceptions do not change src rules.
+
+[tsconfig.json](../omni-frontend/tsconfig.json) enables strict, noUnusedLocals/noUnusedParameters, noFallthroughCasesInSwitch, bundler resolution and noEmit; @/* maps src/*. These checks do not certify backend permissions or every historical naming/style rule.
 
 ---
 
 ## 10. UI Framework
 
-- **Element Plus** as the UI component library (forms, tables, cards, menus, etc.)
-- **@element-plus/icons-vue** for icons (globally registered in `main.ts`)
-- Use Element Plus CSS variables for theme customization (`--el-color-primary`, `--el-bg-color-page`, etc.)
-- Form validation: Element Plus `FormRules` + `ref<FormInstance>()` pattern
-- Dark mode: automatic toggle via `theme-chalk/dark/css-vars.css`
+[installElementPlus](../omni-frontend/src/plugins/element-plus.ts), called by main, registers its explicit component/icon/loading-directive lists, not the entire icon library. Globe aliases Connection. Keep iconMap references consistent with the actual registry.
 
-```typescript
-// Standard form validation pattern
-const formRef = ref<FormInstance>()
-const rules: FormRules = {
-  username: [{ required: true, message: 'Username is required', trigger: 'blur' }],
-}
-
-async function handleSubmit() {
-  await formRef.value?.validate()  // Proceed only after validation passes
-  // ... submit logic
-}
-```
+main imports base/dark-variable CSS; initTheme/setTheme applies the document.documentElement dark class. appStore owns theme defaults/persistence; CSS import alone does not switch themes. Use reactive rules and t() when form validation copy must follow locale changes; each view owns its actual implementation.
 
 ---
 
 ## 11. Internationalization (i18n)
 
-### Configuration
+[i18n/index.ts](../omni-frontend/src/i18n/index.ts) uses legacy=false and `zh-CN/en-US/ja-JP/ko-KR`, stored under omni-lang. Invalid/missing preferences default to zh-CN; missing keys fall back to en-US. Noncomponent contexts use translate() on the same instance.
 
-Based on `vue-i18n` 11.x, using Composition API mode (`legacy: false`):
+[LanguageSelector](../omni-frontend/src/components/LanguageSelector.vue) updates locale and calls storeLang, which persists and sets HTML lang. [App.vue](../omni-frontend/src/App.vue) maps locale to Element Plus ElConfigProvider, falling back to enUS for an unknown mapping. Writing localStorage alone does not change reactive language.
 
-```typescript
-// i18n/index.ts
-const i18n = createI18n({
-  legacy: false,
-  locale: getStoredLang(),        // Read from localStorage, defaults to 'zh-CN'
-  fallbackLocale: 'en-US',
-  // Current SUPPORTED_LOCALES = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR']; new modules must cover all four
-  messages: { 'zh-CN': zhCN, 'en-US': enUS, 'ja-JP': jaJP, 'ko-KR': koKR },
-})
-```
+New messages keep matching key structure in all four locale files; menu keys also update menuI18nMap. Do not translate API/protocol identifiers or put another language's text in an example labeled as a specific source locale. File presence/fallback does not replace semantic or UI verification.
 
-### Usage
-
-```typescript
-// Inside a component
-const { t, locale } = useI18n()
-const label = t('common.dashboard')
-
-// Switch language
-locale.value = 'en-US'
-storeLang('en-US')  // Persist to localStorage
-```
-
-### Translation File Structure
-
-Translation files are located in `src/locales/`, organized by module keys:
-
-```typescript
-// zh-CN.ts
-export default {
-  common: {
-    dashboard: '仪表盘',
-    systemManagement: '系统管理',
-    userManagement: '用户管理',
-    // ...
-  },
-  login: {
-    title: '登录',
-    username: '用户名',
-    // ...
-  },
-  // ...
-}
-```
-
-### i18n Checklist for New Modules
-
-| Step | File | Action |
-|------|------|--------|
-| 1 | `src/locales/zh-CN.ts` | Add `common.<feature>Management` and feature-level translation keys |
-| 2 | `src/locales/en-US.ts` | Add corresponding English translations |
-| 3 | `src/constants/menu.ts` → `menuI18nMap` | Add `permissionCode → i18n key` mapping |
+Router recomputes dynamic titles from menu mappings and public titles from docTitle during navigation. Same-page language switching does not guarantee an immediate document.title update. Key parity, hardcoded-text audit, document AI_REVIEW and actual browser coverage are distinct checks.
 
 ---
 
 ## 12. Permission & Access Control
 
-### Permission Store (`src/stores/permission.ts`)
+The permissions array is expected from JWT scope; roles comes separately from roles. Local decoding validates neither signatures nor the claims schema. With the expected array, hasPermission checks exact string membership and does not automatically grant wildcard access to SUPER_ADMIN or a role name.
 
-`usePermissionStore` manages the permission code list and dynamic menu tree:
+`GET /api/auth/menus` supplies the menu tree; DIRECTORY/MENU groups/routes nodes, while path is materialized. Client visibility does not prove backend authorization. v-permission sets display:none or restores empty display in mounted/updated without removing DOM. An empty binding is not a security denial mechanism.
 
-```typescript
-// Initialize permission codes from JWT token
-permissionStore.initFromToken()
+Route access also uses management, supplier and asset-self-service policies in [access.ts](../omni-frontend/src/utils/access.ts). Backend authentication, endpoint permissions/row ownership, tenant and data scope are the security boundary; client paths/buttons do not replace them. Domain facts document existing service limits.
 
-// Load dynamic menus from backend
-await permissionStore.loadMenus()
-
-// Check if user has a specific permission
-permissionStore.hasPermission('system:user:create')
-```
-
-**Data sources**:
-- Permission code list: `authorities` field in the JWT Token (written at login, parsed via `getPermissionsFromToken()`)
-- Dynamic menu tree: `GET /api/auth/menus` call (backend filters by user permissions)
-
-### Dynamic Menu Routing
-
-After a successful login, the navigation guard triggers the following flow:
-
-```
-JWT decode → permissionStore.initFromToken() extracts permission codes
-    → permissionStore.loadMenus() fetches backend-filtered menu tree
-    → registerDynamicRoutes() iterates the menu tree to add Vue Router routes
-    → Sidebar renders permissionStore.menuTree
-```
-
-The menu data structure (`MenuNode`) includes fields such as `path` (frontend route path), `permissionCode` (permission code), and `type` (DIRECTORY/MENU).
-
-### Button-Level Permission (`v-permission`)
-
-The Vue custom directive `v-permission` controls button visibility:
-
-```vue
-<!-- Only visible to users with system:user:create permission -->
-<el-button v-permission="'system:user:create'" type="primary">
-  Create
-</el-button>
-```
-
-**Implementation details**:
-- On directive mount, queries permission codes from `usePermissionStore`
-- When permission is absent, sets `el.style.display = 'none'` (not `removeChild`, to stay compatible with Vue reactivity)
-- Checks are performed in both `mounted` and `updated` hooks
-
-**Registration** (`src/directives/permission.ts`):
-
-```typescript
-// Register in main.ts
-import { setupPermissionDirective } from '@/directives/permission'
-setupPermissionDirective(app)
-```
-
-### Rules
-
-- Permission codes must match those defined in the backend `sys_permission` table, in the format `resource:action`
-- The `v-permission` directive is for UI-layer visibility control only; the backend `@PreAuthorize` is the actual security boundary
-- Dynamic routes must wait for `permissionStore.loadMenus()` to complete before registration in the navigation guard
-- On logout, `permissionStore.reset()` must be called to clear permission state
-
-### XSS Protection Configuration Management
-
-The XSS protection management page (`views/system/xssconfig/index.vue`) provides a global toggle and blacklist rule CRUD:
-
-- **Global toggle**: `el-switch` component, calls `PUT /api/auth/xss-config/toggle`
-- **Rule list**: `el-table` paginated table, supporting create, edit, delete, and per-rule enable/disable
-- **Tenant isolation**: API layer extracts `tenant_id` from JWT Token and passes it via the `X-Tenant-Id` request header
-- **Rule types**: HTML tags / event handlers / dangerous protocols / custom regex
+The [API contract](api-contract.en.md) owns XSS configuration endpoints, errors and tenant rules. Sending X-Tenant-Id does not make arbitrary client identity trusted; Gateway overwrites it from validated identity. Logout must clear the whole session, not merely hide menus.
 
 ---
 
 ## 13. Business Module Structure Pattern
 
-When adding a new business module, follow these conventions for directory organization, route registration, and i18n configuration.
+Organize views, APIs, optional stores and four-language locales by domain, covering CRM/SRM/Procurement/Asset and platform features. src/types/api.ts alone owns shared response types.
 
-### Standard Directory Layout
-
-Using "Base Data module → Dictionary management" as an example:
-
-```
-src/
-├── views/
-│   └── base/                  # Module group directory
-│       └── dict/
-│           └── index.vue      # Feature page (SFC order: script → template → style)
-├── api/
-│   └── dict.ts               # API functions + TypeScript interfaces (one file per feature domain)
-├── stores/
-│   └── dict.ts               # (Optional) Only create when complex client-side state is needed
-└── locales/
-    ├── zh-CN.ts              # Chinese translations
-    └── en-US.ts              # English translations
-```
-
-### Registration Checklist
-
-Each new business module requires the following registrations:
-
-| Step | File | Action |
-|------|------|--------|
-| 1 | `src/router/index.ts` → `iconMap` | Add `'<module>:<feature>': '<IconName>'` (e.g., `'base:dict': 'Collection'`) |
-| 2 | `src/constants/menu.ts` → `menuI18nMap` | Add i18n key mappings for module directory and menu items |
-| 3 | `src/locales/zh-CN.ts` + `en-US.ts` + `ja-JP.ts` + `ko-KR.ts` | Add `common.<module>Management` (directory name), `common.<feature>Management` (menu name), and feature-level translation keys across all four locales |
-| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | Add idempotent DIRECTORY (module group) + MENU (feature page) + BUTTON/API (operation permission) seeds and refresh the seed manifest |
-| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | Idempotently assign new permission nodes to SUPER_ADMIN and add natural-key assertions |
-
-### Reference Implementation: Dictionary Management Module
-
-Use `base:dict` (Dictionary Management) as a reference template for new modules:
-
-- **View**: `views/base/dict/index.vue` — master-detail layout (left: type list 10/24 cols, right: data list 14/24 cols)
-- **API**: `api/dict.ts` — 11 typed functions (`listDictTypes`, `getDictType`, `createDictType`, `updateDictType`, `deleteDictType`, `toggleDictTypeStatus`, `listDictData`, `createDictData`, `updateDictData`, `deleteDictData`, `refreshDictCache`)
-- **Permission codes**: `dict:type:*` (4) + `dict:data:*` (5)
-- **UI patterns**: `v-permission` button permission control, `el-switch` status toggle, `el-pagination` pagination, `ElMessageBox.confirm` delete confirmation, `X-Tenant-Id` multi-tenant isolation
+Keep router iconMap, constants/menu.ts menuI18nMap, backend sys_permission/sys_role_permission, directives and endpoint permissions aligned; seed changes refresh manifest digests/assertions. The [scaffold guide](guides/scaffold-development.en.md) owns onboarding procedures. Current examples are the [dictionary view](../omni-frontend/src/views/base/dict/index.vue) and [API](../omni-frontend/src/api/dict.ts).
 
 ---
 
 ## 14. Composables Pattern
 
-Composables are the core logic reuse mechanism in the Omni-Stack frontend, replacing the traditional Mixin pattern.
+State-bearing composables return named Ref, ComputedRef and operation functions by functional domain; plain helpers return their declared values. Side effects need an owner: component resources end with their scope, while a shared module cache owns its context observer.
 
 ### Design Principles
 
-| Principle | Description |
-|-----------|-------------|
-| **Single responsibility** | A Composable focuses on one functional domain only |
-| **Return value convention** | Returns a `{ state, computed, actions }` object, consumed via destructuring |
-| **Reactive** | Uses `ref()` / `reactive()` internally; return values are automatically reactive |
-| **Lifecycle-safe** | Manages side effects within `onMounted` / `onUnmounted` |
+| Principle | Constraint |
+| --- | --- |
+| Single responsibility | Organize by functional domain; reuse shared ApiResponse/PageResult |
+| Reactive returns | When exposing reactive state, Return refs/computed to preserve updates after destructuring; Vue templates unwrap them |
+| Context ownership | Caches and pending requests distinguish tenant and identity context |
+| Lifecycle | Component observers stop with their scope; a module observer is owned separately and stops on context replacement or HMR |
 
 ### Example Composable: useDictOptions
 
 ```typescript
-// composables/useDictOptions.ts
-export function useDictOptions(dictTypeCode: string) {
-  const options = ref<DictOption[]>([])
-  const loading = ref(false)
+import { useDictOptions } from '@/composables/useDictOptions'
 
-  async function loadOptions() {
-    loading.value = true
-    try {
-      const { data: res } = await listDictDataByType(dictTypeCode)
-      options.value = res.data.map(item => ({
-        label: item.dictLabel,
-        value: item.dictValue,
-      }))
-    } finally {
-      loading.value = false
-    }
-  }
-
-  onMounted(loadOptions)
-
-  return { options, loading, reload: loadOptions }
-}
+const { options, loading } = useDictOptions('workflow_category')
 ```
 
-**Usage**:
+`useDictOptions(typeCode)` returns `{ options, loading }`: options is `ComputedRef<DictOption[]>`, loading is `Ref<boolean>`. It calls authenticated `getDictOptions()`. There is no public `reload` method or `listDictDataByType()` call.
 
-```vue
-<script setup lang="ts">
-const { options: categoryOptions } = useDictOptions('workflow_category')
-</script>
+The cache key combines tenant ID and typeCode; requests in progress are shared within the same tenant and Token. A tenant change switches the options view, and a Token change invalidates old requests. Completed cache entries for the same tenant can still be reused. An old response populates the cache only while valid and its Token unchanged; its completion cannot remove a newer pending entry.
 
-<template>
-  <el-select v-model="form.category">
-    <el-option v-for="opt in categoryOptions" :key="opt.value"
-               :label="opt.label" :value="opt.value" />
-  </el-select>
-</template>
-```
+The module owns an identity-observer scope independent of consumers. Logout still clears the cache and blocks old responses after the last consumer is destroyed. No options request is sent when the decoded tenant value is falsy; this client check validates neither JWT signatures nor the claims schema. Component unmount does not itself expire shared cache; refreshing backend Redis does not refresh client memory.
+
+Templates bind loading through normal Ref unwrapping; scripts use `.value`. The source links cover this contract and 8 regressions against the actual composable and Vue. Step-by-step operations belong in the Wiki.
+
+[dict.ts](../omni-frontend/src/api/dict.ts) / [useDictOptions.ts](../omni-frontend/src/composables/useDictOptions.ts) / [dict-options.test.ts](../omni-frontend/tests/base/dict-options.test.ts)
 
 ### Existing Composables
 
-| Composable | File | Responsibility |
-|------------|------|----------------|
-| `useDictOptions` | `composables/useDictOptions.ts` | Loads dictionary options, returns a reactive `options` array |
-| `useBpmnModeler` | `composables/useBpmnModeler.ts` | Manages bpmn-js Modeler creation, destruction, and import/export |
-| `useBpmnExtension` | `composables/useBpmnExtension.ts` | Read/write operations on BPMN extensionElements |
+| Source | Responsibility |
+| --- | --- |
+| [useDictOptions.ts](../omni-frontend/src/composables/useDictOptions.ts) | Tenant option cache, context observer and loading state |
+| [useBpmnModeler.ts](../omni-frontend/src/composables/useBpmnModeler.ts) | bpmn-js modeler initialization, import/export and onBeforeUnmount destruction |
+| [useBpmnExtension.ts](../omni-frontend/src/composables/useBpmnExtension.ts) | BPMN extension read/write functions such as readAssignment/writeAssignment |
+
+[Flow 9](core-flows.en.md)
+
+That isolation belongs to useDictOptions, not permissionStore menu requests. useBpmnModeler initializes after its container is ready, imports/exports and removes keydown/destroys on unmount. useBpmnExtension exports plain extension functions and moddle descriptors. They do not share dictionary request state, and those 8 regressions do not certify universal async cancellation, readonly behavior or browser lifecycle.
 
 ---
 
-## 15. Vite Build Optimization for Docker Deployment
+## 15. Build and Static Serving Boundaries
 
-### Multi-Stage Build
+The [frontend Dockerfile](../docker/frontend/Dockerfile) builds with Node 22 and serves dist with Nginx 1.28 on 3000. Current [Nginx](../docker/frontend/nginx.conf) proxies /api/, /oauth2/ and /.well-known/ to omni-gateway:8080 using Docker DNS and provides index.html history fallback.
 
-The frontend Docker image uses a two-stage build (see `docker/frontend/Dockerfile`):
-
-```dockerfile
-# Stage 1: Build
-FROM node:22-alpine AS builder
-WORKDIR /app
-COPY omni-frontend/package*.json ./
-RUN npm ci                      # Deterministic install (locked versions)
-COPY omni-frontend/ .
-RUN npm run build               # vue-tsc type check + Vite production build
-
-# Stage 2: Serve (Nginx static server)
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
-```
-
-### Vite Build Configuration
-
-```typescript
-// vite.config.ts
-build: {
-  target: 'es2020',            // Build target: supports optional chaining, nullish coalescing, etc.
-  outDir: 'dist',
-  chunkSizeWarningLimit: 750, // current repo threshold
-}
-```
-
-### Production Build Optimization Highlights
-
-| Optimization | Description |
-|--------------|-------------|
-| **Route lazy loading** | All view components use `() => import()` dynamic imports for on-demand loading |
-| **Element Plus on-demand** | Explicitly import and register the components actually used via `src/plugins/element-plus.ts` (not plugin auto tree-shake) |
-| **`import.meta.glob`** | View module scanning is statically analyzed at compile time; unrelated files are not bundled |
-| **Chunk splitting** | `build.rollupOptions.output.manualChunks` in `vite.config.ts` explicitly splits bpmn, vendor, and Element Plus into separate chunks |
-| **CSS extraction** | Production builds automatically extract CSS into separate files for browser caching |
-
-### Nginx Configuration Highlights
-
-```nginx
-server {
-    listen 3000;  # container listens on 3000 (matches Compose host 3000 → container 3000)
-    root /usr/share/nginx/html;
-    index index.html;
-
-    # SPA History mode: fallback all non-file requests to index.html
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # API reverse proxy to Gateway (internal container port)
-    location /api/ {
-        proxy_pass http://omni-gateway:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    # OAuth2 endpoint proxy
-    location /oauth2/ {
-        proxy_pass http://omni-gateway:8080;
-    }
-}
-```
+HTML uses no-cache/no-store, assets one-year immutable caching. Locations declaring add_header explicitly repeat security headers. These are configuration facts, not claims that this stage started services or verified proxy/cache behavior. [Docker deployment](docker-deployment.en.md) and [quick start](guides/quick-start.en.md) own operations and persistence.
 
 ---
 
 ## 16. Build & Tooling
 
-| Tool | Purpose | Config |
-|------|---------|--------|
-| Vite 8 | Dev server + bundler | `vite.config.ts` |
-| TypeScript 5.9 | Type checking | `tsconfig.json` (strict mode) |
-| ESLint 9 | Linting | `eslint.config.mjs` (flat config) |
-| Sass | CSS preprocessing | via `<style lang="scss">` |
-| vue-i18n 11 | Internationalization | `src/i18n/index.ts` |
-| bpmn-js 18 | BPMN process modeling | `composables/useBpmnModeler.ts` |
+package.json defines build=`vue-tsc -b && vite build`, lint=`eslint . --max-warnings 0`, and unit/E2E/screenshot/language-audit commands. Vite uses es2020, dist, a 750 KB warning threshold and bpmn-vendor/element-plus/vue-vendor chunks. Its development target `http://localhost:8102` means the Vite process network, not container-to-container routing.
 
-### Vite Proxy
-
-The dev server proxies `/api`, `/oauth2`, and `/.well-known` to `http://localhost:8102` (Gateway):
-
-```typescript
-server: {
-  port: 3000,
-  host: true,
-  proxy: {
-    '/api': { target: 'http://localhost:8102', changeOrigin: true },
-    '/oauth2': { target: 'http://localhost:8102', changeOrigin: true },
-    '/.well-known': { target: 'http://localhost:8102', changeOrigin: true },
-  },
-},
-```
-
-### Commands
-
-```bash
-npm install        # Install dependencies
-npm run dev        # Dev server on :3000
-npm run build      # Type check + production build
-npm run lint       # ESLint check
-npm run preview    # Preview production build
-```
+Applications, builds, tests and browser validation run in local Docker. [AGENTS](../AGENTS.md) owns exact commands. Use the lockfile/npm ci; source changes require affected build/lint/tests, and E2E changes also require their TypeScript check. Documentation edits do not repeatedly reopen unchanged expensive validation; reuse requires source-digest/commit equivalence. Generated presets still require their own checks.
 
 ---
 
 ## 17. Troubleshooting Guide
 
-### Development Environment Issues
+The [troubleshooting guide](guides/troubleshooting.en.md) owns startup/network/build/login/menu/language operations and recovery; [source debugging](wiki/source-debugging.en.md) owns call chains and breakpoints.
 
-| Problem | Possible Cause | How to Investigate |
-|---------|---------------|-------------------|
-| **Vite startup error `EADDRINUSE`** | Port 3000 is occupied | `lsof -i :3000` or `netstat -ano \| findstr :3000`; kill the process or change `server.port` in `vite.config.ts` |
-| **API requests return 404** | Gateway not running or proxy misconfigured | Verify Gateway is running on port 8102; check proxy target in `vite.config.ts` |
-| **CORS errors** | Requests bypass the proxy and hit the backend directly | Ensure requests go through the `/api` prefix via the Vite proxy |
-| **Missing Element Plus styles** | CSS not imported | Verify `main.ts` includes `import 'element-plus/dist/index.css'` |
-| **TypeScript type errors** | Stale `node_modules` cache | `rm -rf node_modules && npm install` |
-| **HMR not working** | File system watcher limit | Linux: `echo fs.inotify.max_user_watches=524288 \| sudo tee -a /etc/sysctl.conf` |
-
-### Build Issues
-
-| Problem | Possible Cause | How to Investigate |
-|---------|---------------|-------------------|
-| **`vue-tsc` type check fails** | Type mismatch | Run `npx vue-tsc --noEmit` to locate the specific file and line number |
-| **Chunk size too large** | Dependencies not tree-shaken | Run `npx vite build --mode analyze` to inspect dependency sizes |
-| **Docker build `npm ci` fails** | Network issues or `package-lock.json` out of sync | Re-run `npm install` locally to regenerate the lock file, or configure an npm mirror |
-
-### Runtime Issues
-
-| Problem | Possible Cause | How to Investigate |
-|---------|---------------|-------------------|
-| **Blank screen after login** | Invalid token or menu load failure | Open DevTools → Application → Local Storage to check token; check `/api/auth/menus` response in Network tab |
-| **Dynamic menus not displayed** | `permissionStore.loadMenus()` failed | Verify backend `/api/auth/menus` returns correctly; check `menusLoaded` state |
-| **v-permission button always hidden** | Permission code mismatch | Compare `permission_code` in `sys_permission` table with the frontend `v-permission` value |
-| **OAuth2 callback 404** | Incorrect redirect_uri configuration | Verify that the OAuth2 client's redirect_uri in the Auth service matches the actual callback URL |
-| **i18n shows keys instead of translations** | Missing translation keys | Check if `zh-CN.ts` / `en-US.ts` contains the corresponding keys; verify `menuI18nMap` mappings |
-| **SPA route refresh returns 404** | Nginx fallback not configured | Ensure Nginx config includes `try_files $uri $uri/ /index.html;` |
+Preserve actual HTTP/R.code, trace and error origin; inspect identity, menu state/view mapping, permissions and translation separately. Do not conceal failure by changing default ports, clearing shared caches or disabling gates. Record source inspection, tests, static configuration, browser and real-business evidence distinctly.

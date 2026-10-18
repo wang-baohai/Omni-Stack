@@ -1,624 +1,424 @@
 # Backend Patterns & Conventions
 
-> This document defines the internal organization of the Omni-Stack backend. All backend code must follow these patterns.  
-> For an architecture overview, see [architecture.en.md](architecture.en.md). For Docker deployment configuration, see [docker-deployment.en.md](docker-deployment.en.md).
+> This document owns backend layering, coding conventions and common capability boundaries. Requirements apply to new or modified code; they do not certify all historical code or business flows.
+> See [Architecture](architecture.en.md) for modules and trust, [API Contract](api-contract.en.md) for wire behavior, and [Docker Deployment](docker-deployment.en.md) for deployment variables. Wiki pages and development guides own complete procedures.
 
 ## Layering
 
-```
-Controller --> Service --> Repository (DAO)
-     |            |            |
-  Param check   Business     Data access
-  Result wrap   logic        SQL / ORM
-                Transaction
+```text
+Controller --> Service --> Mapper (DAO)
+HTTP/validation   Domain rules   SQL/data access
+                  Local transaction boundary
 ```
 
 ### Controller Layer
 
-- **Responsibility**: Receive HTTP requests, validate parameters, call Service, wrap response
-- **No business logic** in Controller
-- All methods return `R<T>` (success) or `R<PageResult<T>>` (paginated)
-- Request DTOs validated with `@Valid` (Jakarta Bean Validation)
-- DTOs can be inner static classes of the Controller or standalone files
-- RESTful style: `GET /user/{id}`, `POST /user`, `GET /user/list`
+- Receive HTTP input, trigger declared constraints, enforce entry permissions and identity, then call a Service. Services own domain transitions and persistence rules.
+- Ordinary business APIs use `R<T>` or `R<PageResult<T>>`. OAuth/OIDC, redirects and Actuator endpoints retain their protocol responses.
+- `@Valid` triggers declared DTO constraints; it does not establish tenant ownership, visibility, uniqueness or valid business state. DTOs may be separate classes or static nested classes.
+- Actual Controllers define paths, methods and fields. Illustrations and excerpts are not complete callable APIs. New write endpoints require matching permission seeds, migration checks and frontend permissions.
 
 ### Service Layer
 
-- **Interface + Implementation**: `XxxService` (interface) + `XxxServiceImpl` (class)
-- `@Service` annotation on the implementation class
-- `@Transactional` on implementation methods:
-  - Read operations: `@Transactional(readOnly = true)`
-  - Write operations: `@Transactional`
-- No `HttpServletRequest` / `HttpServletResponse` in Service layer
-- Constructor injection via `@RequiredArgsConstructor` + `final` fields
+- Use `XxxService` and `XxxServiceImpl`, mark business implementations `@Service`, and inject dependencies through constructors.
+- Declare transactions at local boundaries that need atomicity. Choose read-only transactions according to consistency requirements; this convention does not mean every existing method has a transaction.
+- New domain Services should accept explicit identity, tenant and business parameters, keeping HTTP objects in adapters. Handle historical exceptions according to the module contract.
 
 ### Repository / DAO Layer
 
-- Use MyBatis-Plus or JPA; Mapper interface naming: `XxxMapper`
-- No business logic in Mapper
-- SQL parameters: always `#{}`, never `${}` (prevent SQL injection)
+- Business persistence primarily uses MyBatis-Plus and `XxxMapper`. Flowable manages its own persistence; this does not establish a general project JPA integration.
+- Mappers access data; Services make domain decisions. Bind values with `#{}`. Dynamic table, column and ordering identifiers must come from controlled mappings, never raw user input.
+- Check tenant and data scope explicitly for custom SQL, child joins and cross-tenant background tasks. Adding a Starter does not prove every SQL path is protected.
 
 ## Dependency Injection (DI)
 
+This constructor-injection illustration omits imports and does not introduce a production Controller.
+
 ```java
-// CORRECT: Constructor injection via Lombok
+// 构造器注入示意，省略 imports
 @RequiredArgsConstructor
 @RestController
 public class UserController {
     private final UserService userService;
 }
-
-// FORBIDDEN: Field injection
-@Autowired
-private UserService userService;
 ```
 
-**Rule**: All dependency injection must use `@RequiredArgsConstructor` + `final` fields. `@Autowired` field injection is forbidden.
+Do not use `@Autowired` field injection. Prefer `@RequiredArgsConstructor` with `final` fields. Explicit constructors, `@Bean` methods or `ObjectProvider` can express `@Lazy`, optional dependencies or initialization branches; see OperLogProducer and OperLogAutoConfiguration.
 
 ### Design Rationale: Why @RequiredArgsConstructor Instead of @Autowired
 
-| Consideration | Rationale |
-|---------------|-----------|
-| **Immutability** | `final` fields ensure dependencies cannot be changed once constructed, preventing accidental replacement at runtime |
-| **Compile-time safety** | Missing dependencies cause compile errors, not runtime `NullPointerException` |
-| **Test-friendliness** | Constructor injection allows passing Mock objects directly in tests, without a Spring container or reflection utilities |
-| **Clarity** | All dependencies are visible in the class constructor, no need to scan all fields for `@Autowired` |
-| **Spring official recommendation** | The Spring team has recommended constructor injection since 4.x; field injection was marked as discouraged after 5.x |
+| Consideration | Benefit and limit |
+|---|---|
+| Visible dependencies | Constructors show what an object needs; tests can supply mocks directly |
+| Stable fields | `final` prevents reassignment, not mutation or concurrent misuse of the referenced object |
+| Failure diagnosis | Missing arguments in manual construction can fail compilation; missing or ambiguous Spring beans and configuration can still fail at startup |
+| Optional capabilities | Optionality needs explicit handling; Lombok does not remove runtime conditions |
 
 ## Validation
 
-- Use Jakarta Bean Validation annotations on request DTOs
-- Trigger validation with `@Valid` on Controller method parameters
-- `MethodArgumentNotValidException` and `BindException` are caught globally by `GlobalExceptionHandler`
+Use Jakarta Bean Validation with `@Valid @RequestBody`. This CreateDictTypeRequest excerpt omits other fields and imports. The four language versions preserve actual Chinese diagnostics in source excerpts.
 
 ```java
-@Data
-public static class CreateUserRequest {
-    @NotBlank(message = "Username is required")
-    private String username;
-    @NotBlank(message = "Email is required")
-    private String email;
-}
+/** 字典类型编码 */
+@NotBlank(message = "字典类型编码不能为空")
+private String typeCode;
+
+/** 字典类型名称 */
+@NotBlank(message = "字典类型名称不能为空")
+private String typeName;
 ```
+
+Matching MVC advice handles validation failures, missing parameters and type mismatches. Services still validate tenant, permissions, resources and state. Nested objects, collection elements and method parameters depend on their actual declarations and invocation paths.
 
 ## Exception Handling
 
 ### BusinessException
 
+These are two independent examples. The single-argument constructor uses business code 500; the two-argument constructor uses the supplied code. Record business codes separately from HTTP status.
+
 ```java
-// Business rule violation
-throw new BusinessException("User not found");           // code: 500
-throw new BusinessException(404, "User not found");      // code: 404
+// 两个独立示例：默认业务码与显式业务码
+throw new BusinessException("资源不存在");
+throw new BusinessException(404, "资源不存在");
 ```
 
 ### GlobalExceptionHandler
 
-Located in `omni-common`, catches all exceptions and converts them to `R<Void>`:
+omni-common auto-configuration imports GlobalExceptionHandler. This table applies when an exception reaches that MVC advice; Gateway, Security Filters, OAuth protocols and errors after response commitment have separate boundaries.
 
-| Exception | Handling |
-|-----------|----------|
-| `BusinessException` | `log.warn` + `R.fail(code, message)` |
-| `MethodArgumentNotValidException` | HTTP 400 + aggregate field errors + `R.fail(400, ...)` |
-| `BindException` | HTTP 400 + aggregate field errors + `R.fail(400, ...)` |
-| `Exception` (catch-all) | `log.error` with full stack + `R.fail("Internal server error")` |
+| Exception | HTTP status | `R.code` and handling |
+|---|---|---|
+| `BusinessException` | Handler sets no status; an otherwise unchanged ordinary response is usually 200 | Carried business code; WARN |
+| `MethodArgumentNotValidException` / `BindException` | 400 | 400; aggregate field errors |
+| `MissingServletRequestParameterException` / `MethodArgumentTypeMismatchException` | 400 | 400; parameter error |
+| `AccessDeniedException` / `AuthorizationDeniedException` | 403 | 403; insufficient permission |
+| `NoResourceFoundException` | 404 | 404; unmatched resource inside a service |
+| `HttpRequestMethodNotSupportedException` | 405 | 405 |
+| `HttpMediaTypeNotSupportedException` | 415 | 415 |
+| Catch-all `Exception` | 500 | 500; ERROR with stack, generic response message |
+
+[API Contract](api-contract.en.md) owns complete error, null, date and monetary serialization behavior. JSON parsing failures are not universally mapped to 400.
 
 ### Rules
 
-- Never use empty `catch` blocks
-- Never use exceptions for flow control
-- NPE defense: use `Optional`, `Objects.requireNonNull()`, early null checks
-- Log exceptions with `log.error("msg", e)` preserving the full stack trace; never `e.printStackTrace()`
+- Handle exceptions that need action. Distinguish expected rejection from unexpected failure. Deliberate fallback catches must explain logs, results and recovery.
+- Check nulls at boundaries; Optional and Objects.requireNonNull do not replace business error contracts.
+- Preserve required stacks through logger exception arguments, not e.printStackTrace(). Keep credentials and personal data out of logs and responses.
 
 ## Logging
 
-Use Lombok `@Slf4j` and the `log` object:
-
-| Level | Usage |
-|-------|-------|
-| `ERROR` | System-level errors requiring immediate attention |
-| `WARN` | Business exceptions, recoverable issues |
-| `INFO` | Key business flow checkpoints |
-| `DEBUG` | Development and debugging |
+Use @Slf4j and parameterized placeholders. Select levels by effect: ERROR for failure, WARN for expected rejection or degradation, INFO for important business milestones and DEBUG for diagnosis.
 
 ```java
-// CORRECT: parameterized placeholder
-log.info("User {} logged in from {}", userId, ip);
-
-// FORBIDDEN: string concatenation
-log.info("User " + userId + " logged in");
-
-// FORBIDDEN: console output
-System.out.println("debug info");
+// 使用占位符，示意日志不包含凭据
+log.info("用户 {} 从 {} 登录", userId, ip);
 ```
 
-- Never log sensitive information (passwords, tokens, ID numbers)
+Do not use System.out.println or concatenate log strings. Passwords, Bearer/Refresh Tokens, client secrets and complete personal information must not enter ordinary logs. OperLog masking rules do not prove arbitrary custom fields are redacted; business code still owns field selection and access. See [Observability](observability.en.md) for tracing, metrics and correlation.
 
 ## OOP Conventions
 
-- All POJO classes implement `Serializable` and declare `serialVersionUID`
-- Use Lombok: `@Data`, `@Getter`, `@Slf4j`, `@RequiredArgsConstructor`
-- Class member order: static constants -> static variables -> instance variables -> constructors -> public methods -> private methods
-- `equals`: put constants/deterministic values on the left: `"success".equals(status)`
-- Wrapper types: use `valueOf()`, never `new Integer()`
-- Float comparison: use `BigDecimal` or specify an epsilon
+- Choose Lombok according to the model. Classes implementing Serializable must declare serialVersionUID; not every DTO, record or domain class needs that interface.
+- Prefer constants, static variables, fields, constructors, public methods, then private methods. Make invariants explicit through encapsulation and responsibilities.
+- A constant equals receiver avoids a null receiver; use valueOf for boxing. Monetary BigDecimal operations need explicit precision, rounding and comparison rules. Approximate floating-point comparisons require domain tolerance.
 
 ## Collection & Concurrency
 
-- Initialize collections with capacity: `new ArrayList<>(16)`, `new HashMap<>(16)`
-- Empty check: use `CollectionUtils.isEmpty()`, not `== null` or `size() == 0`
-- No `remove` during iteration; use `Iterator` or `removeIf()`
-- Map traversal: use `entrySet()`, not `keySet()` then `get()`
-- Thread pools: use `ThreadPoolExecutor`, never `Executors.newXxx()`
-- Concurrent modifications: `ConcurrentHashMap`, `AtomicXxx`; avoid manual locking unless necessary
+- Size collections according to expected use rather than assigning a fixed capacity everywhere. CollectionUtils.isEmpty handles null; isEmpty() is valid for a non-null collection.
+- Modify during iteration through an appropriate Iterator, removeIf or separate phases. Prefer entrySet() when both keys and values are needed.
+- New thread pools need explicit queues, thread limits, rejection policies and shutdown lifecycles. Avoid uncontrolled Executors.newXxx() defaults.
+- ConcurrentHashMap and atomic variables do not protect invariants across objects. Compound updates, database concurrency and approval occupancy follow module locking, versioning or transaction protocols; a concurrent collection is not a concurrency test.
 
 ## Naming Conventions (Java)
 
-| Type | Style | Example |
-|------|-------|---------|
-| Package | lowercase, dot-separated | `com.omni.business.controller` |
-| Class | UpperCamelCase | `UserController`, `BusinessException` |
-| Method / Variable | lowerCamelCase | `getUserById`, `createTime` |
-| Constant | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`, `DEFAULT_PAGE_SIZE` |
-| Boolean variable | No `is` prefix | `deleted`, `enabled` (not `isDeleted`) |
-| Abstract class | `Abstract` prefix | `AbstractEntity` |
-| Exception class | `Exception` suffix | `BusinessException` |
-| Enum class | `Enum` suffix | `OrderStatusEnum` |
-| DTO class | `Request` / `Response` / `VO` suffix | `CreateUserRequest`, `UserVO` |
-| Feign interface | `FeignClient` suffix | `RemoteServiceFeignClient` |
-| Service interface | `XxxService` | `UserService` |
-| Service implementation | `XxxServiceImpl` | `UserServiceImpl` |
-| Mapper interface | `XxxMapper` | `UserMapper` |
+These are conventions for new code; existing names are source facts. OperType has no Enum suffix, for example. Do not rename public types merely for formatting.
+
+| Type | Convention or example |
+|---|---|
+| Package / class / method and variable | Lowercase dot-separated package; UpperCamelCase; lowerCamelCase |
+| Constant / boolean | UPPER_SNAKE_CASE; normally avoid an is field prefix |
+| Abstract class / exception | AbstractXxx / XxxException |
+| Enum / DTO | Meaningful type name; Request, Response or VO according to responsibility |
+| Feign / Service / implementation / Mapper | Follow module naming; XxxService / XxxServiceImpl / XxxMapper |
 
 ## Code Format (Java)
 
-- Indent: 4 spaces, no tabs
-- Max line length: 120 characters
-- Braces: K&R style (opening brace on same line)
-- One blank line between methods
-- Spaces around operators: `a + b`, `if (x == y)`
-- Space after commas: `method(a, b, c)`
-- Max 5 method parameters; encapsulate as Request object if exceeded
-- Import order: `java.*` -> `jakarta.*` -> third-party -> `com.omni.*`, blank line between groups
-- No wildcard imports (`import xxx.*`), except for Controller annotation packages
+Use four-space indentation, K&R braces, spacing around operators and commas, and blank lines between methods in new or modified code. Treat 120 characters and short parameter lists as readability targets; consider a parameter object when appropriate. Existing Controllers can exceed five parameters.
+
+Group imports as java, jakarta, third-party and com.omni. Avoid wildcard imports except Controller annotation packages. The current Maven POM scan found no Checkstyle, Spotless or PMD declaration; successful compilation does not verify these formatting targets.
 
 ## Comments
 
-- Classes, class attributes, and class methods must have Javadoc (`/** ... */`)
-- Use `//` for inline comments explaining key logic
-- No meaningless comments (e.g., `// get name` for `getName()`)
-- TODO format: `// TODO: [module] description`, clean up regularly
-- FIXME format: `// FIXME: description` for known issues
+Document new public classes and methods with Javadoc; explain key fields and non-obvious logic as needed. Code comments are Chinese and should add meaning. Use `// TODO: [module] description`; FIXME must identify the issue and boundary. Conventions are not proof that all historical code complies.
 
 ## Security & Permission
 
 ### Functional Permission (API Authorization)
 
-Controller methods use `@PreAuthorize` to declare required permission codes:
+Ordinary protected business requests rely on Gateway JWT validation, then service verification of trusted identity assertions, Authentication construction and method permissions. Do not trust identity/permission headers supplied directly by clients. [Architecture](architecture.en.md) owns signature coverage and network trust limits.
+
+These two annotations come from the Base dictionary-type update endpoint and do not replace ownership checks:
 
 ```java
-@PreAuthorize("hasAuthority('system:user:create')")
-@PostMapping
-public R<Void> create(@Valid @RequestBody CreateUserRequest request) {
-    userService.createUser(request);
-    return R.ok();
-}
+@PutMapping("/{id}")
+@PreAuthorize("hasAuthority('dict:type:update')")
 ```
 
-- Permission code format: `resource:action` (e.g., `system:user:update`, `system:role:delete`)
-- Permission set is carried in JWT Claims; Spring Security validates before method invocation
-- Returns 403 Forbidden when unauthorized
+Permission codes use resource:action hierarchies, such as dict:type:update. New writes need matching @PreAuthorize, scripts/sql/seed/auth.sql, database/seed/manifest.yaml and frontend v-permission updates. Public registration, OAuth/OIDC, internal Token protocols and MyJobController row ownership follow their own contracts. Ordinary method denial returns 403; classify Filter errors by their actual path.
 
 ### Data Permission (DataPermission)
 
-Implements row-level data filtering based on MyBatis-Plus `DataPermissionInterceptor`, with zero intrusion to business code.
-
-**Core Component Collaboration**:
-
-```
-Gateway → X-User-Id/X-Tenant-Id Header
-    ↓
-DataScopeResolveFilter (@Order(0), OncePerRequestFilter)
-    ↓ Query roles → Merge dataScope (most permissive wins) → Resolve accessible unit IDs
-    ↓
-DataScopeContext (ThreadLocal stores userId, tenantId, primaryUnitId, effectiveScope, accessibleUnitIds)
-    ↓
-DataPermissionInterceptor (MyBatis-Plus InnerInterceptor)
-    ↓ Calls DataPermissionHandlerImpl.getSqlSegment(Table, Expression, String)
-    ↓ Appends WHERE clause only to sys_user table
-    ↓
-Business SQL execution (automatically filtered result set)
-    ↓
-DataScopeContext.clear() (finally block, prevents ThreadLocal leaks)
+```text
+Trusted identity --> Request context --> Permission-aware scope
+    --> Domain table/aggregate policy --> SQL + explicit tenant predicates
+    --> finally: restore/clear context
 ```
 
-**Six-Level Data Scope**:
+Auth MybatisPlusConfig orders DataPermission → OptimisticLock → Pagination, with no general TenantLine. DataPermissionHandlerImpl maps sys_user, sys_org_unit and sys_role. Relevant Mappers/Services still own explicit tenant predicates.
 
-| dataScope | SQL Behavior |
-|-----------|-------------|
-| `ALL` | No additional condition (cross-tenant visible) |
-| `TENANT` | No additional condition (existing tenant_id filter already satisfies) |
-| `DEPT_AND_BELOW` | `WHERE sys_user.primary_unit_id IN (current dept and descendant IDs)` |
-| `DEPT` | `WHERE sys_user.primary_unit_id IN (current dept ID)` |
-| `CUSTOM` | `WHERE sys_user.primary_unit_id IN (custom dept + descendant IDs)` |
-| `SELF` | `WHERE sys_user.id = {current user ID}` |
+| dataScope | Auth sys_user example |
+|---|---|
+| ALL / TENANT | This handler adds no condition; that does not authorize every call across tenants |
+| DEPT_AND_BELOW / DEPT / CUSTOM | Filter primary_unit_id by resolved organization IDs |
+| SELF | Filter id by the current user |
 
-**Multi-Role Merging**: When a user has multiple roles, the highest-priority dataScope is used (ALL > TENANT > DEPT_AND_BELOW > DEPT > CUSTOM > SELF).
+With missing context this Auth handler may also add no predicate; interceptor presence cannot replace entry authorization. Ordinary two-argument role resolution differs from three-argument permission-specific resolution. The latter merges only roles granting the target permission and rejects when no grant matches. [Core Flows](core-flows.en.md) owns all six scopes and precedence.
 
-**Extending Data Permission to New Tables**:
+When common-service persistence is enabled, CRM/SRM/Procurement/Asset use TenantLine → DataPermission → OptimisticLock → Pagination. Domains own table policy, owner mappings, child inheritance through aggregate roots and AccessGuard. TenantLine applies only to domain prefixes; sys_mq_message remains available for cross-tenant relay.
 
-1. Add the target table name and corresponding column mapping in `DataPermissionHandlerImpl`
-2. The target table must contain a foreign key column linking to `sys_user` (e.g., `primary_unit_id`, `create_by`)
-3. `DataPermissionInterceptor` must be registered before `PaginationInnerInterceptor`
+For new tables update the owning service DataScopeTablePolicy/handler. Distinguish owner, current holder, tenant-shared data and child relationships. Do not append owner predicates to tables without those columns or treat organization IDs as user foreign keys. DataPermission precedes Pagination.
 
-**In-Memory Filtering Mode**: For data not from database queries (e.g., online user list from Redis), the Controller reads the data scope from `DataScopeContext.get()` and manually filters by `primaryUnitId`.
+OnlineUserServiceImpl checks Redis online users explicitly: ALL retains cross-tenant behavior; other scopes first establish tenant membership, then SELF or organization scope. Force logout checks targets before Redis changes and success audit. Missing identity, tenant or valid scope produces business code 403. This specific behavior is not a rule for all SQL.
 
 ### ThreadLocal Usage Guidelines
 
-- `DataScopeContext` uses `ThreadLocal<DataScopeInfo>` to store request-scoped context
-- **Must** be cleared in a `try/finally` block to prevent leaks in thread pool scenarios
-- Write timing: Before the `try` block in `DataScopeResolveFilter.doFilterInternal()`
-- Clear timing: In the `finally` block of `DataScopeResolveFilter.doFilterInternal()`
+Auth DataScopeResolveFilter resolves and sets context inside try, then clears it in finally; internal paths have a separate branch. common-service identity Filters and the method DataScope Aspect own separate lifecycles and must restore or clear their context.
+
+DataScopeContext, identity context and XssRuleHolder do not automatically propagate to async work. Pass identity/tenantId explicitly and manage task lifecycles. Reliable messaging must not infer tenants from ThreadLocal.
 
 ### XSS Protection (Three-Layer Defense Architecture)
 
-XSS protection employs three layers of defense, with configuration managed via database + Redis cache, supporting per-tenant isolation.
-
-```
-Layer 1: Jackson StringDeserializer — Automatically sanitizes String fields in @RequestBody JSON
-Layer 2: Servlet Filter + HttpServletRequestWrapper — Sanitizes query parameters
-Layer 3: Gateway WebFilter — Adds security response headers
+```text
+JSON String conversion --> Jackson 2/3 XSS modules + request rules
+Query/form access --> XssHttpServletRequestWrapper
+Gateway response --> SecurityHeadersFilter (no input sanitization)
 ```
 
-**Core Components**:
+In a Servlet environment, omni-common XssAutoConfiguration registers the /* Filter when an XssConfigProvider bean exists, and Jackson 2/3 String modules according to classpath conditions. JSON cleaning needs the actual converter to use its module and request-thread rules. Implementing an unregistered interface is insufficient.
 
-| Component | Module | Responsibility |
-|-----------|--------|----------------|
-| `XssConfigProvider` | omni-common-core | SPI interface, implemented by specific service modules |
-| `XssSettings` / `XssRule` | omni-common-core | Configuration value objects (enabled + rule list) |
-| `XssSanitizer` | omni-common | Core sanitization logic (HTML_TAG / EVENT_HANDLER / DANGEROUS_PROTOCOL / CUSTOM_PATTERN) |
-| `XssStringDeserializer` | omni-common | Jackson String deserializer wrapper, auto-sanitizes |
-| `XssFilter` | omni-common | OncePerRequestFilter, loads config + sets ThreadLocal |
-| `XssHttpServletRequestWrapper` | omni-common | Overrides getParameter/getParameterValues |
-| `XssAutoConfiguration` | omni-common | Auto-registers Filter + Jackson SimpleModule |
-| `XssConfigProviderImpl` | omni-auth | Implements config loading (Redis cache + DB fallback) |
-| `SecurityHeadersFilter` | omni-gateway | Adds X-Content-Type-Options / X-Frame-Options / Referrer-Policy |
+XssFilter loads settings from the tenant header. Missing/unparseable tenants, disabled settings or empty rules pass through. When enabled, it wraps getParameter/getParameterValues and clears rules in finally. It does not override getParameterMap, so not every input access mechanism is covered.
 
-**Rule Types**:
+| ruleType | Current handling |
+|---|---|
+| HTML_TAG | Remove configured tags/paired content; escape pipe-separated tag names as literals |
+| EVENT_HANDLER | Remove event attributes matching the configured pattern |
+| DANGEROUS_PROTOCOL | Remove configured protocols case-insensitively; treat pipe-separated values literally |
+| CUSTOM_PATTERN | Regex replacement; WARN and skip invalid regex rules |
 
-| ruleType | Matching & Sanitization Method |
-|----------|-------------------------------|
-| `HTML_TAG` | Strips paired tags and self-closing tags |
-| `EVENT_HANDLER` | Strips `on*` attributes |
-| `DANGEROUS_PROTOCOL` | Replaces `javascript:` / `vbscript:` / `data:` protocol strings |
-| `CUSTOM_PATTERN` | Custom regex replacement |
+Rule filtering does not replace output encoding or trusted rich-text policies. Gateway headers X-Content-Type-Options: nosniff, X-Frame-Options: DENY and Referrer-Policy are response defenses, not input sanitization.
 
-**Extending to New Services**: Implement the `XssConfigProvider` interface to automatically gain XSS protection. After importing `omni-common` as a dependency, it auto-configures via `AutoConfiguration.imports`.
+Auth XssConfigProviderImpl uses xss:enabled:{tenantId} and xss:rules:{tenantId}, with a 30-minute TTL. XssConfigServiceImpl actively deletes both keys after setting/rule writes; waiting for TTL is insufficient. Deletion is inside the local transaction, not proof of race-free commit/cache refill. Auth Provider also does not catch every Redis failure for automatic database fallback.
 
-**Cache Strategy**: Redis keys `xss:enabled:{tenantId}` + `xss:rules:{tenantId}`, TTL 30 minutes. All write operations (toggle switches, rule CRUD) proactively invalidate the cache.
+common-service CachedServiceXssConfigProvider tries Auth after cache failure, then the enabled DefaultXssSettingsFallback baseline after failure or no result; authoritative disabled settings remain disabled. Verify Provider auto-configuration order, actual Jackson modules and Filter beans together. See [Development Guide](guides/scaffold-development.en.md).
 
 ## MQ Message Sending Records & Compensation Management (omni-common-mqlog)
 
-The MQ message sending records and compensation management system is built on a Transactional Outbox + XXL-JOB async delivery architecture, providing reliable message sending capabilities for all microservices — plug-and-play with zero business code.
+Reliable business sending uses omni-common-mqlog with DB and Job capabilities. ReliableMessageRelay/ReliableMessageTemplate send(bindingName, payload, tenantId[, msgKey]) require an explicit positive tenantId. Outbox and business updates share a commit only when the call has an actual local transaction; it does not include remote services or Broker transactions.
 
-### Core Architecture
+database/changelog/common/0001-mq-schema.yaml solely owns sys_mq_message DDL; historical schema.sql is not the primary creation path. mqRelayHandler declares both @XxlJob and @SystemJobMeta. Relay scans PENDING/FAILED across tenants; external/internal management queries filter tenantId. MessageSender routes by broker_type, with RocketMqMessageSender as the current implementation.
 
-```
-Business transaction (@Transactional)
-    ↓
-ReliableMessageTemplate.send(bindingName, payload, tenantId)
-    ↓ INSERT sys_mq_message (status=PENDING) -- within the same local transaction
-    ↓
-XXL-JOB mqRelayHandler (10s polling)
-    ↓
-MqMessageRelayService.relayAll()
-    ↓ Batch query PENDING/FAILED with next_retry_time <= NOW()
-    ↓
-MessageSender.send(message) -- strategy pattern, routed by broker_type
-    ↓
-Success → status=SENT | Failure → retry_count++, exponential backoff | Exceeded → DEAD_LETTER
-```
-
-### Core Components
-
-| Component | Responsibility |
-|-----------|----------------|
-| `ReliableMessageTemplate` | Provides `send(bindingName, payload, tenantId)` / `send(bindingName, payload, tenantId, msgKey)` overloads (`tenantId` is a required positive integer and must not be omitted); INSERTs message record within the caller's transaction |
-| `MqMessageRelayService` | Polls pending messages, invokes `MessageSender` strategy for delivery, handles retry backoff and dead letter marking |
-| `MqMessageRelayJob` | XXL-JOB handler (`@XxlJob("mqRelayHandler")` + `@SystemJobMeta`), triggers relay logic |
-| `MessageSender` | Strategy interface, routed by `broker_type`. Current implementation: `RocketMqMessageSender` (based on StreamBridge); extensible for `KafkaMessageSender` |
-| `MqMessageInternalController` | Feign internal query API (`/api/internal/mq-message`), for aggregated query services |
-
-### Steps to Onboard a New Service
-
-1. Add `omni-common-mqlog` dependency in POM
-2. Ensure `omni-common-mybatis` (database) and `omni-common-job` (XXL-JOB) are already included
-3. For RocketMQ sending capability, add `spring-cloud-starter-stream-rocketmq` dependency
-4. `sys_mq_message` table is created by Liquibase migration (`database/changelog/common/0001-mq-schema.yaml`, applied by `omni-db-migrator` container at startup)
-5. `mqRelayHandler` auto-registers with XXL-JOB (each service executor has a different AppName, so handler names are naturally isolated)
-6. Inject `ReliableMessageTemplate` in business code and call `send()`
-
-### Exponential Backoff Strategy
-
-Retry interval: `2^retryCount × 10s`. 1st retry: 20s, 2nd: 40s, 3rd: 80s. Exceeding `max_retry` (default 3) transitions to DEAD_LETTER status.
-
-### Dead Letter Handling
-
-- **Resend**: Resets PENDING/FAILED/DEAD_LETTER status to PENDING, clears `retry_count`; relay task re-delivers on next poll
-- **Ignore**: DEAD_LETTER → SKIPPED, a terminal state confirming no further delivery is needed
+[MQ Reliability](mq-reliability.en.md) owns states, exponential backoff, dead-letter resend/skip and extensions; [Outbox Development](wiki/outbox-development.en.md) owns breakpoints and recovery. Dependencies and annotations do not prove the executor, Broker, consumer and compensation are currently running.
 
 ## Operation Log (OperLog)
 
-The operation log system is based on an AOP + RocketMQ async architecture, automatically capturing request context and entity change snapshots from Controller methods to provide comprehensive audit trails for business operations.
+@OperLog AOP records operation metadata and optional snapshots for annotated endpoints, then sends them through MQ for Base persistence. This does not cover every event or guarantee comprehensive auditing, losslessness or compliance.
 
 ### Core Recording Flow
 
+```text
+@OperLog --> OperLogAspect --> OperLogProducer
+    --> ReliableMessageRelay / Outbox (if available)
+    --> StreamBridge direct send (fallback)
+    --> Base OperLogConsumer --> sys_oper_log
+XXL-JOB operLogArchiveHandler --> sys_oper_log_archive
 ```
-Controller method (@OperLog annotation)
-    ↓
-OperLogAspect (AOP @Around advice)
-    ↓ Capture request context: username, tenantId, IP, URL, request parameters
-    ↓ Entity change snapshot: query oldValue before UPDATE/DELETE, query newValue after operation
-    ↓ EntityDiffer.diff(): field-level diff comparison (UPDATE only)
-    ↓
-OperLogProducer.send(OperLogMessage)
-    ↓ RocketMQ async send
-    ↓
-omni-base consumer
-    ↓ INSERT INTO sys_oper_log (hot table)
-    ↓
-OperLogArchiver (@Scheduled daily at 02:00)
-    ↓ Migrates records older than 180 days from hot table to sys_oper_log_archive (cold table)
-    ↓ Batch processing (1000 per batch), deletes from hot table after migration
-```
+
+OperLogProducer uses Outbox when ReliableMessageRelay is available and StreamBridge otherwise; it catches send exceptions and logs WARN. Direct sending does not inspect the returned boolean, so it is not a reliable delivery receipt. Sharing the business transaction also depends on the call boundary.
+
+The Base consumer ignores DuplicateKeyException under event_id uniqueness and rethrows other failures for middleware handling. OperLogService derives a deterministic legacy ID when eventId is absent. This is not proof of exactly-once processing for all business consumers.
+
+OperLogArchiver is operLogArchiveHandler with both @XxlJob/@SystemJobMeta. Metadata defaults are cron 0 0 2 * * ?, retentionDays 180 and batch size 1000. Actual scheduling needs XXL-JOB configuration and execution. It inserts cold rows before deleting hot rows and stops after a failed batch. archiveBatch is invoked within the same bean; its @Transactional annotation alone does not establish proxy transaction protection on this path. A cold table does not prove retention policy or compliance acceptance.
 
 ### @OperLog Annotation Usage
 
+This existing DictTypeController.update excerpt omits imports/Javadoc; Chinese module text and parameters match source. Auth user management is unsuitable as an OperLog onboarding example.
+
 ```java
-@OperLog(module = "User Management", operType = OperType.CREATE, entityClass = SysUser.class, idExpr = "#result.data.id")
-@PreAuthorize("hasAuthority('system:user:create')")
-@PostMapping
-public R<UserVO> create(@Valid @RequestBody CreateUserRequest request) {
-    return R.ok(userService.createUser(request));
+@OperLog(module = "字典类型管理", operType = OperType.UPDATE, entityClass = SysDictType.class, idExpr = "#id")
+@PutMapping("/{id}")
+@PreAuthorize("hasAuthority('dict:type:update')")
+public R<SysDictType> update(@PathVariable Long id,
+                              @RequestHeader("X-Tenant-Id") Long tenantId,
+                              @Valid @RequestBody UpdateDictTypeRequest request) {
+    String operator = SecurityContextHolder.getContext().getAuthentication().getName();
+    return R.ok(dictTypeService.updateType(id, tenantId, request, operator));
 }
 ```
 
-**Annotation Parameter Reference**:
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `module` | String | Yes | Business module name, e.g., "User Management", "Dictionary Type Management" |
-| `operType` | OperType | Yes | Operation type enum (see table below) |
-| `entityClass` | Class<?> | Conditional | Target entity class, used by AOP for automatic diff snapshots. Not required for QUERY/EXPORT/IMPORT types |
-| `idExpr` | String | Conditional | SpEL expression to extract entity ID from method parameters or return value. e.g., `"#id"`, `"#result.data.id"` |
+| Parameter | Current meaning |
+|---|---|
+| module / operType | module defaults to empty; project convention requires an explicit name. operType has no default |
+| entityClass / idExpr | Defaults Object.class / empty; snapshot collection uses a Mapper and parameter/result SpEL to obtain the ID |
+| recordParams / recordSnapshot | Default true; may be disabled for sensitive or large-text operations |
+| excludeFields | Additional excluded fields; default empty array; masking normalizes names |
 
 ### OperType Enum
 
-| Enum Value | Meaning | Requires entityClass | Description |
-|------------|---------|---------------------|-------------|
-| `CREATE` | Create | Recommended | AOP extracts new entity ID from return value and queries newValue |
-| `UPDATE` | Update | Yes | AOP queries oldValue before operation, queries newValue after, performs field-level diff |
-| `DELETE` | Delete | Yes | AOP queries oldValue before operation, newValue is null |
-| `QUERY` | Query | No | Records query behavior only, no entity snapshot |
-| `EXPORT` | Export | No | Records export behavior only, no entity snapshot |
-| `IMPORT` | Import | No | Records import behavior only, no entity snapshot |
+| Type | Behavior when snapshots and configuration permit |
+|---|---|
+| CREATE | Extract result ID and query newValue |
+| UPDATE | Query before/after and compare top-level field values |
+| DELETE | Query oldValue; newValue stays null |
+| QUERY / EXPORT / IMPORT | This snapshot branch does not read entities |
 
 ### Development Constraints
 
-1. **All new write-operation Controller methods must be annotated with `@OperLog`**, specifying `module` and `operType`; for entity changes, also specify `entityClass` and `idExpr`
-2. **omni-auth module disables `@OperLog`**: Authentication behavior is fully recorded in `sys_audit_log` security-audit events (`LOGIN_SUCCESS`/`LOGIN_FAILED`/`ACCOUNT_LOCKED`, etc.; the "Login Records" page is a read-only projection of its login events) — there is no separate `sys_login_log` table; omni-auth does not include the `omni-common-operlog` dependency and does not use `@OperLog` on controller methods
-3. **Onboarding new microservices**: Add `omni-common-operlog` dependency in `pom.xml` and configure RocketMQ; the module auto-registers AOP aspects and MQ producers via `AutoConfiguration.imports`
-4. **`entityClass` purpose**: AOP uses `ApplicationContext` to find the `BaseMapper` for the corresponding entity type, automatically executing `selectById` to obtain pre/post-change snapshots
-5. **`idExpr` SpEL syntax**: Supports referencing method parameters (`#id`, `#request.id`) and return values (`#result.data.id`); resolution failure logs a warning but does not affect business logic
-6. **JSON snapshot limit**: Max 4000 characters per oldValue/newValue; auto-truncated if exceeded
-7. **Hot/Cold table separation**: Hot table `sys_oper_log` retains recent 180 days of data for fast queries; cold table `sys_oper_log_archive` provides long-term retention for compliance. Archival job runs daily at 02:00, 1000 records per batch; stops current archival on failure
+- Configure new writes that need operation logs according to sensitivity. **omni-auth must not depend on omni-common-operlog or use @OperLog**. Authentication events belong to sys_audit_log; login records are its read-only projection, not a separate sys_login_log.
+- Mapper lookup and SpEL must actually resolve. Entities with tenantId are retained only when matching the current positive tenantId; global entities without that property keep existing behavior. Snapshot checking is not write authorization.
+- OperLogSanitizer masks matched fields, phones, emails and credential fragments using rules, not all arbitrary text. Long snapshot/parameter strings retain the first 4000 characters and append ...[TRUNCATED], so total length can exceed 4000. Truncation can invalidate JSON while database snapshot columns are JSON; successful oversized persistence is not guaranteed.
+- Target exceptions propagate. Post-processing catches Exception; SpEL and Mapper lookup have local fallbacks. Pre-target snapshot queries and ID casts are not all protected, so collection failures are not universally isolated from business execution.
+- Logged responseStatus is 200 on normal return and 500 on target exception, not final MVC HTTP status or R.code.
 
 ### Module Responsibilities
 
-| Module | Component | Responsibility |
-|--------|-----------|----------------|
-| `omni-common-core` | `OperLog` annotation, `OperType` enum, `OperLogMessage` POJO | Pure POJO layer, no Spring dependency |
-| `omni-common-operlog` | `OperLogAspect`, `OperLogProducer`, `EntityDiffer`, `OperLogAutoConfiguration` | AOP aspect + MQ producer + entity diff + auto-configuration |
-| `omni-base` | `OperLogConsumer`, `OperLogArchiver` | MQ consumer writes to hot table + scheduled archival to cold table |
+| Module | Components |
+|---|---|
+| omni-common-core | OperLog, OperType, OperLogMessage; production code has no Spring dependency |
+| omni-common-operlog | Aspect, Producer, Sanitizer, EntityDiffer and conditional auto-configuration |
+| omni-base | Consumer, OperLogService, Archiver and hot/cold tables |
 
 ## Common Starter Onboarding Specification
 
-The project splits shared capabilities into composite starters and optional capability modules. Servlet business services should prefer `omni-common-service`; Gateway, Auth and Workflow choose the underlying modules according to their own special boundaries.
-
 ### Starter Module Overview
 
-| Module | Responsibility | Auto-Configuration Content | Target Service Type |
-|--------|----------------|---------------------------|--------------------|
-| `omni-common-core` | Pure POJO layer | None (no Spring dependency) | All modules |
-| `omni-common` | Web auto-configuration | `JacksonConfig` (time serialization), `WebMvcConfig` (CORS), `GlobalExceptionHandler`, `XssAutoConfiguration` (Filter + Jackson Module) | Servlet services |
-| `omni-common-mybatis` | Database capabilities | `MybatisPlusAutoConfiguration`: `MybatisPlusInterceptor` (MySQL `PaginationInnerInterceptor`) + YAML defaults (camelCase mapping, logical delete, auto-increment ID) | Servlet services |
-| `omni-common-redis` | Blocking Redis | `RedisAutoConfiguration`: `RedisTemplate<String, Object>` (Jackson serialization) + `RedisUtils` utility + Lettuce connection pool config | Servlet services |
-| `omni-common-redis-reactive` | Reactive Redis | `spring-boot-starter-data-redis-reactive` + YAML default timeout config | WebFlux services (e.g., Gateway) |
-| `omni-common-mqlog` | Reliable MQ sending | `ReliableMessageTemplate` (Transactional Outbox), `MqMessageRelayService` (XXL-JOB async delivery), `MessageSender` strategy interface, `MqMessageInternalController` (Feign internal query), Liquibase migration DDL (`database/changelog/common/0001-mq-schema.yaml`) | Servlet services (requiring MQ) |
-| `omni-common-service` | Servlet business service security and context composite | Gateway pre-authentication Filter, immutable request identity, internal API Token, DataScope SPI/aspect, fixed Tenant/DataPermission order, Auth XSS fallback and security baseline | Servlet business services such as CRM/SRM/Procurement/Asset |
+There are ten common modules: core supplies base types and nine modules compose capabilities. [Architecture](architecture.en.md) is the authoritative module/dependency entry point.
 
-**Auto-Configuration Registration**: All starters register via `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` — the standard mechanism for Spring Boot 3+/4+ (replacing the legacy `spring.factories`).
+| Module | Boundary |
+|---|---|
+| omni-common-core | Base types; no production Spring auto-configuration |
+| omni-common | Servlet Web/MVC, Jackson, exception advice and conditional XSS |
+| omni-common-mybatis | Default OptimisticLock → MySQL Pagination; YAML mapping/deletion/ID conventions |
+| omni-common-redis | Blocking RedisTemplate, RedisUtils and connection defaults |
+| omni-common-redis-reactive | Reactive dependency/timeout YAML; no custom AutoConfiguration.imports in this module |
+| omni-common-job | Conditional XXL-JOB executor and system task registration |
+| omni-common-mqlog | Outbox, relay, sender strategies and management; needs DB/Job/Broker configuration |
+| omni-common-operlog | Annotation AOP and sending; matching Servlet/AspectJ/Mapper/StreamBridge dependencies required |
+| omni-common-workflow | Shared Workflow capabilities; do not introduce engine runtime into domain services |
+| omni-common-service | Servlet identity, internal APIs, DataScope, persistence and XSS composition |
+
+Eight capability modules have custom AutoConfiguration.imports. Entries establish registration points, not satisfied conditions or active beans; not every module uses the same custom mechanism.
 
 ### Steps to Onboard a New Service
 
-1. **POM Dependencies**: Servlet business services declare the composite starter, then add OperLog/Job/MQ as needed:
-   ```xml
-   <dependency><groupId>com.omni</groupId><artifactId>omni-common-service</artifactId></dependency>
-   ```
-2. **application.yml**: Besides datasource and Redis, explicitly configure the service identity and enabled security capabilities; the internal Token must come from an environment variable, weak defaults are not allowed:
-   ```yaml
-   spring:
-     datasource:
-       url: jdbc:mysql://127.0.0.1:3306/omni_xxx?useSSL=false&serverTimezone=Asia/Shanghai
-       username: root
-       password: root
-     data:
-       redis:
-         host: 127.0.0.1
-         port: 6379
-         database: 0
-   omni:
-     service:
-       name: omni-xxx
-       display-name: Xxx
-       gateway-preauth:
-         enabled: true
-       internal-api:
-         enabled: true
-         token: ${OMNI_INTERNAL_API_TOKEN}
-       tenant:
-         enabled: true
-       data-scope:
-         enabled: true
-       xss:
-         enabled: true
-   ```
-3. **Domain SPI**: When tenant/data-scope is enabled, provide the unique `TenantTablePolicy` and `DataScopeTablePolicy` respectively; domain table names or owner columns must not be placed into the Starter.
-4. **Security chain**: Place the Starter-provided Gateway Filter before `AuthorizationFilter`, and the identity context Filter after the Gateway Filter; duplicate Servlet container registration of the two is forbidden.
-5. **Optional capabilities**: OperLog, Job, MQ and Workflow remain independent dependencies, enabled per business needs.
+Prefer common-service for Servlet domain services and select OperLog/Job/MQ as needed. Gateway, Auth, Base and Workflow retain their own boundaries. Identity settings, GATEWAY_ASSERTION_SECRET and OMNI_INTERNAL_API_TOKEN come from private configuration; enabled capabilities must satisfy startup validation.
 
-`omni-common-service` currently provides the v0 auto-configuration and tests; CRM, SRM, Procurement and Asset have all completed migration, module tests and isolated runtime re-verification. The Starter's XSS Provider auto-configuration must take effect before `XssAutoConfiguration`, and context tests must assert the Provider, the Servlet FilterRegistration and the Jackson 2/3 cleaning modules together, avoiding silent failure caused by condition evaluation order.
+Enabled tenant/data scope capabilities need unique domain-matching TenantTablePolicy/DataScopeTablePolicy implementations. Assertion verification precedes AuthorizationFilter; identity context follows pre-authentication. Avoid duplicate Servlet registration. Configure XSS Providers before conditional consumers and verify FilterRegistration and Jackson 2/3 beans together. [Development Guide](guides/scaffold-development.en.md) owns complete onboarding, generator and Docker steps.
 
 ### Override Mechanism
 
-All starter auto-configuration beans use `@ConditionalOnMissingBean`, allowing services to override as needed:
-
-- **MybatisPlusInterceptor**: Define a `mybatisPlusInterceptor` bean to override default pagination config. Typical scenario: adding `DataPermissionInterceptor` (**must be registered before `PaginationInnerInterceptor`**)
-- **RedisTemplate**: Define `@Bean(name = "redisTemplate")` to replace the default serialization strategy
-- **XSS Configuration**: `XssAutoConfiguration` conditionally depends on `XssConfigProvider` bean; if the SPI is not implemented, the XSS filter chain does not activate
+- The default MyBatis interceptor is conditional on the absence of the MybatisPlusInterceptor type. Follow project naming for a replacement bean and preserve interceptor order.
+- RedisTemplate is conditional on the name redisTemplate; RedisUtils uses a return-type condition. These are different replacement rules.
+- XSS depends on a Provider bean and Servlet/classpath conditions. Several OperLog beans have no ConditionalOnMissingBean. Read the configuration and verify the container context instead of claiming all Starter beans support identical overrides.
 
 ### Redis Starter Mutual Exclusion
 
-`omni-common-redis` (blocking) and `omni-common-redis-reactive` (reactive) **must not be mixed in the same service**:
-
-- **WebFlux services** (e.g., Gateway): Can only depend on `omni-common-redis-reactive`; blocking Redis calls will starve the Netty event loop threads
-- **Servlet services**: Use `omni-common-redis` (blocking); `RedisUtils` provides synchronous APIs
+WebFlux Gateway uses only omni-common-redis-reactive; Servlet services use the blocking module. Do not mix them in one service or run blocking calls on the Netty event loop. A reactive dependency does not convert arbitrary blocking business code.
 
 ## Configuration Reference
 
 ### application.yml Key Configuration Items
 
-The following are the core configuration items in backend microservice `application.yml`:
+This distinguishes repository YAML from formal Compose. [Deployment](docker-deployment.en.md) and actual configuration own complete settings.
 
-| Config Key | Description | Default | Docker Env Override |
-|------------|-------------|---------|-------------------|
-| `server.port` | Service port | 8100/8101/8102/8103 | `SERVER_PORT=8080` |
-| `spring.application.name` | Nacos service name | omni-auth/base/gateway/workflow | — |
-| `spring.datasource.url` | Database connection | `jdbc:mysql://127.0.0.1:3306/omni_xxx` | `SPRING_DATASOURCE_URL` |
-| `spring.datasource.username` | Database user | `root` | `SPRING_DATASOURCE_USERNAME` |
-| `spring.datasource.password` | Database password | `root` | `SPRING_DATASOURCE_PASSWORD` |
-| `spring.data.redis.host` | Redis host | `127.0.0.1` | `SPRING_DATA_REDIS_HOST` |
-| `spring.data.redis.port` | Redis port | `6379` | `SPRING_DATA_REDIS_PORT` |
-| `spring.data.redis.database` | Redis DB index | 0 | `SPRING_DATA_REDIS_DATABASE` |
-| `spring.cloud.nacos.discovery.server-addr` | Nacos address | `127.0.0.1:8848` | `SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR` |
-| `spring.cloud.nacos.discovery.ip` | Registration IP | `127.0.0.1` | `SPRING_CLOUD_NACOS_DISCOVERY_IP` |
-| `auth.jwks.uri` | JWKS endpoint | `http://localhost:8100/oauth2/jwks` | `AUTH_JWKS_URI` |
-| `auth.jwks.cache-ttl` | Public key cache TTL | `5m` | — |
-| `spring.profiles.active` | Active profile | `default` | `SPRING_PROFILES_ACTIVE` |
+| Item | Current convention or formal Docker value |
+|---|---|
+| server.port / SERVER_PORT | Host entry points 8100–8107; application containers HTTP 8080; Frontend 3000 |
+| spring.application.name | omni-auth/base/gateway/workflow/crm/srm/procurement/asset, per service |
+| spring.datasource.* | Formal mysql:3306, omni_app, password from OMNI_DB_PASSWORD; no business datasource in Gateway |
+| spring.data.redis.* | Formal redis:6379; service-specific database and serialization |
+| spring.cloud.nacos.discovery.server-addr | Formal nacos:8848; Auth/Base/Workflow and domain variable mappings follow their respective configuration |
+| spring.cloud.nacos.discovery.ip | Compose leaves it empty for container discovery, not a fixed host loopback |
+| auth.jwks.uri / AUTH_JWKS_URI | Gateway YAML `http://localhost:8100/oauth2/jwks`; Compose `http://omni-auth:8080/oauth2/jwks` |
+| auth.jwks.cache-ttl | Gateway default 5m |
+| spring.profiles.active | Distinguish Spring Profile, Compose profile and CLI preset |
+
+Passwords, Nacos identity/signing secrets, Gateway assertion secrets and internal Tokens use private configuration. Historical source fallbacks are not recommended deployment credentials.
 
 ### MyBatis-Plus Configuration
 
-| Config Key | Description | Default |
-|------------|-------------|---------|
-| `mybatis-plus.configuration.map-underscore-to-camel-case` | Underscore to camelCase | `true` |
-| `mybatis-plus.global-config.db-config.logic-delete-field` | Logical delete field | `deleted` |
-| `mybatis-plus.global-config.db-config.logic-delete-value` | Logical delete value | `1` |
-| `mybatis-plus.global-config.db-config.logic-not-delete-value` | Logical not-delete value | `0` |
-| `mybatis-plus.global-config.db-config.id-type` | ID strategy | `AUTO` (database auto-increment) |
+common-mybatis YAML declares map-underscore-to-camel-case=true, logic-delete-field=deleted (deleted 1, active 0) and id-type=auto. Entities/services may have separate mappings or policies; defaults do not establish columns on every table. Custom interceptors must retain DataPermission before Pagination.
 
 ### XXL-JOB Configuration (omni-base)
 
-| Config Key | Description | Default |
-|------------|-------------|---------|
-| `xxl.job.admin.addresses` | Admin address | `http://127.0.0.1:18080/xxl-job-admin` |
-| `xxl.job.executor.appname` | Executor name | `omni-base` |
-| `xxl.job.executor.port` | Executor port | `9999` |
-| `xxl.job.accessToken` | Communication token | `default_token` |
+| Item | Current Base or formal Docker value |
+|---|---|
+| xxl.job.admin.addresses | YAML http://127.0.0.1:18080/xxl-job-admin; Compose http://xxl-job-admin:8080/xxl-job-admin |
+| xxl.job.executor.appname | omni-base |
+| xxl.job.executor.port | Base YAML 9901; property-class general fallback 9999; other services configure their own ports |
+| xxl.job.executor.address / ip | Compose http://omni-base:9901/ / omni-base |
+| xxl.job.access-token | General property default empty; Compose requires private XXL_JOB_ACCESS_TOKEN matching both ends |
+| xxl.job.executor.enabled | Auto-configuration defaults enabled; Compose uses XXL_JOB_ENABLED |
+
+Admin credentials come from private configuration. Default cron, registration success and actual execution are distinct. System handlers require both @XxlJob and @SystemJobMeta; [Scheduling](scheduling.en.md) owns user routing and compensation rules.
 
 ## Service Layer Design Patterns
 
 ### Interface + Implementation Separation
 
-```
-UserService (interface)     — Defines business method signatures
-    ↑ implements
-UserServiceImpl (@Service)  — Implements business logic + @Transactional
+```text
+XxxService (contract)
+    ^ implements
+XxxServiceImpl (business behavior; local transactions where configured)
 ```
 
-**Design Rationale**:
-- Interface layer can be reused by OpenFeign clients
-- Unit tests can directly Mock interfaces without depending on implementation classes
-- Implementation classes can be replaced without affecting callers
+Interfaces isolate callers and facilitate mocks. Replacement implementations must preserve semantics and transactions. Feign is a separate remote protocol adapter; an arbitrary Service interface is not automatically an available Feign client.
 
 ### Transaction Management Strategy
 
-| Scenario | Annotation | Description |
-|----------|------------|-------------|
-| Read-only query | `@Transactional(readOnly = true)` | Optimizes DB query performance, forbids write operations |
-| Write operations | `@Transactional` | Default REQUIRED propagation level |
-| Cross-service calls | `@Transactional` + Outbox pattern | Local transaction writes to Outbox table; does not participate in remote transactions |
-| Independent transaction | `@Transactional(propagation = REQUIRES_NEW)` | e.g., logging — ensures log is recorded even if the main transaction rolls back |
+| Scenario | Convention and limit |
+|---|---|
+| Read-only | @Transactional(readOnly = true) is transaction configuration/a hint, not authorization or universal proof that writes are prohibited |
+| Local writes | @Transactional defaults to REQUIRED; verify actual proxy invocation, rollback rules and database boundary |
+| Remote effects | Local transactions/Outbox can record pending messages, not roll back completed HTTP/Broker/external-account effects |
+| Independent transaction | REQUIRES_NEW needs an applicable proxy and successful commit; it does not guarantee logs survive |
+
+Do not infer proxy interception of same-class calls from annotations alone or describe every log sending path as an independent transaction. Domain facts and regressions define critical transitions, occupancy and idempotency.
 
 ### Exception Handling Chain
 
-```
-Controller method
-    │ Calls Service method
-    ▼
-Service layer
-    │ Business validation failure → throw new BusinessException(400, "Username already exists")
-    │ Resource not found         → throw new BusinessException(404, "User not found")
-    ▼
-GlobalExceptionHandler (@RestControllerAdvice)
-    │ @ExceptionHandler(BusinessException.class)
-    │   → log.warn + R.fail(code, message)
-    │ @ExceptionHandler(MethodArgumentNotValidException.class)
-    │   → HTTP 400 + aggregate field errors + R.fail(400, "field: message")
-    │ @ExceptionHandler(AccessDeniedException.class)
-    │   → HTTP 403 + R.fail(403, "Insufficient permissions")
-    │ @ExceptionHandler(Exception.class)
-    │   → log.error (full stack) + R.fail("Internal server error")
-    ▼
-Unified R<Void> response
+```text
+Controller --> Service --> matching MVC advice --> R
+Gateway / Security Filter / protocol endpoint --> own response boundary
 ```
 
-**Special handling for omni-auth**: omni-auth depends on BOTH `omni-common-core` and `omni-common`. The `GlobalExceptionHandler` in `omni-common` (`com.omni.common.result`) is auto-configured via `AutoConfiguration.imports` and applies to every service depending on `omni-common` (including Auth) — it is neither component-scanned nor absent for Auth. On top of that, omni-auth provides a narrower `AuthExceptionHandler` (`@RestControllerAdvice(basePackages = "com.omni.auth.controller")`) for Auth-specific mapping of `BusinessException`/validation/`AccessDeniedException`, coexisting with the global handler rather than replacing its auto-configuration premise.
+Auth depends on both common-core and common. common imports register global advice; AuthExceptionHandler is scoped to com.omni.auth.controller and coexists. Old Javadoc saying Auth does not depend on common cannot override current POM/imports. Matching handlers or Filter/protocol layers decide actual responses. Do not translate generic Chinese advice messages as if translated values were sent by the backend.
 
 ## Troubleshooting Guide
 
-### Common Issues
+[Troubleshooting](guides/troubleshooting.en.md) owns reproduction, and [Source Debugging](wiki/source-debugging.en.md) owns call paths, variables and breakpoints. Inspect assertions, method permissions, tenant, visibility and transactions separately. Empty lists, 403, 404 and connection errors are different findings.
 
-| Issue | Possible Cause | Solution |
-|-------|---------------|----------|
-| `@PreAuthorize` not working | `GatewayPreAuthFilter` not registered | Check SecurityConfig for `addFilterBefore(new GatewayPreAuthFilter(), AuthorizationFilter.class)` |
-| Paginated query returns empty | `PaginationInnerInterceptor` not registered | Check interceptor registration order in `MybatisPlusConfig` |
-| `@Transactional` ineffective | Method not public / self-invocation | `@Transactional` only works on public methods; intra-class method calls bypass the proxy |
-| Redis connection timeout | Container network unreachable | `docker compose exec omni-auth ping redis` to verify connectivity |
-| Nacos registration failure | Incorrect address config | Ensure `server-addr` uses container name `nacos:8848` instead of `localhost` |
-| JWT verification failure | Public key cache expired | Check `auth.jwks.cache-ttl` config, or restart Gateway to clear cache |
-| XXL-JOB registration failure | Admin not started | Ensure `xxl-job-admin` container is healthy |
-| MQ messages not delivered | Relay Job not triggered | Check `mqRelayHandler` scheduling status in XXL-JOB Admin console |
-
-### Debugging Tips
-
-```bash
-# View backend service logs
-docker compose logs -f omni-auth
-
-# Check environment variables
-docker compose exec omni-auth env | grep SPRING
-
-# Test database connection
-docker compose exec omni-auth sh -c 'nc -zv mysql 3306'
-
-# Check Nacos registered instances
-curl -s http://localhost:8848/nacos/v1/ns/instance/list?serviceName=omni-auth
-```
+Follow [AGENTS.md](../AGENTS.md) for local Docker builds, tests and execution. Record container/session handles, exit codes and existing effects; protect logs/configuration. Check active work before continuing. Do not manufacture success through data resets, disabled authorization or shared-resource deletion.
 
 ## Testing
 
-Auth, CRM, and selected Common modules now have test suites. When changing backend behavior:
+JUnit 5/Mockito isolate logic. MockMvc can validate specific MVC wire behavior; mocked identity, Services or engines do not prove real Gateway, database, Flowable, Broker or browser flows. SpringBootTest scope depends on active dependencies, environment and assertions, not its class name.
 
-- **Unit tests**: JUnit 5 + Mockito, placed in `src/test/java/`
-- **Integration tests**: `@SpringBootTest` + embedded database or Test Containers
-- Test class naming: `XxxTest` (unit) or `XxxIntegrationTest` (integration)
-- Test method naming: `should_<expected>_when_<condition>`
+Put tests in module src/test/java and describe behavior/preconditions through names, following module conventions. Existing tests cover multiple business/common modules, not only Auth/CRM. Conditional skips are not passes.
+
+After backend implementation changes, run the Maven Wrapper reactor in Docker:
+
+```bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm backend ./mvnw clean install
+```
+
+The tools container/reactor supplies JDK 25, JAVA_HOME and module order. For documentation-only changes, reuse evidence only after exact implementation/build-input checks, disclosing source, passes, skips and limits. Markdown rendering, unit tests and successful builds do not certify every business flow.

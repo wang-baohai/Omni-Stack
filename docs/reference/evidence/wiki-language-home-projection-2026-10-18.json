@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "kind": "generated-language-home-projections",
+  "at": "2026-10-18T00:27:36.191Z",
+  "source_baseline": "9b3a9d0eb4021f179ee50a765092966fb9844a64",
+  "actual_current_browser_failure": {
+    "unique_urls": [
+      {
+        "url": "http://wiki:4173/zh-CN/",
+        "status": 403
+      },
+      {
+        "url": "http://wiki:4173/en-US/",
+        "status": 403
+      },
+      {
+        "url": "http://wiki:4173/ja-JP/",
+        "status": 403
+      },
+      {
+        "url": "http://wiki:4173/ko-KR/",
+        "status": 403
+      }
+    ],
+    "affected_page_contracts": 192,
+    "positive_partial_scope": {
+      "localized_canonical_pages": 192,
+      "SVGs": 184,
+      "width_checks": 384,
+      "page_errors": 0,
+      "console_errors": 0
+    },
+    "overall_pass": false
+  },
+  "root_cause": "VitePress title links and corresponding-language routing use locale root prefixes. The generator had canonical wiki/index pages but emitted no locale/index module or HTML file;the four actual root requests returned403.",
+  "fix": "Generate four language home projections from the already prepared canonical Wiki index. Keep locale root prefixes for corresponding-language routing. Exclude these projections from local search and point their canonical metadata to the primary Wiki route using the configured base.",
+  "checked_source_file": {
+    "path": "docs/scripts/prepare-site.mjs",
+    "before_sha256": "1f105d33b72ee8bd9dc52c2d1a886a0d9ff4e840c934175e86448d1f30c5655c",
+    "after_sha256": "2ba94deacb6d4a673c83919a5baecde4d257e1a9e647a4976f926296de47bd94"
+  },
+  "canonical_document_changes": 0,
+  "translation_review_rows_changed": 0,
+  "actual_AI_REVIEW_criterion_preserved": true,
+  "human_review_required": false,
+  "independent_rebuilt_image_and_native_navigation_verification": "pending",
+  "business_writes": 0,
+  "full_original_A_G_preserved": true,
+  "global_release_complete": false
+}

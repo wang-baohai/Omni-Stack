@@ -30,7 +30,7 @@
   # 预览用途：真实接入由 service-integration-renderer 按开关计算（enableOperLog → operlog-topic；enableMq → <serviceId>-domain-event）
   mq: { producers: [{{#if enableOperLog}}operlog-topic{{#if enableMq}}, {{/if}}{{/if}}{{#if enableMq}}{{serviceId}}-domain-event{{/if}}], consumers: [] }
   xxl: { handlers: [{{#if enableJob}}mqRelayHandler{{/if}}], appNames: [{{#if enableJob}}{{artifactId}}{{/if}}] }
-  docs: [docs/{{serviceId}}.md, docs/{{serviceId}}-i18n-status.yaml]
+  docs: [docs/{{serviceId}}.md, docs/{{serviceId}}.en.md, docs/{{serviceId}}.jp.md, docs/{{serviceId}}.kr.md, docs/{{serviceId}}-i18n-status.yaml]
   resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 }
   deprecation: { status: active }
   compatibility: { java: "25", node: ">=22.12.0", notes: [由 create-service 生成] }

@@ -1,111 +1,123 @@
-# Five-Minute Quick Start
+# From cloning to first login
 
-Applies to: Omni-Stack 0.6.x
+Baseline: 0.6.x from main fc165e3; this remediation branch adds documentation/tooling. The checked-out Compose, source and seeds define behavior. First-build time depends on network, CPU and caches; no five-minute promise.
 
-Use this guide to start a local development environment and sign in for the first time. For production, read the [Docker Deployment Guide](../docker-deployment.en.md) and [Operations, Backup, Recovery, and Upgrade Guide](operations-upgrade.en.md).
+## 1. Clone and understand the layout
 
-## 1. Prerequisites
+Choose one hosting platform and clone into an empty location. Do not run both commands into the same directory. Run all following commands from the repository root.
 
-- JDK 25.
-- Node.js LTS 22.12.0 or later.
-- Docker Desktop with Docker Compose.
-- At least 12 GB of available memory is recommended. Prefer a project preset when evaluating one domain.
-
-Official build images provide JDK 25 and Node.js 22.12+; host installations are optional development tools.
-
-## 2. Choose a Startup Mode
-
-> **Prerequisite (fresh run)**: In the repo root, copy the template and securely fill required secrets before startup, otherwise Compose fails closed on missing required variables:
->
-> ```bash
-> # run in the repo root (Windows PowerShell)
-> Copy-Item -LiteralPath .env.example -Destination .env
-> ```
->
-> `.env` must provide (never echo real values): `MYSQL_ROOT_PASSWORD`, `OMNI_DB_PASSWORD`, `REDIS_PASSWORD`, `NACOS_AUTH_TOKEN`, `XXL_JOB_ACCESS_TOKEN`, and a `GATEWAY_ASSERTION_SECRET` consistent across every backend service (otherwise generated services return 503 "gateway assertion secret not ready"). Generate random secrets securely. This step is for a brand-new start; adopting an old data volume is a separate bounded migration path, not a fresh run.
-
-Full system:
+GitHub:
 
 ```bash
-docker compose --profile full up -d
-docker compose ps
+git clone --branch main https://github.com/wang-baohai/Omni-Stack.git
+cd Omni-Stack
 ```
 
-CRM only:
+Gitee:
 
 ```bash
-npm --prefix tools/omni-cli run dev -- dev up --preset crm
+git clone --branch main https://gitee.com/wang-baohai/Omni-Stack.git
+cd Omni-Stack
 ```
 
-Available presets include `core`, `workflow`, `crm`, `supply-chain`, and `full`. See [Preset Quick Selection](../preset-quick-selection.en.md). On first startup, Liquibase migrates the database before services start. Do not run legacy `init-all.sql` or `migrate-*.sql` files.
+`omni-backend/` contains Maven modules; `omni-frontend/` contains Vue source. `docker/` and Compose build and run containers. `database/` holds schema migrations, `scripts/sql/seed/` holds official bootstrap data, and `tools/omni-cli/` plus `scaffold/` generate projects. `docs/` holds engineering references and Wiki content; `ai/` holds shared AI assets.
 
-## 3. Verify Service Health
+## 2. Prepare Docker and the tool container
 
-Wait until every selected application is `healthy` in `docker compose ps`.
+The host needs Git, Docker Desktop/Engine with Compose, and an editor. Builds and verification do not require host JDK/Node: tool containers provide JDK 25, Node 22 and Maven Wrapper. Use the local Linux engine. Allocate Docker resources from the [preset matrix](../preset-dependency-matrix.en.md). Start planning full-stack memory around 12–16 GiB and spare disk around 20 GiB, then adjust for actual images and build peaks. These are preparation budgets, not measured limits.
 
-| Entry | Address | Purpose |
-|---|---|---|
-| Frontend | `http://localhost:3000` | Login, workspace, and administration |
-| Nacos | `http://localhost:8080` | Local discovery and configuration |
-| Gateway | `http://localhost:8102` | Unified frontend API entry |
+```bash
+docker version
+docker compose version
+docker compose -p omni-stack-tools -f compose.tools.yaml build cli
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm ci
+```
 
-If a port is busy, use `docker compose ps` and `docker compose logs <service>` to identify the failed service. Do not repeatedly rebuild the database volume.
+Expected: both Docker client and server respond, Compose reports a version, and the tool image builds. Registry/Maven/npm timeouts require proxy, DNS and Docker-network checks. Handle local permission failures through platform authorization; they do not establish that the daemon is stopped.
 
-## 4. First Login
+## 3. Create private configuration for a fresh environment
 
-1. Open the frontend login page.
-2. Select the development tenant.
-3. Use the development administrator explicitly marked in `scripts/sql/seed/auth.sql`.
-4. Enter the one-time CAPTCHA shown on the page.
-5. Replace the development credential immediately after login. Never use seed credentials in shared, non-development, or production environments.
+The container script securely derives all required secrets from `.env.example`. It creates a new `.env`, never overwrites an existing file and does not print values. Existing data volumes require their original credentials and the [upgrade/recovery path](operations-upgrade.en.md); do not regenerate passwords to adopt an old database.
 
-A CAPTCHA belongs to one request and can be used once. After refreshing it or after a failed submission, use the new image and `captchaKey`.
+```bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node scripts/init-env.mjs
+```
 
-## 5. First Functional Check
+Expected output only confirms creation. Git ignores the real `.env`. All four languages use the same variable names.
 
-An administrator should see System, Base Data, Scheduling, Monitoring, Workflow, and the business modules included by the selected preset. Check that:
+| Variables | Purpose and constraints |
+|---|---|
+| `MYSQL_ROOT_PASSWORD` / `OMNI_DB_PASSWORD` | Migration administrator / application user for seven databases; migrator creates and grants on fresh startup |
+| `REDIS_PASSWORD` | Must match Redis and every client |
+| `NACOS_AUTH_TOKEN` | Base64 of at least 32 random bytes for server signing |
+| `NACOS_AUTH_IDENTITY_KEY` / `NACOS_AUTH_IDENTITY_VALUE` | Nacos server identity authentication |
+| `NACOS_PASSWORD` | Same console/client password; default username nacos |
+| `XXL_JOB_ACCESS_TOKEN` / `XXL_JOB_ADMIN_PASSWORD` | Executor token / random console password; default admin username, 14–20 password characters |
+| `GATEWAY_ASSERTION_SECRET` / `OMNI_INTERNAL_API_TOKEN` | Shared gateway HMAC secret (at least 32 bytes) / internal API authentication |
+| `OAUTH2_STATE_SECRET` / `JWK_ENCRYPT_KEY` | Social state HMAC (at least 32 bytes) / Redis JWK encryption key (exactly 32 characters) |
 
-1. System Management → Users loads a list.
-2. Workflow → Process Models shows the seeded models.
-3. The target domain overview loads real data or an explicit empty state.
-4. My Workspace can open the Create Task dialog.
+GitHub, Google and Gitee OAuth client IDs/secrets are optional external app credentials. Password login does not need them. Empty credentials do not supply working external social login.
 
-A missing menu usually means the role lacks permission or the preset omits the module. Do not fix it by hard-coding frontend routes.
+## 4. Select and start
 
-### Screenshot
-
-#### Figure 1 `system-dashboard-en-US`: Console dashboard
-
-- Prerequisites: log in as an administrator
-- Actor: administrator
-- Action: after login the app lands on the approval workbench; click Console (top right) to open the admin dashboard
-- Expected result: the main area shows the Welcome card with backend/frontend/core services/infrastructure info, and the sidebar lists System, Base Data, Scheduler, Monitoring, and Workflow
-
-![Console dashboard](../images/en-US/system-dashboard.png)
-
-## 6. Source Development
-
-After editing source, rebuild the affected images from the repository root. Backend build stages use JDK 25 and the Maven Wrapper; the Node build stage produces frontend assets. Run every application in Docker.
-
-The standard local project is `omni-stack`, its default network is `omni-stack_default`, and its MySQL volume is `omni-stack_omni-mysql-data`. Run every application and business verification in local Docker. Edit source on the host and rebuild through Compose. Keep the default ports fixed; identify and resolve conflicts instead of shifting ports.
+Use full for the complete supply chain or all capabilities. First `--build` downloads dependencies and builds inside images. The migrator must exit successfully before health-based service startup.
 
 ```bash
 docker compose --profile full up -d --build
-docker compose ps
+docker compose ps -a
+docker compose logs omni-db-migrator
 ```
 
-## 7. Stop the Environment
+Use core to learn login, permissions and the base platform. The CLI prints the module closure, services and degraded capabilities. Core lite disables Nacos clients, XXL-JOB and MQ relay; it cannot validate the supply chain.
+
+```bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run dev -- preset list
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run dev -- preset explain core
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run dev -- dev up --preset core --project-name omni-stack --build
+```
+
+This starts selected services. To generate a pruned project, read [scaffold development](scaffold-development.en.md): `preset create` and `dev up` produce different results.
+
+## 5. Confirm migration and health
+
+`omni-db-migrator` must show Exited (0). Selected containers with a declared healthcheck must become healthy, and the frontend must be reachable; omitted services need not appear. Investigate the migrator or failed service, required variables and ports before retrying. Do not delete data volumes to mask a failure. The standard project is omni-stack with fixed defaults: frontend 3000, Gateway 8102 and MySQL 3306.
+
+```bash
+docker compose ps -a
+docker compose logs --tail 100 omni-auth omni-gateway omni-frontend
+```
+
+## 6. First login and one-time CAPTCHA
+
+1. Open `http://localhost:3000` in the browser.
+2. Select the development tenant and use the local demonstration identity `admin` / `admin123` from official `auth.sql`.
+3. A person enters the current image CAPTCHA; refreshing creates a new captchaKey.
+4. Successful login opens the workspace. Open the console and check System Management → Users.
+5. Use demonstration credentials only in an isolated development environment; replace them before shared or production use.
+
+After a wrong CAPTCHA or failed submission, request a new image: Redis GETDEL has consumed the old value. Diagnose wrong tenants, locked accounts and 503 through the [authentication guide](authentication.en.md). Never replay the old captchaKey. A short-lived fixture token only tests authenticated functionality and cannot replace this step.
+
+This image illustrates the localized form layout with CAPTCHA masked. A human-entered one-time CAPTCHA completed the real first login on 2026-10-09 with HTTP/business 200; see the [sanitized login receipt](../reference/evidence/human-login-2026-10-09.json). Other localized page tests use short-lived test identities and do not prove four password logins.
+
+![Login entry: tenant, account, password and CAPTCHA](../images/en-US/auth-login.png)
+
+## 7. Check the preset, stop and develop
+
+Admins see selected modules. Core omits workflow and supply-chain menus; ordinary users are further limited by roles. Empty lists may be expected: bootstrap seeds do not contain historical orders, approvals or assets. Create your own teaching records using [data and fixtures](../wiki/data-and-fixtures.en.md).
+
+Default down retains named volumes and a new up reuses data. Omit `--volumes`. After source changes, test in containers and rebuild the relevant images:
 
 ```bash
 docker compose --profile full down
+docker compose --profile full up -d
 ```
 
-Do not add `--volumes` by default. Delete a dedicated volume only when you intentionally need a fresh database and have verified the exact Compose project and volume name.
+```bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm backend ./mvnw clean install
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm frontend npm ci
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm frontend npm run build
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm frontend npm run lint
+docker compose --profile full up -d --build
+```
 
-## 8. Next Steps
-
-- [Authentication and Tenant Selection](authentication.en.md)
-- [Menus, Roles, and Data Permissions](permissions.en.md)
-- [Scaffold Development Tutorial](scaffold-development.en.md)
-- [Troubleshooting](troubleshooting.en.md)
-
+Next: [Authentication and tenants](authentication.en.md) · [Permissions and scope](permissions.en.md) · [Services and pruning](scaffold-development.en.md) · [Troubleshooting](troubleshooting.en.md)

@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-data-and-fixtures",
+  "source": "docs/wiki/data-and-fixtures.md",
+  "source_sha256": "818b691315dfae229f0f17113efeb6b8f1a336b16ac17b98ead540fd84c5987d",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/data-and-fixtures.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:58:03",
+      "result": "approved",
+      "translation_sha256": "d616a00beb6eca9b3de0f08f37f1972e656af9e6d3db55c3e71d681d4e5093f5",
+      "checks": {
+        "coverage_and_meaning": "六种数据来源、fresh/replay/adoption、教学六步、组织作用域、SRM审批权限、CAPTCHA与故障表逐段完整。",
+        "technical_literals": "保留全部数据库目录、五个 workflow 权限、SAME_UNIT、requestId、脚本开关与 PowerShell 命令字面量。",
+        "security_and_failure_semantics": "不重置数据、不改已执行changeSet、不代理管理员审批；fixture仅测试classpath，真实验证码消费与失败关闭边界完整。",
+        "language_and_terminology": "natural keys、forward repairs、ownership与adoption语义准确；补回负例先于主链确认的顺序要求。",
+        "images_and_links": "无图片；全部操作指南为英文，两个fixture脚本与说明为规范源，路径保持可定位。"
+      },
+      "findings": [
+        {
+          "id": "negative-check-order",
+          "status": "resolved",
+          "description": "第六步弱化了中文先检查负例再确认主链的顺序。",
+          "resolution": "明确invisibility/denial/cancellation/duplicate先于main-chain success。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/data-and-fixtures.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:58:03",
+      "result": "approved",
+      "translation_sha256": "ca5f4a64d01a7f9e2f11aed17d02ee10995c376e922b6bd4cf7447b0b9375644",
+      "checks": {
+        "coverage_and_meaning": "核对五节、六来源、六操作步骤与两段模块专用作用域说明，保留迁移重放和数据接管区别。",
+        "technical_literals": "所有目录、SAME_UNIT、角色/权限、E2E_MUTATIONS、VerifyOnly与fixture命令保持原值，API表名一致。",
+        "security_and_failure_semantics": "明确用户名不证明权限、不覆盖冲突和标准栈保护；不读密码/破解CAPTCHA，不以超管代签掩盖权限缺项。",
+        "language_and_terminology": "将中文残留接管/回執/脱敏/種子/摘要改为既存データの取り込み、検証記録、機密情報を除去、シード、ハッシュ。",
+        "images_and_links": "无截图；操作指南使用 .jp.md，测试入口和脚本相对路径与中文一致，仓库外输出要求不变。"
+      },
+      "findings": [
+        {
+          "id": "japanese-terms",
+          "status": "resolved",
+          "description": "多个关键步骤含不自然的中文词，影响日文初学者理解。",
+          "resolution": "改用既存データの取り込み、ハッシュ、ソース、検証記録和機密情報を除去。"
+        },
+        {
+          "id": "permission-and-order",
+          "status": "resolved",
+          "description": "用户名不证明权限和负例先行顺序不够明确。",
+          "resolution": "补齐两项边界，保留所有正式前置条件。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/data-and-fixtures.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:58:03",
+      "result": "approved",
+      "translation_sha256": "a313ddc301ae818bf73649da3b3e59e505816fe289ba52edd6ddc43e43a2a6e2",
+      "checks": {
+        "coverage_and_meaning": "核对数据来源表、迁移与已有数据接入、六步教学、审批作用域、测试身份与故障表全部内容。",
+        "technical_literals": "目录、自然键、SHA-256、SAME_UNIT、五个权限码、PowerShell fixture调用与requestId保持字面量。",
+        "security_and_failure_semantics": "保留不重置卷、不覆盖共享租户、候选人和审批权限分别满足，真实CAPTCHA由人输入，fixture不增加生产后门。",
+        "language_and_terminology": "원본、자연 키、멱등、기존 데이터 인수等含义准确；补回用户名不证明权限和负例先于主链的步骤。",
+        "images_and_links": "无图片；指南链接为 .kr.md，fixture入口保持规范源，仓库外证据输出和token排除要求完整。"
+      },
+      "findings": [
+        {
+          "id": "permission-and-order",
+          "status": "resolved",
+          "description": "用户名不能代替权限和负例检查顺序不够明确。",
+          "resolution": "补充角色关联前提的明确解释，负例先于主链成功确认。"
+        }
+      ]
+    }
+  }
+}

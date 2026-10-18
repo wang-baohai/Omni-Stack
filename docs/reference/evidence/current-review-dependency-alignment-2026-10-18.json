@@ -1,0 +1,440 @@
+{
+  "schema": 1,
+  "kind": "current-direct-review-dependency-impact-assessment",
+  "at": "2026-10-17T17:55:16.877Z",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "human_review": false,
+  "human_review_required": false,
+  "source_head": "1702b350501cb716397a108a032ec7d9c9bd0266",
+  "source_tree": "035b38ca328d47256b9efd749ed5a997b3dbca09",
+  "scope": "Assess each of seven unique changed direct dependencies against the actual later full/delta semantic reviews and the actual reference contexts in all eight affected unchanged source documents. Reuse the original whole-review scopes and current matching source/translation/review hashes;do not claim new whole rereads of those eight documents or overwrite historical checked-source snapshots.",
+  "actual_read_outputs": {
+    "affected_reference_context": "5e5ff2",
+    "backend_and_crm_context": "a66f66",
+    "ownership_delta": "308e27",
+    "golden_repair_delta": "c0c433"
+  },
+  "inventory": {
+    "current_review_records": 46,
+    "direct_binding_comparisons": 3189,
+    "matching": 3173,
+    "changed": 16,
+    "unknown_or_missing": 0,
+    "unique_changed_dependencies": 7,
+    "affected_review_records": 8,
+    "records_without_optional_binding_list": 19
+  },
+  "queue": {
+    "total": 138,
+    "valid_ai_review": 138,
+    "pending": 0,
+    "human_review": 0
+  },
+  "assessments": [
+    {
+      "path": "AGENTS.md",
+      "status": "compatible_at_current_scope",
+      "impact": "308e27 changes only SRM fact/design navigation and requires reading both. Existing JDK25/MavenWrapper,Docker-only execution,forward-only migration,seed checksum,permissions,v-permission,security and build requirements remain. The affected architecture/backend/frontend/Workflow/tutorial references use those preserved execution rules;5e5ff2 confirms their actual contexts.",
+      "later_review": "docs/reference/reviews/srm-design-ownership-2026-10-18.json",
+      "current_sha256": "885c3574e4ff6ab98feb0a1216a6d80541005b7a2021e8c46e2130206fa4673d",
+      "later_review_sha256": "2ada498f2082e7d1bcd08a64c8768bcd7a3e826d253b89ff5a4a7ad98684d99f"
+    },
+    {
+      "path": "docs/design/srm-design.md",
+      "status": "compatible_at_current_scope",
+      "impact": "All content from the firstH2 onward is byte-identical to the completely reviewed9b23ab9 design snapshot. New purpose/ownership declarations point current contracts to srm.md and preserve the snapshot and original date. Architecture and SRM tutorial already link current SRM facts separately;no changed state,authority,API,Saga,transaction or historical section is imported through their design references.",
+      "later_review": "docs/reference/reviews/srm-design-ownership-2026-10-18.json",
+      "current_sha256": "84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0",
+      "later_review_sha256": "2ada498f2082e7d1bcd08a64c8768bcd7a3e826d253b89ff5a4a7ad98684d99f"
+    },
+    {
+      "path": "docs/repository-governance.md",
+      "status": "compatible_at_current_scope",
+      "impact": "308e27 clarifies document ownership and actual authorizedAI_REVIEW suffices. It preserves current digest/evidence/authorization checks,strict publication gates,Docker execution,artifact protection and historical scope. Existing affected articles already use authorizedAI_REVIEW or reference unchanged governance roles;none requires mandatory human translation review. Platform Auto-review and actual runtime/business requirements remain independent.",
+      "later_review": "docs/reference/reviews/srm-design-ownership-2026-10-18.json",
+      "current_sha256": "9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08",
+      "later_review_sha256": "2ada498f2082e7d1bcd08a64c8768bcd7a3e826d253b89ff5a4a7ad98684d99f"
+    },
+    {
+      "path": "docs/wiki/outbox-development.md",
+      "status": "compatible_at_current_scope",
+      "impact": "The actual complete Outbox review covers652original lines plus all final changes covering660current lines. Corrections clarify full prerequisites,broker_type,actual permissions,configuration-only deliveryEnabled,transaction/lease/CAS/dedup/metrics and dated image evidence. Backend-patterns points to this tutorial for actual breakpoints/failure recovery and keeps the invariant owner in mq-reliability;its explicit tenant,sender routing and dual job annotations remain consistent. All ten command fences per language are unchanged.",
+      "later_review": "docs/reference/reviews/wiki-outbox-development.json",
+      "current_sha256": "d260241659ee9521063b0719b1685dc0c904ddf180758bcc77c44dcabf1d2653",
+      "later_review_sha256": "77a8e239d9bcfabd315145e1e80e3accc5129514a035f9caebcb38af646b1606"
+    },
+    {
+      "path": "docs/wiki/source-debugging.md",
+      "status": "compatible_at_current_scope",
+      "impact": "The later full semantic review covers the complete debugging tutorial,actual selected source and final changes,including Docker-only JDK25/Surefire JDWP and bounded rollback,replay and MI_END interpretation. Backend-patterns delegates call relations,variables and breakpoints to this page while retaining its identity/tenant/transaction distinctions;no backend invariant is weakened. Actual IDE attachment,realDB/Broker and global UI claims remain unproved unless separately evidenced.",
+      "later_review": "docs/reference/reviews/wiki-source-debugging.json",
+      "current_sha256": "82f7572b9aaeebda0effba0633f0a6f1ffc13ce73d36ec54e45f7d1b55b2029c",
+      "later_review_sha256": "ff74282a3a28c43cd08b460f732e06e0ea68160ecb104dcb4e8c072dc2ec6bd6"
+    },
+    {
+      "path": "docs/guides/troubleshooting.md",
+      "status": "compatible_at_current_scope",
+      "impact": "The later full review corrects900fallback versus7200repository configuration/runtime expiry,Auth login projection versus other services' safety logs,and actual archiver/handler names. Backend-patterns delegates reproduction steps and separately distinguishes empty/403/404/connection failures;it retains Auth's noOperLog rule and unchanged security/tenant behavior. Localized protocol literals and all remaining troubleshooting boundaries were reviewed,without rerunning successful business operations.",
+      "later_review": "docs/reference/reviews/guide-troubleshooting.json",
+      "current_sha256": "2481ddc1de179b76290b46c2506b8f71fce0d3c6d60be1ceca25369f940b7dbb",
+      "later_review_sha256": "e0de088f5711e65af4ce0b3043ef7c72ddb6368e4dbc11dc6ec70459686cb279"
+    },
+    {
+      "path": "docs/architecture.md",
+      "status": "compatible_at_current_scope",
+      "impact": "The current complete architecture review and later paragraph364 delta explicitly cover current common-service module roles,trust-chain limits,catalog/Compose integration and authorizedAI review. CRM design references architecture for the full dependency list and signed identity/time limits;its actual paragraph55 common-service composition and paragraph115 limited assertion are consistent. No new cross-database atomicity,Workflow runtime dependency or proof from a bare forwarded header is introduced.",
+      "later_review": "docs/reference/reviews/architecture.json",
+      "current_sha256": "dc06378a9efe9c689ff447fd5d230474438a2e846e0f75c15cc96c4c8ad4b206",
+      "later_review_sha256": "2e7038f5a34f0060a3038b8259aaea9b726c9962cfff6ff42645400f48428979"
+    }
+  ],
+  "affected_unchanged_documents": [
+    {
+      "path": "docs/reference/reviews/architecture.json",
+      "sha256": "2e7038f5a34f0060a3038b8259aaea9b726c9962cfff6ff42645400f48428979",
+      "document_id": "architecture",
+      "source": "docs/architecture.md",
+      "source_sha256": "dc06378a9efe9c689ff447fd5d230474438a2e846e0f75c15cc96c4c8ad4b206",
+      "original_review_kept": true,
+      "new_whole_document_reread": false
+    },
+    {
+      "path": "docs/reference/reviews/backend-patterns.json",
+      "sha256": "f88e81c0d3153d8e1648e61dc0d6c2b12ea13faf2ba63f09f847417727104d84",
+      "document_id": "backend-patterns",
+      "source": "docs/backend-patterns.md",
+      "source_sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7",
+      "original_review_kept": true,
+      "new_whole_document_reread": false
+    },
+    {
+      "path": "docs/reference/reviews/frontend-patterns.json",
+      "sha256": "dedc1bbd2afeeddc81cf932b0f1a990b699bb1d4ddcb85aa31f865f3e0a4f3c0",
+      "document_id": "frontend-patterns",
+      "source": "docs/frontend-patterns.md",
+      "source_sha256": "0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1",
+      "original_review_kept": true,
+      "new_whole_document_reread": false
+    },
+    {
+      "path": "docs/reference/reviews/workflow.json",
+      "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+      "document_id": "workflow",
+      "source": "docs/workflow.md",
+      "source_sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389",
+      "original_review_kept": true,
+      "new_whole_document_reread": false
+    },
+    {
+      "path": "docs/reference/reviews/docker-deployment.json",
+      "sha256": "23d66344ee27e48fabbfdfc81838cdd541370cdfb3b4937d4480976cabcbdf03",
+      "document_id": "docker-deployment",
+      "source": "docs/docker-deployment.md",
+      "source_sha256": "eb486492162150ec60c6895a4cfa1e172407a427c7ad0b6402de3419b46a6fc8",
+      "original_review_kept": true,
+      "new_whole_document_reread": false
+    },
+    {
+      "path": "docs/reference/reviews/crm-design.json",
+      "sha256": "4c2639157723a5d39f96f173b49714c7347501b13d15725daa8aceaea373ad37",
+      "document_id": "crm-design",
+      "source": "docs/design/crm-design.md",
+      "source_sha256": "07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81",
+      "original_review_kept": true,
+      "new_whole_document_reread": false
+    },
+    {
+      "path": "docs/reference/reviews/guide-workflow-approval.json",
+      "sha256": "9dcb32dc1a9d52d5915fc7771db176aa3c25baeff6aa23951221e9d4a7bfe6bc",
+      "document_id": "guide-workflow-approval",
+      "source": "docs/guides/workflow-approval.md",
+      "source_sha256": "43e51b029befd4b3655908d7c076b87b230b8b5df2dd12f74bdfc0e3fc5e005a",
+      "original_review_kept": true,
+      "new_whole_document_reread": false
+    },
+    {
+      "path": "docs/reference/reviews/guide-srm-flow.json",
+      "sha256": "db4ae3776ba16081ddcee65665f109e6619131b850cd7e04ed4866e86a4a2404",
+      "document_id": "guide-srm-flow",
+      "source": "docs/guides/srm-flow.md",
+      "source_sha256": "10b8ea68357084cfd923a495b63bc4567416549b23122d19bd54e92c1094f082",
+      "original_review_kept": true,
+      "new_whole_document_reread": false
+    }
+  ],
+  "historical_binding_deltas": [
+    {
+      "review": "docs/reference/reviews/architecture.json",
+      "document_id": "architecture",
+      "path": "AGENTS.md",
+      "recorded_sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df",
+      "current_sha256": "885c3574e4ff6ab98feb0a1216a6d80541005b7a2021e8c46e2130206fa4673d",
+      "assessment_path": "AGENTS.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/architecture.json",
+      "document_id": "architecture",
+      "path": "docs/design/srm-design.md",
+      "recorded_sha256": "401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211",
+      "current_sha256": "84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0",
+      "assessment_path": "docs/design/srm-design.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/architecture.json",
+      "document_id": "architecture",
+      "path": "docs/repository-governance.md",
+      "recorded_sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12",
+      "current_sha256": "9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08",
+      "assessment_path": "docs/repository-governance.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/backend-patterns.json",
+      "document_id": "backend-patterns",
+      "path": "docs/wiki/outbox-development.md",
+      "recorded_sha256": "4c5e9fbcbf1408a13500ab2582647c833d5aed7bec897a2a938c2ab9600e6ffd",
+      "current_sha256": "d260241659ee9521063b0719b1685dc0c904ddf180758bcc77c44dcabf1d2653",
+      "assessment_path": "docs/wiki/outbox-development.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/backend-patterns.json",
+      "document_id": "backend-patterns",
+      "path": "docs/wiki/source-debugging.md",
+      "recorded_sha256": "d4fe8024da0e87028697268e6c962647ee0178a77bb2001275693b3812ff3e3b",
+      "current_sha256": "82f7572b9aaeebda0effba0633f0a6f1ffc13ce73d36ec54e45f7d1b55b2029c",
+      "assessment_path": "docs/wiki/source-debugging.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/backend-patterns.json",
+      "document_id": "backend-patterns",
+      "path": "docs/guides/troubleshooting.md",
+      "recorded_sha256": "ca3b52f3ca65143331fb46b69ff96b1fe46ff98a2b12ab4ce201f226e7d9ee20",
+      "current_sha256": "2481ddc1de179b76290b46c2506b8f71fce0d3c6d60be1ceca25369f940b7dbb",
+      "assessment_path": "docs/guides/troubleshooting.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/backend-patterns.json",
+      "document_id": "backend-patterns",
+      "path": "AGENTS.md",
+      "recorded_sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df",
+      "current_sha256": "885c3574e4ff6ab98feb0a1216a6d80541005b7a2021e8c46e2130206fa4673d",
+      "assessment_path": "AGENTS.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/backend-patterns.json",
+      "document_id": "backend-patterns",
+      "path": "docs/repository-governance.md",
+      "recorded_sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12",
+      "current_sha256": "9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08",
+      "assessment_path": "docs/repository-governance.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/frontend-patterns.json",
+      "document_id": "frontend-patterns",
+      "path": "AGENTS.md",
+      "recorded_sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df",
+      "current_sha256": "885c3574e4ff6ab98feb0a1216a6d80541005b7a2021e8c46e2130206fa4673d",
+      "assessment_path": "AGENTS.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/frontend-patterns.json",
+      "document_id": "frontend-patterns",
+      "path": "docs/repository-governance.md",
+      "recorded_sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12",
+      "current_sha256": "9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08",
+      "assessment_path": "docs/repository-governance.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/workflow.json",
+      "document_id": "workflow",
+      "path": "AGENTS.md",
+      "recorded_sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df",
+      "current_sha256": "885c3574e4ff6ab98feb0a1216a6d80541005b7a2021e8c46e2130206fa4673d",
+      "assessment_path": "AGENTS.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/docker-deployment.json",
+      "document_id": "docker-deployment",
+      "path": "docs/repository-governance.md",
+      "recorded_sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12",
+      "current_sha256": "9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08",
+      "assessment_path": "docs/repository-governance.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/crm-design.json",
+      "document_id": "crm-design",
+      "path": "docs/architecture.md",
+      "recorded_sha256": "abb00d78daadc8a36fb82b71d62c4134a7bc9b4c0de8e82eb64be7924db9949d",
+      "current_sha256": "dc06378a9efe9c689ff447fd5d230474438a2e846e0f75c15cc96c4c8ad4b206",
+      "assessment_path": "docs/architecture.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/crm-design.json",
+      "document_id": "crm-design",
+      "path": "docs/repository-governance.md",
+      "recorded_sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12",
+      "current_sha256": "9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08",
+      "assessment_path": "docs/repository-governance.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/guide-workflow-approval.json",
+      "document_id": "guide-workflow-approval",
+      "path": "AGENTS.md",
+      "recorded_sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df",
+      "current_sha256": "885c3574e4ff6ab98feb0a1216a6d80541005b7a2021e8c46e2130206fa4673d",
+      "assessment_path": "AGENTS.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    },
+    {
+      "review": "docs/reference/reviews/guide-srm-flow.json",
+      "document_id": "guide-srm-flow",
+      "path": "docs/design/srm-design.md",
+      "recorded_sha256": "401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211",
+      "current_sha256": "84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0",
+      "assessment_path": "docs/design/srm-design.md",
+      "status": "covered_by_scoped_current_impact_assessment"
+    }
+  ],
+  "current_input_bindings": [
+    {
+      "path": "docs/docs-manifest.yaml",
+      "sha256": "e5d8975888c7021062cb74b7cb6cc1c80e55b13d2207d74f5c882f4b1c3b9261"
+    },
+    {
+      "path": "docs/i18n-review-queue.md",
+      "sha256": "f42c094e006bb52ad79ed3e00d1ec6d0b2d4c0801d9e5ec28048bb9fb50b3c73"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "885c3574e4ff6ab98feb0a1216a6d80541005b7a2021e8c46e2130206fa4673d"
+    },
+    {
+      "path": "docs/reference/reviews/srm-design-ownership-2026-10-18.json",
+      "sha256": "2ada498f2082e7d1bcd08a64c8768bcd7a3e826d253b89ff5a4a7ad98684d99f"
+    },
+    {
+      "path": "docs/design/srm-design.md",
+      "sha256": "84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0"
+    },
+    {
+      "path": "docs/repository-governance.md",
+      "sha256": "9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08"
+    },
+    {
+      "path": "docs/wiki/outbox-development.md",
+      "sha256": "d260241659ee9521063b0719b1685dc0c904ddf180758bcc77c44dcabf1d2653"
+    },
+    {
+      "path": "docs/reference/reviews/wiki-outbox-development.json",
+      "sha256": "77a8e239d9bcfabd315145e1e80e3accc5129514a035f9caebcb38af646b1606"
+    },
+    {
+      "path": "docs/wiki/source-debugging.md",
+      "sha256": "82f7572b9aaeebda0effba0633f0a6f1ffc13ce73d36ec54e45f7d1b55b2029c"
+    },
+    {
+      "path": "docs/reference/reviews/wiki-source-debugging.json",
+      "sha256": "ff74282a3a28c43cd08b460f732e06e0ea68160ecb104dcb4e8c072dc2ec6bd6"
+    },
+    {
+      "path": "docs/guides/troubleshooting.md",
+      "sha256": "2481ddc1de179b76290b46c2506b8f71fce0d3c6d60be1ceca25369f940b7dbb"
+    },
+    {
+      "path": "docs/reference/reviews/guide-troubleshooting.json",
+      "sha256": "e0de088f5711e65af4ce0b3043ef7c72ddb6368e4dbc11dc6ec70459686cb279"
+    },
+    {
+      "path": "docs/architecture.md",
+      "sha256": "dc06378a9efe9c689ff447fd5d230474438a2e846e0f75c15cc96c4c8ad4b206"
+    },
+    {
+      "path": "docs/reference/reviews/architecture.json",
+      "sha256": "2e7038f5a34f0060a3038b8259aaea9b726c9962cfff6ff42645400f48428979"
+    },
+    {
+      "path": "docs/reference/reviews/backend-patterns.json",
+      "sha256": "f88e81c0d3153d8e1648e61dc0d6c2b12ea13faf2ba63f09f847417727104d84"
+    },
+    {
+      "path": "docs/backend-patterns.md",
+      "sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7"
+    },
+    {
+      "path": "docs/reference/reviews/frontend-patterns.json",
+      "sha256": "dedc1bbd2afeeddc81cf932b0f1a990b699bb1d4ddcb85aa31f865f3e0a4f3c0"
+    },
+    {
+      "path": "docs/frontend-patterns.md",
+      "sha256": "0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1"
+    },
+    {
+      "path": "docs/reference/reviews/workflow.json",
+      "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f"
+    },
+    {
+      "path": "docs/workflow.md",
+      "sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389"
+    },
+    {
+      "path": "docs/reference/reviews/docker-deployment.json",
+      "sha256": "23d66344ee27e48fabbfdfc81838cdd541370cdfb3b4937d4480976cabcbdf03"
+    },
+    {
+      "path": "docs/docker-deployment.md",
+      "sha256": "eb486492162150ec60c6895a4cfa1e172407a427c7ad0b6402de3419b46a6fc8"
+    },
+    {
+      "path": "docs/reference/reviews/crm-design.json",
+      "sha256": "4c2639157723a5d39f96f173b49714c7347501b13d15725daa8aceaea373ad37"
+    },
+    {
+      "path": "docs/design/crm-design.md",
+      "sha256": "07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81"
+    },
+    {
+      "path": "docs/reference/reviews/guide-workflow-approval.json",
+      "sha256": "9dcb32dc1a9d52d5915fc7771db176aa3c25baeff6aa23951221e9d4a7bfe6bc"
+    },
+    {
+      "path": "docs/guides/workflow-approval.md",
+      "sha256": "43e51b029befd4b3655908d7c076b87b230b8b5df2dd12f74bdfc0e3fc5e005a"
+    },
+    {
+      "path": "docs/reference/reviews/guide-srm-flow.json",
+      "sha256": "db4ae3776ba16081ddcee65665f109e6619131b850cd7e04ed4866e86a4a2404"
+    },
+    {
+      "path": "docs/guides/srm-flow.md",
+      "sha256": "10b8ea68357084cfd923a495b63bc4567416549b23122d19bd54e92c1094f082"
+    }
+  ],
+  "historical_review_records_rewritten": false,
+  "new_whole_affected_document_rereads": 0,
+  "new_translation_rows": 0,
+  "application_source_changes": false,
+  "application_runs": 0,
+  "business_writes": 0,
+  "full_original_A_G_preserved": true,
+  "global_release_complete": false,
+  "limitations": [
+    "This is a direct-dependency impact assessment,not3189newsemantic reads or fresh runtime verification. The original checked_source_files remain historical read snapshots.",
+    "Nineteen current review records lack the optional checked_source_files list. Their actual original methods/evidence remain at their recorded scope;no missing list was fabricated and no uniform transitive-source freshness is claimed.",
+    "No translation text or historical review was modified;no new translation row,application build,test replay,capture,external authorization,CAPTCHA or business write was performed by this assessment.",
+    "All original A-G remain. CLI/generation/structure checks do not prove full application goldens,independent five-preset docs-AI delivery or current final site/browser acceptance."
+  ]
+}

@@ -1,7 +1,7 @@
 # API 契约
 
-> 本文档定义了前端与后端之间的权威 API 契约。双方必须遵守这些结构。任何偏离需要团队明确批准。  
-> 社交登录完整流程详见 [core-flows.md](core-flows.md)。数据字典和工作流端点详见各自文档。
+> 本文维护响应、字段、路由、身份头及跨服务消息的当前线格式。源码、配置和 Controller/DTO 定义实际行为；示例中的 ID、日期、地址与状态值只用于说明结构，不代表当前环境数据或验收结果。
+> 业务状态机与实现边界见各领域事实/设计文档；配置、登录、浏览器操作及失败恢复见 [Wiki](wiki/index.md) 和[认证指南](guides/authentication.md)。本地协议授权与外部社交登录是不同链路。
 
 ---
 
@@ -30,57 +30,23 @@
 
 ## 1. 响应封装
 
-所有 API 响应使用统一的 `R<T>` 封装。
+常规业务 Controller 返回 `R<T>`；分页为 `R<PageResult<T>>`。OAuth2/OIDC 协议端点、社交登录重定向、Actuator 及过滤器/框架产生的响应不能一概视为同一封装。
 
 ```json
-// 成功
-{
-  "code": 200,
-  "message": "success",
-  "data": { ... }
-}
-
-// 失败（业务错误）
-{
-  "code": 500,
-  "message": "操作失败"
-}
-
-// 失败（验证错误）
-{
-  "code": 400,
-  "message": "username: 用户名不能为空; email: 邮箱不能为空"
-}
+{"code":200,"message":"success","data":{"id":1}}
 ```
 
-### 后端类型：`R<T>`
-
-```java
-@Data
-public class R<T> implements Serializable {
-    private int code;
-    private String message;
-    private T data;
-
-    public static <T> R<T> ok(T data) { ... }
-    public static <T> R<T> fail(String message) { ... }
-    public static <T> R<T> fail(int code, String message) { ... }
-}
+```json
+{"code":500,"message":"操作失败","data":null}
 ```
 
-**位置**：`omni-common-core` 模块，`com.omni.common.core.result.R`。
-
-### 前端类型：`ApiResponse<T>`
-
-```typescript
-interface ApiResponse<T = unknown> {
-  code: number
-  message: string
-  data: T
-}
+```json
+{"code":400,"message":"username: 用户名不能为空","data":null}
 ```
 
-**权威位置**：`src/types/api.ts`（唯一真实来源；不要在其他文件中重复定义）。
+`R.ok(data)` 的业务码为 200、message 为 `success`；`R.ok()` 与失败响应的 data 为 null。`R.fail(message)` 默认业务码为 500，显式重载使用调用方给出的码。JSON 字段顺序不是契约。
+
+后端唯一类型为 [R.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/R.java)。前端唯一声明为 [src/types/api.ts](../omni-frontend/src/types/api.ts) 中的 `ApiResponse<T>`；类型声明 `data: T` 不会在运行时消除 null。本文不复制可编译类型，调用方应按端点实际空值处理。
 
 ---
 
@@ -88,123 +54,62 @@ interface ApiResponse<T = unknown> {
 
 ### 2.1 系统级错误码
 
-| HTTP 状态码 | 业务码 | 场景 | 触发条件 | 处理方 |
-|------------|--------|------|---------|--------|
-| 200 | 200 | 成功 | `R.ok(data)` | — |
-| 400 | 400 | 参数校验失败 | `MethodArgumentNotValidException` / `BindException` 被 `GlobalExceptionHandler` 捕获 | 前端按业务码本地化提示（不回显后端原始 `message`） |
-| 401 | 401 | 未认证 | Gateway `AuthFilter` 返回 401 JSON | 仅会话过期时安全登出并回跳登录；凭据类 401 保留会话与输入 |
-| 403 | 403 | 权限不足 | `AccessDeniedException` / `AuthorizationDeniedException` 被 `GlobalExceptionHandler` 捕获 | 保持会话，本地化提示权限不足（不登出/不强制回退） |
-| 200 | 404 | 资源不存在 | `throw new BusinessException(404, "xxx不存在")` | 前端显示错误信息 |
-| 200 | 409 | 状态/并发冲突 | 乐观锁版本不一致或状态机拒绝迁移 | 前端刷新数据后提示用户重试 |
-| 200 | 503 | 下游依赖不可用 | CRM 调用 Auth 数据范围接口失败关闭 | 前端提示服务暂不可用，不降级为越权数据 |
-| 200 | 500 | 业务异常 | `BusinessException` 被 `GlobalExceptionHandler` 捕获 | 前端显示错误信息 |
-| 500 | 500 | 未知系统错误 | 兜底 `Exception` 处理器 | 前端显示"服务器内部错误" |
+HTTP 状态和 `R.code` 必须分别读取：
+
+| HTTP 状态 | 业务码 | 当前映射 |
+|---|---|---|
+| 200 | 200 | 常规业务成功 |
+| 200 | 抛出时指定的码，默认 500 | `BusinessException`；例如业务 400/403/404/409/503 |
+| 400 | 400 | 已由对应 advice 处理的 Bean 校验、绑定、缺少 query 参数或类型不匹配 |
+| 403 | 403 | `AccessDeniedException/AuthorizationDeniedException` |
+| 404 / 405 / 415 | 同 HTTP 状态 | advice 处理的资源、方法、媒体类型错误 |
+| 500 | 500 | 未被专门处理的异常 |
+
+JSON 读取错误的映射存在服务差异：SRM/Procurement 的专用 advice 把 `HttpMessageNotReadableException` 映射为 400；Asset 当前通用处理器会落入 500。受控 MockMvc 已观察到 Asset 金额传 JSON number 或非法金额字符串返回 500；这不表示请求有效，也不保证所有服务均返回相同状态。
 
 ### 2.2 业务级错误码
 
-| 业务码 | 场景 | 消息示例 |
-|--------|------|---------|
-| 500 | 验证码无效/过期 | "验证码已过期" |
-| 500 | 认证失败 | "用户名或密码错误" |
-| 500 | 账号被禁用 | "账号已被禁用" |
-| 500 | 账号被锁定 | "账号已锁定，请 N 分钟后重试" |
-| 500 | 租户不存在/禁用 | "租户不存在或已禁用" |
-| 400 | 唯一性冲突 | "用户名已存在" / "任务类型编码已存在" |
-| 404 | 资源不存在 | "组织单元不存在" / "字典数据不存在" |
-| 403 | 权限不足 | "权限不足，拒绝访问" |
-| 409 | 乐观锁或状态冲突 | "数据已被其他用户修改，请刷新后重试" |
-| 503 | 必需依赖不可用 | "认证授权服务暂不可用" |
+业务码由当前抛出点决定，不能从 message 推断。验证码、账号、租户等失败有使用默认 500 的路径；400、403、404、409、503 也可能出现在 HTTP 200 的业务失败体中。前端为 410、423、429、502 等码提供展示分类，不代表每个端点都实现这些业务分支。
 
 ### 2.3 Gateway 级错误码
 
-| HTTP 状态码 | 场景 | 响应格式 |
-|------------|------|---------|
-| 401 | JWT 签名无效 | `{"code":401,"message":"Invalid JWT signature","data":null}` |
-| 401 | JWT 已过期 | `{"code":401,"message":"JWT token expired","data":null}` |
-| 401 | Token 已被撤销 | `{"code":401,"message":"Token has been revoked","data":null}` |
-| 401 | 缺少 Authorization 头 | `{"code":401,"message":"Missing Authorization header","data":null}` |
+| HTTP 状态 / code | 条件 | 当前 message |
+|---|---|---|
+| 401 / 401 | 缺少 Bearer 认证 | 请先登录 |
+| 401 / 401 | JWT 过期 | 登录已过期，请重新登录 |
+| 401 / 401 | 其他 JWT/安全校验失败，包括撤销命中 | 认证失败，请重新登录 |
+| 503 / 503 | 非 test 配置下身份签名密钥缺失、过弱或签名生成失败 | 网关身份签名未就绪，请联系管理员 |
+
+以上是 `AuthFilter` 的分支；其他过滤器、限流器、下游或框架错误仍有自己的映射。message 供诊断，不能作为前端认证状态判断条件。
 
 ### 2.4 社交登录错误码
 
-| error 参数 | 含义 | 触发条件 |
-|------------|------|---------|
-| `user_denied` | 用户拒绝授权 | 第三方平台回调携带 `error=access_denied` |
-| `invalid_callback` | 回调参数缺失 | code 或 state 为空 |
-| `social_login_failed` | 登录流程异常 | state 验证失败、第三方 API 错误、用户信息获取失败、用户已禁用 |
+社交回调的 `user_denied/invalid_callback/social_login_failed` 是 302 Location 中的 query 值，不是 `R.code`；条件与地址见第 10 节。
 
 ### 2.5 前端错误处理流程
 
-Axios 响应拦截器（`src/api/request.ts`）检查 `res.code !== 200`：
-1. 依业务码从 `error-display.ts` 解析本地化描述符（`i18nKey`/`displayMessage`）；前端只展示码值驱动的本地化文案，**后端 `res.message` 与 Axios `error.message` 一律不上屏**（原始 message 仅随 `ApiError` 附带供诊断）。
-2. 返回 `Promise.reject(new ApiError(display, readServerMessage(res)))`，错误对象携带 `businessCode`/`httpStatus`/`traceId`/`i18nKey`/`displayMessage`，由调用方分类处理。
+[request.ts](../omni-frontend/src/api/request.ts) 和 [error-display.ts](../omni-frontend/src/utils/error-display.ts) 以 HTTP 状态、业务码和无响应时的 Axios 传输错误码分类。HTTP 401/403 优先于响应体业务码；其余优先业务码，再用 HTTP 状态。
 
-**HTTP 状态码处理**（区分「会话过期」与「登录凭据校验失败」，非任何文案匹配）：
-- HTTP 401：仅当 `error-display.ts` 判定 `shouldLogout`（会话过期 / 携带过期 `Authorization`）时才安全登出并回跳登录页；登录/会话登录/注册等凭据端点返回的 401 属凭据校验失败，**保留会话与用户输入，不登出、不清表单**。
-- HTTP 403（权限不足）：保持当前会话，**不登出、不强制返回上一页**，仅本地化提示权限不足。
-- HTTP 400/409/5xx：按业务码本地化提示；409 建议刷新后重试，503 提示服务暂不可用且不降级为越权数据，均不清会话。
+- 业务失败抛出携带 `businessCode/httpStatus/traceId/i18nKey/displayMessage` 的 `ApiError`；HTTP 失败保留并增强 AxiosError，不把两类都描述成同一构造函数。
+- 原始后端 message 与 Axios message 不直接上屏。只显示码值驱动的四语安全文案；400 的字段提示只接受经过校验的 ASCII 字段名。
+- 401：凭据端点保留会话和输入；其他请求按是否有会话区分未登录/会话过期，两者的 `shouldLogout` 均为 true，再安全清理会话并跳登录。凭据端点识别包括 `/auth/login`、`/auth/session-login`、`/auth/register`、`/auth/social-login`、`/srm/portal/auth/login`；这份前端分类不等于 Gateway 白名单。
+- 403 保持会话；400/409/5xx、网络与超时使用各自本地化文案，不根据英文/中文技术串猜语义。业务冲突的处理由调用方刷新并决定是否重试。
 
 ---
 
 ## 3. 分页契约
 
-### 后端类型：`PageResult<T>`
+后端唯一类型为 [PageResult.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/PageResult.java)，前端为 [src/types/api.ts](../omni-frontend/src/types/api.ts)。响应 data 包含：
 
-```java
-@Data
-public class PageResult<T> implements Serializable {
-    private List<T> records;
-    private long total;
-    private long size;
-    private long current;
-    private long pages;   // 自动计算: (total + size - 1) / size
+| 字段 | 含义 |
+|---|---|
+| `records` | 当前页记录 |
+| `total` | 总记录数 |
+| `size` | 每页数量 |
+| `current` | 当前页码 |
+| `pages` | `(total + size - 1) / size`，由构造器计算 |
 
-    public PageResult(List<T> records, long total, long size, long current) { ... }
-}
-```
-
-### 前端类型：`PageResult<T>`
-
-```typescript
-interface PageResult<T> {
-  records: T[]
-  total: number
-  size: number
-  current: number
-  pages: number
-}
-```
-
-**权威位置**：`src/types/api.ts`。
-
-### 使用模式
-
-```java
-// 后端 Controller
-@GetMapping("/list")
-public R<PageResult<UserVO>> listUsers(@RequestParam(defaultValue = "1") int page,
-                                        @RequestParam(defaultValue = "10") int size) {
-    return R.ok(userService.listUsers(page, size));
-}
-```
-
-```typescript
-// 前端 API 调用
-export function listUsers(page: number, size: number) {
-  return request.get<ApiResponse<PageResult<UserInfo>>>(
-    `/auth/user/list?page=${page}&size=${size}`,
-  )
-}
-```
-
-### 分页参数约定
-
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `page` | int | 1 | 当前页码（从 1 开始） |
-| `size` | int | 10 | 每页条数 |
-| `records` | List | — | 当前页数据列表 |
-| `total` | long | — | 总记录数 |
-| `pages` | long | — | 总页数（自动计算） |
+通常 query 使用 `page=1&size=10`；范围、默认值、过滤字段和上限以具体 Controller/查询 DTO 为准，不能把示例默认值当作所有端点的统一限制。构造器保留传入的 records，未提供全局 null→[] 转换或分页参数校验；调用方必须提供有效的 size，并按端点约定处理空记录。
 
 ---
 
@@ -219,7 +124,9 @@ export function listUsers(page: number, size: number) {
 | 删除 | DELETE | `/{resource}/{id}` | `DELETE /user/1` |
 | 批量操作 | POST | `/{resource}/batch` | `POST /user/batch` |
 
-**Gateway 路径前缀**：所有前端请求使用 `/api/<service>/<resource>`（如 `/api/auth/user/list`）。当前 Gateway 对 Auth、Base、Workflow、CRM、SRM、Procurement 与 Asset 等业务路由均不使用 `StripPrefix`，下游 Controller 声明并接收完整 `/api/**` 路径。
+**Gateway 路径前缀**：常规前端业务资源请求使用 `/api/<service>/<resource>`，例如 /api/auth/user/list。Auth、Base、Workflow、CRM、SRM、Procurement、Asset 的业务路由保留完整路径，不使用 StripPrefix。协议与内部路径按各自端点定义。
+
+上表是业务资源的命名约定；动作型命令、OAuth2/OIDC 与内部接口按正式 Controller 使用各自路径，不能据此推导出尚未实现的端点。
 
 ---
 
@@ -227,44 +134,36 @@ export function listUsers(page: number, size: number) {
 
 ### 5.1 本地开发环境路由
 
-Gateway `application.yml` 中的路由配置（`spring.cloud.gateway.server.webflux.routes`）：
+当前 [Gateway application.yml](../omni-backend/omni-gateway/src/main/resources/application.yml) 的 `spring.cloud.gateway.server.webflux.routes` 有 12 个显式路由，服务发现自动路由关闭：
 
-| 路由 ID | 路径匹配 | 目标服务 | StripPrefix | 说明 |
-|---------|---------|---------|-------------|------|
-| `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` | 无 | OAuth2 授权服务器端点 |
-| `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` | 无 | OpenID Connect 发现端点 |
-| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | **无** | Auth 服务 REST API（使用完整路径） |
-| `omni-base` | `/api/base/**` | `lb://omni-base` | **无** | Base 服务（使用完整路径） |
-| `omni-base-job` | `/api/job/**` | `lb://omni-base` | **无** | 定时任务管理 |
-| `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` | **无** | 工作流引擎 |
+| 路由 ID | Path 匹配 | 目标 |
+|---|---|---|
+| `block-internal-api` | `/internal/**,/api/internal/**` | `no://op` |
+| `block-internal-api-services` | `/omni-auth/internal/**,/omni-auth/api/internal/**,/omni-base/internal/**,/omni-base/api/internal/**,/omni-workflow/internal/**,/omni-workflow/api/internal/**,/omni-crm/internal/**,/omni-crm/api/internal/**,/omni-srm/internal/**,/omni-srm/api/internal/**,/omni-procurement/internal/**,/omni-procurement/api/internal/**,/omni-asset/internal/**,/omni-asset/api/internal/**,/omni-gateway/internal/**` | `no://op` |
+| `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` |
+| `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` |
+| `omni-auth` | `/api/auth/**` | `lb://omni-auth` |
+| `omni-base` | `/api/base/**` | `lb://omni-base` |
+| `omni-base-job` | `/api/job/**` | `lb://omni-base` |
+| `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` |
+| `omni-crm` | `/api/crm/**` | `lb://omni-crm` |
+| `omni-srm` | `/api/srm/**` | `lb://omni-srm` |
+| `omni-procurement` | `/api/procurement/**` | `lb://omni-procurement` |
+| `omni-asset` | `/api/asset/**` | `lb://omni-asset` |
+
+普通业务路由保留完整路径，没有 `StripPrefix`。两个 `no://op` 路由配置 `SetStatus=404`，阻断内部路径；认证或其他前置过滤器也可能先返回自己的错误。
 
 ### 5.2 Docker 部署路由
 
-Docker 部署时，路由配置相同，但目标服务的 URI 通过 Nacos 服务发现自动解析：
-
-| 前端请求 | Gateway 路由 | 下游接收路径 | 说明 |
-|---------|-------------|-------------|------|
-| `GET /api/auth/user/list` | `lb://omni-auth` 无 StripPrefix | `GET /api/auth/user/list` | Auth 服务保留完整路径 |
-| `GET /api/base/dict/type/list` | `lb://omni-base` 无 StripPrefix | `GET /api/base/dict/type/list` | Base 服务保留完整路径 |
-| `POST /api/workflow/model` | `lb://omni-workflow` 无 StripPrefix | `POST /api/workflow/model` | Workflow 服务保留完整路径 |
-| `GET /api/job/type/list` | `lb://omni-base` 无 StripPrefix | `GET /api/job/type/list` | Job 路由到 Base 服务 |
+正式 Compose 通过 Nacos 解析相同的 `lb://` 服务名；部署环境、配置覆盖与实际启动的模块决定能否访问。路由配置本身不证明下游健康。例如 `/api/base/dict/type/list` 原样到达 Base，`/api/job/**` 也到 Base。
 
 ### 5.3 AuthFilter 白名单路径
 
-以下路径跳过 JWT 验证（`AuthFilter` 不拦截）：
+精确匹配：`/api/auth/login`、`/api/auth/session-login`、`/api/auth/register`、`/api/auth/captcha`、`/api/auth/tenants`、`/favicon.ico`。
 
-```
-/api/auth/login          — 登录
-/api/auth/register       — 注册
-/api/auth/captcha        — 验证码
-/api/auth/tenants        — 租户列表
-/api/auth/oauth2/        — 社交登录
-/actuator/               — 健康检查
-/oauth2/                 — OAuth2 端点
-/.well-known/            — OIDC 发现
-/login                   — Spring Security 登录
-/error                   — 错误页面
-```
+前缀匹配：`/api/auth/oauth2/`、`/actuator/`、`/oauth2/`、`/.well-known/`、`/login`、`/error`。这里的前缀判断是 startsWith，不能改写为全部精确匹配；也不代表整族 `/api/auth/**` 公开。
+
+白名单仅跳过该过滤器的 JWT 校验，不创建路由、控制器或下游权限。公开路径仍清除客户端伪造的可信身份头和 Bearer Authorization，保留 OAuth2 协议需要的 Basic Authorization，并设置 `X-Gateway-Forwarded=true`。
 
 ---
 
@@ -308,126 +207,72 @@ DTO 可以定义为 Controller 的静态内部类（简单场景）或独立文�
 
 ### 8.1 Gateway 注入的请求头
 
-Gateway 的 `AuthFilter` 在 JWT 验证成功后，向下游请求注入以下请求头：
+受保护路径通过 JWT 校验后，Gateway 清除客户端 Authorization 和同名可信头，再设置：
 
-| 请求头 | 类型 | 说明 | 示例 |
-|--------|------|------|------|
-| `X-User-Id` | String | 用户 ID | `"1"` |
-| `X-User-Name` | String | 用户名 | `"admin"` |
-| `X-Tenant-Id` | String | 租户 ID | `"1"` |
-| `X-User-Roles` | String | 逗号分隔的角色编码 | `"SUPER_ADMIN,DEPT_LEADER"` |
-| `X-User-Scopes` | String | 空格/逗号分隔的权限编码 | `"dict:type:list dict:data:create"` |
+| 请求头 | 来源/含义 |
+|---|---|
+| `X-User-Id` | JWT 用户 ID，要求正整数 |
+| `X-Tenant-Id` | JWT 租户 ID，要求正整数 |
+| `X-User-Name` | JWT 用户名；不是 `X-Username` |
+| `X-User-Roles` | 角色 claim |
+| `X-User-Scopes` | 权限 claim |
+| `X-Gateway-Forwarded` | `true` |
+| `X-Gateway-Assertion` | Gateway 生成的身份断言 |
+
+角色/权限 claim 为 List 时用逗号连接，其他非空值转为字符串，缺失为空串。断言对 `userId|tenantId|username|issuedAt` 做 HMAC-SHA256，格式为无 padding 的 `base64url(payload):base64url(signature)`。非 test 配置要求足够强的私有密钥；服务端必须通过自己的预认证链校验，不能因存在任意同名头就信任身份。
 
 ### 8.2 前端发送的请求头
 
-| 请求头 | 来源 | 说明 |
-|--------|------|------|
-| `Authorization: Bearer <JWT>` | Axios 拦截器自动注入 | 从 `useUserStore()` 获取 Token |
-| `X-Tenant-Id` | Axios 拦截器自动注入 | 从 `useUserStore()` 获取租户 ID |
-| `Content-Type: application/json` | Axios 默认 | JSON 请求体 |
+Axios 从 `useUserStore().token` 设置 `Authorization: Bearer <JWT>`，并由 `getTenantIdFromToken(token)` 解析租户头；不是独立信任可编辑的 store 租户字段。Gateway 对受保护请求会覆盖可信身份头。JSON 请求按实际载荷设置 Content-Type；共享 Axios 实例没有显式配置全局 Content-Type 默认头。
 
 ### 8.3 内部服务请求头
 
-所有服务间接口统一放在 `/api/internal/**` 下，使用共享令牌认证，不使用终端用户 JWT：
+本文列出的业务内部接口使用 `X-Internal-Token` 与显式 `X-Tenant-Id`，不使用终端用户 JWT 代替内部认证。带 JSON body 时使用 `Content-Type: application/json`；需要 body/query tenantId 的端点还校验与请求头一致，具体不一致错误见各端点。
 
-| 请求头 | 必填 | 说明 |
-|--------|------|------|
-| `X-Internal-Token` | 是 | 服务间共享令牌；由 `InternalApiAuthFilter` 校验 |
-| `X-Tenant-Id` | 是 | 当前业务租户；必须与 body/query 中的 `tenantId` 一致 |
-| `Content-Type: application/json` | JSON 请求必填 | JSON 请求体 |
+令牌校验器按服务配置生效：`omni-common-service` 的内部认证过滤器拒绝无效请求令牌为 HTTP 401，配置校验器在启用相关能力但私有令牌缺失/过弱时阻止启动；兼容 MQ 的 `InternalApiAuthFilter` 在服务端令牌未配置时返回 HTTP 503，在请求令牌缺失/不匹配时返回 401。不能把这两条实现写成所有服务统一的运行时 503 分支。
 
-`InternalApiAuthFilter` 作为容器级前置过滤器统一保护 `/api/internal/**`，服务安全链不得再次要求
-Gateway 用户身份。令牌缺失或不匹配返回 HTTP 401；服务端未配置令牌时失败关闭并返回 HTTP 503；
-请求头与 body/query 租户不一致返回业务码 403。内部路径不得依赖 `X-Gateway-Forwarded` 或用户权限头。
+内部路径被 Gateway 路由显式阻断，不依赖客户端 `X-Gateway-Forwarded` 或角色/权限头；可信内部调用者仍需为每次请求提供正确业务租户，令牌不自动决定租户。
 
 ### 8.4 安全响应头（Gateway 注入）
 
-`SecurityHeadersFilter`（WebFlux WebFilter）为所有经过网关的响应添加：
+| 响应头 | 当前值 |
+|---|---|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `X-Trace-Id` | 实际 tracer 的 trace ID；无 span 时为 UUID 去连字符的 32 位值 |
 
-| 响应头 | 值 | 用途 |
-|--------|-----|------|
-| `X-Content-Type-Options` | `nosniff` | 防止浏览器 MIME 类型嗅探 |
-| `X-Frame-Options` | `DENY` | 禁止页面被 iframe 嵌套，防止点击劫持 |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | 控制 Referer 头泄露 |
-| `X-Trace-Id` | 32 位小写十六进制字符串 | 关联 Gateway、Servlet、Feign 与错误反馈 |
-
-Gateway 始终生成新的 `X-Trace-Id`，不信任公网客户端提供的同名头；下游 Servlet 服务把合法值写入
-MDC 和响应头，公共 Feign 拦截器继续向内部调用传播。前端错误面板可展示响应中的 traceId，日志排查
-应优先使用同一值检索完整调用链。
+[SecurityHeadersFilter](../omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/SecurityHeadersFilter.java) 清除公网传入的同名 trace 头。存在实际 tracer span 时将其 ID 放入下游请求及响应；无 span 时只给响应生成 fallback ID，不把该 fallback 注入下游请求。因此仅有响应头不能证明 Gateway、Servlet 与 Feign 完整关联。前端只接受 1–128 位安全 ASCII traceId 供诊断，拒绝异常值。
 
 ---
 
 ## 9. 认证头
 
-```
-Authorization: Bearer <token>
-```
-
-- 由 Axios 请求拦截器（`src/api/request.ts`）使用 `useUserStore()` 中的 Token 设置
-- 由 `omni-gateway` 中的 `AuthFilter` 验证（JWT RS256 签名验证 + claims 提取 + 身份头注入）
-- 公开路径免认证（依 `AuthFilter` 精确/前缀白名单，**非整族 `/api/auth/**`**）：精确匹配 `/api/auth/login`、`/api/auth/session-login`、`/api/auth/register`、`/api/auth/captcha`、`/api/auth/tenants`、`/favicon.ico`；前缀匹配 `/api/auth/oauth2/`、`/actuator/`、`/oauth2/`、`/.well-known/`、`/login`、`/error`。用户/角色等管理 API（`/api/auth/user/**`、`/api/auth/role/**`）必须携带有效 JWT。
+`Authorization: Bearer <token>` 由前端请求拦截器设置，Gateway 校验 JWT 签名、有效期、正整数用户/租户及适用的撤销记录，再注入身份。当前撤销检查依赖 JWT 的 jti；不能把缺少 jti 的令牌也描述为已查黑名单。精确/前缀公开范围统一见第 5.3 节；用户、角色等管理接口仍要求有效认证和端点权限。
 
 ---
 
 ## 10. 社交登录端点
 
-社交登录端点返回 HTTP 302 重定向（非标准 `R<T>` 响应），因为前端通过 `window.location.href` 触发浏览器导航。
+这两个浏览器导航端点在正常授权链路返回 HTTP 302，不使用 `R<T>` 包装。提供商标识为 `github`、`google`、`gitee`：
 
-| HTTP 方法 | URL | 说明 |
-|-----------|-----|------|
-| GET | `/api/auth/oauth2/{provider}?tenant_id=1` | 发起第三方登录，302 重定向到第三方授权页面 |
-| GET | `/api/auth/oauth2/{provider}/callback?code=XXX&state=YYY` | 处理第三方回调，成功时 302 重定向到前端回调页面 |
+| 方法 | URL / 参数 | 合同 |
+|---|---|---|
+| GET | `/api/auth/oauth2/{provider}?tenant_id=1` | `tenant_id` 必填；校验提供商与租户后，302 到提供商授权页 |
+| GET | `/api/auth/oauth2/{provider}/callback`；`code`、`state`、`error` 均为可选绑定参数 | 按下表处理拒绝、缺参、业务失败或成功；参数可选不表示成功分支可省略 code/state |
 
-### 发起登录
+| 回调条件 | HTTP 302 Location |
+|---|---|
+| 提供商返回非空 `error` | 前端 `/login?error=user_denied` |
+| `code` 或 `state` 缺失/空白 | 前端 `/login?error=invalid_callback` |
+| `BusinessException`，包括 state 或提供商换码失败 | 前端 `/login?error=social_login_failed&message=<URL编码消息>` |
+| 成功 | 配置的前端 `/callback#token=<URL编码JWT>&username=<URL编码用户名>` |
 
-```
-# GitHub
-GET /api/auth/oauth2/github?tenant_id=1
-→ 302 Location: https://github.com/login/oauth/authorize?client_id=...&redirect_uri=...&scope=...&state=...
+`OAuth2StateUtils` 的 state 格式为 `tenantId|timestamp|hex(HMAC-SHA256(tenantId|timestamp, secret))`；回调验证完整性并拒绝已超过 10 分钟的时间戳，再还原租户。当前实现没有一次消费标记、随机 nonce 或浏览器会话绑定，不能据此声称完整的一次性 CSRF/重放防护。应用凭据本身也不能代替外部用户登录与授权。
 
-# Google
-GET /api/auth/oauth2/google?tenant_id=1
-→ 302 Location: https://accounts.google.com/o/oauth2/v2/auth?client_id=...&redirect_uri=...&response_type=code&scope=openid+profile+email&state=...
+正式 Docker Compose 的回调入口为 `http://localhost:8102/api/auth/oauth2/{provider}/callback`，由 Gateway 转发；生产回调使用配置的 Frontend/Gateway HTTPS 域名。提供商登记值必须与实际 redirect_uri 一致，不能将私有容器地址登记为公网入口。发起阶段参数/提供商/租户校验失败仍按 Auth 的错误映射处理，不保证返回 302。
 
-# Gitee
-GET /api/auth/oauth2/gitee?tenant_id=1
-→ 302 Location: https://gitee.com/oauth/authorize?client_id=...&redirect_uri=...&response_type=code&scope=user_info&state=...
-```
-
-- `{provider}` 支持 `github`、`google` 和 `gitee`
-- `tenant_id` 必填，指定登录的目标租户
-- State 参数包含 HMAC-SHA256 签名（`tenantId|timestamp|hmac`），防止 CSRF 攻击
-
-### 回调处理
-
-```
-# GitHub/Google/Gitee 回调
-GET /api/auth/oauth2/{provider}/callback?code=XXX&state=YYY
-
-→ 成功: 302 Location: /callback#token=<JWT>&username=<username>
-→ 失败: 302 Location: /login?error=<error_code>&message=<message>
-```
-
-### Docker 部署下的 OAuth2 回调 URL 配置
-
-Docker 部署时，社交登录的 `redirect_uri` 需要使用**宿主机可访问的 URL**：
-
-| 部署环境 | redirect_uri 示例 |
-|---------|------------------|
-| 本地开发 | `http://localhost:8100/api/auth/oauth2/github/callback` |
-| Docker 部署 | `http://<宿主机IP>:8102/api/auth/oauth2/github/callback` |
-| 生产环境 | `https://your-domain.com/api/auth/oauth2/github/callback` |
-
-> **注意**：Docker 部署中，第三方回调统一进入 Gateway 的宿主机端口 8102；生产环境使用 Frontend/Gateway 的 HTTPS 域名。不要把私有 Auth 容器端口注册为公网回调。
-
-### 前端回调页面
-
-`/callback` 页面（`src/views/callback/index.vue`）负责：
-1. 解析 URL fragment 中的 `token` 和 `username`
-2. 存储到 `localStorage`（通过 `useUserStore`）
-3. 重定向到 Dashboard
-
-> 完整流程时序图详见 [core-flows.md](core-flows.md) Flow 4。
+源码入口：[SocialLoginController](../omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SocialLoginController.java)、[OAuth2StateUtils](../omni-backend/omni-auth/src/main/java/com/omni/auth/util/OAuth2StateUtils.java)、[Compose 回调配置](../compose.apps.yaml)。配置、浏览器操作和失败复现统一见[认证指南](guides/authentication.md)；本地授权码/PKCE 与设备码是独立协议链路。
 
 ---
 
@@ -457,7 +302,7 @@ Response 200:
 ### 切换全局开关
 
 ```
-PUT /api/auth/xss-config/toggle
+PUT /api/auth/xss-config/toggle?enabled=true
 Authorization: Bearer <token>
 X-Tenant-Id: 1
 
@@ -473,7 +318,7 @@ Response 200: { "code": 200, "message": "success" }
 | POST | `/api/auth/xss-config/rules` | `system:xssconfig:create` | 创建规则 |
 | PUT | `/api/auth/xss-config/rules/{id}` | `system:xssconfig:update` | 更新规则 |
 | DELETE | `/api/auth/xss-config/rules/{id}` | `system:xssconfig:delete` | 删除规则 |
-| PUT | `/api/auth/xss-config/rules/{id}/toggle` | `system:xssconfig:update` | 切换规则启用状态 |
+| PUT | `/api/auth/xss-config/rules/{id}/toggle?enabled=true` | `system:xssconfig:update` | 切换规则启用状态 |
 
 **ruleType 枚举值**：`HTML_TAG` | `EVENT_HANDLER` | `DANGEROUS_PROTOCOL` | `CUSTOM_PATTERN`
 
@@ -486,98 +331,67 @@ Response 200: { "code": 200, "message": "success" }
 | `system:xssconfig:create` | 创建规则 |
 | `system:xssconfig:delete` | 删除规则 |
 
+规则更新、删除与状态开关均使用 Gateway 注入的 `X-Tenant-Id` 检查规则所属租户。不存在或属于其他租户时，在写入与缓存失效前返回 HTTP 200 + `R.code=404`；正整数租户校验失败抛业务码 400。三处权限码保持不变。
+
+开关接口的 `enabled` 为必填查询参数。创建时 `ruleName`、`ruleType`、`pattern` 非空；更新只处理非 null 字段，提交 pattern 时执行正则语法校验。支持的 ruleType 见上表，当前 DTO 不校验枚举，运行时未知类型不执行净化。净化触发条件、Jackson 2/3、权威读取与缓存边界见 [核心流程](core-flows.md)。
+
 ---
 
 ## 12. Base 服务字典管理端点
 
-Base 服务（`omni-base :8101`）提供数据字典管理，采用「类型 + 数据」两级结构。
+Base 通过 Gateway 的 `/api/base/**` 路由提供完整路径接口，身份链和默认端口见核心流程。类型与数据各 6 个端点；所有入口都使用已验证的当前租户上下文。
 
-**路由说明**：Gateway 路由 `Path=/api/base/**` **无** StripPrefix 过滤器，Base 服务控制器使用完整路径（如 `@RequestMapping("/api/base/dict/type")`）。
+### 字典类型端点
 
-### Dictionary Type 端点
+基础路径: `/api/base/dict/type`
 
-Base path: `/api/base/dict/type`
+| 方法 | 路径 | 权限 | 行为 |
+| --- | --- | --- | --- |
+| GET | `/api/base/dict/type/list` | `dict:type:list` | 按租户分页；typeCode/typeName 模糊过滤、status 可选，sort/id 升序 |
+| GET | `/api/base/dict/type/{id}` | `dict:type:list` | 查当前租户的类型，缺失或外租户为业务码 404 |
+| POST | `/api/base/dict/type` | `dict:type:create` | 要求 typeCode/typeName 非空；租户内类型编码唯一 |
+| PUT | `/api/base/dict/type/{id}` | `dict:type:update` | 只更新非 null 字段，typeCode 不可在此变更 |
+| DELETE | `/api/base/dict/type/{id}` | `dict:type:delete` | 归属检查后级联删除同租户同类型数据 |
+| PUT | `/api/base/dict/type/{id}/status?status=...` | `dict:type:update` | status 为必填查询参数，写后失效缓存 |
 
-| HTTP 方法 | URL | 权限码 | 说明 |
-|-----------|-----|--------|------|
-| GET | `/api/base/dict/type/list?page=1&size=10&typeCode=&typeName=&status=` | `dict:type:list` | 分页列表，支持过滤 |
-| GET | `/api/base/dict/type/{id}` | `dict:type:list` | 按 ID 查询 |
-| POST | `/api/base/dict/type` | `dict:type:create` | 创建（验证 tenant 内 typeCode 唯一） |
-| PUT | `/api/base/dict/type/{id}` | `dict:type:update` | 更新（部分更新） |
-| DELETE | `/api/base/dict/type/{id}` | `dict:type:delete` | 删除（级联删除关联数据） |
-| PUT | `/api/base/dict/type/{id}/status` | `dict:type:update` | 切换启用/禁用 |
+分页参数 `page=1,size=10`；类型查询可选 `typeCode/typeName/status`。创建类型可选 `remark/sort`；创建数据可选 `tagType/remark/sort`。创建时服务设置 `status=1`，sort 未提供时为 0。
 
-**示例请求**：
+### 字典数据端点
 
-```
-GET /api/base/dict/type/list?page=1&size=10
-Authorization: Bearer <token>
-X-Tenant-Id: 1
+基础路径: `/api/base/dict/data`
 
-Response 200:
-{
-  "code": 200,
-  "data": {
-    "records": [
-      { "id": 1, "typeCode": "sys_user_gender", "typeName": "用户性别", "status": 1, "sort": 0 }
-    ],
-    "total": 3,
-    "size": 10,
-    "current": 1,
-    "pages": 1
-  }
-}
-```
+| 方法 | 路径 | 权限 | 行为 |
+| --- | --- | --- | --- |
+| GET | `/api/base/dict/data/options?typeCode=...` | 已认证；无单独动作权限 | 仅要求认证，返回已启用数据的 value/label 选项并使用缓存 |
+| GET | `/api/base/dict/data/list?typeCode=...` | `dict:data:list` | 管理分页直接查库；typeCode 必填，sort/id 升序 |
+| POST | `/api/base/dict/data` | `dict:data:create` | typeCode/dictValue/dictLabel 非空；校验当前租户父类型存在 |
+| PUT | `/api/base/dict/data/{id}` | `dict:data:update` | 只更新非 null 字段；typeCode 不在更新 DTO 中 |
+| DELETE | `/api/base/dict/data/{id}` | `dict:data:delete` | 归属检查后删除并失效缓存 |
+| POST | `/api/base/dict/data/refresh-cache?typeCode=...` | `dict:data:refresh` | typeCode 为必填查询参数；删除后回源启用数据并回填 |
 
-### Dictionary Data 端点
-
-Base path: `/api/base/dict/data`
-
-| HTTP 方法 | URL | 权限码 | 说明 |
-|-----------|-----|--------|------|
-| GET | `/api/base/dict/data/list?typeCode=sys_user_gender&page=1&size=10` | `dict:data:list` | 按 typeCode 分页查询 |
-| POST | `/api/base/dict/data` | `dict:data:create` | 创建（验证父类型存在） |
-| PUT | `/api/base/dict/data/{id}` | `dict:data:update` | 更新（部分更新） |
-| DELETE | `/api/base/dict/data/{id}` | `dict:data:delete` | 删除单条 |
-| POST | `/api/base/dict/data/refresh-cache` | `dict:data:refresh` | 手动刷新 Redis 缓存 |
-
-**示例请求**：
-
-```
-POST /api/base/dict/data
-Authorization: Bearer <token>
-X-Tenant-Id: 1
-Content-Type: application/json
-
-{
-  "typeCode": "sys_user_gender",
-  "dictValue": "3",
-  "dictLabel": "保密",
-  "tagType": "warning",
-  "sort": 3
-}
-
-@PreAuthorize("hasAuthority('dict:data:create')")
-Response 200: { "code": 200, "data": { "id": 8, ... } }
-```
+更新 DTO 仅处理非 null 字段；这不提供“提交 null 清空字段”的语义。`/options` 返回 `R<List<DictOptionVO>>`，对象只有 `value` 与 `label`；管理分页返回 `R<PageResult<SysDictType>>` 或 `R<PageResult<SysDictData>>`。
 
 ### 字典权限码
 
-| 权限码 | 说明 |
-|--------|------|
-| `dict:type:list` | 查看字典类型列表 |
-| `dict:type:create` | 创建字典类型 |
-| `dict:type:update` | 更新/切换字典类型状态 |
-| `dict:type:delete` | 删除字典类型（级联） |
-| `dict:data:list` | 查看字典数据列表 |
-| `dict:data:create` | 创建字典数据 |
-| `dict:data:update` | 更新字典数据 |
-| `dict:data:delete` | 删除字典数据 |
-| `dict:data:refresh` | 手动刷新字典缓存 |
+| 权限码 | 用途 |
+| --- | --- |
+| `dict:type:list` | 类型列表及详情 |
+| `dict:type:create` | 创建类型 |
+| `dict:type:update` | 更新类型及切换状态 |
+| `dict:type:delete` | 级联删除类型 |
+| `dict:data:list` | 管理数据列表 |
+| `dict:data:create` | 创建数据 |
+| `dict:data:update` | 更新数据 |
+| `dict:data:delete` | 删除数据 |
+| `dict:data:refresh` | 刷新缓存 |
 
 ### 租户隔离
 
-所有列表查询和创建操作要求 `X-Tenant-Id` 请求头（前端从 JWT Token 提取，Gateway 注入）。数据在 SQL 查询层按 `tenant_id` 隔离。字典类型唯一性约束范围为 `(tenant_id, type_code)`。
+列表、创建、选项与刷新都显式传递租户。六个按 ID 的读写入口也将 Gateway 注入的 `X-Tenant-Id` 传入服务，先要求正租户 ID 并检查实体归属，再执行返回、写入或缓存操作。类型唯一约束为 `(tenant_id,type_code)`。
+
+不存在或属于其他租户的 ID 资源均抛 `BusinessException(404)`，由公共异常处理返回 HTTP 200 + `R.code=404`；缺失或非正数的租户 ID 抛业务码 400。网关与方法权限验证仍独立执行。缓存、客户端生命周期和源码入口统一见核心流程及前端规范。
+
+[Flow 9](core-flows.md) / [Composable](frontend-patterns.md)
 
 ### MQ 投递运行状态
 
@@ -595,37 +409,23 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 }
 ```
 
-`OUTBOX_ONLY` 表示业务事务仍写入本地 Outbox，但 MQ relay/XXL-JOB 未运行；前端必须显示降级提示并禁用重发操作。`FULL` 表示写入和异步投递均启用。
+该结果按配置计算：`outboxWriteEnabled=true`，`deliveryEnabled = omni.mqlog.relay.enabled && xxl.job.executor.enabled`（两项读取默认 true），模式据此为 `FULL/OUTBOX_ONLY`。它不探测 relay 进程、XXL-JOB 调度、Broker、数据库或消息是否已送达；`FULL` 仅表示相关开关启用，`OUTBOX_ONLY` 表示至少一个投递开关关闭。真实可靠性与恢复见 [MQ 可靠性](mq-reliability.md)。
 
 ---
 
 ## 13. API 版本管理策略
 
-### 当前决策
+当前路由使用无版本前缀的 `/api/...`，例如 `/api/auth/user/list`；Gateway 与 Controller 没有实现 `/api/v1/...` 或 `/api/v2/...` 的并行版本路由。
 
-脚手架阶段不使用 URL 版本号。API 稳定后且有多个消费者时，引入前缀版本控制。
-
-### 未来演进路径
-
-| 阶段 | 版本策略 | URL 示例 |
-|------|---------|---------|
-| **当前（脚手架）** | 无版本号 | `/api/auth/user/list` |
-| **V1（API 稳定后）** | URL 前缀版本 | `/api/v1/auth/user/list` |
-| **V2（Breaking Change）** | URL 前缀版本 | `/api/v2/auth/user/list` |
-
-**版本规则**：
-- 新增字段（向后兼容）：不需要版本号变更
-- 删除/重命名字段：需要新版本
-- 变更请求/响应结构：需要新版本
-- 旧版本至少维护 6 个月
+未来 URL 版本、破坏性变更迁移和旧版保留期限尚未形成已实现契约。需要时先在设计与 ADR 中确定消费者、兼容范围、迁移与支持期限，再同步实现和文档；本文不把未实现的前缀或六个月维护期作为承诺。当前字段、错误与状态语义继续以本契约和源码为准。
 
 ---
 
 ## 14. Null 语义
 
-- `null` 字段包含在 JSON 输出中（不省略）
-- 空集合返回为 `[]`，不是 `null`
-- 可选的单个值使用 `null` 表示不存在，不使用空字符串
+`R.ok()` 与失败响应的 data 为 null；常规当前 mapper 输出这些 null 字段。空集合必须由生产者实际返回空 List 才成为 []；`PageResult` 会保留 null records，没有全局转换保证。可选字段的 null、空字符串或省略行为以具体 DTO、serializer 和端点为准。
+
+JSON 绑定、业务允许字段与身份来源是三个不同约束。未知属性不保证统一返回 400：当前受控 Asset DTO 绑定忽略了额外属性。未在 DTO 暴露的 tenant、user、金额快照等不会因此成为可控业务输入，但也不能宣称所有伪造字段都被解析器显式拒绝。调用方只发送端点列出的字段。
 
 ---
 
@@ -656,6 +456,8 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 当前用户可通过 `GET /api/srm/portal/enrollment` 查询状态，并在失败后调用
 `POST /api/srm/portal/enrollment/retry` 幂等重试。角色分配完成前不创建 PortalUser，也不开放企业资料接口。
 
+门户入驻 DTO 要求 requestId（非空、最长64）、inviteToken（非空、最长256）、name（非空、最长200）、creditCode（非空、最长50）。creditCode 会 trim 并转大写；示例不是已登记的真实企业代码。与普通未知属性行为不同，此 DTO 的 JsonAnySetter 显式拒绝任何未声明属性，包括 tenantId/userId；SRM 的 JSON 读取异常由专用 advice 映射为400。
+
 ### 15.3 评估与风险
 
 - `GET /api/srm/evaluation/template/default/dimensions` 返回当前租户默认模板及有效维度，前端不得硬编码数据库 ID。
@@ -663,6 +465,8 @@ Response 200: { "code": 200, "data": { "id": 8, ... } }
 - `GET /api/srm/risk/list` 返回按供应商最新评估聚合的风险摘要分页，可按 `riskLevel` 筛选。
 - `GET /api/srm/supplier/{id}/risk` 返回 `indicators/latestAssessment/history` 聚合视图。
 - 风险指标更新携带 `version`；仅综合等级从非 RED 变为 RED 时产生 `srm.risk.level-changed.v1`。
+
+评估创建由服务选择当前租户已启用的默认模板，DTO 没有 templateId；items 为 1–100 项，必须完整覆盖启用维度且不重复。score 为 1–5，最多一位小数；dimensionId 从默认模板接口取得。模板、维度名和权重由服务端确定。
 
 ### 15.4 内部供应商摘要
 
@@ -728,7 +532,7 @@ GET 的 query tenantId、batch 的 body tenantId 必须与 `X-Tenant-Id` 完全�
       "rfqLineId": 10011,
       "materialCode": "IT-LAPTOP-001",
       "materialName": "商务笔记本",
-      "unit": "台",
+      "unit": "EA",
       "quantity": "20.000000",
       "remark": "含三年保修"
     }
@@ -766,20 +570,17 @@ GET 的 query tenantId、batch 的 body tenantId 必须与 `X-Tenant-Id` 完全�
 | `lines[].rfqLineId` | Long | 是 | 正整数且不得重复 |
 | `lines[].unitPrice` | Decimal String | 是 | 十进制字符串；`DECIMAL(19,6)`，大于 0，整数位最多 13 |
 | `lines[].deliveryDays` | Integer | 是 | 0–3650 |
-| `lines[].remark` | String | 否 | 最长 500，纯文本 |
+| `lines[].remark` | String | 否 | 最长 500；服务 trim 并归一化空白 |
 
-请求不接受 `tenantId/supplierId/rfqNo/material/quantity/currencyCode/lineAmount/totalAmount`。这些字段分别从可信身份头、PortalUser、Procurement 邀请详情读取或由服务端按
-`unitPrice × quantity` 计算；行金额与总金额按 `DECIMAL(19,4)` 保存。响应为 `R<QuotationVO>`，包含报价头、`version` 和所有行快照。
+`tenantId/supplierId/rfqNo/material/quantity/currencyCode/lineAmount/totalAmount` 不是此请求 DTO 的可控输入；服务从可信身份、PortalUser、Procurement 邀请快照读取或计算。额外 JSON 属性可能被忽略，不能承诺一律显式报错。响应为 `R<QuotationVO>`，包含报价头、version 和行快照；金额/数量的线格式见下节。
 
 幂等与并发规则：
 
-- `srm_quotation_request` 永久保存 `(tenantId, requestId)`、规范化请求体 SHA-256、quotationId 和 targetVersion；同 requestId、同 requestHash 重试返回当前报价快照，不再次写报价或 Outbox。
-- 同 requestId 绑定不同 rfqId 或请求内容返回业务码 409。
-- `(tenantId, rfqId, supplierId)` 最多一条未删除报价；首次请求使用创建哨兵 `version=0`，首版持久化并响应为 `version=1`，后续更新必须携带当前 version，过期版本或再次使用 0 均返回 409。
-- 提交前必须重新验证 RFQ `status=SENT`、邀请 `status IN (INVITED, QUOTED)`、截止时间和行集合；其他 RFQ 状态（`DRAFT/CLOSED/AWARDED/CANCELLED`）拒绝。Procurement 不可用时返回 503，不允许离线写入。
-
-requestHash 不包含 requestId，本阶段规范化输入为
-`rfqId/version/validUntil/lines`；lines 按 `rfqLineId` 升序，单价归一到 6 位小数并使用非科学计数法字符串，备注 trim 后将 null/空白统一为 null。服务端不得直接对原始 JSON 字节求 hash，以免字段顺序导致同意图误判。
+- `srm_quotation_request` 保存租户内 requestId、规范化 SHA-256、quotationId 与 targetVersion。历史 COMPLETED 记录在新请求的供应商状态、RFQ、截止时间和邀请行校验之前重放；返回当前报价快照且不再写报价/Outbox。不能把成功重放描述成再次执行全部新提交校验。
+- 同 requestId 的 hash、supplierId 或 rfqId 不一致，记录仍 RESERVED、状态无效或当前报价版本落后于 targetVersion，返回业务码 409。
+- 新请求必须由当前已准入供应商提交，重新读取 `SENT` RFQ、`INVITED/QUOTED` 邀请及未过期截止时间；有效期晚于当前时间且不早于 RFQ 截止。报价行须完整且仅覆盖全部 RFQ 行，1–200 行且不能重复；依赖不可用时失败关闭为 503。
+- `(tenantId, rfqId, supplierId)` 最多一条未删除报价；首次请求 version=0，持久化首版为 1；修改使用当前 version，冲突为 409。
+- requestHash 不含 requestId；输入为 `rfqId/version/validUntil/lines`。行按 rfqLineId 排序，单价统一为 6 位非科学计数十进制字符串，备注 trim，null/空白统一；不对原始 JSON 字节直接求 hash。行金额按 `unitPrice × quantity` 以 4 位 HALF_UP 计算再求总额。
 
 ### 15.6 SRM 与 Procurement 报价内部契约
 
@@ -812,7 +613,7 @@ X-Tenant-Id: 1
 ## 16. Workflow 跨服务契约
 
 Workflow 内部端点统一使用 §8.3 的 `X-Internal-Token` 与 `X-Tenant-Id`，响应继续使用标准
-`R<T>`。详细运行机制见 [workflow.md](workflow.md#28-跨服务内部契约)。
+`R<T>`。详细运行机制见 [workflow.md](workflow.md#6-内部启动与完成事件)。
 
 ### 16.1 幂等启动流程
 
@@ -873,12 +674,11 @@ Content-Type: application/json
 }
 ```
 
-幂等性由两个租户内唯一键共同保证：
+幂等记录有租户内 `(tenantId, requestId)` 与 `(tenantId, businessType, businessKey)` 双唯一键。冲突比较业务类型/主键、modelVersionId 与 startUserId，不比较 title、variables、startUserName，也没有完整 payload hash。
 
-- `(tenantId, requestId)`：请求级幂等；同一请求 ID 不得绑定不同业务。
-- `(tenantId, businessType, businessKey)`：业务级幂等；同一业务不得启动多个流程。
-- 已成功的同意图重试返回原 `processInstanceId`，`replayed = true`。
-- 正在处理、请求 ID 冲突、或业务键对应的 `modelVersionId/startUserId` 改变均返回业务码 409。
+成功记录返回原 processInstanceId 和 replayed=true，但响应 requestId 使用本次请求值。正在处理、不同业务/模型/发起人冲突返回业务码 409。FAILED 的同 requestId 分支可原子抢占重试；换 requestId 命中同业务键的 FAILED 记录不会自动走相同重试分支。
+
+真正新启动重新校验 PUBLISHED 版本与非空 processDefinitionId，并对 `ASSET_TRANSFER/ASSET_DISPOSAL/SRM_SUPPLIER_ONBOARDING` 强制分类相等。title 空白时使用 `{businessType}:{businessKey}`。这些检查不把任意 variables 变成可信身份；发起人、租户、受保护变量及审批路由约束见 [Workflow](workflow.md)。
 
 ### 16.2 任务处理资格校验
 
@@ -924,9 +724,7 @@ Content-Type: application/json
 }
 ```
 
-服务必须同时匹配 Flowable 任务租户、实例扩展记录租户、`businessType + businessKey` 业务归属，
-并确认 `userId` 是当前 `ASSIGNEE` 或未签收任务的 `CANDIDATE`。`assignmentType` 仅取
-`ASSIGNEE`、`CANDIDATE`、`NONE`；任务不存在或任一边界不匹配时返回 `valid = false`。
+请求头与 body 的 tenantId 不一致先返回业务码 403。其余资格检查匹配 Flowable 任务租户、实例扩展租户及 businessType/businessKey，再确认当前 ASSIGNEE 或未签收的 CANDIDATE。任务不存在、业务不匹配或无资格返回 `R.code=200,data.valid=false`；assignmentType 为 `ASSIGNEE/CANDIDATE/NONE`。false 不能代替调用方执行审批命令时的权限和并发校验。
 
 ### 16.3 流程完成事件
 
@@ -965,9 +763,7 @@ Content-Type: application/json
 | `result` | Enum | `APPROVED`、`REJECTED`、`CANCELLED` |
 | `completedTime` | LocalDateTime | 流程实际完成或终止时间 |
 
-完成状态和 `completionEventId` 的条件更新与 PENDING Outbox 记录在同一本地事务内提交；
-`completion_event_id IS NULL` 是同一流程实例仅生成一次逻辑完成事件的数据库门闩。
-提交后由可靠消息中继异步投递和重试，传输语义为至少一次，因此消费者必须按 `eventId` 幂等处理。
+由已接入的审批完成与显式终止路径更新完成状态、completionEventId，并在同一本地事务写入 PENDING Outbox；`completion_event_id IS NULL` 防止重复逻辑完成事件。当前不是所有 Flowable engine-end/瞬时结束分支均有通用事件监听器。响应成功或 Outbox 提交不等于 Broker 投递或消费完成；中继在投递能力启用且依赖可用时异步投递/重试，消费者按 eventId 幂等。
 
 ### 16.4 查询已发布模型版本
 
@@ -995,34 +791,39 @@ X-Tenant-Id: 1
 }
 ```
 
-端点只返回请求租户内仍可用的模型和版本。`modelKey` 是租户内唯一且与 BPMN process id
-一致的模型标识；`category` 是跨服务业务分类。调用方除校验 `PUBLISHED` 和非空
-`processDefinitionId` 外，还可以把稳定业务类型绑定到 `category`。Asset 强制要求调拨模型分类为
-`ASSET_TRANSFER`，处置模型分类为 `ASSET_DISPOSAL`，不得交叉复用或使用其他业务模型；
-Workflow 在实际创建资产审批实例前再次执行相同校验，关闭预校验后的模型变更窗口。
+查询按租户约束，要求版本为 PUBLISHED 且 processDefinitionId 非空；不存在或不可用为业务 404。modelKey 与 BPMN process id 的一致性由模型发布校验维护，不能仅凭返回字符串推断 engine 当前可执行。
+
+按分类获取当前版本还可调用 `GET /api/internal/workflow/model-version/current?category={category}`。新启动对 `ASSET_TRANSFER/ASSET_DISPOSAL/SRM_SUPPLIER_ONBOARDING` 做分类绑定；同意图成功重放复用既有实例。内部终止为 `POST /api/internal/workflow/process-instance/{processInstanceId}/terminate?reason={reason}`，除内部令牌外显式携带 X-Tenant-Id、X-User-Id；原因可选。
 
 ### 16.5 审批规则只读模型聚合
 
-| 方法 | 路径 | 约束 |
+| 方法 | 路径 | 当前约束 |
 |---|---|---|
-| GET | `/api/internal/workflow/model-versions/published?category=purchase` | 只返回当前租户、分类精确匹配、主模型有效且 currentPublishedVersionId 指向可部署已发布版本的记录 |
-| POST | `/api/internal/workflow/model-versions/resolve` | body 为 `{ "modelVersionIds": [1, 2] }`，单次 1–200 个正整数，按请求顺序返回 |
-| GET | `/api/internal/workflow/model-version/{id}/preview` | 返回安全审批图，不返回 BPMN XML 或 designerJson |
+| GET | `/api/internal/workflow/model-versions/published?category=purchase` | 当前租户、精确分类、启用主模型、当前已发布版本且 processDefinitionId 非空 |
+| POST | `/api/internal/workflow/model-versions/resolve` | body 为 `{ "modelVersionIds": [1, 2] }`；1–200 个正整数，按首次出现顺序去重返回 |
+| GET | `/api/internal/workflow/model-version/{id}/preview` | 安全审批图与元数据，不返回原始 BPMN XML/designerJson |
 
-批量解析的 `availability` 仅取 `AVAILABLE/NOT_CURRENT/UNAVAILABLE/MODEL_ARCHIVED/NOT_FOUND`。
-安全预览只包含节点、脱敏边和模型元数据；UserTask 可包含 `roleCode/approvalMode`，条件表达式只返回
-“已配置条件（内容已隐藏）”。有分支或环时 `linearSummary=null`，前端必须提示实际路径由业务数据决定，
-不得把当前组织解析成未来实际审批人。
+availability 为 `AVAILABLE/NOT_CURRENT/UNAVAILABLE/MODEL_ARCHIVED/NOT_FOUND`，来自模型/版本元数据；不是对 Flowable 部署、挂起或实际执行能力的实时探测。
+
+预览根字段为 `approvalPreviewVersion/modelVersion/nodes/edges/hasBranches/linearSummary`。nodes 含 `id/name/type/roleCode/approvalMode/description`，type 为 `START/END/APPROVAL/GATEWAY/SERVICE`；edges 含 `id/name/source/target/defaultBranch/conditionSummary`。条件只返回“已配置条件（内容已隐藏）”。分支或不能生成单路径摘要时 linearSummary 为 null；不得把当前组织预览当作未来实际审批人。
+
+### 16.6 设计器候选人预览
+
+`POST /api/workflow/identity/resolve-preview` 需要 `workflow:identity:list` 和可信租户头。请求字段为 `assignmentType/roleCode/anchorType/anchorParams/scopeMode/simulateUserId`，assignmentType 必填；响应 data 为 `candidateCount/candidates`，候选项含 `userId/username/nickname/unitName`。解析失败/兼容模式与锚点语义统一见 [Workflow 第 3 节](workflow.md#3-候选人监听器与会签)，不与内部安全审批图 DTO 混用。
+
+### 16.7 实例读取租户边界
+
+外部 `GET /api/workflow/process-instance/{id}/progress` 和 `GET /api/workflow/process-instance/{id}/approval-records` 显式使用 Gateway 的 X-Tenant-Id。缺失/非法租户失败，非正租户为业务 400；同租户历史实例不存在或属其他租户均为业务 404，先检查再读取活动、评论或候选详情。这项隔离不增加参与人 ACL，不能据此推断所有历史流程定义接口均有相同保护。
 
 ## 17. Procurement MVP 契约
 
 ### 17.1 通用边界
 
-- 外部 Base path 为 `/api/procurement`，Gateway 保留完整路径，不使用 `StripPrefix`。
-- 所有请求使用 Gateway 注入的 `X-User-Id`、`X-Tenant-Id` 和权限头；业务表同时受 TenantLine 与 permission-aware DataScope 约束。
-- 数量、单价使用 `DECIMAL(19,6)`，金额使用 `DECIMAL(19,4)`；所有响应中的数量、单价和金额均为 JSON string，前端不得用 JavaScript `number` 计算业务金额。
-- 更新 body 和删除 query 必须携带 `version`；版本冲突返回业务码 409。
-- 内部端点统一使用 `/api/internal/procurement/**`，要求 `X-Internal-Token` 与 `X-Tenant-Id`，不得经 Gateway 暴露。
+- 外部 Base path 为 `/api/procurement`，保留完整路径。使用 Gateway 身份及权限；TenantLine 仅覆盖 proc_* 业务表，Outbox 不通过该租户拦截器扫描。
+- DataScope：请购按 requester_user_id/requester_unit_id；RFQ、PO、GR 按 owner_user_id/owner_unit_id；子行继承聚合根。物料、品类、审批路由与配置在租户内共享，不附加不存在的 owner 列。
+- 数量/单价为 DECIMAL(19,6)，金额为 DECIMAL(19,4)，响应为 JSON 十进制字符串。请求也按各 DTO 的十进制字符串约束，不能用 JavaScript number 计算业务金额。
+- 更新/删除和版本状态命令按 DTO 提供版本；RFQ 定点使用 rfqVersion/quotationVersion，不能统称所有写请求都带 version。创建没有已有行版本。
+- 内部路径为 `/api/internal/procurement/**`，需要 X-Internal-Token 与 X-Tenant-Id，被 Gateway 阻断。详细状态与事务边界见 [Procurement 设计](design/procurement-design.md)。
 
 ### 17.2 物料与品类
 
@@ -1121,10 +922,7 @@ Workflow 完成事件按 `eventId` 进入 `proc_event_inbox`。当前轮次事�
 | POST | `/api/procurement/rfq/{id}/award` | `procurement:rfq:award` | 锁定报价版本并原子生成采购订单 |
 | POST | `/api/procurement/rfq/{id}/cancel` | `procurement:rfq:cancel` | body `{ "version": 0 }`；仅 DRAFT/SENT |
 
-创建和更新请求包含 `requisitionId/title/quotationDeadline/supplierIds`；更新时间格式统一为
-`yyyy-MM-dd HH:mm:ss`。只有 `SENT` RFQ 可以比价和定点。邀请状态为
-`INVITED/QUOTED/EXPIRED/AWARDED/REJECTED`；定点后中标邀请变为 `AWARDED`，其余邀请变为
-`REJECTED`，这些终态仅供供应商门户历史查看，不能继续报价。
+创建包含 `requisitionId/title/quotationDeadline/supplierIds`；草稿更新包含 `version/title/quotationDeadline/supplierIds`，不更换 requisitionId。quotationDeadline 使用 `yyyy-MM-dd HH:mm:ss` 且晚于当前时间；supplierIds 为 1–100 个正整数。仅 SENT RFQ 可以比价/定点；邀请状态为 `INVITED/QUOTED/EXPIRED/AWARDED/REJECTED`，后两种终态只允许历史查看，不能继续报价。
 
 定点请求示例：
 
@@ -1235,13 +1033,12 @@ TenantLine；支出分析使用采购订单 owner 范围，不得因聚合查询
 
 ### 18.1 通用边界
 
-- 外部 Base path 为 `/api/asset`；Gateway 保留完整路径，不使用 `StripPrefix`。
-- 外部请求使用 Gateway 注入的 `X-User-Id`、`X-Tenant-Id`、`X-Username`、角色和权限头。业务表始终受 TenantLine 约束，管理列表、子资源和概览还受 permission-aware DataScope 约束。
-- 管理列表按 `owner_user_id/owner_unit_id` 过滤；`GET /api/asset/asset/my` 固定按 `current_user_id` 查询，不能因同一用户拥有管理角色而扩大。
-- 写命令携带 `version` 并执行乐观锁校验；版本或活动操作占位不匹配返回业务冲突。
-- 资产原值、残值和聚合金额使用 `DECIMAL(18,2)`，请求与响应均使用 JSON 十进制字符串；JSON number 返回 400。币种使用三位 ISO 4217 编码。
-- 资产状态为 `IN_STOCK/ALLOCATED/IN_USE/MAINTENANCE/TRANSFER/DISPOSAL_PENDING/DISPOSED/SCRAPPED`。
-- 内部端点使用 `/api/internal/asset/**`，必须携带 `X-Internal-Token` 和 `X-Tenant-Id`，并被 Gateway 显式阻断。
+- 外部 Base path 为 `/api/asset`，保留完整路径。身份头为 `X-User-Id/X-Tenant-Id/X-User-Name`、角色及权限；不是 X-Username。TenantLine 仅作用于 ast_* 表，Outbox 中继跨租户扫描。
+- 管理列表按 owner_user_id/owner_unit_id；子资源继承资产范围。我的资产、接收与退还固定 current_user_id，不因管理权限扩大个人资产查询。
+- 更新/删除及已有资产命令提供 version；创建没有已有版本。活动操作占位和版本冲突拒绝写入。
+- 原值、残值及金额聚合为 DECIMAL(18,2)，非空请求/响应使用 JSON 十进制字符串。数字或非法字符串会被拒绝，但当前通用 JSON 读取异常映射为 500，不能承诺400。currencyCode 校验为三位英文字母，不能据此声称校验 ISO 4217 注册表。
+- 状态为 `IN_STOCK/ALLOCATED/IN_USE/MAINTENANCE/TRANSFER/DISPOSAL_PENDING/DISPOSED/SCRAPPED`。
+- 内部路径为 `/api/internal/asset/**`，需要 X-Internal-Token、X-Tenant-Id，被 Gateway 阻断。详细生命周期、接收入账与审批事务见 [Asset 设计](design/asset-design.md)。
 
 ### 18.2 资产台账与命令
 

@@ -31,7 +31,15 @@ databasechangelog.csv
 node_modules/
 dist/
 dist-ssr/
+*.tsbuildinfo
 *.local
+
+# 文档站投影与缓存；Markdown 与站点配置仍提交
+docs/.vitepress/source/
+docs/.vitepress/cache/
+docs/.vitepress/navigation.json
+docs/.vitepress/evidence/
+generated/
 
 # Env
 .env

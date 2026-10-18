@@ -1,0 +1,33 @@
+{
+  "label": "English",
+  "wiki": "Learning paths",
+  "guides": "How-to guides",
+  "truth": "Engineering reference",
+  "design": "Design and history",
+  "outline": "On this page",
+  "search": "Search docs",
+  "back": "Back to top",
+  "menu": "Menu",
+  "previous": "Previous",
+  "next": "Next",
+  "interface": {
+    "details": "Show details",
+    "reset": "Reset search",
+    "close": "Close search",
+    "empty": "No results for",
+    "select": "Select",
+    "enter": "Enter",
+    "navigate": "Navigate",
+    "up": "Up arrow",
+    "down": "Down arrow",
+    "escape": "Escape",
+    "language": "Change language",
+    "appearance": "Appearance",
+    "light": "Switch to light mode",
+    "dark": "Switch to dark mode",
+    "skip": "Skip to content"
+  },
+  "sourceOnlyTitle": "Chinese source reference",
+  "sourceOnlyNotice": "This document is registered for Chinese-only maintenance. This page links to its canonical source; it is not a translated body.",
+  "sourceOnlyLink": "Read the canonical Chinese source"
+}

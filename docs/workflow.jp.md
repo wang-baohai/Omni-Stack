@@ -1,594 +1,158 @@
-# ワークフローエンジン
+# ワークフローの現行仕様と実行境界
 
-> 本文書は、Omni-Stack ワークフローエンジンのアーキテクチャ、コアフロー、制約事項、および拡張ガイドについて説明します。  
-> アーキテクチャの概要は [architecture.jp.md](architecture.jp.md) を参照してください。Docker デプロイメント構成は [docker-deployment.jp.md](docker-deployment.jp.md) を参照してください。
+本書は、現行サービスのモデル、実行、承認、テナント分離、サービス間整合性の規則を管理します。モデリングと画面操作は [ワークフロー開発とモデリング](wiki/workflow-development.jp.md)、画面配置と過去の画像は [画面リファレンス](wiki/interface-reference.jp.md#workflow) を参照してください。リクエスト項目と応答構造は [API 契約](api-contract.jp.md)、配置手順は [Docker デプロイ](docker-deployment.jp.md) が管理します。
 
-Omni-Stack は、**Flowable 8.x** をベースにした可視化 BPMN ワークフローエンジンであり、モデル設計、デュアルバージョン管理、マルチインスタンス回覧承認、およびエンドツーエンドのプロセス追跡をサポートします。
+## 1. サービスと永続化の境界
 
-## 1. Architecture Overview
-
-ワークフローシステムは、スタンドアロンマイクロサービスと共有スターターライブラリで構成されています：
-
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                          Workflow Engine                                  │
-├──────────────────────────────────────────────────────────────────────────┤
-│                      omni-workflow (port 8103)                            │
-│  ─────────────────────────────────────────────────────────────────────   │
-│  Controllers (7): WorkflowModel · ProcessDefinition · ProcessInstance    │
-│                   Approval · Task · WorkflowStats · WorkflowIdentity     │
-│  Services (8): WorkflowModel · ProcessDefinition · ProcessInstance       │
-│                WorkflowApproval · WorkflowTask · WorkflowStats            │
-│                WorkflowIdentity · WorkflowTodoSync                       │
-│  Delegates:  ScopedRoleAssignmentListener · CandidateResolverDelegate    │
-│              CandidateResolverBean · CcNotifyDelegate                    │
-│  Engine:     BpmnXmlBuilder · BpmnXmlValidator                           │
-├──────────────────────────────────────────────────────────────────────────┤
-│                  omni-common-workflow (shared starter)                    │
-│  FlowableAutoConfiguration · ApprovalService(Impl) · UserGroupLookup     │
-│  WorkflowNotificationService · TenantInfoFilter · TenantInfoHolder       │
-├──────────────────────────────────────────────────────────────────────────┤
-│                        Flowable BPMN Engine 7.x                           │
-│  repositoryService · runtimeService · taskService · historyService       │
-├──────────────────────────────────────────────────────────────────────────┤
-│                       omni_workflow (MySQL)                               │
-│  wf_process_model · wf_process_model_version · wf_process_instance_ext   │
-│  wf_todo_task · wf_cc_record · wf_form_schema · wf_delegation_rule      │
-└──────────────────────────────────────────────────────────────────────────┘
-```
-
-**モジュール依存関係**：
-
-- `omni-common-core` — POJOs (`R<T>`, `PageResult`)、XSS SPI インターフェース
-- `omni-common-mybatis` — MyBatis-Plus + MySQL ドライバ + テナントインターセプター
-- `omni-common-redis` — XSS 構成およびセッションデータ用の Redis キャッシュ
-- `omni-common-workflow` — Flowable 自動構成、承認 SPI、テナントフィルター、通知 SPI
-- `omni-common-mqlog` — Transactional Outbox、内部 API 共有トークンフィルター、信頼性メッセージリレー
-- `omni-workflow` — ビジネス層：コントローラー、サービス、デリゲート、BPMN エンジンツール
-
-**主要な設計判断**：
-
-- **Flowable** を BPMN エンジンとして採用：オープンソース、成熟した Spring Boot 統合、ネイティブマルチインスタンス（MI）サポート
-- **デュアルバージョン管理**：ビジネスバージョンは `wf_process_model_version` で追跡（DRAFT → PUBLISHED → ARCHIVED）、エンジンバージョンは Flowable デプロイメントで管理
-- **ビジュアルデザイナー**：フロントエンド BPMN モデラーがデザイナー JSON を生成し、`BpmnXmlBuilder` が BPMN 2.0 XML に変換
-- **動的候補解決**：`omni:assignment` JSON 拡張要素がタスク開始時に `ScopedRoleAssignmentListener` によって解析され、ハードコードされた担当者はいません
-- **クロスサービス起動の二重冪等**：テナント内 `requestId` と `(businessType, businessKey)` のそれぞれでプロセス起動を制約します
-- **信頼性のある完了通知**：完了メタデータと Outbox レコードを同一ローカルトランザクション内でコミットし、リレータスクが非同期で配信します
-
-### データモデル
+`omni-workflow` は独立した Servlet サービスで、業務ポートは `8103`、管理ポートは `19903` です。バックエンド親 POM が Flowable を `8.0.0` に固定します。業務サービスは内部 API を呼び、エンジンを組み込みません。POM の直接依存は `omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`、`omni-common-workflow` で、`omni-common-service` のセキュリティ構成は使いません。
 
 ```mermaid
-erDiagram
-    wf_process_model ||--o{ wf_process_model_version : "1:N versions"
-    wf_process_model_version ||--o{ wf_process_instance_ext : "1:N instances"
-    wf_process_instance_ext ||--o{ wf_todo_task : "1:N todos"
-    wf_process_instance_ext ||--o{ wf_cc_record : "1:N cc"
+flowchart LR
+  A[利用者とゲートウェイ] --> W[ワークフローサービス]
+  B[業務サービス] -->|内部 API| W
+  W --> M[モデルと業務拡張テーブル]
+  W --> F[Flowable エンジンと履歴]
+  W --> O[ローカル Outbox]
+  O --> R[メッセージ中継]
+  R --> C[業務イベントの受信側]
 ```
 
-### データベーステーブル (omni_workflow)
+`application.yml` はデータベース `omni_workflow`、Redis DB `0`、`history-level: audit`、非同期実行器、`database-schema-update: false` を設定します。正式な構造は移行ツールが管理し、実行時エンジンの自動作成には依存しません。候補者、ID 情報、表示名の取得には `omni_auth` への直接 JDBC アクセスが含まれるため、必要なデータベースアクセス権を配置時に用意します。すべてが Auth HTTP API 経由ではありません。
 
-| テーブル | 用途 |
-|-------|---------|
-| `wf_process_model` | プロセスモデルレジストリ、`model_key` はテナントごとに一意 |
-| `wf_process_model_version` | バージョン履歴：BPMN XML、デザイナー JSON、デプロイメント情報 |
-| `wf_process_instance_ext` | インスタンス拡張：モデルバージョンに関連付け、`requestId`・業務キー・完了イベントラッチを記録します |
-| `wf_process_start_request` | クロスサービス起動の予約レコード。リクエスト ID と業務キーはテナント内でそれぞれ一意 |
-| `wf_todo_task` | 担当者スコープの高速クエリ用の未処理タスクキャッシュ |
-| `wf_cc_record` | 既読ステータス付き CC 通知レコード |
-| `wf_form_schema` | JSON Schema フォーム定義 |
-| `wf_delegation_rule` | 承認委任ルール（ユーザー間、任意のプロセススコープ） |
-| `sys_mq_message` | Transactional Outbox メッセージ記録。信頼性メッセージリレーが非同期で配信 |
+ドメイン構造は `database/changelog/workflow/0001-workflow-schema.yaml` にあります。
 
----
-
-## 2. Core Flow Walkthrough
-
-### 2.1 モデル作成
-
-```
-POST /api/workflow/model  (workflow:model:create)
-```
-
-1. `WorkflowModelController.createModel(CreateModelRequest)` → `WorkflowModelService.createModel()`
-2. `model_key`（テナントごとに一意）を持つ `wf_process_model` 行を作成
-3. `status = DRAFT` の初期 `wf_process_model_version` 行を作成
-4. `wf_process_model.current_draft_version_id` を新バージョンにリンク
-
-### 2.2 ドラフト保存（ビジュアルデザイナー）
-
-```
-PUT /api/workflow/model/{id}/draft  (workflow:model:update)
-```
-
-1. `WorkflowModelController.saveDraft(id, SaveDraftRequest)` → `WorkflowModelService.saveDraft()`
-2. ドラフトバージョンの `designer_json` を更新し、`BpmnXmlBuilder.build()` で `bpmn_xml` を再生成
-3. 変更検知のため `xml_sha256` を計算
-4. リクエストからモデル名とカテゴリを同期
-
-**BpmnXmlBuilder** はデザイナー JSON ノードを BPMN 2.0 XML 要素に変換します：
-
-| デザイナーノードタイプ | BPMN 要素 | 拡張 |
-|---|---|---|
-| `StartEvent` | `<startEvent>` | — |
-| `EndEvent` | `<endEvent>` | — |
-| `UserTask` | `<userTask>` | `<omni:assignment>` + `flowable:executionListener` |
-| `ServiceTask` (CC) | `<serviceTask>` | `<omni:cc>` + `flowable:delegateExpression` |
-| `ExclusiveGateway` | `<exclusiveGateway>` | `default` 属性 |
-| `ParallelGateway` | `<parallelGateway>` | — |
-
-### 2.3 モデル検証
-
-```
-POST /api/workflow/model/{id}/validate  (workflow:model:validate)
-```
-
-`BpmnXmlValidator.validate()` のチェック項目：
-1. XML の整形式（XXE 保護付き）
-2. 実行可能な `<process>` がちょうど1つで、id が `model_key` と一致
-3. 少なくとも1つの `StartEvent` と1つの `EndEvent` が存在
-4. すべての `UserTask` に `<omni:assignment>` 拡張が存在
-5. CC `ServiceTask` に `<omni:cc>` 拡張が存在
-6. `ExclusiveGateway` に `default` フロー（`conditionExpression` なし）が存在
-7. すべての `SequenceFlow` が有効な source/target を参照
-
-### 2.4 モデル公開
-
-```
-POST /api/workflow/model/{id}/publish  (workflow:model:publish)
-```
-
-1. `SELECT FOR UPDATE` でモデル行に悲観的ロックを取得
-2. `BpmnXmlValidator` で BPMN XML を検証
-3. `targetNamespace` をモデルカテゴリに置換
-4. Flowable にデプロイ：`repositoryService.createDeployment().addString(bpmnXml).deploy()`
-5. ビジネスバージョン番号を計算（`max(existing) + 1`）
-6. バージョンレコードを更新：`status = PUBLISHED`、`deploymentId`、`processDefinitionId`、`engineVersion`
-7. 以前の PUBLISHED バージョンをアーカイブ（`status = ARCHIVED`）
-8. モデルの `current_published_version_id` を更新
-
-### 2.5 プロセスインスタンス開始
-
-```
-POST /api/workflow/process-instance/start  (workflow:instance:start)
-```
-
-1. `ProcessInstanceController.start(StartProcessRequest)` → `ProcessInstanceService.start()`
-2. 最新の PUBLISHED バージョンを解決して `processDefinitionId` を取得
-3. Flowable インスタンスを開始：`runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables)`
-4. モデル、バージョン、Flowable インスタンスを関連付ける `wf_process_instance_ext` 行を作成
-5. `ScopedRoleAssignmentListener` が各 UserTask 開始イベントで発火し、候補者を解決
-
-### 2.6 承認完了
-
-```
-POST /api/workflow/approval/{taskId}/complete  (workflow:approval:complete)
-```
-
-1. `ApprovalController.complete(taskId, ApprovalRequest)` → `WorkflowApprovalService.complete()`
-2. プロセス変数を設定：`approved = true/false`、`comment = "..."`
-3. `taskService.complete(taskId, variables)` を呼び出し
-4. `ApprovalServiceImpl` が MI カウンターを更新（`approvedCount` / `rejectedCount`）
-5. MI `completionCondition` の評価：`${rejectedCount > 0 || approvedCount >= requiredApprovals}`
-6. 条件が満たされた場合 → 残りの MI インスタンスがスキップされる（deleteReason = `MI_END`）
-
-### 2.7 進捗と記録
-
-**進捗**（`GET /{id}/progress`）：
-- すべてのアクティビティについて `HistoricActivityInstance` をクエリ
-- `activityId` で集約（MI サブインスタンスを重複排除）
-- 未処理の UserTask について、`CandidateResolverBean` で候補者を事前解決
-- 担当者ごとのステータスを含む `List<ActivityInfo>` を持つ `ProcessProgressResponse` を返却
-
-**承認記録**（`GET /{id}/approval-records`）：
-- `HistoricTaskInstance` をクエリ（作成時刻の昇順）
-- タスクごとの結果を判定：`approved` / `rejected` / `auto-approved`（MI_END）/ `cancelled` / `pending`
-- 承認意見の `Comment` と承認/却下の区別のための `approved` 変数を取得
-
-### 2.8 クロスサービス内部契約
-
-すべてのサービス間インターフェースは統一的に `/api/internal/**` パスを使用し、Gateway ユーザー事前認証を経由しません。呼び出し元は両方を携帯しなければなりません：
-
-```http
-X-Internal-Token: <共有内部トークン>
-X-Tenant-Id: 1
-Content-Type: application/json
-```
-
-コンテナレベルの `InternalApiAuthFilter` は Spring Security チェーンの前で共有トークンを検証し、すべての `/api/internal/**` に対してフェイルクローズします；これらのパスは Gateway ユーザー事前認証を再使用しません。トークンの欠落や不一致は HTTP 401 を返し；サーバー側に共有トークンが未設定の場合は HTTP 503 を返します。内部リクエストの `X-Tenant-Id` はリクエストボディやクエリパラメータの `tenantId` と完全一致しなければならず、不一致はビジネスコード 403 を返します。
-
-#### 2.8.1 冪等プロセス起動
-
-```http
-POST /api/internal/workflow/process-instance/start
-```
-
-リクエストボディ：
-
-```json
-{
-  "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
-  "tenantId": 1,
-  "modelVersionId": 42,
-  "businessType": "PROCUREMENT_REQUISITION",
-  "businessKey": "10001",
-  "startUserId": 7,
-  "startUserName": "buyer",
-  "title": "購買申請 PR-202607-0001",
-  "variables": {
-    "amount": 120000
-  }
-}
-```
-
-| フィールド | 必須 | 制約 | 説明 |
-|---|---|---|---|
-| `requestId` | はい | 非空、最大 64 | 呼び出し元生成の冪等リクエスト ID |
-| `tenantId` | はい | 正整数 | `X-Tenant-Id` と等しくなければならない |
-| `modelVersionId` | はい | 正整数 | 現在のテナントに属し Flowable `processDefinitionId` に関連済みでなければならない |
-| `businessType` | はい | 非空、最大 100 | 安定したクロスサービスビジネスタイプ |
-| `businessKey` | はい | 非空、最大 255 | 呼び出し元ビジネス主キー |
-| `startUserId` | はい | 正整数 | プロセス発起者 |
-| `startUserName` | いいえ | 最大 100 | 発起者表示名 |
-| `title` | いいえ | 最大 500 | 空の場合 `{businessType}:{businessKey}` を生成 |
-| `variables` | いいえ | JSON オブジェクト | ビジネスプロセス変数；サービスが 3 つの関連変数を上書き |
-
-サービスは常に `modelVersionId` で `processDefinitionId` を解決し、次に
-`startProcessInstanceById` を呼び出します。`requestId`、`businessType`、`businessKey` はプロセス変数とインスタンス拡張記録の両方に書き込まれます。
-
-成功レスポンス：
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
-    "businessType": "PROCUREMENT_REQUISITION",
-    "businessKey": "10001",
-    "processInstanceId": "22501",
-    "replayed": false
-  }
-}
-```
-
-冪等ルール：
-
-- `wf_process_start_request` は `(tenant_id, request_id)` と
-  `(tenant_id, business_type, business_key)` の一意制約をそれぞれ確立；いずれの次元もプロセスを重複作成できません。
-- 同一のリクエスト意図（同一ビジネスキー、`modelVersionId`、`startUserId`）が既に成功している場合、リトライは元の
-  `processInstanceId` を返し、`replayed = true` を設定します。
-- 既存の予約が処理中の場合はビジネスコード 409 を返します；呼び出し元は同一 `requestId` でバックオフ・リトライすべきです。
-- 同一 `requestId` が異なるビジネスに使用される、または同一ビジネスキーがプロセスモデル/発起者を切り替える場合はビジネスコード 409 を返し、静かな再利用を禁止します。
-
-#### 2.8.2 タスク処理資格の検証
-
-```http
-POST /api/internal/workflow/task/assignment/validate
-```
-
-リクエストボディ：
-
-```json
-{
-  "tenantId": 1,
-  "taskId": "25017",
-  "userId": 7,
-  "businessType": "PROCUREMENT_REQUISITION",
-  "businessKey": "10001"
-}
-```
-
-検証は 4 層の境界を同時にカバーします：Flowable タスクテナント、インスタンス拡張記録テナント、`businessType + businessKey`
-ビジネス帰属、およびユーザーが現在の `ASSIGNEE` または未受領タスクの `CANDIDATE` かどうか。任何の層の不一致も処理資格を付与しません。
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "valid": true,
-    "processInstanceId": "22501",
-    "assignmentType": "ASSIGNEE",
-    "message": "検証通過"
-  }
-}
-```
-
-`assignmentType` は `ASSIGNEE`、`CANDIDATE`、`NONE` のみ。タスクが存在しないか境界が不一致の場合は正常に
-`valid = false` を返します；リクエストヘッダーとリクエストボディのテナント不一致は呼び出し元のセキュリティエラーで、ビジネスコード 403 を返します。
-
-#### 2.8.3 プロセス完了イベント
-
-クロスサービスプロセスは最終承認の終了または終了時に `workflow.process.completed.v1` を生成します。イベントは
-`workflow-domain-out-0` binding 経由で `workflow-domain-event` に書き込まれ、ペイロードは以下：
-
-```json
-{
-  "eventId": "3f206832-9dc1-4422-870a-a286a979404d",
-  "eventType": "workflow.process.completed.v1",
-  "occurredAt": "2026-07-21 10:30:00",
-  "tenantId": 1,
-  "producer": "omni-workflow",
-  "businessType": "PROCUREMENT_REQUISITION",
-  "businessKey": "10001",
-  "processInstanceId": "22501",
-  "result": "APPROVED",
-  "completedTime": "2026-07-21 10:30:00"
-}
-```
-
-| フィールド | 説明 |
+| テーブル | 現在の用途と制約 |
 |---|---|
-| `eventId` | UUID；Outbox `msgKey` とコンシューマ側冪等キーも兼ねる |
-| `eventType` | `workflow.process.completed.v1` に固定 |
-| `occurredAt` | イベント記録の生成時刻 |
-| `tenantId` | ビジネステナント ID |
-| `producer` | `omni-workflow` に固定 |
-| `businessType` / `businessKey` | 呼び出し元集約を再照会する安定ビジネス識別子 |
-| `processInstanceId` | Flowable プロセスインスタンス ID |
-| `result` | `APPROVED`、`REJECTED`、`CANCELLED` |
-| `completedTime` | プロセスの実際の完了または終了時刻 |
+| `wf_process_model` | テナント内のモデル台帳。`(tenant_id, model_key)` が一意。草稿と現在の公開版へのポインタ |
+| `wf_process_model_version` | 設計用 JSON、BPMN XML、ダイジェスト、業務版、エンジン配置情報。`(model_id, version)` が一意 |
+| `wf_process_instance_ext` | 起案者、業務関連、インスタンス状態、完了イベントの書き込みラッチ |
+| `wf_process_start_request` | 内部起動の予約。リクエスト、業務キー、インスタンス関連にそれぞれテナント内一意制約 |
+| `wf_todo_task` | 担当者別の未処理タスク投影。実行の正はエンジンタスク |
+| `wf_cc_record` | CC 記録。記録の存在は外部通知の配信完了を示さない |
+| `wf_form_schema` | 構造は存在するが、本モジュールにフォーム定義 CRUD Controller/Service はない |
+| `wf_delegation_rule` | 構造は存在するが、規則による自動的な担当変更の実装を意味しない |
 
-インスタンスステータス/完了メタデータの更新と `sys_mq_message` の PENDING Outbox 記録は同一ローカルトランザクションでコミットされます。
-`completion_event_id IS NULL` 条件付き更新はデータベース発行ラッチで、同一プロセスインスタンスが論理完了イベントを 1 条だけ生成することを保証；トランザクション失敗時は両者が一緒にロールバックします。
-リレータスクはコミット後に非同期で配信・リトライするため、メッセージ伝送セマンティクスは**少なくとも一度**であり、コンシューマは引き続き `eventId` で冪等消費しなければなりません。
+`sys_mq_message` は共通 Outbox で、DDL の唯一の管理元は `database/changelog/common/0001-mq-schema.yaml` です。Flowable の `ACT_*` は専用の移行が管理します。これらを `wf_` 業務テーブルのテナントインターセプタ対象に含めません。
 
-#### 2.8.4 公開済みモデルバージョンの照会
+## 2. モデルと版の不変条件
 
-```http
-GET /api/internal/workflow/model-version/{modelVersionId}
-X-Internal-Token: <共有内部トークン>
-X-Tenant-Id: 1
-```
+モデル API は `WorkflowModelController` が管理し、`workflow:model:*` 権限を使用します。作成時の modelKey は `^[a-zA-Z][a-zA-Z0-9-]*$` に一致し、テナント内で一意である必要があります。有効モデルと版番号 `0` の `DRAFT` を作成します。初期 designerJson から公開可能な BPMN が自動生成されるわけではありません。
 
-レスポンスは `id/modelId/modelKey/category/version/processDefinitionId/status` を含みます。うち：
+草稿保存は受信した designerJson と bpmnXml を保存し、XML のダイジェストを計算します。現在のバックエンドは designerJson から XML を生成しません。現在のポインタが `DRAFT` でなければ新しい草稿を作り、過去の公開内容を保持します。状態 `0` のモデルは通常一覧から除外され、`PUBLISHED` 版のあるモデルは直接削除できません。
 
-- `modelKey` はテナント内で一意かつ BPMN process id と一致しなければならないモデル識別子。
-- `category` はビジネスサービスが承認用途をバインドするための安定分類で、自由に表示できるモデル名とは異なります。
-- モデル主記録がアーカイブ済み、バージョンが `PUBLISHED` でない、バージョンがリクエストテナントに属さない、または
-  `processDefinitionId` を欠く場合は統一的に 404 を返します。
+`BpmnXmlValidator` は DOCTYPE と外部エンティティを無効にした XML パーサを使用し、変換器でも外部 DTD/スタイルシートを無効化します。単一の実行可能 process、modelKey と一致する process id、開始/終了イベント、UserTask の `omni:assignment`、対象 CC ノードの `omni:cc`、排他ゲートウェイの既定フローとフロー参照を検査します。開始イベントが複数なら警告します。参照検査は process の直接の子要素に基づき、空でない sourceRef/targetRef のみを検査します。拡張要素の存在確認は assignment JSON の妥当性、スクリプト/リスナー/式の安全な許可リスト、業務経路の実行成功を保証しません。
 
-ビジネスサービスは起動前に自身の安定 `businessType` と `category` を正確一致させ、他のビジネスの公開済みモデルの誤用を防げます。Workflow 内部起動エンドポイントは実際にインスタンスを作成する前に
-`ASSET_TRANSFER/ASSET_DISPOSAL` とモデル分類を再検証し、誤設定は 404 で明示的に拒否しインスタンスを作成しません；既存の
-Procurement 承認ルートはこの Asset 専用バインドの影響を受けません。この照会はモデルメタデータのみを提供し、プロセス起動や承認権限を付与しません。
+`WorkflowModelServiceImpl.publishModel()` のローカルトランザクションは、生 JDBC の `SELECT ... FOR UPDATE` でモデル行をロックし、空でない `DRAFT` を要求して再検査後に Flowable へ配置し、次の業務版とエンジン識別子を保存します。新版は `PUBLISHED`、直前の公開ポインタが指す版はアーカイブとなり、公開ポインタを更新します。生 JDBC の行ロックは MyBatis-Plus テナントプラグインを通らず、認可検査ではありません。
 
----
+検査失敗時は `FAILED` を書こうとしてから同じロールバック対象トランザクション内で例外を投げるため、失敗状態の永続化は保証できません。公開例外は Broker、業務サービス、外部通知のロールバックを意味しません。ローカル DB/エンジンのトランザクションとサービス間整合性は別の境界です。
 
-## 3. Constraints & Pitfalls
+旧 `/api/workflow/process-definition` は `workflow:definition:*` 権限で配置、BPMN 読み取り、一時停止、有効化、関連インスタンスを含む削除を提供します。モデル草稿の検査と業務版公開経路は通りません。現行 `ProcessDefinitionServiceImpl` は一覧かつテナントコンテキストがある場合だけテナント条件を加え、ID による読み取り/一時停止/有効化/削除に共通の所属検査はありません。機能権限だけでこれらのデータ分離が証明されたとはいえません。
 
-### 3.1 MI DeleteReason
+## 3. 候補者、リスナー、複数人承認
 
-マルチインスタンスの `completionCondition` がトリガーされると、残りのタスクは Flowable によって `deleteReason = "MI_END"` で削除されます — `"deleted"` **ではありません**。`"deleted"` の理由は、プロセスインスタンス全体が終了または却下された場合に使用されます。
+### 3.1. 構成の形状
 
-**ルール**：スキップとキャンセルの判定には、必ず `HistoricTaskInstance.getDeleteReason()` を使用してください：
+担当設定は BPMN の `omni:assignment` に保存します。XML 名前空間は `http://omni.com/workflow`、Flowable 拡張は `http://flowable.org/bpmn` です。以下は構成形状のみを示し、ロールと組織は対象テナントに設定する必要があります。
 
-| `deleteReason` | 意味 | 結果 |
-|---|---|---|
-| `null` | タスクが正常に完了 | `approved` 変数をチェック → 承認 / 却下 |
-| `MI_END` | MI completionCondition によりスキップ | 自動承認 |
-| `deleted` | プロセス終了 / 却下 | キャンセル済み |
-
-**落とし穴**：`HistoricActivityInstance` の親ルックアップに依存しないでください。複数の行が同じ `ACT_ID_` を共有する可能性があります（1つは `NULL` の deleteReason、もう1つは `MI_END`）。`putIfAbsent` が誤った行を保存する可能性があります。タスクレベルの `deleteReason` を直接使用してください。
-
-### 3.2 omni:assignment 拡張要素
-
-`omni:assignment` JSON は候補者解決の**唯一の設定エントリ**です：
-
-```xml
-<userTask id="dept-leader-approve" flowable:assignee="${userId}">
-  <extensionElements>
-    <flowable:executionListener event="start"
-        delegateExpression="${scopedRoleAssignmentListener}" />
-    <omni:assignment>{
-      "roleCode": "DEPT_LEADER",
-      "anchorType": "PARENT",
-      "anchorParams": {},
-      "scopeMode": "SAME_UNIT",
-      "fallbackStrategy": "ERROR",
-      "approvalMode": "ANY"
-    }</omni:assignment>
-  </extensionElements>
-  <multiInstanceLoopCharacteristics isSequential="false"
-      flowable:collection="candidateUserIds"
-      flowable:elementVariable="userId">
-    <completionCondition>${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
-  </multiInstanceLoopCharacteristics>
-</userTask>
-```
-
-**フィールド**：
-
-| フィールド | 値 | 説明 |
-|---|---|---|
-| `roleCode` | 任意のロールコード（例：`TEAM_LEADER`、`DEPT_LEADER`） | 解決対象のロール |
-| `anchorType` | `START_USER_PRIMARY_UNIT`、`PARENT`、`ABSOLUTE_UNIT`、`PARENT_BY_TYPE`、`CHILD_BY_CODE`、`SIBLING_BY_CODE`、`PARENT_CHILDREN`、`DEPT_BY_CODE`、`CHILD_UNIT`、`SIBLING_UNIT` | アンカー組織単位の特定方法 |
-| `anchorParams` | JSON オブジェクト（例：`{"unitIds": [200]}`) | アンカー解決のパラメータ |
-| `scopeMode` | `SAME_UNIT`、`UNIT_AND_BELOW`、`CHILDREN_ONLY` | 候補者検索スコープ |
-| `fallbackStrategy` | `ERROR`、`ASSIGN_ADMIN`、`ESCALATE_PARENT` | 候補者が見つからない場合の動作 |
-| `approvalMode` | `ALL`（デフォルト）、`ANY` | MI 回覧モード |
-
-### 3.3 承認モード
-
-- **ALL**：すべての候補者が承認する必要があります。`requiredApprovals = candidateUserIds.size()`。`approvedCount >= requiredApprovals` の場合にフローが進行します。
-- **ANY**：1つの承認があれば十分です。`requiredApprovals = 1`。最初の承認でフローが進行し、残りのタスクは `deleteReason = MI_END` で自動完了します。
-
-両モードとも同じ `completionCondition` 式を共有します：`${rejectedCount > 0 || approvedCount >= requiredApprovals}`。違いは `ScopedRoleAssignmentListener` が設定する `requiredApprovals` の値です。
-
-**却下ショートカット**：両モードとも、1つの却下（`rejectedCount > 0`）で即座に却下ブランチがトリガーされ、残りの承認者がスキップされます。
-
-### 3.4 テナント分離
-
-`omni-workflow` の `MybatisPlusConfig` は `TenantLineInnerInterceptor` を登録し、以下を行います：
-- `TenantInfoHolder` からテナント ID を読み取り（`TenantInfoFilter` により `X-Tenant-Id` ヘッダーから設定）
-- Flowable 内部テーブル（`ACT_*` / `act_*` プレフィックス）をテナントフィルタリングから**除外**
-
-Flowable テーブルは、MyBatis-Plus インターセプションではなく、Flowable の組み込み `tenantId` メカニズムによってテナント分離されます。
-
-### 3.5 XSS 統合
-
-`omni-workflow` は `XssConfigProviderImpl` を通じて `XssConfigProvider` SPI を実装します：
-- Redis キャッシュから XSS 構成を読み取り（`xss:enabled:{tenantId}`、`xss:rules:{tenantId}`）
-- キャッシュは `omni-auth` サービスによって書き込まれ、ワークフローサービスは**読み取り専用コンシューマー**です
-- キャッシュミスの場合、`enabled = false` を返却（フェイルオープン）
-
-### 3.6 候補者解決コンポーネント
-
-| コンポーネント | Bean 名 | トリガー |
-|---|---|---|
-| `ScopedRoleAssignmentListener` | `scopedRoleAssignmentListener` | UserTask `start` イベントの ExecutionListener |
-| `CandidateResolverDelegate` | `candidateResolverDelegate` | UserTask の前の ServiceTask の JavaDelegate |
-| `CandidateResolverBean` | `candidateResolver` | UEL 式またはオフライン事前解決 |
-
-`CandidateResolverBean` は `resolveCandidates(processDefinitionId, activityId, startUserId, tenantId)` をオフライン使用のために公開します（例：`getProgress()` で未処理タスクの承認予定者を表示する必要がある場合）。
-
-### 3.7 公開ロック
-
-`publishModel()` は `wf_process_model` に `SELECT FOR UPDATE` 悲観的ロックを使用して、同一モデルの同時デプロイメントを防止します。これは Flowable デプロイメントがアトミックではなく、複数のエンジン API 呼び出しを伴うため重要です。
-
----
-
-## 4. Extension Guide
-
-### 4.1 新しい承認プロセスタイプの追加
-
-1. 各 UserTask に `<omni:assignment>` を設定した BPMN XML を設計
-2. `BpmnXmlValidator` で検証（必須拡張を強制）
-3. API でモデルを作成：`POST /api/workflow/model`
-4. BPMN XML を保存：`PUT /api/workflow/model/{id}/draft`
-5. 公開：`POST /api/workflow/model/{id}/publish`
-
-コード変更は不要です — フレームワークは BPMN XML + `omni:assignment` 構成によるデータ駆動です。
-
-### 4.2 新しいアンカータイプの追加
-
-1. `ScopedRoleAssignmentListener` の解決ロジックに新しいアンカータイプ文字列を追加
-2. 組織単位ルックアップクエリを実装（例：特定の条件で `sys_org_unit` をクエリ）
-3. 検証が必要な場合、`BpmnXmlValidator` の既知の値にアンカータイプを追加
-4. フロントエンドの `UserTaskPanel.vue` を更新して、プロパティパネルに新しいアンカータイプを公開
-
-### 4.3 新しいフォールバック戦略の追加
-
-1. `ScopedRoleAssignmentListener` に戦略定数を追加
-2. フォールバック動作を実装（例：`ASSIGN_ADMIN` → 管理者ユーザーを検索、`ESCALATE_PARENT` → 親単位の候補者を検索）
-3. `omni:assignment` JSON スキーマ検証を更新
-
-### 4.4 カスタム通知サービス
-
-`omni-common-workflow` の `WorkflowNotificationService` インターフェースを実装します：
-
-```java
-@Service
-public class MyNotificationService implements WorkflowNotificationService {
-    @Override
-    public void notifyPendingTask(String assigneeId, String taskId, String title) { ... }
-
-    @Override
-    public void clearPendingTask(String taskId) { ... }
+```json
+{
+  "assignmentType": "SCOPED_ROLE",
+  "roleCode": "SUPER_ADMIN",
+  "anchorType": "START_USER_PRIMARY_UNIT",
+  "anchorParams": {},
+  "scopeMode": "SAME_UNIT",
+  "fallbackStrategy": "ERROR",
+  "approvalMode": "ALL"
 }
 ```
 
-デフォルトの `NoOpNotificationService`（`FlowableAutoConfiguration` により登録）は、`@ConditionalOnMissingBean` を通じて独自の実装に置き換えられます。
+### 3.2. 基準組織
 
-### 4.5 CC（カーボンコピー）通知
+| anchorType | 実際の基準組織 |
+|---|---|
+| `START_USER_PRIMARY_UNIT` | 有効な起案者の主組織 |
+| `PARENT_BY_TYPE`、`PARENT_CHILDREN` | 主組織から targetType で上方検索。targetType がなければ主組織 |
+| `CHILD_BY_CODE`、`SIBLING_BY_CODE` | 主組織の直属下位/同階層を childCode/siblingCode で検索 |
+| `DEPT_BY_CODE` | 現テナントの有効組織を deptCode で検索 |
+| `ABSOLUTE_UNIT` | 通常候補検索は anchorParams.unitIds または unitId に対応 |
+| `PARENT` | 主組織の親組織 |
+| `CHILD_UNIT`、`SIBLING_UNIT` | 設定の unitId を直接使用し、起案者との親子/兄弟関係は検査しない |
 
-BPMN デザイナーで `ccNotifyDelegate` デリゲート式を持つ `ServiceTask` ノードを追加します。`<omni:cc>` 拡張要素に対象ユーザー ID またはロールベースの解決を設定します。`CcNotifyDelegate` が実行時に `wf_cc_record` エントリを作成します。
+### 3.3. 検索範囲
 
----
+`SAME_UNIT` は同じ組織のロール、`UNIT_AND_BELOW` は組織パスで本組織と下位、`CHILDREN_ONLY` は直属下位のみを検索します。未知の scopeMode は現在同組織検索になります。SQL はロールのテナント、有効ロール、ロール範囲、ユーザー状態で絞りますが、任意に設定したユーザーの完全な Auth 認可検査とは異なります。検索例外は通常空候補になります。
 
-## 5. 技術選定：Flowable 8.x を選択した理由
+### 3.4. 空候補の処理
 
-| 検討項目 | Flowable | Camunda | Activiti |
-|------|---------|---------|----------|
-| **オープンソースライセンス** | Apache 2.0（商用利用に優しい） | 商用版はライセンス必要（コミュニティ版は MIT） | Apache 2.0 |
-| **Spring Boot 統合** | ネイティブ Spring Boot Starter、自動構成 | Spring Boot Starter の追加構成が必要 | メンテナンス停止（Flowable はそのフォーク） |
-| **マルチインスタンスサポート** | ネイティブ MI（Multi-Instance）サポート、柔軟な completionCondition | 類似機能 | 基本的 MI サポート |
-| **CMMN/DMN** | BPMN + CMMN + DMN をサポート | BPMN + DMN をサポート（CMMN は商用版） | BPMN のみ |
-| **コミュニティ活発度** | 活発（GitHub 8k+ stars） | 活発（商用サポート） | メンテナンス停止 |
-| **バージョン 7.x** | Jakarta EE 互換、Spring Boot 3/4 サポート | バージョン 8 は大幅なアーキテクチャ変更 | 新バージョンなし |
+`ERROR` は未指定/その他の戦略を含めて例外を投げます。`ASSIGN_ADMIN` は現テナントの組織 ID `1` の `SUPER_ADMIN` 候補を検索し、不在なら失敗します。ユーザー ID `1` を固定する処理ではありません。`ESCALATE_PARENT` は解決した基準組織の親から同じ roleCode と scopeMode で最大 `20` 階層をたどり、最初の候補を返します。見つからなければ失敗し、自動承認しません。`ABSOLUTE_UNIT` の上方検索は単一 unitId を読み、unitIds の先頭を自動的に基準にしません。起案者/基準組織の欠落や組織検索例外でも失敗します。
 
-**結論**：Flowable 8.x はオープンソースライセンス、Spring Boot ネイティブ統合、マルチインスタンスサポートにおいて明確な優位性があり、Omni-Stack ワークフローエンジンの最適な選択です。
+### 3.5. 複数人承認のカウンタ
 
-## 6. BPMN モデリングベストプラクティス
+複数インスタンスのカウンタは MI ルートのローカル変数として初期化し、最大 `32` 実行階層を探索して見つからなければ現在の実行を使います。`_counters_init` の重複防止はその活動ルート内のみで、次の承認ノードへの票数流出を防ぎます。初期しきい値は `ALL` なら候補人数、`ANY` なら `1`。署名者の増減後は全員承認のしきい値を「承認済み + 未処理」で再計算します。設計器の完了条件は `${rejectedCount > 0 || approvedCount >= requiredApprovals}` です。その他の BPMN は適切な条件と却下経路を用意する必要があります。
 
-### 命名規則
+### 3.6. 候補解決コンポーネント
 
-| 要素 | 命名規則 | 例 |
-|------|---------|------|
-| Process ID | `model_key` と一致 | `leave-request`、`expense-approval` |
-| UserTask ID | kebab-case、ロール+アクションを記述 | `dept-leader-approve`、`hr-review` |
-| SequenceFlow ID | `flow-{source}-{target}` | `flow-start-submit` |
-| Gateway ID | `{type}-gw-{purpose}` | `exclusive-gw-amount`、`parallel-gw-notify` |
+設計器の `useBpmnExtension.writeAssignment()` は `${scopedRoleAssignmentListener}` を参照する `ExecutionListener(event=start)`、並列複数インスタンス、集合 `candidateUserIds`、要素変数 `userId`、担当者 `${userId}` を書き込みます。旧 `TaskListener` はログ記録のみで、実行開始リスナーの代わりにはなりません。`CandidateResolverBean` は集合式 `${candidateResolver.resolve(execution)}` もサポートします。候補解決は互換代理と設計時プレビューも含めて `CandidateResolutionService` を共用します。
 
-### モデリング原則
+この上方検索と例外伝播は実行リスナーと `CandidateResolverBean` の動作です。リスナーは assignment または roleCode がなければ直接戻る場合があり、拡張の存在だけでは集合の設定を保証しません。互換 `CandidateResolverDelegate` は ESCALATE_PARENT 分岐がなく、対象欠落時は戻り、実行例外を捕捉してログのみ残します。すべての旧 BPMN が同じ失敗終了動作を持つとはいえません。
 
-1. **すべての UserTask に `<omni:assignment>` を設定する必要があります**：動的候補者解決、`assignee` のハードコードは禁止
-2. **ExclusiveGateway には必ず default flow を設定してください**：無条件ブランチをフォールバックとして設定し、プロセスのデッドロックを回避
-3. **マルチインスタンス回覧には統一された completionCondition を使用**：`${rejectedCount > 0 \|\| approvedCount >= requiredApprovals}`
-4. **CC 通知は ServiceTask + `ccNotifyDelegate` を使用**：非ブロッキング、メインフローに影響しません
-5. **モデル公開前に必ず `BpmnXmlValidator` をパスしてください**：XML の正当性と拡張要素の完全性を確保
+## 4. インスタンス、タスク、承認記録
 
-### プロセスデザイナー フロントエンドアーキテクチャ
+通常起動は Gateway の主体を使い、異なる simulateUserId/simulateUserName を拒否します。エンジンに入る前に入力変数 `initiator`、`startUserId`、`authenticatedUserId`、`START_USER_ID` を除去し、実際の initiator を設定します。Flowable 認証コンテキストは finally で解除します。modelVersionId 指定時は同テナントの `PUBLISHED` 版とエンジン定義 ID が必要です。processKey のみでは互換の key/テナント起動を使い、モデル台帳の現行公開ポインタとは限りません。
 
-```
-bpmn-js Modeler (オープンソース BPMN 2.0 モデリングツール)
-    │
-    ├── useBpmnModeler.ts      — Modeler の作成/破棄ライフサイクル
-    ├── useBpmnExtension.ts    — omni:assignment などの拡張要素の読み書き
-    ├── bpmnContextPadI18n.ts  — コンテキストメニューの国際化
-    └── bpmnContextPadProvider.ts — カスタムコンテキストメニュー項目
+エンジン起動後に拡張レコードを書きます。状態 `1` は実行中、`2` は完了、`0` は中止です。通常起動の requestId/businessType だけでは内部予約の冪等性は得られません。未処理タスク同期はコミット後に実行し、例外は記録するだけでコミット済みインスタンスを戻しません。投影はエンジンの即時状態ではありません。
 
-プロパティパネル (panels/)
-    ├── UserTaskPanel.vue      — ロール解決設定（roleCode, anchorType, scopeMode）
-    ├── ServiceTaskPanel.vue   — CC 通知設定
-    └── GatewayPanel.vue       — ゲートウェイ条件設定
-```
+`ApprovalController` の完了、承認者追加/削除、委任はそれぞれ `workflow:approval:*` 権限を要求し、サービスは現テナントのタスクと正確な assignee も要求します。タスク不在は業務コード `409`、別担当者は `403` です。独立した claim、transfer、withdraw Controller はなく、内部候補資格検査もタスクを自動取得しません。追加/削除/委任対象は数値解析のみで、有効ユーザーや Auth テナント所属の検査済みとはいえません。委任は assignee の設定です。
 
-## 7. トラブルシューティングガイド
+承認完了は先に意見、タスク局所の approved/comment と実行変数を保存し、MI の承認/却下カウンタを更新してから `taskService.complete()` を呼び、今回の票を完了条件に反映します。追加 variables はその後タスク局所とプロセススコープに設定され、予約名を除外しません。任意のクライアント変数がカウンタや経路値を上書きできないとは保証できません。
 
-| 問題 | 考えられる原因 | トラブルシューティング方法 |
-|------|---------|----------|
-| **モデル公開失敗** | BPMN XML 検証に失敗 | `POST /api/workflow/model/{id}/validate` を呼び出して具体的なエラー情報を取得 |
-| **候補者解決失敗** | `omni:assignment` 設定エラー | `roleCode`、`anchorType`、`scopeMode` の値が有効か確認；サービスログで例外を確認 |
-| **プロセスインスタンスが開始されない** | モデルが未公開またはバージョンがアーカイブ済み | `wf_process_model_version` テーブルで `status=PUBLISHED` のバージョンがあるか確認 |
-| **マルチインスタンスタスクがスキップされない** | completionCondition がトリガーされていない | `approvedCount`、`rejectedCount`、`requiredApprovals` の変数値を確認 |
-| **deleteReason が誤って表示される** | MI_END と deleted の混同 | §3.1 MI DeleteReason テーブルを参照；`MI_END` = 自動完了、`deleted` = プロセス終了 |
-| **テナント分離が機能しない** | TenantInfoHolder が未設定 | Gateway が `X-Tenant-Id` リクエストヘッダーを注入しているか確認；`TenantInfoFilter` が正常に実行されているか確認 |
-| **BPMN デザイナーが読み込めない** | bpmn-js のバージョン非互換 | `bpmn-js` のバージョンが 18.x であることを確認；ブラウザコンソールエラーを確認 |
+読み取り API は `GET /api/workflow/process-instance/{processInstanceId}/progress` と `GET /api/workflow/process-instance/{processInstanceId}/approval-records` です。両方が Gateway の `X-Tenant-Id` を明示的に受け、ID とテナントで履歴インスタンスを先に照会します。無効テナントは業務コード `400`、不在/他テナントは共通の `404` で、活動、意見、候補、表示名の読み取り前に拒否します。同テナント参加者 ACL や機能権限の追加はありません。
 
-## 8. 管理画面スクリーンショット（4言語）
+| 表示/読み取り | 現在の意味 |
+|---|---|
+| 進捗ノード | 履歴活動と担当者を集約し completed/active/pending を表示。未到達ノードの候補プレビューは最終担当を示さない |
+| 個人別進捗 | deleteReason のない終了タスクが実際の完了。終了タスクの null でない deleteReason はすべて auto-completed |
+| 承認記録 | 通常終了はタスク局所 approved で判定し、変数欠落は互換の approved。未終了は pending |
+| 削除タスク | MI で始まる deleteReason は旧ラベル `auto-approved`、その他は cancelled。`MI_END` はエンジンによるスキップで、その人の賛成票ではない |
+| 意見 | 取得したタスク意見の最初の一件。最新の一件である保証はない |
 
-正式画像はドキュメント専用 Playwright ケース `omni-frontend/e2e-docs/flows/management.flows.spec.ts` により実際の実行スタック上で生成され、言語別ディレクトリに保存され、他言語の画像を再利用せず、プレースホルダー画像やモック応答を使用しません。
+自分の起案/処理済みと未処理一覧はテナントと現在ユーザーで絞ります。「処理済み」はタスクを処理した意味で、プロセス全体の完了とは限りません。タスクフォームは現テナントかつ現在担当者を要求し、プロセス変数を返しますが、任意の個人情報の自動マスキングは保証しません。起案者による中止は同テナント拡張、本人、実行中状態を要求します。
 
-- 前提条件：ローカル Compose フルスタックが実行中、フロントエンド `127.0.0.1:3000`；`omni-workflow` ヘルス；DB に実際のプロセスモデルとインスタンスが存在（採集時は 8 個のモデル/バージョン、23 件のインスタンス）。
-- 操作者：`admin`（`SUPER_ADMIN`、ワークフローメニュー権限を保持）。
-- 操作：ログイン後に「プロセス定義」「プロセスインスタンス」「統計ダッシュボード」ページに順に移動。
-- 期待状態：ページタイトルと列ラベルが現在の言語でレンダリング；プロセスインスタンスリストはプロセスタイトル、プロセス Key、ビジネス主キー、発起者、状態と起動時刻を表示し、「プロセス進捗」と「承認記録」の入口を提供。
-- トークン：`E2eTokenFixture` がテストプロセス内で短期 JWT（TTL 1200 秒）を発行、収尾で破棄し、ドキュメント、ログ、リポジトリに書き込みません。
-- 本グループはすべて**読み取り専用採集**：プロセスデータを一切作成、変更、削除しないため、書き込みスイッチは不要で、データ収尾もありません。
+## 5. 信頼、テナント、入力内容の境界
 
-内容説明：現在の環境のプロセスインスタンスはすべて歴代のエンドツーエンド検証で生成され、タイトルにテスト識別（例 `E2ESQ`）を持ちます。`wf_process_instance_ext` と Flowable `ACT_HI_*` はエンジン管理の監査履歴でソフト削除列を持たず、SQL でのハード削除は不可のため、画像は実際のタイトルをそのまま保持し、データ造形やトリミングで美化しません。
+外部セキュリティチェーンは認証を要求します。`GatewayPreAuthFilter` は転送印と HMAC 身元アサーションを検証し、平文身元ヘッダーとの不一致を拒否します。機能権限は各 Controller が宣言します。内部 `/api/internal/**` はユーザー JWT ではなく前段の共有トークンフィルターが保護します。身元、テナント、担当資格、業務関連は別々の検査です。
 
-| ページ | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| プロセス定義（publish） | ![プロセス定義（簡体字中国語）](images/zh-CN/workflow-definitions.png) | ![プロセス定義（英語）](images/en-US/workflow-definitions.png) | ![プロセス定義（日本語）](images/ja-JP/workflow-definitions.png) | ![プロセス定義（韓国語）](images/ko-KR/workflow-definitions.png) |
-| プロセスインスタンス追跡（instance-tracking） | ![プロセスインスタンス（簡体字中国語）](images/zh-CN/workflow-instances.png) | ![プロセスインスタンス（英語）](images/en-US/workflow-instances.png) | ![プロセスインスタンス（日本語）](images/ja-JP/workflow-instances.png) | ![プロセスインスタンス（韓国語）](images/ko-KR/workflow-instances.png) |
-| 統計ダッシュボード（サマリービュー） | ![統計ダッシュボード（簡体字中国語）](images/zh-CN/workflow-stats.png) | ![統計ダッシュボード（英語）](images/en-US/workflow-stats.png) | ![統計ダッシュボード（日本語）](images/ja-JP/workflow-stats.png) | ![統計ダッシュボード（韓国語）](images/ko-KR/workflow-stats.png) |
+`TenantInfoFilter` は finally で `TenantInfoHolder` を解除します。Workflow の MyBatis-Plus 順序は Tenant → Optimistic → Pagination、対象は `wf_` のみで、コンテキスト欠落時はテナント `1` になります。生 JDBC と Flowable 照会はこのプラグインを通らないため、各メソッドの明示的な制約を確認し、サービス全体の owner DataScope を推定しないでください。
 
-### 読み取り専用詳細オーバーレイ（4言語）
+独立した `XssConfigProviderImpl` は Redis DB `0` の `xss:enabled:{tenantId}` と `xss:rules:{tenantId}` を読みます。設定欠落や規則 JSON の解析失敗では enabled=false と空規則を返し、Redis 読み取り例外はこのメソッドで捕捉しません。common-service の Auth 再取得や既定安全基準はありません。変数、意見、設計 JSON/XML、ログは実際の入出力経路で扱い、統一的な自動無害化を保証しません。
 
-`omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` により生成、同様に**読み取り専用採集**：行内の閲覧系アクションのみをクリックしてオーバーレイを開き、フォームを提出せず、設計/検証/公開/削除/終了などの書き込み操作を一切トリガーしません。
+`CcNotifyDelegate` は `wf_cc_record` に書き、未処理タスクや外部通知を生成しません。実行例外は捕捉して記録します。既定 `NoOpNotificationService` はログのみです。操作ログや Outbox もメール/SMS 等の配信証拠にはなりません。
 
-- 操作者：`admin`；前提条件は前節と同じ。
-- 操作：プロセスインスタンスの先頭行で「プロセス進捗」と「承認記録」をクリック、プロセスモデルの先頭行で「バージョン」をクリック。
-- 期待状態：オーバーレイタイトルが現在の言語でレンダリング；プロセス進捗オーバーレイは **BPMN グラフィックが実際にレンダリング完了するまで待ってから**撮影しなければならず（ケースは `.bpmn-viewer-wrap .djs-element` が可視かつ `.el-loading-mask` が消えたことをアサート）、非同期読み込み中のスピナー状態を撮影してはいけません。
-- 実測結果：16 passed / 0 skipped（本文書と信頼性メッセージ文書が共用する 4 つのオーバーレイシナリオ × 4 言語を含む）。
+## 6. 内部起動と完了イベント
 
-| オーバーレイ | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| プロセス進捗（instance-tracking） | ![プロセス進捗（簡体字中国語）](images/zh-CN/workflow-instance-progress.png) | ![プロセス進捗（英語）](images/en-US/workflow-instance-progress.png) | ![プロセス進捗（日本語）](images/ja-JP/workflow-instance-progress.png) | ![プロセス進捗（韓国語）](images/ko-KR/workflow-instance-progress.png) |
-| 承認記録（approval） | ![承認記録（簡体字中国語）](images/zh-CN/workflow-instance-approval-records.png) | ![承認記録（英語）](images/en-US/workflow-instance-approval-records.png) | ![承認記録（日本語）](images/ja-JP/workflow-instance-approval-records.png) | ![承認記録（韓国語）](images/ko-KR/workflow-instance-approval-records.png) |
-| バージョン履歴（publish） | ![バージョン履歴（簡体字中国語）](images/zh-CN/workflow-model-versions.png) | ![バージョン履歴（英語）](images/en-US/workflow-model-versions.png) | ![バージョン履歴（日本語）](images/ja-JP/workflow-model-versions.png) | ![バージョン履歴（韓国語）](images/ko-KR/workflow-model-versions.png) |
+`InternalWorkflowController` の八つのメソッドパスは版詳細、区分別現在版、公開版一覧、版の一括解決、承認図プレビュー、起動、担当資格検査、中止を提供します。完全な項目は [API 契約](api-contract.jp.md) が管理します。`X-Internal-Token` と `X-Tenant-Id` を送り、該当する body/query のテナントも一致させます。呼び出し側が実際の startUserId/startUserName を提供し、共有トークンだけでは利用者の認可を証明できません。
 
-プロセス進捗図では、緑のノードは本インスタンスが実行済みのアクティビティ（`completed-node` マーク）、灰色は通っていない分岐（例「承認却下」）で、§2.7「進捗と記録」の意味と一致します。
+内部起動はローカルトランザクションで `wf_process_start_request` を予約し、`(tenant_id, request_id)` と `(tenant_id, business_type, business_key)` を一意制約で守ります。再送は業務識別、modelVersionId、startUserId を比較し、title/startUserName/variables の完全ハッシュは比較しません。STARTED は元インスタンスと replayed=true を返し、応答 requestId は今回のリクエスト由来です。処理中は `409`。同じ requestId の FAILED は再予約できますが、同じ業務キーで requestId だけ変更しても自動的に再試行権を得ません。
 
-未カバーのプロセス：`model-lifecycle` / `detail-and-action-states` / `failure-states` は「モデリング → BPMN 設計 → 検証 → 公開」の書き込みチェーンを必要とし、公開は共有 Flowable エンジンにプロセス定義（`ACT_RE_*`）をデプロイし、検証済みのクリーンな削除/ロールバック経路がまだありません；`countersign` はマルチインスタンス会署モデルと複数の承認者身分を必要とします。4 項はいずれも**個別の承認/新規テスト身分が必要**で、本ラウンドでは勝手にデプロイも一時的な権限昇格も行わず、カバレッジリストで明示的な gap として保持します。
+新規起動では公開版を再検査し、`ASSET_TRANSFER`、`ASSET_DISPOSAL`、`SRM_SUPPLIER_ONBOARDING` は category と businessType の完全一致を要求します。内部サービスが変数 requestId/businessType/businessKey を上書きし、通常起動層が起案者変数を上書きします。予約、起動、拡張、markStarted はローカルトランザクション内ですが、業務サービスとの分散原子コミットではありません。
+
+担当資格は先にテナントのタスクと拡張の businessType/businessKey を照合し、次に assignee、未割当時のみ candidate を確認します。valid=true は取得/完了を行いません。版の利用可能状態と図プレビューはモデルメタデータ/BPMN に基づき、最終候補者、エンジン実行可能性、業務承認成功を保証しません。
+
+イベント型は `workflow.process.completed.v1` で、`workflow-domain-out-0` から共通 Outbox に書きます。現行呼び出し元は実行インスタンス終了を検出した承認サービスと明示的中止です。結果はそれぞれリクエストの APPROVED/REJECTED、または CANCELLED。拡張の completion_event_id 条件更新が一回の書き込みを制御し、Outbox と同じトランザクションに入ります。既存ラッチでは false を返して再書き込みせず、Broker 配信確認ではありません。
+
+すべての終了を扱う汎用エンジン終了リスナーはありません。起動直後の終了、別の管理操作による終了、業務拡張の欠落から完了イベント生成を推定できません。中継は少なくとも一回の配信で、受信側は冪等である必要があります。APPROVED/REJECTED は拡張状態 `2`、CANCELLED は `0` となり、最終業務状態は業務受信側が処理します。[MQ 信頼性](mq-reliability.jp.md) を参照してください。
+
+## 7. ソース入口と検証範囲
+
+| 入口 | 確認対象 |
+|---|---|
+| `WorkflowModelController` / `WorkflowModelServiceImpl` / `BpmnXmlValidator` | 権限、版ポインタ、ロック、検査、公開 |
+| `ProcessInstanceServiceImpl` / `WorkflowTaskServiceImpl` | 起案者身元、テナント読み取り、本人一覧、フォーム、中止 |
+| `WorkflowApprovalServiceImpl` / common-workflow の `ApprovalServiceImpl` | 担当者、MI カウンタ順序、承認者増減、完了 |
+| `CandidateResolutionService` / `ScopedRoleAssignmentListener` / `CandidateResolverBean` | 基準組織、空候補、リスナー時機、カウンタスコープ |
+| `InternalWorkflowServiceImpl` / `WorkflowProcessStartRequestServiceImpl` / `WorkflowCompletionEventServiceImpl` | 内部意図の再送と Outbox ラッチ |
+| `SecurityConfig` / `GatewayPreAuthFilter` / `MybatisPlusConfig` / `XssConfigProviderImpl` | 独立セキュリティ構成と実際の制約 |
+
+初期化器は既定テナント `1` の `supplier-onboarding`、`procurement-approval`、`asset-transfer`、`asset-disposal` を修正/公開します。不在や公開失敗は起動を妨げますが、すべてのテナントと外部依存の準備完了は保証しません。
+
+テストはモデル、起動身元、承認、内部プロトコル、完了イベント、テナント境界を対象にします。`ProcessInstanceReadTenantBoundaryTest` は実際の MVC/サービスと模擬履歴で二つの読み取りを検査し、実 Flowable DB/Gateway 統合の代わりにはなりません。`it/Fw*IT` は保護された隔離環境が必要で、既定 Surefire 単体実行には含まれません。Docker ビルド、単体、実承認、ブラウザー画像、メッセージ/通知検証を区別し、過去画像を今回の業務再現証拠にしません。コマンドは [AGENTS.md](../AGENTS.md) に集約します。

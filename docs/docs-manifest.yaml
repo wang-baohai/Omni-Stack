@@ -3,395 +3,2415 @@ source_locale: zh-CN
 baseline_date: 2026-08-21
 release_policy:
   require_all_translations: true
-  require_human_review: true
+  require_human_review: false
   source_digest_algorithm: sha256
   statuses:
-    present-unverified: 文件存在，但尚未按当前中文事实源完成人工复核
+    present-unverified: 文件存在，但尚未按当前中文事实源完成授权 AI 复核
     missing: 文件尚不存在
-    synchronized: 已按记录的中文摘要完成人工复核
-
+    synchronized: 已按当前授权策略完成实际复核，源、译文和适用证据摘要有效
+  ai_review_authorization:
+    reference: docs/adr/0003-authorized-ai-translation-review.md
+    reference_sha256: 5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed
+    approved_by: project-owner
+    approved_at: 2026-10-13
+    reviewer: Codex
 documents:
   - id: architecture
     type: system-truth
     module: platform
     owner: architecture
     source: docs/architecture.md
-    source_sha256: a642b292be145019c86f0cc0d451b0cedc6acbe38ec7db3404bdb536a27d2362
-    dependencies: [module-structure, ports, data-flow, permissions]
+    source_sha256: dc06378a9efe9c689ff447fd5d230474438a2e846e0f75c15cc96c4c8ad4b206
+    dependencies:
+      - module-structure
+      - ports
+      - data-flow
+      - permissions
     translations:
-      en-US: { path: docs/architecture.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/architecture.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/architecture.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/architecture.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 09:58:40
+        review_evidence: docs/reference/reviews/architecture.json
+        review_evidence_sha256: 2e7038f5a34f0060a3038b8259aaea9b726c9962cfff6ff42645400f48428979
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 22:34:04
+          source_sha256: abb00d78daadc8a36fb82b71d62c4134a7bc9b4c0de8e82eb64be7924db9949d
+          translation_sha256: 782d023e7968c5aac5a2b3956425a3b71f75c03c0c4a521926673fbd0a624dff
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: dc06378a9efe9c689ff447fd5d230474438a2e846e0f75c15cc96c4c8ad4b206
+        translation_sha256: 3ad54fd56e838499b4dd9194a8b52a531eef7d0c55a1f876252e6ccc0c192435
+      ja-JP:
+        path: docs/architecture.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 09:58:40
+        review_evidence: docs/reference/reviews/architecture.json
+        review_evidence_sha256: 2e7038f5a34f0060a3038b8259aaea9b726c9962cfff6ff42645400f48428979
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 22:34:04
+          source_sha256: abb00d78daadc8a36fb82b71d62c4134a7bc9b4c0de8e82eb64be7924db9949d
+          translation_sha256: 7992fee3c57da9b528a751b18ac36c7ddca677257e8c49591e8f9a25322fed70
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: dc06378a9efe9c689ff447fd5d230474438a2e846e0f75c15cc96c4c8ad4b206
+        translation_sha256: b1fbaea5cbc529473ab327dc8df520abb85cd44c4450f3622c316119cb033f1c
+      ko-KR:
+        path: docs/architecture.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 09:58:40
+        review_evidence: docs/reference/reviews/architecture.json
+        review_evidence_sha256: 2e7038f5a34f0060a3038b8259aaea9b726c9962cfff6ff42645400f48428979
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 22:34:04
+          source_sha256: abb00d78daadc8a36fb82b71d62c4134a7bc9b4c0de8e82eb64be7924db9949d
+          translation_sha256: 910bcc310d7cf3dbf19ee53711d707d859a12ec4c85f43367b75999e42fe32a5
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: dc06378a9efe9c689ff447fd5d230474438a2e846e0f75c15cc96c4c8ad4b206
+        translation_sha256: 1594ae354a26f378d9f6ed33142edde4ccbd24d56e9a5d1515105572db28ae6f
   - id: api-contract
     type: system-truth
     module: platform
     owner: backend
     source: docs/api-contract.md
-    source_sha256: 60c18671b12e0daba2c6c824b7816e1ee87235cfe5298059338f34954ea27f15
-    dependencies: [api, error-codes, pagination, internal-contract]
+    source_sha256: 63bb7c8c879ae25e46dc17642a41b61e9445efe48583def3e7afa92a7d2bd837
+    dependencies:
+      - api
+      - error-codes
+      - pagination
+      - internal-contract
     translations:
-      en-US: { path: docs/api-contract.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/api-contract.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/api-contract.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/api-contract.en.md
+        status: synchronized
+        reviewed_at: 2026-10-16 16:52:27
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 63bb7c8c879ae25e46dc17642a41b61e9445efe48583def3e7afa92a7d2bd837
+        translation_sha256: 03f823498f0bae911513c6cc8b8d6d13cd00f22428d1ffdb6f7e47021771ebaa
+        review_evidence: docs/reference/reviews/api-contract.json
+        review_evidence_sha256: 9c29adcd2b830fb11426b058f53d84883336b409c9a8d985f525167e2a4efaba
+      ja-JP:
+        path: docs/api-contract.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-16 16:52:27
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 63bb7c8c879ae25e46dc17642a41b61e9445efe48583def3e7afa92a7d2bd837
+        translation_sha256: 958fe16322ecb9b3b8157a7beb6700b1c4af5ea0a08ab71a2b053bb5288d3303
+        review_evidence: docs/reference/reviews/api-contract.json
+        review_evidence_sha256: 9c29adcd2b830fb11426b058f53d84883336b409c9a8d985f525167e2a4efaba
+      ko-KR:
+        path: docs/api-contract.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-16 16:52:27
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 63bb7c8c879ae25e46dc17642a41b61e9445efe48583def3e7afa92a7d2bd837
+        translation_sha256: 9303ceec059e71fb974decca16f738f541fbcdcc3f8b18233e481a49cb513756
+        review_evidence: docs/reference/reviews/api-contract.json
+        review_evidence_sha256: 9c29adcd2b830fb11426b058f53d84883336b409c9a8d985f525167e2a4efaba
   - id: backend-patterns
     type: development-guide
     module: backend
     owner: backend
     source: docs/backend-patterns.md
-    source_sha256: dbd21f7d604830ae55cf10d13c712be3ac804dc8e3f6ea4844b7e5a268319710
-    dependencies: [starter, security, persistence, testing]
+    source_sha256: 809c62fe362c84115768d1f478d0eef23c728f0a24583d08a7109a1a221d7126
+    dependencies:
+      - starter
+      - security
+      - persistence
+      - testing
     translations:
-      en-US: { path: docs/backend-patterns.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/backend-patterns.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/backend-patterns.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/backend-patterns.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:26:17
+        review_evidence: docs/reference/reviews/backend-patterns-config-literals-2026-10-18.json
+        review_evidence_sha256: eb66f40edd7890147232f5aae25732d028ee3c5cf727328e7277def54331165c
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-17 13:52:35
+          source_sha256: 43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7
+          translation_sha256: e7487a8684cdec794923e2e28210f9843d353a536cfce486e172efa2d830ed7d
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 809c62fe362c84115768d1f478d0eef23c728f0a24583d08a7109a1a221d7126
+        translation_sha256: 203a154d7a09aaea18a54e168006d9a5b96f062c0ebca779ec245eab8b803cfa
+      ja-JP:
+        path: docs/backend-patterns.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:26:17
+        review_evidence: docs/reference/reviews/backend-patterns-config-literals-2026-10-18.json
+        review_evidence_sha256: eb66f40edd7890147232f5aae25732d028ee3c5cf727328e7277def54331165c
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-17 13:52:35
+          source_sha256: 43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7
+          translation_sha256: 7d2cf3b946c01b47245f0292819a24d95c49a13e0fd3bb1541369dda6e6d4403
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 809c62fe362c84115768d1f478d0eef23c728f0a24583d08a7109a1a221d7126
+        translation_sha256: 232a558fc230f0da56b35394c4fb2b3a032b5dbfb5aec58f8ad93653ae2747a6
+      ko-KR:
+        path: docs/backend-patterns.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:26:17
+        review_evidence: docs/reference/reviews/backend-patterns-config-literals-2026-10-18.json
+        review_evidence_sha256: eb66f40edd7890147232f5aae25732d028ee3c5cf727328e7277def54331165c
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-17 13:52:35
+          source_sha256: 43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7
+          translation_sha256: b47fdd3b47307cb74b00d33e9416f8536b6f7ffe677b6078b2e1315b8231e677
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 809c62fe362c84115768d1f478d0eef23c728f0a24583d08a7109a1a221d7126
+        translation_sha256: 613aeeae55b020d6b2f0a295c0226fb5160ac14aa7bd3a23142f597ca928fc96
   - id: frontend-patterns
     type: development-guide
     module: frontend
     owner: frontend
     source: docs/frontend-patterns.md
-    source_sha256: 9c86ddb75751e9f5191f65d00ea727d963660b76aa9ce4cad1679dde01d92363
-    dependencies: [routing, state, permissions, i18n, testing]
+    source_sha256: 69df06b582a497eaec21b0bb85cbaab341aee52d6b801c163fe8eac06780d327
+    dependencies:
+      - routing
+      - state
+      - permissions
+      - i18n
+      - testing
     translations:
-      en-US: { path: docs/frontend-patterns.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/frontend-patterns.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/frontend-patterns.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/frontend-patterns.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:26:17
+        review_evidence: docs/reference/reviews/frontend-patterns-config-literals-2026-10-18.json
+        review_evidence_sha256: 3f768f03bd30fe508b7b17ad8517fcbc020c09f493633abbe5d7dfb820d939a1
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 21:26:00
+          source_sha256: 0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1
+          translation_sha256: 75c1ed163f1ed0565ea318e33cd1e960dabfd0780f1df36d894d5bbf2526a651
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 69df06b582a497eaec21b0bb85cbaab341aee52d6b801c163fe8eac06780d327
+        translation_sha256: 60acf309c53e9a676792571e7ec8777f86dd2f1c2d4dbaec243cb8a2013253cb
+      ja-JP:
+        path: docs/frontend-patterns.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:26:17
+        review_evidence: docs/reference/reviews/frontend-patterns-config-literals-2026-10-18.json
+        review_evidence_sha256: 3f768f03bd30fe508b7b17ad8517fcbc020c09f493633abbe5d7dfb820d939a1
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 21:26:00
+          source_sha256: 0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1
+          translation_sha256: a824b793f66b41bacb1a8e4c06cea854112c01880a09807a8e3063d93d828de2
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 69df06b582a497eaec21b0bb85cbaab341aee52d6b801c163fe8eac06780d327
+        translation_sha256: 1bef1f6ebf3f5bedd72c4429a195764562afee35445801f54dc29356dc9a02f6
+      ko-KR:
+        path: docs/frontend-patterns.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:26:17
+        review_evidence: docs/reference/reviews/frontend-patterns-config-literals-2026-10-18.json
+        review_evidence_sha256: 3f768f03bd30fe508b7b17ad8517fcbc020c09f493633abbe5d7dfb820d939a1
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 21:26:00
+          source_sha256: 0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1
+          translation_sha256: 0df81fdfee0c3c1bf8524c2bf8106974421b122c4690ab60c7b4c6661fd14272
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 69df06b582a497eaec21b0bb85cbaab341aee52d6b801c163fe8eac06780d327
+        translation_sha256: 44198d0e3465ef2cab061b0f420e4372cbd90b0e018630523a7c6eee9f21958b
   - id: core-flows
     type: system-truth
     module: platform
     owner: architecture
     source: docs/core-flows.md
-    source_sha256: 19d8001ba528dacb47f5b5b3f002d17959e0daf09eb5183be91ff58eb2221dab
-    dependencies: [authentication, permissions, tenant, xss, screenshots]
+    source_sha256: 932748a1e461d4eb5b7088e31a1af728dadac49f59e492566f7fa5413dcfae49
+    dependencies:
+      - authentication
+      - permissions
+      - tenant
+      - xss
+      - screenshots
     translations:
-      en-US: { path: docs/core-flows.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/core-flows.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/core-flows.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/core-flows.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 08:04:41
+        review_evidence: docs/reference/reviews/core-flows-mermaid-entities-2026-10-18.json
+        review_evidence_sha256: aa350bb38e442516315c8950168be3f7ed2b9da036b64d6b651b7b938b3e4aa9
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-15 10:40:56
+          source_sha256: 68acd52b56b7e540ad4fa3a9b7015500983d832187ef1fc724e461bb6fe095e5
+          translation_sha256: c62836c8ad4aeec5dba5a15e7c0905c66afc36b6fba4adccf9d574d7d0c8e8f2
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 932748a1e461d4eb5b7088e31a1af728dadac49f59e492566f7fa5413dcfae49
+        translation_sha256: a221e7e10307765f5238087f60473f70951bff6673dcb4296e06dcf68d6659af
+      ja-JP:
+        path: docs/core-flows.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 08:04:41
+        review_evidence: docs/reference/reviews/core-flows-mermaid-entities-2026-10-18.json
+        review_evidence_sha256: aa350bb38e442516315c8950168be3f7ed2b9da036b64d6b651b7b938b3e4aa9
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-15 10:40:56
+          source_sha256: 68acd52b56b7e540ad4fa3a9b7015500983d832187ef1fc724e461bb6fe095e5
+          translation_sha256: ce0e975e76c2161f941131165d70888cd3ceb3356e833bbf2379e109005c7c69
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 932748a1e461d4eb5b7088e31a1af728dadac49f59e492566f7fa5413dcfae49
+        translation_sha256: 796551739ef859d082f72d9151873e63523837614efb192fea43bf71b704d00f
+      ko-KR:
+        path: docs/core-flows.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 08:04:41
+        review_evidence: docs/reference/reviews/core-flows-mermaid-entities-2026-10-18.json
+        review_evidence_sha256: aa350bb38e442516315c8950168be3f7ed2b9da036b64d6b651b7b938b3e4aa9
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-15 10:40:56
+          source_sha256: 68acd52b56b7e540ad4fa3a9b7015500983d832187ef1fc724e461bb6fe095e5
+          translation_sha256: 235b39b681c8286d30d577e50c538da3177360747e0c1e79555bd400d02c88ce
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 932748a1e461d4eb5b7088e31a1af728dadac49f59e492566f7fa5413dcfae49
+        translation_sha256: c28fc54336958ec81d73d1468cebe30b8417f8e346d74657f891b81971d2df05
   - id: scheduling
     type: module-guide
     module: scheduling
     owner: base
     source: docs/scheduling.md
-    source_sha256: 3ca14937792cf00600b428172ab57a0ddbc629871318f4d164a98e7c2714ba80
-    dependencies: [api, permissions, xxl-job, screenshots]
+    source_sha256: af1e4a539d551605e6d4466de4fc740b78a527a50660a5f4f4d82c2c3247b8a7
+    dependencies:
+      - api
+      - permissions
+      - xxl-job
+      - screenshots
     translations:
-      en-US: { path: docs/scheduling.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/scheduling.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/scheduling.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/scheduling.en.md
+        status: synchronized
+        reviewed_at: 2026-10-15 08:48:47
+        review_evidence: docs/reference/reviews/scheduling.json
+        review_evidence_sha256: 57adc3a811be042dcfad96bc91e45ca48d897628d54e4e2deecae44578df9d0b
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 12:26:49
+          source_sha256: 070fad2e84a01493fa3396ad4a7f8ad2ee20d972dad98686b9ccbe21a926b560
+          translation_sha256: 8a8b7565f181309979f3754706132ba4204c3b6633abdd01b449812c1b646f57
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: af1e4a539d551605e6d4466de4fc740b78a527a50660a5f4f4d82c2c3247b8a7
+        translation_sha256: fb5341adedb90af549867e5a86cbf2b0713a8125af19fb76913ea420cb838a91
+      ja-JP:
+        path: docs/scheduling.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-15 08:48:47
+        review_evidence: docs/reference/reviews/scheduling.json
+        review_evidence_sha256: 57adc3a811be042dcfad96bc91e45ca48d897628d54e4e2deecae44578df9d0b
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 12:26:49
+          source_sha256: 070fad2e84a01493fa3396ad4a7f8ad2ee20d972dad98686b9ccbe21a926b560
+          translation_sha256: 58b62c161e1d1fdf7c7845680bc302e389c9fc2654396ef6e4d7d35bd792812d
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: af1e4a539d551605e6d4466de4fc740b78a527a50660a5f4f4d82c2c3247b8a7
+        translation_sha256: f2747e5c4f85c6e89e3d0d57f7835af560f554dc9c7ab5f37a0244ef3948df4f
+      ko-KR:
+        path: docs/scheduling.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-15 08:48:47
+        review_evidence: docs/reference/reviews/scheduling.json
+        review_evidence_sha256: 57adc3a811be042dcfad96bc91e45ca48d897628d54e4e2deecae44578df9d0b
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 12:26:49
+          source_sha256: 070fad2e84a01493fa3396ad4a7f8ad2ee20d972dad98686b9ccbe21a926b560
+          translation_sha256: 738addca50ca9371e49c7965e6c83c3c18a1eb66366680f9f3ba0a091d7b211c
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: af1e4a539d551605e6d4466de4fc740b78a527a50660a5f4f4d82c2c3247b8a7
+        translation_sha256: 55e60bef8e98a753a71400943c99e4cf9ac9a33567542dffd0ce2ae06e267ad2
   - id: workflow
     type: module-guide
     module: workflow
     owner: workflow
     source: docs/workflow.md
-    source_sha256: 08de8ac09fa93c4ea98de75820b1db453c159e629183d7fbf2c1c29c378e4f44
-    dependencies: [api, bpmn, permissions, screenshots]
+    source_sha256: 4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389
+    dependencies:
+      - api
+      - bpmn
+      - permissions
+      - screenshots
     translations:
-      en-US: { path: docs/workflow.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/workflow.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/workflow.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/workflow.en.md
+        status: synchronized
+        reviewed_at: 2026-10-16 15:16:52
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389
+        translation_sha256: e2c9a4f2e1c0419e0a6ba7a8206e034b467e291e53adc9546d69eb91e35d62a1
+        review_evidence: docs/reference/reviews/workflow.json
+        review_evidence_sha256: 8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f
+      ja-JP:
+        path: docs/workflow.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-16 15:16:52
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389
+        translation_sha256: bf2a2db1e45360a2d8b6a108328c32fb2b19f59adec629cf62a8b856109a1b4a
+        review_evidence: docs/reference/reviews/workflow.json
+        review_evidence_sha256: 8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f
+      ko-KR:
+        path: docs/workflow.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-16 15:16:52
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389
+        translation_sha256: 4f92e5629571b9059154ffb2777a5ffb506b8ad93483d7fcf2e5595a58f19479
+        review_evidence: docs/reference/reviews/workflow.json
+        review_evidence_sha256: 8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f
   - id: crm
     type: module-guide
     module: crm
     owner: crm
     source: docs/crm.md
-    source_sha256: 8ddf46014cbbab5204ae5693aa45699f383b6e03aa2dcb91237e7a6b85dc8383
-    dependencies: [api, permissions, state-machine, screenshots]
+    source_sha256: dbb748468d43a479f89eacacc28a9c4056a7b8db87fa37a7e29973a6fde4e23d
+    dependencies:
+      - api
+      - permissions
+      - state-machine
+      - screenshots
     translations:
-      en-US: { path: docs/crm.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/crm.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/crm.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/crm.en.md
+        status: synchronized
+        reviewed_at: 2026-10-15 11:38:58
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: dbb748468d43a479f89eacacc28a9c4056a7b8db87fa37a7e29973a6fde4e23d
+        translation_sha256: 628660a1d53b012068d2a458575f9b64279074736a381c476b6f9d9898ec223d
+        review_evidence: docs/reference/reviews/crm.json
+        review_evidence_sha256: d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc
+      ja-JP:
+        path: docs/crm.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-15 11:38:58
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: dbb748468d43a479f89eacacc28a9c4056a7b8db87fa37a7e29973a6fde4e23d
+        translation_sha256: 1b47b35a5d143ed4cf3c505bd79b0dbbf6c7a8f82eb7c1f37595a7a261b3c8f1
+        review_evidence: docs/reference/reviews/crm.json
+        review_evidence_sha256: d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc
+      ko-KR:
+        path: docs/crm.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-15 11:38:58
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: dbb748468d43a479f89eacacc28a9c4056a7b8db87fa37a7e29973a6fde4e23d
+        translation_sha256: f5d1659bb901b42bb0d36ab99e47374734d98399d264336e8943d07b12cf552f
+        review_evidence: docs/reference/reviews/crm.json
+        review_evidence_sha256: d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc
   - id: srm
     type: module-guide
     module: srm
     owner: srm
     source: docs/srm.md
-    source_sha256: fc10c16cba9f8a04e19a2a4d344b83ee31911ff1d4db9fc83803c9c1e4ce3750
-    dependencies: [api, permissions, portal, saga, screenshots]
+    source_sha256: b5d3f7de4909a61855d7bc0d1e3aebea1df2f88b33f2f753e8c82ab96d26c200
+    dependencies:
+      - api
+      - permissions
+      - portal
+      - saga
+      - screenshots
     translations:
-      en-US: { path: docs/srm.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/srm.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/srm.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/srm.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:13:05
+        review_evidence: docs/reference/reviews/srm-rendering-2026-10-18.json
+        review_evidence_sha256: 05640c88be70dc186d5355196be09cdaef0e3f1ea20a1566193ebc665fa89960
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-15 17:44:37
+          source_sha256: b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03
+          translation_sha256: 1e147b3fbe8dd1d40dec801b18341af562242567b8e7e5710ed8dbe5a215d534
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: b5d3f7de4909a61855d7bc0d1e3aebea1df2f88b33f2f753e8c82ab96d26c200
+        translation_sha256: c4df01c59a3f951cbc01d2172f840b5d9bd8c6d21b72e38bbedce244d3db2457
+      ja-JP:
+        path: docs/srm.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:13:05
+        review_evidence: docs/reference/reviews/srm-rendering-2026-10-18.json
+        review_evidence_sha256: 05640c88be70dc186d5355196be09cdaef0e3f1ea20a1566193ebc665fa89960
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-15 17:44:37
+          source_sha256: b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03
+          translation_sha256: 981822e9042ad22d8dc488a3ece89a5a80e7c56d41da5ac6ac814a7e212d93e1
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: b5d3f7de4909a61855d7bc0d1e3aebea1df2f88b33f2f753e8c82ab96d26c200
+        translation_sha256: 4940e1f357d3689c5bfd461e0950ef2059441750c603bb5d4c6d4bc13bdcbc3f
+      ko-KR:
+        path: docs/srm.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:13:05
+        review_evidence: docs/reference/reviews/srm-rendering-2026-10-18.json
+        review_evidence_sha256: 05640c88be70dc186d5355196be09cdaef0e3f1ea20a1566193ebc665fa89960
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-15 17:44:37
+          source_sha256: b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03
+          translation_sha256: 652a77c1ae78d9c0d5a54e8161e8ef47016f2e7a68a19909b36efca0dabeb58a
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: b5d3f7de4909a61855d7bc0d1e3aebea1df2f88b33f2f753e8c82ab96d26c200
+        translation_sha256: 0e7cff066981da724578e2d4cf79edc23194807bc8bcd1c056c26c4a942926bb
   - id: mq-reliability
     type: module-guide
     module: messaging
     owner: platform
     source: docs/mq-reliability.md
-    source_sha256: cdc95ef7f2a53a2bda23b724e87eb2c9c73376c3942f0a564f94ad46d5eca1eb
-    dependencies: [outbox, api, tenant, observability]
+    source_sha256: 98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957
+    dependencies:
+      - outbox
+      - api
+      - tenant
+      - observability
     translations:
-      en-US: { path: docs/mq-reliability.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/mq-reliability.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/mq-reliability.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/mq-reliability.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:26:49
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957
+        translation_sha256: eea187884c2c5a68ecd3d9d25c80b129cbf9c0be970bfd6d48c8781d01c48c48
+        review_evidence: docs/reference/reviews/mq-reliability.json
+        review_evidence_sha256: b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf
+      ja-JP:
+        path: docs/mq-reliability.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:26:49
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957
+        translation_sha256: dcd2744b4fbb6795ec82ccfb8f683d5970ca4c356c78ef751bda6bf896cfb129
+        review_evidence: docs/reference/reviews/mq-reliability.json
+        review_evidence_sha256: b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf
+      ko-KR:
+        path: docs/mq-reliability.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:26:49
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957
+        translation_sha256: a7e7d806ef2e3cdf372571fac08f2721cf089db01411cd63e8fae6c52a2a52e1
+        review_evidence: docs/reference/reviews/mq-reliability.json
+        review_evidence_sha256: b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf
   - id: docker-deployment
     type: operations-guide
     module: deployment
     owner: operations
     source: docs/docker-deployment.md
-    source_sha256: a14b3f1bc816b6df905e40bff211c47198f4f312930210851ae622c90f8c3e25
-    dependencies: [compose, ports, health-checks, security]
+    source_sha256: eb486492162150ec60c6895a4cfa1e172407a427c7ad0b6402de3419b46a6fc8
+    dependencies:
+      - compose
+      - ports
+      - health-checks
+      - security
     translations:
-      en-US: { path: docs/docker-deployment.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/docker-deployment.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/docker-deployment.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/docker-deployment.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 13:52:35
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: eb486492162150ec60c6895a4cfa1e172407a427c7ad0b6402de3419b46a6fc8
+        translation_sha256: 7c5359e442dc4acbb766f108e4e9573b4f0112346cefc223b0e94ed16e13c1e8
+        review_evidence: docs/reference/reviews/docker-deployment.json
+        review_evidence_sha256: 23d66344ee27e48fabbfdfc81838cdd541370cdfb3b4937d4480976cabcbdf03
+      ja-JP:
+        path: docs/docker-deployment.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 13:52:35
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: eb486492162150ec60c6895a4cfa1e172407a427c7ad0b6402de3419b46a6fc8
+        translation_sha256: 0e29decc6a6f1774b8b777f07875d6f74bf34260b426825ee174c830b085152d
+        review_evidence: docs/reference/reviews/docker-deployment.json
+        review_evidence_sha256: 23d66344ee27e48fabbfdfc81838cdd541370cdfb3b4937d4480976cabcbdf03
+      ko-KR:
+        path: docs/docker-deployment.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 13:52:35
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: eb486492162150ec60c6895a4cfa1e172407a427c7ad0b6402de3419b46a6fc8
+        translation_sha256: 13985e470a1d81b94c8b57c39e45c17fc61bfb72d028f9ed9e68c14dcd8f42a1
+        review_evidence: docs/reference/reviews/docker-deployment.json
+        review_evidence_sha256: 23d66344ee27e48fabbfdfc81838cdd541370cdfb3b4937d4480976cabcbdf03
   - id: observability
     type: operations-guide
     module: platform
     owner: operations
     source: docs/observability.md
-    source_sha256: 67fd84b7ebd737f603f47a702574fa1349d706a4d818c6f51078f47981ca63f6
-    dependencies: [metrics, tracing, logging, alerts, slo, compose]
+    source_sha256: 798c160e3208af2f06a1159df25a2ef4cf42ab6006dcaa4ced3a761a5ff3b0d4
+    dependencies:
+      - metrics
+      - tracing
+      - logging
+      - alerts
+      - slo
+      - compose
     translations:
-      en-US: { path: docs/observability.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/observability.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/observability.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/observability.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 14:54:15
+        review_evidence: docs/reference/reviews/observability.json
+        review_evidence_sha256: acb59ba016afabefe31efc3689c7bfc6f28d717a6f0dfc87f75f6f50bc41f56c
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 12:26:49
+          source_sha256: 998887df82dc25e9657591d65066da7dbaebd8580e2f6a3b82bef21a817de670
+          translation_sha256: 5b8b16f5e27f34b60a9fa0a821eddf4cf5b16a1bd8f8235f8f7e402ec80c39bd
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 798c160e3208af2f06a1159df25a2ef4cf42ab6006dcaa4ced3a761a5ff3b0d4
+        translation_sha256: 671ee3c3f4469630e57f6eeec3c946e65a23e4bbc00cbbc2eac6b1e88a5a3393
+      ja-JP:
+        path: docs/observability.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 14:54:15
+        review_evidence: docs/reference/reviews/observability.json
+        review_evidence_sha256: acb59ba016afabefe31efc3689c7bfc6f28d717a6f0dfc87f75f6f50bc41f56c
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 12:26:49
+          source_sha256: 998887df82dc25e9657591d65066da7dbaebd8580e2f6a3b82bef21a817de670
+          translation_sha256: f7e398a4f8662427af0afc4ad0ab66cc9fc122f7593c9784495b5a8bdefc6ebb
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 798c160e3208af2f06a1159df25a2ef4cf42ab6006dcaa4ced3a761a5ff3b0d4
+        translation_sha256: be1adc0c214c02c9cfc106b410c7716e55001f624433eb9ffafcf0fcc53dbfc8
+      ko-KR:
+        path: docs/observability.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 14:54:15
+        review_evidence: docs/reference/reviews/observability.json
+        review_evidence_sha256: acb59ba016afabefe31efc3689c7bfc6f28d717a6f0dfc87f75f6f50bc41f56c
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 12:26:49
+          source_sha256: 998887df82dc25e9657591d65066da7dbaebd8580e2f6a3b82bef21a817de670
+          translation_sha256: 5e3861135a417174a64b3f479c4bfec5301747a72524d2574b9abc14c0ef4fa8
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 798c160e3208af2f06a1159df25a2ef4cf42ab6006dcaa4ced3a761a5ff3b0d4
+        translation_sha256: 56bb1d99839d43dca6a81500afc1ab77e7a4037dbe0c61e092c9f2e10b8e6eaa
   - id: crm-design
     type: design
     module: crm
     owner: crm
     source: docs/design/crm-design.md
-    source_sha256: 2b85ffc5a003871de4cc2f7f0331f26cd764f122e1fedd64498404b5cd03fd42
-    dependencies: [schema, api, permissions]
+    source_sha256: 07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81
+    dependencies:
+      - schema
+      - api
+      - permissions
     translations:
-      en-US: { path: docs/design/crm-design.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/design/crm-design.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/design/crm-design.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/design/crm-design.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 08:04:41
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81
+        translation_sha256: 98edfec9d349041f5e97170ab85d8fff278d151b71bb30aa3f327ddf9c4845bd
+        review_evidence: docs/reference/reviews/crm-design-mermaid-entities-2026-10-18.json
+        review_evidence_sha256: 0e558e1d9dd019579e685b617fd525acc532f5e988f22409314bcd3c9622cc95
+      ja-JP:
+        path: docs/design/crm-design.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 08:24:10
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81
+        translation_sha256: 9413cd9e1d8914c56f08b713913c39bb4da2e0c609d99ff61771cd88816b48a4
+        review_evidence: docs/reference/reviews/crm-design.json
+        review_evidence_sha256: 4c2639157723a5d39f96f173b49714c7347501b13d15725daa8aceaea373ad37
+      ko-KR:
+        path: docs/design/crm-design.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 08:24:10
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81
+        translation_sha256: 100f82cb2378a9e59c9f3f269d8635c6dd69563acf8c5e33c5febb9bad821feb
+        review_evidence: docs/reference/reviews/crm-design.json
+        review_evidence_sha256: 4c2639157723a5d39f96f173b49714c7347501b13d15725daa8aceaea373ad37
   - id: srm-design
     type: design
     module: srm
     owner: srm
     source: docs/design/srm-design.md
-    source_sha256: ceeb22198758d1561a4fdfa4984c6f415ebb7bf76d50a18778327435b5065c9b
-    dependencies: [schema, api, permissions, portal-saga]
+    source_sha256: 84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0
+    dependencies:
+      - schema
+      - api
+      - permissions
+      - portal-saga
     translations:
-      en-US: { path: docs/design/srm-design.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/design/srm-design.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/design/srm-design.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/design/srm-design.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 08:04:41
+        review_evidence: docs/reference/reviews/srm-design-mermaid-entities-2026-10-18.json
+        review_evidence_sha256: cb391ef05a70723f2f6ffa725af16b8e205833170f8354b7bb3f2f0de911697e
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 11:58:47
+          source_sha256: 401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211
+          translation_sha256: b435531984cbcc01647378182f1e04a5a36b59912fa2243656040c380261fb5d
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0
+        translation_sha256: 47e332ffdddd31eaa8e61eef042d645a88d61bdbf0c20ef7a4effd00068c91ed
+      ja-JP:
+        path: docs/design/srm-design.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 01:31:44
+        review_evidence: docs/reference/reviews/srm-design-ownership-2026-10-18.json
+        review_evidence_sha256: 2ada498f2082e7d1bcd08a64c8768bcd7a3e826d253b89ff5a4a7ad98684d99f
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 11:58:47
+          source_sha256: 401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211
+          translation_sha256: 48e72ba2e7c4cf8fb7c290c74b44ca8263025d3f5d9fa6a6976684a22896a8fd
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0
+        translation_sha256: 83aba64dc5c68d99025a32f01cfe090978b545caf951912f7194abdeb35b2ffa
+      ko-KR:
+        path: docs/design/srm-design.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 01:31:44
+        review_evidence: docs/reference/reviews/srm-design-ownership-2026-10-18.json
+        review_evidence_sha256: 2ada498f2082e7d1bcd08a64c8768bcd7a3e826d253b89ff5a4a7ad98684d99f
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 11:58:47
+          source_sha256: 401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211
+          translation_sha256: a097b26813ddb1076bd04c076e0ea74545ac3f9b2161d6054a887c2dedc56990
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0
+        translation_sha256: e8d79e62bceda2a5c2d4fb6ba4bc5b0f7c81421fc851553143ea5b63d4cc0081
   - id: procurement-design
     type: design
     module: procurement
     owner: procurement
     source: docs/design/procurement-design.md
-    source_sha256: 46b8f10e8e393b6a2789306fd6d645ed13af050e69d44f8bffa041e35f74c8f6
-    dependencies: [schema, api, permissions, workflow]
+    source_sha256: 57521465bcd8e8779d9465ca36a6f9bb89db50800a62c2d3cbe8a05ef6041a49
+    dependencies:
+      - schema
+      - api
+      - permissions
+      - workflow
     translations:
-      en-US: { path: docs/design/procurement-design.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/design/procurement-design.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/design/procurement-design.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/design/procurement-design.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:13:05
+        review_evidence: docs/reference/reviews/procurement-design-rendering-2026-10-18.json
+        review_evidence_sha256: b490e9df14fdc9550b757df763342e30d64424e487497e0f080c904d9ec295e5
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 08:42:31
+          source_sha256: 06735bfc48c6082fb9e96e92d80c62c4a5be24f40659500acee7565233c47303
+          translation_sha256: 54a7800021fc41c6845735fdb24236d30ed03871993298c9a7088b6946f53574
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 57521465bcd8e8779d9465ca36a6f9bb89db50800a62c2d3cbe8a05ef6041a49
+        translation_sha256: e4a755c6e1d46c9ed930ba57d241b82bb1be7ad5722875e56e328404ba662773
+      ja-JP:
+        path: docs/design/procurement-design.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:13:05
+        review_evidence: docs/reference/reviews/procurement-design-rendering-2026-10-18.json
+        review_evidence_sha256: b490e9df14fdc9550b757df763342e30d64424e487497e0f080c904d9ec295e5
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 08:42:31
+          source_sha256: 06735bfc48c6082fb9e96e92d80c62c4a5be24f40659500acee7565233c47303
+          translation_sha256: 3090ee93a6939a5281c7302b3e1285589a5091021433ed48d7d037db0c78a427
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 57521465bcd8e8779d9465ca36a6f9bb89db50800a62c2d3cbe8a05ef6041a49
+        translation_sha256: 218d72af5c9599813f59ffedb4509322fce149605455d9c84301a5343853bc5d
+      ko-KR:
+        path: docs/design/procurement-design.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:13:05
+        review_evidence: docs/reference/reviews/procurement-design-rendering-2026-10-18.json
+        review_evidence_sha256: b490e9df14fdc9550b757df763342e30d64424e487497e0f080c904d9ec295e5
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-16 08:42:31
+          source_sha256: 06735bfc48c6082fb9e96e92d80c62c4a5be24f40659500acee7565233c47303
+          translation_sha256: d6118959cb44e49815d72db4404966d5541946cb96a07ae9b08e8fb5e98ac8d9
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 57521465bcd8e8779d9465ca36a6f9bb89db50800a62c2d3cbe8a05ef6041a49
+        translation_sha256: 9e29a8cc31a0250cf47917a225fdb4c0073f547d63d8ce1e12d2d5aa3608ba47
   - id: asset-design
     type: design
     module: asset
     owner: asset
     source: docs/design/asset-design.md
-    source_sha256: bba9461126d85d919c83fa80fe235987a9e911740bebb5faf0ad5aa144bb6261
-    dependencies: [schema, api, permissions, workflow, procurement-events]
+    source_sha256: 65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620
+    dependencies:
+      - schema
+      - api
+      - permissions
+      - workflow
+      - procurement-events
     translations:
-      en-US: { path: docs/design/asset-design.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/design/asset-design.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/design/asset-design.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/design/asset-design.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 08:04:41
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620
+        translation_sha256: 2cc59de91959244499a2b0e8d1b4f0cef04b41efa48b27dd0a41da7d0786f084
+        review_evidence: docs/reference/reviews/asset-design-mermaid-entities-2026-10-18.json
+        review_evidence_sha256: 6e4176698ac32976972c609ba3142519fe9ee6680484af308ec2ef200b8927e2
+      ja-JP:
+        path: docs/design/asset-design.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-16 09:22:57
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620
+        translation_sha256: 01f477a00ac812938f37e7c1513c274976acb26d75f2a520f0bd3ffdf7c320e0
+        review_evidence: docs/reference/reviews/asset-design.json
+        review_evidence_sha256: fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747
+      ko-KR:
+        path: docs/design/asset-design.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-16 09:22:57
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620
+        translation_sha256: c0fcbf49b441379f3e76a324ed58606b0cb63841c2431cf99761cefb91b561f5
+        review_evidence: docs/reference/reviews/asset-design.json
+        review_evidence_sha256: fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747
   - id: preset-quick-selection
     type: user-guide
     module: scaffold
     owner: architecture
     source: docs/preset-quick-selection.md
-    source_sha256: 592114d6a6d3814e91ff8cd63f492a9ddbceac07623e9ace6cbc6da4d60478f4
-    dependencies: [module-catalog, presets, generator]
+    source_sha256: 4b3af45e9711021dbefcd6ee8fbd9ac08cda49c6b769954baade08a415605203
+    dependencies:
+      - module-catalog
+      - presets
+      - generator
     translations:
-      en-US: { path: docs/preset-quick-selection.en.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:36.838Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 4e30cd953bdac78388bea90aa513710fa7899085bc392bff82160ea4c80b0351 }
-      ja-JP: { path: docs/preset-quick-selection.jp.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:37.756Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 46c284edcae03c125c0a516758365a42e69ca661bb53de124b1e918fe5de79e4 }
-      ko-KR: { path: docs/preset-quick-selection.kr.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:38.744Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: e3a4caca8ffc5179d9a224502c12970c8c783f001712ada9e0b4b4e29cf9a1d7 }
+      en-US:
+        path: docs/preset-quick-selection.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:36.838Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 4b3af45e9711021dbefcd6ee8fbd9ac08cda49c6b769954baade08a415605203
+        translation_sha256: 2d87501c832122ff5d987f69ff8dcdbe0ccb04b76edccb4307ad04f89658d33d
+        review_evidence: docs/reference/reviews/preset-quick-selection.json
+        review_evidence_sha256: 859dc592a83011a9bf3b65758a3b20058017b48a31e37866513a9dd217a79f00
+      ja-JP:
+        path: docs/preset-quick-selection.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:37.756Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 4b3af45e9711021dbefcd6ee8fbd9ac08cda49c6b769954baade08a415605203
+        translation_sha256: a84b66955934b134f80f3d6a7f4dd31b3bb3558b38df8aff6b9946b1451f7f32
+        review_evidence: docs/reference/reviews/preset-quick-selection.json
+        review_evidence_sha256: 859dc592a83011a9bf3b65758a3b20058017b48a31e37866513a9dd217a79f00
+      ko-KR:
+        path: docs/preset-quick-selection.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:38.744Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 4b3af45e9711021dbefcd6ee8fbd9ac08cda49c6b769954baade08a415605203
+        translation_sha256: 6a0b7556b23ab40a1c3efc1c4fdcab158af616720dfbf1801953714b82f2e68d
+        review_evidence: docs/reference/reviews/preset-quick-selection.json
+        review_evidence_sha256: 859dc592a83011a9bf3b65758a3b20058017b48a31e37866513a9dd217a79f00
   - id: preset-maintenance
     type: maintenance-guide
     module: scaffold
     owner: architecture
     source: docs/preset-maintenance.md
-    source_sha256: c168b62c7bb1f1f68634fceb24fdbd72cf29940a8abd1eb566adfdb551b94ba4
-    dependencies: [module-catalog, schemas, generator, golden-matrix]
+    source_sha256: d174bfe252aeba2f1129544f3a1fd2bca8700d1bc621e26ef1111b7420e13cc0
+    dependencies:
+      - module-catalog
+      - schemas
+      - generator
+      - golden-matrix
     translations:
-      en-US: { path: docs/preset-maintenance.en.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:27.970Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 659fe439c44e57d119c7e43205c288e1411a0bc47fbf8704ca28df4e51070af5 }
-      ja-JP: { path: docs/preset-maintenance.jp.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T08:10:23.650Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: ca625b94cb7dfb7a7d189b36bc9863c304e534be882d37b20e39224cb8016839 }
-      ko-KR: { path: docs/preset-maintenance.kr.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T08:10:23.663Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: d64c8f2ec8eaafe173802a3c6eebdc6bc3e4252d2af3bd7a1624b3d5f2d07467 }
+      en-US:
+        path: docs/preset-maintenance.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:27.970Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: d174bfe252aeba2f1129544f3a1fd2bca8700d1bc621e26ef1111b7420e13cc0
+        translation_sha256: 931cff478bc1ede771eb000b9c76ccec03d3a43dd39dc010ba7cac68c737c64b
+        review_evidence: docs/reference/reviews/preset-maintenance.json
+        review_evidence_sha256: f7b5190026c9e83577d16b5eb91d2e56fed8b85561adb88176d155f0da21635f
+      ja-JP:
+        path: docs/preset-maintenance.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T08:10:23.650Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: d174bfe252aeba2f1129544f3a1fd2bca8700d1bc621e26ef1111b7420e13cc0
+        translation_sha256: 26cc45ce91854096c3eef647abfc66da1706fc5370ad861f0658cf015a918101
+        review_evidence: docs/reference/reviews/preset-maintenance.json
+        review_evidence_sha256: f7b5190026c9e83577d16b5eb91d2e56fed8b85561adb88176d155f0da21635f
+      ko-KR:
+        path: docs/preset-maintenance.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T08:10:23.663Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: d174bfe252aeba2f1129544f3a1fd2bca8700d1bc621e26ef1111b7420e13cc0
+        translation_sha256: 2bf0184381b1e090cbf59d11ce7d0602fd828fad07a47bd74dd8b72ae5f664b0
+        review_evidence: docs/reference/reviews/preset-maintenance.json
+        review_evidence_sha256: f7b5190026c9e83577d16b5eb91d2e56fed8b85561adb88176d155f0da21635f
   - id: preset-dependency-matrix
     type: generated-reference
     module: scaffold
     owner: architecture
     source: docs/preset-dependency-matrix.md
     source_sha256: 6b63121f029afe65ee2a8ee46520d4266d93d33682f4bb92d7b19a2481f39339
-    dependencies: [module-catalog, presets]
+    dependencies:
+      - module-catalog
+      - presets
     translations:
-      en-US: { path: docs/preset-dependency-matrix.en.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T08:10:23.674Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: fba71d451f35875f16927c41335b2ea66b5dd718ed716fed253fd984298db808 }
-      ja-JP: { path: docs/preset-dependency-matrix.jp.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T08:10:23.685Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 3d8d14f3ffa96e755cd55c8376ebdf49490f2d4fd3071689915f252f25b6a506 }
-      ko-KR: { path: docs/preset-dependency-matrix.kr.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T08:10:23.696Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 212163ba9f5970df561f50a63c94d5b38f5f988cd949ea59a25273efb6178bdd }
+      en-US:
+        path: docs/preset-dependency-matrix.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T08:10:23.674Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 6b63121f029afe65ee2a8ee46520d4266d93d33682f4bb92d7b19a2481f39339
+        translation_sha256: fba71d451f35875f16927c41335b2ea66b5dd718ed716fed253fd984298db808
+        review_evidence: docs/reference/reviews/preset-dependency-matrix.json
+        review_evidence_sha256: 6114a68f23c7a01f22cf8c1f40d64ed25ee73077d2d3b2ac5963cdadbc586cff
+      ja-JP:
+        path: docs/preset-dependency-matrix.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T08:10:23.685Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 6b63121f029afe65ee2a8ee46520d4266d93d33682f4bb92d7b19a2481f39339
+        translation_sha256: 3d8d14f3ffa96e755cd55c8376ebdf49490f2d4fd3071689915f252f25b6a506
+        review_evidence: docs/reference/reviews/preset-dependency-matrix.json
+        review_evidence_sha256: 6114a68f23c7a01f22cf8c1f40d64ed25ee73077d2d3b2ac5963cdadbc586cff
+      ko-KR:
+        path: docs/preset-dependency-matrix.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T08:10:23.696Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 6b63121f029afe65ee2a8ee46520d4266d93d33682f4bb92d7b19a2481f39339
+        translation_sha256: 212163ba9f5970df561f50a63c94d5b38f5f988cd949ea59a25273efb6178bdd
+        review_evidence: docs/reference/reviews/preset-dependency-matrix.json
+        review_evidence_sha256: 6114a68f23c7a01f22cf8c1f40d64ed25ee73077d2d3b2ac5963cdadbc586cff
   - id: custom-preset-tutorial
     type: user-guide
     module: scaffold
     owner: architecture
     source: docs/custom-preset-tutorial.md
-    source_sha256: d435a5d976a5445ce24b92f0fdfbbe248646c593f1bf4b017eac508291ae8cb2
-    dependencies: [preset-schema, dependency-closure, generator]
+    source_sha256: 52b76d03e3986d172a66babe70306bb5fac79edd6b9dd702ae7ceb8312ca1991
+    dependencies:
+      - preset-schema
+      - dependency-closure
+      - generator
     translations:
-      en-US: { path: docs/custom-preset-tutorial.en.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:30.989Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: b7b161968655edf2cf5e28653055fe40d2b7243f76103fbbb8513a4148f8f4a1 }
-      ja-JP: { path: docs/custom-preset-tutorial.jp.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:31.986Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: b2b8baed1bdf24661a1dd15db5e058b466e78f7118c22745e0f5d7530b91e24a }
-      ko-KR: { path: docs/custom-preset-tutorial.kr.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:32.945Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: fddb9371691d6c6ae8d4530320cfa291b8553809160724408e33f891245688ad }
+      en-US:
+        path: docs/custom-preset-tutorial.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:54:18
+        previous_review:
+          path: docs/custom-preset-tutorial.en.md
+          status: synchronized
+          reviewed_at: 2026-10-13 12:17:37
+          previous_review:
+            reviewer: Codex
+            reviewed_at: 2026-09-30T17:59:30.989Z
+            review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+            reason: Historical automated review is not evidence of human review
+          reviewer: Codex
+          review_type: AI_REVIEW
+          reviewed_source_sha256: cca5aecdc8a0c0082e089790ecb0896be8f5c4e3b2f2a5907573d2e869bb7f82
+          translation_sha256: f7eac9e2f38a6f2cde63a7ba1e3f8ba04e36c06a2173419b6faacc196f798da7
+          review_evidence: docs/reference/reviews/custom-preset-tutorial.json
+          review_evidence_sha256: bd811722d61b32e5aad9ad9d16a9861d9b57180c5372e0fbbda7dedf101897d7
+          reason: Correct XXL-JOB variable names to actual Compose and .env.example keys
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 52b76d03e3986d172a66babe70306bb5fac79edd6b9dd702ae7ceb8312ca1991
+        translation_sha256: 46fed5eb4474903bcf7a7596759e94a9c5833b54c60b7d784dd3c41e7fda3282
+        review_evidence: docs/reference/reviews/custom-preset-tutorial.json
+        review_evidence_sha256: a3974c5d70cb1f631a0d5f8407b8c580e01cb28298d4b243df3244eb9244d14a
+      ja-JP:
+        path: docs/custom-preset-tutorial.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:54:18
+        previous_review:
+          path: docs/custom-preset-tutorial.jp.md
+          status: synchronized
+          reviewed_at: 2026-10-13 12:17:37
+          previous_review:
+            reviewer: Codex
+            reviewed_at: 2026-09-30T17:59:31.986Z
+            review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+            reason: Historical automated review is not evidence of human review
+          reviewer: Codex
+          review_type: AI_REVIEW
+          reviewed_source_sha256: cca5aecdc8a0c0082e089790ecb0896be8f5c4e3b2f2a5907573d2e869bb7f82
+          translation_sha256: 117c117460cd30dc53d4a11205a7ff6b30c2df06cda7f6f4bb0a7d51bfb139e6
+          review_evidence: docs/reference/reviews/custom-preset-tutorial.json
+          review_evidence_sha256: bd811722d61b32e5aad9ad9d16a9861d9b57180c5372e0fbbda7dedf101897d7
+          reason: Correct XXL-JOB variable names to actual Compose and .env.example keys
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 52b76d03e3986d172a66babe70306bb5fac79edd6b9dd702ae7ceb8312ca1991
+        translation_sha256: 0a6f637d6bf5b0e047226514da4089f2a65fd640389608c5bac646a70cc3c97d
+        review_evidence: docs/reference/reviews/custom-preset-tutorial.json
+        review_evidence_sha256: a3974c5d70cb1f631a0d5f8407b8c580e01cb28298d4b243df3244eb9244d14a
+      ko-KR:
+        path: docs/custom-preset-tutorial.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:54:18
+        previous_review:
+          path: docs/custom-preset-tutorial.kr.md
+          status: synchronized
+          reviewed_at: 2026-10-13 12:17:37
+          previous_review:
+            reviewer: Codex
+            reviewed_at: 2026-09-30T17:59:32.945Z
+            review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+            reason: Historical automated review is not evidence of human review
+          reviewer: Codex
+          review_type: AI_REVIEW
+          reviewed_source_sha256: cca5aecdc8a0c0082e089790ecb0896be8f5c4e3b2f2a5907573d2e869bb7f82
+          translation_sha256: 8a2bd94241a63671747febd82bad34f812621ab04554080ecb54e724c06e3699
+          review_evidence: docs/reference/reviews/custom-preset-tutorial.json
+          review_evidence_sha256: bd811722d61b32e5aad9ad9d16a9861d9b57180c5372e0fbbda7dedf101897d7
+          reason: Correct XXL-JOB variable names to actual Compose and .env.example keys
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 52b76d03e3986d172a66babe70306bb5fac79edd6b9dd702ae7ceb8312ca1991
+        translation_sha256: 4ece414927a3a04eb2cf742b9b144d3a176c390baa145d033a3af3f258f36278
+        review_evidence: docs/reference/reviews/custom-preset-tutorial.json
+        review_evidence_sha256: a3974c5d70cb1f631a0d5f8407b8c580e01cb28298d4b243df3244eb9244d14a
   - id: preset-upgrade-guide
     type: upgrade-guide
     module: scaffold
     owner: architecture
     source: docs/preset-upgrade-guide.md
     source_sha256: 2991c5aaebf3825dcfee91248a7d80ff273d9f5080229b7a051898495e692bd4
-    dependencies: [scaffold-lock, compatibility, database-upgrade]
+    dependencies:
+      - scaffold-lock
+      - compatibility
+      - database-upgrade
     translations:
-      en-US: { path: docs/preset-upgrade-guide.en.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:33.854Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 4249c66abddfbf133461eedfc17f55d13b7476a0354ea101456f3f7ed9df53a8 }
-      ja-JP: { path: docs/preset-upgrade-guide.jp.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:34.850Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 97cc097158338aa0119f370addab883c9b7e1f91f9ef666253a72f690d812b03 }
-      ko-KR: { path: docs/preset-upgrade-guide.kr.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:35.814Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 83dbc87cf2ef3770061ef129b9f524cd035bcaca5d9f5dc4b9c83af0aa148ea0 }
-
+      en-US:
+        path: docs/preset-upgrade-guide.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:33.854Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 2991c5aaebf3825dcfee91248a7d80ff273d9f5080229b7a051898495e692bd4
+        translation_sha256: 4249c66abddfbf133461eedfc17f55d13b7476a0354ea101456f3f7ed9df53a8
+        review_evidence: docs/reference/reviews/preset-upgrade-guide.json
+        review_evidence_sha256: 16c96165b95bd47b6f58b5f5e4333cbfbeabee6c25b6f3d7fc593dfe267aeb1b
+      ja-JP:
+        path: docs/preset-upgrade-guide.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:34.850Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 2991c5aaebf3825dcfee91248a7d80ff273d9f5080229b7a051898495e692bd4
+        translation_sha256: c3e235311b35701b81484d7134f73df48f7331fe346a8285e857d746550f9362
+        review_evidence: docs/reference/reviews/preset-upgrade-guide.json
+        review_evidence_sha256: 16c96165b95bd47b6f58b5f5e4333cbfbeabee6c25b6f3d7fc593dfe267aeb1b
+      ko-KR:
+        path: docs/preset-upgrade-guide.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:35.814Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 2991c5aaebf3825dcfee91248a7d80ff273d9f5080229b7a051898495e692bd4
+        translation_sha256: 83dbc87cf2ef3770061ef129b9f524cd035bcaca5d9f5dc4b9c83af0aa148ea0
+        review_evidence: docs/reference/reviews/preset-upgrade-guide.json
+        review_evidence_sha256: 16c96165b95bd47b6f58b5f5e4333cbfbeabee6c25b6f3d7fc593dfe267aeb1b
   - id: guide-quick-start
     type: user-guide
     module: platform
     owner: documentation
     source: docs/guides/quick-start.md
-    source_sha256: 15dfceb25ba25ca4a122a3a22fd41b268c8e538b53ba78393e01042bf2dcb299
-    dependencies: [compose, presets, authentication, screenshots]
+    source_sha256: fa594d5972aba1be8c313d5984907f0ed34e29750126d3138e8a221524894fd3
+    dependencies:
+      - compose
+      - presets
+      - authentication
+      - screenshots
     translations:
-      en-US: { path: docs/guides/quick-start.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/guides/quick-start.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/guides/quick-start.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/guides/quick-start.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:54:18
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: fa594d5972aba1be8c313d5984907f0ed34e29750126d3138e8a221524894fd3
+        translation_sha256: 122502982270eeb36a03acbd2925f871f5c0b2907d36c7191f3ed3f4d9ebef20
+        review_evidence: docs/reference/reviews/guide-quick-start.json
+        review_evidence_sha256: 540e85f8fa3e6edeb08ac387697e606560c74153a89bd0196f5d2279c3730567
+      ja-JP:
+        path: docs/guides/quick-start.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:54:18
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: fa594d5972aba1be8c313d5984907f0ed34e29750126d3138e8a221524894fd3
+        translation_sha256: b5008e0fe5efaa1cad14c0950e39e08776fd3fc43c6f78bea426e760bba91bf7
+        review_evidence: docs/reference/reviews/guide-quick-start.json
+        review_evidence_sha256: 540e85f8fa3e6edeb08ac387697e606560c74153a89bd0196f5d2279c3730567
+      ko-KR:
+        path: docs/guides/quick-start.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:54:18
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: fa594d5972aba1be8c313d5984907f0ed34e29750126d3138e8a221524894fd3
+        translation_sha256: d46acb4bfab3b256688d9bddfd93801d473223bee8f7ff613aba393d23cdaf16
+        review_evidence: docs/reference/reviews/guide-quick-start.json
+        review_evidence_sha256: 540e85f8fa3e6edeb08ac387697e606560c74153a89bd0196f5d2279c3730567
   - id: guide-authentication
     type: user-guide
     module: authentication
     owner: auth
     source: docs/guides/authentication.md
-    source_sha256: 6f654b5f7d5b07efae1c4800e351db0079148418f3078a8f933f99ee124e0764
-    dependencies: [captcha, social-login, device-code, tenant, screenshots]
+    source_sha256: e395fe11bda18af88f391049eed7e8296bf4554071bbe6678000fd4223439323
+    dependencies:
+      - captcha
+      - social-login
+      - device-code
+      - tenant
+      - screenshots
     translations:
-      en-US: { path: docs/guides/authentication.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/guides/authentication.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/guides/authentication.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/guides/authentication.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 08:50:36
+        review_evidence: docs/reference/reviews/guide-authentication-oauth-placeholders-2026-10-18.json
+        review_evidence_sha256: 6fa24b68b2fd1126736f62290e5d2e29f9e54b14c36fbf2de4320dbed1715e7f
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 12:54:18
+          source_sha256: 127d2a8396618e2dbb787d9a72e838cf26991b719bb8a9c81a93d6e4d04cf09f
+          translation_sha256: 3529175d0469aae8bdc9b6a79db6482db2dbed89141ef68db466cf483bb4630a
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: e395fe11bda18af88f391049eed7e8296bf4554071bbe6678000fd4223439323
+        translation_sha256: bd4da3cc04c76df61684528ebc1bee95bb537f2c56ef65a01da0cc766c2c24b8
+      ja-JP:
+        path: docs/guides/authentication.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 08:50:36
+        review_evidence: docs/reference/reviews/guide-authentication-oauth-placeholders-2026-10-18.json
+        review_evidence_sha256: 6fa24b68b2fd1126736f62290e5d2e29f9e54b14c36fbf2de4320dbed1715e7f
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 12:54:18
+          source_sha256: 127d2a8396618e2dbb787d9a72e838cf26991b719bb8a9c81a93d6e4d04cf09f
+          translation_sha256: d4de413530037d4f8ee92d704cf2daff48e6d75fe2f21da35374ffd5ed9120b8
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: e395fe11bda18af88f391049eed7e8296bf4554071bbe6678000fd4223439323
+        translation_sha256: 99e13ad6169c66519895dc6b7cd879ac7336479729f2674c86e988055503286f
+      ko-KR:
+        path: docs/guides/authentication.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 08:50:36
+        review_evidence: docs/reference/reviews/guide-authentication-oauth-placeholders-2026-10-18.json
+        review_evidence_sha256: 6fa24b68b2fd1126736f62290e5d2e29f9e54b14c36fbf2de4320dbed1715e7f
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 12:54:18
+          source_sha256: 127d2a8396618e2dbb787d9a72e838cf26991b719bb8a9c81a93d6e4d04cf09f
+          translation_sha256: cd4dd39bfa5a6deb69b666e06d9a536a956204ce89fb092054580a6d7dcf1ac1
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: e395fe11bda18af88f391049eed7e8296bf4554071bbe6678000fd4223439323
+        translation_sha256: 2765f5d06f97c268cbd485473f652ba6f25f23e8b4b181cf2f2c1cbbeded6461
   - id: guide-permissions
     type: user-guide
     module: security
     owner: auth
     source: docs/guides/permissions.md
-    source_sha256: 15857fcc5dd5013d773314f8d36bfc273884d56046076c536b0fc6d8a73e9e2b
-    dependencies: [menus, roles, functional-permission, data-scope]
+    source_sha256: 53bb104afd5d1c4500777730018ef5c01bb4f69f6a2a2ec3d4d95fbaedf2ccc9
+    dependencies:
+      - menus
+      - roles
+      - functional-permission
+      - data-scope
     translations:
-      en-US: { path: docs/guides/permissions.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/guides/permissions.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/guides/permissions.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/guides/permissions.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 13:10:29
+        review_evidence: docs/reference/reviews/guide-permissions-core-evidence-2026-10-18.json
+        review_evidence_sha256: ed2205034e99c24ff3023f841d23011068db417d37769f26375466e9efd8e7d2
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-17 18:58:51
+          source_sha256: 8878710f45b3aab84590c57c5539a6f321e5a31c168de1f7e37edcfdf0a76ad2
+          translation_sha256: 1a2d8f16bafc3eda82789bb89c8d45995e1d0cd66744592f73f71a9f3bc2fa4a
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 53bb104afd5d1c4500777730018ef5c01bb4f69f6a2a2ec3d4d95fbaedf2ccc9
+        translation_sha256: e200e8db0a237b5c5c4ea4fac0934fb06c5d7baa676ebb8fe618291b7dbb55f0
+      ja-JP:
+        path: docs/guides/permissions.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 13:10:29
+        review_evidence: docs/reference/reviews/guide-permissions-core-evidence-2026-10-18.json
+        review_evidence_sha256: ed2205034e99c24ff3023f841d23011068db417d37769f26375466e9efd8e7d2
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-17 18:58:51
+          source_sha256: 8878710f45b3aab84590c57c5539a6f321e5a31c168de1f7e37edcfdf0a76ad2
+          translation_sha256: 8ad4b86af083b4c6667656ad882e559002629607520632551b5680572d588e22
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 53bb104afd5d1c4500777730018ef5c01bb4f69f6a2a2ec3d4d95fbaedf2ccc9
+        translation_sha256: cff8e18689ffe9c747cf462da9e40de10f29ab3c72feb1f57c6217c7126f6557
+      ko-KR:
+        path: docs/guides/permissions.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 13:10:29
+        review_evidence: docs/reference/reviews/guide-permissions-core-evidence-2026-10-18.json
+        review_evidence_sha256: ed2205034e99c24ff3023f841d23011068db417d37769f26375466e9efd8e7d2
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-17 18:58:51
+          source_sha256: 8878710f45b3aab84590c57c5539a6f321e5a31c168de1f7e37edcfdf0a76ad2
+          translation_sha256: 733dc2419568a4dc20e2d905577fe2d6ac5e3307e9ee8babf450dcd7dffc710b
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 53bb104afd5d1c4500777730018ef5c01bb4f69f6a2a2ec3d4d95fbaedf2ccc9
+        translation_sha256: 05507b4d61e8157d4533285defc14d24cf44402a4ecb913e3191c963171c5fdd
   - id: guide-system-security-audit
     type: user-guide
     module: security
     owner: operations
     source: docs/guides/system-security-audit.md
-    source_sha256: 11b09f799014c25a5f4aa75dcdc2fb1a54dbf16cd5a04c589b34c176d220393d
-    dependencies: [oauth2, xss, audit, mq, observability]
+    source_sha256: ecd3f71912186f95ccb6ae8d674efcaa3ea7d758a954e7f3dc13eeab65ec1ff9
+    dependencies:
+      - oauth2
+      - xss
+      - audit
+      - mq
+      - observability
     translations:
-      en-US: { path: docs/guides/system-security-audit.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/guides/system-security-audit.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/guides/system-security-audit.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/guides/system-security-audit.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 18:58:51
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: ecd3f71912186f95ccb6ae8d674efcaa3ea7d758a954e7f3dc13eeab65ec1ff9
+        translation_sha256: 51496d9394404ad38c83b5a7e74b24a2f3f107829acc10be772aca296be9e162
+        review_evidence: docs/reference/reviews/guide-system-security-audit.json
+        review_evidence_sha256: d864693562c9635ecb50077c2045b362a7db408ea20a12ddc121cd5b91bce851
+      ja-JP:
+        path: docs/guides/system-security-audit.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 18:58:51
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: ecd3f71912186f95ccb6ae8d674efcaa3ea7d758a954e7f3dc13eeab65ec1ff9
+        translation_sha256: 900afb45711ad9e00448725c02b2618c099da800b87cf0fa6522b07f89a1fb65
+        review_evidence: docs/reference/reviews/guide-system-security-audit.json
+        review_evidence_sha256: d864693562c9635ecb50077c2045b362a7db408ea20a12ddc121cd5b91bce851
+      ko-KR:
+        path: docs/guides/system-security-audit.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 18:58:51
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: ecd3f71912186f95ccb6ae8d674efcaa3ea7d758a954e7f3dc13eeab65ec1ff9
+        translation_sha256: 40f1b0b492ee53b096c18514c59651c38059209447343dbdca04a8b4ee10aa8a
+        review_evidence: docs/reference/reviews/guide-system-security-audit.json
+        review_evidence_sha256: d864693562c9635ecb50077c2045b362a7db408ea20a12ddc121cd5b91bce851
   - id: guide-workflow-approval
     type: user-guide
     module: workflow
     owner: workflow
     source: docs/guides/workflow-approval.md
-    source_sha256: ff4df819c13cf3a499a5f92ab3aadea11195de632c6b157d7f34b5ebf882aae9
-    dependencies: [bpmn, candidates, publishing, approval, screenshots]
+    source_sha256: 43e51b029befd4b3655908d7c076b87b230b8b5df2dd12f74bdfc0e3fc5e005a
+    dependencies:
+      - bpmn
+      - candidates
+      - publishing
+      - approval
+      - screenshots
     translations:
-      en-US: { path: docs/guides/workflow-approval.en.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:42.473Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 87e498a7eae6351a3a9bf5c84a144d9a7a75368f316bbac56f01dd83b3eac186 }
-      ja-JP: { path: docs/guides/workflow-approval.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/guides/workflow-approval.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/guides/workflow-approval.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 19:33:57
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:42.473Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 43e51b029befd4b3655908d7c076b87b230b8b5df2dd12f74bdfc0e3fc5e005a
+        translation_sha256: bece54dcb5f504f3c8d92c895c90a4f352746831774a1817d9adfbad7b84e136
+        review_evidence: docs/reference/reviews/guide-workflow-approval.json
+        review_evidence_sha256: 9dcb32dc1a9d52d5915fc7771db176aa3c25baeff6aa23951221e9d4a7bfe6bc
+      ja-JP:
+        path: docs/guides/workflow-approval.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 19:33:57
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 43e51b029befd4b3655908d7c076b87b230b8b5df2dd12f74bdfc0e3fc5e005a
+        translation_sha256: 98539ef629cde8866c46bbeee444330bcc068eff5cfda7819ce713d47336d7c0
+        review_evidence: docs/reference/reviews/guide-workflow-approval.json
+        review_evidence_sha256: 9dcb32dc1a9d52d5915fc7771db176aa3c25baeff6aa23951221e9d4a7bfe6bc
+      ko-KR:
+        path: docs/guides/workflow-approval.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 19:33:57
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 43e51b029befd4b3655908d7c076b87b230b8b5df2dd12f74bdfc0e3fc5e005a
+        translation_sha256: 2a7f2aab55aecce168901adc02e8d54e0ca647ede57a93ebf19cbc7146a648f6
+        review_evidence: docs/reference/reviews/guide-workflow-approval.json
+        review_evidence_sha256: 9dcb32dc1a9d52d5915fc7771db176aa3c25baeff6aa23951221e9d4a7bfe6bc
   - id: guide-scheduling
     type: user-guide
     module: scheduling
     owner: base
     source: docs/guides/scheduling.md
-    source_sha256: 9720091cafc6bf94a5d01315cdcfee3916bac5b9ca6e1fa980c472bb9c6fc363
-    dependencies: [xxl-job, job-type, dynamic-schema, screenshots]
+    source_sha256: 064a93470c559cb1809a358ac9c8aa6a32ddcc088e769a462c1434df1b9a0ebc
+    dependencies:
+      - xxl-job
+      - job-type
+      - dynamic-schema
+      - screenshots
     translations:
-      en-US: { path: docs/guides/scheduling.en.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:43.388Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: a77b3e9104a32362fdc4a36362c64961105e952bc7e2a1506eba54645c7a505e }
-      ja-JP: { path: docs/guides/scheduling.jp.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:44.405Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: a71fd542d935b9efb37e4b092add072a2eaa768ed83f9127b102cda9a7c561f0 }
-      ko-KR: { path: docs/guides/scheduling.kr.md, status: synchronized, reviewer: Codex, reviewed_at: '2026-09-30T17:59:45.365Z', review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW, translation_sha256: 0f1043ca9820a56dd99bd033ac275fd821be0ea79cd3c302dd6feb88952aac19 }
+      en-US:
+        path: docs/guides/scheduling.en.md
+        status: synchronized
+        reviewed_at: 2026-10-14 09:08:30
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:43.388Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 064a93470c559cb1809a358ac9c8aa6a32ddcc088e769a462c1434df1b9a0ebc
+        translation_sha256: f1cf0ec7be8ceff12dd324167c274dd089ed7b6ab2cbd198d5d743fd5120dceb
+        review_evidence: docs/reference/reviews/guide-scheduling.json
+        review_evidence_sha256: d96939062687848655869c44cea968a4ed67739397bd01f33d2c454ee767617b
+      ja-JP:
+        path: docs/guides/scheduling.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-14 09:08:30
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:44.405Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 064a93470c559cb1809a358ac9c8aa6a32ddcc088e769a462c1434df1b9a0ebc
+        translation_sha256: 78ad03c754d737605aa7fefccd0ec35b6f35eaa3f71be6f72a8606f81c2aa5e2
+        review_evidence: docs/reference/reviews/guide-scheduling.json
+        review_evidence_sha256: d96939062687848655869c44cea968a4ed67739397bd01f33d2c454ee767617b
+      ko-KR:
+        path: docs/guides/scheduling.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-14 09:08:30
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-09-30T17:59:45.365Z
+          review_type: CODEX_DESIGNATED_SEMANTIC_REVIEW
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 064a93470c559cb1809a358ac9c8aa6a32ddcc088e769a462c1434df1b9a0ebc
+        translation_sha256: b5f585f9e8ffe7e7438099526bb6ef85c0022a62218b23fbfb185cefcb1ce919
+        review_evidence: docs/reference/reviews/guide-scheduling.json
+        review_evidence_sha256: d96939062687848655869c44cea968a4ed67739397bd01f33d2c454ee767617b
   - id: guide-crm-flow
     type: user-guide
     module: crm
     owner: crm
     source: docs/guides/crm-flow.md
-    source_sha256: b61be136ee600ce5276fd0f5a272a9d83ca6fed9a1c621d42efa8382c47f23c3
-    dependencies: [crm, permissions, state-machine, screenshots]
+    source_sha256: b833d13167c3bc7c33cc3e72ca32693c8cd6e649983b7b664f2431db1ca4a8fa
+    dependencies:
+      - crm
+      - permissions
+      - state-machine
+      - screenshots
     translations:
-      en-US: { path: docs/guides/crm-flow.en.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
-      ja-JP: { path: docs/guides/crm-flow.jp.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
-      ko-KR: { path: docs/guides/crm-flow.kr.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
+      en-US:
+        path: docs/guides/crm-flow.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 19:45:10
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: b833d13167c3bc7c33cc3e72ca32693c8cd6e649983b7b664f2431db1ca4a8fa
+        translation_sha256: b207effcee6611c06e06782df67982c63fd73c40df0a2303a697c4d2c90325d1
+        review_evidence: docs/reference/reviews/guide-crm-flow.json
+        review_evidence_sha256: 6dd842fad2fb04d738fb9c715ea56859d70e537d435a93c84b5884b691235bc6
+      ja-JP:
+        path: docs/guides/crm-flow.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 19:45:10
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: b833d13167c3bc7c33cc3e72ca32693c8cd6e649983b7b664f2431db1ca4a8fa
+        translation_sha256: 7f8cc5c4c64bbf4ea2ed61d261173a3e42ef817a7e77fc7a6e52fdbbfda5d9a4
+        review_evidence: docs/reference/reviews/guide-crm-flow.json
+        review_evidence_sha256: 6dd842fad2fb04d738fb9c715ea56859d70e537d435a93c84b5884b691235bc6
+      ko-KR:
+        path: docs/guides/crm-flow.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 19:45:10
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: b833d13167c3bc7c33cc3e72ca32693c8cd6e649983b7b664f2431db1ca4a8fa
+        translation_sha256: 588e9494aedb6a39bbfe330767c184b8e2ee72a71e98e8e94ea23066dac9a360
+        review_evidence: docs/reference/reviews/guide-crm-flow.json
+        review_evidence_sha256: 6dd842fad2fb04d738fb9c715ea56859d70e537d435a93c84b5884b691235bc6
   - id: guide-srm-flow
     type: user-guide
     module: srm
     owner: srm
     source: docs/guides/srm-flow.md
-    source_sha256: 432bd91c02ae72927b0881cbd04a9a1d6525796013ad7ae443e4e4551495994a
-    dependencies: [srm, portal, saga, quotation, screenshots]
+    source_sha256: 10b8ea68357084cfd923a495b63bc4567416549b23122d19bd54e92c1094f082
+    dependencies:
+      - srm
+      - portal
+      - saga
+      - quotation
+      - screenshots
     translations:
-      en-US: { path: docs/guides/srm-flow.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/guides/srm-flow.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/guides/srm-flow.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/guides/srm-flow.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:03:36
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 10b8ea68357084cfd923a495b63bc4567416549b23122d19bd54e92c1094f082
+        translation_sha256: b2ad7c203828a88fb44ebbd9a9bb8d65b3940f624107dcd11d6262e71b06793e
+        review_evidence: docs/reference/reviews/guide-srm-flow.json
+        review_evidence_sha256: db4ae3776ba16081ddcee65665f109e6619131b850cd7e04ed4866e86a4a2404
+      ja-JP:
+        path: docs/guides/srm-flow.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:03:36
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 10b8ea68357084cfd923a495b63bc4567416549b23122d19bd54e92c1094f082
+        translation_sha256: 4042c143ff92aa7ee9b54964f2e50451dcba6c27e92530e3ee8b8a9aeca3ab32
+        review_evidence: docs/reference/reviews/guide-srm-flow.json
+        review_evidence_sha256: db4ae3776ba16081ddcee65665f109e6619131b850cd7e04ed4866e86a4a2404
+      ko-KR:
+        path: docs/guides/srm-flow.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:03:36
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 10b8ea68357084cfd923a495b63bc4567416549b23122d19bd54e92c1094f082
+        translation_sha256: 41efe61ea05994d469552b50f69832cedad2dcf8607eabb02d10aa444f01c5e6
+        review_evidence: docs/reference/reviews/guide-srm-flow.json
+        review_evidence_sha256: db4ae3776ba16081ddcee65665f109e6619131b850cd7e04ed4866e86a4a2404
   - id: guide-procurement-flow
     type: user-guide
     module: procurement
     owner: procurement
     source: docs/guides/procurement-flow.md
-    source_sha256: a0dbc9a5d0d5f1caae99e18269e7e34a42f9239d6c1394bc5b32749adf3ec9d0
-    dependencies: [procurement, workflow, srm-events, asset-events, screenshots]
+    source_sha256: 201034f4ee9bfdfedda14981891df9c970f13eecab79a488455b79a9005d5b36
+    dependencies:
+      - procurement
+      - workflow
+      - srm-events
+      - asset-events
+      - screenshots
     translations:
-      en-US: { path: docs/guides/procurement-flow.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/guides/procurement-flow.jp.md, status: present-unverified, reviewed_at: null }
-      ko-KR: { path: docs/guides/procurement-flow.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/guides/procurement-flow.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:21:09
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 201034f4ee9bfdfedda14981891df9c970f13eecab79a488455b79a9005d5b36
+        translation_sha256: 1535b446c94551f1f45edb28f41092aad312a03e65576b555bf1e1c66b81850f
+        review_evidence: docs/reference/reviews/guide-procurement-flow.json
+        review_evidence_sha256: 50863f7be61b20f9848c5eb027764d3df1e47a828faf162486b33f753ec5808b
+      ja-JP:
+        path: docs/guides/procurement-flow.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:21:09
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 201034f4ee9bfdfedda14981891df9c970f13eecab79a488455b79a9005d5b36
+        translation_sha256: 38b22d87cd192a9920a91e05e2fa8bcea6c210ff9fd12ddaea3d7b990e1116ed
+        review_evidence: docs/reference/reviews/guide-procurement-flow.json
+        review_evidence_sha256: 50863f7be61b20f9848c5eb027764d3df1e47a828faf162486b33f753ec5808b
+      ko-KR:
+        path: docs/guides/procurement-flow.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:21:09
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 201034f4ee9bfdfedda14981891df9c970f13eecab79a488455b79a9005d5b36
+        translation_sha256: 4297a015eb9b5e255a91d372b9fc48f80c221c38c875b465779ac5cb954b39af
+        review_evidence: docs/reference/reviews/guide-procurement-flow.json
+        review_evidence_sha256: 50863f7be61b20f9848c5eb027764d3df1e47a828faf162486b33f753ec5808b
   - id: guide-asset-flow
     type: user-guide
     module: asset
     owner: asset
     source: docs/guides/asset-flow.md
-    source_sha256: 604cc241701add354f63d76ceaeb61363e2d555e61f0f083878ef9c219077eba
-    dependencies: [asset, procurement-events, workflow, screenshots]
+    source_sha256: 0e0a4523741b3ee17f024aa4a6d8c4a729fb77b49569d276df2b0a6db3936162
+    dependencies:
+      - asset
+      - procurement-events
+      - workflow
+      - screenshots
     translations:
-      en-US: { path: docs/guides/asset-flow.en.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
-      ja-JP: { path: docs/guides/asset-flow.jp.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
-      ko-KR: { path: docs/guides/asset-flow.kr.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
+      en-US:
+        path: docs/guides/asset-flow.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:33:06
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 0e0a4523741b3ee17f024aa4a6d8c4a729fb77b49569d276df2b0a6db3936162
+        translation_sha256: 545827b2df56a290d6a9bd9eef8831515103e463f103158711b094338221c4f3
+        review_evidence: docs/reference/reviews/guide-asset-flow.json
+        review_evidence_sha256: bd1ddf49bbcf067e88d39d04c67f37c784cade127dd73cbf5cd90d1ee03919db
+      ja-JP:
+        path: docs/guides/asset-flow.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:33:06
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 0e0a4523741b3ee17f024aa4a6d8c4a729fb77b49569d276df2b0a6db3936162
+        translation_sha256: 7e523b68c9aa2937440521937237cd7c3757b9ebcbf34a8175de268b534f4f1f
+        review_evidence: docs/reference/reviews/guide-asset-flow.json
+        review_evidence_sha256: bd1ddf49bbcf067e88d39d04c67f37c784cade127dd73cbf5cd90d1ee03919db
+      ko-KR:
+        path: docs/guides/asset-flow.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:33:06
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 0e0a4523741b3ee17f024aa4a6d8c4a729fb77b49569d276df2b0a6db3936162
+        translation_sha256: a496b3cb15ad36eb8c471fb833adea975de70e56cf843a00743eac456ddfa243
+        review_evidence: docs/reference/reviews/guide-asset-flow.json
+        review_evidence_sha256: bd1ddf49bbcf067e88d39d04c67f37c784cade127dd73cbf5cd90d1ee03919db
   - id: guide-scaffold-development
     type: development-guide
     module: scaffold
     owner: architecture
     source: docs/guides/scaffold-development.md
-    source_sha256: df46e278232ae488a6da2f7d6a5f6f7142e7396f6f0ad9e7897aa2220a117321
-    dependencies: [cli, presets, create-service, crud-generator]
+    source_sha256: 6777bfff1f5df08ed873439137df9bba9dd389e211ec8d11de59877e54472351
+    dependencies:
+      - cli
+      - presets
+      - create-service
+      - crud-generator
     translations:
-      en-US: { path: docs/guides/scaffold-development.en.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
-      ja-JP: { path: docs/guides/scaffold-development.jp.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
-      ko-KR: { path: docs/guides/scaffold-development.kr.md, status: present-unverified, reviewed_at: null }
+      en-US:
+        path: docs/guides/scaffold-development.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 09:58:40
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 6777bfff1f5df08ed873439137df9bba9dd389e211ec8d11de59877e54472351
+        translation_sha256: c1eb86dcc068710814c8e1a187834feeb33ab22a7833d26a400b92ef8bd5dce9
+        review_evidence: docs/reference/reviews/guide-scaffold-development.json
+        review_evidence_sha256: 27b7ba81bf232998d903b635074dd8498b3597354d0d8ddfc7795f470524ab21
+      ja-JP:
+        path: docs/guides/scaffold-development.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 09:58:40
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 6777bfff1f5df08ed873439137df9bba9dd389e211ec8d11de59877e54472351
+        translation_sha256: 54b4a430ea62c7f52392923409674707a038d6fa777acfb376ef03ba62f4f34c
+        review_evidence: docs/reference/reviews/guide-scaffold-development.json
+        review_evidence_sha256: 27b7ba81bf232998d903b635074dd8498b3597354d0d8ddfc7795f470524ab21
+      ko-KR:
+        path: docs/guides/scaffold-development.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 09:58:40
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 6777bfff1f5df08ed873439137df9bba9dd389e211ec8d11de59877e54472351
+        translation_sha256: bd1899cb8cabf92cbad6be87296c0ad6115acc786dc6c6badaed23fcf47bd026
+        review_evidence: docs/reference/reviews/guide-scaffold-development.json
+        review_evidence_sha256: 27b7ba81bf232998d903b635074dd8498b3597354d0d8ddfc7795f470524ab21
   - id: guide-operations-upgrade
     type: operations-guide
     module: operations
     owner: operations
     source: docs/guides/operations-upgrade.md
-    source_sha256: b579f54839ec5f95650fbdd398a5874c67022403c369c68bfcefec9925eeee02
-    dependencies: [compose, observability, backup, recovery, upgrade]
+    source_sha256: cc4c3588f07cc484aa52bb7f1e6f97b83f730b02ba3ea9fef1437479d356e3e3
+    dependencies:
+      - compose
+      - observability
+      - backup
+      - recovery
+      - upgrade
     translations:
-      en-US: { path: docs/guides/operations-upgrade.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/guides/operations-upgrade.jp.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:14:09.347Z }
-      ko-KR: { path: docs/guides/operations-upgrade.kr.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:14:09.347Z }
+      en-US:
+        path: docs/guides/operations-upgrade.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 14:54:15
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: cc4c3588f07cc484aa52bb7f1e6f97b83f730b02ba3ea9fef1437479d356e3e3
+        translation_sha256: 127f9f6bd86b8db131d4b594c817d23d7c56ef2459018d1cc2635fdf96be3022
+        review_evidence: docs/reference/reviews/guide-operations-upgrade.json
+        review_evidence_sha256: f80b2e6359d545ae3fc13e1190e70966040e51d68b2e4cf2f96e54e89b98016b
+      ja-JP:
+        path: docs/guides/operations-upgrade.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 14:54:15
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:14:09.347Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: cc4c3588f07cc484aa52bb7f1e6f97b83f730b02ba3ea9fef1437479d356e3e3
+        translation_sha256: e54c4572f82c5726dd25eddc8ef6993c42098164c3e11c64928c0abc288b48a3
+        review_evidence: docs/reference/reviews/guide-operations-upgrade.json
+        review_evidence_sha256: f80b2e6359d545ae3fc13e1190e70966040e51d68b2e4cf2f96e54e89b98016b
+      ko-KR:
+        path: docs/guides/operations-upgrade.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 14:54:15
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:14:09.347Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: cc4c3588f07cc484aa52bb7f1e6f97b83f730b02ba3ea9fef1437479d356e3e3
+        translation_sha256: 68976ca36fdf89c1ee38e4be116b129f6ffa2f83924d8abcfeec3197b64c2c72
+        review_evidence: docs/reference/reviews/guide-operations-upgrade.json
+        review_evidence_sha256: f80b2e6359d545ae3fc13e1190e70966040e51d68b2e4cf2f96e54e89b98016b
   - id: guide-troubleshooting
     type: operations-guide
     module: all
     owner: operations
     source: docs/guides/troubleshooting.md
-    source_sha256: 12df8ee1a3215e854254bad4568860cd79866e5e057b464d3f16c0eb7a6d41d6
-    dependencies: [runtime, security, workflow, scheduling, mq, frontend]
+    source_sha256: 2481ddc1de179b76290b46c2506b8f71fce0d3c6d60be1ceca25369f940b7dbb
+    dependencies:
+      - runtime
+      - security
+      - workflow
+      - scheduling
+      - mq
+      - frontend
     translations:
-      en-US: { path: docs/guides/troubleshooting.en.md, status: present-unverified, reviewed_at: null }
-      ja-JP: { path: docs/guides/troubleshooting.jp.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
-      ko-KR: { path: docs/guides/troubleshooting.kr.md, status: synchronized, reviewer: Codex, reviewed_at: 2026-10-05T15:09:12.619Z }
-
+      en-US:
+        path: docs/guides/troubleshooting.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:49:46
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 2481ddc1de179b76290b46c2506b8f71fce0d3c6d60be1ceca25369f940b7dbb
+        translation_sha256: ca458481a9cebb3ebbb53090a82029d9fe3a547d86775b1ac8494fa2173e9c7f
+        review_evidence: docs/reference/reviews/guide-troubleshooting.json
+        review_evidence_sha256: e0de088f5711e65af4ce0b3043ef7c72ddb6368e4dbc11dc6ec70459686cb279
+      ja-JP:
+        path: docs/guides/troubleshooting.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:46:23
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 2481ddc1de179b76290b46c2506b8f71fce0d3c6d60be1ceca25369f940b7dbb
+        translation_sha256: 5f7bdedfed1abd445ef19c53c4abfdd6d1db2526c919f81c620b369037b974fa
+        review_evidence: docs/reference/reviews/guide-troubleshooting.json
+        review_evidence_sha256: e0de088f5711e65af4ce0b3043ef7c72ddb6368e4dbc11dc6ec70459686cb279
+      ko-KR:
+        path: docs/guides/troubleshooting.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 20:46:23
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-05T15:09:12.619Z
+          review_type: null
+          reason: Historical automated review is not evidence of human review
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 2481ddc1de179b76290b46c2506b8f71fce0d3c6d60be1ceca25369f940b7dbb
+        translation_sha256: e78de2c939d30b2d9e8da39ba819badfcc9f9c37c07401e37e8763ce60d555c3
+        review_evidence: docs/reference/reviews/guide-troubleshooting.json
+        review_evidence_sha256: e0de088f5711e65af4ce0b3043ef7c72ddb6368e4dbc11dc6ec70459686cb279
+  - id: wiki-index
+    type: wiki-guide
+    module: platform
+    owner: documentation
+    source: docs/wiki/index.md
+    source_sha256: 371317d798e6851282487da8de4f031bf7e2eb204042867724ea4dbe2ab76e1a
+    dependencies:
+      - repository-content
+    translations:
+      en-US:
+        path: docs/wiki/index.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 11:58:03
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 371317d798e6851282487da8de4f031bf7e2eb204042867724ea4dbe2ab76e1a
+        translation_sha256: de1d687ec00e3f149946b5b1d5540a34e38d6127ac2da6cd28d223d4fcc12c90
+        review_evidence: docs/reference/reviews/wiki-index.json
+        review_evidence_sha256: 106a3d3ce99c349c6471bc390c1fc6ec48c9cb580d935263133aa215d0c941b5
+      ja-JP:
+        path: docs/wiki/index.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 11:58:03
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 371317d798e6851282487da8de4f031bf7e2eb204042867724ea4dbe2ab76e1a
+        translation_sha256: 880a6cebebaa53bec924218c6313f5332cd14c1128e6097e20d1779e52375c53
+        review_evidence: docs/reference/reviews/wiki-index.json
+        review_evidence_sha256: 106a3d3ce99c349c6471bc390c1fc6ec48c9cb580d935263133aa215d0c941b5
+      ko-KR:
+        path: docs/wiki/index.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 11:58:03
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 371317d798e6851282487da8de4f031bf7e2eb204042867724ea4dbe2ab76e1a
+        translation_sha256: 7a9a3676c83582d3cede1868dd6c87b5c0f7f0252a0854b4517210f765686590
+        review_evidence: docs/reference/reviews/wiki-index.json
+        review_evidence_sha256: 106a3d3ce99c349c6471bc390c1fc6ec48c9cb580d935263133aa215d0c941b5
+  - id: wiki-feature-tour
+    type: wiki-guide
+    module: platform
+    owner: documentation
+    source: docs/wiki/feature-tour.md
+    source_sha256: 58b46cb78fd075c67b997375210da84559f9141493280f75cb95385177cc1888
+    dependencies:
+      - repository-content
+    translations:
+      en-US:
+        path: docs/wiki/feature-tour.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          path: docs/wiki/feature-tour.en.md
+          status: synchronized
+          reviewed_at: 2026-10-13 11:58:03
+          reviewer: Codex
+          review_type: AI_REVIEW
+          reviewed_source_sha256: 5f6b7c0e790c9cdb200a50aba5f44c72aea3aeb78b292a480b76f0ef85fea693
+          translation_sha256: eeecc1d6d6ecc76636b77657a2e2c8742f65859662d7b8d54a1ffda1bc9bef5e
+          review_evidence: docs/reference/reviews/wiki-feature-tour.json
+          review_evidence_sha256: d5777856b6c2a05549d050f4e17c1b1761cb69708b379d74f5826940b2a7cea7
+          reason: Corrected scheduling block ownership from workflow to xxl-job; actual current content re-reviewed after the change
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 58b46cb78fd075c67b997375210da84559f9141493280f75cb95385177cc1888
+        translation_sha256: 8f8ec149efcf53959cdffe648b3b22df7b6ffb23b2d983eedcf9d4b96f37088f
+        review_evidence: docs/reference/reviews/wiki-feature-tour.json
+        review_evidence_sha256: 8234d6be322fe8ae46726d2792c385b870a26c17678514f680447ccd7678d0b8
+      ja-JP:
+        path: docs/wiki/feature-tour.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          path: docs/wiki/feature-tour.jp.md
+          status: synchronized
+          reviewed_at: 2026-10-13 11:58:03
+          reviewer: Codex
+          review_type: AI_REVIEW
+          reviewed_source_sha256: 5f6b7c0e790c9cdb200a50aba5f44c72aea3aeb78b292a480b76f0ef85fea693
+          translation_sha256: 91550953ef5224cd2bc201355f4acb60b81bc5c4f9a74b1bc067b571756598f7
+          review_evidence: docs/reference/reviews/wiki-feature-tour.json
+          review_evidence_sha256: d5777856b6c2a05549d050f4e17c1b1761cb69708b379d74f5826940b2a7cea7
+          reason: Corrected scheduling block ownership from workflow to xxl-job; actual current content re-reviewed after the change
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 58b46cb78fd075c67b997375210da84559f9141493280f75cb95385177cc1888
+        translation_sha256: f950ed4cb57bd2e965aa90b1c1bc092ee7a29ba5f8be414e35f0f1cae8ddae6a
+        review_evidence: docs/reference/reviews/wiki-feature-tour.json
+        review_evidence_sha256: 8234d6be322fe8ae46726d2792c385b870a26c17678514f680447ccd7678d0b8
+      ko-KR:
+        path: docs/wiki/feature-tour.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 12:17:37
+        previous_review:
+          path: docs/wiki/feature-tour.kr.md
+          status: synchronized
+          reviewed_at: 2026-10-13 11:58:03
+          reviewer: Codex
+          review_type: AI_REVIEW
+          reviewed_source_sha256: 5f6b7c0e790c9cdb200a50aba5f44c72aea3aeb78b292a480b76f0ef85fea693
+          translation_sha256: f60bff6cca8575827e4dabb12fa565345f116c2094978c470f4388954f76c6ec
+          review_evidence: docs/reference/reviews/wiki-feature-tour.json
+          review_evidence_sha256: d5777856b6c2a05549d050f4e17c1b1761cb69708b379d74f5826940b2a7cea7
+          reason: Corrected scheduling block ownership from workflow to xxl-job; actual current content re-reviewed after the change
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 58b46cb78fd075c67b997375210da84559f9141493280f75cb95385177cc1888
+        translation_sha256: e931fc5e75e1e092325bd78797424f64419febcb98277ac1f03b75916fdc60a5
+        review_evidence: docs/reference/reviews/wiki-feature-tour.json
+        review_evidence_sha256: 8234d6be322fe8ae46726d2792c385b870a26c17678514f680447ccd7678d0b8
+  - id: wiki-site-maintenance
+    type: wiki-guide
+    module: platform
+    owner: documentation
+    source: docs/wiki/site-maintenance.md
+    source_sha256: c1e408112efd4176dfc4bf4ec303248c7b0c1042720365651ed59eb024dd8f34
+    dependencies:
+      - repository-content
+    translations:
+      en-US:
+        path: docs/wiki/site-maintenance.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:57:41
+        review_evidence: docs/reference/reviews/wiki-site-maintenance-mermaid-2026-10-18.json
+        review_evidence_sha256: 3d0ff77d10a10d415ca2d2fce7ec38d408c47056ae3b13db174c1f632665e016
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 11:42:35
+          source_sha256: a56b27a8c5263fc2aea5f538de896d7e6d5bebe581dc9e57336140d8ebb06ffb
+          translation_sha256: 2f8c6e413056692034bfd6482fb02404c63f9a8a10a4bf3705bf9268b4bedaa7
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: c1e408112efd4176dfc4bf4ec303248c7b0c1042720365651ed59eb024dd8f34
+        translation_sha256: 89cfe8d6b5188ae05d73976f6a15b432a57eb24e57b70aba55fa7e78e624c3f5
+      ja-JP:
+        path: docs/wiki/site-maintenance.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:57:41
+        review_evidence: docs/reference/reviews/wiki-site-maintenance-mermaid-2026-10-18.json
+        review_evidence_sha256: 3d0ff77d10a10d415ca2d2fce7ec38d408c47056ae3b13db174c1f632665e016
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 11:42:35
+          source_sha256: a56b27a8c5263fc2aea5f538de896d7e6d5bebe581dc9e57336140d8ebb06ffb
+          translation_sha256: 6fe7b2297222174777a98a9bae5b4101cdfcc6d48c22836545571cc2751f2c03
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: c1e408112efd4176dfc4bf4ec303248c7b0c1042720365651ed59eb024dd8f34
+        translation_sha256: e4a7f4a152fbff174d75c43ed1c5975d0e06bca454600c7f36313c486a5cb938
+      ko-KR:
+        path: docs/wiki/site-maintenance.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 02:57:41
+        review_evidence: docs/reference/reviews/wiki-site-maintenance-mermaid-2026-10-18.json
+        review_evidence_sha256: 3d0ff77d10a10d415ca2d2fce7ec38d408c47056ae3b13db174c1f632665e016
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 11:42:35
+          source_sha256: a56b27a8c5263fc2aea5f538de896d7e6d5bebe581dc9e57336140d8ebb06ffb
+          translation_sha256: 3e4a6361e3a826e365f06f7056eb5ddea34f0c25c5103d08328f84670b0c2cc1
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: c1e408112efd4176dfc4bf4ec303248c7b0c1042720365651ed59eb024dd8f34
+        translation_sha256: 31f6fedbca9ff9f1bd95a21053c4c15d08ba802738b1a273329378af7362204c
+  - id: wiki-data-and-fixtures
+    type: wiki-guide
+    module: platform
+    owner: documentation
+    source: docs/wiki/data-and-fixtures.md
+    source_sha256: 818b691315dfae229f0f17113efeb6b8f1a336b16ac17b98ead540fd84c5987d
+    dependencies:
+      - repository-content
+    translations:
+      en-US:
+        path: docs/wiki/data-and-fixtures.en.md
+        status: synchronized
+        reviewed_at: 2026-10-13 11:58:03
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 818b691315dfae229f0f17113efeb6b8f1a336b16ac17b98ead540fd84c5987d
+        translation_sha256: d616a00beb6eca9b3de0f08f37f1972e656af9e6d3db55c3e71d681d4e5093f5
+        review_evidence: docs/reference/reviews/wiki-data-and-fixtures.json
+        review_evidence_sha256: 6a90ad43798c9928789609ddd2cf78b736949f4351f90856b567f953fd131954
+      ja-JP:
+        path: docs/wiki/data-and-fixtures.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-13 11:58:03
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 818b691315dfae229f0f17113efeb6b8f1a336b16ac17b98ead540fd84c5987d
+        translation_sha256: ca5f4a64d01a7f9e2f11aed17d02ee10995c376e922b6bd4cf7447b0b9375644
+        review_evidence: docs/reference/reviews/wiki-data-and-fixtures.json
+        review_evidence_sha256: 6a90ad43798c9928789609ddd2cf78b736949f4351f90856b567f953fd131954
+      ko-KR:
+        path: docs/wiki/data-and-fixtures.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-13 11:58:03
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 818b691315dfae229f0f17113efeb6b8f1a336b16ac17b98ead540fd84c5987d
+        translation_sha256: a313ddc301ae818bf73649da3b3e59e505816fe289ba52edd6ddc43e43a2a6e2
+        review_evidence: docs/reference/reviews/wiki-data-and-fixtures.json
+        review_evidence_sha256: 6a90ad43798c9928789609ddd2cf78b736949f4351f90856b567f953fd131954
+  - id: wiki-source-debugging
+    type: wiki-guide
+    module: platform
+    owner: documentation
+    source: docs/wiki/source-debugging.md
+    source_sha256: 82f7572b9aaeebda0effba0633f0a6f1ffc13ce73d36ec54e45f7d1b55b2029c
+    dependencies:
+      - repository-content
+    translations:
+      en-US:
+        path: docs/wiki/source-debugging.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 21:07:11
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 82f7572b9aaeebda0effba0633f0a6f1ffc13ce73d36ec54e45f7d1b55b2029c
+        translation_sha256: 3c30975897638c9a7809ff7d3e15adb4e8fb75a9da6271941b9078e6a106c7a2
+        review_evidence: docs/reference/reviews/wiki-source-debugging.json
+        review_evidence_sha256: ff74282a3a28c43cd08b460f732e06e0ea68160ecb104dcb4e8c072dc2ec6bd6
+      ja-JP:
+        path: docs/wiki/source-debugging.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 21:07:11
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 82f7572b9aaeebda0effba0633f0a6f1ffc13ce73d36ec54e45f7d1b55b2029c
+        translation_sha256: 93bb8c8806125f51c03053a1308f34ad36b277d158a47cf7b04a53cba72b241e
+        review_evidence: docs/reference/reviews/wiki-source-debugging.json
+        review_evidence_sha256: ff74282a3a28c43cd08b460f732e06e0ea68160ecb104dcb4e8c072dc2ec6bd6
+      ko-KR:
+        path: docs/wiki/source-debugging.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 21:07:11
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 82f7572b9aaeebda0effba0633f0a6f1ffc13ce73d36ec54e45f7d1b55b2029c
+        translation_sha256: ba582857966db0de7bc6834e2d38c83be4c7d1d17506de4a09c5a75402e26aa1
+        review_evidence: docs/reference/reviews/wiki-source-debugging.json
+        review_evidence_sha256: ff74282a3a28c43cd08b460f732e06e0ea68160ecb104dcb4e8c072dc2ec6bd6
+  - id: source-map
+    type: generated-reference
+    module: platform
+    owner: documentation
+    source: docs/reference/source-map.md
+    source_sha256: a1a85b47805818ec2343e905a104a2030c636ea3c9cf61b4fc03fbc085425657
+    dependencies:
+      - repository-content
+    translations:
+      en-US:
+        path: docs/reference/source-map.en.md
+        status: synchronized
+        reviewed_at: 2026-10-14 11:18:34
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: a1a85b47805818ec2343e905a104a2030c636ea3c9cf61b4fc03fbc085425657
+        translation_sha256: 017a8504db53caff37ce4711a12ac7b197d608adea47105d8f879f6d83e75dee
+        review_evidence: docs/reference/reviews/source-map.json
+        review_evidence_sha256: 855099603da44c5392aedd30dc3d4d1de82c6ef8d3a29cf26939e6e8394a6038
+      ja-JP:
+        path: docs/reference/source-map.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-14 11:18:34
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: a1a85b47805818ec2343e905a104a2030c636ea3c9cf61b4fc03fbc085425657
+        translation_sha256: a1680f19e46a46abcd86ed0f0cef8ed565c652fd5da1fce87058cac126532680
+        review_evidence: docs/reference/reviews/source-map.json
+        review_evidence_sha256: 855099603da44c5392aedd30dc3d4d1de82c6ef8d3a29cf26939e6e8394a6038
+      ko-KR:
+        path: docs/reference/source-map.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-14 11:18:34
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: a1a85b47805818ec2343e905a104a2030c636ea3c9cf61b4fc03fbc085425657
+        translation_sha256: 2292e98f28f631ec3c20b1800053fb569e7497ff3a2eb6a68b30d1d182479db6
+        review_evidence: docs/reference/reviews/source-map.json
+        review_evidence_sha256: 855099603da44c5392aedd30dc3d4d1de82c6ef8d3a29cf26939e6e8394a6038
+  - id: shared-ai-assets
+    type: maintenance-guide
+    module: platform
+    owner: documentation
+    source: ai/README.md
+    source_sha256: 4c82c82114f604df197ab4b8b664b0f7d5532c9997d5a0e4c5ef1ee51a1a3eb2
+    dependencies:
+      - repository-content
+    translations:
+      en-US:
+        path: ai/README.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 13:47:01
+        review_evidence: docs/reference/reviews/shared-ai-assets-qoder-2026-10-18.json
+        review_evidence_sha256: 424513b6fbee354563918f2804eea2a227881764bc58dd2da8a147c4cef74e67
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 11:28:17
+          source_sha256: bdcbdec404f49b2a40e5c4f97018b034d326d598db52e41dbd32a9bccbd229e6
+          translation_sha256: 7e9770845b899b74116a04c786761a6dbb1366b10083d0abeb0566c5d9721cc6
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 4c82c82114f604df197ab4b8b664b0f7d5532c9997d5a0e4c5ef1ee51a1a3eb2
+        translation_sha256: 5163b4ce1cef8c3498c4253ecaf4eae1e34c77013724f44a54ca1253a6e77a11
+      ja-JP:
+        path: ai/README.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 13:47:01
+        review_evidence: docs/reference/reviews/shared-ai-assets-qoder-2026-10-18.json
+        review_evidence_sha256: 424513b6fbee354563918f2804eea2a227881764bc58dd2da8a147c4cef74e67
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 11:28:17
+          source_sha256: bdcbdec404f49b2a40e5c4f97018b034d326d598db52e41dbd32a9bccbd229e6
+          translation_sha256: 7205241bacacc38cb6e5e44bc909a9e028719ae8a0260c882b1ad35729f862e1
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 4c82c82114f604df197ab4b8b664b0f7d5532c9997d5a0e4c5ef1ee51a1a3eb2
+        translation_sha256: 68bf4dbcdb9a56ac0c9819702878c652a407774117cc3d0fd69a23aa250bda7c
+      ko-KR:
+        path: ai/README.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 13:47:01
+        review_evidence: docs/reference/reviews/shared-ai-assets-qoder-2026-10-18.json
+        review_evidence_sha256: 424513b6fbee354563918f2804eea2a227881764bc58dd2da8a147c4cef74e67
+        previous_review:
+          reviewer: Codex
+          reviewed_at: 2026-10-13 11:28:17
+          source_sha256: bdcbdec404f49b2a40e5c4f97018b034d326d598db52e41dbd32a9bccbd229e6
+          translation_sha256: bc0c3eed09aa81e316b940dd0a88fbeae740b70b6b2ed8490b156c8865a973a9
+          review_type: AI_REVIEW
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 4c82c82114f604df197ab4b8b664b0f7d5532c9997d5a0e4c5ef1ee51a1a3eb2
+        translation_sha256: 83a090c76fd41f769b996c8e95376a240290dbf97da43d44011c258b81e04569
+  - id: project-readme
+    type: overview
+    module: platform
+    owner: documentation
+    source: README.md
+    source_sha256: 9884ad04e96f5a32774b2678bb5239e3fa6efddf2e82e1907f3eca299754f42b
+    dependencies:
+      - repository-content
+    translations:
+      en-US:
+        path: README.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18T06:44:23.993Z
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 9884ad04e96f5a32774b2678bb5239e3fa6efddf2e82e1907f3eca299754f42b
+        translation_sha256: bfece04f6aaa41b344ca1bf0904be600ebf7473331f6366bacfa078bc393162c
+        review_evidence: docs/reference/reviews/project-readme-capability-scope-2026-10-18.json
+        review_evidence_sha256: 18fa1794f59872e1d6da697bf76051efd5d9b480cb02f4951b3c5488acdd16f1
+      ja-JP:
+        path: README.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18T06:44:23.993Z
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 9884ad04e96f5a32774b2678bb5239e3fa6efddf2e82e1907f3eca299754f42b
+        translation_sha256: 2fb632779305bbf26dd986c6edb171eadf42563e0cb8fa822616ef814a9ce848
+        review_evidence: docs/reference/reviews/project-readme-capability-scope-2026-10-18.json
+        review_evidence_sha256: 18fa1794f59872e1d6da697bf76051efd5d9b480cb02f4951b3c5488acdd16f1
+      ko-KR:
+        path: README.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18T06:44:23.993Z
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 9884ad04e96f5a32774b2678bb5239e3fa6efddf2e82e1907f3eca299754f42b
+        translation_sha256: d3b3168ceb20823043266e1c0e1c64be6d7023b3d901fe5e9bf124721d9a2a32
+        review_evidence: docs/reference/reviews/project-readme-capability-scope-2026-10-18.json
+        review_evidence_sha256: 18fa1794f59872e1d6da697bf76051efd5d9b480cb02f4951b3c5488acdd16f1
+  - id: repository-governance
+    type: governance
+    module: platform
+    owner: architecture
+    source: docs/repository-governance.md
+    source_sha256: 9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08
+    language_scope: zh-CN
+    reason: Repository execution rules follow Chinese AGENTS; user-facing Wiki is translated separately
+    translations: {}
+  - id: adr-wiki-ai-assets
+    type: adr
+    module: platform
+    owner: architecture
+    source: docs/adr/0002-repository-wiki-and-ai-assets.md
+    source_sha256: 8ad0bb7005e03195228dc80b9d22cabfbdfde65cce19046b01f24acdd58aa5e0
+    language_scope: zh-CN
+    reason: Decision record preserves original user-authorized Chinese wording; four-language Wiki explains current usage
+    translations: {}
+  - id: curated-changelog
+    type: history
+    module: platform
+    owner: architecture
+    source: CHANGELOG.md
+    source_sha256: 046018074b0466c2e94084deb8938072096625f1f057dfca1aa024f7afa05fd0
+    language_scope: zh-CN
+    reason: Curated change record preserves original release notes; it is not a Wiki tutorial
+    translations: {}
+  - id: wiki-interface-reference
+    type: wiki-guide
+    module: platform
+    owner: documentation
+    source: docs/wiki/interface-reference.md
+    source_sha256: f6a38d89750eb38ceb2e79a03d988db767e8458fc48785b1145afd20fa1d7dda
+    dependencies:
+      - source-code
+      - historical-image-provenance
+    translations:
+      en-US:
+        path: docs/wiki/interface-reference.en.md
+        status: synchronized
+        reviewed_at: 2026-10-17 21:24:24
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: f6a38d89750eb38ceb2e79a03d988db767e8458fc48785b1145afd20fa1d7dda
+        translation_sha256: 707914801c53816ad1b3ca94a911bc21bfb41153c61273195c7184846c268328
+        review_evidence: docs/reference/reviews/wiki-interface-reference.json
+        review_evidence_sha256: 5eb8cf7abc0b906e67b1a26ce1107c19705cef0462b54e6a4ec8151f599b704f
+      ja-JP:
+        path: docs/wiki/interface-reference.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-17 21:24:24
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: f6a38d89750eb38ceb2e79a03d988db767e8458fc48785b1145afd20fa1d7dda
+        translation_sha256: fb71ea54428812856214868ce4d3962b3e8702c2a76d4aa061344ae19b278e1e
+        review_evidence: docs/reference/reviews/wiki-interface-reference.json
+        review_evidence_sha256: 5eb8cf7abc0b906e67b1a26ce1107c19705cef0462b54e6a4ec8151f599b704f
+      ko-KR:
+        path: docs/wiki/interface-reference.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-17 21:24:24
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: f6a38d89750eb38ceb2e79a03d988db767e8458fc48785b1145afd20fa1d7dda
+        translation_sha256: f45cb5332e54e7cc1db52072a9508c4bf9f4bcbd9ee729f911505f63975b3515
+        review_evidence: docs/reference/reviews/wiki-interface-reference.json
+        review_evidence_sha256: 5eb8cf7abc0b906e67b1a26ce1107c19705cef0462b54e6a4ec8151f599b704f
+  - id: wiki-workflow-development
+    type: wiki-guide
+    module: workflow
+    owner: documentation
+    source: docs/wiki/workflow-development.md
+    source_sha256: 0705d000ab8f98e4030af8ac7bf6f8aeb1d3607cd99a14d615051d9b439bc559
+    dependencies:
+      - source-code
+      - historical-image-provenance
+    translations:
+      en-US:
+        path: docs/wiki/workflow-development.en.md
+        status: synchronized
+        reviewed_at: 2026-10-14 10:25:08
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 0705d000ab8f98e4030af8ac7bf6f8aeb1d3607cd99a14d615051d9b439bc559
+        translation_sha256: 44609c0499e9ae35ca755e8c053956809bd775beff0f82b5a0bd3deeb8a0da1e
+        review_evidence: docs/reference/reviews/wiki-workflow-development.json
+        review_evidence_sha256: 8873f81c19cc7122725ec3588bcdbf6fa8c1496c1cbaf0f957972afab0fcb0e2
+      ja-JP:
+        path: docs/wiki/workflow-development.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-14 10:25:08
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 0705d000ab8f98e4030af8ac7bf6f8aeb1d3607cd99a14d615051d9b439bc559
+        translation_sha256: 64a31efb1d0742b79a50ba131a7a4e6ac2a91432334950065aec59df2da5442b
+        review_evidence: docs/reference/reviews/wiki-workflow-development.json
+        review_evidence_sha256: 8873f81c19cc7122725ec3588bcdbf6fa8c1496c1cbaf0f957972afab0fcb0e2
+      ko-KR:
+        path: docs/wiki/workflow-development.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-14 10:25:08
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: 0705d000ab8f98e4030af8ac7bf6f8aeb1d3607cd99a14d615051d9b439bc559
+        translation_sha256: 4a3b8bb618ce9d398a580c34274965ae4a09638e33b504c8447941f6d689af9a
+        review_evidence: docs/reference/reviews/wiki-workflow-development.json
+        review_evidence_sha256: 8873f81c19cc7122725ec3588bcdbf6fa8c1496c1cbaf0f957972afab0fcb0e2
+  - id: wiki-outbox-development
+    type: wiki-guide
+    module: platform
+    owner: documentation
+    source: docs/wiki/outbox-development.md
+    source_sha256: d260241659ee9521063b0719b1685dc0c904ddf180758bcc77c44dcabf1d2653
+    dependencies:
+      - source-code
+      - historical-image-provenance
+    translations:
+      en-US:
+        path: docs/wiki/outbox-development.en.md
+        status: synchronized
+        reviewed_at: 2026-10-18 01:20:55
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: d260241659ee9521063b0719b1685dc0c904ddf180758bcc77c44dcabf1d2653
+        translation_sha256: 15c7799448ac7a521d18b2ce5102707f41af9b318dd2c56ca2ee64dd05ad5bb1
+        review_evidence: docs/reference/reviews/wiki-outbox-development.json
+        review_evidence_sha256: 77a8e239d9bcfabd315145e1e80e3accc5129514a035f9caebcb38af646b1606
+      ja-JP:
+        path: docs/wiki/outbox-development.jp.md
+        status: synchronized
+        reviewed_at: 2026-10-18 01:20:55
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: d260241659ee9521063b0719b1685dc0c904ddf180758bcc77c44dcabf1d2653
+        translation_sha256: 0c49512905b9f672b4af6862d755321dbd85959f7392d3e502d28bc3a31e2306
+        review_evidence: docs/reference/reviews/wiki-outbox-development.json
+        review_evidence_sha256: 77a8e239d9bcfabd315145e1e80e3accc5129514a035f9caebcb38af646b1606
+      ko-KR:
+        path: docs/wiki/outbox-development.kr.md
+        status: synchronized
+        reviewed_at: 2026-10-18 01:20:55
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: d260241659ee9521063b0719b1685dc0c904ddf180758bcc77c44dcabf1d2653
+        translation_sha256: 91fe9f92652a9f9539c5951053ce80039ae3077a6592588d1473c0b8398710c1
+        review_evidence: docs/reference/reviews/wiki-outbox-development.json
+        review_evidence_sha256: 77a8e239d9bcfabd315145e1e80e3accc5129514a035f9caebcb38af646b1606
+  - id: wiki-site-interface-copy
+    type: site-ui
+    module: platform
+    source: docs/.vitepress/locales/zh-CN.json
+    source_language: zh-CN
+    source_sha256: d6032e90eedab74e99415d166caa54a699dd498144e58b6c2d275d28dfaac7ef
+    language_scope: full
+    translations:
+      en-US:
+        path: docs/.vitepress/locales/en-US.json
+        status: synchronized
+        reviewed_at: 2026-10-13 11:42:35
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: d6032e90eedab74e99415d166caa54a699dd498144e58b6c2d275d28dfaac7ef
+        translation_sha256: 0f2303a5cc7363665e89595f81ffb31c793331068a36c5ef4e4037e547b5557e
+        review_evidence: docs/reference/reviews/wiki-site-interface-copy.json
+        review_evidence_sha256: 75ab2d57e75434955b24d2c283118b3684f36cec6163aaa48a1a671238615ea4
+      ja-JP:
+        path: docs/.vitepress/locales/ja-JP.json
+        status: synchronized
+        reviewed_at: 2026-10-13 11:42:35
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: d6032e90eedab74e99415d166caa54a699dd498144e58b6c2d275d28dfaac7ef
+        translation_sha256: 5e450e16104342b211b961ac09a1e07ac0da0f5fad5c06150f4ae9372b274585
+        review_evidence: docs/reference/reviews/wiki-site-interface-copy.json
+        review_evidence_sha256: 75ab2d57e75434955b24d2c283118b3684f36cec6163aaa48a1a671238615ea4
+      ko-KR:
+        path: docs/.vitepress/locales/ko-KR.json
+        status: synchronized
+        reviewed_at: 2026-10-13 11:42:35
+        reviewer: Codex
+        review_type: AI_REVIEW
+        reviewed_source_sha256: d6032e90eedab74e99415d166caa54a699dd498144e58b6c2d275d28dfaac7ef
+        translation_sha256: 7e8e403ece79b1fd51043f665a08e4b19777dd9672a00bfd1cef656a474fdd29
+        review_evidence: docs/reference/reviews/wiki-site-interface-copy.json
+        review_evidence_sha256: 75ab2d57e75434955b24d2c283118b3684f36cec6163aaa48a1a671238615ea4
 source_only:
   - path: docs/adr/0001-scaffold-upgrade-foundations.md
     reason: 内部架构决策记录，正式发布前重新评估翻译范围
   - path: docs/evidence/
     reason: 构建与验收证据保留中文原文，不作为最终用户文档发布
-
   - path: docs/repository-governance.md
     reason: 内部长期治理与质量门规则；本轮另做路径/链接/证据完整性校验，不冒充四语用户指南
+  - path: docs/adr/0003-authorized-ai-translation-review.md
+    reason: 项目所有者授权与内部复核策略决策，保留中文原始记录
+  - path: docs/adr/0004-native-alertmanager-localization.md
+    reason: 内部架构决策保留中文原始记录；当前操作、边界和截图由四语运维教程及观测事实完整说明

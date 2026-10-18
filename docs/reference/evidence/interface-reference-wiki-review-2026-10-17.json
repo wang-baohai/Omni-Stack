@@ -1,0 +1,1165 @@
+{
+  "schema": 1,
+  "kind": "historical-interface-document-source-semantic-audit",
+  "recorded_at": "2026-10-17T13:22:19.549Z",
+  "source_baseline": "e3f8c495ada63497181580386e9d149f7d370a12",
+  "document_id": "wiki-interface-reference",
+  "original_documents_actually_read": 4,
+  "original_whole_lines": 312,
+  "current_source_inspection": {
+    "whole_files": 5,
+    "whole_lines": 506,
+    "files": [
+      {
+        "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+        "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc",
+        "read_scope": "Whole:four locales,display-fixtures-only fixedclock/auth mocks,options viewport,localStoragefixture,stable waits/masking/fullPagefalse/atomicrename. Current code cannot retroactively prove old capture mode.",
+        "outputs": [
+          "c1f632"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/playwright.docs.config.ts",
+        "sha256": "1521bc4c6eefd09c2f3a3cf9280fa9ab56a98c4966527e2875ae74f6619851a0",
+        "read_scope": "Whole:external mode suppresseswebServer andrequires explicit baseURL/tenant/execution/registry;default devserver must not run onhost;default1440x900. Not newexecution.",
+        "outputs": [
+          "85bef9"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/management.flows.spec.ts",
+        "sha256": "700c72a847e836999cc37fc1529f4a5675e3a59453dfddd4d06637cf0a2a0639",
+        "read_scope": "Whole current read-only page inventory,adminfixture,actualtitles/tablelabels;changedcurrentassertions do not retroactively revalidate baseline images.",
+        "outputs": [
+          "523873"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts",
+        "sha256": "6657760668749213f4007e8ddc3da5811acadffbeb0564c0333d3d52e6c1e6a8",
+        "read_scope": "Whole:read-only overlays,firstrow/bpmn-render/loadingguard,currentlocalizedMQassertions and explicit old ja/koEnglish/Comment fallback remarks. Currenttests notexecuted here.",
+        "outputs": [
+          "340dce"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts",
+        "sha256": "d91c7c7b4a8371e768c0f5a78352b896d26d7c0c9e23f3336560aad7544cc7e7",
+        "read_scope": "Whole:only page/tab/read-onlyrefreshcontrols asserted,mobile390x844/tablet1024x768;not quote form/submit mobileflow.",
+        "outputs": [
+          "a05bb5"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/e2e/E2eTokenFixture.java",
+        "sha256": "2d6eafa8e333882845ab9b2f1c831124175234685a9e3830aa60355f3e04a3c0",
+        "read_scope": "Selected actual first166 and206-261 lines:1200secondstestTTL,read-onlyDBrole/permissionderivation,required/forbiddenrolevalidationandproductionsigner;callerrequiredcleanup isnotpast deletionproof. No fixture executed.",
+        "outputs": [
+          "523873",
+          "e46cad"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/srm.flows.spec.ts",
+        "sha256": "822d7dd630b43f3c94618f1fd620194b90e51910dc10df49b13e1741700577c2",
+        "read_scope": "Selected1-67,171-193,218-246,341-401 plusmatched403-409:tokens/mutationtestskip;APIpreparationmodelbinding;expectOk checksafter awaitedrequest,notnetworkpreflight;cleanup409residualsretained. No mutationexecuted.",
+        "outputs": [
+          "4bb1eb",
+          "e46cad",
+          "f85fd7"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/e2e-docs/screenshot-manifest.yaml",
+        "sha256": "1fc63b7bbcf745b256c5d52fee540ee609f575d3aa0539adb33ba97af2dd1163",
+        "read_scope": "All68referenced image entries parsed and matched bypath/locale/dimensions;metadata values are historical self-reports,not new capture success or per-image container provenance.",
+        "outputs": [
+          "22dfda"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+        "read_scope": "Previously actuallyread user-authorized AI-only document review policy;exact hashretained.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/workflow-approval.md",
+        "sha256": "43e51b029befd4b3655908d7c076b87b230b8b5df2dd12f74bdfc0e3fc5e005a",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-workflow-approval.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/workflow-approval.en.md",
+        "sha256": "bece54dcb5f504f3c8d92c895c90a4f352746831774a1817d9adfbad7b84e136",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-workflow-approval.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/workflow-approval.jp.md",
+        "sha256": "98539ef629cde8866c46bbeee444330bcc068eff5cfda7819ce713d47336d7c0",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-workflow-approval.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/workflow-approval.kr.md",
+        "sha256": "2a7f2aab55aecce168901adc02e8d54e0ca647ede57a93ebf19cbc7146a648f6",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-workflow-approval.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/guide-workflow-approval.json",
+        "sha256": "9dcb32dc1a9d52d5915fc7771db176aa3c25baeff6aa23951221e9d4a7bfe6bc",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-workflow-approval.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/srm-flow.md",
+        "sha256": "10b8ea68357084cfd923a495b63bc4567416549b23122d19bd54e92c1094f082",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-srm-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/srm-flow.en.md",
+        "sha256": "b2ad7c203828a88fb44ebbd9a9bb8d65b3940f624107dcd11d6262e71b06793e",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-srm-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/srm-flow.jp.md",
+        "sha256": "4042c143ff92aa7ee9b54964f2e50451dcba6c27e92530e3ee8b8a9aeca3ab32",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-srm-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/srm-flow.kr.md",
+        "sha256": "41efe61ea05994d469552b50f69832cedad2dcf8607eabb02d10aa444f01c5e6",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-srm-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/guide-srm-flow.json",
+        "sha256": "db4ae3776ba16081ddcee65665f109e6619131b850cd7e04ed4866e86a4a2404",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-srm-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/procurement-flow.md",
+        "sha256": "201034f4ee9bfdfedda14981891df9c970f13eecab79a488455b79a9005d5b36",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-procurement-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/procurement-flow.en.md",
+        "sha256": "1535b446c94551f1f45edb28f41092aad312a03e65576b555bf1e1c66b81850f",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-procurement-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/procurement-flow.jp.md",
+        "sha256": "38b22d87cd192a9920a91e05e2fa8bcea6c210ff9fd12ddaea3d7b990e1116ed",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-procurement-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/procurement-flow.kr.md",
+        "sha256": "4297a015eb9b5e255a91d372b9fc48f80c221c38c875b465779ac5cb954b39af",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-procurement-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/guide-procurement-flow.json",
+        "sha256": "50863f7be61b20f9848c5eb027764d3df1e47a828faf162486b33f753ec5808b",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/guide-procurement-flow.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/mq-reliability.md",
+        "sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/mq-reliability.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/mq-reliability.en.md",
+        "sha256": "eea187884c2c5a68ecd3d9d25c80b129cbf9c0be970bfd6d48c8781d01c48c48",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/mq-reliability.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/mq-reliability.jp.md",
+        "sha256": "dcd2744b4fbb6795ec82ccfb8f683d5970ca4c356c78ef751bda6bf896cfb129",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/mq-reliability.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/mq-reliability.kr.md",
+        "sha256": "a7e7d806ef2e3cdf372571fac08f2721cf089db01411cd63e8fae6c52a2a52e1",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/mq-reliability.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/mq-reliability.json",
+        "sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf",
+        "read_scope": "Exact current named prior document review reuse at the scope recorded in docs/reference/reviews/mq-reliability.json;not fresh whole read.",
+        "whole_current_file_actually_read": false
+      }
+    ]
+  },
+  "prior_named_document_reviews": [
+    {
+      "document_id": "guide-workflow-approval",
+      "source": "docs/guides/workflow-approval.md",
+      "review": "docs/reference/reviews/guide-workflow-approval.json",
+      "review_sha256": "9dcb32dc1a9d52d5915fc7771db176aa3c25baeff6aa23951221e9d4a7bfe6bc",
+      "reuse_scope": "Named completed whole/delta document review at its actual recorded scope;current exact bytes,not fresh full rereads or new runtime acceptance."
+    },
+    {
+      "document_id": "guide-srm-flow",
+      "source": "docs/guides/srm-flow.md",
+      "review": "docs/reference/reviews/guide-srm-flow.json",
+      "review_sha256": "db4ae3776ba16081ddcee65665f109e6619131b850cd7e04ed4866e86a4a2404",
+      "reuse_scope": "Named completed whole/delta document review at its actual recorded scope;current exact bytes,not fresh full rereads or new runtime acceptance."
+    },
+    {
+      "document_id": "guide-procurement-flow",
+      "source": "docs/guides/procurement-flow.md",
+      "review": "docs/reference/reviews/guide-procurement-flow.json",
+      "review_sha256": "50863f7be61b20f9848c5eb027764d3df1e47a828faf162486b33f753ec5808b",
+      "reuse_scope": "Named completed whole/delta document review at its actual recorded scope;current exact bytes,not fresh full rereads or new runtime acceptance."
+    },
+    {
+      "document_id": "mq-reliability",
+      "source": "docs/mq-reliability.md",
+      "review": "docs/reference/reviews/mq-reliability.json",
+      "review_sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf",
+      "reuse_scope": "Named completed whole/delta document review at its actual recorded scope;current exact bytes,not fresh full rereads or new runtime acceptance."
+    }
+  ],
+  "images": {
+    "unique_files": 68,
+    "document_reference_occurrences": 272,
+    "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+    "all_baseline_git_bytes_preserved": true,
+    "legacy_registered_hashes": 0,
+    "per_image_historical_capture_runtime": "unknown",
+    "individual_original_images_viewed_this_audit": 12,
+    "other56_fresh_individual_views": false,
+    "files": [
+      {
+        "path": "docs/images/en-US/monitor-mq-message-detail.png",
+        "sha256": "90714c9e5faa446ba3215694d5dea460125560081e99d16913bf61d464d76e71",
+        "baseline_git_blob": "6cf8715bbaef1a1fe56868b32b3e5bc4f466aaff",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "monitor-mq-message-detail-en-US",
+        "registered_last_success_at": "2026-09-04T09:23:46+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/en-US/srm-evaluations.png",
+        "sha256": "d874201224472a46c6d5c815f23967016be9884900e03721625e1a5e9877131c",
+        "baseline_git_blob": "86e78d94f5bf1ba45997f650410c21579859009d",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-evaluations-en-US",
+        "registered_last_success_at": "2026-09-03T17:33:22+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/srm-invites.png",
+        "sha256": "010823bc74f7a868375d130fdfd5651047d59bfe5b54b0288d59e5cb3a6f76b3",
+        "baseline_git_blob": "0de4b3c2e44ca6f7b1abaa3d8ff40912a667af9c",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-invites-en-US",
+        "registered_last_success_at": "2026-09-03T17:33:25+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/srm-portal-quotation-form.png",
+        "sha256": "ac7e3fe62cd89cbfc19c5847c9e6762a72c230626929301278c0fc814b7d81b4",
+        "baseline_git_blob": "b42acc3719d6fec110b4147092c5a79aa04c05ac",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-form-en-US",
+        "registered_last_success_at": "2026-09-03T16:07:22+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/en-US/srm-portal-quotation-invitations.png",
+        "sha256": "3ff7dbe4cad9426ab400b596180ae3bd294ad42ca4dbb3ca957cacfb6c884849",
+        "baseline_git_blob": "cb0930e100bc817a95074a9b4f0fc417600e5848",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-invitations-en-US",
+        "registered_last_success_at": "2026-09-03T16:07:21+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/srm-portal-quotation-mobile.png",
+        "sha256": "c7e6ad3d6891c26af1e0ab2cc4ad8eb2fd287587381c382536fc97fb9cd7af17",
+        "baseline_git_blob": "06e9ad4cf196cc5940bc2dae8b12feb2a405be8d",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-mobile-en-US",
+        "registered_last_success_at": "2026-09-03T18:00:44+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 390,
+        "height": 844,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/srm-portal-quotation-submitted.png",
+        "sha256": "973fe68df6b58e4793165f10d7f84f9f0c5e7ca2f0c040dd1c818649c03a2c76",
+        "baseline_git_blob": "67f93c79447e08be6922005df81d2c3fe3d3401b",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-submitted-en-US",
+        "registered_last_success_at": "2026-09-03T16:07:38+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/srm-portal-quotation-tablet.png",
+        "sha256": "a2f79a90765b7373eb5d48599724aa180f005034511769635bf9bd772216be30",
+        "baseline_git_blob": "6a9cceaf197ea40bb983d31d245a40ea06d91de9",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-tablet-en-US",
+        "registered_last_success_at": "2026-09-03T18:00:46+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1024,
+        "height": 768,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/srm-risk-config.png",
+        "sha256": "2b840d4d18b2f52587530a54777d1c9c74c45b8b15485830d6f1238bcb57c62b",
+        "baseline_git_blob": "b2cbf185918f1b04d706eac235b2b1928d786bab",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-risk-config-en-US",
+        "registered_last_success_at": "2026-09-03T17:33:24+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/srm-risks.png",
+        "sha256": "1ecada0e3ba07f3c3fc0f725d00aaf271e6ed0748d51d60f3c70fde7bda3ef6f",
+        "baseline_git_blob": "49ceb272b47ed00d5630be074b41b0836d9e89cd",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-risks-en-US",
+        "registered_last_success_at": "2026-09-03T17:33:23+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/srm-suppliers.png",
+        "sha256": "d98b29dc2d89c3e85b4810d11edf5a07929dcc37351f62431cd8c0970b1e210e",
+        "baseline_git_blob": "0b64c0be522cabb8b1f0e73973599e7d145904e8",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "srm-suppliers-en-US",
+        "registered_last_success_at": "2026-09-03T17:33:21+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-definitions.png",
+        "sha256": "a6a18d15adf2e6f87cd4ee8dac8915196d632df589ca20450fb7955d7a02fffa",
+        "baseline_git_blob": "05e2f87c1ae549827b5b88cf3d9a71c07e3cd984",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "workflow-definitions-en-US",
+        "registered_last_success_at": "2026-09-03T17:33:19+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-instance-approval-records.png",
+        "sha256": "df0084f1a518a447b9d92bc89f3a84621279cf92583b9411e2c270a108dd0376",
+        "baseline_git_blob": "9832ef55c2399d178f98550dba39072624db95f7",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instance-approval-records-en-US",
+        "registered_last_success_at": "2026-09-04T09:23:43+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-instance-progress.png",
+        "sha256": "f3915fb96c551347e6c1b0521214197abed2c58ada9d040461616b6cbfa7fbe7",
+        "baseline_git_blob": "5d2f86fa7ddcda7d48590d2f629bed12f5fc51fc",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instance-progress-en-US",
+        "registered_last_success_at": "2026-09-04T09:23:42+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-instances.png",
+        "sha256": "ee71b9e8226749615e1f1f9e4516233da81b04fbc3f26764f77049759ac0b389",
+        "baseline_git_blob": "f1c55abf5b2cee607a4a4875cf4868d131a7f413",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instances-en-US",
+        "registered_last_success_at": "2026-09-03T17:33:19+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-model-versions.png",
+        "sha256": "fa6e6fe59df2d89e51533b07ab9b024a09ef5132606500e294cd2911c6d4b4e8",
+        "baseline_git_blob": "4185a709b71514b2ef80bed482cf548044e85242",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "workflow-model-versions-en-US",
+        "registered_last_success_at": "2026-09-04T09:23:44+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/en-US/workflow-stats.png",
+        "sha256": "5f08091bc271951c6c526f4bb258edef79a1736d0531ee385c75d6c7724f7961",
+        "baseline_git_blob": "16380f17a4de24859c7f6249f00c27456e347653",
+        "locale": "en-US",
+        "reference_occurrences": 4,
+        "register_id": "workflow-stats-en-US",
+        "registered_last_success_at": "2026-09-03T17:33:20+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/monitor-mq-message-detail.png",
+        "sha256": "a458d2defb24aa330cc1140ef90f1e9bdefdb3c2a18622a81fff7d2bd1f02125",
+        "baseline_git_blob": "fe08bf819bd134ddcad4564325185652e11d3eed",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "monitor-mq-message-detail-ja-JP",
+        "registered_last_success_at": "2026-09-04T09:23:51+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/ja-JP/srm-evaluations.png",
+        "sha256": "4eb755ee634c93c98f23ca954d1f713fe9ee45adb4a13a95c1424d82ea9a9d53",
+        "baseline_git_blob": "bb9e7d1cea13bc3c8555e36327691d88bf6e7c68",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-evaluations-ja-JP",
+        "registered_last_success_at": "2026-09-03T17:33:39+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/srm-invites.png",
+        "sha256": "88c15a4e00f2a9a095658be16dd14e78e920345a472b7a927b5cbbb93dc54577",
+        "baseline_git_blob": "01d93e06986c095d6772daf47a83468a54a097e1",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-invites-ja-JP",
+        "registered_last_success_at": "2026-09-03T17:33:41+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/srm-portal-quotation-form.png",
+        "sha256": "f51535129e40de0bb52c709bbcbadc2f49110ffee735656522d555bea8de4838",
+        "baseline_git_blob": "772851db8d8f5d71bfdb1f6c3ccd192d7c864176",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-form-ja-JP",
+        "registered_last_success_at": "2026-09-03T16:07:42+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/ja-JP/srm-portal-quotation-invitations.png",
+        "sha256": "4f8aa5705264ccdded58c605318f412aaf867e7c815e854d105eebb1f1b474f7",
+        "baseline_git_blob": "b27c2fad3ee4fdd58b7f2bb6b801fcabbfd473bf",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-invitations-ja-JP",
+        "registered_last_success_at": "2026-09-03T16:07:41+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/srm-portal-quotation-mobile.png",
+        "sha256": "3c168e6d8890f30333f4a3c99a8ab8b480dfc2c3df90e9f966c88ac41a360f1c",
+        "baseline_git_blob": "12040ece47b2cc1fc9d46e3025a6d768c7ce4428",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-mobile-ja-JP",
+        "registered_last_success_at": "2026-09-03T18:00:44+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 390,
+        "height": 844,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/srm-portal-quotation-submitted.png",
+        "sha256": "ec2530f1f32e9ac0a392c3e8cf87163041826ee6f7de16fc11dc0726cc634b13",
+        "baseline_git_blob": "63194df62ca51a7c20b0034577693fc00ee3f395",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-submitted-ja-JP",
+        "registered_last_success_at": "2026-09-03T16:07:58+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/srm-portal-quotation-tablet.png",
+        "sha256": "ac1af7ff293e1a15fdbc7e15cb072c142f6d02e30a5225d7545606817baf3768",
+        "baseline_git_blob": "654141a52952ae8e67ac4a4311135ec9c8bc780b",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-tablet-ja-JP",
+        "registered_last_success_at": "2026-09-03T18:00:47+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1024,
+        "height": 768,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/srm-risk-config.png",
+        "sha256": "44327053d1c484ba6ecc44e332c64dea064e260cd654b11efcbc35f6f4c64a42",
+        "baseline_git_blob": "054db9c64bb095a4e1f6fc278556f0356a4389ed",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-risk-config-ja-JP",
+        "registered_last_success_at": "2026-09-03T17:33:40+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/srm-risks.png",
+        "sha256": "b8bcc6b113650a31aaec6a150d45f3db665610fc9e7255cc54da666156d1a15e",
+        "baseline_git_blob": "188b04030cb5392f68aba9e52ea75bd9c6501065",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-risks-ja-JP",
+        "registered_last_success_at": "2026-09-03T17:33:39+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/srm-suppliers.png",
+        "sha256": "dd5aa665ac27220b664338333be4ed3ff001c61e4bd585d2a0180e17c3ddeb8a",
+        "baseline_git_blob": "f804c8e43a6023455751976c6b7484d48de6e1bc",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "srm-suppliers-ja-JP",
+        "registered_last_success_at": "2026-09-03T17:33:38+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-definitions.png",
+        "sha256": "c905617f254a678b181ee536bc87f14c17ee99c8068868368d7fd194edc68059",
+        "baseline_git_blob": "ef20f18c6bcdffc62ecf2b8d2eb59d9b9c3ab07f",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "workflow-definitions-ja-JP",
+        "registered_last_success_at": "2026-09-03T17:33:36+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-instance-approval-records.png",
+        "sha256": "7bfe1d32aaf64d29dbc98dc55a26eb37ceaafa23165682f35527e4933d94751c",
+        "baseline_git_blob": "58fd7e5ea378d7a31534d1a31610565848206712",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instance-approval-records-ja-JP",
+        "registered_last_success_at": "2026-09-04T09:23:48+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-instance-progress.png",
+        "sha256": "9248f92d21e125b773f6e2c02b28b96f2a9c2c33da0e6a8a473bb3b625223a17",
+        "baseline_git_blob": "433d3988a47e83e08a877babdb1b20e8c0bd2d93",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instance-progress-ja-JP",
+        "registered_last_success_at": "2026-09-04T09:23:47+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-instances.png",
+        "sha256": "42c75c0f7ec27bfb05d5984627b9c39e33643dd4299828d385a8ac9a8fa1d658",
+        "baseline_git_blob": "ca6809000c4bc89a384265cf3a835ac9ec26dc80",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instances-ja-JP",
+        "registered_last_success_at": "2026-09-03T17:33:35+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-model-versions.png",
+        "sha256": "4a6caecb495cdcafcac2e7162ff57c5802731a5721dbb0ce31ab1ad0dfb69523",
+        "baseline_git_blob": "4d2112311826e503fd8bf9d50b3ba3f2114f6ea6",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "workflow-model-versions-ja-JP",
+        "registered_last_success_at": "2026-09-04T09:23:49+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-stats.png",
+        "sha256": "cf42658c4aa50d610f2d36f4e675752a371623725ffea98d5e39a23c15c6e4a2",
+        "baseline_git_blob": "82a310578cca2a4e389a729dab3913232740f663",
+        "locale": "ja-JP",
+        "reference_occurrences": 4,
+        "register_id": "workflow-stats-ja-JP",
+        "registered_last_success_at": "2026-09-03T17:33:37+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/monitor-mq-message-detail.png",
+        "sha256": "0525ef2eb01da54e56b30a583749330cd75295bb9058d652a70f5f17e1e44943",
+        "baseline_git_blob": "046cbecba93c3c8e7c8dca1a2b4abb664c777476",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "monitor-mq-message-detail-ko-KR",
+        "registered_last_success_at": "2026-09-04T09:24:00+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/ko-KR/srm-evaluations.png",
+        "sha256": "68c5a3f4cba0a6449c20438d402716581450b60e11acf45721a950f59b0afcf0",
+        "baseline_git_blob": "906daac129f05f87ffff41ab5bfb3cc33d915e84",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-evaluations-ko-KR",
+        "registered_last_success_at": "2026-09-03T17:33:58+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/srm-invites.png",
+        "sha256": "c24f6384ed5b14580eb27a727110c921dceb5ea224322cbcc57160024d3e99ee",
+        "baseline_git_blob": "5224d91658a2098218efbd7b89bc4fb7d69ca086",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-invites-ko-KR",
+        "registered_last_success_at": "2026-09-03T17:34:00+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/srm-portal-quotation-form.png",
+        "sha256": "07f07b53555e664a11c8c949f015d5244928beb41edc65f0d2700b3f820e7122",
+        "baseline_git_blob": "e2d1235390c5d096ec9591826d641c64c6ce8dd7",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-form-ko-KR",
+        "registered_last_success_at": "2026-09-03T16:08:01+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/ko-KR/srm-portal-quotation-invitations.png",
+        "sha256": "c60f159532f282a6c3e46dbe11bbf9e6b826eefdaf295a6958a72d61c0a44b2f",
+        "baseline_git_blob": "6db258138204bfb2e01af10f34e9666d22ad7205",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-invitations-ko-KR",
+        "registered_last_success_at": "2026-09-03T16:08:00+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/srm-portal-quotation-mobile.png",
+        "sha256": "0644338af9213d1f48fe2314da1f973d8656adf4f6481343e73cb4a48c72e862",
+        "baseline_git_blob": "97d5cebfbcacb241d5cfd9393169195500ee22bb",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-mobile-ko-KR",
+        "registered_last_success_at": "2026-09-03T18:00:45+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 390,
+        "height": 844,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/srm-portal-quotation-submitted.png",
+        "sha256": "96fb538a7d04971e5c49d9ad27ab6119b07955c15adb1d87285a936061786109",
+        "baseline_git_blob": "a0dd07cb85b4c5bf2dbdb48667c6c3fba218e8a3",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-submitted-ko-KR",
+        "registered_last_success_at": "2026-09-03T16:08:17+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/srm-portal-quotation-tablet.png",
+        "sha256": "bcf575c097add9e56f214949576fd5c6e327b319333740cbb26be8ba2b3eb06f",
+        "baseline_git_blob": "9750a4ef7eb9a71387674ffbbfc0b02cd759564c",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-tablet-ko-KR",
+        "registered_last_success_at": "2026-09-03T18:00:48+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1024,
+        "height": 768,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/srm-risk-config.png",
+        "sha256": "b60bbb1cbb481d7fbe51b7ae70e236da5289569b648986452e205d495d381dce",
+        "baseline_git_blob": "128a984476d77648c6c0fab8591f63662eb4e1d9",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-risk-config-ko-KR",
+        "registered_last_success_at": "2026-09-03T17:34:00+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/srm-risks.png",
+        "sha256": "d4af21d8cec7dd9895fe331040518266a5389f52aa1dbaabc8b7267e5ef470a8",
+        "baseline_git_blob": "f7a677c4c1bfa5ad711c618a6e2727aa16fea13f",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-risks-ko-KR",
+        "registered_last_success_at": "2026-09-03T17:33:59+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/srm-suppliers.png",
+        "sha256": "846695d9174903c5c2080f182308cb7e3f09451729f22c70f28c23e9d54d4479",
+        "baseline_git_blob": "3e8ebeff36341beb2f04f330546346c3b7eed7dc",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "srm-suppliers-ko-KR",
+        "registered_last_success_at": "2026-09-03T17:33:57+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-definitions.png",
+        "sha256": "5941a80c87108a7a4d02b6286d69a6b4e9d01183e482cad4dee1272162a1b999",
+        "baseline_git_blob": "51c8032692c6ad39b2a15d7d5c1216a70403f50b",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "workflow-definitions-ko-KR",
+        "registered_last_success_at": "2026-09-03T17:33:55+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-instance-approval-records.png",
+        "sha256": "6b5c9c18b4e90e336691fc50403c80d75eb21e823664aea0bec8dc46eb4c9d21",
+        "baseline_git_blob": "91c9b4d082564349798af61545364d09df4f1c0d",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instance-approval-records-ko-KR",
+        "registered_last_success_at": "2026-09-04T09:23:55+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-instance-progress.png",
+        "sha256": "fc4ffd0bccba5f11a60be92f689799a12d20885b57af483f33ceda51a55f5b8a",
+        "baseline_git_blob": "091669efebf4bea646b3e03983c93b583b4b55c2",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instance-progress-ko-KR",
+        "registered_last_success_at": "2026-09-04T09:23:53+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-instances.png",
+        "sha256": "6c5c2bff94a36a205057e36c35c6a17d3195205c218335e4bbf03866475e2cb9",
+        "baseline_git_blob": "b1a9cb3f0db765b8b8e4e5b8fafee0453e29a00c",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instances-ko-KR",
+        "registered_last_success_at": "2026-09-03T17:33:55+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-model-versions.png",
+        "sha256": "056cdf345762ba6a7a9c78b1a41c87c6a1c5f651140b40c0f742aa0762ec3f6f",
+        "baseline_git_blob": "b6e300ee7bb58e0078646d20db4e5d8e461495d6",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "workflow-model-versions-ko-KR",
+        "registered_last_success_at": "2026-09-04T09:23:58+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-stats.png",
+        "sha256": "1ffa4c1b2c45824567555f5a50b7ca69dd6860371933b0b0ef7b432dfd518625",
+        "baseline_git_blob": "9f202637367239a2419e13b5871c04fecdd23157",
+        "locale": "ko-KR",
+        "reference_occurrences": 4,
+        "register_id": "workflow-stats-ko-KR",
+        "registered_last_success_at": "2026-09-03T17:33:56+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/monitor-mq-message-detail.png",
+        "sha256": "4b820709cffe0f0904bde0c4868c2ac12de9b4bbd03a22af3ac0c3ff6e2a3182",
+        "baseline_git_blob": "c5eb4882b8ab96ce644da96729f478cfafb2cc4c",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "monitor-mq-message-detail-zh-CN",
+        "registered_last_success_at": "2026-09-04T09:23:41+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/zh-CN/srm-evaluations.png",
+        "sha256": "fa6ca50f9cccdd30404b7dbbfeb6c50a0f37187c8f9e0a9005e38ab31514e846",
+        "baseline_git_blob": "e6127c99e543417f2240f74ba5dc97735fe9fbe6",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-evaluations-zh-CN",
+        "registered_last_success_at": "2026-09-03T17:33:01+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/srm-invites.png",
+        "sha256": "ccd4a0a19bb82fc7dfda43e26070d49aa0265b4a13d229c20cbf998f401246bd",
+        "baseline_git_blob": "75995798bcf4fa734a1d945f96c4d858326f1d27",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-invites-zh-CN",
+        "registered_last_success_at": "2026-09-03T17:33:04+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/srm-portal-quotation-form.png",
+        "sha256": "8dc5fddf84e2a9fdb0a2df05ce709341bcf507b9884475709b3071a7b56df054",
+        "baseline_git_blob": "f05140ddc5f6750eec2f6e0d4d53f89c99ee64ec",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-form-zh-CN",
+        "registered_last_success_at": "2026-09-03T16:07:02+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/zh-CN/srm-portal-quotation-invitations.png",
+        "sha256": "b8ca0e0af36fc651e19d83b8042da267e366766ac829609a701f6ece65a674e3",
+        "baseline_git_blob": "acacbeaa942d8db8d396042fb9d97c29214303b6",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-invitations-zh-CN",
+        "registered_last_success_at": "2026-09-03T16:07:01+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/srm-portal-quotation-mobile.png",
+        "sha256": "044dd0e25fe64e590c0a4b1314f20731e437a5126447d8aa0102b3c997c8315c",
+        "baseline_git_blob": "4a5a0ee9330931f6f98283638ed77839a843ff6d",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-mobile-zh-CN",
+        "registered_last_success_at": "2026-09-03T18:00:42+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 390,
+        "height": 844,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/srm-portal-quotation-submitted.png",
+        "sha256": "dc0c8df14aef5aa5006488b7c60557ce03924c2fa9ef1e2ba8c78cdc60b4fda3",
+        "baseline_git_blob": "eb219a8f57507f8ffcaf9e7fb366e8fccaf4d23a",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-submitted-zh-CN",
+        "registered_last_success_at": "2026-09-03T16:07:18+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/srm-portal-quotation-tablet.png",
+        "sha256": "336831f1a6e9ec1f5c505c1c921c0e99be80774a6361eaaac42fe9c3a891ed08",
+        "baseline_git_blob": "388a102ef59c5325d0043cc27320eccc8ab8f189",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-portal-quotation-tablet-zh-CN",
+        "registered_last_success_at": "2026-09-03T18:00:46+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1024,
+        "height": 768,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/srm-risk-config.png",
+        "sha256": "8dc9c762cb070e0ef6ba609678ca6cab134ab7c922a43240608c591c493c40ee",
+        "baseline_git_blob": "fbaf72a8710d3463cfbab8082442922152e89cb0",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-risk-config-zh-CN",
+        "registered_last_success_at": "2026-09-03T17:33:03+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/srm-risks.png",
+        "sha256": "2676ae6a845be8914789e5b96e9650b52f93f2ed5cc88789127be442d72d2041",
+        "baseline_git_blob": "e544ed993ccb3241c0c18390056db65371770804",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-risks-zh-CN",
+        "registered_last_success_at": "2026-09-03T17:33:02+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/srm-suppliers.png",
+        "sha256": "e3eba66c971e2b322a575b74dcf359d810d0c3fa635abf62ecd6247b1e70ecd0",
+        "baseline_git_blob": "618a83a028644c02a86233ce56328471c57a8801",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "srm-suppliers-zh-CN",
+        "registered_last_success_at": "2026-09-03T17:33:00+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-definitions.png",
+        "sha256": "e42e933cf0b5211921791a0aba12ba15a2848255048f5a255d2e943ec6228d03",
+        "baseline_git_blob": "0d1b5ccc200f68937e1db5dc004452081d1fcb53",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "workflow-definitions-zh-CN",
+        "registered_last_success_at": "2026-09-03T17:32:58+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-instance-approval-records.png",
+        "sha256": "3260818e8594143feabeef65f9503870cdb617d5f5736e263b9a6a1d53d8791e",
+        "baseline_git_blob": "35d3585703ff40e3ef4d5ccfbaf7ffbe14f996c1",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instance-approval-records-zh-CN",
+        "registered_last_success_at": "2026-09-04T09:23:39+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-instance-progress.png",
+        "sha256": "513e1ad39a0465669faf4c497af36ef09944f88efa27efc1a377cc972de76ae6",
+        "baseline_git_blob": "a35b7391929245edbce82864b0511adcfbe9bf5f",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instance-progress-zh-CN",
+        "registered_last_success_at": "2026-09-04T09:23:37+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-instances.png",
+        "sha256": "940a7299ac3f47d06f854d496b4dc2f9e9be04b451c4a6c7b70fa4b89973d1c9",
+        "baseline_git_blob": "607b086b0e70c1595f3aa019fbc24f546c7c4163",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "workflow-instances-zh-CN",
+        "registered_last_success_at": "2026-09-03T17:32:58+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-model-versions.png",
+        "sha256": "147950f61bb89b25d5d551ae18e9f04245b5643e38f5f5b7f55368706e21ca39",
+        "baseline_git_blob": "4d6e358314a9ae3f017418e6742321f92e7c00ac",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "workflow-model-versions-zh-CN",
+        "registered_last_success_at": "2026-09-04T09:23:40+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": true
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-stats.png",
+        "sha256": "b1563729d99e3d9649081dea2a6278f4e91cbfac77996b59aec95a3c520c742d",
+        "baseline_git_blob": "944dc1f3d1ec28405a96570c846e2db805c6ce44",
+        "locale": "zh-CN",
+        "reference_occurrences": 4,
+        "register_id": "workflow-stats-zh-CN",
+        "registered_last_success_at": "2026-09-03T17:32:59+08:00",
+        "registered_time_is_not_capture_proof": true,
+        "width": 1440,
+        "height": 900,
+        "individually_viewed_original_this_audit": false
+      }
+    ]
+  },
+  "current_semantics": {
+    "history": "Reference layouts only;differentlocaleversion/messageexamplesarenotsame-recordacceptance. ChineseDRAFT0vsothersPUBLISHED2;ChineseMQPENDINGvsothersSENT.",
+    "localization": "Oldja/koMQEnglish,quoteexpirylabelwrap/Chineseunit/backgroundbleedandpayloadviewportclippingretainedwithoutrepainting;notalllegacyUItextapproved.",
+    "fixture": "ExistingDBgrants/testJWT1200do notprovepassword/CAPTCHA;callermustdeleteoutsidefiles,butpastcleanupunproved.",
+    "mutation": "Suite-leveltokens/flag skip;expectOkresponsecheckisnotnetworkpreflight. No oldsuccesswritesreplayed.",
+    "docker": "Newcapturemustbothbrowser/appinlocalDocker externalmode;defaultwebServernotonhost;fixedclockonlydisplay-fixturesandnotretroactivehistoryproof.",
+    "responsive": "List/tabreferenceat390x844and1024x768;notcomplete mobilequotejourney.",
+    "policy": "Actual authorized AI_REVIEW sufficient;human document review optional;otherA-G boundariesremain."
+  },
+  "new_application_runs": 0,
+  "new_builds_or_tests": 0,
+  "new_captures": 0,
+  "business_writes": 0,
+  "historical_successful_writes_replayed": false,
+  "human_review": false,
+  "human_review_required": false,
+  "limitations": [
+    "Baseline68preservationandlegacyregistrycannotprovetime/runtime/containerimageofformercapture.",
+    "Only12individualoriginalsnewlyviewed;not68freshUItranslationreviews. Documentcaptions/proseallreviewed.",
+    "Currentcode/testlinksarenotoldcaptureexecutionproof;no newtests/captures/writes,oldUItranslationgapsremain.",
+    "FullA-G,remainingOutboxtranslations,OAuth0/3,realSRMCAPTCHA,Qodernative,currentgoldens/presets/finalsiteandreview-dependencyalignmentremainopen."
+  ]
+}

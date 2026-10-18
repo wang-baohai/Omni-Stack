@@ -1,6 +1,6 @@
 # Omni-Stack Observability Operations and Maintenance
 
-This document is the operational source of truth for WP-07, covering application metrics, distributed tracing, structured logs, the local observability stack, alerts, and the SLO template. Observability is disabled by default and is not a prerequisite for application startup.
+This document defines current engineering boundaries for metrics, tracing, structured logs, alerts and SLOs. Observability is disabled by default and is not an application startup prerequisite.
 
 ## 1. Data Flow and Boundaries
 
@@ -17,47 +17,13 @@ Management endpoints do not go through the Gateway. In Compose, the application 
 
 ## 2. Start and Stop
 
-First create a complete `.env` from `.env.example`, then run from the repository root:
-
-```powershell
-npm --prefix tools/omni-cli run dev -- dev up --preset full --observability
-npm --prefix tools/omni-cli run dev -- dev status
-```
-
-The CLI sets `OTLP_EXPORT_ENABLED=true`, ECS JSON logs, and local 100% sampling for this process, and makes the one-shot migrator push results to Pushgateway on exit. Without `--observability`, both OTLP and migration metric pushes are disabled, the sampling rate is 0, and applications still start normally without exporting spans.
-
-Local entries:
-
-| Component | Address | Default purpose |
-|---|---|---|
-| Grafana | `http://127.0.0.1:3001` | Dashboards, logs and traces |
-| Prometheus | `http://127.0.0.1:9090` | Targets, PromQL, rules |
-| Pushgateway | `http://127.0.0.1:9091` | Short-lived migration metrics |
-| Node Exporter | `http://127.0.0.1:9100` | Local node and filesystem metrics |
-| cAdvisor | `http://127.0.0.1:8088` | Container resource and lifecycle metrics |
-| Alertmanager | `http://127.0.0.1:9093` | Alert state |
-| Tempo | `http://127.0.0.1:3200` | Trace API |
-| Loki | `http://127.0.0.1:3100` | Log API |
-| Alloy | `http://127.0.0.1:12345` | Log collection state |
-| OTLP | `127.0.0.1:4317/4318` | gRPC/HTTP receiver |
-
-Stopping preserves the observability data volumes by default:
-
-```powershell
-npm --prefix tools/omni-cli run dev -- dev down
-```
-
-Only when you confirm that local metrics, traces, logs and database data are no longer needed may you explicitly delete all named volumes:
-
-```powershell
-npm --prefix tools/omni-cli run dev -- dev down --volumes --confirm-delete-volumes
-```
+The observability profile and explicit export configuration jointly control observability; it is disabled by default. Business ports do not move when observability is enabled. Management endpoints must not be public. Metrics use a separate management port: a 404 on the business port does not prove missing metrics. See [Operations](guides/operations-upgrade.en.md) for startup, ports, health checks and safe shutdown.
 
 ## 3. Dashboards and Metric Contract
 
 Grafana auto-loads 7 read-only dashboards: Platform Overview, Service RED, JVM and Pools, Feign Clients, MQ and Outbox, Workflow, Database Migrations. The JSON lives in `observability/grafana/dashboards/`, and the datasource and dashboard providers live in `observability/grafana/provisioning/`.
 
-Alloy only collects container logs whose `COMPOSE_PROJECT_NAME` label matches its own. When using `docker compose -p <name>` or setting `COMPOSE_PROJECT_NAME`, this filter value changes accordingly and will not scan other Compose projects on the host.
+Alloy filters log targets by the Docker label `com.docker.compose.project` and collects logs only from the current Compose project. `OMNI_COMPOSE_PROJECT` supplies the filter value from `COMPOSE_PROJECT_NAME`; it follows `docker compose -p <name>` or an explicit `COMPOSE_PROJECT_NAME`. Docker discovery discovers container metadata; log collection runs after filtering and excludes other Compose projects.
 
 The only allowed metric labels are: `service.name`, `environment`, `instance`, HTTP method/route template/status, exception class, MQ destination/result, and the closed operation/status enums in code. Database migration info may additionally use the repository-controlled schema version. Never put tenantId, userId, username, businessKey, raw URL, request body, message body, dynamic SQL, table name or connection address into labels. A new label must first prove its value set is fixed and assess its cardinality upper bound.
 
@@ -77,6 +43,10 @@ Other custom metrics:
 - `omni_db_migration_operations_total{result}`, `omni_db_migration_duration_seconds`, `omni_db_schema_version_info{version}`: results, duration and controlled manifest version pushed by the one-shot migrator on exit.
 
 On Outbox creation the real traceId is saved as `producer_trace_id`; on send it is passed to consumers via the `omniProducerTraceId` and `omniMessageId` message headers; delivery still works when history lacks a producer traceId. The relay creates a new relay span per delivery, and logs only `msgId`, `producerTraceId`, `relayTraceId` and the fixed destination/result; the Asset Consumer extracts the correlation fields from the headers and logs `msgId`, `producerTraceId` and its own `consumerTraceId`. Neither side logs payload, tenant or business key. Via `msgId` you can jump from producer logs to relay and consumer logs, then query the corresponding Traces separately.
+
+### Alertmanager UI Boundary
+
+`alertmanager-ui` builds four languages from the official v0.30.1 Elm source and proxies the same `alertmanager:9093` backend. The host entry remains `127.0.0.1:9093`; the backend does not also publish that port. UI paths are `/zh-CN/`, `/en-US/`, `/ja-JP/`, `/ko-KR/`; switching language preserves the hash route and filters. API fields, labels, state enums and receiver names retain their original values; weekday preferences still store upstream English protocol values. The build pins the upstream archive SHA-256, preserves the Apache-2.0 LICENSE/NOTICE and fails on a missing message or structural patch mismatch. See [ADR-0004](adr/0004-native-alertmanager-localization.md) for provenance and maintenance, and [Operations](guides/operations-upgrade.en.md) for procedures and screenshots. This does not add a business service or a public management entry.
 
 ## 4. Alerts and Threshold Calibration
 
@@ -116,14 +86,4 @@ Each production service copies the following template and confirms it jointly be
 
 ## 7. Verification and Troubleshooting
 
-Configuration-level validation:
-
-```powershell
-docker compose --profile observability config --quiet
-docker run --rm --entrypoint /bin/promtool --mount type=bind,source=${PWD}/observability/prometheus,target=/etc/prometheus,readonly prom/prometheus:v3.14.0 check rules /etc/prometheus/alerts.yml
-docker run --rm --entrypoint /bin/promtool --mount type=bind,source=${PWD}/observability/prometheus,target=/etc/prometheus,readonly prom/prometheus:v3.14.0 check config /etc/prometheus/prometheus.yml
-```
-
-After running, check that the started applications in Prometheus `/targets` are UP; services not included in the current preset showing DOWN is expected. When Grafana has no data, check in order the application `/actuator/prometheus`, the Prometheus target, the OTel Collector logs, Tempo/Loki readiness and Alloy targets.
-
-Performance acceptance uses the same fixture to separately measure startup time, CPU, memory, throughput and P95/P99 with observability disabled and enabled. Results are written to `docs/evidence/scaffold-upgrade/`; local 100% sampling is only for acceptance, and the production sampling rate is calibrated by capacity and SLO.
+Validate configuration, runtime health, Trace/log correlation, alert delivery and performance separately. Valid syntax proves neither targets UP nor delivered notifications. Interpret absent services against the selected preset; do not ignore every DOWN target. Record current source, images, preset, time, actual failures and scope. Historical acceptance proves only its baseline. Procedures and current recovery limits are in [Operations](guides/operations-upgrade.en.md).

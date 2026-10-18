@@ -1,6 +1,6 @@
 # Omni-Stack 可観測性の運用とメンテナンス
 
-本ドキュメントは WP-07 の運用事実源であり、アプリケーションメトリクス、分散トレーシング、構造化ログ、ローカル観測スタック、アラート、SLO テンプレートを説明します。観測機能はデフォルトで無効であり、アプリケーション起動の前提条件ではありません。
+本書はメトリクス、追跡、構造化ログ、アラートと SLO の現在の工程境界を定義します。観測機能は既定で無効で、アプリ起動の前提条件ではありません。
 
 ## 1. データフローと境界
 
@@ -17,47 +17,13 @@
 
 ## 2. 起動と停止
 
-まず `.env.example` から完全な `.env` を作成し、リポジトリルートから実行します：
-
-```powershell
-npm --prefix tools/omni-cli run dev -- dev up --preset full --observability
-npm --prefix tools/omni-cli run dev -- dev status
-```
-
-CLI は本プロセスに `OTLP_EXPORT_ENABLED=true`、ECS JSON ログ、ローカル 100% サンプリングを設定し、一回限りのマイグレーターが終了時に結果を Pushgateway にプッシュするようにします。`--observability` がない場合、OTLP とマイグレーションメトリクスのプッシュはいずれも無効で、サンプリング率は 0、アプリケーションは Span をエクスポートせず正常に起動します。
-
-ローカル入口：
-
-| コンポーネント | アドレス | デフォルト用途 |
-|---|---|---|
-| Grafana | `http://127.0.0.1:3001` | ダッシュボード、ログ、Trace |
-| Prometheus | `http://127.0.0.1:9090` | Targets、PromQL、ルール |
-| Pushgateway | `http://127.0.0.1:9091` | 短命のマイグレーションメトリクス |
-| Node Exporter | `http://127.0.0.1:9100` | ローカルノードとファイルシステムのメトリクス |
-| cAdvisor | `http://127.0.0.1:8088` | コンテナリソースとライフサイクルのメトリクス |
-| Alertmanager | `http://127.0.0.1:9093` | アラート状態 |
-| Tempo | `http://127.0.0.1:3200` | Trace API |
-| Loki | `http://127.0.0.1:3100` | ログ API |
-| Alloy | `http://127.0.0.1:12345` | ログ収集状態 |
-| OTLP | `127.0.0.1:4317/4318` | gRPC/HTTP 受信 |
-
-停止はデフォルトで観測データボリュームを保持します：
-
-```powershell
-npm --prefix tools/omni-cli run dev -- dev down
-```
-
-ローカルのメトリクス、Trace、ログ、データベースデータが不要であることを確認した時のみ、すべての名前付きボリュームを明示的に削除できます：
-
-```powershell
-npm --prefix tools/omni-cli run dev -- dev down --volumes --confirm-delete-volumes
-```
+observability profile と明示的な出力設定が観測機能を制御し、既定は無効です。有効化しても業務ポートを変更しません。管理入口を公開してはなりません。メトリクスは独立した management ポートを使い、業務ポートの 404 はメトリクス欠如の証拠ではありません。起動・ポート・正常性確認と安全な停止は[運用](guides/operations-upgrade.jp.md)を参照してください。
 
 ## 3. ダッシュボードとメトリクス契約
 
 Grafana は 7 つの読み取り専用ダッシュボードを自動ロードします：Platform Overview、Service RED、JVM and Pools、Feign Clients、MQ and Outbox、Workflow、Database Migrations。JSON は `observability/grafana/dashboards/` に、データソースとダッシュボード provider は `observability/grafana/provisioning/` にあります。
 
-Alloy は自分と同じ `COMPOSE_PROJECT_NAME` ラベルのコンテナログのみを収集します。`docker compose -p <name>` を使うか `COMPOSE_PROJECT_NAME` を設定すると、このフィルタ値は同期的に変わり、ホスト上の他の Compose プロジェクトをスキャンしません。
+Alloy は Docker ラベル `com.docker.compose.project` でログ対象を絞り込み、現在の Compose プロジェクトのログだけを収集します。フィルタ値は `COMPOSE_PROJECT_NAME` に由来する `OMNI_COMPOSE_PROJECT` から取得し、`docker compose -p <name>` または明示的な `COMPOSE_PROJECT_NAME` に従います。Docker discovery はコンテナのメタデータを検出しますが、ログ収集は絞り込み後に行い、他の Compose プロジェクトのログを収集しません。
 
 許可されるメトリクスラベルは次のみです：`service.name`、`environment`、`instance`、HTTP method/route template/status、exception class、MQ destination/result、およびコード内の閉じた列挙 operation/status。データベースマイグレーション情報はリポジトリ管理下の schema version を追加で使用できます。tenantId、userId、username、businessKey、生の URL、リクエストボディ、メッセージボディ、動的 SQL、テーブル名、接続アドレスをラベルに入れてはいけません。新しいラベルはまず値集合が固定であることを証明し、カーディナリティ上限を評価しなければなりません。
 
@@ -76,7 +42,11 @@ Alloy は自分と同じ `COMPOSE_PROJECT_NAME` ラベルのコンテナログ�
 - `omni_inbox_operations_total{destination,result}`：SRM、調達、資産の Inbox 成功または Broker リトライのトリガー。
 - `omni_db_migration_operations_total{result}`、`omni_db_migration_duration_seconds`、`omni_db_schema_version_info{version}`：一回限りのマイグレーターが終了時にプッシュする結果、所要時間、管理下のマニフェストバージョン。
 
-Outbox 作成時に実際の traceId を `producer_trace_id` として保存し、送信時に `omniProducerTraceId` と `omniMessageId` メッセージヘッダーでコンシューマーに渡します；履歴に生産 traceId が欠けていても正常に配信できます。リレーは配信ごとに新しい relay span を作成し、ログには `msgId`、`producerTraceId`、`relayTraceId` と固定の destination/result のみを出力します；Asset Consumer はメッセージヘッダーから関連フィールドを取り出し、`msgId`、`producerTraceId` と自身の `consumerTraceId` を記録します。どちら側も payload、テナント、ビジネスキーを出力しません。`msgId` により生産ログからリレーと消費ログへジャンプし、それぞれ対応する Trace を照会できます。
+Outbox 作成時に実際の traceId を `producer_trace_id` として保存し、送信時に `omniProducerTraceId` と `omniMessageId` メッセージヘッダーでコンシューマーに渡します；履歴に送信側 traceId が欠けていても正常に配信できます。リレーは配信ごとに新しい relay span を作成し、ログには `msgId`、`producerTraceId`、`relayTraceId` と固定の destination/result のみを出力します；Asset Consumer はメッセージヘッダーから関連フィールドを取り出し、`msgId`、`producerTraceId` と自身の `consumerTraceId` を記録します。どちら側も payload、テナント、ビジネスキーを出力しません。`msgId` により送信側ログからリレーと受信側ログへジャンプし、それぞれ対応する Trace を照会できます。
+
+### Alertmanager UI の境界
+
+`alertmanager-ui` は公式 v0.30.1 の Elm ソースから4言語の UI を構築し、同じ `alertmanager:9093` バックエンドへプロキシします。ホスト入口は `127.0.0.1:9093` のままで、バックエンドから同じポートを重複公開しません。UI パスは `/zh-CN/`、`/en-US/`、`/ja-JP/`、`/ko-KR/` で、言語を切り替えても hash ルートとフィルターを維持します。API フィールド、ラベル、状態の列挙値、レシーバー名は原値を保持し、曜日設定も上流の英語プロトコル値で保存します。ビルドは上流アーカイブの SHA-256 を固定し、Apache-2.0 の LICENSE/NOTICE を保持します。文案の欠落や構造パッチの不一致があれば失敗します。出典と保守判断は [ADR-0004](adr/0004-native-alertmanager-localization.md)、操作と画像は[運用ガイド](guides/operations-upgrade.jp.md)を参照してください。業務サービスや公開管理入口の追加ではありません。
 
 ## 4. アラートと閾値キャリブレーション
 
@@ -116,14 +86,4 @@ Outbox 作成時に実際の traceId を `producer_trace_id` として保存し�
 
 ## 7. 検証とトラブルシューティング
 
-構成レベルの検証：
-
-```powershell
-docker compose --profile observability config --quiet
-docker run --rm --entrypoint /bin/promtool --mount type=bind,source=${PWD}/observability/prometheus,target=/etc/prometheus,readonly prom/prometheus:v3.14.0 check rules /etc/prometheus/alerts.yml
-docker run --rm --entrypoint /bin/promtool --mount type=bind,source=${PWD}/observability/prometheus,target=/etc/prometheus,readonly prom/prometheus:v3.14.0 check config /etc/prometheus/prometheus.yml
-```
-
-実行後、Prometheus `/targets` で起動済みアプリケーションが UP であることを確認します；現在のプリセットに含まれないサービスが DOWN と表示されるのは想定内です。Grafana にデータがない場合は、アプリケーションの `/actuator/prometheus`、Prometheus target、OTel Collector ログ、Tempo/Loki readiness、Alloy targets の順に確認します。
-
-性能受け入れは同じ fixture で観測の無効時と有効時の起動時間、CPU、メモリ、スループット、P95/P99 をそれぞれ測定します。結果は `docs/evidence/scaffold-upgrade/` に書き込みます；ローカル 100% サンプリングは受け入れ専用で、本番のサンプリング率は容量と SLO でキャリブレーションします。
+設定、実行正常性、Trace・ログ関連、通知の到達と性能を個別に検証します。構文成功だけでは targets UP や通知到達は証明できません。未起動サービスは対象 preset と照合し、すべての DOWN を無視しません。現在のソース、イメージ、preset、時刻、実際の失敗と範囲を記録します。過去の検証は当時の基準だけを証明します。手順と復元範囲は[運用](guides/operations-upgrade.jp.md)を参照してください。

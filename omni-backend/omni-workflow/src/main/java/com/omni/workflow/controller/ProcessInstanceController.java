@@ -128,27 +128,31 @@ public class ProcessInstanceController {
     }
 
     /**
-     * 获取流程实例的流转进度。
+     * 获取当前租户流程实例的流转进度。
      *
      * @param processInstanceId 流程实例 ID
+     * @param tenantId Gateway 注入的租户 ID
      * @return 进度信息（已完成/进行中/未到达活动节点）
      */
     @GetMapping("/{processInstanceId}/progress")
     public R<ProcessProgressResponse> getProgress(
-            @PathVariable String processInstanceId) {
-        return R.ok(processInstanceService.getProgress(processInstanceId));
+            @PathVariable String processInstanceId,
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
+        return R.ok(processInstanceService.getProgress(processInstanceId, tenantId));
     }
 
     /**
-     * 获取流程实例的审批记录。
+     * 获取当前租户流程实例的审批记录。
      * <p>逐人展示每个 userTask 节点的审批结果和意见。</p>
      *
      * @param processInstanceId 流程实例 ID
+     * @param tenantId Gateway 注入的租户 ID
      * @return 审批记录列表
      */
     @GetMapping("/{processInstanceId}/approval-records")
     public R<List<ApprovalRecord>> getApprovalRecords(
-            @PathVariable String processInstanceId) {
-        return R.ok(processInstanceService.getApprovalRecords(processInstanceId));
+            @PathVariable String processInstanceId,
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
+        return R.ok(processInstanceService.getApprovalRecords(processInstanceId, tenantId));
     }
 }

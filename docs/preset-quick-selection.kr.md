@@ -16,15 +16,17 @@
 
 ## 사용 단계
 
-~~~powershell
-Set-Location tools/omni-cli
-npm ci
-npm run build
-node dist/src/cli.js preset list
-node dist/src/cli.js preset explain workflow
-node dist/src/cli.js preset create workflow --output C:\WorkSpace\my-workflow --dry-run
-node dist/src/cli.js preset create workflow --output C:\WorkSpace\my-workflow
-node dist/src/cli.js preset validate workflow --output C:\WorkSpace\my-workflow
+다음 명령은 원본 저장소 루트에서 실행합니다. 의존성 설치, CLI 빌드와 실행은 로컬 Docker 도구 컨테이너를 사용하며 학습 결과는 별도 generated/my-workflow 디렉터리에 저장합니다.
+
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml build cli
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm ci
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run build
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset list
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset explain workflow
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create workflow --output generated/my-workflow --dry-run
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create workflow --output generated/my-workflow
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset validate workflow --output generated/my-workflow
 ~~~
 
 생성 전에 의존성 클로저, 백엔드 모듈, Compose 서비스, 포트, 데이터베이스, 권한 루트, 메모리 추정을 표시합니다. 출력 디렉터리는 존재하지 않거나 비어 있어야 합니다. 생성 완료 후 `scaffold.lock` 에 소스 버전, 프리셋 버전, 모듈 버전, 템플릿 버전을 기록합니다.
@@ -35,9 +37,9 @@ node dist/src/cli.js preset validate workflow --output C:\WorkSpace\my-workflow
 
 이어 생성된 프로젝트에서 백엔드 빌드, `npm ci`, 프론트엔드 lint/build, `docker compose config --quiet` 를 실행합니다. 저장소 유지관리자는 다음도 실행해야 합니다:
 
-~~~powershell
-npm run test:preset-structure
-npm run test:preset-smoke
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-structure
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-smoke
 ~~~
 
 `test:preset-golden` 은 다섯 종 프리셋 전체의 완전한 빌드 매트릭스를 실행하며, 야간이나 릴리스 전 실행에 적합합니다. 데이터베이스 fresh, 실제 기동, 브라우저 smoke 는 런타임 검증으로, 구조 검사로 대체할 수 없습니다.

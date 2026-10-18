@@ -16,7 +16,7 @@ const HEAVY_INFRASTRUCTURE_SERVICES = ['rocketmq-namesrv', 'rocketmq-broker', 'x
 const LITE_UNSAFE_CONSUMER_SERVICES = ['omni-srm', 'omni-procurement', 'omni-asset'];
 const OBSERVABILITY_SERVICES = [
   'otel-collector', 'prometheus', 'pushgateway', 'node-exporter', 'cadvisor',
-  'alertmanager', 'tempo', 'loki', 'alloy', 'grafana',
+  'alertmanager', 'alertmanager-ui', 'tempo', 'loki', 'alloy', 'grafana',
 ];
 const FUNCTION_ENVIRONMENT_KEYS = [
   'OMNI_AUTH_FUNCTION_DEFINITION',

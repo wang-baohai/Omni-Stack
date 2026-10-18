@@ -159,7 +159,7 @@ services:
       NAMESRV_ADDR: rocketmq-namesrv:9876
       JAVA_OPT_EXT: -Drocketmq.broker.diskSpaceWarningLevelRatio=0.98
     volumes:
-      - ./docker/rocketmq/broker-docker.conf:/home/rocketmq/rocketmq-5.3.2/conf/broker.conf
+      - ${OMNI_DOCKER_BIND_ROOT:-.}/docker/rocketmq/broker-docker.conf:/home/rocketmq/rocketmq-5.3.2/conf/broker.conf
       - omni-rocketmq-data:/home/rocketmq/store
     command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.2/conf/broker.conf --enable-proxy
     depends_on:

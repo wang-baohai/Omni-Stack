@@ -1,0 +1,927 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "docker-deployment",
+  "source": "docs/docker-deployment.md",
+  "source_sha256": "eb486492162150ec60c6895a4cfa1e172407a427c7ad0b6402de3419b46a6fc8",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "7880b7ba2e1bceb252cf6543eb67c3f09f62dbd7",
+  "source_state": "Entire current Chinese Docker deployment technical reference and three translations actually reviewed. All63originalheadings and62narrative sections retained with Wiki/tutorial ownership. Current Compose/Dockerfile/migrator/reverse-proxy/management/port/bootstrap/persistence facts corrected;actual source dependencies distinguished from runtime,delivery and external OAuth acceptance. Mainrepository fullbaseline distinguished from generated local scope. No application or business execution;full originalA-G remains incomplete.",
+  "method": "All four complete originals (3408 lines) actually read under receipt356c. All four current private drafts565 lines each actually read in explicit1-190/191-380/381-565 outputs bound in proof360. The nine final current-file wording changes were directly read in e2afba, and exact unchanged text/code-fence identity plus final file hashes proved360. Technical conclusions use24 whole current source files plus explicitly selected ranges, parsed YAML and prior exact scoped reuse across71 bindings, not71 new whole reads. Actual semantic reading and localized conclusions grant approval; hashes/rendering alone do not.",
+  "checked_source_files": [
+    {
+      "path": ".env.example",
+      "sha256": "ae327dd9a383db816cba778a7ed8ed26bb2d17c48692b14f1870a288a266be63"
+    },
+    {
+      "path": "compose.apps.yaml",
+      "sha256": "57781677a1d2b04ee6aaea5e6ee431fbe2bb57f38ef43c418bb8913454efb123"
+    },
+    {
+      "path": "compose.infra.yaml",
+      "sha256": "c9dd1a7542520148b3b3d5397fa37669fb4132cd41ad5cf10ff878995646dab6"
+    },
+    {
+      "path": "compose.yaml",
+      "sha256": "49c8ab0a7f3317ae800773812322a0ee29ee3ffdd18a3b7650108ae6c9c2e8fb"
+    },
+    {
+      "path": "database/changelog/asset/db.changelog-asset.yaml",
+      "sha256": "c8568a62b53fe808978a9a645d36fefd6a807cd0270512275f6f966ffaae8aa9"
+    },
+    {
+      "path": "database/changelog/auth/db.changelog-auth.yaml",
+      "sha256": "91c1fb65bb5370af7d9fcb81b75220a7b74b3678ef91aa335b9cfc4b7403ca49"
+    },
+    {
+      "path": "database/changelog/base/db.changelog-base.yaml",
+      "sha256": "310547fdaaec0bbe34fd68c6b6752cd1b0e2b72ae240991dd84c5dc0c7059090"
+    },
+    {
+      "path": "database/changelog/common/0001-mq-schema.yaml",
+      "sha256": "fa7d7f436f281bdddde9d8351146de92fde80510807d9be99052e71273827bc9"
+    },
+    {
+      "path": "database/changelog/common/db.changelog-common-mq.yaml",
+      "sha256": "345977e451bc0069d234cabf4374b40cd193f80f593875d8360e7455095263db"
+    },
+    {
+      "path": "database/changelog/crm/db.changelog-crm.yaml",
+      "sha256": "96453c0e9fbae15bba2e614c57e97fa39203be2d0fbb7fcfca79fd8d5d842233"
+    },
+    {
+      "path": "database/changelog/procurement/db.changelog-procurement.yaml",
+      "sha256": "e2d3f85fa037e7269531ad8389703a74cfefbef9688e2137160f0bbf4cef8495"
+    },
+    {
+      "path": "database/changelog/srm/db.changelog-srm.yaml",
+      "sha256": "7adc75fa5b98079090a7802c1a2897c87d36fd17e4581bfd91658f00fa7ce18b"
+    },
+    {
+      "path": "database/changelog/workflow/db.changelog-workflow.yaml",
+      "sha256": "9e0dedb711dcb0875671744ecc8ad0368177fa38ff51aa52a28df668f46d33db"
+    },
+    {
+      "path": "database/seed/manifest.yaml",
+      "sha256": "c54ac31e3bf1351a10ae83406bbb635a85e4c56c2e7098d99bbb9acbba79ad14"
+    },
+    {
+      "path": "docker/backend/Dockerfile",
+      "sha256": "b93b0b47e4397d82b06d069eb374f3bfa39f9a932ea847ce71f8628ac5bb60f9"
+    },
+    {
+      "path": "docker/frontend/Dockerfile",
+      "sha256": "6542f30feabceb2924259ae339b996f92759f7fc3fb8b31835645aa226152e83"
+    },
+    {
+      "path": "docker/frontend/nginx.conf",
+      "sha256": "d652b7c896a04755354bc8f691873e402d344804e0682bbcc2baa29866d88990"
+    },
+    {
+      "path": "docker/migrator/Dockerfile",
+      "sha256": "ea58e5251a48ba6dcd523b2d741446b2e2bee20f98f60227ac6b084df3bdcdad"
+    },
+    {
+      "path": "docker/rocketmq/broker-docker.conf",
+      "sha256": "932c83be0bb30c0eaa7fbf3efc5902ddf46602c4d5546329f7fa34520a89756b"
+    },
+    {
+      "path": "docker/rocketmq/Dockerfile",
+      "sha256": "8ead2e0d7499f24572a64cecb1cd9150e580ff60c504d03d7682f57e61cb1f85"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/repository-governance.md",
+      "sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12"
+    },
+    {
+      "path": "omni-backend/docker-settings.xml",
+      "sha256": "fe927fe1a5c14cb2de75592f63b8651aad21fbe4ab62b02eec23e1b44ef277ea"
+    },
+    {
+      "path": "omni-backend/omni-asset/pom.xml",
+      "sha256": "a661a82550ace2f4f286c19fb3b4273f707f698b445dd2457184bbcad5c19a9e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/resources/application.yml",
+      "sha256": "34451137fa3181e1192ec6de11fe5cc92488104b70d759036e95c52e96434680"
+    },
+    {
+      "path": "omni-backend/omni-auth/pom.xml",
+      "sha256": "02e514abafe6b610311e297cabd686b31028bd877b34c8e5fd2679cbfab292ad"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/resources/application.yml",
+      "sha256": "d1ce2ce3f6bd0ecc11ce641fc23475b571b0cbe382274be5cdc4e4d47dfc25f9"
+    },
+    {
+      "path": "omni-backend/omni-base/pom.xml",
+      "sha256": "8acd8570ffb3847ce3be71a7d5e3081b4522d573fe638a7918ae28826c9fb827"
+    },
+    {
+      "path": "omni-backend/omni-common-core/pom.xml",
+      "sha256": "8e660c5ff16dfc24d5108b3c61919ee089d9b7ebdf6f59d6504e8463f30a8ab9"
+    },
+    {
+      "path": "omni-backend/omni-common-job/pom.xml",
+      "sha256": "2c0816b62967658018b18601342563005119c21a60e700cc25724f4579f0843a"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/pom.xml",
+      "sha256": "080373b3803a9749c94d4e367eb1afebc3ad79f709948a62f37f05e213e954c5"
+    },
+    {
+      "path": "omni-backend/omni-common-mybatis/pom.xml",
+      "sha256": "0cfd068f5797e8c12cbae96babdb863e897bb053cc8c48b97b33dcdd5ac1ea8f"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/pom.xml",
+      "sha256": "e476cf537636a8b5530fc0f4552e34d9318b0cf02e75d74b40fbf79c64ec9cd5"
+    },
+    {
+      "path": "omni-backend/omni-common-redis-reactive/pom.xml",
+      "sha256": "a9ee460e9ebdb2a95ee0fe0656b7e3089d3b8659dcf751ddfb6bb6b47cfc148d"
+    },
+    {
+      "path": "omni-backend/omni-common-redis-reactive/src/main/resources/application.yml",
+      "sha256": "ed82690d31d6cef0fa7ef9411376bc7961a1eb18987e04b3da2d0d7cbc008e4d"
+    },
+    {
+      "path": "omni-backend/omni-common-redis/pom.xml",
+      "sha256": "3a81617ffeb15ab0953896cca6c5577f934550373f864e26cbd9c1dc09c3b891"
+    },
+    {
+      "path": "omni-backend/omni-common-service/pom.xml",
+      "sha256": "10cac501ee7f5c055237c9376c67a702d6a057e40ab32f0ba59ddc36768001f1"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/pom.xml",
+      "sha256": "76302d6e470b88599093b6fd81bef957c38fb030c65328a42f2212f4d553b8c4"
+    },
+    {
+      "path": "omni-backend/omni-common/pom.xml",
+      "sha256": "fe079f62675d7eec7cb0289a095c046a2f9823146c49c43b2273aa8fdba833dd"
+    },
+    {
+      "path": "omni-backend/omni-crm/pom.xml",
+      "sha256": "4801a220e50bf13340174238835977b6e5d2f9e89fabf00e205dc8a23c96557c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/resources/application.yml",
+      "sha256": "e35d392d9730485362b41f79aad28339769fe790830c7a6b570b5a310eae5288"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/pom.xml",
+      "sha256": "49648b3437dca6156f4ecde25e82b911af9ea43474bdc2a65e8b3044dd6d9eac"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/adoption/AdoptionService.java",
+      "sha256": "cc28345510aaba17ccb0c25767eb691d729d0a7dd55306feb36f40eba0659042"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/adoption/BackupEvidenceService.java",
+      "sha256": "5c176592cb8bd75939d608494632f44f9fac4e0c919745a0dca2a15b1b3a5665"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/command/MigrationCommandRunner.java",
+      "sha256": "b7f76008639b70a1274c919a18309de253158e5afe49771c570af08232d20f20"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/LiquibaseMigrationService.java",
+      "sha256": "39a3dd355303019440b996aaca6d9c52b58f7d88a0e5c6864e964ed598bf39a4"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java",
+      "sha256": "5e24af6f6748272f9b48117bd12bfbad0b9b173fcc0ea1521905bcc0d284c9d1"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/NacosAdminBootstrap.java",
+      "sha256": "a244ebb6793705c7cbc78afbc729681d97d09f01963dea2d4ef8110d2becf768"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/XxlJobAdminBootstrap.java",
+      "sha256": "2a8869f40a55fc4328217c42a8f0a85a4046dcc1d9debd92009f1554f0169e3e"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/seed/SeedVerificationService.java",
+      "sha256": "38f2427628159d0a5b38eda7f0c735f4901f63f3238f1af685562933785dd611"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/resources/application.yml",
+      "sha256": "5ffff68ddb7c87141ecc8f1dcbdb22d1d92f01d98aa957728dc31cc6c8e74c57"
+    },
+    {
+      "path": "omni-backend/omni-gateway/pom.xml",
+      "sha256": "9c862355c8a3c192b214a3ba7b5519ea4fb979653a1d270d6aeb3eb825fdf422"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/resources/application.yml",
+      "sha256": "b759994853839263e125044cb5a99b51a22aee7c5b38bdbdb646176fdf87c0f2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/pom.xml",
+      "sha256": "6dec4a7577f3807b3a9420c3fe49682d5a65d26f73f024b17ec7e9f148b521f2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/resources/application.yml",
+      "sha256": "e4dde986037907125e1d92f325f387623f8ce471fae64151c32dc9164e0d7430"
+    },
+    {
+      "path": "omni-backend/omni-srm/pom.xml",
+      "sha256": "50fc38206395819c1ea108dd0c25041972c73731a89e63074dd4fea4a1f1742d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/resources/application.yml",
+      "sha256": "33cb88e595135c1d5b1c19288ecdf000860973a110a5816643e924e4808081a6"
+    },
+    {
+      "path": "omni-backend/omni-workflow/pom.xml",
+      "sha256": "615657791592a837a4f3b464a8252d20b16ca143d33f9c930d9f7d685da09168"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/resources/application.yml",
+      "sha256": "dde4208074502bc092e8788006b0984d95bb76cd7de647a7cd8edec9e436d0df"
+    },
+    {
+      "path": "omni-backend/pom.xml",
+      "sha256": "18a2eda967a3dc9147decf645518f80692eae6d8b89c2cd3f230d07c14f33275"
+    },
+    {
+      "path": "start.bat",
+      "sha256": "b30bb45d4413cb972d043b0901c5c9220cc958eb757848f3359de2f7cfdf9677"
+    },
+    {
+      "path": "start.sh",
+      "sha256": "ffabda8f4cad8fb88138eb914f3f4b8c762246189156c196b1003f8e13de1489"
+    },
+    {
+      "path": "stop.bat",
+      "sha256": "81869c906d38970893a03d9a593b652cca20b7c0bffda8dd7897b74887b289c4"
+    },
+    {
+      "path": "stop.sh",
+      "sha256": "018b40725ce826ee13b9559befeffa8b262a3bdc70cc43b38ac6b3720590e56d"
+    },
+    {
+      "path": "tools/omni-cli/scripts/preset-docs.mjs",
+      "sha256": "acd0aad6ffd4ee3a55e659870f22bf4885a281cd80eb7b4ada994af8487585c1"
+    },
+    {
+      "path": "tools/omni-cli/src/cli.ts",
+      "sha256": "d0b5df88164319f5b4308ca68bb587aa9ae8ce68fb3b74ac3eecf82ffe030c97"
+    },
+    {
+      "path": "tools/omni-cli/src/development.ts",
+      "sha256": "98a2e15bfe7441e5634ea2e280e9c9867157f955b68fc4bba5bc3da9bffecaea"
+    },
+    {
+      "path": "tools/omni-cli/src/doctor.ts",
+      "sha256": "a95c02cd338a1053088b955529aaebe9f1a895ac8e3f6c4283c95320cccdd115"
+    },
+    {
+      "path": "tools/omni-cli/src/documentation-delivery.ts",
+      "sha256": "5631e905f5f4444a8ea201a2c0efc9ef50b8d5bd6761f5ce4e4e00c4a6a93b6f"
+    },
+    {
+      "path": "tools/omni-cli/src/preset-generator.ts",
+      "sha256": "2139e233787024453b57f9dcb0ae46b9544a42f69970b3cf6c4f9c71121f3bd0"
+    },
+    {
+      "path": "tools/omni-cli/src/workspace.ts",
+      "sha256": "a0254cbf3c9b56a9dad8f5bdd13dcfcc47f8ebef366a3d3fde844b1c8d13e5ae"
+    }
+  ],
+  "source_inspection_scope": "24 current source files actually read whole in 357/357c/358a receipts. The 71 bindings also include explicitly selected source ranges, parsed YAML metadata, and exact prior reuse; not 71 newly whole-read files.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_current_documents_actually_read": 4,
+    "current_whole_lines": 2260,
+    "lines_each": 565,
+    "original_whole_lines_read": 3408,
+    "original_headings_each": 63,
+    "h2_each": 18,
+    "h3_each": 45,
+    "whole_markdown_rendered_documents": 4,
+    "technical_fences_each": 15,
+    "tables_each": 8,
+    "strict_four_language_technical_fence_equality": true,
+    "strict_locale_normalized_local_link_equality": true,
+    "all_current_local_source_paths_and_TOC_anchors_resolve": true,
+    "controlled_module_pruning_blocks_retained_and_extended": true,
+    "raster_images": 0,
+    "mermaid_blocks_each": 1,
+    "mermaid_nodes_each": 6,
+    "mermaid_edges_each": 7,
+    "diagram_matches_exact_declared_dependency_subset": true,
+    "frontend_has_no_invented_dependency_edge": true,
+    "actual_svg_or_browser_acceptance": false,
+    "source_bindings": 71,
+    "current_whole_source_files": 24,
+    "actual_document_read": {
+      "whole_original_lines": 3408,
+      "whole_current_private_draft_lines": 2260,
+      "lines_each": 565,
+      "ranges_each": [
+        [
+          1,
+          190
+        ],
+        [
+          191,
+          380
+        ],
+        [
+          381,
+          565
+        ]
+      ],
+      "outputs": {
+        "zh": [
+          "86f3da",
+          "d9f25d",
+          "d58876"
+        ],
+        "en": [
+          "1494d5",
+          "2ba9f2",
+          "6c4e8b"
+        ],
+        "jp": [
+          "1be759",
+          "bd5e75",
+          "f761ff"
+        ],
+        "kr": [
+          "af2804",
+          "e753fb",
+          "dae382"
+        ]
+      },
+      "current_four_drafts_actually_read_whole": true,
+      "final_polish_diff_review_pending": false,
+      "hashes_or_rendering_alone_do_not_approve": true,
+      "final_polish_diff_actual_read_output": "e2afba"
+    },
+    "small_final_polish_diff": {
+      "actual_read": true,
+      "output": "e2afba",
+      "changes": 9,
+      "whole_other_body_exactly_reused": true
+    },
+    "current_seed_sources": 8,
+    "current_seed_assertions": 25,
+    "current_main_full_model_persistent_services": 15,
+    "current_main_full_model_one_shot_services": 1,
+    "current_generated_scope_and_review_invalidation_preserved": true,
+    "RedisAOFexplicitly_not_claimed": true,
+    "seed_override_or_database_action_performed": false,
+    "highrisk_adoption_confirmation_waived": false,
+    "unchanged_build_proofs": {
+      "backend": "backend-workflow-boundary-260.json",
+      "backend_tests": 811,
+      "backend_passed": 806,
+      "backend_skipped": 5,
+      "frontend": "frontend-dict-checks-144.json",
+      "frontend_tests": 33,
+      "frontend_passed": 33,
+      "lint_build_exit": 0,
+      "exact_current_application_tree_proof": "goal-runtime-observation-355.json",
+      "backend_tree": "cf01beedbbf55676885fa8c469dc0d7e0b9de98d",
+      "frontend_tree": "2f9d8b826adacd1bf3707632eb18071168b37ac5",
+      "new_build_or_business_runs": 0
+    },
+    "new_application_build_or_test_runs": 0,
+    "application_or_business_execution": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "This approval covers the entire Docker deployment four-language family and the named backend referenced-document dependency renewal only. Other33 translation rows remain pending after expected105/138 scoped gates.",
+      "The71bindings include24actuallywhole current source files plus named selected/metadata/prior scopes;hashes and rendering alone do not approve translations.",
+      "No new application build,application startup,business write,database adoption,seed override,OAuth callback,cleanup or private service-bundle recreation.",
+      "Existing backend811 cases include5skips;frontend33tests/lint/build reused only with exact unchanged app trees. No rerun of unchanged costly validation.",
+      "Real externalOAuth0/3,SRM CAPTCHA self-registration,Qoder nativeSkillloading,current fullservice/CRUDgoldens andfivepreset structuralmatrix,finalsite root/subpath/browser/SVG/tutorial acceptance remain open. Full originalA-G scope preserved."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/docker-deployment.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 13:52:35",
+      "result": "approved",
+      "translation_sha256": "7c5359e442dc4acbb766f108e4e9573b4f0112346cefc223b0e94ed16e13c1e8",
+      "checks": {
+        "coverage_and_meaning": "逐篇核对完整四语当前正文、原63标题和62段说明；中文为事实源。配置参考与 Wiki 操作职责分开，主仓库 full 对照与生成工程实际范围分开。初始化、持久化、依赖、反代、构建、端口、扩容与排障的判断条件在四语等价。",
+        "technical_literals": "四语各15技术围栏严格一致；Docker 渲染各18个H2、45个H3、八表。逐项核对JDK25、Wrapper/reactor、业务8080、管理19900–19907、Gateway8102/19902、Authproxy7897、Broker10909/10911/10912、NameServer19876/9876、Nacos8080/8848/9848、8seed sources/25assertions/9目标库及15常驻+1迁移器的主仓库模型。依赖图六节点七边来自真实配置。",
+        "security_and_failure_semantics": "配置/running/探针/迁移成功/业务投递/外部OAuth分别判断；不把未启用AOF、保留卷、override WARN或已存在备份误称完整成功。Admin登录密码区别executor accessToken；root厂商连接范围如实保留。无Secret输出、自动端口移动、全局prune或业务写入。数据库adopt-current高风险确认及平台审批保留。",
+        "images_and_links": "四篇在本机Docker完整Markdown渲染，63原标题及目录锚点可达，相对链接实际存在，四语归一化源码链接与技术围栏相同。依赖图语义与真实声明逐边核对；本阶段没有实际SVG/浏览器截图验收，该范围继续保留在最终G。没有新增光栅图或虚构运行截图。",
+        "language_and_terminology": "Read all565lines against Chinese/source scopes, including all63headings and complete narrative. Preserve business/management ports, bootstrap conditionality, fixed-port scaling limit, override WARN semantics, generated-scope invalidation and independent business/external acceptance. Final executor accessToken versus Admin login wording directly reviewed e2afba."
+      },
+      "findings": [
+        {
+          "id": "DP01",
+          "status": "resolved",
+          "description": "Quick-start entry pointed to a removed README chapter.",
+          "resolution": "四语改为现有快速开始与 Wiki 入口；README 保持定位、亮点、导航职责。"
+        },
+        {
+          "id": "DP02",
+          "status": "resolved",
+          "description": "Health examples mixed business ports and management probe ports.",
+          "resolution": "按正式 Compose 区分 8080 与 19900–19907，Gateway 诊断用 19902；Dockerfile 回退并不读取应用 YAML。"
+        },
+        {
+          "id": "DP03",
+          "status": "resolved",
+          "description": "Scaling advice contradicted fixed mappings and referenced a missing override.",
+          "resolution": "说明没有固定 container_name 但宿主端口固定，Docker 不自动递增；移除不存在的 compose.scale.yaml 操作配方。"
+        },
+        {
+          "id": "DP04",
+          "status": "resolved",
+          "description": "Published mappings and least-privilege claims differed from configuration.",
+          "resolution": "端口表从正式配置投影，业务诊断及中间件回环绑定；如实保留 Nacos/XXL-JOB root 连接与七应用库 omni_app 范围。"
+        },
+        {
+          "id": "DP05",
+          "status": "resolved",
+          "description": "Build excerpts omitted actual entrypoint/cache/retry behavior.",
+          "resolution": "四语使用现行 Dockerfile 节选，保留 bash exec/JAVA_OPTS、Wrapper、实际 reactor 与前端 cache/retry；片段不冒充完整文件。"
+        },
+        {
+          "id": "DP06",
+          "status": "resolved",
+          "description": "Generic binding/priority/OAuth statements were unsupported.",
+          "resolution": "逐服务区分显式占位符和 Spring 环境覆盖，说明 optional:nacos import；Compose 三家回调为 8102，未证明外部登录成功。"
+        },
+        {
+          "id": "DP07",
+          "status": "resolved",
+          "description": "Mirror recommendations and size estimates lacked current evidence.",
+          "resolution": "记录现有 central mirror、cache/retry 和镜像身份要求，不推荐未经验证的公共站或保留无来源 MB 估计。"
+        },
+        {
+          "id": "DP08",
+          "status": "resolved",
+          "description": "Recovery recipes used global prune and automatic port shifts.",
+          "resolution": "替换为限定项目的只读诊断、归属与实际错误核对，保持标准端口；不执行清理或系统设置变更。"
+        },
+        {
+          "id": "DP09",
+          "status": "resolved",
+          "description": "Nacos environment dump could reveal credentials.",
+          "resolution": "四语禁止完整 env 过滤输出，改为允许公开的键名、地址和配置存在性；正文示例不读取真实 Secret。"
+        },
+        {
+          "id": "DP10",
+          "status": "resolved",
+          "description": "Nginx explanation omitted current dynamic DNS/security/cache behavior.",
+          "resolution": "对照当前 resolver、变量 upstream、代理路径、SPA、缓存和安全头；注明仅动态代理节选。"
+        },
+        {
+          "id": "DP11",
+          "status": "resolved",
+          "description": "Artifact appendix mixed broken tables and unsupported namespace/size claims.",
+          "resolution": "删除无测量身份的体积估计，明确 OMNI_IMAGE_NAMESPACE 默认 omni；附录结构完整。"
+        },
+        {
+          "id": "DP12",
+          "status": "resolved",
+          "description": "Technical facts and operations had overlapping ownership.",
+          "resolution": "四语保留全部 63 个原有标题，62 段当前技术说明；完整操作、身份、预期与恢复由 Wiki/指南维护。"
+        },
+        {
+          "id": "DP13",
+          "status": "resolved",
+          "description": "Japanese/Korean assertion counts differed from the formal manifest.",
+          "resolution": "四语统一现行主仓库八 seed sources、25 assertions、九目标库，且生成工程使用自身清单。"
+        },
+        {
+          "id": "DP14",
+          "status": "resolved",
+          "description": "Translated terminology and spacing needed correction.",
+          "resolution": "实际逐篇核对日/韩全文，替换旧中文残留及含混措辞，保持技术标识、路径和数值准确。"
+        },
+        {
+          "id": "DP15",
+          "status": "resolved",
+          "description": "Unsafe/debug recipes were repeated in every locale.",
+          "resolution": "四语 15 个技术围栏严格相同；没有可执行的全局 prune、down -v 或 Nacos env dump 配方。"
+        },
+        {
+          "id": "DP16",
+          "status": "resolved",
+          "description": "The startup graph invented global readiness dependencies.",
+          "resolution": "六节点七边逐项匹配正式 depends_on；Frontend 无等待边，Gateway 只等待迁移器、Redis、Auth。"
+        },
+        {
+          "id": "DP17",
+          "status": "resolved",
+          "description": "Document acceptance could be confused with database adoption authorization.",
+          "resolution": "保留 adopt-current 的指纹、seed、备份/恢复身份与精确 ADOPT 报告确认，不免除高风险写入控制；未执行接管。"
+        },
+        {
+          "id": "DP18",
+          "status": "resolved",
+          "description": "Start/stop scripts and placeholder checks were overstated.",
+          "resolution": "如实区分脚本默认 full/--build、CLI lite 开关、普通 down 保留卷、Compose 非空检查与 doctor 占位符检测。"
+        },
+        {
+          "id": "DP19",
+          "status": "resolved",
+          "description": "Broker port lists contained an incorrect port.",
+          "resolution": "从正式配置列出 10909、10911、10912，未发布 10910；NameServer 宿主 19876 与容器 9876 区分。"
+        },
+        {
+          "id": "DP20",
+          "status": "resolved",
+          "description": "Probe timings/configuration were treated as runtime guarantees.",
+          "resolution": "数值只作为配置参数，未声称冷启动耗时、MB 大小、生产容量或上游产品无法集群。"
+        },
+        {
+          "id": "DP21",
+          "status": "resolved",
+          "description": "All four old documents incorrectly claimed explicit Redis AOF.",
+          "resolution": "明确正式配置未显式启用 AOF；命名卷保留不证明每键持久化或重启恢复。"
+        },
+        {
+          "id": "DP22",
+          "status": "resolved",
+          "description": "Seed override exit zero could be misreported as all assertions passing.",
+          "resolution": "注明 acceptedOverrides/WARN 与 SQL 执行失败不同、正式 Compose 默认未声明覆盖；未设置或运行覆盖。"
+        },
+        {
+          "id": "DP23",
+          "status": "resolved",
+          "description": "Generated projects could inherit full-baseline counts or prior approval.",
+          "resolution": "明确主仓库对照与生成工程页首范围；保留模块裁剪标记及源变化后 unverified/旧证据失效规则。"
+        },
+        {
+          "id": "DP24",
+          "status": "resolved",
+          "description": "Source proxy/callback settings could be mistaken for external success.",
+          "resolution": "记录 Auth proxy 7897、NO_PROXY 与回调 8102，仅为当前声明配置，外部 OAuth 正向成功仍 0/3。"
+        },
+        {
+          "id": "DP25",
+          "status": "resolved",
+          "description": "Japanese/Korean 502 troubleshooting had an ambiguous container antecedent.",
+          "resolution": "明确检查 Frontend 与 Gateway 的状态和日志，避免误把前句 Nacos/Gateway 当作所指的两个容器。"
+        },
+        {
+          "id": "DP26",
+          "status": "resolved",
+          "description": "Executor tokens and Admin login credentials were conflated in wording.",
+          "resolution": "四语明确执行器 accessToken 匹配 Admin；Admin 登录密码变更另行协调数据库与私有配置，日/韩 reactor 与投递措辞同步澄清。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/docker-deployment.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 13:52:35",
+      "result": "approved",
+      "translation_sha256": "0e29decc6a6f1774b8b777f07875d6f74bf34260b426825ee174c830b085152d",
+      "checks": {
+        "coverage_and_meaning": "逐篇核对完整四语当前正文、原63标题和62段说明；中文为事实源。配置参考与 Wiki 操作职责分开，主仓库 full 对照与生成工程实际范围分开。初始化、持久化、依赖、反代、构建、端口、扩容与排障的判断条件在四语等价。",
+        "technical_literals": "四语各15技术围栏严格一致；Docker 渲染各18个H2、45个H3、八表。逐项核对JDK25、Wrapper/reactor、业务8080、管理19900–19907、Gateway8102/19902、Authproxy7897、Broker10909/10911/10912、NameServer19876/9876、Nacos8080/8848/9848、8seed sources/25assertions/9目标库及15常驻+1迁移器的主仓库模型。依赖图六节点七边来自真实配置。",
+        "security_and_failure_semantics": "配置/running/探针/迁移成功/业务投递/外部OAuth分别判断；不把未启用AOF、保留卷、override WARN或已存在备份误称完整成功。Admin登录密码区别executor accessToken；root厂商连接范围如实保留。无Secret输出、自动端口移动、全局prune或业务写入。数据库adopt-current高风险确认及平台审批保留。",
+        "images_and_links": "四篇在本机Docker完整Markdown渲染，63原标题及目录锚点可达，相对链接实际存在，四语归一化源码链接与技术围栏相同。依赖图语义与真实声明逐边核对；本阶段没有实际SVG/浏览器截图验收，该范围继续保留在最终G。没有新增光栅图或虚构运行截图。",
+        "language_and_terminology": "全565行を中国語事実源と照合。63見出し、数値、コード、依存関係、条件付き初期化、永続化、seed override、生成範囲を維持。reactor対象、確実な配信、Frontend/Gatewayの指示対象とaccessToken/Loginの相違を最後の差分e2afbaで再確認。実際のAIレビューであり人手署名ではない。"
+      },
+      "findings": [
+        {
+          "id": "DP01",
+          "status": "resolved",
+          "description": "Quick-start entry pointed to a removed README chapter.",
+          "resolution": "四语改为现有快速开始与 Wiki 入口；README 保持定位、亮点、导航职责。"
+        },
+        {
+          "id": "DP02",
+          "status": "resolved",
+          "description": "Health examples mixed business ports and management probe ports.",
+          "resolution": "按正式 Compose 区分 8080 与 19900–19907，Gateway 诊断用 19902；Dockerfile 回退并不读取应用 YAML。"
+        },
+        {
+          "id": "DP03",
+          "status": "resolved",
+          "description": "Scaling advice contradicted fixed mappings and referenced a missing override.",
+          "resolution": "说明没有固定 container_name 但宿主端口固定，Docker 不自动递增；移除不存在的 compose.scale.yaml 操作配方。"
+        },
+        {
+          "id": "DP04",
+          "status": "resolved",
+          "description": "Published mappings and least-privilege claims differed from configuration.",
+          "resolution": "端口表从正式配置投影，业务诊断及中间件回环绑定；如实保留 Nacos/XXL-JOB root 连接与七应用库 omni_app 范围。"
+        },
+        {
+          "id": "DP05",
+          "status": "resolved",
+          "description": "Build excerpts omitted actual entrypoint/cache/retry behavior.",
+          "resolution": "四语使用现行 Dockerfile 节选，保留 bash exec/JAVA_OPTS、Wrapper、实际 reactor 与前端 cache/retry；片段不冒充完整文件。"
+        },
+        {
+          "id": "DP06",
+          "status": "resolved",
+          "description": "Generic binding/priority/OAuth statements were unsupported.",
+          "resolution": "逐服务区分显式占位符和 Spring 环境覆盖，说明 optional:nacos import；Compose 三家回调为 8102，未证明外部登录成功。"
+        },
+        {
+          "id": "DP07",
+          "status": "resolved",
+          "description": "Mirror recommendations and size estimates lacked current evidence.",
+          "resolution": "记录现有 central mirror、cache/retry 和镜像身份要求，不推荐未经验证的公共站或保留无来源 MB 估计。"
+        },
+        {
+          "id": "DP08",
+          "status": "resolved",
+          "description": "Recovery recipes used global prune and automatic port shifts.",
+          "resolution": "替换为限定项目的只读诊断、归属与实际错误核对，保持标准端口；不执行清理或系统设置变更。"
+        },
+        {
+          "id": "DP09",
+          "status": "resolved",
+          "description": "Nacos environment dump could reveal credentials.",
+          "resolution": "四语禁止完整 env 过滤输出，改为允许公开的键名、地址和配置存在性；正文示例不读取真实 Secret。"
+        },
+        {
+          "id": "DP10",
+          "status": "resolved",
+          "description": "Nginx explanation omitted current dynamic DNS/security/cache behavior.",
+          "resolution": "对照当前 resolver、变量 upstream、代理路径、SPA、缓存和安全头；注明仅动态代理节选。"
+        },
+        {
+          "id": "DP11",
+          "status": "resolved",
+          "description": "Artifact appendix mixed broken tables and unsupported namespace/size claims.",
+          "resolution": "删除无测量身份的体积估计，明确 OMNI_IMAGE_NAMESPACE 默认 omni；附录结构完整。"
+        },
+        {
+          "id": "DP12",
+          "status": "resolved",
+          "description": "Technical facts and operations had overlapping ownership.",
+          "resolution": "四语保留全部 63 个原有标题，62 段当前技术说明；完整操作、身份、预期与恢复由 Wiki/指南维护。"
+        },
+        {
+          "id": "DP13",
+          "status": "resolved",
+          "description": "Japanese/Korean assertion counts differed from the formal manifest.",
+          "resolution": "四语统一现行主仓库八 seed sources、25 assertions、九目标库，且生成工程使用自身清单。"
+        },
+        {
+          "id": "DP14",
+          "status": "resolved",
+          "description": "Translated terminology and spacing needed correction.",
+          "resolution": "实际逐篇核对日/韩全文，替换旧中文残留及含混措辞，保持技术标识、路径和数值准确。"
+        },
+        {
+          "id": "DP15",
+          "status": "resolved",
+          "description": "Unsafe/debug recipes were repeated in every locale.",
+          "resolution": "四语 15 个技术围栏严格相同；没有可执行的全局 prune、down -v 或 Nacos env dump 配方。"
+        },
+        {
+          "id": "DP16",
+          "status": "resolved",
+          "description": "The startup graph invented global readiness dependencies.",
+          "resolution": "六节点七边逐项匹配正式 depends_on；Frontend 无等待边，Gateway 只等待迁移器、Redis、Auth。"
+        },
+        {
+          "id": "DP17",
+          "status": "resolved",
+          "description": "Document acceptance could be confused with database adoption authorization.",
+          "resolution": "保留 adopt-current 的指纹、seed、备份/恢复身份与精确 ADOPT 报告确认，不免除高风险写入控制；未执行接管。"
+        },
+        {
+          "id": "DP18",
+          "status": "resolved",
+          "description": "Start/stop scripts and placeholder checks were overstated.",
+          "resolution": "如实区分脚本默认 full/--build、CLI lite 开关、普通 down 保留卷、Compose 非空检查与 doctor 占位符检测。"
+        },
+        {
+          "id": "DP19",
+          "status": "resolved",
+          "description": "Broker port lists contained an incorrect port.",
+          "resolution": "从正式配置列出 10909、10911、10912，未发布 10910；NameServer 宿主 19876 与容器 9876 区分。"
+        },
+        {
+          "id": "DP20",
+          "status": "resolved",
+          "description": "Probe timings/configuration were treated as runtime guarantees.",
+          "resolution": "数值只作为配置参数，未声称冷启动耗时、MB 大小、生产容量或上游产品无法集群。"
+        },
+        {
+          "id": "DP21",
+          "status": "resolved",
+          "description": "All four old documents incorrectly claimed explicit Redis AOF.",
+          "resolution": "明确正式配置未显式启用 AOF；命名卷保留不证明每键持久化或重启恢复。"
+        },
+        {
+          "id": "DP22",
+          "status": "resolved",
+          "description": "Seed override exit zero could be misreported as all assertions passing.",
+          "resolution": "注明 acceptedOverrides/WARN 与 SQL 执行失败不同、正式 Compose 默认未声明覆盖；未设置或运行覆盖。"
+        },
+        {
+          "id": "DP23",
+          "status": "resolved",
+          "description": "Generated projects could inherit full-baseline counts or prior approval.",
+          "resolution": "明确主仓库对照与生成工程页首范围；保留模块裁剪标记及源变化后 unverified/旧证据失效规则。"
+        },
+        {
+          "id": "DP24",
+          "status": "resolved",
+          "description": "Source proxy/callback settings could be mistaken for external success.",
+          "resolution": "记录 Auth proxy 7897、NO_PROXY 与回调 8102，仅为当前声明配置，外部 OAuth 正向成功仍 0/3。"
+        },
+        {
+          "id": "DP25",
+          "status": "resolved",
+          "description": "Japanese/Korean 502 troubleshooting had an ambiguous container antecedent.",
+          "resolution": "明确检查 Frontend 与 Gateway 的状态和日志，避免误把前句 Nacos/Gateway 当作所指的两个容器。"
+        },
+        {
+          "id": "DP26",
+          "status": "resolved",
+          "description": "Executor tokens and Admin login credentials were conflated in wording.",
+          "resolution": "四语明确执行器 accessToken 匹配 Admin；Admin 登录密码变更另行协调数据库与私有配置，日/韩 reactor 与投递措辞同步澄清。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/docker-deployment.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 13:52:35",
+      "result": "approved",
+      "translation_sha256": "13985e470a1d81b94c8b57c39e45c17fc61bfb72d028f9ed9e68c14dcd8f42a1",
+      "checks": {
+        "coverage_and_meaning": "逐篇核对完整四语当前正文、原63标题和62段说明；中文为事实源。配置参考与 Wiki 操作职责分开，主仓库 full 对照与生成工程实际范围分开。初始化、持久化、依赖、反代、构建、端口、扩容与排障的判断条件在四语等价。",
+        "technical_literals": "四语各15技术围栏严格一致；Docker 渲染各18个H2、45个H3、八表。逐项核对JDK25、Wrapper/reactor、业务8080、管理19900–19907、Gateway8102/19902、Authproxy7897、Broker10909/10911/10912、NameServer19876/9876、Nacos8080/8848/9848、8seed sources/25assertions/9目标库及15常驻+1迁移器的主仓库模型。依赖图六节点七边来自真实配置。",
+        "security_and_failure_semantics": "配置/running/探针/迁移成功/业务投递/外部OAuth分别判断；不把未启用AOF、保留卷、override WARN或已存在备份误称完整成功。Admin登录密码区别executor accessToken；root厂商连接范围如实保留。无Secret输出、自动端口移动、全局prune或业务写入。数据库adopt-current高风险确认及平台审批保留。",
+        "images_and_links": "四篇在本机Docker完整Markdown渲染，63原标题及目录锚点可达，相对链接实际存在，四语归一化源码链接与技术围栏相同。依赖图语义与真实声明逐边核对；本阶段没有实际SVG/浏览器截图验收，该范围继续保留在最终G。没有新增光栅图或虚构运行截图。",
+        "language_and_terminology": "565행 전체를 중국어 사실 원문과 대조했다. 63개 제목, 포트·명령·의존성·조건부 초기화·영속화·seed override·생성 범위를 유지했다. 마지막 e2afba 차이에서 reactor 대상, Frontend/Gateway 지시 대상 및 executor accessToken과 Admin 로그인 비밀번호 구분을 확인했다. 실제 AI_REVIEW이며 사람 서명이나 외부 업무 성공을 주장하지 않는다."
+      },
+      "findings": [
+        {
+          "id": "DP01",
+          "status": "resolved",
+          "description": "Quick-start entry pointed to a removed README chapter.",
+          "resolution": "四语改为现有快速开始与 Wiki 入口；README 保持定位、亮点、导航职责。"
+        },
+        {
+          "id": "DP02",
+          "status": "resolved",
+          "description": "Health examples mixed business ports and management probe ports.",
+          "resolution": "按正式 Compose 区分 8080 与 19900–19907，Gateway 诊断用 19902；Dockerfile 回退并不读取应用 YAML。"
+        },
+        {
+          "id": "DP03",
+          "status": "resolved",
+          "description": "Scaling advice contradicted fixed mappings and referenced a missing override.",
+          "resolution": "说明没有固定 container_name 但宿主端口固定，Docker 不自动递增；移除不存在的 compose.scale.yaml 操作配方。"
+        },
+        {
+          "id": "DP04",
+          "status": "resolved",
+          "description": "Published mappings and least-privilege claims differed from configuration.",
+          "resolution": "端口表从正式配置投影，业务诊断及中间件回环绑定；如实保留 Nacos/XXL-JOB root 连接与七应用库 omni_app 范围。"
+        },
+        {
+          "id": "DP05",
+          "status": "resolved",
+          "description": "Build excerpts omitted actual entrypoint/cache/retry behavior.",
+          "resolution": "四语使用现行 Dockerfile 节选，保留 bash exec/JAVA_OPTS、Wrapper、实际 reactor 与前端 cache/retry；片段不冒充完整文件。"
+        },
+        {
+          "id": "DP06",
+          "status": "resolved",
+          "description": "Generic binding/priority/OAuth statements were unsupported.",
+          "resolution": "逐服务区分显式占位符和 Spring 环境覆盖，说明 optional:nacos import；Compose 三家回调为 8102，未证明外部登录成功。"
+        },
+        {
+          "id": "DP07",
+          "status": "resolved",
+          "description": "Mirror recommendations and size estimates lacked current evidence.",
+          "resolution": "记录现有 central mirror、cache/retry 和镜像身份要求，不推荐未经验证的公共站或保留无来源 MB 估计。"
+        },
+        {
+          "id": "DP08",
+          "status": "resolved",
+          "description": "Recovery recipes used global prune and automatic port shifts.",
+          "resolution": "替换为限定项目的只读诊断、归属与实际错误核对，保持标准端口；不执行清理或系统设置变更。"
+        },
+        {
+          "id": "DP09",
+          "status": "resolved",
+          "description": "Nacos environment dump could reveal credentials.",
+          "resolution": "四语禁止完整 env 过滤输出，改为允许公开的键名、地址和配置存在性；正文示例不读取真实 Secret。"
+        },
+        {
+          "id": "DP10",
+          "status": "resolved",
+          "description": "Nginx explanation omitted current dynamic DNS/security/cache behavior.",
+          "resolution": "对照当前 resolver、变量 upstream、代理路径、SPA、缓存和安全头；注明仅动态代理节选。"
+        },
+        {
+          "id": "DP11",
+          "status": "resolved",
+          "description": "Artifact appendix mixed broken tables and unsupported namespace/size claims.",
+          "resolution": "删除无测量身份的体积估计，明确 OMNI_IMAGE_NAMESPACE 默认 omni；附录结构完整。"
+        },
+        {
+          "id": "DP12",
+          "status": "resolved",
+          "description": "Technical facts and operations had overlapping ownership.",
+          "resolution": "四语保留全部 63 个原有标题，62 段当前技术说明；完整操作、身份、预期与恢复由 Wiki/指南维护。"
+        },
+        {
+          "id": "DP13",
+          "status": "resolved",
+          "description": "Japanese/Korean assertion counts differed from the formal manifest.",
+          "resolution": "四语统一现行主仓库八 seed sources、25 assertions、九目标库，且生成工程使用自身清单。"
+        },
+        {
+          "id": "DP14",
+          "status": "resolved",
+          "description": "Translated terminology and spacing needed correction.",
+          "resolution": "实际逐篇核对日/韩全文，替换旧中文残留及含混措辞，保持技术标识、路径和数值准确。"
+        },
+        {
+          "id": "DP15",
+          "status": "resolved",
+          "description": "Unsafe/debug recipes were repeated in every locale.",
+          "resolution": "四语 15 个技术围栏严格相同；没有可执行的全局 prune、down -v 或 Nacos env dump 配方。"
+        },
+        {
+          "id": "DP16",
+          "status": "resolved",
+          "description": "The startup graph invented global readiness dependencies.",
+          "resolution": "六节点七边逐项匹配正式 depends_on；Frontend 无等待边，Gateway 只等待迁移器、Redis、Auth。"
+        },
+        {
+          "id": "DP17",
+          "status": "resolved",
+          "description": "Document acceptance could be confused with database adoption authorization.",
+          "resolution": "保留 adopt-current 的指纹、seed、备份/恢复身份与精确 ADOPT 报告确认，不免除高风险写入控制；未执行接管。"
+        },
+        {
+          "id": "DP18",
+          "status": "resolved",
+          "description": "Start/stop scripts and placeholder checks were overstated.",
+          "resolution": "如实区分脚本默认 full/--build、CLI lite 开关、普通 down 保留卷、Compose 非空检查与 doctor 占位符检测。"
+        },
+        {
+          "id": "DP19",
+          "status": "resolved",
+          "description": "Broker port lists contained an incorrect port.",
+          "resolution": "从正式配置列出 10909、10911、10912，未发布 10910；NameServer 宿主 19876 与容器 9876 区分。"
+        },
+        {
+          "id": "DP20",
+          "status": "resolved",
+          "description": "Probe timings/configuration were treated as runtime guarantees.",
+          "resolution": "数值只作为配置参数，未声称冷启动耗时、MB 大小、生产容量或上游产品无法集群。"
+        },
+        {
+          "id": "DP21",
+          "status": "resolved",
+          "description": "All four old documents incorrectly claimed explicit Redis AOF.",
+          "resolution": "明确正式配置未显式启用 AOF；命名卷保留不证明每键持久化或重启恢复。"
+        },
+        {
+          "id": "DP22",
+          "status": "resolved",
+          "description": "Seed override exit zero could be misreported as all assertions passing.",
+          "resolution": "注明 acceptedOverrides/WARN 与 SQL 执行失败不同、正式 Compose 默认未声明覆盖；未设置或运行覆盖。"
+        },
+        {
+          "id": "DP23",
+          "status": "resolved",
+          "description": "Generated projects could inherit full-baseline counts or prior approval.",
+          "resolution": "明确主仓库对照与生成工程页首范围；保留模块裁剪标记及源变化后 unverified/旧证据失效规则。"
+        },
+        {
+          "id": "DP24",
+          "status": "resolved",
+          "description": "Source proxy/callback settings could be mistaken for external success.",
+          "resolution": "记录 Auth proxy 7897、NO_PROXY 与回调 8102，仅为当前声明配置，外部 OAuth 正向成功仍 0/3。"
+        },
+        {
+          "id": "DP25",
+          "status": "resolved",
+          "description": "Japanese/Korean 502 troubleshooting had an ambiguous container antecedent.",
+          "resolution": "明确检查 Frontend 与 Gateway 的状态和日志，避免误把前句 Nacos/Gateway 当作所指的两个容器。"
+        },
+        {
+          "id": "DP26",
+          "status": "resolved",
+          "description": "Executor tokens and Admin login credentials were conflated in wording.",
+          "resolution": "四语明确执行器 accessToken 匹配 Admin；Admin 登录密码变更另行协调数据库与私有配置，日/韩 reactor 与投递措辞同步澄清。"
+        }
+      ]
+    }
+  }
+}

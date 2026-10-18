@@ -181,8 +181,13 @@ describe('secret-scan 归档扫描范围', () => {
       Buffer.from('INSERT INTO `x` VALUES (' + FAKE_JWT + ');', 'utf16le'),
     ]));
     const zipPath = join(fixtureDir, 'utf16-entry.zip');
-    execFileSync('powershell', ['-NoProfile', '-Command',
-      `$ErrorActionPreference='Stop'; Compress-Archive -LiteralPath '${srcDir}' -DestinationPath '${zipPath}' -Force`]);
+    if (process.platform === 'win32') {
+      execFileSync('powershell', ['-NoProfile', '-Command',
+        `$ErrorActionPreference='Stop'; Compress-Archive -LiteralPath '${srcDir.replaceAll("'", "''")}' -DestinationPath '${zipPath.replaceAll("'", "''")}' -Force`]);
+    } else {
+      // 容器使用项目必需 JDK 的 ZIP 实现，不依赖 Windows PowerShell。
+      execFileSync('jar', ['--create', '--file', zipPath, '-C', srcDir, '.']);
+    }
     rmSync(srcDir, { recursive: true, force: true });
 
     for (const mode of ['--archive=', '--file=']) {

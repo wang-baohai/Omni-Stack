@@ -1,0 +1,926 @@
+{
+  "schema": 1,
+  "kind": "current-document-source-and-selected-original-image-audit",
+  "recorded_at": "2026-10-17T12:18:33.303Z",
+  "source_baseline": "2451313b5d9206e465c3282831cafeeb543e61d8",
+  "document_id": "guide-procurement-flow",
+  "evidence_kind": "AI semantic/source/provenance/visual inspection,not a new application or business test",
+  "original_documents_actually_read": 4,
+  "original_whole_lines": 668,
+  "original_image_registers": [
+    {
+      "path": "docs/reference/evidence/supply-chain-2026-10-09.json",
+      "sha256": "2b36754f24ea7182b4768e39a3cc8a1fb37aa2cdd9b82aae40808935c4f8786b",
+      "recorded_at": "2026-10-09T08:23:45.7227068+00:00",
+      "total_records": 48,
+      "used_by_guide": 28,
+      "visual_review": "Per-record original-resolution four-locale contact sheets;not individual raw-image review",
+      "production_base_image_build_proven": false
+    },
+    {
+      "path": "docs/reference/evidence/procurement-readonly-2026-10-12.json",
+      "sha256": "dbe678b933afa7f414b23049d8198c4f08b296eb95a882ef26ab27b9fac225fd",
+      "recorded_at": "2026-10-12T13:24:41.185Z",
+      "total_records": 20,
+      "used_by_guide": 20,
+      "visual_review": {
+        "status": "passed-with-documented-limits",
+        "reviewer": "Agent individually inspected 20 original PNGs; not a human translation signature",
+        "reviewed": 20,
+        "published": 20,
+        "human_translation_review": "pending",
+        "limits": [
+          "Existing teaching material/routing data is reused; no persisted business command was attempted. Twelve real POST match-preview requests are read-only evaluations.",
+          "Ordinary manager has additional non-SUPER_ADMIN roles listed here; this is an effective-actor experiment, not a single-role experiment.",
+          "All 20 originals were individually inspected. UI labels follow the selected locale; existing category, model, node and raw server diagnostic strings remain Chinese.",
+          "The mobile result table requires its own horizontal scrolling. The screenshot proves the amount, actionable Test button and MATCHED result; API assertions verify the model and route fields outside the narrow viewport.",
+          "The English desktop sidebar clips long navigation labels. Japanese and Korean tablet captures focus the match card and partially scroll the page heading under the fixed header. These images do not claim every sidebar/page label is simultaneously visible.",
+          "The new frontend defaults mobile sidebar to collapsed and keeps its toggle above the drawer. Each locale was opened/closed with native clicks before mobile rule interaction; no forced click, CSS injection or mocked response.",
+          "The previously recorded supply-chain commands and receipts retain their original timestamps and runtime identities. This supplement does not replay approvals, quotations, orders or receipts.",
+          "Human translation review is pending and is independent of agent visual inspection."
+        ]
+      }
+    },
+    {
+      "path": "docs/reference/evidence/procurement-quotation-2026-10-12.json",
+      "sha256": "539bb904bb46d2c775c3721161eec458a7df5338de787ecb44c76c9b8a4fd844",
+      "recorded_at": "2026-10-12T13:42:19.109Z",
+      "total_records": 12,
+      "used_by_guide": 12,
+      "visual_review": {
+        "status": "passed-with-documented-limits",
+        "originals_inspected": 31,
+        "published": 12,
+        "rejected_incomplete_paint": 7,
+        "readable_private_superseded": 12,
+        "reviewer": "Agent individually inspected 31 original PNGs; not human translation signature",
+        "human_translation_review": "pending",
+        "limits": [
+          "AWARDED RFQ detail shows retained quote IDs, versions and winning result, not an interactive pre-award price comparison screen.",
+          "The current /comparison endpoint correctly returns HTTP 200 with business code 409 after award. No re-award, quote submission or status reset occurred.",
+          "Each supplier can read its own quotation. The public list images prove its total and invitation outcome; real API and opened read-only controls separately verify line prices.",
+          "Supplier list images use the product native light-theme button. Raw status enums and teaching object names remain unchanged.",
+          "Seven incomplete-paint originals are excluded; readable but superseded details remain private. Long Japanese invitation-status labels wrap inside the table header."
+        ]
+      }
+    }
+  ],
+  "prior_current_fact_review": {
+    "path": "docs/reference/reviews/procurement-design.json",
+    "sha256": "5569f107d72abe3986c5f73c8144adf6402736bb59ecd7e737825694efa6217a",
+    "unchanged_named_dependencies": 60,
+    "new_whole_read_claim": false
+  },
+  "capture_source_groups": [
+    {
+      "key": "docs/reference/evidence/supply-chain-2026-10-09.json|dated per-service images|dated per-source bindings|1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "images": 28,
+      "first_document_occurrence": "2026-10-09T08:01:14.731Z",
+      "last_document_occurrence": "2026-10-09T08:01:57.448Z",
+      "document_order_not_chronological": true,
+      "records": [
+        "procurement-requisition-approved.png",
+        "procurement-requisition-rejected.png",
+        "procurement-requisition-cancelled.png",
+        "procurement-rfq-awarded.png",
+        "procurement-purchase-order-received.png",
+        "procurement-goods-receipt-fail-nonasset.png",
+        "procurement-goods-receipt-pass.png",
+        "procurement-requisition-approved.png",
+        "procurement-requisition-rejected.png",
+        "procurement-requisition-cancelled.png",
+        "procurement-rfq-awarded.png",
+        "procurement-purchase-order-received.png",
+        "procurement-goods-receipt-fail-nonasset.png",
+        "procurement-goods-receipt-pass.png",
+        "procurement-requisition-approved.png",
+        "procurement-requisition-rejected.png",
+        "procurement-requisition-cancelled.png",
+        "procurement-rfq-awarded.png",
+        "procurement-purchase-order-received.png",
+        "procurement-goods-receipt-fail-nonasset.png",
+        "procurement-goods-receipt-pass.png",
+        "procurement-requisition-approved.png",
+        "procurement-requisition-rejected.png",
+        "procurement-requisition-cancelled.png",
+        "procurement-rfq-awarded.png",
+        "procurement-purchase-order-received.png",
+        "procurement-goods-receipt-fail-nonasset.png",
+        "procurement-goods-receipt-pass.png"
+      ]
+    },
+    {
+      "key": "docs/reference/evidence/procurement-readonly-2026-10-12.json|sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c|2962823d508d7842d31edada30e010c7031eef20568bd18d51ddbe622072b237|cb6d79aa8491c70ccc73961ce7587249b38f694d66374df4a0f8f01ab474ff6b",
+      "images": 20,
+      "first_document_occurrence": "2026-10-12T13:15:33.826Z",
+      "last_document_occurrence": "2026-10-12T13:15:55.343Z",
+      "document_order_not_chronological": true,
+      "records": [
+        "procurement-current-material.png",
+        "procurement-current-rule-match.png",
+        "procurement-current-overview.png",
+        "procurement-current-rule-match-mobile.png",
+        "procurement-current-rule-match-tablet.png",
+        "procurement-current-material.png",
+        "procurement-current-rule-match.png",
+        "procurement-current-overview.png",
+        "procurement-current-rule-match-mobile.png",
+        "procurement-current-rule-match-tablet.png",
+        "procurement-current-material.png",
+        "procurement-current-rule-match.png",
+        "procurement-current-overview.png",
+        "procurement-current-rule-match-mobile.png",
+        "procurement-current-rule-match-tablet.png",
+        "procurement-current-material.png",
+        "procurement-current-rule-match.png",
+        "procurement-current-overview.png",
+        "procurement-current-rule-match-mobile.png",
+        "procurement-current-rule-match-tablet.png"
+      ]
+    },
+    {
+      "key": "docs/reference/evidence/procurement-quotation-2026-10-12.json|sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c|0f0026a03c8d9330f4871b459ef9c2aac6d9bfda0c2c9b09630b6888d75d3a4e|c6dd8df429b99328d389aaedc418272a766e6a0f4e053e026797dd9ef720c055",
+      "images": 4,
+      "first_document_occurrence": "2026-10-12T13:33:04.571Z",
+      "last_document_occurrence": "2026-10-12T13:33:13.038Z",
+      "document_order_not_chronological": true,
+      "records": [
+        "procurement-current-quote-versions.png",
+        "procurement-current-quote-versions.png",
+        "procurement-current-quote-versions.png",
+        "procurement-current-quote-versions.png"
+      ]
+    },
+    {
+      "key": "docs/reference/evidence/procurement-quotation-2026-10-12.json|sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c|6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb|8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "images": 8,
+      "first_document_occurrence": "2026-10-12T13:40:02.477Z",
+      "last_document_occurrence": "2026-10-12T13:40:09.029Z",
+      "document_order_not_chronological": true,
+      "records": [
+        "procurement-current-supplierC-quote.png",
+        "procurement-current-supplierD-quote.png",
+        "procurement-current-supplierC-quote.png",
+        "procurement-current-supplierD-quote.png",
+        "procurement-current-supplierC-quote.png",
+        "procurement-current-supplierD-quote.png",
+        "procurement-current-supplierC-quote.png",
+        "procurement-current-supplierD-quote.png"
+      ]
+    }
+  ],
+  "current_source_inspection": {
+    "whole_files": 3,
+    "whole_lines": 371,
+    "files": [
+      {
+        "path": "database/changelog/asset/0001-asset-schema.yaml",
+        "sha256": "e4b5f80df2e380ee71fb664d0c73ee4b4515e52d1c1e98ade30394b5cdc5fbb6",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "database/changelog/procurement/0001-procurement-schema.yaml",
+        "sha256": "e1db7a749d924de2c3b6a4ff4789fa193b1904ccc7f38b6624e1a45dcdacca2a",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/entity/AstInboxEvent.java",
+        "sha256": "0ae4ef7cf045c5ded5fac742709c783f5aeffd1fff0da8206ebe5b4a5c27b8de",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/sanitize/OperLogSanitizer.java",
+        "sha256": "8f5d34bca9097343ca596b409e69bc15a1472b02a0aa6fc6cefd04a27cc31479",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/pom.xml",
+        "sha256": "6dec4a7577f3807b3a9420c3fe49682d5a65d26f73f024b17ec7e9f148b521f2",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/WorkflowInternalClient.java",
+        "sha256": "232525732c21dd069311ba3c1776f7db76e2e815cf5f5d1bc437e2753178ccff",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/ApprovalRouteController.java",
+        "sha256": "5553119b83e7881a97efcdd0086e1cc9d219e942f11e4b0e28012c46da3e73b0",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/GoodsReceiptController.java",
+        "sha256": "c1878e6fb97c4c0a89c6e9d446e78ac059c97e0108987c515c7611cb118de362",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/InternalAssetCandidateController.java",
+        "sha256": "d5bee68ebbe2b294365ae40b9369755956806f7ce03d52fa3b3bfd2f6c1cdb88",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/InternalRfqInvitationController.java",
+        "sha256": "235f12e203b2424614c321bf968844fcd983e5788a9bd0eaecd5775612cef7a1",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/MaterialController.java",
+        "sha256": "adf7c0a0411e1f79dd6775a413bd6dc5c212f205b7a121a0e7e70157bb1f119b",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/OverviewController.java",
+        "sha256": "d4672bfaa95a39a36f878bf2bc2c4fc2e62dffb3280b7e7c83db6a274c077720",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/PurchaseOrderController.java",
+        "sha256": "5d3d3ea6b9a9fa993bbce8562346ad8fc730fdb7534daeb5951cd21a4f2835b0",
+        "read_scope": "Selected123-140:confirmauthority plusServiceDataScope andversioncommand. Notwhole.",
+        "outputs": [
+          "9c2120"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RequisitionController.java",
+        "sha256": "6db55a427c4ea94d9e04f757ba29a8ac9ae3104b7588783031aeab76f06b44d9",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RfqController.java",
+        "sha256": "05dbcbf2c7fd904ebd9264424e3d62819f4f8567e5768c48e198e4c92f10cbaa",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/ApprovalRouteCoverageAnalyzer.java",
+        "sha256": "bcb0fc894d62b3229c3853dd3b27fabaa03591dd998dc22ef1a3541aed17f6b9",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/ApprovalRouteResolver.java",
+        "sha256": "70293fec161d64a8f2d1a08fd5935cddfbd90db2a4a168a406deeda473b79746",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/GoodsReceiptStateMachine.java",
+        "sha256": "c487970c9966aa0e059e49b6db51a77a5c33d0f37907aba3d02eec4aaabeddf5",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/MaterialDomainPolicy.java",
+        "sha256": "c938033816e379cc0e2b1d16ee07bb800ab0c68f59311f1095f05d875cff0d55",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/PurchaseOrderStateMachine.java",
+        "sha256": "987b59710d85a3b57f40dc5709769736712443504c1a27babbc7b5609b622e2b",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RequisitionStateMachine.java",
+        "sha256": "bf473a86a15317df69a8a821816bcd7615858ef017a7538064ade67f9a33e20d",
+        "read_scope": "Whole actual read:only DRAFTsubmit;SUBMITTED+FAILEDretry/cancel;DRAFTdelete;409guards.",
+        "outputs": [
+          "a9226f"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RfqStateMachine.java",
+        "sha256": "c6c9f4e79144f36b9f16572f6c8f84a19d005a09e960421512b613755acd5f77",
+        "read_scope": "Whole actual read:SENTonlycomparison/award;active invitations;historical Portalvisible states differ from writable states.",
+        "outputs": [
+          "d3f645"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/PurchaseOrderViews.java",
+        "sha256": "4b5a61f35e6d8fe7912319403a2be07cf3fd1c0cb45687658b5636c3819bf6c0",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/RequisitionRequests.java",
+        "sha256": "148db8f6c79990d2ce241edd578489fcf460a840fe686856edd0938670cb70c8",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/RfqRequests.java",
+        "sha256": "a651e19bc043501755b9a475a77ada42500b3bf5636f801f88f9dbfcfedcade7",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcEventInboxMapper.java",
+        "sha256": "494eb3a24065f8eba1ab6745d65c16806389242cda99733539efa52f46c5dc04",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcGoodsReceiptLineMapper.java",
+        "sha256": "515d468b0052998986c59c5cff125b92a1f7788127b6ae7dc5c6fa592be92f0b",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcGoodsReceiptMapper.java",
+        "sha256": "10c4c513f99c4c4dda3bb554b1af19d051965aa4ab5fa8e1afa7222890698ef5",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcPurchaseOrderMapper.java",
+        "sha256": "ebdc96b81c0c67a1d402baeb10a342c62fda6aa3197eb55f79947592119ae51b",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcRequisitionMapper.java",
+        "sha256": "73aa68d4aba4072254602ca2b5e1384204d35ac586dfa54b8c6eb453829afb3f",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcRfqMapper.java",
+        "sha256": "3ad3496f95bf68c806c25895d381349b0e825c3d69cb618b4e39d432ee586047",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java",
+        "sha256": "862a902bdcd8dd57fd07b6280284f712f2203149a0bf40f84d3fe590507efddf",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ApprovalRouteInsightServiceImpl.java",
+        "sha256": "cabfc8cbe87a192287f505b1cb2c2f3699907d4a80e536ebd6cc4d22a657ce70",
+        "read_scope": "Selected65-196:readOnlyannotation,tenantinitializer,ruleoutcomes/modelpreview,not actualcandidate/user eligibility check or workflowstart. Notwhole.",
+        "outputs": [
+          "d3f645",
+          "9c2120"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ApprovalRouteServiceImpl.java",
+        "sha256": "88f80a5161cdb50a5bef098e28bdf145b5296a6ae80fda93f643a2338f13f637",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/GoodsReceiptServiceImpl.java",
+        "sha256": "6863e2187ddcbec101a1d4c04c02d40ffc0277c361d01aee74d150c1bde4b610",
+        "read_scope": "Selected177-273,350-387,533-600:versionedconfirm/orderlock/cumulativereceiptquantity,FAILcountsreceived,isAssetCandidatePASS+managed+exactpositivelong,generatedeventfieldanddecimalstrings. Notwhole/Inboxdeliveryproof.",
+        "outputs": [
+          "725cc7",
+          "d3f645"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/InternalAssetCandidateServiceImpl.java",
+        "sha256": "3bce8c5b42752d764034d8c94d430df0559db72470e2f72cae51b2263c17637a",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantInitializerImpl.java",
+        "sha256": "48e0579d06012035c66e7d97d184ca29bee51295248aa49d022ca0957ffb946e",
+        "read_scope": "Whole actual read:findexisting tenant config returns;otherwise idempotent config/defaultcategory writes. A preview does not start workflow but first tenant access may initialize defaults;historical zero writes must not become universal guarantee.",
+        "outputs": [
+          "f3f9a6"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantModuleProvisioner.java",
+        "sha256": "19328c9903adb5c32ec875c8c11faab945cfad224fe488ad12a700af31c1160f",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/PurchaseOrderServiceImpl.java",
+        "sha256": "0230a7d599669c3d082ab3f4ff3fb947b37be4b0cd1c8224f8a1e3447f47bbe6",
+        "read_scope": "Selected112-136,235-268:existingRFQordercheck,sameawardreconcile;versionedconfirm/Outbox andcancel. Notwhole.",
+        "outputs": [
+          "9c2120"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/QuotationSubmittedServiceImpl.java",
+        "sha256": "6d0c94bec3c430750fa2f37e4b21caf990309be8949c277c2db5c06da6464421",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionServiceImpl.java",
+        "sha256": "49860f021ec548cb8e993a251b2557ad9d0145b19cdb78c85312909143f06066",
+        "read_scope": "Selected230-310:versioneddelete,prepareSubmit/retry+coordinator,visibletenantread,cancelguard. Notwhole.",
+        "outputs": [
+          "725cc7"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionWorkflowStateServiceImpl.java",
+        "sha256": "c30d0c09ddfd7746e3013b195939f447751e99a8da4bdf9eb13e1b7241d21f5c",
+        "read_scope": "Selected60-151:submitcomputesroute+newattempt/request;retry requires existing snapshot,FAILED->PENDING andsamecommand;markStartedAPPROVING;markFailedCAS. Notwhole.",
+        "outputs": [
+          "a9226f"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RfqServiceImpl.java",
+        "sha256": "6a6356496869d0f8aa822234b74618a7a90588e3dfce233be296336c9dcd7ac7",
+        "read_scope": "Selected175-218 and340-403(completely retrieved aftermiddle outputtruncation):currentquotationsvalidated,RFQ+quotationversion,activeinvitation,createPO,AWARDEDCAS/localOutbox,returnRFQ+PO. Notwhole/deployedproof.Range203-218completedin95c947afterinitialoutputtruncation;notinferredfromhash.",
+        "outputs": [
+          "725cc7",
+          "a9226f",
+          "95c947"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/WorkflowCompletionServiceImpl.java",
+        "sha256": "b1982df5b9cd24025b2dc757e55628d7e251985f3c43f0a9f6fdf58d357c95c2",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinator.java",
+        "sha256": "d3761c42d613f6f512fde07e71ed2bb3cb057fe140e9315287b0a94e0b0c7e20",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/domain/ApprovalRouteResolverTest.java",
+        "sha256": "cda14903a9ea2c374bc87b56f8b92d2e84d7d3a56b1b64336274b5cd90bf9c18",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/service/impl/RequisitionWorkflowStateServiceImplTest.java",
+        "sha256": "ec66dab1fa9d3b8b9ccf169923f75274556e03cbb9e335f25414e63ecb198c3d",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/service/impl/WorkflowCompletionServiceImplTest.java",
+        "sha256": "c2efb43294ddf0d343f46b95a328839ea76f784ad7e3ec973241b4d7fd4d3873",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinatorTest.java",
+        "sha256": "d79cf3ce0fbb8713e14c3262e66fdadff46401c96b398e68ac715cf030d148a1",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+        "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+        "sha256": "fb540dc12ae8c821fd9324a06de566beee5aa7bf4e0f105668f3a1bd139ac020",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+        "sha256": "65012a8fc6a5311a06e32e6201ff3f6ec9da84c58341e2f0c678ca19f5037c16",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+        "sha256": "63a1a2bd58ae7b696d77f8ec1e1e5616020f297999f11ec412c32de1fff09ac8",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+        "sha256": "f63cb03ab55045944f20e206bec4c5d59d04f4a7abc5abebb37e641054dabd83",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java",
+        "sha256": "7fc8e3ee17cc3d4a2c0e09ebc937b83e061782c294be22ba49300a3c60f62ad5",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcOverviewMapper.java",
+        "sha256": "ab8edd039391a6eeb0c27f0070c186739511b4ace98a6d176b749c64b7aff4c5",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/AuthInternalClient.java",
+        "sha256": "7489727316858bc8b9d3a0eed24b46fe0bdd6943a59d1ce466d97eb638bed9ac",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/SrmInternalClient.java",
+        "sha256": "b2f1a0d99579733809aeb4ccb6526cb9b45fbb3a6030ac5451041d1ff436079d",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/resources/application.yml",
+        "sha256": "e4dde986037907125e1d92f325f387623f8ce471fae64151c32dc9164e0d7430",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/resources/application-lite.yml",
+        "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd",
+        "read_scope": "Exact unchanged prior Procurement design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/procurement/requisition/index.vue",
+        "sha256": "ba0f4e3f7346bed2a93cfcf8bca77b4f407e838005ddba86ff9d77dbd21b1d1a",
+        "read_scope": "Selected288-310:nativeretryrequiresSUBMITTED+FAILED+submitpermission,cancelguard. Notwhole.",
+        "outputs": [
+          "d3f645"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/procurement/rfq/index.vue",
+        "sha256": "158c3e102d1b8c49d3c59c43fe2e761de2856a70db4934d18d1d71373d903795",
+        "read_scope": "Selected390-410:nativecompare/awardonlySENTplusawardpermission. Notwhole.",
+        "outputs": [
+          "d3f645"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/design/procurement-design.md",
+        "sha256": "06735bfc48c6082fb9e96e92d80c62c4a5be24f40659500acee7565233c47303",
+        "read_scope": "Prior completed semantic fact/design/policy review reused with exact current hash;not new whole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/procurement-design.json",
+        "sha256": "5569f107d72abe3986c5f73c8144adf6402736bb59ecd7e737825694efa6217a",
+        "read_scope": "Prior completed semantic fact/design/policy review reused with exact current hash;not new whole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+        "read_scope": "Prior completed semantic fact/design/policy review reused with exact current hash;not new whole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/supply-chain-2026-10-09.json",
+        "sha256": "2b36754f24ea7182b4768e39a3cc8a1fb37aa2cdd9b82aae40808935c4f8786b",
+        "read_scope": "Actual dated recordmetadata,source/testgroups,visualmethods/limits,semanticbusinessfields andno-write/current-buildlimitations read. Historicalhumanpendingrecordnotrewritten;currentADR governsdocument acceptance.",
+        "outputs": [
+          "c2e15d",
+          "2534e7",
+          "196897"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/procurement-readonly-2026-10-12.json",
+        "sha256": "dbe678b933afa7f414b23049d8198c4f08b296eb95a882ef26ab27b9fac225fd",
+        "read_scope": "Actual dated recordmetadata,source/testgroups,visualmethods/limits,semanticbusinessfields andno-write/current-buildlimitations read. Historicalhumanpendingrecordnotrewritten;currentADR governsdocument acceptance.",
+        "outputs": [
+          "c2e15d",
+          "2534e7",
+          "196897"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/procurement-quotation-2026-10-12.json",
+        "sha256": "539bb904bb46d2c775c3721161eec458a7df5338de787ecb44c76c9b8a4fd844",
+        "read_scope": "Actual dated recordmetadata,source/testgroups,visualmethods/limits,semanticbusinessfields andno-write/current-buildlimitations read. Historicalhumanpendingrecordnotrewritten;currentADR governsdocument acceptance.",
+        "outputs": [
+          "c2e15d",
+          "2534e7",
+          "196897"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ]
+  },
+  "selected_raw_images": [
+    {
+      "path": "docs/images/zh-CN/procurement-goods-receipt-fail-nonasset.png",
+      "locale": "zh-CN",
+      "sha256": "5a51026865c5220f9ce63fefa00a79e26c8ab4465b5d6540f94cd5104d2dd0eb",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "GR-1-1CONFIRMED/PO-1-1,MaterialA1of3FAIL/managedyes,MaterialB10of10PASS/managedno. All four localized labels readable,KRlineheaderwraps. No asset query or brokerdelivery shown."
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-goods-receipt-pass.png",
+      "locale": "zh-CN",
+      "sha256": "d26823495e71e9856b6f25a044ef11e0b1f117810c83391d79e37a491ad596ef",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "GR-1-2CONFIRMED/PO-1-1,MaterialA2of3PASS/managedyes. Same historical dates andbatch2. No two-cardcount,Inbox orduplicate-delivery proof in pixels."
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-rule-match-mobile.png",
+      "locale": "zh-CN",
+      "sha256": "e7c564aed733fca1d9068307b3eb62748bd507bfddd0e5be15ecd33eb34f18e1",
+      "width": 390,
+      "height": 844,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "390x844sidebarcollapsed,total4000,testbuttonandMATCHEDvisible. Businesscategory/model/nodename/diagnosticChinese. ENtableanddiagnosticoverflowinsidecard;modelVersion2visible inallfourselected originals,lowerflowpartbelowfold. No candidate membership or newworkflow proof."
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-quote-versions.png",
+      "locale": "zh-CN",
+      "sha256": "9d7c7cf307c5ea08a1702e38656881435c5242e388c4b0eda3afae4aa888e294",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "RFQ-1-1AWARDED/version2,CNY,winningquote#2/v1;C REJECTED#1/v1,D AWARDED#2/v1. JA native UI says内定済み;JAquotationversionheaderwraps. This is retained detail,not livecomparison or a clickedaward."
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-supplierD-quote.png",
+      "locale": "zh-CN",
+      "sha256": "7346350e848ccbffdb2e3a147168631110db7b664f99a495c51199b7a7162a7a",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Native light Portal,selectedlocale,ownRFQ-1-1AWARDED,CNY3500 andViewonly. JAinvitationstatuswraps,rawenum andbusinessnames retained. No competitorread/lineprice/newsubmission/confirmPOproof."
+    },
+    {
+      "path": "docs/images/en-US/procurement-goods-receipt-fail-nonasset.png",
+      "locale": "en-US",
+      "sha256": "84650d9366526d786534ebe6c3b0ab1d322c8f358d69b1fd903253ef6b8ab268",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "GR-1-1CONFIRMED/PO-1-1,MaterialA1of3FAIL/managedyes,MaterialB10of10PASS/managedno. All four localized labels readable,KRlineheaderwraps. No asset query or brokerdelivery shown."
+    },
+    {
+      "path": "docs/images/en-US/procurement-goods-receipt-pass.png",
+      "locale": "en-US",
+      "sha256": "bc48ddf263863ef93fd9a097b53d0a7b68eecab30efc547fe97939fce88a246d",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "GR-1-2CONFIRMED/PO-1-1,MaterialA2of3PASS/managedyes. Same historical dates andbatch2. No two-cardcount,Inbox orduplicate-delivery proof in pixels."
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-rule-match-mobile.png",
+      "locale": "en-US",
+      "sha256": "30f09a79aa22f9943203d2f96827f189e389098bb0c37da5bd951491953e35de",
+      "width": 390,
+      "height": 844,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "390x844sidebarcollapsed,total4000,testbuttonandMATCHEDvisible. Businesscategory/model/nodename/diagnosticChinese. ENtableanddiagnosticoverflowinsidecard;modelVersion2visible inallfourselected originals,lowerflowpartbelowfold. No candidate membership or newworkflow proof."
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-quote-versions.png",
+      "locale": "en-US",
+      "sha256": "9d5a4cfde925dc7f9490d7a759100bec5908c552da1b151b17b9c51c979a7fac",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "RFQ-1-1AWARDED/version2,CNY,winningquote#2/v1;C REJECTED#1/v1,D AWARDED#2/v1. JA native UI says内定済み;JAquotationversionheaderwraps. This is retained detail,not livecomparison or a clickedaward."
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-supplierD-quote.png",
+      "locale": "en-US",
+      "sha256": "6bae5f82ebb7b94a7337b3c1e93b8be64979d6cde0def29ee2c1df0cf850d083",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Native light Portal,selectedlocale,ownRFQ-1-1AWARDED,CNY3500 andViewonly. JAinvitationstatuswraps,rawenum andbusinessnames retained. No competitorread/lineprice/newsubmission/confirmPOproof."
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-goods-receipt-fail-nonasset.png",
+      "locale": "ja-JP",
+      "sha256": "e81c92da481b8f9bcfb885cef72af1e16fdd8c87322e56334d4180e2281b33f7",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "GR-1-1CONFIRMED/PO-1-1,MaterialA1of3FAIL/managedyes,MaterialB10of10PASS/managedno. All four localized labels readable,KRlineheaderwraps. No asset query or brokerdelivery shown."
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-goods-receipt-pass.png",
+      "locale": "ja-JP",
+      "sha256": "45d37fa76c4ea11f1f92049bb8d7a3e104e8185190d6157f6179b38552992ca1",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "GR-1-2CONFIRMED/PO-1-1,MaterialA2of3PASS/managedyes. Same historical dates andbatch2. No two-cardcount,Inbox orduplicate-delivery proof in pixels."
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-rule-match-mobile.png",
+      "locale": "ja-JP",
+      "sha256": "eef2699ad7e8f6123c0f97514d9acefcb607a92cf6409e3c3a0d8d12ae14f3e6",
+      "width": 390,
+      "height": 844,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "390x844sidebarcollapsed,total4000,testbuttonandMATCHEDvisible. Businesscategory/model/nodename/diagnosticChinese. ENtableanddiagnosticoverflowinsidecard;modelVersion2visible inallfourselected originals,lowerflowpartbelowfold. No candidate membership or newworkflow proof."
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-quote-versions.png",
+      "locale": "ja-JP",
+      "sha256": "cc538b77a8bd8cbb772340f1e632f7da6b77786cbbdfc7a569be6a5a3d71fb5f",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "RFQ-1-1AWARDED/version2,CNY,winningquote#2/v1;C REJECTED#1/v1,D AWARDED#2/v1. JA native UI says内定済み;JAquotationversionheaderwraps. This is retained detail,not livecomparison or a clickedaward."
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-supplierD-quote.png",
+      "locale": "ja-JP",
+      "sha256": "1c743287403470bc79810a418dcbdc899d31303b14dc740c0b97206af667e58e",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Native light Portal,selectedlocale,ownRFQ-1-1AWARDED,CNY3500 andViewonly. JAinvitationstatuswraps,rawenum andbusinessnames retained. No competitorread/lineprice/newsubmission/confirmPOproof."
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-goods-receipt-fail-nonasset.png",
+      "locale": "ko-KR",
+      "sha256": "4469f99ee6058c00f018ae944f1a84f77719350396b3baad761b6e92007c800a",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "GR-1-1CONFIRMED/PO-1-1,MaterialA1of3FAIL/managedyes,MaterialB10of10PASS/managedno. All four localized labels readable,KRlineheaderwraps. No asset query or brokerdelivery shown."
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-goods-receipt-pass.png",
+      "locale": "ko-KR",
+      "sha256": "2906ee51d2ee2f14f367c230eb544249a41cbdac4ec79c80f045d256df826f42",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "GR-1-2CONFIRMED/PO-1-1,MaterialA2of3PASS/managedyes. Same historical dates andbatch2. No two-cardcount,Inbox orduplicate-delivery proof in pixels."
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-rule-match-mobile.png",
+      "locale": "ko-KR",
+      "sha256": "6879f9d278699e231e197ad9288d36a1033f06b781ac1c1a6ba74c058a2dc74c",
+      "width": 390,
+      "height": 844,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "390x844sidebarcollapsed,total4000,testbuttonandMATCHEDvisible. Businesscategory/model/nodename/diagnosticChinese. ENtableanddiagnosticoverflowinsidecard;modelVersion2visible inallfourselected originals,lowerflowpartbelowfold. No candidate membership or newworkflow proof."
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-quote-versions.png",
+      "locale": "ko-KR",
+      "sha256": "21c63bd286d302a54bff4672cee04043af345d3301bcb2cac83a6b7900f956b6",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "RFQ-1-1AWARDED/version2,CNY,winningquote#2/v1;C REJECTED#1/v1,D AWARDED#2/v1. JA native UI says内定済み;JAquotationversionheaderwraps. This is retained detail,not livecomparison or a clickedaward."
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-supplierD-quote.png",
+      "locale": "ko-KR",
+      "sha256": "b0e37939e5a103e193b36a9372da0fd281bda16b0fb0041c533435049d3b65ce",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Native light Portal,selectedlocale,ownRFQ-1-1AWARDED,CNY3500 andViewonly. JAinvitationstatuswraps,rawenum andbusinessnames retained. No competitorread/lineprice/newsubmission/confirmPOproof."
+    }
+  ],
+  "visual_scope": {
+    "guide_files": 60,
+    "used_register_records": 60,
+    "all_register_records": 80,
+    "current_individual_original_views": 20,
+    "other40not_freshly_individually_viewed": true,
+    "prior_methods": "2026-10-09:12 four-locale contact sheets for48sourceimages,guide uses28of48(7scenes).2026-10-12 readonly:20individual originalshistorical.2026-10-12 quotation:31individual originals,12published,7incompletepaintrejected,12private superseded. None is a new capture or view this stage.",
+    "quotation_rejected_originals": 7,
+    "quotation_readable_private_superseded": 12,
+    "no_image_modification": true,
+    "no_recapture": true
+  },
+  "historical_results": {
+    "business": {
+      "date": "2026-10-09",
+      "run": "WIKI-20261009A",
+      "source_baseline": "fc165e3",
+      "receipt_examples": "GR-1-1FAILasset1/nonassetPASS10;GR-1-2PASSasset2",
+      "new_current_run": false,
+      "production_base_image_build_proven": false,
+      "base_image_limit": "Registry DNS/authentication failures;cached verification images are not formal production-base build proof"
+    },
+    "readonly": {
+      "date": "2026-10-12",
+      "manager_roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "single_role_experiment": false,
+      "preview_matches": 12,
+      "persisted_business_writes": 0,
+      "before_after_hash": "04c03e2e2a4a8ab87b881f05e1acfe6297bb7e666992d69cfa2538a95916ebc7",
+      "scope": "Reused initialized tenant;material/route/overview snapshots unchanged,not universal zero-write preview guarantee"
+    },
+    "quotation": {
+      "date": "2026-10-12",
+      "rfq": "RFQ-1-1",
+      "state": "AWARDED",
+      "rfq_version": 2,
+      "winner": "quotation2version1,supplierD",
+      "other": "quotation1version1,supplierCREJECTED",
+      "own_totals": [
+        "3850.0000",
+        "3500.0000"
+      ],
+      "closed_comparison": {
+        "http": 200,
+        "business_code": 409
+      },
+      "persisted_writes": 0,
+      "manager_captured_test_sha256": "c6dd8df429b99328d389aaedc418272a766e6a0f4e053e026797dd9ef720c055",
+      "later_helper_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "later_helper_not_assigned_to_earlier_capture": true
+    }
+  },
+  "current_source_semantics": {
+    "retry": "OnlySUBMITTED+FAILED/currentversion,originalattempt/request/model snapshot reused",
+    "award": "SENTonly,rfqVersion+quotationId+quotationVersion,currentinvitation/quotevalidation,returnsRFQandcreatedPO",
+    "confirm": "Internalpermissionprocurement:purchase-order:confirmplusdataScope;not supplierPortalcommand",
+    "preview": "Model/rule availability,not usercandidateeligibility;firsttenantaccessmayinitializedefaults",
+    "receipt": "FAILcountsreceived;assetcandidateonlyPASS+managed+exactpositivelong;generatedassetQuantitynotclientreceiptfield",
+    "asset_delivery": "GRpixelsnotcardcountorInboxproof;datedAPI/Outbox/Inbox/assertions separatelyrequired"
+  },
+  "application_runs_this_audit": 0,
+  "business_writes_this_audit": 0,
+  "new_captures": 0,
+  "new_builds_or_tests": 0,
+  "historical_successful_writes_replayed": false,
+  "human_review": false,
+  "human_review_required": false,
+  "limitations": [
+    "Three whole371source lines andselectedranges;60priorbindings reusedatactualscope",
+    "Current20rawviewsnotall60freshviews;datedsource/test/runtimegroups retained",
+    "Historicalcontact-sheetreviewisnot48individualrawopens",
+    "No current integrated business run or all-language nativewriteproof;globalcoverage andfullA-Gstillopen"
+  ],
+  "final_delta_review_correction": "Moved empty-list-is-not-denial note from stale-version row to missing-authority row inEN/JA/KR beforeapproval. Original458receipt retained."
+}

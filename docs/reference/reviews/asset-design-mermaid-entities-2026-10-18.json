@@ -1,0 +1,518 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "asset-design",
+  "source": "docs/design/asset-design.md",
+  "source_sha256": "65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "62d9398ddd7c5f62ee48519f04c02456d65629d5",
+  "source_state": "All38 changed Mermaid message lines in7 canonical documents plus the complete renderer cleanup delta; reuse exact prior complete semantic reviews for unchanged content. No prose, domain/API contract or message wording changes.",
+  "method": "Actually read all38changed Mermaid lines and the renderer finally-cleanup delta inbc0a22. Only the Mermaid spelling of literal semicolons changes;decoded full document text is unchanged. Reuse hash-matching complete prior semantic reviews for all unchanged content/locales. Actual184diagram parse proposals have0failures and a real temporary-render-host failure experiment cleans the error SVG. Full rebuilt-site,route/theme,fallback and visual acceptance remain pending.",
+  "prior_complete_semantic_reviews": [
+    {
+      "path": "docs/reference/reviews/asset-design.json",
+      "sha256": "fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747"
+    }
+  ],
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/asset-design.json",
+      "sha256": "fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747"
+    },
+    {
+      "path": "docs/reference/evidence/wiki-diagram-syntax-cleanup-2026-10-18.json",
+      "sha256": "b25f84d59d4f219c8a08224623c1ff59ebdd4def50e2e6d78184424437f0baac"
+    },
+    {
+      "path": "docs/.vitepress/theme/DiagramLayout.vue",
+      "sha256": "6529ea4768729fac0c934ce4cb64f7799c9080632860b93b7b8a39f59c1d46a5"
+    },
+    {
+      "path": "docs/.vitepress/theme/index.mjs",
+      "sha256": "af860ce8f9ea054965f0ae1aa58fbad27d003e965ce7320a3b0e17aee7279d9c"
+    },
+    {
+      "path": "docs/.vitepress/config.mjs",
+      "sha256": "1634a1821170bb9dc9c42952854499287be6ceb7cef404a6f3f66b1871a13a29"
+    },
+    {
+      "path": "docs/package.json",
+      "sha256": "90ea9d68c2b7d30bd2203b7ec7fa1edadc80dc4dbcb286355aea271eddf1c2bd"
+    },
+    {
+      "path": "docs/package-lock.json",
+      "sha256": "8dc8a419a660feb88855b304c875f97da0c832554a9d45437e709821d909e5d1"
+    }
+  ],
+  "source_inspection_scope": "All38 changed Mermaid message lines in7 canonical documents plus the complete renderer cleanup delta; reuse exact prior complete semantic reviews for unchanged content. No prose, domain/API contract or message wording changes.",
+  "technical_verification": {
+    "runtime": "local Docker browser",
+    "canonical_diagrams_parsed": 184,
+    "original_parse_failures": 26,
+    "corrected_proposal_parse_failures": 0,
+    "decoded_document_text_unchanged": true,
+    "new_whole_document_rereads": 0,
+    "renewed_locales": [
+      "en-US"
+    ],
+    "unchanged_locale_entries_reused": true,
+    "current_evidence": "docs/reference/evidence/wiki-diagram-syntax-cleanup-2026-10-18.json",
+    "full_site_build_and_browser_acceptance_pending": true,
+    "limitations": [
+      "The184diagram result is actual grammar parsing with the built11.17.2 API plus an isolated container-cleanup experiment; it does not prove all184SVG layouts or the post-application full site build.",
+      "Four architecture SVG and four native mobile cases passed in image580; native core-flow route/theme and source-fallback acceptance need rerunning with the corrected current artifact.",
+      "The current dependency attestation and five-preset delivery scopes need final alignment. All originalA-G, external OAuth/CAPTCHA/Qoder constraints and global screenshot gaps remain."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/design/asset-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 08:04:41",
+      "result": "approved",
+      "translation_sha256": "2cc59de91959244499a2b0e8d1b4f0cef04b41efa48b27dd0a41da7d0786f084",
+      "checks": {
+        "coverage_and_meaning": "实际阅读bc0a22全部差异：七份规范文档共38行，只把时序图中的字面分号写成Mermaid实体#59;。实体解码后整篇逐字一致，箭头、顺序、消息词语、条件与所有图外正文不变。核心流程中文源发生两行语法变化，重审其三份译文；三个设计文档仅英文变化，各重审一条。其余全文复用摘要匹配的既有完整语义复核，不冒称新整篇重读。",
+        "technical_literals": "实际Docker浏览器用当前打包的11.17.2公共API对全部184个规范图表做原始/修正对照：26个原始解析失败，修正后0失败。#59;为官方规定的字面分号表示，POST/jobinfo/insert、execute(message)、getResultMessage(message)、CRON/BEAN、FIRST、triggerStatus、tenant/eventId、事务传播和状态字面量均不变。临时DOM作为render第三参数，并在finally回收；真实隔离失败实验确认错误SVG也在该容器内并可清除。",
+        "security_and_failure_semantics": "保留核心流程中的Outbox显式tenantId、幂等/重复消息、默认角色尽力分配、启动快照、REQUIRED/REQUIRES_NEW与失败重试语义。CRM候选设计仍为设计；SRM配置修复与Auth独立提交/SRM回滚区别、Asset审批后继续占位均完整。渲染依旧strict、v-pre保护不变，失败保留源码；临时容器finally保证异常和过期代次返回时都回收。",
+        "images_and_links": "图片、链接、锚点、标题、命令和图外内容无变化。保留581真实4语架构SVG与原生移动各4通过及8张原图查看记录，同时保留核心流程/错误SVG失败。583首次审计因ESM包装未找到API，完成0图，不能当作成功；583b完成184图后才应用修正。当前应用后的镜像、整页渲染、主题切换和视觉验证仍待独立执行。",
+        "language_and_terminology": "Compared every changed English message inbc0a22 with its current Chinese fact source and the matching prior full reviews. The21core-flow lines and1CRM/2SRM/2Asset design lines change only a literal semicolon's Mermaid spelling. Candidate-design status, reconciliation/cancellation requirements, possible configuration repair, independently committed Auth role versus SRM rollback, and retaining Asset occupancy after approval all remain unchanged."
+      },
+      "findings": [
+        {
+          "id": "MS01",
+          "status": "resolved",
+          "resolution": "Encode only literal sequence-message semicolons with #59; in7documents/38lines. All184canonical diagram proposals parse with the actual bundle; decoded full document text remains unchanged."
+        },
+        {
+          "id": "MS02",
+          "status": "resolved",
+          "resolution": "Pass an explicit temporary host to Mermaid.render and remove it in finally, preserving source fallback while clearing the error SVG proven by the real negative fixture."
+        },
+        {
+          "id": "MS03",
+          "status": "resolved",
+          "resolution": "Renew only6affected existing AI_REVIEW rows:3core-flow translations plus the English CRM/SRM/Asset design rows. Preserve all prior complete review files and unchanged locale entries. Claim0new rows and0human reviews."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/design/asset-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 09:22:57",
+      "result": "approved",
+      "translation_sha256": "01f477a00ac812938f37e7c1513c274976acb26d75f2a520f0bd3ffdf7c320e0",
+      "checks": {
+        "coverage_and_meaning": "逐段覆盖16节及当前四语全文：原2026-07-27日期/历史与分期、独立Asset/Workflow边界、八公共依赖、五领域表含Inbox、ID/归属/金额与删除条件、八状态/版本化生命周期命令、完整采购校验与实时/候选事务区别、双幂等/写后读/新卡Outbox、调拨/处置准备-启动-确认-审批-实物完成、32外部+1内部路径与候选权限、Auth/SRM/Procurement实际调用、PII/日志/XSS、真实四页面/台账本人页签/币种概览、当前工程入口、并发降级与测试要求。保留重要原里程碑/ADR/风险并明确历史适用性，教程/截图指向Wiki，不批准对应Wiki整篇。",
+        "technical_literals": "核对8107/19907/9907、omni_asset、/api/asset无StripPrefix、八个直接common依赖、Flowable排除、五表/三个关键唯一键、完整MyBatis链、owner/current用户维度及SELFtransfer例外、全部33方法路径、targetUserId/targetUnitId与申请version、categoryASSET_TRANSFER/ASSET_DISPOSAL、requestId/businessKey=operationId及原始发起人快照、REQUIRES_NEW确认、业务R.code404与HTTP404区别、采购价格/数量等式/Integer.MAX_VALUE/HALF_UP2/来源序号、JSON金额字符串、eventId/tenant/JSON语义意图、真实候选完整路径/afterId/size/nextAfterId/hasMore及逐候选事务、六类资产事件、application-lite.yml/compose.yaml。28份现有XML报告106通过0跳过逐份摘要匹配后复用，没有昂贵源码不变重跑。",
+        "security_and_failure_semantics": "管理owner与固定本人current_user_id不OR合并，SELFtransfer:create明确current_user_id例外，目标单位可写与Auth启用/主组织引用再验证。approval-view只PENDING_APPROVAL+STARTED及完整业务键/实例/本人任务资格，通过后临时TENANT读取并finally恢复。创建占位校验租户/ID/版本/原状态/deleted及两空活动字段。未知启动/响应或确认失败保持占位同键重试；R.code404仅尝试写FAILED，本地写失败仍可能PENDING，只有实际START_FAILED+FAILED可本地取消。早到合法完成可重试、旧/重复/异实例忽略、异意图409；APPROVED不等于物理完成。实时卡片/历史/Inbox/新卡Outbox原子，回扫不登记实时Inbox且逐候选提交，整页失败不能重跑成功写或假定全回滚。来源/金额先验全校验、合法非资产行跳过，Outbox不证明Broker/DLQ。保存username/自由文本是真实PII边界，日志规则有限；Redis失败先Auth，有有效权威设置则不fallback，回源失败才安全基线。",
+        "images_and_links": "无光栅截图；四语各六个Mermaid块，共24个，系统、ER逻辑关系、八状态、采购事务、调拨和处置的提交/确认/实物完成边界逐项比较，人用标签本地化。ER不声明跨库物理外键。所有33方法路径完整显示，权限缩写已展开。当前文件/目录与本语Wiki、源码索引和相关事实链接已核对，重要设计历史保留。Markdown渲染不等于Mermaid浏览器布局或完整根/子路径文档站验收；G综合验收仍保留。",
+        "language_and_terminology": "原日文全文と全修訂を対照。資産台帳/管理帰属/使用帰属、移管/処分、冪等性、出典単位、補完/カーソル、開始未確定/明示失敗記録、活動枠、実物完了を統一。六図の人向けラベルを日本語化、信封をエンベロープ、誤字回执を記録へ修正。条件、試行、部分コミット、元の設計日、通貨別集計と文字列金額を保持。"
+      },
+      "findings": [
+        {
+          "id": "AS01",
+          "description": "Human-only release preface and implemented/verified header conflate historical and current evidence.",
+          "resolution": "Preserve 2026-07-27 design date and dated history; identify current fact scope, ADR0003 authorized AI_REVIEW and no fresh global acceptance.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS02",
+          "description": "Redis asset: business-key prefix and conditional XXL executor wording are unsupported by current configuration.",
+          "resolution": "Record DB0 shared xss keys and current configurable executor9907; do not invent module cache keys or active depreciation jobs.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS03",
+          "description": "Recommended common dependencies and old file tree describe plans rather than the current Maven/resources tree.",
+          "resolution": "List eight actual common dependencies, application.yml/application-lite.yml and compose.yaml; keep original milestones as history.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS04",
+          "description": "Domain aggregates omit ast_inbox_event.",
+          "resolution": "Describe all five domain tables and independent procurement/Workflow consumer Inbox roles.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS05",
+          "description": "Money contract omits decimal JSON strings and currency-separated aggregation.",
+          "resolution": "Explain purchaseAmount/residualValue string serialization/deserialization, 18,2 storage and per-currency overview totals.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS06",
+          "description": "Asset ledger promises current supplier/user/unit batch enrichment that the current service/assembler does not perform.",
+          "resolution": "Record supplierNameSnapshot and user/unit IDs returned by AssetViewAssembler; distinguish selection APIs from display enrichment.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS07",
+          "description": "Manual create/update/delete boundaries are incomplete.",
+          "resolution": "Document current owner validation, versioned metadata updates, no generic status/user/location edits and restricted manual-stock deletion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS08",
+          "description": "Procurement intake eligibility omits malformed-line rejection and exact amount/quantity checks.",
+          "resolution": "Validate every root/line, unique source IDs, positive quantity/prices, exact total equation and eligible integer equality before writes; valid ineligible lines are skipped.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS09",
+          "description": "Realtime intake transaction omits created-event Outbox and replay intent validation.",
+          "resolution": "Document transactional cards/history/Inbox/new-card Outbox, tenant plus JSON-semantic intent checks and source-key readback.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS10",
+          "description": "Historical backfill is described as automatic startup scanning and uses an incorrect internal path.",
+          "resolution": "Document controlled one-page POST and actual /api/internal/procurement candidate path, matching header/query tenants, strict cursor, caller orchestration and partial commits.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS11",
+          "description": "Backfill and realtime event paths are said to share whole-event Inbox behavior.",
+          "resolution": "Distinguish per-candidate transactional source-key intake from realtime Inbox; both share source-unit uniqueness and new-card events.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS12",
+          "description": "Allocation/accept/return commands omit versions and authoritative user/unit validation.",
+          "resolution": "Include version, targetUserId/targetUnitId, current-user guard, status/slot checks and permitted repair transitions.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS13",
+          "description": "Transfer/disposal diagrams obscure local prepare transaction before remote Workflow calls.",
+          "resolution": "Show model resolution, local snapshot+occupancy commit, remote start and separate confirmation; APPROVED still occupies the asset until business completion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS14",
+          "description": "Single-level approval is described as an enforced current MVP restriction.",
+          "resolution": "Keep the original dated simple-approval decision in history; current published category-bound BPMN determines approval behavior.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS15",
+          "description": "Workflow business404 is unconditionally equated with persisted START_FAILED.",
+          "resolution": "Only R.code404 attempts markFailed; local confirmation may fail and remain PENDING. HTTP404 Feign is unknown. Only persisted START_FAILED+FAILED permits local cancel.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS16",
+          "description": "All out-of-order Workflow completion events are described as ignored.",
+          "resolution": "Distinguish retryable early completion, ignored duplicate/stale/foreign-instance events and conflicting same-event intent409.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS17",
+          "description": "Atomic activity-slot example checks only active_operation_id.",
+          "resolution": "Record tenant/id/version/current status/deleted0 and both activity fields NULL; require one affected row.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS18",
+          "description": "Transfer completion can be misunderstood as moving management ownership.",
+          "resolution": "Document current-user/current-unit/location update with owner columns retained, plus separate versioned completion transaction and Outbox.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS19",
+          "description": "DataScope table omits SELF transfer-create special mapping.",
+          "resolution": "Add current_user_id for asset:transfer:create with SELF; maintain owner mapping elsewhere and no broad owner/current OR.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS20",
+          "description": "Approval-view description omits local start state and temporary scope restoration.",
+          "resolution": "Require PENDING_APPROVAL+STARTED and full business/instance/task assignment, then temporary TENANT read with finally restore.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS21",
+          "description": "API table mixes abbreviated paths and omits options endpoints.",
+          "resolution": "Enumerate every actual external and internal method/path from six controllers and state prefix conventions explicitly.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS22",
+          "description": "Auth/SRM/Procurement integration implies unused realtime enrichment/detail clients.",
+          "resolution": "Describe actual Auth candidate/reference validation, SRM approved-supplier search only and Procurement candidate client only.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS23",
+          "description": "Malformed incoming messages are said to reach dead letters without deployment proof.",
+          "resolution": "State consumer rejection/exception; actual retry/dead-letter policy depends on broker/binder configuration and is not asserted.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS24",
+          "description": "Asset is said to store no PII and only user IDs.",
+          "resolution": "Acknowledge original Workflow username snapshot, free text, supplier/source snapshots and identifiers; explain current sanitization scope without universal privacy guarantee.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS25",
+          "description": "Frontend tree lists nonexistent extracted components and promises transfer/disposal histories inside ledger detail.",
+          "resolution": "Describe four actual page/API files, ledger/my tabs, current detail/history display and separate operation pages.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS26",
+          "description": "Overview total amount suggests summing currencies or currency conversion.",
+          "resolution": "Describe amountsByCurrency and distribution dimensions, currency-separated grouping and no exchange conversion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS27",
+          "description": "Generic degradation claims overstate blanket Auth failure and live SRM display calls.",
+          "resolution": "Describe dependency-specific fail-closed commands/options, local snapshot reads and uncertain Workflow latches.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS28",
+          "description": "Test requirements and original milestones can be read as current executed acceptance.",
+          "resolution": "Keep requirements/history with labels; reuse only digest-matched existing Docker reports and leave real MQ/Workflow/concurrency/browser acceptance separate.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS29",
+          "description": "Japanese/Korean human-facing Mermaid/text-tree labels remain English.",
+          "resolution": "Localize all six diagrams and current navigation labels while preserving technical states/identifiers/contracts.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS30",
+          "description": "Original XSS prose incorrectly says a Redis outage itself forces baseline.",
+          "resolution": "All four versions now distinguish Redis failure -> Auth, authoritative result retained despite cache-write failure, and fallback only when Auth result is unavailable.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS31",
+          "description": "Retained scope table uses incomplete ledger paths and permission shorthand that could be copied as one invalid permission.",
+          "resolution": "Use actual full ledger paths and expand slash-compressed asset permission literals into complete codes.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS32",
+          "description": "Current engineering subsection headings and root application entry still suggest planned folders.",
+          "resolution": "Use current-entry headings and actual AssetApplication.java; polish Japanese envelope and Korean initiation terminology.",
+          "status": "resolved"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/design/asset-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 09:22:57",
+      "result": "approved",
+      "translation_sha256": "c0fcbf49b441379f3e76a324ed58606b0cb63841c2431cf99761cefb91b561f5",
+      "checks": {
+        "coverage_and_meaning": "逐段覆盖16节及当前四语全文：原2026-07-27日期/历史与分期、独立Asset/Workflow边界、八公共依赖、五领域表含Inbox、ID/归属/金额与删除条件、八状态/版本化生命周期命令、完整采购校验与实时/候选事务区别、双幂等/写后读/新卡Outbox、调拨/处置准备-启动-确认-审批-实物完成、32外部+1内部路径与候选权限、Auth/SRM/Procurement实际调用、PII/日志/XSS、真实四页面/台账本人页签/币种概览、当前工程入口、并发降级与测试要求。保留重要原里程碑/ADR/风险并明确历史适用性，教程/截图指向Wiki，不批准对应Wiki整篇。",
+        "technical_literals": "核对8107/19907/9907、omni_asset、/api/asset无StripPrefix、八个直接common依赖、Flowable排除、五表/三个关键唯一键、完整MyBatis链、owner/current用户维度及SELFtransfer例外、全部33方法路径、targetUserId/targetUnitId与申请version、categoryASSET_TRANSFER/ASSET_DISPOSAL、requestId/businessKey=operationId及原始发起人快照、REQUIRES_NEW确认、业务R.code404与HTTP404区别、采购价格/数量等式/Integer.MAX_VALUE/HALF_UP2/来源序号、JSON金额字符串、eventId/tenant/JSON语义意图、真实候选完整路径/afterId/size/nextAfterId/hasMore及逐候选事务、六类资产事件、application-lite.yml/compose.yaml。28份现有XML报告106通过0跳过逐份摘要匹配后复用，没有昂贵源码不变重跑。",
+        "security_and_failure_semantics": "管理owner与固定本人current_user_id不OR合并，SELFtransfer:create明确current_user_id例外，目标单位可写与Auth启用/主组织引用再验证。approval-view只PENDING_APPROVAL+STARTED及完整业务键/实例/本人任务资格，通过后临时TENANT读取并finally恢复。创建占位校验租户/ID/版本/原状态/deleted及两空活动字段。未知启动/响应或确认失败保持占位同键重试；R.code404仅尝试写FAILED，本地写失败仍可能PENDING，只有实际START_FAILED+FAILED可本地取消。早到合法完成可重试、旧/重复/异实例忽略、异意图409；APPROVED不等于物理完成。实时卡片/历史/Inbox/新卡Outbox原子，回扫不登记实时Inbox且逐候选提交，整页失败不能重跑成功写或假定全回滚。来源/金额先验全校验、合法非资产行跳过，Outbox不证明Broker/DLQ。保存username/自由文本是真实PII边界，日志规则有限；Redis失败先Auth，有有效权威设置则不fallback，回源失败才安全基线。",
+        "images_and_links": "无光栅截图；四语各六个Mermaid块，共24个，系统、ER逻辑关系、八状态、采购事务、调拨和处置的提交/确认/实物完成边界逐项比较，人用标签本地化。ER不声明跨库物理外键。所有33方法路径完整显示，权限缩写已展开。当前文件/目录与本语Wiki、源码索引和相关事实链接已核对，重要设计历史保留。Markdown渲染不等于Mermaid浏览器布局或完整根/子路径文档站验收；G综合验收仍保留。",
+        "language_and_terminology": "원문 전체와 모든 수정 비교. 자산 장부/관리 귀속/사용 귀속、이전/처분、멱등성/출처 단위、제어된 보상/커서、시작 불명/저장된 명시 실패、활성 슬롯/실물 완료를 일관되게 사용. 여섯 도식의 설명을 한국어화하고 발기를 시작으로 수정. 반드시/경우에만/시도/이미 커밋 가능/증명하지 않음과 통화별 집계/문자열 금액 경계를 보존."
+      },
+      "findings": [
+        {
+          "id": "AS01",
+          "description": "Human-only release preface and implemented/verified header conflate historical and current evidence.",
+          "resolution": "Preserve 2026-07-27 design date and dated history; identify current fact scope, ADR0003 authorized AI_REVIEW and no fresh global acceptance.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS02",
+          "description": "Redis asset: business-key prefix and conditional XXL executor wording are unsupported by current configuration.",
+          "resolution": "Record DB0 shared xss keys and current configurable executor9907; do not invent module cache keys or active depreciation jobs.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS03",
+          "description": "Recommended common dependencies and old file tree describe plans rather than the current Maven/resources tree.",
+          "resolution": "List eight actual common dependencies, application.yml/application-lite.yml and compose.yaml; keep original milestones as history.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS04",
+          "description": "Domain aggregates omit ast_inbox_event.",
+          "resolution": "Describe all five domain tables and independent procurement/Workflow consumer Inbox roles.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS05",
+          "description": "Money contract omits decimal JSON strings and currency-separated aggregation.",
+          "resolution": "Explain purchaseAmount/residualValue string serialization/deserialization, 18,2 storage and per-currency overview totals.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS06",
+          "description": "Asset ledger promises current supplier/user/unit batch enrichment that the current service/assembler does not perform.",
+          "resolution": "Record supplierNameSnapshot and user/unit IDs returned by AssetViewAssembler; distinguish selection APIs from display enrichment.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS07",
+          "description": "Manual create/update/delete boundaries are incomplete.",
+          "resolution": "Document current owner validation, versioned metadata updates, no generic status/user/location edits and restricted manual-stock deletion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS08",
+          "description": "Procurement intake eligibility omits malformed-line rejection and exact amount/quantity checks.",
+          "resolution": "Validate every root/line, unique source IDs, positive quantity/prices, exact total equation and eligible integer equality before writes; valid ineligible lines are skipped.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS09",
+          "description": "Realtime intake transaction omits created-event Outbox and replay intent validation.",
+          "resolution": "Document transactional cards/history/Inbox/new-card Outbox, tenant plus JSON-semantic intent checks and source-key readback.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS10",
+          "description": "Historical backfill is described as automatic startup scanning and uses an incorrect internal path.",
+          "resolution": "Document controlled one-page POST and actual /api/internal/procurement candidate path, matching header/query tenants, strict cursor, caller orchestration and partial commits.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS11",
+          "description": "Backfill and realtime event paths are said to share whole-event Inbox behavior.",
+          "resolution": "Distinguish per-candidate transactional source-key intake from realtime Inbox; both share source-unit uniqueness and new-card events.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS12",
+          "description": "Allocation/accept/return commands omit versions and authoritative user/unit validation.",
+          "resolution": "Include version, targetUserId/targetUnitId, current-user guard, status/slot checks and permitted repair transitions.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS13",
+          "description": "Transfer/disposal diagrams obscure local prepare transaction before remote Workflow calls.",
+          "resolution": "Show model resolution, local snapshot+occupancy commit, remote start and separate confirmation; APPROVED still occupies the asset until business completion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS14",
+          "description": "Single-level approval is described as an enforced current MVP restriction.",
+          "resolution": "Keep the original dated simple-approval decision in history; current published category-bound BPMN determines approval behavior.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS15",
+          "description": "Workflow business404 is unconditionally equated with persisted START_FAILED.",
+          "resolution": "Only R.code404 attempts markFailed; local confirmation may fail and remain PENDING. HTTP404 Feign is unknown. Only persisted START_FAILED+FAILED permits local cancel.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS16",
+          "description": "All out-of-order Workflow completion events are described as ignored.",
+          "resolution": "Distinguish retryable early completion, ignored duplicate/stale/foreign-instance events and conflicting same-event intent409.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS17",
+          "description": "Atomic activity-slot example checks only active_operation_id.",
+          "resolution": "Record tenant/id/version/current status/deleted0 and both activity fields NULL; require one affected row.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS18",
+          "description": "Transfer completion can be misunderstood as moving management ownership.",
+          "resolution": "Document current-user/current-unit/location update with owner columns retained, plus separate versioned completion transaction and Outbox.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS19",
+          "description": "DataScope table omits SELF transfer-create special mapping.",
+          "resolution": "Add current_user_id for asset:transfer:create with SELF; maintain owner mapping elsewhere and no broad owner/current OR.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS20",
+          "description": "Approval-view description omits local start state and temporary scope restoration.",
+          "resolution": "Require PENDING_APPROVAL+STARTED and full business/instance/task assignment, then temporary TENANT read with finally restore.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS21",
+          "description": "API table mixes abbreviated paths and omits options endpoints.",
+          "resolution": "Enumerate every actual external and internal method/path from six controllers and state prefix conventions explicitly.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS22",
+          "description": "Auth/SRM/Procurement integration implies unused realtime enrichment/detail clients.",
+          "resolution": "Describe actual Auth candidate/reference validation, SRM approved-supplier search only and Procurement candidate client only.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS23",
+          "description": "Malformed incoming messages are said to reach dead letters without deployment proof.",
+          "resolution": "State consumer rejection/exception; actual retry/dead-letter policy depends on broker/binder configuration and is not asserted.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS24",
+          "description": "Asset is said to store no PII and only user IDs.",
+          "resolution": "Acknowledge original Workflow username snapshot, free text, supplier/source snapshots and identifiers; explain current sanitization scope without universal privacy guarantee.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS25",
+          "description": "Frontend tree lists nonexistent extracted components and promises transfer/disposal histories inside ledger detail.",
+          "resolution": "Describe four actual page/API files, ledger/my tabs, current detail/history display and separate operation pages.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS26",
+          "description": "Overview total amount suggests summing currencies or currency conversion.",
+          "resolution": "Describe amountsByCurrency and distribution dimensions, currency-separated grouping and no exchange conversion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS27",
+          "description": "Generic degradation claims overstate blanket Auth failure and live SRM display calls.",
+          "resolution": "Describe dependency-specific fail-closed commands/options, local snapshot reads and uncertain Workflow latches.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS28",
+          "description": "Test requirements and original milestones can be read as current executed acceptance.",
+          "resolution": "Keep requirements/history with labels; reuse only digest-matched existing Docker reports and leave real MQ/Workflow/concurrency/browser acceptance separate.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS29",
+          "description": "Japanese/Korean human-facing Mermaid/text-tree labels remain English.",
+          "resolution": "Localize all six diagrams and current navigation labels while preserving technical states/identifiers/contracts.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS30",
+          "description": "Original XSS prose incorrectly says a Redis outage itself forces baseline.",
+          "resolution": "All four versions now distinguish Redis failure -> Auth, authoritative result retained despite cache-write failure, and fallback only when Auth result is unavailable.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS31",
+          "description": "Retained scope table uses incomplete ledger paths and permission shorthand that could be copied as one invalid permission.",
+          "resolution": "Use actual full ledger paths and expand slash-compressed asset permission literals into complete codes.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS32",
+          "description": "Current engineering subsection headings and root application entry still suggest planned folders.",
+          "resolution": "Use current-entry headings and actual AssetApplication.java; polish Japanese envelope and Korean initiation terminology.",
+          "status": "resolved"
+        }
+      ]
+    }
+  }
+}

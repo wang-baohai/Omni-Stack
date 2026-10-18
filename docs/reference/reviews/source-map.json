@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "source-map",
+  "source": "docs/reference/source-map.md",
+  "source_sha256": "a1a85b47805818ec2343e905a104a2030c636ea3c9cf61b4fc03fbc085425657",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "28fa1f2f385438ac1c11e7f1bed3396623eec690",
+  "source_state": "Current four-language source navigation contents, complete technical rows and actual Docker rendering bound by per-file digests",
+  "method": "Codex read each localized heading, introduction and table header and all117 shared navigation rows; compared complete bodies across languages and corrected structural and semantic findings before approval.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "renderer": "VitePress1.6.4",
+    "documents": 4,
+    "before_rendered_tables": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "after_rendered_tables": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "data_rows_per_language": 117,
+    "path_checks": 468,
+    "navigation_body_sha256": "0a65c953a8fdae5ef4ce4b2124e17660d347d2f5622e08c15dd4fea605b226b8",
+    "limitation": "Local source targets and targeted Markdown rendering only; final root/subpath site and generated-preset acceptance remain required."
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/reference/source-map.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-14 11:18:34",
+      "result": "approved",
+      "translation_sha256": "017a8504db53caff37ce4711a12ac7b197d608adea47105d8f879f6d83e75dee",
+      "checks": {
+        "coverage_and_meaning": "完整读取四语索引：中文与三份译文的标题、说明、三列表头及全部117条导航。四语导航正文逐条一致、共同摘要已核对；表格覆盖应用入口、配置、权限与XSS、任务、MQ、工作流、CRM/SRM、采购和资产源入口。索引保持只负责导航，不增加第二套行为契约或教程。",
+        "technical_literals": "核对117条模块、文件/目录符号、显示路径及Markdown目标；四语共同正文摘要保持0a65c953a8fdae5ef4ce4b2124e17660d347d2f5622e08c15dd4fea605b226b8。全部468个本地路径存在性/仓库边界/显示与链接一致检查通过。实际VitePress1.6.4在Docker中的修复前四份table=0，修复后每份单一H1、三列table=1、tbody=117；无丢行或代码字面量变更。",
+        "security_and_failure_semantics": "说明明确行为、不变量与边界仍以工程事实和当前源码为准。索引文件存在不代表源码路径的运行行为已验收，不将兼容schema.sql入口当作正式迁移所有者；不把本地链接存在或Markdown渲染冒称外部OAuth、验证码、业务写入或完整站点/预设交付成功。保留全部七组待办与停止长期服务策略。",
+        "images_and_links": "本篇没有图片；全部源码/目录链接逐项核对。标题、说明和表头原来连成一行导致渲染器没有导航表，四语已分离为独立Markdown块。保留原117条链接及顺序，渲染产物与当前内容摘要绑定；完整站点根路径/子路径和生成预设验收仍待G阶段。",
+        "language_and_terminology": "完整核对Source entry index、service/symbol、Module、Symbol or directory、Repository path与导航用途。英文原说明遗漏中文的边界一项；补齐behavior, invariants, and boundaries，保持engineering facts/current source与navigation only的限制。文件/类/目录符号是共享技术字面量，未翻改。"
+      },
+      "findings": [
+        {
+          "id": "joined-markdown-blocks",
+          "status": "resolved",
+          "description": "Title, introductory paragraph, table header and delimiter were on one line, so the actual renderer did not produce a navigation table.",
+          "resolution": "Separate H1, paragraph and three-column table with proper newlines; actual Docker VitePress render now contains all117 data rows."
+        },
+        {
+          "id": "omitted-boundaries",
+          "status": "resolved",
+          "description": "The English introduction preserved behavior and invariants but omitted the Chinese statement about boundaries.",
+          "resolution": "Restore boundaries explicitly and retain source/fact authority and navigation-only scope."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/reference/source-map.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-14 11:18:34",
+      "result": "approved",
+      "translation_sha256": "a1680f19e46a46abcd86ed0f0cef8ed565c652fd5da1fce87058cac126532680",
+      "checks": {
+        "coverage_and_meaning": "完整读取四语索引：中文与三份译文的标题、说明、三列表头及全部117条导航。四语导航正文逐条一致、共同摘要已核对；表格覆盖应用入口、配置、权限与XSS、任务、MQ、工作流、CRM/SRM、采购和资产源入口。索引保持只负责导航，不增加第二套行为契约或教程。",
+        "technical_literals": "核对117条模块、文件/目录符号、显示路径及Markdown目标；四语共同正文摘要保持0a65c953a8fdae5ef4ce4b2124e17660d347d2f5622e08c15dd4fea605b226b8。全部468个本地路径存在性/仓库边界/显示与链接一致检查通过。实际VitePress1.6.4在Docker中的修复前四份table=0，修复后每份单一H1、三列table=1、tbody=117；无丢行或代码字面量变更。",
+        "security_and_failure_semantics": "说明明确行为、不变量与边界仍以工程事实和当前源码为准。索引文件存在不代表源码路径的运行行为已验收，不将兼容schema.sql入口当作正式迁移所有者；不把本地链接存在或Markdown渲染冒称外部OAuth、验证码、业务写入或完整站点/预设交付成功。保留全部七组待办与停止长期服务策略。",
+        "images_and_links": "本篇没有图片；全部源码/目录链接逐项核对。标题、说明和表头原来连成一行导致渲染器没有导航表，四语已分离为独立Markdown块。保留原117条链接及顺序，渲染产物与当前内容摘要绑定；完整站点根路径/子路径和生成预设验收仍待G阶段。",
+        "language_and_terminology": "完整核对ソース入口索引、サービス/シンボル、モジュール、シンボル・ディレクトリ、リポジトリのパス以及動作/不変条件/境界。将本索引は案内だけを担当します改为自然的ソースを探すための案内です，明确读者应参照事实与当前代码；所有稳定源码符号与路径保持一致。"
+      },
+      "findings": [
+        {
+          "id": "joined-markdown-blocks",
+          "status": "resolved",
+          "description": "日文标题、说明、三列表头和分隔线在一行，真实渲染没有导航表。",
+          "resolution": "分离Markdown块，实际Docker渲染保留117条数据行与三列。"
+        },
+        {
+          "id": "unnatural-navigation-wording",
+          "status": "resolved",
+          "description": "案内だけを担当します表达不自然，容易把索引拟人化。",
+          "resolution": "改为この索引はソースを探すための案内です；保留事实、源码与行为边界关系。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/reference/source-map.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-14 11:18:34",
+      "result": "approved",
+      "translation_sha256": "2292e98f28f631ec3c20b1800053fb569e7497ff3a2eb6a68b30d1d182479db6",
+      "checks": {
+        "coverage_and_meaning": "完整读取四语索引：中文与三份译文的标题、说明、三列表头及全部117条导航。四语导航正文逐条一致、共同摘要已核对；表格覆盖应用入口、配置、权限与XSS、任务、MQ、工作流、CRM/SRM、采购和资产源入口。索引保持只负责导航，不增加第二套行为契约或教程。",
+        "technical_literals": "核对117条模块、文件/目录符号、显示路径及Markdown目标；四语共同正文摘要保持0a65c953a8fdae5ef4ce4b2124e17660d347d2f5622e08c15dd4fea605b226b8。全部468个本地路径存在性/仓库边界/显示与链接一致检查通过。实际VitePress1.6.4在Docker中的修复前四份table=0，修复后每份单一H1、三列table=1、tbody=117；无丢行或代码字面量变更。",
+        "security_and_failure_semantics": "说明明确行为、不变量与边界仍以工程事实和当前源码为准。索引文件存在不代表源码路径的运行行为已验收，不将兼容schema.sql入口当作正式迁移所有者；不把本地链接存在或Markdown渲染冒称外部OAuth、验证码、业务写入或完整站点/预设交付成功。保留全部七组待办与停止长期服务策略。",
+        "images_and_links": "本篇没有图片；全部源码/目录链接逐项核对。标题、说明和表头原来连成一行导致渲染器没有导航表，四语已分离为独立Markdown块。保留原117条链接及顺序，渲染产物与当前内容摘要绑定；完整站点根路径/子路径和生成预设验收仍待G阶段。",
+        "language_and_terminology": "完整核对소스 진입점 색인、서비스/심볼、모듈、심볼 또는 디렉터리、저장소 경로与동작/불변 조건/경계。原韩文说明与中文事实源语义一致，仅修复Markdown块结构；文件、目录和API符号共享，不翻译或更改任何技术路径。"
+      },
+      "findings": [
+        {
+          "id": "joined-markdown-blocks",
+          "status": "resolved",
+          "description": "韩文标题、说明、表头和分隔线粘成一行，真实渲染不生成导航表。",
+          "resolution": "按独立标题、说明和三列表格排版；Docker渲染117行，路径与中文及另两语一致。"
+        }
+      ]
+    }
+  }
+}

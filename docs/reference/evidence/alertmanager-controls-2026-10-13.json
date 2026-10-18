@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "kind": "local-docker-alertmanager-mobile-native-controls",
+  "recorded_at": "2026-10-13T00:55:16.749Z",
+  "status": "READONLY_CONTROLS_PASS;NATIVE_ENGLISH_ACCEPTANCE_PENDING",
+  "project": "omni-wiki-acceptance-20261009",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "test": "scripts/fixtures/capture-observability.mjs",
+  "test_sha256": "d9db5376018cb16876c1019caeccc737edcabb6ab26faa107bca2f0816bb712a",
+  "runtime": {
+    "service": "alertmanager",
+    "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+    "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+    "host_ports": 0
+  },
+  "browser_image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+  "summary": {
+    "step": "readonly-controls-summary",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "restored_checkbox": true,
+    "persisted_writes": 0,
+    "alert_count_before": 0,
+    "alert_count_after": 0,
+    "limitation": "Current alerts only; this check does not retrigger or prove delivery of an OmniServiceDown alert.",
+    "mocks": false
+  },
+  "visual_review": {
+    "reviewer": "Agent original-image inspection",
+    "reviewed": 2,
+    "human_translation_review": "pending",
+    "limits": [
+      "Two originals individually reviewed by the agent; not human translation signatures.",
+      "Native English third-party UI shared by four-language explanations; explicit acceptance remains pending.",
+      "At 390px, native horizontal scrolling reaches the rightmost Muted label; two real label clicks toggle and restore the checkbox. No forced click or CSS injection.",
+      "Horizontal scrolling clips the left navigation while exposing right controls; return left to read navigation.",
+      "Zero active alerts before and after; these images prove filter control access, not firing delivery. Prior OmniServiceDown evidence retains its own timestamp and identity.",
+      "Only GET/HEAD browser requests allowed; no silence creation, configuration change, new fault injection or external notification."
+    ]
+  },
+  "captures": [
+    {
+      "step": "left",
+      "locale": "shared",
+      "actual_ui_language": "English; third-party native UI",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "image": "docs/images/operations-alert-controls-left-mobile.png",
+      "sha256": "a068162196fee05967d5f78ad4f8e87f2530467be29a9a13373537a395039b19",
+      "captured_at": "2026-10-13T00:54:05.800Z",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "step": "right-toggle",
+      "locale": "shared",
+      "actual_ui_language": "English; third-party native UI",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "image": "docs/images/operations-alert-controls-right-toggle-mobile.png",
+      "sha256": "dcddb908900c3303ac7aee20b7cee5b3fe1c99cd512bc6c3e32d398deb5888ca",
+      "captured_at": "2026-10-13T00:54:06.066Z",
+      "scroll": {
+        "x": 164,
+        "width": 390,
+        "scroll_width": 554
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    }
+  ]
+}

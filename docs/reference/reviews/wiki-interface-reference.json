@@ -1,0 +1,706 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-interface-reference",
+  "source": "docs/wiki/interface-reference.md",
+  "source_sha256": "f6a38d89750eb38ceb2e79a03d988db767e8458fc48785b1145afd20fa1d7dda",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "e3f8c495ada63497181580386e9d149f7d370a12",
+  "source_state": "All 312 original lines were actually read in four complete articles, then every final delta was checked against Chinese, current capture sources and selected original images. Exact unchanged-line mapping covers 344 current lines; this is not four fresh final whole rereads. Five whole current helper/config/test files total 506 lines, with selected Java/SRM reads and four named completed guide/fact reviews reused at their recorded scopes. All 68 baseline image files were hash/Git checked; 272 article references are duplicates of those files. Twelve originals were individually viewed; the other 56 were not freshly inspected. Legacy registration has no image capture hashes or container provenance. No tests, captures or business writes were executed.",
+  "method": "All 312 original lines were actually read in four complete articles, then every final delta was checked against Chinese, current capture sources and selected original images. Exact unchanged-line mapping covers 344 current lines; this is not four fresh final whole rereads. Five whole current helper/config/test files total 506 lines, with selected Java/SRM reads and four named completed guide/fact reviews reused at their recorded scopes. All 68 baseline image files were hash/Git checked; 272 article references are duplicates of those files. Twelve originals were individually viewed; the other 56 were not freshly inspected. Legacy registration has no image capture hashes or container provenance. No tests, captures or business writes were executed.",
+  "checked_source_files": [
+    {
+      "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+      "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+    },
+    {
+      "path": "omni-frontend/playwright.docs.config.ts",
+      "sha256": "1521bc4c6eefd09c2f3a3cf9280fa9ab56a98c4966527e2875ae74f6619851a0"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/flows/management.flows.spec.ts",
+      "sha256": "700c72a847e836999cc37fc1529f4a5675e3a59453dfddd4d06637cf0a2a0639"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts",
+      "sha256": "6657760668749213f4007e8ddc3da5811acadffbeb0564c0333d3d52e6c1e6a8"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts",
+      "sha256": "d91c7c7b4a8371e768c0f5a78352b896d26d7c0c9e23f3336560aad7544cc7e7"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/e2e/E2eTokenFixture.java",
+      "sha256": "2d6eafa8e333882845ab9b2f1c831124175234685a9e3830aa60355f3e04a3c0"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/flows/srm.flows.spec.ts",
+      "sha256": "822d7dd630b43f3c94618f1fd620194b90e51910dc10df49b13e1741700577c2"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/screenshot-manifest.yaml",
+      "sha256": "1fc63b7bbcf745b256c5d52fee540ee609f575d3aa0539adb33ba97af2dd1163"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/images/en-US/monitor-mq-message-detail.png",
+      "sha256": "90714c9e5faa446ba3215694d5dea460125560081e99d16913bf61d464d76e71"
+    },
+    {
+      "path": "docs/images/en-US/srm-evaluations.png",
+      "sha256": "d874201224472a46c6d5c815f23967016be9884900e03721625e1a5e9877131c"
+    },
+    {
+      "path": "docs/images/en-US/srm-invites.png",
+      "sha256": "010823bc74f7a868375d130fdfd5651047d59bfe5b54b0288d59e5cb3a6f76b3"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-quotation-form.png",
+      "sha256": "ac7e3fe62cd89cbfc19c5847c9e6762a72c230626929301278c0fc814b7d81b4"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-quotation-invitations.png",
+      "sha256": "3ff7dbe4cad9426ab400b596180ae3bd294ad42ca4dbb3ca957cacfb6c884849"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-quotation-mobile.png",
+      "sha256": "c7e6ad3d6891c26af1e0ab2cc4ad8eb2fd287587381c382536fc97fb9cd7af17"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-quotation-submitted.png",
+      "sha256": "973fe68df6b58e4793165f10d7f84f9f0c5e7ca2f0c040dd1c818649c03a2c76"
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-quotation-tablet.png",
+      "sha256": "a2f79a90765b7373eb5d48599724aa180f005034511769635bf9bd772216be30"
+    },
+    {
+      "path": "docs/images/en-US/srm-risk-config.png",
+      "sha256": "2b840d4d18b2f52587530a54777d1c9c74c45b8b15485830d6f1238bcb57c62b"
+    },
+    {
+      "path": "docs/images/en-US/srm-risks.png",
+      "sha256": "1ecada0e3ba07f3c3fc0f725d00aaf271e6ed0748d51d60f3c70fde7bda3ef6f"
+    },
+    {
+      "path": "docs/images/en-US/srm-suppliers.png",
+      "sha256": "d98b29dc2d89c3e85b4810d11edf5a07929dcc37351f62431cd8c0970b1e210e"
+    },
+    {
+      "path": "docs/images/en-US/workflow-definitions.png",
+      "sha256": "a6a18d15adf2e6f87cd4ee8dac8915196d632df589ca20450fb7955d7a02fffa"
+    },
+    {
+      "path": "docs/images/en-US/workflow-instance-approval-records.png",
+      "sha256": "df0084f1a518a447b9d92bc89f3a84621279cf92583b9411e2c270a108dd0376"
+    },
+    {
+      "path": "docs/images/en-US/workflow-instance-progress.png",
+      "sha256": "f3915fb96c551347e6c1b0521214197abed2c58ada9d040461616b6cbfa7fbe7"
+    },
+    {
+      "path": "docs/images/en-US/workflow-instances.png",
+      "sha256": "ee71b9e8226749615e1f1f9e4516233da81b04fbc3f26764f77049759ac0b389"
+    },
+    {
+      "path": "docs/images/en-US/workflow-model-versions.png",
+      "sha256": "fa6e6fe59df2d89e51533b07ab9b024a09ef5132606500e294cd2911c6d4b4e8"
+    },
+    {
+      "path": "docs/images/en-US/workflow-stats.png",
+      "sha256": "5f08091bc271951c6c526f4bb258edef79a1736d0531ee385c75d6c7724f7961"
+    },
+    {
+      "path": "docs/images/ja-JP/monitor-mq-message-detail.png",
+      "sha256": "a458d2defb24aa330cc1140ef90f1e9bdefdb3c2a18622a81fff7d2bd1f02125"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-evaluations.png",
+      "sha256": "4eb755ee634c93c98f23ca954d1f713fe9ee45adb4a13a95c1424d82ea9a9d53"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-invites.png",
+      "sha256": "88c15a4e00f2a9a095658be16dd14e78e920345a472b7a927b5cbbb93dc54577"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-quotation-form.png",
+      "sha256": "f51535129e40de0bb52c709bbcbadc2f49110ffee735656522d555bea8de4838"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-quotation-invitations.png",
+      "sha256": "4f8aa5705264ccdded58c605318f412aaf867e7c815e854d105eebb1f1b474f7"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-quotation-mobile.png",
+      "sha256": "3c168e6d8890f30333f4a3c99a8ab8b480dfc2c3df90e9f966c88ac41a360f1c"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-quotation-submitted.png",
+      "sha256": "ec2530f1f32e9ac0a392c3e8cf87163041826ee6f7de16fc11dc0726cc634b13"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-quotation-tablet.png",
+      "sha256": "ac1af7ff293e1a15fdbc7e15cb072c142f6d02e30a5225d7545606817baf3768"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-risk-config.png",
+      "sha256": "44327053d1c484ba6ecc44e332c64dea064e260cd654b11efcbc35f6f4c64a42"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-risks.png",
+      "sha256": "b8bcc6b113650a31aaec6a150d45f3db665610fc9e7255cc54da666156d1a15e"
+    },
+    {
+      "path": "docs/images/ja-JP/srm-suppliers.png",
+      "sha256": "dd5aa665ac27220b664338333be4ed3ff001c61e4bd585d2a0180e17c3ddeb8a"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-definitions.png",
+      "sha256": "c905617f254a678b181ee536bc87f14c17ee99c8068868368d7fd194edc68059"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-instance-approval-records.png",
+      "sha256": "7bfe1d32aaf64d29dbc98dc55a26eb37ceaafa23165682f35527e4933d94751c"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-instance-progress.png",
+      "sha256": "9248f92d21e125b773f6e2c02b28b96f2a9c2c33da0e6a8a473bb3b625223a17"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-instances.png",
+      "sha256": "42c75c0f7ec27bfb05d5984627b9c39e33643dd4299828d385a8ac9a8fa1d658"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-model-versions.png",
+      "sha256": "4a6caecb495cdcafcac2e7162ff57c5802731a5721dbb0ce31ab1ad0dfb69523"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-stats.png",
+      "sha256": "cf42658c4aa50d610f2d36f4e675752a371623725ffea98d5e39a23c15c6e4a2"
+    },
+    {
+      "path": "docs/images/ko-KR/monitor-mq-message-detail.png",
+      "sha256": "0525ef2eb01da54e56b30a583749330cd75295bb9058d652a70f5f17e1e44943"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-evaluations.png",
+      "sha256": "68c5a3f4cba0a6449c20438d402716581450b60e11acf45721a950f59b0afcf0"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-invites.png",
+      "sha256": "c24f6384ed5b14580eb27a727110c921dceb5ea224322cbcc57160024d3e99ee"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-quotation-form.png",
+      "sha256": "07f07b53555e664a11c8c949f015d5244928beb41edc65f0d2700b3f820e7122"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-quotation-invitations.png",
+      "sha256": "c60f159532f282a6c3e46dbe11bbf9e6b826eefdaf295a6958a72d61c0a44b2f"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-quotation-mobile.png",
+      "sha256": "0644338af9213d1f48fe2314da1f973d8656adf4f6481343e73cb4a48c72e862"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-quotation-submitted.png",
+      "sha256": "96fb538a7d04971e5c49d9ad27ab6119b07955c15adb1d87285a936061786109"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-quotation-tablet.png",
+      "sha256": "bcf575c097add9e56f214949576fd5c6e327b319333740cbb26be8ba2b3eb06f"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-risk-config.png",
+      "sha256": "b60bbb1cbb481d7fbe51b7ae70e236da5289569b648986452e205d495d381dce"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-risks.png",
+      "sha256": "d4af21d8cec7dd9895fe331040518266a5389f52aa1dbaabc8b7267e5ef470a8"
+    },
+    {
+      "path": "docs/images/ko-KR/srm-suppliers.png",
+      "sha256": "846695d9174903c5c2080f182308cb7e3f09451729f22c70f28c23e9d54d4479"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-definitions.png",
+      "sha256": "5941a80c87108a7a4d02b6286d69a6b4e9d01183e482cad4dee1272162a1b999"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-instance-approval-records.png",
+      "sha256": "6b5c9c18b4e90e336691fc50403c80d75eb21e823664aea0bec8dc46eb4c9d21"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-instance-progress.png",
+      "sha256": "fc4ffd0bccba5f11a60be92f689799a12d20885b57af483f33ceda51a55f5b8a"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-instances.png",
+      "sha256": "6c5c2bff94a36a205057e36c35c6a17d3195205c218335e4bbf03866475e2cb9"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-model-versions.png",
+      "sha256": "056cdf345762ba6a7a9c78b1a41c87c6a1c5f651140b40c0f742aa0762ec3f6f"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-stats.png",
+      "sha256": "1ffa4c1b2c45824567555f5a50b7ca69dd6860371933b0b0ef7b432dfd518625"
+    },
+    {
+      "path": "docs/images/zh-CN/monitor-mq-message-detail.png",
+      "sha256": "4b820709cffe0f0904bde0c4868c2ac12de9b4bbd03a22af3ac0c3ff6e2a3182"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-evaluations.png",
+      "sha256": "fa6ca50f9cccdd30404b7dbbfeb6c50a0f37187c8f9e0a9005e38ab31514e846"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-invites.png",
+      "sha256": "ccd4a0a19bb82fc7dfda43e26070d49aa0265b4a13d229c20cbf998f401246bd"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-quotation-form.png",
+      "sha256": "8dc5fddf84e2a9fdb0a2df05ce709341bcf507b9884475709b3071a7b56df054"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-quotation-invitations.png",
+      "sha256": "b8ca0e0af36fc651e19d83b8042da267e366766ac829609a701f6ece65a674e3"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-quotation-mobile.png",
+      "sha256": "044dd0e25fe64e590c0a4b1314f20731e437a5126447d8aa0102b3c997c8315c"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-quotation-submitted.png",
+      "sha256": "dc0c8df14aef5aa5006488b7c60557ce03924c2fa9ef1e2ba8c78cdc60b4fda3"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-quotation-tablet.png",
+      "sha256": "336831f1a6e9ec1f5c505c1c921c0e99be80774a6361eaaac42fe9c3a891ed08"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-risk-config.png",
+      "sha256": "8dc9c762cb070e0ef6ba609678ca6cab134ab7c922a43240608c591c493c40ee"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-risks.png",
+      "sha256": "2676ae6a845be8914789e5b96e9650b52f93f2ed5cc88789127be442d72d2041"
+    },
+    {
+      "path": "docs/images/zh-CN/srm-suppliers.png",
+      "sha256": "e3eba66c971e2b322a575b74dcf359d810d0c3fa635abf62ecd6247b1e70ecd0"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-definitions.png",
+      "sha256": "e42e933cf0b5211921791a0aba12ba15a2848255048f5a255d2e943ec6228d03"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-instance-approval-records.png",
+      "sha256": "3260818e8594143feabeef65f9503870cdb617d5f5736e263b9a6a1d53d8791e"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-instance-progress.png",
+      "sha256": "513e1ad39a0465669faf4c497af36ef09944f88efa27efc1a377cc972de76ae6"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-instances.png",
+      "sha256": "940a7299ac3f47d06f854d496b4dc2f9e9be04b451c4a6c7b70fa4b89973d1c9"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-model-versions.png",
+      "sha256": "147950f61bb89b25d5d551ae18e9f04245b5643e38f5f5b7f55368706e21ca39"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-stats.png",
+      "sha256": "b1563729d99e3d9649081dea2a6278f4e91cbfac77996b59aec95a3c520c742d"
+    },
+    {
+      "path": "docs/guides/workflow-approval.md",
+      "sha256": "43e51b029befd4b3655908d7c076b87b230b8b5df2dd12f74bdfc0e3fc5e005a"
+    },
+    {
+      "path": "docs/guides/workflow-approval.en.md",
+      "sha256": "bece54dcb5f504f3c8d92c895c90a4f352746831774a1817d9adfbad7b84e136"
+    },
+    {
+      "path": "docs/guides/workflow-approval.jp.md",
+      "sha256": "98539ef629cde8866c46bbeee444330bcc068eff5cfda7819ce713d47336d7c0"
+    },
+    {
+      "path": "docs/guides/workflow-approval.kr.md",
+      "sha256": "2a7f2aab55aecce168901adc02e8d54e0ca647ede57a93ebf19cbc7146a648f6"
+    },
+    {
+      "path": "docs/reference/reviews/guide-workflow-approval.json",
+      "sha256": "9dcb32dc1a9d52d5915fc7771db176aa3c25baeff6aa23951221e9d4a7bfe6bc"
+    },
+    {
+      "path": "docs/guides/srm-flow.md",
+      "sha256": "10b8ea68357084cfd923a495b63bc4567416549b23122d19bd54e92c1094f082"
+    },
+    {
+      "path": "docs/guides/srm-flow.en.md",
+      "sha256": "b2ad7c203828a88fb44ebbd9a9bb8d65b3940f624107dcd11d6262e71b06793e"
+    },
+    {
+      "path": "docs/guides/srm-flow.jp.md",
+      "sha256": "4042c143ff92aa7ee9b54964f2e50451dcba6c27e92530e3ee8b8a9aeca3ab32"
+    },
+    {
+      "path": "docs/guides/srm-flow.kr.md",
+      "sha256": "41efe61ea05994d469552b50f69832cedad2dcf8607eabb02d10aa444f01c5e6"
+    },
+    {
+      "path": "docs/reference/reviews/guide-srm-flow.json",
+      "sha256": "db4ae3776ba16081ddcee65665f109e6619131b850cd7e04ed4866e86a4a2404"
+    },
+    {
+      "path": "docs/guides/procurement-flow.md",
+      "sha256": "201034f4ee9bfdfedda14981891df9c970f13eecab79a488455b79a9005d5b36"
+    },
+    {
+      "path": "docs/guides/procurement-flow.en.md",
+      "sha256": "1535b446c94551f1f45edb28f41092aad312a03e65576b555bf1e1c66b81850f"
+    },
+    {
+      "path": "docs/guides/procurement-flow.jp.md",
+      "sha256": "38b22d87cd192a9920a91e05e2fa8bcea6c210ff9fd12ddaea3d7b990e1116ed"
+    },
+    {
+      "path": "docs/guides/procurement-flow.kr.md",
+      "sha256": "4297a015eb9b5e255a91d372b9fc48f80c221c38c875b465779ac5cb954b39af"
+    },
+    {
+      "path": "docs/reference/reviews/guide-procurement-flow.json",
+      "sha256": "50863f7be61b20f9848c5eb027764d3df1e47a828faf162486b33f753ec5808b"
+    },
+    {
+      "path": "docs/mq-reliability.md",
+      "sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957"
+    },
+    {
+      "path": "docs/mq-reliability.en.md",
+      "sha256": "eea187884c2c5a68ecd3d9d25c80b129cbf9c0be970bfd6d48c8781d01c48c48"
+    },
+    {
+      "path": "docs/mq-reliability.jp.md",
+      "sha256": "dcd2744b4fbb6795ec82ccfb8f683d5970ca4c356c78ef751bda6bf896cfb129"
+    },
+    {
+      "path": "docs/mq-reliability.kr.md",
+      "sha256": "a7e7d806ef2e3cdf372571fac08f2721cf089db01411cd63e8fae6c52a2a52e1"
+    },
+    {
+      "path": "docs/reference/reviews/mq-reliability.json",
+      "sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf"
+    },
+    {
+      "path": "docs/reference/evidence/interface-reference-wiki-review-2026-10-17.json",
+      "sha256": "e94572ab1f6deb164a80356bd64d9c613efe2d7717cf9f835362a552b7676ea5"
+    }
+  ],
+  "source_inspection_scope": "Actually read all312 original four-language article lines andevery final delta with exactunchanged-line mapping for344current lines;notfreshwholefinal rereads. Five whole current capture/helper/config files506lines plus selected Java/SRM reads. 68baselineimagehashes/272references and12original individual visual inspections distinguished;other56notfreshindividualviews. All68legacy registrations lack per-image capture SHA/runtime;baseline preservation is not capture/runtime provenance. Four named completed current guide/fact reviews reused atactual recorded scope.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "complete_current_semantic_coverage": true,
+    "original_whole_lines_actually_read": 312,
+    "current_combined_semantic_lines": 344,
+    "fresh_whole_final_rereads": false,
+    "original_full_read_outputs": {
+      "zh-CN": "1947c5",
+      "en-US": "1d6605",
+      "ja-JP": "739060",
+      "ko-KR": "a8cb7e"
+    },
+    "final_exact_delta_outputs": {
+      "zh-CN": "b32a02",
+      "en-US": "b32a02",
+      "ja-JP": "7b1554",
+      "ko-KR": "7b1554"
+    },
+    "lines_each": 86,
+    "headings_each": 11,
+    "h2_each": 3,
+    "h3_each": 4,
+    "h4_each": 3,
+    "tables_each": 12,
+    "images_each": 68,
+    "technical_fences_each": 0,
+    "normalized_inline_literals_each": 15,
+    "normalized_links_each": 74,
+    "whole_markdown_rendered_documents": 4,
+    "source_bindings": 98,
+    "current_whole_source_files": 5,
+    "current_whole_source_lines": 506,
+    "current_source_reads": [
+      {
+        "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+        "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc",
+        "read_scope": "Whole:four locales,display-fixtures-only fixedclock/auth mocks,options viewport,localStoragefixture,stable waits/masking/fullPagefalse/atomicrename. Current code cannot retroactively prove old capture mode.",
+        "outputs": [
+          "c1f632"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/playwright.docs.config.ts",
+        "sha256": "1521bc4c6eefd09c2f3a3cf9280fa9ab56a98c4966527e2875ae74f6619851a0",
+        "read_scope": "Whole:external mode suppresseswebServer andrequires explicit baseURL/tenant/execution/registry;default devserver must not run onhost;default1440x900. Not newexecution.",
+        "outputs": [
+          "85bef9"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/management.flows.spec.ts",
+        "sha256": "700c72a847e836999cc37fc1529f4a5675e3a59453dfddd4d06637cf0a2a0639",
+        "read_scope": "Whole current read-only page inventory,adminfixture,actualtitles/tablelabels;changedcurrentassertions do not retroactively revalidate baseline images.",
+        "outputs": [
+          "523873"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts",
+        "sha256": "6657760668749213f4007e8ddc3da5811acadffbeb0564c0333d3d52e6c1e6a8",
+        "read_scope": "Whole:read-only overlays,firstrow/bpmn-render/loadingguard,currentlocalizedMQassertions and explicit old ja/koEnglish/Comment fallback remarks. Currenttests notexecuted here.",
+        "outputs": [
+          "340dce"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts",
+        "sha256": "d91c7c7b4a8371e768c0f5a78352b896d26d7c0c9e23f3336560aad7544cc7e7",
+        "read_scope": "Whole:only page/tab/read-onlyrefreshcontrols asserted,mobile390x844/tablet1024x768;not quote form/submit mobileflow.",
+        "outputs": [
+          "a05bb5"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/e2e/E2eTokenFixture.java",
+        "sha256": "2d6eafa8e333882845ab9b2f1c831124175234685a9e3830aa60355f3e04a3c0",
+        "read_scope": "Selected actual first166 and206-261 lines:1200secondstestTTL,read-onlyDBrole/permissionderivation,required/forbiddenrolevalidationandproductionsigner;callerrequiredcleanup isnotpast deletionproof. No fixture executed.",
+        "outputs": [
+          "523873",
+          "e46cad"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/srm.flows.spec.ts",
+        "sha256": "822d7dd630b43f3c94618f1fd620194b90e51910dc10df49b13e1741700577c2",
+        "read_scope": "Selected1-67,171-193,218-246,341-401 plusmatched403-409:tokens/mutationtestskip;APIpreparationmodelbinding;expectOk checksafter awaitedrequest,notnetworkpreflight;cleanup409residualsretained. No mutationexecuted.",
+        "outputs": [
+          "4bb1eb",
+          "e46cad",
+          "f85fd7"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/e2e-docs/screenshot-manifest.yaml",
+        "sha256": "1fc63b7bbcf745b256c5d52fee540ee609f575d3aa0539adb33ba97af2dd1163",
+        "read_scope": "All68referenced image entries parsed and matched bypath/locale/dimensions;metadata values are historical self-reports,not new capture success or per-image container provenance.",
+        "outputs": [
+          "22dfda"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ],
+    "prior_named_document_reviews": 4,
+    "image_references": 272,
+    "unique_historical_images": 68,
+    "current_original_images_individually_viewed": 12,
+    "legacy_registered_capture_hashes": 0,
+    "historical_runtime_unknown": true,
+    "other56_fresh_individual_views": false,
+    "current_evidence": "docs/reference/evidence/interface-reference-wiki-review-2026-10-17.json",
+    "new_application_test_or_build_runs": 0,
+    "business_writes": 0,
+    "new_ide_attachments": 0,
+    "historical_business_writes_replayed": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "No new test, browser/application run, capture, test-token generation, cleanup execution or business write. Baseline Git and old registration are not former runtime provenance.",
+      "Only12 originals were freshly viewed individually;other56 were hash/metadata checked. Historical English UI labels, wrapping, background bleed, Chinese unit, different records and clipped content are honestly retained. This approves the complete translated document and captions, not complete old UI translations.",
+      "Remaining three Outbox translation rows and full A-G still include OAuth0/3,real SRM CAPTCHA,native Qoder,current full goldens/five presets,SRM fact/design ownership,current dependency alignment and final site/integrated acceptance."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/interface-reference.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 21:24:24",
+      "result": "approved",
+      "translation_sha256": "707914801c53816ad1b3ca94a911bc21bfb41153c61273195c7184846c268328",
+      "checks": {
+        "coverage_and_meaning": "四语原稿312行与全部最终差异实际阅读，逐行对应覆盖当前344行。保留每语11个标题（3H2、4H3、3H4）、12张表、68个图片引用及所有模块剪裁标记；Workflow、Outbox、SRM报价/管理/响应式参考与前置说明完整对应。",
+        "technical_literals": "四语15个行内技术字面量和74个归一化链接一致。保留全部272次图引用对应的68个实际文件和像素。固定端口/外部Docker模式、procurement-approval、send、SUPPLIER/Portal关联、TTL1200、E2E_MUTATIONS与display-fixtures准确区分；无代码围栏被删改。",
+        "security_and_failure_semantics": "不把历史last_success_at追认为绑定当前原图摘要/镜像的采集回执。保持账号授权来自数据库、测试JWT不等于CAPTCHA/密码登录、仓库外文件由调用者删除且不虚报历史清理。准确区分套件令牌/变更开关skip与网络响应后的expectOk检查，后者不是请求前拦截。重新取证必须应用/浏览器都在Docker且external模式不在宿主启动默认webServer；不重放历史写入。角色/候选最小要求转到当前已复核指南。",
+        "images_and_links": "68个唯一原图与fc165e3的Git字节完全一致，并与旧登记的路径/locale/尺寸逐一核对；没有登记采集摘要。实际新查看的是三场景×四语的12张原图。日/韩MQ仍英文且消息体被截；中文PENDING与其他SENT不是同一消息；版本历史中文DRAFT0与其他PUBLISHED2不是同一记录。保留报价背景透出、标签换行和中文单位，窄屏图只证明布局参考，未宣称当前完整UI翻译/移动报价闭环。四篇在Docker完整渲染，相对链接有效。",
+        "language_and_terminology": "All 78 original lines and every final delta were compared with Chinese and source evidence, covering 86 current lines through exact unchanged mapping. Captions and tables retain every page/overlay/quotation/responsive item. Historical preservation is distinguished from actual capture provenance, current UI acceptance, same-record state comparisons, runtime clock modes and verified cleanup. Human document review is optional; actual AI_REVIEW is required, and no new runtime or business success is claimed."
+      },
+      "findings": [
+        {
+          "id": "IR01",
+          "status": "resolved",
+          "resolution": "Distinguish 68 unique baseline image files from 272 repeated article references and 12 actual individual original views; no fresh full68 visual review claim."
+        },
+        {
+          "id": "IR02",
+          "status": "resolved",
+          "resolution": "Legacy last_success_at has no image capture hash/container provenance, so actual capture time/runtime remains unknown despite exact baseline Git preservation."
+        },
+        {
+          "id": "IR03",
+          "status": "resolved",
+          "resolution": "Document old ja/ko English MQ labels, payload viewport clipping and different message states; do not imply same-message four-language delivery."
+        },
+        {
+          "id": "IR04",
+          "status": "resolved",
+          "resolution": "Document Chinese DRAFT0 versus other PUBLISHED2 version-history frames; link current Workflow guide instead of implying same-record publication evidence."
+        },
+        {
+          "id": "IR05",
+          "status": "resolved",
+          "resolution": "Correct blanket fixed-clock/Compose/cleanup claims: current clock is display-fixtures-only, new capture is local Docker external mode, caller cleanup obligations are not historical cleanup proof."
+        },
+        {
+          "id": "IR06",
+          "status": "resolved",
+          "resolution": "Separate historical admin fixture from current ordinary-user roles/candidates and point to actually completed SRM/Procurement guides; test JWTs do not prove password/CAPTCHA."
+        },
+        {
+          "id": "IR07",
+          "status": "resolved",
+          "resolution": "Describe suite-level token/mutation skip accurately and state that expectOk awaits the request before its flag check; no preflight interceptor claim or business replay."
+        },
+        {
+          "id": "IR08",
+          "status": "resolved",
+          "resolution": "Retain real historical rendering/localization imperfections and limit responsive frames to list/tab layout; actual AI_REVIEW suffices for document acceptance without claiming global UI acceptance."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/interface-reference.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 21:24:24",
+      "result": "approved",
+      "translation_sha256": "fb71ea54428812856214868ce4d3962b3e8702c2a76d4aa061344ae19b278e1e",
+      "checks": {
+        "coverage_and_meaning": "四语原稿312行与全部最终差异实际阅读，逐行对应覆盖当前344行。保留每语11个标题（3H2、4H3、3H4）、12张表、68个图片引用及所有模块剪裁标记；Workflow、Outbox、SRM报价/管理/响应式参考与前置说明完整对应。",
+        "technical_literals": "四语15个行内技术字面量和74个归一化链接一致。保留全部272次图引用对应的68个实际文件和像素。固定端口/外部Docker模式、procurement-approval、send、SUPPLIER/Portal关联、TTL1200、E2E_MUTATIONS与display-fixtures准确区分；无代码围栏被删改。",
+        "security_and_failure_semantics": "不把历史last_success_at追认为绑定当前原图摘要/镜像的采集回执。保持账号授权来自数据库、测试JWT不等于CAPTCHA/密码登录、仓库外文件由调用者删除且不虚报历史清理。准确区分套件令牌/变更开关skip与网络响应后的expectOk检查，后者不是请求前拦截。重新取证必须应用/浏览器都在Docker且external模式不在宿主启动默认webServer；不重放历史写入。角色/候选最小要求转到当前已复核指南。",
+        "images_and_links": "68个唯一原图与fc165e3的Git字节完全一致，并与旧登记的路径/locale/尺寸逐一核对；没有登记采集摘要。实际新查看的是三场景×四语的12张原图。日/韩MQ仍英文且消息体被截；中文PENDING与其他SENT不是同一消息；版本历史中文DRAFT0与其他PUBLISHED2不是同一记录。保留报价背景透出、标签换行和中文单位，窄屏图只证明布局参考，未宣称当前完整UI翻译/移动报价闭环。四篇在Docker完整渲染，相对链接有效。",
+        "language_and_terminology": "全78行と最終変更行を中文事実源に照合し、未変更行対応で現在86行を網羅した。ページ・詳細・見積・管理・狭い画面の表と画像説明を保持する。基準画像の保存と実撮影の証明、DRAFT/PUBLISHEDやPENDING/SENTの異なる記録、英語のままのラベル、模擬時計、事後チェックと事前遮断、削除義務と過去の削除完了を明確に区別した。実際のAI_REVIEWで十分とし、人による文書レビューを必須にせず、CAPTCHAや業務・最終画面検証を代替しない。"
+      },
+      "findings": [
+        {
+          "id": "IR01",
+          "status": "resolved",
+          "resolution": "Distinguish 68 unique baseline image files from 272 repeated article references and 12 actual individual original views; no fresh full68 visual review claim."
+        },
+        {
+          "id": "IR02",
+          "status": "resolved",
+          "resolution": "Legacy last_success_at has no image capture hash/container provenance, so actual capture time/runtime remains unknown despite exact baseline Git preservation."
+        },
+        {
+          "id": "IR03",
+          "status": "resolved",
+          "resolution": "Document old ja/ko English MQ labels, payload viewport clipping and different message states; do not imply same-message four-language delivery."
+        },
+        {
+          "id": "IR04",
+          "status": "resolved",
+          "resolution": "Document Chinese DRAFT0 versus other PUBLISHED2 version-history frames; link current Workflow guide instead of implying same-record publication evidence."
+        },
+        {
+          "id": "IR05",
+          "status": "resolved",
+          "resolution": "Correct blanket fixed-clock/Compose/cleanup claims: current clock is display-fixtures-only, new capture is local Docker external mode, caller cleanup obligations are not historical cleanup proof."
+        },
+        {
+          "id": "IR06",
+          "status": "resolved",
+          "resolution": "Separate historical admin fixture from current ordinary-user roles/candidates and point to actually completed SRM/Procurement guides; test JWTs do not prove password/CAPTCHA."
+        },
+        {
+          "id": "IR07",
+          "status": "resolved",
+          "resolution": "Describe suite-level token/mutation skip accurately and state that expectOk awaits the request before its flag check; no preflight interceptor claim or business replay."
+        },
+        {
+          "id": "IR08",
+          "status": "resolved",
+          "resolution": "Retain real historical rendering/localization imperfections and limit responsive frames to list/tab layout; actual AI_REVIEW suffices for document acceptance without claiming global UI acceptance."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/interface-reference.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 21:24:24",
+      "result": "approved",
+      "translation_sha256": "f45cb5332e54e7cc1db52072a9508c4bf9f4bcbd9ee729f911505f63975b3515",
+      "checks": {
+        "coverage_and_meaning": "四语原稿312行与全部最终差异实际阅读，逐行对应覆盖当前344行。保留每语11个标题（3H2、4H3、3H4）、12张表、68个图片引用及所有模块剪裁标记；Workflow、Outbox、SRM报价/管理/响应式参考与前置说明完整对应。",
+        "technical_literals": "四语15个行内技术字面量和74个归一化链接一致。保留全部272次图引用对应的68个实际文件和像素。固定端口/外部Docker模式、procurement-approval、send、SUPPLIER/Portal关联、TTL1200、E2E_MUTATIONS与display-fixtures准确区分；无代码围栏被删改。",
+        "security_and_failure_semantics": "不把历史last_success_at追认为绑定当前原图摘要/镜像的采集回执。保持账号授权来自数据库、测试JWT不等于CAPTCHA/密码登录、仓库外文件由调用者删除且不虚报历史清理。准确区分套件令牌/变更开关skip与网络响应后的expectOk检查，后者不是请求前拦截。重新取证必须应用/浏览器都在Docker且external模式不在宿主启动默认webServer；不重放历史写入。角色/候选最小要求转到当前已复核指南。",
+        "images_and_links": "68个唯一原图与fc165e3的Git字节完全一致，并与旧登记的路径/locale/尺寸逐一核对；没有登记采集摘要。实际新查看的是三场景×四语的12张原图。日/韩MQ仍英文且消息体被截；中文PENDING与其他SENT不是同一消息；版本历史中文DRAFT0与其他PUBLISHED2不是同一记录。保留报价背景透出、标签换行和中文单位，窄屏图只证明布局参考，未宣称当前完整UI翻译/移动报价闭环。四篇在Docker完整渲染，相对链接有效。",
+        "language_and_terminology": "원본78행과최종변경행을중국어사실원문에대조하고미변경행대응으로현재86행을확인했다. 모든페이지·상세·견적·관리·반응형표와이미지설명을보존했다. 기준이미지보존/실제촬영증명,서로다른기록의상태,영어레이블잔존,시계모드,응답후검사/요청전차단,삭제의무/과거삭제완료를구분했다. 실제AI_REVIEW충분과사람의문서검토선택조건을명시하며CAPTCHA·현재업무실행·최종UI인수를대체하지않는다."
+      },
+      "findings": [
+        {
+          "id": "IR01",
+          "status": "resolved",
+          "resolution": "Distinguish 68 unique baseline image files from 272 repeated article references and 12 actual individual original views; no fresh full68 visual review claim."
+        },
+        {
+          "id": "IR02",
+          "status": "resolved",
+          "resolution": "Legacy last_success_at has no image capture hash/container provenance, so actual capture time/runtime remains unknown despite exact baseline Git preservation."
+        },
+        {
+          "id": "IR03",
+          "status": "resolved",
+          "resolution": "Document old ja/ko English MQ labels, payload viewport clipping and different message states; do not imply same-message four-language delivery."
+        },
+        {
+          "id": "IR04",
+          "status": "resolved",
+          "resolution": "Document Chinese DRAFT0 versus other PUBLISHED2 version-history frames; link current Workflow guide instead of implying same-record publication evidence."
+        },
+        {
+          "id": "IR05",
+          "status": "resolved",
+          "resolution": "Correct blanket fixed-clock/Compose/cleanup claims: current clock is display-fixtures-only, new capture is local Docker external mode, caller cleanup obligations are not historical cleanup proof."
+        },
+        {
+          "id": "IR06",
+          "status": "resolved",
+          "resolution": "Separate historical admin fixture from current ordinary-user roles/candidates and point to actually completed SRM/Procurement guides; test JWTs do not prove password/CAPTCHA."
+        },
+        {
+          "id": "IR07",
+          "status": "resolved",
+          "resolution": "Describe suite-level token/mutation skip accurately and state that expectOk awaits the request before its flag check; no preflight interceptor claim or business replay."
+        },
+        {
+          "id": "IR08",
+          "status": "resolved",
+          "resolution": "Retain real historical rendering/localization imperfections and limit responsive frames to list/tab layout; actual AI_REVIEW suffices for document acceptance without claiming global UI acceptance."
+        }
+      ]
+    }
+  }
+}

@@ -9,7 +9,7 @@ const adminToken = process.env.E2E_ADMIN_TOKEN
 const adminScenes = [
   { id: 'system-dashboard', route: '/admin/dashboard', expectText: ['欢迎', 'Welcome', 'ようこそ', '환영합니다'] },
   { id: 'system-users', route: '/admin/system/user', expectText: ['用户管理', 'User Management', 'ユーザー管理', '사용자 관리'] },
-  { id: 'scheduling-system-jobs', route: '/admin/job/system-job', expectText: ['Cron 表达式', 'Cron Expression', 'Cron Expression', 'Cron Expression'] },
+  { id: 'scheduling-system-jobs', route: '/admin/job/system-job', expectText: ['Cron 表达式', 'Cron Expression', 'Cron 式', 'Cron 식'] },
   { id: 'monitor-mq-messages', route: '/admin/base/mqmessage', expectText: ['MQ 消息记录', 'MQ Messages', 'MQ メッセージ記録', 'MQ 메시지 기록'] },
   { id: 'workflow-models', route: '/admin/workflow/model', expectText: ['流程分类', 'Category', 'プロセス分類', '프로세스 분류'] },
   { id: 'crm-overview', route: '/admin/crm/overview', expectText: ['销售概览', 'Sales Overview', '営業概要', '영업 개요'] },

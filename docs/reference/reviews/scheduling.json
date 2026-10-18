@@ -1,0 +1,302 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "scheduling",
+  "source": "docs/scheduling.md",
+  "source_sha256": "af1e4a539d551605e6d4466de4fc740b78a527a50660a5f4f4d82c2c3247b8a7",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "15a51d3047aafa27a5cfe496dee96e781d97a876",
+  "source_state": "Current edited four-language content bound by exact per-file digests",
+  "method": "Codex read the complete current Chinese document and all three complete translations, compared the inspected implementation, corrected factual findings and reviewed technical literals, language, failure semantics and links.",
+  "checked_source_files": [
+    {
+      "path": "database/changelog/base/0001-base-schema.yaml",
+      "sha256": "ecfcdbdaf6d1a15ab3a504325c6f4d81eff12be18b6da377575aa94b7d6d06ef"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java",
+      "sha256": "3e1326c18ec437e57acda3952a4a7c4af9803c237c510f229b2e8b22bef5f277"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateUserJobRequest.java",
+      "sha256": "eaaf5e62b4026b658d805801dae498215c010151100bbbece4b43b513bfb8a25"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/handler/DrinkWaterRemindHandler.java",
+      "sha256": "3a775eb6d89c1ff77dd2db725950f7d3554d165229f981be7b6e0224afc56b96"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobExecuteHandler.java",
+      "sha256": "d27669aa3b7d2487701634281092afdcd9b9ad50e591d93ff514be6df672e32b"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobHandlerRegistry.java",
+      "sha256": "136ac3d8cea3b290212929779fa7a72ddc9f0aad76f226d3bf315d438ca45fb8"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobSeedSyncRunner.java",
+      "sha256": "e202cde77f1eb031ddec709346e6baa4e13ebb35daa2893645fbcac308837a43"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/mapper/SysUserJobLogMapper.java",
+      "sha256": "0246e76de70c807181a3c3e1d5ba095cb84da8de64cf2633c68b7c7ac1851b77"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobLogServiceImpl.java",
+      "sha256": "4c397a8b3d31b3a53917fdc27fcad9c36107c38b0f5dc2f0f34512b5181647a5"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java",
+      "sha256": "2e4ee9762caaa45cf6f70404dff0bf1448cfd11615ba8df80f2fb2e27fd1826a"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobTypeServiceImpl.java",
+      "sha256": "ef47632cee758ebc14cc1c43560d5d4f1bf7eaea585922d0e0ed21ec5c38e566"
+    },
+    {
+      "path": "omni-backend/omni-base/src/test/java/com/omni/base/controller/MyJobControllerTest.java",
+      "sha256": "616aab815c41c7886e6c65942a738c616f2a5ec9551ee211b8e32d14f63bc817"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobHandler.java",
+      "sha256": "0e90610ea5544b2520285e507ed94030c9f1017e93385149973129fb17df3f1a"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobMessage.java",
+      "sha256": "6f5fe8eb970b3683d586f5ef50c923b3a305616a05073e2559c322f263edfd2e"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java",
+      "sha256": "9e77ff40bc35ee35b12970b5b850c00a2c670db05d712cfa23f672e6790c5005"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobAdminClient.java",
+      "sha256": "891e46d4744f7257f3bcde6c718862f29986e9a3148acb70175fe715aafe6b15"
+    },
+    {
+      "path": "omni-frontend/src/api/myJob.ts",
+      "sha256": "2c318f5b8b56c7837a96ce92b75bd85db6817e153d44642a7b25ac03918e1de7"
+    },
+    {
+      "path": "omni-frontend/src/components/CronGenerator.vue",
+      "sha256": "587e03e302b92bbaa612ee05a26c2b7f0abc6ebe063aaff915fe45e34cf7c212"
+    },
+    {
+      "path": "omni-frontend/src/components/DynamicFormRenderer.vue",
+      "sha256": "3e79430c2144a9f4391fbcf48e292b28191cfcf6fb9d9c1618d923fa1c7848a5"
+    },
+    {
+      "path": "omni-frontend/src/views/home/index.vue",
+      "sha256": "0961d631051111d6d8a9eacb904253b71b1f7ed698399c05872600019efdc98a"
+    },
+    {
+      "path": "scripts/sql/seed/base.sql",
+      "sha256": "e9133957e7d242b42c80bd653d86b88ab5718344410cdeccac5c8de50fabfc80"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/UpdateUserJobRequest.java",
+      "sha256": "225612012dab68d9227725400e90cd79b3c2898f87024fe7d0285d406bdd4c80"
+    },
+    {
+      "path": "omni-frontend/src/types/schema.ts",
+      "sha256": "f321a46a16e62b2eb9dba1419f12527eaaa99a34bd12054c6a31f58c01e33296"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobProperties.java",
+      "sha256": "e6cf4844ef2d393faade4821b1ec00912cd06f0c9d7a58c36b1e0504f8ef003b"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/JobMetrics.java",
+      "sha256": "b4961d97db747cac01fb900a73cfda38b058185d4707093d803b1e8c9b916426"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/SystemJobController.java",
+      "sha256": "2c660a18de0af2a704d952d3475516592225f2dded8fcfa6f2cb2bcc80794ab7"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/UserJobTypeController.java",
+      "sha256": "12c63c98d56852d1c30076b7dc237ffb0700bf113410f28a4274afc8543d1a3f"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/SystemJobService.java",
+      "sha256": "26ccb931fdd4c93ee19c0d4c899e03ac9f63b8c84cc7be6e4880eb28084a2dba"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/SystemJobRegistry.java",
+      "sha256": "bf2b704901d2e13c1d0a558d52263c3e00f308e61554e0000bec85773ecf655a"
+    },
+    {
+      "path": "compose.apps.yaml",
+      "sha256": "57781677a1d2b04ee6aaea5e6ee431fbe2bb57f38ef43c418bb8913454efb123"
+    },
+    {
+      "path": "compose.infra.yaml",
+      "sha256": "c9dd1a7542520148b3b3d5397fa37669fb4132cd41ad5cf10ff878995646dab6"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    }
+  ],
+  "source_inspection_scope": "Relevant implementation sections inspected directly; digests bind entire files, not a claim of deployed runtime verification.",
+  "supersedes": {
+    "source_sha256": "070fad2e84a01493fa3396ad4a7f8ad2ee20d972dad98686b9ccbe21a926b560",
+    "review_evidence_sha256": "f4d3ce30547b0837c3be996ec7161648feda424cc8a454ac43ed13bd89805846",
+    "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261"
+  },
+  "technical_verification": {
+    "runtime": "local Docker",
+    "markdown_rendered_documents": 8,
+    "links_checked": 180,
+    "application_or_business_execution": false,
+    "limitation": "Semantic review and Markdown rendering do not prove real Cron execution, browser notification, MQ, external service actions or full Goal completion."
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/scheduling.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-15 08:48:47",
+      "result": "approved",
+      "translation_sha256": "fb5341adedb90af549867e5a86cbf2b0713a8125af19fb76913ea420cb838a91",
+      "checks": {
+        "coverage_and_meaning": "完整对照六节、四个所有者、系统任务约束、九条个人任务契约、六项扩展约束及源码/运行边界；明确创建赋值身份与五类已有ID操作校验的区别，四语没有删掉条件。",
+        "technical_literals": "逐项核对两注解、AppName/执行器组、五个UserJobMessage字段、jobType/Bean名、status1/0、三个列表状态、API路径、object/properties、日期格式和精确远端关联，代码字面量保持一致。",
+        "security_and_failure_semantics": "对照实际Controller/Service/Mapper和Admin客户端：父任务租户+创建人校验、日志SQL未用tenantId入参、未知注册结果保留、已关联XXL ID才走远端先行、UNREGISTERED展示回退、失败日志非必达和Cookie一次重试边界均准确。",
+        "images_and_links": "本事实文档无图片，四语教程/部署链接按语言保留，新增日志和系统任务服务源码入口可定位；Docker Markdown解析/渲染与链接检查通过，未重复真实Cron或业务写入，不将这些检查冒称运行闭环。",
+        "language_and_terminology": "English preserves creation versus ID ownership, parent-job filtering and explicit uncertainty; acceptance is distinct from completed execution and the remote-state label is qualified."
+      },
+      "findings": [
+        {
+          "id": "creation-versus-existing-ownership",
+          "status": "resolved",
+          "description": "旧句把创建也说成verifyOwnership调用，并未说明日志服务独立SQL条件缺失。",
+          "resolution": "区分创建身份赋值与已有ID的租户+创建人校验，说明日志查询依赖父任务守卫和固定jobId。"
+        },
+        {
+          "id": "unknown-remote-state-label",
+          "status": "resolved",
+          "description": "系统任务列表状态缺少远端查询失败时的展示回退边界。",
+          "resolution": "说明读取失败也可能显示UNREGISTERED，该标签不能证明远端无任务。"
+        },
+        {
+          "id": "conditional-remote-first-mutation",
+          "status": "resolved",
+          "description": "旧句把远端先行描述为无条件适用于全部本地任务。",
+          "resolution": "限定为已关联XXL ID的Cron/参数、启停和删除操作，保持未知结果恢复关联规则。"
+        },
+        {
+          "id": "conditional-user-log-persistence",
+          "status": "resolved",
+          "description": "旧句可能使读者认为缺失Handler或所有失败都必然拥有个人日志。",
+          "resolution": "改为尝试写入；明确反序列化提前返回、两次数据库写入未共用声明式事务及最终结果中断边界。"
+        },
+        {
+          "id": "cookie-retry-contract",
+          "status": "resolved",
+          "description": "旧句只描述过期重登，未精确反映当前非200/not login响应触发的一次重试。",
+          "resolution": "保留Cookie只驻留内存，精确说明重登重试条件且不承诺业务幂等。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/scheduling.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-15 08:48:47",
+      "result": "approved",
+      "translation_sha256": "f2747e5c4f85c6e89e3d0d57f7835af560f554dc9c7ab5f37a0244ef3948df4f",
+      "checks": {
+        "coverage_and_meaning": "完整对照六节、四个所有者、系统任务约束、九条个人任务契约、六项扩展约束及源码/运行边界；明确创建赋值身份与五类已有ID操作校验的区别，四语没有删掉条件。",
+        "technical_literals": "逐项核对两注解、AppName/执行器组、五个UserJobMessage字段、jobType/Bean名、status1/0、三个列表状态、API路径、object/properties、日期格式和精确远端关联，代码字面量保持一致。",
+        "security_and_failure_semantics": "对照实际Controller/Service/Mapper和Admin客户端：父任务租户+创建人校验、日志SQL未用tenantId入参、未知注册结果保留、已关联XXL ID才走远端先行、UNREGISTERED展示回退、失败日志非必达和Cookie一次重试边界均准确。",
+        "images_and_links": "本事实文档无图片，四语教程/部署链接按语言保留，新增日志和系统任务服务源码入口可定位；Docker Markdown解析/渲染与链接检查通过，未重复真实Cron或业务写入，不将这些检查冒称运行闭环。",
+        "language_and_terminology": "日本語全文で作成時の認証文脈、両方の所有権照合、復旧用関連、リモート不存在と表示の区別を確認し、ハンドラー/スケジューラー用語と否定条件を維持した。"
+      },
+      "findings": [
+        {
+          "id": "scheduler-and-handler-terms",
+          "status": "resolved",
+          "description": "调度侧、处理器和注解的中文式用语混入日文。",
+          "resolution": "使用スケジューラー側、ハンドラー和アノテーション，代码字面量保持不变。"
+        },
+        {
+          "id": "creation-versus-existing-ownership",
+          "status": "resolved",
+          "description": "旧句把创建也说成verifyOwnership调用，并未说明日志服务独立SQL条件缺失。",
+          "resolution": "区分创建身份赋值与已有ID的租户+创建人校验，说明日志查询依赖父任务守卫和固定jobId。"
+        },
+        {
+          "id": "unknown-remote-state-label",
+          "status": "resolved",
+          "description": "系统任务列表状态缺少远端查询失败时的展示回退边界。",
+          "resolution": "说明读取失败也可能显示UNREGISTERED，该标签不能证明远端无任务。"
+        },
+        {
+          "id": "conditional-remote-first-mutation",
+          "status": "resolved",
+          "description": "旧句把远端先行描述为无条件适用于全部本地任务。",
+          "resolution": "限定为已关联XXL ID的Cron/参数、启停和删除操作，保持未知结果恢复关联规则。"
+        },
+        {
+          "id": "conditional-user-log-persistence",
+          "status": "resolved",
+          "description": "旧句可能使读者认为缺失Handler或所有失败都必然拥有个人日志。",
+          "resolution": "改为尝试写入；明确反序列化提前返回、两次数据库写入未共用声明式事务及最终结果中断边界。"
+        },
+        {
+          "id": "cookie-retry-contract",
+          "status": "resolved",
+          "description": "旧句只描述过期重登，未精确反映当前非200/not login响应触发的一次重试。",
+          "resolution": "保留Cookie只驻留内存，精确说明重登重试条件且不承诺业务幂等。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/scheduling.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-15 08:48:47",
+      "result": "approved",
+      "translation_sha256": "55e60bef8e98a753a71400943c99e4cf9ac9a33567542dffd0ce2ae06e267ad2",
+      "checks": {
+        "coverage_and_meaning": "完整对照六节、四个所有者、系统任务约束、九条个人任务契约、六项扩展约束及源码/运行边界；明确创建赋值身份与五类已有ID操作校验的区别，四语没有删掉条件。",
+        "technical_literals": "逐项核对两注解、AppName/执行器组、五个UserJobMessage字段、jobType/Bean名、status1/0、三个列表状态、API路径、object/properties、日期格式和精确远端关联，代码字面量保持一致。",
+        "security_and_failure_semantics": "对照实际Controller/Service/Mapper和Admin客户端：父任务租户+创建人校验、日志SQL未用tenantId入参、未知注册结果保留、已关联XXL ID才走远端先行、UNREGISTERED展示回退、失败日志非必达和Cookie一次重试边界均准确。",
+        "images_and_links": "本事实文档无图片，四语教程/部署链接按语言保留，新增日志和系统任务服务源码入口可定位；Docker Markdown解析/渲染与链接检查通过，未重复真实Cron或业务写入，不将这些检查冒称运行闭环。",
+        "language_and_terminology": "한국어 전문에서 생성 신원과 행별 소유권, 부모 검증, 결과 불명 복구 연결, 원격 부재와 표시 상태의 차이를 확인했으며 실패 조건과 접수/완료 구분을 유지했다。"
+      },
+      "findings": [
+        {
+          "id": "creation-versus-existing-ownership",
+          "status": "resolved",
+          "description": "旧句把创建也说成verifyOwnership调用，并未说明日志服务独立SQL条件缺失。",
+          "resolution": "区分创建身份赋值与已有ID的租户+创建人校验，说明日志查询依赖父任务守卫和固定jobId。"
+        },
+        {
+          "id": "unknown-remote-state-label",
+          "status": "resolved",
+          "description": "系统任务列表状态缺少远端查询失败时的展示回退边界。",
+          "resolution": "说明读取失败也可能显示UNREGISTERED，该标签不能证明远端无任务。"
+        },
+        {
+          "id": "conditional-remote-first-mutation",
+          "status": "resolved",
+          "description": "旧句把远端先行描述为无条件适用于全部本地任务。",
+          "resolution": "限定为已关联XXL ID的Cron/参数、启停和删除操作，保持未知结果恢复关联规则。"
+        },
+        {
+          "id": "conditional-user-log-persistence",
+          "status": "resolved",
+          "description": "旧句可能使读者认为缺失Handler或所有失败都必然拥有个人日志。",
+          "resolution": "改为尝试写入；明确反序列化提前返回、两次数据库写入未共用声明式事务及最终结果中断边界。"
+        },
+        {
+          "id": "cookie-retry-contract",
+          "status": "resolved",
+          "description": "旧句只描述过期重登，未精确反映当前非200/not login响应触发的一次重试。",
+          "resolution": "保留Cookie只驻留内存，精确说明重登重试条件且不承诺业务幂等。"
+        }
+      ]
+    }
+  }
+}

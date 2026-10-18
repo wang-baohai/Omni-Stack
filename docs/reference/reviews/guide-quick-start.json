@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-quick-start",
+  "source": "docs/guides/quick-start.md",
+  "source_sha256": "fa594d5972aba1be8c313d5984907f0ed34e29750126d3138e8a221524894fd3",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "6929bf4c29a6fcecfd7e95b43682117b4a48dc9f",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/quick-start.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:54:18",
+      "result": "approved",
+      "translation_sha256": "122502982270eeb36a03acbd2925f871f5c0b2907d36c7191f3ed3f4d9ebef20",
+      "checks": {
+        "coverage_and_meaning": "核对七节全部步骤、目录说明、九组私有配置、full/core区别、首次真实验证码登录、停止和开发顺序。",
+        "technical_literals": "两平台Gitclone、所有Docker/CLI/Maven/npm命令、JDK25/Node22、3000/8102/3306和变量名均与中文一致。",
+        "security_and_failure_semantics": "保留空环境生成秘密但不覆盖旧凭据、失败不删卷、真人CAPTCHA与测试令牌边界及默认down保留卷；healthy要求已限定声明healthcheck的容器。",
+        "language_and_terminology": "English distinguishes startup subset, generated project, real login and layout captures; resource budgets remain recommendations rather than measured limits.",
+        "images_and_links": "单张英文auth-login原图与正式登记一致且遮罩CAPTCHA；全部教程入口为 .en.md，脱敏首次登录证明仅一次人工登录。"
+      },
+      "findings": [
+        {
+          "id": "healthcheck-scope",
+          "status": "resolved",
+          "description": "旧表述要求所有容器healthy，未区分没有healthcheck的前端。",
+          "resolution": "限定声明healthcheck的容器，并单独要求前端可访问。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/quick-start.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:54:18",
+      "result": "approved",
+      "translation_sha256": "b5008e0fe5efaa1cad14c0950e39e08776fd3fc43c6f78bea426e760bba91bf7",
+      "checks": {
+        "coverage_and_meaning": "核对目录、工具、私密配置、全栈与core、健康、真人登录及开发七节，所有变量及操作顺序完整。",
+        "technical_literals": "Compose命令、Git地址、JDK25/Node22、固定端口与XXL/Nacos/JWK变量逐项对应，未把宿主路径当容器路径。",
+        "security_and_failure_semantics": "保留已有卷使用原凭据、不能重置卷遮盖失败、人输入验证码和短期fixture不替代登录；健康检查限定与前端可达分开。",
+        "language_and_terminology": "将種子、接管、裁剪等中文残留改为シード、認証情報の置換禁止、必要なモジュールに絞る；五分钟保证改为自然表达。",
+        "images_and_links": "对应ja-JP原图及遮罩范围明确，全部指南为 .jp.md；历史一回真实登录与四语页面身份测试没有混淆。"
+      },
+      "findings": [
+        {
+          "id": "healthcheck-scope",
+          "status": "resolved",
+          "description": "旧表述要求所有容器healthy，未区分没有healthcheck的前端。",
+          "resolution": "限定声明healthcheck的容器，并单独要求前端可访问。"
+        },
+        {
+          "id": "japanese-bootstrap-terms",
+          "status": "resolved",
+          "description": "种子、接管、裁剪等中文用词混入日文。",
+          "resolution": "采用シード、認証情報を置き換えない、モジュールに絞る等自然表达。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/quick-start.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:54:18",
+      "result": "approved",
+      "translation_sha256": "d46acb4bfab3b256688d9bddfd93801d473223bee8f7ff613aba393d23cdaf16",
+      "checks": {
+        "coverage_and_meaning": "七节完整对照克隆、目录、Docker工具、九组秘密、预设、健康、验证码登录、保留卷和后续开发。",
+        "technical_literals": "所有命令、变量、预设和固定端口与中文一致，full资源预算和32bytes/32chars及14–20chars分别保留。",
+        "security_and_failure_semantics": "原凭据/不覆盖.env/不删数据卷边界完整，CAPTCHA单次消费且fixture不能替代首次登录，健康要求与前端可达分别说明。",
+        "language_and_terminology": "프리셋、단기token、일회성CAPTCHA和원래자격정보表述清楚，没有将预算或示例登录声称为全部生产能力。",
+        "images_and_links": "使用ko-KR的登录原图且已遮罩，链接均为 .kr.md；一次真人登录历史证据与四次密码登录的区别明确。"
+      },
+      "findings": [
+        {
+          "id": "healthcheck-scope",
+          "status": "resolved",
+          "description": "旧表述要求所有容器healthy，未区分没有healthcheck的前端。",
+          "resolution": "限定声明healthcheck的容器，并单独要求前端可访问。"
+        }
+      ]
+    }
+  }
+}

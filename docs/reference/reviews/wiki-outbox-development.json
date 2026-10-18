@@ -1,0 +1,795 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-outbox-development",
+  "source": "docs/wiki/outbox-development.md",
+  "source_sha256": "d260241659ee9521063b0719b1685dc0c904ddf180758bcc77c44dcabf1d2653",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "b34f01554458bba4994ddf57133989dfead282a3",
+  "source_state": "All 652 original lines were actually read in four complete tutorials. Every final delta was then checked against Chinese, current source and dated evidence; exact unchanged-line mapping covers 660 current lines. Japanese line93 received a final natural-language correction read in d4ce28. This is not four fresh final whole rereads. Twelve whole current implementation/helper/preset files total 1105 lines, with separately scoped selected source/test/DDL/config reads and three named completed document reviews reused at their actual scopes. All48 image hashes match dated capture records;only12 originals were newly viewed individually. Historical phase tests,cleanup and captures were not rerun.",
+  "method": "All 652 original lines were actually read in four complete tutorials. Every final delta was then checked against Chinese, current source and dated evidence; exact unchanged-line mapping covers 660 current lines. Japanese line93 received a final natural-language correction read in d4ce28. This is not four fresh final whole rereads. Twelve whole current implementation/helper/preset files total 1105 lines, with separately scoped selected source/test/DDL/config reads and three named completed document reviews reused at their actual scopes. All48 image hashes match dated capture records;only12 originals were newly viewed individually. Historical phase tests,cleanup and captures were not rerun.",
+  "checked_source_files": [
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java",
+      "sha256": "db640b6e594ab53272c078e42776e904b7e6ca33a4ae625e2f9bcf5c1c9ea928"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/consumer/OperLogConsumer.java",
+      "sha256": "37d638102e860f68dc2aec789c0bb0c42c9e81bc3e58e0c1fe8b31fe26906358"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/OperLogServiceImpl.java",
+      "sha256": "cafc52ae3b66a69d7cbe33453251a710310523d31fa8ff121ec78c0a95a556c6"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java",
+      "sha256": "bfe1ce1806668c8e28c80a7614d7a5fff1fed2b7f65b3e18a56137e2cca627bf"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqRelayJobRegistrar.java",
+      "sha256": "a3dec182440569af937551d2eefae288bdb931ee67d6c1d951585fe3f14c2154"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayJob.java",
+      "sha256": "cba7eb5bca8b468aa1e5bce279da6c32e13b716be65adf8234b823ee79605e95"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MqMessageController.java",
+      "sha256": "722fb645de7c96df62e6ce27c7031d39e244e0ec9361186ba7eb635cf38e1f28"
+    },
+    {
+      "path": "scripts/fixtures/run-mq-teaching-fixture.ps1",
+      "sha256": "b03d0607c5022cb9874d1fc937872ff7df05e0694e927981b6a3bc71f6748b0b"
+    },
+    {
+      "path": "scripts/fixtures/run-mq-teaching-browser.mjs",
+      "sha256": "9b67dea5f148779dd17db318bf22b2726db535ed90642894f91afd961878403a"
+    },
+    {
+      "path": "scripts/fixtures/compose.teaching.yaml",
+      "sha256": "fc22b0215943b6c54a08002df5aa90fd06d8688200a603ae927afe2d0b653140"
+    },
+    {
+      "path": "scaffold/presets/core.yaml",
+      "sha256": "4d3f3c2d704828ecdb607f06a91ef2b3c9a41d04af8063a4d75bb9501a3c78ac"
+    },
+    {
+      "path": "scaffold/presets/full.yaml",
+      "sha256": "879b0d78a1c8a2ddb8723872daa715c5d3b2b7c60b79e1853d1f29ff494a11e2"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/MqMessageAggregationServiceImpl.java",
+      "sha256": "ed8f5d0d49de96cdf40ec732df76bed5a14160f153320cfdb8a2fca6ac31a88f"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/flows/mq-teaching.flows.spec.ts",
+      "sha256": "367da3f8334a157c1fbf1f1bfe5945cf8a6429b0780441715965a5f1bec4c762"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/config/MqLogAutoConfiguration.java",
+      "sha256": "bfb434ba1c5e5b8b1cf5d93d87cbb38954a7dbc65f14eab8bf47a717ecbad9c2"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/metrics/MqLogMetrics.java",
+      "sha256": "f2d4ed61159fd32ffeae639488454bc5a556da155d818c66d20cf9d7d4360d2c"
+    },
+    {
+      "path": "database/changelog/base/0001-base-schema.yaml",
+      "sha256": "ecfcdbdaf6d1a15ab3a504325c6f4d81eff12be18b6da377575aa94b7d6d06ef"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/resources/application.yml",
+      "sha256": "384f39fb2486238edb300becfb637409e92622fd1ca820acb73b2eed3453bd35"
+    },
+    {
+      "path": "compose.yaml",
+      "sha256": "49c8ab0a7f3317ae800773812322a0ee29ee3ffdd18a3b7650108ae6c9c2e8fb"
+    },
+    {
+      "path": "scripts/fixtures/README.md",
+      "sha256": "a8843257aad9838f60e8753a117935a369b660abe21e8882ecb6b7320b738b00"
+    },
+    {
+      "path": "database/changelog/common/0001-mq-schema.yaml",
+      "sha256": "fa7d7f436f281bdddde9d8351146de92fde80510807d9be99052e71273827bc9"
+    },
+    {
+      "path": "docs/reference/evidence/mq-2026-10-12.json",
+      "sha256": "da0d267d1b22bfbdf0551ae2875d013dc90e4c48492aafa6c55443fdedc3de16"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/mq-reliability.md",
+      "sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957"
+    },
+    {
+      "path": "docs/mq-reliability.en.md",
+      "sha256": "eea187884c2c5a68ecd3d9d25c80b129cbf9c0be970bfd6d48c8781d01c48c48"
+    },
+    {
+      "path": "docs/mq-reliability.jp.md",
+      "sha256": "dcd2744b4fbb6795ec82ccfb8f683d5970ca4c356c78ef751bda6bf896cfb129"
+    },
+    {
+      "path": "docs/mq-reliability.kr.md",
+      "sha256": "a7e7d806ef2e3cdf372571fac08f2721cf089db01411cd63e8fae6c52a2a52e1"
+    },
+    {
+      "path": "docs/reference/reviews/mq-reliability.json",
+      "sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf"
+    },
+    {
+      "path": "docs/wiki/source-debugging.md",
+      "sha256": "82f7572b9aaeebda0effba0633f0a6f1ffc13ce73d36ec54e45f7d1b55b2029c"
+    },
+    {
+      "path": "docs/wiki/source-debugging.en.md",
+      "sha256": "3c30975897638c9a7809ff7d3e15adb4e8fb75a9da6271941b9078e6a106c7a2"
+    },
+    {
+      "path": "docs/wiki/source-debugging.jp.md",
+      "sha256": "93bb8c8806125f51c03053a1308f34ad36b277d158a47cf7b04a53cba72b241e"
+    },
+    {
+      "path": "docs/wiki/source-debugging.kr.md",
+      "sha256": "ba582857966db0de7bc6834e2d38c83be4c7d1d17506de4a09c5a75402e26aa1"
+    },
+    {
+      "path": "docs/reference/reviews/wiki-source-debugging.json",
+      "sha256": "ff74282a3a28c43cd08b460f732e06e0ea68160ecb104dcb4e8c072dc2ec6bd6"
+    },
+    {
+      "path": "docs/guides/quick-start.md",
+      "sha256": "fa594d5972aba1be8c313d5984907f0ed34e29750126d3138e8a221524894fd3"
+    },
+    {
+      "path": "docs/guides/quick-start.en.md",
+      "sha256": "122502982270eeb36a03acbd2925f871f5c0b2907d36c7191f3ed3f4d9ebef20"
+    },
+    {
+      "path": "docs/guides/quick-start.jp.md",
+      "sha256": "b5008e0fe5efaa1cad14c0950e39e08776fd3fc43c6f78bea426e760bba91bf7"
+    },
+    {
+      "path": "docs/guides/quick-start.kr.md",
+      "sha256": "d46acb4bfab3b256688d9bddfd93801d473223bee8f7ff613aba393d23cdaf16"
+    },
+    {
+      "path": "docs/reference/reviews/guide-quick-start.json",
+      "sha256": "540e85f8fa3e6edeb08ac387697e606560c74153a89bd0196f5d2279c3730567"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-pending.png",
+      "sha256": "5e2cdc4297e12787a8f2967b4f69f008b89b430344081d158e3ba53b0376b4a1"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-failed-detail.png",
+      "sha256": "b92f3013d99996846c92224310e95ca84db55d1e80de7e4b3d63fa3aff12a07b"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-dead-letter.png",
+      "sha256": "b205d689d012596cee79e77c7840149f3145da41ed3175f13ae5b77a93a9d551"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-dead-detail.png",
+      "sha256": "7d67fc7b674a8d27150aa98382cabd031f7cb2c276a50e77bc3dd7513ffdf61a"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-resend-confirm.png",
+      "sha256": "92f5ab59e8ea99bf3cd7d3eba876d369ec8e56b8da50d012dea99c10fe140030"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-skip-confirm.png",
+      "sha256": "de54353477823bcf654622e94c84f3c25ec0cbc08f5c5da92a9851a375635151"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-sent.png",
+      "sha256": "2989949f0c1d5cf8533c2dae24cccaef1062328533309d9cc6c849462b604e88"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-skipped.png",
+      "sha256": "0a81355a52dc13f9d2998d2b8439db881a21a99d3cdd29914637d0ad585e9a43"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-operlog-list.png",
+      "sha256": "bc24dd38cd8fcc6d9e69f1612180cccf7ad84a2e629f23e550c87622de71a9a2"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-operlog-detail.png",
+      "sha256": "bd39f782da08fdde4a54eb3c638bb00c36665a0aeaeef5cf883ea10b51a45d3f"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-service-unavailable.png",
+      "sha256": "a4abbc4c2d936e0a7c86a978cf925c49a20a3eff8834b6668ed43896ea20c3c6"
+    },
+    {
+      "path": "docs/images/zh-CN/mq-teaching-service-recovered.png",
+      "sha256": "610a1046dbb5f996fa046837ae0c92e60f2bc723f5462ac31d150511f51ab33a"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-pending.png",
+      "sha256": "d80a9e28630a487e9c5921acfdee62fb22b39c14cc7440d1cae8ae3035b67a98"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-failed-detail.png",
+      "sha256": "9eb043eea179610d174720cc56f0565adf77cd39d019409bba8fe80f7c05df9a"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-dead-letter.png",
+      "sha256": "897ae11eacdd1ab8ad46c9744b6f54b7ca65f7985713be8a25f8bf5a4f65b4c4"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-dead-detail.png",
+      "sha256": "8e22b10b9141e0e6a2beceb218d77dcc0114ea729c26fb5425034f72de0f86a3"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-resend-confirm.png",
+      "sha256": "040f10f19d8889b78a1d9a88505872ddceef1fea537bf57a82d5a5a797d1efcf"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-skip-confirm.png",
+      "sha256": "47a7b775166a314e7611d93af6b4747f971dd006549339a36bca24f82f83a8dd"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-sent.png",
+      "sha256": "c427ab3e3b376c481171afcec237abfe349fc992e7b9f74e45126f6185a1460b"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-skipped.png",
+      "sha256": "566233ae2e8bfc93180f66db283c7973f1f616d2f21449fa9eeae0264cc0081d"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-operlog-list.png",
+      "sha256": "d9288f581e70c3352ed49037b950b9b92a875c10b1a527c1d695e02026ac87f6"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-operlog-detail.png",
+      "sha256": "d6e6849fae7b5ccd3f865a0f35390020ea6d4dc088aeaa68fad11743de2cdbbd"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-service-unavailable.png",
+      "sha256": "b03bdf94403546e19865025252ea1865768d4d139820f04ad69aed6da877a452"
+    },
+    {
+      "path": "docs/images/en-US/mq-teaching-service-recovered.png",
+      "sha256": "6766a478a14be065336587c685aad040b961194830110df1e9fe1e1878b2f695"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-pending.png",
+      "sha256": "2be9eda415cc4cd96103154a63346870311698eca6a5229ae939f24746931c1c"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-failed-detail.png",
+      "sha256": "05021c413387ecad90a452eede84fb6bd1fbb7b03174d53ea7127f343029c95e"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-dead-letter.png",
+      "sha256": "3736fbc34c2250313b54f9d24c43938e6b14eee25e08e9e2148e280e60667903"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-dead-detail.png",
+      "sha256": "461808a308a9cfaa4631aa17710e4f8b53ee47185bc2884ddabf9bdb100d3af8"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-resend-confirm.png",
+      "sha256": "533a55b3d0fe3dd48fa3b1f374561a436099e2341bc3fcd7d9870425593035a9"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-skip-confirm.png",
+      "sha256": "9bcf0911ffa5fbd78340921527abb0cdf00ee03d4782b1e9b6accb4adf28b1ff"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-sent.png",
+      "sha256": "ff74abc63d24a91172b60eb63b0395a26045120bfcbe8b998e9c81983f082f7e"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-skipped.png",
+      "sha256": "2ac569d2b1e65b2b90e171ddd5cea8db93fe7ab30a569cfc156522867b8a43b0"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-operlog-list.png",
+      "sha256": "3f421af5c04ceb734c80c30a96a19b3a86e0aa5d70aaf66669402cdfbd9b8f7c"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-operlog-detail.png",
+      "sha256": "c26c05ccc1fb0c8015b3d040a3c4762eb3f594a2e90b6230a2c59387de9c207e"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-service-unavailable.png",
+      "sha256": "e26d9c6ccf074c529cd4ee4b312d45acad71dca2ef3aacdd674d4433ff4dbb6a"
+    },
+    {
+      "path": "docs/images/ja-JP/mq-teaching-service-recovered.png",
+      "sha256": "a49f1d44f2ffde947449700500ab57ed56e14f0e4b5d89f77d5e0322aea0218a"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-pending.png",
+      "sha256": "718b6206f36ab2c529e6a316167fc86a716d70b14e9bd7f48b8e6437b0a787ff"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-failed-detail.png",
+      "sha256": "82274673b969465d99fc2ca08a3c9e6c06a30dc5bb3fd9cad503dfd22e4c87ad"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-dead-letter.png",
+      "sha256": "63c11ad9d991d1094cf480546574357ee29abcab82d5c3cad589e5ce4498ba3a"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-dead-detail.png",
+      "sha256": "b65eafc449c56dbacddf25fbd3d8e5205b8b31b9ddbf0fa2be3df349aff9633e"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-resend-confirm.png",
+      "sha256": "c5a22491333200131bfe8f64e53beb5536e2337940620ec8e08c30a4c9b2122d"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-skip-confirm.png",
+      "sha256": "820a3cb325093143a5effb58c613ecbc8da830e605ebaa05f0b3779fd3d586f9"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-sent.png",
+      "sha256": "870f6c2ab4ce86fd291adf26122ce41d9008d039a83f9c0b59fa5f78a12c9aff"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-skipped.png",
+      "sha256": "88502864344697b10546b5079f3bd1cf042633e28c2103542cecad21dd753531"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-operlog-list.png",
+      "sha256": "b8e11202163ab4dd662ddfc5c0c400450f490e7271e710cc507c98e702378025"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-operlog-detail.png",
+      "sha256": "bed3d1225f631d5726ea9dd5a4d2c210bc4a33be668b6a68c6ab28be88f38f91"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-service-unavailable.png",
+      "sha256": "f821d4e74a8dfa69bf3c36aa4ae8c092fdcddbff123abafb465dc4d3460c3b21"
+    },
+    {
+      "path": "docs/images/ko-KR/mq-teaching-service-recovered.png",
+      "sha256": "37d11bb3eb00d2a1b467e7e305488d6dbe62518efb0d34a372d4d67b73fa1695"
+    },
+    {
+      "path": "compose.infra.yaml",
+      "sha256": "c9dd1a7542520148b3b3d5397fa37669fb4132cd41ad5cf10ff878995646dab6"
+    },
+    {
+      "path": "compose.apps.yaml",
+      "sha256": "57781677a1d2b04ee6aaea5e6ee431fbe2bb57f38ef43c418bb8913454efb123"
+    },
+    {
+      "path": "compose.observability.yaml",
+      "sha256": "27094d5ff514cf1f1155ba15d4991ea2e7a3a41b946bd7b18fcf0e098881e805"
+    },
+    {
+      "path": "docs/reference/evidence/outbox-development-wiki-review-2026-10-18.json",
+      "sha256": "03d38561b25409a849ceeae7c7ad0449e7e3c5ea6d25f720a532c3c972c3ca03"
+    }
+  ],
+  "source_inspection_scope": "All652 original lines were actually read in four complete articles. Current coverage combines that read with every final delta and exact unchanged-line mapping for660current lines;not four fresh final whole rereads. Twelve whole current implementation/helper/preset files1105lines plus explicit selected source/test/DDL/config reads. Three named completed current document reviews are reused at their recorded scopes. All48 dated capture hashes are unchanged;only12 originals newly viewed individually,other36retain historical scope. No historical successful business operation,cleanup,capture or application test/build rerun.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "complete_current_semantic_coverage": true,
+    "original_whole_lines_actually_read": 652,
+    "current_combined_semantic_lines": 660,
+    "fresh_whole_final_rereads": false,
+    "original_full_read_outputs": {
+      "zh-CN": "75197e",
+      "en-US": "7215af",
+      "ja-JP": "ddd3fb",
+      "ko-KR": "1ccd18"
+    },
+    "final_exact_delta_outputs": {
+      "zh-CN": "2fdb20",
+      "en-US": "2fdb20",
+      "ja-JP": [
+        "4e499c",
+        "d4ce28"
+      ],
+      "ko-KR": "4e499c"
+    },
+    "lines_each": 165,
+    "headings_each": 9,
+    "h2_each": 8,
+    "h3_each": 0,
+    "tables_each": 0,
+    "images_each": 12,
+    "technical_fences_each": 10,
+    "all_command_fences_unchanged": true,
+    "normalized_inline_literals_each": 11,
+    "normalized_links_each": 20,
+    "whole_markdown_rendered_documents": 4,
+    "source_bindings": 90,
+    "current_whole_source_files": 12,
+    "current_whole_source_lines": 1105,
+    "current_source_reads": [
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java",
+        "sha256": "db640b6e594ab53272c078e42776e904b7e6ca33a4ae625e2f9bcf5c1c9ea928",
+        "read_scope": "Whole:explicit tenant validation,void send,REQUIRED transaction onfour-argument overload,defaultrocketmq,PENDING UUID/body/trace insert;caller effective local transaction still required.",
+        "outputs": [
+          "42e235"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/consumer/OperLogConsumer.java",
+        "sha256": "37d638102e860f68dc2aec789c0bb0c42c9e81bc3e58e0c1fe8b31fe26906358",
+        "read_scope": "Whole:delegate save,DuplicateKeyException ignored,other errors rethrown for Broker retry.",
+        "outputs": [
+          "42e235"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/OperLogServiceImpl.java",
+        "sha256": "cafc52ae3b66a69d7cbe33453251a710310523d31fa8ff121ec78c0a95a556c6",
+        "read_scope": "Whole:eventId/legacyidentity,payload mapping/insert,tenant-filtered loglist and VO;not runtime consumption.",
+        "outputs": [
+          "42e235"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java",
+        "sha256": "bfe1ce1806668c8e28c80a7614d7a5fff1fed2b7f65b3e18a56137e2cca627bf",
+        "read_scope": "Whole:due/cross-tenant candidate scan,120secondclaim,PROCESSING CAS,unknown broker failure,20/40backoff then dead/null,span and error redaction.",
+        "outputs": [
+          "1b580f"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqRelayJobRegistrar.java",
+        "sha256": "a3dec182440569af937551d2eefae288bdb931ee67d6c1d951585fe3f14c2154",
+        "read_scope": "Whole:default0/10 cron for newjob,existingjob reuse,background retry and per-service executor;configuration is not actual registration/health proof.",
+        "outputs": [
+          "1b580f"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayJob.java",
+        "sha256": "cba7eb5bca8b468aa1e5bce279da6c32e13b716be65adf8234b823ee79605e95",
+        "read_scope": "Whole:dual XxlJob/SystemJobMeta annotation,mqRelayHandler/defaultcron and relay delegation.",
+        "outputs": [
+          "1b580f"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MqMessageController.java",
+        "sha256": "722fb645de7c96df62e6ce27c7031d39e244e0ec9361186ba7eb635cf38e1f28",
+        "read_scope": "Whole:runtime flag projection,FULL/OUTBOX_ONLY,tenantheader andbase:mqmessage:list/resend/skip authority;configuration flags do not prove delivery.",
+        "outputs": [
+          "579749"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "scripts/fixtures/run-mq-teaching-fixture.ps1",
+        "sha256": "b03d0607c5022cb9874d1fc937872ff7df05e0694e927981b6a3bc71f6748b0b",
+        "read_scope": "Whole:local Docker engine,isolatedproject/container/network/volume/tenant ownership;non-Inspect mutation guard;receipt-before-SQL and COMMITTED/unknown,Prepare/Replay/Cleanup idempotency and exact scoped SQL. Not executed.",
+        "outputs": [
+          "9e390a"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "scripts/fixtures/run-mq-teaching-browser.mjs",
+        "sha256": "9b67dea5f148779dd17db318bf22b2726db535ed90642894f91afd961878403a",
+        "read_scope": "Whole:Docker-only externalphase entry,private token/registry paths,no existingregistry overwrite,restricted arguments;no identitygeneration or replay. Not executed.",
+        "outputs": [
+          "3ad9cc"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "scripts/fixtures/compose.teaching.yaml",
+        "sha256": "fc22b0215943b6c54a08002df5aa90fd06d8688200a603ae927afe2d0b653140",
+        "read_scope": "Whole:all16serviceportsreset andnorestart teaching overlay. Not actual newstack creation.",
+        "outputs": [
+          "3ad9cc"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "scaffold/presets/core.yaml",
+        "sha256": "4d3f3c2d704828ecdb607f06a91ef2b3c9a41d04af8063a4d75bb9501a3c78ac",
+        "read_scope": "Whole:core module selection omits explicit RocketMQ/XXL/CRM;generated core omission also checked in prior actual named source-debugging test scope.",
+        "outputs": [
+          "4ce782"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "scaffold/presets/full.yaml",
+        "sha256": "879b0d78a1c8a2ddb8723872daa715c5d3b2b7c60b79e1853d1f29ff494a11e2",
+        "read_scope": "Whole:full selectsCRM/assetandRocketMQ/XXL pluscore dependencies. Tutorial commands usefull.",
+        "outputs": [
+          "4ce782"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/MqMessageAggregationServiceImpl.java",
+        "sha256": "ed8f5d0d49de96cdf40ec732df76bed5a14160f153320cfdb8a2fca6ac31a88f",
+        "read_scope": "Selected1-71/129-217:Base+CRM clients,tenant predicates,resend CAS affected0=>business400,remote failures. Notwhole.",
+        "outputs": [
+          "7de62b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/mq-teaching.flows.spec.ts",
+        "sha256": "367da3f8334a157c1fbf1f1bfe5945cf8a6429b0780441715965a5f1bec4c762",
+        "read_scope": "Selected phase/runtime/ownership/pending/retry matches and254-316/319-338 actions+operlog assertions;fault recovery tailin579749. Failed review attempts before2a6275 producedno read output;nowactual successful outputs scoped. Notwhole or re-execution.",
+        "outputs": [
+          "7de62b",
+          "579749",
+          "2a6275"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/config/MqLogAutoConfiguration.java",
+        "sha256": "bfb434ba1c5e5b8b1cf5d93d87cbb38954a7dbc65f14eab8bf47a717ecbad9c2",
+        "read_scope": "Selected124-184 relay/auto-register/executor flags andconditionalbeans;notwhole.",
+        "outputs": [
+          "64ed94"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/metrics/MqLogMetrics.java",
+        "sha256": "f2d4ed61159fd32ffeae639488454bc5a556da155d818c66d20cf9d7d4360d2c",
+        "read_scope": "Matched destination/result/status tags only;notwhole metrics/observability delivery proof.",
+        "outputs": [
+          "64ed94"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "database/changelog/base/0001-base-schema.yaml",
+        "sha256": "ecfcdbdaf6d1a15ab3a504325c6f4d81eff12be18b6da377575aa94b7d6d06ef",
+        "read_scope": "Matched sys_oper_log event_id anduk_operlog_event plusarchiveeventindex. NotwholeDDL or anew migration.",
+        "outputs": [
+          "64ed94"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/resources/application.yml",
+        "sha256": "384f39fb2486238edb300becfb637409e92622fd1ca820acb73b2eed3453bd35",
+        "read_scope": "Matched management port19901;notwholeconfiguration/currentcontainerenv.",
+        "outputs": [
+          "7de62b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/mq-2026-10-12.json",
+        "sha256": "da0d267d1b22bfbdf0551ae2875d013dc90e4c48492aafa6c55443fdedc3de16",
+        "read_scope": "Selected executionphase summaries/cleanup/dedup/fault+limitations and48 capture rows. Large earlyphase observation dumps were truncated andnotwholeread. Historical dated evidence retained,notcurrent execution.",
+        "outputs": [
+          "9e390a",
+          "3cde29"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ],
+    "prior_named_document_reviews": 3,
+    "image_references": 48,
+    "unique_historical_images": 48,
+    "current_original_images_individually_viewed": 12,
+    "dated_capture_image_hashes": 48,
+    "captured_test_revision_image_counts": [
+      32,
+      8,
+      8
+    ],
+    "other36_fresh_individual_views": false,
+    "current_evidence": "docs/reference/evidence/outbox-development-wiki-review-2026-10-18.json",
+    "new_application_test_or_build_runs": 0,
+    "business_writes": 0,
+    "historical_business_writes_replayed": false,
+    "historical_cleanup_replayed": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "No new application build/test,phase execution,Broker delivery,capture,token generation,fault injection or cleanup/business write. Historical successful actions are not repeated.",
+      "Twelve whole current files1105lines plus selected source/test/DDL/config scopes;other named document reviews retain original scope. Static port/include/profile checks do not prove a freshly merged/running stack. Only12 of48 originals were newly viewed individually.",
+      "After these three prospective rows,full original A-G still require OAuth0/3,realSRMCAPTCHA,Qodernative loading,currentfullgoldens/fivepresets,SRMfact/designownership,current review-dependency alignment and finalsite/integratedacceptance;this is not full Goal completion."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/outbox-development.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 01:20:55",
+      "result": "approved",
+      "translation_sha256": "15c7799448ac7a521d18b2ce5102707f41af9b318dd2c56ca2ee64dd05ad5bb1",
+      "checks": {
+        "coverage_and_meaning": "四语原稿652行与所有最终变化已实际阅读，逐行对应覆盖当前660行。每语9个标题、8节教程、12个图片引用、10个命令围栏完整保留。环境准备、合成消息、20/40秒失败重试与死信、修复/重发/忽略、消费去重、故障/Trace/指标、新服务接入、分阶段取证和精确清理均对应。",
+        "technical_literals": "四语11个围栏外技术字面量与20个归一化链接一致，40个命令围栏按语言逐一保留相同内容。明确full及16个full服务的ports重置声明，不把core当成完整投递环境。统一三个base:mqmessage权限码、broker_type、wiki-unregistered、wiki_mq_fixture、deliveryEnabled和19901/actuator/prometheus；全部48张PNG摘要不变。",
+        "security_and_failure_semantics": "保留私密env/令牌在仓库外、真实Docker项目/网络/卷/容器/租户归属、提交状态未知先Inspect、阶段登记及不并发重放写入。区分角色与端点权限、默认USER读日志200与无权管理403、终态重复操作HTTP200/业务400。保留同库有效本地事务与显式tenant、120秒租约/CAS、20/40后第三次死信无退避、eventId/唯一键去重与offset/inflight证据。deliveryEnabled仅为配置投影；Base/CRM聚合、指标进程累计、producer_trace_id可空、原容器故障/恢复及90秒超时边界准确。测试JWT和文档复核不代替CAPTCHA/密码登录。",
+        "images_and_links": "48个唯一原图与2026-10-12逐图摘要/locale取证对应，保留三种捕获时测试版本（32/8/8），没有把全部图追认为当前测试版本。本轮实际查看三场景×四语12张原图，其余36张复用原批次实际视觉审查与未变字节。保留英文菜单裁切、日韩换行、中文错误、ID省略和恢复图tooltip。四篇在Docker完整渲染，图片URL及相对文件链接存在；#outbox仍由正式链接门禁核验。原6阶段通过/2次失败/12Outbox+4日志清理和零残留仅作为历史证据。",
+        "language_and_terminology": "All163 original lines and all final deltas were compared with Chinese/current source, covering165current lines by exact mapping. Full versus core prerequisites,actual authority codes,unsupported broker_type,configuration-only deliveryEnabled,management endpoint and dated test/cleanup provenance are explicit. Every recovery/deduplication/tenant/secret boundary is retained. Actual AI_REVIEW suffices;human translation review is optional without converting visual review into human sign-off."
+      },
+      "findings": [
+        {
+          "id": "OD01",
+          "status": "resolved",
+          "resolution": "Replace implied mandatory human translation review with actual authorized AI_REVIEW;human review remains optional and is never falsely claimed."
+        },
+        {
+          "id": "OD02",
+          "status": "resolved",
+          "resolution": "Use full for the RocketMQ/XXL/CRM exercise;core alone is insufficient. Distinguish16port-reset declarations and actual include/profile metadata from a newly merged or running Compose model."
+        },
+        {
+          "id": "OD03",
+          "status": "resolved",
+          "resolution": "State actual base:mqmessage:list/resend/skip plus tenant requirements instead of a role-name-only rule;retain ordinaryUSERlogread200 as a separate endpoint."
+        },
+        {
+          "id": "OD04",
+          "status": "resolved",
+          "resolution": "Identify wiki-unregistered as unsupportedbroker_type sender dispatch,not an incorrectrealbindingName/destination."
+        },
+        {
+          "id": "OD05",
+          "status": "resolved",
+          "resolution": "Keep2026-10-12six passed phases,two failed attempts,three capturedtest revisions andexact12Outbox+4logcleanup as dated evidence without replaying committed effects."
+        },
+        {
+          "id": "OD06",
+          "status": "resolved",
+          "resolution": "Clarify deliveryEnabled flag projection;retain sameDB/localtransaction,explicittenant,lease/CAS/backoff/consumer dedup and metrics/trace limitations."
+        },
+        {
+          "id": "OD07",
+          "status": "resolved",
+          "resolution": "Separate48unchanged source-bound images from12fresh individual views and36historical-scope reuse;keep original visual imperfections and no newglobalUIclaim."
+        },
+        {
+          "id": "OD08",
+          "status": "resolved",
+          "resolution": "Correct Japanese deadletter/breakpoint/queue terminology and Korean title/prose spacing while preserving sections,URLs and all command fences."
+        },
+        {
+          "id": "OD09",
+          "status": "resolved",
+          "resolution": "Align19901/actuator/prometheus technical literal across all languages without changing the actual management endpoint or hostport policy."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/outbox-development.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 01:20:55",
+      "result": "approved",
+      "translation_sha256": "0c49512905b9f672b4af6862d755321dbd85959f7392d3e502d28bc3a31e2306",
+      "checks": {
+        "coverage_and_meaning": "四语原稿652行与所有最终变化已实际阅读，逐行对应覆盖当前660行。每语9个标题、8节教程、12个图片引用、10个命令围栏完整保留。环境准备、合成消息、20/40秒失败重试与死信、修复/重发/忽略、消费去重、故障/Trace/指标、新服务接入、分阶段取证和精确清理均对应。",
+        "technical_literals": "四语11个围栏外技术字面量与20个归一化链接一致，40个命令围栏按语言逐一保留相同内容。明确full及16个full服务的ports重置声明，不把core当成完整投递环境。统一三个base:mqmessage权限码、broker_type、wiki-unregistered、wiki_mq_fixture、deliveryEnabled和19901/actuator/prometheus；全部48张PNG摘要不变。",
+        "security_and_failure_semantics": "保留私密env/令牌在仓库外、真实Docker项目/网络/卷/容器/租户归属、提交状态未知先Inspect、阶段登记及不并发重放写入。区分角色与端点权限、默认USER读日志200与无权管理403、终态重复操作HTTP200/业务400。保留同库有效本地事务与显式tenant、120秒租约/CAS、20/40后第三次死信无退避、eventId/唯一键去重与offset/inflight证据。deliveryEnabled仅为配置投影；Base/CRM聚合、指标进程累计、producer_trace_id可空、原容器故障/恢复及90秒超时边界准确。测试JWT和文档复核不代替CAPTCHA/密码登录。",
+        "images_and_links": "48个唯一原图与2026-10-12逐图摘要/locale取证对应，保留三种捕获时测试版本（32/8/8），没有把全部图追认为当前测试版本。本轮实际查看三场景×四语12张原图，其余36张复用原批次实际视觉审查与未变字节。保留英文菜单裁切、日韩换行、中文错误、ID省略和恢复图tooltip。四篇在Docker完整渲染，图片URL及相对文件链接存在；#outbox仍由正式链接门禁核验。原6阶段通过/2次失败/12Outbox+4日志清理和零残留仅作为历史证据。",
+        "language_and_terminology": "全163行と最終変更行を中文事実源に照合し、未変更行対応で現在165行を網羅した。デッドレター・ブレークポイント・キュー投入とSQLの合成メッセージを自然な日本語へ修正した。fullの前提、機能権限、未登録Broker種別、設定投影と実稼働、管理エンドポイント、過去の実行と今回の文書確認を区別する。テナント・トランザクション・重複排除・原コンテナ復旧・機密保護を保持し、実際のAI_REVIEWで十分とし、人による翻訳レビューを必須にしない。"
+      },
+      "findings": [
+        {
+          "id": "OD01",
+          "status": "resolved",
+          "resolution": "Replace implied mandatory human translation review with actual authorized AI_REVIEW;human review remains optional and is never falsely claimed."
+        },
+        {
+          "id": "OD02",
+          "status": "resolved",
+          "resolution": "Use full for the RocketMQ/XXL/CRM exercise;core alone is insufficient. Distinguish16port-reset declarations and actual include/profile metadata from a newly merged or running Compose model."
+        },
+        {
+          "id": "OD03",
+          "status": "resolved",
+          "resolution": "State actual base:mqmessage:list/resend/skip plus tenant requirements instead of a role-name-only rule;retain ordinaryUSERlogread200 as a separate endpoint."
+        },
+        {
+          "id": "OD04",
+          "status": "resolved",
+          "resolution": "Identify wiki-unregistered as unsupportedbroker_type sender dispatch,not an incorrectrealbindingName/destination."
+        },
+        {
+          "id": "OD05",
+          "status": "resolved",
+          "resolution": "Keep2026-10-12six passed phases,two failed attempts,three capturedtest revisions andexact12Outbox+4logcleanup as dated evidence without replaying committed effects."
+        },
+        {
+          "id": "OD06",
+          "status": "resolved",
+          "resolution": "Clarify deliveryEnabled flag projection;retain sameDB/localtransaction,explicittenant,lease/CAS/backoff/consumer dedup and metrics/trace limitations."
+        },
+        {
+          "id": "OD07",
+          "status": "resolved",
+          "resolution": "Separate48unchanged source-bound images from12fresh individual views and36historical-scope reuse;keep original visual imperfections and no newglobalUIclaim."
+        },
+        {
+          "id": "OD08",
+          "status": "resolved",
+          "resolution": "Correct Japanese deadletter/breakpoint/queue terminology and Korean title/prose spacing while preserving sections,URLs and all command fences."
+        },
+        {
+          "id": "OD09",
+          "status": "resolved",
+          "resolution": "Align19901/actuator/prometheus technical literal across all languages without changing the actual management endpoint or hostport policy."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/outbox-development.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 01:20:55",
+      "result": "approved",
+      "translation_sha256": "91fe9f92652a9f9539c5951053ce80039ae3077a6592588d1473c0b8398710c1",
+      "checks": {
+        "coverage_and_meaning": "四语原稿652行与所有最终变化已实际阅读，逐行对应覆盖当前660行。每语9个标题、8节教程、12个图片引用、10个命令围栏完整保留。环境准备、合成消息、20/40秒失败重试与死信、修复/重发/忽略、消费去重、故障/Trace/指标、新服务接入、分阶段取证和精确清理均对应。",
+        "technical_literals": "四语11个围栏外技术字面量与20个归一化链接一致，40个命令围栏按语言逐一保留相同内容。明确full及16个full服务的ports重置声明，不把core当成完整投递环境。统一三个base:mqmessage权限码、broker_type、wiki-unregistered、wiki_mq_fixture、deliveryEnabled和19901/actuator/prometheus；全部48张PNG摘要不变。",
+        "security_and_failure_semantics": "保留私密env/令牌在仓库外、真实Docker项目/网络/卷/容器/租户归属、提交状态未知先Inspect、阶段登记及不并发重放写入。区分角色与端点权限、默认USER读日志200与无权管理403、终态重复操作HTTP200/业务400。保留同库有效本地事务与显式tenant、120秒租约/CAS、20/40后第三次死信无退避、eventId/唯一键去重与offset/inflight证据。deliveryEnabled仅为配置投影；Base/CRM聚合、指标进程累计、producer_trace_id可空、原容器故障/恢复及90秒超时边界准确。测试JWT和文档复核不代替CAPTCHA/密码登录。",
+        "images_and_links": "48个唯一原图与2026-10-12逐图摘要/locale取证对应，保留三种捕获时测试版本（32/8/8），没有把全部图追认为当前测试版本。本轮实际查看三场景×四语12张原图，其余36张复用原批次实际视觉审查与未变字节。保留英文菜单裁切、日韩换行、中文错误、ID省略和恢复图tooltip。四篇在Docker完整渲染，图片URL及相对文件链接存在；#outbox仍由正式链接门禁核验。原6阶段通过/2次失败/12Outbox+4日志清理和零残留仅作为历史证据。",
+        "language_and_terminology": "원본163행과최종변경행을중국어사실원문및현재소스와대조하고미변경행대응으로현재165행을확인했다. 제목과본문의띄어쓰기,실행기록/소비자/큐투입표현을자연스럽게정리했다. full필수조건,실제권한코드,미등록Broker유형,설정투영과정상상태,관리엔드포인트,과거실행/이번문서검토를구분했다. 모든테넌트·트랜잭션·멱등성·복구·비밀보호조건을보존하고실제AI_REVIEW충분/사람의번역검토선택조건을명시한다."
+      },
+      "findings": [
+        {
+          "id": "OD01",
+          "status": "resolved",
+          "resolution": "Replace implied mandatory human translation review with actual authorized AI_REVIEW;human review remains optional and is never falsely claimed."
+        },
+        {
+          "id": "OD02",
+          "status": "resolved",
+          "resolution": "Use full for the RocketMQ/XXL/CRM exercise;core alone is insufficient. Distinguish16port-reset declarations and actual include/profile metadata from a newly merged or running Compose model."
+        },
+        {
+          "id": "OD03",
+          "status": "resolved",
+          "resolution": "State actual base:mqmessage:list/resend/skip plus tenant requirements instead of a role-name-only rule;retain ordinaryUSERlogread200 as a separate endpoint."
+        },
+        {
+          "id": "OD04",
+          "status": "resolved",
+          "resolution": "Identify wiki-unregistered as unsupportedbroker_type sender dispatch,not an incorrectrealbindingName/destination."
+        },
+        {
+          "id": "OD05",
+          "status": "resolved",
+          "resolution": "Keep2026-10-12six passed phases,two failed attempts,three capturedtest revisions andexact12Outbox+4logcleanup as dated evidence without replaying committed effects."
+        },
+        {
+          "id": "OD06",
+          "status": "resolved",
+          "resolution": "Clarify deliveryEnabled flag projection;retain sameDB/localtransaction,explicittenant,lease/CAS/backoff/consumer dedup and metrics/trace limitations."
+        },
+        {
+          "id": "OD07",
+          "status": "resolved",
+          "resolution": "Separate48unchanged source-bound images from12fresh individual views and36historical-scope reuse;keep original visual imperfections and no newglobalUIclaim."
+        },
+        {
+          "id": "OD08",
+          "status": "resolved",
+          "resolution": "Correct Japanese deadletter/breakpoint/queue terminology and Korean title/prose spacing while preserving sections,URLs and all command fences."
+        },
+        {
+          "id": "OD09",
+          "status": "resolved",
+          "resolution": "Align19901/actuator/prometheus technical literal across all languages without changing the actual management endpoint or hostport policy."
+        }
+      ]
+    }
+  }
+}

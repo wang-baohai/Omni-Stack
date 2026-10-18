@@ -1,0 +1,304 @@
+Actual local Docker output; own generated-core CLI/backend/frontend build and private prebuilt runtime; formal multistage build is a separate unpassed gate
+Source HEAD: fc165e392216e75d903199ab121eba46a8edecf3
+Input worktree SHA256: 044454b0ceed553187e9bcd36796d9313e3ea21c64214e14ede3f4b5f4eabf33
+Path aliases mask private output locations only. Raw originals are retained privately.
+
+
+$ node tools/omni-cli/dist/src/cli.js preset validate core --output <moved-core>
+generated preset valid: core@1.0.0, modules=7
+preset valid: core, modules=platform,auth,base,nacos,gateway,mysql,redis
+
+$ node tools/omni-cli/dist/src/cli.js dev up --preset core --mode lite --project-name omni-e2e-lite-20261012a --no-build
+development preset: core
+mode: lite
+modules: platform, auth, base, nacos, gateway, mysql, redis
+services: omni-db-migrator, omni-frontend, omni-auth, omni-base, omni-gateway, mysql, redis
+observability: off
+degraded: XXL-JOB=off, MQ relay/consumers=off, Outbox writes=on
+ Network omni-e2e-lite-20261012a_default Creating 
+ Volume omni-e2e-lite-20261012a_omni-mysql-data Creating 
+ Volume omni-e2e-lite-20261012a_omni-mysql-data Creating 
+ Network omni-e2e-lite-20261012a_default Creating 
+ Volume omni-e2e-lite-20261012a_omni-redis-data Creating 
+ Volume omni-e2e-lite-20261012a_omni-redis-data Creating 
+ Volume omni-e2e-lite-20261012a_omni-mysql-data Created 
+ Volume omni-e2e-lite-20261012a_omni-mysql-data Created 
+ Volume omni-e2e-lite-20261012a_omni-redis-data Created 
+ Volume omni-e2e-lite-20261012a_omni-redis-data Created 
+ Network omni-e2e-lite-20261012a_default Created 
+ Network omni-e2e-lite-20261012a_default Created 
+ Container omni-e2e-lite-20261012a-omni-frontend-1 Creating 
+ Container omni-e2e-lite-20261012a-mysql-1 Creating 
+ Container omni-e2e-lite-20261012a-redis-1 Creating 
+ Container omni-e2e-lite-20261012a-omni-frontend-1 Created 
+ Container omni-e2e-lite-20261012a-mysql-1 Created 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Creating 
+ Container omni-e2e-lite-20261012a-redis-1 Created 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Created 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Creating 
+ Container omni-e2e-lite-20261012a-omni-base-1 Creating 
+ Container omni-e2e-lite-20261012a-omni-base-1 Created 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Created 
+ Container omni-e2e-lite-20261012a-omni-gateway-1 Creating 
+ Container omni-e2e-lite-20261012a-omni-gateway-1 Created 
+ Container omni-e2e-lite-20261012a-redis-1 Starting 
+ Container omni-e2e-lite-20261012a-mysql-1 Starting 
+ Container omni-e2e-lite-20261012a-omni-frontend-1 Starting 
+ Container omni-e2e-lite-20261012a-redis-1 Started 
+ Container omni-e2e-lite-20261012a-mysql-1 Started 
+ Container omni-e2e-lite-20261012a-mysql-1 Waiting 
+ Container omni-e2e-lite-20261012a-omni-frontend-1 Started 
+ Container omni-e2e-lite-20261012a-mysql-1 Healthy 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Starting 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Started 
+ Container omni-e2e-lite-20261012a-redis-1 Waiting 
+ Container omni-e2e-lite-20261012a-redis-1 Waiting 
+ Container omni-e2e-lite-20261012a-mysql-1 Waiting 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Waiting 
+ Container omni-e2e-lite-20261012a-mysql-1 Waiting 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Waiting 
+ Container omni-e2e-lite-20261012a-redis-1 Healthy 
+ Container omni-e2e-lite-20261012a-redis-1 Healthy 
+ Container omni-e2e-lite-20261012a-mysql-1 Healthy 
+ Container omni-e2e-lite-20261012a-mysql-1 Healthy 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Exited 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Exited 
+ Container omni-e2e-lite-20261012a-omni-base-1 Starting 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Starting 
+ Container omni-e2e-lite-20261012a-omni-base-1 Started 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Started 
+ Container omni-e2e-lite-20261012a-redis-1 Waiting 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Waiting 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Waiting 
+ Container omni-e2e-lite-20261012a-redis-1 Healthy 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Exited 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Healthy 
+ Container omni-e2e-lite-20261012a-omni-gateway-1 Starting 
+ Container omni-e2e-lite-20261012a-omni-gateway-1 Started 
+
+$ node tools/omni-cli/dist/src/cli.js dev status --project-name omni-e2e-lite-20261012a
+NAME                                         IMAGE                                        COMMAND                  SERVICE            CREATED              STATUS                        PORTS
+omni-e2e-lite-20261012a-mysql-1              mysql:8.4                                    "docker-entrypoint.s…"   mysql              About a minute ago   Up About a minute (healthy)   3306/tcp, 33060/tcp
+omni-e2e-lite-20261012a-omni-auth-1          omni-e2e-lite-20261012a-auth:latest          "/bin/bash -c 'exec …"   omni-auth          About a minute ago   Up 44 seconds (healthy)       8080/tcp
+omni-e2e-lite-20261012a-omni-base-1          omni-e2e-lite-20261012a-base:latest          "/bin/bash -c 'exec …"   omni-base          About a minute ago   Up 44 seconds (healthy)       8080/tcp
+omni-e2e-lite-20261012a-omni-db-migrator-1   omni-e2e-lite-20261012a-db-migrator:latest   "java -jar /app/app.…"   omni-db-migrator   About a minute ago   Exited (0) 44 seconds ago     
+omni-e2e-lite-20261012a-omni-frontend-1      omni-e2e-lite-20261012a-frontend:latest      "/docker-entrypoint.…"   omni-frontend      About a minute ago   Up About a minute             80/tcp
+omni-e2e-lite-20261012a-omni-gateway-1       omni-e2e-lite-20261012a-gateway:latest       "/bin/bash -c 'exec …"   omni-gateway       About a minute ago   Up 17 seconds (healthy)       8080/tcp
+omni-e2e-lite-20261012a-redis-1              redis:7.4                                    "docker-entrypoint.s…"   redis              About a minute ago   Up About a minute (healthy)   6379/tcp
+
+$ node tools/omni-cli/dist/src/cli.js dev doctor
+PASS Node.js: 22.23.3 (required >= 22.12.0)
+PASS JDK: 25 via JAVA_HOME
+PASS Maven Wrapper: omni-backend/mvnw(.cmd) present
+PASS Frontend: omni-frontend/package.json present
+PASS Module catalog: 7 modules, 8 services
+PASS Preset closure: 1 presets resolve to existing modules and services
+PASS .env: 12 required names configured (values not printed)
+PASS Disk: 569.6 GiB free (required >= 5 GiB)
+PASS Docker Compose: 5.6.0
+PASS Docker daemon: server 29.7.2
+PASS Compose profiles: 6 profiles valid via .env
+SKIP Ports: SKIP 9 declared host ports; conflict scan is only implemented on Windows
+  HINT 在 Linux/macOS 用 `ss -ltn` 人工核对这些端口
+PASS Volume isolation: 8 named volumes resolved for project "moved-core"
+PASS Runtime inventory: 7 containers; mysql=healthy, nacos=absent
+PASS Database connectivity: mysqladmin ping alive inside mysql container
+SKIP Nacos registration: SKIP nacos container not running
+  HINT dev up 带 Nacos 的组合后重跑 doctor
+
+$ node tools/omni-cli/dist/src/cli.js dev down --project-name omni-e2e-lite-20261012a
+ Container omni-e2e-lite-20261012a-omni-base-1 Stopping 
+ Container omni-e2e-lite-20261012a-omni-frontend-1 Stopping 
+ Container omni-e2e-lite-20261012a-omni-gateway-1 Stopping 
+ Container omni-e2e-lite-20261012a-omni-frontend-1 Stopped 
+ Container omni-e2e-lite-20261012a-omni-frontend-1 Removing 
+ Container omni-e2e-lite-20261012a-omni-frontend-1 Removed 
+ Container omni-e2e-lite-20261012a-omni-base-1 Stopped 
+ Container omni-e2e-lite-20261012a-omni-base-1 Removing 
+ Container omni-e2e-lite-20261012a-omni-base-1 Removed 
+ Container omni-e2e-lite-20261012a-omni-gateway-1 Stopped 
+ Container omni-e2e-lite-20261012a-omni-gateway-1 Removing 
+ Container omni-e2e-lite-20261012a-omni-gateway-1 Removed 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Stopping 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Stopped 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Removing 
+ Container omni-e2e-lite-20261012a-omni-auth-1 Removed 
+ Container omni-e2e-lite-20261012a-redis-1 Stopping 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Stopping 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Stopped 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Removing 
+ Container omni-e2e-lite-20261012a-omni-db-migrator-1 Removed 
+ Container omni-e2e-lite-20261012a-mysql-1 Stopping 
+ Container omni-e2e-lite-20261012a-redis-1 Stopped 
+ Container omni-e2e-lite-20261012a-redis-1 Removing 
+ Container omni-e2e-lite-20261012a-redis-1 Removed 
+ Container omni-e2e-lite-20261012a-mysql-1 Stopped 
+ Container omni-e2e-lite-20261012a-mysql-1 Removing 
+ Container omni-e2e-lite-20261012a-mysql-1 Removed 
+ Network omni-e2e-lite-20261012a_default Removing 
+ Network omni-e2e-lite-20261012a_default Removed 
+
+$ node tools/omni-cli/dist/src/cli.js dev down --project-name omni-e2e-lite-20261012a --volumes --confirm-delete-volumes
+ Volume omni-e2e-lite-20261012a_omni-mysql-data Removing 
+ Volume omni-e2e-lite-20261012a_omni-redis-data Removing 
+ Volume omni-e2e-lite-20261012a_omni-mysql-data Removed 
+ Volume omni-e2e-lite-20261012a_omni-redis-data Removed 
+
+Generated core backend build summary:
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 33, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 68, Failures: 0, Errors: 0, Skipped: 1
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+Actual HTTP checks and owned cleanup from the runtime receipt:
+{
+  "checks": [
+    {
+      "check": "omni-auth health",
+      "http_status": 200,
+      "status": "UP"
+    },
+    {
+      "check": "omni-base health",
+      "http_status": 200,
+      "status": "UP"
+    },
+    {
+      "check": "omni-gateway health",
+      "http_status": 200,
+      "status": "UP"
+    },
+    {
+      "check": "frontend login route",
+      "http_status": 200
+    },
+    {
+      "check": "Gateway->Auth public formal tenant read",
+      "http_status": 200,
+      "business_code": 200,
+      "rows": 1
+    },
+    {
+      "check": "anonymous protected Base route",
+      "http_status": 401
+    }
+  ],
+  "containers": [
+    {
+      "service": "mysql",
+      "id": "261896473f9ff85b0fbc1a1134f3a263b7f325e99e8f80d12217ce144f027465",
+      "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "status": "running",
+      "health": "healthy",
+      "exit_code": 0,
+      "published_bindings": 0,
+      "flags": {}
+    },
+    {
+      "service": "redis",
+      "id": "6bb6db1983479d476d425ddc791d3b54da58d78d3821c6e1751d8230b3005e79",
+      "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+      "status": "running",
+      "health": "healthy",
+      "exit_code": 0,
+      "published_bindings": 0,
+      "flags": {}
+    },
+    {
+      "service": "omni-db-migrator",
+      "id": "7f2245f3653fbb2bb4f71b0092648ae12a0e94e327df0baafaa555efe4c435cb",
+      "image_id": "sha256:cf73b4344fc8cd3d6d180357e318f976ecb88c43dde3a35bdfeec4b076392091",
+      "status": "exited",
+      "health": "unhealthy",
+      "exit_code": 0,
+      "published_bindings": 0,
+      "flags": {
+        "XXL_JOB_EXECUTOR_ENABLED": "false"
+      }
+    },
+    {
+      "service": "omni-gateway",
+      "id": "82c736e65cd6d891efea83a3aa82bc4f8c7ab22d9903bdadc2dcb1da59c367cc",
+      "image_id": "sha256:40cfc83ea990f4dfa3b4a45a000e5409ee35c03b27437749e5600c1e50872c10",
+      "status": "running",
+      "health": "healthy",
+      "exit_code": 0,
+      "published_bindings": 0,
+      "flags": {
+        "SPRING_PROFILES_ACTIVE": "lite",
+        "SPRING_CLOUD_NACOS_DISCOVERY_ENABLED": "false",
+        "SPRING_CLOUD_NACOS_CONFIG_ENABLED": "false"
+      }
+    },
+    {
+      "service": "omni-base",
+      "id": "de8c47c0fbdb5a4e8a059eba059e404c66ddf126c327c71250bc9faad61fc3b0",
+      "image_id": "sha256:81d12b6dbb2f6471e76c70ad9183a2a53deced808f413ae94c15a2a917238f1b",
+      "status": "running",
+      "health": "healthy",
+      "exit_code": 0,
+      "published_bindings": 0,
+      "flags": {
+        "SPRING_CLOUD_NACOS_DISCOVERY_ENABLED": "false",
+        "SPRING_PROFILES_ACTIVE": "lite",
+        "OMNI_MQLOG_RELAY_AUTO_REGISTER": "false",
+        "OMNI_MQLOG_RELAY_ENABLED": "false",
+        "SPRING_CLOUD_FUNCTION_DEFINITION": "",
+        "XXL_JOB_EXECUTOR_ENABLED": "false",
+        "SPRING_CLOUD_NACOS_CONFIG_ENABLED": "false",
+        "SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT": "false"
+      }
+    },
+    {
+      "service": "omni-frontend",
+      "id": "deb82340c504a46507ffc825d78b7d39305dd742805e55839dcebe7097b118be",
+      "image_id": "sha256:98745c562a3d3a2d1579a9cac3e03ddf0e1742b9be7259f9ca4faa82e416afa9",
+      "status": "running",
+      "health": null,
+      "exit_code": 0,
+      "published_bindings": 0,
+      "flags": {}
+    },
+    {
+      "service": "omni-auth",
+      "id": "f2fcefbf19537c2b1cd4986c314049a5d3c1f6856ce6d77e5bcefa74cebfa262",
+      "image_id": "sha256:570c46b5d3b9aa9f17faf99e4b660d2285dd935e52394d5d3dee5f85b324a27b",
+      "status": "running",
+      "health": "healthy",
+      "exit_code": 0,
+      "published_bindings": 0,
+      "flags": {
+        "SPRING_CLOUD_NACOS_CONFIG_ENABLED": "false",
+        "SPRING_CLOUD_STREAM_FUNCTION_AUTODETECT": "false",
+        "SPRING_PROFILES_ACTIVE": "lite",
+        "OMNI_MQLOG_RELAY_AUTO_REGISTER": "false",
+        "OMNI_MQLOG_RELAY_ENABLED": "false",
+        "SPRING_CLOUD_NACOS_DISCOVERY_ENABLED": "false",
+        "SPRING_CLOUD_FUNCTION_DEFINITION": "",
+        "XXL_JOB_EXECUTOR_ENABLED": "false"
+      }
+    }
+  ],
+  "retained_volumes": [
+    "omni-e2e-lite-20261012a_omni-mysql-data",
+    "omni-e2e-lite-20261012a_omni-redis-data"
+  ],
+  "cleanup": {
+    "containers": 0,
+    "volumes": "",
+    "networks": ""
+  },
+  "existing_teaching_identities_preserved": true,
+  "limits": [
+    "Private prebuilt runtime images of exact Docker-built generated-core artifacts; formal production multistage build is a separate unpassed gate.",
+    "Read-only runtime/API health checks; no password login, no CAPTCHA answer access, no claim of Outbox delivery or complete core business E2E."
+  ]
+}

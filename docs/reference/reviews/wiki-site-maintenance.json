@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-site-maintenance",
+  "source": "docs/wiki/site-maintenance.md",
+  "source_sha256": "a56b27a8c5263fc2aea5f538de896d7e6d5bebe581dc9e57336140d8ebb06ffb",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/site-maintenance.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:42:35",
+      "result": "approved",
+      "translation_sha256": "2f8c6e413056692034bfd6482fb02404c63f9a8a10a4bf3705bf9268b4bedaa7",
+      "checks": {
+        "coverage_and_meaning": "核对五节完整步骤：独立启动、两种阅读入口、质量门、静态交付和故障排查均与中文对应。",
+        "technical_literals": "Compose project、4173、Dockerfile、DOCS_BASE 与全部 E2E 变量保持字面量，命令可在仓库根目录执行。",
+        "security_and_failure_semantics": "保留真人 CAPTCHA、external 与 display-fixtures 区别及故障注入标注；真实 AI_REVIEW 需所有者授权和证据摘要。",
+        "language_and_terminology": "canonical content、projection、review acceptance 和 provenance 的表达准确，旧人工唯一条件已随授权更新。",
+        "images_and_links": "直接阅读入口修正为 index.en.md；ADR 使用同一规范源，图片要求实际语言截图而不是译写覆盖。"
+      },
+      "findings": [
+        {
+          "id": "localized-index",
+          "status": "resolved",
+          "description": "直接阅读步骤仍指向中文 index.md。",
+          "resolution": "改为 index.en.md。"
+        },
+        {
+          "id": "review-troubleshooting",
+          "status": "resolved",
+          "description": "故障排查仅列两份正文摘要。",
+          "resolution": "补充 AI 授权和证据摘要，保留变化后的实际再审。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/site-maintenance.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:42:35",
+      "result": "approved",
+      "translation_sha256": "6fe7b2297222174777a98a9bae5b4101cdfcc6d48c22836545571cc2751f2c03",
+      "checks": {
+        "coverage_and_meaning": "逐节核对构建/停止、规范源、静态产物、四语质量门及六项故障排查，未遗漏部署约束。",
+        "technical_literals": "四条 Compose 命令、127.0.0.1:4173、DOCS_REPOSITORY_URL、E2E 模式和变量没有翻译变形。",
+        "security_and_failure_semantics": "保留不发布生产、草稿不替代严格门、真人 CAPTCHA 和短期测试令牌边界；明确 AI 记录不得伪装真人。",
+        "language_and_terminology": "将不自然的中国語源改为中国語原文，将摘要改为ハッシュ；レビュー担当者同时适用于人和授权 Codex。",
+        "images_and_links": "Wiki 入口已改 index.jp.md；ADR 相对路径和实际语言截图要求完整，无新增第三方图服务依赖。"
+      },
+      "findings": [
+        {
+          "id": "localized-index",
+          "status": "resolved",
+          "description": "直接阅读步骤仍指向中文页面。",
+          "resolution": "使用 index.jp.md。"
+        },
+        {
+          "id": "hash-and-review-terms",
+          "status": "resolved",
+          "description": "摘要和源等中文表达混入日文，故障表使用旧人工规则。",
+          "resolution": "改为原文、ハッシュ、レビュー担当者并加入授权及证据哈希条件。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/site-maintenance.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:42:35",
+      "result": "approved",
+      "translation_sha256": "3e4a6361e3a826e365f06f7056eb5ddea34f0c25c5103d08328f84670b0c2cc1",
+      "checks": {
+        "coverage_and_meaning": "五节及故障表与中文逐项对应，独立文档站不需业务服务、两种阅读入口和子路径交付均完整。",
+        "technical_literals": "Docker Compose 命令、固定回环端口、构建/运行目录和 E2E 变量及两个模式字面量保持一致。",
+        "security_and_failure_semantics": "真人验证码、测试 fixture、模拟展示不能证明真实认证、严格发布门和实际 AI 授权证据要求全部保留。",
+        "language_and_terminology": "원본、생성물、검토、해시 与正文含义一致；검토자修正了旧表中仅限人的不准确表达。",
+        "images_and_links": "直接阅读入口修正为 index.kr.md；图片来自规范目录且按实际 UI 语言拍摄，ADR 链接保持可解析。"
+      },
+      "findings": [
+        {
+          "id": "localized-index",
+          "status": "resolved",
+          "description": "韩文直接入口指向中文。",
+          "resolution": "改为 index.kr.md。"
+        },
+        {
+          "id": "review-troubleshooting",
+          "status": "resolved",
+          "description": "旧故障表只提人及两份哈希。",
+          "resolution": "改为检视者、原文译文哈希，以及 AI 授权和证据哈希。"
+        }
+      ]
+    }
+  }
+}

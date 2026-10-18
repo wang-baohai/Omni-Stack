@@ -1,0 +1,786 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "crm",
+  "source": "docs/crm.md",
+  "source_sha256": "dbb748468d43a479f89eacacc28a9c4056a7b8db87fa37a7e29973a6fde4e23d",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "926cf722893e8efb20a14891d71149e0830cef6a",
+  "source_state": "Current whole CRM Chinese source and three translations plus moved Wiki steps are digest-bound; only CRM translation rows are approved.",
+  "method": "Read all four complete original CRM documents, inspected the additional current implementation ranges and prior source-bound Flow13/14 audit, authored and semantically compared every replacement in all four languages, retained unchanged sections, and reconciled the resulting whole documents with current file digests and whole Markdown rendering. Source hashes bind selected inspection scope, not an assertion that every implementation line was read. Automatic checks supplement the actual language review.",
+  "checked_source_files": [
+    {
+      "path": "compose.tools.yaml",
+      "sha256": "24d37d4437eb8f2c1bce2a7478a8566162c9d65f9ee111393b0131463732f035"
+    },
+    {
+      "path": "database/changelog/crm/0001-crm-schema.yaml",
+      "sha256": "59b38d94db0bb368ae8d54e049bd66bc735eab67c4f1f749125f5d59661f9a82"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/config/MqLogAutoConfiguration.java",
+      "sha256": "bfb434ba1c5e5b8b1cf5d93d87cbb38954a7dbc65f14eab8bf47a717ecbad9c2"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java",
+      "sha256": "db640b6e594ab53272c078e42776e904b7e6ca33a4ae625e2f9bcf5c1c9ea928"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthDataScopeResolver.java",
+      "sha256": "8c8b2c3d5818682e93e3f0874d8b23e359680015cbc9bcb68b3f156675807531"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthSecuritySettingsClient.java",
+      "sha256": "b8650890b1807b9b099bd9082aa98f5785a658595db55debe0b1b63b89e35a61"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java",
+      "sha256": "4fcaa7b87b3547392e77284334ad8553546cdac8351a402b726ce1f2d9697220"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceXssAutoConfiguration.java",
+      "sha256": "9274353be73edd87ed851ae5684d1886a16095a87248f596f076f7824142237e"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/datascope/ServiceDataScopeAspect.java",
+      "sha256": "e47082d659d8ecda501066b2a4de6693eafbb9dc390d63bbf7ef3f6afaf50a32"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/identity/ServiceIdentityFilter.java",
+      "sha256": "ca6d6c99dad790c0599c785d3362bdc9987e92a2240bde92e8dd94af567beac5"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java",
+      "sha256": "796424bf5067b1e80c3658572f2d1d3fb60a0db68c5bf349db10b5ddd323328d"
+    },
+    {
+      "path": "omni-backend/omni-crm/pom.xml",
+      "sha256": "4801a220e50bf13340174238835977b6e5d2f9e89fabf00e205dc8a23c96557c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/ActivityController.java",
+      "sha256": "9d3af091afb224b347e50ea67a60c5005b432f63407a2129b6d6c9c7dc949a4f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/ContactController.java",
+      "sha256": "17f7712928d62a572d51d56b50e827dfa802cd1c689925e4fa8fb85689365030"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/CustomerController.java",
+      "sha256": "2cd745e3903b0b87a023271a4b02f7748eb0c39dd512923d0dc664ea169802e0"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/LeadController.java",
+      "sha256": "f81e64deac6c0674a3f180eb8569d5d88f1c2967ad3e2a2d3f396506842488ac"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OpportunityController.java",
+      "sha256": "5e908c7ccb970de52464ec427b73b2643f0a413c86faa22d229a894f45ac2def"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OptionsController.java",
+      "sha256": "a8e1910b02fffe26971210f8b23240ca1ae244974dc28a49bfd1b93317982701"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OverviewController.java",
+      "sha256": "6ce47ad02a385a96fb1d0c576cc28f1e4a3d798d8e08d2c06a5f7ca700e8a8e2"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/PipelineController.java",
+      "sha256": "36b1471b582315216700a26eb9e48bc8d573a3a4edde7ac7e00b4cad4b345263"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/domain/CrmStateMachine.java",
+      "sha256": "1d6286fa82b101e7f0c4b0c815d89df6a2b35f13db27f07e3fb3265182fc72b4"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmRequests.java",
+      "sha256": "4a0019ce1e5d5bd6bf474d548f6fa4ed150bc94399b650f1f19d89aea6f3e7ff"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmViewAssembler.java",
+      "sha256": "bc03388bcc9b538ccec2a2ecc4a04af061f7c7062a4e85d01f25f7ff8b4a2c2f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/DomainEventEnvelope.java",
+      "sha256": "36df88c43801cdde71f0b1cc3fc8e5999add5efa15ca5a6bc420fa960e17d85c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmTenantEntity.java",
+      "sha256": "974a6d15124c6c6fd41e596eeaff0d4aeb1a1e18482bca214fd18f9d15965d23"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmCustomerMapper.java",
+      "sha256": "55de5926efa1898e566944124af4d3e2c763dae0811147883a5f36aca5059ae7"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmLeadMapper.java",
+      "sha256": "f05303453ca1952e4bda4830df837b03022f89c1d19711ec7c585a0a73f49d46"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmOpportunityMapper.java",
+      "sha256": "662df629986892e38dc91473ab081ed2734dc01e773987e92e6ac5241c355abc"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmDataPermissionHandler.java",
+      "sha256": "e62727dc2c3fa241d35f8a9d1304b78f94798d37d7936e185469c767c49b1b0b"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmTenantTablePolicy.java",
+      "sha256": "ca15c2631c038f6caf049846712f7329eb0c6581e998eb03032de4aeedb5335e"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/CrmTenantInitializer.java",
+      "sha256": "bdfd03dd9921c3e8f1bccfe54449611ad24c35a917581036a873f50677d165cf"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ActivityServiceImpl.java",
+      "sha256": "1465bce958b3a9d3d14862512cdfd2785bd9b6c014853335a85e0ced8cb4fa27"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ContactServiceImpl.java",
+      "sha256": "9eb9b26eee085dba3a8fdbc23c9f9fb86a2a29a5ef757361dcf1f168a65b6a2a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CrmTenantInitializerImpl.java",
+      "sha256": "20c810e6e0f28ae512022a582c9a943fba444e8e4d3aa302559909ac12127f0c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CustomerServiceImpl.java",
+      "sha256": "ab9264767541b880da0e88d3660fdc679e6e8117c29bf75b6e1c549c21702978"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/LeadServiceImpl.java",
+      "sha256": "ddd0317511aeb7b73b1199ad9c1a90c8d59488b866180e4ab96cff27c1c2b67a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OpportunityServiceImpl.java",
+      "sha256": "e45d967c578e0437f3c6eddbf5d3c20cd99ea31d22a44ecf0bd8ef805525cd3f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OverviewServiceImpl.java",
+      "sha256": "a611a7fad36c8cce7ae0d0a86aa58b94374f7933f75a6f0f7849b63865d64b1c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmOwnerEnricher.java",
+      "sha256": "0770f1287b559874e44730f2bea08b98396961bf51d1e7eb5f5171619398fd4d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmOwnerResolver.java",
+      "sha256": "0318d455f1dbfc43d1c921902fb620b2800208269af4c55fdb2e1d9021dbd09d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmPermissionScopeExecutor.java",
+      "sha256": "b0f1f39646f3433457beddd651682c55b9b9273b2a84323dd5f30e0ea3e97523"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmRecordAccessGuard.java",
+      "sha256": "63d3bbc0e0d0fa52afa31e651c0916ce299d12395dedadd492d1ba6b24f6c780"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/resources/application.yml",
+      "sha256": "e35d392d9730485362b41f79aad28339769fe790830c7a6b570b5a310eae5288"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/integration/CrmMysqlInterceptorIntegrationTest.java",
+      "sha256": "561ebd83b943a40951c31b184d81755aa4753f5a6d7080b3ace25185c28415e4"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/it/AbstractFcIT.java",
+      "sha256": "418a14ff4e4c856355865d8c82b668bf661142a0d4aab2a809f08e7c0487601c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/security/PiiMaskerTest.java",
+      "sha256": "1c557676c601021e5fa6b27725b2964a7e7e7e52d00d9a8f5b02e09736106ad0"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/LeadServiceImplTest.java",
+      "sha256": "ed980d81d2d65a910f3784c5372f167c4b9f6ab7721a309bd96452e5b0f43f2d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/OpportunityServiceImplTest.java",
+      "sha256": "2f021264bc7799ed8115aa24fcd1999903d99c35b7bbeb2bf97954c1a1fccd8d"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/resources/application.yml",
+      "sha256": "b759994853839263e125044cb5a99b51a22aee7c5b38bdbdb646176fdf87c0f2"
+    },
+    {
+      "path": "omni-backend/pom.xml",
+      "sha256": "18a2eda967a3dc9147decf645518f80692eae6d8b89c2cd3f230d07c14f33275"
+    },
+    {
+      "path": "omni-frontend/src/components/crm/CustomerOverview.vue",
+      "sha256": "f4b0a76b9734a7da0a448f07b64e100377ae056f2a8c674d9a3fffcbcf1cdacd"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/activity/index.vue",
+      "sha256": "fb5def60e696a6a57ad184273f15b38bf134687c09ce99120cb6333d6ff200ac"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/contact/index.vue",
+      "sha256": "c257748349e645970ac109e131f64baf936b9060fe8c05ffd10bd5eb3831e921"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/customer/index.vue",
+      "sha256": "4dc3d43c162a96e1364d8f5840428ef928ba7820ed6a56a33c4adeb9aaec2f91"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/lead/index.vue",
+      "sha256": "87f94fb10bd65d3959a43fa622319e5d3a048f2ddc1c3b8df56aeb0cf05f2c03"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/opportunity/index.vue",
+      "sha256": "1da0226185ce7429237ec914631c35a715ccacdea00d0873cb77e12eb55c427c"
+    },
+    {
+      "path": "scripts/sql/seed/auth.sql",
+      "sha256": "131d495c9b1eed92d4d2a7f0aaf92026117c25c6d8d13b8773fdc00fb94c357c"
+    }
+  ],
+  "source_inspection_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "current_whole_markdown_rendered_documents": 8,
+    "crm_fact_documents": 4,
+    "crm_mermaid_fences": 4,
+    "raster_images": 0,
+    "controller_endpoints_matched": 55,
+    "shared_wiki_command_blocks": 4,
+    "wiki_full_review": false,
+    "crm_surefire_reports": [
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.client.AuthInternalClientFeignConfigTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "01bfe49214ed2ba47ba9b1916e2d975a85af6ddf75085787e8dbf730eb5c1b8f",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.config.MybatisPlusConfigTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "097288c3117f60412bb114d29056b9872132a119fafb8d4f312f975acad340b9",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.domain.CrmStateMachineTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "dc2f1b3717d2082df08e015ad37e03a24e843b5a04c712ceeceafdb92c6f6f73",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.dto.CrmViewAssemblerTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "58611350424cc6ffb6d464ff8dd2f08b99d7bcfe0170d93311b58402465a3af1",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.integration.CrmMysqlInterceptorIntegrationTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 4,
+        "sha256": "12c6e5ca74814c17e8875736ae775d59818e3103cfd929af2401457901ef7894",
+        "skip_reasons": [
+          "Environment variable [CRM_TEST_MYSQL_URL] does not exist",
+          "Environment variable [CRM_TEST_MYSQL_URL] does not exist",
+          "Environment variable [CRM_TEST_MYSQL_URL] does not exist",
+          "Environment variable [CRM_TEST_MYSQL_URL] does not exist"
+        ]
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.security.CrmDataPermissionHandlerTest.xml",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "51da159b435fb127c3f24fe8000f3904f1500e216c392a6d6906d8dda38f0f2a",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.security.CrmStarterSecurityTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "cf0ee6e2007dc7b54c9414700f2ded3b9f802e588d3046131d68bf6a1c38bfc5",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.security.CrmStarterXssTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "584e0b111e5358d20ce163cfec5d77392dff08779a3f9ae3f8807f126b3fac74",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.security.PiiMaskerTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "f088bde37f034b90c773f37adffdcf9935cbcdb379779dda373ded84b21f9ffe",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.service.impl.ActivityServiceImplTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "7079f1a7d976c4213ad42591b96ecca822532c9c9aaff813be095dd3dff2761b",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.service.impl.CrmTenantModuleProvisionerTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "4b28fed1768535adc0e2aeffc560aad06ac543b7e9889566debcea1389628b27",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.service.impl.DeletionConsistencyTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "4be38b5d6235f78c9d1b69d3e16826b561cc5f181a74bdef1dc1758aa4f82a50",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.service.impl.LeadServiceImplTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "a1fea1881f1d34c0711489a0fcce327e3704c2e27f3b6837bbc9d6c65bcb5bcd",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.service.impl.OpportunityServiceImplTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "52969e011400080abea64e331c50c05688569163d39f3d3a49fc07e2002b4220",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.service.impl.OverviewServiceImplTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "f4fd439662c236662b066a286ebc0739045856e6bbc2b4d22efad1f4cdc3e83c",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-crm",
+        "file": "TEST-com.omni.crm.service.support.CrmPermissionScopeExecutorTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "cad04343048925db1b3d1f92dfffb54856e01ae2647836865df895081c265ef9",
+        "skip_reasons": []
+      }
+    ],
+    "reused_report_totals": {
+      "reports": 16,
+      "tests": 45,
+      "passed": 41,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 4,
+      "rerun": false
+    },
+    "application_or_business_execution": false,
+    "limitations": [
+      "Semantic AI review is not human review and does not prove current UI, external OAuth, CAPTCHA, native Qoder, MySQL concurrency or MQ delivery.",
+      "New CRM extension/MySQL tutorial steps were not executed in this stage; scaffold-development and CRM operation-guide reviews remain pending.",
+      "Remaining full A-G remediation scope is unchanged."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/crm.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-15 11:38:58",
+      "result": "approved",
+      "translation_sha256": "628660a1d53b012068d2a458575f9b64279074736a381c476b6f9d9898ec223d",
+      "checks": {
+        "coverage_and_meaning": "完整逐段核对服务边界、11表领域地图、通用字段与五个owner聚合、六层授权、四种生命周期、转换和阶段命令、全部55条API、Customer360块范围、Feign与Outbox事务、操作日志、14条约束、前端目录及验证边界。扩展/测试步骤迁入既有开发Wiki的四语CRM小节，保留聚合、权限种子、未来阶段管理、事件幂等及测试前置条件；迁移不等于该开发指南整篇已复核。",
+        "technical_literals": "逐项核对8104/19904/9904、omni_crm、/api/crm、八个依赖与Workflow排除、SQL金额与版本字段、完整四层MyBatis链、权限简写及实际同码控制器、六种dataScope值与范围条件、全部55条Controller方法/路径、QUALIFIED/CONVERTED/OPEN/WON/LOST/REOPEN/CONVERSION_CREATE、(tenant_id,lead_id)、真实CrmDataPermissionHandler、信封顶层eventId与独立msgId、四类CRM事件及payload字段。16份现有Surefire报告摘要与133b逐个匹配，45例=41通过+4条件跳过；新教程四段可执行代码在四语中逐字相同，没有重跑业务或测试。",
+        "security_and_failure_semantics": "转换重放仍需DTO、权限与记录可见性，首次状态/version与继承owner分别说明；关联联系人必须属于所选客户。阶段锁、同管道启用、回退/输单原因、重开来源及WON激活不强制一行均保留。专用列表与后端360的PII差异、UI分接口查询、字段省略不等于独立后端字段权限、Auth拒绝403/依赖503、展示降级不扩权、共享XSS缓存失败回源/基线与权威enabled值、tenant保留、scope上下文恢复/清理、显式tenant Outbox、消费者业务幂等、日志显式规则和MySQL DROP/CREATE隔离要求均与中文一致。",
+        "images_and_links": "本事实文档没有光栅截图，只有一个ER Mermaid块；图中表标识符/基数保持，面向人的关系标签按语言本地化。操作截图和既有API演练仍指向CRM Wiki，不以本次渲染或单元报告冒充新浏览器/数据库/MQ证据。源码入口与开发Wiki本地化路径、原设计历史定位和原生标题锚点已核对；正式链接门仍需执行，整站根/子路径与Mermaid浏览器布局验收仍属G。",
+        "language_and_terminology": "完整阅读英文并逐段对照中文。统一 lead/customer/contact/opportunity、owner/primary unit/scope、first conversion/replay、masked dedicated list versus PII-aware overview、local Outbox/Relay/Broker、conditional skip/report snapshot 的含义。使用明确的 attempts、may、requires 与 does not guarantee 表达源码中的限定；修正共享XSS实现、Feign事务概括和一次批量API误导，保持全部协议值与新Wiki可执行字面量。"
+      },
+      "findings": [
+        {
+          "id": "missing-optimistic-locker",
+          "status": "resolved",
+          "description": "拦截器正文与硬约束两处遗漏OptimisticLocker。",
+          "resolution": "四语均使用TenantLine→DataPermission→OptimisticLocker→Pagination，对应共享配置。"
+        },
+        {
+          "id": "nonexistent-handler-and-entity-base",
+          "status": "resolved",
+          "description": "扩展步骤引用不存在的CrmDataPermissionHandlerImpl并只泛写BaseEntity。",
+          "resolution": "迁入开发Wiki并指向真实CrmDataPermissionHandler与CrmTenantEntity继承入口。"
+        },
+        {
+          "id": "conversion-replay-preconditions",
+          "status": "resolved",
+          "description": "原文把重放概括为无条件返回，并缺少完整首转顺序。",
+          "resolution": "保留DTO/权限/可见性前提，区分重放与QUALIFIED/version首次转换，并按真实业务更新→转换行→Outbox顺序说明。"
+        },
+        {
+          "id": "conversion-owner-and-history",
+          "status": "resolved",
+          "description": "原文缺少关联客户时联系人owner差异和转换商机历史原因。",
+          "resolution": "分别列客户/联系人/商机/活动的owner来源、关联关系、DISCOVERY与CONVERSION_CREATE，不虚构Auth重解析。"
+        },
+        {
+          "id": "feign-transaction-overclaim",
+          "status": "resolved",
+          "description": "原文声称CRM的Feign均在数据库事务外。",
+          "resolution": "只将转换限定为本地事务路径；明确创建、转移、展示增强可从带事务方法调用Auth。"
+        },
+        {
+          "id": "stage-and-won-boundaries",
+          "status": "resolved",
+          "description": "原阶段简图没有锁/版本、启用同管道、原因及WON更新行数边界。",
+          "resolution": "补齐真实校验和Outbox，写明WON只尝试激活POTENTIAL客户而不强制一行，重开取最近关闭历史fromStageId。"
+        },
+        {
+          "id": "pii-collection-exception",
+          "status": "resolved",
+          "description": "原列表默认掩码描述无法区分专用列表、后端360和前端分接口请求。",
+          "resolution": "四语列出专用列表恒掩码、活动null/blank例外、360详情PII标志和UI实际API；说明省略字段不是独立后端写权限。"
+        },
+        {
+          "id": "shared-xss-and-redis-prefix",
+          "status": "resolved",
+          "description": "译文误称CRM另行实现SPI，服务表声明未证实的crm:缓存前缀。",
+          "resolution": "改为共享CachedServiceXssConfigProvider与实际XSS公共键，区分缓存/回源失败安全基线与权威enabled配置。"
+        },
+        {
+          "id": "incomplete-api-index",
+          "status": "resolved",
+          "description": "黑名单/恢复、联系人详情缺失，多个命令路径简写含糊。",
+          "resolution": "用八个Controller全部55条方法/完整相对路径对照，四语共用同一已核对路径表。"
+        },
+        {
+          "id": "event-envelope-and-missing-event",
+          "status": "resolved",
+          "description": "原事件扩展使用payload.eventId且漏列客户owner变更事件。",
+          "resolution": "改为顶层eventId，区分msgKey与独立msgId及消费者原子幂等，补齐crm.customer.owner-changed.v1和真实payload。"
+        },
+        {
+          "id": "batch-enrichment-and-operlog",
+          "status": "resolved",
+          "description": "原文把用户/组织补全写成一次API，并泛称日志支持PII脱敏。",
+          "resolution": "明确分别批量查询及执行人批次；日志仅按显式规则，转换关闭快照并排除指定名称字段。"
+        },
+        {
+          "id": "version-and-write-authorization",
+          "status": "resolved",
+          "description": "所有写入统一版本命令的表述忽略创建编号补全/专用级联，且过度概括DataPermission库行为。",
+          "resolution": "区分既有记录外部变更与内部专用SQL，要求显式AccessGuard而不绝对声称所有库写路径不受DataPermission影响。"
+        },
+        {
+          "id": "role-seed-and-domain-map",
+          "status": "resolved",
+          "description": "原领域表缺租户配置，角色表未限定默认种子示例。",
+          "resolution": "补crm_tenant_config，明确auth.sql默认租户角色不是所有新租户已具备角色的证据。"
+        },
+        {
+          "id": "fact-wiki-responsibility",
+          "status": "resolved",
+          "description": "事实文档含完整扩展、未来设计与宿主测试命令。",
+          "resolution": "四语将可执行开发/测试流程迁至现有开发Wiki的CRM条件模块，事实文档保留当前约束、入口与验证边界。"
+        },
+        {
+          "id": "test-count-and-mysql-skip",
+          "status": "resolved",
+          "description": "16个测试文件被当成覆盖说明，MySQL凭据/破坏性表操作与历史IT范围不完整。",
+          "resolution": "引用当前16份报告45例41通过4跳过，说明条件、凭据、DROP/CREATE专用库和WP008历史IT不包含在默认结果；不重跑无变化验证。"
+        },
+        {
+          "id": "review-policy-and-guide-boundary",
+          "status": "resolved",
+          "description": "现有开发Wiki仍要求只有人工签核，与已授权ADR0003冲突。",
+          "resolution": "四语对齐授权AI_REVIEW/HUMAN_REVIEW分类，同时明确开发Wiki整篇语义复核仍待完成，本次只批准CRM事实文档三条译文。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/crm.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-15 11:38:58",
+      "result": "approved",
+      "translation_sha256": "1b47b35a5d143ed4cf3c505bd79b0dbbf6c7a8f82eb7c1f37595a7a261b3c8f1",
+      "checks": {
+        "coverage_and_meaning": "完整逐段核对服务边界、11表领域地图、通用字段与五个owner聚合、六层授权、四种生命周期、转换和阶段命令、全部55条API、Customer360块范围、Feign与Outbox事务、操作日志、14条约束、前端目录及验证边界。扩展/测试步骤迁入既有开发Wiki的四语CRM小节，保留聚合、权限种子、未来阶段管理、事件幂等及测试前置条件；迁移不等于该开发指南整篇已复核。",
+        "technical_literals": "逐项核对8104/19904/9904、omni_crm、/api/crm、八个依赖与Workflow排除、SQL金额与版本字段、完整四层MyBatis链、权限简写及实际同码控制器、六种dataScope值与范围条件、全部55条Controller方法/路径、QUALIFIED/CONVERTED/OPEN/WON/LOST/REOPEN/CONVERSION_CREATE、(tenant_id,lead_id)、真实CrmDataPermissionHandler、信封顶层eventId与独立msgId、四类CRM事件及payload字段。16份现有Surefire报告摘要与133b逐个匹配，45例=41通过+4条件跳过；新教程四段可执行代码在四语中逐字相同，没有重跑业务或测试。",
+        "security_and_failure_semantics": "转换重放仍需DTO、权限与记录可见性，首次状态/version与继承owner分别说明；关联联系人必须属于所选客户。阶段锁、同管道启用、回退/输单原因、重开来源及WON激活不强制一行均保留。专用列表与后端360的PII差异、UI分接口查询、字段省略不等于独立后端字段权限、Auth拒绝403/依赖503、展示降级不扩权、共享XSS缓存失败回源/基线与权威enabled值、tenant保留、scope上下文恢复/清理、显式tenant Outbox、消费者业务幂等、日志显式规则和MySQL DROP/CREATE隔离要求均与中文一致。",
+        "images_and_links": "本事实文档没有光栅截图，只有一个ER Mermaid块；图中表标识符/基数保持，面向人的关系标签按语言本地化。操作截图和既有API演练仍指向CRM Wiki，不以本次渲染或单元报告冒充新浏览器/数据库/MQ证据。源码入口与开发Wiki本地化路径、原设计历史定位和原生标题锚点已核对；正式链接门仍需执行，整站根/子路径与Mermaid浏览器布局验收仍属G。",
+        "language_and_terminology": "完整阅读日文并对照中文，统一リード/顧客/連絡先/商談、担当者/主組織/スコープ、初回変換/再実行、行ロック/楽観的ロック、権威設定/基準防護、同期履歴/非同期配送等术语。纠正競合の競合病句和未本地化ER关系标签，链接对应日文工程事实与Wiki；WON尝试激活、Feign可能位于事务中、MySQL仍跳过和整篇开发指南待审的限定均未丢失。"
+      },
+      "findings": [
+        {
+          "id": "missing-optimistic-locker",
+          "status": "resolved",
+          "description": "拦截器正文与硬约束两处遗漏OptimisticLocker。",
+          "resolution": "四语均使用TenantLine→DataPermission→OptimisticLocker→Pagination，对应共享配置。"
+        },
+        {
+          "id": "nonexistent-handler-and-entity-base",
+          "status": "resolved",
+          "description": "扩展步骤引用不存在的CrmDataPermissionHandlerImpl并只泛写BaseEntity。",
+          "resolution": "迁入开发Wiki并指向真实CrmDataPermissionHandler与CrmTenantEntity继承入口。"
+        },
+        {
+          "id": "conversion-replay-preconditions",
+          "status": "resolved",
+          "description": "原文把重放概括为无条件返回，并缺少完整首转顺序。",
+          "resolution": "保留DTO/权限/可见性前提，区分重放与QUALIFIED/version首次转换，并按真实业务更新→转换行→Outbox顺序说明。"
+        },
+        {
+          "id": "conversion-owner-and-history",
+          "status": "resolved",
+          "description": "原文缺少关联客户时联系人owner差异和转换商机历史原因。",
+          "resolution": "分别列客户/联系人/商机/活动的owner来源、关联关系、DISCOVERY与CONVERSION_CREATE，不虚构Auth重解析。"
+        },
+        {
+          "id": "feign-transaction-overclaim",
+          "status": "resolved",
+          "description": "原文声称CRM的Feign均在数据库事务外。",
+          "resolution": "只将转换限定为本地事务路径；明确创建、转移、展示增强可从带事务方法调用Auth。"
+        },
+        {
+          "id": "stage-and-won-boundaries",
+          "status": "resolved",
+          "description": "原阶段简图没有锁/版本、启用同管道、原因及WON更新行数边界。",
+          "resolution": "补齐真实校验和Outbox，写明WON只尝试激活POTENTIAL客户而不强制一行，重开取最近关闭历史fromStageId。"
+        },
+        {
+          "id": "pii-collection-exception",
+          "status": "resolved",
+          "description": "原列表默认掩码描述无法区分专用列表、后端360和前端分接口请求。",
+          "resolution": "四语列出专用列表恒掩码、活动null/blank例外、360详情PII标志和UI实际API；说明省略字段不是独立后端写权限。"
+        },
+        {
+          "id": "shared-xss-and-redis-prefix",
+          "status": "resolved",
+          "description": "译文误称CRM另行实现SPI，服务表声明未证实的crm:缓存前缀。",
+          "resolution": "改为共享CachedServiceXssConfigProvider与实际XSS公共键，区分缓存/回源失败安全基线与权威enabled配置。"
+        },
+        {
+          "id": "incomplete-api-index",
+          "status": "resolved",
+          "description": "黑名单/恢复、联系人详情缺失，多个命令路径简写含糊。",
+          "resolution": "用八个Controller全部55条方法/完整相对路径对照，四语共用同一已核对路径表。"
+        },
+        {
+          "id": "event-envelope-and-missing-event",
+          "status": "resolved",
+          "description": "原事件扩展使用payload.eventId且漏列客户owner变更事件。",
+          "resolution": "改为顶层eventId，区分msgKey与独立msgId及消费者原子幂等，补齐crm.customer.owner-changed.v1和真实payload。"
+        },
+        {
+          "id": "batch-enrichment-and-operlog",
+          "status": "resolved",
+          "description": "原文把用户/组织补全写成一次API，并泛称日志支持PII脱敏。",
+          "resolution": "明确分别批量查询及执行人批次；日志仅按显式规则，转换关闭快照并排除指定名称字段。"
+        },
+        {
+          "id": "version-and-write-authorization",
+          "status": "resolved",
+          "description": "所有写入统一版本命令的表述忽略创建编号补全/专用级联，且过度概括DataPermission库行为。",
+          "resolution": "区分既有记录外部变更与内部专用SQL，要求显式AccessGuard而不绝对声称所有库写路径不受DataPermission影响。"
+        },
+        {
+          "id": "role-seed-and-domain-map",
+          "status": "resolved",
+          "description": "原领域表缺租户配置，角色表未限定默认种子示例。",
+          "resolution": "补crm_tenant_config，明确auth.sql默认租户角色不是所有新租户已具备角色的证据。"
+        },
+        {
+          "id": "fact-wiki-responsibility",
+          "status": "resolved",
+          "description": "事实文档含完整扩展、未来设计与宿主测试命令。",
+          "resolution": "四语将可执行开发/测试流程迁至现有开发Wiki的CRM条件模块，事实文档保留当前约束、入口与验证边界。"
+        },
+        {
+          "id": "test-count-and-mysql-skip",
+          "status": "resolved",
+          "description": "16个测试文件被当成覆盖说明，MySQL凭据/破坏性表操作与历史IT范围不完整。",
+          "resolution": "引用当前16份报告45例41通过4跳过，说明条件、凭据、DROP/CREATE专用库和WP008历史IT不包含在默认结果；不重跑无变化验证。"
+        },
+        {
+          "id": "review-policy-and-guide-boundary",
+          "status": "resolved",
+          "description": "现有开发Wiki仍要求只有人工签核，与已授权ADR0003冲突。",
+          "resolution": "四语对齐授权AI_REVIEW/HUMAN_REVIEW分类，同时明确开发Wiki整篇语义复核仍待完成，本次只批准CRM事实文档三条译文。"
+        },
+        {
+          "id": "japanese-wording-and-navigation",
+          "status": "resolved",
+          "description": "重複する競合表現と中文資料へ向かう入口、英語の図ラベルが残っていた。",
+          "resolution": "同時更新の競合に修正し、日文の事実/Wiki入口と日本語のER関係ラベルに統一した。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/crm.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-15 11:38:58",
+      "result": "approved",
+      "translation_sha256": "f5d1659bb901b42bb0d36ab99e47374734d98399d264336e8943d07b12cf552f",
+      "checks": {
+        "coverage_and_meaning": "完整逐段核对服务边界、11表领域地图、通用字段与五个owner聚合、六层授权、四种生命周期、转换和阶段命令、全部55条API、Customer360块范围、Feign与Outbox事务、操作日志、14条约束、前端目录及验证边界。扩展/测试步骤迁入既有开发Wiki的四语CRM小节，保留聚合、权限种子、未来阶段管理、事件幂等及测试前置条件；迁移不等于该开发指南整篇已复核。",
+        "technical_literals": "逐项核对8104/19904/9904、omni_crm、/api/crm、八个依赖与Workflow排除、SQL金额与版本字段、完整四层MyBatis链、权限简写及实际同码控制器、六种dataScope值与范围条件、全部55条Controller方法/路径、QUALIFIED/CONVERTED/OPEN/WON/LOST/REOPEN/CONVERSION_CREATE、(tenant_id,lead_id)、真实CrmDataPermissionHandler、信封顶层eventId与独立msgId、四类CRM事件及payload字段。16份现有Surefire报告摘要与133b逐个匹配，45例=41通过+4条件跳过；新教程四段可执行代码在四语中逐字相同，没有重跑业务或测试。",
+        "security_and_failure_semantics": "转换重放仍需DTO、权限与记录可见性，首次状态/version与继承owner分别说明；关联联系人必须属于所选客户。阶段锁、同管道启用、回退/输单原因、重开来源及WON激活不强制一行均保留。专用列表与后端360的PII差异、UI分接口查询、字段省略不等于独立后端字段权限、Auth拒绝403/依赖503、展示降级不扩权、共享XSS缓存失败回源/基线与权威enabled值、tenant保留、scope上下文恢复/清理、显式tenant Outbox、消费者业务幂等、日志显式规则和MySQL DROP/CREATE隔离要求均与中文一致。",
+        "images_and_links": "本事实文档没有光栅截图，只有一个ER Mermaid块；图中表标识符/基数保持，面向人的关系标签按语言本地化。操作截图和既有API演练仍指向CRM Wiki，不以本次渲染或单元报告冒充新浏览器/数据库/MQ证据。源码入口与开发Wiki本地化路径、原设计历史定位和原生标题锚点已核对；正式链接门仍需执行，整站根/子路径与Mermaid浏览器布局验收仍属G。",
+        "language_and_terminology": "完整阅读韩文并对照中文，统一리드/고객/연락처/기회、담당자/주 조직/데이터 범위、첫 전환/재실행、낙관적 잠금/행 잠금、업무 멱등성和조건부 건너뜀等词义。把前端目录的中文说明全部改为韩文，并本地化ER关系标签与事实/Wiki入口；保留事务不确定性、字段权限限制、显示降级不扩权、独立数据库破坏性测试前提和未执行新教程的语义。"
+      },
+      "findings": [
+        {
+          "id": "missing-optimistic-locker",
+          "status": "resolved",
+          "description": "拦截器正文与硬约束两处遗漏OptimisticLocker。",
+          "resolution": "四语均使用TenantLine→DataPermission→OptimisticLocker→Pagination，对应共享配置。"
+        },
+        {
+          "id": "nonexistent-handler-and-entity-base",
+          "status": "resolved",
+          "description": "扩展步骤引用不存在的CrmDataPermissionHandlerImpl并只泛写BaseEntity。",
+          "resolution": "迁入开发Wiki并指向真实CrmDataPermissionHandler与CrmTenantEntity继承入口。"
+        },
+        {
+          "id": "conversion-replay-preconditions",
+          "status": "resolved",
+          "description": "原文把重放概括为无条件返回，并缺少完整首转顺序。",
+          "resolution": "保留DTO/权限/可见性前提，区分重放与QUALIFIED/version首次转换，并按真实业务更新→转换行→Outbox顺序说明。"
+        },
+        {
+          "id": "conversion-owner-and-history",
+          "status": "resolved",
+          "description": "原文缺少关联客户时联系人owner差异和转换商机历史原因。",
+          "resolution": "分别列客户/联系人/商机/活动的owner来源、关联关系、DISCOVERY与CONVERSION_CREATE，不虚构Auth重解析。"
+        },
+        {
+          "id": "feign-transaction-overclaim",
+          "status": "resolved",
+          "description": "原文声称CRM的Feign均在数据库事务外。",
+          "resolution": "只将转换限定为本地事务路径；明确创建、转移、展示增强可从带事务方法调用Auth。"
+        },
+        {
+          "id": "stage-and-won-boundaries",
+          "status": "resolved",
+          "description": "原阶段简图没有锁/版本、启用同管道、原因及WON更新行数边界。",
+          "resolution": "补齐真实校验和Outbox，写明WON只尝试激活POTENTIAL客户而不强制一行，重开取最近关闭历史fromStageId。"
+        },
+        {
+          "id": "pii-collection-exception",
+          "status": "resolved",
+          "description": "原列表默认掩码描述无法区分专用列表、后端360和前端分接口请求。",
+          "resolution": "四语列出专用列表恒掩码、活动null/blank例外、360详情PII标志和UI实际API；说明省略字段不是独立后端写权限。"
+        },
+        {
+          "id": "shared-xss-and-redis-prefix",
+          "status": "resolved",
+          "description": "译文误称CRM另行实现SPI，服务表声明未证实的crm:缓存前缀。",
+          "resolution": "改为共享CachedServiceXssConfigProvider与实际XSS公共键，区分缓存/回源失败安全基线与权威enabled配置。"
+        },
+        {
+          "id": "incomplete-api-index",
+          "status": "resolved",
+          "description": "黑名单/恢复、联系人详情缺失，多个命令路径简写含糊。",
+          "resolution": "用八个Controller全部55条方法/完整相对路径对照，四语共用同一已核对路径表。"
+        },
+        {
+          "id": "event-envelope-and-missing-event",
+          "status": "resolved",
+          "description": "原事件扩展使用payload.eventId且漏列客户owner变更事件。",
+          "resolution": "改为顶层eventId，区分msgKey与独立msgId及消费者原子幂等，补齐crm.customer.owner-changed.v1和真实payload。"
+        },
+        {
+          "id": "batch-enrichment-and-operlog",
+          "status": "resolved",
+          "description": "原文把用户/组织补全写成一次API，并泛称日志支持PII脱敏。",
+          "resolution": "明确分别批量查询及执行人批次；日志仅按显式规则，转换关闭快照并排除指定名称字段。"
+        },
+        {
+          "id": "version-and-write-authorization",
+          "status": "resolved",
+          "description": "所有写入统一版本命令的表述忽略创建编号补全/专用级联，且过度概括DataPermission库行为。",
+          "resolution": "区分既有记录外部变更与内部专用SQL，要求显式AccessGuard而不绝对声称所有库写路径不受DataPermission影响。"
+        },
+        {
+          "id": "role-seed-and-domain-map",
+          "status": "resolved",
+          "description": "原领域表缺租户配置，角色表未限定默认种子示例。",
+          "resolution": "补crm_tenant_config，明确auth.sql默认租户角色不是所有新租户已具备角色的证据。"
+        },
+        {
+          "id": "fact-wiki-responsibility",
+          "status": "resolved",
+          "description": "事实文档含完整扩展、未来设计与宿主测试命令。",
+          "resolution": "四语将可执行开发/测试流程迁至现有开发Wiki的CRM条件模块，事实文档保留当前约束、入口与验证边界。"
+        },
+        {
+          "id": "test-count-and-mysql-skip",
+          "status": "resolved",
+          "description": "16个测试文件被当成覆盖说明，MySQL凭据/破坏性表操作与历史IT范围不完整。",
+          "resolution": "引用当前16份报告45例41通过4跳过，说明条件、凭据、DROP/CREATE专用库和WP008历史IT不包含在默认结果；不重跑无变化验证。"
+        },
+        {
+          "id": "review-policy-and-guide-boundary",
+          "status": "resolved",
+          "description": "现有开发Wiki仍要求只有人工签核，与已授权ADR0003冲突。",
+          "resolution": "四语对齐授权AI_REVIEW/HUMAN_REVIEW分类，同时明确开发Wiki整篇语义复核仍待完成，本次只批准CRM事实文档三条译文。"
+        },
+        {
+          "id": "korean-tree-localization",
+          "status": "resolved",
+          "description": "프론트엔드 디렉터리 설명과 ER 관계 이름이 중국어/영어로 남아 있었다.",
+          "resolution": "코드 경로와 테이블 식별자를 유지하고 사람 대상 설명을 한국어로 옮겼다."
+        }
+      ]
+    }
+  }
+}

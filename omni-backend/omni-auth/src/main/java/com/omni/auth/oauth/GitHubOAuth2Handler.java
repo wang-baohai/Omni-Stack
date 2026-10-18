@@ -37,11 +37,11 @@ import java.time.Duration;
 @Component("github")
 public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
 
-    /** GitHub OAuth2 授权页面 URL（默认值，可通过配置覆盖） */
+    /** GitHub OAuth2 授权页面 URL。运行时实际取值来自 {@link OAuth2Properties.GitHubProperties#getAuthorizeUrl()}，本常量未被引用。 */
     private static final String GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
-    /** GitHub OAuth2 Token 端点 URL（默认值，可通过配置覆盖） */
+    /** GitHub OAuth2 Token 端点 URL。运行时实际取值来自 {@link OAuth2Properties.GitHubProperties#getTokenUrl()}，本常量未被引用。 */
     private static final String GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
-    /** GitHub 用户信息 API URL（默认值，可通过配置覆盖） */
+    /** GitHub 用户信息 API URL。运行时实际取值来自 {@link OAuth2Properties.GitHubProperties#getUserApiUrl()}，本常量未被引用。 */
     private static final String GITHUB_USER_API = "https://api.github.com/user";
     /** 请求的 OAuth2 授权范围：读取用户资料和邮箱 */
     private static final String SCOPE = "read:user user:email";

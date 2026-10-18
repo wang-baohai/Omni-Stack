@@ -19,10 +19,16 @@
 ## 接入顺序
 
 1. 审核 `integration/` 中的父 POM、catalog、Gateway、Compose、权限和前端片段。
-2. 使用后续结构化集成命令合并，不手工复制未知区块。
+2. 在项目根目录先执行 `docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run dev -- service integrate {{serviceId}} --source generated/{{serviceId}}`；确认计划后追加 `--apply`。包路径必须与实际生成位置一致。
 3. 为数据库增加 forward-only Liquibase changeSet；SQL 目录只保留正式种子数据。
 4. 实现领域模型、权限和 DataScope 后，再开放业务写接口。
-5. 执行后端构建、前端 build/lint、Compose 配置校验和 401/403/503 冒烟测试。
+5. 用 `compose.tools.yaml` 的 `backend`、`frontend` 服务在本地 Docker 执行后端构建和前端 build/lint；再校验 Compose 配置与 401/403/503。不要在宿主机启动应用。
+
+## 文档与验收边界
+
+接入事务同时登记四种语言正文、中文 SHA-256 和翻译复核队列。生成成功只证明文件和结构检查，不能代替真实业务验收或语义复核；译文初始保持 `present-unverified`。验收遵循目标工程 `docs/docs-manifest.yaml` 的 `release_policy`：本项目所有者已授权的真实 `AI_REVIEW` 即可满足翻译复核，无需人工复核。实际记录须包含复核者、日期、中文与译文摘要，以及逐文档 `review_evidence` 和证据摘要；AI 复核不得记作 `HUMAN_REVIEW`。
+
+运行说明见 [脚手架开发指南](guides/scaffold-development.md)，通用约束见 [后端模式](backend-patterns.md)。首次验收应在独立 Docker 项目中使用合成数据，记录请求、预期状态与失败恢复；截图不得包含令牌或私有凭据。
 
 ## 手写区域
 

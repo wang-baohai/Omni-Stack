@@ -1,594 +1,158 @@
-# 워크플로우 엔진
+# 워크플로 현재 규칙과 실행 경계
 
-> 본 문서는 Omni-Stack 워크플로우 엔진의 아키텍처, 핵심 플로우, 제약 사항 및 확장 가이드를 다룹니다.  
-> 아키텍처 개요는 [architecture.kr.md](architecture.kr.md)를 참조하십시오. Docker 배포 구성은 [docker-deployment.kr.md](docker-deployment.kr.md)를 참조하십시오.
+이 문서는 현재 서비스의 모델, 실행, 승인, 테넌트 및 서비스 간 일관성 규칙을 관리합니다. 모델링과 화면 조작은 [워크플로 개발과 모델링](wiki/workflow-development.kr.md), 화면 배치와 과거 이미지는 [화면 참조](wiki/interface-reference.kr.md#workflow)를 참고합니다. 요청 필드와 응답 구조는 [API 계약](api-contract.kr.md), 배포 절차는 [Docker 배포](docker-deployment.kr.md)가 관리합니다.
 
-Omni-Stack은 **Flowable 8.x** 기반의 시각적 BPMN 워크플로우 엔진을 제공하며, 모델 설계, 이중 버전 관리, 다중 인스턴스 합의 승인 및 엔드투엔드 프로세스 추적을 지원합니다.
+## 1. 서비스와 영속성 경계
 
-## 1. Architecture Overview
-
-워크플로우 시스템은 독립 실행형 마이크로서비스와 공유 스타터 라이브러리로 구성됩니다:
-
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                          Workflow Engine                                  │
-├──────────────────────────────────────────────────────────────────────────┤
-│                      omni-workflow (port 8103)                            │
-│  ─────────────────────────────────────────────────────────────────────   │
-│  Controllers (7): WorkflowModel · ProcessDefinition · ProcessInstance    │
-│                   Approval · Task · WorkflowStats · WorkflowIdentity     │
-│  Services (8): WorkflowModel · ProcessDefinition · ProcessInstance       │
-│                WorkflowApproval · WorkflowTask · WorkflowStats            │
-│                WorkflowIdentity · WorkflowTodoSync                       │
-│  Delegates:  ScopedRoleAssignmentListener · CandidateResolverDelegate    │
-│              CandidateResolverBean · CcNotifyDelegate                    │
-│  Engine:     BpmnXmlBuilder · BpmnXmlValidator                           │
-├──────────────────────────────────────────────────────────────────────────┤
-│                  omni-common-workflow (shared starter)                    │
-│  FlowableAutoConfiguration · ApprovalService(Impl) · UserGroupLookup     │
-│  WorkflowNotificationService · TenantInfoFilter · TenantInfoHolder       │
-├──────────────────────────────────────────────────────────────────────────┤
-│                        Flowable BPMN Engine 7.x                           │
-│  repositoryService · runtimeService · taskService · historyService       │
-├──────────────────────────────────────────────────────────────────────────┤
-│                       omni_workflow (MySQL)                               │
-│  wf_process_model · wf_process_model_version · wf_process_instance_ext   │
-│  wf_todo_task · wf_cc_record · wf_form_schema · wf_delegation_rule      │
-└──────────────────────────────────────────────────────────────────────────┘
-```
-
-**모듈 의존성**:
-
-- `omni-common-core` — POJOs (`R<T>`, `PageResult`), XSS SPI 인터페이스
-- `omni-common-mybatis` — MyBatis-Plus + MySQL 드라이버 + 테넌트 인터셉터
-- `omni-common-redis` — XSS 구성 및 세션 데이터용 Redis 캐시
-- `omni-common-workflow` — Flowable 자동 구성, 승인 SPI, 테넌트 필터, 알림 SPI
-- `omni-common-mqlog` — Transactional Outbox, 내부 API 공유 토큰 필터, 신뢰성 메시지 릴레이
-- `omni-workflow` — 비즈니스 레이어: 컨트롤러, 서비스, 델리게이트, BPMN 엔진 도구
-
-**주요 설계 결정**:
-
-- **Flowable**을 BPMN 엔진으로 채택: 오픈소스, 성숙한 Spring Boot 통합, 네이티브 다중 인스턴스(MI) 지원
-- **이중 버전 관리**: 비즈니스 버전은 `wf_process_model_version`에서 추적(DRAFT → PUBLISHED → ARCHIVED), 엔진 버전은 Flowable 배포에서 관리
-- **비주얼 디자이너**: 프론트엔드 BPMN 모델러가 디자이너 JSON을 생성하고, `BpmnXmlBuilder`가 BPMN 2.0 XML로 변환
-- **동적 후보자 해결**: `omni:assignment` JSON 확장 요소가 작업 시작 시 `ScopedRoleAssignmentListener`에 의해 파싱되며, 하드코딩된 담당자는 없습니다
-- **크로스 서비스 시작 이중 멱등**: 테넌트 내 `requestId`와 `(businessType, businessKey)`로 각각 프로세스 시작을 제약합니다
-- **신뢰성 있는 완료 알림**: 완료 메타데이터와 Outbox 레코드를 동일 로컬 트랜잭션에 커밋하고 릴레이 작업이 비동기로 전달합니다
-
-### 데이터 모델
+`omni-workflow`는 업무 포트 `8103`, 관리 포트 `19903`을 사용하는 독립 Servlet 서비스입니다. 백엔드 부모 POM은 Flowable을 `8.0.0`으로 고정합니다. 업무 서비스는 엔진을 내장하지 않고 내부 API를 호출합니다. POM의 직접 의존성은 `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`, `omni-common-workflow`이며 `omni-common-service`의 보안 조합을 사용하지 않습니다.
 
 ```mermaid
-erDiagram
-    wf_process_model ||--o{ wf_process_model_version : "1:N versions"
-    wf_process_model_version ||--o{ wf_process_instance_ext : "1:N instances"
-    wf_process_instance_ext ||--o{ wf_todo_task : "1:N todos"
-    wf_process_instance_ext ||--o{ wf_cc_record : "1:N cc"
+flowchart LR
+  A[사용자와 게이트웨이] --> W[워크플로 서비스]
+  B[업무 서비스] -->|내부 API| W
+  W --> M[모델과 업무 확장 테이블]
+  W --> F[Flowable 엔진과 이력]
+  W --> O[로컬 Outbox]
+  O --> R[메시지 중계]
+  R --> C[업무 이벤트 소비자]
 ```
 
-### 데이터베이스 테이블 (omni_workflow)
+`application.yml`은 `omni_workflow` 데이터베이스, Redis DB `0`, `history-level: audit`, 비동기 실행기와 `database-schema-update: false`를 설정합니다. 정식 스키마는 마이그레이터가 관리하며 엔진의 런타임 테이블 생성에 의존하지 않습니다. 후보자, 신원 정보와 표시 이름 조회에는 `omni_auth`에 대한 직접 JDBC 접근이 포함되므로 배포 시 해당 데이터베이스 접근 조건을 갖춰야 합니다. 모든 조회가 Auth HTTP API를 거치는 것은 아닙니다.
 
-| 테이블 | 용도 |
-|-------|---------|
-| `wf_process_model` | 프로세스 모델 레지스트리, `model_key`는 테넌트별 고유 |
-| `wf_process_model_version` | 버전 이력: BPMN XML, 디자이너 JSON, 배포 정보 |
-| `wf_process_instance_ext` | 인스턴스 확장: 모델 버전에 연결하고 `requestId`·비즈니스 키·완료 이벤트 래치를 기록합니다 |
-| `wf_process_start_request` | 크로스 서비스 시작 예약 레코드. 요청 ID와 비즈니스 키는 테넌트 내에서 각각 고유 |
-| `wf_todo_task` | 담당자 범위 고속 쿼리용 대기 작업 캐시 |
-| `wf_cc_record` | 읽음 상태가 포함된 CC 알림 레코드 |
-| `wf_form_schema` | JSON Schema 폼 정의 |
-| `wf_delegation_rule` | 승인 위임 규칙(사용자 간, 선택적 프로세스 범위) |
-| `sys_mq_message` | Transactional Outbox 메시지 기록. 신뢰성 메시지 릴레이가 비동기로 전달 |
+도메인 스키마는 `database/changelog/workflow/0001-workflow-schema.yaml`에 있습니다.
 
----
-
-## 2. Core Flow Walkthrough
-
-### 2.1 모델 생성
-
-```
-POST /api/workflow/model  (workflow:model:create)
-```
-
-1. `WorkflowModelController.createModel(CreateModelRequest)` → `WorkflowModelService.createModel()`
-2. `model_key`(테넌트별 고유)를 가진 `wf_process_model` 행 생성
-3. `status = DRAFT`인 초기 `wf_process_model_version` 행 생성
-4. `wf_process_model.current_draft_version_id`를 새 버전에 연결
-
-### 2.2 초안 저장 (비주얼 디자이너)
-
-```
-PUT /api/workflow/model/{id}/draft  (workflow:model:update)
-```
-
-1. `WorkflowModelController.saveDraft(id, SaveDraftRequest)` → `WorkflowModelService.saveDraft()`
-2. 초안 버전의 `designer_json`를 업데이트하고, `BpmnXmlBuilder.build()`로 `bpmn_xml`를 재생성
-3. 변경 감지를 위해 `xml_sha256` 계산
-4. 요청에서 모델명과 카테고리를 동기화
-
-**BpmnXmlBuilder**는 디자이너 JSON 노드를 BPMN 2.0 XML 요소로 변환합니다:
-
-| 디자이너 노드 유형 | BPMN 요소 | 확장 |
-|---|---|---|
-| `StartEvent` | `<startEvent>` | — |
-| `EndEvent` | `<endEvent>` | — |
-| `UserTask` | `<userTask>` | `<omni:assignment>` + `flowable:executionListener` |
-| `ServiceTask` (CC) | `<serviceTask>` | `<omni:cc>` + `flowable:delegateExpression` |
-| `ExclusiveGateway` | `<exclusiveGateway>` | `default` 속성 |
-| `ParallelGateway` | `<parallelGateway>` | — |
-
-### 2.3 모델 검증
-
-```
-POST /api/workflow/model/{id}/validate  (workflow:model:validate)
-```
-
-`BpmnXmlValidator.validate()` 검증 항목:
-1. XML 정형성(XXE 보호 포함)
-2. 실행 가능한 `<process>`가 정확히 하나이며, id가 `model_key`와 일치
-3. 최소 하나의 `StartEvent`과 하나의 `EndEvent` 존재
-4. 모든 `UserTask`에 `<omni:assignment>` 확장이 존재
-5. CC `ServiceTask`에 `<omni:cc>` 확장이 존재
-6. `ExclusiveGateway`에 `default` 플로우(`conditionExpression` 없음)가 존재
-7. 모든 `SequenceFlow`가 유효한 source/target을 참조
-
-### 2.4 모델 게시
-
-```
-POST /api/workflow/model/{id}/publish  (workflow:model:publish)
-```
-
-1. `SELECT FOR UPDATE`로 모델 행에 비관적 잠금 획득
-2. `BpmnXmlValidator`로 BPMN XML 검증
-3. `targetNamespace`를 모델 카테고리로 교체
-4. Flowable에 배포: `repositoryService.createDeployment().addString(bpmnXml).deploy()`
-5. 비즈니스 버전 번호 계산(`max(existing) + 1`)
-6. 버전 레코드 업데이트: `status = PUBLISHED`, `deploymentId`, `processDefinitionId`, `engineVersion`
-7. 이전 PUBLISHED 버전을 아카이브(`status = ARCHIVED`)
-8. 모델의 `current_published_version_id` 업데이트
-
-### 2.5 프로세스 인스턴스 시작
-
-```
-POST /api/workflow/process-instance/start  (workflow:instance:start)
-```
-
-1. `ProcessInstanceController.start(StartProcessRequest)` → `ProcessInstanceService.start()`
-2. 최신 PUBLISHED 버전을 해결하여 `processDefinitionId` 획득
-3. Flowable 인스턴스 시작: `runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables)`
-4. 모델, 버전, Flowable 인스턴스를 연결하는 `wf_process_instance_ext` 행 생성
-5. `ScopedRoleAssignmentListener`가 각 UserTask 시작 이벤트에서 발동하여 후보자를 해결
-
-### 2.6 승인 완료
-
-```
-POST /api/workflow/approval/{taskId}/complete  (workflow:approval:complete)
-```
-
-1. `ApprovalController.complete(taskId, ApprovalRequest)` → `WorkflowApprovalService.complete()`
-2. 프로세스 변수 설정: `approved = true/false`, `comment = "..."`
-3. `taskService.complete(taskId, variables)` 호출
-4. `ApprovalServiceImpl`이 MI 카운터를 업데이트(`approvedCount` / `rejectedCount`)
-5. MI `completionCondition` 평가: `${rejectedCount > 0 || approvedCount >= requiredApprovals}`
-6. 조건 충족 시 → 나머지 MI 인스턴스가 스킵됨(deleteReason = `MI_END`)
-
-### 2.7 진행 상황 및 기록
-
-**진행 상황** (`GET /{id}/progress`):
-- 모든 활동에 대해 `HistoricActivityInstance` 쿼리
-- `activityId`로 집계(MI 하위 인스턴스 중복 제거)
-- 대기 중인 UserTask에 대해 `CandidateResolverBean`으로 후보자를 사전 해결
-- 담당자별 상태를 포함한 `List<ActivityInfo>`를 가진 `ProcessProgressResponse` 반환
-
-**승인 기록** (`GET /{id}/approval-records`):
-- `HistoricTaskInstance` 쿼리(생성 시간 오름차순)
-- 작업별 결과 판정: `approved` / `rejected` / `auto-approved`(MI_END) / `cancelled` / `pending`
-- 승인 의견의 `Comment`와 승인/거부 구분을 위한 `approved` 변수 조회
-
-### 2.8 크로스 서비스 내부 계약
-
-모든 서비스 간 인터페이스는 통일적으로 `/api/internal/**` 경로를 사용하며, Gateway 사용자 사전 인증을 거치지 않습니다. 호출자는 둘 다 휴대해야 합니다:
-
-```http
-X-Internal-Token: <공유 내부 토큰>
-X-Tenant-Id: 1
-Content-Type: application/json
-```
-
-컨테이너 수준 `InternalApiAuthFilter` 는 Spring Security 체인 전에 공유 토큰을 검증하고 모든 `/api/internal/**` 에 대해 실패 차단합니다; 이 경로는 Gateway 사용자 사전 인증을 다시 사용하지 않습니다. 토큰 누락 또는 불일치는 HTTP 401 을 반환; 서버측에 공유 토큰이 미구성된 경우 HTTP 503 을 반환합니다. 내부 요청의 `X-Tenant-Id` 는 요청 본문이나 쿼리 파라미터의 `tenantId` 와 완전히 일치해야 하며, 불일치는 비즈니스 코드 403 을 반환합니다.
-
-#### 2.8.1 멱등 프로세스 시작
-
-```http
-POST /api/internal/workflow/process-instance/start
-```
-
-요청 본문:
-
-```json
-{
-  "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
-  "tenantId": 1,
-  "modelVersionId": 42,
-  "businessType": "PROCUREMENT_REQUISITION",
-  "businessKey": "10001",
-  "startUserId": 7,
-  "startUserName": "buyer",
-  "title": "구매 신청 PR-202607-0001",
-  "variables": {
-    "amount": 120000
-  }
-}
-```
-
-| 필드 | 필수 | 제약 | 설명 |
-|---|---|---|---|
-| `requestId` | 예 | 비어 있지 않음, 최대 64 | 호출자 생성 멱등 요청 ID |
-| `tenantId` | 예 | 양의 정수 | `X-Tenant-Id` 와 같아야 함 |
-| `modelVersionId` | 예 | 양의 정수 | 현재 테넌트에 속하고 Flowable `processDefinitionId` 와 연결되어 있어야 함 |
-| `businessType` | 예 | 비어 있지 않음, 최대 100 | 안정된 크로스 서비스 비즈니스 타입 |
-| `businessKey` | 예 | 비어 있지 않음, 최대 255 | 호출자 비즈니스 기본 키 |
-| `startUserId` | 예 | 양의 정수 | 프로세스 발기인 |
-| `startUserName` | 아니오 | 최대 100 | 발기인 표시 이름 |
-| `title` | 아니오 | 최대 500 | 비어 있으면 `{businessType}:{businessKey}` 생성 |
-| `variables` | 아니오 | JSON 객체 | 비즈니스 프로세스 변수; 서비스가 세 개의 연관 변수를 덮어씀 |
-
-서비스는 항상 `modelVersionId` 로 `processDefinitionId` 를 해석한 뒤
-`startProcessInstanceById` 를 호출합니다. `requestId`, `businessType`, `businessKey` 는 프로세스 변수와 인스턴스 확장 기록 양쪽에 기록됩니다.
-
-성공 응답:
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
-    "businessType": "PROCUREMENT_REQUISITION",
-    "businessKey": "10001",
-    "processInstanceId": "22501",
-    "replayed": false
-  }
-}
-```
-
-멱등 규칙:
-
-- `wf_process_start_request` 는 `(tenant_id, request_id)` 와
-  `(tenant_id, business_type, business_key)` 유일 제약을 각각 확립; 어떤 차원도 프로세스를 중복 생성할 수 없습니다.
-- 동일 요청 의도(동일 비즈니스 키, `modelVersionId`, `startUserId`)가 이미 성공한 경우, 재시도는 원래
-  `processInstanceId` 를 반환하고 `replayed = true` 로 설정합니다.
-- 기존 예약이 여전히 처리 중이면 비즈니스 코드 409 를 반환; 호출자는 동일 `requestId` 로 백오프 재시도해야 합니다.
-- 동일 `requestId` 가 다른 비즈니스에 사용되거나, 동일 비즈니스 키가 프로세스 모델/발기인을 교체하면 비즈니스 코드 409 를 반환하며, 조용한 재사용을 금지합니다.
-
-#### 2.8.2 작업 처리 자격 검증
-
-```http
-POST /api/internal/workflow/task/assignment/validate
-```
-
-요청 본문:
-
-```json
-{
-  "tenantId": 1,
-  "taskId": "25017",
-  "userId": 7,
-  "businessType": "PROCUREMENT_REQUISITION",
-  "businessKey": "10001"
-}
-```
-
-검증은 네 개의 경계 층을 동시에 커버합니다: Flowable 작업 테넌트, 인스턴스 확장 기록 테넌트, `businessType + businessKey`
-비즈니스 귀속, 그리고 사용자가 현재 `ASSIGNEE` 또는 미수령 작업의 `CANDIDATE` 인지. 어떤 층의 불일치도 처리 자격을 부여하지 않습니다.
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "valid": true,
-    "processInstanceId": "22501",
-    "assignmentType": "ASSIGNEE",
-    "message": "검증 통과"
-  }
-}
-```
-
-`assignmentType` 은 `ASSIGNEE`, `CANDIDATE`, `NONE` 만 사용합니다. 작업이 존재하지 않거나 경계가 불일치할 때 정상적으로
-`valid = false` 를 반환; 요청 헤더와 요청 본문의 테넌트 불일치는 호출자 보안 오류로, 비즈니스 코드 403 을 반환합니다.
-
-#### 2.8.3 프로세스 완료 이벤트
-
-크로스 서비스 프로세스는 최종 승인이 끝나거나 종료될 때 `workflow.process.completed.v1` 을 생성합니다. 이벤트는
-`workflow-domain-out-0` binding 을 통해 `workflow-domain-event` 에 기록되며, 페이로드는 다음과 같습니다:
-
-```json
-{
-  "eventId": "3f206832-9dc1-4422-870a-a286a979404d",
-  "eventType": "workflow.process.completed.v1",
-  "occurredAt": "2026-07-21 10:30:00",
-  "tenantId": 1,
-  "producer": "omni-workflow",
-  "businessType": "PROCUREMENT_REQUISITION",
-  "businessKey": "10001",
-  "processInstanceId": "22501",
-  "result": "APPROVED",
-  "completedTime": "2026-07-21 10:30:00"
-}
-```
-
-| 필드 | 설명 |
+| 테이블 | 현재 용도와 제한 |
 |---|---|
-| `eventId` | UUID; Outbox `msgKey` 와 소비자측 멱등 키도 겸함 |
-| `eventType` | `workflow.process.completed.v1` 로 고정 |
-| `occurredAt` | 이벤트 기록 생성 시간 |
-| `tenantId` | 비즈니스 테넌트 ID |
-| `producer` | `omni-workflow` 로 고정 |
-| `businessType` / `businessKey` | 호출자 집계를 재조회하는 안정 비즈니스 식별자 |
-| `processInstanceId` | Flowable 프로세스 인스턴스 ID |
-| `result` | `APPROVED`, `REJECTED`, `CANCELLED` |
-| `completedTime` | 프로세스 실제 완료 또는 종료 시간 |
+| `wf_process_model` | 테넌트 모델 목록. `(tenant_id, model_key)` 고유 제약. 초안과 현재 게시 버전 포인터 |
+| `wf_process_model_version` | 디자이너 JSON, BPMN XML, 해시, 업무 버전과 엔진 배포 정보. `(model_id, version)` 고유 제약 |
+| `wf_process_instance_ext` | 시작 사용자, 업무 연결, 인스턴스 상태와 완료 이벤트 기록 잠금 표식 |
+| `wf_process_start_request` | 내부 시작 예약. 요청, 업무 키, 인스턴스 연결에 각각 테넌트별 고유 제약 |
+| `wf_todo_task` | 담당자별 할 일 투영. 실제 실행 기준은 엔진 태스크 |
+| `wf_cc_record` | 참조 수신 기록. 기록이 있어도 외부 알림 전달을 입증하지 않음 |
+| `wf_form_schema` | 스키마는 존재하나 현재 모듈에 양식 정의 CRUD Controller/Service는 없음 |
+| `wf_delegation_rule` | 스키마 존재가 규칙 기반 자동 태스크 재배정 구현을 뜻하지 않음 |
 
-인스턴스 상태/완료 메타데이터 갱신과 `sys_mq_message` 의 PENDING Outbox 기록은 동일 로컬 트랜잭션에서 커밋됩니다.
-`completion_event_id IS NULL` 조건부 갱신은 데이터베이스 발행 래치로, 동일 프로세스 인스턴스가 하나의 논리 완료 이벤트만 생성함을 보장; 트랜잭션 실패 시 둘이 함께 롤백됩니다.
-릴레이 작업은 커밋 후 비동기로 전달·재시도하므로, 메시지 전송 의미는 **최소 한 번**이며, 컨슈머는 여전히 `eventId` 로 멱등 소비해야 합니다.
+`sys_mq_message`는 공통 Outbox이며 DDL의 유일한 소유자는 `database/changelog/common/0001-mq-schema.yaml`입니다. Flowable `ACT_*` 테이블은 전용 마이그레이션이 관리합니다. 이 테이블들을 `wf_` 업무 테이블의 테넌트 인터셉터에 포함하지 않습니다.
 
-#### 2.8.4 게시된 모델 버전 조회
+## 2. 모델과 버전 불변 조건
 
-```http
-GET /api/internal/workflow/model-version/{modelVersionId}
-X-Internal-Token: <공유 내부 토큰>
-X-Tenant-Id: 1
-```
+모델 API는 `WorkflowModelController`가 관리하며 `workflow:model:*` 권한을 사용합니다. 생성 시 modelKey는 `^[a-zA-Z][a-zA-Z0-9-]*$`에 맞고 테넌트 안에서 고유해야 합니다. 활성 모델과 버전 `0`의 `DRAFT`를 생성하며 초기 designerJson이 자동으로 게시 가능한 BPMN이 되지는 않습니다.
 
-응답은 `id/modelId/modelKey/category/version/processDefinitionId/status` 를 포함합니다. 그중:
+초안 저장은 호출자가 보낸 designerJson과 bpmnXml을 저장하고 XML 해시를 계산합니다. 현재 백엔드는 designerJson에서 XML을 생성하지 않습니다. 현재 포인터가 `DRAFT`가 아니면 새 초안을 만들고 이전 게시 내용을 보존합니다. 상태 `0`인 모델은 일반 목록에서 제외되며 `PUBLISHED` 버전이 있는 모델은 직접 삭제할 수 없습니다.
 
-- `modelKey` 는 테넌트 내 유일하고 BPMN process id 와 일치해야 하는 모델 식별자.
-- `category` 는 비즈니스 서비스가 승인 용도를 바인딩하기 위한 안정 분류로, 자유롭게 표시할 수 있는 모델 이름과 같지 않습니다.
-- 모델 주 기록이 보관되었거나, 버전이 `PUBLISHED` 가 아니거나, 버전이 요청 테넌트에 속하지 않거나,
-  `processDefinitionId` 가 누락된 경우 통일적으로 404 를 반환합니다.
+`BpmnXmlValidator`는 DOCTYPE과 외부 엔티티를 비활성화한 XML 파서를 사용하며 변환기에서도 외부 DTD/스타일시트를 막습니다. 실행 가능한 단일 process, modelKey와 일치하는 process id, 시작/종료 이벤트, UserTask의 `omni:assignment`, 해당 참조 수신 노드의 `omni:cc`, 배타 게이트웨이 기본 흐름과 흐름 참조를 검사합니다. 시작 이벤트가 여러 개면 경고합니다. 참조 검사는 process의 직접 자식 요소와 비어 있지 않은 sourceRef/targetRef만 대상으로 합니다. 확장 요소 존재 검사는 assignment JSON의 유효성, 스크립트/리스너/표현식 안전 허용 목록이나 업무 경로 실행 성공을 보장하지 않습니다.
 
-비즈니스 서비스는 시작 전에 자신의 안정 `businessType` 과 `category` 를 정확히 일치시켜, 다른 비즈니스의 게시된 모델 오용을 방지할 수 있습니다. Workflow 내부 시작 엔드포인트는 실제로 인스턴스를 생성하기 전에
-`ASSET_TRANSFER/ASSET_DISPOSAL` 과 모델 분류를 재검증하며, 불일치는 404 로 명시적으로 거부하고 인스턴스를 생성하지 않습니다; 기존
-Procurement 승인 라우트는 이 Asset 전용 바인딩의 영향을 받지 않습니다. 이 조회는 모델 메타데이터만 제공하고 프로세스 시작이나 승인 권한을 부여하지 않습니다.
+`WorkflowModelServiceImpl.publishModel()`의 로컬 트랜잭션은 원시 JDBC `SELECT ... FOR UPDATE`로 모델 행을 잠그고 비어 있지 않은 `DRAFT`를 요구합니다. 재검사 후 Flowable에 배포하고 다음 업무 버전과 엔진 식별자를 저장합니다. 새 버전은 `PUBLISHED`, 직전 게시 포인터의 버전은 보관 상태가 되며 모델 포인터를 갱신합니다. 원시 JDBC 행 잠금은 MyBatis-Plus 테넌트 플러그인을 거치지 않으며 인가 검사가 아닙니다.
 
----
+검사 실패 분기는 `FAILED`를 기록하려 한 뒤 같은 롤백 트랜잭션에서 예외를 던지므로 실패 상태 영속화를 보장할 수 없습니다. 게시 예외가 Broker, 업무 서비스나 외부 알림의 롤백을 뜻하지도 않습니다. 로컬 DB/엔진 트랜잭션과 서비스 간 일관성은 서로 다른 경계입니다.
 
-## 3. Constraints & Pitfalls
+기존 `/api/workflow/process-definition` API는 `workflow:definition:*` 권한으로 배포, BPMN 읽기, 일시 중지, 활성화와 연관 인스턴스 포함 삭제를 제공합니다. 모델 초안 검사와 업무 버전 게시 경로는 거치지 않습니다. 현재 `ProcessDefinitionServiceImpl`은 목록에서 테넌트 문맥이 있을 때만 테넌트 조건을 추가하며 ID 기반 읽기/중지/활성화/삭제에는 공통 소유 테넌트 검사가 없습니다. 기능 권한만으로 이 API들의 데이터 격리를 입증할 수 없습니다.
 
-### 3.1 MI DeleteReason
+## 3. 후보자, 리스너와 다중 승인
 
-다중 인스턴스 `completionCondition`가 트리거되면, 나머지 작업은 Flowable에 의해 `deleteReason = "MI_END"`로 삭제됩니다 — `"deleted"`가 **아닙니다**. `"deleted"` 이유는 전체 프로세스 인스턴스가 종료되거나 거부된 경우에 사용됩니다.
+### 3.1. 설정 형태
 
-**규칙**: 스킵과 취소 판정에는 반드시 `HistoricTaskInstance.getDeleteReason()`을 사용하십시오:
+담당 설정은 BPMN `omni:assignment`에 저장하며 XML 네임스페이스는 `http://omni.com/workflow`, Flowable 확장은 `http://flowable.org/bpmn`입니다. 다음은 설정 형태만 보여 줍니다. 역할과 조직은 대상 테넌트에 구성해야 합니다.
 
-| `deleteReason` | 의미 | 결과 |
-|---|---|---|
-| `null` | 작업이 정상 완료됨 | `approved` 변수 확인 → 승인 / 거부 |
-| `MI_END` | MI completionCondition에 의해 스킵됨 | 자동 승인 |
-| `deleted` | 프로세스 종료 / 거부 | 취소됨 |
-
-**주의사항**: `HistoricActivityInstance` 부모 조회에 의존하지 마십시오. 여러 행이 동일한 `ACT_ID_`를 공유할 수 있습니다(하나는 `NULL` deleteReason, 다른 하나는 `MI_END`). `putIfAbsent`가 잘못된 행을 저장할 수 있습니다. 작업 수준의 `deleteReason`을 직접 사용하십시오.
-
-### 3.2 omni:assignment 확장 요소
-
-`omni:assignment` JSON은 후보자 해결을 위한 **유일한 구성 항목**입니다:
-
-```xml
-<userTask id="dept-leader-approve" flowable:assignee="${userId}">
-  <extensionElements>
-    <flowable:executionListener event="start"
-        delegateExpression="${scopedRoleAssignmentListener}" />
-    <omni:assignment>{
-      "roleCode": "DEPT_LEADER",
-      "anchorType": "PARENT",
-      "anchorParams": {},
-      "scopeMode": "SAME_UNIT",
-      "fallbackStrategy": "ERROR",
-      "approvalMode": "ANY"
-    }</omni:assignment>
-  </extensionElements>
-  <multiInstanceLoopCharacteristics isSequential="false"
-      flowable:collection="candidateUserIds"
-      flowable:elementVariable="userId">
-    <completionCondition>${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
-  </multiInstanceLoopCharacteristics>
-</userTask>
-```
-
-**필드**:
-
-| 필드 | 값 | 설명 |
-|---|---|---|
-| `roleCode` | 임의의 역할 코드(예: `TEAM_LEADER`, `DEPT_LEADER`) | 해결 대상 역할 |
-| `anchorType` | `START_USER_PRIMARY_UNIT`, `PARENT`, `ABSOLUTE_UNIT`, `PARENT_BY_TYPE`, `CHILD_BY_CODE`, `SIBLING_BY_CODE`, `PARENT_CHILDREN`, `DEPT_BY_CODE`, `CHILD_UNIT`, `SIBLING_UNIT` | 앵커 조직 단위 찾는 방법 |
-| `anchorParams` | JSON 객체(예: `{"unitIds": [200]}`) | 앵커 해결 파라미터 |
-| `scopeMode` | `SAME_UNIT`, `UNIT_AND_BELOW`, `CHILDREN_ONLY` | 후보자 검색 범위 |
-| `fallbackStrategy` | `ERROR`, `ASSIGN_ADMIN`, `ESCALATE_PARENT` | 후보자를 찾지 못한 경우의 동작 |
-| `approvalMode` | `ALL`(기본값), `ANY` | MI 합의 모드 |
-
-### 3.3 승인 모드
-
-- **ALL**: 모든 후보자가 승인해야 합니다. `requiredApprovals = candidateUserIds.size()`. `approvedCount >= requiredApprovals`일 때 플로우가 진행됩니다.
-- **ANY**: 단일 승인으로 충분합니다. `requiredApprovals = 1`. 첫 번째 승인 시 플로우가 진행되며, 나머지 작업은 `deleteReason = MI_END`로 자동 완료됩니다.
-
-두 모드 모두 동일한 `completionCondition` 수식을 공유합니다: `${rejectedCount > 0 || approvedCount >= requiredApprovals}`. 차이는 `ScopedRoleAssignmentListener`가 설정하는 `requiredApprovals` 값에 있습니다.
-
-**거부 단축**: 두 모드 모두 단일 거부(`rejectedCount > 0`)가 즉시 거부 분기를 트리거하여 나머지 승인자를 스킵합니다.
-
-### 3.4 테넌트 격리
-
-`omni-workflow`의 `MybatisPlusConfig`는 `TenantLineInnerInterceptor`를 등록하며:
-- `TenantInfoHolder`에서 테넌트 ID를 읽음(`TenantInfoFilter`가 `X-Tenant-Id` 헤더에서 설정)
-- Flowable 내부 테이블(`ACT_*` / `act_*` 접두사)을 테넌트 필터링에서 **제외**
-
-Flowable 테이블은 MyBatis-Plus 인터셉션이 아닌 Flowable의 내장 `tenantId` 메커니즘을 통해 테넌트 격리됩니다.
-
-### 3.5 XSS 통합
-
-`omni-workflow`는 `XssConfigProviderImpl`을 통해 `XssConfigProvider` SPI를 구현합니다:
-- Redis 캐시에서 XSS 구성을 읽음(`xss:enabled:{tenantId}`, `xss:rules:{tenantId}`)
-- 캐시는 `omni-auth` 서비스에 의해 기록되며, 워크플로우 서비스는 **읽기 전용 소비자**입니다
-- 캐시 미스 시 `enabled = false`를 반환(페일오픈)
-
-### 3.6 후보자 해결 컴포넌트
-
-| 컴포넌트 | Bean 이름 | 트리거 |
-|---|---|---|
-| `ScopedRoleAssignmentListener` | `scopedRoleAssignmentListener` | UserTask `start` 이벤트의 ExecutionListener |
-| `CandidateResolverDelegate` | `candidateResolverDelegate` | UserTask 이전 ServiceTask의 JavaDelegate |
-| `CandidateResolverBean` | `candidateResolver` | UEL 표현식 또는 오프라인 사전 해결 |
-
-`CandidateResolverBean`은 `resolveCandidates(processDefinitionId, activityId, startUserId, tenantId)`를 오프라인 사용용으로 노출합니다(예: `getProgress()`에서 대기 중인 작업의 승인 예정자를 표시해야 하는 경우).
-
-### 3.7 게시 잠금
-
-`publishModel()`은 `wf_process_model`에 `SELECT FOR UPDATE` 비관적 잠금을 사용하여 동일한 모델의 동시 배포를 방지합니다. 이는 Flowable 배포가 원자적이지 않고 여러 엔진 API 호출을 수반하기 때문에 중요합니다.
-
----
-
-## 4. Extension Guide
-
-### 4.1 새 승인 프로세스 유형 추가
-
-1. 각 UserTask에 `<omni:assignment>`를 설정한 BPMN XML 설계
-2. `BpmnXmlValidator`로 검증(필수 확장 강제)
-3. API를 통해 모델 생성: `POST /api/workflow/model`
-4. BPMN XML 저장: `PUT /api/workflow/model/{id}/draft`
-5. 게시: `POST /api/workflow/model/{id}/publish`
-
-코드 변경이 필요 없습니다 — 프레임워크는 BPMN XML + `omni:assignment` 구성을 통한 데이터 기반입니다.
-
-### 4.2 새 앵커 유형 추가
-
-1. `ScopedRoleAssignmentListener`의 해결 로직에 새 앵커 유형 문자열 추가
-2. 조직 단위 조회 쿼리 구현(예: 특정 조건으로 `sys_org_unit` 쿼리)
-3. 검증이 필요한 경우 `BpmnXmlValidator`의 알려진 값에 앵커 유형 추가
-4. 프론트엔드 `UserTaskPanel.vue`를 업데이트하여 속성 패널에 새 앵커 유형 노출
-
-### 4.3 새 폴백 전략 추가
-
-1. `ScopedRoleAssignmentListener`에 전략 상수 추가
-2. 폴백 동작 구현(예: `ASSIGN_ADMIN` → 관리자 사용자 조회, `ESCALATE_PARENT` → 상위 단위 후보자 검색)
-3. `omni:assignment` JSON 스키마 검증 업데이트
-
-### 4.4 커스텀 알림 서비스
-
-`omni-common-workflow`의 `WorkflowNotificationService` 인터페이스를 구현합니다:
-
-```java
-@Service
-public class MyNotificationService implements WorkflowNotificationService {
-    @Override
-    public void notifyPendingTask(String assigneeId, String taskId, String title) { ... }
-
-    @Override
-    public void clearPendingTask(String taskId) { ... }
+```json
+{
+  "assignmentType": "SCOPED_ROLE",
+  "roleCode": "SUPER_ADMIN",
+  "anchorType": "START_USER_PRIMARY_UNIT",
+  "anchorParams": {},
+  "scopeMode": "SAME_UNIT",
+  "fallbackStrategy": "ERROR",
+  "approvalMode": "ALL"
 }
 ```
 
-기본 `NoOpNotificationService`(`FlowableAutoConfiguration`에 의해 등록됨)는 `@ConditionalOnMissingBean`을 통해 사용자 구현으로 대체됩니다.
+### 3.2. 기준 조직
 
-### 4.5 CC(참조) 알림
+| anchorType | 실제 기준 조직 |
+|---|---|
+| `START_USER_PRIMARY_UNIT` | 활성 시작 사용자의 주 조직 |
+| `PARENT_BY_TYPE`, `PARENT_CHILDREN` | 주 조직부터 targetType으로 상위 검색. targetType이 없으면 주 조직 |
+| `CHILD_BY_CODE`, `SIBLING_BY_CODE` | 주 조직의 직계 하위/동급 조직을 childCode/siblingCode로 조회 |
+| `DEPT_BY_CODE` | 현 테넌트의 활성 조직을 deptCode로 조회 |
+| `ABSOLUTE_UNIT` | 일반 후보 조회는 anchorParams.unitIds 또는 unitId 지원 |
+| `PARENT` | 주 조직의 부모 조직 |
+| `CHILD_UNIT`, `SIBLING_UNIT` | 설정 unitId를 직접 사용하며 시작 사용자와의 부모/형제 관계는 검사하지 않음 |
 
-BPMN 디자이너에서 `ccNotifyDelegate` 델리게이트 표현식을 가진 `ServiceTask` 노드를 추가하십시오. `<omni:cc>` 확장 요소에 대상 사용자 ID 또는 역할 기반 해결을 구성하십시오. `CcNotifyDelegate`가 실행 시 `wf_cc_record` 항목을 생성합니다.
+### 3.3. 조회 범위
 
----
+`SAME_UNIT`은 같은 조직의 역할을, `UNIT_AND_BELOW`는 조직 경로에 따라 해당 조직과 하위를, `CHILDREN_ONLY`는 직계 하위만 조회합니다. 알 수 없는 scopeMode는 현재 같은 조직 조회로 처리합니다. SQL은 역할의 테넌트와 활성 역할, 역할 범위, 사용자 상태를 제한하지만 임의 설정 사용자에 대한 완전한 Auth 인가 검사는 아닙니다. 조회 오류는 보통 빈 후보가 됩니다.
 
-## 5. 기술 선정: Flowable 8.x를 선택한 이유
+### 3.4. 빈 후보 처리
 
-| 고려 사항 | Flowable | Camunda | Activiti |
-|------|---------|---------|----------|
-| **오픈소스 라이선스** | Apache 2.0(상업 친화적) | 상업 버전은 라이선스 필요(커뮤니티 버전 MIT) | Apache 2.0 |
-| **Spring Boot 통합** | 네이티브 Spring Boot Starter, 자동 구성 | Spring Boot Starter 추가 구성 필요 | 유지보수 중단(Flowable은 이 포크) |
-| **다중 인스턴스 지원** | 네이티브 MI(Multi-Instance) 지원, 유연한 completionCondition | 유사 기능 | 기본 MI 지원 |
-| **CMMN/DMN** | BPMN + CMMN + DMN 지원 | BPMN + DMN 지원(CMMN은 상업 버전) | BPMN만 지원 |
-| **커뮤니티 활성도** | 활발(GitHub 8k+ stars) | 활발(상업 지원) | 유지보수 중단 |
-| **버전 7.x** | Jakarta EE 호환, Spring Boot 3/4 지원 | 버전 8은 대규모 아키텍처 변경 | 새 버전 없음 |
+`ERROR`는 누락/기타 전략을 포함해 예외를 던집니다. `ASSIGN_ADMIN`은 현 테넌트의 조직 ID `1`에서 `SUPER_ADMIN` 후보를 찾고 없으면 실패합니다. 사용자 ID `1`을 고정하지 않습니다. `ESCALATE_PARENT`는 해석된 기준 조직의 부모부터 같은 roleCode와 scopeMode로 최대 `20`단계를 검색해 첫 후보를 반환합니다. 없으면 실패하며 자동 승인하지 않습니다. `ABSOLUTE_UNIT`의 상위 검색은 단일 unitId만 읽고 unitIds의 첫 요소를 자동으로 기준으로 삼지 않습니다. 시작 사용자/기준 조직 누락과 조직 조회 오류도 실패를 일으킬 수 있습니다.
 
-**결론**: Flowable 8.x는 오픈소스 라이선스, Spring Boot 네이티브 통합, 다중 인스턴스 지원 측면에서 명확한 우위를 가지며, Omni-Stack 워크플로우 엔진의 최적 선택입니다.
+### 3.5. 다중 승인 카운터
 
-## 6. BPMN 모델링 모범 사례
+다중 인스턴스 카운터는 MI 루트의 로컬 변수로 초기화합니다. 실행 트리를 최대 `32`단계 탐색하고 루트가 없으면 현재 실행을 사용합니다. `_counters_init`는 해당 활동 루트 안에서만 중복 초기화를 막아 다음 승인 노드로 이전 표가 전달되지 않게 합니다. 초기 임계값은 `ALL`이면 후보 수, `ANY`이면 `1`입니다. 승인자 추가/제거 후 전체 승인 임계값은 “승인 완료 + 아직 대기 중”으로 다시 계산합니다. 디자이너의 완료 조건은 `${rejectedCount > 0 || approvedCount >= requiredApprovals}`입니다. 다른 BPMN은 올바른 완료 조건과 반려 경로를 직접 갖춰야 합니다.
 
-### 명명 규칙
+### 3.6. 후보 해석 구성요소
 
-| 요소 | 명명 규칙 | 예시 |
-|------|---------|------|
-| Process ID | `model_key`와 일치 | `leave-request`, `expense-approval` |
-| UserTask ID | kebab-case, 역할+동작 설명 | `dept-leader-approve`, `hr-review` |
-| SequenceFlow ID | `flow-{source}-{target}` | `flow-start-submit` |
-| Gateway ID | `{type}-gw-{purpose}` | `exclusive-gw-amount`, `parallel-gw-notify` |
+디자이너의 `useBpmnExtension.writeAssignment()`는 `${scopedRoleAssignmentListener}`를 참조하는 `ExecutionListener(event=start)`, 병렬 다중 인스턴스, 컬렉션 `candidateUserIds`, 요소 변수 `userId`, 담당자 `${userId}`를 기록합니다. 기존 `TaskListener` 진입점은 로그만 남기므로 실행 시작 리스너를 대신할 수 없습니다. `CandidateResolverBean`은 컬렉션 표현식 `${candidateResolver.resolve(execution)}`도 지원합니다. 후보 해석은 호환 델리게이트와 설계 시 미리보기를 포함해 `CandidateResolutionService`를 공유합니다.
 
-### 모델링 원칙
+이 상위 검색과 예외 전달은 실행 리스너와 `CandidateResolverBean`의 동작입니다. 리스너는 assignment나 roleCode가 없으면 바로 반환할 수 있으므로 확장 존재만으로 컬렉션 기록을 보장하지 않습니다. 호환 `CandidateResolverDelegate`에는 ESCALATE_PARENT 분기가 없고 대상이 없으면 반환하며 실행 예외는 잡아서 로그만 남깁니다. 모든 기존 BPMN이 같은 실패 종료 동작을 한다고 주장할 수 없습니다.
 
-1. **모든 UserTask에 `<omni:assignment>`를 구성해야 합니다**: 동적 후보자 해결, `assignee` 하드코딩 금지
-2. **ExclusiveGateway에는 반드시 default flow를 설정하십시오**: 무조건 분기를 폴백으로 설정하여 프로세스 데드락 방지
-3. **다중 인스턴스 합의에 통일된 completionCondition 사용**: `${rejectedCount > 0 \|\| approvedCount >= requiredApprovals}`
-4. **CC 알림은 ServiceTask + `ccNotifyDelegate` 사용**: 비상쇄, 메인 플로우에 영향 없음
-5. **모델 게시 전 반드시 `BpmnXmlValidator`를 통과하십시오**: XML 유효성과 확장 요소 완전성 보장
+## 4. 인스턴스, 태스크와 승인 기록
 
-### 프로세스 디자이너 프론트엔드 아키텍처
+일반 시작은 Gateway 주체를 사용하며 다른 simulateUserId/simulateUserName을 거부합니다. 엔진에 들어가기 전에 입력 변수 `initiator`, `startUserId`, `authenticatedUserId`, `START_USER_ID`를 제거하고 실제 initiator를 설정하며 finally에서 Flowable 인증 문맥을 지웁니다. modelVersionId를 지정하면 같은 테넌트의 `PUBLISHED` 버전과 엔진 정의 ID가 필요합니다. processKey만 지정하면 기존 key/테넌트 시작 경로를 사용하므로 모델 목록의 현재 게시 포인터와 일치한다고 보장할 수 없습니다.
 
-```
-bpmn-js Modeler (오픈소스 BPMN 2.0 모델링 도구)
-    │
-    ├── useBpmnModeler.ts      — Modeler 생성/파괴 라이프사이클
-    ├── useBpmnExtension.ts    — omni:assignment 등 확장 요소 읽기/쓰기
-    ├── bpmnContextPadI18n.ts  — 컨텍스트 메뉴 국제화
-    └── bpmnContextPadProvider.ts — 커스텀 컨텍스트 메뉴 항목
+엔진 시작 후 확장 레코드를 기록하며 상태 `1`은 실행 중, `2`는 완료, `0`은 중단입니다. 일반 시작의 requestId/businessType만으로 내부 예약 멱등성이 생기지는 않습니다. 할 일 동기화는 커밋 후 실행되고 오류는 기록되며 커밋된 인스턴스를 롤백하지 않습니다. 따라서 투영은 엔진의 실시간 상태와 같지 않습니다.
 
-속성 패널 (panels/)
-    ├── UserTaskPanel.vue      — 역할 해결 구성(roleCode, anchorType, scopeMode)
-    ├── ServiceTaskPanel.vue   — CC 알림 구성
-    └── GatewayPanel.vue       — 게이트웨이 조건 구성
-```
+`ApprovalController`의 완료, 승인자 추가/제거, 위임은 각각 해당 `workflow:approval:*` 권한을 요구합니다. 서비스는 현 테넌트 태스크와 정확한 assignee도 요구합니다. 태스크 부재는 업무 코드 `409`, 다른 담당자는 `403`입니다. 별도 claim, transfer, withdraw Controller는 없으며 내부 후보 자격 검사도 태스크를 자동 선점하지 않습니다. 추가/제거/위임 대상은 숫자 파싱만 하므로 활성 사용자와 Auth 테넌트 소속을 검사했다고 주장할 수 없습니다. 위임은 assignee 설정으로 구현됩니다.
 
-## 7. 문제 해결 가이드
+승인 완료는 의견, 태스크 로컬 approved/comment와 실행 변수를 먼저 기록하고 MI 승인/반려 카운터를 갱신한 뒤 `taskService.complete()`를 호출하여 이번 표를 완료 조건에 반영합니다. 추가 variables는 그 뒤 태스크 로컬과 프로세스 범위에 적용되며 예약 변수 이름을 제거하지 않습니다. 임의 클라이언트 변수가 카운터나 라우팅 값을 덮어쓸 수 없다는 보장은 없습니다.
 
-| 문제 | 가능한 원인 | 문제 해결 방법 |
-|------|---------|----------|
-| **모델 게시 실패** | BPMN XML 검증 실패 | `POST /api/workflow/model/{id}/validate`를 호출하여 구체적인 오류 정보 확인 |
-| **후보자 해결 실패** | `omni:assignment` 구성 오류 | `roleCode`, `anchorType`, `scopeMode` 값이 유효한지 확인; 서비스 로그에서 예외 확인 |
-| **프로세스 인스턴스가 시작되지 않음** | 모델이 게시되지 않았거나 버전이 아카이브됨 | `wf_process_model_version` 테이블에서 `status=PUBLISHED` 버전이 있는지 확인 |
-| **다중 인스턴스 작업이 스킵되지 않음** | completionCondition가 트리거되지 않음 | `approvedCount`, `rejectedCount`, `requiredApprovals` 변수 값 확인 |
-| **deleteReason이 잘못 표시됨** | MI_END vs deleted 혼동 | §3.1 MI DeleteReason 테이블 참조; `MI_END` = 자동 완료, `deleted` = 프로세스 종료 |
-| **테넌트 격리가 작동하지 않음** | TenantInfoHolder가 설정되지 않음 | Gateway가 `X-Tenant-Id` 요청 헤더를 주입했는지 확인; `TenantInfoFilter`가 정상 실행되는지 확인 |
-| **BPMN 디자이너를 로드할 수 없음** | bpmn-js 버전 비호환 | `bpmn-js` 버전이 18.x인지 확인; 브라우저 콘솔 오류 확인 |
+읽기 API는 `GET /api/workflow/process-instance/{processInstanceId}/progress`와 `GET /api/workflow/process-instance/{processInstanceId}/approval-records`입니다. 두 API는 Gateway의 `X-Tenant-Id`를 명시적으로 받고 ID와 테넌트로 이력 인스턴스를 먼저 조회합니다. 잘못된 테넌트는 업무 코드 `400`, 부재/다른 테넌트 인스턴스는 동일한 `404`로 활동, 의견, 후보자와 표시 이름을 읽기 전에 거부합니다. 이 경계는 같은 테넌트 참여자 ACL이나 기능 권한을 추가하지 않습니다.
 
-## 8. 관리 화면 스크린샷(4개 언어)
+| 표시/조회 | 현재 의미 |
+|---|---|
+| 진행 노드 | 이력 활동과 담당자를 집계하여 completed/active/pending 표시. 미도달 노드 후보 미리보기는 최종 배정이 아님 |
+| 개인별 진행 | deleteReason 없는 종료 태스크는 실제 완료. 종료 태스크의 null이 아닌 deleteReason은 모두 auto-completed |
+| 승인 기록 | 정상 종료는 태스크 로컬 approved로 판정. 변수 누락은 호환상 approved, 미종료는 pending |
+| 삭제 태스크 | MI로 시작하는 deleteReason은 기존 `auto-approved`, 다른 삭제는 cancelled. `MI_END`는 엔진 건너뛰기이며 해당 사용자의 찬성표가 아님 |
+| 의견 | 반환된 태스크 의견 중 첫 항목을 사용하며 최신 항목을 보장하지 않음 |
 
-공식 이미지는 문서 전용 Playwright 케이스 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 에 의해 실제 실행 스택에서 생성되며, 언어별 디렉토리에 저장되고, 다른 언어 이미지를 재사용하지 않으며, 자리표시자 이미지나 목 응답을 사용하지 않습니다.
+내 시작/처리 완료 및 할 일 목록은 테넌트와 현재 사용자로 제한합니다. “처리 완료”는 태스크를 처리했다는 뜻이며 전체 프로세스 종료를 보장하지 않습니다. 태스크 양식은 현 테넌트의 현재 담당자만 읽으며 프로세스 변수를 반환하지만 임의 개인정보 자동 마스킹은 보장하지 않습니다. 시작 사용자의 중단은 같은 테넌트 확장, 본인과 실행 중 상태를 요구합니다.
 
-- 전제 조건: 로컬 Compose 전체 스택 실행 중, 프론트엔드 `127.0.0.1:3000`; `omni-workflow` 헬스; DB에 실제 프로세스 모델과 인스턴스 존재(수집 시 8개 모델/버전, 23건 인스턴스).
-- 조작자: `admin`(`SUPER_ADMIN`, 워크플로 메뉴 권한 보유).
-- 조작: 로그인 후 「프로세스 정의」「프로세스 인스턴스」「통계 대시보드」 페이지에 순차 진입.
-- 기대 상태: 페이지 제목과 열 레이블이 현재 언어로 렌더링; 프로세스 인스턴스 목록은 프로세스 제목, 프로세스 Key, 비즈니스 기본 키, 발기인, 상태 및 시작 시간을 표시하고, 「프로세스 진행」과 「승인 기록」 입구를 제공.
-- 토큰: `E2eTokenFixture` 가 테스트 프로세스 내에서 단기 JWT(TTL 1200초)를 발급, 마무리 시 파기하며, 문서, 로그, 저장소에 쓰지 않습니다.
-- 본 그룹은 모두 **읽기 전용 수집**: 프로세스 데이터를 전혀 생성, 수정, 삭제하지 않으므로, 쓰기 스위치가 불필요하고 데이터 마무리도 없습니다.
+## 5. 신뢰, 테넌트와 입력 내용 경계
 
-내용 설명: 현재 환경의 프로세스 인스턴스는 모두 역대 엔드투엔드 검증으로 생성되었으며 제목에 테스트 식별(예 `E2ESQ`)을 가집니다. `wf_process_instance_ext` 와 Flowable `ACT_HI_*` 는 엔진 관리 감사 이력으로 소프트 삭제 열이 없어 SQL 하드 삭제가 불가하므로, 이미지는 실제 제목을 그대로 보존하고 데이터 조작이나 자르기로 미화하지 않습니다.
+외부 보안 체인은 인증을 요구합니다. `GatewayPreAuthFilter`는 전달 표식과 HMAC 신원 어서션을 확인하고 일반 신원 헤더와의 불일치를 거부합니다. 기능 권한은 각 Controller가 선언합니다. 내부 `/api/internal/**`는 사용자 JWT 대신 앞단 공유 토큰 필터로 보호합니다. 신원, 테넌트, 태스크 처리 자격과 업무 연결은 별개의 검사입니다.
 
-| 페이지 | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| 프로세스 정의(publish) | ![프로세스 정의(간체 중국어)](images/zh-CN/workflow-definitions.png) | ![프로세스 정의(영어)](images/en-US/workflow-definitions.png) | ![프로세스 정의(일본어)](images/ja-JP/workflow-definitions.png) | ![프로세스 정의(한국어)](images/ko-KR/workflow-definitions.png) |
-| 프로세스 인스턴스 추적(instance-tracking) | ![프로세스 인스턴스(간체 중국어)](images/zh-CN/workflow-instances.png) | ![프로세스 인스턴스(영어)](images/en-US/workflow-instances.png) | ![프로세스 인스턴스(일본어)](images/ja-JP/workflow-instances.png) | ![프로세스 인스턴스(한국어)](images/ko-KR/workflow-instances.png) |
-| 통계 대시보드(요약 뷰) | ![통계 대시보드(간체 중국어)](images/zh-CN/workflow-stats.png) | ![통계 대시보드(영어)](images/en-US/workflow-stats.png) | ![통계 대시보드(일본어)](images/ja-JP/workflow-stats.png) | ![통계 대시보드(한국어)](images/ko-KR/workflow-stats.png) |
+`TenantInfoFilter`는 finally에서 `TenantInfoHolder`를 지웁니다. Workflow의 MyBatis-Plus 순서는 Tenant → Optimistic → Pagination이며 `wf_` 테이블만 가로채고 문맥이 없으면 테넌트 `1`로 처리합니다. 원시 JDBC와 Flowable 조회는 이 플러그인을 거치지 않으므로 메서드별 명시 제약을 확인해야 하며 서비스 전체에 owner DataScope가 있다고 추정할 수 없습니다.
 
-### 읽기 전용 상세 오버레이(4개 언어)
+독립 `XssConfigProviderImpl`은 Redis DB `0`의 `xss:enabled:{tenantId}`와 `xss:rules:{tenantId}`를 읽습니다. 설정 누락이나 규칙 JSON 파싱 실패는 enabled=false와 빈 규칙을 반환하며 Redis 읽기 예외는 이 메서드에서 잡지 않습니다. common-service의 Auth 재조회나 기본 보안 기준도 없습니다. 변수, 의견, 디자이너 JSON/XML과 로그는 실제 입출력 경로별로 처리해야 하며 일괄 자동 정화를 보장하지 않습니다.
 
-`omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` 에 의해 생성되며, 마찬가지로 **읽기 전용 수집**: 행 내 보기형 액션만 클릭해 오버레이를 열고, 폼을 제출하지 않으며, 설계/검증/게시/삭제/종료 등 어떤 쓰기 조작도 트리거하지 않습니다.
+`CcNotifyDelegate`는 `wf_cc_record`만 기록하고 할 일이나 외부 알림을 생성하지 않으며 실행 예외를 잡아 로그로 남깁니다. 기본 `NoOpNotificationService`도 로그만 기록합니다. 작업 로그와 Outbox 역시 이메일/SMS 등 알림 전달 증거가 아닙니다.
 
-- 조작자: `admin`; 전제 조건은 전 절과 동일.
-- 조작: 프로세스 인스턴스 첫 행에서 「프로세스 진행」과 「승인 기록」을 클릭, 프로세스 모델 첫 행에서 「버전」을 클릭.
-- 기대 상태: 오버레이 제목이 현재 언어로 렌더링; 프로세스 진행 오버레이는 **BPMN 그래픽이 실제로 렌더링 완료될 때까지 기다린 후** 촬영해야 하며(케이스는 `.bpmn-viewer-wrap .djs-element` 가 보이고 `.el-loading-mask` 가 사라졌음을 단정), 비동기 로딩 중인 스피너 상태를 촬영해서는 안 됩니다.
-- 실측 결과: 16 passed / 0 skipped(본 문서와 신뢰성 메시지 문서가 공용하는 네 개의 오버레이 시나리오 × 4 언어 포함).
+## 6. 내부 시작과 완료 이벤트
 
-| 오버레이 | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| 프로세스 진행(instance-tracking) | ![프로세스 진행(간체 중국어)](images/zh-CN/workflow-instance-progress.png) | ![프로세스 진행(영어)](images/en-US/workflow-instance-progress.png) | ![프로세스 진행(일본어)](images/ja-JP/workflow-instance-progress.png) | ![프로세스 진행(한국어)](images/ko-KR/workflow-instance-progress.png) |
-| 승인 기록(approval) | ![승인 기록(간체 중국어)](images/zh-CN/workflow-instance-approval-records.png) | ![승인 기록(영어)](images/en-US/workflow-instance-approval-records.png) | ![승인 기록(일본어)](images/ja-JP/workflow-instance-approval-records.png) | ![승인 기록(한국어)](images/ko-KR/workflow-instance-approval-records.png) |
-| 버전 이력(publish) | ![버전 이력(간체 중국어)](images/zh-CN/workflow-model-versions.png) | ![버전 이력(영어)](images/en-US/workflow-model-versions.png) | ![버전 이력(일본어)](images/ja-JP/workflow-model-versions.png) | ![버전 이력(한국어)](images/ko-KR/workflow-model-versions.png) |
+`InternalWorkflowController`의 여덟 메서드 경로는 버전 상세, 분류별 현재 버전, 게시 버전 목록, 일괄 버전 해석, 승인 그래프 미리보기, 시작, 처리 자격 검사와 중단을 제공합니다. 전체 필드는 [API 계약](api-contract.kr.md)이 관리합니다. `X-Internal-Token`과 `X-Tenant-Id`를 보내고 해당 body/query 테넌트도 일치시켜야 합니다. 호출자는 실제 startUserId/startUserName을 제공해야 하며 공유 토큰이 최종 사용자 인가를 입증하지는 않습니다.
 
-프로세스 진행 그림에서 녹색 노드는 본 인스턴스가 실행한 활동(`completed-node` 마크), 회색은 지나지 않은 분기(예 「승인 거부」)로, §2.7 「진행 상황 및 기록」의 의미와 일치합니다.
+내부 시작은 로컬 트랜잭션에서 `wf_process_start_request`를 예약하며 `(tenant_id, request_id)`와 `(tenant_id, business_type, business_key)`를 고유 제약으로 보호합니다. 재요청은 업무 식별자, modelVersionId와 startUserId를 비교하며 title/startUserName/variables의 전체 해시는 비교하지 않습니다. STARTED는 원래 인스턴스와 replayed=true를 반환하고 응답 requestId는 이번 요청에서 가져옵니다. 처리 중이면 `409`입니다. 같은 requestId의 FAILED는 다시 예약할 수 있지만 같은 업무 키에 requestId만 바꿔서는 실패 기록의 재시도 권한을 자동으로 얻지 못합니다.
 
-아직 커버되지 않은 프로세스: `model-lifecycle` / `detail-and-action-states` / `failure-states` 는 「모델링 → BPMN 설계 → 검증 → 게시」 쓰기 체인이 필요하고, 게시는 공유 Flowable 엔진에 프로세스 정의(`ACT_RE_*`)를 배포하며 검증된 깨끗한 삭제/롤백 경로가 아직 없습니다; `countersign` 는 다중 인스턴스 합동 결재 모델과 여러 승인자 신분이 필요합니다. 네 항목 모두 **개별 승인/신규 테스트 신분이 필요**하며, 본 라운드에서는 임의 배포도 일시적 권한 초과도 하지 않고, 커버리지 목록에서 명시적 gap 으로 보존합니다.
+새 시작은 게시 버전을 다시 검사하며 `ASSET_TRANSFER`, `ASSET_DISPOSAL`, `SRM_SUPPLIER_ONBOARDING`은 category와 businessType의 정확한 일치를 요구합니다. 내부 서비스가 변수 requestId/businessType/businessKey를 덮어쓰고 일반 시작 계층이 시작 사용자 변수를 덮어씁니다. 예약, 시작, 확장과 markStarted는 로컬 트랜잭션에 속하며 업무 서비스와의 분산 원자적 커밋은 아닙니다.
+
+처리 자격은 테넌트 태스크와 확장의 businessType/businessKey를 먼저 맞춘 뒤 assignee를 확인하고 미배정 태스크만 candidate를 확인합니다. valid=true는 선점이나 완료를 수행하지 않습니다. 버전 가용성과 그래프 미리보기는 모델 메타데이터/BPMN에 근거하며 최종 후보, 엔진 실행 가능성이나 업무 승인 성공을 입증하지 않습니다.
+
+이벤트 유형은 `workflow.process.completed.v1`이며 `workflow-domain-out-0`을 통해 공통 Outbox에 기록합니다. 현재 호출 지점은 실행 인스턴스 종료를 확인한 승인 서비스와 명시적 중단입니다. 결과는 각각 요청의 APPROVED/REJECTED 또는 CANCELLED입니다. 확장의 completion_event_id 조건부 갱신은 한 번의 기록을 제어하며 Outbox 이벤트와 같은 트랜잭션에 속합니다. 기존 표식이 있으면 false를 반환하고 다시 기록하지 않으며 Broker 전달 확인은 아닙니다.
+
+모든 종료를 처리하는 범용 엔진 종료 리스너는 현재 없습니다. 시작 즉시 종료, 다른 관리 동작으로 종료하거나 업무 확장이 없을 때 완료 이벤트가 생성되었다고 추정할 수 없습니다. 중계는 적어도 한 번 전달하므로 소비자는 멱등해야 합니다. APPROVED/REJECTED는 확장 상태 `2`, CANCELLED는 `0`이며 최종 업무 상태는 업무 소비자가 처리합니다. [MQ 신뢰성](mq-reliability.kr.md)을 참고합니다.
+
+## 7. 소스 진입점과 검증 범위
+
+| 진입점 | 확인 대상 |
+|---|---|
+| `WorkflowModelController` / `WorkflowModelServiceImpl` / `BpmnXmlValidator` | 권한, 버전 포인터, 잠금, 검사와 게시 |
+| `ProcessInstanceServiceImpl` / `WorkflowTaskServiceImpl` | 시작 사용자 신원, 테넌트 읽기, 본인 목록, 양식과 중단 |
+| `WorkflowApprovalServiceImpl` / common-workflow의 `ApprovalServiceImpl` | 담당자, MI 카운터 순서, 승인자 증감과 완료 |
+| `CandidateResolutionService` / `ScopedRoleAssignmentListener` / `CandidateResolverBean` | 기준 조직, 빈 후보, 리스너 시점과 카운터 범위 |
+| `InternalWorkflowServiceImpl` / `WorkflowProcessStartRequestServiceImpl` / `WorkflowCompletionEventServiceImpl` | 내부 의도 재요청과 Outbox 표식 |
+| `SecurityConfig` / `GatewayPreAuthFilter` / `MybatisPlusConfig` / `XssConfigProviderImpl` | 독립 보안 설정과 실제 제한 |
+
+초기화기는 기본 테넌트 `1`의 `supplier-onboarding`, `procurement-approval`, `asset-transfer`, `asset-disposal`을 보정하고 게시합니다. 모델 누락이나 게시 실패는 시작을 막지만 모든 테넌트와 외부 의존성이 준비되었다고 보장하지 않습니다.
+
+테스트는 모델, 시작 신원, 승인, 내부 프로토콜, 완료 이벤트와 테넌트 경계를 다룹니다. `ProcessInstanceReadTenantBoundaryTest`는 실제 MVC/서비스와 모의 이력으로 두 읽기 API를 검사하며 실제 Flowable DB/Gateway 통합을 대체하지 않습니다. `it/Fw*IT`는 보호된 격리 환경이 필요하고 기본 Surefire 단위 실행에 포함되지 않습니다. Docker 빌드, 단위 테스트, 실제 승인, 브라우저 이미지와 메시지/알림 검증은 따로 기록하며 과거 이미지가 이번 업무 재현을 입증하지 않습니다. 명령은 [AGENTS.md](../AGENTS.md)에 모읍니다.

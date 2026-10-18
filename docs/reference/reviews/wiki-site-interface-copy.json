@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-site-interface-copy",
+  "source": "docs/.vitepress/locales/zh-CN.json",
+  "source_sha256": "d6032e90eedab74e99415d166caa54a699dd498144e58b6c2d275d28dfaac7ef",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/.vitepress/locales/en-US.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:42:35",
+      "result": "approved",
+      "translation_sha256": "0f2303a5cc7363665e89595f81ffb31c793331068a36c5ef4e4037e547b5557e",
+      "checks": {
+        "coverage_and_meaning": "逐键阅读全部导航、搜索、主题、键盘和中文规范源提示，与中文字段覆盖和用户动作一致。",
+        "technical_literals": "JSON 键名和 interface 结构未改变；Enter 与 Escape 是键盘动作名称，符合搜索框用途。",
+        "security_and_failure_semantics": "中文专用内部文档明确标为 source reference，不声称存在译文；亮暗主题按钮表达下一步切换动作。",
+        "language_and_terminology": "Learning paths、Engineering reference、Select、Navigate 和 Reset search 等英文简洁可理解。",
+        "images_and_links": "本 JSON 不含图片或路径链接；来源入口标签明确指向中文规范源，不能误认翻译正文。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/.vitepress/locales/ja-JP.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:42:35",
+      "result": "approved",
+      "translation_sha256": "5e450e16104342b211b961ac09a1e07ac0da0f5fad5c06150f4ae9372b274585",
+      "checks": {
+        "coverage_and_meaning": "全部导航和搜索动作、四种外观相关提示、中文规范源提示已逐键对照，没有缺失字段或操作。",
+        "technical_literals": "保留全部 JSON 键结构；Enter/Esc 按实际键名表达，其余上下箭头和关闭搜索语义与中文相同。",
+        "security_and_failure_semantics": "中文专用源提示明确未翻译，主题按钮对应切换目标，没有隐去未复核或语言缺失状态。",
+        "language_and_terminology": "学習パス、技術リファレンス、本文へ移動及再検索相关日文自然，空结果提示语义完整。",
+        "images_and_links": "无截图和实际链接路径；中国語の正式な原文を読む标识清晰，不冒称日文规范参考。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/.vitepress/locales/ko-KR.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:42:35",
+      "result": "approved",
+      "translation_sha256": "7e8e403ece79b1fd51043f665a08e4b19777dd9672a00bfd1cef656a474fdd29",
+      "checks": {
+        "coverage_and_meaning": "核对全部菜单、导航、搜索、键盘、语言和主题文案，以及中文规范源三项提示，动作语义完整。",
+        "technical_literals": "JSON 全部键名和层级一致，Enter/Esc保留物理键名，箭头与 선택/이동对应搜索选择与导航。",
+        "security_and_failure_semantics": "中文专用内容明确不是翻译正文；亮暗模式文案指明目标模式，没有承诺缺失内容自动回退。",
+        "language_and_terminology": "학습 경로、기술 참조、본문으로 이동、검색 초기화等用语准确，按钮可直接理解。",
+        "images_and_links": "本文件没有图片和路径；중국어 정식 원문 읽기明确源入口语言，与页面说明一致。"
+      },
+      "findings": []
+    }
+  }
+}

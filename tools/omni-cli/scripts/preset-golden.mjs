@@ -13,6 +13,8 @@ import {
 } from '../dist/src/preset-generator.js';
 import { findWorkspaceRoot } from '../dist/src/workspace.js';
 import { lintFingerprint } from './lint-baseline.mjs';
+import { jdkEnvironment } from './jdk-environment.mjs';
+import { initializeEnvironment } from './init-env.mjs';
 
 const OFFICIAL_PRESETS = ['core', 'workflow', 'crm', 'supply-chain', 'full'];
 const workspaceRoot = findWorkspaceRoot(resolve(import.meta.dirname, '..'));
@@ -31,6 +33,9 @@ try {
     validateNoOmittedResiduals(target, sourceCatalog, new Set(lock.modules.map((module) => module.id)));
 
     if (!argumentsMap.structuralOnly) {
+      // 使用交付项目自己的模板初始化私有配置；配置失败在昂贵构建之前报告。
+      initializeEnvironment(target);
+      run('docker', ['compose', '--env-file', '.env', 'config', '--quiet'], target);
       const backendRoot = resolve(target, 'omni-backend');
       const wrapper = process.platform === 'win32' ? 'mvnw.cmd' : './mvnw';
       run(wrapper, ['clean', argumentsMap.verifyOnly ? 'verify' : 'install'], backendRoot, jdkEnvironment());
@@ -50,7 +55,6 @@ try {
       assert.deepEqual(lintErrors, [], `${presetId} 生成物 lint 仍有错误：${lintErrors.slice(0, 5).join(', ')}`);
       console.log(`preset golden lint: ${presetId} errors=0 exit=0 strict=pass`);
       run('npm', ['run', 'build'], frontendRoot);
-      run('docker', ['compose', 'config', '--quiet'], target, composeEnvironment());
     }
     console.log(`preset golden valid: ${presetId}, modules=${lock.modules.length}`);
   }
@@ -192,35 +196,6 @@ function run(command, args, cwd, extraEnvironment = {}) {
   });
   if (result.error) throw result.error;
   assert.equal(result.status, 0, `预设黄金命令失败：${command} ${args.join(' ')}`);
-}
-
-function jdkEnvironment() {
-  const javaHome = process.env.JAVA_HOME && process.env.JAVA_HOME.includes('jdk-25')
-    ? process.env.JAVA_HOME
-    : 'C:\\APP\\JDK25\\jdk-25.0.2';
-  return {
-    JAVA_HOME: javaHome,
-    PATH: `${resolve(javaHome, 'bin')}${process.platform === 'win32' ? ';' : ':'}${process.env.PATH ?? ''}`,
-  };
-}
-
-function composeEnvironment() {
-  return {
-    MYSQL_ROOT_PASSWORD: 'golden-only-root-password',
-    OMNI_DB_PASSWORD: 'golden-only-app-password',
-    REDIS_PASSWORD: 'golden-only-redis-password',
-    XXL_JOB_ACCESS_TOKEN: 'golden-only-xxl-token',
-    XXL_JOB_ADMIN_USERNAME: 'golden-admin',
-    XXL_JOB_ADMIN_PASSWORD: 'golden-only-admin-password',
-    NACOS_AUTH_TOKEN: 'golden-only-nacos-token-value-that-is-long-enough-for-validation',
-    NACOS_AUTH_IDENTITY_KEY: 'golden-only-key',
-    NACOS_AUTH_IDENTITY_VALUE: 'golden-only-value',
-    JWK_ENCRYPT_KEY: 'golden-only-jwk-encryption-key-32bytes',
-    OAUTH2_STATE_SECRET: 'golden-only-oauth2-state-secret',
-    OMNI_INTERNAL_API_TOKEN: 'golden-only-internal-token',
-    GATEWAY_ASSERTION_SECRET: 'golden-only-gateway-assertion-secret-32b',
-    OMNI_IMAGE_NAMESPACE: 'omni',
-  };
 }
 
 function unique(values) {

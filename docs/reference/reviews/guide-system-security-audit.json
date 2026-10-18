@@ -1,0 +1,2319 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-system-security-audit",
+  "source": "docs/guides/system-security-audit.md",
+  "source_sha256": "ecd3f71912186f95ccb6ae8d674efcaa3ea7d758a954e7f3dc13eeab65ec1ff9",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "7a4219e9a4469966c723eb5cac503e138b046f26",
+  "source_state": "All four complete current security guides actually read,Chinese as fact source. Full original seven sections/role2.1/21images retained;actual UI/API,policy restoration,XSS settings andTrace/Outbox runtime boundaries corrected. Forty current raw Docker read-only images with individual visual inspection replace unbound originals;44dated historical images and their prior visual results retained. No historical successful writes or password/CAPTCHA login replay. Other original A-G remains open.",
+  "method": "Actually read all four original guides(484lines),current exact/scoped source and dated receipt semantic fields,then all four final complete guides(496lines) against the Chinese fact source. Checked prerequisites,tenant/identity,full procedures,results,failures,restoration,technical literals,links and captions. Individually inspected all40current raw Docker screenshots;44unchanged historical images retain exact dated source/locale/hash and their prior individual AI visual review,not a new40+44visual claim. Source binding146 distinguishes20whole current files/1946lines from selected reads,unchanged prior381review reuse and runtime/hash-only bindings. No hash,renderer or API success is treated as semantic review by itself.",
+  "checked_source_files": [
+    {
+      "path": "omni-frontend/src/views/system/tenant/index.vue",
+      "sha256": "024dfffd40ea875523a9e7edea7779328e5c8e5693b78f1b741a0db1e51225c2"
+    },
+    {
+      "path": "omni-frontend/src/views/system/org/index.vue",
+      "sha256": "909e99df926e6bdd265eae7cb0bbdce48d5dc8def0e0a13ecec77ae68ba42c75"
+    },
+    {
+      "path": "omni-frontend/src/views/system/role/index.vue",
+      "sha256": "a80a892ed0d0f7150d8ce7665a5c28ea640e81fbd2ed98921f1181bd2dca3dfb"
+    },
+    {
+      "path": "omni-frontend/src/views/system/permission/index.vue",
+      "sha256": "9fb1dc7888cf514d02a1ce4710d6ebbdeb6d91be295f207d8cbcee40514768bb"
+    },
+    {
+      "path": "omni-frontend/src/views/base/dict/index.vue",
+      "sha256": "810dd1f572773026719a483b18c2153013536b9786bb55a6c7204066ee5fff9d"
+    },
+    {
+      "path": "omni-frontend/src/views/system/online/index.vue",
+      "sha256": "836c46deee50169815d43a31ded7c8f8b74f694f781ba3b47981c4c20c35b182"
+    },
+    {
+      "path": "omni-frontend/src/views/system/auditlog/index.vue",
+      "sha256": "b22c038ddda5d21f443bdf94c2d3f4ea49075437099852af92a46f4c64e5b490"
+    },
+    {
+      "path": "omni-frontend/src/views/system/authrecord/index.vue",
+      "sha256": "7902636147b609c794b913b3cf3909973e262930ebac52be9b411b9bc95611b3"
+    },
+    {
+      "path": "omni-frontend/src/views/system/xssconfig/index.vue",
+      "sha256": "83dd2127608d7ae78c2d816ce087a3ba2b8101be756144f30fc131baf1a0e0bf"
+    },
+    {
+      "path": "omni-frontend/src/views/monitor/oper-log/index.vue",
+      "sha256": "32c8b3b1aa618008f3979b256eb500c65cd64ebc435057ba7b8ef432dbeb4387"
+    },
+    {
+      "path": "omni-frontend/src/router/index.ts",
+      "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+    },
+    {
+      "path": "omni-frontend/src/api/tenant.ts",
+      "sha256": "b33438daeb856db94320db84fe8317953b0efbba0013409e91bf063fb363f75c"
+    },
+    {
+      "path": "omni-frontend/src/api/org.ts",
+      "sha256": "8bac90c15626997ddff761da72c8c1546f32abf76f58b69eb4b8f4f103e06c7b"
+    },
+    {
+      "path": "omni-frontend/src/api/role.ts",
+      "sha256": "085669dc33255cb8588e142b723e788973dfef2f8c2b4388f99409b204fb5f32"
+    },
+    {
+      "path": "omni-frontend/src/api/permission.ts",
+      "sha256": "704812d5db7cc5866a016bf9780c09319a036e2eba82ead6a757e82b07974a7f"
+    },
+    {
+      "path": "omni-frontend/src/api/dict.ts",
+      "sha256": "0f0f9d07f6f9a4634d63edff22219b126555f98166a160276a98f1e07c020c9f"
+    },
+    {
+      "path": "omni-frontend/src/api/online.ts",
+      "sha256": "12d43ebac280407aa2432ca61ab331ae96b0d53152fde0b87ff1d9d46c57ba45"
+    },
+    {
+      "path": "omni-frontend/src/api/audit-log.ts",
+      "sha256": "2d61bb138b7d0b702cad37ff1690b370165f6d6b6b1a61c6c6d9253f2cd13c4b"
+    },
+    {
+      "path": "omni-frontend/src/api/auth-record.ts",
+      "sha256": "2d1accf0d0bc9966aa2bc0468b0f0fbf8fcaf6c77d0031a0764aa19e7626d422"
+    },
+    {
+      "path": "omni-frontend/src/api/xss-config.ts",
+      "sha256": "cba5f7e47a89745ac7ee1d8827093132b584d6a19d95a655594fe76a9009b153"
+    },
+    {
+      "path": "omni-frontend/src/api/oper-log.ts",
+      "sha256": "88d324e74dc23e7fe926178fb7d2e4ffcb943f9c6511eb6b0dc3d6e307468c35"
+    },
+    {
+      "path": "omni-frontend/src/api/system-config.ts",
+      "sha256": "bbdb1c97eba0c51680dc847d0af72dc109b0bdae30d35a0004edee75cf2fb837"
+    },
+    {
+      "path": "omni-frontend/src/api/request.ts",
+      "sha256": "71f7d1f5003fd81fb41a4fa82386b3fe281c10ccd6e25a40816ca370e460a789"
+    },
+    {
+      "path": "omni-frontend/src/i18n/index.ts",
+      "sha256": "1f03b35f5616586da17441dd5dda7e877ffbc3a197eccef75641ad4794d48618"
+    },
+    {
+      "path": "docker/frontend/nginx.conf",
+      "sha256": "d652b7c896a04755354bc8f691873e402d344804e0682bbcc2baa29866d88990"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/e2e/E2eTokenFixture.java",
+      "sha256": "2d6eafa8e333882845ab9b2f1c831124175234685a9e3830aa60355f3e04a3c0"
+    },
+    {
+      "path": "omni-frontend/src/views/system/user/index.vue",
+      "sha256": "1a7daa939bfb6d271c78802244b0533006dc0c663ac583322c00759873c46d43"
+    },
+    {
+      "path": "omni-frontend/src/api/user.ts",
+      "sha256": "af2704e9fd07b19a44df6ce134532160bec02c92e62d53312d8801bd4e1175e7"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/UserServiceImpl.java",
+      "sha256": "aee5b14ab535cbd943ac22661117d2bcffac74e0e39bdb8bee76d812753a3d29"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/UserController.java",
+      "sha256": "eb1c952f78fc62a0a7415daba32a3882c322961d1f560e78e040a97d2fcbaf6c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/RoleController.java",
+      "sha256": "2575a0ee2e52b5bc5eda0ed91fc116276f381e29fd763308facecc70346c6eb7"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/PermissionController.java",
+      "sha256": "70b74bd1f0803567234dc93b1dc69dc954e1a112631c538f200a56afd61b0560"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PermissionServiceImpl.java",
+      "sha256": "269589cbdb75758f41772da287fc061d61a459fa342f93e2703a4854090fb0cf"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/CandidateResolutionService.java",
+      "sha256": "b5321847781c8404f5975bc898340e76b84c0892c3ac25af5cd8d32d94f30cd2"
+    },
+    {
+      "path": "tools/omni-cli/src/development.ts",
+      "sha256": "98a2e15bfe7441e5634ea2e280e9c9867157f955b68fc4bba5bc3da9bffecaea"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    },
+    {
+      "path": "omni-frontend/src/api/login-record.ts",
+      "sha256": "bda458976caca2a3f74302cf6e9deb761feb95dacf4b49270bb9d64d86733601"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/AuthRecordVO.java",
+      "sha256": "b89d6b88e678606e588e6a419d29cd8ee6e15fc547aebd0d633c57f1ad769061"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/entity/SysAuthLoginPolicy.java",
+      "sha256": "b9ce03daf5d4691b0d9bc426ad34698c9502f4ad6b93ccbb3199d88258492f0d"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/LoginPolicyUpdateRequest.java",
+      "sha256": "1b3c163da6ded4a2d4ae5b0b85d15821f9dbd9c209c99b37e8b48069979ac38e"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SystemConfigController.java",
+      "sha256": "05bc63916a629b27708419f7afe49e73cc8542a70470a552347bb757b5cb14c7"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/LoginPolicyServiceImpl.java",
+      "sha256": "15ec2a234ef8b93186797cced4c1dd453905cde2d23b83ad5fe78bf22b3c6cfe"
+    },
+    {
+      "path": "omni-frontend/src/views/system/config/index.vue",
+      "sha256": "c66cad639023326c73406763e36897bab5b9d9fe7ee20c8afa49d9e11c011971"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/LoginRecordServiceImpl.java",
+      "sha256": "958b665d4480a3d0d512e614759a5ba39971d6343129045506e9058edcc3448f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/LoginRecordQuery.java",
+      "sha256": "df5b448b38a42193131d70eceeb2f36b0a711a3ff1f9aa03b509a44966e16d86"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/LoginRecordController.java",
+      "sha256": "9b63744a0fcb2a01caec09534411a5977b451cf0ff6e416a3a8310ae951909f8"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/LoginPolicyProvider.java",
+      "sha256": "8360e8e04e877925ae72eba66b40aaaccab9ab7cd0311eae0c06e4e7f5bb637c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/XssConfigServiceImpl.java",
+      "sha256": "a40f4156e3001ac94df57a235df3ce877062aea461bb7902caed159ca98c898b"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateDictTypeRequest.java",
+      "sha256": "624e392f04e5529496275e7a41c7297f51227e8dfd2c6f14ace7ee62c0192943"
+    },
+    {
+      "path": "omni-frontend/src/api/mqMessage.ts",
+      "sha256": "c205d89a9363f976f6928d6f0db82c80f6eadfe7b7c0dbf285bc5fa901febaa2"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MqMessageController.java",
+      "sha256": "722fb645de7c96df62e6ce27c7031d39e244e0ec9361186ba7eb635cf38e1f28"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java",
+      "sha256": "db640b6e594ab53272c078e42776e904b7e6ca33a4ae625e2f9bcf5c1c9ea928"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/entity/SysMqMessage.java",
+      "sha256": "c3a83a109683411053faa8135c753943ea2474270180b90e352f847568c2378d"
+    },
+    {
+      "path": "tools/omni-cli/src/cli.ts",
+      "sha256": "d0b5df88164319f5b4308ca68bb587aa9ae8ce68fb3b74ac3eecf82ffe030c97"
+    },
+    {
+      "path": "docs/reference/evidence/dictionary-2026-10-10.json",
+      "sha256": "fc0bdf424696c07e00365cc808d7fe53b425aac743c6be463aba0a883a3f71f3"
+    },
+    {
+      "path": "docs/reference/evidence/system-platform-2026-10-12.json",
+      "sha256": "f86cbda04af97995076ba18ef3049106992e6d1e9264a5608467d7f45ec40660"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/images/zh-CN/system-role-scope-form.png",
+      "sha256": "e61a474492b40a6ed5b4b4cf2057c80beff265bfb05216bc1c986da4c0f5931c"
+    },
+    {
+      "path": "docs/images/zh-CN/system-role-scope-saved.png",
+      "sha256": "69ec6c0e7e9dc32fb34a724faf4c6fae90a7e7ec04f916b299b0855d8a50fe54"
+    },
+    {
+      "path": "docs/images/zh-CN/system-menu-permission-tree.png",
+      "sha256": "c0e2db0f39078b5d0b931f912912a6c60e8f62d62f75ba200242f982d2e59c0f"
+    },
+    {
+      "path": "docs/images/zh-CN/system-role-permission-dialog.png",
+      "sha256": "f975c0e6b808d5ea1f7776a7b5e6f6614c5384ec92e52441c812e77fb8aeb7e1"
+    },
+    {
+      "path": "docs/images/zh-CN/system-dictionary-create-form.png",
+      "sha256": "ec1e6b23be51ed4f249200aec7347af16d1256b53e3b5f4d7b272d409d8eef65"
+    },
+    {
+      "path": "docs/images/zh-CN/system-dictionary-create-validation.png",
+      "sha256": "926bf8d6fafceb8de7baec7c3698476412d05f343759832e3c7d9771a9750ee6"
+    },
+    {
+      "path": "docs/images/zh-CN/system-dictionary-create-success.png",
+      "sha256": "701b691ce5944676e35f948c7d679fdbd641cdbbdc95050824f163c8e1059d7c"
+    },
+    {
+      "path": "docs/images/zh-CN/system-config-policy.png",
+      "sha256": "819fcef51baa471618ec489e669c895512b2a5239f41d26853f44548ee934378"
+    },
+    {
+      "path": "docs/images/zh-CN/system-config-saved.png",
+      "sha256": "61fea857e4466ad5a841916c5b4d7111d617a1c36d2e964850fbb9df8a822983"
+    },
+    {
+      "path": "docs/images/zh-CN/system-config-conflict.png",
+      "sha256": "b7103cf4f2a5bb04f80f79c0e65b7b51d273286bf310d82614b47d566b47bcb7"
+    },
+    {
+      "path": "docs/images/zh-CN/system-login-record-filtered.png",
+      "sha256": "3541d485445bb135eb9dc7623d613d2982b6b2b67f9cbe4926f682e97f379ca4"
+    },
+    {
+      "path": "docs/images/en-US/system-dictionary-create-form.png",
+      "sha256": "91cc59d6c3b7d9a69125ebb06456be726c38a8bd46e8d3b84dbe77a0aad1bf80"
+    },
+    {
+      "path": "docs/images/en-US/system-dictionary-create-validation.png",
+      "sha256": "8c9705183af6a2e12ce27f6dfdac0f0cc90cffa5f3384c631786d95f0f50ed2f"
+    },
+    {
+      "path": "docs/images/en-US/system-dictionary-create-success.png",
+      "sha256": "c2d7e95de63d692e70a936312756dcc2c3d4b5bbe2cf6ede5b7671ce07a36a47"
+    },
+    {
+      "path": "docs/images/en-US/system-config-policy.png",
+      "sha256": "8376c45fada7578f344dd6d37c3660b10a69aa92678e56f36c18ca2310abd789"
+    },
+    {
+      "path": "docs/images/en-US/system-config-saved.png",
+      "sha256": "0aae74a201f2bb5e6177b87fb2b33028865c3d8a297785ba438c961df4d1c637"
+    },
+    {
+      "path": "docs/images/en-US/system-config-conflict.png",
+      "sha256": "5c34eff62c2ceab7c2142c8c95e5f75b1deabcbb06cda930e2873927ed0da224"
+    },
+    {
+      "path": "docs/images/en-US/system-login-record-filtered.png",
+      "sha256": "a004f01a3927bd1b3901cb4255edcc8f8dab6aefd62724cba1b4068834165d84"
+    },
+    {
+      "path": "docs/images/en-US/system-role-scope-form.png",
+      "sha256": "93787f34394f524a63a917ac40ae848ef05224bf4ca1adc3c553cbd95a4db612"
+    },
+    {
+      "path": "docs/images/en-US/system-role-scope-saved.png",
+      "sha256": "ccf98d1bc590c63a1d44de887290342057dcd3ae53727b3838efb59f714119d0"
+    },
+    {
+      "path": "docs/images/en-US/system-menu-permission-tree.png",
+      "sha256": "6c714d662a500e6201a0ba58162d15e07977dded9d328ca9493346035fc9eff1"
+    },
+    {
+      "path": "docs/images/en-US/system-role-permission-dialog.png",
+      "sha256": "4cf455746a73aa97be16739c5e8f9692127fd2c8fd470aaab3c8d3d58d0228c9"
+    },
+    {
+      "path": "docs/images/ja-JP/system-dictionary-create-form.png",
+      "sha256": "545506e977a9103e5216f6bb56043473d2786688a2164e94acab671f9bf33fb0"
+    },
+    {
+      "path": "docs/images/ja-JP/system-dictionary-create-validation.png",
+      "sha256": "8d7809c4ea3ff31a6827fa70a35b2274b66e13c6df2d3b98ed9cb21aea818b5d"
+    },
+    {
+      "path": "docs/images/ja-JP/system-dictionary-create-success.png",
+      "sha256": "80d926fe717d297cbe7bed79d5b934834cec906f40e9fdf215df53e41fc6ff0a"
+    },
+    {
+      "path": "docs/images/ja-JP/system-config-policy.png",
+      "sha256": "9a95d742a4ccd389fdbdb17c3844e7be9786e9bb368bb465c85feb832c57e1b4"
+    },
+    {
+      "path": "docs/images/ja-JP/system-config-saved.png",
+      "sha256": "653b459e7ef08a8d853ada27d123ceb56ae2a6a7fe1ecfb30e0c894f3e8cf72d"
+    },
+    {
+      "path": "docs/images/ja-JP/system-config-conflict.png",
+      "sha256": "230a4b304ae1a85eb01dcccefe5e621f565f2d0644f26e9cecc9e3542ebb52f5"
+    },
+    {
+      "path": "docs/images/ja-JP/system-login-record-filtered.png",
+      "sha256": "f1fa28494364f34d8628dfbff9d692f875a10f122b8aaee6356174b61efdd789"
+    },
+    {
+      "path": "docs/images/ja-JP/system-role-scope-form.png",
+      "sha256": "80bdf71004f4729c0ecb0b0d424128fd22785d1b6a11aa817ac3cf6ef5769667"
+    },
+    {
+      "path": "docs/images/ja-JP/system-role-scope-saved.png",
+      "sha256": "ae4eef14fa1cf446d6c3efe03ca43750d5e87b74873199eed36b3b95eb8a15e4"
+    },
+    {
+      "path": "docs/images/ja-JP/system-menu-permission-tree.png",
+      "sha256": "11eac83c8834ed946106db064462d4050ac689bb4d67e9e0cf7b64cfdac1a8f5"
+    },
+    {
+      "path": "docs/images/ja-JP/system-role-permission-dialog.png",
+      "sha256": "981161f1e7b408470d449d17dc4ecf61fd60ae7c275b9eada61d12068edf3e68"
+    },
+    {
+      "path": "docs/images/ko-KR/system-dictionary-create-form.png",
+      "sha256": "3da54833c3c7906ec6080ecf278f415817b8a6d8de6b91333fd03efecb1ae23c"
+    },
+    {
+      "path": "docs/images/ko-KR/system-dictionary-create-validation.png",
+      "sha256": "e859fd7131e0cd51ea43fe1478f1bb2880c81f2669a587f9b105f511f1d13c70"
+    },
+    {
+      "path": "docs/images/ko-KR/system-dictionary-create-success.png",
+      "sha256": "3628f052be0ade0256f3b13bb1183e1345e2f7e62a1a72c0496a2a255977472d"
+    },
+    {
+      "path": "docs/images/ko-KR/system-config-policy.png",
+      "sha256": "b1a4d28bd3b82eeb8899f03b5d97a5a359324a461a79f9b0d68df5a358ca5679"
+    },
+    {
+      "path": "docs/images/ko-KR/system-config-saved.png",
+      "sha256": "e558d25d9909d6bc160569896f901f9795afefa30841920ce55a813a378b0f7a"
+    },
+    {
+      "path": "docs/images/ko-KR/system-config-conflict.png",
+      "sha256": "92cb6657379832dffc9d3e5f365e954acc4b82f97d5e91ea5e4acce21ba30a13"
+    },
+    {
+      "path": "docs/images/ko-KR/system-login-record-filtered.png",
+      "sha256": "6dee83e6703f7da069ba92e9f6a1143bcff4074e3fe1ceaf4a6fb370cbaf6ddc"
+    },
+    {
+      "path": "docs/images/ko-KR/system-role-scope-form.png",
+      "sha256": "fb392d44ebd66ce5054527c21709c631dae13a85dee621764118da995b7f6a63"
+    },
+    {
+      "path": "docs/images/ko-KR/system-role-scope-saved.png",
+      "sha256": "37fa02d559e320c88454219b8013345d659d0b013b89b980f623be7e5a6d80dc"
+    },
+    {
+      "path": "docs/images/ko-KR/system-menu-permission-tree.png",
+      "sha256": "961a25817c30c30052b7a545a851153fdcc7e690d8b64e00d6f514a6c5d958c3"
+    },
+    {
+      "path": "docs/images/ko-KR/system-role-permission-dialog.png",
+      "sha256": "be1f69f9b6e784b8248bbb76ed9d02a560efd617ed14d41c0d9fd38589b70de9"
+    },
+    {
+      "path": "docs/images/zh-CN/system-tenants.png",
+      "sha256": "07320ad457210fa73a8794fd910752d01796c9540c99b381382a2ee9c462c16e"
+    },
+    {
+      "path": "docs/images/zh-CN/system-organizations.png",
+      "sha256": "dd8df6efdf3423ba93f5b75dc54828ccb1e826215a90840527210bd2362a9c1e"
+    },
+    {
+      "path": "docs/images/zh-CN/system-roles.png",
+      "sha256": "686008e4cbd2f892c31158705a65480d346441fc3ee15d2a520ade426de8fe5d"
+    },
+    {
+      "path": "docs/images/zh-CN/system-permissions.png",
+      "sha256": "876901ee67d25089d668c23bd1b5add8653d33199efbd758c5982f7a5773f603"
+    },
+    {
+      "path": "docs/images/zh-CN/system-dictionaries.png",
+      "sha256": "815716910672473888d698232753a513ffb56190ce6d591ac2c0aed681c97132"
+    },
+    {
+      "path": "docs/images/zh-CN/system-online-users.png",
+      "sha256": "533ccc47cbae8b9af90fcb29e31d112b3e49b97314458d0d389acec7d41867bb"
+    },
+    {
+      "path": "docs/images/zh-CN/system-audit-log.png",
+      "sha256": "ef1d0a46b3c5497fac0aced04ca1548e8bd8f62e98821522915553c76df30441"
+    },
+    {
+      "path": "docs/images/zh-CN/system-auth-records.png",
+      "sha256": "92e22e7de06173de31f768227fc464aa57e463e7dbd7cad3b6e0fd08651b72b4"
+    },
+    {
+      "path": "docs/images/zh-CN/system-xss-config.png",
+      "sha256": "b2e0e763993e066142a7e6754528bf40c51640f3e2f7edadd255dd2fef37ef05"
+    },
+    {
+      "path": "docs/images/zh-CN/system-operation-log.png",
+      "sha256": "13077d0cb857e198a7265e9d3a8d388b1ac33ba048753d6ee50944ffb8c2f0fb"
+    },
+    {
+      "path": "docs/images/en-US/system-tenants.png",
+      "sha256": "35669ba1a1918c67077c4fc250a138a5b5024d25ff405fec1c954a7986fe127b"
+    },
+    {
+      "path": "docs/images/en-US/system-organizations.png",
+      "sha256": "f721c76b962cbd1fb9e2b69f2ccb8c26a091e0b77ece28f94902365c88c53bfb"
+    },
+    {
+      "path": "docs/images/en-US/system-roles.png",
+      "sha256": "78cdab34800d9b46ef45339ac40b63866965c36216657992773a7f727c6b7a03"
+    },
+    {
+      "path": "docs/images/en-US/system-permissions.png",
+      "sha256": "17741f85c9920d135eaafbed9000f94d926cc2446ef8ae906aaa582992eca4aa"
+    },
+    {
+      "path": "docs/images/en-US/system-dictionaries.png",
+      "sha256": "944071185f3942dc0492ddf239736a38d88c99702efef25ff5a22911604052f2"
+    },
+    {
+      "path": "docs/images/en-US/system-online-users.png",
+      "sha256": "50af584cd00b3b4b6d1ebf7d1db622edc0c979e1e68e26cb4fced9a52b96fa04"
+    },
+    {
+      "path": "docs/images/en-US/system-audit-log.png",
+      "sha256": "8a71f66fcd61e35bb624ba2f92e14dcc7f9d4911541594643a8ca11b2e20e75d"
+    },
+    {
+      "path": "docs/images/en-US/system-auth-records.png",
+      "sha256": "34bd37394a870daf7d30057e1457e5bb84354927320361533ab2cca7f26f232e"
+    },
+    {
+      "path": "docs/images/en-US/system-xss-config.png",
+      "sha256": "570f7a1caa7b9be0a8a722d5a0827cc3b5725a74e03c094fea88a5c5c7fb1f0a"
+    },
+    {
+      "path": "docs/images/en-US/system-operation-log.png",
+      "sha256": "4a6c083350018166c85ba72b0639530f700e526a79ca13b4dfce3e5d17be2e1d"
+    },
+    {
+      "path": "docs/images/ja-JP/system-tenants.png",
+      "sha256": "600ca8a061526c2ffef1abbcb1daeb5ba0e0b353da42d253a34003bfe96701bf"
+    },
+    {
+      "path": "docs/images/ja-JP/system-organizations.png",
+      "sha256": "8903dd061909f22b5b922c09e2438328fea3f4f07171c031b2fde1c463b8c571"
+    },
+    {
+      "path": "docs/images/ja-JP/system-roles.png",
+      "sha256": "c3f44784ae08f2d3cef03b331eabbdd6e46ef9dad920831219ab9758d485b58e"
+    },
+    {
+      "path": "docs/images/ja-JP/system-permissions.png",
+      "sha256": "d4bb5a119f0ec2ae76b24d8ea466b85c9cb77efd7491dc405aabee5af7a27083"
+    },
+    {
+      "path": "docs/images/ja-JP/system-dictionaries.png",
+      "sha256": "6c68907f426646b074e30a9154afb8f2ea6287ec2fe9ecc0d3a316fe8e133e70"
+    },
+    {
+      "path": "docs/images/ja-JP/system-online-users.png",
+      "sha256": "c7e420787af2700f8ee356282060e1b12ed3f8594142c8f772e9e8b41d419cf8"
+    },
+    {
+      "path": "docs/images/ja-JP/system-audit-log.png",
+      "sha256": "0935b2b52bb7cb6c85631895d211b210ec76b586cf86c4b61b2075ef6e4557b1"
+    },
+    {
+      "path": "docs/images/ja-JP/system-auth-records.png",
+      "sha256": "faf49d1ea8a32ce7764374e70bf3c78e16840bfbcdd54564a21c51c272b22032"
+    },
+    {
+      "path": "docs/images/ja-JP/system-xss-config.png",
+      "sha256": "81cefe26cc34ee6af89ad9b05f252d26bd2672e3271d370d6a67c7e960d38191"
+    },
+    {
+      "path": "docs/images/ja-JP/system-operation-log.png",
+      "sha256": "850fee65f49b6203c2f6842b66e0439b552d26cef3523c3715bb05cd0864c166"
+    },
+    {
+      "path": "docs/images/ko-KR/system-tenants.png",
+      "sha256": "3610412d786620b8f0571e447245b1afbbb9565ae99863f73ee25cf436d418d0"
+    },
+    {
+      "path": "docs/images/ko-KR/system-organizations.png",
+      "sha256": "75c282c59f15a10e3fc706530a08f7e3510c6a81ba3eae4bfb756f0a2111d5f8"
+    },
+    {
+      "path": "docs/images/ko-KR/system-roles.png",
+      "sha256": "e5875ccde27f6b58cc11a38615bc971e5a0d1d57aeb76145906eb9c4f3cee572"
+    },
+    {
+      "path": "docs/images/ko-KR/system-permissions.png",
+      "sha256": "e68c26a54e28b2b89ea36b51f7ce730697cac01419591661fa445ba7db7050c9"
+    },
+    {
+      "path": "docs/images/ko-KR/system-dictionaries.png",
+      "sha256": "f580980e925c65e7bd695b1df68b3e9faa85cef01171353cdfccc583c3e4d2a5"
+    },
+    {
+      "path": "docs/images/ko-KR/system-online-users.png",
+      "sha256": "2c7e389b8bcc7563fc9f6cc7aa6d0811bfb1bd992d03c5baad825c47bdc939da"
+    },
+    {
+      "path": "docs/images/ko-KR/system-audit-log.png",
+      "sha256": "85ff5420da2b470fb88e35eb0bd3eeef3d2d8750432278a564a56ffb5a36c4de"
+    },
+    {
+      "path": "docs/images/ko-KR/system-auth-records.png",
+      "sha256": "a87088900d87018553252a656620ac480e6ec11c03fc7ea98a5db4ec1182cac0"
+    },
+    {
+      "path": "docs/images/ko-KR/system-xss-config.png",
+      "sha256": "5c217ba731d46d3a6bc86acda02ac30d9b3906c1f1e5cd326fa54b0482103656"
+    },
+    {
+      "path": "docs/images/ko-KR/system-operation-log.png",
+      "sha256": "360107d14260d926d2b43714f7dbf49068e7cd2260b7d39afff8fa5334d5abac"
+    },
+    {
+      "path": "docs/reference/evidence/security-lists-2026-10-17.json",
+      "sha256": "1834e56b746c6f1435e236254da2885397a058ac58c22401f631f78430d5c31d"
+    },
+    {
+      "path": "docs/reference/evidence/scripts/security-lists-2026-10-17.mjs",
+      "sha256": "d8cb39b01f548f892ca4d69d4447cd12081dbec6f230f62df70177ede8eb6cb2"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/screenshot-manifest.yaml",
+      "sha256": "1fc63b7bbcf745b256c5d52fee540ee609f575d3aa0539adb33ba97af2dd1163"
+    }
+  ],
+  "source_inspection_scope": "Explicit whole current source reads,selected current ranges,unchanged named381review reuse,current runtime/images and dated historical semantic fields are distinguished per binding. Hash/render/API success does not constitute semantic approval.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_current_documents_actually_read": 4,
+    "current_whole_lines": 496,
+    "lines_each": 124,
+    "original_whole_lines_read": 484,
+    "main_headings_each": 9,
+    "h2_each": 7,
+    "h3_each": 1,
+    "images_each": 21,
+    "technical_fences_each": 0,
+    "whole_markdown_rendered_documents": 4,
+    "strict_locale_normalized_inline_literal_multiset": true,
+    "inline_literals_each": 59,
+    "strict_locale_normalized_local_link_sequence": true,
+    "relative_links_each": 36,
+    "all_local_links_resolve": true,
+    "actual_text_full_reads": {
+      "zh-CN": {
+        "path": "docs/guides/system-security-audit.md",
+        "range": [
+          1,
+          124
+        ],
+        "output": "9d4bd4",
+        "sha256": "ecd3f71912186f95ccb6ae8d674efcaa3ea7d758a954e7f3dc13eeab65ec1ff9"
+      },
+      "en-US": {
+        "path": "docs/guides/system-security-audit.en.md",
+        "range": [
+          1,
+          124
+        ],
+        "output": "85908b",
+        "sha256": "51496d9394404ad38c83b5a7e74b24a2f3f107829acc10be772aca296be9e162"
+      },
+      "ja-JP": {
+        "path": "docs/guides/system-security-audit.jp.md",
+        "range": [
+          1,
+          124
+        ],
+        "output": "6da1d0",
+        "sha256": "900afb45711ad9e00448725c02b2618c099da800b87cf0fa6522b07f89a1fb65"
+      },
+      "ko-KR": {
+        "path": "docs/guides/system-security-audit.kr.md",
+        "range": [
+          1,
+          124
+        ],
+        "output": "791b24",
+        "sha256": "40f1b0b492ee53b096c18514c59651c38059209447343dbdca04a8b4ee10aa8a"
+      }
+    },
+    "source_bindings": 146,
+    "current_whole_source_files": 20,
+    "current_whole_source_lines": 1946,
+    "source_read_scopes": [
+      {
+        "path": "omni-frontend/src/views/system/tenant/index.vue",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/system/org/index.vue",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/system/role/index.vue",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current entire file actually read in the named outputs; not inferred from a hash or scan.",
+        "outputs": [
+          "1c8a63",
+          "28b332"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": true
+      },
+      {
+        "path": "omni-frontend/src/views/system/permission/index.vue",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/base/dict/index.vue",
+        "read_scope": "Current129-180 form fields/save/backend error;not whole.",
+        "outputs": [
+          "ef6bda"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/system/online/index.vue",
+        "read_scope": "Current1-95 native empty state and userId kick;not whole.",
+        "outputs": [
+          "6f823f"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/system/auditlog/index.vue",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/system/authrecord/index.vue",
+        "read_scope": "Current1-110;read-only grant list and visible metadata;not claimed whole.",
+        "outputs": [
+          "e75907"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/system/xssconfig/index.vue",
+        "read_scope": "Current1-145 settings/rules GET and user-triggered writes;not whole.",
+        "outputs": [
+          "6f823f"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/monitor/oper-log/index.vue",
+        "read_scope": "Current matched requestParams and trace search(no Trace ID UI match);not a whole view read.",
+        "outputs": [
+          "817233"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/router/index.ts",
+        "read_scope": "Current1-77;previous215-296/360-405 scope reused381. Actual admin prefix and base operlog override;not whole router.",
+        "outputs": [
+          "511a9e",
+          "381 scoped reuse"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/tenant.ts",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/org.ts",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/role.ts",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "178df4"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/permission.ts",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/dict.ts",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/online.ts",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "e75907",
+          "5d76b4"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/audit-log.ts",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "e75907"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/auth-record.ts",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "e75907"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/xss-config.ts",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "178df4"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/oper-log.ts",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "721c4b"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/system-config.ts",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "e75907",
+          "5d76b4"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/request.ts",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/i18n/index.ts",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docker/frontend/nginx.conf",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/e2e/E2eTokenFixture.java",
+        "read_scope": "Current capture source hash binding only,unless explicit whole or selected reading below;not semantic approval from hashing.",
+        "outputs": [
+          "398 capture"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/system/user/index.vue",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current entire file actually read in the named outputs; not inferred from a hash or scan.",
+        "outputs": [
+          "9ce133",
+          "02fa5b"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/user.ts",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current entire file actually read in the named outputs; not inferred from a hash or scan.",
+        "outputs": [
+          "703a8b"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/UserServiceImpl.java",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current120-161 and176-200:user tenant-bound read,whitelist primaryUnitId update,full role replacement and tenant validation;not whole file.",
+        "outputs": [
+          "9c0a5f",
+          "b9ef1b"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/UserController.java",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current matched37-197:formalpaths/authorities;not whole file.",
+        "outputs": [
+          "1c8a63"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/RoleController.java",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current1-95 rolelist/update contract;not whole file.",
+        "outputs": [
+          "7e4b62 last visible section"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/PermissionController.java",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current matched25-90:tree/assignment paths and system:role:list/update;not whole file.",
+        "outputs": [
+          "44b518"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PermissionServiceImpl.java",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current67-85 visible before truncated followup:full permission-set replacement;not whole file.",
+        "outputs": [
+          "e1e945 first visible section"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/CandidateResolutionService.java",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current matched SQL lines597-603/620-626/647-653/676-682 in4812c2 plus prior exact whole/selected workflow review to be reconciled;this turn is not a new whole file read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": false
+      },
+      {
+        "path": "tools/omni-cli/src/development.ts",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current entire file actually read in the named outputs; not inferred from a hash or scan.",
+        "outputs": [
+          "0d2ad2",
+          "addb61"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/resources/application-lite.yml",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current entire file actually read in the named outputs; not inferred from a hash or scan.",
+        "outputs": [
+          "41cad9"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": true
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/resources/application-lite.yml",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current entire file actually read in the named outputs; not inferred from a hash or scan.",
+        "outputs": [
+          "41cad9"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": true
+      },
+      {
+        "path": "omni-backend/omni-gateway/src/main/resources/application-lite.yml",
+        "read_scope": "Explicit unchanged source review reuse from381,not a new whole reread. Current entire file actually read in the named outputs; not inferred from a hash or scan.",
+        "outputs": [
+          "41cad9"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "permissions-semantic-proof-381.json",
+        "previous_whole_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/login-record.ts",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "ff2637"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/AuthRecordVO.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "e75907"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/entity/SysAuthLoginPolicy.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "721c4b"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/LoginPolicyUpdateRequest.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "721c4b"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SystemConfigController.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "721c4b"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/LoginPolicyServiceImpl.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "6f823f"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/views/system/config/index.vue",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "ff2637"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/LoginRecordServiceImpl.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "a2f3e8"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/LoginRecordQuery.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "a2f3e8"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/LoginRecordController.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "a2f3e8"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/LoginPolicyProvider.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "da5c6f"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/XssConfigServiceImpl.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "ef6bda 1-180",
+          "da5c6f 181-342"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateDictTypeRequest.java",
+        "read_scope": "Current entire file actually read in the named outputs;not inferred from hash or successful HTTP.",
+        "outputs": [
+          "ef6bda"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/api/mqMessage.ts",
+        "read_scope": "Current first115 lines exposed API fields/status/runtime/list/detail;not whole.",
+        "outputs": [
+          "5d76b4"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MqMessageController.java",
+        "read_scope": "Current1-90 runtime flags and tenant/header scoped list;not whole.",
+        "outputs": [
+          "5d76b4"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java",
+        "read_scope": "Current matched optional msgKey,explicit tenant,producerTraceId from MDC and logging;not whole.",
+        "outputs": [
+          "817233",
+          "3be385",
+          "5d76b4"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/entity/SysMqMessage.java",
+        "read_scope": "Current class body visible from TableName through end in partly truncated output;header/imports not read;not whole.",
+        "outputs": [
+          "817233"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "tools/omni-cli/src/cli.ts",
+        "read_scope": "Current exact --mode lite|full option line128;not whole CLI.",
+        "outputs": [
+          "817233"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/dictionary-2026-10-10.json",
+        "read_scope": "Actually read bounded semantic metadata,identity/runtime,successful scenes,failed attempt reconciliation,cleanup,per-image epoch/visual statuses and limits;not an entire JSON read.",
+        "outputs": [
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/system-platform-2026-10-12.json",
+        "read_scope": "Actually read bounded semantic metadata,identity/runtime,successful scenes,failed attempt reconciliation,cleanup,per-image epoch/visual statuses and limits;not an entire JSON read.",
+        "outputs": [
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "read_scope": "Existing authorized AI-only acceptance policy retained;not a new authorization.",
+        "outputs": [
+          "prior policy review"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-role-scope-form.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-role-scope-saved.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-menu-permission-tree.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-role-permission-dialog.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-dictionary-create-form.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-dictionary-create-validation.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-dictionary-create-success.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-config-policy.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-config-saved.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-config-conflict.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-login-record-filtered.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-dictionary-create-form.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-dictionary-create-validation.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-dictionary-create-success.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-config-policy.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-config-saved.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-config-conflict.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-login-record-filtered.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-role-scope-form.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-role-scope-saved.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-menu-permission-tree.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-role-permission-dialog.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-dictionary-create-form.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-dictionary-create-validation.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-dictionary-create-success.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-config-policy.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-config-saved.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-config-conflict.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-login-record-filtered.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-role-scope-form.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-role-scope-saved.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-menu-permission-tree.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-role-permission-dialog.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-dictionary-create-form.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-dictionary-create-validation.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-dictionary-create-success.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-config-policy.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-config-saved.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-config-conflict.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-login-record-filtered.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-role-scope-form.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-role-scope-saved.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-menu-permission-tree.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-role-permission-dialog.png",
+        "read_scope": "Exact original path/locale/hash and dated receipt with prior individual AI visual review retained;historical semantic fields read this stage,not a new individual image view.",
+        "outputs": [
+          "392 matches",
+          "057bcd",
+          "21999e",
+          "89c0d2",
+          "12992b"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-tenants.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-organizations.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-roles.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-permissions.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-dictionaries.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-online-users.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-audit-log.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-auth-records.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-xss-config.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/system-operation-log.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-tenants.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-organizations.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-roles.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-permissions.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-dictionaries.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-online-users.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-audit-log.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-auth-records.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-xss-config.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/system-operation-log.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-tenants.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-organizations.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-roles.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-permissions.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-dictionaries.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-online-users.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-audit-log.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-auth-records.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-xss-config.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/system-operation-log.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-tenants.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-organizations.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-roles.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-permissions.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-dictionaries.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-online-users.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-audit-log.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-auth-records.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-xss-config.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/system-operation-log.png",
+        "read_scope": "Current original Docker image actually individually viewed401;copied byte-for-byte from successful398 capture;no image edits.",
+        "outputs": [
+          "398 capture",
+          "401 actual individual views"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/security-lists-2026-10-17.json",
+        "read_scope": "Actual398capture,401individualvisual observations,DBbefore/after guard and reconciled prior failures.",
+        "outputs": [
+          "1fb229",
+          "421e85",
+          "f487f7"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/scripts/security-lists-2026-10-17.mjs",
+        "read_scope": "Exact executed successful398script archive,not a replacement test;no token values.",
+        "outputs": [
+          "398 executed source"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/e2e-docs/screenshot-manifest.yaml",
+        "read_scope": "Exactly40list/settings image records updated;all other records and rules asserted unchanged;permission dependency requires scoped renewal.",
+        "outputs": [
+          "403 mutation with exact preservation guards"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ],
+    "current_raw_images_individually_viewed": 40,
+    "current_screenshot_source": "docs/reference/evidence/security-lists-2026-10-17.json",
+    "current_unchanged_historical_images": 44,
+    "historical_images_all_newly_recaptured_or_viewed": false,
+    "current_page_api_reads": 44,
+    "current_policy_admin_http": 200,
+    "current_policy_employee_http": 403,
+    "observed_database_values_unchanged": true,
+    "xss_settings_row_already_existed": true,
+    "xss_enabled_before_after": 0,
+    "read_only_capture": true,
+    "business_form_submissions": 0,
+    "password_captcha_login": false,
+    "historical_business_writes_replayed": false,
+    "current_screenshot_viewport": {
+      "width": 1680,
+      "height": 1050
+    },
+    "no_pixel_or_dom_text_rewriting": true,
+    "all_six_stage_started_containers_stopped": true,
+    "temporary_tokens_and_env_files_removed": true,
+    "volumes_preserved": true,
+    "unchanged_backend_build": "backend-workflow-boundary-260.json;211report hashes andcurrentJAR/source equivalence attested370",
+    "unchanged_frontend_build": "frontend-dict-checks-144.json;159output hashes attested370;only screenshot metadata changed infrontend,application code unchanged",
+    "new_application_build_or_test_runs": 0,
+    "application_source_changes": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "Current screenshots prove40read-only pages/settings and recorded API results only;no XSS mutation/attack input,kick,new password/CAPTCHA login,external OAuth callback or asynchronous delivery test.",
+      "Historical dictionary12/platform32 originals retain exact date/runtime/source limits and prior individual AI visual review;not newly recaptured or all freshly re-viewed.",
+      "Native header/sidebar clipping,ID/grant wrapping,partial tree viewport,English fallback,Chinese database business values and blank scope/time fields remain explicit.",
+      "Full original A-G remains open;global authentication/social-login/SRM screenshot coverage and other27translation rows are not approved by this family review."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/system-security-audit.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 18:58:51",
+      "result": "approved",
+      "translation_sha256": "51496d9394404ad38c83b5a7e74b24a2f3f107829acc10be772aca296be9e162",
+      "checks": {
+        "coverage_and_meaning": "四篇最终正文各124行已完整阅读，原484行覆盖的七节、角色2.1、21图及全部操作/恢复场景保留；三译文将错放的4.1移回2.1，与中文顺序一致。读者写操作、历史已完成写入及当前只读取证明确区分。",
+        "technical_literals": "四语59个归一化行内技术字面量多重集、36个归一化相对链接序列一致；每篇7H2/1H3/21图、无技术围栏。核对主组织primaryUnitId正式API、全量角色/权限替换、六种范围、登录策略版本/界限、两种缓存键及Outbox真实字段。",
+        "security_and_failure_semantics": "核对功能角色/候选作用域独立，管理员与员工边界、HTTP400校验、HTTP200/body409冲突保留草稿、最新服务器配置版本和原值恢复。XSS设置GET可能创建默认关闭行，本轮先确认既存行并保持0；规则开关不证明过滤，在线空表不证明踢出。Auth审计、登录投影、OAuth许可和业务操作日志分开；SENT不等于消费完成。",
+        "images_and_links": "四篇完整Markdown已在Docker渲染，相对链接均可达。40张当前原图逐张实际查看且原字节复制，44次真实页面API读取和额外管理员200/员工403配置读取有记录；44张历史图精确匹配原始来源和先前AI视觉复核。表头重叠/截断、滚动范围、英文回退及中文业务数据明确保留；不冒称历史写入重跑、CAPTCHA/OAuth正向、踢出或异步消费已完成。",
+        "language_and_terminology": "Read all124current lines against Chinese. Preserves full operational meaning and dated evidence boundaries. Distinguishes functional roles from workflow scopes,primary organization API from UI,latest server configuration version from authorization,default reset from original restoration,and request Trace ID from unavailable operation-log UI fields."
+      },
+      "findings": [
+        {
+          "id": "SA01",
+          "status": "resolved",
+          "resolution": "All four use authorized AI_REVIEW without a mandatory human gate or false HUMAN_REVIEW claim."
+        },
+        {
+          "id": "SA02",
+          "status": "resolved",
+          "resolution": "Complete role-scope/menu procedure placed at2.1 before dictionary/login sections in every locale."
+        },
+        {
+          "id": "SA03",
+          "status": "resolved",
+          "resolution": "Primary organization cannot be edited on current user UI;document actual primaryUnitId PUT and independent workflow scope."
+        },
+        {
+          "id": "SA04",
+          "status": "resolved",
+          "resolution": "40source-unbound list images replaced with actual current Docker originals and source/runtime/script/API/individualvisual records;44dated originals retained exactly."
+        },
+        {
+          "id": "SA05",
+          "status": "resolved",
+          "resolution": "Historical dictionary/role/policy writes,failed epochs,reconciliation and cleanup are dated;not replayed or described as current execution."
+        },
+        {
+          "id": "SA06",
+          "status": "resolved",
+          "resolution": "Use actual original values/latest expectedVersion;10to9 is dated example only. Preserve bounds,HTTP200/body409,draft retention,explicit retry/adopt and original restoration without version/audit rollback."
+        },
+        {
+          "id": "SA07",
+          "status": "resolved",
+          "resolution": "Japanese/Korean explicitly refer to latest server configuration version,not authorization version or unnatural authoritative-version wording."
+        },
+        {
+          "id": "SA08",
+          "status": "resolved",
+          "resolution": "Current sources and dated receipts bound with exact scopes. Dictionary/backendvalidation,login7day/90day projection,grantmetadata,online userId kick and audit distinctions retained;unexecuted writes not claimed."
+        },
+        {
+          "id": "SA09",
+          "status": "resolved",
+          "resolution": "Expose default-disabled XSS settings materialization;prove current row existed and remained disabled,without equating enabled rules/list availability with filtering."
+        },
+        {
+          "id": "SA10",
+          "status": "resolved",
+          "resolution": "Remove implied operation-log TraceID search/mandatorybusinesskey;use actual filters,structuredlogs,Outbox msgId/optionalmsgKey/producerTraceId and full messaging runtime prerequisites."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/system-security-audit.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 18:58:51",
+      "result": "approved",
+      "translation_sha256": "900afb45711ad9e00448725c02b2618c099da800b87cf0fa6522b07f89a1fb65",
+      "checks": {
+        "coverage_and_meaning": "四篇最终正文各124行已完整阅读，原484行覆盖的七节、角色2.1、21图及全部操作/恢复场景保留；三译文将错放的4.1移回2.1，与中文顺序一致。读者写操作、历史已完成写入及当前只读取证明确区分。",
+        "technical_literals": "四语59个归一化行内技术字面量多重集、36个归一化相对链接序列一致；每篇7H2/1H3/21图、无技术围栏。核对主组织primaryUnitId正式API、全量角色/权限替换、六种范围、登录策略版本/界限、两种缓存键及Outbox真实字段。",
+        "security_and_failure_semantics": "核对功能角色/候选作用域独立，管理员与员工边界、HTTP400校验、HTTP200/body409冲突保留草稿、最新服务器配置版本和原值恢复。XSS设置GET可能创建默认关闭行，本轮先确认既存行并保持0；规则开关不证明过滤，在线空表不证明踢出。Auth审计、登录投影、OAuth许可和业务操作日志分开；SENT不等于消费完成。",
+        "images_and_links": "四篇完整Markdown已在Docker渲染，相对链接均可达。40张当前原图逐张实际查看且原字节复制，44次真实页面API读取和额外管理员200/员工403配置读取有记录；44张历史图精确匹配原始来源和先前AI视觉复核。表头重叠/截断、滚动范围、英文回退及中文业务数据明确保留；不冒称历史写入重跑、CAPTCHA/OAuth正向、踢出或异步消费已完成。",
+        "language_and_terminology": "全124行を中文事実源と照合。既存の権限・辞書・設定手順と復元を保持し、節2.1へ順序を統一。サーバーの最新設定バージョンを自然に表現し、認証記録という画面名とOAuth許可履歴の意味、現在の読み取りと過去の書き込みを区別。コード・日時・失敗条件を変更していない。"
+      },
+      "findings": [
+        {
+          "id": "SA01",
+          "status": "resolved",
+          "resolution": "All four use authorized AI_REVIEW without a mandatory human gate or false HUMAN_REVIEW claim."
+        },
+        {
+          "id": "SA02",
+          "status": "resolved",
+          "resolution": "Complete role-scope/menu procedure placed at2.1 before dictionary/login sections in every locale."
+        },
+        {
+          "id": "SA03",
+          "status": "resolved",
+          "resolution": "Primary organization cannot be edited on current user UI;document actual primaryUnitId PUT and independent workflow scope."
+        },
+        {
+          "id": "SA04",
+          "status": "resolved",
+          "resolution": "40source-unbound list images replaced with actual current Docker originals and source/runtime/script/API/individualvisual records;44dated originals retained exactly."
+        },
+        {
+          "id": "SA05",
+          "status": "resolved",
+          "resolution": "Historical dictionary/role/policy writes,failed epochs,reconciliation and cleanup are dated;not replayed or described as current execution."
+        },
+        {
+          "id": "SA06",
+          "status": "resolved",
+          "resolution": "Use actual original values/latest expectedVersion;10to9 is dated example only. Preserve bounds,HTTP200/body409,draft retention,explicit retry/adopt and original restoration without version/audit rollback."
+        },
+        {
+          "id": "SA07",
+          "status": "resolved",
+          "resolution": "Japanese/Korean explicitly refer to latest server configuration version,not authorization version or unnatural authoritative-version wording."
+        },
+        {
+          "id": "SA08",
+          "status": "resolved",
+          "resolution": "Current sources and dated receipts bound with exact scopes. Dictionary/backendvalidation,login7day/90day projection,grantmetadata,online userId kick and audit distinctions retained;unexecuted writes not claimed."
+        },
+        {
+          "id": "SA09",
+          "status": "resolved",
+          "resolution": "Expose default-disabled XSS settings materialization;prove current row existed and remained disabled,without equating enabled rules/list availability with filtering."
+        },
+        {
+          "id": "SA10",
+          "status": "resolved",
+          "resolution": "Remove implied operation-log TraceID search/mandatorybusinesskey;use actual filters,structuredlogs,Outbox msgId/optionalmsgKey/producerTraceId and full messaging runtime prerequisites."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/system-security-audit.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 18:58:51",
+      "result": "approved",
+      "translation_sha256": "40f1b0b492ee53b096c18514c59651c38059209447343dbdca04a8b4ee10aa8a",
+      "checks": {
+        "coverage_and_meaning": "四篇最终正文各124行已完整阅读，原484行覆盖的七节、角色2.1、21图及全部操作/恢复场景保留；三译文将错放的4.1移回2.1，与中文顺序一致。读者写操作、历史已完成写入及当前只读取证明确区分。",
+        "technical_literals": "四语59个归一化行内技术字面量多重集、36个归一化相对链接序列一致；每篇7H2/1H3/21图、无技术围栏。核对主组织primaryUnitId正式API、全量角色/权限替换、六种范围、登录策略版本/界限、两种缓存键及Outbox真实字段。",
+        "security_and_failure_semantics": "核对功能角色/候选作用域独立，管理员与员工边界、HTTP400校验、HTTP200/body409冲突保留草稿、最新服务器配置版本和原值恢复。XSS设置GET可能创建默认关闭行，本轮先确认既存行并保持0；规则开关不证明过滤，在线空表不证明踢出。Auth审计、登录投影、OAuth许可和业务操作日志分开；SENT不等于消费完成。",
+        "images_and_links": "四篇完整Markdown已在Docker渲染，相对链接均可达。40张当前原图逐张实际查看且原字节复制，44次真实页面API读取和额外管理员200/员工403配置读取有记录；44张历史图精确匹配原始来源和先前AI视觉复核。表头重叠/截断、滚动范围、英文回退及中文业务数据明确保留；不冒称历史写入重跑、CAPTCHA/OAuth正向、踢出或异步消费已完成。",
+        "language_and_terminology": "현재124행 전체를 중국어 사실 원문과 대조했다. 서버의 최신 설정 버전과 권한 부여 버전을 혼동하지 않으며 초안 유지,원래 값 복원,기능 역할/후보자 범위,과거 증거/현재 읽기를 구분한다. UI 인증 기록과 OAuth 허가 이력의 관계를 설명하고 API,코드,복구 조건을 유지했다."
+      },
+      "findings": [
+        {
+          "id": "SA01",
+          "status": "resolved",
+          "resolution": "All four use authorized AI_REVIEW without a mandatory human gate or false HUMAN_REVIEW claim."
+        },
+        {
+          "id": "SA02",
+          "status": "resolved",
+          "resolution": "Complete role-scope/menu procedure placed at2.1 before dictionary/login sections in every locale."
+        },
+        {
+          "id": "SA03",
+          "status": "resolved",
+          "resolution": "Primary organization cannot be edited on current user UI;document actual primaryUnitId PUT and independent workflow scope."
+        },
+        {
+          "id": "SA04",
+          "status": "resolved",
+          "resolution": "40source-unbound list images replaced with actual current Docker originals and source/runtime/script/API/individualvisual records;44dated originals retained exactly."
+        },
+        {
+          "id": "SA05",
+          "status": "resolved",
+          "resolution": "Historical dictionary/role/policy writes,failed epochs,reconciliation and cleanup are dated;not replayed or described as current execution."
+        },
+        {
+          "id": "SA06",
+          "status": "resolved",
+          "resolution": "Use actual original values/latest expectedVersion;10to9 is dated example only. Preserve bounds,HTTP200/body409,draft retention,explicit retry/adopt and original restoration without version/audit rollback."
+        },
+        {
+          "id": "SA07",
+          "status": "resolved",
+          "resolution": "Japanese/Korean explicitly refer to latest server configuration version,not authorization version or unnatural authoritative-version wording."
+        },
+        {
+          "id": "SA08",
+          "status": "resolved",
+          "resolution": "Current sources and dated receipts bound with exact scopes. Dictionary/backendvalidation,login7day/90day projection,grantmetadata,online userId kick and audit distinctions retained;unexecuted writes not claimed."
+        },
+        {
+          "id": "SA09",
+          "status": "resolved",
+          "resolution": "Expose default-disabled XSS settings materialization;prove current row existed and remained disabled,without equating enabled rules/list availability with filtering."
+        },
+        {
+          "id": "SA10",
+          "status": "resolved",
+          "resolution": "Remove implied operation-log TraceID search/mandatorybusinesskey;use actual filters,structuredlogs,Outbox msgId/optionalmsgKey/producerTraceId and full messaging runtime prerequisites."
+        }
+      ]
+    }
+  }
+}

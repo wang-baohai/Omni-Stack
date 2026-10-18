@@ -2,6 +2,11 @@
 const NON_MANAGEMENT_SUPPLIER_ROLES = new Set(['USER', 'SUPPLIER'])
 const ASSET_SELF_SERVICE_ROLES = new Set(['USER', 'ASSET_USER'])
 
+/** 门户入驻权限独立于后台只读权限；企业资料仍由各接口校验 SUPPLIER 角色和关联。 */
+export function hasSupplierPortalAccess(permissions: string[], roles: string[] = []): boolean {
+  return roles.includes('SUPPLIER') || permissions.includes('srm:portal:enroll')
+}
+
 /**
  * 判断当前账号是否具备管理端身份。
  *

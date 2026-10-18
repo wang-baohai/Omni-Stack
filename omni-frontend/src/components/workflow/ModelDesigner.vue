@@ -17,7 +17,7 @@ import {
   type ProcessModelVersion,
   type ValidateResult,
 } from '@/api/workflow-model'
-import { useBpmnModeler } from '@/composables/useBpmnModeler'
+import { createInitialBpmn, useBpmnModeler } from '@/composables/useBpmnModeler'
 import { registerOmniModdle } from '@/composables/useBpmnExtension'
 import {
   type BpmnConnect,
@@ -133,9 +133,9 @@ async function loadModel() {
       const vRes = await getVersion(draftVersionId)
       currentVersion.value = vRes.data.data
       const xml = currentVersion.value.bpmnXml
-      if (xml) {
-        await importXml(xml)
-      }
+      await importXml(xml || createInitialBpmn(modelInfo.value.modelKey))
+    } else {
+      await importXml(createInitialBpmn(modelInfo.value.modelKey))
     }
   } catch {
     ElMessage.error(t('workflow.modelLoadFailed'))

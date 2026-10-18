@@ -1,18 +1,6 @@
-# Docker フルスタックデプロイメント完全ガイド
+# Docker デプロイメント技術リファレンス
 
-標準環境のプロジェクトは `omni-stack`、ネットワークは `omni-stack_default` です。MySQL、Redis、RocketMQ Broker はそれぞれ `omni-stack_omni-mysql-data`、`omni-stack_omni-redis-data`、`omni-stack_omni-rocketmq-data` の名前付きボリュームを使用し、コンテナーの再作成後もデータを保持します。`docker/rocketmq/Dockerfile` は公式 5.3.2 を使用し、uid 3000 のデータディレクトリを準備します。資産の移管・処分承認には `ASSET_MANAGER` の割り当てと組織内候補者スコープの設定が必要です。シードはデモ管理者にこの承認業務を自動で割り当てません。
-
-> 本ドキュメントは Omni-Stack Docker デプロイメントの完全な技術リファレンスです。アーキテクチャ設計、ビルド原理、設定詳細、運用操作、トラブルシューティングを網羅しています。  
-> クイックスタートは [README.jp.md](../README.jp.md) の Docker ワンクリックデプロイメントセクションを参照してください。
-
-
-標準ローカルプロジェクトは `omni-stack`、既定ネットワークは `omni-stack_default`、MySQL ボリュームは `omni-stack_omni-mysql-data` です。すべてのアプリと業務検証をローカル Docker 内で実行します。ホストでソースを編集し、Compose で再ビルドします。既定ポートは固定し、競合の原因を解消してください。
-
-XXL-JOB のログイン名は `admin` 固定です。初回初期化時、migrator が公開シードパスワードを `.env` の `XXL_JOB_ADMIN_PASSWORD` の SHA-256 に置換し、全 executor が同じ認証情報を使用します。移行の再実行では変更済みパスワードを上書きしません。既存管理者のパスワード変更時は `.env` と DB アカウントの両方を更新してください。
-
-Nacos のサーバー認証を有効にし、コンソールと登録・設定クライアントは `.env` の `NACOS_USERNAME=nacos` と `NACOS_PASSWORD` を共用します。migrator は初回のみ公開シードの BCrypt パスワードを置換し、変更済みアカウントは保持します。`NACOS_AUTH_TOKEN` と `NACOS_AUTH_IDENTITY_KEY/VALUE` はサーバー署名・ノード認証用であり、ログイン情報ではありません。
-
----
+正式な Compose、Dockerfile、移行ツール、リバースプロキシの現在の動作を説明します。メインリポジトリの full 構成は比較用の基準です。生成プロジェクトはページ冒頭のプリセット範囲と自身の Compose、catalog、seed manifest を使い、元のサービス数やレビュー承認を継承しません。初回起動は[クイックスタート](guides/quick-start.jp.md)、操作・期待結果・復旧は [Wiki](wiki/index.jp.md)と[トラブルシューティング](guides/troubleshooting.jp.md)を参照してください。[現行承認方針](adr/0003-authorized-ai-translation-review.md)では実際の AI_REVIEW で足り、四言語文書の人手レビューは必須ではありません。
 
 ## 目次
 
@@ -33,814 +21,545 @@ Nacos のサーバー認証を有効にし、コンソールと登録・設定�
 - [15. トラブルシューティングガイド](#15-トラブルシューティングガイド)
 - [16. 設定リファレンス](#16-設定リファレンス)
 
----
-
 ## 1. アーキテクチャ概要
 
-Omni-Stack Docker フルスタックは **15 個の常駐コンテナーと 1 個の一時移行コンテナー**を含み、3 つのレイヤーに分類されます：
+メインリポジトリの full profile は常駐サービス 15 個と一回限りの移行ツールを宣言します。内訳はフロントエンド 1、バックエンド 8、基盤 6 です。これは構成モデルの数であり、現在の稼働、正常性、業務検証の証明ではありません。任意の観測スタックと独立文書サイトは別に有効化し、この基準数に含めません。
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                  フロントエンド層（1 コンテナ）               │
-│  omni-frontend (Vue 3 + Nginx:3000)                        │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ proxy_pass
-┌──────────────────────────┴──────────────────────────────────┐
-│              バックエンドマイクロサービス層（8 コンテナ）      │
-│  Gateway · Auth · Base · Workflow · CRM · SRM              │
-│  Procurement · Asset（公開入口は Gateway のみ）             │
-└────────┼────────────────────┬───────────────────────────────┘
-         │                    │
-┌────────┴────────────────────┴───────────────────────────────┐
-│                  ミドルウェア層（6 コンテナ）                 │
-│  MySQL (:3306) · Redis (:6379) · Nacos (:8080/:8848/:9848) │
-│  RocketMQ NameServer (:19876) · Broker (:10909-10912)      │
-│  XXL-JOB Admin (:18080)                                    │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**設計原則**：
-- すべてのバックエンドマイクロサービスコンテナの内部ポートは **8080** に統一し、ホストポートマッピングで区別
-- コンテナ間通信は **Docker 内部ネットワーク**（`omni-stack_default`）を使用し、コンテナ名で解決
-- フロントエンド Nginx は静的ファイルと API リバースプロキシの両方を提供 — ユーザーは 1 つのポート（3000）のみアクセス
-
----
+ソース: [compose.yaml](../compose.yaml)、[compose.apps.yaml](../compose.apps.yaml)、[compose.infra.yaml](../compose.infra.yaml).
 
 ## 2. コンテナネットワークトポロジ
 
-すべてのコンテナは Docker ブリッジネットワーク `omni-stack_default` を共有します：
+標準プロジェクトは `omni-stack`、既定ネットワークは `omni-stack_default` です。コンテナ間は Compose サービス名と内部ポートを使い、ホストのマッピングとは区別します。Frontend/Gateway はホスト IP を明示しないマッピングで、その他の業務診断・基盤ポートは `127.0.0.1` にバインドします。管理ポートはホストへ公開しません。実際の公開範囲は Docker の状態で確認し、ローカル構成を本番 HTTPS、隔離、高可用性の証明にはしません。
 
-```yaml
-name: omni-stack
-# Compose 自动创建 omni-stack_default
-```
-
-**ネットワーク通信ルール**：
-
-| 送信元コンテナ | 送信先コンテナ | 使用アドレス | 説明 |
-|---------------|---------------|-------------|------|
-| omni-frontend | omni-gateway | `omni-gateway:8080` | Nginx proxy_pass（内部ポート） |
-| omni-gateway | omni-auth | `omni-auth:8080` | Spring Cloud Gateway ルーティング |
-| omni-auth | mysql | `mysql:3306` | JDBC 接続 |
-| omni-auth | redis | `redis:6379` | キャッシュ/セッション |
-| omni-auth | nacos | `nacos:8848` | サービス登録/設定 |
-| omni-base | rocketmq-namesrv | `rocketmq-namesrv:9876` | MQ メッセージ送信 |
-| omni-base | xxl-job-admin | `xxl-job-admin:8080` | ジョブ実行登録 |
-| omni-crm | omni-auth | `omni-auth:8080` | ユーザー/組織/データスコープ/XSS 内部クエリ |
-| omni-crm | rocketmq-namesrv | `rocketmq-namesrv:9876` | CRM Outbox メッセージ配信 |
-| omni-crm | xxl-job-admin | `xxl-job-admin:8080` | CRM リレー実行体登録 |
-| omni-srm | mysql | `mysql:3306` | SRM 業務データベースとローカル Outbox |
-| omni-srm | omni-auth | `omni-auth:8080` | ユーザー/組織内部クエリと Portal Saga |
-| omni-procurement | omni-srm | `omni-srm:8080` | サプライヤー招待/見積/落札検証 |
-| omni-procurement | omni-workflow | `omni-workflow:8080` | 購買申請承認内部契約 |
-| omni-asset | omni-procurement | `omni-procurement:8080` | 入庫資産候補の履歴補償 |
-| omni-asset | omni-workflow | `omni-workflow:8080` | 移管/廃棄承認内部契約 |
-| ホストブラウザ | omni-frontend | `localhost:3000` | ユーザーアクセス入口 |
-| ホストブラウザ | Nacos Console | `localhost:8080` | 運用管理 |
-
-> **重要な区別**：コンテナ間通信は内部コンテナポート（例：8080）を使用し、ホストからのアクセスはマッピングポート（例：8100-8107）を使用します。MySQL はコンテナ内では常に 3306 を使い、ホストには 3306 にマッピングされます。
-
-> **本番ネットワーク境界**：リポジトリルートの `compose.yaml` とその include ファイルはローカル開発/統合オーケストレーションです。フロントエンド 3000 と Gateway 8102 のみがホストからアクセス可能で、その他の全サービス/ミドルウェア/管理コンソールは診断用入口として `127.0.0.1` にのみバインドされます。本番デプロイではフロントエンド/Gateway の HTTPS 入口のみを公開し、すべての診断用ポートマッピングを除去しなければなりません。下流の `X-Gateway-Forwarded` は転送マーカーに過ぎず、プライベートネットワークとサービス間トークンの代替にはなりません。
-
----
+ソース: [compose.apps.yaml](../compose.apps.yaml)、[compose.infra.yaml](../compose.infra.yaml).
 
 ## 3. 起動チェーンとヘルスチェック
 
+各サービスの `depends_on` とプローブが起動条件を決めます。running、正常プローブ、移行完了、業務機能の利用可能性は別の状態です。完全な項目は現在の Compose とイメージ設定が管理します。
+
 ### 3.1 レイヤー起動順序
 
-以下は Compose に実際に宣言された依存関係です。起動後はアプリの正常判定を待ってください。migrator の正常終了は想定どおりです。
+MySQL の正常判定後に移行ツールが起動します。Nacos、XXL-JOB、バックエンドの移行ゲートは `service_completed_successfully` を要求します。Gateway が明示的に待つのは移行ツール、Redis、Auth であり、全下流サービスではありません。Frontend に Compose の `depends_on` はなく、動的 DNS プロキシは Gateway の準備前に起動でき、その間の要求は失敗する場合があります。以下は現在の Gateway/Frontend 依存関係の抜粋です。
 
-```text
-mysql healthy -> omni-db-migrator exit 0 -> nacos / xxl-job-admin / applications
-redis healthy ---------------------------------------------> applications
-rocketmq-namesrv healthy -> rocketmq-broker healthy
-all downstream applications healthy -> omni-gateway -> omni-frontend
+```mermaid
+flowchart LR
+    s0["mysql"]
+    s1["omni-db-migrator"]
+    s2["redis"]
+    s3["omni-auth"]
+    s4["omni-gateway"]
+    s5["omni-frontend"]
+    s0 -->|service_healthy| s1
+    s2 -->|service_healthy| s3
+    s0 -->|service_healthy| s3
+    s1 -->|service_completed_successfully| s3
+    s1 -->|service_completed_successfully| s4
+    s2 -->|service_healthy| s4
+    s3 -->|service_healthy| s4
 ```
+
+ソース: [compose.apps.yaml](../compose.apps.yaml)、[compose.infra.yaml](../compose.infra.yaml).
 
 ### 3.2 ヘルスチェック設定一覧
 
-| サービス | チェック方式 | interval | timeout | retries | start_period |
-|---------|-------------|----------|---------|---------|--------------|
-| MySQL | `mysqladmin ping` | 10s | 5s | 5 | 30s |
-| Redis | `redis-cli ping` | 10s | 5s | 5 | 10s |
-| Nacos | `curl http://localhost:8848/nacos/` | 15s | 5s | 5 | 60s |
-| RocketMQ NameServer | TCP ポート探测 `/dev/tcp/127.0.0.1/9876` | 10s | 5s | 5 | 30s |
-| RocketMQ Broker | TCP ポート探测 `/dev/tcp/127.0.0.1/10911` | 15s | 5s | 5 | 60s |
-| XXL-JOB Admin | TCP ポート探测 `/dev/tcp/localhost/8080` | 15s | 5s | 5 | 60s |
-| omni-auth | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
-| omni-base | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
-| omni-gateway | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
-| omni-workflow | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
-| omni-crm | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
-| omni-srm | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
-| omni-procurement | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
-| omni-asset | `curl http://localhost:8080/actuator/health` | 15s | 5s | 5 | 90s |
+バックエンドのプローブは `MANAGEMENT_SERVER_PORT` を使います。正式 Compose は 8 サービスに `19900`–`19907` を設定し、ホストへは公開しません。Dockerfile の `8080` フォールバックはアプリ YAML の管理ポートを読み取りません。単独イメージ実行では明示的に一致させます。起動猶予はプローブ設定であり、コールドスタート時間の保証ではありません。Frontend 専用のプローブはリポジトリで追加していません。
 
-> 注：omni-* の `HEALTHCHECK` は実際には `curl http://localhost:${MANAGEMENT_SERVER_PORT:-8080}/actuator/health` です。Compose では各サービスの `MANAGEMENT_SERVER_PORT` が `19900`〜`19907` に設定されるため、プローブはコンテナ内の management ポートを指します（表の `8080` は未指定時の Dockerfile のフォールバック既定値）。management ポートはホストへ公開されないため、ホスト側で `localhost:8080/actuator/health` にアクセスしないでください（404 になります）。
+| サービス | プローブ | 間隔 / タイムアウト / 再試行 / 起動猶予 |
+| --- | --- | --- |
+| `mysql` | `CMD-SHELL` / `mysqladmin ping` | `10s / 5s / 5 / 30s` |
+| `redis` | `CMD-SHELL` / `REDISCLI_AUTH / redis-cli ping` | `10s / 5s / 5 / 10s` |
+| `nacos` | `CMD` / `http://localhost:8848/nacos/` | `15s / 5s / 5 / 60s` |
 
-> **なぜ start_period = 90s？**  
-> Spring Boot マイクロサービスはコールドスタート時に多数の Bean のロード + データベース初期化 + Nacos 登録が必要で、60-80 秒かかる場合があります。90s に設定することで誤判定を防止します。
+<!-- omni:modules:rocketmq -->
+| サービス | プローブ | 間隔 / タイムアウト / 再試行 / 起動猶予 |
+| --- | --- | --- |
+| `rocketmq-namesrv` | `CMD-SHELL` / `/dev/tcp/127.0.0.1/9876` | `10s / 5s / 5 / 30s` |
+| `rocketmq-broker` | `CMD-SHELL` / `/dev/tcp/127.0.0.1/10911` | `15s / 5s / 5 / 60s` |
+<!-- omni:modules:end -->
 
----
+<!-- omni:modules:xxl-job -->
+| サービス | プローブ | 間隔 / タイムアウト / 再試行 / 起動猶予 |
+| --- | --- | --- |
+| `xxl-job-admin` | `CMD-SHELL` / `/dev/tcp/localhost/8080` | `15s / 5s / 5 / 60s` |
+<!-- omni:modules:end -->
+
+ソース: [Dockerfile](../docker/backend/Dockerfile)、[compose.apps.yaml](../compose.apps.yaml)、[compose.infra.yaml](../compose.infra.yaml).
 
 ## 4. マルチステージビルドの原理
 
+業務サービス、移行ツール、フロントエンド、Broker はそれぞれ正式 Dockerfile を使います。ビルドと起動は個別に検証します。既存成果物の再利用には、正確なソース・入力の等価性と識別情報が必要です。タグや未測定のサイズでは検証済みイメージを識別できません。
+
 ### 4.1 バックエンドマイクロサービスビルド
 
-すべてのバックエンドマイクロサービスは共通の Dockerfile（`docker/backend/Dockerfile`）を共有し、`SERVICE_NAME` ビルド引数で区別します：
+バックエンドのビルダーは JDK 25 を提供し、Maven Wrapper を実行します。`dependency:go-offline` は失敗を許容する事前取得ですが、実際の `package -pl '!omni-db-migrator'` ゲートは省略できません。`SERVICE_NAME` は最終 JAR を選び、この段階の reactor のビルド対象を絞り込みません。移行ツールの別イメージでそのモジュールのテストを行います。`-DskipTests` は指定しませんが、条件付きテストはスキップされ得るため報告を確認します。以下は実際のビルドと入口の抜粋です。
 
 ```dockerfile
 FROM maven:3.9-eclipse-temurin-25-alpine AS build
-COPY omni-backend/docker-settings.xml /build/docker-settings.xml
-WORKDIR /build
-COPY omni-backend/ .
-COPY scaffold/ /scaffold/
-COPY database/seed/ /database/seed/
 RUN --mount=type=cache,id=omni-maven-repository,target=/root/.m2,sharing=locked \
-    sh ./mvnw -s docker-settings.xml package -pl '!omni-db-migrator' -B -q
+    sh ./mvnw -s docker-settings.xml package -pl '!omni-db-migrator' -B -q -Dmaven.wagon.http.retryHandler.count=5
 FROM eclipse-temurin:25-jre-alpine
 ARG SERVICE_NAME
 COPY --from=build /build/${SERVICE_NAME}/target/*.jar /app/app.jar
-ENV SERVER_PORT=8080
-ENTRYPOINT ["java", "--enable-native-access=ALL-UNNAMED", "-jar", "/app/app.jar"]
+ENTRYPOINT ["/bin/bash", "-c", "exec java --enable-native-access=ALL-UNNAMED $JAVA_OPTS -jar /app/app.jar"]
 ```
 
-**レイヤーキャッシュ最適化戦略**：
-
-1. **POM レイヤーキャッシュ**：すべての `pom.xml` をコピーして `dependency:go-offline` を実行 — POM が変わらない限り、後続ビルドはキャッシュレイヤーを再利用し、依存関係ダウンロードをスキップ
-2. **ソース分離**：`COPY . .` はソースコード変更時のみリビルドをトリガー
-3. **フルリアクタビルド + 最終 jar 選択**：発布層は `sh ./mvnw -s docker-settings.xml package -pl '!omni-db-migrator'` でマイグレータ以外の全モジュールを一括ビルド（**テストをスキップしない**、`-DskipTests` で偽らない）；サービスイメージは同一ビルド層を共有；`SERVICE_NAME` は Stage 2 で `COPY --from=build .../${SERVICE_NAME}/target/*.jar` により最終 jar を選択するのみで、コンパイル範囲を制御しません
-
-**イメージ選定の考慮事項**：
-
-| 選択 | 理由 |
-|------|------|
-| `maven:3.9-eclipse-temurin-25-alpine` | Alpine ベースは小さい（~200MB vs ~800MB for Debian）、Maven 3.9 + JDK 25 内蔵 |
-| `eclipse-temurin:25-jre-alpine` | ランタイムには JRE のみ必要（~80MB）、フル JDK イメージより 300MB+ 小さい |
+ソース: [Dockerfile](../docker/backend/Dockerfile)、[Dockerfile](../docker/migrator/Dockerfile).
 
 ### 4.2 フロントエンドビルド
 
-```dockerfile
-# Stage 1: Node ビルド
-FROM node:22-alpine AS build
-WORKDIR /app
-COPY omni-frontend/package*.json ./
-RUN npm ci                                  # 正確インストール（lock ファイル使用）
-COPY omni-frontend/ .
-RUN npm run build                           # Vite プロダクションビルド
+フロントエンドは `node:22-alpine` で、ロックファイル、BuildKit npm cache、再試行設定を使って `npm ci` を実行し、production build を作成します。実行段階は `nginx:1.28-alpine` で dist と正式 Nginx 設定をコピーし、3000 で待ち受けます。この手順だけでは lint、ブラウザー、業務検証を証明しません。
 
-# Stage 2: Nginx ランタイム
+```dockerfile
+FROM node:22-alpine AS build
+RUN --mount=type=cache,id=omni-npm-cache,target=/root/.npm,sharing=locked \
+    npm ci --prefer-offline --no-audit --fetch-retries=5 \
+      --fetch-retry-mintimeout=10000 --fetch-retry-maxtimeout=60000
+RUN npm run build
 FROM nginx:1.28-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3000
 ```
 
-**レイヤーキャッシュ**：`package*.json` をコピーして `npm ci` を先に実行 — ソースコード変更時に依存関係の再インストールを回避。
-
----
+ソース: [Dockerfile](../docker/frontend/Dockerfile).
 
 ## 5. compose.yaml サービス別設定解説
 
+`compose.yaml` は `compose.infra.yaml`、`compose.apps.yaml`、`compose.observability.yaml` を include し、profiles でサービスを組み合わせます。標準業務モデルと任意の観測モデルを区別し、同じサービスの正式定義は一か所に置きます。本書は境界を説明し、完全な起動操作は Wiki が管理します。
+
+ソース: [compose.yaml](../compose.yaml)、[compose.observability.yaml](../compose.observability.yaml).
+
 ### 5.1 MySQL 8.4
 
-```yaml
-mysql:
-  image: mysql:8.4
-  environment:
-    MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:? .env に設定してください}
-    MYSQL_DATABASE: omni_auth          # 自動作成される最初のデータベース
-    MYSQL_CHARACTER_SET_SERVER: utf8mb4
-    MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
-    TZ: Asia/Shanghai                  # タイムゾーン
-  volumes:
-    - omni-mysql-data:/var/lib/mysql
-```
+MySQL 8.4 は明示的な名前付きデータボリュームを使い、標準名は `omni-stack_omni-mysql-data` です。entrypoint に集約 SQL はマウントしません。移行管理者が DB を作成・移行し、アプリ用 `omni_app` には七つのアプリ DB だけを許可します。Nacos/XXL-JOB の現在のベンダー DB 接続は root を使用するため、基盤全体が最小権限とは言えません。業務表があり Liquibase 履歴がない既存 DB は直接 migrate を拒否します。
 
-**ポイント**：
-- MySQL entrypoint には集約 SQL をマウントせず、新規環境とアップグレード環境で同じ Liquibase チェーンを使用
-- one-shot の `omni-db-migrator` が DB 作成、構造移行、正式シード、検証を行い、正常終了後にのみ Nacos、XXL-JOB、各アプリを起動
-- アプリケーションは移行管理者ではなく、最小権限の `omni_app` / `OMNI_DB_PASSWORD` を使用
-- MySQL は明示的な名前付きボリューム `omni-stack_omni-mysql-data` を使用します。通常の `docker compose down` とコンテナ再作成ではデータは削除されず、`docker compose down -v` はボリュームを復元不可能に削除します。
-- 既存の非空データベースの初回引き受けは必ず先にバックアップし、`omni-db-migrator adopt-current` の構造フィンガープリントと確認ゲートを通じて行います。`migrate` を直接実行して引き受けを迂回してはなりません。
+ソース: [compose.infra.yaml](../compose.infra.yaml)、[LiquibaseMigrationService.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/LiquibaseMigrationService.java).
 
 ### 5.2 Redis 7.4
 
-```yaml
-redis:
-  image: redis:7.4
-  command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:? .env に設定してください}"]
-```
+Redis 7.4 の正式設定はパスワードと名前付きボリューム（標準 `omni-stack_omni-redis-data`）を宣言しますが、AOF を明示的に有効化していません。実際の永続化方式と保存状態はイメージ/実行設定と結果で確認します。ボリューム保持は全キーの保存や再起動後の復元を意味しません。プローブは設定認証を使い、TCP/running だけではセッション、キャッシュ、JWK を証明しません。実パスワードは非公開設定/ログの範囲で扱います。
+
+ソース: [compose.infra.yaml](../compose.infra.yaml).
 
 ### 5.3 Nacos v3.1.1
 
-```yaml
-nacos:
-  image: nacos/nacos-server:v3.1.1
-  environment:
-    MODE: standalone                      # シングルノードモード
-    SPRING_DATASOURCE_PLATFORM: mysql     # 外部 MySQL ストレージ（埋め込み Derby ではない）
-    MYSQL_SERVICE_HOST: mysql             # MySQL コンテナ名を指定
-    NACOS_AUTH_ENABLE: "true"
-    NACOS_AUTH_TOKEN: ...                 # JWT 署名シークレット（Base64 エンコード）
-  ports:
-    - "8080:8080"                         # コンソール
-    - "8848:8848"                         # API ポート（サービス登録/設定）
-    - "9848:9848"                         # gRPC ポート（ロングコネクション）
-```
+Nacos v3.1.1 は standalone で MySQL のベンダー DB を使用します。8080、8848、9848 はコンソール、HTTP API、クライアント gRPC で、正式ホストマッピングはループバックです。`NACOS_AUTH_TOKEN` やノード identity はコンソール認証情報と異なります。クライアントは `NACOS_USERNAME=nacos` と非公開パスワードを共用します。移行後は公開 seed の BCrypt ハッシュに一致する場合だけ更新し、変更済みアカウントを保持します。
 
-**3 ポート説明**：
-
-| ポート | 用途 | 利用者 |
-|-------|------|--------|
-| 8080 | Web コンソール | 運用者ブラウザアクセス |
-| 8848 | HTTP API | バックエンドマイクロサービス登録/設定 |
-| 9848 | gRPC | Nacos 2.x+ クライアントロングコネクション |
+ソース: [compose.infra.yaml](../compose.infra.yaml)、[NacosAdminBootstrap.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/NacosAdminBootstrap.java).
 
 ### 5.4 RocketMQ 5.3.2（NameServer + Broker）
 
-```yaml
-rocketmq-namesrv:
-  ports:
-    - "19876:9876"     # ホスト 19876 → コンテナ 9876（Windows Hyper-V ポート競合回避）
+この機能が含まれるかはプロジェクトのプリセット依存閉包で決まります。以下の実装説明は該当モジュールが含まれる場合だけ適用します。
 
-rocketmq-broker:
-  environment:
-    NAMESRV_ADDR: rocketmq-namesrv:9876          # コンテナ間通信
-    JAVA_OPT_EXT: "-Drocketmq.broker.diskSpaceWarningLevelRatio=0.98"
-  volumes:
-    - ./docker/rocketmq/broker-docker.conf:...   # Docker 専用 Broker 設定
-  command: sh mqbroker -n rocketmq-namesrv:9876 -c ... --enable-proxy
-```
+<!-- omni:modules:rocketmq -->
+NameServer の内部ポートは 9876、既定ホストポートは 19876 です。全 Windows 機が同じ範囲を予約する意味ではありません。Broker は公式 5.3.2 を基にしたリポジトリのイメージを使い、uid 3000 で名前付きボリュームのディレクトリを準備します。標準ボリュームは `omni-stack_omni-rocketmq-data` です。公開するのは 10909、10911、10912 で、10910 は含みません。TCP プローブはメッセージの確実な配信を証明しません。
 
-> **ポートマッピング 19876:9876 の理由**：Windows Hyper-V/WSL2 は 9859-9958 のポート範囲を予約します。9876 を直接マッピングすると競合が発生します。[セクション 10](#10-windows-hyper-vwsl2-ポート予約問題)を参照。
+ソース: [Dockerfile](../docker/rocketmq/Dockerfile)、[broker-docker.conf](../docker/rocketmq/broker-docker.conf)、[compose.infra.yaml](../compose.infra.yaml).
+<!-- omni:modules:end -->
 
 ### 5.5 XXL-JOB Admin v3.3.1
 
-```yaml
-xxl-job-admin:
-  environment:
-    PARAMS: >
-      --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?...
-      --spring.datasource.username=root
-      --spring.datasource.password=${MYSQL_ROOT_PASSWORD}
-      --xxl.job.login.username=${XXL_JOB_ADMIN_USERNAME}
-      --xxl.job.login.password=${XXL_JOB_ADMIN_PASSWORD}
-      --xxl.job.accessToken=${XXL_JOB_ACCESS_TOKEN:?set in .env}   # 必須・空でない（executor と一致）；空トークンを重複追記しない
-```
+この機能が含まれるかはプロジェクトのプリセット依存閉包で決まります。以下の実装説明は該当モジュールが含まれる場合だけ適用します。
+
+<!-- omni:modules:xxl-job -->
+XXL-JOB Admin v3.3.1 の PARAMS は DB と空でない accessToken を設定し、ログイン変更の `xxl.job.login.username/password` は使いません。migrate 後、固定 admin が公開 seed ハッシュに一致する場合だけ、非公開パスワードの SHA-256 を書き込み、変更済み値は保持します。executor の accessToken は Admin と一致させます。既存の Admin ログインパスワードを変更する場合は DB と非公開設定を同時に調整します。`.env.example` はこのパスワードを 14–20 文字と定めます。
+
+ソース: [compose.infra.yaml](../compose.infra.yaml)、[XxlJobAdminBootstrap.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/XxlJobAdminBootstrap.java).
+<!-- omni:modules:end -->
 
 ### 5.6 バックエンドマイクロサービス（8 サービス）
 
-8 つのバックエンドマイクロサービスは同一の Dockerfile を使用し、`build.args.SERVICE_NAME` で区別します。各サービスの `environment` で主要設定をオーバーライド：
+メインリポジトリの対照は Auth、Base、Workflow、CRM、SRM、Procurement、Asset、Gateway です。業務内部ポートは 8080、管理ポートは別で、アプリ DB はモジュール別です。生成プロジェクトは保持した設定と冒頭のプリセット範囲を使います。見出しの八サービスはメイン基準で、生成プロジェクトの現在の稼働数ではありません。表は正式アプリ設定の投影です。
 
-| 環境変数 | 説明 | 例値 |
-|---------|------|------|
-| `SERVER_PORT` | コンテナ内部ポート（統一 8080） | `8080` |
-| `SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR` | Nacos アドレス | `nacos:8848` |
-| `SPRING_DATASOURCE_URL` | データベース接続 | `jdbc:mysql://mysql:3306/omni_auth?...` |
-| `SPRING_DATA_REDIS_HOST` | Redis アドレス | `redis` |
-| `SPRING_CLOUD_NACOS_DISCOVERY_IP` | 登録 IP（空=自動検出コンテナ IP） | `""` |
-| `AUTH_ISSUER` | JWT Issuer（auth のみ） | `http://omni-auth:8080` |
-| `AUTH_JWKS_URI` | JWKS エンドポイント（gateway のみ） | `http://omni-auth:8080/oauth2/jwks` |
-| `OMNI_INTERNAL_API_TOKEN` | サービス間共有シークレット（全 Servlet サービスで同一） | `.env` から注入 |
-| `MYSQL_URL` | 現在の業務サービスデータベース接続 | `jdbc:mysql://mysql:3306/omni_asset?...` |
-
-初回起動時には必ず `cp .env.example .env` を実行し、`OMNI_INTERNAL_API_TOKEN` を 32 バイト以上のランダム値に置き換えてください。Compose は必須変数構文を使用しており、シークレットが欠落すると起動を拒否します。リポジトリ内のデフォルト値は提供されません。
+| サービス | `database` | 現在の正規情報源 |
+| --- | --- | --- |
+| `omni-auth` | `omni_auth` | [application.yml](../omni-backend/omni-auth/src/main/resources/application.yml) |
+| `omni-base` | `omni_base` | [application.yml](../omni-backend/omni-base/src/main/resources/application.yml) |
+| `omni-workflow` | `omni_workflow` | [application.yml](../omni-backend/omni-workflow/src/main/resources/application.yml) |
+| `omni-crm` | `omni_crm` | [application.yml](../omni-backend/omni-crm/src/main/resources/application.yml) |
+| `omni-srm` | `omni_srm` | [application.yml](../omni-backend/omni-srm/src/main/resources/application.yml) |
+| `omni-procurement` | `omni_procurement` | [application.yml](../omni-backend/omni-procurement/src/main/resources/application.yml) |
+| `omni-asset` | `omni_asset` | [application.yml](../omni-backend/omni-asset/src/main/resources/application.yml) |
+| `omni-gateway` | `—` | [application.yml](../omni-backend/omni-gateway/src/main/resources/application.yml) |
 
 ### 5.7 フロントエンド
 
-```yaml
-omni-frontend:
-  build:
-    context: .                          # プロジェクトルート（docker/ 設定へのアクセス必要）
-    dockerfile: docker/frontend/Dockerfile
-  ports:
-    - "3000:3000"                       # 唯一のユーザーアクセス入口
-  depends_on:
-    omni-gateway:
-      condition: service_healthy        # ゲートウェイ準備完了後に起動
-```
+フロントエンドは 3000 で静的資源と同一オリジン API/OAuth/OIDC プロキシを提供します。Docker DNS で Gateway を動的に解決し、Compose の起動依存は宣言しません。ページ提供プロセスの起動は API、ログイン、ルーティングの準備完了を証明しません。完全な操作とブラウザーの期待結果はクイックスタートと業務 Wiki が管理します。
 
----
+ソース: [nginx.conf](../docker/frontend/nginx.conf)、[compose.apps.yaml](../compose.apps.yaml).
 
 ## 6. 環境変数オーバーライドメカニズム
 
-Spring Boot は環境変数による `application.yml` 設定のオーバーライドをサポートしており、Docker デプロイメントで大量に使用されます。
+現在の設定は Spring の環境変数上書きと YAML の明示的プレースホルダーを併用します。Compose のキー、各サービスの YAML、有効な profile を照合し、変数の綴りだけで接続や登録成功を推測しません。
 
 ### 6.1 変換ルール
 
-| application.yml 設定 | 環境変数名 | 変換ルール |
-|---------------------|-----------|-----------|
-| `server.port` | `SERVER_PORT` | 大文字 + ドット→アンダースコア |
-| `spring.datasource.url` | `SPRING_DATASOURCE_URL` | 大文字 + ドット→アンダースコア |
-| `spring.data.redis.host` | `SPRING_DATA_REDIS_HOST` | 大文字 + ドット→アンダースコア |
-| `spring.cloud.nacos.discovery.server-addr` | `SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR` | 大文字 + ハイフン→アンダースコア |
+`SERVER_PORT` は業務ポート、`MANAGEMENT_SERVER_PORT` と `MANAGEMENT_PORT` は管理設定とプローブ規約に関わります。Auth/Base/Workflow の Compose は `SPRING_CLOUD_NACOS_*_SERVER_ADDR`、CRM/Gateway/SRM 等は YAML 用の `NACOS_SERVER_ADDR` も宣言します。サービスごとに確認し、すべてのハイフンを機械的にアンダースコアへ変える汎用規則は本書で管理しません。
+
+ソース: [compose.apps.yaml](../compose.apps.yaml)、[application.yml](../omni-backend/omni-auth/src/main/resources/application.yml)、[application.yml](../omni-backend/omni-gateway/src/main/resources/application.yml).
 
 ### 6.2 優先順位（高→低）
 
-```
-1. コマンドライン引数（--server.port=9090）
-2. 環境変数（SERVER_PORT=9090）
-3. application-{profile}.yml
-4. application.yml
-5. Nacos 設定センター（有効な場合）
-```
+コマンドライン、環境、profile ファイル、import が最終値に関わります。現在の複数サービスには `optional:nacos:...` import があり、Nacos を常に最低優先順位にはできません。実際の profile、import、キーの出所を確認し、公開するのは非秘密のキー名と秘匿化した結論だけです。
+
+ソース: [application.yml](../omni-backend/omni-auth/src/main/resources/application.yml)、[application.yml](../omni-backend/omni-gateway/src/main/resources/application.yml).
 
 ### 6.3 Docker デプロイメントでの典型的なオーバーライド
 
-| 設定 | application.yml 値（ローカル開発） | Docker 環境変数値 |
-|------|----------------------------------|-----------------|
-| データベースアドレス | `localhost:3306`（本 Compose の MySQL に接続） | `mysql:3306` |
-| Redis ホスト | `localhost` | `redis` |
-| Nacos アドレス | `localhost:8848` | `nacos:8848` |
-| RocketMQ | `localhost:9876` | `rocketmq-namesrv:9876` |
-| JWT Issuer | `http://localhost:8100` | `http://omni-auth:8080` |
-| OAuth2 コールバック | `http://localhost:8100/api/auth/...` | `http://localhost:8100/api/auth/...` |
+Compose 内の DB、Redis、Nacos、NameServer はサービス名を使い、ブラウザーのコールバックはブラウザーから到達できる入口を使います。Auth YAML の OAuth フォールバックは 8100 ですが、正式 Compose の `AUTH_OAUTH2_*_REDIRECT_URI` は Gateway 8102 へ上書きします。三社の経路は実設定の抜粋に示します。外部登録は完全一致させますが、設定だけで外部 OAuth のコールバックの成功は証明しません。 現 Auth Compose は `host.docker.internal:7897` 経由の HTTP/HTTPS proxy と内部 NO_PROXY も宣言します。これはソース上のアドレスであり、外部接続や proxy の可用性は実際に確認する必要があります。
 
-> **注意**：OAuth2 コールバック URI は `localhost:8100`（ホストポート）を使用します。これはユーザーのブラウザーが実際にアクセスするアドレスであるためです。
+```yaml
+AUTH_FRONTEND_BASE_URL: http://localhost:3000
+AUTH_OAUTH2_GITHUB_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/github/callback
+AUTH_OAUTH2_GITEE_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/gitee/callback
+AUTH_OAUTH2_GOOGLE_REDIRECT_URI: http://localhost:8102/api/auth/oauth2/google/callback
+HTTP_PROXY: http://host.docker.internal:7897
+HTTPS_PROXY: http://host.docker.internal:7897
+NO_PROXY: localhost,127.0.0.1,mysql,redis,nacos
+```
 
----
+ソース: [compose.apps.yaml](../compose.apps.yaml)、[.env.example](../.env.example).
 
 ## 7. Nginx リバースプロキシ設定
 
+正式ファイルは `docker/frontend/nginx.conf` です。内部プロキシは Gateway 8080 を指します。現行規則には Docker DNS、ヘッダーバッファー、安全ヘッダー、キャッシュもあり、単純な静的 proxy_pass 例は完全な現行設定ではありません。
+
+ソース: [nginx.conf](../docker/frontend/nginx.conf).
+
 ### 7.1 設定解説
 
+`resolver 127.0.0.11 valid=10s ipv6=off` と変数 upstream を使い、起動時だけ古いコンテナ IP を解決する問題を避けます。`/api/`、`/oauth2/`、`/.well-known/` を Gateway に転送し、SPA は index.html にフォールバックします。HTML はキャッシュせず、内容ハッシュ付き assets は長期キャッシュします。location で必要な安全ヘッダーを再宣言して基準を保持します。抜粋は動的転送部分のみで、ファイル全体の置換には使えません。
+
 ```nginx
-server {
-    listen 3000;
-    root /usr/share/nginx/html;
-
-    # API リクエストを Gateway にリバースプロキシ
-    location /api/ {
-        proxy_pass http://omni-gateway:8080;    # ← コンテナ内部ポート！
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # OAuth2 エンドポイントリバースプロキシ
-    location /oauth2/ {
-        proxy_pass http://omni-gateway:8080;
-        # ... 上記と同じ
-    }
-
-    # OIDC Discovery エンドポイントリバースプロキシ
-    location /.well-known/ {
-        proxy_pass http://omni-gateway:8080;
-        # ... 上記と同じ
-    }
-
-    # Vue Router History モード
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
+resolver 127.0.0.11 valid=10s ipv6=off;
+location /api/ {
+    set $upstream_gateway http://omni-gateway:8080;
+    proxy_pass $upstream_gateway;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
+
+ソース: [nginx.conf](../docker/frontend/nginx.conf).
 
 ### 7.2 よくある間違い：proxy_pass ポート
 
-| 設定 | 正しい？ | 説明 |
-|------|---------|------|
-| `proxy_pass http://omni-gateway:8080` | ✅ | コンテナ内部ポート、Docker ネットワーク内で到達可能 |
-| `proxy_pass http://omni-gateway:8102` | ❌ | 8102 はホストマッピングポート、コンテナ間でアクセス不可 |
-| `proxy_pass http://localhost:8102` | ❌ | コンテナ内の localhost は自分自身、Gateway に到達不可 |
-| `proxy_pass http://host.docker.internal:8102` | ⚠️ | 動作するが Docker ネットワークを迂回、パフォーマンス劣化 |
-
----
+Docker 内では `omni-gateway:8080` を使います。8102 はホストマッピングで、コンテナ localhost は自分自身です。`host.docker.internal` 経由は正式な転送経路ではなく、到達性や未測定の性能を仮定しません。Gateway の管理ヘルスポートは 19902 で、業務ポートの actuator 404 は停止を意味しません。
 
 ## 8. データ初期化と永続化
 
+スキーマは `database/changelog/`、正式 DML は `scripts/sql/seed/`、入力と assertion は `database/seed/manifest.yaml` が管理します。旧手動 init/migrate スクリプトは実行入口ではありません。移行、既存 DB の引き受け、通常起動は副作用と検証範囲が異なります。
+
 ### 8.1 データベース初期化チェーン
 
-Compose は空ボリュームと後続アップグレードに同一の移行起動ゲートを適用します：
+メイン catalog は九つの DB 対象を宣言し、現在の manifest は八つの seed source と 25 assertion を持ちます。生成プロジェクトは自身の manifest を使います。実 migrate 順序は構造/seed 移行、XXL-JOB/Nacos 条件付き初期化、seed 検証、正常終了です。業務表があり Liquibase 履歴がなければ直接 migrate は拒否します。adopt-current は指紋、seed、バックアップ復元証拠を検証し、本報告と完全一致する `ADOPT:<sha256>` 二段階確認後に baseline 履歴を書きます。文書 AI レビューはこの高リスク確認を免除しません。 移行ツールは seed-accept-ids をサポートしますが、正式 Compose は既定で宣言しません。別に `DB_MIGRATOR_SEED_ACCEPT_IDS` を設定すると、列挙した不一致 assertion を WARN として受容できますが、SQL 実行エラーは失敗します。検証時は acceptedOverrides を記録し、上書き付き exit 0 を元 assertion の全成功とはしません。本書でこの上書きは設定しません。
 
-```
-MySQL healthy
-  → omni-db-migrator migrate（9 DB の Liquibase changeSet）
-  → 8 seed source の SHA-256 と 24 件の自然キー検証
-  → migrator 正常終了
-  → Nacos / XXL-JOB / バックエンドサービス起動
-```
-
-構造の正規情報源は `database/changelog/` です。正式な DML シードは `scripts/sql/seed/` にあり、
-`database/seed/manifest.yaml` で宣言します。旧手動 `init-all.sql` と `migrate-*.sql` は現在のツリーから撤去しました。構造は `database/changelog/`、初期データは `scripts/sql/seed/` を使用し、旧スクリプトを手動で実行しません。 Flowable の実行時スキーマ更新は無効です。
+ソース: [MigrationTargetCatalog.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java)、[MigrationCommandRunner.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/command/MigrationCommandRunner.java)、[AdoptionService.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/adoption/AdoptionService.java)、[BackupEvidenceService.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/adoption/BackupEvidenceService.java)、[SeedVerificationService.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/seed/SeedVerificationService.java)、[manifest.yaml](../database/seed/manifest.yaml).
 
 ### 8.2 データ永続化戦略
 
-現在の Compose は明示的な MySQL 名前付きボリュームを使用します：
+標準 MySQL、Redis、Broker の業務ボリュームはコンテナ再作成後も保持し、通常 down はデータ削除操作ではありません。`down -v` は業務データを削除し得るため通常復旧には使いません。バックアップハッシュ、元/復元サーバー ID、鮮度、実復元結果を照合します。ファイルの存在は復元検証ではなく、本番バックアップと高可用性は別途設計します。
 
-```yaml
-# compose.infra.yaml に Volume を追加
-mysql:
-  volumes:
-    - omni-mysql-data:/var/lib/mysql
-
-volumes:
-  omni-mysql-data:
-    name: omni-stack_omni-mysql-data
-```
-
-`docker compose down` は MySQL・Redis・RocketMQ Broker の三つの名前付きボリュームを保持し、`docker compose down -v` はそれらと全業務データを削除します。Redis は AOF と名前付きボリュームでセッション・キャッシュ・署名鍵を保存します。本番環境では外部 DB かバックアップ管理された永続ボリュームを使用し、復旧を定期的に演習してください。単一ノードの Compose 構成は高可用本番環境ではありません。
+ソース: [compose.infra.yaml](../compose.infra.yaml)、[BackupEvidenceService.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/adoption/BackupEvidenceService.java).
 
 ## 9. Docker レジストリミラー設定
 
+イメージ取得、Maven 依存、npm 導入はネットワークとキャッシュ経路が異なります。本書はリポジトリ設定を記録し、未検証の公開ミラーを推奨したり、ホスト Docker・プロキシ・アカウントの全体設定を変更したりしません。
+
 ### 9.1 Docker レジストリミラー
 
-Docker Hub へのアクセスが遅い地域のユーザーはミラーを設定してください：
-
-**Linux**（`/etc/docker/daemon.json`）：
-```json
-{
-  "registry-mirrors": ["https://docker.1ms.run"]
-}
-```
-```bash
-sudo systemctl restart docker
-```
-
-**Windows / Mac**（Docker Desktop → Settings → Docker Engine）：
-```json
-{
-  "registry-mirrors": ["https://docker.1ms.run"]
-}
-```
+正式 Compose/Dockerfile は Docker daemon の全体 registry-mirrors を設定しません。名前/タグ、権限、ネットワーク、ディスクを区別し、実エラーとイメージ ID を保存します。有効イメージの再利用は入力等価性と ID が明確な場合に限ります。過去 daemon.json 例は第三者ミラーの可用性や信頼の証明ではありません。
 
 ### 9.2 Maven 依存関係の高速化
 
-バックエンド Dockerfile には Aliyun Maven ミラーが組み込まれています（`docker-settings.xml`）：
+バックエンドと移行 Dockerfile は `omni-backend/docker-settings.xml` を使い、Aliyun mirror は `mirrorOf=central` だけを宣言します。事前取得も package も Wrapper と正式 settings を使います。事前取得の失敗許容は本ビルドの失敗許容ではなく、cache/retry 設定は現在の取得成功を保証しません。
 
 ```xml
 <mirror>
   <id>aliyun</id>
+  <name>Aliyun Maven Mirror</name>
   <url>https://maven.aliyun.com/repository/public</url>
   <mirrorOf>central</mirrorOf>
 </mirror>
 ```
 
+ソース: [docker-settings.xml](../omni-backend/docker-settings.xml)、[Dockerfile](../docker/backend/Dockerfile).
+
 ### 9.3 npm 依存関係の高速化
 
-フロントエンド npm インストールを高速化するには、Dockerfile にミラーレジストリを追加：
+正式フロントエンド Dockerfile は BuildKit npm cache、lockfile、fetch retry を使い、`npm config set registry https://registry.npmmirror.com` は組み込みません。任意ミラー例を現行設定にせず、registry/proxy 変更と lockfile を独立に検証します。全キャッシュ削除を診断の代わりにはしません。
 
-```dockerfile
-RUN npm config set registry https://registry.npmmirror.com
-RUN npm ci
-```
-
----
+ソース: [Dockerfile](../docker/frontend/Dockerfile).
 
 ## 10. Windows Hyper-V/WSL2 ポート予約問題
 
+標準ポートは固定です。Windows の待ち受けと予約範囲は別原因で、実範囲は対象マシンで決まります。一度の観察を全 Windows/WSL2 環境へ一般化しません。
+
 ### 10.1 問題の説明
 
-Windows 10/11 の Hyper-V または WSL2 は TCP ポート範囲を動的に予約します（例：9859-9958）。予約された範囲に Docker がマッピングするポート（例：9876）が含まれていると、コンテナ起動が失敗します：
-
-```
-Error starting userland proxy: listen tcp4 0.0.0.0:9876: bind: An attempt was made to access a socket in a way forbidden by its access permissions.
-```
+bind エラーの原因は既存プロセス、他コンテナ、システム予約などです。エラーは bind 失敗だけを示し、原因を断定しません。正確なアドレス、ポート、所有者を確認します。
 
 ### 10.2 解決策
 
-待ち受けプロセス、他のコンテナー、Windows の予約ポートを確認し、競合を解消して既定ポートで再起動します。標準環境では `OMNI_*_HOST_PORT` によるポート変更を行いません。
+まず待ち受けと予約を読み取り、権限を持つ操作者が特定した競合を解消します。標準プロジェクトは `OMNI_*_HOST_PORT` を自動変更せず、起動スクリプトでシステムのポート方針を変更しません。
+
+### 10.3 予約ポートの確認
+
+以下は Windows ホストの読取専用診断であり、ビルド、アプリ、業務の実行方法ではありません。不明なプロセスの終了やシステム予約の削除を許可するものでもありません。
 
 ```powershell
 Get-NetTCPConnection -State Listen
 netsh interface ipv4 show excludedportrange protocol=tcp
 ```
 
-### 10.3 予約ポートの確認
-
-```powershell
-netsh interface ipv4 show excludedportrange protocol=tcp
-```
-
----
-
 ## 11. Nacos v3.1.1 ヘルスチェックエンドポイント変更
+
+本リポジトリは Nacos v3.1.1 に HTTP `GET /nacos/` プローブを設定します。これで全 Nacos バージョンのエンドポイント履歴は推測しません。コンソール/API 応答は全アプリの登録を証明しません。
 
 ### 11.1 変更内容
 
-Nacos v3.x から、`/nacos/actuator/health` エンドポイントが削除されました。ヘルスチェックは以下を使用：
-
-| Nacos バージョン | ヘルスチェックエンドポイント | メソッド |
-|----------------|--------------------------|---------|
-| v2.x | `/nacos/actuator/health` | GET |
-| v3.0+ | `/nacos/` | GET |
+サーバー HTTP プローブ、クライアント認証、インスタンス登録、設定 import を区別します。旧 actuator 経路で現在の Compose 宣言を代替せず、登録失敗は両側の秘匿化ログ、アカウント設定、ネットワークで診断します。
 
 ### 11.2 compose.yaml の設定
 
+正式 Nacos プローブは内部 8848 の /nacos/ へ curl -sf を実行し、interval 15s、timeout 5s、retries 5、start_period 60s です。これは設定値で、指定秒数以内の起動を保証しません。
+
 ```yaml
 healthcheck:
-  test: ["CMD", "curl", "-sf", "http://localhost:8848/nacos/"]
-  start_period: 60s     # Nacos は起動が遅く、40-60 秒必要
+  test:
+    - CMD
+    - curl
+    - -sf
+    - http://localhost:8848/nacos/
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 60s
 ```
 
-> **注意**：`curl -sf` — `-s` はサイレントモード、`-f` は HTTP エラー時に非ゼロ終了コードを返します。これらを組み合わせてヘルスチェックの余計な出力を防止します。
-
----
+ソース: [compose.infra.yaml](../compose.infra.yaml).
 
 ## 12. RocketMQ Broker Docker ネットワーク設定
 
+この機能が含まれるかはプロジェクトのプリセット依存閉包で決まります。以下の実装説明は該当モジュールが含まれる場合だけ適用します。
+
+<!-- omni:modules:rocketmq -->
+Broker と NameServer は同一 Docker ネットワークのサービス名を使います。ホストマッピングは診断入口であり、バックエンドの NameServer アドレスではありません。
+<!-- omni:modules:end -->
+
 ### 12.1 背景
 
-RocketMQ Broker はデフォルトで自身の IP を NameServer に登録します。Docker 環境では、Broker が `127.0.0.1` や Docker ブリッジ IP を取得し、他のコンテナから接続できない場合があります。
+この機能が含まれるかはプロジェクトのプリセット依存閉包で決まります。以下の実装説明は該当モジュールが含まれる場合だけ適用します。
+
+<!-- omni:modules:rocketmq -->
+Broker が通知するアドレスはクライアントのネットワークから解決・接続できる必要があります。NameServer 到達だけでは通知アドレスの正しさやコンシューマー処理完了は証明しません。
+<!-- omni:modules:end -->
 
 ### 12.2 解決策
 
-カスタム設定ファイル `docker/rocketmq/broker-docker.conf` で `brokerIP1` を明示的に設定：
+この機能が含まれるかはプロジェクトのプリセット依存閉包で決まります。以下の実装説明は該当モジュールが含まれる場合だけ適用します。
+
+<!-- omni:modules:rocketmq -->
+正式 `docker/rocketmq/broker-docker.conf` は `brokerIP1=rocketmq-broker`、単一 Broker、ASYNC_MASTER/ASYNC_FLUSH を宣言します。Compose は設定と名前付きデータボリュームをマウントし、--enable-proxy で起動します。メインの単一ノード構成はクラスタや他ネットワークからの接続検証ではありません。
 
 ```properties
-brokerIP1 = rocketmq-broker    # コンテナ名に設定、Docker DNS で解決可能
+brokerClusterName = DefaultCluster
+brokerName = broker-a
+brokerId = 0
+brokerRole = ASYNC_MASTER
+flushDiskType = ASYNC_FLUSH
+brokerIP1 = rocketmq-broker
 ```
+
+ソース: [broker-docker.conf](../docker/rocketmq/broker-docker.conf)、[compose.infra.yaml](../compose.infra.yaml).
+<!-- omni:modules:end -->
 
 ### 12.3 バックエンド接続設定
 
-バックエンドマイクロサービスは環境変数で RocketMQ に接続：
+この機能が含まれるかはプロジェクトのプリセット依存閉包で決まります。以下の実装説明は該当モジュールが含まれる場合だけ適用します。
+
+<!-- omni:modules:rocketmq -->
+現在のアプリは内部 `rocketmq-namesrv:9876` を使用し、正確な環境キーはサービスごとに確認します。Outbox 挿入、Relay ジョブ、Broker 受信、業務コミットは別段階です。設定や TCP 成功を配信成功へまとめません。
 
 ```yaml
-SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER: rocketmq-namesrv:9876
+ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
 ```
 
-NameServer のコンテナ名と内部ポートを使用しており、ホストマッピングポート 19876 ではないことに注意してください。
-
----
+ソース: [compose.apps.yaml](../compose.apps.yaml).
+<!-- omni:modules:end -->
 
 ## 13. スケーリングガイド
 
+リポジトリはローカル単一インスタンス構成を配布し、正式 `compose.scale.yaml` はありません。サービス検出コードだけでは固定ポートモデルの直接拡張や本番容量を証明できません。
+
 ### 13.1 バックエンドサービスの水平スケーリング
 
-```bash
-# omni-base を 3 インスタンス起動
-docker compose up -d --scale omni-base=3
-
-# インスタンス状況を確認
-docker compose ps
-```
-
-**注意事項**：
-- 現行 Compose の omni-base は固定ホストマッピング `127.0.0.1:${OMNI_BASE_HOST_PORT:-8101}:8080` を使用。固定ホストポートでは `--scale omni-base=3` を直接実行しても異なる/連番のホストポートは自動割当されず、複数インスタンスはポート衝突で失敗します。まず固定ホストポートマッピングを外す/動的に変える override を用意してから scale してください
-- Nacos サービスディスカバリがすべてのインスタンスを自動登録
-- Spring Cloud Gateway が Nacos 経由で各インスタンスにロードバランシング
-- 固定ポートが必要な場合は手動指定が必要
+メイン Compose に固定 container_name はありませんが、固定ホストマッピングは単純な --scale 複数実行を妨げます。Docker は固定マッピングを自動で連番にしません。拡張には管理された構成、入口、検出と実検証が必要です。存在しない override を使う実行例は提供しません。
 
 ### 13.2 データベース接続プールの考慮事項
 
-水平スケーリング時、各インスタンスは独立した接続プールを維持します。HikariCP `maximumPoolSize=20`、3 インスタンス = 60 データベース接続。MySQL の `max_connections` が十分であることを確認：
-
-```sql
-SHOW VARIABLES LIKE 'max_connections';
-SET GLOBAL max_connections = 200;
-```
+実際の pool 上限とインスタンス数を合計し、ジョブ、移行、管理接続も予算に含めます。20×3=60 は仮定の算術で、現行設定や SET GLOBAL を 200 にする推奨ではありません。サーバー容量変更には独立した評価と承認が必要です。
 
 ### 13.3 ステートフルサービスの注意事項
 
-- **XXL-JOB**：水平スケーリング非対応（シングル Admin モード）、スケジューリングデータは MySQL に保存
-- **RocketMQ Broker**：本番環境ではマルチ Broker クラスタを推奨、現在はシングル Broker 開発モード
-- **Nacos**：本番環境では 3 ノードクラスタを推奨、現在はスタンドアロンシングルノードモード
-
----
+現在 Nacos は standalone、RocketMQ は単 Broker、XXL-JOB は単 Admin です。ローカル配置の説明は上流製品がクラスタ化できないという断定ではありません。本番状態、耐障害性、拡張は具体的設計ごとに検証します。
 
 ## 14. 運用操作マニュアル
 
+全操作順序、実行者の立場、期待結果、復旧は Wiki とガイドが管理します。本書は設定と限定した読取専用診断を扱います。再起動、再ビルド、移行、整理前に対象プロジェクトとデータ所有者を確認します。
+
 ### 14.1 常用コマンド
 
+対象プロジェクトのルートで状態を読みます。start.sh/start.bat は既定 full、五つの preset profile を選択でき、--build を実行します。これは CLI dev up の軽量構成用実行スイッチ上書きと異なります。stop.sh/stop.bat は標準プロジェクトと全 profiles で down し、業務ボリュームを保持します。
+
 ```bash
-# すべてのコンテナステータスを表示
-docker compose ps
-
-# サービスログを表示（リアルタイム追跡）
-docker compose logs -f omni-auth
-
-# 単一サービスを再起動
-docker compose restart omni-gateway
-
-# サービスを再ビルドして再起動
-docker compose up -d --build omni-base
-
-# すべてのコンテナを停止（イメージは保持）
-docker compose down
-
-# 停止してすべてのデータを削除（完全リセット）
-docker compose down -v
-
-# コンテナリソース使用量を表示
-docker stats --no-stream
+docker compose -p omni-stack ps -a
+docker compose -p omni-stack images
 ```
+
+ソース: [start.sh](../start.sh)、[start.bat](../start.bat)、[stop.sh](../stop.sh)、[stop.bat](../stop.bat).
 
 ### 14.2 ログ調査
 
+証拠ログはサービス・時刻を限定し、原本はリポジトリ外へ置き、公開前に秘匿化します。started は正常性、登録、業務結果の代わりになりません。再操作前に成功済みの一意業務キーを照会します。
+
 ```bash
-# 最新 100 行のログを表示
-docker compose logs --tail=100 omni-gateway
-
-# 指定時間帯のログを表示
-docker compose logs --since="2025-01-01T10:00:00" omni-auth
-
-# ログをファイルに出力
-docker compose logs omni-base > base-logs.txt
+docker compose -p omni-stack logs --tail 100 omni-gateway
 ```
 
 ### 14.3 コンテナ内デバッグ
 
+正式 Dockerfile にあるツールを使い、全イメージに同じ診断機能があると仮定しません。管理プローブは対応するバックエンド内部で行います。アドレスと認証情報を分け、完全な env を共有記録へ出力しません。
+
 ```bash
-# バックエンドサービスコンテナに入る
-docker compose exec omni-auth sh
-
-# コンテナ内プロセスを表示
-docker compose exec omni-auth ps aux
-
-# コンテナ間ネットワーク接続性をテスト
-docker compose exec omni-auth curl -s http://nacos:8848/nacos/
+docker compose -p omni-stack exec -T omni-gateway curl -sf http://localhost:19902/actuator/health
 ```
 
----
+ソース: [Dockerfile](../docker/backend/Dockerfile).
 
 ## 15. トラブルシューティングガイド
 
+解析、取得、ビルド、移行、起動、正常性、認証、業務、外部サービスのどの段階が失敗したかを特定します。完全な操作は[ガイド](guides/troubleshooting.jp.md)と[ソース調査](wiki/source-debugging.jp.md)が管理し、以下は判断の境界を説明します。
+
 ### 15.1 502 Bad Gateway
 
-**症状**：ブラウザで `http://localhost:3000` にアクセスすると 502 が返される。
-
-**診断手順**：
-```bash
-# 1. Nginx コンテナが稼働中か確認
-docker compose ps omni-frontend
-
-# 2. Gateway コンテナが稼働中か確認
-docker compose ps omni-gateway
-
-# 3. Nginx エラーログを確認
-docker compose logs omni-frontend
-
-# 4. コンテナ間接続性をテスト
-docker compose exec omni-frontend curl -s http://omni-gateway:8080/actuator/health
-```
-
-**よくある原因**：
-- Nginx `proxy_pass` がホストポート（8102）を使用している（コンテナ内部ポート 8080 の間違い）
-- Gateway コンテナがまだヘルスチェックに合格していない
-- Nacos が準備できる前に Gateway が起動した
+502 はプロキシに使用可能な上流応答がないことを示すだけで、Nacos/Gateway 停止を断定しません。フロントエンドと Gateway の状態・ログ、Docker DNS、業務転送アドレスを確認します。Gateway 自身の管理ヘルスは 19902 で、8080 に actuator を当てません。
 
 ### 15.2 イメージプル失敗
 
-**症状**：`docker compose pull` がタイムアウトまたは `pull access denied` を報告。
+pull access denied、タグ欠落、接続タイムアウト、容量不足を分けます。正確なイメージ ID とエラーを保存し、宣言された名前とネットワークを確認します。不明なミラーや別アカウントへ自動変更しません。読取専用容量表示は削除してよいイメージの証明ではありません。
 
-**解決策**：
-1. Docker レジストリミラーを設定（[セクション 9](#9-docker-レジストリミラー設定)を参照）
-2. 手動プル確認：`docker pull xuxueli/xxl-job-admin:3.3.1`
-3. ディスク容量確認：`docker system df`
+```bash
+docker system df
+```
 
 ### 15.3 ビルド失敗
 
-**症状**：`docker compose build` が失敗。
-
-**Maven 依存関係ダウンロードタイムアウト**：
-- Aliyun ミラーが組み込み済み（`docker-settings.xml`）。まだ失敗する場合はネットワークを確認
-- Docker ビルドキャッシュをクリア：`docker builder prune -a`
-
-**npm install タイムアウト**：
-- Dockerfile にミラーレジストリを追加（[セクション 9.3](#93-npm-依存関係の高速化)を参照）
-
-**ディスク容量不足**：
-```bash
-docker system prune -a    # 未使用のイメージ/コンテナ/ネットワークをすべてクリーン
-```
+実 package/npm の最初のエラーと段階を保持します。ソース不変の有効報告は等価性で再利用し、ソース・lock・設定変更時は影響範囲を検証します。全体 builder/system prune は他タスクの cache/資産を失うため、通常復旧コマンドにしません。
 
 ### 15.4 ポート競合
 
-**症状**：`bind: address already in use`。
-
-**診断**：
-```bash
-# Windows
-netstat -ano | findstr :8080
-# Linux/Mac
-lsof -i :8080
-```
-
-**解決策**：
-- ポートを占有しているプロセスを停止
-- `.env` の該当する `OMNI_*_HOST_PORT` を変更し、Compose にホストポートをマッピングさせる
-- Windows ユーザー：Hyper-V ポート予約を確認（[セクション 10](#10-windows-hyper-vwsl2-ポート予約問題)を参照）
+対象ポート、待ち受け、Docker マッピング、Windows 予約範囲を確認します。所有者が明確な競合を解消し、正式既定値を保ちます。合格のために業務ポートを自動移動したり、不明プロセスを停止したりしません。
 
 ### 15.5 Nacos 登録失敗
 
-**症状**：バックエンドログに `NacosException: failed to req API:/nacos/v1/ns/instance` が報告される。
+Nacos の HTTP、クライアントスイッチ、宣言アドレス、認証情報の存在、インスタンスを確認します。env | grep NACOS はパスワードやノード秘密を出すため使いません。公開できるアドレス/キー名と設定有無だけを記録します。サーバープローブは登録の証明ではありません。
 
-**診断**：
-```bash
-# Nacos が正常か確認
-docker compose ps nacos
-docker compose exec nacos curl -s http://localhost:8848/nacos/
-
-# バックエンドサービスの Nacos 設定を確認
-docker compose exec omni-auth env | grep NACOS
-```
-
-**よくある原因**：
-- `SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR` が `nacos:8848` に設定されていない
-- `SPRING_CLOUD_NACOS_DISCOVERY_IP` が空でない（自動検出のため `""` にすべき）
-- バックエンドサービス起動時に Nacos がまだヘルスチェックに合格していなかった（depends_on 設定の問題）
+ソース: [doctor.ts](../tools/omni-cli/src/doctor.ts).
 
 ### 15.6 RocketMQ 接続失敗
 
-**症状**：バックエンドログに `org.apache.rocketmq.remoting.exception.RemotingConnectException` が報告される。
-
-**診断**：
-```bash
-# Broker が NameServer に登録されているか確認
-docker compose exec rocketmq-namesrv sh mqadmin clusterList -n localhost:9876
-
-# brokerIP1 設定を確認
-docker compose exec rocketmq-broker cat /home/rocketmq/rocketmq-5.3.2/conf/broker.conf
-```
-
-**よくある原因**：
-- `brokerIP1` がコンテナ名 `rocketmq-broker` に設定されていない
-- バックエンドサービスがコンテナポート 9876 ではなくホストポート 19876 を使用している
+NameServer、Broker 通知アドレス/ポート、Relay、binding、コンシューマーログを個別に確認します。内部 9876 を使い、ホスト 19876 には接続しません。通知設定だけではテナント分離、冪等性、実業務のメッセージフローは証明しません。
 
 ### 15.7 コンテナ起動順序異常
 
-**症状**：バックエンドサービスの起動が失敗しているが `docker compose ps` ではコンテナが稼働中と表示される。
+running と healthy は異なり、移行ツールの exit 0 は正常完了の場合があります。非零エラーは先に保存します。全体障壁を仮定せず実際の部分依存を確認し、再試行前に完了済み移行と業務副作用を調べます。
 
-**診断**：
-```bash
-# サービス起動順序を表示
-docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Health}}"
-
-# サービス起動タイムスタンプを表示
-docker compose logs --timestamps omni-auth | head -5
-```
-
----
+ソース: [compose.apps.yaml](../compose.apps.yaml)、[compose.infra.yaml](../compose.infra.yaml).
 
 ## 16. 設定リファレンス
 
+正式ファイルが唯一の実行事実源です。本節は投影とソース入口を集約し、他文書はリンクで参照します。表だけで Compose、API、業務契約を変更できません。
+
 ### 16.1 サービスポートマッピング一覧表
 
-| サービス | 内部ポート | ホストマッピングポート | プロトコル | 説明 |
-|---------|-----------|---------------------|-----------|------|
-| omni-frontend | 3000 | 3000 | HTTP | ユーザーアクセス入口 |
-| omni-auth | 8080 | 127.0.0.1:8100 | HTTP | 認証/認可サービス、ループバックデバッグのみ |
-| omni-base | 8080 | 127.0.0.1:8101 | HTTP | 基礎データサービス、ループバックデバッグのみ |
-| omni-gateway | 8080 | 8102 | HTTP | API ゲートウェイ |
-| omni-workflow | 8080 | 127.0.0.1:8103 | HTTP | ワークフローサービス、ループバックデバッグのみ |
-| omni-crm | 8080 | 127.0.0.1:8104 | HTTP | CRM 商談前段サービス、ループバックデバッグのみ |
-| omni-srm | 8080 | 127.0.0.1:8105 | HTTP | SRM サービス、本番トラフィックは Gateway 経由のみ、ホストはループバックデバッグのみ |
-| omni-procurement | 8080 | 127.0.0.1:8106 | HTTP | 調達サービス、本番トラフィックは Gateway 経由のみ |
-| omni-asset | 8080 | 127.0.0.1:8107 | HTTP | 資産サービス、本番トラフィックは Gateway 経由のみ |
-| MySQL | 3306 | 127.0.0.1:3306 | TCP | データベース、明示的な名前付きボリューム、ループバックデバッグのみ |
-| Redis | 6379 | 127.0.0.1:6379 | TCP | パスワード保護キャッシュ、ループバックデバッグのみ |
-| Nacos Console/API/gRPC | 8080/8848/9848 | 127.0.0.1 同一ポートのみ | HTTP/gRPC | レジストリ/設定とコンソール |
-| RocketMQ NameServer | 9876 | **127.0.0.1:19876** | TCP | ネームサービス |
-| RocketMQ Broker | 10909-10912 | 127.0.0.1 同一ポートのみ | TCP | メッセージブローカー |
-| XXL-JOB Admin | 8080 | 127.0.0.1:18080 | HTTP | ジョブスケジューラー、ログイン/実行体トークンは `.env` から注入 |
+以下はメインリポジトリの正式既定マッピングの投影で、明示公開したポートだけを列挙します。19900–19907 の八管理ポートにホストマッピングはありません。生成プロジェクトは保持した自身の設定を使い、実バインドと正常性は実行時に確認します。
+
+| サービス | 正式な既定ポートマッピング |
+| --- | --- |
+| `omni-auth` | `127.0.0.1:8100:8080` |
+| `omni-base` | `127.0.0.1:8101:8080` |
+| `omni-workflow` | `127.0.0.1:8103:8080` |
+| `omni-crm` | `127.0.0.1:8104:8080` |
+| `omni-srm` | `127.0.0.1:8105:8080` |
+| `omni-procurement` | `127.0.0.1:8106:8080` |
+| `omni-asset` | `127.0.0.1:8107:8080` |
+| `omni-gateway` | `8102:8080` |
+| `omni-frontend` | `3000:3000` |
+| `mysql` | `127.0.0.1:3306:3306` |
+| `redis` | `127.0.0.1:6379:6379` |
+| `nacos` | `127.0.0.1:8080:8080`<br>`127.0.0.1:8848:8848`<br>`127.0.0.1:9848:9848` |
+
+<!-- omni:modules:rocketmq -->
+| サービス | 正式な既定ポートマッピング |
+| --- | --- |
+| `rocketmq-namesrv` | `127.0.0.1:19876:9876` |
+| `rocketmq-broker` | `127.0.0.1:10909:10909`<br>`127.0.0.1:10911:10911`<br>`127.0.0.1:10912:10912` |
+<!-- omni:modules:end -->
+
+<!-- omni:modules:xxl-job -->
+| サービス | 正式な既定ポートマッピング |
+| --- | --- |
+| `xxl-job-admin` | `127.0.0.1:18080:8080` |
+<!-- omni:modules:end -->
 
 ### 16.2 ローカル初期化アカウントとシークレット供給源
 
-| サービス | アカウント | パスワード | アクセスアドレス |
-|------|------|------|----------|
-| フロントエンドアプリ | ローカルシード `admin` | ローカルシード `admin123`、初回ログイン時に即時変更、本番では使用禁止 | http://localhost:3000 |
-| MySQL | root | `.env: MYSQL_ROOT_PASSWORD` | 127.0.0.1:3306 |
-| Redis | ユーザー名なし | `.env: REDIS_PASSWORD` | 127.0.0.1:6379 |
-| Nacos 管理アカウント | `.env: NACOS_USERNAME`（`nacos` 固定） | `.env: NACOS_PASSWORD` | http://127.0.0.1:8080 |
-| XXL-JOB Admin | `.env: XXL_JOB_ADMIN_USERNAME` | `.env: XXL_JOB_ADMIN_PASSWORD` | http://127.0.0.1:18080 |
+実 Secret は非公開 .env に保持します。`:?` は欠落/空値を拒否するだけで、仮置き値の置換、強度、認証成功を証明しません。doctor は replace-with と山括弧の値を未設定とし、キー名だけを報告します。start は doctor を自動実行しません。アプリの初期アカウント、テナント、Portal ロール、パスワード規則は認証/業務の事実と Wiki が管理し、admin の文字列だけでログイン成功を仮定しません。
 
-すべての `replace-with-*` 値は起動前に置き換える必要があります。Compose は必須変数構文によりフェイルクローズドします。新規テナント管理者のパスワードは作成リクエストで明示的に指定され、バックエンドは BCrypt ハッシュのみを保存し、`admin123` は生成しなくなりました。
+```bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run dev -- dev doctor
+```
+
+ソース: [.env.example](../.env.example)、[doctor.ts](../tools/omni-cli/src/doctor.ts).
 
 ### 16.3 主要ファイルパス
 
-| ファイル | パス | 説明 |
-|---------|------|------|
-| Compose エントリ | `compose.yaml` | インフラとアプリケーションのオーケストレーションを include |
-| Compose インフラ | `compose.infra.yaml` | MySQL、Redis、Nacos、RocketMQ、XXL-JOB |
-| Compose アプリケーション | `compose.apps.yaml` | バックエンドサービスとフロントエンド |
-| バックエンド Dockerfile | `docker/backend/Dockerfile` | マイクロサービスマルチステージビルド |
-| フロントエンド Dockerfile | `docker/frontend/Dockerfile` | Vue フロントエンドマルチステージビルド |
-| Nginx 設定 | `docker/frontend/nginx.conf` | フロントエンドリバースプロキシルール |
-| Broker 設定 | `docker/rocketmq/broker-docker.conf` | RocketMQ Docker ネットワーク設定 |
-| Maven ミラー | `omni-backend/docker-settings.xml` | Aliyun Maven 高速化 |
-| DB マイグレーション | `database/changelog/` | 9 DB の Liquibase スキーマ、制約、アップグレード |
-| DB シード | `scripts/sql/seed/`、`database/seed/manifest.yaml` | 冪等 DML、ソースチェックサム、自然キー検証 |
-| Migrator イメージ | `docker/migrator/Dockerfile` | 一回限りの Liquibase マイグレーションサービスをビルド |
-| 起動スクリプト (Linux) | `start.sh` | ワンクリック起動 |
-| 起動スクリプト (Windows) | `start.bat` | 管理者権限なしで指定プリセットを起動、システムポートポリシーは変更しない |
-| 停止スクリプト (Linux) | `stop.sh` | ワンクリック停止 |
-| 停止スクリプト (Windows) | `stop.bat` | ワンクリック停止 |
+各入口は構成、ビルド、転送、移行、seed、preset、文書、操作の事実を管理します。現在のプロジェクト内の相対パスを使い、生成プロジェクトから元作業場所の絶対パスには依存しません。
 
----
+| ファイル |
+| --- |
+| [compose.yaml](../compose.yaml) |
+| [compose.apps.yaml](../compose.apps.yaml) |
+| [compose.infra.yaml](../compose.infra.yaml) |
+| [compose.observability.yaml](../compose.observability.yaml) |
+| [Dockerfile](../docker/backend/Dockerfile) |
+| [Dockerfile](../docker/frontend/Dockerfile) |
+| [nginx.conf](../docker/frontend/nginx.conf) |
+| [Dockerfile](../docker/migrator/Dockerfile) |
+| [MigrationTargetCatalog.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java) |
+| [MigrationCommandRunner.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/command/MigrationCommandRunner.java) |
+| [AdoptionService.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/adoption/AdoptionService.java) |
+| [BackupEvidenceService.java](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/adoption/BackupEvidenceService.java) |
+| [db.changelog-root.yaml](../database/changelog/db.changelog-root.yaml) |
+| [manifest.yaml](../database/seed/manifest.yaml) |
+| [modules.yaml](../scaffold/catalog/modules.yaml) |
+| [development.ts](../tools/omni-cli/src/development.ts) |
+| [doctor.ts](../tools/omni-cli/src/doctor.ts) |
+| [compose.tools.yaml](../compose.tools.yaml) |
+| [compose.docs.yaml](../compose.docs.yaml) |
+| [.env.example](../.env.example) |
+| [start.sh](../start.sh) |
+| [start.bat](../start.bat) |
+| [stop.sh](../stop.sh) |
+| [stop.bat](../stop.bat) |
+| [repository-governance.md](repository-governance.md) |
+| [source-map.md](reference/source-map.md) |
 
 ## 付録：ビルド成果物サイズ参考
 
-| イメージ | サイズ（約） | 説明 |
-|---------|------------|------|
-| omni-auth:latest | ~200MB | JRE + Fat JAR |
-| omni-base:latest | ~200MB | JRE + Fat JAR |
-| omni-gateway:latest | ~200MB | JRE + Fat JAR |
-| omni-workflow:latest | ~250MB | JRE + Fat JAR + Flowable エンジン |
-| omni-crm:latest | ~210MB | JRE + Fat JAR + CRM/Outbox |
-| omni-frontend:latest | ~50MB | Nginx + Vue 静的ファイル |
-> 注：イメージ名は `OMNI_IMAGE_NAMESPACE` を前缀にできます（既定は `omni-`）。並行した隔離環境では各自の Compose project 名を設定し、`omni-*:latest` が互いに上書きされて黙って再利用されることを防ぎます。
-| mysql:8.4 | ~600MB | 公式イメージ |
-| nacos/nacos-server:v3.1.1 | ~800MB | 公式イメージ |
-| apache/rocketmq:5.3.2 | ~700MB | 公式イメージ |
+測定時刻、イメージ ID、プラットフォーム、ビルド範囲がない MB 推定は掲載しません。イメージ名は `OMNI_IMAGE_NAMESPACE`（既定 omni）を使います。有効な容量証拠には実イメージ ID が必要で、ソースのタグだけではローカル使用量を証明できません。資産一覧と整理は所有者、参照、バックアップ、復元可能性を先に確認します。
+
+ソース: [compose.apps.yaml](../compose.apps.yaml)、[compose.infra.yaml](../compose.infra.yaml).

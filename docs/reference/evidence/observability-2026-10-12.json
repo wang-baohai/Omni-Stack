@@ -1,0 +1,661 @@
+{
+  "schema": 1,
+  "kind": "local-docker-observability-teaching-evidence",
+  "recorded_at": "2026-10-12T07:40:08.951Z",
+  "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "runtime": {
+    "project": "omni-wiki-acceptance-20261009",
+    "containers": [
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+        "id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+        "service": "omni-base"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+        "id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+        "service": "omni-gateway"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": null,
+        "image": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+        "id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+        "service": "grafana"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": null,
+        "image": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+        "id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+        "service": "prometheus"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": null,
+        "image": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+        "id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+        "service": "otel-collector"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": null,
+        "image": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+        "id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+        "service": "alloy"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": null,
+        "image": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+        "id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+        "service": "tempo"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": null,
+        "image": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+        "id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+        "service": "pushgateway"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": null,
+        "image": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+        "id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+        "service": "loki"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": null,
+        "image": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+        "id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+        "service": "alertmanager"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": null,
+        "image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "service": "omni-frontend"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+        "id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+        "service": "omni-workflow"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+        "id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+        "service": "omni-asset"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+        "id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+        "service": "omni-procurement"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+        "id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+        "service": "omni-crm"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+        "id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+        "service": "omni-srm"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+        "id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+        "service": "omni-auth"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+        "id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+        "service": "nacos"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+        "id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+        "service": "xxl-job-admin"
+      },
+      {
+        "status": "exited",
+        "ports": 0,
+        "health": "unhealthy",
+        "image": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+        "id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+        "service": "omni-db-migrator"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+        "id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+        "service": "rocketmq-broker"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+        "id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+        "service": "mysql"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+        "id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+        "service": "redis"
+      },
+      {
+        "status": "running",
+        "ports": 0,
+        "health": "healthy",
+        "image": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+        "id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+        "service": "rocketmq-namesrv"
+      }
+    ],
+    "host_bindings": 0,
+    "docker": "29.7.2",
+    "compose": "5.4.0",
+    "browser": "mcr.microsoft.com/playwright:v1.61.1-noble",
+    "browser_image_id": "sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48"
+  },
+  "trace": {
+    "trace_id": "b8e0d5eb7d9c346cda61c49218695527",
+    "initial_captured_at": "2026-10-12T06:14:37.300Z",
+    "initial_span_count": 25,
+    "services": [
+      "omni-gateway",
+      "omni-base"
+    ],
+    "matching_loki_records": 6,
+    "requests": [
+      {
+        "path": "/api/base/dict/type/list?page=1&size=20&typeCode=WIKI_OBS_20261012A",
+        "method": "GET",
+        "http": 200,
+        "code": 200,
+        "response_trace": "b8e0d5eb7d9c346cda61c49218695527"
+      },
+      {
+        "path": "/api/base/dict/type",
+        "method": "POST",
+        "http": 200,
+        "code": 200,
+        "response_trace": "b8e0d5eb7d9c346cda61c49218695527"
+      },
+      {
+        "path": "/api/base/dict/type/list?page=1&size=20&typeCode=WIKI_OBS_20261012A",
+        "method": "GET",
+        "http": 200,
+        "code": 200,
+        "response_trace": "b8e0d5eb7d9c346cda61c49218695527"
+      },
+      {
+        "path": "/api/base/dict/type/31",
+        "method": "DELETE",
+        "http": 200,
+        "code": 200,
+        "response_trace": "b8e0d5eb7d9c346cda61c49218695527"
+      },
+      {
+        "path": "/api/base/dict/type/list?page=1&size=20&typeCode=WIKI_OBS_20261012A",
+        "method": "GET",
+        "http": 200,
+        "code": 200,
+        "response_trace": "b8e0d5eb7d9c346cda61c49218695527"
+      }
+    ],
+    "cleanup": "EXACT_CREATED_RECORD_DELETED_RESIDUAL0",
+    "later_read_only_verification": {
+      "trace_id": "b8e0d5eb7d9c346cda61c49218695527",
+      "http": 200,
+      "services": [
+        "omni-base",
+        "omni-gateway"
+      ],
+      "span_count": 56,
+      "historical_read_only": true
+    }
+  },
+  "metrics": {
+    "business_up": 8,
+    "total_targets": 13,
+    "down": [
+      {
+        "job": "cadvisor",
+        "instance": "cadvisor:8080",
+        "health": "down"
+      },
+      {
+        "job": "node-exporter",
+        "instance": "node-exporter:9100",
+        "health": "down"
+      }
+    ]
+  },
+  "alert": {
+    "rule": "OmniServiceDown",
+    "formal_for": "2m",
+    "receiver": "local-null",
+    "external_notifications_sent": false,
+    "firing": {
+      "status": "PASS",
+      "observed_at": "2026-10-12T07:34:28.910Z",
+      "attempt": 37
+    },
+    "resolved": {
+      "status": "PASS",
+      "observed_at": "2026-10-12T07:35:31.253Z",
+      "attempt": 14
+    },
+    "runtime_status": "PASS_SAME_CONTAINER_RECOVERED",
+    "finished_at": "2026-10-12T07:35:32.3538098Z",
+    "image_epoch": "002;fresh reusable capture entry and three native viewports;original001 retained privately"
+  },
+  "terminal_evidence": [
+    {
+      "id": "operations-compose-start-terminal",
+      "artifact": "docs/reference/evidence/operations-compose-start-2026-10-12.txt",
+      "sha256": "83124d10d9635098dc30b23ac5a0a1d137d9d9ce231ab2497e8c103c9e505b03",
+      "command": "docker compose -p omni-wiki-acceptance-20261009 --env-file <private-env> -f compose.yaml -f <private-portless-overlay> --profile full --profile observability up -d --no-deps --pull never otel-collector prometheus pushgateway alertmanager tempo loki alloy grafana",
+      "source_sha256": "70c27d4524e53b20788cfa9636714fd97a37b05063d4482046a01a6b678369d4",
+      "captured_at": "2026-10-12T05:50:42.1888972Z",
+      "exit_code": 0
+    },
+    {
+      "id": "operations-health-terminal",
+      "artifact": "docs/reference/evidence/operations-health-2026-10-12.json",
+      "sha256": "ba75afcdf86bd989c320deddcfd07782891f232e17017510059f824a957fe562",
+      "command": "docker run --rm --network omni-wiki-acceptance-20261009_default -e E2E_OBSERVABILITY_SERVICES=omni-asset,omni-auth,omni-base,omni-crm,omni-gateway,omni-procurement,omni-srm,omni-workflow -v <repository>:/workspace:ro --entrypoint node omni-stack-tools:local /workspace/scripts/fixtures/verify-observability.mjs --trace-id=b8e0d5eb7d9c346cda61c49218695527",
+      "source_sha256": "e408fcddeb0269329790284b78a94e029a8b05044dbc4190a61940fbe227d2b8",
+      "captured_at": "2026-10-12T07:36:57.521Z",
+      "exit_code": 0
+    },
+    {
+      "id": "operations-trace-terminal",
+      "artifact": "docs/reference/evidence/operations-health-2026-10-12.json",
+      "sha256": "ba75afcdf86bd989c320deddcfd07782891f232e17017510059f824a957fe562",
+      "command": "docker run --rm --network omni-wiki-acceptance-20261009_default -e E2E_OBSERVABILITY_SERVICES=omni-asset,omni-auth,omni-base,omni-crm,omni-gateway,omni-procurement,omni-srm,omni-workflow -v <repository>:/workspace:ro --entrypoint node omni-stack-tools:local /workspace/scripts/fixtures/verify-observability.mjs --trace-id=b8e0d5eb7d9c346cda61c49218695527",
+      "source_sha256": "e408fcddeb0269329790284b78a94e029a8b05044dbc4190a61940fbe227d2b8",
+      "captured_at": "2026-10-12T07:36:57.521Z",
+      "exit_code": 0
+    }
+  ],
+  "images": [
+    {
+      "id": "operations-dashboard-zh-CN-1440",
+      "image": "docs/images/zh-CN/operations-dashboard.png",
+      "sha256": "e36ece2bd5f81a4717c4a723e3939b8d791ea7445eb515a58a86daed33671e3b",
+      "locale": "zh-CN",
+      "requested_language": "zh-Hans",
+      "actual_html_language": "zh-Hans",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "captured_at": "2026-10-12T07:27:41.320Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-zh-CN-1024",
+      "image": "docs/images/zh-CN/operations-dashboard-tablet.png",
+      "sha256": "54f7d10c17eb747417f06f00cbddc3913d3156d81d0ee7378b2afd3e56fee5da",
+      "locale": "zh-CN",
+      "requested_language": "zh-Hans",
+      "actual_html_language": "zh-Hans",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "captured_at": "2026-10-12T07:27:43.526Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-zh-CN-390",
+      "image": "docs/images/zh-CN/operations-dashboard-mobile.png",
+      "sha256": "059c2fa921bef3052cefcb0e5bb9498eda8c73e2da97af31d85502a8cc196f4f",
+      "locale": "zh-CN",
+      "requested_language": "zh-Hans",
+      "actual_html_language": "zh-Hans",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "captured_at": "2026-10-12T07:27:45.610Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-en-US-1440",
+      "image": "docs/images/en-US/operations-dashboard.png",
+      "sha256": "7d91a2fcb09d7200da05431c1c808ce58667b09bfd53835a3269245090add88e",
+      "locale": "en-US",
+      "requested_language": "en-US",
+      "actual_html_language": "en-US",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "captured_at": "2026-10-12T07:27:47.781Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-en-US-1024",
+      "image": "docs/images/en-US/operations-dashboard-tablet.png",
+      "sha256": "1ad10028fabc04bd2a8beac4dafd5adad008089a3d4e6af53c509ba537a64855",
+      "locale": "en-US",
+      "requested_language": "en-US",
+      "actual_html_language": "en-US",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "captured_at": "2026-10-12T07:27:49.710Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-en-US-390",
+      "image": "docs/images/en-US/operations-dashboard-mobile.png",
+      "sha256": "2fe33455bce363787f24decca8663cdd239242c8ef9c3295b0a31124685386c4",
+      "locale": "en-US",
+      "requested_language": "en-US",
+      "actual_html_language": "en-US",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "captured_at": "2026-10-12T07:27:51.964Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-ja-JP-1440",
+      "image": "docs/images/ja-JP/operations-dashboard.png",
+      "sha256": "ba9074c36c61a0aaba3ee7b878dc563b0397a860089636b86642b5e9b08f8cf0",
+      "locale": "ja-JP",
+      "requested_language": "ja-JP",
+      "actual_html_language": "ja-JP",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "captured_at": "2026-10-12T07:27:54.115Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-ja-JP-1024",
+      "image": "docs/images/ja-JP/operations-dashboard-tablet.png",
+      "sha256": "b0c589eab5d6da619af07b80f6b66f4503323046f38828986cd26c0a3afa5fed",
+      "locale": "ja-JP",
+      "requested_language": "ja-JP",
+      "actual_html_language": "ja-JP",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "captured_at": "2026-10-12T07:27:56.211Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-ja-JP-390",
+      "image": "docs/images/ja-JP/operations-dashboard-mobile.png",
+      "sha256": "2b42df4ccb440113c7de96d03823b0f4ebf57598ec2eeeda361e6c3c2927bfab",
+      "locale": "ja-JP",
+      "requested_language": "ja-JP",
+      "actual_html_language": "ja-JP",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "captured_at": "2026-10-12T07:27:58.336Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-ko-KR-1440",
+      "image": "docs/images/ko-KR/operations-dashboard.png",
+      "sha256": "55c2d5d83c5b50f0e50e4cd7be5fcac13fb34d12b9c9a08c06c37788dbd28362",
+      "locale": "ko-KR",
+      "requested_language": "ko-KR",
+      "actual_html_language": "ko-KR",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "captured_at": "2026-10-12T07:28:00.613Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-ko-KR-1024",
+      "image": "docs/images/ko-KR/operations-dashboard-tablet.png",
+      "sha256": "3e372c6f971b42fadbd44ecf99d2a0b9f5ab3e7b98a4bb950b55be18645a70cf",
+      "locale": "ko-KR",
+      "requested_language": "ko-KR",
+      "actual_html_language": "ko-KR",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "captured_at": "2026-10-12T07:28:02.735Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-dashboard-ko-KR-390",
+      "image": "docs/images/ko-KR/operations-dashboard-mobile.png",
+      "sha256": "7bcb2a881ec58ec34b37f844d408f8c73d89bb678dce6b68c48afc7636c17298",
+      "locale": "ko-KR",
+      "requested_language": "ko-KR",
+      "actual_html_language": "ko-KR",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "captured_at": "2026-10-12T07:28:04.802Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native shell language is selected;provisioned dashboard/panel titles remainEnglish;mobile breadcrumbs truncate"
+      ],
+      "datasource_statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "operations-alert-shared-1440",
+      "image": "docs/images/operations-alert-firing.png",
+      "sha256": "5e9b81c76609d98c770a562a840f4dbbe4589991b6bea549bdefbb9ca3ebc3b9",
+      "locale": "shared",
+      "requested_language": null,
+      "actual_html_language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "captured_at": "2026-10-12T07:34:33.508Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native English UI;shared original,not four translated interfaces"
+      ],
+      "datasource_statuses": []
+    },
+    {
+      "id": "operations-alert-shared-1024",
+      "image": "docs/images/operations-alert-firing-tablet.png",
+      "sha256": "e06ad35a6a37d5e18167b4affd4b36359c390bbde0efb61948b9512686ba40fc",
+      "locale": "shared",
+      "requested_language": null,
+      "actual_html_language": "en",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "captured_at": "2026-10-12T07:34:34.464Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native English UI;shared original,not four translated interfaces"
+      ],
+      "datasource_statuses": []
+    },
+    {
+      "id": "operations-alert-shared-390",
+      "image": "docs/images/operations-alert-firing-mobile.png",
+      "sha256": "437341ad97c39ed3dbc0372cdac9834671b2dadb640683dc19065e8802d48785",
+      "locale": "shared",
+      "requested_language": null,
+      "actual_html_language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "captured_at": "2026-10-12T07:34:35.317Z",
+      "test_sha256": "430242f61f3311d6dc0ed46e42d5a06ac02c2c65fe4d9eda45feec0255c8b3e7",
+      "visual_review": "passed-with-documented-limits",
+      "limitations": [
+        "Native English UI;mobile clips some right-side controls and requires scrolling;full mobile usability not accepted"
+      ],
+      "datasource_statuses": []
+    }
+  ],
+  "human_translation_review": "pending",
+  "limits": [
+    "Grafana native shell languages were switched;provisioned dashboard/panel titles stayEnglish",
+    "Alertmanager nativeEnglish and some clipped mobile controls await a specific acceptance decision;coverage remainspartial",
+    "Node Exporter/cAdvisor intentionally omitted;two host targetsDOWN",
+    "Historical trace requery differs from first capture:25 then56spans;both epochs recorded",
+    "No external notification,production failover,full asynchronous trace or human translation signoff asserted"
+  ]
+}

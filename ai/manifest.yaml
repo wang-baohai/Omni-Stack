@@ -1,0 +1,70 @@
+version: 1
+canonical_root: ai
+license: Apache-2.0
+assets:
+  - id: grill-me
+    kind: skill
+    path: ai/skills/grill-me/SKILL.md
+    version: 1.0.1
+    module: platform
+    source: https://github.com/mattpocock/skills/blob/694fa30311e02c2639942308513555e61ee84a6f/skills/productivity/grill-me/SKILL.md
+    license: MIT
+    license_file: ai/skills/grill-me/LICENSE
+    upstream_commit: 694fa30311e02c2639942308513555e61ee84a6f
+    content_sha256: 74147eb6010a65957efef2b9e0f0b3ff935c1def7fc117697151b1d0f3610556
+    verified_at: 2026-10-12
+    provenance_note: 原资产由 fc165e3 的 .qoder/skills/grill-me/SKILL.md 迁移；本次容器只读 Git 核对与固定上游提交全文字节一致，并保留该提交 MIT 许可。历史导入过程未独立证实，不据此编造来源历史。
+    tools: [codex, qoder]
+    dependencies: []
+  - id: omni-change
+    kind: skill
+    path: ai/skills/omni-change/SKILL.md
+    version: 1.0.0
+    module: platform
+    source: project engineering rules and repository-governance at fc165e3
+    license: Apache-2.0
+    tools: [codex, qoder]
+    dependencies: [local-docker]
+  - id: change-review
+    kind: prompt
+    path: ai/prompts/change-review.md
+    version: 1.0.0
+    module: platform
+    source: project engineering rules
+    license: Apache-2.0
+    tools: [codex, qoder]
+    dependencies: []
+  - id: documentation
+    kind: prompt
+    path: ai/prompts/documentation.md
+    version: 1.0.0
+    module: platform
+    source: repository Wiki and review policy
+    license: Apache-2.0
+    tools: [codex, qoder]
+    dependencies: [local-docker]
+  - id: docker-verification
+    kind: knowledge
+    path: ai/knowledge/docker-verification.md
+    version: 1.0.0
+    module: platform
+    source: current local verification and governance
+    license: Apache-2.0
+    tools: [codex, qoder]
+    dependencies: [local-docker]
+external_tools:
+  - id: codex
+    source: https://developers.openai.com/codex/skills
+    installation: 使用官方 Codex；本目录不携带账号、自动化身份、全局配置或插件缓存。
+  - id: qoder
+    source: https://docs.qoder.com/cli/Skills
+    installation: 使用 Qoder 的项目 skills 入口；通过 adapters 安装规范源。
+    validated_cli_version: 1.1.73
+    validated_at: 2026-10-18
+    validation_scope: official npm CLI project-skill discovery; five generated presets; zero model requests
+    validation_record: docs/reference/evidence/qoder-native-skill-discovery-2026-10-18.json
+  - id: skill-creator
+    source: https://github.com/openai/skills/tree/main/skills/.system/skill-creator
+    installation: 使用 Codex 系统提供版本；只登记来源，不复制系统安装缓存。
+self_maintained_plugins: []
+plugin_note: 共享清单登记 grill-me 与 omni-change 两项 Skill；项目自维护插件条目仍为空。个人全局插件不复制到项目中。

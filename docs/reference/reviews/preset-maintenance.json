@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "preset-maintenance",
+  "source": "docs/preset-maintenance.md",
+  "source_sha256": "d174bfe252aeba2f1129544f3a1fd2bca8700d1bc621e26ef1111b7420e13cc0",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/preset-maintenance.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "931cff478bc1ede771eb000b9c76ccec03d3a43dd39dc010ba7cac68c737c64b",
+      "checks": {
+        "coverage_and_meaning": "完整核对受管理文件、新增模块七步、预设版本、三类黄金门、失败诊断和回滚，未把领域规则下沉生成器。",
+        "technical_literals": "catalog/schema/preset/generator/golden/lock路径、版本级别、clean verify/install与四条容器维护命令逐项一致。",
+        "security_and_failure_semantics": "保留依赖顺序、可选集成必须有运行时开关、冲突检查、staging原子回滚、非空目标拒绝和禁止改写已执行迁移。",
+        "language_and_terminology": "English managed-artifact grouping covers Chinese fields; version wording now includes breaking output changes rather than only compatible changes.",
+        "images_and_links": "本页没有图片及Markdown路径链接，规范文件名可直接定位；维护命令明确Docker及首次工具准备，未声称夜间矩阵已执行。"
+      },
+      "findings": [
+        {
+          "id": "container-maintenance",
+          "status": "resolved",
+          "description": "维护代码块在宿主机运行npm。",
+          "resolution": "改为仓库根的Docker CLI维护命令，并说明准备镜像和依赖。"
+        },
+        {
+          "id": "version-compatibility",
+          "status": "resolved",
+          "description": "change compatibly误将版本递增条件局限为兼容变化。",
+          "resolution": "改为所有模块、配置或输出变化，保留patch/minor/major规则。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/preset-maintenance.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "26cc45ce91854096c3eef647abfc66da1706fc5370ad861f0658cf015a918101",
+      "checks": {
+        "coverage_and_meaning": "完整核对受管理文件、新增模块七步、预设版本、三类黄金门、失败诊断和回滚，未把领域规则下沉生成器。",
+        "technical_literals": "catalog/schema/preset/generator/golden/lock路径、版本级别、clean verify/install与四条容器维护命令逐项一致。",
+        "security_and_failure_semantics": "保留依赖顺序、可选集成必须有运行时开关、冲突检查、staging原子回滚、非空目标拒绝和禁止改写已执行迁移。",
+        "language_and_terminology": "モジュール除外替代含糊的裁断/裁断器，错误定位、事务边界和前方修正语义保持一致。",
+        "images_and_links": "本页没有图片及Markdown路径链接，规范文件名可直接定位；维护命令明确Docker及首次工具准备，未声称夜间矩阵已执行。"
+      },
+      "findings": [
+        {
+          "id": "container-maintenance",
+          "status": "resolved",
+          "description": "维护代码块在宿主机运行npm。",
+          "resolution": "改为仓库根的Docker CLI维护命令，并说明准备镜像和依赖。"
+        },
+        {
+          "id": "pruning-term",
+          "status": "resolved",
+          "description": "多处使用中文式裁断及源catalog。",
+          "resolution": "改为结构化模块除外、元のcatalog和除外処理。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/preset-maintenance.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "2bf0184381b1e090cbf59d11ce7d0602fd828fad07a47bd74dd8b72ae5f664b0",
+      "checks": {
+        "coverage_and_meaning": "完整核对受管理文件、新增模块七步、预设版本、三类黄金门、失败诊断和回滚，未把领域规则下沉生成器。",
+        "technical_literals": "catalog/schema/preset/generator/golden/lock路径、版本级别、clean verify/install与四条容器维护命令逐项一致。",
+        "security_and_failure_semantics": "保留依赖顺序、可选集成必须有运行时开关、冲突检查、staging原子回滚、非空目标拒绝和禁止改写已执行迁移。",
+        "language_and_terminology": "관리 대상、원자적 복사、가지치기、전이 의존성、멱등等词对应工程步骤，失败回滚表达明确。",
+        "images_and_links": "本页没有图片及Markdown路径链接，规范文件名可直接定位；维护命令明确Docker及首次工具准备，未声称夜间矩阵已执行。"
+      },
+      "findings": [
+        {
+          "id": "container-maintenance",
+          "status": "resolved",
+          "description": "维护代码块在宿主机运行npm。",
+          "resolution": "改为仓库根的Docker CLI维护命令，并说明准备镜像和依赖。"
+        }
+      ]
+    }
+  }
+}

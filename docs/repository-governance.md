@@ -9,8 +9,9 @@
 | 系统边界与流程 | [架构](architecture.md)、[核心流程](core-flows.md) |
 | API、错误码、日期与金额表示 | [API 契约](api-contract.md)、当前 Controller/DTO |
 | 开发约束 | [AGENTS.md](../AGENTS.md)、[后端模式](backend-patterns.md)、[前端模式](frontend-patterns.md) |
-| 架构决策 | [ADR](adr/0001-scaffold-upgrade-foundations.md) |
-| 业务规则 | Workflow、Scheduling、CRM、SRM、Procurement、Asset 的正式设计与操作指南 |
+| 架构决策 | [脚手架 ADR](adr/0001-scaffold-upgrade-foundations.md)、[Wiki 与 AI 资产 ADR](adr/0002-repository-wiki-and-ai-assets.md) |
+| 业务规则 | Workflow、Scheduling、CRM 与 [SRM 当前事实](srm.md)；Procurement、Asset 使用各自明确标注的实现基线，操作指南只承担教程 |
+| SRM 设计与历史 | [SRM 设计](design/srm-design.md) 保留决策和指定提交的实现快照；后续状态机、权限和 API 只在 `srm.md` 维护 |
 | 模块与预设 | `scaffold/catalog/modules.yaml`、`scaffold/presets/`；预设文档由 CLI 派生 |
 | 数据结构与接管 | `database/changelog/`、`database/adoption/` |
 | 种子与断言 | `scripts/sql/seed/`、`database/seed/manifest.yaml` |
@@ -18,8 +19,25 @@
 | 文档语言与复核状态 | `docs/docs-manifest.yaml`；`i18n-review-queue.md` 是派生队列 |
 | 截图场景与覆盖 | `omni-frontend/e2e-docs/screenshot-manifest.yaml`、`screenshot-coverage.yaml` |
 | 本地运行 | 正式 Compose、Dockerfile、[部署说明](docker-deployment.md)、[快速开始](guides/quick-start.md) |
+| 初学者阅读与操作 | [Wiki](wiki/index.md)、`guides/`；不得把教程描述当成新的业务契约 |
+| 共享 AI 资产 | [AI 目录](../ai/README.md)、`ai/manifest.yaml`；`.agents/skills`、`.qoder/skills` 为可校验的派生入口 |
+| 版本与重要历史 | [CHANGELOG](../CHANGELOG.md)、`adr/`、`evidence/`；普通过程检索 Git 历史 |
 
 源码和配置定义当前行为；文档解释边界。历史报告只提供线索，不能代替当前运行证据。中文是文档事实源，其他语言不得改变公共契约或安全规则。
+
+README 只负责项目定位、能力、最短体验和导航。事实保留边界、状态机、不变量、失败语义及源码/测试入口；教程保留操作、截图、预期与恢复；设计说明实现状态和取舍，ADR 保留决策关系。新的长期规则只维护一处，其他正文通过链接引用。
+
+## 文档发布与资产维护
+
+`docs/docs-manifest.yaml` 为正文与语言路径清单，站点仅生成四语言投影；GitHub/Gitee 原生 Wiki 可链接统一入口，不维护第二份正文。`compose.docs.yaml` 独立运行，固定 4173；`compose.tools.yaml` 为容器构建/测试工具，业务镜像仍排除 docs 与 ai。
+
+Wiki 变更同步四语言。项目所有者已按 [ADR-0003](adr/0003-authorized-ai-translation-review.md) 授权 Codex 逐篇语义审校；真实 `AI_REVIEW` 通过即可，不要求额外人工复核。只有实际由人完成的复核才记录为 `HUMAN_REVIEW`。两种记录均须绑定 `reviewer`、`reviewed_at`、当前 `reviewed_source_sha256` 和 `translation_sha256`；AI 模式另绑定所有者授权和 `docs/reference/reviews` 中的逐项结论及证据摘要。源、译文、授权或证据变化后相应旧记录失效。AI 记录不能冒称真人，平台 Auto-review 和内容检查不产生翻译签核。`docs:i18n:content:check` 只检查内容，正式发布必须另过严格 `docs:i18n:check`，不得用草稿开关或单独关闭人工标志跳过复核。
+
+图片必须附场景、身份、预设、语言、来源版本和实际验证状态。历史图片可用于说明界面布局，不能当成本次业务复现证据。永久保留必要说明图；原始日志、HAR、录屏、浏览器状态、恢复检查点和临时截图保存在私有输出。
+
+AI 资产记录来源、版本、许可证、依赖、触发范围和失效条件。只维护 `ai/` 规范正文；adapter 预检用户改动后派生原生入口。外部插件保留官方安装信息，不复制账号缓存或全局记忆。生成预设必须携带自己的文档站、AI 规范源和 adapter，校验时不借用源工作区。
+
+CHANGELOG 记录已证实的行为变化、兼容性、修复与升级要求；没有发布版本就使用未发布。重要事故/验收记录注明提交、触发条件、根因、修复、验证范围和限制；没有证据的历史背景标为未知。
 
 ## 验证与证据
 

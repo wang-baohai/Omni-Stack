@@ -1,0 +1,69 @@
+Actual local Docker output; core and supply-chain creation, with core relocation and validation; not all five strict deliveries
+Source HEAD: fc165e392216e75d903199ab121eba46a8edecf3
+Input worktree SHA256: 044454b0ceed553187e9bcd36796d9313e3ea21c64214e14ede3f4b5f4eabf33
+Path aliases mask private output locations only. Raw originals are retained privately.
+
+
+$ node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset list
+core
+crm
+full
+supply-chain
+workflow
+
+$ node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset explain crm
+CRM 销售平台 (crm@1.0.0)
+核心平台加 CRM 销售管道，不包含供应链。
+explicit: crm, gateway, mysql, redis, nacos
+resolved: platform, auth, base, crm, nacos, gateway, mysql, redis
+
+$ node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset create core --output <original-core> --dry-run
+DRY-RUN preset core@1.0.0
+target: <original-core>
+modules: platform, auth, base, nacos, gateway, mysql, redis
+backend: omni-common-core, omni-common, omni-common-mybatis, omni-common-redis, omni-common-redis-reactive, omni-common-operlog, omni-common-job, omni-common-mqlog, omni-common-service, omni-db-migrator, omni-auth, omni-base, omni-gateway
+compose: omni-db-migrator, omni-frontend, omni-auth, omni-base, nacos, omni-gateway, mysql, redis
+ports: 80, 3000, 3306, 6379, 8080, 8100, 8101, 8102, 8848, 9848, 9900, 9901, 19900, 19901, 19902
+databases: platform, common, auth, base, nacos, vendor
+permissions: system, base, dict, job, monitor
+memory: minimum=3328MB, recommended=5632MB
+omit: workflow, crm, srm, procurement, asset, xxl-job, rocketmq
+未写入文件；移除 --dry-run 后创建。
+
+$ node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset create core --output <original-core>
+CREATE preset core@1.0.0
+target: <original-core>
+modules: platform, auth, base, nacos, gateway, mysql, redis
+backend: omni-common-core, omni-common, omni-common-mybatis, omni-common-redis, omni-common-redis-reactive, omni-common-operlog, omni-common-job, omni-common-mqlog, omni-common-service, omni-db-migrator, omni-auth, omni-base, omni-gateway
+compose: omni-db-migrator, omni-frontend, omni-auth, omni-base, nacos, omni-gateway, mysql, redis
+ports: 80, 3000, 3306, 6379, 8080, 8100, 8101, 8102, 8848, 9848, 9900, 9901, 19900, 19901, 19902
+databases: platform, common, auth, base, nacos, vendor
+permissions: system, base, dict, job, monitor
+memory: minimum=3328MB, recommended=5632MB
+omit: workflow, crm, srm, procurement, asset, xxl-job, rocketmq
+preset created: core@1.0.0, modules=7
+
+$ node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset validate core --output <original-core>
+generated preset valid: core@1.0.0, modules=7
+preset valid: core, modules=platform,auth,base,nacos,gateway,mysql,redis
+
+$ node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset validate core --output <moved-core>
+generated preset valid: core@1.0.0, modules=7
+preset valid: core, modules=platform,auth,base,nacos,gateway,mysql,redis
+
+$ node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset create supply-chain --output <learning-supply-chain>
+CREATE preset supply-chain@1.0.0
+target: <learning-supply-chain>
+modules: platform, auth, base, workflow, srm, procurement, asset, nacos, xxl-job, gateway, mysql, redis, rocketmq
+backend: omni-common-core, omni-common, omni-common-mybatis, omni-common-redis, omni-common-redis-reactive, omni-common-operlog, omni-common-job, omni-common-mqlog, omni-common-service, omni-db-migrator, omni-auth, omni-base, omni-common-workflow, omni-workflow, omni-srm, omni-procurement, omni-asset, omni-gateway
+compose: omni-db-migrator, omni-frontend, omni-auth, omni-base, omni-workflow, omni-srm, omni-procurement, omni-asset, nacos, xxl-job-admin, omni-gateway, mysql, redis, rocketmq-namesrv, rocketmq-broker
+ports: 80, 3000, 3306, 6379, 8080, 8100, 8101, 8102, 8103, 8105, 8106, 8107, 8848, 9848, 9876, 9900, 9901, 9903, 9905, 9906, 9907, 10909, 10911, 10912, 19900, 19901, 19902, 19903, 19905, 19906, 19907
+databases: platform, common, auth, base, workflow, vendor, srm, procurement, asset, nacos, xxl-job
+permissions: system, base, dict, job, monitor, workflow, srm, procurement, asset
+memory: minimum=6784MB, recommended=11008MB
+omit: crm
+preset created: supply-chain@1.0.0, modules=13
+
+$ node tools/omni-cli/dist/src/cli.js --root <source-workspace> preset validate supply-chain --output <learning-supply-chain>
+generated preset valid: supply-chain@1.0.0, modules=13
+preset valid: supply-chain, modules=platform,auth,base,workflow,srm,procurement,asset,nacos,xxl-job,gateway,mysql,redis,rocketmq

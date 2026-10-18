@@ -1,0 +1,654 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "frontend-patterns",
+  "source": "docs/frontend-patterns.md",
+  "source_sha256": "0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "d95b0c92bca28cd60b760a06ae0b3ac0af36ebef",
+  "source_state": "Current entire frontend-patterns Chinese fact document and three translations only;17main sections including exact dictionary/BPMN scope reviewed against named current source. No application source change. OriginalA-G and ownerAI-only amendment retained;other families are not approved by this record.",
+  "method": "Four originals2522lines actually read in284;28currentwhole frontend sources and named selected scopes audited284-285,3priorwholeAPIfrontendreads reused only after exact equality. All4 edited documents264lines each were actually read in bounded ranges1-135/136-264;clipped last JP/KR136-264 output re-read completely before287. All287 final replacement sentences and inline-code changes directly authored and reviewed. Whole Markdown renders,identical TypeScript examples,locale-normalized links and44source hashes supplement this semantic decision;they do not grant approval by themselves.",
+  "checked_source_files": [
+    {
+      "path": "docker/frontend/Dockerfile",
+      "sha256": "6542f30feabceb2924259ae339b996f92759f7fc3fb8b31835645aa226152e83"
+    },
+    {
+      "path": "docker/frontend/nginx.conf",
+      "sha256": "d652b7c896a04755354bc8f691873e402d344804e0682bbcc2baa29866d88990"
+    },
+    {
+      "path": "omni-frontend/eslint.config.mjs",
+      "sha256": "fb3213b098b0a819e83ccd280d0e0ef675c950e8cc20ecfdbab9604728081ee0"
+    },
+    {
+      "path": "omni-frontend/package-lock.json",
+      "sha256": "35bbfa535cce50a9e68ab660d10544ca2e62534e279622e039ddf7350403e336"
+    },
+    {
+      "path": "omni-frontend/package.json",
+      "sha256": "24c2338b1e5fdda8063dab364a44c20b9038a2308769638230511d07f3807162"
+    },
+    {
+      "path": "omni-frontend/src/api/auth.ts",
+      "sha256": "2caa1f80207f4e86af65dd2d45fd643b900a4c9a1748bc7679af2ee026312ecc"
+    },
+    {
+      "path": "omni-frontend/src/api/dict.ts",
+      "sha256": "0f0f9d07f6f9a4634d63edff22219b126555f98166a160276a98f1e07c020c9f"
+    },
+    {
+      "path": "omni-frontend/src/api/menu.ts",
+      "sha256": "6d2c8eec518e669c315b26ce07d7dc94bcf9e88f0f6ce218040cd6bcb87687b7"
+    },
+    {
+      "path": "omni-frontend/src/api/request.ts",
+      "sha256": "71f7d1f5003fd81fb41a4fa82386b3fe281c10ccd6e25a40816ca370e460a789"
+    },
+    {
+      "path": "omni-frontend/src/api/user.ts",
+      "sha256": "af2704e9fd07b19a44df6ce134532160bec02c92e62d53312d8801bd4e1175e7"
+    },
+    {
+      "path": "omni-frontend/src/App.vue",
+      "sha256": "c7e29ddb7ce1126fa384ad6431a5a06d6edb4b18e6e3e414d34797a7d11013bf"
+    },
+    {
+      "path": "omni-frontend/src/components/LanguageSelector.vue",
+      "sha256": "43fc6ea583d03e518145e47adff4953d521657fc276e2619ef9570e7ab6431d7"
+    },
+    {
+      "path": "omni-frontend/src/components/LoginForm.vue",
+      "sha256": "d94e742b29b418fd57f8c91ecda6e5f1d93faa4f7ba455e6e1508485faf18388"
+    },
+    {
+      "path": "omni-frontend/src/composables/useBpmnExtension.ts",
+      "sha256": "0e16f77a627be044876b762e5f8bd6f3d261e580347fbd391f6430792036efc6"
+    },
+    {
+      "path": "omni-frontend/src/composables/useBpmnModeler.ts",
+      "sha256": "605a487e94922b2ce3c44e3937f079919469ed5886d58557c6a4af524e7e4004"
+    },
+    {
+      "path": "omni-frontend/src/composables/useDictOptions.ts",
+      "sha256": "d30095ea3cd8fc874d9b6006c83ce7831459bd99f21eaf89d8fa440034c9dae7"
+    },
+    {
+      "path": "omni-frontend/src/constants/menu.ts",
+      "sha256": "baed24fc8643ae8d306dcb179629b7fc8ab43d03fc122b0dc9b1fbdb5e24eb73"
+    },
+    {
+      "path": "omni-frontend/src/directives/permission.ts",
+      "sha256": "b52bb4b166510e09cd07a82471b722409716182a0442f4269b2fa8a40e3805fc"
+    },
+    {
+      "path": "omni-frontend/src/i18n/index.ts",
+      "sha256": "1f03b35f5616586da17441dd5dda7e877ffbc3a197eccef75641ad4794d48618"
+    },
+    {
+      "path": "omni-frontend/src/layout/index.vue",
+      "sha256": "e2e6e022e9e1d1789a6993dda8af088ea80bfd78186f0fc4fc3565e555b40f4c"
+    },
+    {
+      "path": "omni-frontend/src/main.ts",
+      "sha256": "51e98420d46a683532bde44b782c727d59c36e5ee5b7a564bca75f509cea93a0"
+    },
+    {
+      "path": "omni-frontend/src/plugins/element-plus.ts",
+      "sha256": "215e6ae5637ef6f1d9b34249ab70c9fe854c5cff151c3e107e561d56d1b3c963"
+    },
+    {
+      "path": "omni-frontend/src/router/index.ts",
+      "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+    },
+    {
+      "path": "omni-frontend/src/stores/app.ts",
+      "sha256": "3f52763e819ec43a36156d6c14da8c826992bdcbee46b68d9efcba2a1f6ac202"
+    },
+    {
+      "path": "omni-frontend/src/stores/permission.ts",
+      "sha256": "1194fe1457d924e4fb483e7fd1f54c01fe6499af8cb388e01f5fcf9933e91419"
+    },
+    {
+      "path": "omni-frontend/src/stores/user.ts",
+      "sha256": "6cce522263c8c57b91c701fd74f2f9a550807e7c3ed7c07416d3818d04e69d63"
+    },
+    {
+      "path": "omni-frontend/src/types/api.ts",
+      "sha256": "71096455f9a0fe4c84daeccc8f2366d2da9862a11dc87605f86aaf7179eaa9f2"
+    },
+    {
+      "path": "omni-frontend/src/utils/access.ts",
+      "sha256": "dd1e0bccc173fa1fd42a93ce5f72f8344202a6ec170eee00c93c01aaec9c9a3e"
+    },
+    {
+      "path": "omni-frontend/src/utils/error-display.ts",
+      "sha256": "6928ea32c61f137210f28a60954e046b98fedc4872f768cbd6766d8f3410c44b"
+    },
+    {
+      "path": "omni-frontend/src/utils/errors.ts",
+      "sha256": "e8119905dd6f0756f87a56d9284b1ed1e75f5a3ffb2a7d9a193746674aacaeb4"
+    },
+    {
+      "path": "omni-frontend/src/utils/jwt.ts",
+      "sha256": "e75c9657c22aa9c7d45171eeb78bd206766e10e164b88a67c7c339c823cd24cc"
+    },
+    {
+      "path": "omni-frontend/src/utils/navigation.ts",
+      "sha256": "c97c6ded5cb2fca312e682909e35150f8a98cdbce1395b27cfd86fd82608f8a5"
+    },
+    {
+      "path": "omni-frontend/src/utils/pkce.ts",
+      "sha256": "c5a17634b638d79a92761068314a75e7d0b7021e4b9529085c9a8677044510ac"
+    },
+    {
+      "path": "omni-frontend/src/views/error/menu-load/index.vue",
+      "sha256": "452f8bc8938634c54f5b05030df037ff1fb42f630f6b0edd6aa8e0419dee05b8"
+    },
+    {
+      "path": "omni-frontend/src/views/home/index.vue",
+      "sha256": "0961d631051111d6d8a9eacb904253b71b1f7ed698399c05872600019efdc98a"
+    },
+    {
+      "path": "omni-frontend/src/views/srm/supplier/index.vue",
+      "sha256": "c5774d6d7a8c99d28340051bbe4cfc288feb9c538e92db4d719d9bf1a479dd07"
+    },
+    {
+      "path": "omni-frontend/src/views/system/user/index.vue",
+      "sha256": "1a7daa939bfb6d271c78802244b0533006dc0c663ac583322c00759873c46d43"
+    },
+    {
+      "path": "omni-frontend/tests/base/dict-options.test.ts",
+      "sha256": "df87241461ae796f5c0e2d732cde269b62453901543d29c789184d49c7df912e"
+    },
+    {
+      "path": "omni-frontend/tsconfig.json",
+      "sha256": "41c32c2a0ee6f40b5eaece638e897c9b93f8dd2ef55eb91d9176236c2b06c4ce"
+    },
+    {
+      "path": "omni-frontend/vite.config.ts",
+      "sha256": "0aeeb06f688d2ab23b07cbaada2def91e39cc79c3da983faa924bbc92eb779b2"
+    },
+    {
+      "path": "docs/api-contract.md",
+      "sha256": "63bb7c8c879ae25e46dc17642a41b61e9445efe48583def3e7afa92a7d2bd837"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df"
+    },
+    {
+      "path": "docs/repository-governance.md",
+      "sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12"
+    }
+  ],
+  "source_inspection_scope": "28currentwhole source reads,3exactpriorwholeAPIfrontendreads,7selected current files and scoped build-bound sources;per-file ranges retained.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_markdown_rendered_documents": 4,
+    "typescript_fenced_blocks": 4,
+    "identical_typescript_examples": true,
+    "locale_normalized_link_sets_equal": true,
+    "main_sections_per_document": 17,
+    "raster_images": 0,
+    "source_bindings": 44,
+    "actual_document_read": {
+      "original_whole_lines": 2522,
+      "current_whole_lines": 1056,
+      "current_all4_whole_read": true,
+      "current_ranges": "zh/en/jp/kr1-135+136-264;last clipped JP/KR136-264 re-read in separate bounded calls before287",
+      "final_replacements_directly_authored_and_reviewed": true,
+      "hashes_or_renders_alone_do_not_grant_review": true
+    },
+    "unchanged_frontend_proof": {
+      "receipt": "frontend-dict-checks-144.json",
+      "git_bridge": "frontend-git-reuse-285.json",
+      "current_and_baseline_frontend_tree": "2f9d8b826adacd1bf3707632eb18071168b37ac5",
+      "bound_changed_files": [
+        {
+          "path": "omni-frontend/src/composables/useDictOptions.ts",
+          "sha256": "d30095ea3cd8fc874d9b6006c83ce7831459bd99f21eaf89d8fa440034c9dae7",
+          "read_scope": "Verified prior build binding;not a new whole-source read"
+        },
+        {
+          "path": "omni-frontend/package.json",
+          "sha256": "24c2338b1e5fdda8063dab364a44c20b9038a2308769638230511d07f3807162",
+          "read_scope": "Verified prior build binding;not a new whole-source read"
+        },
+        {
+          "path": "omni-frontend/tests/base/dict-options.test.ts",
+          "sha256": "df87241461ae796f5c0e2d732cde269b62453901543d29c789184d49c7df912e",
+          "read_scope": "Verified prior build binding;not a new whole-source read"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "c5774d6d7a8c99d28340051bbe4cfc288feb9c538e92db4d719d9bf1a479dd07",
+          "read_scope": "Verified prior build binding;not a new whole-source read"
+        }
+      ],
+      "all3command_exit_codes_zero": true,
+      "logs_hash_verified": true,
+      "tests": 33,
+      "passed": 33,
+      "failed": 0,
+      "skipped": 0,
+      "no_new_test_run": true,
+      "real_browser_or_login": false,
+      "bridge_scope": "CurrententirefrontendGittreeequals15a51d3;thatcommitfourfrontendchangedpathsareexact144sourcebindings;fourhashesandbuildlogsverified"
+    },
+    "new_build_lint_or_test_runs": false,
+    "application_or_business_execution": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "Only frontend-patterns Chinese facts and3translation rows are approved;expected90/138 after gates,remaining48 and fullA-G remain incomplete.",
+      "44source bindings retain original whole/selected/reused read scopes;not all44were newly read whole.",
+      "No frontend/backend production source changed or new application/business writes;frontend144unit33pass+lint/build reused under exact entire-tree bridge285.",
+      "Markdown,source reads and historical unit tests do not establish actual browser layout,login/externalOAuth,CAPTCHAregistration,Qodernativeloading or whole-goal acceptance.",
+      "JWT decoding does not verify signatures or claims schema;frontend directives/router visibility are not backend authorization."
+    ],
+    "underlying_business_limits_not_fixed": [
+      "permissionStore pending menus have no Token/generation guard;useDictOptions isolation tests do not cover that path.",
+      "document.title is recomputed on navigation,not guaranteed immediately after same-page locale changes.",
+      "Local non-Axios Error retains rawmessage;notalllocalexceptions are localized.",
+      "BPMN readonly option and all asynchronous-cancellation/browser-lifecycle behavior are outside dictionary8regression acceptance."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/frontend-patterns.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 21:26:00",
+      "result": "approved",
+      "translation_sha256": "75c1ed163f1ed0565ea318e33cd1e960dabfd0780f1df36d894d5bbf2526a651",
+      "checks": {
+        "coverage_and_meaning": "整篇对照中文事实源、三篇译文和具名源码，17主节及字典/BPMN章节均保留；事实、源码配置、新代码约定和Wiki操作职责分开。19审计项以真实文档更正或具名限制闭合，原始七组待办和全部验收范围保留。",
+        "technical_literals": "核对AxiosResponse/ApiResponse/PageResult层次、实际SysUser和API名称、路由/permissionCode转换、requiresAuth条件、JWT scope与roles、Store字段、omni-theme/omni-lang、四locale、菜单状态、字典缓存Token/tenant条件、PKCE授权码边界、Docker/Nginx/Vite参数与命令；4份唯一TypeScript示例字节一致。",
+        "security_and_failure_semantics": "401凭据例外、403保留会话、先清理再对话框导航、失败菜单重试和客户端解码限制如实描述。v-permission和路由可见性不替代后台鉴权。菜单异步隔离、同页标题语言及本地Error原消息的未修复限制清楚，不扩张字典回归的覆盖。",
+        "images_and_links": "四篇当前Markdown整篇在本机Docker渲染；每篇17主节、TOC锚点、语言归一化源码/事实/指南链接和同一TS示例校验，无光栅图。静态Markdown/配置不替代G项真实站点根/子路径、浏览器布局和教程截图。",
+        "language_and_terminology": "Read every current section against Chinese and current scoped source. Distinguish transport wrapping from payload,static from public routes,expected claims from verified identity,theme from locale persistence,completed cache from in-flight requests,and factual code limits from rules for new work. Technical identifiers stay unchanged;spacing and state-bearing/helper wording corrected."
+      },
+      "findings": [
+        {
+          "id": "FP01",
+          "status": "resolved",
+          "description": "目录长示例只列两语言、部分页面/命名与当前源目录未核对；应维护真实职责与入口，非完整生成树承诺。",
+          "resolution": "用当前职责表和真实源码入口替代不完整目录树，保留平台及CRM/SRM/Procurement/Asset、四locale和生产/开发配置边界。"
+        },
+        {
+          "id": "FP02",
+          "status": "resolved",
+          "description": "响应拦截器把所有401一律写成过期对话框/登出，需引用刚完成的API错误分类与凭据例外。",
+          "resolution": "区分凭据401、需重新认证的未登录/过期、保持会话403；说明先清共享状态、对话框结束后导航及并发/显式退出抑制，引用唯一API错误契约。"
+        },
+        {
+          "id": "FP03",
+          "status": "resolved",
+          "description": "API示例UserInfo/getUserById与实际SysUser/getUser、AxiosResponse<R<T>>层次与领域函数返回类型需核对；占位代码不可作可编译实现。",
+          "resolution": "按当前request.ts保留完整AxiosResponse，response.data是R对应ApiResponse，response.data.data是业务载荷；使用实际SysUser/listUsers/getUser，不建立占位实现或重复共享类型。"
+        },
+        {
+          "id": "FP04",
+          "status": "resolved",
+          "description": "token-only logout示例遗漏username/isLoggingOut与统一会话清理；Store表昵称/avatar/语言/持久化字段和主题DOM规则与实际实现不符。",
+          "resolution": "按源码列user/app/permission三个Store真实字段、token+username、isLoggingOut、默认dark/omni-theme/初始768px侧栏及独立omni-lang职责；统一会话清理覆盖菜单与动态路由。"
+        },
+        {
+          "id": "FP05",
+          "status": "resolved",
+          "description": "静态路由被统称公开，导航守卫遗漏真实认证、菜单失败/重试和动态路由边界，需读当前router全部相关分支。",
+          "resolution": "静态预声明与公开分开，仅requiresAuth===false公开；列真实静态入口、管理/供应商/资产本人策略、菜单失败重试和动态name去重移除，保护分支不被静态表误放行。"
+        },
+        {
+          "id": "FP06",
+          "status": "resolved",
+          "description": "viewOverrides只列两项、glob映射与懒加载/meta范围可能过宽，需核对当前映射和实际路由注册。",
+          "resolution": "确认现有viewOverrides恰好两项而非推断缺失；核实MENU匹配/懒加载/glob/meta、srm:portal排除、permissionCode转路径/名称。修正system:user与base:dict完整管理路径，MenuNode.path为权限树路径。"
+        },
+        {
+          "id": "FP07",
+          "status": "resolved",
+          "description": "页面代码含缺失导入与ellipsis，SFC/通信/组件命名的示例和新增代码规范应与现行实现分开并链接正式页面。",
+          "resolution": "移除缺失import/ellipsis的第二套运行页，引用实际用户页；保留SFC顺序、Props/emits/Store责任和loading/validation规则，明确新增约定与既有实现。"
+        },
+        {
+          "id": "FP08",
+          "status": "resolved",
+          "description": "格式/命名规则与现有ESLint/配置的实际检查范围需区分；不能声称所有现存代码已符合新增约定。",
+          "resolution": "按实际ESLint的semi/quotes/comma/indent/block-order及max-warnings0说明检查，TS strict/noUnused/bundler/noEmit/@别名照当前配置；新命名规范不声称既有代码已整体改名。"
+        },
+        {
+          "id": "FP09",
+          "status": "resolved",
+          "description": "图标注册、ElementPlus手动注册、主题CSS导入与dark类实际切换需核对，不能称导入CSS即可自动切换。",
+          "resolution": "按installElementPlus命名子集/Globe别名说明注册，区分导入暗色CSS与initTheme/setTheme设置dark类，明确主题默认值/持久化归属与OwnedDOM例外。"
+        },
+        {
+          "id": "FP10",
+          "status": "resolved",
+          "description": "英日韩i18n新增清单仍只要求中英，韩语zh-CN.ts示例却写韩语；locale切换与组件语言/持久化入口需要实际绑定。",
+          "resolution": "四locale同键、menuI18nMap、legacy=false、缺省zh-CN与fallbacken-US、omni-lang/reactive locale/storeLang/HTMLlang/ElConfigProvider全部核对；移除韩语zh-CN混写与只要求中英的旧清单。"
+        },
+        {
+          "id": "FP11",
+          "status": "resolved",
+          "description": "前端JWT解析/按钮显隐/菜单可见性不能替代后端认证、功能权限和租户DataScope；角色与scope来源保持区别。",
+          "resolution": "JWT scope约定为permissions数组、roles独立；解码既不验签也不校验claims结构。预期数组下hasPermission精确成员判断无角色通配；v-permission display:none不删DOM且空绑定不拒绝。UI与后台认证/行所有权/租户DataScope分开。"
+        },
+        {
+          "id": "FP12",
+          "status": "resolved",
+          "description": "MenuNode字段/type值与GET菜单来源、菜单加载状态menusLoaded/failed/无tenant及并发合并需核对当前代码。",
+          "resolution": "核对GET菜单来源、DIRECTORY/MENU字段与path含义、idle/loading/loaded/failed/menusLoaded语义、无租户空加载、同次Promise合并与retry；具体状态不被布尔加载标记替代。"
+        },
+        {
+          "id": "FP13",
+          "status": "resolved",
+          "description": "模块组织事实与开发教程独立；保留所有业务模块、源图标/菜单文案/SQL权限一致性，不建立第二套接入操作。",
+          "resolution": "保留全部业务域和图标/菜单文案/后端权限/seedmanifest一致性，事实文档只管理约定及当前源入口，接入步骤和排障归Wiki/正式指南，未缩小原A-G范围。"
+        },
+        {
+          "id": "FP14",
+          "status": "resolved",
+          "description": "字典缓存8项既有验证与BPMN生命周期/纯扩展函数、共享缓存上下文边界需按各自实际源码，不能泛化所有Composables。",
+          "resolution": "保留useDictOptions返回值、tenant:typeCode缓存、同Token进行中合并、Token变更旧结果与finally隔离、同tenant已完成缓存复用、独立observer/HMR/退出边界；falsy解码tenant不请求且非验签/schema验证。BPMN初始化/销毁和纯扩展函数分别描述；8项回归仅字典范围，状态Composable与普通helper区分。"
+        },
+        {
+          "id": "FP15",
+          "status": "resolved",
+          "description": "Nginx端口/代理/history/cache/securityheader与Vite目标/切块/配置覆盖需验证当前文件，区别静态配置与真实运行。",
+          "resolution": "核对Node22/Nginx1.28/3000/omni-gateway:8080/DockerDNS/history、HTML不缓存/资产一年immutable及重复安全头；Vite es2020/dist/750KB/chunks/8102网络归属按当前配置，未冒称本次运行或浏览器验收。"
+        },
+        {
+          "id": "FP16",
+          "status": "resolved",
+          "description": "剩余整体四语语义、人用标题/术语/链接及工具命令边界仍未批准；无代码变化时复用当前成功构建，不伪造新浏览器验收。",
+          "resolution": "实际完成四篇17主节全文语义和技术标识/术语对照，日韩残留英文主标题及生硬物化路径用语修正，四TS示例严格一致、语言归一化链接集合相同，未增加人审门槛。整个frontendGit树与15a51d3相同，复用真实144中33tests及lint/build成功记录而非重复运行。"
+        },
+        {
+          "id": "FP17",
+          "status": "resolved",
+          "description": "Current permissionStore.loadMenus/reset has no Token/generation guard on existing asynchronous results;dictionary cache regression cannot certify equivalent menu isolation.",
+          "resolution": "明确permissionStore菜单请求无Token/generation隔离，字典缓存8回归不覆盖此限制；仅修正文档承诺，未改动源实现。"
+        },
+        {
+          "id": "FP18",
+          "status": "resolved",
+          "description": "Browser title recomputation lives in router navigation guard;LanguageSelector does not recompute it on same-page locale change.",
+          "resolution": "明确document.title在导航守卫重算，同页语言切换后不会保证立刻重算；未宣称实现已修复。"
+        },
+        {
+          "id": "FP19",
+          "status": "resolved",
+          "description": "getErrorMessage local non-Axios Error branch preserves Error.message;remote safe-error classification is not a guarantee that all local errors are translated.",
+          "resolution": "保留getErrorMessage对本地非Axios Error返回message的实际分支，不再声称所有本地异常均本地化；远程安全错误分类与本地异常区别明确。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/frontend-patterns.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 21:26:00",
+      "result": "approved",
+      "translation_sha256": "a824b793f66b41bacb1a8e4c06cea854112c01880a09807a8e3063d93d828de2",
+      "checks": {
+        "coverage_and_meaning": "整篇对照中文事实源、三篇译文和具名源码，17主节及字典/BPMN章节均保留；事实、源码配置、新代码约定和Wiki操作职责分开。19审计项以真实文档更正或具名限制闭合，原始七组待办和全部验收范围保留。",
+        "technical_literals": "核对AxiosResponse/ApiResponse/PageResult层次、实际SysUser和API名称、路由/permissionCode转换、requiresAuth条件、JWT scope与roles、Store字段、omni-theme/omni-lang、四locale、菜单状态、字典缓存Token/tenant条件、PKCE授权码边界、Docker/Nginx/Vite参数与命令；4份唯一TypeScript示例字节一致。",
+        "security_and_failure_semantics": "401凭据例外、403保留会话、先清理再对话框导航、失败菜单重试和客户端解码限制如实描述。v-permission和路由可见性不替代后台鉴权。菜单异步隔离、同页标题语言及本地Error原消息的未修复限制清楚，不扩张字典回归的覆盖。",
+        "images_and_links": "四篇当前Markdown整篇在本机Docker渲染；每篇17主节、TOC锚点、语言归一化源码/事实/指南链接和同一TS示例校验，无光栅图。静态Markdown/配置不替代G项真实站点根/子路径、浏览器布局和教程截图。",
+        "language_and_terminology": "現在の17主節全体を中国語と対象ソースに照合。応答階層、公開条件、権限配列の前提、テーマと言語の保存、取得済みキャッシュと処理中要求を区別。管理アクセス方針と権限ツリーの保存パスを自然な表現に修正し、補助関数と状態を持つComposableの責務を明確化。技術識別子は保持。"
+      },
+      "findings": [
+        {
+          "id": "FP01",
+          "status": "resolved",
+          "description": "目录长示例只列两语言、部分页面/命名与当前源目录未核对；应维护真实职责与入口，非完整生成树承诺。",
+          "resolution": "用当前职责表和真实源码入口替代不完整目录树，保留平台及CRM/SRM/Procurement/Asset、四locale和生产/开发配置边界。"
+        },
+        {
+          "id": "FP02",
+          "status": "resolved",
+          "description": "响应拦截器把所有401一律写成过期对话框/登出，需引用刚完成的API错误分类与凭据例外。",
+          "resolution": "区分凭据401、需重新认证的未登录/过期、保持会话403；说明先清共享状态、对话框结束后导航及并发/显式退出抑制，引用唯一API错误契约。"
+        },
+        {
+          "id": "FP03",
+          "status": "resolved",
+          "description": "API示例UserInfo/getUserById与实际SysUser/getUser、AxiosResponse<R<T>>层次与领域函数返回类型需核对；占位代码不可作可编译实现。",
+          "resolution": "按当前request.ts保留完整AxiosResponse，response.data是R对应ApiResponse，response.data.data是业务载荷；使用实际SysUser/listUsers/getUser，不建立占位实现或重复共享类型。"
+        },
+        {
+          "id": "FP04",
+          "status": "resolved",
+          "description": "token-only logout示例遗漏username/isLoggingOut与统一会话清理；Store表昵称/avatar/语言/持久化字段和主题DOM规则与实际实现不符。",
+          "resolution": "按源码列user/app/permission三个Store真实字段、token+username、isLoggingOut、默认dark/omni-theme/初始768px侧栏及独立omni-lang职责；统一会话清理覆盖菜单与动态路由。"
+        },
+        {
+          "id": "FP05",
+          "status": "resolved",
+          "description": "静态路由被统称公开，导航守卫遗漏真实认证、菜单失败/重试和动态路由边界，需读当前router全部相关分支。",
+          "resolution": "静态预声明与公开分开，仅requiresAuth===false公开；列真实静态入口、管理/供应商/资产本人策略、菜单失败重试和动态name去重移除，保护分支不被静态表误放行。"
+        },
+        {
+          "id": "FP06",
+          "status": "resolved",
+          "description": "viewOverrides只列两项、glob映射与懒加载/meta范围可能过宽，需核对当前映射和实际路由注册。",
+          "resolution": "确认现有viewOverrides恰好两项而非推断缺失；核实MENU匹配/懒加载/glob/meta、srm:portal排除、permissionCode转路径/名称。修正system:user与base:dict完整管理路径，MenuNode.path为权限树路径。"
+        },
+        {
+          "id": "FP07",
+          "status": "resolved",
+          "description": "页面代码含缺失导入与ellipsis，SFC/通信/组件命名的示例和新增代码规范应与现行实现分开并链接正式页面。",
+          "resolution": "移除缺失import/ellipsis的第二套运行页，引用实际用户页；保留SFC顺序、Props/emits/Store责任和loading/validation规则，明确新增约定与既有实现。"
+        },
+        {
+          "id": "FP08",
+          "status": "resolved",
+          "description": "格式/命名规则与现有ESLint/配置的实际检查范围需区分；不能声称所有现存代码已符合新增约定。",
+          "resolution": "按实际ESLint的semi/quotes/comma/indent/block-order及max-warnings0说明检查，TS strict/noUnused/bundler/noEmit/@别名照当前配置；新命名规范不声称既有代码已整体改名。"
+        },
+        {
+          "id": "FP09",
+          "status": "resolved",
+          "description": "图标注册、ElementPlus手动注册、主题CSS导入与dark类实际切换需核对，不能称导入CSS即可自动切换。",
+          "resolution": "按installElementPlus命名子集/Globe别名说明注册，区分导入暗色CSS与initTheme/setTheme设置dark类，明确主题默认值/持久化归属与OwnedDOM例外。"
+        },
+        {
+          "id": "FP10",
+          "status": "resolved",
+          "description": "英日韩i18n新增清单仍只要求中英，韩语zh-CN.ts示例却写韩语；locale切换与组件语言/持久化入口需要实际绑定。",
+          "resolution": "四locale同键、menuI18nMap、legacy=false、缺省zh-CN与fallbacken-US、omni-lang/reactive locale/storeLang/HTMLlang/ElConfigProvider全部核对；移除韩语zh-CN混写与只要求中英的旧清单。"
+        },
+        {
+          "id": "FP11",
+          "status": "resolved",
+          "description": "前端JWT解析/按钮显隐/菜单可见性不能替代后端认证、功能权限和租户DataScope；角色与scope来源保持区别。",
+          "resolution": "JWT scope约定为permissions数组、roles独立；解码既不验签也不校验claims结构。预期数组下hasPermission精确成员判断无角色通配；v-permission display:none不删DOM且空绑定不拒绝。UI与后台认证/行所有权/租户DataScope分开。"
+        },
+        {
+          "id": "FP12",
+          "status": "resolved",
+          "description": "MenuNode字段/type值与GET菜单来源、菜单加载状态menusLoaded/failed/无tenant及并发合并需核对当前代码。",
+          "resolution": "核对GET菜单来源、DIRECTORY/MENU字段与path含义、idle/loading/loaded/failed/menusLoaded语义、无租户空加载、同次Promise合并与retry；具体状态不被布尔加载标记替代。"
+        },
+        {
+          "id": "FP13",
+          "status": "resolved",
+          "description": "模块组织事实与开发教程独立；保留所有业务模块、源图标/菜单文案/SQL权限一致性，不建立第二套接入操作。",
+          "resolution": "保留全部业务域和图标/菜单文案/后端权限/seedmanifest一致性，事实文档只管理约定及当前源入口，接入步骤和排障归Wiki/正式指南，未缩小原A-G范围。"
+        },
+        {
+          "id": "FP14",
+          "status": "resolved",
+          "description": "字典缓存8项既有验证与BPMN生命周期/纯扩展函数、共享缓存上下文边界需按各自实际源码，不能泛化所有Composables。",
+          "resolution": "保留useDictOptions返回值、tenant:typeCode缓存、同Token进行中合并、Token变更旧结果与finally隔离、同tenant已完成缓存复用、独立observer/HMR/退出边界；falsy解码tenant不请求且非验签/schema验证。BPMN初始化/销毁和纯扩展函数分别描述；8项回归仅字典范围，状态Composable与普通helper区分。"
+        },
+        {
+          "id": "FP15",
+          "status": "resolved",
+          "description": "Nginx端口/代理/history/cache/securityheader与Vite目标/切块/配置覆盖需验证当前文件，区别静态配置与真实运行。",
+          "resolution": "核对Node22/Nginx1.28/3000/omni-gateway:8080/DockerDNS/history、HTML不缓存/资产一年immutable及重复安全头；Vite es2020/dist/750KB/chunks/8102网络归属按当前配置，未冒称本次运行或浏览器验收。"
+        },
+        {
+          "id": "FP16",
+          "status": "resolved",
+          "description": "剩余整体四语语义、人用标题/术语/链接及工具命令边界仍未批准；无代码变化时复用当前成功构建，不伪造新浏览器验收。",
+          "resolution": "实际完成四篇17主节全文语义和技术标识/术语对照，日韩残留英文主标题及生硬物化路径用语修正，四TS示例严格一致、语言归一化链接集合相同，未增加人审门槛。整个frontendGit树与15a51d3相同，复用真实144中33tests及lint/build成功记录而非重复运行。"
+        },
+        {
+          "id": "FP17",
+          "status": "resolved",
+          "description": "Current permissionStore.loadMenus/reset has no Token/generation guard on existing asynchronous results;dictionary cache regression cannot certify equivalent menu isolation.",
+          "resolution": "明确permissionStore菜单请求无Token/generation隔离，字典缓存8回归不覆盖此限制；仅修正文档承诺，未改动源实现。"
+        },
+        {
+          "id": "FP18",
+          "status": "resolved",
+          "description": "Browser title recomputation lives in router navigation guard;LanguageSelector does not recompute it on same-page locale change.",
+          "resolution": "明确document.title在导航守卫重算，同页语言切换后不会保证立刻重算；未宣称实现已修复。"
+        },
+        {
+          "id": "FP19",
+          "status": "resolved",
+          "description": "getErrorMessage local non-Axios Error branch preserves Error.message;remote safe-error classification is not a guarantee that all local errors are translated.",
+          "resolution": "保留getErrorMessage对本地非Axios Error返回message的实际分支，不再声称所有本地异常均本地化；远程安全错误分类与本地异常区别明确。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/frontend-patterns.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 21:26:00",
+      "result": "approved",
+      "translation_sha256": "0df81fdfee0c3c1bf8524c2bf8106974421b122c4690ab60c7b4c6661fd14272",
+      "checks": {
+        "coverage_and_meaning": "整篇对照中文事实源、三篇译文和具名源码，17主节及字典/BPMN章节均保留；事实、源码配置、新代码约定和Wiki操作职责分开。19审计项以真实文档更正或具名限制闭合，原始七组待办和全部验收范围保留。",
+        "technical_literals": "核对AxiosResponse/ApiResponse/PageResult层次、实际SysUser和API名称、路由/permissionCode转换、requiresAuth条件、JWT scope与roles、Store字段、omni-theme/omni-lang、四locale、菜单状态、字典缓存Token/tenant条件、PKCE授权码边界、Docker/Nginx/Vite参数与命令；4份唯一TypeScript示例字节一致。",
+        "security_and_failure_semantics": "401凭据例外、403保留会话、先清理再对话框导航、失败菜单重试和客户端解码限制如实描述。v-permission和路由可见性不替代后台鉴权。菜单异步隔离、同页标题语言及本地Error原消息的未修复限制清楚，不扩张字典回归的覆盖。",
+        "images_and_links": "四篇当前Markdown整篇在本机Docker渲染；每篇17主节、TOC锚点、语言归一化源码/事实/指南链接和同一TS示例校验，无光栅图。静态Markdown/配置不替代G项真实站点根/子路径、浏览器布局和教程截图。",
+        "language_and_terminology": "현재17개 주절 전체를 중국어와 해당 소스에 대조했습니다. 응답 계층·공개 경로 조건·권한 배열 전제·테마와 언어 저장·완료 캐시와 진행 요청을 구분합니다. 권한 트리 저장 경로와 상태Composable/일반 보조 함수의 표현을 정리하고 기술 식별자는 유지했습니다."
+      },
+      "findings": [
+        {
+          "id": "FP01",
+          "status": "resolved",
+          "description": "目录长示例只列两语言、部分页面/命名与当前源目录未核对；应维护真实职责与入口，非完整生成树承诺。",
+          "resolution": "用当前职责表和真实源码入口替代不完整目录树，保留平台及CRM/SRM/Procurement/Asset、四locale和生产/开发配置边界。"
+        },
+        {
+          "id": "FP02",
+          "status": "resolved",
+          "description": "响应拦截器把所有401一律写成过期对话框/登出，需引用刚完成的API错误分类与凭据例外。",
+          "resolution": "区分凭据401、需重新认证的未登录/过期、保持会话403；说明先清共享状态、对话框结束后导航及并发/显式退出抑制，引用唯一API错误契约。"
+        },
+        {
+          "id": "FP03",
+          "status": "resolved",
+          "description": "API示例UserInfo/getUserById与实际SysUser/getUser、AxiosResponse<R<T>>层次与领域函数返回类型需核对；占位代码不可作可编译实现。",
+          "resolution": "按当前request.ts保留完整AxiosResponse，response.data是R对应ApiResponse，response.data.data是业务载荷；使用实际SysUser/listUsers/getUser，不建立占位实现或重复共享类型。"
+        },
+        {
+          "id": "FP04",
+          "status": "resolved",
+          "description": "token-only logout示例遗漏username/isLoggingOut与统一会话清理；Store表昵称/avatar/语言/持久化字段和主题DOM规则与实际实现不符。",
+          "resolution": "按源码列user/app/permission三个Store真实字段、token+username、isLoggingOut、默认dark/omni-theme/初始768px侧栏及独立omni-lang职责；统一会话清理覆盖菜单与动态路由。"
+        },
+        {
+          "id": "FP05",
+          "status": "resolved",
+          "description": "静态路由被统称公开，导航守卫遗漏真实认证、菜单失败/重试和动态路由边界，需读当前router全部相关分支。",
+          "resolution": "静态预声明与公开分开，仅requiresAuth===false公开；列真实静态入口、管理/供应商/资产本人策略、菜单失败重试和动态name去重移除，保护分支不被静态表误放行。"
+        },
+        {
+          "id": "FP06",
+          "status": "resolved",
+          "description": "viewOverrides只列两项、glob映射与懒加载/meta范围可能过宽，需核对当前映射和实际路由注册。",
+          "resolution": "确认现有viewOverrides恰好两项而非推断缺失；核实MENU匹配/懒加载/glob/meta、srm:portal排除、permissionCode转路径/名称。修正system:user与base:dict完整管理路径，MenuNode.path为权限树路径。"
+        },
+        {
+          "id": "FP07",
+          "status": "resolved",
+          "description": "页面代码含缺失导入与ellipsis，SFC/通信/组件命名的示例和新增代码规范应与现行实现分开并链接正式页面。",
+          "resolution": "移除缺失import/ellipsis的第二套运行页，引用实际用户页；保留SFC顺序、Props/emits/Store责任和loading/validation规则，明确新增约定与既有实现。"
+        },
+        {
+          "id": "FP08",
+          "status": "resolved",
+          "description": "格式/命名规则与现有ESLint/配置的实际检查范围需区分；不能声称所有现存代码已符合新增约定。",
+          "resolution": "按实际ESLint的semi/quotes/comma/indent/block-order及max-warnings0说明检查，TS strict/noUnused/bundler/noEmit/@别名照当前配置；新命名规范不声称既有代码已整体改名。"
+        },
+        {
+          "id": "FP09",
+          "status": "resolved",
+          "description": "图标注册、ElementPlus手动注册、主题CSS导入与dark类实际切换需核对，不能称导入CSS即可自动切换。",
+          "resolution": "按installElementPlus命名子集/Globe别名说明注册，区分导入暗色CSS与initTheme/setTheme设置dark类，明确主题默认值/持久化归属与OwnedDOM例外。"
+        },
+        {
+          "id": "FP10",
+          "status": "resolved",
+          "description": "英日韩i18n新增清单仍只要求中英，韩语zh-CN.ts示例却写韩语；locale切换与组件语言/持久化入口需要实际绑定。",
+          "resolution": "四locale同键、menuI18nMap、legacy=false、缺省zh-CN与fallbacken-US、omni-lang/reactive locale/storeLang/HTMLlang/ElConfigProvider全部核对；移除韩语zh-CN混写与只要求中英的旧清单。"
+        },
+        {
+          "id": "FP11",
+          "status": "resolved",
+          "description": "前端JWT解析/按钮显隐/菜单可见性不能替代后端认证、功能权限和租户DataScope；角色与scope来源保持区别。",
+          "resolution": "JWT scope约定为permissions数组、roles独立；解码既不验签也不校验claims结构。预期数组下hasPermission精确成员判断无角色通配；v-permission display:none不删DOM且空绑定不拒绝。UI与后台认证/行所有权/租户DataScope分开。"
+        },
+        {
+          "id": "FP12",
+          "status": "resolved",
+          "description": "MenuNode字段/type值与GET菜单来源、菜单加载状态menusLoaded/failed/无tenant及并发合并需核对当前代码。",
+          "resolution": "核对GET菜单来源、DIRECTORY/MENU字段与path含义、idle/loading/loaded/failed/menusLoaded语义、无租户空加载、同次Promise合并与retry；具体状态不被布尔加载标记替代。"
+        },
+        {
+          "id": "FP13",
+          "status": "resolved",
+          "description": "模块组织事实与开发教程独立；保留所有业务模块、源图标/菜单文案/SQL权限一致性，不建立第二套接入操作。",
+          "resolution": "保留全部业务域和图标/菜单文案/后端权限/seedmanifest一致性，事实文档只管理约定及当前源入口，接入步骤和排障归Wiki/正式指南，未缩小原A-G范围。"
+        },
+        {
+          "id": "FP14",
+          "status": "resolved",
+          "description": "字典缓存8项既有验证与BPMN生命周期/纯扩展函数、共享缓存上下文边界需按各自实际源码，不能泛化所有Composables。",
+          "resolution": "保留useDictOptions返回值、tenant:typeCode缓存、同Token进行中合并、Token变更旧结果与finally隔离、同tenant已完成缓存复用、独立observer/HMR/退出边界；falsy解码tenant不请求且非验签/schema验证。BPMN初始化/销毁和纯扩展函数分别描述；8项回归仅字典范围，状态Composable与普通helper区分。"
+        },
+        {
+          "id": "FP15",
+          "status": "resolved",
+          "description": "Nginx端口/代理/history/cache/securityheader与Vite目标/切块/配置覆盖需验证当前文件，区别静态配置与真实运行。",
+          "resolution": "核对Node22/Nginx1.28/3000/omni-gateway:8080/DockerDNS/history、HTML不缓存/资产一年immutable及重复安全头；Vite es2020/dist/750KB/chunks/8102网络归属按当前配置，未冒称本次运行或浏览器验收。"
+        },
+        {
+          "id": "FP16",
+          "status": "resolved",
+          "description": "剩余整体四语语义、人用标题/术语/链接及工具命令边界仍未批准；无代码变化时复用当前成功构建，不伪造新浏览器验收。",
+          "resolution": "实际完成四篇17主节全文语义和技术标识/术语对照，日韩残留英文主标题及生硬物化路径用语修正，四TS示例严格一致、语言归一化链接集合相同，未增加人审门槛。整个frontendGit树与15a51d3相同，复用真实144中33tests及lint/build成功记录而非重复运行。"
+        },
+        {
+          "id": "FP17",
+          "status": "resolved",
+          "description": "Current permissionStore.loadMenus/reset has no Token/generation guard on existing asynchronous results;dictionary cache regression cannot certify equivalent menu isolation.",
+          "resolution": "明确permissionStore菜单请求无Token/generation隔离，字典缓存8回归不覆盖此限制；仅修正文档承诺，未改动源实现。"
+        },
+        {
+          "id": "FP18",
+          "status": "resolved",
+          "description": "Browser title recomputation lives in router navigation guard;LanguageSelector does not recompute it on same-page locale change.",
+          "resolution": "明确document.title在导航守卫重算，同页语言切换后不会保证立刻重算；未宣称实现已修复。"
+        },
+        {
+          "id": "FP19",
+          "status": "resolved",
+          "description": "getErrorMessage local non-Axios Error branch preserves Error.message;remote safe-error classification is not a guarantee that all local errors are translated.",
+          "resolution": "保留getErrorMessage对本地非Axios Error返回message的实际分支，不再声称所有本地异常均本地化；远程安全错误分类与本地异常区别明确。"
+        }
+      ]
+    }
+  }
+}

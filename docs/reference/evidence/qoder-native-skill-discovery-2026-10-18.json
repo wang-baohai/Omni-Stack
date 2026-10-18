@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "verified_at": "2026-10-18T05:40:51.899Z",
+  "source_baseline": "b7860d5dff4e74b32d64caf4010d9abb7eef22c1",
+  "tool": {
+    "name": "official @qoder-ai/qodercli npm compatibility CLI",
+    "version": "1.1.73",
+    "package_integrity": "sha512-OdmmSppZUAZWL5ZEEORV5BNplXgAaa5cFMXnmNPStvIlknJ1fiyykgY6AjsP1t7OgWuVlh76vDK8lpbPNRlmBQ==",
+    "distribution": "Official npm compatibility CLI;not desktop IDE"
+  },
+  "runtime": {
+    "location": "local Docker",
+    "network": "none",
+    "projects": "Five actual generated and moved presets,each mounted readonly",
+    "configuration": "A fresh distinct user configuration for each project;automatic update disabled only in these owned test configurations",
+    "account_configuration_used": false,
+    "model_requests": 0,
+    "approval_bypass_flags_used": false
+  },
+  "command": [
+    "qodercli",
+    "skills",
+    "list"
+  ],
+  "method": "Execute the official CLI local discovery command in each generated project,then compare enabled names,descriptions and locations with its native entry frontmatter and compare complete derived bytes with the canonical source via the formal adapter. Directory existence alone is not treated as native discovery.",
+  "cases": [
+    {
+      "preset": "core",
+      "exit_code": 0,
+      "native_stdout_sha256": "c9cdc39ae59623eae0b6e336c1ebaddefbb478ffc22ce05973f53519250bbe70",
+      "skills": [
+        {
+          "name": "grill-me",
+          "enabled": true,
+          "description": "Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions \"grill me\".",
+          "canonical_path": "ai/skills/grill-me/SKILL.md",
+          "canonical_sha256": "74147eb6010a65957efef2b9e0f0b3ff935c1def7fc117697151b1d0f3610556",
+          "native_path": ".qoder/skills/grill-me/SKILL.md",
+          "native_sha256": "2c0488ad20dab14457f58c8ec50108adf826bf7a740fbb03f2ffed344080d976",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        },
+        {
+          "name": "omni-change",
+          "enabled": true,
+          "description": "Implement or review Omni-Stack changes using the project's fact documents, module catalog, controlled Docker verification, and delivery boundaries. Use for changes in this repository or generated Omni-Stack projects.",
+          "canonical_path": "ai/skills/omni-change/SKILL.md",
+          "canonical_sha256": "e0e26f3ad0eafd05f7b2c61a2643b5ee5bbb6c4d0dd3d91dc89a211cd7c9bf86",
+          "native_path": ".qoder/skills/omni-change/SKILL.md",
+          "native_sha256": "8abdfe4adc30d011d711a3852c4c8c884a8c43a9933c92196fa98aeaa2caadf9",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        }
+      ]
+    },
+    {
+      "preset": "workflow",
+      "exit_code": 0,
+      "native_stdout_sha256": "e0aedf74f44c9d48ef3b51ef6a346b23da85cb294e7fdb3224bf1d9a69db8ead",
+      "skills": [
+        {
+          "name": "grill-me",
+          "enabled": true,
+          "description": "Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions \"grill me\".",
+          "canonical_path": "ai/skills/grill-me/SKILL.md",
+          "canonical_sha256": "74147eb6010a65957efef2b9e0f0b3ff935c1def7fc117697151b1d0f3610556",
+          "native_path": ".qoder/skills/grill-me/SKILL.md",
+          "native_sha256": "2c0488ad20dab14457f58c8ec50108adf826bf7a740fbb03f2ffed344080d976",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        },
+        {
+          "name": "omni-change",
+          "enabled": true,
+          "description": "Implement or review Omni-Stack changes using the project's fact documents, module catalog, controlled Docker verification, and delivery boundaries. Use for changes in this repository or generated Omni-Stack projects.",
+          "canonical_path": "ai/skills/omni-change/SKILL.md",
+          "canonical_sha256": "e0e26f3ad0eafd05f7b2c61a2643b5ee5bbb6c4d0dd3d91dc89a211cd7c9bf86",
+          "native_path": ".qoder/skills/omni-change/SKILL.md",
+          "native_sha256": "8abdfe4adc30d011d711a3852c4c8c884a8c43a9933c92196fa98aeaa2caadf9",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        }
+      ]
+    },
+    {
+      "preset": "crm",
+      "exit_code": 0,
+      "native_stdout_sha256": "b740af359797ddb2d460710959ce48e26309f830b2de1267792f8e6ae75807f6",
+      "skills": [
+        {
+          "name": "grill-me",
+          "enabled": true,
+          "description": "Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions \"grill me\".",
+          "canonical_path": "ai/skills/grill-me/SKILL.md",
+          "canonical_sha256": "74147eb6010a65957efef2b9e0f0b3ff935c1def7fc117697151b1d0f3610556",
+          "native_path": ".qoder/skills/grill-me/SKILL.md",
+          "native_sha256": "2c0488ad20dab14457f58c8ec50108adf826bf7a740fbb03f2ffed344080d976",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        },
+        {
+          "name": "omni-change",
+          "enabled": true,
+          "description": "Implement or review Omni-Stack changes using the project's fact documents, module catalog, controlled Docker verification, and delivery boundaries. Use for changes in this repository or generated Omni-Stack projects.",
+          "canonical_path": "ai/skills/omni-change/SKILL.md",
+          "canonical_sha256": "e0e26f3ad0eafd05f7b2c61a2643b5ee5bbb6c4d0dd3d91dc89a211cd7c9bf86",
+          "native_path": ".qoder/skills/omni-change/SKILL.md",
+          "native_sha256": "8abdfe4adc30d011d711a3852c4c8c884a8c43a9933c92196fa98aeaa2caadf9",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        }
+      ]
+    },
+    {
+      "preset": "supply-chain",
+      "exit_code": 0,
+      "native_stdout_sha256": "8d2fbd9865b283c9053081cac00b22e29c75841341be17d1a3db7e16f1583a49",
+      "skills": [
+        {
+          "name": "grill-me",
+          "enabled": true,
+          "description": "Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions \"grill me\".",
+          "canonical_path": "ai/skills/grill-me/SKILL.md",
+          "canonical_sha256": "74147eb6010a65957efef2b9e0f0b3ff935c1def7fc117697151b1d0f3610556",
+          "native_path": ".qoder/skills/grill-me/SKILL.md",
+          "native_sha256": "2c0488ad20dab14457f58c8ec50108adf826bf7a740fbb03f2ffed344080d976",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        },
+        {
+          "name": "omni-change",
+          "enabled": true,
+          "description": "Implement or review Omni-Stack changes using the project's fact documents, module catalog, controlled Docker verification, and delivery boundaries. Use for changes in this repository or generated Omni-Stack projects.",
+          "canonical_path": "ai/skills/omni-change/SKILL.md",
+          "canonical_sha256": "e0e26f3ad0eafd05f7b2c61a2643b5ee5bbb6c4d0dd3d91dc89a211cd7c9bf86",
+          "native_path": ".qoder/skills/omni-change/SKILL.md",
+          "native_sha256": "8abdfe4adc30d011d711a3852c4c8c884a8c43a9933c92196fa98aeaa2caadf9",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        }
+      ]
+    },
+    {
+      "preset": "full",
+      "exit_code": 0,
+      "native_stdout_sha256": "4c059994a9f32474bc754e34bcf1217090da56b0396483cdfcc23415033bb55c",
+      "skills": [
+        {
+          "name": "grill-me",
+          "enabled": true,
+          "description": "Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions \"grill me\".",
+          "canonical_path": "ai/skills/grill-me/SKILL.md",
+          "canonical_sha256": "74147eb6010a65957efef2b9e0f0b3ff935c1def7fc117697151b1d0f3610556",
+          "native_path": ".qoder/skills/grill-me/SKILL.md",
+          "native_sha256": "2c0488ad20dab14457f58c8ec50108adf826bf7a740fbb03f2ffed344080d976",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        },
+        {
+          "name": "omni-change",
+          "enabled": true,
+          "description": "Implement or review Omni-Stack changes using the project's fact documents, module catalog, controlled Docker verification, and delivery boundaries. Use for changes in this repository or generated Omni-Stack projects.",
+          "canonical_path": "ai/skills/omni-change/SKILL.md",
+          "canonical_sha256": "e0e26f3ad0eafd05f7b2c61a2643b5ee5bbb6c4d0dd3d91dc89a211cd7c9bf86",
+          "native_path": ".qoder/skills/omni-change/SKILL.md",
+          "native_sha256": "8abdfe4adc30d011d711a3852c4c8c884a8c43a9933c92196fa98aeaa2caadf9",
+          "metadata_matches_canonical": true,
+          "full_derived_bytes_match": true
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "presets": 5,
+    "enabled_project_skill_observations": 10,
+    "skills": [
+      "grill-me",
+      "omni-change"
+    ],
+    "all_names_descriptions_and_project_locations_match": true,
+    "all_complete_derived_bytes_match": true
+  },
+  "primary_sources": [
+    "https://docs.qoder.com/cli/installation",
+    "https://docs.qoder.com/cli/cli-reference",
+    "https://docs.qoder.com/cli/Skills"
+  ],
+  "limits": [
+    "Tests native CLI project-skill discovery and metadata loading",
+    "Desktop IDE UI not tested",
+    "Skill body activation and model task execution not tested",
+    "No account login,OAuth callback or CAPTCHA registration was performed",
+    "No vendor package source or personal configuration is redistributed"
+  ]
+}

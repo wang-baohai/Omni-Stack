@@ -1,0 +1,2131 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-workflow-approval",
+  "source": "docs/guides/workflow-approval.md",
+  "source_sha256": "43e51b029befd4b3655908d7c076b87b230b8b5df2dd12f74bdfc0e3fc5e005a",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "b4b384ed5bd85049cb055d125912b4b41376e239",
+  "source_state": "Complete four-language semantic coverage from712original lines actually read plus all exact final deltas and unchanged-line hashes,covering760current lines. Retains24numbered operations/eight sections/21images per locale. Current source guards and dated2026-10-10real exercise evidence distinguished;84image bytes/5capture epoch groups preserved.20selected raw originals individually viewed this stage,not84fresh individual views. No application/business write or unchanged build replay. Full originalA-G remains open.",
+  "method": "Actually read all four complete original guides,712lines,in this stage. Then read every exact final changed line from the current four files,including terminology polish422. Unchanged original lines map exactly to current lines under per-line hashes421. Together these reads cover all760current lines;this is combined complete semantic review,not four fresh whole190line rereads. Compared all three translations with the Chinese fact source,selected current implementation and dated evidence semantics. Rendering/hash checks support but do not replace actual semantic reading.",
+  "checked_source_files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df"
+    },
+    {
+      "path": "database/changelog/workflow/0001-workflow-schema.yaml",
+      "sha256": "bf1c826c33a4481ae51df5c13f2be0e49bcf035f6ff528fa6d932c169329fa8e"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/pom.xml",
+      "sha256": "76302d6e470b88599093b6fd81bef957c38fb030c65328a42f2212f4d553b8c4"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/approval/ApprovalServiceImpl.java",
+      "sha256": "bb3835b2067a5cca21f63fad58ceec5550b8751cc705eb476c268f9b299a35be"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/config/FlowableAutoConfiguration.java",
+      "sha256": "6f37d9e50fc3d081a79c6cbac2a84f36761d54e5019dcb7a489b55df2816c2c2"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/notification/NoOpNotificationService.java",
+      "sha256": "20ce08ddbbdee024659e4fb022d7b7848689a9383b12c1a420bd614d04c77959"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/tenant/TenantInfoFilter.java",
+      "sha256": "a7008bd20d0a358fa0af2220dc8dd2e025e0fdc4b54c31a77f351fd78869bee2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/pom.xml",
+      "sha256": "615657791592a837a4f3b464a8252d20b16ca143d33f9c930d9f7d685da09168"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/MybatisPlusConfig.java",
+      "sha256": "b787ea78976b1ae4aac3a8ef8aadf20daccadedbd194e9bedbd333bc48431084"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+      "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/SecurityConfig.java",
+      "sha256": "fab002e857eb36ea7deea2c4441eacd5077e4cac292f81cedb201c6ac1be02a1"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ApprovalController.java",
+      "sha256": "cb3efb20b522efffa1aaa1a936f8c307a8cd239a2cbd99170e18bcce552a84cd"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+      "sha256": "fb540dc12ae8c821fd9324a06de566beee5aa7bf4e0f105668f3a1bd139ac020"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessDefinitionController.java",
+      "sha256": "19c20b00acb9b6c293e1651bbe1abcb4c903a1b4824f419a0b4e987d6299e112"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessInstanceController.java",
+      "sha256": "864bf4351d9bb78142b4a6124d7035be3344063e36d0e4c62e0a6716ae4b926f"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/TaskController.java",
+      "sha256": "55b650d451ede246d5352e47308a68c34e5b6da7967c4f974e466f7fa48773a5"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowIdentityController.java",
+      "sha256": "3c859fb2aa150739c2a0007a4f213a5123827a73a53c48ac3514d48160e4fe2d"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowModelController.java",
+      "sha256": "0ee50a247ba0d9b81c6de89b17aa047ebc3a1299067695ee59d0566363b43962"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowStatsController.java",
+      "sha256": "2897a347eb58c3ff6be4ee848d89a1c558ddf696f727b9888e622f7671368152"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverBean.java",
+      "sha256": "08bc3db0d5c21ee1ea9d3636d13741c6154970ad0bdd26472efe6d68d6a2dadc"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverDelegate.java",
+      "sha256": "89e654d78fbbc46b3ad9e41313e34b4b4e4cea41ebe70c24cc0891ba7b7e2690"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CcNotifyDelegate.java",
+      "sha256": "8521417479a710e0bd38ce7eadc60db68364c0bf78cc9ac1333d4e108f4253cb"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRecord.java",
+      "sha256": "bfeaf38f1d2ba1451903d90a169525513d9baa5e38d81127f53b45c23a6c53f4"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRequest.java",
+      "sha256": "d700f162113c512b808591344d08c5acc247f9cd1e49e4a3f19ac40e5822fecb"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/CreateModelRequest.java",
+      "sha256": "ebacc498847b0f7b67ac2f9d142c26c344631bb42c406b17818983561922e3c9"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ProcessProgressResponse.java",
+      "sha256": "874df46fc8d8d1acb93226aa3c19d7e2a6aa3f06b21c69231b3ad4a98041fb2b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/SaveDraftRequest.java",
+      "sha256": "2e2d869e20474c82dd1f9e7fc9e5c137c0322fcfda5594115c9bbad91d95f668"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/StartProcessRequest.java",
+      "sha256": "042cb2c5d5ddf7227e57785deac28484361890de8f79a73d1562cbf604c2b0ee"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/BpmnXmlValidator.java",
+      "sha256": "01703f1846d2f69cdf99943fe0f49b43f1bdc6a675dc44f2982edb5777ba4f04"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/XmlSecurityUtils.java",
+      "sha256": "a0178c2de6a266e2bd1826c1ad0aff9fcbb6116d3baf0400b12d6baf68639096"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/listener/ScopedRoleAssignmentListener.java",
+      "sha256": "6981b11b7167a1cc28a2c640280ccfca46d7fe3f6965cc9ea50324a8e5b5f7d3"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/GatewayPreAuthFilter.java",
+      "sha256": "62ad1f64e9a57f9e8b0cede81564ac6d7e7c7cccc72d9be5c578a35a42da6d27"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/RbacUserGroupLookup.java",
+      "sha256": "95401461b083d1880fbcc324e96518178f7f5c2294483aef0b7261e1a772a142"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/XssConfigProviderImpl.java",
+      "sha256": "a4ac025ff72e0bed3a3ca3658f473761979074a2e4e0919759f7170ef8c0b64e"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/CandidateResolutionService.java",
+      "sha256": "b5321847781c8404f5975bc898340e76b84c0892c3ac25af5cd8d32d94f30cd2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+      "sha256": "65012a8fc6a5311a06e32e6201ff3f6ec9da84c58341e2f0c678ca19f5037c16"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessDefinitionServiceImpl.java",
+      "sha256": "cd8c2cdddf1165aa6059f2e6695906babe9e98f26506e5c6ddd46f3744cef7d6"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessInstanceServiceImpl.java",
+      "sha256": "f650ad68e8836e46cec0eac145697cd628fdd2757700e8c118b973e4f442a82a"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowApprovalServiceImpl.java",
+      "sha256": "82d2a03aa758445a15b6f872f767f2053c1850a75cbd589bc80e1f8a330f3ff8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+      "sha256": "63a1a2bd58ae7b696d77f8ec1e1e5616020f297999f11ec412c32de1fff09ac8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowModelServiceImpl.java",
+      "sha256": "ddeeae6a0c93612f503ea63c1394e38253e6d2ca5ccf51418b6116429cfd2ce2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+      "sha256": "f63cb03ab55045944f20e206bec4c5d59d04f4a7abc5abebb37e641054dabd83"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowTaskServiceImpl.java",
+      "sha256": "8628307b01eaa868de04d6fa568dd6d318444c9dd28f9de6fac39504c2842c7d"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/ProcessInstanceService.java",
+      "sha256": "4650362dc912ddbfb7cbebcaed55101096c0d50e8dd6c962fec5ee26241608b0"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/resources/application.yml",
+      "sha256": "dde4208074502bc092e8788006b0984d95bb76cd7de647a7cd8edec9e436d0df"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/controller/ProcessInstanceReadTenantBoundaryTest.java",
+      "sha256": "cf248d6ec9be344a3ff7fb7fcc2428b6ce3e0eb00cc1cb326ec5b7ee9d6da44b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/it/Fw05MultiInstanceIT.java",
+      "sha256": "628fd83e3fbfa065312c3379b154a6a5b94134ac5106a7fcbdca2bc675444b7d"
+    },
+    {
+      "path": "omni-backend/pom.xml",
+      "sha256": "18a2eda967a3dc9147decf645518f80692eae6d8b89c2cd3f230d07c14f33275"
+    },
+    {
+      "path": "omni-frontend/src/composables/useBpmnExtension.ts",
+      "sha256": "0e16f77a627be044876b762e5f8bd6f3d261e580347fbd391f6430792036efc6"
+    },
+    {
+      "path": "omni-frontend/src/components/workflow/ApprovalRecordsDialog.vue",
+      "sha256": "78cd5edb8692660275f90b60c93efe7b06818b45669f5f402a2473da342eb084"
+    },
+    {
+      "path": "scripts/fixtures/README.md",
+      "sha256": "a8843257aad9838f60e8753a117935a369b660abe21e8882ecb6b7320b738b00"
+    },
+    {
+      "path": "scripts/fixtures/run-workflow-scope-fixture.ps1",
+      "sha256": "3c4648c04b7c2cd66f8e839b534927c7b240e91445781abe4db6501b1c2d289b"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/filter/AuthFilter.java",
+      "sha256": "a0773cce8e6ba3d7e90e40c088fb9bae1f77c049577665ad9a0201a4e1c3d76e"
+    },
+    {
+      "path": "omni-frontend/src/components/workflow/ModelDesigner.vue",
+      "sha256": "fe0245b51dff03ec8e39772266336cb524cc9c1450964b6bdbccb8b1945894ed"
+    },
+    {
+      "path": "omni-frontend/src/views/workflow/model/index.vue",
+      "sha256": "dcece28f4c6d04a427c5418c45d97f91bc3b972f6a1d9ef4e31d87eb0730e505"
+    },
+    {
+      "path": "omni-frontend/src/views/workflow/model/CreateModelDialog.vue",
+      "sha256": "ec66564ac3e8ddffbc52a62b6294adced3912efc2fc32bd3c40961f80201e962"
+    },
+    {
+      "path": "omni-frontend/src/views/home/index.vue",
+      "sha256": "0961d631051111d6d8a9eacb904253b71b1f7ed698399c05872600019efdc98a"
+    },
+    {
+      "path": "omni-frontend/src/api/workflow.ts",
+      "sha256": "b4194f2322557e3a6a057e134bd0488a23a21afb8cdb529d0571f5ea90f10937"
+    },
+    {
+      "path": "docs/reference/evidence/workflow-2026-10-10.json",
+      "sha256": "7b4fdc5fc94091bcc2380244ea80a01cd26543159f2eb2c1a146875a59ae4399"
+    },
+    {
+      "path": "docs/reference/reviews/workflow.json",
+      "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-model-create-form.png",
+      "sha256": "9a023d9f3bae72871ce3dda08372bb7ecf4469fb8b12b9ad53f666e68b4433ab"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-model-initial-canvas.png",
+      "sha256": "4aa1a7cadf8e3cc9e69bffd05e6733175ca254cbf75602686da156483f3aee22"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-assignment-all-preview.png",
+      "sha256": "e48aca5699ec92228356c8666586e73698966b93149738f1cb36df4dc7ba801f"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-model-validation.png",
+      "sha256": "bb153f6e771b0f77c1f2a6c1d2e4fded825ce7396431baff8f1ff5075c4d183b"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-model-version-one.png",
+      "sha256": "52fce9e004ef4a202b3f34e6194832e3a14638a3ea2ce02326b31d3c7b8bef07"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-ordinary-todo.png",
+      "sha256": "e4f435933c9a995374facf2091d131130a7c70597d41d60277f7a4978e0058a6"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-approval-form.png",
+      "sha256": "de5586d11659e55e95242a7a406be8057dc4adbb0fddb9ac95b61f80559624b0"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-all-partial-progress.png",
+      "sha256": "1cee55262ee635caeb3606f068f4eccbc823ecacfbf57b81c8b99335cbf223f5"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-assignment-any.png",
+      "sha256": "3386f9090b1a64c5e395996af7845bea3abefa85ef8d887f7898c0146505e2c5"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-model-versions-two.png",
+      "sha256": "d0a03354c91c3d1a8dadcd05d8b603a82a9fc5d7c540fd27ada9177133fe2c60"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-any-auto-approved-progress.png",
+      "sha256": "0e5f531d91c86334aeada3d89534fc8817e6631930e1e4f2f9c43105ca210167"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-all-approved-records.png",
+      "sha256": "351859dd7c687f3222c16db9eefd1307fc58a105b55af6bb1e15d8bf9ac11c36"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-teaching-reject-progress.png",
+      "sha256": "75688cc5ca132f78b75b6f884e02343304028c3189a48f371d2f0b487802643c"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-teaching-reject-records.png",
+      "sha256": "e0121467ef1379618984f782b4df40464a5dd7e8aadfdc46d0ca4e2a785a6437"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-teaching-withdraw-records.png",
+      "sha256": "2ae34dc9e13f3fe81caffc2e68c1807369b44d1b614a7cdd4aeacfdcfea89d67"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-teaching-delegate-records.png",
+      "sha256": "e05dfb4bfe197ef22711dcbb233dab6112dd5cd02424ba886cf4fc8cb0d06354"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-teaching-add-signer-records.png",
+      "sha256": "813be8d17b5129aaaf911f83e18efc642e0e7b8cac24c792a83e2eb2841a420f"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-teaching-remove-signer-records.png",
+      "sha256": "fd2bfce1193da610f4a0afbcdf329dad7c99473e2f3045282903a74e358cfc0e"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-negative-validation.png",
+      "sha256": "38377ad08ef688dba407f9b2d48068188c780706bc558bdbd728bdaf5e4d60de"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-negative-publish.png",
+      "sha256": "fd6c6fc921ea4d29cea48cd3f7e182b1aaac97b6d5e7d9d82c64705f39511e15"
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-negative-model-forbidden.png",
+      "sha256": "f34c001cab6e9e55e9bd907fcc62286c6dda13cf2f30378a6e60f0d4863b5125"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-model-create-form.png",
+      "sha256": "edec11de36d7b69e7ffe93e4ce1df1225306b175f72215914572712ecbc2f4c7"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-model-initial-canvas.png",
+      "sha256": "ec95a79fdb5cd8710e2b621271edc99cfe461f61536a4c81007fb6c8bb71222f"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-assignment-all-preview.png",
+      "sha256": "1ef880efab7f43ef6047ac640ee4d09a50e10e248e4778d8f5593f716a23c2a6"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-model-validation.png",
+      "sha256": "9d9401e67eed7e5c41bf7037a43b75f3d570997147eed5c0b7faedb35e4acfd1"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-model-version-one.png",
+      "sha256": "207bfad7cf1150e356cd93fa4cac87a37311b85de8580765629ea9f03fb2ccec"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-ordinary-todo.png",
+      "sha256": "c4f30bd9f87e31f60eee4e7a7675ef5bda267eda93c890bce61e8b38c1c444c5"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-approval-form.png",
+      "sha256": "b50ad484ef00e29e9dac1db52bc1ceb25079dab62e411776f25203db860d4c07"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-all-partial-progress.png",
+      "sha256": "5930742d3eacd7998511a0f503fc3627333a5843fcce1cf384cd48d0d4d77482"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-assignment-any.png",
+      "sha256": "68b77f484b6e27d50d5ece5b84f4e6a60d7338485a124ea171785716237ab37c"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-model-versions-two.png",
+      "sha256": "7f8dda9007932ac40f243ddc507b03d1729480aec7e889b1a4fd4fdf35a2aa04"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-any-auto-approved-progress.png",
+      "sha256": "bd1cb8c206ad6a728ee255a14a1b4a93144e172aee3f1999c89c3dda8bef32d0"
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-all-approved-records.png",
+      "sha256": "31c8d46055107f759bdb7412333d47e5b14afa0512dba593cbb1dc2c038adbd5"
+    },
+    {
+      "path": "docs/images/en-US/workflow-teaching-reject-progress.png",
+      "sha256": "e7c7705599d2d14322eaf536091c46927c31b76e0ba93ee2e59a7df0acbf029d"
+    },
+    {
+      "path": "docs/images/en-US/workflow-teaching-reject-records.png",
+      "sha256": "addc26656667089e22ac9798834773306475fd212ddfe3ba467cfd09ac68c440"
+    },
+    {
+      "path": "docs/images/en-US/workflow-teaching-withdraw-records.png",
+      "sha256": "f46f05721f06a41fd8d13ff77314ce8a9483c7fe620baebf1e5d903e2d55689c"
+    },
+    {
+      "path": "docs/images/en-US/workflow-teaching-delegate-records.png",
+      "sha256": "3314227fc9b8576c96e16bafca816dff01c1fff2fe63818b43b010c4824e4874"
+    },
+    {
+      "path": "docs/images/en-US/workflow-teaching-add-signer-records.png",
+      "sha256": "07a13edc14e22fea262c7c342fb96c2e6e6f3b2a174aca901639f3734539a083"
+    },
+    {
+      "path": "docs/images/en-US/workflow-teaching-remove-signer-records.png",
+      "sha256": "4546df13b40360ce7d264068e8f3596884aa6bf70661994458582f601fa5e1f3"
+    },
+    {
+      "path": "docs/images/en-US/workflow-negative-validation.png",
+      "sha256": "8f230733c009981c9cab41fa1a52075ba9033f1766d5acba0b716d44d88d4358"
+    },
+    {
+      "path": "docs/images/en-US/workflow-negative-publish.png",
+      "sha256": "5b016565ed857f4b8b7ecf6ea7d6b396f24da1bf4d2d9085d6b6b29ea5027498"
+    },
+    {
+      "path": "docs/images/en-US/workflow-negative-model-forbidden.png",
+      "sha256": "d0d860b09e60d807e406522a2ef2b853c8e23357be0d2e310a1fe6f9e43d5a0d"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-model-create-form.png",
+      "sha256": "2190478528739a489b676a3b6e63a415749d50be00df807151281d53e6419811"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-model-initial-canvas.png",
+      "sha256": "aaef08dbe1aa9699600bf5776d93784c2fca7597d196df667960acbd1d0484db"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-assignment-all-preview.png",
+      "sha256": "4f003cf04ee177fa594217ab1aae7aecaf8167604c45682fcb2f2be505826abc"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-model-validation.png",
+      "sha256": "3b4c77cd0cc572a54386fbe8bac6695d6851337d2ea153b5e4103dd1a54e9ab3"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-model-version-one.png",
+      "sha256": "4331b91dad4760c5b7484593085c264ed509fbf9cfad8ac66d73e7010250d2f8"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-ordinary-todo.png",
+      "sha256": "2c4737b7c1fe5635b98bcb4758ad4f8e83dc7ad497d854e65b8315ce6eac2477"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-approval-form.png",
+      "sha256": "9c31de07ca84a5fd86aa937806d9d91c085736862638eeee73f0bd6681e59def"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-all-partial-progress.png",
+      "sha256": "5eef2ae939c3f7193d0a04d775e56f2918c5df2c97d78b3c11bb1e7fd6cd52cd"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-assignment-any.png",
+      "sha256": "06b312ef75a26b0dd03f2be6dbe2bebc2b1b89ec5717091d5803b64789280c99"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-model-versions-two.png",
+      "sha256": "369de07245704d017fcf1e78cbe864f52537da5dd6c56bf5b5ba231e4e1f2aa6"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-any-auto-approved-progress.png",
+      "sha256": "3f7307f9edd69a78e36ef36f6f4e695619df4fe59bc7569ea2a767327db16106"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-all-approved-records.png",
+      "sha256": "dfec10a5e49b8a85acea17bcbde1d80506cc813d008a20b85a8444382684199e"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-teaching-reject-progress.png",
+      "sha256": "8ecc45d75e344c249dc8127abd2e4bb23a3c13eb2af28bd9e016a68810c0dd80"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-teaching-reject-records.png",
+      "sha256": "fa4c8ddc250c557080a84b2e08cf2d945eea14e181f3703a7202552eb4e10e96"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-teaching-withdraw-records.png",
+      "sha256": "5655675f81f2937675b769f41ced2c7123124f228dc6769e241427b0234061bc"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-teaching-delegate-records.png",
+      "sha256": "5a0dd0889e607d53a4e96ed6971ecf0d5812c65a97a1c53d502f2366cc9a20f4"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-teaching-add-signer-records.png",
+      "sha256": "493c043a6164fdf5d8d58ec437f7b6cf93512e1101df35041043292621954ee4"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-teaching-remove-signer-records.png",
+      "sha256": "939dfebb0104498cf64977c21b5da145cceadd9c4e1f4369ea09ea2a62fc4ab9"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-negative-validation.png",
+      "sha256": "b56eddca94dd6a3955d7e93f54fb1862ba08f462fd31af7b017d5cd009d116ea"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-negative-publish.png",
+      "sha256": "b750b9821a5357d75bd8f1b3837d2bb1c52c6654b88da1a5789d43979e6f75a4"
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-negative-model-forbidden.png",
+      "sha256": "5b8d8367bf36d2a0df7edd3306499adc5e1d595faec6c818ece41c509fc88151"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-model-create-form.png",
+      "sha256": "0de595c62062342caaed357b0c7f1b0a40a362ca5ab675d785e3185923608b34"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-model-initial-canvas.png",
+      "sha256": "8de9aa6daa96a90491dd47a63db11df62d6ea3a3cc7d5df7305c266e5044bee2"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-assignment-all-preview.png",
+      "sha256": "c2c14e837d70ed98e05ea8330de661787b184c38ef1a0189cb49289aa6afddd6"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-model-validation.png",
+      "sha256": "cf8b03da5a9e02c6506126b503297564946f32c967da1c4b15b996d16d4f7460"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-model-version-one.png",
+      "sha256": "d94558d6139832cd7c310b4b12805616b4e3c7aa527644763d170988c9f1614b"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-ordinary-todo.png",
+      "sha256": "46f8efc8331c4637a10386f85ad6d4e532f84b584cba5d0865d61948d2e294b0"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-approval-form.png",
+      "sha256": "65d98ad6d9be2028310c40d7b7441564c4b646d68a2cee4c6970dc9521c8153e"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-all-partial-progress.png",
+      "sha256": "1e0d13c25ebf8a92a6c6dfa96bf45835e651caae76c9f73dacf31d162059b45e"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-assignment-any.png",
+      "sha256": "8c54ce980189f1aa72f015f6b377a9b0e9eb2233aa4cc3e384da13ef33b0d290"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-model-versions-two.png",
+      "sha256": "2a4e2e5fbc2b3fb1ae122b112550f28beba4e78b4a0f9149f434492a601b443b"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-any-auto-approved-progress.png",
+      "sha256": "bc19df4de70fe7ee2bfc80f053f7f436f8e578fca8cb9ff5b08cccccce493b50"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-all-approved-records.png",
+      "sha256": "74b4a02cf417aa8c52b7affe229cd08a1f3a7507bd1cb0bbcc321c7b5e96724a"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-teaching-reject-progress.png",
+      "sha256": "7cae016fd613d47b388109c08f79d3b62fdd6ca3eadf6e908210a6ec6611a07f"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-teaching-reject-records.png",
+      "sha256": "5e149bd0c01fa888d248dd8872b7357c346e043db1090dff50197cbf8818767b"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-teaching-withdraw-records.png",
+      "sha256": "8e97bc76053f48a5f968d177e12a947d773e68de5299bfbc6b807907db5da71e"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-teaching-delegate-records.png",
+      "sha256": "3f48fc2b1b2da19a424eef22908d2109f06fc48265a75f8b32eb32e62cbab8a6"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-teaching-add-signer-records.png",
+      "sha256": "a3a7b704e08d8a4d279efa9f71f591298d668107bf1746153b4406591aa13086"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-teaching-remove-signer-records.png",
+      "sha256": "d80d2f3c12871270efe644201ec5a0d162270715cd8484037523e99515576536"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-negative-validation.png",
+      "sha256": "5b0f25d92de2dc0f654b57b37071c57277b0ae5f7592f231bce7323431034ade"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-negative-publish.png",
+      "sha256": "8f8d14d8fed5c00d3df82ce602687930525908f222aed83113e76b7fc6a1b3b4"
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-negative-model-forbidden.png",
+      "sha256": "8fce4ab7415855f3848d028b07a9cd837a390b6acd9e101286fd182a454608d5"
+    },
+    {
+      "path": "docs/reference/evidence/workflow-guide-review-2026-10-17.json",
+      "sha256": "d70b9b9442bdd4ec41231589f7aa06598168f08a90b7ae98a1741f58eaacb794"
+    }
+  ],
+  "source_inspection_scope": "All712originalguide lines actually read thisstage;completecurrentcoveragewillcombine thatfullreadwithindividuallyreviewedexactdeltasandassertedunchanged-linemapping. Noautomaticapprovalfromhashes. Sourcebindingsdistinguish7whole628lines,selectedcurrentreads andunchanged49priorfactdependencies.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "complete_current_semantic_coverage": true,
+    "original_whole_lines_actually_read": 712,
+    "current_combined_semantic_lines": 760,
+    "fresh_whole_final_rereads": false,
+    "read_method": "Actually read all four complete original guides,712lines,in this stage. Then read every exact final changed line from the current four files,including terminology polish422. Unchanged original lines map exactly to current lines under per-line hashes421. Together these reads cover all760current lines;this is combined complete semantic review,not four fresh whole190line rereads. Compared all three translations with the Chinese fact source,selected current implementation and dated evidence semantics. Rendering/hash checks support but do not replace actual semantic reading.",
+    "original_full_read_outputs": {
+      "zh-CN": "20ad93",
+      "en-US": "928170",
+      "ja-JP": "01d0af",
+      "ko-KR": "1491a6"
+    },
+    "final_exact_delta_outputs": {
+      "zh-CN": "218ee9",
+      "en-US": "9f3752",
+      "ja-JP": "99bb0a",
+      "ko-KR": "1fb39b"
+    },
+    "lines_each": 190,
+    "headings_each": 9,
+    "h2_each": 8,
+    "numbered_operations_each": 24,
+    "images_each": 21,
+    "tables_each": 4,
+    "unchanged_json_fences_each": 1,
+    "whole_markdown_rendered_documents": 4,
+    "strict_locale_normalized_inline_literal_multiset": true,
+    "inline_literals_each": 84,
+    "strict_locale_normalized_local_link_sequence": true,
+    "relative_links_each": 42,
+    "source_bindings": 146,
+    "current_whole_source_files": 7,
+    "current_whole_source_lines": 628,
+    "unchanged_prior_fact_source_bindings": 49,
+    "source_read_scopes": [
+      {
+        "path": "AGENTS.md",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Current navigation rule241read;prior execution rules retained.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Current navigation rule241read;prior execution rules retained."
+      },
+      {
+        "path": "database/changelog/workflow/0001-workflow-schema.yaml",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Selected version/dependency/schema inventory only;further selected semantic reads pending",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Selected version/dependency/schema inventory only;further selected semantic reads pending"
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/pom.xml",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Selected version/dependency/schema inventory only;further selected semantic reads pending",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Selected version/dependency/schema inventory only;further selected semantic reads pending"
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/approval/ApprovalServiceImpl.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow stage"
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/config/FlowableAutoConfiguration.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow stage"
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/notification/NoOpNotificationService.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/tenant/TenantInfoFilter.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow stage"
+      },
+      {
+        "path": "omni-backend/omni-workflow/pom.xml",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow stage"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/MybatisPlusConfig.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow stage"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/SecurityConfig.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "full current file read; notes below and workflow-audit-notes-253.json"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ApprovalController.java",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "958e10"
+        ],
+        "whole_current_file_actually_read": true,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Current full annotation/method-path inventory;method bodies still inspected only at selected guards"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessDefinitionController.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessInstanceController.java",
+        "read_scope": "Current exact mapping/permission/header/body call inventory;prior whole fact review unchanged;not a new whole read.",
+        "outputs": [
+          "a0c642"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "full current file read; notes below and workflow-audit-notes-253.json"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/TaskController.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowIdentityController.java",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "54c115 1-96 entire file"
+        ],
+        "whole_current_file_actually_read": true,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Current full annotation/method-path inventory;method bodies still inspected only at selected guards"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowModelController.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowStatsController.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverBean.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverDelegate.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CcNotifyDelegate.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Current1-170read,includingexecute and direct-recipient branch;remaining SQL not claimed fully read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Current1-170read,includingexecute and direct-recipient branch;remaining SQL not claimed fully read."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRecord.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRequest.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow stage"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/CreateModelRequest.java",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "958e10"
+        ],
+        "whole_current_file_actually_read": true,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ProcessProgressResponse.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/SaveDraftRequest.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/StartProcessRequest.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "full current file read; notes below and workflow-audit-notes-253.json"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/BpmnXmlValidator.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "full current file read; notes below and workflow-audit-notes-253.json"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/XmlSecurityUtils.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "full current file read; notes below and workflow-audit-notes-253.json"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/listener/ScopedRoleAssignmentListener.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/GatewayPreAuthFilter.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Current1-190read and prior security evidence;remaining methods not claimed fully read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Current1-190read and prior security evidence;remaining methods not claimed fully read."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/RbacUserGroupLookup.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "full current file read; notes below and workflow-audit-notes-253.json"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/XssConfigProviderImpl.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow stage"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/CandidateResolutionService.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessDefinitionServiceImpl.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessInstanceServiceImpl.java",
+        "read_scope": "Current75-168 trusted startup/sanitization/version tenancy and532-672 history/MI_END/tenant-read boundary;other original whole fact review reused,not re-read.",
+        "outputs": [
+          "54c115",
+          "6b0581"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "full current file read; notes below and workflow-audit-notes-253.json"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowApprovalServiceImpl.java",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "958e10"
+        ],
+        "whole_current_file_actually_read": true,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow stage"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowModelServiceImpl.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "full current file read; notes below and workflow-audit-notes-253.json"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowTaskServiceImpl.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/ProcessInstanceService.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "full current file read; notes below and workflow-audit-notes-253.json"
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/resources/application.yml",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/controller/ProcessInstanceReadTenantBoundaryTest.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. New regression authored/read/run red and green;existingIT caller update only,IT not executed.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "New regression authored/read/run red and green;existingIT caller update only,IT not executed."
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/it/Fw05MultiInstanceIT.java",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. New regression authored/read/run red and green;existingIT caller update only,IT not executed.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "New regression authored/read/run red and green;existingIT caller update only,IT not executed."
+      },
+      {
+        "path": "omni-backend/pom.xml",
+        "read_scope": "Selected flowable.version8.0.0 line49;prior remaining inventory scope retained,not a new whole pom read.",
+        "outputs": [
+          "a0c642"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Selected version/dependency/schema inventory only;further selected semantic reads pending"
+      },
+      {
+        "path": "omni-frontend/src/composables/useBpmnExtension.ts",
+        "read_scope": "Current98-185 assignment body,execution start listener,parallel MI collection/counters;not whole.",
+        "outputs": [
+          "f76272"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/workflow.json",
+        "reused_review_sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "prior_read_scope": "Current98-177read,including writeAssignment listener/MI wiring;not whole frontend audit."
+      },
+      {
+        "path": "omni-frontend/src/components/workflow/ApprovalRecordsDialog.vue",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "6b0581 1-80 entire file"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "scripts/fixtures/README.md",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "6b0581 entire file within first100lines"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "scripts/fixtures/run-workflow-scope-fixture.ps1",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "569af6 1-114 entire file"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/filter/AuthFilter.java",
+        "read_scope": "Current125-218 public stripping,JWT validation,assertion andderived X-User-Id/X-Tenant-Id injection;not whole.",
+        "outputs": [
+          "54c115"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/components/workflow/ModelDesigner.vue",
+        "read_scope": "Current105-270 model loading,initial BPMN,exportedXML save,dirty save-before-validation/publish;not whole.",
+        "outputs": [
+          "f76272"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/workflow/model/index.vue",
+        "read_scope": "Current90-136 list validation andpublish use saved draft;not whole.",
+        "outputs": [
+          "f76272"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/workflow/model/CreateModelDialog.vue",
+        "read_scope": "Current exact matched35-37modelKey required/pattern;not whole.",
+        "outputs": [
+          "a0c642"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/home/index.vue",
+        "read_scope": "Current608-664 approval form data/load andcomplete payload,1054-1086 approve/reject/commenttemplate withoutdelegate/signercontrols;not whole.",
+        "outputs": [
+          "f13280"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/workflow.ts",
+        "read_scope": "Current matched function signatures andrequest lines for task form,complete,delegation/signers;not whole.",
+        "outputs": [
+          "f13280"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/workflow-2026-10-10.json",
+        "read_scope": "Bounded actual semantic reads ofmetadata/firstrecord,fixture/tools/9APIgroups/history/limits,runtime/UIjourney,negative+xmlrecovery/code;all84path/locale/hash/epochs structured reconciliation. Not a whole raw JSON read.",
+        "outputs": [
+          "50c65a primitive fields only",
+          "5f3ce8",
+          "2646b5",
+          "8e215a",
+          "7edb24",
+          "415 structured reconciliation"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/workflow.json",
+        "read_scope": "49current checked dependencies exact-match prior review. Actually read current state,selectedscope andunderlyinglimits;large50c65a scope output partly truncated,not whole reviewJSON.",
+        "outputs": [
+          "415",
+          "d1318d"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "read_scope": "Authorized actual AI-only acceptance retained from prior policy implementation;not a new authorization or whole re-read.",
+        "outputs": [
+          "existing approved policy"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-model-create-form.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-model-initial-canvas.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-assignment-all-preview.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-model-validation.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-model-version-one.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-ordinary-todo.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-approval-form.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-all-partial-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-assignment-any.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-model-versions-two.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-any-auto-approved-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-ui-all-approved-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-teaching-reject-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-teaching-reject-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-teaching-withdraw-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-teaching-delegate-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-teaching-add-signer-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-teaching-remove-signer-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-negative-validation.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-negative-publish.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/workflow-negative-model-forbidden.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-model-create-form.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-model-initial-canvas.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-assignment-all-preview.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-model-validation.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-model-version-one.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-ordinary-todo.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-approval-form.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-all-partial-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-assignment-any.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-model-versions-two.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-any-auto-approved-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-ui-all-approved-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-teaching-reject-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-teaching-reject-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-teaching-withdraw-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-teaching-delegate-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-teaching-add-signer-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-teaching-remove-signer-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-negative-validation.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-negative-publish.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/workflow-negative-model-forbidden.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-model-create-form.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-model-initial-canvas.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-assignment-all-preview.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-model-validation.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-model-version-one.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-ordinary-todo.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-approval-form.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-all-partial-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-assignment-any.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-model-versions-two.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-any-auto-approved-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-ui-all-approved-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-teaching-reject-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-teaching-reject-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-teaching-withdraw-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-teaching-delegate-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-teaching-add-signer-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-teaching-remove-signer-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-negative-validation.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-negative-publish.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/workflow-negative-model-forbidden.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-model-create-form.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-model-initial-canvas.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-assignment-all-preview.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-model-validation.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-model-version-one.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-ordinary-todo.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-approval-form.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-all-partial-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-assignment-any.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-model-versions-two.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-any-auto-approved-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-ui-all-approved-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-teaching-reject-progress.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-teaching-reject-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-teaching-withdraw-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-teaching-delegate-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-teaching-add-signer-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-teaching-remove-signer-records.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-negative-validation.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-negative-publish.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/workflow-negative-model-forbidden.png",
+        "read_scope": "Exact unchanged original path/locale/hash matches dated source receipt andcapture-time epoch. Prior72contactsheet/12individual visual methods retained;new20selected rawviews recorded separately418,not84freshviews.",
+        "outputs": [
+          "415 reconciliation",
+          "418 selected visual scope"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/workflow-guide-review-2026-10-17.json",
+        "read_scope": "Derived from actual414fulltextread,415exactsourceepochreconciliation,416source reads,and418twentyactualrawimageviews;notnewruntimeevidence.",
+        "outputs": [
+          "414",
+          "415",
+          "416",
+          "418"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ],
+    "current_evidence": "docs/reference/evidence/workflow-guide-review-2026-10-17.json",
+    "all_image_hashes_unchanged": 84,
+    "capture_epoch_groups": 5,
+    "current_selected_raw_images_individually_viewed": 20,
+    "other64_freshly_viewed": false,
+    "prior_visual_methods": "72positive/history originals through18original-resolution four-locale contact sheets;12negative originals individually. These remain dated records,not84new individual raw views.",
+    "current_application_or_business_runs": 0,
+    "current_application_tests_or_builds": 0,
+    "current_business_writes": 0,
+    "historical_business_writes_replayed": false,
+    "application_source_changes": false,
+    "screenshot_manifest_changed": false,
+    "unchanged_backend_build": "backend-workflow-boundary-260.json;current source/JAR/report equivalence attested370",
+    "unchanged_frontend_build": "frontend-dict-checks-144.json;current runtime/dist equivalence attested370;subsequent source changes only screenshot metadata",
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "This stage executes no model/process/approval/signer writes,application tests/builds or new screenshot captures. Current source inspection and dated real exercise evidence are distinguished.",
+      "Seven whole current source files/628lines and selected reads were inspected;49unchanged named prior fact-review source bindings are reused at their actual scopes,not claimed as49new whole reads.",
+      "Only20selected raw images individually viewed this stage;other64retain original dated methods. Native English fallback,Chinese validation detail and wrapped names remain visible.",
+      "Existing unfiltered approval variables,numeric-only approver eligibility,legacy process-definition ownership/compatibility and standalone XSS boundaries remain explicit source limitations,not repaired or covered by this documentation review.",
+      "Global authentication/social-login/SRM screenshot gaps and the remaining24translation rows after this family's prospective three approvals remain open;full original A-G is preserved."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/workflow-approval.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 19:33:57",
+      "result": "approved",
+      "translation_sha256": "bece54dcb5f504f3c8d92c895c90a4f352746831774a1817d9adfbad7b84e136",
+      "checks": {
+        "coverage_and_meaning": "四篇原稿712行已通读，最终所有变更行已实际阅读，并以逐行哈希映射覆盖未变正文；组合覆盖当前760行。每语24项编号操作、8节、21图、4表和原JSON完整保留。前置预设/版本/身份/候选作用域、ALL/ANY版本隔离、拒绝/撤回/加减签、错误XML与恢复、源码导航和失败表均覆盖。历史成功写入不重复，本轮文档检查不冒充新业务演练。",
+        "technical_literals": "四语各84个归一化行内技术字面量、42个归一化相对链接及原JSON一致。核对Flowable8.0.0、Gateway公共启动、用户/租户可信来源、发布HTTP200/body500、草稿恢复、409任务冲突及404租户隐藏。MI_END自动结束任务不计为实际赞成票，终态2不等于业务通过。",
+        "security_and_failure_semantics": "候选作用域与功能角色独立，早期ABSOLUTE_UNIT不证明后来普通PARENT启动。普通身份经Gateway校验JWT派生，不信任客户端身份头。数字目标ID不是启用/同租户/权限资格验证；先核对目标，仅发送必要approved/comment，扩展variables由受信任业务代码构造。409先刷新待办查历史，404不泄露其他租户存在性；保留不可变发布版和已有业务副作用。",
+        "images_and_links": "Docker已渲染四篇完整Markdown。84图路径/语言/字节哈希和5组运行版本均匹配原始证据；其中20张原图本轮逐张查看，其他64张保留实际历史视觉方法。原72张正向/历史图使用18张原分辨率四语汇总图，原12张负向图逐张检查；不冒称84张全部新拍或本轮逐张查看。记录日/韩英文回退、中文后端详情、长名称换行和图色不能替代实际票数。",
+        "language_and_terminology": "Read complete178line English original against Chinese,then every final changed line. Complete190line meaning preserved through exact unchanged-line mapping. Distinguishes ordinary API startup from a UI action,actual votes from MI_END automatic closure,dated exercise results from current audit,and numeric target parsing from eligibility validation. Recovery and trusted identity wording match current implementation."
+      },
+      "findings": [
+        {
+          "id": "WG01",
+          "status": "resolved",
+          "resolution": "Actual AI_REVIEW suffices under the authorized ADR;no mandatory human review or false HUMAN_REVIEW label."
+        },
+        {
+          "id": "WG02",
+          "status": "resolved",
+          "resolution": "Date historical writes and image evidence2026-10-10;bind five capture-time groups and do not assign later runtime aggregate to five early images."
+        },
+        {
+          "id": "WG03",
+          "status": "resolved",
+          "resolution": "Preserve MI_END automatic closure versus actual votes,generic completed status versus business approval,and immutable old ALL version versus new ANY."
+        },
+        {
+          "id": "WG04",
+          "status": "resolved",
+          "resolution": "Explicitly distinguish20current selected individual raw views,other64retained records,72prior images via18contact sheets and12prior individually viewed negative images."
+        },
+        {
+          "id": "WG05",
+          "status": "resolved",
+          "resolution": "Correct Japanese/Korean multi-instance caption and image/case terminology;preserve native fallback/wrapping limits instead of claiming translated UI."
+        },
+        {
+          "id": "WG06",
+          "status": "resolved",
+          "resolution": "Early nine ABSOLUTE_UNIT API groups do not establish later ordinary PARENT startup;007/008 journeys and earlier failures/reconciliation remain scoped."
+        },
+        {
+          "id": "WG07",
+          "status": "resolved",
+          "resolution": "Document numeric-only target guard and trusted extra variables;require existing enabled same-tenant qualified approver and minimal tutorial fields."
+        },
+        {
+          "id": "WG08",
+          "status": "resolved",
+          "resolution": "Add current business409processed/absent/tenant-invisible approval submission and404cross-tenant progress/history behavior with reconciliation recovery."
+        },
+        {
+          "id": "WG09",
+          "status": "resolved",
+          "resolution": "Use verified JWT Gateway-derived identity/tenant;ordinary API startup is not a UI-start proof. State exact Flowable8.0.0 version."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/workflow-approval.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 19:33:57",
+      "result": "approved",
+      "translation_sha256": "98539ef629cde8866c46bbeee444330bcc068eff5cfda7819ce713d47336d7c0",
+      "checks": {
+        "coverage_and_meaning": "四篇原稿712行已通读，最终所有变更行已实际阅读，并以逐行哈希映射覆盖未变正文；组合覆盖当前760行。每语24项编号操作、8节、21图、4表和原JSON完整保留。前置预设/版本/身份/候选作用域、ALL/ANY版本隔离、拒绝/撤回/加减签、错误XML与恢复、源码导航和失败表均覆盖。历史成功写入不重复，本轮文档检查不冒充新业务演练。",
+        "technical_literals": "四语各84个归一化行内技术字面量、42个归一化相对链接及原JSON一致。核对Flowable8.0.0、Gateway公共启动、用户/租户可信来源、发布HTTP200/body500、草稿恢复、409任务冲突及404租户隐藏。MI_END自动结束任务不计为实际赞成票，终态2不等于业务通过。",
+        "security_and_failure_semantics": "候选作用域与功能角色独立，早期ABSOLUTE_UNIT不证明后来普通PARENT启动。普通身份经Gateway校验JWT派生，不信任客户端身份头。数字目标ID不是启用/同租户/权限资格验证；先核对目标，仅发送必要approved/comment，扩展variables由受信任业务代码构造。409先刷新待办查历史，404不泄露其他租户存在性；保留不可变发布版和已有业务副作用。",
+        "images_and_links": "Docker已渲染四篇完整Markdown。84图路径/语言/字节哈希和5组运行版本均匹配原始证据；其中20张原图本轮逐张查看，其他64张保留实际历史视觉方法。原72张正向/历史图使用18张原分辨率四语汇总图，原12张负向图逐张检查；不冒称84张全部新拍或本轮逐张查看。记录日/韩英文回退、中文后端详情、长名称换行和图色不能替代实际票数。",
+        "language_and_terminology": "全178行の原稿と最終変更行を中国語の事実源に照合し、未変更行の厳密対応と合わせて現在190行を網羅。会議承認の曖昧な表現を複数承認タスクに修正し、画像の助数詞を統一。実投票とMI_END、一般起案者のAPI開始と画面操作、過去演習と今回の文書確認、公開拒否とサービス停止を区別した。"
+      },
+      "findings": [
+        {
+          "id": "WG01",
+          "status": "resolved",
+          "resolution": "Actual AI_REVIEW suffices under the authorized ADR;no mandatory human review or false HUMAN_REVIEW label."
+        },
+        {
+          "id": "WG02",
+          "status": "resolved",
+          "resolution": "Date historical writes and image evidence2026-10-10;bind five capture-time groups and do not assign later runtime aggregate to five early images."
+        },
+        {
+          "id": "WG03",
+          "status": "resolved",
+          "resolution": "Preserve MI_END automatic closure versus actual votes,generic completed status versus business approval,and immutable old ALL version versus new ANY."
+        },
+        {
+          "id": "WG04",
+          "status": "resolved",
+          "resolution": "Explicitly distinguish20current selected individual raw views,other64retained records,72prior images via18contact sheets and12prior individually viewed negative images."
+        },
+        {
+          "id": "WG05",
+          "status": "resolved",
+          "resolution": "Correct Japanese/Korean multi-instance caption and image/case terminology;preserve native fallback/wrapping limits instead of claiming translated UI."
+        },
+        {
+          "id": "WG06",
+          "status": "resolved",
+          "resolution": "Early nine ABSOLUTE_UNIT API groups do not establish later ordinary PARENT startup;007/008 journeys and earlier failures/reconciliation remain scoped."
+        },
+        {
+          "id": "WG07",
+          "status": "resolved",
+          "resolution": "Document numeric-only target guard and trusted extra variables;require existing enabled same-tenant qualified approver and minimal tutorial fields."
+        },
+        {
+          "id": "WG08",
+          "status": "resolved",
+          "resolution": "Add current business409processed/absent/tenant-invisible approval submission and404cross-tenant progress/history behavior with reconciliation recovery."
+        },
+        {
+          "id": "WG09",
+          "status": "resolved",
+          "resolution": "Use verified JWT Gateway-derived identity/tenant;ordinary API startup is not a UI-start proof. State exact Flowable8.0.0 version."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/workflow-approval.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 19:33:57",
+      "result": "approved",
+      "translation_sha256": "2a7f2aab55aecce168901adc02e8d54e0ca647ede57a93ebf19cbc7146a648f6",
+      "checks": {
+        "coverage_and_meaning": "四篇原稿712行已通读，最终所有变更行已实际阅读，并以逐行哈希映射覆盖未变正文；组合覆盖当前760行。每语24项编号操作、8节、21图、4表和原JSON完整保留。前置预设/版本/身份/候选作用域、ALL/ANY版本隔离、拒绝/撤回/加减签、错误XML与恢复、源码导航和失败表均覆盖。历史成功写入不重复，本轮文档检查不冒充新业务演练。",
+        "technical_literals": "四语各84个归一化行内技术字面量、42个归一化相对链接及原JSON一致。核对Flowable8.0.0、Gateway公共启动、用户/租户可信来源、发布HTTP200/body500、草稿恢复、409任务冲突及404租户隐藏。MI_END自动结束任务不计为实际赞成票，终态2不等于业务通过。",
+        "security_and_failure_semantics": "候选作用域与功能角色独立，早期ABSOLUTE_UNIT不证明后来普通PARENT启动。普通身份经Gateway校验JWT派生，不信任客户端身份头。数字目标ID不是启用/同租户/权限资格验证；先核对目标，仅发送必要approved/comment，扩展variables由受信任业务代码构造。409先刷新待办查历史，404不泄露其他租户存在性；保留不可变发布版和已有业务副作用。",
+        "images_and_links": "Docker已渲染四篇完整Markdown。84图路径/语言/字节哈希和5组运行版本均匹配原始证据；其中20张原图本轮逐张查看，其他64张保留实际历史视觉方法。原72张正向/历史图使用18张原分辨率四语汇总图，原12张负向图逐张检查；不冒称84张全部新拍或本轮逐张查看。记录日/韩英文回退、中文后端详情、长名称换行和图色不能替代实际票数。",
+        "language_and_terminology": "원본178행과 최종 변경 행을 중국어 사실 원문과 대조하고 동일한 미변경 행 매핑으로 현재190행 전체 의미를 확인했다. 합의 대신 다중 인스턴스 작업을 사용하고 정상/실패 사례 용어를 정리했다. 실제 표와자동 종료,일반 API 시작과 화면 동작,기록된 실습과현재 문서 검사,숫자 형식과사용자 자격 검증을 구분한다."
+      },
+      "findings": [
+        {
+          "id": "WG01",
+          "status": "resolved",
+          "resolution": "Actual AI_REVIEW suffices under the authorized ADR;no mandatory human review or false HUMAN_REVIEW label."
+        },
+        {
+          "id": "WG02",
+          "status": "resolved",
+          "resolution": "Date historical writes and image evidence2026-10-10;bind five capture-time groups and do not assign later runtime aggregate to five early images."
+        },
+        {
+          "id": "WG03",
+          "status": "resolved",
+          "resolution": "Preserve MI_END automatic closure versus actual votes,generic completed status versus business approval,and immutable old ALL version versus new ANY."
+        },
+        {
+          "id": "WG04",
+          "status": "resolved",
+          "resolution": "Explicitly distinguish20current selected individual raw views,other64retained records,72prior images via18contact sheets and12prior individually viewed negative images."
+        },
+        {
+          "id": "WG05",
+          "status": "resolved",
+          "resolution": "Correct Japanese/Korean multi-instance caption and image/case terminology;preserve native fallback/wrapping limits instead of claiming translated UI."
+        },
+        {
+          "id": "WG06",
+          "status": "resolved",
+          "resolution": "Early nine ABSOLUTE_UNIT API groups do not establish later ordinary PARENT startup;007/008 journeys and earlier failures/reconciliation remain scoped."
+        },
+        {
+          "id": "WG07",
+          "status": "resolved",
+          "resolution": "Document numeric-only target guard and trusted extra variables;require existing enabled same-tenant qualified approver and minimal tutorial fields."
+        },
+        {
+          "id": "WG08",
+          "status": "resolved",
+          "resolution": "Add current business409processed/absent/tenant-invisible approval submission and404cross-tenant progress/history behavior with reconciliation recovery."
+        },
+        {
+          "id": "WG09",
+          "status": "resolved",
+          "resolution": "Use verified JWT Gateway-derived identity/tenant;ordinary API startup is not a UI-start proof. State exact Flowable8.0.0 version."
+        }
+      ]
+    }
+  }
+}

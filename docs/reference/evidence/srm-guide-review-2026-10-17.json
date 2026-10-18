@@ -1,0 +1,992 @@
+{
+  "schema": 1,
+  "kind": "current-document-source-and-selected-original-image-audit",
+  "recorded_at": "2026-10-17T12:01:51.221Z",
+  "source_baseline": "1f085b93bcb9ef04d2e5b3bdade4148f8f96a2d0",
+  "document_id": "guide-srm-flow",
+  "evidence_kind": "AI semantic source/provenance/visual inspection,not a new application or business test",
+  "original_documents_actually_read": 4,
+  "original_whole_lines": 648,
+  "original_image_registers": [
+    {
+      "path": "docs/reference/evidence/srm-2026-10-12.json",
+      "sha256": "6c53e3404f0590955ec2f7abc3f54f8639fa5f103899102a8ce7ce50101d66bd",
+      "date": "2026-10-12T11:41:44.966Z",
+      "run_id": "WIKI-20261012-SRM-E",
+      "capture_records": 56,
+      "visual_review": {
+        "status": "passed-with-documented-limits",
+        "reviewer": "Agent reviewed all 76 original images individually",
+        "reviewed": 76,
+        "published": 56,
+        "rejected": 20,
+        "human_translation_review": "pending",
+        "limits": [
+          "Registration screen is entry only; no CAPTCHA/password submission for this account.",
+          "Invitation form is preview; formal API created invitation. Approval decisions used formal APIs, not a complete UI click journey.",
+          "First eight public/invitation images predate frontend route fix; per-image runtime and captured test digests preserved.",
+          "JA/KO have existing English fallbacks and long-label wraps; 360-view states are raw enums.",
+          "Twenty fixed-column list images hide state text and remain private; actual detail recaptures replace them.",
+          "Boundary used an existing awarded RFQ and proves reads only; error HTTP status is 200 with business code 404.",
+          "Retired sample history and fixture account remain in isolated project until final project-wide cleanup."
+        ]
+      }
+    },
+    {
+      "path": "docs/reference/evidence/srm-native-actions-2026-10-13.json",
+      "sha256": "3ac61ee2f1cc5c21cfd7aab1e3c00605f5052eed8eeb9f86064c27b2da4562dd",
+      "date": "2026-10-13T00:46:54.416Z",
+      "run_id": "WIKI-20261013-SRM-F",
+      "capture_records": 32,
+      "visual_review": {
+        "status": "passed-with-documented-limits",
+        "reviewer": "Agent original-image inspection, not human translation signature",
+        "reviewed": 32,
+        "published_unique_files": 24,
+        "byte_identical_reuse": 8,
+        "human_translation_review": "pending",
+        "limits": [
+          "Only supplier creation and five lifecycle commands use real native UI clicks.",
+          "Three admission decisions use ordinary candidate API identities, not native approval clicks.",
+          "No portal account, CAPTCHA self-registration or social login is claimed.",
+          "All 32 original PNGs individually inspected by the agent; 24 distinct images published, with 8 byte-identical APPROVED detail results reusing the first image per locale.",
+          "Desktop 1440x1000 only. Actual dark product theme; no injected UI styles, forced clicks or mocked responses.",
+          "Long supplier input clips visually; the complete value is asserted. English/Japanese labels wrap, the English Primary table heading breaks across lines, and some optional form labels remain raw English.",
+          "Detail images prove the supplier identity and status at the top. Lower risk rows are outside the viewport; empty contact/bank/evaluation sections are not evidence of those flows. Status, type and level remain raw enums.",
+          "Versions are verified from real API responses, not displayed in the detail screenshot. The native Chinese command executes once; other locales are previews and subsequent read-only result captures.",
+          "The terminal supplier and approval history remain in the dedicated isolated project. No portal account or invite was created for this internal-only sample; final project cleanup remains pending.",
+          "Human translation review remains pending and is independent of agent visual inspection."
+        ]
+      }
+    }
+  ],
+  "prior_current_fact_review": {
+    "path": "docs/reference/reviews/srm.json",
+    "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f",
+    "unchanged_named_dependencies": 76,
+    "new_whole_read_claim": false
+  },
+  "capture_source_groups": [
+    {
+      "key": "docs/reference/evidence/srm-2026-10-12.json|sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab|2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688|a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "images": 8,
+      "first_document_occurrence": "2026-10-12T09:45:33.318Z",
+      "last_document_occurrence": "2026-10-12T09:45:32.521Z",
+      "document_order_not_chronological": true
+    },
+    {
+      "key": "docs/reference/evidence/srm-2026-10-12.json|sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af|a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e|3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "images": 8,
+      "first_document_occurrence": "2026-10-12T09:55:50.554Z",
+      "last_document_occurrence": "2026-10-12T09:56:14.000Z",
+      "document_order_not_chronological": true
+    },
+    {
+      "key": "docs/reference/evidence/srm-2026-10-12.json|sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af|26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a|f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "images": 16,
+      "first_document_occurrence": "2026-10-12T11:20:48.770Z",
+      "last_document_occurrence": "2026-10-12T11:21:09.584Z",
+      "document_order_not_chronological": true
+    },
+    {
+      "key": "docs/reference/evidence/srm-2026-10-12.json|sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af|3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e|884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "images": 16,
+      "first_document_occurrence": "2026-10-12T11:31:09.379Z",
+      "last_document_occurrence": "2026-10-12T11:31:28.733Z",
+      "document_order_not_chronological": true
+    },
+    {
+      "key": "docs/reference/evidence/srm-2026-10-12.json|sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af|1c9e23da3f9a793eb7da4fa924beec6884a62f0d948c5614ec8e7ed51df6fcb3|37f8f86e64c5745406553e38b8232fee8d63d2738aa3b162b4b156e5ff3c8037",
+      "images": 4,
+      "first_document_occurrence": "2026-10-12T11:33:55.056Z",
+      "last_document_occurrence": "2026-10-12T11:33:57.099Z",
+      "document_order_not_chronological": true
+    },
+    {
+      "key": "docs/reference/evidence/srm-2026-10-12.json|sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af|3c716187a6348b26c54a618bc1e20beab0fa7edf29ea55dd782d39f4ee9ca02c|2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844",
+      "images": 4,
+      "first_document_occurrence": "2026-10-12T11:36:14.864Z",
+      "last_document_occurrence": "2026-10-12T11:36:18.594Z",
+      "document_order_not_chronological": true
+    },
+    {
+      "key": "docs/reference/evidence/srm-native-actions-2026-10-13.json|sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c|per-source-files|0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+      "images": 24,
+      "first_document_occurrence": "2026-10-13T00:38:01.847Z",
+      "last_document_occurrence": "2026-10-13T00:44:57.378Z",
+      "document_order_not_chronological": true
+    }
+  ],
+  "current_source_inspection": {
+    "whole_files": 3,
+    "whole_lines": 210,
+    "files": [
+      {
+        "path": "database/changelog/srm/0001-srm-schema.yaml",
+        "sha256": "76edbd94ddfe5e146afa6faa6a01d02219b514901156bd9e1b99c8671cc92591",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/consumer/PortalRoleAssignConsumer.java",
+        "sha256": "3281bb60d1d0a5d0560f5efb845b7910d5552447bd45d29fb2f4c01a91574459",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthController.java",
+        "sha256": "b973052c2787ac95547edaa93be6bb8de48becc34017d8666e02e2a52b6662fb",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysPortalRoleRequestMapper.java",
+        "sha256": "6e47933e2a947a1b3ae8acaa0689e6acbfb1e49e0afc1276a226d908aec0d767",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PortalRoleAssignmentServiceImpl.java",
+        "sha256": "bb6efb8c4536f80ada2ff8ebb6cf98fc32c633c85f7add99b94d15b8373b36bf",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/UserServiceImpl.java",
+        "sha256": "aee5b14ab535cbd943ac22661117d2bcffac74e0e39bdb8bee76d812753a3d29",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/service/impl/PortalRoleAssignmentServiceImplTest.java",
+        "sha256": "fb48db22f1aad8ff570f6931becee170381c71c174523a7d3577b769782f9852",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/pom.xml",
+        "sha256": "50fc38206395819c1ea108dd0c25041972c73731a89e63074dd4fea4a1f1742d",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/client/WorkflowInternalClient.java",
+        "sha256": "7aa64d3006b8498646ed0a7d9fa65662e5d7ed4b305970c17e804def7c858144",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/consumer/PortalRoleResultConsumer.java",
+        "sha256": "daa3063db197f8b9ed0ea676c9b1998df59aeb0cbc2cdb12995383eb39750956",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/consumer/WorkflowProcessCompletedConsumer.java",
+        "sha256": "645db9aa619e6c73fef8f376c397e58002eb0e5adfbb183f8261bc4f48c9b2c5",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/BankAccountController.java",
+        "sha256": "0a4c430abb7092c1bbe91564cc65e48b665d0e375d15efea08460a5178916883",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/ContactController.java",
+        "sha256": "3d64c96047199f6d5580b58531e6219db28ba5eb56a0f129bed94b6daf20a270",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/EvaluationController.java",
+        "sha256": "e926bdb93440f60d68f0c503569edf86e83407566d17972858616f92ad91e547",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/InternalQuotationController.java",
+        "sha256": "65c72a5dd1451f2cafb453bb792c727d3dac52774eda5e3b59afe60da8c9c7da",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/InternalSupplierController.java",
+        "sha256": "24fe6064e7a8d504383c286d9b2ad42ac3f846d12709a08da71bfb4c045734e7",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/OptionsController.java",
+        "sha256": "14803dc21255ebf6fe6428fa55248b814f2bc4d4d5e7faaa162c1e9830773719",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/OverviewController.java",
+        "sha256": "1d31a6cf31e222935bf40c4cf8474ee9107638761a09a839a38218b3a3cd789d",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalController.java",
+        "sha256": "22f8a2e188ef7cf36a9cd086206d6cbd286aface2a0a1902d42aad7e308e518d",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalEvaluationController.java",
+        "sha256": "ab2dc6cf8ab35006740c766f2eef3d3ee7443c5c68706ef3cfcef9308fa8cada",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalInviteController.java",
+        "sha256": "ed1f52210ac5a3b6ee2a5397bde3858b5cead2f1ca971bfd5ab31d404d6b2aa3",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalQuotationController.java",
+        "sha256": "60273a0a09b8eca2365f1889f8aad02f8c23adf5f9eceaecbc40cf70a3c51297",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/QualificationController.java",
+        "sha256": "b8f2dbc3d91fdcb86f4ce4b926063c45e86eea458e8f6610df393386e9bc96f8",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/RiskController.java",
+        "sha256": "6ae0c12de2e76a71120675b4a61142bef35d1c16afed29ea0416a846fa5c600f",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/RiskIndicatorConfigController.java",
+        "sha256": "386b2ed6ef769743f390711cb42383708b0fecc6e47703a8319dace0b8c46bda",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/SupplierController.java",
+        "sha256": "b329152e40cd52d83908ec4bf5c5ebc624526cf3f1855de343c18c3502c3b6ac",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/SupplierInsightController.java",
+        "sha256": "ea828e3e2c452b1c741f3aaa61970a7e807e534ed2657c50c8f4863cc46b4f69",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmEvaluationPolicy.java",
+        "sha256": "a85ae635aaf6a922d728e1ae9446fc9688f8c57443f5ef902334d294f05fa291",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmEvaluationScoreCalculator.java",
+        "sha256": "96a2de999e19946c73b56227ffac597124dc8e260ab99f92904a145d50b700f0",
+        "read_scope": "Whole96lines read;positive enabled weights sum100,score1..5,HALF_UP total2decimals,level thresholds. Formula variables translated in guides.",
+        "outputs": [
+          "d32b38"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmRiskCalculator.java",
+        "sha256": "dfea0fcd1321c7fdee642e4348d3c84ac73f5f98baa8295d2e8ad35114363808",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmStateMachine.java",
+        "sha256": "23b50960e0ef730fafdfc0804d1972fc7fd879bfaad34bacc17e1890466456ff",
+        "read_scope": "Whole68lines read;9supplierstates,terminalELIMINATED,allowedtransitions andbusiness409.",
+        "outputs": [
+          "50904c"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/Jackson2DecimalStringDeserializer.java",
+        "sha256": "7fdc6e74bffe9d5c5b16f2444f3bd99f1564f36cbd9141247e1ca8440f753876",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/Jackson3DecimalStringDeserializer.java",
+        "sha256": "d6595663f13cb37eab371c18116270dc05062fb5d355992e5a97299fdc702ca6",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationLineRequest.java",
+        "sha256": "2c3d9192820c781c17ac5a9c855588dd1a6eb75e2f78c94b5fd252ebea2809d5",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationLineVO.java",
+        "sha256": "3cc702526fa9f93514586a351ba7bca5c21a574928806035901d5a44334b23fc",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationSubmitRequest.java",
+        "sha256": "c5192dbda68a83df71b99e53be85b484d5f800185f01962bc7e7dd8c62bd63ee",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationVO.java",
+        "sha256": "164c8d349ed46761b08db68b486274f638ca134d8702af93b677b137b1c47e48",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/SrmRequests.java",
+        "sha256": "43433b0b5f45a75f780345b53a52d4769a4a025f3eccadeeef73e4bda6916787",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/SrmViewAssembler.java",
+        "sha256": "d48baade929890b8530a953a13a79d2dce4d531cb6fa4607efdf41fad534267b",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/WorkflowContracts.java",
+        "sha256": "d1dfa02839cae90412e76a891f0ad46c3aabc563614e04914644e92c67b0adbe",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmEvaluation.java",
+        "sha256": "938b5aad0040af0a6cd5f0e6614c2971feb5d9c71c68027fca07024965c1251b",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplier.java",
+        "sha256": "fba5431db8ff49eb3114eeb8bf3ef41289efc5e7442c929907c07af78ad4905e",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplierBankAccount.java",
+        "sha256": "e60065d75e13b5d41b3507148c50b146d50ec54dbe06ead912a730a08a43cd21",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplierContact.java",
+        "sha256": "3b70b3e87d8174039b51c146196596596ae6f9d2fce8131276dfd14f21315b47",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/mapper/SrmEventInboxMapper.java",
+        "sha256": "a8fce30e4f80b54d8478210b6544e9d43c3173a746676139f72bca597460ce4b",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/mapper/SrmSupplierInviteMapper.java",
+        "sha256": "e787643166227dbc20c9e156752f7bf47b6f22b8cae102191ae858a6a39f68db",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmDataPermissionHandler.java",
+        "sha256": "c44aacdf9fb3cb52dcca347b1c2d4eafb962240f99e4df719ff570575e1b600d",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmPortalScope.java",
+        "sha256": "eff1452e9b4349d44b2dd2275054513e2817bac14ad19309a9521f0c683adf68",
+        "read_scope": "Whole46lines read;PortalUser association mustprevalidate tenant/user/supplier;restore prior sharedscope infinally.",
+        "outputs": [
+          "d32b38"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/EvaluationServiceImpl.java",
+        "sha256": "be27cb3d943742ebae647e6a40e5a15721cd437bc49e33054243fff6b1dd86ac",
+        "read_scope": "Selected125-215;visible supplierlock,eligibility/dimensions,score,COMPLETED,levelsupplierCAS andOutbox. Notwhole.",
+        "outputs": [
+          "9d5a6d",
+          "6a7365"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/InternalSupplierServiceImpl.java",
+        "sha256": "c8bf5508b306fef83573708ef32d02fd38a69bec119e6aa2affa00c56622a1f1",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/PortalInviteServiceImpl.java",
+        "sha256": "cbb4265347bcb4d1138444ddad831ad5cd9f80bb29abf0527cfe424ff01277dc",
+        "read_scope": "Selected63-86,104-130;rawACTIVE revocation andcomputedUSED viewwhenmaxusesreached. Notwhole.",
+        "outputs": [
+          "9d5a6d"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/PortalRoleResultServiceImpl.java",
+        "sha256": "fc418de204fcf651a887cfab4e76428fe03981765851360464c1a04ec46fda1c",
+        "read_scope": "Selected66-112;idempotentCOMPLETED,tenant/user/supplierbinding andACTIVEassociation. Notwhole.",
+        "outputs": [
+          "9d5a6d"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/QualificationServiceImpl.java",
+        "sha256": "61ee02db716e6d9fb1e0b6f9ac72c2ea72494ec9dec9cf4318639d112342f771",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/QuotationServiceImpl.java",
+        "sha256": "0323b4f79842bc409be42e3b2823a1f9018e6925d66c8202c3184156bd22ad9b",
+        "read_scope": "Selected223-261;procurementresponseidentity/invitationvalidation and404/503 boundaries;notwhole.",
+        "outputs": [
+          "selectedquotation followup444"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskIndicatorConfigServiceImpl.java",
+        "sha256": "7001beb02897c269b4d86dbb53f81a88ba1f1d2da5c3dbb81557adcb915b1027",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskServiceImpl.java",
+        "sha256": "f414b9593f1e14a410df88c269c742b369c9b0ca695f7a6b84075470a2d28f29",
+        "read_scope": "Selected100-156 andmatchedcomputeFromScore/sum context;onlyenabledtypeautoCalcguard,criterionexistswithoutsame-typeguard,automaticnewassessment andsumthresholdsemantics. Notwhole.",
+        "outputs": [
+          "9d5a6d",
+          "selectedsum followup444"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SrmTenantInitializerImpl.java",
+        "sha256": "48f5f132f8a6b8b8764b1dbbf0471ab2795da5ede97d51ae66f7a8929371cb7e",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+        "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d",
+        "read_scope": "Selected119-192,288-339;sameapplicant/request/credit guards,consumeinvite,roleassignOutbox,retryenrollment distinction,REJECTED-onlyprofile-resubmit. Notwhole.",
+        "outputs": [
+          "50904c"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+        "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26",
+        "read_scope": "Selected187-226,370-437,542-573;nativecreateownership,versionedstatuscommands,REJECTED-onlysubmit,remote termination beforelocalversionwrite. Notwhole.",
+        "outputs": [
+          "56e2be",
+          "d32b38"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierWorkflowCompletionServiceImpl.java",
+        "sha256": "0747a9bd1d22281646e3fad2808c7de80e295a30438e31a23cc3a4e0365de836",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SrmOwnerEnricher.java",
+        "sha256": "4107528b850d6f99f8a5e047905938f5ec3f8f8c8123df3ac9fc5c4a385ad652",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SrmPermissionScopeExecutor.java",
+        "sha256": "e4f7c84f65cdd5cfcb6adb1f7edf9103d0202943ac13eb3ecdade34781b357f2",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/workflow/SupplierWorkflowCoordinator.java",
+        "sha256": "1a239aadb6a43eee1c66e16f063fc65435cc21c22b1d60a5d075715e5925b246",
+        "read_scope": "Selected68-145;modelresolvebeforecatch,synchronousstart,identity/request/attempt;remote503/responsecheck. Notwhole/distributedatomicproof.",
+        "outputs": [
+          "50904c"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/workflow/SupplierWorkflowStateServiceImpl.java",
+        "sha256": "ca55d16c520227ccad2fb619f61f3744412d0ad0da86b93a9940674c55c5eb6a",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/resources/application.yml",
+        "sha256": "33cb88e595135c1d5b1c19288ecdf000860973a110a5816643e924e4808081a6",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/PortalInviteServiceImplTest.java",
+        "sha256": "98b50607037b2a08f25bd3c0a642fdbef3ec61e5db51519dbeba37c38bdd20f7",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/PortalRoleResultServiceImplTest.java",
+        "sha256": "18f7979ded2cee6a8c6930a60b236b01b717fea6b401e57f2a9fd8f0a6f9fefe",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/SupplierPortalServiceImplTest.java",
+        "sha256": "63423723e10dc55947f3e3662976f09e5f67986f4d357ff5fe205d4d21aaa63b",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/SupplierServiceImplTest.java",
+        "sha256": "762ee68676b4d9012c69904393fb6e7e361074df1fe83e984d37ec97340f033a",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+        "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/router/index.ts",
+        "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/stores/permission.ts",
+        "sha256": "1194fe1457d924e4fb483e7fd1f54c01fe6499af8cb388e01f5fcf9933e91419",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/supplier-portal/index.vue",
+        "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "scripts/sql/seed/auth.sql",
+        "sha256": "131d495c9b1eed92d4d2a7f0aaf92026117c25c6d8d13b8773fdc00fb94c357c",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SupplierRiskInitializer.java",
+        "sha256": "d41649bee4a84e7012ac8453bda885c630907defbbb56071ad9d18758e37852b",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "scripts/sql/seed/srm.sql",
+        "sha256": "e1a353dfc623e44f267ff7e0e18bf8bcc3e70f8f1b7a7210ca32a2edf118e698",
+        "read_scope": "Unchanged named prior SRM fact-review reuse at its actual selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/srm/supplier/index.vue",
+        "sha256": "c5774d6d7a8c99d28340051bbe4cfc288feb9c538e92db4d719d9bf1a479dd07",
+        "read_scope": "Selected300-352;nativeconfirmationdialog hasno reasoninput,calls versionedlifecycleAPI. Notwhole.",
+        "outputs": [
+          "6a7365"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/srm-supplier.ts",
+        "sha256": "8351cf5af3e5c76a1d6cb4f40956da0228833f7ec344df9aaaffbf52578d1dfa",
+        "read_scope": "Selectedtypes1-225visiblein6a7365,matchedfunctions250-268in56e2be;reasonoptional inAPIhelper butnativeUI doesnot passit. Output6a7365middletruncated;notwhole.",
+        "outputs": [
+          "6a7365",
+          "56e2be"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "scripts/fixtures/capture-srm-teaching.mjs",
+        "sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844",
+        "read_scope": "Selected367-403;reconcileexistingretire,eliminateonce,onlyrevokeifdisplaystatusACTIVE,recordactualinviteafterUSED. Lastgenericlimitsentenceoverstatesrevocation;currentauditcorrectswithoutreplayingoroverwritingdatedreceipt.",
+        "outputs": [
+          "9d5a6d"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "scripts/fixtures/capture-srm-native-actions.mjs",
+        "sha256": "0f41066aab3ae8d10846cc738f84e99b5e84457c1fbd4fc312099f12f946b244",
+        "read_scope": "Selected1-88;Docker/project/runtimeguard,phase/unknownsubmissionjournal,ordinaryshort-livedidentities. Notwholeornewexecution.",
+        "outputs": [
+          "6a7365"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/srm.md",
+        "sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03",
+        "read_scope": "Current hash pluspreviously completed named fact/design semantic review reuse;notnewwhole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/design/srm-design.md",
+        "sha256": "401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211",
+        "read_scope": "Current hash pluspreviously completed named fact/design semantic review reuse;notnewwhole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/srm.json",
+        "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f",
+        "read_scope": "Current hash pluspreviously completed named fact/design semantic review reuse;notnewwhole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/srm-design.json",
+        "sha256": "cffc5d996c9ff5bb0e9eb91b40db89cb9e91e23e2e3650a68823f384eb91b50f",
+        "read_scope": "Current hash pluspreviously completed named fact/design semantic review reuse;notnewwhole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+        "read_scope": "Previously read authorized AI-only acceptance policy;exacthashrebound,notnewwhole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/srm-2026-10-12.json",
+        "sha256": "6c53e3404f0590955ec2f7abc3f54f8639fa5f103899102a8ce7ce50101d66bd",
+        "read_scope": "Actualregistermetadata,visualscope,primarycapture,phases,businesssample/operations/boundary/cleanupfieldsread. Originalversiongroups andhistoricalpendinghumanfieldkeptasdateddata;currentpolicyoverridesmandatoryhumanacceptance.",
+        "outputs": [
+          "2beb46",
+          "4c0f09",
+          "d4b89e"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/srm-native-actions-2026-10-13.json",
+        "sha256": "3ac61ee2f1cc5c21cfd7aab1e3c00605f5052eed8eeb9f86064c27b2da4562dd",
+        "read_scope": "Actualregistermetadata,visualscope,primarycapture,phases,businesssample/operations/boundary/cleanupfieldsread. Originalversiongroups andhistoricalpendinghumanfieldkeptasdateddata;currentpolicyoverridesmandatoryhumanacceptance.",
+        "outputs": [
+          "2beb46",
+          "4c0f09",
+          "d4b89e"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ]
+  },
+  "selected_raw_images": [
+    {
+      "path": "docs/images/zh-CN/srm-portal-account-entry.png",
+      "locale": "zh-CN",
+      "sha256": "ffc9b3e6b60968cb82f4f9c2ffcad13c5b4fa4ee77da0f84b673f559e0e94aa0",
+      "step": "srm-portal-account-entry",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Publicregistration entryonly,usernameblank,passwordandCAPTCHAintentionallymasked;no submittedsuccess. JA/KRLoginfooterEnglishfallback;DefaultTenantbusinesslabelretained."
+    },
+    {
+      "path": "docs/images/zh-CN/srm-portal-enrollment-completed.png",
+      "locale": "zh-CN",
+      "sha256": "f2c164384bce7e561cce31537f2c7531e84eaa79335021984b49027b50f3b7af",
+      "step": "srm-portal-enrollment-completed",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameapplicationIDandSupplier8withCOMPLETED,portalroleauthorizationmessage andrefreshidentitybuttons;doesnotshowAPPROVEDorrealpasswordlogin."
+    },
+    {
+      "path": "docs/images/zh-CN/srm-approved-uninvited-quotation-empty.png",
+      "locale": "zh-CN",
+      "sha256": "bed29a04af65a71986d9ce8d1f62c1afaf35f033ddffd55eb34428632f1495f1",
+      "step": "srm-approved-uninvited-quotation-empty",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "OwnsupplierEemptyRFQtableandemptyinvitationmessage;JAinvitationheaderwraps. PixelsdonotproveHTTP404,whichneedsdatedAPIreceipt;noquotationsubmission."
+    },
+    {
+      "path": "docs/images/zh-CN/srm-native-suspend-confirmation.png",
+      "locale": "zh-CN",
+      "sha256": "13dba1bbde1d72f312c2ac48ab8a395a58577b233a3a043938b9fa59d9a8ac2e",
+      "step": "srm-native-suspend-confirmation",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameSupplierFname,localizedwarning/Cancel/Confirm,no reasoninput. JA/ENnamelineswrap. Before-submitpreviewonly;ChinesemutationversusotherlocaleCancelisjournal/APIproof."
+    },
+    {
+      "path": "docs/images/zh-CN/srm-native-eliminate-detail.png",
+      "locale": "zh-CN",
+      "sha256": "34b9fcacf60091b34c6faa15eb3b5204a4f20a068855bf6731189e0baf520051",
+      "step": "srm-native-eliminate-detail",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameS1-9,SupplierF,internalowner,rawELIMINATEDandQUALIFIEDlevel,notversion. Emptycontact/qualification/bank/evaluationsectionsandbelowfoldriskdonotprovethoseflows;ENPrimaryheaderwrap."
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-account-entry.png",
+      "locale": "en-US",
+      "sha256": "afabe58ae4bd8ca640da8d76fc0e8d7733fea5bb55900d47d4c2d45510802363",
+      "step": "srm-portal-account-entry",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Publicregistration entryonly,usernameblank,passwordandCAPTCHAintentionallymasked;no submittedsuccess. JA/KRLoginfooterEnglishfallback;DefaultTenantbusinesslabelretained."
+    },
+    {
+      "path": "docs/images/en-US/srm-portal-enrollment-completed.png",
+      "locale": "en-US",
+      "sha256": "7fa85e155436c5942de32bc1fb9b224a1828db72bef12b33f19232fd226f9d86",
+      "step": "srm-portal-enrollment-completed",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameapplicationIDandSupplier8withCOMPLETED,portalroleauthorizationmessage andrefreshidentitybuttons;doesnotshowAPPROVEDorrealpasswordlogin."
+    },
+    {
+      "path": "docs/images/en-US/srm-approved-uninvited-quotation-empty.png",
+      "locale": "en-US",
+      "sha256": "f1910290e09f17ccc12b0536339882137b6c8b2fcb2be263d9eb85d06c032511",
+      "step": "srm-approved-uninvited-quotation-empty",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "OwnsupplierEemptyRFQtableandemptyinvitationmessage;JAinvitationheaderwraps. PixelsdonotproveHTTP404,whichneedsdatedAPIreceipt;noquotationsubmission."
+    },
+    {
+      "path": "docs/images/en-US/srm-native-suspend-confirmation.png",
+      "locale": "en-US",
+      "sha256": "d31cef9e83028882be33651cbfcbe55e160fa3c730d49158e1e55131cfbeec4d",
+      "step": "srm-native-suspend-confirmation",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameSupplierFname,localizedwarning/Cancel/Confirm,no reasoninput. JA/ENnamelineswrap. Before-submitpreviewonly;ChinesemutationversusotherlocaleCancelisjournal/APIproof."
+    },
+    {
+      "path": "docs/images/en-US/srm-native-eliminate-detail.png",
+      "locale": "en-US",
+      "sha256": "ce2b246a5c91c70454999d09da131f5c78c9f69bc72d890ce9566b6846d7b80f",
+      "step": "srm-native-eliminate-detail",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameS1-9,SupplierF,internalowner,rawELIMINATEDandQUALIFIEDlevel,notversion. Emptycontact/qualification/bank/evaluationsectionsandbelowfoldriskdonotprovethoseflows;ENPrimaryheaderwrap."
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-account-entry.png",
+      "locale": "ja-JP",
+      "sha256": "0ee06077df862543ff713cdd09f90eac9a5be7f4926838e675584f1b4b3a1a62",
+      "step": "srm-portal-account-entry",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Publicregistration entryonly,usernameblank,passwordandCAPTCHAintentionallymasked;no submittedsuccess. JA/KRLoginfooterEnglishfallback;DefaultTenantbusinesslabelretained."
+    },
+    {
+      "path": "docs/images/ja-JP/srm-portal-enrollment-completed.png",
+      "locale": "ja-JP",
+      "sha256": "4f170202836b2bddfff07ced21c930631f0f119c8f9d7ee9a97c3c042cf9244e",
+      "step": "srm-portal-enrollment-completed",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameapplicationIDandSupplier8withCOMPLETED,portalroleauthorizationmessage andrefreshidentitybuttons;doesnotshowAPPROVEDorrealpasswordlogin."
+    },
+    {
+      "path": "docs/images/ja-JP/srm-approved-uninvited-quotation-empty.png",
+      "locale": "ja-JP",
+      "sha256": "efcffcad38ccd64795c48593e8c327c0c999f4c87bf3bcfb155994ae0e62dbb2",
+      "step": "srm-approved-uninvited-quotation-empty",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "OwnsupplierEemptyRFQtableandemptyinvitationmessage;JAinvitationheaderwraps. PixelsdonotproveHTTP404,whichneedsdatedAPIreceipt;noquotationsubmission."
+    },
+    {
+      "path": "docs/images/ja-JP/srm-native-suspend-confirmation.png",
+      "locale": "ja-JP",
+      "sha256": "f6148c85c69da503f73c8364efb9c959beb6591ee42c7896da12a8714cb1759d",
+      "step": "srm-native-suspend-confirmation",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameSupplierFname,localizedwarning/Cancel/Confirm,no reasoninput. JA/ENnamelineswrap. Before-submitpreviewonly;ChinesemutationversusotherlocaleCancelisjournal/APIproof."
+    },
+    {
+      "path": "docs/images/ja-JP/srm-native-eliminate-detail.png",
+      "locale": "ja-JP",
+      "sha256": "1e44d314e33edc77ca2255f438b576cb10a264f02747bb0fd5a51418b439827c",
+      "step": "srm-native-eliminate-detail",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameS1-9,SupplierF,internalowner,rawELIMINATEDandQUALIFIEDlevel,notversion. Emptycontact/qualification/bank/evaluationsectionsandbelowfoldriskdonotprovethoseflows;ENPrimaryheaderwrap."
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-account-entry.png",
+      "locale": "ko-KR",
+      "sha256": "55a6c190ad865337b11bd3de47fb02b34861802ff27dc5ce2567b3d8070fa714",
+      "step": "srm-portal-account-entry",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Publicregistration entryonly,usernameblank,passwordandCAPTCHAintentionallymasked;no submittedsuccess. JA/KRLoginfooterEnglishfallback;DefaultTenantbusinesslabelretained."
+    },
+    {
+      "path": "docs/images/ko-KR/srm-portal-enrollment-completed.png",
+      "locale": "ko-KR",
+      "sha256": "10df1317b7100f0f388c3dfacf38f915edb5bd7f9bbebe8b8e2b5e670bd50f69",
+      "step": "srm-portal-enrollment-completed",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameapplicationIDandSupplier8withCOMPLETED,portalroleauthorizationmessage andrefreshidentitybuttons;doesnotshowAPPROVEDorrealpasswordlogin."
+    },
+    {
+      "path": "docs/images/ko-KR/srm-approved-uninvited-quotation-empty.png",
+      "locale": "ko-KR",
+      "sha256": "1616d0439b6aff1d925cd2a6388aa52e5a0820f7e80077c1a050c4b37e647394",
+      "step": "srm-approved-uninvited-quotation-empty",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "OwnsupplierEemptyRFQtableandemptyinvitationmessage;JAinvitationheaderwraps. PixelsdonotproveHTTP404,whichneedsdatedAPIreceipt;noquotationsubmission."
+    },
+    {
+      "path": "docs/images/ko-KR/srm-native-suspend-confirmation.png",
+      "locale": "ko-KR",
+      "sha256": "7e4aa90d95c226f92afd32c3a927123d4c8a7042536aa5510844551a663af243",
+      "step": "srm-native-suspend-confirmation",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameSupplierFname,localizedwarning/Cancel/Confirm,no reasoninput. JA/ENnamelineswrap. Before-submitpreviewonly;ChinesemutationversusotherlocaleCancelisjournal/APIproof."
+    },
+    {
+      "path": "docs/images/ko-KR/srm-native-eliminate-detail.png",
+      "locale": "ko-KR",
+      "sha256": "9347caf01bf9d48ad22eda57a1b47aade8e8cf936b40ce6c25f9db5a23c93e4b",
+      "step": "srm-native-eliminate-detail",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SameS1-9,SupplierF,internalowner,rawELIMINATEDandQUALIFIEDlevel,notversion. Emptycontact/qualification/bank/evaluationsectionsandbelowfoldriskdonotprovethoseflows;ENPrimaryheaderwrap."
+    }
+  ],
+  "visual_scope": {
+    "guide_files": 80,
+    "capture_records": 88,
+    "byte_identical_alias_records": 8,
+    "rejected_old_images": 20,
+    "current_individual_original_views": 20,
+    "other60not_freshly_individually_viewed": true,
+    "prior_methods": "2026-10-12receipt76individual originals reviewed,56publishedand20rejected;2026-10-13receipt32individualcaptures,24unique filesand8byteidenticalreuse. Historical records,not current freshviews.",
+    "no_image_modification": true,
+    "no_recapture": true
+  },
+  "historical_results": {
+    "portal": {
+      "date": "2026-10-12",
+      "run": "WIKI-20261012-SRM-E",
+      "published_files": 56,
+      "old_images_rejected": 20,
+      "identity": "FormaladministratorAPI plusshort-livedfixture;notCAPTCHA/passwordlogin",
+      "enrollment": "One realPortalUIenrollment;sameRequestId,SagaCOMPLETED,threecandidateAPIapprovals",
+      "boundary": "ExistingAWARDEDRFQreads:uninvitedHTTP200/body404,invitedbody200;no newquote",
+      "cleanup": "Supplier8ELIMINATED/version14;invite6displayUSED,scriptrevokesonlydisplayACTIVE. Legacygenericrevokedwordingoverstatesactualaction."
+    },
+    "native": {
+      "date": "2026-10-13",
+      "run": "WIKI-20261013-SRM-F",
+      "supplier": "S1-9",
+      "final_status": "ELIMINATED",
+      "final_version": 7,
+      "chinese_native_commands": 6,
+      "candidate_api_decisions": 3,
+      "other_locales": "Preview/cancelorreadonlysame supplier",
+      "capture_records": 32,
+      "unique_files": 24,
+      "byte_identical_reuse": 8
+    },
+    "current_reexecution": false
+  },
+  "current_source_semantics": {
+    "resubmit": "REJECTEDonly,nogenericPENDING_REVIEW/FAILEDrestartAPI;Sagaretryisnotworkflowretry",
+    "termination": "Remoteterminationbeforelocalversionwrite;notdistributedatomicrollback",
+    "native_reason": "Dialoghasnoreasoninput,optionalreasonthroughformalAPI",
+    "evaluation": "Enabledweights100,score1..5,HALF_UPtotal;COMPLETED/level/Outboxisnotdeliveryproof",
+    "risk": "OnlyenabledtypeautoCalcguard,criterionexistsisnotsame-typecheck,sumscoreandtenantthresholds",
+    "cleanup": "DisplayUSEDmax-useprojectionisnotarevocationwrite"
+  },
+  "application_runs_this_audit": 0,
+  "business_writes_this_audit": 0,
+  "new_captures": 0,
+  "new_builds_or_tests": 0,
+  "historical_successful_writes_replayed": false,
+  "human_review": false,
+  "human_review_required": false,
+  "limitations": [
+    "3whole210source linesandselectedranges;76unchangedpriorbindingsnot76newwholereads",
+    "Current20rawviewsnotall80freshviews;historicalversionsandmethodsretained",
+    "RealCAPTCHAselfregistration/passwordlogin,all-languagenativemutations,nativeapprovalbuttonclicksandunshownbranchesnotproved",
+    "Globalcoverage,currentintegratedacceptanceandfulloriginalA-Gremainopen"
+  ]
+}

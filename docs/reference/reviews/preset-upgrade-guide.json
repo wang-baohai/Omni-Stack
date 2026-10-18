@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "preset-upgrade-guide",
+  "source": "docs/preset-upgrade-guide.md",
+  "source_sha256": "2991c5aaebf3825dcfee91248a7d80ff273d9f5080229b7a051898495e692bd4",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/preset-upgrade-guide.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "4249c66abddfbf133461eedfc17f55d13b7476a0354ea101456f3f7ed9df53a8",
+      "checks": {
+        "coverage_and_meaning": "逐项核对升级前5项评估、7步升级、5类版本、回滚和5项完成标准，保留新目录迁移默认策略。",
+        "technical_literals": "scaffold.lock五类版本、sourceVersion顶层字段、compatibility/deprecation、expand/migrate/contract、fresh/clone-upgrade均准确。",
+        "security_and_failure_semantics": "保留人工评审major升级、不自动覆盖手写文件、数据库备份和兼容回退窗口、禁止未经演练down SQL与失败证据保留。",
+        "language_and_terminology": "Handwritten changes、managed output、compatibility window和forward-fix术语准确，版本字段说明与中文一致。",
+        "images_and_links": "本页无图片或Markdown路径链接，字段与命令片段是代码规范源字面量；未把未执行的升级演练宣称已通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/preset-upgrade-guide.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "c3e235311b35701b81484d7134f73df48f7331fe346a8285e857d746550f9362",
+      "checks": {
+        "coverage_and_meaning": "逐项核对升级前5项评估、7步升级、5类版本、回滚和5项完成标准，保留新目录迁移默认策略。",
+        "technical_literals": "scaffold.lock五类版本、sourceVersion顶层字段、compatibility/deprecation、expand/migrate/contract、fresh/clone-upgrade均准确。",
+        "security_and_failure_semantics": "保留人工评审major升级、不自动覆盖手写文件、数据库备份和兼容回退窗口、禁止未经演练down SQL与失败证据保留。",
+        "language_and_terminology": "补齐sourceVersion处于scaffold.lock最上层且非source.version的说明，避免使用者按错误结构读取锁文件。",
+        "images_and_links": "本页无图片或Markdown路径链接，字段与命令片段是代码规范源字面量；未把未执行的升级演练宣称已通过。"
+      },
+      "findings": [
+        {
+          "id": "lock-field-position",
+          "status": "resolved",
+          "description": "日文漏掉sourceVersion顶层位置及非source.version约束。",
+          "resolution": "补齐与catalogVersion同层及错误字段路径说明。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/preset-upgrade-guide.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "83dbc87cf2ef3770061ef129b9f524cd035bcaca5d9f5dc4b9c83af0aa148ea0",
+      "checks": {
+        "coverage_and_meaning": "逐项核对升级前5项评估、7步升级、5类版本、回滚和5项完成标准，保留新目录迁移默认策略。",
+        "technical_literals": "scaffold.lock五类版本、sourceVersion顶层字段、compatibility/deprecation、expand/migrate/contract、fresh/clone-upgrade均准确。",
+        "security_and_failure_semantics": "保留人工评审major升级、不自动覆盖手写文件、数据库备份和兼容回退窗口、禁止未经演练down SQL与失败证据保留。",
+        "language_and_terminology": "수기 변경、호환 롤백 창、전방 수정、최상위字段说明与中文一致，迁移和回退步骤没有遗漏。",
+        "images_and_links": "本页无图片或Markdown路径链接，字段与命令片段是代码规范源字面量；未把未执行的升级演练宣称已通过。"
+      },
+      "findings": []
+    }
+  }
+}

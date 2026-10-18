@@ -8,7 +8,7 @@
 - `scaffold/schemas/module.schema.json`：モジュールマニフェスト Schema。
 - `scaffold/schemas/preset.schema.json`：プリセット Schema。
 - `scaffold/presets/*.yaml`：5 つの公式プリセット。
-- `tools/omni-cli/src/preset-generator.ts`：アトミックコピーと構造化裁断。
+- `tools/omni-cli/src/preset-generator.ts`：アトミックコピーと構造に従ったモジュール除外。
 - `tools/omni-cli/scripts/preset-golden.mjs`：生成物マトリクスと残留ゲート。
 - `scaffold.lock`：生成プロジェクトのバージョンとモジュールスナップショット。
 
@@ -20,7 +20,7 @@
 4. `optionalModules` は任意の統合を示すだけで、実行時無効化スイッチの代わりにはならない；`conflicts` は双方向または検証ルールで明示的に処理しなければならない。
 5. `omni catalog validate` を実行し、存在しないパス、孤立した Compose 依存、重複ポート、未管理の公式モジュールを修正。
 6. モジュールを適切なプリセット入口に追加；推移的依存を複製しない。
-7. 裁断ユニットテスト、生成プロジェクトのビルド、ランタイムスモークの証跡を追加。
+7. モジュール除外のユニットテスト、生成プロジェクトのビルド、ランタイムスモークの証跡を追加。
 
 ドメインステートマシン、DataScope テーブルマッピング、子リソース継承、Saga、冪等ルールはビジネスモジュールに属し、汎用プリセットジェネレーターに下ろしてはいけない。
 
@@ -28,12 +28,13 @@
 
 `scaffold/presets/<id>.yaml` の入口モジュールと説明のみを編集する。その後実行：
 
-~~~powershell
-Set-Location tools/omni-cli
-npm test
-npm run test:preset-structure
-npm run docs:preset
-npm run docs:preset:check
+以下はソースリポジトリ直下からローカル Docker の CLI ツールコンテナで実行します。初回起動ガイドに従い、ツールイメージと依存を先に準備します。
+
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm test
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-structure
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run docs:preset
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run docs:preset:check
 ~~~
 
 モジュール集合、デフォルト設定、生成結果に互換性の変化が生じたら `version` を増分：修正は patch、後方互換な機能追加は minor、破壊的な境界変化は major。catalog モジュールバージョンとプリセットバージョンはそれぞれ維持する。
@@ -50,6 +51,6 @@ npm run docs:preset:check
 
 生成は同階層の staging ディレクトリを使い、失敗時は staging を削除するため、目標ディレクトリに未完成品は現れない。既存の非空目標はコピー前に拒否される。
 
-特定の順序：Schema エラー → 依存クロージャ/競合 → catalog パス → 構造化裁断 → Maven/npm → Compose → fresh データベース → ランタイム/E2E。生成後の失敗時はログと `scaffold.lock` を保持し、管理対象ファイルを直接パッチしない；まず源 catalog、テンプレート、裁断器を修正し、新しいディレクトリへ再生成する。
+特定の順序：Schema エラー → 依存クロージャ/競合 → catalog パス → 構造に従ったモジュール除外 → Maven/npm → Compose → fresh データベース → ランタイム/E2E。生成後の失敗時はログと `scaffold.lock` を保持し、管理対象ファイルを直接パッチしない；まず元の catalog、テンプレート、除外処理を修正し、新しいディレクトリへ再生成する。
 
 実行済み Liquibase changeSet は決して書き換えない。アプリバージョンをロールバックする際は互換なデータベース構造を保持し、必要に応じて前向き修正 changeSet を追加する；安易な down SQL を使ってはいけない。

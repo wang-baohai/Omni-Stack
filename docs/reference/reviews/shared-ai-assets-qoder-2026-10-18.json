@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "shared-ai-assets",
+  "source": "ai/README.md",
+  "source_sha256": "4c82c82114f604df197ab4b8b664b0f7d5532c9997d5a0e4c5ef1ee51a1a3eb2",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "b7860d5dff4e74b32d64caf4010d9abb7eef22c1",
+  "source_state": "Four added Qoder native-discovery paragraphs actually read and compared with the Chinese fact source and ten real native observations;all original body bytes retain the exact prior complete semantic review.",
+  "method": "Incremental AI semantic review of the complete added four-language paragraphs and precise Qoder manifest metadata delta. Compare version,command,enabled names,descriptions,locations,network/account boundaries and untested scope against actual official CLI execution. Reuse prior complete review only after exact inverse-insertion body/hash proof;no new whole-document reread or human review claim.",
+  "prior_complete_semantic_review": {
+    "path": "docs/reference/reviews/shared-ai-assets.json",
+    "sha256": "f8ceef49369861c52dfecb4c442beb5c917dd753e0bb2f97d72878060320b1d1"
+  },
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/shared-ai-assets.json",
+      "sha256": "f8ceef49369861c52dfecb4c442beb5c917dd753e0bb2f97d72878060320b1d1"
+    },
+    {
+      "path": "docs/reference/evidence/qoder-native-skill-discovery-2026-10-18.json",
+      "sha256": "0b98e1cdfeb8cf363b492d220134639dea4eb57f92b77dd556ef4051ab555396"
+    },
+    {
+      "path": "ai/manifest.yaml",
+      "sha256": "8d86c6e31810c1e9993e2a0a50c14aaa2df3dd50a998a888266c756daf8bf75f"
+    },
+    {
+      "path": "ai/adapters/bootstrap.mjs",
+      "sha256": "a5eebb17653c1395a63d998f05a275d9cae5795a01ae63c602f49733ae7d409c"
+    },
+    {
+      "path": "ai/skills/grill-me/SKILL.md",
+      "sha256": "74147eb6010a65957efef2b9e0f0b3ff935c1def7fc117697151b1d0f3610556"
+    },
+    {
+      "path": "ai/skills/omni-change/SKILL.md",
+      "sha256": "e0e26f3ad0eafd05f7b2c61a2643b5ee5bbb6c4d0dd3d91dc89a211cd7c9bf86"
+    }
+  ],
+  "source_inspection_scope": "Complete added paragraphs;exact unchanged-body proof;actual native CLI output in five independent generated projects;selected manifest Qoder version/source/evidence fields",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "native_cli_version": "1.1.73",
+    "native_discovery_cases": 5,
+    "enabled_project_skill_observations": 10,
+    "project_skills": [
+      "grill-me",
+      "omni-change"
+    ],
+    "metadata_and_full_derived_bytes_match": true,
+    "network": "none",
+    "account_configuration_used": false,
+    "model_requests": 0,
+    "approval_bypass_flags_used": false,
+    "desktop_IDE_tested": false,
+    "body_activation_or_model_task_executed": false,
+    "added_literals_each": 5,
+    "old_body_exact_after_inverse": true,
+    "new_whole_document_rereads": 0,
+    "source_application_code_changed": false
+  },
+  "translations": {
+    "en-US": {
+      "path": "ai/README.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 13:47:01",
+      "result": "approved",
+      "translation_sha256": "5163b4ce1cef8c3498c4253ecaf4eae1e34c77013724f44a54ca1253a6e77a11",
+      "checks": {
+        "coverage_and_meaning": "All four added paragraphs preserve the actual five moved generated presets,official npm CLI1.1.73,native enabled discovery of two project Skills and exact canonical/derived-entry correspondence.",
+        "technical_literals": "Five inline technical literals and the same new local evidence link match Chinese exactly:qodercli skills list,1.1.73,grill-me,omni-change and Enabled. CLI commands were actually executed in all five own projects.",
+        "security_and_failure_semantics": "Discovery is expressly separated from untested IDE UI,Skill activation and model execution. Fresh isolated configs with disabled updates and network none used no account/global state;no approval bypass or model request occurred.",
+        "images_and_links": "No new screenshot or image assertion is introduced. The same local public evidence link resolves in all four languages and contains five successful native CLI cases with metadata/full-byte comparisons;original raw logs remain private.",
+        "language_and_terminology": "Actually read the complete final English addition;names,version,all-five count,derived locations and CLI-versus-IDE/task boundary faithfully match Chinese after word-spacing corrections."
+      },
+      "findings": [
+        {
+          "id": "NATIVE-DISCOVERY-PROOF",
+          "status": "resolved",
+          "finding": "Adapter checks and file existence alone do not establish Qoder discovery",
+          "resolution": "Official CLI skills list executed in five own projects;all ten enabled observations match exact canonical and native entries"
+        },
+        {
+          "id": "CONFIG-SCOPE-WORDING",
+          "status": "resolved",
+          "finding": "Empty config wording could obscure the test-only auto-update setting",
+          "resolution": "All four additions specify fresh separate configs;the public record discloses the test-only setting"
+        },
+        {
+          "id": "INVOCATION-SCOPE",
+          "status": "resolved",
+          "finding": "Discovery does not prove IDE UI or model-mediated task execution",
+          "resolution": "All four additions and evidence explicitly exclude those unexecuted scopes"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "ai/README.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 13:47:01",
+      "result": "approved",
+      "translation_sha256": "68bf4dbcdb9a56ac0c9819702878c652a407774117cc3d0fd69a23aa250bda7c",
+      "checks": {
+        "coverage_and_meaning": "All four added paragraphs preserve the actual five moved generated presets,official npm CLI1.1.73,native enabled discovery of two project Skills and exact canonical/derived-entry correspondence.",
+        "technical_literals": "Five inline technical literals and the same new local evidence link match Chinese exactly:qodercli skills list,1.1.73,grill-me,omni-change and Enabled. CLI commands were actually executed in all five own projects.",
+        "security_and_failure_semantics": "Discovery is expressly separated from untested IDE UI,Skill activation and model execution. Fresh isolated configs with disabled updates and network none used no account/global state;no approval bypass or model request occurred.",
+        "images_and_links": "No new screenshot or image assertion is introduced. The same local public evidence link resolves in all four languages and contains five successful native CLI cases with metadata/full-byte comparisons;original raw logs remain private.",
+        "language_and_terminology": "Actually read the complete Japanese addition;native discovery,canonical descriptions,fresh separate configs and untested IDE/task scope preserve Chinese meaning and all technical literals."
+      },
+      "findings": [
+        {
+          "id": "NATIVE-DISCOVERY-PROOF",
+          "status": "resolved",
+          "finding": "Adapter checks and file existence alone do not establish Qoder discovery",
+          "resolution": "Official CLI skills list executed in five own projects;all ten enabled observations match exact canonical and native entries"
+        },
+        {
+          "id": "CONFIG-SCOPE-WORDING",
+          "status": "resolved",
+          "finding": "Empty config wording could obscure the test-only auto-update setting",
+          "resolution": "All four additions specify fresh separate configs;the public record discloses the test-only setting"
+        },
+        {
+          "id": "INVOCATION-SCOPE",
+          "status": "resolved",
+          "finding": "Discovery does not prove IDE UI or model-mediated task execution",
+          "resolution": "All four additions and evidence explicitly exclude those unexecuted scopes"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "ai/README.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 13:47:01",
+      "result": "approved",
+      "translation_sha256": "83a090c76fd41f769b996c8e95376a240290dbf97da43d44011c258b81e04569",
+      "checks": {
+        "coverage_and_meaning": "All four added paragraphs preserve the actual five moved generated presets,official npm CLI1.1.73,native enabled discovery of two project Skills and exact canonical/derived-entry correspondence.",
+        "technical_literals": "Five inline technical literals and the same new local evidence link match Chinese exactly:qodercli skills list,1.1.73,grill-me,omni-change and Enabled. CLI commands were actually executed in all five own projects.",
+        "security_and_failure_semantics": "Discovery is expressly separated from untested IDE UI,Skill activation and model execution. Fresh isolated configs with disabled updates and network none used no account/global state;no approval bypass or model request occurred.",
+        "images_and_links": "No new screenshot or image assertion is introduced. The same local public evidence link resolves in all four languages and contains five successful native CLI cases with metadata/full-byte comparisons;original raw logs remain private.",
+        "language_and_terminology": "Actually read the complete Korean addition;local project Skill discovery in five isolated presets,both Enabled entries and no account/model use agree with Chinese;fresh configuration wording is precise."
+      },
+      "findings": [
+        {
+          "id": "NATIVE-DISCOVERY-PROOF",
+          "status": "resolved",
+          "finding": "Adapter checks and file existence alone do not establish Qoder discovery",
+          "resolution": "Official CLI skills list executed in five own projects;all ten enabled observations match exact canonical and native entries"
+        },
+        {
+          "id": "CONFIG-SCOPE-WORDING",
+          "status": "resolved",
+          "finding": "Empty config wording could obscure the test-only auto-update setting",
+          "resolution": "All four additions specify fresh separate configs;the public record discloses the test-only setting"
+        },
+        {
+          "id": "INVOCATION-SCOPE",
+          "status": "resolved",
+          "finding": "Discovery does not prove IDE UI or model-mediated task execution",
+          "resolution": "All four additions and evidence explicitly exclude those unexecuted scopes"
+        }
+      ]
+    }
+  },
+  "dependency_renewals": [
+    {
+      "at": "2026-10-18T05:49:46.318Z",
+      "path": "ai/manifest.yaml",
+      "before_sha256": "9525c134336fea9e33abd92f4a279dc65afc2fa12bc865caf1a57619300378d9",
+      "after_sha256": "8d86c6e31810c1e9993e2a0a50c14aaa2df3dd50a998a888266c756daf8bf75f",
+      "reason": "Correct the initial-baseline-only plugin_note to current two canonical Skill entries and empty project-plugin list;actual native CLI verified both in all five presets. The four newly reviewed paragraphs are unchanged.",
+      "new_translation_rows": 0
+    }
+  ]
+}

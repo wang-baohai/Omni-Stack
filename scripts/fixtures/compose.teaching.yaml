@@ -1,0 +1,51 @@
+# 独立 full 教学环境的覆盖层；项目名、私密 env 和数据卷由调用方隔离。
+# 不映射宿主端口。浏览器/测试容器加入该项目网络访问服务。
+services:
+  mysql:
+    ports: !reset []
+    restart: "no"
+  redis:
+    ports: !reset []
+    restart: "no"
+  nacos:
+    ports: !reset []
+    restart: "no"
+  rocketmq-namesrv:
+    ports: !reset []
+    restart: "no"
+  rocketmq-broker:
+    ports: !reset []
+    restart: "no"
+  xxl-job-admin:
+    ports: !reset []
+    restart: "no"
+  omni-db-migrator:
+    ports: !reset []
+    restart: "no"
+  omni-auth:
+    ports: !reset []
+    restart: "no"
+  omni-base:
+    ports: !reset []
+    restart: "no"
+  omni-gateway:
+    ports: !reset []
+    restart: "no"
+  omni-workflow:
+    ports: !reset []
+    restart: "no"
+  omni-crm:
+    ports: !reset []
+    restart: "no"
+  omni-srm:
+    ports: !reset []
+    restart: "no"
+  omni-procurement:
+    ports: !reset []
+    restart: "no"
+  omni-asset:
+    ports: !reset []
+    restart: "no"
+  omni-frontend:
+    ports: !reset []
+    restart: "no"

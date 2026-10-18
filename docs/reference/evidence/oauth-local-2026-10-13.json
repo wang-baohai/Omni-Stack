@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "kind": "local-docker-oauth-configuration-and-negative-callbacks",
+  "generated_at": "2026-10-13T04:49:16.446Z",
+  "source_revision": "6929bf4c29a6fcecfd7e95b43682117b4a48dc9f",
+  "source_files": {
+    "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SocialLoginController.java": "e401bc70a37340c3a55b4a1cffbeeabc9a3ca7ae363b9e752f06ce855704135f",
+    "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/SocialLoginServiceImpl.java": "6af297a030dea03c0f6d817e3834a756f0935e6b55208749e00831c42bf6b0f3",
+    "omni-backend/omni-auth/src/main/java/com/omni/auth/util/OAuth2StateUtils.java": "d8df64afd8910daef4308c75e8d38f7a26665996ee8c2bb814d42a62f974afed",
+    "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/GoogleOAuth2Handler.java": "ade9ff290543ada330bbc269b929385c50017743e50af409fe2db7fa83df46c3",
+    "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/GiteeOAuth2Handler.java": "6c52c5652f317815aef2c84c5378fc5c8c65b401ea6ece1831e598c961d55a51",
+    "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/GitHubOAuth2Handler.java": "e0f7422f038400efc332980f6bdd49417cd1cef9a2da7c8b13ed41fbe03e1a7f"
+  },
+  "runtime": "local Docker headed Chromium and Node HTTP checks",
+  "project": "omni-wiki-acceptance-20261009",
+  "initiation_at": "2026-10-13T03:01:17.678Z",
+  "binding_at": "2026-10-13T11:06:46.3842643+08:00",
+  "providers": [
+    {
+      "provider": "google",
+      "checked_at": "2026-10-13T04:08:38.950Z",
+      "client_id_matches_private": true,
+      "client_secret_matches_private": true,
+      "callback": "http://localhost:8102/api/auth/oauth2/google/callback",
+      "initiation_http": 302,
+      "real_login_page": {
+        "at": "2026-10-13T04:05:31.035Z",
+        "http_status": 200,
+        "origin": "https://accounts.google.com",
+        "path": "/v3/signin/identifier",
+        "title": "Sign in - Google Accounts"
+      },
+      "invalid_authorization_code_response": {
+        "http_status": 400,
+        "error": "invalid_grant",
+        "description": "Malformed auth code.",
+        "unexpected_access_token": false,
+        "negative_code": true
+      },
+      "negative_callbacks": [
+        {
+          "name": "provider-denied",
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "user_denied",
+          "message": "",
+          "token_in_redirect": false
+        },
+        {
+          "name": "missing-callback-parameters",
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "invalid_callback",
+          "message": "",
+          "token_in_redirect": false
+        },
+        {
+          "name": "tampered-state",
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "social_login_failed",
+          "message": "OAuth2 授权状态格式无效",
+          "token_in_redirect": false
+        }
+      ],
+      "valid_state_invalid_code": {
+        "first": {
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "social_login_failed",
+          "message": "Google 授权码换取失败",
+          "token_in_redirect": false
+        },
+        "replay": {
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "social_login_failed",
+          "message": "Google 授权码换取失败",
+          "token_in_redirect": false
+        },
+        "negative_code": true,
+        "signed_state_from_real_initiation": true
+      },
+      "actual_account_login": false
+    },
+    {
+      "provider": "gitee",
+      "checked_at": "2026-10-13T04:08:39.515Z",
+      "client_id_matches_private": true,
+      "client_secret_matches_private": true,
+      "callback": "http://localhost:8102/api/auth/oauth2/gitee/callback",
+      "initiation_http": 302,
+      "real_login_page": {
+        "at": "2026-10-13T04:05:34.542Z",
+        "http_status": 200,
+        "origin": "https://gitee.com",
+        "path": "/login",
+        "title": "登录 - Gitee.com"
+      },
+      "invalid_authorization_code_response": {
+        "http_status": 401,
+        "error": "authorization_code_request_invalid_grant",
+        "description": "授权时发生错误，查看是否参数有误",
+        "unexpected_access_token": false,
+        "negative_code": true
+      },
+      "negative_callbacks": [
+        {
+          "name": "provider-denied",
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "user_denied",
+          "message": "",
+          "token_in_redirect": false
+        },
+        {
+          "name": "missing-callback-parameters",
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "invalid_callback",
+          "message": "",
+          "token_in_redirect": false
+        },
+        {
+          "name": "tampered-state",
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "social_login_failed",
+          "message": "OAuth2 授权状态格式无效",
+          "token_in_redirect": false
+        }
+      ],
+      "valid_state_invalid_code": {
+        "first": {
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "social_login_failed",
+          "message": "Gitee 授权码换取失败",
+          "token_in_redirect": false
+        },
+        "replay": {
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "social_login_failed",
+          "message": "Gitee 授权码换取失败",
+          "token_in_redirect": false
+        },
+        "negative_code": true,
+        "signed_state_from_real_initiation": true
+      },
+      "actual_account_login": false
+    },
+    {
+      "provider": "github",
+      "checked_at": "2026-10-13T04:08:41.982Z",
+      "client_id_matches_private": true,
+      "client_secret_matches_private": true,
+      "callback": "http://localhost:8102/api/auth/oauth2/github/callback",
+      "initiation_http": 302,
+      "real_login_page": {
+        "at": "2026-10-13T04:05:43.282Z",
+        "http_status": 200,
+        "origin": "https://github.com",
+        "path": "/login",
+        "title": "Sign in to GitHub · GitHub"
+      },
+      "invalid_authorization_code_response": {
+        "http_status": 200,
+        "error": "bad_verification_code",
+        "description": "The code passed is incorrect or expired.",
+        "unexpected_access_token": false,
+        "negative_code": true
+      },
+      "negative_callbacks": [
+        {
+          "name": "provider-denied",
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "user_denied",
+          "message": "",
+          "token_in_redirect": false
+        },
+        {
+          "name": "missing-callback-parameters",
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "invalid_callback",
+          "message": "",
+          "token_in_redirect": false
+        },
+        {
+          "name": "tampered-state",
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "social_login_failed",
+          "message": "OAuth2 授权状态格式无效",
+          "token_in_redirect": false
+        }
+      ],
+      "valid_state_invalid_code": {
+        "first": {
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "social_login_failed",
+          "message": "GitHub 授权码换取失败: bad_verification_code",
+          "token_in_redirect": false
+        },
+        "replay": {
+          "http_status": 302,
+          "redirect": true,
+          "origin": "http://localhost:3000",
+          "path": "/login",
+          "error": "social_login_failed",
+          "message": "GitHub 授权码换取失败: bad_verification_code",
+          "token_in_redirect": false
+        },
+        "negative_code": true,
+        "signed_state_from_real_initiation": true
+      },
+      "actual_account_login": false
+    }
+  ],
+  "limitations": [
+    "官方登录页可达和无效授权码拒绝不能证明用户授权、令牌取得、用户资料读取或本地社交账号登录成功。",
+    "当前HMAC state只检查完整性和十分钟时间窗口，重复有效state仍进入换码；本次负例不证明一次性nonce消费。",
+    "所有输入框和图片的浏览器原图只保存在仓库外；本记录不包含密码、Client ID/Secret值、cookie、state值或token。"
+  ],
+  "release_scope": "PARTIAL_CONFIGURATION_AND_NEGATIVE_BRANCHES_ONLY",
+  "actual_user_authorization": false,
+  "successful_token_exchange": false
+}

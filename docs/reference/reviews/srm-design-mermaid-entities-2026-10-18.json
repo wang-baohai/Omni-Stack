@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "srm-design",
+  "source": "docs/design/srm-design.md",
+  "source_sha256": "84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "62d9398ddd7c5f62ee48519f04c02456d65629d5",
+  "source_state": "All38 changed Mermaid message lines in7 canonical documents plus the complete renderer cleanup delta; reuse exact prior complete semantic reviews for unchanged content. No prose, domain/API contract or message wording changes.",
+  "method": "Actually read all38changed Mermaid lines and the renderer finally-cleanup delta inbc0a22. Only the Mermaid spelling of literal semicolons changes;decoded full document text is unchanged. Reuse hash-matching complete prior semantic reviews for all unchanged content/locales. Actual184diagram parse proposals have0failures and a real temporary-render-host failure experiment cleans the error SVG. Full rebuilt-site,route/theme,fallback and visual acceptance remain pending.",
+  "prior_complete_semantic_reviews": [
+    {
+      "path": "docs/reference/reviews/srm-design-ownership-2026-10-18.json",
+      "sha256": "2ada498f2082e7d1bcd08a64c8768bcd7a3e826d253b89ff5a4a7ad98684d99f"
+    }
+  ],
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/srm-design-ownership-2026-10-18.json",
+      "sha256": "2ada498f2082e7d1bcd08a64c8768bcd7a3e826d253b89ff5a4a7ad98684d99f"
+    },
+    {
+      "path": "docs/reference/evidence/wiki-diagram-syntax-cleanup-2026-10-18.json",
+      "sha256": "b25f84d59d4f219c8a08224623c1ff59ebdd4def50e2e6d78184424437f0baac"
+    },
+    {
+      "path": "docs/.vitepress/theme/DiagramLayout.vue",
+      "sha256": "6529ea4768729fac0c934ce4cb64f7799c9080632860b93b7b8a39f59c1d46a5"
+    },
+    {
+      "path": "docs/.vitepress/theme/index.mjs",
+      "sha256": "af860ce8f9ea054965f0ae1aa58fbad27d003e965ce7320a3b0e17aee7279d9c"
+    },
+    {
+      "path": "docs/.vitepress/config.mjs",
+      "sha256": "1634a1821170bb9dc9c42952854499287be6ceb7cef404a6f3f66b1871a13a29"
+    },
+    {
+      "path": "docs/package.json",
+      "sha256": "90ea9d68c2b7d30bd2203b7ec7fa1edadc80dc4dbcb286355aea271eddf1c2bd"
+    },
+    {
+      "path": "docs/package-lock.json",
+      "sha256": "8dc8a419a660feb88855b304c875f97da0c832554a9d45437e709821d909e5d1"
+    }
+  ],
+  "source_inspection_scope": "All38 changed Mermaid message lines in7 canonical documents plus the complete renderer cleanup delta; reuse exact prior complete semantic reviews for unchanged content. No prose, domain/API contract or message wording changes.",
+  "technical_verification": {
+    "runtime": "local Docker browser",
+    "canonical_diagrams_parsed": 184,
+    "original_parse_failures": 26,
+    "corrected_proposal_parse_failures": 0,
+    "decoded_document_text_unchanged": true,
+    "new_whole_document_rereads": 0,
+    "renewed_locales": [
+      "en-US"
+    ],
+    "unchanged_locale_entries_reused": true,
+    "current_evidence": "docs/reference/evidence/wiki-diagram-syntax-cleanup-2026-10-18.json",
+    "full_site_build_and_browser_acceptance_pending": true,
+    "limitations": [
+      "The184diagram result is actual grammar parsing with the built11.17.2 API plus an isolated container-cleanup experiment; it does not prove all184SVG layouts or the post-application full site build.",
+      "Four architecture SVG and four native mobile cases passed in image580; native core-flow route/theme and source-fallback acceptance need rerunning with the corrected current artifact.",
+      "The current dependency attestation and five-preset delivery scopes need final alignment. All originalA-G, external OAuth/CAPTCHA/Qoder constraints and global screenshot gaps remain."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/design/srm-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 08:04:41",
+      "result": "approved",
+      "translation_sha256": "47e332ffdddd31eaa8e61eef042d645a88d61bdbf0c20ef7a4effd00068c91ed",
+      "checks": {
+        "coverage_and_meaning": "实际阅读bc0a22全部差异：七份规范文档共38行，只把时序图中的字面分号写成Mermaid实体#59;。实体解码后整篇逐字一致，箭头、顺序、消息词语、条件与所有图外正文不变。核心流程中文源发生两行语法变化，重审其三份译文；三个设计文档仅英文变化，各重审一条。其余全文复用摘要匹配的既有完整语义复核，不冒称新整篇重读。",
+        "technical_literals": "实际Docker浏览器用当前打包的11.17.2公共API对全部184个规范图表做原始/修正对照：26个原始解析失败，修正后0失败。#59;为官方规定的字面分号表示，POST/jobinfo/insert、execute(message)、getResultMessage(message)、CRON/BEAN、FIRST、triggerStatus、tenant/eventId、事务传播和状态字面量均不变。临时DOM作为render第三参数，并在finally回收；真实隔离失败实验确认错误SVG也在该容器内并可清除。",
+        "security_and_failure_semantics": "保留核心流程中的Outbox显式tenantId、幂等/重复消息、默认角色尽力分配、启动快照、REQUIRED/REQUIRES_NEW与失败重试语义。CRM候选设计仍为设计；SRM配置修复与Auth独立提交/SRM回滚区别、Asset审批后继续占位均完整。渲染依旧strict、v-pre保护不变，失败保留源码；临时容器finally保证异常和过期代次返回时都回收。",
+        "images_and_links": "图片、链接、锚点、标题、命令和图外内容无变化。保留581真实4语架构SVG与原生移动各4通过及8张原图查看记录，同时保留核心流程/错误SVG失败。583首次审计因ESM包装未找到API，完成0图，不能当作成功；583b完成184图后才应用修正。当前应用后的镜像、整页渲染、主题切换和视觉验证仍待独立执行。",
+        "language_and_terminology": "Compared every changed English message inbc0a22 with its current Chinese fact source and the matching prior full reviews. The21core-flow lines and1CRM/2SRM/2Asset design lines change only a literal semicolon's Mermaid spelling. Candidate-design status, reconciliation/cancellation requirements, possible configuration repair, independently committed Auth role versus SRM rollback, and retaining Asset occupancy after approval all remain unchanged."
+      },
+      "findings": [
+        {
+          "id": "MS01",
+          "status": "resolved",
+          "resolution": "Encode only literal sequence-message semicolons with #59; in7documents/38lines. All184canonical diagram proposals parse with the actual bundle; decoded full document text remains unchanged."
+        },
+        {
+          "id": "MS02",
+          "status": "resolved",
+          "resolution": "Pass an explicit temporary host to Mermaid.render and remove it in finally, preserving source fallback while clearing the error SVG proven by the real negative fixture."
+        },
+        {
+          "id": "MS03",
+          "status": "resolved",
+          "resolution": "Renew only6affected existing AI_REVIEW rows:3core-flow translations plus the English CRM/SRM/Asset design rows. Preserve all prior complete review files and unchanged locale entries. Claim0new rows and0human reviews."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/design/srm-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 01:31:44",
+      "result": "approved",
+      "translation_sha256": "83aba64dc5c68d99025a32f01cfe090978b545caf951912f7194abdeb35b2ffa",
+      "checks": {
+        "coverage_and_meaning": "实际阅读全部最终差异308e27。四语职责句和新增段落等义：当前契约唯一在对应SRM事实文档维护，设计保留既有决策与指定提交的快照，长期设计变化仍说明事实/ADR关系，教程和运行证据仍归Wiki。全部第一节及其后正文逐字未变，既有完整语义复核按当前原始摘要复用，没有声称本轮重读整篇。",
+        "technical_literals": "四语同一40位提交号9b23ab972f1dcac4116ae95fb5cd56442e2961e4与实际Git对象核对c185ba一致；SRM事实链接分别对应md/en/jp/kr。现有端口、状态、81条方法/路径、权限、金额字符串、数据范围、事务、幂等、命令和图表未修改。",
+        "security_and_failure_semantics": "设计内原有租户、身份/权限、Portal关联、Saga失败恢复和幂等语义均保持原字节。AGENTS改为同时读取当前SRM事实及设计；保留forward-only迁移、seed摘要、权限/v-permission同步约束。治理明确实际AI_REVIEW通过即可、HUMAN_REVIEW仅记录真实人工工作，未放宽摘要/授权/严格质量门。",
+        "images_and_links": "没有新增或变更图片、标题、锚点、命令和领域正文。四语新增事实链接指向已通过完整复核且摘要匹配的当前SRM事实；保留原Wiki/源码/设计/ADR入口。六个修改文档在本机Docker渲染；正式链接门另行核验。",
+        "language_and_terminology": "308e27の最終変更を中文と照合した。設計判断・実装済みベースラインのスナップショット・現行契約の一元管理・原設計日への遡及禁止・ADRとの関係を自然な日本語で区別する。コミット値と日本語SRM事実文書へのリンクは正確で、変更のない本文は既存の完全レビューを再利用する。"
+      },
+      "findings": [
+        {
+          "id": "SO01",
+          "status": "resolved",
+          "resolution": "Make SRM facts the sole owner of subsequent current contracts;retain the already reviewed design content as an explicitly commit-bound snapshot."
+        },
+        {
+          "id": "SO02",
+          "status": "resolved",
+          "resolution": "Preserve the original2026-07-27 design date and all important history without backdating implementation results to that date."
+        },
+        {
+          "id": "SO03",
+          "status": "resolved",
+          "resolution": "Route execution rules to both current facts and design while preserving every existing migration,seed,permission and frontend authorization requirement."
+        },
+        {
+          "id": "SO04",
+          "status": "resolved",
+          "resolution": "State actual authorizedAI_REVIEW suffices and distinguish genuineHUMAN_REVIEW;keep strict authorization and current digest checks."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/design/srm-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 01:31:44",
+      "result": "approved",
+      "translation_sha256": "e8d79e62bceda2a5c2d4fb6ba4bc5b0f7c81421fc851553143ea5b63d4cc0081",
+      "checks": {
+        "coverage_and_meaning": "实际阅读全部最终差异308e27。四语职责句和新增段落等义：当前契约唯一在对应SRM事实文档维护，设计保留既有决策与指定提交的快照，长期设计变化仍说明事实/ADR关系，教程和运行证据仍归Wiki。全部第一节及其后正文逐字未变，既有完整语义复核按当前原始摘要复用，没有声称本轮重读整篇。",
+        "technical_literals": "四语同一40位提交号9b23ab972f1dcac4116ae95fb5cd56442e2961e4与实际Git对象核对c185ba一致；SRM事实链接分别对应md/en/jp/kr。现有端口、状态、81条方法/路径、权限、金额字符串、数据范围、事务、幂等、命令和图表未修改。",
+        "security_and_failure_semantics": "设计内原有租户、身份/权限、Portal关联、Saga失败恢复和幂等语义均保持原字节。AGENTS改为同时读取当前SRM事实及设计；保留forward-only迁移、seed摘要、权限/v-permission同步约束。治理明确实际AI_REVIEW通过即可、HUMAN_REVIEW仅记录真实人工工作，未放宽摘要/授权/严格质量门。",
+        "images_and_links": "没有新增或变更图片、标题、锚点、命令和领域正文。四语新增事实链接指向已通过完整复核且摘要匹配的当前SRM事实；保留原Wiki/源码/设计/ADR入口。六个修改文档在本机Docker渲染；正式链接门另行核验。",
+        "language_and_terminology": "308e27의 최종 역할 문장과 추가 단락을 중국어와 대조했다. 현재 규칙의 단일 관리 원본, 검토한 설계 기준선 스냅샷, 원 설계 날짜로 소급하지 않는다는 조건, 장기 결정과 ADR 및 Wiki의 역할을 동일하게 설명한다. 커밋 값과 한국어 SRM 사실 링크가 정확하며, 변경하지 않은 본문은 기존 전체 의미 검토를 재사용한다."
+      },
+      "findings": [
+        {
+          "id": "SO01",
+          "status": "resolved",
+          "resolution": "Make SRM facts the sole owner of subsequent current contracts;retain the already reviewed design content as an explicitly commit-bound snapshot."
+        },
+        {
+          "id": "SO02",
+          "status": "resolved",
+          "resolution": "Preserve the original2026-07-27 design date and all important history without backdating implementation results to that date."
+        },
+        {
+          "id": "SO03",
+          "status": "resolved",
+          "resolution": "Route execution rules to both current facts and design while preserving every existing migration,seed,permission and frontend authorization requirement."
+        },
+        {
+          "id": "SO04",
+          "status": "resolved",
+          "resolution": "State actual authorizedAI_REVIEW suffices and distinguish genuineHUMAN_REVIEW;keep strict authorization and current digest checks."
+        }
+      ]
+    }
+  }
+}

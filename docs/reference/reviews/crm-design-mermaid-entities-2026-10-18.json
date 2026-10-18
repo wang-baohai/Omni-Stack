@@ -1,0 +1,374 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "crm-design",
+  "source": "docs/design/crm-design.md",
+  "source_sha256": "07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "62d9398ddd7c5f62ee48519f04c02456d65629d5",
+  "source_state": "All38 changed Mermaid message lines in7 canonical documents plus the complete renderer cleanup delta; reuse exact prior complete semantic reviews for unchanged content. No prose, domain/API contract or message wording changes.",
+  "method": "Actually read all38changed Mermaid lines and the renderer finally-cleanup delta inbc0a22. Only the Mermaid spelling of literal semicolons changes;decoded full document text is unchanged. Reuse hash-matching complete prior semantic reviews for all unchanged content/locales. Actual184diagram parse proposals have0failures and a real temporary-render-host failure experiment cleans the error SVG. Full rebuilt-site,route/theme,fallback and visual acceptance remain pending.",
+  "prior_complete_semantic_reviews": [
+    {
+      "path": "docs/reference/reviews/crm-design.json",
+      "sha256": "4c2639157723a5d39f96f173b49714c7347501b13d15725daa8aceaea373ad37"
+    }
+  ],
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/crm-design.json",
+      "sha256": "4c2639157723a5d39f96f173b49714c7347501b13d15725daa8aceaea373ad37"
+    },
+    {
+      "path": "docs/reference/evidence/wiki-diagram-syntax-cleanup-2026-10-18.json",
+      "sha256": "b25f84d59d4f219c8a08224623c1ff59ebdd4def50e2e6d78184424437f0baac"
+    },
+    {
+      "path": "docs/.vitepress/theme/DiagramLayout.vue",
+      "sha256": "6529ea4768729fac0c934ce4cb64f7799c9080632860b93b7b8a39f59c1d46a5"
+    },
+    {
+      "path": "docs/.vitepress/theme/index.mjs",
+      "sha256": "af860ce8f9ea054965f0ae1aa58fbad27d003e965ce7320a3b0e17aee7279d9c"
+    },
+    {
+      "path": "docs/.vitepress/config.mjs",
+      "sha256": "1634a1821170bb9dc9c42952854499287be6ceb7cef404a6f3f66b1871a13a29"
+    },
+    {
+      "path": "docs/package.json",
+      "sha256": "90ea9d68c2b7d30bd2203b7ec7fa1edadc80dc4dbcb286355aea271eddf1c2bd"
+    },
+    {
+      "path": "docs/package-lock.json",
+      "sha256": "8dc8a419a660feb88855b304c875f97da0c832554a9d45437e709821d909e5d1"
+    }
+  ],
+  "source_inspection_scope": "All38 changed Mermaid message lines in7 canonical documents plus the complete renderer cleanup delta; reuse exact prior complete semantic reviews for unchanged content. No prose, domain/API contract or message wording changes.",
+  "technical_verification": {
+    "runtime": "local Docker browser",
+    "canonical_diagrams_parsed": 184,
+    "original_parse_failures": 26,
+    "corrected_proposal_parse_failures": 0,
+    "decoded_document_text_unchanged": true,
+    "new_whole_document_rereads": 0,
+    "renewed_locales": [
+      "en-US"
+    ],
+    "unchanged_locale_entries_reused": true,
+    "current_evidence": "docs/reference/evidence/wiki-diagram-syntax-cleanup-2026-10-18.json",
+    "full_site_build_and_browser_acceptance_pending": true,
+    "limitations": [
+      "The184diagram result is actual grammar parsing with the built11.17.2 API plus an isolated container-cleanup experiment; it does not prove all184SVG layouts or the post-application full site build.",
+      "Four architecture SVG and four native mobile cases passed in image580; native core-flow route/theme and source-fallback acceptance need rerunning with the corrected current artifact.",
+      "The current dependency attestation and five-preset delivery scopes need final alignment. All originalA-G, external OAuth/CAPTCHA/Qoder constraints and global screenshot gaps remain."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/design/crm-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 08:04:41",
+      "result": "approved",
+      "translation_sha256": "98edfec9d349041f5e97170ab85d8fff278d151b71bb30aa3f327ddf9c4845bd",
+      "checks": {
+        "coverage_and_meaning": "实际阅读bc0a22全部差异：七份规范文档共38行，只把时序图中的字面分号写成Mermaid实体#59;。实体解码后整篇逐字一致，箭头、顺序、消息词语、条件与所有图外正文不变。核心流程中文源发生两行语法变化，重审其三份译文；三个设计文档仅英文变化，各重审一条。其余全文复用摘要匹配的既有完整语义复核，不冒称新整篇重读。",
+        "technical_literals": "实际Docker浏览器用当前打包的11.17.2公共API对全部184个规范图表做原始/修正对照：26个原始解析失败，修正后0失败。#59;为官方规定的字面分号表示，POST/jobinfo/insert、execute(message)、getResultMessage(message)、CRON/BEAN、FIRST、triggerStatus、tenant/eventId、事务传播和状态字面量均不变。临时DOM作为render第三参数，并在finally回收；真实隔离失败实验确认错误SVG也在该容器内并可清除。",
+        "security_and_failure_semantics": "保留核心流程中的Outbox显式tenantId、幂等/重复消息、默认角色尽力分配、启动快照、REQUIRED/REQUIRES_NEW与失败重试语义。CRM候选设计仍为设计；SRM配置修复与Auth独立提交/SRM回滚区别、Asset审批后继续占位均完整。渲染依旧strict、v-pre保护不变，失败保留源码；临时容器finally保证异常和过期代次返回时都回收。",
+        "images_and_links": "图片、链接、锚点、标题、命令和图外内容无变化。保留581真实4语架构SVG与原生移动各4通过及8张原图查看记录，同时保留核心流程/错误SVG失败。583首次审计因ESM包装未找到API，完成0图，不能当作成功；583b完成184图后才应用修正。当前应用后的镜像、整页渲染、主题切换和视觉验证仍待独立执行。",
+        "language_and_terminology": "Compared every changed English message inbc0a22 with its current Chinese fact source and the matching prior full reviews. The21core-flow lines and1CRM/2SRM/2Asset design lines change only a literal semicolon's Mermaid spelling. Candidate-design status, reconciliation/cancellation requirements, possible configuration repair, independently committed Auth role versus SRM rollback, and retaining Asset occupancy after approval all remain unchanged."
+      },
+      "findings": [
+        {
+          "id": "MS01",
+          "status": "resolved",
+          "resolution": "Encode only literal sequence-message semicolons with #59; in7documents/38lines. All184canonical diagram proposals parse with the actual bundle; decoded full document text remains unchanged."
+        },
+        {
+          "id": "MS02",
+          "status": "resolved",
+          "resolution": "Pass an explicit temporary host to Mermaid.render and remove it in finally, preserving source fallback while clearing the error SVG proven by the real negative fixture."
+        },
+        {
+          "id": "MS03",
+          "status": "resolved",
+          "resolution": "Renew only6affected existing AI_REVIEW rows:3core-flow translations plus the English CRM/SRM/Asset design rows. Preserve all prior complete review files and unchanged locale entries. Claim0new rows and0human reviews."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/design/crm-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 08:24:10",
+      "result": "approved",
+      "translation_sha256": "9413cd9e1d8914c56f08b713913c39bb4da2e0c609d99ff61771cd88816b48a4",
+      "checks": {
+        "coverage_and_meaning": "逐篇对照当前中文与三译文及具名源码范围。保留16主节、54原标题与产品/聚合/状态/权限/API/一致性/隐私/前端/工程/非功能/验收/分期/ADR/风险主题；20项文档发现以修正或如实限定闭合，事实/设计/Wiki/历史各归其职责，原A-G不缩减。",
+        "technical_literals": "核对common-service实际类名、TenantLine/DataPermission/OptimisticLock/Pagination次序、tenant_id+lead_id唯一键、11表、四候选handler/频率、六审批状态与租户businessKey、12字段JSON/eventId/msgKey/msgId/correlation/causation、120秒租约和仅状态CAS、Compose/migrator与专用MySQL测试变量；两图结构、JSON、表名、handler和归一化链接严格一致。",
+        "security_and_failure_semantics": "身份签名/网络、方法权/范围/PII、租户内ALL、默认USER、根可见性/子块/版本、Auth显示降级与授权拒绝、Outbox本地事务/消费幂等/租约CAS限制、OperLog/XSS实际跳过与事务边界分别保留；候选审批/提醒/跨租户方案不作当前端点或全面安全保证。",
+        "images_and_links": "四篇当前Markdown在本机Docker整篇渲染，保留54原标题锚点和16主题。每篇两Mermaid分别为职责图/未来审批方案，结构相同、动作标签本地化；每篇一JSON严格一致，11表名及候选handler一致。语言归一化链接集合相同，无光栅图；MarkdownHTML不替代实际SVG、站点根/子路径、浏览器布局与教程证据。",
+        "language_and_terminology": "全16章を中国語と現在のソース範囲に照合。現実装・候補・履歴、テナント/権限/PII、識別のみの署名、ローカルトランザクションと配信、leaseと状態CAS、ソースと実稼働証拠を区別。中国語残留の信封をイベントエンベロープに直し、コンシューマーの冪等性・例外伝播、デッドレター等を文脈に合わせて修正。最終七差分も実読し、技術識別子とJSONを保持。AIレビューを人手レビューと呼ばない。"
+      },
+      "findings": [
+        {
+          "id": "CD01",
+          "status": "resolved",
+          "description": "Design/current-fact/history responsibilities overlap;oldfc165baseline,MVPimplemented header and human-only release wording must align with current owned facts and AI-only authorization.",
+          "resolution": "设计页改为取舍、实现边界与演进前提；现状唯一指向CRM事实/API，原全文由Git3ef2fbc保存，原日期不冒称当日验收；遵循已授权AI-only规则，无人工阻塞。"
+        },
+        {
+          "id": "CD02",
+          "status": "resolved",
+          "description": "MVP/Phase2/Phase3 scope and proposed sales domains must remain explicit decisions,not newly certified implementation or deadlines.",
+          "resolution": "当前MVP与Phase2/3候选、独立sales/营销/客服/财务职责分开；保留阶段管理只读现状及迁移前提，分期不作完成记录或新增交付承诺。"
+        },
+        {
+          "id": "CD03",
+          "status": "resolved",
+          "description": "Service/port/management/executor/DB/route/Redis/module dependency claims need current raw source comparison,including common-service adoption and formal container boundary.",
+          "resolution": "按现有独立Servlet/模块/DB/Gateway/common-service与按需OperLog/Job/MQ解释架构理由；端口、profiles、executor、完整POM由部署/架构唯一维护，职责图不冒称调用或启动全链。"
+        },
+        {
+          "id": "CD04",
+          "status": "resolved",
+          "description": "Aggregate/table/field/index/leadconversion uniqueness/owner snapshot claims need exact current schema ownership;futureapproval/inbox tables must not appear alreadyinstalled.",
+          "resolution": "11张当前crm表分类与tenant_id事实保留，转换唯一键修为tenant_id+lead_id；不假定相同owner/version/deleted列；未来approval/inbox未列入当前表，DDL不冒称已迁移。"
+        },
+        {
+          "id": "CD05",
+          "status": "resolved",
+          "description": "Lead/customer/opportunity/activity transitions and conversion sequence duplicate CRMfacts;distinguish design intent from actual command/state/localtransaction/currentevents.",
+          "resolution": "保留五类状态/转换的设计不变量，精确边和重放顺序指向现有CRM事实；本地转换加Outbox不泛化为所有Auth调用事务外，不复制另一份状态机。"
+        },
+        {
+          "id": "CD06",
+          "status": "resolved",
+          "description": "Trust chain still calls signing a futureaddition;compare actual current HMACpreauthentication and identity-only signing/network limits.",
+          "resolution": "HMAC签名预认证写为已实现；身份/时间覆盖、roles/scopes/request未绑定与网络信任限制保留，X-Gateway-Forwarded本身不作身份凭证。"
+        },
+        {
+          "id": "CD07",
+          "status": "resolved",
+          "description": "Permission/menu/roles/defaultUSER/PII mappings need currentseeds/backend/frontend source,not universal success inferredfromdeclaredroles.",
+          "resolution": "功能权限/范围/PII与前端显示分别解释，ALL仍租户内，角色仅配置示例，默认USER不得由登录推导授权，跨租户权限名标明未来候选。"
+        },
+        {
+          "id": "CD08",
+          "status": "resolved",
+          "description": "Auth internalAPI/DTO/securityVersion/permission-aware merge/tenantchecks/cache descriptions mix proposals and current behavior;verify actual paths/contracts/failures.",
+          "resolution": "现有Auth显式tenantId/完整permissionCode及授权目标角色合并、InternalDataScopeDTO securityVersion如实描述；指纹不证明缓存失效/请求绑定，显示降级与403/503授权失败边界保留。"
+        },
+        {
+          "id": "CD09",
+          "status": "resolved",
+          "description": "CRM common-service class names/filter/aspect/tableSPI and interceptor order need currentsource;advisor ordering is not provenbydiagram alone.",
+          "resolution": "实际SecurityConfig/CrmTenantTablePolicy/CrmDataPermissionHandler与DataScopeTablePolicy组合、common-service持久化与Filter/Aspect职责明确；拦截器次序TenantLine/DataPermission/OptimisticLock/Pagination修正，旧独立配置模板不再待建。"
+        },
+        {
+          "id": "CD10",
+          "status": "resolved",
+          "description": "AccessGuard/writecondition/version/cross-tenant platform endpoint rules must distinguish constraints from actual endpoint guarantees and proposed cross-tenant API.",
+          "resolution": "写命令需可见根、状态关联和适用条件更新，创建/级联/外部命令版本不能一律；子资源与360分块拥有范围，owner候选不能扩大，跨租户API不冒称已实现。"
+        },
+        {
+          "id": "CD11",
+          "status": "resolved",
+          "description": "Duplicated endpoint/permission/pagination/date/VO/version inventory must reference unique current API/CRMfacts rather than another drifting current contract.",
+          "resolution": "R/PageResult、命令意图、受控PII请求与新命令契约理由保留；现有路径/权限/VO/日期/分页/金额清单归唯一CRM/API，不保留失效缩写端点。"
+        },
+        {
+          "id": "CD12",
+          "status": "resolved",
+          "description": "Workflow readiness/proposed crm_approval_request/businessKey/eventInbox integration need explicitfuture scope and actualcurrentWorkflow limits.",
+          "resolution": "CRM审批/Inbox与Workflow序列明确未来候选；六状态和租户businessKey保留为方案，可靠结果/终结/对账/取消需契约，不从现有局部事件推导全部引擎已可靠发布。"
+        },
+        {
+          "id": "CD13",
+          "status": "resolved",
+          "description": "Proposed reminder/SLA/stale/reconcile jobs and claim algorithms must not be described as live executors or recurring deployedbusinesswrites.",
+          "resolution": "四个系统handler和频率均标候选并限于79文件扫描证据；按类别扫描、租户枚举/context清理/原子领取/重入去重仍为实施前提，不启动或宣称已有调度业务。"
+        },
+        {
+          "id": "CD14",
+          "status": "resolved",
+          "description": "Eventenvelope/suggestedevents/msgkey/UUID/tenant/inbox/version rules need actualproducer/consumer comparison;futurecontract notruntimecertification.",
+          "resolution": "DomainEventEnvelope示例含12字段及correlationId/causationId，明确非已发送事件；顶层eventId/msgKey与另生成Outbox msgId分开，实际生产类型/字段与未来Inbox去重乱序边界由源/事实说明。"
+        },
+        {
+          "id": "CD15",
+          "status": "resolved",
+          "description": "Outbox claim/lease/singleinstance and operations aggregation descriptions need currentexistingimplementation comparison;do not change scope or run costlybusiness probes blindly.",
+          "resolution": "纠正共享Relay无claim/lease旧结论，明确PROCESSING原子领取/120秒next_retry_time租约以及仅状态终态CAS；owner/generation未校验，不承诺exactly-once，保留消费幂等和副作用核对要求。"
+        },
+        {
+          "id": "CD16",
+          "status": "resolved",
+          "description": "OperLog prerequisite text is stale relativeto currentmasker/snapshotflags/eventdedup;retain actualpre-target/HTTPstatus/truncation/archiver limits from completedbackend review andPII fieldscope.",
+          "resolution": "已有脱敏器/快照参数开关/排除字段/事件去重与消费者错误传播不再列为缺失；端点最小化、列表/360区别及后端前置采集/responseStatus/截断JSON/归档自调用限制保留，不做合规或审计全面保证。"
+        },
+        {
+          "id": "CD17",
+          "status": "resolved",
+          "description": "XSS saysownProviderrequiredandfallbackfuture;compare common-serviceactivation/cache/Authfallback/authoritativedisabled and outputencoding scope.",
+          "resolution": "common-service已有缓存/Auth回源/启用基线与Provider/Servlet/Jackson条件、权威关闭设置明确；不要求复制CRM独立Provider；纯文本、输入规则、响应头和输出编码各层边界保留。"
+        },
+        {
+          "id": "CD18",
+          "status": "resolved",
+          "description": "Frontend/API/componenttrees/dynamicroute/iconMaps/zh-enonly locale and startupfiles/docker-compose names need actualcurrentpaths,all4languages and generator boundary.",
+          "resolution": "前端现有共享类型、组件、动态路由和router单iconMap由现事实/规范拥有；layout使用已解析图标，四语言同步；正式Compose/migrator/catalog代替旧docker-compose/start/fixedcounts，生成器验收留待原A/G。"
+        },
+        {
+          "id": "CD19",
+          "status": "resolved",
+          "description": "HostMaven/npm commands conflict withDockeronly;conditionaldestructiveMySQLtest requiresdedicatedcontainer/database scope;no-testfoundation/historicalacceptance notcurrentproof.",
+          "resolution": "已有业务/common测试事实修正，原验收主题完整保留；真实MySQL条件测试会创建/删除crm_lead，须专用可销毁库，WP008开关单独，skip非pass；Docker/JDK25/Wrapper规范和精确树复用报告保留。"
+        },
+        {
+          "id": "CD20",
+          "status": "resolved",
+          "description": "Milestones/ADR/risk matrix combine oldassumptions aboutmigration/tests/signing/OperLog withcurrentsuccessclaims;preserve decisionrationale/history and label remainingrequirements honestly.",
+          "resolution": "六里程碑、ADR和风险表解释依赖/代价/剩余证据，不作全业务已通过回执；四语16主节/54原锚点保留，所有当前文档全文真实复读，日文残留已修，AI审核不冒称人工。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/design/crm-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 08:24:10",
+      "result": "approved",
+      "translation_sha256": "100f82cb2378a9e59c9f3f269d8635c6dd69563acf8c5e33c5febb9bad821feb",
+      "checks": {
+        "coverage_and_meaning": "逐篇对照当前中文与三译文及具名源码范围。保留16主节、54原标题与产品/聚合/状态/权限/API/一致性/隐私/前端/工程/非功能/验收/分期/ADR/风险主题；20项文档发现以修正或如实限定闭合，事实/设计/Wiki/历史各归其职责，原A-G不缩减。",
+        "technical_literals": "核对common-service实际类名、TenantLine/DataPermission/OptimisticLock/Pagination次序、tenant_id+lead_id唯一键、11表、四候选handler/频率、六审批状态与租户businessKey、12字段JSON/eventId/msgKey/msgId/correlation/causation、120秒租约和仅状态CAS、Compose/migrator与专用MySQL测试变量；两图结构、JSON、表名、handler和归一化链接严格一致。",
+        "security_and_failure_semantics": "身份签名/网络、方法权/范围/PII、租户内ALL、默认USER、根可见性/子块/版本、Auth显示降级与授权拒绝、Outbox本地事务/消费幂等/租约CAS限制、OperLog/XSS实际跳过与事务边界分别保留；候选审批/提醒/跨租户方案不作当前端点或全面安全保证。",
+        "images_and_links": "四篇当前Markdown在本机Docker整篇渲染，保留54原标题锚点和16主题。每篇两Mermaid分别为职责图/未来审批方案，结构相同、动作标签本地化；每篇一JSON严格一致，11表名及候选handler一致。语言归一化链接集合相同，无光栅图；MarkdownHTML不替代实际SVG、站点根/子路径、浏览器布局与教程证据。",
+        "language_and_terminology": "16개 주제 전체를 중국어와 현재 소스 범위에 대조했습니다. 현재 구현·후보·이력,테넌트/권한/PII,신원만 서명하는 범위,로컬 트랜잭션/전달,lease와 상태CAS,소스/실제 실행 증거를 구분합니다. 이벤트 봉투와 consumer 멱등성·폴백·스냅샷 용어를 문맥에 맞추고 JSON·식별자·다이어그램 역할을 유지했습니다. AI 검토를 사람 검토나 실제 업무 검증으로 부르지 않습니다."
+      },
+      "findings": [
+        {
+          "id": "CD01",
+          "status": "resolved",
+          "description": "Design/current-fact/history responsibilities overlap;oldfc165baseline,MVPimplemented header and human-only release wording must align with current owned facts and AI-only authorization.",
+          "resolution": "设计页改为取舍、实现边界与演进前提；现状唯一指向CRM事实/API，原全文由Git3ef2fbc保存，原日期不冒称当日验收；遵循已授权AI-only规则，无人工阻塞。"
+        },
+        {
+          "id": "CD02",
+          "status": "resolved",
+          "description": "MVP/Phase2/Phase3 scope and proposed sales domains must remain explicit decisions,not newly certified implementation or deadlines.",
+          "resolution": "当前MVP与Phase2/3候选、独立sales/营销/客服/财务职责分开；保留阶段管理只读现状及迁移前提，分期不作完成记录或新增交付承诺。"
+        },
+        {
+          "id": "CD03",
+          "status": "resolved",
+          "description": "Service/port/management/executor/DB/route/Redis/module dependency claims need current raw source comparison,including common-service adoption and formal container boundary.",
+          "resolution": "按现有独立Servlet/模块/DB/Gateway/common-service与按需OperLog/Job/MQ解释架构理由；端口、profiles、executor、完整POM由部署/架构唯一维护，职责图不冒称调用或启动全链。"
+        },
+        {
+          "id": "CD04",
+          "status": "resolved",
+          "description": "Aggregate/table/field/index/leadconversion uniqueness/owner snapshot claims need exact current schema ownership;futureapproval/inbox tables must not appear alreadyinstalled.",
+          "resolution": "11张当前crm表分类与tenant_id事实保留，转换唯一键修为tenant_id+lead_id；不假定相同owner/version/deleted列；未来approval/inbox未列入当前表，DDL不冒称已迁移。"
+        },
+        {
+          "id": "CD05",
+          "status": "resolved",
+          "description": "Lead/customer/opportunity/activity transitions and conversion sequence duplicate CRMfacts;distinguish design intent from actual command/state/localtransaction/currentevents.",
+          "resolution": "保留五类状态/转换的设计不变量，精确边和重放顺序指向现有CRM事实；本地转换加Outbox不泛化为所有Auth调用事务外，不复制另一份状态机。"
+        },
+        {
+          "id": "CD06",
+          "status": "resolved",
+          "description": "Trust chain still calls signing a futureaddition;compare actual current HMACpreauthentication and identity-only signing/network limits.",
+          "resolution": "HMAC签名预认证写为已实现；身份/时间覆盖、roles/scopes/request未绑定与网络信任限制保留，X-Gateway-Forwarded本身不作身份凭证。"
+        },
+        {
+          "id": "CD07",
+          "status": "resolved",
+          "description": "Permission/menu/roles/defaultUSER/PII mappings need currentseeds/backend/frontend source,not universal success inferredfromdeclaredroles.",
+          "resolution": "功能权限/范围/PII与前端显示分别解释，ALL仍租户内，角色仅配置示例，默认USER不得由登录推导授权，跨租户权限名标明未来候选。"
+        },
+        {
+          "id": "CD08",
+          "status": "resolved",
+          "description": "Auth internalAPI/DTO/securityVersion/permission-aware merge/tenantchecks/cache descriptions mix proposals and current behavior;verify actual paths/contracts/failures.",
+          "resolution": "现有Auth显式tenantId/完整permissionCode及授权目标角色合并、InternalDataScopeDTO securityVersion如实描述；指纹不证明缓存失效/请求绑定，显示降级与403/503授权失败边界保留。"
+        },
+        {
+          "id": "CD09",
+          "status": "resolved",
+          "description": "CRM common-service class names/filter/aspect/tableSPI and interceptor order need currentsource;advisor ordering is not provenbydiagram alone.",
+          "resolution": "实际SecurityConfig/CrmTenantTablePolicy/CrmDataPermissionHandler与DataScopeTablePolicy组合、common-service持久化与Filter/Aspect职责明确；拦截器次序TenantLine/DataPermission/OptimisticLock/Pagination修正，旧独立配置模板不再待建。"
+        },
+        {
+          "id": "CD10",
+          "status": "resolved",
+          "description": "AccessGuard/writecondition/version/cross-tenant platform endpoint rules must distinguish constraints from actual endpoint guarantees and proposed cross-tenant API.",
+          "resolution": "写命令需可见根、状态关联和适用条件更新，创建/级联/外部命令版本不能一律；子资源与360分块拥有范围，owner候选不能扩大，跨租户API不冒称已实现。"
+        },
+        {
+          "id": "CD11",
+          "status": "resolved",
+          "description": "Duplicated endpoint/permission/pagination/date/VO/version inventory must reference unique current API/CRMfacts rather than another drifting current contract.",
+          "resolution": "R/PageResult、命令意图、受控PII请求与新命令契约理由保留；现有路径/权限/VO/日期/分页/金额清单归唯一CRM/API，不保留失效缩写端点。"
+        },
+        {
+          "id": "CD12",
+          "status": "resolved",
+          "description": "Workflow readiness/proposed crm_approval_request/businessKey/eventInbox integration need explicitfuture scope and actualcurrentWorkflow limits.",
+          "resolution": "CRM审批/Inbox与Workflow序列明确未来候选；六状态和租户businessKey保留为方案，可靠结果/终结/对账/取消需契约，不从现有局部事件推导全部引擎已可靠发布。"
+        },
+        {
+          "id": "CD13",
+          "status": "resolved",
+          "description": "Proposed reminder/SLA/stale/reconcile jobs and claim algorithms must not be described as live executors or recurring deployedbusinesswrites.",
+          "resolution": "四个系统handler和频率均标候选并限于79文件扫描证据；按类别扫描、租户枚举/context清理/原子领取/重入去重仍为实施前提，不启动或宣称已有调度业务。"
+        },
+        {
+          "id": "CD14",
+          "status": "resolved",
+          "description": "Eventenvelope/suggestedevents/msgkey/UUID/tenant/inbox/version rules need actualproducer/consumer comparison;futurecontract notruntimecertification.",
+          "resolution": "DomainEventEnvelope示例含12字段及correlationId/causationId，明确非已发送事件；顶层eventId/msgKey与另生成Outbox msgId分开，实际生产类型/字段与未来Inbox去重乱序边界由源/事实说明。"
+        },
+        {
+          "id": "CD15",
+          "status": "resolved",
+          "description": "Outbox claim/lease/singleinstance and operations aggregation descriptions need currentexistingimplementation comparison;do not change scope or run costlybusiness probes blindly.",
+          "resolution": "纠正共享Relay无claim/lease旧结论，明确PROCESSING原子领取/120秒next_retry_time租约以及仅状态终态CAS；owner/generation未校验，不承诺exactly-once，保留消费幂等和副作用核对要求。"
+        },
+        {
+          "id": "CD16",
+          "status": "resolved",
+          "description": "OperLog prerequisite text is stale relativeto currentmasker/snapshotflags/eventdedup;retain actualpre-target/HTTPstatus/truncation/archiver limits from completedbackend review andPII fieldscope.",
+          "resolution": "已有脱敏器/快照参数开关/排除字段/事件去重与消费者错误传播不再列为缺失；端点最小化、列表/360区别及后端前置采集/responseStatus/截断JSON/归档自调用限制保留，不做合规或审计全面保证。"
+        },
+        {
+          "id": "CD17",
+          "status": "resolved",
+          "description": "XSS saysownProviderrequiredandfallbackfuture;compare common-serviceactivation/cache/Authfallback/authoritativedisabled and outputencoding scope.",
+          "resolution": "common-service已有缓存/Auth回源/启用基线与Provider/Servlet/Jackson条件、权威关闭设置明确；不要求复制CRM独立Provider；纯文本、输入规则、响应头和输出编码各层边界保留。"
+        },
+        {
+          "id": "CD18",
+          "status": "resolved",
+          "description": "Frontend/API/componenttrees/dynamicroute/iconMaps/zh-enonly locale and startupfiles/docker-compose names need actualcurrentpaths,all4languages and generator boundary.",
+          "resolution": "前端现有共享类型、组件、动态路由和router单iconMap由现事实/规范拥有；layout使用已解析图标，四语言同步；正式Compose/migrator/catalog代替旧docker-compose/start/fixedcounts，生成器验收留待原A/G。"
+        },
+        {
+          "id": "CD19",
+          "status": "resolved",
+          "description": "HostMaven/npm commands conflict withDockeronly;conditionaldestructiveMySQLtest requiresdedicatedcontainer/database scope;no-testfoundation/historicalacceptance notcurrentproof.",
+          "resolution": "已有业务/common测试事实修正，原验收主题完整保留；真实MySQL条件测试会创建/删除crm_lead，须专用可销毁库，WP008开关单独，skip非pass；Docker/JDK25/Wrapper规范和精确树复用报告保留。"
+        },
+        {
+          "id": "CD20",
+          "status": "resolved",
+          "description": "Milestones/ADR/risk matrix combine oldassumptions aboutmigration/tests/signing/OperLog withcurrentsuccessclaims;preserve decisionrationale/history and label remainingrequirements honestly.",
+          "resolution": "六里程碑、ADR和风险表解释依赖/代价/剩余证据，不作全业务已通过回执；四语16主节/54原锚点保留，所有当前文档全文真实复读，日文残留已修，AI审核不冒称人工。"
+        }
+      ]
+    }
+  }
+}

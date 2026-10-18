@@ -39,7 +39,7 @@ async function loadData() {
       ? listCustomerContacts(props.customerId, { page: 1, size: 100 })
       : null
     const opportunityRequest = canViewOpportunities.value
-      ? listOpportunities({ customerId: props.customerId, page: 1, size: 100 })
+      ? listOpportunities({ customerId: props.customerId, status: 'OPEN', page: 1, size: 100 })
       : null
     const activityRequest = canViewActivities.value
       ? listActivityTimeline({ rootType: 'CUSTOMER', rootId: props.customerId, limit: 30 })

@@ -1,0 +1,92 @@
+Actual local Docker output; supply-chain CLI generation; separate full-source golden fixture builds the same CRUD template
+Source HEAD: fc165e392216e75d903199ab121eba46a8edecf3
+Input worktree SHA256: 044454b0ceed553187e9bcd36796d9313e3ea21c64214e14ede3f4b5f4eabf33
+Path aliases mask private output locations only. Raw originals are retained privately.
+
+
+$ node tools/omni-cli/dist/src/cli.js --root <learning-supply-chain> generate crud --spec scaffold/specs/material-brand.yaml --check
+crud spec valid: procurement:MaterialBrand, fields=4
+
+$ node tools/omni-cli/dist/src/cli.js --root <learning-supply-chain> generate crud --spec scaffold/specs/material-brand.yaml --dry-run
+DRY-RUN CRUD procurement-material-brand
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/entity/ProcMaterialBrand.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/MaterialBrandQuery.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/CreateMaterialBrandRequest.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/UpdateMaterialBrandRequest.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/MaterialBrandVO.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcMaterialBrandMapper.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/MaterialBrandService.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/MaterialBrandServiceImpl.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/MaterialBrandController.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/test/java/com/omni/procurement/generated/MaterialBrandGeneratedContractTest.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-frontend/src/api/procurement-material-brand.ts - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-frontend/src/views/procurement/material-brand/index.vue - 创建受锁文件管理的生成文件
+  CREATE-FILE database/changelog/procurement/generated-material-brand-0001.yaml - 创建受锁文件管理的生成文件
+  CREATE-FILE scripts/sql/seed/procurement-material-brand-permissions.sql - 创建受锁文件管理的生成文件
+  CREATE-FILE database/changelog/auth/generated-procurement-material-brand-permissions.yaml - 创建受锁文件管理的生成文件
+  CREATE-FILE docs/generated/procurement-material-brand.md - 创建受锁文件管理的生成文件
+  CREATE-FILE docs/generated/i18n/procurement-material-brand.ja-JP.yaml - 创建受锁文件管理的生成文件
+  CREATE-FILE docs/generated/i18n/procurement-material-brand.ko-KR.yaml - 创建受锁文件管理的生成文件
+  MODIFY-YAML database/changelog/procurement/db.changelog-procurement.yaml - 登记生成区块
+  MODIFY-YAML database/changelog/auth/db.changelog-auth.yaml - 登记生成区块
+  MODIFY-YAML database/seed/manifest.yaml - 登记生成区块
+  MODIFY-YAML scaffold/catalog/modules.yaml - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/constants/menu.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/router/index.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/zh-CN.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/en-US.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/ja-JP.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/ko-KR.ts - 登记生成区块
+  CREATE-FILE scaffold/locks/crud/procurement-material-brand.lock.json - 创建受锁文件管理的生成文件
+ready: 29 file changes; 未写入工作区，确认后追加 --apply。
+
+$ node tools/omni-cli/dist/src/cli.js --root <learning-supply-chain> generate crud --spec scaffold/specs/material-brand.yaml --apply
+APPLY CRUD procurement-material-brand
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/entity/ProcMaterialBrand.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/MaterialBrandQuery.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/CreateMaterialBrandRequest.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/UpdateMaterialBrandRequest.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/MaterialBrandVO.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcMaterialBrandMapper.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/MaterialBrandService.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/MaterialBrandServiceImpl.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/MaterialBrandController.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-backend/omni-procurement/src/test/java/com/omni/procurement/generated/MaterialBrandGeneratedContractTest.java - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-frontend/src/api/procurement-material-brand.ts - 创建受锁文件管理的生成文件
+  CREATE-FILE omni-frontend/src/views/procurement/material-brand/index.vue - 创建受锁文件管理的生成文件
+  CREATE-FILE database/changelog/procurement/generated-material-brand-0001.yaml - 创建受锁文件管理的生成文件
+  CREATE-FILE scripts/sql/seed/procurement-material-brand-permissions.sql - 创建受锁文件管理的生成文件
+  CREATE-FILE database/changelog/auth/generated-procurement-material-brand-permissions.yaml - 创建受锁文件管理的生成文件
+  CREATE-FILE docs/generated/procurement-material-brand.md - 创建受锁文件管理的生成文件
+  CREATE-FILE docs/generated/i18n/procurement-material-brand.ja-JP.yaml - 创建受锁文件管理的生成文件
+  CREATE-FILE docs/generated/i18n/procurement-material-brand.ko-KR.yaml - 创建受锁文件管理的生成文件
+  MODIFY-YAML database/changelog/procurement/db.changelog-procurement.yaml - 登记生成区块
+  MODIFY-YAML database/changelog/auth/db.changelog-auth.yaml - 登记生成区块
+  MODIFY-YAML database/seed/manifest.yaml - 登记生成区块
+  MODIFY-YAML scaffold/catalog/modules.yaml - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/constants/menu.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/router/index.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/zh-CN.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/en-US.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/ja-JP.ts - 登记生成区块
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/ko-KR.ts - 登记生成区块
+  CREATE-FILE scaffold/locks/crud/procurement-material-brand.lock.json - 创建受锁文件管理的生成文件
+crud applied: files=29
+
+$ node tools/omni-cli/dist/src/cli.js --root <learning-supply-chain> generate crud --spec scaffold/specs/material-brand.yaml --dry-run
+DRY-RUN CRUD procurement-material-brand
+unchanged: files=18, template=1.1.0
+
+Separate golden backend/frontend/lint validation:
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 214, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+✓ built in 2.51s
+golden CRUD lint: baselineErrors=0, newErrors=0, generatedFilesChecked=8
+golden CRUD valid: procurement-material-brand, generated=18, changes=29

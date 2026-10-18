@@ -1,0 +1,245 @@
+Actual local Docker output; basic CLI fixture and separate extended-service golden build are different generated projects
+Source HEAD: fc165e392216e75d903199ab121eba46a8edecf3
+Input worktree SHA256: 044454b0ceed553187e9bcd36796d9313e3ea21c64214e14ede3f4b5f4eabf33
+Path aliases mask private output locations only. Raw originals are retained privately.
+
+
+$ node tools/omni-cli/dist/src/cli.js --root <learning-core-service> create-service inventory-basic --output generated/inventory-basic-bundle
+DRY-RUN create omni-inventory-basic
+target: <learning-core-service>/generated/inventory-basic-bundle
+ports: service=8110, management=19910
+  CREATE omni-backend/omni-inventory-basic/pom.xml
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/InventoryBasicApplication.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/config/SecurityConfig.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/security/InventoryBasicTenantTablePolicy.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/controller/ModuleInfoController.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/service/ModuleInfoService.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/service/impl/ModuleInfoServiceImpl.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/mapper/package-info.java
+  CREATE omni-backend/omni-inventory-basic/src/main/resources/application.yml
+  CREATE omni-backend/omni-inventory-basic/src/main/resources/application-dev.yml
+  CREATE omni-backend/omni-inventory-basic/src/test/java/com/omni/inventory/basic/ServiceSkeletonContractTest.java
+  CREATE omni-frontend/src/api/inventory-basic.ts
+  CREATE omni-frontend/src/views/inventory-basic/overview/index.vue
+  CREATE database/changelog/inventory-basic/db.changelog-inventory-basic.yaml
+  CREATE database/changelog/auth/inventory-basic-permissions.yaml
+  CREATE scripts/sql/seed/inventory-basic-permissions.sql
+  CREATE integration/frontend/inventory-basic.zh-CN.fragment.ts
+  CREATE integration/frontend/inventory-basic.en-US.fragment.ts
+  CREATE integration/frontend/inventory-basic.ja-JP.fragment.ts
+  CREATE integration/frontend/inventory-basic.ko-KR.fragment.ts
+  CREATE integration/catalog/inventory-basic.yaml
+  CREATE integration/gateway/inventory-basic.yaml
+  CREATE integration/compose/inventory-basic.yaml
+  CREATE integration/maven/inventory-basic.xml
+  CREATE integration/permissions/inventory-basic.yaml
+  CREATE integration/frontend/inventory-basic.menu.fragment.ts
+  CREATE docs/inventory-basic.md
+  CREATE docs/inventory-basic.en.md
+  CREATE docs/inventory-basic.jp.md
+  CREATE docs/inventory-basic.kr.md
+  CREATE docs/inventory-basic-i18n-status.yaml
+  CREATE GENERATION-PLAN.md
+  CREATE omni-service.lock.json
+未写入文件；确认后追加 --apply。
+
+$ node tools/omni-cli/dist/src/cli.js --root <learning-core-service> create-service inventory-basic --output generated/inventory-basic-bundle --apply
+APPLY create omni-inventory-basic
+target: <learning-core-service>/generated/inventory-basic-bundle
+ports: service=8110, management=19910
+  CREATE omni-backend/omni-inventory-basic/pom.xml
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/InventoryBasicApplication.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/config/SecurityConfig.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/security/InventoryBasicTenantTablePolicy.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/controller/ModuleInfoController.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/service/ModuleInfoService.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/service/impl/ModuleInfoServiceImpl.java
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/mapper/package-info.java
+  CREATE omni-backend/omni-inventory-basic/src/main/resources/application.yml
+  CREATE omni-backend/omni-inventory-basic/src/main/resources/application-dev.yml
+  CREATE omni-backend/omni-inventory-basic/src/test/java/com/omni/inventory/basic/ServiceSkeletonContractTest.java
+  CREATE omni-frontend/src/api/inventory-basic.ts
+  CREATE omni-frontend/src/views/inventory-basic/overview/index.vue
+  CREATE database/changelog/inventory-basic/db.changelog-inventory-basic.yaml
+  CREATE database/changelog/auth/inventory-basic-permissions.yaml
+  CREATE scripts/sql/seed/inventory-basic-permissions.sql
+  CREATE integration/frontend/inventory-basic.zh-CN.fragment.ts
+  CREATE integration/frontend/inventory-basic.en-US.fragment.ts
+  CREATE integration/frontend/inventory-basic.ja-JP.fragment.ts
+  CREATE integration/frontend/inventory-basic.ko-KR.fragment.ts
+  CREATE integration/catalog/inventory-basic.yaml
+  CREATE integration/gateway/inventory-basic.yaml
+  CREATE integration/compose/inventory-basic.yaml
+  CREATE integration/maven/inventory-basic.xml
+  CREATE integration/permissions/inventory-basic.yaml
+  CREATE integration/frontend/inventory-basic.menu.fragment.ts
+  CREATE docs/inventory-basic.md
+  CREATE docs/inventory-basic.en.md
+  CREATE docs/inventory-basic.jp.md
+  CREATE docs/inventory-basic.kr.md
+  CREATE docs/inventory-basic-i18n-status.yaml
+  CREATE GENERATION-PLAN.md
+  CREATE omni-service.lock.json
+服务生成包已原子写入。
+
+$ node tools/omni-cli/dist/src/cli.js --root <learning-core-service> service validate inventory-basic --output generated/inventory-basic-bundle
+service valid: inventory-basic, files=32, template=1.5.0
+
+$ node tools/omni-cli/dist/src/cli.js --root <learning-core-service> service integrate inventory-basic --source generated/inventory-basic-bundle
+INTEGRATION PLAN inventory-basic
+source: <learning-core-service>/generated/inventory-basic-bundle
+  CREATE-DIRECTORY omni-backend/omni-inventory-basic - 创建后端 Maven 模块
+  CREATE-FILE omni-frontend/src/api/inventory-basic.ts - 创建前端 typed API
+  CREATE-DIRECTORY omni-frontend/src/views/inventory-basic - 创建前端模块页面
+  CREATE-FILE docs/inventory-basic.md - 创建模块维护说明
+  CREATE-FILE docs/inventory-basic.en.md - 创建 en 模块维护说明（待人工复核）
+  CREATE-FILE docs/inventory-basic.jp.md - 创建 jp 模块维护说明（待人工复核）
+  CREATE-FILE docs/inventory-basic.kr.md - 创建 kr 模块维护说明（待人工复核）
+  CREATE-FILE docs/inventory-basic-i18n-status.yaml - 创建多语言完成状态
+  CREATE-FILE database/changelog/inventory-basic/db.changelog-inventory-basic.yaml - 创建服务数据库 Liquibase 主文件
+  CREATE-FILE database/changelog/auth/inventory-basic-permissions.yaml - 创建 forward-only 权限 changeSet
+  CREATE-FILE scripts/sql/seed/inventory-basic-permissions.sql - 创建独立权限种子资源
+  MODIFY-XML omni-backend/pom.xml - 向 Maven reactor 登记 omni-inventory-basic
+  MODIFY-YAML omni-backend/omni-gateway/src/main/resources/application.yml - 登记 omni-inventory-basic 路由并扩展内部 API 屏蔽清单
+  MODIFY-YAML compose.apps.yaml - 登记 omni-inventory-basic 服务、依赖、环境和健康检查
+  MODIFY-YAML scaffold/catalog/modules.yaml - 登记 inventory-basic 模块依赖和权限根
+  MODIFY-DOCKERFILE docker/backend/Dockerfile - 登记 omni-inventory-basic POM 缓存层
+  MODIFY-YAML database/changelog/platform/db.changelog-platform.yaml - 登记 omni_inventory_basic 平台建库语句
+  MODIFY-JAVA omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java - 登记 inventory-basic Liquibase 迁移目标
+  MODIFY-TYPESCRIPT omni-frontend/src/constants/menu.ts - 登记 inventory-basic 菜单翻译映射
+  MODIFY-TYPESCRIPT omni-frontend/src/router/index.ts - 登记 inventory-basic 菜单图标
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/zh-CN.ts - 登记 inventory-basic 简体中文翻译
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/en-US.ts - 登记 inventory-basic 英文翻译
+  MODIFY-YAML database/changelog/auth/db.changelog-auth.yaml - 引用 inventory-basic forward-only 权限 changeSet
+  MODIFY-YAML database/seed/manifest.yaml - 刷新 auth seed SHA-256、module 和自然键断言
+  MODIFY-YAML docs/docs-manifest.yaml - 登记四语言模块文档及待人工复核摘要
+  MODIFY-MARKDOWN docs/i18n-review-queue.md - 在接入事务中重新生成翻译复核队列
+  WARN 权限 SQL 必须在写入层生成自然键幂等语句；planner 不分配固定自增 ID
+rendered: 38 file changes
+  CREATE omni-backend/omni-inventory-basic/pom.xml (+68 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/InventoryBasicApplication.java (+30 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/config/SecurityConfig.java (+99 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/security/InventoryBasicTenantTablePolicy.java (+22 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/controller/ModuleInfoController.java (+37 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/service/ModuleInfoService.java (+19 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/service/impl/ModuleInfoServiceImpl.java (+21 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/mapper/package-info.java (+7 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/resources/application.yml (+88 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/resources/application-dev.yml (+9 lines)
+  CREATE omni-backend/omni-inventory-basic/src/test/java/com/omni/inventory/basic/ServiceSkeletonContractTest.java (+25 lines)
+  CREATE omni-frontend/src/api/inventory-basic.ts (+17 lines)
+  CREATE omni-frontend/src/views/inventory-basic/overview/index.vue (+44 lines)
+  CREATE database/changelog/inventory-basic/db.changelog-inventory-basic.yaml (+2 lines)
+  CREATE database/changelog/auth/inventory-basic-permissions.yaml (+17 lines)
+  CREATE scripts/sql/seed/inventory-basic-permissions.sql (+63 lines)
+  CREATE docs/inventory-basic.md (+36 lines)
+  CREATE docs/inventory-basic.en.md (+36 lines)
+  CREATE docs/inventory-basic.jp.md (+36 lines)
+  CREATE docs/inventory-basic.kr.md (+36 lines)
+  CREATE docs/inventory-basic-i18n-status.yaml (+23 lines)
+  MODIFY omni-backend/pom.xml (+1 lines)
+  MODIFY omni-backend/omni-gateway/src/main/resources/application.yml (+10 lines)
+  MODIFY compose.apps.yaml (+47 lines)
+  MODIFY scaffold/catalog/modules.yaml (+60 lines)
+  MODIFY docker/backend/Dockerfile (+1 lines)
+  MODIFY database/changelog/platform/db.changelog-platform.yaml (+19 lines)
+  MODIFY omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java (+1 lines)
+  MODIFY omni-frontend/src/constants/menu.ts (+2 lines)
+  MODIFY omni-frontend/src/router/index.ts (+2 lines)
+  MODIFY omni-frontend/src/locales/zh-CN.ts (+8 lines)
+  MODIFY omni-frontend/src/locales/en-US.ts (+8 lines)
+  MODIFY omni-frontend/src/locales/ja-JP.ts (+8 lines)
+  MODIFY omni-frontend/src/locales/ko-KR.ts (+8 lines)
+  MODIFY database/changelog/auth/db.changelog-auth.yaml (+3 lines)
+  MODIFY database/seed/manifest.yaml (+10 lines)
+  MODIFY docs/docs-manifest.yaml (+23 lines)
+  MODIFY docs/i18n-review-queue.md (+1 lines)
+ready: 26 operations; renderer is read-only and wrote no files.
+未写入工作区；确认后追加 --apply。
+
+$ node tools/omni-cli/dist/src/cli.js --root <learning-core-service> service integrate inventory-basic --source generated/inventory-basic-bundle --apply
+INTEGRATION PLAN inventory-basic
+source: <learning-core-service>/generated/inventory-basic-bundle
+  CREATE-DIRECTORY omni-backend/omni-inventory-basic - 创建后端 Maven 模块
+  CREATE-FILE omni-frontend/src/api/inventory-basic.ts - 创建前端 typed API
+  CREATE-DIRECTORY omni-frontend/src/views/inventory-basic - 创建前端模块页面
+  CREATE-FILE docs/inventory-basic.md - 创建模块维护说明
+  CREATE-FILE docs/inventory-basic.en.md - 创建 en 模块维护说明（待人工复核）
+  CREATE-FILE docs/inventory-basic.jp.md - 创建 jp 模块维护说明（待人工复核）
+  CREATE-FILE docs/inventory-basic.kr.md - 创建 kr 模块维护说明（待人工复核）
+  CREATE-FILE docs/inventory-basic-i18n-status.yaml - 创建多语言完成状态
+  CREATE-FILE database/changelog/inventory-basic/db.changelog-inventory-basic.yaml - 创建服务数据库 Liquibase 主文件
+  CREATE-FILE database/changelog/auth/inventory-basic-permissions.yaml - 创建 forward-only 权限 changeSet
+  CREATE-FILE scripts/sql/seed/inventory-basic-permissions.sql - 创建独立权限种子资源
+  MODIFY-XML omni-backend/pom.xml - 向 Maven reactor 登记 omni-inventory-basic
+  MODIFY-YAML omni-backend/omni-gateway/src/main/resources/application.yml - 登记 omni-inventory-basic 路由并扩展内部 API 屏蔽清单
+  MODIFY-YAML compose.apps.yaml - 登记 omni-inventory-basic 服务、依赖、环境和健康检查
+  MODIFY-YAML scaffold/catalog/modules.yaml - 登记 inventory-basic 模块依赖和权限根
+  MODIFY-DOCKERFILE docker/backend/Dockerfile - 登记 omni-inventory-basic POM 缓存层
+  MODIFY-YAML database/changelog/platform/db.changelog-platform.yaml - 登记 omni_inventory_basic 平台建库语句
+  MODIFY-JAVA omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java - 登记 inventory-basic Liquibase 迁移目标
+  MODIFY-TYPESCRIPT omni-frontend/src/constants/menu.ts - 登记 inventory-basic 菜单翻译映射
+  MODIFY-TYPESCRIPT omni-frontend/src/router/index.ts - 登记 inventory-basic 菜单图标
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/zh-CN.ts - 登记 inventory-basic 简体中文翻译
+  MODIFY-TYPESCRIPT omni-frontend/src/locales/en-US.ts - 登记 inventory-basic 英文翻译
+  MODIFY-YAML database/changelog/auth/db.changelog-auth.yaml - 引用 inventory-basic forward-only 权限 changeSet
+  MODIFY-YAML database/seed/manifest.yaml - 刷新 auth seed SHA-256、module 和自然键断言
+  MODIFY-YAML docs/docs-manifest.yaml - 登记四语言模块文档及待人工复核摘要
+  MODIFY-MARKDOWN docs/i18n-review-queue.md - 在接入事务中重新生成翻译复核队列
+  WARN 权限 SQL 必须在写入层生成自然键幂等语句；planner 不分配固定自增 ID
+rendered: 38 file changes
+  CREATE omni-backend/omni-inventory-basic/pom.xml (+68 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/InventoryBasicApplication.java (+30 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/config/SecurityConfig.java (+99 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/security/InventoryBasicTenantTablePolicy.java (+22 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/controller/ModuleInfoController.java (+37 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/service/ModuleInfoService.java (+19 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/service/impl/ModuleInfoServiceImpl.java (+21 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/java/com/omni/inventory/basic/mapper/package-info.java (+7 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/resources/application.yml (+88 lines)
+  CREATE omni-backend/omni-inventory-basic/src/main/resources/application-dev.yml (+9 lines)
+  CREATE omni-backend/omni-inventory-basic/src/test/java/com/omni/inventory/basic/ServiceSkeletonContractTest.java (+25 lines)
+  CREATE omni-frontend/src/api/inventory-basic.ts (+17 lines)
+  CREATE omni-frontend/src/views/inventory-basic/overview/index.vue (+44 lines)
+  CREATE database/changelog/inventory-basic/db.changelog-inventory-basic.yaml (+2 lines)
+  CREATE database/changelog/auth/inventory-basic-permissions.yaml (+17 lines)
+  CREATE scripts/sql/seed/inventory-basic-permissions.sql (+63 lines)
+  CREATE docs/inventory-basic.md (+36 lines)
+  CREATE docs/inventory-basic.en.md (+36 lines)
+  CREATE docs/inventory-basic.jp.md (+36 lines)
+  CREATE docs/inventory-basic.kr.md (+36 lines)
+  CREATE docs/inventory-basic-i18n-status.yaml (+23 lines)
+  MODIFY omni-backend/pom.xml (+1 lines)
+  MODIFY omni-backend/omni-gateway/src/main/resources/application.yml (+10 lines)
+  MODIFY compose.apps.yaml (+47 lines)
+  MODIFY scaffold/catalog/modules.yaml (+60 lines)
+  MODIFY docker/backend/Dockerfile (+1 lines)
+  MODIFY database/changelog/platform/db.changelog-platform.yaml (+19 lines)
+  MODIFY omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java (+1 lines)
+  MODIFY omni-frontend/src/constants/menu.ts (+2 lines)
+  MODIFY omni-frontend/src/router/index.ts (+2 lines)
+  MODIFY omni-frontend/src/locales/zh-CN.ts (+8 lines)
+  MODIFY omni-frontend/src/locales/en-US.ts (+8 lines)
+  MODIFY omni-frontend/src/locales/ja-JP.ts (+8 lines)
+  MODIFY omni-frontend/src/locales/ko-KR.ts (+8 lines)
+  MODIFY database/changelog/auth/db.changelog-auth.yaml (+3 lines)
+  MODIFY database/seed/manifest.yaml (+10 lines)
+  MODIFY docs/docs-manifest.yaml (+23 lines)
+  MODIFY docs/i18n-review-queue.md (+1 lines)
+integration applied: files=38
+
+Separate full-source golden build (inventory-sample: MQ/Job/DataScope):
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 33, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+golden service valid: omni-inventory-sample, generated=33, integrated=39
+
+Preserved negative dependency guard, before any integration write:
+ERROR: 接入计划存在冲突：服务包启用 MQ，但目标工程 catalog 缺少 rocketmq 模块；请先以包含 rocketmq 的预设生成或注册模块; 服务包启用 XXL-JOB，但目标工程 catalog 缺少 xxl-job 模块

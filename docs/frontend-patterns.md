@@ -1,848 +1,264 @@
 # 前端模式与规范
 
-> 本文档定义了 Omni-Stack 前端的内部组织方式。所有前端代码必须遵循这些模式。  
-> 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。
+> 本文维护前端的当前组织、共享客户端状态、路由、权限显示、语言及生命周期约束。源码和配置定义实际行为；新增代码约定不表示所有历史代码已被逐行认证。
+> API 线格式与错误分类由 [API 契约](api-contract.md)维护；业务不变量见各领域事实/设计。安装、模块接入、操作与恢复统一见 [Wiki](wiki/index.md)、[脚手架开发](guides/scaffold-development.md)和 [Docker 部署](docker-deployment.md)。
 
 ---
 
 ## 目录
 
-- [1. 技术选型思考](#1-技术选型思考)
+- [1. 技术基线](#1-技术基线)
 - [2. 目录结构](#2-目录结构)
-- [3. API 层](#3-api-层-srcapi)
-- [4. 状态管理](#4-状态管理-srcstores)
-- [5. 路由](#5-路由-srcrouter)
+- [3. API 层 (src/api/)](#3-api-层-srcapi)
+- [4. 状态管理 (src/stores/)](#4-状态管理-srcstores)
+- [5. 路由 (src/router/)](#5-路由-srcrouter)
 - [6. 组件设计模式](#6-组件设计模式)
 - [7. 组件约定](#7-组件约定)
-- [8. 命名约定](#8-命名约定-typescript)
-- [9. 代码格式](#9-代码格式-typescript--vue)
+- [8. 命名约定 (TypeScript)](#8-命名约定-typescript)
+- [9. 代码格式 (TypeScript / Vue)](#9-代码格式-typescript--vue)
 - [10. UI 框架](#10-ui-框架)
 - [11. 国际化（i18n）](#11-国际化i18n)
 - [12. 权限与访问控制](#12-权限与访问控制)
 - [13. 业务模块结构范式](#13-业务模块结构范式)
 - [14. Composables 模式](#14-composables-模式)
-- [15. Docker 部署下的 Vite 构建优化](#15-docker-部署下的-vite-构建优化)
+- [15. 构建与静态服务边界](#15-构建与静态服务边界)
 - [16. 构建与工具](#16-构建与工具)
 - [17. 故障排查指南](#17-故障排查指南)
 
 ---
 
-## 1. 技术选型思考
+## 1. 技术基线
 
-### 为什么选择 Vue 3.5 + Composition API
+前端采用 Vue 3 Composition API、TypeScript、Pinia、Vue Router、Element Plus、vue-i18n 与 Vite。声明范围见 [package.json](../omni-frontend/package.json)，实际解析版本见 [package-lock.json](../omni-frontend/package-lock.json)，不把范围下限当作当前安装版本。
 
-| 考量 | 理由 |
-|------|------|
-| **TypeScript 原生支持** | Vue 3.5 对 `<script setup lang="ts">` 提供一流的类型推导，`defineProps<T>()` 无需运行时声明 |
-| **Composition API** | 逻辑复用通过 Composables 实现，替代 Mixin 的命名冲突和来源不透明问题 |
-| **Tree-shaking 友好** | 按需导入 API（`ref`、`computed`、`watch`），未使用的功能不会打包 |
-| **性能** | Proxy-based 响应式系统比 Vue 2 的 `Object.defineProperty` 更快，且支持 `Map`/`Set` 等集合类型 |
-| **Teleport / Suspense** | 内置 `<Teleport>` 和 `<Suspense>` 组件，简化模态框和异步组件的处理 |
-
-### 为什么选择 Vite 8
-
-| 考量 | 理由 |
-|------|------|
-| **原生 ESM** | 开发服务器基于浏览器原生 ES Module，无需打包即可启动，冷启动速度从 Webpack 的 30s+ 降至 < 2s |
-| **HMR 速度** | 模块级 HMR，修改单文件仅更新该模块而非整个 chunk，热更新延迟 < 50ms |
-| **Rollup 兼容** | 生产构建基于 Rollup，成熟的 tree-shaking 和 chunk splitting |
-| **插件生态** | `@vitejs/plugin-vue` 6.x 提供 SFC 编译、HMR 集成 |
-
-### 为什么选择 Pinia 3 而非 Vuex
-
-| 考量 | 理由 |
-|------|------|
-| **官方推荐** | Vue 官方从 Vue 3 起推荐 Pinia 替代 Vuex，Vuex 已进入维护模式 |
-| **Composition API 风格** | `defineStore('id', () => { ... })` 与 Vue 3 的 `<script setup>` 风格一致 |
-| **TypeScript 支持** | 完整的类型推导，无需 `@Mutation` / `@Action` 装饰器 |
-| **无 Mutation** | 只有 State + Getters + Actions，简化数据流（直接修改 state 或通过 action） |
-| **轻量** | 核心包 < 1KB gzipped，无 boilerplate 代码 |
-| **DevTools** | 集成 Vue DevTools，支持时间旅行调试和状态快照 |
-
-### 为什么选择 Element Plus 2.x
-
-| 考量 | 理由 |
-|------|------|
-| **Vue 3 原生** | Element UI 的 Vue 3 版本，完整的 Composition API 支持 |
-| **企业级组件** | 表格（`el-table`）、表单（`el-form`）、对话框（`el-dialog`）等企业场景组件成熟 |
-| **国际化内置** | 支持 `vue-i18n` 集成，组件内置中英文文案 |
-| **暗色模式** | 通过 `theme-chalk/dark/css-vars.css` 一键切换暗色主题 |
-| **图标库** | `@element-plus/icons-vue` 提供 280+ 矢量图标 |
+应用使用 `<script setup lang="ts">` 和 Pinia setup store。共享组件由 [plugins/element-plus.ts](../omni-frontend/src/plugins/element-plus.ts)显式注册，应用语言与 Element Plus locale 关联。冷启动、HMR、包体与生产性能须注明测量环境；依赖版本不证明固定速度、体积或全局 UI 验收。
 
 ---
 
 ## 2. 目录结构
 
-```
-omni-frontend/
-├── index.html              # Vite 入口 HTML
-├── package.json
-├── vite.config.ts          # Vite 配置（代理、别名、构建）
-├── tsconfig.json
-├── eslint.config.mjs       # ESLint flat config
-└── src/
-    ├── main.ts             # 应用启动（Pinia、Router、Element Plus、I18n）
-    ├── App.vue             # 根组件（<router-view />）
-    ├── api/                # API 层（一个业务域一个文件）
-    │   ├── request.ts      # 共享 Axios 实例 + 拦截器
-    │   ├── user.ts         # 用户 API 函数
-    │   ├── dict.ts         # 字典 API（类型 + 数据 CRUD）
-    │   ├── auth.ts         # 认证 API（登录、注册、验证码、社交登录、OAuth2）
-    │   ├── menu.ts         # 菜单 API（动态菜单树）
-    │   ├── workflow.ts     # 工作流 API（模型、定义、实例、审批）
-    │   └── myJob.ts        # 用户定时任务 API
-    ├── stores/             # Pinia 状态管理（一个业务域一个文件）
-    │   ├── user.ts         # 用户认证 Store（Token、用户信息）
-    │   ├── app.ts          # 应用设置 Store（主题、侧边栏）
-    │   └── permission.ts   # 权限 Store（权限编码列表、动态菜单树）
-    ├── router/
-    │   └── index.ts        # 路由定义 + 导航守卫 + 动态路由注册
-    ├── views/              # 页面组件（kebab-case 目录）
-    │   ├── home/index.vue          # 首页（未登录落地页 / 已登录工作台）
-    │   ├── login/index.vue         # 登录页
-    │   ├── register/index.vue      # 注册页
-    │   ├── callback/index.vue      # OAuth2 回调页
-    │   ├── dashboard/index.vue     # 仪表盘
-    │   ├── consent/index.vue       # OAuth2 授权确认页
-    │   ├── device/                 # 设备授权（Device Code Flow）
-    │   │   ├── index.vue           # 设备模拟器：显示二维码 + 轮询 Token
-    │   │   └── verify.vue          # 用户确认授权页
-    │   ├── base/                   # 基础数据模块
-    │   │   └── dict/index.vue      # 字典管理（master-detail 布局）
-    │   ├── system/                 # 系统管理模块
-    │   │   ├── user/index.vue      # 用户管理
-    │   │   ├── role/index.vue      # 角色管理
-    │   │   ├── permission/index.vue # 权限管理
-    │   │   ├── org/index.vue       # 组织管理
-    │   │   ├── tenant/index.vue    # 租户管理
-    │   │   ├── oauth2/index.vue    # OAuth2 客户端管理
-    │   │   ├── online/index.vue    # 在线用户监控
-    │   │   └── xssconfig/index.vue # XSS 防护配置
-    │   ├── workflow/               # 工作流模块
-    │   │   ├── model/index.vue     # 流程模型管理 + BPMN 设计器
-    │   │   ├── definition/index.vue # 流程定义管理
-    │   │   ├── instance/index.vue  # 流程实例管理
-    │   │   └── stats/index.vue     # 流程统计
-    │   └── monitor/                # 监控模块
-    │       └── oper-log/index.vue  # 操作日志
-    ├── layout/
-    │   └── index.vue       # 应用壳布局（侧边栏、顶栏、内容区）
-    ├── components/         # 共享/复用 UI 组件
-    │   ├── LoginForm.vue           # 登录表单（密码 + SSO + 第三方 OAuth2）
-    │   ├── CronGenerator.vue       # Cron 表达式生成器
-    │   ├── DynamicFormRenderer.vue # 动态表单渲染器
-    │   └── workflow/               # 工作流专用组件
-    │       ├── ModelDesigner.vue   # BPMN 建模设计器
-    │       └── panels/             # BPMN 属性面板
-    ├── composables/        # Vue Composables（逻辑复用）
-    │   ├── useDictOptions.ts       # 字典选项加载
-    │   ├── useBpmnModeler.ts       # BPMN Modeler 生命周期管理
-    │   └── useBpmnExtension.ts     # BPMN 扩展元素读写
-    ├── constants/          # 常量定义
-    │   └── menu.ts                 # 菜单 i18n 映射表
-    ├── directives/         # Vue 自定义指令
-    │   └── permission.ts           # v-permission 权限指令
-    ├── utils/              # 工具函数
-    │   ├── jwt.ts                  # JWT 解析（提取权限、租户 ID）
-    │   └── pkce.ts                 # PKCE 工具（OAuth2 Device Code Flow）
-    ├── i18n/
-    │   └── index.ts        # vue-i18n 实例配置
-    ├── locales/            # 翻译文件
-    │   ├── zh-CN.ts        # 中文翻译
-    │   └── en-US.ts        # 英文翻译
-    ├── types/              # 共享 TypeScript 类型
-    │   └── api.ts          # ApiResponse<T>, PageResult<T>
-    └── styles/
-        └── index.scss      # 全局样式（reset、布局、主题）
-```
+下表是职责与代表入口，不是完整文件树；所有业务模块仍按当前源码和模块目录组织。
+
+| 目录/入口 | 当前职责 |
+|---|---|
+| [main.ts](../omni-frontend/src/main.ts)、[App.vue](../omni-frontend/src/App.vue) | Pinia、Router、UI、i18n、指令、主题启动；根路由出口与组件语言 |
+| `src/api/` | 共享 request.ts；按子域拆分的 user.ts、dict.ts、`crm-*`、`srm-*`、`procurement-*`、`asset-*` 等 |
+| `src/stores/` | user.ts、app.ts、permission.ts |
+| [router/index.ts](../omni-frontend/src/router/index.ts) | 静态/动态路由、视图/图标映射、会话清理和导航守卫 |
+| `src/views/`、`src/components/`、`src/layout/` | 页面、复用组件、管理布局；OAuth 客户端实际在 views/oauth2-client，不在 system/oauth2 |
+| `src/composables/` | 字典状态与 BPMN 生命周期；扩展读写也可导出普通函数 |
+| `src/utils/`、`src/constants/` | JWT 解码、错误/回跳/访问策略、PKCE 与菜单文案映射；PKCE 用于授权码流程 |
+| `src/i18n/`、`src/locales/` | 语言实例和 zh-CN.ts、en-US.ts、ja-JP.ts、ko-KR.ts |
+| [types/api.ts](../omni-frontend/src/types/api.ts)、`src/styles/` | 唯一共享响应类型与全局样式 |
 
 ---
 
 ## 3. API 层 (`src/api/`)
 
-### 共享 Axios 实例
+[request.ts](../omni-frontend/src/api/request.ts) 共享 Axios 实例的 baseURL 为 VITE_API_BASE_URL（缺省 /api）、timeout 为15000ms、withCredentials 为true。请求从 userStore.token 设置 Bearer，并由 token 解析 X-Tenant-Id；客户端解析不验证 JWT 签名，可信身份由 Gateway 决定。
 
-`request.ts` 导出单个配置的 Axios 实例：
+成功拦截器返回完整 AxiosResponse，不自动解包业务 data：
 
-- **baseURL**：从 `VITE_API_BASE_URL` 环境变量读取，默认 `/api`
-- **timeout**：15000ms
-- **withCredentials**：`true`（携带 Cookie，支持 OAuth2 Session 管理）
-- **请求拦截器**：从 `useUserStore()` 读取 Token，注入 `Authorization: Bearer <token>`
-- **响应拦截器**：检查 `code === 200`，业务错误弹出 `ElMessage.error`，401 弹出过期对话框并跳转登录页（携带 redirect 参数）
+| 层次 | 当前示例 |
+|---|---|
+| HTTP 响应 | `AxiosResponse<ApiResponse<PageResult<SysUser>>>` |
+| `response.data` | `R<T>` 对应的 ApiResponse |
+| `response.data.data` | 业务 PageResult |
 
-### API 函数模式
+当前 [user.ts](../omni-frontend/src/api/user.ts) 使用 SysUser、listUsers、getUser；领域函数的返回类型由 Axios 泛型推导。共享 ApiResponse/PageResult 仅从 `@/types/api` 导入，不复制第二份；DTO 字段与 null 行为见 API 契约。
 
-一个业务域一个文件。函数命名约定：
+错误处理使用 [error-display.ts](../omni-frontend/src/utils/error-display.ts) 与 [errors.ts](../omni-frontend/src/utils/errors.ts) 的分类和本地化描述符。401 不是一律过期：凭据端点保留会话/输入，其他未登录或过期分支才执行重新认证；403 不清会话。重新认证先统一清理状态，再在对话框结束时导航；并发对话框和显式退出有抑制标志。
 
-| 操作 | 前缀 | 示例 |
-|------|------|------|
-| 按 ID 查询 | `getXxx` | `getUserById(id)` |
-| 分页列表 | `listXxx` | `listUsers(page, size)` |
-| 创建 | `createXxx` | `createUser(data)` |
-| 更新 | `updateXxx` | `updateUser(id, data)` |
-| 删除 | `deleteXxx` | `deleteUser(id)` |
-
-所有函数必须有类型化参数和返回类型，使用 `ApiResponse<T>`：
-
-```typescript
-import request from './request'
-import type { ApiResponse, PageResult } from '@/types/api'
-
-export function listUsers(page: number, size: number) {
-  return request.get<ApiResponse<PageResult<UserInfo>>>(
-    `/auth/user/list?page=${page}&size=${size}`,
-  )
-}
-```
-
-### 类型系统
-
-- **共享类型**（`ApiResponse<T>`、`PageResult<T>`）：定义在 `src/types/api.ts`，作为唯一真实来源
-- **领域类型**（如 `UserInfo`、`SysUser`）：共同定位在使用它们的 API 文件中（`src/api/user.ts`）
-- **禁止重复**定义共享类型；始终从 `@/types/api` 导入
-- 使用 `import type { ... }` 仅导入类型
+远端/Axios 技术 message 只供诊断，调用方使用 displayMessage/getErrorMessage 等安全入口。getErrorMessage 对非 Axios 的本地 Error 仍保留原 message，不能据此声称所有本地异常都已翻译。OAuth2 标准 token 请求等使用独立 fetch/协议响应，不套用这份 R 客户端规则。
 
 ---
 
 ## 4. 状态管理 (`src/stores/`)
 
-### Pinia Composition API 风格
+三个 setup store 的实际职责为：
 
-```typescript
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+| Store | 当前状态与持久化 |
+|---|---|
+| [user](../omni-frontend/src/stores/user.ts) | token、username 均持久化；isLoggedIn 只判断 token 存在；isLoggingOut 标记显式退出 |
+| [app](../omni-frontend/src/stores/app.ts) | sidebarCollapsed、theme；主题键 omni-theme，默认 dark；初次侧栏按768px媒体条件收起，不持久化侧栏 |
+| [permission](../omni-frontend/src/stores/permission.ts) | permissions、menuTree、menusLoaded、menuLoadState、menuLoadError；内存状态与并发菜单 Promise |
 
-export const useUserStore = defineStore('user', () => {
-  const token = ref<string>(localStorage.getItem('token') || '')
-  const username = ref<string>('')
+nickname/avatar 不是 userStore 当前字段，语言由 i18n 的 omni-lang 管理，不属于 appStore。不要把精简 token-only logout 示例当作完整会话回收。
 
-  function setToken(newToken: string) {
-    token.value = newToken
-    localStorage.setItem('token', newToken)
-  }
+路由层 `clearAuthenticatedSession(explicit)` 依次调用 user.logout、permission.reset 和 clearDynamicRoutes。user.logout 自身只清 token/username；字典缓存另外观察身份变化。appStore 通过专属主题 helper 更新 HTML dark 类，此职责是明确的 DOM 副作用；普通业务 store 不应随意操作页面 DOM。
 
-  function logout() {
-    token.value = ''
-    username.value = ''
-    localStorage.removeItem('token')
-  }
-
-  return { token, username, setToken, logout }
-})
-```
-
-### 规则
-
-- 一个业务域一个 Store：`user.ts`、`app.ts`、`permission.ts`
-- Store 文件命名：kebab-case
-- Store Hook 命名：`use` 前缀（`useUserStore`、`useAppStore`、`usePermissionStore`）
-- 使用 Composition API 风格（`defineStore('id', () => { ... })`）
-- 持久化使用 `localStorage`；非持久化状态使用 `ref()`
-- Store 中禁止直接操作 DOM
-
-### 三个核心 Store 职责
-
-| Store | 职责 | 持久化 |
-|-------|------|--------|
-| `useUserStore` | Token 管理、用户基本信息（username、nickname、avatar） | `localStorage`（token） |
-| `useAppStore` | 主题切换（light/dark）、侧边栏折叠状态、语言偏好 | `localStorage`（theme、lang） |
-| `usePermissionStore` | 权限编码列表（从 JWT 解析）、动态菜单树（从后端加载）、`menusLoaded` 标志 | 无（每次登录重新获取） |
+当前菜单异步请求没有字典缓存的 Token/代次回填守卫；reset 清状态/Promise 引用，不等于已取消发出的请求。字典回归不能证明所有共享状态均有相同隔离能力。
 
 ---
 
 ## 5. 路由 (`src/router/`)
 
-### 路由架构
+Router 使用 `createWebHistory(import.meta.env.BASE_URL)`。静态只表示预先声明，并不等于公开；只有 `requiresAuth === false` 明确走公开分支，未设置也按保护分支处理。
 
-Omni-Stack 采用**静态路由 + 动态路由**混合架构：
+| 静态路径 | 当前访问处理 |
+|---|---|
+| `/`、`/login`、`/register` | 公开；有 token 访问 Login 回 Home |
+| `/portal-login`、`/portal-register` | 公开；有 token 访问 PortalLogin 回 supplier-portal |
+| `/callback`、`/device`、`/device/verify`、`/consent` | 公开路由；页面/协议仍有各自验证 |
+| `/supplier-portal` | 需要 token 与 portalAccess 策略 |
+| `/menu-load-error` | 需要 token；提供菜单重试 |
+| `/admin`、`/admin/dashboard` | 管理布局及默认子页；受管理身份策略约束 |
+| `/admin/:pathMatch(.*)*`、`/:pathMatch(.*)*` | 分别渲染403/404页；前者受保护，后者公开 |
 
-```
-静态路由（公开页面）
-├── /            → Home（首页落地页 / 工作台）
-├── /login       → Login
-├── /register    → Register
-├── /callback    → OAuth2Callback
-├── /device      → DeviceAuth
-├── /device/verify → DeviceVerify
-├── /consent     → OAuth2 授权确认
-└── /admin       → Layout（管理后台壳）
-    └── /admin/dashboard → Dashboard（静态子路由）
+保护路由无 token 时通过 safeAppRedirect 保留站内回跳，并选择 Login/PortalLogin。有 token 时每次 initFromToken；菜单未完成则等待 loadMenus、注册并 replace 重导航，失败进入 MenuLoadError；其余分支补注册，再执行管理/供应商门户/资产本人访问策略。Token 存在与客户端解码不证明签名有效或未过期，服务端请求仍须认证。
 
-动态路由（权限驱动，运行时注册）
-└── /admin/<feature> → 对应 views/<module>/<feature>/index.vue
-    例如：/admin/user → views/system/user/index.vue
-         /admin/dict → views/base/dict/index.vue
-```
+动态注册只处理有匹配组件的 MENU，排除 srm:portal: 子项，并递归 children。permissionCode 中冒号换斜线形成 admin 子路径、换连字符形成路由名；`system:user → /admin/system/user`，`base:dict → /admin/base/dict`，不是 /admin/user 或 /admin/dict。MenuNode.path 是权限树物化路径，不是前端 URL。
 
-### 导航守卫流程
+视图由 `import.meta.glob('../views/**/index.vue')` 延迟加载。当前 viewOverrides 恰有两项：system:oauth2→views/oauth2-client/index.vue、base:operlog→views/monitor/oper-log/index.vue。动态 meta 包含 title/icon/requiresAuth/permissionCode；类型中的元字段可选，不能说所有静态记录都显式填写全部字段。动态名称集合用于去重，退出时按注册名移除。
 
-```
-router.beforeEach()
-    ↓
-判断 to.meta.requiresAuth
-    ├── false → 已登录用户访问 /login → 重定向到 Home（实际 path 为 `/`，非 `/home`）
-    │           其他公开页面 → 放行
-    └── true  → 检查 userStore.token
-                ├── 无 Token → 重定向到 /login?redirect=<path>
-                └── 有 Token → 检查 permissionStore.menusLoaded
-                    ├── false → initFromToken() → loadMenus() → registerDynamicRoutes() → 重新导航
-                    └── true  → registerDynamicRoutes()（幂等）→ 放行
-```
-
-### 约定式视图组件映射
-
-动态路由通过 `import.meta.glob` 扫描 `views/` 目录下所有 `index.vue`，实现 permissionCode → 视图组件的自动映射：
-
-```typescript
-// router/index.ts
-const viewModules = import.meta.glob('../views/**/index.vue')
-
-// 映射规则：permissionCode "system:user" → "views/system/user/index.vue"
-function resolveViewComponent(permissionCode: string) {
-  if (viewOverrides[permissionCode]) return viewModules[viewOverrides[permissionCode]]
-  const modulePath = permissionCode.replace(/:/g, '/')
-  return viewModules[`../views/${modulePath}/index.vue`]
-}
-```
-
-**特殊映射覆盖**（`viewOverrides`）：
-
-| permissionCode | 特殊映射路径 | 原因 |
-|----------------|------------|------|
-| `system:oauth2` | `views/oauth2-client/index.vue` | 避免与 OAuth2 回调页冲突 |
-| `base:operlog` | `views/monitor/oper-log/index.vue` | 归类到 monitor 目录 |
-
-### 规则
-
-- 所有路由组件使用懒加载：`() => import('@/views/xxx/index.vue')`
-- `meta` 字段：`title`（必需）、`icon`（可选）、`requiresAuth`（必需）、`permissionCode`（动态路由自动设置）
-- 需要认证的路由：明确设置 `requiresAuth: true`
-- 公开路由：明确设置 `requiresAuth: false`
-- 登出时调用 `clearDynamicRoutes()` 清除所有动态路由
+菜单失败也会设置 menusLoaded=true，必须同时查看 idle/loading/loaded/failed 状态；retryLoadMenus 先重置后重载。具体恢复操作归 Wiki。
 
 ---
 
 ## 6. 组件设计模式
 
-### 页面组件（Views）
+页面把响应式数据、加载/表单状态、操作函数与模板分开；API/类型由领域模块导入，复用逻辑放 Composables，业务专用组件可与页面共同组织。实际用户页见 [views/system/user](../omni-frontend/src/views/system/user/index.vue)，不维护含缺失导入或省略号的第二份“可运行”页面。
 
-页面组件遵循标准的**数据 + 操作 + UI**三层结构：
+加载状态在 finally 回收；提交先等待表单校验，写操作同时遵守按钮权限与服务端校验。新增交互应区分用户取消与真实失败，避免用宽泛 catch 把失败当作取消；已有处理范围仍以源码为准。
 
-```vue
-<script setup lang="ts">
-// 1. 导入（API、类型、组件、i18n）
-import { ref, reactive, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { listUsers, createUser, type SysUser } from '@/api/user'
-
-const { t } = useI18n()
-
-// 2. 响应式状态
-const tableData = ref<SysUser[]>([])
-const total = ref(0)
-const currentPage = ref(1)
-const pageSize = ref(10)
-const loading = ref(false)
-
-// 3. 表单状态
-const dialogVisible = ref(false)
-const formRef = ref<FormInstance>()
-const form = reactive({ username: '', password: '' })
-const rules: FormRules = { username: [{ required: true, ... }] }
-
-// 4. 业务函数
-async function loadData() { loading.value = true; try { ... } finally { loading.value = false } }
-function handleCreate() { dialogVisible.value = true }
-async function handleSubmit() { await formRef.value?.validate(); ... }
-async function handleDelete(id: number) { await ElMessageBox.confirm(...); ... }
-</script>
-```
-
-### 共享组件（Components）
-
-- 通用 UI 组件放在 `src/components/`
-- 业务特定组件与对应 views 共同定位
-- 组件使用 UpperCamelCase（`<UserCard />`），文件使用 kebab-case 目录
-
-### 组件通信模式
-
-| 场景 | 模式 | 示例 |
-|------|------|------|
-| 父子通信 | `defineProps<T>()` + `defineEmits<T>()` | `<LoginForm @login-success="onLogin" />` |
-| 跨组件状态 | Pinia Store | `useUserStore().token` |
-| 逻辑复用 | Composable | `useDictOptions('dict_type_code')` |
-| 插槽扩展 | `<slot>` + named slots | `<template #header>...</template>` |
+父子组件用 defineProps/defineEmits，跨组件客户端状态用 Pinia，扩展 UI 用 slots。类型推导不替代运行时载荷检查。
 
 ---
 
 ## 7. 组件约定
 
-### SFC 元素顺序
+新增 Vue SFC 按 `<script setup lang="ts">` → `<template>` → `<style scoped>` 排列。页面通常为 kebab-case 目录的 index.vue；共享组件可为 LoginForm.vue、LanguageSelector.vue 等 UpperCamelCase 文件，不能把页面目录规则强加到所有组件文件。
 
-```vue
-<script setup lang="ts">
-// Script 在前
-</script>
-
-<template>
-  <!-- Template 在中 -->
-</template>
-
-<style scoped lang="scss">
-/* Styles 在后 */
-</style>
-```
-
-### 规则
-
-- 所有组件使用 `<script setup lang="ts">`
-- Props：使用 `defineProps<T>()` TypeScript 泛型
-- 目录：kebab-case 目录 + `index.vue`（如 `views/login/index.vue`）
-- 样式：`<style scoped lang="scss">` 按组件隔离
-- 全局样式在 `src/styles/`
-- 禁止使用 `!important`，除非覆盖第三方组件样式
+Props/事件用类型化 defineProps/defineEmits。组件样式按范围组织，全局样式归 src/styles；覆盖第三方样式需有明确作用域。日期时间、金额和共享响应类型遵循 [API 契约](api-contract.md) 与 [AGENTS](../AGENTS.md)，不另建冲突格式。
 
 ---
 
 ## 8. 命名约定 (TypeScript)
 
-| 类型 | 风格 | 示例 |
-|------|------|------|
-| 变量 / 函数 | lowerCamelCase | `getUserById`、`userList` |
-| 接口 / 类型 | UpperCamelCase | `ApiResponse`、`UserInfo` |
-| 组件文件 | kebab-case 目录 + `index.vue` | `views/login/index.vue` |
-| Store 文件 | kebab-case | `stores/user.ts` |
-| Store Hook | `use` 前缀 | `useUserStore` |
-| Composable | `use` 前缀 | `useDictOptions` |
-| 常量 | UPPER_SNAKE_CASE | `MAX_PAGE_SIZE` |
-| CSS 类名 | kebab-case | `sidebar-menu`、`login-container` |
+| 对象 | 新增代码约定 |
+|---|---|
+| 变量/函数 | lowerCamelCase |
+| 接口/类型/组件 | UpperCamelCase |
+| 页面目录 | kebab-case + index.vue |
+| Store/领域模块文件 | 按现有领域入口命名；新文件优先 kebab-case |
+| Store/状态 Composable | use 前缀 |
+| 常量/CSS 类 | UPPER_SNAKE_CASE / kebab-case |
+
+myJob.ts、systemJob.ts 等历史入口仍存在，命名约定不是已完成批量重命名的声明。纯辅助函数不因位于 composables 目录就必须返回 Ref 或命名为 Hook。新增代码注释按 AGENTS 使用中文。
 
 ---
 
 ## 9. 代码格式 (TypeScript / Vue)
 
-- 缩进：2 空格
-- 无分号（ASI 风格）
-- 单引号；JSX 中使用双引号
-- 多行结构保留尾逗号
-- 使用 `import type { ... }` 仅导入类型
-- 使用 `@` 路径别名导入 `src/` 下的模块
-- Vue SFC 顺序：`<script setup>` → `<template>` → `<style scoped>`
+[eslint.config.mjs](../omni-frontend/eslint.config.mjs) 实际检查两空格、无分号、单引号、多行尾逗号和 SFC block-order；lint 使用 `--max-warnings 0`，配置为 warn 的问题仍会导致该命令失败。Node 脚本的局部 globals/no-console 例外不改变 src 规则。
+
+[tsconfig.json](../omni-frontend/tsconfig.json) 启用 strict、noUnusedLocals/noUnusedParameters、noFallthroughCasesInSwitch、bundler resolution、noEmit；@/* 映射 src/*。这些检查不证明后端权限或所有历史格式与命名约定已完成审计。
 
 ---
 
 ## 10. UI 框架
 
-- **Element Plus** 作为 UI 组件库（表单、表格、卡片、菜单等）
-- **@element-plus/icons-vue** 提供图标（全局注册在 `main.ts`）
-- 使用 Element Plus CSS 变量进行主题定制（`--el-color-primary`、`--el-bg-color-page` 等）
-- 表单校验：Element Plus `FormRules` + `ref<FormInstance>()` 模式
-- 暗色模式：通过 `theme-chalk/dark/css-vars.css` 自动切换
+[installElementPlus](../omni-frontend/src/plugins/element-plus.ts) 显式注册列出的组件、图标和 loading 指令，由 main 调用；不是把完整图标库全部注册。Globe 是 Connection 的别名。页面的 iconMap 与真实注册集合要配套维护。
 
-```typescript
-// 表单校验标准模式
-const formRef = ref<FormInstance>()
-const rules: FormRules = {
-  username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
-}
-
-async function handleSubmit() {
-  await formRef.value?.validate()  // 校验通过才继续
-  // ... 提交逻辑
-}
-```
+main 导入 Element Plus 基础/暗色变量 CSS；initTheme/setTheme 才应用 document.documentElement 的 dark 类。主题默认值与持久化归 appStore，CSS 导入本身不会自动切换主题。表单规则需要随语言更新时采用响应式规则和 t()；具体组件实现以对应页面为准。
 
 ---
 
 ## 11. 国际化（i18n）
 
-### 配置
+[i18n/index.ts](../omni-frontend/src/i18n/index.ts) 使用 legacy=false，支持 `zh-CN/en-US/ja-JP/ko-KR`，存储键 omni-lang；持久化值无效或缺失时默认 zh-CN，缺词 fallback 为 en-US。非组件上下文通过 translate() 使用同一实例。
 
-基于 `vue-i18n` 11.x，使用 Composition API 模式（`legacy: false`）：
+[LanguageSelector](../omni-frontend/src/components/LanguageSelector.vue) 同时修改 locale 与 storeLang；后者持久化并设置 HTML lang。[App.vue](../omni-frontend/src/App.vue) 将该 locale 映射到 Element Plus ElConfigProvider，异常映射回 enUS。只写 localStorage 不等于当前响应式语言已切换。
 
-```typescript
-// i18n/index.ts
-const i18n = createI18n({
-  legacy: false,
-  locale: getStoredLang(),        // 从 localStorage 读取，默认 'zh-CN'
-  fallbackLocale: 'en-US',
-  // 当前 SUPPORTED_LOCALES = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR']，新增模块必须四语齐全
-  messages: { 'zh-CN': zhCN, 'en-US': enUS, 'ja-JP': jaJP, 'ko-KR': koKR },
-})
-```
+新增文案在四份 locale 中保持相同键结构；菜单键同步 menuI18nMap。API/协议技术标识不翻译，例示某语言源文件时不得把内容误译成另一语言。文件齐全和 fallback 不代替四语语义/界面验证。
 
-### 使用方式
-
-```typescript
-// 组件内
-const { t, locale } = useI18n()
-const label = t('common.dashboard')
-
-// 切换语言
-locale.value = 'en-US'
-storeLang('en-US')  // 持久化到 localStorage
-```
-
-### 翻译文件结构
-
-翻译文件位于 `src/locales/`，按模块组织 key：
-
-```typescript
-// zh-CN.ts
-export default {
-  common: {
-    dashboard: '仪表盘',
-    systemManagement: '系统管理',
-    userManagement: '用户管理',
-    // ...
-  },
-  login: {
-    title: '登录',
-    username: '用户名',
-    // ...
-  },
-  // ...
-}
-```
-
-### 新增模块的 i18n 清单
-
-| 步骤 | 文件 | 操作 |
-|------|------|------|
-| 1 | `src/locales/zh-CN.ts` | 添加 `common.<feature>Management` 和功能级翻译 key |
-| 2 | `src/locales/en-US.ts` | 添加对应英文翻译 |
-| 3 | `src/locales/ja-JP.ts` | 添加对应日文翻译（当前为四语体系，缺项会导致日文回退） |
-| 4 | `src/locales/ko-KR.ts` | 添加对应韩文翻译 |
-| 5 | `src/constants/menu.ts` → `menuI18nMap` | 添加 `permissionCode → i18n key` 映射 |
+动态页面标题由 router 在导航时按菜单映射生成，公开路由使用 docTitle；不保证同页切语言立即重算 document.title。语言 key 一致性、硬编码审计、文档 AI_REVIEW 与真实浏览器覆盖是不同检查。
 
 ---
 
 ## 12. 权限与访问控制
 
-### 权限 Store (`src/stores/permission.ts`)
+permissions 按约定来自 JWT scope 数组，roles 单独来自 roles；本地解码不校验签名或 claims 结构。在该数组约定下，hasPermission 做权限字符串精确成员判断，不会自动给 SUPER_ADMIN 或角色名赋予通配权限。
 
-`usePermissionStore` 管理权限编码列表和动态菜单树：
+菜单树来自 `GET /api/auth/menus`，MenuNode 的 DIRECTORY/MENU 用于分组/路由；path 为物化路径。客户端可见性不是后端授权证明。v-permission 在 mounted/updated 时设置 display:none 或恢复空 display，不移除 DOM；空绑定也不是拒绝访问的安全措施。
 
-```typescript
-// 从 JWT Token 初始化权限编码
-permissionStore.initFromToken()
+路由准入还使用 [access.ts](../omni-frontend/src/utils/access.ts) 的管理、供应商与资产本人策略。后端认证、功能权限/逐行归属、租户与数据范围承担实际安全边界，前端按钮/路径不能代替它们；具体服务现有限制见领域事实文档。
 
-// 从后端加载动态菜单
-await permissionStore.loadMenus()
-
-// 查询用户是否拥有指定权限
-permissionStore.hasPermission('system:user:create')
-```
-
-**数据来源**：
-- 权限编码列表：JWT Token 的 `authorities` 字段（登录时写入，通过 `getPermissionsFromToken()` 解析）
-- 动态菜单树：调用 `GET /api/auth/menus`（后端已按用户权限过滤）
-
-### 动态菜单路由
-
-登录成功后，路由守卫触发以下流程：
-
-```
-JWT 解码 → permissionStore.initFromToken() 提取权限编码
-    → permissionStore.loadMenus() 获取后端过滤后的菜单树
-    → registerDynamicRoutes() 遍历菜单树添加 Vue Router 路由
-    → 侧边栏渲染 permissionStore.menuTree
-```
-
-菜单数据结构（`MenuNode`）包含 `path`（前端路由路径）、`permissionCode`（权限编码）、`type`（DIRECTORY/MENU）等字段。
-
-### 按钮级权限控制 (`v-permission`)
-
-通过 Vue 自定义指令 `v-permission` 控制按钮的显隐：
-
-```vue
-<!-- 仅拥有 system:user:create 权限的用户可见 -->
-<el-button v-permission="'system:user:create'" type="primary">
-  新增
-</el-button>
-```
-
-**实现原理**：
-- 指令挂载时从 `usePermissionStore` 查询权限编码
-- 无权限时设置 `el.style.display = 'none'`（非 `removeChild`，兼容 Vue 响应式更新）
-- 在 `mounted` 和 `updated` 两个钩子中执行检查
-
-**注册方式**（`src/directives/permission.ts`）：
-
-```typescript
-// 在 main.ts 中注册
-import { setupPermissionDirective } from '@/directives/permission'
-setupPermissionDirective(app)
-```
-
-### 规则
-
-- 权限编码必须与后端 `sys_permission` 表中定义的一致，格式为 `resource:action`
-- `v-permission` 指令仅用于 UI 层显隐控制，后端 `@PreAuthorize` 才是安全边界
-- 动态路由必须在导航守卫中等待 `permissionStore.loadMenus()` 完成后注册
-- 登出时必须调用 `permissionStore.reset()` 清除权限状态
-
-### XSS 防护配置管理
-
-XSS 防护管理页面（`views/system/xssconfig/index.vue`）提供全局开关和黑名单规则 CRUD：
-
-- **全局开关**：`el-switch` 组件，调用 `PUT /api/auth/xss-config/toggle`
-- **规则列表**：`el-table` 分页表格，支持新建、编辑、删除、单条启用/禁用
-- **租户隔离**：API 层从 JWT Token 提取 `tenant_id`，通过 `X-Tenant-Id` 请求头传递
-- **规则类型**：HTML 标签 / 事件处理器 / 危险协议 / 自定义正则
+XSS 配置页、API 与错误/租户约束见 [API 契约](api-contract.md)。前端传 X-Tenant-Id 不等于服务端信任任意输入；Gateway 会从已验证身份覆盖。退出必须走统一会话清理，不能只隐藏菜单。
 
 ---
 
 ## 13. 业务模块结构范式
 
-新增业务模块时，按以下约定组织目录、注册路由和配置国际化。
+页面、API、可选 Store 与四语 locale 按领域组织，覆盖 CRM、SRM、Procurement、Asset 及平台功能。响应类型唯一归 src/types/api.ts，模块不得复制。
 
-### 标准目录布局
-
-以「基础数据模块 → 字典管理功能」为例：
-
-```
-src/
-├── views/
-│   └── base/                  # 模块分组目录
-│       └── dict/
-│           └── index.vue      # 功能页面（SFC 顺序: script → template → style）
-├── api/
-│   └── dict.ts               # API 函数 + TypeScript 接口（一文件一功能域）
-├── stores/
-│   └── dict.ts               # （可选）仅当需要复杂客户端状态时创建
-└── locales/
-    ├── zh-CN.ts              # 中文翻译
-    └── en-US.ts              # 英文翻译
-```
-
-### 注册清单
-
-每个新业务模块需要完成以下注册：
-
-| 步骤 | 文件 | 操作 |
-|------|------|------|
-| 1 | `src/router/index.ts` → `iconMap` | 添加 `'<module>:<feature>': '<IconName>'`（如 `'base:dict': 'Collection'`） |
-| 2 | `src/constants/menu.ts` → `menuI18nMap` | 添加模块目录和菜单项的 i18n key 映射 |
-| 3 | `src/locales/zh-CN.ts` + `en-US.ts` + `ja-JP.ts` + `ko-KR.ts` | 四个 locale 同步添加 `common.<module>Management`（目录名）、`common.<feature>Management`（菜单名）和功能级翻译 key |
-| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | 添加幂等 DIRECTORY（模块分组）+ MENU（功能页面）+ BUTTON/API（操作权限）种子数据，并刷新 seed manifest |
-| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | 幂等地为 SUPER_ADMIN 角色分配新权限节点，并增加自然键断言 |
-
-### 参考实现：字典管理模块
-
-以 `base:dict`（字典管理）作为新模块的参考范本：
-
-- **View**: `views/base/dict/index.vue` — master-detail 布局（左侧类型列表 10/24 cols，右侧数据列表 14/24 cols）
-- **API**: `api/dict.ts` — 11 个 typed 函数（`listDictTypes`、`getDictType`、`createDictType`、`updateDictType`、`deleteDictType`、`toggleDictTypeStatus`、`listDictData`、`createDictData`、`updateDictData`、`deleteDictData`、`refreshDictCache`）
-- **Permission codes**: `dict:type:*`（4 个）+ `dict:data:*`（5 个）
-- **UI patterns**: `v-permission` 按钮权限控制、`el-switch` 状态切换、`el-pagination` 分页、`ElMessageBox.confirm` 删除确认、`X-Tenant-Id` 多租户隔离
+router 的 iconMap、constants/menu.ts 的 menuI18nMap、后端 sys_permission/sys_role_permission、按钮指令与端点权限保持一致；种子修改同步 manifest 摘要与断言。接入步骤统一维护在[脚手架开发](guides/scaffold-development.md)，实例参考[字典页面](../omni-frontend/src/views/base/dict/index.vue)与[字典 API](../omni-frontend/src/api/dict.ts)。
 
 ---
 
 ## 14. Composables 模式
 
-Composables 是 Omni-Stack 前端的逻辑复用核心机制，替代传统的 Mixin 模式。
+有状态 Composable 按功能域返回有名称的 Ref、ComputedRef 与操作函数；纯辅助函数按其接口返回值。副作用必须有明确归属：组件资源随组件作用域回收，跨组件共享缓存由自己的上下文观察管理。
 
 ### 设计原则
 
-| 原则 | 说明 |
-|------|------|
-| **单一职责** | 一个 Composable 只关注一个功能域 |
-| **返回值约定** | 返回 `{ state, computed, actions }` 对象，使用解构消费 |
-| **响应式** | 内部使用 `ref()` / `reactive()`，返回值自动响应式 |
-| **生命周期安全** | 在 `onMounted` / `onUnmounted` 中管理副作用 |
+| 原则 | 约束 |
+| --- | --- |
+| 单一职责 | 按功能域组织，不复制共享 ApiResponse/PageResult |
+| 响应式返回 | 暴露响应式状态时返回 refs/computed，解构后保持更新；模板按 Vue 规则自动解包 |
+| 上下文归属 | 缓存与在途请求必须区分租户和身份上下文 |
+| 生命周期 | 组件观察随作用域停止；模块共享观察独立持有，并在上下文替换或 HMR 时停止 |
 
 ### 典型 Composable：useDictOptions
 
 ```typescript
-// composables/useDictOptions.ts
-export function useDictOptions(dictTypeCode: string) {
-  const options = ref<DictOption[]>([])
-  const loading = ref(false)
+import { useDictOptions } from '@/composables/useDictOptions'
 
-  async function loadOptions() {
-    loading.value = true
-    try {
-      const { data: res } = await listDictDataByType(dictTypeCode)
-      options.value = res.data.map(item => ({
-        label: item.dictLabel,
-        value: item.dictValue,
-      }))
-    } finally {
-      loading.value = false
-    }
-  }
-
-  onMounted(loadOptions)
-
-  return { options, loading, reload: loadOptions }
-}
+const { options, loading } = useDictOptions('workflow_category')
 ```
 
-**使用方式**：
+当前 `useDictOptions(typeCode)` 返回 `{ options, loading }`：options 为 `ComputedRef<DictOption[]>`，loading 为 `Ref<boolean>`。它调用已认证的 `getDictOptions()`，没有公开 `reload` 方法，也不存在示例中的 `listDictDataByType()` 调用。
 
-```vue
-<script setup lang="ts">
-const { options: categoryOptions } = useDictOptions('workflow_category')
-</script>
+缓存键为租户 ID 与 typeCode；同租户同 Token 的进行中请求合并。租户变化切换选项视图，Token 变化使旧请求失效；已完成的同租户缓存仍可复用。旧响应仅在请求仍有效且 Token 未变时回填，结束处理也不会删除新的在途记录。
 
-<template>
-  <el-select v-model="form.category">
-    <el-option v-for="opt in categoryOptions" :key="opt.value"
-               :label="opt.label" :value="opt.value" />
-  </el-select>
-</template>
-```
+模块拥有独立于消费者的身份观察作用域；最后一个消费者销毁后，退出仍清空缓存并禁止旧响应回填。解码租户值为假值时不发选项请求；该客户端判断不验证 JWT 签名或 claims 结构。共享缓存不因组件卸载自行失效，后台刷新 Redis 也不等于已刷新客户端内存。
+
+模板消费 loading 时直接绑定该 Ref 的自动解包值；脚本中读写使用 `.value`。相关契约与 8 项实际源码/Vue 回归均有源码入口，具体操作步骤归 Wiki。
+
+[dict.ts](../omni-frontend/src/api/dict.ts) / [useDictOptions.ts](../omni-frontend/src/composables/useDictOptions.ts) / [dict-options.test.ts](../omni-frontend/tests/base/dict-options.test.ts)
 
 ### 现有 Composables
 
-| Composable | 文件 | 职责 |
-|------------|------|------|
-| `useDictOptions` | `composables/useDictOptions.ts` | 加载字典选项，返回响应式 `options` 数组 |
-| `useBpmnModeler` | `composables/useBpmnModeler.ts` | 管理 bpmn-js Modeler 的创建、销毁和导入/导出 |
-| `useBpmnExtension` | `composables/useBpmnExtension.ts` | BPMN extensionElements 的读写操作 |
+| 源码 | 职责 |
+| --- | --- |
+| [useDictOptions.ts](../omni-frontend/src/composables/useDictOptions.ts) | 租户选项缓存、上下文观察与加载状态 |
+| [useBpmnModeler.ts](../omni-frontend/src/composables/useBpmnModeler.ts) | bpmn-js 建模器初始化、导入导出和 onBeforeUnmount 销毁 |
+| [useBpmnExtension.ts](../omni-frontend/src/composables/useBpmnExtension.ts) | readAssignment/writeAssignment 等 BPMN 扩展读写函数 |
+
+[Flow 9](core-flows.md)
+
+该缓存隔离是 useDictOptions 的具体实现，不能推广到 permissionStore 的菜单请求。useBpmnModeler 监听容器后初始化、处理导入导出，卸载时移除 keydown 并 destroy；useBpmnExtension 导出普通扩展函数和 moddle 描述符。它们不共享字典请求状态，也不因这8项回归就获得全部异步取消、只读或浏览器生命周期认证。
 
 ---
 
-## 15. Docker 部署下的 Vite 构建优化
+## 15. 构建与静态服务边界
 
-### 多阶段构建
+[前端 Dockerfile](../docker/frontend/Dockerfile) 以 Node 22 构建、Nginx 1.28 交付 dist，监听3000。当前 [Nginx](../docker/frontend/nginx.conf) 把 /api/、/oauth2/、/.well-known/ 代理到 omni-gateway:8080，以 Docker DNS 解析，并提供 history 的 index.html 回退。
 
-前端 Docker 镜像采用两阶段构建（详见 `docker/frontend/Dockerfile`）：
-
-```dockerfile
-# 阶段 1：构建
-FROM node:22-alpine AS builder
-WORKDIR /app
-COPY omni-frontend/package*.json ./
-RUN npm ci                      # 确定性安装（锁定版本）
-COPY omni-frontend/ .
-RUN npm run build               # vue-tsc 类型检查 + Vite 生产构建
-
-# 阶段 2：运行（Nginx 静态服务）
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
-```
-
-### Vite 构建配置
-
-```typescript
-// vite.config.ts
-build: {
-  target: 'es2020',            // 构建目标：支持可选链、空值合并等现代语法
-  outDir: 'dist',
-  chunkSizeWarningLimit: 750, // 当前仓库实际阈值
-}
-```
-
-### 生产构建优化要点
-
-| 优化项 | 说明 |
-|--------|------|
-| **路由懒加载** | 所有 views 组件使用 `() => import()` 动态导入，实现按需加载 |
-| **Element Plus 按需** | 通过 `src/plugins/element-plus.ts` 显式导入并注册实际使用的组件（非插件自动 tree-shake） |
-| **`import.meta.glob`** | 视图模块扫描编译时静态分析，不会打包无关文件 |
-| **chunk splitting** | `vite.config.ts` 的 `build.rollupOptions.output.manualChunks` 显式将 bpmn、vendor、Element Plus 拆分为独立 chunk |
-| **CSS 提取** | 生产构建自动提取 CSS 为独立文件，支持浏览器缓存 |
-
-### Nginx 配置要点
-
-```nginx
-server {
-    listen 3000;  # 容器内监听 3000（与 Compose 宿主 3000 → 容器 3000 一致）
-    root /usr/share/nginx/html;
-    index index.html;
-
-    # SPA History 模式：所有非文件请求回退到 index.html
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # API 反向代理到 Gateway（容器内部端口）
-    location /api/ {
-        proxy_pass http://omni-gateway:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    # OAuth2 端点代理
-    location /oauth2/ {
-        proxy_pass http://omni-gateway:8080;
-    }
-}
-```
+HTML 配置 no-cache/no-store，assets 为一年 immutable 缓存；声明 add_header 的 location 显式重列安全头。以上是当前配置，不是本轮已启动服务、已验证代理或缓存行为的宣称。部署和持久化操作归 [Docker 部署](docker-deployment.md)与[快速开始](guides/quick-start.md)。
 
 ---
 
 ## 16. 构建与工具
 
-| 工具 | 用途 | 配置 |
-|------|------|------|
-| Vite 8 | 开发服务器 + 打包器 | `vite.config.ts` |
-| TypeScript 5.9 | 类型检查 | `tsconfig.json`（strict 模式） |
-| ESLint 9 | 代码检查 | `eslint.config.mjs`（flat config） |
-| Sass | CSS 预处理 | 通过 `<style lang="scss">` |
-| vue-i18n 11 | 国际化 | `src/i18n/index.ts` |
-| bpmn-js 18 | BPMN 流程建模 | `composables/useBpmnModeler.ts` |
+package.json 定义 build=`vue-tsc -b && vite build`、lint=`eslint . --max-warnings 0`、单元/E2E/截图/语言审计命令。Vite 采用 es2020、dist、750KB警告阈值及 bpmn-vendor/element-plus/vue-vendor 分块；开发代理 `http://localhost:8102` 指 Vite 所在网络，不是容器间地址。
 
-### Vite 代理
-
-开发服务器代理 `/api`、`/oauth2`、`/.well-known` 到 `http://localhost:8102`（Gateway）：
-
-```typescript
-server: {
-  port: 3000,
-  host: true,
-  proxy: {
-    '/api': { target: 'http://localhost:8102', changeOrigin: true },
-    '/oauth2': { target: 'http://localhost:8102', changeOrigin: true },
-    '/.well-known': { target: 'http://localhost:8102', changeOrigin: true },
-  },
-},
-```
-
-### 命令
-
-```bash
-npm install        # 安装依赖
-npm run dev        # 开发服务器 :3000
-npm run build      # 类型检查 + 生产构建
-npm run lint       # ESLint 检查
-npm run preview    # 预览生产构建
-```
+应用、构建、测试和浏览器验证在本机 Docker；精确命令见 [AGENTS](../AGENTS.md)。使用锁文件和 npm ci；源码变化按影响运行 build/lint/相关测试，E2E 另做其 TypeScript 检查。文档修改不把无变化的昂贵验证反复重开，复用须有源摘要/提交等价证据；预设生成物仍需自己的检查。
 
 ---
 
 ## 17. 故障排查指南
 
-### 开发环境问题
+[排错指南](guides/troubleshooting.md)维护启动、网络、构建、登录、菜单与语言故障的操作和恢复；[源码调试](wiki/source-debugging.md)维护调用链和断点。
 
-| 问题 | 可能原因 | 排查方法 |
-|------|---------|---------|
-| **Vite 启动报错 `EADDRINUSE`** | 端口 3000 被占用 | `lsof -i :3000` 或 `netstat -ano \| findstr :3000`，终止占用进程或修改 `vite.config.ts` 中的 `server.port` |
-| **API 请求 404** | Gateway 未启动或代理配置错误 | 检查 Gateway 是否在 8102 端口运行；检查 `vite.config.ts` 中 proxy target |
-| **CORS 错误** | 未通过代理直接请求后端 | 确保请求通过 `/api` 前缀走 Vite 代理 |
-| **Element Plus 样式缺失** | 未导入 CSS | 检查 `main.ts` 中是否包含 `import 'element-plus/dist/index.css'` |
-| **TypeScript 类型错误** | `node_modules` 缓存过期 | `rm -rf node_modules && npm install` |
-| **HMR 不生效** | 文件系统监听器限制 | Linux: `echo fs.inotify.max_user_watches=524288 \| sudo tee -a /etc/sysctl.conf` |
-
-### 构建问题
-
-| 问题 | 可能原因 | 排查方法 |
-|------|---------|---------|
-| **`vue-tsc` 类型检查失败** | 类型不匹配 | 运行 `npx vue-tsc --noEmit` 定位具体文件和行号 |
-| **chunk 体积过大** | 依赖未 tree-shake | 运行 `npx vite build --mode analyze` 分析依赖体积 |
-| **Docker 构建 `npm ci` 失败** | 网络问题或 `package-lock.json` 不同步 | 本地重新 `npm install` 生成新 lock 文件，或配置 npm 镜像源 |
-
-### 运行时问题
-
-| 问题 | 可能原因 | 排查方法 |
-|------|---------|---------|
-| **登录后白屏** | Token 无效或菜单加载失败 | 打开 DevTools → Application → Local Storage 检查 token；Network 标签检查 `/api/auth/menus` 响应 |
-| **动态菜单不显示** | `permissionStore.loadMenus()` 失败 | 检查后端 `/api/auth/menus` 是否正常返回；检查 `menusLoaded` 状态 |
-| **v-permission 按钮始终隐藏** | 权限编码不匹配 | 比较 `sys_permission` 表中的 `permission_code` 与前端 `v-permission` 值 |
-| **OAuth2 回调 404** | redirect_uri 配置错误 | 检查 Auth 服务的 OAuth2 客户端配置中 redirect_uri 是否与实际回调 URL 一致 |
-| **i18n 显示 key 而非翻译** | 翻译 key 缺失 | 检查 `zh-CN.ts` / `en-US.ts` 中是否包含对应 key；检查 `menuI18nMap` 映射 |
-| **SPA 路由刷新 404** | Nginx 未配置回退 | 确认 Nginx 配置 `try_files $uri $uri/ /index.html;` |
+诊断保留真实 HTTP/R.code、trace 与错误来源，分别核对身份、菜单状态/视图映射、权限和翻译；不能用改默认端口、清共享缓存或关质量门掩盖失败。源码阅读、测试、静态配置、浏览器与真实业务证据须分开记录。

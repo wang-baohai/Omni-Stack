@@ -26,15 +26,16 @@ Domain state machines, DataScope mappings, inherited child scope, Sagas, and ide
 
 Edit only the entry modules and metadata in `scaffold/presets/<id>.yaml`, then run:
 
-~~~powershell
-Set-Location tools/omni-cli
-npm test
-npm run test:preset-structure
-npm run docs:preset
-npm run docs:preset:check
+Run these commands at the source repository root in the local Docker CLI tooling container. Prepare the tooling image and dependencies using the first-start guide.
+
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm test
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-structure
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run docs:preset
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run docs:preset:check
 ~~~
 
-Bump `version` when module sets, default configuration, or generated output change compatibly: patch for fixes, minor for backward-compatible capability additions, and major for breaking boundary changes. Module and preset versions are independent.
+Bump `version` when module sets, default configuration, or generated output change: patch for fixes, minor for backward-compatible capability additions, and major for breaking boundary changes. Module and preset versions are independent.
 
 ## Gates
 

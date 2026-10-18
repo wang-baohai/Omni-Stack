@@ -1,0 +1,226 @@
+Omni-Stack current CLI terminal evidence, 2026-10-17
+Source commit: 064dc20ab2236a0f7d44881a8eab8731667a3837
+Runtime: local Docker, existing verified tool image and read-only dependency cache.
+Placeholders are private paths, not executable shell arguments. No application startup or business writes.
+
+$ npm run dev -- preset list
+ Container omni-scaffold-guide-cli-345-01 Creating
+ Container omni-scaffold-guide-cli-345-01 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts preset list
+
+core
+crm
+full
+supply-chain
+workflow
+[exit_code=0]
+
+$ npm run dev -- preset explain crm
+ Container omni-scaffold-guide-cli-345-02 Creating
+ Container omni-scaffold-guide-cli-345-02 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts preset explain crm
+
+CRM 销售平台 (crm@1.0.0)
+核心平台加 CRM 销售管道，不包含供应链。
+explicit: crm, gateway, mysql, redis, nacos
+resolved: platform, auth, base, crm, nacos, gateway, mysql, redis
+[exit_code=0]
+
+$ npm run dev -- preset create crm --output <PREVIEW_PROJECT_DIR> --dry-run
+ Container omni-scaffold-guide-cli-345-03 Creating
+ Container omni-scaffold-guide-cli-345-03 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts preset create crm --output <PREVIEW_PROJECT_DIR> --dry-run
+
+DRY-RUN preset crm@1.0.0
+target: /workspace/<PREVIEW_PROJECT_DIR>
+modules: platform, auth, base, crm, nacos, gateway, mysql, redis
+backend: omni-common-core, omni-common, omni-common-mybatis, omni-common-redis, omni-common-redis-reactive, omni-common-operlog, omni-common-job, omni-common-mqlog, omni-common-service, omni-db-migrator, omni-auth, omni-base, omni-crm, omni-gateway
+compose: omni-db-migrator, omni-frontend, omni-auth, omni-base, omni-crm, nacos, omni-gateway, mysql, redis
+ports: 80, 3000, 3306, 6379, 8080, 8100, 8101, 8102, 8104, 8848, 9848, 9900, 9901, 9904, 19900, 19901, 19902, 19904
+databases: platform, common, auth, base, crm, nacos, vendor
+permissions: system, base, dict, job, monitor, crm
+memory: minimum=3840MB, recommended=6400MB
+omit: workflow, srm, procurement, asset, xxl-job, rocketmq
+未写入文件；移除 --dry-run 后创建。
+[exit_code=0]
+
+$ npm run dev -- create-service tutorial-check-r345 --output <PRIVATE_BUNDLE_DIR>
+ Container omni-scaffold-guide-cli-345c-01 Creating
+ Container omni-scaffold-guide-cli-345c-01 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts create-service tutorial-check-r345 --output <PRIVATE_BUNDLE_DIR>
+
+DRY-RUN create omni-tutorial-check-r345
+target: <PRIVATE_BUNDLE_DIR>
+ports: service=8110, management=19910
+  CREATE omni-backend/omni-tutorial-check-r345/pom.xml
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/TutorialCheckR345Application.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/config/SecurityConfig.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/security/TutorialCheckR345TenantTablePolicy.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/controller/ModuleInfoController.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/service/ModuleInfoService.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/service/impl/ModuleInfoServiceImpl.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/mapper/package-info.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/resources/application.yml
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/resources/application-dev.yml
+  CREATE omni-backend/omni-tutorial-check-r345/src/test/java/com/omni/tutorial/check/r345/ServiceSkeletonContractTest.java
+  CREATE omni-frontend/src/api/tutorial-check-r345.ts
+  CREATE omni-frontend/src/views/tutorial-check-r345/overview/index.vue
+  CREATE database/changelog/tutorial-check-r345/db.changelog-tutorial-check-r345.yaml
+  CREATE database/changelog/auth/tutorial-check-r345-permissions.yaml
+  CREATE scripts/sql/seed/tutorial-check-r345-permissions.sql
+  CREATE integration/frontend/tutorial-check-r345.zh-CN.fragment.ts
+  CREATE integration/frontend/tutorial-check-r345.en-US.fragment.ts
+  CREATE integration/frontend/tutorial-check-r345.ja-JP.fragment.ts
+  CREATE integration/frontend/tutorial-check-r345.ko-KR.fragment.ts
+  CREATE integration/catalog/tutorial-check-r345.yaml
+  CREATE integration/gateway/tutorial-check-r345.yaml
+  CREATE integration/compose/tutorial-check-r345.yaml
+  CREATE integration/maven/tutorial-check-r345.xml
+  CREATE integration/permissions/tutorial-check-r345.yaml
+  CREATE integration/frontend/tutorial-check-r345.menu.fragment.ts
+  CREATE docs/tutorial-check-r345.md
+  CREATE docs/tutorial-check-r345.en.md
+  CREATE docs/tutorial-check-r345.jp.md
+  CREATE docs/tutorial-check-r345.kr.md
+  CREATE docs/tutorial-check-r345-i18n-status.yaml
+  CREATE GENERATION-PLAN.md
+  CREATE omni-service.lock.json
+未写入文件；确认后追加 --apply。
+[exit_code=0]
+
+$ npm run dev -- create-service tutorial-check-r345 --output <PRIVATE_BUNDLE_DIR> --apply
+ Container omni-scaffold-guide-cli-345c-02 Creating
+ Container omni-scaffold-guide-cli-345c-02 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts create-service tutorial-check-r345 --output <PRIVATE_BUNDLE_DIR> --apply
+
+APPLY create omni-tutorial-check-r345
+target: <PRIVATE_BUNDLE_DIR>
+ports: service=8110, management=19910
+  CREATE omni-backend/omni-tutorial-check-r345/pom.xml
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/TutorialCheckR345Application.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/config/SecurityConfig.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/security/TutorialCheckR345TenantTablePolicy.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/controller/ModuleInfoController.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/service/ModuleInfoService.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/service/impl/ModuleInfoServiceImpl.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/java/com/omni/tutorial/check/r345/mapper/package-info.java
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/resources/application.yml
+  CREATE omni-backend/omni-tutorial-check-r345/src/main/resources/application-dev.yml
+  CREATE omni-backend/omni-tutorial-check-r345/src/test/java/com/omni/tutorial/check/r345/ServiceSkeletonContractTest.java
+  CREATE omni-frontend/src/api/tutorial-check-r345.ts
+  CREATE omni-frontend/src/views/tutorial-check-r345/overview/index.vue
+  CREATE database/changelog/tutorial-check-r345/db.changelog-tutorial-check-r345.yaml
+  CREATE database/changelog/auth/tutorial-check-r345-permissions.yaml
+  CREATE scripts/sql/seed/tutorial-check-r345-permissions.sql
+  CREATE integration/frontend/tutorial-check-r345.zh-CN.fragment.ts
+  CREATE integration/frontend/tutorial-check-r345.en-US.fragment.ts
+  CREATE integration/frontend/tutorial-check-r345.ja-JP.fragment.ts
+  CREATE integration/frontend/tutorial-check-r345.ko-KR.fragment.ts
+  CREATE integration/catalog/tutorial-check-r345.yaml
+  CREATE integration/gateway/tutorial-check-r345.yaml
+  CREATE integration/compose/tutorial-check-r345.yaml
+  CREATE integration/maven/tutorial-check-r345.xml
+  CREATE integration/permissions/tutorial-check-r345.yaml
+  CREATE integration/frontend/tutorial-check-r345.menu.fragment.ts
+  CREATE docs/tutorial-check-r345.md
+  CREATE docs/tutorial-check-r345.en.md
+  CREATE docs/tutorial-check-r345.jp.md
+  CREATE docs/tutorial-check-r345.kr.md
+  CREATE docs/tutorial-check-r345-i18n-status.yaml
+  CREATE GENERATION-PLAN.md
+  CREATE omni-service.lock.json
+服务生成包已原子写入。
+[exit_code=0]
+
+$ npm run dev -- service validate tutorial-check-r345 --output <PRIVATE_BUNDLE_DIR>
+ Container omni-scaffold-guide-cli-345c-03 Creating
+ Container omni-scaffold-guide-cli-345c-03 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts service validate tutorial-check-r345 --output <PRIVATE_BUNDLE_DIR>
+
+service valid: tutorial-check-r345, files=32, template=1.5.1
+[exit_code=0]
+
+$ npm run dev -- generate crud --spec scaffold/specs/material-brand.yaml --check
+ Container omni-scaffold-guide-cli-345c-04 Creating
+ Container omni-scaffold-guide-cli-345c-04 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts generate crud --spec scaffold/specs/material-brand.yaml --check
+
+crud spec valid: procurement:MaterialBrand, fields=4
+[exit_code=0]
+
+$ npm run dev -- dev --help
+ Container omni-scaffold-guide-cli-345c-05 Creating
+ Container omni-scaffold-guide-cli-345c-05 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts dev --help
+
+Usage: omni dev [options] [command]
+
+轻量本地开发环境命令
+
+Options:
+  -h, --help        display help for command
+
+Commands:
+  up [options]      启动预设或模块的最小依赖组合
+  down [options]    停止当前开发栈，默认保留命名卷
+  status [options]  显示所有开发 profile 的容器状态
+  doctor            检查本地开发环境与工作区
+  logs [options]    查看指定模块服务日志
+  help [command]    display help for command
+[exit_code=0]
+
+$ npm run dev -- dev up --help
+ Container omni-scaffold-guide-cli-345c-06 Creating
+ Container omni-scaffold-guide-cli-345c-06 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts dev up --help
+
+Usage: omni dev up [options]
+
+启动预设或模块的最小依赖组合
+
+Options:
+  --preset <preset>      正式预设 ID
+  --module <module>      模块 ID
+  --mode <mode>          显式运行模式 lite|full（默认按预设/模块推断）
+  --project-name <name>  Compose project 名（多行并行隔离必需）
+  --set <assignment...>  覆盖宿主端口或命名卷名，形如 OMNI_MYSQL_HOST_PORT=23306
+  --build                启动前强制重新构建镜像（默认已开启，保留为兼容选项）
+  --no-build             跳过镜像构建；仅当已证明现存镜像与当前生成物一致时可用
+  --observability        同时启动本地指标、Trace、日志和告警栈
+  -h, --help             display help for command
+[exit_code=0]
+
+$ npm run dev -- service integrate --help
+ Container omni-scaffold-guide-cli-345c-07 Creating
+ Container omni-scaffold-guide-cli-345c-07 Created
+
+> @omni-stack/cli@0.6.1 dev
+> tsx src/cli.ts service integrate --help
+
+Usage: omni service integrate [options] <service-id>
+
+只读渲染服务包接入当前 monorepo 的全部变更
+
+Options:
+  --source <directory>  已生成并通过校验的服务包目录
+  --apply               执行跨文件原子写入；默认只读 dry-run
+  -h, --help            display help for command
+[exit_code=0]

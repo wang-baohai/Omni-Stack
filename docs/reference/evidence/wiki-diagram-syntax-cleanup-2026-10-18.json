@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "kind": "canonical-mermaid-entity-and-render-cleanup-correction",
+  "at": "2026-10-18T00:04:40.950Z",
+  "source_baseline": "62d9398ddd7c5f62ee48519f04c02456d65629d5",
+  "actual_delta_read_output": "bc0a22",
+  "official_syntax_reference": "https://mermaid.js.org/syntax/sequenceDiagram.html#entity-codes-to-escape-characters",
+  "root_causes": [
+    "Unescaped literal semicolons in sequence messages were parsed as statement separators.",
+    "The default error-rendering DOM escaped the retained code source when Mermaid.render rejected."
+  ],
+  "source_change": {
+    "documents": 7,
+    "message_lines": 38,
+    "all_other_text_unchanged": true,
+    "entity_decoded_full_text_unchanged": true,
+    "domain_or_API_changes": 0
+  },
+  "renderer_change": "Confine each render to a hidden temporary DOM host passed as the third argument;always remove the host in finally,including failures and stale-generation returns.",
+  "actual_Docker_browser_audit": {
+    "api": "Actually bundled Mermaid11.17.2 public parse/render/initialize exports",
+    "canonical_diagrams_parsed": 184,
+    "original_parse_failures": 26,
+    "corrected_proposal_parse_failures": 0,
+    "invalid_source_rejected": true,
+    "temporary_host_removed": true,
+    "stray_error_SVG_after_cleanup": 0,
+    "not_all_SVG_layout_or_postfix_build_proof": true
+  },
+  "files": [
+    {
+      "path": "docs/core-flows.md",
+      "before_sha256": "68acd52b56b7e540ad4fa3a9b7015500983d832187ef1fc724e461bb6fe095e5",
+      "after_sha256": "932748a1e461d4eb5b7088e31a1af728dadac49f59e492566f7fa5413dcfae49",
+      "change_kind": "literal-semicolon-to-Mermaid-entity-only"
+    },
+    {
+      "path": "docs/core-flows.en.md",
+      "before_sha256": "c62836c8ad4aeec5dba5a15e7c0905c66afc36b6fba4adccf9d574d7d0c8e8f2",
+      "after_sha256": "a221e7e10307765f5238087f60473f70951bff6673dcb4296e06dcf68d6659af",
+      "change_kind": "literal-semicolon-to-Mermaid-entity-only"
+    },
+    {
+      "path": "docs/core-flows.jp.md",
+      "before_sha256": "ce0e975e76c2161f941131165d70888cd3ceb3356e833bbf2379e109005c7c69",
+      "after_sha256": "796551739ef859d082f72d9151873e63523837614efb192fea43bf71b704d00f",
+      "change_kind": "literal-semicolon-to-Mermaid-entity-only"
+    },
+    {
+      "path": "docs/core-flows.kr.md",
+      "before_sha256": "235b39b681c8286d30d577e50c538da3177360747e0c1e79555bd400d02c88ce",
+      "after_sha256": "c28fc54336958ec81d73d1468cebe30b8417f8e346d74657f891b81971d2df05",
+      "change_kind": "literal-semicolon-to-Mermaid-entity-only"
+    },
+    {
+      "path": "docs/design/crm-design.en.md",
+      "before_sha256": "47b28d5026762e4fa2348cf19a0b78f6f190df1b72184bd49673d4eb3fad7104",
+      "after_sha256": "98edfec9d349041f5e97170ab85d8fff278d151b71bb30aa3f327ddf9c4845bd",
+      "change_kind": "literal-semicolon-to-Mermaid-entity-only"
+    },
+    {
+      "path": "docs/design/srm-design.en.md",
+      "before_sha256": "8e816a45b5ef5b270fa92419f141cc44da9ab21e76159266b672dc318e580bfc",
+      "after_sha256": "47e332ffdddd31eaa8e61eef042d645a88d61bdbf0c20ef7a4effd00068c91ed",
+      "change_kind": "literal-semicolon-to-Mermaid-entity-only"
+    },
+    {
+      "path": "docs/design/asset-design.en.md",
+      "before_sha256": "0ae419e3f5d85b819d5c4c5ba523ae2c9d2f78f97f2639544b90dd04e0d3860b",
+      "after_sha256": "2cc59de91959244499a2b0e8d1b4f0cef04b41efa48b27dd0a41da7d0786f084",
+      "change_kind": "literal-semicolon-to-Mermaid-entity-only"
+    },
+    {
+      "path": "docs/.vitepress/theme/DiagramLayout.vue",
+      "before_sha256": "0bac16ab90e68db668a02f2aaf19afb32faeeb62fbbcdd81c0171a45de5c32fa",
+      "after_sha256": "6529ea4768729fac0c934ce4cb64f7799c9080632860b93b7b8a39f59c1d46a5",
+      "change_kind": "confine-rendering-to-a-finally-cleaned-temporary-container"
+    }
+  ],
+  "prior_complete_semantic_reviews": [
+    {
+      "id": "core-flows",
+      "source_sha256": "68acd52b56b7e540ad4fa3a9b7015500983d832187ef1fc724e461bb6fe095e5",
+      "records": [
+        {
+          "path": "docs/reference/reviews/core-flows.json",
+          "sha256": "82dafa99cf9bf6905c6814624db1859a31f69e60596aab43f2f5b5a7be139785"
+        }
+      ]
+    },
+    {
+      "id": "crm-design",
+      "source_sha256": "07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81",
+      "records": [
+        {
+          "path": "docs/reference/reviews/crm-design.json",
+          "sha256": "4c2639157723a5d39f96f173b49714c7347501b13d15725daa8aceaea373ad37"
+        }
+      ]
+    },
+    {
+      "id": "srm-design",
+      "source_sha256": "84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0",
+      "records": [
+        {
+          "path": "docs/reference/reviews/srm-design-ownership-2026-10-18.json",
+          "sha256": "2ada498f2082e7d1bcd08a64c8768bcd7a3e826d253b89ff5a4a7ad98684d99f"
+        }
+      ]
+    },
+    {
+      "id": "asset-design",
+      "source_sha256": "65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620",
+      "records": [
+        {
+          "path": "docs/reference/reviews/asset-design.json",
+          "sha256": "fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747"
+        }
+      ]
+    }
+  ],
+  "affected_rows": [
+    {
+      "id": "core-flows",
+      "locales": [
+        "en-US",
+        "ja-JP",
+        "ko-KR"
+      ]
+    },
+    {
+      "id": "crm-design",
+      "locales": [
+        "en-US"
+      ]
+    },
+    {
+      "id": "srm-design",
+      "locales": [
+        "en-US"
+      ]
+    },
+    {
+      "id": "asset-design",
+      "locales": [
+        "en-US"
+      ]
+    }
+  ],
+  "new_translation_rows": 0,
+  "renewed_translation_rows": 6,
+  "human_review": false,
+  "formal_image_and_native_browser_acceptance": "pending",
+  "business_writes": 0,
+  "full_original_A_G_preserved": true,
+  "global_release_complete": false
+}

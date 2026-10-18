@@ -128,11 +128,8 @@ public class DictDataServiceImpl implements DictDataService {
 
     /** {@inheritDoc} */
     @Override
-    public SysDictData updateData(Long id, UpdateDictDataRequest request, String operator) {
-        SysDictData entity = sysDictDataMapper.selectById(id);
-        if (entity == null) {
-            throw new BusinessException(404, "字典数据不存在");
-        }
+    public SysDictData updateData(Long id, Long tenantId, UpdateDictDataRequest request, String operator) {
+        SysDictData entity = requireData(id, tenantId);
 
         if (request.getDictValue() != null) {
             entity.setDictValue(request.getDictValue());
@@ -163,11 +160,8 @@ public class DictDataServiceImpl implements DictDataService {
 
     /** {@inheritDoc} */
     @Override
-    public void deleteData(Long id) {
-        SysDictData entity = sysDictDataMapper.selectById(id);
-        if (entity == null) {
-            throw new BusinessException(404, "字典数据不存在");
-        }
+    public void deleteData(Long id, Long tenantId) {
+        SysDictData entity = requireData(id, tenantId);
 
         sysDictDataMapper.deleteById(id);
 
@@ -199,6 +193,25 @@ public class DictDataServiceImpl implements DictDataService {
         } catch (JsonProcessingException e) {
             log.warn("刷新字典缓存序列化失败，key={}: {}", cacheKey, e.getMessage());
         }
+    }
+
+    /**
+     * 获取当前租户的字典数据，拒绝仅凭 ID 访问其他租户资源。
+     *
+     * @param id 字典数据 ID
+     * @param tenantId 当前登录租户 ID
+     * @return 属于当前租户的数据
+     * @throws BusinessException 租户无效、数据不存在或所属租户不匹配时抛出
+     */
+    private SysDictData requireData(Long id, Long tenantId) {
+        if (tenantId == null || tenantId <= 0) {
+            throw new BusinessException(400, "租户 ID 必须为正整数");
+        }
+        SysDictData entity = sysDictDataMapper.selectById(id);
+        if (entity == null || !tenantId.equals(entity.getTenantId())) {
+            throw new BusinessException(404, "字典数据不存在");
+        }
+        return entity;
     }
 
     /**

@@ -1,6 +1,6 @@
 # Omni-Stack 관측성 운영 및 유지보수
 
-본 문서는 WP-07 의 운영 사실 소스로, 애플리케이션 지표, 분산 트레이싱, 구조화 로그, 로컬 관측 스택, 알림, SLO 템플릿을 설명합니다. 관측 기능은 기본적으로 비활성화되어 있으며 애플리케이션 시작의 전제 조건이 아닙니다.
+이 문서는 지표, 추적, 구조화 로그, 알림, SLO의 현재 엔지니어링 경계를 정의합니다. 관측은 기본적으로 비활성이며 앱 시작의 전제 조건이 아닙니다.
 
 ## 1. 데이터 흐름과 경계
 
@@ -11,53 +11,19 @@
 | 로그 | ECS JSON stdout | Alloy → Loki | Grafana Explore |
 | 알림 | Prometheus rules | Alertmanager | Alertmanager / 외부 receiver |
 
-`X-Trace-Id` 는 레거시 클라이언트와 로그 검색을 위한 호환 응답 헤더일 뿐입니다. 트레이싱 활성화 시 현재 Micrometer/OTel traceId 와 같으며; 서비스 간 전파는 W3C `traceparent` 를 정으로 합니다. Gateway 는 클라이언트가 위조한 신원 헤더를 계속 덮어쓰지만, 표준 Trace 컨텍스트는 파괴하지 않습니다.
+`X-Trace-Id` 는 레거시 클라이언트와 로그 검색을 위한 호환 응답 헤더일 뿐입니다. 트레이싱 활성화 시 현재 Micrometer/OTel traceId 와 같으며; 서비스 간 전파는 W3C `traceparent` 를 기준으로 합니다. Gateway 는 클라이언트가 위조한 신원 헤더를 계속 덮어쓰지만, 표준 Trace 컨텍스트는 파괴하지 않습니다.
 
 관리 엔드포인트는 Gateway 를 거치지 않습니다. Compose 에서 애플리케이션 포트는 컨테이너 내 `8080` 으로 통일되지만, Actuator 는 독립적인 관리 포트 `MANAGEMENT_SERVER_PORT`(서비스별 `19900`~`19907`, auth/base/gateway/workflow/crm/srm/procurement/asset 에 대응) 를 사용하며 두 포트는 공유되지 않습니다. 관리 포트는 호스트에 매핑되지 않고 내부 Compose 네트워크를 통해 Prometheus 만 스크레이프합니다. Gateway 비즈니스 포트를 제외하면 서비스 호스트 포트는 모두 `127.0.0.1` 에 바인딩됩니다. 프로덕션에서는 네트워크 격리를 계속 적용하고 Actuator 인증을 활성화해야 합니다.
 
 ## 2. 시작과 중지
 
-먼저 `.env.example` 에서 완전한 `.env` 를 만든 뒤, 저장소 루트에서 실행합니다:
-
-```powershell
-npm --prefix tools/omni-cli run dev -- dev up --preset full --observability
-npm --prefix tools/omni-cli run dev -- dev status
-```
-
-CLI 는 본 프로세스에 `OTLP_EXPORT_ENABLED=true`, ECS JSON 로그, 로컬 100% 샘플링을 설정하고, 일회성 마이그레이터가 종료 시 결과를 Pushgateway 로 푸시하게 합니다. `--observability` 가 없으면 OTLP 와 마이그레이션 지표 푸시가 모두 비활성화되고 샘플링률은 0 이며, 애플리케이션은 Span 을 내보내지 않고 정상 시작합니다.
-
-로컬 입구:
-
-| 컴포넌트 | 주소 | 기본 용도 |
-|---|---|---|
-| Grafana | `http://127.0.0.1:3001` | 대시보드, 로그, Trace |
-| Prometheus | `http://127.0.0.1:9090` | Targets, PromQL, 규칙 |
-| Pushgateway | `http://127.0.0.1:9091` | 단기 수명 마이그레이션 지표 |
-| Node Exporter | `http://127.0.0.1:9100` | 로컬 노드 및 파일 시스템 지표 |
-| cAdvisor | `http://127.0.0.1:8088` | 컨테이너 리소스 및 수명주기 지표 |
-| Alertmanager | `http://127.0.0.1:9093` | 알림 상태 |
-| Tempo | `http://127.0.0.1:3200` | Trace API |
-| Loki | `http://127.0.0.1:3100` | 로그 API |
-| Alloy | `http://127.0.0.1:12345` | 로그 수집 상태 |
-| OTLP | `127.0.0.1:4317/4318` | gRPC/HTTP 수신 |
-
-중지는 기본적으로 관측 데이터 볼륨을 보존합니다:
-
-```powershell
-npm --prefix tools/omni-cli run dev -- dev down
-```
-
-로컬 지표, Trace, 로그, 데이터베이스 데이터가 더 이상 필요 없음을 확인했을 때만 모든 이름 있는 볼륨을 명시적으로 삭제할 수 있습니다:
-
-```powershell
-npm --prefix tools/omni-cli run dev -- dev down --volumes --confirm-delete-volumes
-```
+observability profile과 명시적 내보내기 설정이 관측 기능을 제어하며 기본값은 비활성입니다. 활성화해도 업무 포트를 바꾸지 않습니다. 관리 엔드포인트를 공개하면 안 됩니다. 지표는 별도 management 포트를 쓰므로 업무 포트의 404는 지표 누락 증거가 아닙니다. 시작·포트·상태 확인과 안전한 종료는[운영](guides/operations-upgrade.kr.md)을 참조합니다.
 
 ## 3. 대시보드와 지표 계약
 
 Grafana 는 7 개의 읽기 전용 대시보드를 자동 로드합니다: Platform Overview, Service RED, JVM and Pools, Feign Clients, MQ and Outbox, Workflow, Database Migrations. JSON 은 `observability/grafana/dashboards/` 에, 데이터 소스와 대시보드 provider 는 `observability/grafana/provisioning/` 에 있습니다.
 
-Alloy 는 자신과 동일한 `COMPOSE_PROJECT_NAME` 레이블의 컨테이너 로그만 수집합니다. `docker compose -p <name>` 을 사용하거나 `COMPOSE_PROJECT_NAME` 을 설정하면 이 필터 값이 동기적으로 바뀌며, 호스트의 다른 Compose 프로젝트를 스캔하지 않습니다.
+Alloy는 Docker 레이블 `com.docker.compose.project`로 로그 대상을 필터링하고 현재 Compose 프로젝트의 로그만 수집합니다. 필터 값은 `COMPOSE_PROJECT_NAME`에서 전달된 `OMNI_COMPOSE_PROJECT`를 사용하며 `docker compose -p <name>` 또는 명시한 `COMPOSE_PROJECT_NAME`을 따릅니다. Docker discovery는 컨테이너 메타데이터를 발견하지만 로그 수집은 필터링 후 수행하므로 다른 Compose 프로젝트의 로그는 수집하지 않습니다.
 
 허용되는 지표 레이블은 다음뿐입니다: `service.name`, `environment`, `instance`, HTTP method/route template/status, exception class, MQ destination/result, 그리고 코드 내의 닫힌 열거 operation/status. 데이터베이스 마이그레이션 정보는 저장소 통제하의 schema version 을 추가로 사용할 수 있습니다. tenantId, userId, username, businessKey, 원시 URL, 요청 본문, 메시지 본문, 동적 SQL, 테이블 이름, 연결 주소를 레이블에 넣어선 안 됩니다. 새 레이블은 먼저 값 집합이 고정됨을 증명하고 카디널리티 상한을 평가해야 합니다.
 
@@ -77,6 +43,10 @@ Alloy 는 자신과 동일한 `COMPOSE_PROJECT_NAME` 레이블의 컨테이너 �
 - `omni_db_migration_operations_total{result}`, `omni_db_migration_duration_seconds`, `omni_db_schema_version_info{version}`: 일회성 마이그레이터가 종료 시 푸시하는 결과, 소요 시간, 통제된 매니페스트 버전.
 
 Outbox 생성 시 실제 traceId 를 `producer_trace_id` 로 저장하고, 전송 시 `omniProducerTraceId` 와 `omniMessageId` 메시지 헤더로 컨슈머에 전달합니다; 이력에 프로듀서 traceId 가 없어도 정상 전달됩니다. 릴레이는 전달마다 새 relay span 을 만들고, 로그에는 `msgId`, `producerTraceId`, `relayTraceId` 와 고정된 destination/result 만 출력합니다; Asset Consumer 는 메시지 헤더에서 연관 필드를 꺼내 `msgId`, `producerTraceId` 와 자신의 `consumerTraceId` 를 기록합니다. 어느 쪽도 payload, 테넌트, 비즈니스 키를 출력하지 않습니다. `msgId` 로 프로듀서 로그에서 릴레이 및 소비 로그로 이동한 뒤 각각 해당 Trace 를 조회할 수 있습니다.
+
+### Alertmanager UI 경계
+
+`alertmanager-ui`는 공식 v0.30.1 Elm 소스에서 네 언어 UI를 빌드하고 같은 `alertmanager:9093` 백엔드로 프록시합니다. 호스트 진입점은 `127.0.0.1:9093`을 유지하며 백엔드에서 같은 포트를 중복 공개하지 않습니다. UI 경로는 `/zh-CN/`, `/en-US/`, `/ja-JP/`, `/ko-KR/`이며 언어를 바꿔도 hash 경로와 필터를 유지합니다. API 필드, 레이블, 상태 열거 값, 수신기 이름은 원래 값을 유지하고 요일 설정도 업스트림의 영어 프로토콜 값으로 저장합니다. 빌드는 업스트림 아카이브 SHA-256을 고정하고 Apache-2.0 LICENSE/NOTICE를 보존합니다. 문구 누락이나 구조 패치 불일치 시 빌드가 실패합니다. 출처와 유지보수 결정은 [ADR-0004](adr/0004-native-alertmanager-localization.md), 절차와 이미지는 [운영 가이드](guides/operations-upgrade.kr.md)를 참조합니다. 업무 서비스나 공개 관리 진입점을 추가하는 변경은 아닙니다.
 
 ## 4. 알림과 임계값 보정
 
@@ -116,14 +86,4 @@ Outbox 생성 시 실제 traceId 를 `producer_trace_id` 로 저장하고, 전�
 
 ## 7. 검증과 문제 해결
 
-구성 수준 검증:
-
-```powershell
-docker compose --profile observability config --quiet
-docker run --rm --entrypoint /bin/promtool --mount type=bind,source=${PWD}/observability/prometheus,target=/etc/prometheus,readonly prom/prometheus:v3.14.0 check rules /etc/prometheus/alerts.yml
-docker run --rm --entrypoint /bin/promtool --mount type=bind,source=${PWD}/observability/prometheus,target=/etc/prometheus,readonly prom/prometheus:v3.14.0 check config /etc/prometheus/prometheus.yml
-```
-
-실행 후 Prometheus `/targets` 에서 시작된 애플리케이션이 UP 인지 확인합니다; 현재 프리셋에 포함되지 않은 서비스가 DOWN 으로 표시되는 것은 예상된 현상입니다. Grafana 에 데이터가 없으면 애플리케이션 `/actuator/prometheus`, Prometheus target, OTel Collector 로그, Tempo/Loki readiness, Alloy targets 순으로 확인합니다.
-
-성능 검증은 동일 fixture 로 관측 비활성화 시와 활성화 시의 시작 시간, CPU, 메모리, 처리량, P95/P99 를 각각 측정합니다. 결과는 `docs/evidence/scaffold-upgrade/` 에 기록합니다; 로컬 100% 샘플링은 검증 전용이며 프로덕션 샘플링률은 용량과 SLO 로 보정합니다.
+설정, 실행 상태, Trace·로그 연결, 알림 전달과 성능은 별도로 검증합니다. 구문 통과만으로 targets UP이나 알림 도착을 입증할 수 없습니다. 시작하지 않은 서비스는 선택 preset과 비교하며 모든 DOWN을 무시하지 않습니다. 현재 소스, 이미지, preset, 시간, 실제 실패와 범위를 기록합니다. 과거 검증은 당시 기준만 증명합니다. 절차와 복원 범위는[운영](guides/operations-upgrade.kr.md)을 참조합니다.

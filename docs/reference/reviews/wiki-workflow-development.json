@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-workflow-development",
+  "source": "docs/wiki/workflow-development.md",
+  "source_sha256": "0705d000ab8f98e4030af8ac7bf6f8aeb1d3607cd99a14d615051d9b439bc559",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "6ec779d5f57b797cfaf25a8edfd8a786fc5ce21f",
+  "source_state": "Current edited four-language contents and inspected implementation bound by per-file digests",
+  "method": "Codex read the complete Chinese source and each complete translation, checked implementation entry points, corrected findings, and reviewed executable literals and failure boundaries.",
+  "checked_source_files": [
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/CandidateResolutionService.java",
+      "sha256": "b5321847781c8404f5975bc898340e76b84c0892c3ac25af5cd8d32d94f30cd2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverDelegate.java",
+      "sha256": "89e654d78fbbc46b3ad9e41313e34b4b4e4cea41ebe70c24cc0891ba7b7e2690"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverBean.java",
+      "sha256": "08bc3db0d5c21ee1ea9d3636d13741c6154970ad0bdd26472efe6d68d6a2dadc"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/listener/ScopedRoleAssignmentListener.java",
+      "sha256": "6981b11b7167a1cc28a2c640280ccfca46d7fe3f6965cc9ea50324a8e5b5f7d3"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CcNotifyDelegate.java",
+      "sha256": "8521417479a710e0bd38ce7eadc60db68364c0bf78cc9ac1333d4e108f4253cb"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/BpmnXmlValidator.java",
+      "sha256": "01703f1846d2f69cdf99943fe0f49b43f1bdc6a675dc44f2982edb5777ba4f04"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowModelController.java",
+      "sha256": "0ee50a247ba0d9b81c6de89b17aa047ebc3a1299067695ee59d0566363b43962"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/notification/WorkflowNotificationService.java",
+      "sha256": "0ebcc836be1f1cf45c6164f903562068290167b8bccd5ba23a6c30a4cb18f069"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/config/FlowableAutoConfiguration.java",
+      "sha256": "6f37d9e50fc3d081a79c6cbac2a84f36761d54e5019dcb7a489b55df2816c2c2"
+    }
+  ],
+  "technical_verification": {
+    "runtime": "local Docker",
+    "java": "Temurin 25.0.4.1",
+    "node": "22.23.3",
+    "same_complete_example_in_all_four_languages": true,
+    "example_sha256": "e136294a7dd2255fb4ccf43a4cc4f28c0f9fd208a9652a49d46a4fe75851c6aa",
+    "compilation_exit_code": 0,
+    "compilation_warnings": [
+      "Lombok invokes deprecated sun.misc.Unsafe method",
+      "Annotation processing does not claim Spring Service"
+    ],
+    "documentation_tests": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "limitation": "Example compilation and documentation tests do not establish runtime delivery, external notifications, or approval E2E."
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/workflow-development.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-14 10:25:08",
+      "result": "approved",
+      "translation_sha256": "44609c0499e9ae35ca755e8c053956809bd775beff0f82b5a0bd3deeb8a0da1e",
+      "checks": {
+        "coverage_and_meaning": "逐段核对中文与译文的环境/权限/租户前置条件、扩展指南4.1至4.5、引擎事实入口、BPMN命名/建模规则、设计器源码入口和八类故障排查。保留操作教程入口与只清理本人无引用练习数据的边界；删除未经当前证据支持的竞争产品性能、许可、星标及最优选择断言。",
+        "technical_literals": "核对五个完整workflow:model权限码、四条模型写入API、modelKey与BPMN process id、真实CandidateResolutionService/ScopedRoleAssignmentListener路径、四参数notifyPendingTask含processInstanceId、clearPendingTask、ConditionalOnMissingBean、ccNotifyDelegate/omni:cc/wf_cc_record、PUBLISHED/MI_END/deleted、七个设计器源码路径与Docker Maven/build/lint命令。四语完整Java示例逐字一致，并以真实SPI、JDK25和真实缓存依赖在本机Docker编译通过；会签表达式保留可复制的||，无Markdown转义。",
+        "security_and_failure_semantics": "五权限按操作授予，不以登录替代授权；ASSIGN_ADMIN明确当前租户组织单元1的SUPER_ADMIN候选，不硬编码用户1。ESCALATE_PARENT与空候选失败规则区分实际三入口；明确ServiceTask Delegate直接handleFallback且外层只记录异常，不能把三入口当作同一失败实现。BPMN验证不冒充完整JSON语义白名单；CC为同步JavaDelegate且捕获异常，流程继续或空通知实现均不证明投递成功。",
+        "images_and_links": "本篇没有新增图片，真实操作/预期/清理与四语工作流操作教程相互链接，未用源码编译冒充审批E2E或外部通知取证。逐项核对共享SPI、公共解析器、监听器、校验器、配置类、CC委托与七个设计器路径；本机Docker另执行链接与源摘录质量检查。",
+        "language_and_terminology": "完整核对 modeling/approval、anchor/scope/fallback、pending task/CC、validation/publication、MI activity root、tenant-local 与 failure/delivery。正文改写为自然英文，保留中文代码注释和稳定协议值；synchronously/catches-and-logs 与 not-interchangeable 等失败限定与中文一致。"
+      },
+      "findings": [
+        {
+          "id": "non-compiling-notification-example",
+          "status": "resolved",
+          "description": "原通知示例省略processInstanceId，方法签名与真实四参数SPI不一致，且类中没有完整可编译上下文。",
+          "resolution": "提供包含包、显式导入、注解、两个Override和中文Javadoc的完整实现；四语代码一致，真实JDK25 Docker编译验证。"
+        },
+        {
+          "id": "stale-source-extension-entry-points",
+          "status": "resolved",
+          "description": "原锚点/降级扩展说明将逻辑放在错误类或过期目录，并把当前多个引擎入口等同。",
+          "resolution": "链接真实公共解析器与listener目录，列出三入口和真实异常处理差异；增加七个当前设计器源入口。"
+        },
+        {
+          "id": "unsupported-engine-comparison",
+          "status": "resolved",
+          "description": "教程混入未由本轮证据支撑的第三方许可、流行度、性能及最优选择比较。",
+          "resolution": "移除该比较，保留由POM/package定义的当前引擎和设计器依赖入口及ADR决策关系。"
+        },
+        {
+          "id": "incorrect-cc-and-copyable-expression",
+          "status": "resolved",
+          "description": "原文将CC称为异步，并在可复制会签表达式中保留Markdown管道转义。",
+          "resolution": "明确同步JavaDelegate、异常记录与实际wf_cc_record结果边界；在非表格代码字面量中使用准确||表达式。"
+        },
+        {
+          "id": "modeling-prerequisites-and-permissions",
+          "status": "resolved",
+          "description": "扩展操作缺少明确环境、租户唯一键和逐操作权限，可能使初学者把登录当作建模授权。",
+          "resolution": "链接四语真实操作教程，列出五个完整权限码、校验/发布步骤和本人练习数据清理边界。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/workflow-development.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-14 10:25:08",
+      "result": "approved",
+      "translation_sha256": "64a31efb1d0742b79a50ba131a7a4e6ac2a91432334950065aec59df2da5442b",
+      "checks": {
+        "coverage_and_meaning": "逐段核对中文与译文的环境/权限/租户前置条件、扩展指南4.1至4.5、引擎事实入口、BPMN命名/建模规则、设计器源码入口和八类故障排查。保留操作教程入口与只清理本人无引用练习数据的边界；删除未经当前证据支持的竞争产品性能、许可、星标及最优选择断言。",
+        "technical_literals": "核对五个完整workflow:model权限码、四条模型写入API、modelKey与BPMN process id、真实CandidateResolutionService/ScopedRoleAssignmentListener路径、四参数notifyPendingTask含processInstanceId、clearPendingTask、ConditionalOnMissingBean、ccNotifyDelegate/omni:cc/wf_cc_record、PUBLISHED/MI_END/deleted、七个设计器源码路径与Docker Maven/build/lint命令。四语完整Java示例逐字一致，并以真实SPI、JDK25和真实缓存依赖在本机Docker编译通过；会签表达式保留可复制的||，无Markdown转义。",
+        "security_and_failure_semantics": "五权限按操作授予，不以登录替代授权；ASSIGN_ADMIN明确当前租户组织单元1的SUPER_ADMIN候选，不硬编码用户1。ESCALATE_PARENT与空候选失败规则区分实际三入口；明确ServiceTask Delegate直接handleFallback且外层只记录异常，不能把三入口当作同一失败实现。BPMN验证不冒充完整JSON语义白名单；CC为同步JavaDelegate且捕获异常，流程继续或空通知实现均不证明投递成功。",
+        "images_and_links": "本篇没有新增图片，真实操作/预期/清理与四语工作流操作教程相互链接，未用源码编译冒充审批E2E或外部通知取证。逐项核对共享SPI、公共解析器、监听器、校验器、配置类、CC委托与七个设计器路径；本机Docker另执行链接与源摘录质量检查。",
+        "language_and_terminology": "完整核对 モデル/承認、アンカー/スコープ/フォールバック、待ちタスク/CC、検証/公開、多重インスタンス活動ルート、テナント与失敗結果。将不自然的会署改为複数承認，明确同期実行、例外をログに記録するだけ与使用入口真实失败结果；中文代码注释按项目规则一致保留。"
+      },
+      "findings": [
+        {
+          "id": "non-compiling-notification-example",
+          "status": "resolved",
+          "description": "原通知示例省略processInstanceId，方法签名与真实四参数SPI不一致，且类中没有完整可编译上下文。",
+          "resolution": "提供包含包、显式导入、注解、两个Override和中文Javadoc的完整实现；四语代码一致，真实JDK25 Docker编译验证。"
+        },
+        {
+          "id": "stale-source-extension-entry-points",
+          "status": "resolved",
+          "description": "原锚点/降级扩展说明将逻辑放在错误类或过期目录，并把当前多个引擎入口等同。",
+          "resolution": "链接真实公共解析器与listener目录，列出三入口和真实异常处理差异；增加七个当前设计器源入口。"
+        },
+        {
+          "id": "unsupported-engine-comparison",
+          "status": "resolved",
+          "description": "教程混入未由本轮证据支撑的第三方许可、流行度、性能及最优选择比较。",
+          "resolution": "移除该比较，保留由POM/package定义的当前引擎和设计器依赖入口及ADR决策关系。"
+        },
+        {
+          "id": "incorrect-cc-and-copyable-expression",
+          "status": "resolved",
+          "description": "原文将CC称为异步，并在可复制会签表达式中保留Markdown管道转义。",
+          "resolution": "明确同步JavaDelegate、异常记录与实际wf_cc_record结果边界；在非表格代码字面量中使用准确||表达式。"
+        },
+        {
+          "id": "modeling-prerequisites-and-permissions",
+          "status": "resolved",
+          "description": "扩展操作缺少明确环境、租户唯一键和逐操作权限，可能使初学者把登录当作建模授权。",
+          "resolution": "链接四语真实操作教程，列出五个完整权限码、校验/发布步骤和本人练习数据清理边界。"
+        },
+        {
+          "id": "japanese-countersign-terminology",
+          "status": "resolved",
+          "description": "故障排查的会署不自然且有歧义。",
+          "resolution": "改为複数承認，与多重インスタンス活动根计数器说明一致。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/workflow-development.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-14 10:25:08",
+      "result": "approved",
+      "translation_sha256": "4a3b8bb618ce9d398a580c34274965ae4a09638e33b504c8447941f6d689af9a",
+      "checks": {
+        "coverage_and_meaning": "逐段核对中文与译文的环境/权限/租户前置条件、扩展指南4.1至4.5、引擎事实入口、BPMN命名/建模规则、设计器源码入口和八类故障排查。保留操作教程入口与只清理本人无引用练习数据的边界；删除未经当前证据支持的竞争产品性能、许可、星标及最优选择断言。",
+        "technical_literals": "核对五个完整workflow:model权限码、四条模型写入API、modelKey与BPMN process id、真实CandidateResolutionService/ScopedRoleAssignmentListener路径、四参数notifyPendingTask含processInstanceId、clearPendingTask、ConditionalOnMissingBean、ccNotifyDelegate/omni:cc/wf_cc_record、PUBLISHED/MI_END/deleted、七个设计器源码路径与Docker Maven/build/lint命令。四语完整Java示例逐字一致，并以真实SPI、JDK25和真实缓存依赖在本机Docker编译通过；会签表达式保留可复制的||，无Markdown转义。",
+        "security_and_failure_semantics": "五权限按操作授予，不以登录替代授权；ASSIGN_ADMIN明确当前租户组织单元1的SUPER_ADMIN候选，不硬编码用户1。ESCALATE_PARENT与空候选失败规则区分实际三入口；明确ServiceTask Delegate直接handleFallback且外层只记录异常，不能把三入口当作同一失败实现。BPMN验证不冒充完整JSON语义白名单；CC为同步JavaDelegate且捕获异常，流程继续或空通知实现均不证明投递成功。",
+        "images_and_links": "本篇没有新增图片，真实操作/预期/清理与四语工作流操作教程相互链接，未用源码编译冒充审批E2E或外部通知取证。逐项核对共享SPI、公共解析器、监听器、校验器、配置类、CC委托与七个设计器路径；本机Docker另执行链接与源摘录质量检查。",
+        "language_and_terminology": "完整核对 모델링/승인、앵커/범위/폴백、대기 작업/CC、검증/게시、MI 활동 루트、테넌트与실패结果。修正开发步骤和术语表达，明确동기적으로 실행、로그에만 남김以及各入口失败区别；中文代码注释和稳定协议字面量不翻改。"
+      },
+      "findings": [
+        {
+          "id": "non-compiling-notification-example",
+          "status": "resolved",
+          "description": "原通知示例省略processInstanceId，方法签名与真实四参数SPI不一致，且类中没有完整可编译上下文。",
+          "resolution": "提供包含包、显式导入、注解、两个Override和中文Javadoc的完整实现；四语代码一致，真实JDK25 Docker编译验证。"
+        },
+        {
+          "id": "stale-source-extension-entry-points",
+          "status": "resolved",
+          "description": "原锚点/降级扩展说明将逻辑放在错误类或过期目录，并把当前多个引擎入口等同。",
+          "resolution": "链接真实公共解析器与listener目录，列出三入口和真实异常处理差异；增加七个当前设计器源入口。"
+        },
+        {
+          "id": "unsupported-engine-comparison",
+          "status": "resolved",
+          "description": "教程混入未由本轮证据支撑的第三方许可、流行度、性能及最优选择比较。",
+          "resolution": "移除该比较，保留由POM/package定义的当前引擎和设计器依赖入口及ADR决策关系。"
+        },
+        {
+          "id": "incorrect-cc-and-copyable-expression",
+          "status": "resolved",
+          "description": "原文将CC称为异步，并在可复制会签表达式中保留Markdown管道转义。",
+          "resolution": "明确同步JavaDelegate、异常记录与实际wf_cc_record结果边界；在非表格代码字面量中使用准确||表达式。"
+        },
+        {
+          "id": "modeling-prerequisites-and-permissions",
+          "status": "resolved",
+          "description": "扩展操作缺少明确环境、租户唯一键和逐操作权限，可能使初学者把登录当作建模授权。",
+          "resolution": "链接四语真实操作教程，列出五个完整权限码、校验/发布步骤和本人练习数据清理边界。"
+        }
+      ]
+    }
+  }
+}

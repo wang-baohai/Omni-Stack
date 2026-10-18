@@ -22,18 +22,20 @@ public interface OnlineUserService {
     void recordOnline(Long userId, String username, String jti, long ttlSeconds);
 
     /**
-     * 获取当前在线用户列表。
+     * 获取当前请求数据范围内的在线用户列表。
      *
      * @return 在线用户信息列表
+     * @throws com.omni.common.core.result.BusinessException 缺少有效请求数据范围时拒绝查询
      */
     List<OnlineUserVO> listOnlineUsers();
 
     /**
-     * 强制踢出用户（删除 Redis 在线标记 + 加入 Token 黑名单）。
+     * 强制踢出数据范围内的用户（校验后删除 Redis 在线标记 + 加入 Token 黑名单）。
      *
      * @param userId          用户 ID
      * @param operatorUsername 操作人用户名
      * @param ipAddress       操作人 IP 地址
+     * @throws com.omni.common.core.result.BusinessException 数据范围无效或无权操作目标用户
      */
     void kickUser(Long userId, String operatorUsername, String ipAddress);
 

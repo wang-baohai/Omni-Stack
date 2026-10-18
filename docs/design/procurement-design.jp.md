@@ -1,11 +1,17 @@
 # 調達実行モジュール アーキテクチャと実装ベースライン
 
-> 状態：MVP 実装済み・検証完了
+> 2026-07-27 の原設計日、段階計画、重要な決定を保持し、現行ソースの制約も記録します。中国語版が事実の原本です。過去の検収は現在の実行や公開条件を証明しません。承認済み AI_REVIEW と HUMAN_REVIEW は区別し、[ADR 0003](../adr/0003-authorized-ai-translation-review.md) に従います。
+
+> 原記録の状態（2026-07-27）：MVP 実装済み・検証完了
 > プロジェクト：Omni-Stack
 > 日付：2026-07-27
 > 目標：omni-procurement MVP のアーキテクチャ、サービス横断契約、実装境界を説明する。実装入口は `omni-backend/omni-procurement` と `omni-frontend/src/views/procurement`。
 
 設計根拠：`README.md`、および `docs/` 内の architecture、api-contract、backend-patterns、frontend-patterns、core-flows、scheduling、workflow、mq-reliability、docker-deployment の全トピックドキュメント。同時に `docs/design/srm-design.md` の SRM サプライヤーモデルを参照。
+
+操作、アカウント、画面は[調達 Wiki](../guides/procurement-flow.jp.md)、拡張と Docker ツールは[開発 Wiki](../guides/scaffold-development.jp.md)、現行ファイルは[ソース索引](../reference/source-map.jp.md)を参照してください。
+
+[中文](procurement-design.md) · [English](procurement-design.en.md) · [日本語](procurement-design.jp.md) · [한국어](procurement-design.kr.md)
 
 ## 1. 設計結論
 
@@ -18,14 +24,14 @@
 | XXL-JOB 実行体 | `omni-procurement` / `9906`（定期リマインド有効時） |
 | データベース | `omni_procurement` |
 | Gateway | `/api/procurement/**` → `lb://omni-procurement`、`StripPrefix` は使用しない |
-| Redis | DB 0、Auth が書き込む XSS 設定を共有；キーは `proc:` プレフィックスを使用 |
+| Redis | DB 0、Auth 共通 XSS キャッシュキー。独立 proc: 業務キャッシュ接頭辞は未確認 |
 | フロントエンド | 引き続き `omni-frontend` を使用し、`views/procurement/**` を新設 |
 
 Procurement MVP は調達実行の閉ループをカバーする：
 
 > 資材カタログ → 購買申請 → 承認 → RFQ/価格比較 → 選定 → 購買注文 → 入庫確認。
 
-三-way マッチング（PO + 入庫伝票 + 請求書）と支払は MVP に含めず、ERP または財務システムに残す。契約管理は Phase 2 で導入する。
+三点照合 マッチング（PO + 入庫伝票 + 請求書）と支払は MVP に含めず、ERP または財務システムに残す。契約管理は Phase 2 で導入する。
 
 ## 2. 製品範囲
 
@@ -46,7 +52,7 @@ MVP は次に答えられるべきである：承認待ちの購買申請がど�
 | フェーズ | 能力 |
 |---|---|
 | MVP | 資材カタログ、購買申請、承認フロー（品目+金額の多次元分岐）、RFQ/価格比較、購買注文、入庫確認、調達オーバービュー |
-| Phase 2 | 契約管理、リバースオークション、調達テンプレート、フレームワーク契約、三-way マッチング、サプライヤー業績連動 |
+| Phase 2 | 契約管理、リバースオークション、調達テンプレート、フレームワーク契約、三点照合 マッチング、サプライヤー業績連動 |
 | Phase 3 | 調達分析（価格トレンド、サプライヤー集中度）、予算統制、自動補充提案 |
 
 ## 3. システム境界
@@ -56,7 +62,7 @@ MVP は次に答えられるべきである：承認待ちの購買申請がど�
 | `omni-auth` | テナント、ユーザー、組織、ロール、権限、データ範囲、XSS 設定 | 内部 OpenFeign；ユーザー/組織 ID のみ保存 |
 | `omni-srm` | サプライヤーデータ（参入、グレーディング、リスク） | 内部 OpenFeign でサプライヤーを照会；サプライヤーポータル見積は SRM サービス経由 |
 | `omni-base` | 辞書、操作ログ | 操作ログ集約 |
-| `omni-workflow` | BPMN、プロセスインスタンス、承認、Flowable エンジンの唯一の実行時 | 内部 OpenFeign でフローを起動/照会/取消し、承認結果イベントを消費 |
+| `omni-workflow` | BPMN、インスタンス、承認、唯一の Flowable ランタイム | モデル照会/プレビュー、冪等開始、タスク資格検証、完了イベント。Procurement からの直接終了機能はない |
 | `omni-procurement` | 資材、購買申請、RFQ、購買注文、入庫 | 唯一のビジネス書き込み側 |
 | `omni-asset` | 資産管理 | 入庫検収通過後、Outbox イベントと制御された履歴補償で資産カードを作成 |
 | XXL-JOB | バッチスキャンのトリガー | 注文期限超過リマインド（Phase 2） |
@@ -64,23 +70,25 @@ MVP は次に答えられるべきである：承認待ちの購買申請がど�
 
 ```mermaid
 flowchart LR
-    UI["omni-frontend"] --> GW["omni-gateway<br/>JWT validation / identity headers"]
+    UI["omni-frontend"] --> GW["omni-gateway<br/>JWT 検証/識別ヘッダー"]
     GW --> PROC["omni-procurement :8106"]
     GW --> AUTH["omni-auth :8100"]
     PROC -->|"OpenFeign + X-Internal-Token"| AUTH
     PROC -->|"OpenFeign + X-Internal-Token"| SRM["omni-srm :8105"]
-    PROC -->|"Feign / Outbox"| WF["omni-workflow :8103"]
+    PROC -->|"Feign"| WF["omni-workflow :8103"]
     PROC --> DB[("omni_procurement")]
     PROC --> R[("Redis DB 0")]
     PROC --> O["sys_mq_message"]
     O -->|"mqRelayHandler"| MQ["RocketMQ"]
-    PROC -->|"Qualified goods-receipt event"| ASSET["omni-asset :8107"]
-    ASSET -->|"Historical candidate compensation"| PROC
+    WF -->|"workflow.process.completed.v1 / Outbox"| MQ
+    MQ -->|"workflow.process.completed.v1"| PROC
+    MQ -->|"適格入庫イベント"| ASSET["omni-asset :8107"]
+    ASSET -->|"履歴候補回掃"| PROC
 ```
 
-推奨依存：`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`、および Web、Validation、Security、AspectJ、OpenFeign、LoadBalancer、Nacos、RocketMQ Stream、Actuator、Lombok。
+現行の基礎依存：`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`、`omni-common-service`。ほかに Web、Validation、Security、AspectJ、OpenFeign、LoadBalancer、Nacos、RocketMQ Stream、Actuator、Lombok など。
 
-**Procurement は `omni-common-workflow` に依存せず、本サービスに Flowable を埋め込まない。** `omni-workflow` は独立マイクロサービスであり Flowable の唯一の実行時である；Procurement は内部 Feign 契約でフローを発起し、信頼できるドメインイベントで承認結果を受信する。サービス横断 DTO は純粋な契約モジュールに置くか Feign クライアントでローカルに定義し、これによって Flowable Starter を導入してはならない。
+**Procurement は `omni-common-workflow` に依存せず、本サービスに Flowable を埋め込まない。** `omni-workflow` は独立マイクロサービスであり Flowable の唯一の実行時である；Procurement は内部 Feign 契約でフローを開始し、信頼できるドメインイベントで承認結果を受信する。サービス横断 DTO は純粋な契約モジュールに置くか Feign クライアントでローカルに定義し、これによって Flowable Starter を導入してはならない。
 
 ## 4. ドメインとデータ設計
 
@@ -94,41 +102,32 @@ flowchart LR
 | RFQ | `proc_rfq`、`proc_rfq_line`、`proc_rfq_supplier` | RFQ、明細行、招待サプライヤー |
 | PurchaseOrder | `proc_purchase_order`、`proc_purchase_order_line` | 購買注文、明細行 |
 | GoodsReceipt | `proc_goods_receipt`、`proc_goods_receipt_line` | 入庫伝票、明細行 |
+| Inbox | `proc_event_inbox` | 同テナントの Workflow/見積イベントの冪等性と元の意図 |
 
 ```mermaid
 erDiagram
-    PROC_MATERIAL_CATEGORY ||--o{ PROC_MATERIAL : contains
-    PROC_REQUISITION ||--o{ PROC_REQUISITION_LINE : has
-    PROC_REQUISITION ||--o{ PROC_RFQ : triggers
-    PROC_RFQ ||--o{ PROC_RFQ_LINE : has
-    PROC_RFQ ||--o{ PROC_RFQ_SUPPLIER : invites
-    PROC_RFQ ||--o| PROC_PURCHASE_ORDER : awards
-    PROC_PURCHASE_ORDER ||--o{ PROC_PURCHASE_ORDER_LINE : has
-    PROC_PURCHASE_ORDER ||--o{ PROC_GOODS_RECEIPT : receives
-    PROC_GOODS_RECEIPT ||--o{ PROC_GOODS_RECEIPT_LINE : has
-    PROC_RFQ_SUPPLIER }o--|| SRM_SUPPLIER : references
+    PROC_MATERIAL_CATEGORY ||--o{ PROC_MATERIAL : 含む
+    PROC_REQUISITION ||--o{ PROC_REQUISITION_LINE : 明細
+    PROC_REQUISITION ||--o{ PROC_RFQ : 開始
+    PROC_RFQ ||--o{ PROC_RFQ_LINE : 明細
+    PROC_RFQ ||--o{ PROC_RFQ_SUPPLIER : 招待
+    PROC_RFQ ||--o| PROC_PURCHASE_ORDER : 選定
+    PROC_PURCHASE_ORDER ||--o{ PROC_PURCHASE_ORDER_LINE : 明細
+    PROC_PURCHASE_ORDER ||--o{ PROC_GOODS_RECEIPT : 入庫
+    PROC_GOODS_RECEIPT ||--o{ PROC_GOODS_RECEIPT_LINE : 明細
+    PROC_RFQ_SUPPLIER }o--|| SRM_SUPPLIER : 参照
 ```
 
 ### 4.2 共通フィールドとルール
 
-すべての `proc_*` テーブルは `tenant_id` を含まなければならない。認可可能なビジネステーブルはさらに次を含める必要がある：
+全 `proc_*` 表に tenant_id を保持します。業務ルートは version/deleted と監査列を持ちますが、範囲列は集約別です。Requisition は requester_user_id/requester_unit_id、RFQ・PurchaseOrder・GoodsReceipt は owner_user_id/owner_unit_id を使います。子は親経由、Material/Category・承認ルート・テナント設定は共有です。全表に owner 条件を追加しません。
 
-- `tenant_id`：テナント分離。
-- `owner_user_id`：SELF 範囲（購買申請者 / 調達担当）。
-- `owner_unit_id`：DEPT/DEPT_AND_BELOW 範囲。
-- `version`：楽観ロック。
-- `deleted`：論理削除。
-- `id/create_time/update_time/create_by/update_by`：監査フィールド。
-
-制約：
-
-- サプライヤー ID は SRM が管理し、Procurement は `supplier_id` のみ保存、クロス DB 外部キーを作らない。
-- 資材番号 `material_code` はテナント内でユニーク。
-- 購買申請番号 `requisition_no`、RFQ 番号 `rfq_no`、注文番号 `po_no`、入庫伝票番号 `gr_no` はデータベース ID から生成し、テナント内でユニーク。
-- 数量と単価は `DECIMAL(19,6)` / `BigDecimal`、行金額と総金額は `DECIMAL(19,4)` / `BigDecimal` を使用；HTTP JSON は一律に十進文字列で受け渡し、JavaScript の `number` による計算を禁止。通貨は ISO 4217 三桁コードを使用（MVP はテナントデフォルト通貨を強制）。
-- 時刻は `yyyy-MM-dd HH:mm:ss` に統一。
-- 通常の PUT では承認状態、注文状態を直接変更できない。
-- 外部リクエストは素の `selectById/updateById/deleteById` を使用してはならない。
+- 購買申請は有効 scope のユーザー/主組織を申請者と初期 owner に保存し、認可には requester 列を使います。
+- RFQ は現在 scope の owner、PO は RFQ の帰属、GR は現在の受取人/主組織を使います。ポータルアカウントや消費スレッドから推測しません。
+- 番号は DB ID 由来、資材コードと業務番号はテナント内一意です。supplier_id は SRM の論理参照で、クロス DB 外部キーはありません。
+- 数量/単価は DECIMAL(19,6)、行/総額は DECIMAL(19,4)、HTTP JSON は十進文字列です。JavaScript number で金額計算しません。購買申請の見積単価は 0 可、見積/注文単価は正です。
+- 日時は yyyy-MM-dd HH:mm:ss。予定/実納入日は LocalDate の日付フィールドとして DTO に従います。
+- 通常 PUT はライフサイクル/承認状態/owner を変えません。既存業務変更は認可後、状態・version・更新行数を確認します。共有設定、番号補完、台帳を同一コマンドとみなしません。
 
 ### 4.3 主要テーブル
 
@@ -176,7 +175,7 @@ erDiagram
 - `rfq_no/requisition_id/title/quotation_deadline/currency_code/status/sent_time/owner_user_id/owner_unit_id/version/deleted`。
 - `status`：DRAFT/SENT/CLOSED/AWARDED/CANCELLED。
 - `awarded_supplier_id/awarded_quotation_id/awarded_quotation_version/awarded_time`：選定と見積バージョンのスナップショット。
-- 購買申請に関連付け（1 件の購買申請から複数の RFQ を生成でき、品目で分割）。
+- 可視な APPROVED 購買申請の全明細をコピーします。同一申請を複数 RFQ が参照できますが、現行作成には明細選択やカテゴリ分割機能はありません。
 
 `proc_rfq_line`
 
@@ -186,7 +185,7 @@ erDiagram
 
 - `rfq_id/supplier_id/supplier_name_snapshot/invited_time/quotation_id/quotation_version/quotation_request_id/quotation_time/status/version/deleted`。
 - `status`：INVITED/QUOTED/EXPIRED/AWARDED/REJECTED。`AWARDED/REJECTED` は選定後の読み取り専用履歴終端状態で、見積を継続できない。
-- RFQ `status=SENT`、招待 `status IN (INVITED, QUOTED)`、かつ現在時刻が deadline を超えない場合のみ見積を提出または更新できる。
+- 新しい見積書込は RFQ status=SENT、招待 status IN (INVITED, QUOTED)、現在より後の deadline を要求します。成功済み履歴の再実行は SRM 契約の別の検証順序に従います。
 - `quotation_id` は SRM の `srm_quotation` に論理的に関連付け（クロス DB 外部キーを作らない）；`supplier_name_snapshot` は履歴表示専用で、現在のサプライヤー状態や権限の根拠にしない。
 
 `proc_purchase_order`
@@ -220,36 +219,40 @@ erDiagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> DRAFT: Create requisition
-    DRAFT --> SUBMITTED: Submit
-    SUBMITTED --> APPROVING: Start approval flow
-    APPROVING --> APPROVED: Approval passed
-    APPROVING --> REJECTED: Approval rejected
-    DRAFT --> CANCELLED: Cancel
-    SUBMITTED --> CANCELLED: Cancel
+    [*] --> DRAFT: 申請作成
+    DRAFT --> SUBMITTED: 提出
+    SUBMITTED --> APPROVING: STARTED 確認
+    APPROVING --> APPROVED: 完了：承認
+    APPROVING --> REJECTED: 完了：却下
+    APPROVING --> CANCELLED: 完了：取消
+    DRAFT --> CANCELLED: 取消
+    SUBMITTED --> CANCELLED: FAILED のみ取消
+    REJECTED --> DRAFT: 編集して下書き
     APPROVED --> [*]
-    REJECTED --> DRAFT: Resubmit after modification
+    CANCELLED --> [*]
 ```
 
-購買申請の提出後に Flowable 承認フローを起動する。承認フローは Exclusive Gateway を使い、資材品目と金額で異なる承認者にルーティングする。
+提出は別ローカルトランザクションで資材/カテゴリ/金額を再計算し、ルートを解決して SUBMITTED/PENDING と Outbox をコミット後、Workflow を呼びます。開始確認後のみ APPROVING に進みます。SUBMITTED の cancel は workflow_start_status=FAILED のみです。APPROVING→CANCELLED は照合済み Workflow 完了結果で、調達 cancel による遠隔終了ではありません。
 
 ### 5.2 承認フロー設計（omni-workflow との統合）
 
+下図は原設計のカテゴリ/金額分岐例です。全テナントに同じ BPMN、役職、閾値が配置済みとの証明ではありません。現行提出はサーバー規則で公開モデルを選び、そのモデルを実行します。
+
 ```mermaid
 flowchart TD
-    A[Requisition submitted] --> B{Branch by category}
-    B -->|IT Equipment| C{IT amount branch}
-    B -->|Office Supplies| D{Admin amount branch}
-    B -->|Raw Materials| E{Procurement amount branch}
-    B -->|Other| F{General amount branch}
-    C -->|<50,000| C1[Department Manager]
-    C -->|>=50,000| C2[Department Manager -> CTO]
-    D -->|<10,000| D1[Administration Supervisor]
-    D -->|>=10,000| D2[Administration Supervisor -> Administration Director]
-    E -->|<100,000| E1[Procurement Manager]
-    E -->|>=100,000| E2[Procurement Manager -> Supply Chain VP]
-    F -->|<30,000| F1[Requesting Dept Head]
-    F -->|>=30,000| F2[Requesting Dept Head -> CFO]
+    A["購買申請提出"] --> B{"カテゴリ"}
+    B -->|"IT機器"| C{"IT金額"}
+    B -->|"事務用品"| D{"事務金額"}
+    B -->|"原材料"| E{"調達金額"}
+    B -->|"その他"| F{"一般金額"}
+    C -->|"<50000"| C1["部門長"]
+    C -->|">=50000"| C2["部門長 → CTO"]
+    D -->|"<10000"| D1["事務責任者"]
+    D -->|">=10000"| D2["事務責任者 → 事務部長"]
+    E -->|"<100000"| E1["調達責任者"]
+    E -->|">=100000"| E2["調達責任者 → 供給網VP"]
+    F -->|"<30000"| F1["要求部門責任者"]
+    F -->|">=30000"| F2["部門責任者 → CFO"]
 ```
 
 実装方式：
@@ -258,9 +261,11 @@ flowchart TD
 - Procurement サービスは購買申請提出時に、購買申請の一意の品目とサーバー側再計算の総金額に基づき、`proc_approval_route` から公開済み modelVersionId を選択し、Workflow 内部 API でフローを起動；クライアントはモデルバージョンを指定できない。
 - 承認者は Flowable の `ScopedRoleAssignmentListener` で動的に解決（既存の組織構造+ロール体系を利用）。
 
-サービス横断の起動はリトライ可能でなければならない：DRAFT から提出するたびにまず `approvalAttempt + 1` し、requestId と `businessKey={requisitionId}:{approvalAttempt}` を生成・永続化；Procurement は `tenantId + businessType(PROCUREMENT_REQUISITION) + businessKey` を現在のラウンドの冪等キーとする。まずローカルトランザクションで `status=SUBMITTED, workflow_start_status=PENDING` に更新し、トランザクションコミット後に Workflow を呼ぶ；成功後に processInstanceId を書き込み、workflow_start_status=STARTED に設定し APPROVING へ進める。応答喪失や呼び出し失敗時は `status=SUBMITTED, workflow_start_status=FAILED` を保持し、retry は必ず保存済みの requestId/businessKey/modelVersionId を再利用し attempt を増やしてはならない。REJECTED の修正成功後は DRAFT に戻り、再提出して初めて新しい attempt を開く。Workflow の永久ビジネスキーユニーク制約が古いフローをリプレイするのを避ける。
+サービス横断の起動はリトライ可能でなければならない：DRAFT から提出するたびにまず `approvalAttempt + 1` し、requestId と `businessKey={requisitionId}:{approvalAttempt}` を生成・永続化；Procurement は `tenantId + businessType(PROCUREMENT_REQUISITION) + businessKey` を現在のラウンドの冪等キーとする。まずローカルトランザクションで `status=SUBMITTED, workflow_start_status=PENDING` に更新し、トランザクションコミット後に Workflow を呼ぶ；成功後に processInstanceId を書き込み、workflow_start_status=STARTED に設定し APPROVING へ進める。応答喪失や呼出し失敗時は FAILED 記録を試み、実状態を再読込します。retry は必ず保存済みの requestId/businessKey/modelVersionId を再利用し attempt を増やしてはならない。REJECTED の修正成功後は DRAFT に戻り、再提出して初めて新しい attempt を開く。Workflow の永久ビジネスキーユニーク制約が古いフローをリプレイするのを避ける。
 
 **MVP 制約**：1 件の購買申請は 1 品目のみ許可；承認ルートは正確な品目と `*` デフォルトルートをサポートし、BPMN は金額で分岐できる。後で品目横断の購買申請が必要になったら、明示的な主品目または複数フロー戦略を定義する。現行バージョンが暗黙に先頭行を取ることを禁止する。
+
+prepareSubmit のコミット前の資材/モデル/ルート失敗はロールバックし、SUBMITTED/FAILED を意味しません。コミット後の開始不確定時は REQUIRES_NEW で FAILED 記録を試みますが、失敗や零行更新もあり、実状態/version を再読込します。FAILED は遠隔未開始の証明ではありません。retry-start は SUBMITTED/FAILED で保存済み要求/モデル/金額/申請者/試行を再利用し、ルートを再選択しません。
 
 ### 5.2.1 購買申請承認ルールの管理
 
@@ -279,79 +284,76 @@ Workflow が利用不可のとき、読み取り専用リストはローカル�
 
 ```mermaid
 sequenceDiagram
-    participant BUYER as Buyer
+    participant BUYER as 調達担当者
     participant S as RfqService
     participant SRM as omni-srm
     participant DB as omni_procurement
-    participant SUP as Supplier Portal
-
-    BUYER->>S: POST /rfq (requisitionId, supplierIds[]) create draft
-    S->>SRM: Feign validate supplier status=APPROVED
-    S->>DB: INSERT Rfq + Lines + RfqSuppliers
-    BUYER->>S: POST /rfq/{id}/send
-    S->>SRM: Re-validate supplier status=APPROVED
-    S->>DB: INSERT Outbox event (rfq.sent.v1)
-
-    Note over SUP: Supplier views the RFQ through the SRM portal
-
+    participant SUP as サプライヤーポータル
+    BUYER->>S: POST /api/procurement/rfq (CreateRequest)
+    S->>SRM: APPROVED Supplier 検証
+    S->>DB: RFQ/明細/招待を保存
+    BUYER->>S: POST /api/procurement/rfq/{id}/send
+    S->>SRM: Supplier 再確認
+    S->>DB: Outbox procurement.rfq.sent.v1
     SUP->>SRM: GET /api/srm/portal/quotation/invitations
     SRM->>S: GET /api/internal/procurement/rfq/invitations
     SUP->>SRM: GET /api/srm/portal/quotation/invitations/{rfqId}
     SRM->>S: GET /api/internal/procurement/rfq/{rfqId}/invitation
-    SUP->>SRM: POST /api/srm/portal/quotation (requestId, lines)
-    SRM->>S: Re-validate RFQ invitation/tenant/deadline/line snapshot
-    SRM->>SRM: Save quotation + Outbox in a local transaction
+    SUP->>SRM: POST /api/srm/portal/quotation (requestId/rfqId/version/validUntil/lines)
+    SRM->>SRM: 見積/台帳/Outbox 保存
     SRM-->>S: MQ srm.quotation.submitted.v1
-    S->>DB: Idempotent update RfqSupplier.status=QUOTED
-
-    BUYER->>S: POST /rfq/{id}/award (supplierId)
-    S->>SRM: batch query valid quotations
-    S->>DB: UPDATE Rfq status=AWARDED
-    S->>DB: INSERT PurchaseOrder + winning quotation snapshot
-    S-->>BUYER: PurchaseOrderVO
+    S->>DB: イベント意図/版で招待更新
+    BUYER->>S: POST /api/procurement/rfq/{id}/award (AwardRequest)
+    S->>SRM: 現有効見積を照会
+    S->>DB: PO スナップショット生成/照合
+    S->>DB: RFQ/招待/Outbox 更新
+    S-->>BUYER: R<AwardResult> (rfq/purchaseOrder)
 ```
 
 価格比較方式：MVP は簡単な比較ビューを提供する——`GET /api/internal/quotation/batch` で招待サプライヤーの有効な見積（単価、総価、納期）を列挙し、調達担当が手動で選定サプライヤーを選ぶ。自動入札評価アルゴリズムは行わない。選定トランザクションは必ず quotationId、見積バージョン、および金額/納期の不変スナップショットを保存し、後続の SRM 見積変更は既存の選定と購買注文を変えてはならない。
+
+選定は RfqRequests.AwardRequest の rfqVersion、quotationId、quotationVersion、title、任意 expectedDeliveryDate、deliveryAddress/contactName/contactPhone を使います。supplierId は有効見積から取り、Supplier ID だけでは選定できません。`R<AwardResult>` は rfq と purchaseOrder を返します。
 
 ### 5.4 購買注文（Purchase Order）
 
 ```mermaid
 stateDiagram-v2
-    [*] --> DRAFT: Generated after RFQ award
-    DRAFT --> SENT: Send to supplier
-    SENT --> CONFIRMED: Supplier confirms
-    CONFIRMED --> PARTIAL_RECEIVED: Partial goods receipt
-    PARTIAL_RECEIVED --> RECEIVED: Full goods receipt
-    RECEIVED --> CLOSED: Close
-    DRAFT --> CANCELLED: Cancel
-    SENT --> CANCELLED: Cancel (requires approval)
-    CONFIRMED --> CANCELLED: Cancel (requires approval)
-    CLOSED --> [*]
+    [*] --> DRAFT: 選定で生成
+    DRAFT --> SENT: 送信
+    SENT --> CONFIRMED: 管理側確認
+    CONFIRMED --> PARTIAL_RECEIVED: 一部入庫
+    CONFIRMED --> RECEIVED: 全数入庫
+    PARTIAL_RECEIVED --> RECEIVED: 全数入庫
+    DRAFT --> CANCELLED: 取消
+    SENT --> CANCELLED: 取消
+    CONFIRMED --> CANCELLED: 取消
 ```
+
+PO は RFQ 選定でのみ生成します。確認は管理権限/行範囲を検証する命令で、独立 Supplier ポータル API ではありません。DRAFT/SENT/CONFIRMED の取消は cancel 権限・状態・version を使い、追加 Workflow 承認はありません。CLOSED 値は存在しますが現 Controller に close はありません。初回全数入庫は CONFIRMED→RECEIVED に直接進めます。
 
 ### 5.5 入庫確認（Goods Receipt）
 
 ```mermaid
 sequenceDiagram
-    participant R as Receiver
+    participant R as 受取人
     participant S as GoodsReceiptService
     participant DB as omni_procurement
     participant O as Outbox
-
-    R->>S: POST /goods-receipt (poId, lines[])
-    S->>DB: INSERT GoodsReceipt + Lines (DRAFT)
-    S-->>R: Draft GoodsReceiptVO
-    R->>S: POST /goods-receipt/{id}/confirm (version)
-    S->>DB: SELECT GR + PO FOR UPDATE + tenant/scope
-    S->>DB: Validate this quantity does not exceed the order by accumulated confirmed receipts
-    S->>DB: UPDATE GR=CONFIRMED, PO=PARTIAL_RECEIVED/RECEIVED
-    S->>O: INSERT procurement.goods-receipt.confirmed.v1 (same transaction)
-    S-->>R: Confirmed GoodsReceiptVO
+    R->>S: POST /api/procurement/goods-receipt (poId/lines)
+    S->>DB: 入庫下書き保存 (DRAFT)
+    R->>S: POST /api/procurement/goods-receipt/{id}/confirm (version)
+    S->>DB: GR/PO FOR UPDATE + tenant/scope
+    S->>DB: 累計数量検証
+    S->>DB: 同一取引で確認/版更新
+    S->>O: procurement.goods-receipt.confirmed.v1 (同一取引で Outbox 保存)
+    S-->>R: R<GoodsReceiptViews.Detail>
 ```
 
 DRAFT の作成は注文の入庫済み数量を占有せず、イベントも送信しない。確認時は必ず PO をロックし、すべての CONFIRMED 入庫行に基づいて累計で再検証し、複数の下書きの並行確認による超過入庫を防ぐ。確認成功後に Outbox イベント `procurement.goods-receipt.confirmed.v1` を書く；Asset が未構築のとき Procurement をブロックしないが、履歴イベントが Outbox/Broker に無期限に滞留すると仮定してはならない——Asset の稼働開始時は必ず以下で定義する履歴補償再スキャンを実行する。
 
 `quality_status=PASS`、`asset_managed=true`、かつ receivedQuantity が正の整数の入庫行のみ資産化できる。PENDING/FAIL 行、消耗品、サービス、連続計量資材は資産を作成しない。PENDING が後で `POST /goods-receipt/{id}/quality-result` により PASS になったとき、Procurement は `procurement.goods-receipt.quality-passed.v1` を発行し、今回新たに通過した行のみを携行；送信済みの confirmed イベントの変更や再利用を禁止する。
+
+品質追記は CONFIRMED の PENDING 行を PASS/FAIL にする場合のみです。quality-passed は今回合格した資産適格行のみを送り、終端行の再変更は競合で成功再実行ではありません。confirmed の候補行は空の場合もあります。累計は全同テナントの確定入庫を含み、専用集計は受取 owner 範囲を除外して漏計を防ぎます。伝票/PO は実 FOR UPDATE と版更新を使い、明細照会自体には FOR UPDATE がありません。
 
 ## 6. テナント、RBAC とデータ権限
 
@@ -410,11 +412,7 @@ API 権限：
 
 ### 6.4 承認フロー権限
 
-購買申請承認は独立した `omni-workflow` が駆動し、承認者は `ScopedRoleAssignmentListener` が動的に解決する。ユーザーは Workflow の `/api/workflow/approval/{taskId}/complete` でタスクを完了する；Workflow は必ず機能権限と現在のタスク候補者/受理者の身分を同時に検証しなければならない。
-
-購買申請承認を担う `TEAM_LEADER/DEPT_LEADER/PROCUREMENT_MANAGER` は必ず `procurement:requisition:approve`（専用ビジネス承認 VO の読み取り）と `workflow:approval:complete`（本人の Workflow タスク完了）を同時に取得しなければならない。どちらも欠かせず、テナント初期化とロール seed は同期して保守しなければならない。
-
-承認者はビジネスフォームを閲覧する際に `procurement:requisition:approve` 権限を使うが、承認の可視範囲は通常の requester/owner dataScope に制限されない。汎用バイパスの形成を避けるため、Procurement は専用の `GET /api/procurement/requisition/{id}/approval-view?taskId={taskId}` を提供する：まず Workflow 内部 API で taskId が現在の tenant に属し、businessKey がその requisitionId に等しく、タスクが現在ユーザーに割り当て済みであることを検証し、次に `tenant_id + id` で読み取り専用の承認 VO を読む。通常の詳細インターフェースは引き続き DataPermission を実行し、この例外の再利用を禁止する。
+タスク完了は Workflow が所有します。専用 approval-view は procurement:requisition:approve と、同テナントの APPROVING/STARTED、保存済み完全 businessKey（requisitionId:attempt）、processInstanceId を要求します。Workflow が現ユーザー、taskId、businessType、完全キーを検証し、返されたインスタンスも一致する必要があります。成功後に一時 TENANT 範囲で読取専用 VO を取得し、finally で元 scope に戻します。通常詳細は requester 範囲を維持し、例外を流用しません。完了には workflow:approval:complete と実タスク資格も必要です。
 
 ## 7. API 設計
 
@@ -424,21 +422,17 @@ SRM と一致：`R<T>`、`R<PageResult<T>>`、`page=1`、`size=10`、`size <= 10
 
 ### 7.2 エンドポイント
 
-| ドメイン | エンドポイント |
+実 Controller の外部 50 メソッド/パスを /api/procurement 相対で完全記載し、内部読取専用 3 パスも示します。approval-view は taskId query、version/削除引数は実 DTO/query に従います。
+
+| Controller | メソッドとパス |
 |---|---|
-| Overview | `GET /api/procurement/overview/summary`、`/spend-analysis` |
-| Material Category | `GET /material/category/list`、`POST /material/category`、`PUT/DELETE /material/category/{id}`；更新 body と削除 query はいずれも `version` を携行 |
-| Material | `GET /material/list`、`GET /material/{id}`、`POST /material`、`PUT/DELETE /material/{id}`；更新 body と削除 query はいずれも `version` を携行 |
-| Approval Route | `GET /approval-route/list`、`POST /approval-route`、`PUT/DELETE /approval-route/{id}` |
-| Requisition | `GET /requisition/list`、`GET /requisition/{id}`、`POST /requisition`、`PUT/DELETE /requisition/{id}` |
-| Requisition 承認ビュー | `GET /requisition/{id}/approval-view?taskId={taskId}`（まず Workflow タスク割当を検証） |
-| Requisition コマンド | `POST /requisition/{id}/submit`、`/retry-start`、`/cancel` |
-| RFQ | `GET /rfq/list`、`GET /rfq/{id}`、`POST /rfq`、`PUT/DELETE /rfq/{id}` |
-| RFQ コマンド | `POST /rfq/{id}/send`、`/award`、`/cancel` |
-| Purchase Order | `GET /purchase-order/list`、`GET /purchase-order/{id}`、`POST /purchase-order`、`PUT/DELETE /purchase-order/{id}` |
-| PO コマンド | `POST /purchase-order/{id}/send`、`/confirm`、`/cancel` |
-| Goods Receipt | `GET /goods-receipt/list`、`GET /goods-receipt/{id}`、`POST /goods-receipt` |
-| GR コマンド | `POST /goods-receipt/{id}/confirm`、`/quality-result` |
+| 承認規則 (ApprovalRouteController) | `GET /approval-route/list` · `GET /approval-route/workflow-options` · `POST /approval-route/match-preview` · `GET /approval-route/coverage` · `GET /approval-route/impact` · `POST /approval-route` · `PUT /approval-route/{id}` · `DELETE /approval-route/{id}` |
+| 入庫 (GoodsReceiptController) | `GET /goods-receipt/list` · `GET /goods-receipt/{id}` · `POST /goods-receipt` · `POST /goods-receipt/{id}/confirm` · `POST /goods-receipt/{id}/quality-result` |
+| 資材/カテゴリ (MaterialController) | `GET /material/category/list` · `POST /material/category` · `PUT /material/category/{id}` · `DELETE /material/category/{id}` · `GET /material/list` · `GET /material/{id}` · `POST /material` · `PUT /material/{id}` · `DELETE /material/{id}` |
+| 概要 (OverviewController) | `GET /overview/summary` · `GET /overview/spend-analysis` |
+| 購買注文 (PurchaseOrderController) | `GET /purchase-order/list` · `GET /purchase-order/{id}` · `PUT /purchase-order/{id}` · `DELETE /purchase-order/{id}` · `POST /purchase-order/{id}/send` · `POST /purchase-order/{id}/confirm` · `POST /purchase-order/{id}/cancel` |
+| 購買申請 (RequisitionController) | `GET /requisition/list` · `GET /requisition/{id}` · `GET /requisition/{id}/approval-view` · `POST /requisition` · `PUT /requisition/{id}` · `DELETE /requisition/{id}` · `POST /requisition/{id}/submit` · `POST /requisition/{id}/retry-start` · `POST /requisition/{id}/cancel` |
+| RFQ (RfqController) | `GET /rfq/supplier-options` · `GET /rfq/list` · `GET /rfq/{id}` · `GET /rfq/{id}/comparison` · `POST /rfq` · `PUT /rfq/{id}` · `DELETE /rfq/{id}` · `POST /rfq/{id}/send` · `POST /rfq/{id}/award` · `POST /rfq/{id}/cancel` |
 
 Overview のサマリは固定で次を返す：承認中の購買申請数、締切内にまだ `INVITED` サプライヤーがいる `SENT` RFQ 数、
 購買注文の各状態の数、入庫下書き数、および `currencyCode` でグループ化した確認済み調達コミット金額。
@@ -446,6 +440,11 @@ Overview のサマリは固定で次を返す：承認中の購買申請数、�
 `DRAFT/SENT/CANCELLED` を含まない。`spend-analysis` の `dimension` は
 `CATEGORY/SUPPLIER/DEPARTMENT` をサポートし、DEPARTMENT は購買注文の `owner_unit_id` を表す；
 結果はまず通貨別、次に金額降順に並べ、`limit` の範囲は 1–100。どのインターフェースも通貨横断で直接合計してはならない。
+
+| Controller | メソッドとパス |
+|---|---|
+| 内部資産候補 (InternalAssetCandidateController) | `GET /api/internal/procurement/goods-receipt/asset-candidates` |
+| 内部招待 (InternalRfqInvitationController) | `GET /api/internal/procurement/rfq/invitations` · `GET /api/internal/procurement/rfq/{rfqId}/invitation` |
 
 ### 7.3 エンドポイントと DataScope permission のマッピング
 
@@ -472,30 +471,17 @@ Overview のサマリは固定で次を返す：承認中の購買申請数、�
 
 ### 8.1 Auth Feign
 
-SRM と一致：userId/unitId のみ保存し、割当前にユーザーが存在し、有効で、同一テナントであることを検証。リストは batch enrich、N+1 を禁止。
+Auth はユーザー/組織/権限/範囲の権威です。現行作成は有効な ServiceDataScopeContext の識別/主組織を使い、PO は RFQ の帰属を継承します。SRM の担当移管/候補解決が調達にもあるとはみなしません。AuthInternalClient の宣言だけでは全作成/一覧が呼ぶ証拠になりません。共通識別/範囲障害は拒否し、XSS 回源の安全基準は別です。
 
 ### 8.2 SRM Feign
 
-Procurement は SRM 内部 API でサプライヤーデータを取得する：
+現行 SrmInternalClient は `GET /api/internal/supplier/search`、`POST /api/internal/supplier/batch`、`GET /api/internal/quotation/batch` を使います。RFQ 作成/送信は同テナントの APPROVED サプライヤーを確認し、比較/選定は有効見積、version、招待、全明細を再確認します。過去の名称は認可根拠にしません。
 
-- `GET /api/internal/supplier/{id}?tenantId={tenantId}`：サプライヤー概要を取得。
-- `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}`：合格サプライヤーを検索。
-- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}`：招待サプライヤーの有効な見積、バージョン、完全な行スナップショットを返し、価格比較と選定スナップショットに使用。
-- RFQ 時にサプライヤー状態が APPROVED で、ブラックリストにないことを検証。
-- リストでサプライヤー名称を表示する際、supplier_id を収集した後一度に batch Feign。
+Procurement は `GET /api/internal/procurement/rfq/invitations` と `GET /api/internal/procurement/rfq/{rfqId}/invitation` を SRM に公開します。supplierId は現在の ACTIVE PortalUser 由来です。X-Internal-Token/X-Tenant-Id と重複 tenant 引数の一致を要求し、Gateway はこの接頭辞を公開しません。
 
-Procurement は SRM に 2 種類の内部読み取り専用インターフェースも提供する：
+新見積は SENT、INVITED/QUOTED、将来 deadline、validUntil、全行を検証します。成功履歴再実行は新状態/RFQ 検査より先ですが、ポータル関連/DTO/意図一致は必要で、現在見積を返して再発行しません。SRM は RFQ をクロス DB 更新せず、Procurement が Inbox 消費し、古い見積版で新しい版を上書きしません。
 
-- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`：現在のサプライヤーの招待リストを返し、少なくとも `rfqId/rfqNo/title/status/invitationStatus/quotationDeadline/currencyCode/invitedTime` を含む。
-- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`：招待詳細と RFQ 行スナップショットを返し、行は少なくとも `rfqLineId/materialCode/materialName/unit/quantity/remark` を含む。
-
-SRM は必ず PortalUser 関連付けで得た supplierId でこれらのインターフェースを呼び、ポータルリクエストが渡す supplierId を使ってはならない。提出前に RFQ `status=SENT`、招待 `status IN (INVITED, QUOTED)`、かつ quotationDeadline を超えていないことを再検証し、見積 `validUntil` は quotationDeadline より早くならず、提出する rfqLineId 集合が詳細と完全一致することを検証する。SRM は見積保存後に `srm.quotation.submitted.v1` を発行；Procurement は eventId Inbox で冪等に消費して自身の `proc_rfq_supplier` を更新し、SRM は Procurement テーブルをクロス DB で書いてはならない。
-
-上記のすべての内部インターフェースは統一して `/api/internal/**` プレフィックスを使い、`X-Internal-Token` と `X-Tenant-Id` を要求する；インターフェースが query/body tenant も携行する場合は header tenant と一致しなければならない。Gateway はこのプレフィックスを転送しない。
-
-SRM が利用不可のとき：
-- サプライヤー表示：ID/不明サプライヤーを返せる。
-- RFQ/発注：継続できず、503 を返す。
+SRM 障害は現行 Supplier/見積を必要とする操作を拒否します。生成済み PO の後続ローカル命令は保存済みスナップショットを使い、一律利用不可にはなりません。招待/注文は保存済み名称を表示し、全一覧が現行 Supplier を batch 補完するとは保証しません。
 
 ### 8.3 Workflow 統合
 
@@ -544,7 +530,7 @@ Procurement は Flowable を埋め込まず、`X-Internal-Token` で保護され
         "materialId": 601,
         "materialCode": "IT-NB-001",
         "materialNameSnapshot": "ThinkPad X1 Carbon",
-        "categoryCode": "IT_DEVICE",
+        "categoryCode": "LAPTOP",
         "unit": "PCS",
         "receivedQuantity": "5.000000",
         "qualityStatus": "PASS",
@@ -564,13 +550,14 @@ Procurement は Flowable を埋め込まず、`X-Internal-Token` で保護され
 `consumerName + eventId` の Inbox ユニークキーで冪等を行い、リアルタイム消費と履歴再スキャンは共同で
 `tenantId + goodsReceiptLineId + unitSequence` の資産ソースユニークキーをフォールバックに使う；同一冪等キーが異なる完全なビジネス意図にバインドされた場合は競合を返し、サイレントに上書きしてはならない。
 
-Outbox はイベントが Broker へ確実に配送されることのみを保証する；メッセージは一度送信成功すると SENT に入り、将来まだデプロイされていないコンシューマーのために無期限に保持されることは保証されない。Asset の稼働開始時は必ず補償再スキャンを実行する：ページングされた `GET /api/internal/procurement/goods-receipt/asset-candidates?tenantId={tenantId}&afterId={id}&size={size}` で確認済みかつ資産化可能な履歴入庫行をすべて読み、同一冪等キーで補建する。リアルタイム消費と履歴再スキャンは並行でき、Inbox ユニーク制約が重複しないことを保証する。
+ローカル Outbox/Relay は再試行可能な送信経路で、Broker/消費成功や将来消費者向け永久保持の証明ではありません。履歴候補は入庫行 ID 昇順、afterId>=0、size1–100 で、CONFIRMED/PASS/assetManaged/正整数/元イベント門閂を要求します。サービスは一意な元イベント、owner、関連を再検証します。実時間/回掃は consumerName+eventId Inbox とテナント/入庫行/単位序号の元データ一意制約の両方を使い、Inbox だけで重複防止を説明しません。異意図を上書きしません。
 
 ### 8.5 Outbox イベント
 
 - `procurement.requisition.submitted.v1`
 - `procurement.requisition.approved.v1`
 - `procurement.requisition.rejected.v1`
+- `procurement.requisition.cancelled.v1`
 - `procurement.rfq.sent.v1`
 - `procurement.rfq.awarded.v1`
 - `procurement.purchase-order.created.v1`
@@ -582,20 +569,15 @@ Outbox はイベントが Broker へ確実に配送されることのみを保�
 
 ### 9.1 OperLog マスキング
 
-既存の PII マスキング能力を再利用する。Procurement がマスキングを必要とするフィールド：
-
-- 入庫住所（`delivery_address`）
-- 連絡先の携帯電話（`contact_phone`）
+OperLogSanitizer は名前を正規化して address/contactname/phone の包含規則を適用し、現行住所/名前/電話を処理します。非 JSON では一部の電話・メール・資格情報をテキスト規則で処理します。任意 PII 認識や業務認可の代替ではありません。
 
 ### 9.2 PII
 
-- 入庫住所と連絡先の携帯電話はリストページでデフォルトマスク。
-- 詳細は権限で表示。
-- 購買注文の印刷/エクスポート時（Phase 2）は完全な値が必要で、独立した権限を使う。
+PO Summary は住所/名前/電話のマスク値を返します。Detail は procurement:purchase-order:list と行可視性確認後に完全値を返し、追加の独立 PII 権限検査はありません。Phase 2 の印刷/出力権限は計画です。
 
 ### 9.3 XSS
 
-Procurement は `omni-common-service` の `CachedServiceXssConfigProvider` で XSS 設定を得て、モジュールレベルの `XssConfigProvider` を再実装しない。設定はまず Redis DB 0 を読み、キャッシュ未ヒット時は Auth へ回源；Auth が利用不可かつキャッシュがない場合はセーフティベースラインでフィルタを継続する。MVP の備考はプレーンテキストのみ許可。
+共通 CachedServiceXssConfigProvider は Redis DB 0 の xss:enabled:{tenantId}/xss:rules:{tenantId} を読み、未ヒット/障害は Auth に回源、失敗時は安全基準を使いつつ権威 enabled を尊重します。proc: 業務キャッシュではなく、備考はプレーンテキストです。
 
 ## 10. フロントエンド設計
 
@@ -609,17 +591,17 @@ omni-frontend/src/
 │   ├── procurement-purchase-order.ts
 │   └── procurement-goods-receipt.ts
 ├── views/procurement/
-│   ├── overview/index.vue           # Procurement overview + spend analysis
-│   ├── material/index.vue           # Material catalog management
-│   ├── requisition/index.vue        # Requisition management
-│   ├── rfq/index.vue                # RFQ management
-│   ├── purchase-order/index.vue     # Purchase order management
-│   └── goods-receipt/index.vue      # Goods receipt management
+│   ├── overview/index.vue           # 概要/支出
+│   ├── material/index.vue           # 資材目録
+│   ├── requisition/index.vue        # 購買申請
+│   ├── rfq/index.vue                # RFQ
+│   ├── purchase-order/index.vue     # 購買注文
+│   └── goods-receipt/index.vue      # 入庫
 └── components/procurement/
-    ├── RequisitionForm.vue          # Requisition form (with dynamic line add/remove)
-    ├── RfqCompareView.vue           # Price comparison view (multi-supplier quotation comparison table)
-    ├── PurchaseOrderTracker.vue     # Order progress tracker
-    └── GoodsReceiptForm.vue         # Goods receipt form (with quality status)
+    ├── RequisitionForm.vue          # 申請フォーム
+    ├── RfqCompareView.vue           # 比較
+    ├── PurchaseOrderTracker.vue     # 注文進捗
+    └── GoodsReceiptForm.vue         # 入庫フォーム
 ```
 
 - `ApiResponse/PageResult` は `src/types/api.ts` からのみインポート。
@@ -627,73 +609,52 @@ omni-frontend/src/
 - 価格比較ビューは Element Plus テーブルで各サプライヤーの見積を横に比較。
 - Workflow の未処理リスト自体は Procurement の businessKey を携行しない；タスクを開くときまず `/api/workflow/task/{taskId}/form` を呼び、variables から `businessType/requisitionId` を読み、次に Procurement の `approval-view` をロードする。ビジネスフォームのロードやタスク割当検証が失敗したときは必ず承認提出を禁止する。
 - `router/index.ts` と `layout/index.vue` の iconMap に Procurement を補う。
-- `constants/menu.ts`、`zh-CN.ts`、`en-US.ts` を同期。
+
+procurement-approval-route.ts と views/procurement/approval-route（規則ウィザード、網羅性、試算、図プレビュー）もあります。メニュー/権限ボタンと zh-CN/en-US/ja-JP/ko-KR を同期します。
 
 ## 11. エンジニアリング着地点
 
-### 11.1 新モジュール
+以下は既存実装の入口で、モジュールを再作成する手順ではありません。サービス拡張の教材は開発 Wiki を参照します。
 
-```text
-omni-backend/omni-procurement/
-├── pom.xml
-└── src/main/
-    ├── java/com/omni/procurement/
-    │   ├── ProcurementApplication.java
-    │   ├── client/ config/ controller/ dto/ entity/
-    │   ├── mapper/ security/ service/ service/impl/
-    │   └── workflow/                    # Workflow Feign client and approval-result event consumer
-    └── resources/
-        ├── application.yml
-        ├── application-dev.yml
-        └── mapper/
-```
-
-`ProcurementApplication` は `@EnableDiscoveryClient`、`@EnableFeignClients(basePackages="com.omni.procurement.client")`、`@MapperScan("com.omni.procurement.mapper")` を使用。
-
-### 11.2 必ず変更するファイル
-
-| ファイル | 変更 |
+| 領域 | 現行ファイル |
 |---|---|
-| `omni-backend/pom.xml` | `omni-procurement` を追加 |
-| Gateway `application.yml` | `/api/procurement/**` ルートを明示 |
-| `docker/backend/Dockerfile` | POM キャッシュ層 |
-| `docker-compose.yml` | Procurement サービス、8106 |
-| `start.bat/start.sh` | build リストに Procurement を追加 |
-| `database/changelog/procurement/` | 調達構造変更に forward-only の Liquibase changeSet を追加 |
-| `scripts/sql/seed/procurement.sql` | 資材品目などの正式冪等シード；更新後に seed manifest をリフレッシュ |
-| `scripts/sql/seed/auth.sql` | 調達権限とロールの正式冪等シード；更新後に seed manifest をリフレッシュ |
-| Procurement `TenantModuleProvisioner` | 新テナントの 13 項目の資材分類の冪等初期化 |
-| `omni-workflow` | 冪等内部起動/タスク割当検証 API、および `workflow.process.completed.v1` Outbox イベントを追加 |
-| `docs/workflow.md` | サービス横断の冪等起動、結果イベント、調達承認フローモデルの説明を補足 |
-| Frontend router/layout/menu/locales | アイコン、メニュー、i18n |
+| アプリ/走査 | [omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java) |
+| 設定 | [omni-backend/omni-procurement/src/main/resources/application.yml](../../omni-backend/omni-procurement/src/main/resources/application.yml) · [omni-backend/omni-procurement/src/main/resources/application-lite.yml](../../omni-backend/omni-procurement/src/main/resources/application-lite.yml) |
+| サービス/API | [omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/) · [omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/) |
+| 範囲/認可 | [omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java) |
+| 移行/シード | [database/changelog/procurement/](../../database/changelog/procurement/) · [scripts/sql/seed/procurement.sql](../../scripts/sql/seed/procurement.sql) · [scripts/sql/seed/auth.sql](../../scripts/sql/seed/auth.sql) · [database/seed/manifest.yaml](../../database/seed/manifest.yaml) |
+| コンテナ | [compose.yaml](../../compose.yaml) · [compose.tools.yaml](../../compose.tools.yaml) · [docker/backend/Dockerfile](../../docker/backend/Dockerfile) · [start.bat](../../start.bat) · [start.sh](../../start.sh) |
+| 画面 | [omni-frontend/src/views/procurement/](../../omni-frontend/src/views/procurement/) · [omni-frontend/src/api/procurement-approval-route.ts](../../omni-frontend/src/api/procurement-approval-route.ts) |
+| テナント初期化 | [omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantInitializerImpl.java](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantInitializerImpl.java) · [omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantModuleProvisioner.java](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantModuleProvisioner.java) |
 
-設定要点：server 8106、management 19906、Redis DB 0、XXL appname `omni-procurement`/port 9906。
+ProcTenantInitializerImpl は初回設定作成時に CNY と 13 既定カテゴリを書き、設定があれば早期 return します。削除された全カテゴリの恒久修復を保証しません。ProcTenantModuleProvisioner はテナント識別を設定し finally で消去します。
 
 ## 12. 非機能設計
 
 ### 性能
 
-- すべてのリストはページング、最大 100。
-- サプライヤー名称は一度に batch enrich、N+1 を禁止。
+ページ応答は最大100、カテゴリツリー/選択肢/内部カーソルは個別契約です。一括 Supplier 検証と過去名称表示は別で、全一覧の実時間補完は保証しません。
+
 - オーバービュー統計は Mapper 層の集約 SQL を使用（品目/サプライヤー/担当部門および通貨別の調達支出 `GROUP BY`）、
   各アグリゲートルートは引き続きそのリストと同一の requester/owner DataScope を適用し、通貨横断の合計とレコードごとのクエリを禁止する。
 
 ### 並行と冪等
 
+入庫確認は伝票/PO の実 FOR UPDATE、全同テナント確定数量、version/更新行数を組み合わせます。メソッド名だけで明細ロックとみなしません。選定は RFQ/招待をロックして現見積版を確認し、PO スナップショットを生成/照合後、同ローカルトランザクションで RFQ/Outbox を更新します。
+
 - 購買申請提出 → 承認フロー起動：ローカル状態の条件更新 + Workflow の `tenantId + businessType + businessKey` ユニーク冪等；タイムアウト時は同一 requestId でリトライ。
-- 入庫数量検証：`received_quantity <= ordered_quantity - already_received`、楽観ロックを使用。
-- RFQ 選定：version 楽観ロック + RFQ 状態検証。
 - ポータル見積提出：SRM は永久リクエスト履歴テーブルで `(tenantId, requestId)` により冪等を行い、requestHash で同一キー異意図を防ぎ、`(tenantId, rfqId, supplierId)` でユニークな有効見積を制約；同一意図のリプレイは現在のスナップショットを返し、イベントを重複発行しない。
 - 見積イベントと承認結果イベント：各自 Inbox eventId ユニークキーで冪等消費；同一 quotationId の古い quotationVersion は新しいバージョンを上書きしてはならない。
 
+proc_event_inbox は (tenant_id,event_id) 一意キーで完全イベント JSON を保存します。見積/承認消費は種類・送信元・集約・JSON 意味上の意図を先に照合し、異意図は409、キー順序/空白差は競合としません。業務結果と Inbox 状態は同ローカルトランザクションで更新します。
+
 ### 縮退
 
-- SRM 利用不可：サプライヤー表示は ID に縮退；RFQ/発注は拒否（503）。
-- Workflow 利用不可：提出インターフェースは 503 を返し、購買申請はリトライ可能な状態 `status=SUBMITTED, workflow_start_status=FAILED` を保持；承認をスキップしたり、フローを重複起動してはならない。
-- Auth 利用不可：503 フェイルクローズド。
-- RocketMQ 利用不可：Outbox はコミットし、Relay が後補。
+障害は段階別です。提出前モデル/ルート失敗はロールバック、コミット後不確定開始は FAILED 記録を試み再読込し、遠隔未開始を仮定しません。RFQ の Supplier/見積は SRM 依存、既存 PO 命令はスナップショットを使います。Auth 範囲障害でアクセスを広げず、XSS は別の安全基準を持ちます。Broker 障害では Outbox を保留でき、最終配送には証拠が必要です。
 
 ## 13. テストと検収
+
+本節は設計要件/検収シナリオで、全実行済み記録ではありません。現行の個別摘要一致 Docker Reactor 産物は調達 49 報告、213 成功、失敗/エラー/スキップ 0 です。各アサーションのみを証明し、実 Workflow/MQ、MySQL 並行性、新教材実行を証明しません。画面/操作は調達 Wiki 固有の証拠範囲に従います。
 
 最小テストセット：
 
@@ -719,6 +680,8 @@ omni-backend/omni-procurement/
 エンドツーエンド検収：資材作成 → 購買申請提出 → 承認通過 → RFQ 作成 → サプライヤー招待 → サプライヤー見積 → 価格比較選定 → 購買注文生成 → 入庫確認 → Outbox イベント発行。
 
 ## 14. 実装順序
+
+以下は 2026-07-27 の原実装計画を追跡用に保持します。段階は既存モジュールの再作成要求でも現完了証拠でもありません。現事実はソース契約と実証拠に従います。
 
 ### Milestone 0：前提確認
 
@@ -771,10 +734,12 @@ omni-backend/omni-procurement/
 | 価格比較方式 | 手動選定 | MVP は自動入札評価をしない |
 | 入庫 → Asset | Outbox リアルタイムイベント + 履歴補償再スキャン | 疎結合かつ Broker が将来のコンシューマーのためにメッセージを永久保存することに依存しない |
 | サプライヤーデータ | SRM への Feign 呼び出し | SRM データをクロス DB で読まない |
-| 三-way マッチング | 行わない | ERP/財務システムに残す |
+| 三点照合 マッチング | 行わない | ERP/財務システムに残す |
 | MVP 品目管理 | フロントエンド管理 UI を開放済み | 任意階層の品目ツリーの自主保守をサポート |
 
 ## 16. 主要リスク
+
+以下は原設計リスクと当時の対処案です。金額を先行しカテゴリを後で追加する記述は当時の計画で、現サーバーのカテゴリ/金額ルールと承認/検収要件を下げません。
 
 | 優先度 | リスク | 対処 |
 |---|---|---|

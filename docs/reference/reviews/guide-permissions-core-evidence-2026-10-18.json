@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-permissions",
+  "source": "docs/guides/permissions.md",
+  "source_sha256": "53bb104afd5d1c4500777730018ef5c01bb4f69f6a2a2ec3d4d95fbaedf2ccc9",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "e3c435737ffa4d47be910418b169c11b48b28635",
+  "source_state": "Actual incremental semantic review of all newly added four-language instructions,intros and historical-module scoping;reuse only hash-matching prior complete permission review for byte-identical old body;no new whole-document reread claim",
+  "method": "Actually read all four added core sections and exact intro/module-scoping delta;read final corrected Korean block. Individually viewed all8exact original Docker screenshots. Retain prior complete permission semantics only for hash-matching original body,which is byte-identical after precise indexed inverse of additions,scoping and terminology/spacing edits. No new whole-document reread or human review asserted.",
+  "prior_complete_semantic_review": {
+    "path": "docs/reference/reviews/guide-permissions.json",
+    "sha256": "234b4df9b9bff01ad1f976b0cbb53f9a45a022d049e81ca0c30ddecef571ec89"
+  },
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/guide-permissions.json",
+      "sha256": "234b4df9b9bff01ad1f976b0cbb53f9a45a022d049e81ca0c30ddecef571ec89"
+    },
+    {
+      "path": "docs/reference/evidence/core-permissions-errors-2026-10-18.json",
+      "sha256": "3f6f311bd0337aafce1753148836490988fc8f93ad2579766ff2f837f08269ce"
+    },
+    {
+      "path": "docs/reference/evidence/scripts/core-permissions-errors-2026-10-18.mjs",
+      "sha256": "ed7409660bf4897ebf164b6068ab29452eb3d17324e703ae752357941df4b1cb"
+    },
+    {
+      "path": "docs/reference/evidence/scripts/core-viewer-role-fixture-2026-10-18.mjs",
+      "sha256": "0740964182ec8bd2ed580595d72cdb0f3425b4aed45f116b09ec4a05c340c343"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/screenshot-manifest.yaml",
+      "sha256": "0e22bd40b38c606d13efc011f21df67147f7d135e7d24471da4245a61144e165"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/screenshot-coverage.yaml",
+      "sha256": "1a7fcd92eb1750405607f88d874e1074856b45699e531e284eb1bae1d7eb761f"
+    },
+    {
+      "path": "omni-frontend/src/api/system-config.ts",
+      "sha256": "bbdb1c97eba0c51680dc847d0af72dc109b0bdae30d35a0004edee75cf2fb837"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SystemConfigController.java",
+      "sha256": "05bc63916a629b27708419f7afe49e73cc8542a70470a552347bb757b5cb14c7"
+    }
+  ],
+  "source_inspection_scope": "Actual incremental semantic review of all newly added four-language instructions,intros and historical-module scoping;reuse only hash-matching prior complete permission review for byte-identical old body;no new whole-document reread claim",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_document_rereads_claimed": 0,
+    "unchanged_body_inverse_exact": true,
+    "added_inline_literals_each": 13,
+    "locale_normalized_new_image_links_equal": true,
+    "old_screenshot_rows_unchanged": 818,
+    "new_screenshot_rows": 8,
+    "actual_original_images_individually_AI_viewed": 8,
+    "HTTP_configuration_admin": 200,
+    "HTTP_configuration_controlled_employee": 403,
+    "configuration_business_code_employee": 403,
+    "explicit_client_fault_HTTP": 500,
+    "native_user_list_recovery_each_locale_HTTP": 200,
+    "native_user_list_recovery_each_locale_code": 200,
+    "visible_rows_after_recovery": 10,
+    "temporary_role_fixture_formal_API_writes": 2,
+    "temporary_roles_restored_exactly": true,
+    "direct_SQL_writes": 0,
+    "original_database_used": false,
+    "temporary_tokens_removed": true,
+    "runtime_containers_stopped": true,
+    "password_CAPTCHA_login_proven": false,
+    "source_application_code_changed": false,
+    "all_five_generated_delivery_complete": false,
+    "other_A_G_work_complete": false
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/permissions.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 13:10:29",
+      "result": "approved",
+      "translation_sha256": "e200e8db0a237b5c5c4ea4fac0934fb06c5d7baa676ebb8fe618291b7dbb55f0",
+      "checks": {
+        "coverage_and_meaning": "All four additions preserve generated core/lite prerequisites,tenant1,temporary EMPLOYEE+USER identity,configuration denial and user-list failure/recovery. The original core employee workspace redirect is explicitly disclosed.",
+        "security_and_failure_semantics": "Real HTTP403/business403 is independently observed;SPA403page is not mislabeled as route HTTP403.500is explicit browser-only injection with four native recoveries. Test-classpath identity is not password/CAPTCHA login. Two formal role writes are disclosed and restored;no production or original DB used.",
+        "technical_literals": "All13added inline technical literals and two locale-normalized image links match Chinese exactly. Routes,GET endpoints,permission names,roles and500/200semantics were compared with successful647and formal role grant/restore646.",
+        "images_and_links": "All8original1680x1050PNGs were individually viewed and hash-bound648;target error text and buttons readable. English/Japanese sidebar clipping remains documented.818prior screenshot rows are byte-value equivalent;historical images are scoped to actual modules rather than relabeled as core.",
+        "language_and_terminology": "Complete added English paragraphs preserve Chinese identity,permissions,denial,fault and restoration meaning;fixed count/word spacing and clearly state client injection and independent API observations."
+      },
+      "findings": [
+        {
+          "finding": "Default core EMPLOYEE returns to workspace",
+          "resolution": "New screenshots and all translations explicitly declare the temporary formal USER read-only role and separate real configuration403",
+          "status": "resolved",
+          "id": "CORE-SCENARIO-IDENTITY"
+        },
+        {
+          "finding": "Generic API-failure evidence must survive core selection and preserve its actual proof scope",
+          "resolution": "New native user-list screenshots use explicitly declared browser fault injection;four successful removals/reloads recorded",
+          "status": "resolved",
+          "id": "CORE-500-PROVENANCE"
+        },
+        {
+          "finding": "Korean decisive wording is unsuitable for deterministic test response",
+          "resolution": "Use fixed500response while preserving all technical literals",
+          "status": "resolved",
+          "id": "KO-DETERMINISTIC-TERM"
+        },
+        {
+          "finding": "Historical Procurement/SRM screenshots do not apply to bare core",
+          "resolution": "Four guides retain dated originals behind matching module guards;generic core images are separate",
+          "status": "resolved",
+          "id": "MODULE-IMAGE-SCOPE"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/permissions.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 13:10:29",
+      "result": "approved",
+      "translation_sha256": "cff8e18689ffe9c747cf462da9e40de10f29ab3c72feb1f57c6217c7126f6557",
+      "checks": {
+        "coverage_and_meaning": "All four additions preserve generated core/lite prerequisites,tenant1,temporary EMPLOYEE+USER identity,configuration denial and user-list failure/recovery. The original core employee workspace redirect is explicitly disclosed.",
+        "security_and_failure_semantics": "Real HTTP403/business403 is independently observed;SPA403page is not mislabeled as route HTTP403.500is explicit browser-only injection with four native recoveries. Test-classpath identity is not password/CAPTCHA login. Two formal role writes are disclosed and restored;no production or original DB used.",
+        "technical_literals": "All13added inline technical literals and two locale-normalized image links match Chinese exactly. Routes,GET endpoints,permission names,roles and500/200semantics were compared with successful647and formal role grant/restore646.",
+        "images_and_links": "All8original1680x1050PNGs were individually viewed and hash-bound648;target error text and buttons readable. English/Japanese sidebar clipping remains documented.818prior screenshot rows are byte-value equivalent;historical images are scoped to actual modules rather than relabeled as core.",
+        "language_and_terminology": "Complete added Japanese paragraphs accurately preserve DB-derived temporary roles,missing configuration authority,real403versus injected500,and exact restoration;technical names and recovery meaning match Chinese."
+      },
+      "findings": [
+        {
+          "finding": "Default core EMPLOYEE returns to workspace",
+          "resolution": "New screenshots and all translations explicitly declare the temporary formal USER read-only role and separate real configuration403",
+          "status": "resolved",
+          "id": "CORE-SCENARIO-IDENTITY"
+        },
+        {
+          "finding": "Generic API-failure evidence must survive core selection and preserve its actual proof scope",
+          "resolution": "New native user-list screenshots use explicitly declared browser fault injection;four successful removals/reloads recorded",
+          "status": "resolved",
+          "id": "CORE-500-PROVENANCE"
+        },
+        {
+          "finding": "Korean decisive wording is unsuitable for deterministic test response",
+          "resolution": "Use fixed500response while preserving all technical literals",
+          "status": "resolved",
+          "id": "KO-DETERMINISTIC-TERM"
+        },
+        {
+          "finding": "Historical Procurement/SRM screenshots do not apply to bare core",
+          "resolution": "Four guides retain dated originals behind matching module guards;generic core images are separate",
+          "status": "resolved",
+          "id": "MODULE-IMAGE-SCOPE"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/permissions.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 13:10:29",
+      "result": "approved",
+      "translation_sha256": "05507b4d61e8157d4533285defc14d24cf44402a4ecb913e3191c963171c5fdd",
+      "checks": {
+        "coverage_and_meaning": "All four additions preserve generated core/lite prerequisites,tenant1,temporary EMPLOYEE+USER identity,configuration denial and user-list failure/recovery. The original core employee workspace redirect is explicitly disclosed.",
+        "security_and_failure_semantics": "Real HTTP403/business403 is independently observed;SPA403page is not mislabeled as route HTTP403.500is explicit browser-only injection with four native recoveries. Test-classpath identity is not password/CAPTCHA login. Two formal role writes are disclosed and restored;no production or original DB used.",
+        "technical_literals": "All13added inline technical literals and two locale-normalized image links match Chinese exactly. Routes,GET endpoints,permission names,roles and500/200semantics were compared with successful647and formal role grant/restore646.",
+        "images_and_links": "All8original1680x1050PNGs were individually viewed and hash-bound648;target error text and buttons readable. English/Japanese sidebar clipping remains documented.818prior screenshot rows are byte-value equivalent;historical images are scoped to actual modules rather than relabeled as core.",
+        "language_and_terminology": "Complete final Korean paragraphs were read after changing decisive500to fixed500response and normalizing spacing;identity,client fault injection,real refusal,session preservation and recovery agree with Chinese."
+      },
+      "findings": [
+        {
+          "finding": "Default core EMPLOYEE returns to workspace",
+          "resolution": "New screenshots and all translations explicitly declare the temporary formal USER read-only role and separate real configuration403",
+          "status": "resolved",
+          "id": "CORE-SCENARIO-IDENTITY"
+        },
+        {
+          "finding": "Generic API-failure evidence must survive core selection and preserve its actual proof scope",
+          "resolution": "New native user-list screenshots use explicitly declared browser fault injection;four successful removals/reloads recorded",
+          "status": "resolved",
+          "id": "CORE-500-PROVENANCE"
+        },
+        {
+          "finding": "Korean decisive wording is unsuitable for deterministic test response",
+          "resolution": "Use fixed500response while preserving all technical literals",
+          "status": "resolved",
+          "id": "KO-DETERMINISTIC-TERM"
+        },
+        {
+          "finding": "Historical Procurement/SRM screenshots do not apply to bare core",
+          "resolution": "Four guides retain dated originals behind matching module guards;generic core images are separate",
+          "status": "resolved",
+          "id": "MODULE-IMAGE-SCOPE"
+        }
+      ]
+    }
+  },
+  "dependency_renewals": [
+    {
+      "at": "2026-10-18T05:14:03.638Z",
+      "reason": "Exact YAML decoded values unchanged;preserve original818screenshot rows byte-for-byte and append only8new rows;coverage adds only2image patterns. No guide content,translated meaning,image or source runtime changed.",
+      "changes": [
+        {
+          "path": "omni-frontend/e2e-docs/screenshot-manifest.yaml",
+          "before_sha256": "9803eabd886a2b24a4bfba0fb32d38bd32b7ddaee6240d655a2bd2625c523cd3",
+          "after_sha256": "0e22bd40b38c606d13efc011f21df67147f7d135e7d24471da4245a61144e165"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/screenshot-coverage.yaml",
+          "before_sha256": "33d9df99e29f4f3c78ac2b98896b4194182a19537f4dbb57e710fe468ea02793",
+          "after_sha256": "1a7fcd92eb1750405607f88d874e1074856b45699e531e284eb1bae1d7eb761f"
+        }
+      ],
+      "new_semantic_rows": 0
+    }
+  ]
+}

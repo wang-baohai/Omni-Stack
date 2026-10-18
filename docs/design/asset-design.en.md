@@ -1,11 +1,12 @@
 # Asset Management Module Architecture and Implementation Baseline
 
-> Status: MVP implemented and verified
+> Applicability: The original design date, 2026-07-27, and important history in sections 14–16 are retained. Current facts are checked against `omni-asset` source, Liquibase, frontend and configuration; historical “verified” status does not establish complete acceptance in this run. Translation review follows [ADR-0003](../adr/0003-authorized-ai-translation-review.md) and records actual `AI_REVIEW`, never human review.
+>
 > Project: Omni-Stack
-> Date: 2026-07-27
-> Goal: Describe the architecture, cross-service contracts, and implementation boundaries of the omni-asset MVP; the implementation entry points are `omni-backend/omni-asset` and `omni-frontend/src/views/asset`.
+> Original design date: 2026-07-27
+> Current purpose: Explain asset service boundaries, data, commands, approval and procurement intake contracts.
 
-Design basis: `README.md`, and all topic documents in `docs/` — architecture, api-contract, backend-patterns, frontend-patterns, core-flows, scheduling, workflow, mq-reliability, docker-deployment; also references `docs/design/srm-design.md` and `docs/design/procurement-design.md`.
+For operation entry points see the [feature tour](../wiki/feature-tour.en.md), and for development see the [source index](../reference/source-map.en.md). Prerequisites, identity, steps, screenshots and recovery belong in the Wiki. Requirements, historical plans and unit tests do not substitute for new end-to-end evidence. Related facts: [architecture](../architecture.en.md), [API contract](../api-contract.en.md), [core flows](../core-flows.en.md), [Workflow](../workflow.en.md), [Procurement design](procurement-design.en.md) and [SRM design](srm-design.en.md).
 
 ## 1. Design Conclusion
 
@@ -15,11 +16,11 @@ Asset management should be built as an independent Servlet microservice that man
 |---|---|
 | Maven module / service name | `omni-asset` |
 | Local port / management port | `8107` / `19907` |
-| XXL-JOB executor | `omni-asset` / `9907` (when depreciation calculation or maintenance reminders are enabled) |
+| XXL-JOB executor | `omni-asset` / `9907`, controlled by `XXL_JOB_ENABLED` and related settings; this does not establish depreciation or maintenance jobs |
 | Database | `omni_asset` |
 | Gateway | `/api/asset/**` → `lb://omni-asset`, without `StripPrefix` |
-| Redis | DB 0, shares the XSS configuration written by Auth; keys use the `asset:` prefix |
-| Frontend | Continue to use `omni-frontend`, add `views/asset/**` |
+| Redis | DB 0; shared `xss:enabled:{tenantId}` / `xss:rules:{tenantId}`; no general `asset:` business cache prefix is declared |
+| Frontend | `omni-frontend/src/views/asset/**` |
 
 The Asset MVP covers the closed loop of full asset lifecycle management:
 
@@ -28,6 +29,8 @@ The Asset MVP covers the closed loop of full asset lifecycle management:
 Depreciation calculation, asset stocktaking, and maintenance/repair work orders are not included in the MVP.
 
 ## 2. Product Scope
+
+This section retains product goals and phases. Actual role capabilities depend on current permissions and data scope; Phase 2/3 are not delivered features. Asset values are aggregated separately by currency, without exchange conversion.
 
 ### 2.1 Users and Goals
 
@@ -51,15 +54,15 @@ The MVP should be able to answer: how many assets the company has and where they
 
 ## 3. System Boundaries
 
-| Component | Authoritative responsibility | How Asset uses it |
+| Component | Authority | Current Asset use |
 |---|---|---|
-| `omni-auth` | Tenant, user, organization, role, permission, data scope, XSS configuration | Internal OpenFeign; stores only user/organization IDs |
-| `omni-srm` | Supplier data | Internal OpenFeign to query supplier information (warranty contacts, etc.) |
-| `omni-procurement` | Purchase orders, goods-receipt records | Consumes Outbox events to create asset cards; or Feign queries the procurement source |
-| `omni-base` | Dictionary, operation logs | Operation log aggregation; asset category/location use dictionary codes |
-| `omni-workflow` | BPMN, process instances, approvals, the sole Flowable engine runtime | Internal OpenFeign to start/query flows, consumes approval-result events |
-| `omni-asset` | Asset ledger, asset status, asset disposal | The sole business writer |
-| RocketMQ | Asynchronous transport | Consumes Procurement goods-receipt events, at-least-once idempotent |
+| `omni-auth` | Identity, organizations, permissions, data scope, XSS | Internal user options, user/organization reference checks and shared security; IDs and the original Workflow starter username snapshot are stored |
+| `omni-srm` | Suppliers | Current client searches this tenant's `APPROVED` supplier options; the ledger displays a local name snapshot |
+| `omni-procurement` | POs, receipts, asset candidates | Consume receipt events; internal candidate API supports controlled backfill, not current realtime source-detail lookup |
+| `omni-base` | Dictionaries, operation logs | Dictionary authority and log aggregation; Asset's own provisioner has no default tenant business data |
+| `omni-workflow` | BPMN, instances, tasks, Flowable | Resolve published versions by business category, start idempotently, validate assignments and receive completion events |
+| `omni-asset` | Assets, history, transfers, disposals, consumer Inbox | Sole writer of this service's asset business data |
+| RocketMQ | Event transport | Consumers tolerate duplicates; deployed configuration determines retry/dead-letter behavior |
 
 ```mermaid
 flowchart LR
@@ -68,17 +71,17 @@ flowchart LR
     GW --> AUTH["omni-auth :8100"]
     ASSET -->|"OpenFeign + X-Internal-Token"| AUTH
     ASSET -->|"OpenFeign + X-Internal-Token"| SRM["omni-srm :8105"]
-    ASSET -->|"Feign / Outbox consumption"| PROC["omni-procurement :8106"]
-    ASSET -->|"Feign / Outbox"| WF["omni-workflow :8103"]
+    ASSET -->|"Receipt events / candidate lookup"| PROC["omni-procurement :8106"]
+    ASSET -->|"Model / idempotent start / completion events"| WF["omni-workflow :8103"]
     ASSET --> DB[("omni_asset")]
     ASSET --> R[("Redis DB 0")]
     ASSET --> O["sys_mq_message"]
     O -->|"mqRelayHandler"| MQ["RocketMQ"]
 ```
 
-Recommended dependencies: `omni-common-service` (Servlet business-service security, identity, tenant, DataScope, MyBatis, and XSS composition), plus `omni-common-operlog`, `omni-common-job`, and `omni-common-mqlog` enabled as needed. Asset still explicitly uses business dependencies such as Web, Validation, Security, OpenFeign, LoadBalancer, Nacos, RocketMQ Stream, and Actuator.
+The current POM explicitly depends on `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`, `omni-common-service`, alongside Web, Security, Validation, OpenFeign, LoadBalancer, Nacos, RocketMQ and Actuator. `omni-common-service` assembles identity, tenancy, DataScope, persistence and XSS. A dependency does not establish that every background job is enabled.
 
-**Asset does not depend on `omni-common-workflow` and does not embed Flowable.** `omni-workflow` is an independent microservice and the sole Flowable runtime; Asset initiates flows through an internal Feign contract and receives approval results through reliable domain events.
+**Asset does not depend on `omni-common-workflow` or embed Flowable.** The engine and database belong to the independent `omni-workflow` service.
 
 ## 4. Domain and Data Design
 
@@ -89,36 +92,30 @@ Recommended dependencies: `omni-common-service` (Servlet business-service securi
 | Asset | `ast_asset`, `ast_asset_history` | Asset master data, immutable status-change history |
 | Transfer | `ast_transfer` | Asset transfer records |
 | Disposal | `ast_disposal` | Asset disposal records (discard/scrap shared) |
+| Consumer Inbox | `ast_inbox_event` | Registration, intent validation and processing state for separate Procurement and Workflow-completion consumers |
 
 ```mermaid
 erDiagram
-    AST_ASSET ||--o{ AST_ASSET_HISTORY : tracks
-    AST_ASSET ||--o{ AST_TRANSFER : transfers
-    AST_ASSET ||--o{ AST_DISPOSAL : disposes
+    AST_ASSET ||--o{ AST_ASSET_HISTORY : "records history"
+    AST_ASSET ||--o{ AST_TRANSFER : "requests transfers"
+    AST_ASSET ||--o{ AST_DISPOSAL : "requests disposals"
+    AST_INBOX_EVENT {
+        varchar consumer_name
+        varchar event_id
+        bigint tenant_id
+    }
 ```
 
 ### 4.2 Common Fields and Rules
 
-Every `ast_*` table must contain `tenant_id`. The asset aggregate root `ast_asset` must also contain:
-
-- `tenant_id`: tenant isolation.
-- `owner_user_id`: asset administrator (SELF scope).
-- `owner_unit_id`: asset management department (DEPT scope).
-- `version`: optimistic lock. Transfer and disposal requests also maintain their own `version`.
-- `deleted`: logical deletion. The immutable history and the Inbox do not use logical deletion.
-- `id/create_time/update_time/create_by/update_by`: audit fields.
-
-Constraints:
-
-- The asset number `asset_no` is unique within the tenant and generated from the database ID.
-- User/organization IDs are managed by Auth; no cross-database foreign keys are created.
-- Supplier IDs are managed by SRM; only `supplier_id` is stored.
-- Procurement source IDs are managed by Procurement; `source_po_id/source_gr_id/source_gr_line_id/source_unit_sequence` are saved as idempotent traceability, and poNo/grNo display snapshots are also saved, without cross-database foreign keys.
-- Amounts use `DECIMAL(18,2)` / `BigDecimal`.
-- Times are uniformly `yyyy-MM-dd HH:mm:ss`.
-- A normal PUT is not allowed to directly modify the asset status, user, or location (dedicated command endpoints are required).
-- An asset cannot be recovered after disposal.
-- At most one active transfer or disposal request may exist for the same asset at the same moment; `ast_asset.active_operation_type/active_operation_id` atomically occupies via a version-conditional update, uniformly preventing concurrency between the two request tables.
+- All five `ast_*` tables include `tenant_id`. `ast_asset` separates management ownership (`owner_user_id/owner_unit_id`) from usage (`current_user_id/current_unit_id`); these cannot be merged for write authorization.
+- Assets and both applications have their own `version`, `deleted` and audit fields; history and Inbox have no logical deletion. `AST-<id>` is unique within a tenant. Manual assets receive a database-generated ID first; procurement intake uses a server-generated ID.
+- Auth owns users/organizations, SRM suppliers and Procurement sources. Store IDs and necessary snapshots locally, without cross-database foreign keys. The diagram shows domain references, not every physical DDL constraint.
+- Source `source_po_id/source_gr_id/source_gr_line_id/source_unit_sequence` and PO/GR numbers provide traceability. The `tenant_id + source_gr_line_id + source_unit_sequence` unique key protects each physical unit.
+- Money uses `DECIMAL(18,2)` / `BigDecimal`. Request and response `purchaseAmount` and `residualValue` are JSON decimal strings, never JSON numbers; procurement source prices also use strings. Date-times use `yyyy-MM-dd HH:mm:ss`; purchase date is a date field.
+- Manual creation checks writable management ownership and asks Auth to validate active users/organizations and matching primary organization. Updates require `version`; generic PUT cannot change status, current user or location.
+- Deletion is limited to manual in-stock assets with no current user, active operation or subsequent business history. Procurement-imported assets cannot be deleted. Disposal terminal states cannot be restored.
+- At most one transfer/disposal occupies an asset. Creation atomically checks tenant, ID, version, original status, `deleted=0` and both `active_operation_* IS NULL` fields. Exactly one affected row is required; otherwise 409.
 
 ### 4.3 Main Tables
 
@@ -126,13 +123,13 @@ Constraints:
 
 - `asset_no/name/category_code`: asset number, name, category (dictionary code).
 - `specification/brand/model`: specification, brand, model.
-- `supplier_id/supplier_name_snapshot`: supplier ID and the name snapshot at acceptance; the current name is batch-enriched through SRM, and the snapshot does not participate in permission or current-status decisions.
+- `supplier_id/supplier_name_snapshot`: Supplier ID and local name snapshot. The current ledger does not batch-enrich live names from SRM; a snapshot does not establish current supplier eligibility.
 - `source_po_id/source_gr_id/source_gr_line_id/source_unit_sequence/source_po_no/source_gr_no`: procurement source and unit-level idempotency identifiers.
 - `purchase_date/purchase_amount/currency_code`: purchase date, original value, currency.
 - `location_code`: asset location (dictionary code, e.g., floor + room number).
 - `status`: lifecycle status (IN_STOCK/ALLOCATED/IN_USE/MAINTENANCE/TRANSFER/DISPOSAL_PENDING/DISPOSED/SCRAPPED).
-- `current_user_id`: current user; the name is batch-enriched from Auth and not persisted.
-- `current_unit_id`: current using department; the name is batch-enriched from Auth and not persisted.
+- `current_user_id`: Current user ID; the ledger VO returns the ID without Auth name enrichment.
+- `current_unit_id`: Current usage department ID; the ledger VO returns the ID without Auth organization-name enrichment.
 - `allocated_time`: allocation time.
 - `active_operation_type/active_operation_id`: current active operation (TRANSFER/DISPOSAL) and request ID; NULL when there is no active operation.
 - `warranty_expiry_date`: warranty expiry date.
@@ -165,34 +162,40 @@ Constraints:
 - `approved_time/completed_time`.
 - `version/deleted` and audit fields.
 
+`ast_inbox_event`
+
+- Unique `consumer_name/event_id`; stores tenant, event type, source, aggregate identity, payload, processing state and timestamps.
+- A different tenant or JSON-semantic intent under the same event ID conflicts. Intent must be checked before skipping an already-processed event.
+- Realtime Procurement intake and Workflow completion use separate consumer identities. Backfill candidates use source-unit idempotency without registering realtime Inbox events.
+
 ## 5. State Machine and Core Flows
 
 ### 5.1 Asset Lifecycle
 
 ```mermaid
 stateDiagram-v2
-    [*] --> IN_STOCK: Goods-receipt acceptance / manual stock-in
+    [*] --> IN_STOCK: Eligible procurement intake / manual stock-in
     IN_STOCK --> ALLOCATED: Allocate to employee
-    ALLOCATED --> IN_USE: Employee confirms acceptance
-    IN_USE --> MAINTENANCE: Send for repair
-    MAINTENANCE --> IN_USE: Repaired and returned
-    IN_USE --> IN_STOCK: Return (employee leaves / device swap)
+    ALLOCATED --> IN_USE: Caller confirms acceptance
+    IN_USE --> MAINTENANCE: Start repair
+    MAINTENANCE --> IN_USE: Complete repair
+    IN_USE --> IN_STOCK: Return
     ALLOCATED --> IN_STOCK: Return to stock
     IN_STOCK --> TRANSFER: Initiate transfer
     ALLOCATED --> TRANSFER: Initiate transfer
     IN_USE --> TRANSFER: Initiate transfer
-    TRANSFER --> IN_USE: Transfer complete (new user)
-    TRANSFER --> IN_STOCK: Rejected/cancelled, restore previousStatus
-    TRANSFER --> ALLOCATED: Rejected/cancelled, restore previousStatus
-    TRANSFER --> IN_USE: Rejected/cancelled, restore previousStatus
+    TRANSFER --> IN_USE: Complete handover
+    TRANSFER --> IN_STOCK: Rejected/cancelled: restore original state
+    TRANSFER --> ALLOCATED: Rejected/cancelled: restore original state
+    TRANSFER --> IN_USE: Rejected/cancelled: restore original state
     IN_STOCK --> DISPOSAL_PENDING: Initiate disposal
     ALLOCATED --> DISPOSAL_PENDING: Initiate disposal
     IN_USE --> DISPOSAL_PENDING: Initiate disposal
     DISPOSAL_PENDING --> DISPOSED: Discard approved and completed
     DISPOSAL_PENDING --> SCRAPPED: Scrap approved and completed
-    DISPOSAL_PENDING --> IN_STOCK: Rejected/cancelled, restore previousStatus
-    DISPOSAL_PENDING --> ALLOCATED: Rejected/cancelled, restore previousStatus
-    DISPOSAL_PENDING --> IN_USE: Rejected/cancelled, restore previousStatus
+    DISPOSAL_PENDING --> IN_STOCK: Rejected/cancelled: restore original state
+    DISPOSAL_PENDING --> ALLOCATED: Rejected/cancelled: restore original state
+    DISPOSAL_PENDING --> IN_USE: Rejected/cancelled: restore original state
     DISPOSED --> [*]
     SCRAPPED --> [*]
 ```
@@ -206,7 +209,7 @@ stateDiagram-v2
 - `DISPOSED`: discard disposal completed (terminal state).
 - `SCRAPPED`: scrap disposal completed (terminal state).
 
-Only assets in the `IN_STOCK`, `IN_USE`, or `ALLOCATED` status can initiate a transfer or disposal. Assets in the `MAINTENANCE`, `TRANSFER`, or `DISPOSAL_PENDING` status cannot initiate other business operations. The MVP provides two lightweight commands, `maintenance/start` and `maintenance/complete`, which only maintain the status and history without introducing repair work orders.
+Only `IN_STOCK/ALLOCATED/IN_USE` can initiate transfer or disposal. Repair provides only `IN_USE → MAINTENANCE → IN_USE` commands. An active transfer/disposal blocks allocation, return, repair and duplicate occupancy. A state-machine transition also requires endpoint permission, row scope, version and activity-slot conditions.
 
 ### 5.2 Asset Acceptance (Procurement Linkage)
 
@@ -216,108 +219,89 @@ sequenceDiagram
     participant MQ as RocketMQ
     participant ASSET as omni-asset
     participant DB as omni_asset
-
-    PROC->>MQ: Outbox delivers goods-receipt.confirmed / quality-passed v1
-    MQ->>ASSET: Consume event
-    ASSET->>ASSET: Validate eventId idempotency and verify tenant/event version
-    ASSET->>DB: INSERT ast_asset by assetQuantity only for qualified and assetManaged lines
-    ASSET->>DB: INSERT ast_asset_history
-    ASSET->>DB: UPDATE inbox consumption status
+    PROC->>MQ: Outbox delivers receipt v1 event
+    MQ->>ASSET: procurement.goods-receipt.confirmed.v1 / quality-passed.v1
+    ASSET->>ASSET: Validate envelope, all source lines and quantities/amounts
+    Note over ASSET,DB: Cards and Inbox/Outbox share one transaction
+    ASSET->>DB: Same transaction: intent/source dedup/new cards/history/Outbox
+    ASSET->>DB: Update Inbox in same transaction
 ```
 
-**Idempotent consumption**: Asset maintains the `ast_inbox_event` table (`consumer_name + event_id` unique key), and simultaneously uses the `tenant_id + source_gr_line_id + source_unit_sequence` unique key on `ast_asset`. The former prevents duplicate execution of an entire real-time event; the latter uniformly protects real-time consumption, manual replay, and historical compensation rescan.
+Realtime intake consumes `procurement.goods-receipt.confirmed.v1` and `procurement.goods-receipt.quality-passed.v1`. It validates the envelope, tenant, source root, metadata of every line and unique source-line IDs before writes. Quantity, unit price and line amount must be positive, with `unitPrice × receivedQuantity = totalPrice`. Missing fields, invalid enums or unsupported versions reject the whole event; defaults are not guessed.
 
-**Batch creation**: only lines with `qualityStatus=PASS && assetManaged=true && assetQuantity>0` are processed; assetQuantity must be a positive integer. If 5 laptops pass acceptance, 5 independent assets are created with unitSequence=1..5. Consumables, services, kg and other continuous-measure materials, and PENDING/FAIL lines do not create assets.
+Only valid `qualityStatus=PASS && assetManaged=true` lines produce cards. `receivedQuantity` must be an exact positive integer equal to `assetQuantity` and no greater than `Integer.MAX_VALUE`. Valid non-asset or PENDING/FAIL lines are skipped; malformed lines are still rejected. Five eligible units produce five cards with `source_unit_sequence=1..5`, initial `IN_STOCK` status and source management ownership. Each card's `purchaseAmount` is `unitPrice` rounded HALF_UP to two decimals, not the whole line amount copied to every card.
 
-**Historical compensation**: when Asset goes live or repairs a consumption fault, it rescans historical goods-receipt candidates through Procurement's `/internal/procurement/goods-receipt/asset-candidates` cursor-paginated interface. Compensation data maps to the same source keys and reuses the same creation service; it must not be assumed that the Procurement Outbox or Broker will permanently retain messages for a consumer that is not yet deployed.
+Dual idempotency: realtime Inbox `consumer_name + event_id` validates tenant and JSON-semantic intent before replay handling. Source-unit uniqueness protects realtime delivery, replay and backfill together. The persisted source record is locked and read back to validate intent; JDBC affected-row counts alone do not determine creation. One realtime transaction contains new cards, history, Inbox state and `asset.created.v1` Outbox only for new cards. Persisting Outbox does not prove Broker delivery or downstream consumption.
+
+Historical backfill processes one controlled page per call; cursor and partial-commit boundaries are in 8.3. There is no guarantee of an automatic exhaustive startup scan.
 
 ### 5.3 Asset Allocation and Return
 
-```text
-Allocate:
-POST /asset/{id}/allocate (targetUserId, targetUnitId)
-→ validate status=IN_STOCK
-→ UPDATE asset SET current_user_id, current_unit_id, status=ALLOCATED, allocated_time
-→ INSERT asset_history (IN_STOCK → ALLOCATED)
+| Command (prefix `/api/asset/asset`) | Request and state conditions | Transactional effect |
+|---|---|---|
+| `POST /{id}/allocate` | `version,targetUserId,targetUnitId,remark?`; in stock, empty activity slot; writable target department, Auth-validated active same-tenant user/organization and primary organization | `ALLOCATED`; current user/unit, allocation time, history and `asset.allocated.v1` Outbox |
+| `POST /{id}/accept` | `version,remark?`; `ALLOCATED` and current user equals caller | `IN_USE` and history |
+| `POST /{id}/return` | `version,remark?`; `ALLOCATED/IN_USE` and current user equals caller | `IN_STOCK`; clear user/unit/allocation time, history and `asset.returned.v1` Outbox |
+| `POST /{id}/maintenance/start` | `version,remark?`; `IN_USE`, empty activity slot | `MAINTENANCE` and history |
+| `POST /{id}/maintenance/complete` | `version,remark?`; `MAINTENANCE`, empty activity slot | `IN_USE` and history |
 
-Acceptance confirmation:
-POST /asset/{id}/accept
-→ validate status=ALLOCATED
-→ UPDATE asset SET status=IN_USE
-→ INSERT asset_history (ALLOCATED → IN_USE)
-
-Return:
-POST /asset/{id}/return
-→ validate status=IN_USE or ALLOCATED
-→ UPDATE asset SET current_user_id=NULL, current_unit_id=NULL, allocated_time=NULL, status=IN_STOCK
-→ INSERT asset_history (IN_USE → IN_STOCK)
-
-Send for repair / repair:
-POST /asset/{id}/maintenance/start → IN_USE → MAINTENANCE
-POST /asset/{id}/maintenance/complete → MAINTENANCE → IN_USE
-```
+Lock the asset by tenant and data scope, then update conditionally by version and original state. Conflicts return 409. Management roles do not widen the caller-only accept/return boundary. These commands do not implement repair work orders, automatic depreciation or maintenance scheduling.
 
 ### 5.4 Asset Transfer
 
 ```mermaid
 sequenceDiagram
-    participant M as Admin
-    participant S as TransferService
+    participant M as Authorized caller
+    participant S as AssetTransferService
     participant WF as omni-workflow
     participant DB as omni_asset
-
-    M->>S: POST /transfer (assetId, toUserId, toUnitId, reason)
-    S->>DB: SELECT Asset FOR UPDATE + tenant/scope
-    S->>DB: validate status=IN_STOCK/IN_USE/ALLOCATED
-    S->>DB: INSERT Transfer (status=PENDING_APPROVAL, previousStatus, active=true)
-    S->>DB: UPDATE Asset status=TRANSFER
-    S->>WF: After transaction commit, Feign idempotently starts the transfer approval flow
-
-    Note over WF: Approver approves
-
-    WF-->>S: MQ workflow.process.completed.v1 (APPROVED)
-    S->>DB: Idempotent UPDATE Transfer status=APPROVED
-    M->>S: POST /transfer/{id}/complete (complete handover)
-    S->>DB: UPDATE Transfer status=COMPLETED, active=false
-    S->>DB: UPDATE Asset (new user/unit, status=IN_USE, active_operation=NULL)
-    S->>DB: INSERT asset_history (TRANSFER → IN_USE)
+    M->>S: POST /api/asset/transfer
+    S->>WF: Resolve model category (ASSET_TRANSFER)
+    WF-->>S: PUBLISHED modelVersionId
+    S->>DB: Application / original start snapshot / slot
+    Note over S,DB: Commit local preparation transaction
+    S->>WF: Idempotent start with original snapshot
+    WF-->>S: Validate successful response
+    S->>DB: Confirm start in separate transaction
+    WF-->>S: workflow.process.completed.v1 (APPROVED)
+    S->>DB: Approved#59; keep occupancy
+    M->>S: POST /api/asset/transfer/{id}/complete (version)
+    Note over M,S: Confirm physical completion with application version
+    S->>DB: Update asset / clear slot / complete application / history / Outbox (IN_USE)
 ```
 
-Transfer approval uses a simple single-level approval (approved by an administrator or department manager). The MVP does not do multi-level approval. When Workflow returns REJECTED or the user cancels, Asset must set the Transfer to a terminal state and `active=false` in the same transaction, and restore the Asset to `previous_asset_status`; when the flow-start result is uncertain, it keeps `PENDING_APPROVAL + PENDING` and retries with the same `tenantId + businessType + businessKey`, and local cancellation is not allowed. A Workflow business response of 404 means the model version can no longer be started and no instance was created remotely; it then enters `START_FAILED + FAILED` and can be retried or cancelled to restore.
+Creation accepts `assetId,toUserId,toUnitId,toLocation?,reason`; the server resolves `modelVersionId` rather than accepting the caller's choice. Validate the target department and Auth references, then resolve the current published `ASSET_TRANSFER` model. The local preparation transaction persists the application, `previous_asset_status`, original start snapshot and activity slot. Call remote Workflow only after that transaction commits; persist start confirmation separately.
+
+`APPROVED` retains `active_flag=1` and the asset's `TRANSFER` occupancy. An authorized caller supplies the application `version` to business `/complete` for handover. That transaction changes current user/unit and optional location, sets `IN_USE`, clears the slot, appends history and completion Outbox. Management `owner_user_id/owner_unit_id` remain unchanged.
+
+The current category-matching published BPMN determines approval levels; section 15's single-level approval is the original design choice. Rejection/process cancellation terminates the application and restores original asset status/clears the slot transactionally. See 8.4 for unknown-start versus explicit-failure recovery.
 
 ### 5.5 Asset Disposal (Discard/Scrap)
 
 ```mermaid
 sequenceDiagram
-    participant M as Admin
-    participant S as DisposalService
+    participant M as Authorized caller
+    participant S as AssetDisposalService
     participant WF as omni-workflow
     participant DB as omni_asset
-
-    M->>S: POST /disposal (assetId, type=DISCARD|SCRAP, reason)
-    S->>DB: SELECT Asset FOR UPDATE + tenant/scope
-    S->>DB: validate status allows disposal
-    S->>DB: INSERT Disposal (status=PENDING_APPROVAL, previousStatus, active=true)
-    S->>DB: UPDATE Asset status=DISPOSAL_PENDING
-    S->>WF: After transaction commit, Feign idempotently starts the disposal approval flow
-
-    Note over WF: Approver approves (may require finance confirmation)
-
-    WF-->>S: MQ workflow.process.completed.v1 (APPROVED)
-    S->>DB: Idempotent UPDATE Disposal status=APPROVED
-    M->>S: POST /disposal/{id}/complete (confirm physical disposal)
-    S->>DB: UPDATE Disposal status=COMPLETED, active=false
-    S->>DB: UPDATE Asset status=DISPOSED|SCRAPPED, active_operation=NULL
-    S->>DB: INSERT asset_history
+    M->>S: POST /api/asset/disposal
+    S->>WF: Resolve model category (ASSET_DISPOSAL)
+    WF-->>S: PUBLISHED modelVersionId
+    S->>DB: Application / original start snapshot / slot
+    Note over S,DB: Commit local preparation transaction
+    S->>WF: Idempotent start with original snapshot
+    WF-->>S: Validate successful response
+    S->>DB: Confirm start in separate transaction
+    WF-->>S: workflow.process.completed.v1 (APPROVED)
+    S->>DB: Approved#59; keep occupancy
+    M->>S: POST /api/asset/disposal/{id}/complete (version)
+    Note over M,S: Confirm physical completion with application version
+    S->>DB: Update asset / clear slot / complete application / history / Outbox (DISPOSED/SCRAPPED)
 ```
 
-Discard and scrap use the same approval flow; the difference is:
-- **Discard (DISCARD)**: the asset is no longer used and is discarded directly. It may need to record the disposal method (donation, recycling, destruction).
-- **Scrap (SCRAP)**: the asset has reached its service life or is damaged beyond repair and is formally scrapped. It may need to record the residual value.
+Creation uses `assetId,disposalType,reason,residualValue?,disposalMethod?`. `disposalType` is `DISCARD/SCRAP` and residual value is a JSON decimal string. The server resolves an `ASSET_DISPOSAL` model; both types share the application table and approval integration. BPMN determines actual approvers and levels; finance confirmation cannot be assumed to have occurred.
 
-The approval flow can configure different approvers (scrapping may require finance confirmation, while discarding only needs the administration manager).
-
-When a disposal approval is rejected, cancelled, or cancelled after a start failure, the Asset must be restored to `previous_asset_status`, and the request's active_flag and the Asset's `active_operation_*` must be cleared. Both transfer and disposal creation must atomically occupy under the condition `tenant_id + asset_id + version + active_operation_id IS NULL`; if the number of updated rows is not 1, return 409, blocking cross-concurrency between the two request types at the database layer.
+After `APPROVED`, `DISPOSAL_PENDING` occupancy remains. Only a permission- and application-version-checked business `/complete` confirms physical disposal, enters `DISPOSED/SCRAPPED`, clears the slot and writes history plus the corresponding Outbox. Rejection/process cancellation, or local cancellation after persisted explicit start failure, must restore `previous_asset_status` and clear both activity markers in one transaction. Unknown start results cannot be locally cancelled.
 
 ## 6. Tenant, RBAC, and Data Permissions
 
@@ -332,9 +316,9 @@ Menus: `asset` (DIRECTORY) and `asset:overview`, `asset:asset`, `asset:transfer`
 API permissions:
 
 - `asset:overview:list`
-- `asset:asset:list/self/create/update/delete/allocate/accept/return/maintenance`
-- `asset:transfer:list/create/approve/complete/cancel/retry`
-- `asset:disposal:list/create/approve/complete/cancel/retry`
+- `asset:asset:list`, `asset:asset:self`, `asset:asset:create`, `asset:asset:update`, `asset:asset:delete`, `asset:asset:allocate`, `asset:asset:accept`, `asset:asset:return`, `asset:asset:maintenance`
+- `asset:transfer:list`, `asset:transfer:create`, `asset:transfer:approve`, `asset:transfer:complete`, `asset:transfer:cancel`, `asset:transfer:retry`
+- `asset:disposal:list`, `asset:disposal:create`, `asset:disposal:approve`, `asset:disposal:complete`, `asset:disposal:cancel`, `asset:disposal:retry`
 
 | Role | dataScope | Capability |
 |---|---|---|
@@ -354,45 +338,74 @@ The interceptor order is fixed: `TenantLineInnerInterceptor → DataPermissionIn
 | dataScope | Condition |
 |---|---|
 | SELF | The owner or current_user column mapped by the current permission equals currentUserId |
-| DEPT | The owner_unit or current_unit column mapped by the current permission equals primaryUnitId |
-| DEPT_AND_BELOW / CUSTOM | The unit column mapped by the current permission IN accessibleUnitIds |
+| DEPT | owner_unit_id equals primaryUnitId |
+| DEPT_AND_BELOW / CUSTOM | owner_unit_id IN accessibleUnitIds |
 | TENANT / ALL | No owner condition is added; TenantLine is always retained |
 
 The asset dataScope has a management dimension and a usage dimension; a broad OR must not be used in generic SQL, and it must be explicitly mapped by permissionCode/endpoint:
 
 | Endpoint/permission | Scope column | Rule |
 |---|---|---|
-| `/asset/list`, detail, management history; `asset:asset:list` | `owner_user_id/owner_unit_id` | For asset management staff, filtered by management ownership |
-| `/asset/my`; `asset:asset:self` | `current_user_id` | Fixed to equal the current user, not widened by a broader dataScope of another role |
+| `/api/asset/asset/list`, detail, management history; `asset:asset:list` | `owner_user_id/owner_unit_id` | For asset management staff, filtered by management ownership |
+| `/api/asset/asset/my`; `asset:asset:self` | `current_user_id` | Fixed to equal the current user, not widened by a broader dataScope of another role |
 | accept/return; corresponding command permission | `current_user_id` | RecordAccessGuard enforces that the target asset is currently allocated to currentUserId |
 | Transfer/Disposal list/detail | The management dimension of the associated Asset | Child tables inherit through the asset_id of the same tenant, without directly concatenating non-existent owner columns |
 | Transfer/Disposal approval-view | Workflow taskId assignment relationship | First verify the current user is the task approver of that tenant/business document, then read the read-only VO by tenant + id |
-| Overview | Asset management dimension | The aggregate SQL uses the same scope as `/asset/list` |
+| Overview | Asset management dimension | The aggregate SQL uses the same scope as `/api/asset/asset/list` |
 
 If a user holds both ASSET_USER and a management role, the frontend still calls "my assets" and the management list separately; the backend must not OR-merge the two dimensions for write authorization.
+
+Interpret exceptions by full permission code: `asset:asset:self`, `asset:asset:accept`, `asset:asset:return` always fixes `current_user_id`. `asset:transfer:create` also maps to `current_user_id` under `SELF`; other management operations retain owner columns. Candidate queries use the corresponding create permission's scope and filter both empty activity fields plus eligible states.
+
+Approval-view requires local `PENDING_APPROVAL + STARTED` with a complete business key/instance, then validates caller, tenant, business type/key, Workflow task assignment and matching instance. Only then is a temporary `TENANT` scope used to read that application's VO; `finally` restores the prior context. It is not an unconditional bypass for ordinary details.
 
 ## 7. API Design
 
 ### 7.1 Common Contract
 
-Consistent with other services.
+Follow the [API contract](../api-contract.en.md): `R<T>` and `R<PageResult<T>>` for pages. Page numbering starts/defaults at 1; size defaults to 10 and accepts 1..100. Invisible/missing data generally yields business 404, insufficient permission 403, version/state/occupancy conflicts 409, and dependency unavailability or uncertain Workflow results 503. HTTP status and `R.code` are different layers.
+
+Source DTOs and VOs define fields. Asset updates/lifecycle commands require `version`; transfer/disposal retry/cancel/complete use the application version. `purchaseAmount/residualValue` are decimal strings; time formats follow 4.2.
 
 ### 7.2 Endpoints
 
-| Domain | Endpoints |
+The following 32 external method paths and one internal method path are complete service paths. Gateway does not strip `/api/asset`. Internal backfill requires a valid internal token and equal positive `X-Tenant-Id` and query `tenantId`.
+
+| Area | Method and full path |
 |---|---|
-| Overview | `GET /api/asset/overview/summary`, `/distribution` |
-| Asset | `GET /asset/list`, `GET /asset/{id}`, `POST /asset`, `PUT/DELETE /asset/{id}` |
-| My assets | `GET /asset/my` |
-| Asset commands | `POST /asset/{id}/allocate`, `/accept`, `/return`, `/maintenance/start`, `/maintenance/complete` |
-| Asset history | `GET /asset/{id}/history` |
-| Transfer | `GET /transfer/list`, `GET /transfer/{id}`, `POST /transfer` |
-| Transfer approval view | `GET /transfer/{id}/approval-view?taskId={taskId}` |
-| Transfer commands | `POST /transfer/{id}/complete`, `/cancel`, `/retry-start`; approval actions are completed in Workflow |
-| Disposal | `GET /disposal/list`, `GET /disposal/{id}`, `POST /disposal` |
-| Disposal approval view | `GET /disposal/{id}/approval-view?taskId={taskId}` |
-| Disposal commands | `POST /disposal/{id}/complete`, `/cancel`, `/retry-start`; approval actions are completed in Workflow |
-| Internal API | `POST /api/internal/asset/procurement/backfill?tenantId={tenantId}&afterId={id}&size={size}`, protected by an internal token |
+| Asset ledger / caller commands | `GET /api/asset/asset/list` |
+| Asset ledger / caller commands | `GET /api/asset/asset/my` |
+| Asset ledger / caller commands | `GET /api/asset/asset/{id}` |
+| Asset ledger / caller commands | `GET /api/asset/asset/{id}/history` |
+| Asset ledger / caller commands | `POST /api/asset/asset` |
+| Asset ledger / caller commands | `PUT /api/asset/asset/{id}` |
+| Asset ledger / caller commands | `DELETE /api/asset/asset/{id}` |
+| Asset ledger / caller commands | `POST /api/asset/asset/{id}/allocate` |
+| Asset ledger / caller commands | `POST /api/asset/asset/{id}/accept` |
+| Asset ledger / caller commands | `POST /api/asset/asset/{id}/return` |
+| Asset ledger / caller commands | `POST /api/asset/asset/{id}/maintenance/start` |
+| Asset ledger / caller commands | `POST /api/asset/asset/{id}/maintenance/complete` |
+| Disposal | `GET /api/asset/disposal/list` |
+| Disposal | `GET /api/asset/disposal/{id}` |
+| Disposal | `GET /api/asset/disposal/{id}/approval-view` |
+| Disposal | `POST /api/asset/disposal` |
+| Disposal | `POST /api/asset/disposal/{id}/retry-start` |
+| Disposal | `POST /api/asset/disposal/{id}/cancel` |
+| Disposal | `POST /api/asset/disposal/{id}/complete` |
+| Options | `GET /api/asset/options/users` |
+| Options | `GET /api/asset/options/transfer-assets` |
+| Options | `GET /api/asset/options/disposal-assets` |
+| Options | `GET /api/asset/options/suppliers` |
+| Overview | `GET /api/asset/overview/summary` |
+| Overview | `GET /api/asset/overview/distribution` |
+| Transfer | `GET /api/asset/transfer/list` |
+| Transfer | `GET /api/asset/transfer/{id}` |
+| Transfer | `GET /api/asset/transfer/{id}/approval-view` |
+| Transfer | `POST /api/asset/transfer` |
+| Transfer | `POST /api/asset/transfer/{id}/retry-start` |
+| Transfer | `POST /api/asset/transfer/{id}/cancel` |
+| Transfer | `POST /api/asset/transfer/{id}/complete` |
+| Internal backfill | `POST /api/internal/asset/procurement/backfill` |
 
 ### 7.3 Endpoint to DataScope Permission Mapping
 
@@ -401,7 +414,7 @@ Consistent with other services.
 | Overview | `asset:overview:list` |
 | Asset list/detail/history | `asset:asset:list` |
 | My Asset | `asset:asset:self` |
-| Asset create/update/delete | `asset:asset:create/update/delete` |
+| Asset create/update/delete | `asset:asset:create`, `asset:asset:update`, `asset:asset:delete` |
 | Asset allocate | `asset:asset:allocate` |
 | Asset accept (employee self-use) | `asset:asset:accept` |
 | Asset return | `asset:asset:return` |
@@ -410,210 +423,128 @@ Consistent with other services.
 | Transfer create | `asset:transfer:create` |
 | Transfer approval-view | `asset:transfer:approve` |
 | Transfer complete | `asset:transfer:complete` |
-| Transfer cancel/retry-start | `asset:transfer:cancel/retry` |
+| Transfer cancel/retry-start | `asset:transfer:cancel`, `asset:transfer:retry` |
 | Disposal list/detail | `asset:disposal:list` |
 | Disposal create | `asset:disposal:create` |
 | Disposal approval-view | `asset:disposal:approve` |
 | Disposal complete | `asset:disposal:complete` |
-| Disposal cancel/retry-start | `asset:disposal:cancel/retry` |
+| Disposal cancel/retry-start | `asset:disposal:cancel`, `asset:disposal:retry` |
+
+`options/users` accepts any complete `asset:asset:list`, `asset:asset:create`, `asset:asset:update`, `asset:asset:allocate`, `asset:transfer:create` or `asset:disposal:create` permission. `options/suppliers` requires `asset:asset:create` or `asset:asset:update`. `options/transfer-assets` and `options/disposal-assets` require the corresponding create permission and DataScope. An option is not final write authorization; writes revalidate state, references and scope.
 
 ## 8. Cross-Service Consistency
 
 ### 8.1 Auth Feign
 
-Consistent with other services.
+Auth owns identity, permissions, organizations, data scope and XSS. `AssetIdentityGuard` checks `/internal/users/{id}` and `/internal/orgs/{id}` for the same tenant, active status and matching primary organization. Exceptions/invalid responses fail closed. `options/users` calls `/internal/users/options`, filters missing primary organizations and validates tenant. These APIs do not automatically enrich ledger names.
+
+Internal Feign uses `InternalFeignHeadersFactory` for authentication headers; shared service components manage identity/DataScope lifecycles. Caller-entered numeric IDs are not validated references by themselves.
 
 ### 8.2 SRM Feign
 
-Asset obtains supplier information through the SRM internal API (asset entry candidates, warranty contacts, supplier status):
+The current `SrmInternalClient` exposes only `GET /api/internal/supplier/search` with matching tenant header/parameter and fixed `status=APPROVED`. Registration UI calls `GET /api/asset/options/suppliers`. Failure or an invalid response yields 503.
 
-- `GET /api/internal/supplier/{id}?tenantId={tenantId}`: get the supplier summary.
-- `GET /api/internal/supplier/search?...&status=APPROVED&keyword={keyword}`: search approved suppliers of the current tenant.
-- The asset entry page calls `/api/asset/options/suppliers`, showing the number and name, and no longer requires the user to manually enter a numeric ID;
-  historical details still use the local name snapshot for display when SRM is temporarily unavailable.
+Ledger/details display `supplierNameSnapshot`, falling back to supplier ID. Current paths provide no live supplier detail, warranty-contact lookup or batch name enrichment. A stored snapshot does not grant current supplier eligibility.
 
 ### 8.3 Procurement Linkage
 
-**Event consumption**: Asset consumes `procurement.goods-receipt.confirmed.v1` and `procurement.goods-receipt.quality-passed.v1` to create asset cards. Both use the same payload line contract and source-unit idempotency key; quality-passed only contains lines newly turned from PENDING to PASS.
+Realtime v1 payload follows the [Procurement design](procurement-design.en.md), including source, currency, management ownership and line quantity/amounts. Consumers establish current-tenant identity and `TENANT` DataScope and clear them in `finally`; see 5.2 for validation and atomic intake. Consumer exceptions mean this attempt failed. Retry timing and dead-letter behavior require actual Broker/binder configuration and evidence; an exception alone does not establish dead-letter delivery.
 
-The event envelope takes `procurement-design.md` 8.4 as the authoritative contract and must contain eventId/eventType/occurredAt/tenantId, as well as goodsReceiptId, grNo, purchaseOrderId, poNo, the supplier snapshot, currency, and per-line goodsReceiptLineId, purchaseOrderLineId, material/category, qualityStatus, assetManaged, assetQuantity, unitPrice. When the tenant, source line ID, asset-managed flag, or version is missing or unsupported, it enters consumption failure/dead letter; guessing default values to create assets is forbidden.
+Controlled backfill calls `POST /api/internal/asset/procurement/backfill` with `tenantId>0,afterId>=0,size=1..100`, default afterId 0 and size 100. It calls `GET /api/internal/procurement/goods-receipt/asset-candidates` with matching tenant header/parameter. Source-line IDs must strictly increase beyond afterId; the entire page's cursor order is checked before importing. Each candidate imports in its own transaction using source-unit uniqueness, without realtime Inbox. Only new cards receive history and created Outbox.
 
-Consumption flow:
-1. The RocketMQ Consumer receives the message.
-2. Validate the event `tenantId`, use `ServiceRequestIdentity` to set `ServiceIdentityContext`, and set the current tenant's `TENANT`-level `ServiceDataScopeContext`; both must be cleared in a `finally` block at the end of consumption.
-3. Idempotency check: the `ast_inbox_event` table (`consumer_name + event_id` unique key).
-4. Create asset records by unitSequence for goods-receipt lines that meet the asset-managed conditions, relying on the source unique key as a fallback.
-5. Update the inbox consumption status in the same transaction.
-
-**Feign query** (optional): Asset can query procurement source details (PO number, amount, supplier) through the Procurement internal API.
-
-**Compensation rescan**: a controlled task after Asset startup calls the Procurement asset-candidate pagination API until the cursor is exhausted; real-time events and the rescan share the same idempotent creation logic. The rescan must likewise explicitly set the current tenant's `TENANT`-level `ServiceDataScopeContext` to avoid the validation query after the source-idempotent write being filtered by the fail-closed rule; the shared identity and DataScope context are cleared after the request ends.
+One call returns `fetchedCount/createdCount/duplicateCount/nextAfterId/hasMore`. `hasMore` is inferred when page count equals size. The caller persists cursors and schedules subsequent pages; this is not an automatic scanner. If a later candidate fails, earlier candidates may already be committed. Reconcile source units and retry the original page; a failed response does not mean whole-page rollback. Backfill cleans identity and DataScope on exit.
 
 ### 8.4 Workflow Integration
 
-Asset does not embed Flowable and integrates through the Workflow internal API and approval-result events. Scenarios requiring approval:
+A current published model must belong to the tenant, be `PUBLISHED`, have a process definition and match category `ASSET_TRANSFER/ASSET_DISPOSAL`. Resolve before local creation. After preparation commits, start with the original `requestId/tenantId/modelVersionId/businessType/businessKey/startUser` snapshot. Business key is the application ID. Workflow idempotency is `tenantId + businessType + businessKey`; retries do not invent a new intent.
 
-- Asset transfer approval (MVP simple single-level approval).
-- Asset discard disposal approval.
-- Asset scrap disposal approval (may require finance confirmation).
+- Successful responses must match request ID, business type/key and instance ID. Local `markStarted` confirms in a separate transaction.
+- Feign/HTTP errors, stream loss, other non-success business codes, inconsistent responses or failed local confirmation retain `PENDING_APPROVAL + PENDING` and occupancy for same-key retries.
+- Only business `R.code=404` enters the explicit-failure branch and attempts `markFailed`. Local persistence can still fail and leave PENDING. HTTP 404 thrown by Feign is unknown. Only persisted local `START_FAILED + FAILED` permits versioned local cancellation; retry keeps the original snapshot.
+- Approval uses `/api/workflow/approval/{taskId}/complete`. Asset approval-view also needs its asset approve permission; completing the assigned task needs `workflow:approval:complete` and assignment validation, as in 6.3.
 
-The approval flow follows the `docs/workflow.md` specification. One BPMN process model per approval type; the model key can be customized by the tenant,
-but the model `category` must be precisely bound to the purpose: transfer is `ASSET_TRANSFER`, and discard/scrap disposal is
-`ASSET_DISPOSAL`.
-
-When a user creates a transfer or disposal request, `modelVersionId` is not passed. Asset first calls the Workflow
-`current-published` internal query by the current tenant and fixed business category, automatically selecting a version that is published, has a process definition, and whose `category` matches the business type, then saves
-`requestId/tenantId/modelVersionId/businessType/businessKey/startUser/variables` as a local idempotency snapshot.
-At actual startup, Workflow validates the model again, closing the change window between resolution and startup. Workflow is idempotent and unique on
-`tenantId + businessType + businessKey`; duplicate calls return the existing instance.
-
-Approvers perform approvals through Workflow `/api/workflow/approval/{taskId}/complete`. A role undertaking asset approval must simultaneously obtain the corresponding `asset:transfer:approve` or `asset:disposal:approve` (to read the dedicated approval-view) and `workflow:approval:complete` (to complete their own task). The approval-view must validate the tenant, businessType, businessKey, and current task assignment, and cannot serve as a generic bypass of the normal dataScope.
-
-Approval completion is published by the Workflow Outbox as `workflow.process.completed.v1`. Asset consumes it idempotently by Inbox eventId and strictly checks the tenantId, businessType, businessKey, processInstanceId, and current request status:
-
-- APPROVED: the request enters APPROVED, awaiting the business `/complete` to finish handover or physical disposal.
-- REJECTED/CANCELLED: the request enters the corresponding terminal state, restores Asset.previousStatus, and clears `active_operation_*`.
-- Duplicate, out-of-order, or instance-mismatched events only log a warning and do not change the asset.
-
-The MVP completion event does not carry approvers or approval comments that may contain sensitive information, and Asset does not redundantly store such snapshots; the complete task,
-handler, and comments always take the Workflow query result as authoritative.
-
-When Workflow is unavailable, returns 409/other uncertain-result responses, or the response is lost, the remote result may already have been accepted; the request keeps `PENDING_APPROVAL + PENDING` and the asset occupancy status, and can only be retried with the original requestId, business key, model version, and initiator identity. A Workflow business response of 404 is an explicit failure that the remote transaction did not create an instance; only after entering `START_FAILED + FAILED` is an authorized user allowed to cancel locally and restore. Asset does not depend on `omni-common-workflow`; Flowable tables exist only in the `omni-workflow` database.
+`workflow.process.completed.v1` validates producer, tenant, type, business key, instance and current state. After Inbox registration, same-event JSON-semantic intent is checked first; conflicts return 409. Already-processed events, stale states and foreign instances are ignored. **A valid completion arriving before local start confirmation raises a retryable exception instead of being permanently swallowed.** APPROVED keeps occupancy until business completion; REJECTED/CANCELLED restore state and clear the slot transactionally. Workflow remains authoritative for full tasks, actors and comments; Asset does not copy approval-comment history.
 
 ### 8.5 Outbox Events
 
-- `asset.created.v1` (acceptance creation)
-- `asset.allocated.v1`
-- `asset.returned.v1`
-- `asset.transfer.completed.v1`
-- `asset.disposed.v1`
-- `asset.scrapped.v1`
+Local Outbox sends these domain events through `asset-domain-out-0` to `asset-domain-event`:
+
+- `asset.created.v1`: actually new cards from realtime/backfill procurement intake; manual creation has no such publication call.
+- `asset.allocated.v1`, `asset.returned.v1`.
+- `asset.transfer.completed.v1`.
+- `asset.disposed.v1`, `asset.scrapped.v1`.
+
+The envelope contains `eventId/eventType/occurredAt/tenantId/producer/payload`. Follow actual call sites; do not infer an event for every state change. Relay/Broker delivery requires separate observation.
 
 ## 9. Privacy, Operation Logs, and XSS
 
 ### 9.1 OperLog
 
-Reuses the existing PII masking capability. Asset has relatively few PII fields, mainly asset user information (already managed in Auth).
+Write commands use `@OperLog`. Shared `OperLogSanitizer` sanitizes parameters, snapshots and exceptions before MQ: field rules replace reason/remark and credential fields, mask phone/email and handle credential fragments in text. Coverage has explicit boundaries; it does not guarantee anonymization of arbitrary names, address variants or all application logs.
 
 ### 9.2 PII
 
-The asset itself does not contain sensitive PII. User information is displayed through Auth; Asset stores only the userId.
+Asset stores current-user/manager IDs, supplier/source snapshots, free text and the original starter username `workflow_start_user_name`. User options also return username/nickname. It is therefore inaccurate to claim “no PII” or “only userId is stored.” Production screenshots, exports, logs and review evidence require field-appropriate authorization and handling to avoid exposing credentials or personal information.
 
 ### 9.3 XSS
 
-Asset obtains the unified XSS configuration through `omni-common-service`'s `CachedServiceXssConfigProvider`: it first reads the Redis DB 0 cache, and on a cache miss falls back to Auth with an internal identity; when Auth or Redis is unavailable, it must fall to the safe baseline, and bypassing sanitization due to a configuration-center failure is forbidden. MVP remarks allow plain text only.
+`CachedServiceXssConfigProvider` first reads Redis DB0 `xss:enabled:{tenantId}` / `xss:rules:{tenantId}`. Missing cache, read failure or parse failure triggers Auth fallback. A valid Auth result is still used; a Redis outage alone does not necessarily select the local baseline. Only an absent/failed authoritative result uses `XssSettingsFallback`; the default enables HTML_TAG, EVENT_HANDLER and DANGEROUS_PROTOCOL protection. Failed cache writes do not discard obtained authoritative settings. Remarks are intended as plain text; dependency failures cannot bypass filtering.
 
 ## 10. Frontend Design
 
-```text
-omni-frontend/src/
-├── api/
-│   ├── asset-overview.ts
-│   ├── asset-asset.ts
-│   ├── asset-transfer.ts
-│   └── asset-disposal.ts
-├── views/asset/
-│   ├── overview/index.vue           # Asset overview (stats + distribution)
-│   ├── asset/index.vue              # Asset ledger
-│   ├── transfer/index.vue           # Asset transfer
-│   └── disposal/index.vue           # Asset disposal
-└── components/asset/
-    ├── AssetCard.vue                # Asset card (for overview)
-    ├── AssetDistribution.vue        # Asset distribution chart
-    ├── TransferForm.vue             # Transfer form
-    └── DisposalForm.vue             # Disposal form
-```
+Current pages are `omni-frontend/src/views/asset/{overview,asset,transfer,disposal}/index.vue` with APIs `src/api/asset-{overview,asset,transfer,disposal}.ts`. The old proposed separate `components/asset/AssetCard.vue` and related components do not exist.
 
-- `ApiResponse/PageResult` are imported only from `src/types/api.ts`.
-- The asset ledger supports multi-dimensional filtering by status, category, department, and location.
-- The asset detail page shows basic information + user + procurement source + change history + transfer records + disposal records.
-- The overview page shows the total number of assets, total value, distribution by status, distribution by department, and distribution by category.
-- `router/index.ts` and the `layout/index.vue` iconMap add Asset.
+- The ledger page shows ledger/my tabs by permission, calling management and fixed-caller lists separately. Management filters include status, category, management department and location. Its detail drawer shows base fields, user/unit IDs, source snapshots and change history; transfer/disposal records use their own pages.
+- Supplier/user options drive selection, with management/usage department populated from the selected user's primary organization. The backend revalidates. Buttons use corresponding `v-permission`.
+- Overview returns status counts and `amountsByCurrency`. Distribution supports `STATUS/CATEGORY/DEPARTMENT/LOCATION` with currency-separated amounts; different currencies are not added together.
+- Import shared `ApiResponse/PageResult` only from `src/types/api.ts`. Current router/layout handles menus, icons and caller-only entry. Actual tutorial steps/screenshots belong in Wiki; this structural description does not establish this run's browser acceptance.
 
 ## 11. Engineering Landing Points
 
-### 11.1 New Module
+### 11.1 Current Module Entries
 
-```text
-omni-backend/omni-asset/
-├── pom.xml
-└── src/main/
-    ├── java/com/omni/asset/
-    │   ├── AssetApplication.java
-    │   ├── client/ config/ controller/ dto/ entity/
-    │   ├── mapper/ security/ service/ service/impl/
-    │   ├── consumer/                  # MQ consumer (goods-receipt events)
-    │   └── workflow/                  # Workflow Feign client and approval-result event consumer
-    └── resources/
-        ├── application.yml
-        ├── application-dev.yml
-        └── mapper/
-```
+Current Java entry is `omni-backend/omni-asset/src/main/java/com/omni/asset`: `AssetApplication.java`, client, config, controller, dto, entity, mapper, security, service, consumer, workflow and domain. SQL lives in Java Mapper annotations and Liquibase. Resources are `application.yml` and `application-lite.yml`, not a separate application-dev.yml or XML mapper directory. Use the [source index](../reference/source-map.en.md) for navigation.
 
-### 11.2 Files That Must Change
+### 11.2 Current Related Files
 
-| File | Change |
+These are current fact entry points, to update when the corresponding contract changes; they are not files still awaiting creation.
+
+| Area | Current files/directories |
 |---|---|
-| `omni-backend/pom.xml` | Add `omni-asset` |
-| Gateway `application.yml` | Explicit `/api/asset/**` route |
-| `docker/backend/Dockerfile` | POM cache layer |
-| `docker-compose.yml` | Asset service, 8107 |
-| `start.bat/start.sh` | Add Asset to the build list |
-| `database/changelog/asset/` | Add forward-only Liquibase changeSets for asset structure changes |
-| `scripts/sql/seed/auth.sql` | Formal idempotent seed for asset permissions and roles; refresh the seed manifest after updating |
-| Asset `TenantModuleProvisioner` | Explicitly declare that there is currently no module-owned tenant default fact, keeping the protocol idempotent |
-| `omni-workflow` | Reuse/complete the idempotent internal start, task-assignment validation API, and the `workflow.process.completed.v1` Outbox event |
-| `omni-procurement` | Confirm the goods-receipt event v1 fields and the historical asset-candidate pagination API |
-| Frontend router/layout/menu/locales | Icons, menus, i18n |
+| Module | `omni-backend/omni-asset/pom.xml`<br/>`omni-backend/pom.xml` |
+| Runtime configuration | `omni-backend/omni-asset/src/main/resources/application.yml`<br/>`omni-backend/omni-asset/src/main/resources/application-lite.yml` |
+| Schema | `database/changelog/asset/0001-asset-schema.yaml` |
+| Permissions and seed digests | `scripts/sql/seed/auth.sql`<br/>`database/seed/manifest.yaml` |
+| Tenant provisioning | `omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetTenantModuleProvisioner.java` |
+| Gateway / Compose | `omni-backend/omni-gateway/src/main/resources/application.yml`<br/>`compose.yaml` |
+| Frontend | `omni-frontend/src/views/asset`<br/>`omni-frontend/src/api/asset-asset.ts`<br/>`omni-frontend/src/router/index.ts` |
+| Cross-service contracts | `omni-backend/omni-asset/src/main/java/com/omni/asset/client`<br/>`omni-backend/omni-asset/src/main/java/com/omni/asset/dto/ProcurementAssetContracts.java`<br/>`omni-backend/omni-asset/src/main/java/com/omni/asset/dto/WorkflowContracts.java` |
 
-Configuration points: server 8107, management 19907, Redis DB 0, XXL appname `omni-asset`/port 9907.
+Defaults: host entry `8107`, management `19907`, Redis DB 0, XXL appname `omni-asset` / `9907`. Compose maps container ports according to its configuration. `application-lite.yml` disables Nacos and uses static discovery. All running, builds and tests use local Docker. Auth provisions permissions; Base owns dictionary initialization.
 
 ## 12. Non-Functional Design
 
-### Performance
-
-- All lists are paginated, maximum 100.
-- Supplier names and user names are batch-enriched once; N+1 is forbidden.
-- Overview statistics use Mapper-layer aggregate SQL.
-
-### Concurrency and Idempotency
-
-- Asset allocation/return: row lock + version optimistic lock.
-- Transfer/disposal: request row lock + Asset version-conditional update of `active_operation_*`, uniformly preventing cross-concurrency between the two active request types.
-- Workflow start: cross-service businessKey idempotency; approval results use Inbox eventId idempotency.
-- Goods-receipt event consumption: dual idempotency via `ast_inbox_event` and the asset source-unit unique key.
-
-### Degradation
-
-- SRM unavailable: supplier information degrades to the ID.
-- Procurement unavailable: procurement source information degrades to PO-number text.
-- Workflow unavailable or uncertain result: return 503; the request keeps `PENDING_APPROVAL + PENDING` retryable with the same key; when the model version is explicitly returned as unstartable, enter `START_FAILED + FAILED`. Approval must not be skipped, nor locally cancelled when the start result is uncertain.
-- Auth unavailable: 503 fail-closed.
+- Lists accept at most 100 rows; option/distribution limits also validate 1..100. Overview Mapper aggregates directly on the asset root, inheriting tenancy and management scope, with currency-separated amounts. No live ledger-name enrichment or measured performance is claimed.
+- Allocation/return lock assets and update by version. Transfer/disposal creation shares one activity slot; completion/cancellation checks application and asset versions, states and occupancy identity. Actual database concurrency acceptance requires separate proof.
+- Auth outages fail closed for operations depending on its reference/options/scope checks, rather than necessarily failing every local snapshot read. SRM option failures yield 503; existing ledgers display local supplier snapshots. Procurement candidate failures fail that backfill attempt; historical PO/GR numbers remain local fields.
+- Unknown Workflow results retain occupancy and retry the same key. Persisting a business404 failure marker can itself fail. Do not bypass approval or cancel blindly. Local Outbox success does not establish MQ availability.
 
 ## 13. Testing and Acceptance
 
-Minimum test set:
+Current tests are under `omni-backend/omni-asset/src/test/java`. Unit assertions, build results and real database/cross-service/browser evidence are recorded separately. Acceptance requirements include:
 
-- Asset state-machine legal/illegal transitions (all legal paths + illegal paths rejected).
-- Idempotent consumption of goods-receipt events (the same event does not create duplicate assets).
-- When a real-time event and a historical rescan process the same goods-receipt line simultaneously, no duplicate asset is created.
-- Non-asset materials, failed/pending quality checks, continuous-measure, or non-integer quantities do not create assets.
-- Batch goods-receipt correctly creates multiple assets (quantity > 1).
-- After a transfer completes, the asset user and department are correctly updated.
-- After a disposal completes, the asset enters the terminal state.
-- Transfer/disposal rejection and local cancellation after `START_FAILED + FAILED` both restore previousStatus and clear the active occupancy; cancellation must not happen when the start result is uncertain.
-- When a transfer and a disposal are created concurrently for the same asset, only one succeeds and the other returns 409.
-- When Workflow approval results are duplicate, out-of-order, or have mismatched tenant/businessKey/processInstanceId, the asset is not updated.
-- An approver can read the Transfer/Disposal approval-view only through a taskId assigned to themselves; a forged taskId or business ID is rejected.
-- Concurrent allocation of the same asset succeeds for only one.
-- Cross-tenant isolation.
-- Fail-closed when tenant/scope is missing.
-- `ASSET_USER` can only see assets under their own name.
-- "My assets" is fixed to query by current_user_id and is not expanded because the user also holds a management role; the management list queries by the owner dimension.
-
-End-to-end acceptance: procurement goods-receipt → MQ event → asset creation (IN_STOCK) → allocate to employee (ALLOCATED) → employee confirms acceptance (IN_USE) → initiate transfer → approval passed → new user (IN_USE) → initiate scrap → approval passed → SCRAPPED.
+- Legal/illegal transitions across eight asset states, version conflicts, manual-deletion limits and caller-only list/accept/return despite management roles.
+- Complete source validation, quantity/amount equality, valid ineligible-line skipping and whole-event rejection of malformed lines; event replay, conflicting intent and source-unit deduplication.
+- Realtime atomic transactions versus candidate transactions, reconciliation/retry after partial pages, and no new-card events for duplicate sources.
+- Transfer/disposal competition for the slot; APPROVED awaits physical completion, terminal states remain irreversible, rejection/cancellation restores previousStatus.
+- Model category/task qualification, unknown start, failed local confirmation, unpersisted explicit-failure markers, retryable early completion and foreign-instance isolation.
+- Management owner scope, SELF transfer's current-user exception, cross-tenant isolation and fail-closed missing context.
+- JSON decimal strings, currency-separated aggregation, logging/XSS boundaries and permission display in four languages.
+- Real end-to-end: procurement receipt → MQ → IN_STOCK → ALLOCATED → IN_USE → transfer approval/handover → disposal approval/physical completion → SCRAPPED. Actual execution receipts are required; neither passing units nor this document proves that chain.
 
 ## 14. Implementation Order
+
+Retained 2026-07-27 implementation breakdown: historical planning, not work to repeat in this run or the current acceptance checklist. Current entries/contracts are in sections 3–13.
 
 ### Milestone 0: Prerequisite Confirmation
 
@@ -655,6 +586,8 @@ End-to-end acceptance: procurement goods-receipt → MQ event → asset creation
 
 ## 15. ADR Summary
 
+Original design choices are retained. Single-level approval was the original simplification; current category-matching published BPMN determines behavior. Deferred items describe the original MVP boundary.
+
 | Decision | Choice | Reason |
 |---|---|---|
 | Service | Independent `omni-asset` | Separated from SRM/Procurement, clear responsibilities |
@@ -667,6 +600,8 @@ End-to-end acceptance: procurement goods-receipt → MQ event → asset creation
 | Depreciation calculation | Not done | The MVP does not handle financial depreciation |
 
 ## 16. Main Risks
+
+Original risk register and then-proposed mitigations are retained. Current transaction, backfill, failure and initialization boundaries are above: whole backfill pages do not roll back atomically; Base owns dictionaries; source-unit uniqueness supplements Inbox.
 
 | Priority | Risk | Handling |
 |---|---|---|

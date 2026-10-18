@@ -1,0 +1,871 @@
+{
+  "schema": 1,
+  "kind": "five-preset-independent-docs-and-ai-delivery",
+  "recorded_at": "2026-10-13T01:17:46.420Z",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "source_state": "uncommitted remediation branch",
+  "runtime": "local Docker",
+  "command": "docker compose -p omni-stack-tools -f compose.tools.yaml run --rm --no-deps cli npm run test:preset-delivery",
+  "started_at": "2026-10-13T01:02:59.3580401+00:00",
+  "finished_at": "2026-10-13T01:10:49.4801567+00:00",
+  "exit_code": 1,
+  "status": "STRICT_SCREENSHOT_FAILURES_RETAINED",
+  "totals": {
+    "checks": 90,
+    "pass": 85,
+    "fail": 5,
+    "skipped": 0
+  },
+  "presets": [
+    {
+      "preset": "core",
+      "status": "automated-delivery-fail",
+      "modules": 7,
+      "source_checkout_mounted": false,
+      "checks": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=links"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=i18n-content"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=readme"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=sensitive"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=screenshots"
+          ],
+          "status": "FAIL",
+          "exit_code": 1
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/preset-docs.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-review-queue.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "--test",
+            "ai/adapters/bootstrap.test.mjs"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "i18n-review-contract",
+          "status": "PASS",
+          "exit_code": 1,
+          "human_review_errors": 96
+        },
+        {
+          "command": "npm",
+          "args": [
+            "ci",
+            "--prefer-offline"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "test"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "post-build-delivery-digest",
+          "status": "PASS"
+        }
+      ],
+      "human_translation_pending": 96,
+      "release_ready": false
+    },
+    {
+      "preset": "workflow",
+      "status": "automated-delivery-fail",
+      "modules": 8,
+      "source_checkout_mounted": false,
+      "checks": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=links"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=i18n-content"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=readme"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=sensitive"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=screenshots"
+          ],
+          "status": "FAIL",
+          "exit_code": 1
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/preset-docs.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-review-queue.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "--test",
+            "ai/adapters/bootstrap.test.mjs"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "i18n-review-contract",
+          "status": "PASS",
+          "exit_code": 1,
+          "human_review_errors": 105
+        },
+        {
+          "command": "npm",
+          "args": [
+            "ci",
+            "--prefer-offline"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "test"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "post-build-delivery-digest",
+          "status": "PASS"
+        }
+      ],
+      "human_translation_pending": 105,
+      "release_ready": false
+    },
+    {
+      "preset": "crm",
+      "status": "automated-delivery-fail",
+      "modules": 8,
+      "source_checkout_mounted": false,
+      "checks": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=links"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=i18n-content"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=readme"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=sensitive"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=screenshots"
+          ],
+          "status": "FAIL",
+          "exit_code": 1
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/preset-docs.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-review-queue.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "--test",
+            "ai/adapters/bootstrap.test.mjs"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "i18n-review-contract",
+          "status": "PASS",
+          "exit_code": 1,
+          "human_review_errors": 105
+        },
+        {
+          "command": "npm",
+          "args": [
+            "ci",
+            "--prefer-offline"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "test"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "post-build-delivery-digest",
+          "status": "PASS"
+        }
+      ],
+      "human_translation_pending": 105,
+      "release_ready": false
+    },
+    {
+      "preset": "supply-chain",
+      "status": "automated-delivery-fail",
+      "modules": 13,
+      "source_checkout_mounted": false,
+      "checks": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=links"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=i18n-content"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=readme"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=sensitive"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=screenshots"
+          ],
+          "status": "FAIL",
+          "exit_code": 1
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/preset-docs.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-review-queue.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "--test",
+            "ai/adapters/bootstrap.test.mjs"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "i18n-review-contract",
+          "status": "PASS",
+          "exit_code": 1,
+          "human_review_errors": 129
+        },
+        {
+          "command": "npm",
+          "args": [
+            "ci",
+            "--prefer-offline"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "test"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "post-build-delivery-digest",
+          "status": "PASS"
+        }
+      ],
+      "human_translation_pending": 129,
+      "release_ready": false
+    },
+    {
+      "preset": "full",
+      "status": "automated-delivery-fail",
+      "modules": 14,
+      "source_checkout_mounted": false,
+      "checks": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=links"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=i18n-content"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=readme"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=sensitive"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-quality.mjs",
+            "--scope=screenshots"
+          ],
+          "status": "FAIL",
+          "exit_code": 1
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/preset-docs.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "tools/omni-cli/scripts/docs-review-queue.mjs",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "--test",
+            "ai/adapters/bootstrap.test.mjs"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=codex",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--apply"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "/usr/local/bin/node",
+          "args": [
+            "ai/adapters/bootstrap.mjs",
+            "--tool=qoder",
+            "--check"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "i18n-review-contract",
+          "status": "PASS",
+          "exit_code": 1,
+          "human_review_errors": 138
+        },
+        {
+          "command": "npm",
+          "args": [
+            "ci",
+            "--prefer-offline"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "test"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "build"
+          ],
+          "status": "PASS",
+          "exit_code": 0
+        },
+        {
+          "command": "post-build-delivery-digest",
+          "status": "PASS"
+        }
+      ],
+      "human_translation_pending": 138,
+      "release_ready": false
+    }
+  ],
+  "cleanup": {
+    "label": "omni.preset-delivery=9d20e344b1f7",
+    "containers_remaining": 0,
+    "volumes_remaining": 0,
+    "method": "Exact-label Docker inventory after the outer command exited; no global prune"
+  },
+  "private_log_sha256": "1c255f51239e5a4e822c79bdfb3b6dae3d28eace5710e7f70ecbc9c56f2ebe50",
+  "release_ready": false,
+  "limits": [
+    "Five failed checks are strict screenshot coverage; all retained without allow-draft or weakened assertions.",
+    "The i18n-review-contract PASS asserts the correct rejection of unsigned translations; it is not a passed human translation gate.",
+    "Codex/Qoder adapter installation and synchronization checks do not independently prove native Qoder loading.",
+    "Generated projects used only delivery and owned npm-cache volumes; the original source checkout was not mounted.",
+    "This receipt was added after the matrix; the matrix does not claim to have packaged its own result receipt."
+  ]
+}

@@ -1,0 +1,1136 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "architecture",
+  "source": "docs/architecture.md",
+  "source_sha256": "dc06378a9efe9c689ff447fd5d230474438a2e846e0f75c15cc96c4c8ad4b206",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "064dc20ab2236a0f7d44881a8eab8731667a3837",
+  "source_state": "Current complete architecture family remains approved through its initial whole four-document review and exact unchanged-body reuse plus actual four-language line364delta review. Current serviceintegration native fourlocale/Git-conditional guard and AI-only policy corrected;no application code or business write. Other originalA-G work remains open.",
+  "method": "All4originalarchitecture documents2145lines actually read294;36whole current sources plus scoped selected/prior exact reads audited296. All4current merged368line documents actually read in untruncated1-125,126-250,251-368 ranges after298. Six additional whole changelog entry files read before299;all7business MQ includes checked. Final299Chinese vendor/linear-chain terms,Japanese library-count/database/table/forward-migration terms andKorean table particle directly reviewed. Markdown,table/link/literal/ER-structure and144hash checks supplement actual semantic reading,not approval by themselves. Renewal2026-10-17:allfourline364paragraphs directly read27b47c;unchangedbody and code fences exactly preserved349c,no repeated1472line read. Current serviceintegration fullactualdelta18d4c7/native11tests336 and current whole backend-patterns approved311c/317 resolve the two sourcehash deltas. Scope is actual semantic review plus structural evidence,not automatic hash approval.",
+  "checked_source_files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df"
+    },
+    {
+      "path": "compose.apps.yaml",
+      "sha256": "57781677a1d2b04ee6aaea5e6ee431fbe2bb57f38ef43c418bb8913454efb123"
+    },
+    {
+      "path": "compose.infra.yaml",
+      "sha256": "c9dd1a7542520148b3b3d5397fa37669fb4132cd41ad5cf10ff878995646dab6"
+    },
+    {
+      "path": "compose.yaml",
+      "sha256": "49c8ab0a7f3317ae800773812322a0ee29ee3ffdd18a3b7650108ae6c9c2e8fb"
+    },
+    {
+      "path": "database/changelog/asset/db.changelog-asset.yaml",
+      "sha256": "c8568a62b53fe808978a9a645d36fefd6a807cd0270512275f6f966ffaae8aa9"
+    },
+    {
+      "path": "database/changelog/auth/db.changelog-auth.yaml",
+      "sha256": "91c1fb65bb5370af7d9fcb81b75220a7b74b3678ef91aa335b9cfc4b7403ca49"
+    },
+    {
+      "path": "database/changelog/base/db.changelog-base.yaml",
+      "sha256": "310547fdaaec0bbe34fd68c6b6752cd1b0e2b72ae240991dd84c5dc0c7059090"
+    },
+    {
+      "path": "database/changelog/common/0001-mq-schema.yaml",
+      "sha256": "fa7d7f436f281bdddde9d8351146de92fde80510807d9be99052e71273827bc9"
+    },
+    {
+      "path": "database/changelog/common/db.changelog-common-mq.yaml",
+      "sha256": "345977e451bc0069d234cabf4374b40cd193f80f593875d8360e7455095263db"
+    },
+    {
+      "path": "database/changelog/crm/db.changelog-crm.yaml",
+      "sha256": "96453c0e9fbae15bba2e614c57e97fa39203be2d0fbb7fcfca79fd8d5d842233"
+    },
+    {
+      "path": "database/changelog/procurement/db.changelog-procurement.yaml",
+      "sha256": "e2d3f85fa037e7269531ad8389703a74cfefbef9688e2137160f0bbf4cef8495"
+    },
+    {
+      "path": "database/changelog/srm/db.changelog-srm.yaml",
+      "sha256": "7adc75fa5b98079090a7802c1a2897c87d36fd17e4581bfd91658f00fa7ce18b"
+    },
+    {
+      "path": "database/changelog/workflow/db.changelog-workflow.yaml",
+      "sha256": "9e0dedb711dcb0875671744ecc8ad0368177fa38ff51aa52a28df668f46d33db"
+    },
+    {
+      "path": "docker/backend/Dockerfile",
+      "sha256": "b93b0b47e4397d82b06d069eb374f3bfa39f9a932ea847ce71f8628ac5bb60f9"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/api-contract.md",
+      "sha256": "63bb7c8c879ae25e46dc17642a41b61e9445efe48583def3e7afa92a7d2bd837"
+    },
+    {
+      "path": "docs/backend-patterns.md",
+      "sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7"
+    },
+    {
+      "path": "docs/core-flows.md",
+      "sha256": "68acd52b56b7e540ad4fa3a9b7015500983d832187ef1fc724e461bb6fe095e5"
+    },
+    {
+      "path": "docs/crm.md",
+      "sha256": "dbb748468d43a479f89eacacc28a9c4056a7b8db87fa37a7e29973a6fde4e23d"
+    },
+    {
+      "path": "docs/design/asset-design.md",
+      "sha256": "65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620"
+    },
+    {
+      "path": "docs/design/procurement-design.md",
+      "sha256": "06735bfc48c6082fb9e96e92d80c62c4a5be24f40659500acee7565233c47303"
+    },
+    {
+      "path": "docs/design/srm-design.md",
+      "sha256": "401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211"
+    },
+    {
+      "path": "docs/frontend-patterns.md",
+      "sha256": "0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1"
+    },
+    {
+      "path": "docs/mq-reliability.md",
+      "sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957"
+    },
+    {
+      "path": "docs/observability.md",
+      "sha256": "798c160e3208af2f06a1159df25a2ef4cf42ab6006dcaa4ced3a761a5ff3b0d4"
+    },
+    {
+      "path": "docs/repository-governance.md",
+      "sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12"
+    },
+    {
+      "path": "docs/scheduling.md",
+      "sha256": "af1e4a539d551605e6d4466de4fc740b78a527a50660a5f4f4d82c2c3247b8a7"
+    },
+    {
+      "path": "docs/srm.md",
+      "sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03"
+    },
+    {
+      "path": "docs/workflow.md",
+      "sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389"
+    },
+    {
+      "path": "omni-backend/omni-asset/pom.xml",
+      "sha256": "a661a82550ace2f4f286c19fb3b4273f707f698b445dd2457184bbcad5c19a9e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/config/SecurityConfig.java",
+      "sha256": "41d9e8a91c9bfb4a7ff1d516aaf906137233399d05772e50df4ad990b0f774cf"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/security/AssetDataPermissionHandler.java",
+      "sha256": "c24e44f1f561f94d315919c2c6fd9ef8679f9b5189b456585a83b65589a10eda"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/security/AssetTenantTablePolicy.java",
+      "sha256": "d156acdca1f3eac7517c783f08ede33e9dfca31f0912abc161755b330f8a6f5f"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/resources/application.yml",
+      "sha256": "34451137fa3181e1192ec6de11fe5cc92488104b70d759036e95c52e96434680"
+    },
+    {
+      "path": "omni-backend/omni-auth/pom.xml",
+      "sha256": "02e514abafe6b610311e297cabd686b31028bd877b34c8e5fd2679cbfab292ad"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/AuthExceptionHandler.java",
+      "sha256": "3207c455515648ffd4dc07b9b433173cdc5116d4c147ca1402f5073fa3d38b40"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/AuthorizationServerConfig.java",
+      "sha256": "527d5efbef4742c06f256e4003d3dc7f273634e5d56a709083ec25b20f899c42"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/DeviceClientInitializer.java",
+      "sha256": "e8db2e48565093ae1166f2a9ee20dafaacc7d2bb52099e88a214167a3793528d"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/MybatisPlusConfig.java",
+      "sha256": "a4de63c2a9e4613ea44ea4558386d6cb307fa3772f7a4afc7670ea20e27a160c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/MyBatisPlusConfig.java",
+      "sha256": "a4de63c2a9e4613ea44ea4558386d6cb307fa3772f7a4afc7670ea20e27a160c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/OAuth2ClientInitializer.java",
+      "sha256": "e2acc1b363986b95052f77f22a4c2372b4dddde07a752e6026c069ee97711dfe"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/OAuth2Properties.java",
+      "sha256": "f38241b6a2e0d6f918e633d70a507f4716ee0c92a0bda2b223a3a8dde480129c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/MenuController.java",
+      "sha256": "eed9b466770f01f6bde80a5c60230a97b76544b0bf64d402a7ee6f5a3c22fe31"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataPermissionHandlerImpl.java",
+      "sha256": "c5e1aecc634138eb7e4c925b4883009b9f0f73412a047f135c704b505556daab"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeContext.java",
+      "sha256": "bfaf6a60176be53e82037ba62df507823229619ad7f89f26343549b4bd686c12"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeResolveFilter.java",
+      "sha256": "cf32b3ba6d1b95e4f4d5c0a6fd38924f2186cd04aa52cf48e67fb205472c77d8"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DeviceClientAuthenticationFilter.java",
+      "sha256": "f88ef360d2933b31c7e0d77d73f8279c30be9af530198c0661bf23b80f6ba3e3"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/GatewayPreAuthFilter.java",
+      "sha256": "ba56c6bda6838d5430b063d652f6003f0865e3be462347ccb6acc5c508b7236a"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/OmniUserDetailsService.java",
+      "sha256": "16877ccc08a206470c44f23ae40990b55c28324bf92185aa7d9265ae93244eff"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/SasConsentOriginFilter.java",
+      "sha256": "b77666ba006ba90f712b06fa713653e42b5431e05d47a0e01b62f4d0ce3844a5"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/XssConfigProviderImpl.java",
+      "sha256": "df5908da4d7d240805de6c569504a4d8891ad5932124fd9c7066777b3d52977c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/DataScopeServiceImpl.java",
+      "sha256": "5f9a6c657349e0039f1c419305bc0aa74dea7c23df79d3a0e615f621751f415f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/OnlineUserServiceImpl.java",
+      "sha256": "591a2e51edea59fc1d7b2056488d84551763786d88da532d955c2edd22c1f69e"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/resources/application.yml",
+      "sha256": "d1ce2ce3f6bd0ecc11ce641fc23475b571b0cbe382274be5cdc4e4d47dfc25f9"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/security/DataScopeResolveFilterTest.java",
+      "sha256": "c473bd55afc3069d5e8a982da1f0ac0bfbe24d8bb413fc7253e542fd76799a5e"
+    },
+    {
+      "path": "omni-backend/omni-base/pom.xml",
+      "sha256": "8acd8570ffb3847ce3be71a7d5e3081b4522d573fe638a7918ae28826c9fb827"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/config/SecurityConfig.java",
+      "sha256": "4156554b99ffede27a023a78b77a25364db0de9b6a51fb2ac96b93a956d92be5"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/security/GatewayPreAuthFilter.java",
+      "sha256": "1cb7c9d5a5598db4bd4f6df807c35b35eb133a7333a8f2960d78d19356beb358"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/security/XssConfigProviderImpl.java",
+      "sha256": "f889e6da0c2af08a93b6dc13899441e60bdcc68791b42e40c60b0bdd289c282b"
+    },
+    {
+      "path": "omni-backend/omni-common-core/pom.xml",
+      "sha256": "8e660c5ff16dfc24d5108b3c61919ee089d9b7ebdf6f59d6504e8463f30a8ab9"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/mq/ReliableMessageRelay.java",
+      "sha256": "399ece831ed218c6938f9987e15e3e2f86f90fc3a95693a85e65c8145d7f33cb"
+    },
+    {
+      "path": "omni-backend/omni-common-job/pom.xml",
+      "sha256": "2c0816b62967658018b18601342563005119c21a60e700cc25724f4579f0843a"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java",
+      "sha256": "9e77ff40bc35ee35b12970b5b850c00a2c670db05d712cfa23f672e6790c5005"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "2844e6688d0c3def6bc71c71708651c58d8f13681de7f0ff4ab80d39976dca5e"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/pom.xml",
+      "sha256": "080373b3803a9749c94d4e367eb1afebc3ad79f709948a62f37f05e213e954c5"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/config/MqLogAutoConfiguration.java",
+      "sha256": "bfb434ba1c5e5b8b1cf5d93d87cbb38954a7dbc65f14eab8bf47a717ecbad9c2"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "c6f773059036d48cc1d8b0c0e0d5c676773e106a0043c3c40ad4f9479d70ebef"
+    },
+    {
+      "path": "omni-backend/omni-common-mybatis/pom.xml",
+      "sha256": "0cfd068f5797e8c12cbae96babdb863e897bb053cc8c48b97b33dcdd5ac1ea8f"
+    },
+    {
+      "path": "omni-backend/omni-common-mybatis/src/main/java/com/omni/common/mybatis/config/MybatisPlusAutoConfiguration.java",
+      "sha256": "d6d75ead8dd29327e2081a038500d0321c4b6ab63476914646c59a4d800e0ffa"
+    },
+    {
+      "path": "omni-backend/omni-common-mybatis/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "d180231f630757e974e5e79bc31f42350dda7f8a68607e028c411bf950452e80"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/pom.xml",
+      "sha256": "e476cf537636a8b5530fc0f4552e34d9318b0cf02e75d74b40fbf79c64ec9cd5"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/config/OperLogAutoConfiguration.java",
+      "sha256": "c0b2d210eb54cf339b9e77f1ab24f015cd06f695b665e67f8cda4d72e9f78afc"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "6f4d4795c97283611cf64d2dc1a03b55732926897c9daa643cd6a1c1a75f62e0"
+    },
+    {
+      "path": "omni-backend/omni-common-redis-reactive/pom.xml",
+      "sha256": "a9ee460e9ebdb2a95ee0fe0656b7e3089d3b8659dcf751ddfb6bb6b47cfc148d"
+    },
+    {
+      "path": "omni-backend/omni-common-redis-reactive/src/main/resources/application.yml",
+      "sha256": "ed82690d31d6cef0fa7ef9411376bc7961a1eb18987e04b3da2d0d7cbc008e4d"
+    },
+    {
+      "path": "omni-backend/omni-common-redis/pom.xml",
+      "sha256": "3a81617ffeb15ab0953896cca6c5577f934550373f864e26cbd9c1dc09c3b891"
+    },
+    {
+      "path": "omni-backend/omni-common-redis/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "fd435fd8dee7012d7ea7c16557c19878bb49a37318e823d1ee033abfd79adc6f"
+    },
+    {
+      "path": "omni-backend/omni-common-service/pom.xml",
+      "sha256": "10cac501ee7f5c055237c9376c67a702d6a057e40ab32f0ba59ddc36768001f1"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthDataScopeResolver.java",
+      "sha256": "8c8b2c3d5818682e93e3f0874d8b23e359680015cbc9bcb68b3f156675807531"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthXssSettingsResolver.java",
+      "sha256": "f43e509df635acfc3b28b817263df7615952a335c68aaa2441af4e36cd2b4576"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceConfigurationValidator.java",
+      "sha256": "2019df35b95271027aea48ddfdd34d9c484a844437d36460231950930b042476"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceCoreAutoConfiguration.java",
+      "sha256": "831aa2fa80742dfbf17fe4c5faa928116d988c05384c768c87735c985e1e9e8a"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceIdentityProperties.java",
+      "sha256": "f17e5d5123df3dcbdf1b1cab4fcd3f429199c5028aac2067b18d6012f34386f8"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java",
+      "sha256": "4fcaa7b87b3547392e77284334ad8553546cdac8351a402b726ce1f2d9697220"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceXssAutoConfiguration.java",
+      "sha256": "9274353be73edd87ed851ae5684d1886a16095a87248f596f076f7824142237e"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/datascope/ServiceDataScopeAspect.java",
+      "sha256": "e47082d659d8ecda501066b2a4de6693eafbb9dc390d63bbf7ef3f6afaf50a32"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/identity/GatewayPreAuthenticationFilter.java",
+      "sha256": "222cac194f8d6adf7b060cf88a8b82a83feb61dcc60fb8b84cf5a0b45846b912"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java",
+      "sha256": "796424bf5067b1e80c3658572f2d1d3fb60a0db68c5bf349db10b5ddd323328d"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/DefaultXssSettingsFallback.java",
+      "sha256": "3b6881f0ff8c5855a8711732ee5268fb38ea1176bc4a987cad93a136ad4c2f16"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "9b042dfc687ee0c3f4f1e17e2b4dd99cb31e69d43cb6a6f9344b8cd8f114bce0"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/pom.xml",
+      "sha256": "76302d6e470b88599093b6fd81bef957c38fb030c65328a42f2212f4d553b8c4"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/config/FlowableAutoConfiguration.java",
+      "sha256": "6f37d9e50fc3d081a79c6cbac2a84f36761d54e5019dcb7a489b55df2816c2c2"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "50a4a374ef2aeab939721ba6b5d87058ac58e4ab2f2ab8cf65bcaa5e3fac8482"
+    },
+    {
+      "path": "omni-backend/omni-common/pom.xml",
+      "sha256": "fe079f62675d7eec7cb0289a095c046a2f9823146c49c43b2273aa8fdba833dd"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/config/JacksonConfig.java",
+      "sha256": "2c7a585a9cf5725bc682650c655e67368c5a804ed4ebfd358baf6c29ce43f0f6"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssAutoConfiguration.java",
+      "sha256": "c49eb19091de4cfb885cfb09893d09cdfb581ca2b6a71b2b872e9d207824cd75"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssFilter.java",
+      "sha256": "97fcb44f91b67e3749f2fa2ceff23952d9a6fd8815ca839635fa3ab6766c8373"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssHttpServletRequestWrapper.java",
+      "sha256": "1d3dab14470e2c25878a7fd15f500d6589425c7bbbabb42bcb3e28400cffe0c8"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssRuleHolder.java",
+      "sha256": "541cec49717f51105a7cd49a6d911e0b08a56a0b08baa601277a7bf3d131e5b6"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssSanitizer.java",
+      "sha256": "c60a69f43a3142a46802544af830aec02dbe0c7a1cdb70bde883a0883e80baf7"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssStringDeserializer.java",
+      "sha256": "7c350e118220c612fcd811c3e390a9f8e4f3c363091add6c0483efd8124f6b83"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssStringDeserializer3.java",
+      "sha256": "213564eed416fc8111a6b51be2297800fd4abbad7f81da5ee72833ce20c4052b"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "af7f602b550724c8faf31da5d81c3f61d94615763937b506b618017f9d96d4bc"
+    },
+    {
+      "path": "omni-backend/omni-common/src/test/java/com/omni/common/security/xss/XssHttpJsonIntegrationTest.java",
+      "sha256": "9feb83aea3fdf94788513f1856516d2cecbd2037020151906d3725cf6894a63f"
+    },
+    {
+      "path": "omni-backend/omni-common/src/test/java/com/omni/common/security/xss/XssJsonDeserializationTest.java",
+      "sha256": "4548bc1f6515d55ac25b346bb1ce42b8bc3ef70e6895f1c4cb72e98584d2826f"
+    },
+    {
+      "path": "omni-backend/omni-crm/pom.xml",
+      "sha256": "4801a220e50bf13340174238835977b6e5d2f9e89fabf00e205dc8a23c96557c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmDataPermissionHandler.java",
+      "sha256": "e62727dc2c3fa241d35f8a9d1304b78f94798d37d7936e185469c767c49b1b0b"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmTenantTablePolicy.java",
+      "sha256": "ca15c2631c038f6caf049846712f7329eb0c6581e998eb03032de4aeedb5335e"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmPermissionScopeExecutor.java",
+      "sha256": "b0f1f39646f3433457beddd651682c55b9b9273b2a84323dd5f30e0ea3e97523"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/resources/application.yml",
+      "sha256": "e35d392d9730485362b41f79aad28339769fe790830c7a6b570b5a310eae5288"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/security/PiiMaskerTest.java",
+      "sha256": "1c557676c601021e5fa6b27725b2964a7e7e7e52d00d9a8f5b02e09736106ad0"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/pom.xml",
+      "sha256": "49648b3437dca6156f4ecde25e82b911af9ea43474bdc2a65e8b3044dd6d9eac"
+    },
+    {
+      "path": "omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java",
+      "sha256": "5e24af6f6748272f9b48117bd12bfbad0b9b173fcc0ea1521905bcc0d284c9d1"
+    },
+    {
+      "path": "omni-backend/omni-gateway/pom.xml",
+      "sha256": "9c862355c8a3c192b214a3ba7b5519ea4fb979653a1d270d6aeb3eb825fdf422"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/CorsConfig.java",
+      "sha256": "158ade2839323df157706193c9a4215f3329d9fc80118a0ee28bb9edd9ff3592"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/JwkKeyProvider.java",
+      "sha256": "8c57fe2764d65cd0a023c7cb92e11f95a37bdb3f327a5699419e0630790c7a6d"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/SecurityHeadersFilter.java",
+      "sha256": "79bb875e9299be756a97a967271528f658131ed359a93a305ffa948288140a74"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/filter/AuthFilter.java",
+      "sha256": "a0773cce8e6ba3d7e90e40c088fb9bae1f77c049577665ad9a0201a4e1c3d76e"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/resources/application.yml",
+      "sha256": "b759994853839263e125044cb5a99b51a22aee7c5b38bdbdb646176fdf87c0f2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/pom.xml",
+      "sha256": "6dec4a7577f3807b3a9420c3fe49682d5a65d26f73f024b17ec7e9f148b521f2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/config/ProcExceptionHandler.java",
+      "sha256": "8365bc1c68d52f02c0e530943f33fdf269cc977cda01450529ba062a3733cc60"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java",
+      "sha256": "862a902bdcd8dd57fd07b6280284f712f2203149a0bf40f84d3fe590507efddf"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcTenantTablePolicy.java",
+      "sha256": "246dcd0a2199c06fcb6120a03405787f947ebf56ce7c70fee7e4cead9ad8484a"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/resources/application.yml",
+      "sha256": "e4dde986037907125e1d92f325f387623f8ce471fae64151c32dc9164e0d7430"
+    },
+    {
+      "path": "omni-backend/omni-srm/pom.xml",
+      "sha256": "50fc38206395819c1ea108dd0c25041972c73731a89e63074dd4fea4a1f1742d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/config/SecurityConfig.java",
+      "sha256": "d283ef844b82b91671da743c547274107f44f932a2af9b4fe9912efdf2275962"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/config/SrmExceptionHandler.java",
+      "sha256": "5516488099277869fcaebe14f81b6bef2511ac5b7e794cca54c4529ffb87607a"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmDataPermissionHandler.java",
+      "sha256": "c44aacdf9fb3cb52dcca347b1c2d4eafb962240f99e4df719ff570575e1b600d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmPortalScope.java",
+      "sha256": "eff1452e9b4349d44b2dd2275054513e2817bac14ad19309a9521f0c683adf68"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmTenantTablePolicy.java",
+      "sha256": "9c2c0667b0904ce738ee984ab0eff14fe65f3368af197b19f543b4b3037f8f43"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SrmPermissionScopeExecutor.java",
+      "sha256": "e4f7c84f65cdd5cfcb6adb1f7edf9103d0202943ac13eb3ecdade34781b357f2"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/resources/application.yml",
+      "sha256": "33cb88e595135c1d5b1c19288ecdf000860973a110a5816643e924e4808081a6"
+    },
+    {
+      "path": "omni-backend/omni-workflow/pom.xml",
+      "sha256": "615657791592a837a4f3b464a8252d20b16ca143d33f9c930d9f7d685da09168"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/MybatisPlusConfig.java",
+      "sha256": "b787ea78976b1ae4aac3a8ef8aadf20daccadedbd194e9bedbd333bc48431084"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+      "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/SecurityConfig.java",
+      "sha256": "fab002e857eb36ea7deea2c4441eacd5077e4cac292f81cedb201c6ac1be02a1"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/GatewayPreAuthFilter.java",
+      "sha256": "62ad1f64e9a57f9e8b0cede81564ac6d7e7c7cccc72d9be5c578a35a42da6d27"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/RbacUserGroupLookup.java",
+      "sha256": "95401461b083d1880fbcc324e96518178f7f5c2294483aef0b7261e1a772a142"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/XssConfigProviderImpl.java",
+      "sha256": "a4ac025ff72e0bed3a3ca3658f473761979074a2e4e0919759f7170ef8c0b64e"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/resources/application.yml",
+      "sha256": "dde4208074502bc092e8788006b0984d95bb76cd7de647a7cd8edec9e436d0df"
+    },
+    {
+      "path": "omni-backend/pom.xml",
+      "sha256": "18a2eda967a3dc9147decf645518f80692eae6d8b89c2cd3f230d07c14f33275"
+    },
+    {
+      "path": "scaffold/catalog/modules.yaml",
+      "sha256": "96fce7b277ee60b4a0d132ea22f0932481000779b8293241738da4c0edfdba9c"
+    },
+    {
+      "path": "scaffold/templates/service/docs/i18n-status.yaml.hbs",
+      "sha256": "9e5fb4b5d4cd35c29150e825eaae065cf420124dad864eae76e638aa935455a1"
+    },
+    {
+      "path": "scaffold/templates/service/docs/module.en.md.hbs",
+      "sha256": "6666a41dea469f98613e0887021835b7e5862b55ed0bc0eda4095963eeec481c"
+    },
+    {
+      "path": "scaffold/templates/service/docs/module.jp.md.hbs",
+      "sha256": "6a21e4aac108ab26a1f3ead378d76e7562d19dc6384ccd85728639c1e44d0db6"
+    },
+    {
+      "path": "scaffold/templates/service/docs/module.kr.md.hbs",
+      "sha256": "6995bb3dfd8b762564b29062d7c3ee526d46b0d8b6007fdb976f77bc23eb748f"
+    },
+    {
+      "path": "scaffold/templates/service/docs/module.md.hbs",
+      "sha256": "2870c78f5d81d7369698be56c8cbf59ef58a85bd166271cfbd8a66df72350b69"
+    },
+    {
+      "path": "tools/omni-cli/src/cli.ts",
+      "sha256": "d0b5df88164319f5b4308ca68bb587aa9ae8ce68fb3b74ac3eecf82ffe030c97"
+    },
+    {
+      "path": "tools/omni-cli/src/service-generator.ts",
+      "sha256": "2218c24f96016bdef198531a15bfce0fc8a70196f43b62a2dbfc50f747454558"
+    },
+    {
+      "path": "tools/omni-cli/src/service-integration-renderer.ts",
+      "sha256": "b7dd8cf9d6178eb41c5659b40bc46ab234ef55e3df3fd9533df34a90ad693e09"
+    },
+    {
+      "path": "tools/omni-cli/src/service-integration.ts",
+      "sha256": "fa1c9fa327d7be02cccc27aa0b471aaff06e7d0356a3c7c6dcbded7e4f4d0312"
+    },
+    {
+      "path": "tools/omni-cli/test/service-integration.test.ts",
+      "sha256": "e51713dcd4fd0bcba4e817accb7934cea814874c93401d431f260711f03ddee4"
+    }
+  ],
+  "source_inspection_scope": "34new currentwhole actual file reads;explicit selected current DataScope/AuthFilter/CLI/catalog;other POM/imports are parsed metadata only;prior retained whole/selected scopes after exact hashes. No whole-read claim for all bindings. Plus2whole reactive POM/YAML reads confirmed after295a;raw metadata and current selected scopes remain distinct. Plus6whole actual business/common changelog entry reads after298,42newwhole source reads total. Renewal retains those original scopes;current152bindings include two classifiedsourcechanges and8additional currentnativepolicybindings. No152newwhole-source-read claim.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_markdown_rendered_documents": 4,
+    "text_fenced_blocks": 8,
+    "mermaid_blocks": 4,
+    "er_edges_per_document": 14,
+    "strict_technical_text_example_equality": true,
+    "strict_er_structure_equality": true,
+    "strict_dependency_table_technical_equality": true,
+    "strict_port_numbers_equality": true,
+    "strict_nine_database_target_equality": true,
+    "shared_outbox_includes_verified": 7,
+    "locale_normalized_link_sets_equal": true,
+    "main_sections_per_document": 14,
+    "raster_images": 0,
+    "source_bindings": 152,
+    "current_whole_source_reads": 42,
+    "actual_document_read": {
+      "initial_full_four_language_current_review_lines": 1472,
+      "initial_full_review_retained": true,
+      "current_four_line364_paragraphs_actually_read": true,
+      "current_paragraph_output": "27b47c",
+      "body_except_line364_exactly_unchanged": true,
+      "current_whole_reread": false,
+      "hashes_or_rendering_alone_do_not_grant_review": true
+    },
+    "unchanged_build_proofs": {
+      "git_bridge": "architecture-git-reuse-295.json",
+      "backend_tree": "cf01beedbbf55676885fa8c469dc0d7e0b9de98d",
+      "frontend_tree": "2f9d8b826adacd1bf3707632eb18071168b37ac5",
+      "backend_receipt": "backend-workflow-boundary-260.json",
+      "backend_eol_bridge": "workflow-source-eol-preserved-260c.json",
+      "backend_closure": "workflow-stage-closure-268.json",
+      "backend_tests": {
+        "suites": 211,
+        "tests": 811,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 5,
+        "passed": 806
+      },
+      "frontend_receipt": "frontend-dict-checks-144.json",
+      "frontend_bridge": "frontend-git-reuse-285.json",
+      "frontend_tests": 33,
+      "frontend_passed": 33,
+      "frontend_lint_build_pass": true,
+      "new_build_or_test_run": false
+    },
+    "new_build_lint_or_test_runs": false,
+    "application_or_business_execution": false,
+    "svg_or_browser_acceptance": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "Review covers the entire scaffold-development family and four architecture line364 changes only;other36translation rows remain pending after expected102/138 scoped gates.",
+      "216guidebindings and152architecturebindings preserve named whole/selected/metadata read scopes;hash matches alone are not semantic approval.",
+      "No new application build,business write,service integration,full preset generation,MySQL test or cleanup;one valid private service bundle preserved.",
+      "Focused11service/13CRUD tests and10formalCLIcommands do not replace current fullgoldens and fivepreset structural matrix.",
+      "Backend811cases include5skips,including4conditionalCRMMySQLcases. Real externalOAuth0/3,SRMCAPTCHA,QodernativeSkillloading andfinalsite/browser/SVG/tutorial acceptance remain open.",
+      "Two private validator expectation errors349/349b retained with exact completed side effects;corrected349c passed without replaying CLI creation or costly builds."
+    ],
+    "underlying_business_limits_not_fixed": [
+      "HMAC covers identity/time only,not roles/scopes/method/path/body,and lacks one-use nonce;trusted network assumptions remain.",
+      "JWKprovider caches firstRSAkey,without kidselection or merged concurrentrefresh.",
+      "Menu permission filtering preserves MENU children without another recursive child-permission check.",
+      "Native planner/renderer now register four locales and protect allfour Git targets;domain terminology,page/business acceptance and fullcurrentgolden/fivepresetmatrix remain separate.",
+      "OriginalexternalOAuth0/3,realSRMCAPTCHA,Qodernativeloading andintegratedsite/browser/preset acceptance remain open."
+    ],
+    "current_delta": {
+      "architecture_paragraphs": 4,
+      "source_delta_classification": [
+        {
+          "path": "tools/omni-cli/src/service-integration.ts",
+          "before": "01b55a7e9895c01bc8417851f8e5667b97e9c1eb22c70febf4eb0efeca77a995",
+          "current": "fa1c9fa327d7be02cccc27aa0b471aaff06e7d0356a3c7c6dcbded7e4f4d0312"
+        },
+        {
+          "path": "docs/backend-patterns.md",
+          "before": "8b925ae0c06d8f8ef31b73aab08a83f1942bad4f804ea4e007e6ba2064610cb4",
+          "current": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7",
+          "resolution": "Current whole backend-patterns review311c/315/317;application source unchanged."
+        }
+      ],
+      "rendered_documents": 4,
+      "code_fences_unchanged": true,
+      "main_numbered_sections": 14,
+      "total_h2_including_toc": 15,
+      "source_inspection_scope": "Currentnativepolicyactualdeltas/outputreads and priorwholebackenddocumentreview;otherprevious source/document review retained.",
+      "renewed_translation_rows": 3,
+      "new_translation_rows": 0,
+      "application_source_changes": false,
+      "business_writes": false
+    }
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/architecture.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 09:58:40",
+      "result": "approved",
+      "translation_sha256": "3ad54fd56e838499b4dd9194a8b52a531eef7d0c55a1f876252e6ccc0c192435",
+      "checks": {
+        "coverage_and_meaning": "逐篇对照当前中文、三译文和具名源。保留全部14主节、10common/8服务/Migrator、业务域与RBAC/信任链/部署/扩展主题；完整DDL和教程归唯一源，范围未删减为易通过子集。20文档审计项以修正或明确当前限制闭合，原A-G继续。 Currentline364nativefourlocale/Gitconditional/actualAIpolicy delta directly reviewed;unchangedbodypriorwholeproof retained.",
+        "technical_literals": "核对当前POM版本/19子模块/20项目/8imports、直接与optional公共依赖、catalog闭包、WebFilter/GlobalFilter、Basic/Bearer/可信头/签名字段/300秒/TTL5m、503/401/403、MENU子节点、DataScope六值/表前缀/拦截器序列、宿主内部端口/volume/profiles、九库ID/七MQ入口和CLI参数。八text围栏严格一致；四ER各14边结构、依赖技术词/optional、端口数字、九库id与链接严格一致。",
+        "security_and_failure_semantics": "协议会话/登录JWT/内部令牌/预认证分开，HMAC实际覆盖与网络假设如实说明；无重放/权限头全签名承诺。普通/permission-aware角色解析、Auth无TenantLine与领域前缀隔离、SQL映射/AccessGuard、在线ALL例外、MENU子权限局限、Job注册失败与启动、Outbox与送达都不被混同。",
+        "images_and_links": "四篇当前Markdown在本机Docker整篇渲染。每篇1ER概念图的14边和本地化标签已AI逐边核对；共同结构严格一致，不声明完整DDL外键。八技术text围栏相同；语言归一化链接集合一致，14主标题与TOC保留。无光栅图；Markdown/manualER证据不替代实际SVG、站点根/子路径与浏览器布局/教程验收。",
+        "language_and_terminology": "Read all14sections against Chinese/current scoped source. Distinguish direct/optional Maven dependencies,generated module closure,startup gates and actual calls;identity-only signature versus request integrity,scope versus tenant,request rejection versus startup failure,andcommit versus delivery. Version/port/identifier literals stay intact. Narrative and final grammar are readable;no false human approval or application certification. Currentfourparagraphs use correct localeIDs,.git condition,present-unverified and actualAIapprovalwithoutmandatoryhumanreview;registration differs from domain/page/business acceptance."
+      },
+      "findings": [
+        {
+          "id": "AR01",
+          "status": "resolved",
+          "description": "Common 模块生产依赖、测试依赖、自装配前提及当前模块/一次性Migrator地图需逐POM核对，零Spring依赖和零配置表述过宽。",
+          "resolution": "核实10common、8自定义AutoConfiguration.imports与响应式依赖/YAML模块；core仅生产依赖无Spring，测试依赖明确。区分8常驻业务服务、一次性Migrator及19子模块/20reactor项目和实际启用条件。"
+        },
+        {
+          "id": "AR02",
+          "status": "resolved",
+          "description": "依赖ASCII图遗漏common-service/workflow/mqlog/operlog与译文业务服务；图示层级和真实直接/传递/optional依赖、构建顺序需区分。",
+          "resolution": "以逐POM直接com.omni依赖表替代遗漏的ASCII图，保留optional job边；Gateway只有reactive库，job/reactive/Migrator无core直接依赖。区分Maven依赖、catalog资源闭包与Compose启动边，三语补齐全部业务域。"
+        },
+        {
+          "id": "AR03",
+          "status": "resolved",
+          "description": "Gateway WebFilter与GlobalFilter被画成单一顺序，白名单/清可信头/HMAC与未带JWT例外不完整，需按当前管道与唯一API契约。",
+          "resolution": "将Cors/SecurityHeaders WebFilter与路由GlobalFilter分开，不编造单一顺序；保留公开名单不创造路由、清客户端身份/Bearer、保留Basic、受保护JWT/黑名单/头替换与503/401语义。"
+        },
+        {
+          "id": "AR04",
+          "status": "resolved",
+          "description": "JwkKeyProvider WebClient原因、5分钟缓存/并发与JWT验证范围需按源码，不以框架通用推断替代当前事实。",
+          "resolution": "按实际JwkKeyProvider说明自行WebClient、配置URI/Compose8080、TTL5m、第一RSAkey、volatile仅可见性及无kid/并发刷新合并，不推广为所有WebFlux不能注入Builder或已保证轮转。"
+        },
+        {
+          "id": "AR05",
+          "status": "resolved",
+          "description": "所有下游均缺密钥401的描述未区分common-service启动校验、各服务请求边界、内部令牌与业务认证例外。",
+          "resolution": "分别描述协议HttpSession、普通STATELESS、内部令牌与下游预认证；请求断言401、部分直接访问403、Gateway未就绪503及启用common-service配置校验导致启动失败，未统一成缺密钥401。"
+        },
+        {
+          "id": "AR06",
+          "status": "resolved",
+          "description": "TenantLine/DataPermission约束每条业务SQL和零侵入过宽，需保留领域映射、显式tenant写入、AccessGuard/ownership及Outbox例外。",
+          "resolution": "明确common-service按配置/表策略启用拦截器，领域映射、子资源继承、AccessGuard、所有权、显式tenant与事务仍独立；Outbox不受领域前缀TenantLine，不称每条SQL零侵入。"
+        },
+        {
+          "id": "AR07",
+          "status": "resolved",
+          "description": "Auth数据范围旧图只说所有角色合并，需核对permission-aware解析、角色分配范围、组织集合和清理生命周期。",
+          "resolution": "区分Auth普通解析不带permissionCode与内部permission-aware只取授予角色、无权限403；保留启用用户/租户校验、组织树集合和finally清理，scope_mode候选作用域不与dataScope六值混同。"
+        },
+        {
+          "id": "AR08",
+          "status": "resolved",
+          "description": "ALL跨租户含义与TenantLine独立性、在线用户特殊边界需分别按当前实现，不泛化所有领域。",
+          "resolution": "ALL仅在范围层不加行条件，跨租户与接口/租户策略独立；Auth没有通用TenantLine，对应Mapper/Service负责租户。在线用户ALL跨租户仅是该接口事实，不泛化领域SQL。"
+        },
+        {
+          "id": "AR09",
+          "status": "resolved",
+          "description": "菜单类型与MenuNode.path混成前端URL，示例路由/当前API来源和菜单过滤分支需核对。",
+          "resolution": "明确非ROLE_ authorities、DIRECTORY/MENU类型递归筛选；权限阶段DIRECTORY递归，MENU仅自身code且保留已有children，不宣称其子权限再次过滤。path为权限树层级，实际路由system:user→/admin/system/user。"
+        },
+        {
+          "id": "AR10",
+          "status": "resolved",
+          "description": "SpringSecurity方法级使用已建Authentication的authorities，前端菜单/按钮不构成后端授权；MyJob等所有权校验例外需保留。",
+          "resolution": "方法授权使用已建Authentication authorities而非每方法重验JWT；UI显隐不替代后台。保留MyJob等行所有权专用校验，不机械统一注解；ROLE_与功能权限分开。"
+        },
+        {
+          "id": "AR11",
+          "status": "resolved",
+          "description": "架构Schema硬编码Auth/Workflow/各库表数及不完整表清单易陈旧，需确认迁移源所有权、运行时Flowable表与每服务Outbox。",
+          "resolution": "架构只维护MigrationTargetCatalog九库职责、正式changelog/seed唯一所有权；撤去易陈旧完整表数/清单。逐7业务入口确认commonMQ引用，公共根包含schema/normalize/receipt/trace，Flowable使用vendor迁移且Compose关闭auto-update。"
+        },
+        {
+          "id": "AR12",
+          "status": "resolved",
+          "description": "基础设施版本/端口、XXLJOB/Nacos与依赖启动门及profile四语漏项需要核对正式Compose和迁移目录。",
+          "resolution": "分开宿主/内部端口，修正NameServer19876→9876和Broker10909/10911/10912；核实volume键、五业务profiles与独立MQ/Job、Migrator成功门和非线性depends_on，Frontend没有depends_on。配置不冒称运行健康。"
+        },
+        {
+          "id": "AR13",
+          "status": "resolved",
+          "description": "Outbox可靠投递措辞可能被误读为已送达，应区分本地提交、中继失败退避、Broker与消费幂等范围。",
+          "resolution": "明确本地Outbox与业务共同提交、跨租户中继及按tenant管理查询；Relay失败/消费幂等仍有各自边界，Broker接收、消费完成与本地提交不同，不声称已送达或全消费实现一致。"
+        },
+        {
+          "id": "AR14",
+          "status": "resolved",
+          "description": "调用关系图与同步OpenFeign/异步Outbox/历史补偿和服务库边界需匹配当前领域实现；源码约束不等于业务验收。",
+          "resolution": "保留Auth设置/权限、SRMPortalSaga、采购Workflow/SRM/收货事件、资产消费/审批与历史补偿；同步、异步和本地事务区分，不承诺跨库原子事务或新业务验收。"
+        },
+        {
+          "id": "AR15",
+          "status": "resolved",
+          "description": "容器网络、主机端口/内部8080、NacosIP、环境覆盖与缺密钥策略需按配置，保持固定默认端口不以启动状态替代健康。",
+          "resolution": "区分项目bridge、容器内部8080与宿主8100–8107/3000、Servlet宿主默认127.0.0.1和组件/管理/内部路径；Nacos显式路由/自动IP与变量命名差异按当前配置，签名不替代网络信任边界。"
+        },
+        {
+          "id": "AR16",
+          "status": "resolved",
+          "description": "扩展入口的策略/默认角色/XSS/Scheduling及service preview/apply不得与完整Wiki教程或已完成外部验收混淆。",
+          "resolution": "扩展策略、默认角色、XSS实际Bean/classpath/开关和缓存失效、系统双注解与用户handler名称按源保留。Wiki拥有完整教程，CLI preview/apply/lockhash验证不等于编译/业务或OAuth外部成功。"
+        },
+        {
+          "id": "AR17",
+          "status": "resolved",
+          "description": "技术约束引用过宽框架断言、API:R<T>例外及源码/测试与真实浏览器证据应分别限定，不重复昂贵不变构建。",
+          "resolution": "移除旧Java17门槛/旧前缀静默行为等过宽框架断言，保留项目JDK25与正确WebFlux前缀；普通R与协议例外分别引用。准确复用不变后台260/前端144成功证据，无新构建/浏览器声明。"
+        },
+        {
+          "id": "AR18",
+          "status": "resolved",
+          "description": "四语全文术语和示例覆盖存在遗漏，日韩存在定时/原点回源/生硬闭环表达，仍需真实AI语义修订和门禁。",
+          "resolution": "四语14主节及新增实际边界均全文对照；日韩XSS配置取得、表/哈希/迁移术语与中文vendor误译已修正；八文本围栏、14边ER结构、依赖技术词、端口/九库目标和归一化链接一致。所有者AI-only规则保留，无人审等待。"
+        },
+        {
+          "id": "AR19",
+          "status": "resolved",
+          "description": "Current HMAC payload authenticates userId|tenantId|username|issuedAt only;it does not sign roles/scopes,method,path or body and has no one-use nonce. Document exact boundary and network trust assumptions;do not claim complete request integrity or new end-to-end security acceptance.",
+          "resolution": "明确HMAC只签userId|tenantId|username|issuedAt和±300秒，不签roles/scopes/method/path/body，无一次性nonce；标记头不构成身份凭证。该源限制仅如实说明，未声称完整请求防篡改或端到端安全验收。"
+        },
+        {
+          "id": "AR20",
+          "status": "resolved",
+          "description": "Architecture integration paragraph must match current native fourlocale planner/renderer and Git-conditional dirty-file protection,while retaining actual review requirements and domain/page/business limits.",
+          "resolution": "service1.5.1当前计划/渲染四locale一致，Git目标ja/ko保护已按11测试/生成结果验证；四架构段落同步并真实AI复核。新文档保持unverified，现行ownerAI授权足够且不自动批准；领域词/页面/业务与完整generator/matrix仍须各自验收。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/architecture.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 09:58:40",
+      "result": "approved",
+      "translation_sha256": "b1fbaea5cbc529473ab327dc8df520abb85cd44c4450f3622c316119cb033f1c",
+      "checks": {
+        "coverage_and_meaning": "逐篇对照当前中文、三译文和具名源。保留全部14主节、10common/8服务/Migrator、业务域与RBAC/信任链/部署/扩展主题；完整DDL和教程归唯一源，范围未删减为易通过子集。20文档审计项以修正或明确当前限制闭合，原A-G继续。 Currentline364nativefourlocale/Gitconditional/actualAIpolicy delta directly reviewed;unchangedbodypriorwholeproof retained.",
+        "technical_literals": "核对当前POM版本/19子模块/20项目/8imports、直接与optional公共依赖、catalog闭包、WebFilter/GlobalFilter、Basic/Bearer/可信头/签名字段/300秒/TTL5m、503/401/403、MENU子节点、DataScope六值/表前缀/拦截器序列、宿主内部端口/volume/profiles、九库ID/七MQ入口和CLI参数。八text围栏严格一致；四ER各14边结构、依赖技术词/optional、端口数字、九库id与链接严格一致。",
+        "security_and_failure_semantics": "协议会话/登录JWT/内部令牌/预认证分开，HMAC实际覆盖与网络假设如实说明；无重放/权限头全签名承诺。普通/permission-aware角色解析、Auth无TenantLine与领域前缀隔离、SQL映射/AccessGuard、在线ALL例外、MENU子权限局限、Job注册失败与启动、Outbox与送达都不被混同。",
+        "images_and_links": "四篇当前Markdown在本机Docker整篇渲染。每篇1ER概念图的14边和本地化标签已AI逐边核对；共同结构严格一致，不声明完整DDL外键。八技术text围栏相同；语言归一化链接集合一致，14主标题与TOC保留。无光栅图；Markdown/manualER证据不替代实际SVG、站点根/子路径与浏览器布局/教程验收。",
+        "language_and_terminology": "14主節全体を中国語と現在のソースに照合。直接/optional依存、生成閉包、起動条件と実呼び出し、IDアサーションと要求全体、データ範囲とテナント、コミットと配信を区別。XSS設定取得、ハッシュ、データベース作成、テーブル、前進のみの移行とキーのローテーションを自然な表記に修正。図の意味と技術識別子を保持し、人手レビューや実業務検証を冒称しない。 Currentfourparagraphs use correct localeIDs,.git condition,present-unverified and actualAIapprovalwithoutmandatoryhumanreview;registration differs from domain/page/business acceptance."
+      },
+      "findings": [
+        {
+          "id": "AR01",
+          "status": "resolved",
+          "description": "Common 模块生产依赖、测试依赖、自装配前提及当前模块/一次性Migrator地图需逐POM核对，零Spring依赖和零配置表述过宽。",
+          "resolution": "核实10common、8自定义AutoConfiguration.imports与响应式依赖/YAML模块；core仅生产依赖无Spring，测试依赖明确。区分8常驻业务服务、一次性Migrator及19子模块/20reactor项目和实际启用条件。"
+        },
+        {
+          "id": "AR02",
+          "status": "resolved",
+          "description": "依赖ASCII图遗漏common-service/workflow/mqlog/operlog与译文业务服务；图示层级和真实直接/传递/optional依赖、构建顺序需区分。",
+          "resolution": "以逐POM直接com.omni依赖表替代遗漏的ASCII图，保留optional job边；Gateway只有reactive库，job/reactive/Migrator无core直接依赖。区分Maven依赖、catalog资源闭包与Compose启动边，三语补齐全部业务域。"
+        },
+        {
+          "id": "AR03",
+          "status": "resolved",
+          "description": "Gateway WebFilter与GlobalFilter被画成单一顺序，白名单/清可信头/HMAC与未带JWT例外不完整，需按当前管道与唯一API契约。",
+          "resolution": "将Cors/SecurityHeaders WebFilter与路由GlobalFilter分开，不编造单一顺序；保留公开名单不创造路由、清客户端身份/Bearer、保留Basic、受保护JWT/黑名单/头替换与503/401语义。"
+        },
+        {
+          "id": "AR04",
+          "status": "resolved",
+          "description": "JwkKeyProvider WebClient原因、5分钟缓存/并发与JWT验证范围需按源码，不以框架通用推断替代当前事实。",
+          "resolution": "按实际JwkKeyProvider说明自行WebClient、配置URI/Compose8080、TTL5m、第一RSAkey、volatile仅可见性及无kid/并发刷新合并，不推广为所有WebFlux不能注入Builder或已保证轮转。"
+        },
+        {
+          "id": "AR05",
+          "status": "resolved",
+          "description": "所有下游均缺密钥401的描述未区分common-service启动校验、各服务请求边界、内部令牌与业务认证例外。",
+          "resolution": "分别描述协议HttpSession、普通STATELESS、内部令牌与下游预认证；请求断言401、部分直接访问403、Gateway未就绪503及启用common-service配置校验导致启动失败，未统一成缺密钥401。"
+        },
+        {
+          "id": "AR06",
+          "status": "resolved",
+          "description": "TenantLine/DataPermission约束每条业务SQL和零侵入过宽，需保留领域映射、显式tenant写入、AccessGuard/ownership及Outbox例外。",
+          "resolution": "明确common-service按配置/表策略启用拦截器，领域映射、子资源继承、AccessGuard、所有权、显式tenant与事务仍独立；Outbox不受领域前缀TenantLine，不称每条SQL零侵入。"
+        },
+        {
+          "id": "AR07",
+          "status": "resolved",
+          "description": "Auth数据范围旧图只说所有角色合并，需核对permission-aware解析、角色分配范围、组织集合和清理生命周期。",
+          "resolution": "区分Auth普通解析不带permissionCode与内部permission-aware只取授予角色、无权限403；保留启用用户/租户校验、组织树集合和finally清理，scope_mode候选作用域不与dataScope六值混同。"
+        },
+        {
+          "id": "AR08",
+          "status": "resolved",
+          "description": "ALL跨租户含义与TenantLine独立性、在线用户特殊边界需分别按当前实现，不泛化所有领域。",
+          "resolution": "ALL仅在范围层不加行条件，跨租户与接口/租户策略独立；Auth没有通用TenantLine，对应Mapper/Service负责租户。在线用户ALL跨租户仅是该接口事实，不泛化领域SQL。"
+        },
+        {
+          "id": "AR09",
+          "status": "resolved",
+          "description": "菜单类型与MenuNode.path混成前端URL，示例路由/当前API来源和菜单过滤分支需核对。",
+          "resolution": "明确非ROLE_ authorities、DIRECTORY/MENU类型递归筛选；权限阶段DIRECTORY递归，MENU仅自身code且保留已有children，不宣称其子权限再次过滤。path为权限树层级，实际路由system:user→/admin/system/user。"
+        },
+        {
+          "id": "AR10",
+          "status": "resolved",
+          "description": "SpringSecurity方法级使用已建Authentication的authorities，前端菜单/按钮不构成后端授权；MyJob等所有权校验例外需保留。",
+          "resolution": "方法授权使用已建Authentication authorities而非每方法重验JWT；UI显隐不替代后台。保留MyJob等行所有权专用校验，不机械统一注解；ROLE_与功能权限分开。"
+        },
+        {
+          "id": "AR11",
+          "status": "resolved",
+          "description": "架构Schema硬编码Auth/Workflow/各库表数及不完整表清单易陈旧，需确认迁移源所有权、运行时Flowable表与每服务Outbox。",
+          "resolution": "架构只维护MigrationTargetCatalog九库职责、正式changelog/seed唯一所有权；撤去易陈旧完整表数/清单。逐7业务入口确认commonMQ引用，公共根包含schema/normalize/receipt/trace，Flowable使用vendor迁移且Compose关闭auto-update。"
+        },
+        {
+          "id": "AR12",
+          "status": "resolved",
+          "description": "基础设施版本/端口、XXLJOB/Nacos与依赖启动门及profile四语漏项需要核对正式Compose和迁移目录。",
+          "resolution": "分开宿主/内部端口，修正NameServer19876→9876和Broker10909/10911/10912；核实volume键、五业务profiles与独立MQ/Job、Migrator成功门和非线性depends_on，Frontend没有depends_on。配置不冒称运行健康。"
+        },
+        {
+          "id": "AR13",
+          "status": "resolved",
+          "description": "Outbox可靠投递措辞可能被误读为已送达，应区分本地提交、中继失败退避、Broker与消费幂等范围。",
+          "resolution": "明确本地Outbox与业务共同提交、跨租户中继及按tenant管理查询；Relay失败/消费幂等仍有各自边界，Broker接收、消费完成与本地提交不同，不声称已送达或全消费实现一致。"
+        },
+        {
+          "id": "AR14",
+          "status": "resolved",
+          "description": "调用关系图与同步OpenFeign/异步Outbox/历史补偿和服务库边界需匹配当前领域实现；源码约束不等于业务验收。",
+          "resolution": "保留Auth设置/权限、SRMPortalSaga、采购Workflow/SRM/收货事件、资产消费/审批与历史补偿；同步、异步和本地事务区分，不承诺跨库原子事务或新业务验收。"
+        },
+        {
+          "id": "AR15",
+          "status": "resolved",
+          "description": "容器网络、主机端口/内部8080、NacosIP、环境覆盖与缺密钥策略需按配置，保持固定默认端口不以启动状态替代健康。",
+          "resolution": "区分项目bridge、容器内部8080与宿主8100–8107/3000、Servlet宿主默认127.0.0.1和组件/管理/内部路径；Nacos显式路由/自动IP与变量命名差异按当前配置，签名不替代网络信任边界。"
+        },
+        {
+          "id": "AR16",
+          "status": "resolved",
+          "description": "扩展入口的策略/默认角色/XSS/Scheduling及service preview/apply不得与完整Wiki教程或已完成外部验收混淆。",
+          "resolution": "扩展策略、默认角色、XSS实际Bean/classpath/开关和缓存失效、系统双注解与用户handler名称按源保留。Wiki拥有完整教程，CLI preview/apply/lockhash验证不等于编译/业务或OAuth外部成功。"
+        },
+        {
+          "id": "AR17",
+          "status": "resolved",
+          "description": "技术约束引用过宽框架断言、API:R<T>例外及源码/测试与真实浏览器证据应分别限定，不重复昂贵不变构建。",
+          "resolution": "移除旧Java17门槛/旧前缀静默行为等过宽框架断言，保留项目JDK25与正确WebFlux前缀；普通R与协议例外分别引用。准确复用不变后台260/前端144成功证据，无新构建/浏览器声明。"
+        },
+        {
+          "id": "AR18",
+          "status": "resolved",
+          "description": "四语全文术语和示例覆盖存在遗漏，日韩存在定时/原点回源/生硬闭环表达，仍需真实AI语义修订和门禁。",
+          "resolution": "四语14主节及新增实际边界均全文对照；日韩XSS配置取得、表/哈希/迁移术语与中文vendor误译已修正；八文本围栏、14边ER结构、依赖技术词、端口/九库目标和归一化链接一致。所有者AI-only规则保留，无人审等待。"
+        },
+        {
+          "id": "AR19",
+          "status": "resolved",
+          "description": "Current HMAC payload authenticates userId|tenantId|username|issuedAt only;it does not sign roles/scopes,method,path or body and has no one-use nonce. Document exact boundary and network trust assumptions;do not claim complete request integrity or new end-to-end security acceptance.",
+          "resolution": "明确HMAC只签userId|tenantId|username|issuedAt和±300秒，不签roles/scopes/method/path/body，无一次性nonce；标记头不构成身份凭证。该源限制仅如实说明，未声称完整请求防篡改或端到端安全验收。"
+        },
+        {
+          "id": "AR20",
+          "status": "resolved",
+          "description": "Architecture integration paragraph must match current native fourlocale planner/renderer and Git-conditional dirty-file protection,while retaining actual review requirements and domain/page/business limits.",
+          "resolution": "service1.5.1当前计划/渲染四locale一致，Git目标ja/ko保护已按11测试/生成结果验证；四架构段落同步并真实AI复核。新文档保持unverified，现行ownerAI授权足够且不自动批准；领域词/页面/业务与完整generator/matrix仍须各自验收。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/architecture.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 09:58:40",
+      "result": "approved",
+      "translation_sha256": "1594ae354a26f378d9f6ed33142edde4ccbd24d56e9a5d1515105572db28ae6f",
+      "checks": {
+        "coverage_and_meaning": "逐篇对照当前中文、三译文和具名源。保留全部14主节、10common/8服务/Migrator、业务域与RBAC/信任链/部署/扩展主题；完整DDL和教程归唯一源，范围未删减为易通过子集。20文档审计项以修正或明确当前限制闭合，原A-G继续。 Currentline364nativefourlocale/Gitconditional/actualAIpolicy delta directly reviewed;unchangedbodypriorwholeproof retained.",
+        "technical_literals": "核对当前POM版本/19子模块/20项目/8imports、直接与optional公共依赖、catalog闭包、WebFilter/GlobalFilter、Basic/Bearer/可信头/签名字段/300秒/TTL5m、503/401/403、MENU子节点、DataScope六值/表前缀/拦截器序列、宿主内部端口/volume/profiles、九库ID/七MQ入口和CLI参数。八text围栏严格一致；四ER各14边结构、依赖技术词/optional、端口数字、九库id与链接严格一致。",
+        "security_and_failure_semantics": "协议会话/登录JWT/内部令牌/预认证分开，HMAC实际覆盖与网络假设如实说明；无重放/权限头全签名承诺。普通/permission-aware角色解析、Auth无TenantLine与领域前缀隔离、SQL映射/AccessGuard、在线ALL例外、MENU子权限局限、Job注册失败与启动、Outbox与送达都不被混同。",
+        "images_and_links": "四篇当前Markdown在本机Docker整篇渲染。每篇1ER概念图的14边和本地化标签已AI逐边核对；共同结构严格一致，不声明完整DDL外键。八技术text围栏相同；语言归一化链接集合一致，14主标题与TOC保留。无光栅图；Markdown/manualER证据不替代实际SVG、站点根/子路径与浏览器布局/教程验收。",
+        "language_and_terminology": "14개 주절 전체를 중국어·현재 소스와 대조했습니다. 직접/optional 의존성,생성 클로저,시작 조건과 실제 호출,신원 서명과 요청 전체,데이터 범위와 테넌트,커밋과 전달을 구분합니다. XSS 설정 조회·해시·테이블·마이그레이션 용어와 조사 오류를 수정하고 기술 식별자 및 관계 의미를 유지했습니다. 사람 검토나 실제 업무 검증을 주장하지 않습니다. Currentfourparagraphs use correct localeIDs,.git condition,present-unverified and actualAIapprovalwithoutmandatoryhumanreview;registration differs from domain/page/business acceptance."
+      },
+      "findings": [
+        {
+          "id": "AR01",
+          "status": "resolved",
+          "description": "Common 模块生产依赖、测试依赖、自装配前提及当前模块/一次性Migrator地图需逐POM核对，零Spring依赖和零配置表述过宽。",
+          "resolution": "核实10common、8自定义AutoConfiguration.imports与响应式依赖/YAML模块；core仅生产依赖无Spring，测试依赖明确。区分8常驻业务服务、一次性Migrator及19子模块/20reactor项目和实际启用条件。"
+        },
+        {
+          "id": "AR02",
+          "status": "resolved",
+          "description": "依赖ASCII图遗漏common-service/workflow/mqlog/operlog与译文业务服务；图示层级和真实直接/传递/optional依赖、构建顺序需区分。",
+          "resolution": "以逐POM直接com.omni依赖表替代遗漏的ASCII图，保留optional job边；Gateway只有reactive库，job/reactive/Migrator无core直接依赖。区分Maven依赖、catalog资源闭包与Compose启动边，三语补齐全部业务域。"
+        },
+        {
+          "id": "AR03",
+          "status": "resolved",
+          "description": "Gateway WebFilter与GlobalFilter被画成单一顺序，白名单/清可信头/HMAC与未带JWT例外不完整，需按当前管道与唯一API契约。",
+          "resolution": "将Cors/SecurityHeaders WebFilter与路由GlobalFilter分开，不编造单一顺序；保留公开名单不创造路由、清客户端身份/Bearer、保留Basic、受保护JWT/黑名单/头替换与503/401语义。"
+        },
+        {
+          "id": "AR04",
+          "status": "resolved",
+          "description": "JwkKeyProvider WebClient原因、5分钟缓存/并发与JWT验证范围需按源码，不以框架通用推断替代当前事实。",
+          "resolution": "按实际JwkKeyProvider说明自行WebClient、配置URI/Compose8080、TTL5m、第一RSAkey、volatile仅可见性及无kid/并发刷新合并，不推广为所有WebFlux不能注入Builder或已保证轮转。"
+        },
+        {
+          "id": "AR05",
+          "status": "resolved",
+          "description": "所有下游均缺密钥401的描述未区分common-service启动校验、各服务请求边界、内部令牌与业务认证例外。",
+          "resolution": "分别描述协议HttpSession、普通STATELESS、内部令牌与下游预认证；请求断言401、部分直接访问403、Gateway未就绪503及启用common-service配置校验导致启动失败，未统一成缺密钥401。"
+        },
+        {
+          "id": "AR06",
+          "status": "resolved",
+          "description": "TenantLine/DataPermission约束每条业务SQL和零侵入过宽，需保留领域映射、显式tenant写入、AccessGuard/ownership及Outbox例外。",
+          "resolution": "明确common-service按配置/表策略启用拦截器，领域映射、子资源继承、AccessGuard、所有权、显式tenant与事务仍独立；Outbox不受领域前缀TenantLine，不称每条SQL零侵入。"
+        },
+        {
+          "id": "AR07",
+          "status": "resolved",
+          "description": "Auth数据范围旧图只说所有角色合并，需核对permission-aware解析、角色分配范围、组织集合和清理生命周期。",
+          "resolution": "区分Auth普通解析不带permissionCode与内部permission-aware只取授予角色、无权限403；保留启用用户/租户校验、组织树集合和finally清理，scope_mode候选作用域不与dataScope六值混同。"
+        },
+        {
+          "id": "AR08",
+          "status": "resolved",
+          "description": "ALL跨租户含义与TenantLine独立性、在线用户特殊边界需分别按当前实现，不泛化所有领域。",
+          "resolution": "ALL仅在范围层不加行条件，跨租户与接口/租户策略独立；Auth没有通用TenantLine，对应Mapper/Service负责租户。在线用户ALL跨租户仅是该接口事实，不泛化领域SQL。"
+        },
+        {
+          "id": "AR09",
+          "status": "resolved",
+          "description": "菜单类型与MenuNode.path混成前端URL，示例路由/当前API来源和菜单过滤分支需核对。",
+          "resolution": "明确非ROLE_ authorities、DIRECTORY/MENU类型递归筛选；权限阶段DIRECTORY递归，MENU仅自身code且保留已有children，不宣称其子权限再次过滤。path为权限树层级，实际路由system:user→/admin/system/user。"
+        },
+        {
+          "id": "AR10",
+          "status": "resolved",
+          "description": "SpringSecurity方法级使用已建Authentication的authorities，前端菜单/按钮不构成后端授权；MyJob等所有权校验例外需保留。",
+          "resolution": "方法授权使用已建Authentication authorities而非每方法重验JWT；UI显隐不替代后台。保留MyJob等行所有权专用校验，不机械统一注解；ROLE_与功能权限分开。"
+        },
+        {
+          "id": "AR11",
+          "status": "resolved",
+          "description": "架构Schema硬编码Auth/Workflow/各库表数及不完整表清单易陈旧，需确认迁移源所有权、运行时Flowable表与每服务Outbox。",
+          "resolution": "架构只维护MigrationTargetCatalog九库职责、正式changelog/seed唯一所有权；撤去易陈旧完整表数/清单。逐7业务入口确认commonMQ引用，公共根包含schema/normalize/receipt/trace，Flowable使用vendor迁移且Compose关闭auto-update。"
+        },
+        {
+          "id": "AR12",
+          "status": "resolved",
+          "description": "基础设施版本/端口、XXLJOB/Nacos与依赖启动门及profile四语漏项需要核对正式Compose和迁移目录。",
+          "resolution": "分开宿主/内部端口，修正NameServer19876→9876和Broker10909/10911/10912；核实volume键、五业务profiles与独立MQ/Job、Migrator成功门和非线性depends_on，Frontend没有depends_on。配置不冒称运行健康。"
+        },
+        {
+          "id": "AR13",
+          "status": "resolved",
+          "description": "Outbox可靠投递措辞可能被误读为已送达，应区分本地提交、中继失败退避、Broker与消费幂等范围。",
+          "resolution": "明确本地Outbox与业务共同提交、跨租户中继及按tenant管理查询；Relay失败/消费幂等仍有各自边界，Broker接收、消费完成与本地提交不同，不声称已送达或全消费实现一致。"
+        },
+        {
+          "id": "AR14",
+          "status": "resolved",
+          "description": "调用关系图与同步OpenFeign/异步Outbox/历史补偿和服务库边界需匹配当前领域实现；源码约束不等于业务验收。",
+          "resolution": "保留Auth设置/权限、SRMPortalSaga、采购Workflow/SRM/收货事件、资产消费/审批与历史补偿；同步、异步和本地事务区分，不承诺跨库原子事务或新业务验收。"
+        },
+        {
+          "id": "AR15",
+          "status": "resolved",
+          "description": "容器网络、主机端口/内部8080、NacosIP、环境覆盖与缺密钥策略需按配置，保持固定默认端口不以启动状态替代健康。",
+          "resolution": "区分项目bridge、容器内部8080与宿主8100–8107/3000、Servlet宿主默认127.0.0.1和组件/管理/内部路径；Nacos显式路由/自动IP与变量命名差异按当前配置，签名不替代网络信任边界。"
+        },
+        {
+          "id": "AR16",
+          "status": "resolved",
+          "description": "扩展入口的策略/默认角色/XSS/Scheduling及service preview/apply不得与完整Wiki教程或已完成外部验收混淆。",
+          "resolution": "扩展策略、默认角色、XSS实际Bean/classpath/开关和缓存失效、系统双注解与用户handler名称按源保留。Wiki拥有完整教程，CLI preview/apply/lockhash验证不等于编译/业务或OAuth外部成功。"
+        },
+        {
+          "id": "AR17",
+          "status": "resolved",
+          "description": "技术约束引用过宽框架断言、API:R<T>例外及源码/测试与真实浏览器证据应分别限定，不重复昂贵不变构建。",
+          "resolution": "移除旧Java17门槛/旧前缀静默行为等过宽框架断言，保留项目JDK25与正确WebFlux前缀；普通R与协议例外分别引用。准确复用不变后台260/前端144成功证据，无新构建/浏览器声明。"
+        },
+        {
+          "id": "AR18",
+          "status": "resolved",
+          "description": "四语全文术语和示例覆盖存在遗漏，日韩存在定时/原点回源/生硬闭环表达，仍需真实AI语义修订和门禁。",
+          "resolution": "四语14主节及新增实际边界均全文对照；日韩XSS配置取得、表/哈希/迁移术语与中文vendor误译已修正；八文本围栏、14边ER结构、依赖技术词、端口/九库目标和归一化链接一致。所有者AI-only规则保留，无人审等待。"
+        },
+        {
+          "id": "AR19",
+          "status": "resolved",
+          "description": "Current HMAC payload authenticates userId|tenantId|username|issuedAt only;it does not sign roles/scopes,method,path or body and has no one-use nonce. Document exact boundary and network trust assumptions;do not claim complete request integrity or new end-to-end security acceptance.",
+          "resolution": "明确HMAC只签userId|tenantId|username|issuedAt和±300秒，不签roles/scopes/method/path/body，无一次性nonce；标记头不构成身份凭证。该源限制仅如实说明，未声称完整请求防篡改或端到端安全验收。"
+        },
+        {
+          "id": "AR20",
+          "status": "resolved",
+          "description": "Architecture integration paragraph must match current native fourlocale planner/renderer and Git-conditional dirty-file protection,while retaining actual review requirements and domain/page/business limits.",
+          "resolution": "service1.5.1当前计划/渲染四locale一致，Git目标ja/ko保护已按11测试/生成结果验证；四架构段落同步并真实AI复核。新文档保持unverified，现行ownerAI授权足够且不自动批准；领域词/页面/业务与完整generator/matrix仍须各自验收。"
+        }
+      ]
+    }
+  },
+  "renewal_history": [
+    {
+      "previous_source_baseline": "1d17a46a1eb264ee81fd6e3693880cab811a4976",
+      "previous_source_sha256": "abb00d78daadc8a36fb82b71d62c4134a7bc9b4c0de8e82eb64be7924db9949d",
+      "previous_evidence_sha256": "a5156f594bcb3adf6de36bef759e84e1f6df2e2db2ffad828c22b100cf920d0c",
+      "previous_reviewed_at": "2026-10-16 22:34:04",
+      "reason": "Native service1.5.1 fourlocale planner/dirtyguard and actualAI-only wording alignment;fourline364paragraphs updated;otherbody exact unchanged."
+    }
+  ]
+}

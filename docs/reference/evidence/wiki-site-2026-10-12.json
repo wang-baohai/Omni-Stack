@@ -1,0 +1,781 @@
+{
+  "schema": 1,
+  "kind": "standalone-local-docker-wiki-root-and-subpath",
+  "recorded_at": "2026-10-12T13:38:41.146Z",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "status": "BROWSER_AND_VISUAL_REVIEW_PASS",
+  "test": "docs/scripts/browser-check.mjs",
+  "test_sha256": "37f3ecc053945564ff58cf4602566d1df1daa93a41273b4f55e81ef77be7d4d5",
+  "deployments": [
+    {
+      "deployment": "root",
+      "base": "/",
+      "runtime": "local Docker",
+      "image_id": "sha256:6b089fd3a6a12e58845ecc380c436b8869915cc88c2f460ec3ece6cedf7b99bc",
+      "started_at": "2026-10-12T12:47:23.752Z",
+      "finished_at": "2026-10-12T12:49:33.888Z",
+      "status": "pass",
+      "checks": [
+        {
+          "name": "all reachable pages, local links, anchors, images and desktop layout",
+          "status": "pass",
+          "pages": 192,
+          "images": 933,
+          "anchors": 8304
+        },
+        {
+          "name": "zh-CN navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "en-US navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "ja-JP navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "ko-KR navigation, search, title, images and mobile",
+          "status": "pass"
+        }
+      ],
+      "screenshots": [
+        {
+          "artifact": "wiki-index-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "role": "public documentation reader",
+          "route": "/zh-CN/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 2710,
+          "expected": "Localized learning paths and navigation",
+          "captured_at": "2026-10-12T12:49:28.049Z",
+          "sha256": "167a319a8cc0ed99fd1510068aab6548ad0d75eb1f134a675ad5e28d8c007bde",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-search-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "role": "public documentation reader",
+          "route": "/zh-CN/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "expected": "Local search finds current-locale GETDEL source explanation",
+          "captured_at": "2026-10-12T12:49:28.655Z",
+          "sha256": "df4d7a1d6c74b7b298ecb3887943e9905a7ee1274d13ebe5c692e15db917e416",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-quick-start-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "role": "public documentation reader",
+          "route": "/zh-CN/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 4973,
+          "expected": "Current localized container quick-start with readable images",
+          "captured_at": "2026-10-12T12:49:29.160Z",
+          "sha256": "7e977eca38490ade11625ce854b62419f59b8b0b797da20015e37dafa5df4331",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-mobile-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "role": "public documentation reader",
+          "route": "/zh-CN/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "expected": "Quick-start remains readable at 390×844",
+          "captured_at": "2026-10-12T12:49:29.279Z",
+          "sha256": "86f8779c3e3f32deb37a732f83e244db9ae4889650e516a45e6071e0c665c031",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-index-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "role": "public documentation reader",
+          "route": "/en-US/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 3310,
+          "expected": "Localized learning paths and navigation",
+          "captured_at": "2026-10-12T12:49:29.625Z",
+          "sha256": "309b636db17ae999581ac847e4a355fe698c6fdfe8fd25582fc4700b0abdc573",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-search-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "role": "public documentation reader",
+          "route": "/en-US/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "expected": "Local search finds current-locale GETDEL source explanation",
+          "captured_at": "2026-10-12T12:49:30.123Z",
+          "sha256": "dc2174d05076793b0834346a5aebf9586282e8f328c9fdcb7c547d0aff88fb7d",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-quick-start-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "role": "public documentation reader",
+          "route": "/en-US/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5563,
+          "expected": "Current localized container quick-start with readable images",
+          "captured_at": "2026-10-12T12:49:30.606Z",
+          "sha256": "eaea609c27b6ca74bfa6c2256dbcb44b1c8b7a31d3be68baff60bc7cfd35a814",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-mobile-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "role": "public documentation reader",
+          "route": "/en-US/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "expected": "Quick-start remains readable at 390×844",
+          "captured_at": "2026-10-12T12:49:30.711Z",
+          "sha256": "cf449ed7f209d1e4407ee4dfa91c3c084a3c7afea7b6975deeed259eaa731e4c",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-index-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "role": "public documentation reader",
+          "route": "/ja-JP/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 3142,
+          "expected": "Localized learning paths and navigation",
+          "captured_at": "2026-10-12T12:49:31.088Z",
+          "sha256": "0cc9d787c69068153a2038e9c203855862e827ae23bc889150069250b3403676",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-search-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "role": "public documentation reader",
+          "route": "/ja-JP/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "expected": "Local search finds current-locale GETDEL source explanation",
+          "captured_at": "2026-10-12T12:49:31.630Z",
+          "sha256": "c6685dedfeaeb8398f682105753ef9d1a279196bcb62f56b62dcddfc4803039f",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-quick-start-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "role": "public documentation reader",
+          "route": "/ja-JP/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5287,
+          "expected": "Current localized container quick-start with readable images",
+          "captured_at": "2026-10-12T12:49:32.183Z",
+          "sha256": "2e2974bbcd1266f5cfa44b30a0ea7b192a6a774412538c794ad95007ae0dca3e",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-mobile-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "role": "public documentation reader",
+          "route": "/ja-JP/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "expected": "Quick-start remains readable at 390×844",
+          "captured_at": "2026-10-12T12:49:32.267Z",
+          "sha256": "bb9f433aaa19efed88842fe3b653510632f06a54b0023542cf6cea097b0c2cea",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-index-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "role": "public documentation reader",
+          "route": "/ko-KR/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 2994,
+          "expected": "Localized learning paths and navigation",
+          "captured_at": "2026-10-12T12:49:32.647Z",
+          "sha256": "ed89b7fde73d4ab4fda769c6781d822981e69ff123406c3c32931f0c5106fdeb",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-search-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "role": "public documentation reader",
+          "route": "/ko-KR/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "expected": "Local search finds current-locale GETDEL source explanation",
+          "captured_at": "2026-10-12T12:49:33.194Z",
+          "sha256": "32410c0aefaf1a4682cfeb23a7851d9928ec56f3ea70da693cfc62eb95079031",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-quick-start-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "role": "public documentation reader",
+          "route": "/ko-KR/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5225,
+          "expected": "Current localized container quick-start with readable images",
+          "captured_at": "2026-10-12T12:49:33.767Z",
+          "sha256": "eddfc0eea47ee13ed9e318eb6ac243249b67f4b6d6891b7936c29426831e77e4",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-mobile-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "role": "public documentation reader",
+          "route": "/ko-KR/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "expected": "Quick-start remains readable at 390×844",
+          "captured_at": "2026-10-12T12:49:33.866Z",
+          "sha256": "4e86e7738cefaee2f4ac757b1962702dfc1d6ba86dea3d1e2f68f94a4f4efb90",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        }
+      ]
+    },
+    {
+      "deployment": "subpath",
+      "base": "/omni-stack/",
+      "runtime": "local Docker",
+      "image_id": "sha256:1a1950d1c38bf2ab8fa3472fa83b75d6216d32c6a77683319a4e2ffa6ce6f125",
+      "started_at": "2026-10-12T12:48:58.529Z",
+      "finished_at": "2026-10-12T12:51:05.733Z",
+      "status": "pass",
+      "checks": [
+        {
+          "name": "all reachable pages, local links, anchors, images and desktop layout",
+          "status": "pass",
+          "pages": 192,
+          "images": 933,
+          "anchors": 8304
+        },
+        {
+          "name": "zh-CN navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "en-US navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "ja-JP navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "ko-KR navigation, search, title, images and mobile",
+          "status": "pass"
+        }
+      ],
+      "screenshots": [
+        {
+          "artifact": "wiki-index-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "role": "public documentation reader",
+          "route": "/omni-stack/zh-CN/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 2710,
+          "expected": "Localized learning paths and navigation",
+          "captured_at": "2026-10-12T12:51:00.435Z",
+          "sha256": "167a319a8cc0ed99fd1510068aab6548ad0d75eb1f134a675ad5e28d8c007bde",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-search-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "role": "public documentation reader",
+          "route": "/omni-stack/zh-CN/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "expected": "Local search finds current-locale GETDEL source explanation",
+          "captured_at": "2026-10-12T12:51:00.972Z",
+          "sha256": "df4d7a1d6c74b7b298ecb3887943e9905a7ee1274d13ebe5c692e15db917e416",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-quick-start-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "role": "public documentation reader",
+          "route": "/omni-stack/zh-CN/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 4973,
+          "expected": "Current localized container quick-start with readable images",
+          "captured_at": "2026-10-12T12:51:01.546Z",
+          "sha256": "7e977eca38490ade11625ce854b62419f59b8b0b797da20015e37dafa5df4331",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Exact-byte SHA equality with directly inspected root original"
+        },
+        {
+          "artifact": "wiki-mobile-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "role": "public documentation reader",
+          "route": "/omni-stack/zh-CN/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "expected": "Quick-start remains readable at 390×844",
+          "captured_at": "2026-10-12T12:51:01.650Z",
+          "sha256": "86f8779c3e3f32deb37a732f83e244db9ae4889650e516a45e6071e0c665c031",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-index-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "role": "public documentation reader",
+          "route": "/omni-stack/en-US/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 3310,
+          "expected": "Localized learning paths and navigation",
+          "captured_at": "2026-10-12T12:51:01.952Z",
+          "sha256": "309b636db17ae999581ac847e4a355fe698c6fdfe8fd25582fc4700b0abdc573",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-search-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "role": "public documentation reader",
+          "route": "/omni-stack/en-US/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "expected": "Local search finds current-locale GETDEL source explanation",
+          "captured_at": "2026-10-12T12:51:02.410Z",
+          "sha256": "dc2174d05076793b0834346a5aebf9586282e8f328c9fdcb7c547d0aff88fb7d",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-quick-start-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "role": "public documentation reader",
+          "route": "/omni-stack/en-US/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5563,
+          "expected": "Current localized container quick-start with readable images",
+          "captured_at": "2026-10-12T12:51:02.860Z",
+          "sha256": "eaea609c27b6ca74bfa6c2256dbcb44b1c8b7a31d3be68baff60bc7cfd35a814",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Exact-byte SHA equality with directly inspected root original"
+        },
+        {
+          "artifact": "wiki-mobile-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "role": "public documentation reader",
+          "route": "/omni-stack/en-US/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "expected": "Quick-start remains readable at 390×844",
+          "captured_at": "2026-10-12T12:51:02.932Z",
+          "sha256": "cf449ed7f209d1e4407ee4dfa91c3c084a3c7afea7b6975deeed259eaa731e4c",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-index-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "role": "public documentation reader",
+          "route": "/omni-stack/ja-JP/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 3142,
+          "expected": "Localized learning paths and navigation",
+          "captured_at": "2026-10-12T12:51:03.274Z",
+          "sha256": "0cc9d787c69068153a2038e9c203855862e827ae23bc889150069250b3403676",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-search-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "role": "public documentation reader",
+          "route": "/omni-stack/ja-JP/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "expected": "Local search finds current-locale GETDEL source explanation",
+          "captured_at": "2026-10-12T12:51:03.776Z",
+          "sha256": "c6685dedfeaeb8398f682105753ef9d1a279196bcb62f56b62dcddfc4803039f",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-quick-start-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "role": "public documentation reader",
+          "route": "/omni-stack/ja-JP/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5287,
+          "expected": "Current localized container quick-start with readable images",
+          "captured_at": "2026-10-12T12:51:04.253Z",
+          "sha256": "2e2974bbcd1266f5cfa44b30a0ea7b192a6a774412538c794ad95007ae0dca3e",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Exact-byte SHA equality with directly inspected root original"
+        },
+        {
+          "artifact": "wiki-mobile-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "role": "public documentation reader",
+          "route": "/omni-stack/ja-JP/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "expected": "Quick-start remains readable at 390×844",
+          "captured_at": "2026-10-12T12:51:04.338Z",
+          "sha256": "bb9f433aaa19efed88842fe3b653510632f06a54b0023542cf6cea097b0c2cea",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-index-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "role": "public documentation reader",
+          "route": "/omni-stack/ko-KR/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 2994,
+          "expected": "Localized learning paths and navigation",
+          "captured_at": "2026-10-12T12:51:04.630Z",
+          "sha256": "ed89b7fde73d4ab4fda769c6781d822981e69ff123406c3c32931f0c5106fdeb",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-search-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "role": "public documentation reader",
+          "route": "/omni-stack/ko-KR/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "expected": "Local search finds current-locale GETDEL source explanation",
+          "captured_at": "2026-10-12T12:51:05.133Z",
+          "sha256": "32410c0aefaf1a4682cfeb23a7851d9928ec56f3ea70da693cfc62eb95079031",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        },
+        {
+          "artifact": "wiki-quick-start-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "role": "public documentation reader",
+          "route": "/omni-stack/ko-KR/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5225,
+          "expected": "Current localized container quick-start with readable images",
+          "captured_at": "2026-10-12T12:51:05.631Z",
+          "sha256": "eddfc0eea47ee13ed9e318eb6ac243249b67f4b6d6891b7936c29426831e77e4",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Exact-byte SHA equality with directly inspected root original"
+        },
+        {
+          "artifact": "wiki-mobile-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "role": "public documentation reader",
+          "route": "/omni-stack/ko-KR/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "expected": "Quick-start remains readable at 390×844",
+          "captured_at": "2026-10-12T12:51:05.718Z",
+          "sha256": "4e86e7738cefaee2f4ac757b1962702dfc1d6ba86dea3d1e2f68f94a4f4efb90",
+          "test": "docs/scripts/browser-check.mjs",
+          "visual_review": "passed-with-documented-limits",
+          "review_method": "Direct original PNG inspection by agent"
+        }
+      ]
+    }
+  ],
+  "mobile_interaction": {
+    "tested_at": "2026-10-12T13:16:31.728Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "cases": 8,
+    "native_clicks": 16,
+    "checks": [
+      {
+        "base": "/",
+        "locale": "zh-CN",
+        "status": "PASS",
+        "menu_click": true,
+        "navigation_click": true,
+        "sidebar_auto_closed": true
+      },
+      {
+        "base": "/",
+        "locale": "en-US",
+        "status": "PASS",
+        "menu_click": true,
+        "navigation_click": true,
+        "sidebar_auto_closed": true
+      },
+      {
+        "base": "/",
+        "locale": "ja-JP",
+        "status": "PASS",
+        "menu_click": true,
+        "navigation_click": true,
+        "sidebar_auto_closed": true
+      },
+      {
+        "base": "/",
+        "locale": "ko-KR",
+        "status": "PASS",
+        "menu_click": true,
+        "navigation_click": true,
+        "sidebar_auto_closed": true
+      },
+      {
+        "base": "/omni-stack/",
+        "locale": "zh-CN",
+        "status": "PASS",
+        "menu_click": true,
+        "navigation_click": true,
+        "sidebar_auto_closed": true
+      },
+      {
+        "base": "/omni-stack/",
+        "locale": "en-US",
+        "status": "PASS",
+        "menu_click": true,
+        "navigation_click": true,
+        "sidebar_auto_closed": true
+      },
+      {
+        "base": "/omni-stack/",
+        "locale": "ja-JP",
+        "status": "PASS",
+        "menu_click": true,
+        "navigation_click": true,
+        "sidebar_auto_closed": true
+      },
+      {
+        "base": "/omni-stack/",
+        "locale": "ko-KR",
+        "status": "PASS",
+        "menu_click": true,
+        "navigation_click": true,
+        "sidebar_auto_closed": true
+      }
+    ],
+    "test_storage": "private audit script and original output retained",
+    "test_sha256": "b6bd776c92387f43e6b3b2bf96068199eb6ecf7761a434c1cb0d4f0aad2e605e"
+  },
+  "visual_review": {
+    "status": "passed-with-documented-limits",
+    "originals": 32,
+    "directly_inspected": 28,
+    "exact_byte_reuse": 4,
+    "reviewer": "Agent original-image inspection; not a human translation signature",
+    "human_translation_review": "pending",
+    "limits": [
+      "Long code blocks have intentional internal horizontal scroll; no page-wide horizontal overflow.",
+      "These formal images were built before the later procurement read-only chapter and supplementary receipts; this is an as-captured snapshot, not proof that later edits were already present.",
+      "No public hosting or GitHub/Gitee publishing was performed. Original QA images remain private rather than duplicating another site screenshot gallery in the repository."
+    ]
+  }
+}

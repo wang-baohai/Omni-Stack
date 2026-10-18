@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-feature-tour",
+  "source": "docs/wiki/feature-tour.md",
+  "source_sha256": "58b46cb78fd075c67b997375210da84559f9141493280f75cb95385177cc1888",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/feature-tour.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "8f8ec149efcf53959cdffe648b3b22df7b6ffb23b2d983eedcf9d4b96f37088f",
+      "checks": {
+        "coverage_and_meaning": "新导览与中文逐节对应，包含认证、系统、调度、审批、CRM、SRM、采购与资产八条路径及复现边界。",
+        "technical_literals": "全部guide路径、模块标记和截图文件名按语言正确映射；预设、租户、功能权限、数据范围含义一致。 调度区块已重新核对归属xxl-job，不随只有workflow而缺XXL-JOB的预设保留。",
+        "security_and_failure_semantics": "登录图片仅展示入口，不证明密码或三家OAuth成功；明确示例数据不能复用，页面/API/译审不能相互替代。",
+        "language_and_terminology": "English descriptions accurately retain each domain prerequisite; removed the old mismatched SRM feature list and ambiguous layer count.",
+        "images_and_links": "八张英文原图均对应正式manifest登记且SHA一致，不再共用旧中文图库；教程、历史参考和源码入口均为英文。"
+      },
+      "findings": [
+        {
+          "id": "shared-chinese-gallery",
+          "status": "resolved",
+          "description": "旧英文导览共用中文截图，且SRM能力列表与中文不一致。",
+          "resolution": "改为八项精简导览，使用逐语言已登记原图，完整保留复现和证据范围。"
+        },
+        {
+          "id": "scheduling-module-owner",
+          "status": "resolved",
+          "description": "调度区块错误标为workflow，会让不含XXL-JOB的workflow预设保留运行教程。",
+          "resolution": "改为xxl-job，原审校真实失效并按当前四语正文重新复核。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/feature-tour.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "f950ed4cb57bd2e965aa90b1c1bc092ee7a29ba5f8be414e35f0f1cae8ddae6a",
+      "checks": {
+        "coverage_and_meaning": "八模块介绍、首次阅读顺序与图片复现边界均与中文新版本一致，保留每个模块的教程入口。",
+        "technical_literals": "模块裁剪标记、预设和权限概念不变，八个 .jp.md 教程和 ja-JP 图片路径已核对。 调度区块已重新核对归属xxl-job，不随只有workflow而缺XXL-JOB的预设保留。",
+        "security_and_failure_semantics": "保留人输入CAPTCHA、图像不证明同数据或社交登录、字段限制有来源，不混淆API验证和翻译审校。",
+        "language_and_terminology": "使用登録審査、仕入先、見積依頼、選定、移管、処分等自然日文，避免旧准入/入居/百分制等误译。",
+        "images_and_links": "八张对应日文原图均已登记且摘要一致；旧历史布局仍可从历史界面参考及Git历史查看，未伪造图片。"
+      },
+      "findings": [
+        {
+          "id": "shared-chinese-gallery",
+          "status": "resolved",
+          "description": "原日文导览展示中文截图并含多处中文式领域用语。",
+          "resolution": "同步精简导览，使用已登记日文原图并校正领域术语及复现边界。"
+        },
+        {
+          "id": "scheduling-module-owner",
+          "status": "resolved",
+          "description": "调度区块错误标为workflow，会让不含XXL-JOB的workflow预设保留运行教程。",
+          "resolution": "改为xxl-job，原审校真实失效并按当前四语正文重新复核。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/feature-tour.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "e931fc5e75e1e092325bd78797424f64419febcb98277ac1f03b75916fdc60a5",
+      "checks": {
+        "coverage_and_meaning": "八项功能路径和图片边界完整对应中文，区分系统任务/个人任务、采购/资产及审批前提。",
+        "technical_literals": "全部模块标记和 .kr.md 教程对应准确，八个 ko-KR 图片引用文件与正式登记摘要相符。 调度区块已重新核对归属xxl-job，不随只有workflow而缺XXL-JOB的预设保留。",
+        "security_and_failure_semantics": "真实验证码须人输入，入口截图不代表OAuth登录成功；本人和管理范围不同，移交处置必须审批。",
+        "language_and_terminology": "테넌트、입점 승인、동결、견적 요청、위임、반납等韩文用语与源含义一致，旧认证同意误称不再沿用。",
+        "images_and_links": "不共用中文图，八张实际韩文界面图全部hash一致；数据/诊断保留原值的限制与证据入口明确说明。"
+      },
+      "findings": [
+        {
+          "id": "shared-chinese-gallery",
+          "status": "resolved",
+          "description": "原韩文导览使用中文截图，并把授权同意称为认证同意。",
+          "resolution": "使用八张已登记韩文原图与准确领域说明，不假称社交授权成功。"
+        },
+        {
+          "id": "scheduling-module-owner",
+          "status": "resolved",
+          "description": "调度区块错误标为workflow，会让不含XXL-JOB的workflow预设保留运行教程。",
+          "resolution": "改为xxl-job，原审校真实失效并按当前四语正文重新复核。"
+        }
+      ]
+    }
+  }
+}

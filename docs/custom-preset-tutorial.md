@@ -18,21 +18,24 @@ modules: [srm, gateway, mysql, redis, nacos]
 
 ## 2. 校验和解释
 
-~~~powershell
-Set-Location tools/omni-cli
-npm run build
-node dist/src/cli.js preset validate C:\WorkSpace\supplier-workspace.yaml
-node dist/src/cli.js preset explain C:\WorkSpace\supplier-workspace.yaml
+将上述 YAML 保存为源仓库的 scaffold/presets/supplier-workspace.yaml。以下命令从源仓库根目录执行，在本机 Docker 工具容器中构建和运行 CLI。
+
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml build cli
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm ci
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run build
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset validate scaffold/presets/supplier-workspace.yaml
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset explain scaffold/presets/supplier-workspace.yaml
 ~~~
 
 未知模块、Schema 错误或冲突会在写入任何文件前失败。
 
 ## 3. 预览并生成
 
-~~~powershell
-node dist/src/cli.js preset create C:\WorkSpace\supplier-workspace.yaml --output C:\WorkSpace\supplier-app --dry-run
-node dist/src/cli.js preset create C:\WorkSpace\supplier-workspace.yaml --output C:\WorkSpace\supplier-app
-node dist/src/cli.js preset validate C:\WorkSpace\supplier-workspace.yaml --output C:\WorkSpace\supplier-app
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create scaffold/presets/supplier-workspace.yaml --output generated/supplier-app --dry-run
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create scaffold/presets/supplier-workspace.yaml --output generated/supplier-app
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset validate scaffold/presets/supplier-workspace.yaml --output generated/supplier-app
 ~~~
 
 生成工程会保存规范化的 `scaffold/presets/supplier-workspace.yaml` 和 `scaffold.lock`。共享 Workflow 服务中的采购、资产默认流程会按组合裁掉，只保留供应商准入流程。
@@ -41,24 +44,20 @@ node dist/src/cli.js preset validate C:\WorkSpace\supplier-workspace.yaml --outp
 
 `docker compose config`/启动会读取工程根目录的 `.env`；缺它会以 "required variable is missing" 失败（exit 1）。先从生成工程自带的 `.env.example` 复制并填入**自造的随机秘密**（≥ 32 字节，`JWK_ENCRYPT_KEY` 必须 32 字符；禁止复用仓库占位默认值或真实共享密钥），并行隔离时另设独立 project/端口/卷/镜像命名空间：
 
+NACOS_AUTH_TOKEN 必须是至少 32 字节随机值的 Base64 编码；NACOS_USERNAME 使用 nacos，NACOS_PASSWORD 需与服务端和所有客户端保持一致。
+
 ~~~powershell
-Set-Location C:\WorkSpace\supplier-app
-Copy-Item .env.example .env   # 填必填: OMNI_INTERNAL_API_TOKEN / GATEWAY_ASSERTION_SECRET / MYSQL_ROOT_PASSWORD / OMNI_DB_PASSWORD / REDIS_PASSWORD / XXL_JOB_ACCESS_TOKEN|USERNAME|PASSWORD / NACOS_AUTH_TOKEN|IDENTITY_KEY|IDENTITY_VALUE / OAUTH2_STATE_SECRET / JWK_ENCRYPT_KEY; 隔离设 COMPOSE_PROJECT_NAME(或 -p)、OMNI_MYSQL_VOLUME_NAME、OMNI_*_HOST_PORT、OMNI_IMAGE_NAMESPACE
+Set-Location generated/supplier-app
+Copy-Item .env.example .env   # 填必填: OMNI_INTERNAL_API_TOKEN / GATEWAY_ASSERTION_SECRET / MYSQL_ROOT_PASSWORD / OMNI_DB_PASSWORD / REDIS_PASSWORD / XXL_JOB_ACCESS_TOKEN / XXL_JOB_ADMIN_USERNAME / XXL_JOB_ADMIN_PASSWORD / NACOS_PASSWORD / NACOS_AUTH_TOKEN / NACOS_AUTH_IDENTITY_KEY / NACOS_AUTH_IDENTITY_VALUE / OAUTH2_STATE_SECRET / JWK_ENCRYPT_KEY; 隔离设 COMPOSE_PROJECT_NAME(或 -p)、OMNI_MYSQL_VOLUME_NAME、OMNI_*_HOST_PORT、OMNI_IMAGE_NAMESPACE
 ~~~
 
 随后构建后端、前端并校验 Compose 配置：
 
-~~~powershell
-Set-Location C:\WorkSpace\supplier-app\omni-backend
-$env:JAVA_HOME='C:\APP\JDK25\jdk-25.0.2'
-.\mvnw.cmd clean install
-
-Set-Location ..\omni-frontend
-npm ci
-npm run lint
-npm run build
-
-Set-Location ..
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm backend ./mvnw clean install
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm frontend npm ci
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm frontend npm run lint
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm frontend npm run build
 docker compose config --quiet
 ~~~
 
@@ -68,7 +67,7 @@ docker compose config --quiet
 
 - 把 `omni-*` artifact 名写进 `modules`：这里必须使用 catalog 的模块 ID。
 - 显式复制全部传递依赖：不需要，且会增加维护噪声。
-- 输出到当前仓库或非空目录：生成器会拒绝。
+- 输出覆盖源仓库根目录本身或非空目录：生成器会拒绝。
 - 手工删除生成后的模块：会使 `scaffold.lock`、种子摘要和路由失真，应修改 YAML 后重新生成。
 - 将可选基础设施理解为自动关闭：生成后仍需检查对应运行时开关。
 - 含 RocketMQ 却未含 `srm`：`auth` 的门户角色消费者订阅 `srm-domain-event`，生成器会因悬空 consumer 拦截写入；启用 MQ 的组合必须一并纳入 `srm`。不含 RocketMQ 时该约束不适用（如只含 `auth`、`workflow`、`crm` 的裁剪组合可正常生成）。

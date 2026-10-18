@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-authentication",
+  "source": "docs/guides/authentication.md",
+  "source_sha256": "127d2a8396618e2dbb787d9a72e838cf26991b719bb8a9c81a93d6e4d04cf09f",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "6929bf4c29a6fcecfd7e95b43682117b4a48dc9f",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/authentication.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:54:18",
+      "result": "approved",
+      "translation_sha256": "3529175d0469aae8bdc9b6a79db6482db2dbed89141ef68db466cf483bb4630a",
+      "checks": {
+        "coverage_and_meaning": "完整核对八节、五张截图的前置/操作者/动作/预期，外部OAuth四步与本地PKCE分离，新增变量及工具验收边界完整。",
+        "technical_literals": "API方法/路径、gh_/go_/ge_、SUPPLIER、三家Client变量、固定回调环境优先级、10min HMAC与PKCE两个字段逐项准确。",
+        "security_and_failure_semantics": "不缓存CAPTCHA、不泄露token、默认USER失败不阻塞创建、租户可信头、Portal关联、重定向限制和无无限请求均保留；不能把失败码当成功登录。",
+        "language_and_terminology": "authorization、authentication、enrollment和partial acceptance分别准确；配置覆盖的说明没有误称.env可覆盖Compose固定环境值。",
+        "images_and_links": "五张en-US原图均按正式登记和既有目检范围引用，401是明确测试故障，新的OAuth证据不含秘密或个人账号，所有用户指南为英文。"
+      },
+      "findings": [
+        {
+          "id": "local-provider-configuration",
+          "status": "resolved",
+          "description": "外部应用凭据键名及Compose固定回调的覆盖优先级缺少具体说明。",
+          "resolution": "同步三家变量表、私有覆盖方式、前端地址以及真实工具验收范围，未放入凭据值。"
+        },
+        {
+          "id": "state-consumption-boundary",
+          "status": "resolved",
+          "description": "既有说明未界定HMAC state是否一次性消费。",
+          "resolution": "按OAuth2StateUtils与重复回调工具结果说明只有HMAC/十分钟校验，本次不证明一次性消费。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/authentication.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:54:18",
+      "result": "approved",
+      "translation_sha256": "d4de413530037d4f8ee92d704cf2daff48e6d75fe2f21da35374ffd5ed9120b8",
+      "checks": {
+        "coverage_and_meaning": "八节及五组图注完整对照；将压缩的社交流程展开为四步，补回登录后返回目的地、租户认证上下文和Portal资料/评价/报价前提。",
+        "technical_literals": "所有API/PKCE字段、provider前缀、变量和回调优先级保持字面量，源代码HMAC只校验10分钟与无一次性nonce的限制准确。",
+        "security_and_failure_semantics": "CAPTCHA必须人输入、最小租户信息、不可枚举账号、USER分配失败不阻塞、内部跳转白名单和不无限重试都保留；负例不冒充登录完成。",
+        "language_and_terminology": "Portal入居/半成品改为Portal登録/不完全なユーザー状態，设备流程统一認可，客户端secret与用户密码明确区分。",
+        "images_and_links": "五张ja-JP真实原图及实际英文回退限制完整；所有指南为 .jp.md，OAuth脱敏证据链接正确且未发布外部账号表单截图。"
+      },
+      "findings": [
+        {
+          "id": "local-provider-configuration",
+          "status": "resolved",
+          "description": "外部应用凭据键名及Compose固定回调的覆盖优先级缺少具体说明。",
+          "resolution": "同步三家变量表、私有覆盖方式、前端地址以及真实工具验收范围，未放入凭据值。"
+        },
+        {
+          "id": "state-consumption-boundary",
+          "status": "resolved",
+          "description": "既有说明未界定HMAC state是否一次性消费。",
+          "resolution": "按OAuth2StateUtils与重复回调工具结果说明只有HMAC/十分钟校验，本次不证明一次性消费。"
+        },
+        {
+          "id": "omitted-steps-and-terms",
+          "status": "resolved",
+          "description": "压缩的社交流程漏返回目标，缺认证上下文与Portal功能前提，并含不准确设备授权术语。",
+          "resolution": "展开四步流程，补齐所有源文安全步骤和对应语言术语。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/authentication.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:54:18",
+      "result": "approved",
+      "translation_sha256": "cd4dd39bfa5a6deb69b666e06d9a536a956204ce89fb092054580a6d7dcf1ac1",
+      "checks": {
+        "coverage_and_meaning": "八节和五张图的角色/步骤/预期逐项对应，展开四步外部社交链路并补齐返回目标、租户认证上下文和Portal功能前提。",
+        "technical_literals": "API、provider前缀、PKCE、Client变量、Compose固定回调与HMAC十分钟均与中文相同，明确nonce不消费的实际代码行为。",
+        "security_and_failure_semantics": "CAPTCHA/秘密禁止留存、租户可信来源、Portal角色关联、用户角色赋予失败处理、重定向限制和无限重试边界完整。",
+        "language_and_terminology": "将반제품트랜잭션改为不完整用户状态，디바이스인증改为디바이스인가；应用secret不能作为平台用户密码，失败路径不等于成功授权。",
+        "images_and_links": "使用ko-KR五张原图，保留实际英文回退/数据值限制；教程路径为 .kr.md，OAuth JSON为脱敏实际工具结论且标记未完成账号登录。"
+      },
+      "findings": [
+        {
+          "id": "local-provider-configuration",
+          "status": "resolved",
+          "description": "外部应用凭据键名及Compose固定回调的覆盖优先级缺少具体说明。",
+          "resolution": "同步三家变量表、私有覆盖方式、前端地址以及真实工具验收范围，未放入凭据值。"
+        },
+        {
+          "id": "state-consumption-boundary",
+          "status": "resolved",
+          "description": "既有说明未界定HMAC state是否一次性消费。",
+          "resolution": "按OAuth2StateUtils与重复回调工具结果说明只有HMAC/十分钟校验，本次不证明一次性消费。"
+        },
+        {
+          "id": "omitted-steps-and-terms",
+          "status": "resolved",
+          "description": "压缩的社交流程漏返回目标，缺认证上下文与Portal功能前提，并含不准确设备授权术语。",
+          "resolution": "展开四步流程，补齐所有源文安全步骤和对应语言术语。"
+        }
+      ]
+    }
+  }
+}

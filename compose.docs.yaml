@@ -1,0 +1,29 @@
+name: omni-stack-docs
+services:
+  wiki:
+    image: omni-stack-wiki:local
+    build:
+      context: .
+      dockerfile: docker/docs/Dockerfile
+      args:
+        DOCS_REPOSITORY_URL: ${DOCS_REPOSITORY_URL:-https://github.com/wang-baohai/Omni-Stack}
+        DOCS_BASE: ${DOCS_BASE:-/}
+        DOCS_SOURCE_REF: ${DOCS_SOURCE_REF:-main}
+    ports:
+      - "127.0.0.1:4173:4173"
+    restart: unless-stopped
+  browser:
+    image: mcr.microsoft.com/playwright:v1.61.1-noble
+    profiles: [verify]
+    init: true
+    shm_size: 1gb
+    working_dir: /workspace/omni-frontend
+    volumes:
+      - .:/workspace
+      - browser-modules:/workspace/omni-frontend/node_modules
+    environment:
+      WIKI_URL: ${WIKI_URL:-http://wiki:4173/}
+      WIKI_EVIDENCE_DIR: /evidence
+    command: ["sh", "-c", "npm ci && node /workspace/docs/scripts/browser-check.mjs"]
+volumes:
+  browser-modules:

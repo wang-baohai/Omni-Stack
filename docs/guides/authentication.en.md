@@ -1,5 +1,7 @@
 # Login, CAPTCHA, Social Login, and Tenant Selection
 
+See the [2026-10-12 basic receipt](../reference/evidence/basic-2026-10-12.json): 44 unique checks and 44 individually reviewed originals, with exact source and image identities for each capture epoch. Readable pages do not prove every business operation in this chapter. Some Japanese/Korean Status, Phone, Email and Retry labels still fall back to English; data names retain the teaching dataset.
+
 Audience: end users, tenant administrators, and identity maintainers.
 
 ## 1. Entry Points and Tenant Selection
@@ -44,6 +46,40 @@ GitHub, Google, and Gitee social login is a **different path** from the local OA
 
 Callback addresses, client secrets, and allowed origins come from environment configuration. Production must not reuse repository development clients.
 
+### Local app configuration and tool verification
+
+Fill the following variables in Git-ignored `.env` or a private environment file outside the repository. Use your own application credentials; never write real values into the Wiki.
+
+| Provider | Client ID | Client Secret |
+|---|---|---|
+| GitHub | `GITHUB_CLIENT_ID` | `GITHUB_CLIENT_SECRET` |
+| Google | `GOOGLE_CLIENT_ID` | `GOOGLE_CLIENT_SECRET` |
+| Gitee | `GITEE_CLIENT_ID` | `GITEE_CLIENT_SECRET` |
+
+Compose currently sets the three `AUTH_OAUTH2_*_REDIRECT_URI` values directly to Gateway callbacks on localhost:8102. Adding identically named keys to `.env` alone does not override these fixed environment values. To change the domain or use 127.0.0.1, override `omni-auth.environment` in a private Compose file and register exactly matching provider URIs. `AUTH_OAUTH2_FRONTEND_CALLBACK_URL` must match the browser's frontend address, for example `http://localhost:3000/callback`. An application's Client Secret is not the platform account's login password.
+
+The current `OAuth2StateUtils` validates HMAC and a 10-minute time window. It does not store or atomically consume a one-time nonce. Repeating a valid state in this run still reached provider code exchange, so these negative tests do not establish single-use state consumption.
+
+The [2026-10-13 local tool receipt](../reference/evidence/oauth-local-2026-10-13.json) records real provider pages, configuration binding and rejected callback branches. HTTP 200 on a login page and rejection of invalid codes do not prove user authorization, successful token exchange or completed local social login.
+
+### External OAuth screenshots pending
+
+The account holder must complete secondary sign-in verification for GitHub, Google and Gitee. For this delivery, the project owner has deferred capture and reserved the three regions below. Successful callbacks, code exchange and local login after real user authorization remain unverified for all three providers. These placeholders do not indicate a passed verification.
+
+#### GitHub
+
+> **Screenshot pending**: GitHub secondary sign-in verification, authorization confirmation, and the login result after returning to this system.
+
+#### Google
+
+> **Screenshot pending**: Google secondary sign-in verification, authorization confirmation, and the login result after returning to this system.
+
+#### Gitee
+
+> **Screenshot pending**: Gitee secondary sign-in verification, authorization confirmation, and the login result after returning to this system.
+
+After completing actual verification and authorization in a local Docker browser, replace each region with a redacted original and register its language, role, tenant, source version and actual verification scope in the screenshot manifest. Exclude passwords, verification codes, tokens, Cookies and personal account information. This deferral covers only screenshots of these three external flows. Password/CAPTCHA, local PKCE, device authorization and SRM registration retain their respective acceptance scopes.
+
 ## 5. Device Authorization
 
 `/device` obtains a device code and presents a user code and QR code. The user signs in and confirms at `/device/verify`; the device only polls the token endpoint and never handles the password. An expired, rejected, or consumed code requires a new request.
@@ -75,7 +111,7 @@ Device authorization is for input-constrained devices, not a general CAPTCHA byp
 - Prerequisites: a headless device starts the OAuth2 device flow
 - Actor: device user
 - Action: open `/device` for the user code, then enter it at `/device/verify`
-- Expected result: the device user code is shown with a fixed 10:00 countdown
+- Expected result: after the real device authorization request succeeds, the user code, QR code, live countdown based on the server expiry, and confirmation entry appear; public images mask active codes and links
 
 ![Device authorization](../images/en-US/auth-device-code.png)
 
@@ -111,3 +147,10 @@ When a token expires or permissions change, the client clears local authenticati
 
 See the [API Contract](../api-contract.en.md) and [Core Flows](../core-flows.en.md).
 
+## 8. Docker Callbacks and Actual Acceptance Scope
+
+1. The provider's allowed callback must exactly match `AUTH_OAUTH2_GITHUB_REDIRECT_URI`, `AUTH_OAUTH2_GOOGLE_REDIRECT_URI` or `AUTH_OAUTH2_GITEE_REDIRECT_URI` in `compose.apps.yaml`. Local defaults use Gateway `http://localhost:8102/api/auth/oauth2/{provider}/callback`; production uses a browser-reachable HTTPS domain. Internal `omni-auth:8080` is not an external callback.
+2. Vue Router consumes the result at `/callback`; failure returns to login. Nginx falls back to `index.html` for SPA routes and forwards `/api/*` and `/oauth2/*` to Gateway, which discovers Auth. Keep token fragments, Cookies, client secrets and active CAPTCHA values out of public logs and screenshots.
+3. For missing CAPTCHA, check Auth-to-Redis connectivity. Refresh a failed or expired challenge and ask a person to enter the new code; never replay it. Check the tenant for password failures. For actual 401, inspect Gateway access to `/oauth2/jwks`, signature, expiry and session. Account throttling and session expiry are separate cases.
+4. For `state` failure, check server signing configuration and callback parameters. Provider timeouts require container outbound-network and proxy checks. Username collisions use the `gh_`/`go_`/`ge_` fallback. External provider and local PKCE code exchange use different configuration.
+5. The [real login receipt](../reference/evidence/human-login-2026-10-09.json) proves one human CAPTCHA/password login. Registration, device initialization, Portal entry and session-error images have separate scopes. Test identities, client-injected 401, unconfigured providers and page visits do not prove successful registration, completed device authorization or a complete external social login.

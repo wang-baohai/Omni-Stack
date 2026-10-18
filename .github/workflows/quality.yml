@@ -60,6 +60,8 @@ jobs:
       - name: E2E TypeScript type check
         working-directory: omni-frontend
         run: npm run typecheck:e2e
+      - name: Prevent simulated responses in formal evidence
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T frontend sh -c "npm ci && npm run docs:screenshots:test"
       - name: Install Chromium
         working-directory: omni-frontend
         run: npx playwright install --with-deps chromium
@@ -71,46 +73,67 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-          cache-dependency-path: tools/omni-cli/package-lock.json
+      - name: Build container documentation tooling
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml build cli
       - name: Install documentation tooling
-        working-directory: tools/omni-cli
-        run: npm ci
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli npm ci
       - name: Verify generated preset documentation
-        working-directory: tools/omni-cli
-        run: npm run docs:preset:check
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli npm run docs:preset:check
       - name: Verify documentation links
-        working-directory: tools/omni-cli
-        run: npm run docs:links:check
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli npm run docs:links:check
       - name: Verify current README facts
-        working-directory: tools/omni-cli
-        run: npm run docs:readme:check
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli npm run docs:readme:check
       # 严格质量门：翻译状态未 synchronized 或截图覆盖未达标时直接失败，
       # 阻塞状态必须保持可见，禁止用 --allow-draft 伪造绿色。
       - name: Verify translation files and human review status (strict)
-        working-directory: tools/omni-cli
-        run: node scripts/docs-quality.mjs --scope=i18n
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli node scripts/docs-quality.mjs --scope=i18n
       - name: Verify screenshot manifest and coverage (strict)
-        working-directory: tools/omni-cli
-        run: node scripts/docs-quality.mjs --scope=screenshots
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli node scripts/docs-quality.mjs --scope=screenshots
       - name: Verify i18n review queue consistency
-        working-directory: tools/omni-cli
-        run: node scripts/docs-review-queue.mjs
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli node scripts/docs-review-queue.mjs
       - name: Verify admin screenshot manifest sync
-        working-directory: tools/omni-cli
-        run: node scripts/screenshot-manifest-sync.mjs
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli node scripts/screenshot-manifest-sync.mjs
       - name: Scan documentation for sensitive content
-        working-directory: tools/omni-cli
-        run: node scripts/docs-quality.mjs --scope=sensitive
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli node scripts/docs-quality.mjs --scope=sensitive
       - name: Prevent new hard-coded UI copy
-        working-directory: tools/omni-cli
-        run: npm run ui:i18n:check
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli npm run ui:i18n:check
       - name: Verify locale key/placeholder parity and language residue (strict)
-        working-directory: omni-frontend
-        run: node ../tools/omni-cli/scripts/locale-parity-check.mjs --strict
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli node scripts/locale-parity-check.mjs --strict
+
+  wiki-and-ai:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolated tooling
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml build cli
+      - name: Install CLI dependencies
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli npm ci
+      - name: Check canonical AI adapters and conflict protection
+        run: |
+          docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli node --test /workspace/ai/adapters/bootstrap.test.mjs
+          docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli node /workspace/ai/adapters/bootstrap.mjs --tool=codex --check
+          docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli node /workspace/ai/adapters/bootstrap.mjs --tool=qoder --check
+      - name: Verify moved preset docs and AI without the source checkout
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T cli npm run test:preset-delivery
+      - name: Test and build four-language site
+        run: docker compose -p omni-stack-tools -f compose.tools.yaml run --rm -T documentation
+      - name: Build and start static Wiki
+        run: docker compose -p omni-stack-docs -f compose.docs.yaml up -d --build wiki
+      - name: Check pages, search, anchors, images and mobile layout in Docker
+        run: |
+          mkdir -p "${{ runner.temp }}/wiki-evidence"
+          docker compose -p omni-stack-docs -f compose.docs.yaml run --rm -T \
+            --volume "${{ runner.temp }}/wiki-evidence:/evidence" \
+            -e WIKI_SOURCE_HEAD="${{ github.sha }}" browser
+      - name: Export Wiki browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiki-browser-evidence
+          path: ${{ runner.temp }}/wiki-evidence
+      - name: Stop owned Wiki containers
+        if: always()
+        run: docker compose -p omni-stack-docs -f compose.docs.yaml down
 
   database-migrations:
     runs-on: ubuntu-latest

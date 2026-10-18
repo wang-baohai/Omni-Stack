@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-12T02:41:49.366Z",
+  "status": "MATCHED_BODY_AND_PINNED_MIT_LICENSE",
+  "repository": "https://github.com/mattpocock/skills",
+  "commit": "694fa30311e02c2639942308513555e61ee84a6f",
+  "path": "skills/productivity/grill-me/SKILL.md",
+  "skill_url": "https://github.com/mattpocock/skills/blob/694fa30311e02c2639942308513555e61ee84a6f/skills/productivity/grill-me/SKILL.md",
+  "license_url": "https://github.com/mattpocock/skills/blob/694fa30311e02c2639942308513555e61ee84a6f/LICENSE",
+  "local_sha256": "74147eb6010a65957efef2b9e0f0b3ff935c1def7fc117697151b1d0f3610556",
+  "upstream_sha256": "74147eb6010a65957efef2b9e0f0b3ff935c1def7fc117697151b1d0f3610556",
+  "license_sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+  "comparison": "LF normalized; frontmatter and optional Grill Me H1 excluded; all remaining body equal",
+  "historical_import_origin": "Not independently proven; verified reusable upstream body and MIT license at pinned commit",
+  "commits_examined": 5
+}

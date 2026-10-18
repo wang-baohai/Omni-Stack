@@ -1,0 +1,3615 @@
+{
+  "schema": 1,
+  "kind": "local-docker-personal-and-system-scheduling-evidence",
+  "recorded_at": "2026-10-10T07:28:36.552Z",
+  "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+  "application_source_files": 1339,
+  "application_hash_method": "SHA256 of sorted production path + space + file SHA256 + newline; current aggregate checked against workflow baseline. Captured and current test hashes remain distinct.",
+  "fixture": {
+    "project": "omni-wiki-acceptance-20261009",
+    "tenant_id": 1,
+    "ordinary_user_id": 202,
+    "ordinary_roles": [
+      "USER",
+      "EMPLOYEE",
+      "ASSET_USER",
+      "WIKI_20261009A_WORKFLOW_STARTER"
+    ],
+    "host_ports": [],
+    "administrative_access": "Catalog/system views and exact owned fixture setup/cleanup only; no system task mutations"
+  },
+  "tools": {
+    "runtime": "local Docker",
+    "browser": "mcr.microsoft.com/playwright:v1.61.1-noble",
+    "node": "22.23.3",
+    "jdk": "25.0.4.1"
+  },
+  "runtime_snapshot": [
+    {
+      "service": "omni-workflow-1",
+      "image": "omni-wiki-acceptance-workflow:trusted-initiator-20261010",
+      "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+      "started_at": "2026-10-10T03:42:49.666753618Z",
+      "host_ports": []
+    },
+    {
+      "service": "omni-frontend-1",
+      "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+      "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+      "started_at": "2026-10-10T03:20:46.725424729Z",
+      "host_ports": []
+    },
+    {
+      "service": "omni-asset-1",
+      "image": "omni-wiki-acceptance-asset:latest",
+      "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+      "started_at": "2026-10-10T00:37:23.253757518Z",
+      "host_ports": []
+    },
+    {
+      "service": "omni-procurement-1",
+      "image": "omni-wiki-acceptance-procurement:latest",
+      "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+      "started_at": "2026-10-10T00:37:22.889468898Z",
+      "host_ports": []
+    },
+    {
+      "service": "omni-gateway-1",
+      "image": "omni-wiki-acceptance-gateway:latest",
+      "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+      "started_at": "2026-10-10T00:37:23.773590531Z",
+      "host_ports": []
+    },
+    {
+      "service": "omni-crm-1",
+      "image": "omni-wiki-acceptance-crm:latest",
+      "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+      "started_at": "2026-10-10T00:37:22.109433406Z",
+      "host_ports": []
+    },
+    {
+      "service": "omni-srm-1",
+      "image": "omni-wiki-acceptance-srm:latest",
+      "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+      "started_at": "2026-10-10T00:37:22.523431455Z",
+      "host_ports": []
+    },
+    {
+      "service": "omni-auth-1",
+      "image": "omni-wiki-acceptance-auth:latest",
+      "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+      "started_at": "2026-10-10T00:37:21.377388856Z",
+      "host_ports": []
+    },
+    {
+      "service": "nacos-1",
+      "image": "nacos/nacos-server:v3.1.1",
+      "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+      "started_at": "2026-10-10T00:36:25.640245183Z",
+      "host_ports": []
+    },
+    {
+      "service": "omni-base-1",
+      "image": "omni-wiki-acceptance-base:latest",
+      "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+      "started_at": "2026-10-10T00:37:21.577211588Z",
+      "host_ports": []
+    },
+    {
+      "service": "xxl-job-admin-1",
+      "image": "xuxueli/xxl-job-admin:3.3.1",
+      "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+      "started_at": "2026-10-10T00:36:26.124593509Z",
+      "host_ports": []
+    },
+    {
+      "service": "rocketmq-broker-1",
+      "image": "omni-wiki-acceptance-rocketmq-broker:5.3.2",
+      "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+      "started_at": "2026-10-10T00:36:25.854136488Z",
+      "host_ports": []
+    },
+    {
+      "service": "mysql-1",
+      "image": "mysql:8.4",
+      "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "started_at": "2026-10-10T00:35:51.659576527Z",
+      "host_ports": []
+    },
+    {
+      "service": "redis-1",
+      "image": "redis:7.4",
+      "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+      "started_at": "2026-10-10T00:35:51.861616707Z",
+      "host_ports": []
+    },
+    {
+      "service": "rocketmq-namesrv-1",
+      "image": "apache/rocketmq:5.3.2",
+      "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+      "started_at": "2026-10-10T00:35:52.081542673Z",
+      "host_ports": []
+    }
+  ],
+  "ui_verification": {
+    "tests_passed": 4,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "tests_flaky": 0,
+    "continuation_duration_ms": 21574.357,
+    "run": "scheduling-ui-004",
+    "originals": 49,
+    "prior_execution": "002 completed the Chinese UI lifecycle.003 committed EN/JA/KO ordinary creation, edit, manual execution and resumed Cron, then an explicit read-only XXL session failure interrupted audit.004 reconciled committed outcomes and completed audit, failure and cleanup; it did not replay successful writes.",
+    "xxl_contract": "XXL-JOB3.3.1 data.data page envelope; explicit not-login response permits one authentication retry of the read-only query only.",
+    "early_failures": "Private001 form/switch test issue and003 read-only expired XXL session retained. Original Chinese job was deleted before XXL trigger audit, so a uniquely named API-created Chinese supplement establishes MANUAL/CRON origins separately."
+  },
+  "locale_results": [
+    {
+      "locale": "zh-CN",
+      "status": "PASS",
+      "operations": {
+        "createGood": "COMMITTED",
+        "pauseInitial": "COMMITTED",
+        "editGood": "COMMITTED",
+        "manualWhilePaused": "COMMITTED",
+        "resume": "COMMITTED",
+        "pauseAfterSchedule": "COMMITTED",
+        "ownershipBoundaries": "COMMITTED",
+        "deleteGood": "COMMITTED",
+        "createBad": "COMMITTED",
+        "pauseBad": "COMMITTED",
+        "triggerBad": "COMMITTED",
+        "deleteBad": "COMMITTED",
+        "origin:create": "COMMITTED",
+        "origin:pause": "COMMITTED",
+        "origin:edit": "COMMITTED",
+        "origin:manual": "COMMITTED",
+        "origin:resume": "COMMITTED",
+        "origin:stop": "COMMITTED",
+        "origin:delete": "COMMITTED"
+      },
+      "normal_job_id": 3,
+      "normal_xxl_job_id": 11,
+      "manual_log": {
+        "id": 1482,
+        "jobId": 3,
+        "jobName": "WIKI-20261009A-SCHUI-zh-CN-WATER-EDITED",
+        "jobType": "Task-00001",
+        "tenantId": 1,
+        "status": 1,
+        "fireTime": "2026-10-10 14:50:59",
+        "executeTimeMs": 0,
+        "resultMessage": "请喝一杯大杯水，保持身体健康！",
+        "errorMessage": null
+      },
+      "scheduled_log": {
+        "id": 1485,
+        "jobId": 3,
+        "jobName": "WIKI-20261009A-SCHUI-zh-CN-WATER-EDITED",
+        "jobType": "Task-00001",
+        "tenantId": 1,
+        "status": 1,
+        "fireTime": "2026-10-10 14:52:00",
+        "executeTimeMs": 1,
+        "resultMessage": "请喝一杯大杯水，保持身体健康！",
+        "errorMessage": null
+      },
+      "failure_job_id": 4,
+      "failure_xxl_job_id": 12,
+      "failure_log": {
+        "id": 1486,
+        "jobId": 4,
+        "jobName": "WIKI-20261009A-SCHUI-zh-CN-UNHANDLED",
+        "jobType": "WIKI-20261009A-UNHANDLED",
+        "tenantId": 1,
+        "status": 0,
+        "fireTime": "2026-10-10 14:52:06",
+        "executeTimeMs": 0,
+        "resultMessage": null,
+        "errorMessage": "未找到任务类型 [WIKI-20261009A-UNHANDLED] 对应的处理器"
+      },
+      "xxl_success": [
+        {
+          "id": 64404,
+          "jobId": 13,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:06:00.000Z",
+          "handleTime": "2026-10-10T07:06:00.000Z",
+          "origin": "CRON"
+        },
+        {
+          "id": 64361,
+          "jobId": 13,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:05:00.000Z",
+          "handleTime": "2026-10-10T07:05:00.000Z",
+          "origin": "CRON"
+        },
+        {
+          "id": 64322,
+          "jobId": 13,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:04:00.000Z",
+          "handleTime": "2026-10-10T07:04:00.000Z",
+          "origin": "CRON"
+        },
+        {
+          "id": 64272,
+          "jobId": 13,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:03:00.000Z",
+          "handleTime": "2026-10-10T07:03:00.000Z",
+          "origin": "CRON"
+        },
+        {
+          "id": 64223,
+          "jobId": 13,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:02:00.000Z",
+          "handleTime": "2026-10-10T07:02:00.000Z",
+          "origin": "CRON"
+        },
+        {
+          "id": 64191,
+          "jobId": 13,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:01:20.000Z",
+          "handleTime": "2026-10-10T07:01:20.000Z",
+          "origin": "MANUAL"
+        }
+      ],
+      "xxl_failure": [],
+      "origin_supplement": {
+        "local_job_id": 5,
+        "xxl_job_id": 13,
+        "creation": "Real API-created supplement, not a second UI creation journey",
+        "deleted": true
+      },
+      "ownership": "Different ordinary identity saw no owner jobs and received403 for logs/update/status/trigger/delete; assertion committed in the lifecycle test",
+      "cleanup": "Exact owned jobs deleted and remote absence checked"
+    },
+    {
+      "locale": "en-US",
+      "status": "PASS",
+      "operations": {
+        "createGood": "COMMITTED",
+        "pauseInitial": "COMMITTED",
+        "editGood": "COMMITTED",
+        "manualWhilePaused": "COMMITTED",
+        "resume": "COMMITTED",
+        "pauseAfterSchedule": "COMMITTED",
+        "ownershipBoundaries": "COMMITTED",
+        "deleteGood": "COMMITTED",
+        "createBad": "COMMITTED",
+        "pauseBad": "COMMITTED",
+        "triggerBad": "COMMITTED",
+        "deleteBad": "COMMITTED"
+      },
+      "normal_job_id": 6,
+      "normal_xxl_job_id": 14,
+      "manual_log": {
+        "id": 1497,
+        "jobId": 6,
+        "jobName": "WIKI-20261009A-SCHUI-en-US-WATER-EDITED",
+        "jobType": "Task-00001",
+        "tenantId": 1,
+        "status": 1,
+        "fireTime": "2026-10-10 15:01:26",
+        "executeTimeMs": 0,
+        "resultMessage": "请喝一杯大杯水，保持身体健康！",
+        "errorMessage": null
+      },
+      "scheduled_log": {
+        "id": 1499,
+        "jobId": 6,
+        "jobName": "WIKI-20261009A-SCHUI-en-US-WATER-EDITED",
+        "jobType": "Task-00001",
+        "tenantId": 1,
+        "status": 1,
+        "fireTime": "2026-10-10 15:02:00",
+        "executeTimeMs": 0,
+        "resultMessage": "请喝一杯大杯水，保持身体健康！",
+        "errorMessage": null
+      },
+      "failure_job_id": 9,
+      "failure_xxl_job_id": 17,
+      "failure_log": {
+        "id": 1514,
+        "jobId": 9,
+        "jobName": "WIKI-20261009A-SCHUI-en-US-UNHANDLED",
+        "jobType": "WIKI-20261009A-UNHANDLED",
+        "tenantId": 1,
+        "status": 0,
+        "fireTime": "2026-10-10 15:07:55",
+        "executeTimeMs": 0,
+        "resultMessage": null,
+        "errorMessage": "未找到任务类型 [WIKI-20261009A-UNHANDLED] 对应的处理器"
+      },
+      "xxl_success": [
+        {
+          "id": 64227,
+          "jobId": 14,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:02:00.000Z",
+          "handleTime": "2026-10-10T07:02:00.000Z",
+          "origin": "CRON"
+        },
+        {
+          "id": 64199,
+          "jobId": 14,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:01:26.000Z",
+          "handleTime": "2026-10-10T07:01:26.000Z",
+          "origin": "MANUAL"
+        }
+      ],
+      "xxl_failure": [
+        {
+          "id": 64489,
+          "jobId": 17,
+          "triggerCode": 200,
+          "handleCode": 500,
+          "triggerTime": "2026-10-10T07:07:55.000Z",
+          "handleTime": "2026-10-10T07:07:55.000Z",
+          "origin": "MANUAL"
+        }
+      ],
+      "origin_supplement": null,
+      "ownership": "Different ordinary identity saw no owner jobs and received403 for logs/update/status/trigger/delete; assertion committed in the lifecycle test",
+      "cleanup": "Exact owned jobs deleted and remote absence checked"
+    },
+    {
+      "locale": "ja-JP",
+      "status": "PASS",
+      "operations": {
+        "createGood": "COMMITTED",
+        "pauseInitial": "COMMITTED",
+        "editGood": "COMMITTED",
+        "manualWhilePaused": "COMMITTED",
+        "resume": "COMMITTED",
+        "pauseAfterSchedule": "COMMITTED",
+        "ownershipBoundaries": "COMMITTED",
+        "deleteGood": "COMMITTED",
+        "createBad": "COMMITTED",
+        "pauseBad": "COMMITTED",
+        "triggerBad": "COMMITTED",
+        "deleteBad": "COMMITTED"
+      },
+      "normal_job_id": 7,
+      "normal_xxl_job_id": 15,
+      "manual_log": {
+        "id": 1501,
+        "jobId": 7,
+        "jobName": "WIKI-20261009A-SCHUI-ja-JP-WATER-EDITED",
+        "jobType": "Task-00001",
+        "tenantId": 1,
+        "status": 1,
+        "fireTime": "2026-10-10 15:02:07",
+        "executeTimeMs": 0,
+        "resultMessage": "请喝一杯大杯水，保持身体健康！",
+        "errorMessage": null
+      },
+      "scheduled_log": {
+        "id": 1502,
+        "jobId": 7,
+        "jobName": "WIKI-20261009A-SCHUI-ja-JP-WATER-EDITED",
+        "jobType": "Task-00001",
+        "tenantId": 1,
+        "status": 1,
+        "fireTime": "2026-10-10 15:03:00",
+        "executeTimeMs": 1,
+        "resultMessage": "请喝一杯大杯水，保持身体健康！",
+        "errorMessage": null
+      },
+      "failure_job_id": 10,
+      "failure_xxl_job_id": 18,
+      "failure_log": {
+        "id": 1516,
+        "jobId": 10,
+        "jobName": "WIKI-20261009A-SCHUI-ja-JP-UNHANDLED",
+        "jobType": "WIKI-20261009A-UNHANDLED",
+        "tenantId": 1,
+        "status": 0,
+        "fireTime": "2026-10-10 15:08:01",
+        "executeTimeMs": 0,
+        "resultMessage": null,
+        "errorMessage": "未找到任务类型 [WIKI-20261009A-UNHANDLED] 对应的处理器"
+      },
+      "xxl_success": [
+        {
+          "id": 64276,
+          "jobId": 15,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:03:00.000Z",
+          "handleTime": "2026-10-10T07:03:00.000Z",
+          "origin": "CRON"
+        },
+        {
+          "id": 64231,
+          "jobId": 15,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:02:07.000Z",
+          "handleTime": "2026-10-10T07:02:07.000Z",
+          "origin": "MANUAL"
+        }
+      ],
+      "xxl_failure": [
+        {
+          "id": 64498,
+          "jobId": 18,
+          "triggerCode": 200,
+          "handleCode": 500,
+          "triggerTime": "2026-10-10T07:08:01.000Z",
+          "handleTime": "2026-10-10T07:08:01.000Z",
+          "origin": "MANUAL"
+        }
+      ],
+      "origin_supplement": null,
+      "ownership": "Different ordinary identity saw no owner jobs and received403 for logs/update/status/trigger/delete; assertion committed in the lifecycle test",
+      "cleanup": "Exact owned jobs deleted and remote absence checked"
+    },
+    {
+      "locale": "ko-KR",
+      "status": "PASS",
+      "operations": {
+        "createGood": "COMMITTED",
+        "pauseInitial": "COMMITTED",
+        "editGood": "COMMITTED",
+        "manualWhilePaused": "COMMITTED",
+        "resume": "COMMITTED",
+        "pauseAfterSchedule": "COMMITTED",
+        "ownershipBoundaries": "COMMITTED",
+        "deleteGood": "COMMITTED",
+        "createBad": "COMMITTED",
+        "pauseBad": "COMMITTED",
+        "triggerBad": "COMMITTED",
+        "deleteBad": "COMMITTED"
+      },
+      "normal_job_id": 8,
+      "normal_xxl_job_id": 16,
+      "manual_log": {
+        "id": 1505,
+        "jobId": 8,
+        "jobName": "WIKI-20261009A-SCHUI-ko-KR-WATER-EDITED",
+        "jobType": "Task-00001",
+        "tenantId": 1,
+        "status": 1,
+        "fireTime": "2026-10-10 15:03:07",
+        "executeTimeMs": 0,
+        "resultMessage": "请喝一杯大杯水，保持身体健康！",
+        "errorMessage": null
+      },
+      "scheduled_log": {
+        "id": 1508,
+        "jobId": 8,
+        "jobName": "WIKI-20261009A-SCHUI-ko-KR-WATER-EDITED",
+        "jobType": "Task-00001",
+        "tenantId": 1,
+        "status": 1,
+        "fireTime": "2026-10-10 15:04:00",
+        "executeTimeMs": 0,
+        "resultMessage": "请喝一杯大杯水，保持身体健康！",
+        "errorMessage": null
+      },
+      "failure_job_id": 11,
+      "failure_xxl_job_id": 19,
+      "failure_log": {
+        "id": 1517,
+        "jobId": 11,
+        "jobName": "WIKI-20261009A-SCHUI-ko-KR-UNHANDLED",
+        "jobType": "WIKI-20261009A-UNHANDLED",
+        "tenantId": 1,
+        "status": 0,
+        "fireTime": "2026-10-10 15:08:07",
+        "executeTimeMs": 0,
+        "resultMessage": null,
+        "errorMessage": "未找到任务类型 [WIKI-20261009A-UNHANDLED] 对应的处理器"
+      },
+      "xxl_success": [
+        {
+          "id": 64321,
+          "jobId": 16,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:04:00.000Z",
+          "handleTime": "2026-10-10T07:04:00.000Z",
+          "origin": "CRON"
+        },
+        {
+          "id": 64277,
+          "jobId": 16,
+          "triggerCode": 200,
+          "handleCode": 200,
+          "triggerTime": "2026-10-10T07:03:07.000Z",
+          "handleTime": "2026-10-10T07:03:07.000Z",
+          "origin": "MANUAL"
+        }
+      ],
+      "xxl_failure": [
+        {
+          "id": 64499,
+          "jobId": 19,
+          "triggerCode": 200,
+          "handleCode": 500,
+          "triggerTime": "2026-10-10T07:08:07.000Z",
+          "handleTime": "2026-10-10T07:08:07.000Z",
+          "origin": "MANUAL"
+        }
+      ],
+      "origin_supplement": null,
+      "ownership": "Different ordinary identity saw no owner jobs and received403 for logs/update/status/trigger/delete; assertion committed in the lifecycle test",
+      "cleanup": "Exact owned jobs deleted and remote absence checked"
+    }
+  ],
+  "cleanup": {
+    "status": "PASS",
+    "at": "2026-10-10T07:20:53.077Z",
+    "deletedTypeId": 2,
+    "deletedTypeCode": "WIKI-20261009A-UNHANDLED",
+    "localPersonalJobs": 0,
+    "remotePersonalJobs": 0,
+    "allTenantTypeReferences": 0,
+    "scope": "Exact owned fixture type; zero references verified by read-only local Docker SQL before DELETE; seed and system tasks untouched",
+    "delete_journal_status": "COMMITTED"
+  },
+  "scope_limits": [
+    "Drink-water handler returns and logs a reminder; it does not send a desktop/email/mobile notification.",
+    "Paused jobs can be manually triggered. Trigger accepted is distinct from executor completion.",
+    "Chinese original success/failure UI logs are retained; their deleted XXL trigger logs cannot be reconstructed. Chinese MANUAL/CRON origins belong to the separate API-created supplement. XXL failure500 is recorded for EN/JA/KO, not claimed for the earlier deleted Chinese failure job.",
+    "Next-fire display follows browser locale; summary counters can be stale. Identify each scene by its unique job name.",
+    "The type catalog is global; an enabled catalog row does not establish that a matching handler Bean is deployed.",
+    "Business parameter names/enums, results and errors remain Chinese; some JA/KO labels remain English. Human four-language translation review is pending."
+  ],
+  "records": [
+    {
+      "id": "scheduling-ui-create-form-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "personal-create",
+      "step": "scheduling-ui-create-form",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Ordinary user chooses real enabled type, daily23:59 and small cup before saving",
+      "image": "docs/images/zh-CN/scheduling-ui-create-form.png",
+      "image_sha256": "d004ef5ff05685abe0e3ec33841439f0fff7ae5b8eade60e622285f4486101b8",
+      "captured_at": "2026-10-10T06:47:47.818Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "196ffb726bb577f993fc5fb32d43b8981fcfc8da56b34db08ba890e69594de35",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "This is the form before submission; committed writes are established separately by the journal."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-created-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "personal-create",
+      "step": "scheduling-ui-created",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Real local row and returned XXL job ID confirmed; initially enabled daily job",
+      "image": "docs/images/zh-CN/scheduling-ui-created.png",
+      "image_sha256": "c3cfa8e4f48f35c5e2bbf58d7704cb7777a302a40ab04ea4b76d08fbf812aa86",
+      "captured_at": "2026-10-10T06:47:48.325Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "196ffb726bb577f993fc5fb32d43b8981fcfc8da56b34db08ba890e69594de35",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-paused-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "pause",
+      "step": "scheduling-ui-paused",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Ordinary owner pauses the job; switch is off and next time is absent",
+      "image": "docs/images/zh-CN/scheduling-ui-paused.png",
+      "image_sha256": "5c8f5168aa347d832c93128acedced069a4b0a9d979fc8b8bda2109243acdee4",
+      "captured_at": "2026-10-10T06:50:57.463Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-edit-form-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "schedule",
+      "step": "scheduling-ui-edit-form",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "While paused, edit to every minute and large cup; type remains immutable",
+      "image": "docs/images/zh-CN/scheduling-ui-edit-form.png",
+      "image_sha256": "ce03cb668460583b4c2e0fd980c951e8cc567cfa104d5f1345624d9704314450",
+      "captured_at": "2026-10-10T06:50:58.631Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "This is the form before submission; committed writes are established separately by the journal."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-manual-success-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "trigger",
+      "step": "scheduling-ui-manual-success",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Trigger accepted while paused; actual successful execution log contains large cup result",
+      "image": "docs/images/zh-CN/scheduling-ui-manual-success.png",
+      "image_sha256": "adc24285ef80cb317c0234210dfc1fa87145839a229266cb0bca85cd8eb472cb",
+      "captured_at": "2026-10-10T06:50:59.825Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The dialog shows successful business logs; it does not show trigger origin. MANUAL/CRON origin is established separately through XXL-JOB audit records."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-resumed-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "resume",
+      "step": "scheduling-ui-resumed",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Switch enabled; every-minute Cron becomes active again",
+      "image": "docs/images/zh-CN/scheduling-ui-resumed.png",
+      "image_sha256": "83f35228c5170bad4decf50a791bff64fd24d6cc437a2d7286135364b8ddf83b",
+      "captured_at": "2026-10-10T06:51:00.315Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-scheduled-success-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "execution-log",
+      "step": "scheduling-ui-scheduled-success",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Later success log arrived without another manual request; Cron origin checked separately against XXL logs",
+      "image": "docs/images/zh-CN/scheduling-ui-scheduled-success.png",
+      "image_sha256": "bb8c9d87dbaa1c251ee10d94f61b42f14307c44801f1dd484b391fcfc66294ed",
+      "captured_at": "2026-10-10T06:52:02.888Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The dialog shows successful business logs; it does not show trigger origin. MANUAL/CRON origin is established separately through XXL-JOB audit records."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-paused-final-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "pause",
+      "step": "scheduling-ui-paused-final",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Owner stops future scheduled executions after observing the Cron run",
+      "image": "docs/images/zh-CN/scheduling-ui-paused-final.png",
+      "image_sha256": "b88c29da6e5e424d79beca4df06e726bd32a9cc9947783474bff48793e6ab6b7",
+      "captured_at": "2026-10-10T06:52:03.184Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-deleted-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "personal-delete",
+      "step": "scheduling-ui-deleted",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Deleted owned job absent from owner list; remote absence checked separately",
+      "image": "docs/images/zh-CN/scheduling-ui-deleted.png",
+      "image_sha256": "1808f4ba8e419655fbed7b3747f689d2992b9696ec112f537c74566ccaa342db",
+      "captured_at": "2026-10-10T06:52:03.980Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The scene proves absence of the named job, not necessarily an empty account; independent remote cleanup checks are separate."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-handler-failure-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "execution-failure",
+      "step": "scheduling-ui-handler-failure",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Real executor could not find deliberately absent handler; failed log and error tooltip visible",
+      "image": "docs/images/zh-CN/scheduling-ui-handler-failure.png",
+      "image_sha256": "16e550fe8bd245acb266ea96ff495c9fddfb30ed394ff022dc8873735c093e3b",
+      "captured_at": "2026-10-10T06:52:06.459Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Failure and the full missing-handler error are visible in the tooltip. A green trigger-accepted toast is not proof of successful execution."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-system-jobs-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "system-job",
+      "step": "scheduling-ui-system-jobs",
+      "locale": "zh-CN",
+      "actor": "admin",
+      "roles": [],
+      "access": "Read-only administrative catalog/system-task view",
+      "route": "/admin/job/system-job",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Actual system task metadata and live XXL statuses; no system task mutation",
+      "image": "docs/images/zh-CN/scheduling-ui-system-jobs.png",
+      "image_sha256": "60b4865b1260b3b9344a5d5242cc5aa7c871eef6139c60a38b19fdd529aa0180",
+      "captured_at": "2026-10-10T06:52:07.685Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Read-only admin view of omni-base system handlers; MQ description is truncated. No system task was stopped or unregistered."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-job-types-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "job-type",
+      "step": "scheduling-ui-job-types",
+      "locale": "zh-CN",
+      "actor": "admin",
+      "roles": [],
+      "access": "Read-only administrative catalog/system-task view",
+      "route": "/admin/job/user-job-type",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Global task catalog shows seeded drink-water type and owned missing-handler fixture",
+      "image": "docs/images/zh-CN/scheduling-ui-job-types.png",
+      "image_sha256": "a0302cf532d688a8d5528814870066ab061b16383db07babca2552e6ead25c5d",
+      "captured_at": "2026-10-10T06:52:08.302Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "0989cbdeab12a89f01b40de169627b92535ebf8fc8bd1be3be62d91243079391",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Read-only admin catalog view. The deliberately unmatched owned teaching type is not a deployed handler and was removed after zero references were verified; this image records its earlier presence."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-create-form-en-US",
+      "module": "scheduling-workspace",
+      "flow": "personal-create",
+      "step": "scheduling-ui-create-form",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Ordinary user chooses real enabled type, daily23:59 and small cup before saving",
+      "image": "docs/images/en-US/scheduling-ui-create-form.png",
+      "image_sha256": "a4641a5184cf32be46bb4533c1c07f9f99859143976340602ba1311759297c74",
+      "captured_at": "2026-10-10T07:01:23.816Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "This is the form before submission; committed writes are established separately by the journal."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-created-en-US",
+      "module": "scheduling-workspace",
+      "flow": "personal-create",
+      "step": "scheduling-ui-created",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Real local row and returned XXL job ID confirmed; initially enabled daily job",
+      "image": "docs/images/en-US/scheduling-ui-created.png",
+      "image_sha256": "fd0a14c68ef0ac98ff84b161a7f5c27abcb94db8150b1ab8ae41e009c9a19bd1",
+      "captured_at": "2026-10-10T07:01:24.201Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-paused-en-US",
+      "module": "scheduling-workspace",
+      "flow": "pause",
+      "step": "scheduling-ui-paused",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Ordinary owner pauses the job; switch is off and next time is absent",
+      "image": "docs/images/en-US/scheduling-ui-paused.png",
+      "image_sha256": "c3d8b53881989b8c935ac8b24ad560139ba9ff460e820de222d24ae900fbfb85",
+      "captured_at": "2026-10-10T07:01:24.562Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-edit-form-en-US",
+      "module": "scheduling-workspace",
+      "flow": "schedule",
+      "step": "scheduling-ui-edit-form",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "While paused, edit to every minute and large cup; type remains immutable",
+      "image": "docs/images/en-US/scheduling-ui-edit-form.png",
+      "image_sha256": "a1fd4013b16c1e25b7d51b2f755b5222f1300a5675cc65ab1e794fe89498a5f1",
+      "captured_at": "2026-10-10T07:01:25.680Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "This is the form before submission; committed writes are established separately by the journal."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-manual-success-en-US",
+      "module": "scheduling-workspace",
+      "flow": "trigger",
+      "step": "scheduling-ui-manual-success",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Trigger accepted while paused; actual successful execution log contains large cup result",
+      "image": "docs/images/en-US/scheduling-ui-manual-success.png",
+      "image_sha256": "aef8de70438874475ea304f339cbdb415aa6706ec2b987957a68198b4da0d459",
+      "captured_at": "2026-10-10T07:01:26.716Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The dialog shows successful business logs; it does not show trigger origin. MANUAL/CRON origin is established separately through XXL-JOB audit records."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-resumed-en-US",
+      "module": "scheduling-workspace",
+      "flow": "resume",
+      "step": "scheduling-ui-resumed",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Switch enabled; every-minute Cron becomes active again",
+      "image": "docs/images/en-US/scheduling-ui-resumed.png",
+      "image_sha256": "6ea419ac171236667d09d986f4ef274760d689b531558ae4d7b6277a2ad69f60",
+      "captured_at": "2026-10-10T07:01:27.313Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-create-form-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "personal-create",
+      "step": "scheduling-ui-create-form",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Ordinary user chooses real enabled type, daily23:59 and small cup before saving",
+      "image": "docs/images/ja-JP/scheduling-ui-create-form.png",
+      "image_sha256": "939857e7e78008c2f9ae864cff604b1c8da778727ed79c4f86d1dbecee71565c",
+      "captured_at": "2026-10-10T07:02:04.341Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "This is the form before submission; committed writes are established separately by the journal."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-created-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "personal-create",
+      "step": "scheduling-ui-created",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Real local row and returned XXL job ID confirmed; initially enabled daily job",
+      "image": "docs/images/ja-JP/scheduling-ui-created.png",
+      "image_sha256": "b763003df24d9f9a55f5ab36a7da396590c1b2a0820267326c13a068444223d6",
+      "captured_at": "2026-10-10T07:02:04.734Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-paused-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "pause",
+      "step": "scheduling-ui-paused",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Ordinary owner pauses the job; switch is off and next time is absent",
+      "image": "docs/images/ja-JP/scheduling-ui-paused.png",
+      "image_sha256": "63fe1f0e799694c780f21eb389265bea7b2f8df7b1919c3b81fae6812b879de0",
+      "captured_at": "2026-10-10T07:02:05.058Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-edit-form-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "schedule",
+      "step": "scheduling-ui-edit-form",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "While paused, edit to every minute and large cup; type remains immutable",
+      "image": "docs/images/ja-JP/scheduling-ui-edit-form.png",
+      "image_sha256": "3bcfdbcff6dfdcc4717c2f08bb2ac1a2070820f5ada98fc60df3fe40a82a55e4",
+      "captured_at": "2026-10-10T07:02:06.063Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "This is the form before submission; committed writes are established separately by the journal."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-manual-success-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "trigger",
+      "step": "scheduling-ui-manual-success",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Trigger accepted while paused; actual successful execution log contains large cup result",
+      "image": "docs/images/ja-JP/scheduling-ui-manual-success.png",
+      "image_sha256": "5d8d8eba5f9d33a6d0b19770c247c20b55343683e6af4f6b79d90b82eacfe5f7",
+      "captured_at": "2026-10-10T07:02:07.398Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The dialog shows successful business logs; it does not show trigger origin. MANUAL/CRON origin is established separately through XXL-JOB audit records."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-resumed-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "resume",
+      "step": "scheduling-ui-resumed",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Switch enabled; every-minute Cron becomes active again",
+      "image": "docs/images/ja-JP/scheduling-ui-resumed.png",
+      "image_sha256": "d3679aa374faff8f6755d58f91f30410a685d9f267ed6c528949113ffb543ce0",
+      "captured_at": "2026-10-10T07:02:07.820Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-create-form-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "personal-create",
+      "step": "scheduling-ui-create-form",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Ordinary user chooses real enabled type, daily23:59 and small cup before saving",
+      "image": "docs/images/ko-KR/scheduling-ui-create-form.png",
+      "image_sha256": "f098b51970c8ff070d6b4623ee8ba0fcd377c7cd92e4e350447cfd1ca1277592",
+      "captured_at": "2026-10-10T07:03:04.919Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "This is the form before submission; committed writes are established separately by the journal."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-created-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "personal-create",
+      "step": "scheduling-ui-created",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Real local row and returned XXL job ID confirmed; initially enabled daily job",
+      "image": "docs/images/ko-KR/scheduling-ui-created.png",
+      "image_sha256": "a8b55b076385a35281739eaa7903a7e3360a5c1fc4e6cea67d8e86b9cf193d98",
+      "captured_at": "2026-10-10T07:03:05.373Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-paused-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "pause",
+      "step": "scheduling-ui-paused",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Ordinary owner pauses the job; switch is off and next time is absent",
+      "image": "docs/images/ko-KR/scheduling-ui-paused.png",
+      "image_sha256": "91e46901ba48bae55d7e3d78a30a1c7bb4fa0f4a6784b15cd2f688f8c4f69741",
+      "captured_at": "2026-10-10T07:03:05.709Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-edit-form-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "schedule",
+      "step": "scheduling-ui-edit-form",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "While paused, edit to every minute and large cup; type remains immutable",
+      "image": "docs/images/ko-KR/scheduling-ui-edit-form.png",
+      "image_sha256": "9091d59d92dc60b216aab8df805c7ebaf591d8657901cf8e81a2a04adc0c96a0",
+      "captured_at": "2026-10-10T07:03:06.877Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "This is the form before submission; committed writes are established separately by the journal."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-manual-success-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "trigger",
+      "step": "scheduling-ui-manual-success",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Trigger accepted while paused; actual successful execution log contains large cup result",
+      "image": "docs/images/ko-KR/scheduling-ui-manual-success.png",
+      "image_sha256": "5220c7746f8de2fb8f43a8412bd244b45e479169ec99ab8ab7800a4930222cf2",
+      "captured_at": "2026-10-10T07:03:07.983Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The dialog shows successful business logs; it does not show trigger origin. MANUAL/CRON origin is established separately through XXL-JOB audit records."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-resumed-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "resume",
+      "step": "scheduling-ui-resumed",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Switch enabled; every-minute Cron becomes active again",
+      "image": "docs/images/ko-KR/scheduling-ui-resumed.png",
+      "image_sha256": "111be834d0f7375e629a9674457fe9321a0ac6d5939f42d7d80cfef5563d21eb",
+      "captured_at": "2026-10-10T07:03:08.377Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c89a61d78d44945953152e228edef1ca367bf50e0e50c70eb0da8861766ed098",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-cron-origin-proof-zh-CN",
+      "module": "scheduling-workspace",
+      "flow": "execution-log",
+      "step": "scheduling-ui-cron-origin-proof",
+      "locale": "zh-CN",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Supplemental API-created owned job: actual manual and Cron success correlated with XXL trigger origins",
+      "image": "docs/images/zh-CN/scheduling-ui-cron-origin-proof.png",
+      "image_sha256": "d1c6bfaadd19835439010ef817c6fe75c5123a1089456d1988320fb7a10ee15a",
+      "captured_at": "2026-10-10T07:07:50.822Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The dialog shows successful business logs; it does not show trigger origin. MANUAL/CRON origin is established separately through XXL-JOB audit records.",
+          "Chinese-only supplementary job was created through real APIs after the first Chinese UI job was deleted. It is not a second UI create journey."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-scheduled-success-en-US",
+      "module": "scheduling-workspace",
+      "flow": "execution-log",
+      "step": "scheduling-ui-scheduled-success",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Later success log arrived without another manual request; Cron origin checked separately against XXL logs",
+      "image": "docs/images/en-US/scheduling-ui-scheduled-success.png",
+      "image_sha256": "c77e2db3cbf83edf66113dfc9f8ba8d99876e3ad0316c0782b529c90075abfb6",
+      "captured_at": "2026-10-10T07:07:52.882Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The dialog shows successful business logs; it does not show trigger origin. MANUAL/CRON origin is established separately through XXL-JOB audit records."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-paused-final-en-US",
+      "module": "scheduling-workspace",
+      "flow": "pause",
+      "step": "scheduling-ui-paused-final",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Owner stops future scheduled executions after observing the Cron run",
+      "image": "docs/images/en-US/scheduling-ui-paused-final.png",
+      "image_sha256": "37fb404c09a23db40e1483c3db604e945c83b58501a1a56a075d1b24d2b4ea7d",
+      "captured_at": "2026-10-10T07:07:53.153Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-deleted-en-US",
+      "module": "scheduling-workspace",
+      "flow": "personal-delete",
+      "step": "scheduling-ui-deleted",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Deleted owned job absent from owner list; remote absence checked separately",
+      "image": "docs/images/en-US/scheduling-ui-deleted.png",
+      "image_sha256": "2c6cac9f6c133fd83d66bef5f1b73bcc854ff5fa548aea49a951cee04d848c07",
+      "captured_at": "2026-10-10T07:07:53.694Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The scene proves absence of the named job, not necessarily an empty account; independent remote cleanup checks are separate."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-handler-failure-en-US",
+      "module": "scheduling-workspace",
+      "flow": "execution-failure",
+      "step": "scheduling-ui-handler-failure",
+      "locale": "en-US",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Real executor could not find deliberately absent handler; failed log and error tooltip visible",
+      "image": "docs/images/en-US/scheduling-ui-handler-failure.png",
+      "image_sha256": "a324440d7f2d22425acc05d3b17b4c5fdee3bb54eb7ab698d5ee43652f059284",
+      "captured_at": "2026-10-10T07:07:55.637Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Failure and the full missing-handler error are visible in the tooltip. A green trigger-accepted toast is not proof of successful execution."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-system-jobs-en-US",
+      "module": "scheduling-workspace",
+      "flow": "system-job",
+      "step": "scheduling-ui-system-jobs",
+      "locale": "en-US",
+      "actor": "admin",
+      "roles": [],
+      "access": "Read-only administrative catalog/system-task view",
+      "route": "/admin/job/system-job",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Actual system task metadata and live XXL statuses; no system task mutation",
+      "image": "docs/images/en-US/scheduling-ui-system-jobs.png",
+      "image_sha256": "27ccef14163fdea575ea0911d7e3e1bcb7fbc196d0830f37885dc05c128ab3c9",
+      "captured_at": "2026-10-10T07:07:56.504Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Read-only admin view of omni-base system handlers; MQ description is truncated. No system task was stopped or unregistered."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-job-types-en-US",
+      "module": "scheduling-workspace",
+      "flow": "job-type",
+      "step": "scheduling-ui-job-types",
+      "locale": "en-US",
+      "actor": "admin",
+      "roles": [],
+      "access": "Read-only administrative catalog/system-task view",
+      "route": "/admin/job/user-job-type",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-en-US",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Global task catalog shows seeded drink-water type and owned missing-handler fixture",
+      "image": "docs/images/en-US/scheduling-ui-job-types.png",
+      "image_sha256": "a4be196c0d8b90308f2dd5e58a534cdf39edce7d28f5fa438267cf7f2afa771f",
+      "captured_at": "2026-10-10T07:07:57.046Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Read-only admin catalog view. The deliberately unmatched owned teaching type is not a deployed handler and was removed after zero references were verified; this image records its earlier presence."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-scheduled-success-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "execution-log",
+      "step": "scheduling-ui-scheduled-success",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Later success log arrived without another manual request; Cron origin checked separately against XXL logs",
+      "image": "docs/images/ja-JP/scheduling-ui-scheduled-success.png",
+      "image_sha256": "48693dac6033339e62a07a3392ff6f076703b1c8442ef0461602f1ded17ccafc",
+      "captured_at": "2026-10-10T07:07:58.990Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The dialog shows successful business logs; it does not show trigger origin. MANUAL/CRON origin is established separately through XXL-JOB audit records."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-paused-final-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "pause",
+      "step": "scheduling-ui-paused-final",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Owner stops future scheduled executions after observing the Cron run",
+      "image": "docs/images/ja-JP/scheduling-ui-paused-final.png",
+      "image_sha256": "36394385275258bbbab4e42d6b7c869c21ae3c38cfc594c8945894fbf73239d2",
+      "captured_at": "2026-10-10T07:07:59.239Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-deleted-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "personal-delete",
+      "step": "scheduling-ui-deleted",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Deleted owned job absent from owner list; remote absence checked separately",
+      "image": "docs/images/ja-JP/scheduling-ui-deleted.png",
+      "image_sha256": "74912dc1f4807588cc3020e5571bccbbff099d7f9eca3da094aecb988a2ff9fb",
+      "captured_at": "2026-10-10T07:07:59.778Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The scene proves absence of the named job, not necessarily an empty account; independent remote cleanup checks are separate."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-handler-failure-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "execution-failure",
+      "step": "scheduling-ui-handler-failure",
+      "locale": "ja-JP",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Real executor could not find deliberately absent handler; failed log and error tooltip visible",
+      "image": "docs/images/ja-JP/scheduling-ui-handler-failure.png",
+      "image_sha256": "a275476c709fd1131123da02daee6c716a8889befd52d2c3f06e05942dd18d6b",
+      "captured_at": "2026-10-10T07:08:01.672Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Failure and the full missing-handler error are visible in the tooltip. A green trigger-accepted toast is not proof of successful execution."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-system-jobs-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "system-job",
+      "step": "scheduling-ui-system-jobs",
+      "locale": "ja-JP",
+      "actor": "admin",
+      "roles": [],
+      "access": "Read-only administrative catalog/system-task view",
+      "route": "/admin/job/system-job",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Actual system task metadata and live XXL statuses; no system task mutation",
+      "image": "docs/images/ja-JP/scheduling-ui-system-jobs.png",
+      "image_sha256": "05cef9795179d8dace256ebaff0d96c65f17b6254f075eccb571175f72512dcd",
+      "captured_at": "2026-10-10T07:08:02.498Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Read-only admin view of omni-base system handlers; MQ description is truncated. No system task was stopped or unregistered."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-job-types-ja-JP",
+      "module": "scheduling-workspace",
+      "flow": "job-type",
+      "step": "scheduling-ui-job-types",
+      "locale": "ja-JP",
+      "actor": "admin",
+      "roles": [],
+      "access": "Read-only administrative catalog/system-task view",
+      "route": "/admin/job/user-job-type",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ja-JP",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Global task catalog shows seeded drink-water type and owned missing-handler fixture",
+      "image": "docs/images/ja-JP/scheduling-ui-job-types.png",
+      "image_sha256": "8523fa8f096e19c50fc52516d07e71b0dfebf76b473ece3c9c8ed2d9621139b9",
+      "captured_at": "2026-10-10T07:08:02.930Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Read-only admin catalog view. The deliberately unmatched owned teaching type is not a deployed handler and was removed after zero references were verified; this image records its earlier presence."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-scheduled-success-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "execution-log",
+      "step": "scheduling-ui-scheduled-success",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Later success log arrived without another manual request; Cron origin checked separately against XXL logs",
+      "image": "docs/images/ko-KR/scheduling-ui-scheduled-success.png",
+      "image_sha256": "37db0e9248298a35fdc4fe4e3efbd9acec0cd3a32a1367167e358a72730b8be1",
+      "captured_at": "2026-10-10T07:08:04.889Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The dialog shows successful business logs; it does not show trigger origin. MANUAL/CRON origin is established separately through XXL-JOB audit records."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-paused-final-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "pause",
+      "step": "scheduling-ui-paused-final",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Owner stops future scheduled executions after observing the Cron run",
+      "image": "docs/images/ko-KR/scheduling-ui-paused-final.png",
+      "image_sha256": "0fd6ddc9a06691f2633225b021bab13e991505adb01e472202e9c9a80be9f529",
+      "captured_at": "2026-10-10T07:08:05.119Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Next-fire time is formatted in the browser locale and can differ from the canonical backend date-time string. Long names and action buttons can wrap."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-deleted-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "personal-delete",
+      "step": "scheduling-ui-deleted",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Deleted owned job absent from owner list; remote absence checked separately",
+      "image": "docs/images/ko-KR/scheduling-ui-deleted.png",
+      "image_sha256": "c74b6941e8f124e01ef074a7e2066424a118e9a92d870a988154f4130723e6d9",
+      "captured_at": "2026-10-10T07:08:05.725Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "The scene proves absence of the named job, not necessarily an empty account; independent remote cleanup checks are separate."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-handler-failure-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "execution-failure",
+      "step": "scheduling-ui-handler-failure",
+      "locale": "ko-KR",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "access": "Ordinary owner; no SUPER_ADMIN",
+      "route": "/",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Real executor could not find deliberately absent handler; failed log and error tooltip visible",
+      "image": "docs/images/ko-KR/scheduling-ui-handler-failure.png",
+      "image_sha256": "226e68d27215cb6b18271a369a1d654828e681c1baa831ea2a81313c59482622",
+      "captured_at": "2026-10-10T07:08:07.714Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Failure and the full missing-handler error are visible in the tooltip. A green trigger-accepted toast is not proof of successful execution."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-system-jobs-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "system-job",
+      "step": "scheduling-ui-system-jobs",
+      "locale": "ko-KR",
+      "actor": "admin",
+      "roles": [],
+      "access": "Read-only administrative catalog/system-task view",
+      "route": "/admin/job/system-job",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Actual system task metadata and live XXL statuses; no system task mutation",
+      "image": "docs/images/ko-KR/scheduling-ui-system-jobs.png",
+      "image_sha256": "f2f449b55f6e8d6cd08ab194630354858d50f946174f73c1df275f458b46f557",
+      "captured_at": "2026-10-10T07:08:08.551Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Read-only admin view of omni-base system handlers; MQ description is truncated. No system task was stopped or unregistered."
+        ],
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "scheduling-ui-job-types-ko-KR",
+      "module": "scheduling-workspace",
+      "flow": "job-type",
+      "step": "scheduling-ui-job-types",
+      "locale": "ko-KR",
+      "actor": "admin",
+      "roles": [],
+      "access": "Read-only administrative catalog/system-task view",
+      "route": "/admin/job/user-job-type",
+      "fixture": "omni-wiki-acceptance-20261009/WIKI-20261009A-SCHUI-ko-KR",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "claim": "Global task catalog shows seeded drink-water type and owned missing-handler fixture",
+      "image": "docs/images/ko-KR/scheduling-ui-job-types.png",
+      "image_sha256": "83d977fe8424e204c2b2eb1f73767e126e08379f55c9fff24670c45cf4d6a681",
+      "captured_at": "2026-10-10T07:08:09.081Z",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "application_source_sha256": "6591fcec0e70b29255ac258c581d0d6c00f4a7c05a12e09ce90ac0dfdc04a76e",
+      "runtime": {
+        "frontend": {
+          "service": "omni-frontend-1",
+          "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+          "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+          "started_at": "2026-10-10T03:20:46.725424729Z",
+          "host_ports": []
+        },
+        "base": {
+          "service": "omni-base-1",
+          "image": "omni-wiki-acceptance-base:latest",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "started_at": "2026-10-10T00:37:21.577211588Z",
+          "host_ports": []
+        }
+      },
+      "test": "omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts",
+      "captured_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "current_test_sha256": "c50ed3b3e2d78756295d8673bdae3db5fe1b5fa91c866c2dec19b524389ec677",
+      "mocks": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-10T15:16:52.4864630+08:00",
+        "method": "Twelve original-resolution four-locale QA sheets plus one original Chinese supplement inspected; QA labels remain private.",
+        "limitations": [
+          "The original images are unchanged. Twelve full-resolution four-locale QA sheets and the separate Chinese origin supplement were visually inspected.",
+          "Server-provided type names, parameter labels/enums, execution results and error messages remain Chinese across UI locales. Japanese/Korean screens also retain some English labels.",
+          "Only the row matching the scene locale and unique job name is the subject. Other owned practice jobs and their notifications can remain visible.",
+          "Top summary counters can be stale until refresh and do not prove a specific trigger completed.",
+          "Read-only admin catalog view. The deliberately unmatched owned teaching type is not a deployed handler and was removed after zero references were verified; this image records its earlier presence."
+        ],
+        "human_translation_review": false
+      }
+    }
+  ],
+  "documentation_verification": {
+    "at": "2026-10-10T07:48:15.140Z",
+    "four_locale_flow_mapping": {
+      "flows": 10,
+      "locales": 4,
+      "images": 49,
+      "status": "PASS"
+    },
+    "source_excerpt_and_code_fence_parity": "PASS",
+    "draft_document_quality": "PASS; allows pending translation review",
+    "strict_screenshot_scope": "PASS for scheduling-workspace only; not global release acceptance",
+    "new_public_json_secret_scan": "PASS actual UTF8 file,1 decoded entry,0 warnings",
+    "cli_build": "PASS",
+    "preset_generator_tests": {
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    },
+    "preset_structure": {
+      "presets": [
+        "core",
+        "workflow",
+        "crm",
+        "supply-chain",
+        "full"
+      ],
+      "status": "PASS",
+      "independent_delivery": "Still pending"
+    },
+    "frontend": {
+      "e2e_typecheck": "PASS",
+      "lint": "PASS",
+      "production_build": "PASS"
+    },
+    "human_translation_review": {
+      "pending": 138,
+      "completed": 0,
+      "automatic_signoff": false
+    }
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "recorded_at": "2026-10-17T07:54:43.469Z",
+  "baseline": "bdc4c5c4013514949d5629f21ce0c51e4714101f",
+  "runtime": "local Docker; isolated existing acceptance network; native core lite",
+  "identity_method": "Current test-classpath E2eTokenFixture; enabled database users and actual role/permission claims; 1200-second tokens; not password/CAPTCHA login",
+  "actor": {
+    "username": "admin",
+    "tenantId": 1,
+    "roles": [
+      "PROCUREMENT_MANAGER",
+      "SUPER_ADMIN"
+    ],
+    "expires_at": "2026-10-17T08:14:35.000Z"
+  },
+  "capture_script": {
+    "path": "docs/reference/evidence/scripts/permissions-users-2026-10-17.mjs",
+    "sha256": "a6aee7c7363c5c5b7b285d4e2a64688f40d5e4251d4440dafe874f45b74610e1",
+    "execution": "Exact byte-for-byte archive of the successful standalone Playwright capture script; not an application server or password/CAPTCHA login test"
+  },
+  "tools": {
+    "node": "v24.17.0",
+    "playwright": "1.61.1",
+    "chromium": "149.0.7827.55"
+  },
+  "source_files": [
+    {
+      "path": "omni-frontend/src/views/system/user/index.vue",
+      "sha256": "1a7daa939bfb6d271c78802244b0533006dc0c663ac583322c00759873c46d43"
+    },
+    {
+      "path": "omni-frontend/src/views/system/role/index.vue",
+      "sha256": "a80a892ed0d0f7150d8ce7665a5c28ea640e81fbd2ed98921f1181bd2dca3dfb"
+    },
+    {
+      "path": "omni-frontend/src/api/user.ts",
+      "sha256": "af2704e9fd07b19a44df6ce134532160bec02c92e62d53312d8801bd4e1175e7"
+    },
+    {
+      "path": "omni-frontend/src/api/role.ts",
+      "sha256": "085669dc33255cb8588e142b723e788973dfef2f8c2b4388f99409b204fb5f32"
+    },
+    {
+      "path": "omni-frontend/src/api/request.ts",
+      "sha256": "71f7d1f5003fd81fb41a4fa82386b3fe281c10ccd6e25a40816ca370e460a789"
+    },
+    {
+      "path": "omni-frontend/src/i18n/index.ts",
+      "sha256": "1f03b35f5616586da17441dd5dda7e877ffbc3a197eccef75641ad4794d48618"
+    },
+    {
+      "path": "omni-frontend/src/stores/user.ts",
+      "sha256": "6cce522263c8c57b91c701fd74f2f9a550807e7c3ed7c07416d3818d04e69d63"
+    },
+    {
+      "path": "docker/frontend/nginx.conf",
+      "sha256": "d652b7c896a04755354bc8f691873e402d344804e0682bbcc2baa29866d88990"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/e2e/E2eTokenFixture.java",
+      "sha256": "2d6eafa8e333882845ab9b2f1c831124175234685a9e3830aa60355f3e04a3c0"
+    }
+  ],
+  "source_sha256": "91b81217fe05d4a059b6232c20962441ca53a742c52e3ff5e2e5d68357990cee",
+  "artifacts": {
+    "backend_tree": "cf01beedbbf55676885fa8c469dc0d7e0b9de98d",
+    "frontend_tree": "2f9d8b826adacd1bf3707632eb18071168b37ac5",
+    "jars": [
+      {
+        "service": "auth",
+        "sha256": "0e7033116591b5c6cf409d6374b9acde8b3cae4aed8315d65a4d5a7ee2f3b162"
+      },
+      {
+        "service": "base",
+        "sha256": "0b07ff1a7dc0bb9b008938bb2e0ddbea452c08865480e990b78c2ee44ba79f20"
+      },
+      {
+        "service": "gateway",
+        "sha256": "a89b071de7759315aae09a5d8acf29bafd3d4d7c9dfc2dbf98c9c31afd636165"
+      }
+    ],
+    "frontend_dist_files": 159,
+    "reuse": "211 preserved backend report hashes verified;current JAR mainclasses/nested local module hashes and159 frontend output hashes attested;no unchanged Maven/npm rebuild"
+  },
+  "containers": [
+    {
+      "id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+      "service": "/omni-wiki-acceptance-20261009-mysql-1",
+      "state_after_capture": "stopped"
+    },
+    {
+      "id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+      "service": "/omni-wiki-acceptance-20261009-redis-1",
+      "state_after_capture": "stopped"
+    },
+    {
+      "id": "65bea4ef1a4314e674fa9cd82ec98cdffbcf94f38a1e7d53fbddce8a4ca42e86",
+      "service": "auth",
+      "state_after_capture": "stopped",
+      "image": "sha256:6e67f17b3ff1420f6a1891257298745335585002425b8809e8b8f759d5d4c815"
+    },
+    {
+      "id": "88ff953d2dda854ac887fc3bd9a202815f7cc0036e7015064fa4649e4d752e09",
+      "service": "base",
+      "state_after_capture": "stopped",
+      "image": "sha256:60f176a03e7660b903530b9d323944eecbd3de39ae6154e12c963403e2e0e526"
+    },
+    {
+      "id": "ae1241e848b6b0e7b413ed1de1dc3b2a13a969782332105f6a4c1cef189c293c",
+      "service": "gateway",
+      "state_after_capture": "stopped",
+      "image": "sha256:afd58b5547f378897b515ce9293a7fbeb8f4aa68e1d14d226846d1072db735ad"
+    },
+    {
+      "id": "7c82ec5794da84dead90af206eb591cbf851303e5a59a094d1fb0623802974cd",
+      "service": "frontend",
+      "state_after_capture": "stopped",
+      "image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c"
+    }
+  ],
+  "observations": [
+    {
+      "at": "2026-10-17T07:54:37.012Z",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/auth/user/list?page=1&size=10",
+      "http": 200,
+      "code": 200,
+      "total": 29,
+      "records": 10
+    },
+    {
+      "at": "2026-10-17T07:54:37.053Z",
+      "actor": "employee",
+      "method": "GET",
+      "path": "/api/auth/user/list?page=1&size=10",
+      "http": 403,
+      "code": 403
+    }
+  ],
+  "captures": [
+    {
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/system-users.png",
+      "sha256": "6eddf60e522955e8016a24e12b93ca81b3aa3f16be30a572e46c92caa36724cf",
+      "route": "/admin/system/user",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T07:54:38.865Z",
+      "total": 29,
+      "visible_rows": 10,
+      "visual_review": {
+        "type": "AI_REVIEW",
+        "reviewer": "Codex",
+        "result": "approved-with-recorded-layout-limitations",
+        "actual_raw_image_inspected": true
+      }
+    },
+    {
+      "locale": "en-US",
+      "image": "docs/images/en-US/system-users.png",
+      "sha256": "21841f53db48389b544b97d1f5860b70fd209d262d14e60378089e4de0c98780",
+      "route": "/admin/system/user",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T07:54:40.227Z",
+      "total": 29,
+      "visible_rows": 10,
+      "visual_review": {
+        "type": "AI_REVIEW",
+        "reviewer": "Codex",
+        "result": "approved-with-recorded-layout-limitations",
+        "actual_raw_image_inspected": true
+      }
+    },
+    {
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/system-users.png",
+      "sha256": "f4e958e805e7b050e8128328248259c7746bf7df8afbdd9226c5c449b9cff517",
+      "route": "/admin/system/user",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T07:54:41.670Z",
+      "total": 29,
+      "visible_rows": 10,
+      "visual_review": {
+        "type": "AI_REVIEW",
+        "reviewer": "Codex",
+        "result": "approved-with-recorded-layout-limitations",
+        "actual_raw_image_inspected": true
+      }
+    },
+    {
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/system-users.png",
+      "sha256": "234631686ad829fa2a25f471f533e109f5fe4434f8acec6f3e5096b1b44df993",
+      "route": "/admin/system/user",
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "captured_at": "2026-10-17T07:54:43.366Z",
+      "total": 29,
+      "visible_rows": 10,
+      "visual_review": {
+        "type": "AI_REVIEW",
+        "reviewer": "Codex",
+        "result": "approved-with-recorded-layout-limitations",
+        "actual_raw_image_inspected": true
+      }
+    }
+  ],
+  "checks": {
+    "locale_captures": 4,
+    "admin_read_http": 200,
+    "admin_read_code": 200,
+    "employee_same_endpoint_http": 403,
+    "employee_code": 403,
+    "blocked_mutations": 0,
+    "page_errors": 0,
+    "forms_submitted": false,
+    "loading_masks_absent": true,
+    "mocks": false,
+    "pixel_or_dom_text_replacement": false
+  },
+  "cleanup": {
+    "all_six_stage_started_containers_stopped": true,
+    "temporary_token_file_removed": true,
+    "temporary_fixture_env_removed": true,
+    "temporary_app_env_files_removed": true,
+    "existing_registered_client_public_settings_and_user_role_counts_unchanged": true,
+    "comparison": "Exact row-set equality;initial ordering-sensitive comparison was false because SQL lacked ORDER BY;not a whole-database checksum",
+    "volumes_preserved": true,
+    "shared_standard_project_untouched": true
+  },
+  "limitations": [
+    "EN gender Unknown wraps; action labels wrap into two rows",
+    "EN long sidebar labels clip; JA long sidebar labels can clip; long teaching identifiers wrap",
+    "Fixed viewport captures visible navigation only, not an entire-site responsive or accessibility certification"
+  ],
+  "scope": "Only four current system-users images and readonly user-list authorization. Other36 guide images retain their dated2026-10-12 provenance. No role/user writes, password/CAPTCHA login, supplier self-registration, all-service or global responsive certification.",
+  "attempt_history": [
+    {
+      "attempt": 375,
+      "result": "Failed before token issuance:PowerShell unquoted Java property argument;no images."
+    },
+    {
+      "attempt": 376,
+      "result": "Readonly API200/403 succeeded;private screenshot route omitted/admin;no images;tokens deleted."
+    },
+    {
+      "attempt": 377,
+      "result": "Correct native/admin/system/user route;four captures and readonly checks succeeded;tokens deleted."
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "observability",
+  "source": "docs/observability.md",
+  "source_sha256": "798c160e3208af2f06a1159df25a2ef4cf42ab6006dcaa4ced3a761a5ff3b0d4",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "63d9ba565e6b85f89e915c4420b79ef90ce6063c",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/observability.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 14:54:15",
+      "result": "approved",
+      "translation_sha256": "671ee3c3f4469630e57f6eeec3c946e65a23e4bbc00cbbc2eac6b1e88a5a3393",
+      "checks": {
+        "coverage_and_meaning": "Compared all seven existing sections and the added native Alertmanager boundary: four signals, management isolation, dashboards, custom metrics, thresholds, SLOs, production restrictions and verification limits remain intact.",
+        "technical_literals": "Checked v0.30.1, alertmanager-ui:8080 versus internal alertmanager:9093, loopback host 9093, all four locale paths, hash filters and English weekday storage values against the Docker/Elm implementation; existing metrics and tracing keys remain exact.",
+        "security_and_failure_semantics": "Retains default-off observability, no public management access, finite label sets, no sensitive payload logging and separate notification-delivery acceptance. Archive digest and patch mismatch fail the build; localization does not add authentication or a business service.",
+        "language_and_terminology": "English distinguishes the UI proxy from the official backend and translated display strings from real API fields, receiver names and state values; the existing metrics/SLO prose keeps examples distinct from production targets.",
+        "images_and_links": "Facts contain no screenshots. English operations links use .en.md; ADR-0004 records the actual pinned-source decision and licensing rather than claiming upstream had built-in four-language support."
+      },
+      "findings": [
+        {
+          "id": "native-ui-boundary",
+          "status": "resolved",
+          "description": "The previous review did not cover the new UI service, locale paths or proxy boundary.",
+          "resolution": "Added the same verified boundary in all four languages, invalidated the previous source/translation bindings and reviewed the current files."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/observability.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 14:54:15",
+      "result": "approved",
+      "translation_sha256": "be1adc0c214c02c9cfc106b410c7716e55001f624433eb9ffafcf0fcc53dbfc8",
+      "checks": {
+        "coverage_and_meaning": "全7節と追加のUI境界を照合。シグナル、管理ポート、ダッシュボード、全指標、閾値、SLO、安全条件と検証の限界を保持。",
+        "technical_literals": "公式v0.30.1、内部alertmanager:9093、UIの8080、ホスト127.0.0.1:9093、4言語パス、hashと曜日保存値を実装と照合。既存Trace/metric名も変更なし。",
+        "security_and_failure_semantics": "既定無効・内部管理面・有限ラベル・Secret非記録・外部通知の個別検証を保持。固定ソースハッシュと構造不一致によるビルド失敗を正確に説明。",
+        "language_and_terminology": "公式バックエンドと独自のソース翻訳ビルドを区別。状態やラベルは原値、曜日表示だけを翻訳するという契約を自然な日本語で表現。",
+        "images_and_links": "事実文書に画像なし。運用入口は.jp.mdでADRは出典決定を参照。英語原図を4言語の証拠として扱う記述は追加していない。"
+      },
+      "findings": [
+        {
+          "id": "native-ui-boundary",
+          "status": "resolved",
+          "description": "旧レビューは新UIサービスとプロキシ境界を含まない。",
+          "resolution": "中文と同じ検証済み境界を追記し、旧ハッシュ承認を失効させて現ファイルを再レビュー。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/observability.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 14:54:15",
+      "result": "approved",
+      "translation_sha256": "56bb1d99839d43dca6a81500afc1ab77e7a4037dbe0c61e092c9f2e10b8e6eaa",
+      "checks": {
+        "coverage_and_meaning": "기존 7개 절과 추가 UI 경계를 대조했다. 신호, 관리 포트, 대시보드, 지표, 임계값, SLO, 운영 보안과 검증 범위를 유지한다.",
+        "technical_literals": "v0.30.1, 내부 alertmanager:9093, UI 8080, 호스트 127.0.0.1:9093, 네 언어 경로, hash 필터와 영어 요일 저장 값을 실제 구현과 대조했다.",
+        "security_and_failure_semantics": "기본 비활성, 관리면 비공개, 제한된 레이블, 민감 payload 금지, 외부 알림 별도 검증을 보존한다. 소스 해시나 구조가 다르면 빌드 실패하며 인증이나 업무 서비스를 추가하지 않는다.",
+        "language_and_terminology": "공식 백엔드와 소스 번역 UI 프록시를 구분하며 API 값, 수신기와 상태 열거 값은 원문 데이터임을 명시한다. 예시 임계값을 운영 보장으로 바꾸지 않았다.",
+        "images_and_links": "사실 문서에는 이미지가 없다. 운영 링크는.kr.md이며 ADR-0004로 출처·라이선스를 연결한다. 업스트림에 원래 네 언어가 있다고 오해시키지 않는다."
+      },
+      "findings": [
+        {
+          "id": "native-ui-boundary",
+          "status": "resolved",
+          "description": "기존 검토 범위에 새 UI 서비스와 프록시 경계가 없었다.",
+          "resolution": "네 언어에 동일한 실제 경계를 추가하고 이전 해시 승인을 무효화한 뒤 현재 파일을 다시 검토했다."
+        }
+      ]
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
@@ -28,6 +29,10 @@ const fixtureTargets = [
   'database/seed/manifest.yaml',
   'database/changelog/platform/db.changelog-platform.yaml',
   'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
+  'docs/docs-manifest.yaml',
+  'docs/i18n-review-queue.md',
+  'tools/omni-cli/scripts/translation-queue.mjs',
+  'tools/omni-cli/scripts/translation-review.mjs',
 ];
 
 afterEach(() => {
@@ -54,11 +59,25 @@ describe('service integration renderer', () => {
       { checkGit: false },
     );
 
-    assert.equal(rendered.changes.length, 34);
+    assert.equal(rendered.changes.length, 39);
     assert.equal(readFileSync(resolve(fixtureRoot, 'omni-backend/pom.xml'), 'utf8'), originalPom);
     assert.equal(existsSync(resolve(fixtureRoot, 'omni-backend/omni-inventory-sample')), false);
 
     const byTarget = new Map(rendered.changes.map((change) => [change.target, change.after]));
+    const documentation = parseDocument(required(byTarget, 'docs/docs-manifest.yaml')).toJS() as {
+      documents: Array<{ id: string; source_sha256: string; translations: Record<string, { path: string; status: string; reviewed_at: unknown; reviewer?: string }> }>;
+    };
+    const registered = documentation.documents.find((entry) => entry.id === 'service-inventory-sample');
+    assert.ok(registered);
+    assert.equal(registered.source_sha256, createHash('sha256').update(required(byTarget, 'docs/inventory-sample.md')).digest('hex'));
+    for (const locale of ['en-US', 'ja-JP', 'ko-KR']) {
+      const translation: { path: string; status: string; reviewed_at: unknown; reviewer?: string } = registered.translations[locale]!;
+      assert.ok(required(byTarget, translation.path).startsWith('# Inventory Sample'));
+      assert.equal(translation.status, 'present-unverified');
+      assert.equal(translation.reviewed_at, null);
+      assert.equal(translation.reviewer, undefined);
+    }
+    assert.match(required(byTarget, 'docs/i18n-review-queue.md'), /\| service-inventory-sample \| docs\/inventory-sample.md \| [a-f0-9]{12} \| present-unverified \| present-unverified \| present-unverified \|/);
     assert.match(required(byTarget, 'omni-backend/pom.xml'), /<module>omni-inventory-sample<\/module>/);
     assert.match(required(byTarget, 'scripts/sql/seed/inventory-sample-permissions.sql'), /NOT EXISTS/);
     assert.doesNotMatch(
@@ -173,7 +192,7 @@ describe('service integration renderer', () => {
 
     const result = applyRenderedIntegration(fixtureRoot, rendered);
 
-    assert.deepEqual(result, { files: 34, cleanupWarnings: [] });
+    assert.deepEqual(result, { files: 39, cleanupWarnings: [] });
     for (const change of rendered.changes) {
       assert.equal(readFileSync(resolve(fixtureRoot, ...change.target.split('/')), 'utf8'), change.after);
     }
@@ -193,7 +212,7 @@ describe('service integration renderer', () => {
       .map((change) => [change.target, readFileSync(resolve(fixtureRoot, ...change.target.split('/')), 'utf8')]));
 
     assert.throws(
-      () => applyRenderedIntegration(fixtureRoot, rendered, { failAfter: 5 }),
+      () => applyRenderedIntegration(fixtureRoot, rendered, { failAfter: 38 }),
       /已完整回滚/,
     );
     for (const change of rendered.changes) {

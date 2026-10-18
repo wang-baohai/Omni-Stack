@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "kind": "site-markdown-generic-literal-format-fix",
+  "at": "2026-10-17T18:10:43.068Z",
+  "source_head": "8679eb7232cc1a4fd7ddc1fdd95396e1ab66d2d6",
+  "actual_original_line_reads": [
+    "af5cfc",
+    "f90ca3"
+  ],
+  "actual_controller_scope_output": "3b592f",
+  "root_cause": "Bare response-type angle brackets in normal Markdown were parsed as unclosed HTML by Vue. v-pre preserves template interpolation but does not close or escape malformed HTML.",
+  "actual_red_scope": {
+    "image_build": "current-site-image-builds-548.json",
+    "prepared_page_audit": "site-vue-parsing-audit-549c.json",
+    "prepared_pages": 192,
+    "failed_pages": 8
+  },
+  "prior_complete_semantic_reviews": [
+    {
+      "id": "srm",
+      "path": "docs/reference/reviews/srm.json",
+      "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f",
+      "source_sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03",
+      "translations": {
+        "en-US": {
+          "path": "docs/srm.en.md",
+          "sha256": "1e147b3fbe8dd1d40dec801b18341af562242567b8e7e5710ed8dbe5a215d534"
+        },
+        "ja-JP": {
+          "path": "docs/srm.jp.md",
+          "sha256": "981822e9042ad22d8dc488a3ece89a5a80e7c56d41da5ac6ac814a7e212d93e1"
+        },
+        "ko-KR": {
+          "path": "docs/srm.kr.md",
+          "sha256": "652a77c1ae78d9c0d5a54e8161e8ef47016f2e7a68a19909b36efca0dabeb58a"
+        }
+      }
+    },
+    {
+      "id": "procurement-design",
+      "path": "docs/reference/reviews/procurement-design.json",
+      "sha256": "5569f107d72abe3986c5f73c8144adf6402736bb59ecd7e737825694efa6217a",
+      "source_sha256": "06735bfc48c6082fb9e96e92d80c62c4a5be24f40659500acee7565233c47303",
+      "translations": {
+        "en-US": {
+          "path": "docs/design/procurement-design.en.md",
+          "sha256": "54a7800021fc41c6845735fdb24236d30ed03871993298c9a7088b6946f53574"
+        },
+        "ja-JP": {
+          "path": "docs/design/procurement-design.jp.md",
+          "sha256": "3090ee93a6939a5281c7302b3e1285589a5091021433ed48d7d037db0c78a427"
+        },
+        "ko-KR": {
+          "path": "docs/design/procurement-design.kr.md",
+          "sha256": "d6118959cb44e49815d72db4404966d5541946cb96a07ae9b08e8fb5e98ac8d9"
+        }
+      }
+    }
+  ],
+  "fix_scope": "Add code formatting around16 existing generic literal spans in8 lines across2four-language families. No literal spelling,endpoint,permission,DTO,transaction,diagram/codefence,link or other prose changes.",
+  "targeted_actual_vue_parse": {
+    "pages": 8,
+    "failed": 0,
+    "parser": "@vue/compiler-sfc",
+    "runtime": "local Docker",
+    "full192_page_recheck_and_image_build_pending": true
+  },
+  "documents": [
+    {
+      "path": "docs/srm.md",
+      "family": "srm",
+      "locale": "zh-CN",
+      "before_sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03",
+      "after_sha256": "b5d3f7de4909a61855d7bc0d1e3aebea1df2f88b33f2f753e8c82ab96d26c200",
+      "line": 196,
+      "added_code_spans": [
+        "R<T>",
+        "R<PageResult<T>>",
+        "R<List<T>>"
+      ]
+    },
+    {
+      "path": "docs/srm.en.md",
+      "family": "srm",
+      "locale": "en-US",
+      "before_sha256": "1e147b3fbe8dd1d40dec801b18341af562242567b8e7e5710ed8dbe5a215d534",
+      "after_sha256": "c4df01c59a3f951cbc01d2172f840b5d9bd8c6d21b72e38bbedce244d3db2457",
+      "line": 196,
+      "added_code_spans": [
+        "R<T>",
+        "R<PageResult<T>>",
+        "R<List<T>>"
+      ]
+    },
+    {
+      "path": "docs/srm.jp.md",
+      "family": "srm",
+      "locale": "ja-JP",
+      "before_sha256": "981822e9042ad22d8dc488a3ece89a5a80e7c56d41da5ac6ac814a7e212d93e1",
+      "after_sha256": "4940e1f357d3689c5bfd461e0950ef2059441750c603bb5d4c6d4bc13bdcbc3f",
+      "line": 196,
+      "added_code_spans": [
+        "R<T>",
+        "R<PageResult<T>>",
+        "R<List<T>>"
+      ]
+    },
+    {
+      "path": "docs/srm.kr.md",
+      "family": "srm",
+      "locale": "ko-KR",
+      "before_sha256": "652a77c1ae78d9c0d5a54e8161e8ef47016f2e7a68a19909b36efca0dabeb58a",
+      "after_sha256": "0e7cff066981da724578e2d4cf79edc23194807bc8bcd1c056c26c4a942926bb",
+      "line": 196,
+      "added_code_spans": [
+        "R<T>",
+        "R<PageResult<T>>",
+        "R<List<T>>"
+      ]
+    },
+    {
+      "path": "docs/design/procurement-design.md",
+      "family": "procurement-design",
+      "locale": "zh-CN",
+      "before_sha256": "06735bfc48c6082fb9e96e92d80c62c4a5be24f40659500acee7565233c47303",
+      "after_sha256": "57521465bcd8e8779d9465ca36a6f9bb89db50800a62c2d3cbe8a05ef6041a49",
+      "line": 315,
+      "added_code_spans": [
+        "R<AwardResult>"
+      ]
+    },
+    {
+      "path": "docs/design/procurement-design.en.md",
+      "family": "procurement-design",
+      "locale": "en-US",
+      "before_sha256": "54a7800021fc41c6845735fdb24236d30ed03871993298c9a7088b6946f53574",
+      "after_sha256": "e4a755c6e1d46c9ed930ba57d241b82bb1be7ad5722875e56e328404ba662773",
+      "line": 315,
+      "added_code_spans": [
+        "R<AwardResult>"
+      ]
+    },
+    {
+      "path": "docs/design/procurement-design.jp.md",
+      "family": "procurement-design",
+      "locale": "ja-JP",
+      "before_sha256": "3090ee93a6939a5281c7302b3e1285589a5091021433ed48d7d037db0c78a427",
+      "after_sha256": "218d72af5c9599813f59ffedb4509322fce149605455d9c84301a5343853bc5d",
+      "line": 315,
+      "added_code_spans": [
+        "R<AwardResult>"
+      ]
+    },
+    {
+      "path": "docs/design/procurement-design.kr.md",
+      "family": "procurement-design",
+      "locale": "ko-KR",
+      "before_sha256": "d6118959cb44e49815d72db4404966d5541946cb96a07ae9b08e8fb5e98ac8d9",
+      "after_sha256": "9e29a8cc31a0250cf47917a225fdb4c0073f547d63d8ce1e12d2d5aa3608ba47",
+      "line": 315,
+      "added_code_spans": [
+        "R<AwardResult>"
+      ]
+    }
+  ],
+  "new_whole_document_rereads": 0,
+  "new_translation_rows": 0,
+  "application_source_changes": false,
+  "business_writes": 0,
+  "full_original_A_G_preserved": true,
+  "global_release_complete": false
+}

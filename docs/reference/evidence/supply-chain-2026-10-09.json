@@ -1,0 +1,1793 @@
+{
+  "schema": 1,
+  "kind": "local-docker-read-only-ui-evidence",
+  "recorded_at": "2026-10-09T08:23:45.7227068+00:00",
+  "project": "omni-wiki-acceptance-20261009",
+  "run_id": "WIKI-20261009A",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "application_source_sha256": "ee97fbe4a5de6ed820f02ed22d7f5f0763cc301a8e796d38b24488fbbec83244",
+  "application_source_digest_method": "Sorted repository-relative tracked paths under omni-backend and omni-frontend/src, space, raw-file SHA-256, LF; SHA-256 over UTF-8 list",
+  "application_source_file_count": 1339,
+  "runtime": [
+    {
+      "service": "omni-asset-1",
+      "image": "omni-wiki-acceptance-asset:latest",
+      "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+      "host_ports": []
+    },
+    {
+      "service": "omni-procurement-1",
+      "image": "omni-wiki-acceptance-procurement:latest",
+      "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+      "host_ports": []
+    },
+    {
+      "service": "omni-gateway-1",
+      "image": "omni-wiki-acceptance-gateway:latest",
+      "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+      "host_ports": []
+    },
+    {
+      "service": "omni-crm-1",
+      "image": "omni-wiki-acceptance-crm:latest",
+      "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+      "host_ports": []
+    },
+    {
+      "service": "omni-srm-1",
+      "image": "omni-wiki-acceptance-srm:latest",
+      "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+      "host_ports": []
+    },
+    {
+      "service": "omni-auth-1",
+      "image": "omni-wiki-acceptance-auth:latest",
+      "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+      "host_ports": []
+    },
+    {
+      "service": "nacos-1",
+      "image": "nacos/nacos-server:v3.1.1",
+      "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+      "host_ports": []
+    },
+    {
+      "service": "omni-base-1",
+      "image": "omni-wiki-acceptance-base:latest",
+      "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+      "host_ports": []
+    },
+    {
+      "service": "omni-workflow-1",
+      "image": "omni-wiki-acceptance-workflow:latest",
+      "image_id": "sha256:b2296a5b1206b492176bfa5aae197aed5cb473e32934467142fbaa81371d4b86",
+      "host_ports": []
+    },
+    {
+      "service": "xxl-job-admin-1",
+      "image": "xuxueli/xxl-job-admin:3.3.1",
+      "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+      "host_ports": []
+    },
+    {
+      "service": "rocketmq-broker-1",
+      "image": "omni-wiki-acceptance-rocketmq-broker:5.3.2",
+      "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+      "host_ports": []
+    },
+    {
+      "service": "mysql-1",
+      "image": "mysql:8.4",
+      "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "host_ports": []
+    },
+    {
+      "service": "redis-1",
+      "image": "redis:7.4",
+      "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+      "host_ports": []
+    },
+    {
+      "service": "rocketmq-namesrv-1",
+      "image": "apache/rocketmq:5.3.2",
+      "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+      "host_ports": []
+    },
+    {
+      "service": "omni-frontend-1",
+      "image": "omni-wiki-acceptance-frontend:latest",
+      "image_id": "sha256:4f932739bd2f73523b918944a51ab0134e84b85659a2bf2cebef885b12fff671",
+      "host_ports": []
+    }
+  ],
+  "browser": {
+    "image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+    "image_id": "sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48",
+    "playwright": "1.61.1",
+    "node": "24.17.0"
+  },
+  "mocks": false,
+  "business_mutations": "Owned records were created through formal APIs in a separate teaching run; this Playwright test reads the resulting records only.",
+  "production_base_image_build_proven": false,
+  "runtime_build_limitation": "Formal base-image build was blocked by registry DNS/authentication. Explicit private verification images used the current compiled application jars and frontend build with cached local bases.",
+  "test_result": {
+    "passed": 48,
+    "failed": 0,
+    "skipped": 0
+  },
+  "translation_human_review": "pending; agent visual review is not human translation sign-off",
+  "records": [
+    {
+      "id": "teaching-procurement-requisition-approved-zh-CN",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-approved",
+      "locale": "zh-CN",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "APPROVED",
+      "image": "docs/images/zh-CN/procurement-requisition-approved.png",
+      "sha256": "6d4c396c90f7fc607e866de0acfcd1814ca7e843ae37fa69447799753eb09b10",
+      "captured_at": "2026-10-09T08:01:14.731Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-approved",
+        "locale": "zh-CN",
+        "sha256": "6d4c396c90f7fc607e866de0acfcd1814ca7e843ae37fa69447799753eb09b10",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-rejected-zh-CN",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-rejected",
+      "locale": "zh-CN",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/zh-CN/procurement-requisition-rejected.png",
+      "sha256": "733f060e15dcf68ebab6232530f1c94dfa469c1d4b71150a020649a8b39ece72",
+      "captured_at": "2026-10-09T08:01:15.743Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-rejected",
+        "locale": "zh-CN",
+        "sha256": "733f060e15dcf68ebab6232530f1c94dfa469c1d4b71150a020649a8b39ece72",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-cancelled-zh-CN",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-cancelled",
+      "locale": "zh-CN",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CANCELLED",
+      "image": "docs/images/zh-CN/procurement-requisition-cancelled.png",
+      "sha256": "1a5d36d49ccc9d60ff96d12700833aaef41c12e7961ee718e9ede764de9794fe",
+      "captured_at": "2026-10-09T08:01:16.69Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-cancelled",
+        "locale": "zh-CN",
+        "sha256": "1a5d36d49ccc9d60ff96d12700833aaef41c12e7961ee718e9ede764de9794fe",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-rfq-awarded-zh-CN",
+      "module": "procurement",
+      "flow": "rfq",
+      "step": "procurement-rfq-awarded",
+      "locale": "zh-CN",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/rfq",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "AWARDED",
+      "image": "docs/images/zh-CN/procurement-rfq-awarded.png",
+      "sha256": "5aebde411a4048ffb49373589dcbbd3f6cf7697d43dc09e93601964faeda2479",
+      "captured_at": "2026-10-09T08:01:17.646Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-rfq-awarded",
+        "locale": "zh-CN",
+        "sha256": "5aebde411a4048ffb49373589dcbbd3f6cf7697d43dc09e93601964faeda2479",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-procurement-purchase-order-received-zh-CN",
+      "module": "procurement",
+      "flow": "purchase-order",
+      "step": "procurement-purchase-order-received",
+      "locale": "zh-CN",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/purchase-order",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "RECEIVED",
+      "image": "docs/images/zh-CN/procurement-purchase-order-received.png",
+      "sha256": "b35b860e1af23e4d7ffeb7d0ad1cd74058ab6ea20565496806b8779b3ea0eb40",
+      "captured_at": "2026-10-09T08:01:18.745Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-purchase-order-received",
+        "locale": "zh-CN",
+        "sha256": "b35b860e1af23e4d7ffeb7d0ad1cd74058ab6ea20565496806b8779b3ea0eb40",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-goods-receipt-fail-nonasset-zh-CN",
+      "module": "procurement",
+      "flow": "goods-receipt",
+      "step": "procurement-goods-receipt-fail-nonasset",
+      "locale": "zh-CN",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/goods-receipt",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CONFIRMED",
+      "image": "docs/images/zh-CN/procurement-goods-receipt-fail-nonasset.png",
+      "sha256": "5a51026865c5220f9ce63fefa00a79e26c8ab4465b5d6540f94cd5104d2dd0eb",
+      "captured_at": "2026-10-09T08:01:19.785Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-goods-receipt-fail-nonasset",
+        "locale": "zh-CN",
+        "sha256": "5a51026865c5220f9ce63fefa00a79e26c8ab4465b5d6540f94cd5104d2dd0eb",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-procurement-goods-receipt-pass-zh-CN",
+      "module": "procurement",
+      "flow": "goods-receipt",
+      "step": "procurement-goods-receipt-pass",
+      "locale": "zh-CN",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/goods-receipt",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CONFIRMED",
+      "image": "docs/images/zh-CN/procurement-goods-receipt-pass.png",
+      "sha256": "d26823495e71e9856b6f25a044ef11e0b1f117810c83391d79e37a491ad596ef",
+      "captured_at": "2026-10-09T08:01:20.886Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-goods-receipt-pass",
+        "locale": "zh-CN",
+        "sha256": "d26823495e71e9856b6f25a044ef11e0b1f117810c83391d79e37a491ad596ef",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-transfer-rejected-zh-CN",
+      "module": "asset",
+      "flow": "transfer-approval",
+      "step": "asset-transfer-rejected",
+      "locale": "zh-CN",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/transfer",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/zh-CN/asset-transfer-rejected.png",
+      "sha256": "991e8dfee5001c2ce4be65887d011b289cca37ccadcb2495ad2c53418bd663b6",
+      "captured_at": "2026-10-09T08:01:21.762Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-transfer-rejected",
+        "locale": "zh-CN",
+        "sha256": "991e8dfee5001c2ce4be65887d011b289cca37ccadcb2495ad2c53418bd663b6",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-transfer-completed-zh-CN",
+      "module": "asset",
+      "flow": "transfer-approval",
+      "step": "asset-transfer-completed",
+      "locale": "zh-CN",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/transfer",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/zh-CN/asset-transfer-completed.png",
+      "sha256": "ba50a5a00a4bfd0727bf341909952bb3388c348bd3682e8c5b0b17d6325b5ee8",
+      "captured_at": "2026-10-09T08:01:22.606Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-transfer-completed",
+        "locale": "zh-CN",
+        "sha256": "ba50a5a00a4bfd0727bf341909952bb3388c348bd3682e8c5b0b17d6325b5ee8",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-disposal-rejected-zh-CN",
+      "module": "asset",
+      "flow": "disposal-approval",
+      "step": "asset-disposal-rejected",
+      "locale": "zh-CN",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/disposal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/zh-CN/asset-disposal-rejected.png",
+      "sha256": "748aaf04b71c354f4c8b53088a1a08f346b9a4c4d718d6302ca79bfce0ea70f7",
+      "captured_at": "2026-10-09T08:01:23.607Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-disposal-rejected",
+        "locale": "zh-CN",
+        "sha256": "748aaf04b71c354f4c8b53088a1a08f346b9a4c4d718d6302ca79bfce0ea70f7",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-disposal-completed-zh-CN",
+      "module": "asset",
+      "flow": "disposal-approval",
+      "step": "asset-disposal-completed",
+      "locale": "zh-CN",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/disposal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/zh-CN/asset-disposal-completed.png",
+      "sha256": "192a3ebdb9645d3ece53c2df1cf5a222ea8bca0f859075c4756c175b4549d71d",
+      "captured_at": "2026-10-09T08:01:24.574Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-disposal-completed",
+        "locale": "zh-CN",
+        "sha256": "192a3ebdb9645d3ece53c2df1cf5a222ea8bca0f859075c4756c175b4549d71d",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-scrapped-card-zh-CN",
+      "module": "asset",
+      "flow": "ledger",
+      "step": "asset-scrapped-card",
+      "locale": "zh-CN",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "SCRAPPED",
+      "image": "docs/images/zh-CN/asset-scrapped-card.png",
+      "sha256": "ff5c4e8504c2b62775eeb4ab7029a0d9f50effd44deb39f6cf8e8e9e178b7ec3",
+      "captured_at": "2026-10-09T08:01:25.472Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-scrapped-card",
+        "locale": "zh-CN",
+        "sha256": "ff5c4e8504c2b62775eeb4ab7029a0d9f50effd44deb39f6cf8e8e9e178b7ec3",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "Persisted backend history remarks remain Chinese in all locales; localized UI labels and real history values are shown without alteration."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-approved-en-US",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-approved",
+      "locale": "en-US",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "APPROVED",
+      "image": "docs/images/en-US/procurement-requisition-approved.png",
+      "sha256": "21dccad596221f9188f7a2147451112145a5a3b8dd57e1d09b018938ccbc2ed1",
+      "captured_at": "2026-10-09T08:01:26.445Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-approved",
+        "locale": "en-US",
+        "sha256": "21dccad596221f9188f7a2147451112145a5a3b8dd57e1d09b018938ccbc2ed1",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-rejected-en-US",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-rejected",
+      "locale": "en-US",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/en-US/procurement-requisition-rejected.png",
+      "sha256": "46fda788f7a283203ff091f3fae1fd02ed785e36c1f4437ce24cd73b4d4cc697",
+      "captured_at": "2026-10-09T08:01:27.412Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-rejected",
+        "locale": "en-US",
+        "sha256": "46fda788f7a283203ff091f3fae1fd02ed785e36c1f4437ce24cd73b4d4cc697",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-cancelled-en-US",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-cancelled",
+      "locale": "en-US",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CANCELLED",
+      "image": "docs/images/en-US/procurement-requisition-cancelled.png",
+      "sha256": "6dccbfa0c0a75f4d36609235628600d82015f14b270d08248ea408dd51803bcd",
+      "captured_at": "2026-10-09T08:01:28.318Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-cancelled",
+        "locale": "en-US",
+        "sha256": "6dccbfa0c0a75f4d36609235628600d82015f14b270d08248ea408dd51803bcd",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-rfq-awarded-en-US",
+      "module": "procurement",
+      "flow": "rfq",
+      "step": "procurement-rfq-awarded",
+      "locale": "en-US",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/rfq",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "AWARDED",
+      "image": "docs/images/en-US/procurement-rfq-awarded.png",
+      "sha256": "0ad692452864b89fd07597ffd5a4ebc2b3a8c22c0e3e39d49a7903f3c50ee73e",
+      "captured_at": "2026-10-09T08:01:29.27Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-rfq-awarded",
+        "locale": "en-US",
+        "sha256": "0ad692452864b89fd07597ffd5a4ebc2b3a8c22c0e3e39d49a7903f3c50ee73e",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-procurement-purchase-order-received-en-US",
+      "module": "procurement",
+      "flow": "purchase-order",
+      "step": "procurement-purchase-order-received",
+      "locale": "en-US",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/purchase-order",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "RECEIVED",
+      "image": "docs/images/en-US/procurement-purchase-order-received.png",
+      "sha256": "b41615daa815581975912dbb299f8e1e951de68bbbdcf7691e8edb7e612f4872",
+      "captured_at": "2026-10-09T08:01:30.355Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-purchase-order-received",
+        "locale": "en-US",
+        "sha256": "b41615daa815581975912dbb299f8e1e951de68bbbdcf7691e8edb7e612f4872",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-goods-receipt-fail-nonasset-en-US",
+      "module": "procurement",
+      "flow": "goods-receipt",
+      "step": "procurement-goods-receipt-fail-nonasset",
+      "locale": "en-US",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/goods-receipt",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CONFIRMED",
+      "image": "docs/images/en-US/procurement-goods-receipt-fail-nonasset.png",
+      "sha256": "84650d9366526d786534ebe6c3b0ab1d322c8f358d69b1fd903253ef6b8ab268",
+      "captured_at": "2026-10-09T08:01:31.6Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-goods-receipt-fail-nonasset",
+        "locale": "en-US",
+        "sha256": "84650d9366526d786534ebe6c3b0ab1d322c8f358d69b1fd903253ef6b8ab268",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-procurement-goods-receipt-pass-en-US",
+      "module": "procurement",
+      "flow": "goods-receipt",
+      "step": "procurement-goods-receipt-pass",
+      "locale": "en-US",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/goods-receipt",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CONFIRMED",
+      "image": "docs/images/en-US/procurement-goods-receipt-pass.png",
+      "sha256": "bc48ddf263863ef93fd9a097b53d0a7b68eecab30efc547fe97939fce88a246d",
+      "captured_at": "2026-10-09T08:01:32.598Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-goods-receipt-pass",
+        "locale": "en-US",
+        "sha256": "bc48ddf263863ef93fd9a097b53d0a7b68eecab30efc547fe97939fce88a246d",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-transfer-rejected-en-US",
+      "module": "asset",
+      "flow": "transfer-approval",
+      "step": "asset-transfer-rejected",
+      "locale": "en-US",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/transfer",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/en-US/asset-transfer-rejected.png",
+      "sha256": "97ae391e3c8aeaeac92c5b9f2c13c4855e84e28c0a5fad6f8029e5f86a4c8c00",
+      "captured_at": "2026-10-09T08:01:33.563Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-transfer-rejected",
+        "locale": "en-US",
+        "sha256": "97ae391e3c8aeaeac92c5b9f2c13c4855e84e28c0a5fad6f8029e5f86a4c8c00",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-transfer-completed-en-US",
+      "module": "asset",
+      "flow": "transfer-approval",
+      "step": "asset-transfer-completed",
+      "locale": "en-US",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/transfer",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/en-US/asset-transfer-completed.png",
+      "sha256": "a1008512bfda787e5fe3028e642c5ecb2fdaa675aed02f85c96c7688b4cff05c",
+      "captured_at": "2026-10-09T08:01:34.551Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-transfer-completed",
+        "locale": "en-US",
+        "sha256": "a1008512bfda787e5fe3028e642c5ecb2fdaa675aed02f85c96c7688b4cff05c",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-disposal-rejected-en-US",
+      "module": "asset",
+      "flow": "disposal-approval",
+      "step": "asset-disposal-rejected",
+      "locale": "en-US",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/disposal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/en-US/asset-disposal-rejected.png",
+      "sha256": "00d406ff2669b5ccc8990dec7cdf5ff2db72f61c55bd131f726471957612f4c7",
+      "captured_at": "2026-10-09T08:01:35.499Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-disposal-rejected",
+        "locale": "en-US",
+        "sha256": "00d406ff2669b5ccc8990dec7cdf5ff2db72f61c55bd131f726471957612f4c7",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-disposal-completed-en-US",
+      "module": "asset",
+      "flow": "disposal-approval",
+      "step": "asset-disposal-completed",
+      "locale": "en-US",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/disposal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/en-US/asset-disposal-completed.png",
+      "sha256": "89941beaf0c2eb3be5892ace5dff2efec85418fb61ac33aca1f33d464d9c051c",
+      "captured_at": "2026-10-09T08:01:36.492Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-disposal-completed",
+        "locale": "en-US",
+        "sha256": "89941beaf0c2eb3be5892ace5dff2efec85418fb61ac33aca1f33d464d9c051c",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-scrapped-card-en-US",
+      "module": "asset",
+      "flow": "ledger",
+      "step": "asset-scrapped-card",
+      "locale": "en-US",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "SCRAPPED",
+      "image": "docs/images/en-US/asset-scrapped-card.png",
+      "sha256": "cf1bb0a20d4cfc09a599529a022184cce88e9ca5f5e57111d6d02eb9eed4ddde",
+      "captured_at": "2026-10-09T08:01:37.444Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-scrapped-card",
+        "locale": "en-US",
+        "sha256": "cf1bb0a20d4cfc09a599529a022184cce88e9ca5f5e57111d6d02eb9eed4ddde",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "Persisted backend history remarks remain Chinese in all locales; localized UI labels and real history values are shown without alteration."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-approved-ja-JP",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-approved",
+      "locale": "ja-JP",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "APPROVED",
+      "image": "docs/images/ja-JP/procurement-requisition-approved.png",
+      "sha256": "64f148856dd575c3a997a29f02dc5d8aef2b3a95d23646cf35762b39b3993bd1",
+      "captured_at": "2026-10-09T08:01:38.428Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-approved",
+        "locale": "ja-JP",
+        "sha256": "64f148856dd575c3a997a29f02dc5d8aef2b3a95d23646cf35762b39b3993bd1",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-rejected-ja-JP",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-rejected",
+      "locale": "ja-JP",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/ja-JP/procurement-requisition-rejected.png",
+      "sha256": "285e63f007e22e3bbc6a335a0d8662d0d71e462ccdc5e2192029d5f6f63a9109",
+      "captured_at": "2026-10-09T08:01:39.45Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-rejected",
+        "locale": "ja-JP",
+        "sha256": "285e63f007e22e3bbc6a335a0d8662d0d71e462ccdc5e2192029d5f6f63a9109",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-cancelled-ja-JP",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-cancelled",
+      "locale": "ja-JP",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CANCELLED",
+      "image": "docs/images/ja-JP/procurement-requisition-cancelled.png",
+      "sha256": "a5fa3fb8c1cf8677622215835d56776f785431c0d5d403bfa93f6baa92810cdf",
+      "captured_at": "2026-10-09T08:01:40.462Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-cancelled",
+        "locale": "ja-JP",
+        "sha256": "a5fa3fb8c1cf8677622215835d56776f785431c0d5d403bfa93f6baa92810cdf",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-rfq-awarded-ja-JP",
+      "module": "procurement",
+      "flow": "rfq",
+      "step": "procurement-rfq-awarded",
+      "locale": "ja-JP",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/rfq",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "AWARDED",
+      "image": "docs/images/ja-JP/procurement-rfq-awarded.png",
+      "sha256": "d5b2de4dd7eeeab9df03b7f5a4de3d1731d632f1e74f501c809f51a87aa7051c",
+      "captured_at": "2026-10-09T08:01:41.551Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-rfq-awarded",
+        "locale": "ja-JP",
+        "sha256": "d5b2de4dd7eeeab9df03b7f5a4de3d1731d632f1e74f501c809f51a87aa7051c",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-procurement-purchase-order-received-ja-JP",
+      "module": "procurement",
+      "flow": "purchase-order",
+      "step": "procurement-purchase-order-received",
+      "locale": "ja-JP",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/purchase-order",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "RECEIVED",
+      "image": "docs/images/ja-JP/procurement-purchase-order-received.png",
+      "sha256": "8ef2525c7f66d89bf0d9a55b94e36571f2b2825ad3520fc952e6481928e34996",
+      "captured_at": "2026-10-09T08:01:42.896Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-purchase-order-received",
+        "locale": "ja-JP",
+        "sha256": "8ef2525c7f66d89bf0d9a55b94e36571f2b2825ad3520fc952e6481928e34996",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-goods-receipt-fail-nonasset-ja-JP",
+      "module": "procurement",
+      "flow": "goods-receipt",
+      "step": "procurement-goods-receipt-fail-nonasset",
+      "locale": "ja-JP",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/goods-receipt",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CONFIRMED",
+      "image": "docs/images/ja-JP/procurement-goods-receipt-fail-nonasset.png",
+      "sha256": "e81c92da481b8f9bcfb885cef72af1e16fdd8c87322e56334d4180e2281b33f7",
+      "captured_at": "2026-10-09T08:01:44.35Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-goods-receipt-fail-nonasset",
+        "locale": "ja-JP",
+        "sha256": "e81c92da481b8f9bcfb885cef72af1e16fdd8c87322e56334d4180e2281b33f7",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-procurement-goods-receipt-pass-ja-JP",
+      "module": "procurement",
+      "flow": "goods-receipt",
+      "step": "procurement-goods-receipt-pass",
+      "locale": "ja-JP",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/goods-receipt",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CONFIRMED",
+      "image": "docs/images/ja-JP/procurement-goods-receipt-pass.png",
+      "sha256": "45d37fa76c4ea11f1f92049bb8d7a3e104e8185190d6157f6179b38552992ca1",
+      "captured_at": "2026-10-09T08:01:45.345Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-goods-receipt-pass",
+        "locale": "ja-JP",
+        "sha256": "45d37fa76c4ea11f1f92049bb8d7a3e104e8185190d6157f6179b38552992ca1",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-transfer-rejected-ja-JP",
+      "module": "asset",
+      "flow": "transfer-approval",
+      "step": "asset-transfer-rejected",
+      "locale": "ja-JP",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/transfer",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/ja-JP/asset-transfer-rejected.png",
+      "sha256": "f289cf76b1aba5c89619cfa35e44bc927cf52f755f24318f4dfa2f45ee1e0c65",
+      "captured_at": "2026-10-09T08:01:46.41Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-transfer-rejected",
+        "locale": "ja-JP",
+        "sha256": "f289cf76b1aba5c89619cfa35e44bc927cf52f755f24318f4dfa2f45ee1e0c65",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-transfer-completed-ja-JP",
+      "module": "asset",
+      "flow": "transfer-approval",
+      "step": "asset-transfer-completed",
+      "locale": "ja-JP",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/transfer",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/ja-JP/asset-transfer-completed.png",
+      "sha256": "a17f5c1883a15b532fa284e8144b714a16ecf1d4f57848c1b949c75b3d3aa270",
+      "captured_at": "2026-10-09T08:01:47.362Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-transfer-completed",
+        "locale": "ja-JP",
+        "sha256": "a17f5c1883a15b532fa284e8144b714a16ecf1d4f57848c1b949c75b3d3aa270",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-disposal-rejected-ja-JP",
+      "module": "asset",
+      "flow": "disposal-approval",
+      "step": "asset-disposal-rejected",
+      "locale": "ja-JP",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/disposal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/ja-JP/asset-disposal-rejected.png",
+      "sha256": "fd95fdac866d329c376e7aa9a78869b8e5cb8b556b35c9d0250f4a2fc6a02d87",
+      "captured_at": "2026-10-09T08:01:48.517Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-disposal-rejected",
+        "locale": "ja-JP",
+        "sha256": "fd95fdac866d329c376e7aa9a78869b8e5cb8b556b35c9d0250f4a2fc6a02d87",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-disposal-completed-ja-JP",
+      "module": "asset",
+      "flow": "disposal-approval",
+      "step": "asset-disposal-completed",
+      "locale": "ja-JP",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/disposal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/ja-JP/asset-disposal-completed.png",
+      "sha256": "b3618dc6a83c10659038e6f2116cb5359fc4d66f60789a4ae218c70c497432bf",
+      "captured_at": "2026-10-09T08:01:49.518Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-disposal-completed",
+        "locale": "ja-JP",
+        "sha256": "b3618dc6a83c10659038e6f2116cb5359fc4d66f60789a4ae218c70c497432bf",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-scrapped-card-ja-JP",
+      "module": "asset",
+      "flow": "ledger",
+      "step": "asset-scrapped-card",
+      "locale": "ja-JP",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "SCRAPPED",
+      "image": "docs/images/ja-JP/asset-scrapped-card.png",
+      "sha256": "d8c74f0c4d05162e43a756f57bb890c1a12472eb92d613f2ab199c78d77c2e36",
+      "captured_at": "2026-10-09T08:01:50.582Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-scrapped-card",
+        "locale": "ja-JP",
+        "sha256": "d8c74f0c4d05162e43a756f57bb890c1a12472eb92d613f2ab199c78d77c2e36",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "Persisted backend history remarks remain Chinese in all locales; localized UI labels and real history values are shown without alteration."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-approved-ko-KR",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-approved",
+      "locale": "ko-KR",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "APPROVED",
+      "image": "docs/images/ko-KR/procurement-requisition-approved.png",
+      "sha256": "914829edc7031f91f5d555f91c1c5523cc8974a659fb9c7a3596fdcccd56633f",
+      "captured_at": "2026-10-09T08:01:51.482Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-approved",
+        "locale": "ko-KR",
+        "sha256": "914829edc7031f91f5d555f91c1c5523cc8974a659fb9c7a3596fdcccd56633f",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-rejected-ko-KR",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-rejected",
+      "locale": "ko-KR",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/ko-KR/procurement-requisition-rejected.png",
+      "sha256": "66c61fcd60aeb001cd0f446e1da855d872ecf2a537e62fe56d2e87b0a03b3a90",
+      "captured_at": "2026-10-09T08:01:52.433Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-rejected",
+        "locale": "ko-KR",
+        "sha256": "66c61fcd60aeb001cd0f446e1da855d872ecf2a537e62fe56d2e87b0a03b3a90",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-requisition-cancelled-ko-KR",
+      "module": "procurement",
+      "flow": "requisition-approval",
+      "step": "procurement-requisition-cancelled",
+      "locale": "ko-KR",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CANCELLED",
+      "image": "docs/images/ko-KR/procurement-requisition-cancelled.png",
+      "sha256": "bf04b9e7c26d4891b67ce4e8d8a5ce62dadd746727ab7d95343be22259f68817",
+      "captured_at": "2026-10-09T08:01:53.316Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-requisition-cancelled",
+        "locale": "ko-KR",
+        "sha256": "bf04b9e7c26d4891b67ce4e8d8a5ce62dadd746727ab7d95343be22259f68817",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-rfq-awarded-ko-KR",
+      "module": "procurement",
+      "flow": "rfq",
+      "step": "procurement-rfq-awarded",
+      "locale": "ko-KR",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/rfq",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "AWARDED",
+      "image": "docs/images/ko-KR/procurement-rfq-awarded.png",
+      "sha256": "81ad17d8221ecdb0b414e2d69c6bf9e0fc57bc59c25add65c19c8c025634c90f",
+      "captured_at": "2026-10-09T08:01:54.321Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-rfq-awarded",
+        "locale": "ko-KR",
+        "sha256": "81ad17d8221ecdb0b414e2d69c6bf9e0fc57bc59c25add65c19c8c025634c90f",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-procurement-purchase-order-received-ko-KR",
+      "module": "procurement",
+      "flow": "purchase-order",
+      "step": "procurement-purchase-order-received",
+      "locale": "ko-KR",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/purchase-order",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "RECEIVED",
+      "image": "docs/images/ko-KR/procurement-purchase-order-received.png",
+      "sha256": "43efeb150d2b586f2244481375a2250980670b87e1ce1aa758ab1c8347ca7b42",
+      "captured_at": "2026-10-09T08:01:55.373Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-purchase-order-received",
+        "locale": "ko-KR",
+        "sha256": "43efeb150d2b586f2244481375a2250980670b87e1ce1aa758ab1c8347ca7b42",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "The wide line table has horizontally scrollable columns; the image establishes only visible fields, not every line field."
+        ]
+      }
+    },
+    {
+      "id": "teaching-procurement-goods-receipt-fail-nonasset-ko-KR",
+      "module": "procurement",
+      "flow": "goods-receipt",
+      "step": "procurement-goods-receipt-fail-nonasset",
+      "locale": "ko-KR",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/goods-receipt",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CONFIRMED",
+      "image": "docs/images/ko-KR/procurement-goods-receipt-fail-nonasset.png",
+      "sha256": "4469f99ee6058c00f018ae944f1a84f77719350396b3baad761b6e92007c800a",
+      "captured_at": "2026-10-09T08:01:56.42Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-goods-receipt-fail-nonasset",
+        "locale": "ko-KR",
+        "sha256": "4469f99ee6058c00f018ae944f1a84f77719350396b3baad761b6e92007c800a",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-procurement-goods-receipt-pass-ko-KR",
+      "module": "procurement",
+      "flow": "goods-receipt",
+      "step": "procurement-goods-receipt-pass",
+      "locale": "ko-KR",
+      "actor": "buyer",
+      "roles": [
+        "USER",
+        "PROCUREMENT_STAFF"
+      ],
+      "route": "/admin/procurement/goods-receipt",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "CONFIRMED",
+      "image": "docs/images/ko-KR/procurement-goods-receipt-pass.png",
+      "sha256": "2906ee51d2ee2f14f367c230eb544249a41cbdac4ec79c80f045d256df826f42",
+      "captured_at": "2026-10-09T08:01:57.448Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "procurement-goods-receipt-pass",
+        "locale": "ko-KR",
+        "sha256": "2906ee51d2ee2f14f367c230eb544249a41cbdac4ec79c80f045d256df826f42",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-transfer-rejected-ko-KR",
+      "module": "asset",
+      "flow": "transfer-approval",
+      "step": "asset-transfer-rejected",
+      "locale": "ko-KR",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/transfer",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/ko-KR/asset-transfer-rejected.png",
+      "sha256": "f31ca1ee9b4abe35fcc2d36df287d5056c4636c5975051c30de8f362aac7cc52",
+      "captured_at": "2026-10-09T08:01:58.445Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-transfer-rejected",
+        "locale": "ko-KR",
+        "sha256": "f31ca1ee9b4abe35fcc2d36df287d5056c4636c5975051c30de8f362aac7cc52",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-transfer-completed-ko-KR",
+      "module": "asset",
+      "flow": "transfer-approval",
+      "step": "asset-transfer-completed",
+      "locale": "ko-KR",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/transfer",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/ko-KR/asset-transfer-completed.png",
+      "sha256": "dbf7984bacbcb6343fa024501e196854947a2baef167b0ae21d5e5e44297c3a7",
+      "captured_at": "2026-10-09T08:01:59.462Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-transfer-completed",
+        "locale": "ko-KR",
+        "sha256": "dbf7984bacbcb6343fa024501e196854947a2baef167b0ae21d5e5e44297c3a7",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-disposal-rejected-ko-KR",
+      "module": "asset",
+      "flow": "disposal-approval",
+      "step": "asset-disposal-rejected",
+      "locale": "ko-KR",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/disposal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "REJECTED",
+      "image": "docs/images/ko-KR/asset-disposal-rejected.png",
+      "sha256": "10979e56883e5ee5d7b6d5ca8e5654cf113db4db077a91ef0810ea48813b569a",
+      "captured_at": "2026-10-09T08:02:00.568Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-disposal-rejected",
+        "locale": "ko-KR",
+        "sha256": "10979e56883e5ee5d7b6d5ca8e5654cf113db4db077a91ef0810ea48813b569a",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-disposal-completed-ko-KR",
+      "module": "asset",
+      "flow": "disposal-approval",
+      "step": "asset-disposal-completed",
+      "locale": "ko-KR",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/disposal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "COMPLETED",
+      "image": "docs/images/ko-KR/asset-disposal-completed.png",
+      "sha256": "392738ebaf962a8b4c52b51ca180c23d724e170a0904890c8b2cfcfeb5a75159",
+      "captured_at": "2026-10-09T08:02:01.562Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-disposal-completed",
+        "locale": "ko-KR",
+        "sha256": "392738ebaf962a8b4c52b51ca180c23d724e170a0904890c8b2cfcfeb5a75159",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": []
+      }
+    },
+    {
+      "id": "teaching-asset-scrapped-card-ko-KR",
+      "module": "asset",
+      "flow": "ledger",
+      "step": "asset-scrapped-card",
+      "locale": "ko-KR",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": "SCRAPPED",
+      "image": "docs/images/ko-KR/asset-scrapped-card.png",
+      "sha256": "2b487e53139c05bcd66e140b75e8238bd3ba9899b35310d1e3e552009c5d8b42",
+      "captured_at": "2026-10-09T08:02:02.682Z",
+      "test": "omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts",
+      "test_sha256": "1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "visual_review": {
+        "step": "asset-scrapped-card",
+        "locale": "ko-KR",
+        "sha256": "2b487e53139c05bcd66e140b75e8238bd3ba9899b35310d1e3e552009c5d8b42",
+        "reviewer": "Codex",
+        "review_type": "agent_visual_review",
+        "status": "passed",
+        "reviewed_at": "2026-10-09T08:23:45.7227068+00:00",
+        "method": "Original-resolution four-locale contact sheet, all 12 scenes inspected",
+        "limitations": [
+          "Persisted backend history remarks remain Chinese in all locales; localized UI labels and real history values are shown without alteration."
+        ]
+      }
+    }
+  ]
+}

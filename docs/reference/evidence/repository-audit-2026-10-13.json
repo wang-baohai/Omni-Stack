@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "kind": "repository-retention-and-final-self-review",
+  "recorded_at": "2026-10-13T01:53:22.797Z",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "delivery_branch": "codex/docs-wiki-ai-delivery",
+  "source_state": "Isolated remediation files; concurrent session changes excluded",
+  "review_type": "AI_SELF_REVIEW",
+  "status": "ENGINEERING_REVIEWED_RELEASE_BLOCKED",
+  "runtime": "local Docker",
+  "inventory": {
+    "remediation_files_before_this_receipt": 873,
+    "excluded_other_session_whole_files": 15,
+    "mixed_file_owned_hunks": 2,
+    "original_index_unchanged": true,
+    "hash_mismatches": 0,
+    "deleted_tracked_files": 0,
+    "changed_executed_migrations_adoption_or_seed_sql": 0
+  },
+  "retention": {
+    "digest_matched_removed_content_backups": 32,
+    "historical_gallery_mappings_reviewed": 12,
+    "lost_historical_images_or_captions": 0,
+    "originals": "Retained in Git history; private backups digest-matched. Current tutorials replace old environment-specific procedures.",
+    "required_source_tests_fixtures_seed_ci_and_templates_retained": true
+  },
+  "sensitive_review": {
+    "scanner_files_with_hits": 10,
+    "matched_tokens_reviewed": 14,
+    "classification_counts": {
+      "UNCHANGED_PUBLIC_EPHEMERAL_CI_LITERAL": 5,
+      "UNCHANGED_PUBLIC_LOCAL_GRAFANA_DEFAULT": 1,
+      "UNCHANGED_DOCUMENTATION_PLACEHOLDER": 4,
+      "SOURCE_VARIABLE_REFERENCE": 4
+    },
+    "unresolved": 0,
+    "scanner_rules_changed": false,
+    "note": "Raw scanner HITS are retained. Source expressions, unchanged public CI/local defaults and documentation placeholders were classified; this review does not turn raw HITS into a scanner CLEAN result."
+  },
+  "behavior_review": [
+    "Workflow start puts the trusted authenticated initiator into a copied variable map before synchronous first-node resolution, clears reserved client variables and restores authentication in finally; both model-version and legacy paths have boundary regressions.",
+    "BPMN authoring preserves unrelated listeners, writes the candidate listener at execution start, and serializes multi-instance collection, assignee and completion condition with the model key.",
+    "Portal page access follows enrollment permission; supplier profile and quotation authorization still remain server-side role and association checks.",
+    "Customer overview uses OPEN opportunity state, and message resend offers only FAILED and DEAD_LETTER as permitted by the existing API.",
+    "Seed verification selects the five formal natural keys while retaining expected row count, digest and missing-seed failures.",
+    "Human translation review remains mandatory and content-bound; terminal evidence is restricted to explicitly supported command-line flows; browser pages retain screenshot requirements."
+  ],
+  "previous_validation": {
+    "backend": "JDK25 Maven reactor clean install completed; no subsequent owned backend code change.",
+    "frontend": "Production build, lint, E2E TypeScript and focused regressions completed; excluded concurrent edits are comments only.",
+    "wiki": "192 pages, 997 image references and 8328 anchors checked at root and subpath; eight mobile navigation cases passed.",
+    "cli": "119 unit tests, service/generator golden verification and preset structural matrix completed.",
+    "independent_five_presets": {
+      "checks": 90,
+      "pass": 85,
+      "fail": 5,
+      "skipped": 0,
+      "failures": "Strict screenshot evidence gates retained."
+    }
+  },
+  "remaining_acceptance": {
+    "human_translation_reviews": 138,
+    "human_translation_reviews_completed": 0,
+    "external_provider_real_login": true,
+    "srm_human_self_registration": true,
+    "native_alertmanager_language_layout_decision": true,
+    "qoder_native_skill_load": true,
+    "strict_translation_and_screenshot_gates": "FAIL retained",
+    "release_ready": false
+  },
+  "evidence_digests": {
+    "private_final_audit_classification": "5e8fdcb7f0276adefbf0c758b1641acbe2d3d45063bb9ba676d82d4fcea170f1",
+    "private_delivery_ownership": "eb3918a48c6e17b38477aac231a8a478657492c295f047cf3d010eabde9d64fc"
+  },
+  "formatting_followup": {
+    "recorded_at": "2026-10-13T02:05:02.126Z",
+    "eof_only_files": 12,
+    "source_documents": 3,
+    "translation_bindings_refreshed": 9,
+    "visible_markdown_content_unchanged": true,
+    "raw_terminal_transcripts": [
+      {
+        "path": "docs/reference/evidence/operations-compose-start-2026-10-12.txt",
+        "sha256": "83124d10d9635098dc30b23ac5a0a1d137d9d9ce231ab2497e8c103c9e505b03",
+        "manifest_sha256": "83124d10d9635098dc30b23ac5a0a1d137d9d9ce231ab2497e8c103c9e505b03",
+        "exact_original_bytes_preserved": true,
+        "terminal_validation": "PASS"
+      },
+      {
+        "path": "docs/reference/evidence/scaffold-lite-mode-2026-10-12.txt",
+        "sha256": "92c47b54290e45effec35690f7e5567324c3ef68d05c00c83461510b91908a31",
+        "manifest_sha256": "92c47b54290e45effec35690f7e5567324c3ef68d05c00c83461510b91908a31",
+        "exact_original_bytes_preserved": true,
+        "terminal_validation": "PASS"
+      }
+    ],
+    "human_translation_reviews_added": 0
+  },
+  "scoped_resource_cleanup": {
+    "superseded_stateless_wiki_containers_removed": 2,
+    "preset_owned_containers_remaining": 0,
+    "preset_owned_volumes_remaining": 0,
+    "isolated_business_containers_retained": 24,
+    "retention_reason": "Pending human interaction evidence; no business records or data volumes reset",
+    "current_stateless_wiki_containers_retained": 2
+  },
+  "translation_literal_followup": {
+    "recorded_at": "2026-10-13T02:23:01.134Z",
+    "path": "docs/wiki/outbox-development.en.md",
+    "before_sha256": "71ca75cb15e93016a5310d29a18b2303a67647deab3ceb8280758e929ff4511c",
+    "after_sha256": "ea0caaed363c76c351e53fefda3267ed8de18d9556457b228f5c266a89b47c9a",
+    "correction": "Restore exact baseline commit literal fc165e3 by removing erroneous spaces",
+    "human_reviews_added": 0
+  }
+}

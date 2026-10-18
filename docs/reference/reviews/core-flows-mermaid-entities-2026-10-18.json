@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "core-flows",
+  "source": "docs/core-flows.md",
+  "source_sha256": "932748a1e461d4eb5b7088e31a1af728dadac49f59e492566f7fa5413dcfae49",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "62d9398ddd7c5f62ee48519f04c02456d65629d5",
+  "source_state": "All38 changed Mermaid message lines in7 canonical documents plus the complete renderer cleanup delta; reuse exact prior complete semantic reviews for unchanged content. No prose, domain/API contract or message wording changes.",
+  "method": "Actually read all38changed Mermaid lines and the renderer finally-cleanup delta inbc0a22. Only the Mermaid spelling of literal semicolons changes;decoded full document text is unchanged. Reuse hash-matching complete prior semantic reviews for all unchanged content/locales. Actual184diagram parse proposals have0failures and a real temporary-render-host failure experiment cleans the error SVG. Full rebuilt-site,route/theme,fallback and visual acceptance remain pending.",
+  "prior_complete_semantic_reviews": [
+    {
+      "path": "docs/reference/reviews/core-flows.json",
+      "sha256": "82dafa99cf9bf6905c6814624db1859a31f69e60596aab43f2f5b5a7be139785"
+    }
+  ],
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/core-flows.json",
+      "sha256": "82dafa99cf9bf6905c6814624db1859a31f69e60596aab43f2f5b5a7be139785"
+    },
+    {
+      "path": "docs/reference/evidence/wiki-diagram-syntax-cleanup-2026-10-18.json",
+      "sha256": "b25f84d59d4f219c8a08224623c1ff59ebdd4def50e2e6d78184424437f0baac"
+    },
+    {
+      "path": "docs/.vitepress/theme/DiagramLayout.vue",
+      "sha256": "6529ea4768729fac0c934ce4cb64f7799c9080632860b93b7b8a39f59c1d46a5"
+    },
+    {
+      "path": "docs/.vitepress/theme/index.mjs",
+      "sha256": "af860ce8f9ea054965f0ae1aa58fbad27d003e965ce7320a3b0e17aee7279d9c"
+    },
+    {
+      "path": "docs/.vitepress/config.mjs",
+      "sha256": "1634a1821170bb9dc9c42952854499287be6ceb7cef404a6f3f66b1871a13a29"
+    },
+    {
+      "path": "docs/package.json",
+      "sha256": "90ea9d68c2b7d30bd2203b7ec7fa1edadc80dc4dbcb286355aea271eddf1c2bd"
+    },
+    {
+      "path": "docs/package-lock.json",
+      "sha256": "8dc8a419a660feb88855b304c875f97da0c832554a9d45437e709821d909e5d1"
+    }
+  ],
+  "source_inspection_scope": "All38 changed Mermaid message lines in7 canonical documents plus the complete renderer cleanup delta; reuse exact prior complete semantic reviews for unchanged content. No prose, domain/API contract or message wording changes.",
+  "technical_verification": {
+    "runtime": "local Docker browser",
+    "canonical_diagrams_parsed": 184,
+    "original_parse_failures": 26,
+    "corrected_proposal_parse_failures": 0,
+    "decoded_document_text_unchanged": true,
+    "new_whole_document_rereads": 0,
+    "renewed_locales": [
+      "en-US",
+      "ja-JP",
+      "ko-KR"
+    ],
+    "unchanged_locale_entries_reused": true,
+    "current_evidence": "docs/reference/evidence/wiki-diagram-syntax-cleanup-2026-10-18.json",
+    "full_site_build_and_browser_acceptance_pending": true,
+    "limitations": [
+      "The184diagram result is actual grammar parsing with the built11.17.2 API plus an isolated container-cleanup experiment; it does not prove all184SVG layouts or the post-application full site build.",
+      "Four architecture SVG and four native mobile cases passed in image580; native core-flow route/theme and source-fallback acceptance need rerunning with the corrected current artifact.",
+      "The current dependency attestation and five-preset delivery scopes need final alignment. All originalA-G, external OAuth/CAPTCHA/Qoder constraints and global screenshot gaps remain."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/core-flows.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 08:04:41",
+      "result": "approved",
+      "translation_sha256": "a221e7e10307765f5238087f60473f70951bff6673dcb4296e06dcf68d6659af",
+      "checks": {
+        "coverage_and_meaning": "实际阅读bc0a22全部差异：七份规范文档共38行，只把时序图中的字面分号写成Mermaid实体#59;。实体解码后整篇逐字一致，箭头、顺序、消息词语、条件与所有图外正文不变。核心流程中文源发生两行语法变化，重审其三份译文；三个设计文档仅英文变化，各重审一条。其余全文复用摘要匹配的既有完整语义复核，不冒称新整篇重读。",
+        "technical_literals": "实际Docker浏览器用当前打包的11.17.2公共API对全部184个规范图表做原始/修正对照：26个原始解析失败，修正后0失败。#59;为官方规定的字面分号表示，POST/jobinfo/insert、execute(message)、getResultMessage(message)、CRON/BEAN、FIRST、triggerStatus、tenant/eventId、事务传播和状态字面量均不变。临时DOM作为render第三参数，并在finally回收；真实隔离失败实验确认错误SVG也在该容器内并可清除。",
+        "security_and_failure_semantics": "保留核心流程中的Outbox显式tenantId、幂等/重复消息、默认角色尽力分配、启动快照、REQUIRED/REQUIRES_NEW与失败重试语义。CRM候选设计仍为设计；SRM配置修复与Auth独立提交/SRM回滚区别、Asset审批后继续占位均完整。渲染依旧strict、v-pre保护不变，失败保留源码；临时容器finally保证异常和过期代次返回时都回收。",
+        "images_and_links": "图片、链接、锚点、标题、命令和图外内容无变化。保留581真实4语架构SVG与原生移动各4通过及8张原图查看记录，同时保留核心流程/错误SVG失败。583首次审计因ESM包装未找到API，完成0图，不能当作成功；583b完成184图后才应用修正。当前应用后的镜像、整页渲染、主题切换和视觉验证仍待独立执行。",
+        "language_and_terminology": "Compared every changed English message inbc0a22 with its current Chinese fact source and the matching prior full reviews. The21core-flow lines and1CRM/2SRM/2Asset design lines change only a literal semicolon's Mermaid spelling. Candidate-design status, reconciliation/cancellation requirements, possible configuration repair, independently committed Auth role versus SRM rollback, and retaining Asset occupancy after approval all remain unchanged."
+      },
+      "findings": [
+        {
+          "id": "MS01",
+          "status": "resolved",
+          "resolution": "Encode only literal sequence-message semicolons with #59; in7documents/38lines. All184canonical diagram proposals parse with the actual bundle; decoded full document text remains unchanged."
+        },
+        {
+          "id": "MS02",
+          "status": "resolved",
+          "resolution": "Pass an explicit temporary host to Mermaid.render and remove it in finally, preserving source fallback while clearing the error SVG proven by the real negative fixture."
+        },
+        {
+          "id": "MS03",
+          "status": "resolved",
+          "resolution": "Renew only6affected existing AI_REVIEW rows:3core-flow translations plus the English CRM/SRM/Asset design rows. Preserve all prior complete review files and unchanged locale entries. Claim0new rows and0human reviews."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/core-flows.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 08:04:41",
+      "result": "approved",
+      "translation_sha256": "796551739ef859d082f72d9151873e63523837614efb192fea43bf71b704d00f",
+      "checks": {
+        "coverage_and_meaning": "实际阅读bc0a22全部差异：七份规范文档共38行，只把时序图中的字面分号写成Mermaid实体#59;。实体解码后整篇逐字一致，箭头、顺序、消息词语、条件与所有图外正文不变。核心流程中文源发生两行语法变化，重审其三份译文；三个设计文档仅英文变化，各重审一条。其余全文复用摘要匹配的既有完整语义复核，不冒称新整篇重读。",
+        "technical_literals": "实际Docker浏览器用当前打包的11.17.2公共API对全部184个规范图表做原始/修正对照：26个原始解析失败，修正后0失败。#59;为官方规定的字面分号表示，POST/jobinfo/insert、execute(message)、getResultMessage(message)、CRON/BEAN、FIRST、triggerStatus、tenant/eventId、事务传播和状态字面量均不变。临时DOM作为render第三参数，并在finally回收；真实隔离失败实验确认错误SVG也在该容器内并可清除。",
+        "security_and_failure_semantics": "保留核心流程中的Outbox显式tenantId、幂等/重复消息、默认角色尽力分配、启动快照、REQUIRED/REQUIRES_NEW与失败重试语义。CRM候选设计仍为设计；SRM配置修复与Auth独立提交/SRM回滚区别、Asset审批后继续占位均完整。渲染依旧strict、v-pre保护不变，失败保留源码；临时容器finally保证异常和过期代次返回时都回收。",
+        "images_and_links": "图片、链接、锚点、标题、命令和图外内容无变化。保留581真实4语架构SVG与原生移动各4通过及8张原图查看记录，同时保留核心流程/错误SVG失败。583首次审计因ESM包装未找到API，完成0图，不能当作成功；583b完成184图后才应用修正。当前应用后的镜像、整页渲染、主题切换和视觉验证仍待独立执行。",
+        "language_and_terminology": "bc0a22の核心フロー日本語2行を中文と照合した。POST/jobinfo/insertの登録説明とexecute(message)/getResultMessage(message)の区切りだけを#59;へ変更し、呼び出し順、CRON/BEAN・FIRST・triggerStatusと語句を保持した。他の本文は既存の完全レビューと一致する。"
+      },
+      "findings": [
+        {
+          "id": "MS01",
+          "status": "resolved",
+          "resolution": "Encode only literal sequence-message semicolons with #59; in7documents/38lines. All184canonical diagram proposals parse with the actual bundle; decoded full document text remains unchanged."
+        },
+        {
+          "id": "MS02",
+          "status": "resolved",
+          "resolution": "Pass an explicit temporary host to Mermaid.render and remove it in finally, preserving source fallback while clearing the error SVG proven by the real negative fixture."
+        },
+        {
+          "id": "MS03",
+          "status": "resolved",
+          "resolution": "Renew only6affected existing AI_REVIEW rows:3core-flow translations plus the English CRM/SRM/Asset design rows. Preserve all prior complete review files and unchanged locale entries. Claim0new rows and0human reviews."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/core-flows.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 08:04:41",
+      "result": "approved",
+      "translation_sha256": "c28fc54336958ec81d73d1468cebe30b8417f8e346d74657f891b81971d2df05",
+      "checks": {
+        "coverage_and_meaning": "实际阅读bc0a22全部差异：七份规范文档共38行，只把时序图中的字面分号写成Mermaid实体#59;。实体解码后整篇逐字一致，箭头、顺序、消息词语、条件与所有图外正文不变。核心流程中文源发生两行语法变化，重审其三份译文；三个设计文档仅英文变化，各重审一条。其余全文复用摘要匹配的既有完整语义复核，不冒称新整篇重读。",
+        "technical_literals": "实际Docker浏览器用当前打包的11.17.2公共API对全部184个规范图表做原始/修正对照：26个原始解析失败，修正后0失败。#59;为官方规定的字面分号表示，POST/jobinfo/insert、execute(message)、getResultMessage(message)、CRON/BEAN、FIRST、triggerStatus、tenant/eventId、事务传播和状态字面量均不变。临时DOM作为render第三参数，并在finally回收；真实隔离失败实验确认错误SVG也在该容器内并可清除。",
+        "security_and_failure_semantics": "保留核心流程中的Outbox显式tenantId、幂等/重复消息、默认角色尽力分配、启动快照、REQUIRED/REQUIRES_NEW与失败重试语义。CRM候选设计仍为设计；SRM配置修复与Auth独立提交/SRM回滚区别、Asset审批后继续占位均完整。渲染依旧strict、v-pre保护不变，失败保留源码；临时容器finally保证异常和过期代次返回时都回收。",
+        "images_and_links": "图片、链接、锚点、标题、命令和图外内容无变化。保留581真实4语架构SVG与原生移动各4通过及8张原图查看记录，同时保留核心流程/错误SVG失败。583首次审计因ESM包装未找到API，完成0图，不能当作成功；583b完成184图后才应用修正。当前应用后的镜像、整页渲染、主题切换和视觉验证仍待独立执行。",
+        "language_and_terminology": "bc0a22의핵심흐름한국어8행을중국어와대조했다. 등록/작업결과,독립커밋,503재시도,Inbox완료와finally정리,후보별트랜잭션,COMPLETED후재로그인의의미를보존하며세미콜론표기만#59;로바꾼다. 나머지본문과계약은기존완전검토와일치한다."
+      },
+      "findings": [
+        {
+          "id": "MS01",
+          "status": "resolved",
+          "resolution": "Encode only literal sequence-message semicolons with #59; in7documents/38lines. All184canonical diagram proposals parse with the actual bundle; decoded full document text remains unchanged."
+        },
+        {
+          "id": "MS02",
+          "status": "resolved",
+          "resolution": "Pass an explicit temporary host to Mermaid.render and remove it in finally, preserving source fallback while clearing the error SVG proven by the real negative fixture."
+        },
+        {
+          "id": "MS03",
+          "status": "resolved",
+          "resolution": "Renew only6affected existing AI_REVIEW rows:3core-flow translations plus the English CRM/SRM/Asset design rows. Preserve all prior complete review files and unchanged locale entries. Claim0new rows and0human reviews."
+        }
+      ]
+    }
+  }
+}

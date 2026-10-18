@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "kind": "official-local-docker-production-image-builds",
+  "recorded_at": "2026-10-12T13:38:41.146Z",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "context": "desktop-linux",
+  "endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+  "image_identity_verification": "Docker image inspect IDs, tags and Created fields read after successful build sessions",
+  "builds": [
+    {
+      "kind": "backend",
+      "dockerfile": "docker/backend/Dockerfile",
+      "command": "docker build --progress plain --build-arg SERVICE_NAME=omni-auth -f docker/backend/Dockerfile -t omni-wiki-formal-backend-20261012:auth .",
+      "tag": "omni-wiki-formal-backend-20261012:auth",
+      "image_id": "sha256:6e67f17b3ff1420f6a1891257298745335585002425b8809e8b8f759d5d4c815",
+      "created_at": "2026-10-12T13:16:32.515115088Z",
+      "test_semantics": "Official Maven reactor package excluding migrator; tests not skipped; does not replace running business services",
+      "status": "PASS",
+      "exit_code": 0,
+      "dockerfile_sha256": "b93b0b47e4397d82b06d069eb374f3bfa39f9a932ea847ce71f8628ac5bb60f9",
+      "private_build_log_sha256": "5dfac8ddfadc57d499133268438bbd247308d95717693f9e4a13183214aeef56"
+    },
+    {
+      "kind": "migrator",
+      "dockerfile": "docker/migrator/Dockerfile",
+      "command": "docker build --progress plain -f docker/migrator/Dockerfile -t omni-wiki-formal-migrator-20261012:acceptance .",
+      "tag": "omni-wiki-formal-migrator-20261012:acceptance",
+      "image_id": "sha256:f1f4755fe6ae3ae7aaec3260722c9a6dced31dbe5d51959dc27d27fbd4b07776",
+      "created_at": "2026-10-12T13:17:48.432008842Z",
+      "test_semantics": "Official migrator package with dependencies; tests not skipped; building this image does not run database migrations",
+      "status": "PASS",
+      "exit_code": 0,
+      "dockerfile_sha256": "ea58e5251a48ba6dcd523b2d741446b2e2bee20f98f60227ac6b084df3bdcdad",
+      "private_build_log_sha256": "64e0e8db85c0c386950c3e87c8a7a31cc21a9bc09387be88a31e2c83e48c0020"
+    },
+    {
+      "kind": "frontend",
+      "dockerfile": "docker/frontend/Dockerfile",
+      "command": "docker build --progress plain -f docker/frontend/Dockerfile -t omni-wiki-formal-frontend-20261012:mobile-sidebar .",
+      "tag": "omni-wiki-formal-frontend-20261012:mobile-sidebar",
+      "image_id": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "created_at": "2026-10-12T13:11:49.154226851Z",
+      "test_semantics": "Official npm ci, vue-tsc and Vite production build; nginx runtime; only owned isolated frontend was replaced",
+      "status": "PASS",
+      "exit_code": 0,
+      "dockerfile_sha256": "6542f30feabceb2924259ae339b996f92759f7fc3fb8b31835645aa226152e83",
+      "private_build_log_sha256": "d3ab88787da7843669a99059663258b86e71bb2ae488d0679af9aef9dc619a21"
+    }
+  ],
+  "frontend_lint": {
+    "status": "PASS",
+    "exit_code": 0,
+    "warnings": 0,
+    "private_log_sha256": "8abeef06f5ec2f96047dbe73d7e8a2e04b04ed0fb076b4c41f370d5593348abd"
+  },
+  "limits": [
+    "Build success is separate from application acceptance and human translation review.",
+    "The previously recorded full clean install remains the backend source-change regression evidence; package image builds supplement it.",
+    "Existing JVM and Lombok Unsafe warnings are retained; this receipt does not claim zero warnings in all tools.",
+    "Private raw BuildKit logs may contain registry redirect URLs and are not published.",
+    "No remote merge, push or deployment was performed."
+  ]
+}

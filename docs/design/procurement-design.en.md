@@ -1,11 +1,17 @@
 # Procurement Execution Module Architecture and Implementation Baseline
 
-> Status: MVP implemented and verified
+> The original design date, phases and important decisions of 2026-07-27 are retained alongside current source constraints; Chinese is the factual source. Historical acceptance does not establish current runtime behavior or release eligibility. Authorized AI_REVIEW and HUMAN_REVIEW are recorded separately; see [ADR 0003](../adr/0003-authorized-ai-translation-review.md).
+
+> Original recorded status (2026-07-27): MVP implemented and verified
 > Project: Omni-Stack
 > Date: 2026-07-27
 > Goal: Describe the architecture, cross-service contracts, and implementation boundaries of the omni-procurement MVP; the implementation entry points are `omni-backend/omni-procurement` and `omni-frontend/src/views/procurement`.
 
 Design basis: `README.md`, and all topic documents in `docs/` — architecture, api-contract, backend-patterns, frontend-patterns, core-flows, scheduling, workflow, mq-reliability, docker-deployment; also references the SRM supplier model in `docs/design/srm-design.md`.
+
+Accounts, operations and screenshots are in the [Procurement Wiki](../guides/procurement-flow.en.md); extension and Docker-tool entry points are in the [development Wiki](../guides/scaffold-development.en.md). Use the [source index](../reference/source-map.en.md) for current files.
+
+[中文](procurement-design.md) · [English](procurement-design.en.md) · [日本語](procurement-design.jp.md) · [한국어](procurement-design.kr.md)
 
 ## 1. Design Conclusion
 
@@ -18,7 +24,7 @@ Procurement execution should be built as an independent Servlet microservice, se
 | XXL-JOB executor | `omni-procurement` / `9906` (when scheduled reminders are enabled) |
 | Database | `omni_procurement` |
 | Gateway | `/api/procurement/**` → `lb://omni-procurement`, without `StripPrefix` |
-| Redis | DB 0, shares the XSS configuration written by Auth; keys use the `proc:` prefix |
+| Redis | DB 0, shared Auth XSS cache keys; no established proc: business-cache prefix |
 | Frontend | Continue to use `omni-frontend`, add `views/procurement/**` |
 
 The Procurement MVP covers the procurement-execution closed loop:
@@ -56,7 +62,7 @@ The MVP should be able to answer: how many requisitions await approval; what ste
 | `omni-auth` | Tenant, user, organization, role, permission, data scope, XSS configuration | Internal OpenFeign; stores only user/organization IDs |
 | `omni-srm` | Supplier data (admission, grading, risk) | Internal OpenFeign to query suppliers; supplier portal quotations go through the SRM service |
 | `omni-base` | Dictionary, operation logs | Operation log aggregation |
-| `omni-workflow` | BPMN, process instances, approvals, the sole Flowable engine runtime | Internal OpenFeign to start/query/cancel flows, consumes approval-result events |
+| `omni-workflow` | BPMN, instances, approvals and the sole Flowable runtime | Model queries/previews, idempotent start, task-assignment validation and completion events; no Procurement-driven termination capability |
 | `omni-procurement` | Material, requisition, RFQ, purchase order, goods receipt | The sole business writer |
 | `omni-asset` | Asset management | After goods-receipt acceptance passes, creates asset cards through Outbox events and controlled historical compensation |
 | XXL-JOB | Triggers batch scans | Order-overdue reminders (Phase 2) |
@@ -64,21 +70,23 @@ The MVP should be able to answer: how many requisitions await approval; what ste
 
 ```mermaid
 flowchart LR
-    UI["omni-frontend"] --> GW["omni-gateway<br/>JWT validation / identity headers"]
+    UI["omni-frontend"] --> GW["omni-gateway<br/>JWT validation/identity headers"]
     GW --> PROC["omni-procurement :8106"]
     GW --> AUTH["omni-auth :8100"]
     PROC -->|"OpenFeign + X-Internal-Token"| AUTH
     PROC -->|"OpenFeign + X-Internal-Token"| SRM["omni-srm :8105"]
-    PROC -->|"Feign / Outbox"| WF["omni-workflow :8103"]
+    PROC -->|"Feign"| WF["omni-workflow :8103"]
     PROC --> DB[("omni_procurement")]
     PROC --> R[("Redis DB 0")]
     PROC --> O["sys_mq_message"]
     O -->|"mqRelayHandler"| MQ["RocketMQ"]
-    PROC -->|"Qualified goods-receipt event"| ASSET["omni-asset :8107"]
-    ASSET -->|"Historical candidate compensation"| PROC
+    WF -->|"workflow.process.completed.v1 / Outbox"| MQ
+    MQ -->|"workflow.process.completed.v1"| PROC
+    MQ -->|"Eligible receipt event"| ASSET["omni-asset :8107"]
+    ASSET -->|"Historical candidate rescan"| PROC
 ```
 
-Recommended dependencies: `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`, plus Web, Validation, Security, AspectJ, OpenFeign, LoadBalancer, Nacos, RocketMQ Stream, Actuator, and Lombok.
+Current base dependencies: `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`, `omni-common-service`; also Web, Validation, Security, AspectJ, OpenFeign, LoadBalancer, Nacos, RocketMQ Stream, Actuator and Lombok.
 
 **Procurement does not depend on `omni-common-workflow` and does not embed Flowable in this service.** `omni-workflow` is an independent microservice and the sole Flowable runtime; Procurement initiates flows through an internal Feign contract and receives approval results through reliable domain events. Cross-service DTOs should live in a pure contract module or be defined locally by the Feign client, and must not introduce the Flowable Starter because of this.
 
@@ -94,41 +102,32 @@ Recommended dependencies: `omni-common-core`, `omni-common`, `omni-common-mybati
 | RFQ | `proc_rfq`, `proc_rfq_line`, `proc_rfq_supplier` | RFQ, detail lines, invited suppliers |
 | PurchaseOrder | `proc_purchase_order`, `proc_purchase_order_line` | Purchase order, detail lines |
 | GoodsReceipt | `proc_goods_receipt`, `proc_goods_receipt_line` | Goods receipt, detail lines |
+| Inbox | `proc_event_inbox` | Tenant-local Workflow/quotation event idempotency and original intent |
 
 ```mermaid
 erDiagram
     PROC_MATERIAL_CATEGORY ||--o{ PROC_MATERIAL : contains
-    PROC_REQUISITION ||--o{ PROC_REQUISITION_LINE : has
-    PROC_REQUISITION ||--o{ PROC_RFQ : triggers
-    PROC_RFQ ||--o{ PROC_RFQ_LINE : has
+    PROC_REQUISITION ||--o{ PROC_REQUISITION_LINE : lines
+    PROC_REQUISITION ||--o{ PROC_RFQ : starts
+    PROC_RFQ ||--o{ PROC_RFQ_LINE : lines
     PROC_RFQ ||--o{ PROC_RFQ_SUPPLIER : invites
     PROC_RFQ ||--o| PROC_PURCHASE_ORDER : awards
-    PROC_PURCHASE_ORDER ||--o{ PROC_PURCHASE_ORDER_LINE : has
+    PROC_PURCHASE_ORDER ||--o{ PROC_PURCHASE_ORDER_LINE : lines
     PROC_PURCHASE_ORDER ||--o{ PROC_GOODS_RECEIPT : receives
-    PROC_GOODS_RECEIPT ||--o{ PROC_GOODS_RECEIPT_LINE : has
+    PROC_GOODS_RECEIPT ||--o{ PROC_GOODS_RECEIPT_LINE : lines
     PROC_RFQ_SUPPLIER }o--|| SRM_SUPPLIER : references
 ```
 
 ### 4.2 Common Fields and Rules
 
-Every `proc_*` table must contain `tenant_id`. Authorizable business tables must also contain:
+Every `proc_*` table retains tenant_id. Business roots use version/deleted and audit fields. Scope columns depend on the aggregate: Requisition uses requester_user_id/requester_unit_id; RFQ, PurchaseOrder and GoodsReceipt use owner_user_id/owner_unit_id. Children inherit through parents; Material/Category, approval routes and tenant configuration are tenant-shared, so owner predicates cannot be appended to every table.
 
-- `tenant_id`: tenant isolation.
-- `owner_user_id`: SELF scope (requisition requester / procurement staff).
-- `owner_unit_id`: DEPT/DEPT_AND_BELOW scope.
-- `version`: optimistic lock.
-- `deleted`: logical deletion.
-- `id/create_time/update_time/create_by/update_by`: audit fields.
-
-Constraints:
-
-- Supplier IDs are managed by SRM; Procurement stores only `supplier_id`, without cross-database foreign keys.
-- The material code `material_code` is unique within the tenant.
-- The requisition number `requisition_no`, RFQ number `rfq_no`, order number `po_no`, and goods-receipt number `gr_no` are generated from database IDs and are unique within the tenant.
-- Quantities and unit prices use `DECIMAL(19,6)` / `BigDecimal`; line amounts and total amounts use `DECIMAL(19,4)` / `BigDecimal`; HTTP JSON uniformly carries them as decimal strings, and computing via the JavaScript `number` type is forbidden. Currencies use ISO 4217 three-letter codes (the MVP enforces the tenant default currency).
-- Times are uniformly `yyyy-MM-dd HH:mm:ss`.
-- A normal PUT is not allowed to directly modify the approval status or order status.
-- External requests must not use bare `selectById/updateById/deleteById`.
+- Requisition creation takes requester/primary unit from the effective scope and stores the same initial owner; authorization still uses requester columns.
+- RFQ takes the current scope owner, PO inherits RFQ ownership, and GR belongs to the current receiver/primary unit. Never infer ownership from a supplier portal account or consumer thread.
+- Numbers come from database IDs; material codes and business numbers are tenant-unique. supplier_id is a logical SRM reference without cross-database foreign keys.
+- Quantities/prices use DECIMAL(19,6), line/total amounts DECIMAL(19,4), and HTTP JSON decimal strings, never JavaScript number money arithmetic. Requisition estimated price may be zero; quotation/order prices are positive.
+- Date-times use yyyy-MM-dd HH:mm:ss; expected/actual delivery dates are LocalDate fields and follow their DTO contract.
+- Ordinary PUT does not change lifecycle, approval state or owner. Existing business changes require authorization, state/version and affected-row checks; tenant-shared configuration, number completion and ledgers are not one uniform command.
 
 ### 4.3 Main Tables
 
@@ -176,7 +175,7 @@ Constraints:
 - `rfq_no/requisition_id/title/quotation_deadline/currency_code/status/sent_time/owner_user_id/owner_unit_id/version/deleted`.
 - `status`: DRAFT/SENT/CLOSED/AWARDED/CANCELLED.
 - `awarded_supplier_id/awarded_quotation_id/awarded_quotation_version/awarded_time`: the award and quotation-version snapshot.
-- Associated requisition (one requisition can generate multiple RFQs, split by category).
+- References a visible APPROVED requisition and copies all its lines. Multiple RFQs may reference one requisition; current creation does not split selected lines or categories.
 
 `proc_rfq_line`
 
@@ -186,7 +185,7 @@ Constraints:
 
 - `rfq_id/supplier_id/supplier_name_snapshot/invited_time/quotation_id/quotation_version/quotation_request_id/quotation_time/status/version/deleted`.
 - `status`: INVITED/QUOTED/EXPIRED/AWARDED/REJECTED. `AWARDED/REJECTED` are read-only historical terminal states after the award and cannot continue quoting.
-- A quotation can be submitted or updated only when the RFQ `status=SENT`, the invitation `status IN (INVITED, QUOTED)`, and the current time is not later than the deadline.
+- New quotation writes require RFQ status=SENT, invitation status IN (INVITED, QUOTED) and a deadline strictly after now. Successful historical replay has the separately documented SRM validation order.
 - `quotation_id` logically associates SRM's `srm_quotation` (no cross-database foreign key); `supplier_name_snapshot` is only for historical display and is not a basis for the current supplier status or permission.
 
 `proc_purchase_order`
@@ -222,34 +221,38 @@ Constraints:
 stateDiagram-v2
     [*] --> DRAFT: Create requisition
     DRAFT --> SUBMITTED: Submit
-    SUBMITTED --> APPROVING: Start approval flow
-    APPROVING --> APPROVED: Approval passed
-    APPROVING --> REJECTED: Approval rejected
+    SUBMITTED --> APPROVING: Confirm STARTED
+    APPROVING --> APPROVED: Completed: approved
+    APPROVING --> REJECTED: Completed: rejected
+    APPROVING --> CANCELLED: Completed: cancelled
     DRAFT --> CANCELLED: Cancel
-    SUBMITTED --> CANCELLED: Cancel
+    SUBMITTED --> CANCELLED: Cancel only FAILED
+    REJECTED --> DRAFT: Edit to draft
     APPROVED --> [*]
-    REJECTED --> DRAFT: Resubmit after modification
+    CANCELLED --> [*]
 ```
 
-After the requisition is submitted, the Flowable approval flow starts. The approval flow uses an Exclusive Gateway to route to different approvers by material category and amount.
+Submission first recomputes material/category/amount facts and resolves the approval route in a separate local transaction, commits SUBMITTED/PENDING and Outbox, then calls Workflow. Only a confirmed start advances APPROVING. Procurement cancel accepts SUBMITTED only with workflow_start_status=FAILED; APPROVING→CANCELLED comes from a matching Workflow completion and is not a Procurement termination command.
 
 ### 5.2 Approval Flow Design (integrated with omni-workflow)
 
+The following category/amount branches preserve the original design example. They do not prove these BPMNs, roles or thresholds are deployed for every current tenant. Current submission selects a published model through server-side rules, then runs that model.
+
 ```mermaid
 flowchart TD
-    A[Requisition submitted] --> B{Branch by category}
-    B -->|IT Equipment| C{IT amount branch}
-    B -->|Office Supplies| D{Admin amount branch}
-    B -->|Raw Materials| E{Procurement amount branch}
-    B -->|Other| F{General amount branch}
-    C -->|<50,000| C1[Department Manager]
-    C -->|>=50,000| C2[Department Manager -> CTO]
-    D -->|<10,000| D1[Administration Supervisor]
-    D -->|>=10,000| D2[Administration Supervisor -> Administration Director]
-    E -->|<100,000| E1[Procurement Manager]
-    E -->|>=100,000| E2[Procurement Manager -> Supply Chain VP]
-    F -->|<30,000| F1[Requesting Dept Head]
-    F -->|>=30,000| F2[Requesting Dept Head -> CFO]
+    A["Requisition submission"] --> B{"Category"}
+    B -->|"IT equipment"| C{"IT amount"}
+    B -->|"Office supplies"| D{"Administration amount"}
+    B -->|"Raw materials"| E{"Procurement amount"}
+    B -->|"Other"| F{"General amount"}
+    C -->|"<50000"| C1["Department manager"]
+    C -->|">=50000"| C2["Department manager → CTO"]
+    D -->|"<10000"| D1["Administration supervisor"]
+    D -->|">=10000"| D2["Administration supervisor → director"]
+    E -->|"<100000"| E1["Procurement manager"]
+    E -->|">=100000"| E2["Procurement manager → supply-chain VP"]
+    F -->|"<30000"| F1["Requesting department head"]
+    F -->|">=30000"| F2["Department head → CFO"]
 ```
 
 Implementation:
@@ -258,9 +261,11 @@ Implementation:
 - When the requisition is submitted, the Procurement service selects a published modelVersionId from `proc_approval_route` based on the requisition's unique category and the server-recomputed total amount, and starts the flow through the Workflow internal API; the client cannot specify the model version.
 - Approvers are dynamically resolved by Flowable's `ScopedRoleAssignmentListener` (using the existing organization structure + role system).
 
-Cross-service startup must be retryable: each time it is submitted from DRAFT, first increment `approvalAttempt + 1`, generate and persist the requestId and `businessKey={requisitionId}:{approvalAttempt}`; Procurement uses `tenantId + businessType(PROCUREMENT_REQUISITION) + businessKey` as the idempotency key for the current round. First update to `status=SUBMITTED, workflow_start_status=PENDING` in a local transaction, then call Workflow after the transaction commits; on success, write the processInstanceId, set workflow_start_status=STARTED, and advance to APPROVING. When the response is lost or the call fails, keep `status=SUBMITTED, workflow_start_status=FAILED`; a retry must reuse the saved requestId/businessKey/modelVersionId and must not increment the attempt. After a REJECTED modification succeeds, it returns to DRAFT, and only resubmission opens a new attempt, avoiding the Workflow permanent-business-key unique constraint replaying an old flow.
+Cross-service startup must be retryable: each time it is submitted from DRAFT, first increment `approvalAttempt + 1`, generate and persist the requestId and `businessKey={requisitionId}:{approvalAttempt}`; Procurement uses `tenantId + businessType(PROCUREMENT_REQUISITION) + businessKey` as the idempotency key for the current round. First update to `status=SUBMITTED, workflow_start_status=PENDING` in a local transaction, then call Workflow after the transaction commits; on success, write the processInstanceId, set workflow_start_status=STARTED, and advance to APPROVING. A lost response or failed call attempts FAILED marking; reload actual state before retry; a retry must reuse the saved requestId/businessKey/modelVersionId and must not increment the attempt. After a REJECTED modification succeeds, it returns to DRAFT, and only resubmission opens a new attempt, avoiding the Workflow permanent-business-key unique constraint replaying an old flow.
 
 **MVP constraint**: a single requisition allows only one category; approval routing supports an exact category and a `*` default route, and the BPMN can branch by amount. When cross-category requisitions are needed later, define an explicit primary-category or multi-flow strategy; the current version is forbidden from implicitly taking the first line.
+
+Material/model/route failure before prepareSubmit commits rolls back and does not imply SUBMITTED/FAILED. After that commit, uncertain start calls/responses attempt REQUIRES_NEW FAILED marking, which can itself fail or match no row; reload real state/version. FAILED does not prove no remote process exists. retry-start reuses the persisted request/model/amount/requester/attempt only for SUBMITTED/FAILED, without reevaluating routing.
 
 ### 5.2.1 Requisition Approval Rule Management
 
@@ -283,51 +288,48 @@ sequenceDiagram
     participant S as RfqService
     participant SRM as omni-srm
     participant DB as omni_procurement
-    participant SUP as Supplier Portal
-
-    BUYER->>S: POST /rfq (requisitionId, supplierIds[]) create draft
-    S->>SRM: Feign validate supplier status=APPROVED
-    S->>DB: INSERT Rfq + Lines + RfqSuppliers
-    BUYER->>S: POST /rfq/{id}/send
-    S->>SRM: Re-validate supplier status=APPROVED
-    S->>DB: INSERT Outbox event (rfq.sent.v1)
-
-    Note over SUP: Supplier views the RFQ through the SRM portal
-
+    participant SUP as Supplier portal
+    BUYER->>S: POST /api/procurement/rfq (CreateRequest)
+    S->>SRM: Validate APPROVED suppliers
+    S->>DB: Save RFQ/lines/invitations
+    BUYER->>S: POST /api/procurement/rfq/{id}/send
+    S->>SRM: Revalidate suppliers
+    S->>DB: Outbox procurement.rfq.sent.v1
     SUP->>SRM: GET /api/srm/portal/quotation/invitations
     SRM->>S: GET /api/internal/procurement/rfq/invitations
     SUP->>SRM: GET /api/srm/portal/quotation/invitations/{rfqId}
     SRM->>S: GET /api/internal/procurement/rfq/{rfqId}/invitation
-    SUP->>SRM: POST /api/srm/portal/quotation (requestId, lines)
-    SRM->>S: Re-validate RFQ invitation/tenant/deadline/line snapshot
-    SRM->>SRM: Save quotation + Outbox in a local transaction
+    SUP->>SRM: POST /api/srm/portal/quotation (requestId/rfqId/version/validUntil/lines)
+    SRM->>SRM: Save quotation/ledger/Outbox
     SRM-->>S: MQ srm.quotation.submitted.v1
-    S->>DB: Idempotent update RfqSupplier.status=QUOTED
-
-    BUYER->>S: POST /rfq/{id}/award (supplierId)
-    S->>SRM: batch query valid quotations
-    S->>DB: UPDATE Rfq status=AWARDED
-    S->>DB: INSERT PurchaseOrder + winning quotation snapshot
-    S-->>BUYER: PurchaseOrderVO
+    S->>DB: Update invitation by event intent/version
+    BUYER->>S: POST /api/procurement/rfq/{id}/award (AwardRequest)
+    S->>SRM: Read current valid quotations
+    S->>DB: Create or verify PO snapshot
+    S->>DB: Update RFQ/invitations/Outbox
+    S-->>BUYER: R<AwardResult> (rfq/purchaseOrder)
 ```
 
 Price-comparison method: the MVP provides a simple comparison view — listing the valid quotations (unit price, total price, delivery days) of invited suppliers through `GET /api/internal/quotation/batch`, and the procurement staff manually selects the awarded supplier. No automatic bid-evaluation algorithm is done. The award transaction must save the quotationId, quotation version, and an immutable amount/delivery snapshot; subsequent SRM quotation changes must not alter the existing award and purchase order.
+
+Award uses RfqRequests.AwardRequest: rfqVersion, quotationId, quotationVersion, title, optional expectedDeliveryDate, and deliveryAddress/contactName/contactPhone. supplierId comes from the selected valid quotation; a supplier ID alone cannot award. `R<AwardResult>` contains rfq and purchaseOrder.
 
 ### 5.4 Purchase Order
 
 ```mermaid
 stateDiagram-v2
-    [*] --> DRAFT: Generated after RFQ award
-    DRAFT --> SENT: Send to supplier
-    SENT --> CONFIRMED: Supplier confirms
-    CONFIRMED --> PARTIAL_RECEIVED: Partial goods receipt
-    PARTIAL_RECEIVED --> RECEIVED: Full goods receipt
-    RECEIVED --> CLOSED: Close
+    [*] --> DRAFT: Award creates order
+    DRAFT --> SENT: Send
+    SENT --> CONFIRMED: Management confirmation
+    CONFIRMED --> PARTIAL_RECEIVED: Partial receipt
+    CONFIRMED --> RECEIVED: Complete receipt
+    PARTIAL_RECEIVED --> RECEIVED: Complete receipt
     DRAFT --> CANCELLED: Cancel
-    SENT --> CANCELLED: Cancel (requires approval)
-    CONFIRMED --> CANCELLED: Cancel (requires approval)
-    CLOSED --> [*]
+    SENT --> CANCELLED: Cancel
+    CONFIRMED --> CANCELLED: Cancel
 ```
+
+Orders are created only by RFQ award. Confirmation is a management-permission and row-scope-protected command, not a separate supplier-portal API. DRAFT/SENT/CONFIRMED cancellation checks cancel permission, state and version without additional Workflow approval. CLOSED exists as a value, but the current Controller has no close command. A first complete receipt may go directly from CONFIRMED to RECEIVED.
 
 ### 5.5 Goods Receipt
 
@@ -337,21 +339,21 @@ sequenceDiagram
     participant S as GoodsReceiptService
     participant DB as omni_procurement
     participant O as Outbox
-
-    R->>S: POST /goods-receipt (poId, lines[])
-    S->>DB: INSERT GoodsReceipt + Lines (DRAFT)
-    S-->>R: Draft GoodsReceiptVO
-    R->>S: POST /goods-receipt/{id}/confirm (version)
-    S->>DB: SELECT GR + PO FOR UPDATE + tenant/scope
-    S->>DB: Validate this quantity does not exceed the order by accumulated confirmed receipts
-    S->>DB: UPDATE GR=CONFIRMED, PO=PARTIAL_RECEIVED/RECEIVED
-    S->>O: INSERT procurement.goods-receipt.confirmed.v1 (same transaction)
-    S-->>R: Confirmed GoodsReceiptVO
+    R->>S: POST /api/procurement/goods-receipt (poId/lines)
+    S->>DB: Save receipt draft (DRAFT)
+    R->>S: POST /api/procurement/goods-receipt/{id}/confirm (version)
+    S->>DB: GR/PO FOR UPDATE + tenant/scope
+    S->>DB: Validate cumulative quantities
+    S->>DB: Confirm/version-update transactionally
+    S->>O: procurement.goods-receipt.confirmed.v1 (Write Outbox in same transaction)
+    S-->>R: R<GoodsReceiptViews.Detail>
 ```
 
 Creating a DRAFT does not occupy the order's received quantity and does not send an event. On confirmation, the PO must be locked and re-validated cumulatively based on all CONFIRMED goods-receipt lines, preventing over-receipt caused by concurrent confirmation of multiple drafts. After a successful confirmation, the Outbox event `procurement.goods-receipt.confirmed.v1` is written; when Asset is not yet built, Procurement is not blocked, but it must not be assumed that historical events stay in the Outbox/Broker indefinitely — when Asset goes live, it must perform the historical-compensation rescan defined below.
 
 Only goods-receipt lines with `quality_status=PASS`, `asset_managed=true`, and a positive-integer receivedQuantity can be assetized. PENDING/FAIL lines, consumables, services, and continuous-measure materials do not create assets. When a PENDING line later becomes PASS through `POST /goods-receipt/{id}/quality-result`, Procurement publishes `procurement.goods-receipt.quality-passed.v1`, carrying only the lines newly passed this time; modifying or reusing an already-sent confirmed event is forbidden.
+
+Quality entry accepts only PENDING lines on CONFIRMED receipts becoming PASS/FAIL. quality-passed carries only newly passing asset-eligible lines. Repeating a terminal result conflicts rather than succeeding as replay. confirmed contains only its asset candidates and may have no lines. Cumulative totals include all tenant-local confirmed receipts; the dedicated query ignores receiver-owner scope to avoid omissions. Receipt/PO use actual FOR UPDATE and version updates; the line query itself has no FOR UPDATE.
 
 ## 6. Tenant, RBAC, and Data Permissions
 
@@ -410,11 +412,7 @@ The table above only describes scope semantics; the actual SQL must be mapped pe
 
 ### 6.4 Approval Flow Permissions
 
-Requisition approval is driven by the independent `omni-workflow`, and approvers are dynamically resolved by `ScopedRoleAssignmentListener`. The user completes the task at Workflow's `/api/workflow/approval/{taskId}/complete`; Workflow must validate both the functional permission and the current task candidate/assignee identity.
-
-`TEAM_LEADER/DEPT_LEADER/PROCUREMENT_MANAGER` undertaking requisition approval must simultaneously obtain `procurement:requisition:approve` (to read the dedicated business approval VO) and `workflow:approval:complete` (to complete their own Workflow task). Neither can be missing; tenant initialization and role seeds must maintain them in sync.
-
-When viewing the business form, an approver uses the `procurement:requisition:approve` permission, but the approval visibility scope is not limited by the normal requester/owner dataScope. To avoid forming a generic bypass, Procurement provides a dedicated `GET /api/procurement/requisition/{id}/approval-view?taskId={taskId}`: first validate through the Workflow internal API that the taskId belongs to the current tenant, the businessKey equals that requisitionId, and the task is assigned to the current user, then read the read-only approval VO by `tenant_id + id`. The normal detail interface still enforces DataPermission; reusing this exception is forbidden.
+Workflow owns task completion. Dedicated approval-view requires procurement:requisition:approve, tenant-local APPROVING/STARTED identity, a complete saved businessKey (requisitionId:attempt) and processInstanceId. Workflow validates current user, taskId, businessType and full key, and the returned instance must match. The service temporarily reads the readonly VO with TENANT scope, restoring the previous scope in finally. Ordinary details retain requester scope; this exception cannot be reused. Completing a task also requires workflow:approval:complete and actual task eligibility.
 
 ## 7. API Design
 
@@ -424,21 +422,17 @@ Consistent with SRM: `R<T>`, `R<PageResult<T>>`, `page=1`, `size=10`, `size <= 1
 
 ### 7.2 Endpoints
 
-| Domain | Endpoints |
+The real Controllers define 50 external method/path combinations, relative to /api/procurement with complete paths, plus three internal readonly paths. approval-view requires taskId query input; version/delete parameters follow their DTO/query contracts.
+
+| Controller | Methods and paths |
 |---|---|
-| Overview | `GET /api/procurement/overview/summary`, `/spend-analysis` |
-| Material Category | `GET /material/category/list`, `POST /material/category`, `PUT/DELETE /material/category/{id}`; both the update body and delete query carry `version` |
-| Material | `GET /material/list`, `GET /material/{id}`, `POST /material`, `PUT/DELETE /material/{id}`; both the update body and delete query carry `version` |
-| Approval Route | `GET /approval-route/list`, `POST /approval-route`, `PUT/DELETE /approval-route/{id}` |
-| Requisition | `GET /requisition/list`, `GET /requisition/{id}`, `POST /requisition`, `PUT/DELETE /requisition/{id}` |
-| Requisition approval view | `GET /requisition/{id}/approval-view?taskId={taskId}` (validates the Workflow task assignment first) |
-| Requisition commands | `POST /requisition/{id}/submit`, `/retry-start`, `/cancel` |
-| RFQ | `GET /rfq/list`, `GET /rfq/{id}`, `POST /rfq`, `PUT/DELETE /rfq/{id}` |
-| RFQ commands | `POST /rfq/{id}/send`, `/award`, `/cancel` |
-| Purchase Order | `GET /purchase-order/list`, `GET /purchase-order/{id}`, `POST /purchase-order`, `PUT/DELETE /purchase-order/{id}` |
-| PO commands | `POST /purchase-order/{id}/send`, `/confirm`, `/cancel` |
-| Goods Receipt | `GET /goods-receipt/list`, `GET /goods-receipt/{id}`, `POST /goods-receipt` |
-| GR commands | `POST /goods-receipt/{id}/confirm`, `/quality-result` |
+| Approval rules (ApprovalRouteController) | `GET /approval-route/list` · `GET /approval-route/workflow-options` · `POST /approval-route/match-preview` · `GET /approval-route/coverage` · `GET /approval-route/impact` · `POST /approval-route` · `PUT /approval-route/{id}` · `DELETE /approval-route/{id}` |
+| Goods receipt (GoodsReceiptController) | `GET /goods-receipt/list` · `GET /goods-receipt/{id}` · `POST /goods-receipt` · `POST /goods-receipt/{id}/confirm` · `POST /goods-receipt/{id}/quality-result` |
+| Materials/categories (MaterialController) | `GET /material/category/list` · `POST /material/category` · `PUT /material/category/{id}` · `DELETE /material/category/{id}` · `GET /material/list` · `GET /material/{id}` · `POST /material` · `PUT /material/{id}` · `DELETE /material/{id}` |
+| Overview (OverviewController) | `GET /overview/summary` · `GET /overview/spend-analysis` |
+| Purchase orders (PurchaseOrderController) | `GET /purchase-order/list` · `GET /purchase-order/{id}` · `PUT /purchase-order/{id}` · `DELETE /purchase-order/{id}` · `POST /purchase-order/{id}/send` · `POST /purchase-order/{id}/confirm` · `POST /purchase-order/{id}/cancel` |
+| Requisitions (RequisitionController) | `GET /requisition/list` · `GET /requisition/{id}` · `GET /requisition/{id}/approval-view` · `POST /requisition` · `PUT /requisition/{id}` · `DELETE /requisition/{id}` · `POST /requisition/{id}/submit` · `POST /requisition/{id}/retry-start` · `POST /requisition/{id}/cancel` |
+| RFQs (RfqController) | `GET /rfq/supplier-options` · `GET /rfq/list` · `GET /rfq/{id}` · `GET /rfq/{id}/comparison` · `POST /rfq` · `PUT /rfq/{id}` · `DELETE /rfq/{id}` · `POST /rfq/{id}/send` · `POST /rfq/{id}/award` · `POST /rfq/{id}/cancel` |
 
 The Overview summary fixedly returns the number of requisitions under approval, the number of `SENT` RFQs that still have `INVITED` suppliers within the deadline,
 the counts of each purchase-order status, the number of goods-receipt drafts, and the confirmed procurement commitment amount grouped by `currencyCode`.
@@ -446,6 +440,11 @@ Procurement commitment and spend count only `CONFIRMED/PARTIAL_RECEIVED/RECEIVED
 `DRAFT/SENT/CANCELLED`. The `dimension` of `spend-analysis` supports
 `CATEGORY/SUPPLIER/DEPARTMENT`, where DEPARTMENT means the purchase order's `owner_unit_id`;
 results are sorted first by currency, then by amount descending, and `limit` ranges from 1–100. No interface may sum directly across currencies.
+
+| Controller | Methods and paths |
+|---|---|
+| Internal asset candidates (InternalAssetCandidateController) | `GET /api/internal/procurement/goods-receipt/asset-candidates` |
+| Internal invitations (InternalRfqInvitationController) | `GET /api/internal/procurement/rfq/invitations` · `GET /api/internal/procurement/rfq/{rfqId}/invitation` |
 
 ### 7.3 Endpoint to DataScope Permission Mapping
 
@@ -472,30 +471,17 @@ results are sorted first by currency, then by amount descending, and `limit` ran
 
 ### 8.1 Auth Feign
 
-Consistent with SRM: store only userId/unitId, and validate before assignment that the user exists, is enabled, and is in the same tenant. Lists batch-enrich; N+1 is forbidden.
+Auth owns users, organizations, permissions and scope. Current creation uses effective ServiceDataScopeContext identity/primary unit; PO inherits RFQ ownership. SRM owner-transfer/candidate capabilities are not automatically Procurement features. AuthInternalClient remains declared, but a contract declaration does not prove each creation/list path calls it. Shared identity/scope failures close access; XSS fallback has separate baseline semantics.
 
 ### 8.2 SRM Feign
 
-Procurement obtains supplier data through the SRM internal API:
+Current SrmInternalClient uses `GET /api/internal/supplier/search`, `POST /api/internal/supplier/batch` and `GET /api/internal/quotation/batch`. RFQ creation/send validate tenant-local APPROVED suppliers. Comparison/award reread valid quotations and verify version, invitation and complete line snapshots; historical names never authorize access.
 
-- `GET /api/internal/supplier/{id}?tenantId={tenantId}`: get the supplier summary.
-- `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}`: search qualified suppliers.
-- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}`: return the valid quotations, versions, and complete line snapshots of invited suppliers, for price comparison and the award snapshot.
-- When creating an RFQ, validate the supplier status is APPROVED and it is not blacklisted.
-- When displaying supplier names in a list, collect supplier_id and then do one batch Feign.
+Procurement exposes `GET /api/internal/procurement/rfq/invitations` and `GET /api/internal/procurement/rfq/{rfqId}/invitation` to SRM. supplierId comes from the current ACTIVE PortalUser. Internal calls use X-Internal-Token/X-Tenant-Id and matching duplicate tenant parameters; Gateway does not expose the prefix.
 
-Procurement also provides two kinds of internal read-only interfaces to SRM:
+New quotation writes check SENT, INVITED/QUOTED, future deadline, validUntil and all lines. Successful historical replay precedes new state/RFQ checks but still needs portal association, DTO and matching intent; it returns the current quotation without republishing. SRM never writes RFQ across databases. Procurement consumes quotation events with Inbox, and an old quotation version cannot overwrite a newer one.
 
-- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`: return the current supplier's invitation list, containing at least `rfqId/rfqNo/title/status/invitationStatus/quotationDeadline/currencyCode/invitedTime`.
-- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`: return the invitation detail and the RFQ line snapshot, with lines containing at least `rfqLineId/materialCode/materialName/unit/quantity/remark`.
-
-SRM must call these interfaces with the supplierId obtained from the PortalUser association, not the supplierId passed in the portal request. Before submission, re-validate that the RFQ `status=SENT`, the invitation `status IN (INVITED, QUOTED)`, and the quotationDeadline is not exceeded; the quotation `validUntil` must not be earlier than the quotationDeadline, and the submitted rfqLineId set must exactly match the detail. After SRM saves the quotation, it publishes `srm.quotation.submitted.v1`; Procurement consumes it idempotently by eventId Inbox and updates its own `proc_rfq_supplier`; SRM must not write Procurement tables across databases.
-
-All the above internal interfaces uniformly use the `/api/internal/**` prefix and require `X-Internal-Token` and `X-Tenant-Id`; if an interface also carries a query/body tenant, it must be consistent with the header tenant. The Gateway does not forward this prefix.
-
-When SRM is unavailable:
-- Supplier display: may return ID/unknown supplier.
-- RFQ/ordering: cannot continue, return 503.
+SRM outages fail actions requiring current suppliers/quotations. Later local commands on an existing PO use its saved snapshot and do not all become unavailable. Invitations/orders display stored supplier-name snapshots; not every list performs current supplier batch enrichment.
 
 ### 8.3 Workflow Integration
 
@@ -544,7 +530,7 @@ After goods-receipt confirmation, the Outbox event `procurement.goods-receipt.co
         "materialId": 601,
         "materialCode": "IT-NB-001",
         "materialNameSnapshot": "ThinkPad X1 Carbon",
-        "categoryCode": "IT_DEVICE",
+        "categoryCode": "LAPTOP",
         "unit": "PCS",
         "receivedQuantity": "5.000000",
         "qualityStatus": "PASS",
@@ -564,13 +550,14 @@ After goods-receipt confirmation, the Outbox event `procurement.goods-receipt.co
 `consumerName + eventId` Inbox unique key for idempotency; real-time consumption and historical rescan jointly use the
 `tenantId + goodsReceiptLineId + unitSequence` asset-source unique key as a fallback; when the same idempotency key binds a different complete business intent, return a conflict and do not silently overwrite.
 
-The Outbox only guarantees reliable event delivery to the Broker; once a message is sent successfully it enters SENT, and it is not guaranteed to be retained indefinitely for a consumer not yet deployed. When Asset goes live, it must perform a compensation rescan: read all confirmed and assetizable historical goods-receipt lines through the paginated `GET /api/internal/procurement/goods-receipt/asset-candidates?tenantId={tenantId}&afterId={id}&size={size}`, and backfill by the same idempotency key. Real-time consumption and historical rescan can run in parallel; the Inbox unique constraint guarantees no duplication.
+Local Outbox and Relay provide retryable sending, not proof of Broker/consumer success or permanent retention for future consumers. Historical candidates use an ascending receipt-line cursor, afterId>=0 and size1–100, selecting CONFIRMED/PASS/assetManaged/positive integers with a source-event latch. The service validates exactly one source event, ownership and associations. Realtime/backfill need both consumerName+eventId Inbox and tenant/receipt-line/unit-sequence source uniqueness; Inbox alone does not explain deduplication. Conflicting intent must not overwrite.
 
 ### 8.5 Outbox Events
 
 - `procurement.requisition.submitted.v1`
 - `procurement.requisition.approved.v1`
 - `procurement.requisition.rejected.v1`
+- `procurement.requisition.cancelled.v1`
 - `procurement.rfq.sent.v1`
 - `procurement.rfq.awarded.v1`
 - `procurement.purchase-order.created.v1`
@@ -582,20 +569,15 @@ The Outbox only guarantees reliable event delivery to the Broker; once a message
 
 ### 9.1 OperLog Masking
 
-Reuses the existing PII masking capability. Fields Procurement needs to mask:
-
-- Delivery address (`delivery_address`)
-- Contact mobile number (`contact_phone`)
+OperLogSanitizer normalizes names and uses contains rules for address/contactname/phone, which cover current address/name/phone fields. Non-JSON fallback patterns handle some phones, emails and credentials. These rules do not recognize arbitrary PII or replace business authorization.
 
 ### 9.2 PII
 
-- The delivery address and contact mobile number are masked by default on the list page.
-- Details are shown by permission.
-- When printing/exporting a purchase order (Phase 2), full values are needed, using a separate permission.
+PO Summary returns masked address/name/phone fields. Detail returns full values after procurement:purchase-order:list and row visibility checks; this path has no additional independent PII grant. Phase 2 print/export permissions remain planned.
 
 ### 9.3 XSS
 
-Procurement obtains the XSS configuration through `omni-common-service`'s `CachedServiceXssConfigProvider`, no longer re-implementing a module-level `XssConfigProvider`. The configuration first reads Redis DB 0 and falls back to Auth on a cache miss; when Auth is unavailable and there is no cache, it uses the safe baseline to continue filtering. MVP remarks allow plain text only.
+Shared CachedServiceXssConfigProvider reads Redis DB 0 xss:enabled:{tenantId}/xss:rules:{tenantId}; cache miss/error resolves through Auth, with a security baseline on resolution failure while respecting authoritative enabled values. These are not proc: business-cache keys. Remarks remain plain text.
 
 ## 10. Frontend Design
 
@@ -609,17 +591,17 @@ omni-frontend/src/
 │   ├── procurement-purchase-order.ts
 │   └── procurement-goods-receipt.ts
 ├── views/procurement/
-│   ├── overview/index.vue           # Procurement overview + spend analysis
-│   ├── material/index.vue           # Material catalog management
-│   ├── requisition/index.vue        # Requisition management
-│   ├── rfq/index.vue                # RFQ management
-│   ├── purchase-order/index.vue     # Purchase order management
-│   └── goods-receipt/index.vue      # Goods receipt management
+│   ├── overview/index.vue           # Overview/spend
+│   ├── material/index.vue           # Material catalog
+│   ├── requisition/index.vue        # Requisitions
+│   ├── rfq/index.vue                # RFQs
+│   ├── purchase-order/index.vue     # Purchase orders
+│   └── goods-receipt/index.vue      # Goods receipt
 └── components/procurement/
-    ├── RequisitionForm.vue          # Requisition form (with dynamic line add/remove)
-    ├── RfqCompareView.vue           # Price comparison view (multi-supplier quotation comparison table)
-    ├── PurchaseOrderTracker.vue     # Order progress tracker
-    └── GoodsReceiptForm.vue         # Goods receipt form (with quality status)
+    ├── RequisitionForm.vue          # Requisition form
+    ├── RfqCompareView.vue           # Comparison
+    ├── PurchaseOrderTracker.vue     # Order progress
+    └── GoodsReceiptForm.vue         # Receipt form
 ```
 
 - `ApiResponse/PageResult` are imported only from `src/types/api.ts`.
@@ -627,73 +609,52 @@ omni-frontend/src/
 - The price-comparison view uses an Element Plus table to compare each supplier's quotation side by side.
 - The Workflow to-do list itself does not carry the Procurement businessKey; when opening a task, first call `/api/workflow/task/{taskId}/form`, read `businessType/requisitionId` from variables, then load the Procurement `approval-view`. When the business form fails to load or the task-assignment validation fails, submitting the approval must be forbidden.
 - `router/index.ts` and the `layout/index.vue` iconMap add Procurement.
-- `constants/menu.ts`, `zh-CN.ts`, and `en-US.ts` are synchronized.
+
+Also present: procurement-approval-route.ts and views/procurement/approval-route with wizard, coverage, match test and flow preview. Maintain menus, permission buttons and all zh-CN/en-US/ja-JP/ko-KR locales together.
 
 ## 11. Engineering Landing Points
 
-### 11.1 New Module
+These are existing implementation entry points, not instructions to recreate the module. See the development Wiki for service-extension teaching.
 
-```text
-omni-backend/omni-procurement/
-├── pom.xml
-└── src/main/
-    ├── java/com/omni/procurement/
-    │   ├── ProcurementApplication.java
-    │   ├── client/ config/ controller/ dto/ entity/
-    │   ├── mapper/ security/ service/ service/impl/
-    │   └── workflow/                    # Workflow Feign client and approval-result event consumer
-    └── resources/
-        ├── application.yml
-        ├── application-dev.yml
-        └── mapper/
-```
-
-`ProcurementApplication` uses `@EnableDiscoveryClient`, `@EnableFeignClients(basePackages="com.omni.procurement.client")`, and `@MapperScan("com.omni.procurement.mapper")`.
-
-### 11.2 Files That Must Change
-
-| File | Change |
+| Area | Current files |
 |---|---|
-| `omni-backend/pom.xml` | Add `omni-procurement` |
-| Gateway `application.yml` | Explicit `/api/procurement/**` route |
-| `docker/backend/Dockerfile` | POM cache layer |
-| `docker-compose.yml` | Procurement service, 8106 |
-| `start.bat/start.sh` | Add Procurement to the build list |
-| `database/changelog/procurement/` | Add forward-only Liquibase changeSets for procurement structure changes |
-| `scripts/sql/seed/procurement.sql` | Formal idempotent seed for material categories, etc.; refresh the seed manifest after updating |
-| `scripts/sql/seed/auth.sql` | Formal idempotent seed for procurement permissions and roles; refresh the seed manifest after updating |
-| Procurement `TenantModuleProvisioner` | Idempotent initialization of the new tenant's 13 material classifications |
-| `omni-workflow` | Add the idempotent internal start/task-assignment validation API and the `workflow.process.completed.v1` Outbox event |
-| `docs/workflow.md` | Supplement the cross-service idempotent start, result events, and procurement approval flow model description |
-| Frontend router/layout/menu/locales | Icons, menus, i18n |
+| Application/scanning | [omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java) |
+| Configuration | [omni-backend/omni-procurement/src/main/resources/application.yml](../../omni-backend/omni-procurement/src/main/resources/application.yml) · [omni-backend/omni-procurement/src/main/resources/application-lite.yml](../../omni-backend/omni-procurement/src/main/resources/application-lite.yml) |
+| Services/APIs | [omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/) · [omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/) |
+| Scope/authorization | [omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java) |
+| Migrations/seeds | [database/changelog/procurement/](../../database/changelog/procurement/) · [scripts/sql/seed/procurement.sql](../../scripts/sql/seed/procurement.sql) · [scripts/sql/seed/auth.sql](../../scripts/sql/seed/auth.sql) · [database/seed/manifest.yaml](../../database/seed/manifest.yaml) |
+| Containers | [compose.yaml](../../compose.yaml) · [compose.tools.yaml](../../compose.tools.yaml) · [docker/backend/Dockerfile](../../docker/backend/Dockerfile) · [start.bat](../../start.bat) · [start.sh](../../start.sh) |
+| Frontend | [omni-frontend/src/views/procurement/](../../omni-frontend/src/views/procurement/) · [omni-frontend/src/api/procurement-approval-route.ts](../../omni-frontend/src/api/procurement-approval-route.ts) |
+| Tenant initialization | [omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantInitializerImpl.java](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantInitializerImpl.java) · [omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantModuleProvisioner.java](../../omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantModuleProvisioner.java) |
 
-Configuration points: server 8106, management 19906, Redis DB 0, XXL appname `omni-procurement`/port 9906.
+ProcTenantInitializerImpl writes CNY and thirteen default categories on first configuration creation, then returns early for an existing configuration. It does not perpetually repair all removed categories. ProcTenantModuleProvisioner binds tenant identity and clears it in finally.
 
 ## 12. Non-Functional Design
 
 ### Performance
 
-- All lists are paginated, maximum 100.
-- Supplier names are batch-enriched once; N+1 is forbidden.
+Paginated endpoints enforce maximum100; category trees, options and internal cursors follow their own contracts. Batch supplier validation differs from historical name display; not every list performs live enrichment.
+
 - Overview statistics use Mapper-layer aggregate SQL (procurement spend `GROUP BY` category/supplier/owning department and currency);
   each aggregate root continues to apply the same requester/owner DataScope as its list, and cross-currency summing and per-record queries are forbidden.
 
 ### Concurrency and Idempotency
 
+Receipt confirmation combines actual receipt/PO FOR UPDATE, all tenant-local confirmed quantities and version/affected-row checks; a method name does not prove line locking. Award locks RFQ/invitations, checks current quotation version, creates/verifies the PO snapshot, then updates RFQ and Outbox in the same local transaction.
+
 - Requisition submission → approval-flow start: local-status conditional update + Workflow's `tenantId + businessType + businessKey` unique idempotency; retry with the same requestId on timeout.
-- Goods-receipt quantity validation: `received_quantity <= ordered_quantity - already_received`, using an optimistic lock.
-- RFQ award: version optimistic lock + RFQ status validation.
 - Portal quotation submission: SRM uses a permanent request-history table for idempotency by `(tenantId, requestId)`, requestHash to prevent the same key with a different intent, and constrains a unique valid quotation by `(tenantId, rfqId, supplierId)`; a replay of the same intent returns the current snapshot without re-publishing the event.
 - Quotation events and approval-result events: each consumes idempotently by the Inbox eventId unique key; an old quotationVersion of the same quotationId must not overwrite a newer version.
 
+proc_event_inbox stores full event JSON under unique (tenant_id,event_id). Quotation/approval consumers validate type, producer, aggregate and semantic JSON intent before replay; conflicting intent returns409, while key ordering/whitespace is not a conflict. Business results and Inbox status change in one local transaction.
+
 ### Degradation
 
-- SRM unavailable: supplier display degrades to ID; RFQ/ordering is rejected (503).
-- Workflow unavailable: the submission interface returns 503, and the requisition keeps the retryable state `status=SUBMITTED, workflow_start_status=FAILED`; approval must not be skipped, nor the flow started duplicately.
-- Auth unavailable: 503 fail-closed.
-- RocketMQ unavailable: the Outbox commits, and the Relay backfills later.
+Dependency failures depend on stage: pre-submit model/route failures roll back; uncertain post-commit startup attempts FAILED marking and requires reloading, never assuming no remote start. RFQ supplier/quotation actions need SRM; existing PO commands use snapshots. Auth scope failures cannot widen access; XSS resolution has a separate baseline. Broker outages can leave local Outbox pending; eventual delivery still needs evidence.
 
 ## 13. Testing and Acceptance
+
+This section lists design requirements and acceptance scenarios, not a record that all were executed. Current individually digest-matched Docker Reactor artifacts contain 49 Procurement reports and 213 passes, zero failures/errors/skips. They prove only their assertions, not real Workflow/MQ, MySQL concurrency or new tutorial execution. Operations/screenshots retain the Procurement Wiki's separate evidence scope.
 
 Minimum test set:
 
@@ -719,6 +680,8 @@ Minimum test set:
 End-to-end acceptance: create material → submit requisition → approval passed → create RFQ → invite suppliers → supplier quotation → price comparison and award → generate purchase order → goods-receipt confirmation → Outbox event sent.
 
 ## 14. Implementation Order
+
+The following original implementation plan dates from 2026-07-27 and is kept for traceability. Milestones do not require recreating existing modules or prove current completion. Current facts follow source contracts and actual evidence.
 
 ### Milestone 0: Prerequisite Confirmation
 
@@ -775,6 +738,8 @@ End-to-end acceptance: create material → submit requisition → approval passe
 | MVP category management | Frontend management UI already opened | Supports self-maintenance of an arbitrary-level category tree |
 
 ## 16. Main Risks
+
+The following preserves original risks/proposed mitigations. Amount-first/category-later wording belongs to that plan; current server-side category/amount rules already exist and must retain their current approval and acceptance requirements.
 
 | Priority | Risk | Handling |
 |---|---|---|

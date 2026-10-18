@@ -1,846 +1,264 @@
 # 프론트엔드 패턴 및 규칙
 
-> 이 문서는 Omni-Stack 프론트엔드의 내부 조직 방식을 정의합니다. 모든 프론트엔드 코드는 반드시 이러한 패턴을 따라야 합니다.  
-> 아키텍처 개요는 [architecture.kr.md](architecture.kr.md)를 참조하십시오. Docker 배포 구성은 [docker-deployment.kr.md](docker-deployment.kr.md)를 참조하십시오.
+> 이 문서는 현재 프런트엔드 구조, 공유 클라이언트 상태, 경로, 권한 표시, 언어와 생명 주기 제약을 관리합니다. 실제 동작은 소스와 설정이 결정합니다. 신규 코드 규칙이 기존 모든 행의 검증 완료를 뜻하지는 않습니다.
+> 전송 형식과 오류 분류는 [API 계약](api-contract.kr.md), 업무 불변 조건은 도메인 사실·설계 문서가 관리합니다. 설치·기능 통합·운영·복구는 [Wiki](wiki/index.kr.md), [개발 가이드](guides/scaffold-development.kr.md), [Docker 배포](docker-deployment.kr.md)를 참조하세요.
 
 ---
 
 ## 목차
 
-- [1. 기술 선정 배경](#1-기술-선정-배경)
+- [1. 기술 기준](#1-기술-기준)
 - [2. 디렉터리 구조](#2-디렉터리-구조)
-- [3. API 계층](#3-api-계층-srcapi)
-- [4. 상태 관리](#4-상태-관리-srcstores)
-- [5. 라우팅](#5-라우팅-srcrouter)
+- [3. API 계층 (src/api/)](#3-api-계층-srcapi)
+- [4. 상태 관리 (src/stores/)](#4-상태-관리-srcstores)
+- [5. 라우팅 (src/router/)](#5-라우팅-srcrouter)
 - [6. 컴포넌트 설계 패턴](#6-컴포넌트-설계-패턴)
 - [7. 컴포넌트 규칙](#7-컴포넌트-규칙)
-- [8. 명명 규칙](#8-명명-규칙-typescript)
-- [9. 코드 포맷](#9-코드-포맷-typescript--vue)
+- [8. 명명 규칙 (TypeScript)](#8-명명-규칙-typescript)
+- [9. 코드 포맷 (TypeScript / Vue)](#9-코드-포맷-typescript--vue)
 - [10. UI 프레임워크](#10-ui-프레임워크)
 - [11. 국제화(i18n)](#11-국제화i18n)
 - [12. 권한 및 접근 제어](#12-권한-및-접근-제어)
-- [13. 비즈니스 모듈 구조 패턴](#13-비즈니스-모듈-구조-패턴-business-module-structure-pattern)
+- [13. 비즈니스 모듈 구조 패턴](#13-비즈니스-모듈-구조-패턴)
 - [14. Composables 패턴](#14-composables-패턴)
-- [15. Docker 배포 환경에서의 Vite 빌드 최적화](#15-docker-배포-환경에서의-vite-빌드-최적화)
+- [15. 빌드와 정적 서비스 경계](#15-빌드와-정적-서비스-경계)
 - [16. 빌드 및 도구](#16-빌드-및-도구)
 - [17. 문제 해결 가이드](#17-문제-해결-가이드)
 
 ---
 
-## 1. 기술 선정 배경
+## 1. 기술 기준
 
-### Vue 3.5 + Composition API를 선택한 이유
+Vue 3 Composition API, TypeScript, Pinia, Vue Router, Element Plus, vue-i18n과 Vite를 사용합니다. 선언 범위는 [package.json](../omni-frontend/package.json), 실제 해석 버전은 [package-lock.json](../omni-frontend/package-lock.json)이 관리합니다. 범위 하한을 현재 설치 버전으로 간주하지 않습니다.
 
-| 고려 사항 | 이유 |
-|-----------|------|
-| **TypeScript 네이티브 지원** | Vue 3.5는 `<script setup lang="ts">`에 대한 완전한 타입 추론을 제공하며, `defineProps<T>()`에 런타임 선언이 불필요합니다 |
-| **Composition API** | 로직 재사용이 Composables를 통해 구현되어, Mixin의 이름 충돌 및 출처 불투명 문제를 해결합니다 |
-| **Tree-shaking 친화적** | API를 필요 시 임포트하며(`ref`, `computed`, `watch`), 사용되지 않는 기능은 번들에 포함되지 않습니다 |
-| **성능** | Proxy 기반 반응형 시스템이 Vue 2의 `Object.defineProperty`보다 빠르며, `Map`/`Set` 등 컬렉션 타입을 지원합니다 |
-| **Teleport / Suspense** | 내장 `<Teleport>` 및 `<Suspense>` 컴포넌트를 통해 모달 및 비동기 컴포넌트 처리를 간소화합니다 |
-
-### Vite 8을 선택한 이유
-
-| 고려 사항 | 이유 |
-|-----------|------|
-| **네이티브 ESM** | 개발 서버가 브라우저 네이티브 ES Module 기반이며, 번들링 없이 기동되어 콜드 스타트 속도가 Webpack의 30초 이상에서 2초 미만으로 단축됩니다 |
-| **HMR 속도** | 모듈 단위 HMR로, 단일 파일 수정 시 해당 모듈만 업데이트되며 전체 chunk가 아닌, 핫 업데이트 지연 시간이 50ms 미만입니다 |
-| **Rollup 호환** | 프로덕션 빌드가 Rollup 기반으로, 성숙한 tree-shaking 및 chunk splitting을 지원합니다 |
-| **플러그인 생태계** | `@vitejs/plugin-vue` 6.x가 SFC 컴파일 및 HMR 통합을 제공합니다 |
-
-### Vuex 대신 Pinia 3를 선택한 이유
-
-| 고려 사항 | 이유 |
-|-----------|------|
-| **공식 권장** | Vue 3부터 Vue 공식에서는 Pinia를 Vuex 대신 권장하며, Vuex는 유지보수 모드로 전환되었습니다 |
-| **Composition API 스타일** | `defineStore('id', () => { ... })`가 Vue 3의 `<script setup>` 스타일과 일관됩니다 |
-| **TypeScript 지원** | 완전한 타입 추론을 제공하며, `@Mutation` / `@Action` 데코레이터가 불필요합니다 |
-| **Mutation 없음** | State + Getters + Actions만으로 데이터 흐름이 간소화됩니다(state 직접 수정 또는 action을 통한 수정) |
-| **경량** | 핵심 패키지가 gzip 기준 1KB 미만이며, 보일러플레이트 코드가 없습니다 |
-| **DevTools** | Vue DevTools와 통합되어 시간 여행 디버깅 및 상태 스냅샷을 지원합니다 |
-
-### Element Plus 2.x를 선택한 이유
-
-| 고려 사항 | 이유 |
-|-----------|------|
-| **Vue 3 네이티브** | Element UI의 Vue 3 버전으로, 완전한 Composition API를 지원합니다 |
-| **엔터프라이즈급 컴포넌트** | 테이블(`el-table`), 폼(`el-form`), 대화상자(`el-dialog`) 등 엔터프라이즈 시나리오 컴포넌트가 성숙합니다 |
-| **내장 국제화** | `vue-i18n` 통합을 지원하며, 컴포넌트에 중국어/영문 텍스트가 내장되어 있습니다 |
-| **다크 모드** | `theme-chalk/dark/css-vars.css`를 통해 한 번에 다크 테마로 전환할 수 있습니다 |
-| **아이콘 라이브러리** | `@element-plus/icons-vue`가 280개 이상의 벡터 아이콘을 제공합니다 |
+앱은 `<script setup lang="ts">`와 Pinia setup store를 사용합니다. [plugins/element-plus.ts](../omni-frontend/src/plugins/element-plus.ts)가 공유 컴포넌트를 명시적으로 등록하고 Element Plus locale은 앱 언어와 연동됩니다. 시작·HMR·번들·운영 성능은 측정 환경을 명시해야 하며 의존성 버전만으로 고정 성능이나 전체 UI 검증을 주장하지 않습니다.
 
 ---
 
 ## 2. 디렉터리 구조
 
-```
-omni-frontend/
-├── index.html              # Vite 진입 HTML
-├── package.json
-├── vite.config.ts          # Vite 설정(프록시, 별칭, 빌드)
-├── tsconfig.json
-├── eslint.config.mjs       # ESLint flat config
-└── src/
-    ├── main.ts             # 애플리케이션 부트스트랩(Pinia, Router, Element Plus, I18n)
-    ├── App.vue             # 루트 컴포넌트(<router-view />)
-    ├── api/                # API 계층(비즈니스 도메인당 하나의 파일)
-    │   ├── request.ts      # 공유 Axios 인스턴스 + 인터셉터
-    │   ├── user.ts         # 사용자 API 함수
-    │   ├── dict.ts         # 사전 API(유형 + 데이터 CRUD)
-    │   ├── auth.ts         # 인증 API(로그인, 회원가입, 인증코드, 소셜 로그인, OAuth2)
-    │   ├── menu.ts         # 메뉴 API(동적 메뉴 트리)
-    │   ├── workflow.ts     # 워크플로 API(모델, 정의, 인스턴스, 승인)
-    │   └── myJob.ts        # 사용자 예약 작업 API
-    ├── stores/             # Pinia 상태 관리(비즈니스 도메인당 하나의 파일)
-    │   ├── user.ts         # 사용자 인증 Store(Token, 사용자 정보)
-    │   ├── app.ts          # 애플리케이션 설정 Store(테마, 사이드바)
-    │   └── permission.ts   # 권한 Store(권한 코드 목록, 동적 메뉴 트리)
-    ├── router/
-    │   └── index.ts        # 라우트 정의 + 내비게이션 가드 + 동적 라우트 등록
-    ├── views/              # 페이지 컴포넌트(kebab-case 디렉터리)
-    │   ├── home/index.vue          # 홈페이지(미로그인 랜딩 페이지 / 로그인 후 워크벤치)
-    │   ├── login/index.vue         # 로그인 페이지
-    │   ├── register/index.vue      # 회원가입 페이지
-    │   ├── callback/index.vue      # OAuth2 콜백 페이지
-    │   ├── dashboard/index.vue     # 대시보드
-    │   ├── consent/index.vue       # OAuth2 권한 동의 페이지
-    │   ├── device/                 # 디바이스 인증(Device Code Flow)
-    │   │   ├── index.vue           # 디바이스 시뮬레이터: QR코드 표시 + Token 폴링
-    │   │   └── verify.vue          # 사용자 승인 확인 페이지
-    │   ├── base/                   # 기본 데이터 모듈
-    │   │   └── dict/index.vue      # 사전 관리(master-detail 레이아웃)
-    │   ├── system/                 # 시스템 관리 모듈
-    │   │   ├── user/index.vue      # 사용자 관리
-    │   │   ├── role/index.vue      # 역할 관리
-    │   │   ├── permission/index.vue # 권한 관리
-    │   │   ├── org/index.vue       # 조직 관리
-    │   │   ├── tenant/index.vue    # 테넌트 관리
-    │   │   ├── oauth2/index.vue    # OAuth2 클라이언트 관리
-    │   │   ├── online/index.vue    # 온라인 사용자 모니터링
-    │   │   └── xssconfig/index.vue # XSS 방어 설정
-    │   ├── workflow/               # 워크플로 모듈
-    │   │   ├── model/index.vue     # 프로세스 모델 관리 + BPMN 디자이너
-    │   │   ├── definition/index.vue # 프로세스 정의 관리
-    │   │   ├── instance/index.vue  # 프로세스 인스턴스 관리
-    │   │   └── stats/index.vue     # 프로세스 통계
-    │   └── monitor/                # 모니터링 모듈
-    │       └── oper-log/index.vue  # 운영 로그
-    ├── layout/
-    │   └── index.vue       # 애플리케이션 셸 레이아웃(사이드바, 상단 바, 콘텐츠 영역)
-    ├── components/         # 공유/재사용 UI 컴포넌트
-    │   ├── LoginForm.vue           # 로그인 폼(비밀번호 + SSO + 서드파티 OAuth2)
-    │   ├── CronGenerator.vue       # Cron 표현식 생성기
-    │   ├── DynamicFormRenderer.vue # 동적 폼 렌더러
-    │   └── workflow/               # 워크플로 전용 컴포넌트
-    │       ├── ModelDesigner.vue   # BPMN 모델링 디자이너
-    │       └── panels/             # BPMN 속성 패널
-    ├── composables/        # Vue Composables(로직 재사용)
-    │   ├── useDictOptions.ts       # 사전 옵션 로드
-    │   ├── useBpmnModeler.ts       # BPMN Modeler 수명 주기 관리
-    │   └── useBpmnExtension.ts     # BPMN 확장 요소 읽기/쓰기
-    ├── constants/          # 상수 정의
-    │   └── menu.ts                 # 메뉴 i18n 매핑 테이블
-    ├── directives/         # Vue 커스텀 디렉티브
-    │   └── permission.ts           # v-permission 권한 디렉티브
-    ├── utils/              # 유틸리티 함수
-    │   ├── jwt.ts                  # JWT 파싱(권한, 테넌트 ID 추출)
-    │   └── pkce.ts                 # PKCE 유틸리티(OAuth2 Device Code Flow)
-    ├── i18n/
-    │   └── index.ts        # vue-i18n 인스턴스 설정
-    ├── locales/            # 번역 파일
-    │   ├── zh-CN.ts        # 중국어 번역
-    │   └── en-US.ts        # 영어 번역
-    ├── types/              # 공유 TypeScript 타입
-    │   └── api.ts          # ApiResponse<T>, PageResult<T>
-    └── styles/
-        └── index.scss      # 전역 스타일(reset, 레이아웃, 테마)
-```
+다음은 책임과 대표 진입점이며 완전한 파일 트리가 아닙니다. 모든 업무 모듈은 현재 소스와 모듈 정의에 따라 구성합니다.
+
+| 디렉터리/진입점 | 현재 책임 |
+|---|---|
+| [main.ts](../omni-frontend/src/main.ts), [App.vue](../omni-frontend/src/App.vue) | Pinia/Router/UI/i18n/지시자/테마 시작, 루트 출력과 컴포넌트 언어 |
+| `src/api/` | 공유 request.ts와 user.ts, dict.ts, `crm-*`, `srm-*`, `procurement-*`, `asset-*` 하위 도메인 |
+| `src/stores/` | user.ts, app.ts, permission.ts |
+| [router/index.ts](../omni-frontend/src/router/index.ts) | 정적·동적 경로, 뷰·아이콘 매핑, 세션 정리와 가드 |
+| `src/views/`, `src/components/`, `src/layout/` | 페이지, 공유 컴포넌트, 관리 레이아웃. OAuth 클라이언트는 system/oauth2가 아닌 views/oauth2-client |
+| `src/composables/` | 사전 상태와 BPMN 생명 주기. 확장 모듈은 일반 함수도 내보낼 수 있음 |
+| `src/utils/`, `src/constants/` | JWT 디코딩, 오류·복귀·접근 정책, PKCE와 메뉴 문구. PKCE는 인가 코드 흐름용 |
+| `src/i18n/`, `src/locales/` | 언어 인스턴스와 zh-CN.ts, en-US.ts, ja-JP.ts, ko-KR.ts |
+| [types/api.ts](../omni-frontend/src/types/api.ts), `src/styles/` | 유일한 공유 응답 타입과 전역 스타일 |
 
 ---
 
 ## 3. API 계층 (`src/api/`)
 
-### 공유 Axios 인스턴스
+[request.ts](../omni-frontend/src/api/request.ts)의 공유 Axios는 VITE_API_BASE_URL(기본 /api), timeout 15000 ms, withCredentials=true입니다. userStore.token에서 Bearer와 X-Tenant-Id를 얻습니다. 클라이언트 디코딩은 JWT 서명을 검증하지 않으며 신뢰된 신원은 Gateway가 결정합니다.
 
-`request.ts`는 단일 설정된 Axios 인스턴스를 내보냅니다:
+성공 시 AxiosResponse 전체를 반환하며 업무 data를 자동으로 풀지 않습니다.
 
-- **baseURL**: `VITE_API_BASE_URL` 환경 변수에서 읽으며, 기본값은 `/api`입니다
-- **timeout**: 15000ms
-- **withCredentials**: `true`(쿠키를 포함하여 OAuth2 Session 관리를 지원합니다)
-- **요청 인터셉터**: `useUserStore()`에서 Token을 읽어 `Authorization: Bearer <token>`을 주입합니다
-- **응답 인터셉터**: `code === 200`을 검사하고, 비즈니스 오류는 `ElMessage.error`로 표시하며, 401 오류 시 만료 대화상자를 표시하고 로그인 페이지로 리다이렉트합니다(redirect 파라미터 포함)
+| 계층 | 현재 예 |
+|---|---|
+| HTTP 응답 | `AxiosResponse<ApiResponse<PageResult<SysUser>>>` |
+| `response.data` | `R<T>`에 대응하는 ApiResponse |
+| `response.data.data` | 업무 PageResult |
 
-### API 함수 패턴
+현재 [user.ts](../omni-frontend/src/api/user.ts)는 SysUser/listUsers/getUser를 사용하며 Axios 제네릭으로 반환 타입을 추론합니다. 공유 ApiResponse/PageResult는 `@/types/api`에서만 가져오며 DTO·null 의미는 API 계약을 따릅니다.
 
-비즈니스 도메인당 하나의 파일. 함수 명명 규칙:
+[error-display.ts](../omni-frontend/src/utils/error-display.ts)와 [errors.ts](../omni-frontend/src/utils/errors.ts)가 오류를 분류·번역합니다. 401이 항상 만료는 아닙니다. 자격 증명 엔드포인트는 세션·입력을 보존하고 해당 미로그인·만료 분기만 재인증하며 403은 세션을 지우지 않습니다. 재인증은 공유 상태를 먼저 정리한 뒤 대화상자 종료 시 이동합니다. 동시 대화상자와 명시적 로그아웃 응답은 플래그로 억제합니다.
 
-| 조작 | 접두사 | 예시 |
-|------|--------|------|
-| ID로 조회 | `getXxx` | `getUserById(id)` |
-| 페이지 목록 | `listXxx` | `listUsers(page, size)` |
-| 생성 | `createXxx` | `createUser(data)` |
-| 수정 | `updateXxx` | `updateUser(id, data)` |
-| 삭제 | `deleteXxx` | `deleteUser(id)` |
-
-모든 함수는 타입화된 파라미터와 반환 타입을 가져야 하며, `ApiResponse<T>`를 사용합니다:
-
-```typescript
-import request from './request'
-import type { ApiResponse, PageResult } from '@/types/api'
-
-export function listUsers(page: number, size: number) {
-  return request.get<ApiResponse<PageResult<UserInfo>>>(
-    `/auth/user/list?page=${page}&size=${size}`,
-  )
-}
-```
-
-### 타입 시스템
-
-- **공유 타입**(`ApiResponse<T>`, `PageResult<T>`): `src/types/api.ts`에 정의되어 유일한 출처(single source of truth)로 사용됩니다
-- **도메인 타입**(`UserInfo`, `SysUser` 등): 이를 사용하는 API 파일에 함께 배치됩니다(`src/api/user.ts`)
-- 공유 타입의 **중복 정의 금지**; 항상 `@/types/api`에서 임포트합니다
-- 타입 전용 임포트에는 `import type { ... }`를 사용합니다
+원격·Axios 기술 message는 진단용이며 표시에는 displayMessage/getErrorMessage를 사용합니다. 다만 로컬 non-Axios Error의 message는 getErrorMessage가 유지하므로 모든 로컬 예외가 번역됐다는 보장은 없습니다. OAuth2 표준 token 요청 등은 별도 fetch·프로토콜 응답을 사용하며 이 R 클라이언트 규칙을 적용하지 않습니다.
 
 ---
 
 ## 4. 상태 관리 (`src/stores/`)
 
-### Pinia Composition API 스타일
+현재 세 setup store의 책임입니다.
 
-```typescript
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+| Store | 상태/영속화 |
+|---|---|
+| [user](../omni-frontend/src/stores/user.ts) | token·username 영속화, isLoggedIn은 token 존재만 검사, isLoggingOut은 명시적 종료 |
+| [app](../omni-frontend/src/stores/app.ts) | sidebarCollapsed/theme, omni-theme 기본 dark, 초기 사이드바는768px 조건으로 접고 영속화하지 않음 |
+| [permission](../omni-frontend/src/stores/permission.ts) | permissions/menuTree/menusLoaded/menuLoadState/menuLoadError, 메모리 상태와 공유 메뉴 Promise |
 
-export const useUserStore = defineStore('user', () => {
-  const token = ref<string>(localStorage.getItem('token') || '')
-  const username = ref<string>('')
+nickname/avatar는 현재 userStore 필드가 아닙니다. omni-lang은 i18n이 관리하며 appStore 소속이 아닙니다. token만 지우는 예제는 전체 세션 정리가 아닙니다.
 
-  function setToken(newToken: string) {
-    token.value = newToken
-    localStorage.setItem('token', newToken)
-  }
+Router의 `clearAuthenticatedSession(explicit)`는 user.logout, permission.reset, clearDynamicRoutes를 순서대로 호출합니다. user.logout 자체는 token/username만 지우며 사전 캐시는 별도로 신원 변경을 관찰합니다. appStore의 테마 helper가 HTML dark 클래스를 바꾸는 것은 명확하게 소유한 DOM 부수 효과입니다. 일반 업무 store가 페이지 DOM을 임의로 조작해서는 안 됩니다.
 
-  function logout() {
-    token.value = ''
-    username.value = ''
-    localStorage.removeItem('token')
-  }
-
-  return { token, username, setToken, logout }
-})
-```
-
-### 규칙
-
-- 비즈니스 도메인당 하나의 Store: `user.ts`, `app.ts`, `permission.ts`
-- Store 파일 명명: kebab-case
-- Store Hook 명명: `use` 접두사(`useUserStore`, `useAppStore`, `usePermissionStore`)
-- Composition API 스타일 사용(`defineStore('id', () => { ... })`)
-- 영속화는 `localStorage`를 사용; 비영속 상태는 `ref()`를 사용
-- Store 내에서 DOM 직접 조작 금지
-
-### 세 가지 핵심 Store 역할
-
-| Store | 역할 | 영속화 |
-|-------|------|--------|
-| `useUserStore` | Token 관리, 사용자 기본 정보(username, nickname, avatar) | `localStorage`(token) |
-| `useAppStore` | 테마 전환(light/dark), 사이드바 접기 상태, 언어 기본 설정 | `localStorage`(theme, lang) |
-| `usePermissionStore` | 권한 코드 목록(JWT에서 파싱), 동적 메뉴 트리(백엔드에서 로드), `menusLoaded` 플래그 | 없음(매 로그인 시 재획득) |
+현재 메뉴 요청에는 사전 캐시의 Token·세대 응답 가드가 없습니다. reset은 상태·Promise 참조를 지울 뿐 이미 보낸 요청을 취소하지 않습니다. 사전 회귀 테스트로 모든 공유 상태가 같은 격리 능력을 가진다고 증명할 수 없습니다.
 
 ---
 
 ## 5. 라우팅 (`src/router/`)
 
-### 라우팅 아키텍처
+Router는 `createWebHistory(import.meta.env.BASE_URL)`를 사용합니다. 정적은 미리 선언됐다는 뜻이며 공개라는 뜻은 아닙니다. `requiresAuth === false`만 공개 분기로 가며 미설정도 보호 분기로 처리합니다.
 
-Omni-Stack은 **정적 라우트 + 동적 라우트** 혼합 아키텍처를 사용합니다:
+| 정적 경로 | 현재 접근 처리 |
+|---|---|
+| `/`, `/login`, `/register` | 공개, token이 있는 Login은 Home으로 |
+| `/portal-login`, `/portal-register` | 공개, token이 있는 PortalLogin은 supplier-portal로 |
+| `/callback`, `/device`, `/device/verify`, `/consent` | 공개 경로, 페이지·프로토콜 자체 검증 유지 |
+| `/supplier-portal` | token과 portalAccess 정책 필요 |
+| `/menu-load-error` | token 필요, 메뉴 재시도 |
+| `/admin`, `/admin/dashboard` | 관리 레이아웃·기본 자식 페이지, 관리 신원 정책 적용 |
+| `/admin/:pathMatch(.*)*`, `/:pathMatch(.*)*` | 각각403/404페이지, 전자는 보호·후자는 공개 |
 
-```
-정적 라우트(공개 페이지)
-├── /            → Home(홈페이지 랜딩 / 워크벤치)
-├── /login       → Login
-├── /register    → Register
-├── /callback    → OAuth2Callback
-├── /device      → DeviceAuth
-├── /device/verify → DeviceVerify
-├── /consent     → OAuth2 권한 동의
-└── /admin       → Layout(관리 백엔드 셸)
-    └── /admin/dashboard → Dashboard(정적 자식 라우트)
+보호 경로에 token이 없으면 safeAppRedirect로 앱 내 복귀를 유지하고 Login/PortalLogin을 선택합니다. token이 있으면 매번 initFromToken을 실행합니다. 메뉴 미완료 시 loadMenus를 기다려 등록·replace 재이동하고 실패하면 MenuLoadError로 갑니다. 나머지 분기는 등록을 보완하고 관리·공급업체 포털·자산 본인 정책을 적용합니다. token 존재·디코딩으로 서명 유효성이나 만료를 증명할 수 없으며 서버 요청은 계속 인증해야 합니다.
 
-동적 라우트(권한 기반, 런타임 등록)
-└── /admin/<feature> → 해당 views/<module>/<feature>/index.vue
-    예시: /admin/user → views/system/user/index.vue
-         /admin/dict → views/base/dict/index.vue
-```
+동적 등록은 뷰가 있는 MENU만 처리하고 srm:portal: 하위 항목을 제외하며 children을 재귀 처리합니다. 권한 코드 콜론은 admin 자식 경로에서 슬래시, 경로명에서 하이픈이 됩니다. `system:user → /admin/system/user`, `base:dict → /admin/base/dict`이며 /admin/user·/admin/dict가 아닙니다. MenuNode.path는 권한 트리 계층을 저장한 경로이며 프런트엔드 URL이 아닙니다.
 
-### 내비게이션 가드 흐름
+`import.meta.glob('../views/**/index.vue')`가 지연 뷰를 제공합니다. viewOverrides는 system:oauth2→views/oauth2-client/index.vue, base:operlog→views/monitor/oper-log/index.vue 두 개입니다. 동적 meta에는 title/icon/requiresAuth/permissionCode가 있지만 타입은 선택 필드이며 모든 정적 레코드가 전부 명시하지는 않습니다. 등록명으로 중복을 막고 종료 시 제거합니다.
 
-```
-router.beforeEach()
-    ↓
-to.meta.requiresAuth 판단
-    ├── false → 로그인 사용자가 /login 접근 → Home(실제 path 는 `/`, `/home` 아님)으로 리다이렉트
-    │           기타 공개 페이지 → 허용
-    └── true  → userStore.token 확인
-                ├── Token 없음 → /login?redirect=<path>로 리다이렉트
-                └── Token 있음 → permissionStore.menusLoaded 확인
-                    ├── false → initFromToken() → loadMenus() → registerDynamicRoutes() → 재내비게이션
-                    └── true  → registerDynamicRoutes()(멱등) → 허용
-```
-
-### 관례적 뷰 컴포넌트 매핑
-
-동적 라우트는 `import.meta.glob`을 통해 `views/` 디렉터리 아래 모든 `index.vue`를 스캔하여 permissionCode → 뷰 컴포넌트의 자동 매핑을 구현합니다:
-
-```typescript
-// router/index.ts
-const viewModules = import.meta.glob('../views/**/index.vue')
-
-// 매핑 규칙: permissionCode "system:user" → "views/system/user/index.vue"
-function resolveViewComponent(permissionCode: string) {
-  if (viewOverrides[permissionCode]) return viewModules[viewOverrides[permissionCode]]
-  const modulePath = permissionCode.replace(/:/g, '/')
-  return viewModules[`../views/${modulePath}/index.vue`]
-}
-```
-
-**특수 매핑 재정의**(`viewOverrides`):
-
-| permissionCode | 특수 매핑 경로 | 이유 |
-|----------------|----------------|------|
-| `system:oauth2` | `views/oauth2-client/index.vue` | OAuth2 콜백 페이지와의 충돌 방지 |
-| `base:operlog` | `views/monitor/oper-log/index.vue` | monitor 디렉터리로 분류 |
-
-### 규칙
-
-- 모든 라우트 컴포넌트는 지연 로딩을 사용합니다: `() => import('@/views/xxx/index.vue')`
-- `meta` 필드: `title`(필수), `icon`(선택), `requiresAuth`(필수), `permissionCode`(동적 라우트 자동 설정)
-- 인증 필요 라우트: 명시적으로 `requiresAuth: true` 설정
-- 공개 라우트: 명시적으로 `requiresAuth: false` 설정
-- 로그아웃 시 `clearDynamicRoutes()`를 호출하여 모든 동적 라우트를 제거합니다
+메뉴 실패에도 menusLoaded=true이므로 idle/loading/loaded/failed를 함께 봐야 합니다. retryLoadMenus는 초기화 후 다시 읽습니다. 복구 작업은 Wiki에서 관리합니다.
 
 ---
 
 ## 6. 컴포넌트 설계 패턴
 
-### 페이지 컴포넌트(Views)
+페이지는 반응형 데이터, 로딩·폼 상태, 작업, 템플릿을 분리합니다. API·타입은 도메인, 재사용 로직은 Composables, 업무 컴포넌트는 페이지와 함께 구성할 수 있습니다. 실제 [사용자 페이지](../omni-frontend/src/views/system/user/index.vue)를 참조하며 누락된 import·생략 부호가 있는 두 번째 “실행 가능” 페이지를 유지하지 않습니다.
 
-페이지 컴포넌트는 표준 **데이터 + 조작 + UI** 3계층 구조를 따릅니다:
+loading은 finally에서 회수하고 제출 전에 폼 검증을 기다리며 버튼 권한과 서버 검증을 적용합니다. 신규 작업은 사용자 취소와 실제 실패를 구분하고 넓은 catch로 모든 실패를 취소 취급하지 않습니다. 기존 처리 범위는 소스에 따릅니다.
 
-```vue
-<script setup lang="ts">
-// 1. 임포트(API, 타입, 컴포넌트, i18n)
-import { ref, reactive, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { listUsers, createUser, type SysUser } from '@/api/user'
-
-const { t } = useI18n()
-
-// 2. 반응형 상태
-const tableData = ref<SysUser[]>([])
-const total = ref(0)
-const currentPage = ref(1)
-const pageSize = ref(10)
-const loading = ref(false)
-
-// 3. 폼 상태
-const dialogVisible = ref(false)
-const formRef = ref<FormInstance>()
-const form = reactive({ username: '', password: '' })
-const rules: FormRules = { username: [{ required: true, ... }] }
-
-// 4. 비즈니스 함수
-async function loadData() { loading.value = true; try { ... } finally { loading.value = false } }
-function handleCreate() { dialogVisible.value = true }
-async function handleSubmit() { await formRef.value?.validate(); ... }
-async function handleDelete(id: number) { await ElMessageBox.confirm(...); ... }
-</script>
-```
-
-### 공유 컴포넌트(Components)
-
-- 범용 UI 컴포넌트는 `src/components/`에 배치합니다
-- 비즈니스 특정 컴포넌트는 해당 views와 함께 배치합니다
-- 컴포넌트 사용 시 UpperCamelCase(`<UserCard />`), 파일은 kebab-case 디렉터리를 사용합니다
-
-### 컴포넌트 통신 패턴
-
-| 시나리오 | 패턴 | 예시 |
-|----------|------|------|
-| 부모-자식 통신 | `defineProps<T>()` + `defineEmits<T>()` | `<LoginForm @login-success="onLogin" />` |
-| 컴포넌트 간 상태 | Pinia Store | `useUserStore().token` |
-| 로직 재사용 | Composable | `useDictOptions('dict_type_code')` |
-| 슬롯 확장 | `<slot>` + named slots | `<template #header>...</template>` |
+부모·자식은 defineProps/defineEmits, 공유 클라이언트 상태는 Pinia, UI 확장은 slots를 사용합니다. 타입 추론이 런타임 본문 검증을 대체하지는 않습니다.
 
 ---
 
 ## 7. 컴포넌트 규칙
 
-### SFC 요소 순서
+신규 SFC는 `<script setup lang="ts">` → `<template>` → `<style scoped>` 순서입니다. 페이지는 보통 kebab-case 디렉터리의 index.vue, 공유 컴포넌트는 LoginForm.vue/LanguageSelector.vue 같은 UpperCamelCase 파일도 사용합니다. 페이지 규칙을 모든 컴포넌트명에 강제하지 않습니다.
 
-```vue
-<script setup lang="ts">
-// Script 먼저
-</script>
-
-<template>
-  <!-- Template 중간 -->
-</template>
-
-<style scoped lang="scss">
-/* Styles 마지막 */
-</style>
-```
-
-### 규칙
-
-- 모든 컴포넌트는 `<script setup lang="ts">`를 사용합니다
-- Props: `defineProps<T>()` TypeScript 제네릭을 사용합니다
-- 디렉터리: kebab-case 디렉터리 + `index.vue`(예: `views/login/index.vue`)
-- 스타일: `<style scoped lang="scss">`로 컴포넌트별 격리
-- 전역 스타일은 `src/styles/`에 배치
-- 서드파티 컴포넌트 스타일을 재정의하는 경우를 제외하고 `!important` 사용 금지
+Props·이벤트는 타입을 지정한 defineProps/defineEmits를 사용하고 스타일 범위를 명확히 하며 전역 스타일은 src/styles에 둡니다. 외부 라이브러리 스타일 재정의도 범위를 제한합니다. 날짜·금액·공유 응답 타입은 [API 계약](api-contract.kr.md)과 [AGENTS](../AGENTS.md)를 따르며 상충하는 형식을 만들지 않습니다.
 
 ---
 
 ## 8. 명명 규칙 (TypeScript)
 
-| 유형 | 스타일 | 예시 |
-|------|--------|------|
-| 변수 / 함수 | lowerCamelCase | `getUserById`, `userList` |
-| 인터페이스 / 타입 | UpperCamelCase | `ApiResponse`, `UserInfo` |
-| 컴포넌트 파일 | kebab-case 디렉터리 + `index.vue` | `views/login/index.vue` |
-| Store 파일 | kebab-case | `stores/user.ts` |
-| Store Hook | `use` 접두사 | `useUserStore` |
-| Composable | `use` 접두사 | `useDictOptions` |
-| 상수 | UPPER_SNAKE_CASE | `MAX_PAGE_SIZE` |
-| CSS 클래스명 | kebab-case | `sidebar-menu`, `login-container` |
+| 대상 | 신규 코드 규칙 |
+|---|---|
+| 변수·함수 | lowerCamelCase |
+| 인터페이스·타입·컴포넌트 | UpperCamelCase |
+| 페이지 디렉터리 | kebab-case + index.vue |
+| Store·도메인 파일 | 현재 도메인 진입점을 따르며 신규는 kebab-case 우선 |
+| Store·상태 Composable | use 접두사 |
+| 상수·CSS 클래스 | UPPER_SNAKE_CASE / kebab-case |
+
+myJob.ts/systemJob.ts 같은 기존 진입점은 그대로 있으며 일괄 이름 변경 완료를 뜻하지 않습니다. composables의 일반 helper에 Ref 반환이나 Hook 이름을 강제하지 않습니다. 신규 코드 주석은 AGENTS에 따라 중국어로 작성합니다.
 
 ---
 
 ## 9. 코드 포맷 (TypeScript / Vue)
 
-- 들여쓰기: 2칸 공백
-- 세미콜론 없음(ASI 스타일)
-- 작은따옴표; JSX에서는 큰따옴표
-- 여러 줄 구조에서는 후행 쉼표 유지
-- 타입 전용 임포트에는 `import type { ... }` 사용
-- `src/` 아래 모듈 임포트 시 `@` 경로 별칭 사용
-- Vue SFC 순서: `<script setup>` → `<template>` → `<style scoped>`
+[eslint.config.mjs](../omni-frontend/eslint.config.mjs)는 공백2칸, 세미콜론 없음, 작은따옴표, 여러 줄 후행 쉼표, SFC block-order를 검사합니다. lint는 `--max-warnings 0`이므로 warn도 명령 실패가 됩니다. Node 스크립트의 globals/no-console 예외는 src 규칙을 바꾸지 않습니다.
+
+[tsconfig.json](../omni-frontend/tsconfig.json)은 strict, noUnusedLocals/noUnusedParameters, noFallthroughCasesInSwitch, bundler resolution, noEmit, @/*→src/*를 설정합니다. 이것으로 백엔드 권한이나 모든 기존 이름·서식을 검증했다고 할 수는 없습니다.
 
 ---
 
 ## 10. UI 프레임워크
 
-- **Element Plus**를 UI 컴포넌트 라이브러리로 사용합니다(폼, 테이블, 카드, 메뉴 등)
-- **@element-plus/icons-vue**로 아이콘을 제공합니다(`main.ts`에서 전역 등록)
-- Element Plus CSS 변수를 사용하여 테마를 커스터마이징합니다(`--el-color-primary`, `--el-bg-color-page` 등)
-- 폼 유효성 검사: Element Plus `FormRules` + `ref<FormInstance>()` 패턴
-- 다크 모드: `theme-chalk/dark/css-vars.css`를 통해 자동 전환
+main이 호출하는 [installElementPlus](../omni-frontend/src/plugins/element-plus.ts)는 나열된 컴포넌트·아이콘·loading 지시자만 등록하며 전체 아이콘 라이브러리를 등록하지 않습니다. Globe는 Connection 별칭입니다. iconMap과 실제 등록 집합을 함께 관리합니다.
 
-```typescript
-// 폼 유효성 검사 표준 패턴
-const formRef = ref<FormInstance>()
-const rules: FormRules = {
-  username: [{ required: true, message: '사용자 이름을 입력하십시오', trigger: 'blur' }],
-}
-
-async function handleSubmit() {
-  await formRef.value?.validate()  // 유효성 검사를 통과해야 계속 진행
-  // ... 제출 로직
-}
-```
+main은 기본·다크 변수 CSS를 읽고 initTheme/setTheme가 document.documentElement의 dark 클래스를 적용합니다. 기본값·영속화는 appStore 책임이며 CSS import만으로 테마가 바뀌지는 않습니다. 검증 문구가 언어 변경을 따라야 하면 반응형 규칙과 t()를 사용하며 각 페이지 구현을 확인합니다.
 
 ---
 
 ## 11. 국제화(i18n)
 
-### 설정
+[i18n/index.ts](../omni-frontend/src/i18n/index.ts)는 legacy=false와 `zh-CN/en-US/ja-JP/ko-KR`, 저장 키 omni-lang을 사용합니다. 잘못되거나 없는 설정은 zh-CN, 누락된 키는 en-US로 폴백합니다. 컴포넌트 외부는 같은 인스턴스의 translate()를 사용합니다.
 
-`vue-i18n` 11.x를 기반으로 하며, Composition API 모드(`legacy: false`)를 사용합니다:
+[LanguageSelector](../omni-frontend/src/components/LanguageSelector.vue)는 locale과 storeLang을 함께 갱신하며 후자는 저장하고 HTML lang을 설정합니다. [App.vue](../omni-frontend/src/App.vue)는 ElConfigProvider 언어를 매핑하고 알 수 없는 매핑은 enUS로 되돌립니다. localStorage만 쓰면 반응형 언어는 바뀌지 않습니다.
 
-```typescript
-// i18n/index.ts
-const i18n = createI18n({
-  legacy: false,
-  locale: getStoredLang(),        // localStorage에서 읽기, 기본값 'zh-CN'
-  fallbackLocale: 'en-US',
-  // 현재 SUPPORTED_LOCALES = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR'], 신규 모듈은 4개 언어 필수
-  messages: { 'zh-CN': zhCN, 'en-US': enUS, 'ja-JP': jaJP, 'ko-KR': koKR },
-})
-```
+신규 문구는 네 locale 파일의 키 구조를 맞추고 메뉴는 menuI18nMap도 갱신합니다. API·프로토콜 식별자를 번역하거나 특정 언어 소스 예제에 다른 언어 내용을 넣으면 안 됩니다. 파일 존재·폴백은 의미나 UI 검증을 대체하지 않습니다.
 
-### 사용 방식
-
-```typescript
-// 컴포넌트 내부
-const { t, locale } = useI18n()
-const label = t('common.dashboard')
-
-// 언어 전환
-locale.value = 'en-US'
-storeLang('en-US')  // localStorage에 영속화
-```
-
-### 번역 파일 구조
-
-번역 파일은 `src/locales/`에 위치하며, 모듈별로 key를 조직합니다:
-
-```typescript
-// zh-CN.ts
-export default {
-  common: {
-    dashboard: '대시보드',
-    systemManagement: '시스템 관리',
-    userManagement: '사용자 관리',
-    // ...
-  },
-  login: {
-    title: '로그인',
-    username: '사용자 이름',
-    // ...
-  },
-  // ...
-}
-```
-
-### 신규 모듈 i18n 체크리스트
-
-| 단계 | 파일 | 작업 |
-|------|------|------|
-| 1 | `src/locales/zh-CN.ts` | `common.<feature>Management` 및 기능별 번역 key 추가 |
-| 2 | `src/locales/en-US.ts` | 해당 영어 번역 추가 |
-| 3 | `src/constants/menu.ts` → `menuI18nMap` | `permissionCode → i18n key` 매핑 추가 |
+Router는 이동 시 메뉴 매핑 또는 docTitle로 document.title을 갱신합니다. 같은 페이지의 언어 변경 직후 재계산은 보장하지 않습니다. 키 일치, 하드코딩 감사, 문서 AI_REVIEW, 실제 브라우저 확인은 별개 검사입니다.
 
 ---
 
 ## 12. 권한 및 접근 제어
 
-### Permission Store (`src/stores/permission.ts`)
+permissions는 JWT scope 배열을 전제로 하며 roles는 roles에서 따로 얻습니다. 로컬 디코딩은 서명이나 claims 구조를 검증하지 않습니다. 해당 배열 전제에서 hasPermission은 정확한 문자열 원소 포함 여부를 검사하며 SUPER_ADMIN이나 역할명에 자동으로 와일드카드 권한을 주지 않습니다.
 
-`usePermissionStore`는 권한 코드 목록과 동적 메뉴 트리를 관리합니다:
+메뉴 트리는 `GET /api/auth/menus`에서 얻으며 DIRECTORY/MENU는 그룹·경로, path는 권한 트리 계층을 저장한 경로입니다. 클라이언트 표시로 백엔드 인가를 증명할 수 없습니다. v-permission은 mounted/updated에서 display:none 또는 빈 display를 설정하며 DOM을 제거하지 않습니다. 빈 바인딩은 안전한 접근 거부 수단이 아닙니다.
 
-```typescript
-// JWT Token에서 권한 코드 초기화
-permissionStore.initFromToken()
+경로는 [access.ts](../omni-frontend/src/utils/access.ts)의 관리·공급업체·자산 본인 정책도 사용합니다. 실제 보안 경계는 백엔드 인증, 기능 권한·행 소유, 테넌트·데이터 범위이며 화면 경로·버튼으로 대신할 수 없습니다. 현재 구현 제한은 도메인 문서에서 확인합니다.
 
-// 백엔드에서 동적 메뉴 로드
-await permissionStore.loadMenus()
-
-// 사용자가 특정 권한을 보유하고 있는지 조회
-permissionStore.hasPermission('system:user:create')
-```
-
-**데이터 출처**:
-- 권한 코드 목록: JWT Token의 `authorities` 필드(로그인 시 기록되며, `getPermissionsFromToken()`을 통해 파싱)
-- 동적 메뉴 트리: `GET /api/auth/menus` 호출(백엔드에서 사용자 권한에 따라 필터링됨)
-
-### 동적 메뉴 라우팅
-
-로그인 성공 후, 라우트 가드는 다음 흐름을 트리거합니다:
-
-```
-JWT 디코딩 → permissionStore.initFromToken() 권한 코드 추출
-    → permissionStore.loadMenus() 백엔드 필터링된 메뉴 트리 획득
-    → registerDynamicRoutes() 메뉴 트리를 순회하며 Vue Router 라우트 추가
-    → 사이드바에서 permissionStore.menuTree 렌더링
-```
-
-메뉴 데이터 구조(`MenuNode`)에는 `path`(프론트엔드 라우트 경로), `permissionCode`(권한 코드), `type`(DIRECTORY/MENU) 등의 필드가 포함됩니다.
-
-### 버튼 수준 권한 (`v-permission`)
-
-Vue 커스텀 디렉티브 `v-permission`을 통해 버튼의 표시/숨김을 제어합니다:
-
-```vue
-<!-- system:user:create 권한을 가진 사용자만 볼 수 있음 -->
-<el-button v-permission="'system:user:create'" type="primary">
-  신규 추가
-</el-button>
-```
-
-**구현 원리**:
-- 디렉티브 마운트 시 `usePermissionStore`에서 권한 코드를 조회합니다
-- 권한이 없을 때 `el.style.display = 'none'`을 설정합니다(`removeChild`가 아니며, Vue 반응형 업데이트와 호환됩니다)
-- `mounted` 및 `updated` 두 훅에서 검사를 실행합니다
-
-**등록 방식**(`src/directives/permission.ts`):
-
-```typescript
-// main.ts에서 등록
-import { setupPermissionDirective } from '@/directives/permission'
-setupPermissionDirective(app)
-```
-
-### 규칙
-
-- 권한 코드는 반드시 백엔드 `sys_permission` 테이블에 정의된 것과 일치해야 하며, 형식은 `resource:action`입니다
-- `v-permission` 디렉티브는 UI 계층의 표시/숨김 제어에만 사용하며, 백엔드 `@PreAuthorize`가 보안 경계입니다
-- 동적 라우트는 반드시 내비게이션 가드에서 `permissionStore.loadMenus()` 완료 후 등록해야 합니다
-- 로그아웃 시 반드시 `permissionStore.reset()`을 호출하여 권한 상태를 초기화해야 합니다
-
-### XSS 방어 설정 관리
-
-XSS 방어 관리 페이지(`views/system/xssconfig/index.vue`)는 전역 스위치 및 블랙리스트 규칙 CRUD를 제공합니다:
-
-- **전역 스위치**: `el-switch` 컴포넌트, `PUT /api/auth/xss-config/toggle` 호출
-- **규칙 목록**: `el-table` 페이지네이션 테이블, 신규 생성, 수정, 삭제, 개별 활성화/비활성화 지원
-- **테넌트 격리**: API 계층에서 JWT Token으로부터 `tenant_id`를 추출하여 `X-Tenant-Id` 요청 헤더로 전달
-- **규칙 유형**: HTML 태그 / 이벤트 핸들러 / 위험 프로토콜 / 커스텀 정규식
+XSS 설정 API·오류·테넌트 규칙은 [API 계약](api-contract.kr.md)이 관리합니다. X-Tenant-Id를 보내도 임의 신원이 신뢰되는 것은 아니며 Gateway가 검증된 신원으로 덮어씁니다. 종료는 메뉴 숨김만이 아니라 전체 세션을 정리해야 합니다.
 
 ---
 
-## 13. 비즈니스 모듈 구조 패턴 (Business Module Structure Pattern)
+## 13. 비즈니스 모듈 구조 패턴
 
-신규 비즈니스 모듈 추가 시, 다음 규칙에 따라 디렉터리를 조직하고 라우트를 등록하며 국제화를 설정합니다.
+페이지, API, 선택 Store, 네 언어 locale을 CRM/SRM/Procurement/Asset과 플랫폼 도메인별로 구성합니다. 공유 응답 타입은 src/types/api.ts에서만 정의합니다.
 
-### 표준 디렉터리 레이아웃
-
-「기본 데이터 모듈 → 사전 관리 기능」을 예로 듭니다:
-
-```
-src/
-├── views/
-│   └── base/                  # 모듈 그룹 디렉터리
-│       └── dict/
-│           └── index.vue      # 기능 페이지(SFC 순서: script → template → style)
-├── api/
-│   └── dict.ts               # API 함수 + TypeScript 인터페이스(파일당 하나의 기능 도메인)
-├── stores/
-│   └── dict.ts               # (선택) 복잡한 클라이언트 상태가 필요한 경우에만 생성
-└── locales/
-    ├── zh-CN.ts              # 중국어 번역
-    └── en-US.ts              # 영어 번역
-```
-
-### 등록 체크리스트
-
-각 신규 비즈니스 모듈은 다음 등록을 완료해야 합니다:
-
-| 단계 | 파일 | 작업 |
-|------|------|------|
-| 1 | `src/router/index.ts` → `iconMap` | `'<module>:<feature>': '<IconName>'` 추가(예: `'base:dict': 'Collection'`) |
-| 2 | `src/constants/menu.ts` → `menuI18nMap` | 모듈 디렉터리 및 메뉴 항목의 i18n key 매핑 추가 |
-| 3 | `src/locales/zh-CN.ts` + `en-US.ts` + `ja-JP.ts` + `ko-KR.ts` | 4개 로케일 모두에 `common.<module>Management`(디렉터리명), `common.<feature>Management`(메뉴명) 및 기능별 번역 key 추가 |
-| 4 | `scripts/sql/seed/auth.sql` → `sys_permission` | 멱등 DIRECTORY(모듈 그룹) + MENU(기능 페이지) + BUTTON/API(조작 권한) 시드를 추가하고 seed manifest 갱신 |
-| 5 | `scripts/sql/seed/auth.sql` → `sys_role_permission` | SUPER_ADMIN 역할에 신규 권한 노드를 멱등 할당하고 자연 키 검증 추가 |
-
-### 참고 구현: 사전 관리 모듈
-
-`base:dict`(사전 관리)를 신규 모듈의 참고 템플릿으로 사용합니다:
-
-- **View**: `views/base/dict/index.vue` — master-detail 레이아웃(왼쪽 유형 목록 10/24 cols, 오른쪽 데이터 목록 14/24 cols)
-- **API**: `api/dict.ts` — 11개의 typed 함수(`listDictTypes`, `getDictType`, `createDictType`, `updateDictType`, `deleteDictType`, `toggleDictTypeStatus`, `listDictData`, `createDictData`, `updateDictData`, `deleteDictData`, `refreshDictCache`)
-- **Permission codes**: `dict:type:*`(4개) + `dict:data:*`(5개)
-- **UI patterns**: `v-permission` 버튼 권한 제어, `el-switch` 상태 전환, `el-pagination` 페이지네이션, `ElMessageBox.confirm` 삭제 확인, `X-Tenant-Id` 멀티 테넌트 격리
+router iconMap, constants/menu.ts menuI18nMap, sys_permission/sys_role_permission, 지시자와 엔드포인트 권한을 일치시키고 시드 변경 시 manifest 해시·검증을 갱신합니다. 통합 절차는 [개발 가이드](guides/scaffold-development.kr.md), 현재 예제는 [사전 페이지](../omni-frontend/src/views/base/dict/index.vue)와 [API](../omni-frontend/src/api/dict.ts)에서 관리합니다.
 
 ---
 
 ## 14. Composables 패턴
 
-Composables는 Omni-Stack 프론트엔드의 로직 재사용 핵심 메커니즘으로, 기존의 Mixin 모드를 대체합니다.
+상태를 가진 Composable은 기능별 이름이 있는 Ref·ComputedRef·동작 함수를 반환한다. 일반 보조 함수는 선언된 인터페이스의 값을 반환한다. 부수 효과의 소유자를 명확히 한다. 컴포넌트 자원은 해당 scope와 함께 정리하고 공유 모듈 캐시는 자체 문맥 observer를 소유한다.
 
 ### 설계 원칙
 
-| 원칙 | 설명 |
-|------|------|
-| **단일 책임** | 하나의 Composable은 하나의 기능 도메인만 담당합니다 |
-| **반환값 규칙** | `{ state, computed, actions }` 객체를 반환하며, 구조 분해 할당으로 소비합니다 |
-| **반응형** | 내부에서 `ref()` / `reactive()`를 사용하며, 반환값은 자동으로 반응형이 됩니다 |
-| **수명 주기 안전** | `onMounted` / `onUnmounted`에서 부작용을 관리합니다 |
+| 원칙 | 제약 |
+| --- | --- |
+| 단일 책임 | 기능별 구성, 공유 ApiResponse/PageResult 중복 정의 금지 |
+| 반응형 반환 | 반응형 상태를 노출할 때 refs/computed 반환으로 구조 분해 후 갱신 유지; 템플릿은 Vue 규칙에 따라 해제 |
+| 문맥 소유 | 캐시와 진행 요청은 테넌트 및 신원 문맥을 구분 |
+| 수명 주기 | 컴포넌트 observer는 scope와 함께 종료; 모듈 observer는 독립 소유하며 문맥 교체·HMR 때 종료 |
 
 ### 대표적인 Composable: useDictOptions
 
 ```typescript
-// composables/useDictOptions.ts
-export function useDictOptions(dictTypeCode: string) {
-  const options = ref<DictOption[]>([])
-  const loading = ref(false)
+import { useDictOptions } from '@/composables/useDictOptions'
 
-  async function loadOptions() {
-    loading.value = true
-    try {
-      const { data: res } = await listDictDataByType(dictTypeCode)
-      options.value = res.data.map(item => ({
-        label: item.dictLabel,
-        value: item.dictValue,
-      }))
-    } finally {
-      loading.value = false
-    }
-  }
-
-  onMounted(loadOptions)
-
-  return { options, loading, reload: loadOptions }
-}
+const { options, loading } = useDictOptions('workflow_category')
 ```
 
-**사용 방식**:
+`useDictOptions(typeCode)`는 `{ options, loading }`을 반환한다. options는 `ComputedRef<DictOption[]>`, loading은 `Ref<boolean>`이다. 인증된 `getDictOptions()`를 호출하며 공개 `reload`나 `listDictDataByType()` 호출은 없다.
 
-```vue
-<script setup lang="ts">
-const { options: categoryOptions } = useDictOptions('workflow_category')
-</script>
+캐시 키는 테넌트 ID와 typeCode이다. 같은 테넌트·Token의 진행 요청을 공유한다. 테넌트 변경은 옵션 뷰를 전환하고 Token 변경은 이전 요청을 무효화한다. 같은 테넌트의 완료 캐시는 재사용할 수 있다. 이전 응답은 여전히 유효하고 Token이 같을 때만 반영하며, 종료 처리로 새 진행 요청을 삭제하지 않는다.
 
-<template>
-  <el-select v-model="form.category">
-    <el-option v-for="opt in categoryOptions" :key="opt.value"
-               :label="opt.label" :value="opt.value" />
-  </el-select>
-</template>
-```
+모듈이 소비자와 독립적인 신원 observer scope를 소유한다. 마지막 소비자가 파괴되어도 로그아웃 시 캐시를 비우고 이전 응답을 차단한다. 디코딩된 테넌트 값이 falsy이면 옵션 요청을 보내지 않는다. 이 클라이언트 판단은 JWT 서명이나 claims 구조를 검증하지 않는다. 컴포넌트 unmount만으로 공유 캐시가 만료되지는 않으며 백엔드 Redis 갱신과 클라이언트 메모리 갱신은 별개다.
+
+템플릿은 loading Ref의 자동 해제 값을 직접 바인딩하고 스크립트는 `.value`를 사용한다. 소스 링크는 계약과 실제 Composable/Vue 회귀 8개를 포함한다. 단계별 사용 절차는 Wiki에 둔다.
+
+[dict.ts](../omni-frontend/src/api/dict.ts) / [useDictOptions.ts](../omni-frontend/src/composables/useDictOptions.ts) / [dict-options.test.ts](../omni-frontend/tests/base/dict-options.test.ts)
 
 ### 기존 Composables 목록
 
-| Composable | 파일 | 역할 |
-|------------|------|------|
-| `useDictOptions` | `composables/useDictOptions.ts` | 사전 옵션을 로드하고 반응형 `options` 배열을 반환 |
-| `useBpmnModeler` | `composables/useBpmnModeler.ts` | bpmn-js Modeler의 생성, 소멸, 가져오기/내보내기 관리 |
-| `useBpmnExtension` | `composables/useBpmnExtension.ts` | BPMN extensionElements 읽기/쓰기 조작 |
+| 소스 | 책임 |
+| --- | --- |
+| [useDictOptions.ts](../omni-frontend/src/composables/useDictOptions.ts) | 테넌트 옵션 캐시·문맥 observer·로딩 상태 |
+| [useBpmnModeler.ts](../omni-frontend/src/composables/useBpmnModeler.ts) | bpmn-js 초기화·가져오기/내보내기·onBeforeUnmount 파괴 |
+| [useBpmnExtension.ts](../omni-frontend/src/composables/useBpmnExtension.ts) | readAssignment/writeAssignment 등의 BPMN 확장 읽기·쓰기 함수 |
+
+[Flow 9](core-flows.kr.md)
+
+이 격리는 useDictOptions의 구현이며 permissionStore 메뉴 요청에 일반화하지 않습니다. useBpmnModeler는 컨테이너 준비 후 초기화하고 import/export, unmount 시 keydown 제거·destroy를 처리합니다. useBpmnExtension은 일반 확장 함수와 moddle 정의를 내보냅니다. 사전 요청 상태를 공유하지 않으며 8개 회귀 테스트로 전체 비동기 취소·readonly 동작·브라우저 생명 주기를 검증했다고 할 수 없습니다.
 
 ---
 
-## 15. Docker 배포 환경에서의 Vite 빌드 최적화
+## 15. 빌드와 정적 서비스 경계
 
-### 다단계 빌드
+[프런트엔드 Dockerfile](../docker/frontend/Dockerfile)은 Node 22로 빌드하고 Nginx 1.28로 dist를 3000에서 제공합니다. 현재 [Nginx](../docker/frontend/nginx.conf)는 /api/, /oauth2/, /.well-known/을 Docker DNS로 omni-gateway:8080에 전달하고 index.html history 폴백을 제공합니다.
 
-프론트엔드 Docker 이미지는 2단계 빌드를 사용합니다(상세: `docker/frontend/Dockerfile`):
-
-```dockerfile
-# 단계 1: 빌드
-FROM node:22-alpine AS builder
-WORKDIR /app
-COPY omni-frontend/package*.json ./
-RUN npm ci                      # 결정적 설치(버전 고정)
-COPY omni-frontend/ .
-RUN npm run build               # vue-tsc 타입 검사 + Vite 프로덕션 빌드
-
-# 단계 2: 실행(Nginx 정적 서버)
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
-```
-
-### Vite 빌드 설정
-
-```typescript
-// vite.config.ts
-build: {
-  target: 'es2020',            // 빌드 대상: 옵셔널 체이닝, 널 병합 등 최신 문법 지원
-  outDir: 'dist',
-  chunkSizeWarningLimit: 750, // 현재 저장소 임계값
-}
-```
-
-### 프로덕션 빌드 최적화 항목
-
-| 최적화 항목 | 설명 |
-|-------------|------|
-| **라우트 지연 로딩** | 모든 views 컴포넌트는 `() => import()` 동적 임포트를 사용하여 지연 로딩을 구현합니다 |
-| **Element Plus按需** | `@vitejs/plugin-vue`를 통해 사용되지 않는 컴포넌트를 자동으로 tree-shake합니다 |
-| **`import.meta.glob`** | 뷰 모듈 스캔은 컴파일 시 정적 분석을 수행하여 무관한 파일을 번들에 포함하지 않습니다 |
-| **chunk splitting** | Vite/Rollup이 자동으로 vendor(vue, element-plus, axios)를 독립 chunk로 분리합니다 |
-| **CSS 추출** | 프로덕션 빌드 시 CSS를 독립 파일로 자동 추출하여 브라우저 캐싱을 지원합니다 |
-
-### Nginx 설정 핵심
-
-```nginx
-server {
-    listen 3000;  # 컨테이너는 3000 에서 리스닝(Compose 호스트 3000 → 컨테이너 3000 과 일치)
-    root /usr/share/nginx/html;
-    index index.html;
-
-    # SPA History 모드: 모든 비파일 요청을 index.html로 폴백
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # API 리버스 프록시 → Gateway(컨테이너 내부 포트)
-    location /api/ {
-        proxy_pass http://omni-gateway:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    # OAuth2 엔드포인트 프록시
-    location /oauth2/ {
-        proxy_pass http://omni-gateway:8080;
-    }
-}
-```
+HTML은 no-cache/no-store, assets는 1년 immutable 캐시입니다. add_header가 있는 location은 보안 헤더를 명시적으로 다시 정의합니다. 이는 설정 사실이며 이번 단계에서 서비스를 시작하거나 프록시·캐시 동작을 검증했다는 주장이 아닙니다. 운영·영속화는 [Docker 배포](docker-deployment.kr.md)와 [빠른 시작](guides/quick-start.kr.md)에 둡니다.
 
 ---
 
 ## 16. 빌드 및 도구
 
-| 도구 | 용도 | 설정 |
-|------|------|------|
-| Vite 8 | 개발 서버 + 번들러 | `vite.config.ts` |
-| TypeScript 5.9 | 타입 검사 | `tsconfig.json`(strict 모드) |
-| ESLint 9 | 코드 린팅 | `eslint.config.mjs`(flat config) |
-| Sass | CSS 전처리 | `<style lang="scss">`를 통해 사용 |
-| vue-i18n 11 | 국제화 | `src/i18n/index.ts` |
-| bpmn-js 18 | BPMN 프로세스 모델링 | `composables/useBpmnModeler.ts` |
+package.json은 build=`vue-tsc -b && vite build`, lint=`eslint . --max-warnings 0`, 단위/E2E/스크린샷/언어 감사 명령을 정의합니다. Vite는 es2020, dist, 750 KB 경고, bpmn-vendor/element-plus/vue-vendor 분할을 사용하며 개발 대상 `http://localhost:8102`는 Vite 프로세스 네트워크입니다.
 
-### Vite 프록시
-
-개발 서버는 `/api`, `/oauth2`, `/.well-known`을 `http://localhost:8102`(Gateway)로 프록시합니다:
-
-```typescript
-server: {
-  port: 3000,
-  host: true,
-  proxy: {
-    '/api': { target: 'http://localhost:8102', changeOrigin: true },
-    '/oauth2': { target: 'http://localhost:8102', changeOrigin: true },
-    '/.well-known': { target: 'http://localhost:8102', changeOrigin: true },
-  },
-},
-```
-
-### 명령어
-
-```bash
-npm install        # 의존성 설치
-npm run dev        # 개발 서버 :3000
-npm run build      # 타입 검사 + 프로덕션 빌드
-npm run lint       # ESLint 검사
-npm run preview    # 프로덕션 빌드 미리보기
-```
+앱, 빌드, 테스트, 브라우저 검증은 로컬 Docker에서 실행하고 정확한 명령은 [AGENTS](../AGENTS.md)를 따릅니다. 잠금 파일과 npm ci를 사용하며 소스 변경은 영향받는 build/lint/tests, E2E는 TypeScript도 검사합니다. 문서만 수정한 경우 불변의 비용 큰 검증을 반복하지 않으며 재사용에는 해시·커밋 동등성 증거가 필요합니다. 생성 프리셋은 자체 검사를 실행합니다.
 
 ---
 
 ## 17. 문제 해결 가이드
 
-### 개발 환경 문제
+[문제 해결](guides/troubleshooting.kr.md)은 시작·네트워크·빌드·로그인·메뉴·언어 운영과 복구를, [소스 디버깅](wiki/source-debugging.kr.md)은 호출 관계와 중단점을 관리합니다.
 
-| 문제 | 가능한 원인 | 해결 방법 |
-|------|-------------|-----------|
-| **Vite 기동 오류 `EADDRINUSE`** | 포트 3000이 점유됨 | `lsof -i :3000` 또는 `netstat -ano \| findstr :3000`으로 점유 프로세스를 종료하거나 `vite.config.ts`의 `server.port`를 수정 |
-| **API 요청 404** | Gateway가 기동되지 않았거나 프록시 설정 오류 | Gateway가 8102 포트에서 실행 중인지 확인; `vite.config.ts`의 proxy target 확인 |
-| **CORS 오류** | 프록시를 통하지 않고 백엔드에 직접 요청 | 요청이 `/api` 접두사를 통해 Vite 프록시를 거치도록 확인 |
-| **Element Plus 스타일 누락** | CSS를 임포트하지 않음 | `main.ts`에 `import 'element-plus/dist/index.css'`가 포함되어 있는지 확인 |
-| **TypeScript 타입 오류** | `node_modules` 캐시 만료 | `rm -rf node_modules && npm install` 실행 |
-| **HMR이 작동하지 않음** | 파일 시스템 감시자 제한 | Linux: `echo fs.inotify.max_user_watches=524288 \| sudo tee -a /etc/sysctl.conf` |
-
-### 빌드 문제
-
-| 문제 | 가능한 원인 | 해결 방법 |
-|------|-------------|-----------|
-| **`vue-tsc` 타입 검사 실패** | 타입 불일치 | `npx vue-tsc --noEmit`을 실행하여 구체적인 파일과 행 번호를 확인 |
-| **chunk 크기가 너무 큼** | 의존성이 tree-shake되지 않음 | `npx vite build --mode analyze`를 실행하여 의존성 용량을 분석 |
-| **Docker 빌드 `npm ci` 실패** | 네트워크 문제 또는 `package-lock.json` 비동기화 | 로컬에서 `npm install`을 다시 실행하여 새 lock 파일을 생성하거나 npm 미러 소스를 설정 |
-
-### 런타임 문제
-
-| 문제 | 가능한 원인 | 해결 방법 |
-|------|-------------|-----------|
-| **로그인 후 흰 화면** | Token이 유효하지 않거나 메뉴 로드 실패 | DevTools → Application → Local Storage에서 token 확인; Network 탭에서 `/api/auth/menus` 응답 확인 |
-| **동적 메뉴가 표시되지 않음** | `permissionStore.loadMenus()` 실패 | 백엔드 `/api/auth/menus`가 정상적으로 반환되는지 확인; `menusLoaded` 상태 확인 |
-| **v-permission 버튼이 계속 숨겨짐** | 권한 코드 불일치 | `sys_permission` 테이블의 `permission_code`와 프론트엔드 `v-permission` 값을 비교 |
-| **OAuth2 콜백 404** | redirect_uri 설정 오류 | Auth 서비스의 OAuth2 클라이언트 설정에서 redirect_uri가 실제 콜백 URL과 일치하는지 확인 |
-| **i18n에 key가 번역 대신 표시됨** | 번역 key 누락 | `zh-CN.ts` / `en-US.ts`에 해당 key가 포함되어 있는지 확인; `menuI18nMap` 매핑 확인 |
-| **SPA 라우트 새로고침 시 404** | Nginx 폴백 설정 누락 | Nginx 설정에 `try_files $uri $uri/ /index.html;`이 포함되어 있는지 확인 |
+실제 HTTP/R.code, trace, 오류 출처를 유지하고 신원, 메뉴 상태·뷰 매핑, 권한, 번역을 구분합니다. 기본 포트 변경, 공유 캐시 삭제, 품질 검사 비활성화로 실패를 숨기지 않습니다. 소스 읽기, 테스트, 정적 설정, 브라우저, 실제 업무 증거는 구별해 기록합니다.

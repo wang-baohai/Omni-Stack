@@ -1,6 +1,8 @@
 # 常见故障与排查手册
 
-排查原则：先确定失败层级，再使用 Trace ID、业务 ID 和日志证据定位；不要通过重复重启或直接改数据库掩盖根因。
+排查原则：先确定失败层级，再使用 Trace ID、业务 ID 和日志证据定位；不要通过重复重启或直接改数据库掩盖根因。 构建、检查和诊断程序均在本机 Docker 中运行，宿主只作编辑、只读审计和 Docker 编排。分别保存 HTTP 状态与响应体 R.code，不把业务码直接写成 HTTP 状态。
+
+四语文档按[已授权 AI 复核政策](../adr/0003-authorized-ai-translation-review.md)以实际 AI 语义复核通过验收，不要求人工翻译复核。[本轮复核范围](../reference/evidence/troubleshooting-guide-review-2026-10-17.json)仅覆盖文档与当前源码，没有重新触发登录、任务、消息、缓存刷新或日志归档；步骤可操作不代表当前故障已复测解决。
 
 ## 1. 启动失败
 
@@ -17,14 +19,15 @@
 - CAPTCHA 不能为空或错误：刷新图片并使用新的 `captchaKey`。
 - 用户不存在：确认租户和租户内用户名。
 - 登录后循环回登录页：检查令牌有效期、本机时间和 Gateway 身份头。
+
 - 社交回调失败：检查回调 URI、后端 HMAC 签名的 `state` 和提供商客户端配置（外部社交登录不涉前端 PKCE）；前端 PKCE（`code_verifier`/`code_challenge`）属于本地 `/oauth2/authorize` SPA 流程，需单独排查。
 - Portal 403：检查 `SUPPLIER` 角色、Portal 关联和供应商状态。
 
-认证日志在登录日志中，不在 Auth 操作日志中查找。
+登录事件查看登录日志，它是安全审计登录事件的只读投影；其他认证与安全事件查看安全审计记录。Auth 不使用业务操作日志记录认证行为。
 
 ## 3. 菜单或权限异常
 
-1. 用 API 查看 JWT authorities 和 `/api/auth/menus` 返回。
+1. 在私有环境核对 JWT 的 `scope` 权限集合和 `/api/auth/menus` 返回；不要把完整 JWT 贴进日志或支持请求。
 2. 检查权限种子、角色关系和组织范围。
 3. 权限变化后重新登录。
 4. 用无权限账号直调写 API，确认后端返回 403。
@@ -81,4 +84,26 @@ Relay 跨租户扫描是设计行为；外部查询接口仍必须按租户过�
 - 可重复步骤、期望结果和实际结果。
 
 不要提供密码、CAPTCHA 答案、JWT、内部令牌、私钥或未经脱敏的个人数据。
+
+## 10. 从旧运行说明迁入的排障步骤
+
+以下步骤已按当前源码校准；旧截图、旧部署端口和历史验收通过不能证明本次故障已经解决。构建和诊断程序放在本机 Docker 中运行，宿主只作编辑和 Docker 编排。
+
+<!-- omni:modules:auth -->
+| 症状 | 先核对 | 源码和恢复边界 |
+|---|---|---|
+| 验证码图片不显示 | Auth 健康、Auth 到 Redis 的连接与私有密码配置 | `CaptchaServiceImpl`；校验会一次性取走记录，失败或过期后刷新并由人重新输入，不重放旧码 |
+| 登录成功后立即 401 | Gateway 是否能取到 Auth `/oauth2/jwks`、`kid`、签名、`exp` 与时钟 | `JwkKeyProvider` 与 Gateway 验签；密码登录使用的代码回退值为 900 秒，仓库 `application.yml` 配置为 7200 秒。以部署覆盖后的 `auth.token.access-token-ttl` 和实际 `exp` 为准，其他 OAuth grant 单独核对 |
+| 菜单为空或按钮隐藏 | `scope`、`sys_role_permission`、`permission_code`、前端 `v-permission` | 权限变更后重新登录；菜单隐藏与 API 403 分别验证，不能通过硬编码路由补权限 |
+| 社交回调失败 | provider 注册 URI 与 `AUTH_OAUTH2_*_REDIRECT_URI` 完全一致、服务端 `state` 签名配置、容器出站连接 | 本地回调进入 Gateway 8102，容器 Auth 8080 不是外部回调；配置步骤见[认证教程](authentication.md) |
+<!-- omni:modules:end -->
+
+<!-- omni:modules:platform -->
+| 症状 | 先核对 | 源码和恢复边界 |
+|---|---|---|
+| 字典值更新后仍旧 | 租户、`typeCode` 和 `DictDataServiceImpl` 的租户缓存键 | 写操作应立即失效；有 `dict:data:refresh` 权限时调用 `POST /api/base/dict/data/refresh-cache?typeCode={code}` 再回读，不使用旧的 PUT `/refresh`；30 分钟 TTL 不是正确性保证 |
+| 删除字典类型后关联数据残留 | `DictTypeServiceImpl.deleteType()` 同事务删除当前租户同类型数据、类型及缓存 | 只按本次返回 ID 和唯一编码回查；失败检查事务与租户，不手工删共享数据 |
+| 业务操作日志缺失或延迟 | 来源服务 Outbox、正式 relay、Broker、`OperLogConsumer.operlogConsumer()` 与 Inbox 去重 | 先查同步请求是否提交，再跟踪生产/消费 Trace；日志异步到达不是请求回滚证据，Auth 登录仍查询安全审计投影 |
+| 日志归档不执行 | Base 执行器注册、XXL 调度记录、`OperLogArchiver` 的 `operLogArchiveHandler` 双注解 | 核对一次执行和归档记录；多实例使用单实例路由，未确定当前任务结果前不重复触发，不为取证归档共享日志 |
+<!-- omni:modules:end -->
 

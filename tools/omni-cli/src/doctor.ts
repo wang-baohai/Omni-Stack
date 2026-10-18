@@ -49,7 +49,11 @@ export function runDoctor(workspaceRoot: string): DoctorCheck[] {
     () => ok('Docker daemon', `server ${daemon.stdout.trim()}`),
     () => fail('Docker daemon', captured(daemon), '启动 Docker daemon；Linux 下确认当前用户在 docker 组'),
   ));
-  if (daemon.status === 0) checks.push(checkComposeProfiles(workspaceRoot));
+  // config 只依赖 Compose CLI；daemon 离线也必须报告这一诊断类别。
+  checks.push(compose.status === 0
+    ? checkComposeProfiles(workspaceRoot)
+    : skipped('Compose profiles', 'Docker Compose CLI unavailable',
+      '先修复 Docker Compose 检查，再执行各 profile 的 config --quiet'));
   checks.push(checkPorts(workspaceRoot));
   checks.push(checkVolumeIsolation(workspaceRoot));
   const running = runningContainers(workspaceRoot);

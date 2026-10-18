@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "frontend-patterns",
+  "source": "docs/frontend-patterns.md",
+  "source_sha256": "69df06b582a497eaec21b0bb85cbaab341aee52d6b801c163fe8eac06780d327",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "e1d55d520111d1adac16e13a8553b53c0c782c6f",
+  "source_state": "Code-format-only delta review of backend/frontend patterns;matching prior complete four-language semantic reviews cover all otherwise unchanged content.",
+  "method": "Reused the exact matching prior complete four-language semantic review. Actually read every final line delta22c391;only12 existing configurationURIspans receive inline code. After removing backticks all text is byte-identical,and every fence is unchanged. Actual VitePress rendering removes7badlocalautolinks without disabling deadlinkchecking;fullbuild/browserchecksremainpending. No new whole-document reread or business behavior verification is claimed.",
+  "prior_complete_semantic_review": {
+    "id": "frontend-patterns",
+    "path": "docs/reference/reviews/frontend-patterns.json",
+    "sha256": "dedc1bbd2afeeddc81cf932b0f1a990b699bb1d4ddcb85aa31f865f3e0a4f3c0",
+    "source_sha256": "0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1",
+    "translations": {
+      "en-US": {
+        "path": "docs/frontend-patterns.en.md",
+        "sha256": "75c1ed163f1ed0565ea318e33cd1e960dabfd0780f1df36d894d5bbf2526a651"
+      },
+      "ja-JP": {
+        "path": "docs/frontend-patterns.jp.md",
+        "sha256": "a824b793f66b41bacb1a8e4c06cea854112c01880a09807a8e3063d93d828de2"
+      },
+      "ko-KR": {
+        "path": "docs/frontend-patterns.kr.md",
+        "sha256": "0df81fdfee0c3c1bf8524c2bf8106974421b122c4690ab60c7b4c6661fd14272"
+      }
+    }
+  },
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/frontend-patterns.json",
+      "sha256": "dedc1bbd2afeeddc81cf932b0f1a990b699bb1d4ddcb85aa31f865f3e0a4f3c0"
+    },
+    {
+      "path": "docs/reference/evidence/site-config-url-markup-fix-2026-10-18.json",
+      "sha256": "bea15b1e9011b7f324e7d4b8770cf4a50b8c23ff957a9f222d018e6b1b96c09f"
+    },
+    {
+      "path": "docs/scripts/prepare-site.mjs",
+      "sha256": "1f105d33b72ee8bd9dc52c2d1a886a0d9ff4e840c934175e86448d1f30c5655c"
+    },
+    {
+      "path": "docs/.vitepress/config.mjs",
+      "sha256": "1634a1821170bb9dc9c42952854499287be6ceb7cef404a6f3f66b1871a13a29"
+    },
+    {
+      "path": "docs/package.json",
+      "sha256": "54ce13aa7dd08653fa9c334caee9a6399a24580054f111d456163a4a2c8ef452"
+    },
+    {
+      "path": "docs/package-lock.json",
+      "sha256": "1cef2f247ba06ea5b58a919bcc37c47ac8aa6d28a312518031410ffae909f0ad"
+    }
+  ],
+  "source_inspection_scope": "Code-format-only delta review of backend/frontend patterns;matching prior complete four-language semantic reviews cover all otherwise unchanged content.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "actual_final_delta_read_output": "22c391",
+    "prior_complete_semantic_review_reused": true,
+    "new_whole_document_rereads": 0,
+    "all_text_other_than_backticks_unchanged": true,
+    "all_fences_unchanged": true,
+    "changed_lines_in_this_family": 4,
+    "added_code_spans_in_this_family": 4,
+    "targeted_actual_render_documents": 8,
+    "local_autolinks_before": 7,
+    "local_autolinks_after": 0,
+    "ignoreDeadLinks_disabled": false,
+    "full_site_build_and_browser_checks_pending": true,
+    "current_evidence": "docs/reference/evidence/site-config-url-markup-fix-2026-10-18.json",
+    "new_domain_contract_changes": 0,
+    "new_translation_rows": 0,
+    "renewed_translation_rows": 3,
+    "application_source_changes": false,
+    "business_writes": 0,
+    "limitations": [
+      "The actual8documentrender shows7badlocalautolinks reducedto0;it doesnot prove the fullimagebuild,browser,SVG,mobilebehavior or backendconnectivity.",
+      "No application source,dependency,permission,command,login,CAPTCHA,externalaccountauthorization or businesswrite changed. All originalA-G remain.",
+      "Prior current-dependency attestation and five-preset/document-delivery proofs retain their historical input scopes and need final alignment after these document changes."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/frontend-patterns.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 02:26:17",
+      "result": "approved",
+      "translation_sha256": "60acf309c53e9a676792571e7ec8777f86dd2f1c2d4dbaec243cb8a2013253cb",
+      "checks": {
+        "coverage_and_meaning": "实际阅读22c391全部八行四语差异。只给12处既有配置URI加行内代码格式，移除反引号后所有正文逐字相同；所有围栏不变。完整原稿按摘要匹配的既有真实语义复核复用，不声称新整篇重读。",
+        "technical_literals": "四语GatewayYAML的http://localhost:8100/oauth2/jwks、Compose的http://omni-auth:8080/oauth2/jwks及Vite开发目标http://localhost:8102字面值全部保留。中文分号、日文顿号、韩文助词和英文标点不进入代码URI。实际VitePress渲染中错误本地自动链接从7降为0，ignoreDeadLinks:false未改动。",
+        "security_and_failure_semantics": "保留YAML默认值与Compose容器地址的区别、JWKS公共密钥用途、缓存配置以及Vite进程所在网络的解释。没有启动后端或连接真实账号来掩盖静态文档问题；租户/身份/权限、失败处理、Docker构建边界和实际AI复核条件均不变。",
+        "images_and_links": "图片、显式Markdown链接、标题锚点、导航和代码围栏均未变化。移除的只是配置值不应产生的自动超链接，不关闭正式失效链接校验。保留558真实失败日志和7条URL/页面记录；正式镜像重建及浏览器仍需单独验证。",
+        "language_and_terminology": "Compared the exact final English table cell and Vite paragraph with Chinese in22c391. Only inline code around the three existing URI values changes. Semicolons,punctuation,GatewayYAML versusCompose and Vite process locality retain their meaning. Complete unchanged content reuses the exact matching prior whole semantic review."
+      },
+      "findings": [
+        {
+          "id": "UL01",
+          "status": "resolved",
+          "resolution": "Represent configurationURIvalues as code literals so seven accidentallocalhostsite links disappear without disabling strictdeadlinkchecking."
+        },
+        {
+          "id": "UL02",
+          "status": "resolved",
+          "resolution": "Preserve all12URIspellings,network/config distinctions,language punctuation and allothertext/fences."
+        },
+        {
+          "id": "UL03",
+          "status": "resolved",
+          "resolution": "Renew6existingAItranslationrows with currentdigests and retain priorwhole-reviewrecords;add0newrows and claim0humanreviews."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/frontend-patterns.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 02:26:17",
+      "result": "approved",
+      "translation_sha256": "1bef1f6ebf3f5bedd72c4429a195764562afee35445801f54dc29356dc9a02f6",
+      "checks": {
+        "coverage_and_meaning": "实际阅读22c391全部八行四语差异。只给12处既有配置URI加行内代码格式，移除反引号后所有正文逐字相同；所有围栏不变。完整原稿按摘要匹配的既有真实语义复核复用，不声称新整篇重读。",
+        "technical_literals": "四语GatewayYAML的http://localhost:8100/oauth2/jwks、Compose的http://omni-auth:8080/oauth2/jwks及Vite开发目标http://localhost:8102字面值全部保留。中文分号、日文顿号、韩文助词和英文标点不进入代码URI。实际VitePress渲染中错误本地自动链接从7降为0，ignoreDeadLinks:false未改动。",
+        "security_and_failure_semantics": "保留YAML默认值与Compose容器地址的区别、JWKS公共密钥用途、缓存配置以及Vite进程所在网络的解释。没有启动后端或连接真实账号来掩盖静态文档问题；租户/身份/权限、失败处理、Docker构建边界和实际AI复核条件均不变。",
+        "images_and_links": "图片、显式Markdown链接、标题锚点、导航和代码围栏均未变化。移除的只是配置值不应产生的自动超链接，不关闭正式失效链接校验。保留558真实失败日志和7条URL/页面记录；正式镜像重建及浏览器仍需单独验证。",
+        "language_and_terminology": "22c391の表セルとVite段落を中文と照合した。三つの既存URIのみをインラインコード化し、読点・文言・GatewayYAMLとComposeの違い・Viteプロセスのネットワークという意味を保持した。日本語の区切りをURLに取り込ませず、変更のない全文は既存の完全レビューを再利用する。"
+      },
+      "findings": [
+        {
+          "id": "UL01",
+          "status": "resolved",
+          "resolution": "Represent configurationURIvalues as code literals so seven accidentallocalhostsite links disappear without disabling strictdeadlinkchecking."
+        },
+        {
+          "id": "UL02",
+          "status": "resolved",
+          "resolution": "Preserve all12URIspellings,network/config distinctions,language punctuation and allothertext/fences."
+        },
+        {
+          "id": "UL03",
+          "status": "resolved",
+          "resolution": "Renew6existingAItranslationrows with currentdigests and retain priorwhole-reviewrecords;add0newrows and claim0humanreviews."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/frontend-patterns.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 02:26:17",
+      "result": "approved",
+      "translation_sha256": "44198d0e3465ef2cab061b0f420e4372cbd90b0e018630523a7c6eee9f21958b",
+      "checks": {
+        "coverage_and_meaning": "实际阅读22c391全部八行四语差异。只给12处既有配置URI加行内代码格式，移除反引号后所有正文逐字相同；所有围栏不变。完整原稿按摘要匹配的既有真实语义复核复用，不声称新整篇重读。",
+        "technical_literals": "四语GatewayYAML的http://localhost:8100/oauth2/jwks、Compose的http://omni-auth:8080/oauth2/jwks及Vite开发目标http://localhost:8102字面值全部保留。中文分号、日文顿号、韩文助词和英文标点不进入代码URI。实际VitePress渲染中错误本地自动链接从7降为0，ignoreDeadLinks:false未改动。",
+        "security_and_failure_semantics": "保留YAML默认值与Compose容器地址的区别、JWKS公共密钥用途、缓存配置以及Vite进程所在网络的解释。没有启动后端或连接真实账号来掩盖静态文档问题；租户/身份/权限、失败处理、Docker构建边界和实际AI复核条件均不变。",
+        "images_and_links": "图片、显式Markdown链接、标题锚点、导航和代码围栏均未变化。移除的只是配置值不应产生的自动超链接，不关闭正式失效链接校验。保留558真实失败日志和7条URL/页面记录；正式镜像重建及浏览器仍需单独验证。",
+        "language_and_terminology": "22c391의 한국어 표 셀과Vite단락을중국어와대조했다. 기존세URI에코드형식만적용하며 GatewayYAML/Compose차이와Vite프로세스네트워크의미를유지한다. 조사는코드밖에남기고문구와문장부호를바꾸지않았다. 나머지전체본문은해시가일치하는기존완전검토를재사용한다."
+      },
+      "findings": [
+        {
+          "id": "UL01",
+          "status": "resolved",
+          "resolution": "Represent configurationURIvalues as code literals so seven accidentallocalhostsite links disappear without disabling strictdeadlinkchecking."
+        },
+        {
+          "id": "UL02",
+          "status": "resolved",
+          "resolution": "Preserve all12URIspellings,network/config distinctions,language punctuation and allothertext/fences."
+        },
+        {
+          "id": "UL03",
+          "status": "resolved",
+          "resolution": "Renew6existingAItranslationrows with currentdigests and retain priorwhole-reviewrecords;add0newrows and claim0humanreviews."
+        }
+      ]
+    }
+  }
+}

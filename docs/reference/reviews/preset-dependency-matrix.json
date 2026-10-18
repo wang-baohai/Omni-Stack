@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "preset-dependency-matrix",
+  "source": "docs/preset-dependency-matrix.md",
+  "source_sha256": "6b63121f029afe65ee2a8ee46520d4266d93d33682f4bb92d7b19a2481f39339",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/preset-dependency-matrix.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "fba71d451f35875f16927c41335b2ea66b5dd718ed716fed253fd984298db808",
+      "checks": {
+        "coverage_and_meaning": "逐行核对14个模块的八字段及5种预设的显式模块、闭包、最低和建议内存，译文与中文同一生成事实表一致。",
+        "technical_literals": "全部模块/服务/权限根标识与数值不翻译；特别核对reactive与阻塞Redis模块并列、asset双依赖及core不含MQ/XXL。",
+        "security_and_failure_semantics": "保留catalog为唯一事实源、不得手工维护表；所有冲突/无依赖空值语义一致，没有将可选模块写成必需服务。",
+        "language_and_terminology": "Required dependencies、Optional modules、Conflicts与Memory(min/recommended)表头及None值准确区分。",
+        "images_and_links": "本页没有图片或Markdown链接，生成源路径与catalog-version 1.0.0相同；现有preset-docs --check已证明各语言字面输出。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/preset-dependency-matrix.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "3d8d14f3ffa96e755cd55c8376ebdf49490f2d4fd3071689915f252f25b6a506",
+      "checks": {
+        "coverage_and_meaning": "逐行核对14个模块的八字段及5种预设的显式模块、闭包、最低和建议内存，译文与中文同一生成事实表一致。",
+        "technical_literals": "全部模块/服务/权限根标识与数值不翻译；特别核对reactive与阻塞Redis模块并列、asset双依赖及core不含MQ/XXL。",
+        "security_and_failure_semantics": "保留catalog为唯一事实源、不得手工维护表；所有冲突/无依赖空值语义一致，没有将可选模块写成必需服务。",
+        "language_and_terminology": "必須依存、任意モジュール、競合与最小/推奨メモリ均正确，なし与中文无对应。",
+        "images_and_links": "本页没有图片或Markdown链接，生成源路径与catalog-version 1.0.0相同；现有preset-docs --check已证明各语言字面输出。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/preset-dependency-matrix.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:17:37",
+      "result": "approved",
+      "translation_sha256": "212163ba9f5970df561f50a63c94d5b38f5f988cd949ea59a25273efb6178bdd",
+      "checks": {
+        "coverage_and_meaning": "逐行核对14个模块的八字段及5种预设的显式模块、闭包、最低和建议内存，译文与中文同一生成事实表一致。",
+        "technical_literals": "全部模块/服务/权限根标识与数值不翻译；特别核对reactive与阻塞Redis模块并列、asset双依赖及core不含MQ/XXL。",
+        "security_and_failure_semantics": "保留catalog为唯一事实源、不得手工维护表；所有冲突/无依赖空值语义一致，没有将可选模块写成必需服务。",
+        "language_and_terminology": "필수 의존성、선택 모듈、충돌与최소/권장内存语义正确，없음与中文无一致。",
+        "images_and_links": "本页没有图片或Markdown链接，生成源路径与catalog-version 1.0.0相同；现有preset-docs --check已证明各语言字面输出。"
+      },
+      "findings": []
+    }
+  }
+}

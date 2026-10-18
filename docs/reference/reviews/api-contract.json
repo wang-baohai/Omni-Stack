@@ -1,0 +1,2346 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "api-contract",
+  "source": "docs/api-contract.md",
+  "source_sha256": "63bb7c8c879ae25e46dc17642a41b61e9445efe48583def3e7afa92a7d2bd837",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "20cf305066b778368f044abdc10c1a67a673fd80",
+  "source_state": "Current complete API contract family only;all18sections and added16.6/16.7 reviewed against exact named source. No production code change. OriginalA-G and owner AI-only review amendment retained;other families not approved by this record.",
+  "method": "All4complete originals5182lines actually read in269-270;all21replacement blocks per language authored/read against named current source. Current merged inserted text read with clipped outputs filled in bounded chunks,Japanese0-159andKorean0-155explicitly read. Unchanged original paragraphs preserved under baseline hashes. Candidate anchors corrected from actual Workflow headings;277b path formatting,duplicate Japanese particle,Korean risk sentence and shared JSON unit EA directly reviewed. Hash/render/literal checks supplement this actual semantic decision and do not grant approval alone.",
+  "checked_source_files": [
+    {
+      "path": "omni-backend/omni-asset/pom.xml",
+      "sha256": "a661a82550ace2f4f286c19fb3b4273f707f698b445dd2457184bbcad5c19a9e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/client/AuthInternalClient.java",
+      "sha256": "57718199ce0cac75ff7ad2b15c8e2517fa3e1891dc593f7b9edc8d1a49468093"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/client/ProcurementInternalClient.java",
+      "sha256": "3d616a7f06d87ff6aba1dd8340c13e9b5f68b49ba7718c8375892a9dc2966174"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/client/SrmInternalClient.java",
+      "sha256": "d1381b4d20c448f737b6a94a8c251506262dcec059cad8c2ccc1808fa0b65239"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/config/SecurityConfig.java",
+      "sha256": "41d9e8a91c9bfb4a7ff1d516aaf906137233399d05772e50df4ad990b0f774cf"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/consumer/ProcurementGoodsReceiptConsumer.java",
+      "sha256": "605ac6baae0629e9eb025cb989f537cc3ceb358db70db6eb231d2473e35ac1c2"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetController.java",
+      "sha256": "4456c7345561bcf533ce6e17f5dcce88003afa1873a84d41beb0f8c69d0f4f74"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetDisposalController.java",
+      "sha256": "06534f7d4734cdc108a3b0c41382b0a8396efc0c69f0a965ef3d0c21b3ae34ee"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetOptionsController.java",
+      "sha256": "26a9fb52210a80019bc436ae3dad592fc25a51e66df95daa4102313eca50e6d4"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetOverviewController.java",
+      "sha256": "10e9e9d818399a4b607985597cb9aadffe8105090c67549b6eae16f6ff551b01"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetTransferController.java",
+      "sha256": "96f7b4339c677c91c58fd56532e56d605952a395fceab709ac512307c9d8ae9b"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/InternalProcurementBackfillController.java",
+      "sha256": "fc90bc749bd2fe4721a4db375b38d938fdfe2cf9f2ad022aef973c51baf03cfc"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/domain/AssetOperationStateMachine.java",
+      "sha256": "b1b1530668badc1d8cfc49a3008766f1ee646515019ecf755a4390d019910a5a"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/domain/AssetStateMachine.java",
+      "sha256": "d47acf127e28779a52b6588b3e78be19608e36246cb0462d402ceec89f4a68fc"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetDomainEvent.java",
+      "sha256": "dccc377516c92a1ec0007e63ebff30aed8e1b1e8458e0b02e301945dc1b4485c"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOperationRequests.java",
+      "sha256": "0481f626ac010684335d66f96ef776ffa83b631cbe38c1eac8d7f68bc644a033"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOperationViewAssembler.java",
+      "sha256": "1c514bd7d97bc7ae308a7187df24c7f9302624f021011c474e670fc1978414f7"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOperationViews.java",
+      "sha256": "9d3ff9294a9a52b994694989a921fa57b1cf9a884f63f3beabb35ffb12f6fd11"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOverviewRequests.java",
+      "sha256": "6c78b6af49c8ea4fb8d75538f668487bb9b9e83fa67f8b2fe6ee09ca2fee7f84"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetPageQuery.java",
+      "sha256": "bc07c7781c55b65053692200863de0b4b1121f595f9133c3b30d2730849f9cb4"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetRequests.java",
+      "sha256": "5ccdc6ab795175575ec5178015b19a3960b2a63ec1ce3ce03fa137c08948e9dc"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetViewAssembler.java",
+      "sha256": "999f7d0bb513bd63aa54e389d4a93133650b07ebb6647ac420fa019043b17abe"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetViews.java",
+      "sha256": "ab0aa2759b43f4c5b8e23741ec02b96e5a9273d08f437888d7eda0c2d317a80e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/Jackson2DecimalStringDeserializer.java",
+      "sha256": "c9dfbe9a0bf2ec3bf734b8c37e71a0836198437a4598407e96299693a94b4cac"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/Jackson3DecimalStringDeserializer.java",
+      "sha256": "9edc3c23d277b958fc0880d073b43de4717e5b557f3d3c16ed6cee8dc890912f"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/entity/AstInboxEvent.java",
+      "sha256": "0ae4ef7cf045c5ded5fac742709c783f5aeffd1fff0da8206ebe5b4a5c27b8de"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AssetOverviewMapper.java",
+      "sha256": "e00b92fdc4bc795f8930667700ddd59891e7dfb7cef29ee51abdc43b3c60c78a"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AssetReceiptImportMapper.java",
+      "sha256": "5426334bdbe64f28a4e0e8690fa714c0502e1c33b0f763eaa81ab3b088a39bbf"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AstAssetMapper.java",
+      "sha256": "2413ec60850b4d11b1195d6f514d773d4dfb652ef3349138811fc7936816d379"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AstInboxEventMapper.java",
+      "sha256": "61e9e60923b43488b9ef18f33e93280cf89da2049933560b23cc36f4b9fd0435"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/security/AssetDataPermissionHandler.java",
+      "sha256": "c24e44f1f561f94d315919c2c6fd9ef8679f9b5189b456585a83b65589a10eda"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/security/AssetTenantTablePolicy.java",
+      "sha256": "d156acdca1f3eac7517c783f08ede33e9dfca31f0912abc161755b330f8a6f5f"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetDisposalServiceImpl.java",
+      "sha256": "a3e1a80a162f360fbe37d380d389fa131c4a39dc9e0d04a3079df713e8fcaf5f"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImpl.java",
+      "sha256": "090b0c041065cca3bc8d8cd8df56ab9fc2758744b5cacc6f6312d679b830aead"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOptionServiceImpl.java",
+      "sha256": "486105cebca195c1efc25c8351fdf97bcd446c18bf9d125910dc9a9b3c1fbc9e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOverviewServiceImpl.java",
+      "sha256": "4b4b33ec6c2684da773ba6b799a667fed0e1072669c5141521a64453693a6bb2"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetServiceImpl.java",
+      "sha256": "e00cd0d9a80f6343f0eb6971830e7f36b88f23e5efd45143eedf86e945acee1b"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetTenantModuleProvisioner.java",
+      "sha256": "c31fac8be95e193131b0724bfa361b922c296da2f16bdc1f456c0fa1d287b334"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetTransferServiceImpl.java",
+      "sha256": "7de6e16807f8f7230123e53529fb269a8a26d26880b42f06e23de62c1a1f30de"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/ProcurementAssetBackfillServiceImpl.java",
+      "sha256": "8bc8149d1ca264f068ff28562cd1e42a35dfe887db348b877d3fb5cd4685af28"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImpl.java",
+      "sha256": "d5932e2e482a7e936c4c31810aacfe858fd2e702e8e799e076d6363e14af5c4f"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/WorkflowCompletionServiceImpl.java",
+      "sha256": "976068f09a92536fdf284e6504ac6e806ca38399ff257a18278d3193dee926d2"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/support/AssetIdentityGuard.java",
+      "sha256": "2d8d00f7f6ea4893afdc5f7b15f4d3d763569f9800b2f7d904c9e1c767439ec0"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/support/AssetRecordAccessGuard.java",
+      "sha256": "8c92051e83e6358dd14e9509495516a0311b4dd0eff7fe64e0924e6bb49037e8"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/workflow/AssetWorkflowApprovalGuard.java",
+      "sha256": "fb1b4755b1cd84312288c7d1712a271e63e4e1d474fa5552ad28af55b8916345"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/workflow/AssetWorkflowCoordinator.java",
+      "sha256": "d554eba107cb08e67e738c81a198118f568eb80fbb71487c5ac80e27231a4fa4"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/workflow/AssetWorkflowModelGuard.java",
+      "sha256": "30711f887ada718cb66bb4656156af13c41f12b280d82f51cea7ceb8bb3184e0"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/resources/application.yml",
+      "sha256": "34451137fa3181e1192ec6de11fe5cc92488104b70d759036e95c52e96434680"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImplTest.java",
+      "sha256": "f00013b89da9e4a1e1ad9d9fdf85ae619985e168653253966f910589b445ac91"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/ProcurementAssetBackfillServiceImplTest.java",
+      "sha256": "8e6f3083ab6d736af27613031f36b3c6c746015427c7174b7875e60103a69a4e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImplTest.java",
+      "sha256": "47402543759f886fb28e328ce59db146ecf54eead0dec6aac25691e0ef4d5b58"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/WorkflowCompletionServiceImplTest.java",
+      "sha256": "748e5286e7f9356f0a114a4b9b1720444a823b9098a51e6c4f18690436973aa7"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/workflow/AssetWorkflowCoordinatorTest.java",
+      "sha256": "5ebb30003c9e7c3583d41c00246eee1521062226c815f2d47f68af100b0bd46d"
+    },
+    {
+      "path": "omni-backend/omni-auth/pom.xml",
+      "sha256": "02e514abafe6b610311e297cabd686b31028bd877b34c8e5fd2679cbfab292ad"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/AuthExceptionHandler.java",
+      "sha256": "3207c455515648ffd4dc07b9b433173cdc5116d4c147ca1402f5073fa3d38b40"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/AuthorizationServerConfig.java",
+      "sha256": "527d5efbef4742c06f256e4003d3dc7f273634e5d56a709083ec25b20f899c42"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/DeviceClientInitializer.java",
+      "sha256": "e8db2e48565093ae1166f2a9ee20dafaacc7d2bb52099e88a214167a3793528d"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/MyBatisPlusConfig.java",
+      "sha256": "a4de63c2a9e4613ea44ea4558386d6cb307fa3772f7a4afc7670ea20e27a160c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/OAuth2ClientInitializer.java",
+      "sha256": "e2acc1b363986b95052f77f22a4c2372b4dddde07a752e6026c069ee97711dfe"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/config/OAuth2Properties.java",
+      "sha256": "f38241b6a2e0d6f918e633d70a507f4716ee0c92a0bda2b223a3a8dde480129c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/consumer/PortalRoleAssignConsumer.java",
+      "sha256": "3281bb60d1d0a5d0560f5efb845b7910d5552447bd45d29fb2f4c01a91574459"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthController.java",
+      "sha256": "b973052c2787ac95547edaa93be6bb8de48becc34017d8666e02e2a52b6662fb"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/internal/InternalXssController.java",
+      "sha256": "9ba0577f085642c9ed9cafc71d2dc77cacb514df198cad2beee69046b80498a5"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/MenuController.java",
+      "sha256": "eed9b466770f01f6bde80a5c60230a97b76544b0bf64d402a7ee6f5a3c22fe31"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/OnlineUserController.java",
+      "sha256": "a0fccf953cbf4708c27fd866b3807c0400ae489d5912f24648ee6defa761ee91"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SocialLoginController.java",
+      "sha256": "e401bc70a37340c3a55b4a1cffbeeabc9a3ca7ae363b9e752f06ce855704135f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/UserController.java",
+      "sha256": "eb1c952f78fc62a0a7415daba32a3882c322961d1f560e78e040a97d2fcbaf6c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/XssConfigController.java",
+      "sha256": "3c0046a334064254a7a1ab9ab884265b8af9b0732d3910fa07f064023cc3c9a0"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/CaptchaResult.java",
+      "sha256": "6be677f8c20defa880aadd0bc1b4e8efc74054821967182a2943c8629060ca2c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/CreateUserRequest.java",
+      "sha256": "f0211a5fcc48eb870cb80854d8887cf1940a140ca6562373b6766e2302014a0a"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/CreateXssRuleRequest.java",
+      "sha256": "fd75405c3333004d92b2e6384a982ee1be68869eaa5e923900d6e3c7d385fbab"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/LoginRequest.java",
+      "sha256": "707638595954a19d4f6ddb1af5119a305b4aa07c4248fd9c5cbeeef41e7b3ad0"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/ProviderUser.java",
+      "sha256": "26ebedbcc66b3310e802c43a0574f0ffd2482c6ea1c75fb9e348364663e62d99"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/RegisterRequest.java",
+      "sha256": "4841f298fb08652df2f6df71016aceaf27f357e54d186a034385e65478fb337b"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/dto/UpdateXssRuleRequest.java",
+      "sha256": "21ffcd31f661f7aa9435da26ba22bce97595f905fa3334c3df2e0f1546279011"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/entity/SysUserOauthProvider.java",
+      "sha256": "e1eaddf56b1bf202cd3b421923378e14ff16915ea39781d720755dbd4f9ece0c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/event/AuditEventListener.java",
+      "sha256": "afaaf2eb6c39917bd420f96ff00c7503ab49544286ceeb5dc10cb501ddf10a4e"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysOrgUnitMapper.java",
+      "sha256": "419126c8b655bff8e1eb3e8e27e28b698e0817a1bfcdf91dd8b3fa297ff5709a"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysPortalRoleRequestMapper.java",
+      "sha256": "6e47933e2a947a1b3ae8acaa0689e6acbfb1e49e0afc1276a226d908aec0d767"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysRoleMapper.java",
+      "sha256": "1a83a094e35d0c8dcb91d8982f2a3dab3041a5c6c1ca7780dd36541e33132bfa"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/mapper/SysUserOauthProviderMapper.java",
+      "sha256": "2979f1e20a3ecd827217d385cfd5d08bf56b2c977b61d5ffd4845fa977d0c74e"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/GiteeOAuth2Handler.java",
+      "sha256": "6c52c5652f317815aef2c84c5378fc5c8c65b401ea6ece1831e598c961d55a51"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/GitHubOAuth2Handler.java",
+      "sha256": "e0f7422f038400efc332980f6bdd49417cd1cef9a2da7c8b13ed41fbe03e1a7f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/GoogleOAuth2Handler.java",
+      "sha256": "ade9ff290543ada330bbc269b929385c50017743e50af409fe2db7fa83df46c3"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/oauth/OAuth2ProviderHandler.java",
+      "sha256": "9e567a1906ac4320dbe105aeef1c12bbc380a285d4f47e391df053a3f180c443"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataPermissionHandlerImpl.java",
+      "sha256": "c5e1aecc634138eb7e4c925b4883009b9f0f73412a047f135c704b505556daab"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeContext.java",
+      "sha256": "bfaf6a60176be53e82037ba62df507823229619ad7f89f26343549b4bd686c12"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DataScopeResolveFilter.java",
+      "sha256": "cf32b3ba6d1b95e4f4d5c0a6fd38924f2186cd04aa52cf48e67fb205472c77d8"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/DeviceClientAuthenticationFilter.java",
+      "sha256": "f88ef360d2933b31c7e0d77d73f8279c30be9af530198c0661bf23b80f6ba3e3"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/GatewayPreAuthFilter.java",
+      "sha256": "ba56c6bda6838d5430b063d652f6003f0865e3be462347ccb6acc5c508b7236a"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/OmniUserDetailsService.java",
+      "sha256": "16877ccc08a206470c44f23ae40990b55c28324bf92185aa7d9265ae93244eff"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/SasConsentOriginFilter.java",
+      "sha256": "b77666ba006ba90f712b06fa713653e42b5431e05d47a0e01b62f4d0ce3844a5"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/security/XssConfigProviderImpl.java",
+      "sha256": "df5908da4d7d240805de6c569504a4d8891ad5932124fd9c7066777b3d52977c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/AuditLogServiceImpl.java",
+      "sha256": "cec1f4fa1cf96b39145fef6da0c451be373b5a6702593d24892bd2aca6e311b1"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/CaptchaServiceImpl.java",
+      "sha256": "ac901105b2f949e32bb5e76789f7a5b4dc32a4860cf24da49b0f657e229381e4"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/DataScopeServiceImpl.java",
+      "sha256": "5f9a6c657349e0039f1c419305bc0aa74dea7c23df79d3a0e615f621751f415f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/JwtTokenServiceImpl.java",
+      "sha256": "c84fa86c7c90c63b1b075e5d0558bdc04bf34ec95ae3f0f9a03d585322ff5fa1"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/OnlineUserServiceImpl.java",
+      "sha256": "591a2e51edea59fc1d7b2056488d84551763786d88da532d955c2edd22c1f69e"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PermissionServiceImpl.java",
+      "sha256": "269589cbdb75758f41772da287fc061d61a459fa342f93e2703a4854090fb0cf"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PortalRoleAssignmentServiceImpl.java",
+      "sha256": "bb6efb8c4536f80ada2ff8ebb6cf98fc32c633c85f7add99b94d15b8373b36bf"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/SocialLoginServiceImpl.java",
+      "sha256": "6af297a030dea03c0f6d817e3834a756f0935e6b55208749e00831c42bf6b0f3"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/UserServiceImpl.java",
+      "sha256": "aee5b14ab535cbd943ac22661117d2bcffac74e0e39bdb8bee76d812753a3d29"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/XssConfigServiceImpl.java",
+      "sha256": "a40f4156e3001ac94df57a235df3ce877062aea461bb7902caed159ca98c898b"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/OnlineUserService.java",
+      "sha256": "a19d76f2651735b3343b64ab949a5a237153dd0e703ba8717ae5c1d0cce61197"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/XssConfigService.java",
+      "sha256": "566bfc9726f764cea65b20c7f6aa2efa557adbea81381bb4700184f195988fd3"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/util/OAuth2StateUtils.java",
+      "sha256": "d8df64afd8910daef4308c75e8d38f7a26665996ee8c2bb814d42a62f974afed"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/resources/application.yml",
+      "sha256": "d1ce2ce3f6bd0ecc11ce641fc23475b571b0cbe382274be5cdc4e4d47dfc25f9"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/controller/MenuControllerTest.java",
+      "sha256": "ff2416653e92808cd70d6aca519ae15f00ee204400eb918a377ebd45ee1cd42f"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/controller/XssRuleTenantBoundaryTest.java",
+      "sha256": "fdcafeaf5c22550e7b6b4ac0e6a779f58ea71ea511b8e4efd062b7c23120e00c"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/security/DataScopeResolveFilterTest.java",
+      "sha256": "c473bd55afc3069d5e8a982da1f0ac0bfbe24d8bb413fc7253e542fd76799a5e"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/service/impl/DataScopeServiceImplTest.java",
+      "sha256": "e2eff12e67d97b8c5dcd3efd115225cf0f96a27fba01eb9e42f3ea455f1c9bdf"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/service/impl/OnlineUserServiceImplTest.java",
+      "sha256": "f9850f4c8556c3e70829565436efd7a977880337cbd65385b566563c9a65e032"
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/service/impl/PortalRoleAssignmentServiceImplTest.java",
+      "sha256": "fb48db22f1aad8ff570f6931becee170381c71c174523a7d3577b769782f9852"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/config/SecurityConfig.java",
+      "sha256": "4156554b99ffede27a023a78b77a25364db0de9b6a51fb2ac96b93a956d92be5"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/consumer/OperLogConsumer.java",
+      "sha256": "37d638102e860f68dc2aec789c0bb0c42c9e81bc3e58e0c1fe8b31fe26906358"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/DictDataController.java",
+      "sha256": "9936e714b52f96e21918653d1f9bcbea16542443ebc9b4d5536ff69fb9509615"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/DictTypeController.java",
+      "sha256": "df597170a386ac7f6d4b64bb712dcfec52333701b575be352f96978ba2975c4f"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MqMessageController.java",
+      "sha256": "722fb645de7c96df62e6ce27c7031d39e244e0ec9361186ba7eb635cf38e1f28"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java",
+      "sha256": "3e1326c18ec437e57acda3952a4a7c4af9803c237c510f229b2e8b22bef5f277"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/OperLogController.java",
+      "sha256": "d060a482956d6aa791c6bcb16b4f7324b7acde012f75d289bcdad9bc9d31fa3f"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/SystemJobController.java",
+      "sha256": "2c660a18de0af2a704d952d3475516592225f2dded8fcfa6f2cb2bcc80794ab7"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/UserJobTypeController.java",
+      "sha256": "12c63c98d56852d1c30076b7dc237ffb0700bf113410f28a4274afc8543d1a3f"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateDictDataRequest.java",
+      "sha256": "45d9ffb0f13aa04a93004a37d189c334e93b5a6588a51d3f84bd84b232f7d7ab"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateDictTypeRequest.java",
+      "sha256": "624e392f04e5529496275e7a41c7297f51227e8dfd2c6f14ace7ee62c0192943"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateUserJobRequest.java",
+      "sha256": "eaaf5e62b4026b658d805801dae498215c010151100bbbece4b43b513bfb8a25"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/DictOptionVO.java",
+      "sha256": "628b74b283ab40b25feffce39228ba46fa61d953386d41fa1c228808fe93835b"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/UpdateDictDataRequest.java",
+      "sha256": "021837db3c12243b8678b6ebb976a089d55ad6a444dad0bb9daa736319121c16"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/UpdateDictTypeRequest.java",
+      "sha256": "965b68419fd1da45ec18e5df39c2fd915fbe8a4465f446c9e5dace25d05d1486"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/dto/UpdateUserJobRequest.java",
+      "sha256": "225612012dab68d9227725400e90cd79b3c2898f87024fe7d0285d406bdd4c80"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/handler/DrinkWaterRemindHandler.java",
+      "sha256": "3a775eb6d89c1ff77dd2db725950f7d3554d165229f981be7b6e0224afc56b96"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobExecuteHandler.java",
+      "sha256": "d27669aa3b7d2487701634281092afdcd9b9ad50e591d93ff514be6df672e32b"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobHandlerRegistry.java",
+      "sha256": "136ac3d8cea3b290212929779fa7a72ddc9f0aad76f226d3bf315d438ca45fb8"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobSeedSyncRunner.java",
+      "sha256": "e202cde77f1eb031ddec709346e6baa4e13ebb35daa2893645fbcac308837a43"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/mapper/SysDictDataMapper.java",
+      "sha256": "d3aa3b762389667825d17b1f097fc338a3baa065e1cbb95ebf43e54598fa5c26"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/mapper/SysDictTypeMapper.java",
+      "sha256": "65412bab9087ced8747adad80b1117d6469bff2c2e34cabf42070998db1df032"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/mapper/SysUserJobLogMapper.java",
+      "sha256": "0246e76de70c807181a3c3e1d5ba095cb84da8de64cf2633c68b7c7ac1851b77"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/security/GatewayPreAuthFilter.java",
+      "sha256": "1cb7c9d5a5598db4bd4f6df807c35b35eb133a7333a8f2960d78d19356beb358"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/security/XssConfigProviderImpl.java",
+      "sha256": "f889e6da0c2af08a93b6dc13899441e60bdcc68791b42e40c60b0bdd289c282b"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/DictDataService.java",
+      "sha256": "d8f3e330c5b8b58b5a7188619bfe04312c5ad8db362d3232acb2c81935c76d40"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/DictTypeService.java",
+      "sha256": "7e45495d6238cc705dd6642a2312fece46401d2dc2fd88be8a1d1e8755c56af6"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/DictDataServiceImpl.java",
+      "sha256": "f6b86ad13da6a0d63825d4a4ee20fd345d6728487bf2fa844c96c127c5f63ec6"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/DictTypeServiceImpl.java",
+      "sha256": "81a7eeb41ce81a01270efd4f11ea79640a8c5212b2f911522a51199efad72284"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/OperLogServiceImpl.java",
+      "sha256": "cafc52ae3b66a69d7cbe33453251a710310523d31fa8ff121ec78c0a95a556c6"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobLogServiceImpl.java",
+      "sha256": "4c397a8b3d31b3a53917fdc27fcad9c36107c38b0f5dc2f0f34512b5181647a5"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java",
+      "sha256": "2e4ee9762caaa45cf6f70404dff0bf1448cfd11615ba8df80f2fb2e27fd1826a"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobTypeServiceImpl.java",
+      "sha256": "ef47632cee758ebc14cc1c43560d5d4f1bf7eaea585922d0e0ed21ec5c38e566"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/OperLogArchiver.java",
+      "sha256": "297b676471f4c5212cbf883a3af3e4392b61d51d043ade9a39d6516b8b5cbf49"
+    },
+    {
+      "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/SystemJobService.java",
+      "sha256": "26ccb931fdd4c93ee19c0d4c899e03ac9f63b8c84cc7be6e4880eb28084a2dba"
+    },
+    {
+      "path": "omni-backend/omni-base/src/test/java/com/omni/base/controller/DictOperLogTenantBoundaryTest.java",
+      "sha256": "12469cb2023d27166b0b69e7248fa85f62d242802c1c39334ab22050f39d056e"
+    },
+    {
+      "path": "omni-backend/omni-base/src/test/java/com/omni/base/controller/DictTenantBoundaryTest.java",
+      "sha256": "1ad20b93284f533a0f8c62a55b62532f7ed5ee0511d39950d54122464b49bf06"
+    },
+    {
+      "path": "omni-backend/omni-base/src/test/java/com/omni/base/controller/MyJobControllerTest.java",
+      "sha256": "616aab815c41c7886e6c65942a738c616f2a5ec9551ee211b8e32d14f63bc817"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobHandler.java",
+      "sha256": "0e90610ea5544b2520285e507ed94030c9f1017e93385149973129fb17df3f1a"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobMessage.java",
+      "sha256": "6f5fe8eb970b3683d586f5ef50c923b3a305616a05073e2559c322f263edfd2e"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/model/BaseEntity.java",
+      "sha256": "0723fa3b71e2216483194dde7801d4ff7fd294c6d2975cba7aec5abba1a7b48a"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/mq/ReliableMessageRelay.java",
+      "sha256": "399ece831ed218c6938f9987e15e3e2f86f90fc3a95693a85e65c8145d7f33cb"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/operlog/OperLog.java",
+      "sha256": "5912dddc0e780eea5acc4179b53060ceeb21d290db4d177a24454667442f57ab"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/operlog/OperLogMessage.java",
+      "sha256": "2abbcd8493c1c80b7aa94627d4721bee9d309a2c298b9724dacea2c5d9ff275c"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/operlog/OperType.java",
+      "sha256": "3aabf73f9705144000ac04b4ab0212666a82d84a8ad8283d37866896ecaab3c2"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/PageResult.java",
+      "sha256": "972689d5ecde471310d2c094b4f6aa840aaa2d159fc70d680d7e6d0a67bd9679"
+    },
+    {
+      "path": "omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/R.java",
+      "sha256": "b406cbe93dec21f2d7ece8d83e55b3c1fcba368681b885ba1e1477f00be4a5fc"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java",
+      "sha256": "9e77ff40bc35ee35b12970b5b850c00a2c670db05d712cfa23f672e6790c5005"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/JobMetrics.java",
+      "sha256": "b4961d97db747cac01fb900a73cfda38b058185d4707093d803b1e8c9b916426"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/SystemJobRegistry.java",
+      "sha256": "bf2b704901d2e13c1d0a558d52263c3e00f308e61554e0000bec85773ecf655a"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobAdminClient.java",
+      "sha256": "891e46d4744f7257f3bcde6c718862f29986e9a3148acb70175fe715aafe6b15"
+    },
+    {
+      "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobProperties.java",
+      "sha256": "e6cf4844ef2d393faade4821b1ec00912cd06f0c9d7a58c36b1e0504f8ef003b"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/config/MqLogAutoConfiguration.java",
+      "sha256": "bfb434ba1c5e5b8b1cf5d93d87cbb38954a7dbc65f14eab8bf47a717ecbad9c2"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/filter/InternalApiAuthFilter.java",
+      "sha256": "21bd8ca3cf57a86683db0b54f68ad87066ac9998a045d58cca36676de9677a9d"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java",
+      "sha256": "db640b6e594ab53272c078e42776e904b7e6ca33a4ae625e2f9bcf5c1c9ea928"
+    },
+    {
+      "path": "omni-backend/omni-common-mybatis/src/main/java/com/omni/common/mybatis/config/MybatisPlusAutoConfiguration.java",
+      "sha256": "d6d75ead8dd29327e2081a038500d0321c4b6ab63476914646c59a4d800e0ffa"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/aspect/OperLogAspect.java",
+      "sha256": "6c14f32505e15e89585fd98376c656f2a9dce0feb05d74559fd57509206a8ac0"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/config/OperLogAutoConfiguration.java",
+      "sha256": "c0b2d210eb54cf339b9e77f1ab24f015cd06f695b665e67f8cda4d72e9f78afc"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/diff/EntityDiffer.java",
+      "sha256": "220da9d2c6c25ac841b6bff70749104736ce0ab3ba0018cec268b8c07ecb44c9"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/producer/OperLogProducer.java",
+      "sha256": "be5c6234193b374960cddf4344b07db74eb98e3320b329752be3ac6e7c15d574"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/sanitize/OperLogSanitizer.java",
+      "sha256": "8f5d34bca9097343ca596b409e69bc15a1472b02a0aa6fc6cefd04a27cc31479"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthDataScopeResolver.java",
+      "sha256": "8c8b2c3d5818682e93e3f0874d8b23e359680015cbc9bcb68b3f156675807531"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthSecuritySettingsClient.java",
+      "sha256": "b8650890b1807b9b099bd9082aa98f5785a658595db55debe0b1b63b89e35a61"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthXssSettingsResolver.java",
+      "sha256": "f43e509df635acfc3b28b817263df7615952a335c68aaa2441af4e36cd2b4576"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceConfigurationValidator.java",
+      "sha256": "2019df35b95271027aea48ddfdd34d9c484a844437d36460231950930b042476"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceCoreAutoConfiguration.java",
+      "sha256": "831aa2fa80742dfbf17fe4c5faa928116d988c05384c768c87735c985e1e9e8a"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceIdentityProperties.java",
+      "sha256": "f17e5d5123df3dcbdf1b1cab4fcd3f429199c5028aac2067b18d6012f34386f8"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java",
+      "sha256": "4fcaa7b87b3547392e77284334ad8553546cdac8351a402b726ce1f2d9697220"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceXssAutoConfiguration.java",
+      "sha256": "9274353be73edd87ed851ae5684d1886a16095a87248f596f076f7824142237e"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/datascope/ServiceDataScopeAspect.java",
+      "sha256": "e47082d659d8ecda501066b2a4de6693eafbb9dc390d63bbf7ef3f6afaf50a32"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/internal/InternalApiAuthenticationFilter.java",
+      "sha256": "a2f1b584ad0c4723ccb577ea455f3a23749bf54e9faa84f8585b5319cdf2ece9"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java",
+      "sha256": "796424bf5067b1e80c3658572f2d1d3fb60a0db68c5bf349db10b5ddd323328d"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/DefaultXssSettingsFallback.java",
+      "sha256": "3b6881f0ff8c5855a8711732ee5268fb38ea1176bc4a987cad93a136ad4c2f16"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+      "sha256": "9b042dfc687ee0c3f4f1e17e2b4dd99cb31e69d43cb6a6f9344b8cd8f114bce0"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/pom.xml",
+      "sha256": "76302d6e470b88599093b6fd81bef957c38fb030c65328a42f2212f4d553b8c4"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/approval/ApprovalServiceImpl.java",
+      "sha256": "bb3835b2067a5cca21f63fad58ceec5550b8751cc705eb476c268f9b299a35be"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/config/FlowableAutoConfiguration.java",
+      "sha256": "6f37d9e50fc3d081a79c6cbac2a84f36761d54e5019dcb7a489b55df2816c2c2"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/notification/NoOpNotificationService.java",
+      "sha256": "20ce08ddbbdee024659e4fb022d7b7848689a9383b12c1a420bd614d04c77959"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/tenant/TenantInfoFilter.java",
+      "sha256": "a7008bd20d0a358fa0af2220dc8dd2e025e0fdc4b54c31a77f351fd78869bee2"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/config/JacksonConfig.java",
+      "sha256": "2c7a585a9cf5725bc682650c655e67368c5a804ed4ebfd358baf6c29ce43f0f6"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/result/GlobalExceptionHandler.java",
+      "sha256": "ccf9bf26ae825f8f81e4db294992e8ae7afabd24850a6295bb8adf9772ddaacf"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssAutoConfiguration.java",
+      "sha256": "c49eb19091de4cfb885cfb09893d09cdfb581ca2b6a71b2b872e9d207824cd75"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssFilter.java",
+      "sha256": "97fcb44f91b67e3749f2fa2ceff23952d9a6fd8815ca839635fa3ab6766c8373"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssHttpServletRequestWrapper.java",
+      "sha256": "1d3dab14470e2c25878a7fd15f500d6589425c7bbbabb42bcb3e28400cffe0c8"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssRuleHolder.java",
+      "sha256": "541cec49717f51105a7cd49a6d911e0b08a56a0b08baa601277a7bf3d131e5b6"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssSanitizer.java",
+      "sha256": "c60a69f43a3142a46802544af830aec02dbe0c7a1cdb70bde883a0883e80baf7"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssStringDeserializer.java",
+      "sha256": "7c350e118220c612fcd811c3e390a9f8e4f3c363091add6c0483efd8124f6b83"
+    },
+    {
+      "path": "omni-backend/omni-common/src/main/java/com/omni/common/security/xss/XssStringDeserializer3.java",
+      "sha256": "213564eed416fc8111a6b51be2297800fd4abbad7f81da5ee72833ce20c4052b"
+    },
+    {
+      "path": "omni-backend/omni-common/src/test/java/com/omni/common/security/xss/XssHttpJsonIntegrationTest.java",
+      "sha256": "9feb83aea3fdf94788513f1856516d2cecbd2037020151906d3725cf6894a63f"
+    },
+    {
+      "path": "omni-backend/omni-common/src/test/java/com/omni/common/security/xss/XssJsonDeserializationTest.java",
+      "sha256": "4548bc1f6515d55ac25b346bb1ce42b8bc3ef70e6895f1c4cb72e98584d2826f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/LeadController.java",
+      "sha256": "f81e64deac6c0674a3f180eb8569d5d88f1c2967ad3e2a2d3f396506842488ac"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OpportunityController.java",
+      "sha256": "5e908c7ccb970de52464ec427b73b2643f0a413c86faa22d229a894f45ac2def"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/domain/CrmStateMachine.java",
+      "sha256": "1d6286fa82b101e7f0c4b0c815d89df6a2b35f13db27f07e3fb3265182fc72b4"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmRequests.java",
+      "sha256": "4a0019ce1e5d5bd6bf474d548f6fa4ed150bc94399b650f1f19d89aea6f3e7ff"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmViewAssembler.java",
+      "sha256": "bc03388bcc9b538ccec2a2ecc4a04af061f7c7062a4e85d01f25f7ff8b4a2c2f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/DomainEventEnvelope.java",
+      "sha256": "36df88c43801cdde71f0b1cc3fc8e5999add5efa15ca5a6bc420fa960e17d85c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmCustomerMapper.java",
+      "sha256": "55de5926efa1898e566944124af4d3e2c763dae0811147883a5f36aca5059ae7"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmLeadMapper.java",
+      "sha256": "f05303453ca1952e4bda4830df837b03022f89c1d19711ec7c585a0a73f49d46"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmOpportunityMapper.java",
+      "sha256": "662df629986892e38dc91473ab081ed2734dc01e773987e92e6ac5241c355abc"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmDataPermissionHandler.java",
+      "sha256": "e62727dc2c3fa241d35f8a9d1304b78f94798d37d7936e185469c767c49b1b0b"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/CrmTenantInitializer.java",
+      "sha256": "bdfd03dd9921c3e8f1bccfe54449611ad24c35a917581036a873f50677d165cf"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ActivityServiceImpl.java",
+      "sha256": "1465bce958b3a9d3d14862512cdfd2785bd9b6c014853335a85e0ced8cb4fa27"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ContactServiceImpl.java",
+      "sha256": "9eb9b26eee085dba3a8fdbc23c9f9fb86a2a29a5ef757361dcf1f168a65b6a2a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CrmTenantInitializerImpl.java",
+      "sha256": "20c810e6e0f28ae512022a582c9a943fba444e8e4d3aa302559909ac12127f0c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CustomerServiceImpl.java",
+      "sha256": "ab9264767541b880da0e88d3660fdc679e6e8117c29bf75b6e1c549c21702978"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/LeadServiceImpl.java",
+      "sha256": "ddd0317511aeb7b73b1199ad9c1a90c8d59488b866180e4ab96cff27c1c2b67a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OpportunityServiceImpl.java",
+      "sha256": "e45d967c578e0437f3c6eddbf5d3c20cd99ea31d22a44ecf0bd8ef805525cd3f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmOwnerResolver.java",
+      "sha256": "0318d455f1dbfc43d1c921902fb620b2800208269af4c55fdb2e1d9021dbd09d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmPermissionScopeExecutor.java",
+      "sha256": "b0f1f39646f3433457beddd651682c55b9b9273b2a84323dd5f30e0ea3e97523"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmRecordAccessGuard.java",
+      "sha256": "63d3bbc0e0d0fa52afa31e651c0916ce299d12395dedadd492d1ba6b24f6c780"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/resources/application.yml",
+      "sha256": "e35d392d9730485362b41f79aad28339769fe790830c7a6b570b5a310eae5288"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/security/PiiMaskerTest.java",
+      "sha256": "1c557676c601021e5fa6b27725b2964a7e7e7e52d00d9a8f5b02e09736106ad0"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/LeadServiceImplTest.java",
+      "sha256": "ed980d81d2d65a910f3784c5372f167c4b9f6ab7721a309bd96452e5b0f43f2d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/OpportunityServiceImplTest.java",
+      "sha256": "2f021264bc7799ed8115aa24fcd1999903d99c35b7bbeb2bf97954c1a1fccd8d"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/JwkKeyProvider.java",
+      "sha256": "8c57fe2764d65cd0a023c7cb92e11f95a37bdb3f327a5699419e0630790c7a6d"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/SecurityHeadersFilter.java",
+      "sha256": "79bb875e9299be756a97a967271528f658131ed359a93a305ffa948288140a74"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/filter/AuthFilter.java",
+      "sha256": "a0773cce8e6ba3d7e90e40c088fb9bae1f77c049577665ad9a0201a4e1c3d76e"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/resources/application.yml",
+      "sha256": "b759994853839263e125044cb5a99b51a22aee7c5b38bdbdb646176fdf87c0f2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/pom.xml",
+      "sha256": "6dec4a7577f3807b3a9420c3fe49682d5a65d26f73f024b17ec7e9f148b521f2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/AuthInternalClient.java",
+      "sha256": "7489727316858bc8b9d3a0eed24b46fe0bdd6943a59d1ce466d97eb638bed9ac"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/SrmInternalClient.java",
+      "sha256": "b2f1a0d99579733809aeb4ccb6526cb9b45fbb3a6030ac5451041d1ff436079d"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/WorkflowInternalClient.java",
+      "sha256": "232525732c21dd069311ba3c1776f7db76e2e815cf5f5d1bc437e2753178ccff"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/config/ProcExceptionHandler.java",
+      "sha256": "8365bc1c68d52f02c0e530943f33fdf269cc977cda01450529ba062a3733cc60"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/ApprovalRouteController.java",
+      "sha256": "5553119b83e7881a97efcdd0086e1cc9d219e942f11e4b0e28012c46da3e73b0"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/GoodsReceiptController.java",
+      "sha256": "c1878e6fb97c4c0a89c6e9d446e78ac059c97e0108987c515c7611cb118de362"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/InternalAssetCandidateController.java",
+      "sha256": "d5bee68ebbe2b294365ae40b9369755956806f7ce03d52fa3b3bfd2f6c1cdb88"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/InternalRfqInvitationController.java",
+      "sha256": "235f12e203b2424614c321bf968844fcd983e5788a9bd0eaecd5775612cef7a1"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/MaterialController.java",
+      "sha256": "adf7c0a0411e1f79dd6775a413bd6dc5c212f205b7a121a0e7e70157bb1f119b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/OverviewController.java",
+      "sha256": "d4672bfaa95a39a36f878bf2bc2c4fc2e62dffb3280b7e7c83db6a274c077720"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/PurchaseOrderController.java",
+      "sha256": "5d3d3ea6b9a9fa993bbce8562346ad8fc730fdb7534daeb5951cd21a4f2835b0"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RequisitionController.java",
+      "sha256": "6db55a427c4ea94d9e04f757ba29a8ac9ae3104b7588783031aeab76f06b44d9"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RfqController.java",
+      "sha256": "05dbcbf2c7fd904ebd9264424e3d62819f4f8567e5768c48e198e4c92f10cbaa"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/ApprovalRouteCoverageAnalyzer.java",
+      "sha256": "bcb0fc894d62b3229c3853dd3b27fabaa03591dd998dc22ef1a3541aed17f6b9"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/ApprovalRouteResolver.java",
+      "sha256": "70293fec161d64a8f2d1a08fd5935cddfbd90db2a4a168a406deeda473b79746"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/GoodsReceiptStateMachine.java",
+      "sha256": "c487970c9966aa0e059e49b6db51a77a5c33d0f37907aba3d02eec4aaabeddf5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/MaterialDomainPolicy.java",
+      "sha256": "c938033816e379cc0e2b1d16ee07bb800ab0c68f59311f1095f05d875cff0d55"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/PurchaseOrderStateMachine.java",
+      "sha256": "987b59710d85a3b57f40dc5709769736712443504c1a27babbc7b5609b622e2b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RequisitionStateMachine.java",
+      "sha256": "bf473a86a15317df69a8a821816bcd7615858ef017a7538064ade67f9a33e20d"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RfqStateMachine.java",
+      "sha256": "c6c9f4e79144f36b9f16572f6c8f84a19d005a09e960421512b613755acd5f77"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/GoodsReceiptRequests.java",
+      "sha256": "2e5457ebdbe83eeec0de822019475ae1ad0190937ffe04c9f5ddaba64b58e914"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/PurchaseOrderViews.java",
+      "sha256": "4b5a61f35e6d8fe7912319403a2be07cf3fd1c0cb45687658b5636c3819bf6c0"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/RequisitionRequests.java",
+      "sha256": "148db8f6c79990d2ce241edd578489fcf460a840fe686856edd0938670cb70c8"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/RfqRequests.java",
+      "sha256": "a651e19bc043501755b9a475a77ada42500b3bf5636f801f88f9dbfcfedcade7"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcEventInboxMapper.java",
+      "sha256": "494eb3a24065f8eba1ab6745d65c16806389242cda99733539efa52f46c5dc04"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcGoodsReceiptLineMapper.java",
+      "sha256": "515d468b0052998986c59c5cff125b92a1f7788127b6ae7dc5c6fa592be92f0b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcGoodsReceiptMapper.java",
+      "sha256": "10c4c513f99c4c4dda3bb554b1af19d051965aa4ab5fa8e1afa7222890698ef5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcOverviewMapper.java",
+      "sha256": "ab8edd039391a6eeb0c27f0070c186739511b4ace98a6d176b749c64b7aff4c5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcPurchaseOrderMapper.java",
+      "sha256": "ebdc96b81c0c67a1d402baeb10a342c62fda6aa3197eb55f79947592119ae51b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcRequisitionMapper.java",
+      "sha256": "73aa68d4aba4072254602ca2b5e1384204d35ac586dfa54b8c6eb453829afb3f"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcRfqMapper.java",
+      "sha256": "3ad3496f95bf68c806c25895d381349b0e825c3d69cb618b4e39d432ee586047"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java",
+      "sha256": "7fc8e3ee17cc3d4a2c0e09ebc937b83e061782c294be22ba49300a3c60f62ad5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java",
+      "sha256": "862a902bdcd8dd57fd07b6280284f712f2203149a0bf40f84d3fe590507efddf"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ApprovalRouteInsightServiceImpl.java",
+      "sha256": "cabfc8cbe87a192287f505b1cb2c2f3699907d4a80e536ebd6cc4d22a657ce70"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ApprovalRouteServiceImpl.java",
+      "sha256": "88f80a5161cdb50a5bef098e28bdf145b5296a6ae80fda93f643a2338f13f637"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/GoodsReceiptServiceImpl.java",
+      "sha256": "6863e2187ddcbec101a1d4c04c02d40ffc0277c361d01aee74d150c1bde4b610"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/InternalAssetCandidateServiceImpl.java",
+      "sha256": "3bce8c5b42752d764034d8c94d430df0559db72470e2f72cae51b2263c17637a"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantInitializerImpl.java",
+      "sha256": "48e0579d06012035c66e7d97d184ca29bee51295248aa49d022ca0957ffb946e"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantModuleProvisioner.java",
+      "sha256": "19328c9903adb5c32ec875c8c11faab945cfad224fe488ad12a700af31c1160f"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/PurchaseOrderServiceImpl.java",
+      "sha256": "0230a7d599669c3d082ab3f4ff3fb947b37be4b0cd1c8224f8a1e3447f47bbe6"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/QuotationSubmittedServiceImpl.java",
+      "sha256": "6d0c94bec3c430750fa2f37e4b21caf990309be8949c277c2db5c06da6464421"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionServiceImpl.java",
+      "sha256": "49860f021ec548cb8e993a251b2557ad9d0145b19cdb78c85312909143f06066"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionWorkflowStateServiceImpl.java",
+      "sha256": "c30d0c09ddfd7746e3013b195939f447751e99a8da4bdf9eb13e1b7241d21f5c"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RfqServiceImpl.java",
+      "sha256": "6a6356496869d0f8aa822234b74618a7a90588e3dfce233be296336c9dcd7ac7"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/WorkflowCompletionServiceImpl.java",
+      "sha256": "b1982df5b9cd24025b2dc757e55628d7e251985f3c43f0a9f6fdf58d357c95c2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinator.java",
+      "sha256": "d3761c42d613f6f512fde07e71ed2bb3cb057fe140e9315287b0a94e0b0c7e20"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/resources/application.yml",
+      "sha256": "e4dde986037907125e1d92f325f387623f8ce471fae64151c32dc9164e0d7430"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/domain/ApprovalRouteResolverTest.java",
+      "sha256": "cda14903a9ea2c374bc87b56f8b92d2e84d7d3a56b1b64336274b5cd90bf9c18"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/service/impl/RequisitionWorkflowStateServiceImplTest.java",
+      "sha256": "ec66dab1fa9d3b8b9ccf169923f75274556e03cbb9e335f25414e63ecb198c3d"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/service/impl/WorkflowCompletionServiceImplTest.java",
+      "sha256": "c2efb43294ddf0d343f46b95a328839ea76f784ad7e3ec973241b4d7fd4d3873"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinatorTest.java",
+      "sha256": "d79cf3ce0fbb8713e14c3262e66fdadff46401c96b398e68ac715cf030d148a1"
+    },
+    {
+      "path": "omni-backend/omni-srm/pom.xml",
+      "sha256": "50fc38206395819c1ea108dd0c25041972c73731a89e63074dd4fea4a1f1742d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/client/AuthInternalClient.java",
+      "sha256": "a29a9ed529e017c22f1cb930df317817aebd6e7d77f26eab2cca70370bee2479"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/client/WorkflowInternalClient.java",
+      "sha256": "7aa64d3006b8498646ed0a7d9fa65662e5d7ed4b305970c17e804def7c858144"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/config/SecurityConfig.java",
+      "sha256": "d283ef844b82b91671da743c547274107f44f932a2af9b4fe9912efdf2275962"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/config/SrmExceptionHandler.java",
+      "sha256": "5516488099277869fcaebe14f81b6bef2511ac5b7e794cca54c4529ffb87607a"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/consumer/PortalRoleResultConsumer.java",
+      "sha256": "daa3063db197f8b9ed0ea676c9b1998df59aeb0cbc2cdb12995383eb39750956"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/consumer/WorkflowProcessCompletedConsumer.java",
+      "sha256": "645db9aa619e6c73fef8f376c397e58002eb0e5adfbb183f8261bc4f48c9b2c5"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/BankAccountController.java",
+      "sha256": "0a4c430abb7092c1bbe91564cc65e48b665d0e375d15efea08460a5178916883"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/ContactController.java",
+      "sha256": "3d64c96047199f6d5580b58531e6219db28ba5eb56a0f129bed94b6daf20a270"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/EvaluationController.java",
+      "sha256": "e926bdb93440f60d68f0c503569edf86e83407566d17972858616f92ad91e547"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/InternalQuotationController.java",
+      "sha256": "65c72a5dd1451f2cafb453bb792c727d3dac52774eda5e3b59afe60da8c9c7da"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/InternalSupplierController.java",
+      "sha256": "24fe6064e7a8d504383c286d9b2ad42ac3f846d12709a08da71bfb4c045734e7"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/OptionsController.java",
+      "sha256": "14803dc21255ebf6fe6428fa55248b814f2bc4d4d5e7faaa162c1e9830773719"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/OverviewController.java",
+      "sha256": "1d31a6cf31e222935bf40c4cf8474ee9107638761a09a839a38218b3a3cd789d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalController.java",
+      "sha256": "22f8a2e188ef7cf36a9cd086206d6cbd286aface2a0a1902d42aad7e308e518d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalEvaluationController.java",
+      "sha256": "ab2dc6cf8ab35006740c766f2eef3d3ee7443c5c68706ef3cfcef9308fa8cada"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalInviteController.java",
+      "sha256": "ed1f52210ac5a3b6ee2a5397bde3858b5cead2f1ca971bfd5ab31d404d6b2aa3"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalQuotationController.java",
+      "sha256": "60273a0a09b8eca2365f1889f8aad02f8c23adf5f9eceaecbc40cf70a3c51297"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/QualificationController.java",
+      "sha256": "b8f2dbc3d91fdcb86f4ce4b926063c45e86eea458e8f6610df393386e9bc96f8"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/RiskController.java",
+      "sha256": "6ae0c12de2e76a71120675b4a61142bef35d1c16afed29ea0416a846fa5c600f"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/RiskIndicatorConfigController.java",
+      "sha256": "386b2ed6ef769743f390711cb42383708b0fecc6e47703a8319dace0b8c46bda"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/SupplierController.java",
+      "sha256": "b329152e40cd52d83908ec4bf5c5ebc624526cf3f1855de343c18c3502c3b6ac"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/SupplierInsightController.java",
+      "sha256": "ea828e3e2c452b1c741f3aaa61970a7e807e534ed2657c50c8f4863cc46b4f69"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmEvaluationPolicy.java",
+      "sha256": "a85ae635aaf6a922d728e1ae9446fc9688f8c57443f5ef902334d294f05fa291"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmEvaluationScoreCalculator.java",
+      "sha256": "96a2de999e19946c73b56227ffac597124dc8e260ab99f92904a145d50b700f0"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmRiskCalculator.java",
+      "sha256": "dfea0fcd1321c7fdee642e4348d3c84ac73f5f98baa8295d2e8ad35114363808"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmStateMachine.java",
+      "sha256": "23b50960e0ef730fafdfc0804d1972fc7fd879bfaad34bacc17e1890466456ff"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/DomainEventEnvelope.java",
+      "sha256": "343830b28fc6d21821e3228408f4189c37b3bab2634ee6e735621c3a4333bc45"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/Jackson2DecimalStringDeserializer.java",
+      "sha256": "7fdc6e74bffe9d5c5b16f2444f3bd99f1564f36cbd9141247e1ca8440f753876"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/Jackson3DecimalStringDeserializer.java",
+      "sha256": "d6595663f13cb37eab371c18116270dc05062fb5d355992e5a97299fdc702ca6"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationLineRequest.java",
+      "sha256": "2c3d9192820c781c17ac5a9c855588dd1a6eb75e2f78c94b5fd252ebea2809d5"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationLineVO.java",
+      "sha256": "3cc702526fa9f93514586a351ba7bca5c21a574928806035901d5a44334b23fc"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationSubmitRequest.java",
+      "sha256": "c5192dbda68a83df71b99e53be85b484d5f800185f01962bc7e7dd8c62bd63ee"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationVO.java",
+      "sha256": "164c8d349ed46761b08db68b486274f638ca134d8702af93b677b137b1c47e48"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/SrmRequests.java",
+      "sha256": "43433b0b5f45a75f780345b53a52d4769a4a025f3eccadeeef73e4bda6916787"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/SrmViewAssembler.java",
+      "sha256": "d48baade929890b8530a953a13a79d2dce4d531cb6fa4607efdf41fad534267b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/dto/WorkflowContracts.java",
+      "sha256": "d1dfa02839cae90412e76a891f0ad46c3aabc563614e04914644e92c67b0adbe"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmEvaluation.java",
+      "sha256": "938b5aad0040af0a6cd5f0e6614c2971feb5d9c71c68027fca07024965c1251b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplier.java",
+      "sha256": "fba5431db8ff49eb3114eeb8bf3ef41289efc5e7442c929907c07af78ad4905e"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplierBankAccount.java",
+      "sha256": "e60065d75e13b5d41b3507148c50b146d50ec54dbe06ead912a730a08a43cd21"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplierContact.java",
+      "sha256": "3b70b3e87d8174039b51c146196596596ae6f9d2fce8131276dfd14f21315b47"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplierEnrollment.java",
+      "sha256": "e4bb0ed18323533bc8b5281fa5c3d76327d300245c7725912332e32b33837ede"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmSupplierInvite.java",
+      "sha256": "6b549e164dab7319420ba2cdf758947804b3e8260a4609a9eb67b376a7363e6c"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/entity/SrmTenantEntity.java",
+      "sha256": "19f523ea972c5c57255751bec299f463ed48cf126785b276d788e59b9c1d8675"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/mapper/SrmEventInboxMapper.java",
+      "sha256": "a8fce30e4f80b54d8478210b6544e9d43c3173a746676139f72bca597460ce4b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/mapper/SrmSupplierInviteMapper.java",
+      "sha256": "e787643166227dbc20c9e156752f7bf47b6f22b8cae102191ae858a6a39f68db"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmDataPermissionHandler.java",
+      "sha256": "c44aacdf9fb3cb52dcca347b1c2d4eafb962240f99e4df719ff570575e1b600d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmPortalScope.java",
+      "sha256": "eff1452e9b4349d44b2dd2275054513e2817bac14ad19309a9521f0c683adf68"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/EvaluationServiceImpl.java",
+      "sha256": "be27cb3d943742ebae647e6a40e5a15721cd437bc49e33054243fff6b1dd86ac"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/InternalSupplierServiceImpl.java",
+      "sha256": "c8bf5508b306fef83573708ef32d02fd38a69bec119e6aa2affa00c56622a1f1"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/PortalInviteServiceImpl.java",
+      "sha256": "cbb4265347bcb4d1138444ddad831ad5cd9f80bb29abf0527cfe424ff01277dc"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/PortalRoleResultServiceImpl.java",
+      "sha256": "fc418de204fcf651a887cfab4e76428fe03981765851360464c1a04ec46fda1c"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/QualificationServiceImpl.java",
+      "sha256": "61ee02db716e6d9fb1e0b6f9ac72c2ea72494ec9dec9cf4318639d112342f771"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/QuotationServiceImpl.java",
+      "sha256": "0323b4f79842bc409be42e3b2823a1f9018e6925d66c8202c3184156bd22ad9b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskIndicatorConfigServiceImpl.java",
+      "sha256": "7001beb02897c269b4d86dbb53f81a88ba1f1d2da5c3dbb81557adcb915b1027"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskServiceImpl.java",
+      "sha256": "f414b9593f1e14a410df88c269c742b369c9b0ca695f7a6b84075470a2d28f29"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SrmTenantInitializerImpl.java",
+      "sha256": "48f5f132f8a6b8b8764b1dbbf0471ab2795da5ede97d51ae66f7a8929371cb7e"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+      "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+      "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierWorkflowCompletionServiceImpl.java",
+      "sha256": "0747a9bd1d22281646e3fad2808c7de80e295a30438e31a23cc3a4e0365de836"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SrmOwnerEnricher.java",
+      "sha256": "4107528b850d6f99f8a5e047905938f5ec3f8f8c8123df3ac9fc5c4a385ad652"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SrmPermissionScopeExecutor.java",
+      "sha256": "e4f7c84f65cdd5cfcb6adb1f7edf9103d0202943ac13eb3ecdade34781b357f2"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/support/SupplierRiskInitializer.java",
+      "sha256": "d41649bee4a84e7012ac8453bda885c630907defbbb56071ad9d18758e37852b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/SrmApplication.java",
+      "sha256": "f5d6f9d1772eb5626b25db79fd319a35a9bd3e0df2aa43a0a85552ea4cb2ff7e"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/workflow/SupplierWorkflowCoordinator.java",
+      "sha256": "1a239aadb6a43eee1c66e16f063fc65435cc21c22b1d60a5d075715e5925b246"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/workflow/SupplierWorkflowStateServiceImpl.java",
+      "sha256": "ca55d16c520227ccad2fb619f61f3744412d0ad0da86b93a9940674c55c5eb6a"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/resources/application.yml",
+      "sha256": "33cb88e595135c1d5b1c19288ecdf000860973a110a5816643e924e4808081a6"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/PortalInviteServiceImplTest.java",
+      "sha256": "98b50607037b2a08f25bd3c0a642fdbef3ec61e5db51519dbeba37c38bdd20f7"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/PortalRoleResultServiceImplTest.java",
+      "sha256": "18f7979ded2cee6a8c6930a60b236b01b717fea6b401e57f2a9fd8f0a6f9fefe"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/SupplierPortalServiceImplTest.java",
+      "sha256": "63423723e10dc55947f3e3662976f09e5f67986f4d357ff5fe205d4d21aaa63b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/SupplierServiceImplTest.java",
+      "sha256": "762ee68676b4d9012c69904393fb6e7e361074df1fe83e984d37ec97340f033a"
+    },
+    {
+      "path": "omni-backend/omni-workflow/pom.xml",
+      "sha256": "615657791592a837a4f3b464a8252d20b16ca143d33f9c930d9f7d685da09168"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/MybatisPlusConfig.java",
+      "sha256": "b787ea78976b1ae4aac3a8ef8aadf20daccadedbd194e9bedbd333bc48431084"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+      "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/SecurityConfig.java",
+      "sha256": "fab002e857eb36ea7deea2c4441eacd5077e4cac292f81cedb201c6ac1be02a1"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ApprovalController.java",
+      "sha256": "cb3efb20b522efffa1aaa1a936f8c307a8cd239a2cbd99170e18bcce552a84cd"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+      "sha256": "fb540dc12ae8c821fd9324a06de566beee5aa7bf4e0f105668f3a1bd139ac020"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessDefinitionController.java",
+      "sha256": "19c20b00acb9b6c293e1651bbe1abcb4c903a1b4824f419a0b4e987d6299e112"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessInstanceController.java",
+      "sha256": "864bf4351d9bb78142b4a6124d7035be3344063e36d0e4c62e0a6716ae4b926f"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/TaskController.java",
+      "sha256": "55b650d451ede246d5352e47308a68c34e5b6da7967c4f974e466f7fa48773a5"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowIdentityController.java",
+      "sha256": "3c859fb2aa150739c2a0007a4f213a5123827a73a53c48ac3514d48160e4fe2d"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowModelController.java",
+      "sha256": "0ee50a247ba0d9b81c6de89b17aa047ebc3a1299067695ee59d0566363b43962"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowStatsController.java",
+      "sha256": "2897a347eb58c3ff6be4ee848d89a1c558ddf696f727b9888e622f7671368152"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverBean.java",
+      "sha256": "08bc3db0d5c21ee1ea9d3636d13741c6154970ad0bdd26472efe6d68d6a2dadc"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverDelegate.java",
+      "sha256": "89e654d78fbbc46b3ad9e41313e34b4b4e4cea41ebe70c24cc0891ba7b7e2690"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CcNotifyDelegate.java",
+      "sha256": "8521417479a710e0bd38ce7eadc60db68364c0bf78cc9ac1333d4e108f4253cb"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRecord.java",
+      "sha256": "bfeaf38f1d2ba1451903d90a169525513d9baa5e38d81127f53b45c23a6c53f4"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRequest.java",
+      "sha256": "d700f162113c512b808591344d08c5acc247f9cd1e49e4a3f19ac40e5822fecb"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/CreateModelRequest.java",
+      "sha256": "ebacc498847b0f7b67ac2f9d142c26c344631bb42c406b17818983561922e3c9"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/internal/InternalApprovalPreviewResponse.java",
+      "sha256": "72809b75e76bd3cc7bfe062b3d190e012b309bb1dd38e13fcd515abf4121dd09"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/internal/InternalStartProcessRequest.java",
+      "sha256": "c18216d3ca76af59dd5194d8ee474aecae16da71a1d6210a8668a50b23fc3907"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ProcessProgressResponse.java",
+      "sha256": "874df46fc8d8d1acb93226aa3c19d7e2a6aa3f06b21c69231b3ad4a98041fb2b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ResolvePreviewRequest.java",
+      "sha256": "e6ada9d16a9f96d33c71b8de864261cb74f4b1ad72931c1184d29c60c3a3f3a8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ResolvePreviewResult.java",
+      "sha256": "43908dcf7be0f0988416b2914b7cc9de7da1574825e270195ac183f28a2f3900"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/SaveDraftRequest.java",
+      "sha256": "2e2d869e20474c82dd1f9e7fc9e5c137c0322fcfda5594115c9bbad91d95f668"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/StartProcessRequest.java",
+      "sha256": "042cb2c5d5ddf7227e57785deac28484361890de8f79a73d1562cbf604c2b0ee"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/BpmnXmlValidator.java",
+      "sha256": "01703f1846d2f69cdf99943fe0f49b43f1bdc6a675dc44f2982edb5777ba4f04"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/XmlSecurityUtils.java",
+      "sha256": "a0178c2de6a266e2bd1826c1ad0aff9fcbb6116d3baf0400b12d6baf68639096"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/listener/ScopedRoleAssignmentListener.java",
+      "sha256": "6981b11b7167a1cc28a2c640280ccfca46d7fe3f6965cc9ea50324a8e5b5f7d3"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/mapper/WfProcessStartRequestMapper.java",
+      "sha256": "ea536e6404fb6fc15caefd1755c47d49e500ee185378d368ab4f4a9ed9e982e8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/GatewayPreAuthFilter.java",
+      "sha256": "62ad1f64e9a57f9e8b0cede81564ac6d7e7c7cccc72d9be5c578a35a42da6d27"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/RbacUserGroupLookup.java",
+      "sha256": "95401461b083d1880fbcc324e96518178f7f5c2294483aef0b7261e1a772a142"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/XssConfigProviderImpl.java",
+      "sha256": "a4ac025ff72e0bed3a3ca3658f473761979074a2e4e0919759f7170ef8c0b64e"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/CandidateResolutionService.java",
+      "sha256": "b5321847781c8404f5975bc898340e76b84c0892c3ac25af5cd8d32d94f30cd2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+      "sha256": "65012a8fc6a5311a06e32e6201ff3f6ec9da84c58341e2f0c678ca19f5037c16"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessDefinitionServiceImpl.java",
+      "sha256": "cd8c2cdddf1165aa6059f2e6695906babe9e98f26506e5c6ddd46f3744cef7d6"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessInstanceServiceImpl.java",
+      "sha256": "f650ad68e8836e46cec0eac145697cd628fdd2757700e8c118b973e4f442a82a"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowApprovalServiceImpl.java",
+      "sha256": "82d2a03aa758445a15b6f872f767f2053c1850a75cbd589bc80e1f8a330f3ff8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+      "sha256": "63a1a2bd58ae7b696d77f8ec1e1e5616020f297999f11ec412c32de1fff09ac8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowModelServiceImpl.java",
+      "sha256": "ddeeae6a0c93612f503ea63c1394e38253e6d2ca5ccf51418b6116429cfd2ce2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+      "sha256": "f63cb03ab55045944f20e206bec4c5d59d04f4a7abc5abebb37e641054dabd83"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowTaskServiceImpl.java",
+      "sha256": "8628307b01eaa868de04d6fa568dd6d318444c9dd28f9de6fac39504c2842c7d"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/ProcessInstanceService.java",
+      "sha256": "4650362dc912ddbfb7cbebcaed55101096c0d50e8dd6c962fec5ee26241608b0"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/resources/application.yml",
+      "sha256": "dde4208074502bc092e8788006b0984d95bb76cd7de647a7cd8edec9e436d0df"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/controller/ProcessInstanceReadTenantBoundaryTest.java",
+      "sha256": "cf248d6ec9be344a3ff7fb7fcc2428b6ce3e0eb00cc1cb326ec5b7ee9d6da44b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/it/Fw05MultiInstanceIT.java",
+      "sha256": "628fd83e3fbfa065312c3379b154a6a5b94134ac5106a7fcbdca2bc675444b7d"
+    },
+    {
+      "path": "omni-backend/pom.xml",
+      "sha256": "18a2eda967a3dc9147decf645518f80692eae6d8b89c2cd3f230d07c14f33275"
+    },
+    {
+      "path": "omni-frontend/package.json",
+      "sha256": "24c2338b1e5fdda8063dab364a44c20b9038a2308769638230511d07f3807162"
+    },
+    {
+      "path": "omni-frontend/src/api/asset-asset.ts",
+      "sha256": "d506175e3fa4ef410afff751cf4578328558fa06159e127496aa2b46bb22e762"
+    },
+    {
+      "path": "omni-frontend/src/api/auth.ts",
+      "sha256": "2caa1f80207f4e86af65dd2d45fd643b900a4c9a1748bc7679af2ee026312ecc"
+    },
+    {
+      "path": "omni-frontend/src/api/dict.ts",
+      "sha256": "0f0f9d07f6f9a4634d63edff22219b126555f98166a160276a98f1e07c020c9f"
+    },
+    {
+      "path": "omni-frontend/src/api/menu.ts",
+      "sha256": "6d2c8eec518e669c315b26ce07d7dc94bcf9e88f0f6ce218040cd6bcb87687b7"
+    },
+    {
+      "path": "omni-frontend/src/api/myJob.ts",
+      "sha256": "2c318f5b8b56c7837a96ce92b75bd85db6817e153d44642a7b25ac03918e1de7"
+    },
+    {
+      "path": "omni-frontend/src/api/request.ts",
+      "sha256": "71f7d1f5003fd81fb41a4fa82386b3fe281c10ccd6e25a40816ca370e460a789"
+    },
+    {
+      "path": "omni-frontend/src/components/CronGenerator.vue",
+      "sha256": "587e03e302b92bbaa612ee05a26c2b7f0abc6ebe063aaff915fe45e34cf7c212"
+    },
+    {
+      "path": "omni-frontend/src/components/DynamicFormRenderer.vue",
+      "sha256": "3e79430c2144a9f4391fbcf48e292b28191cfcf6fb9d9c1618d923fa1c7848a5"
+    },
+    {
+      "path": "omni-frontend/src/components/LoginForm.vue",
+      "sha256": "d94e742b29b418fd57f8c91ecda6e5f1d93faa4f7ba455e6e1508485faf18388"
+    },
+    {
+      "path": "omni-frontend/src/composables/useBpmnExtension.ts",
+      "sha256": "0e16f77a627be044876b762e5f8bd6f3d261e580347fbd391f6430792036efc6"
+    },
+    {
+      "path": "omni-frontend/src/composables/useBpmnModeler.ts",
+      "sha256": "605a487e94922b2ce3c44e3937f079919469ed5886d58557c6a4af524e7e4004"
+    },
+    {
+      "path": "omni-frontend/src/composables/useDictOptions.ts",
+      "sha256": "d30095ea3cd8fc874d9b6006c83ce7831459bd99f21eaf89d8fa440034c9dae7"
+    },
+    {
+      "path": "omni-frontend/src/directives/permission.ts",
+      "sha256": "b52bb4b166510e09cd07a82471b722409716182a0442f4269b2fa8a40e3805fc"
+    },
+    {
+      "path": "omni-frontend/src/router/index.ts",
+      "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+    },
+    {
+      "path": "omni-frontend/src/stores/permission.ts",
+      "sha256": "1194fe1457d924e4fb483e7fd1f54c01fe6499af8cb388e01f5fcf9933e91419"
+    },
+    {
+      "path": "omni-frontend/src/stores/user.ts",
+      "sha256": "6cce522263c8c57b91c701fd74f2f9a550807e7c3ed7c07416d3818d04e69d63"
+    },
+    {
+      "path": "omni-frontend/src/types/api.ts",
+      "sha256": "71096455f9a0fe4c84daeccc8f2366d2da9862a11dc87605f86aaf7179eaa9f2"
+    },
+    {
+      "path": "omni-frontend/src/types/schema.ts",
+      "sha256": "f321a46a16e62b2eb9dba1419f12527eaaa99a34bd12054c6a31f58c01e33296"
+    },
+    {
+      "path": "omni-frontend/src/utils/error-display.ts",
+      "sha256": "6928ea32c61f137210f28a60954e046b98fedc4872f768cbd6766d8f3410c44b"
+    },
+    {
+      "path": "omni-frontend/src/utils/jwt.ts",
+      "sha256": "e75c9657c22aa9c7d45171eeb78bd206766e10e164b88a67c7c339c823cd24cc"
+    },
+    {
+      "path": "omni-frontend/src/utils/pkce.ts",
+      "sha256": "c5a17634b638d79a92761068314a75e7d0b7021e4b9529085c9a8677044510ac"
+    },
+    {
+      "path": "omni-frontend/src/views/asset/asset/index.vue",
+      "sha256": "a2a9c72a8ccbb9fd50800b180bcce7fecb3ea796c0b7743237a0d05b1f3c9be5"
+    },
+    {
+      "path": "omni-frontend/src/views/base/dict/index.vue",
+      "sha256": "810dd1f572773026719a483b18c2153013536b9786bb55a6c7204066ee5fff9d"
+    },
+    {
+      "path": "omni-frontend/src/views/callback/index.vue",
+      "sha256": "f38f4ffd81a7ba7dcf7efc92ad48b4a78a64b3ee7ceaf51fe7474db4125daae8"
+    },
+    {
+      "path": "omni-frontend/src/views/consent/index.vue",
+      "sha256": "65c527af9b23ebcd3b67e28bbc13f67276080965d89b5ea0f2428d4a109e1038"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/activity/index.vue",
+      "sha256": "fb5def60e696a6a57ad184273f15b38bf134687c09ce99120cb6333d6ff200ac"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/contact/index.vue",
+      "sha256": "c257748349e645970ac109e131f64baf936b9060fe8c05ffd10bd5eb3831e921"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/customer/index.vue",
+      "sha256": "4dc3d43c162a96e1364d8f5840428ef928ba7820ed6a56a33c4adeb9aaec2f91"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/lead/index.vue",
+      "sha256": "87f94fb10bd65d3959a43fa622319e5d3a048f2ddc1c3b8df56aeb0cf05f2c03"
+    },
+    {
+      "path": "omni-frontend/src/views/device/index.vue",
+      "sha256": "d6fff353acd623bc8ef00ba5bc67cfdd692c54ba2812429e39a5ecc2381df9e7"
+    },
+    {
+      "path": "omni-frontend/src/views/device/verify.vue",
+      "sha256": "2f14994ec4232008fa6bf933f72a020076d52ef24dc192ca8a3e2711a834dfc7"
+    },
+    {
+      "path": "omni-frontend/src/views/home/index.vue",
+      "sha256": "0961d631051111d6d8a9eacb904253b71b1f7ed698399c05872600019efdc98a"
+    },
+    {
+      "path": "omni-frontend/src/views/procurement/approval-route/components/ApprovalRuleWizard.vue",
+      "sha256": "b86a5b02ae6fc3b92bc2721380eb17d2e7e181c52f6d7be8a55cbab21f018076"
+    },
+    {
+      "path": "omni-frontend/src/views/procurement/requisition/index.vue",
+      "sha256": "ba0f4e3f7346bed2a93cfcf8bca77b4f407e838005ddba86ff9d77dbd21b1d1a"
+    },
+    {
+      "path": "omni-frontend/src/views/register/index.vue",
+      "sha256": "c4a40ffda7e01e067721c0b7b0fed402301a43e0b7515e3261884dc190ef5e02"
+    },
+    {
+      "path": "omni-frontend/src/views/srm/supplier/index.vue",
+      "sha256": "c5774d6d7a8c99d28340051bbe4cfc288feb9c538e92db4d719d9bf1a479dd07"
+    },
+    {
+      "path": "omni-frontend/src/views/supplier-portal/index.vue",
+      "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+    },
+    {
+      "path": "omni-frontend/tests/base/dict-options.test.ts",
+      "sha256": "df87241461ae796f5c0e2d732cde269b62453901543d29c789184d49c7df912e"
+    }
+  ],
+  "source_inspection_scope": "Current22whole+selected reads and exact prior semantic evidence reuse;individual source scopes remain in audit274,not inferred whole from hashes.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_markdown_rendered_documents": 4,
+    "json_fenced_blocks": 80,
+    "http_fenced_blocks": 24,
+    "raster_images": 0,
+    "source_bindings": 442,
+    "prior_exact_source_comparisons": 527,
+    "controlled_wire_observations": 9,
+    "controlled_wire_scope": "Isolated MockMvc,currentJacksonConfig/R/PageResult/AssetDTO/GlobalExceptionHandler,emptyoptionalmoduleproviders;noactualservice/security/DB/Gateway/browser integration",
+    "controlled_wire_exit_code": 0,
+    "wire_business_acceptance_tests": 0,
+    "unchanged_backend_proof": {
+      "receipt": "backend-workflow-boundary-260.json",
+      "modules": 20,
+      "suites": 211,
+      "tests": 811,
+      "passed": 806,
+      "skipped": 5,
+      "failures": 0,
+      "errors": 0,
+      "source_eol_bridge": "workflow-source-eol-preserved-260c.json"
+    },
+    "unchanged_frontend_proof": "frontend-dict-checks-144.json",
+    "new_backend_build_or_frontend_tests": false,
+    "strict_json_numeric_enum_and_nonhuman_string_equality": true,
+    "http_example_equality": true,
+    "retained_failed_comparison": "unit label divergence detected before writes;unit=EA corrected without weakening check",
+    "application_or_business_execution": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "No backend/frontend production code changed in this API stage;unchanged successful build260andfrontend144are reused.",
+      "442bindings retain per-source original whole/selected inspection scope;hash equality does not imply all442files were read whole in this stage.",
+      "9wire observations use isolatedMockMvc,currentmapper/DTO/advice andemptyoptionalmoduleproviders;no realservice/security/DB/Gateway/browser integration.",
+      "AI approval is only API translation acceptance;global87/138expected after gates,other51rows and fullA-G remain unfinished.",
+      "Markdown/JSON/HTTP checks do not establish browser layout,OAuthexternal authorization,CAPTCHAregistration,Qodernativeloading or whole-goal completion."
+    ],
+    "underlying_business_limits_not_fixed": [
+      "Asset malformed-money JSON error remains500.",
+      "Workflow idempotency does not hash all variables/title/startUserName;notallengine-endpaths emitcompletion events.",
+      "MQruntime flags do not observe delivery liveness;Outbox commit is not successful external delivery.",
+      "Existing OAuthstate one-use/session/nonce limitations and external positive callbacks remain unchanged."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/api-contract.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 16:52:27",
+      "result": "approved",
+      "translation_sha256": "03f823498f0bae911513c6cc8b8d6d13cd00f22428d1ffdb6f7e47021771ebaa",
+      "checks": {
+        "coverage_and_meaning": "逐篇完成四语言18主节及新16.6/16.7对照，保留现有SRM/Workflow/Procurement/Asset接口与字段、协议/字典/XSS/版本语义；修正过宽实现承诺。原文整篇+实际全量修订段落+未改部分保留证据形成当前覆盖。",
+        "technical_literals": "核对R字段/双错误码、分页公式、12路由、精确/前缀名单、身份头/HMAC/trace、字段名/权限码/版本与幂等键、日期/金额字符串/整数入账、类别与事件型。每语20JSON和6HTTP示例严格比较，只有具名人用例值归一化；单位EA四语统一，数字/枚举/技术字符串一致。",
+        "security_and_failure_semantics": "不信任客户端身份头；内部令牌与显式租户分开，JSONAnySetter特例与普通忽略分开。重放/重试/变量比较范围、503失败关闭、false与403、已有租户读取404、metadata与实际执行、Outbox与送达均保持。Asset500和其他未修复业务边界如实记录。",
+        "images_and_links": "四篇当前Markdown整篇渲染，80JSON与24HTTP示例；无光栅图片/图表。语言内Wiki/认证/MQ/领域事实设计链接，新增候选锚点由当前标题生成。Markdown/HTML不替代G项实际站点根/子路径、浏览器布局和真实教程截图。",
+        "language_and_terminology": "Compared all current sections with Chinese facts and selected/reused source. Keep HTTP versus business errors,replay versus retry,metadata versus live execution,trusted identity versus DTO binding,decimal strings,actor/tenant and failure limits. Actual Chinese server message literals are retained as diagnostic values;English narrative and dictionary labels are readable."
+      },
+      "findings": [
+        {
+          "id": "AP01",
+          "status": "resolved",
+          "description": "包装/错误示例缺data:null与Null章节不一致；全部API统一R的表述需要限定浏览器/OAuth/Actuator等例外。",
+          "resolution": "限定常规业务R封装，补失败data:null并引用唯一后端/前端类型；协议/重定向/框架响应明确例外。"
+        },
+        {
+          "id": "AP02",
+          "status": "resolved",
+          "description": "§5.3白名单遗漏session-login/favicon且未区分精确/前缀；§9重复维护不同清单。",
+          "resolution": "按AuthFilter保留6个精确与6个startsWith前缀路径，补session-login/favicon，说明白名单不创建路由或权限。"
+        },
+        {
+          "id": "AP03",
+          "status": "resolved",
+          "description": "错误表仍写显示原始错误消息，与§2.5本地化策略冲突；Auth验证码/登录具体HTTP与业务码待核对。",
+          "resolution": "分别列HTTP状态/R.code及服务专用advice，保留默认500；前端按码分类、不直接回显原始message，401凭据例外与未登录分开。"
+        },
+        {
+          "id": "AP04",
+          "status": "resolved",
+          "description": "Gateway路由表仅六条，未覆盖当前业务和协议路由；身份头/签名/转发/追踪规则需绑定实际过滤器。",
+          "resolution": "从当前Gateway配置列出全部12路由；核对可信头删除/注入、HMAC断言、Authorization、实际trace与fallback区别。"
+        },
+        {
+          "id": "AP05",
+          "status": "resolved",
+          "description": "Null集合/单值表述可能把约定写成全局归一化实现；分页/REST示例实际DTO与路径需要明确示意范围。",
+          "resolution": "移除全局null集合/单值归一化承诺；PageResult仅保存输入，分页/REST约定按具体DTO限制，示例不创造端点。"
+        },
+        {
+          "id": "AP06",
+          "status": "resolved",
+          "description": "SRM报价新写入前置校验与历史requestId重放应分开，补line条数上限及服务归属字段的实际拒绝/忽略语义。",
+          "resolution": "报价重放先于新写校验；补1-200行、完整唯一集合、服务字段不成为DTO输入以及额外属性可能忽略的边界。"
+        },
+        {
+          "id": "AP07",
+          "status": "resolved",
+          "description": "Workflow内部契约缺按分类当前版本与内部终止两入口，modelVersionId约束省略PUBLISHED；三类category绑定、保留发起变量及端用户信任责任需同步。",
+          "resolution": "补current分类查询与内部terminate；说明PUBLISHED/definitionId、三类category绑定及Workflow对受保护变量的独立约束。"
+        },
+        {
+          "id": "AP08",
+          "status": "resolved",
+          "description": "Workflow重放不是完整请求哈希、FAILED重试与本次requestId回显未说明；资格响应false和header租户403需要分开。",
+          "resolution": "明确非完整payload hash、比较字段、FAILED同requestId重试与本次requestId回显；资格false不覆盖header/body403。"
+        },
+        {
+          "id": "AP09",
+          "status": "resolved",
+          "description": "Workflow模型可用/图预览只能证明元数据，不能称可部署；批量首次去重、预览字段/线性摘要等需核对DTO/Parser。",
+          "resolution": "模型availability仅为元数据；首次出现顺序去重；完整安全预览Node/Edge字段与设计器候选DTO区分。"
+        },
+        {
+          "id": "AP10",
+          "status": "resolved",
+          "description": "Workflow完成事件触发和不覆盖立即结束/其他管理结束需要与现行事实衔接，Outbox门闩不作送达保证。",
+          "resolution": "完成Outbox只由已接入审批完成/显式终止路径触发，非全engine-end覆盖；提交不保证实际投递/消费。"
+        },
+        {
+          "id": "AP11",
+          "status": "resolved",
+          "description": "Procurement通用DataScope表述忽略租户共享物料/品类/规则，版本通用句遗漏award双版本等例外。",
+          "resolution": "请购requester与RFQ/PO/GR owner各自DataScope、子行继承、租户共享表分开；RFQ award双版本及创建例外明确。"
+        },
+        {
+          "id": "AP12",
+          "status": "resolved",
+          "description": "Asset通用写命令必须version对创建不准确；X-Username与共享身份头实际别名、金额/非整数资产数量边界需要核对。",
+          "resolution": "Asset实际头X-User-Name、创建无version、固定本人current_user_id、十进制字符串/正整数入账/货币字母约束与现有异常500如实保留。"
+        },
+        {
+          "id": "AP13",
+          "status": "resolved",
+          "description": "MQ runtime FULL/OUTBOX_ONLY可能仅由配置判定，不能描述为relay/XXL-JOB当前已实际运行或已交付。",
+          "resolution": "MQ runtime按两配置开关计算，FULL不证明进程/Broker/DB/投递健康，不宣称新E2E。"
+        },
+        {
+          "id": "AP14",
+          "status": "resolved",
+          "description": "API字段契约与事实/Wiki职责需唯一维护，代码与日期示例不作当前有效业务复现；四语全部内容/人用标签/条件必须逐篇完成。",
+          "resolution": "API保留字段/路由/失败格式；状态机链接事实/设计、操作链接Wiki；ID日期地址状态全为示例，完整A-G未缩小。"
+        },
+        {
+          "id": "AP15",
+          "status": "resolved",
+          "description": "新增Workflow进度/审批记录租户读取错误契约应同步API，保留同tenant权限限制和受控测试范围。",
+          "resolution": "记录20cf已有progress/approval-records显式租户校验400/404及参与人ACL限制；复用真实260控制测试，不称真实DB/Gateway验收。"
+        },
+        {
+          "id": "AP16",
+          "status": "resolved",
+          "description": "日本語に評分/待办/两类/来源/発起者等が残り、韓国語に발기인・휴대等の不自然な表現。英語の見出し/Responseラベルも日韓で未翻訳。",
+          "resolution": "日语残留及携行/重复助词，韩语发起人/携带/终态用语和不完整风险句已修正；字典人用标题本地化，技术标识不翻译。"
+        },
+        {
+          "id": "AP17",
+          "status": "resolved",
+          "description": "DTO未定义字段的“不接受”与实际unknownJSON是否拒绝需要区分；服务端身份/金额/业务关联不能由额外字段覆盖，但不推断全部返回400。",
+          "resolution": "未知JSON绑定、业务输入、身份来源分开；特列SRMEnroll JsonAnySetter拒绝额外tenant/user字段，不把Asset忽略行为泛化。"
+        },
+        {
+          "id": "AP18",
+          "status": "resolved",
+          "description": "评分是否必须覆盖默认模板而非本次选定模板、报价样例creditCode等约束需与实际DTO和服务核对；格式样例不作当前有效业务请求。",
+          "resolution": "创建评估由服务选择启用默认模板，无templateId，1-100完整维度/1-5一位小数；入驻字段实际长度与creditCode trim/uppercase核实，示例无真实企业验证承诺。"
+        },
+        {
+          "id": "AP19",
+          "status": "resolved",
+          "description": "Current malformed Asset decimal strings/numbers are rejected but generic MVC handler maps HttpMessageNotReadableException to500;SRM/Proc have400-specific handlers.",
+          "resolution": "说明当前Asset JSON读取异常为500、SRM/Proc专用400；保留9项隔离MockMvc观察范围，未修复业务处理器。"
+        },
+        {
+          "id": "AP20",
+          "status": "resolved",
+          "description": "PageResult preserves null records;controlled current mapper ignores an unknown Asset DTO property;no global collection/unknown-field normalization contract.",
+          "resolution": "说明null records和额外Asset属性真实受控观察，不编造全局[]转换或所有未知字段400。"
+        },
+        {
+          "id": "AP21",
+          "status": "resolved",
+          "description": "Response X-Trace-Id UUID fallback is not forwarded to the request when no actual tracer span exists;frontend accepts safe ASCII trace IDs1-128.",
+          "resolution": "tracer存在才传播请求头，无span仅响应fallback；前端安全ASCII1-128，响应trace不证明完整链路。"
+        },
+        {
+          "id": "AP22",
+          "status": "resolved",
+          "description": "Common-service validates missing/weak internal token at startup;legacy MQ filter missing server token gives503,invalid request token gives401.",
+          "resolution": "common-service缺失/弱token启用能力时启动失败，legacy MQ运行时缺配置503与请求401分开。"
+        },
+        {
+          "id": "AP23",
+          "status": "resolved",
+          "description": "Frontend401 handling includes unauthenticated protected requests and credential endpoint exceptions;tenant header is decoded from token,identity header spelling is X-User-Name.",
+          "resolution": "前端凭据URL分类不等于Gateway白名单；未登录/过期shouldLogout均true；tenant取自token，X-User-Name拼写正确。"
+        },
+        {
+          "id": "AP24",
+          "status": "resolved",
+          "description": "Unescaped service/resource placeholders could be rendered as HTML tags.",
+          "resolution": "Wrap the illustrative path in inline code and restore separate REST convention paragraph;HTML render rejects remaining service tags."
+        },
+        {
+          "id": "AP25",
+          "status": "resolved",
+          "description": "Equivalent but different localized unit values made JSON example payloads drift.",
+          "resolution": "Preserve failed277comparison;unify unit=EA in all4examples without weakening nonhuman literal assertions;277b strict equality passes."
+        },
+        {
+          "id": "AP26",
+          "status": "resolved",
+          "description": "New candidate-preview link initially guessed Workflow chapter6 despite current candidates being chapter3.",
+          "resolution": "Read current four Workflow headings and derive exact language-local chapter3 anchors;internal start links retain chapter6."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/api-contract.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 16:52:27",
+      "result": "approved",
+      "translation_sha256": "958fe16322ecb9b3b8157a7beb6700b1c4af5ea0a08ab71a2b053bb5288d3303",
+      "checks": {
+        "coverage_and_meaning": "逐篇完成四语言18主节及新16.6/16.7对照，保留现有SRM/Workflow/Procurement/Asset接口与字段、协议/字典/XSS/版本语义；修正过宽实现承诺。原文整篇+实际全量修订段落+未改部分保留证据形成当前覆盖。",
+        "technical_literals": "核对R字段/双错误码、分页公式、12路由、精确/前缀名单、身份头/HMAC/trace、字段名/权限码/版本与幂等键、日期/金额字符串/整数入账、类别与事件型。每语20JSON和6HTTP示例严格比较，只有具名人用例值归一化；单位EA四语统一，数字/枚举/技术字符串一致。",
+        "security_and_failure_semantics": "不信任客户端身份头；内部令牌与显式租户分开，JSONAnySetter特例与普通忽略分开。重放/重试/变量比较范围、503失败关闭、false与403、已有租户读取404、metadata与实际执行、Outbox与送达均保持。Asset500和其他未修复业务边界如实记录。",
+        "images_and_links": "四篇当前Markdown整篇渲染，80JSON与24HTTP示例；无光栅图片/图表。语言内Wiki/认证/MQ/领域事实设计链接，新增候选锚点由当前标题生成。Markdown/HTML不替代G项实际站点根/子路径、浏览器布局和真实教程截图。",
+        "language_and_terminology": "全文の意味を中国語と現在のソースに照合。HTTPと業務コード、冪等再生と再試行、メタデータと実行可否、IDとJSONバインドを区別。採点・公開ネットワーク・未処理タスク・取得元の表記を統一し、携行、重複助詞、辞書の英語見出しを修正。実際の中国語message値は診断用リテラルとして保持。"
+      },
+      "findings": [
+        {
+          "id": "AP01",
+          "status": "resolved",
+          "description": "包装/错误示例缺data:null与Null章节不一致；全部API统一R的表述需要限定浏览器/OAuth/Actuator等例外。",
+          "resolution": "限定常规业务R封装，补失败data:null并引用唯一后端/前端类型；协议/重定向/框架响应明确例外。"
+        },
+        {
+          "id": "AP02",
+          "status": "resolved",
+          "description": "§5.3白名单遗漏session-login/favicon且未区分精确/前缀；§9重复维护不同清单。",
+          "resolution": "按AuthFilter保留6个精确与6个startsWith前缀路径，补session-login/favicon，说明白名单不创建路由或权限。"
+        },
+        {
+          "id": "AP03",
+          "status": "resolved",
+          "description": "错误表仍写显示原始错误消息，与§2.5本地化策略冲突；Auth验证码/登录具体HTTP与业务码待核对。",
+          "resolution": "分别列HTTP状态/R.code及服务专用advice，保留默认500；前端按码分类、不直接回显原始message，401凭据例外与未登录分开。"
+        },
+        {
+          "id": "AP04",
+          "status": "resolved",
+          "description": "Gateway路由表仅六条，未覆盖当前业务和协议路由；身份头/签名/转发/追踪规则需绑定实际过滤器。",
+          "resolution": "从当前Gateway配置列出全部12路由；核对可信头删除/注入、HMAC断言、Authorization、实际trace与fallback区别。"
+        },
+        {
+          "id": "AP05",
+          "status": "resolved",
+          "description": "Null集合/单值表述可能把约定写成全局归一化实现；分页/REST示例实际DTO与路径需要明确示意范围。",
+          "resolution": "移除全局null集合/单值归一化承诺；PageResult仅保存输入，分页/REST约定按具体DTO限制，示例不创造端点。"
+        },
+        {
+          "id": "AP06",
+          "status": "resolved",
+          "description": "SRM报价新写入前置校验与历史requestId重放应分开，补line条数上限及服务归属字段的实际拒绝/忽略语义。",
+          "resolution": "报价重放先于新写校验；补1-200行、完整唯一集合、服务字段不成为DTO输入以及额外属性可能忽略的边界。"
+        },
+        {
+          "id": "AP07",
+          "status": "resolved",
+          "description": "Workflow内部契约缺按分类当前版本与内部终止两入口，modelVersionId约束省略PUBLISHED；三类category绑定、保留发起变量及端用户信任责任需同步。",
+          "resolution": "补current分类查询与内部terminate；说明PUBLISHED/definitionId、三类category绑定及Workflow对受保护变量的独立约束。"
+        },
+        {
+          "id": "AP08",
+          "status": "resolved",
+          "description": "Workflow重放不是完整请求哈希、FAILED重试与本次requestId回显未说明；资格响应false和header租户403需要分开。",
+          "resolution": "明确非完整payload hash、比较字段、FAILED同requestId重试与本次requestId回显；资格false不覆盖header/body403。"
+        },
+        {
+          "id": "AP09",
+          "status": "resolved",
+          "description": "Workflow模型可用/图预览只能证明元数据，不能称可部署；批量首次去重、预览字段/线性摘要等需核对DTO/Parser。",
+          "resolution": "模型availability仅为元数据；首次出现顺序去重；完整安全预览Node/Edge字段与设计器候选DTO区分。"
+        },
+        {
+          "id": "AP10",
+          "status": "resolved",
+          "description": "Workflow完成事件触发和不覆盖立即结束/其他管理结束需要与现行事实衔接，Outbox门闩不作送达保证。",
+          "resolution": "完成Outbox只由已接入审批完成/显式终止路径触发，非全engine-end覆盖；提交不保证实际投递/消费。"
+        },
+        {
+          "id": "AP11",
+          "status": "resolved",
+          "description": "Procurement通用DataScope表述忽略租户共享物料/品类/规则，版本通用句遗漏award双版本等例外。",
+          "resolution": "请购requester与RFQ/PO/GR owner各自DataScope、子行继承、租户共享表分开；RFQ award双版本及创建例外明确。"
+        },
+        {
+          "id": "AP12",
+          "status": "resolved",
+          "description": "Asset通用写命令必须version对创建不准确；X-Username与共享身份头实际别名、金额/非整数资产数量边界需要核对。",
+          "resolution": "Asset实际头X-User-Name、创建无version、固定本人current_user_id、十进制字符串/正整数入账/货币字母约束与现有异常500如实保留。"
+        },
+        {
+          "id": "AP13",
+          "status": "resolved",
+          "description": "MQ runtime FULL/OUTBOX_ONLY可能仅由配置判定，不能描述为relay/XXL-JOB当前已实际运行或已交付。",
+          "resolution": "MQ runtime按两配置开关计算，FULL不证明进程/Broker/DB/投递健康，不宣称新E2E。"
+        },
+        {
+          "id": "AP14",
+          "status": "resolved",
+          "description": "API字段契约与事实/Wiki职责需唯一维护，代码与日期示例不作当前有效业务复现；四语全部内容/人用标签/条件必须逐篇完成。",
+          "resolution": "API保留字段/路由/失败格式；状态机链接事实/设计、操作链接Wiki；ID日期地址状态全为示例，完整A-G未缩小。"
+        },
+        {
+          "id": "AP15",
+          "status": "resolved",
+          "description": "新增Workflow进度/审批记录租户读取错误契约应同步API，保留同tenant权限限制和受控测试范围。",
+          "resolution": "记录20cf已有progress/approval-records显式租户校验400/404及参与人ACL限制；复用真实260控制测试，不称真实DB/Gateway验收。"
+        },
+        {
+          "id": "AP16",
+          "status": "resolved",
+          "description": "日本語に評分/待办/两类/来源/発起者等が残り、韓国語に발기인・휴대等の不自然な表現。英語の見出し/Responseラベルも日韓で未翻訳。",
+          "resolution": "日语残留及携行/重复助词，韩语发起人/携带/终态用语和不完整风险句已修正；字典人用标题本地化，技术标识不翻译。"
+        },
+        {
+          "id": "AP17",
+          "status": "resolved",
+          "description": "DTO未定义字段的“不接受”与实际unknownJSON是否拒绝需要区分；服务端身份/金额/业务关联不能由额外字段覆盖，但不推断全部返回400。",
+          "resolution": "未知JSON绑定、业务输入、身份来源分开；特列SRMEnroll JsonAnySetter拒绝额外tenant/user字段，不把Asset忽略行为泛化。"
+        },
+        {
+          "id": "AP18",
+          "status": "resolved",
+          "description": "评分是否必须覆盖默认模板而非本次选定模板、报价样例creditCode等约束需与实际DTO和服务核对；格式样例不作当前有效业务请求。",
+          "resolution": "创建评估由服务选择启用默认模板，无templateId，1-100完整维度/1-5一位小数；入驻字段实际长度与creditCode trim/uppercase核实，示例无真实企业验证承诺。"
+        },
+        {
+          "id": "AP19",
+          "status": "resolved",
+          "description": "Current malformed Asset decimal strings/numbers are rejected but generic MVC handler maps HttpMessageNotReadableException to500;SRM/Proc have400-specific handlers.",
+          "resolution": "说明当前Asset JSON读取异常为500、SRM/Proc专用400；保留9项隔离MockMvc观察范围，未修复业务处理器。"
+        },
+        {
+          "id": "AP20",
+          "status": "resolved",
+          "description": "PageResult preserves null records;controlled current mapper ignores an unknown Asset DTO property;no global collection/unknown-field normalization contract.",
+          "resolution": "说明null records和额外Asset属性真实受控观察，不编造全局[]转换或所有未知字段400。"
+        },
+        {
+          "id": "AP21",
+          "status": "resolved",
+          "description": "Response X-Trace-Id UUID fallback is not forwarded to the request when no actual tracer span exists;frontend accepts safe ASCII trace IDs1-128.",
+          "resolution": "tracer存在才传播请求头，无span仅响应fallback；前端安全ASCII1-128，响应trace不证明完整链路。"
+        },
+        {
+          "id": "AP22",
+          "status": "resolved",
+          "description": "Common-service validates missing/weak internal token at startup;legacy MQ filter missing server token gives503,invalid request token gives401.",
+          "resolution": "common-service缺失/弱token启用能力时启动失败，legacy MQ运行时缺配置503与请求401分开。"
+        },
+        {
+          "id": "AP23",
+          "status": "resolved",
+          "description": "Frontend401 handling includes unauthenticated protected requests and credential endpoint exceptions;tenant header is decoded from token,identity header spelling is X-User-Name.",
+          "resolution": "前端凭据URL分类不等于Gateway白名单；未登录/过期shouldLogout均true；tenant取自token，X-User-Name拼写正确。"
+        },
+        {
+          "id": "AP24",
+          "status": "resolved",
+          "description": "Unescaped service/resource placeholders could be rendered as HTML tags.",
+          "resolution": "Wrap the illustrative path in inline code and restore separate REST convention paragraph;HTML render rejects remaining service tags."
+        },
+        {
+          "id": "AP25",
+          "status": "resolved",
+          "description": "Equivalent but different localized unit values made JSON example payloads drift.",
+          "resolution": "Preserve failed277comparison;unify unit=EA in all4examples without weakening nonhuman literal assertions;277b strict equality passes."
+        },
+        {
+          "id": "AP26",
+          "status": "resolved",
+          "description": "New candidate-preview link initially guessed Workflow chapter6 despite current candidates being chapter3.",
+          "resolution": "Read current four Workflow headings and derive exact language-local chapter3 anchors;internal start links retain chapter6."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/api-contract.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 16:52:27",
+      "result": "approved",
+      "translation_sha256": "9303ceec059e71fb974decca16f738f541fbcdcc3f8b18233e481a49cb513756",
+      "checks": {
+        "coverage_and_meaning": "逐篇完成四语言18主节及新16.6/16.7对照，保留现有SRM/Workflow/Procurement/Asset接口与字段、协议/字典/XSS/版本语义；修正过宽实现承诺。原文整篇+实际全量修订段落+未改部分保留证据形成当前覆盖。",
+        "technical_literals": "核对R字段/双错误码、分页公式、12路由、精确/前缀名单、身份头/HMAC/trace、字段名/权限码/版本与幂等键、日期/金额字符串/整数入账、类别与事件型。每语20JSON和6HTTP示例严格比较，只有具名人用例值归一化；单位EA四语统一，数字/枚举/技术字符串一致。",
+        "security_and_failure_semantics": "不信任客户端身份头；内部令牌与显式租户分开，JSONAnySetter特例与普通忽略分开。重放/重试/变量比较范围、503失败关闭、false与403、已有租户读取404、metadata与实际执行、Outbox与送达均保持。Asset500和其他未修复业务边界如实记录。",
+        "images_and_links": "四篇当前Markdown整篇渲染，80JSON与24HTTP示例；无光栅图片/图表。语言内Wiki/认证/MQ/领域事实设计链接，新增候选锚点由当前标题生成。Markdown/HTML不替代G项实际站点根/子路径、浏览器布局和真实教程截图。",
+        "language_and_terminology": "현재 전체 내용을 중국어 사실 및 해당 소스와 대조했습니다. HTTP와 업무 코드,멱등 재생과 재시도,메타데이터와 실행 가능성,신뢰 신원과JSON바인딩을 구분합니다. 시작 사용자·포함·최종 상태 용어와 위험 문장을 정리하고 사전 제목을 한국어화했습니다. 실제 중국어message값은 진단용 리터럴로 유지합니다."
+      },
+      "findings": [
+        {
+          "id": "AP01",
+          "status": "resolved",
+          "description": "包装/错误示例缺data:null与Null章节不一致；全部API统一R的表述需要限定浏览器/OAuth/Actuator等例外。",
+          "resolution": "限定常规业务R封装，补失败data:null并引用唯一后端/前端类型；协议/重定向/框架响应明确例外。"
+        },
+        {
+          "id": "AP02",
+          "status": "resolved",
+          "description": "§5.3白名单遗漏session-login/favicon且未区分精确/前缀；§9重复维护不同清单。",
+          "resolution": "按AuthFilter保留6个精确与6个startsWith前缀路径，补session-login/favicon，说明白名单不创建路由或权限。"
+        },
+        {
+          "id": "AP03",
+          "status": "resolved",
+          "description": "错误表仍写显示原始错误消息，与§2.5本地化策略冲突；Auth验证码/登录具体HTTP与业务码待核对。",
+          "resolution": "分别列HTTP状态/R.code及服务专用advice，保留默认500；前端按码分类、不直接回显原始message，401凭据例外与未登录分开。"
+        },
+        {
+          "id": "AP04",
+          "status": "resolved",
+          "description": "Gateway路由表仅六条，未覆盖当前业务和协议路由；身份头/签名/转发/追踪规则需绑定实际过滤器。",
+          "resolution": "从当前Gateway配置列出全部12路由；核对可信头删除/注入、HMAC断言、Authorization、实际trace与fallback区别。"
+        },
+        {
+          "id": "AP05",
+          "status": "resolved",
+          "description": "Null集合/单值表述可能把约定写成全局归一化实现；分页/REST示例实际DTO与路径需要明确示意范围。",
+          "resolution": "移除全局null集合/单值归一化承诺；PageResult仅保存输入，分页/REST约定按具体DTO限制，示例不创造端点。"
+        },
+        {
+          "id": "AP06",
+          "status": "resolved",
+          "description": "SRM报价新写入前置校验与历史requestId重放应分开，补line条数上限及服务归属字段的实际拒绝/忽略语义。",
+          "resolution": "报价重放先于新写校验；补1-200行、完整唯一集合、服务字段不成为DTO输入以及额外属性可能忽略的边界。"
+        },
+        {
+          "id": "AP07",
+          "status": "resolved",
+          "description": "Workflow内部契约缺按分类当前版本与内部终止两入口，modelVersionId约束省略PUBLISHED；三类category绑定、保留发起变量及端用户信任责任需同步。",
+          "resolution": "补current分类查询与内部terminate；说明PUBLISHED/definitionId、三类category绑定及Workflow对受保护变量的独立约束。"
+        },
+        {
+          "id": "AP08",
+          "status": "resolved",
+          "description": "Workflow重放不是完整请求哈希、FAILED重试与本次requestId回显未说明；资格响应false和header租户403需要分开。",
+          "resolution": "明确非完整payload hash、比较字段、FAILED同requestId重试与本次requestId回显；资格false不覆盖header/body403。"
+        },
+        {
+          "id": "AP09",
+          "status": "resolved",
+          "description": "Workflow模型可用/图预览只能证明元数据，不能称可部署；批量首次去重、预览字段/线性摘要等需核对DTO/Parser。",
+          "resolution": "模型availability仅为元数据；首次出现顺序去重；完整安全预览Node/Edge字段与设计器候选DTO区分。"
+        },
+        {
+          "id": "AP10",
+          "status": "resolved",
+          "description": "Workflow完成事件触发和不覆盖立即结束/其他管理结束需要与现行事实衔接，Outbox门闩不作送达保证。",
+          "resolution": "完成Outbox只由已接入审批完成/显式终止路径触发，非全engine-end覆盖；提交不保证实际投递/消费。"
+        },
+        {
+          "id": "AP11",
+          "status": "resolved",
+          "description": "Procurement通用DataScope表述忽略租户共享物料/品类/规则，版本通用句遗漏award双版本等例外。",
+          "resolution": "请购requester与RFQ/PO/GR owner各自DataScope、子行继承、租户共享表分开；RFQ award双版本及创建例外明确。"
+        },
+        {
+          "id": "AP12",
+          "status": "resolved",
+          "description": "Asset通用写命令必须version对创建不准确；X-Username与共享身份头实际别名、金额/非整数资产数量边界需要核对。",
+          "resolution": "Asset实际头X-User-Name、创建无version、固定本人current_user_id、十进制字符串/正整数入账/货币字母约束与现有异常500如实保留。"
+        },
+        {
+          "id": "AP13",
+          "status": "resolved",
+          "description": "MQ runtime FULL/OUTBOX_ONLY可能仅由配置判定，不能描述为relay/XXL-JOB当前已实际运行或已交付。",
+          "resolution": "MQ runtime按两配置开关计算，FULL不证明进程/Broker/DB/投递健康，不宣称新E2E。"
+        },
+        {
+          "id": "AP14",
+          "status": "resolved",
+          "description": "API字段契约与事实/Wiki职责需唯一维护，代码与日期示例不作当前有效业务复现；四语全部内容/人用标签/条件必须逐篇完成。",
+          "resolution": "API保留字段/路由/失败格式；状态机链接事实/设计、操作链接Wiki；ID日期地址状态全为示例，完整A-G未缩小。"
+        },
+        {
+          "id": "AP15",
+          "status": "resolved",
+          "description": "新增Workflow进度/审批记录租户读取错误契约应同步API，保留同tenant权限限制和受控测试范围。",
+          "resolution": "记录20cf已有progress/approval-records显式租户校验400/404及参与人ACL限制；复用真实260控制测试，不称真实DB/Gateway验收。"
+        },
+        {
+          "id": "AP16",
+          "status": "resolved",
+          "description": "日本語に評分/待办/两类/来源/発起者等が残り、韓国語に발기인・휴대等の不自然な表現。英語の見出し/Responseラベルも日韓で未翻訳。",
+          "resolution": "日语残留及携行/重复助词，韩语发起人/携带/终态用语和不完整风险句已修正；字典人用标题本地化，技术标识不翻译。"
+        },
+        {
+          "id": "AP17",
+          "status": "resolved",
+          "description": "DTO未定义字段的“不接受”与实际unknownJSON是否拒绝需要区分；服务端身份/金额/业务关联不能由额外字段覆盖，但不推断全部返回400。",
+          "resolution": "未知JSON绑定、业务输入、身份来源分开；特列SRMEnroll JsonAnySetter拒绝额外tenant/user字段，不把Asset忽略行为泛化。"
+        },
+        {
+          "id": "AP18",
+          "status": "resolved",
+          "description": "评分是否必须覆盖默认模板而非本次选定模板、报价样例creditCode等约束需与实际DTO和服务核对；格式样例不作当前有效业务请求。",
+          "resolution": "创建评估由服务选择启用默认模板，无templateId，1-100完整维度/1-5一位小数；入驻字段实际长度与creditCode trim/uppercase核实，示例无真实企业验证承诺。"
+        },
+        {
+          "id": "AP19",
+          "status": "resolved",
+          "description": "Current malformed Asset decimal strings/numbers are rejected but generic MVC handler maps HttpMessageNotReadableException to500;SRM/Proc have400-specific handlers.",
+          "resolution": "说明当前Asset JSON读取异常为500、SRM/Proc专用400；保留9项隔离MockMvc观察范围，未修复业务处理器。"
+        },
+        {
+          "id": "AP20",
+          "status": "resolved",
+          "description": "PageResult preserves null records;controlled current mapper ignores an unknown Asset DTO property;no global collection/unknown-field normalization contract.",
+          "resolution": "说明null records和额外Asset属性真实受控观察，不编造全局[]转换或所有未知字段400。"
+        },
+        {
+          "id": "AP21",
+          "status": "resolved",
+          "description": "Response X-Trace-Id UUID fallback is not forwarded to the request when no actual tracer span exists;frontend accepts safe ASCII trace IDs1-128.",
+          "resolution": "tracer存在才传播请求头，无span仅响应fallback；前端安全ASCII1-128，响应trace不证明完整链路。"
+        },
+        {
+          "id": "AP22",
+          "status": "resolved",
+          "description": "Common-service validates missing/weak internal token at startup;legacy MQ filter missing server token gives503,invalid request token gives401.",
+          "resolution": "common-service缺失/弱token启用能力时启动失败，legacy MQ运行时缺配置503与请求401分开。"
+        },
+        {
+          "id": "AP23",
+          "status": "resolved",
+          "description": "Frontend401 handling includes unauthenticated protected requests and credential endpoint exceptions;tenant header is decoded from token,identity header spelling is X-User-Name.",
+          "resolution": "前端凭据URL分类不等于Gateway白名单；未登录/过期shouldLogout均true；tenant取自token，X-User-Name拼写正确。"
+        },
+        {
+          "id": "AP24",
+          "status": "resolved",
+          "description": "Unescaped service/resource placeholders could be rendered as HTML tags.",
+          "resolution": "Wrap the illustrative path in inline code and restore separate REST convention paragraph;HTML render rejects remaining service tags."
+        },
+        {
+          "id": "AP25",
+          "status": "resolved",
+          "description": "Equivalent but different localized unit values made JSON example payloads drift.",
+          "resolution": "Preserve failed277comparison;unify unit=EA in all4examples without weakening nonhuman literal assertions;277b strict equality passes."
+        },
+        {
+          "id": "AP26",
+          "status": "resolved",
+          "description": "New candidate-preview link initially guessed Workflow chapter6 despite current candidates being chapter3.",
+          "resolution": "Read current four Workflow headings and derive exact language-local chapter3 anchors;internal start links retain chapter6."
+        }
+      ]
+    }
+  }
+}

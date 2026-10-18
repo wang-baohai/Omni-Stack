@@ -101,6 +101,7 @@ public class DictDataController {
      * 更新字典数据。
      *
      * @param id      字典数据 ID
+     * @param tenantId 当前登录租户 ID（网关注入）
      * @param request 更新请求
      * @return 更新后的实体
      */
@@ -108,22 +109,25 @@ public class DictDataController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('dict:data:update')")
     public R<SysDictData> update(@PathVariable Long id,
+                                  @RequestHeader("X-Tenant-Id") Long tenantId,
                                   @Valid @RequestBody UpdateDictDataRequest request) {
         String operator = SecurityContextHolder.getContext().getAuthentication().getName();
-        return R.ok(dictDataService.updateData(id, request, operator));
+        return R.ok(dictDataService.updateData(id, tenantId, request, operator));
     }
 
     /**
      * 删除字典数据。
      *
      * @param id 字典数据 ID
+     * @param tenantId 当前登录租户 ID（网关注入）
      * @return 操作结果
      */
     @OperLog(module = "字典数据管理", operType = OperType.DELETE)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('dict:data:delete')")
-    public R<Void> delete(@PathVariable Long id) {
-        dictDataService.deleteData(id);
+    public R<Void> delete(@PathVariable Long id,
+                          @RequestHeader("X-Tenant-Id") Long tenantId) {
+        dictDataService.deleteData(id, tenantId);
         return R.ok();
     }
 

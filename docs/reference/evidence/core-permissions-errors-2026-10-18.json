@@ -1,0 +1,447 @@
+{
+  "schema": 1,
+  "recorded_at": "2026-10-18T05:03:24.821Z",
+  "source_baseline": "e3c435737ffa4d47be910418b169c11b48b28635",
+  "generated_source_baseline": "2ccb46cc281d176b4d443cb78b2a4a5598e8aef4",
+  "runtime": "local Docker;actual moved core preset;native lite;fresh owned MySQL/Redis;internal network;no host ports",
+  "identity_method": "Unmodified generated core Wp008TokenFixture test classpath;read-only enabled users and actual database role/permission claims;1200s tokens;not password/CAPTCHA login",
+  "capture_script": {
+    "path": "docs/reference/evidence/scripts/core-permissions-errors-2026-10-18.mjs",
+    "sha256": "ed7409660bf4897ebf164b6068ab29452eb3d17324e703ae752357941df4b1cb",
+    "execution": "Exact successful standalone Playwright producer archive;requires controlled private test tokens and own generated project mount;not password/CAPTCHA login"
+  },
+  "fixture_script": {
+    "path": "docs/reference/evidence/scripts/core-viewer-role-fixture-2026-10-18.mjs",
+    "sha256": "0740964182ec8bd2ed580595d72cdb0f3425b4aed45f116b09ec4a05c340c343",
+    "execution": "Exact controlled formal role-API grant/restore producer archive;fresh owned core only;not a production role-change guide"
+  },
+  "tools": {
+    "node": "v24.17.0",
+    "playwright": "1.61.1",
+    "chromium": "149.0.7827.55"
+  },
+  "viewport": {
+    "width": 1680,
+    "height": 1050
+  },
+  "application_validation": {
+    "source_baseline": "2ccb46cc281d176b4d443cb78b2a4a5598e8aef4",
+    "runtime_inputs_compared": 598,
+    "backend_tests": {
+      "suites": 77,
+      "tests": 269,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "optional_FW_IT_executed": false,
+    "frontend_install_lint_build": "PASS",
+    "frontend_dist_files": 73,
+    "original_source_checkout_mounted": false,
+    "original_application_artifacts_mounted": false,
+    "private_environment": "Fresh generated project environment;values omitted",
+    "jars": [
+      {
+        "path": "auth/app.jar",
+        "sha256": "17b9fcc87833eaa082f5021fe7b87eacdc4350bbab5e3b5455dbd5d56c254286"
+      },
+      {
+        "path": "base/app.jar",
+        "sha256": "cc5f5b4d51b001434c9502122b27d81e46de7f8b4cc32e034a297483033bd43d"
+      },
+      {
+        "path": "gateway/app.jar",
+        "sha256": "88f3a352bfd38b5cb7cdfbff16fc2b0907420384c6bc9430023e791a20981c7c"
+      },
+      {
+        "path": "db-migrator/app.jar",
+        "sha256": "5fa956ac6ae6d8000dd12b2b9b95432e6721064f78fbb93b4b8fc0eb0a9a4eed"
+      }
+    ],
+    "image_ids": [
+      "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+      "sha256:52123b8b2132c69d877407346d4d03661a6be99890bae45e8db28d298788ad79",
+      "sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236"
+    ]
+  },
+  "source_files": [
+    {
+      "path": "omni-frontend/src/router/index.ts",
+      "sha256": "59f8ec464a640fe6e0c6f0ee5f36cdaf22b82a14aae536bd4108128249e8192c",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4",
+      "same_bytes_as_full_repository_input": false
+    },
+    {
+      "path": "omni-frontend/src/views/error/status/index.vue",
+      "sha256": "cd4b669662b99b34e2dea135b3b939246c56bf7cfee2837c4b6ff1444cf9002f",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "cd4b669662b99b34e2dea135b3b939246c56bf7cfee2837c4b6ff1444cf9002f",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-frontend/src/views/system/user/index.vue",
+      "sha256": "1a7daa939bfb6d271c78802244b0533006dc0c663ac583322c00759873c46d43",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "1a7daa939bfb6d271c78802244b0533006dc0c663ac583322c00759873c46d43",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-frontend/src/api/request.ts",
+      "sha256": "71f7d1f5003fd81fb41a4fa82386b3fe281c10ccd6e25a40816ca370e460a789",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "71f7d1f5003fd81fb41a4fa82386b3fe281c10ccd6e25a40816ca370e460a789",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-frontend/src/api/user.ts",
+      "sha256": "af2704e9fd07b19a44df6ce134532160bec02c92e62d53312d8801bd4e1175e7",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "af2704e9fd07b19a44df6ce134532160bec02c92e62d53312d8801bd4e1175e7",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-frontend/src/api/menu.ts",
+      "sha256": "6d2c8eec518e669c315b26ce07d7dc94bcf9e88f0f6ce218040cd6bcb87687b7",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "6d2c8eec518e669c315b26ce07d7dc94bcf9e88f0f6ce218040cd6bcb87687b7",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-frontend/src/api/system-config.ts",
+      "sha256": "bbdb1c97eba0c51680dc847d0af72dc109b0bdae30d35a0004edee75cf2fb837",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "bbdb1c97eba0c51680dc847d0af72dc109b0bdae30d35a0004edee75cf2fb837",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SystemConfigController.java",
+      "sha256": "05bc63916a629b27708419f7afe49e73cc8542a70470a552347bb757b5cb14c7",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "05bc63916a629b27708419f7afe49e73cc8542a70470a552347bb757b5cb14c7",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-frontend/src/stores/user.ts",
+      "sha256": "6cce522263c8c57b91c701fd74f2f9a550807e7c3ed7c07416d3818d04e69d63",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "6cce522263c8c57b91c701fd74f2f9a550807e7c3ed7c07416d3818d04e69d63",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-frontend/src/stores/permission.ts",
+      "sha256": "1194fe1457d924e4fb483e7fd1f54c01fe6499af8cb388e01f5fcf9933e91419",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "1194fe1457d924e4fb483e7fd1f54c01fe6499af8cb388e01f5fcf9933e91419",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-frontend/src/utils/access.ts",
+      "sha256": "dd1e0bccc173fa1fd42a93ce5f72f8344202a6ec170eee00c93c01aaec9c9a3e",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "dd1e0bccc173fa1fd42a93ce5f72f8344202a6ec170eee00c93c01aaec9c9a3e",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "docker/frontend/nginx.conf",
+      "sha256": "d652b7c896a04755354bc8f691873e402d344804e0682bbcc2baa29866d88990",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "d652b7c896a04755354bc8f691873e402d344804e0682bbcc2baa29866d88990",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/e2e/Wp008TokenFixture.java",
+      "sha256": "9dd5ca55aa0a2a198fcbb3b94efd8682f700143255179ad7d53d518b28fc4315",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "9dd5ca55aa0a2a198fcbb3b94efd8682f700143255179ad7d53d518b28fc4315",
+      "same_bytes_as_full_repository_input": true
+    },
+    {
+      "path": "omni-frontend/src/locales/zh-CN.ts",
+      "sha256": "a508cff8881b1b0881a38e88eb96021a3a2cea01fb0f8514aa489aac4415321c",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "aad0307f12376286182c755bec4bb664d6f138e2b74bdc0e9d00c9b6af9a56c5",
+      "same_bytes_as_full_repository_input": false
+    },
+    {
+      "path": "omni-frontend/src/locales/en-US.ts",
+      "sha256": "fab0a55fcc51b710409fbe9300510f6b57a231d7cc290bf02625156cd50479a3",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "8ebc5c72fd44df6e1132dc4285476dcd09023a19a263347d0b2d9cb9704f6a42",
+      "same_bytes_as_full_repository_input": false
+    },
+    {
+      "path": "omni-frontend/src/locales/ja-JP.ts",
+      "sha256": "6f6af5a2e7e932490b90dddc24b2f32237a3687d34d0b876978899fe41c25706",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "ed8b7fbb2029ac2e62ae1960e1d3f9d87719a9515624ac74c46cc616bc3704ea",
+      "same_bytes_as_full_repository_input": false
+    },
+    {
+      "path": "omni-frontend/src/locales/ko-KR.ts",
+      "sha256": "3cd314e04240babd73c03d656427f22dd3ebca2ade2bb1dc2ee01c7670226ad5",
+      "scope": "Actual generated core source",
+      "full_repository_input_sha256": "d5cac26ced5b0d34ad292bcfa54d3f57f1ae38398856e1781171f1139c08db7a",
+      "same_bytes_as_full_repository_input": false
+    }
+  ],
+  "controlled_fixture": {
+    "actor": "zhangsan",
+    "tenant_id": 1,
+    "before_roles": [
+      "EMPLOYEE"
+    ],
+    "capture_roles": [
+      "EMPLOYEE",
+      "USER"
+    ],
+    "permission": "system:config:list absent;existing USER role enables management navigation",
+    "method": "Formal POST /api/auth/user/100/roles temporarily adds existing USER read-only role and restores exact original [10] after capture;role definitions and permissions unchanged",
+    "formal_API_mutations": [
+      {
+        "at": "2026-10-18T02:15:14.717Z",
+        "action": "GRANT_READONLY_FIXTURE",
+        "method": "POST",
+        "path": "/api/auth/user/100/roles",
+        "body": [
+          2,
+          10
+        ],
+        "status": "CONFIRMED_200_AND_READBACK"
+      },
+      {
+        "at": "2026-10-18T02:15:37.885Z",
+        "action": "RESTORE_ORIGINAL_ROLES",
+        "method": "POST",
+        "path": "/api/auth/user/100/roles",
+        "body": [
+          10
+        ],
+        "status": "CONFIRMED_200_AND_READBACK"
+      }
+    ],
+    "exact_original_roles_restored": true,
+    "users_roles_and_permission_relation_observations_restored": true,
+    "ordinary_seed_employee_note": "Unmodified core EMPLOYEE has no management menu and returns to workspace;first attempted assertion failed and was preserved privately. These403images use the explicitly declared temporary USER fixture."
+  },
+  "API_observations": [
+    {
+      "actor": "admin",
+      "path": "/api/auth/system-config/login-policy",
+      "http": 200,
+      "business_code": 200
+    },
+    {
+      "actor": "employee",
+      "path": "/api/auth/system-config/login-policy",
+      "http": 403,
+      "business_code": 403
+    }
+  ],
+  "API_failure": {
+    "scope": "Explicit deterministic client fault injection for user-list GET only;not backend outage proof",
+    "page_errors": [
+      {
+        "locale": "zh-CN",
+        "scenario": "failure",
+        "during_explicit_fault": true,
+        "message": "系统发生内部错误，请稍后重试"
+      },
+      {
+        "locale": "en-US",
+        "scenario": "failure",
+        "during_explicit_fault": true,
+        "message": "An internal error occurred. Please try again later."
+      },
+      {
+        "locale": "ja-JP",
+        "scenario": "failure",
+        "during_explicit_fault": true,
+        "message": "システム内部エラーが発生しました。後ほど再試行してください。"
+      },
+      {
+        "locale": "ko-KR",
+        "scenario": "failure",
+        "during_explicit_fault": true,
+        "message": "시스템 내부 오류가 발생했습니다. 잠시 후 다시 시도하세요."
+      }
+    ],
+    "unhandled_rejections_during_explicit_fault": 4,
+    "unrelated_page_errors": 0,
+    "recoveries": [
+      {
+        "locale": "zh-CN",
+        "path": "/api/auth/user/list",
+        "action": "Remove explicit client fault and reload native page",
+        "HTTP": 200,
+        "business_code": 200,
+        "visible_rows": 10,
+        "session_retained": true
+      },
+      {
+        "locale": "en-US",
+        "path": "/api/auth/user/list",
+        "action": "Remove explicit client fault and reload native page",
+        "HTTP": 200,
+        "business_code": 200,
+        "visible_rows": 10,
+        "session_retained": true
+      },
+      {
+        "locale": "ja-JP",
+        "path": "/api/auth/user/list",
+        "action": "Remove explicit client fault and reload native page",
+        "HTTP": 200,
+        "business_code": 200,
+        "visible_rows": 10,
+        "session_retained": true
+      },
+      {
+        "locale": "ko-KR",
+        "path": "/api/auth/user/list",
+        "action": "Remove explicit client fault and reload native page",
+        "HTTP": 200,
+        "business_code": 200,
+        "visible_rows": 10,
+        "session_retained": true
+      }
+    ],
+    "empty_table_is_not_success": true
+  },
+  "captures": [
+    {
+      "locale": "zh-CN",
+      "id": "core-config-forbidden-403",
+      "flow": "forbidden-403",
+      "route": "/admin/system/config",
+      "image": "docs/images/zh-CN/core-config-forbidden-403.png",
+      "sha256": "9f291784feb447eb5350218a826cb6c59416592c44459e3955bdbcf2316f59b9",
+      "captured_at": "2026-10-18T02:15:22.573Z",
+      "actor": "employee",
+      "client_fault_injection": false,
+      "visual_review": "AI_REVIEW passed-with-documented-limits"
+    },
+    {
+      "locale": "zh-CN",
+      "id": "core-user-list-failure",
+      "flow": "api-failure",
+      "route": "/admin/system/user",
+      "image": "docs/images/zh-CN/core-user-list-failure.png",
+      "sha256": "5b3b0d170437f71a1b8dca90311e263449209e7324b2ffe4c45e42eedf616e0d",
+      "captured_at": "2026-10-18T02:15:24.706Z",
+      "actor": "admin",
+      "client_fault_injection": true,
+      "visual_review": "AI_REVIEW passed-with-documented-limits"
+    },
+    {
+      "locale": "en-US",
+      "id": "core-config-forbidden-403",
+      "flow": "forbidden-403",
+      "route": "/admin/system/config",
+      "image": "docs/images/en-US/core-config-forbidden-403.png",
+      "sha256": "7dbd4fd89a3a98859ab1b7ec0c687e87a48a95beaa73e87acc8f59aaf2525741",
+      "captured_at": "2026-10-18T02:15:26.237Z",
+      "actor": "employee",
+      "client_fault_injection": false,
+      "visual_review": "AI_REVIEW passed-with-documented-limits"
+    },
+    {
+      "locale": "en-US",
+      "id": "core-user-list-failure",
+      "flow": "api-failure",
+      "route": "/admin/system/user",
+      "image": "docs/images/en-US/core-user-list-failure.png",
+      "sha256": "8ec7ae69d5d4815d0404b98629a5c64c6b5b4a25c3e504068a9ef6b1af7d9296",
+      "captured_at": "2026-10-18T02:15:28.508Z",
+      "actor": "admin",
+      "client_fault_injection": true,
+      "visual_review": "AI_REVIEW passed-with-documented-limits"
+    },
+    {
+      "locale": "ja-JP",
+      "id": "core-config-forbidden-403",
+      "flow": "forbidden-403",
+      "route": "/admin/system/config",
+      "image": "docs/images/ja-JP/core-config-forbidden-403.png",
+      "sha256": "1352f775bf788cec7aa3901f8eadeed89dd190252791759476144389c5cc791f",
+      "captured_at": "2026-10-18T02:15:30.135Z",
+      "actor": "employee",
+      "client_fault_injection": false,
+      "visual_review": "AI_REVIEW passed-with-documented-limits"
+    },
+    {
+      "locale": "ja-JP",
+      "id": "core-user-list-failure",
+      "flow": "api-failure",
+      "route": "/admin/system/user",
+      "image": "docs/images/ja-JP/core-user-list-failure.png",
+      "sha256": "9468be4adfaf13186beea9469e407484ee6dd3c3ad4edb4a4110536d9ae9a6c0",
+      "captured_at": "2026-10-18T02:15:32.128Z",
+      "actor": "admin",
+      "client_fault_injection": true,
+      "visual_review": "AI_REVIEW passed-with-documented-limits"
+    },
+    {
+      "locale": "ko-KR",
+      "id": "core-config-forbidden-403",
+      "flow": "forbidden-403",
+      "route": "/admin/system/config",
+      "image": "docs/images/ko-KR/core-config-forbidden-403.png",
+      "sha256": "08beccc4379593272d971ecd2d3ebd793fd2fdc5605cf899ea2ed375619e906b",
+      "captured_at": "2026-10-18T02:15:33.656Z",
+      "actor": "employee",
+      "client_fault_injection": false,
+      "visual_review": "AI_REVIEW passed-with-documented-limits"
+    },
+    {
+      "locale": "ko-KR",
+      "id": "core-user-list-failure",
+      "flow": "api-failure",
+      "route": "/admin/system/user",
+      "image": "docs/images/ko-KR/core-user-list-failure.png",
+      "sha256": "1cc5ae8e4546a8bca423e0091ff36dc30247704ee6dffcc1bb1e55d8aeecf49f",
+      "captured_at": "2026-10-18T02:15:35.605Z",
+      "actor": "admin",
+      "client_fault_injection": true,
+      "visual_review": "AI_REVIEW passed-with-documented-limits"
+    }
+  ],
+  "visual_review": {
+    "type": "AI_REVIEW",
+    "human_review": 0,
+    "method": "All eight exact original PNGs viewed individually with original-resolution view_image;no image editing,DOM text replacement or synthetic picture",
+    "findings": {
+      "all_locales": "Localized403 title,description and two recovery buttons are readable;failure screenshots show native user table and safe localized500 toast;no loading masks or whole-page horizontal overflow",
+      "ja_JP": "403 and500 target content readable;existing long sidebar labels can clip at fixed sidebar width",
+      "native_limits": "Sidebars and scheduling labels reflect the real generated core UI;no claim that every unrelated view or module capability was visually accepted",
+      "failure_semantics": "An empty table under the500 toast is a failed load,not a successful empty result",
+      "scope": "Eight desktop views at1680x1050;not all UI routes or mobile layouts",
+      "zh_CN": "All target content readable",
+      "ko_KR": "Localized403 and500 target content readable",
+      "en_US": "403 and500 target content readable;existing long sidebar labels clip at fixed sidebar width"
+    }
+  },
+  "safety": {
+    "business_forms_submitted": 0,
+    "direct_SQL_writes": 0,
+    "role_fixture_API_mutations": 2,
+    "historical_business_writes_replayed": false,
+    "original_database_used": false,
+    "blocked_browser_mutations": 0,
+    "external_browser_requests": 0,
+    "DOM_text_replaced": false,
+    "images_edited": false,
+    "token_files_removed": true,
+    "temporary_fixture_environment_files_removed": true,
+    "runtime_stopped": true
+  },
+  "scope_limits": [
+    "Eight desktop screenshots at1680x1050,not all routes/mobile layouts",
+    "Real403on configuration API separately verified;no forged backend denial",
+    "500is explicitly injected in browser,not proof of backend outage",
+    "Current default core identity routing remains as observed;fixture roles are explicitly declared",
+    "Existing long English/Japanese sidebar labels can clip;target error text and recovery controls are readable",
+    "No OAuth callback,CAPTCHA self-registration,Qoder native Skill loading or full Goal completion claimed"
+  ]
+}

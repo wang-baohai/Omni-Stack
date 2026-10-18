@@ -55,9 +55,12 @@ public class DictTypeServiceImpl implements DictTypeService {
 
     /** {@inheritDoc} */
     @Override
-    public SysDictType getTypeById(Long id) {
+    public SysDictType getTypeById(Long id, Long tenantId) {
+        if (tenantId == null || tenantId <= 0) {
+            throw new BusinessException(400, "租户 ID 必须为正整数");
+        }
         SysDictType entity = sysDictTypeMapper.selectById(id);
-        if (entity == null) {
+        if (entity == null || !tenantId.equals(entity.getTenantId())) {
             throw new BusinessException(404, "字典类型不存在");
         }
         return entity;
@@ -92,8 +95,8 @@ public class DictTypeServiceImpl implements DictTypeService {
 
     /** {@inheritDoc} */
     @Override
-    public SysDictType updateType(Long id, UpdateDictTypeRequest request, String operator) {
-        SysDictType entity = getTypeById(id);
+    public SysDictType updateType(Long id, Long tenantId, UpdateDictTypeRequest request, String operator) {
+        SysDictType entity = getTypeById(id, tenantId);
 
         if (request.getTypeName() != null) {
             entity.setTypeName(request.getTypeName());
@@ -120,8 +123,8 @@ public class DictTypeServiceImpl implements DictTypeService {
     /** {@inheritDoc} */
     @Override
     @Transactional
-    public void deleteType(Long id) {
-        SysDictType entity = getTypeById(id);
+    public void deleteType(Long id, Long tenantId) {
+        SysDictType entity = getTypeById(id, tenantId);
 
         // 级联删除关联的字典数据
         sysDictDataMapper.delete(
@@ -139,8 +142,8 @@ public class DictTypeServiceImpl implements DictTypeService {
 
     /** {@inheritDoc} */
     @Override
-    public void toggleStatus(Long id, Integer status) {
-        SysDictType entity = getTypeById(id);
+    public void toggleStatus(Long id, Long tenantId, Integer status) {
+        SysDictType entity = getTypeById(id, tenantId);
         entity.setStatus(status);
         sysDictTypeMapper.updateById(entity);
 

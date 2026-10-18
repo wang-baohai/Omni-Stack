@@ -26,7 +26,7 @@
 - catalog `version`：モジュール事実構造のバージョン。
 - `modules[].version`：個別モジュール実装のバージョン。
 - `templates.*`：生成ファイル形態のバージョン。
-- `sourceVersion`：生成に使用した Omni-Stack ソースバージョン。
+- `sourceVersion`：生成に使用した Omni-Stack ソースバージョン。`scaffold.lock` の最上位にあり、`catalogVersion` と同じ階層です。`source.version` ではありません。
 
 いずれかのテンプレートの major 変化や preset の major 変化は、移行ガイドに従い人手でレビューしなければならず、手書きファイルを自動上書きしてはいけない。
 

@@ -1,0 +1,1777 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-crm-flow",
+  "source": "docs/guides/crm-flow.md",
+  "source_sha256": "b833d13167c3bc7c33cc3e72ca32693c8cd6e649983b7b664f2431db1ca4a8fa",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "61866027dc2abf5b8cfab336949530df98b4afaa",
+  "source_state": "All620original lines actuallyread plusall finaldeltas andexactunchanged-line mapping cover652currentlines. Retainalleightsections/18imagesperlocale. Current3whole308source lines andselectedreads,57unchangedpriorbindings,72source-matchedhistoricalimages and20currentselectedrawviews areseparately scoped. Historical80imagesused20four-locale contact sheets,not80freshindividualviews. No businessorunchangedbuildreplay;fulloriginalA-Gopen.",
+  "method": "Actually read all four complete155line originals,620lines,and every final changed line in all four current163line documents. Exact unchanged-line mapping andper-line hashes combine those reads into complete652line current semantic coverage;not fourfreshwholefinalrereads. Compare three translations withChinese fact source,current selected implementation,anddated exercise/visual methods. Individually view20selected raw images;retain actualhistorical contact-sheet methods forothers. Hashes/rendering supplementactualreading,notautomaticapproval.",
+  "checked_source_files": [
+    {
+      "path": "compose.tools.yaml",
+      "sha256": "24d37d4437eb8f2c1bce2a7478a8566162c9d65f9ee111393b0131463732f035"
+    },
+    {
+      "path": "database/changelog/crm/0001-crm-schema.yaml",
+      "sha256": "59b38d94db0bb368ae8d54e049bd66bc735eab67c4f1f749125f5d59661f9a82"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/config/MqLogAutoConfiguration.java",
+      "sha256": "bfb434ba1c5e5b8b1cf5d93d87cbb38954a7dbc65f14eab8bf47a717ecbad9c2"
+    },
+    {
+      "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java",
+      "sha256": "db640b6e594ab53272c078e42776e904b7e6ca33a4ae625e2f9bcf5c1c9ea928"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthDataScopeResolver.java",
+      "sha256": "8c8b2c3d5818682e93e3f0874d8b23e359680015cbc9bcb68b3f156675807531"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthSecuritySettingsClient.java",
+      "sha256": "b8650890b1807b9b099bd9082aa98f5785a658595db55debe0b1b63b89e35a61"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java",
+      "sha256": "4fcaa7b87b3547392e77284334ad8553546cdac8351a402b726ce1f2d9697220"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceXssAutoConfiguration.java",
+      "sha256": "9274353be73edd87ed851ae5684d1886a16095a87248f596f076f7824142237e"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/datascope/ServiceDataScopeAspect.java",
+      "sha256": "e47082d659d8ecda501066b2a4de6693eafbb9dc390d63bbf7ef3f6afaf50a32"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/identity/ServiceIdentityFilter.java",
+      "sha256": "ca6d6c99dad790c0599c785d3362bdc9987e92a2240bde92e8dd94af567beac5"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java",
+      "sha256": "796424bf5067b1e80c3658572f2d1d3fb60a0db68c5bf349db10b5ddd323328d"
+    },
+    {
+      "path": "omni-backend/omni-crm/pom.xml",
+      "sha256": "4801a220e50bf13340174238835977b6e5d2f9e89fabf00e205dc8a23c96557c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/ActivityController.java",
+      "sha256": "9d3af091afb224b347e50ea67a60c5005b432f63407a2129b6d6c9c7dc949a4f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/ContactController.java",
+      "sha256": "17f7712928d62a572d51d56b50e827dfa802cd1c689925e4fa8fb85689365030"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/CustomerController.java",
+      "sha256": "2cd745e3903b0b87a023271a4b02f7748eb0c39dd512923d0dc664ea169802e0"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/LeadController.java",
+      "sha256": "f81e64deac6c0674a3f180eb8569d5d88f1c2967ad3e2a2d3f396506842488ac"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OpportunityController.java",
+      "sha256": "5e908c7ccb970de52464ec427b73b2643f0a413c86faa22d229a894f45ac2def"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OptionsController.java",
+      "sha256": "a8e1910b02fffe26971210f8b23240ca1ae244974dc28a49bfd1b93317982701"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OverviewController.java",
+      "sha256": "6ce47ad02a385a96fb1d0c576cc28f1e4a3d798d8e08d2c06a5f7ca700e8a8e2"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/PipelineController.java",
+      "sha256": "36b1471b582315216700a26eb9e48bc8d573a3a4edde7ac7e00b4cad4b345263"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/domain/CrmStateMachine.java",
+      "sha256": "1d6286fa82b101e7f0c4b0c815d89df6a2b35f13db27f07e3fb3265182fc72b4"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmRequests.java",
+      "sha256": "4a0019ce1e5d5bd6bf474d548f6fa4ed150bc94399b650f1f19d89aea6f3e7ff"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmViewAssembler.java",
+      "sha256": "bc03388bcc9b538ccec2a2ecc4a04af061f7c7062a4e85d01f25f7ff8b4a2c2f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/DomainEventEnvelope.java",
+      "sha256": "36df88c43801cdde71f0b1cc3fc8e5999add5efa15ca5a6bc420fa960e17d85c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmTenantEntity.java",
+      "sha256": "974a6d15124c6c6fd41e596eeaff0d4aeb1a1e18482bca214fd18f9d15965d23"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmCustomerMapper.java",
+      "sha256": "55de5926efa1898e566944124af4d3e2c763dae0811147883a5f36aca5059ae7"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmLeadMapper.java",
+      "sha256": "f05303453ca1952e4bda4830df837b03022f89c1d19711ec7c585a0a73f49d46"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmOpportunityMapper.java",
+      "sha256": "662df629986892e38dc91473ab081ed2734dc01e773987e92e6ac5241c355abc"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmDataPermissionHandler.java",
+      "sha256": "e62727dc2c3fa241d35f8a9d1304b78f94798d37d7936e185469c767c49b1b0b"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmTenantTablePolicy.java",
+      "sha256": "ca15c2631c038f6caf049846712f7329eb0c6581e998eb03032de4aeedb5335e"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/CrmTenantInitializer.java",
+      "sha256": "bdfd03dd9921c3e8f1bccfe54449611ad24c35a917581036a873f50677d165cf"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ActivityServiceImpl.java",
+      "sha256": "1465bce958b3a9d3d14862512cdfd2785bd9b6c014853335a85e0ced8cb4fa27"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ContactServiceImpl.java",
+      "sha256": "9eb9b26eee085dba3a8fdbc23c9f9fb86a2a29a5ef757361dcf1f168a65b6a2a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CrmTenantInitializerImpl.java",
+      "sha256": "20c810e6e0f28ae512022a582c9a943fba444e8e4d3aa302559909ac12127f0c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CustomerServiceImpl.java",
+      "sha256": "ab9264767541b880da0e88d3660fdc679e6e8117c29bf75b6e1c549c21702978"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/LeadServiceImpl.java",
+      "sha256": "ddd0317511aeb7b73b1199ad9c1a90c8d59488b866180e4ab96cff27c1c2b67a"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OpportunityServiceImpl.java",
+      "sha256": "e45d967c578e0437f3c6eddbf5d3c20cd99ea31d22a44ecf0bd8ef805525cd3f"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OverviewServiceImpl.java",
+      "sha256": "a611a7fad36c8cce7ae0d0a86aa58b94374f7933f75a6f0f7849b63865d64b1c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmOwnerEnricher.java",
+      "sha256": "0770f1287b559874e44730f2bea08b98396961bf51d1e7eb5f5171619398fd4d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmOwnerResolver.java",
+      "sha256": "0318d455f1dbfc43d1c921902fb620b2800208269af4c55fdb2e1d9021dbd09d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmPermissionScopeExecutor.java",
+      "sha256": "b0f1f39646f3433457beddd651682c55b9b9273b2a84323dd5f30e0ea3e97523"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmRecordAccessGuard.java",
+      "sha256": "63d3bbc0e0d0fa52afa31e651c0916ce299d12395dedadd492d1ba6b24f6c780"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/main/resources/application.yml",
+      "sha256": "e35d392d9730485362b41f79aad28339769fe790830c7a6b570b5a310eae5288"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/integration/CrmMysqlInterceptorIntegrationTest.java",
+      "sha256": "561ebd83b943a40951c31b184d81755aa4753f5a6d7080b3ace25185c28415e4"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/it/AbstractFcIT.java",
+      "sha256": "418a14ff4e4c856355865d8c82b668bf661142a0d4aab2a809f08e7c0487601c"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/security/PiiMaskerTest.java",
+      "sha256": "1c557676c601021e5fa6b27725b2964a7e7e7e52d00d9a8f5b02e09736106ad0"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/LeadServiceImplTest.java",
+      "sha256": "ed980d81d2d65a910f3784c5372f167c4b9f6ab7721a309bd96452e5b0f43f2d"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/OpportunityServiceImplTest.java",
+      "sha256": "2f021264bc7799ed8115aa24fcd1999903d99c35b7bbeb2bf97954c1a1fccd8d"
+    },
+    {
+      "path": "omni-backend/omni-gateway/src/main/resources/application.yml",
+      "sha256": "b759994853839263e125044cb5a99b51a22aee7c5b38bdbdb646176fdf87c0f2"
+    },
+    {
+      "path": "omni-backend/pom.xml",
+      "sha256": "18a2eda967a3dc9147decf645518f80692eae6d8b89c2cd3f230d07c14f33275"
+    },
+    {
+      "path": "omni-frontend/src/components/crm/CustomerOverview.vue",
+      "sha256": "f4b0a76b9734a7da0a448f07b64e100377ae056f2a8c674d9a3fffcbcf1cdacd"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/activity/index.vue",
+      "sha256": "fb5def60e696a6a57ad184273f15b38bf134687c09ce99120cb6333d6ff200ac"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/contact/index.vue",
+      "sha256": "c257748349e645970ac109e131f64baf936b9060fe8c05ffd10bd5eb3831e921"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/customer/index.vue",
+      "sha256": "4dc3d43c162a96e1364d8f5840428ef928ba7820ed6a56a33c4adeb9aaec2f91"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/lead/index.vue",
+      "sha256": "87f94fb10bd65d3959a43fa622319e5d3a048f2ddc1c3b8df56aeb0cf05f2c03"
+    },
+    {
+      "path": "omni-frontend/src/views/crm/opportunity/index.vue",
+      "sha256": "1da0226185ce7429237ec914631c35a715ccacdea00d0873cb77e12eb55c427c"
+    },
+    {
+      "path": "scripts/sql/seed/auth.sql",
+      "sha256": "131d495c9b1eed92d4d2a7f0aaf92026117c25c6d8d13b8773fdc00fb94c357c"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+      "sha256": "0565bf74cb0a500d481dce91c9a3f06afc68e76185ab8f27a0808c8c7f28b7d3"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+      "sha256": "e5cd5b1ecf6c1d604a41e346f1b904693539cf58aa043fe093af923a6c8380c3"
+    },
+    {
+      "path": "docs/crm.md",
+      "sha256": "dbb748468d43a479f89eacacc28a9c4056a7b8db87fa37a7e29973a6fde4e23d"
+    },
+    {
+      "path": "docs/design/crm-design.md",
+      "sha256": "07a28829eedf1e8f9c40b874f531c92af3a41f7061dd0e8e34ef1aa737ae3f81"
+    },
+    {
+      "path": "docs/reference/reviews/crm.json",
+      "sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc"
+    },
+    {
+      "path": "docs/reference/reviews/crm-design.json",
+      "sha256": "4c2639157723a5d39f96f173b49714c7347501b13d15725daa8aceaea373ad37"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/ActivityServiceImplTest.java",
+      "sha256": "9519507f94b97aac20fe9311b2f5493721739f2f6a5c1f022a10f613f9745825"
+    },
+    {
+      "path": "docs/reference/evidence/crm-2026-10-10.json",
+      "sha256": "2b0a720af7e6edeb7cd0757ed1a89e6073269d65ba8c3bb0c73cb8ad528422ee"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-lead-create-form.png",
+      "sha256": "f871f02a345531d3ea4bb1bb329242d30addd9b2c8526d2e9b7a401cd1475060"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-activity-plan-form.png",
+      "sha256": "7dd3f0c046d8af9fe98639c0dbf5a5f38a845b169f7e66d0118545503a867bc3"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-activity-planned-result.png",
+      "sha256": "a7c399ea7238033d85a733357803e4554827343f4a99181bcf2de604fc3462eb"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-activity-complete-form.png",
+      "sha256": "5ae366d01f60cbdf0f7b5f0b9239af0dd29e11207d86e8e6c6951c6f834168c1"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-lead-qualified.png",
+      "sha256": "cf6be618614abf166a6666f0a40ee7f14d366e8c95c9bfd626c78e0a72b463fb"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-teaching-activity-completed.png",
+      "sha256": "bdee6039d39bee2967395f790a1d1bbec737e4c02d9202557872d7a6296bd5cf"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-convert-customer.png",
+      "sha256": "a7ac72c8be234acb262c83e17b1d78323e73bba4eda80cea3791690e5e7da260"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-convert-contact.png",
+      "sha256": "29aa37a1e411490d0c09539390d482acf2bec3545214e0cee751c10b7a0d0419"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-convert-opportunity.png",
+      "sha256": "ae2dd2b31d884e5bc3c430ec130dbb8ffde6f07f81f80a2e886679156d11686e"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-convert-confirm.png",
+      "sha256": "67cb013e946353d306afbd2ef8a8d7edb734bbc3ba9fffbba511974103fa0ac0"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-lead-converted-result.png",
+      "sha256": "36db7601dcc57948187a69f229d6215c2be2001c19ca1bf188506e86e6560bb8"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-teaching-contact.png",
+      "sha256": "849cdcfa6776013ac244e651595b6e60d418642479e49d4897ec5472e71a3999"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-opportunity-stage-form.png",
+      "sha256": "1091fb4822389ba9ff00ddecacf41f089896e0fc7c6c0a5c79a95338d4f6e7ef"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-ui-opportunity-won-result.png",
+      "sha256": "e889130e6a57d10a4ebc5678c2317de6a51f73289a8e80f2cf191d233b56710c"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-teaching-customer-active-360.png",
+      "sha256": "88a1df4f5584977760420f7c0390167aeedee3d216931bc91dba906058ba70ed"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-teaching-opportunity-reopened-history.png",
+      "sha256": "33eb68ad30eae0f02c651e991e667a0a8751e3f1000ae61360b5947ebbf35daa"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-teaching-lead-reopened.png",
+      "sha256": "bfd242d667373dfd05f7830348d00cf0277989c43b7fc3b9e08708342b23c458"
+    },
+    {
+      "path": "docs/images/zh-CN/crm-teaching-outside-scope.png",
+      "sha256": "bad447e4f1d9230492cffea154316448a45b6e30c4e36c98f2319d15c70312d4"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-lead-create-form.png",
+      "sha256": "1c4f23d168cdd0e48f7e7d16d7f4828d1c6676c023d4925bb654103f46edb4e6"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-activity-plan-form.png",
+      "sha256": "6537973005979923cd2680fb4d687ebb60da3001d2dd0b385f49723972731cb4"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-activity-planned-result.png",
+      "sha256": "700f137306146ac154b90d587dab4145be04898dcb3d6de37caa67e3135a97a2"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-activity-complete-form.png",
+      "sha256": "cd7e33622d1008a1fcd46eece3c22618494b6cf5d36b1cd7fb65da727e0b71eb"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-lead-qualified.png",
+      "sha256": "c6d967d84afa41666fa6e07fc337a1d7bfc74f305e3a652f5553dd4da2bfd0ed"
+    },
+    {
+      "path": "docs/images/en-US/crm-teaching-activity-completed.png",
+      "sha256": "19f3a9f54f668603f6d7a03a4195f381cef4b81b3a5b7688309b84db4bd7a0e3"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-convert-customer.png",
+      "sha256": "4dd9960f75a37b04511357bdc1ccb131f1c4b5257b046d3689120f8192b7daa3"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-convert-contact.png",
+      "sha256": "55c2a0a27dad01adea5d57ef0cfe1c2173644918b83e9690655ac179c5141679"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-convert-opportunity.png",
+      "sha256": "07c879c93cbd30c433b5e2b392146354c09d2f93dd6cddfcc6261ffd7eb164ce"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-convert-confirm.png",
+      "sha256": "c7a70b400ffcf6aabb9e56d1aa41fadf932832005c35fae1b4183ec8ec2f1c68"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-lead-converted-result.png",
+      "sha256": "8806b8ef05f714d316cf6ec17c0723528155df2a16e969d30c55640dcd722388"
+    },
+    {
+      "path": "docs/images/en-US/crm-teaching-contact.png",
+      "sha256": "8f1a0c481032577cbb10b14fc0aa32707d0875d4b7bef1a6ece7e37bf1de1943"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-opportunity-stage-form.png",
+      "sha256": "054e0f43bc3d6dc93dd26d9c89b13baf73b29fd0b042d7e845d5f06f254df6f5"
+    },
+    {
+      "path": "docs/images/en-US/crm-ui-opportunity-won-result.png",
+      "sha256": "3eb6a7a5d7492b1f7ed619873c8618d11fdf3a6074d13633bb27196ea66e59d5"
+    },
+    {
+      "path": "docs/images/en-US/crm-teaching-customer-active-360.png",
+      "sha256": "24ac131dfbfef0b3e0dcc59bff2404b4fbe87d5536d70af4eb523ae7e922e329"
+    },
+    {
+      "path": "docs/images/en-US/crm-teaching-opportunity-reopened-history.png",
+      "sha256": "d3af2716be830e0c479af5db3840ff9a0624e88c0342bd8af7c2ddd58c2ba546"
+    },
+    {
+      "path": "docs/images/en-US/crm-teaching-lead-reopened.png",
+      "sha256": "e1599a9a7fc1979f0c239bc6c2735012b88a49a7e87585aa3892237616eeaf37"
+    },
+    {
+      "path": "docs/images/en-US/crm-teaching-outside-scope.png",
+      "sha256": "c4b5bbdb5b5069dfb3f617a588688784085bc73d6f7973f01cb0ff80777c4b88"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-lead-create-form.png",
+      "sha256": "6b4d0437213e170f14544ab860e9f2c53585e7a5de5328d313e4f290905f1c20"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-activity-plan-form.png",
+      "sha256": "3dfed8f8dd68fcea12fd4f4c145b955ed3eafdbc6565bbc96654c6312a1d2960"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-activity-planned-result.png",
+      "sha256": "c83190b0273ef3d53d8c0ef13766c3c4c23523c5566282311624413e4bd08fed"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-activity-complete-form.png",
+      "sha256": "9c83ccee1f8fca28c661bf9874effc8effb54fc44af0d8f4f9a966fabeec95da"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-lead-qualified.png",
+      "sha256": "b35fcf9d51f875ecf2e2521b67f98bac61df02d5efae094672b0080b66e12670"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-teaching-activity-completed.png",
+      "sha256": "0b3aee9e75b0bd0279afebe595df8ce2b956d28313e84fbd3332c79b7b4a54cc"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-convert-customer.png",
+      "sha256": "b6370ce206138c2538cf28196b47b7421d354ed1d95ceb6fb1b1f0d9cdf6e471"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-convert-contact.png",
+      "sha256": "94cec04dd9dbd6d6de45207e60ab6fd540312bc85587ebbf1c2e5994c35951b7"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-convert-opportunity.png",
+      "sha256": "66ed0294d5c084eeb79b74b32f5c2ce8c5c90f075711b743445221b492f68ce3"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-convert-confirm.png",
+      "sha256": "7bcc16b8b461221a951c050c37269afb447b5586a9750caba7c0bf01c7ca38a0"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-lead-converted-result.png",
+      "sha256": "f3ebc38771db6631697dd33b7896c1e750bb809c1499cbac09b7d8608c31037c"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-teaching-contact.png",
+      "sha256": "5feeb749229974edf95f37390d5bcab414aacd1c1fedcb9d20d858b719749f98"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-opportunity-stage-form.png",
+      "sha256": "f35d83881237d1b3ab30b18dd8a2682b3affe9ac851bbcc393b5a4fbc94db07e"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-ui-opportunity-won-result.png",
+      "sha256": "4bbe278f8070f34714a70c6b54f390ae7e507e9b5ca1e3f172c23e9478823b07"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-teaching-customer-active-360.png",
+      "sha256": "0f344bb8cb910e0c9e52e68cbd17e0bb36d795a525c3c67ea16c7726457e039c"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-teaching-opportunity-reopened-history.png",
+      "sha256": "b6be18e2c2e4d91f2774c518b04fc9804ca5e3747d639770637d0f4b0af8fe6b"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-teaching-lead-reopened.png",
+      "sha256": "ebf8ab55050359ec9d41221b331f97a5c50367e2cf6561e89fff81a50198f7fe"
+    },
+    {
+      "path": "docs/images/ja-JP/crm-teaching-outside-scope.png",
+      "sha256": "0aaf8d616c08a701975232a6a367c709d753a95dd669e0f6ebe1743c2e18d90c"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-lead-create-form.png",
+      "sha256": "b3452dc10a0498056d7af05fb69947c30fcf295b1ae7054f865714740f715956"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-activity-plan-form.png",
+      "sha256": "753cabab97d86dfa213f6fe2089e6bee6cb3f3f128df79eea1553fc9dd77684a"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-activity-planned-result.png",
+      "sha256": "8861bf76e9fc7580805a0ea8987de78979bf46829b139f3ffaf4c4ec8d1bfd4d"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-activity-complete-form.png",
+      "sha256": "e27afe95f08955a694a322fa22b72ecb2b9e2c00eee4f9b25117ff1058564b19"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-lead-qualified.png",
+      "sha256": "0564af218109fb29431012e5b7aa83b869dbfadfc8ae394c6f21b66e3ada5946"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-teaching-activity-completed.png",
+      "sha256": "21f60498c1fa5f12e386f4e15e5455c481bd2ff4a618d7c9edbe84a5eb8d588c"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-convert-customer.png",
+      "sha256": "47327693a4052aca781dafe2e7e472f87ff6b57a5e2d8d234e2d9f7f24a666b1"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-convert-contact.png",
+      "sha256": "e7e8bd7348f9c034b827d009fd14c106a2a299ae0c2682e2660e3ee361e40861"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-convert-opportunity.png",
+      "sha256": "08244c0d9bc8a787bf59f20e4930feaa3a0e4ac592bdeea92a7348c0e466e5d7"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-convert-confirm.png",
+      "sha256": "c8ff2f53c1abb98954ef8c5216287446a7b5c1c221652bb5f4b745bf599d5a04"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-lead-converted-result.png",
+      "sha256": "b85fc1b735646eba76cf179fa860b1087959236b191aac0137ef10c2c3543d1a"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-teaching-contact.png",
+      "sha256": "193bfbffba38a09ae89eb2163e09e3fadc3aa27ce27a3a7385e147adff601f71"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-opportunity-stage-form.png",
+      "sha256": "bcfdcc11c886d2cdf31a5c392e2a291981db3eec0632686090089333fd33d476"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-ui-opportunity-won-result.png",
+      "sha256": "f3b97fed7491f1366ee14f522e628e37c350437c7491ebfb2927a35c7d57fc87"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-teaching-customer-active-360.png",
+      "sha256": "5a9bdb1d7259d63bec999afceb437ffdd8e887a91edbb42a49cf8bf0e4ac08d7"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-teaching-opportunity-reopened-history.png",
+      "sha256": "9eb4d34e4ad0075c561c1d0b3e9df84c48dbc831902c276fc363eca9a62e65a6"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-teaching-lead-reopened.png",
+      "sha256": "989b03b14553731950020fc3ba350346675142b9c08243ed6c9b3b7a954f60b5"
+    },
+    {
+      "path": "docs/images/ko-KR/crm-teaching-outside-scope.png",
+      "sha256": "df89aeeda805b906eff7664b73819ac2604d455d8ce59eb5559dc63fff117c68"
+    },
+    {
+      "path": "docs/reference/evidence/crm-guide-review-2026-10-17.json",
+      "sha256": "ad865cde6411c01bafd2bfa768a88d5b58378edc39d8a93f01f276122f947586"
+    }
+  ],
+  "source_inspection_scope": "All620original lines actually read;current complete semantic review combines that full read with every final delta and exact unchanged-line mapping. Threewhole308current source lines,selected reads and57unchanged prior bindings are separately scoped. Hashes/rendering do not automatically approve meaning.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "complete_current_semantic_coverage": true,
+    "original_whole_lines_actually_read": 620,
+    "current_combined_semantic_lines": 652,
+    "fresh_whole_final_rereads": false,
+    "original_full_read_outputs": {
+      "zh-CN": "94b4ee",
+      "en-US": "98e9dc",
+      "ja-JP": [
+        "f83b00 visible1-49and138-155",
+        "16d015 complete50-137"
+      ],
+      "ko-KR": "849911"
+    },
+    "final_exact_delta_outputs": {
+      "zh-CN": "ffc749",
+      "en-US": "fc02c1",
+      "ja-JP": "57631f",
+      "ko-KR": "871e10"
+    },
+    "lines_each": 163,
+    "headings_each": 9,
+    "h2_each": 8,
+    "images_each": 18,
+    "tables_each": 3,
+    "localized_text_fences_preserved_each": 1,
+    "whole_markdown_rendered_documents": 4,
+    "strict_locale_normalized_inline_literal_multiset": true,
+    "inline_literals_each": 77,
+    "strict_locale_normalized_local_link_sequence": true,
+    "relative_links_each": 38,
+    "source_bindings": 139,
+    "current_whole_source_files": 3,
+    "current_whole_source_lines": 308,
+    "unchanged_prior_fact_source_bindings": 57,
+    "source_read_scopes": [
+      {
+        "path": "compose.tools.yaml",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "database/changelog/crm/0001-crm-schema.yaml",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/config/MqLogAutoConfiguration.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthDataScopeResolver.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/client/AuthSecuritySettingsClient.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServiceXssAutoConfiguration.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/datascope/ServiceDataScopeAspect.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/identity/ServiceIdentityFilter.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/pom.xml",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/ActivityController.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/ContactController.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/CustomerController.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/LeadController.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OpportunityController.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OptionsController.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/OverviewController.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/controller/PipelineController.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/domain/CrmStateMachine.java",
+        "read_scope": "Whole85lines read;lead/customer/activity transitions,backward stage reason andbusiness409.",
+        "outputs": [
+          "c75e47"
+        ],
+        "whole_current_file_actually_read": true,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmRequests.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmViewAssembler.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/dto/DomainEventEnvelope.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/entity/CrmTenantEntity.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmCustomerMapper.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmLeadMapper.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/mapper/CrmOpportunityMapper.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmDataPermissionHandler.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmTenantTablePolicy.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/CrmTenantInitializer.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ActivityServiceImpl.java",
+        "read_scope": "Selected150-199,224-270,294-304;completion/roottransition,owner relationship,followupversionrefresh,cancel/event. Outputc75e47range271-293wastruncatedandisNOT claimed read.",
+        "outputs": [
+          "c75e47",
+          "01119e"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/ContactServiceImpl.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CrmTenantInitializerImpl.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CustomerServiceImpl.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/LeadServiceImpl.java",
+        "read_scope": "Selected182-305,315-360,410-436;lockedvisible conversion,existing result before state/version validation,contact relationship/primary,explicittenantOutbox andidempotentReplay;not whole.",
+        "outputs": [
+          "2cbd21",
+          "c75e47"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OpportunityServiceImpl.java",
+        "read_scope": "Selected187-248;visible lock,version/state/reason/history,WON activatesPOTENTIAL,reopen restores last open stage;not whole.",
+        "outputs": [
+          "2cbd21"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OverviewServiceImpl.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmOwnerEnricher.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmOwnerResolver.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmPermissionScopeExecutor.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/java/com/omni/crm/service/support/CrmRecordAccessGuard.java",
+        "read_scope": "Whole88lines read;visible records uniformly404,polymorphic access roots and400invalid root.",
+        "outputs": [
+          "d2e9ff"
+        ],
+        "whole_current_file_actually_read": true,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/main/resources/application.yml",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/integration/CrmMysqlInterceptorIntegrationTest.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/it/AbstractFcIT.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/security/PiiMaskerTest.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/LeadServiceImplTest.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/OpportunityServiceImplTest.java",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/omni-gateway/src/main/resources/application.yml",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-backend/pom.xml",
+        "read_scope": "Matched declared1.0.0-SNAPSHOT,JDK25anddependency versions only;priorselectedscope retained.",
+        "outputs": [
+          "c75e47"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-frontend/src/components/crm/CustomerOverview.vue",
+        "read_scope": "Whole135lines read;independent list permissions,OPEN-only query,100row/30activity limits,native#stageId andmaskablefields.",
+        "outputs": [
+          "d2e9ff"
+        ],
+        "whole_current_file_actually_read": true,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-frontend/src/views/crm/activity/index.vue",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-frontend/src/views/crm/contact/index.vue",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-frontend/src/views/crm/customer/index.vue",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-frontend/src/views/crm/lead/index.vue",
+        "read_scope": "Selected200-242;freshversion,4stepconversion/minimalPII andreturnedcustomerID;not whole.",
+        "outputs": [
+          "d2e9ff"
+        ],
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-frontend/src/views/crm/opportunity/index.vue",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "scripts/sql/seed/auth.sql",
+        "read_scope": "Unchanged named prior CRM fact-review reuse at selected implementation scope;not a new whole read.",
+        "whole_current_file_actually_read": false,
+        "reused_review": "docs/reference/reviews/crm.json",
+        "reused_review_sha256": "d020440da733d8a0740c5cca11592ea2aebd380d90291c3d19d9bea48e1d33fc",
+        "prior_read_scope": "Selected relevant implementation ranges and all eight Controller endpoint annotations were inspected directly;prior unchanged Flow13/14 source audit reused.Whole-file digests do not mean every implementation line or deployed behavior was reviewed."
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts",
+        "read_scope": "Selected1-40,75-140;Docker/project guards,ordinary SALES_REP short-lived token fixture,knowncommitted progress andscreenshot checks. Not real CAPTCHA login proof.",
+        "outputs": [
+          "01119e"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts",
+        "read_scope": "Selected1-95;read-only seven scenes+scope,ordinary short-lived token fixture,records/sourcehash. Not whole ornewtest run.",
+        "outputs": [
+          "01119e"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/crm.md",
+        "read_scope": "Current exact hash and previously completed named fact/design review reuse;not a new whole read.",
+        "outputs": [
+          "9ef566",
+          "aa7e02"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/design/crm-design.md",
+        "read_scope": "Current exact hash and previously completed named fact/design review reuse;not a new whole read.",
+        "outputs": [
+          "9ef566",
+          "aa7e02"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/crm.json",
+        "read_scope": "Current exact hash and previously completed named fact/design review reuse;not a new whole read.",
+        "outputs": [
+          "9ef566",
+          "aa7e02"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/crm-design.json",
+        "read_scope": "Current exact hash and previously completed named fact/design review reuse;not a new whole read.",
+        "outputs": [
+          "9ef566",
+          "aa7e02"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "read_scope": "Previously read current authorized AI-only policy;exact digest rebound,not a new whole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-crm/src/test/java/com/omni/crm/service/impl/ActivityServiceImplTest.java",
+        "read_scope": "Link target/hash binding only;not newly read orrerun.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/crm-2026-10-10.json",
+        "read_scope": "Actual semanticfields verification/ui_verification andbothvisualmethods read. Historical aggregate/runtime retained asdatedrecords,not current execution.",
+        "outputs": [
+          "aa7e02",
+          "d51183",
+          "0d499f"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-lead-create-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-activity-plan-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-activity-planned-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-activity-complete-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-lead-qualified.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-teaching-activity-completed.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-convert-customer.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-convert-contact.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-convert-opportunity.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-convert-confirm.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-lead-converted-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-teaching-contact.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-opportunity-stage-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-ui-opportunity-won-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-teaching-customer-active-360.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-teaching-opportunity-reopened-history.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-teaching-lead-reopened.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/zh-CN/crm-teaching-outside-scope.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-lead-create-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-activity-plan-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-activity-planned-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-activity-complete-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-lead-qualified.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-teaching-activity-completed.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-convert-customer.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-convert-contact.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-convert-opportunity.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-convert-confirm.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-lead-converted-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-teaching-contact.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-opportunity-stage-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-ui-opportunity-won-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-teaching-customer-active-360.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-teaching-opportunity-reopened-history.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-teaching-lead-reopened.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/en-US/crm-teaching-outside-scope.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-lead-create-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-activity-plan-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-activity-planned-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-activity-complete-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-lead-qualified.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-teaching-activity-completed.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-convert-customer.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-convert-contact.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-convert-opportunity.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-convert-confirm.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-lead-converted-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-teaching-contact.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-opportunity-stage-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-ui-opportunity-won-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-teaching-customer-active-360.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-teaching-opportunity-reopened-history.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-teaching-lead-reopened.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ja-JP/crm-teaching-outside-scope.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-lead-create-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-activity-plan-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-activity-planned-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-activity-complete-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-lead-qualified.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-teaching-activity-completed.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-convert-customer.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-convert-contact.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-convert-opportunity.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-convert-confirm.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-lead-converted-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-teaching-contact.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-opportunity-stage-form.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-ui-opportunity-won-result.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-teaching-customer-active-360.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-teaching-opportunity-reopened-history.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-teaching-lead-reopened.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/images/ko-KR/crm-teaching-outside-scope.png",
+        "read_scope": "Exact historical image hash/locale/source match;visual method separately scoped,not automatic semantic approval.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/crm-guide-review-2026-10-17.json",
+        "read_scope": "Derived from actual fourcompleteoriginal reads,exact72image provenance,current source selections and20rawimageviews;not newruntime evidence.",
+        "whole_current_file_actually_read": false
+      }
+    ],
+    "current_evidence": "docs/reference/evidence/crm-guide-review-2026-10-17.json",
+    "all_guide_image_hashes_unchanged": 72,
+    "historical_register_images": 80,
+    "current_selected_raw_images_individually_viewed": 20,
+    "other52_freshly_viewed": false,
+    "prior_visual_methods": "80historicalimagesvia8read-onlyand12UIoriginal-resolutionfour-localecontact sheets;not80newindividualviews.",
+    "new_application_test_or_build_runs": 0,
+    "business_writes": 0,
+    "historical_business_writes_replayed": false,
+    "application_source_changes": false,
+    "screenshot_manifest_changed": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "Three current whole sourcefiles/308lines plusselectedreads and57unchanged prior bindings. Not57newwhole reads;current image20viewsnotall72or80individually reviewed.",
+      "No current application run,test/build,business write ornewcapture. Historical32read-only and4UItests retained withtheirdate/runtime/fixture/registrylimits.",
+      "Ordinary fixtureidentity doesnot proveCAPTCHA orOAuth. LocalOutboxinsert doesnot proveMQdelivery/consumption. PriorCRMMySQLITreporthad4conditional skips,notconcurrencyproof.",
+      "Globalauthentication/social-login/SRMcoverage andremaining21translationrows afterthis prospectivefamily remainopen;fulloriginalA-Gpreserved."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/crm-flow.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 19:45:10",
+      "result": "approved",
+      "translation_sha256": "b207effcee6611c06e06782df67982c63fd73c40df0a2303a697c4d2c90325d1",
+      "checks": {
+        "coverage_and_meaning": "四篇原稿620行与最终全部变更行已实际阅读，以逐行哈希映射覆盖当前652行。保留8节、每语18图和全部线索、活动、转换、360、赢输单/重开、权限失败恢复、清理与源码步骤。主体操作是读者教程，2026-10-10业务结果与本次文档检查分开，没有把旧运行描述为当前重跑。",
+        "technical_literals": "四语各77个归一化行内技术字面量、38个归一化相对链接一致；状态图text围栏在各语内部保持原样。按实际pom声明1.0.0-SNAPSHOT，保留12500/4500、日期时间格式、根类型、状态机、版本和idempotentReplay。修正原稿version/409代码格式差异而不改变含义。",
+        "security_and_failure_semantics": "核对功能权限与负责人范围独立、不可见记录404、普通用户与超级管理员区别；活动完成才将NEW转FOLLOWING，合格后转换。转换可见行锁、已有结果优先于旧version校验、关系/主要联系人/活动迁移/显式租户Outbox均与当前源码一致。失单原因、后退原因、关闭状态专用重开及360独立权限/OPEN过滤保留。领域结果不证明CAPTCHA、OAuth、并发或消费成功。",
+        "images_and_links": "四篇完整Markdown已在Docker渲染，相对链接均可达。教程72图均匹配80条历史登记的路径、语言和字节哈希；本轮20张关键原图逐张查看，其他52张保留历史方法。原两批80图使用8+12共20张原分辨率四语汇总图，不声称80次独立原图查看。保留列表前缀、长名称、中文字典、人员ID、#1阶段和REDACTED内容等实际显示限制。",
+        "language_and_terminology": "Complete155line original and every final delta read againstChinese. Combined163line coverage preserves lead qualification/conversion,planned versuscompleted follow-up,owner scope,win/loss/reopen,and idempotent replay before stale-version rejection. Historical contact-sheet inspection and current selected raw views,fixture identity and CAPTCHA,local Outbox and consumption,formal versuscached image build are distinguished."
+      },
+      "findings": [
+        {
+          "id": "CG01",
+          "status": "resolved",
+          "resolution": "Apply authorized actual AI_REVIEW without mandatory human translation review or false HUMAN_REVIEW label."
+        },
+        {
+          "id": "CG02",
+          "status": "resolved",
+          "resolution": "Declare currentbackend1.0.0-SNAPSHOT anddate2026-10-10business/deletion results. Current audit doesnot replay businesswrites."
+        },
+        {
+          "id": "CG03",
+          "status": "resolved",
+          "resolution": "Correct80individual-visualclaim toactual20four-locale contact sheets;distinguish72guide images,20current selectedraw views and52retainedvisualrecords."
+        },
+        {
+          "id": "CG04",
+          "status": "resolved",
+          "resolution": "Explain ordinarysales short-lived fixture tests do not prove real CAPTCHA login;readerlogininstruction remains."
+        },
+        {
+          "id": "CG05",
+          "status": "resolved",
+          "resolution": "Retain formalregistry DNS/auth failure andcachedNginx provenance;do not claimformalproductionimage success orretroactively assigncurrent sourcehashes."
+        },
+        {
+          "id": "CG06",
+          "status": "resolved",
+          "resolution": "Verify complete original state/version/idempotency/access/recovery meaning againstcurrentselectedsource and57unchanged priorfactdependencies,without overstating newtests orwhole-source reads."
+        },
+        {
+          "id": "CG07",
+          "status": "resolved",
+          "resolution": "Alignversion/409inlinecode formatting inall4whilepreservinglocalized statefences,allimages/links/steps. Preserveactualdictionary/wrapping/maskinglimits."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/crm-flow.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 19:45:10",
+      "result": "approved",
+      "translation_sha256": "7f8cc5c4c64bbf4ea2ed61d261173a3e42ef817a7e77fc7a6e52fdbbfda5d9a4",
+      "checks": {
+        "coverage_and_meaning": "四篇原稿620行与最终全部变更行已实际阅读，以逐行哈希映射覆盖当前652行。保留8节、每语18图和全部线索、活动、转换、360、赢输单/重开、权限失败恢复、清理与源码步骤。主体操作是读者教程，2026-10-10业务结果与本次文档检查分开，没有把旧运行描述为当前重跑。",
+        "technical_literals": "四语各77个归一化行内技术字面量、38个归一化相对链接一致；状态图text围栏在各语内部保持原样。按实际pom声明1.0.0-SNAPSHOT，保留12500/4500、日期时间格式、根类型、状态机、版本和idempotentReplay。修正原稿version/409代码格式差异而不改变含义。",
+        "security_and_failure_semantics": "核对功能权限与负责人范围独立、不可见记录404、普通用户与超级管理员区别；活动完成才将NEW转FOLLOWING，合格后转换。转换可见行锁、已有结果优先于旧version校验、关系/主要联系人/活动迁移/显式租户Outbox均与当前源码一致。失单原因、后退原因、关闭状态专用重开及360独立权限/OPEN过滤保留。领域结果不证明CAPTCHA、OAuth、并发或消费成功。",
+        "images_and_links": "四篇完整Markdown已在Docker渲染，相对链接均可达。教程72图均匹配80条历史登记的路径、语言和字节哈希；本轮20张关键原图逐张查看，其他52张保留历史方法。原两批80图使用8+12共20张原分辨率四语汇总图，不声称80次独立原图查看。保留列表前缀、长名称、中文字典、人员ID、#1阶段和REDACTED内容等实际显示限制。",
+        "language_and_terminology": "全155行の原稿と最終変更行を中国語事実源に照合し、未変更行の対応と合わせて163行を網羅。適格判定・変換、受注/失注/再開、担当者範囲、主要連絡先と活動移動を保持。過去のコンタクトシートと今回の個別原画像確認、短期識別フィクスチャと実CAPTCHA、正式ビルドとキャッシュを区別する。"
+      },
+      "findings": [
+        {
+          "id": "CG01",
+          "status": "resolved",
+          "resolution": "Apply authorized actual AI_REVIEW without mandatory human translation review or false HUMAN_REVIEW label."
+        },
+        {
+          "id": "CG02",
+          "status": "resolved",
+          "resolution": "Declare currentbackend1.0.0-SNAPSHOT anddate2026-10-10business/deletion results. Current audit doesnot replay businesswrites."
+        },
+        {
+          "id": "CG03",
+          "status": "resolved",
+          "resolution": "Correct80individual-visualclaim toactual20four-locale contact sheets;distinguish72guide images,20current selectedraw views and52retainedvisualrecords."
+        },
+        {
+          "id": "CG04",
+          "status": "resolved",
+          "resolution": "Explain ordinarysales short-lived fixture tests do not prove real CAPTCHA login;readerlogininstruction remains."
+        },
+        {
+          "id": "CG05",
+          "status": "resolved",
+          "resolution": "Retain formalregistry DNS/auth failure andcachedNginx provenance;do not claimformalproductionimage success orretroactively assigncurrent sourcehashes."
+        },
+        {
+          "id": "CG06",
+          "status": "resolved",
+          "resolution": "Verify complete original state/version/idempotency/access/recovery meaning againstcurrentselectedsource and57unchanged priorfactdependencies,without overstating newtests orwhole-source reads."
+        },
+        {
+          "id": "CG07",
+          "status": "resolved",
+          "resolution": "Alignversion/409inlinecode formatting inall4whilepreservinglocalized statefences,allimages/links/steps. Preserveactualdictionary/wrapping/maskinglimits."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/crm-flow.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 19:45:10",
+      "result": "approved",
+      "translation_sha256": "588e9494aedb6a39bbfe330767c184b8e2ee72a71e98e8e94ea23066dac9a360",
+      "checks": {
+        "coverage_and_meaning": "四篇原稿620行与最终全部变更行已实际阅读，以逐行哈希映射覆盖当前652行。保留8节、每语18图和全部线索、活动、转换、360、赢输单/重开、权限失败恢复、清理与源码步骤。主体操作是读者教程，2026-10-10业务结果与本次文档检查分开，没有把旧运行描述为当前重跑。",
+        "technical_literals": "四语各77个归一化行内技术字面量、38个归一化相对链接一致；状态图text围栏在各语内部保持原样。按实际pom声明1.0.0-SNAPSHOT，保留12500/4500、日期时间格式、根类型、状态机、版本和idempotentReplay。修正原稿version/409代码格式差异而不改变含义。",
+        "security_and_failure_semantics": "核对功能权限与负责人范围独立、不可见记录404、普通用户与超级管理员区别；活动完成才将NEW转FOLLOWING，合格后转换。转换可见行锁、已有结果优先于旧version校验、关系/主要联系人/活动迁移/显式租户Outbox均与当前源码一致。失单原因、后退原因、关闭状态专用重开及360独立权限/OPEN过滤保留。领域结果不证明CAPTCHA、OAuth、并发或消费成功。",
+        "images_and_links": "四篇完整Markdown已在Docker渲染，相对链接均可达。教程72图均匹配80条历史登记的路径、语言和字节哈希；本轮20张关键原图逐张查看，其他52张保留历史方法。原两批80图使用8+12共20张原分辨率四语汇总图，不声称80次独立原图查看。保留列表前缀、长名称、中文字典、人员ID、#1阶段和REDACTED内容等实际显示限制。",
+        "language_and_terminology": "원본155행과 최종 변경 행을 중국어 사실 원문과대조하고 동일한 미변경 행으로 현재163행을 모두 확인했다. 적격 판정/전환,수주/실주/다시 열기,담당자 범위,기본 연락처와활동 이동을 유지한다. 과거 모음 이미지 검토와이번 개별 원본 확인,단기 신원 픽스처와실제CAPTCHA,정식 운영 이미지 빌드와캐시 빌드를 구분한다."
+      },
+      "findings": [
+        {
+          "id": "CG01",
+          "status": "resolved",
+          "resolution": "Apply authorized actual AI_REVIEW without mandatory human translation review or false HUMAN_REVIEW label."
+        },
+        {
+          "id": "CG02",
+          "status": "resolved",
+          "resolution": "Declare currentbackend1.0.0-SNAPSHOT anddate2026-10-10business/deletion results. Current audit doesnot replay businesswrites."
+        },
+        {
+          "id": "CG03",
+          "status": "resolved",
+          "resolution": "Correct80individual-visualclaim toactual20four-locale contact sheets;distinguish72guide images,20current selectedraw views and52retainedvisualrecords."
+        },
+        {
+          "id": "CG04",
+          "status": "resolved",
+          "resolution": "Explain ordinarysales short-lived fixture tests do not prove real CAPTCHA login;readerlogininstruction remains."
+        },
+        {
+          "id": "CG05",
+          "status": "resolved",
+          "resolution": "Retain formalregistry DNS/auth failure andcachedNginx provenance;do not claimformalproductionimage success orretroactively assigncurrent sourcehashes."
+        },
+        {
+          "id": "CG06",
+          "status": "resolved",
+          "resolution": "Verify complete original state/version/idempotency/access/recovery meaning againstcurrentselectedsource and57unchanged priorfactdependencies,without overstating newtests orwhole-source reads."
+        },
+        {
+          "id": "CG07",
+          "status": "resolved",
+          "resolution": "Alignversion/409inlinecode formatting inall4whilepreservinglocalized statefences,allimages/links/steps. Preserveactualdictionary/wrapping/maskinglimits."
+        }
+      ]
+    }
+  }
+}

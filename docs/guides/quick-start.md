@@ -1,111 +1,123 @@
-# 五分钟快速启动
+# 从克隆代码到首次登录
 
-适用版本：Omni-Stack 0.6.x
+适用基线：主干 fc165e3 起的 0.6.x；本次整改分支补充文档/工具。正式行为以当前 checkout 的 Compose、源码和种子为准。首次构建受网络、CPU 和缓存影响，不承诺五分钟。
 
-本指南用于在本机启动开发环境并完成第一次登录。生产部署请改读 [Docker 部署指南](../docker-deployment.md) 和 [运维、备份、恢复与升级](operations-upgrade.md)。
+## 1. 获取代码与认识目录
 
-## 1. 前置条件
+任选一个托管平台，在空目录克隆；不要连续执行两次到同一个目录。所有后续命令从仓库根执行。
 
-- JDK 25。
-- Node.js 22.12.0 或更高的 LTS 版本。
-- Docker Desktop，且 Docker Compose 可用。
-- 可用内存建议不少于 12 GB；只体验单一领域时优先使用项目预设。
-
-JDK 25 和 Node.js 22.12+ 由正式构建镜像提供；仅在宿主机使用开发工具时才需要单独安装。
-
-## 2. 选择启动方式
-
-> **启动前必备（fresh 运行）**：先在**仓库根目录**从模板复制环境变量文件并安全填充必填秘密，否则 Compose 会因必填变量缺失而失败关闭：
->
-> ```bash
-> # 在仓库根执行（Windows PowerShell）
-> Copy-Item -LiteralPath .env.example -Destination .env
-> ```
->
-> `.env` 必须提供（不得回显真实值）：`MYSQL_ROOT_PASSWORD`、`OMNI_DB_PASSWORD`、`REDIS_PASSWORD`、`NACOS_AUTH_TOKEN`、`XXL_JOB_ACCESS_TOKEN`，以及全栈需一致的 `GATEWAY_ASSERTION_SECRET`（否则生成物服务报“网关身份签名未就绪”503）。随机秘密用安全方式生成。本步仅适用于全新启动；接管旧数据卷属于单独的有界迁移路径，不等同 fresh。
-
-完整系统：
+GitHub:
 
 ```bash
-docker compose --profile full up -d
-docker compose ps
+git clone --branch main https://github.com/wang-baohai/Omni-Stack.git
+cd Omni-Stack
 ```
 
-只体验 CRM：
+Gitee:
 
 ```bash
-npm --prefix tools/omni-cli run dev -- dev up --preset crm
+git clone --branch main https://gitee.com/wang-baohai/Omni-Stack.git
+cd Omni-Stack
 ```
 
-可用预设包括 `core`、`workflow`、`crm`、`supply-chain` 和 `full`。选择依据见 [项目预设快速选择](../preset-quick-selection.md)。首次启动会先运行 Liquibase 迁移器，再启动服务；不要再执行历史 `init-all.sql` 或 `migrate-*.sql`。
+`omni-backend/` 是 Maven 多模块源码，`omni-frontend/` 是 Vue 源码；`docker/` 与 Compose 把源码构建为容器。`database/` 保存结构迁移，`scripts/sql/seed/` 保存正式基础数据，`tools/omni-cli/` 与 `scaffold/` 负责生成项目。`docs/` 保存工程事实和 Wiki，`ai/` 保存共享 AI 资产。
 
-## 3. 确认服务状态
+## 2. 准备 Docker 和工具容器
 
-等待 `docker compose ps` 中已选择的应用变为 `healthy`。常用入口：
+宿主需要 Git、Docker Desktop/Engine 和 Compose，以及编辑器。本次构建和验证不要求宿主安装 JDK/Node：工具容器提供 JDK 25、Node 22 和 Maven Wrapper。先确认 Docker 使用本机 Linux engine。按[预设依赖矩阵](../preset-dependency-matrix.md)的资源预算分配 Docker 内存；全栈初始建议 12–16 GiB，可用磁盘预留约 20 GiB，再根据实际镜像与构建峰值调整。这是准备预算，不是已测量的运行上限。
 
-| 入口 | 地址 | 用途 |
-|---|---|---|
-| 前端 | `http://localhost:3000` | 登录、工作台与管理端 |
-| Nacos | `http://localhost:8080` | 本地服务发现与配置 |
-| Gateway | `http://localhost:8102` | 所有前端 API 的统一入口 |
+```bash
+docker version
+docker compose version
+docker compose -p omni-stack-tools -f compose.tools.yaml build cli
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm ci
+```
 
-如果端口被占用，先用 `docker compose ps` 和 `docker compose logs <service>` 找出实际失败服务，不要反复重建数据库卷。
+正常结果是 Docker client/server 都可用、Compose 有版本号、工具镜像构建完成。注册表或 Maven/npm 超时先检查网络代理、DNS 与 Docker 网络；本机权限失败应走平台授权，不把它误判为 daemon 未运行。
 
-## 4. 第一次登录
+## 3. 初始化全新环境的私有配置
 
-1. 打开前端登录页。
-2. 选择开发租户。
-3. 使用 `scripts/sql/seed/auth.sql` 中明确标记的开发管理员账号。
-4. 输入当前页面生成的一次性验证码。
-5. 登录后先修改或替换开发默认凭据；不得把种子账号用于共享、测试外或生产环境。
+下面的容器脚本从 `.env.example` 安全生成全部必填秘密，只创建新 `.env`，不覆盖已有文件、不打印值。已有数据卷必须保留原凭据，改读[升级与恢复](operations-upgrade.md)，不能重新随机生成密码接管旧库。
 
-验证码区分一次请求一次使用。刷新验证码或提交失败后，应使用新图片和新 `captchaKey`，不能重复提交旧验证码。
+```bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node scripts/init-env.mjs
+```
 
-## 5. 第一次功能检查
+预期仅输出创建结果；真实 `.env` 被 Git 忽略。必填项的角色如下，四语言使用同一组键名。
 
-管理员应能看到系统管理、基础数据、任务调度、运维监控、工作流，以及所选预设包含的业务模块。建议依次检查：
+| 变量 | 用途与约束 |
+|---|---|
+| `MYSQL_ROOT_PASSWORD` / `OMNI_DB_PASSWORD` | 迁移管理账号 / 七个业务库应用账号；fresh 由 migrator 创建并授权 |
+| `REDIS_PASSWORD` | Redis 与全部客户端一致 |
+| `NACOS_AUTH_TOKEN` | 至少 32 字节随机内容的 Base64，服务端签名 |
+| `NACOS_AUTH_IDENTITY_KEY` / `NACOS_AUTH_IDENTITY_VALUE` | Nacos 服务端身份认证 |
+| `NACOS_PASSWORD` | 控制台与客户端一致；用户名默认 nacos |
+| `XXL_JOB_ACCESS_TOKEN` / `XXL_JOB_ADMIN_PASSWORD` | 执行器 token / 控制台管理员随机密码；管理员默认 admin，密码 14–20 字符 |
+| `GATEWAY_ASSERTION_SECRET` / `OMNI_INTERNAL_API_TOKEN` | 全栈一致的网关 HMAC（至少 32 字节）/ 内部 API 认证 |
+| `OAUTH2_STATE_SECRET` / `JWK_ENCRYPT_KEY` | 社交 state HMAC（至少 32 字节）/ Redis JWK 加密键（恰好 32 字符） |
 
-1. “系统管理 → 用户管理”能加载列表。
-2. “工作流管理 → 流程模型”能看到预置模型。
-3. 目标业务模块概览页能加载真实数据或明确空状态。
-4. 工作台“我的定时任务”能打开创建对话框。
+GitHub、Google、Gitee OAuth client ID/secret 是可选外部应用凭据；密码登录不需要它们。空凭据不会提供可用的外部社交登录。
 
-菜单缺失通常意味着当前角色没有对应权限，或预设没有包含该模块，不应通过手工修改前端路由解决。
+## 4. 选择并启动
 
-### 操作截图
-
-#### 图 1 `system-dashboard-zh-CN`：工作台首页
-
-- 前置条件：以管理员身份完成登录，进入主界面
-- 操作者：管理员
-- 操作：登录后默认进入审批工作台，点击右上角「控制台」进入管理仪表盘
-- 预期结果：主内容区显示「欢迎」卡片与后端/前端/核心服务/基础设施信息，侧边栏包含系统管理、基础数据、任务调度、运维监控、工作流管理
-
-![工作台首页](../images/zh-CN/system-dashboard.png)
-
-## 6. 本地源码开发
-
-修改源码后，在仓库根目录重建对应应用镜像并启动；后端使用镜像中的 JDK 25 与 Maven Wrapper，前端由 Node 构建阶段生成静态文件。所有应用都在 Docker 中运行。
-
-标准本地项目名为 `omni-stack`，默认网络为 `omni-stack_default`，MySQL 数据卷为 `omni-stack_omni-mysql-data`。所有应用和业务验证均在本机 Docker 中运行；宿主机编辑源码后通过 Compose 重建。默认端口固定，发生冲突时定位并解除占用，不自动偏移端口。
+完整供应链或全部功能选择 full。首次 `--build` 下载依赖、执行镜像内构建；migrator 成功退出后服务按健康依赖启动。
 
 ```bash
 docker compose --profile full up -d --build
-docker compose ps
+docker compose ps -a
+docker compose logs omni-db-migrator
 ```
 
-## 7. 停止环境
+只学习登录、权限和基础平台可先选 core。CLI 真实子命令会列出模块闭包、服务与降级信息；core 的 lite 模式关闭 Nacos 客户端、XXL-JOB 和 MQ 中继，不能拿它验证供应链。
+
+```bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run dev -- preset list
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run dev -- preset explain core
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run dev -- dev up --preset core --project-name omni-stack --build
+```
+
+这是启动所选服务。真正生成裁剪后项目请读[脚手架开发](scaffold-development.md)；`preset create` 与 `dev up` 的结果不同。
+
+## 5. 确认迁移与健康
+
+`omni-db-migrator` 应为 Exited (0)，所选服务中声明了 healthcheck 的容器应为 healthy，前端还需能正常打开；非选中服务无需出现。若失败，先定位 migrator/具体服务日志，再核对必填变量和端口，不删除数据卷重试。标准 project 为 omni-stack，默认端口固定：前端 3000、Gateway 8102、MySQL 3306。
+
+```bash
+docker compose ps -a
+docker compose logs --tail 100 omni-auth omni-gateway omni-frontend
+```
+
+## 6. 首次登录与一次性验证码
+
+1. 在浏览器打开 `http://localhost:3000`。
+2. 选择开发租户，使用正式 `auth.sql` 的本地演示账号 `admin` / `admin123`。
+3. 人工输入当前图片验证码并提交；获取新图会产生新的 captchaKey。
+4. 请求成功后进入工作台，再打开控制台检查“系统管理 → 用户管理”。
+5. 只用于隔离开发环境；共享或生产前替换演示身份与凭据。
+
+输错验证码或一次登录失败后必须换新图，Redis GETDEL 已消费旧值。租户选错、账号锁定或服务 503 时按[认证指南](authentication.md)定位，不重复提交旧 captchaKey。短期测试 token 只能验证登录后的功能，不能替代这一步。
+
+下图仅示意对应语言的表单布局，验证码区域已遮罩。2026-10-09 已通过人工输入一次性验证码完成真实首次登录（HTTP/业务均为 200），见[脱敏登录记录](../reference/evidence/human-login-2026-10-09.json)。其他四语页面测试使用短期测试身份，不能冒充四次密码登录。
+
+![登录入口：租户、账号、密码与验证码](../images/zh-CN/auth-login.png)
+
+## 7. 核对预设、停止与开发
+
+管理员能看到所选模块；core 没有工作流和供应链菜单是预设结果，普通用户的菜单还受角色限制。业务列表为空不代表故障：正式种子没有历史订单、审批和资产。按[数据与 fixture](../wiki/data-and-fixtures.md)建立自己的教学记录。
+
+默认 down 保留命名卷，重新 up 使用原数据；不加 `--volumes`。正常修改源码后，用容器测试并重建对应镜像：
 
 ```bash
 docker compose --profile full down
+docker compose --profile full up -d
 ```
 
-默认不要加 `--volumes`，这样本地业务数据会保留。只有明确要重建全新数据库，并确认目标 Compose project 和卷名后，才删除专属数据卷。
+```bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm backend ./mvnw clean install
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm frontend npm ci
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm frontend npm run build
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm frontend npm run lint
+docker compose --profile full up -d --build
+```
 
-## 8. 下一步
-
-- 登录与租户：[认证与租户选择](authentication.md)
-- 权限模型：[菜单、角色与数据权限](permissions.md)
-- 新服务与 CRUD：[脚手架开发教程](scaffold-development.md)
-- 常见错误：[故障排查手册](troubleshooting.md)
-
+下一步： [认证与租户](authentication.md) · [权限与数据范围](permissions.md) · [新服务与裁剪](scaffold-development.md) · [故障排查](troubleshooting.md)

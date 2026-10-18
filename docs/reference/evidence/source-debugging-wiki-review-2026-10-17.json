@@ -1,0 +1,525 @@
+{
+  "schema": 1,
+  "kind": "current-document-source-semantic-audit",
+  "recorded_at": "2026-10-17T13:05:32.593Z",
+  "source_baseline": "fdd3a311b518ffb1a16571fafdad1e565e829200",
+  "document_id": "wiki-source-debugging",
+  "original_documents_actually_read": 4,
+  "original_whole_lines": 1004,
+  "current_source_inspection": {
+    "whole_files": 5,
+    "whole_lines": 577,
+    "files": [
+      {
+        "path": "docs/reference/reviews/source-map.json",
+        "sha256": "855099603da44c5392aedd30dc3d4d1de82c6ef8d3a29cf26939e6e8394a6038",
+        "read_scope": "Named completed AI review reused with its original scope; no new whole source read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/source-map.md",
+        "sha256": "a1a85b47805818ec2343e905a104a2030c636ea3c9cf61b4fc03fbc085425657",
+        "read_scope": "Current Chinese document exact hash reused from its named completed review; not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/backend-patterns.json",
+        "sha256": "f88e81c0d3153d8e1648e61dc0d6c2b12ea13faf2ba63f09f847417727104d84",
+        "read_scope": "Named completed AI review reused with its original scope; no new whole source read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/backend-patterns.md",
+        "sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7",
+        "read_scope": "Current Chinese document exact hash reused from its named completed review; not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/workflow.json",
+        "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "read_scope": "Named completed AI review reused with its original scope; no new whole source read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/workflow.md",
+        "sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389",
+        "read_scope": "Current Chinese document exact hash reused from its named completed review; not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/mq-reliability.json",
+        "sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf",
+        "read_scope": "Named completed AI review reused with its original scope; no new whole source read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/mq-reliability.md",
+        "sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957",
+        "read_scope": "Current Chinese document exact hash reused from its named completed review; not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/srm.json",
+        "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f",
+        "read_scope": "Named completed AI review reused with its original scope; no new whole source read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/srm.md",
+        "sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03",
+        "read_scope": "Current Chinese document exact hash reused from its named completed review; not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/asset-design.json",
+        "sha256": "fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747",
+        "read_scope": "Named completed AI review reused with its original scope; no new whole source read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/design/asset-design.md",
+        "sha256": "65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620",
+        "read_scope": "Current Chinese document exact hash reused from its named completed review; not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/guide-scaffold-development.json",
+        "sha256": "27b7ba81bf232998d903b635074dd8498b3597354d0d8ddfc7795f470524ab21",
+        "read_scope": "Named completed AI review reused with its original scope; no new whole source read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/scaffold-development.md",
+        "sha256": "6777bfff1f5df08ed873439137df9bba9dd389e211ec8d11de59877e54472351",
+        "read_scope": "Current Chinese document exact hash reused from its named completed review; not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/guide-authentication.json",
+        "sha256": "ff34f4c780b1d8ad98ea0cf06fd45a869863511936f53426028abad50e418ec2",
+        "read_scope": "Named completed AI review reused with its original scope; no new whole source read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/authentication.md",
+        "sha256": "127d2a8396618e2dbb787d9a72e838cf26991b719bb8a9c81a93d6e4d04cf09f",
+        "read_scope": "Current Chinese document exact hash reused from its named completed review; not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/guide-permissions.json",
+        "sha256": "234b4df9b9bff01ad1f976b0cbb53f9a45a022d049e81ca0c30ddecef571ec89",
+        "read_scope": "Named completed AI review reused with its original scope; no new whole source read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/permissions.md",
+        "sha256": "8878710f45b3aab84590c57c5539a6f321e5a31c168de1f7e37edcfdf0a76ad2",
+        "read_scope": "Current Chinese document exact hash reused from its named completed review; not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/CaptchaServiceImpl.java",
+        "sha256": "ac901105b2f949e32bb5e76789f7a5b4dc32a4860cf24da49b0f657e229381e4",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/JwtTokenServiceImpl.java",
+        "sha256": "c84fa86c7c90c63b1b075e5d0558bdc04bf34ec95ae3f0f9a03d585322ff5fa1",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/filter/AuthFilter.java",
+        "sha256": "a0773cce8e6ba3d7e90e40c088fb9bae1f77c049577665ad9a0201a4e1c3d76e",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-gateway/src/test/java/com/omni/gateway/filter/AuthFilterHmacTest.java",
+        "sha256": "784210cee008c5e4b078052d77912b8d4f60e84fad2ab81d7d9a0815660193f9",
+        "read_scope": "Matched actual valid HMAC issuance, forged assertion overwrite, missing/weak key503 and test-profile exception assertions;not whole test.",
+        "outputs": [
+          "f73c32"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/test/java/com/omni/base/security/GatewayPreAuthFilterHmacTest.java",
+        "sha256": "c510674af3fb0f0ee63977364cac9a336aac3b1f91e2276fdce1d287dd494092",
+        "read_scope": "Matched direct/forged rejection and valid assertion;selected127-170 tampered signature and stale timestamp401 assertions;not whole.",
+        "outputs": [
+          "f73c32",
+          "d9b6d0"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/datascope/ServiceDataScopeAspect.java",
+        "sha256": "e47082d659d8ecda501066b2a4de6693eafbb9dc390d63bbf7ef3f6afaf50a32",
+        "read_scope": "Whole current file: verified identity, permission/user/tenant validation and finally ThreadLocal clear.",
+        "outputs": [
+          "489b5d"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/test/java/com/omni/common/service/datascope/ServiceDataScopeAspectTest.java",
+        "sha256": "1c73c71764d2603fc27461575395d7c79a79a6111969ca6a644a82d3a852f061",
+        "read_scope": "Matched authoritative scope binding and tenant-mismatch rejection with context clearing;not whole.",
+        "outputs": [
+          "f73c32"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/test/java/com/omni/auth/security/DataScopeResolveFilterTest.java",
+        "sha256": "c473bd55afc3069d5e8a982da1f0ac0bfbe24d8bb413fc7253e542fd76799a5e",
+        "read_scope": "Matched internal skip,service-resolved scope/finally-clear,missing tenant400/no service/chain assertions;not whole.",
+        "outputs": [
+          "12663a"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowModelServiceImpl.java",
+        "sha256": "ddeeae6a0c93612f503ea63c1394e38253e6d2ca5ccf51418b6116429cfd2ce2",
+        "read_scope": "Matched publish lock-before-validation-before-deploy; unchanged named whole Workflow review retained.",
+        "outputs": [
+          "18b4e6"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessInstanceServiceImpl.java",
+        "sha256": "f650ad68e8836e46cec0eac145697cd628fdd2757700e8c118b973e4f442a82a",
+        "read_scope": "Selected591-621 plus MI_END matches:auto-approved history projection differs from actual manual approved/rejected variable.",
+        "outputs": [
+          "18b4e6",
+          "dbc2ab"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/service/impl/WorkflowModelServiceImplTest.java",
+        "sha256": "558747ce98747fc89d5808c6ef86b02d3e55fb899874f1200e1c8c0e0dc2571b",
+        "read_scope": "Matched new draft from published pointer and non-DRAFT publish rejection without createDeployment;not full invalid-BPMN or concurrent DB proof.",
+        "outputs": [
+          "12663a"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/service/impl/WorkflowApprovalServiceImplTest.java",
+        "sha256": "3c1ea0632fb9757072c9bd2e58a703974b65229ffa7eb7fc9a01585c010fe8a5",
+        "read_scope": "Matched cross-service completion event,not-running/not-legacy guards,ended task409;not MI_END engine execution.",
+        "outputs": [
+          "12663a"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java",
+        "sha256": "bfe1ce1806668c8e28c80a7614d7a5fff1fed2b7f65b3e18a56137e2cca627bf",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceTest.java",
+        "sha256": "70849370ea3d1010a6e5752e75458469b9886112889384720416ff7a282a8eb7",
+        "read_scope": "Matched lazy tracer construction test only;CAS and unknown broker behavior are in separate linked tests.",
+        "outputs": [
+          "a7460e"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceCasTest.java",
+        "sha256": "285db1618adc38c0a4025480439d68ef4abed95069973e3048d08ed69c46d1ba",
+        "read_scope": "Whole current test via remainder in 9d95fe and first70 lines in 489b5d: mocked claims/terminal CAS, concurrent AtomicBoolean and static SQL annotations. Not real DB/Broker execution.",
+        "outputs": [
+          "9d95fe",
+          "489b5d"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceUnknownBrokerTest.java",
+        "sha256": "1d1a9e3153a666aca8309df54a353144d1e4c7ae57386461cb6a1f8a8452c0ba",
+        "read_scope": "Selected31-75 actual mocked unknown broker FAILED/backoff and retry-ceiling DEAD_LETTER assertions;matched redaction/success declarations;not whole.",
+        "outputs": [
+          "a7460e",
+          "d9b6d0"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+        "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/SupplierPortalServiceImplTest.java",
+        "sha256": "63423723e10dc55947f3e3662976f09e5f67986f4d357ff5fe205d4d21aaa63b",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-srm/src/test/java/com/omni/srm/service/impl/PortalRoleResultServiceImplTest.java",
+        "sha256": "18f7979ded2cee6a8c6930a60b236b01b717fea6b401e57f2a9fd8f0a6f9fefe",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImpl.java",
+        "sha256": "d5932e2e482a7e936c4c31810aacfe858fd2e702e8e799e076d6363e14af5c4f",
+        "read_scope": "Selected64-107:processed/ignored same-event returns replayed=true,empty created IDs/count0; source-item backfill separately deduplicates. Prior current Asset review retains full original scope.",
+        "outputs": [
+          "b5b78d",
+          "9d95fe"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImplTest.java",
+        "sha256": "47402543759f886fb28e328ce59db146ecf54eead0dec6aac25691e0ef4d5b58",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImpl.java",
+        "sha256": "090b0c041065cca3bc8d8cd8df56ab9fc2758744b5cacc6f6312d679b830aead",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/WorkflowCompletionServiceImpl.java",
+        "sha256": "976068f09a92536fdf284e6504ac6e806ca38399ff257a18278d3193dee926d2",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImplTest.java",
+        "sha256": "f00013b89da9e4a1e1ad9d9fdf85ae619985e168653253966f910589b445ac91",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/WorkflowCompletionServiceImplTest.java",
+        "sha256": "748e5286e7f9356f0a114a4b9b1720444a823b9098a51e6c4f18690436973aa7",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "tools/omni-cli/src/service-integration-transaction.ts",
+        "sha256": "4ee021e95be7d74337b4eac23a3fe54a3794e9c13326349c6df09ca92cb46d7e",
+        "read_scope": "Whole current file: preflight, sibling temporary/backup paths, inner restore/rethrow, outer reverse rollback, incomplete rollback reporting, cleanup warnings and test-only failAfter.",
+        "outputs": [
+          "9d95fe"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "tools/omni-cli/src/preset-generator.ts",
+        "sha256": "2139e233787024453b57f9dcb0ae46b9544a42f69970b3cf6c4f9c71121f3bd0",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "tools/omni-cli/test/service-integration.test.ts",
+        "sha256": "e51713dcd4fd0bcba4e817accb7934cea814874c93401d431f260711f03ddee4",
+        "read_scope": "Unchanged exact named prior dependency; actual whole/selected scope remains in that immutable review. Not a new whole semantic read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "tools/omni-cli/test/preset-generator.test.ts",
+        "sha256": "832eedda8979000c11a3c047a3d3b7292329cf202ef68dd53d91c896e0e07b56",
+        "read_scope": "Matched generated output and pruning assertions;selected135-173 dependency preflight and isolated failed-staging cleanup,no target publication;not whole.",
+        "outputs": [
+          "a7460e",
+          "d9b6d0"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "tools/omni-cli/test/service-integration-renderer.test.ts",
+        "sha256": "0c9f35dc1f8366b6b89e616b366732ad44b97107cec92aa39c7068505da68d50",
+        "read_scope": "Selected185-235 and matched inventory:39 changes, inject failure after38, remove created paths and restore modified bytes/own transaction artifacts. Not new test execution.",
+        "outputs": [
+          "d19fcb",
+          "dbc2ab"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "compose.tools.yaml",
+        "sha256": "24d37d4437eb8f2c1bce2a7478a8566162c9d65f9ee111393b0131463732f035",
+        "read_scope": "Whole current Compose:backend JDK25/JAVA_HOME,working dir,source/cache binds,loopback-only127.0.0.1:5005:5005 service port; cli build/mount commands.",
+        "outputs": [
+          "43ca33"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "docs/scripts/source-excerpts.test.mjs",
+        "sha256": "794ac97f0b4da0ab0cf98addae2ca7ca3648adae626c2402fd422235c477fca0",
+        "read_scope": "Whole current guard:8documents and exact normalized source excerpts; text equivalence alone is not semantic/runtime approval.",
+        "outputs": [
+          "43ca33"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+        "read_scope": "User-authorized AI-only policy previously actually read; exact hash retained.",
+        "whole_current_file_actually_read": false
+      }
+    ]
+  },
+  "prior_named_reviews": [
+    {
+      "path": "docs/reference/reviews/source-map.json",
+      "sha256": "855099603da44c5392aedd30dc3d4d1de82c6ef8d3a29cf26939e6e8394a6038",
+      "source": "docs/reference/source-map.md",
+      "source_sha256": "a1a85b47805818ec2343e905a104a2030c636ea3c9cf61b4fc03fbc085425657",
+      "unchanged_dependency_occurrences": 0,
+      "additional_bindings_present": false,
+      "prior_scope_retained": true,
+      "new_whole_read": false
+    },
+    {
+      "path": "docs/reference/reviews/backend-patterns.json",
+      "sha256": "f88e81c0d3153d8e1648e61dc0d6c2b12ea13faf2ba63f09f847417727104d84",
+      "source": "docs/backend-patterns.md",
+      "source_sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7",
+      "unchanged_dependency_occurrences": 163,
+      "additional_bindings_present": true,
+      "prior_scope_retained": true,
+      "new_whole_read": false
+    },
+    {
+      "path": "docs/reference/reviews/workflow.json",
+      "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+      "source": "docs/workflow.md",
+      "source_sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389",
+      "unchanged_dependency_occurrences": 49,
+      "additional_bindings_present": true,
+      "prior_scope_retained": true,
+      "new_whole_read": false
+    },
+    {
+      "path": "docs/reference/reviews/mq-reliability.json",
+      "sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf",
+      "source": "docs/mq-reliability.md",
+      "source_sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957",
+      "unchanged_dependency_occurrences": 0,
+      "additional_bindings_present": false,
+      "prior_scope_retained": true,
+      "new_whole_read": false
+    },
+    {
+      "path": "docs/reference/reviews/srm.json",
+      "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f",
+      "source": "docs/srm.md",
+      "source_sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03",
+      "unchanged_dependency_occurrences": 76,
+      "additional_bindings_present": true,
+      "prior_scope_retained": true,
+      "new_whole_read": false
+    },
+    {
+      "path": "docs/reference/reviews/asset-design.json",
+      "sha256": "fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747",
+      "source": "docs/design/asset-design.md",
+      "source_sha256": "65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620",
+      "unchanged_dependency_occurrences": 66,
+      "additional_bindings_present": true,
+      "prior_scope_retained": true,
+      "new_whole_read": false
+    },
+    {
+      "path": "docs/reference/reviews/guide-scaffold-development.json",
+      "sha256": "27b7ba81bf232998d903b635074dd8498b3597354d0d8ddfc7795f470524ab21",
+      "source": "docs/guides/scaffold-development.md",
+      "source_sha256": "6777bfff1f5df08ed873439137df9bba9dd389e211ec8d11de59877e54472351",
+      "unchanged_dependency_occurrences": 216,
+      "additional_bindings_present": true,
+      "prior_scope_retained": true,
+      "new_whole_read": false
+    },
+    {
+      "path": "docs/reference/reviews/guide-authentication.json",
+      "sha256": "ff34f4c780b1d8ad98ea0cf06fd45a869863511936f53426028abad50e418ec2",
+      "source": "docs/guides/authentication.md",
+      "source_sha256": "127d2a8396618e2dbb787d9a72e838cf26991b719bb8a9c81a93d6e4d04cf09f",
+      "unchanged_dependency_occurrences": 0,
+      "additional_bindings_present": false,
+      "prior_scope_retained": true,
+      "new_whole_read": false
+    },
+    {
+      "path": "docs/reference/reviews/guide-permissions.json",
+      "sha256": "234b4df9b9bff01ad1f976b0cbb53f9a45a022d049e81ca0c30ddecef571ec89",
+      "source": "docs/guides/permissions.md",
+      "source_sha256": "8878710f45b3aab84590c57c5539a6f321e5a31c168de1f7e37edcfdf0a76ad2",
+      "unchanged_dependency_occurrences": 91,
+      "additional_bindings_present": true,
+      "prior_scope_retained": true,
+      "new_whole_read": false
+    }
+  ],
+  "prior_binding_audit": {
+    "dependency_occurrences_checked": 661,
+    "matching_unique_files": 512,
+    "changed_dependencies_excluded": [
+      {
+        "review": "docs/reference/reviews/backend-patterns.json",
+        "path": "docs/guides/troubleshooting.md",
+        "recorded_sha256": "ca3b52f3ca65143331fb46b69ff96b1fe46ff98a2b12ab4ce201f226e7d9ee20",
+        "current_sha256": "2481ddc1de179b76290b46c2506b8f71fce0d3c6d60be1ceca25369f940b7dbb",
+        "excluded_from_reuse": true
+      }
+    ],
+    "not_new_whole_source_reads": true
+  },
+  "primary_references": [
+    {
+      "url": "https://maven.apache.org/surefire/maven-surefire-plugin/examples/debugging.html",
+      "actual_output": "turn30view0",
+      "claim": "maven.surefire.debug accepts explicit JDWP agent settings for a forked test JVM."
+    },
+    {
+      "url": "https://docs.oracle.com/en/java/javase/25/docs/specs/jpda/conninv.html",
+      "actual_output": "turn30view1",
+      "claim": "Empty host uses loopback; wildcard host listens on container interfaces. Host published port stays loopback."
+    }
+  ],
+  "current_source_semantics": {
+    "captcha": "RedisGETDEL consumes beforecomparison,password andfailure refresh;no standalone auth CAPTCHA unit test,actual humanCAPTCHA/login remains separate.",
+    "identity": "Gateway strips forged identity,signs verified JWT claims,downstream HMAC/freshness and missing-key failclosed.",
+    "scope": "Authoritative permission/user/tenant match with finally cleanup and aggregate child inheritance;not menu-only authorization.",
+    "workflow": "Publish lock precedes validation anddeployment;MI_END historyauto-approved isengine skip,notmanual approval vote.",
+    "outbox": "Leaseclaim CAS and terminalguard/backoff;namedCAS test usesmocks/AtomicBoolean andSQLannotationassertions,notrealDB/Broker.",
+    "portal": "USERenroll,invite/request idempotency;SUPPLIER plusactiveassociationforportal;noportalIDinternalownership.",
+    "receipt": "Processed/ignoredsameevent=>replayed=true,createdCount0;separatesource-line/unitdedup;eligiblePASS+managed+positiveinteger;decimalstrings.",
+    "occupancy": "Atomicoperationreservation,previousstate restoration/currentoperation matching;staleeventcannotrelease neweroccupancy.",
+    "cli": "39rendererchanges;failAfter38 tests reverse rollback,newfile removal/original restore/artifactcleanup;innerrestore/rethrowversusouterrollback.",
+    "debug": "Explicit forked-test Surefireagent,address=*:5005 insidecontainer;hostonly127.0.0.1:5005 viaexistingCompose;no globalJAVA_TOOL_OPTIONScontention;noactualnewattach claimed.",
+    "policy": "Actual authorized AI_REVIEW sufficient;human document review optional;no CAPTCHA orexternalaccount boundary waived."
+  },
+  "guide_images": 0,
+  "new_application_build_or_test_runs": 0,
+  "business_writes": 0,
+  "new_captures": 0,
+  "historical_successful_writes_replayed": false,
+  "human_review": false,
+  "human_review_required": false,
+  "limitations": [
+    "No new tests/IDE attachment/real database or Broker delivery proved by this review. Existing test links support only actual assertions.",
+    "Prior named reviews retain original whole/selected/document scope;one changed unrelated prior document dependency excluded from reuse.",
+    "Remaining A-G,othertranslations,OAuth0/3,real SRM CAPTCHA,native Qoder,current goldens/presets/finalsite/integratedacceptance remain open."
+  ]
+}

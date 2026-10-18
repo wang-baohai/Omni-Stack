@@ -16,15 +16,17 @@ Start with the smallest preset that covers near-term requirements. Adding a cata
 
 ## Commands
 
-~~~powershell
-Set-Location tools/omni-cli
-npm ci
-npm run build
-node dist/src/cli.js preset list
-node dist/src/cli.js preset explain workflow
-node dist/src/cli.js preset create workflow --output C:\WorkSpace\my-workflow --dry-run
-node dist/src/cli.js preset create workflow --output C:\WorkSpace\my-workflow
-node dist/src/cli.js preset validate workflow --output C:\WorkSpace\my-workflow
+Run these commands at the source repository root. Dependency installation, CLI build and execution use the local Docker tooling container; learning output goes into the separate generated/my-workflow directory.
+
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml build cli
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm ci
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run build
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset list
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset explain workflow
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create workflow --output generated/my-workflow --dry-run
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create workflow --output generated/my-workflow
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset validate workflow --output generated/my-workflow
 ~~~
 
 The preview reports the dependency closure, backend modules, Compose services, ports, databases, permission roots, and memory estimate. The output must be missing or empty. `scaffold.lock` records source, preset, module, and template versions.
@@ -33,9 +35,9 @@ The preview reports the dependency closure, backend modules, Compose services, p
 
 First create `.env` in the generated project from its bundled `.env.example` and fill in self-generated random secrets (required items and the isolation project/ports/volume/image namespace are covered in the Custom Preset Tutorial §4; without `.env`, `docker compose config` fails with required variable missing). Then build the generated backend, and run frontend `npm ci`, lint/build, and `docker compose config --quiet`. Repository maintainers also run:
 
-~~~powershell
-npm run test:preset-structure
-npm run test:preset-smoke
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-structure
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-smoke
 ~~~
 
 `test:preset-golden` runs the full build matrix for all five presets, suitable for nightly or pre-release. Database fresh migration, real startup, and browser smoke tests are runtime acceptance and cannot be replaced by structure checks.

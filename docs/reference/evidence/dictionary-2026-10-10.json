@@ -1,0 +1,302 @@
+{
+  "schema": 1,
+  "kind": "local-docker-dictionary-create-validation-and-cleanup-evidence",
+  "recorded_at": "2026-10-12T00:51:52.239Z",
+  "capture_run_at": "2026-10-10T09:06:54.709Z",
+  "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "source_worktree_dirty": true,
+  "source_scope": "omni-frontend/src (sorted paths and file SHA-256)",
+  "source_sha256": "49b686973c22cc8f82c23f3b8c56848fc66764146fa128c0f505f371827f7222",
+  "test": "omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts",
+  "test_sha256": "79b53a3055de2f8b98ca0610b0db31c291c4072051cca225ba101c6224df6bd3",
+  "fixture": {
+    "project": "omni-wiki-acceptance-20261009",
+    "tenant_id": 1,
+    "run_stamp": 1791623215521,
+    "host_ports": []
+  },
+  "tools": {
+    "runtime": "local Docker",
+    "browser": "mcr.microsoft.com/playwright:v1.61.1-noble",
+    "browser_image_id": "sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48"
+  },
+  "runtime_snapshot": [
+    {
+      "service": "omni-frontend",
+      "image_id": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+      "image": "omni-wiki-acceptance-frontend:workflow-roundtrip-20261010",
+      "started_at": "2026-10-10T03:20:46.725424729Z",
+      "project": "omni-wiki-acceptance-20261009",
+      "host_ports": []
+    },
+    {
+      "service": "omni-base",
+      "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+      "image": "omni-wiki-acceptance-base:latest",
+      "started_at": "2026-10-10T00:37:21.577211588Z",
+      "project": "omni-wiki-acceptance-20261009",
+      "host_ports": []
+    },
+    {
+      "service": "omni-auth",
+      "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+      "image": "omni-wiki-acceptance-auth:latest",
+      "started_at": "2026-10-10T00:37:21.377388856Z",
+      "project": "omni-wiki-acceptance-20261009",
+      "host_ports": []
+    },
+    {
+      "service": "omni-gateway",
+      "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+      "image": "omni-wiki-acceptance-gateway:latest",
+      "started_at": "2026-10-10T00:37:23.773590531Z",
+      "project": "omni-wiki-acceptance-20261009",
+      "host_ports": []
+    }
+  ],
+  "results": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "duration_ms": 24460.186,
+    "empty_submission": {
+      "http_status": 400,
+      "business_code": 400,
+      "created": false
+    },
+    "images": 12,
+    "deleted": 4,
+    "residual": 0
+  },
+  "cleanup": [
+    {
+      "locale": "zh-CN",
+      "type_code": "E2EDICT-1791623215521-zh-CN",
+      "id": 27,
+      "http_status": 200,
+      "business_code": 200,
+      "deleted": true,
+      "still_listed": false
+    },
+    {
+      "locale": "en-US",
+      "type_code": "E2EDICT-1791623215521-en-US",
+      "id": 28,
+      "http_status": 200,
+      "business_code": 200,
+      "deleted": true,
+      "still_listed": false
+    },
+    {
+      "locale": "ja-JP",
+      "type_code": "E2EDICT-1791623215521-ja-JP",
+      "id": 29,
+      "http_status": 200,
+      "business_code": 200,
+      "deleted": true,
+      "still_listed": false
+    },
+    {
+      "locale": "ko-KR",
+      "type_code": "E2EDICT-1791623215521-ko-KR",
+      "id": 30,
+      "http_status": 200,
+      "business_code": 200,
+      "deleted": true,
+      "still_listed": false
+    }
+  ],
+  "images": [
+    {
+      "image": "docs/images/zh-CN/system-dictionary-create-form.png",
+      "sha256": "ec1e6b23be51ed4f249200aec7347af16d1256b53e3b5f4d7b272d409d8eef65",
+      "captured_at": "2026-10-10T09:06:58.503Z",
+      "locale": "zh-CN",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "form",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/zh-CN/system-dictionary-create-validation.png",
+      "sha256": "926bf8d6fafceb8de7baec7c3698476412d05f343759832e3c7d9771a9750ee6",
+      "captured_at": "2026-10-10T09:06:59.010Z",
+      "locale": "zh-CN",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "validation",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/zh-CN/system-dictionary-create-success.png",
+      "sha256": "701b691ce5944676e35f948c7d679fdbd641cdbbdc95050824f163c8e1059d7c",
+      "captured_at": "2026-10-10T09:07:02.518Z",
+      "locale": "zh-CN",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "success",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/en-US/system-dictionary-create-form.png",
+      "sha256": "91cc59d6c3b7d9a69125ebb06456be726c38a8bd46e8d3b84dbe77a0aad1bf80",
+      "captured_at": "2026-10-10T09:07:03.747Z",
+      "locale": "en-US",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "form",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/en-US/system-dictionary-create-validation.png",
+      "sha256": "8c9705183af6a2e12ce27f6dfdac0f0cc90cffa5f3384c631786d95f0f50ed2f",
+      "captured_at": "2026-10-10T09:07:04.218Z",
+      "locale": "en-US",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "validation",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/en-US/system-dictionary-create-success.png",
+      "sha256": "c2d7e95de63d692e70a936312756dcc2c3d4b5bbe2cf6ede5b7671ce07a36a47",
+      "captured_at": "2026-10-10T09:07:07.626Z",
+      "locale": "en-US",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "success",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/ja-JP/system-dictionary-create-form.png",
+      "sha256": "545506e977a9103e5216f6bb56043473d2786688a2164e94acab671f9bf33fb0",
+      "captured_at": "2026-10-10T09:07:08.740Z",
+      "locale": "ja-JP",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "form",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/ja-JP/system-dictionary-create-validation.png",
+      "sha256": "8d7809c4ea3ff31a6827fa70a35b2274b66e13c6df2d3b98ed9cb21aea818b5d",
+      "captured_at": "2026-10-10T09:07:09.213Z",
+      "locale": "ja-JP",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "validation",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/ja-JP/system-dictionary-create-success.png",
+      "sha256": "80d926fe717d297cbe7bed79d5b934834cec906f40e9fdf215df53e41fc6ff0a",
+      "captured_at": "2026-10-10T09:07:13.082Z",
+      "locale": "ja-JP",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "success",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/ko-KR/system-dictionary-create-form.png",
+      "sha256": "3da54833c3c7906ec6080ecf278f415817b8a6d8de6b91333fd03efecb1ae23c",
+      "captured_at": "2026-10-10T09:07:14.650Z",
+      "locale": "ko-KR",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "form",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/ko-KR/system-dictionary-create-validation.png",
+      "sha256": "e859fd7131e0cd51ea43fe1478f1bb2880c81f2669a587f9b105f511f1d13c70",
+      "captured_at": "2026-10-10T09:07:17.801Z",
+      "locale": "ko-KR",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "validation",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    },
+    {
+      "image": "docs/images/ko-KR/system-dictionary-create-success.png",
+      "sha256": "3628f052be0ade0256f3b13bb1183e1345e2f7e62a1a72c0496a2a255977472d",
+      "captured_at": "2026-10-10T09:07:18.486Z",
+      "locale": "ko-KR",
+      "route": "/admin/base/dict",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "state": "success",
+      "role": "admin/SUPER_ADMIN",
+      "visual_review": "passed-with-recorded-limits",
+      "mocks": false
+    }
+  ],
+  "scope_limits": [
+    "This evidence covers dictionary creation, real empty-field rejection and exact cleanup only; it does not close other system-management flows.",
+    "Capture actor is admin/SUPER_ADMIN; ordinary employee authorization is not established by this run.",
+    "Validation prefix is localized, while typeCode/typeName remain API field identifiers. Japanese/Korean remark translation is still Remark in the application. The remark row is not legible in the Japanese form/validation originals; no visibility claim is made for that optional row.",
+    "The right data panel is empty until a dictionary type is selected. The English system sidebar label is clipped; neither limitation blocks the demonstrated central state.",
+    "An earlier private image batch was rejected for invisible error toast and stale error/loading overlays. Those images were not promoted.",
+    "Source SHA-256 is limited to sorted omni-frontend/src paths and file digests. It does not by itself prove that every runtime image was built from that working tree.",
+    "Automatic tests and image inspection do not constitute human translation sign-off."
+  ],
+  "human_translation_review": false
+}

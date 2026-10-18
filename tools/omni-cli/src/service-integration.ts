@@ -20,10 +20,14 @@ const STRUCTURAL_TARGETS = {
   router: 'omni-frontend/src/router/index.ts',
   zhLocale: 'omni-frontend/src/locales/zh-CN.ts',
   enLocale: 'omni-frontend/src/locales/en-US.ts',
+  jaLocale: 'omni-frontend/src/locales/ja-JP.ts',
+  koLocale: 'omni-frontend/src/locales/ko-KR.ts',
   authChangelog: 'database/changelog/auth/db.changelog-auth.yaml',
   seedManifest: 'database/seed/manifest.yaml',
   platformChangelog: 'database/changelog/platform/db.changelog-platform.yaml',
   migrationCatalog: 'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
+  docsManifest: 'docs/docs-manifest.yaml',
+  reviewQueue: 'docs/i18n-review-queue.md',
 } as const;
 
 /**
@@ -62,6 +66,13 @@ export function planServiceIntegration(
   );
   inspectFrontendRegistration(workspaceRoot, lock.spec.className, serviceId, operations, conflicts);
   planSeedIntegration(workspaceRoot, serviceId, operations, conflicts, warnings);
+  const documents = readYamlFile(resolve(workspaceRoot, STRUCTURAL_TARGETS.docsManifest)) as { documents: Array<{ id: string; source: string }> };
+  if (documents.documents.some((document) => document.id === `service-${serviceId}` || document.source === `docs/${serviceId}.md`)) {
+    conflicts.push(`文档清单已登记服务：${serviceId}`);
+  }
+  readRequiredFile(workspaceRoot, STRUCTURAL_TARGETS.reviewQueue);
+  operations.push({ kind: 'modify-yaml', target: STRUCTURAL_TARGETS.docsManifest, description: '登记四语言模块文档及待语义复核摘要' });
+  operations.push({ kind: 'modify-markdown', target: STRUCTURAL_TARGETS.reviewQueue, description: '在接入事务中重新生成翻译复核队列' });
   if (options.checkGit === false) warnings.push('Git 目标文件检查由测试调用方显式隔离');
   else inspectDirtyTargets(workspaceRoot, operations, conflicts);
 
@@ -108,6 +119,12 @@ function planGeneratedTrees(
       target: `docs/${serviceId}.md`,
       description: '创建模块维护说明',
     },
+    ...['en', 'jp', 'kr'].map((suffix) => ({
+      kind: 'create-file' as const,
+      source: `docs/${serviceId}.${suffix}.md`,
+      target: `docs/${serviceId}.${suffix}.md`,
+      description: `创建 ${suffix} 模块维护说明（待语义复核）`,
+    })),
     {
       kind: 'create-file' as const,
       source: `docs/${serviceId}-i18n-status.yaml`,
@@ -286,14 +303,17 @@ function inspectFrontendRegistration(
   inspectTsObject(workspaceRoot, STRUCTURAL_TARGETS.router, 'iconMap', serviceId, conflicts);
   inspectTsObject(workspaceRoot, STRUCTURAL_TARGETS.router, 'iconMap', `${serviceId}:overview`, conflicts);
   operations.push({ kind: 'modify-typescript', target: STRUCTURAL_TARGETS.router, description: `登记 ${serviceId} 菜单图标` });
-  inspectLocaleCommon(workspaceRoot, STRUCTURAL_TARGETS.zhLocale, `${lowerFirst(className)}Management`, conflicts);
-  inspectLocaleCommon(workspaceRoot, STRUCTURAL_TARGETS.zhLocale, `${lowerFirst(className)}Overview`, conflicts);
-  inspectLocaleRoot(workspaceRoot, STRUCTURAL_TARGETS.zhLocale, serviceId, conflicts);
-  inspectLocaleCommon(workspaceRoot, STRUCTURAL_TARGETS.enLocale, `${lowerFirst(className)}Management`, conflicts);
-  inspectLocaleCommon(workspaceRoot, STRUCTURAL_TARGETS.enLocale, `${lowerFirst(className)}Overview`, conflicts);
-  inspectLocaleRoot(workspaceRoot, STRUCTURAL_TARGETS.enLocale, serviceId, conflicts);
-  operations.push({ kind: 'modify-typescript', target: STRUCTURAL_TARGETS.zhLocale, description: `登记 ${serviceId} 简体中文翻译` });
-  operations.push({ kind: 'modify-typescript', target: STRUCTURAL_TARGETS.enLocale, description: `登记 ${serviceId} 英文翻译` });
+  for (const [target, language] of [
+    [STRUCTURAL_TARGETS.zhLocale, '简体中文'],
+    [STRUCTURAL_TARGETS.enLocale, '英文'],
+    [STRUCTURAL_TARGETS.jaLocale, '日文'],
+    [STRUCTURAL_TARGETS.koLocale, '韩文'],
+  ] as const) {
+    inspectLocaleCommon(workspaceRoot, target, lowerFirst(className) + 'Management', conflicts);
+    inspectLocaleCommon(workspaceRoot, target, lowerFirst(className) + 'Overview', conflicts);
+    inspectLocaleRoot(workspaceRoot, target, serviceId, conflicts);
+    operations.push({ kind: 'modify-typescript', target: target, description: '登记 ' + serviceId + ' ' + language + '翻译' });
+  }
 }
 
 function planSeedIntegration(

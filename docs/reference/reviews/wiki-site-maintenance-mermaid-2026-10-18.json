@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "wiki-site-maintenance",
+  "source": "docs/wiki/site-maintenance.md",
+  "source_sha256": "c1e408112efd4176dfc4bf4ec303248c7b0c1042720365651ed59eb024dd8f34",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "303d6a39875a624f7c5b7c26df06184749a53b6f",
+  "source_state": "Actual four-paragraph semantic delta and complete new theme source review; reuse the exact matching prior complete four-language maintenance review for all unchanged content.",
+  "method": "Reuse the hash-matching complete prior four-language maintenance review for unchanged text; actually read every changed paragraph and the new theme source in73929e. All code fences,links,commands and other text remain unchanged. Review the bundled SVG behavior and three translations without claiming build/browser acceptance or a fresh whole-document reread.",
+  "prior_complete_semantic_review": {
+    "path": "docs/reference/reviews/wiki-site-maintenance.json",
+    "sha256": "447cfaeb12ececd14027a46e899e804666897197098bf2614545a4d9616907df",
+    "source_sha256": "a56b27a8c5263fc2aea5f538de896d7e6d5bebe581dc9e57336140d8ebb06ffb"
+  },
+  "checked_source_files": [
+    {
+      "path": "docs/.vitepress/theme/index.mjs",
+      "sha256": "af860ce8f9ea054965f0ae1aa58fbad27d003e965ce7320a3b0e17aee7279d9c"
+    },
+    {
+      "path": "docs/.vitepress/theme/DiagramLayout.vue",
+      "sha256": "0bac16ab90e68db668a02f2aaf19afb32faeeb62fbbcdd81c0171a45de5c32fa"
+    },
+    {
+      "path": "docs/package.json",
+      "sha256": "90ea9d68c2b7d30bd2203b7ec7fa1edadc80dc4dbcb286355aea271eddf1c2bd"
+    },
+    {
+      "path": "docs/package-lock.json",
+      "sha256": "8dc8a419a660feb88855b304c875f97da0c832554a9d45437e709821d909e5d1"
+    },
+    {
+      "path": "docs/scripts/prepare-site.mjs",
+      "sha256": "1f105d33b72ee8bd9dc52c2d1a886a0d9ff4e840c934175e86448d1f30c5655c"
+    },
+    {
+      "path": "docs/.vitepress/config.mjs",
+      "sha256": "1634a1821170bb9dc9c42952854499287be6ceb7cef404a6f3f66b1871a13a29"
+    },
+    {
+      "path": "docker/docs/Dockerfile",
+      "sha256": "8435a28785a37d637fad2a19fd921ce37e8f26e5256d0e499c70e293953100f4"
+    },
+    {
+      "path": "docs/reference/reviews/wiki-site-maintenance.json",
+      "sha256": "447cfaeb12ececd14027a46e899e804666897197098bf2614545a4d9616907df"
+    },
+    {
+      "path": "docs/reference/evidence/wiki-mermaid-integration-2026-10-18.json",
+      "sha256": "5658b6fcd8856b8c0a90ab6921186333920e035a1abc2027885ed77dea914745"
+    }
+  ],
+  "source_inspection_scope": "Actual four-paragraph semantic delta and complete new theme source review; reuse the exact matching prior complete four-language maintenance review for all unchanged content.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "actual_final_delta_read_output": "73929e",
+    "mermaid_version": "11.17.2",
+    "existing_dependency_versions_and_integrities_unchanged": true,
+    "all_other_document_text_and_fences_unchanged": true,
+    "prior_complete_semantic_review_reused": true,
+    "new_whole_document_rereads": 0,
+    "build_and_browser_acceptance_pending": true,
+    "new_translation_rows": 0,
+    "renewed_translation_rows": 3,
+    "business_writes": 0,
+    "limitations": [
+      "This approves the actual source/translation delta and theme integration source. Full Docker image builds, SVG parsing, native route/theme behavior, failure fallback and visual readability still require actual browser validation.",
+      "No application source, permission, real account authorization, CAPTCHA or business write changed. All original A-G remain.",
+      "The current dependency attestation and five-preset delivery scopes need final alignment after source changes settle. Existing global screenshot gaps remain."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/site-maintenance.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 02:57:41",
+      "result": "approved",
+      "translation_sha256": "89cfe8d6b5188ae05d73976f6a15b432a57eb24e57b70aba55fa7e78e624c3f5",
+      "checks": {
+        "coverage_and_meaning": "实际对照73929e中的四语完整变更段落：图片复制、仓库原文可读、构建同捆Mermaid、浏览器SVG、页面及明暗主题切换、失败保留源码、大图区域内滚动、无外部图服务八项含义一致。其余正文与摘要匹配的旧完整语义复核逐字相同，未冒称新整篇重读。",
+        "technical_literals": "保留docs/images、Mermaid和SVG字面量。完整检查新Layout：延迟客户端import、strict安全级别、等待字体、route.path与isDark监听、代次/连接状态守卫、WeakMap保存源码、渲染成功后替换、viewBox自然尺寸和局部滚动。保留v-pre投影及全部规范图表围栏；Mermaid精确固定11.17.2并核对registry完整性，既有版本和完整性解析不变。",
+        "security_and_failure_semantics": "strict模式、源码失败回退、错误日志和浏览器验收要求与段落相符。没有CDN、外部图服务或宿主应用运行。既有登录/CAPTCHA、真实认证与fixture区别、严格发布门和实际AI授权摘要条件均不变；代码检查不冒称真实浏览器通过。",
+        "images_and_links": "图片、Markdown链接、标题锚点、命令、代码围栏和其余正文均未变化。新theme由docs交付与正式Docker构建包含，独立文档站仍不依赖业务服务。保留568真实SVG失败与移动过渡遮罩发现，后续原生交互和原图查看需单独记录。",
+        "language_and_terminology": "Compared the exact final English paragraph with Chinese in73929e. Bundled at build time, browser SVG rendering, page and light/dark theme updates, source fallback, independently scrollable large diagrams and no external rendering service all retain the Chinese meaning. Remaining content is byte-identical to the matching prior complete review."
+      },
+      "findings": [
+        {
+          "id": "MM01",
+          "status": "resolved",
+          "resolution": "Replace the obsolete raw-source-only site description in all four languages with the behavior of the bundled client renderer; keep canonical diagram source and v-pre."
+        },
+        {
+          "id": "MM02",
+          "status": "resolved",
+          "resolution": "Keep all eight updated meanings aligned across the source and three translations. Reuse only the hash-matching unchanged complete review."
+        },
+        {
+          "id": "MM03",
+          "status": "resolved",
+          "resolution": "Renew three existing AI_REVIEW rows with current digests, retaining the prior full review; add no new rows and claim no human review or browser pass."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/site-maintenance.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 02:57:41",
+      "result": "approved",
+      "translation_sha256": "e4a7f4a152fbff174d75c43ed1c5975d0e06bca454600c7f36313c486a5cb938",
+      "checks": {
+        "coverage_and_meaning": "实际对照73929e中的四语完整变更段落：图片复制、仓库原文可读、构建同捆Mermaid、浏览器SVG、页面及明暗主题切换、失败保留源码、大图区域内滚动、无外部图服务八项含义一致。其余正文与摘要匹配的旧完整语义复核逐字相同，未冒称新整篇重读。",
+        "technical_literals": "保留docs/images、Mermaid和SVG字面量。完整检查新Layout：延迟客户端import、strict安全级别、等待字体、route.path与isDark监听、代次/连接状态守卫、WeakMap保存源码、渲染成功后替换、viewBox自然尺寸和局部滚动。保留v-pre投影及全部规范图表围栏；Mermaid精确固定11.17.2并核对registry完整性，既有版本和完整性解析不变。",
+        "security_and_failure_semantics": "strict模式、源码失败回退、错误日志和浏览器验收要求与段落相符。没有CDN、外部图服务或宿主应用运行。既有登录/CAPTCHA、真实认证与fixture区别、严格发布门和实际AI授权摘要条件均不变；代码检查不冒称真实浏览器通过。",
+        "images_and_links": "图片、Markdown链接、标题锚点、命令、代码围栏和其余正文均未变化。新theme由docs交付与正式Docker构建包含，独立文档站仍不依赖业务服务。保留568真实SVG失败与移动过渡遮罩发现，后续原生交互和原图查看需单独记录。",
+        "language_and_terminology": "73929eの変更段落を中文と照合した。同梱・ブラウザー内SVG描画・ページとライト/ダークテーマの更新・失敗時のソース保持・図領域内スクロール・外部描画サービス不要の意味を保つ。既存の画像コピーとリポジトリ可読性を保持し、他の本文は過去の完全レビューと一致する。"
+      },
+      "findings": [
+        {
+          "id": "MM01",
+          "status": "resolved",
+          "resolution": "Replace the obsolete raw-source-only site description in all four languages with the behavior of the bundled client renderer; keep canonical diagram source and v-pre."
+        },
+        {
+          "id": "MM02",
+          "status": "resolved",
+          "resolution": "Keep all eight updated meanings aligned across the source and three translations. Reuse only the hash-matching unchanged complete review."
+        },
+        {
+          "id": "MM03",
+          "status": "resolved",
+          "resolution": "Renew three existing AI_REVIEW rows with current digests, retaining the prior full review; add no new rows and claim no human review or browser pass."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/site-maintenance.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 02:57:41",
+      "result": "approved",
+      "translation_sha256": "31f6fedbca9ff9f1bd95a21053c4c15d08ba802738b1a273329378af7362204c",
+      "checks": {
+        "coverage_and_meaning": "实际对照73929e中的四语完整变更段落：图片复制、仓库原文可读、构建同捆Mermaid、浏览器SVG、页面及明暗主题切换、失败保留源码、大图区域内滚动、无外部图服务八项含义一致。其余正文与摘要匹配的旧完整语义复核逐字相同，未冒称新整篇重读。",
+        "technical_literals": "保留docs/images、Mermaid和SVG字面量。完整检查新Layout：延迟客户端import、strict安全级别、等待字体、route.path与isDark监听、代次/连接状态守卫、WeakMap保存源码、渲染成功后替换、viewBox自然尺寸和局部滚动。保留v-pre投影及全部规范图表围栏；Mermaid精确固定11.17.2并核对registry完整性，既有版本和完整性解析不变。",
+        "security_and_failure_semantics": "strict模式、源码失败回退、错误日志和浏览器验收要求与段落相符。没有CDN、外部图服务或宿主应用运行。既有登录/CAPTCHA、真实认证与fixture区别、严格发布门和实际AI授权摘要条件均不变；代码检查不冒称真实浏览器通过。",
+        "images_and_links": "图片、Markdown链接、标题锚点、命令、代码围栏和其余正文均未变化。新theme由docs交付与正式Docker构建包含，独立文档站仍不依赖业务服务。保留568真实SVG失败与移动过渡遮罩发现，后续原生交互和原图查看需单独记录。",
+        "language_and_terminology": "73929e의 최종한국어단락을중국어와대조했다. 빌드포함,브라우저SVG렌더링,페이지및밝은/어두운테마전환시갱신,실패시소스유지,영역내스크롤,외부서비스비의존을모두보존한다. 기존그림복사와저장소가독성및나머지본문을유지한다."
+      },
+      "findings": [
+        {
+          "id": "MM01",
+          "status": "resolved",
+          "resolution": "Replace the obsolete raw-source-only site description in all four languages with the behavior of the bundled client renderer; keep canonical diagram source and v-pre."
+        },
+        {
+          "id": "MM02",
+          "status": "resolved",
+          "resolution": "Keep all eight updated meanings aligned across the source and three translations. Reuse only the hash-matching unchanged complete review."
+        },
+        {
+          "id": "MM03",
+          "status": "resolved",
+          "resolution": "Renew three existing AI_REVIEW rows with current digests, retaining the prior full review; add no new rows and claim no human review or browser pass."
+        }
+      ]
+    }
+  }
+}

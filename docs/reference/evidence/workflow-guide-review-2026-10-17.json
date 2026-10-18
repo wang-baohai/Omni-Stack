@@ -1,0 +1,820 @@
+{
+  "schema": 1,
+  "kind": "current-document-source-and-selected-original-image-audit",
+  "recorded_at": "2026-10-17T11:26:58.863Z",
+  "source_baseline": "b4b384ed5bd85049cb055d125912b4b41376e239",
+  "document_id": "guide-workflow-approval",
+  "evidence_kind": "AI semantic source/provenance/visual inspection,not a new application or business test",
+  "original_documents_actually_read": 4,
+  "original_whole_lines": 712,
+  "original_source_sha256": "c21212ab97a79f356db8c370345def9ef21a2e48807c091609cbf13ef7293ba0",
+  "original_image_evidence": {
+    "path": "docs/reference/evidence/workflow-2026-10-10.json",
+    "sha256": "7b4fdc5fc94091bcc2380244ea80a01cd26543159f2eb2c1a146875a59ae4399",
+    "recorded_at": "2026-10-10T04:06:36.965Z",
+    "updated_at": "2026-10-10T08:38:40.487Z",
+    "images_exact_path_locale_hash_matches": 84,
+    "application_aggregate_scope": "Sorted production application paths: SHA256 of path + space + file SHA256 + newline. This aggregate describes the final frontend/backend pair only; earlier frames keep their verified runtime epoch and do not inherit it."
+  },
+  "prior_current_fact_review": {
+    "path": "docs/reference/reviews/workflow.json",
+    "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+    "unchanged_named_dependencies": 49,
+    "new_whole_read_claim": false
+  },
+  "capture_epoch_groups": [
+    {
+      "frontend": "sha256:2b13586a8383a051960355772d5ea31da37fb81cbe307c6b2ca5344991c0d842",
+      "workflow": "sha256:b2296a5b1206b492176bfa5aae197aed5cb473e32934467142fbaa81371d4b86",
+      "status": "passed",
+      "method": "All18 original-resolution four-locale contact sheets were visually inspected, covering72 unchanged originals. QA sheet labels are private and never published as screenshots.",
+      "count": 3
+    },
+    {
+      "frontend": "sha256:73e1a59815a5a469d6d6ca90ae71931227cc0029d2b6495794eeb12312df9a25",
+      "workflow": "sha256:b2296a5b1206b492176bfa5aae197aed5cb473e32934467142fbaa81371d4b86",
+      "status": "passed",
+      "method": "All18 original-resolution four-locale contact sheets were visually inspected, covering72 unchanged originals. QA sheet labels are private and never published as screenshots.",
+      "count": 1
+    },
+    {
+      "frontend": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+      "workflow": "sha256:b2296a5b1206b492176bfa5aae197aed5cb473e32934467142fbaa81371d4b86",
+      "status": "passed",
+      "method": "All18 original-resolution four-locale contact sheets were visually inspected, covering72 unchanged originals. QA sheet labels are private and never published as screenshots.",
+      "count": 1
+    },
+    {
+      "frontend": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+      "workflow": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+      "status": "passed",
+      "method": "All18 original-resolution four-locale contact sheets were visually inspected, covering72 unchanged originals. QA sheet labels are private and never published as screenshots.",
+      "count": 67
+    },
+    {
+      "frontend": "sha256:3ce2208a53693aa26bedb8bbf687f8a3950d2f6b1b000fa97c208b7d134fc6df",
+      "workflow": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+      "status": "passed",
+      "method": "All12 original1920x1080 images were individually inspected; PNG bytes remain unchanged.",
+      "count": 12
+    }
+  ],
+  "current_source_inspection": {
+    "whole_files": 7,
+    "whole_lines": 628,
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Current navigation rule241read;prior execution rules retained.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "database/changelog/workflow/0001-workflow-schema.yaml",
+        "sha256": "bf1c826c33a4481ae51df5c13f2be0e49bcf035f6ff528fa6d932c169329fa8e",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Selected version/dependency/schema inventory only;further selected semantic reads pending",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/pom.xml",
+        "sha256": "76302d6e470b88599093b6fd81bef957c38fb030c65328a42f2212f4d553b8c4",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Selected version/dependency/schema inventory only;further selected semantic reads pending",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/approval/ApprovalServiceImpl.java",
+        "sha256": "bb3835b2067a5cca21f63fad58ceec5550b8751cc705eb476c268f9b299a35be",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/config/FlowableAutoConfiguration.java",
+        "sha256": "6f37d9e50fc3d081a79c6cbac2a84f36761d54e5019dcb7a489b55df2816c2c2",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/notification/NoOpNotificationService.java",
+        "sha256": "20ce08ddbbdee024659e4fb022d7b7848689a9383b12c1a420bd614d04c77959",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/tenant/TenantInfoFilter.java",
+        "sha256": "a7008bd20d0a358fa0af2220dc8dd2e025e0fdc4b54c31a77f351fd78869bee2",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/pom.xml",
+        "sha256": "615657791592a837a4f3b464a8252d20b16ca143d33f9c930d9f7d685da09168",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/MybatisPlusConfig.java",
+        "sha256": "b787ea78976b1ae4aac3a8ef8aadf20daccadedbd194e9bedbd333bc48431084",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+        "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/SecurityConfig.java",
+        "sha256": "fab002e857eb36ea7deea2c4441eacd5077e4cac292f81cedb201c6ac1be02a1",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ApprovalController.java",
+        "sha256": "cb3efb20b522efffa1aaa1a936f8c307a8cd239a2cbd99170e18bcce552a84cd",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "958e10"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+        "sha256": "fb540dc12ae8c821fd9324a06de566beee5aa7bf4e0f105668f3a1bd139ac020",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessDefinitionController.java",
+        "sha256": "19c20b00acb9b6c293e1651bbe1abcb4c903a1b4824f419a0b4e987d6299e112",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessInstanceController.java",
+        "sha256": "864bf4351d9bb78142b4a6124d7035be3344063e36d0e4c62e0a6716ae4b926f",
+        "read_scope": "Current exact mapping/permission/header/body call inventory;prior whole fact review unchanged;not a new whole read.",
+        "outputs": [
+          "a0c642"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/TaskController.java",
+        "sha256": "55b650d451ede246d5352e47308a68c34e5b6da7967c4f974e466f7fa48773a5",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowIdentityController.java",
+        "sha256": "3c859fb2aa150739c2a0007a4f213a5123827a73a53c48ac3514d48160e4fe2d",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "54c115 1-96 entire file"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowModelController.java",
+        "sha256": "0ee50a247ba0d9b81c6de89b17aa047ebc3a1299067695ee59d0566363b43962",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowStatsController.java",
+        "sha256": "2897a347eb58c3ff6be4ee848d89a1c558ddf696f727b9888e622f7671368152",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverBean.java",
+        "sha256": "08bc3db0d5c21ee1ea9d3636d13741c6154970ad0bdd26472efe6d68d6a2dadc",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverDelegate.java",
+        "sha256": "89e654d78fbbc46b3ad9e41313e34b4b4e4cea41ebe70c24cc0891ba7b7e2690",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CcNotifyDelegate.java",
+        "sha256": "8521417479a710e0bd38ce7eadc60db68364c0bf78cc9ac1333d4e108f4253cb",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Current1-170read,includingexecute and direct-recipient branch;remaining SQL not claimed fully read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRecord.java",
+        "sha256": "bfeaf38f1d2ba1451903d90a169525513d9baa5e38d81127f53b45c23a6c53f4",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRequest.java",
+        "sha256": "d700f162113c512b808591344d08c5acc247f9cd1e49e4a3f19ac40e5822fecb",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/CreateModelRequest.java",
+        "sha256": "ebacc498847b0f7b67ac2f9d142c26c344631bb42c406b17818983561922e3c9",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "958e10"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ProcessProgressResponse.java",
+        "sha256": "874df46fc8d8d1acb93226aa3c19d7e2a6aa3f06b21c69231b3ad4a98041fb2b",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/SaveDraftRequest.java",
+        "sha256": "2e2d869e20474c82dd1f9e7fc9e5c137c0322fcfda5594115c9bbad91d95f668",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/StartProcessRequest.java",
+        "sha256": "042cb2c5d5ddf7227e57785deac28484361890de8f79a73d1562cbf604c2b0ee",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/BpmnXmlValidator.java",
+        "sha256": "01703f1846d2f69cdf99943fe0f49b43f1bdc6a675dc44f2982edb5777ba4f04",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/XmlSecurityUtils.java",
+        "sha256": "a0178c2de6a266e2bd1826c1ad0aff9fcbb6116d3baf0400b12d6baf68639096",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/listener/ScopedRoleAssignmentListener.java",
+        "sha256": "6981b11b7167a1cc28a2c640280ccfca46d7fe3f6965cc9ea50324a8e5b5f7d3",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/GatewayPreAuthFilter.java",
+        "sha256": "62ad1f64e9a57f9e8b0cede81564ac6d7e7c7cccc72d9be5c578a35a42da6d27",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Current1-190read and prior security evidence;remaining methods not claimed fully read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/RbacUserGroupLookup.java",
+        "sha256": "95401461b083d1880fbcc324e96518178f7f5c2294483aef0b7261e1a772a142",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/XssConfigProviderImpl.java",
+        "sha256": "a4ac025ff72e0bed3a3ca3658f473761979074a2e4e0919759f7170ef8c0b64e",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow stage",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/CandidateResolutionService.java",
+        "sha256": "b5321847781c8404f5975bc898340e76b84c0892c3ac25af5cd8d32d94f30cd2",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+        "sha256": "65012a8fc6a5311a06e32e6201ff3f6ec9da84c58341e2f0c678ca19f5037c16",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessDefinitionServiceImpl.java",
+        "sha256": "cd8c2cdddf1165aa6059f2e6695906babe9e98f26506e5c6ddd46f3744cef7d6",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessInstanceServiceImpl.java",
+        "sha256": "f650ad68e8836e46cec0eac145697cd628fdd2757700e8c118b973e4f442a82a",
+        "read_scope": "Current75-168 trusted startup/sanitization/version tenancy and532-672 history/MI_END/tenant-read boundary;other original whole fact review reused,not re-read.",
+        "outputs": [
+          "54c115",
+          "6b0581"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowApprovalServiceImpl.java",
+        "sha256": "82d2a03aa758445a15b6f872f767f2053c1850a75cbd589bc80e1f8a330f3ff8",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "958e10"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+        "sha256": "63a1a2bd58ae7b696d77f8ec1e1e5616020f297999f11ec412c32de1fff09ac8",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowModelServiceImpl.java",
+        "sha256": "ddeeae6a0c93612f503ea63c1394e38253e6d2ca5ccf51418b6116429cfd2ce2",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+        "sha256": "f63cb03ab55045944f20e206bec4c5d59d04f4a7abc5abebb37e641054dabd83",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowTaskServiceImpl.java",
+        "sha256": "8628307b01eaa868de04d6fa568dd6d318444c9dd28f9de6fac39504c2842c7d",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/ProcessInstanceService.java",
+        "sha256": "4650362dc912ddbfb7cbebcaed55101096c0d50e8dd6c962fec5ee26241608b0",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. full current file read; notes below and workflow-audit-notes-253.json",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/resources/application.yml",
+        "sha256": "dde4208074502bc092e8788006b0984d95bb76cd7de647a7cd8edec9e436d0df",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/controller/ProcessInstanceReadTenantBoundaryTest.java",
+        "sha256": "cf248d6ec9be344a3ff7fb7fcc2428b6ce3e0eb00cc1cb326ec5b7ee9d6da44b",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. New regression authored/read/run red and green;existingIT caller update only,IT not executed.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/it/Fw05MultiInstanceIT.java",
+        "sha256": "628fd83e3fbfa065312c3379b154a6a5b94134ac5106a7fcbdca2bc675444b7d",
+        "read_scope": "Explicit unchanged named prior Workflow fact-review reuse,not a new whole read. New regression authored/read/run red and green;existingIT caller update only,IT not executed.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/pom.xml",
+        "sha256": "18a2eda967a3dc9147decf645518f80692eae6d8b89c2cd3f230d07c14f33275",
+        "read_scope": "Selected flowable.version8.0.0 line49;prior remaining inventory scope retained,not a new whole pom read.",
+        "outputs": [
+          "a0c642"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/composables/useBpmnExtension.ts",
+        "sha256": "0e16f77a627be044876b762e5f8bd6f3d261e580347fbd391f6430792036efc6",
+        "read_scope": "Current98-185 assignment body,execution start listener,parallel MI collection/counters;not whole.",
+        "outputs": [
+          "f76272"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/components/workflow/ApprovalRecordsDialog.vue",
+        "sha256": "78cd5edb8692660275f90b60c93efe7b06818b45669f5f402a2473da342eb084",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "6b0581 1-80 entire file"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "scripts/fixtures/README.md",
+        "sha256": "a8843257aad9838f60e8753a117935a369b660abe21e8882ecb6b7320b738b00",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "6b0581 entire file within first100lines"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "scripts/fixtures/run-workflow-scope-fixture.ps1",
+        "sha256": "3c4648c04b7c2cd66f8e839b534927c7b240e91445781abe4db6501b1c2d289b",
+        "read_scope": "Whole current file actually read in named output;not inferred from hash.",
+        "outputs": [
+          "569af6 1-114 entire file"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-gateway/src/main/java/com/omni/gateway/filter/AuthFilter.java",
+        "sha256": "a0773cce8e6ba3d7e90e40c088fb9bae1f77c049577665ad9a0201a4e1c3d76e",
+        "read_scope": "Current125-218 public stripping,JWT validation,assertion andderived X-User-Id/X-Tenant-Id injection;not whole.",
+        "outputs": [
+          "54c115"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/components/workflow/ModelDesigner.vue",
+        "sha256": "fe0245b51dff03ec8e39772266336cb524cc9c1450964b6bdbccb8b1945894ed",
+        "read_scope": "Current105-270 model loading,initial BPMN,exportedXML save,dirty save-before-validation/publish;not whole.",
+        "outputs": [
+          "f76272"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/workflow/model/index.vue",
+        "sha256": "dcece28f4c6d04a427c5418c45d97f91bc3b972f6a1d9ef4e31d87eb0730e505",
+        "read_scope": "Current90-136 list validation andpublish use saved draft;not whole.",
+        "outputs": [
+          "f76272"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/workflow/model/CreateModelDialog.vue",
+        "sha256": "ec66564ac3e8ddffbc52a62b6294adced3912efc2fc32bd3c40961f80201e962",
+        "read_scope": "Current exact matched35-37modelKey required/pattern;not whole.",
+        "outputs": [
+          "a0c642"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/home/index.vue",
+        "sha256": "0961d631051111d6d8a9eacb904253b71b1f7ed698399c05872600019efdc98a",
+        "read_scope": "Current608-664 approval form data/load andcomplete payload,1054-1086 approve/reject/commenttemplate withoutdelegate/signercontrols;not whole.",
+        "outputs": [
+          "f13280"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/workflow.ts",
+        "sha256": "b4194f2322557e3a6a057e134bd0488a23a21afb8cdb529d0571f5ea90f10937",
+        "read_scope": "Current matched function signatures andrequest lines for task form,complete,delegation/signers;not whole.",
+        "outputs": [
+          "f13280"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/workflow-2026-10-10.json",
+        "sha256": "7b4fdc5fc94091bcc2380244ea80a01cd26543159f2eb2c1a146875a59ae4399",
+        "read_scope": "Bounded actual semantic reads ofmetadata/firstrecord,fixture/tools/9APIgroups/history/limits,runtime/UIjourney,negative+xmlrecovery/code;all84path/locale/hash/epochs structured reconciliation. Not a whole raw JSON read.",
+        "outputs": [
+          "50c65a primitive fields only",
+          "5f3ce8",
+          "2646b5",
+          "8e215a",
+          "7edb24",
+          "415 structured reconciliation"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/workflow.json",
+        "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "read_scope": "49current checked dependencies exact-match prior review. Actually read current state,selectedscope andunderlyinglimits;large50c65a scope output partly truncated,not whole reviewJSON.",
+        "outputs": [
+          "415",
+          "d1318d"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+        "read_scope": "Authorized actual AI-only acceptance retained from prior policy implementation;not a new authorization or whole re-read.",
+        "outputs": [
+          "existing approved policy"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ]
+  },
+  "selected_raw_images": [
+    {
+      "path": "docs/images/zh-CN/workflow-ui-approval-form.png",
+      "locale": "zh-CN",
+      "sha256": "de5586d11659e55e95242a7a406be8057dc4adbb0fddb9ac95b61f80559624b0",
+      "captured_at": "2026-10-10T03:46:57.444Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-approval-form-zh-CN",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native not-yet-submitted form hasApprove/Reject,comment,titleandconfirm/cancel only. JA/KR Approve,Reject,Comment remain English,otherlabels localized. No delegate/add/remove signer control. Screenshotdoesnotprove postsubmissioncommit."
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-model-versions-two.png",
+      "locale": "zh-CN",
+      "sha256": "d0a03354c91c3d1a8dadcd05d8b603a82a9fc5d7c540fd27ada9177133fe2c60",
+      "captured_at": "2026-10-10T03:47:02.268Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-model-versions-two-zh-CN",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native version dialog shows business2 PUBLISHED andbusiness1 ARCHIVED,engine2/1,publisher/time;some JA/EN headers wrap. ProcessDefinitionId is not visible andmustcome from API. Background blur is native modal effect,not imageediting."
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-ui-any-auto-approved-progress.png",
+      "locale": "zh-CN",
+      "sha256": "0e5f531d91c86334aeada3d89534fc8817e6631930e1e4f2f9c43105ca210167",
+      "captured_at": "2026-10-10T03:47:03.941Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-any-auto-approved-progress-zh-CN",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native progress canvas has green start/task/end;right node details unselected. Wrapped long teachingnode label is partly crowded nearMI marker. This proves visible completed graph only;one-vote/two-skipped counts require dated API/history evidence,not green pixels alone."
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-teaching-reject-records.png",
+      "locale": "zh-CN",
+      "sha256": "e0121467ef1379618984f782b4df40464a5dd7e8aadfdc46d0ca4e2a785a6437",
+      "captured_at": "2026-10-10T03:47:51.354Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-teaching-reject-records-zh-CN",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Exactly one rejected row with actualcomment andtwoauto-approved-labelled rows withdashcomments. These are MI_END skips,notactualyesvotes. Actor names wrap;JA/KR Comment header remains English. All three rows/times readable."
+    },
+    {
+      "path": "docs/images/zh-CN/workflow-negative-validation.png",
+      "locale": "zh-CN",
+      "sha256": "38377ad08ef688dba407f9b2d48068188c780706bc558bdbd728bdaf5e4d60de",
+      "captured_at": "2026-10-10T08:10:50.446Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-negative-validation-zh-CN",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Localized failure dialog andErrors1 visible;full Chinese backend process-id/model-key mismatch detail remains Chinese inallfourlocales. Identifiers readable withnormal wrapping;no newserverrequest orbusinessstatechange."
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-approval-form.png",
+      "locale": "en-US",
+      "sha256": "b50ad484ef00e29e9dac1db52bc1ceb25079dab62e411776f25203db860d4c07",
+      "captured_at": "2026-10-10T03:49:20.583Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-approval-form-en-US",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native not-yet-submitted form hasApprove/Reject,comment,titleandconfirm/cancel only. JA/KR Approve,Reject,Comment remain English,otherlabels localized. No delegate/add/remove signer control. Screenshotdoesnotprove postsubmissioncommit."
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-model-versions-two.png",
+      "locale": "en-US",
+      "sha256": "7f8dda9007932ac40f243ddc507b03d1729480aec7e889b1a4fd4fdf35a2aa04",
+      "captured_at": "2026-10-10T03:49:25.172Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-model-versions-two-en-US",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native version dialog shows business2 PUBLISHED andbusiness1 ARCHIVED,engine2/1,publisher/time;some JA/EN headers wrap. ProcessDefinitionId is not visible andmustcome from API. Background blur is native modal effect,not imageediting."
+    },
+    {
+      "path": "docs/images/en-US/workflow-ui-any-auto-approved-progress.png",
+      "locale": "en-US",
+      "sha256": "bd1cb8c206ad6a728ee255a14a1b4a93144e172aee3f1999c89c3dda8bef32d0",
+      "captured_at": "2026-10-10T03:49:26.679Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-any-auto-approved-progress-en-US",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native progress canvas has green start/task/end;right node details unselected. Wrapped long teachingnode label is partly crowded nearMI marker. This proves visible completed graph only;one-vote/two-skipped counts require dated API/history evidence,not green pixels alone."
+    },
+    {
+      "path": "docs/images/en-US/workflow-teaching-reject-records.png",
+      "locale": "en-US",
+      "sha256": "addc26656667089e22ac9798834773306475fd212ddfe3ba467cfd09ac68c440",
+      "captured_at": "2026-10-10T03:48:00.102Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-teaching-reject-records-en-US",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Exactly one rejected row with actualcomment andtwoauto-approved-labelled rows withdashcomments. These are MI_END skips,notactualyesvotes. Actor names wrap;JA/KR Comment header remains English. All three rows/times readable."
+    },
+    {
+      "path": "docs/images/en-US/workflow-negative-validation.png",
+      "locale": "en-US",
+      "sha256": "8f230733c009981c9cab41fa1a52075ba9033f1766d5acba0b716d44d88d4358",
+      "captured_at": "2026-10-10T08:10:53.305Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-negative-validation-en-US",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Localized failure dialog andErrors1 visible;full Chinese backend process-id/model-key mismatch detail remains Chinese inallfourlocales. Identifiers readable withnormal wrapping;no newserverrequest orbusinessstatechange."
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-approval-form.png",
+      "locale": "ja-JP",
+      "sha256": "9c31de07ca84a5fd86aa937806d9d91c085736862638eeee73f0bd6681e59def",
+      "captured_at": "2026-10-10T03:49:36.827Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-approval-form-ja-JP",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native not-yet-submitted form hasApprove/Reject,comment,titleandconfirm/cancel only. JA/KR Approve,Reject,Comment remain English,otherlabels localized. No delegate/add/remove signer control. Screenshotdoesnotprove postsubmissioncommit."
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-model-versions-two.png",
+      "locale": "ja-JP",
+      "sha256": "369de07245704d017fcf1e78cbe864f52537da5dd6c56bf5b5ba231e4e1f2aa6",
+      "captured_at": "2026-10-10T03:49:41.296Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-model-versions-two-ja-JP",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native version dialog shows business2 PUBLISHED andbusiness1 ARCHIVED,engine2/1,publisher/time;some JA/EN headers wrap. ProcessDefinitionId is not visible andmustcome from API. Background blur is native modal effect,not imageediting."
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-ui-any-auto-approved-progress.png",
+      "locale": "ja-JP",
+      "sha256": "3f7307f9edd69a78e36ef36f6f4e695619df4fe59bc7569ea2a767327db16106",
+      "captured_at": "2026-10-10T03:49:42.848Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-any-auto-approved-progress-ja-JP",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native progress canvas has green start/task/end;right node details unselected. Wrapped long teachingnode label is partly crowded nearMI marker. This proves visible completed graph only;one-vote/two-skipped counts require dated API/history evidence,not green pixels alone."
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-teaching-reject-records.png",
+      "locale": "ja-JP",
+      "sha256": "fa4c8ddc250c557080a84b2e08cf2d945eea14e181f3703a7202552eb4e10e96",
+      "captured_at": "2026-10-10T03:48:08.836Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-teaching-reject-records-ja-JP",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Exactly one rejected row with actualcomment andtwoauto-approved-labelled rows withdashcomments. These are MI_END skips,notactualyesvotes. Actor names wrap;JA/KR Comment header remains English. All three rows/times readable."
+    },
+    {
+      "path": "docs/images/ja-JP/workflow-negative-validation.png",
+      "locale": "ja-JP",
+      "sha256": "b56eddca94dd6a3955d7e93f54fb1862ba08f462fd31af7b017d5cd009d116ea",
+      "captured_at": "2026-10-10T08:10:56.279Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-negative-validation-ja-JP",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Localized failure dialog andErrors1 visible;full Chinese backend process-id/model-key mismatch detail remains Chinese inallfourlocales. Identifiers readable withnormal wrapping;no newserverrequest orbusinessstatechange."
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-approval-form.png",
+      "locale": "ko-KR",
+      "sha256": "65d98ad6d9be2028310c40d7b7441564c4b646d68a2cee4c6970dc9521c8153e",
+      "captured_at": "2026-10-10T03:49:53.097Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-approval-form-ko-KR",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native not-yet-submitted form hasApprove/Reject,comment,titleandconfirm/cancel only. JA/KR Approve,Reject,Comment remain English,otherlabels localized. No delegate/add/remove signer control. Screenshotdoesnotprove postsubmissioncommit."
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-model-versions-two.png",
+      "locale": "ko-KR",
+      "sha256": "2a4e2e5fbc2b3fb1ae122b112550f28beba4e78b4a0f9149f434492a601b443b",
+      "captured_at": "2026-10-10T03:49:57.746Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-model-versions-two-ko-KR",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native version dialog shows business2 PUBLISHED andbusiness1 ARCHIVED,engine2/1,publisher/time;some JA/EN headers wrap. ProcessDefinitionId is not visible andmustcome from API. Background blur is native modal effect,not imageediting."
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-ui-any-auto-approved-progress.png",
+      "locale": "ko-KR",
+      "sha256": "bc19df4de70fe7ee2bfc80f053f7f436f8e578fca8cb9ff5b08cccccce493b50",
+      "captured_at": "2026-10-10T03:49:59.152Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-ui-any-auto-approved-progress-ko-KR",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Native progress canvas has green start/task/end;right node details unselected. Wrapped long teachingnode label is partly crowded nearMI marker. This proves visible completed graph only;one-vote/two-skipped counts require dated API/history evidence,not green pixels alone."
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-teaching-reject-records.png",
+      "locale": "ko-KR",
+      "sha256": "5e149bd0c01fa888d248dd8872b7357c346e043db1090dff50197cbf8818767b",
+      "captured_at": "2026-10-10T03:48:17.875Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-teaching-reject-records-ko-KR",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Exactly one rejected row with actualcomment andtwoauto-approved-labelled rows withdashcomments. These are MI_END skips,notactualyesvotes. Actor names wrap;JA/KR Comment header remains English. All three rows/times readable."
+    },
+    {
+      "path": "docs/images/ko-KR/workflow-negative-validation.png",
+      "locale": "ko-KR",
+      "sha256": "5b0f25d92de2dc0f654b57b37071c57277b0ae5f7592f231bce7323431034ade",
+      "captured_at": "2026-10-10T08:10:59.347Z",
+      "source_receipt": "docs/reference/evidence/workflow-2026-10-10.json",
+      "record_id": "workflow-negative-validation-ko-KR",
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "actually_viewed_as_original": true,
+      "visual_review": "passed-with-explicit-dated-scope-limits",
+      "observation": "Localized failure dialog andErrors1 visible;full Chinese backend process-id/model-key mismatch detail remains Chinese inallfourlocales. Identifiers readable withnormal wrapping;no newserverrequest orbusinessstatechange."
+    }
+  ],
+  "visual_scope": {
+    "new_individual_original_views": 20,
+    "other64not_newly_individually_viewed": true,
+    "prior_methods": {
+      "original_positive_andhistory72": "18original-resolution four-locale contact sheets,as recorded in original2026-10-10receipt",
+      "original_negative12": "12original1920x1080images individuallyinspected,as recorded in originalreceipt"
+    },
+    "no_image_modification": true,
+    "no_recapture": true
+  },
+  "historical_results": {
+    "api_supplement_groups": 9,
+    "api_scope": "ABSOLUTE_UNIT on earlier backend,not ordinary PARENT startup",
+    "ui": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "images": 48,
+      "run": "008;Chinese committed007reconciled read-only,other3newjourneys"
+    },
+    "history": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "images": 24,
+      "writes": false
+    },
+    "negative": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "images": 12,
+      "runs": "001 and003selected;earlier identity/selector failures retained"
+    },
+    "xml_recovery": "Separate owned unpublished model14 recovered;negative screenshot model10 unchanged",
+    "current_reexecution": false
+  },
+  "current_source_semantics": {
+    "task_submit": "Business409ifprocessed/absent/tenant-invisible;403ifnonassignee",
+    "progress_and_history_read": "Tenant-constrained;business404forother-tenant orabsentinstance",
+    "gateway_identity": "Derived fromverifiedJWT;clientidentityheadersstripped",
+    "target_id_limit": "Numeric-only;preverifyenabledsame-tenanttargetandpermissions",
+    "extra_variables_limit": "Construct throughtrustedbusinesscode;notautomaticuntrusted-inputsanitization"
+  },
+  "application_runs_this_audit": 0,
+  "business_writes_this_audit": 0,
+  "new_captures": 0,
+  "new_builds_or_tests": 0,
+  "historical_successful_writes_replayed": false,
+  "human_review": false,
+  "human_review_required": false,
+  "limitations": [
+    "Exact source scopes distinguish7whole628lines,selected reads andunchanged49prior dependencies;notallsourcewholeread",
+    "Imageepochsremainhistorical;lateraggregate/currentsourceproofnotretroactivelyassignedtofiveearlyimages",
+    "20selectedrawviewsareadditionalAIinspection;not84freshindividualviews",
+    "Currentbusinesscaseswere notreplayed;originalA-G/globalrelease andremainingfamiliesremainopen"
+  ]
+}

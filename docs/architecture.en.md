@@ -1,14 +1,13 @@
 # System Architecture
 
-> This document is the complete technical reference for Omni-Stack system architecture. It covers system positioning, technology selection rationale, module map, local architecture design, data flows, Docker deployment architecture, and extension guides.  
-> For Docker deployment details, see [docker-deployment.en.md](docker-deployment.en.md).
+> This reference owns current system boundaries, module responsibilities, dependencies, identity trust and extension invariants. The [Wiki](wiki/index.en.md) owns procedures, the [API contract](api-contract.en.md) owns interface details, and [Docker deployment](docker-deployment.en.md) owns deployment parameters. Current source/configuration defines implementation; this reference does not certify whole-system business acceptance.
 
 ---
 
 ## Table of Contents
 
 - [1. System Positioning](#1-system-positioning)
-- [2. Technology Selection Rationale](#2-technology-selection-rationale)
+- [2. Technology Baseline](#2-technology-baseline)
 - [3. System Boundaries](#3-system-boundaries)
 - [4. Module Map](#4-module-map)
 - [5. Dependency Graph](#5-dependency-graph)
@@ -20,165 +19,122 @@
 - [11. RBAC Permission System](#11-rbac-permission-system)
 - [12. Key Constraints](#12-key-constraints)
 - [13. Extension Points](#13-extension-points)
-- [14. Tutorial: Onboarding a New Microservice](#14-tutorial-onboarding-a-new-microservice)
+- [14. Development and Verification Entry Points](#14-development-and-verification-entry-points)
 
 ---
 
 ## 1. System Positioning
 
-Omni-Stack is a microservices scaffolding platform providing a ready-to-use Spring Cloud + Vue 3 full-stack development environment. Teams can rapidly build business systems on a standardized, production-grade infrastructure.
+Omni-Stack is a Spring Cloud and Vue 3 microservices scaffolding platform with shared libraries, independent business services and module-based project generation.
 
-**Core Design Philosophy**:
-
-- **Harness Pattern**: Architecture → Patterns → Code three-tier progression, where architectural decisions drive code conventions
-- **Common Starter Ecosystem**: 8 auto-configuration modules enabling zero-config infrastructure access for new services
-- **Gateway-Centralized Authentication**: JWT verification concentrated at the gateway, with downstream services receiving identity via a trusted header chain
-- **Transactional Outbox**: MQ message reliability guaranteed through a local transaction table + asynchronous relay
+- Architecture → Patterns → Code: architecture owns boundaries, patterns own implementation conventions, and the Wiki owns operations and recovery.
+- Common has 10 modules: the data/SPI core plus 9 integration libraries. Eight declare custom `AutoConfiguration.imports`; reactive Redis only packages a dependency and YAML defaults.
+- Gateway verifies the login JWT for protected business requests; downstream services authorize the preauthenticated identity. Browser authorization sessions and internal-service tokens have separate boundaries.
+- Transactional Outbox commits business updates and pending messages together locally. Relay and consumption may still fail; commit is not delivery.
 
 ---
 
-## 2. Technology Selection Rationale
+## 2. Technology Baseline
 
-### 2.1 Why Spring Boot 4 + JDK 25
+The [parent POM](../omni-backend/pom.xml), module POMs, frontend lockfile and formal Compose own version/build facts. [ADR](adr/0001-scaffold-upgrade-foundations.md) owns design decisions.
 
-| Consideration | Decision Rationale |
-|--------------|-------------------|
-| **Jakarta EE 11** | Spring Boot 4 is based on Jakarta EE 11; `jakarta.*` packages are standard with no migration cost |
-| **Virtual Threads** | JDK 25's virtual threads are mature and stable, ideal for I/O-intensive microservice scenarios (database queries, HTTP calls) |
-| **Spring Security 7** | SAS (Spring Authorization Server) deeply integrates with Spring Security 7, with native OAuth2 + OIDC support |
-| **GraalVM Compatible** | Spring Boot 4's AOT compilation support is more mature; Native Image can be chosen in the future to reduce startup time and memory footprint |
+### 2.1 Spring Boot and JDK
 
-### 2.2 Why Spring Cloud Gateway 5.x (WebFlux)
+The current parent uses Spring Boot 4.0.6, JDK 25, Spring Cloud 2025.1.1 and Spring Cloud Alibaba 2025.1.0.0; code uses `jakarta.*`. Maven Wrapper runs in local Docker with compiler release=25. Virtual threads, AOT and Native Image benefits require separate verification.
 
-| Consideration | Decision Rationale |
-|--------------|-------------------|
-| **Reactive Model** | Gateway is an I/O-intensive routing proxy; WebFlux's Netty event loop model is more efficient than Servlet thread pools |
-| **Sleuth → Micrometer** | Gateway 5.x uses Micrometer Tracing, consistent with Spring Boot 4's observability ecosystem |
-| **Route DSL** | The `spring.cloud.gateway.server.webflux.routes` config prefix, though verbose, provides declarative routing + filter chains |
-| **Caveat** | Config prefix must be `spring.cloud.gateway.server.webflux`; the old prefix `spring.cloud.gateway` is silently ignored |
+### 2.2 Gateway
 
-### 2.3 Why Nacos v3.1.1
+Gateway uses WebFlux, reactive Redis and `spring.cloud.gateway.server.webflux`. Explicit `lb://` routes discover Nacos instances and preserve the full path. Its only direct shared-library dependency is `omni-common-redis-reactive`; it does not depend on core, Servlet Web or the blocking Redis shared library.
 
-| Consideration | Decision Rationale |
-|--------------|-------------------|
-| **Service Discovery + Config Center in One** | Compared to Eureka (discovery only) + Config Server (config only), Nacos solves both problems with a single component |
-| **MySQL External Storage** | Nacos v3 supports MySQL persistence (`nacos_config` database), avoiding embedded Derby's single-point limitations |
-| **gRPC Long Connections** | v3 uses gRPC instead of HTTP short polling, reducing service registration/discovery latency from seconds to milliseconds |
-| **Health Check Endpoint Change** | v3.1.1 changed the endpoint from `/nacos/actuator/health` to `GET /nacos/`, requiring Docker healthcheck adaptation |
+### 2.3 Nacos
 
-### 2.4 Why Flowable 8.x
+Formal Compose uses Nacos v3.1.1 with MySQL `nacos_config`. Discovery/config clients share consistent private authentication parameters. Formal Compose owns service addresses, health checks and ports.
 
-| Consideration | Decision Rationale |
-|--------------|-------------------|
-| **Open-Source BPMN Engine** | Flowable is a fork of Activiti with higher community activity and more mature Spring Boot integration |
-| **Native Multi-Instance (MI) Support** | Countersign approval requires MI features; Flowable's `completionCondition` mechanism is a natural fit |
-| **Version 7.x Refactoring** | 7.x refactored the API layer with better compatibility for Spring Boot 3/4 |
-| **vs Camunda** | Camunda 8.x shifted to Zeebe (distributed engine) with a steeper learning curve; Flowable maintains the embedded engine model, better suited for small-to-medium scale |
+### 2.4 Workflow
 
-### 2.5 Why XXL-JOB over Quartz
+`omni-common-workflow` encapsulates Flowable 8.0.0, running only in the independent `omni-workflow` service. Other business domains request approval through interfaces rather than importing the engine runtime. [Workflow facts](workflow.en.md) own publish locks, model validation, candidates and countersign rules.
 
-| Consideration | Decision Rationale |
-|--------------|-------------------|
-| **Visual Management** | XXL-JOB Admin provides a web console supporting task CRUD, manual triggering, and execution log viewing |
-| **Distributed Scheduling** | XXL-JOB's scheduler is an independent process; executors (business services) are stateless and naturally horizontally scalable |
-| **Existing Project Dependency** | The project already uses XXL-JOB for scheduled tasks; MQ message relay reuses the same scheduling engine without introducing new dependencies |
-| **vs Quartz** | Quartz requires a database for scheduling metadata; cluster mode depends on database locks, increasing operational complexity |
+### 2.5 Scheduling and Message Relay
+
+XXL-JOB 3.3.1 separates Admin from executors; `omni-common-job` is a library. Executor Bean activation includes classpath and `xxl.job.executor.enabled` conditions. Registration retries and logs exhaustion; this does not itself mean whole-application startup failed. [Scheduling facts](scheduling.en.md) and [MQ reliability](mq-reliability.en.md) own registration and compensation.
 
 ---
 
 ## 3. System Boundaries
 
-| Boundary | Omni-Stack Frontend (omni-frontend) | Omni-Stack Backend (omni-backend) |
-|----------|--------------------------------------|-----------------------------------|
-| Responsibility | Presentation, interaction, routing, form UX, user state rendering | Business rules, permission checks, data consistency, persistence, audit |
-| Prohibited | Must not contain business logic affecting data correctness | Must not contain presentation logic or UI concerns |
-| Validation | Client-side UX validation (required fields, format hints) | Server-side authoritative validation (Jakarta Bean Validation) |
+| Boundary | Frontend | Backend |
+|---|---|---|
+| Responsibility | Presentation, interaction, routing, form UX and user state | Business rules, authoritative validation, authorization, persistence, consistency and audit |
+| Validation | Early required-field and format feedback | Actual input, identity, tenant, permission, version and business-state checks |
+| Constraint | Local calculations, button visibility and route access cannot decide server data correctness or authorization | New code follows [backend patterns](backend-patterns.en.md) and does not rely on client validation |
+
+[Frontend patterns](frontend-patterns.en.md) own frontend facts. Passing a form, seeing a menu, decoding JWT locally and verifying server business behavior provide different kinds of evidence.
 
 ---
 
 ## 4. Module Map
 
-### 4.1 Common Starter Ecosystem (10 Common Modules)
+### 4.1 Common Ecosystem (10 Common Modules)
 
-| Module | Role | Technology | Boundary Constraint |
-|--------|------|------------|---------------------|
-| `omni-common-core` | Pure POJO: `R<T>`, `PageResult`, `BaseEntity`, `BusinessException`, XSS SPI (`XssConfigProvider`), `UserJobHandler` SPI | Lombok, Jackson JSR310 | **Zero Spring dependencies**; no framework annotations |
-| `omni-common` | Web auto-config: Jackson time config, CORS, `GlobalExceptionHandler`, XSS Filter/Sanitizer/Deserializer | Spring Boot Web (optional), Validation (optional) | No business logic; cross-cutting web concerns only |
-| `omni-common-mybatis` | MyBatis-Plus Starter: pagination interceptor, MySQL driver, YAML defaults | MyBatis-Plus 3.5.16, MySQL Connector | `@ConditionalOnMissingBean` allows service-level override |
-| `omni-common-redis` | Blocking Redis Starter: `RedisTemplate` (Jackson serialization) + `RedisUtils` | Spring Data Redis (Lettuce), commons-pool2 | **Servlet services only**; never in WebFlux |
-| `omni-common-redis-reactive` | Reactive Redis Starter: `spring-boot-starter-data-redis-reactive` + YAML defaults | Spring Data Redis Reactive | **WebFlux services only**; never in Servlet |
-| `omni-common-job` | XXL-JOB integration: auto-configuration, admin HTTP client, system job registry, job metadata annotations | XXL-JOB Core 3.3.1, Spring Boot Web (optional) | Scheduling infrastructure only; no business task logic |
-| `omni-common-mqlog` | Reliable MQ message sending: Transactional Outbox, relay job, strategy-based sender, internal query API | Spring Cloud Stream RocketMQ (optional), omni-common-job (optional) | MQ infrastructure only; no business message logic |
-| `omni-common-operlog` | Operation log aspect and producer: `@OperLog` annotation-driven, supports both reliable and direct sending modes | Spring AOP, omni-common-mqlog (optional) | Operation log concern only |
-| `omni-common-workflow` | Flowable auto-configuration and the approval SPI | Flowable 8.0.0 | Workflow service only; business services must not depend on the process runtime |
-| `omni-common-service` | Composite starter for Servlet business services: Gateway pre-authentication, request identity/tenant, internal APIs, DataScope, fixed MyBatis interceptor order, XSS origin fallback and the security baseline | Spring Security, OpenFeign, MyBatis-Plus, Redis | Not applicable to Gateway/Auth; domain table mapping and AccessGuard remain service-implemented |
+| Module | Current responsibility and boundary |
+|---|---|
+| `omni-common-core` | `R<T>`, PageResult, BaseEntity, exceptions and XSS/job/MQ/internal-call SPIs; production dependencies exclude Spring, while tests use Spring Boot test |
+| `omni-common` | Jackson, MVC, exceptions, XSS, Feign retry, trace and optional observability; consumers supply dependencies and conditions for optional capabilities |
+| `omni-common-mybatis` | MyBatis-Plus 3.5.16, MySQL and default pagination; services may supply their own interceptor chain |
+| `omni-common-redis` | Servlet blocking Redis, serialization and RedisUtils |
+| `omni-common-redis-reactive` | WebFlux reactive Redis dependency and timeout YAML default; no custom auto-configuration entry |
+| `omni-common-job` | XXL-JOB executor, Admin client and system-job metadata; no domain job logic |
+| `omni-common-mqlog` | Outbox, relay, sending strategies and management queries; optional dependencies do not automatically provide every capability to a consumer |
+| `omni-common-operlog` | @OperLog aspect and reliable/direct sending; Auth security audit uses sys_audit_log and does not import this library |
+| `omni-common-workflow` | Flowable auto-configuration and approval SPI, only for the Workflow engine service |
+| `omni-common-service` | Servlet identity, internal APIs, TenantLine/DataScope, Auth settings clients and XSS settings retrieval; currently used by CRM/SRM/Procurement/Asset, while Auth/Base/Workflow retain their own configuration |
 
 ### 4.2 Microservice Modules (8)
 
-| Module | Port | Role | Core Dependencies |
-|--------|------|------|-------------------|
-| `omni-auth` :8100 | 8100 | Authentication & authorization: login, captcha, JWT, multi-tenant, OAuth2 Authorization Server, XSS config management, RBAC permissions, online user management | Spring Boot Web, Spring Security, OAuth2 Authorization Server |
-| `omni-base` :8101 | 8101 | Base data management: dictionary CRUD, scheduled tasks (system + user), operation log archival, MQ message management | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
-| `omni-workflow` :8103 | 8103 | Workflow engine: BPMN model management, process instances, approvals, task assignment, statistics | Spring Boot Web, Spring Security, omni-common-workflow, Flowable 8.0.0 |
-| `omni-crm` :8104 | 8104 | CRM pre-sales loop: leads, customers, contacts, opportunities, activities, conversion and overview | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
-| `omni-srm` :8105 | 8105 | SRM supplier loop: master data, admission state machine, contacts/qualifications/bank accounts, evaluation, risk, invitations and the supplier portal | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog |
-| `omni-procurement` :8106 | 8106 | Procurement execution loop: material catalog, requisition approval, RFQ and comparison, purchase orders and goods receipts | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
-| `omni-asset` :8107 | 8107 | Asset full lifecycle: procurement receipt ingestion, ledger, allocation/return, transfer, disposal and overview | Spring Boot Web, Spring Security, mybatis, redis, job, mqlog, OpenFeign |
-| `omni-gateway` :8102 | 8102 | API Gateway: request routing, JWT authentication filtering, CORS handling, security headers | Spring Cloud Gateway Server (WebFlux), omni-common-redis-reactive |
+The port column shows default host business ports. Spring Boot containers use `8080` internally.
+
+| Service | Port | Owned business and fact reference |
+|---|---|---|
+| `omni-auth` | 8100 | Tenant users, RBAC, security audit, login/authorization server, social login and XSS settings; [core flows](core-flows.en.md) |
+| `omni-base` | 8101 | Dictionary, operation logs, jobs and MQ management; [scheduling](scheduling.en.md), [MQ](mq-reliability.en.md) |
+| `omni-gateway` | 8102 | Explicit routes, login JWT, identity-header handling and security headers; [API contract](api-contract.en.md) |
+| `omni-workflow` | 8103 | Models, instances, approvals, candidates and todos; [Workflow](workflow.en.md) |
+| `omni-crm` | 8104 | Leads, customers, contacts, opportunities, activities and conversion; [CRM](crm.en.md) |
+| `omni-srm` | 8105 | Suppliers, evaluation, risk, Portal Saga and quotation collaboration; [SRM](srm.en.md), [design](design/srm-design.en.md) |
+| `omni-procurement` | 8106 | Materials, requisitions, RFQs, purchase orders and receipts; [Procurement design](design/procurement-design.en.md) |
+| `omni-asset` | 8107 | Receipt ingestion, allocation/return, transfer, disposal and history; [Asset design](design/asset-design.en.md) |
+
+`omni-db-migrator` is a separate executable module for one-shot database creation, Liquibase, seeds and vendor-component bootstrap. It is not a ninth long-running business microservice. The parent reactor has 19 child modules, or 20 Maven projects including the parent.
 
 ### 4.3 Frontend Module
 
-| Module | Port | Technology Stack | Role |
-|--------|------|-----------------|------|
-| `omni-frontend` | 3000 (dev) / 3000 (Nginx) | Vue 3, Pinia 3, Vue Router 5, Element Plus, Axios, Vite 8 | Presentation-layer SPA; no data-authoritative business rules |
+`omni-frontend` is a Vue 3, Pinia 3, Vue Router 5, Element Plus, Axios and Vite 8 SPA. Development and Nginx static serving both default to `3000`. [Frontend patterns](frontend-patterns.en.md) own four-language resources and session/menu responsibilities.
 
 ---
 
 ## 5. Dependency Graph
 
-```
-omni-common-core  (pure POJO: R<T>, PageResult, BaseEntity, XSS SPI, UserJobHandler SPI — zero Spring deps)
-    ^          ^          ^          ^          ^
-    |          |          |          |          |
-omni-common  omni-common-mybatis  omni-common-redis   omni-common-redis-reactive   omni-common-job
-(Web auto-   (MyBatis-Plus +      (blocking Redis +    (reactive Redis,            (XXL-JOB integration:
- config)      MySQL driver)        RedisUtils)           standalone)                auto-config, admin client,
-    ^   ^          ^    ^              ^    ^                   ^                    system job registry)
-    |   |          |    |              |    |                   |                          ^
-    |   +----------+----+--------------+----+                  |                          |
-    |                     |                                     |                          |
-omni-auth :8100     omni-base :8101                     omni-gateway :8102
-(Servlet, Security,  (Servlet, Security,                 (WebFlux, depends on
- OAuth2 Auth Server)  Dictionary CRUD,                   core + redis-reactive,
-    |                 Scheduling tasks)                    NOT omni-common)
-    |                    |                                     |
-    +-- registers with Nacos --+                               |
-                               |                               |
-omni-gateway --- routes via lb:// ---> omni-auth, omni-base, omni-workflow
-    |
-omni-frontend --- /api proxy :3000 ---> omni-gateway :8102
+This table summarizes direct `com.omni` dependencies in current POMs, not startup order or all third-party dependencies. Optional entries are marked.
 
-omni-base --- XxlJobAdminClient (HTTP) ---> XXL-JOB Admin :18080
-```
+| Consumer module | Direct shared-library dependencies |
+|---|---|
+| common-core, common-job, common-redis-reactive, db-migrator | No other com.omni dependency |
+| common, common-mybatis, common-redis, common-operlog, common-workflow | common-core |
+| common-mqlog | common-core; common-job (optional) |
+| common-service | common-core, common, common-mybatis, common-redis |
+| auth | common-core, common, common-mybatis, common-redis, common-job, common-mqlog |
+| base | Shared libraries in the auth row + common-operlog |
+| workflow | Shared libraries in the base row + common-workflow |
+| crm, srm, procurement, asset | Shared libraries in the base row + common-service |
+| gateway | common-redis-reactive |
 
-**Build dependency order**: `omni-common-core` → `omni-common` → `omni-common-mybatis` / `omni-common-redis` / `omni-common-redis-reactive` → `omni-auth` / `omni-base` / `omni-workflow` / `omni-gateway`. Maven reactor automatically resolves ordering from `<modules>` declaration.
+Module names omit the `omni-` prefix. Core has no other shared-library dependency; that does not imply every library or Gateway depends on core. Maven reactor orders actual dependencies, rather than treating the textual `<modules>` order as the sole dependency relation.
 
 ### Module-to-Whole Relationship
 
-Each module plays a clearly defined role in the overall architecture:
+The [catalog](../scaffold/catalog/modules.yaml) separately owns generated-project module closures, for example `asset → procurement,srm`, `procurement → srm`, `srm → workflow`, `workflow/crm/gateway → base` and `base → auth → platform`. These dependencies select generated resources; they are not Maven direct dependencies or a complete runtime call graph.
 
-| Module | Contribution to the Whole |
-|--------|--------------------------|
-| `omni-common-core` | **Foundation layer**: Shared POJO definitions and SPI interfaces across all modules; zero framework dependency ensures portability |
-| `omni-common-*` starters | **Auto-configuration layer**: Zero-config access via `AutoConfiguration.imports`; new services only need to add Maven dependencies |
-| `omni-auth` | **Security hub**: Centralized authentication, authorization, and JWT issuance; the trust chain origin for the entire system |
-| `omni-gateway` | **Traffic entry**: The sole entry point for all HTTP requests; JWT verification + identity propagation + route distribution |
-| `omni-base` | **Data foundation**: Central management of dictionary, logs, scheduled tasks, and other shared business data |
-| `omni-workflow` | **Process engine**: Independently deployed BPMN workflow service; Flowable dependencies isolated via `omni-common-workflow` starter |
-| `omni-crm` | **Sales domain**: Owns CRM data independently; reuses tenant users, organizations and permission-aware data scopes through Auth internal APIs |
-| `omni-srm` | **Supplier domain**: Owns SRM data independently; assigns the SUPPLIER role together with Auth through the Portal Saga, and exposes internal-token-protected supplier summary APIs to Procurement/Asset |
-| `omni-procurement` | **Procurement execution domain**: Owns procurement data independently; drives requisition approval through Workflow, completes supplier invitation and quotation collaboration through SRM, and publishes qualified goods-receipt events plus a historical backfill API to the Asset domain |
-| `omni-asset` | **Asset lifecycle domain**: Owns asset data independently; creates cards by consuming qualified procurement receipt events, drives transfer/disposal approval through Workflow, and manages ownership and usage scope uniformly through the asset aggregate root |
+For business calls, Auth supplies identity/permissions and settings. SRM coordinates Auth roles through Portal Saga. Procurement uses Workflow approval and SRM quotation collaboration, and publishes receipt events. Asset consumes integrated receipt events and requests Workflow approval. Synchronous interfaces, Outbox events and historical backfill have separate transaction/idempotency boundaries, not a cross-database atomic transaction.
 
 ---
 
@@ -186,108 +142,37 @@ Each module plays a clearly defined role in the overall architecture:
 
 ### 6.1 omni-auth Security Filter Chain
 
-As the authentication and authorization hub, omni-auth maintains two independent security filter chains internally:
+[AuthorizationServerConfig](../omni-backend/omni-auth/src/main/java/com/omni/auth/config/AuthorizationServerConfig.java) explicitly defines two chains:
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│ Chain 1 (Order 1): OAuth2 Authorization Server Endpoints            │
-│ securityMatcher: /oauth2/**, /login, /.well-known/**                │
-│                                                                     │
-│ Request → SecurityContextPersistenceFilter                          │
-│         → DeviceClientAuthenticationFilter (public client auth)     │
-│         → DeviceRedirectFilter (device authorization redirect)      │
-│         → OAuth2AuthorizationEndpointFilter (auth code issuance)    │
-│         → OAuth2TokenEndpointFilter (token issuance/refresh)        │
-│                                                                     │
-│ Session policy: STATELESS (OAuth2 endpoints are stateless)          │
-├─────────────────────────────────────────────────────────────────────┤
-│ Chain 2 (Order 2): Business API Endpoints                           │
-│ securityMatcher: NOT /oauth2/**                                     │
-│                                                                     │
-│ Request → GatewayPreAuthFilter (builds Authentication from          │
-│                                  X-User-* headers)                  │
-│         → DataScopeResolveFilter (@Order(0), resolves data scope)   │
-│         → AuthorizationFilter (@PreAuthorize method-level check)    │
-│                                                                     │
-│ Session policy: STATELESS (API requests don't create HttpSession)   │
-│ Auth whitelist: /api/auth/**, /actuator/**, /error                 │
-└─────────────────────────────────────────────────────────────────────┘
-```
+| Chain | Matching and state |
+|---|---|
+| Order 1 | Authorization, Token, JWKS, OIDC, device and other protocol endpoints in oauth2EndpointsMatcher(); HttpSessionSecurityContextRepository stores browser authorization context; unauthenticated authorization/device-verification entries redirect to the frontend |
+| Order 2 | Complement of the protocol endpoints; ordinary business is STATELESS, preauthentication establishes identity, and /internal/** uses InternalApiFilter and INTERNAL_SERVICE |
 
-**Key Component Interactions**:
+DeviceClientAuthenticationFilter and SasConsentOriginFilter handle public device clients and consent-submission Origin respectively. The business chain publicly permits named login, session-login, registration, CAPTCHA, tenant-list and social-callback paths. Management-port health/info/prometheus are public; other actuator endpoints require ADMIN. Configuration and the [API contract](api-contract.en.md) own full paths and protocol exceptions.
 
-| Component | Location | Responsibility |
-|-----------|----------|---------------|
-| `AuthorizationServerConfig` | omni-auth/config | Dual filter chain config, JWK key source (RSA 2048), OAuth2 client registration |
-| `OmniUserDetailsService` | omni-auth/security | Multi-tenant user loading (`tenantId:username` format) |
-| `GatewayPreAuthFilter` | omni-auth/security | Builds `Authentication` from Gateway-forwarded headers (X-User-Id/Name/Tenant/Roles/Scopes) |
-| `DataScopeResolveFilter` | omni-auth/security | Resolves user data permission scope, writes to `DataScopeContext` (ThreadLocal) |
-| `DeviceClientAuthenticationFilter` | omni-auth/security | RFC 8628 device code grant public client authentication |
-| `JwtTokenService` | omni-auth/service | RS256-signed JWT generation |
+JWT login, browser-authorization HttpSession, external social login and internal-service tokens are validated separately. Redis CAPTCHA, blacklist and online state do not prove that authorization HttpSession is persisted in Redis.
 
 ### 6.2 omni-gateway WebFlux Pipeline
 
-The Gateway is built on Spring Cloud Gateway's reactive WebFlux technology stack. The request processing pipeline:
+[CorsConfig](../omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/CorsConfig.java) and [SecurityHeadersFilter](../omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/SecurityHeadersFilter.java) are WebFilters. [AuthFilter](../omni-backend/omni-gateway/src/main/java/com/omni/gateway/filter/AuthFilter.java) is a GlobalFilter in the routing filter chain, order=-100. These two filter systems cannot be combined into one numbered execution order.
 
-```
-HTTP Request In
-    │
-    ▼
-CorsConfig (CorsWebFilter)
-    │ Handles OPTIONS preflight requests, adds CORS headers
-    │ Higher priority than AuthFilter to prevent preflight interception
-    ▼
-AuthFilter (GlobalFilter, order=-100)
-    │ 1. Whitelist paths pass through (/api/auth/login, /oauth2/**, /actuator/**)
-    │ 2. Extract Authorization: Bearer <JWT> header
-    │ 3. JwkKeyProvider fetches RSA public key (WebClient → omni-auth:8080/oauth2/jwks, cached 5 min)
-    │ 4. RSASSAVerifier verifies JWT signature (RS256)
-    │ 5. Check expiration time
-    │ 6. Check token blacklist (ReactiveStringRedisTemplate → Redis)
-    │ 7. Extract claims, inject forwarded request headers:
-    │    X-User-Id, X-User-Name, X-Tenant-Id, X-User-Roles, X-User-Scopes
-    ▼
-SecurityHeadersFilter (WebFilter)
-    │ Adds security headers: X-Content-Type-Options, X-Frame-Options, Referrer-Policy
-    ▼
-Spring Cloud Gateway Route Engine
-    │ 1. Route matching: Path=/api/auth/** → lb://omni-auth
-    │ 2. Preserve the full path: /api/auth/login → /api/auth/login
-    │ 3. Load balancing: fetch instance list from Nacos service discovery
-    ▼
-Forward to downstream microservice (omni-auth / omni-base / omni-workflow)
-```
+- Public paths remove client-supplied trusted identity headers and Bearer Authorization, retain OAuth client Basic credentials and set the forwarding marker. A public-path list neither creates routes nor grants downstream permissions.
+- Protected paths extract Bearer, verify signature, expiration and valid user/tenant claims, and query reactive Redis blacklist state. Success replaces identity headers, removes the original Token and signs an assertion.
+- Missing/weak signing secrets return 503 for production protected requests. Security exceptions return 401; other downstream failures are not all rewritten as JWT failures. Test-profile exceptions are not production policy.
+- WebFilters set security headers and trace before response commit. A fallback response correlation ID without a real span does not prove complete distributed tracing.
 
-**Key Design Decisions**:
-
-- **JwkKeyProvider uses `WebClient.create()`**: WebFlux environment doesn't auto-configure `WebClient.Builder` bean, so it's created manually
-- **Public key cached 5 minutes**: Avoids calling the JWKS endpoint on every request; `volatile` ensures multi-thread visibility
-- **`onErrorResume` catches only `SecurityException`**: Prevents downstream routing errors (service unavailable, timeout) from being misreported as JWT verification failures
+[JwkKeyProvider](../omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/JwkKeyProvider.java) currently constructs its own WebClient. auth.jwks.uri configures the endpoint; Compose supplies `http://omni-auth:8080/oauth2/jwks`. TTL defaults to 5m. It caches the first RSA key; volatile provides visibility, not kid-based selection or merged concurrent refresh. This does not guarantee key rotation. The current constructor does not establish that every WebFlux application lacks an injectable Builder.
 
 ### 6.3 Servlet Business Services Security Model
 
-Downstream Servlet microservices adopt a **gateway pre-authentication model**; all services require the HMAC signature assertion:
+Downstream preauthentication builds Authentication for protected business identity. Roles receive ROLE_, permissions become corresponding authorities, and method authorization uses that object rather than revalidating the original JWT per method. Public, management and internal-protocol paths match separately; not every HTTP request needs the same assertion.
 
-- **All Servlet business services** (omni-auth, omni-base, omni-workflow, omni-crm, omni-srm, omni-procurement, omni-asset) validate `X-Gateway-Assertion` (an HmacSHA256 signature assertion sharing `GATEWAY_ASSERTION_SECRET` with the Gateway) and `X-Tenant-Id` via `GatewayPreAuthenticationFilter` or their own `GatewayPreAuthFilter`, and only build `Authentication` from the `X-User-*` headers after validation passes. When the secret is not configured, they likewise reject with 401 (fail-closed) and no longer trust plaintext identity headers.
+Current `X-Gateway-Assertion` uses HmacSHA256 over `userId|tenantId|username|issuedAt`, validates the signature, positive-integer identity and ±300 second window, and compares plaintext identity headers. It does not sign roles/scopes, method, path or body and has no one-use nonce. Role/permission headers still rely on Gateway stripping/injection and a trusted service network. The `X-Gateway-Forwarded` marker alone is not identity proof.
 
-CRM, SRM, Procurement and Asset further resolve data scope from Auth by full permissionCode; TenantLine and DataPermission interceptors jointly constrain every business SQL:
+Missing/invalid assertions may return 401; some direct-access checks return 403. When internal API, DataScope, XSS and related capabilities are enabled, common-service also validates private internal tokens and path configuration; invalid configuration fails startup. Startup configuration failure, request denial and Gateway-not-ready 503 are different states.
 
-```
-Request enters (already JWT-verified by Gateway)
-    │
-    ▼
-Pre-auth filter (all services go through GatewayPreAuthenticationFilter or their own GatewayPreAuthFilter; first validates X-Gateway-Assertion (HmacSHA256) + X-Tenant-Id; a missing secret also fails closed with 401)
-    │ Builds UsernamePasswordAuthenticationToken from X-User-* headers
-    │ Roles get ROLE_ prefix, permissions added directly as authority
-    │ Written to SecurityContextHolder
-    ▼
-AuthorizationFilter
-    │ @PreAuthorize("hasAuthority('dict:type:list')") method-level permission check
-    ▼
-Business Controller → Service → Mapper
-```
-
-**Design Rationale**: JWT verification is centralized at the Gateway. All downstream services require a passing `X-Gateway-Assertion` HMAC signature assertion and fail closed when the secret is not configured, preventing downstream from unconditionally accepting forged identity headers. This way, each service doesn't need independent JWT verification configuration, reducing complexity and key management overhead.
+Business services still supply domain table mappings, endpoint permissions, AccessGuard/ownership, explicit tenant parameters and transaction constraints. One interceptor does not cover every SQL statement. [Core flows](core-flows.en.md), [backend patterns](backend-patterns.en.md) and domain facts own implementation constraints.
 
 ---
 
@@ -295,71 +180,42 @@ Business Controller → Service → Mapper
 
 ### 7.1 User Login Request Flow
 
+```text
+Browser -> Frontend -> Gateway(public route) -> Auth
+Auth -> CAPTCHA / tenant-user authentication -> JWT
+Frontend -> Gateway(protected route) -> preauthentication -> business service
 ```
-Browser (Vue SPA)
-    │  HTTP request (e.g., POST /api/auth/login)
-    ▼
-Vite Dev Server (:3000)  -- proxy /api/** -->
-    │
-Gateway (:8102)
-    │  1. Route matching: Path=/api/auth/** -> lb://omni-auth
-    │  2. Preserve the full path: /api/auth/login -> /api/auth/login
-    ▼
-Auth Service (:8100)
-    │  1. AuthController receives the full /api/auth/login
-    │  2. CaptchaService validates captcha (Redis)
-    │  3. OmniUserDetailsService authenticates user (multi-tenant tenantId:username)
-    │  4. JwtTokenService generates RS256-signed JWT
-    │  5. Response wrapped in R<T>
-    ▼
-JSON Response: { code: 200, message: "success", data: { accessToken, tokenType, expiresIn } }
-    │
-Browser stores JWT and uses it for subsequent authenticated requests
-```
+
+[Core flows](core-flows.en.md) and the [API contract](api-contract.en.md) own CAPTCHA consumption, tenant-local user validation, default roles, Token revocation and protocol differences. The [authentication guide](guides/authentication.en.md) owns operations/recovery. This overview is not a method-call inventory or new login acceptance evidence.
 
 ### 7.2 MQ Reliable Message Delivery Flow
 
-```
-Business Service (e.g., omni-base)
-    │  @Transactional
-    │  ReliableMessageTemplate.send(bindingName, payload, tenantId)
-    ▼
-sys_mq_message table (status=PENDING, same local transaction)
-    │
-    │  XXL-JOB mqRelayHandler (every 10s)
-    ▼
-MqMessageRelayService.relayAll()
-    │  1. SELECT * FROM sys_mq_message WHERE status IN (PENDING, FAILED) AND next_retry_time <= NOW() LIMIT 100
-    │  2. MessageSender.send(message) — strategy pattern by broker_type
-    │  3a. Success → status=SENT
-    │  3b. Failure → retry_count++, next_retry_time = NOW() + 2^retryCount * 10s
-    │      Exceeds max_retry → status=DEAD_LETTER, error_msg recorded
-    ▼
-RocketMQ Broker (via StreamBridge)
-    │
-    │  Admin UI (omni-base MqMessageController)
-    ▼
-Monitoring Page: query/resend/skip dead-letter messages
+```text
+business transaction -> sys_mq_message(PENDING)
+mqRelayHandler -> MqMessageRelayService -> MessageSender -> Broker
 ```
 
-> See [mq-reliability.en.md](mq-reliability.en.md) for details.
+`ReliableMessageRelay.send(bindingName, payload, tenantId)` requires explicit tenantId and commits locally with business writes. The relay scans across tenants; management queries still filter tenantId. Integrated domain consumers separately validate tenants and maintain their own Inbox/idempotency and local transactions; do not assume every consumer has the same implementation.
+
+[MQ reliability](mq-reliability.en.md) owns sending states, backoff, resend and consumer idempotency. [Outbox development](wiki/outbox-development.en.md) owns source walkthroughs. Broker acceptance, completed business consumption and local Outbox commit are separate stages.
 
 ---
 
 ## 8. External Dependencies
 
-| Service | Purpose | Version | Port |
-|---------|---------|---------|------|
-| MySQL | Primary relational database (Auth + RBAC + business data) | 8.4 | 3306 |
-| Redis | Captcha storage, session cache, token blacklist | 7.4 | 6379 |
-| Nacos Server | Service discovery + configuration center | v3.1.1 | 8080, 8848, 9848 |
-| Sentinel Dashboard | Flow control + circuit breaking dashboard | 1.8.8 | 8858 |
-| XXL-JOB Admin | Distributed task scheduling console | 3.3.1 | 18080 |
-| RocketMQ | Message queue (NameServer + Broker) | 5.3.2 | 9876, 10909-10912 |
+The table separates default formal-Compose host mappings from container ports. Omitted ports do not imply a component has no other internal ports.
 
-The full stack can be started with `docker compose --profile full up -d`; for daily development use `omni dev up --preset <id>` to start the minimal dependency closure. Adding `--observability` starts Prometheus, Pushgateway, Node Exporter, cAdvisor, Grafana, Tempo, Loki, Alloy, the OTel Collector and Alertmanager, and enables local Trace export. The single entry point is `compose.yaml` at the repository root; see [observability.en.md](observability.en.md) for observability semantics and security boundaries.
+| Component | Version | Default host → container |
+|---|---|---|
+| MySQL | 8.4 | 3306 → 3306 |
+| Redis | 7.4 | 6379 → 6379 |
+| Nacos | v3.1.1 | 8080 → 8080; 8848 → 8848; 9848 → 9848 |
+| RocketMQ NameServer | 5.3.2 | 19876 → 9876 |
+| RocketMQ Broker | 5.3.2 | 10909,10911,10912 → same-number ports |
+| XXL-JOB Admin | 3.3.1 | 18080 → 8080 |
+| Sentinel Dashboard (separate, optional) | 1.8.8 | 8858; absent from formal base Compose |
 
-**Start order**: MySQL → Redis → Nacos → RocketMQ → XXL-JOB Admin → Backend services (Auth, Base, Workflow, CRM, SRM, Procurement, Asset, Gateway) → Frontend
+MySQL, Redis, Nacos, RocketMQ and XXL-JOB default host bindings use 127.0.0.1; see Compose for Gateway/Frontend mappings. Redis owns CAPTCHA, blacklist, online state and caches; Nacos owns discovery/configuration, while MySQL uses separate databases. [Observability facts](observability.en.md) own optional observability and Alertmanager UI boundaries. Versions/ports are configuration facts, not current container or external-service acceptance.
 
 ---
 
@@ -367,106 +223,31 @@ The full stack can be started with `docker compose --profile full up -d`; for da
 
 ### 9.1 Docker Compose Orchestration
 
-The repository root `compose.yaml` merges `compose.infra.yaml` and `compose.apps.yaml` through include; the full profile defines 16 containers:
+[compose.yaml](../compose.yaml) includes infrastructure, application and observability definitions under standard project name omni-stack. Long-running services combine core/workflow/crm/supply-chain/full; MQ/Job infrastructure also has independent profiles. The catalog owns preset closure; profile names alone do not prove all runtime capabilities.
 
-- **Named volumes** (`mysql-data`, `redis-data`) for data persistence across restarts
-- **Health checks** (depends_on + service_healthy) ensuring layered startup chain
-- **Bridge network** (Compose default, project-scoped) for inter-container communication
-- **Migration startup gate**: the one-shot `omni-db-migrator` applies Liquibase structure and idempotent seeds for all nine databases; Nacos, XXL-JOB, and applications start only after it succeeds
+Healthy MySQL allows the one-shot Migrator to run. Its successful exit satisfies the migration gate for Nacos, XXL-JOB and applications. Application dependencies are not one linear chain: Gateway waits for Auth/Redis; domains wait for their respective Auth, Workflow and upstream domains; Frontend currently has no depends_on. Auth/Base/Workflow do not all declare Nacos/XXL-JOB health waits, so registration/readiness needs separate confirmation.
+
+Persistence volume keys are `omni-mysql-data`, `omni-redis-data` and `omni-rocketmq-data`; project/configuration determines actual names. Container start, health, successful migration, task registration and business availability are separate checks. This documentation review did not restart applications or execute migrations.
 
 ### 9.2 Database Schema
 
-#### omni_auth Database (19 tables)
+[MigrationTargetCatalog](../omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java) owns the current nine targets, each entered through `database/changelog/<id>/db.changelog-<id>.yaml`. This table records ownership rather than duplicating full table/column/index inventories.
 
-**OAuth2 Authorization (3 tables)**:
+| id | Database | Owned facts |
+|---|---|---|
+| auth | omni_auth | Users, tenants, RBAC, authorization, security audit, portal roles and settings |
+| base | omni_base | Dictionary, jobs, operation logs and other base business |
+| workflow | omni_workflow | Process business tables and vendor Flowable migrations |
+| crm | omni_crm | CRM aggregates and conversion/activity history |
+| srm | omni_srm | Suppliers, portal, evaluation/risk and quotation collaboration |
+| procurement | omni_procurement | Requisitions, RFQs, purchase orders, receipts and Inbox |
+| asset | omni_asset | Assets, history, transfer, disposal and Inbox |
+| nacos | nacos_config | Nacos vendor schema and bootstrap |
+| xxl-job | xxl_job | XXL-JOB vendor schema and bootstrap |
 
-| Table | Purpose |
-|-------|---------|
-| `oauth2_registered_client` | OAuth2 client registrations (client_id, secrets, grant types, scopes) |
-| `oauth2_authorization` | Active OAuth2 authorization records (access tokens, refresh tokens, authorization codes) |
-| `oauth2_authorization_consent` | User-consented scopes per client |
+Each of the seven business databases has its own Outbox. The sole shared DDL entry is [0001-mq-schema.yaml](../database/changelog/common/0001-mq-schema.yaml), included by each business changelog. Formal Workflow Compose disables Flowable schema auto-update and uses the vendor migration chain.
 
-**Multi-Tenant RBAC (14 tables)**:
-
-| Table | Purpose |
-|-------|---------|
-| `sys_tenant` | Tenant registry (multi-tenancy root) |
-| `sys_org_unit` | Organizational units with materialized path hierarchy |
-| `sys_user` | User accounts (linked to tenant + org unit) |
-| `sys_role` | Role definitions (scoped to tenant) |
-| `sys_permission` | Permission tree (menu, button, API; materialized path) |
-| `sys_user_role` | User-to-role assignments |
-| `sys_role_permission` | Role-to-permission assignments |
-| `sys_user_unit` | User-to-org-unit assignments (primary/secondary) |
-| `sys_role_dept` | Role-to-department data scope bindings |
-| `sys_user_role_scope` | User role scope (`unit_id` + `scope_mode`: SAME_UNIT / UNIT_AND_BELOW; unique key `tenant_id`+`user_id`+`role_id`+`unit_id`), driving data permissions and workflow candidate resolution |
-| `sys_token_blacklist` | Revoked JWT token blacklist |
-| `sys_user_oauth_provider` | Third-party social login identity linking |
-| `sys_xss_config` | Per-tenant XSS global toggle |
-| `sys_xss_blacklist_rule` | XSS blacklist rules |
-
-**Security Audit and Portal Roles (2 tables)**:
-
-| Table | Purpose |
-|-------|---------|
-| `sys_audit_log` | Security audit log (`event_type`: LOGIN_SUCCESS/LOGIN_FAILED/LOGOUT/ACCOUNT_LOCKED/ACCOUNT_UNLOCKED/PASSWORD_CHANGED/USER_CREATED/USER_DELETED/USER_STATUS_CHANGED/ROLE_ASSIGNED/ROLE_REVOKED) |
-| `sys_portal_role_request` | Idempotent inbox for portal role assignment requests (`status`: PROCESSING/COMPLETED/FAILED, unique key `tenant_id`+`request_id`) |
-
-```mermaid
-erDiagram
-    sys_tenant ||--o{ sys_user : "has users"
-    sys_tenant ||--o{ sys_role : "has roles"
-    sys_tenant ||--o{ sys_org_unit : "has org units"
-    sys_org_unit ||--o{ sys_user_unit : "linked to users"
-    sys_user ||--o{ sys_user_unit : "belongs to units"
-    sys_user ||--o{ sys_user_role : "assigned"
-    sys_user ||--o{ sys_user_oauth_provider : "social identities"
-    sys_role ||--o{ sys_user_role : "assigned"
-    sys_role ||--o{ sys_role_permission : "grants"
-    sys_role ||--o{ sys_role_dept : "data scope"
-    sys_permission ||--o{ sys_role_permission : "granted by"
-    sys_permission ||--o{ sys_permission : "parent-child"
-```
-
-#### omni_base Database
-
-**Data Dictionary (2 tables)**: `sys_dict_type` (type registry) + `sys_dict_data` (data entries)
-
-**Scheduled Tasks (3 tables)**: `sys_user_job_type` (task type catalog) + `sys_user_job` (user task instances) + `sys_user_job_log` (execution history)
-
-> See [scheduling.en.md](scheduling.en.md) for details.
-
-#### omni_workflow Database
-
-**Workflow (7 tables)**: `wf_process_model` (model registry) + `wf_process_model_version` (version history) + `wf_process_instance_ext` (instance extension) + `wf_todo_task` (pending task cache) + `wf_cc_record` (CC records) + `wf_form_schema` (form schemas) + `wf_delegation_rule` (delegation rules)
-
-> See [workflow.en.md](workflow.en.md) for details.
-
-#### omni_crm Database
-
-**CRM core tables (11 tables)**: `crm_tenant_config`, `crm_pipeline`, `crm_pipeline_stage`, `crm_lead`, `crm_lead_conversion`, `crm_customer`, `crm_contact`, `crm_opportunity`, `crm_opportunity_stage_history`, `crm_activity`, `crm_owner_change_log`, plus a per-service `sys_mq_message` Outbox. Every `crm_*` table carries `tenant_id`; authorization root tables keep an owner snapshot and use optimistic locking.
-
-> See [crm.en.md](crm.en.md) for domain runtime constraints and [design/crm-design.en.md](design/crm-design.en.md) for the design baseline.
-
-#### omni_srm Database
-
-**SRM core tables**: supplier master, contacts, qualifications, bank accounts, evaluations, risks, portal user associations, the invitation Saga and the quotation collaboration tables, plus a service-specific `sys_mq_message` Outbox. All authorized child resources inherit tenant and data scope through the Supplier or Evaluation aggregate root.
-
-> See [design/srm-design.en.md](design/srm-design.en.md) for details.
-
-#### omni_procurement Database
-
-**Procurement core tables**: tenant config, material/category, approval routes, requisitions and their lines, RFQs with suppliers and lines, purchase orders and lines, goods receipts and lines, the shared Inbox and a service-specific Outbox. Requisitions are filtered by requester scope, RFQ/PO/GR by owner scope, and child tables inherit through their aggregate root.
-
-> See [design/procurement-design.en.md](design/procurement-design.en.md) for details.
-
-#### omni_asset Database
-
-**Asset core tables**: `ast_asset` (asset aggregate root), `ast_asset_history` (immutable history), `ast_transfer` (transfers), `ast_disposal` (disposals), `ast_inbox_event` (cross-service consumption idempotency), plus a service-specific `sys_mq_message` Outbox. Procurement-sourced card creation is made idempotent by the receipt line and unit sequence; transfers and disposals share concurrency occupancy through the aggregate root's active-operation fields.
-
-> See [design/asset-design.en.md](design/asset-design.en.md) for details.
-
-**Authoritative database sources**: `database/changelog/` owns schema, indexes, constraints, and upgrades. `scripts/sql/seed/` owns formal idempotent seeds, guarded by source SHA-256 values and natural-key assertions in `database/seed/manifest.yaml`. Legacy manual `init-all.sql` and `migrate-*.sql` scripts have been retired from the current tree. Use `database/changelog/` for schema and `scripts/sql/seed/` for initialization; do not import old scripts.
+`database/changelog/` owns schema, indexes, constraints and forward upgrades. `scripts/sql/seed/` owns idempotent data, guarded by `database/seed/manifest.yaml` digests and natural-key assertions. Domain facts/design sources and migrations own complete structures; architectural excerpts or historical manual SQL are not a second authoritative version.
 
 ---
 
@@ -474,68 +255,17 @@ erDiagram
 
 ### 10.1 Container Network Topology
 
-All containers share the Compose default bridge network (derived from the project name; `compose.yaml`/`compose.apps.yaml` do not declare a named `omni-network`; containers reach each other by service name):
+Containers communicate through Compose's `<project>_default` bridge, service names and internal ports. The usual business entry is Frontend → Gateway → Servlet services; internal calls, management ports and component protocols do not all traverse Gateway. Common modules are libraries, not separate containers.
 
-```
-┌───────────────────────────────────────────────────────────────────────┐
-│            Docker Network: <project>_default (Compose default)         │
-│                                                                       │
-│  ┌─────────────┐    ┌──────────┐    ┌────────┐    ┌──────────────┐  │
-│  │ omni-       │    │ omni-    │    │ omni-  │    │ omni-        │  │
-│  │ frontend    │───>│ gateway  │───>│ auth   │    │ workflow     │  │
-│  │ :3000       │    │ :8080    │    │ :8080  │    │ :8080        │  │
-│  │ (Nginx)     │    │ (WebFlux)│    │        │    │              │  │
-│  └─────────────┘    └────┬─────┘    └───┬────┘    └──────────────┘  │
-│                          │              │                             │
-│                          │    ┌─────────┤    ┌──────────────┐       │
-│                          └───>│ omni-   │    │ omni-        │       │
-│                               │ base    │    │ common-job   │       │
-│                               │ :8080   │    │ (XXL-JOB     │       │
-│                               └────┬────┘    │  executor)   │       │
-│                                    │         └──────────────┘       │
-│  ┌────────┐  ┌────────┐  ┌────────┐  ┌──────────────┐  ┌────────┐ │
-│  │ MySQL  │  │ Redis  │  │ Nacos  │  │ RocketMQ     │  │XXL-JOB │ │
-│  │ :3306  │  │ :6379  │  │ :8848  │  │ NS:9876      │  │:8080   │ │
-│  │        │  │        │  │ :9848  │  │ Broker:10909 │  │        │ │
-│  └────────┘  └────────┘  └────────┘  └──────────────┘  └────────┘ │
-└───────────────────────────────────────────────────────────────────────┘
-        ↕ Host port mapping
-   :3000    :8100-8103   :3306  :6379  :8080  :8848  :19876  :18080
-```
+Business host ports are 8100–8107, application containers use 8080 and Frontend uses 3000. Default Servlet business host mappings listen only on 127.0.0.1. [Docker deployment](docker-deployment.en.md) owns complete exposure/persistence; an identity assertion does not replace the network boundary.
 
 ### 10.2 Service Discovery Mechanism
 
-```
-omni-auth starts
-    │ @EnableDiscoveryClient
-    │ spring.cloud.nacos.discovery.server-addr = nacos:8848
-    ▼
-Nacos registration: service=omni-auth, ip=<container-internal-IP>, port=8080
-    │
-omni-gateway starts
-    │ @EnableDiscoveryClient
-    │ spring.cloud.gateway.server.webflux.discovery.locator.enabled=false
-    ▼
-Gateway explicit routes: /api/crm/** → lb://omni-crm → query Nacos for instance list → load-balanced forwarding
-```
-
-**Key Configuration**:
-- `SPRING_CLOUD_NACOS_DISCOVERY_IP: ""` — lets Nacos auto-detect the container-internal IP
-- Docker internal communication uses **container-internal port 8080**, not the host-mapped port
+Gateway sets discovery.locator.enabled=false and uses explicit routes. Nacos registers container addresses/internal ports, and `lb://` resolves instances. An empty Compose SPRING_CLOUD_NACOS_DISCOVERY_IP lets the client detect its address. Public paths, route existence, successful registration and downstream readiness are distinct.
 
 ### 10.3 Environment Variable Override Strategy
 
-Spring Boot environment variables take precedence over `application.yml`; Docker deployment makes extensive use of this mechanism:
-
-| Environment Variable | Overrides | Example Value |
-|---------------------|-----------|---------------|
-| `SPRING_DATASOURCE_URL` | `spring.datasource.url` | `jdbc:mysql://mysql:3306/omni_auth` |
-| `SPRING_DATA_REDIS_HOST` | `spring.data.redis.host` | `redis` |
-| `SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR` | `spring.cloud.nacos.discovery.server-addr` | `nacos:8848` |
-| `AUTH_JWKS_URI` | `auth.jwks.uri` | `http://omni-auth:8080/oauth2/jwks` |
-| `SERVER_PORT` | `server.port` | `8080` |
-
-> Complete environment variable override table: see [docker-deployment.en.md](docker-deployment.en.md) Section 6.
+Compose injects container addresses/private settings over corresponding application.yml properties. Auth/Base/Workflow and domain services do not use entirely identical variable names; check actual mappings. [Deployment documentation](docker-deployment.en.md) owns AUTH_JWKS_URI, GATEWAY_ASSERTION_SECRET, database/Redis/Nacos authentication and optional Job/MQ switches. [Quick start](guides/quick-start.en.md) owns initialization.
 
 ---
 
@@ -543,117 +273,71 @@ Spring Boot environment variables take precedence over `application.yml`; Docker
 
 ### 11.1 Design Philosophy
 
-Omni-Stack adopts the **RBAC-0 basic permission model** (User-Role-Permission), divided into two independent but complementary subsystems:
+Auth owns user-role-permission and organization relationships. Functional authorization defines available operations; data scope limits accessible rows, while tenant isolation is independent. Usernames are tenant-unique, permissions use full resource:action codes, and role names are not wildcard permissions.
 
-1. **Functional Permission**: Controls what users "can do" — menu visibility + button/API-level operation permissions
-2. **Data Permission**: Controls what data users "can see" — row-level filtering based on organizational membership
+This conceptual association diagram does not enumerate all tables, columns or current DDL foreign keys:
 
-In multi-tenant scenarios, usernames are unique within a tenant (the `sys_user` table uses a `(username, tenant_id)` composite unique key), with permission codes in `resource:action` format (fine-grained API level).
+```mermaid
+erDiagram
+    sys_tenant ||--o{ sys_user : "has users"
+    sys_tenant ||--o{ sys_role : "has roles"
+    sys_tenant ||--o{ sys_org_unit : "has organizations"
+    sys_user ||--o{ sys_user_role : "role relationship"
+    sys_role ||--o{ sys_user_role : "assigned"
+    sys_role ||--o{ sys_role_permission : "grants"
+    sys_permission ||--o{ sys_role_permission : "granted"
+    sys_user ||--o{ sys_user_unit : "organization relationship"
+    sys_org_unit ||--o{ sys_user_unit : "linked"
+    sys_user ||--o{ sys_user_role_scope : "candidate scope"
+    sys_role ||--o{ sys_user_role_scope : "scope role"
+    sys_org_unit ||--o{ sys_user_role_scope : "scope organization"
+    sys_role ||--o{ sys_role_dept : "custom data scope"
+    sys_permission ||--o{ sys_permission : "parent child"
+```
+
+SAME_UNIT/UNIT_AND_BELOW in `sys_user_role_scope.scope_mode` belongs to role-assignment scope and Workflow candidate resolution. It is not the six-value dataScope enum.
 
 ### 11.2 Functional Permission Architecture
 
-Functional permission is implemented as **menu filtering + button-level control + API authorization** three-layer defense:
+`GET /api/auth/menus` takes non-ROLE_ permissions from Authentication authorities. MenuController first recursively selects DIRECTORY/MENU types. Permission filtering recursively checks DIRECTORY children, but checks each MENU's own code and preserves its existing children without another recursive child-permission check. An empty permission set returns an empty menu. BUTTON/API are not dynamic menu nodes.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Layer 1: Dynamic Menu Filtering (MenuController)            │
-│ Backend recursively filters the permission tree based on    │
-│ user permissions, returning only DIRECTORY (with visible    │
-│ children) and MENU (with permission codes) nodes            │
-│ → Frontend dynamically registers routes + renders sidebar   │
-├─────────────────────────────────────────────────────────────┤
-│ Layer 2: Button-Level Control (v-permission directive)      │
-│ Vue custom directive v-permission="'system:user:create'"    │
-│ Queries permission codes from PermissionStore, hides        │
-│ unauthorized buttons via display:none                       │
-├─────────────────────────────────────────────────────────────┤
-│ Layer 3: API Authorization (Spring Security @PreAuthorize)  │
-│ Controller methods declare @PreAuthorize("hasAuthority()")  │
-│ Spring Security validates JWT permission set before method  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Permission Tree Structure** (`sys_permission` table, materialized path):
-
-| Node Type | Purpose | Example |
-|-----------|---------|---------|
-| `DIRECTORY` | Menu group directory | "System Management" |
-| `MENU` | Routable menu page | "User Management" (path: /system/user) |
-| `BUTTON` | Button/API operation | "Create User" (code: system:user:create) |
-| `API` | Fine-grained API endpoint | "GET /api/auth/user/list" |
+MenuNode.path describes permission-tree hierarchy, not a page URL. Frontend derives paths from permissionCode, for example `system:user → /admin/system/user`. v-permission uses display:none rather than removing DOM. Method @PreAuthorize uses preauthenticated authorities; row-ownership interfaces such as personal jobs use their own checks rather than a mechanical endpoint annotation. Menu/button visibility does not replace backend authorization.
 
 ### 11.3 Data Permission Architecture
 
-Data permission is based on **MyBatis-Plus `DataPermissionInterceptor`** for automatic SQL interception, with zero intrusion into business code.
+| dataScope | Current scope-layer meaning | Priority |
+|---|---|---|
+| ALL | No scope-layer row condition; interface/tenant policy separately determines cross-tenant access | 1 |
+| TENANT | No further organization/self restriction within the tenant; tenant constraints still apply | 2 |
+| DEPT_AND_BELOW | Current primary organization and enabled descendants | 3 |
+| DEPT | Current primary organization | 4 |
+| CUSTOM | Organization trees configured by participating CUSTOM roles | 5 |
+| SELF | Self | 6 |
 
-**Six-Level Data Scope (dataScope)**:
+For ordinary Auth requests, DataScopeResolveFilter calls resolution without permissionCode, validates an enabled user in the tenant and merges relevant roles. /internal/ does not establish that ordinary context. The permission-aware internal interface merges only roles granting the target permission and returns 403 without a grant. Empty/invalid parameters and upstream unavailability are separate failures. These entries are not one unconditional all-role merge.
 
-| Level | dataScope Value | Meaning | Priority |
-|-------|----------------|---------|----------|
-| Most permissive | `ALL` | All data (cross-tenant) | 1 |
-| | `TENANT` | All data within current tenant | 2 |
-| | `DEPT_AND_BELOW` | Current department and all subordinates | 3 |
-| | `DEPT` | Current department only | 4 |
-| | `CUSTOM` | Custom department set (`sys_role_dept` join table) | 5 |
-| Most restrictive | `SELF` | Own data only | 6 |
+Auth's MyBatis chain is DataPermission → OptimisticLock → Pagination, without a general TenantLine. Corresponding Mapper/Service statements and checks own tenant conditions. The local handler maps only sys_user/sys_org_unit/sys_role and adds no row conditions for ALL/TENANT or absent context. User SELF uses id, organizations use current/visible units, and role SELF produces a nonmatching condition.
 
-**Multi-role merge rule**: Most permissive wins — when a user has multiple roles, the dataScope with the smallest priority value is used.
+Current common-service can register TenantLine → DataPermission → OptimisticLock → Pagination under enabled configuration. Tenant policies cover only crm_/srm_/proc_/ast_, excluding sys_mq_message. Request identity and method data scope are established separately and cleared in finally. Domains own aggregate/child mappings, SELF columns, organization mappings and write AccessGuard; this is not universal zero-intrusion SQL protection.
 
-**Request-level data flow**:
-
-```
-HTTP Request (with X-User-Id, X-Tenant-Id headers)
-    │
-    ▼
-DataScopeResolveFilter (OncePerRequestFilter, @Order(0))
-    │ 1. Extract userId, tenantId from headers
-    │ 2. Query all user roles → sys_role_mapper.selectRolesByUserId()
-    │ 3. Merge all roles' dataScope → take most permissive
-    │ 4. Resolve accessible org unit ID set (DEPT*/CUSTOM query materialized path descendants)
-    │ 5. Write to DataScopeContext (ThreadLocal)
-    ▼
-MyBatis-Plus DataPermissionInterceptor
-    │ Intercepts sys_user table SELECT queries
-    │ Calls DataPermissionHandlerImpl.getSqlSegment()
-    │ Auto-appends WHERE conditions based on effectiveScope:
-    │   ALL/TENANT → no append
-    │   SELF       → WHERE sys_user.id = {userId}
-    │   DEPT*/CUSTOM → WHERE sys_user.primary_unit_id IN (...)
-    ▼
-Business Code (Controller → Service → Mapper)
-    │ Zero intrusion; no awareness of data permission required
-    ▼
-DataScopeContext.clear() (finally block, prevents ThreadLocal leak)
-```
-
-**Two Filtering Modes**:
-
-| Mode | Use Case | Implementation |
-|------|----------|---------------|
-| SQL Interception | Database queries (e.g., user list) | `DataPermissionInterceptor` + `DataPermissionHandlerImpl` auto-appends WHERE |
-| In-Memory Filtering | Non-DB data (e.g., online users in Redis) | Controller reads `DataScopeContext`, filters by `primaryUnitId` |
+OnlineUserServiceImpl checks online-user scope: ALL can span tenants, while other scopes validate the tenant first. That interface behavior does not imply domain SQL also spans tenants. [Core flows](core-flows.en.md) own detailed request boundaries.
 
 ### 11.4 RBAC Management Flows
 
-- **Role Management**: Create role → Assign permissions (`sys_role_permission`) → Set data scope (`sys_role.data_scope`) → Custom departments (`sys_role_dept`, CUSTOM scope only)
-- **User Authorization**: Create user → Assign roles (`sys_user_role`) → Assign org units (`sys_user_unit`, mark primary)
-- **Menu Rendering**: Login → JWT contains permission codes → Frontend calls `/api/auth/menus` → Backend recursive filtering → Frontend dynamic route registration
-- **Data Query**: Request → Gateway injects identity headers → Filter resolves data scope → MyBatis-Plus auto-appends SQL → Returns filtered data
-
-> Complete RBAC flow sequence diagrams: see [core-flows.en.md](core-flows.en.md)
+Auth maintains roles, permission trees and user-role/organization relationships. New write endpoints, permission seeds, frontend actions and domain scopes must correspond. The [permissions guide](guides/permissions.en.md) owns operations, screenshots and denial branches; architecture does not duplicate an operating tutorial.
 
 ---
 
 ## 12. Key Constraints
 
-1. **JDK 25 required**: Spring Boot 4.x Maven plugin requires Java 17+; this project targets JDK 25. `JAVA_HOME` must be set before running any Maven commands.
-2. **Gateway 5.x config prefix**: Routes and settings must be under `spring.cloud.gateway.server.webflux`, NOT `spring.cloud.gateway` (the old prefix is silently ignored).
-3. **Build order**: `omni-common-core` must be installed first, followed by `omni-common`, then the common starters. Use `./mvnw clean install` from the parent POM — Maven reactor resolves ordering automatically.
-4. **No direct service-to-service calls**: Inter-service communication must go through OpenFeign clients, never raw HTTP calls.
-5. **Gateway is reactive**: `omni-gateway` runs on WebFlux. It depends on `omni-common-core` (POJO only) and `omni-common-redis-reactive`, but NOT on `omni-common` or `omni-common-redis` (blocking Redis would starve Netty event loop threads).
-6. **Redis starter exclusivity**: `omni-common-redis` (blocking) and `omni-common-redis-reactive` (reactive) must not be mixed in the same service. Servlet services use blocking; WebFlux services use reactive.
-7. **XXL-JOB Admin must be running** before `omni-base` starts. The `XxlJobSpringExecutor` registers with Admin on startup; user task creation/updates require `XxlJobAdminClient` HTTP calls.
-8. **omni-common-job is a library module** — it cannot run independently. Only Servlet services should depend on it. WebFlux services must not depend on it (XXL-JOB executor uses blocking I/O).
+1. The project targets JDK 25. Use Maven Wrapper in Docker with JAVA_HOME set and build current dependencies through the parent reactor.
+2. Gateway uses `spring.cloud.gateway.server.webflux` and reactive dependencies; do not import Servlet/blocking Redis shared libraries.
+3. Do not mix blocking/reactive Redis in a service. Check library dependencies, auto-configuration entries, activation properties and required implementations separately.
+4. Synchronous business calls use OpenFeign/internal tokens. Gateway JWKS, OAuth providers and XXL-JOB Admin clients have distinct protocol boundaries.
+5. With Job/MQ enabled, verify Admin, executor group, handler, Broker and bindings separately. Container health does not prove successful relay or job execution.
+6. Services validate input, permissions, tenant, DataScope, version and transactions rather than relying on frontend checks or an annotation's presence.
+7. Ordinary business Controllers return `R<T>`; the [API contract](api-contract.en.md) owns protocol, redirect and observability exceptions. Do not duplicate shared types or date/money conventions.
+8. Record configuration, source, unit tests, integration tests, real browsers and actual business results as distinct evidence. Diagrams/digests/static configuration do not certify full acceptance.
 
 ---
 
@@ -661,180 +345,24 @@ DataScopeContext.clear() (finally block, prevents ThreadLocal leak)
 
 ### 13.1 Adding a New OAuth2 Social Login Provider
 
-The social login framework uses the Strategy Pattern via `OAuth2ProviderHandler` interface. Adding a new provider requires:
-
-1. **Create handler implementation**: Create `XxxOAuth2Handler.java` implementing `OAuth2ProviderHandler`, annotated with `@Component("xxx")`. Implement `getProviderId()`, `buildAuthorizationUrl()`, `exchangeCodeForAccessToken()`, and `fetchUserProfile()` (returning the unified `ProviderUser` DTO).
-2. **Add configuration**: Add a new `XxxProperties` inner static class in `OAuth2Properties.java`.
-3. **Configure credentials**: Add `auth.oauth2.xxx.*` section in `application.yml`.
-4. **Add username prefix**: Add a case in `SocialLoginServiceImpl.getUsernamePrefix()` switch expression.
-
-`SocialLoginServiceImpl` automatically discovers new handlers via Spring's `Map<String, OAuth2ProviderHandler>` injection.
-
-**Currently implemented**: GitHub, Google, Gitee.
-
-> See [core-flows.en.md](core-flows.en.md) Flow 4 for details.
+SocialLoginServiceImpl discovers OAuth2ProviderHandler strategies through a Map; configuration, handlers and username prefixes must agree. Current GitHub/Google/Gitee new users still follow tenant uniqueness and default-role rules. An implementation entry does not prove three external positive authorizations. [Core flows](core-flows.en.md) own protocols; the [authentication guide](guides/authentication.en.md) owns operations.
 
 ### 13.2 Adding XSS Protection to a New Service
 
-The XSS defense system is modular — new services inherit protection by depending on the Common Starter ecosystem:
-
-1. Add `omni-common-core` + `omni-common` dependencies
-2. Implement `XssConfigProvider` SPI interface
-3. Use Redis caching strategy (`xss:enabled:{tenantId}` + `xss:rules:{tenantId}`, 30-minute TTL)
-4. `XssAutoConfiguration` is registered automatically via `AutoConfiguration.imports`
+A new Servlet service supplies XssConfigProvider SPI. Enabled common-service configuration can supply caching and Auth settings retrieval; existing services may customize it. omni-common registers defense, while actual Beans/classpath/switches determine activation. Isolate `xss:enabled:{tenantId}` and `xss:rules:{tenantId}` by tenant and invalidate on configuration writes. [Backend patterns](backend-patterns.en.md) own order/lifecycle; a dependency declaration alone does not prove every request is protected.
 
 ### 13.3 Adding a New User Task Type
 
-The user task system uses an SPI pattern via `UserJobHandler`:
-
-1. INSERT into `sys_user_job_type` to register the task type (unique `type_code`, maps to Bean name)
-2. Create a `@Component("{type_code}")` class implementing `UserJobHandler`
-3. `UserJobHandlerRegistry` auto-discovers all implementations via `Map<String, UserJobHandler>` injection
-
-> Complete tutorial: see [scheduling.en.md](scheduling.en.md) Chapter 4.
+UserJobHandlerRegistry discovers Map entries. The @Component Bean name must equal sys_user_job_type.type_code. User jobs share userJobExecuteHandler, while system jobs declare both @XxlJob and @SystemJobMeta. Scheduling facts own registration compensation, and the [scheduling guide](guides/scheduling.en.md) owns extension steps.
 
 ---
 
-## 14. Tutorial: Onboarding a New Microservice
+## 14. Development and Verification Entry Points
 
-The following example creates `omni-order` (order service) to demonstrate the complete onboarding steps.
+The [scaffold development guide](guides/scaffold-development.en.md) owns service, CRUD, module and preset onboarding. Current CLI create-service previews by default and writes a bundle only with --apply. service validate checks the lockfile and content digests. service integrate renders read-only by default; --apply performs the cross-file transaction. Bundle validation is not business execution or a full compilation check.
 
-### 14.1 Create Maven Module
+Integration plans cover Maven, Gateway, Compose, catalog, migration targets/seeds, menu/icons, documentation and the review queue. Current [service-integration.ts](../tools/omni-cli/src/service-integration.ts) and the renderer cover zh-CN, en-US, ja-JP and ko-KR frontend locales. When the target has .git, all four locale files participate in the pre-write dirty-file check. New documents/translations remain present-unverified; actual semantic review can be recorded as owner-authorized AI_REVIEW without mandatory human review. Locale registration and file guards do not prove translated domain terminology, page acceptance or business acceptance.
 
-```
-omni-backend/
-└── omni-order/                    # New module
-    ├── pom.xml
-    └── src/main/java/com/omni/order/
-        ├── OrderApplication.java
-        ├── controller/
-        ├── service/
-        ├── mapper/
-        ├── entity/
-        └── config/
-```
+Implementation entries: [preset-generator.ts](../tools/omni-cli/src/preset-generator.ts), [CLI](../tools/omni-cli/src/cli.ts). Regression entries: [service-integration.test.ts](../tools/omni-cli/test/service-integration.test.ts), [preset-generator.test.ts](../tools/omni-cli/test/preset-generator.test.ts). Builds, tests, applications and browsers run in local Docker under [AGENTS.md](../AGENTS.md). Unchanged successful builds may be reused with exact equivalence evidence; generated artifacts still need validation at their actual scope.
 
-### 14.2 Configure POM Dependencies
-
-```xml
-<dependencies>
-    <!-- Required Common Starters -->
-    <dependency>
-        <groupId>com.omni</groupId>
-        <artifactId>omni-common-core</artifactId>   <!-- R<T>, PageResult -->
-    </dependency>
-    <dependency>
-        <groupId>com.omni</groupId>
-        <artifactId>omni-common</artifactId>         <!-- Web auto-config + XSS -->
-    </dependency>
-    <dependency>
-        <groupId>com.omni</groupId>
-        <artifactId>omni-common-mybatis</artifactId> <!-- MyBatis-Plus + MySQL -->
-    </dependency>
-    <dependency>
-        <groupId>com.omni</groupId>
-        <artifactId>omni-common-redis</artifactId>   <!-- Redis cache -->
-    </dependency>
-    <!-- Add as needed -->
-    <dependency>
-        <groupId>com.omni</groupId>
-        <artifactId>omni-common-job</artifactId>     <!-- If scheduled tasks needed -->
-    </dependency>
-</dependencies>
-```
-
-### 14.3 Register in Parent POM
-
-Add to `omni-backend/pom.xml` `<modules>`:
-
-```xml
-<modules>
-    <!-- existing modules... -->
-    <module>omni-order</module>
-</modules>
-```
-
-### 14.4 Configure application.yml
-
-```yaml
-server:
-  port: 8108                        # Unused port (omni-auth 8100 / base 8101 / gateway 8102 / workflow 8103 / crm 8104 / srm 8105 / procurement 8106 / asset 8107 are all taken)
-
-spring:
-  application:
-    name: omni-order                # Nacos service name
-  datasource:
-    url: jdbc:mysql://localhost:3306/omni_order?...
-    username: root
-    password: root
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
-      database: 4                   # Dedicated Redis DB
-  cloud:
-    nacos:
-      discovery:
-        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
-        ip: 127.0.0.1
-```
-
-### 14.5 Add Gateway Route
-
-Add to `omni-gateway/application.yml`:
-
-```yaml
-- id: omni-order
-  uri: lb://omni-order
-  predicates:
-    - Path=/api/order/**
-```
-
-Downstream Controllers keep and declare the full `/api/order/**` path; the gateway currently does not apply `StripPrefix`.
-
-### 14.6 Add Permission Seed Data
-
-Add idempotent `sys_permission` records in `scripts/sql/seed/auth.sql`, then refresh its checksum and natural-key assertions in `database/seed/manifest.yaml`:
-
-```sql
-INSERT INTO sys_permission
-    (tenant_id, parent_id, permission_name, permission_code, type, path, depth, sort, status) VALUES
-(1, 0, '订单管理', 'order', 'DIRECTORY', '/<目录ID>/', 1, 1, 1),
-(1, @order_dir, '订单列表', 'order:list', 'MENU', '/<目录ID>/<菜单ID>/', 2, 1, 1),
-(1, @order_list, '查看订单', 'order:detail:query', 'API', '/<目录ID>/<菜单ID>/<权限ID>/', 3, 1, 1);
-```
-
-### 14.7 Docker Deployment Configuration
-
-Add the single service definition in `compose.apps.yaml` and declare the profiles it applies to:
-
-```yaml
-omni-order:
-  build:
-    context: ./omni-backend
-    dockerfile: ../docker/backend/Dockerfile
-    args:
-      SERVICE_NAME: omni-order
-  ports:
-    - "8108:8080"
-  environment:
-    SERVER_PORT: "8080"
-    SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/omni_order?..."
-    SPRING_DATA_REDIS_HOST: redis
-    SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
-  depends_on:
-    nacos: { condition: service_healthy }
-    redis: { condition: service_healthy }
-    mysql: { condition: service_healthy }
-```
-
-### 14.8 Verification Checklist
-
-- [ ] `./mvnw clean install` compiles successfully (use the repo Maven Wrapper and JDK 25, not a system mvn)
-- [ ] Service visible in Nacos console after local startup
-- [ ] `GET /api/order/xxx` routes successfully through Gateway
-- [ ] `@PreAuthorize` annotations work (a new Servlet business service depends on `GatewayPreAuthenticationFilter` from omni-common-service; for base/workflow-style services with their own filter it is `GatewayPreAuthFilter`)
-- [ ] XSS protection auto-configured (depends on `omni-common`)
-- [ ] MyBatis-Plus pagination auto-configured
-
-> MyBatis-Plus pagination, Jackson time config, CORS, `GlobalExceptionHandler`, and XSS Filter all auto-configure via `AutoConfiguration.imports` — no manual `@ComponentScan("com.omni.common")` needed.
+---

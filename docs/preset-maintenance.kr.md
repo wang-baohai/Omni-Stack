@@ -28,12 +28,13 @@
 
 `scaffold/presets/<id>.yaml` 의 진입 모듈과 설명만 편집합니다. 그런 다음 실행:
 
-~~~powershell
-Set-Location tools/omni-cli
-npm test
-npm run test:preset-structure
-npm run docs:preset
-npm run docs:preset:check
+다음 명령은 원본 저장소 루트에서 로컬 Docker CLI 도구 컨테이너로 실행합니다. 첫 실행 안내에 따라 도구 이미지와 의존성을 먼저 준비하세요.
+
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm test
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-structure
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run docs:preset
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run docs:preset:check
 ~~~
 
 모듈 집합, 기본 구성, 생성 결과에 호환성 변화가 생기면 `version` 을 증가: 수정은 patch, 하위 호환 기능 추가는 minor, 파괴적 경계 변화는 major. catalog 모듈 버전과 프리셋 버전은 각각 유지합니다.

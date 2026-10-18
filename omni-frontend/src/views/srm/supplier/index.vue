@@ -393,7 +393,7 @@ onMounted(() => {
             v-model="query.categoryCode"
             clearable
             filterable
-            :loading="categoryLoading.value"
+            :loading="categoryLoading"
             :placeholder="t('srmSupplierPage.allCategories')"
             style="width: 150px"
           >
@@ -533,7 +533,7 @@ onMounted(() => {
           <el-col :span="12"><el-form-item :label="t('srmSupplierPage.industry')" prop="industryCode"><el-input v-model="form.industryCode" maxlength="50" /></el-form-item></el-col>
           <el-col :span="12">
             <el-form-item :label="t('procurementRequisitionPage.category')" prop="categoryCode">
-              <el-select v-model="form.categoryCode" clearable filterable :loading="categoryLoading.value" style="width: 100%">
+              <el-select v-model="form.categoryCode" clearable filterable :loading="categoryLoading" style="width: 100%">
                 <el-option v-for="option in categoryOptions" :key="option.value" :label="option.label" :value="option.value" />
               </el-select>
             </el-form-item>

@@ -41,11 +41,11 @@ import java.time.Duration;
 @Component("google")
 public class GoogleOAuth2Handler implements OAuth2ProviderHandler {
 
-    /** Google OAuth2 授权页面 URL（默认值，可通过配置覆盖） */
+    /** Google OAuth2 授权页面 URL。运行时实际取值来自 {@link OAuth2Properties.GoogleProperties#getAuthorizeUrl()}，本常量未被引用。 */
     private static final String GOOGLE_AUTHORIZE_URL = "https://accounts.google.com/o/oauth2/v2/auth";
-    /** Google OAuth2 Token 端点 URL（默认值，可通过配置覆盖） */
+    /** Google OAuth2 Token 端点 URL。运行时实际取值来自 {@link OAuth2Properties.GoogleProperties#getTokenUrl()}，本常量未被引用。 */
     private static final String GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
-    /** Google 用户信息 API URL（默认值，可通过配置覆盖） */
+    /** Google 用户信息 API URL。运行时实际取值来自 {@link OAuth2Properties.GoogleProperties#getUserinfoUrl()}，本常量未被引用。 */
     private static final String GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
     /** 请求的 OAuth2 授权范围：用户 ID、基本资料和邮箱 */
     private static final String SCOPE = "openid profile email";

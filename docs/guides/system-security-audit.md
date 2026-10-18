@@ -1,129 +1,124 @@
 # 系统配置、安全配置与审计日志
 
-本指南说明租户管理员和运维人员如何维护基础配置、XSS 防护、在线会话、登录记录、操作日志与可靠消息记录。
+适用基线：本仓库 Spring Boot 4 / Vue 3 实现；所需预设：core 或包含 core 的预设。先完成[首次启动](quick-start.md)和[认证](authentication.md)。本文是操作教程，安全边界与事件契约以[核心流程](../core-flows.md)为准。
 
-## 1. 系统基础数据
+## 1. 准备环境与身份
 
-系统管理包含租户、组织、用户、角色、权限、OAuth2 客户端、在线用户、授权记录、审计记录和 XSS 配置；基础数据包含字典。修改前先确认当前租户和权限范围。
+- 在本机 Docker 内运行数据库迁移、Auth、Base、Gateway 和前端；先确认迁移与服务健康。页面读取可用原生 lite 模式；第 6 节的异步投递还需要完整消息运行环境，见[Docker 部署](../docker-deployment.md)。
+- 准备同一租户的管理员与普通员工，记录各自用户 ID、角色及实际权限。管理操作使用对应写权限；员工负向验证使用员工自己的会话，不能用管理员代替。
+- 每次使用唯一 `WIKI-{run-id}` 前缀，并将原值、创建 ID、请求结果和清理记录保存在仓库外。不要提交密码、令牌、客户端 secret 或私有环境文件。
+- 下文写操作是读者在隔离教学环境中的操作步骤。2026-10-10/12 的成功业务写入已有回执，本轮未重放；2026-10-17 新图只读取既有数据，来源见第 7 节。
 
-字典适合稳定的展示枚举。接口仍传输稳定值，翻译只改变显示文案，不能改变状态码、权限码或业务参数。
+## 2. 认识组织、角色与菜单
 
-## 2. OAuth2 客户端
+1. 管理员进入「系统管理 → 组织管理」，建立唯一前缀的教学部门，记录返回 ID。
+2. 在用户管理新建教学账号，核对默认 `USER` 角色。当前用户页面没有主组织编辑项；需要设置时，由具有 `system:user:update` 权限的管理员通过正式 `PUT /api/auth/user/{id}` 更新 `primaryUnitId`，再回读。不要将组织列表截图说成已完成用户绑定。
+3. 分配功能角色前先读原角色集合；分配接口是全量替换，必须保留仍需使用的角色。目标账号重新登录后再检查菜单、按钮和 API。
+4. 核对角色的数据范围 `ALL/TENANT/DEPT/DEPT_AND_CHILD/SELF/CUSTOM`；`CUSTOM` 还需配置部门集合。实际可见范围用员工和经理对照，不能由 `SUPER_ADMIN` 的结果推断。
 
-客户端配置至少包含客户端 ID、允许的授权方式、回调 URI、作用域和是否需要用户同意。生产客户端必须：
+**功能角色与工作流候选作用域分开维护。** 用户管理写入 `sys_user_role`；设置主组织不会自动建立 `sys_user_role_scope`。默认审批模型通过后者找候选人，只有功能角色仍可能无人审批。当前没有该作用域的公共维护 API；隔离教学环境使用有记录的受控夹具，不把直接修改生产表写成管理步骤。供应链教程开始前先做候选人预览，见[工作流教程](workflow-approval.md)。
 
-- 使用 HTTPS 回调。
-- 精确登记回调地址，不使用宽泛通配符。
-- 通过 Secret 管理客户端密钥。
-- 只开放业务需要的授权方式和作用域。
-- 定期轮换凭据并审查授权记录。
+### 2.1. 保存角色范围并分配菜单权限
 
-## 3. XSS 防护
+1. 准备未分配给任何用户的教学角色，使用唯一编码。可从「角色管理 → 新建」创建；2026-10-12 取证准备使用正式 `POST /api/auth/role`，初始 `dataScope=DEPT`，未改种子角色。
+2. 编辑该角色，将范围改为「仅本人数据」`SELF`，确认保存；回读 `GET /api/auth/role/{id}`，核对 `dataScope=SELF` 与列表一致。
 
-所有包含 `@RequestBody` 的新后端服务必须实现 `XssConfigProvider` SPI。公共组件提供请求过滤、Jackson 字符串净化和 Gateway 安全响应头三层防护。
+![历史步骤：选择 SELF，尚未保存](../images/zh-CN/system-role-scope-form.png)
+![历史步骤：保存后列表显示 SELF](../images/zh-CN/system-role-scope-saved.png)
 
-租户管理员可以切换 XSS 状态并维护规则。任何写操作都必须立即清除：
+3. 读取「权限管理」三级树：目录 `DIRECTORY`、菜单 `MENU`、接口 `API`。查看节点不是创建或改写菜单。
 
-- `xss:enabled:{tenantId}`
-- `xss:rules:{tenantId}`
+![历史权限树：三级节点与稳定编码](../images/zh-CN/system-menu-permission-tree.png)
 
-不能只等待缓存 TTL。规则变更后使用包含事件属性、脚本协议和富文本边界的测试请求复验。
+4. 在教学角色的「分配功能权限」中，仅选择 `system:loginrecord` 菜单与 `system:loginrecord:list` 接口。确认后回读 `GET /api/auth/permission/role/{id}`，将返回 ID 对照权限树，确认只有这两项。分配为全量替换，不要照此覆盖业务角色。
 
-## 4. 安全响应头
+![历史步骤：教学角色的两个登录记录权限](../images/zh-CN/system-role-permission-dialog.png)
 
-Gateway 对所有响应添加：
+5. 按唯一编码和 ID 删除自己的未分配角色，通过 `GET /api/auth/role/all` 确认无残留。角色配置持久化不证明用户行级隔离，相关对照见[权限教程](permissions.md)。若失败，先回读状态，只处理本次对象，不重复已成功写入。
 
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
-- `Referrer-Policy`
+## 3. 创建一条教学字典并清理
 
-这些响应头不能替代输入净化、输出编码、CSP 或权限控制。生产反向代理不应覆盖为更弱配置。
+本节需要字典写权限；历史图片身份为隔离租户的 `admin/SUPER_ADMIN`，不能证明员工写权限。先记录唯一编码，如 `WIKI_DICT_{run-id}`。
 
-## 5. 三类审计信息
+1. 打开「基础数据 → 字典管理 → 新建类型」，核对类型编码、类型名称、备注和排序。保留空编码、空名称，排序可用默认值。
 
-| 信息 | 位置 | 主要用途 |
-|---|---|---|
-| 登录记录 | `sys_audit_log`（`LOGIN_SUCCESS`/`LOGIN_FAILED` 的只读投影，管理端“登录记录”页） | 登录成功/失败、来源（IP 脱敏）和认证方式（密码/会话/第三方/未知） |
-| 安全审计 | `sys_audit_log` | 账号锁定/解锁、角色分配/撤销、密码变更、登录保护策略更新等安全事件 |
-| 操作日志 | 管理端“操作日志” | 业务写操作、操作者、结果和 Trace ID |
-| MQ 消息记录 | 管理端“消息记录” | Outbox 状态、重试、死信和跨服务关联 |
+![2026-10-10：字典表单尚未提交](../images/zh-CN/system-dictionary-create-form.png)
 
-`omni-auth` 不使用 `@OperLog`，认证行为由 `sys_audit_log` 的安全审计事件完整留存（其中“登录记录”页是对 `LOGIN_SUCCESS`/`LOGIN_FAILED` 的独立只读投影，不新增重复表，也不以 OAuth 授权记录冒充）。业务服务的操作日志通过可靠消息发送，查询必须按租户过滤；后台 relay 扫描所有租户是有意设计。
+2. 点击「确认」，`POST /api/base/dict/type` 对空编码/名称返回 HTTP 400、业务码 400，弹窗保持打开且未创建类型。当前页面没有本地必填 rules，由后端校验并经统一错误层提示。
+3. 等待错误提示完全显示；前缀随语言变化，字段名保留 `typeCode/typeName` 并附排障 Trace ID。不要把动画中的空白提示当作失败证据。
 
-## 6. 排障工作流
+![2026-10-10：完整错误提示，表单仍打开](../images/zh-CN/system-dictionary-create-validation.png)
 
-1. 从用户报错页面或响应头取得 Trace ID。
-2. 在操作日志确认请求、操作者和结果。
-3. 若涉及异步业务，在 MQ 消息记录按消息 Key、Topic 或 Trace ID 查找。
-4. 在 Grafana/Tempo 查看同步调用链，在 Loki 查看生产与消费 Trace 关联。
-5. 失败消息达到最大重试后进入死信，只能在确认幂等和下游状态后重发或跳过。
+4. 等错误提示消失，填写唯一编码和名称，确认保存。成功后弹窗关闭；按完整编码搜索，等加载结束，核对本次记录。右侧未选择类型时为空是正常状态。
+5. 历史采集使用 `E2EDICT-{runStamp}-{locale}`，每种语言创建一条；图片编码不是读者应复用的种子。
 
-## 7. 生产安全清单
+![2026-10-10：按唯一编码回查创建结果](../images/zh-CN/system-dictionary-create-success.png)
 
-- 替换所有开发默认账号、数据库口令、Nacos 身份和内部共享令牌。
-- 不公开 MySQL、Redis、Nacos、XXL-JOB、Prometheus、Grafana、Tempo、Loki 或 Actuator 管理端口。
-- 使用最小权限账号和 TLS。
-- 配置日志保留期、脱敏、告警接收人和审计导出。
-- 定期验证备份可恢复，而不是只确认备份文件存在。
-- 截图、测试报告和支持工单不得包含密码、CAPTCHA 答案、JWT、内部令牌或真实个人数据。
+6. 记录列表返回的类型 ID，仅删除本次类型：`DELETE /api/base/dict/type/{id}`。确认 HTTP/业务码均为 200，再按唯一编码回查为零。失败或断流时先查询是否已完成，不删除种子，不按全库固定行数判断清理。
 
-## 8. 管理端页面四语言截图
+自动化入口 `omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts` 要求 Docker、external 模式、显式 `E2E_MUTATIONS=true`、匹配隔离项目及运行镜像回执。图片、资源登记和运行回执均指向仓库外；受控测试令牌不能复制到命令或仓库。
 
-正式图片由文档专用 Playwright 用例 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 在真实运行栈上生成，按语言分目录存放，不复用其他语言图片、不使用占位图或模拟响应。
+[2026-10-10 回执](../reference/evidence/dictionary-2026-10-10.json)：4 passed、0 failed、0 skipped，12 张原图已有逐张 AI 视觉检查；类型 ID 27–30 已经通过正式接口删除并回查无残留，本轮未重建。日/韩备注仍为 `Remark`，日语备注行不清晰、英文侧栏截断、错误字段名为接口标识，均保留原始限制。
 
-- 前置条件：本地 Compose 全栈运行，前端 `127.0.0.1:3000`；`omni-auth` 与 `omni-base` 健康。
-- 操作者：`admin`（`SUPER_ADMIN`，具备系统管理、基础数据与监控菜单权限）。
-- 操作：登录后依次进入租户、组织、角色、权限、字典、在线用户、审计日志、授权记录、XSS 防护与操作日志页面。
-- 预期状态：页面标题与列标签按当前语言渲染，列表展示真实系统数据；无记录时呈现产品自身空状态（不是截图失败）。
-- 令牌：`E2eTokenFixture` 在测试进程内签发短期 JWT（TTL 1200 秒），收尾即销毁，不写入文档、日志或版本库。
-- 本组全部为**只读采集**：不创建、不修改、不删除任何配置或审计数据，因此不需写入开关，也无数据收尾。
+## 4. 修改登录保护并核对审计
 
-敏感信息说明：授权记录页仅展示 OAuth2 `client_id`（公开标识符）、主体与授权类型，**不含 client secret、令牌或密码**；在线用户页在当前环境为空状态，不含任何会话令牌。
+1. 进入「系统管理 → 系统配置」，通过 `GET /api/auth/system-config/login-policy` 保存原 `failureThreshold/failureWindowSeconds/version`。没有持久化策略时读取默认视图，不写库。
+2. 选择一个不同于原值且合法的教学值；历史例为 `10 → 9`、窗口 `3600` 秒，不能假设每个环境原值均为 10。保存使用 `PUT /api/auth/system-config/login-policy` 和最新 `expectedVersion`，再回读确认新值、新版本。
+3. 第二个客户端用最新版本恢复原值；第一个未刷新的页面再提交，应得到 HTTP 200、业务码 409。页面保留草稿并刷新服务器最新配置版本；比较两者后，明确选择采用服务器值或重试草稿，不自动覆盖并发更新。
+4. 在安全审计中按操作者和时间查 `AUTH_CONFIG_UPDATED`；用当前版本恢复原阈值、窗口并回读。页面「恢复默认」是 `10/3600`，不保证等于本次原值。恢复业务值不会回退版本或删除审计。
 
-| 页面 | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| 租户管理（tenant） | ![租户管理（简体中文）](../images/zh-CN/system-tenants.png) | ![租户管理（英文）](../images/en-US/system-tenants.png) | ![租户管理（日文）](../images/ja-JP/system-tenants.png) | ![租户管理（韩文）](../images/ko-KR/system-tenants.png) |
-| 组织管理（organization） | ![组织管理（简体中文）](../images/zh-CN/system-organizations.png) | ![组织管理（英文）](../images/en-US/system-organizations.png) | ![组织管理（日文）](../images/ja-JP/system-organizations.png) | ![组织管理（韩文）](../images/ko-KR/system-organizations.png) |
-| 角色管理（role，含 data-scope 入口） | ![角色管理（简体中文）](../images/zh-CN/system-roles.png) | ![角色管理（英文）](../images/en-US/system-roles.png) | ![角色管理（日文）](../images/ja-JP/system-roles.png) | ![角色管理（韩文）](../images/ko-KR/system-roles.png) |
-| 权限管理（permission，含 menu 节点） | ![权限管理（简体中文）](../images/zh-CN/system-permissions.png) | ![权限管理（英文）](../images/en-US/system-permissions.png) | ![权限管理（日文）](../images/ja-JP/system-permissions.png) | ![权限管理（韩文）](../images/ko-KR/system-permissions.png) |
-| 字典管理（dictionary） | ![字典管理（简体中文）](../images/zh-CN/system-dictionaries.png) | ![字典管理（英文）](../images/en-US/system-dictionaries.png) | ![字典管理（日文）](../images/ja-JP/system-dictionaries.png) | ![字典管理（韩文）](../images/ko-KR/system-dictionaries.png) |
-| 在线用户（online-user，空状态） | ![在线用户（简体中文）](../images/zh-CN/system-online-users.png) | ![在线用户（英文）](../images/en-US/system-online-users.png) | ![在线用户（日文）](../images/ja-JP/system-online-users.png) | ![在线用户（韩文）](../images/ko-KR/system-online-users.png) |
-| 审计日志（audit） | ![审计日志（简体中文）](../images/zh-CN/system-audit-log.png) | ![审计日志（英文）](../images/en-US/system-audit-log.png) | ![审计日志（日文）](../images/ja-JP/system-audit-log.png) | ![审计日志（韩文）](../images/ko-KR/system-audit-log.png) |
-| 授权记录（oauth2） | ![授权记录（简体中文）](../images/zh-CN/system-auth-records.png) | ![授权记录（英文）](../images/en-US/system-auth-records.png) | ![授权记录（日文）](../images/ja-JP/system-auth-records.png) | ![授权记录（韩文）](../images/ko-KR/system-auth-records.png) |
-| XSS 防护（xss） | ![XSS 防护（简体中文）](../images/zh-CN/system-xss-config.png) | ![XSS 防护（英文）](../images/en-US/system-xss-config.png) | ![XSS 防护（日文）](../images/ja-JP/system-xss-config.png) | ![XSS 防护（韩文）](../images/ko-KR/system-xss-config.png) |
-| 操作日志（operation-log） | ![操作日志（简体中文）](../images/zh-CN/system-operation-log.png) | ![操作日志（英文）](../images/en-US/system-operation-log.png) | ![操作日志（日文）](../images/ja-JP/system-operation-log.png) | ![操作日志（韩文）](../images/ko-KR/system-operation-log.png) |
+阈值允许 `3–10`，窗口允许 `3600–86400` 秒，不能关闭登录保护。新策略用于下一个失败窗口，已有窗口保留其创建时策略。读取需 `system:config:list`，更新需 `system:config:update`；按钮隐藏不能证明后端拒绝。2026-10-17 实际读取为管理员 HTTP/业务码 200、员工 HTTP/业务码 403；本轮没有重跑员工写请求。
 
-## 9. 字典类型新建三态截图（四语言）
+![2026-10-12：读取原策略与版本](../images/zh-CN/system-config-policy.png)
+![2026-10-12：保存阈值 9 后版本递增](../images/zh-CN/system-config-saved.png)
+![2026-10-12：409 冲突时草稿 9 保留](../images/zh-CN/system-config-conflict.png)
 
-由 `omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts` 在真实运行栈上生成，对应覆盖清单的 `detail-and-action-states` 与 `failure-states`。
+冲突图绿色提示来自前一次成功保存；当前结果以红色错误、冲突说明和业务码 409 为准。网络失败时先 GET 核实是否已保存，再决定后续动作。
 
-- 前置条件：本地 Compose 全栈运行，`omni-base` 健康；字典类型表已有真实基线数据（采集前 17 条）。
-- 操作者：`admin`（需 `dict:type:list`/`dict:type:create`/`dict:type:delete` 权限）。
-- 写入开关：本组**会创建数据**，因此仅在显式设置 `E2E_MUTATIONS=true` 时执行；未设置时整组跳过且任何写入调用直接抛错。
-- 数据归属与收尾：每语言自建唯一 `typeCode`（含本轮 `runStamp`），创建成功即登记；afterAll 走正式 `DELETE /api/base/dict/type/{id}` 契约逐条清理并核对响应与列表回查。
-- 实测收尾结果：4 passed / 0 skipped；`registered=4 deleted=4 residual=0`；`sys_dict_type` 回到基线 **17** 行，`E2EDICT-%` 残留 **0**，`base-dictionary-catalog` 种子断言复现仍为 **101** 行（未被本批污染）。
+「登录记录」是 `sys_audit_log` 中 `LOGIN_SUCCESS/LOGIN_FAILED` 的只读投影。输入账号、选择「密码」和实际时间范围，搜索后核对账号、方式、结果、原因码与脱敏 IP。默认近 7 天，显式查询须同时提供起止时间且不超过 90 天；日期时间格式为 `yyyy-MM-dd HH:mm:ss`。锁定、角色或密码变化查安全审计，OAuth 授权查授权记录。
 
-| 状态 | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| 新建对话框（create-or-edit） | ![字典新建对话框（简体中文）](../images/zh-CN/system-dictionary-create-form.png) | ![字典新建对话框（英文）](../images/en-US/system-dictionary-create-form.png) | ![字典新建对话框（日文）](../images/ja-JP/system-dictionary-create-form.png) | ![字典新建对话框（韩文）](../images/ko-KR/system-dictionary-create-form.png) |
-| 必填校验失败（failure-or-forbidden） | ![字典必填校验失败（简体中文）](../images/zh-CN/system-dictionary-create-validation.png) | ![字典必填校验失败（英文）](../images/en-US/system-dictionary-create-validation.png) | ![字典必填校验失败（日文）](../images/ja-JP/system-dictionary-create-validation.png) | ![字典必填校验失败（韩文）](../images/ko-KR/system-dictionary-create-validation.png) |
-| 创建成功（key-action-success） | ![字典创建成功（简体中文）](../images/zh-CN/system-dictionary-create-success.png) | ![字典创建成功（英文）](../images/en-US/system-dictionary-create-success.png) | ![字典创建成功（日文）](../images/ja-JP/system-dictionary-create-success.png) | ![字典创建成功（韩文）](../images/ko-KR/system-dictionary-create-success.png) |
+![历史筛选：admin 的两条密码登录记录](../images/zh-CN/system-login-record-filtered.png)
 
-### 已登记的 i18n PRODUCT_DEFECT（不在本批修复）
+图中两条登录实际发生于 2026-10-09；2026-10-12 只筛选历史记录，本轮也没有提交密码或验证码。不要把列表刷新说成一次新登录。
 
-校验失败图中，**四语言 UI 下的错误提示均为中文**（如 `typeCode: 字典类型编码不能为空`）。实测根因：
+[2026-10-12 基础平台回执](../reference/evidence/system-platform-2026-10-12.json)保留 32 张图：首批中文六个成功步骤与后续 26 图分别取证，后续四语测试 4 passed。首批超时后已核对副作用、恢复策略并清理对应角色，不能说所有图来自一次无失败运行。两批临时角色不同，均已删除；原策略 `10/3600` 已恢复，版本及审计递增保留。本轮不重放这些写入。
 
-1. `views/base/dict/index.vue` 未定义任何 `form rules`，前端不做必填校验（`.el-form-item__error` 为空），错误完全依赖后端 400 响应；
-2. `CreateDictTypeRequest` 的 `@NotBlank(message = "字典类型编码不能为空")` 为**中文硬编码**，未接后端消息国际化；
-3. 另：ja-JP/ko-KR 下对话框标题与 `Type Code`/`Type Name`/`Remark` 标签渲染为英文，因为语言包对应键的**取值本身就是英文**（仅「排序/並び順/정렬」已译）。
-   `npm run ui:i18n:parity`（四语言各 2319 键、0 缺失）与 `npm run ui:i18n:check`（0/0 项）均通过，因此属**译文完整度**问题而非硬编码缺陷。
+历史弹窗部分节点回退中文，日/韩权限表有英文，英文侧栏及登录表最右列可能裁切。原图证明其记录日期的保存、冲突、权限持久化和历史筛选，不证明教学角色已用于用户隔离。
 
-上述截图**如实保留真实文案**，未 mock、未美化、未隐藏，也未在本批修改产品代码；修复需产品侧决策（后端消息国际化方案 + 补齐 ja/ko 译文）。
+## 5. OAuth2、XSS 与会话
 
-本包已补齐此前显式登记为 gap 的两个 required flow（实现见 `database/changelog/auth/0006-wp009-auth-management.yaml` 与对应前后端代码，已在隔离 `wp009f` 验证）：
+OAuth2 客户端先核对允许的 grant、精确回调地址、scope 和同意设置。客户端 ID 是公开标识，secret 留在私有配置。外部社交登录和本地授权码/PKCE 见[认证教程](authentication.md)；授权记录列表中的旧 device-code 行不证明新的授权或外部回调成功。
 
-- **系统配置（登录保护）** `MENU system:config` → `/admin/system/config`；`GET/PUT /api/auth/system-config/login-policy`（权限 `system:config:list`/`system:config:update`）。唯一配置对象为 Auth 的 `sys_auth_login_policy`（`tenant_id` 主键 + `version` 乐观锁）。默认阈值 10 / 窗口 3600 秒；仅允许在既有默认基础上收紧（阈值 3~10、窗口 3600~86400），不提供关闭锁定/验证码或修改基础密钥。窗口为“从首次凭证失败起算的固定窗口”，非滑动 TTL；保存后对下一个新窗口生效，在途窗口保留其创建时策略不被重置。无 override 行时读取内置默认（`GET` 不写库）；陈旧 `expectedVersion` 返回业务码 409；配置保存与 `AUTH_CONFIG_UPDATED` 安全审计在同一事务内完成。
-- **登录记录（只读投影）** `MENU system:loginrecord` → `/admin/system/loginrecord`；`GET /api/auth/login-record/list`（权限 `system:loginrecord:list`）。数据源唯一为 `sys_audit_log`，服务端强制可信租户与固定事件集合 `LOGIN_SUCCESS/LOGIN_FAILED`，list 与 COUNT 同条件、`create_time DESC,id DESC` 稳定分页、默认近 7 天且单次跨度≤90 天；`method/provider/reasonCode` 仅取白名单值，IP 后端脱敏（IPv4 隐末段、IPv6 隐后 64 位），不返回 `extra` 原文、原始 UA/IP、sessionId、凭据或验证码。账号锁定/角色/密码/配置变更归“安全审计”，OAuth 授权/撤销归“授权记录”。
+进入「XSS 防护」时核对设置、规则两个请求都成功。当前实现的设置 GET 在该租户尚无配置时会创建默认关闭行；本轮先确认租户 1 已有该行，再读取并核对前后值不变。2026-10-17 原图的全局开关为关闭，即使单条规则启用，也不能证明防护生效。
 
-更多信息见 [可靠消息](../mq-reliability.md)、[可观测性](../observability.md) 和 [Docker 部署](../docker-deployment.md)。
+需要验证 XSS 修改时，在隔离环境先记录原开关和规则，只操作有归属记录、可恢复的教学规则；按[核心流程](../core-flows.md)核对事件属性、脚本协议及允许富文本的实际保存/响应，再恢复原值。写操作应失效 `xss:enabled:{tenantId}` 与 `xss:rules:{tenantId}`。本轮未切换开关、未改规则、未验证攻击输入；不得关闭防护让测试通过。
 
+在线用户、授权记录、登录记录、安全审计各自独立。在线用户踢出 API 是 `DELETE /api/auth/online/{userId}`，按用户操作，并非任意单个 `jti` 的删除按钮。仅对明确归属本次的测试用户执行，再验证旧会话请求被拒和重新登录恢复，不动他人会话。本轮在线用户为空，未执行踢出。
+
+## 6. 从一次操作追到异步日志
+
+Auth 不使用 `@OperLog`，认证事件留在安全审计；业务操作日志经 Outbox、MQ、消费者异步落库。原生 lite 模式关闭消息 relay、XXL-JOB 和消费者；查看历史日志不需要它们，验证新投递则需按[Docker 部署](../docker-deployment.md)启用完整运行模式及相应组件/绑定，详见[可靠消息](../mq-reliability.md)。仅补启动 MQ 容器不足以证明投递链就绪。
+
+1. 保存一次已授权业务请求的租户、操作者、模块、时间、URL、结果及响应 Trace ID。不要为截图重复已经成功的操作。
+2. 按操作人、模块、类型、时间查「操作日志」。当前页面没有 Trace ID 搜索栏或专用列，不能要求读者在此按 Trace ID 查找。
+3. 用请求信息与结构化日志交叉核对；再查来源服务 Outbox 的 `msgId`、可选 `msgKey`、`serviceName`。生产端记录 `producerTraceId`，relay 的跟踪上下文可能不同，关联方法见[可观测性](../observability.md)。不能假设每条消息都有业务键或这些字段都在页面可见。
+4. 核对 broker 确认和消费者结果；Outbox `SENT` 不等于业务消费完成。达到最大重试后，先检查下游状态与幂等，再决定重发或跳过。列表读取成功不证明故障恢复成功。
+
+## 7. 图片与验证边界
+
+[2026-10-17 页面读取回执](../reference/evidence/security-lists-2026-10-17.json)绑定以下 40 张四语原图、实际执行脚本、源码与运行产物。Docker 受控测试身份读取既有租户数据，44 次页面 API 读取成功，未提交业务表单、未重放历史写操作；这不是密码/验证码登录。采集后六个本轮启动容器均已停止。
+
+![租户列表：一条默认租户](../images/zh-CN/system-tenants.png)
+![既有组织树，未编辑](../images/zh-CN/system-organizations.png)
+![角色列表第一页及数据范围入口](../images/zh-CN/system-roles.png)
+![权限树可见部分，更多节点需滚动](../images/zh-CN/system-permissions.png)
+![字典列表，右侧尚未选择类型](../images/zh-CN/system-dictionaries.png)
+![在线用户为空，未踢出](../images/zh-CN/system-online-users.png)
+![安全审计中的历史事件](../images/zh-CN/system-audit-log.png)
+![历史 device-code 授权行，非新授权](../images/zh-CN/system-auth-records.png)
+![XSS 全局关闭，未验证过滤](../images/zh-CN/system-xss-config.png)
+![历史操作日志，未新增业务请求](../images/zh-CN/system-operation-log.png)
+
+全部原图已逐张 AI 检查，并保留原始显示限制：部分侧栏、租户初始化/操作表头重叠或裁切；长 ID/授权类型换行且需滚动；部分日/韩标签保留英文，数据库业务名称和描述保留中文。授权行的 scope、创建时间为空，在线列表为空；这些都未伪造填充。截图只证明可见范围与所记录接口读取，不证明 XSS 效果、踢出、外部 OAuth、异步消费或全局界面翻译完成。
+
+四语言文档按已授权的 `AI_REVIEW` 及绑定内容哈希验收，不要求人工复核，也不冒称 `HUMAN_REVIEW`。图片读取、测试通过和哈希校验均不能替代完整文档语义复核；当前状态以[复核队列](../i18n-review-queue.md)为准。

@@ -26,46 +26,13 @@ function ensureTypesRegistered(moddle: BpmnModdle) {
 
   if (!moddle.registry.packageMap?.['omni']) {
     try {
-      moddle.registry.registerPackage({
-        name: 'Omni',
-        prefix: 'omni',
-        uri: OMNI_NS,
-        types: [
-          { name: 'assignment', superClass: ['Element'], properties: [{ name: 'body', isBody: true, type: 'String' }] },
-          { name: 'cc', superClass: ['Element'], properties: [{ name: 'body', isBody: true, type: 'String' }] },
-        ],
-      })
+      moddle.registry.registerPackage(OMNI_MODDLE_DESCRIPTOR)
     } catch { /* 忽略重复注册 */ }
   }
 
   if (!moddle.registry.packageMap?.['flowable']) {
     try {
-      moddle.registry.registerPackage({
-        name: 'Flowable',
-        prefix: 'flowable',
-        uri: FLOWABLE_NS,
-        types: [
-          {
-            name: 'TaskListener',
-            properties: [
-              { name: 'event', isAttr: true, type: 'String' },
-              { name: 'class', isAttr: true, type: 'String' },
-              { name: 'expression', isAttr: true, type: 'String' },
-              { name: 'delegateExpression', isAttr: true, type: 'String' },
-            ],
-          },
-          {
-            name: 'ExecutionListener',
-            properties: [
-              { name: 'event', isAttr: true, type: 'String' },
-              { name: 'class', isAttr: true, type: 'String' },
-              { name: 'expression', isAttr: true, type: 'String' },
-              { name: 'delegateExpression', isAttr: true, type: 'String' },
-            ],
-          },
-        ],
-        enumerations: [],
-      })
+      moddle.registry.registerPackage(FLOWABLE_MODDLE_DESCRIPTOR)
     } catch { /* 忽略重复注册 */ }
   }
 }
@@ -137,14 +104,14 @@ export function writeAssignment(modeler: BpmnModeler, element: BpmnElement, conf
   const modeling = modeler.get<BpmnModeling>('modeling')
   const bo = rawElement.businessObject
 
-  // 保留已有的非 assignment/taskListener 扩展元素
+  // 仅替换本配置拥有的监听器，保留其他业务扩展与监听器。
   const existingExt = bo.extensionElements
   const keptValues: BpmnModdleElement[] = []
   if (existingExt?.values) {
     for (const v of existingExt.values) {
-      if (!v.$type?.includes('assignment')
-        && !v.$type?.includes('taskListener')
-        && !v.$type?.includes('TaskListener')) {
+      const assignmentListener = /(?:Task|Execution)Listener$/i.test(v.$type || '')
+        && v.delegateExpression === '${scopedRoleAssignmentListener}'
+      if (!v.$type?.includes('assignment') && !assignmentListener) {
         keptValues.push(v)
       }
     }
@@ -159,9 +126,9 @@ export function writeAssignment(modeler: BpmnModeler, element: BpmnElement, conf
   })
   keptValues.push(assignmentElement)
 
-  // 创建 flowable:taskListener
-  const listenerElement = moddle.create('flowable:TaskListener', {
-    event: 'create',
+  // 多实例集合求值前解析候选人与节点本地计数器；旧 TaskListener 已是兼容空实现。
+  const listenerElement = moddle.create('flowable:ExecutionListener', {
+    event: 'start',
     delegateExpression: '${scopedRoleAssignmentListener}',
   })
   keptValues.push(listenerElement)
@@ -169,9 +136,20 @@ export function writeAssignment(modeler: BpmnModeler, element: BpmnElement, conf
   // 每次创建全新的 extensionElements，确保 saveXML 能感知变更
   const extensionElements = moddle.create('bpmn:ExtensionElements')
   extensionElements.values = keptValues
-  bo.extensionElements = extensionElements
+  const loopCharacteristics = moddle.create('bpmn:MultiInstanceLoopCharacteristics', {
+    isSequential: false,
+    'flowable:collection': 'candidateUserIds',
+    'flowable:elementVariable': 'userId',
+    completionCondition: moddle.create('bpmn:FormalExpression', {
+      body: '${rejectedCount > 0 || approvedCount >= requiredApprovals}',
+    }),
+  })
 
-  modeling.updateProperties(rawElement, { extensionElements })
+  modeling.updateProperties(rawElement, {
+    extensionElements,
+    loopCharacteristics,
+    'flowable:assignee': '${userId}',
+  })
 }
 
 /**
@@ -339,9 +317,24 @@ export const FLOWABLE_MODDLE_DESCRIPTOR = {
   name: 'Flowable',
   prefix: 'flowable',
   uri: FLOWABLE_NS,
+  xml: { tagAlias: 'lowerCase' },
   types: [
     {
+      name: 'AssignableTask',
+      extends: ['bpmn:UserTask'],
+      properties: [{ name: 'assignee', isAttr: true, type: 'String' }],
+    },
+    {
+      name: 'MultiInstanceCollection',
+      extends: ['bpmn:MultiInstanceLoopCharacteristics'],
+      properties: [
+        { name: 'collection', isAttr: true, type: 'String' },
+        { name: 'elementVariable', isAttr: true, type: 'String' },
+      ],
+    },
+    {
       name: 'TaskListener',
+      superClass: ['Element'],
       properties: [
         { name: 'event', isAttr: true, type: 'String' },
         { name: 'class', isAttr: true, type: 'String' },
@@ -351,6 +344,7 @@ export const FLOWABLE_MODDLE_DESCRIPTOR = {
     },
     {
       name: 'ExecutionListener',
+      superClass: ['Element'],
       properties: [
         { name: 'event', isAttr: true, type: 'String' },
         { name: 'class', isAttr: true, type: 'String' },
@@ -375,56 +369,5 @@ export const MODDLE_EXTENSIONS = {
  * @param moddle bpmn-js moddle 实例
  */
 export function registerOmniModdle(moddle: BpmnModdle) {
-  if (!moddle) return
-
-  // 注册 omni 命名空间
-  try {
-    if (!moddle.registry?.packageMap?.['omni']) {
-      moddle.registry?.registerPackage({
-        name: 'Omni',
-        prefix: 'omni',
-        uri: OMNI_NS,
-        types: [
-          { name: 'assignment', superClass: ['Element'], properties: [{ name: 'body', isBody: true, type: 'String' }] },
-          { name: 'cc', superClass: ['Element'], properties: [{ name: 'body', isBody: true, type: 'String' }] },
-        ],
-      })
-    }
-  } catch {
-    // 命名空间注册失败不影响基本功能
-  }
-
-  // 注册 flowable 命名空间（taskListener / executionListener / collection 等扩展属性）
-  try {
-    if (!moddle.registry?.packageMap?.['flowable']) {
-      moddle.registry?.registerPackage({
-        name: 'Flowable',
-        prefix: 'flowable',
-        uri: FLOWABLE_NS,
-        types: [
-          {
-            name: 'TaskListener',
-            properties: [
-              { name: 'event', isAttr: true, type: 'String' },
-              { name: 'class', isAttr: true, type: 'String' },
-              { name: 'expression', isAttr: true, type: 'String' },
-              { name: 'delegateExpression', isAttr: true, type: 'String' },
-            ],
-          },
-          {
-            name: 'ExecutionListener',
-            properties: [
-              { name: 'event', isAttr: true, type: 'String' },
-              { name: 'class', isAttr: true, type: 'String' },
-              { name: 'expression', isAttr: true, type: 'String' },
-              { name: 'delegateExpression', isAttr: true, type: 'String' },
-            ],
-          },
-        ],
-        enumerations: [],
-      })
-    }
-  } catch {
-    // 命名空间注册失败不影响基本功能
-  }
+  ensureTypesRegistered(moddle)
 }

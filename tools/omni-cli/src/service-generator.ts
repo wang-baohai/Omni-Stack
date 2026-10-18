@@ -13,7 +13,7 @@ import type {
 } from './types.js';
 
 export const GENERATOR_VERSION = '0.6.1';
-export const SERVICE_TEMPLATE_VERSION = '1.4.1'; // WP-011 S14：catalog-entry 声明 per-service 内部拦截路由归属
+export const SERVICE_TEMPLATE_VERSION = '1.5.1'; // 四语言文档遵循项目授权的实际语义复核策略
 const LOCK_FILE = 'omni-service.lock.json';
 const TEMPLATE_ROOT = 'scaffold/templates/service';
 
@@ -52,6 +52,9 @@ const TEMPLATE_ENTRIES: TemplateEntry[] = [
   { template: 'integration/permission-seed.yaml.hbs', output: 'integration/permissions/{{serviceId}}.yaml' },
   { template: 'integration/menu.fragment.ts.hbs', output: 'integration/frontend/{{serviceId}}.menu.fragment.ts' },
   { template: 'docs/module.md.hbs', output: 'docs/{{serviceId}}.md' },
+  { template: 'docs/module.en.md.hbs', output: 'docs/{{serviceId}}.en.md' },
+  { template: 'docs/module.jp.md.hbs', output: 'docs/{{serviceId}}.jp.md' },
+  { template: 'docs/module.kr.md.hbs', output: 'docs/{{serviceId}}.kr.md' },
   { template: 'docs/i18n-status.yaml.hbs', output: 'docs/{{serviceId}}-i18n-status.yaml' },
   { template: 'generation-plan.md.hbs', output: 'GENERATION-PLAN.md' },
 ];

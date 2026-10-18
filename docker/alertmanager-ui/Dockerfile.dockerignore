@@ -1,0 +1,7 @@
+**
+!docker/
+!docker/alertmanager-ui/
+!docker/alertmanager-ui/**
+!observability/
+!observability/alertmanager-ui/
+!observability/alertmanager-ui/**

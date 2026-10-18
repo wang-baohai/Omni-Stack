@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "kind": "project-owner-authorized-external-oauth-screenshot-deferral",
+  "decision_date": "2026-10-18",
+  "authorization": "Explicit project-owner instruction in the current remediation conversation",
+  "reason": "The three actual provider sign-ins require account-holder secondary verification; reserve screenshot regions for later completion.",
+  "providers": [
+    "github",
+    "google",
+    "gitee"
+  ],
+  "locales": [
+    "zh-CN",
+    "en-US",
+    "ja-JP",
+    "ko-KR"
+  ],
+  "placeholder_documents": [
+    "docs/guides/authentication.md",
+    "docs/guides/authentication.en.md",
+    "docs/guides/authentication.jp.md",
+    "docs/guides/authentication.kr.md"
+  ],
+  "placeholder_regions": 12,
+  "capture_status": "deferred-by-owner",
+  "actual_new_screenshots": 0,
+  "actual_positive_user_authorization_callbacks_verified": 0,
+  "callback_verification": "unverified",
+  "required_screenshot_scope": "Only external social-login screenshots are deferred;password/CAPTCHA,localPKCE,device-code,SRM and other modules retain their requirements.",
+  "backfill": "Complete real authorization in a local Docker browser,replace each placeholder with a redacted original,and register provenance and actual verification scope.",
+  "business_writes": 0,
+  "no_screenshot_or_login_success_claim": true
+}

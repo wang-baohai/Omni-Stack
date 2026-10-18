@@ -1,0 +1,44 @@
+name: omni-stack-tools
+services:
+  cli:
+    image: omni-stack-tools:local
+    build:
+      context: .
+      dockerfile: docker/tools/Dockerfile
+    working_dir: /workspace/tools/omni-cli
+    entrypoint: ["node", "/opt/omni-tools/entrypoint.mjs"]
+    volumes:
+      - .:/workspace
+      - cli-modules:/workspace/tools/omni-cli/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["npm", "run", "dev", "--", "--help"]
+  backend:
+    image: eclipse-temurin:25-jdk
+    working_dir: /workspace/omni-backend
+    environment:
+      JAVA_HOME: /opt/java/openjdk
+    volumes:
+      - .:/workspace
+      - maven-cache:/root/.m2
+    command: ["./mvnw", "clean", "install"]
+    ports:
+      - "127.0.0.1:5005:5005"
+  frontend:
+    image: node:22-bookworm
+    working_dir: /workspace/omni-frontend
+    volumes:
+      - .:/workspace
+      - frontend-modules:/workspace/omni-frontend/node_modules
+    command: ["npm", "run", "build"]
+  documentation:
+    image: node:22-bookworm
+    working_dir: /workspace/docs
+    volumes:
+      - .:/workspace
+      - docs-modules:/workspace/docs/node_modules
+    command: ["sh", "-c", "npm ci && npm test && npm run build"]
+volumes:
+  cli-modules:
+  frontend-modules:
+  maven-cache:
+  docs-modules:

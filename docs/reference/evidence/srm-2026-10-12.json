@@ -1,0 +1,3082 @@
+{
+  "schema": 1,
+  "kind": "isolated-docker-srm-enrollment-admission-lifecycle-boundary",
+  "recorded_at": "2026-10-12T11:41:44.966Z",
+  "project": "omni-wiki-acceptance-20261009",
+  "run_id": "WIKI-20261012-SRM-E",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "status": "SRM_TEACHING_BUSINESS_PASS_HISTORY_RETAINED",
+  "test": "scripts/fixtures/capture-srm-teaching.mjs",
+  "current_test_sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844",
+  "tools": {
+    "node": "v24.17.0",
+    "playwright": "1.61.1",
+    "chromium": "149.0.7827.55",
+    "loader": "tsx from the existing CLI dependency volume"
+  },
+  "phases": [
+    "enroll",
+    "approve",
+    "lifecycle-visual",
+    "boundary",
+    "retire"
+  ],
+  "identity_preparation": "Dedicated account created by formal administrator API with default USER. Short-lived fixture identity from test classpath; no account self-registration or password-login claim.",
+  "journey": "Real portal enrollment UI once; same requestId returned same supplier; Saga COMPLETED; refreshed USER+SUPPLIER; three actual Workflow candidates approved same instance; internal ownership/category; lifecycle commands; approved/uninvited RFQ read isolation; eliminate and revoke dedicated sample.",
+  "approval_nodes": [
+    {
+      "actor": "srmmanager",
+      "task_id": "2723d29b-c623-11f1-b821-ba9702317d61",
+      "process_instance_id": "2717eb9e-c623-11f1-b821-ba9702317d61",
+      "approved": true
+    },
+    {
+      "actor": "compliance",
+      "task_id": "fc7b7343-c62e-11f1-b821-ba9702317d61",
+      "process_instance_id": "2717eb9e-c623-11f1-b821-ba9702317d61",
+      "approved": true
+    },
+    {
+      "actor": "director",
+      "task_id": "fc9e8bba-c62e-11f1-b821-ba9702317d61",
+      "process_instance_id": "2717eb9e-c623-11f1-b821-ba9702317d61",
+      "approved": true
+    }
+  ],
+  "business_sample": {
+    "supplier_id": 8,
+    "final_status": "ELIMINATED",
+    "final_version": 14,
+    "internal_owner_user_id": 206,
+    "portal_user_id": 217
+  },
+  "lifecycle": [
+    {
+      "command": "suspend",
+      "status": "SUSPENDED",
+      "eligible_for_procurement": false
+    },
+    {
+      "command": "resume",
+      "status": "APPROVED",
+      "eligible_for_procurement": true
+    },
+    {
+      "command": "blacklist",
+      "status": "BLACKLISTED",
+      "eligible_for_procurement": false
+    },
+    {
+      "command": "restore-from-blacklist",
+      "status": "APPROVED",
+      "eligible_for_procurement": true
+    }
+  ],
+  "detail_recapture": {
+    "reason": "The fixed action column hides state text in the original list images.",
+    "steps": [
+      {
+        "command": "suspend",
+        "status": "SUSPENDED",
+        "version": 10,
+        "eligible_for_procurement": false
+      },
+      {
+        "command": "resume",
+        "status": "APPROVED",
+        "version": 11,
+        "eligible_for_procurement": true
+      },
+      {
+        "command": "blacklist",
+        "status": "BLACKLISTED",
+        "version": 12,
+        "eligible_for_procurement": false
+      },
+      {
+        "command": "restore-from-blacklist",
+        "status": "APPROVED",
+        "version": 13,
+        "eligible_for_procurement": true
+      }
+    ]
+  },
+  "boundary": {
+    "supplier_id": 8,
+    "supplier_status": "APPROVED",
+    "rfq_id": 1,
+    "rfq_status": "AWARDED",
+    "invited_supplier_ids": [
+      5,
+      6
+    ],
+    "uninvited_list_excludes_rfq": true,
+    "uninvited_detail_code": 404,
+    "invited_detail_code": 200,
+    "business_writes": 0,
+    "scope": "Read isolation for the existing awarded RFQ; no claim about new quotation submission.",
+    "uninvited_detail_http_status": 200
+  },
+  "cleanup": {
+    "status": "OWNED_BUSINESS_SAMPLE_RETIRED_HISTORY_RETAINED",
+    "supplier_id": 8,
+    "supplier_status": "ELIMINATED",
+    "invite_id": 6,
+    "invite_status": "USED",
+    "user_id": 217,
+    "procurement_eligible": false,
+    "terminal_resume_code": 409,
+    "quotation_read_code": 409,
+    "account_cleanup": "Owned fixture identity remains enabled until final project-wide cleanup; no production account is affected.",
+    "reason": "Formal deletion was rejected because lifecycle and Portal history must be retained. No history reset or database deletion."
+  },
+  "sources": [
+    {
+      "test_sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "source_sha256": "2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-teaching.mjs",
+          "sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/portal-register/index.vue",
+          "sha256": "7020eb516def5b297b6d6c3da10a0fe897834a7c747a7524a517131b60aa10a2"
+        },
+        {
+          "path": "omni-frontend/src/views/supplier-portal/index.vue",
+          "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/invite/index.vue",
+          "sha256": "a04b9875777193441e519a67440c2f23db682f6465f4df78d013f011ba5dd2ab"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+          "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-frontend",
+          "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+          "image_id": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    },
+    {
+      "test_sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "source_sha256": "a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-teaching.mjs",
+          "sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/router/index.ts",
+          "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+        },
+        {
+          "path": "omni-frontend/src/utils/access.ts",
+          "sha256": "dd1e0bccc173fa1fd42a93ce5f72f8344202a6ec170eee00c93c01aaec9c9a3e"
+        },
+        {
+          "path": "omni-frontend/src/views/portal-register/index.vue",
+          "sha256": "7020eb516def5b297b6d6c3da10a0fe897834a7c747a7524a517131b60aa10a2"
+        },
+        {
+          "path": "omni-frontend/src/views/supplier-portal/index.vue",
+          "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/invite/index.vue",
+          "sha256": "a04b9875777193441e519a67440c2f23db682f6465f4df78d013f011ba5dd2ab"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+          "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "91d0e80ab20e68c7d057f3a3d85d9682ffcedf9f61d64845225feb37242e5495",
+          "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    },
+    {
+      "test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-teaching.mjs",
+          "sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/router/index.ts",
+          "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+        },
+        {
+          "path": "omni-frontend/src/utils/access.ts",
+          "sha256": "dd1e0bccc173fa1fd42a93ce5f72f8344202a6ec170eee00c93c01aaec9c9a3e"
+        },
+        {
+          "path": "omni-frontend/src/views/portal-register/index.vue",
+          "sha256": "7020eb516def5b297b6d6c3da10a0fe897834a7c747a7524a517131b60aa10a2"
+        },
+        {
+          "path": "omni-frontend/src/views/supplier-portal/index.vue",
+          "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/invite/index.vue",
+          "sha256": "a04b9875777193441e519a67440c2f23db682f6465f4df78d013f011ba5dd2ab"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+          "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "91d0e80ab20e68c7d057f3a3d85d9682ffcedf9f61d64845225feb37242e5495",
+          "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    },
+    {
+      "test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-teaching.mjs",
+          "sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/router/index.ts",
+          "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+        },
+        {
+          "path": "omni-frontend/src/utils/access.ts",
+          "sha256": "dd1e0bccc173fa1fd42a93ce5f72f8344202a6ec170eee00c93c01aaec9c9a3e"
+        },
+        {
+          "path": "omni-frontend/src/views/portal-register/index.vue",
+          "sha256": "7020eb516def5b297b6d6c3da10a0fe897834a7c747a7524a517131b60aa10a2"
+        },
+        {
+          "path": "omni-frontend/src/views/supplier-portal/index.vue",
+          "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/invite/index.vue",
+          "sha256": "a04b9875777193441e519a67440c2f23db682f6465f4df78d013f011ba5dd2ab"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+          "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "91d0e80ab20e68c7d057f3a3d85d9682ffcedf9f61d64845225feb37242e5495",
+          "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    },
+    {
+      "test_sha256": "37f8f86e64c5745406553e38b8232fee8d63d2738aa3b162b4b156e5ff3c8037",
+      "source_sha256": "1c9e23da3f9a793eb7da4fa924beec6884a62f0d948c5614ec8e7ed51df6fcb3",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-teaching.mjs",
+          "sha256": "37f8f86e64c5745406553e38b8232fee8d63d2738aa3b162b4b156e5ff3c8037"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/router/index.ts",
+          "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+        },
+        {
+          "path": "omni-frontend/src/utils/access.ts",
+          "sha256": "dd1e0bccc173fa1fd42a93ce5f72f8344202a6ec170eee00c93c01aaec9c9a3e"
+        },
+        {
+          "path": "omni-frontend/src/views/portal-register/index.vue",
+          "sha256": "7020eb516def5b297b6d6c3da10a0fe897834a7c747a7524a517131b60aa10a2"
+        },
+        {
+          "path": "omni-frontend/src/views/supplier-portal/index.vue",
+          "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/invite/index.vue",
+          "sha256": "a04b9875777193441e519a67440c2f23db682f6465f4df78d013f011ba5dd2ab"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+          "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "91d0e80ab20e68c7d057f3a3d85d9682ffcedf9f61d64845225feb37242e5495",
+          "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    },
+    {
+      "test_sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844",
+      "source_sha256": "3c716187a6348b26c54a618bc1e20beab0fa7edf29ea55dd782d39f4ee9ca02c",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-srm-teaching.mjs",
+          "sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/router/index.ts",
+          "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+        },
+        {
+          "path": "omni-frontend/src/utils/access.ts",
+          "sha256": "dd1e0bccc173fa1fd42a93ce5f72f8344202a6ec170eee00c93c01aaec9c9a3e"
+        },
+        {
+          "path": "omni-frontend/src/views/portal-register/index.vue",
+          "sha256": "7020eb516def5b297b6d6c3da10a0fe897834a7c747a7524a517131b60aa10a2"
+        },
+        {
+          "path": "omni-frontend/src/views/supplier-portal/index.vue",
+          "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/supplier/index.vue",
+          "sha256": "e539ac6616a3d198d0aae4dc75944bdb7e66e75e702e9f1324e93dc57b3bc767"
+        },
+        {
+          "path": "omni-frontend/src/views/srm/invite/index.vue",
+          "sha256": "a04b9875777193441e519a67440c2f23db682f6465f4df78d013f011ba5dd2ab"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java",
+          "sha256": "054aa129c4a31a22f5c8ed7f0ce004e6fd496ea44136965aafe4ad4a0971fe0d"
+        },
+        {
+          "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierServiceImpl.java",
+          "sha256": "2d0638cba1ed18c6c420722ede87b7f464451df7d8f9ebaa029284d570f43e26"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "91d0e80ab20e68c7d057f3a3d85d9682ffcedf9f61d64845225feb37242e5495",
+          "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    }
+  ],
+  "additional_boundary_source_digests": [
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/QuotationServiceImpl.java",
+      "sha256": "0323b4f79842bc409be42e3b2823a1f9018e6925d66c8202c3184156bd22ad9b"
+    },
+    {
+      "path": "omni-backend/omni-srm/src/main/java/com/omni/srm/controller/PortalQuotationController.java",
+      "sha256": "60273a0a09b8eca2365f1889f8aad02f8c23adf5f9eceaecbc40cf70a3c51297"
+    }
+  ],
+  "visual_review": {
+    "status": "passed-with-documented-limits",
+    "reviewer": "Agent reviewed all 76 original images individually",
+    "reviewed": 76,
+    "published": 56,
+    "rejected": 20,
+    "human_translation_review": "pending",
+    "limits": [
+      "Registration screen is entry only; no CAPTCHA/password submission for this account.",
+      "Invitation form is preview; formal API created invitation. Approval decisions used formal APIs, not a complete UI click journey.",
+      "First eight public/invitation images predate frontend route fix; per-image runtime and captured test digests preserved.",
+      "JA/KO have existing English fallbacks and long-label wraps; 360-view states are raw enums.",
+      "Twenty fixed-column list images hide state text and remain private; actual detail recaptures replace them.",
+      "Boundary used an existing awarded RFQ and proves reads only; error HTTP status is 200 with business code 404.",
+      "Retired sample history and fixture account remain in isolated project until final project-wide cleanup."
+    ]
+  },
+  "captures": [
+    {
+      "id": "srm-portal-account-entry-zh-CN",
+      "name": "srm-portal-account-entry",
+      "locale": "zh-CN",
+      "flow": "portal-register",
+      "actor": "public",
+      "roles": [],
+      "route": "/portal-register",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-portal-account-entry.png",
+      "sha256": "ffc9b3e6b60968cb82f4f9c2ffcad13c5b4fa4ee77da0f84b673f559e0e94aa0",
+      "captured_at": "2026-10-12T09:45:31.216Z",
+      "captured_test_sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "captured_source_sha256": "2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688",
+      "runtime_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+      "assertions": {
+        "scope": "Public account registration form only; CAPTCHA not solved or submitted"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-account-entry-en-US",
+      "name": "srm-portal-account-entry",
+      "locale": "en-US",
+      "flow": "portal-register",
+      "actor": "public",
+      "roles": [],
+      "route": "/portal-register",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-portal-account-entry.png",
+      "sha256": "afabe58ae4bd8ca640da8d76fc0e8d7733fea5bb55900d47d4c2d45510802363",
+      "captured_at": "2026-10-12T09:45:31.724Z",
+      "captured_test_sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "captured_source_sha256": "2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688",
+      "runtime_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+      "assertions": {
+        "scope": "Public account registration form only; CAPTCHA not solved or submitted"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-account-entry-ja-JP",
+      "name": "srm-portal-account-entry",
+      "locale": "ja-JP",
+      "flow": "portal-register",
+      "actor": "public",
+      "roles": [],
+      "route": "/portal-register",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-portal-account-entry.png",
+      "sha256": "0ee06077df862543ff713cdd09f90eac9a5be7f4926838e675584f1b4b3a1a62",
+      "captured_at": "2026-10-12T09:45:32.118Z",
+      "captured_test_sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "captured_source_sha256": "2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688",
+      "runtime_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+      "assertions": {
+        "scope": "Public account registration form only; CAPTCHA not solved or submitted"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-account-entry-ko-KR",
+      "name": "srm-portal-account-entry",
+      "locale": "ko-KR",
+      "flow": "portal-register",
+      "actor": "public",
+      "roles": [],
+      "route": "/portal-register",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-portal-account-entry.png",
+      "sha256": "55a6c190ad865337b11bd3de47fb02b34861802ff27dc5ce2567b3d8070fa714",
+      "captured_at": "2026-10-12T09:45:32.521Z",
+      "captured_test_sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "captured_source_sha256": "2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688",
+      "runtime_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+      "assertions": {
+        "scope": "Public account registration form only; CAPTCHA not solved or submitted"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-invite-create-form-zh-CN",
+      "name": "srm-invite-create-form",
+      "locale": "zh-CN",
+      "flow": "invite",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/invite",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-invite-create-form.png",
+      "sha256": "2d9c955ab4c1614b34f0af1bb0b8c460751aebd57cbb29f5df45b8e74bd4981c",
+      "captured_at": "2026-10-12T09:45:33.318Z",
+      "captured_test_sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "captured_source_sha256": "2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688",
+      "runtime_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+      "assertions": {
+        "maxUses": 1,
+        "expiresHours": 1,
+        "scope": "Form preview; invitation is created once through the formal API"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-invite-create-form-en-US",
+      "name": "srm-invite-create-form",
+      "locale": "en-US",
+      "flow": "invite",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/invite",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-invite-create-form.png",
+      "sha256": "1ff37080e75a2ff85bd9dd6279a401bd4fcf8f63d0a87f0c7b7613515025a189",
+      "captured_at": "2026-10-12T09:45:33.99Z",
+      "captured_test_sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "captured_source_sha256": "2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688",
+      "runtime_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+      "assertions": {
+        "maxUses": 1,
+        "expiresHours": 1,
+        "scope": "Form preview; invitation is created once through the formal API"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-invite-create-form-ja-JP",
+      "name": "srm-invite-create-form",
+      "locale": "ja-JP",
+      "flow": "invite",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/invite",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-invite-create-form.png",
+      "sha256": "536226773f0e1d3b33c4b27990b92e1d7790253dab885c7257541f53620368b8",
+      "captured_at": "2026-10-12T09:45:34.613Z",
+      "captured_test_sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "captured_source_sha256": "2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688",
+      "runtime_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+      "assertions": {
+        "maxUses": 1,
+        "expiresHours": 1,
+        "scope": "Form preview; invitation is created once through the formal API"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-invite-create-form-ko-KR",
+      "name": "srm-invite-create-form",
+      "locale": "ko-KR",
+      "flow": "invite",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/invite",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-invite-create-form.png",
+      "sha256": "f313ab0d5a26b42912c8456aa848c36e55c91477020cd37f997cacc480d398a7",
+      "captured_at": "2026-10-12T09:45:35.239Z",
+      "captured_test_sha256": "a913372dd0e6513e2ce88a08c6a3bb027e0a6e29998ad294bcb05a5d8c0b6baa",
+      "captured_source_sha256": "2cdececece595d6b9f132ad0cf856c26a350b3936c016c8ce44b33aeb2c44688",
+      "runtime_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+      "assertions": {
+        "maxUses": 1,
+        "expiresHours": 1,
+        "scope": "Form preview; invitation is created once through the formal API"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enrollment-form-zh-CN",
+      "name": "srm-portal-enrollment-form",
+      "locale": "zh-CN",
+      "flow": "portal-register",
+      "actor": "supplierE",
+      "roles": [
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-portal-enrollment-form.png",
+      "sha256": "94b4ae49ed60ccab12e133d3baac88eee394c49446f2cf39e8fa9b7ebdea2ca1",
+      "captured_at": "2026-10-12T09:55:50.554Z",
+      "captured_test_sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "captured_source_sha256": "a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "company": "WIKI-20261012-SRM-E Vendor E",
+        "invite_masked": true,
+        "default_role": "USER",
+        "scope": "Filled form before the one real enrollment"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enrollment-form-en-US",
+      "name": "srm-portal-enrollment-form",
+      "locale": "en-US",
+      "flow": "portal-register",
+      "actor": "supplierE",
+      "roles": [
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-portal-enrollment-form.png",
+      "sha256": "00cb5166d69d5e458319bf607fb54999cd271a525f965c59e7eb2d8918bea86d",
+      "captured_at": "2026-10-12T09:55:51.200Z",
+      "captured_test_sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "captured_source_sha256": "a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "company": "WIKI-20261012-SRM-E Vendor E",
+        "invite_masked": true,
+        "default_role": "USER",
+        "scope": "Filled form before the one real enrollment"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enrollment-form-ja-JP",
+      "name": "srm-portal-enrollment-form",
+      "locale": "ja-JP",
+      "flow": "portal-register",
+      "actor": "supplierE",
+      "roles": [
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-portal-enrollment-form.png",
+      "sha256": "c4084d9c168151b4d0525f69853560dd0943e1ca76b50f664bd7972f1246f10c",
+      "captured_at": "2026-10-12T09:55:51.801Z",
+      "captured_test_sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "captured_source_sha256": "a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "company": "WIKI-20261012-SRM-E Vendor E",
+        "invite_masked": true,
+        "default_role": "USER",
+        "scope": "Filled form before the one real enrollment"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enrollment-form-ko-KR",
+      "name": "srm-portal-enrollment-form",
+      "locale": "ko-KR",
+      "flow": "portal-register",
+      "actor": "supplierE",
+      "roles": [
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-portal-enrollment-form.png",
+      "sha256": "d360573b1a9096af2eb19140297ceb75b59d69f0b7c55cc80c758423416ec65c",
+      "captured_at": "2026-10-12T09:55:52.399Z",
+      "captured_test_sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "captured_source_sha256": "a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "company": "WIKI-20261012-SRM-E Vendor E",
+        "invite_masked": true,
+        "default_role": "USER",
+        "scope": "Filled form before the one real enrollment"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enrollment-completed-zh-CN",
+      "name": "srm-portal-enrollment-completed",
+      "locale": "zh-CN",
+      "flow": "portal-register",
+      "actor": "supplierE",
+      "roles": [
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-portal-enrollment-completed.png",
+      "sha256": "f2c164384bce7e561cce31537f2c7531e84eaa79335021984b49027b50f3b7af",
+      "captured_at": "2026-10-12T09:56:12.471Z",
+      "captured_test_sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "captured_source_sha256": "a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "saga": "COMPLETED",
+        "stale_USER_token": true,
+        "role_refresh_required": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enrollment-completed-en-US",
+      "name": "srm-portal-enrollment-completed",
+      "locale": "en-US",
+      "flow": "portal-register",
+      "actor": "supplierE",
+      "roles": [
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-portal-enrollment-completed.png",
+      "sha256": "7fa85e155436c5942de32bc1fb9b224a1828db72bef12b33f19232fd226f9d86",
+      "captured_at": "2026-10-12T09:56:12.920Z",
+      "captured_test_sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "captured_source_sha256": "a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "saga": "COMPLETED",
+        "stale_USER_token": true,
+        "role_refresh_required": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enrollment-completed-ja-JP",
+      "name": "srm-portal-enrollment-completed",
+      "locale": "ja-JP",
+      "flow": "portal-register",
+      "actor": "supplierE",
+      "roles": [
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-portal-enrollment-completed.png",
+      "sha256": "4f170202836b2bddfff07ced21c930631f0f119c8f9d7ee9a97c3c042cf9244e",
+      "captured_at": "2026-10-12T09:56:13.490Z",
+      "captured_test_sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "captured_source_sha256": "a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "saga": "COMPLETED",
+        "stale_USER_token": true,
+        "role_refresh_required": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enrollment-completed-ko-KR",
+      "name": "srm-portal-enrollment-completed",
+      "locale": "ko-KR",
+      "flow": "portal-register",
+      "actor": "supplierE",
+      "roles": [
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-portal-enrollment-completed.png",
+      "sha256": "10df1317b7100f0f388c3dfacf38f915edb5bd7f9bbebe8b8e2b5e670bd50f69",
+      "captured_at": "2026-10-12T09:56:14.000Z",
+      "captured_test_sha256": "3364bea63c6b737d0487ec6b859c7fb4bcc4a874c2c9563fc7a15984028db5a8",
+      "captured_source_sha256": "a0916306c213892afa02d1ead77e798bee364a1015e0d548b602e8cb0bda172e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "saga": "COMPLETED",
+        "stale_USER_token": true,
+        "role_refresh_required": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enterprise-reviewing-zh-CN",
+      "name": "srm-portal-enterprise-reviewing",
+      "locale": "zh-CN",
+      "flow": "admission",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-portal-enterprise-reviewing.png",
+      "sha256": "a4ce7a6da1ba100ff22ce8a9ec5f8096e2aefc96836614e3766952bd2c70016b",
+      "captured_at": "2026-10-12T11:20:48.770Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVING",
+        "identity": "USER + SUPPLIER"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enterprise-reviewing-en-US",
+      "name": "srm-portal-enterprise-reviewing",
+      "locale": "en-US",
+      "flow": "admission",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-portal-enterprise-reviewing.png",
+      "sha256": "844196f61356e93adbaecf58e664ec6e919274a7f607cc6c4026d79c8629efc8",
+      "captured_at": "2026-10-12T11:20:49.327Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVING",
+        "identity": "USER + SUPPLIER"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enterprise-reviewing-ja-JP",
+      "name": "srm-portal-enterprise-reviewing",
+      "locale": "ja-JP",
+      "flow": "admission",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-portal-enterprise-reviewing.png",
+      "sha256": "9e5e560769e7c29fdaa97bc95be9eaf41c9fdc42db49b3e92043a62fbd65342d",
+      "captured_at": "2026-10-12T11:20:49.937Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVING",
+        "identity": "USER + SUPPLIER"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enterprise-reviewing-ko-KR",
+      "name": "srm-portal-enterprise-reviewing",
+      "locale": "ko-KR",
+      "flow": "admission",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-portal-enterprise-reviewing.png",
+      "sha256": "dbdfbebe7dfdb068536d975492f66756337de0aaf304a99eac9df0e3f5d3d103",
+      "captured_at": "2026-10-12T11:20:50.559Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVING",
+        "identity": "USER + SUPPLIER"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-admission-manager-todo-zh-CN",
+      "name": "srm-admission-manager-todo",
+      "locale": "zh-CN",
+      "flow": "admission",
+      "actor": "srmmanager",
+      "roles": [
+        "SRM_MANAGER",
+        "USER",
+        "WIKI_20261009A_APPROVER"
+      ],
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-admission-manager-todo.png",
+      "sha256": "e926e3dd69a2949c6c0558ef7b012052a9d79efbf52622f0900358068212081c",
+      "captured_at": "2026-10-12T11:20:51.173Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "process_instance_id": "2717eb9e-c623-11f1-b821-ba9702317d61",
+        "task_id": "2723d29b-c623-11f1-b821-ba9702317d61",
+        "candidate": 207
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-admission-manager-todo-en-US",
+      "name": "srm-admission-manager-todo",
+      "locale": "en-US",
+      "flow": "admission",
+      "actor": "srmmanager",
+      "roles": [
+        "SRM_MANAGER",
+        "USER",
+        "WIKI_20261009A_APPROVER"
+      ],
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-admission-manager-todo.png",
+      "sha256": "c5b2b55465dbca70c857f9c4f214f7d9ab6bf284537d25f361047c849eb1cbf2",
+      "captured_at": "2026-10-12T11:20:51.732Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "process_instance_id": "2717eb9e-c623-11f1-b821-ba9702317d61",
+        "task_id": "2723d29b-c623-11f1-b821-ba9702317d61",
+        "candidate": 207
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-admission-manager-todo-ja-JP",
+      "name": "srm-admission-manager-todo",
+      "locale": "ja-JP",
+      "flow": "admission",
+      "actor": "srmmanager",
+      "roles": [
+        "SRM_MANAGER",
+        "USER",
+        "WIKI_20261009A_APPROVER"
+      ],
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-admission-manager-todo.png",
+      "sha256": "6563c99ac7c85c76081ae3a3be553b2118f87842910d85f427274695e1100054",
+      "captured_at": "2026-10-12T11:20:52.369Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "process_instance_id": "2717eb9e-c623-11f1-b821-ba9702317d61",
+        "task_id": "2723d29b-c623-11f1-b821-ba9702317d61",
+        "candidate": 207
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-admission-manager-todo-ko-KR",
+      "name": "srm-admission-manager-todo",
+      "locale": "ko-KR",
+      "flow": "admission",
+      "actor": "srmmanager",
+      "roles": [
+        "SRM_MANAGER",
+        "USER",
+        "WIKI_20261009A_APPROVER"
+      ],
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-admission-manager-todo.png",
+      "sha256": "a7f21ce860372a500efc4818f4c7fdb6f861a2f96fddc990dfea58c837499fec",
+      "captured_at": "2026-10-12T11:20:53.013Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "process_instance_id": "2717eb9e-c623-11f1-b821-ba9702317d61",
+        "task_id": "2723d29b-c623-11f1-b821-ba9702317d61",
+        "candidate": 207
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-supplier-approved-zh-CN",
+      "name": "srm-supplier-approved",
+      "locale": "zh-CN",
+      "flow": "activation",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-supplier-approved.png",
+      "sha256": "159f1822ec60be569e06098c1ddc9adc64a0a1eeaf2e1caf9488a04c042a360c",
+      "captured_at": "2026-10-12T11:21:03.488Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 5,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-supplier-approved-en-US",
+      "name": "srm-supplier-approved",
+      "locale": "en-US",
+      "flow": "activation",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-supplier-approved.png",
+      "sha256": "10937b8c5814c26a19311dec7d0c814a8d4538c86004e4fe24f893f409aa80ef",
+      "captured_at": "2026-10-12T11:21:04.756Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 5,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-supplier-approved-ja-JP",
+      "name": "srm-supplier-approved",
+      "locale": "ja-JP",
+      "flow": "activation",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-supplier-approved.png",
+      "sha256": "ed8633a001ef77722a8f8b9001625304f18bac4578049658ff82d4ff17d3379d",
+      "captured_at": "2026-10-12T11:21:06.084Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 5,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-supplier-approved-ko-KR",
+      "name": "srm-supplier-approved",
+      "locale": "ko-KR",
+      "flow": "activation",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-supplier-approved.png",
+      "sha256": "d595c49ab154d65007a13876b8b71703ccb0c63af246a9c2f4ccd8342f77c6d2",
+      "captured_at": "2026-10-12T11:21:07.350Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 5,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enterprise-approved-zh-CN",
+      "name": "srm-portal-enterprise-approved",
+      "locale": "zh-CN",
+      "flow": "activation",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-portal-enterprise-approved.png",
+      "sha256": "7d72da9b94ac5ba103325079405e4bf00930580995216e646a49f5276b53d555",
+      "captured_at": "2026-10-12T11:21:07.933Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "APPROVED",
+        "approval_nodes": 3
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enterprise-approved-en-US",
+      "name": "srm-portal-enterprise-approved",
+      "locale": "en-US",
+      "flow": "activation",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-portal-enterprise-approved.png",
+      "sha256": "12fa637a8a43d5e38a61d7d67458440ad64b1f1e439ae0b836cb47556af00676",
+      "captured_at": "2026-10-12T11:21:08.484Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "APPROVED",
+        "approval_nodes": 3
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enterprise-approved-ja-JP",
+      "name": "srm-portal-enterprise-approved",
+      "locale": "ja-JP",
+      "flow": "activation",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-portal-enterprise-approved.png",
+      "sha256": "2084fe576714aec83430f65360de13d47d9f1897470a9edcd7605e3eda02f9ce",
+      "captured_at": "2026-10-12T11:21:09.045Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "APPROVED",
+        "approval_nodes": 3
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-portal-enterprise-approved-ko-KR",
+      "name": "srm-portal-enterprise-approved",
+      "locale": "ko-KR",
+      "flow": "activation",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-portal-enterprise-approved.png",
+      "sha256": "dd62ab669e4f034b9ea5533eeb1b7279be334b81d0e1ddac2e4aeacdff4f6653",
+      "captured_at": "2026-10-12T11:21:09.584Z",
+      "captured_test_sha256": "f529de9763ba5604a75dfbcebd4f0e3a064be715b229d8d0b421c26794ccf5a9",
+      "captured_source_sha256": "26d98d82c1e1123b6295340d940f3038d0df960cbf2e0c15c224a33144fd1d5a",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "APPROVED",
+        "approval_nodes": 3
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-suspend-detail-zh-CN",
+      "name": "srm-lifecycle-suspend-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-lifecycle-suspend-detail.png",
+      "sha256": "164bacd5bc48732dc25298443f087d25449c8d741fa0701158233cf28031ecaf",
+      "captured_at": "2026-10-12T11:31:09.379Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "SUSPENDED",
+        "version": 10,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-suspend-detail-en-US",
+      "name": "srm-lifecycle-suspend-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-lifecycle-suspend-detail.png",
+      "sha256": "433a3fa5d03170e6af90bf0ca6570f60e2dd453c2a3bba550217413bbe5f3e21",
+      "captured_at": "2026-10-12T11:31:10.530Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "SUSPENDED",
+        "version": 10,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-suspend-detail-ja-JP",
+      "name": "srm-lifecycle-suspend-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-lifecycle-suspend-detail.png",
+      "sha256": "9e39675cc4b9caaa101bad83dcf726feea9ce24a2e867e0e479f8d725f2bd4ef",
+      "captured_at": "2026-10-12T11:31:11.774Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "SUSPENDED",
+        "version": 10,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-suspend-detail-ko-KR",
+      "name": "srm-lifecycle-suspend-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-lifecycle-suspend-detail.png",
+      "sha256": "c03d04306855fb6be0db2f4fdeb82268a9d0bbff4c5d609043196c5ebdbfa77a",
+      "captured_at": "2026-10-12T11:31:12.989Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "SUSPENDED",
+        "version": 10,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-resume-detail-zh-CN",
+      "name": "srm-lifecycle-resume-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-lifecycle-resume-detail.png",
+      "sha256": "159f1822ec60be569e06098c1ddc9adc64a0a1eeaf2e1caf9488a04c042a360c",
+      "captured_at": "2026-10-12T11:31:14.506Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 11,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-resume-detail-en-US",
+      "name": "srm-lifecycle-resume-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-lifecycle-resume-detail.png",
+      "sha256": "10937b8c5814c26a19311dec7d0c814a8d4538c86004e4fe24f893f409aa80ef",
+      "captured_at": "2026-10-12T11:31:15.720Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 11,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-resume-detail-ja-JP",
+      "name": "srm-lifecycle-resume-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-lifecycle-resume-detail.png",
+      "sha256": "ed8633a001ef77722a8f8b9001625304f18bac4578049658ff82d4ff17d3379d",
+      "captured_at": "2026-10-12T11:31:16.995Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 11,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-resume-detail-ko-KR",
+      "name": "srm-lifecycle-resume-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-lifecycle-resume-detail.png",
+      "sha256": "d595c49ab154d65007a13876b8b71703ccb0c63af246a9c2f4ccd8342f77c6d2",
+      "captured_at": "2026-10-12T11:31:18.219Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 11,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-blacklist-detail-zh-CN",
+      "name": "srm-lifecycle-blacklist-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-lifecycle-blacklist-detail.png",
+      "sha256": "9783ab9359b6104c769a333821c953aa6dfa7dee4591f00458b2eff6a99aa5e2",
+      "captured_at": "2026-10-12T11:31:19.716Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "BLACKLISTED",
+        "version": 12,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-blacklist-detail-en-US",
+      "name": "srm-lifecycle-blacklist-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-lifecycle-blacklist-detail.png",
+      "sha256": "6db84ef33aaeb7c3f232410ed283ae88958c41562718bd1264adfd5a15dff736",
+      "captured_at": "2026-10-12T11:31:21.030Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "BLACKLISTED",
+        "version": 12,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-blacklist-detail-ja-JP",
+      "name": "srm-lifecycle-blacklist-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-lifecycle-blacklist-detail.png",
+      "sha256": "e58084a9291c89531ceb1a4f4c145abbc86a4ebdedb1acdea8bd8c56eb710253",
+      "captured_at": "2026-10-12T11:31:22.277Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "BLACKLISTED",
+        "version": 12,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-blacklist-detail-ko-KR",
+      "name": "srm-lifecycle-blacklist-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-lifecycle-blacklist-detail.png",
+      "sha256": "55ca64d1936331ba1c3ea0e42e0cb37a2e3879b24765f61ae0e717a8f81309a0",
+      "captured_at": "2026-10-12T11:31:23.639Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "BLACKLISTED",
+        "version": 12,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-restore-from-blacklist-detail-zh-CN",
+      "name": "srm-lifecycle-restore-from-blacklist-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-lifecycle-restore-from-blacklist-detail.png",
+      "sha256": "159f1822ec60be569e06098c1ddc9adc64a0a1eeaf2e1caf9488a04c042a360c",
+      "captured_at": "2026-10-12T11:31:25.145Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 13,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-restore-from-blacklist-detail-en-US",
+      "name": "srm-lifecycle-restore-from-blacklist-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-lifecycle-restore-from-blacklist-detail.png",
+      "sha256": "10937b8c5814c26a19311dec7d0c814a8d4538c86004e4fe24f893f409aa80ef",
+      "captured_at": "2026-10-12T11:31:26.274Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 13,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-restore-from-blacklist-detail-ja-JP",
+      "name": "srm-lifecycle-restore-from-blacklist-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-lifecycle-restore-from-blacklist-detail.png",
+      "sha256": "ed8633a001ef77722a8f8b9001625304f18bac4578049658ff82d4ff17d3379d",
+      "captured_at": "2026-10-12T11:31:27.443Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 13,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-restore-from-blacklist-detail-ko-KR",
+      "name": "srm-lifecycle-restore-from-blacklist-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-lifecycle-restore-from-blacklist-detail.png",
+      "sha256": "d595c49ab154d65007a13876b8b71703ccb0c63af246a9c2f4ccd8342f77c6d2",
+      "captured_at": "2026-10-12T11:31:28.733Z",
+      "captured_test_sha256": "884972f5f398c2cd2fca8bd33fad715df7efd60e561f71f5a8999955818bc23d",
+      "captured_source_sha256": "3d95b0d0e1e534072f8ce1b2afa7b44fdd75bc8cba07cb6598ae0308c2283f4e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "APPROVED",
+        "version": 13,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-approved-uninvited-quotation-empty-zh-CN",
+      "name": "srm-approved-uninvited-quotation-empty",
+      "locale": "zh-CN",
+      "flow": "supplier-quotation",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-approved-uninvited-quotation-empty.png",
+      "sha256": "bed29a04af65a71986d9ce8d1f62c1afaf35f033ddffd55eb34428632f1495f1",
+      "captured_at": "2026-10-12T11:33:55.056Z",
+      "captured_test_sha256": "37f8f86e64c5745406553e38b8232fee8d63d2738aa3b162b4b156e5ff3c8037",
+      "captured_source_sha256": "1c9e23da3f9a793eb7da4fa924beec6884a62f0d948c5614ec8e7ed51df6fcb3",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "supplier_status": "APPROVED",
+        "not_invited_to_rfq": 1,
+        "visible_rows": 0
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-approved-uninvited-quotation-empty-en-US",
+      "name": "srm-approved-uninvited-quotation-empty",
+      "locale": "en-US",
+      "flow": "supplier-quotation",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-approved-uninvited-quotation-empty.png",
+      "sha256": "f1910290e09f17ccc12b0536339882137b6c8b2fcb2be263d9eb85d06c032511",
+      "captured_at": "2026-10-12T11:33:55.693Z",
+      "captured_test_sha256": "37f8f86e64c5745406553e38b8232fee8d63d2738aa3b162b4b156e5ff3c8037",
+      "captured_source_sha256": "1c9e23da3f9a793eb7da4fa924beec6884a62f0d948c5614ec8e7ed51df6fcb3",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "supplier_status": "APPROVED",
+        "not_invited_to_rfq": 1,
+        "visible_rows": 0
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-approved-uninvited-quotation-empty-ja-JP",
+      "name": "srm-approved-uninvited-quotation-empty",
+      "locale": "ja-JP",
+      "flow": "supplier-quotation",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-approved-uninvited-quotation-empty.png",
+      "sha256": "efcffcad38ccd64795c48593e8c327c0c999f4c87bf3bcfb155994ae0e62dbb2",
+      "captured_at": "2026-10-12T11:33:56.491Z",
+      "captured_test_sha256": "37f8f86e64c5745406553e38b8232fee8d63d2738aa3b162b4b156e5ff3c8037",
+      "captured_source_sha256": "1c9e23da3f9a793eb7da4fa924beec6884a62f0d948c5614ec8e7ed51df6fcb3",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "supplier_status": "APPROVED",
+        "not_invited_to_rfq": 1,
+        "visible_rows": 0
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-approved-uninvited-quotation-empty-ko-KR",
+      "name": "srm-approved-uninvited-quotation-empty",
+      "locale": "ko-KR",
+      "flow": "supplier-quotation",
+      "actor": "supplierE",
+      "roles": [
+        "SUPPLIER",
+        "USER"
+      ],
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-approved-uninvited-quotation-empty.png",
+      "sha256": "1616d0439b6aff1d925cd2a6388aa52e5a0820f7e80077c1a050c4b37e647394",
+      "captured_at": "2026-10-12T11:33:57.099Z",
+      "captured_test_sha256": "37f8f86e64c5745406553e38b8232fee8d63d2738aa3b162b4b156e5ff3c8037",
+      "captured_source_sha256": "1c9e23da3f9a793eb7da4fa924beec6884a62f0d948c5614ec8e7ed51df6fcb3",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "supplier_status": "APPROVED",
+        "not_invited_to_rfq": 1,
+        "visible_rows": 0
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-eliminated-detail-zh-CN",
+      "name": "srm-lifecycle-eliminated-detail",
+      "locale": "zh-CN",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/zh-CN/srm-lifecycle-eliminated-detail.png",
+      "sha256": "80e6110eab955144b857be5ebbe66bde4648bab8af56e8da33c0b15ce847d666",
+      "captured_at": "2026-10-12T11:36:14.864Z",
+      "captured_test_sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844",
+      "captured_source_sha256": "3c716187a6348b26c54a618bc1e20beab0fa7edf29ea55dd782d39f4ee9ca02c",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "ELIMINATED",
+        "version": 14,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-eliminated-detail-en-US",
+      "name": "srm-lifecycle-eliminated-detail",
+      "locale": "en-US",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/en-US/srm-lifecycle-eliminated-detail.png",
+      "sha256": "b0d0913c3cd36c0f08f8266b0bf6ff119b580c9204a6f127559e11764b200fb0",
+      "captured_at": "2026-10-12T11:36:16.127Z",
+      "captured_test_sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844",
+      "captured_source_sha256": "3c716187a6348b26c54a618bc1e20beab0fa7edf29ea55dd782d39f4ee9ca02c",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "ELIMINATED",
+        "version": 14,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-eliminated-detail-ja-JP",
+      "name": "srm-lifecycle-eliminated-detail",
+      "locale": "ja-JP",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ja-JP/srm-lifecycle-eliminated-detail.png",
+      "sha256": "a31e33bec2cdfdabff9a7fadfb06ff8fe58577288b8fd8601388d73901fd13f5",
+      "captured_at": "2026-10-12T11:36:17.345Z",
+      "captured_test_sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844",
+      "captured_source_sha256": "3c716187a6348b26c54a618bc1e20beab0fa7edf29ea55dd782d39f4ee9ca02c",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "ELIMINATED",
+        "version": 14,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "srm-lifecycle-eliminated-detail-ko-KR",
+      "name": "srm-lifecycle-eliminated-detail",
+      "locale": "ko-KR",
+      "flow": "lifecycle",
+      "actor": "srmstaff",
+      "roles": [
+        "SRM_ADMIN",
+        "USER"
+      ],
+      "route": "/admin/srm/supplier",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "docs/images/ko-KR/srm-lifecycle-eliminated-detail.png",
+      "sha256": "af13977744834ead10edd3295ff7003817e030217e5d985a6fad6c40a5b45f81",
+      "captured_at": "2026-10-12T11:36:18.594Z",
+      "captured_test_sha256": "2528fb964601a3172b7a38103c60dc036545c1c7e48bcfb587ff76f4a6a3a844",
+      "captured_source_sha256": "3c716187a6348b26c54a618bc1e20beab0fa7edf29ea55dd782d39f4ee9ca02c",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "supplier_id": 8,
+        "status": "ELIMINATED",
+        "version": 14,
+        "exact_row": true,
+        "overview": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    }
+  ],
+  "rejected_captures": [
+    {
+      "name": "srm-admission-running",
+      "locale": "zh-CN",
+      "sha256": "f4adcdbc0c893b5bcea475e45a43616a229961447df93bddefbb7a15526acfb0",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-admission-running",
+      "locale": "en-US",
+      "sha256": "d222e89e39f92b14828b8b73a89d375bd0b91a8fe259a32f4552c60bd5c5f6cd",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-admission-running",
+      "locale": "ja-JP",
+      "sha256": "b374f0c8839c0e31e8487cbbe6149e0368867c3b0c072979baa2e58c54bec3c6",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-admission-running",
+      "locale": "ko-KR",
+      "sha256": "cea3fd40d9bfaf830d9ef980ee2ee31ea5d16063574c7e39140a6b429114efeb",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-suspend",
+      "locale": "zh-CN",
+      "sha256": "f6006f8336ec4d007f22a2e0cca36eac1372eec80f638036f2d3bb6c6fef5f38",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-suspend",
+      "locale": "en-US",
+      "sha256": "b077ef45d3a409c97ecd438030c755fb2230b47f4d0fc32ceec5e24e9ece4d15",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-suspend",
+      "locale": "ja-JP",
+      "sha256": "fae2137a01433be760f7923e989b71e260415de1ed580dd87e7d19fe48e20643",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-suspend",
+      "locale": "ko-KR",
+      "sha256": "3c012183d1448239836ba93f82af379dbe6aa8ab96afcfea88f62d3f652d312b",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-resume",
+      "locale": "zh-CN",
+      "sha256": "a7e72eaac5cc2405c3e8c68e6c3c073afe47103ecc8f37ca0ff9ad1f563258b3",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-resume",
+      "locale": "en-US",
+      "sha256": "11d4c8a02e629ec5834149874be2b2e292d3734ebc3c78bb148d9ebc586f9fc5",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-resume",
+      "locale": "ja-JP",
+      "sha256": "d90c9001b7ef26e772f6b635b75d04d11e1fde624f92f014ee3a4cbe9ce5c3af",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-resume",
+      "locale": "ko-KR",
+      "sha256": "39bf9e37d7a6241f8d81fd4cf81e301137cb3ee33c27472c8d909ae676eec874",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-blacklist",
+      "locale": "zh-CN",
+      "sha256": "32d1e9021c5ea7a2e33ac310f9440595a2b5a0e4c425377103e05753eeb0c746",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-blacklist",
+      "locale": "en-US",
+      "sha256": "de4a8f2366a6be2c38133e7c39d23bd627082973a0633bbb38859bd4ea96f4b8",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-blacklist",
+      "locale": "ja-JP",
+      "sha256": "e8343e5fc3fc4d4afa894a776632d97ce5796e928b5f39fcf028e96af02656c4",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-blacklist",
+      "locale": "ko-KR",
+      "sha256": "51f03ab5b9d98429af1fd5c02d5cbacc3a5079cd01f6912dd93e55b65b13ca41",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-restore-from-blacklist",
+      "locale": "zh-CN",
+      "sha256": "a7e72eaac5cc2405c3e8c68e6c3c073afe47103ecc8f37ca0ff9ad1f563258b3",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-restore-from-blacklist",
+      "locale": "en-US",
+      "sha256": "11d4c8a02e629ec5834149874be2b2e292d3734ebc3c78bb148d9ebc586f9fc5",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-restore-from-blacklist",
+      "locale": "ja-JP",
+      "sha256": "d90c9001b7ef26e772f6b635b75d04d11e1fde624f92f014ee3a4cbe9ce5c3af",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    },
+    {
+      "name": "srm-lifecycle-restore-from-blacklist",
+      "locale": "ko-KR",
+      "sha256": "39bf9e37d7a6241f8d81fd4cf81e301137cb3ee33c27472c8d909ae676eec874",
+      "reason": "State label is hidden by the fixed Actions column; excluded from publication."
+    }
+  ]
+}

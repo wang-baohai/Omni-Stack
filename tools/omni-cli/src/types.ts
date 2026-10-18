@@ -89,6 +89,10 @@ export interface PresetGenerationLock {
   presetDigest: string;
   /** 生成工程内 scaffold/**（模板、schema、spec、catalog）清单摘要。 */
   scaffoldDigest: string;
+  /** 生成工程内 Wiki 正文、清单与站点配置摘要。 */
+  docsDigest: string;
+  /** 生成工程内 AI 规范资产与适配器摘要。 */
+  aiDigest: string;
   catalogVersion: string;
   preset: { id: string; version: string };
   modules: Array<{ id: string; version: string }>;
@@ -250,7 +254,7 @@ export interface RenderedCrudGeneration {
 
 /** 服务包接入操作类型。 */
 export type IntegrationOperationKind = 'create-directory' | 'create-file' | 'modify-xml' | 'modify-yaml'
-  | 'modify-typescript' | 'modify-java' | 'modify-sql' | 'modify-dockerfile';
+  | 'modify-typescript' | 'modify-java' | 'modify-sql' | 'modify-dockerfile' | 'modify-markdown';
 
 /** 单个 monorepo 接入操作。 */
 export interface IntegrationOperation {

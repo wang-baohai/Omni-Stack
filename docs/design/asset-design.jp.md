@@ -1,11 +1,12 @@
 # 資産管理モジュール アーキテクチャと実装ベースライン
 
-> 状態：MVP 実装済み・検証完了
+> 適用範囲：2026-07-27 の原設計日と第 14–16 節の重要な履歴を保持します。現在の事実は `omni-asset` のソース、Liquibase、フロントエンド、設定と照合しています。過去の「検証済み」は今回の完全な実行検収を意味しません。翻訳確認は [ADR-0003](../adr/0003-authorized-ai-translation-review.md) に従い、実際の `AI_REVIEW` として記録し、人によるレビューと偽りません。
+>
 > プロジェクト：Omni-Stack
-> 日付：2026-07-27
-> 目標：omni-asset MVP のアーキテクチャ、サービス横断契約、実装境界を説明する。実装入口は `omni-backend/omni-asset` と `omni-frontend/src/views/asset`。
+> 原設計日：2026-07-27
+> 現在の役割：資産サービスの境界、データ、コマンド、承認、調達取込契約を説明します。
 
-設計根拠：`README.md`、および `docs/` 内の architecture、api-contract、backend-patterns、frontend-patterns、core-flows、scheduling、workflow、mq-reliability、docker-deployment の全トピックドキュメント。同時に `docs/design/srm-design.md` と `docs/design/procurement-design.md` を参照。
+操作入口は [機能ガイド](../wiki/feature-tour.jp.md)、開発入口は [ソース索引](../reference/source-map.jp.md) を参照してください。前提条件、利用者の資格、手順、画面、復旧は Wiki の役割です。要件、過去の計画、単体テストを新たな結合検証の証拠とは扱いません。関連資料は [構成](../architecture.jp.md)、[API 契約](../api-contract.jp.md)、[主要フロー](../core-flows.jp.md)、[Workflow](../workflow.jp.md)、[調達設計](procurement-design.jp.md)、[SRM 設計](srm-design.jp.md) です。
 
 ## 1. 設計結論
 
@@ -15,11 +16,11 @@
 |---|---|
 | Maven モジュール / サービス名 | `omni-asset` |
 | ローカルポート / 管理ポート | `8107` / `19907` |
-| XXL-JOB 実行体 | `omni-asset` / `9907`（減価償却計算や保守通知を有効化する場合） |
+| XXL-JOB 実行体 | `omni-asset` / `9907`。`XXL_JOB_ENABLED` 等の設定で制御し、減価償却や保守ジョブの存在を意味しません |
 | データベース | `omni_asset` |
 | Gateway | `/api/asset/**` → `lb://omni-asset`、`StripPrefix` は使用しない |
-| Redis | DB 0、Auth が書き込む XSS 設定を共有；キーは `asset:` プレフィックスを使用 |
-| フロントエンド | 引き続き `omni-frontend` を使用し、`views/asset/**` を新設 |
+| Redis | DB 0。`xss:enabled:{tenantId}` / `xss:rules:{tenantId}` を共有し、汎用の `asset:` 業務キャッシュ接頭辞は定義しません |
+| フロントエンド | `omni-frontend/src/views/asset/**` |
 
 Asset MVP は資産の全ライフサイクル管理の閉ループをカバーする：
 
@@ -28,6 +29,8 @@ Asset MVP は資産の全ライフサイクル管理の閉ループをカバー�
 減価償却計算、資産棚卸、保守修理工単は MVP に含めない。
 
 ## 2. 製品範囲
+
+本節は製品目標と段階を保持します。実際のロール能力は現在の権限とデータ範囲によります。Phase 2/3 は提供済み機能ではありません。資産原価は通貨ごとに集計し、為替換算しません。
 
 ### 2.1 ユーザーと目標
 
@@ -51,34 +54,34 @@ MVP は次に答えられるべきである：会社に資産がどれだけあ�
 
 ## 3. システム境界
 
-| コンポーネント | 権威的責務 | Asset の利用方式 |
+| 構成要素 | 正式な責務 | 現在の Asset の利用 |
 |---|---|---|
-| `omni-auth` | テナント、ユーザー、組織、ロール、権限、データ範囲、XSS 設定 | 内部 OpenFeign；ユーザー/組織 ID のみ保存 |
-| `omni-srm` | サプライヤーデータ | 内部 OpenFeign でサプライヤー情報を照会（保証連絡先など） |
-| `omni-procurement` | 購買注文、入庫記録 | Outbox イベントを消費して資産カードを作成；または Feign で調達ソースを照会 |
-| `omni-base` | 辞書、操作ログ | 操作ログ集約；資本品目/場所は辞書 code を使用 |
-| `omni-workflow` | BPMN、プロセスインスタンス、承認、Flowable エンジンの唯一の実行時 | 内部 OpenFeign でフローを起動/照会し、承認結果イベントを消費 |
-| `omni-asset` | 資産台帳、資産状態、資産処分 | 唯一のビジネス書き込み側 |
-| RocketMQ | 非同期輸送 | Procurement 入庫イベントを消費、少なくとも一度・冪等 |
+| `omni-auth` | ID、組織、権限、データ範囲、XSS | 内部ユーザー候補、ユーザー/組織参照の検証、共通セキュリティ。ID と元の Workflow 起案者名を保存 |
+| `omni-srm` | 仕入先 | 現在のクライアントは同一テナントの `APPROVED` 候補を検索。台帳はローカル名称スナップショットを表示 |
+| `omni-procurement` | PO、入庫、資産候補 | 入庫イベントを購読。内部候補 API は制御された補完用で、現在のリアルタイム出典詳細照会ではない |
+| `omni-base` | 辞書、操作ログ | 辞書の正式な管理元とログ集約。Asset 独自初期化器にテナント既定業務データはない |
+| `omni-workflow` | BPMN、インスタンス、タスク、Flowable | 業務分類で公開版を解決し、冪等に開始、担当資格を検証、完了イベントを受信 |
+| `omni-asset` | 資産、履歴、移管、処分、消費 Inbox | 本サービスの資産業務データの唯一の書込元 |
+| RocketMQ | イベント転送 | 消費側は重複を許容。再試行/デッドレターの実動作は配置設定による |
 
 ```mermaid
 flowchart LR
-    UI["omni-frontend"] --> GW["omni-gateway<br/>JWT validation / identity headers"]
+    UI["omni-frontend"] --> GW["omni-gateway<br/>JWT 検証/認証ヘッダー"]
     GW --> ASSET["omni-asset :8107"]
     GW --> AUTH["omni-auth :8100"]
     ASSET -->|"OpenFeign + X-Internal-Token"| AUTH
     ASSET -->|"OpenFeign + X-Internal-Token"| SRM["omni-srm :8105"]
-    ASSET -->|"Feign / Outbox consumption"| PROC["omni-procurement :8106"]
-    ASSET -->|"Feign / Outbox"| WF["omni-workflow :8103"]
+    ASSET -->|"入庫イベント/候補照会"| PROC["omni-procurement :8106"]
+    ASSET -->|"モデル/冪等開始/完了イベント"| WF["omni-workflow :8103"]
     ASSET --> DB[("omni_asset")]
     ASSET --> R[("Redis DB 0")]
     ASSET --> O["sys_mq_message"]
     O -->|"mqRelayHandler"| MQ["RocketMQ"]
 ```
 
-推奨依存：`omni-common-service`（Servlet ビジネスサービスのセキュリティ、身分、テナント、DataScope、MyBatis と XSS の組み合わせ）、および必要に応じて有効化する `omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`。Asset は引き続き Web、Validation、Security、OpenFeign、LoadBalancer、Nacos、RocketMQ Stream、Actuator などのビジネス依存を明示的に使用する。
+現在の POM は `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`, `omni-common-service` に加え、Web、Security、Validation、OpenFeign、LoadBalancer、Nacos、RocketMQ、Actuator 等を明示的に使用します。`omni-common-service` が ID、テナント、DataScope、永続化、XSS を組み立てます。依存の存在は全バックグラウンドジョブの有効化を意味しません。
 
-**Asset は `omni-common-workflow` に依存せず、Flowable を埋め込まない。** `omni-workflow` は独立マイクロサービスであり Flowable の唯一の実行時である。Asset は内部 Feign 契約でフローを発起し、信頼できるドメインイベントで承認結果を受信する。
+**Asset は `omni-common-workflow` に依存せず、Flowable を内蔵しません。** エンジンと DB は独立 `omni-workflow` の責務です。
 
 ## 4. ドメインとデータ設計
 
@@ -89,36 +92,30 @@ flowchart LR
 | Asset | `ast_asset`、`ast_asset_history` | 資産マスタデータ、状態変更の不変履歴 |
 | Transfer | `ast_transfer` | 資産移管記録 |
 | Disposal | `ast_disposal` | 資産処分記録（廃棄/スクラップ共用） |
+| 消費 Inbox | `ast_inbox_event` | Procurement と Workflow 完了の各消費者の登録、意図照合、処理状態 |
 
 ```mermaid
 erDiagram
-    AST_ASSET ||--o{ AST_ASSET_HISTORY : tracks
-    AST_ASSET ||--o{ AST_TRANSFER : transfers
-    AST_ASSET ||--o{ AST_DISPOSAL : disposes
+    AST_ASSET ||--o{ AST_ASSET_HISTORY : "履歴を記録"
+    AST_ASSET ||--o{ AST_TRANSFER : "移管を申請"
+    AST_ASSET ||--o{ AST_DISPOSAL : "処分を申請"
+    AST_INBOX_EVENT {
+        varchar consumer_name
+        varchar event_id
+        bigint tenant_id
+    }
 ```
 
 ### 4.2 共通フィールドとルール
 
-すべての `ast_*` テーブルは `tenant_id` を含まなければならない。資産集約ルート `ast_asset` はさらに次を含める必要がある：
-
-- `tenant_id`：テナント分離。
-- `owner_user_id`：資産管理者（SELF 範囲）。
-- `owner_unit_id`：資産管理部門（DEPT 範囲）。
-- `version`：楽観ロック。移管と処分申請もそれぞれ自身の `version` を維持する。
-- `deleted`：論理削除。不変履歴と Inbox は論理削除を使用しない。
-- `id/create_time/update_time/create_by/update_by`：監査フィールド。
-
-制約：
-
-- 資産番号 `asset_no` はテナント内でユニークで、データベース ID から生成される。
-- ユーザー/組織 ID は Auth が管理し、クロス DB 外部キーは作らない。
-- サプライヤー ID は SRM が管理し、`supplier_id` のみ保存する。
-- 調達ソース ID は Procurement が管理し、`source_po_id/source_gr_id/source_gr_line_id/source_unit_sequence` を冪等トレーサビリティとして保存し、同時に poNo/grNo 表示スナップショットを保存する。クロス DB 外部キーは作らない。
-- 金額は `DECIMAL(18,2)` / `BigDecimal` を使用する。
-- 時刻は `yyyy-MM-dd HH:mm:ss` に統一する。
-- 通常の PUT では資産の status、使用者、場所を直接変更できない（専用コマンドエンドポイントが必要）。
-- 資産は処分後回復できない。
-- 同一資産に対し同一時刻に最大 1 件のアクティブな移管または処分申請のみ存在できる。`ast_asset.active_operation_type/active_operation_id` は version 条件付き更新で原子的に占有し、2 つの申請テーブル間の並行を統一的に阻止する。
+- 5 つの `ast_*` テーブルすべてに `tenant_id` があります。`ast_asset` の管理帰属 `owner_user_id/owner_unit_id` と使用帰属 `current_user_id/current_unit_id` を書込認可で混同しません。
+- 資産と両申請はそれぞれ `version`、`deleted`、監査項目を持ち、履歴と Inbox に論理削除はありません。`AST-<id>` はテナント内で一意です。手動資産は先に DB が ID を採番し、調達取込はサーバー生成 ID を使用します。
+- ユーザー/組織は Auth、仕入先は SRM、出典は Procurement が管理します。ID と必要なスナップショットを保存し、DB 間外部キーを作りません。図はドメイン関連で、実際の全 DDL 制約ではありません。
+- `source_po_id/source_gr_id/source_gr_line_id/source_unit_sequence` と PO/GR 番号が追跡元です。`tenant_id + source_gr_line_id + source_unit_sequence` の一意キーで各実物単位を保護します。
+- 金額は `DECIMAL(18,2)` / `BigDecimal`。要求/応答の `purchaseAmount`、`residualValue` は JSON 十進文字列で、JSON number は不可です。調達元価格も文字列契約です。日時は `yyyy-MM-dd HH:mm:ss`、購入日は日付項目です。
+- 手動登録は管理帰属の書込範囲と Auth の有効ユーザー/組織、主組織一致を検証します。更新には `version` が必要です。通常 PUT で状態、使用者、場所を変更しません。
+- 削除は使用者、活動操作、後続業務履歴のない手動在庫資産に限定します。調達取込資産は削除不可、処分終状態は復元不可です。
+- 同じ資産を占有できる活動移管/処分は一つです。作成時はテナント、ID、版、元状態、`deleted=0` と両 `active_operation_* IS NULL` を条件に原子的に占有し、更新 1 行以外は 409 です。
 
 ### 4.3 主要テーブル
 
@@ -126,13 +123,13 @@ erDiagram
 
 - `asset_no/name/category_code`：資産番号、名称、品目（辞書 code）。
 - `specification/brand/model`：仕様、ブランド、型番。
-- `supplier_id/supplier_name_snapshot`：サプライヤー ID と検収時の名称スナップショット；現在の名称は SRM の batch enrich により取得し、スナップショットは権限や現在状態の判定に関与しない。
+- `supplier_id/supplier_name_snapshot`：仕入先 ID とローカル名称スナップショット。現在の台帳は SRM から最新名を一括補完せず、スナップショットは現在の仕入先資格を証明しません。
 - `source_po_id/source_gr_id/source_gr_line_id/source_unit_sequence/source_po_no/source_gr_no`：調達ソースと単位レベルの冪等識別子。
 - `purchase_date/purchase_amount/currency_code`：購買日、取得原価、通貨。
 - `location_code`：資産の場所（辞書 code、例：フロア+部屋番号）。
 - `status`：ライフサイクル状態（IN_STOCK/ALLOCATED/IN_USE/MAINTENANCE/TRANSFER/DISPOSAL_PENDING/DISPOSED/SCRAPPED）。
-- `current_user_id`：現在の使用者、名称は Auth から batch enrich し、DB に保存しない。
-- `current_unit_id`：現在の使用部門、名称は Auth から batch enrich し、DB に保存しない。
+- `current_user_id`：現在の使用者 ID。台帳 VO は ID を返し、Auth の氏名を一括補完しません。
+- `current_unit_id`：現在の使用部門 ID。台帳 VO は ID を返し、Auth の組織名を一括補完しません。
 - `allocated_time`：割当時刻。
 - `active_operation_type/active_operation_id`：現在のアクティブ操作（TRANSFER/DISPOSAL）と申請 ID；アクティブ操作がない場合は NULL。
 - `warranty_expiry_date`：保証期限日。
@@ -165,34 +162,40 @@ erDiagram
 - `approved_time/completed_time`。
 - `version/deleted` と監査フィールド。
 
+`ast_inbox_event`
+
+- `consumer_name/event_id` が一意。テナント、イベント型、出典、集約識別、payload、処理状態、時刻を保持します。
+- 同じイベント ID に異なるテナントや JSON 意味上の意図が結びつくと競合です。処理済みを理由に意図照合を先に省略しません。
+- Procurement のリアルタイム消費と Workflow 完了は別消費者です。補完候補は出典単位の冪等性を使い、リアルタイム Inbox に登録しません。
+
 ## 5. 状態マシンとコアフロー
 
 ### 5.1 Asset ライフサイクル
 
 ```mermaid
 stateDiagram-v2
-    [*] --> IN_STOCK: Goods-receipt acceptance / manual stock-in
-    IN_STOCK --> ALLOCATED: Allocate to employee
-    ALLOCATED --> IN_USE: Employee confirms acceptance
-    IN_USE --> MAINTENANCE: Send for repair
-    MAINTENANCE --> IN_USE: Repaired and returned
-    IN_USE --> IN_STOCK: Return (employee leaves / device swap)
-    ALLOCATED --> IN_STOCK: Return to stock
-    IN_STOCK --> TRANSFER: Initiate transfer
-    ALLOCATED --> TRANSFER: Initiate transfer
-    IN_USE --> TRANSFER: Initiate transfer
-    TRANSFER --> IN_USE: Transfer complete (new user)
-    TRANSFER --> IN_STOCK: Rejected/cancelled, restore previousStatus
-    TRANSFER --> ALLOCATED: Rejected/cancelled, restore previousStatus
-    TRANSFER --> IN_USE: Rejected/cancelled, restore previousStatus
-    IN_STOCK --> DISPOSAL_PENDING: Initiate disposal
-    ALLOCATED --> DISPOSAL_PENDING: Initiate disposal
-    IN_USE --> DISPOSAL_PENDING: Initiate disposal
-    DISPOSAL_PENDING --> DISPOSED: Discard approved and completed
-    DISPOSAL_PENDING --> SCRAPPED: Scrap approved and completed
-    DISPOSAL_PENDING --> IN_STOCK: Rejected/cancelled, restore previousStatus
-    DISPOSAL_PENDING --> ALLOCATED: Rejected/cancelled, restore previousStatus
-    DISPOSAL_PENDING --> IN_USE: Rejected/cancelled, restore previousStatus
+    [*] --> IN_STOCK: 合格調達取込/手動入庫
+    IN_STOCK --> ALLOCATED: 社員に割当
+    ALLOCATED --> IN_USE: 本人が受領確認
+    IN_USE --> MAINTENANCE: 修理開始
+    MAINTENANCE --> IN_USE: 修理完了
+    IN_USE --> IN_STOCK: 返却
+    ALLOCATED --> IN_STOCK: 在庫に返却
+    IN_STOCK --> TRANSFER: 移管申請
+    ALLOCATED --> TRANSFER: 移管申請
+    IN_USE --> TRANSFER: 移管申請
+    TRANSFER --> IN_USE: 引継ぎ完了
+    TRANSFER --> IN_STOCK: 却下/取消で元状態に復元
+    TRANSFER --> ALLOCATED: 却下/取消で元状態に復元
+    TRANSFER --> IN_USE: 却下/取消で元状態に復元
+    IN_STOCK --> DISPOSAL_PENDING: 処分申請
+    ALLOCATED --> DISPOSAL_PENDING: 処分申請
+    IN_USE --> DISPOSAL_PENDING: 処分申請
+    DISPOSAL_PENDING --> DISPOSED: 廃棄承認と実物完了
+    DISPOSAL_PENDING --> SCRAPPED: 除却承認と実物完了
+    DISPOSAL_PENDING --> IN_STOCK: 却下/取消で元状態に復元
+    DISPOSAL_PENDING --> ALLOCATED: 却下/取消で元状態に復元
+    DISPOSAL_PENDING --> IN_USE: 却下/取消で元状態に復元
     DISPOSED --> [*]
     SCRAPPED --> [*]
 ```
@@ -206,7 +209,7 @@ stateDiagram-v2
 - `DISPOSED`：廃棄処分完了（終端状態）。
 - `SCRAPPED`：スクラップ処分完了（終端状態）。
 
-`IN_STOCK`、`IN_USE`、`ALLOCATED` 状態の資産のみ移管または処分を発起できる。`MAINTENANCE`、`TRANSFER`、`DISPOSAL_PENDING` 状態の資産は他のビジネス操作を発起できない。MVP は `maintenance/start` と `maintenance/complete` の 2 つの軽量コマンドを提供し、状態と履歴のみを維持し、修理工単は導入しない。
+移管/処分を作成できるのは `IN_STOCK/ALLOCATED/IN_USE` だけです。修理は `IN_USE → MAINTENANCE → IN_USE` のコマンドのみです。活動移管/処分中は割当、返却、修理、重複占有を禁止します。状態遷移には端点権限、行範囲、版、活動枠の条件も必要です。
 
 ### 5.2 資産検収（調達連動）
 
@@ -216,108 +219,89 @@ sequenceDiagram
     participant MQ as RocketMQ
     participant ASSET as omni-asset
     participant DB as omni_asset
-
-    PROC->>MQ: Outbox delivers goods-receipt.confirmed / quality-passed v1
-    MQ->>ASSET: Consume event
-    ASSET->>ASSET: Validate eventId idempotency and verify tenant/event version
-    ASSET->>DB: INSERT ast_asset by assetQuantity only for qualified and assetManaged lines
-    ASSET->>DB: INSERT ast_asset_history
-    ASSET->>DB: UPDATE inbox consumption status
+    PROC->>MQ: Outbox が入庫 v1 を配信
+    MQ->>ASSET: procurement.goods-receipt.confirmed.v1 / quality-passed.v1
+    ASSET->>ASSET: エンベロープ/全出典行/数量/金額を検証
+    Note over ASSET,DB: カードと Inbox/Outbox は同一取引
+    ASSET->>DB: 同一取引：意図/出典重複排除/新カード/履歴/Outbox
+    ASSET->>DB: 同一取引で Inbox 更新
 ```
 
-**冪等消費**：Asset は `ast_inbox_event` テーブル（`consumer_name + event_id` ユニークキー）を維持し、同時に `ast_asset` 上で `tenant_id + source_gr_line_id + source_unit_sequence` ユニークキーを使用する。前者はリアルタイムイベント全体の重複実行を防ぎ、後者はリアルタイム消費・手動リプレイ・履歴補償再スキャンを統一的に保護する。
+リアルタイム入口は `procurement.goods-receipt.confirmed.v1` と `procurement.goods-receipt.quality-passed.v1` を購読します。書込前にエンベロープ、テナント、出典ルート、全明細のメタデータ、出典行 ID の一意性を検証します。数量、単価、行金額は正数で、`unitPrice × receivedQuantity = totalPrice` が必要です。必須項目欠落、不正列挙値、非対応版はイベント全体を拒否し、既定値を推測しません。
 
-**一括作成**：`qualityStatus=PASS && assetManaged=true && assetQuantity>0` の行のみ処理する。assetQuantity は正の整数でなければならない。5 台のノート PC が検収合格した場合、unitSequence=1..5 で 5 件の独立資産を作成する。消耗品、サービス、kg などの連続計量資材、および PENDING/FAIL 行は資産を作成しない。
+有効な `qualityStatus=PASS && assetManaged=true` 行だけをカード化します。`receivedQuantity` は厳密な正整数で `assetQuantity` と等しく、`Integer.MAX_VALUE` 以下です。有効な非資産行や PENDING/FAIL 行はスキップしますが、不正形式行は検証対象です。合格 5 単位なら `source_unit_sequence=1..5` の 5 枚を `IN_STOCK`、出典の管理帰属で作成します。各カードの `purchaseAmount` は `unitPrice` を HALF_UP で小数 2 桁に丸め、行全体額を各カードに複製しません。
 
-**履歴補償**：Asset の稼働開始時や消費障害の修復時、Procurement の `/internal/procurement/goods-receipt/asset-candidates` カーソルページング API で履歴入庫候補を再スキャンする。補償データは同一のソースキーにマッピングされ同一の作成サービスを再利用する。Procurement Outbox や Broker が未デプロイの消費者のためにメッセージを永久保持すると仮定してはならない。
+二重冪等性：リアルタイム Inbox の `consumer_name + event_id` は再送判定より先にテナントと JSON 意味上の意図を照合します。出典単位の一意キーはリアルタイム、再送、補完を共通保護します。書込後に出典行をロックして読み直し意図を検証し、JDBC 更新行数だけで新規作成を判定しません。同じリアルタイム取引に新カード、履歴、Inbox 状態、新カード分だけの `asset.created.v1` Outbox を含めます。Outbox 保存だけでは Broker 配信や下流消費の成功を証明しません。
+
+過去補完は制御された 1 ページ単位です。カーソルと部分コミットは 8.3 を参照。起動後に自動で全件走査する保証はありません。
 
 ### 5.3 資産割当と返却
 
-```text
-Allocate:
-POST /asset/{id}/allocate (targetUserId, targetUnitId)
-→ validate status=IN_STOCK
-→ UPDATE asset SET current_user_id, current_unit_id, status=ALLOCATED, allocated_time
-→ INSERT asset_history (IN_STOCK → ALLOCATED)
+| コマンド（接頭辞 `/api/asset/asset`） | 要求と状態条件 | 同一取引の効果 |
+|---|---|---|
+| `POST /{id}/allocate` | `version,targetUserId,targetUnitId,remark?`、在庫・空活動枠。対象部門が書込可能、Auth で同一テナントの有効ユーザー/組織と主組織を検証 | `ALLOCATED`、使用者/部門、割当時刻、履歴、`asset.allocated.v1` Outbox |
+| `POST /{id}/accept` | `version,remark?`、`ALLOCATED` かつ使用者本人 | `IN_USE` と履歴 |
+| `POST /{id}/return` | `version,remark?`、`ALLOCATED/IN_USE` かつ使用者本人 | `IN_STOCK`、使用者/部門/時刻を消去、履歴、`asset.returned.v1` Outbox |
+| `POST /{id}/maintenance/start` | `version,remark?`、`IN_USE`、空活動枠 | `MAINTENANCE` と履歴 |
+| `POST /{id}/maintenance/complete` | `version,remark?`、`MAINTENANCE`、空活動枠 | `IN_USE` と履歴 |
 
-Acceptance confirmation:
-POST /asset/{id}/accept
-→ validate status=ALLOCATED
-→ UPDATE asset SET status=IN_USE
-→ INSERT asset_history (ALLOCATED → IN_USE)
-
-Return:
-POST /asset/{id}/return
-→ validate status=IN_USE or ALLOCATED
-→ UPDATE asset SET current_user_id=NULL, current_unit_id=NULL, allocated_time=NULL, status=IN_STOCK
-→ INSERT asset_history (IN_USE → IN_STOCK)
-
-Send for repair / repair:
-POST /asset/{id}/maintenance/start → IN_USE → MAINTENANCE
-POST /asset/{id}/maintenance/complete → MAINTENANCE → IN_USE
-```
+テナントとデータ範囲で資産をロックし、版と元状態等で条件更新します。競合は 409。管理ロールも accept/return の本人限定を拡大しません。修理指示票、自動減価償却、自動保守スケジュールは実装しません。
 
 ### 5.4 資産移管
 
 ```mermaid
 sequenceDiagram
-    participant M as Admin
-    participant S as TransferService
+    participant M as 権限のある利用者
+    participant S as AssetTransferService
     participant WF as omni-workflow
     participant DB as omni_asset
-
-    M->>S: POST /transfer (assetId, toUserId, toUnitId, reason)
-    S->>DB: SELECT Asset FOR UPDATE + tenant/scope
-    S->>DB: validate status=IN_STOCK/IN_USE/ALLOCATED
-    S->>DB: INSERT Transfer (status=PENDING_APPROVAL, previousStatus, active=true)
-    S->>DB: UPDATE Asset status=TRANSFER
-    S->>WF: After transaction commit, Feign idempotently starts the transfer approval flow
-
-    Note over WF: Approver approves
-
-    WF-->>S: MQ workflow.process.completed.v1 (APPROVED)
-    S->>DB: Idempotent UPDATE Transfer status=APPROVED
-    M->>S: POST /transfer/{id}/complete (complete handover)
-    S->>DB: UPDATE Transfer status=COMPLETED, active=false
-    S->>DB: UPDATE Asset (new user/unit, status=IN_USE, active_operation=NULL)
-    S->>DB: INSERT asset_history (TRANSFER → IN_USE)
+    M->>S: POST /api/asset/transfer
+    S->>WF: モデル分類を解決 (ASSET_TRANSFER)
+    WF-->>S: PUBLISHED modelVersionId
+    S->>DB: 申請/元の開始スナップショット/活動枠
+    Note over S,DB: ローカル準備取引をコミット
+    S->>WF: 元スナップショットで冪等開始
+    WF-->>S: 成功応答を照合
+    S->>DB: 別取引で開始確認
+    WF-->>S: workflow.process.completed.v1 (APPROVED)
+    S->>DB: 承認済み、占有継続
+    M->>S: POST /api/asset/transfer/{id}/complete (version)
+    Note over M,S: 申請版付きで実物完了を確認
+    S->>DB: 資産更新/枠消去/申請完了/履歴/Outbox (IN_USE)
 ```
 
-移管承認は単純な単段承認（管理者または部門マネージャーが承認）を使用する。MVP は多段承認を行わない。Workflow が REJECTED を返すかユーザーがキャンセルした場合、Asset は同一トランザクション内で Transfer を終端状態・`active=false` にし、Asset を `previous_asset_status` に回復しなければならない。フロー起動結果が不確実な場合は `PENDING_APPROVAL + PENDING` を保持し、同一の `tenantId + businessType + businessKey` でリトライし、ローカルキャンセルは許可しない。Workflow のビジネス応答 404 はモデルバージョンが起動不可かつリモートでインスタンス未作成であることを示し、このとき `START_FAILED + FAILED` に入り、リトライまたはキャンセル回復が可能になる。
+作成項目は `assetId,toUserId,toUnitId,toLocation?,reason`。`modelVersionId` はサーバーが解決し、利用者指定を受け付けません。対象部門と Auth 参照を検証後、現在の公開 `ASSET_TRANSFER` モデルを解決します。準備取引で申請、`previous_asset_status`、元の開始スナップショット、活動枠を保存します。そのコミット後に遠隔 Workflow を呼び、開始確認を別途永続化します。
+
+`APPROVED` でも申請 `active_flag=1` と資産 `TRANSFER` 占有を維持します。権限のある利用者が申請 `version` 付き業務 `/complete` で引継ぎを完了します。同取引で現在の使用者/使用部門と任意の場所を変更し、`IN_USE`、枠消去、履歴、完了 Outbox を記録します。管理帰属 `owner_user_id/owner_unit_id` は変更しません。
+
+承認段階は現在の分類一致公開 BPMN によります。第 15 節の単段階承認は原設計です。却下/プロセス取消は同取引で申請を終了し資産の元状態を復元、枠を消去します。開始不明と明示失敗の復旧境界は 8.4 を参照。
 
 ### 5.5 資産処分（廃棄/スクラップ）
 
 ```mermaid
 sequenceDiagram
-    participant M as Admin
-    participant S as DisposalService
+    participant M as 権限のある利用者
+    participant S as AssetDisposalService
     participant WF as omni-workflow
     participant DB as omni_asset
-
-    M->>S: POST /disposal (assetId, type=DISCARD|SCRAP, reason)
-    S->>DB: SELECT Asset FOR UPDATE + tenant/scope
-    S->>DB: validate status allows disposal
-    S->>DB: INSERT Disposal (status=PENDING_APPROVAL, previousStatus, active=true)
-    S->>DB: UPDATE Asset status=DISPOSAL_PENDING
-    S->>WF: After transaction commit, Feign idempotently starts the disposal approval flow
-
-    Note over WF: Approver approves (may require finance confirmation)
-
-    WF-->>S: MQ workflow.process.completed.v1 (APPROVED)
-    S->>DB: Idempotent UPDATE Disposal status=APPROVED
-    M->>S: POST /disposal/{id}/complete (confirm physical disposal)
-    S->>DB: UPDATE Disposal status=COMPLETED, active=false
-    S->>DB: UPDATE Asset status=DISPOSED|SCRAPPED, active_operation=NULL
-    S->>DB: INSERT asset_history
+    M->>S: POST /api/asset/disposal
+    S->>WF: モデル分類を解決 (ASSET_DISPOSAL)
+    WF-->>S: PUBLISHED modelVersionId
+    S->>DB: 申請/元の開始スナップショット/活動枠
+    Note over S,DB: ローカル準備取引をコミット
+    S->>WF: 元スナップショットで冪等開始
+    WF-->>S: 成功応答を照合
+    S->>DB: 別取引で開始確認
+    WF-->>S: workflow.process.completed.v1 (APPROVED)
+    S->>DB: 承認済み、占有継続
+    M->>S: POST /api/asset/disposal/{id}/complete (version)
+    Note over M,S: 申請版付きで実物完了を確認
+    S->>DB: 資産更新/枠消去/申請完了/履歴/Outbox (DISPOSED/SCRAPPED)
 ```
 
-廃棄とスクラップは同一の承認フローを使用し、違いは次のとおり：
-- **廃棄（DISCARD）**：資産を使用せず直接廃棄する。処分方式（寄付、リサイクル、破棄）の記録が必要な場合がある。
-- **スクラップ（SCRAP）**：資産が使用年数に達するか損壊して修復不能となり、正式にスクラップする。残存価値の記録が必要な場合がある。
+作成は `assetId,disposalType,reason,residualValue?,disposalMethod?`。`disposalType` は `DISCARD/SCRAP`、残存価額は JSON 十進文字列です。サーバーは `ASSET_DISPOSAL` モデルを解決します。両処分は同じ申請表と承認統合を使いますが、実際の承認者と段階は BPMN に従い、財務確認済みと仮定しません。
 
-承認フローは異なる承認者を設定できる（スクラップは財務確認が必要な場合があり、廃棄は総務マネージャーのみ）。
-
-処分承認が拒否・キャンセル、または起動失敗後にキャンセルされた場合、Asset を `previous_asset_status` に回復し、申請の active_flag および Asset の `active_operation_*` をクリアしなければならない。移管と処分の作成はいずれも `tenant_id + asset_id + version + active_operation_id IS NULL` 条件で原子的に占有しなければならない。更新行数が 1 でない場合は 409 を返し、データベース層から 2 種の申請の交差並行を阻止する。
+`APPROVED` 後も `DISPOSAL_PENDING` の占有を維持します。権限と申請版を検証した業務 `/complete` で初めて実物処分を確定し、`DISPOSED/SCRAPPED`、枠消去、履歴、対応 Outbox を記録します。却下/プロセス取消、または明示開始失敗が永続化された後のローカル取消は、同取引で `previous_asset_status` と両活動印を復旧/消去します。開始結果不明時のローカル取消は禁止です。
 
 ## 6. テナント、RBAC とデータ権限
 
@@ -332,9 +316,9 @@ sequenceDiagram
 API 権限：
 
 - `asset:overview:list`
-- `asset:asset:list/self/create/update/delete/allocate/accept/return/maintenance`
-- `asset:transfer:list/create/approve/complete/cancel/retry`
-- `asset:disposal:list/create/approve/complete/cancel/retry`
+- `asset:asset:list`, `asset:asset:self`, `asset:asset:create`, `asset:asset:update`, `asset:asset:delete`, `asset:asset:allocate`, `asset:asset:accept`, `asset:asset:return`, `asset:asset:maintenance`
+- `asset:transfer:list`, `asset:transfer:create`, `asset:transfer:approve`, `asset:transfer:complete`, `asset:transfer:cancel`, `asset:transfer:retry`
+- `asset:disposal:list`, `asset:disposal:create`, `asset:disposal:approve`, `asset:disposal:complete`, `asset:disposal:cancel`, `asset:disposal:retry`
 
 | ロール | dataScope | 能力 |
 |---|---|---|
@@ -354,45 +338,74 @@ API 権限：
 | dataScope | 条件 |
 |---|---|
 | SELF | 現在の permission がマップする owner または current_user 列が currentUserId に等しい |
-| DEPT | 現在の permission がマップする owner_unit または current_unit 列が primaryUnitId に等しい |
-| DEPT_AND_BELOW / CUSTOM | 現在の permission がマップする unit 列が accessibleUnitIds に含まれる |
+| DEPT | owner_unit_id が primaryUnitId と一致 |
+| DEPT_AND_BELOW / CUSTOM | owner_unit_id が accessibleUnitIds に含まれる |
 | TENANT / ALL | owner 条件を追加しない、TenantLine は常に保持 |
 
 資産の dataScope には管理次元と使用次元があり、汎用 SQL で広い OR を使用できず、permissionCode/エンドポイントごとに明示的にマップしなければならない：
 
 | エンドポイント/権限 | 範囲列 | ルール |
 |---|---|---|
-| `/asset/list`、詳細、管理履歴；`asset:asset:list` | `owner_user_id/owner_unit_id` | 資産管理担当向け、管理帰属でフィルタ |
-| `/asset/my`；`asset:asset:self` | `current_user_id` | 固定して現在ユーザーに等しく、他ロールのより広い dataScope によって拡大しない |
+| `/api/asset/asset/list`、詳細、管理履歴；`asset:asset:list` | `owner_user_id/owner_unit_id` | 資産管理担当向け、管理帰属でフィルタ |
+| `/api/asset/asset/my`；`asset:asset:self` | `current_user_id` | 固定して現在ユーザーに等しく、他ロールのより広い dataScope によって拡大しない |
 | accept/return；対応するコマンド権限 | `current_user_id` | RecordAccessGuard が対象資産の現在割当先が currentUserId であることを強制 |
 | Transfer/Disposal list/detail | 関連 Asset の管理次元 | 子テーブルは同一テナントの asset_id で継承し、存在しない owner 列を直接連結しない |
 | Transfer/Disposal approval-view | Workflow taskId の割当関係 | まず現在ユーザーがその tenant/ビジネス伝票のタスク承認者であることを検証し、その後 tenant + id で読み取り専用 VO を読む |
-| Overview | Asset 管理次元 | 集約 SQL は `/asset/list` と同一範囲を使用 |
+| Overview | Asset 管理次元 | 集約 SQL は `/api/asset/asset/list` と同一範囲を使用 |
 
 ユーザーが ASSET_USER と管理ロールを同時に持つ場合でも、フロントエンドは「マイ資産」と管理リストをそれぞれ呼び出す。バックエンドは 2 つの次元を OR 結合して書き込み認可に使用してはならない。
+
+例外は完全な権限コードで判断します。`asset:asset:self`, `asset:asset:accept`, `asset:asset:return` は常に `current_user_id` 固定です。`asset:transfer:create` の `SELF` も `current_user_id`、その他の管理操作は owner 列です。候補照会も対応 create 権限の範囲を使い、両活動列の NULL と操作可能状態を条件とします。
+
+approval-view はローカル `PENDING_APPROVAL + STARTED` と完全な業務キー/インスタンスが前提です。利用者、テナント、業務型/キー、Workflow タスク割当と同一インスタンスを検証後だけ一時 `TENANT` 範囲で該当 VO を読み、`finally` で元コンテキストを復元します。通常詳細の無条件な権限回避口ではありません。
 
 ## 7. API 設計
 
 ### 7.1 共通契約
 
-他のサービスと一致。
+[API 契約](../api-contract.jp.md) に従い、`R<T>`、ページは `R<PageResult<T>>`。ページは 1 起点/既定 1、件数は既定 10、1..100。非表示/不存在は通常業務 404、権限不足 403、版/状態/占有競合 409、依存先停止または Workflow 結果未確定は 503 です。HTTP 状態と `R.code` を混同しません。
+
+項目は現在の DTO/VO が基準です。資産更新/ライフサイクル操作に `version`、移管/処分 retry/cancel/complete に申請版が必要です。`purchaseAmount/residualValue` は十進文字列、時刻は 4.2 に従います。
 
 ### 7.2 エンドポイント
 
-| ドメイン | エンドポイント |
+以下は外部 32、内部 1 の完全なメソッド/サービスパスです。Gateway は `/api/asset` を除去しません。内部補完には有効な内部トークンと、同じ正数の `X-Tenant-Id` / クエリ `tenantId` が必要です。
+
+| 領域 | メソッドと完全パス |
 |---|---|
-| Overview | `GET /api/asset/overview/summary`、`/distribution` |
-| Asset | `GET /asset/list`、`GET /asset/{id}`、`POST /asset`、`PUT/DELETE /asset/{id}` |
-| マイ資産 | `GET /asset/my` |
-| Asset コマンド | `POST /asset/{id}/allocate`、`/accept`、`/return`、`/maintenance/start`、`/maintenance/complete` |
-| Asset 履歴 | `GET /asset/{id}/history` |
-| Transfer | `GET /transfer/list`、`GET /transfer/{id}`、`POST /transfer` |
-| Transfer 承認ビュー | `GET /transfer/{id}/approval-view?taskId={taskId}` |
-| Transfer コマンド | `POST /transfer/{id}/complete`、`/cancel`、`/retry-start`；承認アクションは Workflow で完了 |
-| Disposal | `GET /disposal/list`、`GET /disposal/{id}`、`POST /disposal` |
-| Disposal 承認ビュー | `GET /disposal/{id}/approval-view?taskId={taskId}` |
-| Disposal コマンド | `POST /disposal/{id}/complete`、`/cancel`、`/retry-start`；承認アクションは Workflow で完了 |
-| 内部 API | `POST /api/internal/asset/procurement/backfill?tenantId={tenantId}&afterId={id}&size={size}`、内部トークンで保護 |
+| 資産台帳/本人操作 | `GET /api/asset/asset/list` |
+| 資産台帳/本人操作 | `GET /api/asset/asset/my` |
+| 資産台帳/本人操作 | `GET /api/asset/asset/{id}` |
+| 資産台帳/本人操作 | `GET /api/asset/asset/{id}/history` |
+| 資産台帳/本人操作 | `POST /api/asset/asset` |
+| 資産台帳/本人操作 | `PUT /api/asset/asset/{id}` |
+| 資産台帳/本人操作 | `DELETE /api/asset/asset/{id}` |
+| 資産台帳/本人操作 | `POST /api/asset/asset/{id}/allocate` |
+| 資産台帳/本人操作 | `POST /api/asset/asset/{id}/accept` |
+| 資産台帳/本人操作 | `POST /api/asset/asset/{id}/return` |
+| 資産台帳/本人操作 | `POST /api/asset/asset/{id}/maintenance/start` |
+| 資産台帳/本人操作 | `POST /api/asset/asset/{id}/maintenance/complete` |
+| 処分 | `GET /api/asset/disposal/list` |
+| 処分 | `GET /api/asset/disposal/{id}` |
+| 処分 | `GET /api/asset/disposal/{id}/approval-view` |
+| 処分 | `POST /api/asset/disposal` |
+| 処分 | `POST /api/asset/disposal/{id}/retry-start` |
+| 処分 | `POST /api/asset/disposal/{id}/cancel` |
+| 処分 | `POST /api/asset/disposal/{id}/complete` |
+| 候補 | `GET /api/asset/options/users` |
+| 候補 | `GET /api/asset/options/transfer-assets` |
+| 候補 | `GET /api/asset/options/disposal-assets` |
+| 候補 | `GET /api/asset/options/suppliers` |
+| 概要 | `GET /api/asset/overview/summary` |
+| 概要 | `GET /api/asset/overview/distribution` |
+| 移管 | `GET /api/asset/transfer/list` |
+| 移管 | `GET /api/asset/transfer/{id}` |
+| 移管 | `GET /api/asset/transfer/{id}/approval-view` |
+| 移管 | `POST /api/asset/transfer` |
+| 移管 | `POST /api/asset/transfer/{id}/retry-start` |
+| 移管 | `POST /api/asset/transfer/{id}/cancel` |
+| 移管 | `POST /api/asset/transfer/{id}/complete` |
+| 内部補完 | `POST /api/internal/asset/procurement/backfill` |
 
 ### 7.3 エンドポイントと DataScope permission のマッピング
 
@@ -401,7 +414,7 @@ API 権限：
 | Overview | `asset:overview:list` |
 | Asset list/detail/history | `asset:asset:list` |
 | My Asset | `asset:asset:self` |
-| Asset create/update/delete | `asset:asset:create/update/delete` |
+| Asset create/update/delete | `asset:asset:create`, `asset:asset:update`, `asset:asset:delete` |
 | Asset allocate | `asset:asset:allocate` |
 | Asset accept（従業員自用） | `asset:asset:accept` |
 | Asset return | `asset:asset:return` |
@@ -410,210 +423,128 @@ API 権限：
 | Transfer create | `asset:transfer:create` |
 | Transfer approval-view | `asset:transfer:approve` |
 | Transfer complete | `asset:transfer:complete` |
-| Transfer cancel/retry-start | `asset:transfer:cancel/retry` |
+| Transfer cancel/retry-start | `asset:transfer:cancel`, `asset:transfer:retry` |
 | Disposal list/detail | `asset:disposal:list` |
 | Disposal create | `asset:disposal:create` |
 | Disposal approval-view | `asset:disposal:approve` |
 | Disposal complete | `asset:disposal:complete` |
-| Disposal cancel/retry-start | `asset:disposal:cancel/retry` |
+| Disposal cancel/retry-start | `asset:disposal:cancel`, `asset:disposal:retry` |
+
+`options/users` は完全な `asset:asset:list`, `asset:asset:create`, `asset:asset:update`, `asset:asset:allocate`、`asset:transfer:create`、`asset:disposal:create` のいずれかを要求します。`options/suppliers` は `asset:asset:create` または `asset:asset:update`。`options/transfer-assets` と `options/disposal-assets` は各 create 権限と DataScope を要求します。候補表示は最終書込認可ではなく、書込時に状態、参照、範囲を再検証します。
 
 ## 8. サービス横断の一貫性
 
 ### 8.1 Auth Feign
 
-他のサービスと一致。
+Auth が ID、権限、組織、データ範囲、XSS を管理します。`AssetIdentityGuard` は `/internal/users/{id}` と `/internal/orgs/{id}` で同一テナント、有効状態、主組織一致を検証し、例外や不正応答は閉鎖します。`options/users` は `/internal/users/options` から主組織のない候補を除外しテナントを照合します。台帳氏名の自動補完を意味しません。
+
+内部 Feign の認証頭は `InternalFeignHeadersFactory` が生成し、ID/DataScope の寿命は共通サービスに従います。利用者入力の数値 ID を検証済み参照と扱いません。
 
 ### 8.2 SRM Feign
 
-Asset は SRM 内部 API でサプライヤー情報を取得する（資産登録候補、保証連絡先、サプライヤー状態）：
+現在の `SrmInternalClient` は `GET /api/internal/supplier/search` のみです。テナント頭/引数を一致させ、`status=APPROVED` に固定します。登録画面は `GET /api/asset/options/suppliers` を使い、失敗/不正応答は 503 です。
 
-- `GET /api/internal/supplier/{id}?tenantId={tenantId}`：サプライヤー概要を取得。
-- `GET /api/internal/supplier/search?...&status=APPROVED&keyword={keyword}`：現テナントの承認済みサプライヤーを検索。
-- 資産登録ページは `/api/asset/options/suppliers` を呼び出し、番号と名称を表示し、ユーザーに数値 ID の手動入力を要求しない；
-  履歴詳細は SRM が一時的に利用不可の場合もローカル名称スナップショットで表示する。
+台帳/詳細は `supplierNameSnapshot`、なければ仕入先 ID を表示します。現在の経路に最新仕入先詳細、保証連絡先、名称一括補完はありません。保存スナップショットは現在の仕入先資格を付与しません。
 
 ### 8.3 Procurement 連動
 
-**イベント消費**：Asset は `procurement.goods-receipt.confirmed.v1` と `procurement.goods-receipt.quality-passed.v1` を消費して資産カードを作成する。両者は同一の payload 行契約とソース単位冪等キーを使用する；quality-passed は PENDING から新たに PASS へ転じた行のみを含む。
+リアルタイム payload は [調達設計](procurement-design.jp.md) の v1 契約で、出典、通貨、管理帰属、行数量/金額を含みます。入口で現在テナントの ID と `TENANT` DataScope を設定し `finally` で消去します。検証と原子的取込は 5.2 を参照。消費例外はその処理試行の失敗を表すだけです。再試行時刻やデッドレター移送は Broker/binder の実設定と証拠が必要で、例外だけから断定しません。
 
-イベントエンベロープは `procurement-design.md` 8.4 を権威契約とし、eventId/eventType/occurredAt/tenantId、および goodsReceiptId、grNo、purchaseOrderId、poNo、supplier スナップショット、通貨、行ごとの goodsReceiptLineId、purchaseOrderLineId、material/category、qualityStatus、assetManaged、assetQuantity、unitPrice を含まなければならない。tenant、ソース行 ID、資産化フラグ、またはバージョンが欠落/未対応の場合は消費失敗/デッドレターに入り、デフォルト値を推測して資産を作成することを禁止する。
+補完は `POST /api/internal/asset/procurement/backfill`、`tenantId>0,afterId>=0,size=1..100`、既定 afterId 0/size 100 です。`GET /api/internal/procurement/goods-receipt/asset-candidates` を一致テナント頭/引数で呼びます。出典行 ID は afterId より大きく厳密昇順で、取込前に全ページの順序を検証します。各候補は独立取引で出典単位一意キーを使用し、リアルタイム Inbox を登録しません。新カードだけ履歴と created Outbox を記録します。
 
-消費フロー：
-1. RocketMQ Consumer がメッセージを受信。
-2. イベント `tenantId` を検証し、`ServiceRequestIdentity` で `ServiceIdentityContext` を設定し、現テナントの `TENANT` 級 `ServiceDataScopeContext` を設定する；消費終了時は必ず `finally` で両者をクリアする。
-3. 冪等チェック：`ast_inbox_event` テーブル（`consumer_name + event_id` ユニークキー）。
-4. 資産化条件を満たす入庫行を unitSequence に従って資産記録として作成し、ソースユニークキーによるフォールバックに依存する。
-5. 同一トランザクション内で inbox 消費状態を更新する。
-
-**Feign 照会**（任意）：Asset は Procurement 内部 API で調達ソース詳細（PO 番号、金額、サプライヤー）を照会できる。
-
-**補償再スキャン**：Asset 起動後の制御されたタスクが Procurement 資産候補ページング API をカーソル枯渇まで呼び出す；リアルタイムイベントと再スキャンは同一の冪等作成ロジックを共有する。再スキャンも同様に現テナントの `TENANT` 級 `ServiceDataScopeContext` を明示的に設定し、ソース冪等書き込み後の検証クエリがフェイルクローズドルールでフィルタされるのを避けなければならない；リクエスト終了後に共有身分と DataScope コンテキストをクリアする。
+1 回の結果は `fetchedCount/createdCount/duplicateCount/nextAfterId/hasMore`。`hasMore` は件数が size と等しい場合の推定です。呼出元がカーソル保存と次ページの実行を管理するので、自動走査器ではありません。後の候補が失敗しても前の候補はコミット済みの場合があります。出典単位を照合して元ページを再試行し、失敗応答を全ページのロールバックと解釈しません。終了時は ID/DataScope を消去します。
 
 ### 8.4 Workflow 統合
 
-Asset は Flowable を埋め込まず、Workflow 内部 API と承認結果イベントで統合する。承認が必要なシナリオ：
+公開モデルは同一テナント、`PUBLISHED`、定義あり、category が `ASSET_TRANSFER/ASSET_DISPOSAL` に一致する必要があります。ローカル作成前に解決し、準備コミット後は元の `requestId/tenantId/modelVersionId/businessType/businessKey/startUser` スナップショットで開始します。業務キーは申請 ID。Workflow は `tenantId + businessType + businessKey` で冪等なので、新しい意図を作り直しません。
 
-- 資産移管承認（MVP 単純単段承認）。
-- 資産廃棄処分承認。
-- 資産スクラップ処分承認（財務確認が必要な場合あり）。
+- 成功応答も要求 ID、業務型/キー、インスタンス ID を照合し、`markStarted` の別取引で確認します。
+- Feign/HTTP エラー、通信断、他の非成功業務コード、不一致応答、ローカル確認失敗は `PENDING_APPROVAL + PENDING` と占有を保ち、同じキーで再試行します。
+- 業務 `R.code=404` だけが明示失敗分岐で `markFailed` を試みます。その保存も失敗して PENDING が残り得ます。Feign の HTTP404 例外は不明分岐です。ローカル `START_FAILED + FAILED` が永続化された場合だけ版付きローカル取消が可能で、retry は元スナップショットを使います。
+- 承認は `/api/workflow/approval/{taskId}/complete` で実行します。資産承認ビューには対応 asset approve 権限、担当タスク完了には `workflow:approval:complete` と割当照合が必要です。6.3 を参照。
 
-承認フローは `docs/workflow.md` 仕様に従う。承認タイプごとに 1 つの BPMN プロセスモデル；モデルキーはテナントがカスタマイズできるが、
-モデルの `category` は用途と正確に結合しなければならない：移管は `ASSET_TRANSFER`、廃棄/スクラップ処分は
-`ASSET_DISPOSAL`。
-
-ユーザーが移管または処分申請を作成する際 `modelVersionId` は渡さない。Asset はまず現テナントと固定ビジネス分類で Workflow の
-`current-published` 内部照会を呼び出し、公開済み・プロセス定義が存在し `category` がビジネスタイプと一致するバージョンを自動選択し、次に
-`requestId/tenantId/modelVersionId/businessType/businessKey/startUser/variables` をローカル冪等スナップショットとして保存する。
-実際の起動時に Workflow がモデルを再検証し、解決と起動の間の変更ウィンドウを閉じる。Workflow は
-`tenantId + businessType + businessKey` でユニーク冪等であり、重複呼び出しは既存インスタンスを返す。
-
-承認者は Workflow `/api/workflow/approval/{taskId}/complete` で承認を実行する。資産承認を担うロールは、対応する `asset:transfer:approve` または `asset:disposal:approve`（専用 approval-view の読み取り）および `workflow:approval:complete`（本人タスクの完了）を同時に取得しなければならない。approval-view は tenant、businessType、businessKey と現在タスク割当を検証しなければならず、通常の dataScope の汎用バイパスとして使ってはならない。
-
-承認終了は Workflow Outbox が `workflow.process.completed.v1` を発行する。Asset は Inbox eventId で冪等消費し、tenantId、businessType、businessKey、processInstanceId と現在の申請状態を厳密に照合する：
-
-- APPROVED：申請は APPROVED に入り、ビジネス `/complete` による引継ぎまたは実物処分の完了を待つ。
-- REJECTED/CANCELLED：申請は対応する終端状態に入り、Asset.previousStatus を回復し、`active_operation_*` をクリアする。
-- 重複、順序不同、またはインスタンス不一致のイベントは警告を記録するのみで、資産を変更しない。
-
-MVP の完了イベントは承認者や承認意見など機微情報を含みうる内容を運ばず、Asset はこのようなスナップショットを冗長化しない；完全なタスク、
-処理者、意見は常に Workflow の照会結果を権威とする。
-
-Workflow が利用不可、409/その他結果不確実な応答、または応答喪失の場合、リモート結果は既に受理された可能性があり、申請は `PENDING_APPROVAL + PENDING` と資産占有状態を保持し、元の requestId、ビジネスキー、モデルバージョン、起票者身分でのみリトライできる。Workflow ビジネス応答 404 はリモートトランザクションがインスタンスを作成しなかった明示的失敗で、`START_FAILED + FAILED` に入った後にのみ権限ユーザーのローカルキャンセルと回復を許可する。Asset は `omni-common-workflow` に依存せず、Flowable テーブルは `omni-workflow` データベースにのみ存在する。
+`workflow.process.completed.v1` は送信元、テナント、型、業務キー、インスタンス、現状態を検証します。Inbox 登録後、同イベントの JSON 意味上の意図を先に照合し、競合は 409。処理済み、古い状態、別インスタンスは無視します。**正当な完了がローカル開始確認より先に届いた場合は再試行可能例外とし、永久に捨てません。** APPROVED は業務完了まで占有、REJECTED/CANCELLED は同取引で復元/枠消去します。完全なタスク、担当者、意見の正式な情報源は Workflow で、Asset は承認意見履歴を複製しません。
 
 ### 8.5 Outbox イベント
 
-- `asset.created.v1`（検収作成）
-- `asset.allocated.v1`
-- `asset.returned.v1`
-- `asset.transfer.completed.v1`
-- `asset.disposed.v1`
-- `asset.scrapped.v1`
+`asset-domain-out-0` から `asset-domain-event` へ以下のローカル Outbox を書きます。
+
+- `asset.created.v1`：調達のリアルタイム/補完で実際に作成した新カード。手動作成にこの発行呼出しはありません。
+- `asset.allocated.v1`、`asset.returned.v1`。
+- `asset.transfer.completed.v1`。
+- `asset.disposed.v1`、`asset.scrapped.v1`。
+
+エンベロープは `eventId/eventType/occurredAt/tenantId/producer/payload`。実呼出しを基準とし、全状態遷移イベントがあるとは推定しません。Relay/Broker 配信は別に観測します。
 
 ## 9. プライバシー、操作ログと XSS
 
 ### 9.1 OperLog
 
-既存の PII マスキング能力を再利用する。Asset の PII フィールドは少なく、主に資産使用者情報（既に Auth で管理）。
+書込操作に `@OperLog` を使用します。共通 `OperLogSanitizer` は MQ 前に引数、スナップショット、例外を処理し、reason/remark 等の自由文や認証情報項目を規則で置換、電話/メールをマスクし、文字列の認証情報断片を処理します。任意の氏名、住所表記や全アプリログの匿名化を保証するものではありません。
 
 ### 9.2 PII
 
-資産自体は機微 PII を含まない。使用者情報は Auth を通じて表示し、Asset は userId のみ保存する。
+Asset は使用者/管理者 ID、仕入先/出典スナップショット、自由文、元起案者名 `workflow_start_user_name` を保存し、ユーザー候補も username/nickname を返します。「PII なし」「userId のみ保存」は不正確です。本番画面、出力、ログ、レビュー証拠は項目と認可に応じて管理し、認証情報や個人情報を漏らしません。
 
 ### 9.3 XSS
 
-Asset は `omni-common-service` の `CachedServiceXssConfigProvider` で統一 XSS 設定を得る：まず Redis DB 0 キャッシュを読み、キャッシュミス時は内部身分付きの Auth 回源を使用；Auth または Redis が利用不可の場合は必ずセーフティベースラインに落ち、設定センター障害を理由にサニタイズをバイパスすることを禁止する。MVP の備考はプレーンテキストのみ許可。
+`CachedServiceXssConfigProvider` はまず Redis DB0 の `xss:enabled:{tenantId}` / `xss:rules:{tenantId}` を読みます。欠落、読取/解析失敗時は Auth に照会し、有効な応答は使用します。Redis 単独障害で必ずローカル基準になるわけではありません。正式設定が得られない場合だけ `XssSettingsFallback` を使い、既定は HTML_TAG、EVENT_HANDLER、DANGEROUS_PROTOCOL の防御を有効にします。キャッシュ書戻し失敗でも取得した正式設定は維持します。備考は平文用途で、依存障害を理由にフィルターを回避しません。
 
 ## 10. フロントエンド設計
 
-```text
-omni-frontend/src/
-├── api/
-│   ├── asset-overview.ts
-│   ├── asset-asset.ts
-│   ├── asset-transfer.ts
-│   └── asset-disposal.ts
-├── views/asset/
-│   ├── overview/index.vue           # Asset overview (stats + distribution)
-│   ├── asset/index.vue              # Asset ledger
-│   ├── transfer/index.vue           # Asset transfer
-│   └── disposal/index.vue           # Asset disposal
-└── components/asset/
-    ├── AssetCard.vue                # Asset card (for overview)
-    ├── AssetDistribution.vue        # Asset distribution chart
-    ├── TransferForm.vue             # Transfer form
-    └── DisposalForm.vue             # Disposal form
-```
+現ページは `omni-frontend/src/views/asset/{overview,asset,transfer,disposal}/index.vue`、API は `src/api/asset-{overview,asset,transfer,disposal}.ts`。旧案の独立 `components/asset/AssetCard.vue` 等はありません。
 
-- `ApiResponse/PageResult` は `src/types/api.ts` からのみインポートする。
-- 資産台帳は状態、品目、部門、場所の多次元フィルタをサポートする。
-- 資産詳細ページは基本情報 + 使用者 + 調達ソース + 変更履歴 + 移管記録 + 処分記録を表示する。
-- オーバービューページは資産総数、総額、状態別分布、部門別分布、品目別分布を表示する。
-- `router/index.ts` と `layout/index.vue` の iconMap に Asset を補う。
+- 台帳の ledger/my タブを権限で表示し、管理一覧と固定本人一覧を別呼出しします。管理側は状態、品類、管理部門、場所で絞ります。詳細ドロワーは基本項目、使用者/部門 ID、出典スナップショット、変更履歴を表示し、移管/処分記録は専用ページで照会します。
+- 仕入先/ユーザー候補を選び、主組織から管理/使用部門を設定します。バックエンドで再照合し、ボタンは対応 `v-permission` を使います。
+- 概要は状態件数と `amountsByCurrency`。分布は `STATUS/CATEGORY/DEPARTMENT/LOCATION`、金額は通貨別で異通貨を合算しません。
+- 共通 `ApiResponse/PageResult` は `src/types/api.ts` だけから導入します。メニュー、アイコン、本人入口は現 router/layout を参照。実手順/画面は Wiki の役割で、この構成説明だけでは今回のブラウザー検収を証明しません。
 
 ## 11. エンジニアリング着地点
 
-### 11.1 新モジュール
+### 11.1 現在のモジュール入口
 
-```text
-omni-backend/omni-asset/
-├── pom.xml
-└── src/main/
-    ├── java/com/omni/asset/
-    │   ├── AssetApplication.java
-    │   ├── client/ config/ controller/ dto/ entity/
-    │   ├── mapper/ security/ service/ service/impl/
-    │   ├── consumer/                  # MQ consumer (goods-receipt events)
-    │   └── workflow/                  # Workflow Feign client and approval-result event consumer
-    └── resources/
-        ├── application.yml
-        ├── application-dev.yml
-        └── mapper/
-```
+Java 入口は `omni-backend/omni-asset/src/main/java/com/omni/asset` 配下の `AssetApplication.java`、client、config、controller、dto、entity、mapper、security、service、consumer、workflow、domain です。SQL は Java Mapper 注釈と Liquibase にあります。リソースは `application.yml` / `application-lite.yml` で、独立 application-dev.yml や XML mapper ディレクトリではありません。[ソース索引](../reference/source-map.jp.md) から移動してください。
 
-### 11.2 必ず変更するファイル
+### 11.2 現在の関連ファイル
 
-| ファイル | 変更 |
+以下は現在の事実の入口です。対応契約を変更したときに同期し、未作成予定ファイルとは扱いません。
+
+| 範囲 | 現在のファイル/ディレクトリ |
 |---|---|
-| `omni-backend/pom.xml` | `omni-asset` を追加 |
-| Gateway `application.yml` | `/api/asset/**` ルートを明示 |
-| `docker/backend/Dockerfile` | POM キャッシュ層 |
-| `docker-compose.yml` | Asset サービス、8107 |
-| `start.bat/start.sh` | build リストに Asset を追加 |
-| `database/changelog/asset/` | 資産構造変更に forward-only の Liquibase changeSet を追加 |
-| `scripts/sql/seed/auth.sql` | 資産権限とロールの正式冪等シード；更新後に seed manifest をリフレッシュ |
-| Asset `TenantModuleProvisioner` | 現在モジュール自有のテナントデフォルト事実が無いことを明示宣言し、プロトコルの冪等性を保持 |
-| `omni-workflow` | 冪等内部起動、タスク割当検証 API と `workflow.process.completed.v1` Outbox イベントを再利用/補完 |
-| `omni-procurement` | 入庫イベント v1 フィールドと履歴資産候補ページング API を確認 |
-| Frontend router/layout/menu/locales | アイコン、メニュー、i18n |
+| モジュール | `omni-backend/omni-asset/pom.xml`<br/>`omni-backend/pom.xml` |
+| 実行設定 | `omni-backend/omni-asset/src/main/resources/application.yml`<br/>`omni-backend/omni-asset/src/main/resources/application-lite.yml` |
+| Schema | `database/changelog/asset/0001-asset-schema.yaml` |
+| 権限と seed 摘要 | `scripts/sql/seed/auth.sql`<br/>`database/seed/manifest.yaml` |
+| テナント初期化 | `omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetTenantModuleProvisioner.java` |
+| Gateway / Compose | `omni-backend/omni-gateway/src/main/resources/application.yml`<br/>`compose.yaml` |
+| 画面 | `omni-frontend/src/views/asset`<br/>`omni-frontend/src/api/asset-asset.ts`<br/>`omni-frontend/src/router/index.ts` |
+| サービス間契約 | `omni-backend/omni-asset/src/main/java/com/omni/asset/client`<br/>`omni-backend/omni-asset/src/main/java/com/omni/asset/dto/ProcurementAssetContracts.java`<br/>`omni-backend/omni-asset/src/main/java/com/omni/asset/dto/WorkflowContracts.java` |
 
-設定要点：server 8107、management 19907、Redis DB 0、XXL appname `omni-asset`/port 9907。
+既定のホスト入口 `8107`、管理 `19907`、Redis DB 0、XXL appname `omni-asset` / `9907`。Compose の設定に従ってコンテナポートを割り当てます。`application-lite.yml` は Nacos を無効にして静的発見を使います。実行、構築、テストはすべてローカル Docker。権限初期化は Auth、辞書は Base が担当します。
 
 ## 12. 非機能設計
 
-### 性能
-
-- すべてのリストはページング、最大 100。
-- サプライヤー名称、使用者名称は一度に batch enrich し、N+1 を禁止。
-- オーバービュー統計は Mapper 層の集約 SQL を使用する。
-
-### 並行と冪等
-
-- 資産割当/返却：行ロック + version 楽観ロック。
-- 移管/処分：申請行ロック + Asset version 条件付き更新 `active_operation_*`、2 種のアクティブ申請の交差並行を統一的に防止。
-- Workflow 起動：サービス横断 businessKey 冪等；承認結果は Inbox eventId 冪等を使用。
-- 入庫イベント消費：`ast_inbox_event` と資産ソース単位ユニークキーの二重冪等。
-
-### 縮退
-
-- SRM 利用不可：サプライヤー情報は ID に縮退。
-- Procurement 利用不可：調達ソース情報は PO 番号テキストに縮退。
-- Workflow 利用不可または結果不確実：503 を返し、申請は同一キーでリトライ可能な `PENDING_APPROVAL + PENDING` を保持；モデルバージョンが起動不可と明示的に返された場合は `START_FAILED + FAILED` に入る。承認をスキップしたり、起動結果が不確実なときにローカルキャンセルしてはならない。
-- Auth 利用不可：503 フェイルクローズド。
+- 一覧は最大 100。候補/分布 limit も 1..100 を検証します。Overview Mapper は資産ルートを直接集計し、テナント/管理範囲を継承、金額は通貨別です。台帳名称の遠隔一括補完や実測性能は主張しません。
+- 割当/返却は資産ロックと版条件更新。移管/処分は活動枠を共用し、完了/取消で申請と資産の版、状態、占有識別を検証します。実 DB 並行検収は別証拠が必要です。
+- Auth 停止は参照/候補/範囲検証に依存する操作を失敗閉鎖しますが、すべてのローカル読取が失敗するとは限りません。SRM 候補失敗は 503、既存台帳はローカル名称を表示。Procurement 候補停止は当該補完の失敗で、過去 PO/GR 号はローカル項目です。
+- Workflow 結果不明時は枠を保ち同キー再試行。業務404の失敗印保存も失敗し得るため、承認迂回や盲目的取消は禁止。ローカル Outbox 成功から MQ 可用性を推定しません。
 
 ## 13. テストと検収
 
-最小テストセット：
+現在のテスト入口は `omni-backend/omni-asset/src/test/java`。単体断言、構築結果、実 DB/サービス間/ブラウザー証拠を区別します。検収要件：
 
-- 資産状態マシンの合法/不正遷移（全合法パス + 不正パスの拒否）。
-- 入庫イベントの冪等消費（同一イベントで資産を重複作成しない）。
-- リアルタイムイベントと履歴再スキャンが同一入庫行を同時処理しても資産を重複作成しない。
-- 非資産資材、品質検査失敗/保留、連続計量または非整数数量は資産を作成しない。
-- 一括入庫が複数の資産を正しく作成する（数量 > 1）。
-- 移管完了後に資産の使用者と部門が正しく更新される。
-- 処分完了後に資産が終端状態に入る。
-- 移管/処分拒否および `START_FAILED + FAILED` 後のローカルキャンセルはいずれも previousStatus を回復しアクティブ占有をクリアする；起動結果が不確実なときはキャンセルしてはならない。
-- 同一資産に移管と処分を並行作成すると 1 つのみ成功し、もう一方は 409 を返す。
-- Workflow 承認結果が重複、順序不同、tenant/businessKey/processInstanceId 不一致のとき資産を更新しない。
-- 承認者は自分に割当られた taskId でのみ Transfer/Disposal approval-view を読め、taskId やビジネス ID を偽造した場合は拒否する。
-- 同一資産の並行割当は 1 つのみ成功する。
-- テナント横断分離。
-- tenant/scope 欠落時はフェイルクローズド。
-- `ASSET_USER` は自分名義の資産のみ見える。
-- 「マイ資産」は固定して current_user_id で照会し、ユーザーが管理ロールを同時に持っていても拡張しない；管理リストは owner 次元で照会する。
-
-エンドツーエンド検収：調達入庫 → MQ イベント → 資産作成（IN_STOCK）→ 従業員に割当（ALLOCATED）→ 従業員が受入確認（IN_USE）→ 移管発起 → 承認通過 → 新使用者（IN_USE）→ スクラップ発起 → 承認通過 → SCRAPPED。
+- 資産 8 状態の合法/不正遷移、版競合、手動削除境界、管理ロールでも本人一覧/accept/return を拡大しないこと。
+- 完全な出典検証、数量/金額等式、有効な非対象行のスキップ、不正行の全イベント拒否、再送、同 ID 異意図競合、出典単位重複排除。
+- リアルタイム原子取引と候補取引、部分ページ成功後の照合/再試行、重複出典から新カードイベントを再発行しないこと。
+- 移管/処分の枠競争、APPROVED 後の実物完了待ち、終状態不可逆、却下/取消の previousStatus 復元。
+- モデル分類/担当資格、開始結果不明、ローカル確認失敗、明示失敗印の保存失敗、早到完了の再試行、別インスタンス分離。
+- owner 管理範囲、SELF 移管の current-user 例外、テナント分離、コンテキスト欠落時の失敗閉鎖。
+- JSON 金額文字列、通貨別集計、ログ/XSS 境界、4 言語の権限表示。
+- 実結合：調達入庫 → MQ → IN_STOCK → ALLOCATED → IN_USE → 移管承認/引継ぎ → 処分承認/実物完了 → SCRAPPED。実行記録が必要で、単体成功や本文の存在だけでは成功扱いしません。
 
 ## 14. 実装順序
+
+2026-07-27 の原実施分解を履歴として保持します。今回の再実行指示や現検収一覧ではありません。現在の入口/契約は第 3–13 節です。
 
 ### Milestone 0：前提確認
 
@@ -655,6 +586,8 @@ omni-backend/omni-asset/
 
 ## 15. ADR 要約
 
+原設計判断を保持します。単段階承認は当時の簡略化で、現在は分類一致の公開 BPMN が決定します。見送り項目は原 MVP の境界です。
+
 | 決定 | 選択 | 理由 |
 |---|---|---|
 | サービス | 独立 `omni-asset` | SRM/Procurement から分離、責務が明確 |
@@ -667,6 +600,8 @@ omni-backend/omni-asset/
 | 減価償却計算 | 行わない | MVP は財務減価償却を処理しない |
 
 ## 16. 主要リスク
+
+原リスク登録と当時の対策を保持します。現取引、補完、失敗、初期化境界は前述のとおりです。補完全ページは原子的にロールバックせず、辞書は Base の責務、Inbox に出典単位一意キーを併用します。
 
 | 優先度 | リスク | 対処 |
 |---|---|---|

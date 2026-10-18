@@ -1,114 +1,124 @@
-# System Configuration, Security, and Audit Logs
+# System Configuration, Security Settings, and Audit Logs
 
-This guide covers tenant configuration, XSS protection, sessions, login records, operation logs, and reliable-message records.
+Baseline: this repository's Spring Boot 4 / Vue 3 implementation; use core or a preset containing core. Complete [first startup](quick-start.en.md) and [authentication](authentication.en.md) first. This is an operating tutorial; [core flows](../core-flows.en.md) define security boundaries and event contracts.
 
-## 1. System Data
+## 1. Prepare the Environment and Identities
 
-System Management includes tenants, organizations, users, roles, permissions, OAuth2 clients, online users, authorization records, audits, and XSS configuration. Base Data includes dictionaries. Confirm the current tenant and permission scope before making changes.
+- Run migrations, Auth, Base, Gateway, and the frontend in local Docker; confirm migration completion and service health. Native lite mode supports page reads. Section 6 requires the complete messaging runtime for asynchronous delivery; see [Docker deployment](../docker-deployment.en.md).
+- Prepare an administrator and an ordinary employee in the same tenant. Record their user IDs, roles, and actual permissions. Use the relevant write permission for administration and the employee's own session for negative checks.
+- Use a unique `WIKI-{run-id}` prefix. Keep original values, created IDs, request results, and cleanup records outside the repository. Never commit passwords, tokens, client secrets, or private environment files.
+- The write instructions below are for an isolated teaching environment. Successful business writes from 2026-10-10/12 already have receipts and were not replayed. New 2026-10-17 images only read existing data; see Section 7.
 
-Dictionaries are suitable for stable display enums. APIs continue to carry stable values; translation must never change status codes, permission codes, or request parameters.
+## 2. Understand Organizations, Roles, and Menus
 
-## 2. OAuth2 Clients
+1. As administrator, open System Management → Organization Management, create a department with the unique prefix, and record its returned ID.
+2. Create a teaching account in User Management and verify its default `USER` role. The current user page has no primary-organization editor. When needed, an administrator with `system:user:update` uses the formal `PUT /api/auth/user/{id}` to update `primaryUnitId`, then reads it back. An organization-list image does not prove user binding.
+3. Read the original role set before assigning functional roles. Assignment replaces the complete set, so preserve every role still needed. Sign in again as the target account before checking menus, buttons, and APIs.
+4. Check the role's `ALL/TENANT/DEPT/DEPT_AND_CHILD/SELF/CUSTOM` data scope; `CUSTOM` also needs a department set. Compare employee and manager results rather than inferring their visibility from `SUPER_ADMIN`.
 
-A client defines its ID, grants, redirect URIs, scopes, and consent behavior. Production clients must use HTTPS, exact redirect addresses, managed secrets, minimum grants/scopes, credential rotation, and periodic grant review.
+**Functional roles and workflow candidate scopes are separate.** User management writes `sys_user_role`; changing the primary organization does not create `sys_user_role_scope`. Default approval models use the latter to find candidates, so functional roles alone can still leave a task without approvers. There is currently no public maintenance API for that scope. Use a recorded controlled fixture in an isolated tutorial environment, not direct production-table edits. Preview candidates before supply-chain tutorials; see the [workflow guide](workflow-approval.en.md).
 
-## 3. XSS Protection
+### 2.1. Save a Role Scope and Assign Menu Permissions
 
-Every new service with `@RequestBody` implements the `XssConfigProvider` SPI. Shared components provide request filtering, Jackson string sanitization, and Gateway security headers.
+1. Prepare a uniquely coded teaching role assigned to no users. You may create it through Role Management → Create. The 2026-10-12 evidence preparation used formal `POST /api/auth/role`, initially with `dataScope=DEPT`, without modifying seed roles.
+2. Edit the role, choose Self Only (`SELF`), and confirm. Read `GET /api/auth/role/{id}` and verify that `dataScope=SELF` matches the list.
 
-Every XSS rule or toggle write immediately invalidates:
+![Historical step: SELF selected before saving](../images/en-US/system-role-scope-form.png)
+![Historical step: saved role displays SELF](../images/en-US/system-role-scope-saved.png)
 
-- `xss:enabled:{tenantId}`
-- `xss:rules:{tenantId}`
+3. Read the three-level permission tree: directory `DIRECTORY`, menu `MENU`, and endpoint `API`. Viewing nodes does not create or modify menus.
 
-Do not rely on TTL. After a rule change, test event attributes, script protocols, and intended rich-text boundaries.
+![Historical permission tree and stable codes](../images/en-US/system-menu-permission-tree.png)
 
-## 4. Security Headers
+4. Open Assign Functional Permissions on the teaching role. Select only menu `system:loginrecord` and endpoint `system:loginrecord:list`. After confirming, read `GET /api/auth/permission/role/{id}` and match the returned IDs to the permission tree: exactly those two items should remain. This replaces the full set; do not apply it to a working business role.
 
-Gateway responses include `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy`. These headers complement, rather than replace, sanitization, output encoding, CSP, and authorization.
+![Historical teaching role with two login-record permissions](../images/en-US/system-role-permission-dialog.png)
 
-## 5. Audit Sources
+5. Delete your unassigned role by its unique code and ID, then confirm absence with `GET /api/auth/role/all`. Persisted role configuration does not prove user row isolation; see the [permission guide](permissions.en.md). After a failure, read the state first and handle only this run's objects; do not repeat successful writes.
 
-| Source | Location | Purpose |
-|---|---|---|
-| Login records | `sys_audit_log` (a read-only projection of `LOGIN_SUCCESS`/`LOGIN_FAILED`; Administration → Login Records) | Login result, source (IP masked), and authentication method (password/session/social/unknown) |
-| Security audit | `sys_audit_log` | Account lock/unlock, role assign/revoke, password change, and login-policy updates |
-| Operation log | Administration → Operation Logs | Business writes, actor, result, and Trace ID |
-| MQ records | Administration → MQ Messages | Outbox state, retries, dead letters, and correlation |
+## 3. Create and Clean Up a Teaching Dictionary
 
-`omni-auth` does not use `@OperLog`; authentication is fully captured in `sys_audit_log` security-audit events (the "Login Records" page is a dedicated read-only projection of `LOGIN_SUCCESS`/`LOGIN_FAILED`, never a separate table, and never faked with OAuth authorization records). Business operation logs use reliable messaging. External queries are tenant-filtered, while the background relay intentionally scans all tenants.
+Dictionary write permission is required. The historical images use isolated-tenant `admin/SUPER_ADMIN`, not evidence of employee write access. Record a unique code such as `WIKI_DICT_{run-id}` first.
 
-## 6. Diagnostic Workflow
+1. Open Base Data → Dictionary → Create Type. Check Type Code, Type Name, Remark, and Sort. Leave the code and name empty; keep the default sort value if suitable.
 
-1. Obtain the Trace ID from the page or response header.
-2. Confirm request, actor, and result in operation logs.
-3. For asynchronous work, locate the message by key, topic, or Trace ID.
-4. Inspect the synchronous trace in Tempo and producer/consumer logs in Loki.
-5. Resend or skip a dead letter only after checking idempotency and downstream state.
+![2026-10-10: dictionary form before submission](../images/en-US/system-dictionary-create-form.png)
 
-## 7. Production Checklist
+2. Confirm. For empty code/name, `POST /api/base/dict/type` returns HTTP 400 and business code 400; the dialog stays open and no type is created. The current page has no local required-field rules: backend validation feeds the common error layer.
+3. Wait for the full error message. Its prefix follows the UI language; field identifiers remain `typeCode/typeName` with a troubleshooting Trace ID. A blank message during animation is not failure evidence.
 
-- Replace all development users, database passwords, Nacos identities, and internal shared tokens.
-- Do not expose MySQL, Redis, Nacos, XXL-JOB, Prometheus, Grafana, Tempo, Loki, or management ports.
-- Use least-privilege accounts and TLS.
-- Define retention, masking, alert recipients, and audit export.
-- Prove that backups restore successfully.
-- Keep passwords, CAPTCHA answers, JWTs, internal tokens, and personal data out of screenshots and reports.
+![2026-10-10: complete validation error with the form still open](../images/en-US/system-dictionary-create-validation.png)
 
-## 8. Admin Page Screenshots (Four Languages)
+4. Let the error disappear, fill the unique code and name, and confirm. Success closes the dialog. Search by the entire code, wait for loading to finish, and verify this run's row. An empty right panel is expected until a type is selected.
+5. The historical capture used `E2EDICT-{runStamp}-{locale}`, creating one type per language. Codes in those images are not seed values for readers to reuse.
 
-The official images are generated by the docs-only Playwright spec `omni-frontend/e2e-docs/flows/management.flows.spec.ts` on the real running stack, stored in per-language directories, without reusing other languages' images, placeholder images or mocked responses.
+![2026-10-10: created type found by its unique code](../images/en-US/system-dictionary-create-success.png)
 
-- Preconditions: the local Compose full stack is running, frontend at `127.0.0.1:3000`; `omni-auth` and `omni-base` healthy.
-- Operator: `admin` (`SUPER_ADMIN`, with system-management, base-data and monitoring menu permissions).
-- Steps: after login, enter the tenant, organization, role, permission, dictionary, online-user, audit-log, authorization-record, XSS-protection and operation-log pages in turn.
-- Expected state: page titles and column labels render in the current language, and lists show real system data; when there are no records, the product's own empty state is shown (not a capture failure).
-- Token: `E2eTokenFixture` issues a short-lived JWT (TTL 1200s) within the test process, destroyed on teardown, never written to docs, logs or the repository.
-- This whole group is **read-only capture**: it creates, modifies or deletes no config or audit data, so no write switch is needed and there is no data teardown.
+6. Record the type ID returned by the list. Delete only that type with `DELETE /api/base/dict/type/{id}`; confirm HTTP/business code 200 and then zero matches for its unique code. After failure or disconnection, query whether the action already completed. Do not delete seeds or use a fixed global row count as cleanup proof.
 
-Sensitive-info note: the authorization-record page shows only the OAuth2 `client_id` (a public identifier), subject and grant type, **no client secret, token or password**; the online-user page is in an empty state in the current environment and contains no session token.
+Automation entry `omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts` requires Docker, external mode, explicit `E2E_MUTATIONS=true`, the matching isolated project, and runtime-image receipts. Image, resource-register, and run-receipt paths must point outside the repository. Never copy controlled test tokens into commands or the repository.
 
-| Page | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| Tenant Management (tenant) | ![Tenant Management (Simplified Chinese)](../images/zh-CN/system-tenants.png) | ![Tenant Management (English)](../images/en-US/system-tenants.png) | ![Tenant Management (Japanese)](../images/ja-JP/system-tenants.png) | ![Tenant Management (Korean)](../images/ko-KR/system-tenants.png) |
-| Organization Management (organization) | ![Organization Management (Simplified Chinese)](../images/zh-CN/system-organizations.png) | ![Organization Management (English)](../images/en-US/system-organizations.png) | ![Organization Management (Japanese)](../images/ja-JP/system-organizations.png) | ![Organization Management (Korean)](../images/ko-KR/system-organizations.png) |
-| Role Management (role, incl. data-scope entry) | ![Role Management (Simplified Chinese)](../images/zh-CN/system-roles.png) | ![Role Management (English)](../images/en-US/system-roles.png) | ![Role Management (Japanese)](../images/ja-JP/system-roles.png) | ![Role Management (Korean)](../images/ko-KR/system-roles.png) |
-| Permission Management (permission, incl. menu nodes) | ![Permission Management (Simplified Chinese)](../images/zh-CN/system-permissions.png) | ![Permission Management (English)](../images/en-US/system-permissions.png) | ![Permission Management (Japanese)](../images/ja-JP/system-permissions.png) | ![Permission Management (Korean)](../images/ko-KR/system-permissions.png) |
-| Dictionary Management (dictionary) | ![Dictionary Management (Simplified Chinese)](../images/zh-CN/system-dictionaries.png) | ![Dictionary Management (English)](../images/en-US/system-dictionaries.png) | ![Dictionary Management (Japanese)](../images/ja-JP/system-dictionaries.png) | ![Dictionary Management (Korean)](../images/ko-KR/system-dictionaries.png) |
-| Online Users (online-user, empty state) | ![Online Users (Simplified Chinese)](../images/zh-CN/system-online-users.png) | ![Online Users (English)](../images/en-US/system-online-users.png) | ![Online Users (Japanese)](../images/ja-JP/system-online-users.png) | ![Online Users (Korean)](../images/ko-KR/system-online-users.png) |
-| Audit Log (audit) | ![Audit Log (Simplified Chinese)](../images/zh-CN/system-audit-log.png) | ![Audit Log (English)](../images/en-US/system-audit-log.png) | ![Audit Log (Japanese)](../images/ja-JP/system-audit-log.png) | ![Audit Log (Korean)](../images/ko-KR/system-audit-log.png) |
-| Authorization Records (oauth2) | ![Authorization Records (Simplified Chinese)](../images/zh-CN/system-auth-records.png) | ![Authorization Records (English)](../images/en-US/system-auth-records.png) | ![Authorization Records (Japanese)](../images/ja-JP/system-auth-records.png) | ![Authorization Records (Korean)](../images/ko-KR/system-auth-records.png) |
-| XSS Protection (xss) | ![XSS Protection (Simplified Chinese)](../images/zh-CN/system-xss-config.png) | ![XSS Protection (English)](../images/en-US/system-xss-config.png) | ![XSS Protection (Japanese)](../images/ja-JP/system-xss-config.png) | ![XSS Protection (Korean)](../images/ko-KR/system-xss-config.png) |
-| Operation Log (operation-log) | ![Operation Log (Simplified Chinese)](../images/zh-CN/system-operation-log.png) | ![Operation Log (English)](../images/en-US/system-operation-log.png) | ![Operation Log (Japanese)](../images/ja-JP/system-operation-log.png) | ![Operation Log (Korean)](../images/ko-KR/system-operation-log.png) |
+The [2026-10-10 receipt](../reference/evidence/dictionary-2026-10-10.json) records 4 passed, 0 failed, 0 skipped, and prior individual AI visual review of 12 originals. Type IDs 27–30 were already deleted through formal APIs and verified absent; they were not recreated in this stage. Japanese/Korean `Remark` remains English, the Japanese remark row is unclear, the English sidebar clips, and error fields remain API identifiers. These original limits are retained.
 
-## 9. Dictionary Type Creation Three-State Screenshots (Four Languages)
+## 4. Change Login Protection and Check the Audit
 
-Generated by `omni-frontend/e2e-docs/flows/system-dictionary.flows.spec.ts` on the real running stack, corresponding to the coverage list's `detail-and-action-states` and `failure-states`.
+1. Open System Management → System Config. Use `GET /api/auth/system-config/login-policy` to record original `failureThreshold/failureWindowSeconds/version`. With no persisted policy, this reads a default view without writing a row.
+2. Choose a valid teaching value different from the original. The historical example is `10 → 9` with a `3600`-second window; do not assume every environment starts at 10. Save through `PUT /api/auth/system-config/login-policy` with the latest `expectedVersion`, then read back the new value and version.
+3. Restore the original values in a second client using the latest version; submit again from the first, unrefreshed page. The result should be HTTP 200 with business code 409. The page retains the draft and refreshes the latest server configuration version. Compare both, then explicitly adopt the server values or retry the draft; do not silently overwrite a concurrent update.
+4. Find `AUTH_CONFIG_UPDATED` in security audit by operator and time. Restore the original threshold/window with the current version and read back. Restore Defaults means `10/3600`, which may differ from this run's original values. Restoring values does not roll back versions or remove audit events.
 
-- Preconditions: the local Compose full stack is running, `omni-base` healthy; the dictionary-type table already has real baseline data (17 rows before capture).
-- Operator: `admin` (requires `dict:type:list`/`dict:type:create`/`dict:type:delete` permissions).
-- Write switch: this group **creates data**, so it runs only when `E2E_MUTATIONS=true` is explicitly set; when unset, the whole group is skipped and any write call throws directly.
-- Data ownership and teardown: each language creates a unique `typeCode` (containing this round's `runStamp`), registered on successful creation; afterAll cleans up one by one via the official `DELETE /api/base/dict/type/{id}` contract and verifies the response and the list re-query.
-- Measured teardown result: 4 passed / 0 skipped; `registered=4 deleted=4 residual=0`; `sys_dict_type` returns to the baseline **17** rows, `E2EDICT-%` residual **0**, and the `base-dictionary-catalog` seed assertion still reproduces **101** rows (not polluted by this batch).
+The threshold is `3–10`, and the window is `3600–86400` seconds; login protection cannot be disabled. New policy applies to the next failure window; existing windows retain their creation-time policy. Reads require `system:config:list`, writes `system:config:update`. A hidden button is not backend-denial evidence. Actual 2026-10-17 reads returned HTTP/business code 200 for admin and 403 for employee; employee writes were not rerun.
 
-| State | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| Create Dialog (create-or-edit) | ![Dictionary Create Dialog (Simplified Chinese)](../images/zh-CN/system-dictionary-create-form.png) | ![Dictionary Create Dialog (English)](../images/en-US/system-dictionary-create-form.png) | ![Dictionary Create Dialog (Japanese)](../images/ja-JP/system-dictionary-create-form.png) | ![Dictionary Create Dialog (Korean)](../images/ko-KR/system-dictionary-create-form.png) |
-| Required-Field Validation Failure (failure-or-forbidden) | ![Dictionary Required-Field Validation Failure (Simplified Chinese)](../images/zh-CN/system-dictionary-create-validation.png) | ![Dictionary Required-Field Validation Failure (English)](../images/en-US/system-dictionary-create-validation.png) | ![Dictionary Required-Field Validation Failure (Japanese)](../images/ja-JP/system-dictionary-create-validation.png) | ![Dictionary Required-Field Validation Failure (Korean)](../images/ko-KR/system-dictionary-create-validation.png) |
-| Creation Success (key-action-success) | ![Dictionary Creation Success (Simplified Chinese)](../images/zh-CN/system-dictionary-create-success.png) | ![Dictionary Creation Success (English)](../images/en-US/system-dictionary-create-success.png) | ![Dictionary Creation Success (Japanese)](../images/ja-JP/system-dictionary-create-success.png) | ![Dictionary Creation Success (Korean)](../images/ko-KR/system-dictionary-create-success.png) |
+![2026-10-12: original policy and version](../images/en-US/system-config-policy.png)
+![2026-10-12: threshold 9 saved with a higher version](../images/en-US/system-config-saved.png)
+![2026-10-12: draft 9 retained after a 409 conflict](../images/en-US/system-config-conflict.png)
 
-### Registered i18n PRODUCT_DEFECT (Not Fixed in This Batch)
+The conflict image's green message belongs to a preceding successful save. The current result is the red error, conflict explanation, and business code 409. After a network failure, GET the policy to determine whether the save completed before taking further action.
 
-In the validation-failure image, **the error message is in Chinese in all four language UIs** (e.g. `typeCode: 字典类型编码不能为空`). Measured root causes:
+Login Records is a read-only projection of `LOGIN_SUCCESS/LOGIN_FAILED` in `sys_audit_log`. Enter the account, choose Password and the actual time range, then check account, method, outcome, reason code, and masked IP. The default is the last 7 days; explicit queries require both endpoints and at most 90 days. Date-time format is `yyyy-MM-dd HH:mm:ss`. Locks and role/password changes belong to security audit; OAuth grants belong to authorization records.
 
-1. `views/base/dict/index.vue` defines no `form rules`, so the frontend does no required-field validation (`.el-form-item__error` is empty) and errors rely entirely on the backend 400 response;
-2. `CreateDictTypeRequest`'s `@NotBlank(message = "字典类型编码不能为空")` is **hardcoded Chinese**, not wired to backend message i18n;
-3. Also: in ja-JP/ko-KR the dialog title and the `Type Code`/`Type Name`/`Remark` labels render in English, because the language-pack values for the corresponding keys are **themselves English** (only “排序/並び順/정렬” is translated).
-   `npm run ui:i18n:parity` (2319 keys per language, 0 missing) and `npm run ui:i18n:check` (0/0 items) both pass, so this is a **translation-completeness** issue rather than a hardcoding defect.
+![Historical filter: two admin password-login events](../images/en-US/system-login-record-filtered.png)
 
-The screenshots above **faithfully keep the real text**, without mocking, beautifying or hiding, and this batch does not modify product code; the fix requires a product-side decision (a backend message i18n approach + completing the ja/ko translations).
+Those two logins occurred on 2026-10-09. The 2026-10-12 run only filtered history, and this stage also submitted no passwords or CAPTCHA. Refreshing a list is not a new login.
 
-Two required flows not yet covered: `config` (parameter configuration) and `login-record` (login records). Measured: `sys_permission` has no corresponding permission code and the frontend has no corresponding view directory, so the product currently provides no such pages; per the constraints, **the required flows are not deleted and not self-marked exempt**, and are kept as explicit gaps in the coverage list.
+The [2026-10-12 platform receipt](../reference/evidence/system-platform-2026-10-12.json) preserves 32 images: six successful Chinese steps from an earlier attempt and 26 later images, with the subsequent four-locale tests reporting 4 passed. Earlier timeouts were reconciled, policy restored, and the corresponding roles cleaned up. The images did not all come from one failure-free run. Temporary roles differed between attempts and were deleted; original `10/3600` was restored while increasing versions and audit events remained. No writes were replayed here.
 
-See [Reliable Messaging](../mq-reliability.en.md), [Observability](../observability.en.md), and [Docker Deployment](../docker-deployment.en.md).
+Some historical dialog nodes fall back to Chinese, Japanese/Korean permission tables contain English, and the English sidebar or rightmost login column may clip. These originals prove dated saves, conflicts, permission persistence, and historical filtering, not user isolation with the teaching role.
 
+## 5. OAuth2, XSS, and Sessions
+
+For OAuth2 clients, check allowed grants, exact callbacks, scopes, and consent settings. Client IDs are public identifiers; keep secrets private. See [authentication](authentication.en.md) for external social login and local authorization-code/PKCE flows. Old device-code rows in an authorization list do not prove a new grant or external callback.
+
+On XSS Protection, confirm that both settings and rules requests succeed. In the current implementation, settings GET creates a default disabled row if that tenant has none. This stage first confirmed the existing tenant-1 row, then checked that reads left its value unchanged. The global switch in the 2026-10-17 originals is OFF; enabled individual rules do not prove protection is active.
+
+To test XSS changes in isolation, first record original settings/rules and operate only on recorded, recoverable teaching rules. Following [core flows](../core-flows.en.md), check actual saves/responses for event attributes, script protocols, and allowed rich text, then restore originals. Writes must invalidate `xss:enabled:{tenantId}` and `xss:rules:{tenantId}`. This stage did not toggle protection, change rules, or test attack inputs. Never disable protection to make a test pass.
+
+Online Users, Auth Records, Login Records, and Audit Logs are separate views. The kick API is `DELETE /api/auth/online/{userId}`, a user-targeted action rather than a delete button for an arbitrary single `jti`. Use only a test user clearly owned by this run, then verify old-session denial and recovery by signing in again; do not affect others. This stage's online list was empty, and no kick occurred.
+
+## 6. Trace an Operation to Asynchronous Logs
+
+Auth does not use `@OperLog`; authentication events remain in security audit. Business-operation logs pass through Outbox, MQ, and a consumer. Native lite mode disables the relay, XXL-JOB, and consumer. Reading old logs needs none of these; testing new delivery requires the full runtime and appropriate components/bindings described in [Docker deployment](../docker-deployment.en.md) and [reliable messaging](../mq-reliability.en.md). Starting an MQ container alone does not prove readiness.
+
+1. Record tenant, operator, module, time, URL, result, and response Trace ID for an authorized business request. Do not repeat a successful operation for a screenshot.
+2. Filter Operation Logs by operator, module, type, and time. The current page has no Trace ID filter or dedicated column; do not instruct readers to search it by Trace ID.
+3. Cross-check request details against structured logs, then inspect the source service's Outbox `msgId`, optional `msgKey`, and `serviceName`. The producer records `producerTraceId`; relay tracing can use a different context. See [observability](../observability.en.md) for correlation. Do not assume every message has a business key or that every field is visible in the UI.
+4. Check broker acknowledgment and consumer results. Outbox `SENT` does not mean business consumption completed. At maximum retries, inspect downstream state and idempotency before resending or skipping. A successful list read does not prove failure recovery.
+
+## 7. Images and Verification Boundaries
+
+The [2026-10-17 page-read receipt](../reference/evidence/security-lists-2026-10-17.json) binds the following 40 four-language originals to the executed script, sources, and runtime artifacts. Controlled Docker identities read existing tenant data: 44 page API reads succeeded, with no business-form submissions or historical-write replay. This was not password/CAPTCHA login. All six containers started for capture were stopped afterward.
+
+![Tenant list with one default tenant](../images/en-US/system-tenants.png)
+![Existing organization tree without edits](../images/en-US/system-organizations.png)
+![First role page and data-scope entry](../images/en-US/system-roles.png)
+![Visible permission tree; scroll for more nodes](../images/en-US/system-permissions.png)
+![Dictionary list before selecting a type](../images/en-US/system-dictionaries.png)
+![Empty online-user list; no kick](../images/en-US/system-online-users.png)
+![Historical security-audit events](../images/en-US/system-audit-log.png)
+![Historical device-code rows, not new grants](../images/en-US/system-auth-records.png)
+![XSS global switch off; filtering untested](../images/en-US/system-xss-config.png)
+![Historical operation logs without a new request](../images/en-US/system-operation-log.png)
+
+Every raw image was individually AI-reviewed with native display limits retained: some sidebar labels and tenant initialization/action headers overlap or clip; long IDs/grants wrap and require scrolling; some Japanese/Korean labels remain English; database business names/descriptions remain Chinese. Grant scopes and creation times are blank, and the online list is empty; no values were fabricated. These captures prove visible content and recorded reads, not XSS effectiveness, kicks, external OAuth, consumption, or complete UI localization.
+
+Four-language documents follow authorized `AI_REVIEW` bound to content hashes. Human review is not mandatory, and AI review must never be labeled `HUMAN_REVIEW`. Image inspection, passing tests, and hashes do not replace complete document semantic review. Current status is recorded in the [review queue](../i18n-review-queue.md).

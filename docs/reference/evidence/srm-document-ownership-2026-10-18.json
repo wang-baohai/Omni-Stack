@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "kind": "document-ownership-clarification",
+  "review_type": "AI_REVIEW",
+  "human_review": false,
+  "human_review_required": false,
+  "source_head": "f2607c1bdf7605645d5eb68d7ab5bfc956cee7f8",
+  "design_snapshot_commit": "9b23ab972f1dcac4116ae95fb5cd56442e2961e4",
+  "baseline_git_identity_output": "c185ba",
+  "prior_complete_design_review": {
+    "path": "docs/reference/reviews/srm-design.json",
+    "sha256": "cffc5d996c9ff5bb0e9eb91b40db89cb9e91e23e2e3650a68823f384eb91b50f",
+    "source_sha256": "401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211",
+    "translations": {
+      "en-US": {
+        "path": "docs/design/srm-design.en.md",
+        "sha256": "b435531984cbcc01647378182f1e04a5a36b59912fa2243656040c380261fb5d"
+      },
+      "ja-JP": {
+        "path": "docs/design/srm-design.jp.md",
+        "sha256": "48e72ba2e7c4cf8fb7c290c74b44ca8263025d3f5d9fa6a6976684a22896a8fd"
+      },
+      "ko-KR": {
+        "path": "docs/design/srm-design.kr.md",
+        "sha256": "a097b26813ddb1076bd04c076e0ea74545ac3f9b2161d6054a887c2dedc56990"
+      }
+    }
+  },
+  "current_fact_review": {
+    "path": "docs/reference/reviews/srm.json",
+    "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f",
+    "source_sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03"
+  },
+  "scope": "Clarify a single current SRM contract owner,retain the reviewed design body as a commit-bound snapshot,route AGENTS to both documents,and state actual AI_REVIEW suffices. All four complete original design documents reuse the matching prior semantic review;only changed declarations are newly assessed. No domain contract,source,API,state machine,permission,diagram,command or historical section was altered.",
+  "source_bindings": [
+    {
+      "path": "docs/reference/reviews/srm-design.json",
+      "sha256": "cffc5d996c9ff5bb0e9eb91b40db89cb9e91e23e2e3650a68823f384eb91b50f"
+    },
+    {
+      "path": "docs/reference/reviews/srm.json",
+      "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/srm.md",
+      "sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03"
+    },
+    {
+      "path": "docs/srm.en.md",
+      "sha256": "1e147b3fbe8dd1d40dec801b18341af562242567b8e7e5710ed8dbe5a215d534"
+    },
+    {
+      "path": "docs/srm.jp.md",
+      "sha256": "981822e9042ad22d8dc488a3ece89a5a80e7c56d41da5ac6ac814a7e212d93e1"
+    },
+    {
+      "path": "docs/srm.kr.md",
+      "sha256": "652a77c1ae78d9c0d5a54e8161e8ef47016f2e7a68a19909b36efca0dabeb58a"
+    }
+  ],
+  "documents": [
+    {
+      "path": "docs/design/srm-design.md",
+      "before_sha256": "401b994fb6499003dc68cbc68bd0b941d90f4e53363f07582a261eea7c780211",
+      "after_sha256": "84d9d8b32687c29779a3d4e713ea2181774eb3580d5b3e3de2657908dadc98f0",
+      "body_from_first_h2_byte_identical": true
+    },
+    {
+      "path": "docs/design/srm-design.en.md",
+      "before_sha256": "b435531984cbcc01647378182f1e04a5a36b59912fa2243656040c380261fb5d",
+      "after_sha256": "8e816a45b5ef5b270fa92419f141cc44da9ab21e76159266b672dc318e580bfc",
+      "body_from_first_h2_byte_identical": true
+    },
+    {
+      "path": "docs/design/srm-design.jp.md",
+      "before_sha256": "48e72ba2e7c4cf8fb7c290c74b44ca8263025d3f5d9fa6a6976684a22896a8fd",
+      "after_sha256": "83aba64dc5c68d99025a32f01cfe090978b545caf951912f7194abdeb35b2ffa",
+      "body_from_first_h2_byte_identical": true
+    },
+    {
+      "path": "docs/design/srm-design.kr.md",
+      "before_sha256": "a097b26813ddb1076bd04c076e0ea74545ac3f9b2161d6054a887c2dedc56990",
+      "after_sha256": "e8d79e62bceda2a5c2d4fb6ba4bc5b0f7c81421fc851553143ea5b63d4cc0081",
+      "body_from_first_h2_byte_identical": true
+    },
+    {
+      "path": "AGENTS.md",
+      "before_sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df",
+      "after_sha256": "885c3574e4ff6ab98feb0a1216a6d80541005b7a2021e8c46e2130206fa4673d",
+      "body_from_first_h2_byte_identical": null
+    },
+    {
+      "path": "docs/repository-governance.md",
+      "before_sha256": "f17457db0e38cfeee99313c529fdfdc33d43e1928987de3f8a8e972f02b74f12",
+      "after_sha256": "9eed1e6162879b7c1609fdddf0f65f4116352bce313d72aa20c814d27eac5a08",
+      "body_from_first_h2_byte_identical": null
+    }
+  ],
+  "application_source_changes": false,
+  "new_application_runs": 0,
+  "business_writes": 0,
+  "full_original_A_G_preserved": true,
+  "global_release_complete": false
+}

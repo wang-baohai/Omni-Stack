@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "custom-preset-tutorial",
+  "source": "docs/custom-preset-tutorial.md",
+  "source_sha256": "52b76d03e3986d172a66babe70306bb5fac79edd6b9dd702ae7ceb8312ca1991",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "6929bf4c29a6fcecfd7e95b43682117b4a48dc9f",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/custom-preset-tutorial.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:54:18",
+      "result": "approved",
+      "translation_sha256": "46fed5eb4474903bcf7a7596759e94a9c5833b54c60b7d784dd3c41e7fda3282",
+      "checks": {
+        "coverage_and_meaning": "四语完整覆盖YAML、验证/解释、预览/生成、生成工程验证和六项常见错误，明确SRM传递引入Workflow但不引入采购资产。",
+        "technical_literals": "YAML五个模块及id/version结构一致；容器CLI相对路径、Nacos完整变量/Base64要求、JWK32字符与Docker构建命令准确。 本次再审将XXL_JOB_ADMIN_USERNAME/XXL_JOB_ADMIN_PASSWORD与实际.env.example和Compose逐项核对，四语一致。",
+        "security_and_failure_semantics": "不复用共享密钥、不共用数据卷、不覆盖源根或非空输出、先dry-run、MQ缺SRM悬空消费者保护及可选开关边界都保留。",
+        "language_and_terminology": "English accurately separates source validation from generated-project verification; root itself clarification matches validateTarget rather than rejecting all nested output.",
+        "images_and_links": "没有图片或实际Markdown链接；当前规范YAML和generated/supplier-app路径能在工具容器内读取，生成后命令使用该工程自己的Compose。"
+      },
+      "findings": [
+        {
+          "id": "host-build-and-container-path",
+          "status": "resolved",
+          "description": "原教程使用宿主Maven/npm、硬编码JDK和Windows绝对路径。",
+          "resolution": "改为Docker工具容器和独立generated输出；生成工程使用自己的Compose工具链。"
+        },
+        {
+          "id": "nacos-configuration",
+          "status": "resolved",
+          "description": "必填列表缺NACOS_PASSWORD，身份变量使用含糊缩写，令牌编码要求未说明。",
+          "resolution": "完整列出Nacos/XXL-JOB变量并补Base64及客户端一致性要求。"
+        },
+        {
+          "id": "output-root-boundary",
+          "status": "resolved",
+          "description": "原文可理解为禁止任何仓库内生成，与教程generated目录矛盾。",
+          "resolution": "根据validateTarget明确禁止覆盖源根本身或非空目录。"
+        },
+        {
+          "id": "xxl-job-admin-variable-names",
+          "status": "resolved",
+          "description": "上一轮补全时将管理员变量误写为XXL_JOB_USERNAME/PASSWORD。",
+          "resolution": "按.env.example和Compose修正为XXL_JOB_ADMIN_USERNAME/PASSWORD，使原审校失效后重新审读并进行必填键交叉检查。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/custom-preset-tutorial.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:54:18",
+      "result": "approved",
+      "translation_sha256": "0a6f637d6bf5b0e047226514da4089f2a65fd640389608c5bac646a70cc3c97d",
+      "checks": {
+        "coverage_and_meaning": "四语完整覆盖YAML、验证/解释、预览/生成、生成工程验证和六项常见错误，明确SRM传递引入Workflow但不引入采购资产。",
+        "technical_literals": "YAML五个模块及id/version结构一致；容器CLI相对路径、Nacos完整变量/Base64要求、JWK32字符与Docker构建命令准确。 本次再审将XXL_JOB_ADMIN_USERNAME/XXL_JOB_ADMIN_PASSWORD与实际.env.example和Compose逐项核对，四语一致。",
+        "security_and_failure_semantics": "不复用共享密钥、不共用数据卷、不覆盖源根或非空输出、先dry-run、MQ缺SRM悬空消费者保护及可选开关边界都保留。",
+        "language_and_terminology": "仕入先の登録審査、除外、入力します替换原误导术语；源根本身与嵌套教材输出不再矛盾。",
+        "images_and_links": "没有图片或实际Markdown链接；当前规范YAML和generated/supplier-app路径能在工具容器内读取，生成后命令使用该工程自己的Compose。"
+      },
+      "findings": [
+        {
+          "id": "host-build-and-container-path",
+          "status": "resolved",
+          "description": "原教程使用宿主Maven/npm、硬编码JDK和Windows绝对路径。",
+          "resolution": "改为Docker工具容器和独立generated输出；生成工程使用自己的Compose工具链。"
+        },
+        {
+          "id": "nacos-configuration",
+          "status": "resolved",
+          "description": "必填列表缺NACOS_PASSWORD，身份变量使用含糊缩写，令牌编码要求未说明。",
+          "resolution": "完整列出Nacos/XXL-JOB变量并补Base64及客户端一致性要求。"
+        },
+        {
+          "id": "output-root-boundary",
+          "status": "resolved",
+          "description": "原文可理解为禁止任何仓库内生成，与教程generated目录矛盾。",
+          "resolution": "根据validateTarget明确禁止覆盖源根本身或非空目录。"
+        },
+        {
+          "id": "xxl-job-admin-variable-names",
+          "status": "resolved",
+          "description": "上一轮补全时将管理员变量误写为XXL_JOB_USERNAME/PASSWORD。",
+          "resolution": "按.env.example和Compose修正为XXL_JOB_ADMIN_USERNAME/PASSWORD，使原审校失效后重新审读并进行必填键交叉检查。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/custom-preset-tutorial.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:54:18",
+      "result": "approved",
+      "translation_sha256": "4ece414927a3a04eb2cf742b9b144d3a176c390baa145d033a3af3f258f36278",
+      "checks": {
+        "coverage_and_meaning": "四语完整覆盖YAML、验证/解释、预览/生成、生成工程验证和六项常见错误，明确SRM传递引入Workflow但不引入采购资产。",
+        "technical_literals": "YAML五个模块及id/version结构一致；容器CLI相对路径、Nacos完整变量/Base64要求、JWK32字符与Docker构建命令准确。 本次再审将XXL_JOB_ADMIN_USERNAME/XXL_JOB_ADMIN_PASSWORD与实际.env.example和Compose逐项核对，四语一致。",
+        "security_and_failure_semantics": "不复用共享密钥、不共用数据卷、不覆盖源根或非空输出、先dry-run、MQ缺SRM悬空消费者保护及可选开关边界都保留。",
+        "language_and_terminology": "원본 저장소 루트 자체、정규화、멱등、역할消费者等含义准确，生成工程与原工程操作目录区别明确。",
+        "images_and_links": "没有图片或实际Markdown链接；当前规范YAML和generated/supplier-app路径能在工具容器内读取，生成后命令使用该工程自己的Compose。"
+      },
+      "findings": [
+        {
+          "id": "host-build-and-container-path",
+          "status": "resolved",
+          "description": "原教程使用宿主Maven/npm、硬编码JDK和Windows绝对路径。",
+          "resolution": "改为Docker工具容器和独立generated输出；生成工程使用自己的Compose工具链。"
+        },
+        {
+          "id": "nacos-configuration",
+          "status": "resolved",
+          "description": "必填列表缺NACOS_PASSWORD，身份变量使用含糊缩写，令牌编码要求未说明。",
+          "resolution": "完整列出Nacos/XXL-JOB变量并补Base64及客户端一致性要求。"
+        },
+        {
+          "id": "output-root-boundary",
+          "status": "resolved",
+          "description": "原文可理解为禁止任何仓库内生成，与教程generated目录矛盾。",
+          "resolution": "根据validateTarget明确禁止覆盖源根本身或非空目录。"
+        },
+        {
+          "id": "xxl-job-admin-variable-names",
+          "status": "resolved",
+          "description": "上一轮补全时将管理员变量误写为XXL_JOB_USERNAME/PASSWORD。",
+          "resolution": "按.env.example和Compose修正为XXL_JOB_ADMIN_USERNAME/PASSWORD，使原审校失效后重新审读并进行必填键交叉检查。"
+        }
+      ]
+    }
+  }
+}

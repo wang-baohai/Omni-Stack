@@ -1,0 +1,665 @@
+{
+  "schema": 1,
+  "kind": "standalone-local-docker-wiki-latest-content-root-and-subpath",
+  "recorded_at": "2026-10-13T01:17:46.420Z",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "source_state": "uncommitted remediation branch; input file hashes bound below",
+  "status": "BROWSER_AND_VISUAL_REVIEW_PASS",
+  "release_ready": false,
+  "test": "docs/scripts/browser-check.mjs",
+  "test_sha256": "37f3ecc053945564ff58cf4602566d1df1daa93a41273b4f55e81ef77be7d4d5",
+  "deployments": [
+    {
+      "deployment": "root",
+      "base": "/",
+      "runtime": "local Docker",
+      "image_id": "sha256:4e71f1b2db6a165a7be441c234c2ec1d58461767953234b62274ea06fc5051d1",
+      "container_id": "82266d7c9e8f90fca1d144fc5aee013d9901cfef6021a738ce12b922270679ae",
+      "published_ports": 0,
+      "started_at": "2026-10-13T01:01:37.170Z",
+      "finished_at": "2026-10-13T01:03:51.673Z",
+      "status": "pass",
+      "checks": [
+        {
+          "name": "all reachable pages, local links, anchors, images and desktop layout",
+          "status": "pass",
+          "pages": 192,
+          "images": 997,
+          "anchors": 8328
+        },
+        {
+          "name": "zh-CN navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "en-US navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "ja-JP navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "ko-KR navigation, search, title, images and mobile",
+          "status": "pass"
+        }
+      ],
+      "screenshots": [
+        {
+          "artifact": "wiki-index-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "route": "/zh-CN/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 2710,
+          "sha256": "167a319a8cc0ed99fd1510068aab6548ad0d75eb1f134a675ad5e28d8c007bde",
+          "captured_at": "2026-10-13T01:03:44.973Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-search-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "route": "/zh-CN/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "sha256": "df4d7a1d6c74b7b298ecb3887943e9905a7ee1274d13ebe5c692e15db917e416",
+          "captured_at": "2026-10-13T01:03:45.604Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-quick-start-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "route": "/zh-CN/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 4973,
+          "sha256": "7e977eca38490ade11625ce854b62419f59b8b0b797da20015e37dafa5df4331",
+          "captured_at": "2026-10-13T01:03:46.196Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-mobile-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "route": "/zh-CN/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "sha256": "86f8779c3e3f32deb37a732f83e244db9ae4889650e516a45e6071e0c665c031",
+          "captured_at": "2026-10-13T01:03:46.312Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-index-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "route": "/en-US/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 3310,
+          "sha256": "309b636db17ae999581ac847e4a355fe698c6fdfe8fd25582fc4700b0abdc573",
+          "captured_at": "2026-10-13T01:03:46.684Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-search-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "route": "/en-US/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "sha256": "dc2174d05076793b0834346a5aebf9586282e8f328c9fdcb7c547d0aff88fb7d",
+          "captured_at": "2026-10-13T01:03:47.288Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-quick-start-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "route": "/en-US/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5563,
+          "sha256": "eaea609c27b6ca74bfa6c2256dbcb44b1c8b7a31d3be68baff60bc7cfd35a814",
+          "captured_at": "2026-10-13T01:03:47.857Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-mobile-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "route": "/en-US/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "sha256": "cf449ed7f209d1e4407ee4dfa91c3c084a3c7afea7b6975deeed259eaa731e4c",
+          "captured_at": "2026-10-13T01:03:47.964Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-index-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "route": "/ja-JP/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 3142,
+          "sha256": "0cc9d787c69068153a2038e9c203855862e827ae23bc889150069250b3403676",
+          "captured_at": "2026-10-13T01:03:48.440Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-search-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "route": "/ja-JP/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "sha256": "c6685dedfeaeb8398f682105753ef9d1a279196bcb62f56b62dcddfc4803039f",
+          "captured_at": "2026-10-13T01:03:49.029Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-quick-start-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "route": "/ja-JP/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5287,
+          "sha256": "2e2974bbcd1266f5cfa44b30a0ea7b192a6a774412538c794ad95007ae0dca3e",
+          "captured_at": "2026-10-13T01:03:49.692Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-mobile-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "route": "/ja-JP/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "sha256": "bb9f433aaa19efed88842fe3b653510632f06a54b0023542cf6cea097b0c2cea",
+          "captured_at": "2026-10-13T01:03:49.803Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-index-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "route": "/ko-KR/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 2994,
+          "sha256": "ed89b7fde73d4ab4fda769c6781d822981e69ff123406c3c32931f0c5106fdeb",
+          "captured_at": "2026-10-13T01:03:50.312Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-search-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "route": "/ko-KR/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "sha256": "32410c0aefaf1a4682cfeb23a7851d9928ec56f3ea70da693cfc62eb95079031",
+          "captured_at": "2026-10-13T01:03:50.898Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-quick-start-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "route": "/ko-KR/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5225,
+          "sha256": "eddfc0eea47ee13ed9e318eb6ac243249b67f4b6d6891b7936c29426831e77e4",
+          "captured_at": "2026-10-13T01:03:51.536Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-mobile-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "route": "/ko-KR/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "sha256": "4e86e7738cefaee2f4ac757b1962702dfc1d6ba86dea3d1e2f68f94a4f4efb90",
+          "captured_at": "2026-10-13T01:03:51.640Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        }
+      ]
+    },
+    {
+      "deployment": "subpath",
+      "base": "/omni-stack/",
+      "runtime": "local Docker",
+      "image_id": "sha256:7d928b0d75156525132aab78f708a089dd1ac0c9e489e0966c8b7e149cafae43",
+      "container_id": "c18aaa9a01699f0d01ffc20789dfd94946b5a6ea8b3adb5d026590f5fd9476db",
+      "published_ports": 0,
+      "started_at": "2026-10-13T01:01:36.259Z",
+      "finished_at": "2026-10-13T01:03:50.889Z",
+      "status": "pass",
+      "checks": [
+        {
+          "name": "all reachable pages, local links, anchors, images and desktop layout",
+          "status": "pass",
+          "pages": 192,
+          "images": 997,
+          "anchors": 8328
+        },
+        {
+          "name": "zh-CN navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "en-US navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "ja-JP navigation, search, title, images and mobile",
+          "status": "pass"
+        },
+        {
+          "name": "ko-KR navigation, search, title, images and mobile",
+          "status": "pass"
+        }
+      ],
+      "screenshots": [
+        {
+          "artifact": "wiki-index-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "route": "/omni-stack/zh-CN/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 2710,
+          "sha256": "167a319a8cc0ed99fd1510068aab6548ad0d75eb1f134a675ad5e28d8c007bde",
+          "captured_at": "2026-10-13T01:03:44.435Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-search-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "route": "/omni-stack/zh-CN/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "sha256": "df4d7a1d6c74b7b298ecb3887943e9905a7ee1274d13ebe5c692e15db917e416",
+          "captured_at": "2026-10-13T01:03:45.015Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-quick-start-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "route": "/omni-stack/zh-CN/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 4973,
+          "sha256": "7e977eca38490ade11625ce854b62419f59b8b0b797da20015e37dafa5df4331",
+          "captured_at": "2026-10-13T01:03:45.633Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-mobile-zh-CN.png",
+          "artifact_storage": "private original retained",
+          "locale": "zh-CN",
+          "route": "/omni-stack/zh-CN/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "sha256": "86f8779c3e3f32deb37a732f83e244db9ae4889650e516a45e6071e0c665c031",
+          "captured_at": "2026-10-13T01:03:45.739Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-index-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "route": "/omni-stack/en-US/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 3310,
+          "sha256": "309b636db17ae999581ac847e4a355fe698c6fdfe8fd25582fc4700b0abdc573",
+          "captured_at": "2026-10-13T01:03:46.139Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-search-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "route": "/omni-stack/en-US/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "sha256": "dc2174d05076793b0834346a5aebf9586282e8f328c9fdcb7c547d0aff88fb7d",
+          "captured_at": "2026-10-13T01:03:46.643Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-quick-start-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "route": "/omni-stack/en-US/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5563,
+          "sha256": "eaea609c27b6ca74bfa6c2256dbcb44b1c8b7a31d3be68baff60bc7cfd35a814",
+          "captured_at": "2026-10-13T01:03:47.188Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-mobile-en-US.png",
+          "artifact_storage": "private original retained",
+          "locale": "en-US",
+          "route": "/omni-stack/en-US/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "sha256": "cf449ed7f209d1e4407ee4dfa91c3c084a3c7afea7b6975deeed259eaa731e4c",
+          "captured_at": "2026-10-13T01:03:47.284Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-index-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "route": "/omni-stack/ja-JP/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 3142,
+          "sha256": "0cc9d787c69068153a2038e9c203855862e827ae23bc889150069250b3403676",
+          "captured_at": "2026-10-13T01:03:47.721Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-search-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "route": "/omni-stack/ja-JP/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "sha256": "c6685dedfeaeb8398f682105753ef9d1a279196bcb62f56b62dcddfc4803039f",
+          "captured_at": "2026-10-13T01:03:48.324Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-quick-start-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "route": "/omni-stack/ja-JP/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5287,
+          "sha256": "2e2974bbcd1266f5cfa44b30a0ea7b192a6a774412538c794ad95007ae0dca3e",
+          "captured_at": "2026-10-13T01:03:48.895Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-mobile-ja-JP.png",
+          "artifact_storage": "private original retained",
+          "locale": "ja-JP",
+          "route": "/omni-stack/ja-JP/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "sha256": "bb9f433aaa19efed88842fe3b653510632f06a54b0023542cf6cea097b0c2cea",
+          "captured_at": "2026-10-13T01:03:49.014Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-index-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "route": "/omni-stack/ko-KR/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 2994,
+          "sha256": "ed89b7fde73d4ab4fda769c6781d822981e69ff123406c3c32931f0c5106fdeb",
+          "captured_at": "2026-10-13T01:03:49.469Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-search-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "route": "/omni-stack/ko-KR/wiki/index.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 900,
+          "sha256": "32410c0aefaf1a4682cfeb23a7851d9928ec56f3ea70da693cfc62eb95079031",
+          "captured_at": "2026-10-13T01:03:50.128Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-quick-start-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "route": "/omni-stack/ko-KR/guides/quick-start.html",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "width": 1440,
+          "height": 5225,
+          "sha256": "eddfc0eea47ee13ed9e318eb6ac243249b67f4b6d6891b7936c29426831e77e4",
+          "captured_at": "2026-10-13T01:03:50.754Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        },
+        {
+          "artifact": "wiki-mobile-ko-KR.png",
+          "artifact_storage": "private original retained",
+          "locale": "ko-KR",
+          "route": "/omni-stack/ko-KR/guides/quick-start.html",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "width": 390,
+          "height": 844,
+          "sha256": "4e86e7738cefaee2f4ac757b1962702dfc1d6ba86dea3d1e2f68f94a4f4efb90",
+          "captured_at": "2026-10-13T01:03:50.866Z",
+          "visual_review": "PASS_BY_EXACT_SHA256_REUSE",
+          "review_reference": "docs/reference/evidence/wiki-site-2026-10-12.json"
+        }
+      ]
+    }
+  ],
+  "mobile_interaction": {
+    "cases": 8,
+    "actual_native_clicks": 16,
+    "status": "PASS",
+    "test_sha256": "1d21b65d0412a71d3762a179782fcb022bab6de9fa5f05c8c6b531c2c66f26d3"
+  },
+  "visual_review": {
+    "originals": 32,
+    "direct_new_reviews": 0,
+    "exact_sha256_reuse": 32,
+    "previous_receipt": "docs/reference/evidence/wiki-site-2026-10-12.json"
+  },
+  "source_inputs": [
+    {
+      "path": "docs/scripts/browser-check.mjs",
+      "sha256": "37f3ecc053945564ff58cf4602566d1df1daa93a41273b4f55e81ef77be7d4d5"
+    },
+    {
+      "path": "docker/docs/Dockerfile",
+      "sha256": "8435a28785a37d637fad2a19fd921ce37e8f26e5256d0e499c70e293953100f4"
+    },
+    {
+      "path": "docs/scripts/prepare-site.mjs",
+      "sha256": "9b57036014d6a5c4a2aa3dadd478f10c1941a6a36aaa514a64a966b582f464af"
+    },
+    {
+      "path": "docs/guides/srm-flow.md",
+      "sha256": "52480fbdf8a2d7e0064d6bee0d544f4325e7ea2f55cf72dd5d2a96421a68d2d2"
+    },
+    {
+      "path": "docs/guides/operations-upgrade.md",
+      "sha256": "b345b998f17207beff0d560780538986a603ddf459bc3b0ba139d4074df9a795"
+    },
+    {
+      "path": "docs/guides/srm-flow.en.md",
+      "sha256": "dbb27925e25a82439ebde8a8ad835e291fd5b5d01d23e2ea63e4271dff6f8162"
+    },
+    {
+      "path": "docs/guides/operations-upgrade.en.md",
+      "sha256": "b1b399590b832ce81bc5656ea5b0b43f80bf9c7780b841dcebda4ae7ac52c5f9"
+    },
+    {
+      "path": "docs/guides/srm-flow.jp.md",
+      "sha256": "fd42a8171bb437bc13ed1eb02552758943b30e65c563d6ef3d141e9569b2ba75"
+    },
+    {
+      "path": "docs/guides/operations-upgrade.jp.md",
+      "sha256": "9f047481d6f0319f3be816415caebfceb4cdd3002ca5a82d10625229f1cb0256"
+    },
+    {
+      "path": "docs/guides/srm-flow.kr.md",
+      "sha256": "75d1d998c28ea17f642c1bf28370abe77ffb2232543cd5f59bb3fee637a51f80"
+    },
+    {
+      "path": "docs/guides/operations-upgrade.kr.md",
+      "sha256": "f2a26ca0739b76afcb83d823edab13436824a1a65913c97276d30150f8e82911"
+    }
+  ],
+  "limits": [
+    "Current crawls cover 192 pages per deployment, 997 image references and 8328 anchors; repeated image references are not unique images.",
+    "The 32 common index/search/quick-start/mobile originals exactly match the previously reviewed bytes. Current SRM and operations additions have separately reviewed business evidence.",
+    "English-native Alertmanager layout acceptance, external OAuth, SRM human self-registration and 138 human translation reviews remain pending.",
+    "This receipt is generated after the image build and is not claimed as an input already contained in that image."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "captured_at": "2026-10-09T06:49:11.1Z",
+  "runtime": "local Docker Playwright/Chromium",
+  "source_commit": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "method": "human-entered CAPTCHA through real UI",
+  "http_status": 200,
+  "business_code": 200,
+  "authenticated": true,
+  "network_mocks": false,
+  "human_captcha": true,
+  "captcha_answer_retained": false,
+  "test_token_fixture": false,
+  "screenshot_sha256": "70dc637d279afcd4d66ae0742067b9f6793a95fb5a6c1dd74fbeebb5c1202a14",
+  "visual_review": "Original inspected 2026-10-12: success toast, admin identity and workspace; no token, password or CAPTCHA visible",
+  "scope": "One real Chinese UI password login; not four localized password logins or external OAuth acceptance",
+  "secrets": "Authentication state and original challenge remain private"
+}

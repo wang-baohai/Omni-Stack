@@ -61,6 +61,12 @@ const DEFAULT_BPMN = `<?xml version="1.0" encoding="UTF-8"?>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>`
 
+/** 为新建模型生成匹配稳定模型标识的初始画布，避免空画布或 Process_1 校验失败。 */
+export function createInitialBpmn(processId: string): string {
+  if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(processId)) throw new Error('Invalid BPMN process id')
+  return DEFAULT_BPMN.split('Process_1').join(processId)
+}
+
 /** bpmn-js 期望的标准命名空间 URI（仅 BPMN 和 BPMNDI 需要归一化，DC/DI 原始 URI 已正确） */
 const NS_MAP: Record<string, string> = {
   'http://www.omg.org/spec/BPMN20': 'http://www.omg.org/spec/BPMN/20100524/MODEL',

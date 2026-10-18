@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { createRequire } from 'node:module';
 import { XMLParser } from 'fast-xml-parser';
 import ts from 'typescript';
 import { parseDocument, type Document } from 'yaml';
@@ -33,6 +34,8 @@ const TARGETS = {
   seedManifest: 'database/seed/manifest.yaml',
   platformChangelog: 'database/changelog/platform/db.changelog-platform.yaml',
   migrationCatalog: 'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
+  docsManifest: 'docs/docs-manifest.yaml',
+  reviewQueue: 'docs/i18n-review-queue.md',
 } as const;
 
 /**
@@ -75,6 +78,7 @@ export function renderServiceIntegration(
     TARGETS.seedManifest,
     (content) => renderSeedManifest(content, lock.spec, sha256(permissionSql)),
   );
+  addDocumentationRegistration(changes, workspaceRoot, lock.spec);
 
   ensureUniqueTargets(changes);
   validateRenderedChanges(workspaceRoot, changes, lock.spec);
@@ -95,6 +99,9 @@ function addGeneratedFiles(
     `database/changelog/auth/${lock.spec.serviceId}-permissions.yaml`,
     `scripts/sql/seed/${lock.spec.serviceId}-permissions.sql`,
     `docs/${lock.spec.serviceId}.md`,
+    `docs/${lock.spec.serviceId}.en.md`,
+    `docs/${lock.spec.serviceId}.jp.md`,
+    `docs/${lock.spec.serviceId}.kr.md`,
     `docs/${lock.spec.serviceId}-i18n-status.yaml`,
   ];
   for (const file of lock.files) {
@@ -107,6 +114,34 @@ function addGeneratedFiles(
       after: readFileSync(resolve(source, ...file.path.split('/')), 'utf8'),
     });
   }
+}
+
+/** 文档正文、摘要及复核队列与源码一起提交或回滚；所有译文保持待语义复核，生成不自动授予 AI 或人工批准。 */
+function addDocumentationRegistration(changes: IntegrationFileChange[], workspaceRoot: string, spec: ServiceSpec): void {
+  const source = `docs/${spec.serviceId}.md`;
+  const manifestChange = addModified(changes, workspaceRoot, TARGETS.docsManifest, (content) => {
+    const document = yamlDocument(content, TARGETS.docsManifest);
+    document.addIn(['documents'], {
+      id: `service-${spec.serviceId}`, type: 'module-guide', module: spec.serviceId, owner: spec.serviceId,
+      source, source_sha256: sha256(generatedContent(changes, source)),
+      dependencies: ['module-structure', 'security', 'testing'],
+      translations: Object.fromEntries([['en-US', 'en'], ['ja-JP', 'jp'], ['ko-KR', 'kr']].map(([locale, suffix]) =>
+        [locale, { path: `docs/${spec.serviceId}.${suffix}.md`, status: 'present-unverified', reviewed_at: null }])),
+    });
+    return document.toString({ lineWidth: 0 });
+  });
+  const require = createRequire(import.meta.url);
+  const { buildReviewQueue } = require(resolve(workspaceRoot, 'tools/omni-cli/scripts/translation-queue.mjs')) as {
+    buildReviewQueue: (manifest: unknown, read: (path: string) => string | null) => { rendered: string };
+  };
+  const virtualFiles = new Map(changes.map((change) => [change.target, change.after]));
+  const queue = buildReviewQueue(yamlDocument(manifestChange.after, TARGETS.docsManifest).toJS(), (path) => {
+    const pending = virtualFiles.get(path);
+    if (pending !== undefined) return pending;
+    const absolute = resolve(workspaceRoot, ...path.split('/'));
+    return existsSync(absolute) ? readFileSync(absolute, 'utf8') : null;
+  });
+  addModified(changes, workspaceRoot, TARGETS.reviewQueue, () => queue.rendered);
 }
 
 function addModified(
@@ -261,7 +296,8 @@ function renderCatalog(content: string, spec: ServiceSpec): string {
       consumers: [],
     },
     xxl: { handlers: spec.enableJob ? ['mqRelayHandler'] : [], appNames: spec.enableJob ? [spec.artifactId] : [] },
-    docs: [`docs/${spec.serviceId}.md`, `docs/${spec.serviceId}-i18n-status.yaml`],
+    docs: ['', '.en', '.jp', '.kr'].map((suffix) => `docs/${spec.serviceId}${suffix}.md`)
+      .concat(`docs/${spec.serviceId}-i18n-status.yaml`),
     resourceHints: { minimumMemoryMb: 512, recommendedMemoryMb: 768 },
     deprecation: { status: 'active' },
     compatibility: { java: '25', node: '>=22.12.0', notes: ['由 create-service 生成'] },

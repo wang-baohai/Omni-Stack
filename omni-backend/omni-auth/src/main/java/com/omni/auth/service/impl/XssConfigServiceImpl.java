@@ -197,11 +197,8 @@ public class XssConfigServiceImpl implements XssConfigService {
      */
     @Override
     @Transactional
-    public BlacklistRuleVO updateRule(Long id, UpdateXssRuleRequest request, String operator) {
-        SysXssBlacklistRule rule = sysXssBlacklistRuleMapper.selectById(id);
-        if (rule == null) {
-            throw new BusinessException(404, "XSS 黑名单规则不存在");
-        }
+    public BlacklistRuleVO updateRule(Long id, Long tenantId, UpdateXssRuleRequest request, String operator) {
+        SysXssBlacklistRule rule = requireRule(id, tenantId);
 
         if (request.getRuleName() != null) {
             rule.setRuleName(request.getRuleName());
@@ -237,13 +234,8 @@ public class XssConfigServiceImpl implements XssConfigService {
      */
     @Override
     @Transactional
-    public void deleteRule(Long id) {
-        SysXssBlacklistRule rule = sysXssBlacklistRuleMapper.selectById(id);
-        if (rule == null) {
-            throw new BusinessException(404, "XSS 黑名单规则不存在");
-        }
-
-        Long tenantId = rule.getTenantId();
+    public void deleteRule(Long id, Long tenantId) {
+        requireRule(id, tenantId);
         sysXssBlacklistRuleMapper.deleteById(id);
         invalidateXssCache(tenantId);
         log.info("已删除 XSS 黑名单规则 ID: {}", id);
@@ -256,16 +248,32 @@ public class XssConfigServiceImpl implements XssConfigService {
      */
     @Override
     @Transactional
-    public void toggleRule(Long id, boolean enabled) {
-        SysXssBlacklistRule rule = sysXssBlacklistRuleMapper.selectById(id);
-        if (rule == null) {
-            throw new BusinessException(404, "XSS 黑名单规则不存在");
-        }
+    public void toggleRule(Long id, Long tenantId, boolean enabled) {
+        SysXssBlacklistRule rule = requireRule(id, tenantId);
 
         rule.setEnabled(enabled ? 1 : 0);
         sysXssBlacklistRuleMapper.updateById(rule);
         invalidateXssCache(rule.getTenantId());
         log.info("已切换 XSS 黑名单规则 {} 的状态为: {}", id, enabled ? "启用" : "禁用");
+    }
+
+    /**
+     * 获取当前租户的规则，阻止仅凭规则 ID 操作其他租户配置。
+     *
+     * @param id 规则 ID
+     * @param tenantId 当前登录租户 ID
+     * @return 属于当前租户的规则
+     * @throws BusinessException 租户无效、规则不存在或不属于当前租户时抛出
+     */
+    private SysXssBlacklistRule requireRule(Long id, Long tenantId) {
+        if (tenantId == null || tenantId <= 0) {
+            throw new BusinessException(400, "租户 ID 必须为正整数");
+        }
+        SysXssBlacklistRule rule = sysXssBlacklistRuleMapper.selectById(id);
+        if (rule == null || !tenantId.equals(rule.getTenantId())) {
+            throw new BusinessException(404, "XSS 黑名单规则不存在");
+        }
+        return rule;
     }
 
     /**

@@ -1,0 +1,565 @@
+{
+  "schema": 1,
+  "captured_at": "2026-10-12T02:45:57.3226318Z",
+  "status": "PASS_AFTER_RECONCILED_INITIAL_FAILURE",
+  "runtime": "local Docker",
+  "source_commit": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "source_state": "uncommitted remediation branch; source digests identify relevant files",
+  "source_files": [
+    {
+      "path": "scripts/fixtures/run-backup-rehearsal.ps1",
+      "sha256": "aed0c0ae3fe298be40733f6df8fbf44a39198bd4454b26af57b8ea2d70f088e5"
+    },
+    {
+      "path": "database/seed/manifest.yaml",
+      "sha256": "c54ac31e3bf1351a10ae83406bbb635a85e4c56c2e7098d99bbb9acbba79ad14"
+    }
+  ],
+  "docker_endpoint": "npipe:////./pipe/dockerDesktopLinuxEngine",
+  "mysql_image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+  "initial_migrator_image": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+  "fixed_migrator_image": "sha256:fc239e1932b3265650eb133da9adfd79116bc5a097b65815bf8018fab7f0358d",
+  "databases": 9,
+  "tables": 181,
+  "history_rows": 60,
+  "backup_bytes": 47978544,
+  "backup_sha256": "59acb18dbeba27b102fc7e87bcc768128241e3b4894781e125dea30dceb4a827",
+  "stable_databases": 8,
+  "stable_source_sha256": "9155858b3116f794cd193ad363a5c832ecd8b850bfbfeae1e8d5effdcdb74386",
+  "stable_restored_sha256": "9155858b3116f794cd193ad363a5c832ecd8b850bfbfeae1e8d5effdcdb74386",
+  "stable_after_migrate_sha256": "9155858b3116f794cd193ad363a5c832ecd8b850bfbfeae1e8d5effdcdb74386",
+  "host_ports": [],
+  "steps": [
+    {
+      "name": "BACKUP_CREATED",
+      "at": "2026-10-12T02:31:23.3334225Z",
+      "details": {
+        "databases": 9,
+        "tables": 181,
+        "bytes": 47978544,
+        "sha256": "59acb18dbeba27b102fc7e87bcc768128241e3b4894781e125dea30dceb4a827"
+      }
+    },
+    {
+      "name": "RESTORE_IMPORTED",
+      "at": "2026-10-12T02:32:00.9903417Z",
+      "details": {
+        "same_source_image": true,
+        "host_ports": 0
+      }
+    },
+    {
+      "name": "RESTORED_DATA_AND_HISTORY_MATCH",
+      "at": "2026-10-12T02:32:02.5103376Z",
+      "details": {
+        "stable_databases": 8,
+        "table_inventory": 181,
+        "changelog_rows": 60,
+        "sha256": "9155858b3116f794cd193ad363a5c832ecd8b850bfbfeae1e8d5effdcdb74386",
+        "xxl_runtime_digest_excluded": true
+      }
+    },
+    {
+      "name": "FORMAL_MIGRATOR_REPLAY_PASS_WITH_USER_MODELS",
+      "at": "2026-10-12T02:45:52.557062Z",
+      "details": {
+        "exit_code": 0,
+        "model_counts": "14\t5",
+        "expected_seed_models": 5,
+        "history_rows": 60,
+        "stable_sha256": "9155858b3116f794cd193ad363a5c832ecd8b850bfbfeae1e8d5effdcdb74386",
+        "expected_digest_unchanged": true
+      }
+    },
+    {
+      "name": "MISSING_FORMAL_SEED_REJECTED",
+      "at": "2026-10-12T02:45:56.3020906Z",
+      "details": {
+        "exit_code": 1,
+        "expected_rows": 5,
+        "actual_rows": 4,
+        "accepted_overrides": 0,
+        "scope": "Only restored copy;original seed untouched"
+      }
+    }
+  ],
+  "initial_failure": "Original workflow-model-catalog included all user models:expected5/actual14. Fixed only natural-key scope;expectedRows5/hash unchanged;no seed-accept override.",
+  "negative_seed_check": {
+    "expected": 5,
+    "actual": 4,
+    "exit_code": 1,
+    "restored_copy_only": true,
+    "key_recovered": true,
+    "post_recovery_digest_matches": true,
+    "accepted_overrides": 0
+  },
+  "migrator_module_tests": {
+    "passed": 33,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": "./mvnw -pl omni-db-migrator -am package -B",
+    "runtime": "local Docker JDK25 with Maven cache",
+    "failed_attempts_preserved": 2
+  },
+  "cleanup": "Only new restore containers/network/volume removed; source unchanged; backup private",
+  "limits": [
+    "Database logical restore only; application recovery recorded separately",
+    "Dynamic XXL data included in backup but excluded from cross-time digest",
+    "No Redis session, Broker queue or production RPO/RTO claim",
+    "SQL exports, credentials and raw logs are private"
+  ],
+  "application_restore": {
+    "status": "PASS",
+    "started_at": "2026-10-12T02:55:55.4218107Z",
+    "completed_at": "2026-10-12T03:08:56.894Z",
+    "host_ports": [],
+    "images": [
+      {
+        "service": "omni-frontend",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "configuration_image_id": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "source_container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab"
+      },
+      {
+        "service": "omni-workflow",
+        "tag": "omni-wiki-acceptance-workflow:trusted-initiator-20261010",
+        "configuration_image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+        "source_container_image": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42"
+      },
+      {
+        "service": "omni-asset",
+        "tag": "omni-wiki-acceptance-asset:latest",
+        "configuration_image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+        "source_container_image": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752"
+      },
+      {
+        "service": "omni-procurement",
+        "tag": "omni-wiki-acceptance-procurement:latest",
+        "configuration_image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+        "source_container_image": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508"
+      },
+      {
+        "service": "omni-gateway",
+        "tag": "omni-wiki-acceptance-gateway:latest",
+        "configuration_image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+        "source_container_image": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb"
+      },
+      {
+        "service": "omni-crm",
+        "tag": "omni-wiki-acceptance-crm:latest",
+        "configuration_image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+        "source_container_image": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72"
+      },
+      {
+        "service": "omni-srm",
+        "tag": "omni-wiki-acceptance-srm:latest",
+        "configuration_image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+        "source_container_image": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc"
+      },
+      {
+        "service": "omni-auth",
+        "tag": "omni-wiki-acceptance-auth:latest",
+        "configuration_image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+        "source_container_image": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe"
+      },
+      {
+        "service": "nacos",
+        "tag": "nacos/nacos-server:v3.1.1",
+        "configuration_image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+        "source_container_image": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13"
+      },
+      {
+        "service": "omni-base",
+        "tag": "omni-wiki-acceptance-base:latest",
+        "configuration_image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+        "source_container_image": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4"
+      },
+      {
+        "service": "xxl-job-admin",
+        "tag": "xuxueli/xxl-job-admin:3.3.1",
+        "configuration_image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+        "source_container_image": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093"
+      },
+      {
+        "service": "omni-db-migrator",
+        "tag": "omni-wiki-acceptance-db-migrator:seed-natural-keys-20261012",
+        "configuration_image_id": "sha256:fc239e1932b3265650eb133da9adfd79116bc5a097b65815bf8018fab7f0358d",
+        "source_container_image": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8"
+      },
+      {
+        "service": "rocketmq-broker",
+        "tag": "omni-wiki-acceptance-rocketmq-broker:5.3.2",
+        "configuration_image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+        "source_container_image": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090"
+      },
+      {
+        "service": "mysql",
+        "tag": "mysql:8.4",
+        "configuration_image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+        "source_container_image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242"
+      },
+      {
+        "service": "redis",
+        "tag": "redis:7.4",
+        "configuration_image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+        "source_container_image": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85"
+      },
+      {
+        "service": "rocketmq-namesrv",
+        "tag": "apache/rocketmq:5.3.2",
+        "configuration_image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+        "source_container_image": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587"
+      }
+    ],
+    "runtime": [
+      {
+        "service": "omni-asset",
+        "id": "5b2c4eec4867f468dfa4a3232a61209d7d3436b3b5ccc17894a04d2f2cff34d1",
+        "image": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "omni-procurement",
+        "id": "e83c1b4e17ff2766e52930a0c3bba7cdc28f3c349fc151654780bec89a6f9dd2",
+        "image": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "omni-gateway",
+        "id": "6b59d66e1cee9feeb2857ca0af52c98da16d49140c89409be91608da05f311bd",
+        "image": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "omni-crm",
+        "id": "77fa4b96da77d2a7d560df1eb2f1b4dd424064d4e3d0108e244c159de85a8b3f",
+        "image": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "omni-srm",
+        "id": "3118d45136e5ef98845e7a5d97758098ace21a368bd494276f62c7a081335f15",
+        "image": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "omni-auth",
+        "id": "a5d084d48b0d68d9dedb5d894d4b6e8e7df679c373b24c9b1814373ee36ef329",
+        "image": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "omni-workflow",
+        "id": "ec259edcbd662514ab71be0604eb0e25180cb0919252345b70ec61b1355bffc7",
+        "image": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "omni-base",
+        "id": "a1e08d5248b0372324b21e75fb8ca4647cd1af57e25221a4a0b1411c1eefaeda",
+        "image": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "nacos",
+        "id": "0285d75d8a0a82754ef8faa8f4d0bc447d0d15cc320d6a13dbfdafa56ed00c9a",
+        "image": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "rocketmq-broker",
+        "id": "c3b7a7f75b8630edf2545b537f654ed938c8b68e8a4cd7851d8a7c1187872dd0",
+        "image": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "xxl-job-admin",
+        "id": "e993a5a869b52a166b019bf6e7fe46033a6d2f8a90acb6a5acbff5cf1fe90112",
+        "image": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "redis",
+        "id": "076fffcd93849e4aac1fb9c9e3e6fd458f922dc9da2b2c5ece651dfe41ee43e3",
+        "image": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "omni-frontend",
+        "id": "444c4b7e87e13fd2fcf5ced2f9d744e48c417f945eae6e2b710db962cb731673",
+        "image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "status": "running",
+        "health": null,
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "omni-db-migrator",
+        "id": "d342204f43c95967542341f0ba8cceefd2bc14f24da9b596a0f10641547d789c",
+        "image": "sha256:fc239e1932b3265650eb133da9adfd79116bc5a097b65815bf8018fab7f0358d",
+        "status": "exited",
+        "health": "unhealthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "rocketmq-namesrv",
+        "id": "1a324c2e8bbba863cc3e4a0f9cb52cb96096495cfa80d1321a8d4c5d789e7aad",
+        "image": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      },
+      {
+        "service": "mysql",
+        "id": "8306499aa86ce6fc4a31324becc6072376c94efa3351253597b30c2efe736578",
+        "image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+        "status": "running",
+        "health": "healthy",
+        "exit_code": 0,
+        "host_port_bindings": 0
+      }
+    ],
+    "checks": [
+      {
+        "at": "2026-10-12T03:08:47.694Z",
+        "actor": "anonymous",
+        "path": "/api/auth/user/list?page=1&size=1",
+        "method": "GET",
+        "http": 401,
+        "code": 401
+      },
+      {
+        "at": "2026-10-12T03:08:47.76Z",
+        "actor": "admin",
+        "path": "/api/auth/user/list?page=1&size=1",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:47.916Z",
+        "actor": "outsider",
+        "path": "/api/workflow/model/list?page=1&size=10",
+        "method": "GET",
+        "http": 403,
+        "code": 403
+      },
+      {
+        "at": "2026-10-12T03:08:48.311Z",
+        "actor": "crmrep",
+        "path": "/api/crm/customer/6",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:48.398Z",
+        "actor": "crmrep",
+        "path": "/api/crm/opportunity/7",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:48.45Z",
+        "actor": "outsider",
+        "path": "/api/crm/customer/6",
+        "method": "GET",
+        "http": 200,
+        "code": 404
+      },
+      {
+        "at": "2026-10-12T03:08:48.95Z",
+        "actor": "srmstaff",
+        "path": "/api/srm/supplier/5",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:49.328Z",
+        "actor": "buyer",
+        "path": "/api/procurement/purchase-order/1",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:49.783Z",
+        "actor": "assetstaff",
+        "path": "/api/asset/transfer/2",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:49.859Z",
+        "actor": "assetstaff",
+        "path": "/api/asset/disposal/2",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:49.93Z",
+        "actor": "assetstaff",
+        "path": "/api/asset/asset/2108462215378907138",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:50.285Z",
+        "actor": "admin",
+        "path": "/api/base/dict/type/list?typeCode=WIKI_RESTORE_20261012A",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:50.401Z",
+        "actor": "admin",
+        "path": "/api/base/dict/type",
+        "method": "POST",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:50.471Z",
+        "actor": "admin",
+        "path": "/api/job/system-job/list",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:50.519Z",
+        "actor": "admin",
+        "path": "/api/job/system-job/3/trigger",
+        "method": "POST",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:50.61Z",
+        "actor": "admin",
+        "path": "/api/base/oper-log/list?operType=CREATE&size=100&page=1",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:52.65Z",
+        "actor": "admin",
+        "path": "/api/base/oper-log/list?operType=CREATE&size=100&page=1",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:54.694Z",
+        "actor": "admin",
+        "path": "/api/base/oper-log/list?operType=CREATE&size=100&page=1",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:56.736Z",
+        "actor": "admin",
+        "path": "/api/base/oper-log/list?operType=CREATE&size=100&page=1",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:56.838Z",
+        "actor": "admin",
+        "path": "/api/base/dict/type/31",
+        "method": "DELETE",
+        "http": 200,
+        "code": 200
+      },
+      {
+        "at": "2026-10-12T03:08:56.891Z",
+        "actor": "admin",
+        "path": "/api/base/dict/type/list?typeCode=WIKI_RESTORE_20261012A",
+        "method": "GET",
+        "http": 200,
+        "code": 200
+      }
+    ],
+    "business_state": {
+      "customer": "ACTIVE",
+      "opportunity": "WON",
+      "supplier": "APPROVED",
+      "order": "RECEIVED",
+      "total": "3500.0000",
+      "transfer": "COMPLETED",
+      "disposal": "COMPLETED",
+      "asset": "SCRAPPED"
+    },
+    "async": {
+      "status": "PASS",
+      "log_id": 234,
+      "operation": "CREATE",
+      "request_url": "/api/base/dict/type",
+      "count": 1,
+      "relay_trigger": "formal system-job API",
+      "fresh_broker": true,
+      "fresh_redis": true
+    },
+    "cleanup": {
+      "at": "2026-10-12T03:26:36.5914981Z",
+      "containers": 16,
+      "volumes": 3,
+      "network": 1,
+      "scope": "Only named owned restore copy; source and private backup retained"
+    },
+    "scheduler_quarantine": "Nine inherited active triggers disabled; stale registry cleared in restored copy only; Base relay triggered explicitly through formal API",
+    "login_proof": "Test-classpath tokens validate restored identity/roles/sessions; not new human CAPTCHA/password proof",
+    "initial_failed_attempt": "Read-only: expected403 on user-list, actual200 due existing role permission; no mutation; subsequently verified workflow:model:list403",
+    "migration_history_rows": 60,
+    "new_dictionary_remaining": 0,
+    "new_create_log_count": 1
+  }
+}

@@ -1,243 +1,173 @@
-# 采购申请、询价、报价、订单与收货完整业务流程
+# 从空业务环境走通采购到收货
 
-Procurement 负责物料目录、请购审批规则、请购、RFQ、报价汇聚、采购订单和收货。审批运行时始终位于 `omni-workflow`，采购服务不直接依赖 Flowable。
+适用基线：主干 fc165e3 及本次文档分支；需要 supply-chain 或 full。先完成[启动与首次登录](quick-start.md)、[SRM 准入](srm-flow.md)和[教学数据边界](../wiki/data-and-fixtures.md)。业务成功记录来自 2026-10-09 的独立本机 Docker 教学执行：请购审批、双供应商报价、定标、两批收货和 2 张来源资产卡核对；2026-10-12 的只读检查复用这些记录。本轮只复核文档、当前源码和已有证据，没有重新执行业务链路，历史结果不证明当前产物已完成综合验收。
 
-> 本文截图取自 WP006 真实主链验收环境（fixture `wp006-real-chain-v1`）：两类 WP005 基础物料 → 请购 PR-1-1 真实审批（10000 CNY）→ RFQ-1-1 双供应商真实报价 → 比价定标 → 采购订单 PO-1-1 → 三张收货单与两态质检。所有截图均为只读采集，由 `omni-frontend/e2e-docs/flows/wp006-visual.flows.spec.ts` 四语言实拍（68 项全部通过），无数据写入。
+验收按[已授权 AI 复核政策](../adr/0003-authorized-ai-translation-review.md)执行，实际 AI 语义复核通过即可，不要求人工翻译复核。[本轮复核范围](../reference/evidence/procurement-guide-review-2026-10-17.json)区分源码、原图和历史执行。旧执行因镜像仓库 DNS/认证失败使用缓存基础镜像验证，未证明正式生产基础镜像构建通过。
 
-## 1. 端到端流程
+## 1. 先准备身份、分类与记录表
 
-```text
-维护物料 → 配置审批规则 → 创建请购 → 提交审批 → 生成 RFQ
-→ 邀请供应商 → 接收报价 → 比价定标 → 创建订单 → 供应商确认 → 收货
-```
+所有身份处于同一教学租户。默认租户为 1，但不要把默认值套到其他环境。正式种子提供分类、币种和角色，不提供本页的请购、订单、报价或收货记录。
 
-每一步都有独立状态机。不能通过修改数据库状态跳过前置步骤。
+| 身份 | 准备与职责 |
+|---|---|
+| 引导管理员 | 使用正式用户/角色/组织页面建立教学身份，配置审批模型和规则 |
+| 申请人 | 分配 PROCUREMENT_STAFF；设置一个主组织，创建自己的请购 |
+| 采购经理/审批人 | 分配 PROCUREMENT_MANAGER；与申请人处于同一主组织，出现在实际候选人预览中 |
+| 供应商 A、B | 通过 SRM 邀请、Portal 注册与入驻 Saga，完成准入；均为 APPROVED，具有 SUPPLIER 和有效门户关联 |
+| 资产管理员/使用人 | 继续[资产教程](asset-flow.md)；领取与接受使用各自身份 |
 
-### 操作截图
+默认采购模型采购审批节点使用 PROCUREMENT_MANAGER + START_USER_PRIMARY_UNIT + SAME_UNIT。SUPER_ADMIN 功能权限不意味着自动成为审批候选人。先验证候选人，再发起实例；不要把“没有候选人”误判为采购接口故障。
 
-#### 图 1 `procurement-overview-zh-CN`：采购概览
+为本次操作选择唯一前缀 `WIKI-{run-id}`。保存一份仓库外的教学记录表：租户、身份、组织、物料 ID、规则/模型版本、请购 ID/单号/version、RFQ ID/明细 ID、报价 ID/version、PO ID/明细 ID、GR ID/明细 ID、资产 ID。每次响应刷新 version。ID 来自实际返回，不能抄历史图片中的数字。
 
-- 前置条件：以采购管理员身份登录，具备 `procurement:overview:list` 权限
-- 操作者：采购管理员
-- 操作：进入「采购执行管理 → 采购概览」
-- 预期结果：主内容区显示「采购概览」标题，金额按币种隔离汇总；真实链路收货完成订单 1 笔、已确认采购承诺 CNY 9000.0000
+10 月 12 日的经理身份同时持有 USER、PROCUREMENT_MANAGER、ASSET_MANAGER、TEAM_LEADER、WIKI_20261009A_WORKFLOW_DESIGNER；证据说明该实际身份的有效权限，不是只授予一个角色的隔离实验。
 
-![采购概览](../images/zh-CN/procurement-overview.png)
+## 2. 建立两种教学物料
 
-## 2. 物料目录
+进入「采购执行管理 → 物料目录」，由采购经理新建本次独有分类，使用大写字母与数字编码，如 `WIKICAT{run}`，记录实际 categoryId/categoryCode。两种物料都放在**同一教学分类**；单张请购混用分类返回 409。准入后的两个教学供应商也设置这个 categoryCode，以便按分类检索；不覆盖他人的供应商。
 
-物料分类和物料是租户共享基础数据。物料记录包含编码、名称、分类、单位、是否资产化和默认资产数量规则。删除前必须检查是否已被请购或采购单据引用。
+| 记录 | materialCode / 名称前缀 | 单位 | assetManaged | 数量 | 预估单价 |
+|---|---|---|---|---|---|
+| A | WIKI-{run-id}-A / 教学样机 | PCS | true | 3 | 1000.0000 |
+| B | WIKI-{run-id}-B / 教学配件 | PCS | false | 10 | 100.0000 |
 
-资产化物料在收货合格时才产生资产候选事件。`assetQuantity` 必须是精确正整数，金额和数量按接口契约使用十进制字符串或明确精度。
+物料均启用 ACTIVE。创建后刷新列表，按编码确认只存在各一条。接口字段见[物料 API](../../omni-frontend/src/api/procurement-material.ts)。价格和数量在接口中为十进制字符串；教学请购总额应为 CNY 4000.0000。教学分类是本例的共同分类，不决定是否建卡；建卡还要检查 assetManaged 和质检结果。
 
-### 操作截图
+## 3. 发布审批模型并启用规则
 
-#### 图 2 `procurement-material-list-zh-CN`：物料目录列表
+在「审批流程管理 → 流程模型」查找 procurement-approval，先检查当前发布版本。标准引导程序通常已发布必需业务模型；有有效发布版时直接记录。需要修改时另存草稿，检查候选配置、校验并发布新版。角色、主组织和 Workflow 组织作用域是不同配置，按[教学数据](../wiki/data-and-fixtures.md)核对候选人绑定。
 
-- 前置条件：以采购管理员身份登录，具备物料目录查看权限
-- 操作者：采购管理员
-- 操作：进入「采购执行管理 → 物料目录」
-- 预期结果：列表显示两类真实 WP005 基础物料（资产化与非资产化各一）
+在「采购执行管理 → 请购审批规则」建立本次教学分类规则，金额范围 `[0, 10000)`，选择当前发布版本。「先试一笔」输入实际 categoryCode 与 4000，预期 MATCHED、模型 AVAILABLE、候选人正确；查看覆盖分析后启用。复用已有规则时核对范围与版本，不覆盖他人的配置。重叠或断档按实际分析处理。
 
-![物料目录](../images/zh-CN/procurement-material-list.png)
+命中试算只检查规则与模型可用性，不会启动审批，也不证明当前用户就是实际候选人；仍需按申请人主组织核对资格。首次访问尚未初始化的租户时，后端可能幂等建立默认配置和分类；旧租户只读回执不能推导所有新租户访问均零写入。
 
-#### 图 3 `procurement-forbidden-403-zh-CN`：无权限访问拒绝
+## 4. 申请人创建并提交请购
 
-- 前置条件：以无采购权限的普通员工身份登录
-- 操作者：普通员工
-- 操作：直接访问物料目录路由
-- 预期结果：呈现 403 无权访问拒绝页而非空列表，页面不泄露任何数据
+1. 用申请人账号进入「请购申请」，创建 WIKI-{run-id}-PR，选择 A、B，填上表数量与预估价格。
+2. 保存草稿：预期 DRAFT、币种 CNY、总额 4000.0000，记录真实 ID/单号/version。
+3. 提交：预期进入提交/审批过程，workflowStartStatus 最终 STARTED；记录 processInstanceId。
+4. 采购经理进入自己的「待办任务」，打开该请购，核对金额与明细后通过。等待采购详情最终 APPROVED。
 
-![403 拒绝](../images/zh-CN/procurement-forbidden-403.png)
+提交返回不代表跨服务审批已结束。仅当 status=SUBMITTED 且 workflowStartStatus=FAILED 时，先排查模型、候选人和 MQ/Workflow，刷新详情，用当前 version 执行「重试启动」；服务复用原审批轮次、请求和模型快照。不要重新提交或另建请购掩盖结果不明的上一笔。
 
-## 3. 请购审批规则
+另建带本次前缀的草稿练习拒绝和撤回/取消：由实际候选人拒绝后核对 REJECTED；取消按页面当前状态允许的动作执行。主链使用已通过的那笔，拒绝单不能拿来创建 RFQ。
 
-“请购审批规则”面向采购业务人员，不要求理解模型版本 ID。创建规则时：
+## 5. 发询价，让两个供应商分别报价
 
-1. 选择适用品类或默认范围。
-2. 设置包含下限、不包含上限的金额区间。
-3. 选择当前已发布的采购审批流程。
-4. 查看真实审批路径预览。
-5. 使用“先试一笔”输入品类和金额验证匹配结果。
-6. 确认覆盖分析无断档或冲突后启用。
+1. 采购人员由 APPROVED 请购创建 WIKI-{run-id}-RFQ，设置未来的报价截止时间，选择已准入的 A、B 供应商并保存。
+2. 核对 DRAFT、请购来源、币种和明细，再发送，预期 SENT。
+3. 供应商 A、B 各自登录「供应商门户 → 询价报价」，只打开自己的邀请，逐行填报价、交付天数和有效期并提交。
+4. 本例供应商 A 报 A=950.0000、B=100.0000，总额 3850.0000；供应商 B 报 A=900.0000、B=80.0000，总额 3500.0000。
+5. 采购人员刷新比较视图，直到出现两个实际 quotationId/version、相同 CNY 和正确总额。报价异步汇聚，Portal 成功响应不等于采购侧已消费事件。
 
-停用或删除前页面会展示新增断档和受影响范围。规则按服务端解析器匹配，前端不复制判断算法。
+报价按本次 RFQ 明细 ID 填写。供应商不能读取另一供应商的邀请或报价。超期、已取消等状态拒绝新报价，不能修改数据库绕过限制。
 
-### 操作截图
+## 6. 定标和记录订单确认
 
-#### 图 4 `procurement-approval-rules-zh-CN`：请购审批规则入口
+采购人员在比价页选择供应商 B 当前报价版本，填写教学收货地址和虚构联系人，提交定标。`award` 响应同时包含 RFQ 和新建 PO：预期 RFQ=AWARDED、PO=DRAFT、总额 3500.0000。直接记录返回的 PO，不再重复创建订单。请求须同时携带当前 `rfqVersion`、所选 `quotationId` 和对应 `quotationVersion`；旧版本冲突后先核对既有定标与 PO 副作用，再决定下一步。
 
-- 前置条件：以采购管理员身份登录，具备 `procurement:approval-route:list` 权限
-- 操作者：采购管理员
-- 操作：进入「采购执行管理 → 请购审批规则」
-- 预期结果：主内容区显示「请购审批规则」标题、真实 LAPTOP 品类三个金额区间规则、「先试一笔」与审批覆盖风险卡片
+发送 PO 后为 SENT。**当前项目由有权限的采购管理端记录供应商已确认**：核实业务确认后，采购人员执行「确认」，预期 CONFIRMED；供应商门户目前承担询价报价，没有独立的 PO 确认按钮。本页不把管理端动作写成供应商 Portal 操作。权限为 procurement:purchase-order:confirm，同时受数据范围约束。
 
-![请购审批规则](../images/zh-CN/procurement-approval-rules.png)
+## 7. 分两批收货，验证质检与建卡
 
-#### 图 5 `procurement-approval-rules-mobile-zh-CN`：390×844 响应式
+使用返回的 poLineId 建立两张草稿收货单；每张保存后还要执行「确认」。日期时间为 `yyyy-MM-dd HH:mm:ss`。
 
-- 前置条件：同图 4
-- 操作者：采购管理员
-- 操作：390×844 视口打开同一页面
-- 预期结果：页面正常渲染无横向滚动，核心文案完整
+| 批次 | A 物料实收/质检 | B 物料实收/质检 | 预期 |
+|---|---|---|---|
+| GR-1 | 1 / FAIL | 10 / PASS | 订单 PARTIAL_RECEIVED；两行均不建资产卡 |
+| GR-2 | 2 / PASS | 本批不再收 B | 订单 RECEIVED；A 的合格数量产生 2 张资产卡 |
 
-![请购审批规则移动端](../images/zh-CN/procurement-approval-rules-mobile.png)
+FAIL 仍计入订单累计实收，但不产生资产候选卡；非资产化 B 即使 PASS 也不建卡。普通收货请求填写 receivedQuantity 和 qualityStatus，不自行伪造事件里的 assetQuantity。确认前校验累计实收不超过订单数量。
 
-#### 图 6 `procurement-approval-rules-tablet-zh-CN`：1024×768 响应式
+在资产台账按本次来源核对 2 张卡，不能用全库资产总数判断。若暂未出现，按 GR、Outbox、Inbox 关联查中继和消费者。重复投递相同事件后仍应为同两张卡；这项证据需要受控消息重放，不用重复点创建收货单来代替。接着练习分配、接受、归还和调拨/处置，见[资产教程](asset-flow.md)。
 
-- 前置条件：同图 4
-- 操作者：采购管理员
-- 操作：1024×768 视口打开同一页面
-- 预期结果：布局自适应，功能入口完整
+## 8. 必须保留的失败与恢复检查
 
-![请购审批规则平板端](../images/zh-CN/procurement-approval-rules-tablet.png)
+| 场景 | 应看到的边界与恢复 |
+|---|---|
+| 单张请购包含两种分类 | 409；改为同一分类或拆单，不放宽领域校验 |
+| 普通员工无采购权限 | 403/无可用操作；不泄露列表，不用空列表当拒绝证明 |
+| 供应商访问管理路由/其他邀请 | 管理域重定向或接口拒绝；自己的 Portal 仍可用 |
+| 使用过期 version 再提交命令 | 冲突；刷新详情，先确认上次副作用，再决定下一条命令 |
+| 审批拒绝/流程启动失败 | 业务状态与 Workflow 相符；按允许的修订或 retry-start 恢复 |
+| RFQ 截止/取消后报价 | 拒绝；新业务需新 RFQ，原邀请不改状态 |
+| 累计超收或资产化数量为非整数 | 校验拒绝；使用合法剩余数量，不手改已收数量 |
+| MQ 失败或消息重投 | 留下失败/重试证据，恢复后无重复报价、订单或资产卡 |
 
-#### 图 7 `procurement-rule-match-success-zh-CN`：先试一笔服务端试算
+出现创建请求超时，先按唯一业务键查询；创建接口不是都接受 requestId，不能盲目重发。Saga 请求重试复用原 requestId，其他命令按各自版本/幂等契约处理。
 
-- 前置条件：同图 4
-- 操作者：采购管理员
-- 操作：在「先试一笔」选择品类“笔记本电脑”、输入金额 5000 触发服务端试算（只读解析，不创建对象）
-- 预期结果：MATCHED 命中 WP006FIX-LAPTOP-small（0 ≤ x < 10000）并展示真实审批路径
+## 9. 收尾、定位与截图
 
-![试算命中](../images/zh-CN/procurement-rule-match-success.png)
+草稿按正式删除接口清理；已提交记录按允许状态拒绝、撤回或取消。已收货/建卡链保留可追溯终态，不物理删库。列出本次前缀涉及的确切对象与不能删除的原因，不删除基础种子、用户旧记录或 volume。
 
-## 4. 请购
+定位按请购、processInstanceId、RFQ、报价、PO、GR、Outbox/Inbox 和 Trace ID 关联。源码与测试入口见[源码调试](../wiki/source-debugging.md)，契约见[采购设计](../design/procurement-design.md)。
 
-请购包含申请人、组织、用途和明细。草稿可编辑和删除；提交后锁定关键字段并启动 Workflow。启动使用持久化请求与重试协调，出现 `START_FAILED` 时可诊断重试，不能重复创建审批实例。
+### 本次链路的真实截图
 
-审批通过后请购进入可采购状态；拒绝、撤回或取消按领域规则恢复。申请人数据范围与 RFQ/订单负责人范围不同。
+以下为 2026-10-09 独立本机 Docker 项目的真实历史记录。[来源记录](../reference/evidence/supply-chain-2026-10-09.json)绑定普通角色、源码摘要、镜像、用例与图片 SHA；其 48 张图曾按 12 组四语原分辨率联系表检查，本页使用其中 28 张，不应写成当时逐张单独打开。宽表的隐藏列须横向滚动，截图只证明可见字段；业务结果须结合对应日期的 API 断言，不能由图片推导本轮已重测。
 
-本验收环境的请购 PR-1-1（10000 CNY）经真实 Workflow 审批通过（APPROVED），审批意见 WP006 main chain approval。
+请购批准：采购经办人打开本次请购详情，核对已批准、金额 4000 CNY 和两行物料数量。
 
-### 操作截图
+![请购批准](../images/zh-CN/procurement-requisition-approved.png)
 
-#### 图 8 `procurement-requisition-list-zh-CN`：请购列表
+请购驳回：打开独立的被拒绝申请，核对业务状态与保留的原流程实例。
 
-- 前置条件：以采购管理员身份登录
-- 操作者：采购管理员
-- 操作：进入「采购执行管理 → 请购管理」
-- 预期结果：列表显示真实 PR-1-1（APPROVED）
+![请购驳回](../images/zh-CN/procurement-requisition-rejected.png)
 
-![请购列表](../images/zh-CN/procurement-requisition-list.png)
+草稿取消：打开本次取消记录，核对已取消且未启动审批，不能据此推定运行中审批可随意取消。
 
-#### 图 9 `procurement-requisition-detail-zh-CN`：请购详情抽屉
+![草稿取消](../images/zh-CN/procurement-requisition-cancelled.png)
 
-- 前置条件：同图 8
-- 操作者：采购管理员
-- 操作：打开 PR-1-1 行「详情」抽屉
-- 预期结果：显示审批 attempt、Workflow 流程实例 ID 与明细行
+询价定标：打开 RFQ 详情，核对 Vendor D 中标、Vendor C 未中标及对应报价版本。
 
-![请购详情](../images/zh-CN/procurement-requisition-detail.png)
+![询价已定标](../images/zh-CN/procurement-rfq-awarded.png)
 
-## 5. RFQ 与供应商报价
+订单收货完成：打开同源 PO，核对总额 3500 CNY、两行累计收齐和待收数量 0。
 
-从已批准请购创建 RFQ，选择有效供应商并发送。供应商在 Portal 提交报价后，SRM 通过可靠消息通知 Procurement。消费者按事件 ID 幂等更新报价。
+![订单已收货](../images/zh-CN/procurement-purchase-order-received.png)
 
-比价视图比较价格、税率、交期和备注。业务人员定标前应确认币种、含税口径、截止状态和供应商有效性。取消或截止的 RFQ 拒绝新报价。
+首批收货：A 数量 1、质检 FAIL、资产化是；B 数量 10、质检 PASS、资产化否。无卡片结果由来源查询验证，不能仅从收货图断言。
 
-本验收环境的 RFQ-1-1 向两家真实供应商发送并收到报价，定标结果为中标报价 #2 / v1。定标后比价入口收起，详情抽屉以定点快照呈现报价接收与比价定标结果。
+![不合格与非资产化收货](../images/zh-CN/procurement-goods-receipt-fail-nonasset.png)
 
-### 操作截图
+第二批收货：A 数量 2、质检 PASS、资产化是。随后按该 GR 来源核对恰好两张卡。
 
-#### 图 10 `procurement-rfq-list-zh-CN`：询价比价列表
+![合格资产化收货](../images/zh-CN/procurement-goods-receipt-pass.png)
 
-- 前置条件：以采购管理员身份登录
-- 操作者：采购管理员
-- 操作：进入「采购执行管理 → 询价比价」
-- 预期结果：列表显示真实 RFQ-1-1（已定标）
+## 10. 复查物料、规则与概览
 
-![询价列表](../images/zh-CN/procurement-rfq-list.png)
+完成前面的独立教学链后，以同租户普通采购经理打开以下页面。2026-10-12 的[只读来源记录](../reference/evidence/procurement-readonly-2026-10-12.json)复用了本次教学对象，没有重建请购、订单或收货；新环境应使用自己记录的分类和名称，不能照抄截图中的 ID。
 
-#### 图 11 `procurement-rfq-detail-award-zh-CN`：RFQ 详情与定点快照
+1. 在物料目录选中教学分类，再搜索本次物料前缀。应只显示 A、B 两行，均为 ACTIVE，资产化分别为是、否；只搜索前缀可能同时找到同前缀的负例分类。
+2. 在请购审批规则的试算区选择同一分类，输入 `4000` 后点击试算。期望 MATCHED、自己的启用规则和 AVAILABLE 模型；本次实际命中规则 1、模型版本 2。`POST /api/procurement/approval-route/match-preview` 是只读计算，不创建流程实例。
+3. 在采购概览核对当前身份的数据范围。本次链路的已承诺金额是 CNY 3500.0000，来自已收货订单；四个待办计数为 0。新环境显示自身数据，不能把截图金额当成种子数据。
 
-- 前置条件：同图 10
-- 操作者：采购管理员
-- 操作：打开 RFQ-1-1 行「详情」抽屉
-- 预期结果：显示两供应商报价 ID 与中标报价 #2 / v1 定点结果（比价定标语义面与定点快照同图呈现）
+![同一教学分类下的两种物料](../images/zh-CN/procurement-current-material.png)
 
-![RFQ 详情定点](../images/zh-CN/procurement-rfq-detail-award.png)
+![分类与金额 4000 的真实规则试算](../images/zh-CN/procurement-current-rule-match.png)
 
-#### 图 12 `procurement-portal-quotation-record-zh-CN`：供应商门户报价记录
+![当前采购范围的概览](../images/zh-CN/procurement-current-overview.png)
 
-- 前置条件：以中标供应商账号（supplier2）登录
-- 操作者：供应商
-- 操作：进入「供应商门户 → 询价报价」页签
-- 预期结果：显示本轮真实报价记录 RFQ-1-1（当前报价 CNY 9000，已中标）
+手机 390×844 下侧栏初始收起；点击顶部菜单可展开，再点击可收起，随后操作分类、金额和试算按钮。平板 1024×768 也使用同一试算。四语言、三种视口共 12 次真实试算均命中，页面无整体横向溢出。
 
-![门户报价记录](../images/zh-CN/procurement-portal-quotation-record.png)
+![手机规则试算](../images/zh-CN/procurement-current-rule-match-mobile.png)
 
-## 6. 采购订单
+![平板规则试算](../images/zh-CN/procurement-current-rule-match-tablet.png)
 
-定标后创建采购订单。订单从草稿到发送、供应商确认、部分收货、全部收货或取消。发送后关键价格与供应商不能随意修改；取消需要检查是否已有收货。
+手机结果表需要在表内横向滚动查看全部列；原图证明金额、试算按钮和命中结果，模型版本另由真实响应断言核对。部分英文侧栏长名称会截断，日/韩平板图滚动到试算区后页标题部分位于固定顶栏下；这些图只说明可见操作和结果。分类、模型、节点名称及原始服务端诊断属于现存业务数据，可能保留中文，不代表对应界面标签未切换语言。截图目检只覆盖视觉可读性；四语文档按前述授权政策完成实际 AI 语义复核即可。
 
-本验收环境的 PO-1-1（9000 CNY）两行明细均已按订单数量完成收货（RECEIVED）。
+## 11. 定标后核对两家供应商的记录
 
-### 操作截图
+比价与定标操作只在 RFQ 为 SENT 时执行。AWARDED 后比价入口收起，`GET /api/procurement/rfq/{id}/comparison` 返回 HTTP 200、业务码 409；不能为了补图修改状态或重新定标。
 
-#### 图 13 `procurement-purchase-order-list-zh-CN`：采购订单列表
+采购经理打开 RFQ 详情，查看保留的报价 ID、版本与中标报价。本次 Vendor C 为 #1/v1、邀请结果 REJECTED，Vendor D 为 #2/v1、AWARDED，中标报价为 #2/v1。这张图证明结果记录，不证明曾在界面点击实时比价或定标。
 
-- 前置条件：以采购管理员身份登录
-- 操作者：采购管理员
-- 操作：进入「采购执行管理 → 采购订单」
-- 预期结果：列表显示真实 PO-1-1（已收货）
+![定标后的报价版本与中标结果](../images/zh-CN/procurement-current-quote-versions.png)
 
-![订单列表](../images/zh-CN/procurement-purchase-order-list.png)
+分别以供应商 C、D 登录门户，打开“询价报价”，按本次 RFQ 找到自己的报价。C 合计 CNY 3850，D 合计 CNY 3500。点击查看会打开只读详情，关闭后仍可核对列表金额和邀请结果。已关闭询价不重新提交报价；未中标不等于该供应商看不到自己的历史记录。
 
-#### 图 14 `procurement-purchase-order-detail-zh-CN`：订单详情跟踪器
+![供应商 C 的报价和未中标结果](../images/zh-CN/procurement-current-supplierC-quote.png)
 
-- 前置条件：同图 13
-- 操作者：采购管理员
-- 操作：打开 PO-1-1 详情（订单跟踪器）
-- 预期结果：两行明细展示订单数量、已收数量与金额
+![供应商 D 的报价和中标结果](../images/zh-CN/procurement-current-supplierD-quote.png)
 
-![订单详情](../images/zh-CN/procurement-purchase-order-detail.png)
-
-## 7. 收货
-
-收货单逐行记录实收数量、质量状态和资产数量。只有 `qualityStatus=PASS`、物料 `assetManaged=true` 且资产数量为精确正整数时，才发布资产候选事件。
-
-重复提交、消息重投和 Asset 回填都必须保持幂等。完成后在采购概览核对订单与收货状态，在资产台账核对实际建卡结果。
-
-本验收环境生成三张真实收货单（GR-1-1 / GR-1-2 / GR-1-3），其中 GR-1-2 呈现真实质检两态（一行不合格、一行合格）。
-
-### 操作截图
-
-#### 图 15 `procurement-goods-receipt-list-zh-CN`：收货单列表
-
-- 前置条件：以采购管理员身份登录
-- 操作者：采购管理员
-- 操作：进入「采购执行管理 → 收货管理」
-- 预期结果：列表显示三张真实收货单 GR-1-1 / GR-1-2 / GR-1-3
-
-![收货列表](../images/zh-CN/procurement-goods-receipt-list.png)
-
-#### 图 16 `procurement-goods-receipt-detail-quality-zh-CN`：收货详情与质检两态
-
-- 前置条件：同图 15
-- 操作者：采购管理员
-- 操作：打开 GR-1-2 详情抽屉
-- 预期结果：material1 行不合格、material2 行合格的真实质检结果与资产化标记
-
-![收货详情质检](../images/zh-CN/procurement-goods-receipt-detail-quality.png)
-
-## 8. 权限与排查
-
-- 采购管理员维护物料和审批规则。
-- 申请人创建并查看自己或组织范围内的请购。
-- 采购负责人管理 RFQ、订单和收货。
-- 供应商只在 Portal 查看自己的邀请和报价。
-
-供应商账号直接访问采购管理路由时，前端路由守卫按角色域隔离将其重定向回供应商门户，管理界面不向供应商泄露。
-
-### 操作截图
-
-#### 图 17 `procurement-supplier-domain-isolation-zh-CN`：供应商角色域隔离
-
-- 前置条件：以供应商账号登录
-- 操作者：供应商
-- 操作：直接访问采购管理路由
-- 预期结果：路由守卫重定向回供应商门户，不出现管理界面内容
-
-![角色域隔离](../images/zh-CN/procurement-supplier-domain-isolation.png)
-
-跨服务问题按业务单号、Workflow 实例 ID、Outbox 消息 ID、Inbox 事件 ID 和 Trace ID 排查。详细约束见 [Procurement 设计](../design/procurement-design.md)。
+[本次只读回执](../reference/evidence/procurement-quotation-2026-10-12.json)绑定普通角色、版本、金额与原图摘要。单价由真实响应及详情控件断言验证，正式列表图只证明可见总额与状态。供应商图通过产品自身按钮切到浅色主题；日文长表头会在列内换行。31 张原图逐张复核后发布 12 张，7 张绘制不完整图被排除，12 张可读但重复的详情图保留在私有记录；没有重放业务写入。以上 31 张原图的检查发生于 2026-10-12；本轮新抽看的 20 张原图与未重新打开的其余 40 张分别列在本轮复核范围中。

@@ -15,7 +15,21 @@ for (const locale of docsLocales) {
   for (const scene of publicScenes) {
     test(`${scene.id} / ${locale}`, async ({ page }) => {
       await prepareDocsPage(page, { locale })
+      const deviceResponse = scene.id === 'auth-device-code'
+        ? page.waitForResponse((response) => response.url().endsWith('/oauth2/device_authorization') && response.request().method() === 'POST')
+        : undefined
       await page.goto(scene.route)
+      if (deviceResponse) {
+        const response = await deviceResponse
+        expect(response.status(), '真实设备授权接口必须成功').toBe(200)
+        const authorization = await response.json() as { user_code?: string; expires_in?: number }
+        expect(typeof authorization.user_code).toBe('string')
+        expect(authorization.expires_in).toBeGreaterThan(0)
+        await expect(page.locator('.user-code-text')).toBeVisible()
+        await expect(page.locator('.qr-code-image')).toBeVisible()
+        await expect(page.locator('.device-countdown')).toContainText(/\d+:\d{2}/)
+        await expect(page.locator('.device-status-text')).toHaveCount(0)
+      }
       await waitForDocsPage(page, scene.selector)
       await captureDocsImage(page, locale, scene.id)
     })

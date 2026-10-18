@@ -1,8 +1,8 @@
 # CRM 销售管道
 
-> 本文档是 CRM 模块的系统真相，AI 修改 CRM 代码前必须先读。
-> 架构总览见 [architecture.md](architecture.md)，API 契约见 [api-contract.md](api-contract.md)，开发规范见 [backend-patterns.md](backend-patterns.md) / [frontend-patterns.md](frontend-patterns.md)。
-> 设计基线存档见 [design/crm-design.md](design/crm-design.md)。
+> 本文记录当前 CRM 实现的边界、契约和约束；中文为事实源。修改 CRM 代码前先读本文。
+> 工程入口：[架构](architecture.md)、[API 契约](api-contract.md)、[后端规范](backend-patterns.md)、[前端规范](frontend-patterns.md)。[原始设计](design/crm-design.md) 是历史基线，发生差异时以当前源码为准。
+> 操作教程与真实截图见 [CRM Wiki](guides/crm-flow.md)；扩展和 Docker 测试步骤见 [开发 Wiki](guides/scaffold-development.md#8-crm-扩展与容器测试)。
 
 CRM 是独立微服务 `omni-crm`，覆盖售前闭环：线索 → 跟进 → 客户/联系人 → 商机 → 赢单或输单。产品、报价、合同、订单、开票、回款、营销自动化和客服工单不在 CRM 范围内。
 
@@ -16,7 +16,7 @@ CRM 是独立微服务 `omni-crm`，覆盖售前闭环：线索 → 跟进 → �
 | XXL-JOB 执行器 | `omni-crm` / `9904` |
 | 数据库 | `omni_crm` |
 | Gateway 路由 | `/api/crm/**` → `lb://omni-crm`（不使用 StripPrefix） |
-| Redis | DB 0，共享 Auth 的 XSS 配置，键前缀 `crm:` |
+| Redis | DB 0，共享 Auth 的 XSS 公共缓存键 |
 
 **依赖模块**：`omni-common-service`、`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`。
 
@@ -36,17 +36,18 @@ CRM 是独立微服务 `omni-crm`，覆盖售前闭环：线索 → 跟进 → �
 | Activity | `crm_activity` | 计划、完成、取消跟进 |
 | Pipeline | `crm_pipeline`、`crm_pipeline_stage` | 管道与阶段定义 |
 | Ownership Audit | `crm_owner_change_log` | 负责人变更的不可变历史 |
+| 租户配置 | `crm_tenant_config` | defaultPipelineId / currencyCode / leadDuplicatePolicy |
 
 ```mermaid
 erDiagram
-    CRM_PIPELINE ||--o{ CRM_PIPELINE_STAGE : contains
-    CRM_LEAD ||--o| CRM_LEAD_CONVERSION : converts
-    CRM_CUSTOMER ||--o{ CRM_CONTACT : has
-    CRM_CUSTOMER ||--o{ CRM_OPPORTUNITY : owns
-    CRM_OPPORTUNITY ||--o{ CRM_OPPORTUNITY_STAGE_HISTORY : changes
-    CRM_LEAD_CONVERSION }o--|| CRM_CUSTOMER : links
-    CRM_LEAD_CONVERSION }o--|| CRM_CONTACT : links
-    CRM_LEAD_CONVERSION }o--o| CRM_OPPORTUNITY : optionally_creates
+    CRM_PIPELINE ||--o{ CRM_PIPELINE_STAGE : 包含
+    CRM_LEAD ||--o| CRM_LEAD_CONVERSION : 转换
+    CRM_CUSTOMER ||--o{ CRM_CONTACT : 拥有
+    CRM_CUSTOMER ||--o{ CRM_OPPORTUNITY : 归属
+    CRM_OPPORTUNITY ||--o{ CRM_OPPORTUNITY_STAGE_HISTORY : 变更
+    CRM_LEAD_CONVERSION }o--|| CRM_CUSTOMER : 关联
+    CRM_LEAD_CONVERSION }o--|| CRM_CONTACT : 关联
+    CRM_LEAD_CONVERSION }o--o| CRM_OPPORTUNITY : 可选创建
 ```
 
 `crm_activity` 用 `root_type + root_id` 多态关联 Lead/Customer/Opportunity。Service 必须验证目标存在、同租户且当前用户可访问。
@@ -94,7 +95,7 @@ Gateway JWT 验证 → CRM Tenant 校验 → Spring Security @PreAuthorize
 CRM 通过 `CrmTenantTablePolicy` 和 `CrmDataPermissionHandler` 向 `omni-common-service` 提供领域策略，公共 Starter 装配 `mybatisPlusInterceptor`，顺序固定不可调换：
 
 ```
-TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInterceptor
+TenantLineInnerInterceptor → DataPermissionInterceptor → OptimisticLockerInnerInterceptor → PaginationInnerInterceptor
 ```
 
 - TenantLine 只处理 `crm_*` 表
@@ -113,7 +114,7 @@ TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInte
 
 ### 3.4 写操作行级授权
 
-DataPermissionInterceptor 不保护写入。每个更新/删除/转换/转移/阶段命令必须：
+DataPermission 不能替代显式的行级写授权；专用 SQL 可能忽略 owner 过滤。每个更新/删除/转换/转移/阶段命令必须：
 
 1. 以 `tenant_id + id + data scope` 查询可见记录（不可见 → 404，防 ID 枚举）
 2. 校验状态机和业务不变量
@@ -137,16 +138,18 @@ DataPermissionInterceptor 不保护写入。每个更新/删除/转换/转移/�
 
 ### 3.6 PII 掩码
 
-- 完整手机、邮箱、地址只返回给持有 `crm:pii:view` 的用户
-- 其他用户后端 VO 直接返回掩码值（`138****1234`、`a***@example.com`），不依赖前端遮挡
-- 列表默认掩码，详情按权限决定
-- 重复检测只返回最小候选摘要
+- 线索、客户、联系人专用列表始终使用脱敏 VO；详情根据 `crm:pii:view` 决定是否返回完整联系信息。
+- 活动专用列表/时间线在无明文模式下将非空白内容变为 `[REDACTED]`；`null` 和空白内容保持原值，详情按 PII 权限处理。
+- 后端 `CustomerServiceImpl.overview` 的联系人与活动块使用详情的 PII 权限标志，不能把“所有集合始终脱敏”作为契约。界面 `CustomerOverview.vue` 当前分别调用客户详情、联系人列表、开放商机列表和活动时间线，未复用 overview 的整包响应。
+- 重复检测只返回候选 ID、编号、名称与脱敏联系摘要。编辑界面先重读详情，无 PII 权限时禁用并省略敏感输入；这不是独立的后端字段写权限机制。
 
 ### 3.7 XSS 防护
 
-CRM 启用 `omni-common-service` 的共享 `XssConfigProvider`，读取 Redis DB 0 的 `xss:enabled:{tenantId}` 和 `xss:rules:{tenantId}`。缓存 miss 时回源 Auth；回源失败使用公共安全基线，不关闭防护。MVP 备注只允许纯文本，前端禁止 `v-html`。
+CRM 通过 `omni.service.xss.enabled=true` 使用公共 Starter 的 `CachedServiceXssConfigProvider`，不是在 CRM 中另写 SPI 实现。读取 Redis DB 0 的 `xss:enabled:{tenantId}` 与 `xss:rules:{tenantId}`；缓存缺失或异常时回源 Auth，回源失败使用公共安全基线。权威配置中的 enabled 值仍被尊重。备注按纯文本处理，前端禁止 `v-html`。
 
 ### 3.8 角色与 dataScope
+
+以下是正式 auth.sql 的默认租户种子示例；不作为每个新租户已拥有这些角色的证据。
 
 | 角色 | dataScope | 能力 |
 |---|---|---|
@@ -168,7 +171,7 @@ NEW/FOLLOWING/QUALIFIED → DISQUALIFIED
 DISQUALIFIED → FOLLOWING（重新激活）
 ```
 
-- 只有 `QUALIFIED` 可转换；`DISQUALIFIED` 必填原因；`CONVERTED` 为终态
+- 首次转换要求 `QUALIFIED`；`DISQUALIFIED` 必填原因；`CONVERTED` 为终态
 
 ### 4.2 Customer 状态
 
@@ -185,10 +188,10 @@ Opportunity 赢单可将 POTENTIAL 自动转为 ACTIVE。客户有开放商机�
 DISCOVERY → QUALIFICATION → PROPOSAL → NEGOTIATION → WON / LOST
 ```
 
-- 开放阶段可前进或回退，回退必须写原因
-- LOST 必填输单原因；WON/LOST 为终态
-- 重开需要 `crm:opportunity:reopen`，恢复到最后一个开放阶段
-- 所有迁移追加 Stage History，普通 PUT 不接受 stage/status
+- 这是默认阶段顺序，不限制命令只能前进到相邻阶段。阶段命令锁定可见记录、检查当前 `OPEN` 与请求版本，要求当前/目标阶段启用且同属一个管道，拒绝相同阶段。
+- 向较小 sort 回退必须有 reason；目标 `LOST` 还必须有 lossReason。迁移执行版本条件更新，写历史和本地 Outbox。
+- `WON` 尝试将关联的未删除 `POTENTIAL` 客户改为 `ACTIVE`，专用 SQL 忽略 owner 条件但保留租户条件；服务没有强制要求该 SQL 影响一行，不能承诺每种客户状态都被激活。
+- `WON/LOST` 的普通编辑被拒绝。专用 `crm:opportunity:reopen` 命令从最近一次关闭历史取 fromStageId，要求该阶段仍启用，恢复 `OPEN` 与阶段概率并清空关闭时间/输单原因，追加 `REOPEN` 历史和阶段事件。
 
 ### 4.4 Activity 状态
 
@@ -200,15 +203,21 @@ CANCELLED → PLANNED（重新计划）
 ### 4.5 Lead 转换流程
 
 ```
-POST /lead/{id}/convert → SELECT Lead FOR UPDATE
-→ 查询已有 Conversion（幂等检查）
-→ 创建或关联 Customer + Contact
-→ 可选创建 Opportunity
-→ INSERT Conversion + Lead → CONVERTED
-→ INSERT Outbox 事件（同事务）
+POST /api/crm/lead/{id}/convert
+→ 校验 DTO、功能权限和数据范围
+→ SELECT 可见且未删除的 Lead FOR UPDATE
+→ 已有 Conversion：返回原 IDs、idempotentReplay=true
+→ 首次转换：检查 QUALIFIED 与 version
+→ 创建或关联 Customer + Contact；可选创建 Opportunity
+→ Lead → CONVERTED，活动迁移到 CUSTOMER 并同步客户 owner
+→ INSERT Conversion → INSERT 本地 Outbox（同一事务）
 ```
 
-转换使用行锁 + `lead_id` 唯一约束双重幂等。已转换的 Lead 再次请求直接返回已有结果。Feign、Workflow 和真实 MQ 发送不在 CRM DB 事务内，事件只写本地 Outbox。
+唯一约束是 `(tenant_id, lead_id)`。重放发生在状态/版本检查之前，但仍需通过请求校验、权限和记录可见性，且不重复写业务行或 Outbox。
+
+新客户继承线索 owner；新联系人继承选定客户 owner，关联联系人必须属于该客户；可选新商机继承线索 owner，使用默认管道 `DISCOVERY`、租户币种与 `CONVERSION_CREATE` 历史原因。转换路径没有重新调用 Auth 解析这些继承的 owner。
+
+转换仅写 CRM 本地事务及 Outbox，不调用 Workflow 或直接发送 Broker 消息。这不能概括为所有 CRM Feign 都在事务外：普通创建、转移及响应展示增强可能在带事务的方法中调用 Auth。详见 [Core Flows 13/14](core-flows.md)。
 
 ## 5. API 入口索引
 
@@ -223,26 +232,26 @@ POST /lead/{id}/convert → SELECT Lead FOR UPDATE
 
 ### 5.2 端点总览
 
-所有端点以 `/api/crm` 为前缀。
+以下路径均相对 `/api/crm`；每条路径完整列出，不从前一项补全。具体 DTO 以 Controller 与 `CrmRequests` 为准。
 
 | 领域 | 端点 |
 |---|---|
-| Overview | `GET /overview/summary`、`/funnel`、`/follow-ups` |
-| Pipeline | `GET /pipeline/list`、`/{id}/stages` |
-| Lead | `GET /lead/list`、`/{id}`、`POST /lead`、`PUT/DELETE /lead/{id}` |
-| Lead 命令 | `POST /lead/duplicate-check`、`/{id}/assign`、`/batch-assign`、`/{id}/qualify`、`/disqualify`、`/reopen`、`/convert` |
-| Customer | `GET /customer/list`、`/{id}`、`/{id}/overview`、`POST /customer`、`PUT/DELETE /customer/{id}` |
-| Customer 命令 | `POST /customer/duplicate-check`、`/{id}/status`、`/{id}/transfer` |
-| Contact | `GET /contact/list`、`/customer/{id}/contact/list`、`POST /customer/{id}/contact`、`PUT/DELETE /contact/{id}`、`POST /contact/{id}/primary` |
-| Opportunity | `GET /opportunity/list`、`/board`、`/{id}`、`/{id}/stage-history`、`POST /opportunity`、`PUT/DELETE /opportunity/{id}` |
-| Opportunity 命令 | `POST /opportunity/{id}/assign`、`/stage`、`/reopen` |
-| Activity | `GET /activity/list`、`/timeline`、`/{id}`、`POST /activity`、`PUT/DELETE /activity/{id}` |
-| Activity 命令 | `POST /activity/{id}/complete`、`/cancel`、`/reschedule` |
-| Owner 选项 | `GET /options/owners` |
+| 概览 | `GET /overview/summary` · `GET /overview/funnel` · `GET /overview/follow-ups` |
+| 管道 | `GET /pipeline/list` · `GET /pipeline/{id}/stages` |
+| 线索 | `GET /lead/list` · `GET /lead/{id}` · `POST /lead` · `PUT /lead/{id}` · `DELETE /lead/{id}` |
+| 线索命令 | `POST /lead/duplicate-check` · `POST /lead/{id}/assign` · `POST /lead/batch-assign` · `POST /lead/{id}/qualify` · `POST /lead/{id}/disqualify` · `POST /lead/{id}/reopen` · `POST /lead/{id}/convert` |
+| 客户 | `GET /customer/list` · `GET /customer/{id}` · `GET /customer/{id}/overview` · `POST /customer` · `PUT /customer/{id}` · `DELETE /customer/{id}` |
+| 客户命令 | `POST /customer/duplicate-check` · `POST /customer/{id}/status` · `POST /customer/{id}/transfer` · `POST /customer/{id}/blacklist` · `POST /customer/{id}/restore-from-blacklist` |
+| 联系人 | `GET /contact/list` · `GET /customer/{customerId}/contact/list` · `GET /contact/{id}` · `POST /customer/{customerId}/contact` · `PUT /contact/{id}` · `DELETE /contact/{id}` · `POST /contact/{id}/primary` |
+| 商机 | `GET /opportunity/list` · `GET /opportunity/board` · `GET /opportunity/{id}` · `GET /opportunity/{id}/stage-history` · `POST /opportunity` · `PUT /opportunity/{id}` · `DELETE /opportunity/{id}` |
+| 商机命令 | `POST /opportunity/{id}/assign` · `POST /opportunity/{id}/stage` · `POST /opportunity/{id}/reopen` |
+| 活动 | `GET /activity/list` · `GET /activity/timeline` · `GET /activity/{id}` · `POST /activity` · `PUT /activity/{id}` · `DELETE /activity/{id}` |
+| 活动命令 | `POST /activity/{id}/complete` · `POST /activity/{id}/cancel` · `POST /activity/{id}/reschedule` |
+| 负责人候选 | `GET /options/owners` |
 
 ### 5.3 Customer 360 分块权限
 
-`/customer/{id}/overview` 返回联系人、商机、活动、线索摘要。但这不是"客户可见即所有子数据可见"——每块用各自的 list permission 独立解析数据范围，缺少某块权限时不查询该块。实现用 `CrmPermissionScopeExecutor` 逐块建立和清理 `ServiceDataScopeContext`。
+`GET /api/crm/customer/{id}/overview` 返回客户、联系人、开放商机、最近最多 20 条活动及转换线索 ID。每块用各自 list 权限独立解析范围；缺权限的块不查询。`CrmPermissionScopeExecutor` 恢复原先的 `ServiceDataScopeContext`，外层切面负责最终清理。客户可见不代表全部子数据可见；PII 边界见 3.6。
 
 ### 5.4 Overview 聚合查询
 
@@ -252,36 +261,39 @@ POST /lead/{id}/convert → SELECT Lead FOR UPDATE
 
 ### 6.1 Auth Feign
 
-- CRM 只存 userId/unitId，分配前通过 Auth 内部 API 验证用户存在、启用、同租户
-- ownerUnitId 取 Auth 权威主组织，不信任前端
-- 列表展示先收集 ID 再一次 batch API，禁止逐行 Feign（N+1）
-- Auth 不可用时：dataScope → 503 失败关闭；展示 enrich → 可返回 ID/未知用户
+- 创建/分配/转移路径的 `CrmOwnerResolver` 验证负责人存在、启用、同租户、有主组织及目标可分配范围；指定其他负责人还需对应 assign/transfer 权限。转换的继承 owner 规则见 4.5。
+- `ownerUnitId` 来自 Auth 主组织。`CrmOwnerEnricher` 先去重收集 ID，再分别批量查询用户和组织，禁止逐行业务循环调用；执行人名称有独立用户批量查询。
+- 数据范围解析遇到 Auth 权限拒绝返回 403，其他依赖失败返回 503；展示增强异常可保留 ID 与空名称。显示降级不扩大授权范围，也不保证远程调用都在数据库事务外。
 
 ### 6.2 Outbox 事件
 
-使用 `ReliableMessageRelay.send("crm-domain-out-0", envelope, tenantId, eventId)` 写本地 Outbox，tenantId 必须显式传入。
+业务事务调用 `ReliableMessageRelay.send("crm-domain-out-0", envelope, tenantId, eventId)`。默认实现以 REQUIRED 传播写本地 PENDING 行；Relay 后续发送 Broker，关闭 Relay 不等于关闭 Outbox 写入。
 
-事件信封包含 `eventId`、`eventType`、`tenantId`、`aggregateType/Id/Version`、`actorUserId`。事件只传 ID 和状态快照，不传完整 PII。
+`DomainEventEnvelope` 包含 `eventId/eventType/occurredAt/tenantId/producer`、`aggregateType/aggregateId/aggregateVersion`、`actorUserId` 和 `payload`。eventId 位于信封顶层，作为 msgKey 传递；Outbox msgId 另行生成，msgKey 不替代消费者业务幂等。payload 不传完整 PII。
 
-已定义事件：`crm.lead.converted.v1`、`crm.opportunity.stage-changed/won/lost.v1`。
+| eventType | payload |
+|---|---|
+| `crm.lead.converted.v1` | leadId、customerId、contactId、可空 opportunityId |
+| `crm.opportunity.stage-changed.v1` / `crm.opportunity.won.v1` / `crm.opportunity.lost.v1` | opportunityId、stageId、status |
+| `crm.customer.owner-changed.v1` | customerId、oldOwnerUserId/newOwnerUserId、oldOwnerUnitId/newOwnerUnitId、cascadeOpenOpportunities |
 
 ### 6.3 操作日志
 
-`@OperLog` 已支持 PII 脱敏。Owner Change 和 Stage History 是同步领域事实，不能用异步通用日志代替。
+通用 `@OperLog` 按显式字段规则脱敏，不保证识别任意 PII。转换接口关闭实体快照并额外排除 customerName/contactName/opportunityName。Owner Change 和 Stage History 是业务事务中的同步事实，异步通用日志不能替代它们。
 
 ## 7. 硬约束
 
 修改 CRM 代码前必须遵守的规则：
 
 1. **租户隔离**：所有 `crm_*` 表必须有 `tenant_id`，TenantLine 始终追加，普通 API 永不跨租户
-2. **乐观锁**：所有写操作必须 `tenant_id + id + version` 条件更新
+2. **版本命令**：既有记录的外部变更命令使用 tenant + id + version 并检查影响行数；创建编号补全和专用级联 SQL 不等同于逐条客户端版本命令
 3. **失败关闭**：缺 tenant → 401，缺 scope → `id=-1`，Auth 不可用 → 503，绝不降级
 4. **ThreadLocal 清理**：`ServiceIdentityContext` 和 `ServiceDataScopeContext` 必须在 `finally` 块清理，防内存泄漏
 5. **权限双声明**：写接口必须同时声明 `@PreAuthorize`（功能权限）和 `@ServiceDataScope`（数据范围），使用同一个完整权限码
 6. **PII 后端掩码**：无 `crm:pii:view` 时后端 VO 直接返回掩码，不依赖前端
 7. **Outbox tenantId 显式**：`ReliableMessageRelay.send()` 必须显式传 `Long tenantId`，禁止 ThreadLocal 隐式
-8. **拦截器顺序**：TenantLine → DataPermission → Pagination，不可调换
-9. **写授权**：DataPermissionInterceptor 不保护写入，必须 AccessGuard 行级校验
+8. **拦截器顺序**：TenantLine → DataPermission → OptimisticLocker → Pagination，不可调换
+9. **写授权**：不能只依赖 DataPermission，必须 AccessGuard 行级校验
 10. **状态机**：普通 PUT 不接受 status/stage 变更，必须走专用命令端点
 11. **MySQL DATETIME 范围**：不可用 `LocalDateTime.MIN/MAX` 作为查询参数，用 `LocalDateTime.of(2000,1,1,0,0)` 等合理值
 12. **Pipeline 只读**：MVP 管道和阶段由租户初始化自动创建，不提供管理 UI
@@ -319,58 +331,16 @@ omni-frontend/src/
 - Customer 360 使用 Drawer 组件
 - Opportunity 页面提供表格 + Kanban 双视图
 
-## 9. 扩展指南
+## 9. 扩展与测试入口
 
-### 新增聚合根
+新增聚合、权限、事件及 Docker 测试步骤已归入 [开发 Wiki 的 CRM 扩展](guides/scaffold-development.md#8-crm-扩展与容器测试)。当前管道/阶段只有读取 API；开放管理、迁移既有商机等需要另行设计，不能把未来规划当作现有能力。
 
-1. 在 `omni_crm` 数据库加表，必须包含 `tenant_id`、`owner_user_id`、`owner_unit_id`、`version`、`deleted` 和审计字段
-2. 创建 Entity（extends BaseEntity）、Mapper、Service 接口 + Impl、Controller
-3. 在 `CrmDataPermissionHandlerImpl` 中注册新表的 owner 列映射
-4. 在 `database/changelog/crm/` 新增 Liquibase changelog，并在 `scripts/sql/seed/`（`crm.sql`、`auth.sql`）补充种子数据，经 `database/seed/manifest.yaml` 校验
-5. Controller 写接口声明 `@PreAuthorize` + `@ServiceDataScope`，使用新的 `crm:<resource>:<action>` 权限码
+## 10. 验证边界
 
-### 新增 Opportunity 阶段
+单元测试包含状态机、转换重放、级联、PII、范围 SQL 与安全失败分支；Mock/内存锁测试不证明真实 MySQL 并发或 MQ 投递。`CrmMysqlInterceptorIntegrationTest` 只有设置 `CRM_TEST_MYSQL_URL` 才启用，且还需要测试库凭据；它会创建和删除 `crm_lead`，只能指向专用可销毁测试库。
 
-MVP 管道不可配置。如果未来开放，需要：
-1. 后端 `crm_pipeline_stage` 表 CRUD 接口
-2. 前端管道配置页面
-3. 已有商机引用旧阶段时的迁移策略
+最新复用的 Docker Reactor 报告中，CRM 有 16 个 Surefire 报告、45 个用例：41 通过、4 个 MySQL 用例按条件跳过。该数是本次报告快照，不是固定测试覆盖承诺。历史 `*IT` 受 `WP008_F_ENABLED` 和独立环境保护，不包含在本次默认测试结论中；不可盲目启用。真实界面与 API 演练的独立证据边界见 [CRM Wiki](guides/crm-flow.md)。
 
-### 新增权限码
+## 11. 当前源码入口
 
-1. 在 `scripts/sql/seed/auth.sql` 的 `sys_permission` 中插入新权限，type 为 `API`
-2. 按角色分配到 `sys_role_permission`
-3. Controller 方法声明 `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@ServiceDataScope(permissionCode = "crm:<resource>:<action>")`
-4. 前端对应按钮添加 `v-permission="'crm:<resource>:<action'"`
-
-### 接入 Outbox 事件
-
-1. 在 Service 业务方法中，同事务调用 `ReliableMessageRelay.send("crm-domain-out-0", envelope, tenantId, eventId)`
-2. `tenantId` 必须显式从上下文获取，禁止 ThreadLocal
-3. 事件信封遵循统一格式，payload 不含完整 PII
-4. 消费者必须幂等，以 `payload.eventId` 做业务去重
-
-## 10. 测试
-
-CRM 模块有 16 个测试文件，覆盖：
-
-- 状态机合法/非法迁移
-- Lead 转换幂等与并发
-- Customer 转移级联
-- PII 掩码
-- 六种 dataScope 的列表和聚合
-- 跨租户隔离（真实 MySQL 集成测试）
-- 缺 tenant/scope 失败关闭
-
-运行测试：
-
-```bash
-cd omni-backend && ./mvnw clean install -pl omni-crm -am
-```
-
-真实 MySQL 拦截器集成测试需外部测试库，默认跳过：
-
-```bash
-CRM_TEST_MYSQL_URL='jdbc:mysql://127.0.0.1:3306/crm_it?...' \
-./mvnw -pl omni-crm -am -Dtest=CrmMysqlInterceptorIntegrationTest test
-```
+[Schemas](../database/changelog/crm/0001-crm-schema.yaml) · [DTO](../omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmRequests.java) · [数据权限](../omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmDataPermissionHandler.java) · [转换](../omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/LeadServiceImpl.java) · [阶段](../omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OpportunityServiceImpl.java) · [客户 360/转移](../omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CustomerServiceImpl.java) · [共享持久化](../omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java) · [XSS 提供者](../omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java)。

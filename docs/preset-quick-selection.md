@@ -16,15 +16,17 @@
 
 ## 使用步骤
 
-~~~powershell
-Set-Location tools/omni-cli
-npm ci
-npm run build
-node dist/src/cli.js preset list
-node dist/src/cli.js preset explain workflow
-node dist/src/cli.js preset create workflow --output C:\WorkSpace\my-workflow --dry-run
-node dist/src/cli.js preset create workflow --output C:\WorkSpace\my-workflow
-node dist/src/cli.js preset validate workflow --output C:\WorkSpace\my-workflow
+以下命令从源仓库根目录执行，依赖安装、CLI 构建和执行均在本机 Docker 工具容器中完成；学习产物写入仓库下独立的 generated/my-workflow。
+
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml build cli
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm ci
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run build
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset list
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset explain workflow
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create workflow --output generated/my-workflow --dry-run
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset create workflow --output generated/my-workflow
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli node dist/src/cli.js preset validate workflow --output generated/my-workflow
 ~~~
 
 生成前会显示依赖闭包、后端模块、Compose 服务、端口、数据库、权限根和内存估算。输出目录必须不存在或为空。生成完成后，`scaffold.lock` 记录源版本、预设版本、模块版本和模板版本。
@@ -33,9 +35,9 @@ node dist/src/cli.js preset validate workflow --output C:\WorkSpace\my-workflow
 
 先在生成工程中按自带的 `.env.example` 创建 `.env` 并填入自造的随机秘密（必填项与隔离 project/端口/卷/镜像命名空间见《自定义预设教程》第 4 节；缺 `.env` 时 `docker compose config` 会以 required variable missing 失败），再执行后端构建、`npm ci`、前端 lint/build 和 `docker compose config --quiet`。仓库维护者还应执行：
 
-~~~powershell
-npm run test:preset-structure
-npm run test:preset-smoke
+~~~bash
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-structure
+docker compose -p omni-stack-tools -f compose.tools.yaml run --rm cli npm run test:preset-smoke
 ~~~
 
 `test:preset-golden` 会执行全部五种预设的完整构建矩阵，适合夜间或发布前运行。数据库 fresh、真实启动和浏览器冒烟属于运行时验收，不能用结构检查替代。

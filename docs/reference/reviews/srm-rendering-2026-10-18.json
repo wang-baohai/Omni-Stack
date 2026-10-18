@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "srm",
+  "source": "docs/srm.md",
+  "source_sha256": "b5d3f7de4909a61855d7bc0d1e3aebea1df2f88b33f2f753e8c82ab96d26c200",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "8679eb7232cc1a4fd7ddc1fdd95396e1ab66d2d6",
+  "source_state": "Format-only delta review for srm and procurement-design;matching prior complete four-language semantic reviews reused for all otherwise unchanged content.",
+  "method": "Reused the exact matching prior complete four-language semantic review. Actually read every final line delta7b3432;only existing response-type inline code formatting changed. After removing backticks all text is byte-identical,and every fence is unchanged. Targeted actual VitePress/Vue parsing passes8pages. No new whole-document reread or business behavior verification is claimed.",
+  "prior_complete_semantic_review": {
+    "id": "srm",
+    "path": "docs/reference/reviews/srm.json",
+    "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f",
+    "source_sha256": "b36326024697f1d5e4cd0db12f3938216225dee1321c991d105d292ee7c8ae03",
+    "translations": {
+      "en-US": {
+        "path": "docs/srm.en.md",
+        "sha256": "1e147b3fbe8dd1d40dec801b18341af562242567b8e7e5710ed8dbe5a215d534"
+      },
+      "ja-JP": {
+        "path": "docs/srm.jp.md",
+        "sha256": "981822e9042ad22d8dc488a3ece89a5a80e7c56d41da5ac6ac814a7e212d93e1"
+      },
+      "ko-KR": {
+        "path": "docs/srm.kr.md",
+        "sha256": "652a77c1ae78d9c0d5a54e8161e8ef47016f2e7a68a19909b36efca0dabeb58a"
+      }
+    }
+  },
+  "checked_source_files": [
+    {
+      "path": "docs/reference/reviews/srm.json",
+      "sha256": "4141d98ecc9fc891e12c3cd61d650bc422b901401668f92ed74b946330d24d6f"
+    },
+    {
+      "path": "docs/reference/evidence/site-generic-markup-fix-2026-10-18.json",
+      "sha256": "48d677a6ee1cd57ae9829ca1fac7c3bc3901998c42c2d5ad7c484d115209618b"
+    },
+    {
+      "path": "docs/scripts/prepare-site.mjs",
+      "sha256": "1f105d33b72ee8bd9dc52c2d1a886a0d9ff4e840c934175e86448d1f30c5655c"
+    },
+    {
+      "path": "docs/.vitepress/config.mjs",
+      "sha256": "1634a1821170bb9dc9c42952854499287be6ceb7cef404a6f3f66b1871a13a29"
+    },
+    {
+      "path": "docs/package.json",
+      "sha256": "54ce13aa7dd08653fa9c334caee9a6399a24580054f111d456163a4a2c8ef452"
+    },
+    {
+      "path": "docs/package-lock.json",
+      "sha256": "1cef2f247ba06ea5b58a919bcc37c47ac8aa6d28a312518031410ffae909f0ad"
+    }
+  ],
+  "source_inspection_scope": "Format-only delta review for srm and procurement-design;matching prior complete four-language semantic reviews reused for all otherwise unchanged content.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "actual_final_delta_read_output": "7b3432",
+    "prior_complete_semantic_review_reused": true,
+    "new_whole_document_rereads": 0,
+    "all_text_other_than_backticks_unchanged": true,
+    "all_fences_unchanged": true,
+    "changed_lines_in_this_family": 4,
+    "added_code_spans_in_this_family": 12,
+    "targeted_actual_vue_parse_pages": 8,
+    "targeted_actual_vue_parse_failures": 0,
+    "full192_page_and_image_build_checks_pending": true,
+    "current_evidence": "docs/reference/evidence/site-generic-markup-fix-2026-10-18.json",
+    "new_domain_contract_changes": 0,
+    "new_translation_rows": 0,
+    "renewed_translation_rows": 3,
+    "application_source_changes": false,
+    "business_writes": 0,
+    "limitations": [
+      "Targeted8pageparsing is not the full192pageintegration gate,imagebuild,browser,Svgrendering or real business proof.",
+      "The initial full parser hit a512MBV8heap in a1gDocker tool. The first batched transport hit localstdinEAGAIN;regular-file batches then completed192pages with8realparsefailures. These are separate local validator failures and remain recorded.",
+      "No application source,back-end/front-end build,login,CAPTCHA,externalaccountauthorization or successfulbusinesswrite replay. FulloriginalA-G remain;the prior direct dependency attestation needs refreshing after this manifest/content change."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/srm.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 02:13:05",
+      "result": "approved",
+      "translation_sha256": "c4df01c59a3f951cbc01d2172f840b5d9bd8c6d21b72e38bbedce244d3db2457",
+      "checks": {
+        "coverage_and_meaning": "实际阅读7b3432全部八行最终差异。四语SRM各为三个既有响应泛型加行内代码格式，四语采购设计各为一个既有AwardResult响应加格式；仅16处代码跨度、32个反引号。移除反引号后全文逐字相同，其他完整语义内容按当前原稿摘要复用原整篇真实复核，不声称新整篇重读。",
+        "technical_literals": "R<T>、R<PageResult<T>>、R<List<T>>、R<AwardResult>拼写、括号、嵌套和返回含义完全保留；不将正文泛型交给Vue作为HTML标签。实际Controller选段仍返回R<RfqViews.AwardResult>，本次不变更原有类型简称或API。所有代码/七个采购图表等围栏、路径、日期、金额、权限和DTO文字不变。",
+        "security_and_failure_semantics": "SRM的租户、角色、Portal/Saga、列表与分页差异、DTO/Entity边界、日期及version例外不变。采购的有效报价、请求版本、supplierId来源、不可变金额/交付快照、返回rfq与purchaseOrder不变。没有放宽权限、幂等、事务、失败恢复或授权AI审校条件，也不产生运行、登录或业务证明。",
+        "images_and_links": "没有图片、URL、标题、锚点、导航或围栏变化。实际目标八页VitePress渲染+VueSFC解析已通过。原整站192页中8页失败的真实回执、整站校验器本地内存/管道失败均保留；完整192页重验、正式镜像和浏览器仍分开核验。",
+        "language_and_terminology": "Compared both exact English changed sentences with Chinese in7b3432. Inline code preserves every existing generic,return/list/pagination meaning,DTO/version exception and award constraint. No English wording or punctuation outside the16markupspans changed. Complete otherwise unchanged bodies reuse matching original semantic reviews;no new whole reread is claimed."
+      },
+      "findings": [
+        {
+          "id": "VF01",
+          "status": "resolved",
+          "resolution": "Format existing response generics as inline code so Vue does not parse them as unclosedHTML;actualred192pageaudit found exactly8affectedpages."
+        },
+        {
+          "id": "VF02",
+          "status": "resolved",
+          "resolution": "Retain all underlying type spellings,source/API contracts,safety and failure semantics;all other text and fenced bodies remain exact."
+        },
+        {
+          "id": "VF03",
+          "status": "resolved",
+          "resolution": "Revalidate6existingAItranslationrows after source/translation hashes change;retain prior full-review evidence and do not add rows or claim human review."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/srm.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 02:13:05",
+      "result": "approved",
+      "translation_sha256": "4940e1f357d3689c5bfd461e0950ef2059441750c603bb5d4c6d4bc13bdcbc3f",
+      "checks": {
+        "coverage_and_meaning": "实际阅读7b3432全部八行最终差异。四语SRM各为三个既有响应泛型加行内代码格式，四语采购设计各为一个既有AwardResult响应加格式；仅16处代码跨度、32个反引号。移除反引号后全文逐字相同，其他完整语义内容按当前原稿摘要复用原整篇真实复核，不声称新整篇重读。",
+        "technical_literals": "R<T>、R<PageResult<T>>、R<List<T>>、R<AwardResult>拼写、括号、嵌套和返回含义完全保留；不将正文泛型交给Vue作为HTML标签。实际Controller选段仍返回R<RfqViews.AwardResult>，本次不变更原有类型简称或API。所有代码/七个采购图表等围栏、路径、日期、金额、权限和DTO文字不变。",
+        "security_and_failure_semantics": "SRM的租户、角色、Portal/Saga、列表与分页差异、DTO/Entity边界、日期及version例外不变。采购的有效报价、请求版本、supplierId来源、不可变金额/交付快照、返回rfq与purchaseOrder不变。没有放宽权限、幂等、事务、失败恢复或授权AI审校条件，也不产生运行、登录或业务证明。",
+        "images_and_links": "没有图片、URL、标题、锚点、导航或围栏变化。实际目标八页VitePress渲染+VueSFC解析已通过。原整站192页中8页失败的真实回执、整站校验器本地内存/管道失败均保留；完整192页重验、正式镜像和浏览器仍分开核验。",
+        "language_and_terminology": "7b3432の日本語二文を中文と照合した。三種類のSRM応答型とAwardResult型をインラインコードとして表示し、型名・括弧・入れ子・助詞・読点・ページ条件・DTO/version例外・選定条件を変更していない。変更のない全文は摘要が一致する既存の完全レビューを再利用する。"
+      },
+      "findings": [
+        {
+          "id": "VF01",
+          "status": "resolved",
+          "resolution": "Format existing response generics as inline code so Vue does not parse them as unclosedHTML;actualred192pageaudit found exactly8affectedpages."
+        },
+        {
+          "id": "VF02",
+          "status": "resolved",
+          "resolution": "Retain all underlying type spellings,source/API contracts,safety and failure semantics;all other text and fenced bodies remain exact."
+        },
+        {
+          "id": "VF03",
+          "status": "resolved",
+          "resolution": "Revalidate6existingAItranslationrows after source/translation hashes change;retain prior full-review evidence and do not add rows or claim human review."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/srm.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-18 02:13:05",
+      "result": "approved",
+      "translation_sha256": "0e7cff066981da724578e2d4cf79edc23194807bc8bcd1c056c26c4a942926bb",
+      "checks": {
+        "coverage_and_meaning": "实际阅读7b3432全部八行最终差异。四语SRM各为三个既有响应泛型加行内代码格式，四语采购设计各为一个既有AwardResult响应加格式；仅16处代码跨度、32个反引号。移除反引号后全文逐字相同，其他完整语义内容按当前原稿摘要复用原整篇真实复核，不声称新整篇重读。",
+        "technical_literals": "R<T>、R<PageResult<T>>、R<List<T>>、R<AwardResult>拼写、括号、嵌套和返回含义完全保留；不将正文泛型交给Vue作为HTML标签。实际Controller选段仍返回R<RfqViews.AwardResult>，本次不变更原有类型简称或API。所有代码/七个采购图表等围栏、路径、日期、金额、权限和DTO文字不变。",
+        "security_and_failure_semantics": "SRM的租户、角色、Portal/Saga、列表与分页差异、DTO/Entity边界、日期及version例外不变。采购的有效报价、请求版本、supplierId来源、不可变金额/交付快照、返回rfq与purchaseOrder不变。没有放宽权限、幂等、事务、失败恢复或授权AI审校条件，也不产生运行、登录或业务证明。",
+        "images_and_links": "没有图片、URL、标题、锚点、导航或围栏变化。实际目标八页VitePress渲染+VueSFC解析已通过。原整站192页中8页失败的真实回执、整站校验器本地内存/管道失败均保留；完整192页重验、正式镜像和浏览器仍分开核验。",
+        "language_and_terminology": "7b3432의 한국어 두 문장을 중국어와 대조했다. SRM의 세 응답 타입과 AwardResult 타입에 코드 형식만 적용했으며 타입명,중첩 괄호,조사,문장부호,페이지/DTO/version 예외와 선정 제약은 그대로다. 변경하지 않은 전체 본문은 원본 해시가 일치하는 기존 전체 의미 검토를 재사용한다."
+      },
+      "findings": [
+        {
+          "id": "VF01",
+          "status": "resolved",
+          "resolution": "Format existing response generics as inline code so Vue does not parse them as unclosedHTML;actualred192pageaudit found exactly8affectedpages."
+        },
+        {
+          "id": "VF02",
+          "status": "resolved",
+          "resolution": "Retain all underlying type spellings,source/API contracts,safety and failure semantics;all other text and fenced bodies remain exact."
+        },
+        {
+          "id": "VF03",
+          "status": "resolved",
+          "resolution": "Revalidate6existingAItranslationrows after source/translation hashes change;retain prior full-review evidence and do not add rows or claim human review."
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-scheduling",
+  "source": "docs/guides/scheduling.md",
+  "source_sha256": "064a93470c559cb1809a358ac9c8aa6a32ddcc088e769a462c1434df1b9a0ebc",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "edb1e072363640dd44d2d157fdafa54ae611d79d",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/scheduling.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-14 09:08:30",
+      "result": "approved",
+      "translation_sha256": "f1cf0ec7be8ceff12dd324167c274dd089ed7b6ab2cbd198d5d743fd5120dceb",
+      "checks": {
+        "coverage_and_meaning": "逐段核对全部9节：环境与多角色证据边界、创建与首次暂停、暂停中编辑/手动触发、真实Cron来源、删除/归属拒绝、真实缺Handler失败与精确清理、双目录、源码断点和新增类型。保留中文原任务来源证据缺失及补充API任务的限制。",
+        "technical_literals": "核对两条Cron、Task-00001、cupShape小杯/大杯、jobId/tenantId/jobType/jobName/jobParams五字段、JSON字符串参数、handler/Bean名称、MANUAL/CRON、403/400/500、handleCode=500、500/2000截断、日期格式、Docker命令及源码方法。四语可执行代码与稳定协议值一致。",
+        "security_and_failure_semantics": "普通取证账号非SUPER_ADMIN但并非只含USER；租户+createBy归属不替换为PreAuthorize；受理与完成分开、暂停允许手动触发；未知远端注册先精确对账不重建；不删除种子/他人类型、先清任务再类型；不将截图数量或AI_REVIEW冒称人工签核。",
+        "images_and_links": "逐段对照语言目录图片、图注、源码链接与公开scheduling-2026-10-10证据边界；中文补充任务图片仅解释来源补证，未伪造已删除日志；本轮没有重跑业务写入、重新取图或把旧镜像说成新验证。链接由本机Docker质量门另验。",
+        "language_and_terminology": "完整比对 ordinary account/ownership、scheduler/executor、acceptance/completion、remote unknown outcome 与 cleanup 顺序。修复 HTTP 状态码、时间及截断数值缺少词间空格；将过期的人工待审声明改为授权AI_REVIEW与当前队列入口。"
+      },
+      "findings": [
+        {
+          "id": "stale-human-only-review-status",
+          "status": "resolved",
+          "description": "Guide still described human review as pending after owner authorized actual AI review.",
+          "resolution": "Reference ADR-0003 and the digest-bound review queue explicitly as AI_REVIEW; preserve no-human-signoff boundary."
+        },
+        {
+          "id": "numeric-word-spacing",
+          "status": "resolved",
+          "description": "English words were joined to execution time, HTTP codes and truncation limits.",
+          "resolution": "Separate daily 23:59, returned 403/400/500, fabricate 500, and 500/2000 character limits without changing any literal value."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/scheduling.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-14 09:08:30",
+      "result": "approved",
+      "translation_sha256": "78ad03c754d737605aa7fefccd0ec35b6f35eaa3f71be6f72a8606f81c2aa5e2",
+      "checks": {
+        "coverage_and_meaning": "逐段核对全部9节：环境与多角色证据边界、创建与首次暂停、暂停中编辑/手动触发、真实Cron来源、删除/归属拒绝、真实缺Handler失败与精确清理、双目录、源码断点和新增类型。保留中文原任务来源证据缺失及补充API任务的限制。",
+        "technical_literals": "核对两条Cron、Task-00001、cupShape小杯/大杯、jobId/tenantId/jobType/jobName/jobParams五字段、JSON字符串参数、handler/Bean名称、MANUAL/CRON、403/400/500、handleCode=500、500/2000截断、日期格式、Docker命令及源码方法。四语可执行代码与稳定协议值一致。",
+        "security_and_failure_semantics": "普通取证账号非SUPER_ADMIN但并非只含USER；租户+createBy归属不替换为PreAuthorize；受理与完成分开、暂停允许手动触发；未知远端注册先精确对账不重建；不删除种子/他人类型、先清任务再类型；不将截图数量或AI_REVIEW冒称人工签核。",
+        "images_and_links": "逐段对照语言目录图片、图注、源码链接与公开scheduling-2026-10-10证据边界；中文补充任务图片仅解释来源补证，未伪造已删除日志；本轮没有重跑业务写入、重新取图或把旧镜像说成新验证。链接由本机Docker质量门另验。",
+        "language_and_terminology": "完整核对個人タスク、タスク種類、ハンドラー、スケジューラー、所有者、受理/完了、遠隔結果不明及トリガー元。步骤、失败与已删除证据的否定条件保持自然明确；过期人审待办改为ADR-0003授权AI审校入口。"
+      },
+      "findings": [
+        {
+          "id": "stale-human-only-review-status",
+          "status": "resolved",
+          "description": "日文仍将人による翻訳レビュー列为未完成的必需状态。",
+          "resolution": "明确采用ADR-0003的AI_REVIEW并链接当前哈希绑定队列，不声称真人签核。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/scheduling.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-14 09:08:30",
+      "result": "approved",
+      "translation_sha256": "b5f585f9e8ffe7e7438099526bb6ef85c0022a62218b23fbfb185cefcb1ce919",
+      "checks": {
+        "coverage_and_meaning": "逐段核对全部9节：环境与多角色证据边界、创建与首次暂停、暂停中编辑/手动触发、真实Cron来源、删除/归属拒绝、真实缺Handler失败与精确清理、双目录、源码断点和新增类型。保留中文原任务来源证据缺失及补充API任务的限制。",
+        "technical_literals": "核对两条Cron、Task-00001、cupShape小杯/大杯、jobId/tenantId/jobType/jobName/jobParams五字段、JSON字符串参数、handler/Bean名称、MANUAL/CRON、403/400/500、handleCode=500、500/2000截断、日期格式、Docker命令及源码方法。四语可执行代码与稳定协议值一致。",
+        "security_and_failure_semantics": "普通取证账号非SUPER_ADMIN但并非只含USER；租户+createBy归属不替换为PreAuthorize；受理与完成分开、暂停允许手动触发；未知远端注册先精确对账不重建；不删除种子/他人类型、先清任务再类型；不将截图数量或AI_REVIEW冒称人工签核。",
+        "images_and_links": "逐段对照语言目录图片、图注、源码链接与公开scheduling-2026-10-10证据边界；中文补充任务图片仅解释来源补证，未伪造已删除日志；本轮没有重跑业务写入、重新取图或把旧镜像说成新验证。链接由本机Docker质量门另验。",
+        "language_and_terminology": "完整核对개인 작업/작업 유형、핸들러、스케줄러、소유권、접수/완료、원격 결과 불명확、멱등성及清理顺序。保持中文固定协议值与代码；将过期人审待办替换为授权AI_REVIEW及当前해시队列入口。"
+      },
+      "findings": [
+        {
+          "id": "stale-human-only-review-status",
+          "status": "resolved",
+          "description": "韩文仍显示人的翻译检查尚未完成，未反映授权AI审校策略。",
+          "resolution": "说明ADR-0003的AI_REVIEW与当前哈希绑定状态；保留图数不证明人工签核等限制。"
+        }
+      ]
+    }
+  }
+}

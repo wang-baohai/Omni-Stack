@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "project-readme",
+  "source": "README.md",
+  "source_sha256": "cabf1b684dcf9281d22f4af0b65b86aecaddd288bc06680a01d7c74a9d7f04b4",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "README.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:28:17",
+      "result": "approved",
+      "translation_sha256": "07b03753b2a902ac4cbf8dc2906e274d3f58c6a95f63ed7087632301cc9b1fdf",
+      "checks": {
+        "coverage_and_meaning": "逐段核对项目定位、六项能力、最短启动、五种预设和贡献入口，英文没有遗漏必需步骤。",
+        "technical_literals": "Spring Boot 4.0.6、JDK 25、Compose full 启动与 ps 命令、3000 端口和 tools/omni-cli 路径保持一致。",
+        "security_and_failure_semantics": "保留 .env 必填秘密、开发租户、种子账号和真人验证码要求；能力介绍没有被写成当前真实登录验收已通过。",
+        "language_and_terminology": "tenant isolation、functional permissions、data scope、Transactional Outbox 和 OAuth2 authorization 的语义与中文一致。",
+        "images_and_links": "本页没有截图；指南和架构入口均指向本语言版本，AI 入口已修正为 ai/README.en.md，许可证和仓库链接保留。"
+      },
+      "findings": [
+        {
+          "id": "localized-ai-entry",
+          "status": "resolved",
+          "description": "英文 README 的 AI 入口指向中文版本。",
+          "resolution": "改为 ai/README.en.md，并核对其维护指南链路。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "README.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:28:17",
+      "result": "approved",
+      "translation_sha256": "302890b7a080f9d40916d195dd349a5c4f19813bd94042bf77020cfae21dd1ec",
+      "checks": {
+        "coverage_and_meaning": "核对主な機能、最短の体験、文書と貢献全部段落；租户、审批、供应链、预设与数据入口均完整。",
+        "technical_literals": "两条 Docker 命令和五个预设字面量完全保留，4.0.6/JDK 25/3000 及 CLI 路径没有被翻译或拆分。",
+        "security_and_failure_semantics": "必須秘密情報、開発テナント、シードアカウント和 CAPTCHA 手入力约束与中文一致，未增加工具权限。",
+        "language_and_terminology": "テナント分離、機能権限、データ範囲、冪等消費、合議等术语表达了对应功能，日文句子完整可读。",
+        "images_and_links": "无图片需要语言切换；各教程使用 .jp.md，AI 入口修正为 ai/README.jp.md，内部治理与许可保持规范源链接。"
+      },
+      "findings": [
+        {
+          "id": "localized-ai-entry",
+          "status": "resolved",
+          "description": "日文 README 的 AI 入口仍指向中文版本。",
+          "resolution": "改为 ai/README.jp.md。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "README.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 11:28:17",
+      "result": "approved",
+      "translation_sha256": "ccfc9aea390f0efacc103a454047a066747aeee83da6d7c2621a7fc9c5e70bce",
+      "checks": {
+        "coverage_and_meaning": "完整对照项目定位、六项功能、启动和维护入口，保留 CRM 与 SRM → Procurement → Asset 协作及五种预设。",
+        "technical_literals": "Compose 两条命令、预设名称、4.0.6/JDK 25、3000 端口和工具路径与中文逐项一致。",
+        "security_and_failure_semantics": "明确保留秘密配置、开发租户、种子账号和真人 CAPTCHA；OAuth2 授权修正为 인가，避免混淆身份认证。",
+        "language_and_terminology": "使用 테넌트 격리、데이터 범위、멱등 소비；将笼统的失败消息管理修正为 데드 레터 처리，对应死信处理。",
+        "images_and_links": "无截图；本语言教程入口均使用 .kr.md，AI 入口改为 ai/README.kr.md，许可证和两个仓库入口一致。"
+      },
+      "findings": [
+        {
+          "id": "localized-ai-entry",
+          "status": "resolved",
+          "description": "韩文 AI 入口指向中文。",
+          "resolution": "改为 ai/README.kr.md。"
+        },
+        {
+          "id": "oauth-authorization-term",
+          "status": "resolved",
+          "description": "OAuth2 授权被写成 인증（认证）。",
+          "resolution": "改为 인가（授权）。"
+        },
+        {
+          "id": "dead-letter-meaning",
+          "status": "resolved",
+          "description": "死信处理被泛化为失败消息管理。",
+          "resolution": "改为 데드 레터 처리，保留独立失败状态语义。"
+        }
+      ]
+    }
+  }
+}

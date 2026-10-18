@@ -1,0 +1,796 @@
+{
+  "schema": 1,
+  "kind": "isolated-docker-procurement-manager-department-boundary",
+  "recorded_at": "2026-10-12T12:28:11.106Z",
+  "project": "omni-wiki-acceptance-20261009",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "status": "FOUR_LANGUAGE_READONLY_E2E_PASS",
+  "test": "omni-frontend/e2e-docs/flows/procurement-scope.flows.spec.ts",
+  "test_statistics": {
+    "startTime": "2026-10-12T12:17:09.379Z",
+    "duration": 9373.375,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "role_meaning": "PROCUREMENT_MANAGER / DEPT_AND_BELOW; procurement-admin-scope is a coverage scenario identifier, not a role code.",
+  "identity_preparation": "Separate PROCUREMENT_STAFF account via formal administrator API; test-classpath short-lived identity, no password/CAPTCHA login claim.",
+  "inside": {
+    "requisition_id": 1,
+    "requisition_no": "PR-1-1",
+    "status": "APPROVED",
+    "requester_unit": 604
+  },
+  "outside": {
+    "requisition_id": 4,
+    "requisition_no": "PR-1-4",
+    "status": "DRAFT",
+    "requester_unit": 605,
+    "requester_user_id": 218,
+    "submitted": false
+  },
+  "boundary": {
+    "inside_detail_business_code": 200,
+    "actual_outside_owner_detail_business_code": 200,
+    "manager_outside_detail_business_code": 404,
+    "manager_outside_list_count": 0,
+    "error_http_status": 200
+  },
+  "observations": [
+    {
+      "at": "2026-10-12T12:17:10.617Z",
+      "locale": "zh-CN",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/1",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:10.656Z",
+      "locale": "zh-CN",
+      "actor": "procurementOutside",
+      "path": "/api/procurement/requisition/4",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:10.692Z",
+      "locale": "zh-CN",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/4",
+      "method": "GET",
+      "http": 200,
+      "code": 404,
+      "expected": 404
+    },
+    {
+      "at": "2026-10-12T12:17:10.729Z",
+      "locale": "zh-CN",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/list?page=1&size=100&keyword=PR-1-4",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:12.694Z",
+      "locale": "en-US",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/1",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:12.731Z",
+      "locale": "en-US",
+      "actor": "procurementOutside",
+      "path": "/api/procurement/requisition/4",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:12.770Z",
+      "locale": "en-US",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/4",
+      "method": "GET",
+      "http": 200,
+      "code": 404,
+      "expected": 404
+    },
+    {
+      "at": "2026-10-12T12:17:12.815Z",
+      "locale": "en-US",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/list?page=1&size=100&keyword=PR-1-4",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:14.665Z",
+      "locale": "ja-JP",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/1",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:14.698Z",
+      "locale": "ja-JP",
+      "actor": "procurementOutside",
+      "path": "/api/procurement/requisition/4",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:14.729Z",
+      "locale": "ja-JP",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/4",
+      "method": "GET",
+      "http": 200,
+      "code": 404,
+      "expected": 404
+    },
+    {
+      "at": "2026-10-12T12:17:14.763Z",
+      "locale": "ja-JP",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/list?page=1&size=100&keyword=PR-1-4",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:16.703Z",
+      "locale": "ko-KR",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/1",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:16.739Z",
+      "locale": "ko-KR",
+      "actor": "procurementOutside",
+      "path": "/api/procurement/requisition/4",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    },
+    {
+      "at": "2026-10-12T12:17:16.786Z",
+      "locale": "ko-KR",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/4",
+      "method": "GET",
+      "http": 200,
+      "code": 404,
+      "expected": 404
+    },
+    {
+      "at": "2026-10-12T12:17:16.850Z",
+      "locale": "ko-KR",
+      "actor": "manager",
+      "path": "/api/procurement/requisition/list?page=1&size=100&keyword=PR-1-4",
+      "method": "GET",
+      "http": 200,
+      "code": 200,
+      "expected": 200
+    }
+  ],
+  "sources": [
+    {
+      "path": "omni-frontend/e2e-docs/flows/procurement-scope.flows.spec.ts",
+      "sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d"
+    },
+    {
+      "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+      "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+    },
+    {
+      "path": "omni-frontend/src/views/procurement/requisition/index.vue",
+      "sha256": "ba0f4e3f7346bed2a93cfcf8bca77b4f407e838005ddba86ff9d77dbd21b1d1a"
+    },
+    {
+      "path": "scripts/sql/seed/auth.sql",
+      "sha256": "131d495c9b1eed92d4d2a7f0aaf92026117c25c6d8d13b8773fdc00fb94c357c"
+    },
+    {
+      "path": "docs/design/procurement-design.md",
+      "sha256": "ab5726fa618a06c20e6f4cf7f6ed50f94b06ead7e30c14b81de2151818a49b98"
+    }
+  ],
+  "runtime": [
+    {
+      "service": "omni-frontend",
+      "container_id": "91d0e80ab20e68c7d057f3a3d85d9682ffcedf9f61d64845225feb37242e5495",
+      "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-base",
+      "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+      "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-gateway",
+      "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+      "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+      "host_ports": 0
+    },
+    {
+      "service": "grafana",
+      "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+      "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+      "host_ports": 0
+    },
+    {
+      "service": "prometheus",
+      "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+      "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+      "host_ports": 0
+    },
+    {
+      "service": "otel-collector",
+      "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+      "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+      "host_ports": 0
+    },
+    {
+      "service": "alloy",
+      "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+      "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+      "host_ports": 0
+    },
+    {
+      "service": "tempo",
+      "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+      "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+      "host_ports": 0
+    },
+    {
+      "service": "pushgateway",
+      "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+      "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+      "host_ports": 0
+    },
+    {
+      "service": "loki",
+      "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+      "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+      "host_ports": 0
+    },
+    {
+      "service": "alertmanager",
+      "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+      "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-workflow",
+      "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+      "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-asset",
+      "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+      "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-procurement",
+      "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+      "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-crm",
+      "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+      "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-srm",
+      "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+      "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-auth",
+      "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+      "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+      "host_ports": 0
+    },
+    {
+      "service": "nacos",
+      "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+      "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+      "host_ports": 0
+    },
+    {
+      "service": "xxl-job-admin",
+      "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+      "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+      "host_ports": 0
+    },
+    {
+      "service": "omni-db-migrator",
+      "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+      "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+      "host_ports": 0
+    },
+    {
+      "service": "rocketmq-broker",
+      "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+      "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+      "host_ports": 0
+    },
+    {
+      "service": "mysql",
+      "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+      "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "host_ports": 0
+    },
+    {
+      "service": "redis",
+      "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+      "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+      "host_ports": 0
+    },
+    {
+      "service": "rocketmq-namesrv",
+      "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+      "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+      "host_ports": 0
+    }
+  ],
+  "cleanup": "OWNED_UNSUBMITTED_DRAFT_DELETED_ACCOUNT_RETAINED_UNTIL_FINAL_PROJECT_CLEANUP",
+  "visual_review": {
+    "status": "passed-with-documented-limits",
+    "reviewer": "Agent individually inspected all 12 original PNGs",
+    "reviewed": 12,
+    "published": 12,
+    "human_translation_review": "pending",
+    "limits": [
+      "Manager has additional non-SUPER_ADMIN roles listed per image; this proves effective actor scope, not a single-role experiment.",
+      "English sidebar has clipped long labels. Detail tables extend horizontally; these screenshots prove resource/status visibility, not all line amount columns.",
+      "Scope screenshots were captured before the dedicated unsubmitted outside draft was deleted by its creator. Existing approved PR and business chain were not changed."
+    ]
+  },
+  "captures": [
+    {
+      "id": "procurement-manager-scope-zh-CN",
+      "name": "procurement-manager-scope",
+      "locale": "zh-CN",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/zh-CN/procurement-manager-scope.png",
+      "sha256": "3538335ab2e1f1a70381222a721ec63559463365dc33505d185d06998d964a63",
+      "captured_at": "2026-10-12T12:17:11.582Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "visible_resource": "PR-1-1",
+        "requester_unit": 604,
+        "actor_scope": "DEPT_AND_BELOW"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-scope-detail-zh-CN",
+      "name": "procurement-manager-scope-detail",
+      "locale": "zh-CN",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/zh-CN/procurement-manager-scope-detail.png",
+      "sha256": "0695855b314e428af7a89e820e7a15e4e831ee14d4089831333de1d5c088a762",
+      "captured_at": "2026-10-12T12:17:12.052Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "APPROVED",
+        "resource": "PR-1-1",
+        "no_super_admin": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-outside-empty-zh-CN",
+      "name": "procurement-manager-outside-empty",
+      "locale": "zh-CN",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/zh-CN/procurement-manager-outside-empty.png",
+      "sha256": "7bc4b9300a2a444c96059d52a9edb4dec594bc9a6e1185fa9e1bc346a4a58234",
+      "captured_at": "2026-10-12T12:17:12.479Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "hidden_resource": "PR-1-4",
+        "outside_unit": 605,
+        "manager_detail_business_code": 404,
+        "manager_list_count": 0,
+        "actual_owner_detail_code": 200
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-scope-en-US",
+      "name": "procurement-manager-scope",
+      "locale": "en-US",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/en-US/procurement-manager-scope.png",
+      "sha256": "7da18bfc4b4a933460aeef240841e9e1ca9696d30f2c2db9513dd0612603ceff",
+      "captured_at": "2026-10-12T12:17:13.543Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "visible_resource": "PR-1-1",
+        "requester_unit": 604,
+        "actor_scope": "DEPT_AND_BELOW"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-scope-detail-en-US",
+      "name": "procurement-manager-scope-detail",
+      "locale": "en-US",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/en-US/procurement-manager-scope-detail.png",
+      "sha256": "b3606d743a5e738119bfe2270261e4189506e04b81f38c7ec1f0d51079b73d9e",
+      "captured_at": "2026-10-12T12:17:13.988Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "APPROVED",
+        "resource": "PR-1-1",
+        "no_super_admin": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-outside-empty-en-US",
+      "name": "procurement-manager-outside-empty",
+      "locale": "en-US",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/en-US/procurement-manager-outside-empty.png",
+      "sha256": "fad557ee7cd48fe56d2ab94bb6de5f463c12aba8b17304554d5445368b8c4fca",
+      "captured_at": "2026-10-12T12:17:14.452Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "hidden_resource": "PR-1-4",
+        "outside_unit": 605,
+        "manager_detail_business_code": 404,
+        "manager_list_count": 0,
+        "actual_owner_detail_code": 200
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-scope-ja-JP",
+      "name": "procurement-manager-scope",
+      "locale": "ja-JP",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ja-JP/procurement-manager-scope.png",
+      "sha256": "adf2312452937d43bbda4713a8229a60f85dfe282edc92dc19361e60439c16bd",
+      "captured_at": "2026-10-12T12:17:15.592Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "visible_resource": "PR-1-1",
+        "requester_unit": 604,
+        "actor_scope": "DEPT_AND_BELOW"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-scope-detail-ja-JP",
+      "name": "procurement-manager-scope-detail",
+      "locale": "ja-JP",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ja-JP/procurement-manager-scope-detail.png",
+      "sha256": "c97d9bf19d79998cfbe2a714b1841cf8c9cc7e441ab4d9d32a90cfcdb99c14ec",
+      "captured_at": "2026-10-12T12:17:16.036Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "APPROVED",
+        "resource": "PR-1-1",
+        "no_super_admin": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-outside-empty-ja-JP",
+      "name": "procurement-manager-outside-empty",
+      "locale": "ja-JP",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ja-JP/procurement-manager-outside-empty.png",
+      "sha256": "2d5dc532b0b273a8b0f6f9496178168ea7f00ac3add799a696b6532476d7442f",
+      "captured_at": "2026-10-12T12:17:16.484Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "hidden_resource": "PR-1-4",
+        "outside_unit": 605,
+        "manager_detail_business_code": 404,
+        "manager_list_count": 0,
+        "actual_owner_detail_code": 200
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-scope-ko-KR",
+      "name": "procurement-manager-scope",
+      "locale": "ko-KR",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ko-KR/procurement-manager-scope.png",
+      "sha256": "4215dd576beacf2f5299d69b17364b0e8db10140a300cadedc1fc08939a938e7",
+      "captured_at": "2026-10-12T12:17:17.643Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "visible_resource": "PR-1-1",
+        "requester_unit": 604,
+        "actor_scope": "DEPT_AND_BELOW"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-scope-detail-ko-KR",
+      "name": "procurement-manager-scope-detail",
+      "locale": "ko-KR",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ko-KR/procurement-manager-scope-detail.png",
+      "sha256": "00009adcdd170dcfe0cf307868e1ef9a11972295924057cc7dd98281bec75326",
+      "captured_at": "2026-10-12T12:17:18.069Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "APPROVED",
+        "resource": "PR-1-1",
+        "no_super_admin": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "procurement-manager-outside-empty-ko-KR",
+      "name": "procurement-manager-outside-empty",
+      "locale": "ko-KR",
+      "flow": "procurement-admin-scope",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "route": "/admin/procurement/requisition",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ko-KR/procurement-manager-outside-empty.png",
+      "sha256": "56e1a74f389fef6dcdaa1ebc803b1544b4a8c5c1921958ff82b50c90b08b831d",
+      "captured_at": "2026-10-12T12:17:18.526Z",
+      "captured_test_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+      "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+      "captured_source_sha256": "fba66be99b744e01d710abae514a90c33567ee965f23eecd278fee3ecfaabe27",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "hidden_resource": "PR-1-4",
+        "outside_unit": 605,
+        "manager_detail_business_code": 404,
+        "manager_list_count": 0,
+        "actual_owner_detail_code": 200
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    }
+  ],
+  "current_test_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+  "post_capture_source_change": {
+    "at": "2026-10-12T12:35:12.121Z",
+    "from_sha256": "3ff8891330adbf976e3b1223001521028441bafd3f85d0c31f188a75acf0d05d",
+    "to_sha256": "77377caa62f0759596c702b7c1d633513c60001d3b245dc1698db1b01e9946df",
+    "change": "Only success logging changed from console.log to process.stdout.write for zero-warning lint; assertions, API requests and screenshots unchanged. No business replay."
+  }
+}

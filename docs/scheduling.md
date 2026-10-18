@@ -1,479 +1,61 @@
-# 定时任务系统
-
-> 本文档描述 Omni-Stack 定时任务系统的架构、实现细节和扩展指南。  
-> 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。
-
-Omni-Stack 提供基于 **XXL-JOB 3.3.1** 的双轨定时任务架构，覆盖系统级运维任务和用户级自助任务。
-
-## 1. 架构概览
-
-定时任务系统分为两个独立的轨道，共享同一套 `omni-common-job` 基础设施：
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                         定时任务系统                                    │
-├────────────────────────────┬───────────────────────────────────────────┤
-│        系统任务             │           用户任务                         │
-│  ─────────────────         │   ─────────────────                       │
-│  @XxlJob + @SystemJobMeta  │   UserJobHandler SPI + Registry           │
-│  管理员通过控制台管理        │   用户通过工作台自助管理                    │
-│  示例: OperLogArchiver      │   示例: DrinkWaterRemindHandler           │
-│  Handler = XXL-JOB Bean    │   共享 userJobExecuteHandler               │
-├────────────────────────────┴───────────────────────────────────────────┤
-│                    omni-common-job（共享类库）                           │
-│  XxlJobAutoConfiguration · XxlJobAdminClient · SystemJobRegistry      │
-│  XxlJobProperties · SystemJobMeta · ParamDef                          │
-├───────────────────────────────────────────────────────────────────────┤
-│                    omni-common-core（SPI 接口）                         │
-│  UserJobHandler · UserJobMessage                                      │
-├───────────────────────────────────────────────────────────────────────┤
-│                       XXL-JOB Admin :18080                             │
-│              (Docker: xuxueli/xxl-job-admin:3.3.1)                     │
-└───────────────────────────────────────────────────────────────────────┘
-```
-
-**模块依赖**：
-
-- `omni-common-core` — 定义 `UserJobHandler` SPI 接口和 `UserJobMessage` POJO（零 Spring 依赖）
-- `omni-common-job` — XXL-JOB 集成：自动配置、Admin HTTP 客户端、系统任务注册、元数据注解
-- `omni-base` — 业务层：系统任务控制器、用户任务服务、Handler 实现、工作台 API
+# 定时任务系统约束
 
-**关键设计决策**：
+本文是调度模块的事实与工程约束。界面操作、截图和源码调试步骤见 [调度教程](guides/scheduling.md)；运行配置见 [Docker 部署](docker-deployment.md)。
 
-- 选用 **XXL-JOB** 作为调度引擎：成熟的分布式调度方案，具备可视化控制台、Cron 管理和执行日志
-- **双轨分离**：系统任务（管理员管理、代码定义）与用户任务（自助服务、数据定义）
-- 用户任务**共享单一 Handler**：所有用户任务在 XXL-JOB 中注册为 `userJobExecuteHandler`，通过 JSON `executorParam` 区分
+## 1. 边界与数据所有权
 
-## 2. 系统任务
+| 所有者 | 职责 |
+|---|---|
+| `omni-common-core` | `UserJobHandler` SPI 与 `UserJobMessage`，不依赖 Spring |
+| `omni-common-job` | XXL-JOB 执行器、Admin 客户端、系统任务元数据注册与自动注册 |
+| `omni-base` | 系统任务/类型管理、个人任务归属校验、处理器路由与执行日志 |
+| XXL-JOB Admin | Cron 调度、执行器发现、触发与回调记录；不是个人任务归属的权威 |
 
-系统任务通过双重注解在代码中定义，由管理员在管理控制台中管理。
-
-### 注解模式
-
-每个系统任务 Handler 方法同时使用 `@XxlJob` 和 `@SystemJobMeta` 注解：
-
-```java
-@XxlJob("operLogArchiveHandler")
-@SystemJobMeta(
-    name = "操作日志归档",
-    description = "将超过保留天数的热表记录迁移到冷表",
-    defaultCron = "0 0 2 * * ?",
-    routeStrategy = "FIRST",
-    params = {
-        @ParamDef(name = "retentionDays", label = "保留天数",
-                  type = "number", defaultValue = "180", required = true, min = 1, max = 3650)
-    }
-)
-public void archive() { ... }
-```
-
-| 注解 | 来源 | 用途 |
-|------|------|------|
-| `@XxlJob` | XXL-JOB Core | 声明 Handler 名称，用于 XXL-JOB 执行器路由 |
-| `@SystemJobMeta` | `omni-common-job` | 声明展示元数据（名称、描述、默认 Cron、路由策略、参数定义），供管理界面使用 |
-| `@ParamDef` | `omni-common-job` | 定义可配置参数（名称、标签、类型、默认值、最小/最大值） |
-
-### 注册机制
-
-`SystemJobRegistry` 在启动时（`@PostConstruct`）扫描所有 Spring Bean，收集同时标注了 `@XxlJob` 和 `@SystemJobMeta` 的方法。收集到的元数据存储在内存中的 `LinkedHashMap<String, SystemJobInfo>`，供控制器查询。
-
-自动配置：`XxlJobAutoConfiguration` 通过 `@ConditionalOnMissingBean` 将 `SystemJobRegistry` 注册为 `@Bean`。
-
-### 管理流程
-
-1. 管理员在系统任务管理页面查看未注册的 Handler
-2. 管理员将 Handler 注册到 XXL-JOB，自定义 Cron 和参数
-3. 管理员可在同一页面启动/停止/触发/注销任务
-4. 执行日志在 XXL-JOB 原生控制台（`http://localhost:18080`）中查看
-
-### REST API
-
-| 方法 | 路径 | 权限 | 描述 |
-|------|------|------|------|
-| `GET` | `/api/job/system-job/list` | `job:system-job:list` | 列出所有 Handler 及其 XXL-JOB 状态（UNREGISTERED/RUNNING/STOPPED） |
-| `POST` | `/api/job/system-job/register` | `job:system-job:manage` | 将 Handler 注册到 XXL-JOB，自定义 Cron/参数 |
-| `POST` | `/api/job/system-job/{xxlJobId}/start` | `job:system-job:manage` | 启动调度 |
-| `POST` | `/api/job/system-job/{xxlJobId}/stop` | `job:system-job:manage` | 停止调度 |
-| `POST` | `/api/job/system-job/{xxlJobId}/trigger` | `job:system-job:manage` | 触发立即执行 |
-| `DELETE` | `/api/job/system-job/{xxlJobId}` | `job:system-job:manage` | 从 XXL-JOB 注销 |
-
-### 示例：操作日志归档
-
-操作日志归档任务将超过 `retentionDays` 的记录从热表（`sys_oper_log`）迁移到冷表（`sys_oper_log_archive`）：
+`sys_user_job_type` 是全局目录，`type_code` 唯一，没有租户字段。`sys_user_job` 保存租户及创建人，`sys_user_job_log` 保存消息中的租户与 `jobId`。工作台日志入口先校验父任务的租户及创建人，再按 `jobId` 查询；当前日志服务未使用 `tenantId` 入参追加 SQL 条件。`xxl_job_id` 关联调度中心记录，不能用名称代替可信关联。
 
-- **Handler**：`omni-base` 中的 `OperLogArchiver.archive()`
-- **默认 Cron**：`0 0 2 * * ?`（每天凌晨 02:00）
-- **参数**：`retentionDays`（数字，1-3650，默认 180）
-- **批处理**：每批 1000 条记录，每批使用 `@Transactional`
-- **执行日志**：在 XXL-JOB 控制台查看，不在应用界面展示
+## 2. 系统任务约束
 
-## 3. 用户任务
+- 系统任务方法必须同时声明 `@XxlJob("handlerName")` 和 `@SystemJobMeta(...)`；缺少任一注解不会进入 `SystemJobRegistry`。
+- `SystemJobRegistry.scan()` 收集元数据；`XxlJobAutoConfiguration.systemJobAutoRegistrar()` 在启用执行器时注册尚不存在的任务，保留已有任务的 Cron 与参数。
+- 执行器需要 `omni-common-job`。自动配置以 `XxlJobSpringExecutor` 在 classpath 为条件；执行器 Bean 和自动注册 Runner 还要求 `xxl.job.executor.enabled` 未设为 `false`。
+- 不同服务使用各自 AppName。同名 handler 跨执行器组可共存；注册、查找和删除必须带正确执行器组。
+- `/api/job/system-job/list` 需要 `job:system-job:list`；注册、启停、触发、注销需要 `job:system-job:manage`。列表状态为 `UNREGISTERED`、`RUNNING`、`STOPPED`；远端列表查询失败时也可能回退为 `UNREGISTERED`，该标签不能单独证明远端无任务。
+- 系统任务结果在 XXL-JOB 日志中核对，不写成个人任务日志。立即触发返回成功只代表调度中心受理。
 
-用户任务是由终端用户通过工作台界面创建的自助式定时任务。每个任务直接注册到 XXL-JOB，充分利用原生 Cron 调度精度。
+## 3. 个人任务契约与一致性
 
-### SPI 接口
-
-`UserJobHandler`（位于 `omni-common-core`）是定义新任务类型的扩展点：
-
-```java
-public interface UserJobHandler {
-    void execute(UserJobMessage message) throws Exception;
-    default String getResultMessage(UserJobMessage message) { return null; }
-}
-```
+- `/api/base/my-job` 创建从可信租户头与认证上下文取得租户和创建人；更新、删除、启停、触发与日志调用 `MyJobController.verifyOwnership(id, tenantId, username)`，同时核对租户及创建人。不得给这些接口添加 `@PreAuthorize` 代替逐行归属校验。
+- 列表与统计固定当前租户、当前 `createBy`。启用类型列表共享全局目录。任务类型管理接口 `/api/job/user-job-type` 使用 `job:user-job-type:*` 权限。
+- `UserJobMessage` 字段固定为 `jobId`、`tenantId`、`jobType`、`jobName`、`jobParams`。所有个人任务注册为同一 `userJobExecuteHandler`；内部用 `jobType` 查找 Bean。
+- 创建先插入本地行，再注册 XXL-JOB 并回填 ID。正常创建立即启用；本地 `status=1` 为启用，`0` 为暂停。
+- 注册失败或回填失败时，按执行器组、handler、含租户与本地 ID 的 `executorParam` 精确清理。只有确认远端已无该任务后才能删除本地行；远端结果未知时保留恢复关联并报错，禁止声称已回滚或盲目再次创建。
+- 已关联 XXL ID 时，更新 Cron/参数、启停和删除先操作远端，再提交本地变更。远端失败时保留本地旧值/关联；删除异常须通过完整分页确认远端已不存在。只改名称不更新 XXL-JOB 描述。
+- 暂停停止后续 Cron 调度，不禁止手动触发。触发响应与执行完成是两个阶段；通过新日志 ID、时间和 XXL-JOB 触发来源核对结果。
+- 执行日志 `status=1` 表示成功，`0` 表示失败。缺失处理器或捕获的处理器异常会尝试写失败日志；JSON 反序列化失败时在日志写入前返回。日志插入、最后时间更新不在同一声明式事务内，数据库异常可阻止后续执行结果设置，不能承诺每次失败都有个人日志。
+- `XxlJobAdminClient` 的会话 Cookie 只驻留内存。响应 code 非 200 或消息含 `not login` 时会重新登录并重试一次；这不构成业务写入幂等保证。Cookie 不写入文件或公共证据。
 
-`UserJobMessage` 承载任务上下文：
-
-| 字段 | 类型 | 描述 |
-|------|------|------|
-| `jobId` | `Long` | 任务 ID（`sys_user_job.id`） |
-| `tenantId` | `Long` | 租户 ID |
-| `jobType` | `String` | 任务类型编码（对应 `sys_user_job_type.type_code`） |
-| `jobName` | `String` | 用户自定义的任务名称 |
-| `jobParams` | `String` | 任务参数 JSON |
-
-### Handler 注册与路由
-
-`UserJobHandlerRegistry` 通过 Spring 的 `Map<String, UserJobHandler>` 注入自动发现所有 `UserJobHandler` 实现。Map 的 key 为 Bean 名称，**必须与** `sys_user_job_type.type_code` **完全一致**。
-
-所有用户任务共享同一个 XXL-JOB Handler：`@XxlJob("userJobExecuteHandler")`。当 XXL-JOB 触发执行时，`UserJobExecuteHandler` 读取 JSON 格式的 `executorParam`，反序列化为 `UserJobMessage`，然后通过 `UserJobHandlerRegistry.getHandler(jobType)` 路由到正确的 Handler。
-
-### 执行流程
-
-```
-XXL-JOB 调度器触发
-    → XxlJobSpringExecutor 分发到 userJobExecuteHandler
-    → UserJobExecuteHandler.execute()：
-        1. XxlJobHelper.getJobParam() → JSON 字符串
-        2. objectMapper.readValue(param, UserJobMessage.class)
-        3. handlerRegistry.getHandler(jobType) → UserJobHandler
-        4. handler.execute(message)
-        5. handler.getResultMessage(message) → 结果文本
-        6. INSERT INTO sys_user_job_log (status, executeTimeMs, resultMessage, errorMessage)
-        7. UPDATE sys_user_job SET last_fire_time = fireTime
-        8. XxlJobHelper.handleSuccess() 或 handleFail()
-```
-
-### 服务层
-
-`UserJobServiceImpl` 管理完整的生命周期：
-
-| 操作 | 流程 |
-|------|------|
-| **创建** | 验证类型 → INSERT `sys_user_job` → `XxlJobAdminClient.addJob()` → 更新 `xxlJobId` → XXL-JOB 失败时回滚数据库 |
-| **更新** | 检查归属 → UPDATE `sys_user_job` → 若 Cron/参数变更则调用 `XxlJobAdminClient.updateJob()` |
-| **删除** | 检查归属 → `XxlJobAdminClient.removeJob()` → DELETE `sys_user_job` |
-| **切换状态** | 检查归属 → UPDATE 状态 → `startJob()` 或 `stopJob()` |
-| **触发执行** | 检查归属 → `triggerJob(xxlJobId, executorParam)` |
-
-### 工作台 API（MyJobController）
-
-| 方法 | 路径 | 认证 | 描述 |
-|------|------|------|------|
-| `GET` | `/api/base/my-job/list` | JWT | 列出当前用户的任务（分页） |
-| `GET` | `/api/base/my-job/types` | JWT | 列出已启用的任务类型（下拉选项） |
-| `GET` | `/api/base/my-job/stats` | JWT | 仪表盘统计（总数、今日执行数、今日失败数） |
-| `POST` | `/api/base/my-job` | JWT | 创建任务 |
-| `PUT` | `/api/base/my-job/{id}` | JWT + 归属验证 | 更新任务 |
-| `DELETE` | `/api/base/my-job/{id}` | JWT + 归属验证 | 删除任务 |
-| `PUT` | `/api/base/my-job/{id}/status` | JWT + 归属验证 | 切换状态 |
-| `POST` | `/api/base/my-job/{id}/trigger` | JWT + 归属验证 | 触发立即执行 |
-| `GET` | `/api/base/my-job/{id}/logs` | JWT + 归属验证 | 列出执行日志 |
-
-**归属模型**：`MyJobController` 使用 `verifyOwnership(id, username)` 而非 `@PreAuthorize`。每个操作都检查任务的 `createBy` 是否与当前用户匹配。这提供了逐行的数据隔离，无需基于角色的权限编码。
-
-## 4. 创建新的用户任务类型（教程）
-
-本章以**喝水提醒**（`Task-00001`）为例，演示如何创建新的用户任务类型。
-
-### 第一步：注册任务类型
-
-在 `sys_user_job_type` 中插入一条记录：
-
-```sql
-INSERT INTO sys_user_job_type (type_code, type_name, description, param_template)
-VALUES (
-    'Task-00001',
-    '喝水提醒',
-    '定时提醒用户喝水，保持身体健康',
-    '[{"fieldKey":"cupShape","fieldLabel":"杯型","fieldType":"select","required":false,"options":["小杯","中杯","大杯"]}]'
-);
-```
-
-| 列名 | 值 | 用途 |
-|------|-----|------|
-| `type_code` | `Task-00001` | 唯一标识符；**必须与 Spring Bean 名称一致** |
-| `type_name` | `喝水提醒` | 工作台界面中的显示名称 |
-| `param_template` | JSON 数组 | 定义任务创建对话框的动态表单字段 |
-
-`param_template` JSON Schema 驱动工作台界面中的动态表单。每个字段定义支持以下属性：
-
-| 属性 | 描述 |
-|------|------|
-| `fieldKey` | 参数键名（用于 `jobParams` JSON 中） |
-| `fieldLabel` | 显示标签 |
-| `fieldType` | `input`、`select`、`number`、`textarea` |
-| `required` | 该字段是否为必填项 |
-| `options` | `select` 类型的可选项 |
-
-### 第二步：实现 UserJobHandler
-
-创建一个带有 `@Component` 注解的 Handler 类，Bean 名称需与 `type_code` 一致：
-
-```java
-@Slf4j
-@Component("Task-00001")  // Bean 名称必须与 sys_user_job_type.type_code 一致
-@RequiredArgsConstructor
-public class DrinkWaterRemindHandler implements UserJobHandler {
-
-    private final ObjectMapper objectMapper;
-
-    @Override
-    public void execute(UserJobMessage message) throws Exception {
-        String cupShape = parseCupShape(message.getJobParams());
-        log.info("【喝水提醒】任务 [{}] 已触发：请喝一杯{}水", message.getJobName(), cupShape);
-    }
-
-    @Override
-    public String getResultMessage(UserJobMessage message) {
-        try {
-            String cupShape = parseCupShape(message.getJobParams());
-            return "请喝一杯" + cupShape + "水，保持身体健康！";
-        } catch (Exception e) {
-            return "请喝水，保持身体健康！";
-        }
-    }
-
-    private String parseCupShape(String jobParams) {
-        if (jobParams == null || jobParams.isBlank()) return "中杯";
-        try {
-            JsonNode params = objectMapper.readTree(jobParams);
-            JsonNode cupNode = params.get("cupShape");
-            if (cupNode != null && !cupNode.isNull() && !cupNode.asText().isBlank()) {
-                return cupNode.asText();
-            }
-        } catch (Exception ignored) { }
-        return "中杯";
-    }
-}
-```
-
-**关键规则**：`@Component` 的 Bean 名称（`"Task-00001"`）必须与 `sys_user_job_type` 中的 `type_code` 完全一致。不匹配会导致静默路由失败——任务会创建成功，但执行时会报错"未找到任务类型对应的处理器"。
-
-### 第三步：用户创建任务
-
-1. 用户打开工作台 → 点击"创建任务"
-2. 从类型下拉框中选择"喝水提醒"
-3. 填写动态表单（如 `cupShape = 大杯`）
-4. 设置 Cron 表达式（如 `0 */30 9-18 * * ?`，表示工作时间每 30 分钟执行一次）
-5. 点击"确认创建"
-
-后台处理流程：
-- `MyJobController.create()` → `UserJobServiceImpl.createJob()`：
-  - 验证 `type_code` 在 `sys_user_job_type` 中存在且已启用
-  - INSERT 到 `sys_user_job`
-  - 构建 `UserJobMessage` JSON 作为 `executorParam`
-  - 调用 `XxlJobAdminClient.addJob()` 注册到 XXL-JOB
-  - 用返回的 ID 更新 `sys_user_job.xxl_job_id`
-
-### 第四步：验证执行
-
-1. **XXL-JOB 控制台**（`http://localhost:18080`）：任务出现在任务列表中，显示已配置的 Cron
-2. **自动触发**：XXL-JOB 在指定时间触发 → `userJobExecuteHandler` → `DrinkWaterRemindHandler.execute()`
-3. **执行日志**：`sys_user_job_log` 中新增一条包含 `result_message` 的记录
-4. **前端通知**：工作台每 10 秒轮询，检测到新日志后弹出 `ElNotification` 通知，显示结果消息
-
-## 5. XXL-JOB Admin 客户端
-
-`XxlJobAdminClient` 是一个 HTTP 客户端，封装了 XXL-JOB Admin 的 REST API。它由 `SystemJobService` 和 `UserJobServiceImpl` 使用 `XxlJobProperties` 中的配置实例化。
-
-### 认证方式
-
-XXL-JOB Admin 使用基于 Session 的认证。`XxlJobAdminClient` 的处理方式：
-1. 使用 `userName` 和 `password` 调用 `POST /login`
-2. 将 Session Cookie 缓存在 `volatile` 字段中
-3. 后续 API 调用时，在 `Cookie` 请求头中包含该 Cookie
-4. 若检测到 302 重定向（登录页面），自动重新认证并重试
-
-### 主要 API 方法
-
-| 方法 | XXL-JOB 端点 | 用途 |
-|------|-------------|------|
-| `addJob(jobGroup, jobDesc, cron, routeStrategy, handler, param)` | `POST /jobinfo/insert` | 创建新的定时任务 |
-| `updateJob(xxlJobId, cron, param)` | `POST /jobinfo/update` | 更新已有任务的 Cron/参数 |
-| `removeJob(xxlJobId)` | `POST /jobinfo/remove` | 删除任务 |
-| `startJob(xxlJobId)` | `POST /jobinfo/start` | 启动调度 |
-| `stopJob(xxlJobId)` | `POST /jobinfo/stop` | 停止调度 |
-| `triggerJob(xxlJobId, param)` | `POST /jobinfo/trigger` | 触发立即执行 |
-| `getJobGroupId(appname)` | `POST /jobgroup/pageList` | 根据 appname 查找执行器组 ID |
-| `pageList(jobGroup, handler)` | `POST /jobinfo/pageList` | 查询任务列表（用于合并元数据与实时状态） |
-
-### 配置项
-
-```yaml
-xxl:
-  job:
-    admin:
-      addresses: http://127.0.0.1:18080/xxl-job-admin
-      username: admin
-      password: 123456
-    executor:
-      appname: omni-base        # 为空时回退到 spring.application.name
-      port: 9999               # 执行器回调端口
-      logPath: /data/applogs/xxl-job/jobhandler
-      logRetentionDays: 30
-```
-
-所有属性通过 `XxlJobProperties` 中的 `@ConfigurationProperties(prefix = "xxl.job")` 绑定。
-
-## 6. 前端集成
-
-### 三个前端入口
-
-| 区域 | 路径 | 受众 | 权限 |
-|------|------|------|------|
-| 系统任务管理 | `src/views/job/system-job/index.vue` | 管理员 | `job:system-job:list`、`job:system-job:manage` |
-| 任务类型管理 | `src/views/job/user-job-type/index.vue` | 管理员 | `job:user-job-type:*` |
-| 工作台（我的任务） | `src/views/home/index.vue` | 所有用户 | 仅需 JWT（基于归属验证） |
-
-### API 模块
-
-| 模块 | 文件 | 函数 |
-|------|------|------|
-| 系统任务 | `src/api/systemJob.ts` | `listSystemJobs`、`registerSystemJob`、`startSystemJob`、`stopSystemJob`、`triggerSystemJob`、`unregisterSystemJob` |
-| 任务类型 | `src/api/userJobType.ts` | `listJobTypes`、`createJobType`、`updateJobType`、`deleteJobType` |
-| 我的任务 | `src/api/myJob.ts` | `getMyJobs`、`getMyJobStats`、`createMyJob`、`updateMyJob`、`deleteMyJob`、`toggleMyJobStatus`、`triggerMyJob`、`getMyJobLogs`、`getEnabledJobTypes` |
-
-### 关键交互模式
-
-- **Cron 生成器**：专用组件（`CronGenerator.vue`）提供频率类型选择器（每分钟 / 每 X 分钟 / 每小时 / 每 X 小时 / 每天 / 每周 / 每月），并附带可读的预览（如"每周一 09:00 执行"）
-- **动态表单渲染器**：`DynamicFormRenderer.vue` 根据 `sys_user_job_type` 的 `param_template` JSON Schema 渲染表单。支持 `input`、`select`、`number` 和 `textarea` 字段类型。
-- **全局轮询**：工作台每 10 秒（`setInterval`）轮询所有活跃任务的新执行日志。使用 `lastLogIdMap`（Map<jobId, lastSeenLogId>）检测新日志并弹出 `ElNotification` 通知。首次轮询初始化基线，不显示通知（防止弹出旧日志通知）。
-
-## 7. 配置
-
-### Docker 部署
-
-XXL-JOB Admin 通过 `docker-compose.yml` 以 Docker 容器方式部署：
-
-```yaml
-xxl-job-admin:
-  image: xuxueli/xxl-job-admin:3.3.1
-  container_name: omni-xxl-job-admin
-  ports:
-    - "18080:8080"
-  environment:
-    PARAMS: >
-      --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?...
-      --spring.datasource.username=root
-      --spring.datasource.password=root123
-```
-
-`xxl_job` 数据库由一次性 `omni-db-migrator` 通过 `database/changelog/xxl-job/` 初始化，正式调度种子位于 `scripts/sql/seed/xxl-job.sql`，并受 seed manifest 校验。
-
-### 数据库表（omni_base 库）
-
-| 表名 | 用途 |
-|------|------|
-| `sys_user_job_type` | 任务类型目录。`type_code`（唯一）对应 `UserJobHandler` Bean 名称。`param_template`（JSON）驱动动态表单。 |
-| `sys_user_job` | 用户任务实例。`xxl_job_id` 关联 XXL-JOB。包含 `cron_expression`、`job_params`、`status`、`last_fire_time`。 |
-| `sys_user_job_log` | 执行历史记录。包含 `job_id`、`fire_time`、`execute_time_ms`、`status`（0=失败，1=成功）、`result_message`、`error_message`。 |
-
-```mermaid
-erDiagram
-    sys_user_job_type ||--o{ sys_user_job : "type_code -> job_type"
-    sys_user_job ||--o{ sys_user_job_log : "id -> job_id"
-```
-
-### 自动配置
-
-`XxlJobAutoConfiguration`（位于 `omni-common-job`）通过 `META-INF/spring/AutoConfiguration.imports` 注册，在以下条件满足时激活：
-- classpath 中存在 `XxlJobSpringExecutor` 类（`@ConditionalOnClass`）
-- `xxl.job.executor.enabled` 未显式设置为 `false`（`@ConditionalOnProperty`，默认为 `true`）
-
-提供以下 Bean：
-1. `XxlJobSpringExecutor` Bean — 启动时向 XXL-JOB Admin 注册
-2. `SystemJobRegistry` Bean — 扫描标注了 `@XxlJob` + `@SystemJobMeta` 的方法（`@ConditionalOnMissingBean`）
-
-### 服务集成清单
-
-要为新的微服务添加调度能力：
-
-1. 添加 POM 依赖：`omni-common-job`
-2. 在 `application.yml` 中配置 `xxl.job.admin.*` 和 `xxl.job.executor.*`
-3. 确保 XXL-JOB Admin 已启动且可访问
-4. 系统任务：在 Handler 方法上添加 `@XxlJob` + `@SystemJobMeta` 注解
-5. 用户任务：实现 `UserJobHandler`，Bean 名称与 `type_code` 一致
-6. 执行器会在服务启动时自动向 XXL-JOB Admin 注册
-
----
-
-## 8. 技术选型思考：为什么选择 XXL-JOB 而非 Quartz
-
-| 考量 | XXL-JOB | Quartz |
-|------|---------|--------|
-| **可视化管理** | 内置 Web 控制台，支持任务 CRUD、执行日志、调度报表 | 无内置 UI，需第三方工具（如 Quartz Web UI） |
-| **分布式支持** | 原生支持多执行器、分片广播、故障转移 | 需额外配置 JDBC JobStore + 集群模式 |
-| **动态调度** | 运行时修改 cron/参数立即生效，无需重启 | 运行时修改需通过 API 重新调度 |
-| **运维友好** | 执行日志可视化、失败重试、邮件报警 | 日志需自定义集成 |
-| **Spring Boot 集成** | 提供 `xxl-job-core` SDK，集成简单 | Spring 内置 `@Scheduled`，但分布式功能有限 |
-| **社区活跃度** | GitHub 25k+ stars，中文社区活跃 | 历史悠久，但社区活跃度下降 |
-
-**结论**：XXL-JOB 在可视化管理、分布式调度、运维友好性方面明显优于 Quartz，特别适合需要管理员动态配置任务的场景。
-
-## 9. XXL-JOB Docker 部署配置详解
-
-### 容器配置
-
-```yaml
-# docker-compose.yml
-xxl-job-admin:
-  image: xuxueli/xxl-job-admin:3.3.1
-  container_name: omni-xxl-job-admin
-  ports:
-    - "18080:8080"              # 宿主机 18080 → 容器内部 8080
-  environment:
-    PARAMS: >
-      --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
-      --spring.datasource.username=root
-      --spring.datasource.password=root123
-  depends_on:
-    mysql:
-      condition: service_healthy
-  networks:
-    - default
-```
-
-### 关键配置说明
-
-| 配置项 | 值 | 说明 |
-|---------|-----|------|
-| 容器内部端口 | 8080 | XXL-JOB Admin 默认端口 |
-| 宿主机映射端口 | 18080 | 避免与 Gateway (8102) 冲突 |
-| 数据库连接 | `mysql:3306` | 使用 Docker 内部网络解析 `mysql` 主机名 |
-| 数据库结构 | `database/changelog/xxl-job/` | 由一次性 migrator 在 XXL-JOB 启动前执行 |
-| 调度种子 | `scripts/sql/seed/xxl-job.sql` | 幂等写入并由 `database/seed/manifest.yaml` 校验 |
-| 默认账号 | admin / 123456 | 生产环境必须修改 |
-
-### 执行器注册
-
-各微服务的执行器通过 `xxl.job.executor.appname` 注册到 XXL-JOB Admin：
-
-| 服务 | appname | 端口 | 说明 |
-|------|---------|------|------|
-| omni-base | `omni-base` | 9999 | 系统任务 + 用户任务 + MQ 中继 |
-| omni-auth | `omni-auth` | 9998 | 认证相关任务（如配置了执行器） |
-| omni-workflow | `omni-workflow` | 9997 | 工作流相关任务（如配置了执行器） |
-
----
-
-## 10. 故障排查指南
-
-| 问题 | 可能原因 | 排查方法 |
-|------|---------|----------|
-| **执行器未注册** | XXL-JOB Admin 未启动或网络不通 | 检查 XXL-JOB Admin 容器状态；确认 `xxl.job.admin.addresses` 配置正确 |
-| **任务未触发** | 任务未启动或 Cron 表达式错误 | XXL-JOB 控制台检查任务状态；使用在线 Cron 工具验证表达式 |
-| **执行失败** | Handler 抛出异常 | XXL-JOB 控制台查看执行日志；检查服务日志中的异常堆栈 |
-| **用户任务「未找到处理器」** | Bean name 与 type_code 不匹配 | 确认 `@Component("Task-XXXXX")` 中的名称与 `sys_user_job_type.type_code` 完全一致 |
-| **XXL-JOB 注册失败回滚** | `XxlJobAdminClient.addJob()` 返回失败 | 检查 XXL-JOB Admin 日志；确认执行器 appname 已注册 |
-| **任务重复注册** | 多次点击创建 | `dynamicRouteNames` Set 防重复，但若服务重启需重新注册 |
+## 4. 扩展约束
+
+1. 实现 `UserJobHandler`，`@Component` Bean 名必须与目录的 `type_code` 完全一致；目录启用不证明处理器已部署。
+2. 校验任务参数，显式使用消息中的 `tenantId`，避免依赖 HTTP 线程上下文。业务副作用必须幂等，不能假设 Cron 与手动触发互斥。
+3. `param_template` 支持标准 JSON Schema `object/properties` 与兼容扁平格式；枚举提交稳定值，显示文本不作为路由编码。
+4. 种子变更修改 `scripts/sql/seed/base.sql`，刷新 `database/seed/manifest.yaml` 对应校验与断言；数据库结构使用前向迁移。
+5. 新系统任务使用双注解，声明默认 Cron、参数和策略。不得把所有个人任务的共享 handler 标成系统任务。
+6. 在本机 Docker 验证创建、编辑、暂停、手动执行、恢复、真实 Cron 执行、成功/失败日志、归属拒绝及删除后的远端无残留。
+
+## 5. 源码入口
+
+- [个人任务控制器](../omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java)：列表过滤、`verifyOwnership()`。
+- [个人任务服务](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java)：外部先行、精确补偿、未知结果保留。
+- [Admin 客户端](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobAdminClient.java)：注册、全字段更新、完整分页与重复页保护。
+- [共享执行入口](../omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobExecuteHandler.java)、[路由注册表](../omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobHandlerRegistry.java)、[喝水处理器](../omni-backend/omni-base/src/main/java/com/omni/base/job/handler/DrinkWaterRemindHandler.java)。
+- [自动配置](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java)、[系统元数据注册表](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/SystemJobRegistry.java)、[种子同步器](../omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobSeedSyncRunner.java)。种子同步扫描启用且无 XXL ID 的行，重启不能代替未知结果对账。
+
+- [个人日志查询](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobLogServiceImpl.java)：当前依赖入口的父任务归属校验和固定 jobId。
+- [系统任务服务](../omni-backend/omni-base/src/main/java/com/omni/base/service/SystemJobService.java)：元数据与远端状态合并，以及远端查询失败的展示回退。
+
+## 6. 运行与验收边界
+
+正式基础设施由 `compose.infra.yaml` 和 migrator 管理；XXL-JOB 数据库/种子位于 `database/changelog/xxl-job/`、`scripts/sql/seed/xxl-job.sql`。账号、密码和 access token 来自私有 `.env`，不使用教程硬编码凭据。服务间连接 `xxl-job-admin:8080/xxl-job-admin`；宿主端口以实际 Compose 为准。
+
+日期时间使用 `yyyy-MM-dd HH:mm:ss`。应用、构建、测试、截图与取证在本机 Docker 执行。教程证据说明具体身份、镜像、源码、真实触发来源与限制；类型目录截图、受理响应或模拟故障不能单独证明真实执行闭环。

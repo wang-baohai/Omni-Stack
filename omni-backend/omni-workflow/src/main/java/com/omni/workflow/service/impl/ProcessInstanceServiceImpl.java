@@ -96,6 +96,8 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
         safeVariables.remove("startUserId");
         safeVariables.remove("authenticatedUserId");
         safeVariables.remove("START_USER_ID");
+        // 启动会同步执行首个节点，候选人解析必须在此时已能读取可信发起人。
+        safeVariables.put("initiator", String.valueOf(effectiveUserId));
 
         // 设置流程发起人（Flowable 通过 Authentication 获取发起人信息）
         Authentication.setAuthenticatedUserId(String.valueOf(effectiveUserId));
@@ -306,7 +308,8 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 
     /** {@inheritDoc} */
     @Override
-    public ProcessProgressResponse getProgress(String processInstanceId) {
+    public ProcessProgressResponse getProgress(String processInstanceId, Long tenantId) {
+        HistoricProcessInstance hpi = requireTenantInstance(processInstanceId, tenantId);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         // 1. 查询所有历史活动实例
@@ -326,9 +329,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
         Set<String> activeIdSet = new HashSet<>(activeIds);
 
         // 2.5 查询流程发起人，用于 startEvent 节点的申请人展示
-        HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery()
-                .processInstanceId(processInstanceId).singleResult();
-        String initiatorId = hpi != null ? hpi.getStartUserId() : null;
+        String initiatorId = hpi.getStartUserId();
 
         // 2.6 查询历史任务实例获取真实 assignee（多实例场景下 HistoricActivityInstance.getAssignee() 不准确）
         List<HistoricTaskInstance> taskInstances = historyService
@@ -528,7 +529,8 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 
     /** {@inheritDoc} */
     @Override
-    public List<ApprovalRecord> getApprovalRecords(String processInstanceId) {
+    public List<ApprovalRecord> getApprovalRecords(String processInstanceId, Long tenantId) {
+        requireTenantInstance(processInstanceId, tenantId);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         // 1. 查询所有历史任务实例（按创建时间升序）
@@ -638,6 +640,29 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
         }
 
         return records;
+    }
+
+    /**
+     * 在读取活动、任务、意见及候选人之前检查流程实例租户归属。
+     * <p>Flowable 历史查询不经过 MyBatis-Plus 租户拦截器，必须显式限定租户。
+     * 不存在与跨租户实例使用同一错误，避免暴露其他租户实例是否存在。</p>
+     *
+     * @param processInstanceId 流程实例 ID
+     * @param tenantId 当前请求租户 ID
+     * @return 当前租户的历史流程实例
+     */
+    private HistoricProcessInstance requireTenantInstance(String processInstanceId, Long tenantId) {
+        if (tenantId == null || tenantId <= 0) {
+            throw new BusinessException(400, "租户 ID 必须为正整数");
+        }
+        HistoricProcessInstance instance = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .processInstanceTenantId(String.valueOf(tenantId))
+                .singleResult();
+        if (instance == null || !String.valueOf(tenantId).equals(instance.getTenantId())) {
+            throw new BusinessException(404, "流程实例不存在");
+        }
+        return instance;
     }
 
     /**

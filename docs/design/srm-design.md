@@ -1,25 +1,28 @@
 # SRM 供应商管理模块架构与实现基线
 
-> 状态：MVP 已实现并完成端到端加固
+> 适用性：保留 2026-07-27 的原设计日期及第 14–16 节重要历史。当前事实以 SRM 源码、Liquibase、前端和配置为准；原“已完成端到端加固”不代表本轮真实运行验收。翻译按 [ADR-0003](../adr/0003-authorized-ai-translation-review.md) 记录实际 `AI_REVIEW`，不冒称人工复核。
+>
 > 项目：Omni-Stack
-> 日期：2026-07-27
-> 目标：说明 omni-srm MVP 的架构、跨服务契约和实施边界；实现入口为 `omni-backend/omni-srm`、`omni-frontend/src/views/srm` 与 `omni-frontend/src/views/supplier-portal`。
+> 原设计日期：2026-07-27
+> 当前职责：保留设计决策、已实现基线快照和重要历史；当前规则由 SRM 事实文档统一维护。
 
-设计依据：`README.md`，以及 `docs/` 中 architecture、api-contract、backend-patterns、frontend-patterns、core-flows、scheduling、workflow、mq-reliability、docker-deployment 全部主题文档；同时参照 `docs/design/crm-design.md` 的 CRM 实现模式。
+当前模块事实见 [SRM](../srm.md)，操作入口见 [功能导览](../wiki/feature-tour.md)，开发入口见 [源码索引](../reference/source-map.md) 与 [开发指南](../guides/scaffold-development.md)。运行前提、身份、步骤、截图和恢复属于 Wiki。本页保留设计决策，不把测试要求或历史计划当作本轮验收证据。相关事实见 [核心流程](../core-flows.md)、[Workflow](../workflow.md)、[采购设计](procurement-design.md) 和 [资产设计](asset-design.md)。
+
+职责边界：本页的实现表、状态机、权限和 API 描述保留为提交 `9b23ab972f1dcac4116ae95fb5cd56442e2961e4` 中已复核的设计基线快照；这不是把实现结果追记到原设计日期。后续当前契约只在 [SRM 事实](../srm.md) 维护，本页不作为第二份可独立修改的事实源。长期设计决定变化时更新本页，并说明与当前事实及 ADR 的关系；操作和运行证据仍属于 Wiki。
 
 ## 1. 设计结论
 
-SRM 应建设为独立 Servlet 微服务，与采购执行（`omni-procurement`）和资产管理（`omni-asset`）分离。三者按依赖关系分步建设：SRM → Procurement → Asset。
+SRM 是独立 Servlet 微服务，与采购执行（`omni-procurement`）及资产管理（`omni-asset`）保持领域边界。当前跨服务依赖和集成见第 3、8 节。
 
 | 项目 | 决策 |
 |---|---|
 | Maven 模块 / 服务名 | `omni-srm` |
 | 本地端口 / 管理端口 | `8105` / `19905` |
-| XXL-JOB 执行器 | `omni-srm` / `9905`（启用定时评估或资质预警时） |
+| XXL-JOB 执行器 | `omni-srm` / `9905`，由 `XXL_JOB_ENABLED` 等配置控制；不表示当前已有定时评估或资质扫描任务 |
 | 数据库 | `omni_srm` |
 | Gateway | `/api/srm/**` → `lb://omni-srm`，不使用 `StripPrefix` |
-| Redis | DB 0，共享 Auth 写入的 XSS 配置；SRM 键使用 `srm:` 前缀 |
-| 前端 | 继续使用 `omni-frontend`，新增 `views/srm/**`（管理端）和 `views/portal/**`（供应商门户） |
+| Redis | DB 0，共享 `xss:enabled:{tenantId}` / `xss:rules:{tenantId}`；不声明通用 `srm:` 业务缓存前缀 |
+| 前端 | `views/srm/**`（管理）与 `views/supplier-portal/index.vue`（门户） |
 
 SRM MVP 覆盖供应商全生命周期管理闭环：
 
@@ -27,9 +30,11 @@ SRM MVP 覆盖供应商全生命周期管理闭环：
 
 采购执行（请购、询价、订单、收货）和资产处置（验收、调拨、报废）不进入 SRM MVP，分别在 `omni-procurement` 和 `omni-asset` 中实现。
 
-SRM 核心供应商聚合是三服务中的地基；供应商主数据仅依赖 Auth 的用户/权限体系。已实现的门户报价增量会通过 Procurement 内部契约校验 RFQ 邀请与行快照，Procurement 直接依赖 SRM，Asset 则通过 Procurement 收货快照间接继承供应商数据。
+SRM 主数据依赖 Auth 身份与共享安全能力；准入调用独立 Workflow，门户报价调用 Procurement 邀请契约。Procurement 查询 SRM 供应商/报价，Asset 同时使用采购收货供应商快照和 SRM 的 APPROVED 供应商候选搜索，不能概括为只间接依赖。
 
 ## 2. 产品范围
+
+本节保留产品目标和分期。当前存在的功能、入口和限制见后文；Phase 2/3 不是已交付功能，也不证明每个租户已有相同种子或流程模型。
 
 ### 2.1 用户与目标
 
@@ -54,38 +59,35 @@ MVP 应能回答：有多少合格/冻结/淘汰供应商；某个供应商的�
 
 ## 3. 系统边界
 
-| 组件 | 权威职责 | SRM 的使用方式 |
+| 组件 | 权威职责 | 当前 SRM 使用边界 |
 |---|---|---|
-| `omni-auth` | 租户、用户、组织、角色、权限、数据范围、XSS 配置 | 内部 OpenFeign；SRM 只存用户/组织 ID |
-| `omni-srm` | 供应商、评估、风险、供应商门户账号关联 | SRM 业务唯一写入方；认证账号仍由 Auth 权威管理 |
-| `omni-base` | 字典、操作日志、任务/MQ 运维 | 操作日志汇聚；品类/行业等用字典 code |
-| `omni-workflow` | BPMN、流程实例、审批 | 通过内部 Feign 启动供应商准入审批，消费可靠完成事件回写状态 |
-| `omni-procurement` | 采购执行 | 通过内部 Feign 查询供应商并协调门户报价 |
-| `omni-asset` | 资产管理 | 继承 Procurement 收货事件中的供应商快照，不直接依赖 SRM |
-| XXL-JOB | 触发批量扫描 | 资质到期预警扫描（MVP 可选） |
-| RocketMQ | 异步运输 | 至少一次；消费者必须幂等 |
-| Redis | XSS 共享配置、短缓存 | 不保存 SRM 权威业务数据 |
+| `omni-auth` | 用户、组织、角色、权限、数据范围、XSS | 内部引用/范围/批量展示查询；为既有用户处理门户角色请求 |
+| `omni-srm` | 供应商、评估、风险、PortalUser、报价 | 本服务业务唯一写入方；不处理开户密码 |
+| `omni-base` | 字典、操作日志、任务/MQ 运维 | 字典权威与日志汇聚，SRM 保存 code 和自己的业务数据 |
+| `omni-workflow` | BPMN、实例、任务、Flowable | 解析已发布准入模型、启动/终止流程，消费完成事件；SRM 不内嵌引擎 |
+| `omni-procurement` | RFQ、邀请、定点、PO、收货 | 内部供应商/报价查询；SRM 报价前验证其邀请和完整行快照 |
+| `omni-asset` | 资产 | 消费采购供应商快照，并直接使用 SRM 合格供应商搜索 |
+| RocketMQ | 事件运输 | 消费者必须幂等；本地 Outbox 不证明实际投递成功 |
+| Redis / XXL-JOB | 共享缓存 / 执行基础 | XSS 配置与可配置执行器；外部任务部署另行取证 |
 
 ```mermaid
 flowchart LR
-    UI["omni-frontend<br/>管理端 + 供应商门户"] --> GW["omni-gateway<br/>JWT 验证/身份头"]
+    UI["omni-frontend<br/>管理端/供应商门户"] --> GW["omni-gateway<br/>JWT 验证/身份头"]
     GW --> SRM["omni-srm :8105"]
-    GW --> AUTH["omni-auth :8100"]
-    SRM -->|"OpenFeign + X-Internal-Token"| AUTH
+    SRM -->|"OpenFeign + X-Internal-Token"| AUTH["omni-auth"]
+    SRM -->|"准入模型/启动/终止"| WF["omni-workflow"]
+    SRM -->|"RFQ 邀请/报价"| PROC["omni-procurement"]
+    PROC --> SRM
+    ASSET["omni-asset"] -->|"合格供应商候选"| SRM
+    PROC -->|"收货供应商快照"| ASSET
     SRM --> DB[("omni_srm")]
     SRM --> R[("Redis DB 0")]
     SRM --> O["sys_mq_message"]
     O -->|"mqRelayHandler"| MQ["RocketMQ"]
-    XXL["XXL-JOB"] -. "Phase 2" .-> SRM
-    PROC["omni-procurement"] -->|"供应商查询 / 门户报价"| SRM
-    PROC -->|"收货供应商快照"| ASSET["omni-asset"]
+    MQ -->|"角色结果/准入完成"| SRM
 ```
 
-推荐依赖：`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`，以及 Web、Validation、Security、AspectJ、OpenFeign、LoadBalancer、Nacos、RocketMQ Stream、Actuator、Lombok。
-
-SRM 不依赖 `omni-common-workflow`，也不在本服务嵌入 Flowable；准入审批通过独立
-`omni-workflow` 的内部 API 与 `workflow.process.completed.v1` 事件完成，Flowable 运行时和表只属于
-Workflow 服务。
+当前 POM 显式依赖 `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`, `omni-common-service`，以及 Web、Security、Validation、AspectJ、OpenFeign、LoadBalancer、Nacos、RocketMQ、Actuator、Lombok 等。`omni-common-service` 提供身份、租户、DataScope、持久化与 XSS 组合；依赖存在不表示所有任务已启用。SRM 不依赖 `omni-common-workflow`，Flowable 运行时和表只属于独立 Workflow。
 
 ## 4. 领域与数据设计
 
@@ -95,53 +97,47 @@ Workflow 服务。
 |---|---|---|
 | Supplier | `srm_supplier`、`srm_supplier_contact`、`srm_supplier_qualification`、`srm_supplier_bank_account` | 供应商主数据、联系人、资质、银行账户 |
 | Evaluation | `srm_evaluation_template`、`srm_evaluation_dimension`、`srm_evaluation`、`srm_evaluation_item` | 评估模板、评估记录、评分明细 |
-| Risk | `srm_risk_indicator`、`srm_risk_assessment` | 风险指标、综合风险评估 |
+| Risk | `srm_risk_indicator`、`srm_risk_assessment`、`srm_risk_indicator_type`、`srm_risk_criterion`、`srm_risk_score_threshold` | 指标、评估历史及租户共享类型/评分标准/总分阈值 |
 | Portal | `srm_supplier_invite`、`srm_supplier_enrollment`、`srm_supplier_portal_user` | 入驻邀请/Saga、门户账号关联 |
 | Quotation | `srm_quotation`、`srm_quotation_line`、`srm_quotation_request` | RFQ 报价快照、报价行、请求幂等历史 |
+| 消费 Inbox | `srm_event_inbox` | Workflow 完成事件登记、意图核对与处理状态 |
 
 ```mermaid
 erDiagram
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_CONTACT : has
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_QUALIFICATION : holds
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_BANK_ACCOUNT : owns
-    SRM_SUPPLIER ||--o{ SRM_EVALUATION : evaluated_by
-    SRM_SUPPLIER ||--o{ SRM_RISK_ASSESSMENT : assessed
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_ENROLLMENT : enrolls
-    SRM_SUPPLIER ||--o{ SRM_QUOTATION : quotes
-    SRM_QUOTATION ||--|{ SRM_QUOTATION_LINE : contains
-    SRM_QUOTATION ||--o{ SRM_QUOTATION_REQUEST : idempotency
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_PORTAL_USER : authorizes
-    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION_DIMENSION : contains
-    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION : uses
-    SRM_EVALUATION ||--o{ SRM_EVALUATION_ITEM : scores
-    SRM_SUPPLIER ||--o{ SRM_RISK_INDICATOR : has
-    SRM_RISK_ASSESSMENT ||--o{ SRM_RISK_INDICATOR : aggregates
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_CONTACT : "联系人"
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_QUALIFICATION : "资质"
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_BANK_ACCOUNT : "银行账户"
+    SRM_SUPPLIER ||--o{ SRM_EVALUATION : "绩效记录"
+    SRM_SUPPLIER ||--o{ SRM_RISK_ASSESSMENT : "风险历史"
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_ENROLLMENT : "入驻申请"
+    SRM_SUPPLIER ||--o{ SRM_QUOTATION : "报价"
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_PORTAL_USER : "授权账号"
+    SRM_SUPPLIER ||--o{ SRM_RISK_INDICATOR : "风险指标"
+    SRM_QUOTATION ||--|{ SRM_QUOTATION_LINE : "报价行"
+    SRM_QUOTATION ||--o{ SRM_QUOTATION_REQUEST : "请求永久账本"
+    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION_DIMENSION : "模板维度"
+    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION : "评估模板"
+    SRM_EVALUATION ||--o{ SRM_EVALUATION_ITEM : "评分明细"
+    SRM_RISK_INDICATOR_TYPE ||--o{ SRM_RISK_CRITERION : "评分标准"
+    SRM_EVENT_INBOX {
+        bigint tenant_id
+        varchar event_id
+    }
+    SRM_RISK_SCORE_THRESHOLD {
+        int min_score
+        int max_score
+    }
 ```
 
 ### 4.2 通用字段与规则
 
-每一张 `srm_*` 表都必须包含 `tenant_id`，包括评估模板、评估维度、资质记录；这样 TenantLine 不会改写到不存在的列。可授权业务表还必须包含：
-
-- `tenant_id`：租户隔离。
-- `owner_user_id`：SELF 范围和业务负责人。
-- `owner_unit_id`：DEPT/DEPT_AND_BELOW/CUSTOM 范围。
-- `version`：乐观锁。
-- `deleted`：逻辑删除。
-- `id/create_time/update_time/create_by/update_by`：项目审计字段。
-
-`srm_quotation_request` 是仅由服务内部访问的追加式幂等账本，不是可授权业务资源：它保留 tenant 和审计字段，但故意不设 `deleted/version`，避免历史 requestId 被删除或复用。报价头/行通过 PortalUser → Supplier 关系授权，不向这些表追加内部 owner 列。
-
-约束：
-
-- 用户/组织 ID 由 Auth 管理，不建跨库外键，不信任前端提交的用户名或 ownerUnitId。
-- 索引以 `tenant_id` 开头，再组合 owner、状态、品类。
-- `create_by` 是用户名审计字段，不能用于 SELF 数据权限。
-- 银行账户账号使用 PII 掩码，完整值只返回给 `srm:pii:view`。
-- 时间统一 `yyyy-MM-dd HH:mm:ss`。
-- `supplier_no` 由已生成的数据库 ID 生成并做 tenant 内唯一，禁止 `SELECT MAX(...) + 1`。
-- 普通 PUT 不允许直接修改 owner 或生命周期 status。
-- 外部请求不得使用裸 `selectById/updateById/deleteById`。
-- `owner_user_id` 只表示租户内部业务负责人；供应商门户账号必须通过 `srm_supplier_portal_user` 关联，禁止复用 owner 字段。
+- 20 张 `srm_*` 表包含 `tenant_id`。Supplier 与 Evaluation 是直接 owner 授权根；其他业务子资源按明确父链继承，不能要求每张可授权表都有 owner 列。模板、维度、风险配置按租户共享。
+- 业务实体按实际 DDL 使用版本、逻辑删除和审计字段；`srm_quotation_request` 是不含 `deleted/version` 的永久幂等账本，Inbox 有独立处理状态。`create_by/update_by` 是用户名审计字段，不能充当 SELF 用户 ID。
+- 用户/组织由 Auth 管理，负责人主组织由服务端解析；门户账号通过 `srm_supplier_portal_user` 关联，禁止写入内部 owner 列。引用不建立跨库外键；图示不代替实际 DDL。
+- `supplier_no` 在租户内唯一，从已生成的 ID 派生，不使用 `MAX+1`。普通 PUT 不改生命周期或 owner；负责人转移、状态命令和删除各有校验，不将 DataPermission 当作写授权。
+- 日期时间使用 `yyyy-MM-dd HH:mm:ss`。报价单价/数量为 `DECIMAL(19,6)`、金额为 `DECIMAL(19,4)`，价格和返回金额采用 JSON 十进制字符串；评分与权重按其 DTO/精度处理。
+- `srm_quotation_request` 的 `tenant_id + request_id` 永久唯一，另以 `tenant_id + quotation_id + target_version` 绑定结果轮次；报价头/行的活动唯一约束防止同 RFQ/供应商或同报价行并存重复。
+- 完整 PII 返回由具体端点和组装器决定：供应商专用列表恒脱敏，内部详情、联系人/银行列表按 `srm:pii:view`，门户自身资料走独立授权边界，见第 9 节。
 
 ### 4.3 主要表
 
@@ -155,12 +151,13 @@ erDiagram
 - `owner_user_id/owner_unit_id/assigned_time/last_evaluation_time`。
 - `version/deleted` 和审计字段。
 - 核心索引：tenant + owner/status、tenant + unit/status、tenant + category/status、tenant + name/credit_code。
+- `workflow_request_id/workflow_business_key/workflow_model_version_id/approval_attempt/process_instance_id/workflow_start_status/workflow_completed_time/approved_time`：准入轮次与幂等快照，业务键为 `supplierId:attempt`。启动标记为 `NOT_STARTED/PENDING/FAILED/STARTED`；起案身份来自当前请求，不是 Supplier 中的持久化起案人列。
 
 `srm_supplier_contact`
 
 - `supplier_id/name/department/job_title/mobile/phone/email/decision_role/primary_flag/status`。
-- owner 是 Supplier owner 的权限快照；供应商转移时在同一事务中同步。
-- 每个供应商最多一个有效主要联系人。
+- 当前表没有内部 owner 列，按同租户 Supplier 关系继承范围，不保存随转移同步的 owner 权限快照。
+- 主要联系人和版本/删除约束以专用服务与 DDL 为准；完整联系方式按 PII 权限返回。
 
 `srm_supplier_qualification`
 
@@ -183,16 +180,15 @@ erDiagram
 
 `srm_supplier_enrollment`
 
-- `request_id/supplier_id/user_id/status/retry_count/last_error_code/next_retry_time/version/deleted`。
-- `status`：PENDING_ROLE_ASSIGN/ROLE_ASSIGN_FAILED/COMPLETED/CANCELLED。
-- `tenant_id + request_id` 唯一；同一 tenant + user_id 同时最多一个活动入驻申请。
-- 仅保存 inviteToken 的标识/摘要和校验结果，不保存原始 inviteToken，更不保存密码或验证码。
+- `request_id/supplier_id/user_id/invite_id/status/retry_count/last_error_code/next_retry_time/version/deleted`。
+- 状态为 `PENDING_ROLE_ASSIGN/ROLE_ASSIGN_FAILED/COMPLETED/CANCELLED`；`tenant_id + request_id` 唯一，原请求重放核对申请人和规范化 credit_code，不是整个申请包的 SHA 哈希。
+- 保存 inviteId，不保存原令牌、密码或验证码。`next_retry_time` 是退避建议时间，不证明后台自动调度存在；角色失败重试与准入启动重试不同。
 
 `srm_supplier_invite`
 
-- `invite_code_hash/status/expires_time/max_uses/used_count/version/deleted`，可选记录预期 credit_code 或联系人邮箱摘要。
-- 原始 inviteToken 只在创建时返回一次，数据库仅保存 SHA-256/HMAC 摘要；校验时同时检查 tenant、ACTIVE、有效期、用途和剩余次数。
-- 入驻事务以 version 条件原子递增 used_count，防止同一邀请并发超用；作废后不可再入驻。
+- `invite_code_hash/status/expires_time/max_uses/used_count/version/deleted`。当前实现没有预期 credit_code、邮箱摘要或用途字段。
+- 创建生成 UUID 原令牌，仅创建响应返回一次；数据库保存 SHA-256，不是 HMAC。消费验证当前租户、ACTIVE、未过期、剩余次数和版本，条件更新次数在入驻事务内完成。
+- 列表可把已过期/耗尽条目显示为 EXPIRED/USED；不能把展示状态等同额外的持久化扫描任务。作废后不可消费。
 
 `srm_evaluation_template`
 
@@ -208,9 +204,9 @@ erDiagram
 
 `srm_evaluation`
 
-- `supplier_id/template_id/evaluation_period（如 2026-Q2）/total_score/evaluator_user_id/evaluation_time/status/version/deleted`。
-- `total_score` 由系统自动加权汇总计算，不接受前端传入。
-- 评估完成后先将 1-5 分归一化为百分制：`total_score = SUM(item.score / 5 × item.weight)`，结果范围为 20-100；再映射供应商等级：≥90 战略级、≥75 优选级、≥60 合格级、<60 待淘汰。
+- `supplier_id/template_id/evaluation_period/total_score/evaluator_user_id/evaluation_time/status/owner_user_id/owner_unit_id/version/deleted`；创建完成为 `COMPLETED`，记录当时的内部 owner 快照。
+- 请求为 `supplierId/evaluationPeriod/items`，不携带客户端供应商版本或总分。仅 APPROVED 且 owner 完整的可见供应商可创建；锁行后使用数据库版本更新。
+- `SUM(score / 5 × weight)` 按 HALF_UP 保留两位，范围 20–100；≥90 STRATEGIC、≥75 PREFERRED、≥60 QUALIFIED、其余 ELIMINATED。这是 `level_code`，不会直接把供应商生命周期变为淘汰终态。
 
 `srm_evaluation_item`
 
@@ -220,15 +216,14 @@ erDiagram
 
 `srm_risk_indicator`
 
-- `supplier_id/indicator_type/indicator_value/risk_level/assessment_time/remark`。
-- `indicator_type` 枚举：FINANCIAL（财务风险）、COMPLIANCE（合规风险）、SUPPLY（供应风险）、COOPERATION（合作风险）、QUALITY（质量风险）、CERTIFICATE（资质风险）。
-- `risk_level` 枚举：GREEN/YELLOW/RED。
-- 部分指标可自动计算（资质到期日距今天数 → CERTIFICATE 指标），其余手动标记。
+- `supplier_id/indicator_type/indicator_value/criterion_id/score/risk_level/assessment_time/remark`，另有实际版本/删除/审计字段。
+- 类型来自启用配置，不是固定 Java 枚举；六种正式种子类型只是默认租户示例。
+- 手工更新仅在查到启用类型且 `autoCalc=1` 时拒绝编辑；类型缺失/停用会跳过该检查。criterionId 分支复制当前租户标准的分数/等级/标签，当前不保证标准与指标类型强一致。
 
 `srm_risk_assessment`
 
 - `supplier_id/overall_level/assessment_time/assessor_user_id/remark/version/deleted`。
-- `overall_level` 为综合风险等级，取各指标最高等级（RED > YELLOW > GREEN）。
+- 当前综合等级由所有非空 `indicator.score` 求和后匹配阈值产生，非“最高指标颜色”；每次重算追加评估历史，见 5.3。
 
 `srm_quotation`
 
@@ -250,504 +245,336 @@ erDiagram
 - `(tenant_id, request_id)` 永久唯一；`request_hash` 是规范化请求体的 SHA-256，用于拒绝同 requestId 的不同意图。
 - `(tenant_id, quotation_id, target_version)` 唯一，保存每次成功更新对应的报价版本；因此旧 requestId 在报价继续更新后重放，仍可识别并且不会重复写报价、明细或 Outbox。
 
+`srm_risk_indicator_type` / `srm_risk_criterion` / `srm_risk_score_threshold`
+
+- 三张表分别保存类型（含启用和 autoCalc）、评分标准、总分区间。按租户及配置功能权限管理，不按内部 owner 限制。
+- 服务使用当前查询顺序与含端点阈值；不能宣称已实现完整覆盖/不重叠校验。
+
+`srm_event_inbox`
+
+- 以租户/eventId 保护 Workflow 完成消费，保存来源、类型、聚合键、payload 与处理状态。
+- 同 ID 先核对 JSON 语义意图再判断重复；处理状态与供应商变更同事务，早到有效完成需要重试，不能永久吞掉。
+
 ## 5. 状态机与核心流程
 
 ### 5.1 Supplier 生命周期
 
 ```mermaid
 stateDiagram-v2
-    [*] --> REGISTERING: 门户入驻申请
-    REGISTERING --> PENDING_REVIEW: Auth 用户和角色创建成功
-    REGISTERING --> REGISTERING_FAILED: Auth 创建/角色分配失败
-    REGISTERING_FAILED --> REGISTERING: 后台重试
+    [*] --> REGISTERING: 既有 Auth 用户入驻
+    REGISTERING --> PENDING_REVIEW: 角色结果成功
+    REGISTERING --> REGISTERING_FAILED: 角色结果失败
+    REGISTERING_FAILED --> REGISTERING: 退避后角色重试
     [*] --> PENDING_REVIEW: 管理员创建
-    PENDING_REVIEW --> APPROVING: Workflow 启动成功
-    APPROVING --> APPROVED: Workflow 审批通过
-    APPROVING --> REJECTED: Workflow 审批拒绝
-    APPROVING --> PENDING_REVIEW: 撤回或取消流程
-    REJECTED --> PENDING_REVIEW: 重新提交
+    PENDING_REVIEW --> APPROVING: 本地确认启动
+    APPROVING --> APPROVED: 审批通过
+    APPROVING --> REJECTED: 审批拒绝
+    APPROVING --> PENDING_REVIEW: 远端终止后本地复原
+    REJECTED --> PENDING_REVIEW: 驳回后新轮次
     APPROVED --> SUSPENDED: 暂停合作
     SUSPENDED --> APPROVED: 恢复合作
     APPROVED --> BLACKLISTED: 加入黑名单
-    BLACKLISTED --> APPROVED: 移出黑名单（专门权限）
+    BLACKLISTED --> APPROVED: 专用权限恢复
     APPROVED --> ELIMINATED: 淘汰退出
     SUSPENDED --> ELIMINATED: 淘汰退出
     ELIMINATED --> [*]
 ```
 
-- 只有 `APPROVED` 状态的供应商可被采购模块引用。
-- `BLACKLISTED` 需要 `srm:supplier:blacklist` 权限才能操作。
-- `ELIMINATED` 为终态，不可恢复。
-- 供应商注册（门户自助或管理员创建）后先进入 `PENDING_REVIEW`；存在当前租户已发布且
-  `category=SRM_SUPPLIER_ONBOARDING` 的模型时，服务持久化幂等启动快照并推进为 `APPROVING`。
+`REGISTERING/REGISTERING_FAILED` 只属于既有 Auth 用户的门户角色 Saga，Auth 开户在此前完成。管理员创建先设 PENDING_REVIEW，在同一本地事务同步准备/调用 Workflow；确认启动才进入 APPROVING。APPROVED 才能供采购新业务引用，ELIMINATED 为不可恢复的生命周期终态，黑名单恢复有专用权限。
+
+管理 `submit` 与门户 `profile/submit` 只允许 REJECTED 并开新审批轮次；当前没有针对 PENDING_REVIEW/FAILED 的通用同快照启动重试接口。撤回/取消需先远端终止匹配实例，再按版本复原为 PENDING_REVIEW/NOT_STARTED；远端成功与本地更新不保证分布式原子回滚。
 
 ### 5.2 绩效评估流程
 
 ```mermaid
 sequenceDiagram
-    participant M as 采购经理
+    participant M as 采购人员
     participant S as EvaluationService
     participant DB as omni_srm
-
-    M->>S: POST /evaluation (supplierId, period, items[])
-    S->>DB: SELECT Supplier FOR UPDATE + tenant/scope
-    S->>DB: Query Template (default)
-    S->>DB: INSERT Evaluation + Items (事务)
-    S->>DB: 计算百分制 totalScore = SUM(item.score / 5 * item.weight)
-    S->>DB: 映射等级并 UPDATE Supplier.level_code
-    S->>DB: INSERT Outbox event（同事务）
+    M->>S: POST /api/srm/evaluation (supplierId,evaluationPeriod,items)
+    S->>DB: 锁定 APPROVED 供应商/当前范围
+    S->>DB: 取得默认模板，可修复配置
+    S->>S: 校验完整唯一评分与正权重
+    S->>S: 计算总分/等级
+    S->>DB: 同事务保存评估/明细/owner 快照
+    S->>DB: 同事务更新供应商/Outbox
     S-->>M: EvaluationVO
 ```
 
-评估周期建议每季度一次，但 MVP 不强制，由管理员手动发起。评估完成后系统自动：
-1. 计算加权总分。
-2. 根据总分映射新的供应商等级。
-3. 更新 `srm_supplier.level_code`。
-4. 记录 `last_evaluation_time`。
+创建字段为 `supplierId/evaluationPeriod/items[{dimensionId,score,remark}]`。默认模板保持质量/交期/价格/服务 30/30/20/20；读取模板也可能修复本地配置，不应当作无副作用查询。每个启用维度必须完整且唯一，评分 1–5、存储 `DECIMAL(3,1)`，正权重总和为 100。
+
+同事务保存 Evaluation/Items、供应商等级/最近评估时间和 `srm.evaluation.completed.v1` Outbox。等级计算见 4.3；评估行保留 owner 快照。独立历史最多 100 条，360 只取最近 5 条。季度周期是原业务建议，没有由文档证明的强制定时执行。
 
 ### 5.3 风险评估流程
 
-```text
-手动/自动更新风险指标
-→ 重新计算综合风险等级（取各指标最高等级）
-→ INSERT/UPDATE srm_risk_assessment
-→ 若等级变更为 RED，写 Outbox 事件通知
-```
+当前流程：校验可见供应商/命令范围 → 按实际标准更新指标 → 重算 CERTIFICATE → 非空 score 求和 → 匹配总分阈值 → 追加 RiskAssessment → 首次或非红转 RED 时写风险 Outbox。
 
-资质到期预警逻辑：
-- `expiry_date - today <= 30` 天 → CERTIFICATE 指标自动设为 YELLOW。
-- `expiry_date < today` → CERTIFICATE 指标自动设为 RED。
-- 预警扫描通过 XXL-JOB 定时任务实现（Phase 2 启用，MVP 手动触发或不启用）。
+区间端点包含，按查询结果首匹配；无阈值为 GREEN，未命中且高于所有最大上界时取最大上界对应等级，其他空档回 GREEN。兼容方法 `highest` 不是当前综合评估路径。
+
+证书到期日缺失为 GREEN；今天起 0–30 天为 YELLOW、已过期为 RED，分数分别 1/2/3；多份资质取最严重且同等级更早日期。手动风险评估、指标更新，以及 APPROVED/SUSPENDED/BLACKLISTED 供应商的资质增改删触发重算。当前 SRM 主 Java 没有专用 `@XxlJob/@Scheduled` 资格风险扫描，外部任务配置须另证。事件存在不代表外部通知送达。
 
 ### 5.4 供应商门户开户与入驻
 
 ```mermaid
 sequenceDiagram
     participant SUP as 供应商
-    participant GW as Gateway
+    participant GW as omni-gateway
     participant S as SupplierPortalService
     participant AUTH as omni-auth
     participant DB as omni_srm
-
-    SUP->>GW: POST /api/auth/register (tenantCode + 凭证 + 验证码)
-    GW->>AUTH: 公开 Auth 自注册
-    AUTH-->>SUP: 默认 USER 账号创建成功
-    SUP->>GW: 登录并获取 JWT
-    SUP->>GW: POST /api/srm/portal/enroll (inviteToken + 企业信息)
-    GW->>S: 已认证用户和可信 tenant/user 头
-    S->>DB: INSERT 入驻申请和 Supplier (status=REGISTERING)
-    S->>DB: INSERT Outbox srm.portal-role.assign-requested.v1
-    S-->>SUP: 入驻申请已受理
-    AUTH-->>S: MQ auth.portal-role.assigned.v1
-    S->>DB: INSERT PortalUser 关联，Supplier → PENDING_REVIEW
+    participant MQ as RocketMQ
+    SUP->>GW: POST /api/auth/register
+    GW->>AUTH: Auth 公开注册/真实验证码
+    AUTH-->>SUP: USER
+    SUP->>GW: 既有 USER 登录取得 JWT
+    GW->>S: POST /api/srm/portal/enroll
+    Note over SUP,S: 当前身份入驻/邀请/requestId
+    S->>DB: 同事务保存 REGISTERING/入驻/角色 Outbox
+    S-->>SUP: PENDING_ROLE_ASSIGN
+    MQ->>AUTH: srm.portal-role.assign-requested.v1
+    AUTH->>AUTH: Auth 独立提交角色/账本/结果 Outbox
+    MQ->>S: auth.portal-role.assigned.v1
+    S->>DB: 同事务保存 ACTIVE 关联/COMPLETED
+    Note over S,DB: 同一本地事务准备/调用准入 Workflow
+    Note over AUTH,DB: 角色已提交，SRM 仍可能回滚
 ```
 
-门户开户与入驻分成两个安全边界：
-
-- 账号开户只使用现有公开 `POST /api/auth/register`，由 Auth 校验 tenantCode、验证码、用户名唯一性并分配默认 `USER` 角色；SRM 不接收、持久化或通过 MQ 传递密码。
-- 用户登录后调用 `POST /api/srm/portal/enroll`。该写接口声明 `@PreAuthorize("hasAuthority('srm:portal:enroll')")`，默认 USER 仅获得这一条 SRM 入驻权限；服务端 tenantId/userId 只取 Gateway 注入的可信身份头。
-- 入驻必须携带租户专属 inviteToken，校验其 tenant、有效期、使用次数和用途；不得接受请求体中的裸 tenantId/userId。
-- 统一社会信用代码（credit_code）在 tenant 内唯一。
-- 入驻请求使用 requestId/credit_code 做幂等，且同一 userId 只能关联一个供应商主体。
-- SRM 通过 Outbox 请求 Auth 为既有 USER 账号增加 `SUPPLIER` 角色。角色分配失败时保持入驻申请为 `REGISTERING_FAILED`，由后台重试或人工处理，不能把未授权账号视为入驻成功。
-- Auth 角色分配成功事件返回 userId 后，SRM 写入 `srm_supplier_portal_user`，再将供应商状态推进到 `PENDING_REVIEW`。
-
-入驻授权横跨 SRM 与 Auth，禁止使用“事务内 Feign 即可回滚远端”的假设。采用本地事务 + Outbox/Saga 保证最终一致性；重复事件由 `requestId` 唯一约束幂等处理。
+- Auth 公开 `POST /api/auth/register` 负责租户、真实验证码、用户名唯一及密码处理；默认 USER 分配的失败边界见核心流程 1。SRM 不接收密码/验证码。
+- 登录后的 `portal/enroll` 要求 enroll 权限、原 requestId 和有效租户邀请。tenant/user 取可信身份；新建 REGISTERING、风险基础数据、PENDING_ROLE_ASSIGN 和角色请求 Outbox。
+- 入驻重放核对申请人及规范化 credit_code；已有申请可能直接返回原结果，不再消耗邀请。Auth 原子增加角色、账本与结果 Outbox，完成重放可再发确定 eventId 的结果。
+- SRM 成功结果创建/激活 ACTIVE PortalUser，置 COMPLETED/PENDING_REVIEW 后，在同一本地事务尝试准入。Auth 角色可能已提交而 SRM 模型解析失败回滚；应核对两侧状态和消息重投，不能声称跨服务无“半成功”。
+- 角色失败分别为 Enrollment ROLE_ASSIGN_FAILED 与 Supplier REGISTERING_FAILED；`enrollment/retry` 在失败且退避到期后复用原 requestId 发角色 Outbox，不再次消耗邀请，不是审批启动重试。
+- Saga COMPLETED 不等于准入 APPROVED。角色变化不会更新既有 JWT，客户端完成后提示重新登录。真实验证码注册和跨服务端到端仍需独立运行证据。
 
 ## 6. 租户、RBAC 与数据权限
 
 ### 6.1 信任链
 
-1. Gateway 验证 RS256 JWT 和黑名单，覆盖并注入 `X-User-*`、`X-Tenant-Id`、`X-Gateway-Forwarded`。
-2. 公共 Starter 的 `GatewayPreAuthenticationFilter` 构建 `Authentication`。
-3. Controller 用 `@PreAuthorize` 验证功能权限。
-4. 公共 `ServiceIdentityFilter` 建立不可变请求身份；`@ServiceDataScope(permissionCode)` 切面按当前端点权限解析 dataScope。
-5. MyBatis-Plus 追加 tenant 和该 permission 对应的 owner 条件。
+Gateway 校验 JWT/黑名单并覆盖身份头 → `GatewayPreAuthenticationFilter` 构建认证 → `ServiceIdentityFilter` 建立当前租户/用户身份 → Controller 方法权限 → 同码 DataScope 切面 → MyBatis 策略与写守卫。身份/认证不完整按实际边界拒绝；内部 API 另外由共享内部令牌 Filter 失败关闭。
 
-`X-Gateway-Forwarded:true` 不是密码学证明。生产环境不得公开 SRM 业务端口。
+`X-Gateway-Forwarded:true` 本身不是密码学证明；生产业务端口需网络边界保护。共享上下文在外层 finally 清理，嵌套范围在 finally 恢复，不宣称没有 ThreadLocal。
 
 ### 6.2 权限树与角色
 
-菜单：`srm`（DIRECTORY）以及 `srm:overview`、`srm:supplier`、`srm:evaluation`、`srm:risk`（MENU）。
+当前权限、菜单及默认租户角色种子以 `scripts/sql/seed/auth.sql` 为准，不证明所有新租户都已具有相同角色。常用权限映射见 7.3。
 
-供应商门户权限树：`srm:portal`（DIRECTORY）以及 `srm:portal:profile`、`srm:portal:evaluation`、`srm:portal:quotation`；入驻接口为 `srm:portal:enroll`。门户资料、绩效与报价仅对已完成关联的 `SUPPLIER` 角色开放。
-
-API 权限：
-
-- `srm:overview:list`
-- `srm:supplier:list/create/update/delete/approve/reject/suspend/resume/blacklist/restore/eliminate/transfer`
-- `srm:contact:list/create/update/delete`
-- `srm:qualification:list/create/update/delete`
-- `srm:bank-account:list/create/update/delete`
-- `srm:evaluation:list/create/view`
-- `srm:risk:list/update/assess`
-- `srm:owner:list`
-- `srm:pii:view`
-- `srm:invite:list/create/revoke`、`srm:portal:invite`（管理端邀请）
-- `srm:portal:enroll/profile/evaluation/quotation`（供应商门户）
-
-上面的 `/` 是同一资源下多个完整权限码的简写，例如 `srm:supplier:list/create` 表示 `srm:supplier:list` 与 `srm:supplier:create`，落库时必须逐条保存完整 code。真实 `sys_permission.type` 使用 `DIRECTORY/MENU/API`。
-
-| 角色 | dataScope | 能力 |
+| 角色 | 种子范围 | 当前边界 |
 |---|---|---|
-| `SRM_ADMIN` | TENANT | 当前租户 SRM 内部管理功能/数据，不含供应商自助门户 |
-| `PROCUREMENT_MANAGER` | DEPT_AND_BELOW | 部门及下级、供应商评估、风险管理，不含供应商自助门户 |
-| `PROCUREMENT_STAFF` | SELF | 自己负责的数据及日常操作 |
-| `SUPPLIER` | SELF | 门户自助：入驻后企业信息维护、查看自身绩效、按邀请报价 |
-| `SUPER_ADMIN` | ALL | 所有功能，SRM 数据仍限当前租户 |
+| `SRM_ADMIN` | TENANT | 租户内管理，不能代供应商报价 |
+| `PROCUREMENT_MANAGER` | DEPT_AND_BELOW | 部门及下级、绩效和风险管理 |
+| `PROCUREMENT_STAFF` | SELF | 自身业务；配置按功能权限租户共享 |
+| `SUPPLIER` | SELF | 仍需对应门户权限及当前租户/用户 ACTIVE PortalUser |
+| `SUPER_ADMIN` | ALL | 功能树完整，数据仍限当前租户；单独不能冒充门户身份 |
 
-默认 USER 仅授予 `srm:portal:enroll`，不授予 SRM 管理或门户资料/绩效/报价权限；入驻完成并增加 SUPPLIER 角色后才能访问 profile/evaluation/quotation。`srm:portal:quotation` 严格只授予 `SUPPLIER` 与按平台规则拥有全部权限树的 `SUPER_ADMIN`，`SRM_ADMIN`、`PROCUREMENT_MANAGER` 等内部角色不得获得供应商代报价能力。Controller 仍同时要求 `SUPPLIER` 角色和有效 PortalUser 关联，因此仅有 SUPER_ADMIN 不能冒充供应商报价。前端 `v-permission` 和后端 `@PreAuthorize` 同码。
+USER 仅获 SRM enroll；profile/evaluation/quotation 还要求 SUPPLIER、功能权限和 ACTIVE 关联。内部管理与门户身份分开，前端按实际角色/权限集合保留多角色管理入口，后端始终重验。
 
 ### 6.3 Auth 内部数据范围契约
 
-SRM 复用 CRM 已建设的 Auth DataScope 内部接口：
+实际内部路径是 `GET /internal/data-scopes/{userId}?tenantId={tenantId}&permissionCode=srm:supplier:list`，不加 `/api`。
 
-```text
-GET /api/internal/data-scopes/{userId}?tenantId={tenantId}&permissionCode=srm:supplier:list
-```
-
-规则与 CRM 一致：
-- 校验用户启用且属于 tenant。
-- 只合并授予该 `permissionCode` 的角色。
-- SRM 调用失败/超时/tenant 不一致时返回 503/403，不降级。
+Auth 校验启用用户和租户，只合并授予该完整权限码的角色范围。共享组件对拒绝、响应不一致、异常等按具体分支返回 403/503；缺身份、缺范围不能放宽查询。
 
 ### 6.4 公共上下文与 SRM SQL 策略
 
-SRM 依赖 `omni-common-service`，复用 `ServiceIdentityContext`、`ServiceDataScopeContext`、
-`@ServiceDataScope`、内部 API Token Filter、XSS 回源/安全基线以及 MyBatis-Plus 自动装配。
-SRM 只实现领域策略 `SrmTenantTablePolicy`、`SrmDataPermissionHandler` 和
-`SrmRecordAccessGuard`；供应商门户通过 `SrmPortalScope` 临时切换为 PORTAL/TENANT 范围，执行后恢复
-原 DataScope，不再维护第二套 ThreadLocal、Filter 或切面。
+`omni-common-service` 组合身份、内部认证、XSS 与持久化。顺序为 `TenantLineInnerInterceptor → DataPermissionInterceptor → OptimisticLockerInnerInterceptor → PaginationInnerInterceptor`；TenantLine 仅处理 `srm_*`，`sys_mq_message` 留在两个权限拦截器外。
 
-公共 Starter 组合 SRM 策略后的拦截器顺序固定：
-
-```text
-TenantLineInnerInterceptor
-→ DataPermissionInterceptor
-→ OptimisticLockerInnerInterceptor
-→ PaginationInnerInterceptor
-```
-
-- TenantLine 只处理 `srm_*` 表，永远添加当前 tenant。
-- `sys_mq_message` 排除两个权限拦截器。
-- DataPermission 映射 Supplier 的 owner 列；评估和风险通过 supplier_id 关联到 Supplier 的 owner 进行权限检查。
-
-| dataScope | 条件 |
+| 资源 | 授权方式 |
 |---|---|
-| SELF | `owner_user_id = currentUserId` |
-| DEPT | `owner_unit_id = primaryUnitId` |
-| DEPT_AND_BELOW / CUSTOM | `owner_unit_id IN accessibleUnitIds` |
-| TENANT / ALL | 不加 owner 条件，TenantLine 始终保留 |
+| Supplier / Evaluation | 直接 owner 根；Evaluation 保留创建时快照 |
+| Contact / Qualification / BankAccount / RiskIndicator / RiskAssessment / Quotation | 同租户 Supplier 父链继承 |
+| EvaluationItem | 从 Evaluation 继承 |
+| QuotationLine | 从 Quotation 再到 Supplier 的双层继承 |
+| Template / Dimension / 风险配置 | 租户共享与功能权限 |
+| Portal | 角色/功能权限/当前 ACTIVE PortalUser 固定 supplierId；不复用内部 owner |
+| Supplier 360 各块 | 联系人、资质、银行、评估、风险分别授权/解析范围，没有权限不查询 |
 
-供应商门户用户（SUPPLIER 角色）不复用内部 owner dataScope。门户查询和命令必须先按 `tenant_id + currentUserId` 查询 `srm_supplier_portal_user`，再以关联的 supplierId 限定 Supplier 及其子资源；找不到有效关联时失败关闭。
-
-实际 SQL 按资源映射，禁止将 owner 条件机械追加到所有 `srm_*` 表：
-
-| 资源/表 | 范围规则 |
-|---|---|
-| Supplier | 使用 `owner_user_id/owner_unit_id` |
-| Contact/Qualification/BankAccount | 通过同 tenant 的 supplier_id 继承 Supplier 范围 |
-| Evaluation/EvaluationItem | 通过同 tenant 的 supplier_id/evaluation_id 继承 Supplier 范围 |
-| RiskIndicator/RiskAssessment | 通过同 tenant 的 supplier_id 继承 Supplier 范围 |
-| Template/Dimension | 租户内共享，只应用 TenantLine 和功能权限 |
-| Portal profile/evaluation | 固定使用 `srm_supplier_portal_user` 关联的 supplierId，不使用内部 owner dataScope |
-| Overview/360 | 聚合和分块查询使用与 Supplier 列表相同范围 |
+owner 根的 SELF 为 `owner_user_id=currentUserId`，DEPT 为 `owner_unit_id=primaryUnitId`，DEPT_AND_BELOW/CUSTOM 为单位集合，TENANT/ALL 省略 owner 但保留租户。SrmPermissionScopeExecutor/SrmPortalScope 临时执行后恢复原范围，不以宽泛 owner OR 代替父链。
 
 ### 6.5 写操作行级授权
 
-DataPermissionInterceptor 不能替代写授权。每个更新/删除/审核/冻结/黑名单命令必须：
+已有记录的变更先读取当前租户可见行，再校验状态/关系，并按具体命令进行版本/删除/状态条件更新及影响行数检查。创建编号、级联、永久账本、邀请作废和租户配置各有路径，不声称所有写入都携带客户端 version。DataPermission 不替代 `SrmRecordAccessGuard`。
 
-1. 以 `tenant_id + id + data scope` 查询可见记录；不可见统一 404。
-2. 校验状态机和业务不变量。
-3. 以 `tenant_id + id + version` 条件更新。
-4. 更新行数非 1 时返回并发冲突。
-
-`SrmRecordAccessGuard` 统一实现详情、命令和子资源访问检查。
+负责人创建/转移通过 Auth 校验同租户启用用户及权威主组织；指定他人还需相应转移权限/可分配范围。普通 PUT 拒绝 owner 修改。删除受生命周期、门户、评估和风险历史等限制。
 
 ## 7. API 设计
 
 ### 7.1 通用契约
 
-- 所有响应为 `R<T>`；分页为 `R<PageResult<T>>`。
-- `page=1`、`size=10`，SRM 限制 `size <= 100`。
-- Entity 不直接作为 Request/Response；状态命令使用独立 DTO。
-- 日期参数声明 `@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")`；前端使用 `value-format="YYYY-MM-DD HH:mm:ss"`。
-- 状态、审核和评估请求携带 `version`。
-- 写接口同时声明 `@PreAuthorize` 和 `@OperLog`。
+响应为 `R<T>`、分页 `R<PageResult<T>>`，page 默认/起点 1、size 默认 10、最大 100。存在 version 字段的 DTO 必须带版本；创建评估没有客户端供应商 version，邀请作废等也不能套通用版本请求。
+
+日期时间统一 `yyyy-MM-dd HH:mm:ss`；报价价格/数量/金额的精度及 JSON 字符串见 8.4。具体字段以 Controller/DTO 为准，写日志、内部认证、门户身份和 owner 切面按入口分别应用，不对所有方法作同一注解承诺。
 
 ### 7.2 端点
 
-| 领域 | 端点 |
-|---|---|
-| Overview | `GET /api/srm/overview/summary`、`/risk-dashboard` |
-| Supplier | `GET /supplier/list`、`GET /supplier/{id}`、`POST /supplier`、`PUT/DELETE /supplier/{id}` |
-| Supplier 命令 | `POST /supplier/{id}/approve`、`/reject`、`/suspend`、`/resume`、`/blacklist`、`/restore-from-blacklist`、`/eliminate`、`/transfer` |
-| Supplier 子资源 | `GET /supplier/{id}/contact/list`、`POST /supplier/{id}/contact`、`PUT/DELETE /contact/{id}` |
-| Supplier 子资源 | `GET /supplier/{id}/qualification/list`、`POST /supplier/{id}/qualification`、`PUT/DELETE /qualification/{id}` |
-| Supplier 子资源 | `GET /supplier/{id}/bank-account/list`、`POST /supplier/{id}/bank-account`、`PUT/DELETE /bank-account/{id}` |
-| Supplier 360 | `GET /supplier/{id}/overview` |
-| Evaluation | `GET /evaluation/list`、`GET /evaluation/{id}`、`POST /evaluation` |
-| Evaluation | `GET /supplier/{id}/evaluation/history` |
-| Risk | `GET /risk/list`、`GET /supplier/{id}/risk`、`PUT /risk/indicator/{id}` |
-| Risk | `POST /risk/assessment/{supplierId}` |
-| Owner 选项 | `GET /api/srm/options/owners`，权限 `srm:owner:list` |
-| Portal 开户 | `POST /api/auth/register`（Auth 公开接口，SRM 不处理凭证） |
-| Portal 邀请 | `GET /portal/invite/list`、`POST /portal/invite`、`POST /portal/invite/{id}/revoke`（管理端） |
-| Portal 入驻 | `POST /api/srm/portal/enroll`（已认证；请求携带 inviteToken，不接受裸 tenantId/userId） |
-| Portal 企业信息 | `GET /portal/profile`、`PUT /portal/profile` |
-| Portal 报价 | `GET /portal/quotation/invitations`、`GET /portal/quotation/invitations/{rfqId}`、`POST /portal/quotation` |
+以下 77 个外部、4 个内部方法/路径包含当前别名，完整显示服务路径；Gateway 不剥离 `/api/srm`。Auth 注册是外部依赖接口，不计入 SRM 控制器路径。
 
-表中省略 `/api/srm` 的端点均以该前缀开头。所有列表/详情和聚合统计应用相同 TenantLine/DataPermission。
+| 领域 | 方法与完整路径 |
+|---|---|
+| 银行账户 | `GET /api/srm/supplier/{supplierId}/bank-account`<br/>`GET /api/srm/supplier/{supplierId}/bank-account/list`<br/>`GET /api/srm/supplier/{supplierId}/bank-account/{id}`<br/>`POST /api/srm/supplier/{supplierId}/bank-account`<br/>`PUT /api/srm/supplier/{supplierId}/bank-account/{id}`<br/>`DELETE /api/srm/supplier/{supplierId}/bank-account/{id}` |
+| 联系人 | `GET /api/srm/supplier/{supplierId}/contact`<br/>`GET /api/srm/supplier/{supplierId}/contact/list`<br/>`GET /api/srm/supplier/{supplierId}/contact/{id}`<br/>`POST /api/srm/supplier/{supplierId}/contact`<br/>`PUT /api/srm/supplier/{supplierId}/contact/{id}`<br/>`DELETE /api/srm/supplier/{supplierId}/contact/{id}` |
+| 绩效评估 | `GET /api/srm/evaluation/list`<br/>`GET /api/srm/evaluation/{id}`<br/>`GET /api/srm/evaluation/supplier/{supplierId}`<br/>`GET /api/srm/evaluation/template/default/dimensions`<br/>`POST /api/srm/evaluation` |
+| 内部报价 | `GET /api/internal/quotation/batch` |
+| 内部供应商 | `GET /api/internal/supplier/{supplierId}`<br/>`GET /api/internal/supplier/search`<br/>`POST /api/internal/supplier/batch` |
+| 负责人候选 | `GET /api/srm/options/owners` |
+| 概览 | `GET /api/srm/overview/summary`<br/>`GET /api/srm/overview/risk-dashboard` |
+| 门户入驻/资料 | `POST /api/srm/portal/enroll`<br/>`GET /api/srm/portal/enrollment`<br/>`POST /api/srm/portal/enrollment/retry`<br/>`GET /api/srm/portal/profile`<br/>`PUT /api/srm/portal/profile`<br/>`POST /api/srm/portal/profile/submit` |
+| 门户绩效 | `GET /api/srm/portal/evaluations`<br/>`GET /api/srm/portal/evaluations/history` |
+| 邀请（含别名） | `GET /api/srm/portal/invite`<br/>`GET /api/srm/portal/invite/list`<br/>`GET /api/srm/invite`<br/>`GET /api/srm/invite/list`<br/>`POST /api/srm/portal/invite`<br/>`POST /api/srm/invite`<br/>`POST /api/srm/portal/invite/{inviteId}/revoke`<br/>`POST /api/srm/invite/{inviteId}/revoke` |
+| 门户报价 | `GET /api/srm/portal/quotation/invitations`<br/>`GET /api/srm/portal/quotation/invitations/{rfqId}`<br/>`POST /api/srm/portal/quotation` |
+| 资质 | `GET /api/srm/supplier/{supplierId}/qualification`<br/>`GET /api/srm/supplier/{supplierId}/qualification/list`<br/>`GET /api/srm/supplier/{supplierId}/qualification/{id}`<br/>`POST /api/srm/supplier/{supplierId}/qualification`<br/>`PUT /api/srm/supplier/{supplierId}/qualification/{id}`<br/>`DELETE /api/srm/supplier/{supplierId}/qualification/{id}` |
+| 风险 | `GET /api/srm/risk/list`<br/>`GET /api/srm/risk/indicators/{supplierId}`<br/>`PUT /api/srm/risk/indicator/{id}`<br/>`POST /api/srm/risk/assessment/{supplierId}`<br/>`GET /api/srm/risk/assessment/history/{supplierId}` |
+| 风险配置 | `GET /api/srm/risk/config/types`<br/>`POST /api/srm/risk/config/types`<br/>`PUT /api/srm/risk/config/types/{id}`<br/>`DELETE /api/srm/risk/config/types/{id}`<br/>`POST /api/srm/risk/config/criteria`<br/>`PUT /api/srm/risk/config/criteria/{id}`<br/>`DELETE /api/srm/risk/config/criteria/{id}`<br/>`GET /api/srm/risk/config/thresholds`<br/>`PUT /api/srm/risk/config/thresholds` |
+| 供应商 | `GET /api/srm/supplier/list`<br/>`GET /api/srm/supplier/{id}`<br/>`GET /api/srm/supplier/{id}/overview`<br/>`POST /api/srm/supplier`<br/>`PUT /api/srm/supplier/{id}`<br/>`POST /api/srm/supplier/{id}/transfer`<br/>`DELETE /api/srm/supplier/{id}`<br/>`POST /api/srm/supplier/{id}/submit`<br/>`POST /api/srm/supplier/{id}/withdraw`<br/>`POST /api/srm/supplier/{id}/cancel`<br/>`POST /api/srm/supplier/{id}/suspend`<br/>`POST /api/srm/supplier/{id}/resume`<br/>`POST /api/srm/supplier/{id}/restore-from-blacklist`<br/>`POST /api/srm/supplier/{id}/restore`<br/>`POST /api/srm/supplier/{id}/blacklist`<br/>`POST /api/srm/supplier/{id}/eliminate` |
+| 供应商洞察 | `GET /api/srm/supplier/{supplierId}/evaluation/history`<br/>`GET /api/srm/supplier/{supplierId}/risk` |
 
 ### 7.3 端点与 DataScope permission 映射
 
-| 操作 | permissionCode |
+| 操作 | 权限 / 附加条件 |
 |---|---|
-| Overview 全部统计 | `srm:overview:list` |
-| Supplier list/detail/overview | `srm:supplier:list` |
-| Supplier create/update/delete | `srm:supplier:create/update/delete` |
-| Supplier approve/reject | `srm:supplier:approve` / `srm:supplier:reject` |
-| Supplier suspend/resume/eliminate | `srm:supplier:suspend` / `srm:supplier:resume` / `srm:supplier:eliminate` |
-| Supplier blacklist/restore | `srm:supplier:blacklist` / `srm:supplier:restore` |
-| Supplier owner transfer (`POST /supplier/{id}/transfer`) | `srm:supplier:transfer`；普通 `PUT /supplier/{id}` 禁止修改 owner |
-| Evaluation list/history | `srm:evaluation:list` |
-| Evaluation create | `srm:evaluation:create` |
-| Risk list/indicator/history | `srm:risk:list` |
-| Risk indicator update / assessment | `srm:risk:update` / `srm:risk:assess` |
-| Owner options | `srm:owner:list` |
-| Portal enroll | `srm:portal:enroll`（默认 USER 仅获此入驻权限，另校验 inviteToken） |
-| Portal invite list/create/revoke | `srm:portal:invite` |
-| Portal profile | `srm:portal:profile`，并校验 `srm_supplier_portal_user` 关联 |
-| Portal quotation list/detail/submit | `srm:portal:quotation`，并校验 PortalUser、Procurement 邀请、RFQ 状态与截止时间 |
+| 概览 | `srm:overview:list` |
+| 供应商 list/detail/360 | `srm:supplier:list`；360 块分别校验子资源权限 |
+| 创建 / 驳回后 submit | `srm:supplier:create` |
+| 更新 / 删除 / 转移 | `srm:supplier:update`, `srm:supplier:delete`, `srm:supplier:transfer` |
+| withdraw / cancel | `srm:supplier:withdraw`, `srm:supplier:cancel`，先匹配远端实例 |
+| suspend / resume / blacklist / restore / eliminate | `srm:supplier:suspend`, `srm:supplier:resume`, `srm:supplier:blacklist`, `srm:supplier:restore`, `srm:supplier:eliminate` |
+| 联系人 / 资质 / 银行账户 | `srm:contact:list`, `srm:contact:create`, `srm:contact:update`, `srm:contact:delete`、`srm:qualification:list`, `srm:qualification:create`, `srm:qualification:update`, `srm:qualification:delete`、`srm:bank-account:list`, `srm:bank-account:create`, `srm:bank-account:update`, `srm:bank-account:delete` |
+| 评估 | `srm:evaluation:list`, `srm:evaluation:create`, `srm:evaluation:view` |
+| 风险 / 配置 | `srm:risk:list`, `srm:risk:update`, `srm:risk:assess`、`srm:risk:config:list`, `srm:risk:config:update` |
+| 负责人 / PII | `srm:owner:list`、`srm:pii:view` |
+| 邀请 | 对应 `srm:invite:list`, `srm:invite:create`, `srm:invite:revoke` 或 `srm:portal:invite` |
+| enroll / 入驻状态或重试 | `srm:portal:enroll`；状态/重试接受 `srm:portal:enroll` 或 `srm:portal:profile` |
+| 门户资料 / 绩效 / 报价 | `srm:portal:profile`, `srm:portal:evaluation`, `srm:portal:quotation`，并要求 SUPPLIER 与 ACTIVE 关联 |
+
+权限判定使用完整 code，并继续执行对应行级授权。当前 SRM 没有本地 approve/reject/approval-view 方法，审批任务在 Workflow 完成。
 
 ## 8. 跨服务一致性
 
 ### 8.1 用户与组织
 
-- SRM 只保存 userId/unitId；分配前通过 tenant 限定的 Auth Feign 验证用户存在、启用、同租户。
-- ownerUnitId 取 Auth 权威主组织，不信任前端。
-- 列表展示先收集 ID，再调用一次 batch API，禁止逐行 Feign。
-- SRM 不维护密码等认证数据；账号由现有 Auth 自注册创建。SRM 入驻流程只通过 Outbox/Saga 请求 Auth 给既有 userId 增加 SUPPLIER 角色，并在 `srm_supplier_portal_user` 保存 userId 与 Supplier 的授权关联。
+OwnerResolver 创建/转移时校验 Auth 用户、主组织与可分配范围，ownerUnitId 取权威值。OwnerEnricher 去重后分别批量查询用户/组织，异常可保留 ID/空名称；展示回退不扩大授权，也不保证所有 Feign 都在事务外。
+
+本地保存用户/组织 ID 以及审计用户名等必要事实，不维护密码。门户角色通过 Auth 的请求账本和结果 Outbox 管理，SRM 保存 PortalUser 关联。
 
 ### 8.2 字典
 
-品类使用 `omni-base` 的 `srm_supplier_category` 字典，MVP 预置 `ELECTRONICS/IT/RAW_MATERIAL/ADMIN/SERVICE`，SRM 只存 `category_code`。迁移和新租户初始化均幂等归一这些 code，不强制依赖 Base 在线。
+Base 管理 `srm_supplier_category`；正式默认租户种子含 ELECTRONICS、IT、RAW_MATERIAL、ADMIN、SERVICE。SRM 保存 category_code，自己的初始化器处理默认评估模板与风险基础数据；这些示例不证明每个租户都有相同目录，也不要求普通本地读每次在线查询 Base。
 
 ### 8.3 Workflow
 
-供应商准入已接入独立 `omni-workflow`，但 SRM 本身不引入 Flowable。创建或重新提交时，
-`SupplierWorkflowCoordinator` 按租户和 `category=SRM_SUPPLIER_ONBOARDING` 自动解析当前已发布模型，
-持久化 `requestId/businessKey/modelVersionId/startUser` 幂等快照，再调用 Workflow 内部启动 API。
-启动成功后供应商进入 `APPROVING`；不确定失败保留原快照供重试。Workflow 通过 Outbox 发布完成事件，
-SRM 以 Inbox 幂等消费并推进 `APPROVED/REJECTED`。撤回或取消必须先终止匹配的流程实例，再恢复
-`PENDING_REVIEW`。默认租户模型由启动初始化器校验并自动发布，缺少必需模型时服务失败启动。
+管理员 create、REJECTED submit 和门户角色成功处理在本地事务中同步调用 SupplierWorkflowCoordinator。解析本租户已发布且分类 `SRM_SUPPLIER_ONBOARDING` 的模型发生在启动异常捕获前；缺失/未发布/查询失败可能回滚本地创建或 Saga 结果。
+
+启动保存 `requestId/businessKey=supplierId:attempt/modelVersionId/attempt/startStatus/instance`。起案 user 来自当前身份；成功响应须匹配请求/业务键/类型/实例，字段名为 `replayed`。markStarted/markFailed 使用 REQUIRED，不是提交后独立确认。启动或确认失败会尝试标记 FAILED，该标记可能失败/未命中；FAILED 不证明远端未创建实例。当前没有 PENDING_REVIEW/FAILED 的通用启动重试 API，不把角色 Saga retry 当作替代。
+
+完成事件通过 `tenantId + eventId` Inbox 先校验 JSON 语义意图，再匹配审批轮次、业务键、实例与状态。有效早到完成要求消息重试；旧轮次/重复/无效实例隔离，APPROVED/REJECTED 才由完成事件推进。撤回/取消先远端终止后本地版本更新，边界见 5.1。
+
+`RequiredWorkflowModelInitializer` 属于 Workflow 服务，检查默认租户 1 的四个必需模型，并校正/发布查到的启用匹配模型；它不为全部租户自动创建模型，也不等于 SRM 自身对所有租户的启动保障。
 
 ### 8.4 Procurement 和 Asset 集成
 
-SRM 提供以下能力供 Procurement/Asset 调用：
+内部 4 路径见 7.2，使用 `X-Internal-Token`、`X-Tenant-Id`，查询/请求体租户必须一致。供应商 get/batch 返回当前未删除摘要，不自动限定 APPROVED；业务调用方再验证资格。search 可筛 status/category/keyword、limit 1..100；batch 最多 100 个唯一正 ID，按首次顺序去重、缺失省略，无联系人/银行 PII。Asset 当前只使用合格供应商 search；收货仍用 Procurement 快照。
 
-- 内部 API：`GET /api/internal/supplier/{id}?tenantId={tenantId}`，返回供应商摘要（ID、名称、状态、等级）。
-- 内部 API：`GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}`，按条件搜索合格供应商。
-- 内部 API：`POST /api/internal/supplier/batch`，body 为 `{tenantId,supplierIds}`；1–100 个正整数按首次出现顺序去重，缺失 ID 省略，返回 `id/supplierNo/name/status/levelCode/categoryCode` 且不含 PII。
-- 内部 API：`GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}`，返回该 RFQ 的有效报价、版本和逐行快照，供比价与定点。
-- 所有内部 API 使用 `X-Internal-Token` 与 `X-Tenant-Id`，query/body tenant 必须与 header 一致，不经 Gateway 暴露。
+门户 RFQ 调用 Procurement 的 `/api/internal/procurement/rfq/invitations` 与 `/api/internal/procurement/rfq/{rfqId}/invitation`，supplierId 取 ACTIVE PortalUser，不接受前端主体指定。报价请求只绑定 `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]`。
 
-报价由 SRM 持久化，但 RFQ 邀请状态由 Procurement 持久化，任何服务都不得跨库更新另一服务的表：
+先验证身份/DTO并查永久请求账本；同意图旧 requestId 返回当前报价快照，不重写或重发，不重新走新请求的 APPROVED/RFQ 开放校验。异意图 409。新请求再锁定 APPROVED 供应商，校验 RFQ SENT、邀请 INVITED/QUOTED、截止晚于现在，validUntil 晚于现在且不早于截止。
 
-1. Supplier 门户通过 SRM 查询邀请列表/详情；SRM 分别调用 Procurement 的 `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}` 与 `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`，租户由必填 `X-Tenant-Id` 传递，并以 PortalUser 关联得到的 supplierId 查询，绝不接受前端 supplierId。
-2. Supplier 门户提交报价前，SRM 再次读取邀请详情，校验 tenant、RFQ `status=SENT`、邀请 `status IN (INVITED, QUOTED)`、截止时间和完整 RFQ 行快照。
-3. SRM 先按 `(tenantId, requestId)` 查询 `srm_quotation_request`：hash 相同则返回当前报价快照，hash 不同返回 409；新请求必须保证 `validUntil` 不早于 RFQ 报价截止时间。首次请求携带创建哨兵 `version=0`，首版从 `version=1` 开始，之后只能携带当前版本更新；报价、明细、幂等历史和 Outbox 事件 `srm.quotation.submitted.v1` 在同一事务提交。
-4. Procurement 以 eventId Inbox 幂等消费事件，更新自己的 `proc_rfq_supplier.quotation_id/status`。
-5. Procurement 定点前通过 SRM batch 内部 API 获取报价，并在定点/订单中保存 quotationId、quotationVersion 及不可变报价快照；SRM 后续变更不得影响已定点结果。
+1–200 行必须唯一、完整覆盖 RFQ 快照；物料/单位/数量/币种来自服务端邀请，单价为正 JSON 十进制字符串且满足 DECIMAL(19,6)，交期 0–3650、备注最多 500 字。行金额 HALF_UP 到 4 位，总额逐行相加，均满足正 DECIMAL(19,4)；返回金额与事件金额使用字符串。
+
+永久账本按 tenant/requestId 保存 SHA-256 规范化意图及 quotationId/targetVersion，意图含 rfqId、version、validUntil 和按行 ID 排序的单价/交期/备注。首建 version=0、存储首版 1，更新要求当前版；报价、行、账本 COMPLETED 和 srm.quotation.submitted.v1 Outbox 同事务。Procurement 以事件/意图/版本更新邀请，定点保存不可变报价/PO 快照；后续报价更新不回写既有 PO。内部报价 batch 只返回 SUBMITTED、有效期内且供应商 APPROVED 的报价。
 
 ### 8.5 Outbox 与事件
 
-使用 `ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)`；tenantId 必须显式。
+`DomainEventEnvelope` 包含 `eventId/eventType/occurredAt/tenantId/producer`、`aggregateType/aggregateId/aggregateVersion`、`actorUserId/correlationId/causationId/payload`，按事件契约填充。事务显式调用 `ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)`；事件顶层 eventId 作为 msgKey，Outbox msgId 独立。
 
-所有事件使用统一信封 `eventId/eventType/occurredAt/tenantId/payload`。门户角色分配请求/结果至少包含 requestId、tenantId、supplierId、userId、roleCode、result/errorCode，消费者以 requestId 幂等；事件中绝不传密码、验证码或 inviteToken。`srm.quotation.submitted.v1` payload 至少包含 requestId、quotationId、quotationVersion、rfqId、rfqNo、supplierId、status、totalAmount、currencyCode、validUntil；不在事件中传完整银行账户或联系人 PII。
+当前 SRM 输出为 supplier registered/approved/rejected/suspended/blacklisted/eliminated 六种事件，以及 `srm.portal-role.assign-requested.v1`、`srm.quotation.submitted.v1`、`srm.evaluation.completed.v1`、`srm.risk.level-changed.v1`。Auth 输入为 `auth.portal-role.assigned.v1` / `auth.portal-role.assign-failed.v1`，合计 12 类，不混称为 12 种 SRM 输出。
 
-建议事件：
+payload 可含明确 ID、版本、状态、评分/金额及必要快照；不传密码、验证码、inviteToken、完整银行账户或联系方式。角色请求/结果遵循各自 DTO，不声称每个信封同时包含请求与结果字段。Outbox 提交不证明 Broker 投递、消费或外部通知成功。
 
-- `srm.supplier.registered.v1`
-- `srm.supplier.approved.v1`
-- `srm.supplier.rejected.v1`
-- `srm.supplier.suspended.v1`
-- `srm.supplier.blacklisted.v1`
-- `srm.supplier.eliminated.v1`
-- `srm.portal-role.assign-requested.v1`
-- `auth.portal-role.assigned.v1`（由 Auth 返回，SRM 消费）
-- `auth.portal-role.assign-failed.v1`（由 Auth 返回，SRM 标记失败并安排重试）
-- `srm.quotation.submitted.v1`
-- `srm.evaluation.completed.v1`
-- `srm.risk.level-changed.v1`
-
-事件只传 ID、状态和必要快照，不传完整银行账户、联系人手机、邮箱。
+| 方向 | 事件类型 |
+|---|---|
+| SRM 输出 | `srm.supplier.registered.v1` |
+| SRM 输出 | `srm.supplier.approved.v1` |
+| SRM 输出 | `srm.supplier.rejected.v1` |
+| SRM 输出 | `srm.supplier.suspended.v1` |
+| SRM 输出 | `srm.supplier.blacklisted.v1` |
+| SRM 输出 | `srm.supplier.eliminated.v1` |
+| SRM 输出 | `srm.portal-role.assign-requested.v1` |
+| SRM 输出 | `srm.quotation.submitted.v1` |
+| SRM 输出 | `srm.evaluation.completed.v1` |
+| SRM 输出 | `srm.risk.level-changed.v1` |
+| Auth 输入 | `auth.portal-role.assigned.v1` |
+| Auth 输入 | `auth.portal-role.assign-failed.v1` |
 
 ## 9. 隐私、操作日志与 XSS
 
 ### 9.1 OperLog 脱敏
 
-复用 CRM 已建设的 `omni-common-operlog` PII 脱敏能力。SRM 需要脱敏的字段：
-
-- 银行账户账号（`account_no`）
-- 联系人手机号（`mobile`）
-- 联系人邮箱（`email`）
-- 供应商电话（`phone`）
-- 入驻邀请原文（`inviteToken`，按凭证处理，禁止写入日志或数据库）
+操作日志按显式字段/文本规则脱敏，不保证任意 PII 识别。银行账号、联系方式、凭证和自由文本按具体注解及共享清洗器处理；enroll 关闭快照并排除 inviteToken/creditCode/phone/email，邀请原令牌不写日志。通用异步日志不能替代业务状态、Inbox 与审批事实。
 
 ### 9.2 PII
 
-- 完整银行账户、联系人手机、邮箱只返回给 `srm:pii:view`。
-- 其他用户由后端 VO 返回掩码，例如 `6222****1234`、`138****1234`、`a***@example.com`。
-- 列表默认掩码；详情按权限决定。
-- 供应商门户中，供应商可以查看自己关联的完整信息（SUPPLIER 角色隐含 `srm:pii:view` 对自身数据）。
+供应商专用列表恒用脱敏 VO；详情/360、联系人与银行列表/详情按 srm:pii:view 返回电话、邮箱和账号。地址等不因此获得通用掩码保证。门户 profile 在 SUPPLIER/功能权限/ACTIVE 关联后返回自身电话和邮箱，不是 SUPPLIER 隐含全局 pii:view；当前没有门户 contacts/qualifications/bank-accounts API。
+
+SRM 保存企业、联系人、银行、自由文本及 BaseEntity 审计用户名，不可称仅有 userId/unitId。Supplier 没有持久化 Workflow 起案人列，启动请求取当前身份传给 Workflow；取证、截图、日志和导出仍需按字段与授权控制。
 
 ### 9.3 XSS
 
-SRM 必须实现 `XssConfigProvider`，读取 Redis DB 0 的 `xss:enabled:{tenantId}` 与 `xss:rules:{tenantId}`。缓存 miss 时回源 Auth 或使用内置基线规则。MVP 备注只允许纯文本且禁止 `v-html`。
+SRM 复用 common-service 的 `CachedServiceXssConfigProvider`，没有第二套独立 SPI。读取 Redis DB0 两个 XSS 键；缺失/异常先向 Auth 回源，有效权威设置（含 enabled）继续使用，缓存写失败也不丢弃它。回源无有效结果时才使用默认 HTML_TAG/EVENT_HANDLER/DANGEROUS_PROTOCOL 安全基线。依赖故障不能绕过过滤；备注按纯文本用途，不用 v-html。
 
 ## 10. 前端设计
 
-```text
-omni-frontend/src/
-├── api/
-│   ├── srm-overview.ts
-│   ├── srm-supplier.ts
-│   ├── srm-evaluation.ts
-│   ├── srm-risk.ts
-│   └── srm-portal.ts
-├── views/
-│   ├── srm/
-│   │   ├── overview/index.vue         # 供应商概览 + 风险看板
-│   │   ├── supplier/index.vue         # 供应商管理
-│   │   ├── evaluation/index.vue       # 绩效评估
-│   │   └── risk/index.vue             # 风险管理
-│   └── supplier-portal/
-│       ├── enrollment/index.vue       # 邀请入驻与 Saga 状态
-│       ├── profile/index.vue          # 企业信息维护
-│       └── evaluation/index.vue       # 自身绩效查看
-└── components/srm/
-    ├── SupplierOverview.vue           # 供应商 360 视图
-    ├── SupplierPicker.vue             # 供应商选择器
-    ├── EvaluationScorecard.vue        # 评估评分卡
-    ├── RiskIndicator.vue              # 风险指标卡片
-    └── RiskDashboard.vue              # 风险看板组件
-```
+当前管理页面为 `views/srm/{overview,supplier,evaluation,risk,invite}/index.vue` 和 `views/srm/risk/config/index.vue`；门户是 `views/supplier-portal/index.vue`，没有原方案的 enrollment/profile/evaluation 三个页面目录。API 包括 srm-overview/supplier/evaluation/risk/risk-config/portal.ts。
 
-- Shared `ApiResponse/PageResult` 只从 `src/types/api.ts` 导入。
-- 供应商门户使用角色路由：`USER + SUPPLIER`（或仅 `SUPPLIER`）属于门户账号，只可见 `portal/**`；只有同时拥有 `SUPER_ADMIN`、采购、CRM 等独立内部管理角色时才视为真实双角色账号并保留管理端入口，禁止用 USER 自带的只读权限前缀推断管理身份。
-- `router/index.ts` 与 `layout/index.vue` 各有 iconMap，两处都要补 SRM 和 Portal。
-- `constants/menu.ts`、`zh-CN.ts`、`en-US.ts` 同步。
-- 供应商 360 使用 Drawer 组件。
-- 所有按钮使用同码 `v-permission`，但后端是最终边界。
-- 风险看板使用红黄绿灯卡片组件，支持按风险等级筛选。
+真实 `components/srm` 保留 SupplierOverview、SupplierPicker、SupplierResourcesDrawer、EvaluationScorecard、RiskIndicator、RiskDashboard。360 使用 Drawer，各块仍有后端独立权限；风险看板支持等级筛选。
+
+`ApiResponse/PageResult` 仅来自 `src/types/api.ts`，按钮用同码 v-permission。SUPPLIER 且无管理权限时管理路由跳门户；多角色按实际权限保留管理入口。四语文案、菜单、router/layout 是当前入口，真实步骤/截图在 Wiki，本文不代替浏览器验收。
 
 ## 11. 工程落点
 
-### 11.1 新模块
+### 11.1 当前模块入口
 
-```text
-omni-backend/omni-srm/
-├── pom.xml
-└── src/main/
-    ├── java/com/omni/srm/
-    │   ├── SrmApplication.java
-    │   ├── client/ config/ controller/ dto/ entity/
-    │   ├── mapper/ security/ service/ service/impl/
-    └── resources/
-        ├── application.yml
-        ├── application-dev.yml
-        └── mapper/
-```
+入口为 `omni-backend/omni-srm/src/main/java/com/omni/srm/SrmApplication.java`，配套 client/config/controller/dto/entity/mapper/security/service/workflow/consumer/domain 等；真实资源为 application.yml/application-lite.yml。启动类声明 EnableDiscoveryClient、EnableFeignClients、MapperScan，领域 SecurityConfig 与共享 common-service 组合。
 
-`SrmApplication` 使用 `@EnableDiscoveryClient`、`@EnableFeignClients(basePackages="com.omni.srm.client")`、`@MapperScan("com.omni.srm.mapper")`。服务保留领域 `SecurityConfig`，公共 `omni-common-service` 提供 Gateway 预认证、请求身份、内部 API 认证、DataScope、持久化拦截链和 XSS 配置能力。
+不要按原计划重建已有模块。SQL/迁移以当前 Mapper 和 Liquibase 为准，开发操作见 [开发指南](../guides/scaffold-development.md)。
 
-### 11.2 必改文件
+### 11.2 当前关联文件
 
-| 文件 | 修改 |
+以下是当前关联入口，不是待新建文件；修改契约时同步对应迁移、种子与校验。
+
+| 范围 | 当前文件/目录 |
 |---|---|
-| `omni-backend/pom.xml` | 加入 `omni-srm` |
-| Gateway `application.yml` | 显式 `/api/srm/**` 路由；内部路径阻断加入 SRM |
-| `docker/backend/Dockerfile` | POM 缓存层 `COPY omni-srm/pom.xml omni-srm/` |
-| `docker-compose.yml` | SRM 服务、8105、DB/Redis/Nacos/MQ/XXL/internal token |
-| `start.bat/start.sh` | build 列表加入 SRM；Windows 端口保护加入 8105 |
-| `database/changelog/srm/` | 为 SRM 结构变更增加 forward-only Liquibase changeSet |
-| `scripts/sql/seed/srm.sql` | 默认评估模板等正式幂等种子；更新后刷新 seed manifest |
-| `scripts/sql/seed/auth.sql` | SRM 权限和角色正式幂等种子；更新后刷新 seed manifest |
-| SRM `TenantModuleProvisioner` | 新租户模板与风险目录的幂等初始化 |
-| `omni-auth` | 消费 portal-role assign 请求并以 requestId 幂等分配 SUPPLIER 角色，发布成功/失败结果事件 |
-| Frontend router/layout/menu/locales | 图标、菜单、i18n |
+| 模块 | `omni-backend/omni-srm/pom.xml`<br/>`omni-backend/pom.xml` |
+| 运行配置 | `omni-backend/omni-srm/src/main/resources/application.yml`<br/>`omni-backend/omni-srm/src/main/resources/application-lite.yml` |
+| 结构与种子 | `database/changelog/srm/0001-srm-schema.yaml`<br/>`scripts/sql/seed/srm.sql` |
+| 权限及摘要 | `scripts/sql/seed/auth.sql`<br/>`database/seed/manifest.yaml` |
+| 租户初始化 | `omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SrmTenantModuleProvisioner.java`<br/>`omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SrmTenantInitializerImpl.java` |
+| Gateway / Compose | `omni-backend/omni-gateway/src/main/resources/application.yml`<br/>`compose.yaml` |
+| 界面 | `omni-frontend/src/views/srm`<br/>`omni-frontend/src/views/supplier-portal/index.vue`<br/>`omni-frontend/src/components/srm` |
+| Workflow / Auth 契约 | `omni-backend/omni-srm/src/main/java/com/omni/srm/workflow`<br/>`omni-backend/omni-srm/src/main/java/com/omni/srm/client`<br/>`omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PortalRoleAssignmentServiceImpl.java` |
 
-权限种子按 tenant + code 的 `NOT EXISTS` 幂等插入，正确重建 parent/path；同时更新 SUPER_ADMIN、SRM 角色、seed manifest 断言及新租户初始化。默认 USER 只增加 `srm:portal:enroll`，SUPPLIER 增加 profile/evaluation/quotation，SRM 管理角色增加 invite 管理但显式排除全部供应商自助门户能力；不得把管理权限整体授给 USER。`srm:portal:quotation` 只授予 SUPPLIER 与 SUPER_ADMIN。
-
-配置要点：server 8105、management 19905、Redis DB 0、XXL appname `omni-srm`/port 9905。
+默认入口8105、管理19905、Redis DB0、XXL appname omni-srm/9905，Compose按当前配置映射容器端口。轻量配置关闭Nacos并使用静态发现。所有运行、构建和测试均在本机Docker；角色种子不整体授予USER，门户身份不能混同内部管理。
 
 ## 12. 非功能设计
 
-### 性能
-
-- 所有列表分页，最大 100；owner/status/category 使用 tenant 前缀联合索引。
-- 用户/组织一次 batch enrich，禁止 N+1。
-- 供应商 360 分块查询并限制评估和风险记录数量。
-- 概览统计使用 Mapper 层聚合 SQL。
-
-### 并发与幂等
-
-- 供应商审核/冻结/黑名单：version 乐观锁。
-- 评估提交：supplier 行锁 + 事务内一次性写入。
-- 门户入驻：credit_code tenant 内唯一约束，同一 tenant + userId 仅允许一个有效供应商关联。
-- 邀请使用次数：invite version 条件更新，校验与 used_count 递增在同一事务。
-- SUPPLIER 角色分配：requestId 幂等 + Outbox/Saga；失败可重试，不依赖分布式事务。
-
-### 降级
-
-- Auth dataScope 不可用：503，失败关闭。
-- Auth 展示 enrich 不可用：可返回 ID/未知用户。
-- RocketMQ 不可用：业务与 Outbox 提交，Relay 后补。
-- Redis XSS miss：回源/基线规则，不关闭防护。
+- 分页最大 100，部分历史/360 使用自身数量上限。owner/status/category 索引以实际 DDL 为准；OwnerEnricher 批量查用户/组织，展示回退不改变查询范围。没有此文档即可证明的性能实测。
+- 状态命令按记录/版本校验，评估锁供应商并一次性写入；邀请次数条件更新，报价永久账本/活动唯一键保证其限定范围的幂等。真实并发与跨服务原子性另行取证。
+- Auth 范围查询失败关闭，展示补全可保留 ID。MQ 不可用不等于本地 Outbox 停写，也不保证最终已经补发；Redis失败先Auth再基线。Workflow解析/启动/确认和PortalSaga的部分提交边界按前文，不以错误响应推定远端未执行。
+- 默认评估模板与风险配置初始化是当前 SRM 事实，Base负责字典；默认租户种子、Workflow必需模型及角色不构成全部租户/部署均已可用的保证。
 
 ## 13. 测试与验收
 
-最低测试集：
+测试入口为 `omni-backend/omni-srm/src/test/java`。当前单元结果、构建与真实运行证据分开记录；以下是验收要求：
 
-- 供应商状态机合法/非法迁移。
-- 评估加权汇总计算正确性。
-- 评估 1-5 分到百分制的边界（全 1 分=20、全 5 分=100）及 60/75/90 调级阈值。
-- 评估自动调级映射正确性。
-- 风险综合等级取最高等级逻辑。
-- PII 掩码（银行账户、联系人手机/邮箱）。
-- 六种 dataScope 的列表和聚合。
-- 跨租户读、改、删全部失败。
-- 缺 tenant/scope 时失败关闭。
-- tenant + id + version 并发更新。
-- 门户入驻幂等性（重复 credit_code 或同一 userId 重复入驻拒绝/返回原 requestId）。
-- Auth 开户缺少/伪造 tenantCode 时拒绝；SRM 入驻缺少/伪造 inviteToken 或请求体伪造 tenantId/userId 时拒绝。
-- Auth 角色分配成功事件重复消费不会重复关联门户账号。
-- SUPPLIER 角色分配失败时入驻保持失败/重试态，不出现半成功授权。
-- SUPPLIER 角色只能看到自己的数据。
-- SUPPLIER 即使伪造 supplierId 也不能访问其他供应商资料或绩效。
-- inviteToken 只返回一次且数据库/OperLog 不出现原文；过期、作废、跨租户和并发超用均拒绝。
-
-端到端验收：Auth 自注册开户 → 登录后供应商入驻 → SUPPLIER 角色分配 → 管理员审核通过 → 采购经理创建评估 → 打分汇总 → 自动调级 → 风险指标更新 → 供应商 360 完整展示。
-
-验证命令：
-
-```powershell
-$env:JAVA_HOME='C:\APP\JDK25\jdk-25.0.2'
-$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
-cd omni-backend
-.\mvnw.cmd clean install
-
-cd ..\omni-frontend
-npm run build
-npm run lint
-
-cd ..
-docker compose config
-docker compose build omni-srm omni-gateway omni-frontend
-```
+- 九状态与版本/删除限制；create/submit/profile-submit 的模型缺失、启动失败标记及当前无通用审批重试边界；远端终止后本地失败。
+- 四维完整评分、1..5/20..100、HALF_UP2和60/75/90等级，不误改生命周期；owner快照和独立评估权限。
+- 当前总分阈值、含端点/首匹配/空档规则，类型启用/autoCalc/criterion实际边界，资质到期重算与红色通知事件。
+- 内部owner/子父链/租户共享配置、360独立块权限、门户角色/功能/ACTIVE关联、PII与XSS/日志边界。
+- 邀请SHA256/有效期/次数并发、申请人/creditCode重放、角色账本/事件重投、Auth已提交而SRM回滚、退避角色retry、JWT重新登录。
+- 报价JSON字符串/金额精度、完整行集合、RFQ资格、永久request账本/旧请求返回当前快照及不重复Outbox；采购PO快照不可变。
+- 真实端到端仍需 Auth真实验证码注册 → 登录 → 入驻/角色结果 → 准入审批 → 绩效/风险 → 门户自身数据与报价的实际证据。单元通过和本文存在不代替该链；Docker验证命令与操作恢复放在既有Wiki，不保留宿主Maven/npm流程。
 
 ## 14. 实施顺序
+
+保留2026-07-27原实施分解与当时完成条件作为历史；它们不是本轮已执行证据或重复运行指令。当前入口和契约见第3–13节。
 
 ### Milestone 0：前置确认
 
@@ -800,6 +627,8 @@ docker compose build omni-srm omni-gateway omni-frontend
 
 ## 15. ADR 摘要
 
+保留原重要设计取舍。阶段建议与当前实现不同处以前文事实为准；原预设/可选扫描方案不证明当前所有租户或任务已可用。
+
 | 决策 | 选择 | 原因 |
 |---|---|---|
 | 服务 | 独立 `omni-srm` | 与采购、资产分离，职责清晰 |
@@ -817,6 +646,8 @@ docker compose build omni-srm omni-gateway omni-frontend
 | Workflow | 已接入 `omni-workflow` | 模型分类固定为 `SRM_SUPPLIER_ONBOARDING`，服务端自动解析当前发布版本 |
 
 ## 16. 主要风险
+
+保留原风险登记和对策；其中SELF门户简述、定时扫描及“无半成功”等必须结合当前角色/关联、消息重投、真实配置与跨服务事务限制理解。
 
 | 优先级 | 风险 | 处理 |
 |---|---|---|

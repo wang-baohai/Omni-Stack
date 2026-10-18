@@ -181,7 +181,7 @@ function formatJson(jsonStr: string | null): string {
 /** 判断是否可重发 */
 function canResend(status: number): boolean {
   return runtimeStatus.value?.deliveryEnabled === true
-    && [MqMessageStatus.PENDING, MqMessageStatus.FAILED, MqMessageStatus.DEAD_LETTER].includes(status)
+    && [MqMessageStatus.FAILED, MqMessageStatus.DEAD_LETTER].includes(status)
 }
 
 /** 判断是否可忽略 */

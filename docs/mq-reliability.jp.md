@@ -1,437 +1,64 @@
-# 信頼性の高いメッセージ送信（Transactional Outbox）
-
-> 本文書は Omni-Stack の Transactional Outbox パターン実装について説明し、メッセージの最低1回配信を保証します。  
-> アーキテクチャの概要は [architecture.jp.md](architecture.jp.md) を参照してください。Docker デプロイ設定は [docker-deployment.jp.md](docker-deployment.jp.md) を参照してください。
-
-Omni-Stack は **Transactional Outbox** パターン + **XXL-JOB** リレースケジューリングにより、メッセージの最低1回配信を保証します。システムは MQ に直接メッセージを送信するのではなく（トランザクションロールバック時のデータ損失を避けるため）、PENDING レコードをローカルの `sys_mq_message` テーブルに書き込み（同じデータベーストランザクション内）、バックグラウンドリレータスクが非同期で MQ Broker に配信します。
-
-## 1. Architecture Overview
-
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                        Business Service (e.g., omni-base)                 │
-│                                                                            │
-│  @OperLog method ──> OperLogAspect ──> OperLogProducer                     │
-│                                            │                               │
-│                                            ▼                               │
-│                                    ReliableMessageRelay (interface)         │
-│                                            │                               │
-│  ┌─────────────────────────────────────────┼─────────────────────────────┐ │
-│  │            omni-common-mqlog            │                             │ │
-│  │                                         ▼                             │ │
-│  │                              ReliableMessageTemplate                   │ │
-│  │                                  │                                     │ │
-│  │                    INSERT sys_mq_message (PENDING)                      │ │
-│  │                    [same local transaction]                             │ │
-│  └─────────────────────────────────────────┼─────────────────────────────┘ │
-└────────────────────────────────────────────┼───────────────────────────────┘
-                                             │
-┌────────────────────────────────────────────┼───────────────────────────────┐
-│  XXL-JOB Scheduler (every 10s)            ▼                               │
-│                                                                            │
-│  MqMessageRelayJob (@XxlJob + @SystemJobMeta)                              │
-│       │                                                                    │
-│       ▼                                                                    │
-│  MqMessageRelayService                                                     │
-│       │ fetchPendingMessages()  ──> PENDING / FAILED & backoff expired     │
-│       │                                                                    │
-│       ▼ relayOne(msg)                                                      │
-│  MessageSender strategy ──> RocketMqMessageSender (StreamBridge)          │
-│       │                                                                    │
-│       ├── Success  ──> status = SENT                                       │
-│       └── Failure  ──> retry_count++, exponential backoff                  │
-│                         └── exceeds max_retry ──> DEAD_LETTER              │
-└────────────────────────────────────────────────────────────────────────────┘
-```
-
-**モジュール依存関係**:
-
-| モジュール | 役割 |
-|--------|------|
-| `omni-common-core` | `ReliableMessageRelay` インターフェースを定義（純粋な POJO、Spring 依存なし） |
-| `omni-common-mqlog` | Outbox パターンを実装：`ReliableMessageTemplate`、`MqMessageRelayService`、`MqMessageRelayJob`、`MessageSender`、自動設定 |
-| `omni-common-operlog` | オプション呼び出し元：`OperLogProducer` は利用可能な場合に `ReliableMessageRelay` を使用し、それ以外は直接 `StreamBridge` にフォールバック |
-| `omni-base` | フロントエンド管理 UI 用の外部管理コントローラ `MqMessageController` |
-
-**主要な設計判断**:
-
-- **なぜ直接送信ではなく Outbox か？** トランザクション内での直接 MQ 送信は分散トランザクションの問題を引き起こします — MQ 送信が成功しても DB トランザクションがロールバックされると、コンシューマは幽霊メッセージを受信します。Outbox パターンはすべてを単一のローカルトランザクションに収めます。
-- **なぜリレーエンジンに XXL-JOB を使うのか？** プロジェクトはすでにスケジューリングに XXL-JOB を使用しています。メッセージリレーに再利用することで、別のポーリングデーモンを導入する必要がなくなります。各サービスのエグゼキュータ AppName は異なるため、同じ `mqRelayHandler` 名はサービス間で自然に分離されます。
-- **なぜ明示的な tenantId パラメータか？** テナント分離は API レベルで保証される必要があります — 暗黙的な ThreadLocal 解決は脆く、エラーが発生しやすいです。すべての呼び出し元は `tenantId` を明示的に渡す必要があります。
-
-## 2. Message Lifecycle
-
-### 2.1 Status Machine
-
-```
-                         ┌──────────┐
-                INSERT   │          │   relay success
-  ─────────────────────> │ PENDING  │ ──────────────────> SENT
-                         │  (0)     │                      (1)
-                         │          │
-                         └────┬─────┘
-                              │ relay failure
-                              ▼
-                         ┌──────────┐
-                         │          │   retry < max_retry
-                         │ FAILED   │ ──────────────────> back to PENDING
-                         │  (2)     │   (with next_retry_time = now + 2^count × 10s)
-                         │          │
-                         └────┬─────┘
-                              │ retry >= max_retry
-                              ▼
-                         ┌──────────┐
-                         │DEAD_LETTER│
-                         │  (3)     │
-                         └────┬─────┘
-                              │
-                    ┌─────────┴─────────┐
-                    │ resend             │ skip
-                    ▼                    ▼
-               PENDING (0)         SKIPPED (4)
-```
-
-| ステータス | コード | 説明 |
-|--------|------|-------------|
-| PENDING | 0 | 配信待ちまたはリトライ準備完了 |
-| SENT | 1 | MQ への配信成功（終端状態） |
-| FAILED | 2 | 配信失敗、次回のリトライ待ち（バックオフ） |
-| DEAD_LETTER | 3 | 最大リトライ回数超過（終端状態、手動対応が必要） |
-| SKIPPED | 4 | 管理者により手動で無視としてマーク（終端状態） |
-| PROCESSING | 5 | relay が送信前に単一 UPDATE で原子的に claim する遷移中のリース状態（デフォルト 120 秒）。終端書込は `status=PROCESSING` を CAS 前条件とし、リース期限切れは他 executor が回収可能 |
+# メッセージ信頼性（Transactional Outbox）
 
-### 2.2 Write Path
+本書はキュー登録、配信、管理、受信処理の現在の境界を定義します。操作手順と実際の画面は [メッセージ Wiki](wiki/outbox-development.jp.md)、ブレークポイントと競合テストは [ソースデバッグ](wiki/source-debugging.jp.md#outbox) を参照してください。
 
-`ReliableMessageTemplate` は `ReliableMessageRelay` インターフェースを実装します：
+## 1. 構成
 
-```java
-// OperLogProducer または任意のビジネスコードから呼び出される
-reliableMessageRelay.send("oper-log-out-0", operLogMessage, tenantId);
-reliableMessageRelay.send("order-out-0", orderPayload, tenantId, "order:12345");
-```
+common-core が ReliableMessageRelay を定義し、common-mqlog がローカル Outbox、XXL-JOB 中継、送信戦略を提供します。Base の管理集約は現在 Base と CRM のみを対象とし、全サービスの Outbox を表示するものではありません。
 
-内部処理：
-1. UUID を `msgId`（重複排除キー）として生成
-2. `ObjectMapper` 経由でペイロードを JSON にシリアライズ
-3. `SysMqMessage` レコードを構築：`status = PENDING`、`brokerType = "rocketmq"`、`tenantId`、`serviceName`
-4. MyBatis-Plus 経由で `sys_mq_message` に INSERT（`@Transactional(REQUIRED)` 内）
+- キュー登録は一意な msgId を生成し、payload を直列化して正の tenantId を検証し、サービス内の sys_mq_message に保存します。broker_type は現在 rocketmq 固定です。
+- 4引数 send は REQUIRED を使用します。業務と Outbox の原子的コミットには、同じデータソースと有効なローカルトランザクションが必要です。Controller の @OperLog 後処理は、終了済みの業務トランザクションとの原子性を保証しません。
+- 現在のテンプレートは topic に bindingName を保存します。実際の RocketMQ destination は Stream binding が選択し、Base の operlog-out-0 は operlog-topic に接続します。
+- 配信は少なくとも1回を目標とします。送信後、SENT 更新前の停止では重複し得るため、受信側に冪等性が必要です。バックオフ、滞留、停止、デッドレター処理が遅延に影響し、一律の「最大10秒」は保証しません。
 
-### 2.3 Relay Path
+## 2. ライフサイクル
 
-`MqMessageRelayJob` は XXL-JOB によりスケジューリングされます（デフォルト：10秒ごと、FIRST ルート戦略）：
+| 状態 | コード | 許可される動作 |
+|---|---|---|
+| PENDING | 0 | 期限到達後に取得可能。管理再送は不可 |
+| SENT | 1 | 送信戦略が成功。受信側の業務処理の完了とは別 |
+| FAILED | 2 | 期限到達後に直接再取得。PENDING への事前更新なし |
+| DEAD_LETTER | 3 | 自動再試行停止。修復後の再送またはスキップ |
+| SKIPPED | 4 | 管理者が配信停止。再送と再スキップは不可 |
+| PROCESSING | 5 | 原子的取得後の120秒リース。期限切れは再取得可能 |
 
-1. `fetchPendingMessages()` — `status IN (PENDING, FAILED)` かつ (`next_retry_time IS NULL` または `next_retry_time <= NOW()`) のレコードを SELECT、`create_time ASC` でソート、LIMIT 100
-2. 各メッセージについて、`broker_type` で sender マップから `MessageSender` を検索
-3. `sender.send(msg)` を呼び出し — 成功時は SENT にマーク、失敗時はリトライカウントを増加し指数バックオフを適用
-4. `retryCount >= maxRetry` の場合、DEAD_LETTER にマーク
+1バッチ最大100件を作成順に取得します。対象は期限到達済み PENDING/FAILED とリース切れ PROCESSING です。取得と結果更新は CAS を使い、取得失敗時に送信せず、更新対象0件で新しい状態を上書きしません。
 
-### 2.4 Retry Strategy
+失敗回数はデータベースで原子的に増加します。既定 max_retry=3 は3回目の失敗でデッドレター化する意味です。1回目は20秒、2回目は40秒、3回目は next_retry_time を消去し、80秒待ちません。不明な broker_type も同じ状態機械を通り、実際の再実行にはスケジューラの巡回も必要です。
 
-指数バックオフの計算式：**2^retryCount × 10 秒**
+- `POST /api/base/mq-message/{msgId}/resend`：FAILED/DEAD_LETTER のみ。CAS で PENDING、retry_count=0 に戻し、バックオフとエラーを消去します。base:mqmessage:resend と非同期配信有効が必要です。
+- `POST /api/base/mq-message/{msgId}/skip`：DEAD_LETTER → SKIPPED のみ。base:mqmessage:skip が必要です。
+- 状態変更済み・終端操作の繰り返しは HTTP200/業務400、権限不足は HTTP403/業務403。確認画面や送信受付通知は配信完了を意味しません。
+- mqRelayHandler は @XxlJob + @SystemJobMeta が必要です。起動準備後に既定 cron `0/10 * * * * ?` で登録・開始し、登録失敗時は10秒ごとに最大12回再試行します。サービスごとに executor AppName を分離します。
 
-| リトライ | バックオフ | 次回リトライまでの時間 |
-|-------|---------|-----------------|
-| 1 | 2^1 × 10 = 20s | 約20秒 |
-| 2 | 2^2 × 10 = 40s | 約40秒 |
-| 3 | 2^3 × 10 = 80s | 約80秒 |
+## 3. テナント分離
 
-デフォルト `max_retry = 3`。3回失敗後、メッセージは DEAD_LETTER ステータスになります。
+send は明示的な正の Long tenantId を必須とし、ThreadLocal から推測しません。外部管理は信頼済み X-Tenant-Id、認証された内部照会は明示的 tenantId を使います。管理者を含む利用者向け照会、再送、スキップはテナントを限定します。
 
-### 2.5 Dead Letter Handling
+基盤の中継処理は全テナントを走査します。SRM/調達/資産の TenantLine は sys_mq_message を除外し、他テナントの配信を妨げないことが必要です。
 
-デッドレターはフロントエンド管理 UI（`運用監視 → メッセージ記録`）を通じて管理者の手動介入が必要です：
+## 4. 制約
 
-- **再送信** (`POST /api/base/mq-message/{msgId}/resend`)：ステータスを PENDING にリセットし、リトライカウントとバックオフタイマーをクリアします。リレータスクが次回のポーリングでピックアップします。
-- **スキップ** (`POST /api/base/mq-message/{msgId}/skip`)：DEAD_LETTER → SKIPPED に遷移し、メッセージが配信されないことを確認します。
+- 正式 DDL の唯一の所有者は [common-mq-0001-schema](../database/changelog/common/0001-mq-schema.yaml)。履歴と事前条件で再実行を制御し、実行済み changeSet を編集しません。旧 schema.sql は履歴参照です。
+- MessageSender は broker_type で選択します。新戦略にはキュー登録選択契約の拡張も必要で、既存 send で rocketmq 以外は選択できません。
+- StreamBridge は業務の重複排除を保証しません。操作ログは一意な eventId を使い、OperLogConsumer は DuplicateKeyException のみ無視し、他の失敗は Broker 再試行のため再送出します。資産受領などは各ドメインの Inbox 契約に従います。
+- producer_trace_id はキュー登録時 MDC 由来で null の場合があります。中継は別 Trace を生成し、omniMessageId と取得可能な omniProducerTraceId をヘッダーで渡します。同期的な親子 Span を捏造しません。
+- 指標のタグは固定 destination/result/status のみで、テナント、ユーザー、業務キー、payload は含めません。管理ポート、サンプリング、出力は [可観測性](observability.jp.md) を参照してください。
+- 非同期配信無効でも Outbox キュー登録は可能です。未配信を消失と判断する前に runtime の deliveryEnabled を確認します。
 
-## 3. Tenant Isolation
+## 5. ソースと検証
 
-### 3.1 Design: Explicit Parameter (No ThreadLocal)
+| シンボル | ソース |
+|---|---|
+| ReliableMessageTemplate.send | [ReliableMessageTemplate.java](../omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/template/ReliableMessageTemplate.java) |
+| relayPendingMessages / relayOne / handleSendFailure | [MqMessageRelayService.java](../omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java) |
+| claim / CAS | [SysMqMessageMapper.java](../omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/mapper/SysMqMessageMapper.java) |
+| RocketMqMessageSender.send | [RocketMqMessageSender.java](../omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/sender/RocketMqMessageSender.java) |
+| MqRelayJobRegistrar | [MqRelayJobRegistrar.java](../omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqRelayJobRegistrar.java) |
+| resend / skip | [MqMessageAggregationServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/MqMessageAggregationServiceImpl.java) |
+| eventId | [OperLogConsumer.java](../omni-backend/omni-base/src/main/java/com/omni/base/consumer/OperLogConsumer.java), [OperLogServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/OperLogServiceImpl.java) |
+| Trace / Metric | [MqLogMetrics.java](../omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/metrics/MqLogMetrics.java) |
 
-`ReliableMessageRelay.send()` メソッドは明示的な `Long tenantId` パラメータを必要とします。これは意図的な設計判断です：
+[MqMessageRelayServiceTest](../omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceTest.java) · [CAS](../omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceCasTest.java) · [UnknownBroker](../omni-backend/omni-common-mqlog/src/test/java/com/omni/common/mqlog/relay/MqMessageRelayServiceUnknownBrokerTest.java) · [AggregationCas](../omni-backend/omni-base/src/test/java/com/omni/base/service/impl/MqMessageAggregationCasTest.java)
 
-- **ThreadLocal の魔法なし**：ThreadLocal ベースのテナント解決は脆い — 非同期境界、スレッドプール引き継ぎ、スケジュールタスクで失われる可能性があります。
-- **コンパイル時の安全性**：パラメータが欠けているとコンパイルエラーが発生し、実行時のサイレントバグにはなりません。
-- **呼び出し元の責任**：各呼び出し元は自身のコンテキストから tenantId を抽出します（例：`OperLogMessage.getTenantId()`、`@RequestHeader("X-Tenant-Id")`）。
-
-```java
-// 正しい：明示的な tenantId
-reliableMessageRelay.send("oper-log-out-0", message, message.getTenantId());
-
-// 間違い：tenantId を省略するとコンパイルエラーになる
-reliableMessageRelay.send("oper-log-out-0", message);
-```
-
-### 3.2 Write: tenantId in Outbox Record
-
-`ReliableMessageTemplate.send()` は `sys_mq_message` に INSERT する前に `message.setTenantId(tenantId)` を設定します。`tenant_id` カラムには効率的なテナントスコープクエリ用のインデックス（`idx_tenant_time`）があります。
-
-### 3.3 Read: All Query Controllers Filter by tenantId
-
-- **外部コントローラ** (`omni-base` の `MqMessageController`)：テナント ID の取得に `@RequestHeader("X-Tenant-Id")` を使用します。すべてのクエリに `.eq(SysMqMessage::getTenantId, tenantId)` が含まれます。
-- **内部コントローラ** (`omni-common-mqlog` の `MqMessageInternalController`)：Feign ベースのクロスサービス集約に `@RequestParam Long tenantId` を使用します。
-
-### 3.4 Relay: No Tenant Filter (Intentional)
-
-`MqMessageRelayService` は `tenant_id` に関係なく、すべての PENDING/FAILED メッセージをスキャンします。これは設計通りです — リレーはすべてのメッセージを配信する必要があるバックグラウンドインフラプロセスです。テナント分離はユーザー向けの読み書き操作にのみ適用されます。
-
-## 4. Constraints & Pitfalls
-
-### 4.1 tenantId Must Be Explicit
-
-`ReliableMessageRelay.send()` に ThreadLocal または SecurityContext ベースのテナント解決を決して導入しないでください。明示的なパラメータが契約です — サイレントな NULL tenantId バグを防止します。
-
-### 4.2 All Query Interfaces Must Filter
-
-`sys_mq_message` をクエリするすべての新しいエンドポイントは `tenantId` フィルタを含む必要があります。例外なし — 「管理者」または「内部」エンドポイントであってもテナント境界を尊重する必要があります。
-
-### 4.3 Idempotent DDL
-
-`sys_mq_message` テーブルは Liquibase 移行により作成されます：`database/changelog/common/0001-mq-schema.yaml`（changeset `common-mq-0001-schema`）は起動時に `omni-db-migrator` コンテナによって適用されます。この changeSet は `CREATE TABLE` を実行します（`IF NOT EXISTS` は**付与されていません**）。冪等性は前提条件と Liquibase 履歴により保証されます：`preConditions` でまず `dbms` が `mysql` であることを要求し、続いて `sqlCheck`（`expectedResult: "0"`）で `information_schema` に `sys_mq_message` テーブルが存在しないことを確認してから変更を実行します。再実行による重複は Liquibase の `DATABASECHANGELOG` 履歴で防止されます — 実行済みとして記録された changeSet は再実行されません。`omni-common-mqlog/src/main/resources/schema.sql` はもはやビジネス classpath の自動 DDL 主パスではなく、歴史的参考としてのみ保持されています。
-
-### 4.4 MessageSender Strategy Pattern
-
-新しい MQ ブローカ（例：Kafka）を追加するには：
-1. `MessageSender` インターフェースを実装：`brokerType()` は `"kafka"` を返し、`send(SysMqMessage)` は実際の配信を処理します。
-2. Spring Bean として登録 — `MqLogAutoConfiguration` はすべての `MessageSender` Bean を `brokerType` をキーとしたマップに収集します。
-3. **重要**：現在の `ReliableMessageTemplate.send()` には **`brokerType` パラメータがなく**、`broker_type` は常に `"rocketmq"` で書き込まれます（§2.2 参照）。既存の `send()` で kafka を選択することはできず、新 broker の接続には可靠入队契约の拡張（broker 選択付きオーバーロードまたは明示的な拡張点）で対応する `broker_type` を書込む必要があります。下記の Kafka は将来拡張の例で、現在有効な能力ではありません。
-
-`MqMessageRelayService` やリレーロジックの変更は不要です。
-
-## 5. New Service Onboarding (Tutorial)
-
-新しいサービス（例：`omni-order`）に信頼性の高い MQ メッセージ送信を追加するには：
-
-### Step 1: Add Dependency
-
-`omni-order/pom.xml` に追加：
-
-```xml
-<dependency>
-    <groupId>com.omni</groupId>
-    <artifactId>omni-common-mqlog</artifactId>
-    <version>${project.version}</version>
-</dependency>
-```
-
-これにより `omni-common-core`（`ReliableMessageRelay` インターフェース用）と `omni-common-mybatis`（`SysMqMessageMapper` 用）が自動的に取り込まれます。
-
-### Step 2: Liquibase 移行 DDL
-
-`sys_mq_message` テーブルは `database/changelog/common/0001-mq-schema.yaml` により Liquibase 移行経由で作成されます（起動時に `omni-db-migrator` コンテナによって適用）。確認方法：
-
-```sql
-SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'sys_mq_message';
--- 1 を返す必要があります；DATABASECHANGELOG に common-mq-0001-schema レコードがあるはずです
-```
-
-### Step 3: Inject and Use
-
-ビジネスサービスで：
-
-```java
-@Service
-@RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService {
-
-    private final ReliableMessageRelay reliableMessageRelay;
-
-    @Transactional
-    public void createOrder(OrderDTO dto, Long tenantId) {
-        // ... ビジネスロジック ...
-        Order order = orderMapper.insert(entity);
-
-        // Outbox に書き込み — 同じトランザクション、原子性を保証
-        reliableMessageRelay.send("order-out-0", order, tenantId, "order:" + order.getId());
-    }
-}
-```
-
-### Step 4: Verify Relay Job Registration
-
-サービスを起動し、XXL-JOB 管理コンソール（`http://localhost:18080`）を確認：
-- エグゼキュータ：サービスの AppName がエグゼキュータリストに表示されるはずです
-- タスク：`mqRelayHandler` が cron `0/10 * * * * ?` で登録されているはずです
-- `MqRelayJobRegistrar` はアプリ起動後に非同期でタスクを登録・開始します。スケジューラが一時的に利用不可の場合は 10 秒ごとに最大 12 回リトライします
-- まだ実行中でない場合はタスクを開始してください
-
-### Step 5: Check Frontend Admin UI
-
-フロントエンドの `運用監視 → メッセージ記録` に移動：
-- 新しいメッセージが `status = PENDING` (0) で表示され、リレー後に `SENT` (1) に遷移するはずです
-- `tenantId`、`status`、`topic`、`serviceName`、または時間範囲でフィルタリング
-- 失敗したメッセージの再送信またはデッドレターのスキップ
-
-Base 管理インターフェースは `X-Internal-Token` を付与した Feign 呼び出しで、接続済みサービスのローカル Outbox を集約します。現在は `omni-base` と `omni-crm` を集約しており、新しいサービスを追加する際はその内部 `/api/internal/mq-message/**` クライアントを集約に組み込む必要があります。組み込まない場合、メッセージは確実に配信されますが統合運用ページには表示されません。
-
-## 6. Extension Guide
-
-### 6.1 Adding a New MQ Broker
-
-`MessageSender` インターフェースを実装：
-
-```java
-@Component
-@RequiredArgsConstructor // コンストラクタ注入（本プロジェクトはフィールド @Autowired 禁止）
-public class KafkaMessageSender implements MessageSender {
-
-    private final KafkaTemplate<String, String> kafkaTemplate;
-
-    @Override
-    public String brokerType() {
-        return "kafka";
-    }
-
-    @Override
-    public void send(SysMqMessage msg) {
-        try {
-            // MessageSender.send は throws を宣言しないため、Kafka get() の検査例外は処理/変換しないとコンパイル不可（そのままコピー不可）
-            kafkaTemplate.send(msg.getTopic(), msg.getMsgKey(), msg.getPayload()).get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Kafka send interrupted", e);
-        } catch (ExecutionException e) {
-            throw new IllegalStateException("Kafka send failed", e);
-        }
-    }
-}
-```
-
-`MqLogAutoConfiguration` はすべての `MessageSender` Bean を自動収集します。リレーサービスは `broker_type` カラムでルーティングします — リレーコードの変更は不要です。
-
-### 6.2 Customizing Retry Strategy
-
-現在のリトライパラメータは `MqMessageRelayService` にハードコードされています：
-
-| パラメータ | 場所 | デフォルト値 |
-|-----------|----------|---------|
-| `BATCH_SIZE` | `MqMessageRelayService` | 100 |
-| `BACKOFF_BASE_SECONDS` | `MqMessageRelayService` | 10 |
-| `max_retry` | `SysMqMessage.maxRetry` | 3 |
-
-メッセージ単位でカスタマイズ：`ReliableMessageTemplate.send()` を呼び出す際に `maxRetry` を設定します（インターフェースの拡張が必要）。グローバルにカスタマイズ：`MqMessageRelayService` Bean をカスタムパラメータでオーバーライドします。
-
-### 6.3 Customizing Relay Schedule
-
-リレータスクの cron 式は XXL-JOB 管理コンソールで設定可能です。デフォルトは `0/10 * * * * ?`（10秒ごと）です。スループットとレイテンシの要件に応じて調整してください。
-
----
-
-## 7. 技術選定の考察：Outbox パターン vs 直接送信
-
-| 考慮事項 | Outbox パターン（Omni-Stack が採用） | 直接 MQ 送信 |
-|------|------------------------------|------------|
-| **トランザクション一貫性** | ビジネスデータとメッセージが同じ DB トランザクションに書き込まれ、原子性を保証 | 分散トランザクションの問題：DB コミット成功だが MQ 送信失敗、またはその逆 |
-| **信頼性** | メッセージが DB に永続化され、サービス再起動後も配信を再開可能 | MQ 送信失敗時にメッセージが失われ、リトライ不可 |
-| **結合度** | ビジネスコードは Outbox テーブルに書き込むのみで、MQ Broker の可用性に依存しない | ビジネスコードが MQ 接続に直接依存し、Broker 利用不可時にブロックされる |
-| **レイテンシ** | 最大レイテンシ = リレータスクスケジュール間隔（10秒）+ 配信時間 | リアルタイム送信、最低レイテンシ |
-| **複雑性** | Outbox テーブル + リレータスク + ステートマシンが必要 | シンプルだが、分散トランザクションの処理が必要 |
-| **可観測性** | メッセージステータスの可視化（PENDING/SENT/FAILED/DEAD_LETTER） | MQ Broker のログのみ |
-
-**結論**：Outbox パターンは少量のレイテンシと引き換えに強い一貫性と可観測性を実現し、メッセージ信頼性への要求が高いビジネスシナリオに適しています。
-
-### 直接送信のリスクシナリオ
-
-```
-シナリオ 1：DB コミット前にサービスがクラッシュ
-  直接送信：MQ は送信済みだが DB トランザクションが未コミット → コンシューマが「幽霊メッセージ」を受信
-  Outbox：メッセージが Outbox に書き込まれていない → 送信されない
-
-シナリオ 2：DB コミット後に MQ 送信が失敗
-  直接送信：DB はコミット済み、MQ が失敗 → メッセージが失われる
-  Outbox：メッセージが Outbox に書き込まれている（PENDING）→ リレータスクが配信をリトライ
-
-シナリオ 3：MQ Broker がダウン
-  直接送信：ビジネスコードがブロックまたは例外をスロー → ユーザー体験に影響
-  Outbox：メッセージの Outbox 書き込みは影響なし → Broker 回復後に自動配信
-```
-
-## 8. RocketMQ Docker デプロイ設定ガイド
-
-### コンテナ設定
-
-```yaml
-# docker-compose.yml
-rocketmq-namesrv:
-  image: apache/rocketmq:5.3.2
-  container_name: omni-rocketmq-namesrv
-  ports:
-    - "9876:9876"
-  command: sh mqnamesrv
-  networks:
-    - default
-
-rocketmq-broker:
-  image: apache/rocketmq:5.3.2
-  container_name: omni-rocketmq-broker
-  ports:
-    - "10911:10911"
-    - "10909:10909"
-  depends_on:
-    - rocketmq-namesrv
-  environment:
-    NAMESRV_ADDR: rocketmq-namesrv:9876
-  command: sh mqbroker -n rocketmq-namesrv:9876
-  networks:
-    - default
-```
-
-### 主要な設定詳細
-
-| 設定項目 | 値 | 説明 |
-|---------|-----|------|
-| NameServer ポート | 9876 | RocketMQ サービスディスカバリポート |
-| Broker ポート | 10911 | Broker メインポート |
-| Broker VIP ポート | 10909 | Broker VIP チャネル（高速応答） |
-| ネットワーク | default | 他のサービスと同じ Bridge ネットワーク |
-
-### Spring Cloud Stream 設定
-
-```yaml
-# application.yml
-spring:
-  cloud:
-    stream:
-      rocketmq:
-        binder:
-          name-server: ${ROCKETMQ_NAMESRV:rocketmq-namesrv:9876}
-      bindings:
-        oper-log-out-0:
-          destination: omni-oper-log-topic
-          content-type: application/json
-```
-
-**環境変数オーバーライド**：Docker デプロイ時に `SPRING_CLOUD_STREAM_ROCKETMQ_BINDER_NAME_SERVER` 環境変数で NameServer アドレスをオーバーライドします。
-
-## 9. トラブルシューティングガイド
-
-| 問題 | 考えられる原因 | 確認方法 |
-|------|---------|----------|
-| **メッセージが PENDING のまま** | リレータスクの自動登録に失敗、またはタスクが未起動 | `MqRelayJobRegistrar` のリトライログ、XXL-JOB 認証情報、`mqRelayHandler` の状態を確認 |
-| **メッセージ送信失敗で FAILED に入る** | RocketMQ Broker が起動していない | RocketMQ コンテナの状態を確認；`spring.cloud.stream.rocketmq.binder.name-server` 設定が正しいか確認 |
-| **メッセージが DEAD_LETTER に入る** | 最大リトライ回数（3回）を超過 | フロントエンド管理画面でメッセージ詳細とエラー情報を確認；問題を修正後、手動で再送信 |
-| **コンシューマがメッセージを受信していない** | Topic が未作成またはコンシューマが未購読 | RocketMQ コンソールで Topic と Consumer Group を確認；コンシューマサービスが起動しているか確認 |
-| **テナント分離が機能しない** | クエリが tenantId でフィルタリングされていない | Controller に `.eq(SysMqMessage::getTenantId, tenantId)` が含まれているか確認 |
-| **重複配信** | リレータスクが同じメッセージを複数回スキャン | `msgId` のユニーク制約を確認；`StreamBridge.send()` の冪等性を確認 |
-
-## 10. メッセージ詳細画面のスクリーンショット（4言語）
-
-ドキュメント専用 Playwright ケース `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` により実際の実行スタック上で生成、§5 ステップ 5「フロントエンド管理画面の確認」に対応。
-
-- 前提条件：ローカル Compose フルスタックが実行中、`omni-base` ヘルスかつ `sys_mq_message` に実際のメッセージが存在（採集時 base データベース 87 行）。
-- 操作者：`admin`（メッセージ照会権限が必要；コントローラーは `X-Tenant-Id` でフィルタ）。
-- 操作：メッセージ記録ページに入り、先頭行で「詳細表示」をクリックして読み取り専用詳細オーバーレイを開く。
-- 期待状態：オーバーレイはメッセージ ID、Topic、Binding Name、Tag、ビジネスキー、ミドルウェアタイプ、ステータス、リトライ回数、ソースサービス、作成時刻と次回リトライ時刻を表示し、内容は §2.1 ステートマシン、§2.4 リトライ戦略のフィールドと一致。
-- 本グループは**読み取り専用採集**：いかなるメッセージも再送信・スキップ・変更しないため、書き込みスイッチは不要でデータ収尾もない。
-
-| ページ | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| メッセージ詳細オーバーレイ（message-status） | ![メッセージ詳細（簡体字中国語）](images/zh-CN/monitor-mq-message-detail.png) | ![メッセージ詳細（英語）](images/en-US/monitor-mq-message-detail.png) | ![メッセージ詳細（日本語）](images/ja-JP/monitor-mq-message-detail.png) | ![メッセージ詳細（韓国語）](images/ko-KR/monitor-mq-message-detail.png) |
-
-登録済みの翻訳完全度問題：このオーバーレイは **en-US/ja-JP/ko-KR でタイトルと全フィールドラベルが実測で英語**（ja/ko 未翻訳、zh-CN のみローカライズ済み）。
-`npm run ui:i18n:parity`（4言語各 2319 キー、0 欠落）と `npm run ui:i18n:check`（0/0 項目）はいずれも通過するため、言語パックの取値問題でありハードコード欠陥ではない；画像と manifest は実際のレンダリング値でそのまま登録し、美化していない。
-
-未カバーのプロセス（いずれも個別の承認が必要、本ラウンドでは勝手に構築しない）：
-
-- `retry` と `dead-letter`：実測で 5 つのデータベースの `sys_mq_message` は計 809 行（base 87、procurement 644、srm 34、workflow 23、crm 21）、**status はすべて 1、FAILED / DEAD_LETTER 記録は皆無**。この 2 つの状態を生成するには、クロステナント共有の outbox に必ず失敗するメッセージを注入し、リレーに §2.4 の `2^retryCount × 10s` バックオフで繰り返しリトライ・エラーさせねばならず——共有インフラ上での障害製造にあたり、明確な承認後にのみ実行可能。
-- `trace-diagnosis`：実際の Trace ID 排障チェーン証拠が必要、可観測スタック（[docs/observability.md](observability.md)）と併せて設計予定。
+[mq-teaching.flows.spec.ts](../omni-frontend/e2e-docs/flows/mq-teaching.flows.spec.ts) と [制御された fixture](../scripts/fixtures/run-mq-teaching-fixture.ps1) は実際の各段階を検証します。合成 Outbox 行は業務とキュー登録の原子的コミットを証明しません。既定再試行、正式管理操作、Broker からの受信処理の完了、重複排除を別々に確認します。

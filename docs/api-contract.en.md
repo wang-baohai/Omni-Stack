@@ -1,7 +1,7 @@
 # API Contract
 
-> This document defines the authoritative API contract between the frontend and backend. Both sides must comply with these structures. Any deviation requires explicit team approval.
-> For the complete social login flow, see [core-flows.en.md](core-flows.en.md). Data dictionary and workflow endpoints are documented separately.
+> This document maintains the current wire format for responses, fields, routes, identity headers and cross-service messages. Source, configuration and Controller/DTO definitions determine actual behavior. Example IDs, dates, addresses and states illustrate structure; they are not current environment data or acceptance results.
+> Domain fact/design documents own state machines and implementation boundaries. See the [Wiki](wiki/index.en.md) and [authentication guide](guides/authentication.en.md) for configuration, login, browser actions and recovery. Local protocol authorization and external social login are separate flows.
 
 ---
 
@@ -30,181 +30,86 @@
 
 ## 1. Response Envelope
 
-All API responses use the unified `R<T>` wrapper.
+Regular business controllers return `R<T>`; pagination uses `R<PageResult<T>>`. OAuth2/OIDC protocol endpoints, social-login redirects, Actuator and responses produced by filters/frameworks do not all share this envelope.
 
 ```json
-// Success
-{
-  "code": 200,
-  "message": "success",
-  "data": { ... }
-}
-
-// Failure (business error)
-{
-  "code": 500,
-  "message": "Operation failed"
-}
-
-// Failure (validation error)
-{
-  "code": 400,
-  "message": "username: Username is required; email: Email is required"
-}
+{"code":200,"message":"success","data":{"id":1}}
 ```
 
-### Backend Type: `R<T>`
-
-```java
-@Data
-public class R<T> implements Serializable {
-    private int code;
-    private String message;
-    private T data;
-
-    public static <T> R<T> ok(T data) { ... }
-    public static <T> R<T> fail(String message) { ... }
-    public static <T> R<T> fail(int code, String message) { ... }
-}
+```json
+{"code":500,"message":"操作失败","data":null}
 ```
 
-**Location**: `omni-common-core` module, `com.omni.common.core.result.R`.
-
-### Frontend Type: `ApiResponse<T>`
-
-```typescript
-interface ApiResponse<T = unknown> {
-  code: number
-  message: string
-  data: T
-}
+```json
+{"code":400,"message":"username: 用户名不能为空","data":null}
 ```
 
-**Canonical location**: `src/types/api.ts` (single source of truth; do not duplicate in other files).
+`R.ok(data)` uses business code 200 and message `success`; `R.ok()` and failure responses have null data. `R.fail(message)` defaults to business code 500; its explicit overload uses the supplied code. JSON property order is not part of the contract.
+
+The sole backend type is [R.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/R.java). The sole frontend declaration is `ApiResponse<T>` in [src/types/api.ts](../omni-frontend/src/types/api.ts). Declaring `data: T` does not remove runtime nulls. This document does not duplicate compilable types; consumers must handle each endpoint's actual null behavior.
 
 ---
 
 ## 2. Error Code Reference
 
-### 2.1 System-Level Error Codes
+### 2.1 System Error Codes
 
-| HTTP Status | Business Code | Scenario | Trigger | Handler |
-|------------|--------|------|---------|--------|
-| 200 | 200 | Success | `R.ok(data)` | — |
-| 400 | 400 | Parameter validation failure | `MethodArgumentNotValidException` / `BindException` caught by `GlobalExceptionHandler` | Frontend shows a code-driven localized hint (does not display the backend raw `message`) |
-| 401 | 401 | Unauthenticated | Gateway `AuthFilter` returns 401 JSON | Only session-expired safely logs out and redirects to login; credential-type 401 keeps session and input |
-| 403 | 403 | Insufficient permissions | `AccessDeniedException` / `AuthorizationDeniedException` caught by `GlobalExceptionHandler` | Keeps session, localized permission-denied hint (no logout / no forced navigate-back) |
-| 200 | 404 | Resource not found | `throw new BusinessException(404, "xxx not found")` | Frontend displays error message |
-| 200 | 409 | Status/concurrency conflict | Optimistic-lock version mismatch or state machine rejects the transition | Frontend refreshes data and prompts the user to retry |
-| 200 | 503 | Downstream dependency unavailable | CRM calls the Auth data-scope API and fails closed | Frontend shows the service is temporarily unavailable; never degrade into unauthorized data |
-| 200 | 500 | Business exception | `BusinessException` caught by `GlobalExceptionHandler` | Frontend displays error message |
-| 500 | 500 | Unknown system error | Catch-all `Exception` handler | Frontend displays "Internal server error" |
+Read HTTP status and `R.code` separately:
 
-### 2.2 Business-Level Error Codes
+| HTTP status | Business code | Current mapping |
+|---|---|---|
+| 200 | 200 | Regular business success |
+| 200 | Code supplied at the throw site; default 500 | `BusinessException`, including business 400/403/404/409/503 |
+| 400 | 400 | Bean validation, binding, missing query parameters or type mismatches handled by the applicable advice |
+| 403 | 403 | `AccessDeniedException/AuthorizationDeniedException` |
+| 404 / 405 / 415 | Same as HTTP status | Resource, method or media-type errors handled by advice |
+| 500 | 500 | Exceptions without a specific handler |
 
-| Business Code | Scenario | Example Message |
-|--------|------|---------|
-| 500 | Invalid/expired captcha | "Captcha has expired" |
-| 500 | Authentication failed | "Incorrect username or password" |
-| 500 | Account disabled | "Account has been disabled" |
-| 500 | Account locked | "Account locked, please try again in N minutes" |
-| 500 | Tenant not found/disabled | "Tenant does not exist or is disabled" |
-| 400 | Uniqueness conflict | "Username already exists" / "Job type code already exists" |
-| 404 | Resource not found | "Organization unit not found" / "Dictionary data not found" |
-| 403 | Insufficient permissions | "Insufficient permissions, access denied" |
-| 409 | Optimistic-lock or state conflict | "Data has been modified by another user, please refresh and retry" |
-| 503 | Required dependency unavailable | "Authentication/authorization service is temporarily unavailable" |
+JSON-read error mapping differs by service. SRM/Procurement advice maps `HttpMessageNotReadableException` to 400; Asset's current general handler falls back to 500. Controlled MockMvc observed 500 for an Asset amount sent as a JSON number or invalid decimal string. The request remains invalid; this does not establish one status for all services.
 
-### 2.3 Gateway-Level Error Codes
+### 2.2 Business Error Codes
 
-| HTTP Status | Scenario | Response Format |
-|------------|------|---------|
-| 401 | Invalid JWT signature | `{"code":401,"message":"Invalid JWT signature","data":null}` |
-| 401 | JWT expired | `{"code":401,"message":"JWT token expired","data":null}` |
-| 401 | Token revoked | `{"code":401,"message":"Token has been revoked","data":null}` |
-| 401 | Missing Authorization header | `{"code":401,"message":"Missing Authorization header","data":null}` |
+The current throw site determines the business code; message text does not. Some CAPTCHA, account and tenant failures use default 500. Business 400, 403, 404, 409 and 503 can appear inside HTTP 200 responses. Frontend display categories for 410, 423, 429 or 502 do not establish that every endpoint implements those branches.
+
+### 2.3 Gateway Error Codes
+
+| HTTP status / code | Condition | Current message |
+|---|---|---|
+| 401 / 401 | Missing Bearer authentication | 请先登录 |
+| 401 / 401 | Expired JWT | 登录已过期，请重新登录 |
+| 401 / 401 | Other JWT/security validation failure, including a revocation match | 认证失败，请重新登录 |
+| 503 / 503 | Identity-signing key missing/weak outside test configuration, or signing failure | 网关身份签名未就绪，请联系管理员 |
+
+These are `AuthFilter` branches. Other filters, rate limiters, downstream services and framework failures have their own mappings. Messages are diagnostic values, not frontend authentication-state signals.
 
 ### 2.4 Social Login Error Codes
 
-| error Parameter | Meaning | Trigger |
-|------------|------|---------|
-| `user_denied` | User denied authorization | Third-party platform callback carries `error=access_denied` |
-| `invalid_callback` | Missing callback parameters | code or state is empty |
-| `social_login_failed` | Login flow exception | State verification failed, third-party API error, user info retrieval failed, user disabled |
+Callback values `user_denied/invalid_callback/social_login_failed` are query values in a 302 Location, not `R.code`. Conditions and destinations are defined in section 10.
 
 ### 2.5 Frontend Error Handling Flow
 
-The Axios response interceptor (`src/api/request.ts`) checks `res.code !== 200`:
-1. Resolves a localized descriptor (`i18nKey`/`displayMessage`) from `error-display.ts` by business code; the frontend shows only code-driven localized text — **the backend `res.message` and Axios `error.message` are never displayed** (the raw message is only carried on `ApiError` for diagnostics).
-2. Returns `Promise.reject(new ApiError(display, readServerMessage(res)))`; the error object carries `businessCode`/`httpStatus`/`traceId`/`i18nKey`/`displayMessage` for caller-side classification.
+[request.ts](../omni-frontend/src/api/request.ts) and [error-display.ts](../omni-frontend/src/utils/error-display.ts) classify HTTP status, business code and Axios transport codes when no response exists. HTTP 401/403 takes precedence over the body business code; otherwise use the business code, then HTTP status.
 
-**HTTP Status Code Handling** (distinguishes “session expired” vs “login credential validation failure”, not any text matching):
-- HTTP 401: only when `error-display.ts` judges `shouldLogout` (session expired / stale `Authorization`) does it safely log out and redirect to login; 401 from login/session-login/register credential endpoints is a credential-validation failure and **keeps session and user input, does not log out or clear the form**.
-- HTTP 403 (Insufficient permissions): keeps the current session, **does not log out and does not force navigate back**, only shows a localized permission-denied hint.
-- HTTP 400/409/5xx: localized hints by business code; 409 suggests refresh-and-retry, 503 signals service temporarily unavailable without degrading to over-privileged data; none clear the session.
+- Business failures throw `ApiError` carrying `businessCode/httpStatus/traceId/i18nKey/displayMessage`. HTTP failures retain and enhance AxiosError; the two paths do not use one common constructor.
+- Raw server and Axios messages are not displayed directly. The UI uses code-based localized safe text; field hints for 400 only accept validated ASCII field names.
+- For 401, credential endpoints preserve the session and input. Other requests distinguish unauthenticated from expired sessions using session presence; both have `shouldLogout=true`, followed by safe session cleanup and login navigation. Credential matching includes `/auth/login`, `/auth/session-login`, `/auth/register`, `/auth/social-login` and `/srm/portal/auth/login`. This frontend classification is not the Gateway allowlist.
+- 403 preserves the session. 400/409/5xx, network failures and timeouts use their respective localized text, without guessing meaning from technical messages. The caller refreshes conflicting data and decides whether to retry.
 
 ---
 
 ## 3. Pagination Contract
 
-### Backend Type: `PageResult<T>`
+The sole backend type is [PageResult.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/result/PageResult.java); frontend types live in [src/types/api.ts](../omni-frontend/src/types/api.ts). Response data contains:
 
-```java
-@Data
-public class PageResult<T> implements Serializable {
-    private List<T> records;
-    private long total;
-    private long size;
-    private long current;
-    private long pages;   // auto-calculated: (total + size - 1) / size
+| Field | Meaning |
+|---|---|
+| `records` | Current-page records |
+| `total` | Total record count |
+| `size` | Page size |
+| `current` | Current page number |
+| `pages` | `(total + size - 1) / size`, calculated by the constructor |
 
-    public PageResult(List<T> records, long total, long size, long current) { ... }
-}
-```
-
-### Frontend Type: `PageResult<T>`
-
-```typescript
-interface PageResult<T> {
-  records: T[]
-  total: number
-  size: number
-  current: number
-  pages: number
-}
-```
-
-**Canonical location**: `src/types/api.ts`.
-
-### Usage Pattern
-
-```java
-// Backend Controller
-@GetMapping("/list")
-public R<PageResult<UserVO>> listUsers(@RequestParam(defaultValue = "1") int page,
-                                        @RequestParam(defaultValue = "10") int size) {
-    return R.ok(userService.listUsers(page, size));
-}
-```
-
-```typescript
-// Frontend API call
-export function listUsers(page: number, size: number) {
-  return request.get<ApiResponse<PageResult<UserInfo>>>(
-    `/auth/user/list?page=${page}&size=${size}`,
-  )
-}
-```
-
-### Pagination Parameter Conventions
-
-| Parameter | Type | Default | Description |
-|------|------|--------|------|
-| `page` | int | 1 | Current page number (starting from 1) |
-| `size` | int | 10 | Number of items per page |
-| `records` | List | — | Data list for the current page |
-| `total` | long | — | Total number of records |
-| `pages` | long | — | Total number of pages (auto-calculated) |
+Queries commonly use `page=1&size=10`. Ranges, defaults, filters and caps belong to each Controller/query DTO; example defaults are not universal endpoint limits. The constructor preserves supplied records and provides neither global null→[] conversion nor pagination validation. Callers must supply a valid size and handle empty records according to the endpoint.
 
 ---
 
@@ -219,52 +124,46 @@ export function listUsers(page: number, size: number) {
 | Delete | DELETE | `/{resource}/{id}` | `DELETE /user/1` |
 | Batch operation | POST | `/{resource}/batch` | `POST /user/batch` |
 
-**Gateway path prefix**: All frontend requests use `/api/<service>/<resource>` (e.g., `/api/auth/user/list`). Currently the Gateway does not use `StripPrefix` for the business routes of Auth, Base, Workflow, CRM, SRM, Procurement and Asset; downstream Controllers declare and receive the full `/api/**` path.
+**Gateway path prefix**: regular frontend business-resource requests use `/api/<service>/<resource>`, for example /api/auth/user/list. Business routes for Auth, Base, Workflow, CRM, SRM, Procurement and Asset retain the full path without StripPrefix. Protocol and internal paths follow their endpoint definitions.
+
+The table gives business-resource naming conventions. Action commands, OAuth2/OIDC and internal APIs use their actual Controller routes; these examples do not create unimplemented endpoints.
 
 ---
 
 ## 5. Gateway Route Configuration
 
-### 5.1 Local Development Environment Routes
+### 5.1 Local Development Routes
 
-Gateway `application.yml` route configuration (`spring.cloud.gateway.server.webflux.routes`):
+Current `spring.cloud.gateway.server.webflux.routes` in [Gateway application.yml](../omni-backend/omni-gateway/src/main/resources/application.yml) defines 12 explicit routes; discovery locator routing is disabled:
 
-| Route ID | Path Match | Target Service | StripPrefix | Description |
-|---------|---------|---------|-------------|------|
-| `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` | None | OAuth2 authorization server endpoints |
-| `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` | None | OpenID Connect discovery endpoint |
-| `omni-auth` | `/api/auth/**` | `lb://omni-auth` | **None** | Auth service REST API (uses full path) |
-| `omni-base` | `/api/base/**` | `lb://omni-base` | **None** | Base service (uses full path) |
-| `omni-base-job` | `/api/job/**` | `lb://omni-base` | **None** | Scheduled job management |
-| `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` | **None** | Workflow engine |
+| Route ID | Path match | Target |
+|---|---|---|
+| `block-internal-api` | `/internal/**,/api/internal/**` | `no://op` |
+| `block-internal-api-services` | `/omni-auth/internal/**,/omni-auth/api/internal/**,/omni-base/internal/**,/omni-base/api/internal/**,/omni-workflow/internal/**,/omni-workflow/api/internal/**,/omni-crm/internal/**,/omni-crm/api/internal/**,/omni-srm/internal/**,/omni-srm/api/internal/**,/omni-procurement/internal/**,/omni-procurement/api/internal/**,/omni-asset/internal/**,/omni-asset/api/internal/**,/omni-gateway/internal/**` | `no://op` |
+| `omni-auth-oauth2` | `/oauth2/**` | `lb://omni-auth` |
+| `omni-auth-wellknown` | `/.well-known/**` | `lb://omni-auth` |
+| `omni-auth` | `/api/auth/**` | `lb://omni-auth` |
+| `omni-base` | `/api/base/**` | `lb://omni-base` |
+| `omni-base-job` | `/api/job/**` | `lb://omni-base` |
+| `omni-workflow` | `/api/workflow/**` | `lb://omni-workflow` |
+| `omni-crm` | `/api/crm/**` | `lb://omni-crm` |
+| `omni-srm` | `/api/srm/**` | `lb://omni-srm` |
+| `omni-procurement` | `/api/procurement/**` | `lb://omni-procurement` |
+| `omni-asset` | `/api/asset/**` | `lb://omni-asset` |
+
+Normal business routes retain the full path without `StripPrefix`. The two `no://op` routes configure `SetStatus=404` to block internal paths; authentication or other preceding filters may return their own errors first.
 
 ### 5.2 Docker Deployment Routes
 
-In Docker deployment, the route configuration is the same, but the target service URIs are automatically resolved via Nacos service discovery:
+Official Compose resolves the same `lb://` service names through Nacos. Environment, configuration overrides and started modules determine accessibility; route configuration alone does not prove downstream health. For example, `/api/base/dict/type/list` reaches Base unchanged, and `/api/job/**` also targets Base.
 
-| Frontend Request | Gateway Route | Downstream Received Path | Description |
-|---------|-------------|-------------|------|
-| `GET /api/auth/user/list` | `lb://omni-auth` no StripPrefix | `GET /api/auth/user/list` | Auth service retains full path |
-| `GET /api/base/dict/type/list` | `lb://omni-base` no StripPrefix | `GET /api/base/dict/type/list` | Base service retains full path |
-| `POST /api/workflow/model` | `lb://omni-workflow` no StripPrefix | `POST /api/workflow/model` | Workflow service retains full path |
-| `GET /api/job/type/list` | `lb://omni-base` no StripPrefix | `GET /api/job/type/list` | Job route to Base service |
+### 5.3 AuthFilter Allowlist Paths
 
-### 5.3 AuthFilter Whitelist Paths
+Exact matches: `/api/auth/login`, `/api/auth/session-login`, `/api/auth/register`, `/api/auth/captcha`, `/api/auth/tenants`, `/favicon.ico`.
 
-The following paths skip JWT verification (`AuthFilter` does not intercept):
+Prefix matches: `/api/auth/oauth2/`, `/actuator/`, `/oauth2/`, `/.well-known/`, `/login`, `/error`. Prefix checking uses startsWith, not exact equality. It does not make all `/api/auth/**` public.
 
-```
-/api/auth/login          — Login
-/api/auth/register       — Registration
-/api/auth/captcha        — Captcha
-/api/auth/tenants        — Tenant list
-/api/auth/oauth2/        — Social login
-/actuator/               — Health check
-/oauth2/                 — OAuth2 endpoints
-/.well-known/            — OIDC discovery
-/login                   — Spring Security login
-/error                   — Error page
-```
+The allowlist only skips this filter's JWT validation. It does not create routes, controllers or downstream authorization. Public requests still lose forged trusted identity headers and Bearer Authorization, retain Basic Authorization required by OAuth2, and receive `X-Gateway-Forwarded=true`.
 
 ---
 
@@ -306,124 +205,74 @@ Timestamps are serialized as strings, not numeric timestamps (`WRITE_DATES_AS_TI
 
 ## 8. Request Header Conventions
 
-### 8.1 Request Headers Injected by Gateway
+### 8.1 Gateway-Injected Request Headers
 
-After successful JWT verification, the Gateway's `AuthFilter` injects the following headers into downstream requests:
+After a protected request passes JWT validation, Gateway removes client Authorization and trusted header names, then sets:
 
-| Header | Type | Description | Example |
-|--------|------|------|------|
-| `X-User-Id` | String | User ID | `"1"` |
-| `X-User-Name` | String | Username | `"admin"` |
-| `X-Tenant-Id` | String | Tenant ID | `"1"` |
-| `X-User-Roles` | String | Comma-separated role codes | `"SUPER_ADMIN,DEPT_LEADER"` |
-| `X-User-Scopes` | String | Space/comma-separated permission codes | `"dict:type:list dict:data:create"` |
+| Header | Source/meaning |
+|---|---|
+| `X-User-Id` | JWT user ID; positive integer |
+| `X-Tenant-Id` | JWT tenant ID; positive integer |
+| `X-User-Name` | JWT username; not `X-Username` |
+| `X-User-Roles` | Role claim |
+| `X-User-Scopes` | Permission claim |
+| `X-Gateway-Forwarded` | `true` |
+| `X-Gateway-Assertion` | Gateway-generated identity assertion |
 
-### 8.2 Request Headers Sent by Frontend
+List role/permission claims are comma-joined; other non-null values become strings, and absent claims become empty strings. The assertion signs `userId|tenantId|username|issuedAt` with HMAC-SHA256 and uses unpadded `base64url(payload):base64url(signature)`. Non-test configuration requires a strong private key. Each service must validate its preauthentication chain; the presence of a same-named header does not establish trusted identity.
 
-| Header | Source | Description |
-|--------|------|------|
-| `Authorization: Bearer <JWT>` | Automatically injected by Axios interceptor | Token obtained from `useUserStore()` |
-| `X-Tenant-Id` | Automatically injected by Axios interceptor | Tenant ID obtained from `useUserStore()` |
-| `Content-Type: application/json` | Axios default | JSON request body |
+### 8.2 Frontend Request Headers
+
+Axios sets `Authorization: Bearer <JWT>` from `useUserStore().token` and obtains the tenant header via `getTenantIdFromToken(token)`, rather than trusting an independently editable tenant field. Gateway overwrites trusted identity headers for protected requests. JSON Content-Type follows the actual payload; the shared Axios instance sets no explicit global Content-Type default.
 
 ### 8.3 Internal Service Request Headers
 
-All service-to-service interfaces live under `/api/internal/**` and use shared-token authentication, not end-user JWT:
+The business internal APIs listed here use `X-Internal-Token` and explicit `X-Tenant-Id`; an end-user JWT does not replace internal authentication. JSON bodies use `Content-Type: application/json`. Endpoints requiring a body/query tenantId also compare it with the header; endpoint sections specify mismatch errors.
 
-| Header | Required | Description |
-|--------|------|------|
-| `X-Internal-Token` | Yes | Shared service-to-service token; validated by `InternalApiAuthFilter` |
-| `X-Tenant-Id` | Yes | Current business tenant; must match the `tenantId` in body/query |
-| `Content-Type: application/json` | Required for JSON requests | JSON request body |
+Validators depend on service configuration. The `omni-common-service` internal filter returns HTTP 401 for invalid request tokens, while its configuration validator prevents startup when relevant features require a missing/weak private token. The compatibility MQ `InternalApiAuthFilter` returns HTTP 503 when its server token is unconfigured and 401 when the request token is missing/mismatched. These implementations are not one universal runtime-503 branch.
 
-`InternalApiAuthFilter` acts as a container-level pre-filter that uniformly protects `/api/internal/**`; the service security chain must not require the Gateway user identity again. A missing or mismatched token returns HTTP 401; if the server has no token configured it fails closed with HTTP 503; a mismatch between the header tenant and the body/query tenant returns business code 403. Internal paths must not rely on `X-Gateway-Forwarded` or user permission headers.
+Gateway explicitly blocks internal routes. They do not trust client `X-Gateway-Forwarded` or role/permission headers. Trusted internal callers still provide the correct business tenant for each request; the token does not select that tenant.
 
-### 8.4 Security Response Headers (Injected by Gateway)
+### 8.4 Security Response Headers (Gateway-Injected)
 
-`SecurityHeadersFilter` (WebFlux WebFilter) adds the following to all responses passing through the gateway:
+| Response header | Current value |
+|---|---|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `X-Trace-Id` | Actual tracer trace ID; without a span, a 32-character UUID with hyphens removed |
 
-| Response Header | Value | Purpose |
-|--------|-----|------|
-| `X-Content-Type-Options` | `nosniff` | Prevent browser MIME-type sniffing |
-| `X-Frame-Options` | `DENY` | Forbid the page from being embedded in an iframe, preventing clickjacking |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | Control Referer header leakage |
-| `X-Trace-Id` | 32-char lowercase hexadecimal string | Correlates Gateway, Servlet, Feign and error feedback |
-
-The Gateway always generates a new `X-Trace-Id` and does not trust a same-named header supplied by the public network; downstream Servlet services write the valid value into the MDC and the response header, and the common Feign interceptor keeps propagating it to internal calls. The frontend error panel can display the traceId from the response, and log troubleshooting should prefer searching the full call chain with the same value.
+[SecurityHeadersFilter](../omni-backend/omni-gateway/src/main/java/com/omni/gateway/config/SecurityHeadersFilter.java) removes the inbound public trace header. With an actual tracer span, it sets that ID on the downstream request and response. Without a span, it generates a response-only fallback and does not inject that fallback downstream. A response header alone therefore does not prove correlation across Gateway, Servlet and Feign. The frontend accepts only safe ASCII trace IDs of 1–128 characters and rejects abnormal values.
 
 ---
 
 ## 9. Authentication Header
 
-```
-Authorization: Bearer <token>
-```
-
-- Set by the Axios request interceptor (`src/api/request.ts`) using the token from `useUserStore()`
-- Verified by `AuthFilter` in `omni-gateway` (JWT RS256 signature verification + claims extraction + identity header injection)
-- Public paths exempt from authentication (per `AuthFilter` exact/prefix whitelist, **NOT the whole `/api/auth/**` family**): exact `/api/auth/login`, `/api/auth/session-login`, `/api/auth/register`, `/api/auth/captcha`, `/api/auth/tenants`, `/favicon.ico`; prefix `/api/auth/oauth2/`, `/actuator/`, `/oauth2/`, `/.well-known/`, `/login`, `/error`. User/role management APIs (`/api/auth/user/**`, `/api/auth/role/**`) require a valid JWT.
+The frontend interceptor sets `Authorization: Bearer <token>`. Gateway validates the JWT signature, expiry, positive user/tenant IDs and applicable revocation records, then injects identity. Current revocation checking depends on JWT jti; tokens without jti cannot be described as having passed a blacklist lookup. Section 5.3 owns exact/prefix public scope. User/role administration still requires valid authentication and endpoint permissions.
 
 ---
 
 ## 10. Social Login Endpoints
 
-Social login endpoints return HTTP 302 redirects (not standard `R<T>` responses), because the frontend triggers browser navigation via `window.location.href`.
+These browser navigation endpoints return HTTP 302 on the normal authorization path, without an `R<T>` wrapper. Provider identifiers are `github`, `google` and `gitee`:
 
-| HTTP Method | URL | Description |
-|-----------|-----|------|
-| GET | `/api/auth/oauth2/{provider}?tenant_id=1` | Initiate third-party login, 302 redirect to third-party authorization page |
-| GET | `/api/auth/oauth2/{provider}/callback?code=XXX&state=YYY` | Handle third-party callback, 302 redirect to frontend callback page on success |
+| Method | URL / parameters | Contract |
+|---|---|---|
+| GET | `/api/auth/oauth2/{provider}?tenant_id=1` | Required `tenant_id`; validate provider/tenant, then redirect to the provider authorization page |
+| GET | `/api/auth/oauth2/{provider}/callback`; `code`, `state` and `error` are optional parameter bindings | Handle denial, missing parameters, business failure or success below; optional binding does not make code/state optional for success |
 
-### Initiating Login
+| Callback condition | HTTP 302 Location |
+|---|---|
+| Nonblank provider `error` | Frontend `/login?error=user_denied` |
+| Missing/blank `code` or `state` | Frontend `/login?error=invalid_callback` |
+| `BusinessException`, including state validation or provider code-exchange failure | Frontend `/login?error=social_login_failed&message=<URL-encoded message>` |
+| Success | Configured frontend `/callback#token=<URL-encoded JWT>&username=<URL-encoded username>` |
 
-```
-# GitHub
-GET /api/auth/oauth2/github?tenant_id=1
-→ 302 Location: https://github.com/login/oauth/authorize?client_id=...&redirect_uri=...&scope=...&state=...
+`OAuth2StateUtils` uses `tenantId|timestamp|hex(HMAC-SHA256(tenantId|timestamp, secret))`. The callback checks integrity, rejects timestamps older than 10 minutes and restores the tenant. Current code has no consumption marker, random nonce or browser-session binding; it does not establish complete one-time CSRF/replay protection. Application credentials do not replace external user login and consent.
 
-# Google
-GET /api/auth/oauth2/google?tenant_id=1
-→ 302 Location: https://accounts.google.com/o/oauth2/v2/auth?client_id=...&redirect_uri=...&response_type=code&scope=openid+profile+email&state=...
+Formal Docker Compose callbacks enter `http://localhost:8102/api/auth/oauth2/{provider}/callback` through Gateway. Production uses the configured Frontend/Gateway HTTPS domain. Provider registration must match the actual redirect_uri; private container addresses are not public callbacks. Initiation parameter/provider/tenant validation failures still use Auth error mapping and are not guaranteed to return 302.
 
-# Gitee
-GET /api/auth/oauth2/gitee?tenant_id=1
-→ 302 Location: https://gitee.com/oauth/authorize?client_id=...&redirect_uri=...&response_type=code&scope=user_info&state=...
-```
-
-- `{provider}` supports `github`, `google`, and `gitee`
-- `tenant_id` is required, specifying the target tenant for login
-- The state parameter contains an HMAC-SHA256 signature (`tenantId|timestamp|hmac`) to prevent CSRF attacks
-
-### Callback Handling
-
-```
-# GitHub/Google/Gitee callback
-GET /api/auth/oauth2/{provider}/callback?code=XXX&state=YYY
-
-→ Success: 302 Location: /callback#token=<JWT>&username=<username>
-→ Failure: 302 Location: /login?error=<error_code>&message=<message>
-```
-
-### OAuth2 Callback URL Configuration for Docker Deployment
-
-When deploying with Docker, the social login `redirect_uri` must use a **URL accessible from the host machine**:
-
-| Deployment Environment | redirect_uri Example |
-|---------|------------------|
-| Local development | `http://localhost:8100/api/auth/oauth2/github/callback` |
-| Docker deployment | `http://<host-ip>:8100/api/auth/oauth2/github/callback` |
-| Production | `https://your-domain.com/api/auth/oauth2/github/callback` |
-
-> **Note**: In Docker deployment, the Auth service container's internal port is 8080, but the OAuth2 callback URL must use the host-mapped port 8100 (because third-party platforms need to call back to a publicly/LAN-reachable address on the host machine).
-
-### Frontend Callback Page
-
-The `/callback` page (`src/views/callback/index.vue`) is responsible for:
-1. Parsing `token` and `username` from the URL fragment
-2. Storing them in `localStorage` (via `useUserStore`)
-3. Redirecting to the Dashboard
-
-> For the complete flow sequence diagram, see [core-flows.en.md](core-flows.en.md) Flow 4.
+Source: [SocialLoginController](../omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SocialLoginController.java), [OAuth2StateUtils](../omni-backend/omni-auth/src/main/java/com/omni/auth/util/OAuth2StateUtils.java), [Compose callback configuration](../compose.apps.yaml). The [authentication guide](guides/authentication.en.md) owns configuration, browser procedures and failure reproduction. Local authorization-code/PKCE and device-code flows are separate protocols.
 
 ---
 
@@ -453,7 +302,7 @@ Response 200:
 ### Toggle Global Switch
 
 ```
-PUT /api/auth/xss-config/toggle
+PUT /api/auth/xss-config/toggle?enabled=true
 Authorization: Bearer <token>
 X-Tenant-Id: 1
 
@@ -469,7 +318,7 @@ Response 200: { "code": 200, "message": "success" }
 | POST | `/api/auth/xss-config/rules` | `system:xssconfig:create` | Create rule |
 | PUT | `/api/auth/xss-config/rules/{id}` | `system:xssconfig:update` | Update rule |
 | DELETE | `/api/auth/xss-config/rules/{id}` | `system:xssconfig:delete` | Delete rule |
-| PUT | `/api/auth/xss-config/rules/{id}/toggle` | `system:xssconfig:update` | Toggle rule enabled status |
+| PUT | `/api/auth/xss-config/rules/{id}/toggle?enabled=true` | `system:xssconfig:update` | Toggle rule enabled status |
 
 **ruleType enum values**: `HTML_TAG` | `EVENT_HANDLER` | `DANGEROUS_PROTOCOL` | `CUSTOM_PATTERN`
 
@@ -482,98 +331,67 @@ Response 200: { "code": 200, "message": "success" }
 | `system:xssconfig:create` | Create rule |
 | `system:xssconfig:delete` | Delete rule |
 
+Rule update, delete and status toggle check ownership using the Gateway-injected `X-Tenant-Id`. A missing or foreign-tenant rule returns HTTP 200 + `R.code=404` before mutation or cache invalidation; an invalid positive-integer tenant check throws business code 400. Existing permission codes are unchanged.
+
+Switch endpoints require the `enabled` query parameter. Creation requires nonblank `ruleName`, `ruleType` and `pattern`; updates process non-null fields and validate a supplied pattern's regex syntax. Supported rule types are listed above; the current DTO does not validate the enum, and unknown runtime types perform no sanitization. See [core flows](core-flows.en.md) for activation conditions, Jackson 2/3, authoritative reads and cache boundaries.
+
 ---
 
 ## 12. Base Service Dictionary Management Endpoints
 
-The Base service (`omni-base :8101`) provides data dictionary management with a two-level "type + data" structure.
-
-**Route note**: The Gateway route `Path=/api/base/**` has **no** StripPrefix filter. Base service controllers use the full path (e.g., `@RequestMapping("/api/base/dict/type")`).
+Base exposes full-path endpoints through Gateway's `/api/base/**` route; core flows describe the identity chain and default ports. Types and data each have 6 endpoints, all using verified current-tenant context.
 
 ### Dictionary Type Endpoints
 
 Base path: `/api/base/dict/type`
 
-| HTTP Method | URL | Permission Code | Description |
-|-----------|-----|--------|------|
-| GET | `/api/base/dict/type/list?page=1&size=10&typeCode=&typeName=&status=` | `dict:type:list` | Paginated list with filtering |
-| GET | `/api/base/dict/type/{id}` | `dict:type:list` | Get by ID |
-| POST | `/api/base/dict/type` | `dict:type:create` | Create (validates typeCode uniqueness within tenant) |
-| PUT | `/api/base/dict/type/{id}` | `dict:type:update` | Update (partial update) |
-| DELETE | `/api/base/dict/type/{id}` | `dict:type:delete` | Delete (cascading delete of associated data) |
-| PUT | `/api/base/dict/type/{id}/status` | `dict:type:update` | Toggle enabled/disabled |
+| Method | Path | Permission | Behavior |
+| --- | --- | --- | --- |
+| GET | `/api/base/dict/type/list` | `dict:type:list` | Tenant pagination; optional typeCode/typeName substring filters and status, ascending sort/id |
+| GET | `/api/base/dict/type/{id}` | `dict:type:list` | Get the current tenant's type; missing or foreign ID gives business code 404 |
+| POST | `/api/base/dict/type` | `dict:type:create` | Nonblank typeCode/typeName; code unique within tenant |
+| PUT | `/api/base/dict/type/{id}` | `dict:type:update` | Update non-null fields only; typeCode cannot change here |
+| DELETE | `/api/base/dict/type/{id}` | `dict:type:delete` | After ownership check, cascade-delete that tenant's data for the type |
+| PUT | `/api/base/dict/type/{id}/status?status=...` | `dict:type:update` | Required status query parameter; invalidate cache after update |
 
-**Example request**:
-
-```
-GET /api/base/dict/type/list?page=1&size=10
-Authorization: Bearer <token>
-X-Tenant-Id: 1
-
-Response 200:
-{
-  "code": 200,
-  "data": {
-    "records": [
-      { "id": 1, "typeCode": "sys_user_gender", "typeName": "User Gender", "status": 1, "sort": 0 }
-    ],
-    "total": 3,
-    "size": 10,
-    "current": 1,
-    "pages": 1
-  }
-}
-```
+Pagination defaults to `page=1,size=10`; type queries optionally filter `typeCode/typeName/status`. Type creation accepts optional `remark/sort`; data creation accepts `tagType/remark/sort`. The service sets `status=1` and defaults sort to 0.
 
 ### Dictionary Data Endpoints
 
 Base path: `/api/base/dict/data`
 
-| HTTP Method | URL | Permission Code | Description |
-|-----------|-----|--------|------|
-| GET | `/api/base/dict/data/list?typeCode=sys_user_gender&page=1&size=10` | `dict:data:list` | Paginated query by typeCode |
-| POST | `/api/base/dict/data` | `dict:data:create` | Create (validates parent type exists) |
-| PUT | `/api/base/dict/data/{id}` | `dict:data:update` | Update (partial update) |
-| DELETE | `/api/base/dict/data/{id}` | `dict:data:delete` | Delete single entry |
-| POST | `/api/base/dict/data/refresh-cache` | `dict:data:refresh` | Manually refresh Redis cache |
+| Method | Path | Permission | Behavior |
+| --- | --- | --- | --- |
+| GET | `/api/base/dict/data/options?typeCode=...` | Authenticated; no separate action permission | Authentication only; cached enabled-data options containing value/label |
+| GET | `/api/base/dict/data/list?typeCode=...` | `dict:data:list` | Administrative pagination reads DB; typeCode required, ascending sort/id |
+| POST | `/api/base/dict/data` | `dict:data:create` | Nonblank typeCode/dictValue/dictLabel; parent must exist in current tenant |
+| PUT | `/api/base/dict/data/{id}` | `dict:data:update` | Update non-null fields only; update DTO has no typeCode |
+| DELETE | `/api/base/dict/data/{id}` | `dict:data:delete` | Check ownership, delete and invalidate cache |
+| POST | `/api/base/dict/data/refresh-cache?typeCode=...` | `dict:data:refresh` | Required typeCode query parameter; delete key, query enabled rows and refill |
 
-**Example request**:
-
-```
-POST /api/base/dict/data
-Authorization: Bearer <token>
-X-Tenant-Id: 1
-Content-Type: application/json
-
-{
-  "typeCode": "sys_user_gender",
-  "dictValue": "3",
-  "dictLabel": "Confidential",
-  "tagType": "warning",
-  "sort": 3
-}
-
-@PreAuthorize("hasAuthority('dict:data:create')")
-Response 200: { "code": 200, "data": { "id": 8, ... } }
-```
+Update DTOs process non-null fields only; submitting null does not clear a field. `/options` returns `R<List<DictOptionVO>>` with only `value` and `label`. Administrative pagination returns `R<PageResult<SysDictType>>` or `R<PageResult<SysDictData>>`.
 
 ### Dictionary Permission Codes
 
-| Permission Code | Description |
-|--------|------|
-| `dict:type:list` | View dictionary type list |
-| `dict:type:create` | Create dictionary type |
-| `dict:type:update` | Update/toggle dictionary type status |
-| `dict:type:delete` | Delete dictionary type (cascading) |
-| `dict:data:list` | View dictionary data list |
-| `dict:data:create` | Create dictionary data |
-| `dict:data:update` | Update dictionary data |
-| `dict:data:delete` | Delete dictionary data |
-| `dict:data:refresh` | Manually refresh dictionary cache |
+| Permission code | Purpose |
+| --- | --- |
+| `dict:type:list` | Type list and details |
+| `dict:type:create` | Create type |
+| `dict:type:update` | Update type and status |
+| `dict:type:delete` | Cascade-delete type |
+| `dict:data:list` | Administrative data list |
+| `dict:data:create` | Create data |
+| `dict:data:update` | Update data |
+| `dict:data:delete` | Delete data |
+| `dict:data:refresh` | Refresh cache |
 
 ### Tenant Isolation
 
-All list queries and create operations require the `X-Tenant-Id` header (extracted from the JWT token by the frontend, injected by the Gateway). Data is isolated by `tenant_id` at the SQL query layer. The dictionary type uniqueness constraint scope is `(tenant_id, type_code)`.
+List, creation, options and refresh explicitly pass the tenant. The six ID-based read/write endpoints also pass Gateway's `X-Tenant-Id` to the service, require a positive tenant ID and verify ownership before returning, writing or invalidating cache. Type uniqueness is `(tenant_id,type_code)`.
+
+Missing and foreign-tenant ID resources throw `BusinessException(404)`, mapped by the common handler to HTTP 200 with `R.code=404`; a missing or nonpositive tenant ID produces business code 400. Gateway and method-permission checks remain independent. Core flows and frontend patterns own cache behavior, client lifecycle and source navigation.
+
+[Flow 9](core-flows.en.md) / [Composable](frontend-patterns.en.md)
 
 ### MQ Delivery Runtime Status
 
@@ -591,37 +409,23 @@ All list queries and create operations require the `X-Tenant-Id` header (extract
 }
 ```
 
-`OUTBOX_ONLY` means business transactions still write to the local Outbox, but the MQ relay/XXL-JOB is not running; the frontend must show a degraded-mode notice and disable resend operations. `FULL` means both writing and asynchronous delivery are enabled.
+The result is configuration-derived: `outboxWriteEnabled=true` and `deliveryEnabled = omni.mqlog.relay.enabled && xxl.job.executor.enabled` (both reads default true); mode is `FULL/OUTBOX_ONLY` accordingly. It probes neither relay processes, XXL-JOB scheduling, Broker, database nor delivered messages. `FULL` means the switches are enabled; `OUTBOX_ONLY` means at least one delivery switch is off. See [MQ reliability](mq-reliability.en.md) for actual reliability and recovery.
 
 ---
 
 ## 13. API Versioning Strategy
 
-### Current Decision
+Current Gateway and Controller routes use unversioned `/api/...` paths such as `/api/auth/user/list`. Parallel `/api/v1/...` or `/api/v2/...` routes are not implemented.
 
-No URL-based versioning during the scaffolding phase. When the API stabilizes and multiple consumers exist, introduce prefix versioning.
-
-### Future Evolution Path
-
-| Phase | Version Strategy | URL Example |
-|------|---------|---------|
-| **Current (scaffolding)** | No version number | `/api/auth/user/list` |
-| **V1 (after API stabilization)** | URL prefix version | `/api/v1/auth/user/list` |
-| **V2 (breaking change)** | URL prefix version | `/api/v2/auth/user/list` |
-
-**Version rules**:
-- Adding new fields (backward compatible): no version change required
-- Removing/renaming fields: requires a new version
-- Changing request/response structures: requires a new version
-- Legacy versions maintained for at least 6 months
+Future URL versioning, breaking-change migration and old-version retention are not implemented contracts. Define consumers, compatibility, migration and support periods in design/ADR first, then synchronize implementation and documentation. Unimplemented prefixes and six-month maintenance are not commitments. Current fields, errors and states continue to follow this contract and source.
 
 ---
 
 ## 14. Null Semantics
 
-- `null` fields are included in JSON output (not suppressed)
-- Empty collections are returned as `[]`, not `null`
-- Optional single values use `null` to indicate absence, not empty strings
+`R.ok()` and failure responses have null data; the current regular mapper includes those null fields. Collections become [] only when producers actually return an empty List. `PageResult` preserves null records; there is no global conversion guarantee. Optional-field null, empty-string and omission behavior depends on the DTO, serializer and endpoint.
+
+JSON binding, accepted business fields and identity sources are separate constraints. Unknown properties do not universally produce 400: controlled current Asset DTO binding ignored an extra property. Tenant/user/amount snapshots not exposed by the DTO do not become controllable business inputs, but the parser does not necessarily reject every forged property explicitly. Send only the fields documented for the endpoint.
 
 ---
 
@@ -652,6 +456,8 @@ The status in the response uses only: `PENDING_ROLE_ASSIGN`, `ROLE_ASSIGN_FAILED
 The current user can query the status via `GET /api/srm/portal/enrollment` and, after a failure, call
 `POST /api/srm/portal/enrollment/retry` to retry idempotently. No PortalUser is created and the enterprise-profile endpoints are not opened before role assignment completes.
 
+Enrollment DTO requires requestId (nonblank,max64), inviteToken (nonblank,max256), name (nonblank,max200) and creditCode (nonblank,max50). creditCode is trimmed and uppercased; the example is not a registered real company code. Unlike ordinary unknown-property behavior, this DTO explicitly rejects every undeclared property, including tenantId/userId, via JsonAnySetter. SRM advice maps JSON-read exceptions to400.
+
 ### 15.3 Evaluation and Risk
 
 - `GET /api/srm/evaluation/template/default/dimensions` returns the current tenant's default template and valid dimensions; the frontend must not hardcode database IDs.
@@ -659,6 +465,8 @@ The current user can query the status via `GET /api/srm/portal/enrollment` and, 
 - `GET /api/srm/risk/list` returns a paginated risk summary aggregated by each supplier's latest evaluation, filterable by `riskLevel`.
 - `GET /api/srm/supplier/{id}/risk` returns an aggregated view of `indicators/latestAssessment/history`.
 - Risk indicator updates carry `version`; `srm.risk.level-changed.v1` is produced only when the composite level changes from non-RED to RED.
+
+Evaluation creation selects the tenant's enabled default template; the DTO has no templateId. items contains 1–100 entries covering exactly all enabled dimensions without duplicates. score is 1–5 with at most one decimal place. Obtain dimensionId from the default-template endpoint. The service determines template, dimension names and weights.
 
 ### 15.4 Internal Supplier Summary
 
@@ -724,7 +532,7 @@ The invitation detail returns an RFQ line snapshot on top of the above fields, a
       "rfqLineId": 10011,
       "materialCode": "IT-LAPTOP-001",
       "materialName": "Business Laptop",
-      "unit": "unit",
+      "unit": "EA",
       "quantity": "20.000000",
       "remark": "Includes three-year warranty"
     }
@@ -762,20 +570,17 @@ Submit request:
 | `lines[].rfqLineId` | Long | Yes | Positive integer, no duplicates |
 | `lines[].unitPrice` | Decimal String | Yes | Decimal string; `DECIMAL(19,6)`, greater than 0, at most 13 integer digits |
 | `lines[].deliveryDays` | Integer | Yes | 0-3650 |
-| `lines[].remark` | String | No | Max 500, plain text |
+| `lines[].remark` | String | No | Max500; service trims and normalizes blank values |
 
-The request does not accept `tenantId/supplierId/rfqNo/material/quantity/currencyCode/lineAmount/totalAmount`. These fields are read respectively from the trusted identity headers, PortalUser and Procurement invitation detail, or computed by the server as
-`unitPrice × quantity`; line amounts and the total amount are stored as `DECIMAL(19,4)`. The response is `R<QuotationVO>`, containing the quotation header, `version` and all line snapshots.
+`tenantId/supplierId/rfqNo/material/quantity/currencyCode/lineAmount/totalAmount` are not controllable inputs of this request DTO. The service obtains or computes them from trusted identity, PortalUser and Procurement invitation snapshots. Extra JSON properties may be ignored; an explicit error is not guaranteed. The `R<QuotationVO>` response contains header, version and line snapshots; the next section defines decimal wire values.
 
 Idempotency and concurrency rules:
 
-- `srm_quotation_request` permanently stores `(tenantId, requestId)`, the canonical request-body SHA-256, quotationId and targetVersion; a retry with the same requestId and requestHash returns the current quotation snapshot without writing the quotation or Outbox again.
-- The same requestId bound to a different rfqId or request content returns business code 409.
-- `(tenantId, rfqId, supplierId)` allows at most one non-deleted quotation; the first request uses the creation sentinel `version=0`, the first version is persisted and responded as `version=1`, and subsequent updates must carry the current version — an expired version or reusing 0 both return 409.
-- Before submitting, the RFQ `status=SENT`, invitation `status IN (INVITED, QUOTED)`, deadline and line set must be re-validated; other RFQ statuses (`DRAFT/CLOSED/AWARDED/CANCELLED`) are rejected. When Procurement is unavailable, 503 is returned and offline writes are not allowed.
-
-requestHash does not include requestId; at this stage the canonical input is
-`rfqId/version/validUntil/lines`; lines are sorted ascending by `rfqLineId`, unit prices are normalized to 6 decimal places using non-scientific-notation strings, and remarks are trimmed with null/blank unified to null. The server must not hash the raw JSON bytes directly, to avoid misjudging the same intent due to field ordering.
+- `srm_quotation_request` stores tenant-scoped requestId, normalized SHA-256, quotationId and targetVersion. A historical COMPLETED request replays before the new-request supplier/RFQ/deadline/invitation-line checks. It returns the current quotation snapshot without another quotation/Outbox write; replay does not repeat all new-submission checks.
+- A different hash, supplierId or rfqId for the same requestId, a RESERVED/invalid record, or a current quotation older than targetVersion returns business 409.
+- A new request requires the currently approved supplier and freshly reads the SENT RFQ, INVITED/QUOTED invitation and unexpired deadline. validUntil must be future and no earlier than the RFQ deadline. The 1–200 lines must cover exactly all RFQ lines without duplicates. Unavailable dependencies fail closed with 503.
+- `(tenantId, rfqId, supplierId)` permits at most one undeleted quotation. Initial request version=0 persists version 1; updates use the current version, with 409 on conflicts.
+- requestHash excludes requestId and covers `rfqId/version/validUntil/lines`. Lines sort by rfqLineId; prices use six-decimal non-scientific strings; remarks are trimmed and null/blank normalized. It is not a hash of raw JSON bytes. Each `unitPrice × quantity` is rounded HALF_UP to four decimals before summing.
 
 ### 15.6 SRM-Procurement Quotation Internal Contract
 
@@ -808,7 +613,7 @@ The quotation header, details, `srm_quotation_request` and the `srm.quotation.su
 ## 16. Workflow Cross-Service Contract
 
 Workflow internal endpoints uniformly use the `X-Internal-Token` and `X-Tenant-Id` from §8.3, and responses continue to use the standard
-`R<T>`. For detailed runtime mechanics, see [workflow.en.md](workflow.en.md#28-cross-service-internal-contract).
+`R<T>`. For detailed runtime mechanics, see [workflow.en.md](workflow.en.md#6-internal-starts-and-completion-events).
 
 ### 16.1 Idempotent Process Start
 
@@ -869,12 +674,11 @@ Response:
 }
 ```
 
-Idempotency is jointly guaranteed by two tenant-unique keys:
+Idempotency uses tenant-scoped unique keys `(tenantId, requestId)` and `(tenantId, businessType, businessKey)`. Conflict checks compare business type/key, modelVersionId and startUserId. They do not compare title, variables or startUserName, and there is no full payload hash.
 
-- `(tenantId, requestId)`: request-level idempotency; the same request ID must not be bound to different business.
-- `(tenantId, businessType, businessKey)`: business-level idempotency; the same business must not start multiple processes.
-- A retry of an already-succeeded same intent returns the original `processInstanceId` with `replayed = true`.
-- In-progress, a request-ID conflict, or a changed `modelVersionId/startUserId` for the business key all return business code 409.
+A successful record returns the original processInstanceId with replayed=true, but echoes the current requestId. Processing or conflicting business/model/starter intent returns business 409. The same-requestId FAILED branch can atomically reserve a retry; a different requestId matching a FAILED business key does not automatically take that retry branch.
+
+A real new start revalidates PUBLISHED metadata and a nonblank processDefinitionId, with exact category binding for `ASSET_TRANSFER/ASSET_DISPOSAL/SRM_SUPPLIER_ONBOARDING`. A blank title becomes `{businessType}:{businessKey}`. These checks do not make arbitrary variables trusted identity. [Workflow](workflow.en.md) owns starter, tenant, protected-variable and routing constraints.
 
 ### 16.2 Task Handling Eligibility Validation
 
@@ -920,9 +724,7 @@ Response:
 }
 ```
 
-The service must simultaneously match the Flowable task tenant, the instance-extension-record tenant, and the `businessType + businessKey` business ownership,
-and confirm that `userId` is the current `ASSIGNEE` or a `CANDIDATE` of an unclaimed task. `assignmentType` takes only
-`ASSIGNEE`, `CANDIDATE`, `NONE`; when the task does not exist or any boundary mismatches, `valid = false` is returned.
+A header/body tenantId mismatch first returns business 403. Other eligibility checks match the Flowable task tenant, extension-record tenant and businessType/businessKey, then the current ASSIGNEE or an unclaimed task's CANDIDATE. Missing tasks, business mismatch or ineligibility return `R.code=200,data.valid=false`; assignmentType is `ASSIGNEE/CANDIDATE/NONE`. false does not replace permission and concurrency checks when the caller executes approval commands.
 
 ### 16.3 Process Completed Event
 
@@ -961,9 +763,7 @@ and confirm that `userId` is the current `ASSIGNEE` or a `CANDIDATE` of an uncla
 | `result` | Enum | `APPROVED`, `REJECTED`, `CANCELLED` |
 | `completedTime` | LocalDateTime | Actual process completion or termination time |
 
-The conditional update of the completion status and `completionEventId` and the PENDING Outbox record are committed in the same local transaction;
-`completion_event_id IS NULL` is the database latch ensuring only one logical completion event is generated per process instance.
-After commit, the reliable message relay delivers and retries asynchronously with at-least-once semantics, so consumers must handle idempotently by `eventId`.
+Integrated approval-completion and explicit-termination paths update completion state/completionEventId and insert a PENDING Outbox record in the same local transaction. `completion_event_id IS NULL` prevents duplicate logical completion events. There is no universal listener covering every Flowable engine-end or instant-end branch. Success/Outbox commit does not mean Broker delivery or consumption completed. Relay delivery/retry is asynchronous when enabled and dependencies are available; consumers deduplicate by eventId.
 
 ### 16.4 Query Published Model Version
 
@@ -991,36 +791,39 @@ Success response:
 }
 ```
 
-The endpoint returns only models and versions still available within the requested tenant. `modelKey` is the model identifier, unique within the tenant and consistent with the BPMN process id;
-`category` is the cross-service business classification. Besides validating `PUBLISHED` and a non-empty
-`processDefinitionId`, the caller can also bind stable business types to `category`. Asset strictly requires the transfer model category to be
-`ASSET_TRANSFER` and the disposal model category to be `ASSET_DISPOSAL`, without cross-reuse or use of other business models;
-Workflow performs the same validation again before actually creating the asset approval instance, closing the model-change window after pre-validation.
+The tenant-scoped query requires PUBLISHED status and a nonblank processDefinitionId. Missing/unavailable versions return business 404. Publication validation maintains modelKey/BPMN process-id consistency; returned strings alone do not establish current engine executability.
+
+The current version by category is also available at `GET /api/internal/workflow/model-version/current?category={category}`. New starts bind `ASSET_TRANSFER/ASSET_DISPOSAL/SRM_SUPPLIER_ONBOARDING` categories; successful same-intent replay reuses the instance. Internal termination uses `POST /api/internal/workflow/process-instance/{processInstanceId}/terminate?reason={reason}` with explicit X-Tenant-Id and X-User-Id in addition to the internal token; reason is optional.
 
 ### 16.5 Approval-Rule Read-Only Model Aggregation
 
-| Method | Path | Constraint |
+| Method | Path | Current constraints |
 |---|---|---|
-| GET | `/api/internal/workflow/model-versions/published?category=purchase` | Returns only records of the current tenant with an exact category match, a valid main model, and a currentPublishedVersionId pointing to a deployable published version |
-| POST | `/api/internal/workflow/model-versions/resolve` | body is `{ "modelVersionIds": [1, 2] }`, 1-200 positive integers per call, returned in request order |
-| GET | `/api/internal/workflow/model-version/{id}/preview` | Returns a safe approval diagram, not BPMN XML or designerJson |
+| GET | `/api/internal/workflow/model-versions/published?category=purchase` | Current tenant, exact category, enabled model, current published version and nonblank processDefinitionId |
+| POST | `/api/internal/workflow/model-versions/resolve` | Body `{ "modelVersionIds": [1, 2] }`; 1–200 positive integers, deduplicated in first-occurrence order |
+| GET | `/api/internal/workflow/model-version/{id}/preview` | Safe approval graph/metadata; no raw BPMN XML/designerJson |
 
-The batch-resolved `availability` takes only `AVAILABLE/NOT_CURRENT/UNAVAILABLE/MODEL_ARCHIVED/NOT_FOUND`.
-The safe preview contains only nodes, desensitized edges and model metadata; a UserTask may include `roleCode/approvalMode`, and a conditional expression returns only
-"condition configured (content hidden)". When there are branches or cycles, `linearSummary=null`, and the frontend must indicate that the actual path is determined by business data,
-and must not resolve the current organization into future actual approvers.
+availability is `AVAILABLE/NOT_CURRENT/UNAVAILABLE/MODEL_ARCHIVED/NOT_FOUND`, derived from model/version metadata. It does not probe live Flowable deployment, suspension or executability.
 
----
+Preview root fields are `approvalPreviewVersion/modelVersion/nodes/edges/hasBranches/linearSummary`. nodes has `id/name/type/roleCode/approvalMode/description`, with type `START/END/APPROVAL/GATEWAY/SERVICE`. edges has `id/name/source/target/defaultBranch/conditionSummary`. Conditions expose only “已配置条件（内容已隐藏）”. linearSummary is null for branches or when no single-path summary can be produced. Current organization previews are not future actual approvers.
+
+### 16.6 Designer Candidate Preview
+
+`POST /api/workflow/identity/resolve-preview` requires `workflow:identity:list` and a trusted tenant header. Request fields are `assignmentType/roleCode/anchorType/anchorParams/scopeMode/simulateUserId`; assignmentType is required. Response data has `candidateCount/candidates`; candidates contain `userId/username/nickname/unitName`. See [Workflow section 3](workflow.en.md#3-candidates-listeners-and-countersigning) for resolver failure/compatibility and anchor semantics. Do not substitute the internal safe-graph DTO.
+
+### 16.7 Instance Read Tenant Boundary
+
+External `GET /api/workflow/process-instance/{id}/progress` and `GET /api/workflow/process-instance/{id}/approval-records` explicitly use Gateway X-Tenant-Id. Missing/invalid tenants fail; nonpositive tenants produce business 400. A missing same-tenant historical instance and a foreign-tenant instance both produce business 404 before activities, comments or candidate details are read. This isolation adds no participant ACL and does not establish equivalent protection on all historical definition APIs.
 
 ## 17. Procurement MVP Contract
 
 ### 17.1 General Boundaries
 
-- The external Base path is `/api/procurement`; the Gateway keeps the full path and does not use `StripPrefix`.
-- All requests use the `X-User-Id`, `X-Tenant-Id` and permission headers injected by the Gateway; business tables are constrained by both TenantLine and permission-aware DataScope.
-- Quantity and unit price use `DECIMAL(19,6)`, amounts use `DECIMAL(19,4)`; all quantities, unit prices and amounts in responses are JSON strings, and the frontend must not compute business amounts with JavaScript `number`.
-- Update bodies and delete queries must carry `version`; a version conflict returns business code 409.
-- Internal endpoints uniformly use `/api/internal/procurement/**`, require `X-Internal-Token` and `X-Tenant-Id`, and must not be exposed through the Gateway.
+- External base path is `/api/procurement`, retaining the full path and Gateway identity/permissions. TenantLine covers only proc_* business tables; it does not tenant-filter the Outbox scan.
+- DataScope uses requester_user_id/requester_unit_id for requisitions and owner_user_id/owner_unit_id for RFQ/PO/GR. Child rows inherit their aggregate root. Materials, categories, approval routes and configuration are shared within a tenant; do not append nonexistent owner columns.
+- Quantity/price use DECIMAL(19,6), amount DECIMAL(19,4), with decimal-string responses. Requests obey each DTO's decimal-string constraints. Do not use JavaScript number for business-money calculations.
+- Updates, deletes and versioned state commands supply versions as defined by their DTO. RFQ awards use rfqVersion/quotationVersion; not every write has a field named version. Creates have no existing-row version.
+- Internal `/api/internal/procurement/**` requires X-Internal-Token/X-Tenant-Id and is Gateway-blocked. [Procurement design](design/procurement-design.en.md) owns detailed state/transaction boundaries.
 
 ### 17.2 Materials and Categories
 
@@ -1119,10 +922,7 @@ The Workflow completion event enters `proc_event_inbox` by `eventId`. The curren
 | POST | `/api/procurement/rfq/{id}/award` | `procurement:rfq:award` | Lock the quotation version and atomically generate a purchase order |
 | POST | `/api/procurement/rfq/{id}/cancel` | `procurement:rfq:cancel` | body `{ "version": 0 }`; DRAFT/SENT only |
 
-Create and update requests contain `requisitionId/title/quotationDeadline/supplierIds`; the time format on update is unified as
-`yyyy-MM-dd HH:mm:ss`. Only a `SENT` RFQ can be compared and awarded. Invitation statuses are
-`INVITED/QUOTED/EXPIRED/AWARDED/REJECTED`; after award the winning invitation becomes `AWARDED` and the rest become
-`REJECTED`, and these terminal states are only for supplier-portal history viewing and cannot continue quoting.
+Create accepts `requisitionId/title/quotationDeadline/supplierIds`. Draft update accepts `version/title/quotationDeadline/supplierIds` and does not change requisitionId. quotationDeadline uses `yyyy-MM-dd HH:mm:ss` and must be future; supplierIds contains 1–100 positive integers. Only SENT RFQs permit comparison/award. Invitation states are `INVITED/QUOTED/EXPIRED/AWARDED/REJECTED`; the last two permit historical viewing only, not further quotation.
 
 Award request example:
 
@@ -1234,13 +1034,12 @@ TenantLine as an ordinary list; spend analysis uses the purchase-order owner sco
 
 ### 18.1 General Boundaries
 
-- The external Base path is `/api/asset`; the Gateway keeps the full path and does not use `StripPrefix`.
-- External requests use the `X-User-Id`, `X-Tenant-Id`, `X-Username`, role and permission headers injected by the Gateway. Business tables are always constrained by TenantLine, and management lists, sub-resources and the overview are additionally constrained by permission-aware DataScope.
-- Management lists filter by `owner_user_id/owner_unit_id`; `GET /api/asset/asset/my` always queries by `current_user_id` and cannot be broadened because the same user holds a management role.
-- Write commands carry `version` and perform optimistic-lock validation; a version or active-operation-occupancy mismatch returns a business conflict.
-- Asset original value, residual value and aggregate amounts use `DECIMAL(18,2)`, and both requests and responses use JSON decimal strings; a JSON number returns 400. Currency uses a three-letter ISO 4217 code.
-- Asset statuses are `IN_STOCK/ALLOCATED/IN_USE/MAINTENANCE/TRANSFER/DISPOSAL_PENDING/DISPOSED/SCRAPPED`.
-- Internal endpoints use `/api/internal/asset/**`, must carry `X-Internal-Token` and `X-Tenant-Id`, and are explicitly blocked by the Gateway.
+- External base path is `/api/asset`, retaining full paths. Identity headers are `X-User-Id/X-Tenant-Id/X-User-Name` plus roles/permissions, not X-Username. TenantLine applies only to ast_* tables; Outbox relay scans across tenants.
+- Management uses owner_user_id/owner_unit_id and children inherit asset scope. My-assets, accept and return use fixed current_user_id; management permission does not expand personal-asset queries.
+- Updates, deletes and commands on existing assets supply version; creates have no existing version. Active-operation occupancy or version conflicts reject the write.
+- Purchase/residual and aggregate amounts use DECIMAL(18,2); non-null requests/responses use decimal JSON strings. Numbers or invalid strings are rejected, but the current general JSON-read handler maps this to 500, not a guaranteed 400. currencyCode checks three English letters; this does not validate the ISO 4217 registry.
+- States are `IN_STOCK/ALLOCATED/IN_USE/MAINTENANCE/TRANSFER/DISPOSAL_PENDING/DISPOSED/SCRAPPED`.
+- Internal `/api/internal/asset/**` requires X-Internal-Token/X-Tenant-Id and is Gateway-blocked. [Asset design](design/asset-design.en.md) owns lifecycle, receipt ingestion and approval transactions.
 
 ### 18.2 Asset Ledger and Commands
 

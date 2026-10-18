@@ -1,0 +1,1063 @@
+{
+  "schema": 1,
+  "kind": "current-document-source-and-selected-original-image-audit",
+  "recorded_at": "2026-10-17T12:30:31.694Z",
+  "source_baseline": "013616dc1e8c0116e05c0bd381ffcf4c7ba85c32",
+  "document_id": "guide-asset-flow",
+  "evidence_kind": "AI semantic/source/provenance/visual inspection,not a new application or business test",
+  "original_documents_actually_read": 4,
+  "original_whole_lines": 493,
+  "original_image_registers": [
+    {
+      "path": "docs/reference/evidence/supply-chain-2026-10-09.json",
+      "sha256": "2b36754f24ea7182b4768e39a3cc8a1fb37aa2cdd9b82aae40808935c4f8786b",
+      "recorded_at": "2026-10-09T08:23:45.7227068+00:00",
+      "total_records": 48,
+      "used_by_guide": 20,
+      "visual_review": "Per-record original-resolution four-locale contact sheets;not individual raw-image review",
+      "production_base_image_build_proven": false
+    },
+    {
+      "path": "docs/reference/evidence/asset-usage-2026-10-12.json",
+      "sha256": "0830b5606517814593546ca01f59d782a5783df8ddb9b325ad6205e3befae6ca",
+      "recorded_at": "2026-10-12T12:28:11.106Z",
+      "total_records": 24,
+      "used_by_guide": 24,
+      "visual_review": {
+        "status": "passed-with-documented-limits",
+        "reviewer": "Agent individually inspected all 48 original PNGs",
+        "reviewed": 48,
+        "published": 24,
+        "rejected": 7,
+        "readable_private_superseded": 17,
+        "human_translation_review": "pending",
+        "limits": [
+          "Manual usage sample is separate from the procurement source card; the source card currently is SCRAPPED, not arrival-time IN_STOCK.",
+          "All four languages show pre-submit dialogs. Each business UI command was submitted once in zh-CN, followed by formal API verification.",
+          "Existing Chinese server history remarks, raw status enums and long-label wraps remain visible; labels are not rewritten in screenshots.",
+          "Seven incomplete-paint/clipped originals excluded; 17 readable but redundant originals stay private.",
+          "Foreign-user 404, stale-version 409 and history-delete 409 are API observations with HTTP 200 and business error codes.",
+          "Final sample and immutable history remain in the owned isolated project until project-wide cleanup."
+        ]
+      }
+    }
+  ],
+  "prior_current_fact_review": {
+    "path": "docs/reference/reviews/asset-design.json",
+    "sha256": "fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747",
+    "unchanged_named_dependencies": 66,
+    "new_whole_read_claim": false
+  },
+  "capture_source_groups": [
+    {
+      "key": "docs/reference/evidence/supply-chain-2026-10-09.json|dated per-service images|dated per-source bindings|1cb29aa9ecd0da2259274d074489ed480cb404383d624ef9c6caaf047c8485ba",
+      "images": 20,
+      "first_document_occurrence": "2026-10-09T08:01:21.762Z",
+      "last_document_occurrence": "2026-10-09T08:02:02.682Z",
+      "document_order_not_chronological": true,
+      "records": [
+        "asset-transfer-rejected.png",
+        "asset-transfer-completed.png",
+        "asset-disposal-rejected.png",
+        "asset-disposal-completed.png",
+        "asset-scrapped-card.png",
+        "asset-transfer-rejected.png",
+        "asset-transfer-completed.png",
+        "asset-disposal-rejected.png",
+        "asset-disposal-completed.png",
+        "asset-scrapped-card.png",
+        "asset-transfer-rejected.png",
+        "asset-transfer-completed.png",
+        "asset-disposal-rejected.png",
+        "asset-disposal-completed.png",
+        "asset-scrapped-card.png",
+        "asset-transfer-rejected.png",
+        "asset-transfer-completed.png",
+        "asset-disposal-rejected.png",
+        "asset-disposal-completed.png",
+        "asset-scrapped-card.png"
+      ]
+    },
+    {
+      "key": "docs/reference/evidence/asset-usage-2026-10-12.json|sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af|1a2756d8ca79a816197eabc34a9386a5171421dc9cffd767268e748e44510246|23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "images": 4,
+      "first_document_occurrence": "2026-10-12T12:09:58.505Z",
+      "last_document_occurrence": "2026-10-12T12:10:01.701Z",
+      "document_order_not_chronological": true,
+      "records": [
+        "asset-final-receipt-source-card.png",
+        "asset-final-receipt-source-card.png",
+        "asset-final-receipt-source-card.png",
+        "asset-final-receipt-source-card.png"
+      ]
+    },
+    {
+      "key": "docs/reference/evidence/asset-usage-2026-10-12.json|sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af|9abea449baad2e0bc8ad975f992e1025c6e43566f7415200a512a30f516559f0|1ef956559fc3b1d940d58a1858e46145c99cc5c7c7356654983ae9998f64115d",
+      "images": 4,
+      "first_document_occurrence": "2026-10-12T11:59:37.387Z",
+      "last_document_occurrence": "2026-10-12T11:59:42.656Z",
+      "document_order_not_chronological": true,
+      "records": [
+        "asset-allocation-form.png",
+        "asset-allocation-form.png",
+        "asset-allocation-form.png",
+        "asset-allocation-form.png"
+      ]
+    },
+    {
+      "key": "docs/reference/evidence/asset-usage-2026-10-12.json|sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af|25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e|76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "images": 16,
+      "first_document_occurrence": "2026-10-12T12:01:57.486Z",
+      "last_document_occurrence": "2026-10-12T12:04:45.990Z",
+      "document_order_not_chronological": true,
+      "records": [
+        "asset-accept-confirm.png",
+        "asset-return-confirm.png",
+        "asset-returned-detail.png",
+        "asset-self-empty-after-return.png",
+        "asset-accept-confirm.png",
+        "asset-return-confirm.png",
+        "asset-returned-detail.png",
+        "asset-self-empty-after-return.png",
+        "asset-accept-confirm.png",
+        "asset-return-confirm.png",
+        "asset-returned-detail.png",
+        "asset-self-empty-after-return.png",
+        "asset-accept-confirm.png",
+        "asset-return-confirm.png",
+        "asset-returned-detail.png",
+        "asset-self-empty-after-return.png"
+      ]
+    }
+  ],
+  "current_source_inspection": {
+    "whole_files": 3,
+    "whole_lines": 292,
+    "files": [
+      {
+        "path": "database/changelog/asset/0001-asset-schema.yaml",
+        "sha256": "e4b5f80df2e380ee71fb664d0c73ee4b4515e52d1c1e98ade30394b5cdc5fbb6",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/pom.xml",
+        "sha256": "a661a82550ace2f4f286c19fb3b4273f707f698b445dd2457184bbcad5c19a9e",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/client/AuthInternalClient.java",
+        "sha256": "57718199ce0cac75ff7ad2b15c8e2517fa3e1891dc593f7b9edc8d1a49468093",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/client/ProcurementInternalClient.java",
+        "sha256": "3d616a7f06d87ff6aba1dd8340c13e9b5f68b49ba7718c8375892a9dc2966174",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/client/SrmInternalClient.java",
+        "sha256": "d1381b4d20c448f737b6a94a8c251506262dcec059cad8c2ccc1808fa0b65239",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/config/SecurityConfig.java",
+        "sha256": "41d9e8a91c9bfb4a7ff1d516aaf906137233399d05772e50df4ad990b0f774cf",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/consumer/ProcurementGoodsReceiptConsumer.java",
+        "sha256": "605ac6baae0629e9eb025cb989f537cc3ceb358db70db6eb231d2473e35ac1c2",
+        "read_scope": "Whole actual read:two v1eventtypes,unsupportedversion/tenantguard,tenantandTENANTscopeidentityset,delegatedimport/rethrowretry,finallyclearcontexts,safelogheaders. Notlivebrokerproof.",
+        "outputs": [
+          "5da33f"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetController.java",
+        "sha256": "4456c7345561bcf533ce6e17f5dcce88003afa1873a84d41beb0f8c69d0f4f74",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetDisposalController.java",
+        "sha256": "06534f7d4734cdc108a3b0c41382b0a8396efc0c69f0a965ef3d0c21b3ae34ee",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetOptionsController.java",
+        "sha256": "26a9fb52210a80019bc436ae3dad592fc25a51e66df95daa4102313eca50e6d4",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetOverviewController.java",
+        "sha256": "10e9e9d818399a4b607985597cb9aadffe8105090c67549b6eae16f6ff551b01",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetTransferController.java",
+        "sha256": "96f7b4339c677c91c58fd56532e56d605952a395fceab709ac512307c9d8ae9b",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/InternalProcurementBackfillController.java",
+        "sha256": "fc90bc749bd2fe4721a4db375b38d938fdfe2cf9f2ad022aef973c51baf03cfc",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/domain/AssetOperationStateMachine.java",
+        "sha256": "b1b1530668badc1d8cfc49a3008766f1ee646515019ecf755a4390d019910a5a",
+        "read_scope": "Whole actual read:retrytwo statuspairs(START_FAILED+FAILED orPENDING_APPROVAL+PENDING);cancelonlyfailedpair;APPROVEDonlycomplete;terminalflags.",
+        "outputs": [
+          "196c0b"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/domain/AssetStateMachine.java",
+        "sha256": "d47acf127e28779a52b6588b3e78be19608e36246cb0462d402ceec89f4a68fc",
+        "read_scope": "Whole actual read:8states,allowedtransitions,maintenance->IN_USE,irreversibleDISPOSED/SCRAPPED.",
+        "outputs": [
+          "196c0b"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetDomainEvent.java",
+        "sha256": "dccc377516c92a1ec0007e63ebff30aed8e1b1e8458e0b02e301945dc1b4485c",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOperationRequests.java",
+        "sha256": "0481f626ac010684335d66f96ef776ffa83b631cbe38c1eac8d7f68bc644a033",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOperationViews.java",
+        "sha256": "9d3ff9294a9a52b994694989a921fa57b1cf9a884f63f3beabb35ffb12f6fd11",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOverviewRequests.java",
+        "sha256": "6c78b6af49c8ea4fb8d75538f668487bb9b9e83fa67f8b2fe6ee09ca2fee7f84",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetPageQuery.java",
+        "sha256": "bc07c7781c55b65053692200863de0b4b1121f595f9133c3b30d2730849f9cb4",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetRequests.java",
+        "sha256": "5ccdc6ab795175575ec5178015b19a3960b2a63ec1ce3ce03fa137c08948e9dc",
+        "read_scope": "Selected113-134:AllocateRequestversion+targetUserId+targetUnitId+remark,nolocation;versioncommand. Notwhole.",
+        "outputs": [
+          "5da33f"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetViewAssembler.java",
+        "sha256": "999f7d0bb513bd63aa54e389d4a93133650b07ebb6647ac420fa019043b17abe",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetViews.java",
+        "sha256": "ab0aa2759b43f4c5b8e23741ec02b96e5a9273d08f437888d7eda0c2d317a80e",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/entity/AstInboxEvent.java",
+        "sha256": "0ae4ef7cf045c5ded5fac742709c783f5aeffd1fff0da8206ebe5b4a5c27b8de",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AssetOverviewMapper.java",
+        "sha256": "e00b92fdc4bc795f8930667700ddd59891e7dfb7cef29ee51abdc43b3c60c78a",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AssetReceiptImportMapper.java",
+        "sha256": "5426334bdbe64f28a4e0e8690fa714c0502e1c33b0f763eaa81ab3b088a39bbf",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AstAssetMapper.java",
+        "sha256": "2413ec60850b4d11b1195d6f514d773d4dfb652ef3349138811fc7936816d379",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AstInboxEventMapper.java",
+        "sha256": "61e9e60923b43488b9ef18f33e93280cf89da2049933560b23cc36f4b9fd0435",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/security/AssetDataPermissionHandler.java",
+        "sha256": "c24e44f1f561f94d315919c2c6fd9ef8679f9b5189b456585a83b65589a10eda",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/security/AssetTenantTablePolicy.java",
+        "sha256": "d156acdca1f3eac7517c783f08ede33e9dfca31f0912abc161755b330f8a6f5f",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetDisposalServiceImpl.java",
+        "sha256": "a3e1a80a162f360fbe37d380d389fa131c4a39dc9e0d04a3079df713e8fcaf5f",
+        "read_scope": "Selected145-214:retry/cancelguards,transactionalrestore,APPROVEDcomplete,SCRAP->SCRAPPEDelseDISPOSED,occupiedassetCASandclear/history/event. Notwhole.",
+        "outputs": [
+          "ae21fb"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImpl.java",
+        "sha256": "090b0c041065cca3bc8d8cd8df56ab9fc2758744b5cacc6f6312d679b830aead",
+        "read_scope": "Selected235-296:sameworkflowrequest/business/model/startuser snapshot,occupiedasset,currentversion,two retrybranches;FAILEDtransitionsbackPENDING. Notwhole.",
+        "outputs": [
+          "ae21fb"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOptionServiceImpl.java",
+        "sha256": "486105cebca195c1efc25c8351fdf97bcd446c18bf9d125910dc9a9b3c1fbc9e",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOverviewServiceImpl.java",
+        "sha256": "4b4b33ec6c2684da773ba6b799a667fed0e1072669c5141521a64453693a6bb2",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetServiceImpl.java",
+        "sha256": "e00cd0d9a80f6343f0eb6971830e7f36b88f23e5efd45143eedf86e945acee1b",
+        "read_scope": "Selected236-349:allocatevalidactiveuserinunit/currentversion/noactiveoperation,assigned-usersonlyaccept/return,clearusagefields/keepowner,history+Outbox,maintenancefixedIN_USE. Notwhole.",
+        "outputs": [
+          "196c0b",
+          "d7fe7a"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetTenantModuleProvisioner.java",
+        "sha256": "c31fac8be95e193131b0724bfa361b922c296da2f16bdc1f456c0fa1d287b334",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetTransferServiceImpl.java",
+        "sha256": "7de6e16807f8f7230123e53529fb269a8a26d26880b42f06e23de62c1a1f30de",
+        "read_scope": "Selected145-221:prepare/startretry,failed-onlylocalcancel+restore,APPROVEDonlycomplete,targetunitwritability/identity,assetCASoccupancyclear/updateusage/locationbutnotowner. Notwhole.",
+        "outputs": [
+          "ae21fb"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/ProcurementAssetBackfillServiceImpl.java",
+        "sha256": "8bc8149d1ca264f068ff28562cd1e42a35dfe887db348b877d3fb5cd4685af28",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImpl.java",
+        "sha256": "d5932e2e482a7e936c4c31810aacfe858fd2e702e8e799e076d6363e14af5c4f",
+        "read_scope": "Selected62-146,177-226,235-268:envelope/tenant/Inboxintentdedup,eligiblePASS+managedandreceivedexactinteger equalsassetQuantity,upperbound;perunit sourceidempotentinsertandintentvalidation. Notwhole/deployedredeliveryproof.",
+        "outputs": [
+          "5da33f",
+          "bee0a9",
+          "d7fe7a"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/WorkflowCompletionServiceImpl.java",
+        "sha256": "976068f09a92536fdf284e6504ac6e806ca38399ff257a18278d3193dee926d2",
+        "read_scope": "Selected52-91,93-132,152-183,238-270:transactionalhandle/Inboxduplicate,matchingcurrentapproval,APPROVEDretainsactiveflag,nonapprovedrestorepreviousstatusandclearoccupancyinCAS,history. Notwhole.",
+        "outputs": [
+          "5da33f",
+          "bee0a9"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/support/AssetIdentityGuard.java",
+        "sha256": "2d8d00f7f6ea4893afdc5f7b15f4d3d763569f9800b2f7d904c9e1c767439ec0",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/support/AssetRecordAccessGuard.java",
+        "sha256": "8c92051e83e6358dd14e9509495516a0311b4dd0eff7fe64e0924e6bb49037e8",
+        "read_scope": "Selected29-68:404visibility,409CAS,assigned-current-useridentityindependentofmanagedscope. Notwhole.",
+        "outputs": [
+          "5da33f"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/workflow/AssetWorkflowApprovalGuard.java",
+        "sha256": "fb1b4755b1cd84312288c7d1712a271e63e4e1d474fa5552ad28af55b8916345",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/workflow/AssetWorkflowCoordinator.java",
+        "sha256": "d554eba107cb08e67e738c81a198118f568eb80fbb71487c5ac80e27231a4fa4",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/workflow/AssetWorkflowModelGuard.java",
+        "sha256": "30711f887ada718cb66bb4656156af13c41f12b280d82f51cea7ceb8bb3184e0",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/resources/application-lite.yml",
+        "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/resources/application.yml",
+        "sha256": "34451137fa3181e1192ec6de11fe5cc92488104b70d759036e95c52e96434680",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImplTest.java",
+        "sha256": "f00013b89da9e4a1e1ad9d9fdf85ae619985e168653253966f910589b445ac91",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/ProcurementAssetBackfillServiceImplTest.java",
+        "sha256": "8e6f3083ab6d736af27613031f36b3c6c746015427c7174b7875e60103a69a4e",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImplTest.java",
+        "sha256": "47402543759f886fb28e328ce59db146ecf54eead0dec6aac25691e0ef4d5b58",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/WorkflowCompletionServiceImplTest.java",
+        "sha256": "748e5286e7f9356f0a114a4b9b1720444a823b9098a51e6c4f18690436973aa7",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/workflow/AssetWorkflowCoordinatorTest.java",
+        "sha256": "5ebb30003c9e7c3583d41c00246eee1521062226c815f2d47f68af100b0bd46d",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/sanitize/OperLogSanitizer.java",
+        "sha256": "8f5d34bca9097343ca596b409e69bc15a1472b02a0aa6fc6cefd04a27cc31479",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java",
+        "sha256": "4fcaa7b87b3547392e77284334ad8553546cdac8351a402b726ce1f2d9697220",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java",
+        "sha256": "796424bf5067b1e80c3658572f2d1d3fb60a0db68c5bf349db10b5ddd323328d",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+        "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+        "sha256": "fb540dc12ae8c821fd9324a06de566beee5aa7bf4e0f105668f3a1bd139ac020",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+        "sha256": "65012a8fc6a5311a06e32e6201ff3f6ec9da84c58341e2f0c678ca19f5037c16",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+        "sha256": "63a1a2bd58ae7b696d77f8ec1e1e5616020f297999f11ec412c32de1fff09ac8",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+        "sha256": "f63cb03ab55045944f20e206bec4c5d59d04f4a7abc5abebb37e641054dabd83",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/api/asset-asset.ts",
+        "sha256": "d506175e3fa4ef410afff751cf4578328558fa06159e127496aa2b46bb22e762",
+        "read_scope": "Selected199-226andmatchedtypes:allocateversion/user/unit/remark,nolocation;accept/returnversionedrequest. Notwhole.",
+        "outputs": [
+          "bee0a9",
+          "e037db"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/router/index.ts",
+        "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/asset/asset/index.vue",
+        "sha256": "a2a9c72a8ccbb9fd50800b180bcce7fecb3ea796c0b7743237a0d05b1f3c9be5",
+        "read_scope": "Selected318-358,423-440:nativeallocationform,versionedcommandsandlocalizedconfirmation;mytabaccept/returnwithpermissions. Samecomponent,notseparatemy-assetpage. Notwhole.",
+        "outputs": [
+          "e037db"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "scripts/sql/seed/auth.sql",
+        "sha256": "131d495c9b1eed92d4d2a7f0aaf92026117c25c6d8d13b8773fdc00fb94c357c",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/DefaultXssSettingsFallback.java",
+        "sha256": "3b6881f0ff8c5855a8711732ee5268fb38ea1176bc4a987cad93a136ad4c2f16",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOperationViewAssembler.java",
+        "sha256": "1c514bd7d97bc7ae308a7187df24c7f9302624f021011c474e670fc1978414f7",
+        "read_scope": "Exact unchanged prior Asset design review dependency reused at its recorded selected scope;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "scripts/fixtures/capture-asset-usage.mjs",
+        "sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+        "read_scope": "Selected27-41,93-120,180-214:ownedDockerproject/phaseguard,externalshortlivedtokens/sessionprepare,oncezh-CNnativeUIcommandthroughjournal,assertrealHTTP200/body200;notCAPTCHA/passwordloginorall-languagemutationproof. Notwhole.",
+        "outputs": [
+          "5da33f",
+          "d7fe7a",
+          "e037db"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/design/asset-design.md",
+        "sha256": "65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620",
+        "read_scope": "Prior completed semantic fact/design/policy review reused with exact current hash;not new whole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/asset-design.json",
+        "sha256": "fd2a0c33eec35009288a279eeb91c2c0a7649f7a221137ef3122406559c7d747",
+        "read_scope": "Prior completed semantic fact/design/policy review reused with exact current hash;not new whole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+        "read_scope": "Prior completed semantic fact/design/policy review reused with exact current hash;not new whole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/supply-chain-2026-10-09.json",
+        "sha256": "2b36754f24ea7182b4768e39a3cc8a1fb37aa2cdd9b82aae40808935c4f8786b",
+        "read_scope": "Actualdatedregistermetadata,visualmethods/limits,businesssample/sourcecard,threeChineseUIcommands,history,threeAPInegativeobservations,projectcleanupandthreecapturetest/source/runtimegroupsread. Runtime/sourcearraysnotwholesemanticread;historicalhumanpendingretainedbutcurrentpolicygoverns.",
+        "outputs": [
+          "db846a",
+          "0d6938",
+          "bee0a9"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/asset-usage-2026-10-12.json",
+        "sha256": "0830b5606517814593546ca01f59d782a5783df8ddb9b325ad6205e3befae6ca",
+        "read_scope": "Actualdatedregistermetadata,visualmethods/limits,businesssample/sourcecard,threeChineseUIcommands,history,threeAPInegativeobservations,projectcleanupandthreecapturetest/source/runtimegroupsread. Runtime/sourcearraysnotwholesemanticread;historicalhumanpendingretainedbutcurrentpolicygoverns.",
+        "outputs": [
+          "db846a",
+          "0d6938",
+          "bee0a9"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ]
+  },
+  "selected_raw_images": [
+    {
+      "path": "docs/images/zh-CN/asset-transfer-completed.png",
+      "locale": "zh-CN",
+      "sha256": "ba50a5a00a4bfd0727bf341909952bb3388c348bd3682e8c5b0b17d6325b5ee8",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "AT-1-2Completed,sourcecardAST-2108462215458598914,previousIN_STOCK,target214/605,locationWIKI-OUTSIDEandprocessinstance visible. EN/JA/KRlonglabels wrap. Noowner/occupancyfieldoractualapprove/completeclick shown."
+    },
+    {
+      "path": "docs/images/zh-CN/asset-allocation-form.png",
+      "locale": "zh-CN",
+      "sha256": "f3927958d4ed1b0d25c7c87b0efe5c66d01289ef3a7c199e54906a4a49623b1e",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Nativepre-submitdialog,targetrequesterusernameclipped,unit604,run-specificremarkandCancel/Confirmvisible;no locationfield. ENTargetDepartmentwrapcrowdsRemarklabel;JAuserlabelwraps. No submittedresult/version oridentitylogin proof."
+    },
+    {
+      "path": "docs/images/zh-CN/asset-accept-confirm.png",
+      "locale": "zh-CN",
+      "sha256": "1eda424cb888a8100860998370b27c1f9cbb623e20fa7710b7fa9565538b4e06",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "NativewarningforAST-2108462215458598915,localizedacceptandCancel/OK. JAmessagewraps;blurredbackground. Beforeconfirmationonly;doesnotproveIN_USEorclick inallfourlanguages."
+    },
+    {
+      "path": "docs/images/zh-CN/asset-return-confirm.png",
+      "locale": "zh-CN",
+      "sha256": "051b8022139e3eb93643c66f1537adf4249ef1ba27e2b142a78a115562e2720e",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SamepracticeassetID,nativereturnwarningandCancel/OK;JAmessagewraps. Pre-submitpreviewonly,notfinalIN_STOCKorclearedupdates."
+    },
+    {
+      "path": "docs/images/zh-CN/asset-returned-detail.png",
+      "locale": "zh-CN",
+      "sha256": "a7d6948ae2f8a0ce5e30c69c3c726b405235d70f8f8c97633895061f214afd3e",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SamepracticecardIN_STOCK,1000.00CNY/manualstock-in,currentuser/departmentblank,fourhistoryrowscreate/allocate/accept/returnwithoperators205/202. Chinesehistoryandrawstates retained inforeignUI;longcreateremarkwraps. OwnerIDs/allocationtimearenotvisiblehere;APIreceiptrequired."
+    },
+    {
+      "path": "docs/images/en-US/asset-transfer-completed.png",
+      "locale": "en-US",
+      "sha256": "a1008512bfda787e5fe3028e642c5ecb2fdaa675aed02f85c96c7688b4cff05c",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "AT-1-2Completed,sourcecardAST-2108462215458598914,previousIN_STOCK,target214/605,locationWIKI-OUTSIDEandprocessinstance visible. EN/JA/KRlonglabels wrap. Noowner/occupancyfieldoractualapprove/completeclick shown."
+    },
+    {
+      "path": "docs/images/en-US/asset-allocation-form.png",
+      "locale": "en-US",
+      "sha256": "d5e7e9a5d0889f6893e3bdf064fbb2d3a0a58deb1013257f2e2f49af48463fcd",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Nativepre-submitdialog,targetrequesterusernameclipped,unit604,run-specificremarkandCancel/Confirmvisible;no locationfield. ENTargetDepartmentwrapcrowdsRemarklabel;JAuserlabelwraps. No submittedresult/version oridentitylogin proof."
+    },
+    {
+      "path": "docs/images/en-US/asset-accept-confirm.png",
+      "locale": "en-US",
+      "sha256": "444efb31293546b99ef2541cdaff2a0a7571415a336588dd38a38bb3ae4fa915",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "NativewarningforAST-2108462215458598915,localizedacceptandCancel/OK. JAmessagewraps;blurredbackground. Beforeconfirmationonly;doesnotproveIN_USEorclick inallfourlanguages."
+    },
+    {
+      "path": "docs/images/en-US/asset-return-confirm.png",
+      "locale": "en-US",
+      "sha256": "8818e8b5b92659216e91706094d5c5469448e2a992ca70a096b928a28b447f88",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SamepracticeassetID,nativereturnwarningandCancel/OK;JAmessagewraps. Pre-submitpreviewonly,notfinalIN_STOCKorclearedupdates."
+    },
+    {
+      "path": "docs/images/en-US/asset-returned-detail.png",
+      "locale": "en-US",
+      "sha256": "d262f2148dcfd6d2d4a0082255308232e3cb2f608f1a705ffdc179ff9da7532b",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SamepracticecardIN_STOCK,1000.00CNY/manualstock-in,currentuser/departmentblank,fourhistoryrowscreate/allocate/accept/returnwithoperators205/202. Chinesehistoryandrawstates retained inforeignUI;longcreateremarkwraps. OwnerIDs/allocationtimearenotvisiblehere;APIreceiptrequired."
+    },
+    {
+      "path": "docs/images/ja-JP/asset-transfer-completed.png",
+      "locale": "ja-JP",
+      "sha256": "a17f5c1883a15b532fa284e8144b714a16ecf1d4f57848c1b949c75b3d3aa270",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "AT-1-2Completed,sourcecardAST-2108462215458598914,previousIN_STOCK,target214/605,locationWIKI-OUTSIDEandprocessinstance visible. EN/JA/KRlonglabels wrap. Noowner/occupancyfieldoractualapprove/completeclick shown."
+    },
+    {
+      "path": "docs/images/ja-JP/asset-allocation-form.png",
+      "locale": "ja-JP",
+      "sha256": "eebc8eadfe82639184ce1c426ca2c8f55ee1f176e851957e0c3d80e3b84439c3",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Nativepre-submitdialog,targetrequesterusernameclipped,unit604,run-specificremarkandCancel/Confirmvisible;no locationfield. ENTargetDepartmentwrapcrowdsRemarklabel;JAuserlabelwraps. No submittedresult/version oridentitylogin proof."
+    },
+    {
+      "path": "docs/images/ja-JP/asset-accept-confirm.png",
+      "locale": "ja-JP",
+      "sha256": "397435325b321c4f3ab82475ca2c7ae20b2069de428779d3250caf99415fc8d6",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "NativewarningforAST-2108462215458598915,localizedacceptandCancel/OK. JAmessagewraps;blurredbackground. Beforeconfirmationonly;doesnotproveIN_USEorclick inallfourlanguages."
+    },
+    {
+      "path": "docs/images/ja-JP/asset-return-confirm.png",
+      "locale": "ja-JP",
+      "sha256": "60b749dfb42bfb819af9596304f7deadd07bd6a5d43943dafe4f9bcfed4e72b0",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SamepracticeassetID,nativereturnwarningandCancel/OK;JAmessagewraps. Pre-submitpreviewonly,notfinalIN_STOCKorclearedupdates."
+    },
+    {
+      "path": "docs/images/ja-JP/asset-returned-detail.png",
+      "locale": "ja-JP",
+      "sha256": "30bb3c84131a59ab8706786a33b5e03bd2f637d70ebd63408af67b4292876844",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SamepracticecardIN_STOCK,1000.00CNY/manualstock-in,currentuser/departmentblank,fourhistoryrowscreate/allocate/accept/returnwithoperators205/202. Chinesehistoryandrawstates retained inforeignUI;longcreateremarkwraps. OwnerIDs/allocationtimearenotvisiblehere;APIreceiptrequired."
+    },
+    {
+      "path": "docs/images/ko-KR/asset-transfer-completed.png",
+      "locale": "ko-KR",
+      "sha256": "dbf7984bacbcb6343fa024501e196854947a2baef167b0ae21d5e5e44297c3a7",
+      "width": 1440,
+      "height": 1000,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "AT-1-2Completed,sourcecardAST-2108462215458598914,previousIN_STOCK,target214/605,locationWIKI-OUTSIDEandprocessinstance visible. EN/JA/KRlonglabels wrap. Noowner/occupancyfieldoractualapprove/completeclick shown."
+    },
+    {
+      "path": "docs/images/ko-KR/asset-allocation-form.png",
+      "locale": "ko-KR",
+      "sha256": "c078ce22ceb3ffb47131cf59f5ea26cd6ec9b1c68b96424af934679c2afe060e",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "Nativepre-submitdialog,targetrequesterusernameclipped,unit604,run-specificremarkandCancel/Confirmvisible;no locationfield. ENTargetDepartmentwrapcrowdsRemarklabel;JAuserlabelwraps. No submittedresult/version oridentitylogin proof."
+    },
+    {
+      "path": "docs/images/ko-KR/asset-accept-confirm.png",
+      "locale": "ko-KR",
+      "sha256": "8d05991a6c596b6e0a194e9974308f37f15f57de65ac09e479ab802f775ab736",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "NativewarningforAST-2108462215458598915,localizedacceptandCancel/OK. JAmessagewraps;blurredbackground. Beforeconfirmationonly;doesnotproveIN_USEorclick inallfourlanguages."
+    },
+    {
+      "path": "docs/images/ko-KR/asset-return-confirm.png",
+      "locale": "ko-KR",
+      "sha256": "3fb1efe546d8735dcd8608d69581b40c7659545b8dabec604108da492c44576f",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SamepracticeassetID,nativereturnwarningandCancel/OK;JAmessagewraps. Pre-submitpreviewonly,notfinalIN_STOCKorclearedupdates."
+    },
+    {
+      "path": "docs/images/ko-KR/asset-returned-detail.png",
+      "locale": "ko-KR",
+      "sha256": "a850c69febdd0a9cb142b1a0fbac497a9ac3fececdabab5792cb5d06e69d5258",
+      "width": 1920,
+      "height": 1080,
+      "detail": "original",
+      "actually_viewed_this_stage": true,
+      "observations": "SamepracticecardIN_STOCK,1000.00CNY/manualstock-in,currentuser/departmentblank,fourhistoryrowscreate/allocate/accept/returnwithoperators205/202. Chinesehistoryandrawstates retained inforeignUI;longcreateremarkwraps. OwnerIDs/allocationtimearenotvisiblehere;APIreceiptrequired."
+    }
+  ],
+  "visual_scope": {
+    "guide_files": 44,
+    "used_register_records": 44,
+    "all_register_records": 72,
+    "current_individual_original_views": 20,
+    "other24not_freshly_individually_viewed": true,
+    "prior_methods": "2026-10-09:12four-localecontact sheets for48sourceimages,guideuses20of48(5scenes).2026-10-12usage:48individualoriginals,24published,7incompletepaint/clippedrejected,17readableprivatesuperseded. Noneisanewcaptureorviewthisstage.",
+    "usage_originals_reviewed_historically": 48,
+    "usage_published": 24,
+    "usage_rejected": 7,
+    "usage_readable_private_superseded": 17,
+    "no_image_modification": true,
+    "no_recapture": true
+  },
+  "historical_results": {
+    "main_flow": {
+      "date": "2026-10-09",
+      "baseline": "fc165e3",
+      "published_guide_images": 20,
+      "method": "Subsetof12four-localecontact sheets covering48Procurement+Assetimages",
+      "production_base_image_build_proven": false,
+      "cached_base_limit": "Registry DNS/authenticationfailures;privateverificationcachedbasesarenotformalproduction-basebuildproof"
+    },
+    "usage": {
+      "date": "2026-10-12",
+      "run": "WIKI-20261012-ASSET-USAGE",
+      "manual_practice": {
+        "id": "2108462215458598915",
+        "asset_no": "AST-2108462215458598915",
+        "origin": "manual-stock-in via formal ASSET_ADMIN API",
+        "purchase_amount": "1000.00",
+        "final_status": "IN_STOCK",
+        "version": 3,
+        "current_user_id": null,
+        "current_unit_id": null,
+        "allocated_time": null,
+        "owner_user_id": 205,
+        "owner_unit_id": 604
+      },
+      "procurement_source": {
+        "id": "2108462215378907138",
+        "asset_no": "AST-2108462215378907138",
+        "status": "SCRAPPED",
+        "purchase_amount": "900.00",
+        "source_po": "PO-1-1",
+        "source_gr": "GR-1-2",
+        "changed_by_this_run": false
+      },
+      "chinese_ui_commands": [
+        {
+          "phase": "allocate",
+          "actor": "assetstaff",
+          "path": "/api/asset/asset/2108462215458598915/allocate",
+          "status": "COMMITTED",
+          "finished_at": "2026-10-12T11:59:44.379Z",
+          "result_status": "ALLOCATED",
+          "mechanism": "real-UI-click"
+        },
+        {
+          "phase": "accept",
+          "actor": "requester",
+          "path": "/api/asset/asset/2108462215458598915/accept",
+          "status": "COMMITTED",
+          "finished_at": "2026-10-12T12:02:00.651Z",
+          "result_status": "IN_USE",
+          "mechanism": "real-UI-click"
+        },
+        {
+          "phase": "return",
+          "actor": "requester",
+          "path": "/api/asset/asset/2108462215458598915/return",
+          "status": "COMMITTED",
+          "finished_at": "2026-10-12T12:04:38.271Z",
+          "result_status": "IN_STOCK",
+          "mechanism": "real-UI-click"
+        }
+      ],
+      "history": [
+        {
+          "assetId": "2108462215458598915",
+          "changedByUserId": 202,
+          "changedTime": "2026-10-12 20:04:38",
+          "fromStatus": "IN_USE",
+          "id": "19",
+          "remark": "退还资产",
+          "toStatus": "IN_STOCK"
+        },
+        {
+          "assetId": "2108462215458598915",
+          "changedByUserId": 202,
+          "changedTime": "2026-10-12 20:02:01",
+          "fromStatus": "ALLOCATED",
+          "id": "18",
+          "remark": "确认领用",
+          "toStatus": "IN_USE"
+        },
+        {
+          "assetId": "2108462215458598915",
+          "changedByUserId": 205,
+          "changedTime": "2026-10-12 19:59:44",
+          "fromStatus": "IN_STOCK",
+          "id": "17",
+          "remark": "分配资产：WIKI-20261012-ASSET-USAGE allocate",
+          "toStatus": "ALLOCATED"
+        },
+        {
+          "assetId": "2108462215458598915",
+          "changedByUserId": 205,
+          "changedTime": "2026-10-12 19:58:50",
+          "fromStatus": null,
+          "id": "16",
+          "remark": "手工入库：Isolated documentation fixture; history retained until owned project cleanup.",
+          "toStatus": "IN_STOCK"
+        }
+      ],
+      "api_negatives": [
+        {
+          "at": "2026-10-12T12:01:56.463Z",
+          "actor": "outsider",
+          "method": "POST",
+          "path": "/api/asset/asset/2108462215458598915/accept",
+          "http": 200,
+          "code": 404,
+          "expected": 404
+        },
+        {
+          "at": "2026-10-12T12:04:33.893Z",
+          "actor": "requester",
+          "method": "POST",
+          "path": "/api/asset/asset/2108462215458598915/return",
+          "http": 200,
+          "code": 409,
+          "expected": 409
+        },
+        {
+          "at": "2026-10-12T12:05:49.538Z",
+          "actor": "assetstaff",
+          "method": "DELETE",
+          "path": "/api/asset/asset/2108462215458598915?version=3",
+          "http": 200,
+          "code": 409,
+          "expected": 409
+        }
+      ],
+      "cleanup": "OWNED_MANUAL_ASSET_IN_STOCK_HISTORY_RETAINED",
+      "source_groups": [
+        {
+          "aggregate": "9abea449baad2e0bc8ad975f992e1025c6e43566f7415200a512a30f516559f0",
+          "test": {
+            "path": "scripts/fixtures/capture-asset-usage.mjs",
+            "sha256": "1ef956559fc3b1d940d58a1858e46145c99cc5c7c7356654983ae9998f64115d"
+          },
+          "source_files": 6,
+          "runtime": [
+            {
+              "service": "omni-frontend",
+              "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af"
+            },
+            {
+              "service": "omni-asset",
+              "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752"
+            }
+          ]
+        },
+        {
+          "aggregate": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+          "test": {
+            "path": "scripts/fixtures/capture-asset-usage.mjs",
+            "sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55"
+          },
+          "source_files": 6,
+          "runtime": [
+            {
+              "service": "omni-frontend",
+              "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af"
+            },
+            {
+              "service": "omni-asset",
+              "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752"
+            }
+          ]
+        },
+        {
+          "aggregate": "1a2756d8ca79a816197eabc34a9386a5171421dc9cffd767268e748e44510246",
+          "test": {
+            "path": "scripts/fixtures/capture-asset-usage.mjs",
+            "sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006"
+          },
+          "source_files": 6,
+          "runtime": [
+            {
+              "service": "omni-frontend",
+              "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af"
+            },
+            {
+              "service": "omni-asset",
+              "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752"
+            }
+          ]
+        }
+      ],
+      "identity": "Short-livedteachingtoken/sessionpreparation;notCAPTCHA/passwordloginproof",
+      "all_locale_preview_not_all_locale_writes": true
+    },
+    "new_current_run": false
+  },
+  "current_source_semantics": {
+    "retry": "START_FAILED+FAILEDorPENDING_APPROVAL+PENDING;currentrequestversion/originalsnapshotandoccupiedassetretained",
+    "cancel": "OnlySTART_FAILED+FAILED,notoutcomeunknownorSTARTED",
+    "completion": "APPROVEDonly;transferupdatesusage/locationnotowner;disposalterminalSCRAPPED/DISPOSED;occupancyclearedatomically",
+    "rejection": "MatchingworkfloweventtransactionallyrestorespreviousAssetStatusandclearsoccupancy",
+    "usage": "Allocateversion/user/unit/remark,nolocation;accept/returnassigneduseronly;returnclearsthreeusagefieldsandkeepsowner",
+    "ingestion": "Two v1events;Inboxintent/eventandperunitGRsourceidempotency;PASS+managed+matchingpositiveintegerreceivedandassetquantity",
+    "visual_limit": "NoownervaluesorallocatedTimeinthepublishedreturned-detailpixels;useAPIreceipt;ENallocationlabelcrowdingremains"
+  },
+  "application_runs_this_audit": 0,
+  "business_writes_this_audit": 0,
+  "new_captures": 0,
+  "new_builds_or_tests": 0,
+  "historical_successful_writes_replayed": false,
+  "human_review": false,
+  "human_review_required": false,
+  "limitations": [
+    "Three whole292source lines andselectedranges;66priorbindings reusedatactualscope",
+    "Current20rawviewsnotall44freshviews;datedsource/test/runtimegroups retained",
+    "Historicalcontact-sheetreviewisnot48individualrawopens",
+    "ActualCAPTCHA/passwordlogin,all-languagenativemutations,currentintegratedacceptance/globalcoverageandfullA-Gstillopen"
+  ]
+}

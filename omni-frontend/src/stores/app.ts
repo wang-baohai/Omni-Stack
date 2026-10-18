@@ -38,8 +38,8 @@ function applyThemeClass(theme: 'light' | 'dark') {
  * 管理侧边栏折叠状态和主题模式。
  */
 export const useAppStore = defineStore('app', () => {
-  /** 侧边栏折叠状态 */
-  const sidebarCollapsed = ref(false)
+  /** 手机端初次加载时收起侧栏，避免覆盖当前页面。 */
+  const sidebarCollapsed = ref(window.matchMedia('(max-width: 768px)').matches)
   /** 当前主题，从 localStorage 读取或使用默认暗色模式 */
   const theme = ref<'light' | 'dark'>(
     (localStorage.getItem(THEME_KEY) as 'light' | 'dark') || 'dark',

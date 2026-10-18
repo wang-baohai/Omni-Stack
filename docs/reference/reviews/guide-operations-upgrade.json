@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-operations-upgrade",
+  "source": "docs/guides/operations-upgrade.md",
+  "source_sha256": "cc4c3588f07cc484aa52bb7f1e6f97b83f730b02ba3ea9fef1437479d356e3e3",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "63d9ba565e6b85f89e915c4420b79ef90ce6063c",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/operations-upgrade.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 14:54:15",
+      "result": "approved",
+      "translation_sha256": "127f9f6bd86b8db131d4b594c817d23d7c56ef2459018d1cc2635fdf96be3022",
+      "checks": {
+        "coverage_and_meaning": "Read all seven sections, including startup, real trace/log retrieval, the replaced four-language alert exercise, backup prerequisites, logical/database-and-application restore boundaries, upgrades and security. All required Chinese steps and acceptance limits are represented.",
+        "technical_literals": "Compared Docker Compose commands, the complete PowerShell browser command, Playwright1.61.1, locale paths, 9093/8080 and 19900–19907, the unchanged two-minute pending rule, 25 spans/6 logs/13 targets, nine databases/181 tables/60 changes and the 21-check restore evidence.",
+        "security_and_failure_semantics": "Teaching-project identity, exact Base container recovery on failure, local-null/no external channel, GET/HEAD-only browser and no fake alert are explicit. Restore-copy scheduler quarantine, unchanged source database, forward-only migrations and no production disaster-recovery claim are preserved.",
+        "language_and_terminology": "Clarified that Muted and related controls filter the displayed alert list rather than changing notification rules or repairing faults. Kept source-localized native Elm distinct from upstream backend; normal vertical phone scrolling and untested positive silence writes are not hidden.",
+        "images_and_links": "All three current English images were actually inspected and SHA-bound in the registered receipt. Four-language 12-image proof and eight control scenarios match actual results. Old English controls remain a historical link, not current four-language evidence; all tutorial links use English siblings."
+      },
+      "findings": [
+        {
+          "id": "old-english-exception",
+          "status": "resolved",
+          "description": "Old text shared English images, described horizontal clipping and left acceptance pending after the user required native four-language UI.",
+          "resolution": "Replaced only that teaching section with real source-localized UI instructions and current locale images; retained the historical receipt with its original scope."
+        },
+        {
+          "id": "filter-semantics",
+          "status": "resolved",
+          "description": "Notification-state filters could be mistaken for changing notification rules.",
+          "resolution": "Explicitly state they filter the list and do not change fault state or notification rules."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/operations-upgrade.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 14:54:15",
+      "result": "approved",
+      "translation_sha256": "e54c4572f82c5726dd25eddc8ef6993c42098164c3e11c64928c0abc288b48a3",
+      "checks": {
+        "coverage_and_meaning": "起動、Trace/ログ、4言語の実アラート演習、バックアップ、論理復元とアプリ復元、更新、安全の全7節を読み、中文の前提・操作・復旧・範囲を照合した。",
+        "technical_literals": "ComposeとPowerShellの全コマンド、Playwright1.61.1、4パス、9093/8080・管理ポート、2分pending、25Span/6ログ/13target、9DB/181表/60履歴、21復元検査を一致確認。",
+        "security_and_failure_semantics": "専用教材環境・同一Baseの復旧・local-null・GET/HEAD限定・偽アラート禁止を保持。復元コピーの旧スケジューラー隔離、元DB保護、実行済み移行の不変更、本番DR未証明を明記。",
+        "language_and_terminology": "面板をパネル、復元副本を復元コピー、調度をスケジューラーへ修正。サイレンス等は一覧の状態フィルターであり、通知設定や障害状態は変えないと明確化。",
+        "images_and_links": "ja-JPの3原図を実際に目検し登録SHAと照合。12枚・8検証組の範囲は実記録に一致。旧英語記録は過去の証拠として保持し、現在のUI説明は日本語の画像・入口を使用。"
+      },
+      "findings": [
+        {
+          "id": "old-english-exception",
+          "status": "resolved",
+          "description": "旧本文は英語共用図と横方向の操作欠落を未確定としていた。",
+          "resolution": "実際の4言語UIと現在の日本語原図に置換し、過去の記録は履歴として参照。"
+        },
+        {
+          "id": "japanese-technical-prose",
+          "status": "resolved",
+          "description": "面板、復元副本、調度という中文表現が残っていた。",
+          "resolution": "パネル、復元コピー、スケジューラーへ修正して技術的意味を保持。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/operations-upgrade.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 14:54:15",
+      "result": "approved",
+      "translation_sha256": "68976ca36fdf89c1ee38e4be116b129f6ffa2f83924d8abcfeec3197b64c2c72",
+      "checks": {
+        "coverage_and_meaning": "시작, Trace·로그, 네 언어 알림 훈련, 백업, DB·앱 복원, 업그레이드, 보안의 전체 7개 절을 읽고 중국어의 전제·절차·결과·복구 한계를 대조했다.",
+        "technical_literals": "Compose와 PowerShell 전체 명령, Playwright1.61.1, 네 경로, 9093/8080과 관리 포트, 2분 pending, 25Span/6로그/13target, 9DB/181표/60이력과 21개 복원 검사를 확인했다.",
+        "security_and_failure_semantics": "격리 환경의 정확한 Base 복구, local-null, GET/HEAD 전용, 가짜 알림 금지, 복원본 스케줄러 격리와 원본 DB 보호를 유지한다. 실제 외부 알림·운영 DR·이전 큐 복원을 검증했다고 주장하지 않는다.",
+        "language_and_terminology": "일시 중지·억제·시간대 음소거는 목록 필터이며 알림 규칙이나 장애를 바꾸지 않는다고 명확히 했다. 네이티브 Elm 번역 UI, 공식 백엔드, 일반적인 세로 스크롤의 경계를 구분한다.",
+        "images_and_links": "한국어 데스크톱·태블릿·휴대폰 원본을 실제로 확인하고 SHA로 등록했다. 12장과 8개 제어 시나리오는 실제 기록과 일치한다. 과거 영어 기록은 이전 UI로 한정하고 현재 그림·가이드 링크는 한국어를 사용한다."
+      },
+      "findings": [
+        {
+          "id": "old-english-exception",
+          "status": "resolved",
+          "description": "이전 안내는 공용 영어 그림과 가로 잘림의 수용 여부를 미정으로 남겼다.",
+          "resolution": "실제 네 언어 UI와 해당 한국어 원본으로 교체하고 과거 기록의 역사적 범위를 명시했다."
+        },
+        {
+          "id": "filter-semantics",
+          "status": "resolved",
+          "description": "필터를 알림 전송 규칙 변경으로 오해할 여지가 있었다.",
+          "resolution": "목록 표시만 필터링하며 규칙이나 장애 상태는 변경하지 않는다고 명시했다."
+        }
+      ]
+    }
+  }
+}

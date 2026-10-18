@@ -1,5 +1,7 @@
 # 登录、验证码、社交登录与租户选择
 
+本节原图来源见[2026-10-12 基础验收](../reference/evidence/basic-2026-10-12.json)：44 个独立检查与 44 张逐张复核原图，保留多次采集的准确源码和镜像身份。页面可读不等于本节所有业务操作已验收；日/韩部分 Status、Phone、Email、Retry 仍是实际英文回退，数据名称沿用教学数据。
+
 适用角色：最终用户、租户管理员、身份系统维护者。
 
 ## 1. 登录入口与租户
@@ -46,6 +48,40 @@
 
 回调地址、客户端密钥和允许的来源必须通过环境配置提供。生产环境不得使用仓库中的开发客户端配置。
 
+### 本地应用配置与工具验收
+
+先在被 Git 忽略的 `.env` 或仓库外私有环境文件中填写下列变量；只填写自己的应用凭据，不将真实值写入 Wiki。
+
+| 提供方 | Client ID | Client Secret |
+|---|---|---|
+| GitHub | `GITHUB_CLIENT_ID` | `GITHUB_CLIENT_SECRET` |
+| Google | `GOOGLE_CLIENT_ID` | `GOOGLE_CLIENT_SECRET` |
+| Gitee | `GITEE_CLIENT_ID` | `GITEE_CLIENT_SECRET` |
+
+Compose 当前直接设置三个 `AUTH_OAUTH2_*_REDIRECT_URI` 为 localhost:8102 的网关回调。仅在 `.env` 增加同名键不会覆盖这三个固定环境值；更换域名或改用 127.0.0.1 时，应使用仓库外的 Compose override 覆盖 `omni-auth.environment`，并在提供方登记完全一致的 URI。`AUTH_OAUTH2_FRONTEND_CALLBACK_URL` 应与浏览器访问的前端地址一致，例如 `http://localhost:3000/callback`。不要将应用 Client Secret 填入平台账号的登录表单。
+
+当前 `OAuth2StateUtils` 校验 HMAC 和 10 分钟时间窗口，没有保存或原子消费一次性 nonce。本轮重复有效 state 仍进入提供方换码分支，因此这些负例不能证明 state 单次消费。
+
+[2026-10-13 本地工具验收](../reference/evidence/oauth-local-2026-10-13.json)记录三家真实授权页、配置绑定和回调拒绝分支。官方登录页 HTTP 200、无效授权码被拒绝，均不等于用户授权、成功换码或本地社交账号登录已完成。
+
+### 外部 OAuth 截图待补充
+
+GitHub、Google、Gitee 的二次登录校验需要账号持有人操作。本轮按项目所有者决定暂缓采集，分别保留下列待补充区域。当前尚未验证这三家真实用户授权后的成功回调、换码和本地登录；截图占位不代表验证通过。
+
+#### GitHub
+
+> **待补充截图**：GitHub 二次登录校验、授权确认，以及返回本系统后的登录结果。
+
+#### Google
+
+> **待补充截图**：Google 二次登录校验、授权确认，以及返回本系统后的登录结果。
+
+#### Gitee
+
+> **待补充截图**：Gitee 二次登录校验、授权确认，以及返回本系统后的登录结果。
+
+后续在本机 Docker 浏览器中真实完成校验与授权后，以脱敏原图替换对应区域，并在截图清单中登记语言、角色、租户、来源版本和实际验证范围。不要截入密码、验证码、令牌、Cookie 或个人账号信息。本次仅暂缓上述三家外部流程的截图；密码 CAPTCHA、本地 PKCE、设备码和 SRM 注册仍按各自范围验收。
+
 ## 5. 设备码授权
 
 设备端通过 `/device` 申请设备码并展示用户码与二维码；用户在 `/device/verify` 登录并确认授权。设备端只轮询令牌端点，不处理用户密码。用户码过期、拒绝或已消费后，设备必须重新发起流程。
@@ -77,7 +113,7 @@
 - 前置条件：无浏览器的设备发起 OAuth2 设备授权流程
 - 操作者：设备使用者
 - 操作：打开 `/device` 获取用户码后到 `/device/verify` 输入
-- 预期结果：显示设备用户码（固定 10:00 倒计时）与确认入口
+- 预期结果：真实设备授权接口成功后显示用户码、二维码、服务端有效期对应的实时倒计时与确认入口；公开截图遮罩当前有效的码和链接
 
 ![设备码授权](../images/zh-CN/auth-device-code.png)
 
@@ -118,3 +154,10 @@
 
 完整协议和错误格式见 [API 契约](../api-contract.md)，端到端认证流见 [核心流程](../core-flows.md)。
 
+## 8. Docker 回调与实际验收边界
+
+1. 第三方 OAuth 应用的允许回调应与 `compose.apps.yaml` 的 `AUTH_OAUTH2_GITHUB_REDIRECT_URI`、`AUTH_OAUTH2_GOOGLE_REDIRECT_URI`、`AUTH_OAUTH2_GITEE_REDIRECT_URI` 完全一致。本地默认进入 Gateway `http://localhost:8102/api/auth/oauth2/{provider}/callback`；生产换为浏览器可达的 HTTPS 域名。容器内部的 `omni-auth:8080` 不能作为外部回调。
+2. 成功回到前端 `/callback` 后由 Vue Router 消费认证结果；失败回到登录页。Nginx 对站内路由回退到 `index.html`，`/api/*` 和 `/oauth2/*` 转发 Gateway，再通过服务发现到 Auth。令牌片段、Cookie、客户端秘密和有效验证码不能进入截图或公开日志。
+3. 验证码不显示先看 Auth 到 Redis 的连接；失败或过期应刷新后请人重新输入，不能重放旧码。密码失败时核对租户；真实 401 则核对 Gateway 到 `/oauth2/jwks`、签名、有效期和当前会话。账户限流与会话失效分别排查。
+4. `state` 失败核对服务端签名秘密与回调参数；提供方超时核对容器出站网络和配置代理；自动建号冲突跟进 `gh_`/`go_`/`ge_` 的备用命名。外部 provider 换码与本地 PKCE 换码使用不同配置。
+5. [真实登录记录](../reference/evidence/human-login-2026-10-09.json)证明一次人工 CAPTCHA 密码登录。注册页、设备码初始化、Portal 入口和会话错误截图各有独立范围；测试身份、客户端注入 401、未配置的外部提供方和页面访问均不能证明注册成功、设备授权完成或外部社交登录完整成功。

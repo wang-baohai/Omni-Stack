@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "mq-reliability",
+  "source": "docs/mq-reliability.md",
+  "source_sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "Codex read each full Chinese source and all three translations, corrected findings, and compared semantic and technical boundaries.",
+  "translations": {
+    "en-US": {
+      "path": "docs/mq-reliability.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:26:49",
+      "result": "approved",
+      "translation_sha256": "eea187884c2c5a68ecd3d9d25c80b129cbf9c0be970bfd6d48c8781d01c48c48",
+      "checks": {
+        "coverage_and_meaning": "逐段核对入队/投递架构、六状态生命周期、领取CAS、重试、管理动作、租户隔离、源码和分阶段验证。",
+        "technical_literals": "六状态编码0–5、120s租约、100条批次、20/40秒及第三次死信、Cron10s/12次、HTTP/业务码、bindingName与broker_type逐项一致。",
+        "security_and_failure_semantics": "显式正tenantId、后台跨租户扫描例外、同数据源有效事务、至少一次与消费幂等、禁敏感标签、无投递不等于丢失全部保留。",
+        "language_and_terminology": "enqueue、claim、lease、dead-letter、at-least-once、idempotency and transaction limitations all match the Chinese source without stronger delivery promises.",
+        "images_and_links": "无图片；Wiki、outbox锚点、DDL、全部Java类/测试与夹具相对路径准确，语言入口对应各自版本，未用合成行假证事务原子性。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/mq-reliability.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:26:49",
+      "result": "approved",
+      "translation_sha256": "dcd2744b4fbb6795ec82ccfb8f683d5970ca4c356c78ef751bda6bf896cfb129",
+      "checks": {
+        "coverage_and_meaning": "逐段核对入队/投递架构、六状态生命周期、领取CAS、重试、管理动作、租户隔离、源码和分阶段验证。",
+        "technical_literals": "六状态编码0–5、120s租约、100条批次、20/40秒及第三次死信、Cron10s/12次、HTTP/业务码、bindingName与broker_type逐项一致。",
+        "security_and_failure_semantics": "显式正tenantId、后台跨租户扫描例外、同数据源有效事务、至少一次与消费幂等、禁敏感标签、无投递不等于丢失全部保留。",
+        "language_and_terminology": "将入隊（加入军队）改为キュー登録，业务消费明确为受信側の業務処理；CAS、至少一次与各失败条件未变。",
+        "images_and_links": "无图片；Wiki、outbox锚点、DDL、全部Java类/测试与夹具相对路径准确，语言入口对应各自版本，未用合成行假证事务原子性。"
+      },
+      "findings": [
+        {
+          "id": "enqueue-meaning",
+          "status": "resolved",
+          "description": "原译文使用入隊，日文通常指加入军队而非消息入队。",
+          "resolution": "统一为キュー登録并用受信処理表达消费阶段。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/mq-reliability.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-13 12:26:49",
+      "result": "approved",
+      "translation_sha256": "a7e7d806ef2e3cdf372571fac08f2721cf089db01411cd63e8fae6c52a2a52e1",
+      "checks": {
+        "coverage_and_meaning": "逐段核对入队/投递架构、六状态生命周期、领取CAS、重试、管理动作、租户隔离、源码和分阶段验证。",
+        "technical_literals": "六状态编码0–5、120s租约、100条批次、20/40秒及第三次死信、Cron10s/12次、HTTP/业务码、bindingName与broker_type逐项一致。",
+        "security_and_failure_semantics": "显式正tenantId、后台跨租户扫描例外、同数据源有效事务、至少一次与消费幂等、禁敏感标签、无投递不等于丢失全部保留。",
+        "language_and_terminology": "등록、전달、임대、멱등、데드레터和건너뛰기准确区分状态；修正数字粘连，使120秒/100条/20与40秒等可读。",
+        "images_and_links": "无图片；Wiki、outbox锚点、DDL、全部Java类/测试与夹具相对路径准确，语言入口对应各自版本，未用合成行假证事务原子性。"
+      },
+      "findings": [
+        {
+          "id": "numeric-readability",
+          "status": "resolved",
+          "description": "多个关键数字与韩文词粘连，重试顺序难读。",
+          "resolution": "分隔数字、使用第一/二/三次自然表达，保留全部技术数值。"
+        }
+      ]
+    }
+  }
+}

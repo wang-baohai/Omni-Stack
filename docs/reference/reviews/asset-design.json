@@ -1,0 +1,1219 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "asset-design",
+  "source": "docs/design/asset-design.md",
+  "source_sha256": "65697478af3cd5b176e59f7776ffd956cf076d7d556c6b5e5eeadcba150de620",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "1c6242aa99acdcc39e30c5e8e726c382d9aa0cda",
+  "source_state": "Whole current four-language Asset design/fact family reviewed.Original2026-07-27 design,phases and important milestones/ADR/risks preserved with applicability.Only this family approved;linked operation/source Wiki reviews remain separate.",
+  "method": "Read all four complete original684-line documents, rereading clipped sections and excluding the truncated Korean attempt; then manually author and compare all replacement prose, tables and six diagrams in every language against the Chinese fact source and selected implementation evidence. The whole resulting family is covered by the previously read retained sections plus all manually compared changes. Inspect final assembled Chinese opening/model, English scope/API/integration/privacy and Japanese transaction/diagram ranges, Korean frontend/security/entry text, actual route inventory and Git change scope. Correct retained path/permission shorthand, current-entry headings, Japanese envelope/Korean initiation wording and Redis-versus-Auth fallback distinctions in230b before application231. Current source66selecteddigests and all four complete Markdown renders bind the reviewed result. Automated rendering is supplementary, not the semantic decision.",
+  "checked_source_files": [
+    {
+      "path": "database/changelog/asset/0001-asset-schema.yaml",
+      "sha256": "e4b5f80df2e380ee71fb664d0c73ee4b4515e52d1c1e98ade30394b5cdc5fbb6"
+    },
+    {
+      "path": "omni-backend/omni-asset/pom.xml",
+      "sha256": "a661a82550ace2f4f286c19fb3b4273f707f698b445dd2457184bbcad5c19a9e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/client/AuthInternalClient.java",
+      "sha256": "57718199ce0cac75ff7ad2b15c8e2517fa3e1891dc593f7b9edc8d1a49468093"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/client/ProcurementInternalClient.java",
+      "sha256": "3d616a7f06d87ff6aba1dd8340c13e9b5f68b49ba7718c8375892a9dc2966174"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/client/SrmInternalClient.java",
+      "sha256": "d1381b4d20c448f737b6a94a8c251506262dcec059cad8c2ccc1808fa0b65239"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/config/SecurityConfig.java",
+      "sha256": "41d9e8a91c9bfb4a7ff1d516aaf906137233399d05772e50df4ad990b0f774cf"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/consumer/ProcurementGoodsReceiptConsumer.java",
+      "sha256": "605ac6baae0629e9eb025cb989f537cc3ceb358db70db6eb231d2473e35ac1c2"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetController.java",
+      "sha256": "4456c7345561bcf533ce6e17f5dcce88003afa1873a84d41beb0f8c69d0f4f74"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetDisposalController.java",
+      "sha256": "06534f7d4734cdc108a3b0c41382b0a8396efc0c69f0a965ef3d0c21b3ae34ee"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetOptionsController.java",
+      "sha256": "26a9fb52210a80019bc436ae3dad592fc25a51e66df95daa4102313eca50e6d4"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetOverviewController.java",
+      "sha256": "10e9e9d818399a4b607985597cb9aadffe8105090c67549b6eae16f6ff551b01"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/AssetTransferController.java",
+      "sha256": "96f7b4339c677c91c58fd56532e56d605952a395fceab709ac512307c9d8ae9b"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/controller/InternalProcurementBackfillController.java",
+      "sha256": "fc90bc749bd2fe4721a4db375b38d938fdfe2cf9f2ad022aef973c51baf03cfc"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/domain/AssetOperationStateMachine.java",
+      "sha256": "b1b1530668badc1d8cfc49a3008766f1ee646515019ecf755a4390d019910a5a"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/domain/AssetStateMachine.java",
+      "sha256": "d47acf127e28779a52b6588b3e78be19608e36246cb0462d402ceec89f4a68fc"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetDomainEvent.java",
+      "sha256": "dccc377516c92a1ec0007e63ebff30aed8e1b1e8458e0b02e301945dc1b4485c"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOperationRequests.java",
+      "sha256": "0481f626ac010684335d66f96ef776ffa83b631cbe38c1eac8d7f68bc644a033"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOperationViews.java",
+      "sha256": "9d3ff9294a9a52b994694989a921fa57b1cf9a884f63f3beabb35ffb12f6fd11"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOverviewRequests.java",
+      "sha256": "6c78b6af49c8ea4fb8d75538f668487bb9b9e83fa67f8b2fe6ee09ca2fee7f84"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetPageQuery.java",
+      "sha256": "bc07c7781c55b65053692200863de0b4b1121f595f9133c3b30d2730849f9cb4"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetRequests.java",
+      "sha256": "5ccdc6ab795175575ec5178015b19a3960b2a63ec1ce3ce03fa137c08948e9dc"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetViewAssembler.java",
+      "sha256": "999f7d0bb513bd63aa54e389d4a93133650b07ebb6647ac420fa019043b17abe"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetViews.java",
+      "sha256": "ab0aa2759b43f4c5b8e23741ec02b96e5a9273d08f437888d7eda0c2d317a80e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/entity/AstInboxEvent.java",
+      "sha256": "0ae4ef7cf045c5ded5fac742709c783f5aeffd1fff0da8206ebe5b4a5c27b8de"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AssetOverviewMapper.java",
+      "sha256": "e00b92fdc4bc795f8930667700ddd59891e7dfb7cef29ee51abdc43b3c60c78a"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AssetReceiptImportMapper.java",
+      "sha256": "5426334bdbe64f28a4e0e8690fa714c0502e1c33b0f763eaa81ab3b088a39bbf"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AstAssetMapper.java",
+      "sha256": "2413ec60850b4d11b1195d6f514d773d4dfb652ef3349138811fc7936816d379"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/mapper/AstInboxEventMapper.java",
+      "sha256": "61e9e60923b43488b9ef18f33e93280cf89da2049933560b23cc36f4b9fd0435"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/security/AssetDataPermissionHandler.java",
+      "sha256": "c24e44f1f561f94d315919c2c6fd9ef8679f9b5189b456585a83b65589a10eda"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/security/AssetTenantTablePolicy.java",
+      "sha256": "d156acdca1f3eac7517c783f08ede33e9dfca31f0912abc161755b330f8a6f5f"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetDisposalServiceImpl.java",
+      "sha256": "a3e1a80a162f360fbe37d380d389fa131c4a39dc9e0d04a3079df713e8fcaf5f"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImpl.java",
+      "sha256": "090b0c041065cca3bc8d8cd8df56ab9fc2758744b5cacc6f6312d679b830aead"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOptionServiceImpl.java",
+      "sha256": "486105cebca195c1efc25c8351fdf97bcd446c18bf9d125910dc9a9b3c1fbc9e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetOverviewServiceImpl.java",
+      "sha256": "4b4b33ec6c2684da773ba6b799a667fed0e1072669c5141521a64453693a6bb2"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetServiceImpl.java",
+      "sha256": "e00cd0d9a80f6343f0eb6971830e7f36b88f23e5efd45143eedf86e945acee1b"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetTenantModuleProvisioner.java",
+      "sha256": "c31fac8be95e193131b0724bfa361b922c296da2f16bdc1f456c0fa1d287b334"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetTransferServiceImpl.java",
+      "sha256": "7de6e16807f8f7230123e53529fb269a8a26d26880b42f06e23de62c1a1f30de"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/ProcurementAssetBackfillServiceImpl.java",
+      "sha256": "8bc8149d1ca264f068ff28562cd1e42a35dfe887db348b877d3fb5cd4685af28"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImpl.java",
+      "sha256": "d5932e2e482a7e936c4c31810aacfe858fd2e702e8e799e076d6363e14af5c4f"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/WorkflowCompletionServiceImpl.java",
+      "sha256": "976068f09a92536fdf284e6504ac6e806ca38399ff257a18278d3193dee926d2"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/support/AssetIdentityGuard.java",
+      "sha256": "2d8d00f7f6ea4893afdc5f7b15f4d3d763569f9800b2f7d904c9e1c767439ec0"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/support/AssetRecordAccessGuard.java",
+      "sha256": "8c92051e83e6358dd14e9509495516a0311b4dd0eff7fe64e0924e6bb49037e8"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/workflow/AssetWorkflowApprovalGuard.java",
+      "sha256": "fb1b4755b1cd84312288c7d1712a271e63e4e1d474fa5552ad28af55b8916345"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/workflow/AssetWorkflowCoordinator.java",
+      "sha256": "d554eba107cb08e67e738c81a198118f568eb80fbb71487c5ac80e27231a4fa4"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/workflow/AssetWorkflowModelGuard.java",
+      "sha256": "30711f887ada718cb66bb4656156af13c41f12b280d82f51cea7ceb8bb3184e0"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/resources/application.yml",
+      "sha256": "34451137fa3181e1192ec6de11fe5cc92488104b70d759036e95c52e96434680"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/AssetOperationWorkflowStateServiceImplTest.java",
+      "sha256": "f00013b89da9e4a1e1ad9d9fdf85ae619985e168653253966f910589b445ac91"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/ProcurementAssetBackfillServiceImplTest.java",
+      "sha256": "8e6f3083ab6d736af27613031f36b3c6c746015427c7174b7875e60103a69a4e"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/ProcurementAssetImportServiceImplTest.java",
+      "sha256": "47402543759f886fb28e328ce59db146ecf54eead0dec6aac25691e0ef4d5b58"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/service/impl/WorkflowCompletionServiceImplTest.java",
+      "sha256": "748e5286e7f9356f0a114a4b9b1720444a823b9098a51e6c4f18690436973aa7"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/test/java/com/omni/asset/workflow/AssetWorkflowCoordinatorTest.java",
+      "sha256": "5ebb30003c9e7c3583d41c00246eee1521062226c815f2d47f68af100b0bd46d"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/sanitize/OperLogSanitizer.java",
+      "sha256": "8f5d34bca9097343ca596b409e69bc15a1472b02a0aa6fc6cefd04a27cc31479"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java",
+      "sha256": "4fcaa7b87b3547392e77284334ad8553546cdac8351a402b726ce1f2d9697220"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java",
+      "sha256": "796424bf5067b1e80c3658572f2d1d3fb60a0db68c5bf349db10b5ddd323328d"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+      "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+      "sha256": "fb540dc12ae8c821fd9324a06de566beee5aa7bf4e0f105668f3a1bd139ac020"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+      "sha256": "65012a8fc6a5311a06e32e6201ff3f6ec9da84c58341e2f0c678ca19f5037c16"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+      "sha256": "63a1a2bd58ae7b696d77f8ec1e1e5616020f297999f11ec412c32de1fff09ac8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+      "sha256": "f63cb03ab55045944f20e206bec4c5d59d04f4a7abc5abebb37e641054dabd83"
+    },
+    {
+      "path": "omni-frontend/src/api/asset-asset.ts",
+      "sha256": "d506175e3fa4ef410afff751cf4578328558fa06159e127496aa2b46bb22e762"
+    },
+    {
+      "path": "omni-frontend/src/router/index.ts",
+      "sha256": "9dbcdcffb4915cef1c26a39a6ef07b0bfdd55426391bf8a0cdfacdac0d1fe8d4"
+    },
+    {
+      "path": "omni-frontend/src/views/asset/asset/index.vue",
+      "sha256": "a2a9c72a8ccbb9fd50800b180bcce7fecb3ea796c0b7743237a0d05b1f3c9be5"
+    },
+    {
+      "path": "scripts/sql/seed/auth.sql",
+      "sha256": "131d495c9b1eed92d4d2a7f0aaf92026117c25c6d8d13b8773fdc00fb94c357c"
+    },
+    {
+      "path": "omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/DefaultXssSettingsFallback.java",
+      "sha256": "3b6881f0ff8c5855a8711732ee5268fb38ea1176bc4a987cad93a136ad4c2f16"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetOperationViewAssembler.java",
+      "sha256": "1c514bd7d97bc7ae308a7187df24c7f9302624f021011c474e670fc1978414f7"
+    }
+  ],
+  "source_inspection_scope": "Selected current source ranges and six Controller mappings inspected;prior unchanged Flow17 implementation evidence reused.Whole-file digests do not mean every source line or deployed behavior was inspected.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_markdown_rendered_documents": 4,
+    "mermaid_fenced_blocks": 24,
+    "raster_images": 0,
+    "domain_tables": 5,
+    "controller_count": 6,
+    "external_http_method_paths": 32,
+    "internal_http_method_paths": 1,
+    "controller_method_paths_matched": 33,
+    "original_design_date": "2026-07-27",
+    "original_important_history_preserved": true,
+    "unit_reports": [
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.client.AssetInternalFeignConfigTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "e43b90de4fb4c82de04abce75d68fd20871c1a3e9d081804fd45741522a82979",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.config.MybatisPlusConfigTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "ba1900705d2fe78697eea05c2e95b40a9713fca818234f05845f79c87ab66d0e",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.consumer.ProcurementGoodsReceiptConsumerTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "57091a1a616b6649390b532486c2138e7f1ddf2192f5e536d03807e158d8a289",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.consumer.WorkflowProcessCompletedConsumerTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "9b94969a52a64d371b2aea80d010ba649c484d012c52dff317b6ebf82f74ca59",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.controller.AssetControllerSecurityTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "fbffbc278610e5fad015f83d67ba93763d79154ebb9a96c1c2e7665cc8608f0c",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.controller.AssetOperationControllerSecurityTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "1d1d3e39744473fe0479429bbdd9cbd1a1c6de36e9e4dd438aeb8977cdafdd6c",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.controller.AssetOverviewControllerSecurityTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "6766f4c454a1d66f9eecf4fd5d986d426a035aa52d05dab09fc6a94892825a22",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.domain.AssetOperationStateMachineTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8d3ae610cb8f8276f495d4e768a76bc34fecd9794498340bd45a1b2aaca4bf37",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.domain.AssetStateMachineTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8edd2f4c306086abb00a1baaf77079abc93482289b3d04a328541810ffe848de",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.dto.AssetJsonSerializationTest.xml",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "67442ddd194541e75d34e2c877f42815649570c556e6473362909f3ade69dbb5",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.security.AssetDataPermissionHandlerTest.xml",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "c6674db881397d7afa25acab7ad90aa8cbc748476423677aa725b6da92698815",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.security.AssetStarterSecurityTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "377c4174bf858cfd681850c4f3e8bcfd04fd4cea4994fbd534114b96b1c2e472",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.security.AssetStarterXssTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "61b2ea3d29e20ba82816f2c54f977bdef1d93e532beec6fa61c3052a97b7d793",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.security.InternalApiAuthFilterTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "d8294805975a0e37937cd6886ec06b48c0c4b3684061d69af8857222d1b5c94c",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.impl.AssetOperationApprovalViewTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "824c54616a1d2915d12da5c77316438ef55bd3cb86ae8b5ee4a09c76cde94621",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.impl.AssetOperationWorkflowStateServiceImplTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "0d92cde38788a9aa6bb6000033fda5728a504112d1006451e3dce4a4d7db7d4d",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.impl.AssetOptionServiceImplTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "bb1b7a39d1d76ba1539b2afac73b32d482b13c61a812b289e624a77a4ee5e5d5",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.impl.AssetOverviewServiceImplTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "98ba9d98386edd0f96b8386c10427b50ac068edf3ca7c50e80cb52485aba87ac",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.impl.AssetServiceImplTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8a7e95a1bab52c3806737edbf45b77925e205a972a37ac79362cfd6f87bc5453",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.impl.AssetTenantModuleProvisionerTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "4de6162e570d5d71f6f4d06a3c8139e19ef97f906bc927a1db84fd8d24ce012f",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.impl.ProcurementAssetBackfillServiceImplTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "b887a62cce242aeaa272e77bda71010bcbfef84363ecb124959b40ac6109052e",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.impl.ProcurementAssetImportServiceImplTest.xml",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "4399afa9b63e00472107fd97a2954a0442577af81b0f24778e007514428c9715",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.impl.WorkflowCompletionServiceImplTest.xml",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "68380fb497853f378f92a04933e2ce1f15dd10abe8f734ce931486b4aa871a7f",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.support.AssetIdentityGuardTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "f032c2d2b11f88072fbf8db32fa48f36f16605b4a31f293423e044c26d85ff43",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.service.support.AssetRecordAccessGuardTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "3bf0dd6842fe162550be65c4de39eb302274e6dc4cc4e3f33f3976da228aad37",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.workflow.AssetWorkflowApprovalGuardTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "4a8099ceed2c71554cecefaa15ea3c26365224aab5a211851321872e0e920222",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.workflow.AssetWorkflowCoordinatorTest.xml",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "4d4990a39612de488e384d4c87fb7f5e86e75dca0c055230f3ac63f2be986735",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-asset",
+        "file": "TEST-com.omni.asset.workflow.AssetWorkflowModelGuardTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "e671ee818bbaa2d99cb54607756e2db5ecef2522e278c0ae373ec9be913bc02d",
+        "skip_reasons": []
+      }
+    ],
+    "reused_report_totals": {
+      "reports": 28,
+      "tests": 106,
+      "passed": 106,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "rerun": false
+    },
+    "application_or_business_execution": false,
+    "wiki_reviews_awarded": false,
+    "limitations": [
+      "Authorized AI semantic review is not HUMAN_REVIEW or current runtime/release acceptance.",
+      "Selected source ranges and prior unchanged Flow17 evidence are bound; whole-file hashes do not mean every implementation line was read.",
+      "Four complete Markdown renders contain24Mermaid fences; actual diagram browser layout and root/subpath site remain G.",
+      "Existing28reports106passing assertions0skip reused without expensive unchanged builds or successful business writes repeated.",
+      "Wiki whole-guide reviews remain separate. All original A-G, OAuth0/3, real SRM CAPTCHA, native Qoder and remaining60review rows continue after these three actual approvals."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/design/asset-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 09:22:57",
+      "result": "approved",
+      "translation_sha256": "0ae419e3f5d85b819d5c4c5ba523ae2c9d2f78f97f2639544b90dd04e0d3860b",
+      "checks": {
+        "coverage_and_meaning": "逐段覆盖16节及当前四语全文：原2026-07-27日期/历史与分期、独立Asset/Workflow边界、八公共依赖、五领域表含Inbox、ID/归属/金额与删除条件、八状态/版本化生命周期命令、完整采购校验与实时/候选事务区别、双幂等/写后读/新卡Outbox、调拨/处置准备-启动-确认-审批-实物完成、32外部+1内部路径与候选权限、Auth/SRM/Procurement实际调用、PII/日志/XSS、真实四页面/台账本人页签/币种概览、当前工程入口、并发降级与测试要求。保留重要原里程碑/ADR/风险并明确历史适用性，教程/截图指向Wiki，不批准对应Wiki整篇。",
+        "technical_literals": "核对8107/19907/9907、omni_asset、/api/asset无StripPrefix、八个直接common依赖、Flowable排除、五表/三个关键唯一键、完整MyBatis链、owner/current用户维度及SELFtransfer例外、全部33方法路径、targetUserId/targetUnitId与申请version、categoryASSET_TRANSFER/ASSET_DISPOSAL、requestId/businessKey=operationId及原始发起人快照、REQUIRES_NEW确认、业务R.code404与HTTP404区别、采购价格/数量等式/Integer.MAX_VALUE/HALF_UP2/来源序号、JSON金额字符串、eventId/tenant/JSON语义意图、真实候选完整路径/afterId/size/nextAfterId/hasMore及逐候选事务、六类资产事件、application-lite.yml/compose.yaml。28份现有XML报告106通过0跳过逐份摘要匹配后复用，没有昂贵源码不变重跑。",
+        "security_and_failure_semantics": "管理owner与固定本人current_user_id不OR合并，SELFtransfer:create明确current_user_id例外，目标单位可写与Auth启用/主组织引用再验证。approval-view只PENDING_APPROVAL+STARTED及完整业务键/实例/本人任务资格，通过后临时TENANT读取并finally恢复。创建占位校验租户/ID/版本/原状态/deleted及两空活动字段。未知启动/响应或确认失败保持占位同键重试；R.code404仅尝试写FAILED，本地写失败仍可能PENDING，只有实际START_FAILED+FAILED可本地取消。早到合法完成可重试、旧/重复/异实例忽略、异意图409；APPROVED不等于物理完成。实时卡片/历史/Inbox/新卡Outbox原子，回扫不登记实时Inbox且逐候选提交，整页失败不能重跑成功写或假定全回滚。来源/金额先验全校验、合法非资产行跳过，Outbox不证明Broker/DLQ。保存username/自由文本是真实PII边界，日志规则有限；Redis失败先Auth，有有效权威设置则不fallback，回源失败才安全基线。",
+        "images_and_links": "无光栅截图；四语各六个Mermaid块，共24个，系统、ER逻辑关系、八状态、采购事务、调拨和处置的提交/确认/实物完成边界逐项比较，人用标签本地化。ER不声明跨库物理外键。所有33方法路径完整显示，权限缩写已展开。当前文件/目录与本语Wiki、源码索引和相关事实链接已核对，重要设计历史保留。Markdown渲染不等于Mermaid浏览器布局或完整根/子路径文档站验收；G综合验收仍保留。",
+        "language_and_terminology": "Read the full original English and compare every authored change with Chinese. Use asset ledger, management ownership/current usage, source-unit idempotency, controlled one-page backfill, original start snapshot, persisted explicit failure, occupancy and physical completion consistently. Preserve must/only/attempts/may/not proof qualifications, currency separation and decimal strings; actual commands and diagrams align with the source."
+      },
+      "findings": [
+        {
+          "id": "AS01",
+          "description": "Human-only release preface and implemented/verified header conflate historical and current evidence.",
+          "resolution": "Preserve 2026-07-27 design date and dated history; identify current fact scope, ADR0003 authorized AI_REVIEW and no fresh global acceptance.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS02",
+          "description": "Redis asset: business-key prefix and conditional XXL executor wording are unsupported by current configuration.",
+          "resolution": "Record DB0 shared xss keys and current configurable executor9907; do not invent module cache keys or active depreciation jobs.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS03",
+          "description": "Recommended common dependencies and old file tree describe plans rather than the current Maven/resources tree.",
+          "resolution": "List eight actual common dependencies, application.yml/application-lite.yml and compose.yaml; keep original milestones as history.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS04",
+          "description": "Domain aggregates omit ast_inbox_event.",
+          "resolution": "Describe all five domain tables and independent procurement/Workflow consumer Inbox roles.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS05",
+          "description": "Money contract omits decimal JSON strings and currency-separated aggregation.",
+          "resolution": "Explain purchaseAmount/residualValue string serialization/deserialization, 18,2 storage and per-currency overview totals.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS06",
+          "description": "Asset ledger promises current supplier/user/unit batch enrichment that the current service/assembler does not perform.",
+          "resolution": "Record supplierNameSnapshot and user/unit IDs returned by AssetViewAssembler; distinguish selection APIs from display enrichment.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS07",
+          "description": "Manual create/update/delete boundaries are incomplete.",
+          "resolution": "Document current owner validation, versioned metadata updates, no generic status/user/location edits and restricted manual-stock deletion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS08",
+          "description": "Procurement intake eligibility omits malformed-line rejection and exact amount/quantity checks.",
+          "resolution": "Validate every root/line, unique source IDs, positive quantity/prices, exact total equation and eligible integer equality before writes; valid ineligible lines are skipped.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS09",
+          "description": "Realtime intake transaction omits created-event Outbox and replay intent validation.",
+          "resolution": "Document transactional cards/history/Inbox/new-card Outbox, tenant plus JSON-semantic intent checks and source-key readback.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS10",
+          "description": "Historical backfill is described as automatic startup scanning and uses an incorrect internal path.",
+          "resolution": "Document controlled one-page POST and actual /api/internal/procurement candidate path, matching header/query tenants, strict cursor, caller orchestration and partial commits.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS11",
+          "description": "Backfill and realtime event paths are said to share whole-event Inbox behavior.",
+          "resolution": "Distinguish per-candidate transactional source-key intake from realtime Inbox; both share source-unit uniqueness and new-card events.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS12",
+          "description": "Allocation/accept/return commands omit versions and authoritative user/unit validation.",
+          "resolution": "Include version, targetUserId/targetUnitId, current-user guard, status/slot checks and permitted repair transitions.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS13",
+          "description": "Transfer/disposal diagrams obscure local prepare transaction before remote Workflow calls.",
+          "resolution": "Show model resolution, local snapshot+occupancy commit, remote start and separate confirmation; APPROVED still occupies the asset until business completion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS14",
+          "description": "Single-level approval is described as an enforced current MVP restriction.",
+          "resolution": "Keep the original dated simple-approval decision in history; current published category-bound BPMN determines approval behavior.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS15",
+          "description": "Workflow business404 is unconditionally equated with persisted START_FAILED.",
+          "resolution": "Only R.code404 attempts markFailed; local confirmation may fail and remain PENDING. HTTP404 Feign is unknown. Only persisted START_FAILED+FAILED permits local cancel.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS16",
+          "description": "All out-of-order Workflow completion events are described as ignored.",
+          "resolution": "Distinguish retryable early completion, ignored duplicate/stale/foreign-instance events and conflicting same-event intent409.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS17",
+          "description": "Atomic activity-slot example checks only active_operation_id.",
+          "resolution": "Record tenant/id/version/current status/deleted0 and both activity fields NULL; require one affected row.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS18",
+          "description": "Transfer completion can be misunderstood as moving management ownership.",
+          "resolution": "Document current-user/current-unit/location update with owner columns retained, plus separate versioned completion transaction and Outbox.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS19",
+          "description": "DataScope table omits SELF transfer-create special mapping.",
+          "resolution": "Add current_user_id for asset:transfer:create with SELF; maintain owner mapping elsewhere and no broad owner/current OR.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS20",
+          "description": "Approval-view description omits local start state and temporary scope restoration.",
+          "resolution": "Require PENDING_APPROVAL+STARTED and full business/instance/task assignment, then temporary TENANT read with finally restore.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS21",
+          "description": "API table mixes abbreviated paths and omits options endpoints.",
+          "resolution": "Enumerate every actual external and internal method/path from six controllers and state prefix conventions explicitly.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS22",
+          "description": "Auth/SRM/Procurement integration implies unused realtime enrichment/detail clients.",
+          "resolution": "Describe actual Auth candidate/reference validation, SRM approved-supplier search only and Procurement candidate client only.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS23",
+          "description": "Malformed incoming messages are said to reach dead letters without deployment proof.",
+          "resolution": "State consumer rejection/exception; actual retry/dead-letter policy depends on broker/binder configuration and is not asserted.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS24",
+          "description": "Asset is said to store no PII and only user IDs.",
+          "resolution": "Acknowledge original Workflow username snapshot, free text, supplier/source snapshots and identifiers; explain current sanitization scope without universal privacy guarantee.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS25",
+          "description": "Frontend tree lists nonexistent extracted components and promises transfer/disposal histories inside ledger detail.",
+          "resolution": "Describe four actual page/API files, ledger/my tabs, current detail/history display and separate operation pages.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS26",
+          "description": "Overview total amount suggests summing currencies or currency conversion.",
+          "resolution": "Describe amountsByCurrency and distribution dimensions, currency-separated grouping and no exchange conversion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS27",
+          "description": "Generic degradation claims overstate blanket Auth failure and live SRM display calls.",
+          "resolution": "Describe dependency-specific fail-closed commands/options, local snapshot reads and uncertain Workflow latches.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS28",
+          "description": "Test requirements and original milestones can be read as current executed acceptance.",
+          "resolution": "Keep requirements/history with labels; reuse only digest-matched existing Docker reports and leave real MQ/Workflow/concurrency/browser acceptance separate.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS29",
+          "description": "Japanese/Korean human-facing Mermaid/text-tree labels remain English.",
+          "resolution": "Localize all six diagrams and current navigation labels while preserving technical states/identifiers/contracts.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS30",
+          "description": "Original XSS prose incorrectly says a Redis outage itself forces baseline.",
+          "resolution": "All four versions now distinguish Redis failure -> Auth, authoritative result retained despite cache-write failure, and fallback only when Auth result is unavailable.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS31",
+          "description": "Retained scope table uses incomplete ledger paths and permission shorthand that could be copied as one invalid permission.",
+          "resolution": "Use actual full ledger paths and expand slash-compressed asset permission literals into complete codes.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS32",
+          "description": "Current engineering subsection headings and root application entry still suggest planned folders.",
+          "resolution": "Use current-entry headings and actual AssetApplication.java; polish Japanese envelope and Korean initiation terminology.",
+          "status": "resolved"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/design/asset-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 09:22:57",
+      "result": "approved",
+      "translation_sha256": "01f477a00ac812938f37e7c1513c274976acb26d75f2a520f0bd3ffdf7c320e0",
+      "checks": {
+        "coverage_and_meaning": "逐段覆盖16节及当前四语全文：原2026-07-27日期/历史与分期、独立Asset/Workflow边界、八公共依赖、五领域表含Inbox、ID/归属/金额与删除条件、八状态/版本化生命周期命令、完整采购校验与实时/候选事务区别、双幂等/写后读/新卡Outbox、调拨/处置准备-启动-确认-审批-实物完成、32外部+1内部路径与候选权限、Auth/SRM/Procurement实际调用、PII/日志/XSS、真实四页面/台账本人页签/币种概览、当前工程入口、并发降级与测试要求。保留重要原里程碑/ADR/风险并明确历史适用性，教程/截图指向Wiki，不批准对应Wiki整篇。",
+        "technical_literals": "核对8107/19907/9907、omni_asset、/api/asset无StripPrefix、八个直接common依赖、Flowable排除、五表/三个关键唯一键、完整MyBatis链、owner/current用户维度及SELFtransfer例外、全部33方法路径、targetUserId/targetUnitId与申请version、categoryASSET_TRANSFER/ASSET_DISPOSAL、requestId/businessKey=operationId及原始发起人快照、REQUIRES_NEW确认、业务R.code404与HTTP404区别、采购价格/数量等式/Integer.MAX_VALUE/HALF_UP2/来源序号、JSON金额字符串、eventId/tenant/JSON语义意图、真实候选完整路径/afterId/size/nextAfterId/hasMore及逐候选事务、六类资产事件、application-lite.yml/compose.yaml。28份现有XML报告106通过0跳过逐份摘要匹配后复用，没有昂贵源码不变重跑。",
+        "security_and_failure_semantics": "管理owner与固定本人current_user_id不OR合并，SELFtransfer:create明确current_user_id例外，目标单位可写与Auth启用/主组织引用再验证。approval-view只PENDING_APPROVAL+STARTED及完整业务键/实例/本人任务资格，通过后临时TENANT读取并finally恢复。创建占位校验租户/ID/版本/原状态/deleted及两空活动字段。未知启动/响应或确认失败保持占位同键重试；R.code404仅尝试写FAILED，本地写失败仍可能PENDING，只有实际START_FAILED+FAILED可本地取消。早到合法完成可重试、旧/重复/异实例忽略、异意图409；APPROVED不等于物理完成。实时卡片/历史/Inbox/新卡Outbox原子，回扫不登记实时Inbox且逐候选提交，整页失败不能重跑成功写或假定全回滚。来源/金额先验全校验、合法非资产行跳过，Outbox不证明Broker/DLQ。保存username/自由文本是真实PII边界，日志规则有限；Redis失败先Auth，有有效权威设置则不fallback，回源失败才安全基线。",
+        "images_and_links": "无光栅截图；四语各六个Mermaid块，共24个，系统、ER逻辑关系、八状态、采购事务、调拨和处置的提交/确认/实物完成边界逐项比较，人用标签本地化。ER不声明跨库物理外键。所有33方法路径完整显示，权限缩写已展开。当前文件/目录与本语Wiki、源码索引和相关事实链接已核对，重要设计历史保留。Markdown渲染不等于Mermaid浏览器布局或完整根/子路径文档站验收；G综合验收仍保留。",
+        "language_and_terminology": "原日文全文と全修訂を対照。資産台帳/管理帰属/使用帰属、移管/処分、冪等性、出典単位、補完/カーソル、開始未確定/明示失敗記録、活動枠、実物完了を統一。六図の人向けラベルを日本語化、信封をエンベロープ、誤字回执を記録へ修正。条件、試行、部分コミット、元の設計日、通貨別集計と文字列金額を保持。"
+      },
+      "findings": [
+        {
+          "id": "AS01",
+          "description": "Human-only release preface and implemented/verified header conflate historical and current evidence.",
+          "resolution": "Preserve 2026-07-27 design date and dated history; identify current fact scope, ADR0003 authorized AI_REVIEW and no fresh global acceptance.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS02",
+          "description": "Redis asset: business-key prefix and conditional XXL executor wording are unsupported by current configuration.",
+          "resolution": "Record DB0 shared xss keys and current configurable executor9907; do not invent module cache keys or active depreciation jobs.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS03",
+          "description": "Recommended common dependencies and old file tree describe plans rather than the current Maven/resources tree.",
+          "resolution": "List eight actual common dependencies, application.yml/application-lite.yml and compose.yaml; keep original milestones as history.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS04",
+          "description": "Domain aggregates omit ast_inbox_event.",
+          "resolution": "Describe all five domain tables and independent procurement/Workflow consumer Inbox roles.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS05",
+          "description": "Money contract omits decimal JSON strings and currency-separated aggregation.",
+          "resolution": "Explain purchaseAmount/residualValue string serialization/deserialization, 18,2 storage and per-currency overview totals.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS06",
+          "description": "Asset ledger promises current supplier/user/unit batch enrichment that the current service/assembler does not perform.",
+          "resolution": "Record supplierNameSnapshot and user/unit IDs returned by AssetViewAssembler; distinguish selection APIs from display enrichment.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS07",
+          "description": "Manual create/update/delete boundaries are incomplete.",
+          "resolution": "Document current owner validation, versioned metadata updates, no generic status/user/location edits and restricted manual-stock deletion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS08",
+          "description": "Procurement intake eligibility omits malformed-line rejection and exact amount/quantity checks.",
+          "resolution": "Validate every root/line, unique source IDs, positive quantity/prices, exact total equation and eligible integer equality before writes; valid ineligible lines are skipped.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS09",
+          "description": "Realtime intake transaction omits created-event Outbox and replay intent validation.",
+          "resolution": "Document transactional cards/history/Inbox/new-card Outbox, tenant plus JSON-semantic intent checks and source-key readback.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS10",
+          "description": "Historical backfill is described as automatic startup scanning and uses an incorrect internal path.",
+          "resolution": "Document controlled one-page POST and actual /api/internal/procurement candidate path, matching header/query tenants, strict cursor, caller orchestration and partial commits.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS11",
+          "description": "Backfill and realtime event paths are said to share whole-event Inbox behavior.",
+          "resolution": "Distinguish per-candidate transactional source-key intake from realtime Inbox; both share source-unit uniqueness and new-card events.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS12",
+          "description": "Allocation/accept/return commands omit versions and authoritative user/unit validation.",
+          "resolution": "Include version, targetUserId/targetUnitId, current-user guard, status/slot checks and permitted repair transitions.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS13",
+          "description": "Transfer/disposal diagrams obscure local prepare transaction before remote Workflow calls.",
+          "resolution": "Show model resolution, local snapshot+occupancy commit, remote start and separate confirmation; APPROVED still occupies the asset until business completion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS14",
+          "description": "Single-level approval is described as an enforced current MVP restriction.",
+          "resolution": "Keep the original dated simple-approval decision in history; current published category-bound BPMN determines approval behavior.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS15",
+          "description": "Workflow business404 is unconditionally equated with persisted START_FAILED.",
+          "resolution": "Only R.code404 attempts markFailed; local confirmation may fail and remain PENDING. HTTP404 Feign is unknown. Only persisted START_FAILED+FAILED permits local cancel.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS16",
+          "description": "All out-of-order Workflow completion events are described as ignored.",
+          "resolution": "Distinguish retryable early completion, ignored duplicate/stale/foreign-instance events and conflicting same-event intent409.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS17",
+          "description": "Atomic activity-slot example checks only active_operation_id.",
+          "resolution": "Record tenant/id/version/current status/deleted0 and both activity fields NULL; require one affected row.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS18",
+          "description": "Transfer completion can be misunderstood as moving management ownership.",
+          "resolution": "Document current-user/current-unit/location update with owner columns retained, plus separate versioned completion transaction and Outbox.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS19",
+          "description": "DataScope table omits SELF transfer-create special mapping.",
+          "resolution": "Add current_user_id for asset:transfer:create with SELF; maintain owner mapping elsewhere and no broad owner/current OR.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS20",
+          "description": "Approval-view description omits local start state and temporary scope restoration.",
+          "resolution": "Require PENDING_APPROVAL+STARTED and full business/instance/task assignment, then temporary TENANT read with finally restore.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS21",
+          "description": "API table mixes abbreviated paths and omits options endpoints.",
+          "resolution": "Enumerate every actual external and internal method/path from six controllers and state prefix conventions explicitly.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS22",
+          "description": "Auth/SRM/Procurement integration implies unused realtime enrichment/detail clients.",
+          "resolution": "Describe actual Auth candidate/reference validation, SRM approved-supplier search only and Procurement candidate client only.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS23",
+          "description": "Malformed incoming messages are said to reach dead letters without deployment proof.",
+          "resolution": "State consumer rejection/exception; actual retry/dead-letter policy depends on broker/binder configuration and is not asserted.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS24",
+          "description": "Asset is said to store no PII and only user IDs.",
+          "resolution": "Acknowledge original Workflow username snapshot, free text, supplier/source snapshots and identifiers; explain current sanitization scope without universal privacy guarantee.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS25",
+          "description": "Frontend tree lists nonexistent extracted components and promises transfer/disposal histories inside ledger detail.",
+          "resolution": "Describe four actual page/API files, ledger/my tabs, current detail/history display and separate operation pages.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS26",
+          "description": "Overview total amount suggests summing currencies or currency conversion.",
+          "resolution": "Describe amountsByCurrency and distribution dimensions, currency-separated grouping and no exchange conversion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS27",
+          "description": "Generic degradation claims overstate blanket Auth failure and live SRM display calls.",
+          "resolution": "Describe dependency-specific fail-closed commands/options, local snapshot reads and uncertain Workflow latches.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS28",
+          "description": "Test requirements and original milestones can be read as current executed acceptance.",
+          "resolution": "Keep requirements/history with labels; reuse only digest-matched existing Docker reports and leave real MQ/Workflow/concurrency/browser acceptance separate.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS29",
+          "description": "Japanese/Korean human-facing Mermaid/text-tree labels remain English.",
+          "resolution": "Localize all six diagrams and current navigation labels while preserving technical states/identifiers/contracts.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS30",
+          "description": "Original XSS prose incorrectly says a Redis outage itself forces baseline.",
+          "resolution": "All four versions now distinguish Redis failure -> Auth, authoritative result retained despite cache-write failure, and fallback only when Auth result is unavailable.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS31",
+          "description": "Retained scope table uses incomplete ledger paths and permission shorthand that could be copied as one invalid permission.",
+          "resolution": "Use actual full ledger paths and expand slash-compressed asset permission literals into complete codes.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS32",
+          "description": "Current engineering subsection headings and root application entry still suggest planned folders.",
+          "resolution": "Use current-entry headings and actual AssetApplication.java; polish Japanese envelope and Korean initiation terminology.",
+          "status": "resolved"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/design/asset-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 09:22:57",
+      "result": "approved",
+      "translation_sha256": "c0fcbf49b441379f3e76a324ed58606b0cb63841c2431cf99761cefb91b561f5",
+      "checks": {
+        "coverage_and_meaning": "逐段覆盖16节及当前四语全文：原2026-07-27日期/历史与分期、独立Asset/Workflow边界、八公共依赖、五领域表含Inbox、ID/归属/金额与删除条件、八状态/版本化生命周期命令、完整采购校验与实时/候选事务区别、双幂等/写后读/新卡Outbox、调拨/处置准备-启动-确认-审批-实物完成、32外部+1内部路径与候选权限、Auth/SRM/Procurement实际调用、PII/日志/XSS、真实四页面/台账本人页签/币种概览、当前工程入口、并发降级与测试要求。保留重要原里程碑/ADR/风险并明确历史适用性，教程/截图指向Wiki，不批准对应Wiki整篇。",
+        "technical_literals": "核对8107/19907/9907、omni_asset、/api/asset无StripPrefix、八个直接common依赖、Flowable排除、五表/三个关键唯一键、完整MyBatis链、owner/current用户维度及SELFtransfer例外、全部33方法路径、targetUserId/targetUnitId与申请version、categoryASSET_TRANSFER/ASSET_DISPOSAL、requestId/businessKey=operationId及原始发起人快照、REQUIRES_NEW确认、业务R.code404与HTTP404区别、采购价格/数量等式/Integer.MAX_VALUE/HALF_UP2/来源序号、JSON金额字符串、eventId/tenant/JSON语义意图、真实候选完整路径/afterId/size/nextAfterId/hasMore及逐候选事务、六类资产事件、application-lite.yml/compose.yaml。28份现有XML报告106通过0跳过逐份摘要匹配后复用，没有昂贵源码不变重跑。",
+        "security_and_failure_semantics": "管理owner与固定本人current_user_id不OR合并，SELFtransfer:create明确current_user_id例外，目标单位可写与Auth启用/主组织引用再验证。approval-view只PENDING_APPROVAL+STARTED及完整业务键/实例/本人任务资格，通过后临时TENANT读取并finally恢复。创建占位校验租户/ID/版本/原状态/deleted及两空活动字段。未知启动/响应或确认失败保持占位同键重试；R.code404仅尝试写FAILED，本地写失败仍可能PENDING，只有实际START_FAILED+FAILED可本地取消。早到合法完成可重试、旧/重复/异实例忽略、异意图409；APPROVED不等于物理完成。实时卡片/历史/Inbox/新卡Outbox原子，回扫不登记实时Inbox且逐候选提交，整页失败不能重跑成功写或假定全回滚。来源/金额先验全校验、合法非资产行跳过，Outbox不证明Broker/DLQ。保存username/自由文本是真实PII边界，日志规则有限；Redis失败先Auth，有有效权威设置则不fallback，回源失败才安全基线。",
+        "images_and_links": "无光栅截图；四语各六个Mermaid块，共24个，系统、ER逻辑关系、八状态、采购事务、调拨和处置的提交/确认/实物完成边界逐项比较，人用标签本地化。ER不声明跨库物理外键。所有33方法路径完整显示，权限缩写已展开。当前文件/目录与本语Wiki、源码索引和相关事实链接已核对，重要设计历史保留。Markdown渲染不等于Mermaid浏览器布局或完整根/子路径文档站验收；G综合验收仍保留。",
+        "language_and_terminology": "원문 전체와 모든 수정 비교. 자산 장부/관리 귀속/사용 귀속、이전/처분、멱등성/출처 단위、제어된 보상/커서、시작 불명/저장된 명시 실패、활성 슬롯/실물 완료를 일관되게 사용. 여섯 도식의 설명을 한국어화하고 발기를 시작으로 수정. 반드시/경우에만/시도/이미 커밋 가능/증명하지 않음과 통화별 집계/문자열 금액 경계를 보존."
+      },
+      "findings": [
+        {
+          "id": "AS01",
+          "description": "Human-only release preface and implemented/verified header conflate historical and current evidence.",
+          "resolution": "Preserve 2026-07-27 design date and dated history; identify current fact scope, ADR0003 authorized AI_REVIEW and no fresh global acceptance.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS02",
+          "description": "Redis asset: business-key prefix and conditional XXL executor wording are unsupported by current configuration.",
+          "resolution": "Record DB0 shared xss keys and current configurable executor9907; do not invent module cache keys or active depreciation jobs.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS03",
+          "description": "Recommended common dependencies and old file tree describe plans rather than the current Maven/resources tree.",
+          "resolution": "List eight actual common dependencies, application.yml/application-lite.yml and compose.yaml; keep original milestones as history.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS04",
+          "description": "Domain aggregates omit ast_inbox_event.",
+          "resolution": "Describe all five domain tables and independent procurement/Workflow consumer Inbox roles.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS05",
+          "description": "Money contract omits decimal JSON strings and currency-separated aggregation.",
+          "resolution": "Explain purchaseAmount/residualValue string serialization/deserialization, 18,2 storage and per-currency overview totals.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS06",
+          "description": "Asset ledger promises current supplier/user/unit batch enrichment that the current service/assembler does not perform.",
+          "resolution": "Record supplierNameSnapshot and user/unit IDs returned by AssetViewAssembler; distinguish selection APIs from display enrichment.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS07",
+          "description": "Manual create/update/delete boundaries are incomplete.",
+          "resolution": "Document current owner validation, versioned metadata updates, no generic status/user/location edits and restricted manual-stock deletion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS08",
+          "description": "Procurement intake eligibility omits malformed-line rejection and exact amount/quantity checks.",
+          "resolution": "Validate every root/line, unique source IDs, positive quantity/prices, exact total equation and eligible integer equality before writes; valid ineligible lines are skipped.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS09",
+          "description": "Realtime intake transaction omits created-event Outbox and replay intent validation.",
+          "resolution": "Document transactional cards/history/Inbox/new-card Outbox, tenant plus JSON-semantic intent checks and source-key readback.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS10",
+          "description": "Historical backfill is described as automatic startup scanning and uses an incorrect internal path.",
+          "resolution": "Document controlled one-page POST and actual /api/internal/procurement candidate path, matching header/query tenants, strict cursor, caller orchestration and partial commits.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS11",
+          "description": "Backfill and realtime event paths are said to share whole-event Inbox behavior.",
+          "resolution": "Distinguish per-candidate transactional source-key intake from realtime Inbox; both share source-unit uniqueness and new-card events.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS12",
+          "description": "Allocation/accept/return commands omit versions and authoritative user/unit validation.",
+          "resolution": "Include version, targetUserId/targetUnitId, current-user guard, status/slot checks and permitted repair transitions.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS13",
+          "description": "Transfer/disposal diagrams obscure local prepare transaction before remote Workflow calls.",
+          "resolution": "Show model resolution, local snapshot+occupancy commit, remote start and separate confirmation; APPROVED still occupies the asset until business completion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS14",
+          "description": "Single-level approval is described as an enforced current MVP restriction.",
+          "resolution": "Keep the original dated simple-approval decision in history; current published category-bound BPMN determines approval behavior.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS15",
+          "description": "Workflow business404 is unconditionally equated with persisted START_FAILED.",
+          "resolution": "Only R.code404 attempts markFailed; local confirmation may fail and remain PENDING. HTTP404 Feign is unknown. Only persisted START_FAILED+FAILED permits local cancel.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS16",
+          "description": "All out-of-order Workflow completion events are described as ignored.",
+          "resolution": "Distinguish retryable early completion, ignored duplicate/stale/foreign-instance events and conflicting same-event intent409.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS17",
+          "description": "Atomic activity-slot example checks only active_operation_id.",
+          "resolution": "Record tenant/id/version/current status/deleted0 and both activity fields NULL; require one affected row.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS18",
+          "description": "Transfer completion can be misunderstood as moving management ownership.",
+          "resolution": "Document current-user/current-unit/location update with owner columns retained, plus separate versioned completion transaction and Outbox.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS19",
+          "description": "DataScope table omits SELF transfer-create special mapping.",
+          "resolution": "Add current_user_id for asset:transfer:create with SELF; maintain owner mapping elsewhere and no broad owner/current OR.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS20",
+          "description": "Approval-view description omits local start state and temporary scope restoration.",
+          "resolution": "Require PENDING_APPROVAL+STARTED and full business/instance/task assignment, then temporary TENANT read with finally restore.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS21",
+          "description": "API table mixes abbreviated paths and omits options endpoints.",
+          "resolution": "Enumerate every actual external and internal method/path from six controllers and state prefix conventions explicitly.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS22",
+          "description": "Auth/SRM/Procurement integration implies unused realtime enrichment/detail clients.",
+          "resolution": "Describe actual Auth candidate/reference validation, SRM approved-supplier search only and Procurement candidate client only.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS23",
+          "description": "Malformed incoming messages are said to reach dead letters without deployment proof.",
+          "resolution": "State consumer rejection/exception; actual retry/dead-letter policy depends on broker/binder configuration and is not asserted.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS24",
+          "description": "Asset is said to store no PII and only user IDs.",
+          "resolution": "Acknowledge original Workflow username snapshot, free text, supplier/source snapshots and identifiers; explain current sanitization scope without universal privacy guarantee.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS25",
+          "description": "Frontend tree lists nonexistent extracted components and promises transfer/disposal histories inside ledger detail.",
+          "resolution": "Describe four actual page/API files, ledger/my tabs, current detail/history display and separate operation pages.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS26",
+          "description": "Overview total amount suggests summing currencies or currency conversion.",
+          "resolution": "Describe amountsByCurrency and distribution dimensions, currency-separated grouping and no exchange conversion.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS27",
+          "description": "Generic degradation claims overstate blanket Auth failure and live SRM display calls.",
+          "resolution": "Describe dependency-specific fail-closed commands/options, local snapshot reads and uncertain Workflow latches.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS28",
+          "description": "Test requirements and original milestones can be read as current executed acceptance.",
+          "resolution": "Keep requirements/history with labels; reuse only digest-matched existing Docker reports and leave real MQ/Workflow/concurrency/browser acceptance separate.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS29",
+          "description": "Japanese/Korean human-facing Mermaid/text-tree labels remain English.",
+          "resolution": "Localize all six diagrams and current navigation labels while preserving technical states/identifiers/contracts.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS30",
+          "description": "Original XSS prose incorrectly says a Redis outage itself forces baseline.",
+          "resolution": "All four versions now distinguish Redis failure -> Auth, authoritative result retained despite cache-write failure, and fallback only when Auth result is unavailable.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS31",
+          "description": "Retained scope table uses incomplete ledger paths and permission shorthand that could be copied as one invalid permission.",
+          "resolution": "Use actual full ledger paths and expand slash-compressed asset permission literals into complete codes.",
+          "status": "resolved"
+        },
+        {
+          "id": "AS32",
+          "description": "Current engineering subsection headings and root application entry still suggest planned folders.",
+          "resolution": "Use current-entry headings and actual AssetApplication.java; polish Japanese envelope and Korean initiation terminology.",
+          "status": "resolved"
+        }
+      ]
+    }
+  }
+}

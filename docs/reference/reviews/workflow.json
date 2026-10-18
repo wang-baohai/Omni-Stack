@@ -1,0 +1,1178 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "workflow",
+  "source": "docs/workflow.md",
+  "source_sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "6d27aacd31d9caf6d8a400ad96cccb0ded2a58d2",
+  "source_state": "Whole current Workflow fact family reviewed against named current source. Base commit plus five current backend changes are bound by digests;two read tenant boundaries have controlled red/green regression.Only Workflow family approved;four API cross-reference edits retain unreviewed status.Whole original A-G and owner AI-only condition retained.",
+  "method": "All four complete original documents read in253 with exact retained hashes and bounded complete ranges. All seven replacement chapters in Chinese/English/Japanese/Korean were authored,read and manually compared paragraph by paragraph against current named source and Chinese facts in261.262 only reorders the same candidate paragraphs and adds six localized subsection headings,including3.6 for AGENTS; the complete text is bound/rendered. Final semantic pass distinguishes compatibility delegate behavior and legacy definition gaps, then corrects non-null versus nonempty deleteReason in262b across all four languages. Diagrams retain identical topology with localized labels and JSON example bytes match. Source inspection records exact whole-file versus selected ranges; automated hashes/render/paths supplement this actual semantic decision,not grant approval themselves.",
+  "checked_source_files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "f8c1636c3a5ec6a38944ab1b78db98fbe5ad4cc20c2337925f222996c49a07df"
+    },
+    {
+      "path": "database/changelog/workflow/0001-workflow-schema.yaml",
+      "sha256": "bf1c826c33a4481ae51df5c13f2be0e49bcf035f6ff528fa6d932c169329fa8e"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/pom.xml",
+      "sha256": "76302d6e470b88599093b6fd81bef957c38fb030c65328a42f2212f4d553b8c4"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/approval/ApprovalServiceImpl.java",
+      "sha256": "bb3835b2067a5cca21f63fad58ceec5550b8751cc705eb476c268f9b299a35be"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/config/FlowableAutoConfiguration.java",
+      "sha256": "6f37d9e50fc3d081a79c6cbac2a84f36761d54e5019dcb7a489b55df2816c2c2"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/notification/NoOpNotificationService.java",
+      "sha256": "20ce08ddbbdee024659e4fb022d7b7848689a9383b12c1a420bd614d04c77959"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/tenant/TenantInfoFilter.java",
+      "sha256": "a7008bd20d0a358fa0af2220dc8dd2e025e0fdc4b54c31a77f351fd78869bee2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/pom.xml",
+      "sha256": "615657791592a837a4f3b464a8252d20b16ca143d33f9c930d9f7d685da09168"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/MybatisPlusConfig.java",
+      "sha256": "b787ea78976b1ae4aac3a8ef8aadf20daccadedbd194e9bedbd333bc48431084"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+      "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/SecurityConfig.java",
+      "sha256": "fab002e857eb36ea7deea2c4441eacd5077e4cac292f81cedb201c6ac1be02a1"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ApprovalController.java",
+      "sha256": "cb3efb20b522efffa1aaa1a936f8c307a8cd239a2cbd99170e18bcce552a84cd"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+      "sha256": "fb540dc12ae8c821fd9324a06de566beee5aa7bf4e0f105668f3a1bd139ac020"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessDefinitionController.java",
+      "sha256": "19c20b00acb9b6c293e1651bbe1abcb4c903a1b4824f419a0b4e987d6299e112"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessInstanceController.java",
+      "sha256": "864bf4351d9bb78142b4a6124d7035be3344063e36d0e4c62e0a6716ae4b926f"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/TaskController.java",
+      "sha256": "55b650d451ede246d5352e47308a68c34e5b6da7967c4f974e466f7fa48773a5"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowIdentityController.java",
+      "sha256": "3c859fb2aa150739c2a0007a4f213a5123827a73a53c48ac3514d48160e4fe2d"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowModelController.java",
+      "sha256": "0ee50a247ba0d9b81c6de89b17aa047ebc3a1299067695ee59d0566363b43962"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowStatsController.java",
+      "sha256": "2897a347eb58c3ff6be4ee848d89a1c558ddf696f727b9888e622f7671368152"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverBean.java",
+      "sha256": "08bc3db0d5c21ee1ea9d3636d13741c6154970ad0bdd26472efe6d68d6a2dadc"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverDelegate.java",
+      "sha256": "89e654d78fbbc46b3ad9e41313e34b4b4e4cea41ebe70c24cc0891ba7b7e2690"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CcNotifyDelegate.java",
+      "sha256": "8521417479a710e0bd38ce7eadc60db68364c0bf78cc9ac1333d4e108f4253cb"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRecord.java",
+      "sha256": "bfeaf38f1d2ba1451903d90a169525513d9baa5e38d81127f53b45c23a6c53f4"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRequest.java",
+      "sha256": "d700f162113c512b808591344d08c5acc247f9cd1e49e4a3f19ac40e5822fecb"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/CreateModelRequest.java",
+      "sha256": "ebacc498847b0f7b67ac2f9d142c26c344631bb42c406b17818983561922e3c9"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ProcessProgressResponse.java",
+      "sha256": "874df46fc8d8d1acb93226aa3c19d7e2a6aa3f06b21c69231b3ad4a98041fb2b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/SaveDraftRequest.java",
+      "sha256": "2e2d869e20474c82dd1f9e7fc9e5c137c0322fcfda5594115c9bbad91d95f668"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/StartProcessRequest.java",
+      "sha256": "042cb2c5d5ddf7227e57785deac28484361890de8f79a73d1562cbf604c2b0ee"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/BpmnXmlValidator.java",
+      "sha256": "01703f1846d2f69cdf99943fe0f49b43f1bdc6a675dc44f2982edb5777ba4f04"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/XmlSecurityUtils.java",
+      "sha256": "a0178c2de6a266e2bd1826c1ad0aff9fcbb6116d3baf0400b12d6baf68639096"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/listener/ScopedRoleAssignmentListener.java",
+      "sha256": "6981b11b7167a1cc28a2c640280ccfca46d7fe3f6965cc9ea50324a8e5b5f7d3"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/GatewayPreAuthFilter.java",
+      "sha256": "62ad1f64e9a57f9e8b0cede81564ac6d7e7c7cccc72d9be5c578a35a42da6d27"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/RbacUserGroupLookup.java",
+      "sha256": "95401461b083d1880fbcc324e96518178f7f5c2294483aef0b7261e1a772a142"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/XssConfigProviderImpl.java",
+      "sha256": "a4ac025ff72e0bed3a3ca3658f473761979074a2e4e0919759f7170ef8c0b64e"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/CandidateResolutionService.java",
+      "sha256": "b5321847781c8404f5975bc898340e76b84c0892c3ac25af5cd8d32d94f30cd2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+      "sha256": "65012a8fc6a5311a06e32e6201ff3f6ec9da84c58341e2f0c678ca19f5037c16"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessDefinitionServiceImpl.java",
+      "sha256": "cd8c2cdddf1165aa6059f2e6695906babe9e98f26506e5c6ddd46f3744cef7d6"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessInstanceServiceImpl.java",
+      "sha256": "f650ad68e8836e46cec0eac145697cd628fdd2757700e8c118b973e4f442a82a"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowApprovalServiceImpl.java",
+      "sha256": "82d2a03aa758445a15b6f872f767f2053c1850a75cbd589bc80e1f8a330f3ff8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+      "sha256": "63a1a2bd58ae7b696d77f8ec1e1e5616020f297999f11ec412c32de1fff09ac8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowModelServiceImpl.java",
+      "sha256": "ddeeae6a0c93612f503ea63c1394e38253e6d2ca5ccf51418b6116429cfd2ce2"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+      "sha256": "f63cb03ab55045944f20e206bec4c5d59d04f4a7abc5abebb37e641054dabd83"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowTaskServiceImpl.java",
+      "sha256": "8628307b01eaa868de04d6fa568dd6d318444c9dd28f9de6fac39504c2842c7d"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/ProcessInstanceService.java",
+      "sha256": "4650362dc912ddbfb7cbebcaed55101096c0d50e8dd6c962fec5ee26241608b0"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/resources/application.yml",
+      "sha256": "dde4208074502bc092e8788006b0984d95bb76cd7de647a7cd8edec9e436d0df"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/controller/ProcessInstanceReadTenantBoundaryTest.java",
+      "sha256": "cf248d6ec9be344a3ff7fb7fcc2428b6ce3e0eb00cc1cb326ec5b7ee9d6da44b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/it/Fw05MultiInstanceIT.java",
+      "sha256": "628fd83e3fbfa065312c3379b154a6a5b94134ac5106a7fcbdca2bc675444b7d"
+    },
+    {
+      "path": "omni-backend/pom.xml",
+      "sha256": "18a2eda967a3dc9147decf645518f80692eae6d8b89c2cd3f230d07c14f33275"
+    },
+    {
+      "path": "omni-frontend/src/composables/useBpmnExtension.ts",
+      "sha256": "0e16f77a627be044876b762e5f8bd6f3d261e580347fbd391f6430792036efc6"
+    }
+  ],
+  "source_inspection_scope": [
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/pom.xml",
+      "scope": "Full file actually read in current Workflow stage"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/MybatisPlusConfig.java",
+      "scope": "Full file actually read in current Workflow stage"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/XssConfigProviderImpl.java",
+      "scope": "Full file actually read in current Workflow stage"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/approval/ApprovalServiceImpl.java",
+      "scope": "Full file actually read in current Workflow stage"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowApprovalServiceImpl.java",
+      "scope": "Full file actually read in current Workflow stage"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRequest.java",
+      "scope": "Full file actually read in current Workflow stage"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/config/FlowableAutoConfiguration.java",
+      "scope": "Full file actually read in current Workflow stage"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/tenant/TenantInfoFilter.java",
+      "scope": "Full file actually read in current Workflow stage"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowModelServiceImpl.java",
+      "scope": "full current file read; notes below and workflow-audit-notes-253.json"
+    },
+    {
+      "path": "omni-backend/pom.xml",
+      "scope": "Selected version/dependency/schema inventory only;further selected semantic reads pending"
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/pom.xml",
+      "scope": "Selected version/dependency/schema inventory only;further selected semantic reads pending"
+    },
+    {
+      "path": "database/changelog/workflow/0001-workflow-schema.yaml",
+      "scope": "Selected version/dependency/schema inventory only;further selected semantic reads pending"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ApprovalController.java",
+      "scope": "Current full annotation/method-path inventory;method bodies still inspected only at selected guards"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessDefinitionController.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/ProcessInstanceController.java",
+      "scope": "full current file read; notes below and workflow-audit-notes-253.json"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/TaskController.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowIdentityController.java",
+      "scope": "Current full annotation/method-path inventory;method bodies still inspected only at selected guards"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowModelController.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/WorkflowStatsController.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessInstanceServiceImpl.java",
+      "scope": "full current file read; notes below and workflow-audit-notes-253.json"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/ProcessInstanceService.java",
+      "scope": "full current file read; notes below and workflow-audit-notes-253.json"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/SecurityConfig.java",
+      "scope": "full current file read; notes below and workflow-audit-notes-253.json"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/StartProcessRequest.java",
+      "scope": "full current file read; notes below and workflow-audit-notes-253.json"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/BpmnXmlValidator.java",
+      "scope": "full current file read; notes below and workflow-audit-notes-253.json"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/engine/XmlSecurityUtils.java",
+      "scope": "full current file read; notes below and workflow-audit-notes-253.json"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/RbacUserGroupLookup.java",
+      "scope": "full current file read; notes below and workflow-audit-notes-253.json"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/CandidateResolutionService.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/listener/ScopedRoleAssignmentListener.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverBean.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CandidateResolverDelegate.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/ProcessDefinitionServiceImpl.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowTaskServiceImpl.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/CreateModelRequest.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/SaveDraftRequest.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ProcessProgressResponse.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/dto/ApprovalRecord.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/resources/application.yml",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-common-workflow/src/main/java/com/omni/common/workflow/notification/NoOpNotificationService.java",
+      "scope": "Full file actually read in current Workflow semantic audit; historical selected binding scope upgraded only for this file."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/delegate/CcNotifyDelegate.java",
+      "scope": "Current1-170read,includingexecute and direct-recipient branch;remaining SQL not claimed fully read."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/security/GatewayPreAuthFilter.java",
+      "scope": "Current1-190read and prior security evidence;remaining methods not claimed fully read."
+    },
+    {
+      "path": "omni-frontend/src/composables/useBpmnExtension.ts",
+      "scope": "Current98-177read,including writeAssignment listener/MI wiring;not whole frontend audit."
+    },
+    {
+      "path": "AGENTS.md",
+      "scope": "Current navigation rule241read;prior execution rules retained."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/controller/ProcessInstanceReadTenantBoundaryTest.java",
+      "scope": "New regression authored/read/run red and green;existingIT caller update only,IT not executed."
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/test/java/com/omni/workflow/it/Fw05MultiInstanceIT.java",
+      "scope": "New regression authored/read/run red and green;existingIT caller update only,IT not executed."
+    }
+  ],
+  "technical_verification": {
+    "runtime": "local Docker",
+    "whole_markdown_rendered_documents": 4,
+    "mermaid_fenced_blocks": 4,
+    "json_fenced_blocks": 4,
+    "raster_images": 0,
+    "domain_tables": 8,
+    "controller_count": 8,
+    "external_http_method_paths": 36,
+    "internal_http_method_paths": 8,
+    "controller_method_paths": 44,
+    "backend_command": "./mvnw -o -B clean install",
+    "backend_image": "sha256:8c0a84ea11c8f6ed52600fc19f1040121f2a162998e9f50a5faebbbad9172dcc",
+    "backend_modules": 20,
+    "backend_totals": {
+      "suites": 211,
+      "tests": 811,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 5,
+      "passed": 806
+    },
+    "workflow_reports": [
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.config.MybatisPlusConfigTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 1,
+        "sha256": "ca218f555e2617ebe7c8320620655d09ea631eeb8254ef87ce1111a0ec37cbf7",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.config.RequiredWorkflowModelInitializerTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 1,
+        "sha256": "5deec6bba1e683dff28b6cd91d900320e5052d2f391201cbcee965ace332808f",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.controller.InternalWorkflowControllerTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 3,
+        "sha256": "dd1c823e831a62b32ae22ac248c11c7ff6c52bef071d4ddbf0b28553a99eafac",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.controller.ProcessInstanceReadTenantBoundaryTest.xml",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 6,
+        "sha256": "cc8f35b130f1c276e04f42fd9ab79d27b6bde5111f43824f8c7c54946c8809ce",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.engine.ApprovalPreviewParserTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 3,
+        "sha256": "4c10a564afd975346e3323bad118872d6d3adf405691327f672c5d2074c6eaf9",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.metrics.WorkflowMetricsTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 1,
+        "sha256": "38474b8db981b83045a603074f37a6b33b22ade388642093b1febe21fc19f425",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.security.GatewayPreAuthFilterTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 3,
+        "sha256": "0b6ac250805e57a7221dadd3c381e3bf97d08d0e04878d1a3a89b7ebb94557c2",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.service.impl.InternalWorkflowServiceImplTest.xml",
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 18,
+        "sha256": "44be0635b4195c9b5a0cd0e8dd20ca079b31419f813161679f071a5814796212",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.service.impl.ProcessInstanceStartIdentityTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 3,
+        "sha256": "53aeb653d5d2c28c80dedd965d500ac4609444df8fbdfc0c9aabe4749cdcf353",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.service.impl.WorkflowApprovalServiceImplTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 4,
+        "sha256": "c4a33bb5bfc212d760cb073e454a4244b8580e78a3ca4745374c6d4ef4eab40d",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.service.impl.WorkflowCompletionEventServiceImplTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 5,
+        "sha256": "5664a4f340b997e07431ad8c62fb8e24f1fbd6e72f587447d6c1c083d03d72c8",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.service.impl.WorkflowModelServiceImplTest.xml",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 2,
+        "sha256": "8a0dc138290036f4a9dbae14ee108820bd0d3c8db2fb72e2e84b78bb19df8bf8",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.service.impl.WorkflowProcessStartRequestServiceImplTest.xml",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 8,
+        "sha256": "aca1a246c605f069dae1488c8761979bad8acd51036c898d7460756ae9af3c23",
+        "skip_reasons": []
+      },
+      {
+        "module": "omni-workflow",
+        "file": "TEST-com.omni.workflow.service.impl.WorkflowTenantModuleProvisionerTest.xml",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 1,
+        "sha256": "b247eef5aeaf6480e6b3f8c1dd97a203026fb59a5639fdf3de7af1268b0f997c",
+        "skip_reasons": []
+      }
+    ],
+    "workflow_totals": {
+      "suites": 14,
+      "tests": 59,
+      "passed": 59,
+      "skipped": 0
+    },
+    "new_read_boundary_regression": {
+      "tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "red_failures": 4,
+      "scope": "Real MockMvc/controller/service with mocked Flowable history;not realDB or Gateway acceptance."
+    },
+    "source_eol_bridge": "LF normal form unchanged from successful build;original unchanged bytes restored.",
+    "zero_warning_claim": false,
+    "application_or_business_execution": false,
+    "real_FW_integration_tests_run": false,
+    "api_contract_or_wiki_reviews_awarded": false,
+    "limitations": [
+      "Source digests bind named current files;each exact full/selected range is separately recorded,not every implementation line.",
+      "Markdown HTML rendering and manual diagram reading do not replace browser/site/SVG evidence.",
+      "New tenant regression uses actual MVC/service and mocked engine history,not real DB/Gateway.",
+      "Legacy definition tenant checks,standalone XSS,compatibility delegate and other current limits are documented;not an all-service security certification.",
+      "Linked API/Wiki full reviews and all original A-G remain separate.",
+      "Actual authorized AI_REVIEW suffices;HUMAN_REVIEW is neither required nor claimed.",
+      "Full reactor260 ran once after backend changes:20modules,211suites,811tests,806passed,5conditionalskips,noerrors/failures;warnings retained.New6tests use mocked engine history;FW real IT notrun.",
+      "260c preserves original unchanged line bytes after an overbroad EOL normalization attempt;LF-normal-form equality bridges current source to successful build without a redundant rebuild.",
+      "API four-file edits are link-only and remain present-unverified;linked Wiki whole review and all original A-G continue."
+    ],
+    "underlying_business_limits_not_fixed": [
+      "LegacyProcessDefinitionService ID ownership guards",
+      "Unfiltered extra approval variables and numeric-only target checks",
+      "StandaloneXSS and compatibilityCandidateResolverDelegate behavior",
+      "Generic engine-end completion coverage"
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/workflow.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 15:16:52",
+      "result": "approved",
+      "translation_sha256": "e2c9a4f2e1c0419e0a6ba7a8206e034b467e291e53adc9546d69eb91e35d62a1",
+      "checks": {
+        "coverage_and_meaning": "完整四语现行七章与候选六小节逐段按中文事实源比较，覆盖服务/结构、模型创建保存校验发布、候选与三种实际执行路径、MI局部票数、普通身份/版本和内部双幂等、审批资格/记录、租户/XSS/敏感信息、完成Outbox和真实验证边界。字段契约归API、建模与截图归Wiki；相应整篇复核不在本批准范围。",
+        "technical_literals": "核实8103/19903/Flowable8.0.0/omni_workflow/Redis0/audit/schema-updatefalse、八common依赖、八wf_表与公共Outbox、modelKey正则/状态/版本指针、44Controller方法路径36外部8内部、四保留发起人变量、两读取完整路径/tenant400与404、模型/业务key双幂等及三类category绑定、候选锚点/参数/默认scope/20与32层/MI公式/ALL与ANY、MI_END和legacy标签、completion_event_id/事件型/绑定、四必需模型。四语JSON完全相同；当前源码49摘要绑定，完整/选段范围分开。",
+        "security_and_failure_semantics": "精确区分认证、功能权限、同tenant实例、本人assignee、业务关联及共享令牌调用者责任。新两处读取提前拒绝异tenant并保留同tenant；原始定义其他缺失守卫、变量覆盖、数字目标、standaloneXSS缓存缺失/读取异常、Listener缺配置返回和旧Delegate吞异常均如实披露。FAILED回滚/待办提交后错误/未知结束不保证事件、Outbox一写门闩/至少一次/外部通知分开；文档批准不等于已有全部业务缺陷已修复。",
+        "images_and_links": "四篇Markdown完整渲染、4个Mermaid结构图与4个JSON块；图的人用标签本地化，无光栅图片。四处API入链仅替换为新第6章锚点；本语Wiki/部署/MQ/API与AGENTS引用核对。渲染和人工图意核对不替代Mermaid浏览器布局、文档站根/子路径或真实教程截图。",
+        "language_and_terminology": "Every full current chapter compared with Chinese and selected current source. Preserve local transaction,request replay versus retry,candidate preview versus assignee,non-null deleteReason,engine skip versus approval vote,conditional tenant filters and exact failure limits. Localize diagram labels;keep all identifiers,JSON,paths and formula literal. Explicit compatibility and legacy security limits match Chinese."
+      },
+      "findings": [
+        {
+          "id": "WF01",
+          "status": "resolved",
+          "description": "模块依赖清单遗漏 common、operlog、job，并把本服务列作自身依赖；Redis 会话描述缺少当前依据。",
+          "resolution": "列明实际八个 common 直接依赖及独立 Servlet/Flowable 服务；没有引入 common-service、Redis 会话或服务自身依赖的虚构能力。"
+        },
+        {
+          "id": "WF02",
+          "status": "resolved",
+          "description": "架构 ASCII 图、固定服务数量、版本和本地配置需要与当前模块核对。",
+          "resolution": "按父POM与application.yml核实Flowable8.0.0、8103/19903、omni_workflow/Redis0、audit/异步/禁止运行时建表；架构图人用标签四语本地化，不硬编码全仓服务数量。"
+        },
+        {
+          "id": "WF03",
+          "status": "resolved",
+          "description": "数据模型未区分已实现能力与表结构预留，Outbox 表所有者需要说明。",
+          "resolution": "区分八个wf_表实际用途与form/delegation预留结构；列关键唯一键及待办投影限制，明确公共Outbox和ACT_*的迁移所有权。"
+        },
+        {
+          "id": "WF04",
+          "status": "resolved",
+          "description": "模型创建/保存的状态、归档、modelKey 校验和版本指针边界不完整。",
+          "resolution": "补齐modelKey正则/租户唯一、启用/0/DRAFT、提交XML/摘要、非DRAFT时新建草稿、不覆盖发布内容、禁直接删除有PUBLISHED版本模型；后端不从designerJson生成XML。"
+        },
+        {
+          "id": "WF05",
+          "status": "resolved",
+          "description": "BPMN 校验仅列七项，缺少当前严格解析及允许配置的具体边界。",
+          "resolution": "描述DOCTYPE/外部实体/外部DTD与样式表限制及实际结构校验；直接子元素/非空引用/扩展存在的有限范围；不宣称JSON语义和脚本/监听器/表达式白名单或可执行业务保证。"
+        },
+        {
+          "id": "WF06",
+          "status": "resolved",
+          "description": "发布流程和“Flowable 部署不是原子操作”的概括需要核对当前事务配置。",
+          "resolution": "按publish本地事务、原始JDBC行锁、重新验证、业务版本/引擎标识、前指针归档说明；FAILED写在回滚事务内不保证持久，不把本地部署描述为跨服务原子性。"
+        },
+        {
+          "id": "WF07",
+          "status": "resolved",
+          "description": "普通实例启动的最新版本、initiator、simulateUserId 与客户端保留变量范围未完整说明。",
+          "resolution": "普通启动拒绝模拟异主体；进入首个同步节点前覆盖四种发起人变量并finally清理；区分PUBLISHED版本路径和兼容key路径；普通requestId不建立内部预留幂等，待办提交后异常不回滚实例。"
+        },
+        {
+          "id": "WF08",
+          "status": "resolved",
+          "description": "审批完成描述把计数更新放到 taskService.complete 之后。",
+          "resolution": "纠正为意见/局部approved和运行变量、MI票数、taskService.complete的顺序；节点本地幂等与32层MI根定位、ALL/ANY及动态签人阈值准确；不保证任意BPMN正确路由。"
+        },
+        {
+          "id": "WF09",
+          "status": "resolved",
+          "description": "审批/任务的功能权限与实际处理资格未覆盖，拒绝分支被概括为所有模型保证。",
+          "resolution": "功能权限+当前租户精确assignee、409/403、数值解析目标及委托setAssignee；没有claim/transfer/withdraw独立入口，内部候选资格不认领；不虚构目标启用/Auth归属校验。"
+        },
+        {
+          "id": "WF10",
+          "status": "resolved",
+          "description": "进度/审批记录使用残缺路径，并过度简化状态和读取资格。",
+          "resolution": "给出完整两处读取路径，新增显式租户历史实例前置校验和400/404；保持同租户响应而未新增参与人ACL。真实MVC/服务模拟历史六用例红4绿6；本人已办、表单与候选预览边界明确。"
+        },
+        {
+          "id": "WF11",
+          "status": "resolved",
+          "description": "MI_END 被直接解释为真正审批通过，ANY 余下任务称自动完成。",
+          "resolution": "区分实际任务局部approved、缺变量兼容approved、pending与MI前缀legacyauto-approved；MI_END是跳过并非本人同意票，其他删除cancelled，意见使用第一条而非保证最新。"
+        },
+        {
+          "id": "WF12",
+          "status": "resolved",
+          "description": "内部启动意图描述只列部分字段，双幂等与重放响应范围需精确核对。",
+          "resolution": "准确记录requestId及业务键双唯一/同模型和发起人意图、未比较title/username/variables哈希；STARTED回原实例但回显本次requestId，RESERVED409，同requestIdFAILED可重试，换requestId业务碰撞不自动重试。"
+        },
+        {
+          "id": "WF13",
+          "status": "resolved",
+          "description": "内部契约章节遗漏当前终止、模型解析/预览等实际入口。",
+          "resolution": "依据8Controller44方法路径36外部8内部库存，涵盖当前模型详情/分类当前版/列表/批量解析/图预览/启动/资格/终止；完整请求响应只由API契约维护，四语入链仅改章锚点不批准API整篇。"
+        },
+        {
+          "id": "WF14",
+          "status": "resolved",
+          "description": "内部变量覆盖只称三个关联变量，发起身份和受保护变量约束不完整。",
+          "resolution": "共享令牌调用者负责真实startUserId/name和端用户授权；body/query租户一致，内部覆盖requestId/businessType/businessKey后再由普通层覆盖发起人；精确三类category绑定，不扩大为所有业务类型。"
+        },
+        {
+          "id": "WF15",
+          "status": "resolved",
+          "description": "完成事件触发、立即完成、缺实例扩展及结果判定边界需复核。",
+          "resolution": "完成事件只有审批检测运行结束及显式终止调用点；结果取本次请求APPROVED/REJECTED或CANCELLED；无通用所有结束监听器，立即结束/其他管理操作/缺扩展不能推断事件生成。"
+        },
+        {
+          "id": "WF16",
+          "status": "resolved",
+          "description": "事件 Outbox 门闩被写成已投递或无条件最终成功。",
+          "resolution": "扩展completion_event_id条件更新与Outbox同本地事务、一写门闩/已有返回false；至少一次交付需消费幂等，不等于Broker、消费者或外部通知送达。"
+        },
+        {
+          "id": "WF17",
+          "status": "resolved",
+          "description": "租户段落只说排除 Flowable 表，没有只拦截 wf_、默认租户和上下文边界。",
+          "resolution": "仅wf_的Tenant→Optimistic→Pagination、上下文缺失默认1、Filterfinally清理，原始JDBC/Flowable显式条件分开；不移植ownerDataScope或全服务租户隔离保证。"
+        },
+        {
+          "id": "WF18",
+          "status": "resolved",
+          "description": "XSS 说明容易被其他服务现有回源策略覆盖，且未区分缓存未命中与 Redis 异常。",
+          "resolution": "独立XssConfigProvider读Redis0两缓存，缺失或JSON解析错误enabled=false/空规则；Redis读取异常未捕获，没有common-service Auth回源/基线，保留当前业务限制而未顺带重构。"
+        },
+        {
+          "id": "WF19",
+          "status": "resolved",
+          "description": "ESCALATE_PARENT 的中文完整规则未同步英文/日文/韩文，其他 fallback 和锚点参数也需校验。",
+          "resolution": "四语同步ESCALATE_PARENT从父组织同角色同scope最多20层、ABSOLUTE_UNIT上溯仅unitId非unitIds首项；ASSIGN_ADMIN当前tenant组织1查SUPER_ADMIN而非硬编码用户1，缺候选抛错；锚点与未知scope实际兼容语义保留。"
+        },
+        {
+          "id": "WF20",
+          "status": "resolved",
+          "description": "omni:assignment 示例及“唯一入口”省略 XML 命名空间、运行时保护和设计器/兼容 Delegate 区别。",
+          "resolution": "配置形状示例与两命名空间、设计器startExecutionListener和candidateUserIds/parallelMI/userId、Bean表达式、旧TaskListener仅日志区分；3.6组件入口与当前AGENTS导航匹配。"
+        },
+        {
+          "id": "WF21",
+          "status": "resolved",
+          "description": "扩展和截图分散4/8章，事实、Wiki、已验证整篇链接的职责需要清楚。",
+          "resolution": "重组七个事实章节及六个候选子节；API只保留其唯一字段契约所有权，教程/截图归既有本语Wiki；相关Wiki/API和全站验收分别待办。"
+        },
+        {
+          "id": "WF22",
+          "status": "resolved",
+          "description": "日/韩主标题/ASCII/ER仍有英文，发起人用词存在発起/발기，日文夹有任何等中文。",
+          "resolution": "四语标题、系统图、表头与正文按中文完整比对；日文起案者/トランザクション/基準組織，韩文시작 사용자/트랜잭션/기준 조직一致；保留机器标识，去除发起用词与中文残留问题。"
+        },
+        {
+          "id": "WF23",
+          "status": "resolved",
+          "description": "流程变量、审批意见、抄送及操作日志的敏感信息和权限边界没有系统说明。",
+          "resolution": "任务表单完整变量、意见/设计JSON/XML/日志未承诺任意PII自动脱敏；CcNotifyDelegate仅记录且捕获异常，无待办/外部通知；NoOp默认仅日志，Outbox不作通知凭据。"
+        },
+        {
+          "id": "WF24",
+          "status": "resolved",
+          "description": "测试、默认模型与部署准备度缺少当前证据范围，易把设计/单元通过当实时验收。",
+          "resolution": "默认租户1四个必需模型与启动失败边界；区分211报告811测试806通过5条件跳过、Workflow14报告59通过、真实DB/MQ/浏览器/截图；默认Surefire不执行FWIT，历史图不作当前复现。"
+        },
+        {
+          "id": "WF25",
+          "status": "resolved",
+          "description": "进度和审批记录只按ID读取，当前租户边界缺失。",
+          "resolution": "两个读取接口传Gateway租户，服务在任何活动/意见/候选/昵称读取前按ID+租户查历史实例；400/404统一错误并保留同租户。六项控制用例红4失败2通过、绿6通过，全后端构建通过。未新增参与人ACL/写权限，未冒称真实DB/Gateway验收。"
+        },
+        {
+          "id": "WF26",
+          "status": "resolved",
+          "description": "候选人fallback被泛化为所有兼容BPMN均失败关闭。",
+          "resolution": "明确Listener缺assignment/role可能直接返回；ExecutionListener和Bean有ESCALATE_PARENT与异常传播，旧CandidateResolverDelegate无该分支、缺目标可返回、捕获错误仅日志。该文档误述已纠正，兼容实现未修改。"
+        },
+        {
+          "id": "WF27",
+          "status": "resolved",
+          "description": "原始定义管理被概括为全部查询自动租户隔离且等价模型发布。",
+          "resolution": "按完整ProcessDefinitionServiceImpl披露只有列表有条件加tenant，按ID读取/挂起/激活/删除没有统一所属检查，并不走模型校验/业务版流程。这是事实文档纠正，不是这些业务入口已修复的结论。"
+        },
+        {
+          "id": "WF28",
+          "status": "resolved",
+          "description": "逐人autoCompleted条件被写作非空字符串，而实现只检查非null。",
+          "resolution": "最终四语精确改为deleteReason非null，保留记录MI前缀/其他删除分支；262b重新渲染，业务代码未变。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/workflow.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 15:16:52",
+      "result": "approved",
+      "translation_sha256": "bf2a2db1e45360a2d8b6a108328c32fb2b19f59adec629cf62a8b856109a1b4a",
+      "checks": {
+        "coverage_and_meaning": "完整四语现行七章与候选六小节逐段按中文事实源比较，覆盖服务/结构、模型创建保存校验发布、候选与三种实际执行路径、MI局部票数、普通身份/版本和内部双幂等、审批资格/记录、租户/XSS/敏感信息、完成Outbox和真实验证边界。字段契约归API、建模与截图归Wiki；相应整篇复核不在本批准范围。",
+        "technical_literals": "核实8103/19903/Flowable8.0.0/omni_workflow/Redis0/audit/schema-updatefalse、八common依赖、八wf_表与公共Outbox、modelKey正则/状态/版本指针、44Controller方法路径36外部8内部、四保留发起人变量、两读取完整路径/tenant400与404、模型/业务key双幂等及三类category绑定、候选锚点/参数/默认scope/20与32层/MI公式/ALL与ANY、MI_END和legacy标签、completion_event_id/事件型/绑定、四必需模型。四语JSON完全相同；当前源码49摘要绑定，完整/选段范围分开。",
+        "security_and_failure_semantics": "精确区分认证、功能权限、同tenant实例、本人assignee、业务关联及共享令牌调用者责任。新两处读取提前拒绝异tenant并保留同tenant；原始定义其他缺失守卫、变量覆盖、数字目标、standaloneXSS缓存缺失/读取异常、Listener缺配置返回和旧Delegate吞异常均如实披露。FAILED回滚/待办提交后错误/未知结束不保证事件、Outbox一写门闩/至少一次/外部通知分开；文档批准不等于已有全部业务缺陷已修复。",
+        "images_and_links": "四篇Markdown完整渲染、4个Mermaid结构图与4个JSON块；图的人用标签本地化，无光栅图片。四处API入链仅替换为新第6章锚点；本语Wiki/部署/MQ/API与AGENTS引用核对。渲染和人工图意核对不替代Mermaid浏览器布局、文档站根/子路径或真实教程截图。",
+        "language_and_terminology": "現行全文を中国語の事実と選定ソースに照合。起案者、担当者、基準組織、トランザクション、冪等再送、MIローカルカウンタを統一し、見出しと図を日本語化。nullでない削除理由、投票でないスキップ、20/32階層、互換代理の例外捕捉、旧定義の所属検査欠落、XSSとOutboxの限界を省略せず保持。"
+      },
+      "findings": [
+        {
+          "id": "WF01",
+          "status": "resolved",
+          "description": "模块依赖清单遗漏 common、operlog、job，并把本服务列作自身依赖；Redis 会话描述缺少当前依据。",
+          "resolution": "列明实际八个 common 直接依赖及独立 Servlet/Flowable 服务；没有引入 common-service、Redis 会话或服务自身依赖的虚构能力。"
+        },
+        {
+          "id": "WF02",
+          "status": "resolved",
+          "description": "架构 ASCII 图、固定服务数量、版本和本地配置需要与当前模块核对。",
+          "resolution": "按父POM与application.yml核实Flowable8.0.0、8103/19903、omni_workflow/Redis0、audit/异步/禁止运行时建表；架构图人用标签四语本地化，不硬编码全仓服务数量。"
+        },
+        {
+          "id": "WF03",
+          "status": "resolved",
+          "description": "数据模型未区分已实现能力与表结构预留，Outbox 表所有者需要说明。",
+          "resolution": "区分八个wf_表实际用途与form/delegation预留结构；列关键唯一键及待办投影限制，明确公共Outbox和ACT_*的迁移所有权。"
+        },
+        {
+          "id": "WF04",
+          "status": "resolved",
+          "description": "模型创建/保存的状态、归档、modelKey 校验和版本指针边界不完整。",
+          "resolution": "补齐modelKey正则/租户唯一、启用/0/DRAFT、提交XML/摘要、非DRAFT时新建草稿、不覆盖发布内容、禁直接删除有PUBLISHED版本模型；后端不从designerJson生成XML。"
+        },
+        {
+          "id": "WF05",
+          "status": "resolved",
+          "description": "BPMN 校验仅列七项，缺少当前严格解析及允许配置的具体边界。",
+          "resolution": "描述DOCTYPE/外部实体/外部DTD与样式表限制及实际结构校验；直接子元素/非空引用/扩展存在的有限范围；不宣称JSON语义和脚本/监听器/表达式白名单或可执行业务保证。"
+        },
+        {
+          "id": "WF06",
+          "status": "resolved",
+          "description": "发布流程和“Flowable 部署不是原子操作”的概括需要核对当前事务配置。",
+          "resolution": "按publish本地事务、原始JDBC行锁、重新验证、业务版本/引擎标识、前指针归档说明；FAILED写在回滚事务内不保证持久，不把本地部署描述为跨服务原子性。"
+        },
+        {
+          "id": "WF07",
+          "status": "resolved",
+          "description": "普通实例启动的最新版本、initiator、simulateUserId 与客户端保留变量范围未完整说明。",
+          "resolution": "普通启动拒绝模拟异主体；进入首个同步节点前覆盖四种发起人变量并finally清理；区分PUBLISHED版本路径和兼容key路径；普通requestId不建立内部预留幂等，待办提交后异常不回滚实例。"
+        },
+        {
+          "id": "WF08",
+          "status": "resolved",
+          "description": "审批完成描述把计数更新放到 taskService.complete 之后。",
+          "resolution": "纠正为意见/局部approved和运行变量、MI票数、taskService.complete的顺序；节点本地幂等与32层MI根定位、ALL/ANY及动态签人阈值准确；不保证任意BPMN正确路由。"
+        },
+        {
+          "id": "WF09",
+          "status": "resolved",
+          "description": "审批/任务的功能权限与实际处理资格未覆盖，拒绝分支被概括为所有模型保证。",
+          "resolution": "功能权限+当前租户精确assignee、409/403、数值解析目标及委托setAssignee；没有claim/transfer/withdraw独立入口，内部候选资格不认领；不虚构目标启用/Auth归属校验。"
+        },
+        {
+          "id": "WF10",
+          "status": "resolved",
+          "description": "进度/审批记录使用残缺路径，并过度简化状态和读取资格。",
+          "resolution": "给出完整两处读取路径，新增显式租户历史实例前置校验和400/404；保持同租户响应而未新增参与人ACL。真实MVC/服务模拟历史六用例红4绿6；本人已办、表单与候选预览边界明确。"
+        },
+        {
+          "id": "WF11",
+          "status": "resolved",
+          "description": "MI_END 被直接解释为真正审批通过，ANY 余下任务称自动完成。",
+          "resolution": "区分实际任务局部approved、缺变量兼容approved、pending与MI前缀legacyauto-approved；MI_END是跳过并非本人同意票，其他删除cancelled，意见使用第一条而非保证最新。"
+        },
+        {
+          "id": "WF12",
+          "status": "resolved",
+          "description": "内部启动意图描述只列部分字段，双幂等与重放响应范围需精确核对。",
+          "resolution": "准确记录requestId及业务键双唯一/同模型和发起人意图、未比较title/username/variables哈希；STARTED回原实例但回显本次requestId，RESERVED409，同requestIdFAILED可重试，换requestId业务碰撞不自动重试。"
+        },
+        {
+          "id": "WF13",
+          "status": "resolved",
+          "description": "内部契约章节遗漏当前终止、模型解析/预览等实际入口。",
+          "resolution": "依据8Controller44方法路径36外部8内部库存，涵盖当前模型详情/分类当前版/列表/批量解析/图预览/启动/资格/终止；完整请求响应只由API契约维护，四语入链仅改章锚点不批准API整篇。"
+        },
+        {
+          "id": "WF14",
+          "status": "resolved",
+          "description": "内部变量覆盖只称三个关联变量，发起身份和受保护变量约束不完整。",
+          "resolution": "共享令牌调用者负责真实startUserId/name和端用户授权；body/query租户一致，内部覆盖requestId/businessType/businessKey后再由普通层覆盖发起人；精确三类category绑定，不扩大为所有业务类型。"
+        },
+        {
+          "id": "WF15",
+          "status": "resolved",
+          "description": "完成事件触发、立即完成、缺实例扩展及结果判定边界需复核。",
+          "resolution": "完成事件只有审批检测运行结束及显式终止调用点；结果取本次请求APPROVED/REJECTED或CANCELLED；无通用所有结束监听器，立即结束/其他管理操作/缺扩展不能推断事件生成。"
+        },
+        {
+          "id": "WF16",
+          "status": "resolved",
+          "description": "事件 Outbox 门闩被写成已投递或无条件最终成功。",
+          "resolution": "扩展completion_event_id条件更新与Outbox同本地事务、一写门闩/已有返回false；至少一次交付需消费幂等，不等于Broker、消费者或外部通知送达。"
+        },
+        {
+          "id": "WF17",
+          "status": "resolved",
+          "description": "租户段落只说排除 Flowable 表，没有只拦截 wf_、默认租户和上下文边界。",
+          "resolution": "仅wf_的Tenant→Optimistic→Pagination、上下文缺失默认1、Filterfinally清理，原始JDBC/Flowable显式条件分开；不移植ownerDataScope或全服务租户隔离保证。"
+        },
+        {
+          "id": "WF18",
+          "status": "resolved",
+          "description": "XSS 说明容易被其他服务现有回源策略覆盖，且未区分缓存未命中与 Redis 异常。",
+          "resolution": "独立XssConfigProvider读Redis0两缓存，缺失或JSON解析错误enabled=false/空规则；Redis读取异常未捕获，没有common-service Auth回源/基线，保留当前业务限制而未顺带重构。"
+        },
+        {
+          "id": "WF19",
+          "status": "resolved",
+          "description": "ESCALATE_PARENT 的中文完整规则未同步英文/日文/韩文，其他 fallback 和锚点参数也需校验。",
+          "resolution": "四语同步ESCALATE_PARENT从父组织同角色同scope最多20层、ABSOLUTE_UNIT上溯仅unitId非unitIds首项；ASSIGN_ADMIN当前tenant组织1查SUPER_ADMIN而非硬编码用户1，缺候选抛错；锚点与未知scope实际兼容语义保留。"
+        },
+        {
+          "id": "WF20",
+          "status": "resolved",
+          "description": "omni:assignment 示例及“唯一入口”省略 XML 命名空间、运行时保护和设计器/兼容 Delegate 区别。",
+          "resolution": "配置形状示例与两命名空间、设计器startExecutionListener和candidateUserIds/parallelMI/userId、Bean表达式、旧TaskListener仅日志区分；3.6组件入口与当前AGENTS导航匹配。"
+        },
+        {
+          "id": "WF21",
+          "status": "resolved",
+          "description": "扩展和截图分散4/8章，事实、Wiki、已验证整篇链接的职责需要清楚。",
+          "resolution": "重组七个事实章节及六个候选子节；API只保留其唯一字段契约所有权，教程/截图归既有本语Wiki；相关Wiki/API和全站验收分别待办。"
+        },
+        {
+          "id": "WF22",
+          "status": "resolved",
+          "description": "日/韩主标题/ASCII/ER仍有英文，发起人用词存在発起/발기，日文夹有任何等中文。",
+          "resolution": "四语标题、系统图、表头与正文按中文完整比对；日文起案者/トランザクション/基準組織，韩文시작 사용자/트랜잭션/기준 조직一致；保留机器标识，去除发起用词与中文残留问题。"
+        },
+        {
+          "id": "WF23",
+          "status": "resolved",
+          "description": "流程变量、审批意见、抄送及操作日志的敏感信息和权限边界没有系统说明。",
+          "resolution": "任务表单完整变量、意见/设计JSON/XML/日志未承诺任意PII自动脱敏；CcNotifyDelegate仅记录且捕获异常，无待办/外部通知；NoOp默认仅日志，Outbox不作通知凭据。"
+        },
+        {
+          "id": "WF24",
+          "status": "resolved",
+          "description": "测试、默认模型与部署准备度缺少当前证据范围，易把设计/单元通过当实时验收。",
+          "resolution": "默认租户1四个必需模型与启动失败边界；区分211报告811测试806通过5条件跳过、Workflow14报告59通过、真实DB/MQ/浏览器/截图；默认Surefire不执行FWIT，历史图不作当前复现。"
+        },
+        {
+          "id": "WF25",
+          "status": "resolved",
+          "description": "进度和审批记录只按ID读取，当前租户边界缺失。",
+          "resolution": "两个读取接口传Gateway租户，服务在任何活动/意见/候选/昵称读取前按ID+租户查历史实例；400/404统一错误并保留同租户。六项控制用例红4失败2通过、绿6通过，全后端构建通过。未新增参与人ACL/写权限，未冒称真实DB/Gateway验收。"
+        },
+        {
+          "id": "WF26",
+          "status": "resolved",
+          "description": "候选人fallback被泛化为所有兼容BPMN均失败关闭。",
+          "resolution": "明确Listener缺assignment/role可能直接返回；ExecutionListener和Bean有ESCALATE_PARENT与异常传播，旧CandidateResolverDelegate无该分支、缺目标可返回、捕获错误仅日志。该文档误述已纠正，兼容实现未修改。"
+        },
+        {
+          "id": "WF27",
+          "status": "resolved",
+          "description": "原始定义管理被概括为全部查询自动租户隔离且等价模型发布。",
+          "resolution": "按完整ProcessDefinitionServiceImpl披露只有列表有条件加tenant，按ID读取/挂起/激活/删除没有统一所属检查，并不走模型校验/业务版流程。这是事实文档纠正，不是这些业务入口已修复的结论。"
+        },
+        {
+          "id": "WF28",
+          "status": "resolved",
+          "description": "逐人autoCompleted条件被写作非空字符串，而实现只检查非null。",
+          "resolution": "最终四语精确改为deleteReason非null，保留记录MI前缀/其他删除分支；262b重新渲染，业务代码未变。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/workflow.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-16 15:16:52",
+      "result": "approved",
+      "translation_sha256": "4f92e5629571b9059154ffb2777a5ffb506b8ad93483d7fcf2e5595a58f19479",
+      "checks": {
+        "coverage_and_meaning": "完整四语现行七章与候选六小节逐段按中文事实源比较，覆盖服务/结构、模型创建保存校验发布、候选与三种实际执行路径、MI局部票数、普通身份/版本和内部双幂等、审批资格/记录、租户/XSS/敏感信息、完成Outbox和真实验证边界。字段契约归API、建模与截图归Wiki；相应整篇复核不在本批准范围。",
+        "technical_literals": "核实8103/19903/Flowable8.0.0/omni_workflow/Redis0/audit/schema-updatefalse、八common依赖、八wf_表与公共Outbox、modelKey正则/状态/版本指针、44Controller方法路径36外部8内部、四保留发起人变量、两读取完整路径/tenant400与404、模型/业务key双幂等及三类category绑定、候选锚点/参数/默认scope/20与32层/MI公式/ALL与ANY、MI_END和legacy标签、completion_event_id/事件型/绑定、四必需模型。四语JSON完全相同；当前源码49摘要绑定，完整/选段范围分开。",
+        "security_and_failure_semantics": "精确区分认证、功能权限、同tenant实例、本人assignee、业务关联及共享令牌调用者责任。新两处读取提前拒绝异tenant并保留同tenant；原始定义其他缺失守卫、变量覆盖、数字目标、standaloneXSS缓存缺失/读取异常、Listener缺配置返回和旧Delegate吞异常均如实披露。FAILED回滚/待办提交后错误/未知结束不保证事件、Outbox一写门闩/至少一次/外部通知分开；文档批准不等于已有全部业务缺陷已修复。",
+        "images_and_links": "四篇Markdown完整渲染、4个Mermaid结构图与4个JSON块；图的人用标签本地化，无光栅图片。四处API入链仅替换为新第6章锚点；本语Wiki/部署/MQ/API与AGENTS引用核对。渲染和人工图意核对不替代Mermaid浏览器布局、文档站根/子路径或真实教程截图。",
+        "language_and_terminology": "현재 전체 문장을 중국어 사실과 해당 소스에 대조했습니다. 시작 사용자,담당자,기준 조직,트랜잭션,멱등 재요청과MI로컬카운터를 일관되게 사용하고 제목과 도식을 한국어화했습니다. null이 아닌 삭제 사유,표가 아닌 건너뛰기,20/32단계,호환델리게이트예외처리,기존정의테넌트검사누락,XSS및Outbox한계를 모두 유지했습니다."
+      },
+      "findings": [
+        {
+          "id": "WF01",
+          "status": "resolved",
+          "description": "模块依赖清单遗漏 common、operlog、job，并把本服务列作自身依赖；Redis 会话描述缺少当前依据。",
+          "resolution": "列明实际八个 common 直接依赖及独立 Servlet/Flowable 服务；没有引入 common-service、Redis 会话或服务自身依赖的虚构能力。"
+        },
+        {
+          "id": "WF02",
+          "status": "resolved",
+          "description": "架构 ASCII 图、固定服务数量、版本和本地配置需要与当前模块核对。",
+          "resolution": "按父POM与application.yml核实Flowable8.0.0、8103/19903、omni_workflow/Redis0、audit/异步/禁止运行时建表；架构图人用标签四语本地化，不硬编码全仓服务数量。"
+        },
+        {
+          "id": "WF03",
+          "status": "resolved",
+          "description": "数据模型未区分已实现能力与表结构预留，Outbox 表所有者需要说明。",
+          "resolution": "区分八个wf_表实际用途与form/delegation预留结构；列关键唯一键及待办投影限制，明确公共Outbox和ACT_*的迁移所有权。"
+        },
+        {
+          "id": "WF04",
+          "status": "resolved",
+          "description": "模型创建/保存的状态、归档、modelKey 校验和版本指针边界不完整。",
+          "resolution": "补齐modelKey正则/租户唯一、启用/0/DRAFT、提交XML/摘要、非DRAFT时新建草稿、不覆盖发布内容、禁直接删除有PUBLISHED版本模型；后端不从designerJson生成XML。"
+        },
+        {
+          "id": "WF05",
+          "status": "resolved",
+          "description": "BPMN 校验仅列七项，缺少当前严格解析及允许配置的具体边界。",
+          "resolution": "描述DOCTYPE/外部实体/外部DTD与样式表限制及实际结构校验；直接子元素/非空引用/扩展存在的有限范围；不宣称JSON语义和脚本/监听器/表达式白名单或可执行业务保证。"
+        },
+        {
+          "id": "WF06",
+          "status": "resolved",
+          "description": "发布流程和“Flowable 部署不是原子操作”的概括需要核对当前事务配置。",
+          "resolution": "按publish本地事务、原始JDBC行锁、重新验证、业务版本/引擎标识、前指针归档说明；FAILED写在回滚事务内不保证持久，不把本地部署描述为跨服务原子性。"
+        },
+        {
+          "id": "WF07",
+          "status": "resolved",
+          "description": "普通实例启动的最新版本、initiator、simulateUserId 与客户端保留变量范围未完整说明。",
+          "resolution": "普通启动拒绝模拟异主体；进入首个同步节点前覆盖四种发起人变量并finally清理；区分PUBLISHED版本路径和兼容key路径；普通requestId不建立内部预留幂等，待办提交后异常不回滚实例。"
+        },
+        {
+          "id": "WF08",
+          "status": "resolved",
+          "description": "审批完成描述把计数更新放到 taskService.complete 之后。",
+          "resolution": "纠正为意见/局部approved和运行变量、MI票数、taskService.complete的顺序；节点本地幂等与32层MI根定位、ALL/ANY及动态签人阈值准确；不保证任意BPMN正确路由。"
+        },
+        {
+          "id": "WF09",
+          "status": "resolved",
+          "description": "审批/任务的功能权限与实际处理资格未覆盖，拒绝分支被概括为所有模型保证。",
+          "resolution": "功能权限+当前租户精确assignee、409/403、数值解析目标及委托setAssignee；没有claim/transfer/withdraw独立入口，内部候选资格不认领；不虚构目标启用/Auth归属校验。"
+        },
+        {
+          "id": "WF10",
+          "status": "resolved",
+          "description": "进度/审批记录使用残缺路径，并过度简化状态和读取资格。",
+          "resolution": "给出完整两处读取路径，新增显式租户历史实例前置校验和400/404；保持同租户响应而未新增参与人ACL。真实MVC/服务模拟历史六用例红4绿6；本人已办、表单与候选预览边界明确。"
+        },
+        {
+          "id": "WF11",
+          "status": "resolved",
+          "description": "MI_END 被直接解释为真正审批通过，ANY 余下任务称自动完成。",
+          "resolution": "区分实际任务局部approved、缺变量兼容approved、pending与MI前缀legacyauto-approved；MI_END是跳过并非本人同意票，其他删除cancelled，意见使用第一条而非保证最新。"
+        },
+        {
+          "id": "WF12",
+          "status": "resolved",
+          "description": "内部启动意图描述只列部分字段，双幂等与重放响应范围需精确核对。",
+          "resolution": "准确记录requestId及业务键双唯一/同模型和发起人意图、未比较title/username/variables哈希；STARTED回原实例但回显本次requestId，RESERVED409，同requestIdFAILED可重试，换requestId业务碰撞不自动重试。"
+        },
+        {
+          "id": "WF13",
+          "status": "resolved",
+          "description": "内部契约章节遗漏当前终止、模型解析/预览等实际入口。",
+          "resolution": "依据8Controller44方法路径36外部8内部库存，涵盖当前模型详情/分类当前版/列表/批量解析/图预览/启动/资格/终止；完整请求响应只由API契约维护，四语入链仅改章锚点不批准API整篇。"
+        },
+        {
+          "id": "WF14",
+          "status": "resolved",
+          "description": "内部变量覆盖只称三个关联变量，发起身份和受保护变量约束不完整。",
+          "resolution": "共享令牌调用者负责真实startUserId/name和端用户授权；body/query租户一致，内部覆盖requestId/businessType/businessKey后再由普通层覆盖发起人；精确三类category绑定，不扩大为所有业务类型。"
+        },
+        {
+          "id": "WF15",
+          "status": "resolved",
+          "description": "完成事件触发、立即完成、缺实例扩展及结果判定边界需复核。",
+          "resolution": "完成事件只有审批检测运行结束及显式终止调用点；结果取本次请求APPROVED/REJECTED或CANCELLED；无通用所有结束监听器，立即结束/其他管理操作/缺扩展不能推断事件生成。"
+        },
+        {
+          "id": "WF16",
+          "status": "resolved",
+          "description": "事件 Outbox 门闩被写成已投递或无条件最终成功。",
+          "resolution": "扩展completion_event_id条件更新与Outbox同本地事务、一写门闩/已有返回false；至少一次交付需消费幂等，不等于Broker、消费者或外部通知送达。"
+        },
+        {
+          "id": "WF17",
+          "status": "resolved",
+          "description": "租户段落只说排除 Flowable 表，没有只拦截 wf_、默认租户和上下文边界。",
+          "resolution": "仅wf_的Tenant→Optimistic→Pagination、上下文缺失默认1、Filterfinally清理，原始JDBC/Flowable显式条件分开；不移植ownerDataScope或全服务租户隔离保证。"
+        },
+        {
+          "id": "WF18",
+          "status": "resolved",
+          "description": "XSS 说明容易被其他服务现有回源策略覆盖，且未区分缓存未命中与 Redis 异常。",
+          "resolution": "独立XssConfigProvider读Redis0两缓存，缺失或JSON解析错误enabled=false/空规则；Redis读取异常未捕获，没有common-service Auth回源/基线，保留当前业务限制而未顺带重构。"
+        },
+        {
+          "id": "WF19",
+          "status": "resolved",
+          "description": "ESCALATE_PARENT 的中文完整规则未同步英文/日文/韩文，其他 fallback 和锚点参数也需校验。",
+          "resolution": "四语同步ESCALATE_PARENT从父组织同角色同scope最多20层、ABSOLUTE_UNIT上溯仅unitId非unitIds首项；ASSIGN_ADMIN当前tenant组织1查SUPER_ADMIN而非硬编码用户1，缺候选抛错；锚点与未知scope实际兼容语义保留。"
+        },
+        {
+          "id": "WF20",
+          "status": "resolved",
+          "description": "omni:assignment 示例及“唯一入口”省略 XML 命名空间、运行时保护和设计器/兼容 Delegate 区别。",
+          "resolution": "配置形状示例与两命名空间、设计器startExecutionListener和candidateUserIds/parallelMI/userId、Bean表达式、旧TaskListener仅日志区分；3.6组件入口与当前AGENTS导航匹配。"
+        },
+        {
+          "id": "WF21",
+          "status": "resolved",
+          "description": "扩展和截图分散4/8章，事实、Wiki、已验证整篇链接的职责需要清楚。",
+          "resolution": "重组七个事实章节及六个候选子节；API只保留其唯一字段契约所有权，教程/截图归既有本语Wiki；相关Wiki/API和全站验收分别待办。"
+        },
+        {
+          "id": "WF22",
+          "status": "resolved",
+          "description": "日/韩主标题/ASCII/ER仍有英文，发起人用词存在発起/발기，日文夹有任何等中文。",
+          "resolution": "四语标题、系统图、表头与正文按中文完整比对；日文起案者/トランザクション/基準組織，韩文시작 사용자/트랜잭션/기준 조직一致；保留机器标识，去除发起用词与中文残留问题。"
+        },
+        {
+          "id": "WF23",
+          "status": "resolved",
+          "description": "流程变量、审批意见、抄送及操作日志的敏感信息和权限边界没有系统说明。",
+          "resolution": "任务表单完整变量、意见/设计JSON/XML/日志未承诺任意PII自动脱敏；CcNotifyDelegate仅记录且捕获异常，无待办/外部通知；NoOp默认仅日志，Outbox不作通知凭据。"
+        },
+        {
+          "id": "WF24",
+          "status": "resolved",
+          "description": "测试、默认模型与部署准备度缺少当前证据范围，易把设计/单元通过当实时验收。",
+          "resolution": "默认租户1四个必需模型与启动失败边界；区分211报告811测试806通过5条件跳过、Workflow14报告59通过、真实DB/MQ/浏览器/截图；默认Surefire不执行FWIT，历史图不作当前复现。"
+        },
+        {
+          "id": "WF25",
+          "status": "resolved",
+          "description": "进度和审批记录只按ID读取，当前租户边界缺失。",
+          "resolution": "两个读取接口传Gateway租户，服务在任何活动/意见/候选/昵称读取前按ID+租户查历史实例；400/404统一错误并保留同租户。六项控制用例红4失败2通过、绿6通过，全后端构建通过。未新增参与人ACL/写权限，未冒称真实DB/Gateway验收。"
+        },
+        {
+          "id": "WF26",
+          "status": "resolved",
+          "description": "候选人fallback被泛化为所有兼容BPMN均失败关闭。",
+          "resolution": "明确Listener缺assignment/role可能直接返回；ExecutionListener和Bean有ESCALATE_PARENT与异常传播，旧CandidateResolverDelegate无该分支、缺目标可返回、捕获错误仅日志。该文档误述已纠正，兼容实现未修改。"
+        },
+        {
+          "id": "WF27",
+          "status": "resolved",
+          "description": "原始定义管理被概括为全部查询自动租户隔离且等价模型发布。",
+          "resolution": "按完整ProcessDefinitionServiceImpl披露只有列表有条件加tenant，按ID读取/挂起/激活/删除没有统一所属检查，并不走模型校验/业务版流程。这是事实文档纠正，不是这些业务入口已修复的结论。"
+        },
+        {
+          "id": "WF28",
+          "status": "resolved",
+          "description": "逐人autoCompleted条件被写作非空字符串，而实现只检查非null。",
+          "resolution": "最终四语精确改为deleteReason非null，保留记录MI前缀/其他删除分支；262b重新渲染，业务代码未变。"
+        }
+      ]
+    }
+  }
+}

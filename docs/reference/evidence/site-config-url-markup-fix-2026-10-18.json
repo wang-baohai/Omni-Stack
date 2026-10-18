@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "kind": "site-local-configuration-url-literal-format-fix",
+  "at": "2026-10-17T18:24:28.226Z",
+  "source_head": "e1d55d520111d1adac16e13a8553b53c0c782c6f",
+  "actual_source_context_output": "db75e7",
+  "actual_image_build_failure": "current-site-image-builds-558.json",
+  "actual_build_log_scope": "site-build-root-558.stderr.log",
+  "actual_dead_links": [
+    {
+      "url": "http://localhost:8100/oauth2/jwks",
+      "page": "en-US/backend-patterns.md"
+    },
+    {
+      "url": "http://localhost:8102",
+      "page": "en-US/frontend-patterns.md"
+    },
+    {
+      "url": "http://localhost:8100/oauth2/jwks%E3%80%81Compose",
+      "page": "ja-JP/backend-patterns.md"
+    },
+    {
+      "url": "http://localhost:8102",
+      "page": "ja-JP/frontend-patterns.md"
+    },
+    {
+      "url": "http://localhost:8100/oauth2/jwks",
+      "page": "ko-KR/backend-patterns.md"
+    },
+    {
+      "url": "http://localhost:8100/oauth2/jwks%EF%BC%9BCompose",
+      "page": "zh-CN/backend-patterns.md"
+    },
+    {
+      "url": "http://localhost:8102",
+      "page": "zh-CN/frontend-patterns.md"
+    }
+  ],
+  "root_cause": "Bare local configuration values became automatic hyperlinks. VitePress treated localhost targets as site links,and Chinese/Japanese punctuation could be absorbed into the URL. These configuration literals need code formatting;the URI values and strict dead-link check are retained.",
+  "scope": "Only12 existing URL spans in8lines acrossfourlanguagebackend/frontendpatterns get inline code. Backend formats both GatewayYAML andCompose URI values in the same table cell;frontend formats the Vite development target in each language.",
+  "prior_complete_semantic_reviews": [
+    {
+      "id": "backend-patterns",
+      "path": "docs/reference/reviews/backend-patterns.json",
+      "sha256": "f88e81c0d3153d8e1648e61dc0d6c2b12ea13faf2ba63f09f847417727104d84",
+      "source_sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7",
+      "translations": {
+        "en-US": {
+          "path": "docs/backend-patterns.en.md",
+          "sha256": "e7487a8684cdec794923e2e28210f9843d353a536cfce486e172efa2d830ed7d"
+        },
+        "ja-JP": {
+          "path": "docs/backend-patterns.jp.md",
+          "sha256": "7d2cf3b946c01b47245f0292819a24d95c49a13e0fd3bb1541369dda6e6d4403"
+        },
+        "ko-KR": {
+          "path": "docs/backend-patterns.kr.md",
+          "sha256": "b47fdd3b47307cb74b00d33e9416f8536b6f7ffe677b6078b2e1315b8231e677"
+        }
+      }
+    },
+    {
+      "id": "frontend-patterns",
+      "path": "docs/reference/reviews/frontend-patterns.json",
+      "sha256": "dedc1bbd2afeeddc81cf932b0f1a990b699bb1d4ddcb85aa31f865f3e0a4f3c0",
+      "source_sha256": "0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1",
+      "translations": {
+        "en-US": {
+          "path": "docs/frontend-patterns.en.md",
+          "sha256": "75c1ed163f1ed0565ea318e33cd1e960dabfd0780f1df36d894d5bbf2526a651"
+        },
+        "ja-JP": {
+          "path": "docs/frontend-patterns.jp.md",
+          "sha256": "a824b793f66b41bacb1a8e4c06cea854112c01880a09807a8e3063d93d828de2"
+        },
+        "ko-KR": {
+          "path": "docs/frontend-patterns.kr.md",
+          "sha256": "0df81fdfee0c3c1bf8524c2bf8106974421b122c4690ab60c7b4c6661fd14272"
+        }
+      }
+    }
+  ],
+  "targeted_actual_markdown_render": {
+    "local_autolinks_before": 7,
+    "local_autolinks_after": 0,
+    "rendered_documents": 8
+  },
+  "documents": [
+    {
+      "path": "docs/backend-patterns.md",
+      "family": "backend-patterns",
+      "locale": "zh-CN",
+      "before_sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7",
+      "after_sha256": "809c62fe362c84115768d1f478d0eef23c728f0a24583d08a7109a1a221d7126",
+      "line": 351,
+      "added_code_spans": [
+        "http://localhost:8100/oauth2/jwks",
+        "http://omni-auth:8080/oauth2/jwks"
+      ]
+    },
+    {
+      "path": "docs/backend-patterns.en.md",
+      "family": "backend-patterns",
+      "locale": "en-US",
+      "before_sha256": "e7487a8684cdec794923e2e28210f9843d353a536cfce486e172efa2d830ed7d",
+      "after_sha256": "203a154d7a09aaea18a54e168006d9a5b96f062c0ebca779ec245eab8b803cfa",
+      "line": 351,
+      "added_code_spans": [
+        "http://localhost:8100/oauth2/jwks",
+        "http://omni-auth:8080/oauth2/jwks"
+      ]
+    },
+    {
+      "path": "docs/backend-patterns.jp.md",
+      "family": "backend-patterns",
+      "locale": "ja-JP",
+      "before_sha256": "7d2cf3b946c01b47245f0292819a24d95c49a13e0fd3bb1541369dda6e6d4403",
+      "after_sha256": "232a558fc230f0da56b35394c4fb2b3a032b5dbfb5aec58f8ad93653ae2747a6",
+      "line": 351,
+      "added_code_spans": [
+        "http://localhost:8100/oauth2/jwks",
+        "http://omni-auth:8080/oauth2/jwks"
+      ]
+    },
+    {
+      "path": "docs/backend-patterns.kr.md",
+      "family": "backend-patterns",
+      "locale": "ko-KR",
+      "before_sha256": "b47fdd3b47307cb74b00d33e9416f8536b6f7ffe677b6078b2e1315b8231e677",
+      "after_sha256": "613aeeae55b020d6b2f0a295c0226fb5160ac14aa7bd3a23142f597ca928fc96",
+      "line": 351,
+      "added_code_spans": [
+        "http://localhost:8100/oauth2/jwks",
+        "http://omni-auth:8080/oauth2/jwks"
+      ]
+    },
+    {
+      "path": "docs/frontend-patterns.md",
+      "family": "frontend-patterns",
+      "locale": "zh-CN",
+      "before_sha256": "0c93f83dc0b44f6f52cc5399d803153dfeaabe50e14a690f0043b3509044bcb1",
+      "after_sha256": "69df06b582a497eaec21b0bb85cbaab341aee52d6b801c163fe8eac06780d327",
+      "line": 254,
+      "added_code_spans": [
+        "http://localhost:8102"
+      ]
+    },
+    {
+      "path": "docs/frontend-patterns.en.md",
+      "family": "frontend-patterns",
+      "locale": "en-US",
+      "before_sha256": "75c1ed163f1ed0565ea318e33cd1e960dabfd0780f1df36d894d5bbf2526a651",
+      "after_sha256": "60acf309c53e9a676792571e7ec8777f86dd2f1c2d4dbaec243cb8a2013253cb",
+      "line": 254,
+      "added_code_spans": [
+        "http://localhost:8102"
+      ]
+    },
+    {
+      "path": "docs/frontend-patterns.jp.md",
+      "family": "frontend-patterns",
+      "locale": "ja-JP",
+      "before_sha256": "a824b793f66b41bacb1a8e4c06cea854112c01880a09807a8e3063d93d828de2",
+      "after_sha256": "1bef1f6ebf3f5bedd72c4429a195764562afee35445801f54dc29356dc9a02f6",
+      "line": 254,
+      "added_code_spans": [
+        "http://localhost:8102"
+      ]
+    },
+    {
+      "path": "docs/frontend-patterns.kr.md",
+      "family": "frontend-patterns",
+      "locale": "ko-KR",
+      "before_sha256": "0df81fdfee0c3c1bf8524c2bf8106974421b122c4690ab60c7b4c6661fd14272",
+      "after_sha256": "44198d0e3465ef2cab061b0f420e4372cbd90b0e018630523a7c6eee9f21958b",
+      "line": 254,
+      "added_code_spans": [
+        "http://localhost:8102"
+      ]
+    }
+  ],
+  "all_text_other_than_backticks_unchanged": true,
+  "all_fences_unchanged": true,
+  "ignoreDeadLinks_setting_changed": false,
+  "new_whole_document_rereads": 0,
+  "new_translation_rows": 0,
+  "application_source_changes": false,
+  "business_writes": 0,
+  "full_original_A_G_preserved": true,
+  "global_release_complete": false
+}

@@ -4,10 +4,10 @@
  *
  * 何时使用：修改了任何 manifest 管理的中文事实源（docs/*.md、docs/guides/*.md）之后，
  * 译文尚未按新源复核前，运行本脚本让 manifest 记录新的源摘要。
- * 译文 status/reviewed_at 由人工复核流程管理，本脚本绝不触碰。
+ * 源发生变化时使旧语义复核失效；本脚本从不批准复核或填写复核日期。
  *
  * 用法：node refresh-source-digests.mjs [--check]
- *   默认：重算全部源摘要并写回 manifest，报告漂移数量。
+ *   默认：重算源摘要、使受影响复核失效并写回，报告漂移数量。
  *   --check：只报告漂移，不写回（漂移存在时退出码 1）。
  */
 import fs from 'node:fs';
@@ -19,7 +19,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const MANIFEST = path.join(ROOT, 'docs/docs-manifest.yaml');
 const checkOnly = process.argv.includes('--check');
 
-const { parse } = await import('yaml');
+const { parse, stringify } = await import('yaml');
 const manifest = parse(fs.readFileSync(MANIFEST, 'utf8'));
 
 const drifted = [];
@@ -39,16 +39,25 @@ drifted.forEach((d) => console.log(`  ${d.id} (${d.source})`));
 
 if (checkOnly) process.exit(1);
 
-let text = fs.readFileSync(MANIFEST, 'utf8');
 for (const d of drifted) {
-  const anchor = `source: ${d.source}\n    source_sha256: `;
-  const start = text.indexOf(anchor);
-  if (start < 0) {
-    console.error(`未找到锚点：${d.source}`);
-    process.exit(1);
+  const document = manifest.documents.find((entry) => entry.id === d.id);
+  document.source_sha256 = d.to;
+  for (const translation of Object.values(document.translations || {})) {
+    if (translation.status === 'synchronized') {
+      translation.previous_review = {
+        reviewer: translation.reviewer || null, reviewed_at: translation.reviewed_at || null,
+        source_sha256: translation.reviewed_source_sha256 || d.from,
+        translation_sha256: translation.translation_sha256 || null,
+        review_type: translation.review_type || null,
+      };
+    }
+    translation.status = 'present-unverified';
+    translation.reviewed_at = null;
+    delete translation.reviewed_source_sha256;
+    delete translation.review_type;
+    delete translation.reviewer;
+    delete translation.translation_sha256;
   }
-  const cursor = start + anchor.length;
-  text = text.slice(0, cursor) + d.to + text.slice(cursor + 64);
 }
-fs.writeFileSync(MANIFEST, text, 'utf8');
-console.log(`manifest 已刷新 ${drifted.length} 个源摘要（译文状态保持不变，待人工复核）。`);
+fs.writeFileSync(MANIFEST, stringify(manifest, { lineWidth: 0 }), 'utf8');
+console.log(`manifest 已刷新 ${drifted.length} 个源摘要；受影响译文等待按现行授权策略重新完成语义复核。`);

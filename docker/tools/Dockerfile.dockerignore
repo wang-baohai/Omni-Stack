@@ -1,0 +1,4 @@
+**
+!docker/
+!docker/tools/
+!docker/tools/**

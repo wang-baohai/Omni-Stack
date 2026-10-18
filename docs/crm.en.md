@@ -1,8 +1,8 @@
 # CRM Sales Pipeline
 
-> This document is the single source of truth for the CRM module. AI agents **must** read it before modifying any CRM code.  
-> Related docs: [architecture.en.md](architecture.en.md) · [api-contract.en.md](api-contract.en.md) · [backend-patterns.en.md](backend-patterns.en.md) · [frontend-patterns.en.md](frontend-patterns.en.md) · [crm.md](crm.md) (中文) · [crm.jp.md](crm.jp.md) (日本語) · [crm.kr.md](crm.kr.md) (한국어)  
-> Design baseline archive: [design/crm-design.md](design/crm-design.md).
+> This document records current CRM boundaries, contracts and constraints; Chinese is the factual source. Read it before changing CRM code.
+> Engineering references: [architecture](architecture.en.md), [API contract](api-contract.en.md), [backend patterns](backend-patterns.en.md), [frontend patterns](frontend-patterns.en.md). The [original design](design/crm-design.en.md) is historical; current source takes precedence when they differ.
+> Operations and real screenshots: [CRM Wiki](guides/crm-flow.en.md). Extension and Docker testing: [development Wiki](guides/scaffold-development.en.md#8-crm-extension-and-container-tests).
 
 CRM is a standalone microservice (`omni-crm`) covering the pre-sales closed loop: Lead → Follow-up → Customer/Contact → Opportunity → Won or Lost. Products, quotes, contracts, orders, invoicing, collections, marketing automation, and customer-service tickets are **out of scope** for CRM.
 
@@ -16,7 +16,7 @@ CRM is a standalone microservice (`omni-crm`) covering the pre-sales closed loop
 | XXL-JOB executor | `omni-crm` / `9904` |
 | Database | `omni_crm` |
 | Gateway route | `/api/crm/**` → `lb://omni-crm` (no StripPrefix) |
-| Redis | DB 0, shares Auth's XSS config, key prefix `crm:` |
+| Redis | DB 0, shares Auth's common XSS cache keys |
 
 **Depends on**: `omni-common-service`, `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`.
 
@@ -36,6 +36,7 @@ CRM is a standalone microservice (`omni-crm`) covering the pre-sales closed loop
 | Activity | `crm_activity` | Plan, complete, cancel follow-ups |
 | Pipeline | `crm_pipeline`, `crm_pipeline_stage` | Pipeline & stage definitions |
 | Ownership Audit | `crm_owner_change_log` | Immutable history of owner changes |
+| Tenant configuration | `crm_tenant_config` | defaultPipelineId / currencyCode / leadDuplicatePolicy |
 
 ```mermaid
 erDiagram
@@ -94,7 +95,7 @@ Gateway JWT verification → CRM Tenant check → Spring Security @PreAuthorize
 CRM provides domain policies to `omni-common-service` via `CrmTenantTablePolicy` and `CrmDataPermissionHandler`; the common Starter assembles `mybatisPlusInterceptor` with a fixed, non-negotiable order:
 
 ```
-TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInterceptor
+TenantLineInnerInterceptor → DataPermissionInterceptor → OptimisticLockerInnerInterceptor → PaginationInnerInterceptor
 ```
 
 - TenantLine only processes `crm_*` tables
@@ -113,7 +114,7 @@ TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInte
 
 ### 3.4 Row-Level Write Authorization
 
-DataPermissionInterceptor does not protect writes. Every update/delete/convert/transfer/stage command must:
+DataPermission does not replace explicit row-level write authorization; dedicated SQL may bypass owner filtering. Every update/delete/convert/transfer/stage command must:
 
 1. Query visible records with `tenant_id + id + data scope` (invisible → 404 to prevent ID enumeration)
 2. Validate state machine and business invariants
@@ -137,16 +138,18 @@ The `/` in the table is shorthand for multiple full permission codes under the s
 
 ### 3.6 PII Masking
 
-- Full phone, email, and address are only returned to users with `crm:pii:view`
-- For other users, the backend VO returns masked values directly (`138****1234`, `a***@example.com`) — no reliance on frontend masking
-- Lists are masked by default; detail views depend on permissions
-- Duplicate detection only returns minimal candidate summaries
+- Dedicated lead, customer and contact lists always use masked VOs. Details use `crm:pii:view` to decide whether to return full contact information.
+- Dedicated activity lists/timelines replace nonblank content with `[REDACTED]` in masked mode; `null` and blank content are preserved. Details follow the PII permission.
+- Backend `CustomerServiceImpl.overview` uses the detail PII flag for contact and activity chunks; a blanket claim that every collection is always masked is incorrect. The UI `CustomerOverview.vue` currently calls customer details, contact lists, OPEN opportunity lists and the activity timeline separately, rather than consuming the overview bundle.
+- Duplicate checks return only candidate IDs, numbers, names and masked contact summaries. Edit pages reload details and disable/omit sensitive inputs without PII permission; this is not a separate backend field-write permission mechanism.
 
 ### 3.7 XSS Protection
 
-CRM implements the `XssConfigProvider` SPI, reading `xss:enabled:{tenantId}` and `xss:rules:{tenantId}` from Redis DB 0. On cache miss, it falls back to Auth or uses built-in baseline rules — protection is never disabled. In MVP, notes allow plain text only; `v-html` is forbidden on the frontend.
+With `omni.service.xss.enabled=true`, CRM uses the shared Starter's `CachedServiceXssConfigProvider`, rather than a CRM-specific SPI implementation. It reads `xss:enabled:{tenantId}` and `xss:rules:{tenantId}` in Redis DB 0. Cache misses/errors resolve through Auth; resolution failure uses the shared security baseline. The authoritative enabled value is still respected. Notes are plain text; frontend `v-html` is forbidden.
 
 ### 3.8 Roles & dataScope
+
+These are default-tenant examples in formal auth.sql seeds, not evidence that every new tenant already has these roles.
 
 | Role | dataScope | Capabilities |
 |---|---|---|
@@ -168,7 +171,7 @@ NEW/FOLLOWING/QUALIFIED → DISQUALIFIED
 DISQUALIFIED → FOLLOWING (reactivate)
 ```
 
-- Only `QUALIFIED` leads can be converted; `DISQUALIFIED` requires a reason; `CONVERTED` is a terminal state
+- First conversion requires `QUALIFIED`; `DISQUALIFIED` requires a reason; `CONVERTED` is a terminal state
 
 ### 4.2 Customer Status
 
@@ -185,10 +188,10 @@ Winning an opportunity can automatically transition a customer from POTENTIAL to
 DISCOVERY → QUALIFICATION → PROPOSAL → NEGOTIATION → WON / LOST
 ```
 
-- Open stages can advance or revert; reverting requires a reason
-- LOST requires a loss reason; WON/LOST are terminal states
-- Reopening requires `crm:opportunity:reopen` and restores the last open stage
-- All transitions append Stage History; regular PUT does not accept stage/status
+- This is the default ordering, not a requirement to advance only to the adjacent stage. The command locks a visible record, checks current `OPEN` status and request version, requires enabled current/target stages in the same pipeline, and rejects the same stage.
+- Moving to a lower sort requires reason; target `LOST` additionally requires lossReason. A versioned update, history and local Outbox write follow.
+- `WON` attempts to activate the associated nondeleted `POTENTIAL` customer. Dedicated SQL ignores owner filtering but retains tenant filtering; the service does not require that SQL to affect one row, so activation is not guaranteed for every customer state.
+- Ordinary editing of `WON/LOST` is rejected. The dedicated `crm:opportunity:reopen` command takes fromStageId from the latest closing history, requires that stage to remain enabled, restores `OPEN` and its probability, clears close time/loss reason, and appends `REOPEN` history and a stage event.
 
 ### 4.4 Activity Status
 
@@ -200,15 +203,21 @@ CANCELLED → PLANNED (reschedule)
 ### 4.5 Lead Conversion Flow
 
 ```
-POST /lead/{id}/convert → SELECT Lead FOR UPDATE
-→ Query existing Conversion (idempotency check)
-→ Create or link Customer + Contact
-→ Optionally create Opportunity
-→ INSERT Conversion + Lead → CONVERTED
-→ INSERT Outbox event (same transaction)
+POST /api/crm/lead/{id}/convert
+→ Validate DTO, functional permission and data scope
+→ SELECT visible, nondeleted Lead FOR UPDATE
+→ Existing Conversion: return original IDs, idempotentReplay=true
+→ First conversion: require QUALIFIED and matching version
+→ Create/link Customer + Contact; optionally create Opportunity
+→ Lead → CONVERTED; move activities to CUSTOMER and its owner
+→ INSERT Conversion → INSERT local Outbox (same transaction)
 ```
 
-Conversion uses row-level locking + a `lead_id` unique constraint for double idempotency. Repeated requests on an already-converted Lead return the existing result directly. Feign calls, Workflow, and actual MQ sends are outside the CRM DB transaction — events are only written to the local Outbox.
+The unique constraint is `(tenant_id, lead_id)`. Replay precedes status/version checks, but still requires request validation, permissions and record visibility; it does not repeat business or Outbox writes.
+
+A new customer inherits the lead owner; a new contact inherits the selected customer owner, and a linked contact must belong to that customer. An optional opportunity inherits the lead owner and uses default-pipeline `DISCOVERY`, tenant currency and the `CONVERSION_CREATE` history reason. This path does not resolve inherited owners through Auth again.
+
+Conversion uses only the local CRM transaction and Outbox; it does not call Workflow or send directly to the Broker. This does not mean all CRM Feign calls run outside transactions: ordinary creation, transfer and response enrichment can call Auth inside transactional methods. See [Core Flows 13/14](core-flows.en.md).
 
 ## 5. API Endpoint Index
 
@@ -223,26 +232,26 @@ Conversion uses row-level locking + a `lead_id` unique constraint for double ide
 
 ### 5.2 Endpoint Overview
 
-All endpoints are prefixed with `/api/crm`.
+Paths below are relative to `/api/crm` and are listed in full, without inheriting a preceding path. Controllers and `CrmRequests` define the DTOs.
 
 | Domain | Endpoints |
 |---|---|
-| Overview | `GET /overview/summary`, `/funnel`, `/follow-ups` |
-| Pipeline | `GET /pipeline/list`, `/{id}/stages` |
-| Lead | `GET /lead/list`, `/{id}`, `POST /lead`, `PUT/DELETE /lead/{id}` |
-| Lead Commands | `POST /lead/duplicate-check`, `/{id}/assign`, `/batch-assign`, `/{id}/qualify`, `/disqualify`, `/reopen`, `/convert` |
-| Customer | `GET /customer/list`, `/{id}`, `/{id}/overview`, `POST /customer`, `PUT/DELETE /customer/{id}` |
-| Customer Commands | `POST /customer/duplicate-check`, `/{id}/status`, `/{id}/transfer` |
-| Contact | `GET /contact/list`, `/customer/{id}/contact/list`, `POST /customer/{id}/contact`, `PUT/DELETE /contact/{id}`, `POST /contact/{id}/primary` |
-| Opportunity | `GET /opportunity/list`, `/board`, `/{id}`, `/{id}/stage-history`, `POST /opportunity`, `PUT/DELETE /opportunity/{id}` |
-| Opportunity Commands | `POST /opportunity/{id}/assign`, `/stage`, `/reopen` |
-| Activity | `GET /activity/list`, `/timeline`, `/{id}`, `POST /activity`, `PUT/DELETE /activity/{id}` |
-| Activity Commands | `POST /activity/{id}/complete`, `/cancel`, `/reschedule` |
-| Owner Options | `GET /options/owners` |
+| Overview | `GET /overview/summary` · `GET /overview/funnel` · `GET /overview/follow-ups` |
+| Pipeline | `GET /pipeline/list` · `GET /pipeline/{id}/stages` |
+| Lead | `GET /lead/list` · `GET /lead/{id}` · `POST /lead` · `PUT /lead/{id}` · `DELETE /lead/{id}` |
+| Lead commands | `POST /lead/duplicate-check` · `POST /lead/{id}/assign` · `POST /lead/batch-assign` · `POST /lead/{id}/qualify` · `POST /lead/{id}/disqualify` · `POST /lead/{id}/reopen` · `POST /lead/{id}/convert` |
+| Customer | `GET /customer/list` · `GET /customer/{id}` · `GET /customer/{id}/overview` · `POST /customer` · `PUT /customer/{id}` · `DELETE /customer/{id}` |
+| Customer commands | `POST /customer/duplicate-check` · `POST /customer/{id}/status` · `POST /customer/{id}/transfer` · `POST /customer/{id}/blacklist` · `POST /customer/{id}/restore-from-blacklist` |
+| Contact | `GET /contact/list` · `GET /customer/{customerId}/contact/list` · `GET /contact/{id}` · `POST /customer/{customerId}/contact` · `PUT /contact/{id}` · `DELETE /contact/{id}` · `POST /contact/{id}/primary` |
+| Opportunity | `GET /opportunity/list` · `GET /opportunity/board` · `GET /opportunity/{id}` · `GET /opportunity/{id}/stage-history` · `POST /opportunity` · `PUT /opportunity/{id}` · `DELETE /opportunity/{id}` |
+| Opportunity commands | `POST /opportunity/{id}/assign` · `POST /opportunity/{id}/stage` · `POST /opportunity/{id}/reopen` |
+| Activity | `GET /activity/list` · `GET /activity/timeline` · `GET /activity/{id}` · `POST /activity` · `PUT /activity/{id}` · `DELETE /activity/{id}` |
+| Activity commands | `POST /activity/{id}/complete` · `POST /activity/{id}/cancel` · `POST /activity/{id}/reschedule` |
+| Owner candidates | `GET /options/owners` |
 
 ### 5.3 Customer 360 Chunked Permissions
 
-`/customer/{id}/overview` returns contacts, opportunities, activities, and lead summaries. However, "customer visible" does not mean "all sub-data visible" — each chunk resolves its data scope independently using its respective list permission. If a chunk's permission is missing, that chunk is not queried. The implementation uses `CrmPermissionScopeExecutor` to establish and clean up `ServiceDataScopeContext` per chunk.
+`GET /api/crm/customer/{id}/overview` returns the customer, contacts, OPEN opportunities, at most 20 recent activities and converted lead IDs. Each chunk resolves scope using its own list permission; an ungranted chunk is not queried. `CrmPermissionScopeExecutor` restores the previous `ServiceDataScopeContext`; the outer aspect performs final cleanup. Customer visibility does not grant access to all related data. See 3.6 for PII behavior.
 
 ### 5.4 Overview Aggregate Queries
 
@@ -252,36 +261,39 @@ All endpoints are prefixed with `/api/crm`.
 
 ### 6.1 Auth Feign
 
-- CRM only stores userId/unitId; before assignment, it validates via Auth internal API that the user exists, is enabled, and belongs to the same tenant
-- ownerUnitId is sourced from Auth's authoritative primary org — never trust the frontend
-- List views collect IDs first, then batch-fetch in a single API call; per-row Feign calls (N+1) are forbidden
-- When Auth is unavailable: dataScope → 503 fail-closed; display enrichment → may return ID/unknown user
+- On creation/assignment/transfer paths, `CrmOwnerResolver` checks that the owner exists, is enabled, belongs to the tenant, has a primary unit and is within the assignable scope. Selecting another owner also requires the corresponding assign/transfer permission. Conversion inheritance follows 4.5.
+- `ownerUnitId` comes from Auth's primary unit. `CrmOwnerEnricher` deduplicates IDs, then performs separate user and organization batch calls rather than per-row calls. Performer names use a separate user batch.
+- Auth permission denial during scope resolution returns 403; other dependency failures return 503. Display enrichment errors can leave IDs and empty names. Display fallback does not widen authorization or imply that every remote call is outside the database transaction.
 
 ### 6.2 Outbox Events
 
-Uses `ReliableMessageRelay.send("crm-domain-out-0", envelope, tenantId, eventId)` to write to the local Outbox. `tenantId` must be passed explicitly.
+Business transactions call `ReliableMessageRelay.send("crm-domain-out-0", envelope, tenantId, eventId)`. The default implementation uses REQUIRED propagation to insert a local PENDING row. Relay later sends to the Broker; disabling Relay does not disable Outbox writes.
 
-Event envelopes contain `eventId`, `eventType`, `tenantId`, `aggregateType/Id/Version`, and `actorUserId`. Events only carry IDs and state snapshots — never full PII.
+`DomainEventEnvelope` contains `eventId/eventType/occurredAt/tenantId/producer`, `aggregateType/aggregateId/aggregateVersion`, `actorUserId` and `payload`. eventId is a top-level envelope field passed as msgKey; Outbox msgId is generated separately. msgKey does not replace consumer business idempotency. Payloads contain no full PII.
 
-Defined events: `crm.lead.converted.v1`, `crm.opportunity.stage-changed/won/lost.v1`.
+| eventType | payload |
+|---|---|
+| `crm.lead.converted.v1` | leadId, customerId, contactId, nullable opportunityId |
+| `crm.opportunity.stage-changed.v1` / `crm.opportunity.won.v1` / `crm.opportunity.lost.v1` | opportunityId, stageId, status |
+| `crm.customer.owner-changed.v1` | customerId, oldOwnerUserId/newOwnerUserId, oldOwnerUnitId/newOwnerUnitId, cascadeOpenOpportunities |
 
 ### 6.3 Operation Logs
 
-`@OperLog` already supports PII sanitization. Owner Change and Stage History are synchronous domain facts and cannot be replaced by the async generic log.
+Generic `@OperLog` sanitization follows explicit field rules and does not guarantee recognition of arbitrary PII. Conversion disables entity snapshots and additionally excludes customerName/contactName/opportunityName. Owner Change and Stage History are synchronous facts in business transactions; asynchronous generic logs cannot replace them.
 
 ## 7. Hard Constraints
 
 Rules that must be followed before modifying CRM code:
 
 1. **Tenant Isolation**: All `crm_*` tables must have `tenant_id`; TenantLine is always appended; regular APIs never cross tenants
-2. **Optimistic Locking**: All writes must update with `tenant_id + id + version` conditions
+2. **Versioned commands**：External mutation commands on existing records use tenant + id + version and check affected rows; creation number completion and dedicated cascade SQL are not per-record client version commands
 3. **Fail-Closed**: Missing tenant → 401, missing scope → `id=-1`, Auth unavailable → 503 — never degrade
 4. **ThreadLocal Cleanup**: `ServiceIdentityContext` and `ServiceDataScopeContext` must be cleaned up in `finally` blocks to prevent memory leaks
 5. **Dual Permission Declaration**: Write endpoints must declare both `@PreAuthorize` (functional permission) and `@ServiceDataScope` (data scope) with the same full permission code
 6. **Backend PII Masking**: Without `crm:pii:view`, the backend VO returns masked values directly — no frontend reliance
 7. **Explicit Outbox tenantId**: `ReliableMessageRelay.send()` must receive an explicit `Long tenantId`; ThreadLocal-based implicit passing is forbidden
-8. **Interceptor Order**: TenantLine → DataPermission → Pagination — non-negotiable
-9. **Write Authorization**: DataPermissionInterceptor does not protect writes; AccessGuard row-level validation is required
+8. **Interceptor Order**: TenantLine → DataPermission → OptimisticLocker → Pagination — non-negotiable
+9. **Write Authorization**: Do not rely solely on DataPermission; AccessGuard row-level validation is required
 10. **State Machine**: Regular PUT does not accept status/stage changes; dedicated command endpoints must be used
 11. **MySQL DATETIME Range**: Do not use `LocalDateTime.MIN/MAX` as query parameters; use reasonable values like `LocalDateTime.of(2000,1,1,0,0)`
 12. **Pipeline Read-Only**: In MVP, pipelines and stages are auto-created during tenant initialization; no admin UI is provided
@@ -319,58 +331,16 @@ omni-frontend/src/
 - Customer 360 uses a Drawer component
 - Opportunity page provides both Table and Kanban views
 
-## 9. Extension Guide
+## 9. Extension and Testing Entry Points
 
-### Adding a New Aggregate Root
+Steps for aggregates, permissions, events and Docker tests are in the [CRM development Wiki](guides/scaffold-development.en.md#8-crm-extension-and-container-tests). Current pipeline/stage APIs are read-only. Management and migration of existing opportunities require separate design; future plans are not current capabilities.
 
-1. Add tables in the `omni_crm` database — must include `tenant_id`, `owner_user_id`, `owner_unit_id`, `version`, `deleted`, and audit fields
-2. Create Entity (extends BaseEntity), Mapper, Service interface + Impl, Controller
-3. Register the new table's owner column mapping in `CrmDataPermissionHandlerImpl`
-4. Add a Liquibase changelog under `database/changelog/crm/`, and provide seed data in `scripts/sql/seed/` (`crm.sql`, `auth.sql`) verified by `database/seed/manifest.yaml`
-5. Controller write endpoints declare `@PreAuthorize` + `@ServiceDataScope` with new `crm:<resource>:<action>` permission codes
+## 10. Verification Boundaries
 
-### Adding Opportunity Stages
+Unit tests cover state machines, conversion replay, cascades, PII, scope SQL and security failure branches. Mock/in-memory locking tests do not prove real MySQL concurrency or MQ delivery. `CrmMysqlInterceptorIntegrationTest` is enabled only with `CRM_TEST_MYSQL_URL` and requires database credentials. It creates and drops `crm_lead`, so it must target a dedicated disposable test database.
 
-MVP pipelines are not configurable. If opened up in the future, the following are needed:
-1. Backend `crm_pipeline_stage` table CRUD API
-2. Frontend pipeline configuration page
-3. Migration strategy for existing opportunities referencing old stages
+The latest reused Docker Reactor reports contain 16 CRM Surefire reports and 45 cases: 41 passed and 4 MySQL cases conditionally skipped. This is a report snapshot, not a fixed coverage promise. Historical `*IT` classes require `WP008_F_ENABLED` and protected independent fixtures; they are outside the default test conclusion and must not be enabled blindly. Independent real UI/API evidence boundaries are in the [CRM Wiki](guides/crm-flow.en.md).
 
-### Adding Permission Codes
+## 11. Current Source Entry Points
 
-1. Insert new permissions into `sys_permission` in `scripts/sql/seed/auth.sql` with type `API`
-2. Assign to roles in `sys_role_permission` as needed
-3. Controller methods declare `@PreAuthorize("hasAuthority('crm:<resource>:<action>')")` + `@ServiceDataScope(permissionCode = "crm:<resource>:<action>")`
-4. Add `v-permission="'crm:<resource>:<action'"` to the corresponding frontend button
-
-### Connecting Outbox Events
-
-1. In the Service business method, call `ReliableMessageRelay.send("crm-domain-out-0", envelope, tenantId, eventId)` within the same transaction
-2. `tenantId` must be explicitly obtained from context; ThreadLocal-based passing is forbidden
-3. Event envelopes follow the unified format; payloads must not contain full PII
-4. Consumers must be idempotent, using `payload.eventId` for business deduplication
-
-## 10. Testing
-
-The CRM module has 16 test files covering:
-
-- Valid/invalid state machine transitions
-- Lead conversion idempotency and concurrency
-- Customer transfer cascading
-- PII masking
-- Six dataScope variants for list and aggregate queries
-- Cross-tenant isolation (real MySQL integration tests)
-- Missing tenant/scope fail-closed behavior
-
-Run tests:
-
-```bash
-cd omni-backend && ./mvnw clean install -pl omni-crm -am
-```
-
-Real MySQL interceptor integration tests require an external test database and are skipped by default:
-
-```bash
-CRM_TEST_MYSQL_URL='jdbc:mysql://127.0.0.1:3306/crm_it?...' \
-./mvnw -pl omni-crm -am -Dtest=CrmMysqlInterceptorIntegrationTest test
-```
+[Schemas](../database/changelog/crm/0001-crm-schema.yaml) · [DTOs](../omni-backend/omni-crm/src/main/java/com/omni/crm/dto/CrmRequests.java) · [data permission](../omni-backend/omni-crm/src/main/java/com/omni/crm/security/CrmDataPermissionHandler.java) · [conversion](../omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/LeadServiceImpl.java) · [stages](../omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/OpportunityServiceImpl.java) · [Customer 360/transfer](../omni-backend/omni-crm/src/main/java/com/omni/crm/service/impl/CustomerServiceImpl.java) · [shared persistence](../omni-backend/omni-common-service/src/main/java/com/omni/common/service/config/ServicePersistenceAutoConfiguration.java) · [XSS provider](../omni-backend/omni-common-service/src/main/java/com/omni/common/service/xss/CachedServiceXssConfigProvider.java).

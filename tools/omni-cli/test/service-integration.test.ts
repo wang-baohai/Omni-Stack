@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { appendFileSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { afterEach, describe, it } from 'node:test';
 import { applyServiceGeneration, planServiceGeneration } from '../src/service-generator.js';
 import { planServiceIntegration } from '../src/service-integration.js';
@@ -24,7 +25,10 @@ describe('service integration planner', () => {
     const plan = planServiceIntegration(workspaceRoot, packageRoot, 'inventory-sample', { checkGit: false });
 
     assert.equal(plan.ready, true, plan.conflicts.join('\n'));
-    assert.equal(plan.operations.length, 21);
+    assert.equal(plan.operations.length, 28);
+    assert.ok(plan.operations.some((operation) => operation.target === 'docs/inventory-sample.jp.md'));
+    assert.ok(plan.operations.some((operation) => operation.kind === 'modify-yaml' && operation.target === 'docs/docs-manifest.yaml'));
+    assert.ok(plan.operations.some((operation) => operation.kind === 'modify-markdown' && operation.target === 'docs/i18n-review-queue.md'));
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-xml'
       && operation.target === 'omni-backend/pom.xml'));
     assert.ok(plan.operations.some((operation) => operation.kind === 'modify-yaml'
@@ -53,4 +57,58 @@ function createGeneratedPackage(): string {
   });
   applyServiceGeneration(generationPlan);
   return output;
+}
+
+describe('service integration locale ownership', () => {
+  for (const locale of ['ja-JP', 'ko-KR']) {
+    it('rejects uncommitted ' + locale + ' translations before integration', () => {
+      const packageRoot = createGeneratedPackage();
+      const targetRoot = createTrackedTargetWorkspace();
+      const localePath = 'omni-frontend/src/locales/' + locale + '.ts';
+      const target = resolve(targetRoot, localePath);
+      appendFileSync(target, '\n// 用户尚未提交的翻译调整。\n', 'utf8');
+      const before = readFileSync(target, 'utf8');
+
+      const plan = planServiceIntegration(targetRoot, packageRoot, 'inventory-sample');
+
+      assert.equal(readFileSync(target, 'utf8'), before);
+      assert.equal(plan.ready, false);
+      assert.ok(plan.conflicts.some((conflict) => conflict.includes(localePath)), plan.conflicts.join('\n'));
+    });
+  }
+});
+
+function createTrackedTargetWorkspace(): string {
+  const targetRoot = mkdtempSync(resolve(tmpdir(), 'omni-cli-integration-locale-test-'));
+  temporaryDirectories.push(targetRoot);
+  const targets = [
+    'omni-backend/pom.xml',
+    'omni-backend/omni-gateway/src/main/resources/application.yml',
+    'compose.apps.yaml',
+    'scaffold/catalog/modules.yaml',
+    'scaffold/schemas/module.schema.json',
+    'docker/backend/Dockerfile',
+    'omni-frontend/src/constants/menu.ts',
+    'omni-frontend/src/router/index.ts',
+    'omni-frontend/src/locales/zh-CN.ts',
+    'omni-frontend/src/locales/en-US.ts',
+    'omni-frontend/src/locales/ja-JP.ts',
+    'omni-frontend/src/locales/ko-KR.ts',
+    'database/changelog/auth/db.changelog-auth.yaml',
+    'database/seed/manifest.yaml',
+    'database/changelog/platform/db.changelog-platform.yaml',
+    'omni-backend/omni-db-migrator/src/main/java/com/omni/dbmigrator/migration/MigrationTargetCatalog.java',
+    'docs/docs-manifest.yaml',
+    'docs/i18n-review-queue.md',
+  ];
+  for (const path of targets) {
+    const target = resolve(targetRoot, path);
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(resolve(workspaceRoot, path), target);
+  }
+  execFileSync('git', ['init', '--quiet'], { cwd: targetRoot });
+  execFileSync('git', ['add', '--', ...targets], { cwd: targetRoot });
+  execFileSync('git', ['-c', 'user.name=Omni CLI test', '-c', 'user.email=omni-cli-test@example.invalid',
+    '-c', 'core.hooksPath=/dev/null', 'commit', '--quiet', '-m', 'fixture'], { cwd: targetRoot });
+  return targetRoot;
 }

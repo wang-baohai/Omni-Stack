@@ -83,7 +83,7 @@ class Fw05MultiInstanceIT extends AbstractFwIT {
             assertThat(runtimeService.createProcessInstanceQuery().processInstanceId(pid).count()).isZero();
             Map<String, String> reasons = historyReasons(pid);
             assertThat(reasons.values()).contains("MI_END");
-            var records = instanceService.getApprovalRecords(pid);
+            var records = instanceService.getApprovalRecords(pid, 1L);
             assertThat(records).anySatisfy(r -> assertThat(String.valueOf(r)).contains("auto-approved"));
             assertThat(records).anySatisfy(r -> assertThat(String.valueOf(r)).contains("result=approved"));
         } finally {
@@ -102,7 +102,7 @@ class Fw05MultiInstanceIT extends AbstractFwIT {
             approve(taskOf(tasks, "2211"), false, "驳回：不符合", 2211L);
             assertThat(runtimeService.createProcessInstanceQuery().processInstanceId(pid).count())
                     .as("驳回后完成条件触发，实例结束").isZero();
-            var records = instanceService.getApprovalRecords(pid);
+            var records = instanceService.getApprovalRecords(pid, 1L);
             assertThat(records).isNotEmpty();
         } finally {
             cleanup(pid);

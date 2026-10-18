@@ -1,603 +1,158 @@
-# 工作流引擎
+# 工作流事实与运行边界
 
-> 本文档覆盖 Omni-Stack 工作流引擎的架构、核心流程、约束和扩展指南。  
-> 架构概览详见 [architecture.md](architecture.md)。Docker 部署配置详见 [docker-deployment.md](docker-deployment.md)。
+本文维护当前工作流服务的模型、执行、审批、租户及跨服务一致性规则。建模步骤和界面操作见 [工作流开发与建模](wiki/workflow-development.md)，界面布局与历史图片见 [界面参考](wiki/interface-reference.md#workflow)。请求字段与响应结构由 [API 契约](api-contract.md) 维护，部署步骤见 [Docker 部署](docker-deployment.md)。
 
-Omni-Stack 提供基于 **Flowable 8.x** 的可视化 BPMN 工作流引擎，支持模型设计、双版本管理、多实例会签审批和端到端流程跟踪。
+## 1. 服务与持久化边界
 
-## 1. 架构概览
-
-工作流系统由一个独立微服务和一个共享 Starter 库组成：
-
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                          Workflow Engine                                  │
-├──────────────────────────────────────────────────────────────────────────┤
-│                      omni-workflow (port 8103)                            │
-│  ─────────────────────────────────────────────────────────────────────   │
-│  Controllers (8): WorkflowModel · ProcessDefinition · ProcessInstance    │
-│                   Approval · Task · WorkflowStats · WorkflowIdentity     │
-│                   InternalWorkflow                                      │
-│  Services (12): WorkflowModel · ProcessDefinition · ProcessInstance      │
-│                 WorkflowApproval · WorkflowTask · WorkflowStats           │
-│                 WorkflowIdentity · WorkflowTodoSync · InternalWorkflow   │
-│                 ProcessStartRequest · CompletionEvent                    │
-│                 CandidateResolution                                     │
-│  Delegates:  ScopedRoleAssignmentListener · CandidateResolverDelegate    │
-│              CandidateResolverBean · CcNotifyDelegate                    │
-│  Engine:     BpmnXmlBuilder · BpmnXmlValidator                           │
-├──────────────────────────────────────────────────────────────────────────┤
-│                  omni-common-workflow (shared starter)                    │
-│  FlowableAutoConfiguration · ApprovalService(Impl) · UserGroupLookup     │
-│  WorkflowNotificationService · TenantInfoFilter · TenantInfoHolder       │
-├──────────────────────────────────────────────────────────────────────────┤
-│                        Flowable BPMN Engine 7.x                           │
-│  repositoryService · runtimeService · taskService · historyService       │
-├──────────────────────────────────────────────────────────────────────────┤
-│                       omni_workflow (MySQL)                               │
-│  wf_process_model · wf_process_model_version · wf_process_instance_ext   │
-│  wf_process_start_request · wf_todo_task · wf_cc_record · sys_mq_message │
-│  wf_form_schema · wf_delegation_rule                                    │
-└──────────────────────────────────────────────────────────────────────────┘
-```
-
-**模块依赖**：
-
-- `omni-common-core` — POJO（`R<T>`、`PageResult`）、XSS SPI 接口
-- `omni-common-mybatis` — MyBatis-Plus + MySQL 驱动 + 租户拦截器
-- `omni-common-redis` — Redis 缓存，用于 XSS 配置和会话数据
-- `omni-common-workflow` — Flowable 自动配置、审批 SPI、租户过滤器、通知 SPI
-- `omni-common-mqlog` — Transactional Outbox、内部 API 共享令牌过滤器和可靠消息中继
-- `omni-workflow` — 业务层：控制器、服务、委托器、BPMN 引擎工具
-
-**关键设计决策**：
-
-- 选择 **Flowable** 作为 BPMN 引擎：开源、成熟的 Spring Boot 集成、原生多实例（MI）支持
-- **双版本管理**：业务版本在 `wf_process_model_version` 中跟踪（DRAFT → PUBLISHED → ARCHIVED），引擎版本由 Flowable 部署管理
-- **可视化设计器**：前端 BPMN 建模器生成设计器 JSON，`BpmnXmlBuilder` 转换为 BPMN 2.0 XML
-- **动态候选人解析**：`omni:assignment` JSON 扩展元素在任务启动时由 `ScopedRoleAssignmentListener` 解析，无需硬编码审批人
-- **跨服务启动双幂等**：分别以租户内 `requestId` 和 `(businessType, businessKey)` 约束流程启动
-- **可靠完成通知**：完成元数据和 Outbox 记录在同一本地事务内提交，由中继任务异步投递
-
-### 数据模型
+`omni-workflow` 是独立 Servlet 微服务，业务端口为 `8103`，管理端口为 `19903`；Flowable 版本由后端父 POM 固定为 `8.0.0`。业务服务通过内部 API 调用它，不嵌入引擎。当前 POM 直接依赖 `omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`、`omni-common-workflow`，没有使用 `omni-common-service` 的安全组合。
 
 ```mermaid
-erDiagram
-    wf_process_model ||--o{ wf_process_model_version : "1:N 版本"
-    wf_process_model_version ||--o{ wf_process_instance_ext : "1:N 实例"
-    wf_process_instance_ext ||--o{ wf_todo_task : "1:N 待办"
-    wf_process_instance_ext ||--o{ wf_cc_record : "1:N 抄送"
+flowchart LR
+  A[用户与网关] --> W[工作流服务]
+  B[业务服务] -->|内部 API| W
+  W --> M[模型与业务扩展表]
+  W --> F[Flowable 引擎与历史表]
+  W --> O[本地 Outbox]
+  O --> R[消息中继]
+  R --> C[业务事件消费者]
 ```
 
-### 数据库表（omni_workflow）
+`application.yml` 使用 `omni_workflow` 数据库、Redis DB `0`，配置 `history-level: audit`、异步执行器以及 `database-schema-update: false`。正式结构由迁移器管理，不能依赖引擎运行时建表。候选人、身份数据及昵称查询包含对 `omni_auth` 的直接 JDBC 读取，部署时必须满足相应数据库访问条件；它们并非全部通过 Auth HTTP 接口取得。
 
-| 表名 | 用途 |
-|------|------|
-| `wf_process_model` | 流程模型注册表，`model_key` 在租户内唯一 |
-| `wf_process_model_version` | 版本历史：BPMN XML、设计器 JSON、部署信息 |
-| `wf_process_instance_ext` | 实例扩展：关联模型版本，并记录 `requestId`、业务键和完成事件门闩 |
-| `wf_process_start_request` | 跨服务启动预留记录；请求 ID 与业务键在租户内分别唯一 |
-| `wf_todo_task` | 待办任务缓存，支持按审批人快速查询 |
-| `wf_cc_record` | 抄送通知记录，含已读状态 |
-| `wf_form_schema` | JSON Schema 表单定义 |
-| `wf_delegation_rule` | 审批委托规则（用户到用户，可选流程范围） |
-| `sys_mq_message` | Transactional Outbox 消息记录，由可靠消息中继异步投递 |
+Workflow 的领域结构见 `database/changelog/workflow/0001-workflow-schema.yaml`：
 
----
-
-## 2. 核心流程详解
-
-### 2.1 模型创建
-
-```
-POST /api/workflow/model  (workflow:model:create)
-```
-
-1. `WorkflowModelController.createModel(CreateModelRequest)` → `WorkflowModelService.createModel()`
-2. 创建 `wf_process_model` 记录，包含 `model_key`（租户内唯一）
-3. 创建初始 `wf_process_model_version` 记录，`status = DRAFT`
-4. 将 `wf_process_model.current_draft_version_id` 指向新版本
-
-### 2.2 草稿保存（可视化设计器）
-
-```
-PUT /api/workflow/model/{id}/draft  (workflow:model:update)
-```
-
-1. `WorkflowModelController.saveDraft(id, SaveDraftRequest)` → `WorkflowModelService.saveDraft()`
-2. 更新草稿版本的 `designer_json`，通过 `BpmnXmlBuilder.build()` 重新生成 `bpmn_xml`
-3. 计算 `xml_sha256` 用于变更检测
-4. 从请求中同步模型名称和分类
-
-**BpmnXmlBuilder** 将设计器 JSON 节点转换为 BPMN 2.0 XML 元素：
-
-| 设计器节点类型 | BPMN 元素 | 扩展 |
-|---|---|---|
-| `StartEvent` | `<startEvent>` | — |
-| `EndEvent` | `<endEvent>` | — |
-| `UserTask` | `<userTask>` | `<omni:assignment>` + `flowable:executionListener` |
-| `ServiceTask`（抄送） | `<serviceTask>` | `<omni:cc>` + `flowable:delegateExpression` |
-| `ExclusiveGateway` | `<exclusiveGateway>` | `default` 属性 |
-| `ParallelGateway` | `<parallelGateway>` | — |
-
-### 2.3 模型校验
-
-```
-POST /api/workflow/model/{id}/validate  (workflow:model:validate)
-```
-
-`BpmnXmlValidator.validate()` 检查项：
-1. XML 格式正确性（含 XXE 防护）
-2. 恰好一个可执行的 `<process>`，其 id 与 `model_key` 匹配
-3. 至少一个 `StartEvent` 和一个 `EndEvent`
-4. 每个 `UserTask` 都有 `<omni:assignment>` 扩展
-5. 抄送 `ServiceTask` 有 `<omni:cc>` 扩展
-6. `ExclusiveGateway` 有一个 `default` 流（不带 `conditionExpression`）
-7. 所有 `SequenceFlow` 引用有效的源/目标
-
-### 2.4 模型发布
-
-```
-POST /api/workflow/model/{id}/publish  (workflow:model:publish)
-```
-
-1. `SELECT FOR UPDATE` 对模型记录加悲观锁
-2. 通过 `BpmnXmlValidator` 校验 BPMN XML
-3. 将 `targetNamespace` 替换为模型分类
-4. 部署到 Flowable：`repositoryService.createDeployment().addString(bpmnXml).deploy()`
-5. 计算业务版本号（`max(现有版本) + 1`）
-6. 更新版本记录：`status = PUBLISHED`、`deploymentId`、`processDefinitionId`、`engineVersion`
-7. 归档之前的已发布版本（`status = ARCHIVED`）
-8. 更新模型的 `current_published_version_id`
-
-### 2.5 流程实例启动
-
-```
-POST /api/workflow/process-instance/start  (workflow:instance:start)
-```
-
-1. `ProcessInstanceController.start(StartProcessRequest)` → `ProcessInstanceService.start()`
-2. 解析最新的已发布版本以获取 `processDefinitionId`
-3. 启动 Flowable 实例：`runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables)`
-4. 创建 `wf_process_instance_ext` 记录，关联模型、版本和 Flowable 实例
-5. `ScopedRoleAssignmentListener` 在每个 UserTask 启动事件触发时解析候选人
-
-### 2.6 审批完成
-
-```
-POST /api/workflow/approval/{taskId}/complete  (workflow:approval:complete)
-```
-
-1. `ApprovalController.complete(taskId, ApprovalRequest)` → `WorkflowApprovalService.complete()`
-2. 设置流程变量：`approved = true/false`、`comment = "..."`
-3. 调用 `taskService.complete(taskId, variables)`
-4. `ApprovalServiceImpl` 更新多实例计数器（`approvedCount` / `rejectedCount`）
-5. 多实例 `completionCondition` 求值：`${rejectedCount > 0 || approvedCount >= requiredApprovals}`
-6. 若条件满足 → 剩余的多实例被跳过（deleteReason = `MI_END`）
-
-### 2.7 进度与记录
-
-**进度**（`GET /{id}/progress`）：
-- 查询 `HistoricActivityInstance` 获取所有活动
-- 按 `activityId` 聚合（去重多实例子实例）
-- 对于待办的 UserTask，通过 `CandidateResolverBean` 预解析候选人
-- 返回 `ProcessProgressResponse`，包含 `List<ActivityInfo>` 及每个审批人的状态
-
-**审批记录**（`GET /{id}/approval-records`）：
-- 查询 `HistoricTaskInstance`（按创建时间升序）
-- 判定每个任务的结果：`approved`（通过）/ `rejected`（驳回）/ `auto-approved`（自动通过，MI_END）/ `cancelled`（已取消）/ `pending`（待办）
-- 获取 `Comment` 作为审批意见，获取 `approved` 变量用于区分通过/驳回
-
-### 2.8 跨服务内部契约
-
-所有服务间接口统一使用 `/api/internal/**` 路径，不经过 Gateway 用户预认证。调用方必须同时携带：
-
-```http
-X-Internal-Token: <共享内部令牌>
-X-Tenant-Id: 1
-Content-Type: application/json
-```
-
-容器级 `InternalApiAuthFilter` 在 Spring Security 链之前校验共享令牌并对全部 `/api/internal/**`
-失败关闭；这些路径不会再使用 Gateway 用户预认证。令牌缺失或不匹配返回 HTTP 401；服务端未配置共享令牌时返回 HTTP 503。
-内部请求中的 `X-Tenant-Id` 必须与请求体或查询参数中的 `tenantId` 完全一致，不一致返回业务码 403。
-
-#### 2.8.1 幂等启动流程
-
-```http
-POST /api/internal/workflow/process-instance/start
-```
-
-请求体：
-
-```json
-{
-  "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
-  "tenantId": 1,
-  "modelVersionId": 42,
-  "businessType": "PROCUREMENT_REQUISITION",
-  "businessKey": "10001",
-  "startUserId": 7,
-  "startUserName": "buyer",
-  "title": "采购申请 PR-202607-0001",
-  "variables": {
-    "amount": 120000
-  }
-}
-```
-
-| 字段 | 必填 | 约束 | 说明 |
-|---|---|---|---|
-| `requestId` | 是 | 非空，最长 64 | 调用方生成的幂等请求 ID |
-| `tenantId` | 是 | 正整数 | 必须等于 `X-Tenant-Id` |
-| `modelVersionId` | 是 | 正整数 | 必须属于当前租户且已关联 Flowable `processDefinitionId` |
-| `businessType` | 是 | 非空，最长 100 | 稳定的跨服务业务类型 |
-| `businessKey` | 是 | 非空，最长 255 | 调用方业务主键 |
-| `startUserId` | 是 | 正整数 | 流程发起人 |
-| `startUserName` | 否 | 最长 100 | 发起人显示名 |
-| `title` | 否 | 最长 500 | 为空时生成 `{businessType}:{businessKey}` |
-| `variables` | 否 | JSON 对象 | 业务流程变量；服务会覆盖写入三个关联变量 |
-
-服务始终按 `modelVersionId` 解析 `processDefinitionId`，再调用
-`startProcessInstanceById`。`requestId`、`businessType`、`businessKey` 同时写入流程变量和实例扩展记录。
-
-成功响应：
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "requestId": "6d2f4d1a-41d7-4f68-a60a-8a2e9425a703",
-    "businessType": "PROCUREMENT_REQUISITION",
-    "businessKey": "10001",
-    "processInstanceId": "22501",
-    "replayed": false
-  }
-}
-```
-
-幂等规则：
-
-- `wf_process_start_request` 分别建立 `(tenant_id, request_id)` 和
-  `(tenant_id, business_type, business_key)` 唯一约束，任一维度都不能重复创建流程。
-- 同一请求意图（相同业务键、`modelVersionId`、`startUserId`）已经成功时，重试返回原
-  `processInstanceId`，并设置 `replayed = true`。
-- 已有预留仍在处理中返回业务码 409；调用方应使用同一 `requestId` 退避重试。
-- 同一 `requestId` 被不同业务使用，或同一业务键改换流程模型/发起人，返回业务码 409，禁止静默复用。
-
-#### 2.8.2 校验任务处理资格
-
-```http
-POST /api/internal/workflow/task/assignment/validate
-```
-
-请求体：
-
-```json
-{
-  "tenantId": 1,
-  "taskId": "25017",
-  "userId": 7,
-  "businessType": "PROCUREMENT_REQUISITION",
-  "businessKey": "10001"
-}
-```
-
-校验同时覆盖四层边界：Flowable 任务租户、实例扩展记录租户、`businessType + businessKey`
-业务归属，以及用户是否为当前 `ASSIGNEE` 或未签收任务的 `CANDIDATE`。任何一层不匹配都不会授予处理资格。
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "valid": true,
-    "processInstanceId": "22501",
-    "assignmentType": "ASSIGNEE",
-    "message": "校验通过"
-  }
-}
-```
-
-`assignmentType` 仅取 `ASSIGNEE`、`CANDIDATE`、`NONE`。任务不存在或边界不匹配时正常返回
-`valid = false`；请求头与请求体租户不一致属于调用方安全错误，返回业务码 403。
-
-#### 2.8.3 流程完成事件
-
-跨服务流程在最终审批结束或被终止时产生 `workflow.process.completed.v1`。事件通过
-`workflow-domain-out-0` binding 写入 `workflow-domain-event`，载荷如下：
-
-```json
-{
-  "eventId": "3f206832-9dc1-4422-870a-a286a979404d",
-  "eventType": "workflow.process.completed.v1",
-  "occurredAt": "2026-07-21 10:30:00",
-  "tenantId": 1,
-  "producer": "omni-workflow",
-  "businessType": "PROCUREMENT_REQUISITION",
-  "businessKey": "10001",
-  "processInstanceId": "22501",
-  "result": "APPROVED",
-  "completedTime": "2026-07-21 10:30:00"
-}
-```
-
-| 字段 | 说明 |
+| 表 | 当前用途与限制 |
 |---|---|
-| `eventId` | UUID；同时作为 Outbox `msgKey` 和消费端幂等键 |
-| `eventType` | 固定为 `workflow.process.completed.v1` |
-| `occurredAt` | 事件记录产生时间 |
-| `tenantId` | 业务租户 ID |
-| `producer` | 固定为 `omni-workflow` |
-| `businessType` / `businessKey` | 回查调用方聚合的稳定业务标识 |
-| `processInstanceId` | Flowable 流程实例 ID |
-| `result` | `APPROVED`、`REJECTED`、`CANCELLED` |
-| `completedTime` | 流程实际完成或终止时间 |
+| `wf_process_model` | 租户内模型目录；`(tenant_id, model_key)` 唯一；保存草稿与当前发布版本指针 |
+| `wf_process_model_version` | 设计器 JSON、BPMN XML、摘要、业务版本及引擎部署信息；`(model_id, version)` 唯一 |
+| `wf_process_instance_ext` | 发起人、业务关联、实例状态及完成事件门闩 |
+| `wf_process_start_request` | 内部启动预留；租户内 requestId、业务键及实例关联分别有唯一约束 |
+| `wf_todo_task` | 按处理人查询的待办投影；引擎任务仍是实际执行依据 |
+| `wf_cc_record` | 抄送记录；存在记录不代表外部通知送达 |
+| `wf_form_schema` | 已有结构，本模块当前没有表单定义 CRUD Controller/Service |
+| `wf_delegation_rule` | 已有结构，不等同于已经实现自动按委托规则转派任务 |
 
-实例状态/完成元数据更新与 `sys_mq_message` 的 PENDING Outbox 记录在同一本地事务中提交。
-`completion_event_id IS NULL` 条件更新是数据库发布门闩，保证同一流程实例只生成一条逻辑完成事件；事务失败时两者一起回滚。
-中继任务在提交后异步投递并重试，因此消息传输语义是**至少一次**，消费方仍必须按 `eventId` 幂等消费。
+`sys_mq_message` 属于公共 Outbox，DDL 唯一所有者是 `database/changelog/common/0001-mq-schema.yaml`；Flowable 的 `ACT_*` 表由专用迁移管理。不要把这些表归入 `wf_` 业务租户拦截范围。
 
-#### 2.8.4 查询已发布模型版本
+## 2. 模型与版本不变量
 
-```http
-GET /api/internal/workflow/model-version/{modelVersionId}
-X-Internal-Token: <共享内部令牌>
-X-Tenant-Id: 1
-```
+模型接口由 `WorkflowModelController` 维护，使用 `workflow:model:*` 权限。创建请求要求 modelKey 匹配 `^[a-zA-Z][a-zA-Z0-9-]*$`，且在当前租户唯一。创建启用模型及版本号 `0` 的 `DRAFT`；初始 designerJson 不会自动变成可发布 BPMN。
 
-响应包含 `id/modelId/modelKey/category/version/processDefinitionId/status`。其中：
+保存草稿存储调用方提交的 designerJson 和 bpmnXml，计算 XML 摘要；后端当前没有从 designerJson 生成 XML 的实现。当前指针不是 `DRAFT` 时创建新草稿，保留旧发布内容。模型状态 `0` 不进入普通列表；已有 `PUBLISHED` 版本的模型不能直接删除。
 
-- `modelKey` 是租户内唯一且必须与 BPMN process id 一致的模型标识。
-- `category` 是供业务服务绑定审批用途的稳定分类，不等同于可自由显示的模型名称。
-- 模型主记录已归档、版本不是 `PUBLISHED`、版本不属于请求租户或缺少
-  `processDefinitionId` 时统一返回 404。
+`BpmnXmlValidator` 使用加固的 XML 解析器：禁用 DOCTYPE、外部实体，转换器禁用外部 DTD/样式表。它检查一个可执行 process、process id 与 modelKey 一致、开始/结束事件、UserTask 的 `omni:assignment`、相关抄送节点的 `omni:cc`、排他网关默认连线及连线引用；多个开始事件产生警告。连线引用检查基于 process 的直接子元素，且只检查非空 sourceRef/targetRef。扩展元素存在检查不等于 assignment JSON、脚本、监听器或表达式安全白名单，也不证明业务路径可执行。
 
-业务服务可以在启动前把自身稳定 `businessType` 与 `category` 做精确匹配，防止误用其他业务的
-已发布模型。Workflow 内部启动端点会在实际创建实例前再次校验
-`ASSET_TRANSFER/ASSET_DISPOSAL` 与模型分类，错配以 404 明确拒绝且不创建实例；既有
-Procurement 审批路由不受该 Asset 专用绑定影响。该查询只提供模型元数据，不授予流程启动或审批权限。
+发布由 `WorkflowModelServiceImpl.publishModel()` 的本地事务执行：先通过原始 JDBC `SELECT ... FOR UPDATE` 锁定模型行，再要求当前草稿非空、状态为 `DRAFT`，重新校验后部署 Flowable，分配下一业务版本并保存引擎标识。新版本成为 `PUBLISHED`，此前发布指针对应的版本归档，模型发布指针更新。原始 JDBC 行锁不经过 MyBatis-Plus 租户插件，不能把行锁解释为授权检查。
 
----
+校验失败分支尝试写 `FAILED` 后抛异常；该写入位于同一回滚事务中，不能承诺失败状态必然持久化。发布异常不能解释为 Broker、业务服务或外部通知均已回滚；本地数据库/引擎事务与跨服务一致性是不同边界。
 
-## 3. 约束与注意事项
+原始定义管理入口 `/api/workflow/process-definition` 保留部署、BPMN 读取、挂起、激活与级联删除功能，使用 `workflow:definition:*` 权限。它不经过上述模型草稿校验和业务版本发布流程。当前 `ProcessDefinitionServiceImpl` 仅在列表且租户上下文非空时增加租户条件，按 ID 读取/挂起/激活/删除没有统一租户归属检查；不能把功能权限当成这些入口的数据隔离证明。
 
-### 3.1 多实例 DeleteReason
+## 3. 候选人、监听器与会签
 
-当多实例 `completionCondition` 触发时，剩余任务会被 Flowable 以 `deleteReason = "MI_END"` 删除——**而非** `"deleted"`。`"deleted"` 原因在整个流程实例被终止或驳回时使用。
+### 3.1. 配置形状
 
-**规则**：始终使用 `HistoricTaskInstance.getDeleteReason()` 来区分跳过与取消：
+审批分配配置保存在 BPMN 的 `omni:assignment` 中；XML 命名空间为 `http://omni.com/workflow`，Flowable 扩展使用 `http://flowable.org/bpmn`。以下仅表示配置形状，角色及组织仍须在目标租户配置：
 
-| `deleteReason` | 含义 | 结果 |
-|---|---|---|
-| `null` | 任务正常完成 | 检查 `approved` 变量 → 通过 / 驳回 |
-| `MI_END` | 被多实例 completionCondition 跳过 | 自动通过 |
-| `deleted` | 流程终止 / 已驳回 | 已取消 |
-
-**注意**：不要依赖 `HistoricActivityInstance` 的父级查找。多行可能共享相同的 `ACT_ID_`（一行 deleteReason 为 `NULL`，另一行为 `MI_END`）。`putIfAbsent` 可能存入错误的行。应直接使用任务级别的 `deleteReason`。
-
-### 3.2 omni:assignment 扩展元素
-
-`omni:assignment` JSON 是候选人解析的**唯一配置入口**：
-
-```xml
-<userTask id="dept-leader-approve" flowable:assignee="${userId}">
-  <extensionElements>
-    <flowable:executionListener event="start"
-        delegateExpression="${scopedRoleAssignmentListener}" />
-    <omni:assignment>{
-      "roleCode": "DEPT_LEADER",
-      "anchorType": "PARENT",
-      "anchorParams": {},
-      "scopeMode": "SAME_UNIT",
-      "fallbackStrategy": "ERROR",
-      "approvalMode": "ANY"
-    }</omni:assignment>
-  </extensionElements>
-  <multiInstanceLoopCharacteristics isSequential="false"
-      flowable:collection="candidateUserIds"
-      flowable:elementVariable="userId">
-    <completionCondition>${rejectedCount > 0 || approvedCount >= requiredApprovals}</completionCondition>
-  </multiInstanceLoopCharacteristics>
-</userTask>
-```
-
-**字段说明**：
-
-| 字段 | 取值 | 描述 |
-|---|---|---|
-| `roleCode` | 任意角色编码（如 `TEAM_LEADER`、`DEPT_LEADER`） | 要解析的目标角色 |
-| `anchorType` | `START_USER_PRIMARY_UNIT`、`PARENT`、`ABSOLUTE_UNIT`、`PARENT_BY_TYPE`、`CHILD_BY_CODE`、`SIBLING_BY_CODE`、`PARENT_CHILDREN`、`DEPT_BY_CODE`、`CHILD_UNIT`、`SIBLING_UNIT` | 如何定位锚点组织单元 |
-| `anchorParams` | JSON 对象（如 `{"unitIds": [200]}`) | 锚点解析参数 |
-| `scopeMode` | `SAME_UNIT`、`UNIT_AND_BELOW`、`CHILDREN_ONLY` | 候选人搜索范围 |
-| `fallbackStrategy` | `ERROR`、`ASSIGN_ADMIN`、`ESCALATE_PARENT` | 未找到候选人时的行为 |
-| `approvalMode` | `ALL`（默认）、`ANY` | 多实例会签模式 |
-
-**`ESCALATE_PARENT` 语义**：当按 `roleCode + anchorType + scopeMode` 解析不到候选人时，从锚点组织单元的父级开始，沿组织树**逐级向上**，在每一上级保持**同一 `roleCode` 与同一 `scopeMode`** 过滤下重新解析，命中即返回该级候选集（仅启用用户，租户隔离）。上溯至根单元（`parent_id` 为空）仍无候选人时，**按 `ERROR` 语义失败关闭**——抛出异常中断启动，不 fail-open、不自动审批、不伪装有候选。依赖故障（组织/权限表查询异常）按空候选处理后同样落入失败关闭路径，不虚报成功。多锚点场景由 `anchorType` 解析为单一锚点单位后再上溯。
-
-### 3.3 审批模式
-
-- **ALL**：所有候选人都必须审批。`requiredApprovals = candidateUserIds.size()`。当 `approvedCount >= requiredApprovals` 时流程推进。
-- **ANY**：任意一人审批即可。`requiredApprovals = 1`。首个审批通过后流程推进；剩余任务自动完成，`deleteReason = MI_END`。
-
-两种模式共享相同的 `completionCondition` 表达式：`${rejectedCount > 0 || approvedCount >= requiredApprovals}`。区别在于 `ScopedRoleAssignmentListener` 设置的 `requiredApprovals` 值不同。
-
-**驳回快捷方式**：在两种模式下，任意一个驳回（`rejectedCount > 0`）都会立即触发驳回分支，跳过剩余审批人。
-
-### 3.4 租户隔离
-
-`omni-workflow` 中的 `MybatisPlusConfig` 注册了 `TenantLineInnerInterceptor`，其行为如下：
-- 从 `TenantInfoHolder` 读取租户 ID（由 `TenantInfoFilter` 从 `X-Tenant-Id` 请求头设置）
-- **排除** Flowable 内部表（`ACT_*` / `act_*` 前缀）不参与租户过滤
-
-Flowable 表通过 Flowable 内置的 `tenantId` 机制实现租户隔离，而非 MyBatis-Plus 拦截。
-
-### 3.5 XSS 集成
-
-`omni-workflow` 通过 `XssConfigProviderImpl` 实现 `XssConfigProvider` SPI：
-- 从 Redis 缓存读取 XSS 配置（`xss:enabled:{tenantId}`、`xss:rules:{tenantId}`）
-- 缓存由 `omni-auth` 服务写入；工作流服务是**只读消费者**
-- 缓存未命中时，返回 `enabled = false`（失败开放策略）
-
-### 3.6 候选人解析组件
-
-| 组件 | Bean 名称 | 触发时机 |
-|---|---|---|
-| `ScopedRoleAssignmentListener` | `scopedRoleAssignmentListener` | UserTask `start` 事件上的 ExecutionListener |
-| `CandidateResolverDelegate` | `candidateResolverDelegate` | UserTask 之前 ServiceTask 中的 JavaDelegate |
-| `CandidateResolverBean` | `candidateResolver` | UEL 表达式或离线预解析 |
-
-`CandidateResolverBean` 暴露 `resolveCandidates(processDefinitionId, activityId, startUserId, tenantId)` 供离线使用（例如 `getProgress()` 需要显示谁*将会*审批一个待办任务）。
-
-### 3.7 发布锁定
-
-`publishModel()` 使用 `SELECT FOR UPDATE` 对 `wf_process_model` 加悲观锁，以防止同一模型的并发部署。这很关键，因为 Flowable 部署不是原子操作——涉及多个引擎 API 调用。
-
----
-
-## 4. 扩展指南
-
-### 4.1 添加新的审批流程类型
-
-1. 设计 BPMN XML，在每个 UserTask 上配置 `<omni:assignment>`
-2. 使用 `BpmnXmlValidator` 校验（强制检查必需的扩展）
-3. 通过 API 创建模型：`POST /api/workflow/model`
-4. 保存 BPMN XML：`PUT /api/workflow/model/{id}/draft`
-5. 发布：`POST /api/workflow/model/{id}/publish`
-
-无需修改代码——框架通过 BPMN XML + `omni:assignment` 配置实现数据驱动。
-
-### 4.2 添加新的锚点类型
-
-1. 在 `ScopedRoleAssignmentListener` 的解析逻辑中添加新的锚点类型字符串
-2. 实现组织单元查询（例如按特定条件查询 `sys_org_unit`）
-3. 如需校验，将锚点类型添加到 `BpmnXmlValidator` 的已知值中
-4. 更新前端 `UserTaskPanel.vue`，在属性面板中展示新的锚点类型
-
-### 4.3 添加新的降级策略
-
-1. 在 `ScopedRoleAssignmentListener` 中添加策略常量
-2. 实现降级行为（例如 `ASSIGN_ADMIN` → 查询管理员用户，`ESCALATE_PARENT` → 查找上级单元候选人）
-3. 更新 `omni:assignment` JSON Schema 校验
-
-### 4.4 自定义通知服务
-
-实现 `omni-common-workflow` 中的 `WorkflowNotificationService` 接口：
-
-```java
-@Service
-public class MyNotificationService implements WorkflowNotificationService {
-    @Override
-    public void notifyPendingTask(String assigneeId, String taskId, String title) { ... }
-
-    @Override
-    public void clearPendingTask(String taskId) { ... }
+```json
+{
+  "assignmentType": "SCOPED_ROLE",
+  "roleCode": "SUPER_ADMIN",
+  "anchorType": "START_USER_PRIMARY_UNIT",
+  "anchorParams": {},
+  "scopeMode": "SAME_UNIT",
+  "fallbackStrategy": "ERROR",
+  "approvalMode": "ALL"
 }
 ```
 
-默认的 `NoOpNotificationService`（由 `FlowableAutoConfiguration` 注册）会通过 `@ConditionalOnMissingBean` 被你的实现替换。
+### 3.2. 锚点来源
 
-### 4.5 抄送（CC）通知
+| anchorType | 实际锚点来源 |
+|---|---|
+| `START_USER_PRIMARY_UNIT` | 启用发起人的主组织 |
+| `PARENT_BY_TYPE`、`PARENT_CHILDREN` | 从主组织向上按 targetType 查找；没有 targetType 时使用主组织 |
+| `CHILD_BY_CODE`、`SIBLING_BY_CODE` | 主组织的直属子组织/同级组织，分别按 childCode/siblingCode 查询 |
+| `DEPT_BY_CODE` | 当前租户按 deptCode 查询启用组织 |
+| `ABSOLUTE_UNIT` | 普通候选查询支持 anchorParams.unitIds 或 unitId |
+| `PARENT` | 主组织的父组织 |
+| `CHILD_UNIT`、`SIBLING_UNIT` | 直接使用配置中的 unitId，并不验证它与发起人的亲缘关系 |
 
-在 BPMN 设计器中添加一个 `ServiceTask` 节点，使用 `ccNotifyDelegate` 委托表达式。配置 `<omni:cc>` 扩展元素指定目标用户 ID 或基于角色的解析。`CcNotifyDelegate` 在运行时创建 `wf_cc_record` 记录。
+### 3.3. 作用域
 
----
+`SAME_UNIT` 查询同组织角色；`UNIT_AND_BELOW` 按组织路径查询本组织及下级；`CHILDREN_ONLY` 只取直属子组织。未知 scopeMode 当前落到同组织查询。候选 SQL 按角色租户及启用角色、角色范围、用户状态过滤；这不等于对任意配置用户执行完整 Auth 授权校验。查询异常通常转换为空候选。
 
-## 5. 技术选型思考：为什么选择 Flowable 8.x
+### 3.4. 空候选处理
 
-| 考量 | Flowable | Camunda | Activiti |
-|------|---------|---------|----------|
-| **开源许可** | Apache 2.0（商业友好） | 商业版需许可（社区版 MIT） | Apache 2.0 |
-| **Spring Boot 集成** | 原生 Spring Boot Starter，自动配置 | 需额外配置 Spring Boot Starter | 已停止维护（Flowable 是其分叉） |
-| **多实例支持** | 原生 MI（Multi-Instance）支持，completionCondition 灵活 | 类似功能 | 基础 MI 支持 |
-| **CMMN/DMN** | 支持 BPMN + CMMN + DMN | 支持 BPMN + DMN（CMMN 商业版） | 仅 BPMN |
-| **社区活跃度** | 活跃（GitHub 8k+ stars） | 活跃（商业支持） | 已停止维护 |
-| **版本 7.x** | Jakarta EE 兼容，Spring Boot 3/4 支持 | 版本 8 架构变动大 | 无新版 |
+`ERROR`（含缺省/其他策略）抛错。`ASSIGN_ADMIN` 查询当前租户、组织 ID `1` 下的 `SUPER_ADMIN` 候选，找不到仍抛错，不硬编码用户 ID `1`。`ESCALATE_PARENT` 从解析锚点的父组织开始，用相同 roleCode 和 scopeMode 最多上溯 `20` 层，首次命中即返回；未命中时失败，不自动审批。其锚点解析对 `ABSOLUTE_UNIT` 读取单个 unitId，并不会把 unitIds 的第一个元素自动作为上溯起点。缺发起人或锚点、组织查询异常也可能导致失败。
 
-**结论**：Flowable 8.x 在开源许可、Spring Boot 原生集成、多实例支持方面优势明显，是 Omni-Stack 工作流引擎的最佳选择。
+### 3.5. 会签计数
 
-## 6. BPMN 建模最佳实践
+多实例计数器在 MI 根执行本地初始化；最多向上找 `32` 层，未找到时使用当前执行。`_counters_init` 只在该活动根本地去重，避免下一会签节点继承上一节点票数。`ALL` 初始阈值为候选人数，`ANY` 为 `1`；动态加/减签后，全员阈值按“已同意 + 仍待办”重算。设计器的完成条件为 `${rejectedCount > 0 || approvedCount >= requiredApprovals}`；其他 BPMN 必须自行提供正确条件和驳回路由。
 
-### 命名约定
+### 3.6. 候选人解析组件
 
-| 元素 | 命名规则 | 示例 |
-|------|---------|------|
-| Process ID | 与 `model_key` 一致 | `leave-request`, `expense-approval` |
-| UserTask ID | kebab-case，描述角色+动作 | `dept-leader-approve`, `hr-review` |
-| SequenceFlow ID | `flow-{source}-{target}` | `flow-start-submit` |
-| Gateway ID | `{type}-gw-{purpose}` | `exclusive-gw-amount`, `parallel-gw-notify` |
+设计器 `useBpmnExtension.writeAssignment()` 写入 `ExecutionListener(event=start)`，引用 `${scopedRoleAssignmentListener}`；同时写入并行多实例、集合 `candidateUserIds`、元素变量 `userId` 及受理人 `${userId}`。旧 `TaskListener` 入口目前只记录日志，不能替代执行启动监听器。`CandidateResolverBean` 还支持 `${candidateResolver.resolve(execution)}` 集合表达式；候选解析共用 `CandidateResolutionService`，兼容代理与设计时预览也使用该服务。
 
-### 建模原则
+上述上溯与异常传播由执行监听器和 `CandidateResolverBean` 实现。监听器缺 assignment 或 roleCode 时可直接返回；配置存在检查不保证集合已写入。兼容 `CandidateResolverDelegate` 没有 ESCALATE_PARENT 分支，缺目标时可返回，执行异常只捕获记日志，不能宣称所有旧 BPMN 都按相同方式失败关闭。
 
-1. **每个 UserTask 必须配置 `<omni:assignment>`**：动态候选人解析，禁止硬编码 `assignee`
-2. **ExclusiveGateway 必须设置 default flow**：无条件分支作为兑底，避免流程死锁
-3. **多实例会签使用统一的 completionCondition**：`${rejectedCount > 0 \|\| approvedCount >= requiredApprovals}`
-4. **CC 通知使用 ServiceTask + `ccNotifyDelegate`**：非阻塞，不影响主流程
-5. **模型发布前必须通过 `BpmnXmlValidator`**：确保 XML 合法性和扩展元素完整性
+## 4. 实例、任务与审批记录
 
-### 流程设计器前端架构
+普通发起入口使用 Gateway 身份，拒绝与当前主体不同的 simulateUserId/simulateUserName。进入引擎前移除输入变量 `initiator`、`startUserId`、`authenticatedUserId`、`START_USER_ID`，写入真实 initiator，并在 finally 清理 Flowable 认证上下文。指定 modelVersionId 时要求同租户 `PUBLISHED` 版本及引擎定义 ID；仅传 processKey 则走按 key 与租户启动的兼容路径，不一定对应模型目录的当前发布指针。
 
-```
-bpmn-js Modeler (开源 BPMN 2.0 建模工具)
-    │
-    ├── useBpmnModeler.ts      — Modeler 创建/销毁生命周期
-    ├── useBpmnExtension.ts    — omni:assignment 等扩展元素读写
-    ├── bpmnContextPadI18n.ts  — 上下文菜单国际化
-    └── bpmnContextPadProvider.ts — 自定义上下文菜单项
+实例启动后写扩展记录，状态 `1` 表示进行中；状态 `2` 表示完成，`0` 表示终止。普通发起的 requestId/businessType 字段本身不建立内部启动预留幂等。待办同步在提交后执行，异常会被记录，不回滚已提交实例，因此待办投影不等于引擎实时状态。
 
-属性面板 (panels/)
-    ├── UserTaskPanel.vue      — 角色解析配置（roleCode, anchorType, scopeMode）
-    ├── ServiceTaskPanel.vue   — CC 通知配置
-    └── GatewayPanel.vue       — 网关条件配置
-```
+`ApprovalController` 的完成、加签、减签与委托分别校验对应 `workflow:approval:*` 权限；服务还要求当前租户任务及精确 assignee。任务不存在使用业务码 `409`，其他处理人使用 `403`。当前没有独立 claim、transfer 或 withdraw Controller；内部候选资格校验也不自动认领任务。加签/减签/委托目标只做数值解析，不能宣称已校验目标用户启用状态及 Auth 租户归属；委托实现是设置 assignee。
 
-## 7. 故障排查指南
+完成审批时，先写意见、任务局部 approved/comment 和运行变量，再更新 MI 同意/拒绝计数，最后调用 `taskService.complete()`，让完成条件读到本次票数。附加 variables 在这些写入之后应用到任务局部和流程作用域，当前没有过滤保留变量；不能承诺任意客户端变量都无法覆盖计数或路由值。
 
-| 问题 | 可能原因 | 排查方法 |
-|------|---------|----------|
-| **模型发布失败** | BPMN XML 校验未通过 | 调用 `POST /api/workflow/model/{id}/validate` 获取具体错误信息 |
-| **候选人解析失败** | `omni:assignment` 配置错误 | 检查 `roleCode`、`anchorType`、`scopeMode` 值是否合法；查看服务日志中的异常信息 |
-| **流程实例未启动** | 模型未发布或版本已归档 | 检查 `wf_process_model_version` 表中是否有 `status=PUBLISHED` 的版本 |
-| **多实例任务未跳过** | completionCondition 未触发 | 检查 `approvedCount`、`rejectedCount`、`requiredApprovals` 变量值 |
-| **deleteReason 显示错误** | MI_END vs deleted 混淆 | 参考 §3.1 MI DeleteReason 表格，`MI_END` = 自动完成，`deleted` = 流程终止 |
-| **租户隔离失效** | TenantInfoHolder 未设置 | 确认 Gateway 已注入 `X-Tenant-Id` 请求头；检查 `TenantInfoFilter` 是否正常执行 |
-| **BPMN 设计器无法加载** | bpmn-js 版本不兼容 | 确认 `bpmn-js` 版本为 18.x；检查浏览器控制台错误 |
+进度与记录入口为 `GET /api/workflow/process-instance/{processInstanceId}/progress` 和 `GET /api/workflow/process-instance/{processInstanceId}/approval-records`。两者显式接收 Gateway 的 `X-Tenant-Id`，先按实例 ID 与租户查询历史实例；无效租户使用业务码 `400`，不存在或其他租户实例统一使用 `404`，在活动、意见、候选及昵称读取前拒绝。该边界没有新增同租户参与人 ACL 或功能权限。
 
-## 8. 管理端界面截图（四语言）
+| 展示/读取 | 当前含义 |
+|---|---|
+| 进度节点 | 汇总历史活动和历史 assignee；状态为 completed/active/pending；未到达节点可附候选预览，不代表最终分配 |
+| 逐人进度 | 无 deleteReason 的已结束任务为真实完成；任意非 null deleteReason 的结束任务标为 auto-completed |
+| 审批记录 | 正常结束按任务局部 approved 判定；缺变量时兼容默认为 approved；待办为 pending |
+| 删除任务 | deleteReason 以 MI 开头时保留 legacy `auto-approved` 标签，其他删除为 cancelled；`MI_END` 是引擎跳过，不是该审批人的同意票 |
+| 意见 | 返回任务意见列表中的第一条；不是保证返回最后一条 |
 
-正式图片由文档专用 Playwright 用例 `omni-frontend/e2e-docs/flows/management.flows.spec.ts` 在真实运行栈上生成，按语言分目录存放，不复用其他语言图片、不使用占位图或模拟响应。
+本人发起/已办与待办列表按租户和当前用户过滤；“已办”表示用户办过任务，不保证整个流程已结束。任务表单要求同租户且当前 assignee，返回流程变量，没有任意 PII 自动脱敏保证。发起人终止要求同租户扩展、本人及进行中状态。
 
-- 前置条件：本地 Compose 全栈运行，前端 `127.0.0.1:3000`；`omni-workflow` 健康；库中已有真实流程模型与实例（采集时为 8 个模型/版本、23 条实例）。
-- 操作者：`admin`（`SUPER_ADMIN`，具备工作流菜单权限）。
-- 操作：登录后依次进入「流程定义」「流程实例」「统计看板」页面。
-- 预期状态：页面标题与列标签按当前语言渲染；流程实例列表展示流程标题、流程 Key、业务主键、发起人、状态与发起时间，并提供「流转进度」与「审批记录」入口。
-- 令牌：由 `E2eTokenFixture` 在测试进程内签发短期 JWT（TTL 1200 秒），收尾即销毁，不写入文档、日志或版本库。
-- 本组全部为**只读采集**：不创建、不修改、不删除任何流程数据，因此不需写入开关，也无数据收尾。
+## 5. 信任、租户与内容边界
 
-内容说明：当前环境中的流程实例均由历次端到端验证产生，标题带有测试标识（如 `E2ESQ`）。`wf_process_instance_ext` 与 Flowable `ACT_HI_*` 属引擎管理的审计历史且无软删列，不得用 SQL 硬删，因此图片如实保留真实标题，不以造数据或裁剪方式美化。
+外部安全链要求认证，`GatewayPreAuthFilter` 校验转发标记和 HMAC 签名身份断言，并拒绝断言与明文身份不一致；功能权限按各 Controller 声明执行。内部 `/api/internal/**` 由前置共享令牌过滤器保护，不依赖用户 JWT。身份、租户、任务受理资格及业务关联是不同校验层。
 
-| 页面 | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| 流程定义（publish） | ![流程定义（简体中文）](images/zh-CN/workflow-definitions.png) | ![流程定义（英文）](images/en-US/workflow-definitions.png) | ![流程定义（日文）](images/ja-JP/workflow-definitions.png) | ![流程定义（韩文）](images/ko-KR/workflow-definitions.png) |
-| 流程实例跟踪（instance-tracking） | ![流程实例（简体中文）](images/zh-CN/workflow-instances.png) | ![流程实例（英文）](images/en-US/workflow-instances.png) | ![流程实例（日文）](images/ja-JP/workflow-instances.png) | ![流程实例（韩文）](images/ko-KR/workflow-instances.png) |
-| 统计看板（汇总视图） | ![统计看板（简体中文）](images/zh-CN/workflow-stats.png) | ![统计看板（英文）](images/en-US/workflow-stats.png) | ![统计看板（日文）](images/ja-JP/workflow-stats.png) | ![统计看板（韩文）](images/ko-KR/workflow-stats.png) |
+`TenantInfoFilter` 在 finally 清理 `TenantInfoHolder`；Workflow 的 MyBatis-Plus 链为 Tenant → Optimistic → Pagination，仅拦截 `wf_` 表，缺租户上下文时回落到 `1`。原始 JDBC 与 Flowable 查询不经过该插件，必须检查各方法的显式约束，不能推断全服务已经具有 owner DataScope。
 
-### 只读详情弹层（四语言）
+本服务独立 `XssConfigProviderImpl` 从 Redis DB `0` 读取 `xss:enabled:{tenantId}` 和 `xss:rules:{tenantId}`。配置缺失或规则 JSON 解析失败时返回 enabled=false、空规则；Redis 读取异常并未被该方法捕获。它没有 common-service 的 Auth 回源或默认安全基线。流程变量、意见、设计器 JSON/XML 与日志需要按实际输入和返回路径处理，不能承诺统一自动清洗。
 
-由 `omni-frontend/e2e-docs/flows/detail-overlays.flows.spec.ts` 生成，同样为**只读采集**：仅点击行内查看类动作打开弹层，不提交表单，也不触发设计/校验/发布/删除/终止等任何写操作。
+`CcNotifyDelegate` 将抄送写入 `wf_cc_record`，不生成待办、不调用外部通知；执行异常被捕获并记录。默认 `NoOpNotificationService` 只记录日志。操作日志与 Outbox 也不能作为邮件、短信或其他通知已送达的凭据。
 
-- 操作者：`admin`；前置条件与上节一致。
-- 操作：在流程实例首行点「流转进度」与「审批记录」，在流程模型首行点「版本」。
-- 预期状态：弹层标题按当前语言渲染；流转进度弹层必须**等 BPMN 图形真实渲染完成**才截图（用例断言 `.bpmn-viewer-wrap .djs-element` 可见且 `.el-loading-mask` 已消失），不得截到异步加载中的转圈态。
-- 实测结果：16 passed / 0 skipped（含本文与可靠消息文档共用的四个弹层场景 × 四语言）。
+## 6. 内部启动与完成事件
 
-| 弹层 | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| 流转进度（instance-tracking） | ![流转进度（简体中文）](images/zh-CN/workflow-instance-progress.png) | ![流转进度（英文）](images/en-US/workflow-instance-progress.png) | ![流转进度（日文）](images/ja-JP/workflow-instance-progress.png) | ![流转进度（韩文）](images/ko-KR/workflow-instance-progress.png) |
-| 审批记录（approval） | ![审批记录（简体中文）](images/zh-CN/workflow-instance-approval-records.png) | ![审批记录（英文）](images/en-US/workflow-instance-approval-records.png) | ![审批记录（日文）](images/ja-JP/workflow-instance-approval-records.png) | ![审批记录（韩文）](images/ko-KR/workflow-instance-approval-records.png) |
-| 版本历史（publish） | ![版本历史（简体中文）](images/zh-CN/workflow-model-versions.png) | ![版本历史（英文）](images/en-US/workflow-model-versions.png) | ![版本历史（日文）](images/ja-JP/workflow-model-versions.png) | ![版本历史（韩文）](images/ko-KR/workflow-model-versions.png) |
+`InternalWorkflowController` 的八个方法路径覆盖版本详情、按分类取当前版本、发布版本列表、批量版本解析、审批图预览、启动、处理资格校验和终止。完整字段由 [API 契约](api-contract.md) 维护；内部请求必须携带 `X-Internal-Token` 和 `X-Tenant-Id`，相应 body/query 租户须一致。内部调用方负责提供真实 startUserId/startUserName；不能把共享令牌当作终端用户授权证明。
 
-流转进度图中，绿色节点为本实例已执行的活动（`completed-node` 标记），灰色为未走过的分支（如「审批驳回」），与 §2.7 「进度与记录」所述语义一致。
+内部启动在本地事务中预留 `wf_process_start_request`，唯一键同时约束 `(tenant_id, request_id)` 与 `(tenant_id, business_type, business_key)`。同一请求/业务重放比较业务标识、modelVersionId 和 startUserId，不比较 title、startUserName 或 variables 的完整哈希。已 STARTED 的记录返回原实例且 replayed=true，响应中的 requestId 来自本次请求；处理中返回 `409`。相同 requestId 的 FAILED 记录可重新预留；仅换 requestId 命中同一业务键不会自动取得失败记录的重试权。
 
-尚未覆盖的流程：`model-lifecycle` / `detail-and-action-states` / `failure-states` 需「建模 → BPMN 设计 → 校验 → 发布」写入链，而发布会向共享 Flowable 引擎部署流程定义（`ACT_RE_*`）且尚无经验证的干净删除/回滚路径；`countersign` 需多实例会签模型与多审批人身份。四项均**需单独授权/新增测试身份**，本轮不擅自部署也不临时越权，在覆盖清单中保留为显式 gap。
+新启动重新校验已发布版本；`ASSET_TRANSFER`、`ASSET_DISPOSAL`、`SRM_SUPPLIER_ONBOARDING` 要求模型 category 与 businessType 精确一致。内部服务覆盖变量 requestId/businessType/businessKey，普通启动层再覆盖发起人变量。预留、启动、扩展和 markStarted 位于本地事务，不能据此承诺跨业务服务分布式原子提交。
+
+处理资格校验先匹配租户任务及扩展的 businessType/businessKey，再检查 assignee；未分配任务才检查 candidate。valid=true 不等于已经认领或完成。版本可用状态和图预览依据模型元数据/BPMN，不证明当前用户最终候选、引擎定义仍可运行或业务审批已成功。
+
+完成事件类型为 `workflow.process.completed.v1`，经 `workflow-domain-out-0` 写入公共 Outbox。当前调用点是审批服务观察到运行实例已结束，以及显式终止；结果分别为请求的 APPROVED/REJECTED 或 CANCELLED。扩展中的 completion_event_id 条件更新作为一次写入门闩，和事件入 Outbox 同事务；有门闩时返回 false，不再写入。它不是 Broker 送达确认。
+
+当前没有通用引擎结束监听器覆盖所有结束方式。启动后立即结束、其他管理操作结束或缺业务扩展，不能推断已经生成完成事件。消息中继采用至少一次交付，业务消费者必须幂等；APPROVED/REJECTED 对应扩展状态 `2`，CANCELLED 对应 `0`，业务领域最终状态仍由消费者处理。可靠性规则见 [MQ 可靠性](mq-reliability.md)。
+
+## 7. 源码入口与验证范围
+
+| 入口 | 核对内容 |
+|---|---|
+| `WorkflowModelController` / `WorkflowModelServiceImpl` / `BpmnXmlValidator` | 模型权限、版本指针、锁定、校验与发布 |
+| `ProcessInstanceServiceImpl` / `WorkflowTaskServiceImpl` | 发起身份、租户读取、本人列表、表单与终止 |
+| `WorkflowApprovalServiceImpl` / common-workflow 的 `ApprovalServiceImpl` | assignee、MI 计数顺序、动态签人与完成 |
+| `CandidateResolutionService` / `ScopedRoleAssignmentListener` / `CandidateResolverBean` | 锚点、空候选、监听时机及计数作用域 |
+| `InternalWorkflowServiceImpl` / `WorkflowProcessStartRequestServiceImpl` / `WorkflowCompletionEventServiceImpl` | 内部意图重放与 Outbox 门闩 |
+| `SecurityConfig` / `GatewayPreAuthFilter` / `MybatisPlusConfig` / `XssConfigProviderImpl` | 独立安全配置与实际限制 |
+
+启动初始化器校正并发布默认租户 `1` 的 `supplier-onboarding`、`procurement-approval`、`asset-transfer`、`asset-disposal`；缺模型或发布失败会阻止启动，不保证所有租户和全部外部依赖都已准备好。
+
+源码测试包括模型、启动身份、审批、内部协议、完成事件及租户边界。`ProcessInstanceReadTenantBoundaryTest` 使用真实 MVC/服务与模拟历史数据覆盖两处读取，不能代替真实 Flowable 数据库和 Gateway 集成。`it/Fw*IT` 使用受守卫的隔离环境，默认 Surefire 单元运行不执行这些 IT。Docker 构建、单元测试、真实审批、浏览器截图和消息/通知验收分别记账，历史截图不证明当前业务复现；验证命令统一见 [AGENTS.md](../AGENTS.md)。

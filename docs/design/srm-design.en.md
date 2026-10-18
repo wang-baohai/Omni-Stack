@@ -1,25 +1,28 @@
 # SRM Supplier Management Module Architecture and Implementation Baseline
 
-> Status: MVP implemented and hardened end-to-end
+> Applicability: Retain the original date, 2026-07-27, and important history in sections 14–16. Current facts follow SRM source, Liquibase, frontend and configuration. Historical “end-to-end hardened” status does not establish this run's actual acceptance. Translation review records actual `AI_REVIEW` under [ADR-0003](../adr/0003-authorized-ai-translation-review.md), never human review.
+>
 > Project: Omni-Stack
-> Date: 2026-07-27
-> Goal: Describe the architecture, cross-service contracts, and implementation boundaries of the omni-srm MVP; the implementation entry points are `omni-backend/omni-srm`, `omni-frontend/src/views/srm`, and `omni-frontend/src/views/supplier-portal`.
+> Original design date: 2026-07-27
+> Current purpose: Preserve design decisions, the implemented baseline snapshot and important history; maintain current rules in the SRM fact document.
 
-Design basis: `README.md`, and all topic documents in `docs/` — architecture, api-contract, backend-patterns, frontend-patterns, core-flows, scheduling, workflow, mq-reliability, docker-deployment; also references the CRM implementation pattern in `docs/design/crm-design.md`.
+See current [SRM facts](../srm.en.md), the [feature tour](../wiki/feature-tour.en.md), [source index](../reference/source-map.en.md) and [development guide](../guides/scaffold-development.en.md). Prerequisites, identity, steps, screenshots and recovery belong in Wiki. Preserve design decisions without treating requirements or historical plans as new acceptance evidence. Related facts: [core flows](../core-flows.en.md), [Workflow](../workflow.en.md), [Procurement](procurement-design.en.md) and [Asset](asset-design.en.md).
+
+Ownership: The implementation tables, state machines, permissions and API descriptions on this page are retained as the reviewed design baseline snapshot in commit `9b23ab972f1dcac4116ae95fb5cd56442e2961e4`; this does not backdate implementation results to the original design date. Maintain subsequent current contracts only in [SRM facts](../srm.en.md), rather than treating this page as a separately editable fact source. Update this page when long-term design decisions change and state their relationship to current facts and ADRs. Procedures and runtime evidence remain in Wiki.
 
 ## 1. Design Conclusion
 
-SRM should be built as an independent Servlet microservice, separated from procurement execution (`omni-procurement`) and asset management (`omni-asset`). The three are built step by step according to their dependencies: SRM → Procurement → Asset.
+SRM is an independent Servlet microservice with domain boundaries separate from procurement execution (`omni-procurement`) and asset management (`omni-asset`). Sections 3 and 8 describe current dependencies and integration.
 
 | Item | Decision |
 |---|---|
 | Maven module / service name | `omni-srm` |
 | Local port / management port | `8105` / `19905` |
-| XXL-JOB executor | `omni-srm` / `9905` (when scheduled evaluation or qualification alerts are enabled) |
+| XXL-JOB executor | `omni-srm` / `9905`, controlled by `XXL_JOB_ENABLED` and related configuration; this does not establish scheduled evaluation or qualification scans |
 | Database | `omni_srm` |
 | Gateway | `/api/srm/**` → `lb://omni-srm`, without `StripPrefix` |
-| Redis | DB 0, shares the XSS configuration written by Auth; SRM keys use the `srm:` prefix |
-| Frontend | Continue to use `omni-frontend`, add `views/srm/**` (admin side) and `views/portal/**` (supplier portal) |
+| Redis | DB 0, shared `xss:enabled:{tenantId}` / `xss:rules:{tenantId}`; no general `srm:` business cache prefix is declared |
+| Frontend | `views/srm/**` (management) and `views/supplier-portal/index.vue` (portal) |
 
 The SRM MVP covers the closed loop of full supplier lifecycle management:
 
@@ -27,9 +30,11 @@ The SRM MVP covers the closed loop of full supplier lifecycle management:
 
 Procurement execution (requisition, RFQ, order, goods receipt) and asset disposal (acceptance, transfer, scrap) are not included in the SRM MVP; they are implemented in `omni-procurement` and `omni-asset` respectively.
 
-The SRM core supplier aggregate is the foundation among the three services; supplier master data depends only on Auth's user/permission system. The implemented portal-quotation increment validates RFQ invitations and line snapshots through the Procurement internal contract; Procurement depends directly on SRM, while Asset inherits supplier data indirectly through Procurement goods-receipt snapshots.
+SRM master data depends on Auth identity/shared security. Admission calls independent Workflow; portal quotations call Procurement invitations. Procurement queries SRM suppliers/quotations. Asset uses both receipt supplier snapshots and direct SRM APPROVED supplier-option search, rather than inheriting supplier data only indirectly.
 
 ## 2. Product Scope
+
+This section retains product goals and phases. Current features, entry points and limitations are below. Phase 2/3 are not delivered features and do not establish identical seeds or workflow models for every tenant.
 
 ### 2.1 Users and Goals
 
@@ -54,38 +59,35 @@ The MVP should be able to answer: how many qualified/frozen/eliminated suppliers
 
 ## 3. System Boundaries
 
-| Component | Authoritative responsibility | How SRM uses it |
+| Component | Authority | Current SRM use |
 |---|---|---|
-| `omni-auth` | Tenant, user, organization, role, permission, data scope, XSS configuration | Internal OpenFeign; SRM stores only user/organization IDs |
-| `omni-srm` | Supplier, evaluation, risk, supplier portal account association | The sole SRM business writer; authentication accounts are still authoritatively managed by Auth |
-| `omni-base` | Dictionary, operation logs, task/MQ operations | Operation log aggregation; category/industry etc. use dictionary codes |
-| `omni-workflow` | BPMN, process instances, approvals | Starts supplier admission approval through internal Feign, consumes reliable completion events to write back status |
-| `omni-procurement` | Procurement execution | Queries suppliers through internal Feign and coordinates portal quotations |
-| `omni-asset` | Asset management | Inherits the supplier snapshot in Procurement goods-receipt events, does not depend directly on SRM |
-| XXL-JOB | Triggers batch scans | Qualification-expiry alert scan (optional in the MVP) |
-| RocketMQ | Asynchronous transport | At-least-once; consumers must be idempotent |
-| Redis | XSS shared configuration, short cache | Does not store authoritative SRM business data |
+| `omni-auth` | Users, organizations, roles, permissions, data scope, XSS | Internal reference/scope/batch-display queries; portal-role requests for existing users |
+| `omni-srm` | Suppliers, evaluations, risk, PortalUser, quotations | Sole business writer of this service; does not process registration passwords |
+| `omni-base` | Dictionaries, operation logs, task/MQ operations | Dictionary authority/log aggregation; SRM stores codes and its own business data |
+| `omni-workflow` | BPMN, instances, tasks, Flowable | Resolve published admission models, start/terminate and consume completion events; SRM embeds no engine |
+| `omni-procurement` | RFQ, invitations, award, PO, receipt | Internal supplier/quotation queries; SRM validates invitations and complete line snapshots before quoting |
+| `omni-asset` | Assets | Consume procurement supplier snapshots and directly search approved suppliers in SRM |
+| RocketMQ | Event transport | Consumers must be idempotent; local Outbox does not prove delivery |
+| Redis / XXL-JOB | Shared cache / execution foundation | XSS settings and configurable executor; external task deployment needs separate evidence |
 
 ```mermaid
 flowchart LR
-    UI["omni-frontend<br/>Admin + Supplier Portal"] --> GW["omni-gateway<br/>JWT validation / identity headers"]
+    UI["omni-frontend<br/>Management / supplier portal"] --> GW["omni-gateway<br/>JWT validation / identity headers"]
     GW --> SRM["omni-srm :8105"]
-    GW --> AUTH["omni-auth :8100"]
-    SRM -->|"OpenFeign + X-Internal-Token"| AUTH
+    SRM -->|"OpenFeign + X-Internal-Token"| AUTH["omni-auth"]
+    SRM -->|"Admission model / start / terminate"| WF["omni-workflow"]
+    SRM -->|"RFQ invitations / quotations"| PROC["omni-procurement"]
+    PROC --> SRM
+    ASSET["omni-asset"] -->|"Approved supplier options"| SRM
+    PROC -->|"Receipt supplier snapshot"| ASSET
     SRM --> DB[("omni_srm")]
     SRM --> R[("Redis DB 0")]
     SRM --> O["sys_mq_message"]
     O -->|"mqRelayHandler"| MQ["RocketMQ"]
-    XXL["XXL-JOB"] -. "Phase 2" .-> SRM
-    PROC["omni-procurement"] -->|"Supplier query / portal quotation"| SRM
-    PROC -->|"Goods-receipt supplier snapshot"| ASSET["omni-asset"]
+    MQ -->|"Role results / admission completion"| SRM
 ```
 
-Recommended dependencies: `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`, plus Web, Validation, Security, AspectJ, OpenFeign, LoadBalancer, Nacos, RocketMQ Stream, Actuator, and Lombok.
-
-SRM does not depend on `omni-common-workflow` and does not embed Flowable in this service; admission approval is completed through the independent
-`omni-workflow`'s internal API and the `workflow.process.completed.v1` event; the Flowable runtime and tables belong only to the
-Workflow service.
+The POM explicitly depends on `omni-common-core`, `omni-common`, `omni-common-mybatis`, `omni-common-redis`, `omni-common-operlog`, `omni-common-job`, `omni-common-mqlog`, `omni-common-service`, plus Web, Security, Validation, AspectJ, OpenFeign, LoadBalancer, Nacos, RocketMQ, Actuator and Lombok. `omni-common-service` assembles identity, tenancy, DataScope, persistence and XSS; dependencies do not establish that all jobs are enabled. SRM does not depend on `omni-common-workflow`. Flowable runtime/tables belong exclusively to independent Workflow.
 
 ## 4. Domain and Data Design
 
@@ -95,53 +97,47 @@ Workflow service.
 |---|---|---|
 | Supplier | `srm_supplier`, `srm_supplier_contact`, `srm_supplier_qualification`, `srm_supplier_bank_account` | Supplier master data, contacts, qualifications, bank accounts |
 | Evaluation | `srm_evaluation_template`, `srm_evaluation_dimension`, `srm_evaluation`, `srm_evaluation_item` | Evaluation template, evaluation records, scoring details |
-| Risk | `srm_risk_indicator`, `srm_risk_assessment` | Risk indicators, overall risk assessment |
+| Risk | `srm_risk_indicator`, `srm_risk_assessment`, `srm_risk_indicator_type`, `srm_risk_criterion`, `srm_risk_score_threshold` | Indicators, assessment history and tenant-shared types/criteria/total-score thresholds |
 | Portal | `srm_supplier_invite`, `srm_supplier_enrollment`, `srm_supplier_portal_user` | Enrollment invitation/Saga, portal account association |
 | Quotation | `srm_quotation`, `srm_quotation_line`, `srm_quotation_request` | RFQ quotation snapshot, quotation lines, request idempotency history |
+| Consumer Inbox | `srm_event_inbox` | Workflow completion registration, intent validation and processing state |
 
 ```mermaid
 erDiagram
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_CONTACT : has
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_QUALIFICATION : holds
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_BANK_ACCOUNT : owns
-    SRM_SUPPLIER ||--o{ SRM_EVALUATION : evaluated_by
-    SRM_SUPPLIER ||--o{ SRM_RISK_ASSESSMENT : assessed
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_ENROLLMENT : enrolls
-    SRM_SUPPLIER ||--o{ SRM_QUOTATION : quotes
-    SRM_QUOTATION ||--|{ SRM_QUOTATION_LINE : contains
-    SRM_QUOTATION ||--o{ SRM_QUOTATION_REQUEST : idempotency
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_PORTAL_USER : authorizes
-    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION_DIMENSION : contains
-    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION : uses
-    SRM_EVALUATION ||--o{ SRM_EVALUATION_ITEM : scores
-    SRM_SUPPLIER ||--o{ SRM_RISK_INDICATOR : has
-    SRM_RISK_ASSESSMENT ||--o{ SRM_RISK_INDICATOR : aggregates
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_CONTACT : "contacts"
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_QUALIFICATION : "qualifications"
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_BANK_ACCOUNT : "bank accounts"
+    SRM_SUPPLIER ||--o{ SRM_EVALUATION : "evaluations"
+    SRM_SUPPLIER ||--o{ SRM_RISK_ASSESSMENT : "risk history"
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_ENROLLMENT : "enrollment"
+    SRM_SUPPLIER ||--o{ SRM_QUOTATION : "quotations"
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_PORTAL_USER : "portal users"
+    SRM_SUPPLIER ||--o{ SRM_RISK_INDICATOR : "risk indicators"
+    SRM_QUOTATION ||--|{ SRM_QUOTATION_LINE : "lines"
+    SRM_QUOTATION ||--o{ SRM_QUOTATION_REQUEST : "permanent request ledger"
+    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION_DIMENSION : "dimensions"
+    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION : "template"
+    SRM_EVALUATION ||--o{ SRM_EVALUATION_ITEM : "score items"
+    SRM_RISK_INDICATOR_TYPE ||--o{ SRM_RISK_CRITERION : "criteria"
+    SRM_EVENT_INBOX {
+        bigint tenant_id
+        varchar event_id
+    }
+    SRM_RISK_SCORE_THRESHOLD {
+        int min_score
+        int max_score
+    }
 ```
 
 ### 4.2 Common Fields and Rules
 
-Every `srm_*` table must contain `tenant_id`, including evaluation templates, evaluation dimensions, and qualification records; this way TenantLine will not rewrite to a non-existent column. Authorizable business tables must also contain:
-
-- `tenant_id`: tenant isolation.
-- `owner_user_id`: SELF scope and business owner.
-- `owner_unit_id`: DEPT/DEPT_AND_BELOW/CUSTOM scope.
-- `version`: optimistic lock.
-- `deleted`: logical deletion.
-- `id/create_time/update_time/create_by/update_by`: project audit fields.
-
-`srm_quotation_request` is an append-only idempotency ledger accessed only internally by the service, not an authorizable business resource: it keeps tenant and audit fields but deliberately has no `deleted/version`, to avoid historical requestIds being deleted or reused. The quotation header/lines are authorized through the PortalUser → Supplier relationship, without appending internal owner columns to these tables.
-
-Constraints:
-
-- User/organization IDs are managed by Auth; no cross-database foreign keys are created, and usernames or ownerUnitId submitted by the frontend are not trusted.
-- Indexes start with `tenant_id`, then combine owner, status, and category.
-- `create_by` is a username audit field and cannot be used for SELF data permission.
-- Bank account numbers use PII masking; the full value is returned only to `srm:pii:view`.
-- Times are uniformly `yyyy-MM-dd HH:mm:ss`.
-- `supplier_no` is generated from an already-generated database ID and made unique within the tenant; `SELECT MAX(...) + 1` is forbidden.
-- A normal PUT is not allowed to directly modify the owner or lifecycle status.
-- External requests must not use bare `selectById/updateById/deleteById`.
-- `owner_user_id` represents only the internal business owner within the tenant; supplier portal accounts must be associated through `srm_supplier_portal_user`, and reusing the owner field is forbidden.
+- All 20 `srm_*` tables contain `tenant_id`. Supplier and Evaluation are direct owner-authorized roots. Other business children inherit through explicit parent chains; not every authorized table has owner columns. Templates, dimensions and risk configuration are tenant-shared.
+- Entities use actual DDL versions, deletion and audit fields. `srm_quotation_request` is a permanent ledger without `deleted/version`; Inbox has its own processing state. `create_by/update_by` are audit usernames, not SELF user IDs.
+- Auth owns users/organizations and the server resolves the owner's primary unit. Portal accounts use `srm_supplier_portal_user`, never internal owner columns. No cross-database foreign keys are created; diagrams do not replace DDL.
+- `supplier_no` is tenant-unique and derived from an existing ID, never `MAX+1`. Generic PUT changes neither lifecycle nor owner. Transfer, state commands and deletion have separate validation; DataPermission is not write authorization.
+- Date-times use `yyyy-MM-dd HH:mm:ss`. Quotation unit price/quantity use `DECIMAL(19,6)` and amounts `DECIMAL(19,4)`; prices and returned amounts use JSON decimal strings. Scores/weights follow their own DTO precision.
+- Permanent `tenant_id + request_id` uniqueness and `tenant_id + quotation_id + target_version` bind quotation requests to result versions. Active unique constraints prevent parallel non-deleted supplier/RFQ quotations or duplicate quotation lines.
+- PII depends on the endpoint/assembler: supplier-specific lists are always masked; internal details and contact/bank lists honor `srm:pii:view`; portal self-profile has separate authorization, as in section 9.
 
 ### 4.3 Main Tables
 
@@ -155,12 +151,13 @@ Constraints:
 - `owner_user_id/owner_unit_id/assigned_time/last_evaluation_time`.
 - `version/deleted` and audit fields.
 - Core indexes: tenant + owner/status, tenant + unit/status, tenant + category/status, tenant + name/credit_code.
+- `workflow_request_id/workflow_business_key/workflow_model_version_id/approval_attempt/process_instance_id/workflow_start_status/workflow_completed_time/approved_time` store admission attempt/idempotency state; business key is `supplierId:attempt`. Start status is `NOT_STARTED/PENDING/FAILED/STARTED`. Starter identity comes from the current request, not persisted starter columns on Supplier.
 
 `srm_supplier_contact`
 
 - `supplier_id/name/department/job_title/mobile/phone/email/decision_role/primary_flag/status`.
-- owner is a permission snapshot of the Supplier owner; it is synchronized in the same transaction when the supplier is transferred.
-- Each supplier has at most one valid primary contact.
+- The current table has no internal owner columns. Scope inherits through the same-tenant Supplier; there is no owner-permission snapshot synchronized on transfer.
+- Primary-contact/version/deletion rules follow dedicated services and DDL. Full contact details require the applicable PII permission.
 
 `srm_supplier_qualification`
 
@@ -183,16 +180,15 @@ Constraints:
 
 `srm_supplier_enrollment`
 
-- `request_id/supplier_id/user_id/status/retry_count/last_error_code/next_retry_time/version/deleted`.
-- `status`: PENDING_ROLE_ASSIGN/ROLE_ASSIGN_FAILED/COMPLETED/CANCELLED.
-- `tenant_id + request_id` is unique; the same tenant + user_id has at most one active enrollment request at a time.
-- Only the identifier/digest and validation result of the inviteToken are stored, not the original inviteToken, and certainly not passwords or verification codes.
+- `request_id/supplier_id/user_id/invite_id/status/retry_count/last_error_code/next_retry_time/version/deleted`.
+- States are `PENDING_ROLE_ASSIGN/ROLE_ASSIGN_FAILED/COMPLETED/CANCELLED`; `tenant_id + request_id` is unique. Replay checks the applicant and normalized credit_code, not a SHA hash of the whole enrollment request.
+- Store inviteId, never raw tokens, passwords or captchas. `next_retry_time` is a backoff recommendation, not proof of automatic scheduling. Role-failure retry differs from admission-start retry.
 
 `srm_supplier_invite`
 
-- `invite_code_hash/status/expires_time/max_uses/used_count/version/deleted`, optionally recording the expected credit_code or a contact-email digest.
-- The original inviteToken is returned only once at creation; the database stores only a SHA-256/HMAC digest; validation checks tenant, ACTIVE, validity period, purpose, and remaining uses at the same time.
-- The enrollment transaction atomically increments used_count under a version condition, preventing concurrent over-use of the same invitation; after revocation, enrollment is no longer possible.
+- `invite_code_hash/status/expires_time/max_uses/used_count/version/deleted`. The current implementation has no expected credit_code, email digest or purpose fields.
+- Creation generates a UUID token returned once in the creation response. The database stores SHA-256, not HMAC. Consumption checks tenant, ACTIVE, expiry, remaining uses and version; the conditional use-count update belongs to enrollment's transaction.
+- List display can show expired/exhausted entries as EXPIRED/USED. Display status does not establish a persisted scanning job. Revoked invitations cannot be consumed.
 
 `srm_evaluation_template`
 
@@ -208,9 +204,9 @@ Constraints:
 
 `srm_evaluation`
 
-- `supplier_id/template_id/evaluation_period (e.g., 2026-Q2)/total_score/evaluator_user_id/evaluation_time/status/version/deleted`.
-- `total_score` is automatically weighted and summarized by the system, not accepted from the frontend.
-- After the evaluation completes, first normalize the 1-5 scores to a percentage scale: `total_score = SUM(item.score / 5 × item.weight)`, with a result range of 20-100; then map the supplier level: ≥90 STRATEGIC, ≥75 PREFERRED, ≥60 QUALIFIED, <60 to be eliminated.
+- `supplier_id/template_id/evaluation_period/total_score/evaluator_user_id/evaluation_time/status/owner_user_id/owner_unit_id/version/deleted`. Creation produces `COMPLETED` and snapshots internal ownership.
+- Request fields are `supplierId/evaluationPeriod/items`, without client supplier version or total score. Only visible APPROVED suppliers with complete ownership are eligible; after locking, use the database version.
+- `SUM(score / 5 × weight)` rounds HALF_UP to two decimals, range 20–100. ≥90 STRATEGIC, ≥75 PREFERRED, ≥60 QUALIFIED, otherwise ELIMINATED. This is `level_code` and does not move the supplier lifecycle directly into its eliminated terminal state.
 
 `srm_evaluation_item`
 
@@ -220,15 +216,14 @@ Constraints:
 
 `srm_risk_indicator`
 
-- `supplier_id/indicator_type/indicator_value/risk_level/assessment_time/remark`.
-- `indicator_type` enum: FINANCIAL (financial risk), COMPLIANCE (compliance risk), SUPPLY (supply risk), COOPERATION (cooperation risk), QUALITY (quality risk), CERTIFICATE (qualification risk).
-- `risk_level` enum: GREEN/YELLOW/RED.
-- Some indicators can be computed automatically (days from the qualification expiry date to today → CERTIFICATE indicator); the rest are marked manually.
+- `supplier_id/indicator_type/indicator_value/criterion_id/score/risk_level/assessment_time/remark` plus actual version/deletion/audit fields.
+- Types come from enabled configuration rather than a fixed Java enum. Six formal seed types are default-tenant examples.
+- Manual edits are rejected for `autoCalc=1` only when an enabled type is found; absent/disabled types skip that check. criterionId copies the current tenant's criterion score/level/label; current code does not enforce criterion/type consistency.
 
 `srm_risk_assessment`
 
 - `supplier_id/overall_level/assessment_time/assessor_user_id/remark/version/deleted`.
-- `overall_level` is the overall risk level, taking the highest level among the indicators (RED > YELLOW > GREEN).
+- Current overall level sums non-null `indicator.score` values and matches score thresholds, not the highest indicator color. Recalculation appends assessment history; see 5.3.
 
 `srm_quotation`
 
@@ -250,504 +245,336 @@ Constraints:
 - `(tenant_id, request_id)` is permanently unique; `request_hash` is the SHA-256 of the normalized request body, used to reject different intents under the same requestId.
 - `(tenant_id, quotation_id, target_version)` is unique, storing the quotation version corresponding to each successful update; therefore an old requestId replayed after the quotation continues to be updated can still be recognized and will not duplicately write the quotation, details, or Outbox.
 
+`srm_risk_indicator_type` / `srm_risk_criterion` / `srm_risk_score_threshold`
+
+- Store types (including enabled/autoCalc), scoring criteria and total-score intervals. Tenant identity and configuration permission apply; internal owner filtering does not.
+- Query order and inclusive interval endpoints determine matching. Complete coverage/non-overlap validation is not guaranteed.
+
+`srm_event_inbox`
+
+- Tenant/eventId protects Workflow completion consumption, with source, type, aggregate key, payload and processing state.
+- Validate same-ID JSON-semantic intent before replay handling. Inbox and supplier changes share a transaction; valid early completion requires retry instead of permanent suppression.
+
 ## 5. State Machine and Core Flows
 
 ### 5.1 Supplier Lifecycle
 
 ```mermaid
 stateDiagram-v2
-    [*] --> REGISTERING: Portal enrollment request
-    REGISTERING --> PENDING_REVIEW: Auth user and role created successfully
-    REGISTERING --> REGISTERING_FAILED: Auth creation/role assignment failed
-    REGISTERING_FAILED --> REGISTERING: Background retry
-    [*] --> PENDING_REVIEW: Admin creates
-    PENDING_REVIEW --> APPROVING: Workflow started successfully
-    APPROVING --> APPROVED: Workflow approval passed
-    APPROVING --> REJECTED: Workflow approval rejected
-    APPROVING --> PENDING_REVIEW: Withdraw or cancel the flow
-    REJECTED --> PENDING_REVIEW: Resubmit
-    APPROVED --> SUSPENDED: Suspend cooperation
-    SUSPENDED --> APPROVED: Resume cooperation
-    APPROVED --> BLACKLISTED: Add to blacklist
-    BLACKLISTED --> APPROVED: Remove from blacklist (dedicated permission)
-    APPROVED --> ELIMINATED: Eliminate/exit
-    SUSPENDED --> ELIMINATED: Eliminate/exit
+    [*] --> REGISTERING: Existing Auth user enrolls
+    REGISTERING --> PENDING_REVIEW: Role result succeeds
+    REGISTERING --> REGISTERING_FAILED: Role result fails
+    REGISTERING_FAILED --> REGISTERING: Role retry after backoff
+    [*] --> PENDING_REVIEW: Admin creation
+    PENDING_REVIEW --> APPROVING: Local start confirmed
+    APPROVING --> APPROVED: Approved
+    APPROVING --> REJECTED: Rejected
+    APPROVING --> PENDING_REVIEW: Remote termination then local restoration
+    REJECTED --> PENDING_REVIEW: New attempt after rejection
+    APPROVED --> SUSPENDED: Suspend
+    SUSPENDED --> APPROVED: Resume
+    APPROVED --> BLACKLISTED: Blacklist
+    BLACKLISTED --> APPROVED: Restore with dedicated permission
+    APPROVED --> ELIMINATED: Eliminate
+    SUSPENDED --> ELIMINATED: Eliminate
     ELIMINATED --> [*]
 ```
 
-- Only suppliers in the `APPROVED` status can be referenced by the procurement module.
-- `BLACKLISTED` requires the `srm:supplier:blacklist` permission to operate.
-- `ELIMINATED` is a terminal state and cannot be recovered.
-- After supplier registration (portal self-service or admin creation), it first enters `PENDING_REVIEW`; when a model published by the current tenant with
-  `category=SRM_SUPPLIER_ONBOARDING` exists, the service persists an idempotent start snapshot and advances to `APPROVING`.
+`REGISTERING/REGISTERING_FAILED` belong only to portal-role Saga for existing Auth users; Auth registration happens first. Admin creation sets PENDING_REVIEW and prepares/calls Workflow synchronously within the same local transaction. Confirmed start yields APPROVING. New procurement business requires APPROVED; ELIMINATED is an irreversible lifecycle terminal state. Blacklist restoration has dedicated permission.
+
+Management `submit` and portal `profile/submit` allow only REJECTED and open a new attempt. There is no generic same-snapshot start-retry API for PENDING_REVIEW/FAILED. Withdrawal/cancellation first terminates the matching remote instance, then version-updates local PENDING_REVIEW/NOT_STARTED. Remote success and local changes are not a distributed atomic rollback.
 
 ### 5.2 Performance Evaluation Flow
 
 ```mermaid
 sequenceDiagram
-    participant M as Procurement Manager
+    participant M as Procurement staff
     participant S as EvaluationService
     participant DB as omni_srm
-
-    M->>S: POST /evaluation (supplierId, period, items[])
-    S->>DB: SELECT Supplier FOR UPDATE + tenant/scope
-    S->>DB: Query Template (default)
-    S->>DB: INSERT Evaluation + Items (transaction)
-    S->>DB: Compute percentage totalScore = SUM(item.score / 5 * item.weight)
-    S->>DB: Map level and UPDATE Supplier.level_code
-    S->>DB: INSERT Outbox event (same transaction)
+    M->>S: POST /api/srm/evaluation (supplierId,evaluationPeriod,items)
+    S->>DB: Lock APPROVED supplier / current scope
+    S->>DB: Load default template#59; may repair configuration
+    S->>S: Validate complete unique scores and positive weights
+    S->>S: Compute total / level
+    S->>DB: Save evaluation / items / owner snapshot transactionally
+    S->>DB: Update supplier / Outbox in same transaction
     S-->>M: EvaluationVO
 ```
 
-The evaluation cycle is recommended once per quarter, but the MVP does not enforce it; it is initiated manually by an administrator. After the evaluation completes, the system automatically:
-1. Computes the weighted total score.
-2. Maps a new supplier level according to the total score.
-3. Updates `srm_supplier.level_code`.
-4. Records `last_evaluation_time`.
+Request fields are `supplierId/evaluationPeriod/items[{dimensionId,score,remark}]`. The default template keeps Quality/Delivery/Price/Service at 30/30/20/20. Template reads can repair local configuration and are not necessarily side-effect-free queries. Every enabled dimension must appear exactly once; scores are 1–5, stored as `DECIMAL(3,1)`, with positive weights totaling 100.
+
+One transaction saves Evaluation/Items, supplier level/latest-evaluation time and `srm.evaluation.completed.v1` Outbox. See 4.3 for grading; Evaluation preserves owner snapshots. Standalone history returns at most 100 records; 360 selects the latest five. Quarterly frequency is an original business suggestion, not evidence of enforced scheduled execution.
 
 ### 5.3 Risk Assessment Flow
 
-```text
-Manually/automatically update risk indicators
-→ Recompute the overall risk level (take the highest level among indicators)
-→ INSERT/UPDATE srm_risk_assessment
-→ If the level changes to RED, write an Outbox event notification
-```
+Current flow: validate visible supplier/command scope → update indicators using actual criteria → recalculate CERTIFICATE → sum non-null scores → match total-score thresholds → append RiskAssessment → write risk Outbox only on first/non-red-to-RED transition.
 
-Qualification-expiry alert logic:
-- `expiry_date - today <= 30` days → the CERTIFICATE indicator is automatically set to YELLOW.
-- `expiry_date < today` → the CERTIFICATE indicator is automatically set to RED.
-- The alert scan is implemented through an XXL-JOB scheduled task (enabled in Phase 2; manually triggered or not enabled in the MVP).
+Endpoints are inclusive, using the first match in query order. No thresholds yields GREEN. An unmatched total above every maximum takes the greatest-upper-bound threshold's level; other gaps yield GREEN. Compatibility method `highest` is not the current overall-assessment path.
+
+Missing certificate expiry is GREEN; 0–30 days from today is YELLOW, overdue RED, with scores 1/2/3. Multiple qualifications choose the worst level, then earlier expiry on ties. Manual assessment, indicator updates and qualification changes for APPROVED/SUSPENDED/BLACKLISTED suppliers trigger recalculation. Current SRM main Java has no dedicated `@XxlJob/@Scheduled` qualification-risk scan; external job configuration needs separate proof. An event does not prove external notification delivery.
 
 ### 5.4 Supplier Portal Account Opening and Enrollment
 
 ```mermaid
 sequenceDiagram
     participant SUP as Supplier
-    participant GW as Gateway
+    participant GW as omni-gateway
     participant S as SupplierPortalService
     participant AUTH as omni-auth
     participant DB as omni_srm
-
-    SUP->>GW: POST /api/auth/register (tenantCode + credentials + captcha)
-    GW->>AUTH: Public Auth self-registration
-    AUTH-->>SUP: Default USER account created successfully
-    SUP->>GW: Log in and obtain JWT
-    SUP->>GW: POST /api/srm/portal/enroll (inviteToken + company info)
-    GW->>S: Authenticated user and trusted tenant/user headers
-    S->>DB: INSERT enrollment request and Supplier (status=REGISTERING)
-    S->>DB: INSERT Outbox srm.portal-role.assign-requested.v1
-    S-->>SUP: Enrollment request accepted
-    AUTH-->>S: MQ auth.portal-role.assigned.v1
-    S->>DB: INSERT PortalUser association, Supplier → PENDING_REVIEW
+    participant MQ as RocketMQ
+    SUP->>GW: POST /api/auth/register
+    GW->>AUTH: Public Auth registration / real CAPTCHA
+    AUTH-->>SUP: USER
+    SUP->>GW: Existing USER logs in for JWT
+    GW->>S: POST /api/srm/portal/enroll
+    Note over SUP,S: Enroll with current identity / invitation / requestId
+    S->>DB: Save REGISTERING / enrollment / role Outbox transactionally
+    S-->>SUP: PENDING_ROLE_ASSIGN
+    MQ->>AUTH: srm.portal-role.assign-requested.v1
+    AUTH->>AUTH: Auth independently commits role / ledger / result Outbox
+    MQ->>S: auth.portal-role.assigned.v1
+    S->>DB: Save ACTIVE association / COMPLETED transactionally
+    Note over S,DB: Prepare/call admission Workflow in same local transaction
+    Note over AUTH,DB: Role committed#59; SRM may still roll back
 ```
 
-Portal account opening and enrollment are split into two security boundaries:
-
-- Account opening uses only the existing public `POST /api/auth/register`; Auth validates the tenantCode, captcha, and username uniqueness and assigns the default `USER` role; SRM does not receive, persist, or transmit passwords via MQ.
-- After logging in, the user calls `POST /api/srm/portal/enroll`. This write interface declares `@PreAuthorize("hasAuthority('srm:portal:enroll')")`; the default USER is granted only this one SRM enrollment permission; the server-side tenantId/userId come only from the trusted identity headers injected by the Gateway.
-- Enrollment must carry a tenant-specific inviteToken, validating its tenant, validity period, use count, and purpose; bare tenantId/userId in the request body must not be accepted.
-- The Unified Social Credit Code (credit_code) is unique within the tenant.
-- The enrollment request uses requestId/credit_code for idempotency, and the same userId can be associated with only one supplier entity.
-- SRM requests Auth via the Outbox to add the `SUPPLIER` role to the existing USER account. When role assignment fails, the enrollment request stays `REGISTERING_FAILED`, handled by background retry or manually; an unauthorized account must not be treated as successfully enrolled.
-- After the Auth role-assignment success event returns the userId, SRM writes `srm_supplier_portal_user`, then advances the supplier status to `PENDING_REVIEW`.
-
-Enrollment authorization spans SRM and Auth; the assumption that "an in-transaction Feign call can roll back the remote" is forbidden. A local transaction + Outbox/Saga ensures eventual consistency; duplicate events are handled idempotently by the `requestId` unique constraint.
+- Public Auth `POST /api/auth/register` validates tenant, real captcha, username uniqueness and password handling. Default USER assignment failure boundaries are in Core Flow 1. SRM receives neither passwords nor captchas.
+- Authenticated `portal/enroll` requires enrollment permission, original requestId and valid tenant invitation. Tenant/user come from trusted identity. New enrollment writes REGISTERING, base risk data, PENDING_ROLE_ASSIGN and a role-request Outbox.
+- Replay checks applicant and normalized credit_code; existing applications may return without another invitation use. Auth atomically adds the role, ledger and result Outbox. Completed replay may publish a deterministic result eventId again.
+- SRM success creates/activates ACTIVE PortalUser and COMPLETED/PENDING_REVIEW, then attempts admission in that same local transaction. Auth's role can already be committed while SRM model-resolution failure rolls back local changes. Reconcile both sides/messages; cross-service “no half-success” is not guaranteed.
+- Role failure means Enrollment ROLE_ASSIGN_FAILED and Supplier REGISTERING_FAILED. `enrollment/retry` requires failure/backoff expiry and republishes the original requestId role intent, without consuming the invitation again. It is not approval-start retry.
+- Saga COMPLETED does not imply admission APPROVED. Role changes do not update existing JWTs; the client prompts re-login. Real captcha registration and cross-service end-to-end execution still need independent evidence.
 
 ## 6. Tenant, RBAC, and Data Permissions
 
 ### 6.1 Trust Chain
 
-1. The Gateway validates the RS256 JWT and the blacklist, overriding and injecting `X-User-*`, `X-Tenant-Id`, and `X-Gateway-Forwarded`.
-2. The common Starter's `GatewayPreAuthenticationFilter` builds the `Authentication`.
-3. The Controller uses `@PreAuthorize` to validate the functional permission.
-4. The common `ServiceIdentityFilter` establishes an immutable request identity; the `@ServiceDataScope(permissionCode)` aspect resolves the dataScope by the current endpoint permission.
-5. MyBatis-Plus appends the tenant and the owner condition corresponding to that permission.
+Gateway validates JWT/blacklist and overrides identity headers → `GatewayPreAuthenticationFilter` builds authentication → `ServiceIdentityFilter` establishes tenant/user → Controller method permission → corresponding DataScope aspect → MyBatis policies/write guards. Missing authentication/identity is rejected at the applicable boundary. Shared internal-token filtering separately fails closed for internal APIs.
 
-`X-Gateway-Forwarded:true` is not a cryptographic proof. Production must not expose SRM business ports.
+`X-Gateway-Forwarded:true` is not cryptographic proof; production business ports need network boundaries. Outer finally clears shared contexts, nested scopes restore previous context. ThreadLocal still exists.
 
 ### 6.2 Permission Tree and Roles
 
-Menus: `srm` (DIRECTORY) and `srm:overview`, `srm:supplier`, `srm:evaluation`, `srm:risk` (MENU).
+Current menus/permissions/default-tenant role seeds follow `scripts/sql/seed/auth.sql`; they do not prove identical roles in every new tenant. Common permission mapping is in 7.3.
 
-Supplier portal permission tree: `srm:portal` (DIRECTORY) and `srm:portal:profile`, `srm:portal:evaluation`, `srm:portal:quotation`; the enrollment interface is `srm:portal:enroll`. Portal profile, performance, and quotation are open only to the `SUPPLIER` role that has completed the association.
-
-API permissions:
-
-- `srm:overview:list`
-- `srm:supplier:list/create/update/delete/approve/reject/suspend/resume/blacklist/restore/eliminate/transfer`
-- `srm:contact:list/create/update/delete`
-- `srm:qualification:list/create/update/delete`
-- `srm:bank-account:list/create/update/delete`
-- `srm:evaluation:list/create/view`
-- `srm:risk:list/update/assess`
-- `srm:owner:list`
-- `srm:pii:view`
-- `srm:invite:list/create/revoke`, `srm:portal:invite` (admin-side invitation)
-- `srm:portal:enroll/profile/evaluation/quotation` (supplier portal)
-
-The `/` above is shorthand for multiple complete permission codes under the same resource; for example, `srm:supplier:list/create` means `srm:supplier:list` and `srm:supplier:create`, and the complete code must be saved one by one when persisted. The real `sys_permission.type` uses `DIRECTORY/MENU/API`.
-
-| Role | dataScope | Capability |
+| Role | Seed scope | Current boundary |
 |---|---|---|
-| `SRM_ADMIN` | TENANT | Current-tenant SRM internal management functions/data, excluding the supplier self-service portal |
-| `PROCUREMENT_MANAGER` | DEPT_AND_BELOW | Department and below, supplier evaluation, risk management, excluding the supplier self-service portal |
-| `PROCUREMENT_STAFF` | SELF | Data they own and daily operations |
-| `SUPPLIER` | SELF | Portal self-service: after enrollment, maintain company information, view their own performance, quote by invitation |
-| `SUPER_ADMIN` | ALL | All functions; SRM data is still limited to the current tenant |
+| `SRM_ADMIN` | TENANT | Tenant management, never proxy supplier quotations |
+| `PROCUREMENT_MANAGER` | DEPT_AND_BELOW | Department/subdepartments, evaluation and risk |
+| `PROCUREMENT_STAFF` | SELF | Own business; configuration is tenant-shared by function permission |
+| `SUPPLIER` | SELF | Still needs portal permission and ACTIVE PortalUser for current tenant/user |
+| `SUPER_ADMIN` | ALL | Full function tree, current-tenant data only; alone cannot impersonate portal identity |
 
-The default USER is granted only `srm:portal:enroll`, not SRM management or portal profile/performance/quotation permissions; only after enrollment completes and the SUPPLIER role is added can profile/evaluation/quotation be accessed. `srm:portal:quotation` is strictly granted only to `SUPPLIER` and to `SUPER_ADMIN` who owns the entire permission tree per platform rules; internal roles such as `SRM_ADMIN` and `PROCUREMENT_MANAGER` must not obtain supplier proxy-quotation capability. The Controller still requires both the `SUPPLIER` role and a valid PortalUser association, so a mere SUPER_ADMIN cannot impersonate a supplier to quote. The frontend `v-permission` and backend `@PreAuthorize` use the same code.
+USER gets SRM enroll only. Profile/evaluation/quotation also require SUPPLIER, function permission and ACTIVE association. Keep internal and portal identities distinct. Frontend retains multi-role management entry according to actual permissions; backend revalidates.
 
 ### 6.3 Auth Internal Data-Scope Contract
 
-SRM reuses the Auth DataScope internal interface already built for CRM:
+The actual internal path is `GET /internal/data-scopes/{userId}?tenantId={tenantId}&permissionCode=srm:supplier:list`, without `/api`.
 
-```text
-GET /api/internal/data-scopes/{userId}?tenantId={tenantId}&permissionCode=srm:supplier:list
-```
-
-The rules are consistent with CRM:
-- Validate the user is enabled and belongs to the tenant.
-- Merge only the roles that grant that `permissionCode`.
-- When the SRM call fails/times out/the tenant is inconsistent, return 503/403; do not degrade.
+Auth validates enabled user/tenant and merges only roles granting that full permission. Shared components distinguish denial, inconsistent responses and failures with applicable 403/503 branches. Missing identity/scope must not widen queries.
 
 ### 6.4 Common Context and SRM SQL Policy
 
-SRM depends on `omni-common-service`, reusing `ServiceIdentityContext`, `ServiceDataScopeContext`,
-`@ServiceDataScope`, the internal API Token Filter, XSS fallback-to-source/safe baseline, and MyBatis-Plus auto-configuration.
-SRM only implements the domain policies `SrmTenantTablePolicy`, `SrmDataPermissionHandler`, and
-`SrmRecordAccessGuard`; the supplier portal temporarily switches to the PORTAL/TENANT scope through `SrmPortalScope` and restores the
-original DataScope after execution, no longer maintaining a second set of ThreadLocal, Filter, or aspect.
+`omni-common-service` assembles identity, internal authentication, XSS and persistence. Order: `TenantLineInnerInterceptor → DataPermissionInterceptor → OptimisticLockerInnerInterceptor → PaginationInnerInterceptor`. TenantLine handles only `srm_*`; `sys_mq_message` remains outside both permission interceptors.
 
-The interceptor order after the common Starter combines the SRM policies is fixed:
-
-```text
-TenantLineInnerInterceptor
-→ DataPermissionInterceptor
-→ OptimisticLockerInnerInterceptor
-→ PaginationInnerInterceptor
-```
-
-- TenantLine only handles `srm_*` tables and always adds the current tenant.
-- `sys_mq_message` is excluded from both permission interceptors.
-- DataPermission maps the Supplier's owner columns; evaluation and risk are permission-checked by associating to the Supplier's owner through supplier_id.
-
-| dataScope | Condition |
+| Resource | Authorization |
 |---|---|
-| SELF | `owner_user_id = currentUserId` |
-| DEPT | `owner_unit_id = primaryUnitId` |
-| DEPT_AND_BELOW / CUSTOM | `owner_unit_id IN accessibleUnitIds` |
-| TENANT / ALL | No owner condition added; TenantLine is always retained |
+| Supplier / Evaluation | Direct owner roots; Evaluation snapshots creation-time ownership |
+| Contact / Qualification / BankAccount / RiskIndicator / RiskAssessment / Quotation | Same-tenant Supplier parent inheritance |
+| EvaluationItem | Inherits Evaluation |
+| QuotationLine | Quotation then Supplier, two-level inheritance |
+| Template / Dimension / risk configuration | Tenant-shared and function permission |
+| Portal | Role/function/ACTIVE PortalUser fixes supplierId; not internal owner scope |
+| Supplier 360 blocks | Contacts, qualifications, banks, evaluations and risk each resolve permission/scope; ungranted blocks are not queried |
 
-Supplier portal users (SUPPLIER role) do not reuse the internal owner dataScope. Portal queries and commands must first query `srm_supplier_portal_user` by `tenant_id + currentUserId`, then constrain the Supplier and its sub-resources by the associated supplierId; when no valid association is found, fail closed.
-
-The actual SQL is mapped per resource; mechanically appending the owner condition to all `srm_*` tables is forbidden:
-
-| Resource/table | Scope rule |
-|---|---|
-| Supplier | Uses `owner_user_id/owner_unit_id` |
-| Contact/Qualification/BankAccount | Inherits the Supplier scope through the supplier_id of the same tenant |
-| Evaluation/EvaluationItem | Inherits the Supplier scope through the supplier_id/evaluation_id of the same tenant |
-| RiskIndicator/RiskAssessment | Inherits the Supplier scope through the supplier_id of the same tenant |
-| Template/Dimension | Shared within the tenant; only TenantLine and functional permission apply |
-| Portal profile/evaluation | Fixed to use the supplierId associated via `srm_supplier_portal_user`, not the internal owner dataScope |
-| Overview/360 | Aggregate and block queries use the same scope as the Supplier list |
+Owner-root SELF is `owner_user_id=currentUserId`, DEPT `owner_unit_id=primaryUnitId`, DEPT_AND_BELOW/CUSTOM a unit set, TENANT/ALL omit owner while retaining tenant. SrmPermissionScopeExecutor/SrmPortalScope restore previous scope; a broad owner OR cannot replace parent chains.
 
 ### 6.5 Row-Level Authorization for Write Operations
 
-DataPermissionInterceptor cannot replace write authorization. Every update/delete/review/suspend/blacklist command must:
+Changes to existing records first load a current-tenant visible row, validate state/relationships, then apply each command's version/deletion/state conditions and affected-row checks. Number assignment, cascades, permanent ledger, invitation revocation and tenant configuration have separate paths; not all writes carry client version. DataPermission does not replace `SrmRecordAccessGuard`.
 
-1. Query the visible record by `tenant_id + id + data scope`; invisible uniformly returns 404.
-2. Validate the state machine and business invariants.
-3. Update conditionally by `tenant_id + id + version`.
-4. Return a concurrency conflict when the number of updated rows is not 1.
-
-`SrmRecordAccessGuard` uniformly implements detail, command, and sub-resource access checks.
+Owner creation/transfer asks Auth for an enabled same-tenant user and authoritative primary organization. Selecting another owner also needs the relevant transfer permission/assignable scope. Generic PUT rejects owner changes. Deletion is limited by lifecycle, portal/evaluation/risk history and other constraints.
 
 ## 7. API Design
 
 ### 7.1 Common Contract
 
-- All responses are `R<T>`; pagination is `R<PageResult<T>>`.
-- `page=1`, `size=10`; SRM limits `size <= 100`.
-- Entities are not used directly as Request/Response; state commands use dedicated DTOs.
-- Date parameters declare `@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")`; the frontend uses `value-format="YYYY-MM-DD HH:mm:ss"`.
-- State, review, and evaluation requests carry `version`.
-- Write interfaces declare both `@PreAuthorize` and `@OperLog`.
+Responses are `R<T>`, pages `R<PageResult<T>>`, page starts/defaults at 1, size defaults to 10 and is at most 100. DTOs declaring version require it. Evaluation creation has no client supplier version; invitation revocation cannot be generalized to one version-command request.
+
+Date-times use `yyyy-MM-dd HH:mm:ss`; quotation precision and JSON strings are in 8.4. Controllers/DTOs define fields. Logging, internal authentication, portal identity and owner aspects apply per entry, not as one annotation promise for every method.
 
 ### 7.2 Endpoints
 
-| Domain | Endpoints |
-|---|---|
-| Overview | `GET /api/srm/overview/summary`, `/risk-dashboard` |
-| Supplier | `GET /supplier/list`, `GET /supplier/{id}`, `POST /supplier`, `PUT/DELETE /supplier/{id}` |
-| Supplier commands | `POST /supplier/{id}/approve`, `/reject`, `/suspend`, `/resume`, `/blacklist`, `/restore-from-blacklist`, `/eliminate`, `/transfer` |
-| Supplier sub-resources | `GET /supplier/{id}/contact/list`, `POST /supplier/{id}/contact`, `PUT/DELETE /contact/{id}` |
-| Supplier sub-resources | `GET /supplier/{id}/qualification/list`, `POST /supplier/{id}/qualification`, `PUT/DELETE /qualification/{id}` |
-| Supplier sub-resources | `GET /supplier/{id}/bank-account/list`, `POST /supplier/{id}/bank-account`, `PUT/DELETE /bank-account/{id}` |
-| Supplier 360 | `GET /supplier/{id}/overview` |
-| Evaluation | `GET /evaluation/list`, `GET /evaluation/{id}`, `POST /evaluation` |
-| Evaluation | `GET /supplier/{id}/evaluation/history` |
-| Risk | `GET /risk/list`, `GET /supplier/{id}/risk`, `PUT /risk/indicator/{id}` |
-| Risk | `POST /risk/assessment/{supplierId}` |
-| Owner options | `GET /api/srm/options/owners`, permission `srm:owner:list` |
-| Portal account opening | `POST /api/auth/register` (Auth public interface, SRM does not handle credentials) |
-| Portal invitation | `GET /portal/invite/list`, `POST /portal/invite`, `POST /portal/invite/{id}/revoke` (admin side) |
-| Portal enrollment | `POST /api/srm/portal/enroll` (authenticated; the request carries inviteToken, does not accept bare tenantId/userId) |
-| Portal company info | `GET /portal/profile`, `PUT /portal/profile` |
-| Portal quotation | `GET /portal/quotation/invitations`, `GET /portal/quotation/invitations/{rfqId}`, `POST /portal/quotation` |
+These 77 external and four internal method paths include current aliases and show full service paths. Gateway does not strip `/api/srm`. Auth registration is an external dependency API, excluded from the SRM-controller inventory.
 
-Endpoints in the table that omit `/api/srm` all start with that prefix. All list/detail and aggregate statistics apply the same TenantLine/DataPermission.
+| Area | Method and full path |
+|---|---|
+| Bank accounts | `GET /api/srm/supplier/{supplierId}/bank-account`<br/>`GET /api/srm/supplier/{supplierId}/bank-account/list`<br/>`GET /api/srm/supplier/{supplierId}/bank-account/{id}`<br/>`POST /api/srm/supplier/{supplierId}/bank-account`<br/>`PUT /api/srm/supplier/{supplierId}/bank-account/{id}`<br/>`DELETE /api/srm/supplier/{supplierId}/bank-account/{id}` |
+| Contacts | `GET /api/srm/supplier/{supplierId}/contact`<br/>`GET /api/srm/supplier/{supplierId}/contact/list`<br/>`GET /api/srm/supplier/{supplierId}/contact/{id}`<br/>`POST /api/srm/supplier/{supplierId}/contact`<br/>`PUT /api/srm/supplier/{supplierId}/contact/{id}`<br/>`DELETE /api/srm/supplier/{supplierId}/contact/{id}` |
+| Performance evaluation | `GET /api/srm/evaluation/list`<br/>`GET /api/srm/evaluation/{id}`<br/>`GET /api/srm/evaluation/supplier/{supplierId}`<br/>`GET /api/srm/evaluation/template/default/dimensions`<br/>`POST /api/srm/evaluation` |
+| Internal quotations | `GET /api/internal/quotation/batch` |
+| Internal suppliers | `GET /api/internal/supplier/{supplierId}`<br/>`GET /api/internal/supplier/search`<br/>`POST /api/internal/supplier/batch` |
+| Owner options | `GET /api/srm/options/owners` |
+| Overview | `GET /api/srm/overview/summary`<br/>`GET /api/srm/overview/risk-dashboard` |
+| Portal enrollment/profile | `POST /api/srm/portal/enroll`<br/>`GET /api/srm/portal/enrollment`<br/>`POST /api/srm/portal/enrollment/retry`<br/>`GET /api/srm/portal/profile`<br/>`PUT /api/srm/portal/profile`<br/>`POST /api/srm/portal/profile/submit` |
+| Portal evaluation | `GET /api/srm/portal/evaluations`<br/>`GET /api/srm/portal/evaluations/history` |
+| Invitations including aliases | `GET /api/srm/portal/invite`<br/>`GET /api/srm/portal/invite/list`<br/>`GET /api/srm/invite`<br/>`GET /api/srm/invite/list`<br/>`POST /api/srm/portal/invite`<br/>`POST /api/srm/invite`<br/>`POST /api/srm/portal/invite/{inviteId}/revoke`<br/>`POST /api/srm/invite/{inviteId}/revoke` |
+| Portal quotations | `GET /api/srm/portal/quotation/invitations`<br/>`GET /api/srm/portal/quotation/invitations/{rfqId}`<br/>`POST /api/srm/portal/quotation` |
+| Qualifications | `GET /api/srm/supplier/{supplierId}/qualification`<br/>`GET /api/srm/supplier/{supplierId}/qualification/list`<br/>`GET /api/srm/supplier/{supplierId}/qualification/{id}`<br/>`POST /api/srm/supplier/{supplierId}/qualification`<br/>`PUT /api/srm/supplier/{supplierId}/qualification/{id}`<br/>`DELETE /api/srm/supplier/{supplierId}/qualification/{id}` |
+| Risk | `GET /api/srm/risk/list`<br/>`GET /api/srm/risk/indicators/{supplierId}`<br/>`PUT /api/srm/risk/indicator/{id}`<br/>`POST /api/srm/risk/assessment/{supplierId}`<br/>`GET /api/srm/risk/assessment/history/{supplierId}` |
+| Risk configuration | `GET /api/srm/risk/config/types`<br/>`POST /api/srm/risk/config/types`<br/>`PUT /api/srm/risk/config/types/{id}`<br/>`DELETE /api/srm/risk/config/types/{id}`<br/>`POST /api/srm/risk/config/criteria`<br/>`PUT /api/srm/risk/config/criteria/{id}`<br/>`DELETE /api/srm/risk/config/criteria/{id}`<br/>`GET /api/srm/risk/config/thresholds`<br/>`PUT /api/srm/risk/config/thresholds` |
+| Supplier | `GET /api/srm/supplier/list`<br/>`GET /api/srm/supplier/{id}`<br/>`GET /api/srm/supplier/{id}/overview`<br/>`POST /api/srm/supplier`<br/>`PUT /api/srm/supplier/{id}`<br/>`POST /api/srm/supplier/{id}/transfer`<br/>`DELETE /api/srm/supplier/{id}`<br/>`POST /api/srm/supplier/{id}/submit`<br/>`POST /api/srm/supplier/{id}/withdraw`<br/>`POST /api/srm/supplier/{id}/cancel`<br/>`POST /api/srm/supplier/{id}/suspend`<br/>`POST /api/srm/supplier/{id}/resume`<br/>`POST /api/srm/supplier/{id}/restore-from-blacklist`<br/>`POST /api/srm/supplier/{id}/restore`<br/>`POST /api/srm/supplier/{id}/blacklist`<br/>`POST /api/srm/supplier/{id}/eliminate` |
+| Supplier insights | `GET /api/srm/supplier/{supplierId}/evaluation/history`<br/>`GET /api/srm/supplier/{supplierId}/risk` |
 
 ### 7.3 Endpoint to DataScope Permission Mapping
 
-| Operation | permissionCode |
+| Operation | Permission / additional conditions |
 |---|---|
-| All Overview statistics | `srm:overview:list` |
-| Supplier list/detail/overview | `srm:supplier:list` |
-| Supplier create/update/delete | `srm:supplier:create/update/delete` |
-| Supplier approve/reject | `srm:supplier:approve` / `srm:supplier:reject` |
-| Supplier suspend/resume/eliminate | `srm:supplier:suspend` / `srm:supplier:resume` / `srm:supplier:eliminate` |
-| Supplier blacklist/restore | `srm:supplier:blacklist` / `srm:supplier:restore` |
-| Supplier owner transfer (`POST /supplier/{id}/transfer`) | `srm:supplier:transfer`; a normal `PUT /supplier/{id}` is forbidden from modifying the owner |
-| Evaluation list/history | `srm:evaluation:list` |
-| Evaluation create | `srm:evaluation:create` |
-| Risk list/indicator/history | `srm:risk:list` |
-| Risk indicator update / assessment | `srm:risk:update` / `srm:risk:assess` |
-| Owner options | `srm:owner:list` |
-| Portal enroll | `srm:portal:enroll` (the default USER gets only this enrollment permission, plus inviteToken validation) |
-| Portal invite list/create/revoke | `srm:portal:invite` |
-| Portal profile | `srm:portal:profile`, plus validation of the `srm_supplier_portal_user` association |
-| Portal quotation list/detail/submit | `srm:portal:quotation`, plus validation of PortalUser, the Procurement invitation, and the RFQ status and deadline |
+| Overview | `srm:overview:list` |
+| Supplier list/detail/360 | `srm:supplier:list`; independently authorize 360 child blocks |
+| Create / rejected submit | `srm:supplier:create` |
+| Update / delete / transfer | `srm:supplier:update`, `srm:supplier:delete`, `srm:supplier:transfer` |
+| withdraw / cancel | `srm:supplier:withdraw`, `srm:supplier:cancel`; match remote instance first |
+| suspend / resume / blacklist / restore / eliminate | `srm:supplier:suspend`, `srm:supplier:resume`, `srm:supplier:blacklist`, `srm:supplier:restore`, `srm:supplier:eliminate` |
+| Contacts / qualifications / banks | `srm:contact:list`, `srm:contact:create`, `srm:contact:update`, `srm:contact:delete`, `srm:qualification:list`, `srm:qualification:create`, `srm:qualification:update`, `srm:qualification:delete`, `srm:bank-account:list`, `srm:bank-account:create`, `srm:bank-account:update`, `srm:bank-account:delete` |
+| Evaluation | `srm:evaluation:list`, `srm:evaluation:create`, `srm:evaluation:view` |
+| Risk / configuration | `srm:risk:list`, `srm:risk:update`, `srm:risk:assess`, `srm:risk:config:list`, `srm:risk:config:update` |
+| Owner / PII | `srm:owner:list`, `srm:pii:view` |
+| Invitations | Corresponding `srm:invite:list`, `srm:invite:create`, `srm:invite:revoke` or `srm:portal:invite` |
+| enroll / enrollment state or retry | `srm:portal:enroll`; state/retry accept `srm:portal:enroll` or `srm:portal:profile` |
+| Portal profile / evaluation / quotation | `srm:portal:profile`, `srm:portal:evaluation`, `srm:portal:quotation` plus SUPPLIER and ACTIVE association |
+
+Authorization uses each complete permission code together with the applicable row-level checks. Current SRM has no local approve/reject/approval-view method; Workflow completes approval tasks.
 
 ## 8. Cross-Service Consistency
 
 ### 8.1 Users and Organizations
 
-- SRM stores only userId/unitId; before assignment it validates through a tenant-scoped Auth Feign that the user exists, is enabled, and is in the same tenant.
-- ownerUnitId takes the authoritative primary organization from Auth and does not trust the frontend.
-- List display first collects IDs, then calls a batch API once; per-row Feign is forbidden.
-- SRM does not maintain authentication data such as passwords; accounts are created by the existing Auth self-registration. The SRM enrollment flow only requests Auth via Outbox/Saga to add the SUPPLIER role to an existing userId, and stores the authorization association between the userId and the Supplier in `srm_supplier_portal_user`.
+OwnerResolver validates Auth user, primary unit and assignable scope during creation/transfer. ownerUnitId is authoritative. OwnerEnricher deduplicates and batch-queries users/organizations; failures may leave IDs/empty names. Display fallback does not widen authorization or prove all Feign calls occur outside transactions.
+
+Store user/unit IDs and necessary audit usernames locally, never passwords. Auth's ledger/result Outbox manages portal roles; SRM stores PortalUser associations.
 
 ### 8.2 Dictionary
 
-Categories use the `srm_supplier_category` dictionary of `omni-base`; the MVP presets `ELECTRONICS/IT/RAW_MATERIAL/ADMIN/SERVICE`, and SRM stores only `category_code`. Migration and new-tenant initialization both idempotently normalize these codes, without a hard dependency on Base being online.
+Base owns `srm_supplier_category`. Formal default-tenant seeds include ELECTRONICS, IT, RAW_MATERIAL, ADMIN and SERVICE. SRM stores category_code and initializes its own evaluation templates/base risk data. These examples do not establish identical catalogs for every tenant or require every local read to query Base online.
 
 ### 8.3 Workflow
 
-Supplier admission is already connected to the independent `omni-workflow`, but SRM itself does not introduce Flowable. On creation or resubmission,
-`SupplierWorkflowCoordinator` automatically resolves the currently published model by tenant and `category=SRM_SUPPLIER_ONBOARDING`,
-persists the `requestId/businessKey/modelVersionId/startUser` idempotency snapshot, then calls the Workflow internal start API.
-After a successful start, the supplier enters `APPROVING`; an uncertain failure keeps the original snapshot for retry. Workflow publishes the completion event via the Outbox;
-SRM consumes it idempotently via the Inbox and advances to `APPROVED/REJECTED`. Withdrawal or cancellation must first terminate the matching process instance, then restore
-`PENDING_REVIEW`. The default tenant model is validated and automatically published by the startup initializer; when a required model is missing, the service fails to start.
+Admin create, REJECTED submit and portal-role success synchronously call SupplierWorkflowCoordinator within local transactions. Resolving a current-tenant published `SRM_SUPPLIER_ONBOARDING` model happens before the start-exception catch. Missing/unpublished models or lookup failure can roll back creation/Saga results.
+
+Persist `requestId/businessKey=supplierId:attempt/modelVersionId/attempt/startStatus/instance`. Starter identity comes from current context. Success must match request/business key/type/instance; the response field is `replayed`. markStarted/markFailed use REQUIRED, not independent post-commit confirmation. Failed start/confirmation attempts a FAILED marker that can fail or match no row. FAILED does not prove the remote instance was absent. There is no generic PENDING_REVIEW/FAILED start-retry API; role-Saga retry is not a substitute.
+
+Completion uses `tenantId + eventId` Inbox: validate JSON-semantic intent before matching attempt, business key, instance and state. Valid early completion requires message retry; stale attempts/duplicates/foreign instances are isolated. Completion advances APPROVED/REJECTED. Withdrawal/cancellation terminates remotely before local version update, as in 5.1.
+
+`RequiredWorkflowModelInitializer` belongs to Workflow. It checks four required models for default tenant 1 and corrects/publishes found enabled matching models. It does not create models for every tenant or guarantee SRM startup readiness for every tenant.
 
 ### 8.4 Procurement and Asset Integration
 
-SRM provides the following capabilities for Procurement/Asset to call:
+Four internal paths are in 7.2. They use `X-Internal-Token` and `X-Tenant-Id` with matching query/body tenant. Supplier get/batch return current non-deleted summaries, without automatically requiring APPROVED; callers validate eligibility. Search accepts status/category/keyword and limit 1..100. Batch accepts at most 100 unique positive IDs, preserves first-appearance order and omits missing IDs, without contact/bank PII. Asset currently uses approved supplier search; receipts retain Procurement snapshots.
 
-- Internal API: `GET /api/internal/supplier/{id}?tenantId={tenantId}`, returns the supplier summary (ID, name, status, level).
-- Internal API: `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}`, searches qualified suppliers by condition.
-- Internal API: `POST /api/internal/supplier/batch`, body is `{tenantId,supplierIds}`; 1–100 positive integers are deduplicated in first-appearance order, missing IDs are omitted, and it returns `id/supplierNo/name/status/levelCode/categoryCode` without PII.
-- Internal API: `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}`, returns the valid quotations, versions, and per-line snapshots of that RFQ, for price comparison and award.
-- All internal APIs use `X-Internal-Token` and `X-Tenant-Id`; the query/body tenant must be consistent with the header, and they are not exposed through the Gateway.
+Portal RFQs call Procurement `/api/internal/procurement/rfq/invitations` and `/api/internal/procurement/rfq/{rfqId}/invitation`. SupplierId comes from ACTIVE PortalUser, not the client. Quotation binds only `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]`.
 
-Quotations are persisted by SRM, but the RFQ invitation status is persisted by Procurement; no service may update another service's tables across databases:
+After identity/DTO validation, check the permanent ledger first. A same-intent historical requestId returns the current quotation without writes/events or repeating new-request APPROVED/RFQ-open checks. Different intent yields 409. New requests then lock an APPROVED supplier and require RFQ SENT, invitation INVITED/QUOTED, a future deadline and validUntil later than now and no earlier than the deadline.
 
-1. The Supplier portal queries the invitation list/detail through SRM; SRM calls Procurement's `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}` and `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}` respectively, the tenant is passed by the required `X-Tenant-Id`, and it queries by the supplierId obtained from the PortalUser association, never accepting the frontend supplierId.
-2. Before the Supplier portal submits a quotation, SRM reads the invitation detail again, validating the tenant, RFQ `status=SENT`, invitation `status IN (INVITED, QUOTED)`, deadline, and the complete RFQ line snapshot.
-3. SRM first queries `srm_quotation_request` by `(tenantId, requestId)`: if the hash is the same, return the current quotation snapshot; if the hash differs, return 409; a new request must ensure `validUntil` is not earlier than the RFQ quotation deadline. The first request carries the creation sentinel `version=0`, the first version starts from `version=1`, and afterwards only the current version may be carried for an update; the quotation, details, idempotency history, and the Outbox event `srm.quotation.submitted.v1` are committed in the same transaction.
-4. Procurement consumes the event idempotently by eventId Inbox and updates its own `proc_rfq_supplier.quotation_id/status`.
-5. Before awarding, Procurement obtains the quotation through the SRM batch internal API and stores the quotationId, quotationVersion, and an immutable quotation snapshot in the award/order; subsequent SRM changes must not affect an already-awarded result.
+Require 1–200 unique lines fully covering the RFQ snapshot. Material/unit/quantity/currency come from the server-side invitation. Positive unitPrice is a JSON decimal string fitting DECIMAL(19,6); delivery 0–3650 days, remark ≤500 characters. Line amount rounds HALF_UP to four decimals; totals sum lines, all positive DECIMAL(19,4). Returned/event amounts use strings.
+
+The tenant/requestId ledger stores SHA-256 normalized intent and quotationId/targetVersion. Intent includes rfqId,version,validUntil and line-ID-sorted price/delivery/remarks. First creation uses version 0 and stores version 1; updates require current version. Quotation, lines, COMPLETED ledger and srm.quotation.submitted.v1 Outbox commit together. Procurement updates invitations by event/intent/version and persists immutable award/PO snapshots; later quotations do not rewrite existing POs. Internal quotation batch returns only SUBMITTED, unexpired quotations from APPROVED suppliers.
 
 ### 8.5 Outbox and Events
 
-Use `ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)`; tenantId must be explicit.
+`DomainEventEnvelope` includes `eventId/eventType/occurredAt/tenantId/producer`, `aggregateType/aggregateId/aggregateVersion`, `actorUserId/correlationId/causationId/payload` as defined per event. Transactions explicitly call `ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)`. Top-level eventId is msgKey; Outbox msgId is independently generated.
 
-All events use the unified envelope `eventId/eventType/occurredAt/tenantId/payload`. The portal role-assignment request/result contains at least requestId, tenantId, supplierId, userId, roleCode, result/errorCode, and consumers are idempotent by requestId; passwords, verification codes, or inviteToken are never carried in events. The `srm.quotation.submitted.v1` payload contains at least requestId, quotationId, quotationVersion, rfqId, rfqNo, supplierId, status, totalAmount, currencyCode, validUntil; full bank accounts or contact PII are not carried in events.
+SRM outputs six supplier registered/approved/rejected/suspended/blacklisted/eliminated events plus `srm.portal-role.assign-requested.v1`, `srm.quotation.submitted.v1`, `srm.evaluation.completed.v1` and `srm.risk.level-changed.v1`. Auth inputs are `auth.portal-role.assigned.v1` / `auth.portal-role.assign-failed.v1`: 12 types total, not 12 SRM outputs.
 
-Suggested events:
+Payloads may include explicit IDs, versions, states, scores/amounts and necessary snapshots, never passwords/captchas/inviteToken/full bank accounts/contact details. Role requests/results follow their own DTOs; every envelope does not contain both request and result fields. Outbox commit proves neither Broker delivery, consumption nor external notifications.
 
-- `srm.supplier.registered.v1`
-- `srm.supplier.approved.v1`
-- `srm.supplier.rejected.v1`
-- `srm.supplier.suspended.v1`
-- `srm.supplier.blacklisted.v1`
-- `srm.supplier.eliminated.v1`
-- `srm.portal-role.assign-requested.v1`
-- `auth.portal-role.assigned.v1` (returned by Auth, consumed by SRM)
-- `auth.portal-role.assign-failed.v1` (returned by Auth, SRM marks failure and schedules a retry)
-- `srm.quotation.submitted.v1`
-- `srm.evaluation.completed.v1`
-- `srm.risk.level-changed.v1`
-
-Events carry only IDs, statuses, and necessary snapshots, not full bank accounts, contact phone numbers, or emails.
+| Direction | Event type |
+|---|---|
+| SRM output | `srm.supplier.registered.v1` |
+| SRM output | `srm.supplier.approved.v1` |
+| SRM output | `srm.supplier.rejected.v1` |
+| SRM output | `srm.supplier.suspended.v1` |
+| SRM output | `srm.supplier.blacklisted.v1` |
+| SRM output | `srm.supplier.eliminated.v1` |
+| SRM output | `srm.portal-role.assign-requested.v1` |
+| SRM output | `srm.quotation.submitted.v1` |
+| SRM output | `srm.evaluation.completed.v1` |
+| SRM output | `srm.risk.level-changed.v1` |
+| Auth input | `auth.portal-role.assigned.v1` |
+| Auth input | `auth.portal-role.assign-failed.v1` |
 
 ## 9. Privacy, Operation Logs, and XSS
 
 ### 9.1 OperLog Masking
 
-Reuses the `omni-common-operlog` PII masking capability already built for CRM. Fields SRM needs to mask:
-
-- Bank account number (`account_no`)
-- Contact mobile number (`mobile`)
-- Contact email (`email`)
-- Supplier phone (`phone`)
-- Original enrollment invitation (`inviteToken`, treated as a credential; writing it to logs or the database is forbidden)
+Operation logs sanitize explicit fields/text rules, not arbitrary PII. Account numbers, contact details, credentials and free text follow actual annotations/shared sanitizer. enroll disables snapshots and excludes inviteToken/creditCode/phone/email; raw invitation tokens are not logged. Generic asynchronous logs do not replace business state, Inbox or approval facts.
 
 ### 9.2 PII
 
-- Full bank accounts, contact mobile numbers, and emails are returned only to `srm:pii:view`.
-- Other users get masked values from the backend VO, e.g., `6222****1234`, `138****1234`, `a***@example.com`.
-- Lists are masked by default; details are decided by permission.
-- In the supplier portal, a supplier can view the full information associated with themselves (the SUPPLIER role implies `srm:pii:view` for their own data).
+Supplier-specific lists always use masked VOs. Details/360 and contact/bank lists/details use srm:pii:view for phone/email/account values. Addresses receive no general masking guarantee from that rule. Portal profile returns own phone/email after SUPPLIER/function/ACTIVE checks; SUPPLIER has no implied global pii:view. Current portal has no contacts/qualifications/bank-accounts APIs.
+
+SRM stores company/contact/bank/free-text data and BaseEntity audit usernames, not only userId/unitId. Supplier has no persisted Workflow-starter columns; start requests pass current identity to Workflow. Evidence, screenshots, logs and exports still require field-appropriate authorization.
 
 ### 9.3 XSS
 
-SRM must implement `XssConfigProvider`, reading `xss:enabled:{tenantId}` and `xss:rules:{tenantId}` from Redis DB 0. On a cache miss, fall back to Auth or use built-in baseline rules. MVP remarks allow plain text only and forbid `v-html`.
+SRM reuses common-service `CachedServiceXssConfigProvider` rather than a second independent SPI. It reads two Redis DB 0 XSS keys. Missing/failed cache triggers Auth; valid authoritative settings, including enabled, remain in use even if cache writes fail. Only absent/failed authoritative results select the default HTML_TAG/EVENT_HANDLER/DANGEROUS_PROTOCOL baseline. Dependency failures cannot bypass filters; remarks are plain-text usage without v-html.
 
 ## 10. Frontend Design
 
-```text
-omni-frontend/src/
-├── api/
-│   ├── srm-overview.ts
-│   ├── srm-supplier.ts
-│   ├── srm-evaluation.ts
-│   ├── srm-risk.ts
-│   └── srm-portal.ts
-├── views/
-│   ├── srm/
-│   │   ├── overview/index.vue         # Supplier overview + risk dashboard
-│   │   ├── supplier/index.vue         # Supplier management
-│   │   ├── evaluation/index.vue       # Performance evaluation
-│   │   └── risk/index.vue             # Risk management
-│   └── supplier-portal/
-│       ├── enrollment/index.vue       # Invitation enrollment and Saga status
-│       ├── profile/index.vue          # Company information maintenance
-│       └── evaluation/index.vue       # View own performance
-└── components/srm/
-    ├── SupplierOverview.vue           # Supplier 360 view
-    ├── SupplierPicker.vue             # Supplier picker
-    ├── EvaluationScorecard.vue        # Evaluation scorecard
-    ├── RiskIndicator.vue              # Risk indicator card
-    └── RiskDashboard.vue              # Risk dashboard component
-```
+Current management pages are `views/srm/{overview,supplier,evaluation,risk,invite}/index.vue` and `views/srm/risk/config/index.vue`. Portal is `views/supplier-portal/index.vue`, not the old enrollment/profile/evaluation directory split. APIs include srm-overview/supplier/evaluation/risk/risk-config/portal.ts.
 
-- Shared `ApiResponse/PageResult` are imported only from `src/types/api.ts`.
-- The supplier portal uses role routing: `USER + SUPPLIER` (or only `SUPPLIER`) belongs to portal accounts and can see only `portal/**`; only when also holding independent internal management roles such as `SUPER_ADMIN`, procurement, or CRM is it treated as a true dual-role account with the admin entry retained; inferring a management identity from the read-only permission prefix that USER carries by default is forbidden.
-- `router/index.ts` and `layout/index.vue` each have an iconMap; both must add SRM and Portal.
-- `constants/menu.ts`, `zh-CN.ts`, and `en-US.ts` are synchronized.
-- Supplier 360 uses a Drawer component.
-- All buttons use the same-code `v-permission`, but the backend is the final boundary.
-- The risk dashboard uses red/yellow/green light card components and supports filtering by risk level.
+Actual `components/srm` retains SupplierOverview, SupplierPicker, SupplierResourcesDrawer, EvaluationScorecard, RiskIndicator and RiskDashboard. 360 uses a Drawer with independently authorized backend blocks. Risk dashboard filters levels.
 
-## 11. Engineering Landing Points
+`ApiResponse/PageResult` come only from `src/types/api.ts`; buttons use matching v-permission. SUPPLIER without management permission routes to portal; multi-role users retain management entry by actual permission. Four-language text, menus/router/layout are current entry points. Real steps/screenshots belong in Wiki; this page does not establish browser acceptance.
 
-### 11.1 New Module
+## 11. Engineering Entry Points
 
-```text
-omni-backend/omni-srm/
-├── pom.xml
-└── src/main/
-    ├── java/com/omni/srm/
-    │   ├── SrmApplication.java
-    │   ├── client/ config/ controller/ dto/ entity/
-    │   ├── mapper/ security/ service/ service/impl/
-    └── resources/
-        ├── application.yml
-        ├── application-dev.yml
-        └── mapper/
-```
+### 11.1 Current Module Entries
 
-`SrmApplication` uses `@EnableDiscoveryClient`, `@EnableFeignClients(basePackages="com.omni.srm.client")`, and `@MapperScan("com.omni.srm.mapper")`. The service keeps a domain `SecurityConfig`; the common `omni-common-service` provides Gateway pre-authentication, request identity, internal API authentication, DataScope, the persistence interceptor chain, and XSS configuration capabilities.
+Entry: `omni-backend/omni-srm/src/main/java/com/omni/srm/SrmApplication.java` with client/config/controller/dto/entity/mapper/security/service/workflow/consumer/domain. Actual resources are application.yml/application-lite.yml. The application declares EnableDiscoveryClient, EnableFeignClients and MapperScan; domain SecurityConfig combines with shared common-service.
 
-### 11.2 Files That Must Change
+Do not recreate the module from the original plan. Current Mappers/Liquibase define SQL/migrations. Development operations belong in the [development guide](../guides/scaffold-development.en.md).
 
-| File | Change |
+### 11.2 Current Related Files
+
+These are current related entry points, not files awaiting creation. Contract changes require corresponding migrations, seeds and checks.
+
+| Area | Current files/directories |
 |---|---|
-| `omni-backend/pom.xml` | Add `omni-srm` |
-| Gateway `application.yml` | Explicit `/api/srm/**` route; add SRM to internal-path blocking |
-| `docker/backend/Dockerfile` | POM cache layer `COPY omni-srm/pom.xml omni-srm/` |
-| `docker-compose.yml` | SRM service, 8105, DB/Redis/Nacos/MQ/XXL/internal token |
-| `start.bat/start.sh` | Add SRM to the build list; add 8105 to Windows port protection |
-| `database/changelog/srm/` | Add forward-only Liquibase changeSets for SRM structure changes |
-| `scripts/sql/seed/srm.sql` | Formal idempotent seed for the default evaluation template, etc.; refresh the seed manifest after updating |
-| `scripts/sql/seed/auth.sql` | Formal idempotent seed for SRM permissions and roles; refresh the seed manifest after updating |
-| SRM `TenantModuleProvisioner` | Idempotent initialization of the new-tenant template and risk catalog |
-| `omni-auth` | Consume the portal-role assign request and idempotently assign the SUPPLIER role by requestId, publishing success/failure result events |
-| Frontend router/layout/menu/locales | Icons, menus, i18n |
+| Module | `omni-backend/omni-srm/pom.xml`<br/>`omni-backend/pom.xml` |
+| Runtime configuration | `omni-backend/omni-srm/src/main/resources/application.yml`<br/>`omni-backend/omni-srm/src/main/resources/application-lite.yml` |
+| Schema and seeds | `database/changelog/srm/0001-srm-schema.yaml`<br/>`scripts/sql/seed/srm.sql` |
+| Permissions/digests | `scripts/sql/seed/auth.sql`<br/>`database/seed/manifest.yaml` |
+| Tenant initialization | `omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SrmTenantModuleProvisioner.java`<br/>`omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SrmTenantInitializerImpl.java` |
+| Gateway / Compose | `omni-backend/omni-gateway/src/main/resources/application.yml`<br/>`compose.yaml` |
+| UI | `omni-frontend/src/views/srm`<br/>`omni-frontend/src/views/supplier-portal/index.vue`<br/>`omni-frontend/src/components/srm` |
+| Workflow / Auth contracts | `omni-backend/omni-srm/src/main/java/com/omni/srm/workflow`<br/>`omni-backend/omni-srm/src/main/java/com/omni/srm/client`<br/>`omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/PortalRoleAssignmentServiceImpl.java` |
 
-The permission seed idempotently inserts by `NOT EXISTS` on tenant + code and correctly rebuilds parent/path; it also updates SUPER_ADMIN, SRM roles, seed manifest assertions, and new-tenant initialization. The default USER only adds `srm:portal:enroll`; SUPPLIER adds profile/evaluation/quotation; SRM management roles add invite management but explicitly exclude all supplier self-service portal capabilities; management permissions must not be granted wholesale to USER. `srm:portal:quotation` is granted only to SUPPLIER and SUPER_ADMIN.
-
-Configuration points: server 8105, management 19905, Redis DB 0, XXL appname `omni-srm`/port 9905.
+Defaults: service port 8105, management port 19905, Redis DB 0, and XXL-JOB appname omni-srm with executor port 9905. Compose maps container ports according to current configuration; the lite profile disables Nacos and uses static discovery. Run applications, builds and tests in local Docker. Role seeds do not grant USER all management permissions or combine portal identity with internal management identity.
 
 ## 12. Non-Functional Design
 
-### Performance
-
-- All lists are paginated, maximum 100; owner/status/category use tenant-prefixed composite indexes.
-- Users/organizations are batch-enriched once; N+1 is forbidden.
-- Supplier 360 queries block by block and limits the number of evaluation and risk records.
-- Overview statistics use Mapper-layer aggregate SQL.
-
-### Concurrency and Idempotency
-
-- Supplier review/suspend/blacklist: version optimistic lock.
-- Evaluation submission: supplier row lock + one-time write within the transaction.
-- Portal enrollment: credit_code unique within the tenant; the same tenant + userId allows only one valid supplier association.
-- Invitation use count: invite version-conditional update; validation and used_count increment are in the same transaction.
-- SUPPLIER role assignment: requestId idempotency + Outbox/Saga; failures can be retried, without relying on distributed transactions.
-
-### Degradation
-
-- Auth dataScope unavailable: 503, fail-closed.
-- Auth display enrich unavailable: may return ID/unknown user.
-- RocketMQ unavailable: business and Outbox commit, the Relay backfills later.
-- Redis XSS miss: fall back to source/baseline rules, do not disable protection.
+- Page size is capped at 100; history and 360 queries have their own limits. The DDL defines owner, status and category indexes. OwnerEnricher fetches user and organization display data in batches; display fallback does not change data scope. This document provides no measured performance results.
+- State commands check the current record and version. Evaluation locks the supplier and writes its result within one local transaction. Conditional invitation counters, the permanent quotation request ledger and active keys provide the documented concurrency and idempotency boundaries. They do not establish distributed atomicity.
+- Data-scope lookup failures deny access. Display enrichment may leave IDs unchanged. A local Outbox write does not prove eventual delivery during an MQ outage. XSS configuration lookup falls back from Redis to Auth and then to the baseline. Workflow and Saga operations retain the partial-commit boundaries described above; an error response does not prove that a remote operation did not execute.
+- SRM initializes its evaluation template and risk configuration; Base owns dictionaries. Default-tenant seeds, required Workflow models and role initialization do not guarantee that every tenant or deployment is ready.
 
 ## 13. Testing and Acceptance
 
-Minimum test set:
+Tests are under `omni-backend/omni-srm/src/test/java`. Keep unit results, build results and actual business execution evidence separate. Verification requirements include:
 
-- Supplier state-machine legal/illegal transitions.
-- Correctness of the evaluation weighted-summary computation.
-- The boundary of normalizing evaluation 1-5 scores to a percentage scale (all 1s = 20, all 5s = 100) and the 60/75/90 level-adjustment thresholds.
-- Correctness of the evaluation automatic level-adjustment mapping.
-- The logic of taking the highest level for the overall risk level.
-- PII masking (bank account, contact mobile/email).
-- List and aggregation for the six dataScopes.
-- Cross-tenant read, modify, and delete all fail.
-- Fail-closed when tenant/scope is missing.
-- Concurrent update with tenant + id + version.
-- Portal enrollment idempotency (a duplicate credit_code or the same userId re-enrolling is rejected/returns the original requestId).
-- Auth account opening rejects a missing/forged tenantCode; SRM enrollment rejects a missing/forged inviteToken or a forged tenantId/userId in the request body.
-- Duplicate consumption of the Auth role-assignment success event does not duplicately associate the portal account.
-- When SUPPLIER role assignment fails, enrollment stays in the failed/retry state, with no half-successful authorization.
-- The SUPPLIER role can only see its own data.
-- Even if a SUPPLIER forges the supplierId, it cannot access another supplier's profile or performance.
-- The inviteToken is returned only once and does not appear in the database/OperLog in original form; expiry, revocation, cross-tenant, and concurrent over-use are all rejected.
-
-End-to-end acceptance: Auth self-registration account opening → supplier enrollment after login → SUPPLIER role assignment → admin review passed → procurement manager creates an evaluation → scoring summary → automatic level adjustment → risk indicator update → supplier 360 fully displayed.
-
-Verification commands:
-
-```powershell
-$env:JAVA_HOME='C:\APP\JDK25\jdk-25.0.2'
-$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
-cd omni-backend
-.\mvnw.cmd clean install
-
-cd ..\omni-frontend
-npm run build
-npm run lint
-
-cd ..
-docker compose config
-docker compose build omni-srm omni-gateway omni-frontend
-```
+- All nine states, version checks and deletion limits; missing models and failures to record a workflow start during create, submit and profile-submit; absence of a generic approval-start retry API; and remote termination followed by a local failure.
+- Complete four-dimension scoring, scores from 1 to 5, totals from 20 to 100, HALF_UP rounding to two decimal places, thresholds of 60/75/90 without automatic lifecycle elimination, owner snapshots and independent evaluation permissions.
+- Current total-score thresholds, inclusive bounds, first-match behavior and gaps; enabled indicator types, autoCalc and criterion boundaries; certificate expiry recalculation and red-risk events.
+- Internal owner and parent chains, tenant-shared configuration, independently scoped 360 blocks, portal role and function checks, ACTIVE associations, and PII, XSS and logging boundaries.
+- Invitation SHA-256 hashes, expiry and concurrent consumption; applicant/creditCode replay checks; role ledger and result replay; an Auth role committed while SRM rolls back; role retry after backoff; and JWT refresh through login.
+- Quotation decimal strings, precision, complete lines, RFQ eligibility and the permanent request ledger. Historical request replay returns the current snapshot without another Outbox write; Procurement award and PO snapshots remain immutable.
+- Real end-to-end acceptance still requires Auth registration with a real CAPTCHA → login → enrollment and role result → admission approval → evaluation and risk → portal self-data and quotations. Unit passes or this page do not prove that chain. Docker commands and operational recovery belong in the existing Wiki.
 
 ## 14. Implementation Order
+
+The original implementation breakdown dated 2026-07-27 and its completion conditions are retained as history. They are not new execution evidence or instructions to repeat completed work. Sections 3–13 describe current entry points and contracts.
 
 ### Milestone 0: Prerequisite Confirmation
 
@@ -800,6 +627,8 @@ Completion condition: the MVP, backend build, frontend Build/Lint, Docker, and s
 
 ## 15. ADR Summary
 
+Important original decisions are retained. Where phased suggestions differ from current implementation, use the current facts above. Historical preset and optional scanner plans do not establish that every tenant or deployment has those capabilities.
+
 | Decision | Choice | Reason |
 |---|---|---|
 | Service | Independent `omni-srm` | Separated from procurement and asset, clear responsibilities |
@@ -817,6 +646,8 @@ Completion condition: the MVP, backend build, frontend Build/Lint, Docker, and s
 | Workflow | Already connected to `omni-workflow` | The model category is fixed to `SRM_SUPPLIER_ONBOARDING`; the server automatically resolves the currently published version |
 
 ## 16. Main Risks
+
+The original risk register and mitigations are retained. Read its SELF-portal shorthand, scheduled scanner proposals and “no half-success” wording together with the current role and association checks, message replay rules, actual configuration and cross-service transaction limits.
 
 | Priority | Risk | Handling |
 |---|---|---|

@@ -1,0 +1,997 @@
+{
+  "schema": 1,
+  "kind": "isolated-docker-procurement-retained-quotation-results",
+  "recorded_at": "2026-10-12T13:42:19.109Z",
+  "project": "omni-wiki-acceptance-20261009",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "status": "FOUR_LANGUAGE_READONLY_AND_VISUAL_PASS",
+  "test": "scripts/fixtures/capture-procurement-quotation.mjs",
+  "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+  "tools": {
+    "node": "v24.17.0",
+    "playwright": "1.61.1",
+    "chromium": "149.0.7827.55"
+  },
+  "persisted_writes": 0,
+  "rfq": {
+    "id": 1,
+    "number": "RFQ-1-1",
+    "status": "AWARDED",
+    "version": 2,
+    "winning_quotation_id": 2,
+    "winning_quotation_version": 1,
+    "supplier_results": [
+      {
+        "supplier_id": 5,
+        "name": "WIKI-20261009A Vendor C",
+        "status": "REJECTED",
+        "quotation_id": 1,
+        "quotation_version": 1
+      },
+      {
+        "supplier_id": 6,
+        "name": "WIKI-20261009A Vendor D",
+        "status": "AWARDED",
+        "quotation_id": 2,
+        "quotation_version": 1
+      }
+    ]
+  },
+  "own_quotations": [
+    {
+      "actor": "supplierC",
+      "id": 1,
+      "supplier_id": 5,
+      "status": "SUBMITTED",
+      "version": 1,
+      "currency": "CNY",
+      "total": "3850.0000",
+      "lines": [
+        {
+          "rfq_line_id": 1,
+          "unit_price": "950.000000",
+          "delivery_days": 3
+        },
+        {
+          "rfq_line_id": 2,
+          "unit_price": "100.000000",
+          "delivery_days": 3
+        }
+      ]
+    },
+    {
+      "actor": "supplierD",
+      "id": 2,
+      "supplier_id": 6,
+      "status": "SUBMITTED",
+      "version": 1,
+      "currency": "CNY",
+      "total": "3500.0000",
+      "lines": [
+        {
+          "rfq_line_id": 1,
+          "unit_price": "900.000000",
+          "delivery_days": 3
+        },
+        {
+          "rfq_line_id": 2,
+          "unit_price": "80.000000",
+          "delivery_days": 3
+        }
+      ]
+    }
+  ],
+  "closed_comparison": {
+    "business_code": 409,
+    "http": 200
+  },
+  "source_snapshots": [
+    {
+      "source_sha256": "0f0026a03c8d9330f4871b459ef9c2aac6d9bfda0c2c9b09630b6888d75d3a4e",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-procurement-quotation.mjs",
+          "sha256": "c6dd8df429b99328d389aaedc418272a766e6a0f4e053e026797dd9ef720c055"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/procurement/rfq/index.vue",
+          "sha256": "158c3e102d1b8c49d3c59c43fe2e761de2856a70db4934d18d1d71373d903795"
+        },
+        {
+          "path": "omni-frontend/src/components/procurement/RfqCompareView.vue",
+          "sha256": "f9f104add855af1ccc26dcad00ba72a003665d10902ac089d6a78ee3c02adf78"
+        },
+        {
+          "path": "omni-frontend/src/views/supplier-portal/index.vue",
+          "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+        },
+        {
+          "path": "omni-frontend/src/api/procurement-rfq.ts",
+          "sha256": "86965cf21c0475685cb6a678fec8c8725a3723f331f14d61f76a9bca05a7e04d"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-portal.ts",
+          "sha256": "bb64434f20ec26a815ac56913a1ece7047101ad07c59a77fc1aee8230490f1da"
+        }
+      ],
+      "before_sha256": "6f7d7be7681141f8060a151cffe8006a1e768acdf31aadef27f3e8016ceb1d15",
+      "after_sha256": "6f7d7be7681141f8060a151cffe8006a1e768acdf31aadef27f3e8016ceb1d15",
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "01ec18abb3a87f08348434184f12660bf8d1294145d7afa64ac9ae51b5d703e6",
+          "image_id": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    },
+    {
+      "source_sha256": "6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-procurement-quotation.mjs",
+          "sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/procurement/rfq/index.vue",
+          "sha256": "158c3e102d1b8c49d3c59c43fe2e761de2856a70db4934d18d1d71373d903795"
+        },
+        {
+          "path": "omni-frontend/src/components/procurement/RfqCompareView.vue",
+          "sha256": "f9f104add855af1ccc26dcad00ba72a003665d10902ac089d6a78ee3c02adf78"
+        },
+        {
+          "path": "omni-frontend/src/views/supplier-portal/index.vue",
+          "sha256": "7c2e5f648e910ecbff02c774f8f5e9fd66d6cb5cd00051777953e68e81ff3ff7"
+        },
+        {
+          "path": "omni-frontend/src/api/procurement-rfq.ts",
+          "sha256": "86965cf21c0475685cb6a678fec8c8725a3723f331f14d61f76a9bca05a7e04d"
+        },
+        {
+          "path": "omni-frontend/src/api/srm-portal.ts",
+          "sha256": "bb64434f20ec26a815ac56913a1ece7047101ad07c59a77fc1aee8230490f1da"
+        }
+      ],
+      "before_sha256": "6f7d7be7681141f8060a151cffe8006a1e768acdf31aadef27f3e8016ceb1d15",
+      "after_sha256": "6f7d7be7681141f8060a151cffe8006a1e768acdf31aadef27f3e8016ceb1d15",
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "01ec18abb3a87f08348434184f12660bf8d1294145d7afa64ac9ae51b5d703e6",
+          "image_id": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "at": "2026-10-12T13:40:01.370Z",
+      "actor": "manager",
+      "method": "GET",
+      "path": "/api/procurement/rfq/1",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:40:01.399Z",
+      "actor": "manager",
+      "method": "GET",
+      "path": "/api/procurement/rfq/1/comparison",
+      "http": 200,
+      "code": 409
+    },
+    {
+      "at": "2026-10-12T13:40:01.440Z",
+      "actor": "supplierC",
+      "method": "GET",
+      "path": "/api/srm/portal/quotation/invitations/1",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:40:01.477Z",
+      "actor": "supplierD",
+      "method": "GET",
+      "path": "/api/srm/portal/quotation/invitations/1",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:40:09.059Z",
+      "actor": "manager",
+      "method": "GET",
+      "path": "/api/procurement/rfq/1",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:40:09.096Z",
+      "actor": "manager",
+      "method": "GET",
+      "path": "/api/procurement/rfq/1/comparison",
+      "http": 200,
+      "code": 409
+    },
+    {
+      "at": "2026-10-12T13:40:09.128Z",
+      "actor": "supplierC",
+      "method": "GET",
+      "path": "/api/srm/portal/quotation/invitations/1",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "at": "2026-10-12T13:40:09.157Z",
+      "actor": "supplierD",
+      "method": "GET",
+      "path": "/api/srm/portal/quotation/invitations/1",
+      "http": 200,
+      "code": 200
+    }
+  ],
+  "post_capture_test_change": {
+    "captured_manager_sha256": "c6dd8df429b99328d389aaedc418272a766e6a0f4e053e026797dd9ef720c055",
+    "current_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+    "scope": "Helper adds validated selective read-only capture, rendering warm-up, native light-theme preference and supplier list snapshots after closing read-only detail. Manager detail interaction and product source did not change; original captured digest retained."
+  },
+  "visual_review": {
+    "status": "passed-with-documented-limits",
+    "originals_inspected": 31,
+    "published": 12,
+    "rejected_incomplete_paint": 7,
+    "readable_private_superseded": 12,
+    "reviewer": "Agent individually inspected 31 original PNGs; not human translation signature",
+    "human_translation_review": "pending",
+    "limits": [
+      "AWARDED RFQ detail shows retained quote IDs, versions and winning result, not an interactive pre-award price comparison screen.",
+      "The current /comparison endpoint correctly returns HTTP 200 with business code 409 after award. No re-award, quote submission or status reset occurred.",
+      "Each supplier can read its own quotation. The public list images prove its total and invitation outcome; real API and opened read-only controls separately verify line prices.",
+      "Supplier list images use the product native light-theme button. Raw status enums and teaching object names remain unchanged.",
+      "Seven incomplete-paint originals are excluded; readable but superseded details remain private. Long Japanese invitation-status labels wrap inside the table header."
+    ]
+  },
+  "captures": [
+    {
+      "name": "procurement-current-quote-versions",
+      "locale": "zh-CN",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "flow": "comparison",
+      "route": "/admin/procurement/rfq",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "state": "AWARDED",
+        "quotes": [
+          1,
+          2
+        ],
+        "versions": [
+          1,
+          1
+        ],
+        "winning_quote": 2,
+        "scope": "Retained result; no live award click"
+      },
+      "image": "docs/images/zh-CN/procurement-current-quote-versions.png",
+      "sha256": "9d7c7cf307c5ea08a1702e38656881435c5242e388c4b0eda3afae4aa888e294",
+      "captured_at": "2026-10-12T13:33:04.571Z",
+      "captured_test_sha256": "c6dd8df429b99328d389aaedc418272a766e6a0f4e053e026797dd9ef720c055",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "0f0026a03c8d9330f4871b459ef9c2aac6d9bfda0c2c9b09630b6888d75d3a4e",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-quote-versions",
+      "locale": "en-US",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "flow": "comparison",
+      "route": "/admin/procurement/rfq",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "state": "AWARDED",
+        "quotes": [
+          1,
+          2
+        ],
+        "versions": [
+          1,
+          1
+        ],
+        "winning_quote": 2,
+        "scope": "Retained result; no live award click"
+      },
+      "image": "docs/images/en-US/procurement-current-quote-versions.png",
+      "sha256": "9d5a4cfde925dc7f9490d7a759100bec5908c552da1b151b17b9c51c979a7fac",
+      "captured_at": "2026-10-12T13:33:07.505Z",
+      "captured_test_sha256": "c6dd8df429b99328d389aaedc418272a766e6a0f4e053e026797dd9ef720c055",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "0f0026a03c8d9330f4871b459ef9c2aac6d9bfda0c2c9b09630b6888d75d3a4e",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-quote-versions",
+      "locale": "ja-JP",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "flow": "comparison",
+      "route": "/admin/procurement/rfq",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "state": "AWARDED",
+        "quotes": [
+          1,
+          2
+        ],
+        "versions": [
+          1,
+          1
+        ],
+        "winning_quote": 2,
+        "scope": "Retained result; no live award click"
+      },
+      "image": "docs/images/ja-JP/procurement-current-quote-versions.png",
+      "sha256": "cc538b77a8bd8cbb772340f1e632f7da6b77786cbbdfc7a569be6a5a3d71fb5f",
+      "captured_at": "2026-10-12T13:33:10.266Z",
+      "captured_test_sha256": "c6dd8df429b99328d389aaedc418272a766e6a0f4e053e026797dd9ef720c055",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "0f0026a03c8d9330f4871b459ef9c2aac6d9bfda0c2c9b09630b6888d75d3a4e",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-quote-versions",
+      "locale": "ko-KR",
+      "actor": "manager",
+      "roles": [
+        "USER",
+        "PROCUREMENT_MANAGER",
+        "ASSET_MANAGER",
+        "TEAM_LEADER",
+        "WIKI_20261009A_WORKFLOW_DESIGNER"
+      ],
+      "flow": "comparison",
+      "route": "/admin/procurement/rfq",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "state": "AWARDED",
+        "quotes": [
+          1,
+          2
+        ],
+        "versions": [
+          1,
+          1
+        ],
+        "winning_quote": 2,
+        "scope": "Retained result; no live award click"
+      },
+      "image": "docs/images/ko-KR/procurement-current-quote-versions.png",
+      "sha256": "21c63bd286d302a54bff4672cee04043af345d3301bcb2cac83a6b7900f956b6",
+      "captured_at": "2026-10-12T13:33:13.038Z",
+      "captured_test_sha256": "c6dd8df429b99328d389aaedc418272a766e6a0f4e053e026797dd9ef720c055",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "0f0026a03c8d9330f4871b459ef9c2aac6d9bfda0c2c9b09630b6888d75d3a4e",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-supplierC-quote",
+      "locale": "zh-CN",
+      "actor": "supplierC",
+      "roles": [
+        "USER",
+        "SUPPLIER"
+      ],
+      "flow": "quotation-receipt",
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "own_quote": 1,
+        "total": "3850.0000",
+        "read_only": true,
+        "scope": "Own quotation list amount and invitation state; detail opened and closed by native clicks; API and input assertions verify line prices"
+      },
+      "image": "docs/images/zh-CN/procurement-current-supplierC-quote.png",
+      "sha256": "ad908da07756a0da98a92e1de0b1f48bda3e4b22ec6f998be956ca4fc52b2d4b",
+      "captured_at": "2026-10-12T13:40:02.477Z",
+      "captured_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-supplierD-quote",
+      "locale": "zh-CN",
+      "actor": "supplierD",
+      "roles": [
+        "USER",
+        "SUPPLIER"
+      ],
+      "flow": "quotation-receipt",
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "own_quote": 2,
+        "total": "3500.0000",
+        "read_only": true,
+        "scope": "Own quotation list amount and invitation state; detail opened and closed by native clicks; API and input assertions verify line prices"
+      },
+      "image": "docs/images/zh-CN/procurement-current-supplierD-quote.png",
+      "sha256": "7346350e848ccbffdb2e3a147168631110db7b664f99a495c51199b7a7162a7a",
+      "captured_at": "2026-10-12T13:40:03.461Z",
+      "captured_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-supplierC-quote",
+      "locale": "en-US",
+      "actor": "supplierC",
+      "roles": [
+        "USER",
+        "SUPPLIER"
+      ],
+      "flow": "quotation-receipt",
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "own_quote": 1,
+        "total": "3850.0000",
+        "read_only": true,
+        "scope": "Own quotation list amount and invitation state; detail opened and closed by native clicks; API and input assertions verify line prices"
+      },
+      "image": "docs/images/en-US/procurement-current-supplierC-quote.png",
+      "sha256": "d150acdd84fad472dccf5719e5bfb3738905697808b51f4de7a560f69780f19e",
+      "captured_at": "2026-10-12T13:40:04.377Z",
+      "captured_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-supplierD-quote",
+      "locale": "en-US",
+      "actor": "supplierD",
+      "roles": [
+        "USER",
+        "SUPPLIER"
+      ],
+      "flow": "quotation-receipt",
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "own_quote": 2,
+        "total": "3500.0000",
+        "read_only": true,
+        "scope": "Own quotation list amount and invitation state; detail opened and closed by native clicks; API and input assertions verify line prices"
+      },
+      "image": "docs/images/en-US/procurement-current-supplierD-quote.png",
+      "sha256": "6bae5f82ebb7b94a7337b3c1e93b8be64979d6cde0def29ee2c1df0cf850d083",
+      "captured_at": "2026-10-12T13:40:05.289Z",
+      "captured_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-supplierC-quote",
+      "locale": "ja-JP",
+      "actor": "supplierC",
+      "roles": [
+        "USER",
+        "SUPPLIER"
+      ],
+      "flow": "quotation-receipt",
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "own_quote": 1,
+        "total": "3850.0000",
+        "read_only": true,
+        "scope": "Own quotation list amount and invitation state; detail opened and closed by native clicks; API and input assertions verify line prices"
+      },
+      "image": "docs/images/ja-JP/procurement-current-supplierC-quote.png",
+      "sha256": "6227135d66c872970f52e6f7afedf2152758dc34a09047a532a15a3bcc4eb6cf",
+      "captured_at": "2026-10-12T13:40:06.205Z",
+      "captured_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-supplierD-quote",
+      "locale": "ja-JP",
+      "actor": "supplierD",
+      "roles": [
+        "USER",
+        "SUPPLIER"
+      ],
+      "flow": "quotation-receipt",
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "own_quote": 2,
+        "total": "3500.0000",
+        "read_only": true,
+        "scope": "Own quotation list amount and invitation state; detail opened and closed by native clicks; API and input assertions verify line prices"
+      },
+      "image": "docs/images/ja-JP/procurement-current-supplierD-quote.png",
+      "sha256": "1c743287403470bc79810a418dcbdc899d31303b14dc740c0b97206af667e58e",
+      "captured_at": "2026-10-12T13:40:07.124Z",
+      "captured_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-supplierC-quote",
+      "locale": "ko-KR",
+      "actor": "supplierC",
+      "roles": [
+        "USER",
+        "SUPPLIER"
+      ],
+      "flow": "quotation-receipt",
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "own_quote": 1,
+        "total": "3850.0000",
+        "read_only": true,
+        "scope": "Own quotation list amount and invitation state; detail opened and closed by native clicks; API and input assertions verify line prices"
+      },
+      "image": "docs/images/ko-KR/procurement-current-supplierC-quote.png",
+      "sha256": "eda24e82a74a3d11927449f2daedac07805da7d3bb50634df2ab293650303ae4",
+      "captured_at": "2026-10-12T13:40:08.101Z",
+      "captured_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "name": "procurement-current-supplierD-quote",
+      "locale": "ko-KR",
+      "actor": "supplierD",
+      "roles": [
+        "USER",
+        "SUPPLIER"
+      ],
+      "flow": "quotation-receipt",
+      "route": "/supplier-portal",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "expected": {
+        "rfq": "RFQ-1-1",
+        "own_quote": 2,
+        "total": "3500.0000",
+        "read_only": true,
+        "scope": "Own quotation list amount and invitation state; detail opened and closed by native clicks; API and input assertions verify line prices"
+      },
+      "image": "docs/images/ko-KR/procurement-current-supplierD-quote.png",
+      "sha256": "b0e37939e5a103e193b36a9372da0fd281bda16b0fb0041c533435049d3b65ce",
+      "captured_at": "2026-10-12T13:40:09.029Z",
+      "captured_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "current_test_sha256": "8f474d2bae295294da8174f102c223cb85527a395ff14a301eccf51bbb68bc85",
+      "source_sha256": "6067be047f69e71ece86180f29882e1e77cbeaecdbbbcfbf904a265c6a37caeb",
+      "runtime_image": "sha256:56f81f20994a19b6e84c9a676af6d1938490ffde95a7d0945182df9cb7a8a04c",
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    }
+  ],
+  "rejected_originals": [
+    {
+      "name": "procurement-current-supplierD-quote",
+      "locale": "zh-CN",
+      "sha256": "31c3109b2bf7b4722b016e93391541e7c58422c6cd961b88ad538693b0d0560b",
+      "reason": "Some body cells or disabled controls not completely painted in original image; not published"
+    },
+    {
+      "name": "procurement-current-supplierC-quote",
+      "locale": "en-US",
+      "sha256": "01e71563ad413e52c7633492f59993574ee027724e623a7a2dc76111d43bbb46",
+      "reason": "Some body cells or disabled controls not completely painted in original image; not published"
+    },
+    {
+      "name": "procurement-current-supplierD-quote",
+      "locale": "en-US",
+      "sha256": "df0ec20e0543dd1ea7b4b0bfdb95fd6bc59ba4ab4613ebf61abf3f351dc6485e",
+      "reason": "Some body cells or disabled controls not completely painted in original image; not published"
+    },
+    {
+      "name": "procurement-current-supplierC-quote",
+      "locale": "en-US",
+      "sha256": "01e71563ad413e52c7633492f59993574ee027724e623a7a2dc76111d43bbb46",
+      "reason": "Some body cells or disabled controls not completely painted in original image; not published"
+    },
+    {
+      "name": "procurement-current-supplierD-quote",
+      "locale": "en-US",
+      "sha256": "df0ec20e0543dd1ea7b4b0bfdb95fd6bc59ba4ab4613ebf61abf3f351dc6485e",
+      "reason": "Some body cells or disabled controls not completely painted in original image; not published"
+    },
+    {
+      "name": "procurement-current-supplierC-quote",
+      "locale": "en-US",
+      "sha256": "33072686815bfc4f7aa93c2049e81f9a80e9ac7798584ce8846642bfea6d55a9",
+      "reason": "Some body cells or disabled controls not completely painted in original image; not published"
+    },
+    {
+      "name": "procurement-current-supplierD-quote",
+      "locale": "en-US",
+      "sha256": "a4e4d759b2c918ed6035f80157057d6c49954227805066f5131b0d728788ca4a",
+      "reason": "Some body cells or disabled controls not completely painted in original image; not published"
+    }
+  ]
+}

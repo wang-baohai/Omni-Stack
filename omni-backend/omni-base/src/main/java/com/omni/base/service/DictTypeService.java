@@ -26,12 +26,13 @@ public interface DictTypeService {
     PageResult<SysDictType> listTypes(Long tenantId, DictTypeQuery query, int page, int size);
 
     /**
-     * 按 ID 查询字典类型。
+     * 按 ID 查询当前租户的字典类型。
      *
      * @param id 字典类型 ID
+     * @param tenantId 当前登录租户 ID
      * @return 字典类型实体
      */
-    SysDictType getTypeById(Long id);
+    SysDictType getTypeById(Long id, Long tenantId);
 
     /**
      * 创建字典类型。
@@ -47,24 +48,27 @@ public interface DictTypeService {
      * 更新字典类型。
      *
      * @param id       字典类型 ID
+     * @param tenantId 当前登录租户 ID
      * @param request  更新请求
      * @param operator 操作人
      * @return 更新后的实体
      */
-    SysDictType updateType(Long id, UpdateDictTypeRequest request, String operator);
+    SysDictType updateType(Long id, Long tenantId, UpdateDictTypeRequest request, String operator);
 
     /**
      * 删除字典类型（级联删除关联的字典数据）。
      *
      * @param id 字典类型 ID
+     * @param tenantId 当前登录租户 ID
      */
-    void deleteType(Long id);
+    void deleteType(Long id, Long tenantId);
 
     /**
      * 切换字典类型启用状态。
      *
      * @param id     字典类型 ID
+     * @param tenantId 当前登录租户 ID
      * @param status 目标状态
      */
-    void toggleStatus(Long id, Integer status);
+    void toggleStatus(Long id, Long tenantId, Integer status);
 }

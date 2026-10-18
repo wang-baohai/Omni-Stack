@@ -64,27 +64,30 @@ public interface XssConfigService {
     BlacklistRuleVO createRule(Long tenantId, CreateXssRuleRequest request, String operator);
 
     /**
-     * 更新黑名单规则。
+     * 更新当前租户的黑名单规则，不存在或属于其他租户时拒绝。
      *
      * @param id      规则 ID
+     * @param tenantId 当前登录租户 ID
      * @param request 更新请求
      * @param operator 操作人
      * @return 更新后的规则视图对象
      */
-    BlacklistRuleVO updateRule(Long id, UpdateXssRuleRequest request, String operator);
+    BlacklistRuleVO updateRule(Long id, Long tenantId, UpdateXssRuleRequest request, String operator);
 
     /**
-     * 删除黑名单规则。
+     * 删除当前租户的黑名单规则，不存在或属于其他租户时拒绝。
      *
      * @param id 规则 ID
+     * @param tenantId 当前登录租户 ID
      */
-    void deleteRule(Long id);
+    void deleteRule(Long id, Long tenantId);
 
     /**
-     * 切换单条黑名单规则的启用状态。
+     * 切换当前租户单条黑名单规则的启用状态。
      *
      * @param id      规则 ID
+     * @param tenantId 当前登录租户 ID
      * @param enabled 是否启用
      */
-    void toggleRule(Long id, boolean enabled);
+    void toggleRule(Long id, Long tenantId, boolean enabled);
 }

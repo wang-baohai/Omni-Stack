@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
-  cpSync,
+  constants as fsConstants,
+  copyFileSync,
   existsSync,
   globSync,
   lstatSync,
@@ -21,10 +22,11 @@ import { COMPOSE_SERVICE_FILES } from './compose-model.js';
 import { CliError } from './errors.js';
 import { CRUD_TEMPLATE_VERSION } from './crud-generator.js';
 import { resolvePreset } from './presets.js';
+import { documentationDigest, pruneDocumentation } from './documentation-delivery.js';
 import { GENERATOR_VERSION, SERVICE_TEMPLATE_VERSION } from './service-generator.js';
 import type { ModuleCatalog, ModuleDefinition, PresetGenerationLock, PresetGenerationPlan } from './types.js';
 
-export const PRESET_TEMPLATE_VERSION = '1.0.0';
+export const PRESET_TEMPLATE_VERSION = '1.1.0';
 const LOCK_FILE = 'scaffold.lock';
 /** 源工程声明版本（非内容摘要；内容溯源由 lock.sourceDigest 承担）。 */
 const SOURCE_VERSION = '1.0.0-SNAPSHOT';
@@ -38,6 +40,11 @@ const IGNORED_SEGMENTS = new Set(['.git', '.qoder', '.agents', '.codex', '.idea'
 // omni-frontend/e2e/wp006-visual-screenshot.mjs（WP-006 专用截图工具，引用旧容器名）；
 // omni-frontend/e2e/wp009-f/（WP-009 F 隔离靶场 E2E，引用旧 project）。
 const GENERATED_SUBPATH_EXCLUDES = [
+  'docs/.vitepress/source',
+  'docs/.vitepress/cache',
+  'docs/.vitepress/.temp',
+  'docs/.vitepress/evidence',
+  'docs/.vitepress/navigation.json',
   'scripts/wp008-f',
   'scripts/wp009',
   'scripts/wp010',
@@ -51,11 +58,12 @@ const GENERATED_SUBPATH_EXCLUDES = [
  * 绝对路径与旧栈容器名。生成项目只拿下列正式交付入口，AC16“不依赖/不透传源仓库本机资源”才有意义。
  */
 const DELIVERABLE_ROOT_DIRS = new Set([
-  'database', 'docker', 'docs', 'observability', 'omni-backend', 'omni-frontend', 'scaffold', 'scripts', 'tools',
+  'ai', 'database', 'docker', 'docs', 'observability', 'omni-backend', 'omni-frontend', 'scaffold', 'scripts', 'tools',
 ]);
 const DELIVERABLE_ROOT_FILES = new Set([
-  '.dockerignore', '.env.example', '.gitignore', 'AGENTS.md', 'LICENSE',
+  '.dockerignore', '.env.example', '.gitignore', 'AGENTS.md', 'LICENSE', 'CHANGELOG.md',
   'compose.yaml', 'compose.apps.yaml', 'compose.infra.yaml', 'compose.observability.yaml',
+  'compose.docs.yaml', 'compose.tools.yaml',
   'start.sh', 'start.bat', 'stop.sh', 'stop.bat',
 ]);
 
@@ -102,11 +110,11 @@ export function applyPresetGeneration(workspaceRoot: string, plan: PresetGenerat
   const sourceDigest = scaffoldManifestDigest(workspaceRoot);
   try {
     copyCleanWorkspace(workspaceRoot, staging, plan.targetDirectory);
-    pruneWorkspace(staging, catalog, new Set(plan.resolved.resolvedModules), plan.resolved.preset.id);
     const presetDirectory = resolve(staging, 'scaffold', 'presets');
     const presetPath = resolve(presetDirectory, `${plan.resolved.preset.id}.yaml`);
     assertSafeChild(presetDirectory, presetPath);
     writeFileSync(presetPath, stringify(plan.resolved.preset, { lineWidth: 0 }), 'utf8');
+    pruneWorkspace(staging, catalog, new Set(plan.resolved.resolvedModules), plan.resolved.preset.id, workspaceRoot);
     const lock = createLock(catalog, plan, presetPath, sourceDigest);
     writeFileSync(resolve(staging, LOCK_FILE), `${stringify(lock, { lineWidth: 0 })}`, 'utf8');
     validateGeneratedPreset(staging, plan.resolved.preset.id);
@@ -131,7 +139,7 @@ export function validateGeneratedPreset(targetDirectory: string, expectedPresetI
     throw new CliError('scaffold.lock 所有权或预设模板版本无效');
   }
   if (expectedPresetId && lock.preset?.id !== expectedPresetId) throw new CliError('scaffold.lock 预设 ID 不匹配');
-  for (const field of ['sourceDigest', 'catalogDigest', 'presetDigest', 'scaffoldDigest'] as const) {
+  for (const field of ['sourceDigest', 'catalogDigest', 'presetDigest', 'scaffoldDigest', 'docsDigest', 'aiDigest'] as const) {
     const value = lock[field];
     if (typeof value !== 'string' || !DIGEST_PATTERN.test(value)) {
       throw new CliError(`scaffold.lock 缺少合法的 ${field}，无法确认源与模板锁`);
@@ -146,6 +154,8 @@ export function validateGeneratedPreset(targetDirectory: string, expectedPresetI
   if (lock.scaffoldDigest !== scaffoldManifestDigest(target)) {
     throw new CliError('scaffold.lock scaffoldDigest 与工程内模板/清单不一致');
   }
+  if (lock.docsDigest !== documentationDigest(target, 'docs')) throw new CliError('scaffold.lock docsDigest 与工程内 Wiki/文档配置不一致');
+  if (lock.aiDigest !== documentationDigest(target, 'ai')) throw new CliError('scaffold.lock aiDigest 与工程内 AI 资产不一致');
   const selected = new Set(lock.modules.map((module) => module.id));
   const catalog = loadCatalog(target);
   if (catalog.modules.some((module) => !selected.has(module.id)) || catalog.modules.length !== selected.size) {
@@ -179,7 +189,7 @@ function summarize(modules: ModuleDefinition[]): PresetGenerationPlan['summary']
   };
 }
 
-function pruneWorkspace(root: string, catalog: ModuleCatalog, selected: Set<string>, presetId: string): void {
+function pruneWorkspace(root: string, catalog: ModuleCatalog, selected: Set<string>, presetId: string, sourceRoot: string): void {
   const omitted = catalog.modules.filter((module) => !selected.has(module.id));
   const selectedDefinitions = catalog.modules.filter((module) => selected.has(module.id));
   const retainedDocs = new Set(selectedDefinitions.flatMap((module) => module.docs));
@@ -221,6 +231,34 @@ function pruneWorkspace(root: string, catalog: ModuleCatalog, selected: Set<stri
   filterHomeWorkspace(root, selected);
   filterFrontendRegistrations(root, omitted.map((module) => module.id));
   filterPresetFiles(root, presetId);
+  if (!selected.has('workflow')) {
+    removeRelative(root, 'scripts/fixtures/run-workflow-scope-fixture.ps1');
+    removeRelative(root, 'omni-frontend/e2e-docs/flows/workflow-teaching.flows.spec.ts');
+    removeRelative(root, 'omni-frontend/e2e-docs/flows/workflow-teaching-ui.flows.spec.ts');
+    removeRelative(root, 'omni-frontend/e2e-docs/flows/workflow-negative-teaching.flows.spec.ts');
+    removeRelative(root, 'omni-frontend/tests/workflow');
+    removeRelative(root, 'docs/reference/evidence/workflow-2026-10-10.json');
+    const packagePath = resolve(root, 'omni-frontend/package.json');
+    const packageJson = JSON.parse(readFileSync(packagePath, 'utf8')) as { scripts: Record<string, string> };
+    packageJson.scripts['test:unit'] = 'node --experimental-strip-types --test "tests/wp012/*.test.ts"';
+    writeFileSync(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`, 'utf8');
+  }
+  if (!selected.has('crm')) {
+    removeRelative(root, 'omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts');
+    removeRelative(root, 'omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts');
+    removeRelative(root, 'docs/reference/evidence/crm-2026-10-10.json');
+  }
+  if (!selected.has('xxl-job')) {
+    removeRelative(root, 'omni-frontend/e2e-docs/flows/scheduling.flows.spec.ts');
+    removeRelative(root, 'omni-frontend/e2e-docs/flows/scheduling-teaching-ui.flows.spec.ts');
+    removeRelative(root, 'omni-frontend/e2e-docs/fixtures/xxl-audit.ts');
+    removeRelative(root, 'docs/reference/evidence/scheduling-2026-10-10.json');
+  }
+  if (!selected.has('procurement') || !selected.has('asset')) {
+    removeRelative(root, 'omni-frontend/e2e-docs/flows/supply-chain-teaching.flows.spec.ts');
+    removeRelative(root, 'docs/reference/evidence/supply-chain-2026-10-09.json');
+  }
+  pruneDocumentation(root, selected, presetId, sourceRoot);
   removeEmptyDirectories(resolve(root, 'database/changelog'));
 }
 
@@ -751,25 +789,33 @@ function filterPresetFiles(root: string, presetId: string): void {
 function copyCleanWorkspace(sourceRoot: string, targetRoot: string, finalTarget: string): void {
   const normalizedTarget = resolve(targetRoot);
   const normalizedFinal = resolve(finalTarget);
-  cpSync(sourceRoot, targetRoot, {
-    recursive: true,
-    errorOnExist: true,
-    force: false,
-    filter(source) {
+  // 先固定每个目录的去重条目，再逐个复制，避免共享挂载遍历期间重复枚举同一路径。
+  const visit = (source: string, destination: string): void => {
       const resolvedSource = resolve(source);
-      if (resolvedSource === normalizedTarget || resolvedSource.startsWith(`${normalizedTarget}${sep}`)) return false;
-      if (resolvedSource === normalizedFinal || resolvedSource.startsWith(`${normalizedFinal}${sep}`)) return false;
+      if (resolvedSource === normalizedTarget || resolvedSource.startsWith(`${normalizedTarget}${sep}`)) return;
+      if (resolvedSource === normalizedFinal || resolvedSource.startsWith(`${normalizedFinal}${sep}`)) return;
       const child = relative(sourceRoot, resolvedSource);
-      if (!child) return true;
-      if (child.split(sep).some((segment) => IGNORED_SEGMENTS.has(segment))) return false;
+      if (child.split(sep).some((segment) => IGNORED_SEGMENTS.has(segment))) return;
       // 排除特定子路径（WP-011 R03：不携带历史 WP 专用工具）
       const normalizedChild = child.split(sep).join('/');
-      if (GENERATED_SUBPATH_EXCLUDES.some(ex => normalizedChild === ex || normalizedChild.startsWith(ex + '/'))) return false;
-      if (!isDeliverableRootEntry(child)) return false;
+      if (GENERATED_SUBPATH_EXCLUDES.some(ex => normalizedChild === ex || normalizedChild.startsWith(ex + '/'))) return;
+      if (child && !isDeliverableRootEntry(child)) return;
       const name = basename(resolvedSource);
-      return name === '.env.example' || !name.startsWith('.env');
-    },
-  });
+      if (name !== '.env.example' && name.startsWith('.env')) return;
+      if (name.endsWith('.tsbuildinfo')) return;
+      const sourceState = lstatSync(source);
+      if (sourceState.isSymbolicLink()) throw new CliError(`交付源不得含指向工作区外的符号链接: ${child}`);
+      if (sourceState.isDirectory()) {
+        mkdirSync(destination);
+        const children = [...new Set(readdirSync(source))].sort();
+        for (const entry of children) visit(resolve(source, entry), resolve(destination, entry));
+      } else if (sourceState.isFile()) {
+        copyFileSync(source, destination, fsConstants.COPYFILE_EXCL);
+      } else {
+        throw new CliError(`交付源含非普通文件: ${child}`);
+      }
+  };
+  visit(sourceRoot, targetRoot);
 }
 
 function createLock(
@@ -788,6 +834,8 @@ function createLock(
     catalogDigest: fileDigest(resolve(targetRoot, 'scaffold/catalog/modules.yaml')),
     presetDigest: fileDigest(presetPath),
     scaffoldDigest: scaffoldManifestDigest(targetRoot),
+    docsDigest: documentationDigest(targetRoot, 'docs'),
+    aiDigest: documentationDigest(targetRoot, 'ai'),
     catalogVersion: catalog.version,
     preset: { id: plan.resolved.preset.id, version: plan.resolved.preset.version },
     modules: catalog.modules.filter((module) => selected.has(module.id)).map((module) => ({ id: module.id, version: module.version })),

@@ -1,14 +1,27 @@
 version: 1
 baseline_date: 2026-08-21
-status_values: [missing, partial, covered, exempt]
-required_states: [entry, list, detail, create-or-edit, key-action, success, failure-or-forbidden]
-locales: [zh-CN, en-US, ja-JP, ko-KR]
+status_values: [ missing, partial, covered, exempt ]
+required_states: [ entry, list, detail, create-or-edit, key-action, success, failure-or-forbidden ]
+locales: [ zh-CN, en-US, ja-JP, ko-KR ]
 default_viewport: { width: 1440, height: 900 }
 
 modules:
   - id: authentication
-    status: partial
-    required_flows: [password-captcha, register, social-login, device-code, expired-session]
+    status: covered
+    # covered 仅指本轮 required_flows 的已登记截图，不包括下列暂缓项或完整业务成功结论。
+    required_flows: [ password-captcha, register, device-code, expired-session ]
+    deferred_flows:
+      - flow: social-login
+        status: deferred-by-owner
+        providers: [ github, google, gitee ]
+        reason: 账号持有人需完成二次登录校验；本轮按所有者决定暂缓三家外部 OAuth 截图。
+        authorization: docs/reference/evidence/oauth-screenshot-deferral-2026-10-18.json
+        placeholders:
+          - docs/guides/authentication.md
+          - docs/guides/authentication.en.md
+          - docs/guides/authentication.jp.md
+          - docs/guides/authentication.kr.md
+        actual_authorization_callback: unverified
     existing_assets:
       - docs/images/login.png
       - docs/images/register.png
@@ -22,16 +35,16 @@ modules:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/supplier-portal-login.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/session-expired-dialog.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/employee-forbidden-403.png
-    gaps: [social-login-no-registered-asset]
+    gaps: []
     # expired-session：确定性测试故障（page.route 拦截待办接口 401，仅测试进程），
     # 产品真实 handle401 弹出本地化过期对话框（标题/重新登录四语言）。
     # forbidden-state：权限拒绝状态由 permissions-exceptions 模块闭环
     # （employee-forbidden-403 四语言，AUTHENTICATED_BUT_FORBIDDEN 已区分 401）。
-    # social-login 由既有 social-* 四图覆盖（coverage gaps 中本无此项）。
+    # social-* 历史图片不证明本次三家真实授权成功；待补截图保留在 deferred_flows。
     # reproducible-fixture：manifest fixture 字段 + public 测试无 mutations 稳定重放。
   - id: system-management
-    status: partial
-    required_flows: [tenant, organization, user, role, permission, menu, data-scope, config, dictionary, oauth2, online-user, login-record, audit, xss]
+    status: covered
+    required_flows: [ tenant, organization, user, role, permission, menu, data-scope, config, dictionary, oauth2, online-user, login-record, audit, xss ]
     existing_assets:
       - docs/images/dashboard.png
       - docs/images/system-user.png
@@ -51,94 +64,75 @@ modules:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-dictionary-create-form.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-dictionary-create-validation.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-dictionary-create-success.png
-    gaps: [config-no-registered-asset, login-record-no-registered-asset, menu-no-registered-asset, data-scope-no-registered-asset]
-    # WP-014 S05 事实纠正（SOURCE_FACT_STALE）：旧理由 config-page-absent / login-record-page-absent
-    # 已被当前源码推翻 —— views/system/config/index.vue 与 views/system/loginrecord/index.vue 均存在，
-    # Auth 侧 SystemConfigController / LoginRecordController 也已交付。
-    # 真实缺口是“页面存在但零张登记图”，不是“页面不存在”，因此不得继续用旧理由销红。
-    # WP-014 S02 另两项发现：menu 与 data-scope 在 manifest 中无任何登记记录（旧注释称“由其他页面承载”
-    # 未满足“需真实操作与源码依据”的要求），现按事实单列 gap。
-    # most-management-flows 已关闭：14 个 required_flows 中 12 个已有四语言正式图
-    # （tenant/organization/user/role/permission/dictionary/oauth2/online-user/audit/xss 直接采集，
-    #  menu 由权限管理的 MENU 类型节点承载、data-scope 由角色管理承载。
-    # WP-014 S02 纠正：“由其他页面承载”未附真实操作与源码依据，且 manifest 中 menu/data-scope 零登记记录，
-    # 因此已拆为单独 gap 列出；待本轮真实采集对应步骤图后才可关闭。
-    # detail-and-action-states 已关闭：字典类型「新建对话框 → 必填校验失败 → 创建成功」三态四语言正式图
-    # （system-dictionary.flows.spec.ts，4 passed / 0 skipped；自建唯一 typeCode，afterAll 走正式 DELETE 契约，
-    #  实测残留 0、sys_dict_type 回到基线 17、base-dictionary-catalog 断言复现仍为 101）。
-    # failure-states 已关闭：业务必填校验失败四语言图（同上），而 403 权限拒绝由 permissions-exceptions 模块的
-    # employee-forbidden-403 四语言图闭环（与 authentication 模块同一分工约定）。
-    # PRODUCT_DEFECT（已登记，本批不修产品）：views/base/dict/index.vue 未定义任何 form rules，
-    # 必填校验完全依赖后端 CreateDictTypeRequest 的 @NotBlank(message="字典类型…不能为空") 中文硬编码，
-    # 因此四语言 UI 下错误提示均为中文；且 ja-JP/ko-KR 的 dict.createType/typeCode/typeName/remark
-    # 语言包取值本身即英文（ui:i18n:parity 四语言各 2319 键 0 缺失、ui:i18n:check 0/0 均通过，
-    # 属译文完整度而非硬编码缺陷）。截图如实保留真实文案，未 mock、未美化、未改产品。
-    # WP-014 S05 已核：当前源码中 views/system/config/index.vue 与 views/system/loginrecord/index.vue
-    # 确实存在，Auth 侧也有 SystemConfigController / LoginRecordController，因此上述
-    # “前端无对应 view 目录、属产品未提供页面”的旧结论已失效（见上方 gaps 的 SOURCE_FACT_STALE 纠正）。
-    # 按约束不删 required_flow、不自行 exempt；真实缺口为“无登记图”。
-    # online-users 与部分页面在当前环境为空状态，已在 manifest expected 中如实声明。
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-config-policy.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-config-saved.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-config-conflict.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-menu-permission-tree.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-role-scope-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-role-scope-saved.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-role-permission-dialog.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-login-record-filtered.png
+    gaps: []
+    # 2026-10-10：字典创建/真实必填失败/成功结果四语言共12张原图，4 passed/0 skipped，
+    # 来源见 docs/reference/evidence/dictionary-2026-10-10.json；4条唯一类型经正式DELETE并回查残留0。
+    # 此范围使用admin/SUPER_ADMIN，不证明普通员工写权限，也不关闭本模块其他流程。
+    # 当前错误层显示本地化前缀与稳定字段标识typeCode/typeName、Trace ID；旧“四语言均显示中文”已失效。
+    # 日/韩备注词条仍是Remark；日语原图中可选备注行不清晰，英文侧栏有截断，均保留为图证限制。
+    # 旧私有截图的提示不可见/加载遮罩问题已被视觉复核拒绝，本轮按真实可见状态重新采集。
+    # online-users与部分旧页面只为空状态；页面访问不证明完整业务链路或人工翻译复核通过。
+    # 2026-10-12：四语32原图与正式接口持久化校验；配置409冲突、角色SELF与两项权限、真实历史登录筛选已闭环。
+    # covered只表示所列flow的图证映射；部分旧页面仍为空状态，不声称所有系统CRUD或用户行隔离已验收。
+    # 新权限词条回退中文、日韩表少量英文、英文侧栏与最右列裁切均按原图保留；人工翻译复核仍待完成。
   - id: scheduling-workspace
-    status: partial
-    required_flows: [system-job, job-type, personal-create, schedule, trigger, pause, resume, execution-log]
+    status: covered
+    required_flows: [ system-job, job-type, personal-create, schedule, trigger, pause, resume, execution-log, personal-delete, execution-failure ]
     existing_assets:
-      - docs/images/job-system.png
-      - docs/images/job-workspace.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-system-jobs.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-job-type.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-personal-create-validation.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-personal-lifecycle.png
-    gaps: [schedule, trigger, pause, resume, execution-log]
-    # WP-014 S02 事实纠正（COVERAGE_ASSERTION_FALSE）：旧 status: covered / gaps: [] 不成立。
-    # 16 条登记资产只覆盖 3 个 flow（system-job/list、job-type/entry、personal-create 的
-    # failure-or-forbidden 与 key-action-success）；schedule/trigger/pause/resume/execution-log
-    # 五个 required flow 零登记。旧注释以“4 资产 × 4 语 = 16 图”反推 8 flow 全覆盖，
-    # 未做 flow→record 逐名映射，现已按事实降为 partial。
-    # 前批 ja/ko 对话框交互失败根因已定位（TEST_DEFECT）：表单 label 误用 common.userJobTypes，
-    # 真实 key 为 userJob.jobType（en/ja/ko = 'Job Type' 单数）；行操作按钮漏了 ko「편집」。
-    # personal-create：UI 创建唯一名称任务（喝水提醒 demo handler，无外部副作用）
-    #   + API fault（POST /base/my-job 500，仅测试进程）验证错误提示。
-    # lifecycle：创建 → 编辑改名 → 列表真实反映（key action + success result）。
-    # 清理：deleteMyJob 正式契约，E2E_MUTATIONS 自建自清理多轮实证。
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-create-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-created.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-paused.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-edit-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-manual-success.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-resumed.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-scheduled-success.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-paused-final.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-deleted.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-handler-failure.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-system-jobs.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/scheduling-ui-job-types.png
+      - docs/images/zh-CN/scheduling-ui-cron-origin-proof.png
+    gaps: []
+    # 2026-10-10：49 张未改动原图全部视觉检查；10 个 flow 均有四语言逐名映射，
+    # 来源见 docs/reference/evidence/scheduling-2026-10-10.json。旧 16 图不作本轮闭环依据。
+    # 普通非 SUPER_ADMIN 账号真实创建/暂停/修改/手动执行/恢复 Cron/日志/删除；
+    # 另一普通身份的日志、修改、状态、触发和删除请求全部 403。
+    # 缺 Handler 的真实失败日志四语可见，XXL handleCode=500 另有英/日/韩记录。
+    # 中文初次任务已删后无法恢复其 XXL 日志，来源用独立 API 补充任务核对，未冒充 UI 创建。
+    # 系统任务与类型目录只读；自建正常/失败/补充任务及无引用的自建类型已精确清理。
+    # covered 仅指本模块所列流程的证据映射，不代表全 UI 本地化或人工翻译复核通过。
   - id: messaging-monitoring
-    status: partial
-    required_flows: [message-status, retry, dead-letter, operation-log, trace-diagnosis]
+    status: covered
+    required_flows: [ message-status, retry, dead-letter, resend, skip, operation-log, trace-diagnosis, service-recovery ]
     existing_assets:
-      - docs/images/monitor-mqmessage.png
-      - docs/images/monitor-operlog.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/monitor-mq-messages.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/system-operation-log.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/monitor-mq-message-detail.png
-      # WP-010 R03 新增脚本（wp010r-mq-visual.flows.spec.ts），图待 R10 重拍后登记：
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/wp010r-mq-list-{locale}-{desktop,tablet,mobile}.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/wp010r-mq-detail-{locale}-desktop.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/wp010r-mq-list-failed-{locale}-desktop.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/wp010r-mq-list-dead-letter-{locale}-desktop.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/wp010r-mq-detail-dead-letter-{locale}-desktop.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/wp010r-mq-resend-confirm-{locale}-desktop.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/wp010r-mq-action-feedback-{locale}-desktop.png
-      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/wp010r-mq-trace-error-{locale}-desktop.png
-    gaps: [retry, dead-letter, trace-diagnosis, detail-and-action-states]
-    # 已补：消息详情弹层四语言只读图（detail-overlays.flows.spec.ts）。
-    # VIS-01 缺陷登记：旧批 wp010f-mq-detail-ko.png 与列表图 SHA 相同（详情图实为列表），
-    # 「详情和操作权限已像素验证」说法已撤回；R03 新增 wp010r-mq-visual.flows.spec.ts
-    # 预置确定性内容断言 + 本批图间 SHA-256 互斥校验，R10 真实重拍后本行转 covered。
-    # - retry / dead-letter：实测 5 个库的 sys_mq_message 共 809 行（base 87、procurement 644、srm 34、
-    #   workflow 23、crm 21）**status 全为 1，无任何 FAILED / DEAD_LETTER 记录**，因此重试与死信状态无法只读构造；
-    #   要产出它们必须向跨租户共享的 outbox 注入必然失败的消息并让 relay 按 2^retryCount×10s 反复重试报错，
-    #   属「制造故障」且会污染共享基础设施，**需单独授权**（BLOCKED）。
-    #   R03 脚本对上述前置如实处理：环境预置真实死信则出图，否则 annotate 跳过不出假图。
-    # - detail-and-action-states：详情态已有图；「操作态」（死信重发/跳过）确认框图只读可拍，
-    #   反馈 toast 图需 E2E_MQ_WRITE_ACTIONS=allow 写门控 + 真实死信数据，同步 BLOCKED 待 R10。
-    # - trace-diagnosis：R03 脚本以仅测试进程的 page.route 确定性故障（列表接口 503 + x-trace-id）
-    #   拍 loadFailedWithTrace 四语告警图，覆盖前端 trace 字段展示链路；与可观测栈排障链的全链路证据仍待单独设计。
-    # 译文完整度登记（R03 更新）：旧注释记录的「MQ 详情弹层 ja/ko 整层英文」已修复；
-    # 原硬编码英文状态标签（PENDING/SENT/FAILED/DEAD_LETTER/SKIPPED）已改走 i18n key
-    # （mqMessage.status* 六态含 PROCESSING(5) 瞬态），zh-CN 的 bindingName/tag 英文残留同步翻译；
-    # ui:i18n:parity 四语键数一致。正式像素仍由 R10 在新 bundle 上重拍为准。
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-pending.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-failed-detail.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-dead-letter.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-dead-detail.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-resend-confirm.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-skip-confirm.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-sent.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-skipped.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-service-unavailable.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-service-recovered.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-operlog-list.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/mq-teaching-operlog-detail.png
+    gaps: []
+    # 本批48张真实原图与6阶段验证：docs/reference/evidence/mq-2026-10-12.json。
+    # 全部来自独立教学项目；真实20/40秒重试、管理动作、消费去重及同容器故障恢复。
+    # covered 仅针对上述8流程；不表示全UI本地化、人工翻译复核或Grafana/Loki/Tempo全链路通过。
+    # 旧WP截图不作本批证明；重复详情/列表SHA的历史错误不继承。
   - id: workflow
-    status: partial
-    required_flows: [model-create, bpmn-design, candidate-config, validation, publish, start, approval, countersign, completion, instance-tracking]
+    status: covered
+    required_flows: [ model-create, bpmn-design, candidate-config, validation, publish, start, approval, countersign, completion, instance-tracking, reject, terminate, delegate, add-signer, remove-signer, model-access-denied ]
     existing_assets:
       - docs/images/workflow-designer.png
       - docs/images/workflow-approval.png
@@ -149,25 +143,43 @@ modules:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-instance-progress.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-instance-approval-records.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-model-versions.png
-    gaps: [model-lifecycle, countersign, detail-and-action-states, failure-states]
-    # tracking 已关闭：/admin/workflow/instance 四语言正式图，页面真实渲染 23 条流程实例、
-    # 流转进度与审批记录入口；definitions 与 stats 同时补齐 publish/instance-tracking 的只读视图。
-    # 已补（本批）：三个只读详情弹层四语言图 —— 流转进度（真实 BPMN 图，已执行节点绿色/未执行分支灰色）、
-    # 审批记录（节点名称/审批人/审批结果/审批意见/审批时间）、版本历史（业务版本/状态/引擎版本/发布人/发布时间/SHA-256）。
-    # 但 gaps 本批**未减少**，如实登记原因：
-    # - model-lifecycle / detail-and-action-states / failure-states 需「建模→BPMN 设计→校验→发布」写入链，
-    #   发布会向**共享 Flowable 引擎**部署流程定义（ACT_RE_*），且未经验证存在干净的删除/回滚路径，
-    #   在共享环境上风险偏高，**需单独授权**（BLOCKED）；本批不擅自部署。
-    # - countersign 需多实例会签模型与**多审批人身份**；现有受信任测试身份仅 admin/supplier1，
-    #   禁止临时越权或硬编码 Token，新增身份**登记待确认**（BLOCKED）。
-    # 图片质检拦截记录：首轮采集时「流转进度」弹层截到的是 BPMN 异步加载中的转圈态（画布空白），
-    # 经质检发现后已在用例中补上就绪断言（`.bpmn-viewer-wrap .djs-element` 可见 + `.el-loading-mask` 已消失）并重拍，
-    # 现图为完整渲染的真实流程图；未将加载态图片登记为正式资产。
-    # 内容注意：当前实例均由历次 E2E（含本批）产生，标题带 E2ESQ 标识；实例属 Flowable 审计历史，
-    # wf_process_instance_ext 无 deleted 列，不得用 SQL 硬删，故不为此造假数据或隐藏真实标题。
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-model-create-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-model-initial-canvas.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-assignment-all-preview.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-model-validation.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-model-version-one.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-ordinary-todo.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-approval-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-all-partial-progress.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-assignment-any.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-model-versions-two.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-any-auto-approved-progress.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-ui-all-approved-records.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-teaching-reject-progress.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-teaching-reject-records.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-teaching-withdraw-records.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-teaching-delegate-records.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-teaching-add-signer-records.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-teaching-remove-signer-records.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-negative-validation.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-negative-publish.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/workflow-negative-model-forbidden.png
+    required_states: [ workflow-negative-validation, workflow-negative-publish, workflow-negative-model-forbidden ]
+    gaps: []
+    # 2026-10-10：独立 Docker 教学项目、普通发起人及三名候选人，已完成真实设计器
+    # 创建/设计/保存/校验/发布 ALL1、首票 UI 审批、运行中发布 ANY2、旧实例版本隔离。
+    # workflow-teaching-ui.flows.spec.ts 四语4 passed/0 skipped，48图；中文从已提交回执续做，
+    # 未重发成功写入。另24项只读历史测试通过，拒绝/撤回/委托/加减签24图。
+    # 72张原图已逐图检查。早期中文帧按实际前后端镜像时间段归属，不冒称最新镜像重拍。
+    # start 使用普通用户 API，图证明产生待办；委托/加减签也由真实 API 执行，当前工作台无对应按钮。
+    # API负例覆盖权限/受理人/伪造身份/空候选/标识不符；另12张四语负向原图已逐图复核并入库。
+    # 负向4tests通过：已存XML标识错误、发布拒绝且草稿回滚、普通员工HTTP/API403；独立模型修复后校验成功。
+    # 发布页仅显示通用错误和排障码，可能重复提示；列表正常不表示已发布。后端校验详情仍为中文。
+    # MI_END 跳过记录的“自动通过”不等于投票；通用状态2不等于业务批准；人工翻译复核仍待完成。
+    # 完整来源、修复前后范围和界面文字限制见 docs/reference/evidence/workflow-2026-10-10.json。
   - id: crm
-    status: partial
-    required_flows: [lead, lead-conversion, customer, contact, opportunity-stage, activity, overview]
+    status: covered
+    required_flows: [ lead, lead-conversion, customer, contact, opportunity-stage, activity, overview ]
     existing_assets:
       - docs/images/crm-lead-list.png
       - docs/images/crm-lead-convert.png
@@ -182,17 +194,39 @@ modules:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-lead-create-validation.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-lead-create-success.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-lead-forbidden-403.png
-    gaps: [lead-conversion, customer, contact, opportunity-stage, activity]
-    # WP-014 S02 事实纠正（COVERAGE_ASSERTION_FALSE）：旧 status: covered / gaps: [] 不成立。
-    # 16 条登记资产只对应 lead 与 overview；lead-conversion/customer/contact/opportunity-stage/activity
-    # 五个 required flow 零登记（agent-B 逐图核对结论，与磁盘清单一致）。
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-teaching-lead-converted.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-teaching-lead-reopened.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-teaching-activity-completed.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-teaching-customer-active-360.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-teaching-contact.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-teaching-opportunity-won.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-teaching-opportunity-reopened-history.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-teaching-outside-scope.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-lead-create-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-activity-plan-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-activity-planned-result.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-activity-complete-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-lead-qualified.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-convert-customer.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-convert-contact.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-convert-opportunity.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-convert-confirm.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-lead-converted-result.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-opportunity-stage-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-ui-opportunity-won-result.png
+    gaps: []
+    # 2026-10-10：真实隔离 API 链路完成跟进、合格、转换/重放、赢输单/重开、版本及范围负例。
+    # 随后32个四语只读用例通过；另一次普通SALES_REP四语界面操作4 passed、0 skipped。
+    # 新建、活动计划/完成、合格、四步转换、推进/赢单共48张原图补齐具体操作态缺口。
+    # 两批80张原图全部AI目检并登记SHA/来源；covered指本模块声明的flow覆盖，人工译审仍待完成。
+    # 标签折行/截断、服务端中文字典及仅API可见断言的限制保留在CRM证据JSON和四语教程。
     # detail-and-action-states：新建对话框表单 + 必填校验失败 + 创建成功（E2E_MUTATIONS 自建唯一线索，
     # finally deleteLead 正式契约清理，多次重跑实证 reproducible-fixture）。
     # permission-and-failure-states：employee-forbidden-403 四语言（AUTHENTICATED_BUT_FORBIDDEN）
     # + 业务校验失败（crmLead.nameRequired 四语言）。
   - id: srm
     status: partial
-    required_flows: [invite, portal-register, admission, activation, lifecycle, evaluation, risk, supplier-quotation]
+    required_flows: [ invite, portal-register, admission, activation, lifecycle, evaluation, risk, supplier-quotation ]
     existing_assets:
       - docs/images/srm-invite.png
       - docs/images/srm-supplier-list.png
@@ -219,16 +253,29 @@ modules:
     special_viewports:
       - { width: 390, height: 844, flow: supplier-quotation }
       - { width: 1024, height: 768, flow: supplier-quotation }
-    gaps: [admission-lifecycle, detail-and-action-states]
+    gaps: [ portal-human-self-registration ]
     # stable-mobile-flow 已关闭：供应商门户在 390×844 与 1024×768 下四语言均稳定可用
     # （页签可见可点、「刷新询价」与逐行报价操作未被窄屏挤出或遮挡、列表按响应式收敛列），
     # 由 srm-portal-responsive.flows.spec.ts 实跑 8 passed / 0 skipped 证明；只读采集，无数据写入与收尾。
-    # admission-lifecycle 仍需完整 Portal 注册 Saga（inviteToken + requestId + 准入审批 + 激活）；
-    # detail-and-action-states 仍需详情弹层与操作结果（含写入与自建自清理）。
+    # 独立 USER 的真实入驻 UI、Saga、三节点准入、激活、生命周期详情、
+    # 已准入未受邀读取边界和淘汰已完成：srm-2026-10-12.json，76 原图复核、56 正式图。
+    # 邀请创建及审批判断使用正式 API；注册图只是入口，不能证明该账号验证码自注册。
+    # srm-native-actions-2026-10-13.json 补齐内部新增及五个生命周期原生按钮命令，
+    # 32 原图逐张检查，24 独立文件、8 字节一致复用；审批仍为普通候选人的正式 API。
+    # portal-human-self-registration 仍待验收；历史与夹具账号仅留在独立项目，
+    # 样例已淘汰、邀请已撤销，最终项目级清理仍待完成，不据此将整模块标 covered。
   - id: procurement
-    status: partial
-    required_flows: [material, approval-rule-match, requisition-approval, rfq, quotation-receipt, comparison, purchase-order, goods-receipt, overview]
+    status: covered
+    required_flows: [ material, approval-rule-match, requisition-approval, rfq, quotation-receipt, comparison, purchase-order, goods-receipt, overview ]
     existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-current-material.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-current-rule-match.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-current-rule-match-mobile.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-current-rule-match-tablet.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-current-overview.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-current-quote-versions.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-current-supplierC-quote.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-current-supplierD-quote.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-overview.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-approval-rules.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-approval-rules-mobile.png
@@ -249,7 +296,12 @@ modules:
     special_viewports:
       - { width: 390, height: 844, flow: approval-rule-match }
       - { width: 1024, height: 768, flow: approval-rule-match }
-    # WP006 十项 gap 全部闭环（2026-09-16，真实主链环境 wp006-real-chain-v1，wp006-visual.flows.spec.ts 四语实拍 68 passed，只读采集）。
+    # 当前九条链路证据：supply-chain-2026-10-09.json 的请购/询价/订单/两种收货，
+    # procurement-readonly-2026-10-12.json 的物料/三视口试算/概览，
+    # procurement-quotation-2026-10-12.json 的两家自身报价与保留的定标版本结果。
+    # 后者不宣称实时 UI 比价/定标点击；已定标 comparison 返回业务码409属于预期契约。
+    # 截图覆盖通过不代表人工翻译复核通过。以下 WP006 记录仅保留历史来源：
+    # WP006（2026-09-16，环境 wp006-real-chain-v1，四语实拍68张，只读采集）。
     # material/requisition-approval/rfq/purchase-order/goods-receipt：列表+详情抽屉真实数据四语截图。
     # quotation-receipt：supplier2 门户询价报价页签真实报价记录（RFQ-1-1，CNY 9000，已中标）。
     # comparison：RFQ 详情定点快照（中标报价 #2/v1 与两供应商报价版本并排；AWARDED 态比价入口收起
@@ -260,14 +312,33 @@ modules:
     # failure-or-forbidden：EMPLOYEE 403 拒绝页 + SUPPLIER 访问 /admin/* 被路由守卫重定向回供应商门户（角色域隔离）。
     gaps: []
   - id: asset
-    status: partial
-    required_flows: [receipt-card, ledger, allocation, acceptance, return, transfer-approval, disposal-approval, overview]
+    status: covered
+    required_flows: [ receipt-card, ledger, allocation, acceptance, return, transfer-approval, disposal-approval, overview ]
     existing_assets:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-overview.png
-    gaps: [receipt-card, ledger, allocation, acceptance, return, transfer-approval, disposal-approval, detail-and-action-states, success-result, failure-or-forbidden]
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-final-receipt-source-card.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-allocation-form.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-accept-confirm.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-return-confirm.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-returned-detail.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-self-empty-after-return.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-transfer-rejected.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-transfer-completed.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-disposal-rejected.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-disposal-completed.png
+    gaps: []
+    # 八项 required_flow 均有正式登记图片：asset-usage-2026-10-12.json 新增24张，
+    # supply-chain-2026-10-09.json 保留真实调拨/处置拒绝与完成结果；overview 使用既有登记图。
+    # 分配/接受/归还各由中文UI实际提交一次，四语为同样本操作前预览和真实归还结果。
+    # 404本人边界、409版本及历史删除保护是正式API负例，HTTP200/业务码，不冒称错误页面图。
+    # 采购来源卡已报废且只读；手工练习卡不证明收货建卡。7张文字未完整绘制/裁切原图排除。
+    # covered 仅表示声明流程的证据覆盖；人工译审与项目级历史/账号收尾仍单独验收。
   - id: permissions-exceptions
-    status: partial
-    required_flows: [employee-scope, procurement-admin-scope, supplier-scope, forbidden-403, not-found-404, menu-failure, api-failure]
+    status: covered
+    required_flows: [ employee-scope, procurement-admin-scope, supplier-scope, forbidden-403, not-found-404, menu-failure, api-failure ]
+    flow_modules:
+      procurement-admin-scope: [ procurement ]
+      supplier-scope: [ srm ]
     existing_assets:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/employee-forbidden-403.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/employee-workspace-scope.png
@@ -276,37 +347,62 @@ modules:
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/approval-route-list-failure.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/admin-menu-load-failure.png
       - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-approval-rules.png
-    gaps: [procurement-admin-scope, forbidden-403-unique-attribution, not-found-404-locale-fallback, menu-failure-locale-fallback]
-    # WP-014 S02 事实纠正：除 procurement-admin-scope 零登记外，另三项为逐图发现：
-    # - forbidden-403：employee/procurement/crm-lead 三个 403 登记项四语均为同一字节图，
-    #   画面无模块标识/URL/面包屑，不能同时支撑三个 claim（已在 reuse-recapture-plan 中保留一个原生 claim，其余转 RECAPTURE）。
-    # - not-found-404：en/ja/ko 三张同字节，画面为纯英文，即未按语言重拍。
-    # - menu-failure：ja/ko 两张同字节且画面英文，同理。旧根因在断言层：
-    #   permissions.flows.spec.ts 将 ja/ko 期望文案硬编码为英文并仅断言数字 404，未强制按语言重拍。
-    # menu-failure 前次“白屏”结论经诊断推翻：降级页 /menu-load-error 完好（本地化标题 + 重试/回首页），
-    # 首批失败为测试断言设计错误（降级页无 header 用户名），已修正断言后四语言 PASS。
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-manager-scope.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-manager-scope-detail.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-manager-outside-empty.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/core-config-forbidden-403.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/core-user-list-failure.png
+    gaps: []
+    # 2026-10-12：basic-2026-10-12.json 的真实 Docker 44项/44原图已逐图复核登记。
+    # employee403 有员工工作台归属且真实API403；404与菜单降级标题按实际四语重拍。
+    # 旧同字节跨模块归属和日/韩英文标题缺口已由新原图关闭，不继承旧图结论。
+    # procurement-scope-2026-10-12.json：普通PROCUREMENT_MANAGER的有效DEPT_AND_BELOW，
+    # 同部门已批准请购可见，另一部门草稿创建人200/经理业务404+空列表，四语4 passed、12原图目检。
+    # procurement-admin-scope 是历史覆盖标识而非不存在的PROCUREMENT_ADMIN角色。
+    # 专用未提交草稿在截图后由创建人正式删除；没有用删除后的不存在证明权限，也未授予SUPER_ADMIN。
     # api-failure/menu-failure 故障均为 deterministic test fault（page.route，仅测试进程）。
     # reproducible-fixture 已由 manifest fixture 字段 + 测试自建自清理多轮实证闭环。
+    # 2026-10-12: Four real local Docker terminal flows registered; public receipt separates CLI, golden builds and lite read-only runtime scope. No fabricated terminal images or human signoff.
   - id: scaffold-development
-    status: missing
-    required_flows: [create-service, crud-generate, preset-select, lite-mode]
-    existing_assets: []
-    gaps: [no-registered-evidence, cli-text-evidence-type-pending]
+    status: covered
+    required_flows: [ create-service, crud-generate, preset-select, lite-mode ]
+    flow_evidence: { create-service: terminal, crud-generate: terminal, preset-select: terminal, lite-mode: terminal }
+    existing_assets:
+      - docs/reference/evidence/scaffold-create-service-2026-10-12.txt
+      - docs/reference/evidence/scaffold-crud-generate-2026-10-12.txt
+      - docs/reference/evidence/scaffold-preset-select-2026-10-12.txt
+      - docs/reference/evidence/scaffold-lite-mode-2026-10-12.txt
+      - docs/reference/evidence/scaffold-2026-10-12.json
+    gaps: []
     # WP-014 S05 事实纠正（SOURCE_FACT_STALE）：旧理由 implementation-not-yet-delivered 不成立。
     # tools/omni-cli 已交付 create-service（默认 preview，--apply 才写）、generate crud --spec
     # --check/--dry-run/--apply、preset list/validate/explain/create --output、dev up/doctor。
-    # 真实缺口是“无任何登记证据”；按 WP-011 原合同，纯 CLI 步骤记录脱敏命令/终端文本，
-    # 不伪造 HTML 终端图，也不删 required_flow。lite 是运行模式而非预设（见 CLI 源码拦截表）。
+    # 历史缺口为“无任何登记证据”；2026-10-12 已登记四项真实终端记录，原 required_flow 保留。
+    # 按 WP-011 原合同不伪造 HTML 终端图。lite 是运行模式而非预设（见 CLI 源码拦截表）。
   - id: operations
-    status: missing
-    required_flows: [compose-start, health-check, trace, dashboard, alert]
-    existing_assets: []
-    gaps: [no-registered-evidence, third-party-ui-locale-viewport-pending]
-    # WP-014 S05 事实纠正（SOURCE_FACT_STALE）：旧理由 observability-not-yet-delivered 不成立。
-    # compose.observability.yaml 已定义 Prometheus/Grafana/Loki/Tempo/Alloy/Alertmanager/OTel，
-    # 并有 observability/grafana/dashboards 与告警规则。真实缺口是“无任何登记证据”，
-    # 且第三方运维 UI 的 ja/ko 与窄视口支持需单格登记并申请决定，不得整体 exempt。
-
+    status: covered
+    required_flows: [ compose-start, health-check, trace, dashboard, alert ]
+    flow_evidence: { compose-start: terminal, health-check: terminal, trace: terminal }
+    existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/operations-dashboard.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/operations-dashboard-tablet.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/operations-dashboard-mobile.png
+      - docs/images/operations-alert-firing.png
+      - docs/images/operations-alert-firing-tablet.png
+      - docs/images/operations-alert-firing-mobile.png
+      - docs/images/operations-alert-controls-left-mobile.png
+      - docs/images/operations-alert-controls-right-toggle-mobile.png
+      - docs/reference/evidence/operations-compose-start-2026-10-12.txt
+      - docs/reference/evidence/operations-health-2026-10-12.json
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/operations-alert-localized.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/operations-alert-localized-tablet.png
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/operations-alert-localized-mobile.png
+      - docs/reference/evidence/alertmanager-i18n-2026-10-13.json
+    special_viewports:
+      - { width: 390, height: 844, flow: dashboard }
+      - { width: 1024, height: 768, flow: dashboard }
+    gaps: []
+    #2026-10-13: The historical English/scroll receipts remain baseline evidence. Current source-localized official Elm UI passed four languages, 12 real-alert captures and eight desktop/phone control scenarios. All images were actually inspected; normal vertical phone scrolling remains documented.
 rules:
   - 正式图片必须在 screenshot-manifest.yaml 中与稳定 Playwright 用例一一对应
   - 同一流程的四语言必须使用相同 fixture、步骤编号和视口

@@ -1,0 +1,2192 @@
+{
+  "schema": 1,
+  "kind": "local-docker-real-public-entry-and-permission-ui-evidence",
+  "recorded_at": "2026-10-12T05:57:31.151Z",
+  "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "tools": {
+    "runtime": "local Docker",
+    "browser": "mcr.microsoft.com/playwright:v1.61.1-noble"
+  },
+  "execution": {
+    "selected_unique_checks": 44,
+    "selected_images": 44,
+    "selected_epochs": {
+      "public": "001:20 successful public checks",
+      "permissions": "003:20 successful permission checks, excluding list-failure captures",
+      "list_failure": "004:4 successful list-failure checks after all loading masks end"
+    },
+    "runs": {
+      "001": {
+        "project": "omni-wiki-acceptance-20261009",
+        "started_at": "2026-10-12T03:25:34.286Z",
+        "finished_at": "2026-10-12T03:26:24.885Z",
+        "runtime": "local Docker",
+        "browser_image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+        "fixture": "E2eTokenFixture test classpath; existing formal seed identities",
+        "real_password_login_proven": false,
+        "mutations": false,
+        "display_fixtures": false,
+        "explicit_fault_tests": [
+          "expired-session: workflow API 401",
+          "menu-failure: auth menus API 500",
+          "api-failure: approval route API 500"
+        ],
+        "tests": [
+          "flows/public.flows.spec.ts",
+          "flows/permissions.flows.spec.ts"
+        ],
+        "exit_code": 1,
+        "visual_review": "pending",
+        "human_translation_review": "pending"
+      },
+      "002": {
+        "project": "omni-wiki-acceptance-20261009",
+        "started_at": "2026-10-12T03:29:12.920Z",
+        "finished_at": "2026-10-12T03:29:18.571Z",
+        "runtime": "local Docker",
+        "browser_image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+        "fixture": "E2eTokenFixture test classpath; existing formal seed identities",
+        "real_password_login_proven": false,
+        "mutations": false,
+        "display_fixtures": false,
+        "explicit_fault_tests": [
+          "expired-session: workflow API 401",
+          "menu-failure: auth menus API 500",
+          "api-failure: approval route API 500"
+        ],
+        "tests": [
+          "flows/public.flows.spec.ts",
+          "flows/permissions.flows.spec.ts"
+        ],
+        "exit_code": 0,
+        "visual_review": "pending",
+        "human_translation_review": "pending"
+      },
+      "003": {
+        "project": "omni-wiki-acceptance-20261009",
+        "started_at": "2026-10-12T05:46:32.740Z",
+        "finished_at": "2026-10-12T05:46:49.872Z",
+        "runtime": "local Docker",
+        "browser_image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+        "fixture": "E2eTokenFixture test classpath; existing formal seed identities",
+        "real_password_login_proven": false,
+        "mutations": false,
+        "display_fixtures": false,
+        "explicit_fault_tests": [
+          "expired-session: workflow API 401",
+          "menu-failure: auth menus API 500",
+          "api-failure: approval route API 500"
+        ],
+        "tests": [
+          "flows/permissions.flows.spec.ts"
+        ],
+        "exit_code": 0,
+        "visual_review": "pending",
+        "human_translation_review": "pending"
+      },
+      "004": {
+        "project": "omni-wiki-acceptance-20261009",
+        "started_at": "2026-10-12T05:53:56.438Z",
+        "finished_at": "2026-10-12T05:54:04.894Z",
+        "runtime": "local Docker",
+        "browser_image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+        "fixture": "E2eTokenFixture test classpath; existing formal seed identities",
+        "real_password_login_proven": false,
+        "mutations": false,
+        "display_fixtures": false,
+        "explicit_fault_tests": [
+          "expired-session: workflow API 401",
+          "menu-failure: auth menus API 500",
+          "api-failure: approval route API 500"
+        ],
+        "tests": [
+          "flows/permissions.flows.spec.ts"
+        ],
+        "exit_code": 0,
+        "visual_review": "pending",
+        "human_translation_review": "pending"
+      }
+    },
+    "reports": {
+      "001": {
+        "expected": 40,
+        "unexpected": 4,
+        "skipped": 0,
+        "flaky": 0,
+        "duration_ms": 49842.149,
+        "sha256": "87fb0a812f7c83f3d7b89cf13aa9217b8ef6a28736fc296507caf2678c661efe"
+      },
+      "002": {
+        "expected": 4,
+        "unexpected": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "duration_ms": 4837.945000000001,
+        "sha256": "6e238f5fe75e49e0e222d98d2bc3cffb7f48d9529ad08c11a1e6f99be45b4ec6"
+      },
+      "003": {
+        "expected": 24,
+        "unexpected": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "duration_ms": 16399.859,
+        "sha256": "d42ff914ce9270c61e2f5ec210d6d2a24bc03b0a3a98fa13be57c422a4ddae2b"
+      },
+      "004": {
+        "expected": 4,
+        "unexpected": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "duration_ms": 7521.066,
+        "sha256": "5fe67fa6bc8348aeac8d05a781cc27f5947fe6e7cf862e4e3c7ba66dfeb8db56"
+      }
+    },
+    "failed_attempts": [
+      {
+        "epoch": "001",
+        "reason": "4 raw500-detail expectations corrected to the actual safe localized error; production behavior unchanged"
+      }
+    ],
+    "rejected_images": [
+      {
+        "epoch": "001",
+        "scenes": [
+          "employee-workspace-scope",
+          "supplier-portal-scope"
+        ],
+        "reason": "Loading masks visible during visual review; real-response readiness added"
+      },
+      {
+        "epoch": "003",
+        "scenes": [
+          "approval-route-list-failure"
+        ],
+        "reason": "Some unrelated real coverage requests were still loading; targeted004 waits for completion"
+      }
+    ]
+  },
+  "source_epochs": {
+    "001": {
+      "captured_at": "2026-10-12T03:25:33.7110119Z",
+      "source_commit": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "source_files": [
+        {
+          "path": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+          "sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+          "sha256": "1c951d6180e20be904a6177110aca13540848c3e0979e59d0ce4765aca19a515"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/playwright.docs.config.ts",
+          "sha256": "1521bc4c6eefd09c2f3a3cf9280fa9ab56a98c4966527e2875ae74f6619851a0"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+          "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+          "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+          "status": "running",
+          "health": null
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "container_image": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "tag": "omni-wiki-acceptance-workflow:trusted-initiator-20261010",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "container_image": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "tag": "omni-wiki-acceptance-asset:latest",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "container_image": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "tag": "omni-wiki-acceptance-procurement:latest",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "70f03daef507600dae51837b38aa133e55baddb3289eee22968a0787d0b380d9",
+          "container_image": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "tag": "omni-wiki-acceptance-gateway:latest",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "container_image": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "tag": "omni-wiki-acceptance-crm:latest",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "container_image": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "tag": "omni-wiki-acceptance-srm:latest",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "container_image": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "tag": "omni-wiki-acceptance-auth:latest",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "container_image": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "tag": "nacos/nacos-server:v3.1.1",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "omni-base",
+          "container_id": "5d700a593ac0c3ac35912981b314780d13d15f1670544443efa1594a24d2f5fc",
+          "container_image": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "tag": "omni-wiki-acceptance-base:latest",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "container_image": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "tag": "xuxueli/xxl-job-admin:3.3.1",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "container_image": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "tag": "omni-wiki-acceptance-db-migrator:latest",
+          "status": "exited",
+          "health": "unhealthy"
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "container_image": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "tag": "omni-wiki-acceptance-rocketmq-broker:5.3.2",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "container_image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "tag": "mysql:8.4",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "container_image": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "tag": "redis:7.4",
+          "status": "running",
+          "health": "healthy"
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "container_image": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "tag": "apache/rocketmq:5.3.2",
+          "status": "running",
+          "health": "healthy"
+        }
+      ],
+      "browser_image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+      "reason": "New current-runtime capture and stronger live API403/localized404/error-visible assertions; previous158-case run retained"
+    },
+    "003": {
+      "captured_at": "2026-10-12T05:46:29.3393896Z",
+      "source_commit": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "source_files": [
+        {
+          "sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+          "path": "omni-frontend/e2e-docs/flows/public.flows.spec.ts"
+        },
+        {
+          "sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+          "path": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts"
+        },
+        {
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc",
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts"
+        },
+        {
+          "sha256": "1521bc4c6eefd09c2f3a3cf9280fa9ab56a98c4966527e2875ae74f6619851a0",
+          "path": "omni-frontend/playwright.docs.config.ts"
+        }
+      ],
+      "runtime": [
+        {
+          "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+          "service": "omni-frontend",
+          "status": "running",
+          "health": null,
+          "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+          "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+        },
+        {
+          "container_image": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "service": "omni-workflow",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-workflow:trusted-initiator-20261010",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541"
+        },
+        {
+          "container_image": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "service": "omni-asset",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-asset:latest",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4"
+        },
+        {
+          "container_image": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "service": "omni-procurement",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-procurement:latest",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b"
+        },
+        {
+          "container_image": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "service": "omni-gateway",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-gateway:latest",
+          "container_id": "70f03daef507600dae51837b38aa133e55baddb3289eee22968a0787d0b380d9"
+        },
+        {
+          "container_image": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "service": "omni-crm",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-crm:latest",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121"
+        },
+        {
+          "container_image": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "service": "omni-srm",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-srm:latest",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a"
+        },
+        {
+          "container_image": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "service": "omni-auth",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-auth:latest",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d"
+        },
+        {
+          "container_image": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "service": "nacos",
+          "status": "running",
+          "health": "healthy",
+          "tag": "nacos/nacos-server:v3.1.1",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994"
+        },
+        {
+          "container_image": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "service": "omni-base",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-base:latest",
+          "container_id": "5d700a593ac0c3ac35912981b314780d13d15f1670544443efa1594a24d2f5fc"
+        },
+        {
+          "container_image": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "service": "xxl-job-admin",
+          "status": "running",
+          "health": "healthy",
+          "tag": "xuxueli/xxl-job-admin:3.3.1",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8"
+        },
+        {
+          "container_image": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "service": "omni-db-migrator",
+          "status": "exited",
+          "health": "unhealthy",
+          "tag": "omni-wiki-acceptance-db-migrator:latest",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535"
+        },
+        {
+          "container_image": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "service": "rocketmq-broker",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-rocketmq-broker:5.3.2",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c"
+        },
+        {
+          "container_image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "service": "mysql",
+          "status": "running",
+          "health": "healthy",
+          "tag": "mysql:8.4",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc"
+        },
+        {
+          "container_image": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "service": "redis",
+          "status": "running",
+          "health": "healthy",
+          "tag": "redis:7.4",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c"
+        },
+        {
+          "container_image": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "service": "rocketmq-namesrv",
+          "status": "running",
+          "health": "healthy",
+          "tag": "apache/rocketmq:5.3.2",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34"
+        }
+      ],
+      "browser_image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+      "reason": "New current-runtime capture and stronger live API403/localized404/error-visible assertions; previous158-case run retained"
+    },
+    "004": {
+      "captured_at": "2026-10-12T05:53:55.6230570Z",
+      "source_commit": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "source_files": [
+        {
+          "sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+          "path": "omni-frontend/e2e-docs/flows/public.flows.spec.ts"
+        },
+        {
+          "sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+          "path": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts"
+        },
+        {
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc",
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts"
+        },
+        {
+          "sha256": "1521bc4c6eefd09c2f3a3cf9280fa9ab56a98c4966527e2875ae74f6619851a0",
+          "path": "omni-frontend/playwright.docs.config.ts"
+        }
+      ],
+      "runtime": [
+        {
+          "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+          "service": "omni-frontend",
+          "status": "running",
+          "health": null,
+          "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+          "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+        },
+        {
+          "container_image": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "service": "omni-workflow",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-workflow:trusted-initiator-20261010",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541"
+        },
+        {
+          "container_image": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "service": "omni-asset",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-asset:latest",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4"
+        },
+        {
+          "container_image": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "service": "omni-procurement",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-procurement:latest",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b"
+        },
+        {
+          "container_image": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "service": "omni-gateway",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-gateway:latest",
+          "container_id": "70f03daef507600dae51837b38aa133e55baddb3289eee22968a0787d0b380d9"
+        },
+        {
+          "container_image": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "service": "omni-crm",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-crm:latest",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121"
+        },
+        {
+          "container_image": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "service": "omni-srm",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-srm:latest",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a"
+        },
+        {
+          "container_image": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "service": "omni-auth",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-auth:latest",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d"
+        },
+        {
+          "container_image": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "service": "nacos",
+          "status": "running",
+          "health": "healthy",
+          "tag": "nacos/nacos-server:v3.1.1",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994"
+        },
+        {
+          "container_image": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "service": "omni-base",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-base:latest",
+          "container_id": "5d700a593ac0c3ac35912981b314780d13d15f1670544443efa1594a24d2f5fc"
+        },
+        {
+          "container_image": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "service": "xxl-job-admin",
+          "status": "running",
+          "health": "healthy",
+          "tag": "xuxueli/xxl-job-admin:3.3.1",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8"
+        },
+        {
+          "container_image": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "service": "omni-db-migrator",
+          "status": "exited",
+          "health": "unhealthy",
+          "tag": "omni-wiki-acceptance-db-migrator:latest",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535"
+        },
+        {
+          "container_image": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "service": "rocketmq-broker",
+          "status": "running",
+          "health": "healthy",
+          "tag": "omni-wiki-acceptance-rocketmq-broker:5.3.2",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c"
+        },
+        {
+          "container_image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "service": "mysql",
+          "status": "running",
+          "health": "healthy",
+          "tag": "mysql:8.4",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc"
+        },
+        {
+          "container_image": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "service": "redis",
+          "status": "running",
+          "health": "healthy",
+          "tag": "redis:7.4",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c"
+        },
+        {
+          "container_image": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "service": "rocketmq-namesrv",
+          "status": "running",
+          "health": "healthy",
+          "tag": "apache/rocketmq:5.3.2",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34"
+        }
+      ],
+      "browser_image": "mcr.microsoft.com/playwright:v1.61.1-noble",
+      "reason": "New current-runtime capture and stronger live API403/localized404/error-visible assertions; previous158-case run retained"
+    }
+  },
+  "limitations": [
+    "All44 selected original-resolution PNGs individually reviewed; copied without editing.",
+    "Seed tenant/company/category content retains its canonical language. It is not a translated UI label.",
+    "Japanese/Korean supplier profile labels Status/Phone/Email and fallback Retry remain English. English sidebar can clip; the Japanese supplier-login heading wraps.",
+    "Expired-session screenshots retain a real Chinese user-job notification outside the dialog; the dialog remains unobscured. No DOM content was substituted.",
+    "Three fault scenes intercept only the named browser requests; these are UI handling tests, not real service outages.",
+    "Controlled test-classpath identities are separate from the single real human CAPTCHA/password login receipt.",
+    "This batch does not prove registration completion, external-provider OAuth callbacks, complete device consent, or all DataScope write boundaries.",
+    "Agent visual review does not replace mandatory human translation sign-off."
+  ],
+  "records": [
+    {
+      "id": "auth-login-zh-CN",
+      "module": "authentication",
+      "flow": "password-captcha",
+      "step": "auth-login",
+      "locale": "zh-CN",
+      "role": "public",
+      "route": "/login",
+      "claim": "Login entry with real tenant/CAPTCHA retrieval; no password submission",
+      "image": "docs/images/zh-CN/auth-login.png",
+      "image_sha256": "555bb6cd53027bea98ba829a0b179ba589225b940babd673ed7cf5e7990a8ab2",
+      "captured_at": "2026-10-12T03:26:12.825Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-login-en-US",
+      "module": "authentication",
+      "flow": "password-captcha",
+      "step": "auth-login",
+      "locale": "en-US",
+      "role": "public",
+      "route": "/login",
+      "claim": "Login entry with real tenant/CAPTCHA retrieval; no password submission",
+      "image": "docs/images/en-US/auth-login.png",
+      "image_sha256": "b54798072435ff341b82d5b0f70f5daed08fe10e364f1c8b4bfed09ff1015a16",
+      "captured_at": "2026-10-12T03:26:14.839Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-login-ja-JP",
+      "module": "authentication",
+      "flow": "password-captcha",
+      "step": "auth-login",
+      "locale": "ja-JP",
+      "role": "public",
+      "route": "/login",
+      "claim": "Login entry with real tenant/CAPTCHA retrieval; no password submission",
+      "image": "docs/images/ja-JP/auth-login.png",
+      "image_sha256": "f8f728825b17533caaffa556f0f63d7aab80097a9ee3d84b53d63711f019c3b4",
+      "captured_at": "2026-10-12T03:26:16.722Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-login-ko-KR",
+      "module": "authentication",
+      "flow": "password-captcha",
+      "step": "auth-login",
+      "locale": "ko-KR",
+      "role": "public",
+      "route": "/login",
+      "claim": "Login entry with real tenant/CAPTCHA retrieval; no password submission",
+      "image": "docs/images/ko-KR/auth-login.png",
+      "image_sha256": "2265b4d9f21d3308933dfb7975873ecafd6d40c50bb52df0d93612b91f611bea",
+      "captured_at": "2026-10-12T03:26:18.709Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-register-zh-CN",
+      "module": "authentication",
+      "flow": "register",
+      "step": "auth-register",
+      "locale": "zh-CN",
+      "role": "public",
+      "route": "/register",
+      "claim": "Registration form only; account creation is not proven",
+      "image": "docs/images/zh-CN/auth-register.png",
+      "image_sha256": "e70e1722f9e4979b42c3ef9183ae2bf626fab5ea792a0a76a71868ecab61ae70",
+      "captured_at": "2026-10-12T03:26:13.370Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-register-en-US",
+      "module": "authentication",
+      "flow": "register",
+      "step": "auth-register",
+      "locale": "en-US",
+      "role": "public",
+      "route": "/register",
+      "claim": "Registration form only; account creation is not proven",
+      "image": "docs/images/en-US/auth-register.png",
+      "image_sha256": "a282f1b051f522bbf62786bd93a5ab49872d059c5e57abe1c9d3099c0d93f75c",
+      "captured_at": "2026-10-12T03:26:15.311Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-register-ja-JP",
+      "module": "authentication",
+      "flow": "register",
+      "step": "auth-register",
+      "locale": "ja-JP",
+      "role": "public",
+      "route": "/register",
+      "claim": "Registration form only; account creation is not proven",
+      "image": "docs/images/ja-JP/auth-register.png",
+      "image_sha256": "76d5315a36047343af2f7e10b870b5a4e76612429a968f7898c999dd65a1be4c",
+      "captured_at": "2026-10-12T03:26:17.171Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-register-ko-KR",
+      "module": "authentication",
+      "flow": "register",
+      "step": "auth-register",
+      "locale": "ko-KR",
+      "role": "public",
+      "route": "/register",
+      "claim": "Registration form only; account creation is not proven",
+      "image": "docs/images/ko-KR/auth-register.png",
+      "image_sha256": "97ebc2d299d69f9a4e98420107469211fe4288bbd76c7dfd68095be57ccb9bee",
+      "captured_at": "2026-10-12T03:26:19.155Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-device-code-zh-CN",
+      "module": "authentication",
+      "flow": "device-code",
+      "step": "auth-device-code",
+      "locale": "zh-CN",
+      "role": "public",
+      "route": "/device",
+      "claim": "Real device authorization initialized; user code/QR/link masked; consent/token completion is not proven",
+      "image": "docs/images/zh-CN/auth-device-code.png",
+      "image_sha256": "14f41a0a526921e72bccb8c0cd9819fb621d277d2e706be66f7aa844e8e0c010",
+      "captured_at": "2026-10-12T03:26:13.883Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-device-code-en-US",
+      "module": "authentication",
+      "flow": "device-code",
+      "step": "auth-device-code",
+      "locale": "en-US",
+      "role": "public",
+      "route": "/device",
+      "claim": "Real device authorization initialized; user code/QR/link masked; consent/token completion is not proven",
+      "image": "docs/images/en-US/auth-device-code.png",
+      "image_sha256": "fd435f0a7d166daa8be2cf21b437056f03976a8ada4a4ed500a0fc4506a6ce6e",
+      "captured_at": "2026-10-12T03:26:15.764Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-device-code-ja-JP",
+      "module": "authentication",
+      "flow": "device-code",
+      "step": "auth-device-code",
+      "locale": "ja-JP",
+      "role": "public",
+      "route": "/device",
+      "claim": "Real device authorization initialized; user code/QR/link masked; consent/token completion is not proven",
+      "image": "docs/images/ja-JP/auth-device-code.png",
+      "image_sha256": "4581e648fddd8fc55d75cd5ef65a7975bce5f09a4974e02a4196163bc904af6b",
+      "captured_at": "2026-10-12T03:26:17.653Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "auth-device-code-ko-KR",
+      "module": "authentication",
+      "flow": "device-code",
+      "step": "auth-device-code",
+      "locale": "ko-KR",
+      "role": "public",
+      "route": "/device",
+      "claim": "Real device authorization initialized; user code/QR/link masked; consent/token completion is not proven",
+      "image": "docs/images/ko-KR/auth-device-code.png",
+      "image_sha256": "440fb83c77b2b06043208c3e09cb430d5a5a1ebf80c44b8ef625ed91eb72df6b",
+      "captured_at": "2026-10-12T03:26:19.631Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "supplier-portal-login-zh-CN",
+      "module": "authentication",
+      "flow": "password-captcha",
+      "step": "supplier-portal-login",
+      "locale": "zh-CN",
+      "role": "public",
+      "route": "/portal-login",
+      "claim": "Supplier login entry; no password submission",
+      "image": "docs/images/zh-CN/supplier-portal-login.png",
+      "image_sha256": "b9b43896b0366cf8da9f32a28817931255f4b664dca0bd7f712b394a99b97aa5",
+      "captured_at": "2026-10-12T03:26:14.391Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "supplier-portal-login-en-US",
+      "module": "authentication",
+      "flow": "password-captcha",
+      "step": "supplier-portal-login",
+      "locale": "en-US",
+      "role": "public",
+      "route": "/portal-login",
+      "claim": "Supplier login entry; no password submission",
+      "image": "docs/images/en-US/supplier-portal-login.png",
+      "image_sha256": "823f98eced920ead2d5d883b4ed6f482c4f22d1bf53ade45be868abee9dd42bf",
+      "captured_at": "2026-10-12T03:26:16.224Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "supplier-portal-login-ja-JP",
+      "module": "authentication",
+      "flow": "password-captcha",
+      "step": "supplier-portal-login",
+      "locale": "ja-JP",
+      "role": "public",
+      "route": "/portal-login",
+      "claim": "Supplier login entry; no password submission",
+      "image": "docs/images/ja-JP/supplier-portal-login.png",
+      "image_sha256": "862797c223b5a8dbd7d161e8f46b8eae1ed77570cf8cd43f6a11edc6b8807fe1",
+      "captured_at": "2026-10-12T03:26:18.092Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "supplier-portal-login-ko-KR",
+      "module": "authentication",
+      "flow": "password-captcha",
+      "step": "supplier-portal-login",
+      "locale": "ko-KR",
+      "role": "public",
+      "route": "/portal-login",
+      "claim": "Supplier login entry; no password submission",
+      "image": "docs/images/ko-KR/supplier-portal-login.png",
+      "image_sha256": "ebc8141f49459fe761e0b42e06bf29843c021622d8892e3c017f6cbf5519403e",
+      "captured_at": "2026-10-12T03:26:20.069Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "session-expired-dialog-zh-CN",
+      "module": "authentication",
+      "flow": "expired-session",
+      "step": "session-expired-dialog",
+      "locale": "zh-CN",
+      "role": "SUPER_ADMIN",
+      "route": "/",
+      "claim": "Explicit browser-test workflow API401 triggers the actual localized expired-session dialog",
+      "image": "docs/images/zh-CN/session-expired-dialog.png",
+      "image_sha256": "3d95bf2c110291404a651f8cf03ffa68e857b8ece539af5190b2480680f21114",
+      "captured_at": "2026-10-12T03:26:21.255Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "session-expired-dialog-en-US",
+      "module": "authentication",
+      "flow": "expired-session",
+      "step": "session-expired-dialog",
+      "locale": "en-US",
+      "role": "SUPER_ADMIN",
+      "route": "/",
+      "claim": "Explicit browser-test workflow API401 triggers the actual localized expired-session dialog",
+      "image": "docs/images/en-US/session-expired-dialog.png",
+      "image_sha256": "356a4613724002fd932296e7863007e9d99c5dc59abacb994129635a49e93db9",
+      "captured_at": "2026-10-12T03:26:22.379Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "session-expired-dialog-ja-JP",
+      "module": "authentication",
+      "flow": "expired-session",
+      "step": "session-expired-dialog",
+      "locale": "ja-JP",
+      "role": "SUPER_ADMIN",
+      "route": "/",
+      "claim": "Explicit browser-test workflow API401 triggers the actual localized expired-session dialog",
+      "image": "docs/images/ja-JP/session-expired-dialog.png",
+      "image_sha256": "49e5267349be72f9e585bf3b65d53efc858f496f52f265e75ce11c539db0c187",
+      "captured_at": "2026-10-12T03:26:23.531Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "session-expired-dialog-ko-KR",
+      "module": "authentication",
+      "flow": "expired-session",
+      "step": "session-expired-dialog",
+      "locale": "ko-KR",
+      "role": "SUPER_ADMIN",
+      "route": "/",
+      "claim": "Explicit browser-test workflow API401 triggers the actual localized expired-session dialog",
+      "image": "docs/images/ko-KR/session-expired-dialog.png",
+      "image_sha256": "372e4d2a2e9126630785f2cfc2babb0979cdbb49101904d9864aa73f37e05cd9",
+      "captured_at": "2026-10-12T03:26:24.565Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/public.flows.spec.ts",
+      "captured_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "current_test_sha256": "1871428cde844e6301c08491865cb8469cde1b808d0061002f161a92f8b275ae",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "service": "omni-frontend",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0",
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "status": "running",
+        "health": null
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "employee-forbidden-403-zh-CN",
+      "module": "permissions-exceptions",
+      "flow": "forbidden-403",
+      "step": "employee-forbidden-403",
+      "locale": "zh-CN",
+      "role": "EMPLOYEE",
+      "route": "/admin/procurement/approval-route",
+      "claim": "Authenticated employee sees localized403; real direct API returns HTTP403/business403",
+      "image": "docs/images/zh-CN/employee-forbidden-403.png",
+      "image_sha256": "e5b60609d33a82f20fc72c5cb3575cf54440ed7ee0ee0edc993a2e675c5aac4a",
+      "captured_at": "2026-10-12T05:46:35.703Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "employee-forbidden-403-en-US",
+      "module": "permissions-exceptions",
+      "flow": "forbidden-403",
+      "step": "employee-forbidden-403",
+      "locale": "en-US",
+      "role": "EMPLOYEE",
+      "route": "/admin/procurement/approval-route",
+      "claim": "Authenticated employee sees localized403; real direct API returns HTTP403/business403",
+      "image": "docs/images/en-US/employee-forbidden-403.png",
+      "image_sha256": "689cd74a127678133ae43a63dcd2e984e487716ea08152f3d41997cde4e23a30",
+      "captured_at": "2026-10-12T05:46:37.295Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "employee-forbidden-403-ja-JP",
+      "module": "permissions-exceptions",
+      "flow": "forbidden-403",
+      "step": "employee-forbidden-403",
+      "locale": "ja-JP",
+      "role": "EMPLOYEE",
+      "route": "/admin/procurement/approval-route",
+      "claim": "Authenticated employee sees localized403; real direct API returns HTTP403/business403",
+      "image": "docs/images/ja-JP/employee-forbidden-403.png",
+      "image_sha256": "0ff2c0ff0c5959a81917e56f6a7aaffcbf35a661b39ff66ab5ffee95b904ae2c",
+      "captured_at": "2026-10-12T05:46:38.535Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "employee-forbidden-403-ko-KR",
+      "module": "permissions-exceptions",
+      "flow": "forbidden-403",
+      "step": "employee-forbidden-403",
+      "locale": "ko-KR",
+      "role": "EMPLOYEE",
+      "route": "/admin/procurement/approval-route",
+      "claim": "Authenticated employee sees localized403; real direct API returns HTTP403/business403",
+      "image": "docs/images/ko-KR/employee-forbidden-403.png",
+      "image_sha256": "0fad5f98a20e0dff7e9f616a0abf5ab95dfcd0cdd2ed36e0c134fac15f4a0a1e",
+      "captured_at": "2026-10-12T05:46:39.798Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "employee-workspace-scope-zh-CN",
+      "module": "permissions-exceptions",
+      "flow": "employee-scope",
+      "step": "employee-workspace-scope",
+      "locale": "zh-CN",
+      "role": "EMPLOYEE",
+      "route": "/",
+      "claim": "Real todo API200; zhangsan identity and localized workspace after loading completes",
+      "image": "docs/images/zh-CN/employee-workspace-scope.png",
+      "image_sha256": "092256af4874aae63544ed55a7fb05140d1add15de63ca67498fb16562bb6b7b",
+      "captured_at": "2026-10-12T05:46:36.807Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "employee-workspace-scope-en-US",
+      "module": "permissions-exceptions",
+      "flow": "employee-scope",
+      "step": "employee-workspace-scope",
+      "locale": "en-US",
+      "role": "EMPLOYEE",
+      "route": "/",
+      "claim": "Real todo API200; zhangsan identity and localized workspace after loading completes",
+      "image": "docs/images/en-US/employee-workspace-scope.png",
+      "image_sha256": "75db1851f6057892078482150477537734c10a161cd9885a3a41ae3cd207f837",
+      "captured_at": "2026-10-12T05:46:37.963Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "employee-workspace-scope-ja-JP",
+      "module": "permissions-exceptions",
+      "flow": "employee-scope",
+      "step": "employee-workspace-scope",
+      "locale": "ja-JP",
+      "role": "EMPLOYEE",
+      "route": "/",
+      "claim": "Real todo API200; zhangsan identity and localized workspace after loading completes",
+      "image": "docs/images/ja-JP/employee-workspace-scope.png",
+      "image_sha256": "9efdc725d87148607796a43b7e57cb7ee4b9e7c7bfaf5004bac105e8d952315b",
+      "captured_at": "2026-10-12T05:46:39.275Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "employee-workspace-scope-ko-KR",
+      "module": "permissions-exceptions",
+      "flow": "employee-scope",
+      "step": "employee-workspace-scope",
+      "locale": "ko-KR",
+      "role": "EMPLOYEE",
+      "route": "/",
+      "claim": "Real todo API200; zhangsan identity and localized workspace after loading completes",
+      "image": "docs/images/ko-KR/employee-workspace-scope.png",
+      "image_sha256": "60f166b02e86c9b392800f89986031e1ded13070bc3d6fd3e59fd908051287a5",
+      "captured_at": "2026-10-12T05:46:40.486Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "supplier-portal-scope-zh-CN",
+      "module": "permissions-exceptions",
+      "flow": "supplier-scope",
+      "step": "supplier-portal-scope",
+      "locale": "zh-CN",
+      "role": "SUPPLIER",
+      "route": "/supplier-portal",
+      "claim": "Real profile API200 for SUP-2026-001; supplier1 identity and profile render after loading completes",
+      "image": "docs/images/zh-CN/supplier-portal-scope.png",
+      "image_sha256": "b71cf14b87796411e71ef7dcf1e179a5355427488aea01b7530841d528150441",
+      "captured_at": "2026-10-12T05:46:41.281Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "supplier-portal-scope-en-US",
+      "module": "permissions-exceptions",
+      "flow": "supplier-scope",
+      "step": "supplier-portal-scope",
+      "locale": "en-US",
+      "role": "SUPPLIER",
+      "route": "/supplier-portal",
+      "claim": "Real profile API200 for SUP-2026-001; supplier1 identity and profile render after loading completes",
+      "image": "docs/images/en-US/supplier-portal-scope.png",
+      "image_sha256": "3efdd9d5374752b49038e0b34dd1eaabed5828fc720315d06cbf13d03ff6ad24",
+      "captured_at": "2026-10-12T05:46:41.893Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "supplier-portal-scope-ja-JP",
+      "module": "permissions-exceptions",
+      "flow": "supplier-scope",
+      "step": "supplier-portal-scope",
+      "locale": "ja-JP",
+      "role": "SUPPLIER",
+      "route": "/supplier-portal",
+      "claim": "Real profile API200 for SUP-2026-001; supplier1 identity and profile render after loading completes",
+      "image": "docs/images/ja-JP/supplier-portal-scope.png",
+      "image_sha256": "a0a5efd4733c02a54bee180283551087d2acb32239908ee7262780cd27f3e692",
+      "captured_at": "2026-10-12T05:46:42.428Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "supplier-portal-scope-ko-KR",
+      "module": "permissions-exceptions",
+      "flow": "supplier-scope",
+      "step": "supplier-portal-scope",
+      "locale": "ko-KR",
+      "role": "SUPPLIER",
+      "route": "/supplier-portal",
+      "claim": "Real profile API200 for SUP-2026-001; supplier1 identity and profile render after loading completes",
+      "image": "docs/images/ko-KR/supplier-portal-scope.png",
+      "image_sha256": "2a76bbeab562a1dbb44d8894416a598544b200fb3e1063449eaad724170344f8",
+      "captured_at": "2026-10-12T05:46:43.178Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "resource-not-found-404-zh-CN",
+      "module": "permissions-exceptions",
+      "flow": "not-found-404",
+      "step": "resource-not-found-404",
+      "locale": "zh-CN",
+      "role": "SUPER_ADMIN",
+      "route": "/e2e-nonexistent-404-probe",
+      "claim": "Real product unknown-route404 page; no data-resource404 claim",
+      "image": "docs/images/zh-CN/resource-not-found-404.png",
+      "image_sha256": "ce9a24b76829837f53bd9ea2abe5524fd577a82fa5bab4293d95c267479e6d23",
+      "captured_at": "2026-10-12T05:46:43.633Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "resource-not-found-404-en-US",
+      "module": "permissions-exceptions",
+      "flow": "not-found-404",
+      "step": "resource-not-found-404",
+      "locale": "en-US",
+      "role": "SUPER_ADMIN",
+      "route": "/e2e-nonexistent-404-probe",
+      "claim": "Real product unknown-route404 page; no data-resource404 claim",
+      "image": "docs/images/en-US/resource-not-found-404.png",
+      "image_sha256": "adcc4231629bf8f3a3abf0a2ec030551b2273180f741c2bd77067c360dd73de0",
+      "captured_at": "2026-10-12T05:46:43.981Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "resource-not-found-404-ja-JP",
+      "module": "permissions-exceptions",
+      "flow": "not-found-404",
+      "step": "resource-not-found-404",
+      "locale": "ja-JP",
+      "role": "SUPER_ADMIN",
+      "route": "/e2e-nonexistent-404-probe",
+      "claim": "Real product unknown-route404 page; no data-resource404 claim",
+      "image": "docs/images/ja-JP/resource-not-found-404.png",
+      "image_sha256": "94844189fe8fe934a3ae61b4f67889fca1a098dc87652eba4ff766318f9a9353",
+      "captured_at": "2026-10-12T05:46:44.316Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "resource-not-found-404-ko-KR",
+      "module": "permissions-exceptions",
+      "flow": "not-found-404",
+      "step": "resource-not-found-404",
+      "locale": "ko-KR",
+      "role": "SUPER_ADMIN",
+      "route": "/e2e-nonexistent-404-probe",
+      "claim": "Real product unknown-route404 page; no data-resource404 claim",
+      "image": "docs/images/ko-KR/resource-not-found-404.png",
+      "image_sha256": "681438f4babcea1dd7c753d28a3622e58eaf8d21bdaefbca52cec00143052253",
+      "captured_at": "2026-10-12T05:46:44.666Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": false,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "admin-menu-load-failure-zh-CN",
+      "module": "permissions-exceptions",
+      "flow": "menu-failure",
+      "step": "admin-menu-load-failure",
+      "locale": "zh-CN",
+      "role": "SUPER_ADMIN",
+      "route": "/menu-load-error",
+      "claim": "Explicit browser-test menu API500 triggers localized fallback page and retry entry",
+      "image": "docs/images/zh-CN/admin-menu-load-failure.png",
+      "image_sha256": "19e17bbe4dbe94a3495e82e2a652b165337329229a850d33be280520662e041e",
+      "captured_at": "2026-10-12T05:46:45.035Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "admin-menu-load-failure-en-US",
+      "module": "permissions-exceptions",
+      "flow": "menu-failure",
+      "step": "admin-menu-load-failure",
+      "locale": "en-US",
+      "role": "SUPER_ADMIN",
+      "route": "/menu-load-error",
+      "claim": "Explicit browser-test menu API500 triggers localized fallback page and retry entry",
+      "image": "docs/images/en-US/admin-menu-load-failure.png",
+      "image_sha256": "3fc06c9b601b06bd46992b8ef3d21e6c903a2019221c8eb1405044de24b65e14",
+      "captured_at": "2026-10-12T05:46:45.417Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "admin-menu-load-failure-ja-JP",
+      "module": "permissions-exceptions",
+      "flow": "menu-failure",
+      "step": "admin-menu-load-failure",
+      "locale": "ja-JP",
+      "role": "SUPER_ADMIN",
+      "route": "/menu-load-error",
+      "claim": "Explicit browser-test menu API500 triggers localized fallback page and retry entry",
+      "image": "docs/images/ja-JP/admin-menu-load-failure.png",
+      "image_sha256": "acd18cf15209e703142b8da4476c3efdc9ebf800fb77fe3d06bc0342875434c5",
+      "captured_at": "2026-10-12T05:46:45.817Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "admin-menu-load-failure-ko-KR",
+      "module": "permissions-exceptions",
+      "flow": "menu-failure",
+      "step": "admin-menu-load-failure",
+      "locale": "ko-KR",
+      "role": "SUPER_ADMIN",
+      "route": "/menu-load-error",
+      "claim": "Explicit browser-test menu API500 triggers localized fallback page and retry entry",
+      "image": "docs/images/ko-KR/admin-menu-load-failure.png",
+      "image_sha256": "dfe872017cefbdc6fa109d58c398ad332237995113e561a8f1722e818a4ca438",
+      "captured_at": "2026-10-12T05:46:46.266Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "345d8b22af91969f47caafc04fb83d8aea7c95118c8ed4aa50e2b359dc84e4dd",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "approval-route-list-failure-zh-CN",
+      "module": "permissions-exceptions",
+      "flow": "api-failure",
+      "step": "approval-route-list-failure",
+      "locale": "zh-CN",
+      "role": "SUPER_ADMIN",
+      "route": "/admin/procurement/approval-route",
+      "claim": "Explicit browser-test list API500; safe localized error toast while unrelated real requests finish",
+      "image": "docs/images/zh-CN/approval-route-list-failure.png",
+      "image_sha256": "170767c6f1bcfe759b8b6e823a11827124ba092186f1b9b365dffbadda2d0004",
+      "captured_at": "2026-10-12T05:54:00.415Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "approval-route-list-failure-en-US",
+      "module": "permissions-exceptions",
+      "flow": "api-failure",
+      "step": "approval-route-list-failure",
+      "locale": "en-US",
+      "role": "SUPER_ADMIN",
+      "route": "/admin/procurement/approval-route",
+      "claim": "Explicit browser-test list API500; safe localized error toast while unrelated real requests finish",
+      "image": "docs/images/en-US/approval-route-list-failure.png",
+      "image_sha256": "3527e1cb08cd6a1ce9fbbd8d19a09d4cd67f7c14d961402ec283c9ed4b493553",
+      "captured_at": "2026-10-12T05:54:01.768Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "approval-route-list-failure-ja-JP",
+      "module": "permissions-exceptions",
+      "flow": "api-failure",
+      "step": "approval-route-list-failure",
+      "locale": "ja-JP",
+      "role": "SUPER_ADMIN",
+      "route": "/admin/procurement/approval-route",
+      "claim": "Explicit browser-test list API500; safe localized error toast while unrelated real requests finish",
+      "image": "docs/images/ja-JP/approval-route-list-failure.png",
+      "image_sha256": "bd17bff8bf2ab82c855cb3707141fe7f3af59d58ccc3ce02ce01fa19b7896fc2",
+      "captured_at": "2026-10-12T05:54:03.193Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    },
+    {
+      "id": "approval-route-list-failure-ko-KR",
+      "module": "permissions-exceptions",
+      "flow": "api-failure",
+      "step": "approval-route-list-failure",
+      "locale": "ko-KR",
+      "role": "SUPER_ADMIN",
+      "route": "/admin/procurement/approval-route",
+      "claim": "Explicit browser-test list API500; safe localized error toast while unrelated real requests finish",
+      "image": "docs/images/ko-KR/approval-route-list-failure.png",
+      "image_sha256": "1a14f86e09ef5cd23129e6cd2e6520331dce26c97d01cdabd1bd7f4bd784d024",
+      "captured_at": "2026-10-12T05:54:04.547Z",
+      "capture_time_source": "Atomic screenshot output file mtime, within recorded test epoch",
+      "test": "omni-frontend/e2e-docs/flows/permissions.flows.spec.ts",
+      "captured_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "current_test_sha256": "7f033272a0f1165e16b3ef452fc7e7ec02e9e8e90d418ff803e0e7055c1560ee",
+      "source_baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+      "runtime": {
+        "container_image": "sha256:f195eee8133d37210053a76ac4aa82d29cd9d38993502ef38a8485d741a2e9ab",
+        "service": "omni-frontend",
+        "status": "running",
+        "health": null,
+        "tag": "omni-wiki-acceptance-frontend:mq-state-20261012",
+        "container_id": "76b1d3e30b520f9099508591b96d8a342d15e8daf7c9e6edd9366f3ed1ba62d0"
+      },
+      "explicit_test_fault": true,
+      "display_fixtures": false,
+      "visual_review": {
+        "reviewer": "Codex",
+        "type": "agent_visual_review",
+        "status": "passed-with-documented-limits",
+        "reviewed_at": "2026-10-12T05:57:31.151Z",
+        "human_translation_review": false
+      }
+    }
+  ],
+  "human_translation_review": {
+    "status": "present-unverified",
+    "signed_off": 0
+  },
+  "real_password_login": "Separate human-login-2026-10-09.json; this browser batch does not submit a password",
+  "documentation_verification": {
+    "status": "pending"
+  }
+}

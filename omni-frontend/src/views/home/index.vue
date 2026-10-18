@@ -363,7 +363,7 @@ onMounted(async () => {
     // 加载工作流统计和待办
     loadWfStats()
     loadTodoList()
-    // 检查最近 10 秒内的执行结果，弹出未读通知
+    // 检查最近 2 分钟内的执行结果，弹出未读通知
     checkRecentLogs()
     // 启动周期性轮询检测 cron 自动触发的执行结果
     startGlobalPolling()
@@ -422,7 +422,7 @@ function pollForNewLog(jobId: number, lastKnownId: number) {
 }
 
 /**
- * 页面加载时检查最近 10 秒内的执行日志。
+ * 页面加载时检查最近 2 分钟内的执行日志。
  */
 async function checkRecentLogs() {
   try {

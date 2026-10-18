@@ -1,0 +1,33 @@
+{
+  "label": "日本語",
+  "wiki": "学習パス",
+  "guides": "操作ガイド",
+  "truth": "技術リファレンス",
+  "design": "設計と履歴",
+  "outline": "このページ",
+  "search": "文書を検索",
+  "back": "先頭に戻る",
+  "menu": "メニュー",
+  "previous": "前のページ",
+  "next": "次のページ",
+  "interface": {
+    "details": "詳細を表示",
+    "reset": "検索をリセット",
+    "close": "検索を閉じる",
+    "empty": "検索結果がありません",
+    "select": "選択",
+    "enter": "Enter",
+    "navigate": "移動",
+    "up": "上矢印",
+    "down": "下矢印",
+    "escape": "Esc",
+    "language": "言語を変更",
+    "appearance": "表示設定",
+    "light": "ライトモードに切り替え",
+    "dark": "ダークモードに切り替え",
+    "skip": "本文へ移動"
+  },
+  "sourceOnlyTitle": "中国語の原文参照",
+  "sourceOnlyNotice": "この文書は中国語のみで管理すると登録されています。このページは原文への入口であり、翻訳本文ではありません。",
+  "sourceOnlyLink": "中国語の正式な原文を読む"
+}

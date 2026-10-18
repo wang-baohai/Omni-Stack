@@ -1,0 +1,400 @@
+{
+  "schema": 1,
+  "kind": "current-document-source-semantic-audit",
+  "recorded_at": "2026-10-17T12:44:33.387Z",
+  "source_baseline": "d26c075103f601135ec64fb6550fa7f0a0cbcbce",
+  "document_id": "guide-troubleshooting",
+  "original_documents_actually_read": 4,
+  "original_whole_lines": 421,
+  "current_source_inspection": {
+    "whole_files": 7,
+    "whole_lines": 548,
+    "files": [
+      {
+        "path": "docs/backend-patterns.md",
+        "sha256": "43939c5121f34cbefb2dde8b30ddd9fac78022f3694bb1baa3bc815464a1fdb7",
+        "read_scope": "Exact current Chinese fact/guide source reused from named completed review;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthController.java",
+        "sha256": "b973052c2787ac95547edaa93be6bb8de48becc34017d8666e02e2a52b6662fb",
+        "read_scope": "Matched87-89fallback900and167/188runtimeTTLuse;selected151-189actualpasswordtoken flowcompleted in finalcurrent followup479. Notwhole.",
+        "outputs": [
+          "224d85",
+          "44de46"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/MenuController.java",
+        "sha256": "eed9b466770f01f6bde80a5c60230a97b76544b0bf64d402a7ee6f5a3c22fe31",
+        "read_scope": "MatchedactualRequestMapping/api/auth/menusandpermissionfilteredreturn;notwhole.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/SocialLoginController.java",
+        "sha256": "e401bc70a37340c3a55b4a1cffbeeabc9a3ca7ae363b9e752f06ce855704135f",
+        "read_scope": "MatchedHMACstatecontractandcallbackdelegation;priorcurrentguide-authentication source semantics reused. Notwhole.",
+        "outputs": [
+          "224d85"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/service/impl/CaptchaServiceImpl.java",
+        "sha256": "ac901105b2f949e32bb5e76789f7a5b4dc32a4860cf24da49b0f657e229381e4",
+        "read_scope": "Whole:Redisone-timeatomicGETDELonvalidationbeforecomparison,CAPTCHArefreshafterfailure/expiry,300fallback. NotactualCAPTCHAexecution.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/resources/application.yml",
+        "sha256": "d1ce2ce3f6bd0ecc11ce641fc23475b571b0cbe382274be5cdc4e4d47dfc25f9",
+        "read_scope": "Selected99-111:repoaccess-token-ttl7200/refresh604800/captcha300;fallback900isnotrepoeffectiveTTL. Notwholeconfigurationorcurrentcontainerenv.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/DictTypeServiceImpl.java",
+        "sha256": "81a7eeb41ce81a01270efd4f11ea79640a8c5212b2f911522a51199efad72284",
+        "read_scope": "Selected120-140:transactional same-tenant/typechilddelete+typedelete+cacheinvalidate. Notwhole.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/OperLogArchiver.java",
+        "sha256": "297b676471f4c5212cbf883a3af3e4392b61d51d043ade9a39d6516b8b5cbf49",
+        "read_scope": "MatchedXxlJob/SystemJobMetadualannotations,archive/batchhistory;priorobservability/backendsource review reused. Notnewarchiveexecution.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-job/src/main/java/com/omni/common/job/SystemJobRegistry.java",
+        "sha256": "bf2b704901d2e13c1d0a558d52263c3e00f308e61554e0000bec85773ecf655a",
+        "read_scope": "Whole:beanmethodscanonlyregistersbothXxlJobandSystemJobMeta,handlerkeyandmetadata.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "docs/observability.md",
+        "sha256": "798c160e3208af2f06a1159df25a2ef4cf42ab6006dcaa4ced3a761a5ff3b0d4",
+        "read_scope": "Exact current Chinese fact/guide source reused from named completed review;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/mq-reliability.md",
+        "sha256": "98aae48046eff1f57a59360c00d5cbf1c3bc1454701f4ca112f357f99df17957",
+        "read_scope": "Exact current Chinese fact/guide source reused from named completed review;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/scheduling.md",
+        "sha256": "af1e4a539d551605e6d4466de4fc740b78a527a50660a5f4f4d82c2c3247b8a7",
+        "read_scope": "Exact current Chinese fact/guide source reused from named completed review;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/adr/0003-authorized-ai-translation-review.md",
+        "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+        "read_scope": "Previously read authorized AI-only policy exactcurrenthash;notnewwhole read.",
+        "outputs": [],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/backend-patterns.json",
+        "sha256": "f88e81c0d3153d8e1648e61dc0d6c2b12ea13faf2ba63f09f847417727104d84",
+        "read_scope": "Named prior completed review anditsunchangedbindings reused,not newsemanticread ofallitsimplementation.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/authentication.md",
+        "sha256": "127d2a8396618e2dbb787d9a72e838cf26991b719bb8a9c81a93d6e4d04cf09f",
+        "read_scope": "Exact current Chinese fact/guide source reused from named completed review;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/guide-authentication.json",
+        "sha256": "ff34f4c780b1d8ad98ea0cf06fd45a869863511936f53426028abad50e418ec2",
+        "read_scope": "Named prior completed review anditsunchangedbindings reused,not newsemanticread ofallitsimplementation.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/guides/permissions.md",
+        "sha256": "8878710f45b3aab84590c57c5539a6f321e5a31c168de1f7e37edcfdf0a76ad2",
+        "read_scope": "Exact current Chinese fact/guide source reused from named completed review;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/directives/permission.ts",
+        "sha256": "b52bb4b166510e09cd07a82471b722409716182a0442f4269b2fa8a40e3805fc",
+        "read_scope": "Whole:permissionstorecheck,displaynone/restore,mounted/updatednotremoveChild.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-frontend/src/i18n/index.ts",
+        "sha256": "1f03b35f5616586da17441dd5dda7e877ffbc3a197eccef75641ad4794d48618",
+        "read_scope": "Whole:fourSUPPORTED_LOCALES,omni-langstorage/defaultzh-CN,fallbacken-US,html.langandtranslatehelper.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "docs/reference/reviews/guide-permissions.json",
+        "sha256": "234b4df9b9bff01ad1f976b0cbb53f9a45a022d049e81ca0c30ddecef571ec89",
+        "read_scope": "Named prior completed review anditsunchangedbindings reused,not newsemanticread ofallitsimplementation.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobHandlerRegistry.java",
+        "sha256": "136ac3d8cea3b290212929779fa7a72ddc9f0aad76f226d3bf315d438ca45fb8",
+        "read_scope": "Whole:SpringMapkeyisbeannameandlookupbyjobType,typecodeconvention.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java",
+        "sha256": "2e4ee9762caaa45cf6f70404dff0bf1448cfd11615ba8df80f2fb2e27fd1826a",
+        "read_scope": "Selected88-123finalfollowup:XXLregistrationfailuredeleteslocaljobthenbusiness500;notwhole.",
+        "outputs": [
+          "44de46"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/scheduling.json",
+        "sha256": "57adc3a811be042dcfad96bc91e45ca48d897628d54e4e2deecae44578df9d0b",
+        "read_scope": "Named prior completed review anditsunchangedbindings reused,not newsemanticread ofallitsimplementation.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/mq-reliability.json",
+        "sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf",
+        "read_scope": "Named prior completed review anditsunchangedbindings reused,not newsemanticread ofallitsimplementation.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/observability.json",
+        "sha256": "acb59ba016afabefe31efc3689c7bfc6f28d717a6f0dfc87f75f6f50bc41f56c",
+        "read_scope": "Named prior completed review anditsunchangedbindings reused,not newsemanticread ofallitsimplementation.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/workflow.md",
+        "sha256": "4cc1e13aff6906514f96b880480d41a0bb0d5d3d3ed2147353e110b7b8e0c389",
+        "read_scope": "Exact current Chinese fact/guide source reused from named completed review;not a new whole read.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/reviews/workflow.json",
+        "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+        "read_scope": "Named prior completed review anditsunchangedbindings reused,not newsemanticread ofallitsimplementation.",
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuditLogController.java",
+        "sha256": "4d4196b7f7967d3a20e1455d2592b047abfafbd696ea7743b32a26e54b48d26a",
+        "read_scope": "Whole:readonlyauditlist,system:auditlog:list,Gatewaytenantheader,filtersdelegated.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-auth/src/main/java/com/omni/auth/controller/AuthRecordController.java",
+        "sha256": "eaeee5ac92dc53b7e33eab54cb9e636fc334b87755d2fa6583f09df2e57bd485",
+        "read_scope": "Whole:separateOAuthauthorizationrecordquery,notallauthenticationeventsareloginrecords.",
+        "outputs": [
+          "351465"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "tools/omni-cli/src/cli.ts",
+        "sha256": "d0b5df88164319f5b4308ca68bb587aa9ae8ce68fb3b74ac3eecf82ffe030c97",
+        "read_scope": "Selected123-186:devupprintsplanbeforestart,mode/preset/project,nobuildrequiresartifactproof;downretainsvolumesunlessexplicittwoflags,status/doctor/logs;nodevplancommand. NotCLIexecution/wholefile.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/DictDataController.java",
+        "sha256": "9936e714b52f96e21918653d1f9bcbea16542443ebc9b4d5536ff69fb9509615",
+        "read_scope": "Selected136-150:POSTrefresh-cache,dict:data:refresh,tenantheader/typecode;notwhole.",
+        "outputs": [
+          "12cfc1"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/service/impl/DictDataServiceImpl.java",
+        "sha256": "f6b86ad13da6a0d63825d4a4ee20fd345d6728487bf2fa844c96c127c5f63ec6",
+        "read_scope": "Selected171-196+matchedwriteinvalidations:tenantcachedeleteandrepopulateactiveorderedvalues;TTLnotconsistencyguarantee. Notwhole.",
+        "outputs": [
+          "12cfc1",
+          "224d85"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-base/src/main/java/com/omni/base/controller/MqMessageController.java",
+        "sha256": "722fb645de7c96df62e6ce27c7031d39e244e0ec9361186ba7eb635cf38e1f28",
+        "read_scope": "Matchedallpublictenantheaderandaggregationcalls;priorMQfactscope reused,notwhole.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/controller/MqMessageInternalController.java",
+        "sha256": "80614b1c1446126563d7574881c513ca8ba22b45a044d30631ac3aa62ec15845",
+        "read_scope": "MatchedtenantqueryconstraintandCASresend/skip;priorMQfactscope reused,notwhole.",
+        "outputs": [
+          "445161"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-common-mqlog/src/main/java/com/omni/common/mqlog/relay/MqMessageRelayService.java",
+        "sha256": "bfe1ce1806668c8e28c80a7614d7a5fff1fed2b7f65b3e18a56137e2cca627bf",
+        "read_scope": "Matchedstatus/nextretry/cross-tenantrelaylogicinfinalfollowup;priorMQfactsource reused,notwhole.",
+        "outputs": [
+          "44de46"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/package.json",
+        "sha256": "24c2338b1e5fdda8063dab364a44c20b9038a2308769638230511d07f3807162",
+        "read_scope": "Matchedlinteslint --max-warnings0;no currentnewlint/buildrun.",
+        "outputs": [
+          "5bee06"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ]
+  },
+  "prior_named_reviews": [
+    {
+      "path": "docs/reference/reviews/backend-patterns.json",
+      "sha256": "f88e81c0d3153d8e1648e61dc0d6c2b12ea13faf2ba63f09f847417727104d84",
+      "source_baseline": "7880b7ba2e1bceb252cf6543eb67c3f09f62dbd7",
+      "source_inspection_scope": "29actual current whole file reads;explicit current selected controller/service/schema scopes. Exact-hash reuse retains prior whole/selected/metadata source scopes separately. Counts are not blanket whole-source or runtime certification. Three current referenced Chinese document/link bindings renewedaftertheir actualwhole or exactnameddelta familyreviews349c/355/360/361b. Initial29whole backend source andselected/reuse scopes retained;no blanketfreshwhole-source claim.",
+      "unchanged_source_bindings": 163,
+      "has_additional_implementation_bindings": true,
+      "new_whole_read_claim": false
+    },
+    {
+      "path": "docs/reference/reviews/guide-authentication.json",
+      "sha256": "ff34f4c780b1d8ad98ea0cf06fd45a869863511936f53426028abad50e418ec2",
+      "source_baseline": "6929bf4c29a6fcecfd7e95b43682117b4a48dc9f",
+      "source_inspection_scope": "Per-file scope/method retained in named immutable review;not new whole reads.",
+      "unchanged_source_bindings": 0,
+      "has_additional_implementation_bindings": false,
+      "new_whole_read_claim": false
+    },
+    {
+      "path": "docs/reference/reviews/guide-permissions.json",
+      "sha256": "234b4df9b9bff01ad1f976b0cbb53f9a45a022d049e81ca0c30ddecef571ec89",
+      "source_baseline": "bdc4c5c4013514949d5629f21ce0c51e4714101f",
+      "source_inspection_scope": "Initial9whole930lines plus named additional whole files in381. Other bindings are selected current ranges,actual screenshot bytes,current readonly runtime,or exact dated historical evidence. Hash/render success alone is not semantic approval.",
+      "unchanged_source_bindings": 91,
+      "has_additional_implementation_bindings": true,
+      "new_whole_read_claim": false
+    },
+    {
+      "path": "docs/reference/reviews/scheduling.json",
+      "sha256": "57adc3a811be042dcfad96bc91e45ca48d897628d54e4e2deecae44578df9d0b",
+      "source_baseline": "15a51d3047aafa27a5cfe496dee96e781d97a876",
+      "source_inspection_scope": "Relevant implementation sections inspected directly; digests bind entire files, not a claim of deployed runtime verification.",
+      "unchanged_source_bindings": 32,
+      "has_additional_implementation_bindings": true,
+      "new_whole_read_claim": false
+    },
+    {
+      "path": "docs/reference/reviews/mq-reliability.json",
+      "sha256": "b7ef16f619f9cfb6b911a43031d772002d0d855c58d482332c21796c6106eecf",
+      "source_baseline": "f422dd6762c8925be545b02a00d93726a6179261",
+      "source_inspection_scope": "Per-file scope/method retained in named immutable review;not new whole reads.",
+      "unchanged_source_bindings": 0,
+      "has_additional_implementation_bindings": false,
+      "new_whole_read_claim": false
+    },
+    {
+      "path": "docs/reference/reviews/observability.json",
+      "sha256": "acb59ba016afabefe31efc3689c7bfc6f28d717a6f0dfc87f75f6f50bc41f56c",
+      "source_baseline": "63d9ba565e6b85f89e915c4420b79ef90ce6063c",
+      "source_inspection_scope": "Per-file scope/method retained in named immutable review;not new whole reads.",
+      "unchanged_source_bindings": 0,
+      "has_additional_implementation_bindings": false,
+      "new_whole_read_claim": false
+    },
+    {
+      "path": "docs/reference/reviews/workflow.json",
+      "sha256": "8532080ee4cea7a0d9b88630475888697493a2fdb9172fcafb0479e8f3125c2f",
+      "source_baseline": "6d27aacd31d9caf6d8a400ad96cccb0ded2a58d2",
+      "source_inspection_scope": "Per-file scope/method retained in named immutable review;not new whole reads.",
+      "unchanged_source_bindings": 49,
+      "has_additional_implementation_bindings": true,
+      "new_whole_read_claim": false
+    }
+  ],
+  "prior_binding_audit": {
+    "checked_named_dependency_occurrences": 335,
+    "unique_named_dependency_files": 299,
+    "all_exact_hashes_unchanged": true,
+    "not335newwhole_reads": true,
+    "new_review_bindings_scope": "Currentactuallyinspected files plussevennamed reviewedfacts/reviewrecordsandpolicy. Other priorhashcomparisons retainedinprivate479;not broaddependenciesofthisguidesemanticrecord."
+  },
+  "current_source_semantics": {
+    "ttl": "AuthControllerfallback900,repositoryapplication.yml7200;runtimeoverrideandactualexpdetermineeffectiveTTL,othergrantsseparate",
+    "audit": "Loginlogisreadonlyprojectionofloginsecurityevents;otherAuthsecurityauditrecords separatefrombusinessoperlog",
+    "pkce": "ExternalsocialHMACstatedoesnotusefrontendPKCE;localSPAOAuthauthorizeusescode_verifier/code_challenge",
+    "captcha": "RedisatomicGETDELconsumesonceevenwronganswer;refreshandhumaninputretainboundary",
+    "permissions": "Menuandv-permissionarenotserverauthorization;tenant/owner/aggregate-childscopeandinterceptororderingretained",
+    "jobs": "Systemdualannotations,userhandlerbeanname/typecode,registrationcompensation,archiveidempotent/sideeffectreconciliation",
+    "mq": "External/internalqueriesfiltertenant,relayintentionallyscansalltenants;Outbox/Broker/Inbox/tracesanddownstreamdeduprequired",
+    "dictionary": "POSTrefresh-cache/permission/tenant;typechilddeleteandcacheinvalidation;TTLnotconsistencyguarantee"
+  },
+  "application_runs_this_audit": 0,
+  "business_writes_this_audit": 0,
+  "new_captures": 0,
+  "new_builds_or_tests": 0,
+  "guide_images": 0,
+  "new_visual_or_runtime_claims": false,
+  "historical_successful_writes_replayed": false,
+  "human_review": false,
+  "human_review_required": false,
+  "limitations": [
+    "Currentwhole7files548linesplusselectedsourceandnamedreviewreuse;notwholeimplementationordeployedbehaviorcertification",
+    "No presentfailedlogin/XXLdispatch/Brokerdelivery/cachemutation/logarchiveornewproductionbasebuildproven",
+    "FullA-G,remainingtranslationsandglobalroot/subpath/UI/integratedacceptanceremainopen"
+  ],
+  "english_eol_normalization": {
+    "reason": "Gitdiff--check treats originalCRLFas trailingwhitespace;normalizedonlyENtoLFbeforestage",
+    "logical_lines_unchanged": true,
+    "all_text_unchanged": true,
+    "rendered_html_identical": true,
+    "new_semantic_read_or_runtime_claim": false
+  }
+}

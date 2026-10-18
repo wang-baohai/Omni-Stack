@@ -1,0 +1,1482 @@
+{
+  "schema": 1,
+  "kind": "isolated-docker-asset-allocation-acceptance-return",
+  "recorded_at": "2026-10-12T12:28:11.106Z",
+  "project": "omni-wiki-acceptance-20261009",
+  "run_id": "WIKI-20261012-ASSET-USAGE",
+  "baseline": "fc165e392216e75d903199ab121eba46a8edecf3",
+  "status": "ASSET_USAGE_REAL_UI_PASS_HISTORY_RETAINED",
+  "test": "scripts/fixtures/capture-asset-usage.mjs",
+  "tools": {
+    "node": "v24.17.0",
+    "playwright": "1.61.1",
+    "chromium": "149.0.7827.55",
+    "loader": "existing CLI tsx dependency volume"
+  },
+  "phases": [
+    "prepare",
+    "allocate",
+    "source-visual",
+    "accept",
+    "return",
+    "close",
+    "final-visual"
+  ],
+  "business_sample": {
+    "id": "2108462215458598915",
+    "asset_no": "AST-2108462215458598915",
+    "origin": "manual-stock-in via formal ASSET_ADMIN API",
+    "purchase_amount": "1000.00",
+    "final_status": "IN_STOCK",
+    "version": 3,
+    "current_user_id": null,
+    "current_unit_id": null,
+    "allocated_time": null,
+    "owner_user_id": 205,
+    "owner_unit_id": 604
+  },
+  "receipt_source": {
+    "id": "2108462215378907138",
+    "asset_no": "AST-2108462215378907138",
+    "status": "SCRAPPED",
+    "purchase_amount": "900.00",
+    "source_po": "PO-1-1",
+    "source_gr": "GR-1-2",
+    "changed_by_this_run": false
+  },
+  "ui_commands": [
+    {
+      "phase": "allocate",
+      "actor": "assetstaff",
+      "path": "/api/asset/asset/2108462215458598915/allocate",
+      "status": "COMMITTED",
+      "finished_at": "2026-10-12T11:59:44.379Z",
+      "result_status": "ALLOCATED",
+      "mechanism": "real-UI-click"
+    },
+    {
+      "phase": "accept",
+      "actor": "requester",
+      "path": "/api/asset/asset/2108462215458598915/accept",
+      "status": "COMMITTED",
+      "finished_at": "2026-10-12T12:02:00.651Z",
+      "result_status": "IN_USE",
+      "mechanism": "real-UI-click"
+    },
+    {
+      "phase": "return",
+      "actor": "requester",
+      "path": "/api/asset/asset/2108462215458598915/return",
+      "status": "COMMITTED",
+      "finished_at": "2026-10-12T12:04:38.271Z",
+      "result_status": "IN_STOCK",
+      "mechanism": "real-UI-click"
+    }
+  ],
+  "history": [
+    {
+      "assetId": "2108462215458598915",
+      "changedByUserId": 202,
+      "changedTime": "2026-10-12 20:04:38",
+      "fromStatus": "IN_USE",
+      "id": "19",
+      "remark": "退还资产",
+      "toStatus": "IN_STOCK"
+    },
+    {
+      "assetId": "2108462215458598915",
+      "changedByUserId": 202,
+      "changedTime": "2026-10-12 20:02:01",
+      "fromStatus": "ALLOCATED",
+      "id": "18",
+      "remark": "确认领用",
+      "toStatus": "IN_USE"
+    },
+    {
+      "assetId": "2108462215458598915",
+      "changedByUserId": 205,
+      "changedTime": "2026-10-12 19:59:44",
+      "fromStatus": "IN_STOCK",
+      "id": "17",
+      "remark": "分配资产：WIKI-20261012-ASSET-USAGE allocate",
+      "toStatus": "ALLOCATED"
+    },
+    {
+      "assetId": "2108462215458598915",
+      "changedByUserId": 205,
+      "changedTime": "2026-10-12 19:58:50",
+      "fromStatus": null,
+      "id": "16",
+      "remark": "手工入库：Isolated documentation fixture; history retained until owned project cleanup.",
+      "toStatus": "IN_STOCK"
+    }
+  ],
+  "negative_observations": [
+    {
+      "at": "2026-10-12T12:01:56.463Z",
+      "actor": "outsider",
+      "method": "POST",
+      "path": "/api/asset/asset/2108462215458598915/accept",
+      "http": 200,
+      "code": 404,
+      "expected": 404
+    },
+    {
+      "at": "2026-10-12T12:04:33.893Z",
+      "actor": "requester",
+      "method": "POST",
+      "path": "/api/asset/asset/2108462215458598915/return",
+      "http": 200,
+      "code": 409,
+      "expected": 409
+    },
+    {
+      "at": "2026-10-12T12:05:49.538Z",
+      "actor": "assetstaff",
+      "method": "DELETE",
+      "path": "/api/asset/asset/2108462215458598915?version=3",
+      "http": 200,
+      "code": 409,
+      "expected": 409
+    }
+  ],
+  "cleanup": "OWNED_MANUAL_ASSET_IN_STOCK_HISTORY_RETAINED",
+  "sources": [
+    {
+      "source_sha256": "9abea449baad2e0bc8ad975f992e1025c6e43566f7415200a512a30f516559f0",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-asset-usage.mjs",
+          "sha256": "1ef956559fc3b1d940d58a1858e46145c99cc5c7c7356654983ae9998f64115d"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/asset/asset/index.vue",
+          "sha256": "a2a9c72a8ccbb9fd50800b180bcce7fecb3ea796c0b7743237a0d05b1f3c9be5"
+        },
+        {
+          "path": "omni-frontend/src/api/asset-asset.ts",
+          "sha256": "d506175e3fa4ef410afff751cf4578328558fa06159e127496aa2b46bb22e762"
+        },
+        {
+          "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetServiceImpl.java",
+          "sha256": "e00cd0d9a80f6343f0eb6971830e7f36b88f23e5efd45143eedf86e945acee1b"
+        },
+        {
+          "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetRequests.java",
+          "sha256": "5ccdc6ab795175575ec5178015b19a3960b2a63ec1ce3ce03fa137c08948e9dc"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "91d0e80ab20e68c7d057f3a3d85d9682ffcedf9f61d64845225feb37242e5495",
+          "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    },
+    {
+      "source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-asset-usage.mjs",
+          "sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/asset/asset/index.vue",
+          "sha256": "a2a9c72a8ccbb9fd50800b180bcce7fecb3ea796c0b7743237a0d05b1f3c9be5"
+        },
+        {
+          "path": "omni-frontend/src/api/asset-asset.ts",
+          "sha256": "d506175e3fa4ef410afff751cf4578328558fa06159e127496aa2b46bb22e762"
+        },
+        {
+          "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetServiceImpl.java",
+          "sha256": "e00cd0d9a80f6343f0eb6971830e7f36b88f23e5efd45143eedf86e945acee1b"
+        },
+        {
+          "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetRequests.java",
+          "sha256": "5ccdc6ab795175575ec5178015b19a3960b2a63ec1ce3ce03fa137c08948e9dc"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "91d0e80ab20e68c7d057f3a3d85d9682ffcedf9f61d64845225feb37242e5495",
+          "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    },
+    {
+      "source_sha256": "1a2756d8ca79a816197eabc34a9386a5171421dc9cffd767268e748e44510246",
+      "sources": [
+        {
+          "path": "scripts/fixtures/capture-asset-usage.mjs",
+          "sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006"
+        },
+        {
+          "path": "omni-frontend/e2e-docs/fixtures/docs-page.ts",
+          "sha256": "3afa64438d898445d98c7adbad2fb31f0564acb87767e86cf47aa8561c0234dc"
+        },
+        {
+          "path": "omni-frontend/src/views/asset/asset/index.vue",
+          "sha256": "a2a9c72a8ccbb9fd50800b180bcce7fecb3ea796c0b7743237a0d05b1f3c9be5"
+        },
+        {
+          "path": "omni-frontend/src/api/asset-asset.ts",
+          "sha256": "d506175e3fa4ef410afff751cf4578328558fa06159e127496aa2b46bb22e762"
+        },
+        {
+          "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/service/impl/AssetServiceImpl.java",
+          "sha256": "e00cd0d9a80f6343f0eb6971830e7f36b88f23e5efd45143eedf86e945acee1b"
+        },
+        {
+          "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/dto/AssetRequests.java",
+          "sha256": "5ccdc6ab795175575ec5178015b19a3960b2a63ec1ce3ce03fa137c08948e9dc"
+        }
+      ],
+      "runtime": [
+        {
+          "service": "omni-frontend",
+          "container_id": "91d0e80ab20e68c7d057f3a3d85d9682ffcedf9f61d64845225feb37242e5495",
+          "image_id": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-base",
+          "container_id": "c1ca7e8203d9ba80fde4bb0f7228be56cd69af943f26d03bb0f621197f220f8d",
+          "image_id": "sha256:187f599712077255dcb837507f787301c1b54c7ddee4e81485d0b4541988b7a4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-gateway",
+          "container_id": "2c4bd25de6030742ad05464ffae4a3701bf49952ec1b4e3b5932280e4828afa9",
+          "image_id": "sha256:47ac2145c55d815e2a3fa463f34720566fb3fd7b8a059c982df1591907879eeb",
+          "host_ports": 0
+        },
+        {
+          "service": "grafana",
+          "container_id": "d4f1bb4e99f721d942dc29e3dbb48df281ba99342e0dde1f688e992977697529",
+          "image_id": "sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+          "host_ports": 0
+        },
+        {
+          "service": "prometheus",
+          "container_id": "a553f5ea6df33d3cc88d9571a48434483c254b4c8e80acb5e867ff379436901e",
+          "image_id": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+          "host_ports": 0
+        },
+        {
+          "service": "otel-collector",
+          "container_id": "8dfaf14e9514e04391f8819227dda0c9634ebf0502c3bb7c717feaf115e96beb",
+          "image_id": "sha256:1f2c54a30e713fac6b3ae77a1ec84010c2007e29ced8ec666214fc2f6739c1cc",
+          "host_ports": 0
+        },
+        {
+          "service": "alloy",
+          "container_id": "cd239d8d9eb154deff41bbb0e94d2ec3c36f303c0825d011f148418e5ac26cb7",
+          "image_id": "sha256:491b0578c04983fd54fe99b587b6fab4404dc46d0dc16677bd6b00cc1140b308",
+          "host_ports": 0
+        },
+        {
+          "service": "tempo",
+          "container_id": "f9e5b1c985b2eb838f895555743a3baec189c40e9659dac6afb6041a76d0ca7d",
+          "image_id": "sha256:ee21727732c7a7199cb71c3eee9153bbf23f9b0b87619f0555a0cf21a67f1a33",
+          "host_ports": 0
+        },
+        {
+          "service": "pushgateway",
+          "container_id": "87b442637519f9b6bca9baf8a25995843fa26314c77f8ed805fdac656dd28cfe",
+          "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+          "host_ports": 0
+        },
+        {
+          "service": "loki",
+          "container_id": "3af2d9ed759ac2c5a3ef3e8e0b6bdbe05413dc0d57e16a6141fa84a2bb394d19",
+          "image_id": "sha256:87f0a067673756a3cede1bcbf0c74875f7df9b09fddb53e399d0c576f756cfcc",
+          "host_ports": 0
+        },
+        {
+          "service": "alertmanager",
+          "container_id": "46f05bff195e78632a9b6aa82f212e41ad67be5ae1d71172dac70ad4e7783c36",
+          "image_id": "sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-workflow",
+          "container_id": "48de8f8983f175f86f6bcafdbbd7504852c336637a0df52c386ddbad655a3541",
+          "image_id": "sha256:afe5fcd0f2a611454c2d8a2696ccc7560be74106f6cb3e74db30e9f988147e42",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-asset",
+          "container_id": "ae36cb4dc3cc4be10ed8d6415274af35a472e0a636ced62a910e6ecb0c66aba4",
+          "image_id": "sha256:051a5d914563262c55de34ed4b555b5a9249616043c7cbe29c021ab48e7c2752",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-procurement",
+          "container_id": "d2d918c7c9897ae706406d7ef42c59eb684b7f80a6bb8a3c30299c8b3509040b",
+          "image_id": "sha256:3428e28091377501087f26a4c0f6772d44278e95330d6c928b709a00af308508",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-crm",
+          "container_id": "7600b5a6db091c4c26a6035624e1c64c69c6568ef432afd7feb3456687f5d121",
+          "image_id": "sha256:e18f15d7c008e23920a5601e865e67fa9c957a370d204be47b891817a8af6c72",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-srm",
+          "container_id": "059674ae151589d67cecc44015628dd4462ddebb2eecb3f9c56bb40e6dd47c6a",
+          "image_id": "sha256:a4fc4f01cbfbeaeda7b1ef792c494b37ef6679f508f51a38df328846416532cc",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-auth",
+          "container_id": "b6004cbd583c5ec8c58e2c8e24f24901260cd9625688b93e8a59a3f62311e69d",
+          "image_id": "sha256:819026b71e8d3b0f4dd0e81e83900892a4f78fe50d6e3672a7b5bcd8855e6cbe",
+          "host_ports": 0
+        },
+        {
+          "service": "nacos",
+          "container_id": "4ca97d466c90648dc847065bc1f18959bdc126e2abb609ec942a608d05c7d994",
+          "image_id": "sha256:13e74786507abbacebe080fae2fc9c05aa2591eb99c97a0a78ff0e72beb21b13",
+          "host_ports": 0
+        },
+        {
+          "service": "xxl-job-admin",
+          "container_id": "5b5e792e4f8c2cfbdb4462222905f19f07a361134db5ef44832b33a963bd59f8",
+          "image_id": "sha256:5cd0b720d34cc0fccc9084ce37e3f0f02f824951a2179890ab9d4d6bd93cd093",
+          "host_ports": 0
+        },
+        {
+          "service": "omni-db-migrator",
+          "container_id": "ffa8be1f20b45bd2f762a52cf891aca8e52cf6b6c5e9fc307fc972aa43818535",
+          "image_id": "sha256:efac29a981417d980ca1ece7e189275a70de98e806cd418597fe0407adb62df8",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-broker",
+          "container_id": "fa2a5c6d9922ccf83a2da7b785e9d990405c8c2a4d36fb96f1eb1c0f5b174d9c",
+          "image_id": "sha256:625facedf349b33fce8b2bad6f08af96c38c95791543a391576695e944404090",
+          "host_ports": 0
+        },
+        {
+          "service": "mysql",
+          "container_id": "f7165bc0277c56cf044e9fd713a681db859de5f2e8e47a9239f56089319eaecc",
+          "image_id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+          "host_ports": 0
+        },
+        {
+          "service": "redis",
+          "container_id": "f4abbd721f781c04ee3b6c6db6da557ca58faf262e77aba15e8a15d1ea03f35c",
+          "image_id": "sha256:4fa24486b8bcca8eec45ee0eb166edc674795e53a2b53d1a9ef263eecebaac85",
+          "host_ports": 0
+        },
+        {
+          "service": "rocketmq-namesrv",
+          "container_id": "a09351706c119841ee12d03c032c2ec1befb1eeac13b2b7998bcd5b688876d34",
+          "image_id": "sha256:4a80ff5cd4b0a3d3ef6dc338ce2028a85bd995648cb3aa5c3e753746d2dbc587",
+          "host_ports": 0
+        }
+      ]
+    }
+  ],
+  "visual_review": {
+    "status": "passed-with-documented-limits",
+    "reviewer": "Agent individually inspected all 48 original PNGs",
+    "reviewed": 48,
+    "published": 24,
+    "rejected": 7,
+    "readable_private_superseded": 17,
+    "human_translation_review": "pending",
+    "limits": [
+      "Manual usage sample is separate from the procurement source card; the source card currently is SCRAPPED, not arrival-time IN_STOCK.",
+      "All four languages show pre-submit dialogs. Each business UI command was submitted once in zh-CN, followed by formal API verification.",
+      "Existing Chinese server history remarks, raw status enums and long-label wraps remain visible; labels are not rewritten in screenshots.",
+      "Seven incomplete-paint/clipped originals excluded; 17 readable but redundant originals stay private.",
+      "Foreign-user 404, stale-version 409 and history-delete 409 are API observations with HTTP 200 and business error codes.",
+      "Final sample and immutable history remain in the owned isolated project until project-wide cleanup."
+    ]
+  },
+  "captures": [
+    {
+      "id": "asset-allocation-form-zh-CN",
+      "name": "asset-allocation-form",
+      "locale": "zh-CN",
+      "flow": "allocation",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/zh-CN/asset-allocation-form.png",
+      "sha256": "f3927958d4ed1b0d25c7c87b0efe5c66d01289ef3a7c199e54906a4a49623b1e",
+      "captured_at": "2026-10-12T11:59:37.387Z",
+      "captured_test_sha256": "1ef956559fc3b1d940d58a1858e46145c99cc5c7c7356654983ae9998f64115d",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "9abea449baad2e0bc8ad975f992e1025c6e43566f7415200a512a30f516559f0",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "targetUserId": 202,
+        "targetUnitId": 604,
+        "preview_only": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-allocation-form-en-US",
+      "name": "asset-allocation-form",
+      "locale": "en-US",
+      "flow": "allocation",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/en-US/asset-allocation-form.png",
+      "sha256": "d5e7e9a5d0889f6893e3bdf064fbb2d3a0a58deb1013257f2e2f49af48463fcd",
+      "captured_at": "2026-10-12T11:59:39.028Z",
+      "captured_test_sha256": "1ef956559fc3b1d940d58a1858e46145c99cc5c7c7356654983ae9998f64115d",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "9abea449baad2e0bc8ad975f992e1025c6e43566f7415200a512a30f516559f0",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "targetUserId": 202,
+        "targetUnitId": 604,
+        "preview_only": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-allocation-form-ja-JP",
+      "name": "asset-allocation-form",
+      "locale": "ja-JP",
+      "flow": "allocation",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ja-JP/asset-allocation-form.png",
+      "sha256": "eebc8eadfe82639184ce1c426ca2c8f55ee1f176e851957e0c3d80e3b84439c3",
+      "captured_at": "2026-10-12T11:59:41.025Z",
+      "captured_test_sha256": "1ef956559fc3b1d940d58a1858e46145c99cc5c7c7356654983ae9998f64115d",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "9abea449baad2e0bc8ad975f992e1025c6e43566f7415200a512a30f516559f0",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "targetUserId": 202,
+        "targetUnitId": 604,
+        "preview_only": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-allocation-form-ko-KR",
+      "name": "asset-allocation-form",
+      "locale": "ko-KR",
+      "flow": "allocation",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ko-KR/asset-allocation-form.png",
+      "sha256": "c078ce22ceb3ffb47131cf59f5ea26cd6ec9b1c68b96424af934679c2afe060e",
+      "captured_at": "2026-10-12T11:59:42.656Z",
+      "captured_test_sha256": "1ef956559fc3b1d940d58a1858e46145c99cc5c7c7356654983ae9998f64115d",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "9abea449baad2e0bc8ad975f992e1025c6e43566f7415200a512a30f516559f0",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "targetUserId": 202,
+        "targetUnitId": 604,
+        "preview_only": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-accept-confirm-zh-CN",
+      "name": "asset-accept-confirm",
+      "locale": "zh-CN",
+      "flow": "acceptance",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/zh-CN/asset-accept-confirm.png",
+      "sha256": "1eda424cb888a8100860998370b27c1f9cbb623e20fa7710b7fa9565538b4e06",
+      "captured_at": "2026-10-12T12:01:57.486Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "ALLOCATED",
+        "preview_only": true,
+        "actor": "assigned user"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-accept-confirm-en-US",
+      "name": "asset-accept-confirm",
+      "locale": "en-US",
+      "flow": "acceptance",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/en-US/asset-accept-confirm.png",
+      "sha256": "444efb31293546b99ef2541cdaff2a0a7571415a336588dd38a38bb3ae4fa915",
+      "captured_at": "2026-10-12T12:01:58.291Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "ALLOCATED",
+        "preview_only": true,
+        "actor": "assigned user"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-accept-confirm-ja-JP",
+      "name": "asset-accept-confirm",
+      "locale": "ja-JP",
+      "flow": "acceptance",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ja-JP/asset-accept-confirm.png",
+      "sha256": "397435325b321c4f3ab82475ca2c7ae20b2069de428779d3250caf99415fc8d6",
+      "captured_at": "2026-10-12T12:01:59.101Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "ALLOCATED",
+        "preview_only": true,
+        "actor": "assigned user"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-accept-confirm-ko-KR",
+      "name": "asset-accept-confirm",
+      "locale": "ko-KR",
+      "flow": "acceptance",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ko-KR/asset-accept-confirm.png",
+      "sha256": "8d05991a6c596b6e0a194e9974308f37f15f57de65ac09e479ab802f775ab736",
+      "captured_at": "2026-10-12T12:01:59.964Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "ALLOCATED",
+        "preview_only": true,
+        "actor": "assigned user"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-return-confirm-zh-CN",
+      "name": "asset-return-confirm",
+      "locale": "zh-CN",
+      "flow": "return",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/zh-CN/asset-return-confirm.png",
+      "sha256": "051b8022139e3eb93643c66f1537adf4249ef1ba27e2b142a78a115562e2720e",
+      "captured_at": "2026-10-12T12:04:34.898Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "IN_USE",
+        "preview_only": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-return-confirm-en-US",
+      "name": "asset-return-confirm",
+      "locale": "en-US",
+      "flow": "return",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/en-US/asset-return-confirm.png",
+      "sha256": "8818e8b5b92659216e91706094d5c5469448e2a992ca70a096b928a28b447f88",
+      "captured_at": "2026-10-12T12:04:35.715Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "IN_USE",
+        "preview_only": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-return-confirm-ja-JP",
+      "name": "asset-return-confirm",
+      "locale": "ja-JP",
+      "flow": "return",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ja-JP/asset-return-confirm.png",
+      "sha256": "60b749dfb42bfb819af9596304f7deadd07bd6a5d43943dafe4f9bcfed4e72b0",
+      "captured_at": "2026-10-12T12:04:36.634Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "IN_USE",
+        "preview_only": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-return-confirm-ko-KR",
+      "name": "asset-return-confirm",
+      "locale": "ko-KR",
+      "flow": "return",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ko-KR/asset-return-confirm.png",
+      "sha256": "3fb1efe546d8735dcd8608d69581b40c7659545b8dabec604108da492c44576f",
+      "captured_at": "2026-10-12T12:04:37.656Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "IN_USE",
+        "preview_only": true
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-returned-detail-zh-CN",
+      "name": "asset-returned-detail",
+      "locale": "zh-CN",
+      "flow": "return",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/zh-CN/asset-returned-detail.png",
+      "sha256": "a7d6948ae2f8a0ce5e30c69c3c726b405235d70f8f8c97633895061f214afd3e",
+      "captured_at": "2026-10-12T12:04:39.281Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "IN_STOCK",
+        "currentUserId": null,
+        "currentUnitId": null,
+        "allocatedTime": null,
+        "ownerUserId": 205
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-returned-detail-en-US",
+      "name": "asset-returned-detail",
+      "locale": "en-US",
+      "flow": "return",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/en-US/asset-returned-detail.png",
+      "sha256": "d262f2148dcfd6d2d4a0082255308232e3cb2f608f1a705ffdc179ff9da7532b",
+      "captured_at": "2026-10-12T12:04:40.353Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "IN_STOCK",
+        "currentUserId": null,
+        "currentUnitId": null,
+        "allocatedTime": null,
+        "ownerUserId": 205
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-returned-detail-ja-JP",
+      "name": "asset-returned-detail",
+      "locale": "ja-JP",
+      "flow": "return",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ja-JP/asset-returned-detail.png",
+      "sha256": "30bb3c84131a59ab8706786a33b5e03bd2f637d70ebd63408af67b4292876844",
+      "captured_at": "2026-10-12T12:04:41.337Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "IN_STOCK",
+        "currentUserId": null,
+        "currentUnitId": null,
+        "allocatedTime": null,
+        "ownerUserId": 205
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-returned-detail-ko-KR",
+      "name": "asset-returned-detail",
+      "locale": "ko-KR",
+      "flow": "return",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ko-KR/asset-returned-detail.png",
+      "sha256": "a850c69febdd0a9cb142b1a0fbac497a9ac3fececdabab5792cb5d06e69d5258",
+      "captured_at": "2026-10-12T12:04:42.356Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "IN_STOCK",
+        "currentUserId": null,
+        "currentUnitId": null,
+        "allocatedTime": null,
+        "ownerUserId": 205
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-self-empty-after-return-zh-CN",
+      "name": "asset-self-empty-after-return",
+      "locale": "zh-CN",
+      "flow": "return",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/zh-CN/asset-self-empty-after-return.png",
+      "sha256": "0daec9f00ce481f232a0c357bed3c147e2400639dd2e34f95fa9cf8f64882fda",
+      "captured_at": "2026-10-12T12:04:43.305Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "my_asset_count": 0,
+        "scope": "same assigned user after return"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-self-empty-after-return-en-US",
+      "name": "asset-self-empty-after-return",
+      "locale": "en-US",
+      "flow": "return",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/en-US/asset-self-empty-after-return.png",
+      "sha256": "5afc484250e3c47bbef975d9862b5cf8af2b76e3d21e29731dbd099e7bab2f56",
+      "captured_at": "2026-10-12T12:04:44.296Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "my_asset_count": 0,
+        "scope": "same assigned user after return"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-self-empty-after-return-ja-JP",
+      "name": "asset-self-empty-after-return",
+      "locale": "ja-JP",
+      "flow": "return",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ja-JP/asset-self-empty-after-return.png",
+      "sha256": "9853fd20b3622276353393abf5c14bc39e0499c46fa7ed8e4631e8529d809dce",
+      "captured_at": "2026-10-12T12:04:44.991Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "my_asset_count": 0,
+        "scope": "same assigned user after return"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-self-empty-after-return-ko-KR",
+      "name": "asset-self-empty-after-return",
+      "locale": "ko-KR",
+      "flow": "return",
+      "actor": "requester",
+      "roles": [
+        "USER",
+        "EMPLOYEE",
+        "ASSET_USER",
+        "WIKI_20261009A_WORKFLOW_STARTER"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ko-KR/asset-self-empty-after-return.png",
+      "sha256": "1c465b9c4ed42a04b52788559214fba582ddb2e64a6a99dea6c207e4a7d3fc5b",
+      "captured_at": "2026-10-12T12:04:45.990Z",
+      "captured_test_sha256": "76a817256f31187375b7f250be2944843a27c537e1e2a25d7220df4b4bcbec55",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "25b2d8ee7eaf935767b94feebba0592cc0134c269be77e3e85b3e5d524bcf17e",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "my_asset_count": 0,
+        "scope": "same assigned user after return"
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-final-receipt-source-card-zh-CN",
+      "name": "asset-final-receipt-source-card",
+      "locale": "zh-CN",
+      "flow": "receipt-card",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/zh-CN/asset-final-receipt-source-card.png",
+      "sha256": "0d097a865a84c40173ffabc91b1b3e40d4a189cc04df5b8c5a1dbfa3c314fce3",
+      "captured_at": "2026-10-12T12:09:58.505Z",
+      "captured_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "1a2756d8ca79a816197eabc34a9386a5171421dc9cffd767268e748e44510246",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "SCRAPPED",
+        "sourcePoNo": "PO-1-1",
+        "sourceGrNo": "GR-1-2",
+        "scope": "Current card and original immutable receipt linkage; no business replay."
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-final-receipt-source-card-en-US",
+      "name": "asset-final-receipt-source-card",
+      "locale": "en-US",
+      "flow": "receipt-card",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/en-US/asset-final-receipt-source-card.png",
+      "sha256": "eb4f3dba9048b7c340937dbd57636c6085f6d15d5f2398274c8e523c0e2652bd",
+      "captured_at": "2026-10-12T12:09:59.464Z",
+      "captured_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "1a2756d8ca79a816197eabc34a9386a5171421dc9cffd767268e748e44510246",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "SCRAPPED",
+        "sourcePoNo": "PO-1-1",
+        "sourceGrNo": "GR-1-2",
+        "scope": "Current card and original immutable receipt linkage; no business replay."
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-final-receipt-source-card-ja-JP",
+      "name": "asset-final-receipt-source-card",
+      "locale": "ja-JP",
+      "flow": "receipt-card",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ja-JP/asset-final-receipt-source-card.png",
+      "sha256": "004fd2bd44a5a7fdb3fc79403aa9ac5f108bd26112056b3a7587888d91b59769",
+      "captured_at": "2026-10-12T12:10:00.694Z",
+      "captured_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "1a2756d8ca79a816197eabc34a9386a5171421dc9cffd767268e748e44510246",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "SCRAPPED",
+        "sourcePoNo": "PO-1-1",
+        "sourceGrNo": "GR-1-2",
+        "scope": "Current card and original immutable receipt linkage; no business replay."
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    },
+    {
+      "id": "asset-final-receipt-source-card-ko-KR",
+      "name": "asset-final-receipt-source-card",
+      "locale": "ko-KR",
+      "flow": "receipt-card",
+      "actor": "assetstaff",
+      "roles": [
+        "USER",
+        "ASSET_ADMIN"
+      ],
+      "route": "/admin/asset/asset",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "image": "docs/images/ko-KR/asset-final-receipt-source-card.png",
+      "sha256": "3a4e4605e18453d73405405755612f299da2de5684b9bdf91f745412145e0809",
+      "captured_at": "2026-10-12T12:10:01.701Z",
+      "captured_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "current_test_sha256": "23f3f4436d2495e807ec3ec9b4ea21fb01607800a6b785fb388a40119c77b006",
+      "captured_source_sha256": "1a2756d8ca79a816197eabc34a9386a5171421dc9cffd767268e748e44510246",
+      "runtime_image": "sha256:8968f7d4795b36b23d5d4ab029bfef0566230b8964a0cbb14e4595de8c3589af",
+      "assertions": {
+        "status": "SCRAPPED",
+        "sourcePoNo": "PO-1-1",
+        "sourceGrNo": "GR-1-2",
+        "scope": "Current card and original immutable receipt linkage; no business replay."
+      },
+      "visual_review": "passed-with-documented-limits",
+      "mocks": false
+    }
+  ],
+  "rejected_captures": [
+    {
+      "name": "asset-receipt-source-card",
+      "locale": "ko-KR",
+      "sha256": "7a147fed6b3d576621f1a58ff5a057ab8026402951b15c10e2dede3dd529fddc",
+      "reason": "Status text not fully painted"
+    },
+    {
+      "name": "asset-manual-in-stock",
+      "locale": "ja-JP",
+      "sha256": "19b385df105a12cd9cbecf8bae543d19abdfc1486444614e2fa7f6262db6cc8b",
+      "reason": "Status text not fully painted"
+    },
+    {
+      "name": "asset-manual-in-stock",
+      "locale": "ko-KR",
+      "sha256": "d5bed7b294b18f67ff8eaed93f864fcc2d8e1d0b312bdc4f664760ac04363f42",
+      "reason": "Status text not fully painted"
+    },
+    {
+      "name": "asset-allocation-pending",
+      "locale": "en-US",
+      "sha256": "e8141e4a05ee8bdfabcc52ec70e20adaba86d1719283e36f7494dfa305abd5a5",
+      "reason": "Fixed Actions column clips the pending-acceptance state"
+    },
+    {
+      "name": "asset-receipt-source-card-stable",
+      "locale": "ko-KR",
+      "sha256": "3a4e4605e18453d73405405755612f299da2de5684b9bdf91f745412145e0809",
+      "reason": "History ASCII cells not fully painted"
+    },
+    {
+      "name": "asset-accepted-detail",
+      "locale": "ko-KR",
+      "sha256": "ab98ebccb0dbd39b155e52de9038d76bc3b9da482759e8632ac0e13f4654d681",
+      "reason": "History ASCII cells not fully painted"
+    },
+    {
+      "name": "asset-final-returned-detail",
+      "locale": "ko-KR",
+      "sha256": "a850c69febdd0a9cb142b1a0fbac497a9ac3fececdabab5792cb5d06e69d5258",
+      "reason": "History ASCII cells not fully painted"
+    }
+  ]
+}

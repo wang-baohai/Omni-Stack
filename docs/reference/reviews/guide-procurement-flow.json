@@ -1,0 +1,945 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "document_id": "guide-procurement-flow",
+  "source": "docs/guides/procurement-flow.md",
+  "source_sha256": "201034f4ee9bfdfedda14981891df9c970f13eecab79a488455b79a9005d5b36",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "2451313b5d9206e465c3282831cafeeb543e61d8",
+  "source_state": "Complete currentsemanticcoverage:668original lines actuallyread plusallfinaldeltas andexactunchanged-line mapping cover692currentlines.12operations/11sections/1subsection/4tables/15imagesperlocale retained. Threewhole371source lines,selectedranges,60unchangedpriorbindings,60historicalguideimages/fourcapturegroups and20selectedrawviewsseparatelyscoped. No newbusinessorunchangedbuildreplay. ActualAIreviewwithoutmandatoryhumantranslation;fullA-G remainsopen.",
+  "method": "Actually read four complete167line originals(668lines),then every final changed line againstChinese,current scopedsource anddated registers. Exactunchanged-line mapping/per-linehashes combine those reads into complete692line currentsemanticcoverage;not fourfreshwholefinalrereads. Threewhole371current source lines,selectedranges,60unchangedpriorreviewdependencies and20selectedraworiginalviews separatelyscoped. Rendering/digestchecks supportreading,notautomaticapproval. Finalreviewcaught anaccess-denialnoteinastale-versionrow;correctedandactuallyread thefinaltable rows beforeapproval.",
+  "checked_source_files": [
+    {
+      "path": "database/changelog/asset/0001-asset-schema.yaml",
+      "sha256": "e4b5f80df2e380ee71fb664d0c73ee4b4515e52d1c1e98ade30394b5cdc5fbb6"
+    },
+    {
+      "path": "database/changelog/procurement/0001-procurement-schema.yaml",
+      "sha256": "e1db7a749d924de2c3b6a4ff4789fa193b1904ccc7f38b6624e1a45dcdacca2a"
+    },
+    {
+      "path": "omni-backend/omni-asset/src/main/java/com/omni/asset/entity/AstInboxEvent.java",
+      "sha256": "0ae4ef7cf045c5ded5fac742709c783f5aeffd1fff0da8206ebe5b4a5c27b8de"
+    },
+    {
+      "path": "omni-backend/omni-common-operlog/src/main/java/com/omni/common/operlog/sanitize/OperLogSanitizer.java",
+      "sha256": "8f5d34bca9097343ca596b409e69bc15a1472b02a0aa6fc6cefd04a27cc31479"
+    },
+    {
+      "path": "omni-backend/omni-procurement/pom.xml",
+      "sha256": "6dec4a7577f3807b3a9420c3fe49682d5a65d26f73f024b17ec7e9f148b521f2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/WorkflowInternalClient.java",
+      "sha256": "232525732c21dd069311ba3c1776f7db76e2e815cf5f5d1bc437e2753178ccff"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/ApprovalRouteController.java",
+      "sha256": "5553119b83e7881a97efcdd0086e1cc9d219e942f11e4b0e28012c46da3e73b0"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/GoodsReceiptController.java",
+      "sha256": "c1878e6fb97c4c0a89c6e9d446e78ac059c97e0108987c515c7611cb118de362"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/InternalAssetCandidateController.java",
+      "sha256": "d5bee68ebbe2b294365ae40b9369755956806f7ce03d52fa3b3bfd2f6c1cdb88"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/InternalRfqInvitationController.java",
+      "sha256": "235f12e203b2424614c321bf968844fcd983e5788a9bd0eaecd5775612cef7a1"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/MaterialController.java",
+      "sha256": "adf7c0a0411e1f79dd6775a413bd6dc5c212f205b7a121a0e7e70157bb1f119b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/OverviewController.java",
+      "sha256": "d4672bfaa95a39a36f878bf2bc2c4fc2e62dffb3280b7e7c83db6a274c077720"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/PurchaseOrderController.java",
+      "sha256": "5d3d3ea6b9a9fa993bbce8562346ad8fc730fdb7534daeb5951cd21a4f2835b0"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RequisitionController.java",
+      "sha256": "6db55a427c4ea94d9e04f757ba29a8ac9ae3104b7588783031aeab76f06b44d9"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/RfqController.java",
+      "sha256": "05dbcbf2c7fd904ebd9264424e3d62819f4f8567e5768c48e198e4c92f10cbaa"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/ApprovalRouteCoverageAnalyzer.java",
+      "sha256": "bcb0fc894d62b3229c3853dd3b27fabaa03591dd998dc22ef1a3541aed17f6b9"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/ApprovalRouteResolver.java",
+      "sha256": "70293fec161d64a8f2d1a08fd5935cddfbd90db2a4a168a406deeda473b79746"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/GoodsReceiptStateMachine.java",
+      "sha256": "c487970c9966aa0e059e49b6db51a77a5c33d0f37907aba3d02eec4aaabeddf5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/MaterialDomainPolicy.java",
+      "sha256": "c938033816e379cc0e2b1d16ee07bb800ab0c68f59311f1095f05d875cff0d55"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/PurchaseOrderStateMachine.java",
+      "sha256": "987b59710d85a3b57f40dc5709769736712443504c1a27babbc7b5609b622e2b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RequisitionStateMachine.java",
+      "sha256": "bf473a86a15317df69a8a821816bcd7615858ef017a7538064ade67f9a33e20d"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RfqStateMachine.java",
+      "sha256": "c6c9f4e79144f36b9f16572f6c8f84a19d005a09e960421512b613755acd5f77"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/PurchaseOrderViews.java",
+      "sha256": "4b5a61f35e6d8fe7912319403a2be07cf3fd1c0cb45687658b5636c3819bf6c0"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/RequisitionRequests.java",
+      "sha256": "148db8f6c79990d2ce241edd578489fcf460a840fe686856edd0938670cb70c8"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/dto/RfqRequests.java",
+      "sha256": "a651e19bc043501755b9a475a77ada42500b3bf5636f801f88f9dbfcfedcade7"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcEventInboxMapper.java",
+      "sha256": "494eb3a24065f8eba1ab6745d65c16806389242cda99733539efa52f46c5dc04"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcGoodsReceiptLineMapper.java",
+      "sha256": "515d468b0052998986c59c5cff125b92a1f7788127b6ae7dc5c6fa592be92f0b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcGoodsReceiptMapper.java",
+      "sha256": "10c4c513f99c4c4dda3bb554b1af19d051965aa4ab5fa8e1afa7222890698ef5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcPurchaseOrderMapper.java",
+      "sha256": "ebdc96b81c0c67a1d402baeb10a342c62fda6aa3197eb55f79947592119ae51b"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcRequisitionMapper.java",
+      "sha256": "73aa68d4aba4072254602ca2b5e1384204d35ac586dfa54b8c6eb453829afb3f"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcRfqMapper.java",
+      "sha256": "3ad3496f95bf68c806c25895d381349b0e825c3d69cb618b4e39d432ee586047"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/security/ProcDataPermissionHandler.java",
+      "sha256": "862a902bdcd8dd57fd07b6280284f712f2203149a0bf40f84d3fe590507efddf"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ApprovalRouteInsightServiceImpl.java",
+      "sha256": "cabfc8cbe87a192287f505b1cb2c2f3699907d4a80e536ebd6cc4d22a657ce70"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ApprovalRouteServiceImpl.java",
+      "sha256": "88f80a5161cdb50a5bef098e28bdf145b5296a6ae80fda93f643a2338f13f637"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/GoodsReceiptServiceImpl.java",
+      "sha256": "6863e2187ddcbec101a1d4c04c02d40ffc0277c361d01aee74d150c1bde4b610"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/InternalAssetCandidateServiceImpl.java",
+      "sha256": "3bce8c5b42752d764034d8c94d430df0559db72470e2f72cae51b2263c17637a"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantInitializerImpl.java",
+      "sha256": "48e0579d06012035c66e7d97d184ca29bee51295248aa49d022ca0957ffb946e"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantModuleProvisioner.java",
+      "sha256": "19328c9903adb5c32ec875c8c11faab945cfad224fe488ad12a700af31c1160f"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/PurchaseOrderServiceImpl.java",
+      "sha256": "0230a7d599669c3d082ab3f4ff3fb947b37be4b0cd1c8224f8a1e3447f47bbe6"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/QuotationSubmittedServiceImpl.java",
+      "sha256": "6d0c94bec3c430750fa2f37e4b21caf990309be8949c277c2db5c06da6464421"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionServiceImpl.java",
+      "sha256": "49860f021ec548cb8e993a251b2557ad9d0145b19cdb78c85312909143f06066"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionWorkflowStateServiceImpl.java",
+      "sha256": "c30d0c09ddfd7746e3013b195939f447751e99a8da4bdf9eb13e1b7241d21f5c"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RfqServiceImpl.java",
+      "sha256": "6a6356496869d0f8aa822234b74618a7a90588e3dfce233be296336c9dcd7ac7"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/WorkflowCompletionServiceImpl.java",
+      "sha256": "b1982df5b9cd24025b2dc757e55628d7e251985f3c43f0a9f6fdf58d357c95c2"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinator.java",
+      "sha256": "d3761c42d613f6f512fde07e71ed2bb3cb057fe140e9315287b0a94e0b0c7e20"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/domain/ApprovalRouteResolverTest.java",
+      "sha256": "cda14903a9ea2c374bc87b56f8b92d2e84d7d3a56b1b64336274b5cd90bf9c18"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/service/impl/RequisitionWorkflowStateServiceImplTest.java",
+      "sha256": "ec66dab1fa9d3b8b9ccf169923f75274556e03cbb9e335f25414e63ecb198c3d"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/service/impl/WorkflowCompletionServiceImplTest.java",
+      "sha256": "c2efb43294ddf0d343f46b95a328839ea76f784ad7e3ec973241b4d7fd4d3873"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/test/java/com/omni/procurement/workflow/RequisitionWorkflowCoordinatorTest.java",
+      "sha256": "d79cf3ce0fbb8713e14c3262e66fdadff46401c96b398e68ac715cf030d148a1"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/config/RequiredWorkflowModelInitializer.java",
+      "sha256": "c66a79f0b2a3848e5b17eec8811713884a9edc5f5851587502a951c7719a1e8b"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/controller/InternalWorkflowController.java",
+      "sha256": "fb540dc12ae8c821fd9324a06de566beee5aa7bf4e0f105668f3a1bd139ac020"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/InternalWorkflowServiceImpl.java",
+      "sha256": "65012a8fc6a5311a06e32e6201ff3f6ec9da84c58341e2f0c678ca19f5037c16"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowCompletionEventServiceImpl.java",
+      "sha256": "63a1a2bd58ae7b696d77f8ec1e1e5616020f297999f11ec412c32de1fff09ac8"
+    },
+    {
+      "path": "omni-backend/omni-workflow/src/main/java/com/omni/workflow/service/impl/WorkflowProcessStartRequestServiceImpl.java",
+      "sha256": "f63cb03ab55045944f20e206bec4c5d59d04f4a7abc5abebb37e641054dabd83"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/ProcurementApplication.java",
+      "sha256": "7fc8e3ee17cc3d4a2c0e09ebc937b83e061782c294be22ba49300a3c60f62ad5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/mapper/ProcOverviewMapper.java",
+      "sha256": "ab8edd039391a6eeb0c27f0070c186739511b4ace98a6d176b749c64b7aff4c5"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/AuthInternalClient.java",
+      "sha256": "7489727316858bc8b9d3a0eed24b46fe0bdd6943a59d1ce466d97eb638bed9ac"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/client/SrmInternalClient.java",
+      "sha256": "b2f1a0d99579733809aeb4ccb6526cb9b45fbb3a6030ac5451041d1ff436079d"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/resources/application.yml",
+      "sha256": "e4dde986037907125e1d92f325f387623f8ce471fae64151c32dc9164e0d7430"
+    },
+    {
+      "path": "omni-backend/omni-procurement/src/main/resources/application-lite.yml",
+      "sha256": "ba00648a627572423f86c5ed122a747c95a68635d438fe4281422b0a8e9b67cd"
+    },
+    {
+      "path": "omni-frontend/src/views/procurement/requisition/index.vue",
+      "sha256": "ba0f4e3f7346bed2a93cfcf8bca77b4f407e838005ddba86ff9d77dbd21b1d1a"
+    },
+    {
+      "path": "omni-frontend/src/views/procurement/rfq/index.vue",
+      "sha256": "158c3e102d1b8c49d3c59c43fe2e761de2856a70db4934d18d1d71373d903795"
+    },
+    {
+      "path": "docs/design/procurement-design.md",
+      "sha256": "06735bfc48c6082fb9e96e92d80c62c4a5be24f40659500acee7565233c47303"
+    },
+    {
+      "path": "docs/reference/reviews/procurement-design.json",
+      "sha256": "5569f107d72abe3986c5f73c8144adf6402736bb59ecd7e737825694efa6217a"
+    },
+    {
+      "path": "docs/adr/0003-authorized-ai-translation-review.md",
+      "sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed"
+    },
+    {
+      "path": "docs/reference/evidence/supply-chain-2026-10-09.json",
+      "sha256": "2b36754f24ea7182b4768e39a3cc8a1fb37aa2cdd9b82aae40808935c4f8786b"
+    },
+    {
+      "path": "docs/reference/evidence/procurement-readonly-2026-10-12.json",
+      "sha256": "dbe678b933afa7f414b23049d8198c4f08b296eb95a882ef26ab27b9fac225fd"
+    },
+    {
+      "path": "docs/reference/evidence/procurement-quotation-2026-10-12.json",
+      "sha256": "539bb904bb46d2c775c3721161eec458a7df5338de787ecb44c76c9b8a4fd844"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-requisition-approved.png",
+      "sha256": "6d4c396c90f7fc607e866de0acfcd1814ca7e843ae37fa69447799753eb09b10"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-requisition-rejected.png",
+      "sha256": "733f060e15dcf68ebab6232530f1c94dfa469c1d4b71150a020649a8b39ece72"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-requisition-cancelled.png",
+      "sha256": "1a5d36d49ccc9d60ff96d12700833aaef41c12e7961ee718e9ede764de9794fe"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-rfq-awarded.png",
+      "sha256": "5aebde411a4048ffb49373589dcbbd3f6cf7697d43dc09e93601964faeda2479"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-purchase-order-received.png",
+      "sha256": "b35b860e1af23e4d7ffeb7d0ad1cd74058ab6ea20565496806b8779b3ea0eb40"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-goods-receipt-fail-nonasset.png",
+      "sha256": "5a51026865c5220f9ce63fefa00a79e26c8ab4465b5d6540f94cd5104d2dd0eb"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-goods-receipt-pass.png",
+      "sha256": "d26823495e71e9856b6f25a044ef11e0b1f117810c83391d79e37a491ad596ef"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-material.png",
+      "sha256": "43a811851b7155e8e8694ce6e24ef99f4c7441055713df899a7eb25a4fb36c59"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-rule-match.png",
+      "sha256": "ea8b0a25b7b1f1171f49ccf5c432ec8e2025a654bed0e37e9692031a92f22109"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-overview.png",
+      "sha256": "c56031158ee6a4cfdd2febc37f6c2ec1560aece797d2a9c905419c50c8f07244"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-rule-match-mobile.png",
+      "sha256": "e7c564aed733fca1d9068307b3eb62748bd507bfddd0e5be15ecd33eb34f18e1"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-rule-match-tablet.png",
+      "sha256": "e432e38fbb7571ce39d7b459fcd16bff6983183a52631305afd00851aecd85fa"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-quote-versions.png",
+      "sha256": "9d7c7cf307c5ea08a1702e38656881435c5242e388c4b0eda3afae4aa888e294"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-supplierC-quote.png",
+      "sha256": "ad908da07756a0da98a92e1de0b1f48bda3e4b22ec6f998be956ca4fc52b2d4b"
+    },
+    {
+      "path": "docs/images/zh-CN/procurement-current-supplierD-quote.png",
+      "sha256": "7346350e848ccbffdb2e3a147168631110db7b664f99a495c51199b7a7162a7a"
+    },
+    {
+      "path": "docs/images/en-US/procurement-requisition-approved.png",
+      "sha256": "21dccad596221f9188f7a2147451112145a5a3b8dd57e1d09b018938ccbc2ed1"
+    },
+    {
+      "path": "docs/images/en-US/procurement-requisition-rejected.png",
+      "sha256": "46fda788f7a283203ff091f3fae1fd02ed785e36c1f4437ce24cd73b4d4cc697"
+    },
+    {
+      "path": "docs/images/en-US/procurement-requisition-cancelled.png",
+      "sha256": "6dccbfa0c0a75f4d36609235628600d82015f14b270d08248ea408dd51803bcd"
+    },
+    {
+      "path": "docs/images/en-US/procurement-rfq-awarded.png",
+      "sha256": "0ad692452864b89fd07597ffd5a4ebc2b3a8c22c0e3e39d49a7903f3c50ee73e"
+    },
+    {
+      "path": "docs/images/en-US/procurement-purchase-order-received.png",
+      "sha256": "b41615daa815581975912dbb299f8e1e951de68bbbdcf7691e8edb7e612f4872"
+    },
+    {
+      "path": "docs/images/en-US/procurement-goods-receipt-fail-nonasset.png",
+      "sha256": "84650d9366526d786534ebe6c3b0ab1d322c8f358d69b1fd903253ef6b8ab268"
+    },
+    {
+      "path": "docs/images/en-US/procurement-goods-receipt-pass.png",
+      "sha256": "bc48ddf263863ef93fd9a097b53d0a7b68eecab30efc547fe97939fce88a246d"
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-material.png",
+      "sha256": "f6342a9a4e270e331fa158f70c46bbc6600602bb63169d41f98ce07491d4034c"
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-rule-match.png",
+      "sha256": "5fa5713e524b4b3071b8b35685d5ee6e1d39bcab9576cda732d146fa33900ac8"
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-overview.png",
+      "sha256": "da9c37f75bd4fe708e24e0d0b65dadc9af3e6775d73d37dbb39813851bd3a139"
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-rule-match-mobile.png",
+      "sha256": "30f09a79aa22f9943203d2f96827f189e389098bb0c37da5bd951491953e35de"
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-rule-match-tablet.png",
+      "sha256": "9a643d7d95803c6556d1e55bba168cfefda8c66dbecd1be23879783f9bcf8193"
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-quote-versions.png",
+      "sha256": "9d5a4cfde925dc7f9490d7a759100bec5908c552da1b151b17b9c51c979a7fac"
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-supplierC-quote.png",
+      "sha256": "d150acdd84fad472dccf5719e5bfb3738905697808b51f4de7a560f69780f19e"
+    },
+    {
+      "path": "docs/images/en-US/procurement-current-supplierD-quote.png",
+      "sha256": "6bae5f82ebb7b94a7337b3c1e93b8be64979d6cde0def29ee2c1df0cf850d083"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-requisition-approved.png",
+      "sha256": "64f148856dd575c3a997a29f02dc5d8aef2b3a95d23646cf35762b39b3993bd1"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-requisition-rejected.png",
+      "sha256": "285e63f007e22e3bbc6a335a0d8662d0d71e462ccdc5e2192029d5f6f63a9109"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-requisition-cancelled.png",
+      "sha256": "a5fa3fb8c1cf8677622215835d56776f785431c0d5d403bfa93f6baa92810cdf"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-rfq-awarded.png",
+      "sha256": "d5b2de4dd7eeeab9df03b7f5a4de3d1731d632f1e74f501c809f51a87aa7051c"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-purchase-order-received.png",
+      "sha256": "8ef2525c7f66d89bf0d9a55b94e36571f2b2825ad3520fc952e6481928e34996"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-goods-receipt-fail-nonasset.png",
+      "sha256": "e81c92da481b8f9bcfb885cef72af1e16fdd8c87322e56334d4180e2281b33f7"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-goods-receipt-pass.png",
+      "sha256": "45d37fa76c4ea11f1f92049bb8d7a3e104e8185190d6157f6179b38552992ca1"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-material.png",
+      "sha256": "abb921824fa3940605329b69ce9f5dfa5899a9ce9f5c8c90d020b8b5b981cba1"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-rule-match.png",
+      "sha256": "03e26893ef97f329731586c2e90019ed16aba28f98877d297da6666b09e99b0b"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-overview.png",
+      "sha256": "43a2ab0ac87da248d2f82f82f5175fe1fc1c306caa87460ddfb029094b90a9db"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-rule-match-mobile.png",
+      "sha256": "eef2699ad7e8f6123c0f97514d9acefcb607a92cf6409e3c3a0d8d12ae14f3e6"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-rule-match-tablet.png",
+      "sha256": "277a04edf9a382a41af1b643e9df710fd4294a5960c0103e054606bc80985808"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-quote-versions.png",
+      "sha256": "cc538b77a8bd8cbb772340f1e632f7da6b77786cbbdfc7a569be6a5a3d71fb5f"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-supplierC-quote.png",
+      "sha256": "6227135d66c872970f52e6f7afedf2152758dc34a09047a532a15a3bcc4eb6cf"
+    },
+    {
+      "path": "docs/images/ja-JP/procurement-current-supplierD-quote.png",
+      "sha256": "1c743287403470bc79810a418dcbdc899d31303b14dc740c0b97206af667e58e"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-requisition-approved.png",
+      "sha256": "914829edc7031f91f5d555f91c1c5523cc8974a659fb9c7a3596fdcccd56633f"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-requisition-rejected.png",
+      "sha256": "66c61fcd60aeb001cd0f446e1da855d872ecf2a537e62fe56d2e87b0a03b3a90"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-requisition-cancelled.png",
+      "sha256": "bf04b9e7c26d4891b67ce4e8d8a5ce62dadd746727ab7d95343be22259f68817"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-rfq-awarded.png",
+      "sha256": "81ad17d8221ecdb0b414e2d69c6bf9e0fc57bc59c25add65c19c8c025634c90f"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-purchase-order-received.png",
+      "sha256": "43efeb150d2b586f2244481375a2250980670b87e1ce1aa758ab1c8347ca7b42"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-goods-receipt-fail-nonasset.png",
+      "sha256": "4469f99ee6058c00f018ae944f1a84f77719350396b3baad761b6e92007c800a"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-goods-receipt-pass.png",
+      "sha256": "2906ee51d2ee2f14f367c230eb544249a41cbdac4ec79c80f045d256df826f42"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-material.png",
+      "sha256": "c64ae446022fe0fd6271d190fd5ac7b869a4b8160b029a7f8e80e58c6093b8c8"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-rule-match.png",
+      "sha256": "35f3b5c5fbfaab592613c121824aa620335cf66063b0ead36c6c62a7f4731381"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-overview.png",
+      "sha256": "56c367f222f3646d8d509b894621f6613fef02e55dd9ff38205fa8e094855cbd"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-rule-match-mobile.png",
+      "sha256": "6879f9d278699e231e197ad9288d36a1033f06b781ac1c1a6ba74c058a2dc74c"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-rule-match-tablet.png",
+      "sha256": "2cc85ac9ec554ce8343d6965fa7aa9101f1e90e061bc926b53aca5006415b68a"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-quote-versions.png",
+      "sha256": "21c63bd286d302a54bff4672cee04043af345d3301bcb2cac83a6b7900f956b6"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-supplierC-quote.png",
+      "sha256": "eda24e82a74a3d11927449f2daedac07805da7d3bb50634df2ab293650303ae4"
+    },
+    {
+      "path": "docs/images/ko-KR/procurement-current-supplierD-quote.png",
+      "sha256": "b0e37939e5a103e193b36a9372da0fd281bda16b0fb0041c533435049d3b65ce"
+    },
+    {
+      "path": "docs/reference/evidence/procurement-guide-review-2026-10-17.json",
+      "sha256": "0914a8158096b4ca8662e8ecb4e7622af6c8f414d4fec750025f148abf1babe9"
+    }
+  ],
+  "source_inspection_scope": "All668original guide lines actuallyread;complete currentsemanticcoveragecombines that whole read witheveryfinaldelta andexactunchanged-line mapping. Threewhole371current source lines,selectedranges and60unchangedpriorbindings separatelyscoped. Hashes/rendering alone do not approve meaning.",
+  "technical_verification": {
+    "runtime": "local Docker",
+    "complete_current_semantic_coverage": true,
+    "original_whole_lines_actually_read": 668,
+    "current_combined_semantic_lines": 692,
+    "fresh_whole_final_rereads": false,
+    "original_full_read_outputs": {
+      "zh-CN": "61a707",
+      "en-US": "a53c55",
+      "ja-JP": "6a6b85",
+      "ko-KR": "e45239"
+    },
+    "final_exact_delta_outputs": {
+      "zh-CN": [
+        "95c947",
+        "f441ab"
+      ],
+      "en-US": [
+        "95c947",
+        "f441ab"
+      ],
+      "ja-JP": [
+        "6c2b03",
+        "f441ab"
+      ],
+      "ko-KR": [
+        "6c2b03",
+        "f441ab"
+      ]
+    },
+    "lines_each": 173,
+    "headings_each": 13,
+    "h2_each": 11,
+    "h3_each": 1,
+    "numbered_operations_each": 12,
+    "images_each": 15,
+    "tables_each": 4,
+    "technical_fences_each": 0,
+    "whole_markdown_rendered_documents": 4,
+    "normalized_inline_literals_each": 11,
+    "normalized_relative_links_each": 29,
+    "source_bindings": 129,
+    "current_whole_source_files": 3,
+    "current_whole_source_lines": 371,
+    "unchanged_prior_fact_source_bindings": 60,
+    "current_source_reads": [
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/controller/PurchaseOrderController.java",
+        "sha256": "5d3d3ea6b9a9fa993bbce8562346ad8fc730fdb7534daeb5951cd21a4f2835b0",
+        "read_scope": "Selected123-140:confirmauthority plusServiceDataScope andversioncommand. Notwhole.",
+        "outputs": [
+          "9c2120"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RequisitionStateMachine.java",
+        "sha256": "bf473a86a15317df69a8a821816bcd7615858ef017a7538064ade67f9a33e20d",
+        "read_scope": "Whole actual read:only DRAFTsubmit;SUBMITTED+FAILEDretry/cancel;DRAFTdelete;409guards.",
+        "outputs": [
+          "a9226f"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/domain/RfqStateMachine.java",
+        "sha256": "c6c9f4e79144f36b9f16572f6c8f84a19d005a09e960421512b613755acd5f77",
+        "read_scope": "Whole actual read:SENTonlycomparison/award;active invitations;historical Portalvisible states differ from writable states.",
+        "outputs": [
+          "d3f645"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ApprovalRouteInsightServiceImpl.java",
+        "sha256": "cabfc8cbe87a192287f505b1cb2c2f3699907d4a80e536ebd6cc4d22a657ce70",
+        "read_scope": "Selected65-196:readOnlyannotation,tenantinitializer,ruleoutcomes/modelpreview,not actualcandidate/user eligibility check or workflowstart. Notwhole.",
+        "outputs": [
+          "d3f645",
+          "9c2120"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/GoodsReceiptServiceImpl.java",
+        "sha256": "6863e2187ddcbec101a1d4c04c02d40ffc0277c361d01aee74d150c1bde4b610",
+        "read_scope": "Selected177-273,350-387,533-600:versionedconfirm/orderlock/cumulativereceiptquantity,FAILcountsreceived,isAssetCandidatePASS+managed+exactpositivelong,generatedeventfieldanddecimalstrings. Notwhole/Inboxdeliveryproof.",
+        "outputs": [
+          "725cc7",
+          "d3f645"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/ProcTenantInitializerImpl.java",
+        "sha256": "48e0579d06012035c66e7d97d184ca29bee51295248aa49d022ca0957ffb946e",
+        "read_scope": "Whole actual read:findexisting tenant config returns;otherwise idempotent config/defaultcategory writes. A preview does not start workflow but first tenant access may initialize defaults;historical zero writes must not become universal guarantee.",
+        "outputs": [
+          "f3f9a6"
+        ],
+        "whole_current_file_actually_read": true
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/PurchaseOrderServiceImpl.java",
+        "sha256": "0230a7d599669c3d082ab3f4ff3fb947b37be4b0cd1c8224f8a1e3447f47bbe6",
+        "read_scope": "Selected112-136,235-268:existingRFQordercheck,sameawardreconcile;versionedconfirm/Outbox andcancel. Notwhole.",
+        "outputs": [
+          "9c2120"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionServiceImpl.java",
+        "sha256": "49860f021ec548cb8e993a251b2557ad9d0145b19cdb78c85312909143f06066",
+        "read_scope": "Selected230-310:versioneddelete,prepareSubmit/retry+coordinator,visibletenantread,cancelguard. Notwhole.",
+        "outputs": [
+          "725cc7"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RequisitionWorkflowStateServiceImpl.java",
+        "sha256": "c30d0c09ddfd7746e3013b195939f447751e99a8da4bdf9eb13e1b7241d21f5c",
+        "read_scope": "Selected60-151:submitcomputesroute+newattempt/request;retry requires existing snapshot,FAILED->PENDING andsamecommand;markStartedAPPROVING;markFailedCAS. Notwhole.",
+        "outputs": [
+          "a9226f"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-backend/omni-procurement/src/main/java/com/omni/procurement/service/impl/RfqServiceImpl.java",
+        "sha256": "6a6356496869d0f8aa822234b74618a7a90588e3dfce233be296336c9dcd7ac7",
+        "read_scope": "Selected175-218 and340-403(completely retrieved aftermiddle outputtruncation):currentquotationsvalidated,RFQ+quotationversion,activeinvitation,createPO,AWARDEDCAS/localOutbox,returnRFQ+PO. Notwhole/deployedproof.",
+        "outputs": [
+          "725cc7",
+          "a9226f",
+          "95c947"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/procurement/requisition/index.vue",
+        "sha256": "ba0f4e3f7346bed2a93cfcf8bca77b4f407e838005ddba86ff9d77dbd21b1d1a",
+        "read_scope": "Selected288-310:nativeretryrequiresSUBMITTED+FAILED+submitpermission,cancelguard. Notwhole.",
+        "outputs": [
+          "d3f645"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "omni-frontend/src/views/procurement/rfq/index.vue",
+        "sha256": "158c3e102d1b8c49d3c59c43fe2e761de2856a70db4934d18d1d71373d903795",
+        "read_scope": "Selected390-410:nativecompare/awardonlySENTplusawardpermission. Notwhole.",
+        "outputs": [
+          "d3f645"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/supply-chain-2026-10-09.json",
+        "sha256": "2b36754f24ea7182b4768e39a3cc8a1fb37aa2cdd9b82aae40808935c4f8786b",
+        "read_scope": "Actual dated recordmetadata,source/testgroups,visualmethods/limits,semanticbusinessfields andno-write/current-buildlimitations read. Historicalhumanpendingrecordnotrewritten;currentADR governsdocument acceptance.",
+        "outputs": [
+          "c2e15d",
+          "2534e7",
+          "196897"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/procurement-readonly-2026-10-12.json",
+        "sha256": "dbe678b933afa7f414b23049d8198c4f08b296eb95a882ef26ab27b9fac225fd",
+        "read_scope": "Actual dated recordmetadata,source/testgroups,visualmethods/limits,semanticbusinessfields andno-write/current-buildlimitations read. Historicalhumanpendingrecordnotrewritten;currentADR governsdocument acceptance.",
+        "outputs": [
+          "c2e15d",
+          "2534e7",
+          "196897"
+        ],
+        "whole_current_file_actually_read": false
+      },
+      {
+        "path": "docs/reference/evidence/procurement-quotation-2026-10-12.json",
+        "sha256": "539bb904bb46d2c775c3721161eec458a7df5338de787ecb44c76c9b8a4fd844",
+        "read_scope": "Actual dated recordmetadata,source/testgroups,visualmethods/limits,semanticbusinessfields andno-write/current-buildlimitations read. Historicalhumanpendingrecordnotrewritten;currentADR governsdocument acceptance.",
+        "outputs": [
+          "c2e15d",
+          "2534e7",
+          "196897"
+        ],
+        "whole_current_file_actually_read": false
+      }
+    ],
+    "current_evidence": "docs/reference/evidence/procurement-guide-review-2026-10-17.json",
+    "unchanged_guide_image_files": 60,
+    "used_historical_capture_records": 60,
+    "all_historical_register_records": 80,
+    "capture_source_groups": 4,
+    "current_selected_raw_images_individually_viewed": 20,
+    "other40_freshly_viewed": false,
+    "prior_visual_scope": "2026-10-09:12four-localecontact sheets for48images,guideuses28.2026-10-12readonly:20individuals;quotation31individuals/12published/7rejected/12privatesuperseded. Datedrecords,notfreshviews.",
+    "new_application_test_or_build_runs": 0,
+    "business_writes": 0,
+    "historical_business_writes_replayed": false,
+    "application_source_changes": false,
+    "screenshot_manifest_changed": false,
+    "global_release_or_other_translation_approval": false,
+    "limitations": [
+      "No new application/business run,test/build orcapture. Current20individualrawviewsareadditional;other40guidefilesretainactualdatedmethods.",
+      "Threecurrentwholefiles/371lines plusselectedranges and60unchangedpriorbindings;hashesbindscope,notwholesourceordeployedbehavior. Rfq203-218completedin95c947afterinitialtruncatedoutput.",
+      "HistoricalregistryDNS/authenticationfailurespreventformalproduction-basebuildproof;extraordinarymanagerrolesandseedinitializationlimitsremainexplicit.",
+      "ExternalOAuth,realSRMCAPTCHAselfregistration,nativeQoder,currentgoldens/fivepresets/globalroot-subpathacceptanceandremaining15translationrowsafterthisprospectivefamilyremaininfullA-G. Globalauthentication/social-login/SRMcoverageisnotapproved."
+    ]
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/guides/procurement-flow.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 20:21:09",
+      "result": "approved",
+      "translation_sha256": "1535b446c94551f1f45edb28f41092aad312a03e65576b555bf1e1c66b81850f",
+      "checks": {
+        "coverage_and_meaning": "四语原稿668行及最终全部变更行已实际阅读，逐行映射覆盖当前692行。每语11节、1小节、12项编号操作、4表、15图保留；身份/租户/同分类、模型规则、请购审批、双供应商报价、定标建单、确认、两批收货、失败恢复及清理语义一致。",
+        "technical_literals": "四语11个归一化行内技术字面量与29个归一化相对链接一致，无技术代码围栏被删改。保留CNY4000请购、3850/3500报价、RFQ/报价双版本、状态、角色、yyyy-MM-dd HH:mm:ss、PASS/FAIL、assetManaged/assetQuantity与精确整数/金额字符串契约。",
+        "security_and_failure_semantics": "重试须SUBMITTED+FAILED/当前version且复用原审批请求及模型快照；试算只验证规则/模型，不证明候选资格，未初始化租户可能建立默认数据。内部订单确认须权限及数据范围，供应商只读自有报价。空列表不单独证明拒绝，冲突先核对已有副作用，成功业务不重放，历史不可SQL清除。",
+        "images_and_links": "四篇完整Markdown在Docker渲染。60张图片按路径、语言、SHA匹配三份历史登记，四组采集源码/用例/镜像保留；2026-10-09的48张图为12组四语联系表，本页用28张，不能称48张单独查看。本轮逐张查看20张原图，另外40张保留既有方法。GR图不证明资产卡数量/Inbox，Portal列表不证明明细单价或新报价，AWARDED详情不证明实时比价或再次定标。",
+        "language_and_terminology": "Complete167line original andeveryfinaldelta comparedwithChinese;exactunchanged-line mapping completes173currentlines. Preserves primaryorganization/candidateconditions,independentPortalquotes,decimalamounts,RFQandquotationversions,internalconfirmpermission,FAILreceiptversusassetcreation,conflict reconciliation andcleanup. Historicalbusinessrun,contact-sheetmethod/currentselectedviews,managercombinedroles,previewinitializationlimit andAI-onlyacceptance areexplicit."
+      },
+      "findings": [
+        {
+          "id": "PG01",
+          "status": "resolved",
+          "resolution": "ActualAI_REVIEWsuffices;remove mandatoryhumantranslationconditionwithoutinventingHUMAN_REVIEW."
+        },
+        {
+          "id": "PG02",
+          "status": "resolved",
+          "resolution": "Datebusinessrun2026-10-09andreadonlyreuse2026-10-12;currentdocument/sourceauditdoesnotclaimnewbusiness/integratedruntimeacceptance."
+        },
+        {
+          "id": "PG03",
+          "status": "resolved",
+          "resolution": "Correct48individualviewclaimto12four-localeoriginal-resolutioncontactsheets;guideuses28datedimages. Current20rawviewsversus40retainedimagesexplicit."
+        },
+        {
+          "id": "PG04",
+          "status": "resolved",
+          "resolution": "RetryrequiresSUBMITTED+FAILED/latestversionandreusesoriginalattempt/request/model snapshot;do notrecreateuncertainrequisitions."
+        },
+        {
+          "id": "PG05",
+          "status": "resolved",
+          "resolution": "AwardrequirescurrentrfqVersion,quotationId,quotationVersionandreturnscreatedPO;reconcileexistingaward/POafterconflict."
+        },
+        {
+          "id": "PG06",
+          "status": "resolved",
+          "resolution": "Managerhasfivenamedordinaryroles;notisolatedsingleroleproof. Previewisnotcandidateeligibility;newtenantinitializationmaywrite defaults."
+        },
+        {
+          "id": "PG07",
+          "status": "resolved",
+          "resolution": "Translateemptylistisnotdenialproofandputnoteinmissing-authorityrow;finalsemanticreviewcaughtandcorrectedmisplacementbeforeapproval."
+        },
+        {
+          "id": "PG08",
+          "status": "resolved",
+          "resolution": "RetainformalinternalscopeforPOconfirm,GRFAILreceivedquantityandPASS/managed/exactintegerassetgates;pixelsdonotproveInbox/cardcounts."
+        },
+        {
+          "id": "PG09",
+          "status": "resolved",
+          "resolution": "Retainfourcapturegroups,earlymanagercapturedtestdigestversuslaterhelperdigest,registryDNS/authcachedbase limitation,andnot-currentdatedsourceaggregates."
+        },
+        {
+          "id": "PG10",
+          "status": "resolved",
+          "resolution": "AlignawardcodeformatandJAUI内定withprocurementmeaning;keepmobilehorizontal-scroll/Chinesebusinessdata/headerwraplimits,allimages/linksandprocedures."
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/guides/procurement-flow.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 20:21:09",
+      "result": "approved",
+      "translation_sha256": "38b22d87cd192a9920a91e05e2fa8bcea6c210ff9fd12ddaea3d7b990e1116ed",
+      "checks": {
+        "coverage_and_meaning": "四语原稿668行及最终全部变更行已实际阅读，逐行映射覆盖当前692行。每语11节、1小节、12项编号操作、4表、15图保留；身份/租户/同分类、模型规则、请购审批、双供应商报价、定标建单、确认、两批收货、失败恢复及清理语义一致。",
+        "technical_literals": "四语11个归一化行内技术字面量与29个归一化相对链接一致，无技术代码围栏被删改。保留CNY4000请购、3850/3500报价、RFQ/报价双版本、状态、角色、yyyy-MM-dd HH:mm:ss、PASS/FAIL、assetManaged/assetQuantity与精确整数/金额字符串契约。",
+        "security_and_failure_semantics": "重试须SUBMITTED+FAILED/当前version且复用原审批请求及模型快照；试算只验证规则/模型，不证明候选资格，未初始化租户可能建立默认数据。内部订单确认须权限及数据范围，供应商只读自有报价。空列表不单独证明拒绝，冲突先核对已有副作用，成功业务不重放，历史不可SQL清除。",
+        "images_and_links": "四篇完整Markdown在Docker渲染。60张图片按路径、语言、SHA匹配三份历史登记，四组采集源码/用例/镜像保留；2026-10-09的48张图为12组四语联系表，本页用28张，不能称48张单独查看。本轮逐张查看20张原图，另外40张保留既有方法。GR图不证明资产卡数量/Inbox，Portal列表不证明明细单价或新报价，AWARDED详情不证明实时比价或再次定标。",
+        "language_and_terminology": "全167行原稿と最終変更行を中文事実源に照合し、未変更行対応で現在173行を網羅。申請・候補・主組織、二社見積、落札、発注確認、分割入荷、検品と資産作成を区別した。過去UIの「内定」は調達の落札を指すと説明し、原表示と文書用語を対応付ける。SUBMITTED+FAILED、版、権限、過去コンタクトシートと今回原画像、AIによる受入れ条件を保持する。"
+      },
+      "findings": [
+        {
+          "id": "PG01",
+          "status": "resolved",
+          "resolution": "ActualAI_REVIEWsuffices;remove mandatoryhumantranslationconditionwithoutinventingHUMAN_REVIEW."
+        },
+        {
+          "id": "PG02",
+          "status": "resolved",
+          "resolution": "Datebusinessrun2026-10-09andreadonlyreuse2026-10-12;currentdocument/sourceauditdoesnotclaimnewbusiness/integratedruntimeacceptance."
+        },
+        {
+          "id": "PG03",
+          "status": "resolved",
+          "resolution": "Correct48individualviewclaimto12four-localeoriginal-resolutioncontactsheets;guideuses28datedimages. Current20rawviewsversus40retainedimagesexplicit."
+        },
+        {
+          "id": "PG04",
+          "status": "resolved",
+          "resolution": "RetryrequiresSUBMITTED+FAILED/latestversionandreusesoriginalattempt/request/model snapshot;do notrecreateuncertainrequisitions."
+        },
+        {
+          "id": "PG05",
+          "status": "resolved",
+          "resolution": "AwardrequirescurrentrfqVersion,quotationId,quotationVersionandreturnscreatedPO;reconcileexistingaward/POafterconflict."
+        },
+        {
+          "id": "PG06",
+          "status": "resolved",
+          "resolution": "Managerhasfivenamedordinaryroles;notisolatedsingleroleproof. Previewisnotcandidateeligibility;newtenantinitializationmaywrite defaults."
+        },
+        {
+          "id": "PG07",
+          "status": "resolved",
+          "resolution": "Translateemptylistisnotdenialproofandputnoteinmissing-authorityrow;finalsemanticreviewcaughtandcorrectedmisplacementbeforeapproval."
+        },
+        {
+          "id": "PG08",
+          "status": "resolved",
+          "resolution": "RetainformalinternalscopeforPOconfirm,GRFAILreceivedquantityandPASS/managed/exactintegerassetgates;pixelsdonotproveInbox/cardcounts."
+        },
+        {
+          "id": "PG09",
+          "status": "resolved",
+          "resolution": "Retainfourcapturegroups,earlymanagercapturedtestdigestversuslaterhelperdigest,registryDNS/authcachedbase limitation,andnot-currentdatedsourceaggregates."
+        },
+        {
+          "id": "PG10",
+          "status": "resolved",
+          "resolution": "AlignawardcodeformatandJAUI内定withprocurementmeaning;keepmobilehorizontal-scroll/Chinesebusinessdata/headerwraplimits,allimages/linksandprocedures."
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/guides/procurement-flow.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-17 20:21:09",
+      "result": "approved",
+      "translation_sha256": "4297a015eb9b5e255a91d372b9fc48f80c221c38c875b465779ac5cb954b39af",
+      "checks": {
+        "coverage_and_meaning": "四语原稿668行及最终全部变更行已实际阅读，逐行映射覆盖当前692行。每语11节、1小节、12项编号操作、4表、15图保留；身份/租户/同分类、模型规则、请购审批、双供应商报价、定标建单、确认、两批收货、失败恢复及清理语义一致。",
+        "technical_literals": "四语11个归一化行内技术字面量与29个归一化相对链接一致，无技术代码围栏被删改。保留CNY4000请购、3850/3500报价、RFQ/报价双版本、状态、角色、yyyy-MM-dd HH:mm:ss、PASS/FAIL、assetManaged/assetQuantity与精确整数/金额字符串契约。",
+        "security_and_failure_semantics": "重试须SUBMITTED+FAILED/当前version且复用原审批请求及模型快照；试算只验证规则/模型，不证明候选资格，未初始化租户可能建立默认数据。内部订单确认须权限及数据范围，供应商只读自有报价。空列表不单独证明拒绝，冲突先核对已有副作用，成功业务不重放，历史不可SQL清除。",
+        "images_and_links": "四篇完整Markdown在Docker渲染。60张图片按路径、语言、SHA匹配三份历史登记，四组采集源码/用例/镜像保留；2026-10-09的48张图为12组四语联系表，本页用28张，不能称48张单独查看。本轮逐张查看20张原图，另外40张保留既有方法。GR图不证明资产卡数量/Inbox，Portal列表不证明明细单价或新报价，AWARDED详情不证明实时比价或再次定标。",
+        "language_and_terminology": "원본167행과 최종변경행을 중국어 사실 원문에 대조하고 미변경행 매핑으로 현재173행을 모두 확인했다. 요청·후보·주 조직,공급업체별견적,선정·발주확인,분할입고·품질·자산생성을 구분한다. 재시도/버전/권한조건,복합역할계정의범위,초기테넌트기본데이터,과거이미지와현재검토,실제AI검토충족조건을 보존한다."
+      },
+      "findings": [
+        {
+          "id": "PG01",
+          "status": "resolved",
+          "resolution": "ActualAI_REVIEWsuffices;remove mandatoryhumantranslationconditionwithoutinventingHUMAN_REVIEW."
+        },
+        {
+          "id": "PG02",
+          "status": "resolved",
+          "resolution": "Datebusinessrun2026-10-09andreadonlyreuse2026-10-12;currentdocument/sourceauditdoesnotclaimnewbusiness/integratedruntimeacceptance."
+        },
+        {
+          "id": "PG03",
+          "status": "resolved",
+          "resolution": "Correct48individualviewclaimto12four-localeoriginal-resolutioncontactsheets;guideuses28datedimages. Current20rawviewsversus40retainedimagesexplicit."
+        },
+        {
+          "id": "PG04",
+          "status": "resolved",
+          "resolution": "RetryrequiresSUBMITTED+FAILED/latestversionandreusesoriginalattempt/request/model snapshot;do notrecreateuncertainrequisitions."
+        },
+        {
+          "id": "PG05",
+          "status": "resolved",
+          "resolution": "AwardrequirescurrentrfqVersion,quotationId,quotationVersionandreturnscreatedPO;reconcileexistingaward/POafterconflict."
+        },
+        {
+          "id": "PG06",
+          "status": "resolved",
+          "resolution": "Managerhasfivenamedordinaryroles;notisolatedsingleroleproof. Previewisnotcandidateeligibility;newtenantinitializationmaywrite defaults."
+        },
+        {
+          "id": "PG07",
+          "status": "resolved",
+          "resolution": "Translateemptylistisnotdenialproofandputnoteinmissing-authorityrow;finalsemanticreviewcaughtandcorrectedmisplacementbeforeapproval."
+        },
+        {
+          "id": "PG08",
+          "status": "resolved",
+          "resolution": "RetainformalinternalscopeforPOconfirm,GRFAILreceivedquantityandPASS/managed/exactintegerassetgates;pixelsdonotproveInbox/cardcounts."
+        },
+        {
+          "id": "PG09",
+          "status": "resolved",
+          "resolution": "Retainfourcapturegroups,earlymanagercapturedtestdigestversuslaterhelperdigest,registryDNS/authcachedbase limitation,andnot-currentdatedsourceaggregates."
+        },
+        {
+          "id": "PG10",
+          "status": "resolved",
+          "resolution": "AlignawardcodeformatandJAUI内定withprocurementmeaning;keepmobilehorizontal-scroll/Chinesebusinessdata/headerwraplimits,allimages/linksandprocedures."
+        }
+      ]
+    }
+  }
+}

@@ -1,8 +1,11 @@
 import { createHash } from 'node:crypto'
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, globSync, readFileSync, statSync } from 'node:fs'
 import { dirname, extname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
+import { translationLocales, reviewErrors } from './translation-review.mjs'
+import { markdownAnchors } from '../../../docs/scripts/markdown-anchors.mjs'
+import { pngErrors, supportsTerminalEvidence, terminalErrors } from './documentation-evidence.mjs'
 
 const repositoryRoot = process.env.WP002_TEST_ROOT || resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const selectedScope = process.argv.find((argument) => argument.startsWith('--scope='))?.slice(8) || 'all'
@@ -25,35 +28,13 @@ function sha256(content) {
   return createHash('sha256').update(content).digest('hex')
 }
 
-function markdownSlug(title) {
-  return title
-    .trim()
-    .toLowerCase()
-    .replace(/[`*_~]/g, '')
-    .replace(/[^\p{L}\p{N}\s-]/gu, '')
-    .replace(/\s/g, '-')
-}
-
-function markdownAnchors(content) {
-  const anchors = new Set()
-  const counts = new Map()
-  for (const line of content.split(/\r?\n/)) {
-    const match = /^(#{1,6})\s+(.+?)\s*$/.exec(line)
-    if (!match) continue
-    const base = markdownSlug(match[2])
-    const count = counts.get(base) || 0
-    counts.set(base, count + 1)
-    anchors.add(count === 0 ? base : `${base}-${count}`)
-  }
-  return anchors
-}
-
 function markdownFiles() {
   const manifest = YAML.parse(read('docs/docs-manifest.yaml'))
-  const files = new Set(['README.md', 'README.en.md', 'README.jp.md', 'README.kr.md'])
+  const files = new Set(['AGENTS.md', 'README.md', 'README.en.md', 'README.jp.md', 'README.kr.md',
+    ...globSync('ai/**/*.md', { cwd: repositoryRoot })])
   for (const document of manifest.documents) {
     files.add(document.source)
-    for (const translation of Object.values(document.translations)) files.add(translation.path)
+    for (const translation of Object.values(document.translations || {})) files.add(translation.path)
   }
   return [...files].filter((path) => existsSync(absolute(path)))
 }
@@ -111,10 +92,10 @@ function effectiveTranslationLocales(document) {
     }
     return []
   }
-  return Object.keys(document.translations || {})
+  return translationLocales
 }
 
-function checkTranslations() {
+function checkTranslations(checkReview = true) {
   const manifestPath = process.env.WP002_MANIFEST || 'docs/docs-manifest.yaml'
   const manifest = YAML.parse(read(manifestPath))
   for (const document of manifest.documents) {
@@ -138,11 +119,13 @@ function checkTranslations() {
         fail(`${document.id}/${locale}: 翻译文件不存在：${translation.path}`)
         continue
       }
-      if (!allowDraft && translation.status !== 'synchronized') {
-        fail(`${document.id}/${locale}: 翻译状态不是 synchronized`)
+      if (!['present-unverified', 'synchronized', 'missing'].includes(translation.status)) {
+        fail(`${document.id}/${locale}: 不识别的翻译状态`)
       }
-      if (!allowDraft && !translation.reviewed_at) {
-        fail(`${document.id}/${locale}: 缺少人工复核日期`)
+      if (checkReview && !allowDraft) {
+        for (const error of reviewErrors(document, locale, translation, read(document.source), read(translation.path), {
+          policy: manifest.release_policy, readEvidence: (path) => existsSync(absolute(path)) ? read(path) : null,
+        })) fail(error)
       }
     }
   }
@@ -167,13 +150,15 @@ function checkScreenshots() {
     } else if (!existsSync(absolute(item.image))) {
       fail(`${item.id}: 正式图片不存在：${item.image}`)
     } else {
-      // W2-R2 修复：验证图片文件完整性（大小 > 0 且含有效图片头）
+      // 图片头与块结构都必须有效，文件长度不能证明图片真实性。
       try {
         const stat = statSync(absolute(item.image))
         if (stat.size === 0) {
           fail(`${item.id}: 图片文件为空：${item.image}`)
-        } else if (stat.size < 100) {
-          fail(`${item.id}: 图片文件过小（${stat.size} bytes），可能损坏：${item.image}`)
+        } else {
+          const bytes = readFileSync(absolute(item.image))
+          for (const error of pngErrors(bytes)) fail(`${item.id}: ${error}：${item.image}`)
+          if (item.image_sha256 && sha256(bytes) !== item.image_sha256) fail(`${item.id}: 图片 SHA-256 不匹配`)
         }
       } catch {
         fail(`${item.id}: 无法读取图片文件状态：${item.image}`)
@@ -197,6 +182,18 @@ function checkScreenshots() {
       screenshotMap.get(key).push(item)
     }
   }
+  const terminalMap = new Map()
+  for (const item of manifest.terminal_evidence || []) {
+    if (!item.id || ids.has(item.id)) fail(`证据稳定 ID 缺失或重复：${item.id || '<empty>'}`)
+    ids.add(item.id)
+    const errors = terminalErrors(repositoryRoot, item)
+    for (const error of errors) fail(`${item.id}: ${error}`)
+    if (!errors.length) {
+      const key = `${item.module}::${item.flow}`
+      if (!terminalMap.has(key)) terminalMap.set(key, [])
+      terminalMap.get(key).push(item)
+    }
+  }
   const coveragePath = process.env.WP002_SCREENSHOT_COVERAGE || 'omni-frontend/e2e-docs/screenshot-coverage.yaml'
   const coverage = YAML.parse(read(coveragePath))
   if (!allowDraft) {
@@ -208,7 +205,12 @@ function checkScreenshots() {
       if (module.required_flows && Array.isArray(module.required_flows)) {
         for (const flow of module.required_flows) {
           const key = `${module.id}::${flow}`
-          if (!screenshotMap.has(key)) {
+          const kind = module.flow_evidence?.[flow] || 'screenshot'
+          if (!['screenshot', 'terminal'].includes(kind)) fail(`${module.id}/${flow}: 不识别的证据类型 ${kind}`)
+          if (kind === 'terminal' && !supportsTerminalEvidence(module.id, flow)) fail(`${module.id}/${flow}: 此步骤必须保留截图证据`)
+          if (kind === 'terminal' && !terminalMap.has(key)) {
+            fail(`${module.id}: required flow "${flow}" 无对应终端证据`)
+          } else if (kind !== 'terminal' && !screenshotMap.has(key)) {
             fail(`${module.id}: required flow "${flow}" 无对应截图`)
           }
         }
@@ -217,7 +219,7 @@ function checkScreenshots() {
       if (module.required_states && Array.isArray(module.required_states)) {
         for (const state of module.required_states) {
           const flowScreenshots = (module.required_flows || []).flatMap(
-            (flow) => screenshotMap.get(`${module.id}::${flow}`) || []
+            (flow) => (module.flow_evidence?.[flow] === 'terminal' ? terminalMap : screenshotMap).get(`${module.id}::${flow}`) || []
           )
           const hasState = flowScreenshots.some((s) => s.step === state || s.expected === state)
           if (!hasState && module.status !== 'exempt') {
@@ -247,15 +249,13 @@ function checkReadmes() {
   const readmes = ['README.md', 'README.en.md', 'README.jp.md', 'README.kr.md']
   const requiredFacts = [
     'Spring Boot 4.0.6',
-    'omni-common-service',
-    'omni-db-migrator',
-    'omni-procurement',
-    'omni-asset',
-    '8107',
     'tools/omni-cli',
     'docs/guides/quick-start',
-    'docs/observability',
-    'scripts/sql/seed',
+    'docs/wiki/index',
+    'docs/architecture',
+    'docs/api-contract',
+    'AGENTS.md',
+    'LICENSE',
   ]
   const retiredFacts = [
     { label: '旧 Compose 单文件名', pattern: /docker-compose\.yml/ },
@@ -264,7 +264,8 @@ function checkReadmes() {
   ]
   for (const relativePath of readmes) {
     const content = read(relativePath)
-    for (const fact of requiredFacts) {
+    const localizedAiEntry = `ai/${relativePath}`
+    for (const fact of [...requiredFacts, localizedAiEntry]) {
       if (!content.includes(fact)) fail(`${relativePath}: 缺少当前事实：${fact}`)
     }
     for (const retired of retiredFacts) {
@@ -276,6 +277,7 @@ function checkReadmes() {
 const scopes = {
   links: checkLinks,
   i18n: checkTranslations,
+  'i18n-content': () => checkTranslations(false),
   screenshots: checkScreenshots,
   sensitive: checkSensitiveContent,
   readme: checkReadmes,

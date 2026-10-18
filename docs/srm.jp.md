@@ -1,12 +1,11 @@
 # SRM サプライヤー関係管理
 
-> 本文書は SRM モジュールのシステム上の唯一の真実です。AI が SRM コードを変更する前に必ず読んでください。
-> アーキテクチャ全体は [architecture.md](architecture.md)、API 契約は [api-contract.md](api-contract.md)、開発規範は [backend-patterns.md](backend-patterns.md) / [frontend-patterns.md](frontend-patterns.md) を参照してください。
-> 設計ベースラインのアーカイブは [design/srm-design.md](design/srm-design.md) にあります。
+> 本文書は現行 SRM の境界、データ契約、実装制約を記録し、中国語版を事実の原本とします。変更前に本文と[アーキテクチャ](architecture.jp.md)、[API 契約](api-contract.jp.md)、[バックエンド規約](backend-patterns.jp.md)、[フロントエンド規約](frontend-patterns.jp.md)を読んでください。
+> [原設計と過去の検収](design/srm-design.jp.md)は当時の適用範囲を保持し、現行ソースや実行証拠の代わりにはなりません。操作と実画面は [SRM Wiki](guides/srm-flow.jp.md)、拡張とコンテナテストは[開発 Wiki](guides/scaffold-development.jp.md#9-srm-拡張とコンテナテスト)を参照してください。
 
-[中文](srm.md) | [English](srm.en.md) | [한국어](srm.kr.md)
+[中文](srm.md) · [English](srm.en.md) · [日本語](srm.jp.md) · [한국어](srm.kr.md)
 
-SRM は独立したマイクロサービス `omni-srm` であり、サプライヤーの全ライフサイクル管理のクローズドループをカバーします：サプライヤー登録/准入 → 審査 → グレード分類 → パフォーマンス評価 → リスク管理 → 淘汰/退出。調達実行（購買依頼、見積依頼、発注、入荷）と資産処分は SRM の範囲外であり、それぞれ今後構築される `omni-procurement` と `omni-asset` で実装されます。
+SRM はサプライヤーの登録審査、分類・等級、業績評価、リスク、ポータルを扱う独立サービス `omni-srm` です。調達実行と資産管理は既存の `omni-procurement`、`omni-asset` が担当します。SRM は内部契約で見積に参加しますが、発注や資産処分を所有しません。
 
 ## 1. サービス境界
 
@@ -15,16 +14,12 @@ SRM は独立したマイクロサービス `omni-srm` であり、サプライ�
 | Maven モジュール | `omni-srm` |
 | サービスポート | `8105` |
 | 管理ポート | `19905` |
-| XXL-JOB エグゼキュータ | `omni-srm` / `9905` |
-| データベース | `omni_srm` |
-| Gateway ルーティング | `/api/srm/**` → `lb://omni-srm`（StripPrefix を使用しない） |
-| Redis | DB 0、Auth の XSS 設定を共有、キープレフィックス `srm:` |
+| XXL-JOB 実行器 | `omni-srm / 9905` |
+| DB | `omni_srm` |
+| Gateway | `/api/srm/**` → `lb://omni-srm` |
+| Redis | DB 0、Auth 共通 XSS キャッシュキー |
 
-**依存モジュール**：`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`。
-
-**`omni-common-workflow` に依存してはいけません**。MVP 段階のサプライヤー准入審査はシンプルなステートマシンで実装し、Flowable エンジンを導入しません。
-
-**クロスサービス呼び出し**：OpenFeign + `X-Internal-Token` を通じて Auth の内部 API を呼び出します。SRM は userId/unitId のみを保持し、`omni_auth` をクロスデータベースで参照しません。
+依存：`omni-common-service`、`omni-common-core`、`omni-common`、`omni-common-mybatis`、`omni-common-redis`、`omni-common-operlog`、`omni-common-job`、`omni-common-mqlog`。`omni-common-workflow` に依存せず、Flowable を組み込みません。承認ランタイムとテーブルは独立 Workflow に属します。サービス間通信は OpenFeign と `X-Internal-Token`、`X-Tenant-Id` を使い、Auth DB を直接読みません。表のポートはソースの既定値であり、現在の稼働健全性の証明ではありません。
 
 ## 2. ドメインモデル
 
@@ -32,530 +27,257 @@ SRM は独立したマイクロサービス `omni-srm` であり、サプライ�
 
 | 集約 | テーブル | 責務 |
 |---|---|---|
-| Supplier | `srm_supplier`、`srm_supplier_contact`、`srm_supplier_qualification`、`srm_supplier_bank_account` | サプライヤー基本データ、連絡先、資格、銀行口座 |
-| Evaluation | `srm_evaluation_template`、`srm_evaluation_dimension`、`srm_evaluation`、`srm_evaluation_item` | 評価テンプレート、評価ディメンション、評価記録、採点明細 |
-| Risk | `srm_risk_indicator`、`srm_risk_assessment` | リスク指標、総合リスク評価 |
-| Portal | `srm_supplier_invite`、`srm_supplier_enrollment`、`srm_supplier_portal_user` | 招待、入居記録（Saga）、ポータルアカウント関連付け |
+| Supplier | `srm_supplier`、`srm_supplier_contact`、`srm_supplier_qualification`、`srm_supplier_bank_account` | 基本データと子資源 |
+| Evaluation | `srm_evaluation_template`、`srm_evaluation_dimension`、`srm_evaluation`、`srm_evaluation_item` | テンプレート、次元、評価と項目 |
+| Risk | `srm_risk_indicator`、`srm_risk_assessment`、`srm_risk_indicator_type`、`srm_risk_criterion`、`srm_risk_score_threshold` | 指標、総合履歴、動的設定 |
+| Portal | `srm_supplier_invite`、`srm_supplier_enrollment`、`srm_supplier_portal_user` | 招待、ロール Saga、アカウント関連 |
+| Quotation | `srm_quotation`、`srm_quotation_line`、`srm_quotation_request` | 見積スナップショット、明細、永続要求台帳 |
+| Inbox | `srm_event_inbox` | 消費の冪等記録 |
+
+図は主な論理関連です。クロス DB 外部キーを示すものでも、全テーブルを描く要件でもありません。
 
 ```mermaid
 erDiagram
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_CONTACT : has
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_QUALIFICATION : holds
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_BANK_ACCOUNT : owns
-    SRM_SUPPLIER ||--o{ SRM_EVALUATION : evaluated_by
-    SRM_SUPPLIER ||--o{ SRM_RISK_ASSESSMENT : assessed
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_ENROLLMENT : enrolls
-    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_PORTAL_USER : authorizes
-    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION_DIMENSION : contains
-    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION : uses
-    SRM_EVALUATION ||--o{ SRM_EVALUATION_ITEM : scores
-    SRM_SUPPLIER ||--o{ SRM_RISK_INDICATOR : has
-    SRM_RISK_ASSESSMENT ||--o{ SRM_RISK_INDICATOR : aggregates
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_CONTACT : 連絡先
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_QUALIFICATION : 資格
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_BANK_ACCOUNT : 口座
+    SRM_SUPPLIER ||--o{ SRM_EVALUATION : 評価
+    SRM_SUPPLIER ||--o{ SRM_RISK_ASSESSMENT : リスク
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_ENROLLMENT : 登録
+    SRM_SUPPLIER ||--o{ SRM_SUPPLIER_PORTAL_USER : 認可
+    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION_DIMENSION : 次元
+    SRM_EVALUATION_TEMPLATE ||--o{ SRM_EVALUATION : 利用
+    SRM_EVALUATION ||--o{ SRM_EVALUATION_ITEM : 採点
+    SRM_SUPPLIER ||--o{ SRM_RISK_INDICATOR : 指標
+    SRM_SUPPLIER ||--o{ SRM_QUOTATION : 見積
+    SRM_QUOTATION ||--o{ SRM_QUOTATION_LINE : 明細
+    SRM_RISK_INDICATOR_TYPE ||--o{ SRM_RISK_CRITERION : 基準
 ```
 
-### 2.2 共通フィールド規則
+### 2.2 フィールドと担当
 
-すべての `srm_*` テーブルに `tenant_id` が必須です。認可可能なビジネステーブルには追加で以下が必要です：
+- 全 `srm_*` に tenant_id があります。owner_user_id/owner_unit_id を直接使う認可ルートは Supplier と Evaluation のみです。連絡先、資格、銀行口座、リスク、見積は親経由、評価項目は Evaluation 経由、見積明細は Quotation→Supplier 経由でスコープを継承します。存在しない owner 列を SQL に追加しません。
+- 認可ルートと可変業務行は version/deleted と監査列を使います。設定表と冪等台帳は個別 schema に従い、全書込みを同じクライアント version コマンドとみなしません。
+- userId/unitId は Auth が管理し、クライアント ownerUnitId は信頼しません。supplier_no は DB ID から生成し MAX+1 は禁止です。正規化 credit_code はテナント内一意で、ポータル登録では必須です。
+- ポータル user_id は `srm_supplier_portal_user` で関連付け、内部 owner に入れません。新規ポータルサプライヤーの内部 owner は初期状態で空です。
+- Supplier は番号、名称/normalized_name、種類、業種、信用コード、Web、電話、メール、地域、住所、分類、等級、状態、割当/評価時刻に加え、インスタンス、要求、業務キー、モデル、試行番号、開始状態を保持します。
+- 有効な主要連絡先と既定銀行口座は各一件で、tenant + primary_supplier_guard 一意制約で保証します。子表に内部 owner スナップショットはありません。Evaluation owner は作成時に Supplier から取得し、担当移管時に同一トランザクションで同期する可変権限スナップショットで、過去の点数は変えません。
+- PortalUser は tenant + user_id で一意です。Enrollment は tenant + request_id で冪等、active_user_guard で活動中の申請を制限します。招待の生トークンは作成時だけ返し、DB は SHA-256 摘要を保存し、version 条件付き SQL で利用数を原子的に増やします。
+- 日時は `yyyy-MM-dd HH:mm:ss`。見積の十進文字列 JSON と精度は第 9 節に従います。
 
-- `tenant_id` — テナント分離
-- `owner_user_id` — SELF スコープと業務担当者
-- `owner_unit_id` — DEPT/DEPT_AND_BELOW/CUSTOM スコープ
-- `version` — 楽観ロック
-- `deleted` — 論理削除
-- `id/create_time/update_time/create_by/update_by` — 監査フィールド
+## 3. セキュリティ
 
-**主要制約**：
+### 3.1 六段階の信頼チェーン
 
-- ユーザー/組織 ID は Auth が管理。クロスデータベース外部キーなし、フロントエンド送信のユーザー名や ownerUnitId を信頼しない
-- `supplier_no` はデータベース ID から生成、テナント内で一意。`SELECT MAX(...) + 1` は禁止
-- `credit_code`（統一社会信用コード）はテナント内で一意
-- 銀行口座番号は PII マスキングを使用、完全な値は `srm:pii:view` を持つユーザーのみに返却
-- 日時は統一 `yyyy-MM-dd HH:mm:ss` 形式
-- 通常の PUT で owner やライフサイクル status を直接変更不可
-- 外部リクエストで裸の `selectById/updateById/deleteById` を使用禁止
-- `owner_user_id` は内部調達担当者のみ；ポータルアカウントは `srm_supplier_portal_user` で関連付け、owner フィールドの再利用は禁止
+Gateway の RS256 JWT 検証と信頼済み識別ヘッダー上書き → 共通 GatewayPreAuthenticationFilter の Authentication 構築 → ServiceIdentityFilter のユーザー/テナント検証・設定 → Controller 機能権限 → スコープ解決と MyBatis 条件 → 明示的な行レベル書込認可。
 
-### 2.3 主要テーブル詳細
+不正な識別情報は 401、有効スコープ欠落は SQL で拒否します（id=-1）。Auth の権限拒否は 403、他の依存障害は 503 で、無制限検索に切り替えません。
 
-**`srm_supplier`** — サプライヤー基本テーブル：`supplier_no/name/normalized_name/supplier_type/industry_code/credit_code/website/phone/email/region/address/category_code/level_code/status/assigned_time/last_evaluation_time`。`level_code` 列挙：STRATEGIC/PREFERRED/QUALIFIED/ELIMINATED、評価により自動調整または手動設定。`status` は8つの状態（ステートマシン参照）。
+### 3.2 永続化とスコープ
 
-**`srm_supplier_contact`** — 連絡先：サプライヤーごとに有効な主要連絡先は最大1つ（`primary_flag` + `status` + `deleted` による `primary_supplier_guard` 一意制約）。owner は Supplier の owner の権限スナップショット；サプライヤー移管時に同一トランザクションで同期。
+共通 `ServicePersistenceAutoConfiguration` がインターセプタを組み立て、SRM は `SrmTenantTablePolicy` と `SrmDataPermissionHandler` を提供します。
 
-**`srm_supplier_qualification`** — 資格：`qualification_name/certificate_no/issuing_authority/issue_date/expiry_date/status`。`expiry_date` は資格期限アラートに使用（30日以内 → YELLOW、期限切れ → RED）。MVP では添付ファイルを保存しません。
-
-**`srm_supplier_bank_account`** — 銀行口座：`account_no` は PII フィールド。サプライヤーごとに複数の銀行口座を管理可能；1つをデフォルトとしてマーク。
-
-**`srm_supplier_portal_user`** — ポータルユーザー関連付け：`tenant_id + user_id` が一意、1つの Auth ユーザーが同一テナントで1つのサプライヤーのみにマッピング。
-
-**`srm_supplier_enrollment`** — 入居記録（Saga）：`request_id` で冪等性確保。`status` は PENDING_ROLE_ASSIGN/ROLE_ASSIGN_FAILED/COMPLETED/CANCELLED。`active_user_guard` で同一 tenant + userId のアクティブ入居は最大1つ。
-
-**`srm_supplier_invite`** — 招待：元の inviteToken は作成時に一度だけ返却、データベースには SHA-256 ハッシュのみ保存。`version` 条件付きアトミック増加で `used_count` を管理し、並行超過使用を防止。
-
-**`srm_evaluation_template`** + **`srm_evaluation_dimension`** — 評価テンプレート：MVP ではテナントごとに1つのデフォルトテンプレート（`default_flag=1`）を提供し、4つの事前設定ディメンション：品質（30%）、納期（30%）、価格（20%）、サービス（20%）。`weight` の合計は100に等しいこと。
-
-**`srm_evaluation`** + **`srm_evaluation_item`** — 評価記録：`score` は1-5点（`DECIMAL(3,1)`）。`total_score` は加重パーセント制で自動計算（範囲20-100）。評価完了後、サプライヤー等級を自動マッピング：≥90 戦略級、≥75 優先級、≥60 合格級、<60 淘汰候補。評価項目は追加のみ、修正インターフェースなし。
-
-**`srm_risk_indicator`** — リスク指標：`indicator_type` 列挙：FINANCIAL/COMPLIANCE/SUPPLY/COOPERATION/QUALITY/CERTIFICATE。`risk_level` 列挙：GREEN/YELLOW/RED。CERTIFICATE 指標は資格期限日から自動計算。
-
-**`srm_risk_assessment`** — 総合リスク評価：`overall_level` は全指標の最高等級を取得（RED > YELLOW > GREEN）。
-
-## 3. セキュリティアーキテクチャ
-
-### 3.1 5層信頼チェーン
-
-```
-Gateway JWT 検証 → SRM テナントチェック → Spring Security @PreAuthorize
-→ @ServiceDataScope アスペクト → MyBatis DataPermission インターセプター → SrmRecordAccessGuard 行レベル書込み認可
+```text
+TenantLineInnerInterceptor → DataPermissionInterceptor → OptimisticLockerInnerInterceptor → PaginationInnerInterceptor
 ```
 
-1. Gateway が RS256 JWT を検証、`X-User-*`、`X-Tenant-Id`、`X-Gateway-Forwarded` を上書き注入
-2. common-service の `GatewayPreAuthenticationFilter` が `Authentication` を構築、userId/tenantId を検証
-3. Controller の `@PreAuthorize` で機能権限を検証
-4. `@ServiceDataScope(permissionCode)` アスペクトが Auth 内部 API を呼び出し dataScope を解決
-5. MyBatis-Plus が tenant + owner 条件を追加
-6. `SrmRecordAccessGuard` が行レベル書込み認可を検証
+TenantLine は srm_* のみを処理します。sys_mq_message は二種類のドメイン権限条件の対象外で、Relay は設計どおり全テナントの送信待ちを走査します。ユーザーのメッセージ検索には明示的 tenant 条件が必要です。DataPermission はページングより前に置き、COUNT と行の範囲を一致させます。
 
-**フェイルクローズ**：tenant 欠落 → 401、scope 欠落 → `id=-1`（データ閲覧ゼロ）、Auth 利用不可 → 503。決して無フィルタリングに degraded しません。
-
-### 3.2 MyBatis インターセプター順序
-
-SRM は独自の `mybatisPlusInterceptor` Bean を定義；順序は固定で入替不可：
-
-```
-TenantLineInnerInterceptor → DataPermissionInterceptor → PaginationInnerInterceptor
-```
-
-- TenantLine は `srm_*` テーブルのみ処理
-- `sys_mq_message` は両権限インターセプターから除外（Relay は設計上全テナントをスキャン）
-- DataPermission は Pagination の前に配置し、COUNT とレコードが同じスコープを共有
-
-### 3.3 DataScope マッピング
-
-| dataScope | SQL 条件 |
+| dataScope | ルート条件 |
 |---|---|
-| SELF | `owner_user_id = currentUserId` |
-| DEPT | `owner_unit_id = primaryUnitId` |
-| DEPT_AND_BELOW / CUSTOM | `owner_unit_id IN accessibleUnitIds` |
-| TENANT / ALL | owner 条件なし、TenantLine は常に保持 |
+| `SELF` | `owner_user_id = currentUserId` |
+| `DEPT` | `owner_unit_id = primaryUnitId` |
+| `DEPT_AND_BELOW / CUSTOM` | `owner_unit_id IN accessibleUnitIds` |
+| `TENANT / ALL` | owner 条件なし、TenantLine 保持 |
 
-評価とリスクは `supplier_id` を通じて Supplier の owner にスコープを継承。Template/Dimension はテナントスコープ + 機能権限のみ。ポータルユーザー（SUPPLIER ロール）は内部 owner dataScope を使用せず、`srm_supplier_portal_user` で supplierId を解決、見つからない場合はフェイルクローズ。
+表は認可ルートの条件で、子は親の EXISTS/JOIN で継承します。テンプレート、ディメンション、リスク設定はテナント共有で、内部 owner 条件を使いません。
 
-### 3.4 行レベル書込み認可
+### 3.3 書込認可とコンテキスト
 
-DataPermissionInterceptor は書込みを保護しません。更新/削除/承認/凍結/ブラックリストコマンドは以下が必須：
+既存業務行の変更は可視なテナント行を読み、状態/関連を確認して、実更新に id/version/deleted と更新行数確認を使います。DataPermission は AccessGuard を代替せず、専用 SQL は owner 条件を除外し得ます。番号補完、連鎖更新、台帳、共有設定は別経路で、全コマンドがクライアント version を受けるわけではありません。
 
-1. `tenant_id + id + data scope` で可視レコードを検索（不可視 → 404、ID 列挙防止）
-2. ステートマシンとビジネス不変量を検証
-3. `tenant_id + id + version` 条件で更新
-4. 影響行数 ≠ 1 の場合は競合を返却
+内部 owner 資源は同じ完全コードの `@PreAuthorize` と `@ServiceDataScope` を使います。ポータルはロール・権限・現在アカウント関連、リスク設定はテナント識別と設定権限で認可し、owner アスペクトを機械的に適用しません。業務変更は `@OperLog` を記録します。
 
-### 3.5 権限コード一覧
+入れ子の SrmPermissionScopeExecutor/SrmPortalScope は finally で元の範囲を復元し、外側アスペクト/識別フィルターが最後に消去します。ServiceIdentityContext と ServiceDataScopeContext は両方存在し、テナント関連のスレッドコンテキストがないとは言えません。
 
-| リソース | 権限コード |
+### 3.4 権限とロール
+
+| 資源 | API 権限 |
 |---|---|
-| Overview | `srm:overview:list` |
-| Supplier | `srm:supplier:list/create/update/delete/approve/reject/suspend/resume/blacklist/restore/eliminate/transfer` |
-| Contact | `srm:contact:list/create/update/delete` |
-| Qualification | `srm:qualification:list/create/update/delete` |
-| Bank Account | `srm:bank-account:list/create/update/delete` |
-| Evaluation | `srm:evaluation:list/create/view` |
-| Risk | `srm:risk:list/update/assess` |
-| Invite | `srm:invite:list/create/revoke`、`srm:portal:invite` |
-| Owner 候補 | `srm:owner:list` |
-| PII 閲覧 | `srm:pii:view` |
-| Portal | `srm:portal:enroll/profile/evaluation/quotation` |
+| 概要 | `srm:overview:list` |
+| サプライヤー | `srm:supplier:list/create/update/delete/withdraw/cancel/suspend/resume/blacklist/restore/eliminate/transfer` |
+| 連絡先 | `srm:contact:list/create/update/delete` |
+| 資格 | `srm:qualification:list/create/update/delete` |
+| 銀行口座 | `srm:bank-account:list/create/update/delete` |
+| 評価 | `srm:evaluation:list/create/view` |
+| リスク | `srm:risk:list/update/assess` |
+| リスク設定 | `srm:risk:config:list/update` |
+| 招待 | `srm:invite:list/create/revoke · srm:portal:invite` |
+| 担当候補 | `srm:owner:list` |
+| PII | `srm:pii:view` |
+| ポータル | `srm:portal:enroll/profile/evaluation/quotation` |
 
-`/` は同一リソース内の複数完全権限コードの略記；データベースには個別に保存。`@PreAuthorize` と `@ServiceDataScope` は同じ完全権限コードを使用。
+斜線は複数の完全コードの略記で、一個の権限ではありません。submit は srm:supplier:create を使います。承認タスクは Workflow が処理し、現行 SRM Controller に approve/reject エンドポイントはありません。
 
-### 3.6 PII マスキング
-
-- 完全な銀行口座番号、連絡先電話番号、メールは `srm:pii:view` を持つユーザーのみに返却
-- その他のユーザーにはバックエンド VO がマスク値を直接返却（`6222****1234`、`138****1234`、`a***@example.com`）；フロントエンドに依存しない
-- リストはデフォルトでマスク；詳細は権限に応じて決定
-- ポータル SUPPLIER ロールは自身のデータに完全アクセスを暗黙的に許可
-
-### 3.7 XSS 防御
-
-SRM は `XssConfigProvider` SPI を実装し、Redis DB 0 の `xss:enabled:{tenantId}` と `xss:rules:{tenantId}` を読み取ります。キャッシュミス時は Auth にフォールバックまたは内蔵ベースラインルールを使用；保護を無効化しません。MVP の備考はプレーンテキストのみ許可、`v-html` はフロントエンドで禁止。
-
-### 3.8 ロールと dataScope
-
-| ロール | dataScope | 能力 |
+| ロール | シード範囲 | 機能 |
 |---|---|---|
-| `SRM_ADMIN` | TENANT | 現在のテナントの全 SRM 機能/データ |
-| `PROCUREMENT_MANAGER` | DEPT_AND_BELOW | 部門および下位、サプライヤー評価、リスク管理 |
-| `PROCUREMENT_STAFF` | SELF | 自身のデータと日常業務 |
-| `SUPPLIER` | SELF | ポータルセルフサービス：入居後の企業情報管理、自身のパフォーマンス閲覧 |
-| `SUPER_ADMIN` | ALL | 全機能、SRM データは現在のテナントに限定 |
+| `SRM_ADMIN` | `TENANT` | テナント内管理、代理のセルフサービス見積は含まない |
+| `PROCUREMENT_MANAGER` | `DEPT_AND_BELOW` | 部門・下位部門、評価とリスク |
+| `PROCUREMENT_STAFF` | `SELF` | 担当業務と日常操作。設定は機能権限によるテナント共有 |
+| `SUPPLIER` | `SELF` | ポータル資料、業績、見積。ACTIVE 関連も必要 |
+| `SUPER_ADMIN` | `ALL` | 全権限ツリー、データは現テナント、ポータルなりすまし不可 |
 
-デフォルト USER ロールは `srm:portal:enroll` のみ付与され、SRM 管理やポータル profile/evaluation/quotation 権限は付与されません。入居完了後に SUPPLIER ロールを追加して初めて profile/evaluation/quotation にアクセスできます。`srm:portal:quotation` は `SUPPLIER` と、プラットフォーム規則により全権限ツリーを保持する `SUPER_ADMIN` にのみ厳格に付与され、`SRM_ADMIN`・`PROCUREMENT_MANAGER` などの内部ロールがサプライヤーに代わって見積を行うことはできません。見積 Controller は SUPPLIER ロールと有効な PortalUser 関連を同時に要求し、SUPER_ADMIN だけではサプライヤーになりすませません。
+正式 auth.sql の既定テナント用シード例で、全新規テナントにこれらのロールがある証拠ではありません。USER は portal enroll のみです。profile/evaluation/quotation は SUPPLIER、対応権限、現在のテナント/ユーザーの ACTIVE PortalUser も必要です。内部管理者は代理見積できず、SUPER_ADMIN だけでもポータル主体になりすませません。複数ロールは実際の権限集合で管理入口を判定します。
 
-## 4. ステートマシンとコアフロー
+### 3.5 PII、XSS、ログ
 
-### 4.1 サプライヤーライフサイクル
+サプライヤー専用一覧は常にマスク VO を使います。サプライヤー詳細/360、連絡先・銀行口座の一覧/詳細は srm:pii:view で電話、メール、口座番号を扱い、全一覧が常時マスクとは限りません。住所など未マスク項目に汎用秘匿化の保証はありません。ポータル profile はロール/権限/ACTIVE 関連を確認して自身の電話/メールを返します。旧文書の portal contacts/qualifications/bank-accounts API は現行にありません。
 
-```
-[*] → REGISTERING → PENDING_REVIEW（Auth ユーザーとロール作成成功）
-[*] → REGISTERING → REGISTERING_FAILED（Auth 作成/ロール割り当て失敗）
-REGISTERING_FAILED → REGISTERING（バックエンドリトライ）
-[*] → PENDING_REVIEW（管理者作成）
-PENDING_REVIEW → APPROVED（承認）
-PENDING_REVIEW → REJECTED（却下）
-REJECTED → PENDING_REVIEW（再提出）
-APPROVED → SUSPENDED（協力停止）
-SUSPENDED → APPROVED（協力再開）
-APPROVED → BLACKLISTED（ブラックリスト追加）
-BLACKLISTED → APPROVED（ブラックリスト解除、srm:supplier:restore 必要）
-APPROVED/SUSPENDED → ELIMINATED（淘汰退出）
-ELIMINATED → [*]（終端状態、回復不可）
-```
+`omni.service.xss.enabled=true` は共通 CachedServiceXssConfigProvider と Redis DB 0 の xss:enabled:{tenantId}/xss:rules:{tenantId} を使います。キャッシュ異常は Auth に照会し、失敗時は安全基準を使いつつ権威設定の enabled を尊重します。SRM 独自 SPI や確認済み srm: 業務キャッシュ接頭辞はありません。備考はプレーンテキストで v-html を使いません。
 
-- `APPROVED` 状態のサプライヤーのみ調達モジュールから参照可能
-- `BLACKLISTED` は `srm:supplier:blacklist` 権限が必要
-- `ELIMINATED` は終端状態で回復不可
-- 管理者作成のサプライヤーは直接 `PENDING_REVIEW` に入る
-- `REGISTERING/REGISTERING_FAILED` はポータルのクロスサービス登録専用
+OperLog は明示的なフィールド規則に従い、任意 PII の認識保証はありません。登録はスナップショットを無効化し inviteToken/creditCode/phone/email を除外します。作成時の招待トークンもログに残しません。非同期汎用ログはドメイン状態、評価、Inbox の事実を代替しません。
 
-### 4.2 パフォーマンス評価フロー
+## 4. ライフサイクルと主要フロー
 
-```
-POST /evaluation (supplierId, period, items[])
-→ SELECT Supplier FOR UPDATE + tenant/scope
-→ Query Template (default)
-→ INSERT Evaluation + Items（トランザクション内）
-→ パーセント制 totalScore = SUM(item.score / 5 × item.weight) を計算
-→ 等級をマッピングし Supplier.level_code を UPDATE
-→ INSERT Outbox event（同一トランザクション）
+### 4.1 登録審査と Workflow
+
+SupplierStatus は REGISTERING、REGISTERING_FAILED、PENDING_REVIEW、APPROVING、REJECTED、APPROVED、SUSPENDED、BLACKLISTED、ELIMINATED の九値です。主経路：
+
+```text
+ポータル：REGISTERING → ロール Saga 成功 → PENDING_REVIEW
+管理者作成 / REJECTED 再提出 → Workflow 準備・呼出し → STARTED 確認後 APPROVING
+Workflow 完了 → APPROVED / REJECTED
+APPROVING 取下げ/取消 → PENDING_REVIEW + NOT_STARTED
+APPROVED → SUSPENDED → APPROVED
+APPROVED → BLACKLISTED → APPROVED
+APPROVED/SUSPENDED → ELIMINATED（終端）
 ```
 
-評価は四半期ごとを推奨しますが MVP では強制せず、管理者が手動で開始します。評価完了後、システムは自動的に：
-1. 加重合計スコアを計算（1-5点をパーセント制に正規化、範囲20-100）
-2. 新しいサプライヤー等級をマッピング（≥90 戦略級、≥75 優先級、≥60 合格級、<60 淘汰候補）
-3. `srm_supplier.level_code` を更新
-4. `last_evaluation_time` を記録
+管理者 create、却下後 submit、ポータルロール成功処理はローカルトランザクション内で SupplierWorkflowCoordinator を同期呼出しします。モデル解決は開始例外捕捉より先で、不在/未公開/照会失敗は作成や Saga 結果をロールバックし得ます。開始呼出し失敗では FAILED 記録を試み、PENDING_REVIEW/FAILED がコミットされ得ます。markStarted/markFailed は REQUIRED で、コミット後開始や分散原子性ではありません。
 
-### 4.3 リスク評価フロー
+requestId、businessKey（supplierId:attempt）、modelVersionId、attempt、開始状態/インスタンスを保存します。startUser は現在識別情報から取得し、Supplier の永続化開始者列ではありません。モデルはサーバー選択で Workflow 応答は replayed です。既定モデル初期化は全テナント分を保証しません。
 
-```
-手動/自動リスク指標更新
-→ 総合リスクレベルを再計算（全指標の最高レベルを取得）
-→ INSERT/UPDATE srm_risk_assessment
-→ レベルが RED に変更された場合、Outbox イベント通知を書込み
-```
+submit/profile-submit は REJECTED のみで新試行を作ります。PENDING_REVIEW/FAILED の汎用同一スナップショット再試行 API はありません。取下げ/取消は遠隔停止後にローカル version 更新をするため分散ロールバックを保証せず、再提出入口の存在も意味しません。
 
-資格期限アラートロジック：`expiry_date - today <= 30` → CERTIFICATE 指標自動 YELLOW；`expiry_date < today` → CERTIFICATE 指標自動 RED。XXL-JOB 定期タスクによる事前スキャンは Phase 2 で有効化予定（MVP：手動トリガーまたは無効）。
+完了は tenant/eventId Inbox と業務意図で冪等化し、業務キー・インスタンス・状態を照合します。有効な早着イベントは再配信を要求し、乱序を一律無視しません。登録審査結果は APPROVED/REJECTED です。調達参照は APPROVED を確認し、ブラックリスト解除は専用 restore 権限を使います。削除には状態とポータル/評価/リスク履歴の制限もあります。
 
-### 4.4 ポータル口座開設と入居
+### 4.2 業績評価
 
-```
-POST /api/auth/register（公開 Auth 自己登録、デフォルト USER ロール割り当て）
-→ ログインして JWT を取得
-→ POST /api/srm/portal/enroll（認証済み、inviteToken + 企業情報）
-→ INSERT 入居申請と Supplier (status=REGISTERING)
-→ INSERT Outbox srm.portal-role.assign-requested.v1
-→ Auth が Outbox を消費し SUPPLIER ロールを割り当て
-→ MQ auth.portal-role.assigned.v1 が返却
-→ SRM が消費：INSERT PortalUser 関連付け、Supplier → PENDING_REVIEW
-```
+可視な APPROVED サプライヤーと完全な内部 owner が必要です。要求は supplierId/evaluationPeriod/items で、クライアント supplier version は受けず、ロック行の DB version を使います。
 
-ポータル口座開設と入居は2つのセキュリティ境界に分離：
-- 口座開設は公開 `POST /api/auth/register` のみ使用；SRM はパスワードを扱わない
-- 入居にはテナント固有の inviteToken が必須；テナント、有効期限、使用回数を確認
-- 統一社会信用コード（credit_code）はテナント内で一意
-- 入居は requestId で冪等性確保；1つの userId は1つのサプライヤーのみにマッピング
-- SRM は Outbox/Saga で Auth に既存 USER アカウントへの SUPPLIER ロール追加を要求；ロール割り当て失敗時は `REGISTERING_FAILED` を維持
+初期化は既定テンプレート一個と品質/納期/価格/サービスの 30/30/20/20 を維持します。テンプレート読込も設定修復を行い得るため書込みゼロではありません。項目は有効ディメンションを重複なく完全網羅し、点数 1–5（保存 DECIMAL(3,1)）、正の重み合計 100 です。`SUM(score / 5 × weight)` を HALF_UP 二桁に丸め、範囲 20–100、≥90 STRATEGIC、≥75 PREFERRED、≥60 QUALIFIED、その他 ELIMINATED です。この level_code は Supplier のライフサイクルを直接終了させません。
 
-## 5. API エンドポイントインデックス
+同一トランザクションで Evaluation/Items、等級/直近評価時刻、srm.evaluation.completed.v1 Outbox を保存します。評価項目は追加のみで、既定テンプレートの動的管理 UI はありません。独立履歴は最大 100 件、360 は直近五件です。
+
+### 4.3 リスク
+
+指標種類、採点基準、総得点閾値は DB 設定です。現行総合等級は非 null indicator.score の合計を閾値に照合し、指標の最高色を取りません。区間端点は含み、返却順の最初の一致を採用します。閾値なしは GREEN、全上界を超える未一致点は最大上界の等級、それ以外は GREEN です。設定は区間の完全網羅/非重複を保証しません。
+
+正式 srm.sql の既定テナント例は FINANCIAL、COMPLIANCE、SUPPLY、COOPERATION、QUALITY、CERTIFICATE です。作成時は現在有効な種類から不足する GREEN 指標を冪等に補い、自動種類の score は null、それ以外は 1 にします。有効設定なしでは追加せず、全テナントにシードがあるとは保証しません。
+
+手動更新は有効な指標種類が見つかった場合のみ autoCalc=1 を拒否し、種類不在・無効時はこの検査を省略します。criterionId 経路はテナント内の既存基準から点数/等級/ラベルをコピーし、現在同種別の強制検証はないため画面候補をサーバー保証と見なしません。旧 indicatorValue/riskLevel 入力も残ります。再計算は新しい評価履歴を挿入し、初回または非赤→RED のみイベントを書きますが、外部通知配送は証明しません。
+
+期限なしは GREEN、残日数 0–30 は YELLOW、期限切れは RED。複数資格は最重大等級、同等級は最早日を使い、点数は 1/2/3 です。手動評価、指標更新、APPROVED/SUSPENDED/BLACKLISTED の資格作成/更新/削除で再計算します。現行 SRM Java に専用 @XxlJob/@Scheduled リスク走査実装はなく、外部タスク設定は別途検証します。
+
+### 4.4 ポータルアカウントとロール Saga
+
+公開 Auth register は実 CAPTCHA、テナント内ユーザー名一意、パスワードハッシュを使います。既定 USER 割当の失敗境界は Core Flow 1 に従います。SRM enroll は認証済み既存ユーザーを扱い、パスワードを受けません。
+
+requestId とテナント招待の期限/状態/利用数を検証し、REGISTERING Supplier、初期リスク、PENDING_ROLE_ASSIGN Enrollment、ロール要求 Outbox を作ります。requestId 再実行は申請者と正規化 credit_code を比較し、全本文ハッシュではありません。活動中申請は元結果を返し、招待を再消費しません。
+
+Auth は SUPPLIER、要求台帳、結果 Outbox を原子的に保存し、完了再実行は決定的イベント ID の結果を再送します。SRM 成功は PortalUser を作成/有効化し COMPLETED/PENDING_REVIEW として同じローカルトランザクションで Workflow を開始します。Auth ロールがコミット済みでも SRM モデル照会でロールバックし得るため、部分成功認可がないとの保証は不正確です。実状態とメッセージ再配信を確認し、Saga COMPLETED を APPROVED/Workflow 健全性と同一視しません。
+
+失敗は ROLE_ASSIGN_FAILED/REGISTERING_FAILED です。enrollment/retry は失敗/待機期限後に元 requestId で新 Outbox を書き、招待を消費しません。承認開始再試行ではありません。画面は状態をポーリングし完了時に再ログインを案内し、DB ロール追加は既存 JWT を変更しません。[Core Flows 15/18](core-flows.jp.md) を参照してください。
+
+## 5. 外部 API
 
 ### 5.1 共通契約
 
-- 全レスポンス：`R<T>`、ページネーション：`R<PageResult<T>>`
-- `page=1`、`size=10`、最大 `size=100`
-- Entity は Request/Response として使用しない；状態コマンドは専用 DTO を使用
-- 日付パラメータ：`@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")`
-- 状態/承認/評価リクエストは `version` を保持
-- 書込みエンドポイントは `@PreAuthorize` と `@OperLog` の両方を宣言
+応答は `R<T>`、ページ応答は `R<PageResult<T>>`、page=1/size=10、size 最大 100。通常一覧は `R<List<T>>` の場合もあります。Entity を外部要求/応答にせず実 DTO に従います。日時は共通形式。状態/既存行更新は通常 version を持ちますが、評価作成、リスク評価作成、設定は個別契約です。
 
-### 5.2 エンドポイント一覧
+### 5.2 現行パス
 
-全エンドポイントは `/api/srm` プレフィックス。
+77 個のメソッド/パスは現行別名を含み、/api/srm からの相対パスを各項に完全記載しています。
 
-| ドメイン | エンドポイント |
+| Controller | メソッドとパス |
 |---|---|
-| Overview | `GET /overview/summary`、`/risk-dashboard` |
-| Supplier | `GET /supplier/list`、`/{id}`、`/{id}/overview`、`POST /supplier`、`PUT/DELETE /supplier/{id}` |
-| Supplier コマンド | `POST /supplier/{id}/submit`、`/approve`、`/reject`、`/suspend`、`/resume`、`/blacklist`、`/restore-from-blacklist`、`/eliminate`、`/transfer` |
-| Contact | `GET /supplier/{id}/contact/list`、`POST /supplier/{id}/contact`、`PUT/DELETE /contact/{id}` |
-| Qualification | `GET /supplier/{id}/qualification/list`、`POST /supplier/{id}/qualification`、`PUT/DELETE /qualification/{id}` |
-| Bank Account | `GET /supplier/{id}/bank-account/list`、`POST /supplier/{id}/bank-account`、`PUT/DELETE /bank-account/{id}` |
-| Insight | `GET /supplier/{id}/evaluation/history`、`/supplier/{id}/risk` |
-| Evaluation | `GET /evaluation/list`、`/{id}`、`POST /evaluation` |
-| Risk | `GET /risk/list`、`PUT /risk/indicator/{id}`、`POST /risk/assessment/{supplierId}` |
-| Owner オプション | `GET /options/owners` |
-| Portal 招待 | `GET /portal/invite/list`、`POST /portal/invite`、`POST /portal/invite/{id}/revoke`（管理側） |
-| Portal 入居 | `POST /portal/enroll`（認証済み、inviteToken 付き） |
-| Portal 企業情報 | `GET /portal/profile`、`PUT /portal/profile`、`GET /portal/contacts`、`GET /portal/qualifications`、`GET /portal/bank-accounts` |
-| Portal パフォーマンス | `GET /portal/evaluations`、`GET /portal/evaluations/{id}` |
+| サプライヤー分析 (SupplierInsightController) | `GET /supplier/{supplierId}/evaluation/history` · `GET /supplier/{supplierId}/risk` |
+| サプライヤー (SupplierController) | `GET /supplier/list` · `GET /supplier/{id}` · `GET /supplier/{id}/overview` · `POST /supplier` · `PUT /supplier/{id}` · `POST /supplier/{id}/transfer` · `DELETE /supplier/{id}` · `POST /supplier/{id}/submit` · `POST /supplier/{id}/withdraw` · `POST /supplier/{id}/cancel` · `POST /supplier/{id}/suspend` · `POST /supplier/{id}/resume` · `POST /supplier/{id}/restore-from-blacklist` · `POST /supplier/{id}/restore` · `POST /supplier/{id}/blacklist` · `POST /supplier/{id}/eliminate` |
+| リスク設定 (RiskIndicatorConfigController) | `GET /risk/config/types` · `POST /risk/config/types` · `PUT /risk/config/types/{id}` · `DELETE /risk/config/types/{id}` · `POST /risk/config/criteria` · `PUT /risk/config/criteria/{id}` · `DELETE /risk/config/criteria/{id}` · `GET /risk/config/thresholds` · `PUT /risk/config/thresholds` |
+| リスク (RiskController) | `GET /risk/list` · `GET /risk/indicators/{supplierId}` · `PUT /risk/indicator/{id}` · `POST /risk/assessment/{supplierId}` · `GET /risk/assessment/history/{supplierId}` |
+| 資格 (QualificationController) | `GET /supplier/{supplierId}/qualification` · `GET /supplier/{supplierId}/qualification/list` · `GET /supplier/{supplierId}/qualification/{id}` · `POST /supplier/{supplierId}/qualification` · `PUT /supplier/{supplierId}/qualification/{id}` · `DELETE /supplier/{supplierId}/qualification/{id}` |
+| ポータル見積 (PortalQuotationController) | `GET /portal/quotation/invitations` · `GET /portal/quotation/invitations/{rfqId}` · `POST /portal/quotation` |
+| 招待・別名 (PortalInviteController) | `GET /portal/invite` · `GET /portal/invite/list` · `GET /invite` · `GET /invite/list` · `POST /portal/invite` · `POST /invite` · `POST /portal/invite/{inviteId}/revoke` · `POST /invite/{inviteId}/revoke` |
+| ポータル評価 (PortalEvaluationController) | `GET /portal/evaluations` · `GET /portal/evaluations/history` |
+| ポータル登録/資料 (PortalController) | `POST /portal/enroll` · `GET /portal/enrollment` · `POST /portal/enrollment/retry` · `GET /portal/profile` · `PUT /portal/profile` · `POST /portal/profile/submit` |
+| 概要 (OverviewController) | `GET /overview/summary` · `GET /overview/risk-dashboard` |
+| 担当候補 (OptionsController) | `GET /options/owners` |
+| 評価 (EvaluationController) | `GET /evaluation/list` · `GET /evaluation/{id}` · `GET /evaluation/supplier/{supplierId}` · `GET /evaluation/template/default/dimensions` · `POST /evaluation` |
+| 連絡先 (ContactController) | `GET /supplier/{supplierId}/contact` · `GET /supplier/{supplierId}/contact/list` · `GET /supplier/{supplierId}/contact/{id}` · `POST /supplier/{supplierId}/contact` · `PUT /supplier/{supplierId}/contact/{id}` · `DELETE /supplier/{supplierId}/contact/{id}` |
+| 銀行口座 (BankAccountController) | `GET /supplier/{supplierId}/bank-account` · `GET /supplier/{supplierId}/bank-account/list` · `GET /supplier/{supplierId}/bank-account/{id}` · `POST /supplier/{supplierId}/bank-account` · `PUT /supplier/{supplierId}/bank-account/{id}` · `DELETE /supplier/{supplierId}/bank-account/{id}` |
 
-### 5.3 サプライヤー360 チャンク権限
+### 5.3 サプライヤー360
 
-`/supplier/{id}/overview` は連絡先、資格、銀行口座、評価履歴、リスク概要を返却。各チャンクはそれぞれの list 権限で独立にデータスコープを解決；権限欠如時はそのチャンクをクエリしない。実装は `SrmPermissionScopeExecutor` でチャンクごとにスコープを確立・クリーンアップ。
+サプライヤー可視性は全子権限を与えません。詳細/overview は連絡先、資格、銀行、評価、リスクの権限ごとにスコープを解決し、未許可ブロックは照会しません。overview は直近五評価、リスク指標、最新評価を取得します。PII は 3.5、SrmPermissionScopeExecutor は元の scope を復元し、全ブロックが一つの owner 認可を共有するわけではありません。
 
-## 6. クロスサービス統合
+## 6. サービス連携とイベント
 
-### 6.1 Auth Feign
+DomainEventEnvelope は eventId/eventType/occurredAt/tenantId/producer、aggregateType/aggregateId/aggregateVersion、actorUserId/correlationId/payload を持ち、各イベント契約に従い設定します。
 
-- SRM は userId/unitId のみ保持；割り当て前に Auth 内部 API でユーザー存在、有効、同テナントを検証
-- ownerUnitId は Auth の権威ある主組織から取得；フロントエンドを信頼しない
-- リスト表示は ID を収集後1回のバッチ API 呼び出し；行ごとの Feign（N+1）は禁止
-- Auth 利用不可時：dataScope → 503 フェイルクローズ；表示エンリッチ → ID/不明ユーザーを返却可能
+作成/移管の OwnerResolver は Auth の有効な同テナントユーザー、主組織、割当範囲を確認し、他者指定には transfer 権限も必要です。OwnerEnricher は重複除去後ユーザー/組織を別バッチで照会します。例外時は ID/空名称を保ち得ますが権限を広げず、全 Feign が DB トランザクション外とは保証しません。
 
-### 6.2 Outbox イベント
+`ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)` は明示的 tenantId と既定 REQUIRED でローカル Outbox を書き、Relay が後から Broker に送ります。Relay 停止は Outbox 停止ではありません。eventId は DomainEventEnvelope 最上位の msgKey、Outbox msgId は別生成です。消費者はイベント/意図を原子的に処理します。payload は明示的 ID、版、状態、点数、金額スナップショットを含められますが、完全口座/連絡情報/招待トークンは含めません。
 
-`ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)` でローカル Outbox に書込み；tenantId は明示的に渡すこと。
+`srm.supplier.registered.v1` · `srm.supplier.approved.v1` · `srm.supplier.rejected.v1` · `srm.supplier.suspended.v1` · `srm.supplier.blacklisted.v1` · `srm.supplier.eliminated.v1` · `srm.portal-role.assign-requested.v1` · `auth.portal-role.assigned.v1` · `auth.portal-role.assign-failed.v1` · `srm.evaluation.completed.v1` · `srm.risk.level-changed.v1` · `srm.quotation.submitted.v1`
 
-イベントエンベロープは `eventId`、`eventType`、`tenantId`、`payload` を含む。定義済みイベント：
+上記は現行イベント種別で、Outbox 挿入や段階完了は Broker 配送を証明しません。
 
-- `srm.supplier.registered.v1`
-- `srm.supplier.approved.v1`
-- `srm.supplier.rejected.v1`
-- `srm.supplier.suspended.v1`
-- `srm.supplier.blacklisted.v1`
-- `srm.supplier.eliminated.v1`
-- `srm.portal-role.assign-requested.v1`
-- `auth.portal-role.assigned.v1`（Auth が発行、SRM が消費）
-- `auth.portal-role.assign-failed.v1`（Auth が発行、SRM が失敗マーク）
-- `srm.evaluation.completed.v1`
-- `srm.risk.level-changed.v1`
+### 6.1 内部 API
 
-イベントは ID と状態スナップショットのみ伝達；完全な銀行口座番号、連絡先電話、メール、inviteToken は含まない。消費者は冪等でなければならない。
+四パスは X-Internal-Token/X-Tenant-Id と query/body tenant 一致が必要で、Gateway 公開はしません。
 
-### 6.3 操作ログ
-
-`@OperLog` は PII 脱感作をサポート（銀行口座番号、連絡先電話、メール、サプライヤー電話）。入居招待 inviteToken は認証情報として扱い、ログへの書込みは禁止。
-
-### 6.4 内部 API
-
-SRM は Procurement/Asset サービスに以下の機能を提供します：
-- `GET /api/internal/supplier/{id}?tenantId={tenantId}` — サプライヤー概要
-- `GET /api/internal/supplier/search?tenantId={tenantId}&status=APPROVED&categoryCode={code}` — 承認済みサプライヤー検索
-- `POST /api/internal/supplier/batch` — body は `{tenantId,supplierIds}`。入力の最初の出現順に最大 100 件の概要を返し、存在しない ID は省略
-- `GET /api/internal/quotation/batch?tenantId={tenantId}&rfqId={rfqId}` — RFQ の有効見積・バージョン・行スナップショットを取得
-- 全内部 API は `X-Internal-Token` と `X-Tenant-Id` を使用し、query/body テナントはヘッダーと一致が必要。Gateway 経由で公開せず、サプライヤー概要に連絡先や銀行口座の PII は含まれない
-
-SRM がポータル可視の RFQ を照会する場合は Procurement を呼び出します：
-
-- `GET /api/internal/procurement/rfq/invitations?supplierId={supplierId}`
-- `GET /api/internal/procurement/rfq/{rfqId}/invitation?supplierId={supplierId}`
-
-supplierId は現在の userId に対応する `srm_supplier_portal_user` のみ指定でき、ポータルリクエストが渡す値は受け付けません。すべての内部リクエストは `X-Tenant-Id` も同時に運搬し、API に追加の query/body テナントがある場合はヘッダーと一致が必要です。
-
-RFQ `status=SENT`、招待 `status IN (INVITED, QUOTED)`、かつ quotationDeadline 未超過の場合のみ見積の送信・更新を許可し、`DRAFT/CLOSED/AWARDED/CANCELLED` は一律拒否します。
-
-## 7. 硬制約
-
-SRM コードを変更する前に遵守すべきルール：
-
-1. **テナント分離**：全 `srm_*` テーブルに `tenant_id` 必須；TenantLine は常に追加；通常 API はクロステナント不可
-2. **楽観ロック**：全书込みは `tenant_id + id + version` 条件で更新
-3. **フェイルクローズ**：tenant 欠落 → 401、scope 欠落 → `id=-1`、Auth 不可用 → 503、決して degraded しない
-4. **ThreadLocal クリーンアップ**：common-service の `ServiceDataScopeContext` は `finally` ブロックで必ずクリア、メモリリーク防止
-5. **権限二重宣言**：書込みエンドポイントは `@PreAuthorize`（機能権限）と `@ServiceDataScope`（データスコープ）の両方を同じ完全権限コードで宣言
-6. **バックエンド PII マスキング**：`srm:pii:view` なし時バックエンド VO はマスク値を直接返却；フロントエンドに依存しない
-7. **明示的 Outbox tenantId**：`ReliableMessageRelay.send()` は `Long tenantId` を明示的に渡す；ThreadLocal 暗黙解決は禁止
-8. **インターセプター順序**：TenantLine → DataPermission → Pagination、入替不可
-9. **書込み認可**：DataPermissionInterceptor は書込みを保護しない；AccessGuard 行レベル検証が必須
-10. **ステートマシン**：通常 PUT は status 変更を受け付けない；専用コマンドエンドポイントを使用
-11. **MySQL DATETIME 範囲**：`LocalDateTime.MIN/MAX` をクエリパラメータとして使用不可
-12. **評価テンプレート読取専用**：MVP テンプレートはテナント初期化で自動作成；動的設定 UI なし
-13. **ポータル分離**：ポータルユーザーは `srm_supplier_portal_user` で関連付け；内部 owner dataScope の再利用禁止
-14. **`sys_mq_message` は権限インターセプターから除外**：Relay は全テナントをスキャン；ユーザークエリは依然明示的テナントフィルタリングが必要
-15. **owner とポータルの分離**：`owner_user_id` は内部調達担当者；ポータル `user_id` はサプライヤーログインアカウント；混同禁止
-
-## 8. フロントエンド構造
-
-```
-omni-frontend/src/
-├── api/
-│   ├── srm-overview.ts          # 概要統計 + リスクダッシュボード
-│   ├── srm-supplier.ts          # サプライヤー CRUD + コマンド + サブリソース
-│   ├── srm-evaluation.ts        # 評価 CRUD
-│   ├── srm-risk.ts              # リスク指標 + 評価
-│   └── srm-portal.ts            # ポータル入居/資料/パフォーマンス
-├── views/
-│   ├── srm/
-│   │   ├── overview/index.vue   # サプライヤー概要 + リスクダッシュボード
-│   │   ├── supplier/index.vue   # サプライヤー管理
-│   │   ├── evaluation/index.vue # パフォーマンス評価
-│   │   ├── risk/index.vue       # リスク管理
-│   │   └── invite/index.vue     # 招待管理
-│   └── supplier-portal/
-│       └── index.vue            # サプライヤーポータルワークスペース（単一ページ）
-└── components/srm/
-    ├── SupplierOverview.vue     # サプライヤー360ビュー
-    ├── SupplierPicker.vue       # サプライヤーセレクター
-    ├── SupplierResourcesDrawer.vue  # サプライヤーサブリソースドロワー
-    ├── EvaluationScorecard.vue  # 評価スコアカード
-    ├── RiskIndicator.vue        # リスク指標カード
-    └── RiskDashboard.vue        # リスクダッシュボードコンポーネント
-```
-
-- `ApiResponse/PageResult` は `src/types/api.ts` からのみインポート
-- ボタンは `v-permission` で同一コードを使用；バックエンドが最終セキュリティ境界
-- サプライヤー360は Drawer コンポーネントを使用
-- リスクダッシュボードは赤/黄/緑の信号カードを使用、リスクレベルでのフィルタリングをサポート
-- サプライヤーポータルはロールベースルーティング；SUPPLIER ロールはポータルページのみ閲覧可能
-
-## 9. 拡張ガイド
-
-### 新しい集約ルートの追加
-
-1. `omni_srm` データベースにテーブル追加；`tenant_id`、`owner_user_id`、`owner_unit_id`、`version`、`deleted`、監査フィールドが必須
-2. Entity（SrmOwnedEntity を継承）、Mapper、Service インターフェース + Impl、Controller を作成
-3. `SrmDataPermissionHandler` に新しいテーブルの owner 列マッピングを登録
-4. `database/changelog/srm/` に forward-only の Liquibase changeSet を追加してテーブルを作成；既定の冪等シードは `scripts/sql/seed/srm.sql` に、権限シードは `scripts/sql/seed/auth.sql` に書き、`database/seed/manifest.yaml` を更新（互換期のレガシー `init-all.sql` は変更しない）
-5. Controller の書込みエンドポイントに `@PreAuthorize` + `@ServiceDataScope` を宣言、新しい `srm:<resource>:<action>` 権限コードを使用
-
-### 権限コードの追加
-
-1. `scripts/sql/seed/auth.sql` の `sys_permission` に新しい権限を挿入、type は `API`（Liquibase/seed の正式入口経由で、廃止済みの `init-all.sql` は変更しない）
-2. `sys_role_permission` でロールに割り当て
-3. Controller メソッドに `@PreAuthorize("hasAuthority('srm:<resource>:<action>')")` + `@ServiceDataScope(permissionCode = "srm:<resource>:<action>")` を宣言
-4. フロントエンドの対応ボタンに `v-permission="'srm:<resource>:<action'"` を追加
-
-### Outbox イベントの統合
-
-1. Service ビジネスメソッド内で、同一トランザクションにて `ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)` を呼び出し
-2. `tenantId` はコンテキストから明示的に取得；ThreadLocal は禁止
-3. イベントエンベロープは統一形式に従う；payload に完全な PII を含まない
-4. 消費者は `payload.eventId` で重複排除し冪等でなければならない
-
-### Procurement 見積統合
-
-ポータルエンドポイント：
-
-- `GET /api/srm/portal/quotation/invitations`：現在の PortalUser の RFQ 招待を一覧し、ローカルの見積状態をマージします。
-- `GET /api/srm/portal/quotation/invitations/{rfqId}`：招待、RFQ 行スナップショットと現在の見積を返します。
-- `POST /api/srm/portal/quotation`：見積を提出するか、`version` を指定して更新します。
-
-提出リクエストは `requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}]` のみを受け付けます。tenantId、supplierId、サプライヤー名、RFQ 番号、品目、単位、数量、通貨、行金額と総金額は、すべて信頼できる身分情報・PortalUser・Procurement 招待詳細から取得するかサーバ側で計算します。
-
-`srm_quotation.request_id` は最後に成功したリクエストを保存し、`srm_quotation_request` は `(tenant_id, request_id)` でリクエスト履歴と SHA-256 requestHash を永久に保持し、`(tenant_id, quotation_id, target_version)` で結果バージョンを関連付けます。`srm_quotation` は `(tenant_id, rfq_id, active_supplier_guard)` により、同一サプライヤーが同一 RFQ に対して未削除の見積を 1 件のみ持つことを保証します。`srm_quotation_line.rfq_line_id` は必須で、提出行の集合は RFQ スナップショットと完全一致しなければなりません。金額精度は：単価/数量 `DECIMAL(19,6)` かつ 0 より大、行金額/総金額 `DECIMAL(19,4)` かつ 0 より大。
-
-見積、明細、`srm_quotation_request` と `srm.quotation.submitted.v1` Outbox は同一トランザクションでコミットする必要があります。同一 requestId+requestHash の再試行は現在の見積スナップショットを返し、イベントを重複発行してはなりません；同一 requestId で意図が異なる場合は 409 を返します。初回リクエストは作成センチネル `version=0` を使用し、初版見積は `version=1` から開始することで、並行する作成意図が初版を更新可能版と誤認するのを防ぎます。イベント payload には少なくとも `requestId/quotationId/quotationVersion/rfqId/rfqNo/supplierId/status/totalAmount/currencyCode/validUntil` を含み、Procurement は eventId Inbox で冪等に消費します。
-
-### サプライヤー見積フローのスクリーンショット（四言語）
-
-正式画像はドキュメント専用 Playwright テストケース `omni-frontend/e2e-docs/flows/srm.flows.spec.ts` により実稼働スタック上で生成され、言語別ディレクトリに保存します。他言語の画像を流用せず、プレースホルダや成功レスポンスのモックで代替しません。三つのステップは同一の実 fixture（同一の見積依頼・同一の見積）を共有するため、三枚は同一業務チェーンの連続した状態であり、互いに関係のないページスナップショットではありません。
-
-共通前提条件（三ステップとも同一）：
-
-| 項目 | 内容 |
+| Controller | メソッドとパス |
 |---|---|
-| 環境 | ローカル Compose フルスタック稼働、フロントエンド `127.0.0.1:3000`、ゲートウェイ経由で `omni-procurement` と `omni-srm` に到達 |
-| データ前提 | `admin` が正式 API で一意な品目カテゴリと品目を作成 → `procurement-approval` プロセスモデルに紐づく購買申請承認ルールを作成 → 購買申請を作成して承認に提出 → 承認後に見積依頼を作成し `send` を実行（DRAFT→SENT、`supplier1` を招待） |
-| 操作者 | データ構築は `admin`（`SUPER_ADMIN` と `PROCUREMENT_MANAGER` ロールおよび `SAME_UNIT` 候補スコープが必要）；撮影ページの操作者は `supplier1`（`SUPPLIER` ロールかつ `srm_supplier_portal_user` 関連付け済み） |
-| トークン | `E2eTokenFixture` がテストプロセス内で発行する短期 JWT（TTL 1200 秒）。プロセスメモリとリポジトリ外の一時ファイルにのみ存在し、終了時に破棄；ドキュメント・ログ・バージョン管理には書き込まない |
-| 書き込みスイッチ | `E2E_MUTATIONS=true` を明示的に設定した時のみ実行；未設定ならグループ全体をスキップし、あらゆる書き込み呼び出しは例外を投げる |
-| ビューポート | 1440×900、ドキュメント用クロックを固定しアニメーションを無効化、四言語で完全一致 |
+| 内部サプライヤー (InternalSupplierController) | `GET /api/internal/supplier/{supplierId}` · `GET /api/internal/supplier/search` · `POST /api/internal/supplier/batch` |
+| 内部見積 (InternalQuotationController) | `GET /api/internal/quotation/batch` |
 
-共有ローカル環境では一覧に他の歴史的な見積依頼行が表示される場合があります；テストケースのアサーションと撮影判定は本実行の `runStamp` で識別される単一の見積依頼のみを対象とし、終了処理も本実行で帰属が確認できたデータのみをクリーンアップします。
+Supplier get/batch はテナント内未削除概要を返し、APPROVED を自動条件にはしません。呼出し側が業務状態を確認します。search は status/category/keyword と 1–100 に制限した limit、batch は重複除去後の初出順・最大 100 正 ID・欠損省略です。概要は ID/番号/名称/状態/等級/分類のみで、連絡先/口座は含みません。
 
-#### ステップ 1：招待一覧（未見積）
+SRM は Procurement /api/internal/procurement/rfq/invitations と /rfq/{rfqId}/invitation を呼びます。supplierId は現在の ACTIVE PortalUser から取り、クライアント主体を使わずテナントを信頼ヘッダーで渡します。内部見積 batch は SUBMITTED、有効期限内、Supplier APPROVED の見積のみ返します。
 
-- 操作者：`supplier1`
-- 操作：サプライヤーポータルを開き「見積回答」タブに切り替える
-- 期待状態：本実行の単一の見積依頼が一覧に表示され、招待状態は `INVITED`、現在の見積列は「未見積」、操作列は「見積を提出」
+## 7. 変更時の制約
 
-| zh-CN | en-US |
-|---|---|
-| ![サプライヤーポータル見積招待一覧（簡体字中国語）](images/zh-CN/srm-portal-quotation-invitations.png) | ![サプライヤーポータル見積招待一覧（英語）](images/en-US/srm-portal-quotation-invitations.png) |
+テナント分離、明示的書込認可、専用状態コマンド、必要 version、明示的 Outbox tenantId、finally 消去、サーバーのフィールドマスクを維持します。ポータルと内部 owner を分離し、子に不存在列を足しません。通常 PUT は状態/owner を変えず、MySQL に LocalDateTime.MIN/MAX を使いません。移行は forward-only、正式シードの摘要/検証条件を同期し init-all.sql は変えません。評価テンプレート、リスク設定、ポータル、内部 API の認可差は第 3–6 節に従います。
 
-| ja-JP | ko-KR |
-|---|---|
-| ![サプライヤーポータル見積招待一覧（日本語）](images/ja-JP/srm-portal-quotation-invitations.png) | ![サプライヤーポータル見積招待一覧（韓国語）](images/ko-KR/srm-portal-quotation-invitations.png) |
+## 8. フロントエンド入口
 
-#### ステップ 2：見積フォーム（単価と有効期の入力）
+| 領域 | 入口 | 役割 |
+|---|---|---|
+| API | [src/api/srm-overview.ts](../omni-frontend/src/api/srm-overview.ts) · [src/api/srm-supplier.ts](../omni-frontend/src/api/srm-supplier.ts) · [src/api/srm-evaluation.ts](../omni-frontend/src/api/srm-evaluation.ts) · [src/api/srm-risk.ts](../omni-frontend/src/api/srm-risk.ts) · [src/api/srm-risk-config.ts](../omni-frontend/src/api/srm-risk-config.ts) · [src/api/srm-portal.ts](../omni-frontend/src/api/srm-portal.ts) | 概要、Supplier/子、評価、リスク/設定、ポータル契約 |
+| 管理画面 | [src/views/srm/overview/index.vue](../omni-frontend/src/views/srm/overview/index.vue) · [src/views/srm/supplier/index.vue](../omni-frontend/src/views/srm/supplier/index.vue) · [src/views/srm/evaluation/index.vue](../omni-frontend/src/views/srm/evaluation/index.vue) · [src/views/srm/risk/index.vue](../omni-frontend/src/views/srm/risk/index.vue) · [src/views/srm/risk/config/index.vue](../omni-frontend/src/views/srm/risk/config/index.vue) · [src/views/srm/invite/index.vue](../omni-frontend/src/views/srm/invite/index.vue) | 360、評価、リスク設定、招待 |
+| サプライヤーポータル | [src/views/supplier-portal/index.vue](../omni-frontend/src/views/supplier-portal/index.vue) | 単一ページの作業画面 |
+| 共通部品 | [src/components/srm/SupplierOverview.vue](../omni-frontend/src/components/srm/SupplierOverview.vue) · [src/components/srm/SupplierPicker.vue](../omni-frontend/src/components/srm/SupplierPicker.vue) · [src/components/srm/SupplierResourcesDrawer.vue](../omni-frontend/src/components/srm/SupplierResourcesDrawer.vue) · [src/components/srm/EvaluationScorecard.vue](../omni-frontend/src/components/srm/EvaluationScorecard.vue) · [src/components/srm/RiskIndicator.vue](../omni-frontend/src/components/srm/RiskIndicator.vue) · [src/components/srm/RiskDashboard.vue](../omni-frontend/src/components/srm/RiskDashboard.vue) | 360、選択、子資源、採点、リスク |
 
-- 操作者：`supplier1`
-- 操作：対象行で「見積を提出」をクリックしてダイアログを開き、単価 `123.45` を入力し、見積有効期を見積締切に設定する
-- 期待状態：ダイアログタイトルに本実行の見積依頼番号が付く；行スナップショットに品目コードと名称、数量 `2`、単位と通貨 `CNY` が表示され、RFQ 状態は `SENT`、単価と有効期ともに入力済み
+ApiResponse/PageResult は src/types/api.ts のみから取得します。ボタンは対応 v-permission、最終境界はサーバーです。360 は Drawer、リスク画面は等級フィルターを使います。管理権限のない SUPPLIER は管理ルートからポータルに移りますが、管理権限を持つ複数ロールを一律ポータル専用にはしません。
 
-| zh-CN | en-US |
-|---|---|
-| ![サプライヤーポータル見積フォーム（簡体字中国語）](images/zh-CN/srm-portal-quotation-form.png) | ![サプライヤーポータル見積フォーム（英語）](images/en-US/srm-portal-quotation-form.png) |
+## 9. ポータル見積契約
 
-| ja-JP | ko-KR |
-|---|---|
-| ![サプライヤーポータル見積フォーム（日本語）](images/ja-JP/srm-portal-quotation-form.png) | ![サプライヤーポータル見積フォーム（韓国語）](images/ko-KR/srm-portal-quotation-form.png) |
+要求は requestId/rfqId/version/validUntil/lines[{rfqLineId,unitPrice,deliveryDays,remark}] をバインドします。テナント、Supplier、名称、RFQ 番号、品目、単位、数量、通貨、金額は識別/関連/招待/サーバー計算から得ます。
 
-#### ステップ 3：提出成功（QUOTED と見積総額）
+新規書込は APPROVED Supplier をロックし RFQ=SENT、招待 INVITED/QUOTED、将来の締切を要求します。validUntil は現在より後で締切以降です。1–200 の一意行が RFQ 全行を網羅し、deliveryDays は 0–3650、remark は最大 500 字。unitPrice JSON は十進文字列のみ。正の単価/数量は DECIMAL(19,6) に無丸めで収まり、正の行金額は HALF_UP 四桁、総額はその合計で DECIMAL(19,4) に収まります。価格、数量、行/総額、イベント金額は文字列です。
 
-- 操作者：`supplier1`
-- 操作：ダイアログで「見積を提出」をクリックして実際の見積を送信し、続いて「見積依頼を更新」をクリックする
-- 期待状態：「見積を提出しました」が表示されてダイアログが閉じる；招待状態は `srm.quotation.submitted.v1` MQ イベントにより非同期で `QUOTED` に転移し、現在の見積列に総額 `CNY 246.9`（単価 `123.45` × 数量 `2`）が表示され、操作列は「見積を修正」になる
+永続 tenant/requestId 台帳は SHA-256 意図と quotationId/targetVersion を保持し、(tenant_id, quotation_id, target_version) で結果版を関連付けます。意図は rfqId、version、validUntil と行 ID 順の正規化単価/納期/備考です。初回 version=0 から保存版 1、更新は現在版を要求します。同一トランザクションで見積/明細/COMPLETED 台帳/イベントを保存し active_supplier_guard は Supplier/RFQ ごとに未削除一件を保証します。
 
-| zh-CN | en-US |
-|---|---|
-| ![サプライヤーポータル見積提出成功（簡体字中国語）](images/zh-CN/srm-portal-quotation-submitted.png) | ![サプライヤーポータル見積提出成功（英語）](images/en-US/srm-portal-quotation-submitted.png) |
+成功再実行は新たな APPROVED/RFQ 確認より先ですが、DTO/ハッシュ/ポータル関連は必要です。元 Supplier/rfq/意図、COMPLETED、現在版≥目標版を照合して過去目標版でなく現在スナップショットを返し、イベントは再発行しません。履歴再実行は現在の編集可能性や内部 batch 採用を証明せず、同 requestId の異意図は 409 です。
 
-| ja-JP | ko-KR |
-|---|---|
-| ![サプライヤーポータル見積提出成功（日本語）](images/ja-JP/srm-portal-quotation-submitted.png) | ![サプライヤーポータル見積提出成功（韓国語）](images/ko-KR/srm-portal-quotation-submitted.png) |
+拡張手順は[開発 Wiki](guides/scaffold-development.jp.md#9-srm-拡張とコンテナテスト)、画面/過去画像は[画像索引](wiki/interface-reference.jp.md#srm)を参照し、新実行証拠とは見なしません。
 
-### SRM 管理側ページのスクリーンショット（四言語）
+## 10. 検証範囲
 
-同様に `omni-frontend/e2e-docs/flows/management.flows.spec.ts` により実稼働スタック上で生成。**読み取り専用の採取**であり、サプライヤーデータを作成・変更・削除しないため、書き込みスイッチもデータ終了処理も不要です。前提条件と操作者は前節と同一（`admin` / `SUPER_ADMIN`、短期 JWT は `E2eTokenFixture` がプロセス内で発行し終了時に破棄）。
+個別摘要が一致した既存 Docker Reactor 産物は SRM JUnit 報告 27、成功 119、失敗/エラー/スキップ 0 です。各状態/点数、権限/分離、招待/ロール結果、見積再実行/版/金額の実際のアサーション範囲を証明します。旧最高色ヘルパーのテストは現行リスクサービス算法の検証ではありません。
 
-- 操作：ログイン後にサプライヤー管理、業績評価、リスク管理、リスク指標設定、招待管理のページを順に開く。
-- 期待状態：ページタイトルと列ラベルが現在の言語で描画される；採取時点でデータベースにはサプライヤー/評価/リスク/招待の実レコードが各 1 件、リスク指標設定が 9 件存在。
+実 CAPTCHA 登録、外部アカウント、実時間 Workflow/MQ、MySQL 並行性、教程実行はこの報告で証明せず、個別の実行証拠が必要です。言語は承認済み AI_REVIEW として記録し HUMAN_REVIEW と偽称せず、実行/画像証拠は固有範囲を保ちます。
 
-| ページ | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| サプライヤー管理（lifecycle） | ![サプライヤー管理（簡体字中国語）](images/zh-CN/srm-suppliers.png) | ![サプライヤー管理（英語）](images/en-US/srm-suppliers.png) | ![サプライヤー管理（日本語）](images/ja-JP/srm-suppliers.png) | ![サプライヤー管理（韓国語）](images/ko-KR/srm-suppliers.png) |
-| 業績評価（evaluation） | ![業績評価（簡体字中国語）](images/zh-CN/srm-evaluations.png) | ![業績評価（英語）](images/en-US/srm-evaluations.png) | ![業績評価（日本語）](images/ja-JP/srm-evaluations.png) | ![業績評価（韓国語）](images/ko-KR/srm-evaluations.png) |
-| リスク管理（risk） | ![リスク管理（簡体字中国語）](images/zh-CN/srm-risks.png) | ![リスク管理（英語）](images/en-US/srm-risks.png) | ![リスク管理（日本語）](images/ja-JP/srm-risks.png) | ![リスク管理（韓国語）](images/ko-KR/srm-risks.png) |
-| リスク指標設定（risk） | ![リスク指標設定（簡体字中国語）](images/zh-CN/srm-risk-config.png) | ![リスク指標設定（英語）](images/en-US/srm-risk-config.png) | ![リスク指標設定（日本語）](images/ja-JP/srm-risk-config.png) | ![リスク指標設定（韓国語）](images/ko-KR/srm-risk-config.png) |
-| 招待管理（invite） | ![招待管理（簡体字中国語）](images/zh-CN/srm-invites.png) | ![招待管理（英語）](images/en-US/srm-invites.png) | ![招待管理（日本語）](images/ja-JP/srm-invites.png) | ![招待管理（韓国語）](images/ko-KR/srm-invites.png) |
+## 11. 現行ソース入口
 
-本グループは一覧/設定ビューのみを閉じるもので、`admission-lifecycle`（完全な Portal 登録 Saga と参入承認が必要）や `detail-and-action-states`（詳細ダイアログと操作結果が必要）を閉じることとは**同等ではありません**；`stable-mobile-flow` は次の小節のレスポンシブ採取により閉じます。したがって SRM は引き続き `partial` です。
-
-### サプライヤーポータルのレスポンシブ安定性スクリーンショット（四言語）
-
-`omni-frontend/e2e-docs/flows/srm-portal-responsive.flows.spec.ts` により実稼働スタック上で生成。**読み取り専用採取**：ポータルを開き、タブを切り替え、更新をクリックするのみで、見積の送信や変更は一切行いません。
-
-- 前提条件：前二節と同一（ローカル Compose フルスタック、`supplier1` の Portal 関連付け済み、短期 JWT はプロセス内で発行し終了時に破棄）。
-- 操作者：`supplier1`。
-- 操作：**390×844（モバイル）** と **1024×768（タブレット）** のビューポートでそれぞれサプライヤーポータルを開き、「見積回答」タブに切り替える。
-- 期待状態：タブが表示されクリック可能；「見積依頼を更新」と行ごとの見積操作が狭い幅で押し出されたり遮蔽されない；一覧はレスポンシブに列を縮約（モバイルは見積番号/テーマ/操作のみ保持）し、はみ出しがない。
-- 実測結果：8 passed / 0 skipped（四言語 × 二ビューポート）。
-
-| ビューポート | zh-CN | en-US | ja-JP | ko-KR |
-|---|---|---|---|---|
-| 390×844 モバイル | ![ポータル見積一覧 モバイル（簡体字中国語）](images/zh-CN/srm-portal-quotation-mobile.png) | ![ポータル見積一覧 モバイル（英語）](images/en-US/srm-portal-quotation-mobile.png) | ![ポータル見積一覧 モバイル（日本語）](images/ja-JP/srm-portal-quotation-mobile.png) | ![ポータル見積一覧 モバイル（韓国語）](images/ko-KR/srm-portal-quotation-mobile.png) |
-| 1024×768 タブレット | ![ポータル見積一覧 タブレット（簡体字中国語）](images/zh-CN/srm-portal-quotation-tablet.png) | ![ポータル見積一覧 タブレット（英語）](images/en-US/srm-portal-quotation-tablet.png) | ![ポータル見積一覧 タブレット（日本語）](images/ja-JP/srm-portal-quotation-tablet.png) | ![ポータル見積一覧 タブレット（韓国語）](images/ko-KR/srm-portal-quotation-tablet.png) |
-
-採取時に一覧へ表示されていたのは環境に既存の歴史的な見積依頼行です（本バッチの見積データは帰属別にクリーンアップ済み）；画像は実際の一覧内容をそのまま保持しており、データを造って埋めてはいません。
-
-## 10. テスト
-
-SRM モジュールは以下のテストスイートをカバー：
-
-- サプライヤーステートマシン：有効/無効な遷移
-- 評価加重スコア計算の正確性（全て1=20、全て5=100）
-- 評価自動等級マッピングの正確性（60/75/90 しきい値）
-- リスク総合レベルは最高指標レベルを取得
-- PII マスキング（銀行口座、連絡先電話/メール）
-- 全6種の dataScope のリストと集計
-- クロステナント読取/更新/削除は全て失敗
-- tenant/scope 欠落時はフェイルクローズ
-- `tenant_id + id + version` 並行更新競合
-- ポータル入居冪等性（重複 credit_code や同一 userId は拒否）
-- 期限切れ、無効化、クロステナント、並行超過使用の inviteToken は全て拒否
-- SUPPLIER ロールは関連付けられたサプライヤーのデータのみ閲覧可能
-
-テスト実行：
-
-```bash
-cd omni-backend && ./mvnw clean install -pl omni-srm -am
-```
+[移行](../database/changelog/srm/0001-srm-schema.yaml) · [状態](../omni-backend/omni-srm/src/main/java/com/omni/srm/domain/SrmStateMachine.java) · [範囲](../omni-backend/omni-srm/src/main/java/com/omni/srm/security/SrmDataPermissionHandler.java) · [DTO](../omni-backend/omni-srm/src/main/java/com/omni/srm/dto/SrmRequests.java) · [承認開始](../omni-backend/omni-srm/src/main/java/com/omni/srm/workflow/SupplierWorkflowCoordinator.java) · [承認完了](../omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierWorkflowCompletionServiceImpl.java) · [ポータル](../omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/SupplierPortalServiceImpl.java) · [ロール結果](../omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/PortalRoleResultServiceImpl.java) · [評価](../omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/EvaluationServiceImpl.java) · [リスク](../omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskServiceImpl.java) · [リスク設定](../omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/RiskIndicatorConfigServiceImpl.java) · [見積](../omni-backend/omni-srm/src/main/java/com/omni/srm/service/impl/QuotationServiceImpl.java) · [JSON 要求](../omni-backend/omni-srm/src/main/java/com/omni/srm/dto/quotation/QuotationLineRequest.java) · [フロントルーター](../omni-frontend/src/router/index.ts)

@@ -10,17 +10,16 @@
  * 已实测的产品事实（如实断言，不 mock、不美化）：
  * 1. `views/base/dict/index.vue` 未定义任何 form rules，必填校验由后端 `@NotBlank` 承担，
  *    因此前端 `.el-form-item__error` 为空、错误以 toast 呈现，且对话框保持打开。
- * 2. `CreateDictTypeRequest` 的 `@NotBlank(message = ...)` 为中文硬编码，四语言 UI 下均返回中文消息。
- *    该现象已作为 i18n PRODUCT_DEFECT 登记（见 coverage 注释与执行 checkpoint），本用例不改产品、不隐藏真实文案。
- * 3. ja-JP/ko-KR 下 `dict.createType`/`typeCode`/`typeName`/`remark` 的语言包取值本身即英文
- *    （`ui:i18n:parity` 与 `ui:i18n:check` 均通过，属译文完整度问题而非硬编码缺陷）。
+ * 2. 后端返回字段校验失败，前端统一错误层显示本地化字段名提示和排障码，不直接展示服务端消息。
+ * 3. 按当前日/韩语言包验证类型名称和编码；备注仍继承英文基础词条，保留真实表现。
  *
  * 所有 selector 文案取自对运行中应用的实测探测，不从语言包推测。
  */
 import { expect, test, request as pwRequest, type APIRequestContext, type Locator, type Page } from '@playwright/test'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { captureDocsImage, docsLocales, prepareDocsPage, waitForDocsPage, type DocsLocale } from '../fixtures/docs-page'
 
 const adminToken = process.env.E2E_ADMIN_TOKEN
@@ -31,13 +30,13 @@ const baseUrl = process.env.E2E_BASE_URL || 'http://127.0.0.1:3000'
 
 // —— 以下为实测探测得到的真实渲染文案（顺序与 docsLocales 一致）——
 const createButton: Record<DocsLocale, string> = {
-  'zh-CN': '新建类型', 'en-US': 'Create Type', 'ja-JP': 'Create Type', 'ko-KR': 'Create Type',
+  'zh-CN': '新建类型', 'en-US': 'Create Type', 'ja-JP': 'タイプ新規作成', 'ko-KR': '타입 추가',
 }
 const codeLabel: Record<DocsLocale, string> = {
-  'zh-CN': '类型编码', 'en-US': 'Type Code', 'ja-JP': 'Type Code', 'ko-KR': 'Type Code',
+  'zh-CN': '类型编码', 'en-US': 'Type Code', 'ja-JP': 'タイプコード', 'ko-KR': '타입 코드',
 }
 const nameLabel: Record<DocsLocale, string> = {
-  'zh-CN': '类型名称', 'en-US': 'Type Name', 'ja-JP': 'Type Name', 'ko-KR': 'Type Name',
+  'zh-CN': '类型名称', 'en-US': 'Type Name', 'ja-JP': 'タイプ名', 'ko-KR': '타입 이름',
 }
 const remarkLabel: Record<DocsLocale, string> = {
   'zh-CN': '备注', 'en-US': 'Remark', 'ja-JP': 'Remark', 'ko-KR': 'Remark',
@@ -51,8 +50,11 @@ const confirmButton: Record<DocsLocale, string> = {
 const searchButton: Record<DocsLocale, string> = {
   'zh-CN': '搜索', 'en-US': 'Search', 'ja-JP': '検索', 'ko-KR': '검색',
 }
-/** 后端 @NotBlank 中文硬编码消息的稳定片段；四语言一致（已登记 PRODUCT_DEFECT）。 */
-const REQUIRED_MESSAGE_FRAGMENT = '字典类型编码不能为空'
+/** 当前统一错误层的四语言字段校验提示；字段标识由真实响应提供。 */
+const requiredMessage: Record<DocsLocale, string> = {
+  'zh-CN': '以下字段填写有误：', 'en-US': 'Please correct the following fields:',
+  'ja-JP': '次の入力内容をご確認ください：', 'ko-KR': '다음 입력 항목을 확인해 주세요:',
+}
 
 const runStamp = Date.now()
 const typeCodes = Object.fromEntries(
@@ -75,8 +77,14 @@ interface CleanupOutcome extends CreatedDictType {
 
 const created: CreatedDictType[] = []
 const cleanupOutcomes: CleanupOutcome[] = []
+const captureRecords: Array<Record<string, unknown>> = []
+let runtime: Record<string, unknown>
+let sourceSha256: string
+const testSha256 = createHash('sha256').update(readFileSync(resolve('e2e-docs/flows/system-dictionary.flows.spec.ts'))).digest('hex')
 // 登记文件位于仓库外系统 TEMP，不会被 stage 或提交。
-const registryPath = join(tmpdir(), 'omni-e2edict-registry', `run-${runStamp}.json`)
+const registryPath = process.env.E2E_REGISTRY_PATH
+  ? `${process.env.E2E_REGISTRY_PATH.replace(/\.json$/, '')}-${runStamp}.json`
+  : join(tmpdir(), 'omni-e2edict-registry', `run-${runStamp}.json`)
 
 /** 落盘本批资源登记与清理结果，供链路中断后的定向清理复用。 */
 function persistRegistry() {
@@ -87,7 +95,40 @@ function persistRegistry() {
     baseUrl,
     resources: created,
     cleanup: cleanupOutcomes,
+    runtime,
+    sourceScope: 'omni-frontend/src (sorted paths and file SHA-256)',
+    sourceSha256,
+    testSha256,
+    captures: captureRecords,
   }, null, 2), 'utf8')
+}
+
+/** 正式截图保留运行来源、原图摘要和采集时间，不以测试通过代替视觉复核。 */
+async function captureDictionaryState(page: Page, locale: DocsLocale, imageName: string) {
+  await captureDocsImage(page, locale, imageName)
+  const image = join(process.env.E2E_DOCS_IMAGE_DIR!, locale, `${imageName}.png`)
+  const imageSha256 = createHash('sha256').update(readFileSync(image)).digest('hex')
+  expect(captureRecords.some((item) => item.locale === locale && item.imageSha256 === imageSha256),
+    '表单、校验失败和创建结果不能使用相同图像').toBe(false)
+  captureRecords.push({ locale, imageName, imageSha256, capturedAt: new Date().toISOString(),
+    route: '/admin/base/dict', viewport: page.viewportSize(), visualReview: 'pending', mocks: false })
+  persistRegistry()
+}
+
+/** 规范化源码清单只包含生产前端源码，避免缓存、私有配置和测试输出混入摘要。 */
+function frontendSourceDigest() {
+  const files: string[] = []
+  function visit(directory: string) {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const file = join(directory, entry.name)
+      if (entry.isDirectory()) visit(file)
+      else if (entry.isFile()) files.push(file)
+      else throw new Error('源码目录不接受符号链接或特殊文件')
+    }
+  }
+  visit(resolve('src'))
+  const content = files.sort().map((file) => `${relative(process.cwd(), file)} ${createHash('sha256').update(readFileSync(file)).digest('hex')}\n`).join('')
+  return createHash('sha256').update(content).digest('hex')
 }
 
 async function apiContext(): Promise<APIRequestContext> {
@@ -100,9 +141,12 @@ function adminHeaders() {
 
 /** 按 typeCode 查询当前可见字典类型；用于取得 id 与验证清理结果。 */
 async function findTypeByCode(api: APIRequestContext, typeCode: string): Promise<{ id: number; total: number } | null> {
-  const payload = await (await api.get(`/api/base/dict/type/list?page=1&size=20&typeCode=${encodeURIComponent(typeCode)}`, {
+  const response = await api.get(`/api/base/dict/type/list?page=1&size=20&typeCode=${encodeURIComponent(typeCode)}`, {
     headers: adminHeaders(),
-  })).json()
+  })
+  expect(response.status(), '清理回查必须成功，不能把接口失败当作记录不存在').toBe(200)
+  const payload = await response.json()
+  expect(payload.code, '清理回查业务响应必须成功').toBe(200)
   const records: Array<Record<string, unknown>> = payload?.data?.records ?? []
   const exact = records.find((item) => item?.typeCode === typeCode)
   return exact ? { id: Number(exact.id), total: Number(payload?.data?.total ?? records.length) } : null
@@ -120,6 +164,28 @@ function fieldByLabel(page: Page, dialog: Locator, label: string) {
 test.describe('系统字典类型三态文档截图', () => {
   // 正式验收要求 4 passed / 0 skipped：缺 Token 或未开写入开关即整组 skip，避免把全 skip 当通过。
   test.skip(!adminToken || !mutationsEnabled, '需要注入 E2E_ADMIN_TOKEN 并显式设置 E2E_MUTATIONS=true')
+
+  test.beforeAll(() => {
+    expect(existsSync('/.dockerenv'), '写入和截图必须在本机 Docker 内').toBe(true)
+    expect(process.env.E2E_RUNTIME_MODE).toBe('external')
+    const project = process.env.E2E_DICTIONARY_PROJECT
+    expect(project).toMatch(/^omni-(?:e2e|wiki-acceptance)-[a-z0-9][a-z0-9-]+$/)
+    for (const output of [process.env.E2E_DOCS_IMAGE_DIR, process.env.E2E_REGISTRY_PATH, process.env.E2E_DICTIONARY_RUNTIME_FILE]) {
+      expect(output, '正式产物路径必须显式提供').toBeTruthy()
+      expect(isAbsolute(output!)).toBe(true)
+      expect(relative(resolve('..'), output!).startsWith('..'), '禁止把私有证据写入仓库').toBe(true)
+    }
+    runtime = JSON.parse(readFileSync(process.env.E2E_DICTIONARY_RUNTIME_FILE!, 'utf8').replace(/^\uFEFF/, ''))
+    expect(runtime.project).toBe(project)
+    const containers = runtime.runtime as Array<{ service: string; image_id: string; project: string; host_ports: unknown[] }>
+    for (const service of ['omni-frontend', 'omni-base', 'omni-auth', 'omni-gateway']) {
+      const container = containers.find((item) => item.service === service)
+      expect(container?.project).toBe(project)
+      expect(container?.image_id).toMatch(/^sha256:[a-f0-9]{64}$/)
+      expect(container?.host_ports).toEqual([])
+    }
+    sourceSha256 = frontendSourceDigest()
+  })
 
   test.afterAll(async () => {
     if (!adminToken || !mutationsEnabled) return
@@ -160,9 +226,11 @@ test.describe('系统字典类型三态文档截图', () => {
 
     // 仅输出计数与资源标识，不输出 Token 或完整响应体。
     const deleted = cleanupOutcomes.filter((item) => item.deleted && item.stillListed === false).length
-    const residual = cleanupOutcomes.filter((item) => !(item.deleted && item.stillListed === false))
+    const neverCreated = cleanupOutcomes.filter((item) => item.id === null && item.stillListed === false).length
+    const residual = cleanupOutcomes.filter((item) =>
+      !((item.deleted || item.id === null) && item.stillListed === false))
     const lines = [
-      `[dict-cleanup] tenantId=${tenantId} runStamp=${runStamp} registered=${created.length} deleted=${deleted} residual=${residual.length} registry=${registryPath}`,
+      `[dict-cleanup] tenantId=${tenantId} runStamp=${runStamp} registered=${created.length} deleted=${deleted} neverCreated=${neverCreated} residual=${residual.length} registry=${registryPath}`,
       ...residual.map((item) => `[dict-cleanup] residual typeCode=${item.typeCode} id=${item.id} http=${item.httpStatus} code=${item.code} stillListed=${item.stillListed} message=${item.message}`),
     ]
     process.stdout.write(`${lines.join('\n')}\n`)
@@ -181,9 +249,10 @@ test.describe('系统字典类型三态文档截图', () => {
 
       const api = await apiContext()
       try {
-        await prepareDocsPage(page, { locale, token: adminToken, username: 'admin' })
+        await prepareDocsPage(page, { locale, token: adminToken, username: 'admin', viewport: { width: 1920, height: 1080 } })
         await page.goto('/admin/base/dict')
         await waitForDocsPage(page, '.el-main, .app-main')
+        await expect(page.locator('.el-loading-mask:visible')).toHaveCount(0)
 
         // 状态一：新建对话框表单（create-or-edit）。
         await page.locator('.el-main button, .app-main button')
@@ -196,16 +265,32 @@ test.describe('系统字典类型三态文档截图', () => {
         for (const label of [codeLabel[locale], nameLabel[locale], remarkLabel[locale], sortLabel[locale]]) {
           await expect(dialog.locator('.el-form-item__label', { hasText: label }).first()).toBeVisible()
         }
-        await captureDocsImage(page, locale, 'system-dictionary-create-form')
+        await captureDictionaryState(page, locale, 'system-dictionary-create-form')
 
-        // 状态二：必填校验失败（failure）。前端无 form rules，错误来自后端 @NotBlank，
-        // 以 toast 呈现且对话框保持打开——这是实测的真实产品行为。
+        // 状态二：必填校验失败（failure）。后端字段错误经统一错误层本地化，
+        // 以 toast 呈现且对话框保持打开。
+        const validationResponse = page.waitForResponse((response) => response.request().method() === 'POST'
+          && new URL(response.url()).pathname === '/api/base/dict/type')
         await dialog.locator('button').filter({ hasText: confirmButton[locale] }).first().click()
-        const toast = page.locator('.el-message, .el-notification').first()
+        const validation = await validationResponse
+        expect(validation.status()).toBe(400)
+        expect((await validation.json()).code).toBe(400)
+        const toast = page.locator('.el-message--error').first()
         await expect(toast).toBeVisible()
-        await expect(toast).toContainText(REQUIRED_MESSAGE_FRAGMENT)
+        await expect(toast).toContainText(requiredMessage[locale])
+        await expect(toast).toContainText('typeCode')
+        await expect(toast).toContainText('typeName')
         await expect(dialog).toBeVisible()
-        await captureDocsImage(page, locale, 'system-dictionary-create-validation')
+        // visible 仍可能处于进入动画；确认完全显示且未被模态层遮挡再采集。
+        await expect(toast).toHaveCSS('opacity', '1')
+        await expect.poll(() => toast.evaluate((element) => {
+          const box = element.getBoundingClientRect()
+          const top = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
+          return box.y >= 0 && box.bottom <= window.innerHeight && (element === top || element.contains(top))
+        })).toBe(true)
+        await captureDictionaryState(page, locale, 'system-dictionary-create-validation')
+        // 等待真实提示自然退出，避免将上一步错误留在成功截图中；不删除或改写 DOM。
+        await expect(toast).toBeHidden({ timeout: 10_000 })
 
         // 状态三：创建成功（key-action-success）。填入本轮唯一 typeCode 后提交。
         await fieldByLabel(page, dialog, codeLabel[locale]).fill(typeCode)
@@ -221,7 +306,9 @@ test.describe('系统字典类型三态文档截图', () => {
         const row = page.locator('.el-table__row', { hasText: typeCode }).first()
         await expect(row).toBeVisible()
         await expect(row).toContainText(`E2E Dict ${locale}`)
-        await captureDocsImage(page, locale, 'system-dictionary-create-success')
+        await expect(page.locator('.el-loading-mask:visible')).toHaveCount(0)
+        await expect(page.locator('.el-message--error:visible')).toHaveCount(0)
+        await captureDictionaryState(page, locale, 'system-dictionary-create-success')
 
         // 以正式 API 回查取得权威 id 并登记，供 afterAll 精确清理。
         const found = await findTypeByCode(api, typeCode)
