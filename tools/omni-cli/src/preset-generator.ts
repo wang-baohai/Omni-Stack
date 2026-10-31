@@ -50,11 +50,6 @@ const GENERATED_SUBPATH_EXCLUDES = [
   'scripts/wp010',
   'omni-frontend/e2e/wp006-visual-screenshot.mjs',
   'omni-frontend/e2e/wp009-f',
-  // 四份本次改造的执行材料不属于生成项目文档，按精确路径排除，不改动 docs 校验。
-  'docs/design/wiki-workspace-ux-goal-prompt.md',
-  'docs/design/wiki-workspace-ux-work-packages.md',
-  'docs/design/wiki-workspace-ux-requirements.md',
-  'docs/design/wiki-workspace-ux-plan-lock.json',
 ];
 
 /**

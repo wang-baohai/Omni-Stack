@@ -2,7 +2,7 @@
  * 生成物结构断言（WP-07.S01 从 preset-golden.mjs 最小提取）。
  *
  * 原断言含义不变：模块残留、Maven、Compose、Gateway、种子、MQ、i18n、工作流模型。
- * 本模块只增加本次改造所需的固定检查：四份计划输入精确排除、前端 `@/` 导入可解析、
+ * 本模块只增加本次改造所需的固定检查：前端 `@/` 导入可解析、
  * 导航测试仍挂在生成物的 test:unit 入口、workflow 缺失时不留伪菜单与审批静态路由。
  */
 import assert from 'node:assert/strict'
@@ -11,27 +11,11 @@ import { relative, resolve } from 'node:path'
 import { parseDocument } from 'yaml'
 import { loadComposeApplication } from '../dist/src/compose-model.js'
 
-/** 四份执行材料不属于生成项目文档，必须按精确路径排除。 */
-export const PLAN_INPUT_EXCLUDES = [
-  'docs/design/wiki-workspace-ux-goal-prompt.md',
-  'docs/design/wiki-workspace-ux-work-packages.md',
-  'docs/design/wiki-workspace-ux-requirements.md',
-  'docs/design/wiki-workspace-ux-plan-lock.json',
-]
-
 /** 生成物结构断言主入口。 */
 export function validateGeneratedStructure(target, catalog, selected) {
-  assertPlanInputsAbsent(target)
   validateNoOmittedResiduals(target, catalog, selected)
   assertFrontendImportsResolve(target)
   assertNavigationTestsWired(target)
-}
-
-/** 四份计划输入不得进入生成物。 */
-export function assertPlanInputsAbsent(target) {
-  for (const rel of PLAN_INPUT_EXCLUDES) {
-    assert.equal(existsSync(resolve(target, rel)), false, `生成物不得携带计划输入：${rel}`)
-  }
 }
 
 export function validateNoOmittedResiduals(target, catalog, selected) {
